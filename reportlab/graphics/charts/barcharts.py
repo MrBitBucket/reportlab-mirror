@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.20 2001/06/26 16:27:34 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.21 2001/06/27 11:58:59 andy_robinson Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -92,6 +92,8 @@ class BarChart(Widget):
     def __init__(self):
         self.debug = 0
 
+        self.barSpacing = 0
+
         self.x = 0
         self.y = 0
         self.width = 200
@@ -105,16 +107,6 @@ class BarChart(Widget):
         self.data = [(100,110,120,130),
                      (70, 80, None, 90)]
         self.categoryNames = ('North','South','East','West')
-        # we really need some well-designed default lists of
-        # colors e.g. from Tufte.  These will be used in a
-        # cycle to set the fill color of each series.
-        self.bars = TypedPropertyCollection(BarChartProperties)
-##        self.bars.symbol = None
-        self.bars.strokeWidth = 1
-        self.bars.strokeColor = colors.black
-        self.bars[0].fillColor = colors.red
-        self.bars[1].fillColor = colors.green
-        self.bars[2].fillColor = colors.blue
 
         # control bar spacing. is useAbsolute = 1 then
         # the next parameters are in points; otherwise
@@ -139,6 +131,18 @@ class BarChart(Widget):
         self.barLabelNudge = 0
         # if you have multiple series, by default they butt
         # together.
+
+        # we really need some well-designed default lists of
+        # colors e.g. from Tufte.  These will be used in a
+        # cycle to set the fill color of each series.
+        self.bars = TypedPropertyCollection(BarChartProperties)
+##        self.bars.symbol = None
+        self.bars.strokeWidth = 1
+        self.bars.strokeColor = colors.black
+
+        self.bars[0].fillColor = colors.red
+        self.bars[1].fillColor = colors.green
+        self.bars[2].fillColor = colors.blue
 
 
     def _findMinMaxValues(self):

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/signsandsymbols.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.12 2001/05/17 16:21:33 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.13 2001/06/27 11:58:59 andy_robinson Exp $
 # signsandsymbols.py
 # A collection of new widgets
 # author: John Precedo (johnp@reportlab.com)
@@ -39,7 +39,7 @@ class ETriangle0(Widget):
     """This draws an equilateral triangle.
 
         possible attributes:
-        'x', 'y', 'size', 'color', 'strokecolor'
+        'x', 'y', 'size', 'color', 'strokeColor'
 
         """
 
@@ -48,7 +48,7 @@ class ETriangle0(Widget):
         y = AttrMapValue( isNumber),
         size = AttrMapValue( isNumber),
         color = AttrMapValue( isColorOrNone),
-        strokecolor = AttrMapValue( isColorOrNone)
+        strokeColor = AttrMapValue( isColorOrNone)
         )
 
     def __init__(self):
@@ -56,7 +56,7 @@ class ETriangle0(Widget):
         self.y = 0
         self.size = 100 
         self.color = colors.red
-        self.strokecolor = None
+        self.strokeColor = None
 
     def demo(self):
         D = shapes.Drawing(200, 100)
@@ -83,7 +83,7 @@ class ETriangle0(Widget):
             self.x+s, self.y,
             self.x+(s/2),self.y+s],
                fillColor = self.color,
-               strokeColor = self.strokecolor,
+               strokeColor = self.strokeColor,
                strokeWidth=s/50.)
         g.add(triangle)
         return g
@@ -92,7 +92,7 @@ class RTriangle0(ETriangle0):
     """This draws a right-angled triangle.
 
         possible attributes:
-        'x', 'y', 'size', 'color', 'strokecolor'
+        'x', 'y', 'size', 'color', 'strokeColor'
 
         """
 
@@ -101,7 +101,7 @@ class RTriangle0(ETriangle0):
         self.y = 0
         self.size = 100 
         self.color = colors.green
-        self.strokecolor = None
+        self.strokeColor = None
 
     def demo(self):
         D = shapes.Drawing(200, 100)
@@ -128,7 +128,7 @@ class RTriangle0(ETriangle0):
             self.x+s, self.y,
             self.x,self.y+s],
                fillColor = self.color,
-               strokeColor = self.strokecolor,
+               strokeColor = self.strokeColor,
                strokeWidth=s/50.)
         g.add(triangle)
         return g  
@@ -137,7 +137,7 @@ class Octagon0(ETriangle0):
     """This widget draws an Octagon.
 
         possible attributes:
-        'x', 'y', 'size', 'color', 'strokecolor'
+        'x', 'y', 'size', 'color', 'strokeColor'
 
     """ 
 
@@ -146,7 +146,7 @@ class Octagon0(ETriangle0):
         self.y = 0
         self.size = 100 
         self.color = colors.yellow
-        self.strokecolor = None
+        self.strokeColor = None
         
     def demo(self):
         D = shapes.Drawing(200, 100)
@@ -178,7 +178,7 @@ class Octagon0(ETriangle0):
                                               self.x+s, self.y+(athird*2),
                                               self.x+s, self.y+athird,
                                               self.x+(athird*2), self.y],
-                                      strokeColor = self.strokecolor,
+                                      strokeColor = self.strokeColor,
                                       fillColor = self.color,
                                       strokeWidth=10)
         g.add(octagon)

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/flags.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.5 2001/05/17 16:21:33 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.6 2001/06/27 11:58:59 andy_robinson Exp $
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 
@@ -42,7 +42,7 @@ class Star0(ETriangle0):
     """This draws a 5-pointed star.
 
         possible attributes:
-        'x', 'y', 'size', 'color', 'strokecolor'
+        'x', 'y', 'size', 'color', 'strokeColor'
 
         """
 
@@ -51,7 +51,7 @@ class Star0(ETriangle0):
         self.y = 0
         self.size = 100 
         self.color = colors.yellow
-        self.strokecolor = None
+        self.strokeColor = None
 
     def demo(self):
         D = shapes.Drawing(200, 100)
@@ -86,7 +86,7 @@ class Star0(ETriangle0):
             self.x+(s/2), self.y+(s/5),
             ],
                fillColor = self.color,
-               strokeColor = self.strokecolor,
+               strokeColor = self.strokeColor,
                strokeWidth=s/50)
         g.add(star)
         
@@ -1045,12 +1045,13 @@ class FlagPortugal0(Flag0):
     is more difficult than the majority of flags, providing an adequate
     representation of it is "left as an exercise for the reader". """
 
-    def __init__(self):
-        pass
     
     def demo(self):
-        pass
+        D = shapes.Drawing(200, 100)
+        return D
 
+    def draw(self):
+        return Group()
 
 class FlagSpain0(Flag0):
     """This draws the Spanish national flag.
@@ -1377,7 +1378,7 @@ class FlagTurkey0(Flag0):
         whitestar.x = self.x+(s*0.5)*2
         whitestar.y = self.y+(s*0.35)
         whitestar.color = colors.mintcream
-        whitestar.strokecolor = None
+        whitestar.strokeColor = None
         whitestar.draw()
         ws.add(whitestar)
         # This star should really be rotated...
