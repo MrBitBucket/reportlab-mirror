@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.60 2002/04/12 22:57:23 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.60 2002/04/12 22:57:23 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.61 2002/04/13 14:21:57 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.61 2002/04/13 14:21:57 rgbecker Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -1632,7 +1632,7 @@ class PDFFormXObject:
         if not self.Annots:
             self.Annots = None
         else:
-			#these must be transferred to the page when the form is used
+            #these must be transferred to the page when the form is used
             raise ValueError, "annotations not reimplemented yet"
         if not self.Contents:
             stream = self.stream
@@ -1714,7 +1714,13 @@ class PDFImageXObject:
         self.streamContent = encoded
         self.width = imgwidth
         self.height = imgheight
-
+        if self.mask=='auto':
+            if PILImage.info.has_key("transparency") :
+                transparency = PILImage.info["transparency"] * 3
+                (tred, tgreen, tblue) = map(ord, PILImage.palette.data[transparency:transparency+3])
+                self.mask = (tred, tred, tgreen, tgreen, tblue, tblue)
+            else:
+                self.mask = None
 
     def format(self, document):
         S = PDFStream()
@@ -1731,14 +1737,7 @@ class PDFImageXObject:
         dict["Length"] = len(self.streamContent)
 
         if self.mask:
-            if self.mask=='auto':
-                if PILImage.info.has_key("transparency") :
-                    transparency = PILImage.info["transparency"] * 3
-                    (tred, tgreen, tblue) = map(ord, PILImage.palette.data[transparency:transparency+3])
-                    self.mask = (tred, tred, tgreen, tgreen, tblue, tblue)
-                    dict["Mask"] = PDFArray(self.mask)
-            else:
-                dict["Mask"] = PDFArray(self.mask)
+            dict["Mask"] = PDFArray(self.mask)
 
         return S.format(document)
 
