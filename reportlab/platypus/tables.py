@@ -834,18 +834,9 @@ class Table(Flowable):
                 self._addCommand((c[0],)+((sc, sr), (ec, er))+c[3:])
 
     def _splitRows(self,availHeight):
-        h = 0
-        n = 0
+        n=self._getFirstPossibleSplitRowPosition(availHeight)
+        if n<=self.repeatRows: return []
         lim = len(self._rowHeights)
-        while n<self._hmax:
-            hn = h + self._rowHeights[n]
-            if hn>availHeight: break
-            h = hn
-            n = n + 1
-
-        if n<=self.repeatRows:
-            return []
-
         if n==lim: return [self]
 
         repeatRows = self.repeatRows
@@ -931,9 +922,52 @@ class Table(Flowable):
 
         R0.hAlign = R1.hAlign = self.hAlign
         R0.vAlign = R1.vAlign = self.vAlign
+        if self._spanCmds: R0._spanCmds, R1._spanCmds=self._cloneSpanCommands(n)
         self.onSplit(R0)
         self.onSplit(R1)
         return [R0,R1]
+
+    def _getFirstPossibleSplitRowPosition(self,availHeight):
+        if self._spanCmds:
+            impossible={}
+            for xy in self._rowSpanCells:
+                r=self._spanRanges[xy]
+                if r!=None:
+                    y1,y2=r[1],r[3]
+                    if y1!=y2:
+                        ymin=min(y1,y2) #normalize
+                        ymax=max(y1,y2) #normalize
+                        y=ymin+1
+                        while 1:
+                            if y>ymax: break
+                            impossible[y]=None #split at position y is impossible because of overlapping rowspan
+                            y=y+1
+        else:
+            impossible={} # any split possible because table does *not* have rowspans
+        h = 0
+        n = 1
+        split_at = 0 # from this point of view 0 is the first position where the table may *always* be splitted
+        for rh in self._rowHeights:
+            if h+rh>availHeight:
+                break
+            if not impossible.has_key(n):
+                split_at=n
+            h=h+rh
+            n=n+1
+        return split_at
+
+    def _cloneSpanCommands(self,n):
+        spans0=[]
+        spans1=[]
+        for rng in self._spanRanges.values():
+            if rng:
+                if rng[0:2]!=rng[2:4]:
+                    x1,y1,x2,y2=rng
+                    assert (x1<=x2) and (y1<=y2), "_spanRanges does contain unexpected values!"
+                    assert not (y1<n and y2>=n) , "Something got wrong with _getFirstPossibleSplitRowPosition! %r" % [ys,ye,n]
+                    if y1< n and y2< n: spans0.append(("SPAN",(x1,y1  ),(x2,y2  )))
+                    if y1>=n and y2>=n: spans1.append(("SPAN",(x1,y1-n),(x2,y2-n)))
+        return spans0,spans1
 
     def split(self, availWidth, availHeight):
         self._calc(availWidth, availHeight)

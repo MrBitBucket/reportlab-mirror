@@ -409,21 +409,60 @@ LIST_STYLE = TableStyle(
                     ('BACKGROUND', (1, 1), (1, 2), colors.lavender),
                     ('BACKGROUND', (2, 2), (2, 3), colors.orange),
                     ])
+    lst.append(Paragraph("Illustrating splits: nosplit", styleSheet['BodyText']))
     lst.append(t)
     lst.append(Spacer(0,6))
+    lst.append(Paragraph("Illustrating splits: split(4in,30)", styleSheet['BodyText']))
     for s in t.split(4*inch,30):
         lst.append(s)
         lst.append(Spacer(0,6))
     lst.append(Spacer(0,6))
+    lst.append(Paragraph("Illustrating splits: split(4in,36)", styleSheet['BodyText']))
     for s in t.split(4*inch,36):
         lst.append(s)
         lst.append(Spacer(0,6))
-
+    lst.append(Paragraph("Illustrating splits: split(4in,56)", styleSheet['BodyText']))
     lst.append(Spacer(0,6))
     for s in t.split(4*inch,56):
         lst.append(s)
         lst.append(Spacer(0,6))
 
+    lst.append(PageBreak())
+    data=  [['00', '01', '02', '03', '04'],
+            ['', '11', '12', '13', '14'],
+            ['20', '21', '22', '23', '24'],
+            ['30', '31', '', '33', '34']]
+    t=Table(data,style=[
+                    ('GRID',(0,0),(-1,-1),0.5,colors.grey),
+                    ('GRID',(1,1),(-2,-2),1,colors.green),
+                    ('BOX',(0,0),(1,-1),2,colors.red),
+                    ('BOX',(0,0),(-1,-1),2,colors.black),
+                    ('LINEABOVE',(1,2),(-2,2),1,colors.blue),
+                    ('LINEBEFORE',(2,1),(2,-2),1,colors.pink),
+                    ('BACKGROUND', (0, 0), (0, 1), colors.pink),
+                    ('SPAN',(0,0),(0,1)),
+                    ('BACKGROUND', (2, 2), (2, 3), colors.orange),
+                    ('SPAN',(2,2),(2,3)),
+                    ])
+    lst.append(Paragraph("Illustrating splits with spans: nosplit", styleSheet['BodyText']))
+    lst.append(t)
+    lst.append(Spacer(0,6))
+    lst.append(Paragraph("Illustrating splits with spans: split(4in,30)", styleSheet['BodyText']))
+    for s in t.split(4*inch,30):
+        lst.append(s)
+        lst.append(Spacer(0,6))
+    lst.append(Spacer(0,6))
+    lst.append(Paragraph("Illustrating splits with spans: split(4in,36)", styleSheet['BodyText']))
+    for s in t.split(4*inch,36):
+        lst.append(s)
+        lst.append(Spacer(0,6))
+    lst.append(Paragraph("Illustrating splits with spans: split(4in,56)", styleSheet['BodyText']))
+    lst.append(Spacer(0,6))
+    for s in t.split(4*inch,56):
+        lst.append(s)
+        lst.append(Spacer(0,6))
+
+    lst.append(PageBreak())
     import os, reportlab.platypus
     I = Image(os.path.join(os.path.dirname(reportlab.platypus.__file__),'..','tools','pythonpoint','demos','leftlogo.gif'))
     I.drawHeight = 1.25*inch*I.drawHeight / I.drawWidth
@@ -569,7 +608,7 @@ LIST_STYLE = TableStyle(
     lst.append(t)
 
     lst.append(PageBreak())
-    lst.append(Paragraph("This spanning example illustrates automatic remova of grids and lines in spanned cells!", styleSheet['BodyText']))
+    lst.append(Paragraph("This spanning example illustrates automatic removal of grids and lines in spanned cells!", styleSheet['BodyText']))
     lst.append(Spacer(0,6))
     data=  [['Top\nLeft', '', '02', '03', '04', '05', '06', '07'],
             ['', '', '12', 'Span (3,1) (6,2)', '','','','17'],
@@ -605,9 +644,6 @@ LIST_STYLE = TableStyle(
     t=LongTable(data, style=sty, colWidths = [50,100,200])
     lst.append(t)
 
-
-
-
     SimpleDocTemplate(outputfile('tables.pdf'), showBoundary=1).build(lst)
 
 
@@ -630,17 +666,3 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
-
-
-#LINEABOVE
-#LINEBELOW
-#LINEBEFORE
-#LINEAFTER
-#GRID
-#BOX
-#INNERGRID ??
-
-#FONT
-#TEXTCOLOR
-#ALIGNMENT
-#PADDING
