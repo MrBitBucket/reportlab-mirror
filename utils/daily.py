@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/daily.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/daily.py,v 1.48 2001/10/28 11:20:26 rgbecker Exp $
-__version__=''' $Id: daily.py,v 1.48 2001/10/28 11:20:26 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/utils/daily.py,v 1.49 2001/10/29 10:32:02 rgbecker Exp $
+__version__=''' $Id: daily.py,v 1.49 2001/10/29 10:32:02 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -97,7 +97,7 @@ def cvs_checkout(d):
 	if release:
 		do_exec(cvs+(' export -r %s %s' % (tagname,projdir)), 'the export phase')
 	else:
-		do_exec(cvs+' co %s' % projdir, 'the checkout phase')
+		do_exec(cvs+' co -P %s' % projdir, 'the checkout phase')
 
 	if py2pdf:
 		# now we need to move the files & delete those we don't need
@@ -126,9 +126,12 @@ def cvs_checkout(d):
 
 		os.chdir(dst)
 		try:
-			do_exec(python + ' tools/genAll.py')
+			# this creates PDFs in each manual's directory, and copies them to reportlab/docs
+			do_exec(python + ' genAll.py')
+			# we copy them out to our html area
 			do_exec('cp %s %s' % (os.path.join(dst,'*.pdf'),htmldir))
-			do_exec('rm *.pdf')
+			# and then delete them
+			do_exec('rm *.pdf userguide/*.pdf graphguide/*.pdf reference/*.pdf')
 		except:
 			print '????????????????????????????????'
 			print 'Failed to run genAll.py, cwd=%s' % os.getcwd()
