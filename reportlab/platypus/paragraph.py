@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.70 2003/12/16 18:04:37 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.70 2003/12/16 18:04:37 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.71 2003/12/17 17:31:01 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.71 2003/12/17 17:31:01 rgbecker Exp $ '''
 from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
@@ -157,6 +157,7 @@ def _justifyDrawParaLineX( tx, offset, line, last=0):
         else:
             _putFragLine(tx, line.words)
     setXPos(tx,-offset)
+    return offset
 
 try:
     from _rl_accel import _sameFrag
