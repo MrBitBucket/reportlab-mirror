@@ -473,7 +473,8 @@ def rl_isfile(fn,os_path_isfile=os.path.isfile):
 def rl_isdir(pn,os_path_isdir=os.path.isdir,os_path_normpath=os.path.normpath):
     if os_path_isdir(pn): return True
     if _isFSD or __loader__ is None: return False
-    pn = os_path_normpath(pn)
+    pn = _startswith_rl(os_path_normpath(pn))
+    if not pn.endswith(os.sep): pn += os.sep
     return len(filter(lambda x,pn=pn: x.startswith(pn),__loader__._files.keys()))>0
 
 def rl_get_module(name,dir):
