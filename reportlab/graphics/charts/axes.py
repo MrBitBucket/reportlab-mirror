@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.20 2001/05/07 14:10:41 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.21 2001/05/07 16:28:05 dinu_gherman Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -188,13 +188,8 @@ class XCategoryAxis(CategoryAxis):
         return d
 
 
-    def joinToAxis(self, yAxis, mode='bottom', value=None, points=None):
+    def joinToAxis(self, yAxis, mode='bottom', pos=None):
         "Join with y-axis using some mode."
-
-        # Make sure only one of the value or points parameter is passed.
-        v, p = value, points
-        if mode[:3] == 'fix':
-            assert (v == None and p != None) or (v != None and p == None)
 
         # Make sure we connect only to a y-axis.
         axisClassName = yAxis.__class__.__name__
@@ -207,12 +202,12 @@ class XCategoryAxis(CategoryAxis):
         elif mode == 'top':        
             self._x = yAxis._x * 1.0
             self._y = (yAxis._y + yAxis._length) * 1.0
-        elif mode == 'fixedValue':
+        elif mode == 'value':
             self._x = yAxis._x * 1.0
-            self._y = yAxis.scale(value) * 1.0
-        elif mode == 'fixedPoints':
+            self._y = yAxis.scale(pos) * 1.0
+        elif mode == 'points':
             self._x = yAxis._x * 1.0
-            self._y = points * 1.0
+            self._y = pos * 1.0
 
 
     def scale(self, idx):
@@ -230,10 +225,8 @@ class XCategoryAxis(CategoryAxis):
             jta = self.joinToAxis
             if jam in ('bottom', 'top'):
                 jta(ja, mode=jam)
-            elif jam == 'value':
-                jta(ja, mode='fixedValue', value=jap)
-            elif jam == 'points':
-                jta(ja, mode='fixedPoints', points=jap)
+            elif jam in ('value', 'points'):
+                jta(ja, mode=jam, pos=jap)
 
         axis = Line(self._x, self._y, self._x + self._length, self._y)
         axis.strokeColor = self.strokeColor
@@ -349,13 +342,8 @@ class YCategoryAxis(CategoryAxis):
         return d
 
 
-    def joinToAxis(self, xAxis, mode='left', value=None, points=None):
+    def joinToAxis(self, xAxis, mode='left', pos=None):
         "Join with x-axis using some mode."
-
-        # Make sure only one of the value or points parameter is passed.
-        v, p = value, points
-        if mode[:3] == 'fix':
-            assert (v == None and p != None) or (v != None and p == None)
 
         # Make sure we connect only to a y-axis.
         axisClassName = xAxis.__class__.__name__
@@ -368,11 +356,11 @@ class YCategoryAxis(CategoryAxis):
         elif mode == 'right':
             self._x = (xAxis._x + xAxis._length) * 1.0
             self._y = xAxis._y * 1.0
-        elif mode == 'fixedValue':
-            self._x = xAxis.scale(value) * 1.0
+        elif mode == 'value':
+            self._x = xAxis.scale(pos) * 1.0
             self._y = xAxis._y * 1.0
-        elif mode == 'fixedPoints':
-            self._x = points * 1.0
+        elif mode == 'points':
+            self._x = pos * 1.0
             self._y = xAxis._y * 1.0
 
 
@@ -392,10 +380,8 @@ class YCategoryAxis(CategoryAxis):
             jta = self.joinToAxis
             if jam in ('left', 'right'):
                 jta(ja, mode=jam)
-            elif jam == 'value':
-                jta(ja, mode='fixedValue', value=jap)
-            elif jam == 'points':
-                jta(ja, mode='fixedPoints', points=jap)
+            elif jam in ('value', 'points'):
+                jta(ja, mode=jam, pos=jap)
 
         axis = Line(self._x, self._y, self._x, self._y + self._length)
         axis.strokeColor = self.strokeColor
@@ -687,13 +673,8 @@ class XValueAxis(ValueAxis):
         return d
 
         
-    def joinToAxis(self, yAxis, mode='bottom', value=None, points=None):
+    def joinToAxis(self, yAxis, mode='bottom', pos=None):
         "Join with y-axis using some mode."
-
-        # Make sure only one of the value or points parameter is passed.
-        v, p = value, points
-        if mode[:3] == 'fix':
-            assert (v == None and p != None) or (v != None and p == None)
 
         # Make sure we connect only to a y-axis.
         axisClassName = yAxis.__class__.__name__
@@ -706,12 +687,12 @@ class XValueAxis(ValueAxis):
         elif mode == 'top':        
             self._x = yAxis._x * 1.0
             self._y = (yAxis._y + yAxis._length) * 1.0
-        elif mode == 'fixedValue':
+        elif mode == 'value':
             self._x = yAxis._x * 1.0
-            self._y = yAxis.scale(value) * 1.0
-        elif mode == 'fixedPoints':
+            self._y = yAxis.scale(pos) * 1.0
+        elif mode == 'points':
             self._x = yAxis._x * 1.0
-            self._y = points * 1.0
+            self._y = pos * 1.0
 
 
     def scale(self, value):
@@ -739,10 +720,8 @@ class XValueAxis(ValueAxis):
             jta = self.joinToAxis
             if jam in ('bottom', 'top'):
                 jta(ja, mode=jam)
-            elif jam == 'value':
-                jta(ja, mode='fixedValue', value=jap)
-            elif jam == 'points':
-                jta(ja, mode='fixedPoints', points=jap)
+            elif jam in ('value', 'points'):
+                jta(ja, mode=jam, pos=jap)
         
         axis = Line(self._x, self._y, self._x + self._length, self._y)
         axis.strokeColor = self.strokeColor
@@ -809,13 +788,8 @@ class YValueAxis(ValueAxis):
         return d
 
         
-    def joinToAxis(self, xAxis, mode='left', value=None, points=None):
+    def joinToAxis(self, xAxis, mode='left', pos=None):
         "Join with x-axis using some mode."
-
-        # Make sure only one of the value or points parameter is passed.
-        v, p = value, points
-        if mode[:3] == 'fix':
-            assert (v == None and p != None) or (v != None and p == None)
 
         # Make sure we connect only to a y-axis.
         axisClassName = xAxis.__class__.__name__
@@ -828,11 +802,11 @@ class YValueAxis(ValueAxis):
         elif mode == 'right':
             self._x = (xAxis._x + xAxis._length) * 1.0
             self._y = xAxis._y * 1.0
-        elif mode == 'fixedValue':
-            self._x = xAxis.scale(value) * 1.0
+        elif mode == 'value':
+            self._x = xAxis.scale(pos) * 1.0
             self._y = xAxis._y * 1.0
-        elif mode == 'fixedPoints':
-            self._x = points * 1.0
+        elif mode == 'points':
+            self._x = pos * 1.0
             self._y = xAxis._y * 1.0
 
 
@@ -861,10 +835,8 @@ class YValueAxis(ValueAxis):
             jta = self.joinToAxis
             if jam in ('left', 'right'):
                 jta(ja, mode=jam)
-            elif jam == 'value':
-                jta(ja, mode='fixedValue', value=jap)
-            elif jam == 'points':
-                jta(ja, mode='fixedPoints', points=jap)
+            elif jam in ('value', 'points'):
+                jta(ja, mode=jam, pos=jap)
 
         axis = Line(self._x, self._y, self._x, self._y + self._length)
         axis.strokeColor = self.strokeColor
@@ -1017,7 +989,7 @@ def sample1():
 ##    xAxis = XCategoryAxis()
 ##    xAxis._length = 300
 ##    xAxis.configure(data)
-##    xAxis.joinToAxis(yAxis, mode='fixedPoints', points=100)
+##    xAxis.joinToAxis(yAxis, mode='points', pos=100)
 ##    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
 ##    xAxis.labels.boxAnchor = 'n'
 ##
@@ -1041,7 +1013,7 @@ def sample1():
 ##    xAxis = XCategoryAxis()
 ##    xAxis._length = 300
 ##    xAxis.configure(data)
-##    xAxis.joinToAxis(yAxis, mode='fixedValue', value=20)
+##    xAxis.joinToAxis(yAxis, mode='value', pos=20)
 ##    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
 ##    xAxis.labels.boxAnchor = 'n'
 ##
@@ -1113,7 +1085,7 @@ def sample1():
 ##    xAxis = XValueAxis()
 ##    xAxis._length = 300
 ##    xAxis.configure(data)
-##    xAxis.joinToAxis(yAxis, mode='fixedPoints', points=100)
+##    xAxis.joinToAxis(yAxis, mode='points', pos=100)
 ##
 ##    drawing.add(xAxis)
 ##    drawing.add(yAxis)
