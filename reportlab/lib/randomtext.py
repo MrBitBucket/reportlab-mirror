@@ -2,9 +2,12 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/randomtext.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/randomtext.py,v 1.3 2001/01/02 15:17:42 johnprecedo Exp $
-__version__=''' $Id: randomtext.py,v 1.3 2001/01/02 15:17:42 johnprecedo Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/randomtext.py,v 1.4 2001/01/19 08:41:22 dinu_gherman Exp $
+
+__version__=''' $Id: randomtext.py,v 1.4 2001/01/19 08:41:22 dinu_gherman Exp $ '''
+
 import string
+
 ###############################################################################
 #	generates so-called 'Greek Text' for use in filling documents.
 ###############################################################################
@@ -123,7 +126,6 @@ PRINTING = ['points', 'picas', 'leading', 'kerning', 'CMYK', 'offset litho',
     'page', 'frame', 'ragged setting', 'flush-right', 'rule', 'drop shadows',
     'prepress', 'spot-colour', 'duotones', 'colour separations', 'four-colour printing',
     'Pantone[TM]', 'service bureau', 'imagesetter']
-
 
 
 def randomText(theme=STARTUP):

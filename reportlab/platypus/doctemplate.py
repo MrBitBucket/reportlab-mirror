@@ -1,8 +1,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.33 2000/12/17 10:51:55 rgbecker Exp $
-__version__=''' $Id: doctemplate.py,v 1.33 2000/12/17 10:51:55 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.34 2001/01/19 08:41:22 dinu_gherman Exp $
+
+__version__=''' $Id: doctemplate.py,v 1.34 2001/01/19 08:41:22 dinu_gherman Exp $ '''
+
 __doc__="""
 This module contains the core structure of platypus.
 
@@ -26,17 +28,21 @@ The special invisible flowable NextPageTemplate can be used to specify
 the page template for the next page (which by default is the one being used
 for the current frame).
 """
+
 from reportlab.platypus.flowables import *
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
 from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
 import reportlab.lib.sequencer
+
 from types import *
 import sys
+
 
 def _doNothing(canvas, doc):
 	"Dummy callback for onPage"
 	pass
+
 
 class IndexingFlowable0(Flowable):
 	"""Abstract interface definition for flowables which might
@@ -63,6 +69,7 @@ class IndexingFlowable0(Flowable):
 	def afterBuild(self):
 		"""Called after build ends but before isSatisfied"""
 		pass
+
 
 class ActionFlowable(Flowable):
 	'''This Flowable is never drawn, it can be used for data driven controls
@@ -104,6 +111,7 @@ class ActionFlowable(Flowable):
 	def __call__(self):
 		return self
 
+
 FrameBreak = ActionFlowable('frameEnd')
 PageBegin = ActionFlowable('pageBegin')
 
@@ -112,6 +120,7 @@ class NextPageTemplate(ActionFlowable):
 	"""When you get to the next page, use the template specified (change to two column, for example)  """
 	def __init__(self,pt):
 		ActionFlowable.__init__(self,('nextPageTemplate',pt))
+
 
 class PageTemplate:
 	"""
@@ -142,6 +151,7 @@ class PageTemplate:
 		this page."""
 		pass
 		
+
 class BaseDocTemplate:
 	"""
 	First attempt at defining a document template class.
@@ -573,6 +583,7 @@ class BaseDocTemplate:
 		'''called after a flowable has been rendered'''
 		pass
 
+
 class SimpleDocTemplate(BaseDocTemplate):
 	"""A special case document template that will handle many simple documents.
 	   See documentation for BaseDocTemplate.  No pageTemplates are required 
@@ -583,6 +594,7 @@ class SimpleDocTemplate(BaseDocTemplate):
 	   page may can be built using this special approach.
 	"""
 	_invalidInitArgs = ('pageTemplates',)
+
 	def handle_pageBegin(self):
 		'''override base method to add a change of page template after the firstpage.
 		'''
@@ -612,6 +624,7 @@ class SimpleDocTemplate(BaseDocTemplate):
 			self.pageTemplates[1].beforeDrawPage = self.onLaterPages
 		BaseDocTemplate.build(self,flowables)
 
+
 	##########################################################
 	##
 	##	 testing
@@ -639,6 +652,7 @@ def randomText():
 			output = output + ' ' +word
 		output = output+'.'
 	return output
+
 
 if __name__ == '__main__':
 

@@ -1,11 +1,16 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/frames.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.11 2000/12/13 23:31:18 aaron_watters Exp $
-__version__=''' $Id: frames.py,v 1.11 2000/12/13 23:31:18 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.12 2001/01/19 08:41:22 dinu_gherman Exp $
+
+__version__=''' $Id: frames.py,v 1.12 2001/01/19 08:41:22 dinu_gherman Exp $ '''
+
 __doc__="""
 """
-_geomAttr=('x1','y1','width','height', 'leftPadding', 'bottomPadding', 'rightPadding', 'topPadding')
+
+_geomAttr=('x1', 'y1', 'width', 'height', 'leftPadding', 'bottomPadding', 'rightPadding', 'topPadding')
+
+
 class Frame:
 	'''
 	A Frame is a piece of space in a document that is filled by the
@@ -72,7 +77,7 @@ class Frame:
 		else:
 			self.__dict__[a] = v
 
-	def	_geom(self):
+	def _geom(self):
 		self._x2 = self._x1 + self._width
 		self._y2 = self._y1 + self._height
 		#efficiency
@@ -81,7 +86,7 @@ class Frame:
 		self._aW = self._x2 - self._x1 - self._leftPadding - self._rightPadding
 		self._aH = self._y2 - self._y1p - self._topPadding
 
-	def	_reset(self):
+	def _reset(self):
 		#drawing starts at top left
 		self._x = self._x1 + self._leftPadding
 		self._y = self._y2 - self._topPadding
@@ -133,7 +138,6 @@ class Frame:
 		r = flowable.split(self._aW, y-p-s)
 		del flowable.canv
 		return r
-
 
 	def drawBoundary(self,canv):
 		"draw the frame boundary as a rectangle (primarily for debugging)."
