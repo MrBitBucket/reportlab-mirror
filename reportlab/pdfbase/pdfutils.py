@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.28 2001/11/13 18:37:17 aaron_watters Exp $
-__version__=''' $Id: pdfutils.py,v 1.28 2001/11/13 18:37:17 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.29 2002/03/12 15:18:03 rgbecker Exp $
+__version__=''' $Id: pdfutils.py,v 1.29 2002/03/12 15:18:03 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -63,7 +63,7 @@ def cacheImageFile(filename, returnInMemory=0):
         f = open(cachedname,'wb')
         f.write(join(code, LINEEND)+LINEEND)
         f.close()
-        if rl_config._verbose:
+        if rl_config.verbose:
             print 'cached image as %s' % cachedname
 
 
@@ -84,7 +84,7 @@ def preProcessImages(spec):
 
     for filename in filelist:
         if cachedImageExists(filename):
-            if rl_config._verbose:
+            if rl_config.verbose:
                 print 'cached version of %s already exists' % filename
         else:
             cacheImageFile(filename)

@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.13 2002/03/02 14:05:51 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.14 2002/03/12 15:18:03 rgbecker Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -57,7 +57,7 @@ from reportlab.graphics.shapes import Drawing
 from reportlab.graphics import shapes
 from reportlab.graphics import renderPDF
 
-VERBOSE = rl_config._verbose
+VERBOSE = rl_config.verbose
 VERIFY = 1
 
 _abstractclasserr_re = re.compile(r'^\s*abstract\s*class\s*(\w+)\s*instantiated',re.I)

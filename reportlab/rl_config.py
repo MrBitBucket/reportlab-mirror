@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.28 2001/11/01 20:53:27 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.29 2002/03/12 15:18:02 rgbecker Exp $
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =				1
@@ -12,7 +12,7 @@ defaultImageCaching =		0						#set to zero to remove those annoying cached image
 PIL_WARNINGS =				1						#set to zero to remove those annoying warnings
 ZLIB_WARNINGS =				1						
 warnOnMissingFontGlyphs =	0						#if 1, warns of each missing glyph
-_verbose =					0
+verbose =					0
 showBoundary =				0						# turns on and off boundary behaviour in Drawing
 
 # places to look for T1Font information
@@ -54,7 +54,7 @@ def	_startUp():
 	else we use the given default'''
 	V = ('T1SearchPath','CMapSearchPath','shapeChecking', 'defaultEncoding', 'pageCompression',
 				'defaultPageSize', 'defaultImageCaching', 'PIL_WARNINGS',
-				'ZLIB_WARNINGS', 'warnOnMissingFontGlyphs', '_verbose',
+				'ZLIB_WARNINGS', 'warnOnMissingFontGlyphs', 'verbose',
 				)
 
 	if _SAVED=={}:

@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/daily.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/daily.py,v 1.52 2001/12/12 10:39:56 rgbecker Exp $
-__version__=''' $Id: daily.py,v 1.52 2001/12/12 10:39:56 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/utils/daily.py,v 1.53 2002/03/12 15:18:03 rgbecker Exp $
+__version__=''' $Id: daily.py,v 1.53 2002/03/12 15:18:03 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -18,7 +18,7 @@ release=0		#1 if making a release
 py2pdf=0		#1 if doing a special py2pdf zip/tgz
 #USER=os.environ['USER']
 USER='anonymous'
-verbose=os.environ.get('RL__verbose',0)
+verbose=os.environ.get('RL_verbose',0)
 sys.stderr = sys.stdout
 
 def get_path():
@@ -146,9 +146,10 @@ def cvs_checkout(d):
 		CVS_remove(dst)
 	elif release:
 		dst = os.path.join(d,"reportlab","docs")
-		for f in ('userguide.pdf', 'graphguide.pdf' 'reference.pdf', 'graphics_reference.pdf'):
-			f = os.path.join(htmldir,f)
-			if os.path.isfile(f): copy(f,dst)
+		for f in ('userguide.pdf', 'graphguide.pdf', 'reference.pdf', 'graphics_reference.pdf'):
+			src = os.path.join(htmldir,f)
+			if os.path.isfile(src): copy(src,dst)
+			else: print "Cannot copy %s to %s" % (src,htmldir)
 
 def do_zip(d):
 	'create .tgz and .zip file archives of d/reportlab'

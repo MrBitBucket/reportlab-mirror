@@ -320,7 +320,7 @@ class PPPresentation:
         #assume landscape
         self.pageWidth = rl_config.defaultPageSize[1]
         self.pageHeight = rl_config.defaultPageSize[0]
-        self.verbose = rl_config._verbose
+        self.verbose = rl_config.verbose
 
 
     def saveAsPresentation(self):
@@ -958,7 +958,7 @@ def handleOptions():
                'handout':0,
                'help':0,
                'notes':0,
-               'verbose':rl_config._verbose,
+               'verbose':rl_config.verbose,
                'silent':0,
                'outDir': None}
 

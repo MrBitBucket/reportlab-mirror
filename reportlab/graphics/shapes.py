@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.70 2002/01/17 10:53:21 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.71 2002/03/12 15:18:02 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -12,7 +12,7 @@ from types import FloatType, IntType, ListType, TupleType, StringType, InstanceT
 from pprint import pprint
 
 from reportlab.platypus import Flowable
-from reportlab.rl_config import shapeChecking, _verbose
+from reportlab.rl_config import shapeChecking, verbose
 from reportlab.lib import logger
 from reportlab.lib import colors
 from reportlab.lib.validators import *
@@ -558,7 +558,7 @@ class Drawing(Group, Flowable):
 		if string.lower(plotMode[1][1:]) in ['pdf','ps','eps','gif','png','jpg','jpeg','tiff','tif','py']:
 			fnroot = plotMode[0]
 
-		plotMode, verbose = formats or getattr(self,'formats',['pdf']), (verbose is not None and (verbose,) or (getattr(self,'verbose',_verbose),))[0]
+		plotMode, verbose = formats or getattr(self,'formats',['pdf']), (verbose is not None and (verbose,) or (getattr(self,'verbose',verbose),))[0]
 		_saved = logger.warnOnce.enabled, logger.infoOnce.enabled
 		logger.warnOnce.enabled = logger.infoOnce.enabled = verbose
 		if 'pdf' in plotMode:
