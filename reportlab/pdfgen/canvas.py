@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.85 2001/07/17 15:34:10 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.85 2001/07/17 15:34:10 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.86 2001/07/19 10:34:22 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.86 2001/07/19 10:34:22 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -909,8 +909,7 @@ class Canvas:
         self.drawText(t)
 
     def drawCentredString(self, x, y, text):
-        """Draws a string right-aligned with the x coordinate.  I
-        am British so the spelling is correct, OK?"""
+        """Draws a string centred on the x coordinate."""
         width = self.stringWidth(text, self._fontname, self._fontsize)
         t = self.beginText(x - 0.5*width, y)
         t.textLine(text)
