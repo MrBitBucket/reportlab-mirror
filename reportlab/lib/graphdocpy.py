@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.6 2001/05/11 10:10:28 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.7 2001/05/11 11:01:12 dinu_gherman Exp $
 
 """Generate documentation of graphical Python objects.
 
@@ -324,8 +324,13 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         self.story.append(Paragraph(
             'Public Attributes',
             self.makeHeadingStyle(self.indentLevel+1)))
-        map = aClass._attrMap.items()
-        map.sort()
+
+        map = aClass._attrMap
+        if map:
+            map = map.items()
+            map.sort()
+        else:
+            map = []
         for name, typ in map:
             if typ != None:
                 if hasattr(typ, 'desc'):
