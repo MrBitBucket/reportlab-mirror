@@ -1,50 +1,38 @@
 """Tests for the (soon to be) reportlab.tools.pythonpoint package.
 """
-
-
 import os, sys
-
 from reportlab.test import unittest
 from reportlab.test.utils import SecureTestCase
 
-
 class PythonPointTestCase(SecureTestCase):
-    "Some very crude tests on PythonPoint."
-    
-    def test1(self):
-        "Test if pythonpoint.pdf can be created from pythonpoint.xml."
+	"Some very crude tests on PythonPoint."
+	
+	def test1(self):
+		"Test if pythonpoint.pdf can be created from pythonpoint.xml."
+		import reportlab
+		rlDir = os.path.dirname(reportlab.__file__)
+		ppDir = os.path.join(rlDir, 'tools', 'pythonpoint')
+		pdf = os.path.join(ppDir,'demos','pythonpoint.pdf')
+		xml = os.path.join(ppDir,'demos','pythonpoint.xml')
+		pp = os.path.join(ppDir,'pythonpoint.py')
+		exe = os.path.abspath(os.path.join(rlDir,'..','pythonpoint.exe'))
 
-        import reportlab
-        rlFolder = os.path.dirname(reportlab.__file__)
-        ppFolder = os.path.join(rlFolder, 'tools', 'pythonpoint')
-        os.chdir(ppFolder)
+		try:
+			os.remove(pdf)
+		except OSError:
+			pass
 
-        try:
-            os.remove('pythonpoint.pdf')
-        except OSError:
-            pass
+		if os.path.isfile(pp):
+			os.system("%s %s %s" % (sys.executable,pp,xml))
+		elif os.path.isfile(exe):
+			os.system("%s %s" % (exe,xml))
 
-##        sys.argv.insert(0, ppFolder)
-##        import pythonpoint
-##        pythonpoint.process('pythonpoint.xml')
-        os.system("python pythonpoint.py demos" + os.sep + "pythonpoint.xml")
-
-        assert os.path.exists(os.path.join('demos','pythonpoint.pdf'))
-
+		assert os.path.exists(pdf)
 
 def makeSuite():
-    suite = unittest.TestSuite()
-    
-    suite.addTest(PythonPointTestCase('test1'))
-##    suite.addTest(ColorTestCase('test2'))
-##    suite.addTest(ColorTestCase('test3'))
-##    suite.addTest(ColorTestCase('test4'))
-##    suite.addTest(ColorTestCase('test5'))
-##    suite.addTest(ColorTestCase('test6'))
+	suite = unittest.TestSuite()
+	suite.addTest(PythonPointTestCase('test1'))
+	return suite
 
-    return suite
-
-
-#noruntests
-if __name__ == "__main__":
-    unittest.TextTestRunner().run(makeSuite())
+if __name__ == "__main__":	#NORUNTESTS
+	unittest.TextTestRunner().run(makeSuite())
