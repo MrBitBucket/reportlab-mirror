@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.16 2001/05/18 10:42:36 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.17 2001/05/18 10:55:48 rgbecker Exp $
 import string
 
 from reportlab.graphics import shapes
@@ -211,9 +211,10 @@ class TypedPropertyCollection(PropHolder):
 
 		return props
 
-	def setVector(self,name,value):
-		for i in xrange(len(value)):
-			setattr(self[i],name,value[i])
+	def setVector(self,**kw):
+		for name, value in kw.items():
+			for i in xrange(len(value)):
+				setattr(self[i],name,value[i])
 
 ## No longer needed!
 class StyleProperties(PropHolder):
@@ -364,7 +365,7 @@ def test():
 	from reportlab.graphics.charts.piecharts import WedgeProperties
 	wedges = TypedPropertyCollection(WedgeProperties)
 	wedges.fillColor = colors.red
-	wedges.setVector('fillColor',(colors.blue,colors.green,colors.white))
+	wedges.setVector(fillColor=(colors.blue,colors.green,colors.white))
 
 	d = shapes.Drawing(400, 200)
 	tc = TwoCircles()
