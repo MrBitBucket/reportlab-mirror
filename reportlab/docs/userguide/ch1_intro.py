@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.4 2001/11/08 17:35:25 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.5 2002/02/13 21:15:33 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 import reportlab
 
@@ -136,6 +136,12 @@ Python is copyrighted but <b>freely usable and distributable, even for commercia
 The ReportLab core modules share the same copyright with the name of the copyright holder
 modified.  Both packages use the "Berkeley Standard Distribution (BSD) style" free software copyright.
 """)
+
+heading2("Acknowledgements")
+disc("""Many people have contributed to ReportLab.  We would like to thank
+in particular (in approximately chronological order) Chris Lee, Magnus Lie Hetland,
+Robert Kern, Jeff Bauer (who contributed normalDate.py) and Jerome Alet (numerous patches
+and the rlzope demo).  """)
 
 heading2("Installation and Setup")
 
