@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.65 2004/03/23 13:54:42 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.65 2004/03/23 13:54:42 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.66 2004/03/23 14:30:01 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.66 2004/03/23 14:30:01 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -405,6 +405,9 @@ def open_for_read(name,mode='b'):
 
 def open_and_read(name,mode='b'):
     return open_for_read(name,mode).read()
+
+def open_and_readlines(name,mode='t'):
+    return open_and_read(name,mode).split('\n')
 
 def rl_isfile(fn,os_path_isfile=os.path.isfile):
     if hasattr(fn,'read'): return True
