@@ -765,5 +765,5 @@ def test(args = None):
     x.close()
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': #NO_REPORTLAB_TEST
     test()
