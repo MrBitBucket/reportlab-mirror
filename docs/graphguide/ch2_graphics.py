@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.14 2001/04/03 11:36:52 johnprecedo Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.15 2001/04/03 11:45:21 johnprecedo Exp $
 
 from gengraphguide import *
 
@@ -971,7 +971,7 @@ pc.wedges[7].strokeWidth = 5
 # Hack to force a new paragraph before the todo() :-(
 #disc("")
 
-#todo("We need more of an explanation of what '$__setattr__$ hooks' are")
+todo("More of an explanation of what '$__setattr__$ hooks' are?")
 
 disc("""The last line is problematic as we have only created four wedges - in 
        fact we might not have created them yet. Does $pc.wedges[7]$ raise an 
