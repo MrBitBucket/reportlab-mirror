@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "$Revision: 1.13 $"
+#define VERSION "$Revision: 1.14 $"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -143,7 +143,7 @@ typedef struct {
 	Gt1EncodedFont*		font;		/*the currently set external font or NULL*/
 	} gstateObject;
 
-static	bpath_add_point(ArtBpath** pp, int* pn, int *pm, int code, double x[3], double y[3])
+static	void bpath_add_point(ArtBpath** pp, int* pn, int *pm, int code, double x[3], double y[3])
 {
 	int i = (*pn)++;
 	if(i == *pm) art_expand(*pp, ArtBpath, *pm);
@@ -832,18 +832,6 @@ static PyObject* gstate__aapixbuf(gstateObject* self, PyObject* args)
 	return Py_None;
 }
 
-static int _setStrAttr(PyObject* value, char** pStr)
-{
-	char	*s;
-	int		i;
-
-	if((i=PyArg_Parse(value,"s",&s))){
-		if(*pStr) PyMem_Free(*pStr);
-		*pStr = s;
-		}
-	return i;
-}
-
 static	void _safeDecr(PyObject** p)
 {
 	if(*p){
@@ -1278,7 +1266,7 @@ static struct PyMethodDef moduleMethods[] = {
 	{NULL,	NULL}			/*sentinel*/
 	};
 
-void init_renderPM()
+void init_renderPM(void)
 {
 	PyObject *m, *d;
 
