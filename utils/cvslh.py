@@ -1,3 +1,11 @@
+#
+#	after cvs -z7 log >\tmp\log
+#
+#	python cvslh.py -d"2000/04/10 14:00:00" <\tmp\log >\tmp\hacked_log
+#
+#	makes a reasonably formatted file of the log entries since the specified
+#	date.
+#
 import re, sys, getopt
 class logFileEntry:
 	def __init__(self, version):
