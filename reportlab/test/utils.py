@@ -87,8 +87,8 @@ class GlobDirectoryWalker:
             self.stack = [directory]
             self.files = []
         else:
-            from reportlab.lib.utils import isCompactDistro, __loader__, _RL_DIR
-            if not isCompactDistro() or not __loader__ or not directory.startswith(_RL_DIR):
+            from reportlab.lib.utils import isCompactDistro, __loader__, rl_isdir
+            if not isCompactDistro() or not __loader__ or not rl_isdir(directory):
                 raise ValueError('"%s" is not a directory' % directory)
             self.directory = directory[len(__loader__.archive)+len(os.sep):]
             pfx = self.directory+os.sep
