@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.71 2004/01/13 11:20:45 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.72 2004/01/20 22:50:31 andy_robinson Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.71 2004/01/13 11:20:45 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.72 2004/01/20 22:50:31 andy_robinson Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -115,7 +115,7 @@ class ActionFlowable(Flowable):
 
     def identity(self, maxLen=None):
         return "ActionFlowable: %s" % str(self.action)
-    
+
 class NextFrameFlowable(ActionFlowable):
     def __init__(self,ix,resume=0):
         ActionFlowable.__init__(self,('nextFrame',ix,resume))
@@ -147,7 +147,7 @@ class Indenter(ActionFlowable):
 
     This allows one to have a 'context-sensitive' indentation
     and makes nested lists way easier.
-    """    
+    """
 
     def __init__(self, left=0, right=0):
         self.left = left
@@ -156,7 +156,7 @@ class Indenter(ActionFlowable):
     def apply(self, doc):
         doc.frame._leftExtraIndent = doc.frame._leftExtraIndent + self.left
         doc.frame._rightExtraIndent = doc.frame._rightExtraIndent + self.right
-        
+
 
 class NextPageTemplate(ActionFlowable):
     """When you get to the next page, use the template specified (change to two column, for example)  """
@@ -320,7 +320,7 @@ class BaseDocTemplate:
         #context sensitive margins - set by story, not from outside
         self._leftExtraIndent = 0.0
         self._rightExtraIndent = 0.0
-        
+
         self._calc()
         self.afterInit()
 
@@ -426,7 +426,7 @@ class BaseDocTemplate:
         ''' Handles the semantics of the end of a frame. This includes the selection of
             the next frame or if this is the last frame then invoke pageEnd.
         '''
-        
+
         self._leftExtraIndent = self.frame._leftExtraIndent
         self._rightExtraIndent = self.frame._rightExtraIndent
 

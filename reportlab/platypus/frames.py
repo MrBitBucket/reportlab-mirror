@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/frames.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.21 2003/08/11 11:39:39 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.22 2004/01/20 22:50:31 andy_robinson Exp $
 
-__version__=''' $Id: frames.py,v 1.21 2003/08/11 11:39:39 rgbecker Exp $ '''
+__version__=''' $Id: frames.py,v 1.22 2004/01/20 22:50:31 andy_robinson Exp $ '''
 
 __doc__="""
 """
@@ -68,7 +68,7 @@ class Frame:
         # to adjust edges e.g. to do nested lists
         self._leftExtraIndent = 0.0
         self._rightExtraIndent = 0.0
-        
+
         # if we want a boundary to be shown
         self.showBoundary = showBoundary
 
@@ -103,7 +103,7 @@ class Frame:
 
     def _getAvailableWidth(self):
         return self._aW - self._leftExtraIndent - self._rightExtraIndent
-    
+
     def _add(self, flowable, canv, trySplit=0):
         """ Draws the flowable at the current position.
         Returns 1 if successful, 0 if it would not fit.
@@ -147,7 +147,7 @@ class Frame:
         s = 0
         if not self._atTop: s = flowable.getSpaceBefore()
         flowable.canv = canv    #some flowables might need this
-        
+
         #print 'asked table to split.  _aW = %0.2f, y-p-s=%0.2f' % (self._aW, y-p-s)
         r = flowable.split(self._aW, y-p-s)
         del flowable.canv

@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/test_invariant.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_invariant.py,v 1.4 2003/12/02 15:21:17 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_invariant.py,v 1.5 2004/01/20 22:50:32 andy_robinson Exp $
 __version__=''' $Id'''
 __doc__="""Verfy that if in invariant mode, repeated runs
 make identical file.  This does NOT test across platforms
@@ -16,7 +16,7 @@ filename = 'test_invariant.pdf'
 class InvarTestCase(unittest.TestCase):
     "Simplest test that makes PDF"
     def test(self):
-        
+
         c = Canvas(filename, invariant=1, pageCompression=0)
         c.setFont('Helvetica-Bold', 36)
         c.drawString(100,700, 'Hello World')
@@ -34,7 +34,7 @@ class InvarTestCase(unittest.TestCase):
         raw2 = open(filename, 'rb').read()
 
         assert raw1 == raw2, 'repeated runs differ!'
-        
+
 
 
 def makeSuite():

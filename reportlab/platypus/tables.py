@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.71 2004/01/09 09:46:17 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.71 2004/01/09 09:46:17 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.72 2004/01/20 22:50:32 andy_robinson Exp $
+__version__=''' $Id: tables.py,v 1.72 2004/01/20 22:50:32 andy_robinson Exp $ '''
 
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
@@ -361,7 +361,7 @@ class Table(Flowable):
                     if t>h: h = t   #record a new maximum
                     j = j + 1
                 H[i] = h
-            if None not in H: hmax = lim 
+            if None not in H: hmax = lim
 
         height = self._height = reduce(operator.add, H[:hmax], 0)
         #print "height, H", height, H

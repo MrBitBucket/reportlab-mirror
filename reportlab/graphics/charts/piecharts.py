@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.38 2003/09/16 13:32:27 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.39 2004/01/20 22:50:31 andy_robinson Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -12,7 +12,7 @@
 This permits you to customize and pop out individual wedges;
 supports elliptical and circular pies.
 """
-__version__=''' $Id: piecharts.py,v 1.38 2003/09/16 13:32:27 rgbecker Exp $ '''
+__version__=''' $Id: piecharts.py,v 1.39 2004/01/20 22:50:31 andy_robinson Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -29,7 +29,7 @@ from reportlab.lib.attrmap import *
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS, ArcPath, Polygon
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
-from textlabels import Label 
+from textlabels import Label
 
 _ANGLE2BOXANCHOR={0:'w', 45:'sw', 90:'s', 135:'se', 180:'e', 225:'ne', 270:'n', 315: 'nw', -45: 'nw'}
 class WedgeLabel(Label):
@@ -610,7 +610,7 @@ class Pie3d(Pie):
         n = len(data)
         _sl3d = self._sl3d = []
         g = Group()
-        last = _360(self.startAngle) 
+        last = _360(self.startAngle)
         a0 = self.direction=='clockwise' and -1 or 1
         for v in data:
             v *= a0

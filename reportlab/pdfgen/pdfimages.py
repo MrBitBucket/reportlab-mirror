@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pdfimages.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.18 2003/09/08 16:16:04 rgbecker Exp $
-__version__=''' $Id: pdfimages.py,v 1.18 2003/09/08 16:16:04 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.19 2004/01/20 22:50:31 andy_robinson Exp $
+__version__=''' $Id: pdfimages.py,v 1.19 2004/01/20 22:50:31 andy_robinson Exp $ '''
 __doc__="""
 Image functionality sliced out of canvas.py for generalization
 """
@@ -22,7 +22,7 @@ class PDFImage:
     from a PIL Image object, a filename (in which case it uses PIL),
     an image we previously cached (optimisation, hardly used these
     days) or a JPEG (which PDF supports natively)."""
-    
+
     def __init__(self, image, x,y, width=None, height=None, caching=0):
         self.image = image
         self.point = (x,y)

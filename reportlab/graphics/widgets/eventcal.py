@@ -1,11 +1,11 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/eventcal.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/eventcal.py,v 1.4 2003/04/01 10:30:16 fuzzypuffin Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/eventcal.py,v 1.5 2004/01/20 22:50:31 andy_robinson Exp $
 # Event Calendar widget
 # author: Andy Robinson
-"""This file is a 
+"""This file is a
 """
-__version__=''' $Id: eventcal.py,v 1.4 2003/04/01 10:30:16 fuzzypuffin Exp $ '''
+__version__=''' $Id: eventcal.py,v 1.5 2004/01/20 22:50:31 andy_robinson Exp $ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *
@@ -28,7 +28,7 @@ class EventCalendar(Widget):
         self.trackRowHeight = 20
         self.data = []  # list of Event objects
         self.trackNames = None
-        
+
         self.startTime = None  #displays ALL data on day if not set
         self.endTime = None    # displays ALL data on day if not set
         self.day = 0
@@ -49,7 +49,7 @@ class EventCalendar(Widget):
         self._talksVisible = self.getRelevantTalks(self.data)
         self._trackCount = len(self.getAllTracks())
         self.computeStartAndEndTimes()
-        self._colLeftEdges = [self.x]        
+        self._colLeftEdges = [self.x]
         if self.timeColWidth is None:
             w = self.width / (1 + self._trackCount)
             self._colWidths = [w] * (1+ self._trackCount)
@@ -86,10 +86,10 @@ class EventCalendar(Widget):
                 else:
                     if start + duration > self._endTime:
                         self._endTime = start + duration
-                
-                
 
-        
+
+
+
     def getAllTracks(self):
         tracks = []
         for (title, speaker, trackId, day, hours, duration) in self.data:
@@ -98,7 +98,7 @@ class EventCalendar(Widget):
                     tracks.append(trackId)
         tracks.sort()
         return tracks
-        
+
     def getRelevantTalks(self, talkList):
         "Scans for tracks actually used"
         used = []
@@ -106,7 +106,7 @@ class EventCalendar(Widget):
             (title, speaker, trackId, day, hours, duration) = talk
             assert trackId <> 0, "trackId must be None or 1,2,3... zero not allowed!"
             if day == self.day:
-                if (((self.startTime is None) or ((hours + duration) >= self.startTime)) 
+                if (((self.startTime is None) or ((hours + duration) >= self.startTime))
                 and ((self.endTime is None) or (hours <= self.endTime))):
                     used.append(talk)
         return used
@@ -114,11 +114,11 @@ class EventCalendar(Widget):
     def scaleTime(self, theTime):
         "Return y-value corresponding to times given"
         axisHeight = self.height - self.trackRowHeight
-        # compute fraction between 0 and 1, 0 is at start of period        
+        # compute fraction between 0 and 1, 0 is at start of period
         proportionUp = ((theTime - self._startTime) / (self._endTime - self._startTime))
-        y = self.y + axisHeight - (axisHeight * proportionUp)        
+        y = self.y + axisHeight - (axisHeight * proportionUp)
         return y
-            
+
 
     def getTalkRect(self, startTime, duration, trackId, text):
         "Return shapes for a specific talk"
@@ -130,7 +130,7 @@ class EventCalendar(Widget):
         if trackId is None:
             #spans all columns
             x = self._colLeftEdges[1]
-            width = self.width - self._colWidths[0] 
+            width = self.width - self._colWidths[0]
         else:
             #trackId is 1-based and these arrays have the margin info in column
             #zero, so no need to add 1
@@ -149,10 +149,10 @@ class EventCalendar(Widget):
         g.add(r)
         g.add(lab)
 
-        #now for a label        
+        #now for a label
         # would expect to color-code and add text
         return g
-            
+
     def draw(self):
         self.computeSize()
         g = Group()
@@ -173,19 +173,19 @@ class EventCalendar(Widget):
 
         for talk in self._talksVisible:
             (title, speaker, trackId, day, start, duration) = talk
-            r = self.getTalkRect(start, duration, trackId, title + '\n' + speaker) 
+            r = self.getTalkRect(start, duration, trackId, title + '\n' + speaker)
             g.add(r)
 
 
         return g
-    
+
 
 
 
 def test():
     "Make a conference event for day 1 of UP Python 2003"
-    
-    
+
+
     d = Drawing(400,200)
 
     cal = EventCalendar()
@@ -195,7 +195,7 @@ def test():
         # these might be better as objects instead of tuples, since I
         # predict a large number of "optionsl" variables to affect
         # formatting in future.
-        
+
         #title, speaker, track id, day, start time (hrs), duration (hrs)
         # track ID is 1-based not zero-based!
         ('Keynote: Why design another programming language?',  'Guido van Rossum', None, 1, 9.0, 1.0),
@@ -244,7 +244,7 @@ def test():
         ("A Common Vendor ABI for C++ -- GCC's why, what and not", 'Nathan Sidwell & Gabriel Dos Reis', 4, 2, 16.0, 1.5),
         ("The Timing and Cost of Choices", 'Hubert Matthews', 5, 2, 16.0, 1.5),
 
-        ('Birds of a Feather meeting', '', None, 2, 17.5, 2.0),        
+        ('Birds of a Feather meeting', '', None, 2, 17.5, 2.0),
 
         ('Keynote: The Cost of C &amp; C++ Compatibility', 'Andy Koenig', None, 3, 9.0, 1.0),
 
@@ -254,8 +254,8 @@ def test():
         ('Extreme Hour (XH): (workshop) - Jutta Eckstein and Nico Josuttis', 'Jutta Ecstein', 4, 2, 10.5, 1.5),
         ('The Lambda Library : Unnamed Functions for C++', 'Jaako Jarvi', 5, 2, 10.5, 1.5),
 
-        ('lunch, short presentations, vendor presentations', '', None, 3, 12.0, 2.0),        
-        
+        ('lunch, short presentations, vendor presentations', '', None, 3, 12.0, 2.0),
+
         ('Reflective Metaprogramming', 'Daveed Vandevoorde', 1, 3, 14.0, 1.5),
         ('Advanced Template Issues and Solutions (double session)', 'Herb Sutter',2, 3, 14.0, 3),
         ('Concurrent Programming in Java (double session)', 'Angelika Langer', 3, 3, 14.0, 3),
@@ -275,8 +275,8 @@ def test():
         ('Generic Build Support - A Pragmatic Approach to the Software Build Process', 'Randy Marques', 3, 5, 10.5, 1.5),
         ('How to Handle Project Managers: a survival guide', 'Barb Byro',  4, 5, 10.5, 1.5),
 
-        ('lunch, ACCU AGM', '', None, 5, 12.0, 2.0), 
-        
+        ('lunch, ACCU AGM', '', None, 5, 12.0, 2.0),
+
         ('Sauce: An OO recursive descent parser; its design and implementation.', 'Jon Jagger', 1, 5, 14.0, 1.5),
         ('GNIRTS ESAC REWOL -  Bringing the UNIX filters to the C++ iostream library.', 'JC van Winkel', 2, 5, 14.0, 1.5),
         ('Pattern Writing: Live and Direct', 'Frank Buschmann & Kevlin Henney',  3, 5, 14.0, 3.0),
@@ -285,8 +285,8 @@ def test():
         ('Honey, I Shrunk the Threads: Compile-time checked multithreaded transactions in C++', 'Andrei Alexandrescu', 1, 5, 16.0, 1.5),
         ('Fun and Functionality with Functors', 'Lois Goldthwaite', 2, 5, 16.0, 1.5),
         ('Agile Enough?', 'Alan Griffiths', 4, 5, 16.0, 1.5),
-        ("Conference Closure: A brief plenary session", '', None, 5, 17.5, 0.5),        
-        
+        ("Conference Closure: A brief plenary session", '', None, 5, 17.5, 0.5),
+
         ]
 
     #return cal
@@ -302,4 +302,3 @@ def test():
 
 if __name__=='__main__':
     test()
-    

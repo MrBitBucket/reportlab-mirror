@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/doughnut.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/doughnut.py,v 1.6 2003/09/09 09:58:00 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/doughnut.py,v 1.7 2004/01/20 22:50:31 andy_robinson Exp $
 # doughnut chart
 
 """Doughnut chart
@@ -10,7 +10,7 @@ Produces a circular chart like the doughnut charts produced by Excel.
 Can handle multiple series (which produce concentric 'rings' in the chart).
 
 """
-__version__=''' $Id: doughnut.py,v 1.6 2003/09/09 09:58:00 johnprecedo Exp $ '''
+__version__=''' $Id: doughnut.py,v 1.7 2004/01/20 22:50:31 andy_robinson Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -209,7 +209,7 @@ class Doughnut(Widget):
                         cx = centerx + popdistance * cos(aveAngleRadians)
                         cy = centery + popdistance * sin(aveAngleRadians)
 
-                    if type(n) in (ListType,TupleType): 
+                    if type(n) in (ListType,TupleType):
                         theSector = Wedge(cx, cy, xradius+(sn*iradius)-iradius, a1, a2, yradius=yradius+(sn*iradius)-iradius, radius1=yradius+(sn*iradius)-(2*iradius))
                     else:
                         theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, radius1=iradius)
@@ -277,7 +277,7 @@ class Doughnut(Widget):
                 theSector.strokeDashArray = sectorStyle.strokeDashArray
 
                 g.add(theSector)
-                
+
                 # now draw a label
                 if labels[i] != "":
                     averageAngle = (a1+a2)/2.0

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_graphics_layout.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_graphics_layout.py,v 1.1 2003/08/03 12:46:23 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_graphics_layout.py,v 1.2 2004/01/20 22:50:32 andy_robinson Exp $
 """
 Tests for getBounds methods of various graphical widgets
 """
@@ -27,7 +27,7 @@ class BoundsTestCase(unittest.TestCase):
     def testCircle(self):
         s = shapes.Circle(100, 50, 10)
         assert s.getBounds() == (90,40,110,60)
-        
+
     def testEllipse(self):
         s = shapes.Ellipse(100, 50, 10, 5)
         assert s.getBounds() == (90,45,110,55)
@@ -53,7 +53,7 @@ class BoundsTestCase(unittest.TestCase):
         g.add(shapes.Rect(0,0,10,10))
         g.add(shapes.Rect(50,50,10,10))
         assert g.getBounds() == (0,0,60,60)
-        
+
         g.translate(40,40)
         assert g.getBounds() == (40,40,100,100)
 
@@ -71,8 +71,8 @@ class BoundsTestCase(unittest.TestCase):
         siz = Sizer()
         siz.add(vbc, 'vbc')
         assert siz.getBounds()[0:2] <> (0,0)
-        
-        
+
+
 def makeSuite():
     return makeSuiteForClasses(BoundsTestCase)
 

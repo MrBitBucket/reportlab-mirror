@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/test_hello.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_postscript.py,v 1.1 2004/01/20 09:42:10 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_postscript.py,v 1.2 2004/01/20 22:50:32 andy_robinson Exp $
 __version__=''' $Id'''
 __doc__="""Tests Postscript XObjects.
 
@@ -34,8 +34,8 @@ class PostScriptTestCase(unittest.TestCase):
         c.drawString(100,640, '"Hello PostScript" below.  In ordinary Acrobat Reader')
         c.drawString(100,620, 'we expect to see nothing.')
         c.addPostScriptCommand('/Helvetica findfont 48 scalefont setfont 100 400 moveto (Hello PostScript) show')
-        
-        
+
+
         c.save()
 
     def testTray(self):
@@ -56,8 +56,8 @@ class PostScriptTestCase(unittest.TestCase):
         c.drawString(100,640, '"Hello PostScript" below.  In ordinary Acrobat Reader')
         c.drawString(100,620, 'we expect to see nothing.')
         c.addPostScriptCommand('/Helvetica findfont 48 scalefont setfont 100 400 moveto (Hello PostScript) show')
-        
-        
+
+
         c.save()
 
 def makeSuite():
@@ -70,4 +70,3 @@ if __name__ == "__main__":
     print 'saved test_pdfgen_postscript_visible.pdf'
     print 'saved test_pdfgen_postscript_tray.pdf'
 
-    

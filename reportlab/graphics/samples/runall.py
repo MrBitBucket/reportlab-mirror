@@ -1,4 +1,4 @@
-# runs all the GUIedit charts in this directory - 
+# runs all the GUIedit charts in this directory -
 # makes a PDF sample for eaxh existing chart type
 import sys
 import glob
@@ -57,4 +57,3 @@ if __name__ == "__main__":
             print '   if format is missing the following formats are assumed: pdf,pict,png'
             print '   -h prints this message'
             raise
-            

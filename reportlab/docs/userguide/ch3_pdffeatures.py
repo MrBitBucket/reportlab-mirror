@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch3_pdffeatures.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch3_pdffeatures.py,v 1.5 2003/04/05 22:02:26 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch3_pdffeatures.py,v 1.6 2004/01/20 22:50:31 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 
 
@@ -89,7 +89,7 @@ Note : $fitType$ settings are case-sensitive so $fitType="FIT"$ is invalid$
 disc("""
 Sometimes you want the destination of a jump to be some part of a page.
 The $FitR$ fitType allows you to identify a particular rectangle, scaling
-the area to fit the entire page. 
+the area to fit the entire page.
 """)
 
 disc("""
@@ -128,7 +128,7 @@ pencilnote()
 disc("""
 <i>Note:</i> Two previous bookmark methods are supported but deprecated now
 that bookmarkPage is so general.  These are $bookmarkHorizontalAbsolute$
-and $bookmarkHorizontal$. 
+and $bookmarkHorizontal$.
 """)
 
 heading3("Defining internal links")

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.53 2003/09/09 18:13:33 rgbecker Exp $
-__version__=''' $Id: paraparser.py,v 1.53 2003/09/09 18:13:33 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.54 2004/01/20 22:50:32 andy_robinson Exp $
+__version__=''' $Id: paraparser.py,v 1.54 2004/01/20 22:50:32 andy_robinson Exp $ '''
 import string
 import re
 from types import TupleType
@@ -137,7 +137,7 @@ def _applyAttributes(obj, attr):
         setattr(obj,k,v)
 
 #Named character entities intended to be supported from the special font
-#with additions suggested by Christoph Zwerschke who also suggested the 
+#with additions suggested by Christoph Zwerschke who also suggested the
 #numeric entity names that follow.
 greeks = {
     'Alpha': 'A',

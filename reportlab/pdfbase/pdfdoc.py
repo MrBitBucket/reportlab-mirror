@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.89 2004/01/20 09:42:10 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.89 2004/01/20 09:42:10 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.90 2004/01/20 22:50:31 andy_robinson Exp $
+__version__=''' $Id: pdfdoc.py,v 1.90 2004/01/20 22:50:31 andy_robinson Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -1741,7 +1741,7 @@ class PDFFormXObject:
 class PDFPostScriptXObject:
     "For embedding PD (e.g. tray commands) in PDF"
     def __init__(self, content=None):
-        self.content = content 
+        self.content = content
 
     def format(self, document):
         S = PDFStream()

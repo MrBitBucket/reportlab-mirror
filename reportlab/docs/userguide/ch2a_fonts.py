@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.10 2003/11/18 11:18:14 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.11 2004/01/20 22:50:31 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.lib.codecharts import SingleByteEncodingChart
 from reportlab.platypus import Image
@@ -637,7 +637,7 @@ wrote pmout\\renderPM12.jpg
 wrote pmout\\renderPM12.pct
 wrote pmout\\index.html""")
 
-disc("""This runs a number of tests progressing from a "Hello World" test, through various tests of  
+disc("""This runs a number of tests progressing from a "Hello World" test, through various tests of
 Lines; text strings in a number of sizes, fonts, colours and alignments; the basic shapes; translated
 and rotated groups; scaled coordinates; rotated strings; nested groups; anchoring and non-standard fonts.""")
 

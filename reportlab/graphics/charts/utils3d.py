@@ -187,7 +187,7 @@ def find_intersections(data,small=0):
 
     find_intersections returns a sequence of 4-tuples
         i, j, x, y
-    
+
     where i is a data index j is an insertion position for data[i]
     and x, y are coordinates of an intersection of series data[i]
     with some other series. If correctly implemented we get all such

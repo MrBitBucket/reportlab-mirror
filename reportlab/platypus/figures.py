@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/platdemos.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.16 2004/01/10 15:59:18 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.17 2004/01/20 22:50:31 andy_robinson Exp $
 """This includes some demos of platypus for use in the API proposal"""
-__version__=''' $Id: figures.py,v 1.16 2004/01/10 15:59:18 rgbecker Exp $ '''
+__version__=''' $Id: figures.py,v 1.17 2004/01/20 22:50:31 andy_robinson Exp $ '''
 
 import os
 
@@ -168,7 +168,7 @@ class FlexFigure(Figure):
         self.captionStyle = ParagraphStyle(
             'Caption',
             fontName='Times', #'Helvetica-Oblique',
-            fontSize=4, #8, 
+            fontSize=4, #8,
             spaceBefore=9, #3,
             alignment=TA_CENTER
             )
@@ -212,7 +212,7 @@ class ImageFigure(FlexFigure):
     def drawFigure(self):
         self.canv.drawInlineImage(self.filename,
                                   0, 0,self.width, self.figureHeight)
-        
+
 class DrawingFigure(FlexFigure):
     """Drawing with a caption below it.  Clunky, scaling fails."""
     def __init__(self, modulename, classname, caption, baseDir=None, background=None):
@@ -225,7 +225,7 @@ class DrawingFigure(FlexFigure):
                             caption,
                             background)
         self.growToFit = 1
-        
+
     def drawFigure(self):
         self.canv.scale(self._scaleFactor, self._scaleFactor)
         self.drawing.drawOn(self.canv, 0, 0)

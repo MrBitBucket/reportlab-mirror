@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.34 2003/08/03 12:46:23 andy_robinson Exp $
-__version__=''' $Id: widgetbase.py,v 1.34 2003/08/03 12:46:23 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.35 2004/01/20 22:50:31 andy_robinson Exp $
+__version__=''' $Id: widgetbase.py,v 1.35 2004/01/20 22:50:31 andy_robinson Exp $ '''
 import string
 
 from reportlab.graphics import shapes
@@ -396,7 +396,7 @@ class TwoFaces(Widget):
 
 class Sizer(Widget):
     "Container to show size of all enclosed objects"
-    
+
     _attrMap = AttrMap(BASE=shapes.SolidShape,
         contents = AttrMapValue(isListOfShapes,desc="Contained drawable elements"),
         )
@@ -404,7 +404,7 @@ class Sizer(Widget):
         self.contents = []
         self.fillColor = colors.cyan
         self.strokeColor = colors.magenta
-        
+
         for elem in elements:
             self.add(elem)
 
@@ -434,7 +434,7 @@ class Sizer(Widget):
             return shapes.getRectsBounds(b)
         else:
             return (0,0,0,0)
-        
+
     def draw(self):
         g = shapes.Group()
         (x1, y1, x2, y2) = self.getBounds()

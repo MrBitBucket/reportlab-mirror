@@ -5,7 +5,7 @@ from reportlab.test import unittest
 from reportlab.test.utils import makeSuiteForClasses
 
 class RlAccelTestCase(unittest.TestCase):
-    
+
     def testFpStr(self):
         # should give siz decimal places if less than 1.
         # if more, give up to seven sig figs
@@ -28,7 +28,7 @@ class RlAccelTestCase(unittest.TestCase):
     def testEscapePDF(self):
         from _rl_accel import escapePDF
         assert escapePDF('(test)')=='\\(test\\)'
-        
+
     def test_instanceEscapePDF(self):
         from _rl_accel import _instanceEscapePDF
         assert _instanceEscapePDF('', '(test)')=='\\(test\\)'

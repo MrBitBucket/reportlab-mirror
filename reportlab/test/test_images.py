@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/test_images.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_images.py,v 1.3 2003/09/11 22:00:15 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_images.py,v 1.4 2004/01/20 22:50:32 andy_robinson Exp $
 __version__=''' $Id'''
 __doc__="""Tests to do with image handling.
 
@@ -40,10 +40,10 @@ class ReaderTestCase(unittest.TestCase):
         assert os.path.isfile(imageFileName), "%s not found!" % imageFileName
 
         ir = ImageReader(imageFileName)
-        assert ir.getSize() == (110,44)        
+        assert ir.getSize() == (110,44)
         pixels = ir.getRGBData()
         assert md5.md5(pixels).hexdigest() == '02e000bf3ffcefe9fc9660c95d7e27cf'
-        
+
 
 def makeSuite():
     return makeSuiteForClasses(ReaderTestCase)

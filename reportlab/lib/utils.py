@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.57 2003/12/02 17:36:04 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.57 2003/12/02 17:36:04 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.58 2004/01/20 22:50:31 andy_robinson Exp $
+__version__=''' $Id: utils.py,v 1.58 2004/01/20 22:50:31 andy_robinson Exp $ '''
 
 import string, os, sys
 from types import *
@@ -130,7 +130,7 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
         import pprint
         pp = pprint.pprint
         print 'path=',pp(path)
-        
+
     #make import errors a bit more informative
     opath = sys.path
     try:
@@ -156,7 +156,7 @@ def recursiveSetAttr(obj, name, value):
     #print 'name=%s, tokens=%s' % (name, tokens)
     if len(tokens) == 1:
         setattr(obj, name, value)
-    else:        
+    else:
         most = string.join(tokens[:-1], '.')
         last = tokens[-1]
         #print 'most=%s, last=%s' % (most, last)
@@ -326,7 +326,7 @@ class ImageReader:
             else:
                 self._width, self._height = self._image.size
         return (self._width, self._height)
-            
+
     def getRGBData(self):
         "Return byte array of RGB data as string"
         if self._data is None:
@@ -350,7 +350,7 @@ class ImageReader:
             else:
                 rgb = self._image.convert('RGB')
                 self._data = rgb.tostring()
-        return self._data  
+        return self._data
 
     def getImageData(self):
         width, height = self.getSize()

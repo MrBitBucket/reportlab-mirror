@@ -234,7 +234,7 @@ def handleHiddenSlides(slides):
                 itd[i] = 0
             if i > 0 and itd[i-1] == 0:
                 itd[i-1] = 1
-                
+
     itd[len(itd)-1] = 0
 
     for i in range(len(itd)):
@@ -602,7 +602,7 @@ class PPPara:
         in rawtext.  We need to escape this to get back to
         something the Platypus parser can accept"""
         pass
-    
+
     def getFlowable(self):
 ##        print 'rawText for para:'
 ##        print repr(self.rawtext)
@@ -965,7 +965,7 @@ def validate(rawdata):
     except ImportError:
         return
     pars = pyRXP.Parser().parse(rawdata)
-    
+
 def process(datafile, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=None, datafilename=None):
     "Process one PythonPoint source file."
     if not hasattr(datafile, "read"):
@@ -976,8 +976,8 @@ def process(datafile, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=
     rawdata = datafile.read()
 
     #if pyRXP present, use it to check and get line numbers for errors...
-    validate(rawdata)        
-    
+    validate(rawdata)
+
     return _process(rawdata, datafilename, notes, handout, printout, cols, verbose, outDir)
 
 def _process(rawdata, datafilename, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=None):

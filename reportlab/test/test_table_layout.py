@@ -33,7 +33,7 @@ class TableTestCase(unittest.TestCase):
             ['North','Spam',100,110,120,130,460],
             ['North','Eggs',101,111,121,131,464],
             ['North','Guinness',102,112,122,132,468],
-            
+
             ['South','Spam',100,110,120,130,460],
             ['South','Eggs',101,111,121,131,464],
             ['South','Guinness',102,112,122,132,468],
@@ -53,7 +53,7 @@ class TableTestCase(unittest.TestCase):
         styNormal = styleSheet['Normal']
         styNormal.spaceBefore = 6
         styNormal.spaceAfter = 6
-        
+
         data = (
             ('', 'Jan', 'Feb', 'Mar','Apr','May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'),
             ('Mugs', 0, 4, 17, 3, 21, 47, 12, 33, 2, -2, 44, 89),
@@ -110,7 +110,7 @@ class TableTestCase(unittest.TestCase):
         lst.append(t3)
         lst.append(Spacer(18,18))
 
-        
+
         colWidths = (None, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32)
         t3 = Table(data3, colWidths, None)
         t3.setStyle(GRID_STYLE)
@@ -238,7 +238,7 @@ class TableTestCase(unittest.TestCase):
 
             ('BOX', (6,0), (6,1), 1.0, colors.black),
 
-            # do fatter boxes around some cells            
+            # do fatter boxes around some cells
             ('BOX', (0,0), (-1,1), 2.0, colors.black),
             ('BOX', (0,2), (-1,4), 2.0, colors.black),
             ('BOX', (0,5), (-1,7), 2.0, colors.black),
@@ -279,7 +279,7 @@ class TableTestCase(unittest.TestCase):
         taken into account. ALL the cells in the leftmost column
         have a vertical span (or are occluded by others which do)
         but it can still work out a sane width for them.
-        
+
         """, styNormal))
 
         data = self.getDataBlock()
@@ -304,7 +304,7 @@ class TableTestCase(unittest.TestCase):
         height calculation for its 'row'.  Under the hood it is in the
         same row as the second Spam, but this row gets a height based on
         its own contents and not the cell with the paragraph.
-        
+
         """, styNormal))
 
 
@@ -323,7 +323,7 @@ class TableTestCase(unittest.TestCase):
         To really get this right would involve multiple passes through all the cells
         applying rules until everything which can be sized is sized (possibly
         backtracking), applying increasingly dumb and brutal
-        rules on each pass. 
+        rules on each pass.
         """, styNormal))
         data = self.getDataBlock()
         data[0][2] = Paragraph("Let's <b>really mess things up</b> with a <i>paragraph</i>.",styNormal)
@@ -350,4 +350,3 @@ if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
     print 'saved test_table_layout.pdf'
 
-    

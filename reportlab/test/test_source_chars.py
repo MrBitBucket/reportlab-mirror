@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_source_chars.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_source_chars.py,v 1.4 2002/11/04 16:37:34 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_source_chars.py,v 1.5 2004/01/20 22:50:32 andy_robinson Exp $
 
 """This tests for things in source files.  Initially, absence of tabs :-)
 """
@@ -42,7 +42,7 @@ class SourceTester(SecureTestCase):
                 badChars = badChars + spaces
 
         if badChars <> 0:
-            self.output.write("file %s contains %d trailing spaces, or %0.2f%% wastage" % (filename, badChars, 100.0*badChars/initSize))
+            self.output.write("file %s contains %d trailing spaces, or %0.2f%% wastage\n" % (filename, badChars, 100.0*badChars/initSize))
 
     def testFiles(self):
         topDir = os.path.dirname(reportlab.__file__)

@@ -2160,7 +2160,7 @@ def handleSpecialCharacters(engine, text, program=None):
                             n = atoi(name[1:])
                     except atoi_error:
                         n = -1
-                    if 0<=n<=255: fragment = chr(n)+fragment[semi+1:] 
+                    if 0<=n<=255: fragment = chr(n)+fragment[semi+1:]
                     elif symenc.has_key(n):
                         fragment = fragment[semi+1:]
                         (f,b,i) = engine.shiftfont(program, face="symbol")

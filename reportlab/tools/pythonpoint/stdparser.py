@@ -617,7 +617,7 @@ class PPMLParser(xmllib.XMLParser):
 
 
     def start_line(self, args):
-        self.pack_slide('line', args)            
+        self.pack_slide('line', args)
         self._curLine = pythonpoint.PPLine(
                     self.ceval('line',args,'x1'),
                     self.ceval('line',args,'y1'),
@@ -755,7 +755,7 @@ class PPMLParser(xmllib.XMLParser):
         showBoundary = int(args.get("showBoundary", "0"))
 
         hAlign = args.get("hAlign", "CENTER")
-        
+
 
         # the path for the imports should include:
         # 1. document directory
@@ -770,7 +770,7 @@ class PPMLParser(xmllib.XMLParser):
             importPath.extend(sys.path)
         else:
             importPath.insert(0, dirName)
-        
+
         modul = recursiveImport(moduleName, baseDir=importPath)
         func = getattr(modul, funcName)
         drawing = func()

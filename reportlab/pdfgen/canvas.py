@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.119 2004/01/20 09:42:10 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.119 2004/01/20 09:42:10 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.120 2004/01/20 22:50:31 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.120 2004/01/20 22:50:31 andy_robinson Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -703,8 +703,8 @@ class Canvas:
             self._doc.addForm(rawName, psObj)
         self._code.append("/%s Do" % regName)
         self._formsinuse.append(rawName)
-        
-        
+
+
         #
 
     def textAnnotation0(self, contents, Rect=None, addtopage=1, name=None, **kw):

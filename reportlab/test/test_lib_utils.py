@@ -26,7 +26,7 @@ class ImporterTestCase(unittest.TestCase):
         fn = os.path.join(D,'stdparser.py')
         if os.path.isfile(fn) or os.path.isfile(fn+'c') or os.path.isfile(fn+'o'):
             m1 = recursiveImport('stdparser', baseDir=D)
-        
+
     def test3(self):
         "ensure CWD is on the path"
         rlDir = os.path.dirname(reportlab.__file__)
@@ -57,7 +57,7 @@ class ImporterTestCase(unittest.TestCase):
         inch = recursiveGetAttr(reportlab, 'lib.units.inch')
         assert inch == 72
 
-        recursiveSetAttr(reportlab, 'lib.units.cubit', 18*inch)        
+        recursiveSetAttr(reportlab, 'lib.units.cubit', 18*inch)
         cubit = recursiveGetAttr(reportlab, 'lib.units.cubit')
         assert cubit == 18*inch
 
@@ -68,12 +68,12 @@ class ImporterTestCase(unittest.TestCase):
         recursiveSetAttr(drawing, 'barchart.valueAxis.valueMax', 72)
         theMax = recursiveGetAttr(drawing, 'barchart.valueAxis.valueMax')
         assert theMax == 72
-        
 
-        
-        
-        
-        
+
+
+
+
+
 
 
 def makeSuite():

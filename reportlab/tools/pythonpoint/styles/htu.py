@@ -27,7 +27,7 @@ def getParagraphStyles():
 
     stylesheet = {}
     ParagraphStyle = styles.ParagraphStyle
-    
+
     para = ParagraphStyle('Normal', None)   #the ancestor of all
     para.fontName = 'Verdana'
     para.fontSize = 28
@@ -39,7 +39,7 @@ def getParagraphStyles():
     para = ParagraphStyle('BodyText', stylesheet['Normal'])
     para.spaceBefore = 12
     stylesheet['BodyText'] = para
-    
+
     #Indented, for lists
     para = ParagraphStyle('Indent', stylesheet['Normal'])
     para.leftIndent = 60
@@ -49,7 +49,7 @@ def getParagraphStyles():
     para = ParagraphStyle('Centered', stylesheet['Normal'])
     para.alignment = TA_CENTER
     stylesheet['Centered'] = para
-    
+
     para = ParagraphStyle('BigCentered', stylesheet['Normal'])
     para.fontSize = 32
     para.alignment = TA_CENTER
@@ -67,14 +67,14 @@ def getParagraphStyles():
     para.leading = 58
     para.alignment = TA_CENTER
     stylesheet['Title'] = para
-    
+
     para = ParagraphStyle('Heading1', stylesheet['Normal'])
     para.fontName = 'Arial Narrow-Bold'
     para.fontSize = 40
     para.leading = 44
     para.alignment = TA_CENTER
     stylesheet['Heading1'] = para
-    
+
     para = ParagraphStyle('Heading2', stylesheet['Normal'])
     para.fontName = 'Verdana'
     para.fontSize = 32
@@ -82,7 +82,7 @@ def getParagraphStyles():
     para.spaceBefore = 32
     para.spaceAfter = 12
     stylesheet['Heading2'] = para
-    
+
     para = ParagraphStyle('Heading3', stylesheet['Normal'])
     para.fontName = 'Verdana'
     para.spaceBefore = 20

@@ -2,7 +2,7 @@
 #this test and associates functionality kinds donated by Ian Sparks.
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pdfgen_links.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_links.py,v 1.1 2003/03/14 00:05:16 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_links.py,v 1.2 2004/01/20 22:50:32 andy_robinson Exp $
 """
 Tests for internal links and destinations
 """
@@ -39,7 +39,7 @@ class LinkTestCase(unittest.TestCase):
     "Test classes."
     def test1(self):
 
-        c = canvas.Canvas(fn,pagesize=letter)    
+        c = canvas.Canvas(fn,pagesize=letter)
         #Page 1
         c.setFont("Courier", 10)
         markPage(c)
@@ -74,7 +74,7 @@ class LinkTestCase(unittest.TestCase):
         #Create link to FitR on page 3
         c.saveState()
         c.setFont("Courier", 14)
-        c.setFillColor(colors.blue) 
+        c.setFillColor(colors.blue)
         c.drawString(inch+20,inch+20,"Click to jump to the meaning of life")
         c.linkAbsolute("","MOL",(inch+10,inch+10,6*inch,2*inch))
         c.restoreState()
@@ -82,7 +82,7 @@ class LinkTestCase(unittest.TestCase):
         #Create linkAbsolute to page 2
         c.saveState()
         c.setFont("Courier", 14)
-        c.setFillColor(colors.green) 
+        c.setFillColor(colors.green)
         c.drawString(4*inch,4*inch,"Jump to 2.5 inch position on page 2")
         c.linkAbsolute("","HYPER_1",(3.75*inch,3.75*inch,8.25*inch,4.25*inch))
         c.restoreState()
@@ -123,10 +123,10 @@ class LinkTestCase(unittest.TestCase):
 
         #Horizontal absolute test from page 1. Note that because of the page size used on page 3 all this will do
         #is put the view centered on the bookmark. If you want to see it "up close and personal" change page3 to be
-        #the same page size as the other pages. 
+        #the same page size as the other pages.
         c.saveState()
         c.setFont("Courier", 14)
-        c.setFillColor(colors.green) 
+        c.setFillColor(colors.green)
         c.drawString(2.5*inch,2.5*inch,"This line is hyperlinked from page 1")
     #    c.bookmarkHorizontalAbsolute("HYPER_1",3*inch) #slightly higher than the text otherwise text is of screen above.
         c.bookmarkPage("HYPER_1",fitType="XYZ",top=2.5*inch,bottom=2*inch)
@@ -163,7 +163,7 @@ class LinkTestCase(unittest.TestCase):
         #Add link from page 1
         c.saveState()
         c.setFont("Courier", 40)
-        c.setFillColor(colors.green) 
+        c.setFillColor(colors.green)
         c.drawString(5*inch,6*inch,"42")
         c.bookmarkPage("MOL",fitType="FitR",left=4*inch,top=7*inch,bottom=4*inch,right=6*inch)
 
