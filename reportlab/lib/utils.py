@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.66 2004/03/23 14:30:01 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.66 2004/03/23 14:30:01 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.67 2004/03/23 15:20:50 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.67 2004/03/23 15:20:50 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -120,8 +120,8 @@ else:
         pass
 
 import reportlab
-_RL_DIR=os.path.dirname(reportlab.__file__)
-_RL_ADIR=os.path.abspath(_RL_DIR)
+__RL_DIR=os.path.dirname(reportlab.__file__)    #possibly relative
+_RL_DIR=os.path.isabs(__RL_DIR) and __RL_DIR or os.path.abspath(__RL_DIR)
 del reportlab
 
 #Attempt to detect if this copy of reportlab is running in a
@@ -134,8 +134,8 @@ except:
     __file__ = sys.argv[0]
 try:
     _isFSD = not __loader__
-    _loaderpfxlen = len(__loader__.archive+os.sep)
-    _loaderpfxlenA = _loaderpfxlen+len(_RL_ADIR)-len(_RL_DIR)
+    _loaderpfxlenR = len(__loader__.archive+os.sep)
+    _loaderpfxlen = _loaderpfxlenR+len(_RL_DIR)-len(__RL_DIR)
 except:
     _isFSD = os.path.isfile(__file__)   #slight risk of wrong path
     __loader__ = None
@@ -145,7 +145,7 @@ def _startswith_rl(fn):
     '''if the name starts with a known prefix strip it off'''
     fn = fn.replace('/',os.sep)
     if fn.startswith(_RL_DIR): return fn[_loaderpfxlen:]
-    elif fn.startswith(_RL_ADIR): return fn[_loaderpfxlenA:]
+    if fn.startswith(__RL_DIR): return fn[_loaderpfxlenR:]
     return fn
 
 def isFileSystemDistro():
