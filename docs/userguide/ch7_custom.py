@@ -57,4 +57,23 @@ handnote(xoffset=3*inch, size=inch, strokecolor=blue, fillcolor=cyan)
 disc("""One inch high and shifted to the left with blue and cyan.""")
 
 
+heading2("Modifying a Built in $Flowable$")
+disc("""To modify an existing flowable, you should create a derived class
+and override the methods you need to change to get the desired behaviour""")
+disc("""As an example to create a rotated image you need to override the wrap
+and draw methods of the existing Image class""")
+import os
+from reportlab.platypus import *
+I = '../images/replogo.gif'
 
+EmbeddedCode("""
+class RotatedImage(Image):
+	def wrap(self,availWidth,availHeight):
+		h, w = Image.wrap(self,availHeight,availWidth)
+		return w, h
+	def draw(self):
+		self.canv.rotate(90)
+		Image.draw(self)
+I = RotatedImage('%s')
+I.noImageCaching = 1
+""" % I,'I')
