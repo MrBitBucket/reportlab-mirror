@@ -1,7 +1,7 @@
 <!--
     pythonpoint.dtd
 
-    PythonPoint XML DTD, version 0.1
+    PythonPoint XML DTD, version 0.1k
     Copyright 2001-2002 ReportLab, Inc.
                                           
     This is a draft of the DTD for PythonPoint, a program for creating
@@ -13,15 +13,13 @@
 
     <?xml version='1.0'?>
     <!DOCTYPE presentation
-              PUBLIC "-//ReportLab//DTD PythonPoint XML v0.1//EN"
+              PUBLIC "-//ReportLab//DTD PythonPoint XML v0.1k//EN"
               "pythonpoint.dtd">
 
     Please send bug reports, suggestions, etc. to: info@reportlab.com.
 -->
 
-
 <!-- Entities -->
-
 <!ENTITY % bool                   "true|false">
 <!ENTITY % align.values           "left|center|right">
 <!ENTITY % effectdimension.values "H|V">
@@ -58,6 +56,7 @@
 <!ATTLIST slide 
               id              CDATA                      #REQUIRED
               title           CDATA                      #REQUIRED
+              outlineentry    CDATA                      #IMPLIED
               outlinelevel    NMTOKEN                    #IMPLIED
               showIDName      (%bool;)                   "true"
               effectname      (%effectname.values;)      #IMPLIED
@@ -102,7 +101,12 @@
               y2        NMTOKEN #REQUIRED
               fill      CDATA   #IMPLIED
               stroke    CDATA   "(0,0,0)"
-              linewidth NMTOKEN "0">
+              linewidth NMTOKEN "0"
+              effectname      (%effectname.values;)      #IMPLIED
+              effectdirection (%effectdirection.values;) "0"
+              effectdimension (%effectdimension.values;) "H"
+              effectmotion    (%effectmotion.values;)    "I"
+              effectduration  NMTOKEN                    "1">
 
 <!ELEMENT fixedimage EMPTY>
 <!ATTLIST fixedimage 
@@ -142,7 +146,12 @@
 <!ATTLIST image 
               filename CDATA   #REQUIRED   
               width    NMTOKEN #IMPLIED
-              height   NMTOKEN #IMPLIED>
+              height   NMTOKEN #IMPLIED
+              effectname      (%effectname.values;)      #IMPLIED
+              effectdirection (%effectdirection.values;) "0"
+              effectdimension (%effectdimension.values;) "H"
+              effectmotion    (%effectmotion.values;)    "I"
+              effectduration  NMTOKEN                    "1">
 
 <!ELEMENT infostring (#PCDATA)>
 <!ATTLIST infostring 
@@ -160,28 +169,45 @@
               x2     NMTOKEN  #REQUIRED
               y2     NMTOKEN  #REQUIRED
               stroke CDATA    "(0,0,0)"
-              width  NMTOKEN  "0">
+              width  NMTOKEN  "0"
+              effectname      (%effectname.values;)      #IMPLIED
+              effectdirection (%effectdirection.values;) "0"
+              effectdimension (%effectdimension.values;) "H"
+              effectmotion    (%effectmotion.values;)    "I"
+              effectduration  NMTOKEN                    "1">
 
-<!ELEMENT notes para+>
+<!ELEMENT notes (para+)>
 
 <!ELEMENT para (#PCDATA | i | b | u | super | sub | font | greek)*>
 <!ATTLIST para 
               style      CDATA "Normal"
-              bullettext CDATA #IMPLIED>
+              bullettext CDATA #IMPLIED
+              effectname      (%effectname.values;)      #IMPLIED
+              effectdirection (%effectdirection.values;) "0"
+              effectdimension (%effectdimension.values;) "H"
+              effectmotion    (%effectmotion.values;)    "I"
+              effectduration  NMTOKEN                    "1">
 
 <!ELEMENT polygon EMPTY>
 <!ATTLIST polygon 
               points    CDATA   #REQUIRED
               fill      CDATA   #REQUIRED
               stroke    CDATA   "(0,0,0)"
-              linewidth NMTOKEN "0">
+              linewidth NMTOKEN "0"
+              effectname      (%effectname.values;)      #IMPLIED
+              effectdirection (%effectdirection.values;) "0"
+              effectdimension (%effectdimension.values;) "H"
+              effectmotion    (%effectmotion.values;)    "I"
+              effectduration  NMTOKEN                    "1">
 
 <!ELEMENT prefmt (#PCDATA)>
 <!ATTLIST prefmt 
+              xml:space (default|preserve) #FIXED 'preserve'
               style CDATA #IMPLIED>
 
 <!ELEMENT pycode (#PCDATA)>
 <!ATTLIST pycode 
+              xml:space (default|preserve) #FIXED 'preserve'
               style CDATA #IMPLIED>
 
 <!ELEMENT rectangle EMPTY>
@@ -192,7 +218,12 @@
               height    NMTOKEN #REQUIRED
               fill      CDATA   #IMPLIED
               stroke    CDATA   "(0,0,0)"
-              linewidth NMTOKEN "0">
+              linewidth NMTOKEN "0"
+              effectname      (%effectname.values;)      #IMPLIED
+              effectdirection (%effectdirection.values;) "0"
+              effectdimension (%effectdimension.values;) "H"
+              effectmotion    (%effectmotion.values;)    "I"
+              effectduration  NMTOKEN                    "1">
 
 <!ELEMENT roundrect EMPTY>
 <!ATTLIST roundrect 
@@ -203,7 +234,12 @@
               fill      CDATA   #IMPLIED
               stroke    CDATA   "(0,0,0)"
               linewidth NMTOKEN "0"
-              radius    NMTOKEN "6">
+              radius    NMTOKEN "6"
+              effectname      (%effectname.values;)      #IMPLIED
+              effectdirection (%effectdirection.values;) "0"
+              effectdimension (%effectdimension.values;) "H"
+              effectmotion    (%effectmotion.values;)    "I"
+              effectduration  NMTOKEN                    "1">
 
 <!ELEMENT spacer EMPTY>
 <!ATTLIST spacer 
@@ -216,7 +252,12 @@
               color CDATA   "(0,0,0)"
               font  CDATA   "Times-Roman"
               size  NMTOKEN "12"
-              align (%align.values;) "left">
+              align (%align.values;) "left"
+              effectname      (%effectname.values;)      #IMPLIED
+              effectdirection (%effectdirection.values;) "0"
+              effectdimension (%effectdimension.values;) "H"
+              effectmotion    (%effectmotion.values;)    "I"
+              effectduration  NMTOKEN                    "1">
 
 <!ELEMENT sub (#PCDATA)>
 
@@ -224,11 +265,17 @@
 
 <!ELEMENT table (#PCDATA)>
 <!ATTLIST table 
+              xml:space (default|preserve) #FIXED 'preserve'
               widths   CDATA #IMPLIED
               heights  CDATA #IMPLIED
               style    CDATA #IMPLIED
               colDelim CDATA #IMPLIED
-              rowDelim CDATA #IMPLIED>
+              rowDelim CDATA #IMPLIED
+              effectname      (%effectname.values;)      #IMPLIED
+              effectdirection (%effectdirection.values;) "0"
+              effectdimension (%effectdimension.values;) "H"
+              effectmotion    (%effectmotion.values;)    "I"
+              effectduration  NMTOKEN                    "1">
 
 <!ELEMENT u (#PCDATA)>
 

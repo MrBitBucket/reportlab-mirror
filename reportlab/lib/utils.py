@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.44 2003/08/05 16:58:58 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.44 2003/08/05 16:58:58 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.45 2003/09/08 14:16:37 andy_robinson Exp $
+__version__=''' $Id: utils.py,v 1.45 2003/09/08 14:16:37 andy_robinson Exp $ '''
 
 import string, os, sys
 from types import *
@@ -173,20 +173,40 @@ def import_zlib():
         if ZLIB_WARNINGS: warnOnce('zlib not available')
     return zlib
 
+
+# Image Capability Detection.  Set a flag canHandleImages
+# to tell us if either PIL or Java imaging libraries present.
+# define PIL_Image as either None, or an alias for the PIL.Image
+# module, as there are 2 ways to import it
+
 try:
     from PIL import Image
 except ImportError, errMsg:
     _checkImportError(errMsg)
-    from reportlab.rl_config import PIL_WARNINGS
+    
     try:
         import Image
-        if PIL_WARNINGS: warnOnce('Python Imaging Library not available as package; upgrade your installation!')
     except ImportError, errMsg:
         _checkImportError(errMsg)
         Image = None
-        if PIL_WARNINGS: warnOnce('Python Imaging Library not available')
+        
 PIL_Image = Image
 del Image
+
+# overall flag for can handle images
+if PIL_Image:
+    canHandleImages = 1
+else:
+    #java?
+    try:
+        import javax.imageio
+        import java.awt.image
+        canHandleImages = 1
+    except:
+        canHandleImages = 0
+
+if not canHandleImages:
+    warnOnce('Python or Java Imaging Libraries not available, unable to import bitmaps')
 
 __StringIO=None
 def getStringIO(buf=None):
@@ -280,6 +300,83 @@ def open_for_read(name,mode='b'):
         return getStringIO(o.read())
     except:
         return open(name,'r'+mode)
+
+
+class ImageReader:
+    "Wraps up either PIL or Java to get data from bitmaps"
+    def __init__(self, fileName):
+        #start wih lots of null private fields, to be populated by
+        #the relevant engine.
+        self.fileName = fileName
+        self._image = None
+        self._width = None
+        self._height = None
+        self._transparent = None
+        self._data = None
+
+        #detect which library we are using and open the image
+        if sys.platform[0:4] == 'java':
+            from javax.imageio import ImageIO
+            from java.io import File
+            self._image = ImageIO.read(File(fileName))
+        else:
+            import PIL.Image
+            self._image = PIL.Image.open(fileName)
+
+    def getSize(self):
+        if (self._width is None or self._height is None):
+            if sys.platform[0:4] == 'java':
+                self._width = self._image.getWidth()
+                self._height = self._image.getHeight()
+            else:
+                self._width, self._height = self._image.size
+        return (self._width, self._height)
+            
+    def getRgbData(self):
+        "Return byte array of RGB data as string"
+        if self._data is None:
+            if sys.platform[0:4] == 'java':
+                import jarray
+                from java.awt.image import PixelGrabber
+                width, height = self.getSize()
+                buffer = jarray.zeros(width*height, 'i')
+                pg = PixelGrabber(self._image, 0,0,width,height,buffer,0,width)
+                pg.grabPixels()
+                # there must be a way to do this with a cast not a byte-level loop,
+                # I just haven't found it yet...
+                pixels = []
+                for i in range(len(buffer)):
+                    rgb = buffer[i]
+                    
+                    rg, b = divmod(rgb, 256)
+                    r, g = divmod(rg, 256)
+                    pix = chr(r % 256) + chr(g % 256) + chr(b % 256)
+                    pixels.append(pix)
+                self._data = ''.join(pixels)
+            else:
+                rgb = self._image.convert('RGB')
+                self._data = rgb.tostring()
+        return self._data  
+        
+
+def getImageData(imageFileName):
+    "Get width, height and RGB pixels from image file.  Wraps Java/PIL"
+    if sys.platform[0:4] == 'java':
+        from java.awt.image import BufferedImage, PixelGrabber
+        from javax.imageio import ImageIO
+        from java.io import File
+        #pixels = buffer.tostring()
+        
+    else:
+        import PIL.Image
+        img = PIL.Image.open(imageFileName)
+        width, height = img.size
+        rgb = img.convert('RGB')
+        data = rgb.tostring()
+        
+    return (width, height, data)
+
+
 
 class DebugMemo:
     '''Intended as a simple report back encapsulator

@@ -1,5 +1,5 @@
 <presentation filename="htu.pdf">
-  <stylesheet module="truetype" function="getParagraphStyles"/>
+  <stylesheet module="htu" function="getParagraphStyles"/>
   <section name="Main">
     <rectangle x="20" width="96" y="20" height="555" fill="ReportLabBlue"/>
     <infostring size="14" align="right" x="800" y="36">
@@ -12,23 +12,8 @@
         <image filename="pplogo.gif" width="200" height="150"/>
         <spacer height="30"/>
         <para style="Title">New features in PythonPoint</para>
-        <para style="BigCentered">H. Turgut Uyar</para>
-        <para style="BigCentered">uyar@cs.itu.edu.tr</para>
-      </frame>
-    </slide>
-
-    <slide title="Warning" id="Slide001">
-      <frame x="120" y="515" width="700" height="60"
-             leftmargin="36" rightmargin="36">
-        <para style="Heading1">Warning</para>
-      </frame>
-      <frame x="120" y="72" width="700" height="418"
-             leftmargin="36" rightmargin="36">
-        <para>For this presentation to work correctly, you have to have
-          the Verdana fonts installed. To do this, put the files</para>
-            <para style="Indent">verdana.ttf verdanab.ttf verdanai.ttf verdanaz.ttf</para>
-        <para>to the directory</para>
-            <para style="Indent">..../site-packages/reportlab/fonts</para>
+        <para style="Author">H. Turgut Uyar</para>
+        <para style="EMail">uyar@cs.itu.edu.tr</para>
       </frame>
     </slide>
 
@@ -39,11 +24,7 @@
       </frame>
       <frame x="120" y="72" width="700" height="418"
              leftmargin="36" rightmargin="36">
-        <para>You can use TrueType fonts in your presentations:</para>
-        <para style="Indent">
-            <font name="Verdana" size="32">this text is Verdana-32</font></para>
-        <spacer height="20"/>
-        <para>PythonPoint can also read UTF-8 encoded input files and produce
+        <para>PythonPoint can read UTF-8 encoded input files and produce
             correct output (provided your font has all necessary
             characters). That enables you, for example, to have native (in my
             case, Turkish) characters in your document:</para>
@@ -57,7 +38,7 @@
             Äž ÄŸ Ä° Ä± Åž ÅŸ
             >>> 
             -->
-            <font name="Verdana" size="32">Äž ÄŸ Ä° Ä± Åž ÅŸ</font></para>
+            <font name="Serif" size="32">Ğ İ Ş ğ ı ş</font></para>
       </frame>
     </slide>
 
@@ -102,19 +83,21 @@
       </frame>
     </slide>
 
-    <slide title="Bullet2" id="Slide005">
+    <slide title="New Paragraph Styles" id="Slide005">
       <frame x="120" y="515" width="700" height="60"
              leftmargin="36" rightmargin="36">
-        <para style="Heading1">Bullet2</para>
+        <para style="Heading1">New Paragraph Styles</para>
       </frame>
       <frame x="120" y="72" width="700" height="418"
              leftmargin="36" rightmargin="36">
-        <para style="Bullet">New element: Bullet2 - Second level bullets</para>
+        <para style="Bullet">Bullet2 - Second level bullets</para>
             <para style="Bullet2">Here's an example</para>
             <para style="Bullet2">Or an example with a longer text to see
             how it wraps at the end of each line</para>
-        <para style="Bullet">It has to be in the style file, so either use
-            the htu or truetype style files, or edit your style file</para>
+        <para style="Bullet">Author and EMail</para>
+            <para style="Bullet2">See the cover page for examples</para>
+        <para style="Bullet">They have to be in the style file, so either use
+            the htu style file or edit your style file</para>
       </frame>
     </slide>
 

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pdfimages.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.16 2002/07/24 19:56:38 andy_robinson Exp $
-__version__=''' $Id: pdfimages.py,v 1.16 2002/07/24 19:56:38 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.17 2003/09/08 14:16:38 andy_robinson Exp $
+__version__=''' $Id: pdfimages.py,v 1.17 2003/09/08 14:16:38 andy_robinson Exp $ '''
 __doc__="""
 Image functionality sliced out of canvas.py for generalization
 """
@@ -14,9 +14,15 @@ import reportlab
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.lib.utils import fp_str, getStringIO
-from reportlab.lib.utils import import_zlib, PIL_Image
+from reportlab.lib.utils import import_zlib, canHandleImages
+
 
 class PDFImage:
+    """Wrapper around different "image sources".  You can make images
+    from a PIL Image object, a filename (in which case it uses PIL),
+    an image we previously cached (optimisation, hardly used these
+    days) or a JPEG (which PDF supports natively)."""
+    
     def __init__(self, image, x,y, width=None, height=None, caching=0):
         self.image = image
         self.point = (x,y)
@@ -69,7 +75,7 @@ class PDFImage:
         if not pdfutils.cachedImageExists(image):
             zlib = import_zlib()
             if not zlib: return
-            if not PIL_Image: return
+            if not canHandleImages: return
             pdfutils.cacheImageFile(image)
 
         #now we have one cached, slurp it in
@@ -80,6 +86,7 @@ class PDFImage:
         return imagedata
 
     def PIL_imagedata(self):
+        print 'PIL_imagedata called for %s' % self.image
         self.source = 'PIL'
         zlib = import_zlib()
         if not zlib: return
@@ -107,6 +114,7 @@ class PDFImage:
         imagedata.append('EI')
         return (imagedata, imgwidth, imgheight)
 
+
     def getImageData(self):
         "Gets data, height, width - whatever type of image"
         image = self.image
@@ -126,7 +134,11 @@ class PDFImage:
                 imgwidth = string.atoi(words[1])
                 imgheight = string.atoi(words[3])
         else:
-            (imagedata, imgwidth, imgheight) = self.PIL_imagedata()
+            if sys.platform[0:4] == 'java':
+                #jython, PIL not available
+                (imagedata, imgwidth, imgheight) = self.JAVA_imagedata()
+            else:
+                (imagedata, imgwidth, imgheight) = self.PIL_imagedata()
         #now build the PDF for the image.
         if not width:
             width = imgwidth

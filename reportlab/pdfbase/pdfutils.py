@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.36 2002/11/27 20:16:24 rgbecker Exp $
-__version__=''' $Id: pdfutils.py,v 1.36 2002/11/27 20:16:24 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.37 2003/09/08 14:16:37 andy_robinson Exp $
+__version__=''' $Id: pdfutils.py,v 1.37 2003/09/08 14:16:37 andy_robinson Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -10,7 +10,7 @@ __doc__=''
 import os
 from reportlab import rl_config
 from string import join, replace, strip, split
-from reportlab.lib.utils import _checkImportError, getStringIO
+from reportlab.lib.utils import _checkImportError, getStringIO, ImageReader
 
 LINEEND = '\015\012'
 
@@ -34,17 +34,17 @@ def cacheImageFile(filename, returnInMemory=0, IMG=None):
         else:
             raise IOError, 'No such cached image %s' % filename
     else:
-        img1 = PIL_Image.open(open_for_read(filename))
-        img = img1.convert('RGB')
-        if IMG is not None: IMG.append(img)
-        imgwidth, imgheight = img.size
+        img = ImageReader(filename)
+        
+        imgwidth, imgheight = img.getSize()
+        raw = img.getRgbData()
+        
         code = []
         code.append('BI')   # begin image
         # this describes what is in the image itself
         code.append('/W %s /H %s /BPC 8 /CS /RGB /F [/A85 /Fl]' % (imgwidth, imgheight))
         code.append('ID')
         #use a flate filter and Ascii Base 85
-        raw = img.tostring()
         assert(len(raw) == imgwidth * imgheight, "Wrong amount of data for image")
         compressed = zlib.compress(raw)   #this bit is very fast...
         encoded = _AsciiBase85Encode(compressed) #...sadly this isn't

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.13 2002/11/04 00:11:48 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.14 2003/09/08 14:16:37 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 import reportlab
 
@@ -513,7 +513,6 @@ may be queried for information on TrueType fonts""")
 bullet("""CMapSearchPathPath: this is a python list of strings representing directories that
 may be queried for information on font code maps.""")
 bullet("""showBoundary: set to non-zero to get boundary lines drawn.""")
-bullet("""PIL_WARNINGS: set to non-zero to get warnings if the Python imaging library is not found.""")
 bullet("""ZLIB_WARNINGS: set to non-zero to get warnings if the Python compression extension is not found.""")
 bullet("""pageComression: set to non-zero to try and get compressed PDF.""")
 bullet("""allowtableBoundsErrors: set to 0 to force an error on very large Platypus table elements""")

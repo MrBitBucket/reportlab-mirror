@@ -733,6 +733,42 @@ class PPMLParser(xmllib.XMLParser):
         self._curCustomShape = None
 
 
+
+    def start_drawing(self, args):
+        #loads one
+        path = self._arg('drawing',args,'path')
+        if path=='None':
+            path = []
+        else:
+            path=[path]
+
+        # add package root folder and input file's folder to path
+        path.append(os.path.dirname(self.sourceFilename))
+        path.append(os.path.dirname(pythonpoint.__file__))
+
+        modulename = self._arg('drawing',args,'module')
+        funcname = self._arg('drawing',args,'class')
+        try:
+            found = imp.find_module(modulename, path)
+            (file, pathname, description) = found
+            mod = imp.load_module(modulename, file, pathname, description)
+        except ImportError:
+            mod = getModule(modulename)
+
+        #now get the function
+
+        func = getattr(mod, funcname)
+        #initargs = self.ceval('customshape',args,'initargs')
+        self._curDrawing = pythonpoint.PPDrawing()
+        self._curDrawing.drawing = func()
+        self._curDrawing.drawing.hAlign = 'CENTRE'
+
+
+    def end_drawing(self):
+        self._curFrame.content.append(self._curDrawing)
+        self._curDrawing = None
+
+
     ## intra-paragraph XML should be allowed through into PLATYPUS
     def unknown_starttag(self, tag, attrs):
         if  self._curPara:

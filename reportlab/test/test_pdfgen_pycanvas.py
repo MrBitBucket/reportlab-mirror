@@ -1,8 +1,8 @@
 #!/bin/env python
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_pycanvas.py,v 1.2 2002/10/02 13:23:49 andy_robinson Exp $
-__version__=''' $Id: test_pdfgen_pycanvas.py,v 1.2 2002/10/02 13:23:49 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_pycanvas.py,v 1.3 2003/09/08 14:16:38 andy_robinson Exp $
+__version__=''' $Id: test_pdfgen_pycanvas.py,v 1.3 2003/09/08 14:16:38 andy_robinson Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas and the pycanvas module to output Python source code.
 
@@ -14,7 +14,7 @@ from reportlab.test.utils import makeSuiteForClasses
 from reportlab.pdfgen import pycanvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
-from reportlab.lib.utils import PIL_Image
+from reportlab.lib.utils import canHandleImages
 
 #################################################################
 #
@@ -625,7 +625,7 @@ cost to performance.""")
     framePage(c, "Images")
     c.setFont('Times-Roman', 12)
     t = c.beginText(inch, 10 * inch)
-    if not PIL_Image:
+    if not canHandleImages:
         c.drawString(inch, 11*inch,
                      "Python Imaging Library not found! Below you see rectangles instead of images.")
 
@@ -641,7 +641,7 @@ cost to performance.""")
 
     c.drawText(t)
 
-    if PIL_Image:
+    if canHandleImages:
         c.drawInlineImage('pythonpowered.gif',2*inch, 7*inch)
     else:
         c.rect(2*inch, 7*inch, 110, 44)
@@ -650,7 +650,7 @@ cost to performance.""")
     c.line(2*inch, 6.5*inch, 2*inch, 8*inch)
     c.drawString(4.5 * inch, 7.25*inch, 'inline image drawn at natural size')
 
-    if PIL_Image:
+    if canHandleImages:
         c.drawInlineImage('pythonpowered.gif',2*inch, 5*inch, inch, inch)
     else:
         c.rect(2*inch, 5*inch, inch, inch)
@@ -663,7 +663,7 @@ cost to performance.""")
     c.drawString(1.5 * inch, 3.75*inch, 'This results in faster generation and much smaller files.')
 
     for i in range(5):
-        if PIL_Image:
+        if canHandleImages:
             (w, h) = c.drawImage('pythonpowered.gif', (1.5 + i)*inch, 3*inch)
         else:
             c.rect((1.5 + i)*inch, 3*inch, 110, 44)
@@ -673,7 +673,7 @@ cost to performance.""")
     c.drawString(1.5 * inch, 2.3*inch, "to determine that the yellow in the image above is RGB=(225,223,0).  We then define a mask")
     c.drawString(1.5 * inch, 2.1*inch, "spanning these RGB values:  %s.  The background vanishes!!" % myMask)
     c.drawString(2.5*inch, 1.2*inch, 'This would normally be obscured')
-    if PIL_Image:
+    if canHandleImages:
         c.drawImage('pythonpowered.gif', 3*inch, 1.2*inch, w, h, mask=myMask)
     else:
         c.rect(3*inch, 1.2*inch, 110, 44)
