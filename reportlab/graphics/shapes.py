@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.50 2001/09/24 15:38:35 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.51 2001/09/25 11:01:00 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -298,7 +298,10 @@ class Group(Shape):
 	def insert(self, i, n, name=None):
 		'Inserts sub-node n in contents at specified location'
 		assert isValidChild(n), "Can only insert Shape or UserNode objects in a Group"
-		self.contents.insert(i,n)
+		if i<0:
+			self.contents[i:i] =[n]
+		else:
+			slf.contents.insert(i,n)
 		self._addNamedNode(name,n)
 
 	def expandUserNodes(self):
