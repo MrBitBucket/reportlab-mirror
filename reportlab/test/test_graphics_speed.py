@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_graphics_speed.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_graphics_speed.py,v 1.9 2001/06/18 12:35:31 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_graphics_speed.py,v 1.10 2001/06/19 09:56:29 dinu_gherman Exp $
 """
 This does a test drawing with lots of things in it, running
 with and without attribute checking.
@@ -46,12 +46,12 @@ class GraphicsSpeedTestCase(unittest.TestCase):
             pc.y = 50
             pc.data = [10,20,30,40,50,60]
             pc.labels = ['a','b','c','d','e','f']
-            pc.pieStyles.strokeWidth=0.5
-            pc.pieStyles[3].popout = 20
-            pc.pieStyles[3].strokeWidth = 2
-            pc.pieStyles[3].strokeDashArray = [2,2]
-            pc.pieStyles[3].labelRadius = 1.75
-            pc.pieStyles[3].fontColor = colors.red
+            pc.slices.strokeWidth=0.5
+            pc.slices[3].popout = 20
+            pc.slices[3].strokeWidth = 2
+            pc.slices[3].strokeDashArray = [2,2]
+            pc.slices[3].labelRadius = 1.75
+            pc.slices[3].fontColor = colors.red
             d.add(pc)
         d.drawOn(c, 80, 500)
 

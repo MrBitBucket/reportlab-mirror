@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.16 2001/06/18 12:35:31 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.17 2001/06/19 09:56:29 dinu_gherman Exp $
 """
 This modules defines a very preliminary Line Plot example.
 """
@@ -57,7 +57,7 @@ class LinePlot(Widget):
         strokeColor = AttrMapValue(isColorOrNone),
         fillColor = AttrMapValue(isColorOrNone),
 
-        lineStyles = AttrMapValue(None),
+        lines = AttrMapValue(None),
 
         xValueAxis = AttrMapValue(None),
         yValueAxis = AttrMapValue(None),
@@ -85,10 +85,10 @@ class LinePlot(Widget):
             ((1,2), (2,3), (2.5,2), (3,4), (4,6))
             ]
 
-        self.lineStyles = TypedPropertyCollection(LinePlotProperties)
-        self.lineStyles.strokeWidth = 1
-        self.lineStyles[0].strokeColor = colors.red
-        self.lineStyles[1].strokeColor = colors.blue
+        self.lines = TypedPropertyCollection(LinePlotProperties)
+        self.lines.strokeWidth = 1
+        self.lines[0].strokeColor = colors.red
+        self.lines[1].strokeColor = colors.blue
         
         # control bar spacing. is useAbsolute = 1 then
         # the next parameters are in points; otherwise
@@ -137,10 +137,10 @@ class LinePlot(Widget):
         lp.lineLabelFormat = '%2.0f'
         lp.strokeColor = colors.black
 
-        lp.lineStyles[0].strokeColor = colors.red
-        lp.lineStyles[0].symbol = makeFilledCircle
-        lp.lineStyles[1].strokeColor = colors.blue
-        lp.lineStyles[1].symbol = makeFilledDiamond
+        lp.lines[0].strokeColor = colors.red
+        lp.lines[0].symbol = makeFilledCircle
+        lp.lines[1].strokeColor = colors.blue
+        lp.lines[1].symbol = makeFilledDiamond
 
         lp.xValueAxis.valueMin = 0
         lp.xValueAxis.valueMax = 5
@@ -236,16 +236,16 @@ class LinePlot(Widget):
         for rowNo in range(len(self._positions)):
             row = self._positions[rowNo]
 
-            styleCount = len(self.lineStyles)
+            styleCount = len(self.lines)
             styleIdx = rowNo % styleCount
-            rowColor = self.lineStyles[styleIdx].strokeColor
-            dash = getattr(self.lineStyles[styleIdx], 'strokeDashArray', None)
+            rowColor = self.lines[styleIdx].strokeColor
+            dash = getattr(self.lines[styleIdx], 'strokeDashArray', None)
 
-            # width = getattr(self.lineStyles[styleIdx], 'strokeWidth', None)
-            if hasattr(self.lineStyles[styleIdx], 'strokeWidth'):
-                width = self.lineStyles[styleIdx].strokeWidth
-            elif hasattr(self.lineStyles, 'strokeWidth'):
-                width = self.lineStyles.strokeWidth
+            # width = getattr(self.lines[styleIdx], 'strokeWidth', None)
+            if hasattr(self.lines[styleIdx], 'strokeWidth'):
+                width = self.lines[styleIdx].strokeWidth
+            elif hasattr(self.lines, 'strokeWidth'):
+                width = self.lines.strokeWidth
             else:
                 width = None
 
@@ -284,11 +284,11 @@ class LinePlot(Widget):
                 # Draw a symbol for each data item.
                 # This if should be done implicitely by the collection,
                 # but it didn't want to...
-                if hasattr(self.lineStyles[styleIdx], 'symbol'):
-                    symbol = self.lineStyles[styleIdx].symbol(x1, y1, 5, rowColor)
+                if hasattr(self.lines[styleIdx], 'symbol'):
+                    symbol = self.lines[styleIdx].symbol(x1, y1, 5, rowColor)
                     g.add(symbol)
-                elif hasattr(self.lineStyles, 'symbol'):
-                    symbol = self.lineStyles.symbol(x1, y1, 5, rowColor)
+                elif hasattr(self.lines, 'symbol'):
+                    symbol = self.lines.symbol(x1, y1, 5, rowColor)
                     g.add(symbol)
                 
                 # Draw item (bar) labels.
@@ -344,9 +344,9 @@ def sample1a():
     lp.joinedLines = 1
     lp.strokeColor = colors.black
 
-    lp.lineStyles.symbol = makeEmptyCircle
-    lp.lineStyles[0].strokeWidth = 2
-    lp.lineStyles[1].strokeWidth = 4
+    lp.lines.symbol = makeEmptyCircle
+    lp.lines[0].strokeWidth = 2
+    lp.lines[1].strokeWidth = 4
 
     lp.xValueAxis.valueMin = 0
     lp.xValueAxis.valueMax = 5
@@ -379,7 +379,7 @@ def sample1b():
     lp.width = 300
     lp.data = data
     lp.joinedLines = 1
-    lp.lineStyles.symbol = makeEmptyCircle
+    lp.lines.symbol = makeEmptyCircle
     lp.lineLabelFormat = '%2.0f'
     lp.strokeColor = colors.black
 
@@ -415,8 +415,8 @@ def sample1c():
     lp.width = 300
     lp.data = data
     lp.joinedLines = 1
-    lp.lineStyles[0].symbol = makeFilledCircle
-    lp.lineStyles[1].symbol = makeEmptyCircle
+    lp.lines[0].symbol = makeFilledCircle
+    lp.lines[1].symbol = makeEmptyCircle
     lp.lineLabelFormat = '%2.0f'
     lp.strokeColor = colors.black
 
@@ -474,7 +474,7 @@ def sample2():
     lp.width = 300
     lp.data = data
     lp.joinedLines = 1
-    lp.lineStyles.symbol = makeFilledDiamond
+    lp.lines.symbol = makeFilledDiamond
     lp.strokeColor = colors.black
 
     start = mktime(mkTimeTuple('25/11/1991'))
