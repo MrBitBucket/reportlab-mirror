@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.24  2000/05/12 12:52:00  rgbecker
+#	Fixes to BasicFrame split method
+#
 #	Revision 1.23  2000/05/11 14:02:14  rgbecker
 #	Removed usage of spaceBefore/After in wrap methods
-#
+#	
 #	Revision 1.22  2000/05/10 13:04:35  rgbecker
 #	Added softspace handling
 #	
@@ -98,7 +101,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.23 2000/05/11 14:02:14 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.24 2000/05/12 12:52:00 rgbecker Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -153,9 +156,9 @@ class Flowable:
 		size actually used."""
 		return (self.width, self.height)
 
-	def split(self,availWidth, availheight):
+	def split(self, availWidth, availheight):
 		"""This will be called by more sophisticated frames when
-		wrap fails. Stupid flowables should return (). Clever flowables
+		wrap fails. Stupid flowables should return []. Clever flowables
 		should split themselves and return a list of flowables"""
 		return []
 
@@ -386,7 +389,7 @@ class BasicFrame:
 		y = self.y
 		p = self.y1p
 		s = self.atTop and 0 or flowable.getSpaceBefore()
-		return flowable.wrap(self.width, y-p-s)
+		return flowable.split(self.width, y-p-s)
 
 
 #############################################################
