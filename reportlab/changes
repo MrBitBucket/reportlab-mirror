@@ -1,3 +1,48 @@
+########### 1.00 Released 2000/07/20
+demos/pythonpoint/pythonpoint.py
+      1.25 2000/07/15 21:13:29  Minor additions to styles etc. andy_robinson
+docs/userguide/app_demos.py
+       1.6 2000/07/18 13:27:47  fixed typos. dinu_gherman
+       1.5 2000/07/18 10:03:45  fixed typos, minimal changes to py2pdf. dinu_gherman
+docs/userguide/ch1_intro.py
+       1.8 2000/07/18 09:58:11  fixed typos. dinu_gherman
+docs/userguide/ch2_graphics.py
+       1.6 2000/07/18 09:59:25  fixed typos. dinu_gherman
+docs/userguide/ch3_pdffeatures.py
+       1.5 2000/07/18 10:00:43  fixed typos. dinu_gherman
+docs/userguide/ch4_platypus_concepts.py
+       1.7 2000/07/18 10:02:06  fixed typos. dinu_gherman
+docs/userguide/ch5_paragraphs.py
+       1.5 2000/07/18 13:24:38  fixed typos. dinu_gherman
+docs/userguide/ch5_tables.py
+       1.2 2000/07/16 14:01:44  ch5_tables.py was a hangover and should have been deleted before. Note to AR if and when we do this again never give the chapters numbers as that is extremely confusing. rgbecker
+docs/userguide/ch6_tables.py
+      1.10 2000/07/18 13:25:38  fixed typos. dinu_gherman
+       1.9 2000/07/14 14:07:48  Image probs again rgbecker
+docs/userguide/ch7_custom.py
+       1.4 2000/07/18 13:26:17  fixed typos. dinu_gherman
+       1.3 2000/07/16 14:07:56  most_chapters.py was also irrelevant rgbecker
+docs/userguide/genuserguide.py
+      1.32 2000/07/18 13:29:19  removed header dashes. dinu_gherman
+docs/userguide/lj8100.jpg
+       1.2 2000/07/14 14:07:48  Image probs again rgbecker
+docs/userguide/most_chapters.py
+       1.6 2000/07/16 14:07:56  most_chapters.py was also irrelevant rgbecker
+       1.5 2000/07/16 14:01:44  ch5_tables.py was a hangover and should have been deleted before. Note to AR if and when we do this again never give the chapters numbers as that is extremely confusing. rgbecker
+lib/xmllib.py
+       1.3 2000/07/18 09:31:53  Uncommented methods in fast parser rgbecker
+pdfbase/Setup.in
+       1.1 2000/07/19 19:06:39  Added _pdfmetrics.c rgbecker
+pdfbase/_pdfmetrics.c
+       1.1 2000/07/19 19:06:39  Added _pdfmetrics.c rgbecker
+pdfbase/pdfmetrics.py
+       1.7 2000/07/19 19:06:39  Added _pdfmetrics.c rgbecker
+platypus/tables.py
+      1.27 2000/07/20 13:32:33  Started debugging Table split rgbecker
+utils/daily.py
+      1.37 2000/07/14 14:27:26  Wasn't doing docs for releases rgbecker
+utils/runtests.py
+      1.12 2000/07/19 13:44:54  Added -prof option rgbecker
 ########### 0.95 Released 2000/07/14
 demos/py2pdf/demo.py
        1.5 2000/06/27 08:58:19  Try to ensure test file removal rgbecker
