@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.44 2001/09/27 18:09:33 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.45 2001/10/02 11:05:37 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -24,29 +24,6 @@ from reportlab.graphics.charts.axes import YCategoryAxis, XValueAxis
 from reportlab.graphics.charts.textlabels import BarChartLabel
 from reportlab.graphics.widgets.grids import ShadedRect
 
-
-### Helpers (maybe put this into Drawing... or shapes)
-##
-##def grid(group, x, y, width, height, dist=100):
-##	  "Make a rectangular grid given a distance between two adjacent lines."
-##
-##	  g = group
-##
-##	  # Vertical lines
-##	  for x0 in range(x, x+width, dist):
-##		  lineWidth = 0
-##		  if x0 % 5 == 0:
-##			  lineWidth = 1
-##		  g.add(Line(x0, 0, x0, y+height, strokeWidth=lineWidth))
-##
-##	  # Horizontal lines
-##	  for y0 in range(y, y+height, dist):
-##		  lineWidth = 0
-##		  if y0 % 5 == 0:
-##			  lineWidth = 1
-##		  g.add(Line(0, y0, x+width, y0, strokeWidth=lineWidth))
-
-
 class BarChartProperties(PropHolder):
 	_attrMap = AttrMap(
 		strokeColor = AttrMapValue(isColorOrNone, desc='Color of the bar border.'),
@@ -62,7 +39,6 @@ class BarChartProperties(PropHolder):
 		self.symbol = None
 
 # Bar chart classes.
-
 class BarChart(Widget):
 	"Abstract base class, unusable by itself."
 
@@ -148,14 +124,8 @@ class BarChart(Widget):
 		self.bars[1].fillColor = colors.green
 		self.bars[2].fillColor = colors.blue
 
-	def _findMinMaxValues(self):
-		"Find the minimum and maximum value of the data we have."
-		D = map(lambda x: map(lambda x: x is not None and x or 0,x),self.data)
-		return min(map(min,D)), max(map(max,D))
-
 	def makeBackground(self):
 		g = Group()
-		#print 'BarChart.makeBackground(%s, %s, %s, %s)' % (self.x, self.y, self.width, self.height)
 		g.add(Rect(self.x, self.y, self.width, self.height,
 			strokeColor = self.strokeColor, fillColor= self.fillColor))
 		return g
@@ -170,35 +140,43 @@ class BarChart(Widget):
 		drawing.add(bc)
 		return drawing
 
+	def _getConfigureData(self):
+		cA = self.categoryAxis
+		data = self.data
+		if cA.style!='parallel':
+			_data = data
+			data = max(map(len,_data))*[0]
+			for d in _data:
+				for i in xrange(len(d)):
+					data[i] += d[i] or 0
+			data = _data + [data]
+		self._configureData = data
+
 
 	def _drawBegin(self,org,length):
 		'''Position and configure value axis, return crossing value'''
-
 		self.valueAxis.setPosition(self.x, self.y, length)
-		self.valueAxis.configure(self.data)
+		self._getConfigureData()
+		self.valueAxis.configure(self._configureData)
 
-		# if zero is in chart, put x axis there, otherwise
-		# use bottom.
+		# if zero is in chart, put x axis there, otherwise use bottom.
 		crossesAt = self.valueAxis.scale(0)
 		if crossesAt > org+length or crossesAt<org:
 			crossesAt = org
-
 		return crossesAt
 
 
 	def _drawFinish(self):
 		'''finalize the drawing of a barchart'''
-
-		self.categoryAxis.configure(self.data)
+		cA = self.categoryAxis
+		cA.configure(self._configureData)
 		self.calcBarPositions()
-
 		g = Group()
-
 		g.add(self.makeBackground())
-		g.add(self.categoryAxis)
+		g.add(cA)
 		g.add(self.valueAxis)
 		g.add(self.makeBars())
-
+		del self._configureData
 		return g
 
 
@@ -219,12 +197,20 @@ class BarChart(Widget):
 
 		data = self.data
 		seriesCount = self._seriesCount = len(data)
-		self._rowLength = max(map(len,data))
+		self._rowLength = rowLength = max(map(len,data))
 		groupSpacing, barSpacing, barWidth = self.groupSpacing, self.barSpacing, self.barWidth
-		self._groupWidth = groupWidth = groupSpacing+(seriesCount*barWidth)+(seriesCount-1)*barSpacing
+		style = self.categoryAxis.style
+		if style=='parallel':
+			groupWidth = groupSpacing+(seriesCount*barWidth)+(seriesCount-1)*barSpacing
+			bGap = barWidth+barSpacing
+		else:
+			accum = rowLength*[0]
+			groupWidth = groupSpacing+barWidth
+			bGap = 0
+		self._groupWidth = groupWidth
 		useAbsolute = self.useAbsolute
 
-		if self.useAbsolute:
+		if useAbsolute:
 			# bar dimensions are absolute
 			normFactor = 1.0
 		else:
@@ -241,21 +227,16 @@ class BarChart(Widget):
 		# 'Baseline' correction...
 		vA = self.valueAxis
 		vScale = vA.scale
-		vm, vM = vA.valueMin, vA.valueMax
-		if None in (vm, vM):
-			y = self._findMinMaxValues()
-			vm = vm or y[0]
-			vM = vM or y[1]
+		vm, vM = vA._valueMin, vA._valueMax
 		if vm <= 0 <= vM:
-			y = vScale(0)
+			baseLine = vScale(0)
 		elif 0 < vm:
-			y = vScale(vm)
+			baseLine = vScale(vm)
 		elif vM < 0:
-			y = vScale(vM)
-		self._baseLine = y
+			baseLine = vScale(vM)
+		self._baseLine = baseLine
 
 		COLUMNS = range(max(map(len,data)))
-		bGap = barWidth+barSpacing
 		if useAbsolute:
 			_cScale = cA._scale
 
@@ -277,8 +258,15 @@ class BarChart(Widget):
 					x = g + normFactor*xVal
 
 				if datum is None:
-					height = 0
+					height = None
 				else:
+					if style!='parallel':
+						y = vScale(accum[colNo])
+						if y<baseLine: y = baseLine
+						accum[colNo] += datum
+						datum = accum[colNo]
+					else:
+						y = baseLine
 					height = vScale(datum) - y
 				barRow.append(flipXY and (y,x,height,width) or (x, y, width, height))
 
@@ -375,6 +363,7 @@ class BarChart(Widget):
 			rowStyle = self.bars[styleIdx]
 			for colNo in range(len(row)):
 				barPos = row[colNo]
+				if None in barPos[2:4]: continue
 				(x, y, width, height) = barPos
 
 				# Draw a rectangular symbol for each data item,
@@ -415,13 +404,17 @@ class BarChart(Widget):
 
 	def draw(self):
 		cA, vA = self.categoryAxis, self.valueAxis
-		if vA: vA.joinAxis = cA
-		if cA: cA.joinAxis = vA
-		if self._flipXY:
-			cA.setPosition(self._drawBegin(self.x,self.width), self.y, self.height)
-		else:
-			cA.setPosition(self.x, self._drawBegin(self.y,self.height), self.width)
-		return self._drawFinish()
+		if vA: ovAjA, vA.joinAxis = vA.joinAxis, cA
+		if cA: ocAjA, cA.joinAxis = cA.joinAxis, vA
+		try:
+			if self._flipXY:
+				cA.setPosition(self._drawBegin(self.x,self.width), self.y, self.height)
+			else:
+				cA.setPosition(self.x, self._drawBegin(self.y,self.height), self.width)
+			return self._drawFinish()
+		finally:
+			if vA: vA.joinAxis = ovAjA
+			if cA: cA.joinAxis = ocAjA
 
 class VerticalBarChart(BarChart):
 	"Vertical bar chart with multiple side-by-side bars."
