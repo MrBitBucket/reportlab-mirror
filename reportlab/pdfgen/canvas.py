@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.82 2001/07/10 21:01:12 aaron_watters Exp $
-__version__=''' $Id: canvas.py,v 1.82 2001/07/10 21:01:12 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.83 2001/07/11 00:38:29 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.83 2001/07/11 00:38:29 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -52,25 +52,8 @@ PATH_OPS = {(0, 0, FILL_EVEN_ODD) : 'n',  #no op
             (1, 1, FILL_NON_ZERO) : 'B',  #Stroke and Fill
             }
 
-## moved to pdfutils
-##try:
-##    from reportlab._rl_accel import _instanceEscapePDF
-##    import new
-##except:
-##    _instanceEscapePDF=None
-##
-##if not _instanceEscapePDF:
-##    if rl_config.sys_version>='2.1':
-##        _ESCAPEDICT={}
-##        for c in range(0,256):
-##            if c<32 or c>=127:
-##                _ESCAPEDICT[chr(c)]= '\\%03o' % c
-##            elif c in (ord('\\'),ord('('),ord(')')):
-##                _ESCAPEDICT[chr(c)] = '\\'+chr(c)
-##            else:
-##                _ESCAPEDICT[chr(c)] = chr(c)
-##        del c
-escapePDF = pdfutils._escape
+_escapePDF = pdfutils._escape
+_instanceEscapePDF = pdfutils._instanceEscapePDF
 
 class Canvas:
     """This class is the programmer's interface to the PDF file format.  Methods
@@ -222,23 +205,9 @@ class Canvas:
             #switch coordinates, flip text and set font
             self._preamble = '1 0 0 -1 0 %s cm BT %s 12 Tf 14.4 TL ET' % (fp_str(self._pagesize[1]), iName)
 
-##    if _instanceEscapePDF:
-##        _escape = new.instancemethod(_instanceEscapePDF,None,Canvas)
-##    else:
-##        if rl_config.sys_version>='2.1':
-##            #Michael Hudson donated this
-##            def _escape(self,s):
-##                return join(map(lambda c, d=_ESCAPEDICT: d[c],s),'')
-##        else:
-##            def _escape(self, s):
-##                """PDF escapes are like Python ones, but brackets need slashes before them too.
-##                Use Python's repr function and chop off the quotes first"""
-##                s = repr(s)[1:-1]
-##                s = replace(s, '(','\(')
-##                s = replace(s, ')','\)')
-##                return s
-    def _escape(self, s):
-        return escapePDF(s)
+    if not _instanceEscapePDF:
+        def _escape(self, s):
+            return _escapePDF(s)
 
     #info functions - non-standard
     def setAuthor(self, author):
@@ -1244,7 +1213,7 @@ class Canvas:
 
     def setPageCompression(self, pageCompression=1):
         """Possible values None, 1 or 0
-		If None the value from rl_config will be used.
+        If None the value from rl_config will be used.
         If on, the page data will be compressed, leading to much
         smaller files, but takes a little longer to create the files.
         This applies to all subsequent pages, or until setPageCompression()
@@ -1326,6 +1295,10 @@ class Canvas:
         for (key, value) in args:
             transDict[key] = value
         self._pageTransition = transDict
+
+if _instanceEscapePDF:
+    import new
+    Canvas._escape = new.instancemethod(_instanceEscapePDF,None,Canvas)
 
 
 if __name__ == '__main__':

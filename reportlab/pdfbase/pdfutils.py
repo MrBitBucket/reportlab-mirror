@@ -1,16 +1,16 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.23 2001/07/10 21:01:12 aaron_watters Exp $
-__version__=''' $Id: pdfutils.py,v 1.23 2001/07/10 21:01:12 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.24 2001/07/11 00:38:01 rgbecker Exp $
+__version__=''' $Id: pdfutils.py,v 1.24 2001/07/11 00:38:01 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
 
 import os
-import string
 import cStringIO
 from reportlab import rl_config
+from string import join, replace, strip, split
 
 LINEEND = '\015\012'
 
@@ -55,7 +55,7 @@ def cacheImageFile(filename, returnInMemory=0):
     #save it to a file
     cachedname = os.path.splitext(filename)[0] + '.a85'
     f = open(cachedname,'wb')
-    f.write(string.join(code, LINEEND)+LINEEND)
+    f.write(join(code, LINEEND)+LINEEND)
     f.close()
     if rl_config._verbose:
         print 'cached image as %s' % cachedname
@@ -107,35 +107,39 @@ def cachedImageExists(filename):
 #            PDF Helper functions
 #
 ##############################################################
-def _escape(s):
-    """Escapes some PDF symbols (in fact, paranthesis).
-
-    PDF escapes are almost like Python ones, but brackets
-    need slashes before them too. Uses Python's repr function
-    and chops off the quotes first."""
-    # this one only works in python versions <2.1
-    s = repr(s)[1:-1]
-    s = string.replace(s, '(','\(')
-    s = string.replace(s, ')','\)')
-    return s
 
 try:
-    from reportlab._rl_accel import escapePDF
+    from _rl_accel import escapePDF, _instanceEscapePDF
     _escape = escapePDF
 except ImportError:
-    if rl_config.sys_version>='2.1':
-        _ESCAPEDICT={}
-        for c in range(0,256):
-            if c<32 or c>=127:
-                _ESCAPEDICT[chr(c)]= '\\%03o' % c
-            elif c in (ord('\\'),ord('('),ord(')')):
-                _ESCAPEDICT[chr(c)] = '\\'+chr(c)
-            else:
-                _ESCAPEDICT[chr(c)] = chr(c)
-        del c
-        #Michael Hudson donated this
-        def _escape(s):
-            return join(map(lambda c, d=_ESCAPEDICT: d[c],s),'')
+    try:
+        from reportlab.lib._rl_accel import escapePDF, _instanceEscapePDF
+        _escape = escapePDF
+    except ImportError:
+        _instanceEscapePDF=None
+        if rl_config.sys_version>='2.1':
+            _ESCAPEDICT={}
+            for c in range(0,256):
+                if c<32 or c>=127:
+                    _ESCAPEDICT[chr(c)]= '\\%03o' % c
+                elif c in (ord('\\'),ord('('),ord(')')):
+                    _ESCAPEDICT[chr(c)] = '\\'+chr(c)
+                else:
+                    _ESCAPEDICT[chr(c)] = chr(c)
+            del c
+            #Michael Hudson donated this
+            def _escape(s):
+                return join(map(lambda c, d=_ESCAPEDICT: d[c],s),'')
+        else:
+            def _escape(s):
+                """Escapes some PDF symbols (in fact, parenthesis).
+                PDF escapes are almost like Python ones, but brackets
+                need slashes before them too. Uses Python's repr function
+                and chops off the quotes first."""
+                s = repr(s)[1:-1]
+                s = replace(s, '(','\(')
+                s = replace(s, ')','\)')
+                return s
 
 def _normalizeLineEnds(text,desired=LINEEND):
     """Normalizes different line end character(s).
@@ -143,10 +147,10 @@ def _normalizeLineEnds(text,desired=LINEEND):
     Ensures all instances of CR, LF and CRLF end up as
     the specified one."""
     unlikely = '\000\001\002\003'
-    text = string.replace(text, '\015\012', unlikely)
-    text = string.replace(text, '\015', unlikely)
-    text = string.replace(text, '\012', unlikely)
-    text = string.replace(text, unlikely, desired)
+    text = replace(text, '\015\012', unlikely)
+    text = replace(text, '\015', unlikely)
+    text = replace(text, '\012', unlikely)
+    text = replace(text, unlikely, desired)
     return text
 
 
@@ -170,7 +174,7 @@ def _AsciiHexDecode(input):
     Not used except to provide a test of the inverse function."""
 
     #strip out all whitespace
-    stripped = string.join(string.split(input),'')
+    stripped = join(split(input),'')
     assert stripped[-1] == '>', 'Invalid terminator for Ascii Hex Stream'
     stripped = stripped[:-1]  #chop off terminator
     assert len(stripped) % 2 == 0, 'Ascii Hex stream has odd number of bytes'
@@ -187,10 +191,10 @@ def _AsciiHexDecode(input):
 
 try:
     try:
-        from reportlab.lib._rl_accel import _AsciiBase85Encode	# where we think it should be
+        from reportlab.lib._rl_accel import _AsciiBase85Encode  # where we think it should be
     except ImportError, errMsg:
         if str(errMsg)!='No module named _rl_accel': raise
-        from _rl_accel import _AsciiBase85Encode				# builtin or on the path
+        from _rl_accel import _AsciiBase85Encode                # builtin or on the path
 except ImportError, errMsg:
     if str(errMsg)!='No module named _rl_accel': raise
     def _AsciiBase85Encode(input):
@@ -273,13 +277,13 @@ def _AsciiBase85Decode(input):
     - but a round trip is essential for testing."""
     outstream = cStringIO.StringIO()
     #strip all whitespace
-    stripped = string.join(string.split(input),'')
+    stripped = join(split(input),'')
     #check end
     assert stripped[-2:] == '~>', 'Invalid terminator for Ascii Base 85 Stream'
     stripped = stripped[:-2]  #chop off terminator
 
     #may have 'z' in it which complicates matters - expand them
-    stripped = string.replace(stripped,'z','!!!!!')
+    stripped = replace(stripped,'z','!!!!!')
     # special rules apply if not a multiple of five bytes.  
     whole_word_count, remainder_size = divmod(len(stripped), 5)
     #print '%d words, %d leftover' % (whole_word_count, remainder_size)
@@ -353,7 +357,7 @@ def _wrap(input, columns=60):
         i = i + 1
         pos = columns * i
 
-    return string.join(output, LINEEND)
+    return join(output, LINEEND)
 
     
 #########################################################################
