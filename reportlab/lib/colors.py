@@ -33,9 +33,12 @@
 #
 ###############################################################################
 #	$Log: colors.py,v $
+#	Revision 1.6  2000/04/05 15:55:52  rgbecker
+#	Fixed getAllNamedColors, needed global etc
+#
 #	Revision 1.5  2000/04/05 15:26:17  rgbecker
 #	Added ColorType
-#
+#	
 #	Revision 1.4  2000/04/05 14:22:38  rgbecker
 #	Allow 0x in HexColor, added stringToColor, fixed caching in getAllNamedColors
 #	
@@ -45,7 +48,7 @@
 #	Revision 1.2  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
 #	
-__version__=''' $Id: colors.py,v 1.5 2000/04/05 15:26:17 rgbecker Exp $ '''
+__version__=''' $Id: colors.py,v 1.6 2000/04/05 15:55:52 rgbecker Exp $ '''
 
 import string
 import math
@@ -277,19 +280,20 @@ def colorDistance(col1, col2):
             (col1.blue - col2.blue)**2
             )
 
-__namedColors = None
+_namedColors = None
 
 def getAllNamedColors():
     #returns a dictionary of all the named ones in the module
     # uses a singleton for efficiency
-    if __namedColors is not None: return __namedColors
+    global _namedColors
+    if _namedColors is not None: return _namedColors
     import colors
-    __namedColors = {}
+    _namedColors = {}
     for (name, value) in colors.__dict__.items():
         if isinstance(value, Color):
-            __namedColors[name] = value
+            _namedColors[name] = value
 
-    return __namedColors
+    return _namedColors
 
 def describe(aColor):
     # finds nearest match to one you provide.  Useful when
