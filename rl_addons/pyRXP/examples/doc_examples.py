@@ -17,7 +17,7 @@ if __name__=='__main__':
 			-1,'''pprint.pprint(p('<outerTag><innerTag>bb</innerTag>aaa<singleTag/></outerTag>'))''',
 			'''p('<tag/><!-- this is a comment about the tag -->')''',
 			'''p('<!-- this is a comment -->')''',
-			'''p('<a>aaa</a') # note the missing '>'''',
+			'''p('<a>aaa</a') # note the missing '>''',
 			'''p('<a></a><b></b>')''',
 			'''p('<outer><a></a><b></b></outer>')''',
 			'''os.getcwd()''',
