@@ -129,8 +129,6 @@ class XCategoryAxis(Widget):
         v, p = value, points
         if mode[:3] == 'fix':
             assert (v == None and p != None) or (v != None and p == None)
-##        else:
-##            assert v != None or p != None
             
         if mode == 'bottom':        
             self._x = yAxis._x * 1.0
@@ -214,13 +212,12 @@ class YValueAxis(Widget):
         self._configured = 0
         # private properties set by methods.  The initial values
         # here are to make demos easy; they would always be
-        # overridden in real life.
-        
+        # overridden in real life.        
         self._x = 50
         self._y = 50
         self._length = 100
+        
         # public properties
-
         self.visible = 1
         
         self.strokeWidth = 1
@@ -264,7 +261,7 @@ class YValueAxis(Widget):
 
     def demo(self):
         self.setPosition(0, 0, 100)
-        self.configure((3,10,20,25,40,60,80,110, 117))
+        self.configure([(10,20,30,40,50)])
         d = Drawing(200, 100)
         d.add(self)
         return d
