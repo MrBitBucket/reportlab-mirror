@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.8  2000/02/20 14:43:27  rgbecker
+#	_currentPageHasImages = 0 in init
+#
 #	Revision 1.7  2000/02/20 11:08:56  rgbecker
 #	Canvas.setPageSize fix
-#
+#	
 #	Revision 1.6  2000/02/17 15:26:28  rgbecker
 #	Change page compression default
 #	
@@ -49,7 +52,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.7 2000/02/20 11:08:56 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.8 2000/02/20 14:43:27 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -142,10 +145,10 @@ class Canvas:
         self._filename = filename
         self._doc = pdfdoc.PDFDocument()
         self._pagesize = pagesize
-        self._currentPageHasImages = 1
+        self._currentPageHasImages = 0
         self._pageTransitionString = ''
 
-        self._pageCompression = pageCompression  #on by default - turn off when debugging!
+        self._pageCompression = pageCompression  #off by default - turn on when we're happy!
         self._pageNumber = 1   # keep a count
         self._code = []    #where the current page's marking operators accumulate
         
@@ -251,7 +254,6 @@ class Canvas:
         and subsequent pages"""
         self._pagesize = size
         self._make_preamble()
-        
 
     def addLiteral(self, s, escaped=1):
         if escaped==0:
