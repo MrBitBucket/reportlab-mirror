@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.60 2001/01/12 21:36:57 dinu_gherman Exp $
-__version__=''' $Id: canvas.py,v 1.60 2001/01/12 21:36:57 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.61 2001/02/21 17:13:11 aaron_watters Exp $
+__version__=''' $Id: canvas.py,v 1.61 2001/02/21 17:13:11 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -151,6 +151,8 @@ class Canvas:
         self.setPageCompression(pageCompression)
         self._pageNumber = 1   # keep a count
         #self3 = []    #where the current page's marking operators accumulate
+        # when we create a form we need to save operations not in the form
+        self._codeStack = []
         self._restartAccumulators()  # restart all accumulation state (generalized, arw)
         self._annotationCount = 0
 
@@ -397,6 +399,22 @@ class Canvas:
         self._formsinuse.append(name)
         
     def _restartAccumulators(self):
+        if self._codeStack:
+            # restore the saved code
+            saved = self._codeStack[-1]
+            del self._codeStack[-1]
+            (self._code, self._formsinuse, self._annotationrefs, self._formData) = saved
+        else:
+            self._code = []    # ready for more...
+            self._currentPageHasImages = 1 # for safety...
+            self._formsinuse = []
+            self._annotationrefs = []
+            self._formData = None
+
+    def _pushAccumulators(self):
+        "when you enter a form, save accumulator info not related to the form for page (if any)"
+        saved = (self._code, self._formsinuse, self._annotationrefs, self._formData)
+        self._codeStack.append(saved)
         self._code = []    # ready for more...
         self._currentPageHasImages = 1 # for safety...
         self._formsinuse = []
@@ -410,6 +428,11 @@ class Canvas:
            but not forms.  The form will not automatically be shown in the
            document but must be explicitly referenced using doForm in pages
            that require the form."""
+        if self._code:
+            # save the code that is not in the formf
+            self._pushAccumulators()
+            #self._codeStack.append(self._code)
+            #self._code = []
         self._formData = (name, lowerx, lowery, upperx, uppery)
         self._doc.inForm()
         #self._inForm0()
