@@ -65,6 +65,11 @@ class TextEncodingTestCase(unittest.TestCase):
     
         #in our current mode, trying to draw this should raise an error
         # as the bytes we pass to the Unicode font are not valid UTF8
+        try:
+            UnicodeDecodeError
+        except:
+            UnicodeDecodeError = UnicodeError
+
         self.assertRaises(UnicodeDecodeError, c.drawString, 100,100,testLatin1)
         c.drawString(100, 600, testUTF8)
         #print 'utf8-',testUTF8

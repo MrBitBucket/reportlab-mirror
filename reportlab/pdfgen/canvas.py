@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.125 2004/06/10 00:43:21 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.125 2004/06/10 00:43:21 andy_robinson Exp $ '''
+#$Header: /cvsroot/reportlab/reportlab/pdfgen/canvas.py,v 1.125 2004/06/10 00:43:21 andy_robinson Exp $
+__version__=''' $Id$ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -1289,7 +1289,8 @@ class Canvas:
                 docEnc = 'cp1252'
             else:
                 docEnc = self.encoding
-            uni = text.decode(docEnc)  #hack
+            #uni = text.decode(docEnc)  #hack #won't work in 2.1
+            uni = unicode(text,docEnc,getattr(self,'decodingErrorMode',self.encodingErrorMode)) #works in 2.1
             return uni.encode(self._fontencoding, self.encodingErrorMode)
     
 
