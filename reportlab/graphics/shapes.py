@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.37 2001/07/16 13:29:28 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.38 2001/07/16 15:20:47 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -17,7 +17,6 @@ from reportlab.lib import colors
 from reportlab.lib.validators import *
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth
-
 
 class NotImplementedError(Exception):
 	pass
@@ -321,22 +320,31 @@ class Group(Shape):
 		self._copyNamedContents(obj)
 		return obj
 
-	def _copyNamedContents(self,obj):
+	def _copyContents(self,obj):
+		for child in self.contents:
+			obj.contents.append(child)
+
+	def _copyNamedContents(self,obj,aKeys=None,noCopy=('contents',)):
+		from copy import copy
 		self_contents = self.contents
-		for (oldKey, oldValue) in self.__dict__.items():
-			if oldValue in self_contents:
-				pos = self_contents.index(oldValue)
+		if not aKeys: aKeys = self._attrMap.keys()
+		for (k, v) in self.__dict__.items():
+			if k in self_contents:
+				pos = self_contents.index(v)
 				setattr(obj, oldKey, obj.contents[pos])
+			elif k in aKeys and k not in noCopy:
+				setattr(obj, k, copy(v))
+
+	def _copy(self,obj):
+		"""copies to obj"""
+		obj._attrMap = self._attrMap.clone()
+		self._copyContents(obj)
+		self._copyNamedContents(obj)
+		return obj
 
 	def copy(self):
 		"""returns a copy"""
-		obj = self.__class__()
-		obj.transform = self.transform[:]
-		self_contents = self.contents
-		for child in self_contents:
-			obj.append(child.copy())
-		self._copyNamedContents(obj)
-		return obj
+		return self._copy(self.__class__())
 
 	def rotate(self, theta):
 		"""Convenience to help you set transforms"""
@@ -409,21 +417,6 @@ class Drawing(Group, Flowable):
 		obj.height = self.height
 		return obj
 
-	def _copy(self,obj):
-		"""copies to obj"""
-		obj._attrMap = self._attrMap.clone()
-
-		self_contents = self.contents
-		for child in self_contents:
-			obj.contents.append(child)
-
-		self_contents = self.contents
-		for (oldKey, oldValue) in self.__dict__.items():
-			if oldValue in self_contents:
-				pos = self_contents.index(oldValue)
-				setattr(obj, oldKey, obj.contents[pos])
-
-		return obj
 
 	def copy(self,obj):
 		"""Returns a copy"""
