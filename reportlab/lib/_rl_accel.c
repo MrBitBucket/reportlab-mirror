@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.17 2001/05/29 17:05:42 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.18 2001/06/13 07:13:56 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.17 2001/05/29 17:05:42 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.18 2001/06/13 07:13:56 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -14,6 +14,10 @@ static __version__=" $Id: _rl_accel.c,v 1.17 2001/05/29 17:05:42 rgbecker Exp $ 
 #	define STRICMP strcasecmp
 #elif defined(_MSC_VER)
 #	define STRICMP stricmp
+#elif defined(macintosh)
+# include <extras.h>
+# define strdup _strdup
+# define STRICMP _stricmp
 #else
 #	error "Don't know how to define STRICMP"
 #endif
@@ -23,7 +27,7 @@ static __version__=" $Id: _rl_accel.c,v 1.17 2001/05/29 17:05:42 rgbecker Exp $ 
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.33"
+#define VERSION "0.34"
 #define MODULE "_rl_accel"
 #ifndef	ATTRDICT
 	#if PY_MAJOR_VERSION>=2
@@ -567,7 +571,7 @@ static PyObject *_escapePDF(unsigned char* text, int textlen)
 			out[j++] = c;
 			}
 		}
-	ret = PyString_FromStringAndSize(out,j);
+	ret = PyString_FromStringAndSize((const char *)out,j);
 	PyMem_Free(out);
 	return ret;
 }
