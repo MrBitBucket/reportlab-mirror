@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tableofcontents.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tableofcontents.py,v 1.4 2001/11/27 16:49:58 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/tableofcontents.py,v 1.5 2002/01/18 12:46:49 rgbecker Exp $
 """
 This module defines a single TableOfContents() class that can be used to
 create automatically a table of tontents for Platypus documents like
@@ -195,7 +195,7 @@ class TableOfContents(IndexingFlowable):
         self._table = Table(tableData, colWidths=widths,
                             style=self.tableStyle)
 
-        self.width, self.height = self._table.wrap(availWidth, availHeight)
+        self.width, self.height = self._table.wrapOn(self.canv,availWidth, availHeight)
         return (self.width, self.height)
 
 
@@ -205,7 +205,7 @@ class TableOfContents(IndexingFlowable):
         calling app has a pointer to the original TableOfContents object;
         Platypus just sees tables.
         """
-        return self._table.split(availWidth, availHeight)
+        return self._table.splitOn(self.canv,availWidth, availHeight)
 
 
     def drawOn(self, canvas, x, y, _sW=0):
@@ -265,7 +265,7 @@ class SimpleIndex(IndexingFlowable):
         calling app has a pointer to the original TableOfContents object;
         Platypus just sees tables.
         """
-        return self._table.split(availWidth, availHeight)
+        return self._table.splitOn(self.canv,availWidth, availHeight)
 
     def wrap(self, availWidth, availHeight):
         "All table properties should be known by now."
@@ -288,7 +288,7 @@ class SimpleIndex(IndexingFlowable):
 
         self._table = Table(tableData, colWidths=[availWidth])
 
-        self.width, self.height = self._table.wrap(availWidth, availHeight)
+        self.width, self.height = self._table.wrapOn(self.canv,availWidth, availHeight)
         return (self.width, self.height)
 
     def drawOn(self, canvas, x, y, _sW=0):
