@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.14  2000/04/25 14:37:18  rgbecker
+#	Commented out call of _inPage0
+#
 #	Revision 1.13  2000/04/14 12:17:05  rgbecker
 #	Splitting layout.py
-#
+#	
 #	Revision 1.12  2000/04/14 08:56:20  rgbecker
 #	Drawable ==> Flowable
 #	
@@ -75,7 +78,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.13 2000/04/14 12:17:05 rgbecker Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.14 2000/04/25 14:37:18 rgbecker Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -202,7 +205,7 @@ class PPSlide:
         if self.title:
             #put an outline entry in the left pane
             tag = self.title
-            canv._inPage0()
+            #canv._inPage0()
             canv.bookmarkPage0(tag)
             canv.outlineNames.append(tag)
             
