@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.32 2002/06/20 10:26:58 rgbecker Exp $
-__version__=''' $Id: colors.py,v 1.32 2002/06/20 10:26:58 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.33 2002/07/01 17:35:52 rgbecker Exp $
+__version__=''' $Id: colors.py,v 1.33 2002/07/01 17:35:52 rgbecker Exp $ '''
 
 import string, math
 from types import StringType, ListType, TupleType
@@ -35,6 +35,9 @@ class Color:
 	def rgb(self):
 		"Returns a three-tuple of components"
 		return (self.red, self.green, self.blue)
+
+	def hexval(self):
+		return '0x%02x%02x%02x' % tuple(map(lambda x: int(x*255), self.rgb()))
 	
 class CMYKColor(Color):
 	"""This represents colors using the CMYK (cyan, magenta, yellow, black)
