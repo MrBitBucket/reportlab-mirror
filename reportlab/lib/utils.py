@@ -643,6 +643,7 @@ class DebugMemo:
                         'api_version': getattr(sys,'api_version','????'),
                         'version_info': getattr(sys,'version_info','????'),
                         'winver': getattr(sys,'winver','????'),
+                        'environment': os.environ,
                         })
         for M,A in (
                 (sys,('getwindowsversion','getfilesystemencoding')),
