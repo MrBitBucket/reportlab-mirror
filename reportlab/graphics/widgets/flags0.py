@@ -331,11 +331,11 @@ class FlagUSA0(Flag0):
 
         for stripecounter in range (13,0, -1):
             stripeheight = s/13.0
-            evennumbers = (2,4,6,8,10,12,14)
-            if stripecounter not in evennumbers:
+            if not (stripecounter%2 == 0):
                 stripecolor = colors.red
             else:
                 stripecolor = colors.mintcream
+
 
             redorwhiteline = shapes.Rect(self.x, self.y+(s-(stripeheight*stripecounter)), width=s*2, height=stripeheight,
                    fillColor = stripecolor,
@@ -834,8 +834,7 @@ class FlagGreece0(Flag0):
 
         for stripecounter in range (9,0, -1):
             stripeheight = s/9.0
-            evennumbers = (2,4,6,8,10,12,14)
-            if stripecounter not in evennumbers:
+            if not (stripecounter%2 == 0):
                 stripecolor = colors.deepskyblue
             else:
                 stripecolor = colors.mintcream
