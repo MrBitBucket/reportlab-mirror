@@ -9,6 +9,11 @@ def libart_version():
 			D[string.strip(l[0])] = string.strip(l[1])
 			if len(D)==3: break
 	return (sys.platform == 'win32' and '\\"%s\\"' or '"%s"') % string.join(map(lambda k,D=D: D.get(k,'?'),K),'.')
+
+if sys.hexversion<0x20000a0:
+	import struct
+	sys.byteorder = struct.pack('>L',0x12345678)==struct.pack('L',0x12345678) and 'big' or 'little'
+
 def BIGENDIAN(macname,value=None):
 	'define a macro if bigendian'
 	return sys.byteorder=='big' and [(macname,value)] or []
