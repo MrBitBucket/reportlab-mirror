@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.7  2000/02/20 11:08:56  rgbecker
+#	Canvas.setPageSize fix
+#
 #	Revision 1.6  2000/02/17 15:26:28  rgbecker
 #	Change page compression default
-#
+#	
 #	Revision 1.5  2000/02/17 02:08:04  rgbecker
 #	Docstring & other fixes
 #	
@@ -46,7 +49,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.6 2000/02/17 15:26:28 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.7 2000/02/20 11:08:56 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -152,14 +155,7 @@ class Canvas:
         #to also set the text matrix accordingly.  You can now choose your
         #drawing coordinates.
         self.bottomup = bottomup
-        if self.bottomup:
-            #set initial font
-            #self._preamble = 'BT /F9 12 Tf 14.4 TL ET'
-            self._preamble = '1 0 0 1 0 0 cm BT /F9 12 Tf 14.4 TL ET'
-        else:
-            #switch coordinates, flip text and set font
-            #self._preamble = '1 0 0 -1 0 %0.2f cm BT /F9 12 Tf 14.4 TL ET' % self._pagesize[1]
-            self._preamble = '1 0 0 -1 0 %0.2f cm BT /F9 12 Tf 14.4 TL ET' % self._pagesize[1]
+        self._make_preamble()
 
         #initial graphics state
         self._x = 0
@@ -189,6 +185,16 @@ class Canvas:
 
         self._fillColorRGB = (0,0,0)
         self._strokeColorRGB = (0,0,0)
+
+    def _make_preamble(self):
+        if self.bottomup:
+            #set initial font
+            #self._preamble = 'BT /F9 12 Tf 14.4 TL ET'
+            self._preamble = '1 0 0 1 0 0 cm BT /F9 12 Tf 14.4 TL ET'
+        else:
+            #switch coordinates, flip text and set font
+            #self._preamble = '1 0 0 -1 0 %0.2f cm BT /F9 12 Tf 14.4 TL ET' % self._pagesize[1]
+            self._preamble = '1 0 0 -1 0 %0.2f cm BT /F9 12 Tf 14.4 TL ET' % self._pagesize[1]
 
     def _escape(self, s):
         """PDF escapes are like Python ones, but brackets need slashes before them too.
@@ -244,6 +250,7 @@ class Canvas:
         """accepts a 2-tuple in points for paper size for this
         and subsequent pages"""
         self._pagesize = size
+        self._make_preamble()
         
 
     def addLiteral(self, s, escaped=1):
