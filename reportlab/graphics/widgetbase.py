@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.26 2001/06/22 15:03:25 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.27 2001/06/27 14:59:00 dinu_gherman Exp $
 import string
 
 from reportlab.graphics import shapes
@@ -31,12 +31,11 @@ class PropHolder:
 					msg = "Unexpected attribute %s found in %s" % (key, self)
 					assert self._attrMap.has_key(key), msg
 			for (attr, metavalue) in self._attrMap.items():
-				msg = "Missing attribute %s from %s" % (key, self)
+				msg = "Missing attribute %s from %s" % (attr, self)
 				assert hasattr(self, attr), msg
 				value = getattr(self, attr)
 				args = (value, attr, self.__class__.__name__)
 				assert metavalue.validate(value), "Invalid value %s for attribute %s in class %s" % args
-
 
 	if rl_config.shapeChecking:
 		"""This adds the ability to check every attribute assignment
