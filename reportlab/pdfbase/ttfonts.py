@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.12 2002/10/10 14:22:54 mgedmin Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.13 2002/10/19 17:28:01 rgbecker Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -58,7 +58,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.12 2002/10/10 14:22:54 mgedmin Exp $'
+__version__ = '$Id: ttfonts.py,v 1.13 2002/10/19 17:28:01 rgbecker Exp $'
 
 import string
 from types import StringType
@@ -152,7 +152,7 @@ def _add32(x, y):
     hi = (x >> 16) + (y >> 16) + (lo >> 16)
     return (hi << 16) | (lo & 0xFFFF)
 
-def calcChecksum(data):
+def _calcChecksum(data):
     """Calculates PDF-style checksums"""
     if len(data)&3: data = data + (4-(len(data)&3))*"\0"
     sum = 0
@@ -161,6 +161,12 @@ def calcChecksum(data):
         hi = (sum >> 16) + (n >> 16) + (lo >> 16)
         sum = (hi << 16) | (lo & 0xFFFF)
     return sum
+
+try:
+    from reportlab.lib import _rl_accel
+    calcChecksum = _rl_accel.calcChecksum
+except:
+    calcChecksum = _calcChecksum
 
 #
 # TrueType font handling
