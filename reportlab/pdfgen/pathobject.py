@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pathobject.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pathobject.py,v 1.8 2001/01/12 21:36:57 dinu_gherman Exp $
-__version__=''' $Id: pathobject.py,v 1.8 2001/01/12 21:36:57 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/pathobject.py,v 1.9 2001/05/25 13:52:34 rgbecker Exp $
+__version__=''' $Id: pathobject.py,v 1.9 2001/05/25 13:52:34 rgbecker Exp $ '''
 __doc__=""" 
 PDFPathObject is an efficient way to draw paths on a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -13,8 +13,8 @@ Progress Reports:
 """
 
 import string
-import reportlab.pdfgen.pdfgeom
 from reportlab.pdfgen import pdfgeom
+from reportlab.lib.utils import fp_str
 
 
 class PDFPathObject:
@@ -36,13 +36,13 @@ class PDFPathObject:
         return string.join(self._code, ' ')
 
     def moveTo(self, x, y):
-        self._code.append('%0.2f %0.2f m' % (x,y))
+        self._code.append('%s m' % fp_str(x,y))
 
     def lineTo(self, x, y):
-        self._code.append('%0.2f %0.2f l' % (x,y))
+        self._code.append('%s l' % fp_str(x,y))
 
     def curveTo(self, x1, y1, x2, y2, x3, y3):
-        self._code.append('%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f c' % (x1, y1, x2, y2, x3, y3))
+        self._code.append('%s c' % fp_str(x1, y1, x2, y2, x3, y3))
     
     def arc(self, x1,y1, x2,y2, startAng=0, extent=90):
         """Contributed to piddlePDF by Robert Kern, 28/7/99.
@@ -56,28 +56,28 @@ class PDFPathObject:
 
         pointList = pdfgeom.bezierArc(x1,y1, x2,y2, startAng, extent)
         #move to first point
-        self._code.append('%0.2f %0.2f m' % pointList[0][:2])
+        self._code.append('%s m' % fp_str(pointList[0][:2]))
         for curve in pointList:
-            self._code.append('%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f c' % curve[2:])
+            self._code.append('%s c' % fp_str(curve[2:]))
 
     def arcTo(self, x1,y1, x2,y2, startAng=0, extent=90):
         """Like arc, but draws a line from the current point to
         the start if the start is not the current point."""
         pointList = pdfgeom.bezierArc(x1,y1, x2,y2, startAng, extent)
-        self._code.append('%0.2f %0.2f l' % pointList[0][:2])
+        self._code.append('%s l' % fp_str(pointList[0][:2]))
         for curve in pointList:
-            self._code.append('%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f c' % curve[2:])
+            self._code.append('%s c' % fp_str(curve[2:]))
     
     def rect(self, x, y, width, height):
         """Adds a rectangle to the path"""
-        self._code.append('%0.2f %0.2f %0.2f %0.2f re' % (x, y, width, height))
+        self._code.append('%s re' % fp_str((x, y, width, height)))
 
     def ellipse(self, x, y, width, height):
         """adds an ellipse to the path"""
         pointList = pdfgeom.bezierArc(x, y, x + width,y + height, 0, 360)
-        self._code.append('%0.2f %0.2f m' % pointList[0][:2])
+        self._code.append('%s m' % fp_str(pointList[0][:2]))
         for curve in pointList:
-            self._code.append('%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f c' % curve[2:])
+            self._code.append('%s c' % fp_str(curve[2:]))
        
     def circle(self, x_cen, y_cen, r):
         """adds a circle to the path"""

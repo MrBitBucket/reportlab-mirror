@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.76 2001/05/10 22:23:35 aaron_watters Exp $
-__version__=''' $Id: canvas.py,v 1.76 2001/05/10 22:23:35 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.77 2001/05/25 13:52:34 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.77 2001/05/25 13:52:34 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -953,7 +953,7 @@ class Canvas:
         if leading is None:
             leading = size * 1.2
         self._leading = leading
-        self._code.append('BT %s %s Tf %0.1f TL ET' % (pdffontname, fp_str(size), leading))
+        self._code.append('BT %s %s Tf %s TL ET' % (pdffontname, fp_str(size), fp_str(leading)))
 
     def stringWidth(self, text, fontName, fontSize, encoding=None):
         "gets width of a string in the given font and size"
