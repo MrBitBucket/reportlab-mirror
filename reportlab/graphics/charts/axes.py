@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.36 2001/09/24 17:57:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.37 2001/09/25 16:45:09 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -231,8 +231,6 @@ class XCategoryAxis(CategoryAxis):
 	def makeAxis(self):
 		g = Group()
 
-		if not self.visibleAxis:
-			return g
 
 		ja = self.joinAxis
 		if ja:
@@ -243,6 +241,8 @@ class XCategoryAxis(CategoryAxis):
 				jta(ja, mode=jam)
 			elif jam in ('value', 'points'):
 				jta(ja, mode=jam, pos=jap)
+
+		if not self.visibleAxis: return g
 
 		axis = Line(self._x, self._y, self._x + self._length, self._y)
 		axis.strokeColor = self.strokeColor
