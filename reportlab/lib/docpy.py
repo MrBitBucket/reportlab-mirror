@@ -45,7 +45,7 @@ from reportlab.platypus.flowables import Flowable, Spacer
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.flowables \
      import Flowable, Preformatted,Spacer, Image, KeepTogether, PageBreak
-from reportlab.platypus.tableofcontents0 import TableOfContents0
+from reportlab.platypus.tableofcontents import TableOfContents0
 from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate \
@@ -72,7 +72,7 @@ def mainPageFrame(canvas, doc):
         canvas.setFont('Times-Roman', 12)
         canvas.drawString(4 * inch, cm, "%d" % pageNumber)
         if hasattr(canvas, 'headerLine'): # hackish
-            headerline = string.join(canvas.headerLine, ' \215 ')
+            headerline = string.join(canvas.headerLine, ' \215 ') # bullet
             canvas.drawString(2*cm, A4[1]-1.75*cm, headerline)
 
     canvas.setFont('Times-Roman', 8)
@@ -99,24 +99,29 @@ class MyTemplate(BaseDocTemplate):
         
         if flowable.__class__.__name__ == 'Paragraph':
             f = flowable
+            name7 = f.style.name[:7]
+            name8 = f.style.name[:8]
 
             # Build a list of heading parts.
             # So far, this is the *last* item on the *previous* page...
-            if f.style.name[:8] == 'Heading0':
+            if name7 == 'Heading' and not hasattr(self.canv, 'headerLine'):
+                self.canv.headerLine = []
+
+            if name8 == 'Heading0':
                 self.canv.headerLine = [f.text] # hackish
-            elif f.style.name[:8] == 'Heading1':
+            elif name8 == 'Heading1':
                 if len(self.canv.headerLine) == 2:
                     del self.canv.headerLine[-1]
                 elif len(self.canv.headerLine) == 3:
                     del self.canv.headerLine[-1]
                     del self.canv.headerLine[-1]
                 self.canv.headerLine.append(f.text)
-            elif f.style.name[:8] == 'Heading2':
+            elif name8 == 'Heading2':
                 if len(self.canv.headerLine) == 3:
                     del self.canv.headerLine[-1]
                 self.canv.headerLine.append(f.text)
 
-            if f.style.name[:7] == 'Heading':
+            if name7 == 'Heading':
                 # Register TOC entries.
                 headLevel = int(f.style.name[7:])
                 self.notify0('TOCEntry', (headLevel, flowable.getPlainText(), self.page))
@@ -125,19 +130,19 @@ class MyTemplate(BaseDocTemplate):
                 c = self.canv
                 title = f.text
                 key = str(hash(f))
-                lev = int(f.style.name[7:])
+
                 try:
-                    if lev == 0:
+                    if headLevel == 0:
                         isClosed = 0
                     else:
                         isClosed = 1
 
                     c.bookmarkPage(key)
-                    c.addOutlineEntry(title, key, level=lev,
+                    c.addOutlineEntry(title, key, level=headLevel,
                                       closed=isClosed)
-                except:
+                except ValueError:
                     pass
-
+                
 
 ####################################################################
 # 
@@ -185,7 +190,7 @@ def makeHtmlSection(text, bgcolor='#FFA0FF'):
     """Create HTML code for a section.
 
     This is usually a header for all classes or functions.
-    """
+u    """
     text = htmlescape(expandtabs(text))
     result = []
     result.append("""<TABLE WIDTH="100\%" BORDER="0">""")
@@ -906,7 +911,7 @@ class UmlPdfDocBuilder0(PdfDocBuilder0):
 
     fileSuffix = '.pdf'
 
-    def begin(self):
+    def begin(self, name='', typ=''):
         styleSheet = getSampleStyleSheet()
         self.h1 = styleSheet['Heading1']
         self.h2 = styleSheet['Heading2']
@@ -928,9 +933,12 @@ class UmlPdfDocBuilder0(PdfDocBuilder0):
         story.append(XPreformatted(doc, bt1))
 
         if imported:
-            story.append(Paragraph('Imported modules', h2))
+            story.append(Paragraph('Imported modules', self.makeHeadingStyle(self.indentLevel + 1)))
             for m in imported:
-                story.append(Paragraph(m, bt1))
+                p = Paragraph('<bullet>\201</bullet> %s' % m, bt1)
+                p.style.bulletIndent = 10
+                p.style.leftIndent = 18
+                story.append(p)
 
 
     def endModule(self, name, doc, imported):
