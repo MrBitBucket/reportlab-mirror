@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.30 2002/05/21 16:41:16 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.31 2002/05/24 15:47:19 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.30 2002/05/21 16:41:16 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.31 2002/05/24 15:47:19 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -19,6 +19,7 @@ from reportlab.graphics.charts.axes import XValueAxis, YValueAxis, AdjYValueAxis
 from reportlab.graphics.charts.utils import *
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol, makeMarker
 from reportlab.graphics.widgets.grids import Grid, DoubleGrid, ShadedRect
+from reportlab.pdfbase.pdfmetrics import stringWidth, getFont
 
 # This might be moved again from here...
 class LinePlotProperties(PropHolder):
@@ -97,7 +98,7 @@ class LinePlot(Widget):
 		self.lines.strokeWidth = 1
 		self.lines[0].strokeColor = colors.red
 		self.lines[1].strokeColor = colors.blue
-		
+
 		self.lineLabels = TypedPropertyCollection(Label)
 		self.lineLabelFormat = None
 
@@ -123,7 +124,7 @@ class LinePlot(Widget):
 			((1,1), (2,2), (2.5,1), (3,3), (4,5)),
 			((1,2), (2,3), (2.5,2), (3.5,5), (4,6))
 			]
-		
+
 		lp = LinePlot()
 
 		lp.x = 50
@@ -147,7 +148,7 @@ class LinePlot(Widget):
 		lp.yValueAxis.valueMin = 0
 		lp.yValueAxis.valueMax = 7
 		lp.yValueAxis.valueStep = 1
-		
+
 		drawing.add(lp)
 
 		return drawing
@@ -162,7 +163,7 @@ class LinePlot(Widget):
 
 		self._seriesCount = len(self.data)
 		self._rowLength = max(map(len,self.data))
-		
+
 		self._positions = []
 		for rowNo in range(len(self.data)):
 			line = []
@@ -184,7 +185,7 @@ class LinePlot(Widget):
 				   self.width, self.height,
 				   strokeColor = self.strokeColor,
 				   fillColor= self.fillColor))
-				
+
 		return g
 
 
@@ -203,7 +204,7 @@ class LinePlot(Widget):
 		elif isinstance(labelFmt, Formatter):
 			labelText = labelFmt(labelValue)
 		else:
-			msg = "Unknown formatter type %s, expected string or function"	
+			msg = "Unknown formatter type %s, expected string or function"
 			raise Exception, msg % labelFmt
 
 		if labelText:
@@ -280,7 +281,7 @@ class LinePlot(Widget):
 					x1, y1 = row[colNo]
 					symbol = uSymbol2Symbol(uSymbol,x1,y1,rowColor)
 					if symbol: g.add(symbol)
-				
+
 			# Draw item (bar) labels.
 			for colNo in range(len(row)):
 				x1, y1 = row[colNo]
@@ -303,9 +304,9 @@ class LinePlot(Widget):
 
 		self.xValueAxis.setPosition(self.x, y, self.width)
 		self.xValueAxis.configure(self.data)
-		
-		self.calcPositions()		
-		
+
+		self.calcPositions()
+
 		g = Group()
 
 		g.add(self.makeBackground())
@@ -548,17 +549,171 @@ class GridLinePlot(LinePlot):
 
 		return g
 
+def _maxWidth(T, fontName, fontSize):
+	'''return max stringWidth for the list of strings T'''
+	if type(T) not in (type(()),type([])): T = (T,)
+	T = filter(None,T)
+	return T and max(map(lambda t,sW=stringWidth,fN=fontName, fS=fontSize: sW(t,fN,fS),T)) or 0
+
+class ScatterPlot(LinePlot):
+	"""A scatter plot widget"""
+
+	_attrMap = AttrMap(BASE=LinePlot,
+					width = AttrMapValue(isNumber, desc="Width of the area inside the axes"),
+					height = AttrMapValue(isNumber, desc="Height of the area inside the axes"),
+					outerBorderOn = AttrMapValue(isBoolean, desc="Is there an outer border (continuation of axes)"),
+					outerBorderColor = AttrMapValue(isColorOrNone, desc="Color of outer border (if any)"),
+					background = AttrMapValue(isColorOrNone, desc="Background color (if any)"),
+					labelOffset = AttrMapValue(isNumber, desc="Space between label and Axis (or other labels)"),
+					axisTickLengths = AttrMapValue(isNumber, desc="Lenth of the ticks on both axes"),
+					axisStrokeWidth = AttrMapValue(isNumber, desc="Stroke width for both axes"),
+					xLabel = AttrMapValue(isString, desc="Label for the whole X-Axis"),
+					yLabel = AttrMapValue(isString, desc="Label for the whole Y-Axis"),
+					data = AttrMapValue(isAnything, desc='Data points - a list of x/y tuples.'),
+					strokeColor = AttrMapValue(isColorOrNone, desc='Color used for border of plot area.'),
+					fillColor = AttrMapValue(isColorOrNone, desc='Color used for background interior of plot area.'),
+					leftPadding = AttrMapValue(isNumber, desc='Padding on left of drawing'),
+					rightPadding = AttrMapValue(isNumber, desc='Padding on right of drawing'),
+					topPadding = AttrMapValue(isNumber, desc='Padding at top of drawing'),
+					bottomPadding = AttrMapValue(isNumber, desc='Padding at bottom of drawing'),
+					)
+
+	def __init__(self):
+		LinePlot.__init__(self)
+		self.width = 142
+		self.height = 77
+		self.outerBorderOn = 1
+		self.outerBorderColor = colors.black
+		self.background = None
+
+		_labelOffset = 3
+		_axisTickLengths = 2
+		_axisStrokeWidth = 0.5
+
+		self.yValueAxis.valueMin = None
+		self.yValueAxis.valueMax = None
+		self.yValueAxis.valueStep = None
+		self.yValueAxis.labelTextFormat  = '%s'
+
+		self.xLabel="X Lable"
+		self.xValueAxis.labels.fontSize = 6
+
+		self.yLabel="Y Lable"
+		self.yValueAxis.labels.fontSize = 6
+
+		self.data =[((0.030, 62.73),
+					 (0.074, 54.363),
+					 (1.216, 17.964)),
+
+					 ((1.360, 11.621),
+					 (1.387, 50.011),
+					 (1.428, 68.953)),
+
+					 ((1.444, 86.888),
+					 (1.754, 35.58),
+					 (1.766, 36.05))]
+
+		#values for lineplot
+		self.joinedLines = 0
+		self.fillColor = self.background
+
+		self.leftPadding=5
+		self.rightPadding=10
+		self.topPadding=5
+		self.bottomPadding=5
+
+		self.x = self.leftPadding+_axisTickLengths+(_labelOffset*2)
+		self.x=self.x+_maxWidth(str(self.yValueAxis.valueMax), self.yValueAxis.labels.fontName, self.yValueAxis.labels.fontSize)
+		self.y = self.bottomPadding+_axisTickLengths+_labelOffset+self.xValueAxis.labels.fontSize
+
+		self.xValueAxis.labels.dy = -_labelOffset 
+		self.xValueAxis.tickDown = _axisTickLengths
+		self.xValueAxis.strokeWidth = _axisStrokeWidth
+		self.xValueAxis.rangeRound='both'
+		self.yValueAxis.labels.dx = -_labelOffset 
+		self.yValueAxis.tickLeft = _axisTickLengths
+		self.yValueAxis.strokeWidth = _axisStrokeWidth
+		self.yValueAxis.rangeRound='both'
+
+		self.lineLabelFormat="%.2f"
+		self.lineLabels.fontSize = 5
+		self.lineLabels.boxAnchor = 'e'
+		self.lineLabels.dx             = -2
+		self.lineLabelNudge = 0
+		self.lines.symbol=makeMarker('FilledCircle',size=3)
+		self.lines[1].symbol=makeMarker('FilledDiamond',size=3)
+		self.lines[2].symbol=makeMarker('FilledSquare',size=3)
+		self.lines[2].strokeColor = colors.green
+
+	def _getDrawingDimensions(self):
+		tx = self.leftPadding+self.yValueAxis.tickLeft+(self.yValueAxis.labels.dx*2)+self.xValueAxis.labels.fontSize
+		tx=tx+(5*_maxWidth(str(self.yValueAxis.valueMax), self.yValueAxis.labels.fontName, self.yValueAxis.labels.fontSize))
+		tx=tx+self.width+self.rightPadding
+		t=('%.2f%%'%self.xValueAxis.valueMax)
+		tx=tx+(_maxWidth(t, self.yValueAxis.labels.fontName, self.yValueAxis.labels.fontSize))
+		ty = self.bottomPadding+self.xValueAxis.tickDown+(self.xValueAxis.labels.dy*2)+(self.xValueAxis.labels.fontSize*2)
+		ty=ty+self.yValueAxis.labels.fontSize+self.height+self.topPadding
+		#print (tx, ty)
+		return (tx,ty)
+
+	def demo(self,drawing=None):
+		if not drawing:
+			tx,ty=self._getDrawingDimensions()
+			drawing = Drawing(tx,ty)
+		drawing.add(self.draw())
+		return drawing
+
+	def draw(self):
+		ascent=getFont(self.xValueAxis.labels.fontName).face.ascent
+		if ascent==0:
+			ascent=0.718 # default (from helvetica)
+		ascent=ascent*self.xValueAxis.labels.fontSize # normalize
+
+		#basic LinePlot - does the Axes, Ticks etc
+		lp = LinePlot.draw(self)
+
+		xLabel = self.xLabel
+		if xLabel: #Overall label for the X-axis
+			xl=Label()
+			xl.x = (self.x+self.width)/2.0
+			xl.y = 0
+			xl.fontName = self.xValueAxis.labels.fontName
+			xl.fontSize = self.xValueAxis.labels.fontSize
+			xl.setText(xLabel)
+			lp.add(xl)
+
+		yLabel = self.yLabel
+		if yLabel: #Overall label for the Y-axis
+			yl=Label()
+			yl.angle = 90
+			yl.x = 0
+			yl.y = (self.y+self.height/2.0)
+			yl.fontName = self.yValueAxis.labels.fontName
+			yl.fontSize = self.yValueAxis.labels.fontSize
+			yl.setText(yLabel)
+			lp.add(yl)
+
+		# do a bounding box - in the same style as the axes
+		if self.outerBorderOn:
+			lp.add(Rect(self.x, self.y, self.width, self.height,
+					   strokeColor = self.outerBorderColor,
+					   strokeWidth = self.yValueAxis.strokeWidth,
+					   fillColor = None))
+
+		lp.shift(self.leftPadding, self.bottomPadding)
+
+		return lp
 
 def sample1a():
 	"A line plot with non-equidistant points in x-axis."
-	
+
 	drawing = Drawing(400, 200)
 
 	data = [
 			((1,1), (2,2), (2.5,1), (3,3), (4,5)),
 			((1,2), (2,3), (2.5,2), (3.5,5), (4,6))
 		]
-	
+
 	lp = LinePlot()
 
 	lp.x = 50
@@ -581,7 +736,7 @@ def sample1a():
 	lp.yValueAxis.valueMin = 0
 	lp.yValueAxis.valueMax = 7
 	lp.yValueAxis.valueStep = 1
-	
+
 	drawing.add(lp)
 
 	return drawing
@@ -589,14 +744,14 @@ def sample1a():
 
 def sample1b():
 	"A line plot with non-equidistant points in x-axis."
-	
+
 	drawing = Drawing(400, 200)
 
 	data = [
 			((1,1), (2,2), (2.5,1), (3,3), (4,5)),
 			((1,2), (2,3), (2.5,2), (3.5,5), (4,6))
 		]
-	
+
 	lp = LinePlot()
 
 	lp.x = 50
@@ -617,7 +772,7 @@ def sample1b():
 	lp.yValueAxis.valueMin = 0
 	lp.yValueAxis.valueMax = 7
 	lp.yValueAxis.valueStep = 1
-	
+
 	drawing.add(lp)
 
 	return drawing
@@ -625,14 +780,14 @@ def sample1b():
 
 def sample1c():
 	"A line plot with non-equidistant points in x-axis."
-	
+
 	drawing = Drawing(400, 200)
 
 	data = [
 			((1,1), (2,2), (2.5,1), (3,3), (4,5)),
 			((1,2), (2,3), (2.5,2), (3.5,5), (4,6))
 		]
-	
+
 	lp = LinePlot()
 
 	lp.x = 50
@@ -654,7 +809,7 @@ def sample1c():
 	lp.yValueAxis.valueMin = 0
 	lp.yValueAxis.valueMax = 7
 	lp.yValueAxis.valueSteps = [1, 2, 3, 5, 6]
-	
+
 	drawing.add(lp)
 
 	return drawing
@@ -668,7 +823,7 @@ def preprocessData(series):
 
 def sample2():
 	"A line plot with non-equidistant points in x-axis."
-	
+
 	drawing = Drawing(400, 200)
 
 	data = [
@@ -691,7 +846,7 @@ def sample2():
 		]
 
 	data[0] = preprocessData(data[0])
-	
+
 	lp = LinePlot()
 
 	lp.x = 50
@@ -721,7 +876,7 @@ def sample2():
 	lp.yValueAxis.valueMin = 100
 	lp.yValueAxis.valueMax = 110
 	lp.yValueAxis.valueStep = 2
-	
+
 	drawing.add(lp)
 
 	return drawing
