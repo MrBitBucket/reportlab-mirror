@@ -3,7 +3,7 @@
 
 
 from reportlab.platypus import PageTemplate, \
-     UserDocTemplate, Frame, Paragraph
+     BaseDocTemplate, Frame, Paragraph
 from reportlab.lib.units import inch, cm
 
 ##def decoratePage(canvas, doc):##    canvas.saveState()
@@ -42,7 +42,7 @@ class TwoColumnTemplate(PageTemplate):
         canvas.restoreState()
 
 
-class RLDocTemplate(UserDocTemplate):
+class RLDocTemplate(BaseDocTemplate):
     def afterInit(self):
         self.addPageTemplates(OneColumnTemplate('Normal'))
         self.addPageTemplates(TwoColumnTemplate('TwoColumn'))
@@ -52,10 +52,10 @@ class RLDocTemplate(UserDocTemplate):
         self.chapter = "(No chapter yet)"
         self.chapterNo = 1 #unique keys
         self.sectionNo = 1 # uniqque keys
-        
+
     def beforeDocument(self):
         self.canv.showOutline()
-        
+
     def afterFlowable(self, flowable):
         """Detect Level 1 and 2 headings, build outline,
         and track chapter title."""
@@ -78,4 +78,3 @@ class RLDocTemplate(UserDocTemplate):
                 self.canv.addOutlineEntry(flowable.getPlainText(),
                                              key, 1, 0)
                 self.sectionNo = self.sectionNo + 1
-
