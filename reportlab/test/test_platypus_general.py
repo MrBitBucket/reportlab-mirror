@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testplatypus.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.3 2001/07/13 09:33:34 andy_robinson Exp $
-__version__=''' $Id: test_platypus_general.py,v 1.3 2001/07/13 09:33:34 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.4 2001/09/19 22:19:35 andy_robinson Exp $
+__version__=''' $Id: test_platypus_general.py,v 1.4 2001/09/19 22:19:35 andy_robinson Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -373,7 +373,8 @@ def getExamples():
 				"Here is an Image.	For now, these are always centred in the frame.",
 				styleSheet['Italic']))
 
-	story.append(platypus.Image('pythonpowered.gif'))
+	img = platypus.Image('pythonpowered.gif')
+	story.append(img)
 
 	story.append(Paragraph("""Here is a Table, which takes all kinds of formatting options...""",
 				styleSheet['Italic']))
@@ -387,7 +388,6 @@ def getExamples():
 			(72,36,36,36,36),
 			(24, 16,16,18)
 			)
-
 	style = platypus.TableStyle([('ALIGN', (1,1), (-1,-1), 'RIGHT'),
 							   ('ALIGN', (0,0), (-1,0), 'CENTRE'),
 							   ('GRID', (0,0), (-1,-1), 0.25, colors.black),

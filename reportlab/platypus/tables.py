@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.43 2001/09/13 19:06:43 aaron_watters Exp $
-__version__=''' $Id: tables.py,v 1.43 2001/09/13 19:06:43 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.44 2001/09/19 22:19:35 andy_robinson Exp $
+__version__=''' $Id: tables.py,v 1.44 2001/09/19 22:19:35 andy_robinson Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -17,10 +17,6 @@ cause the value to wrap (ie are like a traditional linefeed).
 See the test output from running this module as a script for a discussion of the method for constructing
 tables and table styles.
 """
-
-### HACK HACK HACK
-# NUDGE SHOULD BE DISABLED FOR TABLES INSIDE TABLES
-DO_NUDGE = 1
 
 from reportlab.platypus import *
 from reportlab import rl_config
@@ -112,6 +108,7 @@ class Table(Flowable):
 	def __init__(self, data, colWidths=None, rowHeights=None, style=None,
 				repeatRows=0, repeatCols=0, splitByRow=1):
 		#print "colWidths", colWidths
+		self.hAlign = 'CENTER'
 		self._nrows = nrows = len(data)
 		if len(data)==0 or type(data) not in _SeqTypes:
 			raise ValueError, "%s must have at least 1 row" % self.identity()
@@ -498,18 +495,11 @@ class Table(Flowable):
 			raise NotImplementedError
 
 	def draw(self):
-		global DO_NUDGE # ONLY NUDGE IF NOT IN ANOTHER TABLE (HACK)
-		nudge = 0.5 * (self.availWidth - self._width)
-		if DO_NUDGE:
-			self.canv.translate(nudge, 0)
-		OLD_DO_NUDGE = DO_NUDGE
-		DO_NUDGE = 0
 		self._drawBkgrnd()
 		self._drawLines()
 		for row, rowstyle, rowpos, rowheight in map(None, self._cellvalues, self._cellStyles, self._rowpositions[1:], self._rowHeights):
 			for cellval, cellstyle, colpos, colwidth in map(None, row, rowstyle, self._colpositions[:-1], self._colWidths):
 				self._drawCell(cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight))
-		DO_NUDGE = OLD_DO_NUDGE
 
 	def _drawBkgrnd(self):
 		for cmd, (sc, sr), (ec, er), color in self._bkgrndcmds:
