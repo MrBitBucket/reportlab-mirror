@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.76 2004/05/23 09:27:52 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.76 2004/05/23 09:27:52 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.77 2004/05/23 10:39:30 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.77 2004/05/23 10:39:30 rgbecker Exp $ '''
 
-import string, os, sys
+import string, os, sys, imp
 from types import *
 from reportlab.lib.logger import warnOnce
 SeqTypes = (ListType,TupleType)
@@ -468,20 +468,21 @@ def rl_isdir(pn,os_path_isdir=os.path.isdir):
     return len(filter(lambda x,pn=pn: x.startswith(pn),__loader__._files.keys()))>0
 
 def rl_get_module(name,dir):
-    f, p, desc= imp.find_module(name,[dir])
     if sys.modules.has_key(name):
         om = sys.modules[name]
         del sys.modules[name]
     else:
         om = None
     try:
+        f = None
         try:
+            f, p, desc= imp.find_module(name,[dir])
             return imp.load_module(name,f,p,desc)
         except:
             if isCompactDistro() and not os.path.isabs(dir):
                 #attempt a load from inside the zip archive
                 import zipimport
-                zi = zipmport.ZipImporter(os.path.join(__loader__.archive,dir.replace('/',os.sep)))
+                zi = zipimport.zipimporter(os.path.join(__loader__.archive,dir.replace('/',os.sep)))
                 return zi.load_module(name)
             raise ImportError('%s[%s]' % (name,dir))
     finally:
