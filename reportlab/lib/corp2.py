@@ -1,16 +1,8 @@
 #!/usr/bin/env python
 
-"""Make the ReportLab vector logo from a Create XML file.
-
-Right now the file containing the XML data for the logo is
-loaded only once into a singleton XML tree, but for each
-logo instance the relevant data is retrieved from the XML
-tree again. Clearly, this could be further optimised, but
-at the expense of losing some generality...
-"""
+"Make the ReportLab vector logo from canned data."
 
 import pprint, os, string
-from types import StringType, ListType, TupleType
 
 from reportlab.lib.units import cm
 from reportlab.lib.colors import *
@@ -18,7 +10,7 @@ from reportlab.graphics.shapes import *
 from reportlab.graphics.widgetbase import *
 from reportlab.graphics import renderPDF
 
-import pyRXP
+import rllogodata
 
 
 _LOGODATA = None
@@ -120,199 +112,6 @@ def scaleBackAfterSkew(width, height, skewTransform, _debug=0):
 
 
 ######################################################################
-# Data helpers
-######################################################################
-
-def rmWhitespace(data):
-    "Remove all whitespace strings from a sequence."
-
-    if data == [] or data == None:
-        return data
-
-    L = []
-    for i in xrange(len(data)):
-        d = data[i]
-        if type(d) == StringType:
-            if string.strip(d) != '':
-                L.append(d)
-        else:
-            L.append(d)
-
-    assert len(L) <= len(data)
-
-    return L
-
-
-def makePairList(list):
-    """Return a list with even length as list of pairs.
-
-    E.g. [0, 1, 2, 3] -> [(0, 1), (2, 3)].
-    """
-
-    assert len(list) % 2 == 0
-
-    L = []
-    for i in range(0, len(list), 2):
-        L.append((list[i], list[i+1]))
-
-    return L
-
-
-######################################################################
-# Convenience XML displaying functions
-#
-# These functions are not strictly needed, but allow to display
-# pretty nicely a tree parsed with pyRXP.
-# (These were originaly written to operate on such XML "trees",
-# but would be just as easy to write using their PropertyList
-# dictionary equivalent.)
-######################################################################
-
-def printStructure(tree, lev=0):
-    "Print tree as indented list of tag names (only)."
-
-    if tree == None:
-        return
-
-    [tagName, attrs, content, unused] = tree
-
-    print "%s%s" % (lev*'  ', tagName)
-
-    if content != None:
-        for c in content:
-            if type(c) == TupleType:
-                printStructure(c, lev+1)
-
-
-def printExtendedStructure(tree, lev=0):
-    """Print tree as indented list of tags, with 'some' content.
-
-    We print only tags named 'key' and 'string' plus what
-    they contain.
-    """
-
-    if tree == None:
-        return
-
-    [tagName, attrs, content, unused] = tree
-
-    if tagName not in ('key', 'string'):
-        print "%s%s" % (lev*'  ', tagName)
-
-    if content != None:
-        for c in content:
-            if type(c) == TupleType:
-                printExtendedStructure(c, lev+1)
-
-    if tagName in ('key', 'string'):
-        if content:
-            cont = content[0]
-        else:
-            cont = ''
-        print "%s%s: %s" % (lev*'  ', tagName, repr(cont))
-
-
-def printExtendedStructure2(tree, lev=0):
-    "Print tree as indented list of tags, with some summarized content."
-
-    if tree == None:
-        return
-
-    [tagName, attrs, content, unused] = tree
-
-    if content != None:
-        for c in content:
-            if type(c) == TupleType:
-                printExtendedStructure2(c, lev+1)
-
-    if tagName == 'dict':
-        kvPairs = makePairList(content)
-        kvPairs = filter(lambda p:p[0][2][0] in ('Bounds', 'Class', 'Rotation'), kvPairs)
-        found = 0
-        for k, v in kvPairs:
-            if k[2][0] == 'Class':
-                if v[2] == ['Rectangle']:
-                    found = 1
-        if found:
-            keys = map(lambda p:p[0][2][0], kvPairs)
-            print "%s%s: %s" % (lev*'  ', tagName, repr(string.join(keys, '|')))
-
-
-######################################################################
-# XML utility and conversion stuff
-######################################################################
-
-def cleanTree(tree):
-    "Remove all intra-element whitespace data from the tree."
-    # Could be an option for pyRXP, perhaps?
-
-    if tree == None:
-        return
-
-    [tagName, attrs, content, unused] = tree
-
-    if content != None:
-        if type(content == TupleType):
-            content = rmWhitespace(content)
-            for i in xrange(len(content)):
-                cont = content[i]
-                if type(cont) != StringType and len(cont) == 4:
-                    content[i] = tuple(cleanTree(cont))
-
-    clone = [tagName, attrs, content, unused]
-
-    return clone
-
-
-def tree2dict(cleanTree):
-    "Convert a clean XML tree to a PropertyList as Python dictionary."
-    # This allows to access tree data MUCH EASIER!
-
-    tree = cleanTree
-    if tree == None:
-        return
-
-    [tagName, attrs, content, unused] = tree
-
-    if tagName == 'plist':
-        return tree2dict(content[0])
-
-    elif tagName == 'string':
-        try:
-            return content[0]
-        except IndexError:
-            return ''
-
-    elif tagName == 'data':
-        s = content[0]
-        for c in string.whitespace:
-            s = string.replace(s, c, '')
-        return s
-
-    elif tagName == 'key':
-        return content[0]
-
-    elif tagName == 'array':
-        try:
-            return map(tree2dict, content)
-        except TypeError:
-            return []
-
-    elif tagName == 'dict':
-        res = {}
-        kvPairs = makePairList(content)
-        for k, v in kvPairs:
-            res[tree2dict(k)] = tree2dict(v)
-        return res
-
-    return None
-
-
-def dict2tree(cleanDict):
-    return
-
-
-######################################################################
 # Data handling
 ######################################################################
 
@@ -362,7 +161,10 @@ def displacePoints(pts, dx, dy):
 
 
 class RLVectorLogo(Widget):
-    """Vectorised ReportLab logo, based on a Create XML file.
+    """Vectorised ReportLab logo.
+
+    This is based on a Create XML file that was transformed into
+    a canned Python dictionary containing the data.
 
     For further information about Create see www.stone.com.
     """
@@ -378,11 +180,6 @@ class RLVectorLogo(Widget):
         strokeWidth = AttrMapValue(isNumber),
         borderWidth = AttrMapValue(isNumber),
         )
-
-    import reportlab
-    _rlDir = os.path.dirname(reportlab.__file__)
-    _filename = os.path.join(_rlDir, 'lib', 'rllogo.cre8') # actually a directory!
-    _dtdPath = 'file://localhost/System/Library/DTDs/PropertyList.dtd'
 
     def __init__(self):
         self.x = 0
@@ -402,52 +199,15 @@ class RLVectorLogo(Widget):
 
         global _LOGODATA
         if not _LOGODATA:
-            _LOGODATA = self.buildTreeFromXmlFile()
+            _LOGODATA = rllogodata.dict
 
-        self._tree = _LOGODATA
-        self._tree = cleanTree(self._tree)
+        self._dict = _LOGODATA
 
         # Find outer bounds of the graphic.
-        dict = tree2dict(self._tree)
-        bounds = dict['PageList'][0]['GraphicsList'][0]['Bounds']        
+        bounds = self._dict['PageList'][0]['GraphicsList'][0]['Bounds']        
         bounds = bounds2rect(bounds)
         bounds = map(float, bounds)
         self._width, self._height = bounds[2:4]
-
-
-    def _printDict(self):
-        import pprint        
-        dict = tree2dict(self._tree)
-        pprint.pprint(dict)
-
-
-    def _printTree(self):
-        import pprint        
-        pprint.pprint(self._tree)
-
-
-    def buildTreeFromXmlFile(self):
-        "Parse an XML file and return the tree."
-
-        path = self._filename
-        if os.path.splitext(path)[1] == '.cre8':
-            path = os.path.join(path, 'Document.cre8')
-        xmlCode = open(path).read()
-        dtd = os.path.basename(self._dtdPath)
-        dtd = os.path.join(self._rlDir, 'lib', dtd)
-        dtd = os.path.splitdrive(dtd)[1]
-        dtd = string.replace(dtd, '\\', '/')
-        dtd = "file://%s" % dtd
-        xmlCode = string.replace(xmlCode, self._dtdPath, dtd)
-        tree = pyRXP.parse(xmlCode,
-                           srcName=path,
-                           warnCB=lambda x: sys.stdout.write(x))
-
-        from reportlab.rl_config import _verbose
-        if _verbose:
-            print "loaded %s" % self._filename
-
-        return tree
 
 
     def demo(self):
@@ -512,12 +272,12 @@ class RLVectorLogo(Widget):
                 lines.append((cpt1, cpt2))
             elif op == 3:
                 path.closePath()
-                orientation = turn(points)
-                if orientation == left:
+                ori = turn(points)
+                if ori == left:
                     path.strokeColor = strokeColor
                     path.fillColor = strokeColor
                     filledPaths.append(path)
-                elif orientation == right:
+                elif ori == right:
                     path.strokeColor = fillColor
                     path.fillColor = fillColor
                     emptyPaths.append(path)
@@ -529,12 +289,12 @@ class RLVectorLogo(Widget):
 
         if points:
             path.closePath()
-            orientation = turn(points)
-            if orientation == left:
+            ori = turn(points)
+            if ori == left:
                 path.strokeColor = strokeColor
                 path.fillColor = strokeColor
                 filledPaths.append(path)
-            elif orientation == right:
+            elif ori == right:
                 path.strokeColor = fillColor
                 path.fillColor = fillColor
                 emptyPaths.append(path)
@@ -632,45 +392,49 @@ class RLVectorLogo(Widget):
         return stuff
     
 
-    def draw(self):
-        dict = tree2dict(self._tree)
-        groupGraph = dict['PageList'][0]['GraphicsList'][0]['GroupGraphics']
+    def drawCreateElementInBounds(self, g, el, bounds=None):
+        "Add a Create element to a group after converting it to some shapes."
+        
+        klass = el['Class']
+        if klass == 'Group':
+            for sel in el['GroupGraphics']:
+                self.drawCreateElementInBounds(g, sel, bounds)
+        elif klass == 'Spline':
+            ops, pts, elBounds = bezierDict2data(el)
+            pts = map(lambda p:(p[0],-p[1]), pts)
+            dx, dy = elBounds[0:2]
+            dpts = displacePoints(pts, 0, self._height)
+            dpts = displacePoints(dpts, dx, -dy)
+            self._addPaths(g, ops, dpts)
+        elif klass == 'Rectangle':
+            elBounds, rot = rectDict2data(el)
+            x, y, width, height = elBounds
+            x = x + bounds[0]
+            y = self._height - y - height
+            elBounds = x, y, width, height
+            self._addRect(g, elBounds, rot)
+        elif klass == 'MultiLine':
+            ops, pts, elBounds = bezierDict2data(el)
+            pts = map(lambda p:(p[0],-p[1]), pts)
+            dx, dy = elBounds[0:2]
+            dx, dy = dx + bounds[0], dy + bounds[1]
+            dpts = displacePoints(pts, 0, self._height)
+            dpts = displacePoints(dpts, dx, -dy)
+            self._addPaths(g, ops, dpts)
+        else:
+            print 'Unknown Create element: %s' % klass
 
+
+    def draw(self):
         total = Group() # will contain everything
         g = Group() # will contain glyphs and paper border
 
-        # This is the only hard-coded part paying tribute to
-        # the structure of the generated logo file.
-        # (Clearly, this can be more generalised, though.)
+        dict = self._dict
+        groupGraph = dict['PageList'][0]['GraphicsList'][0]['GroupGraphics']
         for el in groupGraph:
-            klass = el['Class']
             bounds = bounds2rect(el['Bounds'])
-            if klass == 'Spline':
-                ops, pts, bounds = bezierDict2data(el)
-                pts = map(lambda p:(p[0],-p[1]), pts)
-                dx, dy = bounds[0:2]
-                dpts = displacePoints(pts, 0, self._height)
-                dpts = displacePoints(dpts, dx, -dy)
-                self._addPaths(g, ops, dpts)
-            elif klass == 'Group':
-                for sel in el['GroupGraphics']:
-                    klass1 = sel['Class']
-                    if klass1 == 'Rectangle':
-                        rbounds, rot = rectDict2data(sel)
-                        x, y, width, height = rbounds
-                        x = x + bounds[0]
-                        y = self._height - y - height
-                        rbounds = x, y, width, height
-                        self._addRect(g, rbounds, rot)
-                    elif klass1 == 'MultiLine':
-                        ops, pts, sbounds = bezierDict2data(sel)
-                        pts = map(lambda p:(p[0],-p[1]), pts)
-                        dx, dy = sbounds[0:2]
-                        dx, dy = dx + bounds[0], dy + bounds[1]
-                        dpts = displacePoints(pts, 0, self._height)
-                        dpts = displacePoints(dpts, dx, -dy)
-                        self._addPaths(g, ops, dpts)
-
+            self.drawCreateElementInBounds(g, el, bounds)
+        
         # add background
         m = self.borderWidth
         if self.borderWidth:
