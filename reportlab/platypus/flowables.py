@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: flowables.py,v $
+#	Revision 1.4  2000/06/27 10:07:55  rgbecker
+#	Added CondPageBreak
+#
 #	Revision 1.3  2000/06/13 13:03:31  aaron_watters
 #	more documentation changes
-#
+#	
 #	Revision 1.2  2000/06/01 16:27:56  rgbecker
 #	pageSize is wrong at present
 #	
@@ -41,7 +44,7 @@
 #	Platypus re-organisation
 #	
 #	
-__version__=''' $Id: flowables.py,v 1.3 2000/06/13 13:03:31 aaron_watters Exp $ '''
+__version__=''' $Id: flowables.py,v 1.4 2000/06/27 10:07:55 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -116,13 +119,13 @@ class Flowable:
 		return []
 
 	def getSpaceAfter(self):
-	        """returns how much space should follow this item if another item follows on the same page."""
+		"""returns how much space should follow this item if another item follows on the same page."""
 		if hasattr(self,'spaceAfter'): return self.spaceAfter
 		elif hasattr(self,'style') and hasattr(self.style,'spaceAfter'): return self.style.spaceAfter
 		else: return 0
 
 	def getSpaceBefore(self):
-	        """returns how much space should precede this item if another item precedess on the same page."""
+		"""returns how much space should precede this item if another item precedess on the same page."""
 		if hasattr(self,'spaceBefore'): return self.spaceBefore
 		elif hasattr(self,'style') and hasattr(self.style,'spaceBefore'): return self.style.spaceBefore
 		else: return 0
@@ -151,10 +154,10 @@ class Preformatted(Flowable):
 	The line breaks are exactly where you put
 	them, and it will not be wrapped."""
 	def __init__(self, text, style, bulletText = None, dedent=0):
-	        """text is the text to display. If dedent is set then common leading space
-	           will be chopped off the front (for example if the entire text is indented
-	           6 spaces or more then each line will have 6 spaces removed from the front).
-	        """
+		"""text is the text to display. If dedent is set then common leading space
+		will be chopped off the front (for example if the entire text is indented
+		6 spaces or more then each line will have 6 spaces removed from the front).
+		"""
 		self.style = style
 		self.bulletText = bulletText
 
@@ -209,9 +212,9 @@ class Preformatted(Flowable):
 			self.canv.setFillColor(self.style.textColor)
 		tx = self.canv.beginText(cur_x, cur_y)
 		#set up the font etc.
-		tx.setFont(self.style.fontName,
-				   self.style.fontSize,
-				   self.style.leading)
+		tx.setFont(	self.style.fontName,
+					self.style.fontSize,
+					self.style.leading)
 
 		for text in self.lines:
 			tx.textLine(text)
@@ -253,11 +256,11 @@ class Image(Flowable):
 		#center it
 		startx = 0.5 * (self.availWidth - self.drawWidth)
 		self.canv.drawInlineImage(self.filename,
-								  startx,
-								  0,
-								  self.drawWidth,
-								  self.drawHeight
-								  )
+								startx,
+								0,
+								self.drawWidth,
+								self.drawHeight
+								)
 class Spacer(Flowable):
 	"""A spacer just takes up space and doesn't draw anything - it guarantees
 	   a gap between objects."""
@@ -271,17 +274,26 @@ class Spacer(Flowable):
 	def draw(self):
 		pass
 
-class PageBreak(Flowable):
+class PageBreak(Spacer):
 	"""Move on to the next page in the document.
 	   This works by consuming all remaining space in the frame!"""
+	def __init__(self):
+		pass
 
 	def wrap(self, availWidth, availHeight):
 		self.width = availWidth
 		self.height = availHeight
 		return (availWidth,availHeight)  #step back a point
 
-	def draw(self):
-		pass
+class CondPageBreak(Spacer):
+	"""Throw a page if not enough vertical space"""
+	def __init__(self, height):
+		self.height = height
+
+	def wrap(self, availWidth, availHeight):
+		if availHeight<self.height:
+			return (availWidth, availHeight)
+		return (0, 0)
 
 class Macro(Flowable):
 	"""This is not actually drawn (i.e. it has zero height)
