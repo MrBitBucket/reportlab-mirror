@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.33 2003/09/04 13:35:14 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.34 2003/09/05 14:51:57 rgbecker Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -12,7 +12,7 @@
 This permits you to customize and pop out individual wedges;
 supports elliptical and circular pies.
 """
-__version__=''' $Id: piecharts.py,v 1.33 2003/09/04 13:35:14 rgbecker Exp $ '''
+__version__=''' $Id: piecharts.py,v 1.34 2003/09/05 14:51:57 rgbecker Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -531,6 +531,7 @@ class _SL3D:
     def __str__(self):
         return '_SL3D(%.2f,%.2f)' % (self.lo,self.hi)
 
+_270r = _2rad(270)
 class Pie3d(Pie):
     _attrMap = AttrMap(BASE=Pie,
         perspective = AttrMapValue(isNumber, desc='A flattening parameter.'),
@@ -579,11 +580,12 @@ class Pie3d(Pie):
     def _fillSide(self,L,i,angle,strokeColor,strokeWidth,fillColor):
         rd = self.rad_dist(angle)
         if rd<self.rad_dist(self._sl3d[i].mid):
-            p = [self.CX(i,0),self.CY(i,0),
-                self.CX(i,1),self.CY(i,1),
-                self.OX(i,angle,1),self.OY(i,angle,1),
-                self.OX(i,angle,0),self.OY(i,angle,0)]
-            L.append((rd,Polygon(p, strokeColor=strokeColor, fillColor=fillColor,strokeWidth=strokeWidth,strokeLineJoin=1)))
+            if abs(angle-_270r)>1e-6:
+                p = [self.CX(i,0),self.CY(i,0),
+                    self.CX(i,1),self.CY(i,1),
+                    self.OX(i,angle,1),self.OY(i,angle,1),
+                    self.OX(i,angle,0),self.OY(i,angle,0)]
+                L.append((rd,Polygon(p, strokeColor=strokeColor, fillColor=fillColor,strokeWidth=strokeWidth,strokeLineJoin=1)))
 
     def draw(self):
         slices = self.slices
