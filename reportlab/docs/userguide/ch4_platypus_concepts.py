@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch4_platypus_concepts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch4_platypus_concepts.py,v 1.4 2002/07/24 19:56:36 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch4_platypus_concepts.py,v 1.5 2004/03/19 22:18:37 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 
 #####################################################################################################3
@@ -208,6 +208,13 @@ which will be considered in order. The implemented split method should avoid
 changing $self$ as this will allow sophisticated layout mechanisms to do multiple
 passes over a list of flowables.
 """)
+
+heading2("Guidelines for flowable positioning")
+
+disc("""Two methods, which by default return zero, provide guidance on vertical
+spacing of flowables:
+""")
+
 eg("""
     Flowable.getSpaceAfter(self):
     Flowable.getSpaceBefore(self):
@@ -218,6 +225,14 @@ $draw$ method shouldn't consider it when rendering. Controlling programs
 will use the values returned in determining how much space is required by
 a particular flowable in context.
 """)
+
+disc("""All flowables have an $hAlign$ property: $('LEFT', 'RIGHT', 'CENTER' or 'CENTRE')$.
+For paragraphs, which fill the full width of the frame, this has no effect.  For tables,
+images or other objects which are less than the width of the frame, this determines their
+horizontal placement.
+
+""")
+
 
 disc("""The chapters which follow will cover the most important
 specific types of flowables: Paragraphs and Tables.""")
