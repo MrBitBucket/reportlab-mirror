@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "$Revision: 1.7 $"
+#define VERSION "$Revision: 1.8 $"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -668,41 +668,50 @@ static PyObject* _get_gstatePath(int n, ArtBpath* path)
 	return P;
 }
 
-static PyObject* gstate_stringPath(gstateObject* self, PyObject* args)
+static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 {
-	double	gw;
+	double	w, x, s;
 	char*	text;
-	PyObject *P, *e, *p;
+	PyObject *P, *p;
 	ArtBpath	*path, *pp;
-	int		n, i, m, c;
+	int		n, i, c;
 	if(!self->font){
 		PyErr_SetString(moduleError, "No font set!");
 		return NULL;
 		}
-	if(!PyArg_ParseTuple(args,"s:stringPath", &text)) return NULL;
+	if(!PyArg_ParseTuple(args,"s:_stringPath", &text)) return NULL;
 
+	x = 0;
+	s = self->fontSize/1000;
 	n = strlen(text);
 	P = PyTuple_New(n);
 	for(i=0;i<n;i++){
 		c = text[i]&0xff;
-		e = PyTuple_New(2);
-		path = gt1_get_glyph_outline(self->font, c, &gw);	/*ascii encoding for the moment*/
+		path = gt1_get_glyph_outline(self->font, c, &w);	/*ascii encoding for the moment*/
 		if(path){
-			m = 0;
 			pp = path;
-			while((pp++)->code!=ART_END) m++;
-			p = _get_gstatePath(m,path);
-			PyMem_Free(self->path);
+			while(pp->code!=ART_END){
+				if(pp->code==ART_CURVETO){
+					pp->x1= pp->x1*s+x;
+					pp->y1= pp->x1*s;
+					pp->x2= pp->x2*s+x;
+					pp->y2= pp->y2*s;
+					}
+				pp->x3 = pp->x3*s+x;
+				pp->y3 = pp->y3*s;
+				pp++;
+				}
+			p = _get_gstatePath(pp-path,path);
+			PyMem_Free(path);
 			}
 		else {
 			fprintf(stderr, "No glyph outline for code %d!\n", c);
-			gw = 1000;
+			w = 1000;
 			Py_INCREF(Py_None);
 			p = Py_None;
 			}
-		PyTuple_SET_ITEM(e, 0, p);
-		PyTuple_SET_ITEM(e, 1, PyFloat_FromDouble(gw));
-		PyTuple_SET_ITEM(P, i, e);
+		PyTuple_SET_ITEM(P, i, p);
+		x += w*s;
 		}
 	return P;
 }
@@ -743,7 +752,7 @@ static struct PyMethodDef gstate_methods[] = {
 	{"pathFill", (PyCFunction)gstate_pathFill, METH_VARARGS, "pathFill()"},
 	{"pathStroke", (PyCFunction)gstate_pathStroke, METH_VARARGS, "pathStroke()"},
 	{"setFont", (PyCFunction)gstate_setFont, METH_VARARGS, "setFont(fontName,fontSize)"},
-	{"stringPath", (PyCFunction)gstate_stringPath, METH_VARARGS, "stringPath(text)"},
+	{"_stringPath", (PyCFunction)gstate__stringPath, METH_VARARGS, "_stringPath(text)"},
 	{NULL, NULL}		/* sentinel */
 };
 
@@ -1077,7 +1086,7 @@ gstates have the following methods\n\
  pathFill()  fill current path\n\
  pathStroke() stroke current path\n\
  setFont(fontName,fontSize) set the font from the gt1 cache\n\
- stringPath(text) return path dump of text\n\
+ _stringPath(text) return path dump of text\n\
 \n\
 gstates have the following attributes\n\
 ctm			6vec float transformation matrix\n\
