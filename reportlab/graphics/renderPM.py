@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.4 2001/05/04 13:24:43 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.4 2001/05/04 13:24:43 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.5 2001/05/15 13:28:05 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.5 2001/05/15 13:28:05 rgbecker Exp $ '''
 """Usage:
 	from reportlab.graphics import renderPM
 	renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -202,6 +202,8 @@ class PMCanvas:
 		from PIL import Image
 		im = self.toPIL()
 		if fmt is None:
+			if type(fn) is not StringType:
+				raise ValueError, "Invalid type '%s' for fn when fmt is None" % type(fn)
 			im.save(fn)	#guess from name
 		else:
 			fmt = string.upper(fmt)
@@ -215,6 +217,12 @@ class PMCanvas:
 				im.save(fn,'JPEG')
 			else:
 				raise RenderPMError,"Unknown image kind %s" % fmt
+
+	def saveToString(self,fmt='GIF'):
+		from StringIO import StringIO
+		s = StringIO()
+		self.saveToFile(s,fmt=fmt)
+		return s.getvalue()
 
 	def setFont(self,fontName,fontSize):
 		try:
@@ -411,7 +419,7 @@ if __name__=='__main__':
 		#grab all drawings from the test module and write out.
 		#make a page of links in HTML to assist viewing.
 		import os
-		from reportlab.graphics import testshapes
+		from reportlab.graphics.testshapes import getAllTestDrawings
 		drawings = []
 		if not os.path.isdir('pmout'):
 			os.mkdir('pmout')
@@ -423,20 +431,14 @@ if __name__=='__main__':
 		</html>
 		"""
 		html = [htmlTop]
-		for funcname in dir(testshapes):
-			#if funcname[0:12] == 'getDrawing10':
-			if funcname[0:10] == 'getDrawing':
-				drawing = eval('testshapes.' + funcname + '()')  #execute it
-				docstring = eval('testshapes.' + funcname + '.__doc__')
-				drawings.append((drawing, docstring))
 
 		i = 0
 		#print in a loop, with their doc strings
-		for (drawing, docstring) in drawings:
+		for (drawing, docstring, name) in getAllTestDrawings():
 			if 1 or i==10:
 				w = int(drawing.width)
 				h = int(drawing.height)
-				html.append('<hr><h2>Drawing %d</h2>\n<pre>%s</pre>' % (i, docstring))
+				html.append('<hr><h2>Drawing %s %d</h2>\n<pre>%s</pre>' % (name, i, docstring))
 					
 				for k in ['gif','tiff', 'png', 'jpg']:
 					if k in ['gif','png','jpg']:

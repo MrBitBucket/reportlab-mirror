@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/testshapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.10 2001/05/01 09:18:53 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.11 2001/05/15 13:28:05 rgbecker Exp $
 
 # testshapes.py - draws shapes onto a PDF canvas.
 
@@ -388,6 +388,19 @@ def getAllFunctionDrawingNames():
 
     return funcNames
 
+def _evalFuncDrawing(name, D):
+	try:
+		d = eval(name + '()')
+	except:
+		d = getFailedDrawing(name)
+	D.append((d, eval(name + '.__doc__'), name[3:]))
+
+def getAllTestDrawings():
+	D = []
+	for f in getAllFunctionDrawingNames():
+		_evalFuncDrawing(f,D)
+	return D
+
 def writePDF(drawings):
     "Create and save a PDF file containing some drawings."
     
@@ -445,18 +458,11 @@ class ShapesTestCase(unittest.TestCase):
     def testAllDrawings(self):
         "Make a list of drawings."
 
-        for funcName in self.funcNames:
-            if funcName[0:10] == 'getDrawing':
+        for f in self.funcNames:
+            if f[0:10] == 'getDrawing':
                 # Make an instance and get its doc string.
                 # If that fails, use a default error drawing.
-                try:
-                    drawing = eval(funcName + '()')
-                except:
-                    drawing = getFailedDrawing(funcName)
-                docstring = eval(funcName + '.__doc__')
-                self.drawings.append((drawing, docstring, funcName[3:]))
-
-        # assert 1 == 1
+				_evalFuncDrawing(f,self.drawings)
 
 
 def makeSuite():
