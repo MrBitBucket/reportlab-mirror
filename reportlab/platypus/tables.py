@@ -367,14 +367,15 @@ class Table(Flowable):
                 w = max(w,ew)
             return w
         elif isinstance(v,Flowable) and v._fixedWidth:
-            if hasattr(v, 'width'): return v.width
-            if hasattr(v, 'drawWidth'): return v.drawWidth
+            if hasattr(v, 'width') and type(v.width) in (IntType,FloatType): return v.width
+            if hasattr(v, 'drawWidth') and type(v.drawWidth) in (IntType,FloatType): return v.drawWidth
         # Even if something is fixedWidth, the attribute to check is not
         # necessarily consistent (cf. Image.drawWidth).  Therefore, we'll
         # be extra-careful and fall through to this code if necessary.
         if hasattr(v, 'minWidth'):
             try:
-                return v.minWidth() # should be all flowables
+                w = v.minWidth() # should be all flowables
+                if type(w) in (FloatType,IntType): return w
             except AttributeError:
                 pass
         if t is not StringType: v = v is not None and str(v) or ''
