@@ -1,13 +1,14 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.75 2001/05/05 06:25:05 aaron_watters Exp $
-__version__=''' $Id: canvas.py,v 1.75 2001/05/05 06:25:05 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.76 2001/05/10 22:23:35 aaron_watters Exp $
+__version__=''' $Id: canvas.py,v 1.76 2001/05/10 22:23:35 aaron_watters Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
 """
 
+ENABLE_TRACKING = 1 # turn this off to do profile testing w/o tracking
 
 import os
 import sys
@@ -382,6 +383,11 @@ class Canvas:
         dest.fith(yhorizontal)
         dest.setPage(pageref)
         return dest
+
+    def bookmarkHorizontal(self, key, relativeX, relativeY):
+        """w.r.t. the current transformation, bookmark this horizontal."""
+        (xt, yt) = self.absolutePosition(relativeX,relativeY)
+        self.bookmarkHorizontalAbsolute(key, yt)
         
     #def _inPage0(self):  disallowed!
     #    """declare a page, enable page features"""
@@ -511,6 +517,27 @@ class Canvas:
         kw["Destination"] = destination
         annotation = apply(pdfdoc.LinkAnnotation, (), kw)
         self._addAnnotation(annotation, name, addtopage)
+
+    def linkRect(self, contents, destinationname, Rect=None, addtopage=1, name=None, **kw):
+        """rectangular link annotation w.r.t the current user transform.
+           if the transform is skewed/rotated the absolute rectangle will use the max/min x/y
+        """
+        if Rect is None:
+            pass # do whatever linkAbsolute does
+        else:
+            (lx, ly, ux, uy) = Rect
+            (xll,yll) = self.absolutePosition(lx,ly)
+            (xur,yur) = self.absolutePosition(ux, uy)
+            (xul,yul) = self.absolutePosition(lx, uy)
+            (xlr,ylr) = self.absolutePosition(ux, ly)
+            xs = (xll, xur, xul, xlr)
+            ys = (yll, yur, yul, ylr)
+            (xmin, ymin) = (min(xs), min(ys))
+            (xmax, ymax) = (max(xs), max(ys))
+            #(w2, h2) = (xmax-xmin, ymax-ymin)
+            Rect = (xmin, ymin, xmax, ymax)
+            #print "rect is", Rect
+        return apply(self.linkAbsolute, (contents, destinationname, Rect, addtopage, name), kw)
     
     def _addAnnotation(self, annotation, name=None, addtopage=1):
         count = self._annotationCount = self._annotationCount+1
@@ -564,16 +591,37 @@ class Canvas:
         #      coordinate transformations
         #
         ######################################################################
+    def resetTransforms(self):
+        """I want to draw something (eg, string underlines) w.r.t. the default user space.
+           Reset the matrix! This should be used usually as follows:
+              canv.saveState()
+              canv.resetTransforms()
+              ...draw some stuff in default space coords...
+              canv.restoreState() # go back!
+        """
+        # we have to adjoin the inverse, since reset is not a basic operation (without save/restore)
+        (selfa, selfb, selfc, selfd, selfe, selff) = self._currentMatrix
+        det = selfa*selfd - selfc*selfb
+        resulta = selfd/det
+        resultc = -selfc/det
+        resulte = (selfc*selff - selfd*selfe)/det
+        resultd = selfa/det
+        resultb = -selfb/det
+        resultf = (selfe*selfb - selff*selfa)/det
+        self.transform(resulta, resultb, resultc, resultd, resulte, resultf)
+        #print self._currentMatrix
 
     def transform(self, a,b,c,d,e,f):
         """adjoin a mathematical transform to the current graphics state matrix.
            Not recommended for beginners."""
         #"""How can Python track this?"""
-        #a0,b0,c0,d0,e0,f0 = self._currentMatrix
-        #self._currentMatrix = (a0*a+c0*b,    b0*a+d0*b,
-        #                       a0*c+c0*d,    b0*c+d0*d,
-        #                       a0*e+c0*f+e0, b0*e+d0*f+f0)
+        if ENABLE_TRACKING:
+            a0,b0,c0,d0,e0,f0 = self._currentMatrix
+            self._currentMatrix = (a0*a+c0*b,    b0*a+d0*b,
+                                   a0*c+c0*d,    b0*c+d0*d,
+                                   a0*e+c0*f+e0, b0*e+d0*f+f0)
         #print "transform", (a,b,c,d,e,f)
+        #print "currentMatrix", self._currentMatrix
         if self._code and self._code[-1][-3:]==' cm':
             L = string.split(self._code[-1])
             a0, b0, c0, d0, e0, f0 = map(float,L[-7:-1])
@@ -589,6 +637,15 @@ class Canvas:
 ##        self.line(-90,-1000,1,1); self.line(1000,-90,-1,1)
 ##        self.drawString(0,0,"here")
 ##    Kolor = (0, 0.5, 1, 0.25, 0.7, 0.3)
+
+    def absolutePosition(self, x, y):
+        """return the absolute position of x,y in user space w.r.t. default user space"""
+        if not ENABLE_TRACKING:
+            raise ValueError, "tracking not enabled! (canvas.ENABLE_TRACKING=0)"
+        (a,b,c,d,e,f) = self._currentMatrix
+        xp = a*x + c*y + e
+        yp = b*x + d*y + f
+        return (xp, yp)
 
     def translate(self, dx, dy):
         """move the origin from the current (0,0) point to the (dx,dy) point
