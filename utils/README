@@ -41,7 +41,7 @@ Release Procedure
 
 1) edit reportlab/__init__.py and insert the new version number d.xy
 
-2) python utils/cvslh.py -d"2001-mm-dd hh:mm:ss" -r >/tmp/logh
+2) 2001-mm-dd hh:mm:ss" -r >/tmp/logh
    to get a list of the latest changes. The date & time should correspond to
    the previous release. Add the changes into the reportlab changes file at
    the top. These changes should probably be trimmed.
@@ -71,13 +71,17 @@ Release Procedure
 	to know that you can add a -F to the tag command to allow you to retag a modified
 	source file ie cvs -z3 tag -F ReportLab_d_xy
 
-5)	Login to zelaza.pair.com
+5)	Login to Yosemite.
+	Run batch script c:\SCRIPTS\ReportLabRelease.bat d_xy
+
+	Login to qs385.pair.com
 
 	cd bin
-	./daily.py -release ReportLab_d_xy
+	./ReportLabRelease d_xy
 
-	this should create the files ~/ReportLab_d_xy.tgz/.zip
-	the links ~/public_ftp/reportlab.tgz/.zip should be pointing to the 
+	this should create the files
+		~/public_ftp/www_reportlab_com/ReportLab_d_xy.tgz/.zip
+	the links ~/public_ftp/www_reportlab_org/reportlab.tgz/.zip should be pointing to the 
 	new archives.
 
 	If we know that the idle py2pdf patch works
@@ -91,8 +95,8 @@ Release Procedure
 
 7)	Optional announcements made to clp, reportlab-users, reportlab-team
 
-8)	Upload the .tgz and .zip files to sourcforge. I log in to zelaza and then 
-	cd public_ftp 
+8)	Upload the .tgz and .zip files to sourcforge. I log in to qs385 and then 
+	cd public_ftp/www_reportlab_com 
 	ftp upload.sourceforge.net
 	 cd incoming
 	 send ReportLab_x_yz.tgz
