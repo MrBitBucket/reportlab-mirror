@@ -7,9 +7,11 @@ import reportlab
 
 heading1("Tables and TableStyles")
 disc("""
-The $Table$ class is derived from the $Flowable$ class and is intended
-as a simple textual gridding mechanism. $Table$ cells can hold anything which can be converted to
-a <b>Python</b> $string$.
+The $Table$  and $LongTable$ classes derive from the $Flowable$ class and are intended
+as a simple textual gridding mechanisms. The $longTable$ class uses a greedy algorithm
+when calculating column widths and is intended for long tables where speed counts.
+$Table$ cells can hold anything which can be converted to
+a <b>Python</b> $string$ or $Flowables$ (or lists of $Flowables$).
 """)
 
 disc("""
@@ -18,10 +20,10 @@ and functionality.  We assume the reader has some familiarity with HTML tables.
 In brief, they have the following characteristics:
 """)
 
-bullet("""They can contain anythign convertible to a string; flowable
+bullet("""They can contain anything convertible to a string; flowable
 objects such as other tables; or entire sub-stories""")
 
-bullet("""They can row out the row heights to fit the data if you don't supply
+bullet("""They can work out the row heights to fit the data if you don't supply
 the row height.  (They can also work out the widths, but generally it is better
 for a designer to set the width manually, and it draws faster).""")
 
@@ -42,8 +44,9 @@ styles and use them for a family of reports.  Styes can also 'inherit', as with
 paragraphs.""")
 
 disc("""There is however one main limitation compared to an HTML table.
-They define a simple rectangular grid.  There is no row or column
-spanning; if you need to span cells, you must nest tables inside table cells instead""")
+They define a simple rectangular grid.  There is no simple row or column
+spanning; if you need to span cells, you must nest tables inside table cells instead or use a more
+complex scheme in which the lead cell of a span contains the actual contents.""")
 
 disc("""
 $Tables$ are created by passing the constructor an optional sequence of column widths,
@@ -154,12 +157,14 @@ FONTNAME (or FACE)      - takes fontname.
 FONTSIZE (or SIZE)      - takes fontsize in points; leading may get out of sync.
 LEADING                 - takes leading in points.
 TEXTCOLOR               - takes a color name or (R,G,B) tuple.
-ALIGNMENT (or ALIGN)    - takes one of LEFT, RIGHT and CENTRE (or CENTER).
+ALIGNMENT (or ALIGN)    - takes one of LEFT, RIGHT and CENTRE (or CENTER) or DECIMAL.
 LEFTPADDING             - takes an integer, defaults to 6.
 RIGHTPADDING            - takes an integer, defaults to 6.
 BOTTOMPADDING           - takes an integer, defaults to 3.
 TOPPADDING              - takes an integer, defaults to 3.
 BACKGROUND              - takes a color.
+ROWBACKGROUNDS          - takes a list of colors to be used cyclically.
+COLBACKGROUNDS          - takes a list of colors to be used cyclically.
 VALIGN                  - takes one of TOP, MIDDLE or the default BOTTOM
 """)
 disc("""This sets the background cell color in the relevant cells.
@@ -294,6 +299,37 @@ t=Table(data,style=[('GRID',(1,1),(-2,-2),1,colors.green),
 
 t._argW[3]=1.5*inch
 """%I)
+heading3("""$TableStyle$ Span Commands""")
+disc("""Our $Table$ classes support the concept of spanning, but it isn't specified in the same way
+as html. The style specification
+""")
+eg("""
+SPAN, (sc,sr), (ec,er)
+""")
+disc("""indicates that the cells in columns $sc$ - $ec$ and rows $sr$ - $er$ should be combined into a super cell
+with contents determined by the cell $(sc, sr)$. The other cells should be present, but should contain empty strings 
+or you may get unexpected results.
+""")
+EmbeddedCode("""
+data=  [['Top\\nLeft', '', '02', '03', '04'],
+        ['', '', '12', '13', '14'],
+        ['20', '21', '22', 'Bottom\\nRight', ''],
+        ['30', '31', '32', '', '']]
+t=Table(data,style=[
+                ('GRID',(0,0),(-1,-1),0.5,colors.grey),
+                ('BACKGROUND',(0,0),(1,1),colors.palegreen),
+                ('SPAN',(0,0),(1,1)),
+                ('BACKGROUND',(-2,-2),(-1,-1), colors.pink),
+                ('SPAN',(-2,-2),(-1,-1)),
+                ])
+""")
+
+disc("""notice that we don't need to be conservative with our $GRID$ command. The spanned cells are not drawn through.
+""")
+heading3("""Special $TableStyle$ Indeces""")
+disc("""In any style command the first row index may be set to one of the special strings
+$'splitlast'$ or $'splitfirst'$ to indicate that the style should be used only for the last row of
+a split table, or the first row of a continuation. This allows splitting tables with nicer effects around the split.""")  
 
 heading1("""Other Useful $Flowables$""")
 heading2("""$Preformatted(text, style, bulletText = None, dedent=0)$""")

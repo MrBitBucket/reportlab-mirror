@@ -149,6 +149,28 @@ def _calc_pc(V,avail):
             R[j] = v
     return R
 
+def _hLine(canvLine, scp, ecp, y, hBlocks, FUZZ=rl_config._FUZZ):
+    '''
+    Draw horizontal lines; do not draw through regions specified in hBlocks
+    This also serves for vertical lines with a suitable canvLine
+    '''
+    if hBlocks: hBlocks = hBlocks.get(y,None)
+    if not hBlocks or scp>=hBlocks[-1][1]-FUZZ or ecp<=hBlocks[0][0]+FUZZ:
+        canvLine(scp,y,ecp,y)
+    else:
+        i = 0
+        n = len(hBlocks)
+        while scp<ecp-FUZZ and i<n:
+            x0, x1 = hBlocks[i]
+            if x1<=scp+FUZZ or x0>=ecp-FUZZ:
+                i += 1
+                continue
+            i0 = max(scp,x0)
+            i1 = min(ecp,x1)
+            if i0>scp: canvLine(scp,y,i0,y)
+            scp = i1
+        if scp<ecp-FUZZ: canvLine(scp,y,ecp,y)
+
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
                 repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None):
@@ -579,20 +601,32 @@ class Table(Flowable):
         has spanned over it will get a None entry on the right
         """
         if getattr(self,'_spanRects',None): return
-        spanRects = {}
+        colpositions = self._colpositions
+        rowpositions = self._rowpositions
+        self._spanRects = spanRects = {}
+        self._vBlocks = vBlocks = {}
+        self._hBlocks = hBlocks = {}
         for (coord, value) in self._spanRanges.items():
             if value is None:
                 spanRects[coord] = None
             else:
                 col,row = coord
                 col0, row0, col1, row1 = value
-                x = self._colpositions[col0]
-                y = self._rowpositions[row1+1]  # should I add 1 for bottom left?
-                width = self._colpositions[col1+1] - x
-                height = self._rowpositions[row0] - y
+                if col1-col0>0:
+                    for _ in xrange(col0+1,col1+1):
+                        vBlocks.setdefault(colpositions[_],[]).append((rowpositions[row1+1],rowpositions[row0]))
+                if row1-row0>0:
+                    for _ in xrange(row0+1,row1+1):
+                        hBlocks.setdefault(rowpositions[_],[]).append((colpositions[col0],colpositions[col1+1]))
+                x = colpositions[col0]
+                y = rowpositions[row1+1]
+                width = colpositions[col1+1] - x
+                height = rowpositions[row0] - y
                 spanRects[coord] = (x, y, width, height)
 
-        self._spanRects = spanRects
+        for _ in hBlocks, vBlocks:
+            for value in _.values():
+                value.sort()
 
     def setStyle(self, tblstyle):
         if type(tblstyle) is not TableStyleType:
@@ -713,17 +747,19 @@ class Table(Flowable):
         self._prepLine(weight, color)
         scp = ecp[0]
         ecp = ecp[-1]
+        hBlocks = getattr(self,'_hBlocks',{})
+        canvLine = self.canv.line
         if count == 1:
-            for rowpos in rp:
-                self.canv.line(scp, rowpos, ecp, rowpos)
+            for y in rp:
+                _hLine(canvLine, scp, ecp, y, hBlocks)
         else:
             #multi-lines; position so count==1 and no space gives origin
             ws = weight+space
             offset = 0.5*(count-1)*ws
-            for rowpos in rp:
-                y = rowpos+offset
+            for y in rp:
+                y += offset
                 for idx in xrange(count):
-                    self.canv.line(scp, y, ecp, y)
+                    _hLine(canvLine, scp, ecp, y, hBlocks)
                     y -= ws
 
     def _drawHLinesB(self, (sc, sr), (ec, er), weight, color, count, space):
@@ -736,15 +772,19 @@ class Table(Flowable):
         self._prepLine(weight, color)
         srp = erp[0]
         erp = erp[-1]
-        for colpos in cp:
-            if count == 1:
-                self.canv.line(colpos, srp, colpos, erp)
-            else: #double/triple lines
-                #position so count=1 and no space gives origin
-                offset = (count-1) * (weight + space)
-                for idx in range(count):
-                    x = colpos + 0.5*offset - (idx * (weight+space))
-                    self.canv.line(x, srp, x, erp)
+        vBlocks = getattr(self,'_vBlocks',{})
+        canvLine = lambda y0, x0, y1, x1, _line=self.canv.line: _line(x0,y0,x1,y1)
+        if count == 1:
+            for x in cp:
+                _hLine(canvLine, erp, srp, x, vBlocks)
+        else:
+            ws = weight + space
+            offset = 0.5*(count-1)*ws
+            for x in cp:
+                x += offset
+                for i in xrange(count):
+                    _vLine(canvLine, erp, srp, x, vBlocks)
+                    x -= ws
 
     def _drawVLinesA(self, (sc, sr), (ec, er), weight, color, count, space):
         self._drawVLines((sc+1, sr), (ec+1, er), weight, color, count, space)

@@ -528,16 +528,6 @@ LIST_STYLE = TableStyle(
     lst.append(t)
 
     lst.append(PageBreak())
-    lst.append(Paragraph("und jetzt noch eine Tabelle mit 5000 Zeilen:", styleSheet['BodyText']))
-    sty = [ ('GRID',(0,0),(-1,-1),1,colors.green),
-            ('BOX',(0,0),(-1,-1),2,colors.red),
-           ]
-    data = [[str(i), Paragraph("xx "* (i%10), styleSheet["BodyText"]), Paragraph("blah "*(i%40), styleSheet["BodyText"])] for i in xrange(500)]
-    t=LongTable(data, style=sty, colWidths = [50,100,200])
-    lst.append(t)
-
-
-    lst.append(PageBreak())
 
     lst.append(Paragraph('Trying colour cycling in background', styleSheet['Heading1']))
     lst.append(Paragraph("This should alternate pale blue and uncolored by row", styleSheet['BodyText']))
@@ -577,6 +567,41 @@ LIST_STYLE = TableStyle(
                     ('COLBACKGROUNDS', (0, 0), (-1, -1), (0xD0D0FF, 0xFFD0D0, None)),
                     ])
     lst.append(t)
+
+    lst.append(PageBreak())
+    lst.append(Paragraph("This spanning example illustrates automatic grid removal!", styleSheet['BodyText']))
+    data=  [['Top\nLeft', '', '02', '03', '04', '05', '06', '07'],
+            ['', '', '12', 'Span (3,1) (6,2)', '','','','17'],
+            ['20', '21', '22', '', '','','','27'],
+            ['30', '31', '32', '33', '34','35','36','37'],
+            ['40', 'In The\nMiddle', '', '', '44','45','46','47'],
+            ['50', '', '', '', '54','55','56','57'],
+            ['60', '', '', '','64', '65', 'Bottom\nRight', ''],
+            ['70', '71', '72', '73','74', '75', '', '']]
+    t=Table(data,style=[
+            ('GRID',(0,0),(-1,-1),0.5,colors.grey),
+            ('BACKGROUND',(0,0),(1,1),colors.palegreen),
+            ('SPAN',(0,0),(1,1)),
+            ('BACKGROUND',(-2,-2),(-1,-1), colors.pink),
+            ('SPAN',(-2,-2),(-1,-1)),
+            ('SPAN',(1,4),(3,6)),
+            ('BACKGROUND',(1,4),(3,6), colors.lightblue),
+            ('SPAN',(3,1),(6,2)),
+            ('BACKGROUND',(3,1),(6,2), colors.peachpuff),
+            ('VALIGN',(3,1),(6,2),'TOP'),
+            ])
+    lst.append(t)
+
+    lst.append(PageBreak())
+
+    lst.append(Paragraph("und jetzt noch eine Tabelle mit 5000 Zeilen:", styleSheet['BodyText']))
+    sty = [ ('GRID',(0,0),(-1,-1),1,colors.green),
+            ('BOX',(0,0),(-1,-1),2,colors.red),
+           ]
+    data = [[str(i), Paragraph("xx "* (i%10), styleSheet["BodyText"]), Paragraph("blah "*(i%40), styleSheet["BodyText"])] for i in xrange(500)]
+    t=LongTable(data, style=sty, colWidths = [50,100,200])
+    lst.append(t)
+
 
 
 
