@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: gfe.py,v $
+#	Revision 1.8  2000/05/11 13:51:21  rgbecker
+#	Fixes for xml<
+#
 #	Revision 1.7  2000/04/14 12:17:05  rgbecker
 #	Splitting layout.py
-#
+#	
 #	Revision 1.6  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
 #	
@@ -52,7 +55,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:15:57  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: gfe.py,v 1.7 2000/04/14 12:17:05 rgbecker Exp $ '''
+__version__=''' $Id: gfe.py,v 1.8 2000/05/11 13:51:21 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -496,8 +499,8 @@ pre("""
        = [DRINKER=>'sam', BAR=>'cheers']
 """)
 
-p("""Illustrating that remapping using the [DRINKER<=DRINKER,
-BAR<=BAR] graph eliminates all attributes except DRINKER and
+p("""Illustrating that remapping using the [DRINKER&lt;=DRINKER,
+BAR&lt;=BAR] graph eliminates all attributes except DRINKER and
 BAR, such as BEER. More generally remap can be used in this way
 to implement the classical relational projection operation. (See [Korth and Silberschatz]
 for a detailed discussion of the projection operator and other relational
@@ -682,7 +685,7 @@ as a generalized table "containing" all possible""")
 pre("""
     [ARG0=>a, ARG1=>b, ARG2=>c]""")
 
-p("""where b<a<c. Furthermore joins with this table are not
+p("""where b&lt;a&lt;c. Furthermore joins with this table are not
 permitted unless all three arguments are available in the sequence
 of input substitutions.""")
 
