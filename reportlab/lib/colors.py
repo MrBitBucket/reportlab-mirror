@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: colors.py,v $
+#	Revision 1.10  2000/08/11 14:29:05  rgbecker
+#	added rgb2cmyk
+#
 #	Revision 1.9  2000/06/14 21:17:30  andy_robinson
 #	Some relative imports fixed
-#
+#	
 #	Revision 1.8  2000/05/26 09:43:44  rgbecker
 #	stringToColor-->toColor
 #	
@@ -56,7 +59,7 @@
 #	Revision 1.2  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
 #	
-__version__=''' $Id: colors.py,v 1.9 2000/06/14 21:17:30 andy_robinson Exp $ '''
+__version__=''' $Id: colors.py,v 1.10 2000/08/11 14:29:05 rgbecker Exp $ '''
 
 import string
 import math
@@ -95,6 +98,17 @@ def cmyk2rgb(cmyktuple):
     g = 1.0 - min(1.0, m + k)
     b = 1.0 - min(1.0, y + k)
     return (r,g,b)
+
+def rgb2cmyk(r,g,b):
+	c = 1 - r
+	m = 1 - g
+	y = 1 - b
+	k = min(c,m,y)
+	c = min(1,max(0,c-k)
+	m = min(1,max(0,m-k)
+	y = min(1,max(0,y-k)
+	k = min(1,max(0,k))
+	return (c,m,y,k)
 
 def HexColor(val):
     """This function converts a hex string, or an actual integer number,
