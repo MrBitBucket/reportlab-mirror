@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.36 2003/04/22 17:32:01 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.36 2003/04/22 17:32:01 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.37 2003/07/29 08:18:17 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.37 2003/07/29 08:18:17 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -371,11 +371,12 @@ class CondPageBreak(Spacer):
 _SeqTypes = (ListType, TupleType)
 
 class KeepTogether(Flowable):
-    def __init__(self,flowables):
+    def __init__(self,flowables,maxHeight=None):
         if type(flowables) not in _SeqTypes:
             self._flowables = [flowables]
         else:
             self._flowables = flowables
+        self._maxHeight = maxHeight
 
     def __repr__(self):
         f = self._flowables
@@ -383,7 +384,7 @@ class KeepTogether(Flowable):
         import string
         L = "\n"+string.join(L, "\n")
         L = string.replace(L, "\n", "\n  ")
-        return "KeepTogether(%s) # end KeepTogether" % L
+        return "KeepTogether(%s,maxHeight=%s) # end KeepTogether" % (L,self._maxHeight)
 
     def wrap(self, aW, aH):
         W = 0
@@ -396,7 +397,7 @@ class KeepTogether(Flowable):
             if f is not F[-1]: h = h + f.getSpaceAfter()
             W = max(W,w)
             H = H+h
-        self._CPage = H>aH
+        self._CPage = (H>aH) and (not self._maxHeight or H<=self._maxHeight)
         return W, 0xffffff  # force a split
 
     def split(self, aW, aH):
