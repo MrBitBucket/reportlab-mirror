@@ -1,12 +1,12 @@
 #ch1_intro
 
 from genuserguide import *
+import reportlab
 
-title("ReportLab User Guide")
+title("User Guide")
+centred('ReportLab Version ' + reportlab.Version)
 
-todo("""To-do items to authors, or points under discussion,
-appear in italics like this.""")
-todo("")
+nextTemplate("Normal")
 
 ########################################################################
 #

@@ -5,16 +5,49 @@
 from reportlab.platypus import PageTemplate, \
      BaseDocTemplate, Frame, Paragraph
 from reportlab.lib.units import inch, cm
+from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
 
-##def decoratePage(canvas, doc):##    canvas.saveState()
-##    canvas.setFont('Times-Roman', 10)
-##    canvas.drawCentredString(doc.pagesize[0] / 2, 0.75*inch, 'Page %d' % canvas.getPageNumber())
-##    canvas.restoreState()
 
+class FrontCoverTemplate(PageTemplate):
+    def __init__(self, id, pageSize=DEFAULT_PAGE_SIZE):
+        self.pageWidth = pageSize[0]
+        self.pageHeight = pageSize[1]
+        frame1 = Frame(inch,
+                       3*inch,
+                       self.pageWidth - 2*inch,
+                       4.5*inch, id='cover')
+        PageTemplate.__init__(self, id, [frame1])  # note lack of onPage
+
+    def afterDrawPage(self, canvas, doc):
+        canvas.saveState()
+        canvas.drawInlineImage('replogo.gif',2*inch, 8*inch)
+
+
+        canvas.setFont('Times-Roman', 10)
+        canvas.line(inch, 120, self.pageWidth - 2*inch, 120)
+
+        canvas.drawString(inch, 100, 'Lombard Business Park')
+        canvas.drawString(inch, 88, '8 Lombard Road')
+        canvas.drawString(inch, 76, 'Wimbledon')
+        canvas.drawString(inch, 64, 'London SW19 3TZ')
+
+        canvas.drawRightString(self.pageWidth - inch, 100, '219 Harper Street')
+        canvas.drawRightString(self.pageWidth - inch, 88, 'Highland Park')
+        canvas.drawRightString(self.pageWidth - inch, 76, 'New Jersey')
+        canvas.drawRightString(self.pageWidth - inch, 64, '')
+        
+        canvas.restoreState()
+    
 
 class OneColumnTemplate(PageTemplate):
-    def __init__(self, id):
-        frame1 = Frame(inch, inch, 6.27*inch, 9.69*inch, id='normal')
+    def __init__(self, id, pageSize=DEFAULT_PAGE_SIZE):
+        self.pageWidth = pageSize[0]
+        self.pageHeight = pageSize[1]
+        frame1 = Frame(inch,
+                       inch,
+                       self.pageWidth - 2*inch,
+                       self.pageHeight - 2*inch,
+                       id='normal')
         PageTemplate.__init__(self, id, [frame1])  # note lack of onPage
 
     def afterDrawPage(self, canvas, doc):
@@ -27,9 +60,20 @@ class OneColumnTemplate(PageTemplate):
         canvas.restoreState()
 
 class TwoColumnTemplate(PageTemplate):
-    def __init__(self, id):
-        frame1 = Frame(inch, inch, 3*inch, 9.69*inch, id='leftCol')
-        frame2 = Frame(4.27 * inch, inch, 3*inch, 9.69*inch, id='rightCol')
+    def __init__(self, id, pageSize=DEFAULT_PAGE_SIZE):
+        self.pageWidth = pageSize[0]
+        self.pageHeight = pageSize[1]
+        colWidth = 0.5 * (self.pageWidth - 2.25*inch)
+        frame1 = Frame(inch,
+                       inch,
+                       colWidth,
+                       self.pageHeight - 2*inch,
+                       id='leftCol')
+        frame2 = Frame(0.5 * self.pageWidth + 0.125,
+                       inch,
+                       colWidth,
+                       self.pageHeight - 2*inch,
+                       id='rightCol')
         PageTemplate.__init__(self, id, [frame1, frame2])  # note lack of onPage
 
     def afterDrawPage(self, canvas, doc):
@@ -44,9 +88,10 @@ class TwoColumnTemplate(PageTemplate):
 
 class RLDocTemplate(BaseDocTemplate):
     def afterInit(self):
+        self.addPageTemplates(FrontCoverTemplate('Cover'))
         self.addPageTemplates(OneColumnTemplate('Normal'))
         self.addPageTemplates(TwoColumnTemplate('TwoColumn'))
-
+        
         #just playing
         self.title = "(Document Title Goes Here)"
         self.chapter = "(No chapter yet)"

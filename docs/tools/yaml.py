@@ -185,6 +185,8 @@ class Parser:
                 break
         assert found, 'No Classes Defined in ' + modulename
 
+    def nextPageTemplate(self, templateName):
+        self._results.append(('NextPageTemplate',templateName))
         
 if __name__=='__main__': #NORUNTESTS
     if len(sys.argv) <> 2:

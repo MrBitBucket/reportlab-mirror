@@ -1,5 +1,7 @@
 .t ReportLab API Reference
 
+.nextPageTemplate Normal
+
 .h1 Introduction
 
 This is the API reference for the ReportLab library.  All public
@@ -156,6 +158,9 @@ applications.
 .h1 Appendix A - CVS Revision History
 .beginPre Code
 $Log: reference.yml,v $
+Revision 1.11  2000/07/10 23:56:09  andy_robinson
+Paragraphs chapter pretty much complete.  Fancy cover.
+
 Revision 1.10  2000/07/03 15:39:51  rgbecker
 Documentation fixes
 

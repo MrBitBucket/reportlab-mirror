@@ -70,8 +70,8 @@ def getStyleSheet():
     stylesheet.add(ParagraphStyle(name='Title',
                                   parent=stylesheet['Normal'],
                                   fontName = 'Times-Bold',
-                                  fontSize=24,
-                                  leading=28.8,
+                                  fontSize=48,
+                                  leading=56,
                                   spaceAfter=72,
                                   alignment=TA_CENTER
                                   ),
@@ -131,9 +131,14 @@ def getStyleSheet():
                                   alignment=TA_CENTER),
                    alias='u')
  
-    stylesheet.add(ParagraphStyle(name='centred',
+    stylesheet.add(ParagraphStyle(name='Centred',
                                   parent=stylesheet['Normal'],
                                   alignment=TA_CENTER
+                                  ))
+
+    stylesheet.add(ParagraphStyle(name='Caption',
+                                  parent=stylesheet['Centred'],
+                                  fontName='Times-Italic'
                                   ))
     
     return stylesheet

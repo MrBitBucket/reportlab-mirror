@@ -32,6 +32,9 @@
 #
 ###############################################################################
 #   $Log: genuserguide.py,v $
+#   Revision 1.26  2000/07/10 23:56:09  andy_robinson
+#   Paragraphs chapter pretty much complete.  Fancy cover.
+#
 #   Revision 1.25  2000/07/10 14:20:15  andy_robinson
 #   Broke up the user guide into chapters.
 #
@@ -111,7 +114,7 @@
 #   Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #   initial checkin. user guide generation framework.
 #   
-__version__=''' $Id: genuserguide.py,v 1.25 2000/07/10 14:20:15 andy_robinson Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.26 2000/07/10 23:56:09 andy_robinson Exp $ '''
 
 
 __doc__ = """
@@ -130,7 +133,8 @@ styleSheet = getStyleSheet()
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import Paragraph, Spacer, Preformatted,\
-            PageBreak, CondPageBreak, Flowable, Table, TableStyle
+            PageBreak, CondPageBreak, Flowable, Table, TableStyle, \
+            NextPageTemplate
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.sequencer import getSequencer
@@ -188,6 +192,8 @@ H4 = styleSheet['Heading4']
 B = styleSheet['BodyText']
 BU = styleSheet['Bullet']
 Comment = styleSheet['Comment']
+Centred = styleSheet['Centred']
+Caption = styleSheet['Caption']
 
 #set up numbering
 seq = getSequencer()
@@ -216,6 +222,10 @@ def CPage(inches):
     
 def newPage():
     getStory().append(PageBreak())
+
+def nextTemplate(templName):
+    f = NextPageTemplate(templName)
+    getStory().append(f)
     
 def disc(text, klass=Paragraph, style=discussiontextstyle):
     text = quickfix(text)
@@ -279,7 +289,13 @@ def heading4(text):
 def todo(text):
     """Used for notes to ourselves"""
     getStory().append(Paragraph(quickfix(text), Comment))
-    
+
+def centred(text):
+    getStory().append(Paragraph(quickfix(text), Centred))
+                      
+def caption(text):
+    getStory().append(Paragraph(quickfix(text), Caption))
+
 class Illustration(platdemos.Figure):
     """The examples are all presented as functions which do
     something to a canvas, with a constant height and width
@@ -303,6 +319,7 @@ def illust(operation, caption):
     getStory().append(i)
 
 class ParaBox(platdemos.Figure):
+    """Illustrates paragraph examples, with style attributes on the left"""
     descrStyle = ParagraphStyle('description',
                                 fontName='Courier',
                                 fontSize=8,
@@ -381,12 +398,52 @@ class ParaBox(platdemos.Figure):
                 lines.append('%s = %s' % (key, value))
         return string.join(lines, '\n')
 
+
+class ParaBox2(platdemos.Figure):
+    """Illustrates a paragraph side-by-side with the raw
+    text, to show how the XML works."""
+    def __init__(self, text, caption):
+        platdemos.Figure.__init__(self, 0, 0, caption)
+        descrStyle = ParagraphStyle('description',
+                                fontName='Courier',
+                                fontSize=8,
+                                leading=9.6)
+        textStyle = B
+        self.text = text
+        self.left = Paragraph('<![CDATA[' + text + ']]>', descrStyle)
+        self.right = Paragraph(text, B)
+        
+
+    def wrap(self, availWidth, availHeight):
+        self.width = availWidth * 0.9
+        colWidth = 0.4 * self.width
+        lw, self.lh = self.left.wrap(colWidth, availHeight)
+        rw, self.rh = self.right.wrap(colWidth, availHeight)
+        self.figureHeight = max(self.lh, self.rh) * 10.0/9.0
+        return platdemos.Figure.wrap(self, availWidth, availHeight)
+
+    def drawFigure(self):
+        self.left.drawOn(self.canv,
+                         self.width * 0.05,
+                         self.figureHeight * 0.95 - self.lh
+                         ) 
+        self.right.drawOn(self.canv,
+                         self.width * 0.55,
+                         self.figureHeight * 0.95 - self.rh
+                         ) 
+
 def parabox(text, style, caption):
     p = ParaBox(text, style,
                 'Figure <seq template="%(Chapter)s-%(Figure+)s"/>: ' + quickfix(caption)
                 )
     getStory().append(p)
     
+def parabox2(text, caption):
+    p = ParaBox2(text, 
+                'Figure <seq template="%(Chapter)s-%(Figure+)s"/>: ' + quickfix(caption)
+                )
+    getStory().append(p)
+
 def pencilnote():
     getStory().append(examples.NoteAnnotation())
         

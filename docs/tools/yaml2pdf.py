@@ -66,6 +66,8 @@ def run(infilename, outfilename):
         elif typ == 'VSpace':
             height = thingy[1]
             story.append(Spacer(0, height))
+        elif typ == 'NextPageTemplate':
+            story.append(NextPageTemplate(thingy[1]))
         elif typ == 'Custom':
             # go find it
             searchPath = [os.getcwd()+'\\']
@@ -78,6 +80,7 @@ def run(infilename, outfilename):
             #now get the function
             func = getattr(mod, funcName)
             story.append(func())
+            
         else:
             print 'skipping',typ, 'for now'
             
