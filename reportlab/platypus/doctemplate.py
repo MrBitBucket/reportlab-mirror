@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.44 2001/10/01 09:33:25 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.45 2001/10/01 09:58:42 rgbecker Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.44 2001/10/01 09:33:25 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.45 2001/10/01 09:58:42 rgbecker Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -159,10 +159,10 @@ class PageTemplate:
 		if canv._pagesize: cp = map(int, canv._pagesize)
 		if self.pagesize: sp = map(int, self.pagesize)
 		if doc.pagesize: dp = map(int, doc.pagesize)
-		if cp != dp:
+		if cp!=sp:
 			if sp:
 				canv.setPageSize(self.pagesize)
-			else:
+			elif cp!=dp:
 				canv.setPageSize(doc.pagesize)
 
 	def afterDrawPage(self, canv, doc):
