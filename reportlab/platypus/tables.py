@@ -171,6 +171,13 @@ def _hLine(canvLine, scp, ecp, y, hBlocks, FUZZ=rl_config._FUZZ):
             scp = i1
         if scp<ecp-FUZZ: canvLine(scp,y,ecp,y)
 
+def _multiLine(scp,ecp,y,canvLine,ws,count):
+    offset = 0.5*(count-1)*ws
+    y += offset
+    for idx in xrange(count):
+        canvLine(scp, y, ecp, y)
+        y -= ws
+
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
                 repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None):
@@ -648,9 +655,9 @@ class Table(Flowable):
 
             #determine line cap value at position 5. This can be string or numeric.
             if len(cmd)<6:
-                cmd = cmd+(1,)  
+                cmd = cmd+(1,)
             else:
-                cap = cmd[5]  
+                cap = cmd[5]
                 try:
                     if type(cap) is not type(int):
                         cap = LINECAPS[cap]
@@ -687,7 +694,7 @@ class Table(Flowable):
             if len(cmd)<10: cmd = cmd + (cmd[3],)
 
             assert len(cmd) == 10
-            
+
             self._linecmds.append(cmd)
         else:
             (op, (sc, sr), (ec, er)), values = cmd[:3] , cmd[3:]
@@ -708,7 +715,7 @@ class Table(Flowable):
             if ec < 0: ec = ec + self._ncols
             if sr < 0: sr = sr + self._nrows
             if er < 0: er = er + self._nrows
-            if ccap!=cap:
+            if cap!=None and ccap!=cap:
                 self.canv.setLineCap(cap)
                 ccap = cap
             getattr(self,_LineOpMap.get(op, '_drawUnknown' ))( (sc, sr), (ec, er), weight, color, count, space)
@@ -753,14 +760,9 @@ class Table(Flowable):
             for y in rp:
                 _hLine(canvLine, scp, ecp, y, hBlocks)
         else:
-            #multi-lines; position so count==1 and no space gives origin
-            ws = weight+space
-            offset = 0.5*(count-1)*ws
+            lf = lambda x0,y0,x1,y1,canvLine=canvLine, ws=weight+space, count=count: _multiLine(x0,x1,y0,canvLine,ws,count)
             for y in rp:
-                y += offset
-                for idx in xrange(count):
-                    _hLine(canvLine, scp, ecp, y, hBlocks)
-                    y -= ws
+                _hLine(lf, scp, ecp, y, hBlocks)
 
     def _drawHLinesB(self, (sc, sr), (ec, er), weight, color, count, space):
         self._drawHLines((sc, sr+1), (ec, er+1), weight, color, count, space)
@@ -778,13 +780,9 @@ class Table(Flowable):
             for x in cp:
                 _hLine(canvLine, erp, srp, x, vBlocks)
         else:
-            ws = weight + space
-            offset = 0.5*(count-1)*ws
+            lf = lambda x0,y0,x1,y1,canvLine=canvLine, ws=weight+space, count=count: _multiLine(x0,x1,y0,canvLine,ws,count)
             for x in cp:
-                x += offset
-                for i in xrange(count):
-                    _vLine(canvLine, erp, srp, x, vBlocks)
-                    x -= ws
+                _hLine(lf, erp, srp, x, vBlocks)
 
     def _drawVLinesA(self, (sc, sr), (ec, er), weight, color, count, space):
         self._drawVLines((sc+1, sr), (ec+1, er), weight, color, count, space)

@@ -569,7 +569,8 @@ LIST_STYLE = TableStyle(
     lst.append(t)
 
     lst.append(PageBreak())
-    lst.append(Paragraph("This spanning example illustrates automatic grid removal!", styleSheet['BodyText']))
+    lst.append(Paragraph("This spanning example illustrates automatic remova of grids and lines in spanned cells!", styleSheet['BodyText']))
+    lst.append(Spacer(0,6))
     data=  [['Top\nLeft', '', '02', '03', '04', '05', '06', '07'],
             ['', '', '12', 'Span (3,1) (6,2)', '','','','17'],
             ['20', '21', '22', '', '','','','27'],
@@ -589,6 +590,8 @@ LIST_STYLE = TableStyle(
             ('SPAN',(3,1),(6,2)),
             ('BACKGROUND',(3,1),(6,2), colors.peachpuff),
             ('VALIGN',(3,1),(6,2),'TOP'),
+            ('LINEABOVE', (0,2),(-1,2), 1, colors.black, 0, None, None, 2, 2),
+            ('LINEBEFORE', (3,0),(3,-1), 1, colors.black, 0, None, None, 2, 2),
             ])
     lst.append(t)
 
