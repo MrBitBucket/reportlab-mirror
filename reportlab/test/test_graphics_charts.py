@@ -23,7 +23,7 @@ from reportlab.platypus.doctemplate \
 from reportlab.graphics.charts.barchart1 import VerticalBarChart
 from reportlab.graphics.charts.linechart0 import LineChart
 from reportlab.graphics.charts.piechart0 import Pie
-from reportlab.graphics.charts.legends0 import Swatches0
+from reportlab.graphics.charts.legends0 import Legend0
 
 
 def myMainPageFrame(canvas, doc):
@@ -125,7 +125,7 @@ def sample3(drawing=None):
 
     d = drawing
     
-    swatches = Swatches0()
+    swatches = Legend0()
     swatches.alignment = 'right'
     swatches.x = 80
     swatches.y = 160
