@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.38 2001/05/04 18:17:01 aaron_watters Exp $
-__version__=''' $Id: tables.py,v 1.38 2001/05/04 18:17:01 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.39 2001/05/05 13:37:10 aaron_watters Exp $
+__version__=''' $Id: tables.py,v 1.39 2001/05/05 13:37:10 aaron_watters Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -17,6 +17,11 @@ cause the value to wrap (ie are like a traditional linefeed).
 See the test output from running this module as a script for a discussion of the method for constructing
 tables and table styles.
 """
+
+### HACK HACK HACK
+# NUDGE SHOULD BE DISABLED FOR TABLES INSIDE TABLES
+DO_NUDGE = 1
+
 from reportlab.platypus import *
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet
 from reportlab.lib import colors
@@ -451,13 +456,18 @@ class Table(Flowable):
 			raise NotImplementedError
 
 	def draw(self):
+		global DO_NUDGE # ONLY NUDGE IF NOT IN ANOTHER TABLE (HACK)
 		nudge = 0.5 * (self.availWidth - self._width)
-		self.canv.translate(nudge, 0)
+		if DO_NUDGE:
+			self.canv.translate(nudge, 0)
+		OLD_DO_NUDGE = DO_NUDGE
+		DO_NUDGE = 0
 		self._drawBkgrnd()
 		self._drawLines()
 		for row, rowstyle, rowpos, rowheight in map(None, self._cellvalues, self._cellStyles, self._rowpositions[1:], self._rowHeights):
 			for cellval, cellstyle, colpos, colwidth in map(None, row, rowstyle, self._colpositions[:-1], self._colWidths):
 				self._drawCell(cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight))
+		DO_NUDGE = OLD_DO_NUDGE
 
 	def _drawBkgrnd(self):
 		for cmd, (sc, sr), (ec, er), color in self._bkgrndcmds:
