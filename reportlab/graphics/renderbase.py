@@ -63,6 +63,9 @@ class StateTracker:
         self.__combined = []
         if defaults is None:
             defaults = STATE_DEFAULTS.copy()
+        #ensure  that if we have a transform, we have a CTM
+        if defaults.has_key('transform'):
+            defaults['ctm'] = defaults['transform']
         self.__combined.append(defaults)
 
     def push(self,delta):
@@ -74,7 +77,11 @@ class StateTracker:
         for (key, value) in delta.items():
             if key == 'transform':  #do cumulative matrix
                 newstate['transform'] = delta['transform']
-                newstate['ctm'] = mmult(self.__combined[-1]['transform'], delta['transform'])
+                #newstate['ctm'] = mmult(self.__combined[-1]['transform'], delta['transform'])
+                newstate['ctm'] = mmult(self.__combined[-1]['ctm'], delta['transform'])
+                print 'statetracker transform = (%0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f)' % tuple(newstate['transform'])
+                print 'statetracker ctm = (%0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f)' % tuple(newstate['ctm'])
+                
             else:  #just overwrite it
                 newstate[key] = value
 
@@ -182,8 +189,7 @@ class Renderer:
         elif isinstance(node, String):
             self.drawString(node)
         elif isinstance(node, Group):
-            for childNode in node.contents:
-                self.drawNode(childNode)
+            self.drawGroup(node)
         elif isinstance(node, Wedge):
             #print "drawWedge"
             self.drawWedge(node)
@@ -194,7 +200,13 @@ class Renderer:
     _restores = {'stroke':'_stroke','stroke_width': '_lineWidth','stroke_linecap':'_lineCap',
                 'stroke_linejoin':'_lineJoin','fill':'_fill','font_family':'_font',
                 'font_size':'_fontSize'}
-                
+
+    def drawGroup(self, group):
+        # just do the contents.  Some renderers might need to override this
+        # if they need a flipped transform
+        for childNode in group.contents:
+            self.drawNode(childNode)
+
     def drawWedge(self, wedge):
         # by default ask the wedge to make a polygon of itself and draw that!
         #print "drawWedge"

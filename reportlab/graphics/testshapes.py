@@ -316,6 +316,7 @@ def getDrawing9():
 
     return D
 
+
 def getAllFunctionDrawingNames():
     "Get a list of drawing function names from somewhere."
 
