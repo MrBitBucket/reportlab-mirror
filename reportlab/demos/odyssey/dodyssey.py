@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: dodyssey.py,v $
+#	Revision 1.4  2000/05/13 09:23:45  rgbecker
+#	Fix spacing bugs
+#
 #	Revision 1.3  2000/05/12 16:19:07  rgbecker
 #	Title leading changes
-#
+#	
 #	Revision 1.2  2000/05/12 14:19:03  andy_robinson
 #	Added 'if __name__=='__main__'' handlers to demos
 #	
@@ -52,7 +55,7 @@
 #	Revision 1.1  2000/04/06 08:58:09  rgbecker
 #	Paragraph formatting version of odyssey.py
 #	
-__version__=''' $Id: dodyssey.py,v 1.3 2000/05/12 16:19:07 rgbecker Exp $ '''
+__version__=''' $Id: dodyssey.py,v 1.4 2000/05/13 09:23:45 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -119,6 +122,7 @@ def fTitle(txt,style=InitialStyle):
 	Elements.append(Paragraph(txt, style))
 	
 ParaStyle = copy.deepcopy(styles["Normal"])
+ParaStyle.spaceBefore = 0.1*inch
 if 'right' in sys.argv:
 	ParaStyle.alignment = TA_RIGHT
 elif 'left' in sys.argv:
@@ -136,7 +140,6 @@ def spacer(inches):
 	Elements.append(doctemplate.Spacer(0.1*inch, inches*inch))
 
 def p(txt, style=ParaStyle):
-	spacer(0.1)
 	Elements.append(Paragraph(txt, style))
 
 firstPre = 1
