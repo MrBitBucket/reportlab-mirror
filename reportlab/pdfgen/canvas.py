@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.32  2000/04/28 13:37:40  rgbecker
+#	Fix verbose filename print when it's actually a file type object
+#
 #	Revision 1.31  2000/04/28 09:10:20  rgbecker
 #	Changed zlib error handling
-#
+#	
 #	Revision 1.30  2000/04/25 20:20:13  aaron_watters
 #	Added support for closed outline entries
 #	
@@ -123,7 +126,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.31 2000/04/28 09:10:20 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.32 2000/04/28 13:37:40 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -519,7 +522,14 @@ class Canvas:
 
         self._doc.SaveToFile(self._filename, self)
         if self._verbosity > 0:
-            print 'saved', self._filename
+            if type(self._filename)==StringType:
+                name = self._filename
+            else:
+                if hasattr(self._filename,'name'):
+                    name = self._filename.name
+                else:
+                    name = '<Unknown>'
+            print 'saved', name
 
     def setPageSize(self, size):
         """accepts a 2-tuple in points for paper size for this
