@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/genuserguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/genuserguide.py,v 1.37 2000/10/26 11:20:04 rgbecker Exp $
-__version__=''' $Id: genuserguide.py,v 1.37 2000/10/26 11:20:04 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/docs/userguide/genuserguide.py,v 1.38 2000/11/05 17:41:58 andy_robinson Exp $
+__version__=''' $Id: genuserguide.py,v 1.38 2000/11/05 17:41:58 andy_robinson Exp $ '''
 
 
 __doc__ = """
@@ -20,7 +20,7 @@ styleSheet = getStyleSheet()
 
 #from reportlab.platypus.doctemplate import SimpleDocTemplate
 from reportlab.lib.units import inch
-from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.pagesizes import letter, A4, A5, A3, DEFAULT_PAGE_SIZE  # latter two for testing
 from reportlab.platypus import Paragraph, Spacer, Preformatted,\
             PageBreak, CondPageBreak, Flowable, Table, TableStyle, \
             NextPageTemplate, KeepTogether, Image, XPreformatted
@@ -384,7 +384,9 @@ def getStory():
     return _story
 
 def run(pagesize):
+    
     doc = RLDocTemplate('userguide.pdf',pagesize = pagesize)
+
 
     #this builds the story    
     #resetStory()
@@ -416,7 +418,13 @@ def run(pagesize):
     
     
 if __name__=="__main__":
-	pagesize = A4
-	if 'letter' in sys.argv: pagesize = letter
-	if 'A4' in sys.argv: pagesize = A4
-	run(pagesize)
+    if len(sys.argv) > 1:
+        try:
+            (w, h) = eval(sys.argv[1])
+        except:
+            print 'Expected page size in argument 1', sys.argv[1]
+            raise
+        print 'set page size to',sys.argv[1]
+    else:
+        (w, h) = DEFAULT_PAGE_SIZE
+    run((w, h))

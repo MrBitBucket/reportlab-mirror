@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/rltemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/tools/rltemplate.py,v 1.7 2000/10/25 08:57:45 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/tools/rltemplate.py,v 1.8 2000/11/05 17:41:58 andy_robinson Exp $
 # doc template for RL manuals.  Currently YAML is hard-coded
 #to use this, which is wrong.
 
@@ -19,7 +19,7 @@ class FrontCoverTemplate(PageTemplate):
         frame1 = Frame(inch,
                        3*inch,
                        self.pageWidth - 2*inch,
-                       4.5*inch, id='cover')
+                       self.pageHeight - 518, id='cover')
         PageTemplate.__init__(self, id, [frame1])  # note lack of onPage
 
     def afterDrawPage(self, canvas, doc):
@@ -28,7 +28,7 @@ class FrontCoverTemplate(PageTemplate):
 
 
         canvas.setFont('Times-Roman', 10)
-        canvas.line(inch, 120, self.pageWidth - 2*inch, 120)
+        canvas.line(inch, 120, self.pageWidth - inch, 120)
 
         canvas.drawString(inch, 100, 'Lombard Business Park')
         canvas.drawString(inch, 88, '8 Lombard Road')
@@ -55,11 +55,12 @@ class OneColumnTemplate(PageTemplate):
         PageTemplate.__init__(self, id, [frame1])  # note lack of onPage
 
     def afterDrawPage(self, canvas, doc):
+        y = self.pageHeight - 50
         canvas.saveState()
         canvas.setFont('Times-Roman', 10)
-        canvas.drawString(inch, 11.1*inch, doc.title)
-        canvas.drawRightString(7*inch, 11.1*inch, doc.chapter)
-        canvas.line(inch, 11*inch, 7*inch, 11*inch)
+        canvas.drawString(inch, y+8, doc.title)
+        canvas.drawRightString(self.pageWidth - inch, y+8, doc.chapter)
+        canvas.line(inch, y, self.pageWidth - inch, y)
         canvas.drawCentredString(doc.pagesize[0] / 2, 0.75*inch, 'Page %d' % canvas.getPageNumber())
         canvas.restoreState()
 
@@ -81,26 +82,27 @@ class TwoColumnTemplate(PageTemplate):
         PageTemplate.__init__(self, id, [frame1, frame2])  # note lack of onPage
 
     def afterDrawPage(self, canvas, doc):
+        y = self.pageHeight - 50
         canvas.saveState()
         canvas.setFont('Times-Roman', 10)
-        canvas.drawString(inch, 11.1*inch, doc.title)
-        canvas.drawRightString(7*inch, 11.1*inch, doc.chapter)
-        canvas.line(inch, 11*inch, 7*inch, 11*inch)
+        canvas.drawString(inch, y+8, doc.title)
+        canvas.drawRightString(self.pageWidth - inch, y+8, doc.chapter)
+        canvas.line(inch, y, self.pageWidth - inch, y*inch)
         canvas.drawCentredString(doc.pagesize[0] / 2, 0.75*inch, 'Page %d' % canvas.getPageNumber())
         canvas.restoreState()
 
 
 class RLDocTemplate(BaseDocTemplate):
     def afterInit(self):
-        self.addPageTemplates(FrontCoverTemplate('Cover'))
-        self.addPageTemplates(OneColumnTemplate('Normal'))
-        self.addPageTemplates(TwoColumnTemplate('TwoColumn'))
+        self.addPageTemplates(FrontCoverTemplate('Cover', self.pagesize))
+        self.addPageTemplates(OneColumnTemplate('Normal', self.pagesize))
+        self.addPageTemplates(TwoColumnTemplate('TwoColumn', self.pagesize))
         
         #just playing
         self.title = "(Document Title Goes Here)"
         self.chapter = "(No chapter yet)"
         self.chapterNo = 1 #unique keys
-        self.sectionNo = 1 # uniqque keys
+        self.sectionNo = 1 # unique keys
 
     def beforeDocument(self):
         self.canv.showOutline()
