@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.9  2000/04/07 09:20:43  rgbecker
+#	Allow multiple files, default to pythonpoint.xml if present
+#
 #	Revision 1.8  2000/04/06 12:15:38  andy_robinson
 #	Updated example XML to include full tag reference
-#
+#	
 #	Revision 1.7  2000/04/06 09:47:20  andy_robinson
 #	Added several new shape tags.
 #	Broke out parser into separate module, to
@@ -58,7 +61,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.8 2000/04/06 12:15:38 andy_robinson Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.9 2000/04/07 09:20:43 rgbecker Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -582,13 +585,9 @@ def process(datafilename):
 
 if __name__ == '__main__':
     import sys
-    if len(sys.argv) > 1:
-        datafile = sys.argv[1]
-        if os.path.isfile(datafile):
-            process(datafile)   #see just above
-        else:
-            print 'Data file not found:',datafile
-    else:
+    if len(sys.argv) == 1 and os.path.isfile('pythonpoint.xml'):
+		sys.argv.apend('pythonpoint.xml')
+    if len(sys.argv) == 1:
         print """PythonPoint - copyright ReportLab Inc. 1999-2000
 usage:
     pythonpoint.py my_presentation.xml
@@ -597,4 +596,9 @@ To create the PythonPoint user guide, do:
     pythonpoint.py pythonpoint.xml
 
 Read it, then look at the XML; all should be clear!"""
-        
+    else:
+        for datafile in sys.argv[1:]:
+            if os.path.isfile(datafile):
+                process(datafile)   #see just above
+            else:
+                print 'Data file not found:', datafile
