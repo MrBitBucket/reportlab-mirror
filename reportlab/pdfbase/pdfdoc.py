@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.13  2000/04/15 15:00:09  aaron_watters
+#	added support for addOutlineEntry0 api
+#
 #	Revision 1.12  2000/04/06 09:52:02  andy_robinson
 #	Removed some old comments; tweaks to experimental Outline methods.
-#
+#	
 #	Revision 1.11  2000/04/02 02:52:39  aaron_watters
 #	added support for outline trees
 #	
@@ -59,7 +62,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.12 2000/04/06 09:52:02 andy_robinson Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.13 2000/04/15 15:00:09 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -264,7 +267,7 @@ class PDFDocument:
         f.write('startxref' + LINEEND)
         f.write(str(self.startxref)  + LINEEND)
 
-    def SaveToFile(self, filename):
+    def SaveToFile(self, filename,canvas):
         """Open a file, and ask each object in turn to write itself to
         the file.  Keep track of the file position at each point for
         use in the index at the end"""
@@ -276,7 +279,7 @@ class PDFDocument:
         # do preprocessing as needed
         # prepare outline
         outline = self.outline
-        outline.prepare(self)
+        outline.prepare(self, canvas)
         for obj in self.objects:
             pos = f.tell()
             self.xref.append(pos)
@@ -576,6 +579,48 @@ class PDFOutline(PDFObject):
     #no init for now
     mydestinations = ready = None
     counter = 0
+    currentlevel = -1 # ie, no levels yet
+    def __init__(self):
+        self.destinationnamestotitles = {}
+        self.destinationstotitles = {}
+        self.levelstack = []
+        self.buildtree = []
+    def addOutlineEntry(self, destinationname, level=0, title=None):
+        """destinationname of None means "close the tree" """
+        if destinationname is None and level!=0:
+            raise ValueError, "close tree must have level of 0"
+        from types import IntType, TupleType
+        if type(level) is not IntType: raise ValueError, "level must be integer, got %s" % type(level)
+        if level<0: raise ValueError, "negative levels not allowed"
+        if title is None: title = destinationname
+        currentlevel = self.currentlevel
+        stack = self.levelstack
+        tree = self.buildtree
+        # adjust currentlevel and stack to match level
+        if level>currentlevel:
+            if level>currentlevel+1:
+                raise ValueError, "can't jump from outline level %s to level %s, need intermediates" %(currentlevel, level)
+            level = currentlevel = currentlevel+1
+            stack.append([])
+        while level<currentlevel:
+            # pop off levels to match
+            current = stack[-1]
+            del stack[-1]
+            previous = stack[-1]
+            lastinprevious = previous[-1]
+            if type(lastinprevious) is TupleType:
+                (name, sectionlist) = lastinprevious
+                raise ValueError, "cannot reset existing sections: " + repr(lastinprevious)
+            else:
+                name = lastinprevious
+                sectionlist = current
+                previous[-1] = (name, sectionlist)
+            #sectionlist.append(current)
+            currentlevel = currentlevel-1
+        if destinationname is None: return
+        stack[-1].append(destinationname)
+        self.destinationnamestotitles[destinationname] = title
+        self.currentlevel = level
     def setDestinations(self, destinationtree):
         self.mydestinations = destinationtree
     def save(self, file):
@@ -599,7 +644,16 @@ class PDFOutline(PDFObject):
         "recursively translate tree of names into tree of destinations"
         from types import ListType, TupleType, StringType
         Ot = type(object)
+        destinationnamestotitles = self.destinationnamestotitles
+        destinationstotitles = self.destinationstotitles
         if Ot is StringType:
+            destination = canvas._bookmarkReference(object)
+            title = object
+            if destinationnamestotitles.has_key(object):
+                title = destinationnamestotitles[object]
+            else:
+                destinationnamestotitles[title] = title
+            destinationstotitles[destination] = title
             return {object: canvas._bookmarkReference(object)} # name-->ref
         if Ot is ListType or Ot is TupleType:
             L = []
@@ -609,15 +663,22 @@ class PDFOutline(PDFObject):
                 return tuple(L)
             return L
         raise "in outline, destination name must be string: got a %s" % Ot
-    def prepare(self, document):
+    def prepare(self, document, canvas):
         """prepare all data structures required for save operation (create related objects)"""
         if self.mydestinations is None:
-            self.first = self.last = None
-            self.count = 0
-            self.ready = 1
-            return
+            if self.levelstack:
+                self.addOutlineEntry(None) # close the tree
+                destnames = self.levelstack[0]
+                #from pprint import pprint; pprint(destnames); stop
+                self.mydestinations = self.translateNames(canvas, destnames)
+            else:
+                self.first = self.last = None
+                self.count = 0
+                self.ready = 1
+                return
         #self.first = document.objectReference("Outline.First")
         #self.last = document.objectReference("Outline.Last")
+        # XXXX this needs to be generalized for closed entries!
         self.count = count(self.mydestinations)
         (self.first, self.last) = self.maketree(document, self.mydestinations, toplevel=1)
         self.ready = 1
@@ -636,6 +697,7 @@ class PDFOutline(PDFObject):
         nelts = len(destinationtree)
         lastindex = nelts-1
         lastelt = firstref = lastref = None
+        destinationnamestotitles = self.destinationnamestotitles
         for index in range(nelts):
             eltobj = OutlineEntryObject()
             eltobj.Parent = Parent
@@ -669,7 +731,7 @@ class PDFOutline(PDFObject):
                 [(Title, Dest)] = leafdict.items()
             except:
                 raise ValueError, "bad outline leaf dictionary, should have one entry "+str(elt)
-            eltobj.Title = Title
+            eltobj.Title = destinationnamestotitles[Title]
             eltobj.Dest = Dest
         return (firstref, lastref)
 def count(tree): 
