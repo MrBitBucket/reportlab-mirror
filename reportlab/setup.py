@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2003
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/setup.py,v 1.7 2002/12/22 23:03:38 andy_robinson Exp $
-__version__=''' $Id: setup.py,v 1.7 2002/12/22 23:03:38 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/setup.py,v 1.8 2003/01/06 11:33:34 rgbecker Exp $
+__version__=''' $Id: setup.py,v 1.8 2003/01/06 11:33:34 rgbecker Exp $ '''
 
 import os, sys, distutils
 from distutils.core import setup, Extension
@@ -19,7 +19,6 @@ def package_home(globals_dict):
 pjoin = os.path.join
 
 package_path = pjoin(package_home(distutils.__dict__), 'reportlab')
-print package_path
 
 
 # why oh why don't most setup scripts have a script handler?
