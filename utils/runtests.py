@@ -32,11 +32,14 @@
 #
 ###############################################################################
 #	$Log: runtests.py,v $
+#	Revision 1.2  2000/02/23 15:08:23  rgbecker
+#	Fixed clean_files
+#
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
-#
 #	
-__version__=''' $Id: runtests.py,v 1.1 2000/02/23 13:16:56 rgbecker Exp $ '''
+#	
+__version__=''' $Id: runtests.py,v 1.2 2000/02/23 15:08:23 rgbecker Exp $ '''
 '''
 script for testing ReportLab
 '''
@@ -121,7 +124,7 @@ def clean_files(d):
 			fn = os.path.normcase(os.path.normpath(os.path.join(d,n)))
 			if os.path.isfile(fn): os.remove(fn)
 	os.chdir(d)
-	os.path.walk('.',find_cleanable_files,test_files)
+	os.path.walk('.',find_cleanable_files,None)
 
 if __name__=='__main__':
 	legal_options = ['-cycles', '-dir', '-help','-notest','-clean', '-fclean']
