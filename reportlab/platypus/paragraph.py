@@ -31,9 +31,13 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.17  2000/07/14 10:29:50  rgbecker
+#	The Paragraph.split method was wrongly assuming that the firstLineIndent
+#	should reset to zero. It should always reset to leftIndent!
+#
 #	Revision 1.16  2000/07/03 15:39:51  rgbecker
 #	Documentation fixes
-#
+#	
 #	Revision 1.15  2000/06/23 13:13:54  rgbecker
 #	Fixes to splitting code
 #	
@@ -79,7 +83,7 @@
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.16 2000/07/03 15:39:51 rgbecker Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.17 2000/07/14 10:29:50 rgbecker Exp $ '''
 import string
 import types
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -330,9 +334,9 @@ class Paragraph(Flowable):
 
 		P1=Paragraph(None,style,bulletText=self.bulletText,frags=func(bfrags,0,s))
 		P1._JustifyLast = 1
-		if style.firstLineIndent != 0:
+		if style.firstLineIndent != style.leftIndent:
 			style = deepcopy(style)
-			style.firstLineIndent = 0
+			style.firstLineIndent = style.leftIndent
 		P2=Paragraph(None,style,bulletText=None,frags=func(bfrags,s,n))
 		return [P1,P2]
 
