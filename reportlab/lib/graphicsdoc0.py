@@ -11,7 +11,7 @@ Type the following for usage info:
 __version__ = 0,1
 
 
-import sys, os, re, types, string, getopt
+import sys, os, re, types, string, getopt, pickle
 from string import find, join, split, replace, expandtabs, rstrip
 
 from docpy0 import *
@@ -243,179 +243,209 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         self.story.append(XPreformatted(text, self.code))
 
 
-##class UmlPdfDocBuilder0(PdfDocBuilder0):
-##    "Document the skeleton of a Python module with UML class diagrams."
-##
-##    fileSuffix = '-uml.pdf'
-##
-##    def begin(self):
-##        styleSheet = getSampleStyleSheet()
-##        self.h1 = styleSheet['Heading1']
-##        self.h2 = styleSheet['Heading2']
-##        self.h3 = styleSheet['Heading3']
-##        self.code = styleSheet['Code']
-##        self.bt = styleSheet['BodyText']
-##        self.story = []
-##        self.classCompartment = ''
-##        self.methodCompartment = []
-##
-##
-##    def beginModule(self, name, doc, imported):
-##        story = self.story
-##        h1, h2, h3, bt = self.h1, self.h2, self.h3, self.bt
-##        styleSheet = getSampleStyleSheet()
-##        bt1 = styleSheet['BodyText']
-##
-##        story.append(Paragraph(name, h1))
-##        story.append(Paragraph(doc, bt1))
-##
-##        story.append(Paragraph('Imported modules', h2))
-##        for m in imported:
-##            story.append(Paragraph(m, bt1))
-##
-##
-##    def beginClasses(self, names):
-##        h1, h2, h3, bt = self.h1, self.h2, self.h3, self.bt
-##        self.story.append(Paragraph('Classes', h2))
-##
-##
-##    def beginClass(self, name, doc, bases):
-##        self.classCompartment = ''
-##        self.methodCompartment = []
-##
-##        if bases:
-##            self.classCompartment = '%s(%s)' % (name, join(bases, ', '))
-##        else:
-##            self.classCompartment = name
-##
-##
-##    def endClass(self, name, doc, bases):
-##        h1, h2, h3, bt, code = self.h1, self.h2, self.h3, self.bt, self.code
-##        styleSheet = getSampleStyleSheet()
-##        bt1 = styleSheet['BodyText']
-##        story = self.story
-##
-##        # Use only the first line of the class' doc string --
-##        # no matter how long! (Do the same later for methods)
-##        classDoc = _reduceDocStringLength(doc)
-##
-##        tsa = tableStyleAttributes = []
-## 
-##        # Make table with class and method rows
-##        # and add it to the story.
-##        p = Paragraph('<b>%s</b>' % self.classCompartment, bt)
-##        p.style.alignment = TA_CENTER
-##        rows = [(p,)]
-##        # No doc strings, now...
-##        # rows = rows + [(Paragraph('<i>%s</i>' % classDoc, bt1),)]
-##        lenRows = len(rows)
-##        tsa.append(('BOX', (0,0), (-1,lenRows-1), 0.25, colors.black))
-##        for name, doc, sig in self.methodCompartment:
-##            nameAndSig = Paragraph('<b>%s</b>%s' % (name, sig), bt1)
-##            rows.append((nameAndSig,))
-##            # No doc strings, now...
-##            # docStr = Paragraph('<i>%s</i>' % _reduceDocStringLength(doc), bt1)
-##            # rows.append((docStr,))
-##        tsa.append(('BOX', (0,lenRows), (-1,-1), 0.25, colors.black))
-##        t = Table(rows, (12*cm,))
-##        tableStyle = TableStyle(tableStyleAttributes)
-##        t.setStyle(tableStyle)
-##        self.story.append(t)
-##        self.story.append(Spacer(1*cm, 1*cm))
-##
-##
-##    def beginMethod(self, name, doc, sig):
-##        self.methodCompartment.append((name, doc, sig))
-##
-##
-##    def beginFunctions(self, names):
-##        h1, h2, h3, bt = self.h1, self.h2, self.h3, self.bt
-##        self.story.append(Paragraph('Functions', h2))
-##        self.classCompartment = chr(171) + ' Module-Level Functions ' + chr(187)
-##        self.methodCompartment = []
-##        if not names:
-##            self.story.append(Paragraph('No functions.', bt))
-##
-##
-##    def beginFunction(self, name, doc, sig):
-##        self.methodCompartment.append((name, doc, sig))
-##
-##
-##    def endFunctions(self, names):
-##        h1, h2, h3, bt, code = self.h1, self.h2, self.h3, self.bt, self.code
-##        styleSheet = getSampleStyleSheet()
-##        bt1 = styleSheet['BodyText']
-##        story = self.story
-##        if not names:
-##            return
-##        
-##        tsa = tableStyleAttributes = []
-##
-##        # Make table with class and method rows
-##        # and add it to the story.
-##        p = Paragraph('<b>%s</b>' % self.classCompartment, bt)
-##        p.style.alignment = TA_CENTER
-##        rows = [(p,)]
-##        lenRows = len(rows)
-##        tsa.append(('BOX', (0,0), (-1,lenRows-1), 0.25, colors.black))
-##        for name, doc, sig in self.methodCompartment:
-##            nameAndSig = Paragraph('<b>%s</b>%s' % (name, sig), bt1)
-##            rows.append((nameAndSig,))
-##            # No doc strings, now...
-##            # docStr = Paragraph('<i>%s</i>' % _reduceDocStringLength(doc), bt1)
-##            # rows.append((docStr,))
-##        tsa.append(('BOX', (0,lenRows), (-1,-1), 0.25, colors.black))
-##        t = Table(rows, (12*cm,))
-##        tableStyle = TableStyle(tableStyleAttributes)
-##        t.setStyle(tableStyle)
-##        self.story.append(t)
-##        self.story.append(Spacer(1*cm, 1*cm))
-##
-##
-##class GraphUmlPdfDocBuilder0(UmlPdfDocBuilder0):
-##    "Now showing: widget drawings."
-##
-##    fileSuffix = '-graph-uml.pdf'
-##
-##    def write(self, skeleton=None):
-##        "Display a structured tree text version of the data found."
-##
-##        self.mySkeleton = skeleton
-##        UmlPdfDocBuilder0.write(self, skeleton)
-##        
-##
-##    def beginClass(self, name, doc, bases):
-##        UmlPdfDocBuilder0.beginClass(self, name, doc, bases)
-##        # Keep an eye on the base classes.
-##        self.currentBaseClasses = bases
-##        
-##    
-##    def endClass(self, name, doc, bases):
-##        "Append a graphic demo of a widget at the end of a class."
-##        
-##        UmlPdfDocBuilder0.endClass(self, name, doc, bases)
-##
-##        # Find out if that was a Widget.
-##        widgetFound = 0
-##        for b in self.currentBaseClasses:
-##            if b.__name__ == 'Widget':
-##                ## print "RING: Widget '%s' found!!" % name
-##                widgetFound = 1
-##                break
-##
-##        if widgetFound:
-##            # Get a demo drawing from the widget and add it to the story.
-##            # Hackish...
-##            try:
-##                widget = eval('self.mySkeleton.moduleSpace.'+name + '()')
-##                drawing = widget.demo()
-##                widget.verify()
-##                flo = renderPDF.GraphicsFlowable(drawing)
-##                self.story.append(Spacer(6,6))
-##                self.story.append(flo)
-##                self.story.append(Spacer(6,6))
-##            except:
-##                pass
+# Highly experimental!
+class PlatypusDocBuilder0(DocBuilder0):
+    "Document the skeleton of a Python module as a Platypus story."
+
+    fileSuffix = '.pps' # A pickled Platypus story.
+
+    def begin(self):
+        styleSheet = getSampleStyleSheet()
+        self.code = styleSheet['Code']
+        self.bt = styleSheet['BodyText']
+        self.story = []
+
+        
+    def end(self):
+        if self.packageName:
+            path = self.packageName + self.fileSuffix
+        elif self.skeleton:
+            path = self.skeleton.getModuleName() + self.fileSuffix
+        else:
+            path = ''
+        
+        if path:
+            f = open(path, 'w')
+            pickle.dump(self.story, f)
+            
+
+    def beginPackage(self, name):
+        DocBuilder0.beginPackage(self, name)
+        self.story.append(Paragraph(name, self.bt))
+
+
+    def beginModule(self, name, doc, imported):
+        story = self.story
+        bt = self.bt
+
+        story.append(Paragraph(name, bt))
+        story.append(XPreformatted(doc, bt))
+
+
+    def beginClasses(self, names):
+        self.story.append(Paragraph('Classes', self.bt))
+
+
+    def beginClass(self, name, doc, bases):
+        bt = self.bt
+        story = self.story
+        if bases:
+            bases = map(lambda b:b.__name__, bases) # hack
+            story.append(Paragraph('%s(%s)' % (name, join(bases, ', ')), bt))
+        else:
+            story.append(Paragraph(name, bt))
+
+        story.append(XPreformatted(doc, bt))
+
+
+    def beginMethod(self, name, doc, sig):
+        bt = self.bt
+        story = self.story
+        story.append(Paragraph(name+sig, bt))
+        story.append(XPreformatted(doc, bt))
+
+
+    def beginFunctions(self, names):
+        if names:
+            self.story.append(Paragraph('Functions', self.bt))
+
+
+    def beginFunction(self, name, doc, sig):
+        bt = self.bt
+        story = self.story
+        story.append(Paragraph(name+sig, bt))
+        story.append(XPreformatted(doc, bt))
+
+
+class UmlPdfDocBuilder0(PdfDocBuilder0):
+    "Document the skeleton of a Python module with UML class diagrams."
+
+    fileSuffix = '-uml.pdf'
+
+    def begin(self):
+        styleSheet = getSampleStyleSheet()
+        self.h1 = styleSheet['Heading1']
+        self.h2 = styleSheet['Heading2']
+        self.h3 = styleSheet['Heading3']
+        self.code = styleSheet['Code']
+        self.bt = styleSheet['BodyText']
+        self.story = []
+        self.classCompartment = ''
+        self.methodCompartment = []
+
+
+    def beginModule(self, name, doc, imported):
+        story = self.story
+        h1, h2, h3, bt = self.h1, self.h2, self.h3, self.bt
+        styleSheet = getSampleStyleSheet()
+        bt1 = styleSheet['BodyText']
+
+        story.append(Paragraph(name, h1))
+        story.append(XPreformatted(doc, bt1))
+
+        if imported:
+            story.append(Paragraph('Imported modules', h2))
+            for m in imported:
+                story.append(Paragraph(m, bt1))
+
+
+    def beginClasses(self, names):
+        h1, h2, h3, bt = self.h1, self.h2, self.h3, self.bt
+        if names:
+            self.story.append(Paragraph('Classes', h2))
+
+
+    def beginClass(self, name, doc, bases):
+        self.classCompartment = ''
+        self.methodCompartment = []
+
+        if bases:
+            bases = map(lambda b:b.__name__, bases) # hack
+            self.classCompartment = '%s(%s)' % (name, join(bases, ', '))
+        else:
+            self.classCompartment = name
+
+
+    def endClass(self, name, doc, bases):
+        h1, h2, h3, bt, code = self.h1, self.h2, self.h3, self.bt, self.code
+        styleSheet = getSampleStyleSheet()
+        bt1 = styleSheet['BodyText']
+        story = self.story
+
+        # Use only the first line of the class' doc string --
+        # no matter how long! (Do the same later for methods)
+        classDoc = _reduceDocStringLength(doc)
+
+        tsa = tableStyleAttributes = []
+ 
+        # Make table with class and method rows
+        # and add it to the story.
+        p = Paragraph('<b>%s</b>' % self.classCompartment, bt)
+        p.style.alignment = TA_CENTER
+        rows = [(p,)]
+        # No doc strings, now...
+        # rows = rows + [(Paragraph('<i>%s</i>' % classDoc, bt1),)]
+        lenRows = len(rows)
+        tsa.append(('BOX', (0,0), (-1,lenRows-1), 0.25, colors.black))
+        for name, doc, sig in self.methodCompartment:
+            nameAndSig = Paragraph('<b>%s</b>%s' % (name, sig), bt1)
+            rows.append((nameAndSig,))
+            # No doc strings, now...
+            # docStr = Paragraph('<i>%s</i>' % _reduceDocStringLength(doc), bt1)
+            # rows.append((docStr,))
+        tsa.append(('BOX', (0,lenRows), (-1,-1), 0.25, colors.black))
+        t = Table(rows, (12*cm,))
+        tableStyle = TableStyle(tableStyleAttributes)
+        t.setStyle(tableStyle)
+        self.story.append(t)
+        self.story.append(Spacer(1*cm, 1*cm))
+
+
+    def beginMethod(self, name, doc, sig):
+        self.methodCompartment.append((name, doc, sig))
+
+
+    def beginFunctions(self, names):
+        h1, h2, h3, bt = self.h1, self.h2, self.h3, self.bt
+        if names:
+            self.story.append(Paragraph('Functions', h2))
+        self.classCompartment = chr(171) + ' Module-Level Functions ' + chr(187)
+        self.methodCompartment = []
+
+
+    def beginFunction(self, name, doc, sig):
+        self.methodCompartment.append((name, doc, sig))
+
+
+    def endFunctions(self, names):
+        h1, h2, h3, bt, code = self.h1, self.h2, self.h3, self.bt, self.code
+        styleSheet = getSampleStyleSheet()
+        bt1 = styleSheet['BodyText']
+        story = self.story
+        if not names:
+            return
+        
+        tsa = tableStyleAttributes = []
+
+        # Make table with class and method rows
+        # and add it to the story.
+        p = Paragraph('<b>%s</b>' % self.classCompartment, bt)
+        p.style.alignment = TA_CENTER
+        rows = [(p,)]
+        lenRows = len(rows)
+        tsa.append(('BOX', (0,0), (-1,lenRows-1), 0.25, colors.black))
+        for name, doc, sig in self.methodCompartment:
+            nameAndSig = Paragraph('<b>%s</b>%s' % (name, sig), bt1)
+            rows.append((nameAndSig,))
+            # No doc strings, now...
+            # docStr = Paragraph('<i>%s</i>' % _reduceDocStringLength(doc), bt1)
+            # rows.append((docStr,))
+        tsa.append(('BOX', (0,lenRows), (-1,-1), 0.25, colors.black))
+        t = Table(rows, (12*cm,))
+        tableStyle = TableStyle(tableStyleAttributes)
+        t.setStyle(tableStyle)
+        self.story.append(t)
+        self.story.append(Spacer(1*cm, 1*cm))
 
 
 class GraphHtmlDocBuilder0(HtmlDocBuilder0):
