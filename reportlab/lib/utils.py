@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.23 2001/12/12 11:42:43 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.23 2001/12/12 11:42:43 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.24 2002/01/17 19:00:09 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.24 2002/01/17 19:00:09 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -41,10 +41,8 @@ def recursiveImport(modulename, baseDir=None):
 	import imp
 	parts = string.split(modulename, '.')
 	part = parts[0]
-	if baseDir:
-		path = [baseDir]
-	else:
-		path = None
+	path = list(baseDir and (type(baseDir) not in SeqTypes and [baseDir] or filter(None,baseDir)) or None)
+	if '.' not in path: path.insert(0,'.')
 
 	#make import errors a bit more informative
 	try:
@@ -58,15 +56,10 @@ def recursiveImport(modulename, baseDir=None):
 	except ImportError:
 		msg = "cannot import '%s' while attempting recursive import of '%s'" % (part, modulename)
 		if baseDir:
-			msg = msg + " under directory '%s'" % baseDir
+			msg = msg + " under paths '%s'" % `path`
 		raise ImportError, msg
 
 	return childModule
-
-
-	
-		
-
 
 def import_zlib():
 	try:
