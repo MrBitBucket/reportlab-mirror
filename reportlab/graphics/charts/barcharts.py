@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.2 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.3 2001/04/09 16:25:07 dinu_gherman Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -229,32 +229,19 @@ class VerticalBarChart(Widget):
             self._barPositions.append(barRow)
         
 
-    def draw(self):
-        self.valueAxis.configure(self.data)
-        self.valueAxis.setPosition(self.x, self.y, self.height)
-
-        # if zero is in chart, put x axis there, otherwise
-        # use bottom.
-        xAxisCrossesAt = self.valueAxis.scale(0)
-        if ((xAxisCrossesAt > self.y + self.height) or (xAxisCrossesAt < self.y)):
-            self.categoryAxis.setPosition(self.x, self.y, self.width)
-        else:
-            self.categoryAxis.setPosition(self.x, xAxisCrossesAt, self.width)
-
-        self.categoryAxis.configure(self.data)
-        
-        self.calcBarPositions()        
-        
+    def makeBackground(self):
         g = Group()
 
-        # debug mode - show border
         g.add(Rect(self.x, self.y,
                    self.width, self.height,
                    strokeColor = self.strokeColor,
                    fillColor= self.fillColor))
         
-        g.add(self.categoryAxis)
-        g.add(self.valueAxis)
+        return g
+    
+
+    def makeBars(self):
+        g = Group()
 
         labelFmt = self.barLabelFormat
 
@@ -301,6 +288,33 @@ class VerticalBarChart(Widget):
                     label.setText(labelText)
 
                     g.add(label)
+
+        return g
+    
+
+    def draw(self):
+        self.valueAxis.setPosition(self.x, self.y, self.height)
+        self.valueAxis.configure(self.data)
+
+        # if zero is in chart, put x axis there, otherwise
+        # use bottom.
+        xAxisCrossesAt = self.valueAxis.scale(0)
+        if ((xAxisCrossesAt > self.y + self.height) or (xAxisCrossesAt < self.y)):
+            x, y, w = self.x, self.y, self.width
+        else:
+            x, y, w = self.x, xAxisCrossesAt, self.width
+
+        self.categoryAxis.setPosition(x, y, w)
+        self.categoryAxis.configure(self.data)
+        
+        self.calcBarPositions()        
+        
+        g = Group()
+
+        g.add(self.makeBackground())
+        g.add(self.categoryAxis)
+        g.add(self.valueAxis)
+        g.add(self.makeBars())
 
         return g
         
@@ -488,32 +502,19 @@ class HorizontalBarChart(Widget):
             self._barPositions.append(barRow)
         
 
-    def draw(self):
-        self.valueAxis.configure(self.data)
-        self.valueAxis.setPosition(self.x, self.y, self.width)
-
-        # if zero is in chart, put y axis there, otherwise
-        # use left.
-        yAxisCrossesAt = self.valueAxis.scale(0)            
-        if ((yAxisCrossesAt > self.x + self.width) or (yAxisCrossesAt < self.x)):
-            self.categoryAxis.setPosition(self.x, self.y, self.height)
-        else:
-            self.categoryAxis.setPosition(yAxisCrossesAt, self.y, self.height)
-
-        self.categoryAxis.configure(self.data)
-
-        self.calcBarPositions()                
-
+    def makeBackground(self):
         g = Group()
 
-        # debug mode - show border
         g.add(Rect(self.x, self.y,
                    self.width, self.height,
                    strokeColor = self.strokeColor,
                    fillColor= self.fillColor))
         
-        g.add(self.categoryAxis)
-        g.add(self.valueAxis)
+        return g
+    
+
+    def makeBars(self):
+        g = Group()
 
         labelFmt = self.barLabelFormat
         
@@ -554,6 +555,35 @@ class HorizontalBarChart(Widget):
                     label.setText(labelText)
 
                     g.add(label)
+
+        return g
+
+
+    def draw(self):
+        self.valueAxis.setPosition(self.x, self.y, self.width)
+        self.valueAxis.configure(self.data)
+
+        # if zero is in chart, put y axis there, otherwise
+        # use left.
+        yAxisCrossesAt = self.valueAxis.scale(0)            
+        if ((yAxisCrossesAt > self.x + self.width) or (yAxisCrossesAt < self.x)):
+            x, y, h = self.x, self.y, self.height
+##            self.categoryAxis.setPosition(self.x, self.y, self.height)
+        else:
+            x, y, h = yAxisCrossesAt, self.y, self.height
+##            self.categoryAxis.setPosition(yAxisCrossesAt, self.y, self.height)
+
+        self.categoryAxis.setPosition(x, y, h)
+        self.categoryAxis.configure(self.data)
+
+        self.calcBarPositions()                
+
+        g = Group()
+
+        g.add(self.makeBackground())
+        g.add(self.categoryAxis)
+        g.add(self.valueAxis)
+        g.add(self.makeBars())
 
         return g
 
