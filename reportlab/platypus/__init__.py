@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: __init__.py,v $
+#	Revision 1.9  2000/07/13 11:41:00  rgbecker
+#	Added KeepTogether
+#
 #	Revision 1.8  2000/06/27 10:07:55  rgbecker
 #	Added CondPageBreak
-#
+#	
 #	Revision 1.7  2000/06/21 12:27:42  rgbecker
 #	remove UserDocTemplate, but add Andy's hook methods
 #	
@@ -52,10 +55,10 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: __init__.py,v 1.8 2000/06/27 10:07:55 rgbecker Exp $ '''
+__version__=''' $Id: __init__.py,v 1.9 2000/07/13 11:41:00 rgbecker Exp $ '''
 __doc__=''
 from reportlab.platypus.flowables import Flowable, Image, Macro, PageBreak, Preformatted, Spacer, XBox, \
-						CondPageBreak
+						CondPageBreak, KeepTogether
 from reportlab.platypus.paragraph import Paragraph, cleanBlockQuotedText
 from reportlab.platypus.paraparser import ParaFrag
 from reportlab.platypus.tables import Table, TableStyle, CellStyle

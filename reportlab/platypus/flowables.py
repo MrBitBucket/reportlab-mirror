@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: flowables.py,v $
+#	Revision 1.5  2000/07/13 11:41:00  rgbecker
+#	Added KeepTogether
+#
 #	Revision 1.4  2000/06/27 10:07:55  rgbecker
 #	Added CondPageBreak
-#
+#	
 #	Revision 1.3  2000/06/13 13:03:31  aaron_watters
 #	more documentation changes
 #	
@@ -44,7 +47,7 @@
 #	Platypus re-organisation
 #	
 #	
-__version__=''' $Id: flowables.py,v 1.4 2000/06/27 10:07:55 rgbecker Exp $ '''
+__version__=''' $Id: flowables.py,v 1.5 2000/07/13 11:41:00 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -67,7 +70,7 @@ higher level components).
 import os
 import string
 from copy import deepcopy
-
+from types import ListType, TupleType
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
@@ -294,6 +297,34 @@ class CondPageBreak(Spacer):
 		if availHeight<self.height:
 			return (availWidth, availHeight)
 		return (0, 0)
+
+_SeqTypes = (ListType, TupleType)
+class KeepTogether(Flowable):
+	def __init__(self,flowables):
+		if type(flowables) not in _SeqTypes:
+			self._flowables = [flowables]
+		else:
+			self._flowables = flowables
+
+	def wrap(self, aW, aH):
+		W = 0
+		H = 0
+		F = self._flowables
+		for f in F:
+			w,h = f.wrap(aW,0xfffffff)
+			if f is not F[0]: h = h + f.getSpaceBefore()
+			if f is not F[-1]: h = h + f.getSpaceAfter()
+			W = max(W,w)
+			H = H+h
+		print 'wrap', aW, aH, W, H
+		self._CPage = H>aH
+		return W, 0xffffff	# force a split
+
+	def split(self, aW, aH):
+		print 'wrap', aW, aH, self._CPage
+		S = self._CPage and [CondPageBreak(aH+1)] or []
+		for f in self._flowables: S.append(f)
+		return S
 
 class Macro(Flowable):
 	"""This is not actually drawn (i.e. it has zero height)
