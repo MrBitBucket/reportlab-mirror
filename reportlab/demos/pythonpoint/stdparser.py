@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: stdparser.py,v $
+#	Revision 1.11  2000/07/15 21:13:29  andy_robinson
+#	Minor additions to styles etc.
+#
 #	Revision 1.10  2000/07/11 15:00:39  rgbecker
 #	Added end_spacer
-#
+#	
 #	Revision 1.9  2000/07/10 15:25:47  andy_robinson
 #	Added tables to PythonPoint
 #	
@@ -79,6 +82,7 @@ from reportlab.lib import xmllib
 import string
 import imp
 import pythonpoint
+from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 
 class PPMLParser(xmllib.XMLParser):
@@ -300,15 +304,21 @@ class PPMLParser(xmllib.XMLParser):
         if a <> 'None': s.effectName = a
         s.effectDirection = self.ceval('slide',args,'effectdirection')
         s.effectDimension = self._arg('slide',args,'effectdimension')
+        s.effectDuration = self.ceval('slide',args,'effectduration')
         s.effectMotion = self._arg('slide',args,'effectmotion')
 
 
         #HACK - may not belong here in the long run...
+        #be default, use the slide title for the outline entry,
+        #unless it is specified as an arg.
         a = self._arg('slide',args,'outlineentry')
-        if a <> 'None':
+        if a == "Hide":
+            s.outlineEntry = None
+        elif a <> 'None':
             s.outlineEntry = a
         else:
             s.outlineEntry = s.title
+        
         s.outlineLevel = self.ceval('slide',args,'outlinelevel')
         
 
@@ -524,6 +534,8 @@ class PPMLParser(xmllib.XMLParser):
         path = self._arg('customshape',args,'path')
         if path=='None':
             path = None
+        else:
+            path=[path]
         modulename = self._arg('customshape',args,'module')
         funcname = self._arg('customshape',args,'class')
         found = imp.find_module(modulename, path)

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.25  2000/07/15 21:13:29  andy_robinson
+#	Minor additions to styles etc.
+#
 #	Revision 1.24  2000/07/12 14:23:12  rgbecker
 #	Table argument order changed
-#
+#	
 #	Revision 1.23  2000/07/12 06:33:43  andy_robinson
 #	Added Speaker Notes facility
 #	
@@ -108,7 +111,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.24 2000/07/12 14:23:12 rgbecker Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.25 2000/07/15 21:13:29 andy_robinson Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -228,6 +231,7 @@ class PPSlide:
         self.effectDirection = 0
         self.effectDimension = 'H'
         self.effectMotion = 'I'
+        self.effectDuration = 1
         self.frames = []
         self.graphics = []
         self.section = None
@@ -238,7 +242,8 @@ class PPSlide:
                         effectname=self.effectName,
                         direction = self.effectDirection,
                         dimension = self.effectDimension,
-                        motion = self.effectMotion
+                        motion = self.effectMotion,
+                        duration = self.effectDuration
                         )
         if self.outlineEntry:
             #gets an outline automatically
@@ -636,9 +641,14 @@ def getSampleStyleSheet():
     para.spaceBefore = 24
     stylesheet['Heading3'] = para
 
+    para = ParagraphStyle('Heading4', stylesheet['Normal'])
+    para.fontName = 'Times-BoldItalic'
+    para.spaceBefore = 6
+    stylesheet['Heading4'] = para
+
     para = ParagraphStyle('Bullet', stylesheet['Normal'])
     para.firstLineIndent = 40
-    para.leftIndent = 80
+    para.leftIndent = 56
     para.spaceBefore = 6
     para.bulletFontName = 'Symbol'
     para.bulletFontSize = 24
@@ -652,6 +662,7 @@ def getSampleStyleSheet():
     para.bulletIndent = 0
     para.spaceBefore = 12
     para.bulletFontName = 'Helvetica-BoldOblique'
+    para.bulletFontSize = 24
     stylesheet['Definition'] = para
 
     para = ParagraphStyle('Code', stylesheet['Normal'])
@@ -660,6 +671,11 @@ def getSampleStyleSheet():
     para.leading = 18
     para.leftIndent = 36
     stylesheet['Code'] = para
+
+    para = ParagraphStyle('Small', stylesheet['Normal'])
+    para.fontSize = 12
+    para.leading = 14
+    stylesheet['Small'] = para
 
     #now for a table
     ts = TableStyle([
