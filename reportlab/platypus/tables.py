@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.30  2000/08/02 11:48:12  rgbecker
+#	Flowable cell fixes/changes
+#
 #	Revision 1.29  2000/08/01 23:10:42  rgbecker
 #	Fixed flowable valign bottom/top middle maybe
-#
+#	
 #	Revision 1.28  2000/08/01 16:07:39  rgbecker
 #	Additions/Improvements to LINE CMD Splitting
 #	
@@ -116,7 +119,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.29 2000/08/01 23:10:42 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.30 2000/08/02 11:48:12 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -138,8 +141,7 @@ from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
 from reportlab.pdfbase import pdfmetrics
 import operator, string
 
-from types import TupleType, ListType
-_stringtype = type('')
+from types import TupleType, ListType, StringType
 
 class CellStyle(PropertySet):
 	defaults = {
@@ -173,13 +175,14 @@ _SeqTypes = (TupleType, ListType)
 def _rowLen(x):
 	return type(x) not in _SeqTypes and 1 or len(x)
 
-def _listCellGeom(V,w,s,W=None):
+def _listCellGeom(V,w,s,W=None,H=None):
 	aW = w-s.leftPadding-s.rightPadding
 	t = 0
 	w = 0
 	for v in V:
 		vw, vh = v.wrap(aW, 72000)
 		if W is not None: W.append(vw)
+		if H is not None: H.append(vh)
 		w = max(w,vw)
 		t = t + vh + v.getSpaceBefore()+v.getSpaceAfter()
 	return w, t - V[0].getSpaceBefore()-V[-1].getSpaceAfter() 
@@ -239,14 +242,17 @@ class Table(Flowable):
 				h = 0
 				for v, s, w in map(None, V, S, W):
 					t = type(v)
-					if t in _SeqTypes:
+					if t in _SeqTypes or isinstance(v,Flowable):
+						if not t in _SeqTypes: v = (v,)
 						if w is None:
 							raise ValueError, "Flowables cell can't have auto width"
 						dummy,t = _listCellGeom(v,w,s)
 					else:
-						if t is not _stringtype: v = str(v)
+						if t is not StringType:
+							v = v is None and '' or str(v)
 						v = string.split(v, "\n")
-						t = s.leading*len(v)+s.bottomPadding+s.topPadding
+						t = s.leading*len(v)
+					t = t+s.bottomPadding+s.topPadding
 					if t>h: h = t	#record a new maximum
 				H[i] = h
 
@@ -262,9 +268,9 @@ class Table(Flowable):
 				d = hasattr(self,'canv') and self.canv or pdfmetrics
 				for v, s in map(None, V, S):
 					t = type(v)
-					if t in _SeqTypes:
+					if t in _SeqTypes or isinstance(v,Flowable):
 						raise ValueError, "Flowables cell can't have auto width"
-					elif t is not _stringtype: v = str(v)
+					elif t is not StringType: v = v is None and '' or str(v)
 					v = string.split(v, "\n")
 					t = s.leftPadding+s.rightPadding + max(map(lambda a, b=s.fontname,
 								c=s.fontsize,d=d.stringWidth: d(a,b,c), v))
@@ -446,16 +452,22 @@ class Table(Flowable):
 					A.append(('LINEBELOW',(sc,er), (ec,er), weight, color))
 					if op=='GRID':
 						A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color))
+						A.append(('LINEABOVE',(sc,n), (ec,n), weight, color))
 						A.append(('INNERGRID',(sc,sr), (ec,er), weight, color))
 				else:
 					A.append((op,(sc,sr), (ec,er), weight, color))
 			elif op in ('INNERGRID','LINEABOVE'):
 				if sr<n and er>=n:
 					A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color))
+					A.append(('LINEABOVE',(sc,n), (ec,n), weight, color))
 				A.append((op,(sc,sr), (ec,er), weight, color))
 			elif op == 'LINEBELOW':
-				if sr<(n-1) and er>=n:
+				if sr<n and er>=(n-1):
 					A.append(('LINEABOVE',(sc,n), (ec,n), weight, color))
+				A.append((op,(sc,sr), (ec,er), weight, color))
+			elif op == 'LINEABOVE':
+				if sr<=n and er>=n:
+					A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color))
 				A.append((op,(sc,sr), (ec,er), weight, color))
 			else:
 				A.append((op,(sc,sr), (ec,er), weight, color))
@@ -526,25 +538,28 @@ class Table(Flowable):
 		just = cellstyle.alignment
 		valign = cellstyle.valign
 		n = type(cellval)
-		if n in _SeqTypes:
+		if n in _SeqTypes or isinstance(cellval,Flowable):
+			if not n in _SeqTypes: cellval = (cellval,)
 			# we assume it's a list of Flowables
-			if valign != 'BOTTOM' or just != 'LEFT':
-				W = []
-				w, h = _listCellGeom(cellval,colwidth,cellstyle,W=W)
-			else:
-				W = len(cellval)*[0]
+			W = []
+			H = []
+			w, h = _listCellGeom(cellval,colwidth,cellstyle,W=W, H=H)
 			if valign=='TOP':
-				y = rowpos + rowheight - cellstyle.topPadding+h
+				y = rowpos + rowheight - cellstyle.topPadding
 			elif valign=='BOTTOM':
-				y = rowpos+cellstyle.bottomPadding
+				y = rowpos+cellstyle.bottomPadding + h
 			else:
-				y = rowpos+(rowheight+cellstyle.bottomPadding-cellstyle.topPadding-h)/2.0
+				y = rowpos+(rowheight+cellstyle.bottomPadding-cellstyle.topPadding+h)/2.0
 			y = y+cellval[0].getSpaceBefore()
-			for v, w in map(None,cellval,W):
+			for v, w, h in map(None,cellval,W,H):
 				if just=='LEFT': x = colpos+cellstyle.leftPadding
 				elif just=='RIGHT': x = colpos+colwidth-cellstyle.rightPadding - w
-				else: x = colpos+(colwidth+cellstyle.leftPadding-cellstyle.rightPadding-w)/2.0
+				elif just in ('CENTRE', 'CENTER'):
+					x = colpos+(colwidth+cellstyle.leftPadding-cellstyle.rightPadding-w)/2.0
+				else:
+					raise ValueError, 'Invalid justification %s' % just
 				y = y - v.getSpaceBefore()
+				y = y - h
 				v.drawOn(self.canv,x,y)
 				y = y - v.getSpaceAfter()
 		else:
@@ -559,7 +574,7 @@ class Table(Flowable):
 				x = colpos + colwidth - cellstyle.rightPadding
 			else:
 				raise ValueError, 'Invalid justification %s' % just
-			if n is _stringtype: val = cellval
+			if n is StringType: val = cellval
 			else: val = str(cellval)
 			vals = string.split(val, "\n")
 			n = len(vals)
@@ -880,7 +895,6 @@ LIST_STYLE = TableStyle(
 				('ALIGN',(0,-1),(-1,-1),'CENTER'),
 				('VALIGN',(0,-1),(-1,-1),'MIDDLE'),
 				('TEXTCOLOR',(0,-1),(-1,-1),colors.green),
-
 				('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
 				('BOX', (0,0), (-1,-1), 0.25, colors.black),
 				])
@@ -951,8 +965,11 @@ LIST_STYLE = TableStyle(
 			['10', '11', '12', '13', '14'],
 			['20', '21', '22', '23', '24'],
 			['30', '31', '32', '33', '34']]
-	t=Table(data,style=[('GRID',(1,1),(-2,-2),1,colors.green),
+	t=Table(data,style=[
+					('GRID',(0,0),(-1,-1),0.5,colors.grey),
+					('GRID',(1,1),(-2,-2),1,colors.green),
 					('BOX',(0,0),(1,-1),2,colors.red),
+					('BOX',(0,0),(-1,-1),2,colors.black),
 					('LINEABOVE',(1,2),(-2,2),1,colors.blue),
 					('LINEBEFORE',(2,1),(2,-2),1,colors.pink),
 					('BACKGROUND', (0, 0), (0, 1), colors.pink),
@@ -974,9 +991,15 @@ LIST_STYLE = TableStyle(
 		lst.append(s)
 		lst.append(Spacer(0,6))
 
-	data=  [['A', 'B', 'C', (Paragraph("<b>A paragraph</b>",styleSheet["BodyText"]),), 'D'],
-			['00', '01', '02', '03', '04'],
-			['10', '11', '12', '13', '14'],
+	import os, reportlab.platypus
+	I = Image(os.path.join(os.path.dirname(reportlab.platypus.__file__),'..','demos','pythonpoint','leftlogo.gif'))
+	I.drawHeight = 1.25*inch*I.drawHeight / I.drawWidth
+	I.drawWidth = 1.25*inch
+	I.noImageCaching = 1
+	P = Paragraph("<para align=center spaceb=3>The <b>ReportLab Left <font color=red>Logo</font></b> Image</para>", styleSheet["BodyText"])
+	data=  [['A', 'B', 'C', Paragraph("<b>A pa<font color=red>r</font>a<i>graph</i></b><super><font color=yellow>1</font></super>",styleSheet["BodyText"]), 'D'],
+			['00', '01', '02', [I,P], '04'],
+			['10', '11', '12', [I,P], '14'],
 			['20', '21', '22', '23', '24'],
 			['30', '31', '32', '33', '34']]
 
@@ -991,6 +1014,10 @@ LIST_STYLE = TableStyle(
 					('GRID',(0,0),(-1,-1),0.5,colors.black),
 					('VALIGN',(3,0),(3,0),'BOTTOM'),
 					('BACKGROUND',(3,0),(3,0),colors.limegreen),
+					('BACKGROUND',(3,1),(3,1),colors.khaki),
+					('ALIGN',(3,1),(3,1),'CENTER'),
+					('BACKGROUND',(3,2),(3,2),colors.beige),
+					('ALIGN',(3,2),(3,2),'LEFT'),
 					])
 
 	t._argW[3]=1.5*inch
