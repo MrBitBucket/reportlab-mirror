@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/docpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/docpy.py,v 1.4 2002/07/24 19:56:39 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/docpy.py,v 1.5 2003/04/17 23:37:39 andy_robinson Exp $
 
 """Generate documentation from live Python objects.
 
@@ -827,13 +827,15 @@ class PdfDocBuilder0(DocBuilder0):
 
 
     def end(self):
-        if self.packageName:
+        if self.outPath is not None:
+            pass
+        elif self.packageName:
             self.outPath = self.packageName + self.fileSuffix
         elif self.skeleton:
             self.outPath = self.skeleton.getModuleName() + self.fileSuffix
         else:
             self.outPath = ''
-
+        print 'output path is %s' % self.outPath
         if self.outPath:
             doc = MyTemplate(self.outPath)
             doc.multiBuild(self.story)

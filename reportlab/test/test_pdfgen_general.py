@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.15 2002/07/24 19:56:38 andy_robinson Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.15 2002/07/24 19:56:38 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.16 2003/04/17 23:37:39 andy_robinson Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.16 2003/04/17 23:37:39 andy_robinson Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 
@@ -205,7 +205,7 @@ def makeDocument(filename, pageCallBack=None):
     c.showOutline()
 
     framePage(c, 'PDFgen graphics API test script')
-    makesubsection(c, "PDFgen and PIDDLE", 10*inch)
+    makesubsection(c, "PDFgen", 10*inch)
 
     t = c.beginText(inch, 10*inch)
     t.setFont('Times-Roman', 10)
