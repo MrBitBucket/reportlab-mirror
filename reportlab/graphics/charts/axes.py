@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.83 2003/08/27 14:07:49 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.84 2003/09/03 15:33:58 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.83 2003/08/27 14:07:49 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.84 2003/09/03 15:33:58 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -69,8 +69,22 @@ def _findMax(V, x, default,special=None):
     return _findMinMaxValue(V,x,default,max,special=special)
 
 
+class _AxisG(Widget):
+    def makeGrid(self,g,dim=None):
+        '''this is only called by a container object'''
+        s = self.gridStart
+        e = self.gridEnd
+        if dim:
+            s = s is None and dim[0]
+            e = e is None and dim[0]+dim[1]
+        c = self.gridStrokeColor
+        if self.visibleGrid and (s or e) and c is not None:
+            if self._dataIndex: offs = self._x
+            else: offs = self._y
+            self._makeLines(g,s-offs,e-offs,c,self.gridStrokeWidth,self.gridStrokeDashArray)
+
 # Category axes.
-class CategoryAxis(Widget):
+class CategoryAxis(_AxisG):
     "Abstract category axis, unusable in itself."
     _nodoc = 1
     _attrMap = AttrMap(
@@ -92,7 +106,7 @@ class CategoryAxis(Widget):
         joinAxis = AttrMapValue(None, desc='Join both axes if true.'),
         joinAxisPos = AttrMapValue(isNumberOrNone, desc='Position at which to join with other axis.'),
         reverseDirection = AttrMapValue(isBoolean, desc='If true reverse category direction.'),
-        style = AttrMapValue(OneOf('parallel','stacked'),"How common category bars are plotted"),
+        style = AttrMapValue(OneOf('parallel','stacked','parallel_3d'),"How common category bars are plotted"),
         labelAxisMode = AttrMapValue(OneOf('high','low','axis'), desc="Like joinAxisMode, but for the axis labels"),
         )
 
@@ -161,19 +175,6 @@ class CategoryAxis(Widget):
     def _scale(self,idx):
         if self.reverseDirection: idx = self._catCount-idx-1
         return idx
-
-    def makeGrid(self,g,dim=None):
-        '''this is only called by a container object'''
-        s = self.gridStart
-        e = self.gridEnd
-        if dim:
-            s = s is None and dim[0]
-            e = e is None and dim[0]+dim[1]
-        c = self.gridStrokeColor
-        if self.visibleGrid and (s or e) and c is not None:
-            if self._dataIndex: offs = self._x
-            else: offs = self._y
-            self._makeLines(g,s-offs,e-offs,c,self.gridStrokeWidth,self.gridStrokeDashArray)
 
 def _assertYAxis(axis):
     acn = axis.__class__.__name__
@@ -466,7 +467,7 @@ class YCategoryAxis(CategoryAxis):
 
 
 # Value axes.
-class ValueAxis(Widget):
+class ValueAxis(_AxisG):
     "Abstract value axis, unusable in itself."
 
     _attrMap = AttrMap(
@@ -800,19 +801,6 @@ class ValueAxis(Widget):
                 L.strokeWidth = strokeWidth
                 L.strokeDashArray = strokeDashArray
                 g.add(L)
-
-    def makeGrid(self,g,dim=None):
-        '''this is only called by a container object'''
-        s = self.gridStart
-        e = self.gridEnd
-        if dim:
-            s = s is None and dim[0]
-            e = e is None and dim[0]+dim[1]
-        c = self.gridStrokeColor
-        if self.visibleGrid and (s or e) and c is not None:
-            if self._dataIndex: offs = self._x
-            else: offs = self._y
-            self._makeLines(g,s-offs,e-offs,c,self.gridStrokeWidth,self.gridStrokeDashArray)
 
     def draw(self):
         g = Group()

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.73 2003/09/03 11:15:06 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.74 2003/09/03 15:33:59 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -9,7 +9,7 @@ vertical versions.
 
 Stacked and percentile bar charts to follow...
 """
-__version__=''' $Id: barcharts.py,v 1.73 2003/09/03 11:15:06 rgbecker Exp $ '''
+__version__=''' $Id: barcharts.py,v 1.74 2003/09/03 15:33:59 rgbecker Exp $ '''
 
 import string, copy
 from types import FunctionType, StringType
@@ -125,7 +125,7 @@ class BarChart(PlotArea):
     def _getConfigureData(self):
         cA = self.categoryAxis
         data = self.data
-        if cA.style!='parallel':
+        if cA.style not in ('parallel','parallel_3d'):
             _data = data
             data = max(map(len,_data))*[0]
             for d in _data:
@@ -245,6 +245,7 @@ class BarChart(PlotArea):
         if useAbsolute:
             _cScale = cA._scale
 
+        self._normFactor = normFactor
         width = self.barWidth*normFactor
         self._barPositions = []
         reversePlotOrder = self.reversePlotOrder
@@ -266,7 +267,7 @@ class BarChart(PlotArea):
                     height = None
                     y = baseLine
                 else:
-                    if style!='parallel':
+                    if style not in ('parallel','parallel_3d'):
                         y = vScale(accum[colNo])
                         if y<baseLine: y = baseLine
                         accum[colNo] = accum[colNo] + datum
@@ -372,10 +373,14 @@ class BarChart(PlotArea):
                 alx(label)
                 del label._callOutInfo
 
-    def makeBars(self):
-        g = Group()
-        lg = Group()
+    def _makeBar(self,g,x,y,width,height,rowNo,style):
+        r = Rect(x, y, width, height)
+        r.strokeWidth = style.strokeWidth
+        r.fillColor = style.fillColor
+        r.strokeColor = style.strokeColor
+        g.add(r)
 
+    def _makeBars(self,g,lg):
         lenData = len(self.data)
         reversePlotOrder = self.reversePlotOrder
         bars = self.bars
@@ -408,13 +413,14 @@ class BarChart(PlotArea):
                     symbol.height = height
                     g.add(symbol)
                 elif abs(width)>1e-7 and abs(height)>=1e-7 and (style.fillColor is not None or style.strokeColor is not None):
-                    r = Rect(x, y, width, height)
-                    r.strokeWidth = style.strokeWidth
-                    r.fillColor = style.fillColor
-                    r.strokeColor = style.strokeColor
-                    g.add(r)
+                    self._makeBar(g,x,y,width,height,rowNo,style)
 
                 self._addBarLabel(lg,rowNo,colNo,x,y,width,height)
+
+    def makeBars(self):
+        g = Group()
+        lg = Group()
+        self._makeBars(g,lg)
         g.add(lg)
         return g
 
@@ -449,6 +455,83 @@ class VerticalBarChart(BarChart):
         self.categoryAxis = XCategoryAxis()
         self.valueAxis = YValueAxis()
         BarChart.__init__(self)
+
+def _cmpFakeItem(a,b):
+    '''t, z0, z1, x, y = a[:5]'''
+    return cmp((-a[1],a[3],a[0],-a[4]),(-b[1],b[3],b[0],-b[4]))
+
+class _FakeGroup:
+    def __init__(self):
+        self._data = []
+
+    def add(self,what):
+        self._data.append(what)
+
+    def value(self):
+        return self._data
+
+    def sort(self):
+        self._data.sort(_cmpFakeItem)
+        #for t in self._data: print t
+
+class VerticalBarChart3D(VerticalBarChart):
+    _theta_x = .5
+    _theta_y = .5
+    def calcBarPositions(self):
+        VerticalBarChart.calcBarPositions(self)
+        seriesCount = self._seriesCount
+        if self.categoryAxis.style=='parallel_3d':
+            _3d_depth = seriesCount*self.barWidth+(seriesCount-1)*self.barSpacing
+        else:
+            _3d_depth = self.barWidth
+        _3d_depth *= self._normFactor
+        self._3d_dx = self._theta_x*_3d_depth
+        self._3d_dy = self._theta_y*_3d_depth
+
+    def _calc_z0(self,rowNo):
+        if self.categoryAxis.style=='parallel_3d':
+            z0 = self._normFactor*rowNo*(self.barWidth+self.barSpacing)
+        else:
+            z0 = 0
+        return z0
+
+    def _makeBar(self,g,x,y,width,height,rowNo,style):
+        z0 = self._calc_z0(rowNo)
+        z1 = z0 + self.barWidth*self._normFactor
+        if height<0:
+            y += height
+            height = -height
+        x += z0*self._theta_x
+        y += z0*self._theta_y
+        g.add((0,z0,z1,x,y,width,height,rowNo,style))
+
+    def _addBarLabel(self, g, rowNo, colNo, x, y, width, height):
+        z0 = self._calc_z0(rowNo)
+        z1 = z0
+        x += z0*self._theta_x
+        y += z0*self._theta_y
+        g.add((1,z0,z1,x,y,width,height,rowNo,colNo))
+
+    def makeBars(self):
+        from utils3d import _draw_3d_bar
+        fg = _FakeGroup()
+        self._makeBars(fg,fg)
+        fg.sort()
+        g = Group()
+        theta_x = self._theta_x
+        theta_y = self._theta_y
+        for t in fg.value():
+            if t[0]==1:
+                z0,z1,x,y,width,height,rowNo,colNo = t[1:]
+                VerticalBarChart._addBarLabel(self,g,rowNo,colNo,x,y,width,height)
+            elif t[0]==0:
+                z0,z1,x,y,width,height,rowNo,style = t[1:]
+                dz = z1 - z0
+                _draw_3d_bar(g, x, x+width, y, y+height, dz*theta_x, dz*theta_y,
+                            fillColor=style.fillColor, fillColorShaded=None,
+                            strokeColor=style.strokeColor, strokeWidth=style.strokeWidth,
+                            shading=0.1)
+        return g
 
 class HorizontalBarChart(BarChart):
     "Horizontal bar chart with multiple side-by-side bars."
