@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.29 2001/05/18 10:43:21 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.30 2001/05/23 16:46:03 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -72,7 +72,7 @@ def scale(sx, sy):
 	return (sx, 0, 0, sy, 0, 0)
 
 def rotate(angle):
-	a = angle * pi /180 
+	a = angle * pi /180
 	return (cos(a), sin(a), -sin(a), cos(a), 0, 0)
 
 def skewX(angle):
@@ -154,7 +154,7 @@ def _textBoxLimits(text, font, fontSize, leading, textAnchor, boxAnchor):
 
 def _rotatedBoxLimits( x, y, w, h, angle):
 	'''
-	Find the corner points of the rotated w x h sized box at x,y 
+	Find the corner points of the rotated w x h sized box at x,y
 	return the corner points and the min max points in the original space
 	'''
 	C = zTransformPoints(rotate(angle),((x,y),(x+w,y),(x+w,y+h),(x,y+h)))
@@ -168,7 +168,7 @@ def _rotatedBoxLimits( x, y, w, h, angle):
 	#	 And now the shapes themselves....
 	#
 	#################################################################
-   
+
 class Shape:
 	"""Base class for all nodes in the tree. Nodes are simply
 	packets of data to be created, stored, and ultimately
@@ -187,12 +187,12 @@ class Shape:
 			#print 'setting keyword %s.%s = %s' % (self, key, value)
 			setattr(self, key, value)
 
-	def copy0(self):
+	def copy(self):
 		"""Return a clone of this shape."""
 
 		# implement this in the descendants as they need the right init methods.
 		raise NotImplementedError, "No copy method implemented for %s" % self.__class__.__name__
-	   
+
 	def getProperties(self):
 		"""Interface to make it easy to extract automatic
 		documentation"""
@@ -205,7 +205,7 @@ class Shape:
 			if key[0:1] <> '_':
 				props[key] = value
 		return props
-		
+
 	def setProperties(self, props):
 		"""Supports the bulk setting if properties from,
 		for example, a GUI application or a config file."""
@@ -224,7 +224,7 @@ class Shape:
 			prefix = prefix + '.'
 		for (name, value) in propList:
 			print '%s%s = %s' % (prefix, name, value)
-			
+
 	def verify(self):
 		"""If the programmer has provided the optional
 		_attrMap attribute, this checks all expected
@@ -254,7 +254,7 @@ class Shape:
 			validateSetattr(self,attr,value)	#from reportlab.lib.attrmap
 	#else:
 	#	 print 'shapeChecking = 0, not defining setattr'
-		
+
 
 class Group(Shape):
 	"""Groups elements together.  May apply a transform
@@ -264,10 +264,10 @@ class Group(Shape):
 	case they are subsequently accessible as properties."""
 
 	_attrMap = AttrMap(
-		transform = AttrMapValue(isTransform,desc="Coordinate transfromation to apply"),
+		transform = AttrMapValue(isTransform,desc="Coordinate transformation to apply"),
 		contents = AttrMapValue(isListOfShapes,desc="Contained drawable elements"),
 		)
-	
+
 	def __init__(self, *elements, **keywords):
 		"""Initial lists of elements may be provided to allow
 		compact definitions in literal Python code.  May or
@@ -283,7 +283,7 @@ class Group(Shape):
 		# this just applies keywords; do it at the end so they
 		#don;t get overwritten
 		Shape.__init__(self, keywords)
-		
+
 	def _addNamedNode(self,name,node):
 		'if name is not None add an attribute pointing to node and add to the attrMap'
 		if name:
@@ -305,59 +305,56 @@ class Group(Shape):
 		self.contents.insert(i,n)
 		self._addNamedNode(name,n)
 
-	def copy0(self):
-		"""Returns a new group with recursively copied contents.
-
-		Expands all user nodes if they do not define a copy method."""
-
-		newGroup = Group()
-		newGroup.transform = self.transform[:]
-		for child in self.contents:
-			newGroup.append(child.copy())
-		# they may have names.	reproduce them
-		for (oldKey, oldValue) in self.__dict__.items():
-			if oldValue in self.contents:
-				pos = mylist.index(oldValue)
-				setattr(newGroup, oldKey, newGroup.contents[pos])
-		return newGroup
-
-	def expandUserNodes0(self):
-		"""Return a new group which only contains primitive shapes."""
+	def expandUserNodes(self):
+		"""Return a new object which only contains primitive shapes."""
 
 		# many limitations - shared nodes become multiple ones,
-		newGroup = Group()
-		newGroup.transform = self.transform[:]
-		
-		for child in self.contents:
+		obj = self.__class__()
+		obj._attrMap = self._attrMap.clone()
+		if hasattr(obj,'transform'): obj.transform = self.transform[:]
+
+		self_contents = self.contents
+		for child in self_contents:
 			if isinstance(child, UserNode):
 				newChild = child.provideNode()
 			elif isinstance(child, Group):
-				newChild = child.expandUserNodes0()
+				newChild = child.expandUserNodes()
 			else:
 				newChild = child.copy()
-			newGroup.contents.append(newChild)
-		# they may have names.	reproduce them
+			obj.contents.append(newChild)
 
+		self._copyNamedContents(obj)
+		return obj
+
+	def _copyNamedContents(self,obj):
+		self_contents = self.contents
 		for (oldKey, oldValue) in self.__dict__.items():
-			if oldValue in self.contents:
-				pos = mylist.index(oldValue)
-				setattr(newGroup, oldKey, newGroup.contents[pos])
+			if oldValue in self_contents:
+				pos = self_contents.index(oldValue)
+				setattr(obj, oldKey, obj.contents[pos])
 
-		return newGroup
-			
+	def copy(self):
+		"""returns a copy"""
+		obj = self.__class__()
+		obj.transform = self.transform[:]
+		self_contents = self.contents
+		for child in self_contents:
+			obj.append(child.copy())
+		self._copyNamedContents(obj)
+		return obj
 
 	def rotate(self, theta):
 		"""Convenience to help you set transforms"""
 		self.transform = mmult(self.transform, rotate(theta))
-	
+
 	def translate(self, dx, dy):
 		"""Convenience to help you set transforms"""
 		self.transform = mmult(self.transform, translate(dx, dy))
-	
+
 	def scale(self, sx, sy):
 		"""Convenience to help you set transforms"""
 		self.transform = mmult(self.transform, scale(sx, sy))
-	
+
 
 	def skew(self, kx, ky):
 		"""Convenience to help you set transforms"""
@@ -385,7 +382,7 @@ class Drawing(Group, Flowable):
 
 	_attrMap = AttrMap(BASE=Group)
 	_attrMap.update(_xtraAttrMap)
-	
+
 	def __init__(self, width, height, *nodes, **keywords):
 		apply(Group.__init__,(self,)+nodes,keywords)
 		self.width = width
@@ -400,46 +397,30 @@ class Drawing(Group, Flowable):
 		R = renderPDF._PDFRenderer()
 		R.draw(self, self.canv, 0, 0)
 
-	def expandUserNodes0(self):
+	def expandUserNodes(self):
 		"""Return a new drawing which only contains primitive shapes."""
+		obj = Group.expandUserNodes(self)
+		obj.width = self.width
+		obj.height = self.height
+		return obj
 
-		# many limitations - shared nodes become multiple ones,
-		newDrawing = Drawing(self.width, self.height)
-		newDrawing._attrMap = self._attrMap.clone()
+	def copy(self):
+		"""Returns a deep copy"""
+		obj = self.Drawing(self.width, self.height)
+		obj._attrMap = self._attrMap.clone()
 
-		for child in self.contents:
-			if isinstance(child, UserNode):
-				newChild = child.provideNode()
-			elif isinstance(child, Group):
-				newChild = child.expandUserNodes0()
-			else:
-				newChild = child.copy0()
-			newDrawing.contents.append(newChild)
-		# they may have names.	reproduce them
+		self_contents = self.contents
+		for child in self_contents:
+			obj.contents.append(child)
 
 		self_contents = self.contents
 		for (oldKey, oldValue) in self.__dict__.items():
 			if oldValue in self_contents:
 				pos = self_contents.index(oldValue)
-				setattr(newDrawing, oldKey, newDrawing.contents[pos])
+				setattr(obj, oldKey, obj.contents[pos])
 
-		return newDrawing
+		return obj
 
-	def copy(self):
-		"""Returns a deep copy of the drawing."""
-		
-		newDrawing = Drawing(self.width, self.height)
-		newDrawing._attrMap = self._attrMap.clone()
-		for child in self.contents:
-			newDrawing.contents.append(child)
-
-		for (oldKey, oldValue) in self.__dict__.items():
-			if oldValue in self.contents:
-				pos = self.contents.index(oldValue)
-				setattr(newDrawing, oldKey, newDrawing.contents[pos])
-
-		return newDrawing
-	
 class LineShape(Shape):
 	# base for types of lines
 
@@ -483,7 +464,7 @@ class Line(LineShape):
 		self.x2 = x2
 		self.y2 = y2
 
-	
+
 class SolidShape(Shape):
 	# base for anything with outline and content
 
@@ -508,15 +489,15 @@ class SolidShape(Shape):
 		# do this at the end so keywords overwrite
 		#the above settings
 		Shape.__init__(self, kw)
-		
+
 
 class Path(SolidShape):
 	# same as current implementation; to do
 	pass
 
-  
+
 class Rect(SolidShape):
-	"""Rectangle, possibly with rounded corners."""    
+	"""Rectangle, possibly with rounded corners."""
 
 	_attrMap = AttrMap(
 		strokeColor = AttrMapValue(isColorOrNone),
@@ -533,7 +514,7 @@ class Rect(SolidShape):
 		rx = AttrMapValue(isNumber),
 		ry = AttrMapValue(isNumber),
 		)
-		
+
 	def __init__(self, x, y, width, height, rx=0, ry=0, **kw):
 		SolidShape.__init__(self, kw)
 		self.x = x
@@ -541,13 +522,13 @@ class Rect(SolidShape):
 		self.width = width
 		self.height = height
 		self.rx = rx
-		self.ry = ry	
+		self.ry = ry
 
-	def copy0(self):
+	def copy(self):
 		new = Rect(self.x, self.y, self.width, self.height)
 		new.setProperties(self.getProperties())
 		return new
-	
+
 
 class Circle(SolidShape):
 
@@ -563,14 +544,14 @@ class Circle(SolidShape):
 		cy = AttrMapValue(isNumber),
 		r = AttrMapValue(isNumber),
 		)
-	
+
 	def __init__(self, cx, cy, r, **kw):
 		SolidShape.__init__(self, kw)
 		self.cx = cx
 		self.cy = cy
 		self.r = r
 
-	def copy0(self):
+	def copy(self):
 		new = Circle(self.cx, self.cy, self.r)
 		new.setProperties(self.getProperties())
 		return new
@@ -599,7 +580,7 @@ class Ellipse(SolidShape):
 		self.rx = rx
 		self.ry = ry
 
-	def copy0(self):
+	def copy(self):
 		new = Ellipse(self.cx, self.cy, self.rx, self.ry)
 		new.setProperties(self.getProperties())
 		return new
@@ -672,7 +653,7 @@ class Wedge(SolidShape):
 		a(x); a(y)
 		return Polygon(points)
 
-	def copy0(self):
+	def copy(self):
 		new = Wedge(self.centerx,
 					self.centery,
 					self.radius,
@@ -702,7 +683,7 @@ class Polygon(SolidShape):
 		assert len(points) % 2 == 0, 'Point list must have even number of elements!'
 		self.points = points
 
-	def copy0(self):
+	def copy(self):
 		new = Polygon(self.points)
 		new.setProperties(self.getProperties())
 		return new
@@ -737,7 +718,7 @@ class PolyLine(LineShape):
 				assert len(points) % 2 == 0, 'Point list must have even number of elements!'
 		self.points = points
 
-	def copy0(self):
+	def copy(self):
 		new = PolyLine(self.points)
 		new.setProperties(self.getProperties())
 		return new
@@ -768,7 +749,7 @@ class String(Shape):
 		self.fillColor = STATE_DEFAULTS['fillColor']
 		self.setProperties(kw)
 
-	def copy0(self):
+	def copy(self):
 		new = String(self.x, self.y, self.text)
 		new.setProperties(self.getProperties())
 		return new
@@ -788,7 +769,7 @@ class UserNode:
 		so that the renderer can draw the custom node."""
 
 		raise NotImplementedError, "this method must be redefined by the user/programmer"
-	
+
 
 def test():
 	r = Rect(10,10,200,50)
@@ -806,7 +787,7 @@ def test():
 	del r.width
 	print 'verifying...',
 	r.verify()
-	
+
 
 if __name__=='__main__':
 	test()

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.20 2001/05/21 11:46:30 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.21 2001/05/23 16:46:03 rgbecker Exp $
 import string
 
 from reportlab.graphics import shapes
@@ -401,7 +401,7 @@ def test():
 	renderPDF.drawToFile(d, 'face.pdf', 'A Sample Widget')
 	print 'saved face.pdf'
 
-	d2 = d.expandUserNodes0()
+	d2 = d.expandUserNodes()
 	renderPDF.drawToFile(d2, 'face_copy.pdf', 'An expanded drawing')
 	print 'saved face_copy.pdf'
 	print 'drawing 2 properties:'
