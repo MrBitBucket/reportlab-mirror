@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.41 2004/04/08 14:17:42 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.42 2004/04/08 16:02:52 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.41 2004/04/08 14:17:42 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.42 2004/04/08 16:02:52 rgbecker Exp $ "
 #endif
 #include "Python.h"
 #include <stdlib.h>
@@ -721,7 +721,7 @@ static PyObject *hex32(PyObject *self, PyObject* args)
 	return PyString_FromString(buf);
 }
 
-#if PY_VERSION_HEX>=0x02020000
+#if PY_VERSION_HEX>=0x02030000
 #define HAVE_BOX
 /*Box start**************/
 typedef struct {
