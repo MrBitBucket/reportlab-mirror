@@ -113,7 +113,7 @@ class Grid0(Widget):
     def makeOuterRect(self):
         # outer grid rectangle
         group = Group()
-
+        #print 'Grid0.makeOuterRect(%d, %d, %d, %d)' % (self.x, self.y, self.width, self.height)
         rect = Rect(self.x, self.y, self.width, self.height)
         rect.fillColor = self.fillColor
         rect.strokeColor = self.strokeColor
@@ -126,26 +126,26 @@ class Grid0(Widget):
         "Returns a list of positions where to place lines."
 
         w, h = self.width, self.height
-        
+        if isX:
+            length = w
+        else:
+            length = h
         if self.deltaSteps:
             r = [start + self.delta0]
             i = 0
             while 1:
-                if r[-1] > start + w:
+                if r[-1] > start + length:
                     del r[-1]
                     break
                 r.append(r[-1] + self.deltaSteps[i % len(self.deltaSteps)])
                 i = i + 1
         else:
-            if isX:
-                r = frange(start + self.delta0, start + w, self.delta)
-            else:
-                r = frange(start + self.delta0, start + h, self.delta)
+            r = frange(start + self.delta0, start + length, self.delta)
 
-        r.append(start + w)
+        r.append(start + length)
         if self.delta0 != 0:
             r.insert(0, start)
-
+        #print 'Grid0.makeLinePosList() -> %s' % r
         return r
     
 

@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/docpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/Attic/docpy.py,v 1.5 2001/07/03 08:24:20 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/lib/Attic/docpy.py,v 1.6 2001/07/16 07:40:30 andy_robinson Exp $
 
 """Generate documentation from live Python objects.
 
@@ -763,7 +763,7 @@ class PdfDocBuilder0(DocBuilder0):
     "Document the skeleton of a Python module in PDF format."
 
     fileSuffix = '.pdf'
-
+        
     def makeHeadingStyle(self, level, typ=None, doc=''):
         "Make a heading style for different types of module content."
 

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.22 2001/06/28 12:28:34 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.23 2001/07/16 07:40:30 andy_robinson Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -170,7 +170,7 @@ class BarChart(Widget):
 
     def makeBackground(self):
         g = Group()
-
+        #print 'BarChart.makeBackground(%s, %s, %s, %s)' % (self.x, self.y, self.width, self.height)
         g.add(Rect(self.x, self.y,
                    self.width, self.height,
                    strokeColor = self.strokeColor,

@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.12 2001/07/03 08:24:20 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.13 2001/07/16 07:40:30 andy_robinson Exp $
 
 """Generate documentation of graphical Python objects.
 
@@ -270,8 +270,10 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         self.story.append(PageBreak())
 
 
-    def end(self):
-        if self.packageName:
+    def end(self, fileName=None):
+        if fileName:  # overrides output path
+            self.outPath = fileName
+        elif self.packageName:
             self.outPath = self.packageName + self.fileSuffix
         elif self.skeleton:
             self.outPath = self.skeleton.getModuleName() + self.fileSuffix
