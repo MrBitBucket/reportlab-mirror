@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.6  2000/02/17 15:26:28  rgbecker
+#	Change page compression default
+#
 #	Revision 1.5  2000/02/17 02:08:04  rgbecker
 #	Docstring & other fixes
-#
+#	
 #	Revision 1.4  2000/02/16 09:42:50  rgbecker
 #	Conversion to reportlab package
 #	
@@ -43,7 +46,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.5 2000/02/17 02:08:04 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.6 2000/02/17 15:26:28 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -130,7 +133,7 @@ class Canvas:
     state'.  Just started development at 5/9/99, not in use yet.
 
     """
-    def __init__(self,filename,pagesize=(595.27,841.89), bottomup = 1):
+    def __init__(self,filename,pagesize=(595.27,841.89), bottomup = 1, pageCompression=0 ):
         """Most of the attributes are private - we will use set/get methods
         as the preferred interface.  Default page size is A4."""
         self._filename = filename
@@ -139,7 +142,7 @@ class Canvas:
         self._currentPageHasImages = 1
         self._pageTransitionString = ''
 
-        self._pageCompression = 1  #on by default - turn off when debugging!
+        self._pageCompression = pageCompression  #on by default - turn off when debugging!
         self._pageNumber = 1   # keep a count
         self._code = []    #where the current page's marking operators accumulate
         
