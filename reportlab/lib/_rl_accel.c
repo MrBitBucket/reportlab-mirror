@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.7 2001/03/13 16:57:18 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.8 2001/03/16 14:29:59 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.7 2001/03/13 16:57:18 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.8 2001/03/16 14:29:59 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -23,7 +23,7 @@ static __version__=" $Id: _rl_accel.c,v 1.7 2001/03/13 16:57:18 rgbecker Exp $ "
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.2"
+#define VERSION "0.3"
 #define MODULE "_rl_accel"
 static PyObject *moduleVersion;
 
@@ -191,16 +191,14 @@ static PyObject *_pdfmetrics_stringWidth(PyObject *self, PyObject* args)
 {
 	char		*fontName, *encoding=NULL;
 	unsigned char *text;
-	PyObject	*pS;
 	double		fontSize;
 	fI_t		*fI;
 	eI_t		*e;
 	int			w, *width, i, textLen;
 	static int	recover=1;
 
-	if (!PyArg_ParseTuple(args, "s#sO|s", &text, &textLen, &fontName, &pS, &encoding)) return NULL;
-	if((pS=PyNumber_Float(pS))) fontSize = PyFloat_AS_DOUBLE(pS);
-	else{
+	if (!PyArg_ParseTuple(args, "s#sd|s", &text, &textLen, &fontName, &fontSize, &encoding)) return NULL;
+	if(fontSize<=0){
 		PyErr_SetString(ErrorObject,"bad fontSize");
 		return NULL;
 		}
@@ -223,16 +221,77 @@ static PyObject *_pdfmetrics_stringWidth(PyObject *self, PyObject* args)
 			recover = 1;
 			Py_DECREF(arglist);
 			if(!result) return NULL;
-			if(result==Py_None){
-				Py_DECREF(result);
-				if(!(fI=find_font(fontName,e->fonts))) goto L_ufe;
-				}
-			else return result;
+			if(result!=Py_None) return result;
+			Py_DECREF(result);
+			if((fI=find_font(fontName,e->fonts))) goto L2;
 			}
-L_ufe:	PyErr_SetString(ErrorObject,"unknown font");
+		PyErr_SetString(ErrorObject,"unknown font");
 		return NULL;
 		}
 
+L2:
+	width = fI->widths;
+	for(i=w=0;i<textLen;i++)
+		w += width[text[i]];
+
+	return Py_BuildValue("f",0.001*fontSize*w);
+}
+
+static PyObject *_pdfmetrics_instanceStringWidth(PyObject *unused, PyObject* args)
+{
+	PyObject	*pfontName, *self;
+	char		*fontName, *encoding=NULL;
+	unsigned char *text;
+	double		fontSize;
+	fI_t		*fI;
+	eI_t		*e;
+	int			w, *width, i, textLen;
+	static int	recover=1;
+
+	if (!PyArg_ParseTuple(args, "Os#d", &self, &text, &textLen, &fontSize)) return NULL;
+	if(fontSize<=0){
+		PyErr_SetString(ErrorObject,"bad fontSize");
+		return NULL;
+		}
+
+	pfontName = PyObject_GetAttrString(self,"fontName");
+	if(!pfontName){
+		PyErr_SetString(PyExc_AttributeError,"No attribute fontName");
+		return NULL;
+		}
+
+	if(!PyString_Check(pfontName)){
+		Py_DECREF(pfontName);
+		PyErr_SetString(PyExc_TypeError,"Attribute fontName is not a string");
+		return NULL;
+		}
+	fontName = PyString_AsString(pfontName);
+
+	e = defaultEncoding;
+
+	if(!(fI=find_font(fontName,e->fonts))){
+		if(_SWRecover && recover){
+			PyObject *arglist = Py_BuildValue("(s#sd)",text,textLen,fontName,fontSize);
+			PyObject *result;
+			if(!arglist){
+				PyErr_SetString(ErrorObject,"recovery failed!");
+				goto L1;
+				}
+			recover = 0;
+			result = PyEval_CallObject(_SWRecover, arglist);
+			recover = 1;
+			Py_DECREF(arglist);
+			if(!result) goto L1;
+			if(result!=Py_None) return result;
+			Py_DECREF(result);
+			if((fI=find_font(fontName,e->fonts))) goto L2;
+			}
+		PyErr_SetString(ErrorObject,"unknown font");
+L1:		Py_DECREF(pfontName);
+		return NULL;
+		}
+
+L2:	Py_DECREF(pfontName);
 	width = fI->widths;
 	for(i=w=0;i<textLen;i++)
 		w += width[text[i]];
@@ -374,7 +433,8 @@ static struct PyMethodDef _methods[] = {
 	{"defaultEncoding", _pdfmetrics_defaultEncoding, 1, "defaultEncoding([encoding])\ngets/sets the default encoding."},
 	{"getFontInfo", _pdfmetrics_getFontInfo, 1, "getFontInfo(fontName,encoding)\nreturns info ([widths],ascent,descent)."},
 	{"setFontInfo", _pdfmetrics_setFontInfo, 1, "setFontInfo(fontName,encoding,ascent, descent, widths)\nadds the font to the table for encoding"},
-	{"stringWidth", _pdfmetrics_stringWidth, 1, "stringwidth(text,fontName,fontSize,[encoding]) returns width of text in points"},
+	{"stringWidth", _pdfmetrics_stringWidth, 1, "stringWidth(text,fontName,fontSize,[encoding]) returns width of text in points"},
+	{"_instanceStringWidth", _pdfmetrics_instanceStringWidth, 1, "_instanceStringWidth(text,fontSize) like stringWidth, but gets fontName from self"},
 	{"_SWRecover", _pdfmetrics__SWRecover, 1,
 					"_SWRecover([callable])\n"
 					"get/set the string width recovery\n"
