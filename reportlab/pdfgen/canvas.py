@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.86 2001/07/19 10:34:22 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.86 2001/07/19 10:34:22 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.87 2001/07/31 10:04:16 dinu_gherman Exp $
+__version__=''' $Id: canvas.py,v 1.87 2001/07/31 10:04:16 dinu_gherman Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -786,11 +786,13 @@ class Canvas:
                           + PATH_OPS[stroke, fill, self._fillMode])        
     
     def ellipse(self, x1, y1, x2, y2, stroke=1, fill=0):
-        """Draw an ellipse with foci at (x1,y1) (x2,y2).
+        """Draw an ellipse defined by an enclosing rectangle.
+
+        Note that (x1,y1) and (x2,y2) are the corner points of
+        the enclosing rectangle.
         
         Uses bezierArc, which conveniently handles 360 degrees.
         Special thanks to Robert Kern."""
-        ### XXXX above documentation is WRONG. Exactly what are (x1,y1), (x2,y2)?
         
         pointList = pdfgeom.bezierArc(x1,y1, x2,y2, 0, 360)
         #move to first point
