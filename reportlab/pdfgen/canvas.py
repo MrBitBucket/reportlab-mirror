@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.15  2000/03/10 21:46:04  andy_robinson
+#	fixed typo in setDash
+#
 #	Revision 1.14  2000/03/08 13:40:03  andy_robinson
 #	Canvas has two methods setFillColor(aColor) and setStrokeColor(aColor)
 #	which accepts color objects directly.
-#
+#	
 #	Revision 1.13  2000/03/06 20:06:36  rgbecker
 #	Typo self._currentPageHasImages = 1
 #	
@@ -72,7 +75,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.14 2000/03/08 13:40:03 andy_robinson Exp $ '''
+__version__=''' $Id: canvas.py,v 1.15 2000/03/10 21:46:04 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -563,7 +566,7 @@ class Canvas:
         """Two notations.  pass two numbers, or an array and phase"""
         if type(array) == IntType or type(array) == FloatType:
             self._code.append('[%s %s] 0 d' % (array, phase))
-        elif type(array) == ListType or type(Array) == TupleType:
+        elif type(array) == ListType or type(array) == TupleType:
             assert phase <= len(array), "setDash phase must be l.t.e. length of array"
             textarray = string.join(map(str, array))
             self._code.append('[%s] %s d' % (textarray, phase))
