@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.12 2001/05/17 16:21:33 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.13 2001/05/18 16:24:25 rgbecker Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -232,7 +232,7 @@ def sample0a():
     pc.y = 50
     pc.data = [10]
     pc.labels = ['a']
-    pc.defaultStyles.strokeWidth=0.5
+    pc.defaultStyles.strokeWidth=1#0.5
     
     d.add(pc)
 
@@ -251,7 +251,7 @@ def sample0b():
     pc.height = 100
     pc.data = [10]
     pc.labels = ['a']
-    pc.defaultStyles.strokeWidth=0.5
+    pc.defaultStyles.strokeWidth=1#0.5
     
     d.add(pc)
 
@@ -269,7 +269,7 @@ def sample1():
     pc.data = [10, 20, 30, 40, 50, 60]
     pc.labels = ['a', 'b', 'c', 'd', 'e', 'f']
 
-    pc.defaultStyles.strokeWidth=0.5
+    pc.defaultStyles.strokeWidth=1#0.5
     pc.defaultStyles[3].popout = 20
     pc.defaultStyles[3].strokeWidth = 2
     pc.defaultStyles[3].strokeDashArray = [2,2]
@@ -296,7 +296,7 @@ def sample2():
 
     pc.width = 150
     pc.height = 150
-    pc.defaultStyles.strokeWidth=0.5
+    pc.defaultStyles.strokeWidth=1#0.5
 
     pc.defaultStyles[0].fillColor = colors.steelblue
     pc.defaultStyles[1].fillColor = colors.thistle
@@ -326,7 +326,7 @@ def sample3():
 
     pc.width = 150
     pc.height = 150
-    pc.defaultStyles.strokeWidth=0.5
+    pc.defaultStyles.strokeWidth=1#0.5
     pc.defaultStyles[0].fillColor = colors.steelblue
     pc.defaultStyles[1].fillColor = colors.thistle
     pc.defaultStyles[2].fillColor = colors.cornflower
@@ -349,7 +349,7 @@ def sample4():
 
     pc.width = 150
     pc.height = 150
-    pc.defaultStyles.strokeWidth=0.5
+    pc.defaultStyles.strokeWidth=1#0.5
     pc.defaultStyles[0].fillColor = colors.steelblue
     pc.defaultStyles[1].fillColor = colors.thistle
     pc.defaultStyles[2].fillColor = colors.cornflower
