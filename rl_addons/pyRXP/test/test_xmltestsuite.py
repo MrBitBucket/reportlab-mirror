@@ -1,23 +1,17 @@
 #!/usr/bin/env python
 '''
-$Id: test_xmltestsuite.py,v 1.1 2003/04/11 13:47:14 rgbecker Exp $
+$Id: test_xmltestsuite.py,v 1.2 2003/04/13 16:04:04 rgbecker Exp $
 Test parsing and validation against James Clark's test cases,
 as downloaded from http://www.jclark.com/xml/
 The .zip file should be in the same directory as this script.
 Note that the .zip file can be freely distributed in unmodified form
 so it could be added to the pyRXP distribution.
 '''
-__rcs_id__	= '$Id: test_xmltestsuite.py,v 1.1 2003/04/11 13:47:14 rgbecker Exp $'
-__version__ = '$Revision: 1.1 $'[11:-2]
+__rcs_id__	= '$Id: test_xmltestsuite.py,v 1.2 2003/04/13 16:04:04 rgbecker Exp $'
+__version__ = '$Revision: 1.2 $'[11:-2]
 __author__ = 'Stuart Bishop <stuart@stuartbishop.net>'
 
-import unittest
-import zipfile
-import sys
-import os
-import os.path
-import pyRXPU
-import codecs
+import unittest, zipfile, sys, os, os.path, codecs
 debug = int(os.environ.get('RL_DEBUG','0'))
 
 # Debug is to help me trace down memory bugs
@@ -30,7 +24,7 @@ except NameError:
 	__file__ = os.path.join(os.getcwd(),'oops')
 
 class test_pyRXPU(unittest.TestCase):
-	mod = pyRXPU
+	mod = None
 	
 	def parse(self,filename,**kw):
 		if debug: print >> sys.stderr,'About to parse %s' % filename
@@ -152,7 +146,7 @@ def buildup_test(cls=test_pyRXPU,I=[]):
 			f = open(osname,'wb')
 			f.write(zipf.read(zipname))
 			f.close()
-		if I and inname not in I: continue
+		if I and zipname not in I: continue
 
 		# Add input files to our lists
 		if os.path.splitext(osname)[1] == '.xml' and zipname.find('out') == -1:
@@ -193,6 +187,8 @@ def buildup_test(cls=test_pyRXPU,I=[]):
 		def doTest(self,inname=inname):
 			self._test_notwf(inname)
 		setattr(cls,mname,doTest)
+	import pyRXPU
+	cls.mod = pyRXPU
 
 if __name__ == '__main__':
 	I = filter(lambda a: a[:2]=='-I',sys.argv)
