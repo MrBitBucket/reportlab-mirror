@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "0.99"
+#define VERSION "1.00"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -1205,12 +1205,12 @@ L0:		c->value = cv;
 		c->valid = 1;
 		return 1;
 		}
-	else if(PyObject_HasAttrString(value,"red")
+	PyErr_Clear();
+	if(PyObject_HasAttrString(value,"red")
 			&& PyObject_HasAttrString(value,"green")
 			&& PyObject_HasAttrString(value,"blue")){
 		double	r, g, b;
 		PyObject *v;
-		PyErr_Clear();
 		v = PyObject_GetAttrString(value,"red");
 		i = PyArg_Parse(v,"d",&r);
 		Py_DECREF(v);
