@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.15 2001/05/25 14:02:47 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.15 2001/05/25 14:02:47 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.16 2001/06/07 15:16:59 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.16 2001/06/07 15:16:59 rgbecker Exp $ '''
 
 import string, os
 from types import *
@@ -46,6 +46,7 @@ try:
 	from PIL import Image
 except ImportError, errMsg:
 	if str(errMsg)!='No module named PIL': raise
+	from reportlab.rl_config import PIL_WARNINGS
 	try:
 		import Image
 		if PIL_WARNINGS: warnOnce('Python Imaging Library not available as package; upgrade your installation!')
