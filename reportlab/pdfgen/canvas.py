@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.74 2001/04/20 05:52:05 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.74 2001/04/20 05:52:05 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.75 2001/05/05 06:25:05 aaron_watters Exp $
+__version__=''' $Id: canvas.py,v 1.75 2001/05/05 06:25:05 aaron_watters Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -138,8 +138,11 @@ class Canvas:
         self.bottomup = bottomup
         self.imageCaching = rl_config.defaultImageCaching
         self._make_preamble()
+        self.init_graphics_state()
+        self.state_stack = []
 
-        #initial graphics state
+    def init_graphics_state(self):
+        #initial graphics state, never modify any of these in place
         self._x = 0
         self._y = 0
         self._fontname = 'Times-Roman'
@@ -167,6 +170,24 @@ class Canvas:
 
         self._fillColorRGB = (0,0,0)
         self._strokeColorRGB = (0,0,0)
+
+    def push_state_stack(self):
+        state = {}
+        for name in self.STATE_ATTRIBUTES:
+            state[name] = getattr(self, name)
+        self.state_stack.append(state)
+
+    def pop_state_stack(self):
+        state = self.state_stack[-1]
+        del self.state_stack[-1]
+        for name in self.STATE_ATTRIBUTES:
+            setattr(self, name, state[name])
+
+    STATE_ATTRIBUTES = string.split("""
+     _x _y _fontname _fontsize _textMode _leading _currentMatrix _fillMode
+     _fillMode _charSpace _wordSpace _horizScale _textRenderMode _rise _textLineMatrix
+     _textMatrix _lineCap _lineJoin _lineDash _lineWidth _mitreLimit _fillColorRGB
+     _strokeColorRGB""")
 
         #self._addStandardFonts()
         
@@ -312,6 +333,8 @@ class Canvas:
         #now get ready for the next one
         self._pageNumber = self._pageNumber + 1
         self._restartAccumulators()
+        self.init_graphics_state()
+        self.state_stack = []
         
     def _setAnnotations(self,page):
         page.Annots = self._annotationrefs
@@ -409,6 +432,8 @@ class Canvas:
            but not forms.  The form will not automatically be shown in the
            document but must be explicitly referenced using doForm in pages
            that require the form."""
+        self.push_state_stack()
+        self.init_graphics_state()
         if self._code:
             # save the code that is not in the formf
             self._pushAccumulators()
@@ -437,6 +462,7 @@ class Canvas:
         self._setAnnotations(form)
         self._doc.addForm(name, form)
         self._restartAccumulators()
+        self.pop_state_stack()
         
     #def forceCodeInsert0(self, code):
     #    """I know a whole lot about PDF and I want to add a bunch of code I know will work..."""
@@ -547,6 +573,7 @@ class Canvas:
         #self._currentMatrix = (a0*a+c0*b,    b0*a+d0*b,
         #                       a0*c+c0*d,    b0*c+d0*d,
         #                       a0*e+c0*f+e0, b0*e+d0*f+f0)
+        #print "transform", (a,b,c,d,e,f)
         if self._code and self._code[-1][-3:]==' cm':
             L = string.split(self._code[-1])
             a0, b0, c0, d0, e0, f0 = map(float,L[-7:-1])
@@ -554,6 +581,14 @@ class Canvas:
             self._code[-1] = s % fp_str(a0*a+c0*b,b0*a+d0*b,a0*c+c0*d,b0*c+d0*d,a0*e+c0*f+e0,b0*e+d0*f+f0)
         else:
             self._code.append('%s cm' % fp_str(a,b,c,d,e,f))
+        ### debug
+##        (a,b,c,d,e,f) = self.Kolor
+##        self.Kolor = (f,a,b,c,d,e)
+##        self.setStrokeColorRGB(f,a,b)
+##        self.setFillColorRGB(f,a,b)
+##        self.line(-90,-1000,1,1); self.line(1000,-90,-1,1)
+##        self.drawString(0,0,"here")
+##    Kolor = (0, 0.5, 1, 0.25, 0.7, 0.3)
 
     def translate(self, dx, dy):
         """move the origin from the current (0,0) point to the (dx,dy) point
@@ -598,12 +633,14 @@ class Canvas:
             # if the save/restore pairs match then font is Helvetica 20 again.
         """
         #"""These need expanding to save/restore Python's state tracking too"""
+        self.push_state_stack()
         self._code.append('q')
         
     def restoreState(self):
         """restore the graphics state to the matching saved state (see saveState)."""
         #"""These need expanding to save/restore Python's state tracking too"""
         self._code.append('Q')
+        self.pop_state_stack()
 
         ###############################################################
         #
@@ -852,6 +889,7 @@ class Canvas:
         font size. Raises a readable exception if an illegal font
         is supplied.  Font names are case-sensitive! Keeps track
         of font name and size for metrics."""
+        #print "setFont", (psfontname, size, leading)
         self._fontname = psfontname
         self._fontsize = size
         pdffontname = self._doc.getInternalFontName(psfontname)
@@ -1016,6 +1054,7 @@ class Canvas:
         height are omitted, they are calculated from the image size.
         Also allow file names as well as images.  This allows a
         caching mechanism"""
+        #return # XXXX debug
 
         self._currentPageHasImages = 1
         # new here
