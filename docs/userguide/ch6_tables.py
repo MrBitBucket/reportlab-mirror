@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch6_tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch6_tables.py,v 1.16 2000/10/25 08:57:45 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch6_tables.py,v 1.17 2001/03/21 14:12:02 rgbecker Exp $
 from genuserguide import *
 from reportlab.platypus import Image
 
@@ -224,7 +224,6 @@ EmbeddedCode("""
 I = Image('%s')
 I.drawHeight = 1.25*inch*I.drawHeight / I.drawWidth
 I.drawWidth = 1.25*inch
-I.noImageCaching = 1
 P0 = Paragraph('''
                <b>A pa<font color=red>r</font>a<i>graph</i></b>
                <super><font color=yellow>1</font></super>''',

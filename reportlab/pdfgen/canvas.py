@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.70 2001/03/16 14:51:50 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.70 2001/03/16 14:51:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.71 2001/03/21 14:12:02 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.71 2001/03/21 14:12:02 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -136,6 +136,7 @@ class Canvas:
         #to also set the text matrix accordingly.  You can now choose your
         #drawing coordinates.
         self.bottomup = bottomup
+        self.imageCaching = rl_config.defaultImageCaching
         self._make_preamble()
 
         #initial graphics state
@@ -1045,7 +1046,7 @@ class Canvas:
                     dataline = outstream.read(60)
                 imagedata.append('EI')
             else:
-                if hasattr(self,'noImageCaching') and self.noImageCaching:
+                if not self.imageCaching:
                     imagedata = pdfutils.cacheImageFile(image,returnInMemory=1)
                 else:
                     if not pdfutils.cachedImageExists(image):

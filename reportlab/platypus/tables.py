@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.36 2001/03/19 23:48:00 aaron_watters Exp $
-__version__=''' $Id: tables.py,v 1.36 2001/03/19 23:48:00 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.37 2001/03/21 14:12:02 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.37 2001/03/21 14:12:02 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -931,7 +931,6 @@ LIST_STYLE = TableStyle(
 	I = Image(os.path.join(os.path.dirname(reportlab.platypus.__file__),'..','demos','pythonpoint','leftlogo.gif'))
 	I.drawHeight = 1.25*inch*I.drawHeight / I.drawWidth
 	I.drawWidth = 1.25*inch
-	I.noImageCaching = 1
 	P = Paragraph("<para align=center spaceb=3>The <b>ReportLab Left <font color=red>Logo</font></b> Image</para>", styleSheet["BodyText"])
 	data=  [['A', 'B', 'C', Paragraph("<b>A pa<font color=red>r</font>a<i>graph</i></b><super><font color=yellow>1</font></super>",styleSheet["BodyText"]), 'D'],
 			['00', '01', '02', [I,P], '04'],

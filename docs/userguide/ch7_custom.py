@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch7_custom.py,v 1.6 2000/10/25 08:57:45 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch7_custom.py,v 1.7 2001/03/21 14:12:02 rgbecker Exp $
 from genuserguide import *
 
 heading1("Writing your own $Flowable$ Objects")
@@ -78,5 +78,4 @@ class RotatedImage(Image):
 		self.canv.rotate(90)
 		Image.draw(self)
 I = RotatedImage('%s')
-I.noImageCaching = 1
 """ % I,'I')
