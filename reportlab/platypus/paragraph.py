@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.43 2000/12/13 23:31:18 aaron_watters Exp $
-__version__=''' $Id: paragraph.py,v 1.43 2000/12/13 23:31:18 aaron_watters Exp $ '''
-from string import split, strip, join
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.44 2000/12/14 12:26:58 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.44 2000/12/14 12:26:58 rgbecker Exp $ '''
+from string import split, strip, join, whitespace
 from operator import truth
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -160,9 +160,9 @@ def _getFragWords(frags):
 		#del f.text # we can't do this until we sort out splitting
 					# of paragraphs
 		if text!='':
-			S = split(text,' ')
+			S = split(text)
 			if S[-1]=='': del S[-1]
-			if W!=[] and text[0] in [' ','\t']:
+			if W!=[] and text[0] in whitespace:
 				W.insert(0,n)
 				R.append(W)
 				W = []
@@ -179,18 +179,13 @@ def _getFragWords(frags):
 			w = S[-1]
 			W.append((f,w))
 			n = n + stringWidth(w, f.fontName, f.fontSize)
-			if text[-1] in [' ','\t']:
+			if text[-1] in whitespace:
 				W.insert(0,n)
 				R.append(W)
 				W = []
 				n = 0
 		elif hasattr(f,'cbDefn'):
-			if W!=[]:
-				W.insert(0,n)
-				R.append(W)
-				W = []
-				n = 0
-			R.append([0,(f,'')])
+			W.append((f,''))
 
 	if W!=[]:
 		W.insert(0,n)
@@ -460,7 +455,7 @@ class Paragraph(Flowable):
 						words = [f.clone()]
 						words[-1].text = nText
 					elif not _sameFrag(words[-1],f):
-						if nText!='' and nText[0]!=' ':
+						if (nText!='' and nText[0]!=' ') or hasattr(f,'cbDefn'):
 							words[-1].text = words[-1].text + ' '
 						words.append(f.clone())
 						words[-1].text = nText
