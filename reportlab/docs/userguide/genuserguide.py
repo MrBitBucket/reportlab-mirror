@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/genuserguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/genuserguide.py,v 1.9 2001/12/11 11:20:38 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/genuserguide.py,v 1.10 2001/12/20 13:55:55 rgbecker Exp $
 
-__version__=''' $Id: genuserguide.py,v 1.9 2001/12/11 11:20:38 rgbecker Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.10 2001/12/20 13:55:55 rgbecker Exp $ '''
 
 __doc__ = """
 This module contains the script for building the user guide.
@@ -12,11 +12,12 @@ This module contains the script for building the user guide.
 
 from reportlab.tools.docco.rl_doc_utils import *
 
-def run(pagesize=defaultPageSize, verbose=0):
+def run(pagesize=defaultPageSize, verbose=0, outDir=None):
 
 	# copy to target
 	import reportlab
-	destfn = os.path.join(os.path.dirname(reportlab.__file__),'docs','userguide.pdf')
+	if not outDir: outDir = os.path.join(os.path.dirname(reportlab.__file__),'docs')
+	destfn = os.path.join(outDir,'userguide.pdf')
 	doc = RLDocTemplate(destfn,pagesize = pagesize)
 
 	#this builds the story
@@ -51,12 +52,20 @@ def makeSuite():
 	return ScriptThatMakesFileTest('../docs/userguide', 'genuserguide.py', 'userguide.pdf') 
 
 if __name__=="__main__":
+	outDir = filter(lambda x: x[:9]=='--outdir=',sys.argv)
+	if outDir:
+		outDir = outDir[0]
+		sys.argv.remove(outDir)
+		outDir = outDir[9:]
+	else:
+		outDir = None
 	verbose = '-s' not in sys.argv
 	if not verbose: sys.argv.remove('-s')
 	timing = '-timing' in sys.argv
 	if timing: sys.argv.remove('-timing')
 	prof = '-prof' in sys.argv
 	if prof: sys.argv.remove('-prof')
+
 	if len(sys.argv) > 1:
 		try:
 			(w, h) = eval(sys.argv[1])
@@ -70,11 +79,11 @@ if __name__=="__main__":
 	if timing:
 		from time import time
 		t0 = time()
-		run((w, h, verbose))
+		run((w, h), verbose,outDir)
 		if verbose:
 			print 'Generation of userguide took %.2f seconds' % (time()-t0)
 	elif prof:
 		import profile
-		profile.run('run((w, h))','genuserguide.stats')
+		profile.run('run((w, h),verbose,outDir)','genuserguide.stats')
 	else:
-		run((w, h))
+		run((w, h), verbose,outDir)
