@@ -709,34 +709,41 @@ class ValueAxis(_AxisG):
         cache = {}
         cMin = valueMin
         cMax = valueMax
-        while go:
+        iter = 0
+        while go and iter<=10:
+            iter += 1
             go = 0
             if do_abf:
                 valueStep, T, fuzz = self._getValueStepAndTicks(valueMin, valueMax, cache)
-                fuzz = 1e-8*valueStep
                 i0 = valueStep*abf[0]
                 i1 = valueStep*abf[1]
                 if rrn: v = T[0]
                 else: v = valueMin
-                d = v - (cMin-i0)
-                if abs(v)>fuzz and fuzz < d:
-                    valueMin = valueMin - (d+fuzz)
+                u = cMin-i0
+                if abs(v)>fuzz and v>=u+fuzz:
+                    valueMin = u
                     go = 1
-                if rrn: v = T[-1]
+                if rrx: v = T[-1]
                 else: v = valueMax
-                d = i1 + cMax - v
-                if abs(v)>fuzz and fuzz < d:
-                    valueMax = valueMax + (d+fuzz)
+                u = cMax+i1
+                if abs(v)>fuzz and v<=u-fuzz:
+                    valueMax = u
                     go = 1
 
             if do_rr:
                 valueStep, T, fuzz = self._getValueStepAndTicks(valueMin, valueMax, cache)
-                if rangeRound in ['both','floor'] and valueMin<T[0]-fuzz:
-                    valueMin = T[0]-valueStep
-                    go = 1
-                if rangeRound in ['both','ceiling'] and valueMax>T[-1]+fuzz:
-                    valueMax = T[-1]+valueStep
-                    go = 1
+                if rrn:
+                    if valueMin<T[0]-fuzz:
+                        valueMin = T[0]-valueStep
+                        go = 1
+                    else:
+                        valueMin = T[0]
+                if rrx:
+                    if valueMax>T[-1]+fuzz:
+                        valueMax = T[-1]+valueStep
+                        go = 1
+                    else:
+                        valueMax = T[-1]
 
         self._valueMin, self._valueMax = valueMin, valueMax
         self._rangeAdjust()
@@ -765,16 +772,20 @@ class ValueAxis(_AxisG):
 
     def _calcTickPositions(self):
         self._calcValueStep()
-        P = []
         valueMin, valueMax, valueStep = self._valueMin, self._valueMax, self._valueStep
         fuzz = 1e-8*valueStep
-        t = int((valueMin-fuzz)/valueStep) * valueStep
-        if t >= valueMin-fuzz: P.append(t)
-        t = t + valueStep
-        while t <= valueMax+fuzz:
-            P.append(t)
-            t = t + valueStep
-        return P
+        rangeRound = self.rangeRound
+        i0 = int(float(valueMin)/valueStep)
+        v = i0*valueStep
+        if rangeRound in ('both','floor'):
+            if v>valueMin+fuzz: i0 -= 1
+        elif v<valueMin-fuzz: i0 += 1
+        i1 = int(float(valueMax)/valueStep)
+        v = i1*valueStep
+        if rangeRound in ('both','ceiling'):
+            if v<valueMax-fuzz: i1 += 1
+        elif v>valueMax+fuzz: i1 -= 1
+        return [i*valueStep for i in xrange(i0,i1+1)]
 
     def _calcTickmarkPositions(self):
         """Calculate a list of tick positions on the axis.  Returns a list of numbers."""
