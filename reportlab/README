@@ -1,11 +1,9 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/README?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/README,v 1.6 2001/10/27 23:19:43 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/README,v 1.7 2001/12/24 07:56:35 andy_robinson Exp $
 
-Release 1.09
-============
-This is release 1.0 or the ReportLab toolkit. 
+This is the ReportLab PDF library. 
 
 Installation
 ============
