@@ -363,7 +363,7 @@ class Table(Flowable):
         if not W: W = _calc_pc(self._argW,availWidth)   #widths array
 
         hmax = lim = len(H)
-        longTable = getattr(self,'_longTableOptimize',None)
+        longTable = getattr(self,'_longTableOptimize',rl_config.longTableOptimize)
 
         if None in H:
             canv = getattr(self,'canv',None)
