@@ -24,7 +24,7 @@ from reportlab.lib import colors
 from reportlab.lib.utils import fp_str
 from reportlab.pdfbase import pdfmetrics
 import operator, string
-from types import TupleType, ListType, StringType
+from types import TupleType, ListType, StringType, FloatType, IntType
 
 class CellStyle(PropertySet):
     defaults = {
@@ -515,11 +515,11 @@ class Table(Flowable):
             elif w == '*':
                 numberUndefined += 1
                 numberGreedyUndefined += 1
-            elif isinstance(w,str) and w.endswith('%'):
+            elif type(w) is StringType and w.endswith('%'):
                 percentDefined += 1
                 percentTotal += float(w[:-1])
             else:
-                assert isinstance(w, (int, float))
+                assert type(w) in (IntType, FloatType)
                 totalDefined = totalDefined + w
         if verbose: print 'prelim width calculation.  %d columns, %d undefined width, %0.2f units remain' % (
             self._ncols, numberUndefined, availWidth - totalDefined)
@@ -533,7 +533,7 @@ class Table(Flowable):
         elementWidth = self._elementWidth
         for colNo in range(self._ncols):
             w = W[colNo]
-            if w is None or w=='*' or (isinstance(w,str) and w.endswith('%')):
+            if w is None or w=='*' or (type(w) is StringType and w.endswith('%')):
                 siz = 1
                 current = final = None
                 for rowNo in range(self._nrows):
@@ -719,7 +719,7 @@ class Table(Flowable):
             else:
                 cap = cmd[5]
                 try:
-                    if not isinstance(cap,int):
+                    if type(cap) is StringType:
                         cap = LINECAPS[cap]
                     elif cap<0 or cap>2:
                         raise ValueError
@@ -735,7 +735,7 @@ class Table(Flowable):
             else:
                 join = cmd[7]
                 try:
-                    if not isinstance(join,int):
+                    if type(join) is StringType:
                         join = LINEJOINS[join]
                     elif join<0 or join>2:
                         raise ValueError
