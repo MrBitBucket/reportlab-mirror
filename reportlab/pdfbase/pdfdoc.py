@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.22  2000/08/09 10:57:52  rgbecker
+#	Andy's Symbol/Zapf font fix
+#
 #	Revision 1.21  2000/06/26 15:58:22  rgbecker
 #	Simple fix to widths problem
-#
+#	
 #	Revision 1.20  2000/06/23 17:51:22  aaron_watters
 #	/Producer (ReportLab http://www.reportlab.com) in document
 #	
@@ -86,7 +89,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.21 2000/06/26 15:58:22 rgbecker Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.22 2000/08/09 10:57:52 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -1241,27 +1244,19 @@ class PDFType1Font(PDFObject):
                    (self.keyname, self.fontname, self.encoding)
                    + LINEEND)
 
-
-       
-
-
-
-
-
 ##############################################################
 #
 #            some helpers
 #
 ##############################################################
-
 def MakeType1Fonts(encoding):
     "returns a list of all the standard font objects"
     fonts = []
     pos = 1
     for fontname in StandardEnglishFonts:
-        #Symbol is almost empty in WinAnsi, no choice!
+        #These only work properly in StandardEncoding
         if fontname in ['Symbol', 'ZapfDingbats']:
-            encUsed = 'MacRomanEncoding'
+            encUsed = 'StandardEncoding'	# Andy's Fix
         else:
             encUsed = encoding
         font = PDFType1Font('F'+str(pos), fontname, encUsed)
