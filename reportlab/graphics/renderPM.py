@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.23 2003/03/02 01:54:57 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.23 2003/03/02 01:54:57 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.24 2003/03/19 14:48:17 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.24 2003/03/19 14:48:17 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -275,7 +275,8 @@ class PMCanvas:
                 except ImportError:
                     import Image
                 im = im.convert("P", dither=Image.NONE, palette=Image.ADAPTIVE)
-            elif fmt in ['PNG','TIFF','BMP', 'PPM']:
+            elif fmt in ['PNG','TIFF','BMP', 'PPM', 'TIF']:
+                if fmt=='TIF': fmt = 'TIFF'
                 if fmt=='PNG':
                     try:
                         from PIL import PngImagePlugin

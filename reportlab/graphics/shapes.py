@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.88 2003/03/19 14:42:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.89 2003/03/19 14:48:18 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.88 2003/03/19 14:42:11 rgbecker Exp $ '''
+__version__=''' $Id: shapes.py,v 1.89 2003/03/19 14:48:18 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -585,7 +585,7 @@ class Drawing(Group, Flowable):
             renderPDF.drawToFile(self, filename, title, showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
             ext = ext +  '/.pdf'
 
-        for bmFmt in ['gif','png','tif','jpg']:
+        for bmFmt in ['gif','png','tif','jpg','tiff']:
             if bmFmt in plotMode:
                 from reportlab.graphics import renderPM
                 filename = '%s.%s' % (fnroot,bmFmt)
