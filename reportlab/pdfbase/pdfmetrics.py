@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.63 2003/10/09 13:55:18 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.64 2003/10/14 15:02:27 dragan1 Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -131,7 +131,6 @@ class TypeFace:
             self.requiredEncoding = 'SymbolEncoding'
         else:
             self.requiredEncoding = None
-
         if name in standardFonts:
             self.builtIn = 1
             self._loadBuiltInData(name)
@@ -140,8 +139,8 @@ class TypeFace:
 
     def _loadBuiltInData(self, name):
         """Called for the built in 14 fonts.  Gets their glyph data.
-
         We presume they never change so this can be a shared reference."""
+	name = str(name)	#needed for pycanvas&jython/2.1 compatibility
         self.glyphWidths = _fontdata.widthsByFontGlyph[name]
         self.glyphNames = self.glyphWidths.keys()
         self.ascent,self.descent = _fontdata.ascent_descent[name]
