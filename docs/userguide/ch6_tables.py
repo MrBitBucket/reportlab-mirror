@@ -278,12 +278,15 @@ from reportlab.lib.styles import getSampleStyleSheet
 stylesheet=getSampleStyleSheet()
 normalStyle = stylesheet['Normal']
 text='''
+
    This is a non rearranging form of the <b>Paragraph</b> class;
    <b><font color=red>XML</font></b> tags are allowed in <i>text</i> and have the same
+   
    meanings as for the <b>Paragraph</b> class.
    As for <b>Preformatted</b>, if dedent is non zero <font color=red size=+1>dedent</font>
    common leading spaces will be removed from the
    front of each line.
+
 '''
 t=XPreformatted(text,normalStyle,dedent=3)
 """)
