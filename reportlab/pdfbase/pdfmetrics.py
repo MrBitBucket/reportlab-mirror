@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfmetrics.py,v $
+#	Revision 1.10  2000/08/16 07:44:53  rgbecker
+#	Start using _rl_accel
+#
 #	Revision 1.9  2000/08/01 10:56:24  rgbecker
 #	moved accelerators to lib
-#
+#	
 #	Revision 1.8  2000/07/26 12:01:10  rgbecker
 #	Accelerator rearrangements
 #	
@@ -55,7 +58,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfmetrics.py,v 1.9 2000/08/01 10:56:24 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.10 2000/08/16 07:44:53 rgbecker Exp $ '''
 __doc__="""This contains pre-canned text metrics for the PDFgen package, and may also
 be used for any other PIDDLE back ends or packages which use the standard
 Type 1 postscript fonts.
@@ -130,7 +133,8 @@ widths={
 	}
 ascent_descent = {'courier': (629, -157), 'courier-bold': (626, -142), 'courier-boldoblique': (626, -142), 'courier-oblique': (629, -157), 'helvetica': (718, -207), 'helvetica-bold': (718, -207), 'helvetica-boldoblique': (718, -207), 'helvetica-oblique': (718, -207), 'symbol': (0, 0), 'times-bold': (676, -205), 'times-bolditalic': (699, -205), 'times-italic': (683, -205), 'times-roman': (683, -217), 'zapfdingbats': (0, 0)}
 try:
-	from reportlab.lib._rl_accel import _stringWidth
+	from reportlab.lib import _rl_accel
+	_stringWidth = _rl_accel.stringWidth
 except ImportError:
 	_stringWidth = None
 
@@ -179,7 +183,7 @@ if _stringWidth:
 	for e, F in widths.items():
 		for f, W in  F.items():
 			ad = ascent_descent[f]
-			_pdfmetrics.setFontInfo(f,e,ad[0],ad[1],W)
+			_rl_accel.setFontInfo(f,e,ad[0],ad[1],W)
 
 	def _loadfont(font,encoding):
 		filename = AFMDIR + os.sep + font + '.afm'
@@ -187,7 +191,7 @@ if _stringWidth:
 		assert os.path.exists(filename)
 		W = parseAFMfile(filename)
 		ad = (0,0)	# TODO don't have this yet?
-		_pdfmetrics.setFontInfo(font,encoding,ad[0],ad[1],W)
+		_rl_accel.setFontInfo(font,encoding,ad[0],ad[1],W)
 
 	def _SWRecover(text, font, fontSize, encoding):
 		#infoOnce('_SWRecover('...',%s,%s,%s')%(font,str(fontSize),encoding))
@@ -198,8 +202,8 @@ if _stringWidth:
 			warnOnce('Font %s:%s not found - using Courier:%s for widths'%(font,encoding,encoding))
 			return _stringWidth(text,'courier',fontSize,encoding)
 
-	_pdfmetrics.defaultEncoding(DEFAULT_ENCODING)
-	_pdfmetrics._SWRecover(_SWRecover)
+	_rl_accel.defaultEncoding(DEFAULT_ENCODING)
+	_rl_accel._SWRecover(_SWRecover)
 	stringWidth = _stringWidth
 
 else:
