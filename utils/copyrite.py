@@ -1,8 +1,5 @@
 # Simple script to check the #history line in cvs files
 # single argument mode an or of 
-INDICATE_MISSING=1
-CHK_HISTORY_REF=2
-FIX_HISTORY_REF=4
 # We descend the working copy from here down looking for files
 # referred to in CVS/Entries. These are checked for the following
 # lines. And the #history line is fixed up so that it points to the
@@ -10,7 +7,7 @@ FIX_HISTORY_REF=4
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/copyrite.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/copyrite.py,v 1.1 2000/10/24 13:56:02 rgbecker Exp $
+#$Header: /tmp/reportlab/utils/copyrite.py,v 1.2 2001/04/05 09:03:11 rgbecker Exp $
 import string, os, sys
 INDICATE_MISSING=1
 CHK_HISTORY_REF=2
