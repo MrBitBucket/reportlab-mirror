@@ -1,20 +1,17 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.7 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.8 2001/04/10 21:44:03 andy_robinson Exp $
 import string
 
 from reportlab.graphics import shapes
 from reportlab import rl_config
 from reportlab.lib import colors
 
-class Widget(shapes.UserNode):
-    """Base for all user-defined widgets.  Keep as simple as possible. Does
-    not inherit from Shape so that we can rewrite shapes without breaking
-    widgets and vice versa."""
+class PropHolder:
+    '''Base for property holders'''
     _attrMap = None
 
-    
     def verify(self):
         """If the _attrMap attribute is not None, this
         checks all expected attributes are present; no
@@ -31,7 +28,7 @@ class Widget(shapes.UserNode):
                 if checkerFunc:
                     value = getattr(self, attr)
                     assert checkerFunc(value), "Invalid value %s for attribute %s in class %s" % (value, attr, self.__class__.__name__)
-                    
+
     if rl_config.shapeChecking:
         """This adds the ability to check every attribite assignment as it is made.
         It slows down shapes but is a big help when developing. It does not
@@ -52,17 +49,6 @@ class Widget(shapes.UserNode):
             self.__dict__[attr] = value
             #print 'set %s.%s = %s' % (self.__class__.__name__, attr, value)
 
-    def draw(self):
-        msg = "draw() must be implemented for each Widget!"
-        raise shapes.NotImplementedError, msg
-    
-    def demo(self):
-        msg = "demo() must be implemented for each Widget!"
-        raise shapes.NotImplementedError, msg
-
-    def provideNode(self):
-        return self.draw()
-
     def getProperties(self):
         """Returns a list of all properties which can be edited and
         which are not marked as private. This may include 'child
@@ -75,7 +61,7 @@ class Widget(shapes.UserNode):
         for name in self.__dict__.keys():
             if name[0:1] <> '_':
                 component = getattr(self, name)
-                
+
                 if shapes.isValidChild(component):
                     # child object, get its properties too
                     childProps = component.getProperties()
@@ -89,20 +75,20 @@ class Widget(shapes.UserNode):
                             props['%s.%s' % (name, childKey)] = childValue
                 else:
                     props[name] = component
-               
+
         return props
 
     def setProperties(self, propDict):
         """Permits bulk setting of properties.  These may include
         child objects e.g. "chart.legend.width = 200".
-        
+
         All assignments will be validated by the object as if they
         were set individually in python code.
 
         All properties of a top-level object are guaranteed to be
         set before any of the children, which may be helpful to
         widget designers."""
-        
+
         childPropDicts = {}
         for (name, value) in propDict.items():
             parts = string.split(name, '.', 1)
@@ -119,9 +105,7 @@ class Widget(shapes.UserNode):
         for (childName, childPropDict) in childPropDicts.items():
             child = getattr(self, childName)
             child.setProperties(childPropDict)
-            
-            
-        
+
     def dumpProperties(self, prefix=""):
         """Convenience. Lists them on standard output.  You
         may provide a prefix - mostly helps to generate code
@@ -132,8 +116,24 @@ class Widget(shapes.UserNode):
             prefix = prefix + '.'
         for (name, value) in propList:
             print '%s%s = %s' % (prefix, name, value)
-                    
-class TypedPropertyCollection(Widget):
+
+class Widget(PropHolder,shapes.UserNode):
+    """Base for all user-defined widgets.  Keep as simple as possible. Does
+    not inherit from Shape so that we can rewrite shapes without breaking
+    widgets and vice versa."""
+
+    def draw(self):
+        msg = "draw() must be implemented for each Widget!"
+        raise shapes.NotImplementedError, msg
+
+    def demo(self):
+        msg = "demo() must be implemented for each Widget!"
+        raise shapes.NotImplementedError, msg
+
+    def provideNode(self):
+        return self.draw()
+
+class TypedPropertyCollection(PropHolder):
     """This makes it easy to create lists of objects.  You initialize
     it with a class of what it is to contain, and that is all you
     can add to it.  You can assign properties to the collection
@@ -154,9 +154,7 @@ class TypedPropertyCollection(Widget):
         #give it same default values as whhat it holds
         self.setProperties(example.getProperties())
         self._children = {}
-        
-        
-        
+
     def __getitem__(self, index):
         try:
             return self._children[index]
@@ -169,7 +167,7 @@ class TypedPropertyCollection(Widget):
 
     def __setitem__(self, key, value):
         assert isinstance(value, self._prototype), "This collection can only hold objects of type %s" % self._prototype.__name__
-        
+
     def getProperties(self):
         # return any children which are defined and whatever
         # differs from the parent
@@ -177,7 +175,7 @@ class TypedPropertyCollection(Widget):
 
         for (key, value) in Widget.getProperties(self).items():
             props['%s' % key] = value
-                  
+
         for idx in self._children.keys():
             childProps = self._children[idx].getProperties()
             for (key, value) in childProps.items():
@@ -187,7 +185,7 @@ class TypedPropertyCollection(Widget):
                     props[newKey] = value
 
         return props
-                
+
 class TwoCircles(Widget):
     def __init__(self):
         self.leftCircle = shapes.Circle(100,100,20, fillColor=colors.red)
@@ -210,7 +208,7 @@ class Face(Widget):
         'mood': checkMood 
         }
 
-        
+
     def __init__(self):
         self.x = 10
         self.y = 10
@@ -221,19 +219,19 @@ class Face(Widget):
 
     def demo(self):
         pass
-    
+
     def draw(self):
         s = self.size  # abbreviate as we will use this a lot
         g = shapes.Group()
         g.transform = [1,0,0,1,self.x, self.y]
         # background
         g.add(shapes.Circle(s * 0.5, s * 0.5, s * 0.5, fillColor=self.skinColor))
-        
+
 
         # left eye
         g.add(shapes.Circle(s * 0.35, s * 0.65, s * 0.1, fillColor=colors.white))
         g.add(shapes.Circle(s * 0.35, s * 0.65, s * 0.05, fillColor=self.eyeColor))
-        
+
         # right eye
         g.add(shapes.Circle(s * 0.65, s * 0.65, s * 0.1, fillColor=colors.white))
         g.add(shapes.Circle(s * 0.65, s * 0.65, s * 0.05, fillColor=self.eyeColor))
@@ -249,19 +247,19 @@ class Face(Widget):
             offset = +0.05
         else:
             offset = 0
-            
+
         g.add(shapes.Polygon(points = [
                                 s * 0.3, s * 0.2, #left of mouth
                                 s * 0.7, s * 0.2, #right of mouth
                                 s * 0.6, s * (0.2 + offset), # the bit going up or down
                                 s * 0.4, s * (0.2 + offset) # the bit going up or down
-                                
+
                                 ],
                              fillColor = colors.pink,
                              strokeColor = colors.red,
                              strokeWidth = s * 0.03
                              ))
-        
+
         return g
 
 class TwoFaces(Widget):
@@ -271,7 +269,7 @@ class TwoFaces(Widget):
         self.faceTwo = Face()
         self.faceTwo.x = 100
         self.faceTwo.mood = "sad"
-        
+
     def draw(self):
         """Just return a group"""
         return shapes.Group(self.faceOne, self.faceTwo)
@@ -280,7 +278,7 @@ class TwoFaces(Widget):
         """The default case already looks good enough,
         no implementation needed here"""
         pass
-    
+
 def test():
     d = shapes.Drawing(400, 200)
     tc = TwoCircles()
@@ -304,10 +302,6 @@ def test():
     print 'saved face_copy.pdf'
     print 'drawing 2 properties:'
     d2.dumpProperties()
-    
-    
 
 if __name__=='__main__':
     test()
-    
-    
