@@ -2,30 +2,53 @@
 This modules defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, stacked and 100% bar charts,
-available in horizontal and vertical versions.  """
+available in horizontal and vertical versions.
+"""
 #chartparts - candidate components for a chart library.
 
 import string
 from types import FunctionType
 
-
+from reportlab.lib import colors 
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.charts.textlabel0 import Label
 from reportlab.graphics.shapes import *
-from reportlab.lib import colors 
-
-
 from reportlab.graphics.charts.textlabel0 import Label
 from reportlab.graphics.charts.axes0 import XCategoryAxis, YValueAxis
       
-
     
 class VerticalBarChart(Widget):
     """Bar chart with multiple side-by-side bars.
 
     Variants will be provided for stacked and 100% charts,
     probably by running all three off a common base class."""
-    
+
+    _attrMap = {
+        'debug':isNumber,
+        'x':isNumber,
+        'y':isNumber,
+        'width':isNumber,
+        'height':isNumber,
+
+        'useAbsolute':isNumber,
+        'barWidth':isNumber,
+        'barLabelNudge':isNumber,
+        'groupSpacing':isNumber,
+        'barSpacing':isNumber,
+
+        'strokeColor':isColorOrNone,
+        'fillColor':isColorOrNone,
+
+        'defaultColors':SequenceOf(isColor),
+
+        'categoryAxis':None,
+        'categoryNames':isListOfStrings,
+        'valueAxis':None,
+        'data':None,
+        'barLabels':None,
+        'barLabelFormat':None
+        }
+
     def __init__(self):
         self.debug = 0
 
@@ -75,6 +98,7 @@ class VerticalBarChart(Widget):
         # if you have multiple series, by default they butt
         # together.
 
+
     def demo(self):
         """Shows basic use of a bar chart"""
         drawing = Drawing(200, 100)
@@ -92,6 +116,7 @@ class VerticalBarChart(Widget):
         bc.data = data
         drawing.add(bc)
         return drawing
+
 
     def calcBarPositions(self):
         """Works out where they go.
@@ -120,10 +145,6 @@ class VerticalBarChart(Widget):
                 print 'width = %d group + (%d bars * %d barWidth) + (%d gaps * %d interBar) = %d total' % (
                     self.groupSpacing, self._seriesCount, self.barWidth,
                     self._seriesCount - 1, self.barSpacing, normWidth)
-                
-
-            
-
         
         self._barPositions = []
         for rowNo in range(len(self.data)):
@@ -144,12 +165,10 @@ class VerticalBarChart(Widget):
                 barRow.append((x, y, width, height))
             self._barPositions.append(barRow)
         
-                                
-        
+
     def draw(self):
         self.valueAxis.configure(self.data)
         self.valueAxis.setPosition(self.x, self.y, self.height)
-
 
         # if zero is in chart, put x axis there, otherwise
         # use bottom.
@@ -160,7 +179,6 @@ class VerticalBarChart(Widget):
             self.categoryAxis.setPosition(self.x, xAxisCrossesAt, self.width)
 
         self.categoryAxis.configure(self.data)
-
         
         self.calcBarPositions()        
         
@@ -207,6 +225,7 @@ class VerticalBarChart(Widget):
                         label.setOrigin(x + 0.5*width, y + height - self.barLabelNudge)
                     label.setText(labelText)
                     g.add(label)
+
         return g
         
 
@@ -240,7 +259,9 @@ def sample1():
     catNames = map(lambda n:n+'-99', catNames)
     bc.categoryAxis.categoryNames = catNames
     drawing.add(bc)
+
     return drawing    
+
     
 def sample2():
 
@@ -279,7 +300,9 @@ def sample2():
     bc.categoryAxis.labels.dy = -60
     
     drawing.add(bc)    
+
     return drawing
+
 
 def sample3():
     """Two side-by-side vertical bar charts"""
@@ -326,35 +349,32 @@ def sample3():
     leftChart.categoryAxis.labels.dy = -100
     leftChart.categoryAxis.labels.fontName = 'Helvetica'
     leftChart.categoryAxis.labels.fontSize = 6
-    
-    
+        
     g = Group(leftChart)
     g.translate(100, 175)
     g.rotate(-90)
     
     drawing.add(g)    
+
     return drawing
 
 
-if __name__=='__main__':
-
-    from reportlab.pdfgen.canvas import Canvas
-    c = Canvas('barchart1.pdf')
-    c.setFont('Helvetica-Bold',24)
-    c.drawString(70, 750, 'Bar Chart Examples')
-    
-    sample1().drawOn(c, 70, 525)
-    sample2().drawOn(c, 70, 300)
-    sample3().drawOn(c, 70, 75)
-
-    c.save()    
-    print 'saved barchart1.pdf'
-
-    from rlextra.graphics import renderGD
-    renderGD.drawToFile(sample1(), 'barchart1_1.jpg', kind="JPG")
-    #renderGD.drawToFile(sample2(), 'barchart1_2.jpg', kind="JPG")
-    #renderGD.drawToFile(sample3(), 'barchart1_3.jpg', kind="JPG")
-    print 'saved JPEG versions'
-        
-
-    
+##if __name__=='__main__':
+##
+##    from reportlab.pdfgen.canvas import Canvas
+##    c = Canvas('barchart1.pdf')
+##    c.setFont('Helvetica-Bold',24)
+##    c.drawString(70, 750, 'Bar Chart Examples')
+##    
+##    sample1().drawOn(c, 70, 525)
+##    sample2().drawOn(c, 70, 300)
+##    sample3().drawOn(c, 70, 75)
+##
+##    c.save()    
+##    print 'saved barchart1.pdf'
+##
+##    from rlextra.graphics import renderGD
+##    renderGD.drawToFile(sample1(), 'barchart1_1.jpg', kind="JPG")
+##    #renderGD.drawToFile(sample2(), 'barchart1_2.jpg', kind="JPG")
+##    #renderGD.drawToFile(sample3(), 'barchart1_3.jpg', kind="JPG")
+##    print 'saved JPEG versions'

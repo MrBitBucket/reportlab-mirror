@@ -1,19 +1,31 @@
-# axes for charts
+"""Axes for charts.
+"""
 
 
 from types import FunctionType
-
 
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics.charts.piechart0 import TypedPropertyCollection
 from reportlab.graphics.shapes import *
 from reportlab.graphics.charts.textlabel0 import Label
 
+
 class XCategoryAxis(Widget):
     """Comes in 'X' and 'Y' flavours.  A 'category axis' has an ordering
     but no metric.  It is divided into a number of equal-sized buckets.
     There may be tick marks or labels BETWEEN the buckets, and a label
     below it. The chart tells it where to go"""
+
+    _attrMap = {
+        'visible':isNumber,
+        'strokeWidth':isNumber,
+        'strokeColor':isColorOrNone,
+        'strokeDashArray':None,
+        'tickUp':isNumber,
+        'tickDown':isNumber,
+        'labels':None,
+        'categoryNames':None
+        }
 
     def __init__(self):
         # private properties set by methods.  The initial values
@@ -49,6 +61,7 @@ class XCategoryAxis(Widget):
         # used for label text.
         self.categoryNames = None
 
+
     def demo(self):
         self.setPosition(30, 70, 140)
         self.configure([(10,20,30,40,50)])
@@ -62,19 +75,23 @@ class XCategoryAxis(Widget):
         d.add(self)
         return d
 
+
     def setPosition(self, x, y, length):
         # ensure floating point
         self._x = x * 1.0
         self._y = y * 1.0
         self._length = length * 1.0
 
+
     def configure(self, multiSeries):
         self._catCount = len(multiSeries[0])
         self._barWidth = self._length / self._catCount
+
         
     def scale(self, idx):
         """returns the x position and width in drawing units of the slice"""
         return (self._x + (idx * self._barWidth), self._barWidth)
+
     
     def draw(self):
         g = Group()
@@ -115,9 +132,9 @@ class XCategoryAxis(Widget):
                 label.setText(self.categoryNames[i])
                 #g.add(label.draw())
                 g.add(label)
-                        
 
         return g
+
 
 def nextRoundNumber(x):
     """Return the first 'nice round number' greater than or equal to x
@@ -156,8 +173,6 @@ def nextRoundNumber(x):
             return base * 10.0
 
 
-
-
 class YValueAxis(Widget):
     """Axis corresponding to a numeric quantity.
     
@@ -190,8 +205,7 @@ class YValueAxis(Widget):
         self.labels.boxAnchor = 'e'
         self.labels.dx = -5
         self.labels.dy = 0
-        self.labels.angle = 0
-        
+        self.labels.angle = 0        
 
         self.tickRight = 0  # how far to right of axis does tick go?
         self.tickLeft = 5  # how far to left does tick go?
@@ -228,12 +242,12 @@ class YValueAxis(Widget):
         d = Drawing(200, 100)
         d.add(self)
         return d
+
         
     def setPosition(self, x, y, length):
         self._x = x
         self._y = y
         self._length = length
-
 
 
     def configure(self, dataSeries):
@@ -269,7 +283,6 @@ class YValueAxis(Widget):
             self._valueMax = maxFound
         else:
             self._valueMax = self.valueMax
-
 
         self._scaleFactor = self._length * 1.0 / (self._valueMax - self._valueMin) 
         
@@ -352,7 +365,6 @@ class YValueAxis(Widget):
                 g.add(label)
             i = i + 1
                         
-
         return g
 
 
