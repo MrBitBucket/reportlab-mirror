@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/_fontdata.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: _fontdata.py,v 1.8 2001/05/20 09:23:31 rgbecker Exp $ '''
+__version__=''' $Id: _fontdata.py,v 1.9 2001/05/20 09:33:01 rgbecker Exp $ '''
 __doc__=""" 
 	database of font related things
 	standardFonts		tuple of the 14 standard string font names
@@ -27,48 +27,48 @@ standardFonts = (
     'Symbol','ZapfDingbats')
 
 #this maps fontnames to the equivalent filename root.
-if sys.platform=='linux2':
-    _font2fnrMap={
-    	'symbol': 'Symbol',
-	'zapfdingbats': 'ZapfDingbats',
-	'helvetica': 'Arial',
-	'helvetica-bold': 'Arial-Bold',
-	'helvetica-boldoblique': 'Arial-BoldItalic',
-	'helvetica-oblique': 'Arial-Italic',
-	'times-bold': 'TimesNewRoman-Bold',
-	'times-bolditalic':'TimesNewRoman-BoldItalic',
-	'times-italic': 'TimesNewRoman-Italic',
-	'times-roman': 'TimesNewRoman',
-	'courier-bold': 'Courier-Bold',
-	'courier-boldoblique': 'Courier-BoldOblique',
-	'courier': 'Courier',
-	'courier-oblique': 'Courier-Oblique',
-	}
-
+if sys.platform in ('linux2',):
+    _font2fnrMap =	{
+					'symbol': 'Symbol',
+					'zapfdingbats': 'ZapfDingbats',
+					'helvetica': 'Arial',
+					'helvetica-bold': 'Arial-Bold',
+					'helvetica-boldoblique': 'Arial-BoldItalic',
+					'helvetica-oblique': 'Arial-Italic',
+					'times-bold': 'TimesNewRoman-Bold',
+					'times-bolditalic':'TimesNewRoman-BoldItalic',
+					'times-italic': 'TimesNewRoman-Italic',
+					'times-roman': 'TimesNewRoman',
+					'courier-bold': 'Courier-Bold',
+					'courier-boldoblique': 'Courier-BoldOblique',
+					'courier': 'Courier',
+					'courier-oblique': 'Courier-Oblique',
+					}
 else:
-    _font2fnrMap={
-	'symbol':					'Sy______',
-	'zapfdingbats':				'Zd______',
-	'helvetica':				'_a______',
-	'helvetica-bold':			'_ab_____',
-	'helvetica-boldoblique':	'_abi____',
-	'helvetica-oblique':		'_ai_____',
-	'times-bold':				'_eb_____',
-	'times-bolditalic':			'_ebi____',
-	'times-italic':				'_ei_____',
-	'times-roman':				'_er_____',
-	'courier-bold':				'cob_____',
-	'courier-boldoblique':		'cobo____',
-	'courier':					'com_____',
-	'courier-oblique':			'coo_____',
-	}
+    _font2fnrMap =	{
+					'symbol':					'Sy______',
+					'zapfdingbats':				'Zd______',
+					'helvetica':				'_a______',
+					'helvetica-bold':			'_ab_____',
+					'helvetica-boldoblique':	'_abi____',
+					'helvetica-oblique':		'_ai_____',
+					'times-bold':				'_eb_____',
+					'times-bolditalic':			'_ebi____',
+					'times-italic':				'_ei_____',
+					'times-roman':				'_er_____',
+					'courier-bold':				'cob_____',
+					'courier-boldoblique':		'cobo____',
+					'courier':					'com_____',
+					'courier-oblique':			'coo_____',
+					}
 
 def _findFNR(fontName):
 	return _font2fnrMap[string.lower(fontName)]
 
 def findT1File(fontName,ext='.pfb'):
 	from reportlab.rl_config import T1SearchPath
-	assert T1SearchPath!=[]
+	assert T1SearchPath!=[], "No Type-1 font search path"
+	if sys.platform in ('linux2',) and ext='.pfb': ext = ''
 	n = _findFNR(fontName)+ext
 	for d in T1SearchPath:
 		f = os.path.join(d,n)
