@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.10 2001/05/08 09:07:50 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.11 2001/05/08 12:23:39 dinu_gherman Exp $
 """
 This modules defines a very preliminary Line Plot example.
 """
@@ -56,7 +56,6 @@ class LinePlot(Widget):
         'groupSpacing':isNumber,
 
         'joinedLines':isNumber,
-        'usedSymbol':None,
 
         'strokeColor':isColorOrNone,
         'fillColor':isColorOrNone,
@@ -89,14 +88,10 @@ class LinePlot(Widget):
             ((1,2), (2,3), (2.5,2), (3,4), (4,6))
             ]
 
-        # we really need some well-designed default lists of
-        # colors e.g. from Tufte.  These will be used in a
-        # cycle to set the fill color of each series.
-        LPP = LinePlotProperties
-        p1 = LPP(strokeColor=colors.red, symbol=makeFilledCircle)
-        p2 = LPP(strokeColor=colors.blue, symbol=makeFilledCircle)
-        self.defaultStyles = [p1, p2]
-
+        self.defaultStyles = TypedPropertyCollection(LinePlotProperties)
+        self.defaultStyles[0].strokeColor = colors.red
+        self.defaultStyles[1].strokeColor = colors.blue
+        
         # control bar spacing. is useAbsolute = 1 then
         # the next parameters are in points; otherwise
         # they are 'proportions' and are normalized to
@@ -121,7 +116,6 @@ class LinePlot(Widget):
 
         # New line chart attributes.
         self.joinedLines = 1 # Connect items with straight lines.
-        self.usedSymbol = makeFilledSquare
 
 
     def demo(self):
@@ -144,6 +138,11 @@ class LinePlot(Widget):
         lp.joinedLines = 1
         lp.lineLabelFormat = '%2.0f'
         lp.strokeColor = colors.black
+
+        lp.defaultStyles[0].strokeColor = colors.red
+        lp.defaultStyles[0].symbol = makeFilledCircle
+        lp.defaultStyles[1].strokeColor = colors.blue
+        lp.defaultStyles[1].symbol = makeFilledDiamond
 
         lp.xValueAxis.valueMin = 0
         lp.xValueAxis.valueMax = 5
@@ -230,46 +229,6 @@ class LinePlot(Widget):
             group.add(label)
 
 
-    def makeLines0(self):
-        g = Group()
-
-        labelFmt = self.lineLabelFormat
-
-        # Iterate over data rows.        
-        for rowNo in range(len(self._positions)):
-            row = self._positions[rowNo]
-
-            styleCount = len(self.defaultStyles)
-            styleIdx = rowNo % styleCount
-            rowColor = self.defaultStyles[styleIdx].strokeColor
-            dash = getattr(self.defaultStyles[styleIdx], 'strokeDashArray', None)
-            width = getattr(self.defaultStyles[styleIdx], 'strokeWidth', None)
-
-            # Iterate over data columns.        
-            for colNo in range(len(row)):
-                x1, y1 = row[colNo]
-                if self.joinedLines == 1:
-                    if colNo > 0:
-                        # Draw lines between adjacent items.
-                        x2, y2 = row[colNo-1]
-                        line = Line(x1, y1, x2, y2)
-                        line.strokeColor = rowColor
-                        g.add(line)
-
-            # Iterate once more over data columns
-            # (to make sure symbols and labels are on top).
-            for colNo in range(len(row)):
-                x1, y1 = row[colNo]
-                # Draw a symbol for each data item.
-                symbol = self.usedSymbol(x1, y1, 5, rowColor)
-                g.add(symbol)
-
-                # Draw item (bar) labels.
-                self.drawLabel(g, rowNo, colNo, x1, y1)
-
-        return g
-
-
     def makeLines(self):
         g = Group()
 
@@ -318,10 +277,15 @@ class LinePlot(Widget):
                 x1, y1 = row[colNo]
 
                 # Draw a symbol for each data item.
+                # This if should be done implicitely by the collection,
+                # but it didn't want to...
                 if hasattr(self.defaultStyles[styleIdx], 'symbol'):
                     symbol = self.defaultStyles[styleIdx].symbol(x1, y1, 5, rowColor)
                     g.add(symbol)
-
+                elif hasattr(self.defaultStyles, 'symbol'):
+                    symbol = self.defaultStyles.symbol(x1, y1, 5, rowColor)
+                    g.add(symbol)
+                
                 # Draw item (bar) labels.
                 self.drawLabel(g, rowNo, colNo, x1, y1)
 
@@ -373,7 +337,7 @@ def sample1a():
     lp.width = 300
     lp.data = data
     lp.joinedLines = 1
-    lp.usedSymbol = makeFilledDiamond
+    lp.defaultStyles.symbol = makeFilledDiamond
     lp.strokeColor = colors.black
 
     lp.xValueAxis.valueMin = 0
@@ -407,7 +371,7 @@ def sample1b():
     lp.width = 300
     lp.data = data
     lp.joinedLines = 1
-    lp.usedSymbol = makeFilledDiamond
+    lp.defaultStyles.symbol = makeEmptyCircle
     lp.lineLabelFormat = '%2.0f'
     lp.strokeColor = colors.black
 
@@ -443,7 +407,8 @@ def sample1c():
     lp.width = 300
     lp.data = data
     lp.joinedLines = 1
-    lp.usedSymbol = makeFilledDiamond
+    lp.defaultStyles[0].symbol = makeFilledCircle
+    lp.defaultStyles[1].symbol = makeEmptyCircle
     lp.lineLabelFormat = '%2.0f'
     lp.strokeColor = colors.black
 
@@ -501,7 +466,7 @@ def sample2():
     lp.width = 300
     lp.data = data
     lp.joinedLines = 1
-    lp.usedSymbol = makeFilledDiamond
+    lp.defaultStyles.symbol = makeFilledDiamond
     lp.strokeColor = colors.black
 
     start = mktime(mkTimeTuple('25/11/1991'))
