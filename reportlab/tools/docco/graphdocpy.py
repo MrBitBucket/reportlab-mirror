@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.19 2002/07/24 19:56:39 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.20 2003/04/17 22:42:03 andy_robinson Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -986,8 +986,8 @@ def _packageWalkCallback((builder, opts), dirPath, files):
     files = filter(lambda f:f[-3:] == '.py', files)
     for f in files:
         path = os.path.join(dirPath, f)
-        if not opts.get('isSilent', 0):
-            print path
+##        if not opts.get('isSilent', 0):
+##            print path
         builder.indentLevel = builder.indentLevel + 1
         #documentModule0(path, builder)
         documentModule0(f, builder)

@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/rl_doc_utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/rl_doc_utils.py,v 1.5 2002/07/24 19:56:39 andy_robinson Exp $
-__version__=''' $Id: rl_doc_utils.py,v 1.5 2002/07/24 19:56:39 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/tools/docco/rl_doc_utils.py,v 1.6 2003/04/17 22:42:03 andy_robinson Exp $
+__version__=''' $Id: rl_doc_utils.py,v 1.6 2003/04/17 22:42:03 andy_robinson Exp $ '''
 
 
 __doc__ = """
@@ -199,7 +199,9 @@ def heading3(text):
 def image(path, width=None, height=None ):
     s = startKeep()
     space(.2)
-    getStory().append(Image(os.path.join(os.path.dirname(sys.argv[0]),'..','images',path),width,height))
+    import reportlab
+    rlDocImageDir = os.path.join(os.path.dirname(reportlab.__file__), 'docs','images')
+    getStory().append(Image(os.path.join(rlDocImageDir,path),width,height))
     space(.2)
     endKeep(s)
 
