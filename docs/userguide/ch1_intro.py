@@ -48,7 +48,7 @@ the Python programming language. """)
 
 disc("""PDF is the global standard for electronic documents. It
 supports high-quality printing yet is totally portable across
-platforms, thanks the freely available Acrobat Reader.  Any
+platforms, thanks to the freely available Acrobat Reader.  Any
 application which previously generated hard copy reports can
 benefit from making PDF documents instead; these can be archived,
 emailed, placed on the web, or printed out the old-fashioned way.
@@ -147,12 +147,12 @@ disc("""First of all, we'll give you the high-speed version for experienced
 Python developers:""")
 list("Install Python 1.5.1 or later")
 list("""If you want to produce compressed PDF files (recommended),
-check zlib is installed.""")
+check that zlib is installed.""")
 list("""If you want to work with bitmap images, install and
 test the Python Imaging Library""")
 list("""Unpack the reportlab package (reportlab.zip
 or reportlab.tgz) into a directory on your path""")
-list("""$cd$ to ^reportlab/pdfgen/test^ and execute $testpdfen.py$,
+list("""$cd$ to ^reportlab/pdfgen/test^ and execute $testpdfgen.py$,
 which will create a file 'testpdfgen.pdf'.""")
 disc(" ")
 disc("""If you have any problems, check the 'Detailed Instructions' section below.""")

@@ -169,7 +169,7 @@ The $setPageTransition$ method specifies how one page will be replaced with
 the next.  By setting the page transition effect to "dissolve" for example
 the current page will appear to melt away when it is replaced by the next
 page during interactive viewing.  These effects are useful in spicing up
-slide presentations, mong other places.
+slide presentations, among other places.
 Please see the reference manual for more detail on how to use this method.
 """)
 

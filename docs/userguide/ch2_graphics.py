@@ -553,7 +553,7 @@ Notice that the text strings are painted backwards.
 heading2("Colors")
 
 disc("""
-There are four way to specify colors in $pdfgen$: by name (using the $color$
+There are four ways to specify colors in $pdfgen$: by name (using the $color$
 module, by red/green/blue (additive, $RGB$) value,
 by cyan/magenta/yellow/darkness (subtractive, $CMYK$), or by gray level.
 The $colors$ function below exercises each of the four methods.
@@ -742,7 +742,7 @@ heading3("Word Spacing")
 
 eg("""textobject.setWordSpace(wordSpace)""")
 
-disc("The $setWordSpace$ method adjusts the space between word.")
+disc("The $setWordSpace$ method adjusts the space between words.")
 
 eg(examples.testwordspace)
 
