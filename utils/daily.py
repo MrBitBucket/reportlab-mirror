@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/daily.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/daily.py,v 1.39 2001/03/30 10:28:58 rgbecker Exp $
-__version__=''' $Id: daily.py,v 1.39 2001/03/30 10:28:58 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/utils/daily.py,v 1.40 2001/04/20 08:39:34 rgbecker Exp $
+__version__=''' $Id: daily.py,v 1.40 2001/04/20 08:39:34 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -126,22 +126,27 @@ def cvs_checkout(d):
 		else:
 			opp = None
 			os.environ['PYTHONPATH']=PP
+		if '-pythonpath' in sys.argv:
+			print 'PYTHONPATH=%s'%os.environ['PYTHONPATH']
 
 		os.chdir('docs/reference')
 		do_exec(python + ' ../tools/yaml2pdf.py reference.yml')
 		os.chdir(d)
 		do_exec('cp docs/reference/*.pdf %s' % htmldir)
 		do_exec('mv docs/reference/*.pdf %s' % dst)
+
 		os.chdir('docs/userguide')
 		do_exec(python + ' genuserguide.py')
 		os.chdir(d)
 		do_exec('cp docs/userguide/*.pdf %s' % htmldir)
 		do_exec('mv docs/userguide/*.pdf %s' % dst)
-		os.chdir('reportlab/lib')
-		do_exec(python + ' graphdocpy.py')
+	
+		os.chdir('docs/graphguide')
+		do_exec(python + ' gengraphguide.py')
 		os.chdir(d)
-		do_exec('cp lib/reportlab.graphics.pdf %s' % htmldir)
-		do_exec('mv lib/reportlab.graphics.pdf %s' % dst)
+		do_exec('cp docs/graphguide/*.pdf %s' % htmldir)
+		do_exec('mv docs/graphguide/*.pdf %s' % dst)
+
 		os.chdir('docs/graphguide')
 		do_exec(python + ' gengraphguide.py')
 		os.chdir(d)
