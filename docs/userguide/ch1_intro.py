@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch1_intro.py,v 1.14 2001/08/11 14:35:52 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch1_intro.py,v 1.15 2002/08/13 15:48:54 johnprecedo Exp $
 from rl_doc_utils import *
 import reportlab
 
@@ -40,12 +40,12 @@ bullet("How do I get everything set up and running?")
 todo("""
 Be warned! This document is in a <em>very</em> preliminary form.  We need
 your help to make sure it is complete and helpful.  Please send any
-feedback to our user mailing list, reportlab-users@egroups.com.
+feedback to our user mailing list, reportlab-users@reportlab.com.
 """)
 
 heading2("What is ReportLab?")
 disc("""ReportLab is a software library that lets you directly
-create documents in Adobe's Portabe Document Format (PDF) using
+create documents in Adobe's Portable Document Format (PDF) using
 the Python programming language. """)
 
 disc("""PDF is the global standard for electronic documents. It
@@ -366,9 +366,9 @@ just want to help out, let us know!""")
 disc("""The first step for anyone wanting to learn more or
 get involved is to join the mailing list.  Just send an email
 with the subject "Subscribe" to
-$reportlab-users-subscribe@egroups.com$.  You can also browse
+$reportlab-users@reportlab.com$.  You can also browse
 through the group's archives and contributions at
-$http://www.egroups.com/group/reportlab-users$.  This list is
+$http://two.pairlist.net/mailman/listinfo/reportlab-users$.  This list is
 the place to report bugs and get support. """)
 
 
