@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.38 2001/07/11 20:49:59 aaron_watters Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.39 2001/07/11 23:20:42 andy_robinson Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -301,7 +301,11 @@ class Font:
                     width = gw[glyphName]
                     w[i] = width
                 except KeyError:
-                    print 'typeface "%s" does not have a glyph "%s", bad font!' % (self.face.name, glyphName)
+                    import reportlab.rl_config
+                    if reportlab.rl_config.warnOnMissingFontGlyphs:
+                        print 'typeface "%s" does not have a glyph "%s", bad font!' % (self.face.name, glyphName)
+                    else:
+                        pass
         self.widths = w
 
     if not _stringWidth:

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.12 2001/06/26 14:45:30 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.13 2001/07/11 23:20:42 andy_robinson Exp $
 import sys, string
 from reportlab.lib import pagesizes
 shapeChecking = 1
@@ -26,6 +26,7 @@ elif sys.platform=='mac':   # we must be able to do better than this
     PIL_WARNINGS = 0 # PIL is not packagized in the Mac Python buildelse:
     T1SearchPath=[]
 
+warnOnMissingFontGlyphs = 1   # if 1, warns of each missing glyph
 _verbose=0
 
 sys_version = string.split(sys.version)[0]  #strip off the other garbage
