@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.32 2000/11/08 10:13:20 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.32 2000/11/08 10:13:20 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.33 2000/11/08 10:55:37 andy_robinson Exp $
+__version__=''' $Id: pdfdoc.py,v 1.33 2000/11/08 10:55:37 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -1412,7 +1412,12 @@ def MakeStandardEnglishFontObjects(document, encoding=DEFAULT_ENCODING):
     for name in StandardEnglishFonts:
         F = PDFType1Font()
         F.BaseFont = name
-        F.Encoding = PDFName(DEFAULT_ENCODING)
+        if name in ('Symbol', 'ZapfDingbats'):
+            # the concept of an encoding does not apply to these two;
+            # they should be taken in the order they appear in the font file
+            F.Encoding = PDFName('StandardEncoding')
+        else:
+            F.Encoding = PDFName(DEFAULT_ENCODING)
         F.__Comment__ = "Standard English Font %s" % repr(name)
         fname = "F"+repr(count)
         F.Name = fname
