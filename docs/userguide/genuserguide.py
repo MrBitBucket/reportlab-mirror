@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: genuserguide.py,v $
+#	Revision 1.9  2000/06/23 21:09:03  aaron_watters
+#	text text and more text
+#
 #	Revision 1.8  2000/06/22 19:05:24  aaron_watters
 #	added quickhack for font changes in paragraphs and lots of new text
-#
+#	
 #	Revision 1.7  2000/06/22 13:55:59  aaron_watters
 #	showPage resets all state parameters warning.
 #	
@@ -56,7 +59,7 @@
 #	Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #	initial checkin. user guide generation framework.
 #	
-__version__=''' $Id: genuserguide.py,v 1.8 2000/06/22 19:05:24 aaron_watters Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.9 2000/06/23 21:09:03 aaron_watters Exp $ '''
 
 
 __doc__ = """
@@ -775,7 +778,7 @@ the text cursor down past the lines that have been missing.
 eg(examples.testcursormoves1)
 
 disc("""
-The $testcursormoves1$ function relies on the automatic
+The $cursormoves$ function relies on the automatic
 movement of the text cursor for placing text after the origin
 has been set.
 """)
@@ -813,71 +816,235 @@ disc("""The
 $charspace$ function exercises various spacing settings.
 It produces the following page.""")
 
-canvasdemo(examples.charspace)\
+canvasdemo(examples.charspace)
 
 head("Word Spacing")
 
 eg("""textobject.setWordSpace(wordSpace)""")
 
+disc("The $setWordSpace$ method adjusts the space between word.")
+
 eg(examples.testwordspace)
+
+disc("""The $wordspace$ function shows what various word space settings
+look like below.""")
 
 canvasdemo(examples.wordspace)
 
+head("Horizontal Scaling")
+
 eg("""textobject.setHorizScale(horizScale)""")
+
+disc("""Lines of text can be stretched or shrunken horizontally by the 
+$setHorizScale$ method.""")
 
 eg(examples.testhorizontalscale)
 
+disc("""The horizontal scaling parameter ^horizScale^
+is given in percentages (with 100 as the default), so the 80 setting
+shown below looks skinny.
+""")
 canvasdemo(examples.horizontalscale)
+
+head("Interline spacing (Leading)")
 
 eg("""textobject.setLeading(leading)""")
 
+disc("""The vertical offset between the point at which one
+line starts and where the next starts is called the leading
+offset.  The $setLeading$ method adjusts the leading offset.
+""")
+
 eg(examples.testleading)
+
+disc("""As shown below if the leading offset is set too small
+characters of one line my write over the bottom parts of characters
+in the previous line.""")
 
 canvasdemo(examples.leading)
 
+head("Other text object methods")
+
 eg("""textobject.setTextRenderMode(mode)""")
 
+disc("""The $setTextRenderMode$ method allows text to be used
+as a forground for clipping background drawings, for example.""")
+
 eg("""textobject.setRise(rise)""")
+
+disc("""
+The $setRise$ method <super>raises</super> or <sub>lowers</sub> text on the line
+(for creating superscripts or subscripts, for example).
+""")
 
 eg("""textobject.setFillColor(aColor); 
 textobject.setStrokeColor(self, aColor) 
 # and similar""")
 
+disc("""
+These color change operations change the <font color=darkviolet>color</font> of the text and are otherwise
+similar to the color methods for the canvas object.""")
+
 lesson('Paths and Lines')
+
+disc("""Just as textobjects are designed for the dedicated presentation
+of text, path objects are designed for the dedicated construction of
+graphical figures.  When path objects are drawn onto a canvas they are
+are drawn as one figure (like a rectangle) and the mode of drawing
+for the entire figure can be adjusted: the lines of the figure can
+be drawn (stroked) or not; the interior of the figure can be filled or
+not; and so forth.""")
+
+disc("""
+For example the $star$ function uses a path object
+to draw a star
+""")
 
 eg(examples.teststar)
 
+disc("""
+The $star$ function has been designed to be useful in illustrating
+various line style parameters supported by $pdfgen$.
+""")
+
 canvasdemo(examples.star)
+
+head("Line join settings")
+
+disc("""
+The $setLineJoin$ method can adjust whether line segments meet in a point
+a square or a rounded vertex.
+""")
 
 eg(examples.testjoins)
 
+disc("""
+The line join setting is only really of interest for thick lines because
+it cannot be seen clearly for thin lines.
+""")
+
 canvasdemo(examples.joins)
+
+head("Line cap settings")
+
+disc("""The line cap setting, adjusted using the $setLineCap$ method,
+determines whether a terminating line
+ends in a square exactly at the vertex, a square over the vertex
+or a half circle over the vertex.
+""")
 
 eg(examples.testcaps)
 
+disc("""The line cap setting, like the line join setting, is only
+visible when the lines are thick.""")
+
 canvasdemo(examples.caps)
+
+head("Dashes and broken lines")
+
+disc("""
+The $setDash$ method allows lines to be broken into dots or dashes.
+""")
 
 eg(examples.testdashes)
 
+disc("""
+The patterns for the dashes or dots can be in a simple on/off repeating pattern
+or they can be specified in a complex repeating pattern.
+""")
+
 canvasdemo(examples.dashes)
 
+head("Creating complex figures with path objects")
+
+disc("""
+Combinations of lines, curves, arcs and other figures
+can be combined into a single figure using path objects.
+For example the function shown below constructs two path
+objects using lines and curves.  
+This function will be used later on as part of a
+pencil icon construction.
+""")
+
 eg(examples.testpenciltip)
+
+disc("""
+Note that the interior of the pencil tip is filled
+as one object even though it is constructed from
+several lines and curves.  The pencil lead is then
+drawn over it using a new path object.
+""")
 
 canvasdemo(examples.penciltip)
 
 lesson('Rectangles, circles, ellipses')
 
+disc("""
+The $pdfgen$ module supports a number of generally useful shapes
+such as rectangles, rounded rectangles, ellipses, and circles.
+Each of these figures can be used in path objects or can be drawn
+directly on a canvas.  For example the $pencil$ function below
+draws a pencil icon using rectangles and rounded rectangles with
+various fill colors and a few other annotations.
+""")
+
 eg(examples.testpencil)
+
+pencilnote()
+
+disc("""
+Note that this function is used to create the "margin pencil" to the left.
+Also note that the order in which the elements are drawn are important
+because, for example, the white rectangles "erase" parts of a black rectangle
+and the "tip" paints over part of the yellow rectangle.
+""")
 
 canvasdemo(examples.pencil)
 
 lesson('Bezier curves')
 
+disc("""
+Programs that wish to construct figures with curving borders
+generally use Bezier curves to form the borders.
+""")
+
 eg(examples.testbezier)
+
+disc("""
+A Bezier curve is specified by four control points 
+$(x1,y1)$, $(x2,y2)$, $(x3,y3)$, $(x4,y4)$.
+The curve starts at $(x1,y1)$ and ends at $(x4,y4)$
+and the line segment from $(x1,y1)$ to $(x2,y2)$
+and the line segment from $(x3,y3)$ to $(x4,y4)$
+both form tangents to the curve.  Furthermore the
+curve is entirely contained in the convex figure with vertices
+at the control points.
+""")
 
 canvasdemo(examples.bezier)
 
+disc("""
+The drawing above (the output of $testbezier$) shows
+a bezier curves, the tangent lines defined by the control points
+and the convex figure with vertices at the control points.
+""")
+
+head("Smoothly joining bezier curve sequences")
+
+disc("""
+It is often useful to join several bezier curves to form a
+single smooth curve.  To construct a larger smooth curve from
+several bezier curves make sure that the tangent lines to adjacent
+bezier curves that join at a control point lie on the same line.
+""")
+
 eg(examples.testbezier2)
+
+disc("""
+The figure created by $testbezier2$ describes a smooth
+complex curve because adjacent tangent lines "line up" as
+illustrated below.
+""")
 
 canvasdemo(examples.bezier2)
 
