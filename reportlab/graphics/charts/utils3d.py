@@ -68,16 +68,22 @@ def _draw_3d_line( G, x0, x1, y0, y1,
 
     def F(x,i, slope=slope, y0=y0, x0=x0):
         return float((x-x0)*slope[i]+y0[i])
+
+    tileStrokeWidth = 0.6
     if x0>=x1: X=[(x0,x0)]
     else:
-        x = x0
-        X = []
-        while x<=x1:
-            xn = x+xdelta
-            X.append((x,xn))
-            x = xn
-        if X[-1][0]==x1: del X[-1]
-        else: X[-1][1] = x1
+        if xdelta is None:
+            X = [(x0,x1)]
+        else:
+            x = x0
+            X = []
+            while x<=x1:
+                xn = x+xdelta
+                X.append((x,xn))
+                x = xn
+            if X[-1][0]==x1: del X[-1]
+            else: X[-1][1] = x1
+            tileStrokeWidth *= xdelta
     Y = n*[None]
     for x in X:
         for i in I:
@@ -86,7 +92,7 @@ def _draw_3d_line( G, x0, x1, y0, y1,
         for y in Y:
             c = y.slope>depth_slope and y.fillColorShaded or y.fillColor
             G.add(Polygon(_ystrip_poly(x[0], x[1], y.y0, y.y1, xdepth, ydepth),
-                fillColor = c, strokeColor=c, strokeWidth=xdelta*0.6))
+                fillColor = c, strokeColor=c, strokeWidth=tileStrokeWidth))
 
 def _make_3d_line_info( G, x0, x1, y0, y1, z0, z1,
                     theta_x, theta_y,
@@ -103,16 +109,22 @@ def _make_3d_line_info( G, x0, x1, y0, y1, z0, z1,
 
     def F(x, slope=slope, y0=y0, x0=x0):
         return float((x-x0)*slope+y0)
+
+    tileStrokeWidth = 0.6
     if x0>=x1: X=[(x0,x0)]
     else:
-        x = x0
-        X = []
-        while x<=x1:
-            xn = x+xdelta
-            X.append([x,xn])
-            x = xn
-        if X[-1][0]==x1: del X[-1]
-        else: X[-1][1] = x1
+        if xdelta is None:
+            X = [(x0,x1)]
+        else:
+            x = x0
+            X = []
+            while x<=x1:
+                xn = x+xdelta
+                X.append([x,xn])
+                x = xn
+            if X[-1][0]==x1: del X[-1]
+            else: X[-1][1] = x1
+            tileStrokeWidth *= xdelta
     a = G.add
     c = slope>depth_slope and _getShaded(fillColor,fillColorShaded,shading) or fillColor
     zy0 = z0*theta_y
@@ -123,7 +135,7 @@ def _make_3d_line_info( G, x0, x1, y0, y1, z0, z1,
         x_0 = x[0]+zx0
         x_1 = x[1]+zx0
         P = Polygon(_ystrip_poly(x_0, x_1, y_0, y_1, xdepth, ydepth),
-                    fillColor = c, strokeColor=c, strokeWidth=xdelta*0.6)
+                    fillColor = c, strokeColor=c, strokeWidth=tileStrokeWidth)
         a((0,z0,z1,x_0,y_0,P))
 
 from math import pi, sin, cos

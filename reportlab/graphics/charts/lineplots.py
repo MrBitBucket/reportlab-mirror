@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.54 2003/11/24 22:40:44 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.55 2003/11/28 17:32:15 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.54 2003/11/24 22:40:44 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.55 2003/11/28 17:32:15 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -410,6 +410,9 @@ class LinePlot3D(LinePlot):
         from linecharts import _FakeGroup
         F = _FakeGroup()
         from utils3d import _make_3d_line_info
+        tileWidth = getattr(self,'_3d_tilewidth',None)
+        if not tileWidth and self.xValueAxis.style!='parallel_3d': tileWidth = 1
+
         # Iterate over data rows.
         styleCount = len(self.lines)
         for rowNo in P:
@@ -436,7 +439,7 @@ class LinePlot3D(LinePlot):
                         x1, y1 = row[colNo]
                         _make_3d_line_info( F, x0, x1, y0, y1, z0, z1,
                                 theta_x, theta_y,
-                                rowColor, fillColorShaded=None, xdelta=1,
+                                rowColor, fillColorShaded=None, xdelta=tileWidth,
                                 strokeColor=None, strokeWidth=None, strokeDashArray=None,
                                 shading=0.1)
                         x0, y0 = x1, y1
