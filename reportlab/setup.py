@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2003
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/setup.py,v 1.10 2003/10/26 09:39:58 rgbecker Exp $
-__version__=''' $Id: setup.py,v 1.10 2003/10/26 09:39:58 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/setup.py,v 1.11 2004/01/21 15:04:47 rgbecker Exp $
+__version__=''' $Id: setup.py,v 1.11 2004/01/21 15:04:47 rgbecker Exp $ '''
 
 import os, sys, distutils
 from distutils.core import setup, Extension
@@ -55,7 +55,7 @@ def run():
     setup(
             name="Reportlab",
             version=get_version(),
-            licence="BSD license (see license.txt for details), Copyright (c) 2000-2003, ReportLab Inc.",
+            license="BSD license (see license.txt for details), Copyright (c) 2000-2003, ReportLab Inc.",
             description="The Reportlab Toolkit",
             long_description="""The ReportLab Toolkit.
 An Open Source Python library for generating PDFs and graphics.
