@@ -1238,6 +1238,12 @@ class Canvas:
             pdffontname = self._doc.getInternalFontName(psfontname)
             self._code.append('BT %s %s Tf %s TL ET' % (pdffontname, fp_str(size), fp_str(leading)))
 
+    def setFontSize(self, size=None, leading=None):
+        '''Sets font size or leading without knowing the font face'''
+        if size is None: size = self._fontsize
+        if leading is None: leading = self._leading
+        self.setFont(self._fontname, size, leading)
+
     def stringWidth(self, text, fontName, fontSize, encoding=None):
         "gets width of a string in the given font and size"
         if encoding is not None:
