@@ -1,0 +1,254 @@
+########### 0.95 Released 2000/07/13
+demos/py2pdf/demo.py
+       1.5 2000/06/27 08:58:19  Try to ensure test file removal rgbecker
+demos/py2pdf/py2pdf.py
+      1.10 2000/06/28 11:12:40  Stop auto testing rgbecker
+demos/pythonpoint/pythonpoint.py
+      1.24 2000/07/12 14:23:12  Table argument order changed rgbecker
+      1.23 2000/07/12 06:33:43  Added Speaker Notes facility andy_robinson
+      1.22 2000/07/10 15:25:47  Added tables to PythonPoint andy_robinson
+demos/pythonpoint/pythonpoint.xml
+       1.7 2000/07/12 06:33:43  Added Speaker Notes facility andy_robinson
+       1.6 2000/07/10 15:25:47  Added tables to PythonPoint andy_robinson
+demos/pythonpoint/stdparser.py
+      1.10 2000/07/11 15:00:39  Added end_spacer rgbecker
+       1.9 2000/07/10 15:25:47  Added tables to PythonPoint andy_robinson
+docs/reference/reference.yml
+      1.11 2000/07/10 23:56:09  Paragraphs chapter pretty much complete.  Fancy cover. andy_robinson
+      1.10 2000/07/03 15:39:51  Documentation fixes rgbecker
+       1.9 2000/06/28 14:52:43  Documentation changes rgbecker
+docs/tools/codegrab.py
+       1.4 2000/06/28 14:52:43  Documentation changes rgbecker
+docs/tools/rltemplate.py
+       1.6 2000/07/12 13:34:35  changed nj address aaron_watters
+       1.5 2000/07/11 05:50:52  Script was referring to the wrong copy of the logo. andy_robinson
+       1.4 2000/07/10 23:56:09  Paragraphs chapter pretty much complete.  Fancy cover. andy_robinson
+       1.3 2000/06/21 12:28:18  remove UserDocTemplate, but add Andy's hook methods rgbecker
+docs/tools/stylesheet.py
+       1.6 2000/07/10 23:56:09  Paragraphs chapter pretty much complete.  Fancy cover. andy_robinson
+       1.5 2000/07/08 12:52:25  Separated out actual text from genuserguide, so it can be broken into chapters. andy_robinson
+       1.4 2000/07/05 16:07:00  added Heading4 style rgbecker
+       1.3 2000/07/03 15:50:31  Pushed down most existing lessons one level; added functions heading1..heading3 for building story unambiguously; spelled Hugh Hefner right! andy_robinson
+docs/tools/yaml.py
+       1.8 2000/07/10 23:56:09  Paragraphs chapter pretty much complete.  Fancy cover. andy_robinson
+       1.7 2000/07/03 15:39:51  Documentation fixes rgbecker
+       1.6 2000/07/03 10:50:32  Fix usage message rgbecker
+docs/tools/yaml2pdf.py
+       1.7 2000/07/10 23:56:09  Paragraphs chapter pretty much complete.  Fancy cover. andy_robinson
+documentaion many changes
+lib/sequencer.py
+       1.8 2000/07/10 11:58:35  Pre-incrementing bug fixed andy_robinson
+       1.7 2000/07/08 07:11:21  Changed to pre-increment andy_robinson
+       1.6 2000/06/21 19:46:43  Added Roman formatters rgbecker
+pdfbase/_streams.c
+       1.1 2000/07/05 12:20:27  Ascii85 fixes/additions rgbecker
+pdfbase/pdfdoc.py
+      1.21 2000/06/26 15:58:22  Simple fix to widths problem rgbecker
+      1.20 2000/06/23 17:51:22  /Producer (ReportLab http://www.reportlab.com) in document aaron_watters
+pdfbase/pdfmetrics.py
+       1.6 2000/06/26 15:58:22  Simple fix to widths problem rgbecker
+pdfbase/pdfutils.py
+       1.8 2000/07/05 12:20:27  Ascii85 fixes/additions rgbecker
+       1.7 2000/06/30 15:29:59  Allow for non-caching of images rgbecker
+pdfgen/canvas.py
+      1.43 2000/06/30 15:27:55  Allow for non-caching of images rgbecker
+      1.42 2000/06/26 15:58:22  Simple fix to widths problem rgbecker
+pdfgen/pathobject.py
+       1.6 2000/07/12 16:07:09  fixed nameerror and path.circle bug aaron_watters
+platypus/__init__.py
+       1.9 2000/07/13 11:41:00  Added KeepTogether rgbecker
+       1.8 2000/06/27 10:07:55  Added CondPageBreak rgbecker
+       1.7 2000/06/21 12:27:42  remove UserDocTemplate, but add Andy's hook methods rgbecker
+platypus/doctemplate.py
+      1.27 2000/07/10 11:58:35  Pre-incrementing bug fixed andy_robinson
+      1.26 2000/07/07 16:21:12  Cosmetics rgbecker
+      1.25 2000/07/06 12:40:37  Push canvas into flowables during wrap/split rgbecker
+      1.24 2000/07/05 12:22:21  Force _calc in SimpleDocTemplae.build rgbecker
+      1.21 2000/06/26 15:58:22  Simple fix to widths problem rgbecker
+      1.20 2000/06/21 12:27:42  remove UserDocTemplate, but add Andy's hook methods rgbecker
+      1.19 2000/06/20 21:56:17  re-synching after sourceforge went weird andy_robinson
+platypus/flowables.py
+       1.6 2000/07/13 11:42:10  removed debug prints rgbecker
+       1.5 2000/07/13 11:41:00  Added KeepTogether rgbecker
+       1.4 2000/06/27 10:07:55  Added CondPageBreak rgbecker
+platypus/frames.py
+       1.4 2000/07/07 16:21:12  Cosmetics rgbecker
+       1.3 2000/07/06 12:40:38  Push canvas into flowables during wrap/split rgbecker
+platypus/paragraph.py
+      1.16 2000/07/03 15:39:51  Documentation fixes rgbecker
+      1.15 2000/06/23 13:13:54  Fixes to splitting code rgbecker
+platypus/paraparser.py
+      1.26 2000/07/10 23:53:46  Changed base of seqdefault tag to 0 andy_robinson
+      1.25 2000/07/04 10:50:33  Sequencer fixes rgbecker
+platypus/tables.py
+      1.26 2000/07/12 15:36:56  Allow automatic leading in FONT command rgbecker
+      1.25 2000/07/12 15:26:46  INNERGRID was dumb rgbecker
+      1.23 2000/07/12 15:18:16  Leading changes fixed rgbecker
+      1.22 2000/07/12 14:23:12  Table argument order changed rgbecker
+								**********Incompatibility************
+      1.21 2000/07/12 09:05:17  Fixed tuple size bug rgbecker
+      1.20 2000/07/11 14:29:45  Table splitting start rgbecker
+      1.19 2000/07/10 15:25:47  Added tables to PythonPoint andy_robinson
+      1.18 2000/07/08 15:30:04  Cosmetics and error testing rgbecker
+      1.17 2000/07/07 16:22:10  Fix auto hieght stuff rgbecker
+      1.16 2000/07/07 10:23:36  First attempt at VALIGN rgbecker
+      1.15 2000/07/06 14:05:55  Adjusted doc string rgbecker
+      1.14 2000/07/06 12:41:47  First try at auto sizing rgbecker
+      1.13 2000/06/29 17:55:19  support explicit \n line splitting in cells aaron_watters
+platypus/test/testplatypus.py
+      1.18 2000/07/12 14:23:12  Table argument order changed rgbecker
+platypus/test/testtables.py
+      1.11 2000/07/12 14:23:12  Table argument order changed rgbecker
+########### 0.94 Released 2000/06/20
+demos/gadflypaper/gfe.py
+      1.11 2000/06/01 16:27:56  pageSize is wrong at present rgbecker
+      1.10 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+demos/odyssey/dodyssey.py
+       1.7 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+       1.6 2000/06/01 09:41:11  test filename case fix rgbecker
+demos/odyssey/fodyssey.py
+      1.13 2000/06/01 16:27:56  pageSize is wrong at present rgbecker
+      1.12 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+      1.11 2000/06/01 09:41:12  test filename case fix rgbecker
+demos/odyssey/odyssey.py
+       1.8 2000/06/01 09:41:12  test filename case fix rgbecker
+demos/odyssey/odyssey.txt
+       1.7 2000/05/31 10:12:45  <bullet> xml tag added rgbecker
+demos/py2pdf/demo.py
+       1.4 2000/06/19 11:14:03  Global sequencer put in the 'story builder'. andy_robinson
+demos/py2pdf/py2pdf.py
+       1.9 2000/06/19 11:14:03  Global sequencer put in the 'story builder'. andy_robinson
+demos/pythonpoint/pythonpoint.py
+      1.21 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+      1.20 2000/05/23 14:06:45  Preformatted objects now know how to split themselves. andy_robinson
+demos/pythonpoint/stdparser.py
+       1.8 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+demos/pythonpoint/styles_horrible.py
+       1.5 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+demos/pythonpoint/styles_modern.py
+       1.6 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+docs/00readme.txt
+       1.1 2000/06/05 16:38:54  Initial revision andy_robinson
+   1.1.1.1 2000/06/05 16:38:54  initial import andy_robinson
+docs/images/replogo.a85
+       1.1 2000/06/05 16:39:04  Initial revision andy_robinson
+   1.1.1.1 2000/06/05 16:39:04  initial import andy_robinson
+docs/images/replogo.gif
+       1.1 2000/06/05 16:39:04  Initial revision andy_robinson
+   1.1.1.1 2000/06/05 16:39:04  initial import andy_robinson
+docs/reference/build.bat
+       1.4 2000/06/19 23:52:31  rltemplate now simple, based on UserDocTemplate andy_robinson
+       1.3 2000/06/17 07:46:45  Small text changes andy_robinson
+       1.2 2000/06/12 11:13:09  Added sequencer tags to paragraph parser andy_robinson
+       1.1 2000/06/07 13:39:22  Added some text to the first page of reference, and a build batch file andy_robinson
+docs/reference/reference.yml
+       1.8 2000/06/19 23:52:31  rltemplate now simple, based on UserDocTemplate andy_robinson
+       1.7 2000/06/17 07:46:45  Small text changes andy_robinson
+       1.6 2000/06/14 21:22:52  Added docs for library andy_robinson
+       1.5 2000/06/12 11:26:34  Numbered list added andy_robinson
+       1.4 2000/06/12 11:13:09  Added sequencer tags to paragraph parser andy_robinson
+       1.3 2000/06/09 01:44:24  added automatic generation for pathobject and textobject modules. aaron_watters
+       1.2 2000/06/07 13:39:22  Added some text to the first page of reference, and a build batch file andy_robinson
+       1.1 2000/06/05 16:39:04  Initial revision andy_robinson
+   1.1.1.1 2000/06/05 16:39:04  initial import andy_robinson
+docs/tools/codegrab.py
+       1.3 2000/06/20 11:35:08  Python 1.5.1 compatibility fixes rgbecker
+       1.2 2000/06/14 21:22:52  Added docs for library andy_robinson
+       1.1 2000/06/05 16:38:57  Initial revision andy_robinson
+   1.1.1.1 2000/06/05 16:38:57  initial import andy_robinson
+docs/tools/rltemplate.py
+       1.2 2000/06/19 23:52:31  rltemplate now simple, based on UserDocTemplate andy_robinson
+       1.1 2000/06/17 07:48:41  Added a separate rltemplate.py file to contain our standard document template. andy_robinson
+docs/tools/stylesheet.py
+       1.2 2000/06/14 21:22:52  Added docs for library andy_robinson
+       1.1 2000/06/13 20:03:30  Docs is now a package; stylesheet separated out andy_robinson
+docs/tools/yaml.py
+       1.5 2000/06/20 11:34:47  Python 1.5.1 compatibility fixes rgbecker
+       1.4 2000/06/19 15:54:21  Changes to imports again sigh mumble rgbecker
+       1.3 2000/06/14 21:22:52  Added docs for library andy_robinson
+       1.2 2000/06/13 20:03:30  Docs is now a package; stylesheet separated out andy_robinson
+       1.1 2000/06/05 16:38:56  Initial revision andy_robinson
+   1.1.1.1 2000/06/05 16:38:56  initial import andy_robinson
+docs/tools/yaml2pdf.py
+       1.6 2000/06/19 15:54:21  Changes to imports again sigh mumble rgbecker
+       1.5 2000/06/17 07:47:20  Factored out rltemplate andy_robinson
+       1.4 2000/06/13 20:03:30  Docs is now a package; stylesheet separated out andy_robinson
+       1.3 2000/06/12 11:26:34  Numbered list added andy_robinson
+       1.2 2000/06/07 21:08:12  Change to style for definition lists andy_robinson
+       1.1 2000/06/05 16:38:55  Initial revision andy_robinson
+   1.1.1.1 2000/06/05 16:38:55  initial import andy_robinson
+docs/userguide/examples.py
+       1.3 2000/06/19 21:13:02  2nd try. more text aaron_watters
+       1.2 2000/06/17 06:54:54  Example had a reference to layout.py, removed andy_robinson
+       1.1 2000/06/17 02:59:05  initial checkin.  examples file for userguide generation aaron_watters
+docs/userguide/genuserguide.py
+       1.2 2000/06/19 21:13:02  2nd try. more text aaron_watters
+       1.1 2000/06/17 02:57:56  initial checkin. user guide generation framework. aaron_watters
+docs/userguide/platdemos.py
+       1.1 2000/06/05 16:39:04  Initial revision andy_robinson
+   1.1.1.1 2000/06/05 16:39:04  initial import andy_robinson
+lib/colors.py
+       1.9 2000/06/14 21:17:30  Some relative imports fixed andy_robinson
+       1.8 2000/05/26 09:43:44  stringToColor-->toColor rgbecker
+lib/pagesizes.py
+       1.4 2000/06/14 21:17:30  Some relative imports fixed andy_robinson
+lib/sequencer.py
+       1.5 2000/06/19 11:14:03  Global sequencer put in the 'story builder'. andy_robinson
+       1.4 2000/06/12 11:27:17  Added Sequencer and associated XML tags andy_robinson
+       1.3 2000/06/11 21:34:01  Largely complete class for numbering lists, figures and chapters andy_robinson
+       1.2 2000/06/09 16:18:19  Doc strings, sequencer andy_robinson
+       1.1 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+pdfbase/pdfdoc.py
+      1.19 2000/06/01 09:44:26  SaveToFile: only close the file if we opened it. Aggregated from types imports to module level. rgbecker
+pdfgen/canvas.py
+      1.41 2000/06/09 16:18:19  Doc strings, sequencer andy_robinson
+      1.40 2000/06/09 01:45:22  Lots of documentation additions and changes. aaron_watters
+      1.39 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+      1.38 2000/05/26 09:44:40  generalised colors slightly rgbecker
+      1.37 2000/05/23 14:06:45  Preformatted objects now know how to split themselves. andy_robinson
+pdfgen/pathobject.py
+       1.5 2000/06/09 08:17:43  Full qualified a local import in pdfgen package andy_robinson
+platypus/__init__.py
+       1.6 2000/06/19 23:51:23  Added UserDocTemplate class, and paragraph.getPlainText() andy_robinson
+       1.5 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+platypus/doctemplate.py
+      1.18 2000/06/19 23:51:23  Added UserDocTemplate class, and paragraph.getPlainText() andy_robinson
+      1.17 2000/06/19 11:14:03  Global sequencer put in the 'story builder'. andy_robinson
+      1.16 2000/06/16 13:49:20  new build parameters to allow alternate filename and canvas implementation (in order to support slideshow summary mode, for example, or embedding one document in another). aaron_watters
+      1.15 2000/06/13 13:03:31  more documentation changes aaron_watters
+      1.14 2000/06/01 16:27:56  pageSize is wrong at present rgbecker
+      1.13 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+      1.12 2000/05/26 10:27:37  Fixed infinite recursion bug rgbecker
+platypus/flowables.py
+       1.3 2000/06/13 13:03:31  more documentation changes aaron_watters
+       1.2 2000/06/01 16:27:56  pageSize is wrong at present rgbecker
+       1.1 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+platypus/frames.py
+       1.2 2000/06/13 13:03:31  more documentation changes aaron_watters
+       1.1 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+platypus/layout.py
+      1.31 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+      1.30 2000/05/23 14:08:02  Preformatted objects now splitting andy_robinson
+platypus/paragraph.py
+      1.14 2000/06/19 23:51:23  Added UserDocTemplate class, and paragraph.getPlainText() andy_robinson
+      1.13 2000/06/19 11:14:03  Global sequencer put in the 'story builder'. andy_robinson
+      1.12 2000/06/13 13:03:31  more documentation changes aaron_watters
+      1.11 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+      1.10 2000/05/31 10:12:20  <bullet> xml tag added rgbecker
+platypus/paraparser.py
+      1.24 2000/06/19 11:14:03  Global sequencer put in the 'story builder'. andy_robinson
+      1.23 2000/06/13 04:11:49  noted replication of XML markup comment between paraparser.py and paragraph.py aaron_watters
+      1.22 2000/06/12 11:27:17  Added Sequencer and associated XML tags andy_robinson
+      1.21 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+      1.20 2000/05/31 10:12:20  <bullet> xml tag added rgbecker
+      1.19 2000/05/26 09:49:23  Color fixes; thanks to J Alet rgbecker
+      1.18 2000/05/20 15:36:42  Removed 1.5.2-style getattr call andy_robinson
+platypus/tables.py
+      1.12 2000/06/13 13:03:31  more documentation changes aaron_watters
+      1.11 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+      1.10 2000/05/26 09:49:23  Color fixes; thanks to J Alet rgbecker
+platypus/test/testplatypus.py
+      1.17 2000/06/01 15:23:06  Platypus re-organisation rgbecker
+platypus/test/testtables.py
+      1.10 2000/06/01 16:27:56  pageSize is wrong at present rgbecker
+       1.9 2000/06/01 15:23:06  Platypus re-organisation rgbecker
