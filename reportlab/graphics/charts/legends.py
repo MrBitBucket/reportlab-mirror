@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.12 2001/07/02 16:50:53 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.13 2001/08/22 21:10:02 johnprecedo Exp $
 """This will be a collection of legends to be used with charts.
 """
 
@@ -59,7 +59,9 @@ class Legend(Widget):
         fillColor = AttrMapValue(isColorOrNone,
             desc=""),
         strokeColor = AttrMapValue(isColorOrNone,
-            desc="Border color of the swatches")
+            desc="Border color of the swatches"),
+        strokeWidth = AttrMapValue(isNumber,
+            desc="Width of the border color of the swatches")
        )
 
     def __init__(self):
@@ -96,6 +98,7 @@ class Legend(Widget):
         self.fontSize = STATE_DEFAULTS['fontSize']
         self.fillColor = STATE_DEFAULTS['fillColor']
         self.strokeColor = STATE_DEFAULTS['strokeColor']
+        self.strokeWidth = STATE_DEFAULTS['strokeWidth']
 
 
     def _calculateMaxWidth(self, colorNamePairs):
@@ -147,6 +150,7 @@ class Legend(Widget):
                 r = Rect(x, y, width, height)
                 r.fillColor = col
                 r.strokeColor = self.strokeColor
+                r.strokeWidth = self.strokeWidth
                 g.add(r)
             # ... or try and see if we should do better.
             else:
