@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.42 2001/08/13 11:54:42 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.43 2001/09/20 16:02:38 aaron_watters Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.42 2001/08/13 11:54:42 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.43 2001/09/20 16:02:38 aaron_watters Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -146,10 +146,18 @@ class PageTemplate:
 
 	def checkPageSize(self,canv,doc):
 		'''This gets called by the template framework'''
-		if canv._pagesize != self.pagesize:
-			if self.pagesize:
+		#print "self.pagesize, canv._pagesize, doc.pagesize",(self.pagesize, canv._pagesize, doc.pagesize)
+		### NEVER EVER EVER COMPARE FLOATS FOR EQUALITY
+		cp = None
+		dp = None
+		sp = None
+		if canv._pagesize: cp = map(int, canv._pagesize)
+		if self.pagesize: sp = map(int, self.pagesize)
+		if doc.pagesize: dp = map(int, doc.pagesize)
+		if cp != dp:
+			if sp:
 				canv.setPageSize(self.pagesize)
-			elif canv._pagesize != doc.pagesize:
+			elif cp != dp:
 				canv.setPageSize(doc.pagesize)
 
 	def afterDrawPage(self, canv, doc):
@@ -235,6 +243,7 @@ class BaseDocTemplate:
 					raise ValueError, "Invalid argument %s" % k
 				v = kw[k]
 			setattr(self,k,v)
+		#print "pagesize is", self.pagesize
 
 		p = self.pageTemplates
 		self.pageTemplates = []
