@@ -97,7 +97,7 @@ class RenderSvgAxesTestCase(unittest.TestCase):
     def test0(self):
         "Test two strings in drawing."
 
-        path = "svgout/axestest0.svg"
+        path = "axestest0.svg"
         from reportlab.graphics.charts.axes import XCategoryAxis
 
         d = XCategoryAxis().demo()

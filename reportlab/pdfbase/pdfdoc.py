@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.65 2002/05/28 15:06:55 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.65 2002/05/28 15:06:55 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.66 2002/06/14 20:26:09 andy_robinson Exp $
+__version__=''' $Id: pdfdoc.py,v 1.66 2002/06/14 20:26:09 andy_robinson Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -22,7 +22,16 @@ from reportlab.pdfbase.pdfutils import LINEEND   # this constant needed in both
 from reportlab import rl_config
 from reportlab.lib.utils import import_zlib, PIL_Image, open_for_read
 
-from sys import platform, version_info
+from sys import platform
+try:
+    from sys import version_info
+except: # pre-2.0
+    # may be inaccurate but will at least
+    #work in anything which seeks to format
+    # version_info into a string
+    version_info = (1,5,2,'unknown',0)
+
+    
 if platform[:4] == 'java' and version_info[:2] == (2, 1):
 	# workaround for list()-bug in Jython 2.1 (should be fixed in 2.2)
     def list(sequence):
