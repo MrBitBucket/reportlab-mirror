@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paraparser.py,v $
+#	Revision 1.25  2000/07/04 10:50:33  rgbecker
+#	Sequencer fixes
+#
 #	Revision 1.24  2000/06/19 11:14:03  andy_robinson
 #	Global sequencer put in the 'story builder'.
-#
+#	
 #	Revision 1.23  2000/06/13 04:11:49  aaron_watters
 #	noted replication of XML markup comment between paraparser.py and paragraph.py
 #	
@@ -67,7 +70,7 @@
 #	Revision 1.13  2000/04/25 13:07:57  rgbecker
 #	Added license
 #	
-__version__=''' $Id: paraparser.py,v 1.24 2000/06/19 11:14:03 andy_robinson Exp $ '''
+__version__=''' $Id: paraparser.py,v 1.25 2000/07/04 10:50:33 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -90,7 +93,6 @@ except ImportError:
 from reportlab.lib.colors import toColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
-from reportlab.lib.sequencer import Sequencer
 _re_para = re.compile('^\\s*<\\s*para(\\s+|>)')
 
 sizeDelta = 2		# amount to reduce font size by for super and sub script
@@ -408,7 +410,7 @@ class ParaParser(xmllib.XMLParser):
 		#otherwise take default sequence
 		if attr.has_key('template'):
 			templ = attr['template']
-			self.handle_data(templ % self.getSequencer())
+			self.handle_data(templ % self._seq)
 			return
 		elif attr.has_key('id'):
 			id = attr['id']
@@ -451,12 +453,6 @@ class ParaParser(xmllib.XMLParser):
 	#----------------------------------------------------------------
 
 	def __init__(self,verbose=0):
-		# the sequencing stuff presumes access to a sequencer.
-		# this may be set with setSequencer(); if a <seq> tag
-		# is encountered and it has not been set, a default
-		# sequencer will be provided.  
-		self._seq = None
-		
 		if _xmllib_newStyle:
 			xmllib.XMLParser.__init__(self,verbose=verbose)
 		else:
@@ -538,12 +534,12 @@ class ParaParser(xmllib.XMLParser):
 		If errors occur None will be returned and the
 		self.errors holds a list of the error messages.
 		"""
+		self._seq = reportlab.lib.sequencer.getSequencer()
+		self._reset(style)	# reinitialise the parser
 
 		# the xmlparser requires that all text be surrounded by xml
 		# tags, therefore we must throw some unused flags around the
 		# given string
-		self._seq = reportlab.lib.sequencer.getSequencer()
-		self._reset(style)	# reinitialise the parser
 		if not(len(text)>=6 and text[0]=='<' and _re_para.match(text)):
 			text = "<para>"+text+"</para>"
 		self.feed(text)
