@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.55 2003/11/19 14:12:41 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.55 2003/11/19 14:12:41 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.56 2003/12/02 15:11:27 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.56 2003/12/02 15:11:27 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -107,18 +107,15 @@ if ',' in fp_str(0.25):
 
 def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     """Dynamically imports possible packagized module, or raises ImportError"""
-    import imp
-    parts = string.split(modulename, '.')
-    name = parts[0]
-
-    if baseDir is None:
-        path = sys.path[:]
-    else:
+    path = sys.path[:]
+    if baseDir:
         if type(baseDir) not in SeqTypes:
-            path = [baseDir]
+            tp = [baseDir]
         else:
-            path = list(baseDir)
-    path = filter(None,path)
+            tp = filter(None,list(baseDir))
+        for p in tp:
+            p = os.path.normcase(os.path.abspath(os.path.normpath(p)))
+            if p not in path: path.insert(0,p)
 
     if noCWD:
         while '.' in path:
@@ -138,28 +135,17 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
         print 'path=',pp(path)
         
     #make import errors a bit more informative
-    fullName = name
+    opath = sys.path
     try:
-        (file, pathname, description) = imp.find_module(name, path)
-        childModule = parentModule = imp.load_module(name, file, pathname, description)
-        if debug: print 'imported module = %s' % parentModule
-        for name in parts[1:]:
-            fullName = fullName + '.' + name
-            if debug: print 'trying part %s' % name
-            (file, pathname, description) = imp.find_module(name, [os.path.dirname(parentModule.__file__)])
-            childModule = imp.load_module(fullName, file, pathname, description)
-            if debug: print 'imported module = %s' % childModule
-            
-            setattr(parentModule, name, childModule)
-            parentModule = childModule
+        sys.path = path
+        exec 'import %s\nm = %s\n' % (modulename,modulename)
+        sys.path = path
+        return m
     except ImportError:
-        msg = "cannot import '%s' while attempting recursive import of '%s'" % (fullName, modulename)
+        msg = "recursiveimport(%s,baseDir=%s) failed" % (modulename,baseDir)
         if baseDir:
             msg = msg + " under paths '%s'" % `path`
         raise ImportError, msg
-
-    return childModule
-
 
 def recursiveGetAttr(obj, name):
     "Can call down into e.g. object1.object2[4].attr"
