@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.19  2000/06/20 21:56:17  andy_robinson
+#	re-synching after sourceforge went weird
+#
 #	Revision 1.18  2000/06/19 23:51:23  andy_robinson
 #	Added UserDocTemplate class, and paragraph.getPlainText()
-#
+#	
 #	Revision 1.17  2000/06/19 11:14:03  andy_robinson
 #	Global sequencer put in the 'story builder'.
 #	
@@ -87,7 +90,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.18 2000/06/19 23:51:23 andy_robinson Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.19 2000/06/20 21:56:17 andy_robinson Exp $ '''
 __doc__="""
 This module contains the core structure of platypus.
 
@@ -671,3 +674,4 @@ if __name__ == '__main__':
 			onFirstPage=myFirstPage,onLaterPages=myLaterPages)
 
 	run()
+
