@@ -16,12 +16,28 @@ documents with a minimum of effort.
 
 disc("""
 The overall design of PLATYPUS can be thought of has having
-several layers, top down, these are
-1) DocTemplate,
-2) PageTemplates,
-3) Frames,
-4) Flowables (ie things like images, paragraphs and tables),
-5) last but not least the lowest level a $pdfgen.Canvas$.
+several layers, top down, these are""")
+
+disc("<b>$DocTemplates$</b> the outermost container for the document;")
+ 
+disc("<b>$PageTemplates$</b> specifications for layouts of pages of various kinds;")
+ 
+disc("<b>$Frames$</b> specifications of regions in pages that can contain flowing text or graphics.")
+ 
+disc("""<b>$Flowables$</b> text or graphic elements that should be "flowed 
+   into the document (ie things like images, paragraphs and tables, but not things
+   like page footers or fixed page graphics).""")
+   
+disc("""<b>$pdfgen.Canvas$</b> the lowest level which ultimately receives the painting of the
+   document from the other layers.""")
+ 
+illust(examples.doctemplateillustration, "Illustration of DocTemplate structure")
+ 
+disc("""
+ The illustration above graphically illustrates the concepts of $DocTemplates$,
+ $PageTemplates$ and $Flowables$.  It is deceptive, however, because each
+ of the $PageTemplates$ actually may specify the format for any number of pages
+ (not just one as might be inferred from the diagram).
 """)
 
 disc("""
