@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.78 2004/04/05 18:07:42 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.78 2004/04/05 18:07:42 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.79 2004/04/21 16:39:36 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.79 2004/04/21 16:39:36 rgbecker Exp $ '''
 
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
@@ -1147,7 +1147,7 @@ LIST_STYLE = TableStyle(
     )
 
 def test():
-    from reportlab.lib.units import inch
+    from reportlab.lib.units import inch, cm
     rowheights = (24, 16, 16, 16, 16)
     rowheights2 = (24, 16, 16, 16, 30)
     colwidths = (50, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32)
@@ -1574,12 +1574,33 @@ LIST_STYLE = TableStyle(
     lst.append(t)
 
     # now for an attempt at percentage widths
+    lst.append(Spacer(18,18))
     lst.append(Paragraph("This table has colWidths=5*['14%']!", styleSheet['BodyText']))
     t=Table(data,style=sty, colWidths = ['14%'] * 5, rowHeights = [20]*5)
     lst.append(t)
 
+    lst.append(Spacer(18,18))
     lst.append(Paragraph("This table has colWidths=['14%','10%','19%','22%','*']!", styleSheet['BodyText']))
     t=Table(data,style=sty, colWidths = ['14%','10%','19%','22%','*'], rowHeights = [20]*5)
+    lst.append(t)
+
+    # Mike's test example
+    lst.append(Spacer(18,18))
+    lst.append(Paragraph('Mike\'s Spanning Example', styleSheet['Heading1']))
+    data=  [[Paragraph('World Domination: The First Five Years', styleSheet['BodyText']), ''],
+            [Paragraph('World <font color="green">Domination</font>: The First Five Years', styleSheet['BodyText']),''],
+            [Paragraph('World Domination: The First Five Years', styleSheet['BodyText']), ''],
+            ]
+    t=Table(data, style=[('SPAN',(0,0),(1,0)),('SPAN',(0,1),(1,1)),('SPAN',(0,2),(1,2)),], colWidths = [3*cm,8*cm], rowHeights = [None]*3)
+    lst.append(t)
+
+    lst.append(Spacer(18,18))
+    lst.append(Paragraph('Mike\'s Non-spanning Example', styleSheet['Heading1']))
+    data=  [[Paragraph('World Domination: The First Five Years', styleSheet['BodyText'])],
+            [Paragraph('World <font color="magenta">Domination</font>: The First Five Years', styleSheet['BodyText'])],
+            [Paragraph('World Domination: The First Five Years', styleSheet['BodyText'])],
+            ]
+    t=Table(data, style=[], colWidths = [11*cm], rowHeights = [None]*3)
     lst.append(t)
 
     lst.append(PageBreak())
