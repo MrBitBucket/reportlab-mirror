@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/cidfonts?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: cidfonts.py,v 1.10 2002/07/24 19:56:37 andy_robinson Exp $ '''
+__version__=''' $Id: cidfonts.py,v 1.11 2004/03/24 14:04:51 rgbecker Exp $ '''
 __doc__="""CID (Asian multi-byte) font support.
 
 This defines classes to represent CID fonts.  They know how to calculate
@@ -65,10 +65,9 @@ class CIDEncoding(pdfmetrics.Encoding):
         self._notDefRanges = []
         self._cmap = {}
         self.source = None
-        fontmapdir = os.path.join(
-                os.path.dirname(reportlab.__file__),
-                'fonts')
         if useCache:
+            from reportlab.lib.utils import get_rl_tempdir
+            fontmapdir = get_rl_tempdir('FastCMAPS')
             if os.path.isfile(fontmapdir + os.sep + name + '.fastmap'):
                 self.fastLoad(fontmapdir)
                 self.source = fontmapdir + os.sep + name + '.fastmap'
