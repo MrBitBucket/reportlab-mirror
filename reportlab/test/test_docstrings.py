@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_docstrings.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_docstrings.py,v 1.10 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_docstrings.py,v 1.11 2003/09/08 16:09:51 rgbecker Exp $
 
 """This is a test on a package level that find all modules,
 classes, methods and functions that do not have a doc string
@@ -21,7 +21,6 @@ from reportlab.test.utils import SecureTestCase, GlobDirectoryWalker
 
 
 RL_HOME = os.path.dirname(reportlab.__file__)
-
 
 def getModuleObjects(folder, rootName, typ):
     "Get a list of all objects defined *somewhere* in a package."

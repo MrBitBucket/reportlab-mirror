@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/test_images.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_images.py,v 1.1 2003/09/08 14:16:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_images.py,v 1.2 2003/09/08 16:09:51 rgbecker Exp $
 __version__=''' $Id'''
 __doc__="""Tests to do with image handling.
 
@@ -23,7 +23,7 @@ class ReaderTestCase(unittest.TestCase):
 
         ir = ImageReader(imageFileName)
         assert ir.getSize() == (110,44)        
-        pixels = ir.getRgbData()
+        pixels = ir.getRGBData()
         assert md5.md5(pixels).hexdigest() == '02e000bf3ffcefe9fc9660c95d7e27cf'
         
 

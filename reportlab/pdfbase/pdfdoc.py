@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.85 2003/08/05 17:37:30 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.85 2003/08/05 17:37:30 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.86 2003/09/08 16:08:15 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.86 2003/09/08 16:08:15 rgbecker Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -20,7 +20,7 @@ import string, types
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfutils import LINEEND   # this constant needed in both
 from reportlab import rl_config
-from reportlab.lib.utils import import_zlib, PIL_Image, open_for_read
+from reportlab.lib.utils import import_zlib, open_for_read
 
 from sys import platform
 try:
@@ -1766,7 +1766,7 @@ class PDFImageXObject:
             else:
                 self.loadImageFromA85(source)
         else: # it is already a PIL Image
-            self.loadImageFromPIL(source)
+            self.loadImageFromSRC(source)
 
     def loadImageFromA85(self,source):
         IMG=[]
@@ -1795,38 +1795,28 @@ class PDFImageXObject:
         self._filters = 'ASCII85Decode','DCTDecode' #'A85','DCT'
         self.mask = None
 
-    def _checkTransparency(self,PILImage):
+    def _checkTransparency(self,im):
         if self.mask=='auto':
-            if PILImage.info.has_key("transparency") :
-                transparency = PILImage.info["transparency"] * 3
-                palette = PILImage.palette
-                try:
-                    palette = palette.palette
-                except:
-                    palette = palette.data
-                (tred, tgreen, tblue) = map(ord, palette[transparency:transparency+3])
-                self.mask = (tred, tred, tgreen, tgreen, tblue, tblue)
+            tc = im.getTransparent()
+            if tc:
+                self.mask = (tc[0], tc[0], tc[1], tc[1], tc[2], tc[2])
             else:
                 self.mask = None
         elif hasattr(self.mask,'rgb'):
             self.mask = self.mask.rgb()+self.mask.rgb()
 
-    def loadImageFromPIL(self, PILImage):
+    def loadImageFromSRC(self, im):
         "Extracts the stream, width and height"
         zlib = import_zlib()
         if not zlib: return
-        #standardize it to RGB.  We could be more optimal later.
-        if PILImage.mode <> 'RGB':
-            PILImage = PILImage.convert('RGB')
-
-        self.width, self.height = PILImage.size
-        raw = PILImage.tostring()
+        self.width, self.height = im.getSize()
+        raw = im.getRGBData()
         assert(len(raw) == self.width*self.height, "Wrong amount of data for image")
         self.streamContent = pdfutils._AsciiBase85Encode(zlib.compress(raw))
         self.colorSpace = 'DeviceRGB'
         self.bitsPerComponent = 8
         self._filters = 'ASCII85Decode','FlateDecode' #'A85','Fl'
-        self._checkTransparency(PILImage)
+        self._checkTransparency(im)
 
     def format(self, document):
         S = PDFStream()

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.38 2003/08/20 16:10:35 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.38 2003/08/20 16:10:35 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.39 2003/09/08 16:08:15 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.39 2003/09/08 16:08:15 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -267,7 +267,7 @@ class Preformatted(Flowable):
         self.canv.drawText(tx)
 
 class Image(Flowable):
-    """an image (digital picture).  Formats supported by PIL (the Python Imaging Library
+    """an image (digital picture).  Formats supported by PIL/Java 1.4 (the Python/Java Imaging Library
        are supported.  At the present time images as flowables are always centered horozontally
        in the frame.
     """
@@ -275,7 +275,6 @@ class Image(Flowable):
     _fixedHeight = 1
     def __init__(self, filename, width=None, height=None, kind='direct', mask="auto"):
         """If size to draw at not specified, get it from the image."""
-        from reportlab.lib.utils import PIL_Image  #this will raise an error if they do not have PIL.
         self._filename = self.filename = filename
         self.hAlign = 'CENTER'
         self._mask = mask
@@ -286,9 +285,10 @@ class Image(Flowable):
             self.imageWidth = info[0]
             self.imageHeight = info[1]
         else:
+            from reportlab.lib.utils import ImageReader  #this may raise an error
             # we have to assume this is a file like object
-            self.filename = img = PIL_Image.open(filename)
-            (self.imageWidth, self.imageHeight) = img.size
+            self.filename = img = ImageReader(filename)
+            (self.imageWidth, self.imageHeight) = img.getSize()
 
         if kind in ['direct','absolute']:
             self.drawWidth = width or self.imageWidth

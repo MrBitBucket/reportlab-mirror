@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.116 2003/08/19 14:51:25 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.116 2003/08/19 14:51:25 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.117 2003/09/08 16:08:15 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.117 2003/09/08 16:08:15 rgbecker Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -26,7 +26,7 @@ from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
 from reportlab.lib.colors import Color, CMYKColor, toColor
-from reportlab.lib.utils import import_zlib, PIL_Image
+from reportlab.lib.utils import import_zlib
 from reportlab.lib.utils import fp_str
 
 zlib = import_zlib()
@@ -549,9 +549,9 @@ class Canvas:
         return (img_obj.width, img_obj.height)
 
     def drawImage(self, image, x, y, width=None, height=None, mask=None):
-        """Draws the image (PIL Image object or filename) as specified.
+        """Draws the image (ImageReader object or filename) as specified.
 
-        "image" may be an image filename or a PIL Image object.  If width
+        "image" may be an image filename or a ImageReader object.  If width
         and height are not given, the "natural" width and height in pixels
         is used at a scale of 1 point to 1 pixel.
 
@@ -567,7 +567,7 @@ class Canvas:
         Unlike drawInlineImage, this creates 'external images' which
         are only stored once in the PDF file but can be drawn many times.
         If you give it the same filename twice, even at different locations
-        and sizes, it will reuse the first occurrence.  If you use PIL image
+        and sizes, it will reuse the first occurrence.  If you use ImageReader
         objects, it tests whether the image content has changed before deciding
         whether to reuse it.
 
@@ -581,7 +581,7 @@ class Canvas:
             #filename, use it
             name = _digester('%s%s' % (image, mask))
         else:
-            rawdata = image.convert('RGB').tostring()
+            rawdata = image.getRGBData()
             name = _digester(rawdata)
 
         # in the pdf document, this will be prefixed with something to

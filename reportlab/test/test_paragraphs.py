@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_paragraphs.py,v 1.16 2003/06/01 09:37:45 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_paragraphs.py,v 1.17 2003/09/08 16:09:51 rgbecker Exp $
 # tests some paragraph styles
 
 from reportlab.test import unittest
@@ -114,7 +114,7 @@ class ParagraphTestCase(unittest.TestCase):
         story.append(Paragraph("""This has <b>bold text</b> here.""", styNormal))
         story.append(Paragraph("""This has <u>underlined text</u> here.""", styNormal))
         story.append(Paragraph("""This has m<super>2</super> a superscript.""", styNormal))
-        story.append(Paragraph("""This has m<sub>2</sub> a subscript.""", styNormal))
+        story.append(Paragraph("""This has m<sub>2</sub> a subscript. Like H<sub>2</sub>O!""", styNormal))
         story.append(Paragraph("""This has a font change to <font name=Helvetica>Helvetica</font>.""", styNormal))
         #This one fails:
         #story.append(Paragraph("""This has a font change to <font name=Helvetica-Oblique>Helvetica-Oblique</font>.""", styNormal))

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testplatypus.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.12 2003/04/24 11:08:02 rgbecker Exp $
-__version__=''' $Id: test_platypus_general.py,v 1.12 2003/04/24 11:08:02 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.13 2003/09/08 16:09:51 rgbecker Exp $
+__version__=''' $Id: test_platypus_general.py,v 1.13 2003/09/08 16:09:51 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -377,8 +377,8 @@ def getExamples():
                 "Here is an Image.  For now, these are always centred in the frame.",
                 styleSheet['Italic']))
 
-    from reportlab.lib.utils import PIL_Image
-    if PIL_Image:
+    from reportlab.lib.utils import haveImages
+    if haveImages:
         story.append(Paragraph(
                 "Here is an Image.  For now, these are always centred in the frame.",
                 styleSheet['Italic']))
