@@ -7,17 +7,20 @@ def _genAll(d=None,verbose=1):
 	for p in ('reference/genreference.py',
 			  'userguide/genuserguide.py',
 			  'graphguide/gengraphguide.py',
-			  '../tools/docco/graphdocpy.py'):
+			  '../tools/docco/graphdocpy.py',
+			  '../rl_addons/pyRXP/docs/PyRXP_Documentation.rml'):
 		os.chdir(d)
 		os.chdir(os.path.dirname(p))
-		if verbose:
-			verboseSuffix = ''
+		if p[-4:]=='.rml':
+			try:
+				from rlextra.rml2pdf.rml2pdf import main
+				main(exe=0,fn=[os.path.basename(p)], quiet=not verbose, outDir=d)
+			except:
+				pass
 		else:
-			verboseSuffix = '-s'
-		cmd = '%s %s %s' % (sys.executable,os.path.basename(p), verboseSuffix)
-		if verbose:
-			print cmd
-		os.system(cmd)
+			cmd = '%s %s %s' % (sys.executable,os.path.basename(p), not verbose and '-s' or '')
+			if verbose: print cmd
+			os.system(cmd)
 
 """Runs the manual-building scripts"""
 if __name__=='__main__':
