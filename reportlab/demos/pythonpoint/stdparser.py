@@ -31,12 +31,15 @@
 #
 ###############################################################################
 #	$Log: stdparser.py,v $
+#	Revision 1.2  2000/04/06 12:15:38  andy_robinson
+#	Updated example XML to include full tag reference
+#
 #	Revision 1.1  2000/04/06 09:47:20  andy_robinson
 #	Added several new shape tags.
 #	Broke out parser into separate module, to
 #	allow for alternative parsers in future.
 #	Broke out 'user guide' into pythonpoint.xml
-#
+#	
 #	
 __version__=''' $Id $ '''
 __doc__="""
@@ -276,8 +279,10 @@ class PPMLParser(xmllib.XMLParser):
     def start_para(self, args):
         self._curPara = pythonpoint.PPPara()
         self._curPara.style = args['style']
+        # hack - we want to allow octal escape sequences in the input -
+        # treat as raw string and evaluate
         self._curPara.bulletText = args['bullettext']
-
+        
     def end_para(self):
         self._curFrame.content.append(self._curPara)
         self._curPara = None

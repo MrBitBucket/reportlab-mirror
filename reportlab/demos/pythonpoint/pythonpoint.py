@@ -31,12 +31,15 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.8  2000/04/06 12:15:38  andy_robinson
+#	Updated example XML to include full tag reference
+#
 #	Revision 1.7  2000/04/06 09:47:20  andy_robinson
 #	Added several new shape tags.
 #	Broke out parser into separate module, to
 #	allow for alternative parsers in future.
 #	Broke out 'user guide' into pythonpoint.xml
-#
+#	
 #	Revision 1.6  2000/03/21 19:36:37  rgbecker
 #	8bit character fixes
 #	
@@ -55,7 +58,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.7 2000/04/06 09:47:20 andy_robinson Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.8 2000/04/06 12:15:38 andy_robinson Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -473,9 +476,20 @@ def getSampleStyleSheet():
     para.leading = 28
     stylesheet['Normal'] = para
 
+    #This one is spaced out a bit...
     para = ParagraphStyle('BodyText', stylesheet['Normal'])
     para.spaceBefore = 12
     stylesheet['BodyText'] = para
+    
+    #Indented, for lists
+    para = ParagraphStyle('Indent', stylesheet['Normal'])
+    para.leftIndent = 36
+    para.firstLineIndent = 36
+    stylesheet['Indent'] = para
+
+    para = ParagraphStyle('Centered', stylesheet['Normal'])
+    para.alignment = layout.TA_CENTER
+    stylesheet['Centered'] = para
     
     para = ParagraphStyle('BigCentered', stylesheet['Normal'])
     para.spaceBefore = 12
@@ -490,7 +504,6 @@ def getSampleStyleSheet():
     para.fontName = 'Times-Roman'
     para.fontSize = 48
     para.Leading = 58
-    para.spaceAfter = 36
     para.alignment = layout.TA_CENTER
     stylesheet['Title'] = para
     
@@ -498,7 +511,6 @@ def getSampleStyleSheet():
     para.fontName = 'Times-Bold'
     para.fontSize = 36
     para.leading = 44
-    para.spaceAfter = 36
     para.alignment = layout.TA_CENTER
     stylesheet['Heading1'] = para
     
@@ -507,13 +519,11 @@ def getSampleStyleSheet():
     para.fontSize = 28
     para.leading = 34
     para.spaceBefore = 24
-    para.spaceAfter = 12
     stylesheet['Heading2'] = para
     
     para = ParagraphStyle('Heading3', stylesheet['Normal'])
     para.fontName = 'Times-BoldItalic'
     para.spaceBefore = 24
-    para.spaceAfter = 12
     stylesheet['Heading3'] = para
 
     para = ParagraphStyle('Bullet', stylesheet['Normal'])
@@ -522,7 +532,7 @@ def getSampleStyleSheet():
     para.spaceBefore = 6
     #para.bulletFontName = 'Symbol'
     para.bulletFontSize = 24
-    para.bulletIndent = 36
+    para.bulletIndent = 20
     stylesheet['Bullet'] = para
 
     para = ParagraphStyle('Definition', stylesheet['Normal'])
