@@ -99,7 +99,6 @@ def run(infilename, outfilename):
         elif typ == 'Custom':
             # go find it
             searchPath = [os.getcwd()+'\\']
-            print 'search path',searchPath
             (typ2, moduleName, funcName) = thingy
             found = imp.find_module(moduleName, searchPath)
             assert found, "Custom object module %s not found" % moduleName

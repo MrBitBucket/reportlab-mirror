@@ -42,7 +42,6 @@ class Figure(Flowable):
         self.drawFigure()
         
     def drawBorder(self):
-        print 'drawing border'
         self.canv.rect(0, 0, self.width, self.figureHeight)
 
     def drawCaption(self):
