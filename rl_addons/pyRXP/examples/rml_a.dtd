@@ -1,0 +1,630 @@
+<!-- edited with XML Spy v4.0 U (http://www.xmlspy.com) by Andy Robinson (Reportlab Inc.) -->
+<!-- DTD for Report Markup Language          -->
+<!-- These are heavily used in the documentatation.         -->
+<!-- *ALWAYS* CHANGE THIS WHEN A NEW VERSION OF THE RML DTD -->
+<!-- IS RELEASED                                            -->
+<!ENTITY % MajorVersionNumber "1">
+<!ENTITY % MinorVersionNumber "0">
+<!ENTITY % VersionNumber "%MajorVersionNumber;.%MinorVersionNumber;">
+<!-- this is an entity for use outside the DTD -->
+<!ENTITY RMLDTDFileName "RML Version %VersionNumber;">
+<!ENTITY RMLVersionNumber "%VersionNumber;">
+<!ENTITY RMLVersionString "RML Version %VersionNumber;">
+<!ELEMENT document (docinit?, ((template, stylesheet, story) | (stylesheet, pageInfo?, (pageDrawing)+)))>
+<!ATTLIST document
+	filename CDATA #REQUIRED
+>
+<!-- pageInfo, used to specify canvas parameters for simple docs -->
+<!ELEMENT pageInfo EMPTY>
+<!ATTLIST pageInfo
+	pageSize CDATA #IMPLIED
+>
+<!-- Use 'name' for items to be put into headers/footers -->
+<!-- eg "<name chapterheading, chapter 5>"               -->
+<!ELEMENT name EMPTY>
+<!ATTLIST name
+	id CDATA #REQUIRED
+	value CDATA #REQUIRED
+	type CDATA "string"
+>
+<!-- 'alias' creates a new name for an existing object   -->
+<!-- eg can be used to have duplicate names for styles   -->
+<!-- THIS NEEDS SCOPING TO BE REALLY USEFUL              -->
+<!ELEMENT alias EMPTY>
+<!ATTLIST alias
+	id CDATA #REQUIRED
+	value CDATA #REQUIRED
+>
+<!-- this yanks information from 'name' -->
+<!ELEMENT getName EMPTY>
+<!ATTLIST getName
+	id CDATA #REQUIRED
+>
+<!ELEMENT color EMPTY>
+<!ATTLIST color
+	id CDATA #REQUIRED
+	RGB CDATA #IMPLIED
+	CMYK CDATA #IMPLIED
+	alias CDATA #IMPLIED
+>
+<!--
+	registerType1Face - read in type 1 font face information for global use
+-->
+<!ELEMENT registerType1Face EMPTY>
+<!ATTLIST registerType1Face
+	afmFile CDATA #REQUIRED
+	pfbFile CDATA #REQUIRED
+>
+<!--
+	registerFont - associate a font name to a face combined with an encoding
+-->
+<!ELEMENT registerFont EMPTY>
+<!ATTLIST registerFont
+	name CDATA #REQUIRED
+	faceName CDATA #REQUIRED
+	encName CDATA #REQUIRED
+>
+<!ELEMENT pageNumber EMPTY>
+<!ELEMENT template (pageTemplate*)>
+<!ATTLIST template
+	pageSize CDATA #IMPLIED
+	leftMargin CDATA #IMPLIED
+	rightMargin CDATA #IMPLIED
+	topMargin CDATA #IMPLIED
+	bottomMargin CDATA #IMPLIED
+	showBoundary CDATA #IMPLIED
+	allowSplitting CDATA #IMPLIED
+	title CDATA "(untitled)"
+	author CDATA "(unauthored)"
+>
+<!ELEMENT pageTemplate ((pageGraphics, pageGraphics?)?, frame*)>
+<!ATTLIST pageTemplate
+	id CDATA #REQUIRED
+>
+<!-- DRAWINGOPS is for use with pageGraphics -->
+<!--
+###########################################################################
+# Highly experimental stuff:
+# added below:
+#   - textBox
+#   - barCode
+###########################################################################
+-->
+<!ENTITY % DRAWINGOPS "(drawString | drawRightString | drawCentredString 
+	| ellipse | alias | catchForms | outlineAdd
+	| circle | rect | fill | stroke | setFont | image 
+	| pageGraphics | place | form | doForm | plugInGraphic
+	| scale | translate | rotate | skew | transform
+	| grid | path | lines | curves | lineMode 
+        | textBox | barCode | checkBox | letterBoxes)*">
+<!-- A form is a stored and named bunch of graphical operations
+     It will only be "evaluated" once, so any page numbers or names
+     in it will become fixed after the first occurrence (if it occurs
+     in another form or in a pageGraphic, for example)
+-->
+<!ELEMENT form %DRAWINGOPS;>
+<!ATTLIST form
+	name CDATA #REQUIRED
+>
+<!-- pageGraphics provide for a graphic backdrop for a WHOLE page-->
+<!ELEMENT pageGraphics %DRAWINGOPS;>
+<!ELEMENT path (#PCDATA | moveto | curvesto)*>
+<!ATTLIST path
+	x CDATA #REQUIRED
+	y CDATA #REQUIRED
+	fill CDATA #IMPLIED
+	stroke CDATA #IMPLIED
+	close CDATA #IMPLIED
+>
+<!ELEMENT moveto (#PCDATA)>
+<!ELEMENT curvesto (#PCDATA)>
+<!ELEMENT rotate EMPTY>
+<!ATTLIST rotate
+	degrees CDATA #REQUIRED
+>
+<!ELEMENT skew EMPTY>
+<!ATTLIST skew
+	alpha CDATA #REQUIRED
+	beta CDATA #REQUIRED
+>
+<!ELEMENT lineMode EMPTY>
+<!ATTLIST lineMode
+	join CDATA #IMPLIED
+	cap CDATA #IMPLIED
+	width CDATA #IMPLIED
+	miterLimit CDATA #IMPLIED
+	dash CDATA #IMPLIED
+>
+<!ELEMENT lines (#PCDATA)>
+<!ELEMENT transform (#PCDATA)>
+<!ELEMENT curves (#PCDATA)>
+<!ELEMENT scale EMPTY>
+<!ATTLIST scale
+	sx CDATA #IMPLIED
+	sy CDATA #IMPLIED
+>
+<!-- 	catchForms provides direct support for PageCatcher form storage files.
+	It is a drawing operation.  It requires pageCatcher module on the python
+	path.
+
+	Example usage:
+
+	<pageDrawing>
+	 <catchForms storageFile="storage.data"/>
+	 <doForm name="PF0"/>
+	</pageDrawing>
+
+	(if storage.data is a pageCatcher storage file containing form "PF0").
+-->
+<!ELEMENT catchForms EMPTY>
+<!ATTLIST catchForms
+	storageFile CDATA #REQUIRED
+>
+<!-- outlineAdd adds an outline entry.  It may occur in either graphics
+     or in a story.  The level specifies how deep in the outline the
+     entry appears. The default level is 0.
+
+     Note: in order to add a level 3 outline entry the previous outline
+     entry must be at least level 2 (2,3,4...).  That is to say, you can
+     "move back" any number of levels, but you can only "move forward" one level
+     at a time.
+
+     "closed" if set hides any children of this outline entry by default.
+     (boolean).
+
+EXAMPLE:
+
+<outlineAdd>First outline entry</outlineAdd>
+<outlineAdd level="1">sub entry</outlineAdd>
+<outlineAdd closed="true">Second outline entry 2</outlineAdd>
+<outlineAdd level="1">sub entry 2</outlineAdd>
+
+-->
+<!ENTITY % STRINGFORMS "(#PCDATA | getName | pageNumber)*">
+<!ELEMENT outlineAdd %STRINGFORMS;>
+<!ATTLIST outlineAdd
+	level CDATA #IMPLIED
+	closed CDATA #IMPLIED
+>
+<!ELEMENT translate EMPTY>
+<!ATTLIST translate
+	dx CDATA #IMPLIED
+	dy CDATA #IMPLIED
+>
+<!ELEMENT grid EMPTY>
+<!ATTLIST grid
+	xs CDATA #IMPLIED
+	ys CDATA #IMPLIED
+>
+<!ELEMENT join EMPTY>
+<!ATTLIST join
+	type CDATA #REQUIRED
+>
+<!ELEMENT image EMPTY>
+<!ATTLIST image
+	file CDATA #REQUIRED
+	x CDATA #REQUIRED
+	y CDATA #REQUIRED
+	width CDATA #IMPLIED
+	height CDATA #IMPLIED
+>
+<!ELEMENT setFont EMPTY>
+<!ATTLIST setFont
+	name CDATA #REQUIRED
+	size CDATA #REQUIRED
+>
+<!ELEMENT stroke EMPTY>
+<!ATTLIST stroke
+	color CDATA #REQUIRED
+>
+<!ELEMENT fill EMPTY>
+<!ATTLIST fill
+	color CDATA #REQUIRED
+>
+<!ELEMENT rect EMPTY>
+<!ATTLIST rect
+	x CDATA #REQUIRED
+	y CDATA #REQUIRED
+	width CDATA #REQUIRED
+	height CDATA #REQUIRED
+	fill CDATA #IMPLIED
+	stroke CDATA #IMPLIED
+	round CDATA #IMPLIED
+>
+<!ELEMENT circle EMPTY>
+<!ATTLIST circle
+	x CDATA #REQUIRED
+	y CDATA #REQUIRED
+	radius CDATA #REQUIRED
+	fill CDATA #IMPLIED
+	stroke CDATA #IMPLIED
+>
+<!ELEMENT ellipse EMPTY>
+<!ATTLIST ellipse
+	x CDATA #REQUIRED
+	y CDATA #REQUIRED
+	width CDATA #REQUIRED
+	height CDATA #REQUIRED
+	fill CDATA #IMPLIED
+	stroke CDATA #IMPLIED
+>
+<!-- a plugInGraphic identifies a function (callable) in a module which
+   takes a canvas and a data string as arguments and presumably draws
+   something on the canvas using information in the data string: eg
+
+	<plugInGraphic module="mymodule" function="myfunction>data string</plugInGraphic>
+
+   when executed results in effectively the execution sequence:
+
+	import mymodule
+	mymodule.myfunction(canvas, "data string")
+
+   using the current canvas object
+-->
+<!ELEMENT plugInGraphic %STRINGFORMS;>
+<!ATTLIST plugInGraphic
+	module CDATA #REQUIRED
+	function CDATA #REQUIRED
+>
+<!-- a plugInFlowable identifies a function (callable) in a module which
+   takes a canvas data string as an argument and returns a flowable
+   object (in the platypus sense):
+
+	<plugInFlowable module="mymodule" function="myfunction>data string</plugInGraphic>
+
+   when executed results in effectively the execution sequence:
+
+	import mymodule
+	flowable = mymodule.myfunction("data string")
+	story.append(flowable)
+
+   using the current canvas object
+-->
+<!ELEMENT plugInFlowable %STRINGFORMS;>
+<!ATTLIST plugInFlowable
+	module CDATA #REQUIRED
+	function CDATA #REQUIRED
+>
+<!-- execute a previously defined form (add translate option?) -->
+<!ELEMENT doForm EMPTY>
+<!ATTLIST doForm
+	name CDATA #REQUIRED
+>
+<!ELEMENT drawString %STRINGFORMS;>
+<!ATTLIST drawString
+	x CDATA #REQUIRED
+	y CDATA #REQUIRED
+>
+<!ELEMENT drawRightString %STRINGFORMS;>
+<!ATTLIST drawRightString
+	x CDATA #REQUIRED
+	y CDATA #REQUIRED
+>
+<!ELEMENT drawCentredString %STRINGFORMS;>
+<!ATTLIST drawCentredString
+	x CDATA #REQUIRED
+	y CDATA #REQUIRED
+>
+<!ELEMENT frame EMPTY>
+<!ATTLIST frame
+	id CDATA #REQUIRED
+	x1 CDATA #REQUIRED
+	y1 CDATA #REQUIRED
+	width CDATA #REQUIRED
+	height CDATA #REQUIRED
+>
+<!ELEMENT stylesheet ((initialize?, (paraStyle | boxStyle | blockTableStyle)*)*)>
+<!ELEMENT initialize ((alias | name | color)*)>
+<!-- In the following elements, "block" refers to a square or rectangular region of
+a table - not necessarily a single cell. The table is called a "blockTable" to keep
+it consistent with all the tags that deal with what appears inside it -->
+<!ELEMENT blockTableStyle (blockFont | blockLeading | blockTextColor | blockAlignment | blockLeftPadding | blockRightPadding | blockBottomPadding | blockTopPadding | blockBackground | blockValign | lineStyle)*>
+<!ATTLIST blockTableStyle
+	id CDATA #REQUIRED
+>
+<!ELEMENT lineStyle EMPTY>
+<!ATTLIST lineStyle
+	kind CDATA #REQUIRED
+	thickness CDATA #IMPLIED
+	colorName CDATA #REQUIRED
+	start CDATA #IMPLIED
+	stop CDATA #IMPLIED
+>
+<!ELEMENT blockFont EMPTY>
+<!ATTLIST blockFont
+	name CDATA #REQUIRED
+	size CDATA #IMPLIED
+	leading CDATA #IMPLIED
+	start CDATA #IMPLIED
+	stop CDATA #IMPLIED
+>
+<!ELEMENT blockTextColor EMPTY>
+<!ATTLIST blockTextColor
+	colorName CDATA #REQUIRED
+	start CDATA #IMPLIED
+	stop CDATA #IMPLIED
+>
+<!ELEMENT blockLeading EMPTY>
+<!ATTLIST blockLeading
+	length CDATA #REQUIRED
+	start CDATA #IMPLIED
+	stop CDATA #IMPLIED
+>
+<!ELEMENT blockAlignment EMPTY>
+<!ATTLIST blockAlignment
+	value CDATA #REQUIRED
+	start CDATA #IMPLIED
+	stop CDATA #IMPLIED
+>
+<!ELEMENT blockValign EMPTY>
+<!ATTLIST blockValign
+	value CDATA #REQUIRED
+	start CDATA #IMPLIED
+	stop CDATA #IMPLIED
+>
+<!ELEMENT blockLeftPadding EMPTY>
+<!ATTLIST blockLeftPadding
+	length CDATA #REQUIRED
+	start CDATA #IMPLIED
+	stop CDATA #IMPLIED
+>
+<!ELEMENT blockRightPadding EMPTY>
+<!ATTLIST blockRightPadding
+	length CDATA #REQUIRED
+	start CDATA #IMPLIED
+	stop CDATA #IMPLIED
+>
+<!ELEMENT blockBottomPadding EMPTY>
+<!ATTLIST blockBottomPadding
+	length CDATA #REQUIRED
+	start CDATA #IMPLIED
+	stop CDATA #IMPLIED
+>
+<!ELEMENT blockTopPadding EMPTY>
+<!ATTLIST blockTopPadding
+	length CDATA #REQUIRED
+	start CDATA #IMPLIED
+	stop CDATA #IMPLIED
+>
+<!ELEMENT blockBackground EMPTY>
+<!ATTLIST blockBackground
+	colorName CDATA #REQUIRED
+	start CDATA #IMPLIED
+	stop CDATA #IMPLIED
+>
+<!ELEMENT paraStyle EMPTY>
+<!ATTLIST paraStyle
+	name CDATA #REQUIRED
+	alias CDATA #IMPLIED
+	parent CDATA #IMPLIED
+	fontName CDATA #IMPLIED
+	fontSize CDATA #IMPLIED
+	leading CDATA #IMPLIED
+	leftIndent CDATA #IMPLIED
+	rightIndent CDATA #IMPLIED
+	firstLineIndent CDATA #IMPLIED
+	alignment CDATA #IMPLIED
+	spaceBefore CDATA #IMPLIED
+	spaceAfter CDATA #IMPLIED
+	bulletFontName CDATA #IMPLIED
+	bulletFontSize CDATA #IMPLIED
+	bulletIndent CDATA #IMPLIED
+	textColor CDATA #IMPLIED
+	backColor CDATA #IMPLIED
+>
+<!ELEMENT boxStyle EMPTY>
+<!ATTLIST boxStyle
+	name CDATA #REQUIRED
+	alias CDATA #IMPLIED
+	parent CDATA #IMPLIED
+	fontName CDATA #IMPLIED
+	fontSize CDATA #IMPLIED
+	alignment CDATA #IMPLIED
+	textColor CDATA #IMPLIED
+	labelFontName CDATA #IMPLIED
+	labelFontSize CDATA #IMPLIED
+	labelAlignment CDATA #IMPLIED
+	labelTextColor CDATA #IMPLIED
+	boxFillColor CDATA #IMPLIED
+	boxStrokeColor CDATA #IMPLIED
+	cellWidth CDATA #IMPLIED
+	cellHeight CDATA #IMPLIED
+>
+<!ENTITY % GENERICFLOWABLES "para | blockTable | title | h1 | h2 | h3 | spacer
+		| illustration | pre | plugInFlowable | outlineAdd ">
+<!-- place places a flowable inside a pageGraphic or illustration -->
+<!ELEMENT place (%GENERICFLOWABLES;)*>
+<!ATTLIST place
+	x CDATA #REQUIRED
+	y CDATA #REQUIRED
+	width CDATA #REQUIRED
+	height CDATA #REQUIRED
+>
+<!ENTITY % TOPLEVEL "( %GENERICFLOWABLES; | alias
+		| nextFrame | setNextTemplate | condPageBreak )*">
+<!ENTITY % TOPLEVEL2 "(#PCDATA | 
+		%GENERICFLOWABLES; )*">
+<!ELEMENT nextFrame EMPTY>
+<!ELEMENT setNextTemplate EMPTY>
+<!ATTLIST setNextTemplate
+	name CDATA #REQUIRED
+>
+<!-- conditional page break -->
+<!ELEMENT condPageBreak EMPTY>
+<!ATTLIST condPageBreak
+	height CDATA #REQUIRED
+>
+<!-- An illustration differs from pageGraphics in that is is 
+contained by a 'box' of space in the same way that an illustration 
+in a book is. It can be anywhere on a page - unlike pageGraphics 
+which must start at the origin -->
+<!ELEMENT illustration %DRAWINGOPS;>
+<!ATTLIST illustration
+	height CDATA #REQUIRED
+	width CDATA #REQUIRED
+>
+<!ELEMENT story %TOPLEVEL;>
+<!ELEMENT spacer EMPTY>
+<!ATTLIST spacer
+	length CDATA #REQUIRED
+	width CDATA #IMPLIED
+>
+<!ENTITY % PARASTUFF "(#PCDATA | b | greek | font | super | sub | pageNumber
+			| seq | seqDefault | seqReset | name | getName | i )*">
+<!ELEMENT pre %STRINGFORMS;>
+<!ATTLIST pre
+	style CDATA "pre.defaultStyle"
+>
+<!ELEMENT para %PARASTUFF;>
+<!ATTLIST para
+	style CDATA "para.defaultStyle"
+	bulletText CDATA #IMPLIED
+	alignment CDATA #IMPLIED
+	bulletColor CDATA #IMPLIED
+	bulletFontName CDATA #IMPLIED
+	bulletFontSize CDATA #IMPLIED
+	bulletIndent CDATA #IMPLIED
+	firstLineIndent CDATA #IMPLIED
+	fontName CDATA #IMPLIED
+	fontSize CDATA #IMPLIED
+	leading CDATA #IMPLIED
+	leftIndent CDATA #IMPLIED
+	rightIndent CDATA #IMPLIED
+	spaceAfter CDATA #IMPLIED
+	spaceBefore CDATA #IMPLIED
+	textColor CDATA #IMPLIED
+>
+<!ELEMENT b %PARASTUFF;>
+<!ELEMENT i %PARASTUFF;>
+<!ELEMENT font %PARASTUFF;>
+<!ATTLIST font
+	face CDATA #IMPLIED
+	color CDATA #IMPLIED
+	size CDATA #IMPLIED
+>
+<!ELEMENT greek %PARASTUFF;>
+<!ELEMENT super %PARASTUFF;>
+<!ELEMENT sub %PARASTUFF;>
+<!ELEMENT seq EMPTY>
+<!ATTLIST seq
+	id CDATA #IMPLIED
+	template CDATA #IMPLIED
+>
+<!-- seqdefault and seqreset are used in paragraph numbering -->
+<!-- or any sequence of consecutive numbers                  -->
+<!ELEMENT seqDefault EMPTY>
+<!ATTLIST seqDefault
+	id CDATA #REQUIRED
+>
+<!ELEMENT seqReset EMPTY>
+<!ATTLIST seqReset
+	id CDATA #IMPLIED
+>
+<!ELEMENT title %PARASTUFF;>
+<!ATTLIST title
+	style CDATA "h1.defaultStyle"
+>
+<!ELEMENT h1 %PARASTUFF;>
+<!ATTLIST h1
+	style CDATA "h1.defaultStyle"
+>
+<!ELEMENT h2 %PARASTUFF;>
+<!ATTLIST h2
+	style CDATA "h2.defaultStyle"
+>
+<!ELEMENT h3 %PARASTUFF;>
+<!ATTLIST h3
+	style CDATA "h3.defaultStyle"
+>
+<!-- AND SIMILARLY FOR H2, ETC (LATER) -->
+<!ELEMENT blockTable (tr*)>
+<!ATTLIST blockTable
+	style CDATA #IMPLIED
+	colWidths CDATA #IMPLIED
+	rowHeights CDATA #IMPLIED
+	splitByRow CDATA #IMPLIED
+	repeatRows CDATA #IMPLIED
+	repeatCols CDATA #IMPLIED
+>
+<!ELEMENT tr (td*)>
+<!ELEMENT td %TOPLEVEL2;>
+<!-- <!ELEMENT pre  (#PCDATA )> -->
+<!-- pageDrawing is for use with simple documents - 
+it specifies one page at a time -->
+<!ELEMENT pageDrawing %DRAWINGOPS;>
+<!--ENTITIES-->
+<!-- RML should always be used with ISO Latin 1 encoding - the following entities 
+are the only ones that should be neccesary. The  encoding should deal with the rest: 
+"ISO Latin 1" handles all European accents and the pound sign. -->
+<!ENTITY gt "&#062;">
+<!ELEMENT docinit (alias | color | name | registerType1Face | registerFont)*>
+<!--
+###########################################################################
+# Highly experimental stuff...
+###########################################################################
+-->
+<!ELEMENT textBox %STRINGFORMS;>
+<!ATTLIST textBox
+	style CDATA ""
+	x CDATA #REQUIRED
+	y CDATA #REQUIRED
+	boxWidth CDATA #REQUIRED
+	boxHeight CDATA #REQUIRED
+	boxStrokeColor CDATA #IMPLIED
+	boxFillColor CDATA #IMPLIED
+	lineWidth CDATA #IMPLIED
+	fontName CDATA #IMPLIED
+	fontSize CDATA #IMPLIED
+	align CDATA #IMPLIED
+	shrinkToFit CDATA #IMPLIED
+	label CDATA #IMPLIED
+>
+<!ELEMENT barCode %STRINGFORMS;>
+<!ATTLIST barCode
+	x CDATA #REQUIRED
+	y CDATA #REQUIRED
+	code CDATA #REQUIRED
+>
+<!ELEMENT checkBox EMPTY>
+<!ATTLIST checkBox
+	style CDATA ""
+	x CDATA #REQUIRED
+	y CDATA #REQUIRED
+	labelFontName CDATA #IMPLIED
+	labelFontSize CDATA #IMPLIED
+	labelTextColor CDATA #IMPLIED
+	boxWidth CDATA #IMPLIED
+	boxHeight CDATA #IMPLIED
+	checkStrokeColor CDATA #IMPLIED
+	boxStrokeColor CDATA #IMPLIED
+	boxFillColor CDATA #IMPLIED
+	lineWidth CDATA #IMPLIED
+	line1 CDATA #IMPLIED
+	line2 CDATA #IMPLIED
+	line3 CDATA #IMPLIED
+	checked CDATA #IMPLIED
+	bold CDATA #IMPLIED
+>
+<!ELEMENT letterBoxes %STRINGFORMS;>
+<!ATTLIST letterBoxes
+	style CDATA ""
+	x CDATA #REQUIRED
+	y CDATA #REQUIRED
+	count CDATA #REQUIRED
+	label CDATA #IMPLIED
+	labelFontName CDATA #IMPLIED
+	labelFontSize CDATA #IMPLIED
+	labelTextColor CDATA #IMPLIED
+	boxWidth CDATA #IMPLIED
+	boxHeight CDATA #IMPLIED
+	boxStrokeColor CDATA #IMPLIED
+	boxFillColor CDATA #IMPLIED
+	lineWidth CDATA #IMPLIED
+	fontName CDATA #IMPLIED
+	fontSize CDATA #IMPLIED
+>
+<!--
+###########################################################################
+# End of Highly experimental stuff...
+###########################################################################
+-->
