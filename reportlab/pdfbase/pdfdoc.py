@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.46 2001/07/10 00:14:04 aaron_watters Exp $
-__version__=''' $Id: pdfdoc.py,v 1.46 2001/07/10 00:14:04 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.47 2001/07/10 13:44:06 aaron_watters Exp $
+__version__=''' $Id: pdfdoc.py,v 1.47 2001/07/10 13:44:06 aaron_watters Exp $ '''
 __doc__=""" 
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The 
@@ -707,7 +707,9 @@ class PDFObjectReference:
 # in Shift-JIS encoding, as these cannot be mistaken for
 # any other encoding, and we'll be able to tell if something
 # has run our PDF files through a dodgy Unicode conversion.
-PDFHeader = ("%PDF-1.3"+LINEEND+"%\223\214\213\236"+LINEEND)
+PDFHeader = (
+"%PDF-1.3"+LINEEND+
+"%\223\214\213\236 ReportLab Generated PDF document http://www.reportlab.com"+LINEEND)
 
 class PDFFile:
     ### just accumulates strings: keeps track of current offset
