@@ -423,14 +423,28 @@ class CondPageBreak(Spacer):
             return (availWidth, availHeight)
         return (0, 0)
 
-_SeqTypes = (ListType, TupleType)
+def _listWrapOn(F,availWidth,canv):
+    '''return max width, required height for a list of flowables F'''
+    W = 0
+    H = 0
+    pS = 0
+    for f in F:
+        w,h = f.wrapOn(canv,availWidth,0xfffffff)
+        W = max(W,w)
+        H = H+h
+        if f is not F[0]: H += max(f.getSpaceBefore()-pS,0) 
+        if f is not F[-1]:
+            pS = f.getSpaceAfter()
+            H += pS
+    return W, H
+
+def _makeIndexable(V):
+    if type(V) not in (ListType, TupleType): V = V is not None and [V] or []
+    return V
 
 class KeepTogether(Flowable):
     def __init__(self,flowables,maxHeight=None):
-        if type(flowables) not in _SeqTypes:
-            self._flowables = [flowables]
-        else:
-            self._flowables = flowables
+        self._flowables = _makeIndexable(flowables)
         self._maxHeight = maxHeight
 
     def __repr__(self):
@@ -442,16 +456,7 @@ class KeepTogether(Flowable):
         return "KeepTogether(%s,maxHeight=%s) # end KeepTogether" % (L,self._maxHeight)
 
     def wrap(self, aW, aH):
-        W = 0
-        H = 0
-        F = self._flowables
-        canv = self.canv
-        for f in F:
-            w,h = f.wrapOn(canv,aW,0xfffffff)
-            if f is not F[0]: h = h + f.getSpaceBefore()
-            if f is not F[-1]: h = h + f.getSpaceAfter()
-            W = max(W,w)
-            H = H+h
+        W,H = _listWrapOn(self._flowables,aW,self.canv)
         self._CPage = (H>aH) and (not self._maxHeight or H<=self._maxHeight)
         return W, 0xffffff  # force a split
 
@@ -566,3 +571,79 @@ class HRFlowable(Flowable):
         canv.setStrokeColor(self.color)
         canv.line(0, 0, self._width, self.height)
         canv.restoreState()
+
+class PTOContainer(Flowable):
+    '''PTOContainer(contentList,trailerList,headerList)
+    
+    A container for flowables decorated with trailer & header lists.
+    If the split operation would be called then the trailer and header
+    lists are injected before and after the split. This allows specialist
+    "please turn over" and "continued from previous" like behaviours.''' 
+    def __init__(self,content,trailer=None,header=None):
+        self._content = _makeIndexable(content)
+        self._trailer = _makeIndexable(trailer)
+        self._header = _makeIndexable(header)
+
+    def wrap(self,availWidth,availHeight):
+        self.width, self.height = _listWrapOn(self._content,availWidth,self.canv)
+
+    def getSpaceBefore(self):
+        return self._content[0].getSpaceBefore()
+
+    def getSpaceAfter(self):
+        return self._content[-1].getSpaceAfter()
+
+    def split(self, availWidth, availHeight):
+        T = self._trailer
+        tW, tH = _listWrapOn(T, availWidth, self.canv)
+        tSB = T[0].getSpaceBefore()
+        if (tH+tSB)>=availHeight*0.90: return []
+        canv = self.canv
+        C = self._content
+        H = pS = 0
+        for c in C:
+            w, h = c.wrapOn(canv,aW,0xfffffff)
+            if c is not C[0]: h += max(c.getSpaceBefore()-pS,0)
+            if c is not C[-1]:
+                pS = c.getSpaceAfter()
+            if H+tH+max(tSB,pS)>=availHeight-_FUZZ: break
+
+        #first retract last thing we tried
+        H -= h
+
+        #attempt a sub split on the last one we have
+        i = len(R)
+        c = C[i]
+        aH = availHeight - H - tSB - tH
+        if aH>=0.05*availHeight:
+            canv._addTrailer = 1
+            SS = c.split(availWidth,aH)
+        else:
+            SS = []
+        try:
+            del canv._addTrailer
+        except:
+            T = []  #somebody already deleted it!!!
+        if SS:
+            R1 = C[:i]+SS[0]+T
+            R2 = SS[1:]+C[i+1:]
+        elif not i:
+            return []
+        else:
+            R1 = C[:i-1]+T
+            R2 = C[i:]
+        return R1 + [PTOContainer(R2,self._trailer,self._header)]
+
+    def drawOn(self, canv, x, y, _sW=0):
+        '''we simulate being added to a frame'''
+        pS = 0
+        aW = self.width+sW
+        C = self._content
+        for c in C:
+            w, h = c.wrapOn(canv,aW,0xfffffff)
+            if c is not C[0]: h += max(c.getSpaceBefore()-pS,0)
+            y -= h
+            c.drawOn(canv,x,y,_sW=aW-w)
+            if c is not C[-1]:
+                pS = c.getSpaceAfter()
+                y -= pS

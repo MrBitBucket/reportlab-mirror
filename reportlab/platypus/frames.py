@@ -115,35 +115,34 @@ class Frame:
         y = self._y
         p = self._y1p
         s = 0
+        aW = self._getAvailableWidth()
         if not self._atTop:
             s =flowable.getSpaceBefore()
             if self._oASpace:
-                h = self._prevASpace
-                if h>s: s = 0
-                else: s = s - h
+                s = max(s-self._prevASpace,0)
         h = y - p - s
         if h>0:
             flowable.canv = canv #so they can use stringWidth etc
-            w, h = flowable.wrap(self._getAvailableWidth(), h)
+            w, h = flowable.wrap(aW, h)
             del flowable.canv
         else:
             return 0
 
-        h = h + s
-        y = y - h
+        h += s
+        y -= h
 
         if y < p-_FUZZ:
-            if not rl_config.allowTableBoundsErrors and ((h>self._aH or w>self._aW) and not trySplit):
+            if not rl_config.allowTableBoundsErrors and ((h>self._aH or w>aW) and not trySplit):
                 raise "LayoutError", "Flowable %s (%sx%s points) too large for frame (%sx%s points)." % (
-                    flowable.__class__, w,h, self._getAvailableWidth(),self._aH)
+                    flowable.__class__, w,h, aW,self._aH)
             return 0
         else:
             #now we can draw it, and update the current point.
-            flowable.drawOn(canv, self._x + self._leftExtraIndent, y, _sW=self._getAvailableWidth()-w)
+            flowable.drawOn(canv, self._x + self._leftExtraIndent, y, _sW=aW-w)
             s = flowable.getSpaceAfter()
-            y = y - s
+            y -= s
             if self._oASpace: self._prevASpace = s
-            if y<>self._y: self._atTop = 0
+            if y!=self._y: self._atTop = 0
             self._y = y
             return 1
 
