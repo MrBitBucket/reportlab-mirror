@@ -23,7 +23,12 @@ class PythonPointTestCase(unittest.TestCase):
         outDir = join(rlDir, 'test')
         pdf = join(outDir, 'pythonpoint.pdf')
         if isfile(pdf): os.remove(pdf)
+
+        cwd = os.getcwd()
+        os.chdir(join(ppDir, 'demos'))
         pythonpoint.process(xml, outDir=outDir, verbose=0)
+        os.chdir(cwd)
+
         assert os.path.exists(pdf)
         os.remove(pdf)
 

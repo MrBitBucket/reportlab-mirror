@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<!DOCTYPE presentation SYSTEM "..\pythonpoint.dtd">
+<!DOCTYPE presentation SYSTEM "../pythonpoint.dtd">
 <presentation filename="htu.pdf">
   <stylesheet module="htu" function="getParagraphStyles"/>
   <section name="Main">

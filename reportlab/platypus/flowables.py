@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.41 2003/11/09 00:54:22 andy_robinson Exp $
-__version__=''' $Id: flowables.py,v 1.41 2003/11/09 00:54:22 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.42 2003/12/02 16:20:52 andy_robinson Exp $
+__version__=''' $Id: flowables.py,v 1.42 2003/12/02 16:20:52 andy_robinson Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -32,7 +32,7 @@ from types import ListType, TupleType, StringType
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
-from reportlab.lib.colors import red
+from reportlab.lib.colors import red, gray
 from reportlab.pdfbase import pdfutils
 
 from reportlab.rl_config import defaultPageSize
@@ -74,6 +74,7 @@ class Flowable:
 
         #optional holder for trace info
         self._traceInfo = None
+        self._showBoundary = None
         
 
     def _drawOn(self,canv):
@@ -95,6 +96,10 @@ class Flowable:
         canvas.saveState()
         canvas.translate(x, y)
         self._drawOn(canvas)
+        if hasattr(self, '_showBoundary') and self._showBoundary:
+            #diagnostic tool support
+            canvas.setStrokeColor(gray)
+            canvas.rect(0,0,self.width, self.height)
         canvas.restoreState()
 
     def wrapOn(self, canv, aW, aH):

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
 <!-- edited with XMLSPY v2004 rel. 3 U (http://www.xmlspy.com) by Andy Robinson (ReportLab Europe Ltd.) -->
-<!DOCTYPE presentation SYSTEM "..\pythonpoint.dtd">
+<!DOCTYPE presentation SYSTEM "../pythonpoint.dtd">
 <presentation filename="monterey.pdf">
   <stylesheet module="modern" function="getParagraphStyles"/>
   <!--

@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/platdemos.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.5 2003/12/02 15:21:17 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.6 2003/12/02 16:20:52 andy_robinson Exp $
 """This includes some demos of platypus for use in the API proposal"""
-__version__=''' $Id: figures.py,v 1.5 2003/12/02 15:21:17 andy_robinson Exp $ '''
+__version__=''' $Id: figures.py,v 1.6 2003/12/02 16:20:52 andy_robinson Exp $ '''
 
 import os
 
@@ -172,6 +172,13 @@ class DrawingFigure(FlexFigure):
         self.canv.scale(self.scaleFactor, self.scaleFactor)
         self.drawing.drawOn(self.canv, 0, 0)
 
+
+    ####################################################################
+    #
+    #    PageCatcher plugins
+    # These let you use our PageCatcher product to add figures
+    # to other documents easily.
+    ####################################################################
 
 try:
     from rlextra.pageCatcher.pageCatcher import restoreForms, storeForms
