@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfmetrics.py,v $
+#	Revision 1.12  2000/09/27 21:56:01  andy_robinson
+#	more work on metrics and encodings for custom fonts
+#
 #	Revision 1.11  2000/09/27 19:57:48  andy_robinson
 #	Begun work on loading new AFM files
-#
+#	
 #	Revision 1.10  2000/08/16 07:44:53  rgbecker
 #	Start using _rl_accel
 #	
@@ -61,7 +64,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfmetrics.py,v 1.11 2000/09/27 19:57:48 andy_robinson Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.12 2000/09/27 21:56:01 andy_robinson Exp $ '''
 __doc__="""This contains pre-canned text metrics for the PDFgen package, and may also
 be used for any other PIDDLE back ends or packages which use the standard
 Type 1 postscript fonts.
@@ -143,45 +146,161 @@ try:
 except ImportError:
 	_stringWidth = None
 
-def parseAFMfile(filename, info={}):
-	"""Returns an array holding the widths of all characters in the font.
-	Ultra-crude parser"""
-	alllines = open(filename, 'r').readlines()
-	# get stuff between StartCharMetrics and EndCharMetrics
-	metriclines = []
-	between = 0
-	for line in alllines:
-		lline = string.lower(line)
-		i = string.find(lline,'fontName')
-		if i>=0:
-			fontName = string.strip(line[i+9:])
-			info['fontName'] = fontName
-		if string.find(lline, 'endcharmetrics') > -1:
-			between = 0
-			break
-		if between:
-			metriclines.append(line)
-		if string.find(lline, 'startcharmetrics') > -1:
-			between = 1
-			
-	# break up - very shaky assumption about array size
-	widths = [0] * 256
-	
-	for line in metriclines:
-		chunks = string.split(line, ';')
-		
-		(c, cid) = string.split(chunks[0])
-		(wx, width) = string.split(chunks[1])
-		#(n, name) = string.split(chunks[2])
-		#(b, x1, y1, x2, y2) = string.split(chunks[3])
-		widths[string.atoi(cid)] = string.atoi(width)
-	
-	# by default, any empties should get the width of a space
-	for i in range(len(widths)):
-		if widths[i] == 0:
-			widths[i] == widths[32]
+	####################################################################################
+	#
+	#  Everything below here is concerned with parsing AFM files and adding metrics
+	#  for new fonts at runtime.
+	#
+	####################################################################################
 
-	return widths
+WinAnsiNames = [None, None, None, None, None, None, None, None, None, None, None, None,
+				None, None, None, None, None, None, None, None, None, None, None, None,
+				None, None, None, None, None, None, None, None, 'space', 'exclam',
+				'quotedbl', 'numbersign', 'dollar', 'percent', 'ampersand',
+				'quotesingle', 'parenleft', 'parenright', 'asterisk', 'plus', 'comma',
+				'hyphen', 'period', 'slash', 'zero', 'one', 'two', 'three', 'four',
+				'five', 'six', 'seven', 'eight', 'nine', 'colon', 'semicolon', 'less',
+				'equal', 'greater', 'question', 'at', 'A', 'B', 'C', 'D', 'E', 'F',
+				'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+				'U', 'V', 'W', 'X', 'Y', 'Z', 'bracketleft', 'backslash', 'bracketright',
+				'asciicircum', 'underscore', 'grave', 'a', 'b', 'c', 'd', 'e', 'f',
+				'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+				'u', 'v', 'w', 'x', 'y', 'z', 'braceleft', 'bar', 'braceright',
+				'asciitilde', 'bullet', 'Euro', 'bullet', 'quotesinglbase', 'florin',
+				'quotedblbase', 'ellipsis', 'dagger', 'daggerdbl', 'circumflex',
+				'perthousand', 'Scaron', 'guilsinglleft', 'OE', 'bullet', 'Zcaron',
+				'bullet', 'bullet', 'quoteleft', 'quoteright', 'quotedblleft',
+				'quotedblright', 'bullet', 'endash', 'emdash', 'tilde', 'trademark',
+				'scaron', 'guilsinglright', 'oe', 'bullet', 'zcaron', 'Ydieresis',
+				'space', 'exclamdown', 'cent', 'sterling', 'currency', 'yen', 'brokenbar',
+				'section', 'dieresis', 'copyright', 'ordfeminine', 'guillemotleft',
+				'logicalnot', 'hyphen', 'registered', 'macron', 'degree', 'plusminus',
+				'twosuperior', 'threesuperior', 'acute', 'mu', 'paragraph', 'periodcentered',
+				'cedilla', 'onesuperior', 'ordmasculine', 'guillemotright', 'onequarter',
+				'onehalf', 'threequarters', 'questiondown', 'Agrave', 'Aacute',
+				'Acircumflex', 'Atilde', 'Adieresis', 'Aring', 'AE', 'Ccedilla',
+				'Egrave', 'Eacute', 'Ecircumflex', 'Edieresis', 'Igrave', 'Iacute',
+				'Icircumflex', 'Idieresis', 'Eth', 'Ntilde', 'Ograve', 'Oacute',
+				'Ocircumflex', 'Otilde', 'Odieresis', 'multiply', 'Oslash', 'Ugrave',
+				'Uacute', 'Ucircumflex', 'Udieresis', 'Yacute', 'Thorn', 'germandbls',
+				'agrave', 'aacute', 'acircumflex', 'atilde', 'adieresis', 'aring', 'ae',
+				'ccedilla', 'egrave', 'eacute', 'ecircumflex', 'edieresis', 'igrave',
+				'iacute', 'icircumflex', 'idieresis', 'eth', 'ntilde', 'ograve', 'oacute',
+				'ocircumflex', 'otilde', 'odieresis', 'divide', 'oslash', 'ugrave', 'uacute',
+				'ucircumflex', 'udieresis', 'yacute', 'thorn', 'ydieresis']
+
+MacRomanNames = [None, None, None, None, None, None, None, None, None, None, None, None,
+				 None, None, None, None, None, None, None, None, None, None, None, None,
+				 None, None, None, None, None, None, None, None, 'space', 'exclam',
+				 'quotedbl', 'numbersign', 'dollar', 'percent', 'ampersand',
+				 'quotesingle', 'parenleft', 'parenright', 'asterisk', 'plus', 'comma',
+				 'hyphen', 'period', 'slash', 'zero', 'one', 'two', 'three', 'four',
+				 'five', 'six', 'seven', 'eight', 'nine', 'colon', 'semicolon', 'less',
+				 'equal', 'greater', 'question', 'at', 'A', 'B', 'C', 'D', 'E', 'F',
+				 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+				 'U', 'V', 'W', 'X', 'Y', 'Z', 'bracketleft', 'backslash', 'bracketright',
+				 'asciicircum', 'underscore', 'grave', 'a', 'b', 'c', 'd', 'e', 'f',
+				 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+				 'u', 'v', 'w', 'x', 'y', 'z', 'braceleft', 'bar', 'braceright',
+				 'asciitilde', None, 'Adieresis', 'Aring', 'Ccedilla', 'Eacute',
+				 'Ntilde', 'Odieresis', 'Udieresis', 'aacute', 'agrave', 'acircumflex',
+				 'adieresis', 'atilde', 'aring', 'ccedilla', 'eacute', 'egrave',
+				 'ecircumflex', 'edieresis', 'iacute', 'igrave', 'icircumflex',
+				 'idieresis', 'ntilde', 'oacute', 'ograve', 'ocircumflex', 'odieresis',
+				 'otilde', 'uacute', 'ugrave', 'ucircumflex', 'udieresis', 'dagger',
+				 'degree', 'cent', 'sterling', 'section', 'bullet', 'paragraph',
+				 'germandbls', 'registered', 'copyright', 'trademark', 'acute',
+				 'dieresis', None, 'AE', 'Oslash', None, 'plusminus', None, None, 'yen',
+				 'mu', None, None, None, None, None, 'ordfeminine', 'ordmasculine', None,
+				 'ae', 'oslash', 'questiondown', 'exclamdown', 'logicalnot', None, 'florin',
+				 None, None, 'guillemotleft', 'guillemotright', 'ellipsis', 'space', 'Agrave',
+				 'Atilde', 'Otilde', 'OE', 'oe', 'endash', 'emdash', 'quotedblleft',
+				 'quotedblright', 'quoteleft', 'quoteright', 'divide', None, 'ydieresis',
+				 'Ydieresis', 'fraction', 'currency', 'guilsinglleft', 'guilsinglright',
+				 'fi', 'fl', 'daggerdbl', 'periodcentered', 'quotesinglbase',
+				 'quotedblbase', 'perthousand', 'Acircumflex', 'Ecircumflex', 'Aacute',
+				 'Edieresis', 'Egrave', 'Iacute', 'Icircumflex', 'Idieresis', 'Igrave',
+				 'Oacute', 'Ocircumflex', None, 'Ograve', 'Uacute', 'Ucircumflex',
+				 'Ugrave', 'dotlessi', 'circumflex', 'tilde', 'macron', 'breve',
+				 'dotaccent', 'ring', 'cedilla', 'hungarumlaut', 'ogonek', 'caron']
+
+
+class FontMetrics:
+	"""This is an object which parses AFM files and holds all the
+	data they contain."""
+	def __init__(self, afmFileName):
+		self.fontName = None
+		self.widthsByPosition = []
+		self.parseAFMFile(afmFileName)
+
+	def parseAFMFile(self, filename):
+		"""Returns an array holding the widths of all characters in the font.
+		Ultra-crude parser"""
+		alllines = open(filename, 'r').readlines()
+		# get stuff between StartCharMetrics and EndCharMetrics
+		metriclines = []
+		between = 0
+		for line in alllines:
+			lline = string.lower(line)
+			i = string.find(lline,'fontName')
+			if i>=0:
+				fontName = string.strip(line[i+9:])
+				self.fontName = fontName
+			if string.find(lline, 'endcharmetrics') > -1:
+				between = 0
+				break
+			if between:
+				metriclines.append(line)
+			if string.find(lline, 'startcharmetrics') > -1:
+				between = 1
+				
+		# break up - very shaky assumption about array size
+		widths = [0] * 256
+		widthsByName = {}
+		for line in metriclines:
+			chunks = string.split(line, ';')
+			
+			(c, cid) = string.split(chunks[0])
+			(wx, width) = string.split(chunks[1])
+			(n, name) = string.split(chunks[2])
+			#(b, x1, y1, x2, y2) = string.split(chunks[3])
+			widths[string.atoi(cid)] = string.atoi(width)
+			widthsByName[name] = string.atoi(width)
+		
+		# by default, any empties should get the width of a space
+		for i in range(len(widths)):
+			if widths[i] == 0:
+				widths[i] == widths[32]
+
+		self.widthsByPosition = widths
+		self.widthsByName = widthsByName
+
+	def getWinAnsiWidths(self):
+		#derive a WinAnsi encoding vector
+		winAnsiWidths = [0] * 256
+		for i in range(255):
+			name = WinAnsiNames[i]
+			try:
+				width = self.widthsByName[name]
+			except:
+				width = 0
+			winAnsiWidths[i] = width
+		return winAnsiWidths
+
+	def getMacRomanWidths(self):
+		#derive a MacRoman encoding vector
+		MacRomanWidths = [0] * 256
+		for i in range(255):
+			name = MacRomanNames[i]
+			try:
+				width = self.widthsByName[name]
+			except:
+				width = 0
+			MacRomanWidths[i] = width
+		return MacRomanWidths
+	
+		
+		
 
 
 if _stringWidth:
@@ -190,12 +309,16 @@ if _stringWidth:
 			ad = ascent_descent[f]
 			_rl_accel.setFontInfo(f,e,ad[0],ad[1],W)
 
-	def _loadfont(fontName, filename, encoding):
+	def _loadfont(fontName, filename):
 		infoOnce('cache loading %s' % filename)
 		assert os.path.exists(filename)
-		W = parseAFMfile(filename)
-		ad = (0,0)	# TODO don't have this yet?
-		_rl_accel.setFontInfo(fontName,encoding,ad[0],ad[1],W)
+##		W = parseAFMfile(filename)
+##		ad = (0,0)	# TODO don't have this yet?
+##		_rl_accel.setFontInfo(fontName,encoding,ad[0],ad[1],W)
+		fm = FontMetrics(filename)
+		_rl_accel.setFontInfo(string.lower(fontName), 'WinAnsiEncoding', ad[0], ad[1], fm.getWinAnsiWidths())
+		_rl_accel.setFontInfo(string.lower(fontName), 'MacRomanEncoding', ad[0], ad[1], fm.getMacRomanWidths())
+		
 
 	def _SWRecover(text, font, fontSize, encoding):
 		#infoOnce('_SWRecover('...',%s,%s,%s')%(font,str(fontSize),encoding))
@@ -219,11 +342,13 @@ else:
 			global widths
 			self.__widtharrays = widths
 			
-		def loadFont(self, fontName, filename, encoding):
+		def loadFont(self, fontName, filename):
 			infoOnce('Info: cache loading%s' % filename)
 			assert os.path.exists(filename)
-			widths = parseAFMfile(filename)
-			self.__widtharrays[encoding][fontName] = widths
+			fm = FontMetrics(filename)
+			self.__widtharrays['WinAnsiEncoding'][string.lower(fontName)] = fm.getWinAnsiWidths()
+			self.__widtharrays['MacRomanEncoding'][string.lower(fontName)] = fm.getMacRomanWidths()
+			
 
 		def getfont(self, fontName, encoding):
 			try:
