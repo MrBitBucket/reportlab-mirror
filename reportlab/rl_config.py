@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.35 2003/02/02 08:37:33 andy_robinson Exp $
-__version__=''' $Id: rl_config.py,v 1.35 2003/02/02 08:37:33 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.36 2003/07/02 18:55:50 rgbecker Exp $
+__version__=''' $Id: rl_config.py,v 1.36 2003/07/02 18:55:50 rgbecker Exp $ '''
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -68,6 +68,7 @@ def _startUp():
                 'shapeChecking', 'defaultEncoding',
                 'pageCompression', 'defaultPageSize', 'defaultImageCaching', 'PIL_WARNINGS',
                 'ZLIB_WARNINGS', 'warnOnMissingFontGlyphs', 'verbose', 'emptyTableAction',
+                'invariant',
                 )
 
     if _SAVED=={}:
