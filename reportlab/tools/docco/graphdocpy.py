@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.9 2001/10/05 00:23:26 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.10 2001/10/12 14:59:29 rgbecker Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -1025,10 +1025,10 @@ def main():
 
     #if doing the usual, put a copy in docs
     if builder.outPath == 'reportlab.graphics.pdf':
-        import shutil
-        shutil.copyfile('reportlab.graphics.pdf',
-                        '../../docs/graphics_reference.pdf')
-        print 'copied to reportlab/docs/graphics_reference.pdf'
+        import shutil, reportlab
+        dst = os.path.join(os.path.dirname(reportlab.__file__),'docs','graphics_reference.pdf')
+        shutil.copyfile('reportlab.graphics.pdf', dst)
+        print 'copied to '+dst
 
 def makeSuite():
     "standard test harness support - run self as separate process"
