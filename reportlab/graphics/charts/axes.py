@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.44 2001/10/04 13:24:57 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.45 2001/10/11 12:48:12 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -894,8 +894,11 @@ class NormalDateXValueAxis(XValueAxis):
 				if self.forceEndDate and self.niceMonth and j:
 					if (axisLength/(ticks[-1]-ticks[0]))*(ticks[-1]-ticks[-2])<=w:
 						del ticks[-2], labels[-2]
-				if labels[0]==labels[1]:
-					del ticks[1], labels[1]
+				try:
+					if labels[0]==labels[1]:
+						del ticks[1], labels[1]
+				except IndexError:
+					pass
 
 				return ticks, labels
 
