@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPDF.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.22 2003/06/12 18:01:43 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.23 2003/07/01 11:56:59 johnprecedo Exp $
 # renderPDF - draws Drawings onto a canvas
 """Usage:
     import renderpdf
@@ -9,7 +9,7 @@
 Execute the script to see some test drawings.
 changed
 """
-__version__=''' $Id: renderPDF.py,v 1.22 2003/06/12 18:01:43 rgbecker Exp $ '''
+__version__=''' $Id: renderPDF.py,v 1.23 2003/07/01 11:56:59 johnprecedo Exp $ '''
 
 from reportlab.graphics.shapes import *
 from reportlab.pdfgen.canvas import Canvas
@@ -283,6 +283,13 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config.showBoundary, autoSize=1):
         draw(d, c, 80, y, showBoundary=showBoundary)
 
     c.save()
+    if sys.platform=='mac' and not hasattr(fn, "write"):
+        try:
+            import macfs, macostools
+            macfs.FSSpec(fn).SetCreatorType("CARO", "PDF ")
+            macostools.touched(fn)
+        except:
+            pass
 
 
 def drawToString(d, msg="", showBoundary=rl_config.showBoundary,autoSize=1):
