@@ -13,13 +13,8 @@ class ImporterTestCase(unittest.TestCase):
 
     def setUp(self):
         from time import time
-        try:
-            from tempfile import mkdtemp
-            self._tempdir = mkdtemp()
-        except:
-            from tempfile import gettempdir
-            self._tempdir = os.path.join(gettempdir(),'tmp_%d' % time())
-            os.mkdir(self._tempdir,0700)
+        from reportlab.lib.utils import get_rl_tempdir
+        self._tempdir = get_rl_tempdir('reportlab_test','tmp_%d' % time())
         _testmodulename = os.path.join(self._tempdir,'test_module_%d.py' % time())
         f = open(_testmodulename,'w')
         f.write('__all__=[]\n')

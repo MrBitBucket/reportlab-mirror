@@ -1,12 +1,12 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_charts_textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_charts_textlabels.py,v 1.5 2003/04/22 16:12:59 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_charts_textlabels.py,v 1.6 2004/03/26 11:34:11 rgbecker Exp $
 """
 Tests for the text Label class.
 """
 
-import os, sys, copy, tempfile
+import os, sys, copy
 from os.path import join, basename, splitext
 
 from reportlab.test import unittest
@@ -265,9 +265,8 @@ textAnchor attribute.""", bt))
 
         story.append(PageBreak())
 
-        pdfPath = 'test_charts_textlabels.pdf'
-        tempfile.tempdir = os.curdir
-        path = join(tempfile.tempdir, pdfPath)
+        from reportlab.lib.utils import get_rl_tempdir
+        path = join(get_rl_tempdir('reportlab_test'),'test_charts_textlabels.pdf')
         doc = MyDocTemplate(path)
         doc.multiBuild(story)
 

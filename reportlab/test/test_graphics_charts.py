@@ -1,12 +1,12 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_graphics_charts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_graphics_charts.py,v 1.14 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_graphics_charts.py,v 1.15 2004/03/26 11:34:11 rgbecker Exp $
 """
 Tests for chart class.
 """
 
-import os, sys, copy, tempfile
+import os, sys, copy
 from os.path import join, basename, splitext
 
 from reportlab.test import unittest
@@ -183,17 +183,14 @@ class ChartTestCase(unittest.TestCase):
         if self.story == []:
             self.story.append(Paragraph('Tests for chart classes', h1))
 
-
     def tearDown(self):
         "Hook method for deconstructing the test fixture after testing it."
 
         if FINISHED:
-            pdfPath = 'test_graphics_charts.pdf'
-            tempfile.tempdir = os.curdir
-            path = join(tempfile.tempdir, pdfPath)
+            from reportlab.lib.utils import get_rl_tempdir
+            path = join(get_rl_tempdir('reportlab_test'),'test_graphics_charts.pdf')
             doc = MyDocTemplate(path)
             doc.build(self.story)
-
 
     def test0(self):
         "Test bar charts."

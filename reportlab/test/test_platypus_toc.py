@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_toc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_toc.py,v 1.9 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_toc.py,v 1.10 2004/03/26 11:34:11 rgbecker Exp $
 """Tests for the Platypus TableOfContents class.
 
 Currently there is only one such test. Most such tests, like this
@@ -10,7 +10,7 @@ in order to find out if it is 'correct'.
 """
 
 
-import sys, os, tempfile
+import sys, os
 from os.path import join, basename, splitext
 from math import sqrt
 
@@ -169,8 +169,8 @@ class TocTestCase(unittest.TestCase):
             para = Paragraph(txt, makeBodyStyle())
             story.append(para)
 
-        tempfile.tempdir = os.curdir
-        path = join(tempfile.tempdir, 'test_platypus_toc.pdf')
+        from reportlab.lib.utils import get_rl_tempdir
+        path = join(get_rl_tempdir('reportlab_test'), 'test_platypus_toc.pdf')
         doc = MyDocTemplate(path)
         doc.multiBuild(story)
 
