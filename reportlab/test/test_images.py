@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/test_images.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_images.py,v 1.2 2003/09/08 16:09:51 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_images.py,v 1.3 2003/09/11 22:00:15 andy_robinson Exp $
 __version__=''' $Id'''
 __doc__="""Tests to do with image handling.
 
@@ -12,6 +12,24 @@ import os,md5
 from reportlab.test import unittest
 from reportlab.test.utils import makeSuiteForClasses
 from reportlab.lib.utils import ImageReader
+
+
+"""To avoid depending on external stuff, I made a small 5x5 image and
+attach its 'file contents' here in several formats.
+
+The image looks like this, with K=black, R=red, G=green, B=blue, W=white.
+
+    K R G B W
+    K R G B W
+    K R G B W
+    K R G B W
+    K R G B W
+
+"""
+
+sampleRAW = '\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\xff\xff\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\xff\xff\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\xff\xff\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\xff\xff\xff\x00\x00\x00\xff\x00\x00\x00\xff\x00\x00\x00\xff\xff\xff\xff'
+samplePNG = '\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x05\x00\x00\x00\x05\x08\x02\x00\x00\x00\x02\r\xb1\xb2\x00\x00\x00:IDATx\x9cb```\xf8\x0f\xc3\xff\xff\xff\x07\x00\x00\x00\xff\xffbb@\x05\x00\x00\x00\x00\xff\xffB\xe7\x03\x00\x00\x00\xff\xffB\xe7\x03\x00\x00\x00\xff\xffB\xe7\x03\x00\x00\x00\xff\xff\x03\x00\x9e\x01\x06\x03\x03\xc4A\xb4\x00\x00\x00\x00IEND\xaeB`\x82'
+
 
 class ReaderTestCase(unittest.TestCase):
     "Simplest tests to import images, work under Jython or PIL"
