@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.70 2004/01/08 23:45:14 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.71 2004/01/13 11:20:45 rgbecker Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.70 2004/01/08 23:45:14 andy_robinson Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.71 2004/01/13 11:20:45 rgbecker Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -386,18 +386,22 @@ class BaseDocTemplate:
         else:
             self._emptyPages = 0
         if self._emptyPages >= self._emptyPagesAllowed:
-            raise LayoutError("More than %d pages generated without content - halting layout.  Likely that a flowable is too large for any frame." % self._emptyPagesAllowed)
-
-
-        if self._onProgress:
-            self._onProgress('PAGE', self.canv.getPageNumber())
-        self.pageTemplate.afterDrawPage(self.canv, self)
-        self.pageTemplate.onPageEnd(self.canv, self)
-        self.afterPage()
-        self.canv.showPage()
-        if hasattr(self,'_nextPageTemplateIndex'):
-            self.pageTemplate = self.pageTemplates[self._nextPageTemplateIndex]
-            del self._nextPageTemplateIndex
+            if 1:
+                raise LayoutError("More than %d pages generated without content - halting layout.  Likely that a flowable is too large for any frame." % self._emptyPagesAllowed)
+            else:
+                pass    #attempt to restore to good state
+        else:
+            if self._onProgress:
+                self._onProgress('PAGE', self.canv.getPageNumber())
+            self.pageTemplate.afterDrawPage(self.canv, self)
+            self.pageTemplate.onPageEnd(self.canv, self)
+            self.afterPage()
+            self.canv.showPage()
+            if hasattr(self,'_nextPageTemplateIndex'):
+                self.pageTemplate = self.pageTemplates[self._nextPageTemplateIndex]
+                del self._nextPageTemplateIndex
+            if self._emptyPages==0:
+                pass    #store good state here
         self._hanging.append(PageBegin)
 
     def handle_pageBreak(self):
@@ -560,23 +564,14 @@ class BaseDocTemplate:
                         self._curPageFlowableCount = self._curPageFlowableCount + 1
                         self.afterFlowable(S[0])
                     else:
-                        print 'n = %d' % n
-                        raise "LayoutError", "splitting error on page %d in\n%s" % (self.page,f.identity(30))
+                        raise LayoutError("Splitting error(n==%d) on page %d in\n%s" % (n,self.page,f.identity(30)))
                     del S[0]
                     for f in xrange(n-1):
                         flowables.insert(f,S[f])    # put split flowables back on the list
                 else:
-                    # this must be cleared when they are finally drawn!
-##                  if hasattr(f,'postponed'):
                     if hasattr(f,'_postponed'):
-                        message = "Flowable %s too large on page %d" % (f.identity(30), self.page)
-                        #print message
-                        #show us, it might be handy
-                        #HACK = it seems within tables we sometimes
-                        #get an empty paragraph that won't fit and this
-                        #causes it to fall over.  FIXME FIXME FIXME
-                        #raise "LayoutError", message
-##                    f.postponed = 1
+                        raise LayoutError("Flowable %s too large on page %d" % (f.identity(30), self.page))
+                    # this ought to be cleared when they are finally drawn!
                     f._postponed = 1
                     flowables.insert(0,f)           # put the flowable back
                     self.handle_frameEnd()
@@ -708,11 +703,8 @@ class BaseDocTemplate:
             #self.notify('debug',None)
 
             #clean up so multi-build does not go wrong - the frame
-            #packer might have tacked an attribute onto some
-            #paragraphs
+            #packer might have tacked an attribute onto some flowables
             for elem in story:
-##              if hasattr(elem, 'postponed'):
-##                  del elem.postponed
                 if hasattr(elem, '_postponed'):
                     del elem._postponed
 
