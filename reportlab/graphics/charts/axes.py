@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.67 2003/06/05 16:33:05 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.68 2003/06/09 09:51:47 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.67 2003/06/05 16:33:05 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.68 2003/06/09 09:51:47 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -982,7 +982,7 @@ class NormalDateXValueAxis(XValueAxis):
             steps, labels = self._xAxisTicker(xEOM)
         else:
             steps, labels = self._xAxisTicker(xVals)
-        return setps, labels
+        return steps, labels
 
     def configure(self, data):
         self._convertXV(data)
