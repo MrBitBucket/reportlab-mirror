@@ -2,13 +2,13 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.19 2001/06/27 11:25:22 rgbecker Exp $
-__version__=''' $Id: colors.py,v 1.19 2001/06/27 11:25:22 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.20 2001/07/05 14:03:45 rgbecker Exp $
+__version__=''' $Id: colors.py,v 1.20 2001/07/05 14:03:45 rgbecker Exp $ '''
 
 import string
 import math
 from types import StringType, ListType, TupleType
-from utils import fp_str
+from reportlab.lib.utils import fp_str
 
 class Color:
 	"""This class is used to represent color.  Components red, green, blue
