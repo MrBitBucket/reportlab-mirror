@@ -16,7 +16,7 @@ showBoundary =              0                       # turns on and off boundary 
 emptyTableAction=           'error'                 # one of 'error', 'indicate', 'ignore'
 invariant=                  0                       #produces repeatable,identical PDFs with same timestamp info (for regression testing)
 eps_preview_transparent=    None                    #set to white etc
-overlapAttachedSpace=       None                    #if set non false then adajacent flowable space after
+overlapAttachedSpace=       1                       #if set non false then adajacent flowable space after
                                                     #and space before are merged (max space is used).
 _FUZZ=                      1e-6                    #fuzz for layout arithmetic
 
@@ -67,7 +67,7 @@ CMapSearchPath = ('/usr/lib/Acrobat6/Resource/CMap',
 
 #### Normally don't need to edit below here ####
 try:
-    execfile('local_rl_config.py')
+    from local_rl_config import *
 except:
     pass
 
