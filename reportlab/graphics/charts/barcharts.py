@@ -1,14 +1,15 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.3 2001/04/09 16:25:07 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.4 2001/04/09 16:39:07 dinu_gherman Exp $
 """
 This modules defines a variety of Bar Chart components.
 
-The basic flavors are Side-by-side, stacked and 100% bar charts,
-available in horizontal and vertical versions.
+The basic flavors are Side-by-side, available in horizontal and
+vertical versions.
+
+Stacked and percentile bar charts to follow...
 """
-#chartparts - candidate components for a chart library.
 
 import string
 from types import FunctionType
@@ -16,7 +17,8 @@ from types import FunctionType
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib import colors 
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
-from reportlab.graphics.shapes import *
+##from reportlab.graphics.shapes import *
+from reportlab.graphics.shapes import Line, Rect, Group
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.axes import YCategoryAxis, XValueAxis
@@ -277,13 +279,7 @@ class VerticalBarChart(Widget):
                     sign = lambda v:[-1, 1][v>=0] # Where the heck is this function??
                     y0 = y + height + sign(height) * self.barLabelNudge
                     x0 = x + 0.5*width
-                    label.boxAnchor = 'c' # saves a lot of correcting code like this:...
-##                    if label.boxAnchor in ('w', 'sw', 'nw'):
-##                        x0 = x0 - 0.5*labelWidth
-##                    elif label.boxAnchor in ('e', 'se', 'ne'):
-##                        x0 = x0 + 0.5*labelWidth
-##                    elif label.boxAnchor == 'c':
-##                        pass
+                    label.boxAnchor = 'c' # might need fixing one day...
                     label.setOrigin(x0, y0)
                     label.setText(labelText)
 
@@ -550,7 +546,7 @@ class HorizontalBarChart(Widget):
                     sign = lambda v:[-1, 1][v>=0] # Where the heck is this function??
                     x0 = x + width + sign(width) * self.barLabelNudge
                     y0 = y + 0.5*height
-                    label.boxAnchor = 'c'
+                    label.boxAnchor = 'c' # might need fixing one day...
                     label.setOrigin(x0, y0)
                     label.setText(labelText)
 
@@ -568,10 +564,8 @@ class HorizontalBarChart(Widget):
         yAxisCrossesAt = self.valueAxis.scale(0)            
         if ((yAxisCrossesAt > self.x + self.width) or (yAxisCrossesAt < self.x)):
             x, y, h = self.x, self.y, self.height
-##            self.categoryAxis.setPosition(self.x, self.y, self.height)
         else:
             x, y, h = yAxisCrossesAt, self.y, self.height
-##            self.categoryAxis.setPosition(yAxisCrossesAt, self.y, self.height)
 
         self.categoryAxis.setPosition(x, y, h)
         self.categoryAxis.configure(self.data)
