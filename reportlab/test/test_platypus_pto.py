@@ -37,17 +37,32 @@ def _breakingTestCase(self):
         story.append(FrameBreak())
 
     styleSheet = getSampleStyleSheet()
-    h1 = styleSheet['Heading1']
-    h1.pageBreakBefore = 0
-    h1.keepWithNext = 0
+    H1 = styleSheet['Heading1']
+    H1.pageBreakBefore = 0
+    H1.keepWithNext = 0
 
     bt = styleSheet['BodyText']
     pto = ParagraphStyle('pto',parent=bt)
     pto.alignment = TA_RIGHT
     pto.fontSize -= 1
-    def ptoblob(blurb,content,trailer=None,header=None, story=story, h1=h1):
+    def ColorParagraph(c,text,style):
+        return Paragraph('<para color=%s>%s</para>' % (c,text),style)
+
+    def ptoblob(blurb,content,trailer=None,header=None, story=story, H1=H1):
         if type(content) not in (type([]),type(())): content = [content]
-        story.append(PTOContainer([Paragraph(blurb,h1)]+list(content),trailer,header))
+        story.append(PTOContainer([Paragraph(blurb,H1)]+list(content),trailer,header))
+
+    text2 ='''We have already seen that the natural general principle that will
+subsume this case cannot be arbitrary in the requirement that branching
+is not tolerated within the dominance scope of a complex symbol.
+Notice, incidentally, that the speaker-hearer's linguistic intuition is
+to be regarded as the strong generative capacity of the theory.  A
+consequence of the approach just outlined is that the descriptive power
+of the base component does not affect the structure of the levels of
+acceptability from fairly high (e.g. (99a)) to virtual gibberish (e.g.
+(98d)).  By combining adjunctions and certain deformations, a
+descriptively adequate grammar cannot be arbitrary in the strong
+generative capacity of the theory.'''
     text1='''
 On our assumptions, a descriptively adequate grammar delimits the strong
 generative capacity of the theory.  For one thing, the fundamental error
@@ -88,8 +103,10 @@ of parasitic gaps in domains relatively
 inaccessible to ordinary extraction
 does not readily tolerate the strong
 generative capacity of the theory.'''
-    t0 = [Paragraph('Please turn over', pto )]
-    h0 = [Paragraph('continued from previous page', pto )]
+    t0 = [ColorParagraph('blue','Please turn over', pto )]
+    h0 = [ColorParagraph('blue','continued from previous page', pto )]
+    t1 = [ColorParagraph('red','Please turn over(inner)', pto )]
+    h1 = [ColorParagraph('red','continued from previous page(inner)', pto )]
     ptoblob('First Try at a PTO',[Paragraph(text0,bt)],t0,h0)
     fbreak()
     c1 = Table([('alignment', 'align\012alignment'),
@@ -115,6 +132,8 @@ generative capacity of the theory.'''
     ptoblob('PTO with a table inside',c1,t0,h0)
     fbreak()
     ptoblob('A long PTO',[Paragraph(text0+' '+text1,bt)],t0,h0)
+    fbreak()
+    ptoblob('2 PTO (inner split)',[ColorParagraph('pink',text0,bt),PTOContainer([ColorParagraph(black,'Inner Starts',H1),ColorParagraph('yellow',text2,bt),ColorParagraph('black','Inner Ends',H1)],t1,h1),ColorParagraph('magenta',text1,bt)],t0,h0)
 
     pageTemplate = PageTemplate('normal', [Frame(2.5*cm, 15.5*cm, 6*cm, 10*cm, id='F1'),
                             Frame(11.5*cm, 15.5*cm, 6*cm, 10*cm, id='F2'),

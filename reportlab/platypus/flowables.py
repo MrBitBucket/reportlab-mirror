@@ -388,10 +388,7 @@ class Spacer(Flowable):
         self.height = height
 
     def __repr__(self):
-        return "Spacer(%s, %s)" % (self.width, self.height)
-
-    def wrap(self, availWidth, availHeight):
-        return (self.width, self.height)
+        return "%s(%s, %s)" % (self.__class__.__name__,self.width, self.height)
 
     def draw(self):
         pass
@@ -423,17 +420,23 @@ class CondPageBreak(Spacer):
             return (availWidth, availHeight)
         return (0, 0)
 
-def _listWrapOn(F,availWidth,canv):
+def _listWrapOn(F,availWidth,canv,mergeSpace=1):
     '''return max width, required height for a list of flowables F'''
     W = 0
     H = 0
     pS = 0
-    for f in F:
+    n = len(F)
+    nm1 = n - 1
+    for i in xrange(n):
+        f = F[i]
         w,h = f.wrapOn(canv,availWidth,0xfffffff)
         W = max(W,w)
         H = H+h
-        if f is not F[0]: H += max(f.getSpaceBefore()-pS,0) 
-        if f is not F[-1]:
+        if i:
+            h = f.getSpaceBefore()
+            if mergeSpace: H += max(h-pS,0) 
+            else: H += h
+        if i!=nm1:
             pS = f.getSpaceAfter()
             H += pS
     return W, H
@@ -572,6 +575,11 @@ class HRFlowable(Flowable):
         canv.line(0, 0, self._width, self.height)
         canv.restoreState()
 
+class _PTOInfo:
+    def __init__(self,trailer,header):
+        self.trailer = _makeIndexable(trailer)
+        self.header = _makeIndexable(header)
+
 class PTOContainer(Flowable):
     '''PTOContainer(contentList,trailerList,headerList)
     
@@ -580,9 +588,14 @@ class PTOContainer(Flowable):
     lists are injected before and after the split. This allows specialist
     "please turn over" and "continued from previous" like behaviours.''' 
     def __init__(self,content,trailer=None,header=None):
-        self._content = _makeIndexable(content)
-        self._trailer = _makeIndexable(trailer)
-        self._header = _makeIndexable(header)
+        I = _PTOInfo(trailer,header)
+        self._content = C = []
+        for _ in _makeIndexable(content):
+            if isinstance(_,PTOContainer):
+                C.extend(_._content)
+            else:
+                C.append(_)
+                if not hasattr(_,'_ptoinfo'): _._ptoinfo = I
 
     def wrap(self,availWidth,availHeight):
         self.width, self.height = _listWrapOn(self._content,availWidth,self.canv)
@@ -595,16 +608,24 @@ class PTOContainer(Flowable):
         return self._content[-1].getSpaceAfter()
 
     def split(self, availWidth, availHeight):
-        T = self._trailer
-        tW, tH = _listWrapOn(T, availWidth, self.canv)
-        tSB = T[0].getSpaceBefore()
-        if (tH+tSB)>=availHeight*0.90: return []
         canv = self.canv
         C = self._content
-        i = H = pS = 0
-        for c in C:
+        x = i = H = pS = 0
+        n = len(C)
+        I2W = {}
+        for x in xrange(n):
+            c = C[x]
+            I = c._ptoinfo
+            if I not in I2W:
+                T = I.trailer
+                Hdr = I.header
+                tW, tH = _listWrapOn(T, availWidth, self.canv)
+                tSB = T[0].getSpaceBefore()
+                I2W[I] = T,tW,tH,tSB
+            else:
+                T,tW,tH,tSB = I2W[I]
             _, h = c.wrapOn(canv,availWidth,0xfffffff)
-            if c is not C[0]: h += max(c.getSpaceBefore()-pS,0)
+            if x: h += max(c.getSpaceBefore()-pS,0)
             pS = c.getSpaceAfter()
             H += h+pS
             if H+tH+max(tSB,pS)>=availHeight-_FUZZ: break
@@ -616,27 +637,22 @@ class PTOContainer(Flowable):
         #attempt a sub split on the last one we have
         aH = (availHeight - H - max(pS,tSB) - tH)*0.99
         if aH>=0.05*availHeight:
-            canv._addTrailer = 1
-            SS = c.split(availWidth,aH)
+            SS = c.splitOn(canv,availWidth,aH)
         else:
             SS = []
-        try:
-            del canv._addTrailer
-            Hdr = self._header
-        except:
-            T = [] #somebody already deleted it!!!
-            Hdr = []
+        if SS:
+            from doctemplate import  FrameBreak
+            F = [FrameBreak()]
 
         if SS:
-            from doctemplate import FrameBreak
-            R1 = C[:i] + SS[:1] + T + [FrameBreak()]
+            R1 = C[:i] + SS[:1] + T + F
             R2 = Hdr + SS[1:]+C[i+1:]
         elif not i:
             return []
         else:
             R1 = C[:i-1]+T
             R2 = Hdr + C[i:]
-        return R1 + [PTOContainer(R2,deepcopy(self._trailer),deepcopy(self._header))]
+        return R1 + [PTOContainer(R2,deepcopy(I.trailer),deepcopy(I.header))]
 
     def drawOn(self, canv, x, y, _sW=0):
         '''we simulate being added to a frame'''
