@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.15  2000/04/25 20:19:07  aaron_watters
+#	added support for closed outline entries
+#
 #	Revision 1.14  2000/04/18 19:50:30  aaron_watters
 #	Minor support for inPage/inForm api elimination in canvas
-#
+#	
 #	Revision 1.13  2000/04/15 15:00:09  aaron_watters
 #	added support for addOutlineEntry0 api
 #	
@@ -65,7 +68,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.14 2000/04/18 19:50:30 aaron_watters Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.15 2000/04/25 20:19:07 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -589,7 +592,8 @@ class PDFOutline(PDFObject):
         self.destinationstotitles = {}
         self.levelstack = []
         self.buildtree = []
-    def addOutlineEntry(self, destinationname, level=0, title=None):
+        self.closedict = {} # dictionary of "closed" destinations in the outline
+    def addOutlineEntry(self, destinationname, level=0, title=None, closed=None):
         """destinationname of None means "close the tree" """
         if destinationname is None and level!=0:
             raise ValueError, "close tree must have level of 0"
@@ -624,6 +628,7 @@ class PDFOutline(PDFObject):
         if destinationname is None: return
         stack[-1].append(destinationname)
         self.destinationnamestotitles[destinationname] = title
+        if closed: self.closedict[destinationname] = 1
         self.currentlevel = level
     def setDestinations(self, destinationtree):
         self.mydestinations = destinationtree
@@ -650,6 +655,7 @@ class PDFOutline(PDFObject):
         Ot = type(object)
         destinationnamestotitles = self.destinationnamestotitles
         destinationstotitles = self.destinationstotitles
+        closedict = self.closedict
         if Ot is StringType:
             destination = canvas._bookmarkReference(object)
             title = object
@@ -658,6 +664,8 @@ class PDFOutline(PDFObject):
             else:
                 destinationnamestotitles[title] = title
             destinationstotitles[destination] = title
+            if closedict.has_key(object):
+                closedict[destination] = 1 # mark destination closed
             return {object: canvas._bookmarkReference(object)} # name-->ref
         if Ot is ListType or Ot is TupleType:
             L = []
@@ -683,7 +691,7 @@ class PDFOutline(PDFObject):
         #self.first = document.objectReference("Outline.First")
         #self.last = document.objectReference("Outline.Last")
         # XXXX this needs to be generalized for closed entries!
-        self.count = count(self.mydestinations)
+        self.count = count(self.mydestinations, self.closedict)
         (self.first, self.last) = self.maketree(document, self.mydestinations, toplevel=1)
         self.ready = 1
     def maketree(self, document, destinationtree, Parent=None, toplevel=0):
@@ -702,6 +710,7 @@ class PDFOutline(PDFObject):
         lastindex = nelts-1
         lastelt = firstref = lastref = None
         destinationnamestotitles = self.destinationnamestotitles
+        closedict = self.closedict
         for index in range(nelts):
             eltobj = OutlineEntryObject()
             eltobj.Parent = Parent
@@ -722,12 +731,12 @@ class PDFOutline(PDFObject):
                 # simple leaf {name: dest}
                 leafdict = elt
             elif te is TupleType:
-                # leaf with subsections: ({name: ref}, subsections)
+                # leaf with subsections: ({name: ref}, subsections) XXXX should clean up (see count(...))
                 try:
                     (leafdict, subsections) = elt
                 except:
                     raise ValueError, "destination tree elt tuple should have two elts, got %s" % len(elt)
-                eltobj.Count = count(subsections)
+                eltobj.Count = count(subsections, closedict)
                 (eltobj.First, eltobj.Last) = self.maketree(document, subsections, eltref)
             else:
                 raise ValueError, "destination tree elt should be dict or tuple, got %s" % te
@@ -737,14 +746,28 @@ class PDFOutline(PDFObject):
                 raise ValueError, "bad outline leaf dictionary, should have one entry "+str(elt)
             eltobj.Title = destinationnamestotitles[Title]
             eltobj.Dest = Dest
+            if te is TupleType and closedict.has_key(Dest):
+                # closed subsection, count should be negative
+                eltobj.Count = -eltobj.Count
         return (firstref, lastref)
-def count(tree): 
+        
+def count(tree, closedict=None): 
     """utility for outline: recursively count leaves in a tuple/list tree"""
     from types import TupleType, ListType
     from operator import add
     tt = type(tree)
+    if tt is TupleType:
+        # leaf with subsections XXXX should clean up this structural usage
+        (leafdict, subsections) = tree
+        [(Title, Dest)] = leafdict.items()
+        if closedict and closedict.has_key(Dest):
+            return 1 # closed tree element
     if tt is TupleType or tt is ListType:
-        return reduce(add, map(count, tree))
+        #return reduce(add, map(count, tree))
+        counts = []
+        for e in tree:
+            counts.append(count(e, closedict))
+        return reduce(add, counts)
     return 1
     
 class OutlineEntryObject(PDFObject):
