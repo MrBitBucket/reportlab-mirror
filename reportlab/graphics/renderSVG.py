@@ -810,38 +810,7 @@ def test2():
     drawToFile(d, "svgout/corplogo.svg")
 
 
-def test3():
-    from test import getDrawing01a
-    d = getDrawing01a()
-    drawToFile(d, "svgout/drawing01a.svg")
-
-    from reportlab.graphics.renderPDF import drawToFile as dtf
-    dtf(d, "msg", "svgout/drawing01a.pdf")
-
-
-def test3a():
-    from reportlab.graphics.renderPDF import drawToFile
-    from test import getDrawing01a
-    if not os.path.isdir('pdfout'):
-        os.mkdir('pdfout')
-    d = getDrawing01a()
-    drawToFile(d, "pdfout/drawing01a.pdf", "msg")
-
-
-def test4():
-    from ums_widgets import Edu1Widget
-    d = Edu1Widget(width=300, height=300)
-    d.data = [12, 20,21,22,23,24,25,26,27,28,29]
-    drawToFile(d, "svgout/Edu1Widget.svg")
-
-
 if __name__=='__main__':
-    import sys
-
     test0()
     test1()
     test2()
-    test3()
-    test3a()
-    test4()
-
