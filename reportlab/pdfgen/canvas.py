@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.18  2000/03/26 20:45:01  aaron_watters
+#	added beginForm..endForm and fixed some naming convention issues.
+#
 #	Revision 1.17  2000/03/24 21:02:21  aaron_watters
 #	added support for destinations, forms, linkages
-#
+#	
 #	Revision 1.15  2000/03/10 21:46:04  andy_robinson
 #	fixed typo in setDash
 #	
@@ -78,7 +81,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.17 2000/03/24 21:02:21 aaron_watters Exp $ '''
+__version__=''' $Id: canvas.py,v 1.18 2000/03/26 20:45:01 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -168,8 +171,8 @@ class Canvas:
         self._pageCompression = pageCompression  #off by default - turn on when we're happy!
         self._pageNumber = 1   # keep a count
         #self._code = []    #where the current page's marking operators accumulate
-        self.restartAccumulators()  # restart all accumulation state (generalized, arw)
-        self.annotationCount = 0
+        self._restartAccumulators()  # restart all accumulation state (generalized, arw)
+        self._annotationCount = 0
         
         #PostScript has the origin at bottom left. It is easy to achieve a top-
         #down coord system by translating to the top of the page and setting y
@@ -250,18 +253,18 @@ class Canvas:
         page.setCompression(self._pageCompression)
         #print stream
         page.setStream([self._preamble] + self._code)
-        self.setXObjects(page)
-        self.setAnnotations(page)
+        self._setXObjects(page)
+        self._setAnnotations(page)
         self._doc.addPage(page)
         
         #now get ready for the next one
         self._pageNumber = self._pageNumber + 1
-        self.restartAccumulators()
+        self._restartAccumulators()
         
-    def setAnnotations(self,page):
+    def _setAnnotations(self,page):
         page.Annots = self._annotationrefs
         
-    def setXObjects(self, thing):
+    def _setXObjects(self, thing):
         """for pages and forms, define the XObject dictionary for resources, if needed"""
         forms = self._formsinuse
         if forms:
@@ -270,7 +273,7 @@ class Canvas:
         else:
             thing.XObjects = None
             
-    def bookmarkReference(self, name):
+    def _bookmarkReference(self, name):
         """get a reference to a (possibly undefined, possibly unbound) bookmark"""
         d = self._destinations
         try:
@@ -283,15 +286,15 @@ class Canvas:
         """bind a bookmark (destination) to the current page"""
         # XXXX there are a lot of other ways a bookmark destination can be bound: should be implemented.
         # XXXX the other ways require tracking of the graphics state....
-        dest = self.bookmarkReference(name)
+        dest = self._bookmarkReference(name)
         pageref = self._doc.thisPageRef()
         dest.fit()
         dest.setPageRef(pageref)
         return dest
         
-    def bookmarkHorizontalInPageAbsolute(self, name, yhorizontal):
+    def bookmarkHorizontalAbsolute(self, name, yhorizontal):
         """bind a bookmark (destination to the current page at a horizontal position"""
-        dest = self.bookmarkReference(name)
+        dest = self._bookmarkReference(name)
         pageref = self._doc.thisPageRef()
         dest.fith(yhorizontal)
         dest.setPageRef(pageref)
@@ -302,6 +305,7 @@ class Canvas:
         self._doc.inPage()
         
     def inForm(self):
+        "deprecated in favore of beginForm...endForm"
         self._doc.inForm()
             
     def doForm(self, name):
@@ -312,33 +316,45 @@ class Canvas:
         self._code.append("/%s Do" % internalname)
         self._formsinuse.append(name)
         
-    def restartAccumulators(self):
+    def _restartAccumulators(self):
         self._code = []    # ready for more...
         self._currentPageHasImages = 1 # for safety...
         self._formsinuse = []
         self._annotationrefs = []
+        self._formData = None
+        
+    def beginForm(self, name, lowerx=0, lowery=0, upperx=None, uppery=None):
+        "declare the current graphics stream to be a form"
+        self._formData = (name, lowerx, lowery, upperx, uppery)
+        self.inForm()
+        
+    def endForm(self):
+        (name, lowerx, lowery, upperx, uppery) = self._formData
+        self.makeForm(name, lowerx, lowery, upperx, uppery)
         
     def makeForm(self, name, lowerx=0, lowery=0, upperx=None, uppery=None):
         """Like showpage, but make a form using accumulated operations instead"""
+        # deprecated in favor or beginForm(...)... endForm()
         (w,h) = self._pagesize
         if upperx is None: upperx=w
         if uppery is None: uppery=h
         form = pdfdoc.PDFFormXObject(lowerx=lowerx, lowery=lowery, upperx=upperx, uppery=uppery)
         form.compression = self._pageCompression
         form.setStreamList([self._preamble] + self._code) # ??? minus preamble (seems to be needed!)
-        self.setXObjects(form)
-        self.setAnnotations(form)
+        self._setXObjects(form)
+        self._setAnnotations(form)
         self._doc.addForm(name, form)
-        self.restartAccumulators()
+        self._restartAccumulators()
         
     def textAnnotation(self, contents, Rect=None, addtopage=1, name=None, **kw):
         if not Rect:
             (w,h) = self._pagesize# default to whole page (?)
             Rect = (0,0,w,h)
         annotation = apply(pdfdoc.TextAnnotation, (Rect, contents), kw)
-        self.addAnnotation(annotation, name, addtopage)
+        self._addAnnotation(annotation, name, addtopage)
         
     def inkAnnotation(self, contents, InkList=None, Rect=None, addtopage=1, name=None, **kw):
+        "not working?"
         (w,h) = self._pagesize
         if not Rect:
             Rect = (0,0,w,h)
@@ -347,9 +363,9 @@ class Canvas:
         annotation = apply(pdfdoc.InkAnnotation, (Rect, contents, InkList), kw)
         self.addAnnotation(annotation, name, addtopage)
     
-    def linkAnnotationAbsolute(self, contents, destinationname, Rect=None, addtopage=1, name=None, **kw):
+    def linkAbsolute(self, contents, destinationname, Rect=None, addtopage=1, name=None, **kw):
         """link annotation positioned wrt the default user space"""
-        destination = self.bookmarkReference(destinationname) # permitted to be undefined... must bind later...
+        destination = self._bookmarkReference(destinationname) # permitted to be undefined... must bind later...
         (w,h) = self._pagesize
         if not Rect:
             Rect = (0,0,w,h)
@@ -357,16 +373,16 @@ class Canvas:
         kw["Contents"] = contents
         kw["Destination"] = destination
         annotation = apply(pdfdoc.LinkAnnotation, (), kw)
-        self.addAnnotation(annotation, name, addtopage)
+        self._addAnnotation(annotation, name, addtopage)
     
-    def addAnnotation(self, annotation, name=None, addtopage=1):
-        count = self.annotationCount = self.annotationCount+1
+    def _addAnnotation(self, annotation, name=None, addtopage=1):
+        count = self._annotationCount = self._annotationCount+1
         if not name: name="NUMBER"+repr(count)
         self._doc.addAnnotation(name, annotation)
         if addtopage:
-            self.annotatePage(name)
+            self._annotatePage(name)
             
-    def annotatePage(self, name):
+    def _annotatePage(self, name):
         ref = self._doc.refAnnotation(name)
         self._annotationrefs.append(ref)
 
