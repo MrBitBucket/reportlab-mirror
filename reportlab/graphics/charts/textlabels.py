@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.18 2001/09/26 12:51:31 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.19 2001/09/28 16:58:33 rgbecker Exp $
 import string
 
 from reportlab.lib import colors
@@ -12,6 +12,23 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.shapes import Drawing, Group, Circle, Rect, String, STATE_DEFAULTS
 from reportlab.graphics.widgetbase import Widget, PropHolder
 
+def _simpleSplit(txt,mW,SW):
+	L = []
+	ws = SW(' ')
+	O = []
+	w = -ws
+	for t in string.split(txt):
+		lt = SW(t)
+		if w+ws+lt<=mW or O==[]:
+			O.append(t)
+			w = w + ws + lt
+		else:
+			L.append(string.join(O,' '))
+			O = [t]
+			w = lt
+	if O!=[]: L.append(string.join(O,' '))
+	return L
+		
 
 class Label(Widget):
 	"""A text label to attach to something else, such as a chart axis.
@@ -39,6 +56,7 @@ class Label(Widget):
 		fontSize = AttrMapValue(isNumber),
 		leading = AttrMapValue(isNumberOrNone),
 		width = AttrMapValue(isNumberOrNone),
+		maxWidth = AttrMapValue(isNumberOrNone),
 		height = AttrMapValue(isNumberOrNone),
 		textAnchor = AttrMapValue(isTextAnchor),
 		visible = AttrMapValue(isBoolean,desc="True if the label is to be drawn"),
@@ -59,9 +77,7 @@ class Label(Widget):
 		self.fillColor = STATE_DEFAULTS['fillColor']
 		self.fontName = STATE_DEFAULTS['fontName']
 		self.fontSize = STATE_DEFAULTS['fontSize']
-		self.leading = None
-		self.width = None
-		self.height = None
+		self.leading =  self.width = self.maxWidth = self.height = None
 		self.textAnchor = 'start'
 		self.visible = 1
 
@@ -104,14 +120,21 @@ class Label(Widget):
 		'''hook for allowing special box anchor effects'''
 		return self.boxAnchor
 
+
 	def computeSize(self):
 		# the thing will draw in its own coordinate system
 		self._lines = string.split(self._text, '\n')
 		self._lineWidths = []
+		SW = lambda text, fN=self.fontName, fS=self.fontSize: stringWidth(text, fN, fS)
+		if self.maxWidth:
+			L = []
+			for l in self._lines:
+				L[-1:-1] = _simpleSplit(l,self.maxWidth,SW)
+			self._lines = L
 		if not self.width:
 			w = 0
 			for line in self._lines:
-				thisWidth = stringWidth(line, self.fontName, self.fontSize)
+				thisWidth = SW(line)
 				self._lineWidths.append(thisWidth)
 				w = max(w,thisWidth)
 			self._width = w
