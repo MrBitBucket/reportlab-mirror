@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.75 2004/05/20 10:10:27 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.75 2004/05/20 10:10:27 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.76 2004/05/23 09:27:52 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.76 2004/05/23 09:27:52 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -466,6 +466,28 @@ def rl_isdir(pn,os_path_isdir=os.path.isdir):
     if _isFSD or __loader__ is None: return False
     pn = _startswith_rl(pn)
     return len(filter(lambda x,pn=pn: x.startswith(pn),__loader__._files.keys()))>0
+
+def rl_get_module(name,dir):
+    f, p, desc= imp.find_module(name,[dir])
+    if sys.modules.has_key(name):
+        om = sys.modules[name]
+        del sys.modules[name]
+    else:
+        om = None
+    try:
+        try:
+            return imp.load_module(name,f,p,desc)
+        except:
+            if isCompactDistro() and not os.path.isabs(dir):
+                #attempt a load from inside the zip archive
+                import zipimport
+                zi = zipmport.ZipImporter(os.path.join(__loader__.archive,dir.replace('/',os.sep)))
+                return zi.load_module(name)
+            raise ImportError('%s[%s]' % (name,dir))
+    finally:
+        if om: sys.modules[name] = om
+        del om
+        if f: f.close()
 
 class ImageReader:
     "Wraps up either PIL or Java to get data from bitmaps"
