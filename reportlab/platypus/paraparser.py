@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.48 2002/09/30 09:43:03 rgbecker Exp $
-__version__=''' $Id: paraparser.py,v 1.48 2002/09/30 09:43:03 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.49 2003/05/26 09:56:16 rgbecker Exp $
+__version__=''' $Id: paraparser.py,v 1.49 2003/05/26 09:56:16 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -111,46 +111,269 @@ def _applyAttributes(obj, attr):
                 v = v[1]
         setattr(obj,k,v)
 
-#characters not supported: epsi, Gammad, gammad, kappav, rhov, Upsi, upsi
+#Named character entities intended to be supported from the special font
+#with additions suggested by Christoph Zwerschke who alos suggested the 
+#numeric entity names that follow.
 greeks = {
-    'alpha':'a',
-    'beta':'b',
-    'chi':'c',
-    'Delta':'D',
-    'delta':'d',
-    'epsiv':'e',
-    'eta':'h',
-    'Gamma':'G',
-    'gamma':'g',
-    'iota':'i',
-    'kappa':'k',
-    'Lambda':'L',
-    'lambda':'l',
-    'mu':'m',
-    'nu':'n',
-    'Omega':'W',
-    'omega':'w',
-    'omicron':'x',
-    'Phi':'F',
-    'phi':'f',
-    'phiv':'j',
-    'Pi':'P',
-    'pi':'p',
-    'piv':'v',
-    'Psi':'Y',
-    'psi':'y',
-    'rho':'r',
-    'Sigma':'S',
-    'sigma':'s',
-    'sigmav':'V',
-    'tau':'t',
-    'Theta':'Q',
-    'theta':'q',
-    'thetav':'j',
-    'Xi':'X',
-    'xi':'x',
-    'zeta':'z'
-}
+    'Alpha': 'A',
+    'Beta': 'B',
+    'Chi': 'C',
+    'Delta': 'D',
+    'Epsilon': 'E',
+    'Eta': 'H',
+    'Gamma': 'G',
+    'Iota': 'I',
+    'Kappa': 'K',
+    'Lambda': 'L',
+    'Mu': 'M',
+    'Nu': 'N',
+    'Omega': 'W',
+    'Omicron': 'O',
+    'Phi': 'F',
+    'Pi': 'P',
+    'Psi': 'Y',
+    'Rho': 'R',
+    'Sigma': 'S',
+    'Tau': 'T',
+    'Theta': 'Q',
+    'Upsilon': 'U',
+    'Xi': 'X',
+    'Zeta': 'Z',
+    'alefsym': '\xc0',
+    'alpha': 'a',
+    'and': '\xd9',
+    'ang': '\xd0',
+    'asymp': '\xbb',
+    'beta': 'b',
+    'bull': '\xb7',
+    'cap': '\xc7',
+    'chi': 'c',
+    'clubs': '\xa7',
+    'cong': '@',
+    'cup': '\xc8',
+    'dArr': '\xdf',
+    'darr': '\xaf',
+    'delta': 'd',
+    'diams': '\xa8',
+    'empty': '\xc6',
+    'epsilon': 'e',
+    'epsiv': 'e',
+    'equiv': '\xba',
+    'eta': 'h',
+    'euro': '\xa0',
+    'exist': '$',
+    'forall': '"',
+    'frasl': '\xa4',
+    'gamma': 'g',
+    'ge': '\xb3',
+    'hArr': '\xdb',
+    'harr': '\xab',
+    'hearts': '\xa9',
+    'hellip': '\xbc',
+    'image': '\xc1',
+    'infin': '\xa5',
+    'int': '\xf2',
+    'iota': 'i',
+    'isin': '\xce',
+    'kappa': 'k',
+    'lArr': '\xdc',
+    'lambda': 'l',
+    'lang': '\xe1',
+    'larr': '\xac',
+    'lceil': '\xe9',
+    'le': '\xa3',
+    'lfloor': '\xeb',
+    'lowast': '*',
+    'loz': '\xe0',
+    'minus': '-',
+    'mu': 'm',
+    'nabla': '\xd1',
+    'ne': '\xb9',
+    'ni': "'",
+    'notin': '\xcf',
+    'nsub': '\xcb',
+    'nu': 'n',
+    'oline': '`',
+    'omega': 'w',
+    'omicron': 'o',
+    'oplus': '\xc5',
+    'or': '\xda',
+    'otimes': '\xc4',
+    'part': '\xb6',
+    'perp': '^',
+    'phi': 'j',
+    'phis': 'f',
+    'pi': 'p',
+    'piv': 'v',
+    'prime': '\xa2',
+    'prod': '\xd5',
+    'prop': '\xb5',
+    'psi': 'y',
+    'rArr': '\xde',
+    'radic': '\xd6',
+    'rang': '\xf1',
+    'rarr': '\xae',
+    'rceil': '\xf9',
+    'real': '\xc2',
+    'rfloor': '\xfb',
+    'rho': 'r',
+    'sdot': '\xd7',
+    'sigma': 's',
+    'sigmaf': 'v',
+    'sigmav': 'V',
+    'sim': '~',
+    'spades': '\xaa',
+    'sub': '\xcc',
+    'sube': '\xcd',
+    'sum': '\xe5',
+    'sup': '\xc9',
+    'supe': '\xca',
+    'tau': 't',
+    'there4': '\\',
+    'theta': 'q',
+    'thetasym': 'j',
+    'thetav': 'j',
+    'trade': '\xe4',
+    'uArr': '\xdd',
+    'uarr': '\xad',
+    'upsih': '\xa1',
+    'upsilon': 'u',
+    'weierp': '\xc3',
+    'xi': 'x',
+    'zeta': 'z',
+    }
+
+# mapping of xml character entities to symbol encoding
+symenc = {
+    # greek letters
+    913:'A', # Alpha
+    914:'B', # Beta
+    915:'G', # Gamma
+    916:'D', # Delta
+    917:'E', # Epsilon
+    918:'Z', # Zeta
+    919:'H', # Eta
+    920:'Q', # Theta
+    921:'I', # Iota
+    922:'K', # Kappa
+    923:'L', # Lambda
+    924:'M', # Mu
+    925:'N', # Nu
+    926:'X', # Xi
+    927:'O', # Omicron
+    928:'P', # Pi
+    929:'R', # Rho
+    931:'S', # Sigma
+    932:'T', # Tau
+    933:'U', # Upsilon
+    934:'F', # Phi
+    935:'C', # Chi
+    936:'Y', # Psi
+    937:'W', # Omega
+    945:'a', # alpha
+    946:'b', # beta
+    947:'g', # gamma
+    948:'d', # delta
+    949:'e', # epsilon
+    950:'z', # zeta
+    951:'h', # eta
+    952:'q', # theta
+    953:'i', # iota
+    954:'k', # kappa
+    955:'l', # lambda
+    956:'m', # mu
+    957:'n', # nu
+    958:'x', # xi
+    959:'o', # omicron
+    960:'p', # pi
+    961:'r', # rho
+    962:'v', # sigmaf
+    963:'s', # sigma
+    964:'t', # tau
+    965:'u', # upsilon
+    966:'j', # phi
+    967:'c', # chi
+    968:'y', # psi
+    969:'w', # omega
+    977:'j', # thetasym
+    978:'\241', # upsih
+    981:'f', # phiv
+    982:'v', # piv
+    # mathematical symbols
+    8704:'"', # forall
+    8706:'\266', # part
+    8707:'$', # exist
+    8709:'\306', # empty
+    8711:'\321', # nabla
+    8712:'\316', # isin
+    8713:'\317', # notin
+    8715:'\'', # ni
+    8719:'\325', # prod
+    8721:'\345', # sum
+    8722:'-', # minus
+    8727:'*', # lowast
+    8730:'\326', # radic
+    8733:'\265', # prop
+    8734:'\245', # infin
+    8736:'\320', # ang
+    8869:'\331', # and
+    8870:'\332', # or
+    8745:'\307', # cap
+    8746:'\310', # cup
+    8747:'\362', # int
+    8756:'\\', # there4
+    8764:'~', # sim
+    8773:'@', # cong
+    8776:'\273', #asymp
+    8800:'\271', # ne
+    8801:'\272', # equiv
+    8804:'\243', # le
+    8805:'\263', # ge
+    8834:'\314', # sub
+    8835:'\311', # sup
+    8836:'\313', # nsub
+    8838:'\315', # sube
+    8839:'\312', # supe
+    8853:'\305', # oplus
+    8855:'\304', # otimes
+    8869:'^', # perp
+    8901:'\327', # sdot
+    9674:'\340', # loz
+    # technical symbols
+    8968:'\351', # lceil
+    8969:'\371', # rceil
+    8970:'\353', # lfloor
+    8971:'\373', # rfloor
+    9001:'\341', # lang
+    9002:'\361', # rang
+    # arrow symbols
+    8592:'\254', # larr
+    8593:'\255', # uarr
+    8594:'\256', # rarr
+    8595:'\257', # darr
+    8596:'\253', # harr
+    8656:'\334', # lArr
+    8657:'\335', # uArr
+    8658:'\336', # rArr
+    8659:'\337', # dArr
+    8660:'\333', # hArr
+    # divers symbols
+    8226:'\267', # bull
+    8230:'\274', # hellip
+    8242:'\242', # prime
+    8254:'`', # oline
+    8260:'\244', # frasl
+    8472:'\303', # weierp
+    8465:'\301', # image
+    8476:'\302', # real
+    8482:'\344', # trade
+    8364:'\240', # euro
+    8501:'\300', # alefsym
+    9824:'\252', # spades
+    9827:'\247', # clubs
+    9829:'\251', # hearts
+    9830:'\250' # diams
+    }
 
 #------------------------------------------------------------------------
 class ParaFrag(ABag):
@@ -234,6 +457,28 @@ class ParaParser(xmllib.XMLParser):
 
     #### greek script
     if _xmllib_newStyle:
+        #### add symbol encoding
+        def handle_charref(self, name):
+            try:
+                if name[0] == 'x':
+                    n = string.atoi(name[1:], 16)
+                else:
+                    n = string.atoi(name)
+            except string.atoi_error:
+                self.unknown_charref(name)
+                return
+            if 0 <=n<=255:
+                self.handle_data(chr(n))
+            else:
+                try:
+                    c = symenc[n]
+                except KeyError:
+                    self.unknown_charref(name)
+                    return
+                self._push(greek=1)
+                self.handle_data(c)
+                self._pop(greek=1)
+
         def handle_entityref(self,name):
             if greeks.has_key(name):
                 self._push(greek=1)
@@ -310,10 +555,7 @@ class ParaParser(xmllib.XMLParser):
     def end_bullet(self):
         self._pop()
 
-
-
     #---------------------------------------------------------------
-
     def start_seqdefault(self, attr):
         try:
             default = attr['id']
