@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.6 2001/04/09 22:49:12 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.7 2001/04/26 14:46:49 dinu_gherman Exp $
 """
 This modules defines a very preliminary Line Plot example.
 """
@@ -12,11 +12,26 @@ from types import FunctionType
 from reportlab.lib import colors 
 from reportlab.graphics.shapes import *
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
+from reportlab.graphics.widgetbase import StyleProperties
 from reportlab.graphics.widgets.signsandsymbols import SmileyFace0
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.axes import XValueAxis, YValueAxis
 from reportlab.graphics.charts.utils import *
 from reportlab.graphics.charts.markers import *
+
+
+# This might be moved again from here...
+
+class LinePlotProperties(StyleProperties):
+    """An adapted set of properties to be used with line charts.
+
+    In fact, it only adds 'symbol' as allowed attribute that is
+    expected to have a Widget value, which a line plot will draw
+    at each data point. 
+    """
+
+    _attrMap = StyleProperties._attrMap.copy()
+    _attrMap.update({'symbol': None})
 
 
 class LinePlot(Widget):
@@ -45,7 +60,8 @@ class LinePlot(Widget):
         'strokeColor':isColorOrNone,
         'fillColor':isColorOrNone,
 
-        'defaultColors':SequenceOf(isColor),
+        'defaultColors':SequenceOf(isColor),    # deprecated
+        'defaultStyles':None,
 
         'xValueAxis':None,
         'yValueAxis':None,
@@ -72,10 +88,17 @@ class LinePlot(Widget):
             ((1,1), (2,2), (2.5,1), (3,3), (4,5)),
             ((1,2), (2,3), (2.5,2), (3,4), (4,6))
             ]
+
         # we really need some well-designed default lists of
         # colors e.g. from Tufte.  These will be used in a
         # cycle to set the fill color of each series.
-        self.defaultColors = [colors.red, colors.green, colors.blue]
+        self.defaultColors = [colors.red, colors.green, colors.blue] # deprecated
+
+        p1 = LinePlotProperties(strokeColor=colors.red,
+                                symbol=makeFilledCircle)
+        p2 = LinePlotProperties(strokeColor=colors.blue,
+                                symbol=makeFilledCircle)
+        self.defaultStyles = [p1, p2]
 
         # control bar spacing. is useAbsolute = 1 then
         # the next parameters are in points; otherwise
@@ -209,7 +232,7 @@ class LinePlot(Widget):
             group.add(label)
 
 
-    def makeLines(self):
+    def makeLines0(self):
         g = Group()
 
         labelFmt = self.lineLabelFormat
@@ -217,9 +240,17 @@ class LinePlot(Widget):
         # Iterate over data rows.        
         for rowNo in range(len(self._positions)):
             row = self._positions[rowNo]
+
+            # deprecated            
             colorCount = len(self.defaultColors)
             colorIdx = rowNo % colorCount
             rowColor = self.defaultColors[colorIdx]
+
+            styleCount = len(self.defaultStyles)
+            styleIdx = rowNo % styleCount
+            rowColor = self.defaultStyles[styleIdx].strokeColor
+            dash = getattr(self.defaultStyles[styleIdx], 'strokeDashArray', None)
+            width = getattr(self.defaultStyles[styleIdx], 'strokeWidth', None)
 
             # Iterate over data columns.        
             for colNo in range(len(row)):
@@ -239,6 +270,69 @@ class LinePlot(Widget):
                 # Draw a symbol for each data item.
                 symbol = self.usedSymbol(x1, y1, 5, rowColor)
                 g.add(symbol)
+
+                # Draw item (bar) labels.
+                self.drawLabel(g, rowNo, colNo, x1, y1)
+
+        return g
+
+
+    def makeLines(self):
+        g = Group()
+
+        labelFmt = self.lineLabelFormat
+
+        # Iterate over data rows.        
+        for rowNo in range(len(self._positions)):
+            row = self._positions[rowNo]
+
+            # deprecated            
+            colorCount = len(self.defaultColors)
+            colorIdx = rowNo % colorCount
+            rowColor = self.defaultColors[colorIdx]
+
+            styleCount = len(self.defaultStyles)
+            styleIdx = rowNo % styleCount
+            rowColor = self.defaultStyles[styleIdx].strokeColor
+            dash = getattr(self.defaultStyles[styleIdx], 'strokeDashArray', None)
+            width = getattr(self.defaultStyles[styleIdx], 'strokeWidth', None)
+
+            # Iterate over data columns.        
+            if self.joinedLines:
+                points = []
+                for xy in row:
+                    points = points + [xy[0], xy[1]]
+                line = PolyLine(points,strokeColor=rowColor,strokeLineCap=0,strokeLineJoin=1)
+                if width:
+                    line.strokeWidth = width
+                if dash:
+                    line.strokeDashArray = dash
+		g.add(line)
+	    else:
+                for colNo in range(len(row)):
+                    x1, y1 = row[colNo]
+                    if self.joinedLines == 1:
+                        if colNo > 0:
+                            # Draw lines between adjacent items.
+                            x2, y2 = row[colNo-1]
+                            line = Line(x1, y1, x2, y2,
+                                        strokeColor=rowColor,
+                                        strokeLineCap=1)
+                            if width:
+                                line.strokeWidth = width
+                            if dash:
+                                line.strokeDashArray = dash
+                            g.add(line)
+
+            # Iterate once more over data columns
+            # (to make sure symbols and labels are on top).
+            for colNo in range(len(row)):
+                x1, y1 = row[colNo]
+
+                # Draw a symbol for each data item.
+                if hasattr(self.defaultStyles[styleIdx], 'symbol'):
+                    symbol = self.defaultStyles[styleIdx].symbol(x1, y1, 5, rowColor)
+                    g.add(symbol)
 
                 # Draw item (bar) labels.
                 self.drawLabel(g, rowNo, colNo, x1, y1)
