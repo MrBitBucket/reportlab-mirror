@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/fonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.14 2002/07/24 19:56:37 andy_robinson Exp $
-__version__=''' $Id: fonts.py,v 1.14 2002/07/24 19:56:37 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.15 2002/11/16 18:56:42 andy_robinson Exp $
+__version__=''' $Id: fonts.py,v 1.15 2002/11/16 18:56:42 andy_robinson Exp $ '''
 import string, sys, os
 ###############################################################################
 #   A place to put useful font stuff
@@ -39,6 +39,47 @@ _tt2ps_map = {
             ('helvetica', 1, 0) :'Helvetica-Bold',
             ('helvetica', 0, 1) :'Helvetica-Oblique',
             ('helvetica', 1, 1) :'Helvetica-BoldOblique',
+  
+            # TTF fonts
+            ('timesnew', 0, 0) :'Times New Roman',
+            ('timesnew', 1, 0) :'Times New Roman-Bold',
+            ('timesnew', 0, 1) :'Times New Roman-Italic',
+            ('timesnew', 1, 1) :'Times New Roman-BoldItalic',
+ 
+            ('courier new', 0, 0) :'Courier New',
+            ('courier new', 1, 0) :'Courier New-Bold',
+            ('courier new', 0, 1) :'Courier New-Italic',
+            ('courier new', 1, 1) :'Courier New-BoldItalic',
+
+            ('verdana', 0, 0) :'Verdana',
+            ('verdana', 1, 0) :'Verdana-Bold',
+            ('verdana', 0, 1) :'Verdana-Italic',
+            ('verdana', 1, 1) :'Verdana-BoldItalic',
+ 
+            ('arial', 0, 0) :'Arial',
+            ('arial', 1, 0) :'Arial-Bold',
+            ('arial', 0, 1) :'Arial-Italic',
+            ('arial', 1, 1) :'Arial-BoldItalic',
+ 
+            ('arialnarrow', 0, 0) :'Arial Narrow',
+            ('arialnarrow', 1, 0) :'Arial Narrow-Bold',
+            ('arialnarrow', 0, 1) :'Arial Narrow-Italic',
+            ('arialnarrow', 1, 1) :'Arial Narrow-BoldItalic',
+ 
+            ('bookmanos', 0, 0) :'Bookman Old Style',
+            ('bookmanos', 1, 0) :'Bookman Old Style-Bold',
+            ('bookmanos', 0, 1) :'Bookman Old Style-Italic',
+            ('bookmanos', 1, 1) :'Bookman Old Style-BoldItalic',
+ 
+            ('georgia', 0, 0) :'Georgia',
+            ('georgia', 1, 0) :'Georgia-Bold',
+            ('georgia', 0, 1) :'Georgia-Italic',
+            ('georgia', 1, 1) :'Georgia-BoldItalic',
+ 
+            ('trebuchet', 0, 0) :'Trebuchet MS',
+            ('trebuchet', 1, 0) :'Trebuchet MS-Bold',
+            ('trebuchet', 0, 1) :'Trebuchet MS-Italic',
+            ('trebuchet', 1, 1) :'Trebuchet MS-BoldItalic',
 
             # there is only one Symbol font
             ('symbol', 0, 0) :'Symbol',

@@ -7,7 +7,7 @@ The parser has a getPresentation method; it is called from
 pythonpoint.py.
 """
 
-import string, imp, os
+import string, imp, os, copy
 
 from reportlab.lib import xmllib
 from reportlab.lib import colors
@@ -72,19 +72,34 @@ class PPMLParser(xmllib.XMLParser):
             },
         'para': {
             'style':'Normal',
-            'bullettext':''
+            'bullettext':'',
+            'effectname':'None',
+            'effectdirection':'0',
+            'effectdimension':'H',
+            'effectmotion':'I',
+            'effectduration':'1'
             },
         'image': {
             'filename':'',
             'width':'None',
-            'height':'None'
+            'height':'None',
+            'effectname':'None',
+            'effectdirection':'0',
+            'effectdimension':'H',
+            'effectmotion':'I',
+            'effectduration':'1'
             },
         'table': {
             'widths':'None',
             'heights':'None',
             'fieldDelim':',',
             'rowDelim':'\n',
-            'style':'None'
+            'style':'None',
+            'effectname':'None',
+            'effectdirection':'0',
+            'effectdimension':'H',
+            'effectmotion':'I',
+            'effectduration':'1'
             },
         'rectangle': {
             'x':'0',
@@ -93,7 +108,12 @@ class PPMLParser(xmllib.XMLParser):
             'height':'100',
             'fill':'None',
             'stroke':'(0,0,0)',
-            'linewidth':'0'
+            'linewidth':'0',
+            'effectname':'None',
+            'effectdirection':'0',
+            'effectdimension':'H',
+            'effectmotion':'I',
+            'effectduration':'1'
             },
         'roundrect': {
             'x':'0',
@@ -103,7 +123,12 @@ class PPMLParser(xmllib.XMLParser):
             'radius':'6',
             'fill':'None',
             'stroke':'(0,0,0)',
-            'linewidth':'0'
+            'linewidth':'0',
+            'effectname':'None',
+            'effectdirection':'0',
+            'effectdimension':'H',
+            'effectmotion':'I',
+            'effectduration':'1'
             },
         'line': {
             'x1':'0',
@@ -111,7 +136,12 @@ class PPMLParser(xmllib.XMLParser):
             'x2':'100',
             'y2':'100',
             'stroke':'(0,0,0)',
-            'width':'0'
+            'width':'0',
+            'effectname':'None',
+            'effectdirection':'0',
+            'effectdimension':'H',
+            'effectmotion':'I',
+            'effectduration':'1'
             },
         'ellipse': {
             'x1':'0',
@@ -120,14 +150,24 @@ class PPMLParser(xmllib.XMLParser):
             'y2':'100',
             'stroke':'(0,0,0)',
             'fill':'None',
-            'linewidth':'0'
+            'linewidth':'0',
+            'effectname':'None',
+            'effectdirection':'0',
+            'effectdimension':'H',
+            'effectmotion':'I',
+            'effectduration':'1'
             },
         'polygon': {
             'points':'(0,0),(50,0),(25,25)',
             'stroke':'(0,0,0)',
             'linewidth':'0',
             'stroke':'(0,0,0)',
-            'fill':'None'
+            'fill':'None',
+            'effectname':'None',
+            'effectdirection':'0',
+            'effectdimension':'H',
+            'effectmotion':'I',
+            'effectduration':'1'
             },
         'string':{
             'x':'0',
@@ -135,7 +175,12 @@ class PPMLParser(xmllib.XMLParser):
             'color':'(0,0,0)',
             'font':'Times-Roman',
             'size':'12',
-            'align':'left'
+            'align':'left',
+            'effectname':'None',
+            'effectdirection':'0',
+            'effectdimension':'H',
+            'effectmotion':'I',
+            'effectduration':'1'
             },
         'customshape':{
             'path':'None',
@@ -384,7 +429,23 @@ class PPMLParser(xmllib.XMLParser):
         pass
 
 
+    def pack_slide(self, element, args):
+        effectName = self._arg(element,args,'effectname')
+        if effectName <> 'None':
+            curSlide = copy.deepcopy(self._curSlide)
+            if self._curFrame:
+                curFrame = copy.deepcopy(self._curFrame)
+                curSlide.frames.append(curFrame)
+            self._curPres.slides.append(curSlide)
+            self._curSlide.effectName = effectName
+            self._curSlide.effectDirection = self.ceval(element,args,'effectdirection')
+            self._curSlide.effectDimension = self._arg(element,args,'effectdimension')
+            self._curSlide.effectDuration = self.ceval(element,args,'effectduration')
+            self._curSlide.effectMotion = self._arg(element,args,'effectmotion')
+            self._curSlide.outlineEntry = None
+
     def start_para(self, args):
+        self.pack_slide('para', args)
         self._curPara = pythonpoint.PPPara()
         self._curPara.style = self._arg('para',args,'style')
 
@@ -393,6 +454,8 @@ class PPMLParser(xmllib.XMLParser):
         if bt == '':
             if self._curPara.style == 'Bullet':
                 bt = '\267'  # Symbol Font bullet character, reasonable default
+            elif self._curPara.style == 'Bullet2':
+                bt = '\267'  # second-level bullet
             else:
                 bt = None
 
@@ -429,6 +492,7 @@ class PPMLParser(xmllib.XMLParser):
 
 
     def start_image(self, args):
+        self.pack_slide('image',args)
         sourceFilename = self.sourceFilename # XXX
         filename = self._arg('image',args,'filename')
         filename = os.path.join(os.path.dirname(sourceFilename), filename)
@@ -444,6 +508,7 @@ class PPMLParser(xmllib.XMLParser):
 
 
     def start_table(self, args):
+        self.pack_slide('table',args)
         self._curTable = pythonpoint.PPTable()
         self._curTable.widths = self.ceval('table',args,'widths')
         self._curTable.heights = self.ceval('table',args,'heights')
@@ -497,6 +562,7 @@ class PPMLParser(xmllib.XMLParser):
 
 
     def start_rectangle(self, args):
+        self.pack_slide('rectangle', args)
         rect = pythonpoint.PPRectangle(
                     self.ceval('rectangle',args,'x'),
                     self.ceval('rectangle',args,'y'),
@@ -517,6 +583,7 @@ class PPMLParser(xmllib.XMLParser):
 
 
     def start_roundrect(self, args):
+        self.pack_slide('roundrect', args)
         rrect = pythonpoint.PPRoundRect(
                     self.ceval('roundrect',args,'x'),
                     self.ceval('roundrect',args,'y'),
@@ -538,6 +605,7 @@ class PPMLParser(xmllib.XMLParser):
 
 
     def start_line(self, args):
+        self.pack_slide('line', args)            
         self._curLine = pythonpoint.PPLine(
                     self.ceval('line',args,'x1'),
                     self.ceval('line',args,'y1'),
@@ -556,6 +624,7 @@ class PPMLParser(xmllib.XMLParser):
 
 
     def start_ellipse(self, args):
+        self.pack_slide('ellipse', args)
         self._curEllipse = pythonpoint.PPEllipse(
                     self.ceval('ellipse',args,'x1'),
                     self.ceval('ellipse',args,'y1'),
@@ -575,6 +644,7 @@ class PPMLParser(xmllib.XMLParser):
 
 
     def start_polygon(self, args):
+        self.pack_slide('polygon', args)
         self._curPolygon = pythonpoint.PPPolygon(self.ceval('polygon',args,'points'))
         self._curPolygon.strokeColor = self.ceval('polygon',args,'stroke')
         self._curPolygon.fillColor = self.ceval('polygon',args,'fill')
@@ -589,6 +659,7 @@ class PPMLParser(xmllib.XMLParser):
 
 
     def start_string(self, args):
+        self.pack_slide('string', args)
         self._curString = pythonpoint.PPString(
                             self.ceval('string',args,'x'),
                             self.ceval('string',args,'y')

@@ -40,6 +40,18 @@ The currently available 'Presentation Objects' are:
         PPLine
         PPEllipse
 
+Features added by H. Turgut Uyar <uyar@cs.itu.edu.tr>
+- TrueType support (actually, just an import in the style file);
+  this also enables the use of Unicode symbols
+- para, image, table, line, rectangle, roundrect, ellipse, polygon
+  and string elements can now have effect attributes
+  (careful: new slide for each effect!)
+- added printout mode (no new slides for effects, see item above)
+- added a second-level bullet: Bullet2
+- small bugfixes in handleHiddenSlides:
+    corrected the outlineEntry of included hidden slide
+    and made sure to include the last slide even if hidden
+
 Recently added features are:
 
 - file globbing
@@ -88,6 +100,7 @@ Usage:
         -v / --verbose  verbose mode
         -s / --silent   silent mode (NO output)
         --handout       produce handout document
+        --printout      produce printout document
         --cols          specify number of columns
                         on handout pages (default: 2)
 
@@ -221,11 +234,16 @@ def handleHiddenSlides(slides):
                 itd[i] = 0
             if i > 0 and itd[i-1] == 0:
                 itd[i-1] = 1
+                
+    itd[len(itd)-1] = 0
 
     for i in range(len(itd)):
+        if slides[i].outlineEntry:
+            curOutlineEntry = slides[i].outlineEntry
         if itd[i] == 1:
             slides[i].delete = 1
         else:
+            slides[i].outlineEntry = curOutlineEntry
             slides[i].delete = 0
 
     slides = filter(lambda s:s.delete == 0, slides)
@@ -313,6 +331,7 @@ class PPPresentation:
         self.subject = None
         self.notes = 0          # different printing mode
         self.handout = 0        # prints many slides per page
+        self.printout = 0       # remove hidden slides
         self.cols = 0           # columns per handout page
         self.slides = []
         self.effectName = None
@@ -913,7 +932,7 @@ def setStyles(newStyleSheet):
 ##    p.close()
 
 
-def process(datafile, notes=0, handout=0, cols=0, verbose=0, outDir=None, datafilename=None):
+def process(datafile, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=None, datafilename=None):
     "Process one PythonPoint source file."
     if not hasattr(datafile, "read"):
         if not datafilename: datafilename = datafile
@@ -921,9 +940,9 @@ def process(datafile, notes=0, handout=0, cols=0, verbose=0, outDir=None, datafi
     else:
         if not datafilename: datafilename = "PseudoFile"
     rawdata = datafile.read()
-    return _process(rawdata, datafilename, notes, handout, cols, verbose, outDir)
+    return _process(rawdata, datafilename, notes, handout, printout, cols, verbose, outDir)
 
-def _process(rawdata, datafilename, notes=0, handout=0, cols=0, verbose=0, outDir=None):
+def _process(rawdata, datafilename, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=None):
     from reportlab.tools.pythonpoint.stdparser import PPMLParser
     parser = PPMLParser()
     parser.sourceFilename = datafilename
@@ -933,8 +952,12 @@ def _process(rawdata, datafilename, notes=0, handout=0, cols=0, verbose=0, outDi
     pres.outDir = outDir
     pres.notes = notes
     pres.handout = handout
+    pres.printout = printout
     pres.cols = cols
     pres.verbose = verbose
+
+    if printout:
+        pres.slides = handleHiddenSlides(pres.slides)
 
     #this does all the work
     pdfcontent = pres.save()
@@ -965,6 +988,7 @@ def handleOptions():
     from reportlab import rl_config
     options = {'cols':2,
                'handout':0,
+               'printout':0,
                'help':0,
                'notes':0,
                'verbose':rl_config.verbose,
@@ -975,7 +999,7 @@ def handleOptions():
     args = filter(lambda x: x and x[0]=='-',args) + filter(lambda x: not x or x[0]!='-',args)
     try:
         shortOpts = 'hnvs'
-        longOpts = string.split('cols= outdir= handout help notes verbose silent')
+        longOpts = string.split('cols= outdir= handout help notes printout verbose silent')
         optList, args = getopt.getopt(args, shortOpts, longOpts)
     except getopt.error, msg:
         options['help'] = 1
@@ -995,6 +1019,9 @@ def handleOptions():
 
     if filter(lambda ov: ov[0] == 'handout', optList):
         options['handout'] = 1
+
+    if filter(lambda ov: ov[0] == 'printout', optList):
+        options['printout'] = 1
 
     if optList == [] and args == [] or \
        filter(lambda ov: ov[0] in ('h', 'help'), optList):
@@ -1028,13 +1055,16 @@ def main():
     if options['verbose'] and options['handout']:
         print 'handout mode'
 
+    if options['verbose'] and options['printout']:
+        print 'printout mode'
+
     for fileGlobs in args:
         files = glob.glob(fileGlobs)
         for datafile in files:
             if os.path.isfile(datafile):
                 file = os.path.join(os.getcwd(), datafile)
-                notes, handout, cols, verbose = options['notes'], options['handout'], options['cols'], options['verbose']
-                process(file, notes, handout, cols, verbose, options['outDir'])
+                notes, handout, printout, cols, verbose = options['notes'], options['handout'], options['printout'],  options['cols'], options['verbose']
+                process(file, notes, handout, printout, cols, verbose, options['outDir'])
             else:
                 print 'Data file not found:', datafile
 
