@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.4 2001/03/29 15:37:30 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.5 2001/03/29 16:03:12 dinu_gherman Exp $
 
 from gengraphguide import *
 
@@ -1414,8 +1414,70 @@ eg("""
 
 disc("""Most of the code above is concerned with setting up the axes and 
        labels, which we have already covered. Here are the top-level 
-       properties of the VerticalBarChart class:""")
-##
+       properties of the $VerticalBarChart$ class:""")
+
+disc("")
+
+data=[["Property", "Meaning"],
+      ["data", """This should be a "list of lists of numbers" or "list of
+tuples of numbers". If you have just one series, write it as
+data = [(10,20,30,42),]"""],
+      ["x, y, width, height", """These define the inner 'plot rectangle'. We
+highlighted this with a yellow border above. Note that it is
+your job to place the chart on the drawing in a way which leaves
+room for all the axis labels and tickmarks. We specify this 'inner
+rectangle' because it makes it vey easy to lay out multiple charts
+in a consistent manner."""],
+      ["strokeColor", """Defaults to None. This will draw a border around the
+plot rectangle, which may be useful in debugging. Axes will
+overwrite this."""],
+      ["fillColor", """Defaults to None. This will fill the plot rectangle with
+a solid color. (Note that we could implement dashArray etc.
+as for any other solid shape)"""],
+      ["barLabelFormat", """This is a format string or function used for displaying
+labels above each bar. We're working on ways to position these
+labels so that they work for positive and negative bars."""],
+      ["useAbsolute", """Defaults to 0. If 1, the three properties below are
+absolute values in points (which means you can make a chart
+where the bars stick out from the plot rectangle); if 0,
+they are relative quantities and indicate the proprotional
+widths of the elements involved."""],
+      ["barWidth", """As it says. Defaults to 10."""],
+      ["groupSpacing", """Defaults to 5. This is the space between each group of
+bars. If you have only one series, use groupSpacing and not
+barSpacing to split them up. Half of the groupSpacing is used
+before the first bar in the chart, and another half at the end."""],
+      ["barSpacing", """Defaults to 0. This is the spacing between bars in each
+group. If you wanted a little gap between green and red bars in
+the example above, you would make this non-zero."""],
+      ["barLabelFormat", """Defaults to None. As with the YValueAxis, if you supply
+a function or format string then labels will be drawn next
+to each bar showing the numeric value."""],
+      ["barLabels", """A collection of labels used to format all bar labels. Since
+this is a two-dimensional array, you may explicitly format the
+third label of the second series using this syntax:
+  chart.barLabels[(1,2)].fontSize = 12"""],
+      ["valueAxis", """The value axis, which may be formatted as described
+previously."""],
+      ["categoryAxis", """The category axis, which may be formatted as described
+previously."""],
+
+      ["title", """Not Implemented Yet. This needs to be like a label, but also
+lets you set the text directly. It would have a default
+location below the axis."""]]
+t=Table(data, colWidths=(100,330))
+t.setStyle(TableStyle([
+            ('FONT',(0,0),(-1,0),'Times-Bold',10,12),
+            ('FONT',(0,1),(0,-1),'Courier',8,8),
+            ('FONT',(1,1),(1,-1),'Times-Roman',10,12),
+            ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ]))
+getStory().append(t)
+caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - VerticalBarChart properties""")
+
+
 ##Property Value 
 ##data This should be a "list of lists of numbers" or "list of tuples of numbers". If you have just one series, write it as
 ##data = [(10,20,30,42),]
@@ -1437,7 +1499,7 @@ disc("""Most of the code above is concerned with setting up the axes and
 ##title, subTitle Not implemented yet. These would be label-like objects whose text could be set directly and which would appear in sensible locations. For now, you can just place extra strings on the drawing. 
 
 
-heading2("Open Issues")
+heading3("Open Issues")
 
 disc("There are several open issues:")
 
