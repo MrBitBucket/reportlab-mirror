@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/pythonpoint.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.33 2001/07/25 06:46:59 dinu_gherman Exp $
-__version__=''' $Id: pythonpoint.py,v 1.33 2001/07/25 06:46:59 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.34 2001/07/25 10:30:33 dinu_gherman Exp $
+__version__=''' $Id: pythonpoint.py,v 1.34 2001/07/25 10:30:33 dinu_gherman Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -98,8 +98,6 @@ class PPPresentation:
                 canv.translate(self.pageWidth / 6.0, self.pageHeight / 3.0)
                 canv.rect(0,0,self.pageWidth, self.pageHeight)
 
-
-
             slide.drawOn(canv)
             canv.showPage()
 
@@ -113,15 +111,26 @@ class PPSection:
     """A section can hold graphics which will be drawn on all
     pages within it, before frames and other content are done.
     In other words, a background template."""
+
     def __init__(self, name):
         self.name = name
         self.graphics = []
         
     def drawOn(self, canv):
         for graphic in self.graphics:
-            graphic.drawOn(canv)
+            name = str(hash(graphic))
+            internalname = canv._doc.hasForm(name)
+            if not internalname:
+                canv.beginForm(name)
+                canv.saveState()
+                graphic.drawOn(canv)
+                canv.restoreState()
+                canv.endForm()
+                canv.doForm(name)
+            else:
+                canv.doForm(name)
             
-        
+
 class PPSlide:
     def __init__(self):
         self.id = None
@@ -146,6 +155,7 @@ class PPSlide:
                         motion = self.effectMotion,
                         duration = self.effectDuration
                         )
+
         if self.outlineEntry:
             #gets an outline automatically
             self.showOutline = 1
@@ -306,20 +316,10 @@ class PPFixedImage(PPDrawingElement):
         self.height = None
 
     def drawOn(self, canv):
-        filename = self.filename
-        if filename:
-            internalname = canv._doc.hasForm(filename)
-            if not internalname:
-                canv.beginForm(filename)
-                canv.saveState()
-                x, y = self.x, self.y
-                w, h = self.width, self.height
-                canv.drawInlineImage(filename, x, y, w, h)
-                canv.restoreState()
-                canv.endForm()
-                canv.doForm(filename)
-            else:
-                canv.doForm(filename)
+        if self.filename:
+            x, y = self.x, self.y
+            w, h = self.width, self.height
+            canv.drawInlineImage(self.filename, x, y, w, h)
 
 
 class PPRectangle:
@@ -642,6 +642,7 @@ def test():
     p.feed(sample)
     p.getPresentation().save()
     p.close()
+
 
 def process(datafilename, speakerNotes=0):
     parser = stdparser.PPMLParser()
