@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.43 2001/09/20 16:02:38 aaron_watters Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.44 2001/10/01 09:33:25 rgbecker Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.43 2001/09/20 16:02:38 aaron_watters Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.44 2001/10/01 09:33:25 rgbecker Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -145,9 +145,14 @@ class PageTemplate:
 		pass
 
 	def checkPageSize(self,canv,doc):
-		'''This gets called by the template framework'''
-		#print "self.pagesize, canv._pagesize, doc.pagesize",(self.pagesize, canv._pagesize, doc.pagesize)
-		### NEVER EVER EVER COMPARE FLOATS FOR EQUALITY
+		'''This gets called by the template framework
+		If canv size != doc size then the canv size is set to
+		the template size or if that's not available to the 
+		doc size.
+		'''
+		#### NEVER EVER EVER COMPARE FLOATS FOR EQUALITY
+		#RGB converting pagesizes to ints means we are accurate to one point
+		#RGB I suggest we should be aiming a little better
 		cp = None
 		dp = None
 		sp = None
@@ -157,7 +162,7 @@ class PageTemplate:
 		if cp != dp:
 			if sp:
 				canv.setPageSize(self.pagesize)
-			elif cp != dp:
+			else:
 				canv.setPageSize(doc.pagesize)
 
 	def afterDrawPage(self, canv, doc):
@@ -627,8 +632,8 @@ class SimpleDocTemplate(BaseDocTemplate):
 		"""
 		self._calc()	#in case we changed margins sizes etc
 		frameT = Frame(self.leftMargin, self.bottomMargin, self.width, self.height, id='normal')
-		self.addPageTemplates([PageTemplate(id='First',frames=frameT, onPage=onFirstPage),
-						PageTemplate(id='Later',frames=frameT, onPage=onLaterPages)])
+		self.addPageTemplates([PageTemplate(id='First',frames=frameT, onPage=onFirstPage,pagesize=self.pagesize),
+						PageTemplate(id='Later',frames=frameT, onPage=onLaterPages,pagesize=self.pagesize)])
 		if onFirstPage is _doNothing and hasattr(self,'onFirstPage'):
 			self.pageTemplates[0].beforeDrawPage = self.onFirstPage
 		if onLaterPages is _doNothing and hasattr(self,'onLaterPages'):
