@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/randomtext.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/randomtext.py,v 1.4 2001/01/19 08:41:22 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/lib/randomtext.py,v 1.5 2001/02/07 15:11:23 johnprecedo Exp $
 
-__version__=''' $Id: randomtext.py,v 1.4 2001/01/19 08:41:22 dinu_gherman Exp $ '''
+__version__=''' $Id: randomtext.py,v 1.5 2001/02/07 15:11:23 johnprecedo Exp $ '''
 
 import string
 
@@ -24,6 +24,7 @@ There are currently six themes provided:
 	BUZZWORD (buzzword bingo),
 	STARTREK (Star Trek),
 	PRINTING (print-related terms)
+	PYTHON (snippets and quotes from Monty Python)
 """
 
 #theme one :-)
@@ -126,6 +127,57 @@ PRINTING = ['points', 'picas', 'leading', 'kerning', 'CMYK', 'offset litho',
     'page', 'frame', 'ragged setting', 'flush-right', 'rule', 'drop shadows',
     'prepress', 'spot-colour', 'duotones', 'colour separations', 'four-colour printing',
     'Pantone[TM]', 'service bureau', 'imagesetter']
+
+#it had to be done!...
+#theme seven - the "full Monty"!
+PYTHON = ['Good evening ladies and Bruces','I want to buy some cheese', 'You do have some cheese, do you?',
+		  "Of course sir, it's a cheese shop sir, we've got...",'discipline?... naked? ... With a melon!?',
+		  'The Church Police!!' , "There's a dead bishop on the landing", 'Would you like a twist of lemming sir?',
+		  '"Conquistador Coffee brings a new meaning to the word vomit"','Your lupins please',
+		  'Crelm Toothpaste, with the miracle ingredient Fraudulin',
+		  "Well there's the first result and the Silly Party has held Leicester.",
+		  'Hello, I would like to buy a fish license please', "Look, it's people like you what cause unrest!",
+		  "When we got home, our Dad would thrash us to sleep with his belt!", 'Luxury', "Gumby Brain Specialist",
+		  "My brain hurts!!!", "My brain hurts too.", "How not to be seen",
+		  "In this picture there are 47 people. None of them can be seen",
+		  "Mrs Smegma, will you stand up please?",
+		  "Mr. Nesbitt has learned the first lesson of 'Not Being Seen', not to stand up.",
+		  "My hovercraft is full of eels", "Ah. You have beautiful thighs.", "My nipples explode with delight",
+		  "Drop your panties Sir William, I cannot wait 'til lunchtime",
+		  "I'm a completely self-taught idiot.", "I always wanted to be a lumberjack!!!",
+		  "Told you so!! Oh, coitus!!", "",
+		  "Nudge nudge?", "Know what I mean!", "Nudge nudge, nudge nudge?", "Say no more!!",
+		  "Hello, well it's just after 8 o'clock, and time for the penguin on top of your television set to explode",
+		  "Oh, intercourse the penguin!!", "Funny that penguin being there, isn't it?",
+		  "I wish to register a complaint.", "Now that's what I call a dead parrot", "Pining for the fjords???",
+		  "No, that's not dead, it's ,uhhhh, resting 6K", "This is an ex-parrot!!",
+		  "That parrot is definitely deceased.", "No, no, no - it's spelt Raymond Luxury Yach-t, but it's pronounced 'Throatwobbler Mangrove'.",
+		  "You're a very silly man and I'm not going to interview you.", "No Mungo... never kill a customer."
+		  "And I'd like to conclude by putting my finger up my nose",
+		  "egg and Spam", "egg bacon and Spam", "egg bacon sausage and Spam", "Spam bacon sausage and Spam",
+		  "Spam egg Spam Spam bacon and Spam", "Spam sausage Spam Spam Spam bacon Spam tomato and Spam", 
+		  "Spam Spam Spam egg and Spam", "Spam Spam Spam Spam Spam Spam baked beans Spam Spam Spam",
+		  "Spam!!", "I don't like Spam!!!", "You can't have egg, bacon, Spam and sausage without the Spam!",
+		  "I'll have your Spam. I Love it!",
+		  "I'm having Spam Spam Spam Spam Spam Spam Spam baked beans Spam Spam Spam and Spam",
+		  "Have you got anything without Spam?", "There's Spam egg sausage and Spam, that's not got much Spam in it.",
+		  "No one expects the Spanish Inquisition!!", "Our weapon is surprise, surprise and fear!",
+		  "Get the comfy chair!", "Amongst our weaponry are such diverse elements as: fear, surprise, ruthless efficiency, an almost fanatical devotion to the Pope, and nice red uniforms - Oh damn!",
+		  "Nobody expects the... Oh bugger!", "What swims in the sea and gets caught in nets? Henri Bergson?",
+		  "Goats. Underwater goats with snorkels and flippers?", "A buffalo with an aqualung?",
+		  "Dinsdale was a looney, but he was a happy looney.", "Dinsdale!!",
+		  "The 127th Upper-Class Twit of the Year Show", "What a great Twit!",
+		  "thought by many to be this year's outstanding twit",
+		  "...and there's a big crowd here today to see these prize idiots in action.",
+		  "And now for something completely different.", "Stop that, it's silly",
+		  "We interrupt this program to annoy you and make things generally irritating",
+		  "This depraved and degrading spectacle is going to stop right now, do you hear me?",
+		  "Stop right there!", "This is absolutely disgusting and I'm not going to stand for it",
+		  "I object to all this sex on the television. I mean, I keep falling off",
+		  "Right! Stop that, it's silly. Very silly indeed", "Very silly indeed", "Lemon curry?",
+		  "And now for something completely different, a man with 3 buttocks",
+		  "I've heard of unisex, but I've never had it", "That's the end, stop the program! Stop it!"]
+
 
 
 def randomText(theme=STARTUP):
