@@ -774,3 +774,20 @@ def find_locals(func,depth=0):
         _ = func(sys._getframe(depth).f_locals)
         if _: return _
         depth += 1
+
+class _FmtSelfDict:
+    def __init__(self,obj):
+        self.obj = obj
+    def __getitem__(self,k):
+        try:
+            return self.obj.__dict__[k]
+        except KeyError:
+            return getattr(self.obj,k)
+
+class FmtSelfDict:
+    '''mixin to provide the _fmt method'''
+    def _fmt(self,fmt):
+        D = getattr(self,'_fmtSelfDict',None)
+        if D is None:
+            D = self._fmtSelfDict = _FmtSelfDict(self)
+        return fmt % D
