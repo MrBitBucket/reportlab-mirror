@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.1 2001/05/03 16:06:55 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.1 2001/05/03 16:06:55 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.2 2001/05/03 18:32:23 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.2 2001/05/03 18:32:23 rgbecker Exp $ '''
 """Usage:
 	from reportlab.graphics import renderPM
 	renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -19,7 +19,14 @@ class RenderPMError(Exception):
 	pass
 
 import string, os, sys
-import _renderPM
+
+try:
+	import _renderPM
+except ImportError, errMsg:
+	if str(errMsg)!='No module named _renderPM':
+		raise ImportError,  "No module named _renderPM\nit may be the wrong version or badly installed!"
+	raise ImportError, "No module named _renderPM\nsee http://www.reportlab.com/rl_addons.html"
+
 from types import TupleType, ListType
 _SeqTypes = (TupleType,ListType)
 
