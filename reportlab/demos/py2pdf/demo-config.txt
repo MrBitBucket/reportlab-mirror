@@ -1,13 +1,11 @@
 --bgCol=(1,.9,.9)
-#-lineNum
+--lineNum
 #--fontSize=12
-#--paperFormat=A4
-#--fontSize=8
+#--paperFormat=B5
 #--fontName=Helvetica
 #--landscape
-#--lineNum
 #--restCol=(0,1,0)
 #--mode=mono
-#--kwCol=(1,1,1)
+--kwCol=(1,0,1)
 #--kwCol=#dd00ff
 #--kwCol=(.5,.5,.5)

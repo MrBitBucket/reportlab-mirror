@@ -1,14 +1,53 @@
 #!/usr/bin/env python
 
-### demo.py
+"""demo.py - Demo script for py2pdf 0.4.
 
-### Main idea: take one Python file and make a whole bunch
-### of PDFs out of it for test purposes.
+The main idea is: take one Python file and make a whole 
+bunch of PDFs out of it for test purposes.
+
+Dinu Gherman
+"""
 
 
 import string, re, os, os.path, sys
 from py2pdf import *
 
+
+### Custom layouter class used with test3().
+
+class ImgPDFLayouter (PDFLayouter):
+    "A customised layouter using an image on each page."
+
+    def setMainFrame(self, frame=None):
+        "Make a frame in the right half of the page."
+        
+        width, height = self.options.realPaperFormat.size
+        self.frame = height - 2*cm, 2*cm, 250, width-1*cm
+
+    
+    def drawPageDecoration(self):
+        "Draw the left border image and page number."
+
+        width, height = self.options.realPaperFormat.size
+        tm, bm, lm, rm = self.frame
+        c = self.canvas
+                
+        # Footer.
+        x, y = lm + 0.5 * (rm - lm), 0.5 * bm
+        c.setFillColor(Color(0, 0, 0))
+        c.setFont('Times-Italic', 12)
+        label = "Page %d" % self.pageNum
+        c.drawCentredString(x, y, label)
+
+        # Image.
+        x, y = 219.0, 655.0 # Known size of the picture.
+        
+        c.saveState()
+        c.scale((lm - 1*cm)/x, height/y)
+        path = 'vertpython.jpg'
+        c.drawInlineImage(path, 0, 0)
+        c.restoreState()        
+        
 
 ### Helpers.
 
@@ -65,16 +104,20 @@ def test2(path):
     
     p = PDFPrettyPrinter()
     p.options.updateOption('landscape', 1)
+    p.options.updateOption('fontName', 'Helvetica')
+    p.options.updateOption('fontSize', '14')
     p.options.display()
     p.process(path)
 
 
 def test3(path):
-    "Creating a PDF with modified options and layout."
+    "Creating a PDF with modified layout."
     
     p = PDFPrettyPrinter()
-    p.Layouter = PDFEmptyLayouter
+    p.Layouter = ImgPDFLayouter
+    # p.options.updateOption('lineNum', 1)
     p.options.updateOption('fontName', 'Helvetica')
+    p.options.updateOption('fontSize', '12')
     p.options.display()
     p.process(path)
 
@@ -88,23 +131,26 @@ def test4(path):
 
 
 def test5(path):
-    "Creating a PDF based with an option config file."
+    "Creating a PDF with options from a config file."
     
     p = PDFPrettyPrinter()
     i = string.find(path, 'test5')
     newPath = modifyPath(path[:i-1], 'config') + '.txt'
-    # print newPath
-    p.options.updateWithContentsOfFile(newPath)
-    p.options.display()
-    p.process(path)
-
+    
+    try:
+        p.options.updateWithContentsOfFile(newPath)
+        p.options.display()
+        p.process(path)
+    except IOError:
+        print "Skipping test5() due to IOError."
+        
 
 def test6(path):
     "Creating several PDFs as 'magazine listings'."
     
     p = PDFPrettyPrinter()
     p.Layouter = PDFEmptyLayouter
-    p.options.updateOption('paperSize', '(200,400)')
+    p.options.updateOption('paperSize', '(250,400)')
     p.options.updateOption('multiPage', 1)
     p.options.updateOption('lineNum', 1)
     p.process(path)

@@ -28,8 +28,7 @@
 ### DEPENDENCIES:
 ### - JvR's PyFontify v. 0.3
 ### - optionally: Marc-Andre's mxTextTools
-### - ReportLab libraries v. 0.90
-### - ReportLab's fonts.py coming in the release after
+### - ReportLab libraries v. 0.92 (2000-04-10)
 
 ### TODO (TESTING):
 ### - test stdin, stdout on Unix
@@ -37,7 +36,6 @@
 ### - test with Marc-Andre's tagging engine in mxTextTools
 
 ### TODO FOR NEXT VERSION (IMPLEMENTATION):
-### - improve smart line wrapping (line numbers)
 ### - improve smart line wrapping (maybe add meta characters)
 ### - better support mxTextTools
 ### - improve tab handling
@@ -62,12 +60,12 @@
 ### - add keywords to PDFdoc
 
 ### KNOWN BUGS:
-### - some problems with line wrapping when using line numbers
 ### - comments beginning immediately with a keyword after the hash
 ###   (i.e. with no whitespace) are not fully ignored to the end of 
 ###   the line... (PyFontify; py2html shows the same behaviour.)
 
 ### CHANGES FROM PREVIOUS VERSION (0.3):
+### - fixed bug with lines in non-Courier extending over right margin 
 ### - removed sys.path.append('.')
 ### - now using reportlab.lib.fonts
 ### - tagFunc no longer needed as init-argument for PDFPrettyPrinter
@@ -94,7 +92,7 @@
 ### - tested on Macs
 
 
-""" Python Highlighter for PDF                     Version: 0.4 pr3
+""" Python Highlighter for PDF                     Version: 0.4
 
     py2pdf.py [options] <file1> [<file2> ...]
 
@@ -138,13 +136,13 @@
       scripts. You can get it via his homepage on the starship:
           http://starship.skyport.net/crew/just 
 
-    * Uses the ReportLab library version 0.9 (from 2000-03-27) to 
+    * Uses the ReportLab library version 0.92 (from 2000-04-10) to 
       generate PDF. You can get it from ReportLab:
           http://www.reportlab.com
 
     * Parts of this code still borrow heavily from Marc-Andre 
       Lemburg's py2html who has kindly given permission to 
-      include it in py2pdf. Thanks, M.-A.!
+      include them in py2pdf. Thanks, M.-A.!
 
 """
 __copyright__ = """
@@ -170,9 +168,9 @@ __copyright__ = """
     OR PERFORMANCE OF THIS SOFTWARE!
 """
 
-__version__ = '0.4 pr3'
+__version__ = '0.4'
 __author__  = 'Dinu C. Gherman'
-__date__    = '2000-04-09'
+__date__    = '2000-04-10'
 __url__     = 'http://starship.python.net/crew/gherman/programs/py2pdf'
 
 
@@ -651,8 +649,8 @@ class PDFLayouter:
         if not o.multiPage:        
             # Create canvas.
             self.canvas = canvas.Canvas(self.path,
-                                o.realPaperFormat.size,
-                                verbosity=0)  #added by AR
+                o.realPaperFormat.size,
+                verbosity=0)  # Added by AR.
             c = self.canvas
             c.setPageCompression(1)
             c.setFont(o.fontName, o.fontSize)                
@@ -682,8 +680,8 @@ class PDFLayouter:
             base, ext = os.path.splitext(self.path)
             newPath = "%s-%d%s" % (base, self.pageNum, ext)            
             self.canvas = canvas.Canvas(newPath,
-                                        o.realPaperFormat.size,
-                                        verbosity=0) #added by AR
+                o.realPaperFormat.size,
+                verbosity=0) # Added by AR.
             c = self.canvas
             c.setPageCompression(1)
             c.setFont(o.fontName, o.fontSize)                
@@ -744,10 +742,8 @@ class PDFLayouter:
     # much space and showed very poor results...
     # This linear method is very slow, but such lines should
     # be very rare, too!
-    # This is ok with Courier, but less so with Helvetica and
-    # Times-Roman, not sure why.
     
-    def putLongText1(self, text):
+    def putSplitLongText(self, text):
         "Add a long text that can't be split into chunks."
         
         # Now, the splitting will be with 'no mercy',
@@ -760,7 +756,7 @@ class PDFLayouter:
         tm, bm, lm, rm = self.frame
 
         width = self.canvas.stringWidth      
-        fn, fs = o.fontName, o.fontSize        
+        fn, fs = self.currFont
         tw = width(text, fn, fs)
         
         tx = self.text
@@ -769,7 +765,7 @@ class PDFLayouter:
             T = ''
             while text:
                 T = text[:i]
-                tx = self.text
+                tx = self.text # Can change after a page break.
                 tw = width(T, fn, fs)
                 
                 if x + tw > rm:
@@ -803,46 +799,44 @@ class PDFLayouter:
         tm, bm, lm, rm = self.frame
         
         width = self.canvas.stringWidth      
-        fn, fs = o.fontName, o.fontSize        
+        fn, fs = self.currFont
         tw = width(text, fn, fs)
 
-        # Hmm, should check for multiple spaces resulting in
-        # empty strings in the array, too...
         arr = string.split(text, ' ')
-        
+                    
         for i in range(len(arr)):
             a = arr[i]
             t = self.text # Can change during the loop...
             tw = width(a, fn, fs)
             x = t.getX()
                 
-            # Subject to further improvements...            
-            if tw < rm - lm:
-                if x + tw > rm:
-                    self.endLine(wrapped=1)
-                    self.beginLine(wrapped=1)
-                    x = t.getX()
-                
-                t.textOut(a)
-                if i < len(arr) - 1:
-                    t.textOut(' ') 
-                    # Or any other char. we used for splitting...
-                    
+            # If current item does not fit on current line, have it
+            # split and then put before/after a line (maybe also
+            # page) break.
+            if x + tw > rm:
+                self.putSplitLongText(a)
+                t = self.text # Can change after a page break...
+            
+            # If it fits, just add it to the current text object.
             else:
-                self.putLongText1(a)
-    
+                t.textOut(a)
+ 
+            # Add the character we used to split th original text.           
+            if i < len(arr) - 1:
+                t.textOut(' ')
+                        
 
     def putText(self, text):
         "Add some text to the current line."
-        
+                
         t = self.text
-        o = self.options
-        tm, bm, lm, rm = self.frame
-        
         x = t.getX()
-        fs = o.fontSize
+        o = self.options
+        fn, fs = o.fontName, o.fontSize
         
-        tw = self.canvas.stringWidth(text, o.fontName, fs)
+        tw = self.canvas.stringWidth(text, fn, fs)
+
+        rm = self.frame[3]
         
         if x + tw < rm:
             t.textOut(text)        
@@ -1483,6 +1477,5 @@ def main(cmdline):
 
 ###
 
-if __name__=='__main__':
+if __name__=='__main__': #Don't autoexec in runtests
     main(sys.argv)
-    
