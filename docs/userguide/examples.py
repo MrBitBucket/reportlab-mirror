@@ -25,7 +25,7 @@ def hello(c):
     c.setStrokeColorRGB(0.2,0.5,0.3)
     c.setFillColorRGB(1,0,1)
     # draw some lines
-    c.line(0,0,0,2*inch)
+    c.line(0,0,0,1.7*inch)
     c.line(0,0,1*inch,0)
     # draw a rectangle
     c.rect(0.2*inch,0.2*inch,1*inch,1.5*inch, fill=1)
@@ -35,6 +35,98 @@ def hello(c):
     c.setFillColorRGB(0,0,0.77)
     # say hello (note after rotate the y coord needs to be negative!)
     c.drawString(0.3*inch, -inch, "Hello World")
+"""
+
+testcoords = """
+def coords(canvas):
+    from reportlab.lib.units import inch
+    from reportlab.lib.colors import pink, black, red, blue, green
+    c = canvas
+    c.setStrokeColor(pink)
+    c.grid([inch, 2*inch, 3*inch, 4*inch], [0.5*inch, inch, 1.5*inch, 2*inch, 2.5*inch])
+    c.setStrokeColor(black)
+    c.setFont("Times-Roman", 20)
+    c.drawString(0,0, "(0,0) the Origin")
+    c.drawString(2.5*inch, inch, "(2.5,1) in inches")
+    c.drawString(4*inch, 2.5*inch, "(4, 2.5)")
+    c.setFillColor(red)
+    c.rect(0,2*inch,0.2*inch,0.3*inch, fill=1)
+    c.setFillColor(green)
+    c.circle(4.5*inch, 0.4*inch, 0.2*inch, fill=1)
+"""
+
+testtranslate = """
+def translate(canvas):
+    from reportlab.lib.units import cm
+    canvas.translate(2.3*cm, 0.3*cm)
+    coords(canvas)
+    """
+    
+testscale = """
+def scale(canvas):
+    canvas.scale(0.75, 0.5)
+    coords(canvas)
+"""
+
+testscaletranslate = """
+def scaletranslate(canvas):
+    from reportlab.lib.units import inch
+    canvas.setFont("Courier-BoldOblique", 12)
+    # save the state
+    canvas.saveState()
+    # scale then translate
+    canvas.scale(0.3, 0.5)
+    canvas.translate(2.4*inch, 1.5*inch)
+    canvas.drawString(0, 2.7*inch, "Scale then translate")
+    coords(canvas)
+    # forget the scale and translate...
+    canvas.restoreState()
+    # translate then scale
+    canvas.translate(2.4*inch, 1.5*inch)
+    canvas.scale(0.3, 0.5)
+    canvas.drawString(0, 2.7*inch, "Translate then scale")
+    coords(canvas)
+"""
+
+testspumoni = """
+def spumoni(canvas):
+    from reportlab.lib.units import inch
+    from reportlab.lib.colors import pink, green, brown, white
+    x = 0; dx = 0.4*inch
+    for i in range(4):
+        for color in (pink, green, brown):
+            canvas.setFillColor(color)
+            canvas.rect(x,0,dx,3*inch,stroke=0,fill=1)
+            x = x+dx
+    canvas.setFillColor(white)
+    canvas.setStrokeColor(white)
+    canvas.setFont("Helvetica-Bold", 85)
+    canvas.drawCentredString(2.75*inch, 1.3*inch, "SPUMONI")
+"""
+
+testspumoni2 = """
+def spumoni2(canvas):
+    from reportlab.lib.units import inch
+    from reportlab.lib.colors import pink, green, brown, white, black
+    # draw the previous drawing
+    spumoni(canvas)
+    # now put an ice cream cone on top of it:
+    # first draw a triangle (ice cream cone)
+    p = canvas.beginPath()
+    xcenter = 2.75*inch
+    radius = 0.45*inch
+    p.moveTo(xcenter-radius, 1.5*inch)
+    p.lineTo(xcenter+radius, 1.5*inch)
+    p.lineTo(xcenter, 0)
+    canvas.setFillColor(brown)
+    canvas.setStrokeColor(black)
+    canvas.drawPath(p, fill=1)
+    # draw some circles (scoops)
+    y = 1.5*inch
+    for color in (pink, green, brown):
+        canvas.setFillColor(color)
+        canvas.circle(xcenter, y, radius, fill=1)
+        y = y+radius
 """
 
 glarp = "this would be a syntax error"
@@ -50,4 +142,3 @@ for (a,b) in g.items():
         #print b
         b = strip(b)
         exec(b+'\n')
-
