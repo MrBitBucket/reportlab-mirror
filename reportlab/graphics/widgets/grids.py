@@ -9,6 +9,23 @@ from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics import renderPDF
 
 
+def frange(start, end=None, inc=None):
+    "A range function, that does accept float increments..."
+
+    if end == None:
+        end = start + 0.0
+        start = 0.0
+
+    if inc == None:
+        inc = 1.0
+
+    L = [start]
+    while L[-1] + inc < end:
+        L.append(L[-1] + inc)
+
+    return L
+
+
 class Grid0(Widget):
     """This makes a rectangular grid of equidistant stripes.
 
@@ -92,19 +109,48 @@ class Grid0(Widget):
         # inner grid lines
         group = Group()
         
+        w, h = self.width, self.height
+
         if self.useLines == 1:
             if self.orientation == 'vertical':
-                for x in xrange(self.x + self.delta0, self.x + self.width, self.delta):
-                    line = Line(x, self.y, x, self.y + self.height)
+                for x in frange(self.x + self.delta0, self.x + w, self.delta):
+                    line = Line(x, self.y, x, self.y + h)
                     line.strokeColor = self.strokeColor
                     line.strokeWidth = self.strokeWidth
                     group.add(line)
+                # if offset != 0 we need to draw left- and rightmost
+                # stripe seperately
+                if self.delta0 != 0:
+                    line = Line(self.x, self.y, self.x, self.y + h)
+                    line.strokeColor = self.strokeColor
+                    line.strokeWidth = self.strokeWidth
+                    group.add(line)
+
+                # hack: this should happen in the for-loop above...
+                line = Line(self.x + w, self.y, self.x + w, self.y + h)
+                line.strokeColor = self.strokeColor
+                line.strokeWidth = self.strokeWidth
+                group.add(line)
+
             elif self.orientation == 'horizontal':
-                for y in xrange(self.y + self.delta0, self.y + self.height, self.delta):
-                    line = Line(self.x, y, self.x + self.width, y)
+                for y in frange(self.y + self.delta0, self.y + h, self.delta):
+                    line = Line(self.x, y, self.x + w, y)
                     line.strokeColor = self.strokeColor
                     line.strokeWidth = self.strokeWidth
                     group.add(line)
+                # if offset != 0 we need to draw upper- and lowermost
+                # stripe seperately
+                if self.delta0 != 0:
+                    line = Line(self.x, self.y, self.x + w, self.y)
+                    line.strokeColor = self.strokeColor
+                    line.strokeWidth = self.strokeWidth
+                    group.add(line)
+
+                # hack: this should happen in the for-loop above...
+                line = Line(self.x, self.y + w, self.x + w, self.y + w)
+                line.strokeColor = self.strokeColor
+                line.strokeWidth = self.strokeWidth
+                group.add(line)
 
         return group
 
@@ -113,23 +159,25 @@ class Grid0(Widget):
         # inner grid lines
         group = Group()
 
+        w, h = self.width, self.height
+
         # inner grid stripes (solid rectangles)
         if self.useRects == 1:
             cols = self.stripeColors
             if self.orientation == 'vertical':
                 i = 0
-                r = range(self.x + self.delta0, self.x + self.width, self.delta)
-                for j in xrange(len(r)):
+                r = frange(self.x + self.delta0, self.x + w, self.delta)
+                for j in frange(len(r)):
                     x = r[j]
                     try:
-                        stripe = Rect(x, self.y, r[j+1]-x, self.height)
+                        stripe = Rect(x, self.y, r[j+1]-x, h)
                         stripe.fillColor = cols[i % len(cols)] 
                         stripe.strokeColor = None
                         group.add(stripe)
                         i = i + 1
                     except IndexError:
                         if self.delta0 == 0:
-                            stripe = Rect(x, self.y, self.delta, self.height)
+                            stripe = Rect(x, self.y, self.delta, h)
                             stripe.fillColor = cols[i % len(cols)] 
                             stripe.strokeColor = None
                             group.add(stripe)
@@ -137,30 +185,30 @@ class Grid0(Widget):
                 # if offset != 0 we need to draw left- and rightmost
                 # stripe seperately
                 if self.delta0 != 0:
-                    lmStripe = Rect(self.x, self.y, self.delta0, self.height)
+                    lmStripe = Rect(self.x, self.y, self.delta0, h)
                     lmStripe.fillColor = cols[-1] 
                     lmStripe.strokeColor = None
                     group.add(lmStripe)
 
-                    rmStripe = Rect(self.x + self.width - self.delta0, self.y, self.delta0, self.height)
+                    rmStripe = Rect(self.x + w - self.delta0, self.y, self.delta0, h)
                     rmStripe.fillColor = cols[i % len(cols)] 
                     rmStripe.strokeColor = None
                     group.add(rmStripe)
 
             elif self.orientation == 'horizontal':
                 i = 0
-                r = range(self.y + self.delta0, self.y + self.height, self.delta)
-                for j in xrange(len(r)):
+                r = frange(self.y + self.delta0, self.y + h, self.delta)
+                for j in frange(len(r)):
                     y = r[j]
                     try:
-                        stripe = Rect(self.x, y, self.width, r[j+1]-y)
+                        stripe = Rect(self.x, y, w, r[j+1]-y)
                         stripe.fillColor = cols[i % len(cols)] 
                         stripe.strokeColor = None
                         group.add(stripe)
                         i = i + 1
                     except IndexError:
                         if self.delta0 == 0:
-                            stripe = Rect(self.x, y, self.width, self.delta)
+                            stripe = Rect(self.x, y, w, self.delta)
                             stripe.fillColor = cols[i % len(cols)] 
                             stripe.strokeColor = None
                             group.add(stripe)
@@ -168,12 +216,12 @@ class Grid0(Widget):
                 # if offset != 0 we need to draw upper- and lowermost
                 # stripe seperately
                 if self.delta0 != 0:
-                    lmStripe = Rect(self.x, self.y, self.width, self.delta0)
+                    lmStripe = Rect(self.x, self.y, w, self.delta0)
                     lmStripe.fillColor = cols[-1] 
                     lmStripe.strokeColor = None
                     group.add(lmStripe)
 
-                    umStripe = Rect(self.x, self.y + self.width - self.delta0, self.width, self.delta0)
+                    umStripe = Rect(self.x, self.y + w - self.delta0, w, self.delta0)
                     umStripe.fillColor = cols[i % len(cols)] 
                     umStripe.strokeColor = None
                     group.add(umStripe)
@@ -194,6 +242,10 @@ class Grid0(Widget):
 
 class ShadedRect0(Widget):
     """This makes a rectangle with shaded colors between two colors.
+
+    Colors are interpolated linearly between 'fillColorStart'
+    and 'fillColorEnd', both of which appear at the margins.
+    If 'numShades' is set to one only 'fillColorStart' is used.    
     """
 
     _attrMap = AttrMap(
@@ -225,7 +277,7 @@ class ShadedRect0(Widget):
         self.width = 100 
         self.height = 100 
         self.orientation = 'vertical' 
-        self.numShades = 20.0
+        self.numShades = 20
         self.fillColorStart = colors.pink
         self.fillColorEnd = colors.black
         self.strokeColor = colors.black
@@ -246,7 +298,9 @@ class ShadedRect0(Widget):
         # general widget bits
         group = Group()
         
-        rect = Rect(self.x, self.y, self.width, self.height)
+        w, h = self.width, self.height
+
+        rect = Rect(self.x, self.y, w, h)
         rect.strokeColor = self.strokeColor
         rect.strokeWidth = self.strokeWidth
         rect.fillColor = None
@@ -254,31 +308,43 @@ class ShadedRect0(Widget):
 
         c0, c1 = self.fillColorStart, self.fillColorEnd
         r, g, b = c0.red, c0.green, c0.green
-        num = self.numShades
+        num = float(self.numShades) # must make it float!
 
         if self.orientation == 'vertical':
-            for x in xrange(self.x, self.x + self.width, self.width/num):
-                line = Rect(x, self.y, self.width/num, self.height)
+            if num == 1:
+                xVals = [self.x]
+            else:
+                xVals = frange(self.x, self.x + w, w/num)
+
+            for x in xVals:
+                stripe = Rect(x, self.y, w/num, h)
                 col = colors.Color(r, g, b)
-                line.fillColor = col
-                line.strokeColor = None
-                line.strokeWidth = 0
-                group.add(line)
-                r = r + (c1.red - c0.red)/num
-                g = g + (c1.green - c0.green)/num
-                b = b + (c1.blue - c0.blue)/num
+                stripe.fillColor = col
+                stripe.strokeColor = None
+                stripe.strokeWidth = 0
+                group.add(stripe)
+                if num > 1:
+                    r = r + (c1.red - c0.red) / (num-1)
+                    g = g + (c1.green - c0.green) / (num-1)
+                    b = b + (c1.blue - c0.blue) / (num-1)
  
         elif self.orientation == 'horizontal':
-            for y in xrange(self.y, self.y + self.height, self.height/num):
-                line = Rect(self.x, y, self.width, self.height/num)
+            if num == 1:
+                yVals = [self.y]
+            else:
+                yVals = frange(self.y, self.y + h, h/num)
+
+            for y in yVals:
+                stripe = Rect(self.x, y, w, h/num)
                 col = colors.Color(r, g, b)
-                line.fillColor = col
-                line.strokeColor = None
-                line.strokeWidth = 0
-                group.add(line)            
-                r = r + (c1.red - c0.red)/num
-                g = g + (c1.green - c0.green)/num
-                b = b + (c1.blue - c0.blue)/num
+                stripe.fillColor = col
+                stripe.strokeColor = None
+                stripe.strokeWidth = 0
+                group.add(stripe)
+                if num > 1:
+                    r = r + (c1.red - c0.red) / (num-1)
+                    g = g + (c1.green - c0.green) / (num-1)
+                    b = b + (c1.blue - c0.blue) / (num-1)
 
         return group
 
@@ -286,99 +352,94 @@ class ShadedRect0(Widget):
 def test():
     D = Drawing(450,650)
 
-    g = Grid0()
-    g.x = 20
-    g.y = 530
-    g.demo()
-    D.add(g)
-
-    g = Grid0()
-    g.x = 140
-    g.y = 530
-    g.delta0 = 10
-    g.demo()
-    D.add(g)
-
-    g = Grid0()
-    g.x = 260
-    g.y = 530
-    g.orientation = 'horizontal'
-    g.demo()
-    D.add(g)
-
-    sr = ShadedRect0()
-    sr.x = 20
-    sr.y = 390
-    sr.fillColorStart = colors.Color(0, 0, 0)
-    sr.fillColorEnd = colors.Color(1, 1, 1)
-    sr.demo()
-    D.add(sr)
-
-    sr = ShadedRect0()
-    sr.x = 140
-    sr.y = 390
-    sr.fillColorStart = colors.Color(1, 1, 1)
-    sr.fillColorEnd = colors.Color(0, 0, 0)
-    sr.demo()
-    D.add(sr)
-
-    sr = ShadedRect0()
-    sr.x = 20
-    sr.y = 250
-    sr.numShades = 10
-    sr.fillColorStart = colors.red
-    sr.fillColorEnd = colors.blue
-    sr.orientation = 'horizontal'
-    sr.demo()
-    D.add(sr)
-
-    sr = ShadedRect0()
-    sr.x = 140
-    sr.y = 250
-    sr.numShades = 20
-    sr.fillColorStart = colors.red
-    sr.fillColorEnd = colors.blue
-    sr.orientation = 'horizontal'
-    sr.demo()
-    D.add(sr)
-
-    sr = ShadedRect0()
-    sr.x = 260
-    sr.y = 250
-    sr.numShades = 50
-    sr.fillColorStart = colors.red
-    sr.fillColorEnd = colors.blue
-    sr.orientation = 'horizontal'
-    sr.demo()
-    D.add(sr)
-
-    g = Grid0()
-    g.x = 20
-    g.y = 110
-    g.useLines = 1
-    g.demo()
-    D.add(g)
-
-    g = Grid0()
-    g.x = 140
-    g.y = 110
-    g.delta0 = 10
-    g.useLines = 1
-    g.useRects = 0
-    g.demo()
-    D.add(g)
-
-    g = Grid0()
-    g.x = 260
-    g.y = 110
-    g.orientation = 'horizontal'
-    g.useLines = 1
-    g.demo()
-    D.add(g)
+    for row in range(5):
+        y = 530 - row*120
+        if row == 0:
+            for col in range(3):
+                x = 20 + col*120
+                g = Grid0()
+                g.x = x
+                g.y = y
+                g.useRects = 0
+                g.useLines = 1
+                if col == 0:
+                    pass
+                elif col == 1:
+                    g.delta0 = 10
+                elif col == 2:
+                    g.orientation = 'horizontal'
+                g.demo()
+                D.add(g)
+        elif row == 1:
+            for col in range(3):
+                x = 20 + col*120
+                g = Grid0()
+                g.y = y
+                g.x = x
+                if col == 0:
+                    pass
+                elif col == 1:
+                    g.delta0 = 10
+                elif col == 2:
+                    g.orientation = 'horizontal'
+                g.demo()
+                D.add(g)
+        elif row == 2:
+            for col in range(3):
+                x = 20 + col*120
+                g = Grid0()
+                g.x = x
+                g.y = y
+                g.useLines = 1
+                g.useRects = 1
+                if col == 0:
+                    pass
+                elif col == 1:
+                    g.delta0 = 10
+                elif col == 2:
+                    g.orientation = 'horizontal'
+                g.demo()
+                D.add(g)
+        elif row == 3:
+            for col in range(3):
+                x = 20 + col*120
+                sr = ShadedRect0()
+                sr.x = x
+                sr.y = y
+                sr.fillColorStart = colors.Color(0, 0, 0)
+                sr.fillColorEnd = colors.Color(1, 1, 1)
+                if col == 0:
+                    sr.numShades = 5
+                elif col == 1:
+                    sr.numShades = 2
+                elif col == 2:
+                    sr.numShades = 1
+                sr.demo()
+                D.add(sr)
+        elif row == 4:
+            for col in range(3):
+                x = 20 + col*120
+                sr = ShadedRect0()
+                sr.x = x
+                sr.y = y
+                sr.fillColorStart = colors.red
+                sr.fillColorEnd = colors.blue
+                sr.orientation = 'horizontal'
+                if col == 0:
+                    sr.numShades = 10
+                elif col == 1:
+                    sr.numShades = 20
+                elif col == 2:
+                    sr.numShades = 50
+                sr.demo()
+                D.add(sr)
 
     renderPDF.drawToFile(D, 'grids.pdf', 'grids.py')
     print 'wrote file: grids.pdf'
     
 
 if __name__=='__main__':
+##    print frange(10)
+##    print frange(10, 20)
+##    print frange(10, 20, 1.5)
     test()
