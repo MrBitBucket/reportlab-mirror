@@ -252,7 +252,7 @@ class Legend(Widget):
 
             # thisy+dy/2 = y+leading/2
             y = thisy+(dy-ascent)*0.5
-            if callout: callout(self,g,thisx,y,colorNamePairs[count])
+            if callout: callout(self,g,thisx,y,(col,name))
             if alignment == "left":
                 for t in T:
                     # align text to left
