@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.9 2001/05/07 14:10:41 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.10 2001/05/08 09:07:50 dinu_gherman Exp $
 """
 This modules defines a very preliminary Line Plot example.
 """
@@ -61,7 +61,6 @@ class LinePlot(Widget):
         'strokeColor':isColorOrNone,
         'fillColor':isColorOrNone,
 
-        'defaultColors':SequenceOf(isColor),    # deprecated
         'defaultStyles':None,
 
         'xValueAxis':None,
@@ -93,12 +92,9 @@ class LinePlot(Widget):
         # we really need some well-designed default lists of
         # colors e.g. from Tufte.  These will be used in a
         # cycle to set the fill color of each series.
-        self.defaultColors = [colors.red, colors.green, colors.blue] # deprecated
-
-        p1 = LinePlotProperties(strokeColor=colors.red,
-                                symbol=makeFilledCircle)
-        p2 = LinePlotProperties(strokeColor=colors.blue,
-                                symbol=makeFilledCircle)
+        LPP = LinePlotProperties
+        p1 = LPP(strokeColor=colors.red, symbol=makeFilledCircle)
+        p2 = LPP(strokeColor=colors.blue, symbol=makeFilledCircle)
         self.defaultStyles = [p1, p2]
 
         # control bar spacing. is useAbsolute = 1 then
@@ -243,11 +239,6 @@ class LinePlot(Widget):
         for rowNo in range(len(self._positions)):
             row = self._positions[rowNo]
 
-            # deprecated            
-            colorCount = len(self.defaultColors)
-            colorIdx = rowNo % colorCount
-            rowColor = self.defaultColors[colorIdx]
-
             styleCount = len(self.defaultStyles)
             styleIdx = rowNo % styleCount
             rowColor = self.defaultStyles[styleIdx].strokeColor
@@ -287,11 +278,6 @@ class LinePlot(Widget):
         # Iterate over data rows.        
         for rowNo in range(len(self._positions)):
             row = self._positions[rowNo]
-
-            # deprecated            
-            colorCount = len(self.defaultColors)
-            colorIdx = rowNo % colorCount
-            rowColor = self.defaultColors[colorIdx]
 
             styleCount = len(self.defaultStyles)
             styleIdx = rowNo % styleCount
