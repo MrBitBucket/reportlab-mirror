@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: textobject.py,v $
+#	Revision 1.18  2000/09/01 12:13:26  rgbecker
+#	Improved optimisation checks
+#
 #	Revision 1.17  2000/09/01 09:29:21  rgbecker
 #	Fixed potential 'Td' bug
-#
+#	
 #	Revision 1.16  2000/08/17 15:50:36  rgbecker
 #	Various brutal changes to paragraph, canvas and textobject for speed/size
 #	
@@ -81,7 +84,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: textobject.py,v 1.17 2000/09/01 09:29:21 rgbecker Exp $ '''
+__version__=''' $Id: textobject.py,v 1.18 2000/09/01 12:13:26 rgbecker Exp $ '''
 __doc__=""" 
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -145,7 +148,7 @@ class PDFTextObject:
         """Moves to a point dx, dy away from the start of the
         current line - NOT from the current point! So if
         you call it in mid-sentence, watch out."""
-        if len(self._code) and self._code[-1][-3:]==' Td':
+        if self._code and self._code[-1][-3:]==' Td':
             L = string.split(self._code[-1])
             if len(L)==3:
                 del self._code[-1]

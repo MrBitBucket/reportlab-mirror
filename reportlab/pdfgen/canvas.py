@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.50  2000/09/01 12:13:26  rgbecker
+#	Improved optimisation checks
+#
 #	Revision 1.49  2000/08/31 23:34:36  rgbecker
 #	Fix transform optimisation
-#
+#	
 #	Revision 1.48  2000/08/20 21:39:50  andy_robinson
 #	Changed an argument syntax for clarity
 #	
@@ -177,7 +180,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.49 2000/08/31 23:34:36 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.50 2000/09/01 12:13:26 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -714,7 +717,7 @@ class Canvas:
         #self._currentMatrix = (a0*a+c0*b,    b0*a+d0*b,
         #                       a0*c+c0*d,    b0*c+d0*d,
         #                       a0*e+c0*f+e0, b0*e+d0*f+f0)
-        if len(self._code) and self._code[-1][-3:]==' cm':
+        if self._code and self._code[-1][-3:]==' cm':
             L = string.split(self._code[-1])
             a0, b0, c0, d0, e0, f0 = map(float,L[-7:-1])
             s = len(L)>7 and string.join(L)+ ' %s cm' or '%s cm'
