@@ -15,7 +15,6 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Flowable
 from reportlab.pdfbase import pdfmetrics, cidfonts
 
-
 class CodeChartBase(Flowable):
     """Basic bits of drawing furniture used by
     single and multi-byte versions: ability to put letters
@@ -238,7 +237,28 @@ class Big5CodeChart(CodeChartBase):
         charList = self.makeRow(self.row) 
         self.drawChars(charList)
         self.canv.grid(self.xlist, self.ylist)
-        
+
+
+def hBoxText(msg, canvas, x, y, faceName, encName):
+    """Helper for stringwidth tests on Asian fonts.
+
+    Registers font if needed.  Then draws the string,
+    and a box around it derived from the stringWidth function"""
+    canvas.saveState()
+    fontName = faceName + '-' + encName
+    try:
+        font = pdfmetrics.getFont(fontName)
+    except KeyError:
+        font = cidfonts.CIDFont(faceName, encName)
+        pdfmetrics.registerFont(font)
+
+    canvas.setFillGray(0.8)
+    canvas.rect(x,y,pdfmetrics.stringWidth(msg, fontName, 16),16,stroke=0,fill=1)
+    canvas.setFillGray(0)
+    canvas.setFont(fontName, 16,16)
+    canvas.drawString(x,y,msg)
+    canvas.restoreState()
+    
 def test():
     c = Canvas('codecharts.pdf')
     c.setFont('Helvetica-Bold', 24)

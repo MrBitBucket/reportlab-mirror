@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/_cidfontdata.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: _cidfontdata.py,v 1.6 2001/10/27 22:37:02 andy_robinson Exp $ '''
+__version__=''' $Id: _cidfontdata.py,v 1.7 2001/10/28 00:22:18 andy_robinson Exp $ '''
 __doc__="""
 This defines additional static data to support CID fonts.
 
@@ -25,10 +25,10 @@ languages = ['jpn', 'kor', 'cht', 'chs']
 
 #breaking down the lists let us check if something is present
 #for a specific language
-typeFaces_chs = ['STSongStd-Light-Acro'] # to do
-typeFaces_cht = ['MSungStd-Light-Acro'] # to do
+typeFaces_chs = ['STSong-Light'] # to do
+typeFaces_cht = ['MSung-Light', 'MHei-Medium'] # to do
 typeFaces_jpn = ['HeiseiMin-W3', 'HeiseiKakuGo-W5']
-typeFaces_kor = ['HYSMyeongJoStd-Medium-Acro']
+typeFaces_kor = ['HYSMyeongJoStd-Medium','HYGothic-Medium']
 
 allowedTypeFaces = typeFaces_chs + typeFaces_cht + typeFaces_jpn + typeFaces_kor
 
@@ -115,6 +115,8 @@ encodings_cht = [
     'UniCNS-UCS2-V'    # Vertical version of UniCNS-UCS2-H.
     ]
 
+# the Identity encodings simply dump out all character
+# in the font in the order they were defined.
 allowedEncodings = (['Identity-H', 'Identity-V'] +
                     encodings_chs +
                     encodings_cht +
@@ -218,31 +220,65 @@ CIDFontInfo['HeiseiKakuGo-W5'] =  {'Type':'/Font',
                 }] # end descendant fonts
             }
 
-
-CIDFontInfo['HYSMyeongJoStd-Medium-Acro'] =  {'Type':'/Font',
+CIDFontInfo['HYGothic-Medium'] =  {'Type':'/Font',
             'Subtype':'/Type0',
             'Name': '/%(internalName)s', #<-- the internal name
-            'BaseFont': '/' + 'HYSMyeongJoStd-Medium-Acro',
+            'BaseFont': '/' + 'HYGothic-Medium',
             'Encoding': '/%(encodings)s',
             'DescendantFonts': [{'Type':'/Font',
-                'Subtype':'/CIDFontType2',
-                'BaseFont':'/'+'HYSMyeongJoStd-Medium-Acro',
+                'Subtype':'/CIDFontType0',
+                'BaseFont':'/'+'HYGothic-Medium',
                 'FontDescriptor': {
                     'Type': '/FontDescriptor',
-                    'Ascent': 858,
-                    'AvgWidth': 500,
-                    'CapHeight': 858,
+                    'Ascent': 752,
+                    'AvgWidth': -271,
+                    'CapHeight': 737,
                     'Descent': -142,
-                    'Flags': 7,
-                    'FontBBox': [-100, -142, 1100, 1000],
+                    'Flags': 6,
+                    'FontBBox': [-6, -145, 1003, 880],
                     'FontName': '/'+'HYSMyeongJoStd-Medium-Acro',
                     'ItalicAngle': 0,
                     'Leading': 148,
                     'MaxWidth': 1000,
                     'MissingWidth': 500,
+                    'StemH': 0,
+                    'StemV': 58,
+                    'XHeight': 553
+                    },
+                'CIDSystemInfo': {
+                    'Registry': '(Adobe)',
+                    'Ordering': '(Korea1)',
+                    'Supplement': 1
+                    },
+                'DW': 1000,
+                'W': (1, 94, 500)
+                }] # end descendant fonts
+            }
+
+CIDFontInfo['HYSMyeongJoStd-Medium'] =  {'Type':'/Font',
+            'Subtype':'/Type0',
+            'Name': '/%(internalName)s', #<-- the internal name
+            'BaseFont': '/' + 'HYSMyeongJoStd-Medium',
+            'Encoding': '/%(encodings)s',
+            'DescendantFonts': [{'Type':'/Font',
+                'Subtype':'/CIDFontType2',
+                'BaseFont':'/'+'HYSMyeongJoStd-Medium',
+                'FontDescriptor': {
+                    'Type': '/FontDescriptor',
+                    'Ascent': 752,
+                    'AvgWidth': 500,
+                    'CapHeight': 737,
+                    'Descent': -271,
+                    'Flags': 6,
+                    'FontBBox': [0, -148, 1001, 880],
+                    'FontName': '/'+'HYSMyeongJoStd-Medium',
+                    'ItalicAngle': 0,
+                    'Leading': 148,
+                    'MaxWidth': 1000,
+                    'MissingWidth': 500,
                     'StemH': 91,
-                    'StemV': 91,
-                    'XHeight': 429,
+                    'StemV': 58,
+                    'XHeight': 553,
                     'Style': {'Panose': '<000000000000000000000000>'}
                     },
                 'CIDSystemInfo': {
@@ -251,57 +287,53 @@ CIDFontInfo['HYSMyeongJoStd-Medium-Acro'] =  {'Type':'/Font',
                     'Supplement': 1
                     },
                 'DW': 1000,
-                'W': (1, 94, 500),
-                'WinCharSet': 129
+                'W': (1, 94, 500)
                 }] # end descendant fonts
             }
 
 #WARNING - not checked, just copied Korean to get some output
-CIDFontInfo['STSongStd-Light-Acro'] =  {'Type':'/Font',
+CIDFontInfo['STSong-Light'] =  {'Type':'/Font',
             'Subtype':'/Type0',
             'Name': '/%(internalName)s', #<-- the internal name
-            'BaseFont': '/' + 'STSongStd-Light-Acro',
+            'BaseFont': '/' + 'STSong-Light',
             'Encoding': '/%(encodings)s',
             'DescendantFonts': [{'Type':'/Font',
-                'Subtype':'/CIDFontType2',
-                'BaseFont':'/'+'STSongStd-Light-Acro',
+                'Subtype':'/CIDFontType0',
+                'BaseFont':'/'+'STSong-Light',
                 'FontDescriptor': {
                     'Type': '/FontDescriptor',
-                    'Ascent': 858,
+                    'Ascent': 857,
                     'AvgWidth': 500,
-                    'CapHeight': 858,
-                    'Descent': -142,
-                    'Flags': 7,
-                    'FontBBox': [-100, -142, 1100, 1000],
-                    'FontName': '/'+'STSongStd-Light-Acro',
+                    'CapHeight': 857,
+                    'Descent': -143,
+                    'Flags': 4,
+                    'FontBBox': [-250, -143, 600, 857],
+                    'FontName': '/'+'STSongStd-Light',
                     'ItalicAngle': 0,
                     'Leading': 148,
                     'MaxWidth': 1000,
                     'MissingWidth': 500,
                     'StemH': 91,
                     'StemV': 91,
-                    'XHeight': 429,
-                    'Style': {'Panose': '<000000000000000000000000>'}
+                    'XHeight': 599
                     },
                 'CIDSystemInfo': {
                     'Registry': '(Adobe)',
-                    'Ordering': '(Korea1)',
-                    'Supplement': 1
+                    'Ordering': '(GB1)',
+                    'Supplement': 0
                     },
                 'DW': 1000,
-                'W': (1, 107, 500),
-                'WinCharSet': 129
+                'W': (1, 107, 500)
                 }] # end descendant fonts
             }
-#WARNING - not checked, just copied Korean to get some output
-CIDFontInfo['MSungStd-Light-Acro'] =  {'Type':'/Font',
+CIDFontInfo['MSung-Light'] =  {'Type':'/Font',
             'Subtype':'/Type0',
             'Name': '/%(internalName)s', #<-- the internal name
-            'BaseFont': '/' + 'MSungStd-Light-Acro',
+            'BaseFont': '/' + 'MSung-Light',
             'Encoding': '/%(encodings)s',
             'DescendantFonts': [{'Type':'/Font',
-                'Subtype':'/CIDFontType2',
-                'BaseFont':'/'+'MSungStd-Light-Acro',
+                'Subtype':'/CIDFontType0',
+                'BaseFont':'/'+'MSung-Light',
                 'FontDescriptor': {
                     'Type': '/FontDescriptor',
                     'Ascent': 752,
@@ -309,15 +341,48 @@ CIDFontInfo['MSungStd-Light-Acro'] =  {'Type':'/Font',
                     'Descent': -271,
                     'Flags': 6,
                     'FontBBox': [-160, -259, 1015, 888],
-                    'FontName': '/'+'MSungStd-Light-Acro',
+                    'FontName': '/'+'MSung-Light',
                     'ItalicAngle': 0,
                     'Leading': 148,
                     'MaxWidth': 1000,
                     'MissingWidth': 500,
                     'StemH': 58,
                     'StemV': 58,
-                    'XHeight': 553,
-                    'Style': {'Panose': '<000000000000000000000000>'}
+                    'XHeight': 553
+                    },
+                'CIDSystemInfo': {
+                    'Registry': '(Adobe)',
+                    'Ordering': '(CNS1)',
+                    'Supplement': 1
+                    },
+                'DW': 1000,
+                'W': (1, 94, 500)
+                }] # end descendant fonts
+            }
+
+CIDFontInfo['MHei-Medium'] =  {'Type':'/Font',
+            'Subtype':'/Type0',
+            'Name': '/%(internalName)s', #<-- the internal name
+            'BaseFont': '/' + 'MHei-Medium',
+            'Encoding': '/%(encodings)s',
+            'DescendantFonts': [{'Type':'/Font',
+                'Subtype':'/CIDFontType0',
+                'BaseFont':'/'+'MHei-Medium',
+                'FontDescriptor': {
+                    'Type': '/FontDescriptor',
+                    'Ascent': 752,
+                    'CapHeight': 737,
+                    'Descent': -271,
+                    'Flags': 6,
+                    'FontBBox': [-45, -250, 1015, 887],
+                    'FontName': '/'+'MHei-Medium',
+                    'ItalicAngle': 0,
+                    'Leading': 148,
+                    'MaxWidth': 1000,
+                    'MissingWidth': 500,
+                    'StemH': 58,
+                    'StemV': 58,
+                    'XHeight': 553
                     },
                 'CIDSystemInfo': {
                     'Registry': '(Adobe)',

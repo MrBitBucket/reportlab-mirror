@@ -6,7 +6,7 @@ from reportlab.test import unittest
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import colors
-from reportlab.lib.codecharts import KutenRowCodeChart
+from reportlab.lib.codecharts import KutenRowCodeChart, hBoxText
 
 global VERBOSE
 VERBOSE = 0
@@ -24,19 +24,19 @@ class KoreanFontTests(unittest.TestCase):
             #don't have the font pack.  return silently
             return
 
-        localFontName = 'HYSMyeongJoStd-Medium-Acro'
+        localFontName = 'HYSMyeongJoStd-Medium'
         c = Canvas('test_multibyte_kor.pdf')
         c.setFont('Helvetica', 30)
         c.drawString(100,700, 'Korean Font Support')
         c.setFont('Helvetica', 10)
         c.drawString(100,680, 'Short sample in Unified Hangul Coding (UHC)')
 
-        pdfmetrics.registerFont(CIDFont('HYSMyeongJoStd-Medium-Acro','KSCms-UHC-H'))
-        pdfmetrics.registerFont(CIDFont('HYSMyeongJoStd-Medium-Acro','KSC-EUC-H'))
-        c.setFont('HYSMyeongJoStd-Medium-Acro-KSCms-UHC-H', 16)
-        message1 = '\xB9\xD9\xC5\xC1\xC3\xBC'
-        c.drawString(100, 675, message1)
+        hBoxText('\xB9\xD9\xC5\xC1\xC3\xBC  (HYSMyeongJoStd-Medium)',
+                 c, 100, 660, 'HYSMyeongJoStd-Medium', 'KSCms-UHC-H')
+        hBoxText('\xB9\xD9\xC5\xC1\xC3\xBC  (HYGothic-Medium)',
+                 c, 100, 640, 'HYGothic-Medium', 'KSCms-UHC-H')
 
+        pdfmetrics.registerFont(CIDFont('HYSMyeongJoStd-Medium','KSC-EUC-H'))
         c.setFont('Helvetica', 10)
         c.drawString(100,610, "Longer sample From Adobe's Acrobat web page in EUC:")
 
@@ -54,7 +54,7 @@ Adobe\xc0\xc7 \xc0\xe5\xbe\xd6\xc0\xda \xc1\xf6\xbf\xf8
 \xbc\xd2\xc7\xc1\xc6\xae\xbf\xfe\xbe\xee \xba\xd2\xb9\xfd \xc0\xcc\xbf\xeb \xb9\xe6\xc1\xf6
 """
         tx = c.beginText(100,600)
-        tx.setFont('HYSMyeongJoStd-Medium-Acro-KSC-EUC-H', 7, 8)
+        tx.setFont('HYSMyeongJoStd-Medium-KSC-EUC-H', 7, 8)
         tx.textLines(sample)
         tx.setFont('Helvetica', 10, 12)
         tx.textLine()
@@ -96,7 +96,7 @@ Adobe\xc0\xc7 \xc0\xe5\xbe\xd6\xc0\xda \xc1\xf6\xbf\xf8
         c.drawString(72,750, 'Characters available in KS X 1001:1992, EUC encoding')
         y = 600
         for row in range(1, 95):
-            KutenRowCodeChart(row, 'HYSMyeongJoStd-Medium-Acro','KSC-EUC-H').drawOn(c, 72, y)
+            KutenRowCodeChart(row, 'HYSMyeongJoStd-Medium','KSC-EUC-H').drawOn(c, 72, y)
             y = y - 125
             if y < 50:
                 c.setFont('Helvetica',10)

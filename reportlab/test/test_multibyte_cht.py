@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/test_multibyte_cht.py,v 1.2 2001/10/27 22:37:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_multibyte_cht.py,v 1.3 2001/10/28 00:22:18 andy_robinson Exp $
 # Temporary japanese support for ReportLab.
 """
 Test of traditional Chinese (as written in Taiwan)
@@ -15,7 +15,7 @@ from reportlab.test import unittest
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import colors
-from reportlab.lib.codecharts import Big5CodeChart
+from reportlab.lib.codecharts import Big5CodeChart, hBoxText
 
 global VERBOSE
 VERBOSE = 0
@@ -35,13 +35,13 @@ class CHTFontTests(unittest.TestCase):
         from reportlab.pdfbase.cidfonts import CIDFont, findCMapFile
 
         
-        enc = 'ETen-B5-H'
+        enc = 'ETenms-B5-H'
         try:
             findCMapFile(enc)
         except:
             #they don't have the font pack, return silently
             return
-        pdfmetrics.registerFont(CIDFont('MSungStd-Light-Acro',enc))
+        pdfmetrics.registerFont(CIDFont('MSung-Light',enc))
     
         c = Canvas('test_multibyte_cht.pdf')
         c.setFont('Helvetica', 24)
@@ -49,14 +49,18 @@ class CHTFontTests(unittest.TestCase):
         c.setFont('Helvetica', 10)
         c.drawString(100,680, 'Short sample: headline from Yahoo Hong Kong, 20 Oct 2001')
 
-        c.setFont('MSungStd-Light-Acro-' + enc, 12)
+        c.setFont('MSung-Light-' + enc, 12)
         # this came from Yahoo Hong Kong leading story today
         message1 = '\xa5\xac\xae\xed\xbbP\xa6\xbf\xbfA\xa5\xc1\xa6b\xad\xba\xa6\xb8\xb7|\xad\xb1\xab\xe1\xa4@\xa6P\xa8\xa3\xb0O\xaa\xcc\xa1A\xa5L\xbb\xa1\xa1A\xa8\xe2\xa4H\xaa\xba\xad\xba\xa6\xb8\xb7|\xad\xb1\xabD\xb1`'
         message2 = '\xa6n\xa1A\xa8\xc3\xaa\xed\xa5\xdc\xb2@\xb5L\xba\xc3\xb0\xdd\xa4\xa4\xb0\xea\xa6b\xb3o\xad\xd3\xa5i\xa9\xc6\xaa\xba\xae\xc9\xa8\xe8\xa1A\xb7|\xbbP\xac\xfc\xb0\xea\xa4H\xa5\xc1\xaf\xb8\xa6b\xa4@\xb0_\xa1C'
-        message3 = '\xA7\x41\xA6\x6E\xB6\xDC and some english'
+        message3 = '\xA7\x41\xA6\x6E\xB6\xDC'
+
+        
         c.drawString(100, 655, message1)
         c.drawString(100, 639, message2)
-        c.drawString(100, 600, message3)
+
+        hBoxText(message3 + ' MSung-Light' , c, 100, 600, 'MSung-Light', enc)
+        hBoxText(message3 + ' MHei-Medium', c, 100, 580, 'MHei-Medium', enc)
         
 
 
@@ -64,7 +68,7 @@ class CHTFontTests(unittest.TestCase):
         tx = c.beginText(100, 500)
         tx.textLines("""
             This test document shows Traditional Chinese output from Reportlab PDF Library.
-            You may use one Chinese font, MSungStd-Light-Acro, and a number of different
+            You may use one Chinese font, MSung-Light, and a number of different
             encodings.
 
             The available encoding names (with comments from the PDF specification) are:
@@ -103,7 +107,7 @@ class CHTFontTests(unittest.TestCase):
         c.drawString(72,750, 'Characters available in Big 5')
         y = 500
         for row in range(0xA1,0xFF):
-            cc = Big5CodeChart(row, 'MSungStd-Light-Acro',enc)
+            cc = Big5CodeChart(row, 'MSung-Light',enc)
             cc.charsPerRow = 16
             cc.rows = 10
             cc.codePoints = 160
