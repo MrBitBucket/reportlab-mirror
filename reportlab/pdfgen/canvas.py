@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.43  2000/06/30 15:27:55  rgbecker
+#	Allow for non-caching of images
+#
 #	Revision 1.42  2000/06/26 15:58:22  rgbecker
 #	Simple fix to widths problem
-#
+#	
 #	Revision 1.41  2000/06/09 16:18:19  andy_robinson
 #	Doc strings, sequencer
 #	
@@ -156,7 +159,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.42 2000/06/26 15:58:22 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.43 2000/06/30 15:27:55 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -1053,7 +1056,7 @@ class Canvas:
             else:
                 raise 'Unknown color', str(aColor)
         elif type(aColor) is StringType:
-			self.setFillColor(colors.toColor(aColor))
+            self.setFillColor(colors.toColor(aColor))
         else:
             raise 'Unknown color', str(aColor)
 
@@ -1074,7 +1077,7 @@ class Canvas:
             else:
                 raise 'Unknown color', str(aColor)
         elif type(aColor) is StringType:
-			self.setFillColor(toColor(aColor))
+            self.setFillColor(toColor(aColor))
         else:
             raise 'Unknown color', str(aColor)
 
@@ -1160,23 +1163,26 @@ class Canvas:
                     dataline = outstream.read(60)
                 imagedata.append('EI')
             else:
-                if not pdfutils.cachedImageExists(image):
-                    if not zlib:
-                        print 'zlib not available'
-                        return
+                if hasattr(self,'noImageCaching') and self.noImageCaching:
+                    imagedata = pdfutils.cacheImageFile(image,returnInMemory=1)
+                else:
+                    if not pdfutils.cachedImageExists(image):
+                        if not zlib:
+                            print 'zlib not available'
+                            return
 
-                    try:
-                        import Image
-                    except ImportError:
-                        print 'Python Imaging Library not available'
-                        return
-                    pdfutils.cacheImageFile(image)
+                        try:
+                            import Image
+                        except ImportError:
+                            print 'Python Imaging Library not available'
+                            return
+                        pdfutils.cacheImageFile(image)
 
-                #now we have one cached, slurp it in
-                cachedname = os.path.splitext(image)[0] + '.a85'
-                imagedata = open(cachedname,'rb').readlines()
-                #trim off newlines...
-                imagedata = map(string.strip, imagedata)
+                    #now we have one cached, slurp it in
+                    cachedname = os.path.splitext(image)[0] + '.a85'
+                    imagedata = open(cachedname,'rb').readlines()
+                    #trim off newlines...
+                    imagedata = map(string.strip, imagedata)
                 
                 #parse line two for width, height
                 words = string.split(imagedata[1])
