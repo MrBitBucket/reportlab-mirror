@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.78 2004/05/25 21:12:31 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.78 2004/05/25 21:12:31 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.79 2004/05/26 18:44:55 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.79 2004/05/26 18:44:55 rgbecker Exp $ '''
 
 import string, os, sys, imp
 from types import *
@@ -146,25 +146,26 @@ try:
         def __startswith_rl(fn,_archivepfx=_archivepfx.upper(),_archivedirpfx=_archivedirpfx.upper()):
             '''if the name starts with a known prefix strip it off'''
             fn = fn.replace('/',os.sep)
+            if fn.startswith('.'+os.sep): fn = fn[1+len(os.sep):]
             if fn.upper().startswith(_archivepfx): return 1,fn[_archivepfxlen:]
             if fn.upper().startswith(_archivedirpfx): return 1,fn[_archivedirpfxlen:]
-            return 0,fn
+            return not os.path.isabs(fn),fn
     else:
         def __startswith_rl(fn):
             '''if the name starts with a known prefix strip it off'''
             fn = fn.replace('/',os.sep)
             if fn.upper().startswith(_archivepfx): return 1,fn[_archivepfxlen:]
             if fn.startswith(_archivedirpfx): return 1,fn[_archivedirpfxlen:]
-            return 0,fn
+            return not os.path.isabs(fn),fn
 
     def _startswith_rl(fn):
         return __startswith_rl(fn)[1]
 
     def rl_glob(pattern,glob=glob.glob,fnmatch=fnmatch.fnmatch, _RL_DIR=_RL_DIR,pjoin=os.path.join):
         c, pfn = __startswith_rl(pattern)
-        r = glob(pattern)
+        r = glob(pfn)
         if c or r==[]:
-            r += map(lambda x,_RL_DIR=_RL_DIR,pjoin=pjoin: pjoin(_RL_DIR,x),filter(lambda x,pattern=pattern,fnmatch=fnmatch: fnmatch(x,pattern),__loader__._files.keys()))
+            r += map(lambda x,D=_archivepfx,pjoin=pjoin: pjoin(_archivepfx,x),filter(lambda x,pfn=pfn,fnmatch=fnmatch: fnmatch(x,pfn),__loader__._files.keys()))
         return r
 except:
     _isFSD = os.path.isfile(__file__)   #slight risk of wrong path
@@ -299,15 +300,12 @@ def recursiveSetAttr(obj, name, value):
     "Can call down into e.g. object1.object2[4].attr = value"
     #get the thing above last.
     tokens = string.split(name, '.')
-    #print 'name=%s, tokens=%s' % (name, tokens)
     if len(tokens) == 1:
         setattr(obj, name, value)
     else:
         most = string.join(tokens[:-1], '.')
         last = tokens[-1]
-        #print 'most=%s, last=%s' % (most, last)
         parent = recursiveGetAttr(obj, most)
-        #print 'parent=%s' % parent
         setattr(parent, last, value)
 
 def import_zlib():
@@ -483,9 +481,10 @@ def rl_get_module(name,dir):
             f, p, desc= imp.find_module(name,[dir])
             return imp.load_module(name,f,p,desc)
         except:
-            if isCompactDistro() and not os.path.isabs(dir):
+            if isCompactDistro():
                 #attempt a load from inside the zip archive
                 import zipimport
+                dir = _startswith_rl(dir)
                 zi = zipimport.zipimporter(os.path.join(__loader__.archive,dir.replace('/',os.sep)))
                 return zi.load_module(name)
             raise ImportError('%s[%s]' % (name,dir))
