@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.2 2002/03/22 16:36:43 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.3 2002/04/17 13:45:05 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.2 2002/03/22 16:36:43 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.3 2002/04/17 13:45:05 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,7 +24,7 @@ static char* __version__=" $Id: pyRXP.c,v 1.2 2002/03/22 16:36:43 rgbecker Exp $
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "0.51"
+#define VERSION "0.6"
 #define MODULE "pyRXP"
 #define MAX_DEPTH 256
 static PyObject *moduleError;
@@ -61,11 +61,15 @@ The python module exports the following\n\
 	Parser(*kw)		Create a parser\n\
 \n\
 \n\
-	Parser() Attributes and Methods\n\
-		parse(src)\n\
+	Parser Attributes and Methods\n\
+		parse(src,**kw)\n\
 				The main interface to the parser. It returns Aaron Watter's\n\
 				radxml encoding of the xml src.\n\
 				The string src contains the xml.\n\
+				The keyword arguments can modify the instance attributes\n\
+				for this call only.\n\
+				The __call__ attribute of Parser instances is equivalent to\n\
+				the parse attribute.\n\
 \n\
 		srcName '<unknown>', name used to refer to the parser src\n\
 				in error and warning messages.\n\
@@ -159,6 +163,10 @@ The python module exports the following\n\
 		AllowUndeclaredNSAttributes = 0\n\
 		RelaxedAny = 0\n\
 		ReturnNamespaceAttributes = 0\n\
+		ReturnList = 0\n\
+			Usually we discard comments and want only one tag; set this to 1 to get\n\
+			a list at the top level instead of a supposed singleton tag.\n\
+			If 0 the first tuple in the list will be returned (ie the first tag tuple).\n\
 ";
 
 /*alter the integer values to change the module defaults*/
@@ -197,7 +205,12 @@ static struct {char* k;long v;} flag_vals[]={
 	{"RelaxedAny",0},
 	{"ReturnNamespaceAttributes",0},
 	{"ProcessDTD",0},
+	{"ReturnList",0},
 	{0}};
+#define LASTRXPFLAG ProcessDTD
+#define ReturnList (ParserFlag)(1+(int)LASTRXPFLAG)
+#define __GetFlag(p, flag) \
+  ((((flag) < 32) ? ((p)->flags[0] & (1u << (flag))) : ((p)->flags[1] & (1u << ((flag)-32))))!=0)
 
 static	PyObject* get_attrs(ElementDefinition e, Attribute a)
 {
@@ -380,9 +393,22 @@ PyObject *ProcessSource(Parser p, InputSource source)
 			}
 		}
 	if(!r && depth==0){
-		retVal = PyList_GetItem(PyTuple_GetItem(stack[0],2),0);
-		Py_INCREF(retVal);
+		PyObject*	l0 = PyTuple_GetItem(stack[0],2);
+		Py_INCREF(l0);
 		Py_DECREF(stack[0]);
+		if(!__GetFlag(p,ReturnList)){
+			int n = PyList_Size(l0);
+			for(i=0;i<n;i++){
+				retVal = PyList_GetItem(l0,i);
+				if(PyTuple_Check(retVal)) break;
+				}
+			if(i==n) retVal = Py_None;
+			Py_INCREF(retVal);
+			Py_DECREF(l0);
+			}
+		else {
+			retVal = l0;
+			}
 		PyErr_Clear();
 		}
 	else {
@@ -453,8 +479,6 @@ static void __SetFlag(pyRXPParserObject* p, ParserFlag flag, int value)
 	else p->flags[flagset] &= ~flagbit;
 }
 
-#define __GetFlag(p, flag) \
-  ((((flag) < 32) ? ((p)->flags[0] & (1u << (flag))) : ((p)->flags[1] & (1u << ((flag)-32))))!=0)
 static int _set_CB(char* name, PyObject** pCB, PyObject* value)
 {
 	if(value!=Py_None && !PyCallable_Check(value)){
@@ -470,57 +494,6 @@ static int _set_CB(char* name, PyObject** pCB, PyObject* value)
 		return 0;
 		}
 }
-
-static PyObject* pyRXPParser_parse(pyRXPParserObject* self, PyObject* args)
-{
-	int			srcLen;
-	char		*src;
-	FILE16		*f;
-	InputSource source;
-	PyObject	*retVal;
-	char		errBuf[512];
-	CB_info_t	CB_info;
-	Parser		p;
-
-	if(!PyArg_ParseTuple(args, "s#", &src, &srcLen)) return NULL;
-
-	if(self->warnCB){
-		CB_info.warnCB = self->warnCB;
-		CB_info.warnErr = 0;
-		CB_info.warnCBF = 0;
-		}
-	if(self->eoCB){
-		CB_info.eoCB = self->eoCB;
-		}
-	p = NewParser();
-	p->flags[0] = self->flags[0];
-	p->flags[1] = self->flags[1];
- 	if((self->warnCB && self->warnCB!=Py_None) || (self->eoCB && self->eoCB!=Py_None)){
-		CB_info.p = p;
- 		ParserSetCallbackArg(p, &CB_info);
-		if(self->warnCB && self->warnCB!=Py_None) ParserSetWarningCallback(p, myWarnCB);
-		if(self->eoCB && self->eoCB!=Py_None) ParserSetEntityOpener(p, entity_open);
-		}
-
-	ParserSetFlag(p,XMLPredefinedEntities,__GetFlag(self,XMLPredefinedEntities));
-
-	/*set up the parsers Stderr stream thing so we get it in a string*/
-	Fclose(Stderr);
-	Stderr = MakeFILE16FromString(errBuf,sizeof(errBuf)-1,"w");
-	f = MakeFILE16FromString(src,srcLen,"r");
-	source = SourceFromFILE16(self->srcName,f);
-	retVal = ProcessSource(p,source);
-	Fclose(Stderr);
-	FreeDtd(p->dtd);
-	FreeParser(p);
-	deinit_parser();
-	return retVal;
-}
-
-static struct PyMethodDef pyRXPParser_methods[] = {
-	{"parse", (PyCFunction)pyRXPParser_parse, METH_VARARGS, "parse(src)"},
-	{NULL, NULL}		/* sentinel */
-};
 
 static int pyRXPParser_setattr(pyRXPParserObject *self, char *name, PyObject* value)
 {
@@ -562,6 +535,68 @@ static int pyRXPParser_setattr(pyRXPParserObject *self, char *name, PyObject* va
 		return -1;
 		}
 }
+
+static PyObject* pyRXPParser_parse(pyRXPParserObject* xself, PyObject* args, PyObject* kw)
+{
+	int			srcLen, i;
+	char		*src;
+	FILE16		*f;
+	InputSource source;
+	PyObject	*retVal;
+	char		errBuf[512];
+	CB_info_t	CB_info;
+	Parser		p;
+	pyRXPParserObject	dummy = *xself;
+	pyRXPParserObject*	self = &dummy;
+
+	if(!PyArg_ParseTuple(args, "s#", &src, &srcLen)) return NULL;
+	printf("xself: %8.8x %s %8.8x %8.8x %8.8x %8.8x\n", xself, xself->srcName, xself->warnCB, xself->eoCB, xself->flags[0], xself->flags[1]);
+	printf(" self: %8.8x %s %8.8x %8.8x %8.8x %8.8x\n", self, self->srcName, self->warnCB, self->eoCB, self->flags[0], self->flags[1]);
+	printf("kw = %p\n",kw);
+	if(kw){
+		PyObject *key, *value;
+		i = 0;
+		while(PyDict_Next(kw,&i,&key,&value))
+			if(pyRXPParser_setattr(self, PyString_AsString(key), value)) return NULL;
+		}
+
+	if(self->warnCB){
+		CB_info.warnCB = self->warnCB;
+		CB_info.warnErr = 0;
+		CB_info.warnCBF = 0;
+		}
+	if(self->eoCB){
+		CB_info.eoCB = self->eoCB;
+		}
+	p = NewParser();
+	p->flags[0] = self->flags[0];
+	p->flags[1] = self->flags[1];
+ 	if((self->warnCB && self->warnCB!=Py_None) || (self->eoCB && self->eoCB!=Py_None)){
+		CB_info.p = p;
+ 		ParserSetCallbackArg(p, &CB_info);
+		if(self->warnCB && self->warnCB!=Py_None) ParserSetWarningCallback(p, myWarnCB);
+		if(self->eoCB && self->eoCB!=Py_None) ParserSetEntityOpener(p, entity_open);
+		}
+
+	ParserSetFlag(p,XMLPredefinedEntities,__GetFlag(self,XMLPredefinedEntities));
+
+	/*set up the parsers Stderr stream thing so we get it in a string*/
+	Fclose(Stderr);
+	Stderr = MakeFILE16FromString(errBuf,sizeof(errBuf)-1,"w");
+	f = MakeFILE16FromString(src,srcLen,"r");
+	source = SourceFromFILE16(self->srcName,f);
+	retVal = ProcessSource(p,source);
+	Fclose(Stderr);
+	FreeDtd(p->dtd);
+	FreeParser(p);
+	deinit_parser();
+	return retVal;
+}
+
+static struct PyMethodDef pyRXPParser_methods[] = {
+	{"parse", (PyCFunction)pyRXPParser_parse, METH_VARARGS|METH_KEYWORDS, "parse(src)"},
+	{NULL, NULL}		/* sentinel */
+};
 
 static PyObject* _get_OB(char* name,PyObject* ob)
 {
@@ -619,7 +654,7 @@ static PyTypeObject pyRXPParserType = {
 	0,								/*tp_as_sequence*/
 	0,								/*tp_as_mapping*/
 	(hashfunc)0,					/*tp_hash*/
-	(ternaryfunc)0,					/*tp_call*/
+	(ternaryfunc)pyRXPParser_parse,	/*tp_call*/
 	(reprfunc)0,					/*tp_str*/
 
 	/* Space for future expansion */
