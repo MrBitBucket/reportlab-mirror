@@ -146,6 +146,10 @@ class _isValidChildOrNone(_isValidChild):
 	def test(self,x):
 		return _isValidChild.test(self,x) or x is None
 
+class _isCallable(Validator):
+	def test(self, x):
+		return callable(x)
+
 class OneOf(Validator):
 	"""Make validator functions for list of choices.
 
@@ -238,3 +242,6 @@ isNoneOrString = NoneOr(isString,'NoneOrString')
 isNoneOrListOfNoneOrStrings=SequenceOf(isNoneOrString,'isNoneOrListOfNoneOrStrings',NoneOK=1)
 isListOfNoneOrString=SequenceOf(isNoneOrString,'isListOfNoneOrString',NoneOK=0)
 isNoneOrListOfNoneOrNumbers=SequenceOf(isNumberOrNone,'isNoneOrListOfNoneOrNumbers',NoneOK=1)
+isCallable = _isCallable()
+isStringOrCallable=EitherOr((isString,isCallable),'isStringOrCallable')
+isStringOrCallableOrNone=NoneOr(isStringOrCallable,'isStringOrCallableNone')
