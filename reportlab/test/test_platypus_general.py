@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testplatypus.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.13 2003/09/08 16:09:51 rgbecker Exp $
-__version__=''' $Id: test_platypus_general.py,v 1.13 2003/09/08 16:09:51 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.14 2004/03/22 14:01:09 rgbecker Exp $
+__version__=''' $Id: test_platypus_general.py,v 1.14 2004/03/22 14:01:09 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -373,18 +373,28 @@ def getExamples():
     story.append(Paragraph("This is a bullet point", styleSheet['Bullet'], bulletText='O'))
     story.append(Paragraph("Another bullet point", styleSheet['Bullet'], bulletText='O'))
 
-    story.append(Paragraph(
-                "Here is an Image.  For now, these are always centred in the frame.",
-                styleSheet['Italic']))
-
     from reportlab.lib.utils import haveImages
     if haveImages:
-        story.append(Paragraph(
-                "Here is an Image.  For now, these are always centred in the frame.",
-                styleSheet['Italic']))
-
+        story.append(Paragraph("Here is an Image  flowableobtained from a string filename.",styleSheet['Italic']))
         img = platypus.Image('pythonpowered.gif')
         story.append(img)
+
+        story.append(Paragraph( "Here is an Image  flowableobtained from a unicode filename.", styleSheet['Italic']))
+        img = platypus.Image(u'pythonpowered.gif')
+        story.append(img)
+
+        story.append(Paragraph("Here is an Image flowable obtained from an open file.",styleSheet['Italic']))
+        img = platypus.Image(open('pythonpowered.gif','rb'))
+        story.append(img)
+
+        jpg = '../docs/images/lj8100.jpg'
+        if os.path.isfile(jpg):
+            story.append(Paragraph("Here is an JPEG Image flowable obtained from a file.",styleSheet['Italic']))
+            img = platypus.Image(jpg)
+            story.append(img)
+            story.append(Paragraph("Here is an JPEG Image flowable obtained from an open file.",styleSheet['Italic']))
+            img = platypus.Image(open(jpg,'rb'))
+            story.append(img)
 
     story.append(Paragraph("""Here is a Table, which takes all kinds of formatting options...""",
                 styleSheet['Italic']))
