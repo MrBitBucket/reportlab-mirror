@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.16 2001/06/13 06:19:14 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.17 2001/06/18 12:35:31 dinu_gherman Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -76,7 +76,7 @@ class BarChart(Widget):
         strokeColor = AttrMapValue(isColorOrNone),
         fillColor = AttrMapValue(isColorOrNone),
 
-        defaultStyles = AttrMapValue(None),
+        barStyles = AttrMapValue(None),
 
         categoryAxis = AttrMapValue(None),
         categoryNames = AttrMapValue(isListOfStrings),
@@ -105,12 +105,12 @@ class BarChart(Widget):
         # we really need some well-designed default lists of
         # colors e.g. from Tufte.  These will be used in a
         # cycle to set the fill color of each series.
-        self.defaultStyles = TypedPropertyCollection(BarChartProperties)
-        self.defaultStyles.strokeWidth = 1
-        self.defaultStyles.strokeColor = colors.black
-        self.defaultStyles[0].fillColor = colors.red
-        self.defaultStyles[1].fillColor = colors.green
-        self.defaultStyles[2].fillColor = colors.blue
+        self.barStyles = TypedPropertyCollection(BarChartProperties)
+        self.barStyles.strokeWidth = 1
+        self.barStyles.strokeColor = colors.black
+        self.barStyles[0].fillColor = colors.red
+        self.barStyles[1].fillColor = colors.green
+        self.barStyles[2].fillColor = colors.blue
 
         # control bar spacing. is useAbsolute = 1 then
         # the next parameters are in points; otherwise
@@ -294,9 +294,9 @@ class BarChart(Widget):
 
         for rowNo in range(len(self._barPositions)):
             row = self._barPositions[rowNo]
-            styleCount = len(self.defaultStyles)
+            styleCount = len(self.barStyles)
             styleIdx = rowNo % styleCount
-            rowStyle = self.defaultStyles[styleIdx]
+            rowStyle = self.barStyles[styleIdx]
             for colNo in range(len(row)):
                 barPos = row[colNo]
                 (x, y, width, height) = barPos
@@ -648,7 +648,7 @@ def sampleV3():
     bc.height = 100
     bc.width = 150
     bc.data = (series1,)
-    bc.defaultStyles.fillColor = colors.green
+    bc.barStyles.fillColor = colors.green
 
     bc.barLabelFormat = '%0.2f'
     bc.barLabels.dx = 0
@@ -1270,7 +1270,7 @@ def sampleH3():
     bc.height = 150
     bc.width = 250
     bc.data = (series1,)
-    bc.defaultStyles.fillColor = colors.green
+    bc.barStyles.fillColor = colors.green
 
     bc.barLabelFormat = '%0.2f'
     bc.barLabels.dx = 0

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.15 2001/06/13 06:19:14 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.16 2001/06/18 12:35:31 dinu_gherman Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -67,7 +67,7 @@ class Pie(Widget):
 		labels = AttrMapValue(isListOfStringsOrNone, desc="optional list of labels to use for each data point"),
 		startAngle = AttrMapValue(isNumber, desc="angle of first slice; like the compass, 0 is due North"),
 		direction = AttrMapValue( OneOf(('clockwise', 'anticlockwise')), desc="'clockwise' or 'anticlockwise'"),
-		defaultStyles = AttrMapValue(None, desc="collection of wedge descriptor objects"),
+		pieStyles = AttrMapValue(None, desc="collection of wedge descriptor objects"),
 		)
 	
 	def __init__(self):
@@ -80,11 +80,11 @@ class Pie(Widget):
 		self.startAngle = 90
 		self.direction = "clockwise"
 		
-		self.defaultStyles = TypedPropertyCollection(WedgeProperties)
-		self.defaultStyles[0].fillColor = colors.darkcyan
-		self.defaultStyles[1].fillColor = colors.blueviolet
-		self.defaultStyles[2].fillColor = colors.blue
-		self.defaultStyles[3].fillColor = colors.cyan
+		self.pieStyles = TypedPropertyCollection(WedgeProperties)
+		self.pieStyles[0].fillColor = colors.darkcyan
+		self.pieStyles[1].fillColor = colors.blueviolet
+		self.pieStyles[2].fillColor = colors.blue
+		self.pieStyles[3].fillColor = colors.cyan
 
 		
 	def demo(self):
@@ -98,19 +98,19 @@ class Pie(Widget):
 		pc.data = [10,20,30,40,50,60]
 		pc.labels = ['a','b','c','d','e','f']
 
-		pc.defaultStyles.strokeWidth=0.5
-		pc.defaultStyles[3].popout = 10
-		pc.defaultStyles[3].strokeWidth = 2
-		pc.defaultStyles[3].strokeDashArray = [2,2]
-		pc.defaultStyles[3].labelRadius = 1.75
-		pc.defaultStyles[3].fontColor = colors.red
-		pc.defaultStyles[0].fillColor = colors.darkcyan
-		pc.defaultStyles[1].fillColor = colors.blueviolet
-		pc.defaultStyles[2].fillColor = colors.blue
-		pc.defaultStyles[3].fillColor = colors.cyan
-		pc.defaultStyles[4].fillColor = colors.aquamarine
-		pc.defaultStyles[5].fillColor = colors.cadetblue
-		pc.defaultStyles[6].fillColor = colors.lightcoral
+		pc.pieStyles.strokeWidth=0.5
+		pc.pieStyles[3].popout = 10
+		pc.pieStyles[3].strokeWidth = 2
+		pc.pieStyles[3].strokeDashArray = [2,2]
+		pc.pieStyles[3].labelRadius = 1.75
+		pc.pieStyles[3].fontColor = colors.red
+		pc.pieStyles[0].fillColor = colors.darkcyan
+		pc.pieStyles[1].fillColor = colors.blueviolet
+		pc.pieStyles[2].fillColor = colors.blue
+		pc.pieStyles[3].fillColor = colors.cyan
+		pc.pieStyles[4].fillColor = colors.aquamarine
+		pc.pieStyles[5].fillColor = colors.cadetblue
+		pc.pieStyles[6].fillColor = colors.lightcoral
 
 		d.add(pc)
 		return d
@@ -156,7 +156,7 @@ class Pie(Widget):
 
 		g = Group()
 		i = 0
-		styleCount = len(self.defaultStyles)
+		styleCount = len(self.pieStyles)
 		
 		startAngle = self.startAngle #% 360
 		for angle in normData:
@@ -172,7 +172,7 @@ class Pie(Widget):
 
 			#if we didn't use %stylecount here we'd end up with the later wedges
 			#all having the default style
-			wedgeStyle = self.defaultStyles[i%styleCount]
+			wedgeStyle = self.pieStyles[i%styleCount]
 
 			# is it a popout?
 			cx, cy = centerx, centery
@@ -234,7 +234,7 @@ def sample0a():
 	pc.y = 50
 	pc.data = [10]
 	pc.labels = ['a']
-	pc.defaultStyles.strokeWidth=1#0.5
+	pc.pieStyles.strokeWidth=1#0.5
 	
 	d.add(pc)
 
@@ -253,7 +253,7 @@ def sample0b():
 	pc.height = 100
 	pc.data = [10]
 	pc.labels = ['a']
-	pc.defaultStyles.strokeWidth=1#0.5
+	pc.pieStyles.strokeWidth=1#0.5
 	
 	d.add(pc)
 
@@ -271,12 +271,12 @@ def sample1():
 	pc.data = [10, 20, 30, 40, 50, 60]
 	pc.labels = ['a', 'b', 'c', 'd', 'e', 'f']
 
-	pc.defaultStyles.strokeWidth=1#0.5
-	pc.defaultStyles[3].popout = 20
-	pc.defaultStyles[3].strokeWidth = 2
-	pc.defaultStyles[3].strokeDashArray = [2,2]
-	pc.defaultStyles[3].labelRadius = 1.75
-	pc.defaultStyles[3].fontColor = colors.red
+	pc.pieStyles.strokeWidth=1#0.5
+	pc.pieStyles[3].popout = 20
+	pc.pieStyles[3].strokeWidth = 2
+	pc.pieStyles[3].strokeDashArray = [2,2]
+	pc.pieStyles[3].labelRadius = 1.75
+	pc.pieStyles[3].fontColor = colors.red
 	
 	d.add(pc)
 
@@ -298,17 +298,17 @@ def sample2():
 
 	pc.width = 150
 	pc.height = 150
-	pc.defaultStyles.strokeWidth=1#0.5
+	pc.pieStyles.strokeWidth=1#0.5
 
-	pc.defaultStyles[0].fillColor = colors.steelblue
-	pc.defaultStyles[1].fillColor = colors.thistle
-	pc.defaultStyles[2].fillColor = colors.cornflower
-	pc.defaultStyles[3].fillColor = colors.lightsteelblue
-	pc.defaultStyles[4].fillColor = colors.aquamarine
-	pc.defaultStyles[5].fillColor = colors.cadetblue
-	pc.defaultStyles[6].fillColor = colors.lightcoral
-	pc.defaultStyles[7].fillColor = colors.tan
-	pc.defaultStyles[8].fillColor = colors.darkseagreen
+	pc.pieStyles[0].fillColor = colors.steelblue
+	pc.pieStyles[1].fillColor = colors.thistle
+	pc.pieStyles[2].fillColor = colors.cornflower
+	pc.pieStyles[3].fillColor = colors.lightsteelblue
+	pc.pieStyles[4].fillColor = colors.aquamarine
+	pc.pieStyles[5].fillColor = colors.cadetblue
+	pc.pieStyles[6].fillColor = colors.lightcoral
+	pc.pieStyles[7].fillColor = colors.tan
+	pc.pieStyles[8].fillColor = colors.darkseagreen
 
 	d.add(pc)
 
@@ -328,10 +328,10 @@ def sample3():
 
 	pc.width = 150
 	pc.height = 150
-	pc.defaultStyles.strokeWidth=1#0.5
-	pc.defaultStyles[0].fillColor = colors.steelblue
-	pc.defaultStyles[1].fillColor = colors.thistle
-	pc.defaultStyles[2].fillColor = colors.cornflower
+	pc.pieStyles.strokeWidth=1#0.5
+	pc.pieStyles[0].fillColor = colors.steelblue
+	pc.pieStyles[1].fillColor = colors.thistle
+	pc.pieStyles[2].fillColor = colors.cornflower
 
 	d.add(pc)
 
@@ -351,13 +351,13 @@ def sample4():
 
 	pc.width = 150
 	pc.height = 150
-	pc.defaultStyles.strokeWidth=1#0.5
-	pc.defaultStyles[0].fillColor = colors.steelblue
-	pc.defaultStyles[1].fillColor = colors.thistle
-	pc.defaultStyles[2].fillColor = colors.cornflower
-	pc.defaultStyles[3].fillColor = colors.lightsteelblue
-	pc.defaultStyles[4].fillColor = colors.aquamarine
-	pc.defaultStyles[5].fillColor = colors.cadetblue
+	pc.pieStyles.strokeWidth=1#0.5
+	pc.pieStyles[0].fillColor = colors.steelblue
+	pc.pieStyles[1].fillColor = colors.thistle
+	pc.pieStyles[2].fillColor = colors.cornflower
+	pc.pieStyles[3].fillColor = colors.lightsteelblue
+	pc.pieStyles[4].fillColor = colors.aquamarine
+	pc.pieStyles[5].fillColor = colors.cadetblue
 
 	d.add(pc)
 

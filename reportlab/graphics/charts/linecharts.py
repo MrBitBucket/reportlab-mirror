@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.10 2001/05/17 16:21:33 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.11 2001/06/18 12:35:31 dinu_gherman Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
@@ -61,7 +61,7 @@ class HorizontalLineChart(LineChart):
 
         strokeColor: color of chart lines (?)
         fillColor: color for chart background (?)
-        defaultStyles: style list, used cyclically for data series
+        lineStyles: style list, used cyclically for data series
 
         valueAxis: value axis object
         categoryAxis: category axis object
@@ -86,7 +86,7 @@ class HorizontalLineChart(LineChart):
 
         strokeColor = AttrMapValue(isColorOrNone),
         fillColor = AttrMapValue(isColorOrNone),
-        defaultStyles = AttrMapValue(None),
+        lineStyles = AttrMapValue(None),
 
         valueAxis = AttrMapValue(None),
         categoryAxis = AttrMapValue(None),
@@ -114,11 +114,11 @@ class HorizontalLineChart(LineChart):
                      (70, 80, 80, 90)]        
         self.categoryNames = ('North','South','East','West')
 
-        self.defaultStyles = TypedPropertyCollection(LineChartProperties)
-        self.defaultStyles.strokeWidth = 1
-        self.defaultStyles[0].strokeColor = colors.red
-        self.defaultStyles[1].strokeColor = colors.green
-        self.defaultStyles[2].strokeColor = colors.blue
+        self.lineStyles = TypedPropertyCollection(LineChartProperties)
+        self.lineStyles.strokeWidth = 1
+        self.lineStyles[0].strokeColor = colors.red
+        self.lineStyles[1].strokeColor = colors.green
+        self.lineStyles[2].strokeColor = colors.blue
 
         # control spacing. if useAbsolute = 1 then
         # the next parameters are in points; otherwise
@@ -161,7 +161,7 @@ class HorizontalLineChart(LineChart):
         lc.height = 85
         lc.width = 170
         lc.data = data
-        lc.defaultStyles.symbol = makeEmptyCircle
+        lc.lineStyles.symbol = makeEmptyCircle
 
         drawing.add(lc)
 
@@ -247,14 +247,14 @@ class HorizontalLineChart(LineChart):
         # Iterate over data rows.        
         for rowNo in range(len(self._positions)):
             row = self._positions[rowNo]
-            styleCount = len(self.defaultStyles)
+            styleCount = len(self.lineStyles)
             styleIdx = rowNo % styleCount
-            rowStyle = self.defaultStyles[styleIdx]
+            rowStyle = self.lineStyles[styleIdx]
 
-            if hasattr(self.defaultStyles[styleIdx], 'strokeWidth'):
-                strokeWidth = self.defaultStyles[styleIdx].strokeWidth
-            elif hasattr(self.defaultStyles, 'strokeWidth'):
-                strokeWidth = self.defaultStyles.strokeWidth
+            if hasattr(self.lineStyles[styleIdx], 'strokeWidth'):
+                strokeWidth = self.lineStyles[styleIdx].strokeWidth
+            elif hasattr(self.lineStyles, 'strokeWidth'):
+                strokeWidth = self.lineStyles.strokeWidth
             else:
                 strokeWidth = None
 
@@ -272,10 +272,10 @@ class HorizontalLineChart(LineChart):
 
             # Iterate once more over data columns
             # (to make sure symbols and labels are on top).
-            if hasattr(self.defaultStyles[styleIdx], 'symbol'):
-                uSymbol = self.defaultStyles[styleIdx].symbol
-            elif hasattr(self.defaultStyles, 'symbol'):
-                uSymbol = self.defaultStyles.symbol
+            if hasattr(self.lineStyles[styleIdx], 'symbol'):
+                uSymbol = self.lineStyles[styleIdx].symbol
+            elif hasattr(self.lineStyles, 'symbol'):
+                uSymbol = self.lineStyles.symbol
             else:
                 uSymbol = None                
 
@@ -358,7 +358,7 @@ def sample1():
     lc.width = 300
     lc.data = data
     lc.joinedLines = 1
-    lc.defaultStyles.symbol = makeFilledDiamond
+    lc.lineStyles.symbol = makeFilledDiamond
     lc.lineLabelFormat = '%2.0f'
 
     catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
@@ -437,7 +437,7 @@ def sample1a():
     lc.joinedLines = 1
     lc.strokeColor = colors.white
     lc.fillColor = colors.HexColor(0xCCCCCC)
-    lc.defaultStyles.symbol = makeFilledDiamond
+    lc.lineStyles.symbol = makeFilledDiamond
     lc.lineLabelFormat = '%2.0f'
 
     catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
@@ -469,7 +469,7 @@ def sample2():
     lc.width = 300
     lc.data = data
     lc.joinedLines = 1
-    lc.defaultStyles.symbol = makeSmiley
+    lc.lineStyles.symbol = makeSmiley
     lc.lineLabelFormat = '%2.0f'
     lc.strokeColor = colors.black
     lc.fillColor = colors.lightblue
@@ -506,10 +506,10 @@ def sample3():
     lc.lineLabelFormat = '%2.0f'
     lc.strokeColor = colors.black
 
-    lc.defaultStyles[0].symbol = makeSmiley
-    lc.defaultStyles[1].symbol = NoEntry0
-    lc.defaultStyles[0].strokeWidth = 2
-    lc.defaultStyles[1].strokeWidth = 4
+    lc.lineStyles[0].symbol = makeSmiley
+    lc.lineStyles[1].symbol = NoEntry0
+    lc.lineStyles[0].strokeWidth = 2
+    lc.lineStyles[1].strokeWidth = 4
 
     catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
     lc.categoryAxis.categoryNames = catNames

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_graphics_charts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_graphics_charts.py,v 1.10 2001/05/16 09:58:03 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_graphics_charts.py,v 1.11 2001/06/18 12:35:31 dinu_gherman Exp $
 """
 Tests for chart class.
 """
@@ -151,12 +151,12 @@ def sample4pie():
     pc.y = 50
     pc.data = [1, 50, 100, 100, 100, 100, 100, 100, 100, 50]
     pc.labels = ['0','a','b','c','d','e','f','g','h','i']
-    pc.defaultStyles.strokeWidth=0.5
-    pc.defaultStyles[3].popout = 20
-    pc.defaultStyles[3].strokeWidth = 2
-    pc.defaultStyles[3].strokeDashArray = [2,2]
-    pc.defaultStyles[3].labelRadius = 1.75
-    pc.defaultStyles[3].fontColor = colors.red
+    pc.pieStyles.strokeWidth=0.5
+    pc.pieStyles[3].popout = 20
+    pc.pieStyles[3].strokeWidth = 2
+    pc.pieStyles[3].strokeDashArray = [2,2]
+    pc.pieStyles[3].labelRadius = 1.75
+    pc.pieStyles[3].fontColor = colors.red
     d.add(pc)
     return d
 
