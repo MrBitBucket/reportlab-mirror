@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: genuserguide.py,v $
+#	Revision 1.7  2000/06/22 13:55:59  aaron_watters
+#	showPage resets all state parameters warning.
+#
 #	Revision 1.6  2000/06/22 13:35:28  aaron_watters
 #	textobject and pathobject methods, among other things
-#
+#	
 #	Revision 1.5  2000/06/21 21:19:29  aaron_watters
 #	colors, line styles, more examples
 #	
@@ -50,7 +53,7 @@
 #	Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #	initial checkin. user guide generation framework.
 #	
-__version__=''' $Id: genuserguide.py,v 1.6 2000/06/22 13:35:28 aaron_watters Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.7 2000/06/22 13:55:59 aaron_watters Exp $ '''
 
 
 __doc__ = """
@@ -369,6 +372,15 @@ eg("""canvas.drawInlineImage(self, image, x,y, width=None,height=None) """)
 head("Ending a page")
 
 eg("""canvas.showPage()""")
+
+disc("""The showPage method finishes the current page.  All additional drawing will
+be done on another page.""")
+
+pencilnote()
+
+disc("""Warning!  All state changes (font changes, color settings, geometry transforms, etcetera)
+are FORGOTTEN when you advance to a new page in pdfgen.  Any state settings you wish to preserve
+must be set up again before the program proceeds with drawing!""")
 
 lesson('The toolbox: the "state change" operations')
 
