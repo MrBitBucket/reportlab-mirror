@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.13 2001/07/16 07:40:30 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.14 2001/07/21 11:35:28 dinu_gherman Exp $
 
-"""Generate documentation of graphical Python objects.
+"""Generate documentation for reportlab.graphics classes.
 
 Type the following for usage info:
 
@@ -15,11 +15,10 @@ Type the following for usage info:
 __version__ = '0.8'
 
 
-import sys, os, re, types, string, getopt, pickle, copy, time
+import sys
 sys.path.insert(0, '.')
-import StringIO, pprint
+import os, re, types, string, getopt, pickle, copy, time, StringIO, pprint, traceback
 from string import find, join, split, replace, expandtabs, rstrip
-import traceback
 
 from reportlab.lib.docpy import PackageSkeleton0, ModuleSkeleton0
 from reportlab.lib.docpy import DocBuilder0, PdfDocBuilder0, HtmlDocBuilder0
@@ -28,13 +27,13 @@ from reportlab.lib.docpy import htmlescape, htmlrepr, defaultformat, \
 from reportlab.lib.docpy import makeHtmlSection, makeHtmlSubSection, \
      makeHtmlInlineImage
 
-from reportlab.pdfgen import canvas
 from reportlab.lib import inspect
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.pdfgen import canvas
 from reportlab.platypus.flowables import Flowable, Spacer
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.tableofcontents import TableOfContents0
@@ -48,10 +47,11 @@ from reportlab.platypus.tables import TableStyle, Table
 from reportlab.graphics.shapes import NotImplementedError
 
 
-# Needed to draw widget demos.
+# Needed to draw Widget/Drawing demos.
 
-from reportlab.graphics import shapes
 from reportlab.graphics.widgetbase import Widget
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics import shapes
 from reportlab.graphics import renderPDF
 
 # Ignore if no GD rendering available.
@@ -59,11 +59,11 @@ from reportlab.graphics import renderPDF
 try:
     from rlextra.graphics import renderPM
 except ImportError, errMsg:
-    if str(errMsg)!='No module named renderPM':
+    if str(errMsg) != 'No module named renderPM':
         pass
 
 
-VERBOSE = 1
+VERBOSE = 0
 VERIFY = 1
 
 ####################################################################
@@ -166,6 +166,7 @@ def indentLevel(line, spacesPerTab=4):
 
     It is assumed that one tab equals 4 spaces.
     """
+
     x = 0
     nextTab = 4
     for ch in line:
@@ -198,7 +199,8 @@ def getFunctionBody(f, linesInFile):
     fixed in a future version that watched the nesting
     level.  It simply looks at the left indent level
     of each line, except for lines with whitespace or
-    leading comments."""
+    leading comments.
+    """
 
     if hasattr(f, 'im_func'):
         #it's a method, drill down and get its function
@@ -315,9 +317,11 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
 
 
     def beginClass(self, name, doc, bases):
-        "Append a graphic demo of a widget at the end of a class."
+        "Append a graphic demo of a Widget or Drawing at the end of a class."
+
         if VERBOSE:
             print 'GraphPdfDocBuilder.beginClass(%s...)' % name
+
         aClass = eval('self.skeleton.moduleSpace.' + name)
         if issubclass(aClass, Widget):
             if self.shouldDisplayModule:
@@ -329,11 +333,20 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
                 if self.shouldDisplayClasses:
                     self.story.append(Paragraph('Classes', self.makeHeadingStyle(self.indentLevel-1)))
                     self.shouldDisplayClasses = 0
-
-            #print '###', name
             PdfDocBuilder0.beginClass(self, name, doc, bases)
-
             self.beginAttributes(aClass)
+
+        elif issubclass(aClass, Drawing):
+            if self.shouldDisplayModule:
+                modName, modDoc, imported = self.shouldDisplayModule
+                self.story.append(Paragraph(modName, self.makeHeadingStyle(self.indentLevel-2, 'module')))
+                self.story.append(XPreformatted(modDoc, self.bt))
+                self.shouldDisplayModule = 0
+                self.hasDisplayedModule = 1
+                if self.shouldDisplayClasses:
+                    self.story.append(Paragraph('Classes', self.makeHeadingStyle(self.indentLevel-1)))
+                    self.shouldDisplayClasses = 0
+            PdfDocBuilder0.beginClass(self, name, doc, bases)
 
 
     def beginAttributes(self, aClass):
@@ -363,7 +376,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
 
 
     def endClass(self, name, doc, bases):
-        "Append a graphic demo of a widget at the end of a class."
+        "Append a graphic demo of a Widget or Drawing at the end of a class."
         
         PdfDocBuilder0.endClass(self, name, doc, bases)
 
@@ -375,9 +388,13 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
             self.story.append(Spacer(0*cm, 0.5*cm))
             self._showWidgetDemo(widget)
             self.story.append(Spacer(0*cm, 0.5*cm))
-            self._showWidgetProperties(widget)
-            
+            self._showWidgetProperties(widget)            
             self.story.append(PageBreak())
+        elif issubclass(aClass, Drawing):
+            drawing = aClass()
+            self.story.append(Spacer(0*cm, 0.5*cm))
+            self._showDrawingDemo(drawing)            
+            self.story.append(Spacer(0*cm, 0.5*cm))
 
 
     def beginFunctions(self, names):
@@ -471,6 +488,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
             else:
                 pass
 
+
     def _showWidgetDemoCode(self, widget):
         """Show a demo code of the widget."""
 
@@ -500,7 +518,6 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         for key in keys:
             value = props[key]
 
-            # Method 3
             f = StringIO.StringIO('')
             pprint.pprint(value, f)
             f.read()
@@ -511,18 +528,10 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
             value = string.join(valueLines, '\n')
 
             lines.append('%s = %s' % (key, value))
+
         text = join(lines, '\n')
         self.story.append(Paragraph("<i>Properties of Example Widget</i>", self.bt))
         self.story.append(Paragraph("", self.bt))
-
-##        # Method 1
-##        self.story.append(Preformatted(text, self.code))
-
-##        # Method 2
-##        f = StringIO.StringIO('')
-##        pprint.pprint(props, f)
-##        text = f.read().buf
-
         self.story.append(Preformatted(text, self.code))
 
 
