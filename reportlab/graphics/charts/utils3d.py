@@ -27,13 +27,12 @@ def _draw_3d_bar(G, x1, x2, y0, yhigh, xdepth, ydepth,
         G.add(Polygon((x1,y1, x1+xoff,y1+yoff, x2+xoff,y2+yoff, x2,y2),
             strokeWidth=strokeWidth, strokeColor=strokeColor, fillColor=fillColor,strokeLineJoin=1))
 
-    from reportlab.lib.colors import limegreen, pink
     usd = max(y0, yhigh)
     if xdepth or ydepth:
         if y0!=yhigh:   #non-zero height
-            _add_3d_bar( x2, x2, y0, yhigh, xdepth, ydepth, fillColor=fillColorShaded) #side
+            _add_3d_bar( x2, x2, y0, yhigh, xdepth, ydepth/2.0, fillColor=fillColorShaded) #side
 
-        _add_3d_bar(x1, x2, usd, usd, xdepth, ydepth, fillColor=fillColorShadedTop)    #top
+        _add_3d_bar(x1, x2, usd, usd, xdepth, ydepth/2.0, fillColor=fillColorShadedTop)    #top
 
     G.add(Polygon((x1,y0,x2,y0,x2,yhigh,x1,yhigh),
         strokeColor=strokeColor, strokeWidth=strokeWidth, fillColor=fillColor,strokeLineJoin=1)) #front
