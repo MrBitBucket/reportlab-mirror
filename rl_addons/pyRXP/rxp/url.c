@@ -488,8 +488,7 @@ static FILE16 *file_open(const char *url,
 
     /* DOS: translate /C:/a/b.c to C:\a\b.c */
 
-    if(path[0] == '/' && path[1] && path[2] == ':')
-	path++;
+    if(path[0] == '/'&& ((path[1] && path[2] == ':')||(path[1]=='/'&&path[2]=='/'))) path++;
 
     file = strdup8(path);
     {
