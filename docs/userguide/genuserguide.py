@@ -2,16 +2,16 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/genuserguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/genuserguide.py,v 1.48 2001/08/11 14:35:52 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/genuserguide.py,v 1.49 2001/10/04 22:14:17 andy_robinson Exp $
 
-__version__=''' $Id: genuserguide.py,v 1.48 2001/08/11 14:35:52 rgbecker Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.49 2001/10/04 22:14:17 andy_robinson Exp $ '''
 
 __doc__ = """
 This module contains the script for building the user guide.
 """
 
 import os, sys
-sys.path.insert(0,os.path.join(os.path.dirname(sys.argv[0]),'..','tools'))
+sys.path.insert(0,os.path.join('..','tools'))
 from rl_doc_utils import *
 
 def run(pagesize):
@@ -37,10 +37,27 @@ def run(pagesize):
 	doc.build(story)
 	print 'Saved userguide.pdf'
 
+	# copy to target
+	import reportlab
+	docdir = os.path.dirname(reportlab.__file__) + os.sep + 'docs'
+	destfn = docdir + os.sep + 'userguide.pdf'
+	import shutil
+	shutil.copyfile('userguide.pdf',
+					destfn)
+	print 'copied to %s' % destfn
+	
 	# remove *.pyc files
 	pat = os.path.join(os.path.dirname(sys.argv[0]), '*.pyc')
 	for file in glob.glob(pat):
 		os.remove(file)
+
+
+def makeSuite():
+    "standard test harness support - run self as separate process"
+    from reportlab.test.utils import ScriptThatMakesFileTest
+    return ScriptThatMakesFileTest('../docs/userguide',
+								   'genuserguide.py',
+								   'userguide.pdf')
 
 if __name__=="__main__":
 	if len(sys.argv) > 1:
