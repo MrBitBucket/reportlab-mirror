@@ -40,6 +40,7 @@
 #if defined(WIN32) && !defined(__CYGWIN__)
 #undef boolean
 #include <winsock.h>
+#include <io.h>
 #include <fcntl.h>
 #include <io.h>
 #else

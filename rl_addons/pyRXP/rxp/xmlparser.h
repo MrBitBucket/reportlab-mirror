@@ -1,4 +1,4 @@
-/* 	$Id: xmlparser.h,v 1.1 2002/03/22 10:48:50 rgbecker Exp $    */
+/* 	$Id: xmlparser.h,v 1.2 2002/03/22 11:00:37 rgbecker Exp $    */
 
 #ifndef XMLPARSER_H
 #define XMLPARSER_H
@@ -208,6 +208,7 @@ XML_API void ParserSetFlag(Parser p,  ParserFlag flag, int value);
 #define ParserGetFlag(p, flag) \
   (((flag) < 32) ? ((p)->flags[0] & (1u << (flag))) : ((p)->flags[1] & (1u << ((flag)-32))))
 
+XML_API void _ParserPerror(FILE16 *f, Parser p, XBit bit);
 XML_API void ParserPerror(Parser p, XBit bit);
 
 #endif /* XMLPARSER_H */

@@ -1,10 +1,10 @@
-/* 	$Id: xmlparser.c,v 1.1 2002/03/22 10:48:45 rgbecker Exp $
+/* 	$Id: xmlparser.c,v 1.2 2002/03/22 11:00:37 rgbecker Exp $
 */
 
 #define DEBUG_FSM 0
 
 #ifndef lint
-static char vcid[] = "$Id: xmlparser.c,v 1.1 2002/03/22 10:48:45 rgbecker Exp $";
+static char vcid[] = "$Id: xmlparser.c,v 1.2 2002/03/22 11:00:37 rgbecker Exp $";
 #endif /* lint */
 
 /* 
@@ -961,7 +961,7 @@ void ParserSetFlag(Parser p, ParserFlag flag, int value)
     }
 }
 
-void ParserPerror(Parser p, XBit bit)
+void _ParserPerror(FILE16 *f, Parser p, XBit bit)
 {
     int linenum, charnum;
     InputSource s, root;
@@ -978,26 +978,26 @@ void ParserPerror(Parser p, XBit bit)
 	    --e;
 
 	if(p->state == PS_validate_dtd)
-	    Fprintf(Stderr, "%s:-1(end of prolog):-1: ", e);
+	    Fprintf(f, "%s:-1(end of prolog):-1: ", e);
 	else if(p->state == PS_validate_final)
-	    Fprintf(Stderr, "%s:-1(end of body):-1: ", e);
+	    Fprintf(f, "%s:-1(end of body):-1: ", e);
 	else
-	    Fprintf(Stderr, "%s:%d:%d: ", e,root->line_number+1, root->next+1);
+	    Fprintf(f, "%s:%d:%d: ", e,root->line_number+1, root->next+1);
 
 	if(bit->type == XBIT_warning)
-	    Fprintf(Stderr, "warning: ");
-	Fprintf(Stderr, "%s\n", bit->error_message);
+	    Fprintf(f, "warning: ");
+	Fprintf(f, "%s\n", bit->error_message);
 
 	return;
     }
 
-    Fprintf(Stderr, "%s: %s\n", 
+    Fprintf(f, "%s: %s\n", 
 	    bit->type == XBIT_error ? "Error" : "Warning", 
 	    bit->error_message);
 
     if(p->state == PS_validate_dtd || p->state == PS_validate_final)
     {
-	Fprintf(Stderr, " (detected at end of %s of document %s)\n",
+	Fprintf(f, " (detected at end of %s of document %s)\n",
 		p->state == PS_validate_final ? "body" : "prolog",
 		EntityDescription(root->entity));
 
@@ -1007,26 +1007,31 @@ void ParserPerror(Parser p, XBit bit)
     for(s=p->source; s; s=s->parent)
     {
 	if(s->entity->name)
-	    Fprintf(Stderr, " in entity \"%S\"", s->entity->name);
+	    Fprintf(f, " in entity \"%S\"", s->entity->name);
 	else
-	    Fprintf(Stderr, " in unnamed entity");
+	    Fprintf(f, " in unnamed entity");
 
 	switch(SourceLineAndChar(s, &linenum, &charnum))
 	{
 	case 1:
-	    Fprintf(Stderr, " at line %d char %d of", linenum+1, charnum+1);
+	    Fprintf(f, " at line %d char %d of", linenum+1, charnum+1);
 	    break;
 	case 0:
-	    Fprintf(Stderr, " defined at line %d char %d of",
+	    Fprintf(f, " defined at line %d char %d of",
 		    linenum+1, charnum+1);
 	    break;
 	case -1:
-	    Fprintf(Stderr, " defined in");
+	    Fprintf(f, " defined in");
 	    break;
 	}
 
-	Fprintf(Stderr, " %s\n", EntityDescription(s->entity));
+	Fprintf(f, " %s\n", EntityDescription(s->entity));
     }
+}
+
+void ParserPerror(Parser p, XBit bit)
+{
+	_ParserPerror(Stderr,p,bit);
 }
 
 
