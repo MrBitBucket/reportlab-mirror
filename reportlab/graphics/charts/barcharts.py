@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.58 2001/12/18 11:14:02 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.59 2002/01/17 10:54:38 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -81,6 +81,7 @@ class BarChart(Widget):
 
 		# allow for a bounding rectangle
 		self.strokeColor = None
+		self.strokeWidth = 1
 		self.fillColor = None
 
 		# this defines two series of 3 points.	Just an example.
@@ -128,10 +129,14 @@ class BarChart(Widget):
 		self.naLabel = None#NA_Label()
 
 	def makeBackground(self):
-		g = Group()
-		g.add(Rect(self.x, self.y, self.width, self.height,
-			strokeColor = self.strokeColor, fillColor= self.fillColor))
-		return g
+		strokeColor,strokeWidth,fillColor=self.strokeColor, self.strokeWidth, self.fillColor
+		if (strokeWidth and strokeColor) or fillColor:
+			g = Group()
+			g.add(Rect(self.x, self.y, self.width, self.height,
+				strokeColor=strokeColor, strokeWidth=strokeWidth, fillColor=fillColor))
+			return g
+		else:
+			return None
 
 
 	def demo(self):
