@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.17 2001/05/18 10:55:48 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.18 2001/05/21 07:55:48 rgbecker Exp $
 import string
 
 from reportlab.graphics import shapes
@@ -146,6 +146,18 @@ class Widget(PropHolder, shapes.UserNode):
 	def provideNode(self):
 		return self.draw()
 
+class TypedPropertyElementWrapper:
+	def __init__(self,parent,child):
+		self.__dict__['_parent'] = parent
+		self.__dict__['_child'] = child
+
+	def __getattr__(self,name):
+		child = self.__dict__['_child']
+		if child.__dict__.has_key(name): return getattr(child,name)
+		return getattr(self._parent,name)
+
+	def __setattr__(self,name,value):
+		setattr(self._child,name,value)
 
 class TypedPropertyCollection(PropHolder):
 	"""A container with properties for objects of the same kind.
@@ -181,8 +193,9 @@ class TypedPropertyCollection(PropHolder):
 			return self._children[index]
 		except KeyError:
 			child = self._prototype()
-			#should we copy down?  how to keep in synch?
-			child.setProperties(Widget.getProperties(self))
+			for i in child._attrMap.keys():
+				del child.__dict__[i]
+			child = TypedPropertyElementWrapper(self,child)
 			self._children[index] = child
 			return child
 
