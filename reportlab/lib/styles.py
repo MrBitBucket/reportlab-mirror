@@ -31,6 +31,11 @@
 #
 ###############################################################################
 #   $Log: styles.py,v $
+#   Revision 1.5  2000/05/17 08:03:53  andy_robinson
+#   readJPEGinfo moved from canvas to pdfutils;
+#   Pythonpoint now handles JPEG images; more
+#   JPEG extensions recognised.
+#
 #   Revision 1.4  2000/05/11 12:26:55  andy_robinson
 #   Stylesheets become classes; styles copy data on __init__
 #   rather than doing acquisition at runtime.  Should go
@@ -45,7 +50,7 @@
 #   Revision 1.1  2000/04/14 10:51:56  rgbecker
 #   Moved out of layout.py
 #   
-__version__=''' $Id: styles.py,v 1.4 2000/05/11 12:26:55 andy_robinson Exp $ '''
+__version__=''' $Id: styles.py,v 1.5 2000/05/17 08:03:53 andy_robinson Exp $ '''
 
 from reportlab.lib.colors import white, black
 from reportlab.lib.enums import TA_LEFT
@@ -77,11 +82,8 @@ class PropertySet:
         #step two - copy from parent if any.  Try to be
         # very strict that only keys in class defaults are
         # allowed, so they cannot inherit
-        if self.parent:
-            for (key, value) in self.parent.__dict__.items():
-                if (key not in ['name','parent']):
-                    self.__dict__[key] = value
-
+        self.refresh()
+        
         #step three - copy keywords if any                    
         for (key, value) in kw.items():
              self.__dict__[key] = value
@@ -89,6 +91,16 @@ class PropertySet:
 
     def __repr__(self):
         return "<%s '%s'>" % (self.__class__.__name__, self.name)
+
+    def refresh(self):
+        """re-fetches attributes from the parent on demand;
+        use if you have been hacking the styles.  This is
+        used by __init__"""
+        if self.parent:
+            for (key, value) in self.parent.__dict__.items():
+                if (key not in ['name','parent']):
+                    self.__dict__[key] = value
+
 
     def listAttrs(self, indent=''):
         print indent + 'name =', self.name

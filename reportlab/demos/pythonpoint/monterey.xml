@@ -22,13 +22,13 @@
     <slide id="Slide002" title="Background" effectname='Wipe'>
         <frame x="160" y="72" width="600" height="432" leftmargin="36" rightmargin="0">
 			<para style='Heading2'>Background to the project:</para>
-			<para style='Bullet' bullettext='¥'>London-based consultant and corporate developer</para>
-			<para style='Bullet' bullettext='¥'>want to do neat Python stuff in the daytime</para>
-			<para style='Bullet' bullettext='¥'>working for many years on financial modelling</para>
-			<para style='Bullet' bullettext='¥'>this is one of 6 modules in that system</para>
-			<para style='Bullet' bullettext='¥'>quickest to deliver, offers very wide benefits</para>
-			<para style='Bullet' bullettext='¥'>25% of architecture done, but already very useful</para>
-			<para style='Bullet' bullettext='¥'>Release early, release often!</para>
+			<para style='Bullet'>London-based consultant and corporate developer</para>
+			<para style='Bullet'>want to do neat Python stuff in the daytime</para>
+			<para style='Bullet'>working for many years on financial modelling</para>
+			<para style='Bullet'>this is one of 6 modules in that system</para>
+			<para style='Bullet'>quickest to deliver, offers very wide benefits</para>
+			<para style='Bullet'>25% of architecture done, but already very useful</para>
+			<para style='Bullet'>Release early, release often!</para>
         </frame>
     </slide>
 
@@ -37,13 +37,13 @@
         <frame x="160" y="72" width="600" height="432" leftmargin="36" rightmargin="0">
 			<para style='Heading2'>Goal:</para>
 			<para style='BodyText'>A Reporting Package on the Next Curve... </para>
-			<para style='Bullet' bullettext='¥'>Report on objects, not databases</para>
-			<para style='Bullet' bullettext='¥'>Scalable to million page runs</para>
-			<para style='Bullet' bullettext='¥'>Light enough to embed in any application</para>
-			<para style='Bullet' bullettext='¥'>Allow reuse of graphical objects across reports</para>
-			<para style='Bullet' bullettext='¥'>Open and extensible on several levels </para>
-			<para style='Bullet' bullettext='¥'>Publication quality</para>
-   			<para style='Bullet' bullettext='¥'>Support all the world's languages - one day</para>
+			<para style='Bullet'>Report on objects, not databases</para>
+			<para style='Bullet'>Scalable to million page runs</para>
+			<para style='Bullet'>Light enough to embed in any application</para>
+			<para style='Bullet'>Allow reuse of graphical objects across reports</para>
+			<para style='Bullet'>Open and extensible on several levels </para>
+			<para style='Bullet'>Publication quality</para>
+   			<para style='Bullet'>Support all the world's languages - one day</para>
         </frame>
     </slide>
 
@@ -51,10 +51,10 @@
         <frame x="160" y="72" width="600" height="432" leftmargin="36" rightmargin="0">
 			<para style='Heading2'>Portable Document Format</para>
 			<para style='Italic'>The New PostScript </para>
-			<para style='Bullet' bullettext='¥'>Free readers on all platforms</para>
-			<para style='Bullet' bullettext='¥'>Better than paper - view it, email it, print it</para>
-			<para style='Bullet' bullettext='¥'>'Final Form' for documents</para>
-			<para style='Bullet' bullettext='¥'>High end solution - no limits to quality</para>
+			<para style='Bullet'>Free readers on all platforms</para>
+			<para style='Bullet'>Better than paper - view it, email it, print it</para>
+			<para style='Bullet'>'Final Form' for documents</para>
+			<para style='Bullet'>High end solution - no limits to quality</para>
 			<para style='Italic'>...but you can't learn it in Notepad!</para>
         </frame>
     </slide>
@@ -70,13 +70,13 @@
     <slide id="Slide006" title="PDFgen layer" effectname='Wipe'>
         <frame x="160" y="72" width="600" height="432" leftmargin="36" rightmargin="0">
 			<para style='Heading2'>Layer One - PDFgen</para>
-			<para style='Bullet' bullettext='¥'>makes PDF documents from pure Python</para>
-			<para style='Bullet' bullettext='¥'>wraps up PDF document structure</para>
-			<para style='Bullet' bullettext='¥'>exposes nice effects - page transitions, outline trees (RSN!)</para>
-			<para style='Bullet' bullettext='¥'>low level graphics promitives (postscript imaging model)</para>
-			<para style='Bullet' bullettext='¥'>Fine control of text placement</para>
-			<para style='Bullet' bullettext='¥'>Supports Asian text</para>
-   			<para style='Bullet' bullettext='¥'>Supports coordinate transformations and clipping</para>
+			<para style='Bullet'>makes PDF documents from pure Python</para>
+			<para style='Bullet'>wraps up PDF document structure</para>
+			<para style='Bullet'>exposes nice effects - page transitions, outline trees (RSN!)</para>
+			<para style='Bullet'>low level graphics promitives (postscript imaging model)</para>
+			<para style='Bullet'>Fine control of text placement</para>
+			<para style='Bullet'>Supports Asian text</para>
+   			<para style='Bullet'>Supports coordinate transformations and clipping</para>
 			<para style='Italic'>...a foundation for other apps to build on</para>
         </frame>
     </slide>
@@ -95,12 +95,12 @@
         <frame x="160" y="72" width="600" height="432" leftmargin="36" rightmargin="0">
 			<para style='Heading2'>Layer Two: PIDDLE</para>
 			<para style='Italic'>Plug In Drawing, Does Little Else</para>
-			<para style='Bullet' bullettext='¥'>Easy Graphics Library</para>
-			<para style='Bullet' bullettext='¥'>Abstract Canvas Interface</para>
-			<para style='Bullet' bullettext='¥'>Pluggable Back Ends</para>
-			<para style='Bullet' bullettext='¥'>Same code can do viewing and printing</para>
-			<para style='Bullet' bullettext='¥'>Standard set of test patterns</para>
-			<para style='Bullet' bullettext='¥'>Uses Python Imaging Library</para>
+			<para style='Bullet'>Easy Graphics Library</para>
+			<para style='Bullet'>Abstract Canvas Interface</para>
+			<para style='Bullet'>Pluggable Back Ends</para>
+			<para style='Bullet'>Same code can do viewing and printing</para>
+			<para style='Bullet'>Standard set of test patterns</para>
+			<para style='Bullet'>Uses Python Imaging Library</para>
 			<para style='BodyText'>
 				Back ends includeTkinter, wxPython, Mac, Pythonwin, PDF, PostScript,
 				OpenGL, Adobe Illustrator and PIL.  Really easy to add a new one!
@@ -113,10 +113,10 @@
 			<para style='Heading2'>Layer Three: PLATYPUS</para>
 			<para style='Italic'>"Page Layout And Typography Using Scripts"</para>
 			<para style='BodyText'>Trying to work out the API now.  Key Concepts:</para>
-			<para style='Bullet' bullettext='¥'>Drawable objects - can 'wrap to fit'</para>
-			<para style='Bullet' bullettext='¥'>Frames on page</para>
-			<para style='Bullet' bullettext='¥'>Frame consumes from a list of drawables until full</para>
-			<para style='Bullet' bullettext='¥'>Document Models e.g. SimpleFlowDocument</para>
+			<para style='Bullet'>Drawable objects - can 'wrap to fit'</para>
+			<para style='Bullet'>Frames on page</para>
+			<para style='Bullet'>Frame consumes from a list of drawables until full</para>
+			<para style='Bullet'>Document Models e.g. SimpleFlowDocument</para>
 			<para style='BodyText'>XSL Flow Object model may be a good target</para>
 		</frame>
     </slide>
@@ -128,9 +128,9 @@
 				Next layer of PIDDLE extensibility.  Each draws in its own 
 				coodinate system
 			</para>
-			<para style='Bullet' bullettext='¥'>paragraph, image, table</para>
-			<para style='Bullet' bullettext='¥'>chart libraries</para>
-			<para style='Bullet' bullettext='¥'>diagrams</para>
+			<para style='Bullet'>paragraph, image, table</para>
+			<para style='Bullet'>chart libraries</para>
+			<para style='Bullet'>diagrams</para>
 			<para style='BodyText'>
 				Open Source - let people contribute new ones.  Anything you could 
 				have in a view can be a new drawable type.
@@ -144,20 +144,20 @@
 			<para style='BodyText'>
 				Styles use instance inheritance
 			</para>
-			<para style='Bullet' bullettext='¥'>Paragraph Styles - Style Sheet Compulsory!</para>
-			<para style='Bullet' bullettext='¥'>Text Styles within a paragraph</para>
-			<para style='Bullet' bullettext='¥'>Table and Table Cell Styles</para>
+			<para style='Bullet'>Paragraph Styles - Style Sheet Compulsory!</para>
+			<para style='Bullet'>Text Styles within a paragraph</para>
+			<para style='Bullet'>Table and Table Cell Styles</para>
 		</frame>
     </slide>
 
     <slide id="Slide012" title="Vision" effectname='Wipe'>
         <frame x="160" y="72" width="600" height="432" leftmargin="36" rightmargin="0">
 			<para style='Heading2'>Vision</para>
-			<para style='Bullet' bullettext='¥'>XML to PDF in one step</para>
-			<para style='Bullet' bullettext='¥'>Publish to web and print from same source</para>
-			<para style='Bullet' bullettext='¥'>Financial and Scientific reporting tool</para>
-			<para style='Bullet' bullettext='¥'>Embedded reporting engine</para>
-			<para style='Bullet' bullettext='¥'>Volume reporting tool for business</para>
+			<para style='Bullet'>XML to PDF in one step</para>
+			<para style='Bullet'>Publish to web and print from same source</para>
+			<para style='Bullet'>Financial and Scientific reporting tool</para>
+			<para style='Bullet'>Embedded reporting engine</para>
+			<para style='Bullet'>Volume reporting tool for business</para>
 		</frame>
     </slide>
 
