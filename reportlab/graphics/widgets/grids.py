@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/grids.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.30 2002/12/02 20:09:53 rgbecker Exp $
-__version__=''' $Id: grids.py,v 1.30 2002/12/02 20:09:53 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.31 2003/04/07 11:40:51 rgbecker Exp $
+__version__=''' $Id: grids.py,v 1.31 2003/04/07 11:40:51 rgbecker Exp $ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColorOrNone, isBoolean, isListOfNumbers, OneOf, isListOfColors
@@ -83,6 +83,8 @@ class Grid(Widget):
             desc='Color used for lines.'),
         strokeWidth = AttrMapValue(isNumber,
             desc='Width used for lines.'),
+        rectStrokeColor = AttrMapValue(isColorOrNone, desc='Color for outer rect stroke.'),
+        rectStrokeWidth = AttrMapValue(isColorOrNone, desc='Width for outer rect stroke.'),
         )
 
     def __init__(self):
@@ -111,11 +113,13 @@ class Grid(Widget):
         return D
 
     def makeOuterRect(self):
-        if self.fillColor or self.strokeColor and self.strokeWidth:
+        strokeColor = getattr(self,'rectStrokeColor',self.strokeColor)
+        strokeWidth = getattr(self,'rectStrokeWidth',self.strokeWidth)
+        if self.fillColor or (strokeColor and strokeWidth):
             rect = Rect(self.x, self.y, self.width, self.height)
             rect.fillColor = self.fillColor
-            rect.strokeColor = self.strokeColor
-            rect.strokeWidth = self.strokeWidth
+            rect.strokeColor = strokeColor
+            rect.strokeWidth = strokeWidth
             return rect
         else:
             return None
