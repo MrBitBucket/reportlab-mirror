@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.67 2003/08/11 10:22:02 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.67 2003/08/11 10:22:02 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.68 2003/12/19 13:22:08 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.68 2003/12/19 13:22:08 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -629,7 +629,8 @@ class Table(Flowable):
     def _drawLines(self):
         ccap, cdash, cjoin = None, None, None
         self.canv.saveState()
-        for op, (sc, sr), (ec, er), weight, color, cap, dash, join in self._linecmds:
+        for op, (sc,sr), (ec,er), weight, color, cap, dash, join in self._linecmds:
+            if type(sr) is type('') and sr.startswith('split'): continue
             if sc < 0: sc = sc + self._ncols
             if ec < 0: ec = ec + self._ncols
             if sr < 0: sr = sr + self._nrows
@@ -717,22 +718,26 @@ class Table(Flowable):
         for c in cmds:
             c = tuple(c)
             (sc,sr), (ec,er) = c[1:3]
-            if sr>=0 and sr>=repeatRows and sr<n and er>=0 and er<n: continue
-            if sr>=repeatRows and sr<n: sr=repeatRows
-            elif sr>=repeatRows and sr>=n: sr=sr+repeatRows-n
-            if er>=repeatRows and er<n: er=repeatRows
-            elif er>=repeatRows and er>=n: er=er+repeatRows-n
-            self._addCommand((c[0],)+((sc, sr), (ec, er))+c[3:])
+            if sr in ('splitfirst','splitlast'): self._addCommand(c)
+            else:
+                if sr>=0 and sr>=repeatRows and sr<n and er>=0 and er<n: continue
+                if sr>=repeatRows and sr<n: sr=repeatRows
+                elif sr>=repeatRows and sr>=n: sr=sr+repeatRows-n
+                if er>=repeatRows and er<n: er=repeatRows
+                elif er>=repeatRows and er>=n: er=er+repeatRows-n
+                self._addCommand((c[0],)+((sc, sr), (ec, er))+c[3:])
 
     def _cr_1_0(self,n,cmds):
         for c in cmds:
             c = tuple(c)
             (sc,sr), (ec,er) = c[1:3]
-            if er>=0 and er<n: continue
-            if sr>=0 and sr<n: sr=0
-            if sr>=n: sr = sr-n
-            if er>=n: er = er-n
-            self._addCommand((c[0],)+((sc, sr), (ec, er))+c[3:])
+            if sr in ('splitfirst','splitlast'): self._addCommand(c)
+            else:
+                if er>=0 and er<n: continue
+                if sr>=0 and sr<n: sr=0
+                if sr>=n: sr = sr-n
+                if er>=n: er = er-n
+                self._addCommand((c[0],)+((sc, sr), (ec, er))+c[3:])
 
     def _splitRows(self,availHeight):
         h = 0
@@ -765,7 +770,15 @@ class Table(Flowable):
 
         A = []
         # hack up the line commands
-        for op, (sc, sr), (ec, er), weight, color, cap, dash, join in self._linecmds:
+        for op, (sc,sr), (ec,er), weight, color, cap, dash, join in self._linecmds:
+            if type(sr)is type('') and sr.startswith('split'):
+                A.append((op,(sc,sr), (ec,sr), weight, color, cap, dash, join))
+                if sr=='splitlast':
+                    sr = er = n-1
+                elif sr=='splitfirst':
+                    sr = n
+                    er = n
+
             if sc < 0: sc = sc + self._ncols
             if ec < 0: ec = ec + self._ncols
             if sr < 0: sr = sr + self._nrows
@@ -1407,7 +1420,7 @@ LIST_STYLE = TableStyle(
             #span 'AAA'down entire left column            
             ('SPAN',(0,0), (0, 1)),
             ('BACKGROUND',(0,0),(0,0),colors.cyan),
-
+            ('LINEBELOW', (0,'splitlast'), (-1,'splitlast'), 1, colors.white,'butt'),
            ]
     t=Table(data,style=sty, colWidths = [20] * 5, rowHeights = [20]*5)
     lst.append(t)
