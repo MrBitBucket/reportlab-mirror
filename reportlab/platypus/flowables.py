@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.26 2002/01/18 12:11:00 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.26 2002/01/18 12:11:00 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.27 2002/01/18 12:18:29 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.27 2002/01/18 12:18:29 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -78,6 +78,13 @@ class Flowable:
 		self.canv.restoreState()
 		del self.canv
 
+	def wrapOn(self, canv, aW, aH):
+		'''intended for use by packers allows setting the canvas on
+		during the actual wrap'''
+		self.canv = canv
+		w, h = self.wrap(aW,aH)
+		del self.canv
+		return w, h
 
 	def wrap(self, availWidth, availHeight):
 		"""This will be called by the enclosing frame before objects
@@ -88,6 +95,14 @@ class Flowable:
 	def minWidth(self):
 		"""This should return the minimum required width"""
 		return getattr(self,'_minWidth',self.width)
+
+	def splitOn(self, canv, aW, aH):
+		'''intended for use by packers allows setting the canvas on
+		during the actual split'''
+		self.canv = canv
+		S = self.split(aW,aH)
+		del self.canv
+		return S
 
 	def split(self, availWidth, availheight):
 		"""This will be called by more sophisticated frames when
@@ -362,8 +377,9 @@ class KeepTogether(Flowable):
 		W = 0
 		H = 0
 		F = self._flowables
+		canv = self.canv
 		for f in F:
-			w,h = f.wrap(aW,0xfffffff)
+			w,h = f.wrapOn(canv,aW,0xfffffff)
 			if f is not F[0]: h = h + f.getSpaceBefore()
 			if f is not F[-1]: h = h + f.getSpaceAfter()
 			W = max(W,w)
