@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.45 2001/10/02 11:05:37 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.46 2001/10/02 11:41:40 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -1715,6 +1715,61 @@ def sampleSymbol1():
 	bc.bars.symbol = sym1
 	bc.bars[2].symbol = sym2
 	bc.bars[3].symbol = sym3
+
+	drawing.add(bc)
+
+	return drawing
+
+def sampleStacked1():
+	"Simple bar chart using symbol attribute."
+
+	drawing = Drawing(400, 200)
+
+	data = dataSample5
+
+	bc = VerticalBarChart()
+	bc.categoryAxis.style = 'stacked'
+	bc.x = 50
+	bc.y = 50
+	bc.height = 125
+	bc.width = 300
+	bc.data = data
+	bc.strokeColor = colors.black
+
+	bc.barWidth = 10
+	bc.groupSpacing = 15
+	bc.valueAxis.valueMin = 0
+
+	bc.categoryAxis.labels.boxAnchor = 'e'
+	bc.categoryAxis.categoryNames = ['Ying', 'Yang']
+
+	bc.bars.symbol = ShadedRect()
+	bc.bars.symbol.fillColorStart = colors.red
+	bc.bars.symbol.fillColorEnd = colors.white
+	bc.bars.symbol.orientation = 'vertical'
+	bc.bars.symbol.cylinderMode = 1
+	bc.bars.symbol.strokeWidth = 0
+
+	bc.bars[1].symbol = ShadedRect()
+	bc.bars[1].symbol.fillColorStart = colors.magenta
+	bc.bars[1].symbol.fillColorEnd = colors.white
+	bc.bars[1].symbol.orientation = 'vertical'
+	bc.bars[1].symbol.cylinderMode = 1
+	bc.bars[1].symbol.strokeWidth = 0
+
+	bc.bars[2].symbol = ShadedRect()
+	bc.bars[2].symbol.fillColorStart = colors.green
+	bc.bars[2].symbol.fillColorEnd = colors.white
+	bc.bars[2].symbol.orientation = 'vertical'
+	bc.bars[2].symbol.cylinderMode = 1
+	bc.bars[2].symbol.strokeWidth = 0
+
+	bc.bars[3].symbol = ShadedRect()
+	bc.bars[3].symbol.fillColorStart = colors.blue
+	bc.bars[3].symbol.fillColorEnd = colors.white
+	bc.bars[3].symbol.orientation = 'vertical'
+	bc.bars[3].symbol.cylinderMode = 1
+	bc.bars[3].symbol.strokeWidth = 0
 
 	drawing.add(bc)
 
