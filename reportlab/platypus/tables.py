@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.62 2002/08/09 11:19:45 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.62 2002/08/09 11:19:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.63 2003/04/05 23:46:42 andy_robinson Exp $
+__version__=''' $Id: tables.py,v 1.63 2003/04/05 23:46:42 andy_robinson Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -24,6 +24,8 @@ from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyl
 from reportlab.lib import colors
 from reportlab.lib.utils import fp_str
 from reportlab.pdfbase import pdfmetrics
+from reportlab.platypus.flowables import PageBreak
+
 import operator, string
 
 from types import TupleType, ListType, StringType
@@ -164,6 +166,7 @@ class Table(Flowable):
 
         self._bkgrndcmds = []
         self._linecmds = []
+        self._spanCmds = []
         self.repeatRows = repeatRows
         self.repeatCols = repeatCols
         self.splitByRow = splitByRow
@@ -332,6 +335,82 @@ class Table(Flowable):
         # calculate the full table width
         self._calc_width()
 
+        if self._spanCmds:
+            self._calcSpanRects()
+            
+
+    def _calcSpanRects(self):
+        """Work out rects for tables which do row and column spanning.
+
+        This is a first try.  The idea is to do the ordinary sizing
+        first and then make two mappings:
+
+        self._spanRanges shows the 'coords' in integers of each
+        'cell range', or None if it was clobbered:
+          (col, row) -> (col0, row0, col1, row1)
+        self._spanRects shows the real coords for drawing:
+          (col, row) -> (x, y, width, height)
+        
+        for each cell.  Any cell which 'does not exist' as another
+        has spanned over it will get a None entry on the right
+        """
+        spanRanges = {}
+        for row in range(self._nrows):
+            for col in range(self._ncols):
+                spanRanges[(col, row)] = (col, row, col, row)
+
+        for (cmd, start, stop) in self._spanCmds:
+            x0, y0 = start
+            x1, y1 = stop
+
+            #normalize
+            if x0 < 0: x0 = x0 + self._ncols
+            if x1 < 0: x1 = x1 + self._ncols
+            if y0 < 0: y0 = y0 + self._nrows
+            if y1 < 0: y1 = y1 + self._nrows
+            
+            if x0 > x1:
+                x0, x1 = x1, x0
+            if y0 > y1:
+                y0, y1 = y1, y0
+
+            # unset/clobber all the ones it
+            # overwrites
+            for y in range(y0, y1+1):
+                for x in range(x0, x1+1):
+                    spanRanges[x, y] = None
+
+            # set the main entry            
+            spanRanges[x0,y0] = (x0, y0, x1, y1)
+        self._spanRanges = spanRanges
+        
+        # now make map 2.  This maps (col, row) to the actual
+        #rectangle to draw with x,y,width,height info
+##        print 'rowpositions = ', self._rowpositions
+##        print 'rowHeights = ', self._rowHeights
+##        print 'colpositions = ', self._colpositions
+##        print 'colWidths = ', self._colWidths
+        spanRects = {}
+        for (coord, value) in spanRanges.items():
+            if value is None:
+                spanRects[coord] = None
+            else:
+                col,row = coord
+                col0, row0, col1, row1 = value
+                x = self._colpositions[col0]
+                y = self._rowpositions[row1+1]  # should I add 1 for bottom left?
+                width = self._colpositions[col1+1] - x
+                height = self._rowpositions[row0] - y
+                spanRects[coord] = (x, y, width, height)
+                
+        self._spanRects = spanRects
+            
+##        from pprint import pprint as pp
+##        print 'span ranges:'
+##        pp(spanRanges)
+##        print '\ncell rects:'
+##        pp(spanRects)        
+
     def setStyle(self, tblstyle):
         if type(tblstyle) is not TableStyleType:
             tblstyle = TableStyle(tblstyle)
@@ -343,6 +422,8 @@ class Table(Flowable):
     def _addCommand(self,cmd):
         if cmd[0] == 'BACKGROUND':
             self._bkgrndcmds.append(cmd)
+        elif cmd[0] == 'SPAN':
+            self._spanCmds.append(cmd)
         elif _isLineCommand(cmd):
             # we expect op, start, stop, weight, colour, cap, dashes, join
             cmd = tuple(cmd)
@@ -595,9 +676,23 @@ class Table(Flowable):
         self._curweight = self._curcolor = self._curcellstyle = None
         self._drawBkgrnd()
         self._drawLines()
-        for row, rowstyle, rowpos, rowheight in map(None, self._cellvalues, self._cellStyles, self._rowpositions[1:], self._rowHeights):
-            for cellval, cellstyle, colpos, colwidth in map(None, row, rowstyle, self._colpositions[:-1], self._colWidths):
-                self._drawCell(cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight))
+        if self._spanCmds == []:
+            # old fashioned case, no spanning, steam on and do each cell
+            for row, rowstyle, rowpos, rowheight in map(None, self._cellvalues, self._cellStyles, self._rowpositions[1:], self._rowHeights):
+                for cellval, cellstyle, colpos, colwidth in map(None, row, rowstyle, self._colpositions[:-1], self._colWidths):
+                    self._drawCell(cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight))
+        else:
+            # we have some row or col spans, need a more complex algorithm
+            # to find the rect for each
+            for rowNo in range(self._nrows):
+                for colNo in range(self._ncols):
+                    cellRect = self._spanRects[colNo, rowNo]
+                    if cellRect is not None:
+                        (x, y, width, height) = cellRect
+                        cellval = self._cellvalues[rowNo][colNo]
+                        cellstyle = self._cellStyles[rowNo][colNo]
+                        self._drawCell(cellval, cellstyle, (x, y), (width, height))
+            
 
     def _drawBkgrnd(self):
         nrows = self._nrows
@@ -1119,6 +1214,40 @@ LIST_STYLE = TableStyle(
 
     t._argW[3]=1.5*inch
     lst.append(t)
+
+    # now for an attempt at column spanning.
+    lst.append(PageBreak())
+    colWidths = [24] * 5
+    rowHeight = [20] * 5
+    data=  [['A', 'BBBBB', 'C', 'D', 'E'],
+            ['00', '01', '02', '03', '04'],
+            ['10', '11', '12', '13', '14'],
+            ['20', '21', '22', '23', '24'],
+            ['30', '31', '32', '33', '34']]
+    sty = [
+            ('ALIGN',(0,0),(-1,-1),'CENTER'),
+            ('VALIGN',(0,0),(-1,-1),'TOP'),
+            ('GRID',(0,0),(-1,-1),1,colors.green),
+            ('BOX',(0,0),(-1,-1),2,colors.red),
+
+            #span 'BBBB' across middle 3 cells in top row
+            ('SPAN',(1,0),(3,0)),
+            #now color the first cell in this range only,
+            #i.e. the one we want to have spanned.  Hopefuly
+            #the range of 3 will come out khaki.
+            ('BACKGROUND',(1,0),(1,0),colors.khaki),
+
+            ('SPAN',(0,2),(-1,2)),
+
+
+            #span 'AAA'down entire left column            
+            ('SPAN',(0,0), (0, 1)),
+            ('BACKGROUND',(0,0),(0,0),colors.cyan),
+
+           ]
+    t=Table(data,style=sty, colWidths = [20] * 5, rowHeights = [20]*5)
+    lst.append(t)
+    
 
     SimpleDocTemplate('tables.pdf', showBoundary=1).build(lst)
 
