@@ -31,6 +31,9 @@
 #
 ###############################################################################
 #   $Log: styles.py,v $
+#   Revision 1.6  2000/09/25 20:07:29  andy_robinson
+#   added has_key method to stylesheet1
+#
 #   Revision 1.5  2000/05/17 08:03:53  andy_robinson
 #   readJPEGinfo moved from canvas to pdfutils;
 #   Pythonpoint now handles JPEG images; more
@@ -50,7 +53,7 @@
 #   Revision 1.1  2000/04/14 10:51:56  rgbecker
 #   Moved out of layout.py
 #   
-__version__=''' $Id: styles.py,v 1.5 2000/05/17 08:03:53 andy_robinson Exp $ '''
+__version__=''' $Id: styles.py,v 1.6 2000/09/25 20:07:29 andy_robinson Exp $ '''
 
 from reportlab.lib.colors import white, black
 from reportlab.lib.enums import TA_LEFT
@@ -182,6 +185,14 @@ class StyleSheet1:
                 return self.byName[key]
             except KeyError:
                 raise KeyError, "Style '%s' not found in stylesheet" % key
+
+    def has_key(self, key):
+        if self.byAlias.has_key(key):
+            return 1
+        elif self.byName.has_key(key):
+            return 1
+        else:
+            return 0
 
     def add(self, style, alias=None):
         key = style.name
