@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tableofcontents.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tableofcontents.py,v 1.3 2001/11/26 21:49:01 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/tableofcontents.py,v 1.4 2001/11/27 16:49:58 andy_robinson Exp $
 """
 This module defines a single TableOfContents() class that can be used to
 create automatically a table of tontents for Platypus documents like
@@ -33,7 +33,7 @@ constant named delta. If one entry spans more than one line, all
 lines after the first are indented by the same constant named
 epsilon. 
 """
-
+import string
 
 from reportlab.lib import enums
 from reportlab.lib.units import cm
@@ -127,8 +127,6 @@ class TableOfContents(IndexingFlowable):
     def isSatisfied(self):
         return (self._entries == self._lastEntries)
 
-
-    # Shouldn't that be notify??
     def notify(self, kind, stuff):
         """The notification hook called to register all kinds of events.
 
@@ -216,3 +214,117 @@ class TableOfContents(IndexingFlowable):
         work to the embedded table object.
         """
         self._table.drawOn(canvas, x, y, _sW)
+
+
+class SimpleIndex(IndexingFlowable):
+    """This creates a very simple index.
+
+    Entries have a string key, and appear with a page number on
+    the right.  Prototype for more sophisticated multi-level index."""
+    def __init__(self):
+        #keep stuff in a dictionary while building
+        self._entries = {}
+        self._lastEntries = {}
+        self._table = None
+        self.textStyle = ParagraphStyle(name='index',
+                                        fontName='Times-Roman',
+                                        fontSize=12)
+    def isIndexing(self):
+        return 1
+
+    def isSatisfied(self):
+        return (self._entries == self._lastEntries)
+        
+    def beforeBuild(self):
+        # keep track of the last run
+        self._lastEntries = self._entries.copy()
+        self.clearEntries()
+
+    def clearEntries(self):
+        self._entries = {}
+
+    def notify(self, kind, stuff):
+        """The notification hook called to register all kinds of events.
+
+        Here we are interested in 'IndexEntry' events only.
+        """
+        if kind == 'IndexEntry':
+            (text, pageNum) = stuff
+            self.addEntry(text, pageNum)
+
+    def addEntry(self, text, pageNum):
+        """Allows incremental buildup"""
+        if self._entries.has_key(text):
+            self._entries[text].append(str(pageNum))
+        else:
+            self._entries[text] = [pageNum]
+
+    def split(self, availWidth, availHeight):
+        """At this stage we do not care about splitting the entries,
+        we will just return a list of platypus tables.  Presumably the
+        calling app has a pointer to the original TableOfContents object;
+        Platypus just sees tables.
+        """
+        return self._table.split(availWidth, availHeight)
+
+    def wrap(self, availWidth, availHeight):
+        "All table properties should be known by now."
+        # makes an internal table which does all the work.
+        # we draw the LAST RUN's entries!  If there are
+        # none, we make some dummy data to keep the table
+        # from complaining
+        if len(self._lastEntries) == 0:
+            _tempEntries = [('Placeholder for index',[0,1,2])]
+        else:
+            _tempEntries = self._lastEntries.items()
+            _tempEntries.sort()
+
+        tableData = []
+        for (text, pageNumbers) in _tempEntries:
+            #right col style is right aligned
+            allText = text + ': ' + string.join(map(str, pageNumbers), ', ')
+            para = Paragraph(allText, self.textStyle)
+            tableData.append([para])
+
+        self._table = Table(tableData, colWidths=[availWidth])
+
+        self.width, self.height = self._table.wrap(availWidth, availHeight)
+        return (self.width, self.height)
+
+    def drawOn(self, canvas, x, y, _sW=0):
+        """Don't do this at home!  The standard calls for implementing
+        draw(); we are hooking this in order to delegate ALL the drawing
+        work to the embedded table object.
+        """
+        self._table.drawOn(canvas, x, y, _sW)
+
+class ReferenceText(IndexingFlowable):
+    """Fakery to illustrate how a reference would work if we could
+    put it in a paragraph."""
+    def __init__(self, textPattern, targetKey):
+        self.textPattern = textPattern
+        self.target = targetKey
+        self.paraStyle = ParagraphStyle('tmp')
+        self._lastPageNum = None
+        self._pageNum = -999
+        self._para = None
+
+    def beforeBuild(self):
+        self._lastPageNum = self._pageNum
+
+    def notify(self, kind, stuff):
+        if kind == 'Target':
+            (key, pageNum) = stuff
+            if key == self.target:
+                self._pageNum = pageNum
+
+    def wrap(self, availWidth, availHeight):
+        text = self.textPattern % self._lastPageNum
+        self._para = Paragraph(text, self.paraStyle)
+        return self._para.wrap(availWidth, availHeight)
+        
+    def drawOn(self, canvas, x, y, _sW=0):
+        self._para.drawOn(canvas, x, y, _sW)
+        
+    
+        
