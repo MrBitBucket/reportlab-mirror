@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.7 2001/05/20 09:33:01 rgbecker Exp $
-import sys
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.8 2001/05/29 17:05:42 rgbecker Exp $
+import sys, string
 from reportlab.lib import pagesizes
 shapeChecking = 1
 defaultEncoding = 'WinAnsiEncoding'		# 'WinAnsi' or 'MacRoman'
@@ -20,3 +20,5 @@ else:
 
 PIL_WARNINGS=1								# set to zero to avoid any warning
 ZLIB_WARNINGS=1
+
+sys_version = string.split(sys.version)[0]	#strip off the other garbage

@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.16 2001/05/25 14:37:29 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.17 2001/05/29 17:05:42 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.16 2001/05/25 14:37:29 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.17 2001/05/29 17:05:42 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -23,7 +23,7 @@ static __version__=" $Id: _rl_accel.c,v 1.16 2001/05/25 14:37:29 rgbecker Exp $ 
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.32"
+#define VERSION "0.33"
 #define MODULE "_rl_accel"
 #ifndef	ATTRDICT
 	#if PY_MAJOR_VERSION>=2
@@ -546,13 +546,61 @@ static PyMappingMethods _AttrDict_as_mapping = {
 };
 #endif
 
+static PyObject *_escapePDF(unsigned char* text, int textlen)
+{
+	unsigned char*	out = PyMem_Malloc((textlen>>2)+1);
+	int				j=0, i=0;
+	char			buf[4];
+	PyObject*		ret;
+
+	while(i<textlen){
+		unsigned char c = text[i++];
+		if(c<32 || c>=127){
+			sprintf(buf,"%03o",c);
+			out[j++] = '\\';
+			out[j++] = buf[0];
+			out[j++] = buf[1];
+			out[j++] = buf[2];
+			}
+		else {
+			if(c=='\\' || c=='(' || c==')') out[j++] = '\\';
+			out[j++] = c;
+			}
+		}
+	ret = PyString_FromStringAndSize(out,j);
+	PyMem_Free(out);
+	return ret;
+}
+
+static PyObject *escapePDF(PyObject *self, PyObject* args)
+{
+	unsigned char	*text;
+	int				textLen;
+
+	if (!PyArg_ParseTuple(args, "s#:escapePDF", &text, &textLen)) return NULL;
+	return _escapePDF(text,textLen);
+}
+
+static PyObject *_instanceEscapePDF(PyObject *unused, PyObject* args)
+{
+	PyObject		*self;
+	unsigned char	*text;
+	int				textLen;
+
+	if (!PyArg_ParseTuple(args, "Os#:_instanceEscapePDF", &self, &text, &textLen)) return NULL;
+	return _escapePDF(text,textLen);
+}
+
 static char *__doc__=
 "_rl_accel contains various accelerated utilities\n\
-    a fast string width function\n\
+    stringWidth a fast string width function\n\
+	_instanceStringWidth a method version of stringWidth\n\
     defaultEncoding gets/sets the default encoding for stringWidth\n\
     getFontInfo gets font info from the internal table\n\
     setFontInfo adds a font to the internal table\n\
     _SWRecover gets/sets a callback for stringWidth recovery\n\
+	escapePDF makes a string safe for PDF\n\
+	_instanceEscapePDF method equivalent of escapePDF\n\
 	\n\
 	_AsciiBase85Encode does what is says\n\
 	\n\
@@ -575,6 +623,8 @@ static struct PyMethodDef _methods[] = {
 					"callback callable(text,font,size,encoding)\n"
 					"return None to retry or the correct result."},
 	{"_AsciiBase85Encode", _a85_encode, METH_VARARGS, "_AsciiBase85Encode(\".....\") return encoded string"},
+	{"escapePDF", escapePDF, METH_VARARGS, "escapePDF(s) return PDF safed string"},
+	{"_instanceEscapePDF", _instanceEscapePDF, METH_VARARGS, "_instanceEscapePDF(s) return PDF safed string"},
 	{"fp_str", _fp_str, METH_VARARGS, "fp_str(a0, a1,...) convert numerics to blank separated string"},
 #ifdef	ATTRDICT
 	{"_AttrDict", _AttrDict, METH_VARARGS, "_AttrDict() create a dict which can use attribute notation"},

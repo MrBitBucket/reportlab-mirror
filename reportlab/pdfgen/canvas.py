@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.77 2001/05/25 13:52:34 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.77 2001/05/25 13:52:34 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.78 2001/05/29 17:05:42 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.78 2001/05/29 17:05:42 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -12,7 +12,7 @@ ENABLE_TRACKING = 1 # turn this off to do profile testing w/o tracking
 
 import os
 import sys
-import string
+from string import join, split, strip, atoi, replace
 import time
 import tempfile
 import cStringIO
@@ -51,6 +51,26 @@ PATH_OPS = {(0, 0, FILL_EVEN_ODD) : 'n',  #no op
             (1, 1, FILL_EVEN_ODD) : 'B*',  #Stroke and Fill
             (1, 1, FILL_NON_ZERO) : 'B',  #Stroke and Fill
             }
+
+try:
+    from reportlab._rl_accel import _instanceEscapePDF
+    import new
+except:
+    _instanceEscapePDF=None
+
+if not _instanceEscapePDF:
+    if rl_config.sys_version>='2.1':
+        _ESCAPEDICT={}
+        for c in range(0,256):
+            if c<32 or c>=127:
+                _ESCAPETABLE[c] = _ESCAPEDICT[chr(c)]= '\\%03o' % c
+            elif c in (ord('\\'),ord('('),ord(')')):
+                _ESCAPETABLE[c] = '\\'+chr(c)
+                _ESCAPEDICT[chr(c)] = '\\'+chr(c)
+            else:
+                _ESCAPETABLE[c] = chr(c)
+                _ESCAPEDICT[chr(c)] = chr(c)
+        del c
 
 class Canvas:
     """This class is the programmer's interface to the PDF file format.  Methods
@@ -184,7 +204,7 @@ class Canvas:
         for name in self.STATE_ATTRIBUTES:
             setattr(self, name, state[name])
 
-    STATE_ATTRIBUTES = string.split("""
+    STATE_ATTRIBUTES = split("""
      _x _y _fontname _fontsize _textMode _leading _currentMatrix _fillMode
      _fillMode _charSpace _wordSpace _horizScale _textRenderMode _rise _textLineMatrix
      _textMatrix _lineCap _lineJoin _lineDash _lineWidth _mitreLimit _fillColorRGB
@@ -202,13 +222,21 @@ class Canvas:
             #switch coordinates, flip text and set font
             self._preamble = '1 0 0 -1 0 %s cm BT %s 12 Tf 14.4 TL ET' % (fp_str(self._pagesize[1]), iName)
 
-    def _escape(self, s):
-        """PDF escapes are like Python ones, but brackets need slashes before them too.
-        Use Python's repr function and chop off the quotes first"""
-        s = repr(s)[1:-1]
-        s = string.replace(s, '(','\(')
-        s = string.replace(s, ')','\)')
-        return s
+    if _instanceEscapePDF:
+        _escape = new.instancemethod(_instanceEscapePDF,None,Canvas)
+    else:
+        if rl_config.sys_version>='2.1':
+            #Michael Hudson donated this
+            def _escape(self,s):
+                return join(map(lambda c, d=_ESCAPEDICT: d[c],s),'')
+        else:
+            def _escape(self, s):
+                """PDF escapes are like Python ones, but brackets need slashes before them too.
+                Use Python's repr function and chop off the quotes first"""
+                s = repr(s)[1:-1]
+                s = replace(s, '(','\(')
+                s = replace(s, ')','\)')
+                return s
 
     #info functions - non-standard
     def setAuthor(self, author):
@@ -623,9 +651,9 @@ class Canvas:
         #print "transform", (a,b,c,d,e,f)
         #print "currentMatrix", self._currentMatrix
         if self._code and self._code[-1][-3:]==' cm':
-            L = string.split(self._code[-1])
+            L = split(self._code[-1])
             a0, b0, c0, d0, e0, f0 = map(float,L[-7:-1])
-            s = len(L)>7 and string.join(L)+ ' %s cm' or '%s cm'
+            s = len(L)>7 and join(L)+ ' %s cm' or '%s cm'
             self._code[-1] = s % fp_str(a0*a+c0*b,b0*a+d0*b,a0*c+c0*d,b0*c+d0*d,a0*e+c0*f+e0,b0*e+d0*f+f0)
         else:
             self._code.append('%s cm' % fp_str(a,b,c,d,e,f))
@@ -991,7 +1019,7 @@ class Canvas:
             self._code.append('[%s %s] 0 d' % (array, phase))
         elif type(array) == ListType or type(array) == TupleType:
             assert phase >= 0, "phase is a length in user space"
-            textarray = string.join(map(str, array))
+            textarray = join(map(str, array))
             self._code.append('[%s] %s d' % (textarray, phase))
         
     def setFillColorRGB(self, r, g, b):
@@ -1162,12 +1190,12 @@ class Canvas:
                     cachedname = os.path.splitext(image)[0] + '.a85'
                     imagedata = open(cachedname,'rb').readlines()
                     #trim off newlines...
-                    imagedata = map(string.strip, imagedata)
+                    imagedata = map(strip, imagedata)
                 
                 #parse line two for width, height
-                words = string.split(imagedata[1])
-                imgwidth = string.atoi(words[1])
-                imgheight = string.atoi(words[3])
+                words = split(imagedata[1])
+                imgwidth = atoi(words[1])
+                imgheight = atoi(words[3])
         else:
             #PIL Image
             #work out all dimensions
