@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.39 2003/10/13 10:39:20 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.40 2003/11/21 14:44:47 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
-__version__=''' $Id: linecharts.py,v 1.39 2003/10/13 10:39:20 rgbecker Exp $ '''
+__version__=''' $Id: linecharts.py,v 1.40 2003/11/21 14:44:47 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType
@@ -27,6 +27,7 @@ class LineChartProperties(PropHolder):
     _attrMap = AttrMap(
         strokeWidth = AttrMapValue(isNumber, desc='Width of a line.'),
         strokeColor = AttrMapValue(isColorOrNone, desc='Color of a line.'),
+        strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array of a line.'),
         symbol = AttrMapValue(NoneOr(isSymbol), desc='Widget placed at data points.'),
         )
 

@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.52 2003/10/24 10:46:00 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.53 2003/11/21 14:44:47 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.52 2003/10/24 10:46:00 johnprecedo Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.53 2003/11/21 14:44:47 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -26,7 +26,8 @@ from reportlab.graphics.charts.areas import PlotArea
 class LinePlotProperties(PropHolder):
     _attrMap = AttrMap(
         strokeWidth = AttrMapValue(isNumber, desc='Width of a line.'),
-        strokeColor = AttrMapValue(isColorOrNone, desc='Color of a line.'), strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array of a line.'),
+        strokeColor = AttrMapValue(isColorOrNone, desc='Color of a line.'),
+        strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array of a line.'),
         symbol = AttrMapValue(None, desc='Widget placed at data points.'),
         shader = AttrMapValue(None, desc='Shader Class.'),
         )
