@@ -1,13 +1,17 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/xpreformatted.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/xpreformatted.py,v 1.13 2001/02/12 07:48:24 dinu_gherman Exp $
-__version__=''' $Id: xpreformatted.py,v 1.13 2001/02/12 07:48:24 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/xpreformatted.py,v 1.14 2001/08/17 10:35:30 dinu_gherman Exp $
+__version__=''' $Id: xpreformatted.py,v 1.14 2001/08/17 10:35:30 dinu_gherman Exp $ '''
+
 import string
 from types import StringType, ListType
-from paragraph import Paragraph, cleanBlockQuotedText, _handleBulletWidth, ParaLines, _getFragWords, \
-	stringWidth, _sameFrag
+
+from reportlab.lib import PyFontify
+from paragraph import Paragraph, cleanBlockQuotedText, _handleBulletWidth, \
+	 ParaLines, _getFragWords, stringWidth, _sameFrag
 from flowables import _dedenter
+
 
 def _getFragLines(frags):
 	lines = []
@@ -68,6 +72,7 @@ def _getFragWord(frags):
 		#del f.text	# we can't do this until we sort out splitting
 					# of paragraphs
 	return n, s, W
+
 
 class XPreformatted(Paragraph):
 	def __init__(self, text, style, bulletText = None, dedent=0, frags=None):
@@ -175,6 +180,52 @@ class XPreformatted(Paragraph):
 	# we need this her to get the right splitter
 	def _get_split_blParaFunc(self):
 		return _split_blPara
+
+
+class PythonPreformatted(XPreformatted):
+	"""Used for syntax-colored Python code, otherwise like XPreformatted.  
+	"""
+
+	formats = {
+		'rest'       : ('', ''),
+		'comment'    : ('<font color="green">', '</font>'),
+		'keyword'    : ('<font color="blue"><b>', '</b></font>'),
+		'parameter'  : ('<font color="black">', '</font>'),
+		'identifier' : ('<font color="red">', '</font>'),
+		'string'     : ('<font color="gray">', '</font>') }
+
+	def __init__(self, text, style, bulletText = None, dedent=0, frags=None):
+		if text:
+			text = self.fontify(self.escapeHtml(text))
+		apply(XPreformatted.__init__,
+			  (self, text, style),
+			  {'bulletText':bulletText, 'dedent':dedent, 'frags':frags})
+
+	def escapeHtml(self, text):
+		s = string.replace(text, '&', '&amp;')
+		s = string.replace(s, '<', '&lt;')
+		s = string.replace(s, '>', '&gt;')
+		return s
+
+	def fontify(self, code):
+		"Return a fontified version of some Python code."
+
+		if code[0] == '\n':
+			code = code[1:]
+
+		tags = PyFontify.fontify(code)
+		fontifiedCode = ''
+		pos = 0
+		for k, i, j, dummy in tags:
+			fontifiedCode = fontifiedCode + code[pos:i]
+			s, e = self.formats[k]
+			fontifiedCode = fontifiedCode + s + code[i:j] + e
+			pos = j
+			
+		fontifiedCode = fontifiedCode + code[pos:]
+		
+		return fontifiedCode
+	
 
 if __name__=='__main__':	#NORUNTESTS
 	def dumpXPreformattedLines(P):
