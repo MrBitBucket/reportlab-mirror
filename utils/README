@@ -109,6 +109,6 @@ Release Procedure
 	words and then make sure that all the files are present and added.
 	To make sure the files will be visible you must first add and then edit them at the bottom
 	of the page. Ensure processor is any, file type is source .zip or source .gz and that the
-	filename and package are set approriately. If any of the fields are unset then the file won't
+	filename and package are set appropriately. If any of the fields are unset then the file won't
 	show up in the downlaod area.
 
