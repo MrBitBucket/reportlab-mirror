@@ -1,3 +1,370 @@
+########### 1.02 Released 2000/12/11
+##### 2000/12/11 #####
+	utils/README 1.5 rgbecker
+		 z7-->z9
+	platypus/paraparser.py 1.37 rgbecker
+		 Comments and cosmetic changes
+	platypus/paragraph.py 1.40 rgbecker
+		 Comments and cosmetic changes
+##### 2000/12/10 #####
+	pdfgen/textobject.py 1.20 andy_robinson
+		 Fixed obscure stringwidth bugs in textobject and bullets
+	pdfgen/canvas.py 1.58 andy_robinson
+		 Fixed obscure stringwidth bugs in textobject and bullets
+	pdfbase/pdfmetrics.py 1.17 andy_robinson
+		 Fixed obscure stringwidth bugs in textobject and bullets
+	lib/styles.py 1.12 andy_robinson
+		 Fixed obscure stringwidth bugs in textobject and bullets
+	platypus/paraparser.py 1.36 andy_robinson
+		 Added a text background color attribute
+	platypus/paragraph.py 1.39 andy_robinson
+		 Added a text background color attribute
+	lib/styles.py 1.11 andy_robinson
+		 Added a text background color attribute
+	test/test_paragraphs.py 1.1 andy_robinson
+		 Added some paragraph style tests
+	lib/styles.py 1.10 andy_robinson
+		 Added a title style to support rml2pdf
+##### 2000/12/08 #####
+	platypus/paragraph.py 1.38 rgbecker
+		 Clean up one word justified paragraph fix.
+##### 2000/12/07 #####
+	platypus/paragraph.py 1.37 aaron_watters
+		 divide by zero problem for one word paragraphs
+##### 2000/12/06 #####
+	docs/userguide/ch4_platypus_concepts.py 1.9 aaron_watters
+		 less than should be less than or equal in example
+	platypus/paragraph.py 1.36 rgbecker
+		 Fixed line wrap problem
+##### 2000/12/05 #####
+	demos/pythonpoint/pythonpoint.xml 1.12 andy_robinson
+		 Changed link to Michael Wiedmann's DTD
+	platypus/paraparser.py 1.35 rgbecker
+		 Fixed typo
+##### 2000/12/04 #####
+	extensions/README 1.2 rgbecker
+		 Spelling corrections
+	platypus/paraparser.py 1.34 rgbecker
+		 More cosmetic changes
+	platypus/paragraph.py 1.35 rgbecker
+		 Cosmetic changes
+	lib/tocindex.py 1.4 rgbecker
+		 Minor fixes to appends
+##### 2000/12/01 #####
+	platypus/paragraph.py 1.34 aaron_watters
+		 mods permitting late string conversions
+	pdfgen/canvas.py 1.57 aaron_watters
+		 mods permitting late string conversions
+	lib/utils.py 1.6 aaron_watters
+		 mods permitting late string conversions
+##### 2000/11/29 #####
+	platypus/xpreformatted.py 1.12 rgbecker
+		 Semantic Name changes
+	platypus/paraparser.py 1.33 rgbecker
+		 Semantic Name changes
+	platypus/paragraph.py 1.33 rgbecker
+		 Semantic Name changes
+	platypus/__init__.py 1.12 rgbecker
+		 Semantic Name changes
+	lib/abag.py 1.1 rgbecker
+		 Initial version split from paraparser.py
+##### 2000/11/24 #####
+	platypus/paragraph.py 1.32 rgbecker
+		 Fixed missing linefeed bug for cbDefn frag at end of line
+	lib/_rl_accel.c 1.5 rgbecker
+		 Fixed non-working cast, added getInfo
+##### 2000/11/23 #####
+	platypus/paraparser.py 1.32 rgbecker
+		 Slight optimisation in handle_data for cbdefn frags
+	platypus/paragraph.py 1.31 rgbecker
+		 Force cbDefn frags to be not Same
+	platypus/flowables.py 1.12 andy_robinson
+		 Added working table of contents framework
+	platypus/doctemplate.py 1.31 andy_robinson
+		 Added working table of contents framework
+	lib/tocindex.py 1.3 andy_robinson
+		 Added working table of contents framework
+	lib/styles.py 1.9 andy_robinson
+		 Added working table of contents framework
+##### 2000/11/21 #####
+	platypus/paragraph.py 1.30 rgbecker
+		 Fixed call back handling in _getFragWords
+	lib/tocindex.py 1.2 andy_robinson
+		 Now formats correctly, no dynamic build stuff yet.
+	lib/tocindex.py 1.1 andy_robinson
+		 Initial checkin
+##### 2000/11/13 #####
+	platypus/paraparser.py 1.31 rgbecker
+		 More <onDraw> hacks
+	platypus/paragraph.py 1.29 rgbecker
+		 More <onDraw> hacks
+	platypus/paraparser.py 1.30 rgbecker
+		 Fixes to stupid parser
+	platypus/paraparser.py 1.29 rgbecker
+		 Added onDraw tag to paragraphs
+	platypus/paragraph.py 1.28 rgbecker
+		 Added onDraw tag to paragraphs
+	pdfbase/pdfmetrics.py 1.16 rgbecker
+		 Added onDraw tag to paragraphs
+	demos/odyssey/dodyssey.py 1.9 rgbecker
+		 Added onDraw tag to paragraphs
+##### 2000/11/08 #####
+	test/unittest.py 1.1 andy_robinson
+		 Added unittest.py and packagized
+	test/__init__.py 1.1 andy_robinson
+		 Added unittest.py and packagized
+	pdfbase/pdfdoc.py 1.33 andy_robinson
+		 Changes to fix font encodings
+	demos/stdfonts/stdfonts.py 1.8 andy_robinson
+		 Changes to fix font encodings
+	utils/runtests.py 1.15 andy_robinson
+		 Added an exclusion for 'test/unittest.py' in the test suite.
+	test/00readme.txt 1.2 andy_robinson
+		 Fixed font encoding lookup, metrics for JPython, created test directory
+	pdfbase/pdfmetrics.py 1.15 andy_robinson
+		 Fixed font encoding lookup, metrics for JPython, created test directory
+	pdfbase/pdfdoc.py 1.32 andy_robinson
+		 Fixed font encoding lookup, metrics for JPython, created test directory
+##### 2000/11/06 #####
+	demos/pythonpoint/pythonpoint.xml 1.11 andy_robinson
+		 compression on by default.
+	demos/pythonpoint/pythonpoint.py 1.28 andy_robinson
+		 compression on by default.
+##### 2000/11/05 #####
+	platypus/doctemplate.py 1.30 andy_robinson
+		 Fixed page transitions; extended Pythonpoint
+	pdfgen/canvas.py 1.56 andy_robinson
+		 Fixed page transitions; extended Pythonpoint
+	pdfbase/pdfdoc.py 1.31 andy_robinson
+		 Fixed page transitions; extended Pythonpoint
+	demos/pythonpoint/stdparser.py 1.13 andy_robinson
+		 Fixed page transitions; extended Pythonpoint
+	demos/pythonpoint/pythonpoint.xml 1.10 andy_robinson
+		 Fixed page transitions; extended Pythonpoint
+	demos/pythonpoint/pythonpoint.py 1.27 andy_robinson
+		 Fixed page transitions; extended Pythonpoint
+	test/00readme.txt 1.1 andy_robinson
+		 initial checkin
+	docs/userguide/genuserguide.py 1.38 andy_robinson
+		 UserGuide now resizes template header to fit page size
+	docs/tools/rltemplate.py 1.8 andy_robinson
+		 UserGuide now resizes template header to fit page size
+##### 2000/11/01 #####
+	platypus/paragraph.py 1.27 andy_robinson
+		 Added experimental method getActualLineWidths0
+##### 2000/10/26 #####
+	platypus/tables.py 1.32 rgbecker
+		 Layout error fixes
+	platypus/paragraph.py 1.26 rgbecker
+		 Layout error fixes
+	platypus/flowables.py 1.11 rgbecker
+		 Layout error fixes
+	docs/userguide/genuserguide.py 1.37 rgbecker
+		 Make page size an optional argument
+##### 2000/10/25 #####
+	utils/simpledoc.py 1.4 rgbecker
+		 Changed to indirect copyright
+	utils/runtests.py 1.14 rgbecker
+		 Changed to indirect copyright
+	utils/license.py 1.4 rgbecker
+		 Changed to indirect copyright
+	utils/license.c 1.4 rgbecker
+		 Changed to indirect copyright
+	utils/daily.py 1.38 rgbecker
+		 Changed to indirect copyright
+	utils/cvslh.py 1.4 rgbecker
+		 Changed to indirect copyright
+	utils/cvs_check.py 1.7 rgbecker
+		 Changed to indirect copyright
+	utils/compress_images.py 1.2 rgbecker
+		 Changed to indirect copyright
+	platypus/test/testtables.py 1.12 rgbecker
+		 Changed to indirect copyright
+	platypus/xpreformatted.py 1.11 rgbecker
+		 Changed to indirect copyright
+	platypus/test/testplatypus.py 1.19 rgbecker
+		 Changed to indirect copyright
+	platypus/tables.py 1.31 rgbecker
+		 Changed to indirect copyright
+	platypus/paraparser.py 1.28 rgbecker
+		 Changed to indirect copyright
+	platypus/paragraph.py 1.25 rgbecker
+		 Changed to indirect copyright
+	platypus/frames.py 1.10 rgbecker
+		 Changed to indirect copyright
+	platypus/flowables.py 1.10 rgbecker
+		 Changed to indirect copyright
+	platypus/doctemplate.py 1.29 rgbecker
+		 Changed to indirect copyright
+	platypus/__init__.py 1.11 rgbecker
+		 Changed to indirect copyright
+	pdfgen/textobject.py 1.19 rgbecker
+		 Changed to indirect copyright
+	pdfgen/test/testpdfgen.py 1.16 rgbecker
+		 Changed to indirect copyright
+	pdfgen/test/testPageMode.py 1.2 rgbecker
+		 Changed to indirect copyright
+	pdfgen/pdfimages.py 1.3 rgbecker
+		 Changed to indirect copyright
+	pdfgen/pdfgeom.py 1.6 rgbecker
+		 Changed to indirect copyright
+	pdfgen/pathobject.py 1.7 rgbecker
+		 Changed to indirect copyright
+	pdfgen/canvas.py 1.55 rgbecker
+		 Changed to indirect copyright
+	pdfgen/__init__.py 1.5 rgbecker
+		 Changed to indirect copyright
+	pdfbase/pdfutils.py 1.13 rgbecker
+		 Changed to indirect copyright
+	pdfbase/pdfmetrics.py 1.14 rgbecker
+		 Changed to indirect copyright
+	pdfbase/pdfdoc.py 1.30 rgbecker
+		 Changed to indirect copyright
+	pdfbase/__init__.py 1.5 rgbecker
+		 Changed to indirect copyright
+	lib/utils.py 1.5 rgbecker
+		 Changed to indirect copyright
+	lib/units.py 1.2 rgbecker
+		 Changed to indirect copyright
+	lib/styles.py 1.8 rgbecker
+		 Changed to indirect copyright
+	lib/sequencer.py 1.9 rgbecker
+		 Changed to indirect copyright
+	lib/pagesizes.py 1.5 rgbecker
+		 Changed to indirect copyright
+	lib/logger.py 1.2 rgbecker
+		 Changed to indirect copyright
+	lib/fonts.py 1.2 rgbecker
+		 Changed to indirect copyright
+	lib/enums.py 1.2 rgbecker
+		 Changed to indirect copyright
+	lib/corp.py 1.2 rgbecker
+		 Changed to indirect copyright
+	lib/colors.py 1.13 rgbecker
+		 Changed to indirect copyright
+	lib/_rl_accel.c 1.4 rgbecker
+		 Changed to indirect copyright
+	lib/__init__.py 1.2 rgbecker
+		 Changed to indirect copyright
+	extensions/__init__.py 1.2 rgbecker
+		 Changed to indirect copyright
+	docs/userguide/t_parse.py 1.2 rgbecker
+		 Changed to indirect copyright
+	docs/userguide/platdemos.py 1.4 rgbecker
+		 Changed to indirect copyright
+	docs/userguide/genuserguide.py 1.36 rgbecker
+		 Changed to indirect copyright
+	docs/userguide/examples.py 1.16 rgbecker
+		 Changed to indirect copyright
+	docs/userguide/ch8_future.py 1.3 rgbecker
+		 Changed to indirect copyright
+	docs/userguide/ch7_custom.py 1.6 rgbecker
+		 Changed to indirect copyright
+	docs/userguide/ch6_tables.py 1.16 rgbecker
+		 Changed to indirect copyright
+	docs/userguide/ch5_paragraphs.py 1.6 rgbecker
+		 Changed to indirect copyright
+	docs/userguide/ch4_platypus_concepts.py 1.8 rgbecker
+		 Changed to indirect copyright
+	docs/userguide/ch3_pdffeatures.py 1.7 rgbecker
+		 Changed to indirect copyright
+	docs/userguide/ch2_graphics.py 1.9 rgbecker
+		 Changed to indirect copyright
+	docs/userguide/ch1_intro.py 1.11 rgbecker
+		 Changed to indirect copyright
+	docs/userguide/app_demos.py 1.7 rgbecker
+		 Changed to indirect copyright
+	docs/tools/yaml2pdf.py 1.8 rgbecker
+		 Changed to indirect copyright
+	docs/tools/yaml.py 1.9 rgbecker
+		 Changed to indirect copyright
+	docs/tools/stylesheet.py 1.7 rgbecker
+		 Changed to indirect copyright
+	docs/tools/rltemplate.py 1.7 rgbecker
+		 Changed to indirect copyright
+	docs/tools/codegrab.py 1.5 rgbecker
+		 Changed to indirect copyright
+	demos/tests/testdemos.py 1.5 rgbecker
+		 Changed to indirect copyright
+	demos/stdfonts/stdfonts.py 1.7 rgbecker
+		 Changed to indirect copyright
+	demos/pythonpoint/styles_modern.py 1.7 rgbecker
+		 Changed to indirect copyright
+	demos/pythonpoint/styles_horrible.py 1.6 rgbecker
+		 Changed to indirect copyright
+	demos/pythonpoint/stdparser.py 1.12 rgbecker
+		 Changed to indirect copyright
+	demos/pythonpoint/pythonpoint.py 1.26 rgbecker
+		 Changed to indirect copyright
+	demos/pythonpoint/customshapes.py 1.3 rgbecker
+		 Changed to indirect copyright
+	demos/py2pdf/idle_print.py 1.7 rgbecker
+		 Changed to indirect copyright
+	demos/odyssey/odyssey.py 1.9 rgbecker
+		 Changed to indirect copyright
+	demos/odyssey/fodyssey.py 1.14 rgbecker
+		 Changed to indirect copyright
+	demos/odyssey/dodyssey.py 1.8 rgbecker
+		 Changed to indirect copyright
+	demos/gadflypaper/gfe.py 1.12 rgbecker
+		 Changed to indirect copyright
+	demos/colors/colortest.py 1.2 rgbecker
+		 Changed to indirect copyright
+	__init__.py 1.7 rgbecker
+		 Changed to indirect copyright
+	README 1.2 rgbecker
+		 Changed to indirect copyright
+##### 2000/10/24 #####
+	license.txt 1.1 rgbecker
+		 Initial separate license file
+	utils/copyrite.py 1.1 rgbecker
+		 Copyright changes
+	utils/copyr.txt 1.1 rgbecker
+		 Copyright changes
+	pdfgen/pdfimages.py 1.2 rgbecker
+		 Fix zlib import bug
+	pdfgen/pdfimages.py 1.1 aaron_watters
+		 image functionality factored out of canvas.py initial checkin. tests pass
+	pdfgen/canvas.py 1.54 aaron_watters
+		 sliced out image functionality (oops adding in pdfimages.py next) tests pass
+##### 2000/10/23 #####
+	platypus/paragraph.py 1.24 rgbecker
+		 Added J Alet's bug case
+	demos/pythonpoint/pythonpoint.xml 1.9 andy_robinson
+		 Corrected bad end tags and added links to Michael Wiedmann's DTD
+##### 2000/10/22 #####
+	demos/pythonpoint/pythonpoint.xml 1.8 andy_robinson
+		 Modified the documentation to correct Michael Wiedmann's error reports.
+##### 2000/10/21 #####
+	lib/sgmlop.dsp 1.2 rgbecker
+		 hyphen.c includes substrings.pl in comment
+	lib/pyHnj.dsp 1.2 rgbecker
+		 hyphen.c includes substrings.pl in comment
+	lib/hyphen.c 1.2 rgbecker
+		 hyphen.c includes substrings.pl in comment
+	lib/_rl_accel.dsp 1.2 rgbecker
+		 hyphen.c includes substrings.pl in comment
+	lib/README.extensions 1.2 rgbecker
+		 hyphen.c includes substrings.pl in comment
+##### 2000/10/19 #####
+	pdfbase/pdfdoc.py 1.29 rgbecker
+		 Aaron's latest update from the newslist
+##### 2000/10/18 #####
+	pdfbase/pdfdoc.py 1.28 aaron_watters
+		 undid last checkin and added an option for a default outline (different fix)
+	pdfbase/pdfdoc.py 1.27 aaron_watters
+		 moved the outline preprocessing step into the format method (fixes testing error)
+	pdfgen/canvas.py 1.53 aaron_watters
+		 complete revision of pdfdoc.  Not finished (compression missing, testing needed) I got Robin's last change in at the last moment :)
+	pdfbase/pdfdoc.py 1.26 aaron_watters
+		 complete revision of pdfdoc.  Not finished (compression missing, testing needed) I got Robin's last change in at the last moment :)
+##### 2000/10/15 #####
+	pdfgen/test/testPageMode.py 1.1 andy_robinson
+		 Test of pageMode functions.
+	pdfgen/canvas.py 1.52 andy_robinson
+		 Added showFullScreen0
+	pdfbase/pdfdoc.py 1.25 andy_robinson
+		 Added showFullScreen0
 ########### 1.01 Released 2000/10/10
 ##### 2000/10/05 #####
 	pdfbase/pdfutils.py 1.12 rgbecker
