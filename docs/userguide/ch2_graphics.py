@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch2_graphics.py,v 1.17 2001/10/05 01:07:18 andy_robinson Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch2_graphics.py,v 1.18 2001/11/05 13:36:39 johnprecedo Exp $
 from rl_doc_utils import *
 
 heading1("Graphics and Text with $pdfgen$")
@@ -130,12 +130,12 @@ you are a Mac user and want to make a global change, modify the
 line at the top of <i>reportlab/pdfbase/pdfdoc.py</i> to switch it
 over.""")
 
-disc("""We plan to add support for encodings on a per-font
-basis in future, so you can explicitly add in new fonts
-and say how the data is to be encoded.  It is your responsibility
-to ensure that your string data is in an encoding matching that
-of the font.  If conversions are needed, the Unicode library
-in Python 1.6 can be of great help.""")
+disc("""We have added support for encodings on a per-font basis, so 
+you can explicitly add in new fonts and say how the data is to be 
+encoded.  It is your responsibility to ensure that your string data is 
+in an encoding matching that of the font.  If conversions are needed, 
+the Unicode library in Python 1.6 can be of great help. See chapter
+three for more information on new fonts and encodings.""")
 
 disc("""The demo script $reportlab/demos/stdfonts.py$
 will print out two test documents showing all code points
@@ -656,9 +656,7 @@ are guaranteed to be present in Acrobat Reader.
 illust(examples.fonts, "the 14 standard fonts")
 
 disc("""
-The next section explains how you can use arbitrary fonts,
-which will increase slightly the document size because these
-fonts need to be embedded within the document.
+For information on how to use arbitrary fonts, see the next chapter.
 """)
 
 heading2("Arbitrary fonts")
