@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/Attic/test_japanese.py,v 1.1 2001/09/04 08:52:13 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/Attic/test_japanese.py,v 1.2 2001/09/04 09:58:18 andy_robinson Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -17,18 +17,26 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import colors
 
-from reportlab.pdfbase.cidfonts import CIDFont
+
 
 
 class JapaneseFontTests(unittest.TestCase):
     def test1(self):
         "A basic document drawing some strings"
+
+        # if they do not have the Japanese font files, go away quietly
+        try:
+            from reportlab.pdfbase.cidfonts import CIDFont
+        except:
+            #don't have the font pack.  return silently
+            return
+        pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90ms-RKSJ-H'))
+        pdfmetrics.registerFont(CIDFont('HeiseiKakuGo-W5','90ms-RKSJ-H'))
+    
         c = Canvas('test_japanese.pdf')
         c.setFont('Helvetica', 30)
         c.drawString(100,700, 'Japanese Font Support')
 
-        pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90ms-RKSJ-H'))
-        pdfmetrics.registerFont(CIDFont('HeiseiKakuGo-W5','90ms-RKSJ-H'))
 
         # the two typefaces
         c.setFont('HeiseiMin-W3-90ms-RKSJ-H', 16)
@@ -104,7 +112,7 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
-    print 'saved test_japanese.pdf'    
+    
 
 
 
