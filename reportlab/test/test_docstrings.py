@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_docstrings.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_docstrings.py,v 1.4 2001/04/05 09:30:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_docstrings.py,v 1.5 2001/05/18 12:16:42 dinu_gherman Exp $
 
 """This is a test on a package level that find all modules,
 classes, methods and functions that do not have a doc string
@@ -13,13 +13,16 @@ are skipped.
 """
 
 import os, sys, glob, string, types, re
+
 import reportlab
 from reportlab.test import unittest
+from reportlab.test.utils import SecureTestCase
 
 
 RL_HOME = os.path.dirname(reportlab.__file__)
 
 
+# Should replace with test.utils.GlobDirectoryWalker, soon...
 def subFoldersOfFolder(folder):
     "Return a list of full paths of all subfolders."
 
@@ -35,7 +38,7 @@ def getModuleObjects(folder, rootName, typ):
     "Get a list of all function objects defined *somewhere* in a package."
 
     folders = [folder] + subFoldersOfFolder(folder)
-
+    
     objects = []
     for f in folders:
         sys.path.insert(0, f)
@@ -81,7 +84,7 @@ def getModuleObjects(folder, rootName, typ):
     return objects
 
     
-class DocstringTestCase(unittest.TestCase):
+class DocstringTestCase(SecureTestCase):
     "Testing if objects in the ReportLab package have docstrings."
     
     def _writeLogFile(self, objType):
