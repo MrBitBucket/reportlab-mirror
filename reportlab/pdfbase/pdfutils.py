@@ -1,72 +1,8 @@
-###############################################################################
-#
-#	ReportLab Public License Version 1.0
-#
-#   Except for the change of names the spirit and intention of this
-#   license is the same as that of Python
-#
-#	(C) Copyright ReportLab Inc. 1998-2000.
-#
-#
-# All Rights Reserved
-#
-# Permission to use, copy, modify, and distribute this software and its
-# documentation for any purpose and without fee is hereby granted, provided
-# that the above copyright notice appear in all copies and that both that
-# copyright notice and this permission notice appear in supporting
-# documentation, and that the name of ReportLab not be used
-# in advertising or publicity pertaining to distribution of the software
-# without specific, written prior permission. 
-# 
-#
-# Disclaimer
-#
-# ReportLab Inc. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
-# SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
-# IN NO EVENT SHALL ReportLab BE LIABLE FOR ANY SPECIAL, INDIRECT
-# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-# PERFORMANCE OF THIS SOFTWARE. 
-#
-###############################################################################
-#	$Log: pdfutils.py,v $
-#	Revision 1.12  2000/10/05 15:00:34  rgbecker
-#	Fix indentation
-#
-#	Revision 1.11  2000/10/05 14:59:04  rgbecker
-#	Changes to make freezing easier
-#	
-#	Revision 1.10  2000/08/03 19:11:49  rgbecker
-#	Robin's take on Bernhard Herzog's fix to A85 decode
-#	
-#	Revision 1.9  2000/08/01 10:56:24  rgbecker
-#	moved accelerators to lib
-#	
-#	Revision 1.8  2000/07/05 12:20:27  rgbecker
-#	Ascii85 fixes/additions
-#	
-#	Revision 1.7  2000/06/30 15:29:59  rgbecker
-#	Allow for non-caching of images
-#	
-#	Revision 1.6  2000/05/17 08:03:53  andy_robinson
-#	readJPEGinfo moved from canvas to pdfutils;
-#	Pythonpoint now handles JPEG images; more
-#	JPEG extensions recognised.
-#	
-#	Revision 1.5  2000/03/03 10:53:55  rgbecker
-#	Added missing import glob
-#	
-#	Revision 1.4  2000/02/17 02:07:23  rgbecker
-#	Docstring & other fixes
-#	
-#	Revision 1.3  2000/02/15 17:55:59  rgbecker
-#	License text fixes
-#	
-#	Revision 1.2  2000/02/15 15:47:09  rgbecker
-#	Added license, __version__ and Logi comment
-#	
-__version__=''' $Id: pdfutils.py,v 1.12 2000/10/05 15:00:34 rgbecker Exp $ '''
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.13 2000/10/25 08:57:45 rgbecker Exp $
+__version__=''' $Id: pdfutils.py,v 1.13 2000/10/25 08:57:45 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants

@@ -1,62 +1,8 @@
-##############################################################################
-#
-#   ReportLab Public License Version 1.0
-#
-#   Except for the change of names the spirit and intention of this
-#   license is the same as that of Python
-#
-#   (C) Copyright ReportLab Inc. 1998-2000.
-#
-#
-# All Rights Reserved
-#
-# Permission to use, copy, modify, and distribute this software and its
-# documentation for any purpose and without fee is hereby granted, provided
-# that the above copyright notice appear in all copies and that both that
-# copyright notice and this permission notice appear in supporting
-# documentation, and that the name of ReportLab not be used
-# in advertising or publicity pertaining to distribution of the software
-# without specific, written prior permission. 
-# 
-#
-# Disclaimer
-#
-# ReportLab Inc. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
-# SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
-# IN NO EVENT SHALL ReportLab BE LIABLE FOR ANY SPECIAL, INDIRECT
-# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-# PERFORMANCE OF THIS SOFTWARE. 
-#
-###############################################################################
-#   $Log: styles.py,v $
-#   Revision 1.7  2000/10/03 09:21:07  rgbecker
-#   Code needs a firstLineIndent same as normal lineIndent
-#
-#   Revision 1.6  2000/09/25 20:07:29  andy_robinson
-#   added has_key method to stylesheet1
-#
-#   Revision 1.5  2000/05/17 08:03:53  andy_robinson
-#   readJPEGinfo moved from canvas to pdfutils;
-#   Pythonpoint now handles JPEG images; more
-#   JPEG extensions recognised.
-#
-#   Revision 1.4  2000/05/11 12:26:55  andy_robinson
-#   Stylesheets become classes; styles copy data on __init__
-#   rather than doing acquisition at runtime.  Should go
-#   much faster for style-intensive things like tables.
-#
-#   Revision 1.3  2000/04/19 12:44:57  rgbecker
-#   Typo fix thanks to Daniel G. Rusch
-#   
-#   Revision 1.2  2000/04/14 11:54:56  rgbecker
-#   Splitting layout.py
-#   
-#   Revision 1.1  2000/04/14 10:51:56  rgbecker
-#   Moved out of layout.py
-#   
-__version__=''' $Id: styles.py,v 1.7 2000/10/03 09:21:07 rgbecker Exp $ '''
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/styles.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/lib/styles.py,v 1.8 2000/10/25 08:57:45 rgbecker Exp $
+__version__=''' $Id: styles.py,v 1.8 2000/10/25 08:57:45 rgbecker Exp $ '''
 
 from reportlab.lib.colors import white, black
 from reportlab.lib.enums import TA_LEFT

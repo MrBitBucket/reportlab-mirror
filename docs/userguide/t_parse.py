@@ -1,4 +1,7 @@
-
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/t_parse.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/docs/userguide/Attic/t_parse.py,v 1.2 2000/10/25 08:57:45 rgbecker Exp $
 """
 Template parsing module inspired by REXX (with thanks to Donn Cave for discussion).
 

@@ -1,71 +1,8 @@
-###############################################################################
-#
-#	ReportLab Public License Version 1.0
-#
-#   Except for the change of names the spirit and intention of this
-#   license is the same as that of Python
-#
-#	(C) Copyright ReportLab Inc. 1998-2000.
-#
-#   adapted with permission from PIDDLE, original author Joe Strout
-#
-# All Rights Reserved
-#
-# Permission to use, copy, modify, and distribute this software and its
-# documentation for any purpose and without fee is hereby granted, provided
-# that the above copyright notice appear in all copies and that both that
-# copyright notice and this permission notice appear in supporting
-# documentation, and that the name of ReportLab not be used
-# in advertising or publicity pertaining to distribution of the software
-# without specific, written prior permission. 
-# 
-#
-# Disclaimer
-#
-# ReportLab Inc. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
-# SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
-# IN NO EVENT SHALL ReportLab BE LIABLE FOR ANY SPECIAL, INDIRECT
-# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-# PERFORMANCE OF THIS SOFTWARE. 
-#
-###############################################################################
-#	$Log: colors.py,v $
-#	Revision 1.12  2000/09/27 15:52:08  rgbecker
-#	Fix for sun compiler
-#
-#	Revision 1.11  2000/08/12 09:36:27  rgbecker
-#	Fix missing parens
-#	
-#	Revision 1.10  2000/08/11 14:29:05  rgbecker
-#	added rgb2cmyk
-#	
-#	Revision 1.9  2000/06/14 21:17:30  andy_robinson
-#	Some relative imports fixed
-#	
-#	Revision 1.8  2000/05/26 09:43:44  rgbecker
-#	stringToColor-->toColor
-#	
-#	Revision 1.7  2000/04/06 18:10:35  rgbecker
-#	Fixed type in stringToColor
-#	
-#	Revision 1.6  2000/04/05 15:55:52  rgbecker
-#	Fixed getAllNamedColors, needed global etc
-#	
-#	Revision 1.5  2000/04/05 15:26:17  rgbecker
-#	Added ColorType
-#	
-#	Revision 1.4  2000/04/05 14:22:38  rgbecker
-#	Allow 0x in HexColor, added stringToColor, fixed caching in getAllNamedColors
-#	
-#	Revision 1.3  2000/03/24 10:37:02  rgbecker
-#	Sync with pingo
-#	
-#	Revision 1.2  2000/03/08 13:06:39  andy_robinson
-#	Moved inch and cm definitions to reportlab.lib.units and amended all demos
-#	
-__version__=''' $Id: colors.py,v 1.12 2000/09/27 15:52:08 rgbecker Exp $ '''
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.13 2000/10/25 08:57:45 rgbecker Exp $
+__version__=''' $Id: colors.py,v 1.13 2000/10/25 08:57:45 rgbecker Exp $ '''
 
 import string
 import math

@@ -1,5 +1,7 @@
-#ch1_intro
-
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/docs/userguide/ch1_intro.py,v 1.11 2000/10/25 08:57:45 rgbecker Exp $
 from genuserguide import *
 import reportlab
 

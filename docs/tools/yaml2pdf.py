@@ -1,3 +1,7 @@
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/yaml2pdf.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/docs/tools/yaml2pdf.py,v 1.8 2000/10/25 08:57:45 rgbecker Exp $
 # yaml2pdf - turns stuff in Yet Another Markup Language
 # into PDF documents.  Very crude - it assumes a
 # doc template and stylesheet (hard coded for now)

@@ -1,3 +1,7 @@
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/stylesheet.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/docs/tools/stylesheet.py,v 1.7 2000/10/25 08:57:45 rgbecker Exp $
 #standard stylesheet for our manuals
 from reportlab.lib.styles import StyleSheet1, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY

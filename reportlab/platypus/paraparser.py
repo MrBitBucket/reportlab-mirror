@@ -1,82 +1,8 @@
-###############################################################################
-#
-#	ReportLab Public License Version 1.0
-#
-#   Except for the change of names the spirit and intention of this
-#   license is the same as that of Python
-#
-#	(C) Copyright ReportLab Inc. 1998-2000.
-#
-#
-# All Rights Reserved
-#
-# Permission to use, copy, modify, and distribute this software and its
-# documentation for any purpose and without fee is hereby granted, provided
-# that the above copyright notice appear in all copies and that both that
-# copyright notice and this permission notice appear in supporting
-# documentation, and that the name of ReportLab not be used
-# in advertising or publicity pertaining to distribution of the software
-# without specific, written prior permission. 
-# 
-#
-# Disclaimer
-#
-# ReportLab Inc. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
-# SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
-# IN NO EVENT SHALL ReportLab BE LIABLE FOR ANY SPECIAL, INDIRECT
-# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-# PERFORMANCE OF THIS SOFTWARE. 
-#
-###############################################################################
-#	$Log: paraparser.py,v $
-#	Revision 1.27  2000/08/17 15:05:51  rgbecker
-#	Changed test formatting
-#
-#	Revision 1.26  2000/07/10 23:53:46  andy_robinson
-#	Changed base of seqdefault tag to 0
-#	
-#	Revision 1.25  2000/07/04 10:50:33  rgbecker
-#	Sequencer fixes
-#	
-#	Revision 1.24  2000/06/19 11:14:03  andy_robinson
-#	Global sequencer put in the 'story builder'.
-#	
-#	Revision 1.23  2000/06/13 04:11:49  aaron_watters
-#	noted replication of XML markup comment between paraparser.py and paragraph.py
-#	
-#	Revision 1.22  2000/06/12 11:27:17  andy_robinson
-#	Added Sequencer and associated XML tags
-#	
-#	Revision 1.21  2000/06/01 15:23:06  rgbecker
-#	Platypus re-organisation
-#	
-#	Revision 1.20  2000/05/31 10:12:20  rgbecker
-#	<bullet> xml tag added
-#	
-#	Revision 1.19  2000/05/26 09:49:23  rgbecker
-#	Color fixes; thanks to J Alet
-#	
-#	Revision 1.18  2000/05/20 15:36:42  andy_robinson
-#	Removed 1.5.2-style getattr call
-#	
-#	Revision 1.17  2000/05/16 14:28:55  rgbecker
-#	Fixes/Changes to get testplatypus to work with new framework
-#	
-#	Revision 1.16  2000/05/15 12:15:29  rgbecker
-#	CDATA handler added
-#	
-#	Revision 1.15  2000/05/13 16:04:06  rgbecker
-#	made size alias of fontsize for <para>
-#	
-#	Revision 1.14  2000/05/11 14:05:17  rgbecker
-#	Use reportlab.lib.xmllib
-#	
-#	Revision 1.13  2000/04/25 13:07:57  rgbecker
-#	Added license
-#	
-__version__=''' $Id: paraparser.py,v 1.27 2000/08/17 15:05:51 rgbecker Exp $ '''
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.28 2000/10/25 08:57:45 rgbecker Exp $
+__version__=''' $Id: paraparser.py,v 1.28 2000/10/25 08:57:45 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType

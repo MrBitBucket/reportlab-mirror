@@ -1,61 +1,8 @@
-###############################################################################
-#
-#	ReportLab Public License Version 1.0
-#
-#   Except for the change of names the spirit and intention of this
-#   license is the same as that of Python
-#
-#	(C) Copyright ReportLab Inc. 1998-2000.
-#
-#
-# All Rights Reserved
-#
-# Permission to use, copy, modify, and distribute this software and its
-# documentation for any purpose and without fee is hereby granted, provided
-# that the above copyright notice appear in all copies and that both that
-# copyright notice and this permission notice appear in supporting
-# documentation, and that the name of ReportLab not be used
-# in advertising or publicity pertaining to distribution of the software
-# without specific, written prior permission.
-#
-#
-# Disclaimer
-#
-# ReportLab Inc. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
-# SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
-# IN NO EVENT SHALL ReportLab BE LIABLE FOR ANY SPECIAL, INDIRECT
-# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-# PERFORMANCE OF THIS SOFTWARE.
-#
-###############################################################################
-#	$Log: sequencer.py,v $
-#	Revision 1.8  2000/07/10 11:58:35  andy_robinson
-#	Pre-incrementing bug fixed
-#
-#	Revision 1.7  2000/07/08 07:11:21  andy_robinson
-#	Changed to pre-increment
-#	
-#	Revision 1.6  2000/06/21 19:46:43  rgbecker
-#	Added Roman formatters
-#	
-#	Revision 1.5  2000/06/19 11:14:03  andy_robinson
-#	Global sequencer put in the 'story builder'.
-#
-#	Revision 1.4  2000/06/12 11:27:17  andy_robinson
-#	Added Sequencer and associated XML tags
-#
-#	Revision 1.3  2000/06/11 21:34:01  andy_robinson
-#	Largely complete class for numbering lists, figures and chapters
-#
-#	Revision 1.2  2000/06/09 16:18:19  andy_robinson
-#	Doc strings, sequencer
-#
-#	Revision 1.1  2000/06/01 15:23:06  rgbecker
-#	Platypus re-organisation
-#
-__version__=''' $Id: sequencer.py,v 1.8 2000/07/10 11:58:35 andy_robinson Exp $ '''
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/sequencer.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/lib/sequencer.py,v 1.9 2000/10/25 08:57:45 rgbecker Exp $
+__version__=''' $Id: sequencer.py,v 1.9 2000/10/25 08:57:45 rgbecker Exp $ '''
 """This module defines a single public class, Sequencer, which aids in
 numbering and formatting lists."""
 #

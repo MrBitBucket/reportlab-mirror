@@ -1,147 +1,9 @@
 #!/bin/env python
-###############################################################################
-#
-#   ReportLab Public License Version 1.0
-#
-#   Except for the change of names the spirit and intention of this
-#   license is the same as that of Python
-#
-#   (C) Copyright ReportLab Inc. 1998-2000.
-#
-#
-# All Rights Reserved
-#
-# Permission to use, copy, modify, and distribute this software and its
-# documentation for any purpose and without fee is hereby granted, provided
-# that the above copyright notice appear in all copies and that both that
-# copyright notice and this permission notice appear in supporting
-# documentation, and that the name of ReportLab not be used
-# in advertising or publicity pertaining to distribution of the software
-# without specific, written prior permission. 
-# 
-#
-# Disclaimer
-#
-# ReportLab Inc. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
-# SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
-# IN NO EVENT SHALL ReportLab BE LIABLE FOR ANY SPECIAL, INDIRECT
-# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-# PERFORMANCE OF THIS SOFTWARE. 
-#
-###############################################################################
-#   $Log: genuserguide.py,v $
-#   Revision 1.35  2000/08/24 13:33:13  rgbecker
-#   Added  Mac Intro
-#
-#   Revision 1.34  2000/08/24 11:30:29  rgbecker
-#   Preformatted docco added
-#
-#   Revision 1.33  2000/08/02 13:11:31  rgbecker
-#   Table cell updates
-#
-#   Revision 1.32  2000/07/18 13:29:19  dinu_gherman
-#   removed header dashes.
-#
-#   Revision 1.31  2000/07/14 10:49:22  rgbecker
-#   Added space, optional bullet and eg after spacing
-#
-#   Revision 1.30  2000/07/13 20:36:02  aaron_watters
-#   various mods
-#
-#   Revision 1.29  2000/07/13 12:38:56  rgbecker
-#   More demos in appendix
-#
-#   Revision 1.28  2000/07/13 12:18:32  rgbecker
-#   begin app_demos.py
-#
-#   Revision 1.27  2000/07/13 11:59:45  rgbecker
-#   Added some more
-#
-#   Revision 1.26  2000/07/10 23:56:09  andy_robinson
-#   Paragraphs chapter pretty much complete.  Fancy cover.
-#
-#   Revision 1.25  2000/07/10 14:20:15  andy_robinson
-#   Broke up the user guide into chapters.
-#
-#   Revision 1.24  2000/07/10 12:00:17  andy_robinson
-#   More work on chapter 1
-#
-#   Revision 1.23  2000/07/08 13:24:27  andy_robinson
-#   Broke out chapter 1
-#
-#   Revision 1.22  2000/07/08 12:52:25  andy_robinson
-#   Separated out actual text from genuserguide, so it can be broken into
-#   chapters.
-#
-#   Revision 1.21  2000/07/07 22:55:31  andy_robinson
-#   Added paragraph examples and widget to User Guide
-#
-#   Revision 1.20  2000/07/07 16:18:37  rgbecker
-#   More on paragraphs
-#
-#   Revision 1.19  2000/07/07 15:09:21  rgbecker
-#   Start on Paragraph
-#
-#   Revision 1.18  2000/07/06 15:38:15  rgbecker
-#   Started on Tables added EmbeddedCode utility
-#
-#   Revision 1.17  2000/07/05 16:06:01  rgbecker
-#   Platypus Start
-#
-#   Revision 1.16  2000/07/04 22:22:40  andy_robinson
-#   Tidied up genuserguide.py, especially figure handling; began
-#   adding PDF special features docco
-#
-#   Revision 1.15  2000/07/03 16:03:31  andy_robinson
-#   Changes to heading structure
-#
-#   Revision 1.14  2000/07/03 15:50:31  andy_robinson
-#   Pushed down most existing lessons one level; added
-#   functions heading1..heading3 for building story
-#   unambiguously; spelled Hugh Hefner right!
-#
-#   Revision 1.13  2000/07/03 09:51:38  rgbecker
-#   abspath is 1.5.2 only
-#   
-#   Revision 1.12  2000/06/28 16:10:00  rgbecker
-#   Fix unwanted 'i'
-#   
-#   Revision 1.11  2000/06/28 14:52:43  rgbecker
-#   Documentation changes
-#   
-#   Revision 1.10  2000/06/27 10:09:48  rgbecker
-#   Minor cosmetic changes
-#   
-#   Revision 1.9  2000/06/23 21:09:03  aaron_watters
-#   text text and more text
-#   
-#   Revision 1.8  2000/06/22 19:05:24  aaron_watters
-#   added quickhack for font changes in paragraphs and lots of new text
-#   
-#   Revision 1.7  2000/06/22 13:55:59  aaron_watters
-#   showPage resets all state parameters warning.
-#   
-#   Revision 1.6  2000/06/22 13:35:28  aaron_watters
-#   textobject and pathobject methods, among other things
-#   
-#   Revision 1.5  2000/06/21 21:19:29  aaron_watters
-#   colors, line styles, more examples
-#   
-#   Revision 1.4  2000/06/21 15:16:05  aaron_watters
-#   Lots of graphical examples added
-#   
-#   Revision 1.3  2000/06/20 20:31:42  aaron_watters
-#   typos and more examples
-#   
-#   Revision 1.2  2000/06/19 21:13:02  aaron_watters
-#   2nd try. more text
-#   
-#   Revision 1.1  2000/06/17 02:57:56  aaron_watters
-#   initial checkin. user guide generation framework.
-#   
-__version__=''' $Id: genuserguide.py,v 1.35 2000/08/24 13:33:13 rgbecker Exp $ '''
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/genuserguide.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/docs/userguide/genuserguide.py,v 1.36 2000/10/25 08:57:45 rgbecker Exp $
+__version__=''' $Id: genuserguide.py,v 1.36 2000/10/25 08:57:45 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -158,7 +20,7 @@ styleSheet = getStyleSheet()
 
 #from reportlab.platypus.doctemplate import SimpleDocTemplate
 from reportlab.lib.units import inch
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import letter, A4
 from reportlab.platypus import Paragraph, Spacer, Preformatted,\
             PageBreak, CondPageBreak, Flowable, Table, TableStyle, \
             NextPageTemplate, KeepTogether, Image, XPreformatted
@@ -523,7 +385,7 @@ def getStory():
 
         
 def run():
-    doc = RLDocTemplate('userguide.pdf',pagesize = letter)
+    doc = RLDocTemplate('userguide.pdf',pagesize = A4)
 
 
     #this builds the story    

@@ -1,3 +1,7 @@
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/codegrab.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/docs/tools/codegrab.py,v 1.5 2000/10/25 08:57:45 rgbecker Exp $
 #codegrab.py
 """
 This grabs various Python class, method and function

@@ -1,47 +1,9 @@
 #!/bin/env python
-###############################################################################
-#
-#	ReportLab Public License Version 1.0
-#
-#   Except for the change of names the spirit and intention of this
-#   license is the same as that of Python
-#
-#	(C) Copyright ReportLab Inc. 1998-2000.
-#
-#
-# All Rights Reserved
-#
-# Permission to use, copy, modify, and distribute this software and its
-# documentation for any purpose and without fee is hereby granted, provided
-# that the above copyright notice appear in all copies and that both that
-# copyright notice and this permission notice appear in supporting
-# documentation, and that the name of ReportLab not be used
-# in advertising or publicity pertaining to distribution of the software
-# without specific, written prior permission. 
-# 
-#
-# Disclaimer
-#
-# ReportLab Inc. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
-# SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
-# IN NO EVENT SHALL ReportLab BE LIABLE FOR ANY SPECIAL, INDIRECT
-# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-# PERFORMANCE OF THIS SOFTWARE. 
-#
-###############################################################################
-#	$Log: cvs_check.py,v $
-#	Revision 1.6  2000/05/17 15:39:10  rgbecker
-#	Changes related to removal of SimpleFlowDocument
-#
-#	Revision 1.5  2000/02/17 01:59:34  rgbecker
-#	Changes to test search
-#	
-#	Revision 1.4  2000/02/16 14:07:14  rgbecker
-#	Fixes for package reportlab
-#	
-__version__=''' $Id: cvs_check.py,v 1.6 2000/05/17 15:39:10 rgbecker Exp $ '''
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/cvs_check.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/utils/cvs_check.py,v 1.7 2000/10/25 08:57:46 rgbecker Exp $
+__version__=''' $Id: cvs_check.py,v 1.7 2000/10/25 08:57:46 rgbecker Exp $ '''
 '''
 script for testing ReportLab anonymous cvs download and test
 '''

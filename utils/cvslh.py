@@ -1,3 +1,7 @@
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/cvslh.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/utils/cvslh.py,v 1.4 2000/10/25 08:57:46 rgbecker Exp $
 #
 #	after cvs -z7 log >\tmp\log
 #

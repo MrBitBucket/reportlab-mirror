@@ -1,5 +1,7 @@
-#ch5_paragraphs
-
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch5_paragraphs.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/docs/userguide/ch5_paragraphs.py,v 1.6 2000/10/25 08:57:45 rgbecker Exp $
 from genuserguide import *
 
 #begin chapter oon paragraphs

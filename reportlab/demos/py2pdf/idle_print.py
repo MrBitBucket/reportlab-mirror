@@ -1,5 +1,10 @@
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/py2pdf/idle_print.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/demos/py2pdf/Attic/idle_print.py,v 1.7 2000/10/25 08:57:44 rgbecker Exp $
+
 # idle_print [py2pdf_options] filename
-__version__=''' $Id: idle_print.py,v 1.6 2000/05/06 22:58:33 rgbecker Exp $ '''
+__version__=''' $Id: idle_print.py,v 1.7 2000/10/25 08:57:44 rgbecker Exp $ '''
 # you should adjust the globals below to configure for your system
 
 import sys, os, py2pdf, string, time

@@ -1,73 +1,7 @@
-###############################################################################
-#
-#	ReportLab Public License Version 1.0
-#
-#   Except for the change of names the spirit and intention of this
-#   license is the same as that of Python
-#
-#	(C) Copyright ReportLab Inc. 1998-2000.
-#
-#
-# All Rights Reserved
-#
-# Permission to use, copy, modify, and distribute this software and its
-# documentation for any purpose and without fee is hereby granted, provided
-# that the above copyright notice appear in all copies and that both that
-# copyright notice and this permission notice appear in supporting
-# documentation, and that the name of ReportLab not be used
-# in advertising or publicity pertaining to distribution of the software
-# without specific, written prior permission. 
-# 
-#
-# Disclaimer
-#
-# ReportLab Inc. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
-# SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
-# IN NO EVENT SHALL ReportLab BE LIABLE FOR ANY SPECIAL, INDIRECT
-# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-# PERFORMANCE OF THIS SOFTWARE. 
-#
-###############################################################################
-#	$Log: stdparser.py,v $
-#	Revision 1.11  2000/07/15 21:13:29  andy_robinson
-#	Minor additions to styles etc.
-#
-#	Revision 1.10  2000/07/11 15:00:39  rgbecker
-#	Added end_spacer
-#	
-#	Revision 1.9  2000/07/10 15:25:47  andy_robinson
-#	Added tables to PythonPoint
-#	
-#	Revision 1.8  2000/06/01 15:23:06  rgbecker
-#	Platypus re-organisation
-#	
-#	Revision 1.7  2000/05/16 23:52:38  andy_robinson
-#	Bug in Image tag
-#	
-#	Revision 1.6  2000/05/16 23:48:00  andy_robinson
-#	Allowed intra-paragraph text; fixed various bugs
-#	
-#	Revision 1.5  2000/05/11 13:53:51  rgbecker
-#	Change to allow different xmllib
-#	
-#	Revision 1.4  2000/04/28 17:04:28  andy_robinson
-#	Changed to display multiple outline levels
-#	
-#	Revision 1.3  2000/04/14 12:17:05  rgbecker
-#	Splitting layout.py
-#	
-#	Revision 1.2  2000/04/06 12:15:38  andy_robinson
-#	Updated example XML to include full tag reference
-#	
-#	Revision 1.1  2000/04/06 09:47:20  andy_robinson
-#	Added several new shape tags.
-#	Broke out parser into separate module, to
-#	allow for alternative parsers in future.
-#	Broke out 'user guide' into pythonpoint.xml
-#	
-#	
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/stdparser.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/stdparser.py,v 1.12 2000/10/25 08:57:44 rgbecker Exp $
 __version__=''' $Id $ '''
 __doc__="""
 Parser for PythonPoint using the xmllib.py in the standard Python

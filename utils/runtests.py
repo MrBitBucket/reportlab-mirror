@@ -1,78 +1,9 @@
 #!/usr/bin/env python
-###############################################################################
-#
-#	ReportLab Public License Version 1.0
-#
-#   Except for the change of names the spirit and intention of this
-#   license is the same as that of Python
-#
-#	(C) Copyright ReportLab Inc. 1998-2000.
-#
-#
-# All Rights Reserved
-#
-# Permission to use, copy, modify, and distribute this software and its
-# documentation for any purpose and without fee is hereby granted, provided
-# that the above copyright notice appear in all copies and that both that
-# copyright notice and this permission notice appear in supporting
-# documentation, and that the name of ReportLab not be used
-# in advertising or publicity pertaining to distribution of the software
-# without specific, written prior permission. 
-# 
-#
-# Disclaimer
-#
-# ReportLab Inc. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
-# SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
-# IN NO EVENT SHALL ReportLab BE LIABLE FOR ANY SPECIAL, INDIRECT
-# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-# PERFORMANCE OF THIS SOFTWARE. 
-#
-###############################################################################
-#	$Log: runtests.py,v $
-#	Revision 1.13  2000/08/01 11:23:41  rgbecker
-#	Added -time flag
-#
-#	Revision 1.12  2000/07/19 13:44:54  rgbecker
-#	Added -prof option
-#	
-#	Revision 1.11  2000/05/17 15:39:10  rgbecker
-#	Changes related to removal of SimpleFlowDocument
-#	
-#	Revision 1.10  2000/05/11 09:54:43  rgbecker
-#	Fixed dir argument handling
-#	
-#	Revision 1.9  2000/04/12 13:34:33  rgbecker
-#	Fixes to exception handling
-#	
-#	Revision 1.8  2000/04/11 10:45:56  rgbecker
-#	CLEAN_EXCEPTIONS & sys.argv[0] setting
-#	
-#	Revision 1.7  2000/04/07 09:21:29  rgbecker
-#	Fixed import bug
-#	
-#	Revision 1.6  2000/04/06 15:08:53  rgbecker
-#	Changes to way dir is handled
-#	
-#	Revision 1.5  2000/04/03 09:29:36  rgbecker
-#	Eliminated -dir option
-#	
-#	Revision 1.4  2000/03/02 12:22:28  rgbecker
-#	Added recognition comment checks
-#	
-#	Revision 1.3  2000/03/02 10:43:37  rgbecker
-#	Fixed problem with -dir relativepath
-#	
-#	Revision 1.2  2000/02/23 15:08:23  rgbecker
-#	Fixed clean_files
-#	
-#	Revision 1.1  2000/02/23 13:16:56  rgbecker
-#	New infrastructure
-#	
-#	
-__version__=''' $Id: runtests.py,v 1.13 2000/08/01 11:23:41 rgbecker Exp $ '''
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/runtests.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/utils/runtests.py,v 1.14 2000/10/25 08:57:46 rgbecker Exp $
+__version__=''' $Id: runtests.py,v 1.14 2000/10/25 08:57:46 rgbecker Exp $ '''
 '''
 script for testing ReportLab
 '''

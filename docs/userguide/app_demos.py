@@ -1,4 +1,7 @@
-#app_demos
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/app_demos.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/docs/userguide/app_demos.py,v 1.7 2000/10/25 08:57:45 rgbecker Exp $
 from genuserguide import *
 
 Appendix1("ReportLab Demos")

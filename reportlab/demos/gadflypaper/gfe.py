@@ -1,70 +1,8 @@
-###############################################################################
-#
-#	ReportLab Public License Version 1.0
-#
-#   Except for the change of names the spirit and intention of this
-#   license is the same as that of Python
-#
-#	(C) Copyright ReportLab Inc. 1998-2000.
-#
-#
-# All Rights Reserved
-#
-# Permission to use, copy, modify, and distribute this software and its
-# documentation for any purpose and without fee is hereby granted, provided
-# that the above copyright notice appear in all copies and that both that
-# copyright notice and this permission notice appear in supporting
-# documentation, and that the name of ReportLab not be used
-# in advertising or publicity pertaining to distribution of the software
-# without specific, written prior permission. 
-# 
-#
-# Disclaimer
-#
-# ReportLab Inc. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
-# SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
-# IN NO EVENT SHALL ReportLab BE LIABLE FOR ANY SPECIAL, INDIRECT
-# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-# PERFORMANCE OF THIS SOFTWARE. 
-#
-###############################################################################
-#	$Log: gfe.py,v $
-#	Revision 1.11  2000/06/01 16:27:56  rgbecker
-#	pageSize is wrong at present
-#
-#	Revision 1.10  2000/06/01 15:23:06  rgbecker
-#	Platypus re-organisation
-#	
-#	Revision 1.9  2000/05/17 15:37:33  rgbecker
-#	Changes related to removal of SimpleFlowDocument
-#	
-#	Revision 1.8  2000/05/11 13:51:21  rgbecker
-#	Fixes for xml<
-#	
-#	Revision 1.7  2000/04/14 12:17:05  rgbecker
-#	Splitting layout.py
-#	
-#	Revision 1.6  2000/03/08 13:06:39  andy_robinson
-#	Moved inch and cm definitions to reportlab.lib.units and amended all demos
-#	
-#	Revision 1.5  2000/03/02 12:21:20  rgbecker
-#	Added recognition comment
-#	
-#	Revision 1.4  2000/02/17 02:03:53  rgbecker
-#	Docstring & other fixes
-#	
-#	Revision 1.3  2000/02/16 09:42:50  rgbecker
-#	Conversion to reportlab package
-#	
-#	Revision 1.2  2000/02/15 17:55:59  rgbecker
-#	License text fixes
-#	
-#	Revision 1.1.1.1  2000/02/15 15:15:57  rgbecker
-#	Initial setup of demos directory and contents.
-#	
-__version__=''' $Id: gfe.py,v 1.11 2000/06/01 16:27:56 rgbecker Exp $ '''
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/gadflypaper/gfe.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/demos/gadflypaper/gfe.py,v 1.12 2000/10/25 08:57:44 rgbecker Exp $
+__version__=''' $Id: gfe.py,v 1.12 2000/10/25 08:57:44 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT

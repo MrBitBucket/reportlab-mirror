@@ -1,5 +1,7 @@
-# colortest.py
-
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/colors/colortest.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/demos/colors/colortest.py,v 1.2 2000/10/25 08:57:44 rgbecker Exp $
 import reportlab.pdfgen.canvas
 from reportlab.lib import colors
 from reportlab.lib.units import inch

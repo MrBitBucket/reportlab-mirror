@@ -1,4 +1,8 @@
-__version__=''' $Id: pdfimages.py,v 1.2 2000/10/24 10:47:14 rgbecker Exp $ '''
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pdfimages.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.3 2000/10/25 08:57:45 rgbecker Exp $
+__version__=''' $Id: pdfimages.py,v 1.3 2000/10/25 08:57:45 rgbecker Exp $ '''
 __doc__="""
 Image functionality sliced out of canvas.py for generalization
 """
@@ -134,44 +138,3 @@ class PDFImage:
             canvas._code.append(line)
 
         canvas._code.append('Q')
-
-###############################################################################
-#
-#	ReportLab Public License Version 1.0
-#
-#   Except for the change of names the spirit and intention of this
-#   license is the same as that of Python
-#
-#	(C) Copyright ReportLab Inc. 1998-2000.
-#
-#
-# All Rights Reserved
-#
-# Permission to use, copy, modify, and distribute this software and its
-# documentation for any purpose and without fee is hereby granted, provided
-# that the above copyright notice appear in all copies and that both that
-# copyright notice and this permission notice appear in supporting
-# documentation, and that the name of ReportLab not be used
-# in advertising or publicity pertaining to distribution of the software
-# without specific, written prior permission. 
-# 
-#
-# Disclaimer
-#
-# ReportLab Inc. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
-# SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
-# IN NO EVENT SHALL ReportLab BE LIABLE FOR ANY SPECIAL, INDIRECT
-# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-# PERFORMANCE OF THIS SOFTWARE. 
-#
-###############################################################################
-#	$Log: pdfimages.py,v $
-#	Revision 1.2  2000/10/24 10:47:14  rgbecker
-#	Fix zlib import bug
-#
-#	Revision 1.1  2000/10/24 02:05:22  aaron_watters
-#	image functionality factored out of canvas.py initial checkin. tests pass
-#	
-#	

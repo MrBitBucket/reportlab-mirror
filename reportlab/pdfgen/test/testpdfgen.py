@@ -1,81 +1,9 @@
 #!/bin/env python
-###############################################################################
-#
-#	ReportLab Public License Version 1.0
-#
-#   Except for the change of names the spirit and intention of this
-#   license is the same as that of Python
-#
-#	(C) Copyright ReportLab Inc. 1998-2000.
-#
-#
-# All Rights Reserved
-#
-# Permission to use, copy, modify, and distribute this software and its
-# documentation for any purpose and without fee is hereby granted, provided
-# that the above copyright notice appear in all copies and that both that
-# copyright notice and this permission notice appear in supporting
-# documentation, and that the name of ReportLab not be used
-# in advertising or publicity pertaining to distribution of the software
-# without specific, written prior permission. 
-# 
-#
-# Disclaimer
-#
-# ReportLab Inc. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
-# SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
-# IN NO EVENT SHALL ReportLab BE LIABLE FOR ANY SPECIAL, INDIRECT
-# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-# PERFORMANCE OF THIS SOFTWARE. 
-#
-###############################################################################
-#	$Log: testpdfgen.py,v $
-#	Revision 1.15  2000/05/19 15:09:16  andy_robinson
-#	Test script text now bears some resemblance to our code base
-#
-#	Revision 1.14  2000/05/18 17:10:09  aaron_watters
-#	removed 0's on outline and link operations
-#	
-#	Revision 1.13  2000/04/25 20:21:12  aaron_watters
-#	added demonstration of usage of closed outline entries
-#	
-#	Revision 1.12  2000/04/18 19:53:47  aaron_watters
-#	eliminated canvas._inPage0() (now disallowed)
-#	
-#	Revision 1.11  2000/04/15 14:57:31  aaron_watters
-#	added demonstration of new AddOutlineEntry0 api
-#	
-#	Revision 1.10  2000/04/03 09:35:37  andy_robinson
-#	Using traling zero convention for new form and link APIs.
-#	
-#	Revision 1.9  2000/04/02 02:54:42  aaron_watters
-#	added demonstration of outline trees
-#	
-#	Revision 1.8  2000/03/26 23:06:49  aaron_watters
-#	added demos for forms and links
-#	
-#	Revision 1.7  2000/03/08 13:40:03  andy_robinson
-#	Canvas has two methods setFillColor(aColor) and setStrokeColor(aColor)
-#	which accepts color objects directly.
-#	
-#	Revision 1.6  2000/03/08 13:06:39  andy_robinson
-#	Moved inch and cm definitions to reportlab.lib.units and amended all demos
-#	
-#	Revision 1.5  2000/02/17 02:08:34  rgbecker
-#	Docstring & other fixes
-#	
-#	Revision 1.4  2000/02/16 09:42:50  rgbecker
-#	Conversion to reportlab package
-#	
-#	Revision 1.3  2000/02/15 17:55:59  rgbecker
-#	License text fixes
-#	
-#	Revision 1.2  2000/02/15 15:47:09  rgbecker
-#	Added license, __version__ and Logi comment
-#	
-__version__=''' $Id: testpdfgen.py,v 1.15 2000/05/19 15:09:16 andy_robinson Exp $ '''
+#copyright ReportLab Inc. 2000
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/pdfgen/test/Attic/testpdfgen.py,v 1.16 2000/10/25 08:57:45 rgbecker Exp $
+__version__=''' $Id: testpdfgen.py,v 1.16 2000/10/25 08:57:45 rgbecker Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
