@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.14 2003/10/14 15:59:01 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.15 2003/11/02 22:14:23 rgbecker Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -58,7 +58,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.14 2003/10/14 15:59:01 rgbecker Exp $'
+__version__ = '$Id: ttfonts.py,v 1.15 2003/11/02 22:14:23 rgbecker Exp $'
 
 import string
 from types import StringType
@@ -66,6 +66,8 @@ from struct import pack, unpack
 from cStringIO import StringIO
 from reportlab.pdfbase import pdfmetrics, pdfdoc
 
+def _L2U32(L):
+    return unpack('l',pack('L',L))[0]
 
 class TTFError(pdfdoc.PDFError):
     "TrueType font exception"
@@ -152,28 +154,36 @@ def _set_ushort(stream, offset, value):
     offset and returns the resulting stream (the original is unchanged)"""
     return splice(stream, offset, pack(">H", value))
 
-def _add32(x, y):
-    "Calculate (x + y) modulo 2**32"
-    lo = (x & 0xFFFF) + (y & 0xFFFF)
-    hi = (x >> 16) + (y >> 16) + (lo >> 16)
-    return (hi << 16) | (lo & 0xFFFF)
+try:
+    import _rl_accel
+except ImportError:
+    try:
+        from reportlab.lib import _rl_accel
+    except ImportError:
+        _rl_accel = None
 
-def _calcChecksum(data):
-    """Calculates PDF-style checksums"""
-    if len(data)&3: data = data + (4-(len(data)&3))*"\0"
-    sum = 0
-    for n in unpack(">%dl" % (len(data)>>2), data):
-        lo = (sum & 0xFFFF) + (n & 0xFFFF)
-        hi = (sum >> 16) + (n >> 16) + (lo >> 16)
-        sum = (hi << 16) | (lo & 0xFFFF)
-    return sum
 
 try:
-    from reportlab.lib import _rl_accel
     calcChecksum = _rl_accel.calcChecksum
 except:
-    calcChecksum = _calcChecksum
-
+    def calcChecksum(data):
+        """Calculates PDF-style checksums"""
+        if len(data)&3: data = data + (4-(len(data)&3))*"\0"
+        sum = 0
+        for n in unpack(">%dl" % (len(data)>>2), data):
+            lo = (sum & 0xFFFF) + (n & 0xFFFF)
+            hi = (sum >> 16) + (n >> 16) + (lo >> 16)
+            sum = (hi << 16) | (lo & 0xFFFF)
+        return sum
+try:
+    add32 = _rl_accel.add32
+except:
+    def add32(x, y):
+        "Calculate (x + y) modulo 2**32"
+        lo = (x & 0xFFFF) + (y & 0xFFFF)
+        hi = (x >> 16) + (y >> 16) + (lo >> 16)
+        return (hi << 16) | (lo & 0xFFFF)
+del _rl_accel
 #
 # TrueType font handling
 #
@@ -191,7 +201,6 @@ GF_USE_MY_METRICS               = 1 << 9
 GF_OVERLAP_COMPOUND             = 1 << 10
 GF_SCALED_COMPONENT_OFFSET      = 1 << 11
 GF_UNSCALED_COMPONENT_OFFSET    = 1 << 12
-
 
 def TTFOpenFile(fn):
     '''Opens a TTF file possibly after searching TTFSearchPath
@@ -264,7 +273,7 @@ class TTFontParser:
 
         # Check the checksums for the whole file
         checkSum = calcChecksum(self._data)
-        checkSum = _add32(0xB1B0AFBA, -checkSum)
+        checkSum = add32(0xB1B0AFBAL, -checkSum)
         if checkSum != 0:
             raise TTFError, 'Invalid font checksum'
 
@@ -274,7 +283,7 @@ class TTFontParser:
             checkSum = calcChecksum(table)
             if t['tag'] == 'head':
                 adjustment = unpack('>l', table[8:8+4])[0]
-                checkSum = _add32(checkSum, -adjustment)
+                checkSum = add32(checkSum, -adjustment)
             if t['checksum'] != checkSum:
                 raise TTFError, 'Invalid checksum for table %s' % t['tag']
 
@@ -312,10 +321,7 @@ class TTFontParser:
     def read_ulong(self):
         "Reads an unsigned long"
         self._pos = self._pos + 4
-        return (ord(self._data[self._pos - 4]) << 24) + \
-               (ord(self._data[self._pos - 3]) << 16) + \
-               (ord(self._data[self._pos - 2]) << 8) + \
-               (ord(self._data[self._pos - 1]))
+        return unpack('>l',self._data[self._pos - 4:self._pos])[0]
 
     def read_short(self):
         "Reads a signed short"
@@ -332,10 +338,7 @@ class TTFontParser:
 
     def get_ulong(self, pos):
         "Return an unsigned long at given position"
-        return (ord(self._data[pos]) << 24) + \
-               (ord(self._data[pos + 1]) << 16) + \
-               (ord(self._data[pos + 2]) << 8) + \
-               (ord(self._data[pos + 3]))
+        return unpack('>l',self._data[pos:pos+4])[0]
 
     def get_chunk(self, pos, length):
         "Return a chunk of raw data at given position"
@@ -386,7 +389,7 @@ class TTFontMaker:
                 head_start = offset
             checksum = calcChecksum(data)
             stm.write(tag)
-            stm.write(pack(">lll", checksum, offset, len(data)))
+            stm.write(pack(">LLL", checksum, offset, len(data)))
             paddedLength = (len(data)+3)&~3
             offset = offset + paddedLength
 
@@ -396,9 +399,9 @@ class TTFontMaker:
             stm.write(data[:len(data)&~3])
 
         checksum = calcChecksum(stm.getvalue())
-        checksum = _add32(0xB1B0AFBA, -checksum)
+        checksum = add32(_L2U32(0xB1B0AFBAL), -checksum)
         stm.seek(head_start + 8)
-        stm.write(pack('>l', checksum))
+        stm.write(pack('>L', checksum))
 
         return stm.getvalue()
 

@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.35 2003/10/10 12:01:46 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.36 2003/11/02 22:13:58 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.35 2003/10/10 12:01:46 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.36 2003/11/02 22:13:58 rgbecker Exp $ "
 #endif
 #include "Python.h"
 #include <stdlib.h>
@@ -27,7 +27,7 @@ static __version__=" $Id: _rl_accel.c,v 1.35 2003/10/10 12:01:46 rgbecker Exp $ 
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.43"
+#define VERSION "0.44"
 #define MODULE "_rl_accel"
 #ifndef	ATTRDICT
 	#if PY_MAJOR_VERSION>=2
@@ -796,6 +796,32 @@ static PyObject *ttfonts_calcChecksum(PyObject *self, PyObject* args)
 	return PyInt_FromLong(Sum);
 }
 
+static PyObject *ttfonts_add32(PyObject *self, PyObject* args)
+{
+	unsigned long x, y;
+#if PY_MAJOR_VERSION>=2 && PY_MINOR_VERSION>=3
+	PyObject	*ox, *oy;
+	if(!PyArg_ParseTuple(args, "OO:add32", &ox, &oy)) return NULL;
+	if(PyLong_Check(ox)){
+		x = PyLong_AsUnsignedLongMask(ox);
+		}
+	else{
+		x = PyInt_AsLong(ox);
+		if(PyErr_Occurred()) return NULL;
+		}
+	if(PyLong_Check(oy)){
+		y = PyLong_AsUnsignedLongMask(oy);
+		}
+	else{
+		y = PyInt_AsLong(oy);
+		if(PyErr_Occurred()) return NULL;
+		}
+#else
+	if(!PyArg_ParseTuple(args, "ii:add32", &x, &y)) return NULL;
+#endif
+	x += y;
+	return PyInt_FromLong(x);
+}
 
 static char *__doc__=
 "_rl_accel contains various accelerated utilities\n\
@@ -842,6 +868,7 @@ static struct PyMethodDef _methods[] = {
 	{"_AttrDict", _AttrDict, METH_VARARGS, "_AttrDict() create a dict which can use attribute notation"},
 #endif
 	{"calcChecksum", ttfonts_calcChecksum, METH_VARARGS, "calcChecksum(string) calculate checksums for TTFs"},
+	{"add32", ttfonts_add32, METH_VARARGS, "add32(x,y)  32 bit unsigned x+y"},
 	{NULL,		NULL}		/* sentinel */
 	};
 
