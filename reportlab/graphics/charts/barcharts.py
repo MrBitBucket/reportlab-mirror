@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.11 2001/05/11 10:08:55 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.12 2001/05/17 11:17:16 rgbecker Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -18,7 +18,7 @@ from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
-from reportlab.graphics.shapes import Auto, Line, Rect, Group, Drawing
+from reportlab.graphics.shapes import Line, Rect, Group, Drawing
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.axes import YCategoryAxis, XValueAxis
 from reportlab.graphics.charts.textlabels import Label
@@ -139,7 +139,7 @@ class BarChart(Widget):
         "Find the minimum and maximum value of the data we have."
 
         data = self.data
-        m, M = Auto, Auto
+        m, M = None, None
         for row in data:
             for val in row:
                 if val < m:
@@ -266,7 +266,7 @@ class BarChart(Widget):
                 # 'Baseline' correction...
                 scale = self.valueAxis.scale
                 vm, vM = self.valueAxis.valueMin, self.valueAxis.valueMax
-                if Auto in (vm, vM):
+                if None in (vm, vM):
                     y = scale(self._findMinMaxValues()[0])
                 elif vm <= 0 <= vM:
                     y = scale(0)

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.8 2001/05/11 10:08:55 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.9 2001/05/17 11:17:16 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
@@ -12,7 +12,7 @@ from types import FunctionType, ClassType, StringType
 from reportlab.lib import colors 
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, isListOfStringsOrNone, SequenceOf
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
-from reportlab.graphics.shapes import Auto, Line, Rect, Group, Drawing
+from reportlab.graphics.shapes import Line, Rect, Group, Drawing
 from reportlab.graphics.widgets.signsandsymbols import NoEntry0
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.textlabels import Label

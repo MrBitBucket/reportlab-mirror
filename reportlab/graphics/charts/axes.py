@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.24 2001/05/15 19:10:55 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.25 2001/05/17 11:17:16 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -36,7 +36,7 @@ the former axes in its own coordinate system.
 from types import FunctionType, StringType, TupleType, ListType
 
 from reportlab.lib.validators import isNumber, isNumberOrNone, isListOfStringsOrNone, isListOfNumbers, isListOfNumbersOrNone, isColorOrNone, OneOf
-from reportlab.graphics.shapes import Drawing, Line, Group, Auto, STATE_DEFAULTS
+from reportlab.graphics.shapes import Drawing, Line, Group, STATE_DEFAULTS
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.utils import nextRoundNumber
@@ -496,12 +496,12 @@ class ValueAxis(Widget):
         # data points.
         self.labelTextFormat = '%d'
 
-        # if set to auto, these will be worked out for you.
+        # if set to None, these will be worked out for you.
         # if you override any or all of them, your values
         # will be used.
-        self.valueMin = Auto
-        self.valueMax = Auto
-        self.valueStep = Auto
+        self.valueMin = None
+        self.valueMax = None
+        self.valueStep = None
         
 
     def setPosition(self, x, y, length):
@@ -517,7 +517,7 @@ class ValueAxis(Widget):
         Called after setPosition. Let it look at a list of lists of
         numbers determine the tick mark intervals.  If valueMin,
         valueMax and valueStep are configured then it
-        will use them; if any of them are set to Auto it
+        will use them; if any of them are set to None it
         will look at the data and make some sensible decision.
         You may override this to build custom axes with
         irregular intervals.  It creates an internal
@@ -547,11 +547,11 @@ class ValueAxis(Widget):
         """
 
         valueMin = self.valueMin
-        if self.valueMin == Auto:
+        if self.valueMin is None:
             valueMin = _findMin(dataSeries,self._dataIndex,valueMin)
 
         valueMax = self.valueMax
-        if self.valueMax == Auto:
+        if self.valueMax is None:
             valueMax = _findMax(dataSeries,self._dataIndex,valueMax)
         self._valueMin, self._valueMax = (valueMin, valueMax)
         self._rangeAdjust()
@@ -605,7 +605,7 @@ class ValueAxis(Widget):
     def _calcValueStep(self):
         '''Calculate _valueStep for the axis or get from valueStep.''' 
 
-        if self.valueStep == Auto:
+        if self.valueStep is None:
             rawRange = self._valueMax - self._valueMin
             rawInterval = rawRange / min(self.maximumTicks-1,(float(self._length)/self.minimumTickSpacing ))
             niceInterval = nextRoundNumber(rawInterval)

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.17 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.18 2001/05/17 11:17:16 rgbecker Exp $
 
 from gengraphguide import *
 
@@ -1435,18 +1435,18 @@ Defaults to None"""],
       ["tickRight", """How far to the right of the axis should the tick mark protrude?"""],
 
       ["valueMin", """The y value to which the bottom of the axis should correspond.
-Default value is 'Auto' in which case the axis sets it to the lowest
+Default value is None in which case the axis sets it to the lowest
 actual data point (e.g. 10 in the example above). It is common to set
 this to zero to avoid misleading the eye."""],
       ["valueMax", """The y value to which the top of the axis should correspond.
-Default value is 'Auto' in which case the axis sets it to the highest
+Default value is None in which case the axis sets it to the highest
 actual data point (e.g. 42 in the example above). It is common to set
 this to a 'round number' so data bars do not quite reach the top."""],
       ["valueStep", """The y change between tick intervals. By default this is
-'Auto', and the chart tries to pick 'nice round numbers' which are
+None, and the chart tries to pick 'nice round numbers' which are
 just wider than the minimumTickSpacing below."""],
 
-      ["minimumTickSpacing", """This is used when valueStep is set to 'Auto', and ignored
+      ["minimumTickSpacing", """This is used when valueStep is set to None, and ignored
 otherwise. The designer specified that tick marks should be no
 closer than X points apart (based, presumably, on considerations
 of the label font size and angle). The chart tries values of the
@@ -1483,11 +1483,11 @@ caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - XCategoryAxis proper
 ##tickLeft How far to the left of the axis should the tick marks protrude?  
 ##tickRight How far to the right of the axis should the tick mark protrude? (Note that making this equal to chart width gives you a gridline) 
 
-##valueMin The y value to which the bottom of the axis should correspond. Default value is 'Auto' in which case the axis sets it to the lowest actual data point (e.g. 10 in the example above). It is common to set this to zero to avoid misleading the eye. 
-##valueMax The y value to which the top of the axis should correspond. Default value is 'Auto' in which case the axis sets it to the highest actual data point (e.g. 42 in the example above). It is common to set this to a 'round number' so data bars do not quite reach the top. 
-##valueStep The y change between tick intervals. By default this is 'Auto', and the chart tries to pick 'nice round numbers' which are just wider than the minimumTickSpacing below. 
+##valueMin The y value to which the bottom of the axis should correspond. Default value is None in which case the axis sets it to the lowest actual data point (e.g. 10 in the example above). It is common to set this to zero to avoid misleading the eye. 
+##valueMax The y value to which the top of the axis should correspond. Default value is None in which case the axis sets it to the highest actual data point (e.g. 42 in the example above). It is common to set this to a 'round number' so data bars do not quite reach the top. 
+##valueStep The y change between tick intervals. By default this is None, and the chart tries to pick 'nice round numbers' which are just wider than the minimumTickSpacing below. 
 
-##minimumTickSpacing This is used when valueStep is set to 'Auto', and ignored otherwise. The designer specified that tick marks should be no closer than X points apart (based, presumably, on considerations of the label font size and angle). The chart tries values of the type 1,2,5,10,20,50,100... (going down below 1 if necessary) until it finds an interval which is greater than the desired spacing, and uses this for the step.  
+##minimumTickSpacing This is used when valueStep is set to None, and ignored otherwise. The designer specified that tick marks should be no closer than X points apart (based, presumably, on considerations of the label font size and angle). The chart tries values of the type 1,2,5,10,20,50,100... (going down below 1 if necessary) until it finds an interval which is greater than the desired spacing, and uses this for the step.  
 ##labelTextFormat This determines what goes in the labels. Unlike a category axis which accepts fixed strings, the labels on a ValueAxis are supposed to be numbers. You may provide either a 'format string' like '%0.2f' (show two decimal places), or an arbitrary function which accepts a number and returns a string. One use for the latter is to convert a timestamp to a readable year-month-day format. 
 ##title Not Implemented Yet. This needs to be like a label, but also let you set the text directly. It would have a default location to the left of the axis and inclined by 90 degrees. 
 

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.25 2001/05/15 15:08:26 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.26 2001/05/17 11:17:16 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -55,24 +55,10 @@ STATE_DEFAULTS = {   # sensible defaults for all
     }
 
 
-# Singleton value for automatic numerals.
-
-class _Auto:
-    "Class for a numeral whose value is determined when needed."
-
-    def __repr__(self):
-        return 'Auto'
-
-    def __str__(self):
-        return 'Auto'
-
-Auto = _Auto()
-
-
-    ####################################################################
-    # math utilities.  These could probably be moved into lib
-    # somewhere.
-    ####################################################################
+####################################################################
+# math utilities.  These could probably be moved into lib
+# somewhere.
+####################################################################
 
 # constructors for matrices:
 def nullTransform():
