@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/cidfonts?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: cidfonts.py,v 1.7 2001/10/04 16:01:08 andy_robinson Exp $ '''
+__version__=''' $Id: cidfonts.py,v 1.8 2001/10/21 17:05:01 andy_robinson Exp $ '''
 __doc__="""CID (Asian multi-byte) font support.
 
 This defines classes to represent CID fonts.  They know how to calculate
@@ -15,6 +15,7 @@ import marshal
 import md5
 import time
 
+import reportlab
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase._cidfontdata import allowedTypeFaces, allowedEncodings, CIDFontInfo
 from reportlab.pdfgen.canvas import Canvas
@@ -57,14 +58,24 @@ class CIDEncoding(pdfmetrics.Encoding):
     # into a SingleByteEncoding since many of its methods
     # should not apply here.
 
-    def __init__(self, name):
+    def __init__(self, name, useCache=1):
         self.name = name
         self._mapFileHash = None
         self._codeSpaceRanges = []
         self._notDefRanges = []
         self._cmap = {}
 
-        self.parseCMAPFile(name)
+        fontmapdir = os.path.join(
+                os.path.dirname(reportlab.__file__),
+                'fonts')
+        if useCache:
+            if os.path.isfile(fontmapdir + os.sep + name + '.fastmap'):
+                self.fastLoad(fontmapdir)
+            else:
+                self.parseCMAPFile(name)
+                self.fastSave(fontmapdir)
+        else:
+            self.parseCMAPFile(name)
 
     def _hash(self, text):
         hasher = md5.new()
@@ -134,7 +145,7 @@ class CIDEncoding(pdfmetrics.Encoding):
             else:
                 words = words[1:]
         finished = time.clock()
-        #print 'loaded %s in %0.4f seconds' % (self.name, finished - started)
+        print 'parsed CMAP %s in %0.4f seconds' % (self.name, finished - started)
 
     def translate(self, text):
         "Convert a string into a list of CIDs"
@@ -190,11 +201,8 @@ class CIDEncoding(pdfmetrics.Encoding):
         self._cmap = marshal.load(f)
         f.close()
         finished = time.clock()
-        print 'loaded %s in %0.4f seconds' % (self.name, finished - started)
+        #print 'loaded %s in %0.4f seconds' % (self.name, finished - started)
         
-        
-                        
-
         
 class CIDTypeFace(pdfmetrics.TypeFace):
     """Multi-byte type face.

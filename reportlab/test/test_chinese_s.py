@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/Attic/test_chinese_s.py,v 1.2 2001/10/20 20:42:14 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/Attic/test_chinese_s.py,v 1.3 2001/10/21 17:05:01 andy_robinson Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -22,6 +22,7 @@ VERBOSE = 0
 
 
 class CHSFontTests(unittest.TestCase):
+    
     def hDraw(self, c, msg, fnt, x, y):
         "Helper - draws it with a box around"
         c.setFont(fnt, 16, 16)

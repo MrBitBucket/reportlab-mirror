@@ -1,9 +1,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2_graphics.py,v 1.1 2001/10/05 12:33:33 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2_graphics.py,v 1.2 2001/10/21 17:05:01 andy_robinson Exp $
 from rl_doc_utils import *
-
+from reportlab.lib.codecharts import SingleByteEncodingChart
+    
 heading1("Graphics and Text with $pdfgen$")
 
 heading2("Basic Concepts")
@@ -697,7 +698,7 @@ import reportlab.rl_config
 reportlab.rl_config.warnOnMissingFontGlyphs = 0
 
 import os
-import reportlab.test
+import reportlab
 folder = os.path.dirname(reportlab.__file__) + os.sep + 'fonts'
 afmFile = os.path.join(folder, 'LeERC___.AFM')
 pfbFile = os.path.join(folder, 'LeERC___.PFB')
@@ -768,6 +769,53 @@ value of the $T1SearchPath$ identifier to contain additional
 directories.
 """)
 
+heading2("Single-byte Font Encodings")
+disc("""
+Every time you draw some text, you presume an encoding.
+The Reportlab PDF library offers very fine-grained control
+of character encodings, which can be critical.  You can specify
+the encoding to use at a per-installation, per-document or per-font
+level, and also synthesize your own encodings.
+""")
+
+disc("""The code chart below shows the characters in the $WinAnsiEncoding$.
+This is the standard encoding on Windows and many Unix systems in America
+and Western Europe.  It is also knows as Code Page 1252, and is practically
+identical to ISO-Latin-1 (it contains one or two extra characters). This
+is the default encoding used by the Reportlab PDF Library. It was generated from
+a standard routine in $reportlab/lib$, $codecharts.py$, 
+which can be used to display the contents of fonts.  The index numbers
+along the edges are in hex.""")
+
+cht1 = SingleByteEncodingChart(encodingName='WinAnsiEncoding',charsPerRow=32, boxSize=12)
+illust(lambda canv: cht1.drawOn(canv, 0, 0), "WinAnsi Encoding", cht1.width, cht1.height)
+
+disc("""The code chart below shows the characters in the $MacRomanEncoding$.
+as it sounds, this is the standard encoding on Macintosh computers in
+America and Western Europe.  As usual with non-unicode encodings, the first
+128 code points (top 4 rows in this case) are the ASCII standard and agree
+with the WinAnsi code chart above; but the bottom 4 rows differ.""")
+cht2 = SingleByteEncodingChart(encodingName='MacRomanEncoding',charsPerRow=32, boxSize=12)
+illust(lambda canv: cht2.drawOn(canv, 0, 0), "MacRoman Encoding", cht2.width, cht2.height)
+
+disc("""These two encodings are available for the standard fonts (Helvetica,
+Times-Roman and Courier and their variants) and will be available for most
+commercial fonts including those from Adobe.  However, some fonts contain non-
+text glyphs and the concept does not really apply.  For example, ZapfDingbats
+and Symbol can each be treated as having their own encoding.""")
+
+cht3 = SingleByteEncodingChart(faceName='ZapfDingbats',encodingName='ZapfDingbatsEncoding',charsPerRow=32, boxSize=12)
+illust(lambda canv: cht3.drawOn(canv, 0, 0), "ZapfDingbats and its one and only encoding", cht3.width, cht3.height)
+
+cht4 = SingleByteEncodingChart(faceName='Symbol',encodingName='SymbolEncoding',charsPerRow=32, boxSize=12)
+illust(lambda canv: cht4.drawOn(canv, 0, 0), "Symbol and its one and only encoding", cht4.width, cht4.height)
+
+# include a bitmap of some Asian text
+I=os.path.join(os.path.dirname(__file__),'..','images','jpnchars.jpg')
+try:
+	getStory().append(Image(I))
+except:
+	disc("""An image should have appeared here.""")
 
 heading2("Text object methods")
 

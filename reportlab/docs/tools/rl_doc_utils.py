@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/rl_doc_utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/tools/Attic/rl_doc_utils.py,v 1.1 2001/10/05 12:33:33 rgbecker Exp $
-__version__=''' $Id: rl_doc_utils.py,v 1.1 2001/10/05 12:33:33 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/docs/tools/Attic/rl_doc_utils.py,v 1.2 2001/10/21 17:05:01 andy_robinson Exp $
+__version__=''' $Id: rl_doc_utils.py,v 1.2 2001/10/21 17:05:01 andy_robinson Exp $ '''
 
 
 __doc__ = """
@@ -225,10 +225,14 @@ class Illustration(platdemos.Figure):
 	something to a canvas, with a constant height and width
 	used.  This puts them inside a figure box with a caption."""
 
-	def __init__(self, operation, caption):
+	def __init__(self, operation, caption, width=None, height=None):
 		stdwidth, stdheight = examplefunctiondisplaysizes
+		if not width:
+			width = stdwidth
+		if not height:
+			height = stdheight
 		#platdemos.Figure.__init__(self, stdwidth * 0.75, stdheight * 0.75)
-		platdemos.Figure.__init__(self, stdwidth, stdheight,
+		platdemos.Figure.__init__(self, width, height,
 					'Figure <seq template="%(Chapter)s-%(Figure+)s"/>: ' + quickfix(caption))
 		self.operation = operation
 
@@ -238,8 +242,8 @@ class Illustration(platdemos.Figure):
 		self.operation(self.canv)
 
 
-def illust(operation, caption):
-	i = Illustration(operation, caption)
+def illust(operation, caption, width=None, height=None):
+	i = Illustration(operation, caption, width=width, height=height)
 	getStory().append(i)
 
 
