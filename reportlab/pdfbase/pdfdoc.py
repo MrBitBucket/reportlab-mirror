@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.54 2001/11/19 16:22:28 aaron_watters Exp $
-__version__=''' $Id: pdfdoc.py,v 1.54 2001/11/19 16:22:28 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.55 2002/02/14 14:51:46 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.55 2002/02/14 14:51:46 rgbecker Exp $ '''
 __doc__=""" 
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The 
@@ -1397,6 +1397,7 @@ class Destination:
     representation = format = page = None
     def __init__(self,name):
         self.name = name
+        self.fmt = self.page = None
     def format(self, document):
         f = self.fmt
         if f is None: raise ValueError, "format not resolved %s" % self.name
