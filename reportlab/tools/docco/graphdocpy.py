@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.15 2002/04/13 15:24:06 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.16 2002/04/13 18:31:19 rgbecker Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -544,7 +544,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         for key in keys:
             value = props[key]
 
-            f = getStringIO('')
+            f = getStringIO()
             pprint.pprint(value, f)
             value = f.getvalue()[:-1]
             valueLines = string.split(value, '\n')
@@ -742,7 +742,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
             value = props[key]
 
             # Method 3
-            f = getStringIO('')
+            f = getStringIO()
             pprint.pprint(value, f)
             value = f.getvalue()[:-1]
             valueLines = string.split(value, '\n')
