@@ -1,4 +1,10 @@
+"""
+This modules defines a variety of Bar Chart components.
+
+The basic flavors are Side-by-side, stacked and 100% bar charts,
+available in horizontal and vertical versions.  """
 #chartparts - candidate components for a chart library.
+
 import string
 from types import FunctionType
 
@@ -68,7 +74,24 @@ class VerticalBarChart(Widget):
         self.barLabelNudge = 0
         # if you have multiple series, by default they butt
         # together.
+
+    def demo(self):
+        """Shows basic use of a bar chart"""
+        drawing = Drawing(200, 100)
+
+        data = [
+                (13, 5, 20, 22, 37, 45, 19, 4),
+                (14, 6, 21, 23, 38, 46, 20, 5)
+                ]
         
+        bc = VerticalBarChart()
+        bc.x = 10
+        bc.y = 10
+        bc.height = 85
+        bc.width = 90
+        bc.data = data
+        drawing.add(bc)
+        return drawing
 
     def calcBarPositions(self):
         """Works out where they go.
@@ -217,7 +240,6 @@ def sample1():
     catNames = map(lambda n:n+'-99', catNames)
     bc.categoryAxis.categoryNames = catNames
     drawing.add(bc)
-    bc.dumpProperties()
     return drawing    
     
 def sample2():
@@ -231,7 +253,7 @@ def sample2():
     drawing = Drawing(400, 200)
 
     bc = VerticalBarChart()
-    bc.debug = 1
+    #bc.debug = 1
     bc.x = 50
     bc.y = 50
     bc.height = 120

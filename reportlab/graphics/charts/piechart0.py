@@ -2,7 +2,10 @@
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
 #wedge.
+"""Basic Pie Chart class.
 
+This permits you to customize and pop out individual wedges;
+supports elliptical and circular pies."""
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.shapes import *
 from reportlab.graphics import renderPDF
@@ -10,153 +13,10 @@ from reportlab.lib import colors
 from reportlab.pdfgen.canvas import Canvas
 import math
 
-class Pie(Widget):
-    """This is the pie which appears in the middle of a pie chart.
-    It does NOT include legends, titles and other furniture.
-    The rectangle is the 'bounding box' for the circle of
-    ellipse; if one uses exploded slices or labels, they
-    will typically stick out from the defining rectangle."""
-    
-    #there is no design at all between this color choice;
-    # we need a palette with some reasoning behind it.
-    defaultColors = [colors.darkcyan,
-                     colors.blueviolet,
-                     colors.blue,
-                     colors.cyan]
-    _attrMap = {
-        'x':isNumber,
-        'y':isNumber,
-        'width':isNumber,
-        'height':isNumber,
-        'data':isListOfNumbers,
-        'labels':isListOfStringsOrNone,
-        'labelRadius':isNumber,   # 0.5 = mid-slice, 1.25 = just outside
-        'labelFontName':isString,
-        'labelFontSize':isNumber,
-        'labelColor':isColor,
-        'startAngle':isNumber,
-        'direction': lambda x: x in ['clockwise','anticlockwise'],
-        'popouts': lambda x: type(x) == type({}) and isListOfNumbers(x.keys()) and isListOfNumbers(x.values()),
-        'strokeColor':isColorOrNone,
-        'strokeWidth':isNumber
-        }
-    def __init__(self):
-        self.x = 0
-        self.y = 0
-        self.width = 100
-        self.height = 100
-        self.data = [1]
-        self.labels = None  # or list of strings
-        self.labelRadius = 1.25
-        self.labelFontName = 'Times-Roman'
-        self.labelFontSize = 12
-        self.labelColor = colors.black
-        self.startAngle = 90
-        self.direction = "clockwise"
-        self.popouts = {}
-        self.strokeColor = colors.black
-        self.strokeWidth = 0
-        
-    def demo(self):
-        self.x = 50
-        self.y = 10
-        self.height = 80
-        self.width = 80
-        self.data = [10,20,30,40,50,60]
-                     
-    def draw(self):
-        # normalize slice data
-        sum = 0.0
-        for number in self.data:
-            sum = sum + number
-        normData = []
-        for number in self.data:
-            normData.append(360.0 * number / sum)
-
-        #labels
-        if self.labels is None:
-            labels = [''] * len(normData)
-        else:
-            labels = self.labels
-        assert len(labels) == len(self.data), "Number of labels does not match number of data points!"
-        
-        xradius = self.width/2.0
-        yradius = self.height/2.0
-        centerx = self.x + xradius
-        centery = self.y + yradius
-
-        if self.direction == "anticlockwise":
-            whichWay = 1
-        else:
-            whichWay = -1
-        i = 0
-        colorCount = len(self.defaultColors)
-        
-        g = Group()
-        startAngle = self.startAngle #% 360
-        for angle in normData:
-            thisWedgeColor = self.defaultColors[i % colorCount]
-            endAngle = (startAngle + (angle * whichWay)) #% 360
-            if startAngle < endAngle:
-                a1 = startAngle
-                a2 = endAngle
-            elif endAngle < startAngle:
-                a1 = endAngle
-                a2 = startAngle
-            else:  #equal, do not draw
-                continue
-
-            # is it a popout?
-            cx, cy = centerx, centery
-            if self.popouts.has_key(i):
-                # pop out the wedge
-                averageAngle = (a1+a2)/2.0
-                aveAngleRadians = averageAngle*math.pi/180.0
-                popdistance = self.popouts[i]
-                cx = centerx + popdistance * math.cos(aveAngleRadians)
-                cy = centery + popdistance * math.sin(aveAngleRadians)
-
-                
-            theWedge = Wedge(cx,
-                             cy,
-                             xradius,
-                             a1,
-                             a2,
-                             yradius=yradius)
-            theWedge.fillColor = thisWedgeColor
-            theWedge.strokeColor = self.strokeColor
-            theWedge.strokeWidth = self.strokeWidth
-            g.add(theWedge)
-            # now draw a label
-            if labels[i] <> "":
-                averageAngle = (a1+a2)/2.0
-                aveAngleRadians = averageAngle*math.pi/180.0
-                labelX = centerx + (0.5 * self.width * math.cos(aveAngleRadians) * self.labelRadius)
-                labelY = centery + (0.5 * self.height * math.sin(aveAngleRadians) * self.labelRadius)
-                
-                theLabel = String(labelX, labelY, labels[i])
-                theLabel.textAnchor = "middle"
-                theLabel.fontSize = self.labelFontSize
-                theLabel.fontName = self.labelFontName
-                theLabel.fillColor = self.labelColor
-
-                g.add(theLabel)
-                
-            startAngle = endAngle
-            i = i + 1
-
-            
-        return g
-
-            
-    #########################################################################
-    #
-    #   experiment on a PieChart exposing/modifying individual elements     #
-    #
-    #########################################################################
 
 class WedgeFormatter(Widget):
-    """This lets you customise some things about the wedges in a pie chart.
+    """This holds descriptive information about the wedges in a pie chart.
+    
     It is not to be confused with the 'wedge itself'; this just holds
     a recipe for how to format one, and does not allow you to hack the
     angles.  It can format a genuine Wedge object for you with its
@@ -186,7 +46,7 @@ class WedgeFormatter(Widget):
     
 
 
-class PieWithWedges(Widget):
+class Pie(Widget):
     defaultColors = [colors.darkcyan,
                      colors.blueviolet,
                      colors.blue,
@@ -220,11 +80,24 @@ class PieWithWedges(Widget):
         #self.wedges.strokeColor = colors.blueviolet
         
     def demo(self):
-        self.x = 50
-        self.y = 10
-        self.height = 80
-        self.width = 80
-        self.data = [10,20,30,40,50,60]
+        d = Drawing(200, 100)
+        pc = Pie()
+        pc.x = 50
+        pc.y = 10
+        pc.width = 100
+        pc.height = 80
+        pc.data = [10,20,30,40,50,60]
+        pc.labels = ['a','b','c','d','e','f']
+        pc.wedges.strokeWidth=0.5
+        pc.wedges[3].popout = 10
+        pc.wedges[3].strokeWidth = 2
+        pc.wedges[3].strokeDashArray = [2,2]
+        pc.wedges[3].labelRadius = 1.75
+        pc.wedges[3].fontColor = colors.red
+        d.add(pc)
+        return d
+
+        
                      
     def draw(self):
         # normalize slice data
@@ -312,47 +185,8 @@ class PieWithWedges(Widget):
         return g
 
 def test():
-    d = Drawing(400,200)
-
-    d.add(String(100,175,"Without labels", textAnchor="middle"))
-    d.add(String(300,175,"With labels", textAnchor="middle"))
-    
-
-    pc = Pie()
-    pc.x = 25
-    pc.y = 50
-    pc.data = [10,20,30,40,50,60]
-    pc.popouts[0] = 5
-    d.add(pc, 'pie1')
-    
-    pc2 = Pie()
-    pc2.x = 150
-    pc2.y = 50
-    pc2.data = [10,20,30,40,50,60]
-    pc2.labels = ['a','b','c','d','e','f']
-    #pc2.labelRadius = 0.5
-    d.add(pc2, 'pie2')
-
-    pc3 = Pie()
-    pc3.x = 275
-    pc3.y = 50
-    pc3.data = [10,20,30,40,50,60]
-    pc3.labels = ['a','b','c','d','e','f']
-    pc3.labelRadius = 0.65
-    pc3.labelFontName = "Helvetica-Bold"
-    pc3.labelFontSize = 16
-    pc3.labelColor = colors.yellow
-    d.add(pc3, 'pie3')
-
-    c = Canvas('piechart0.pdf')
-    c.setFont('Times-Roman', 20)
-    c.drawString(100, 720, "Monolithic pie chart with no top level attributes")
-    c.setFont('Times-Roman', 12)
-    #BUG - currently the drawing gets the most recently used font as its default.
-    d.drawOn(c, 100, 500)
-
     d = Drawing(400, 200)
-    pc = PieWithWedges()
+    pc = Pie()
     pc.x = 150
     pc.y = 50
     pc.data = [10,20,30,40,50,60]
@@ -365,7 +199,6 @@ def test():
     pc.wedges[3].fontColor = colors.red
     
 
-    pc.dumpProperties()
     d.add(pc)
 
     d.drawOn(c, 100, 200)

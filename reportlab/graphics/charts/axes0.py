@@ -225,9 +225,9 @@ class YValueAxis(Widget):
     def demo(self):
         self.setPosition(0, 0, 100)
         self.configure((3,10,20,25,40,60,80,110, 117))
-##        d = Drawing(200, 100)
-##        d.add(self)
-##        return d
+        d = Drawing(200, 100)
+        d.add(self)
+        return d
         
     def setPosition(self, x, y, length):
         self._x = x
@@ -375,7 +375,6 @@ if __name__=='__main__':
     yAxis = YValueAxis()
     yAxis.setPosition(50, 50, 125)
     yAxis.configure(data)
-    yAxis.dumpProperties()
     drawing.add(xAxis)
     drawing.add(yAxis)
 
