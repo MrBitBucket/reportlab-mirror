@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.26 2001/10/05 16:39:08 rgbecker Exp $
-__version__=''' $Id: colors.py,v 1.26 2001/10/05 16:39:08 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.27 2001/10/05 16:42:19 rgbecker Exp $
+__version__=''' $Id: colors.py,v 1.27 2001/10/05 16:42:19 rgbecker Exp $ '''
 
 import string
 import math
@@ -253,7 +253,7 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
 # this is a hangover from PIDDLE - suggest we ditch it since it is not used anywhere
 #transparent = Color(-1, -1, -1)
 
-_CMYK_white
+_CMYK_white=CMYKColor(0,0,0,0)
 
 # Special color 
 ReportLabBlue =		HexColor(0x4e5688)
