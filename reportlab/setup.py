@@ -1,10 +1,12 @@
-# a dangerously incomplete attempt at a reportlab setup script,
-# do not trust it to do anything.  It builds the extensions
-# though :-)
-
-from distutils.core import setup, Extension
+#copyright ReportLab Inc. 2000-2003
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/setup.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/setup.py,v 1.6 2002/12/22 22:15:34 andy_robinson Exp $
+__version__=''' $Id: setup.py,v 1.6 2002/12/22 22:15:34 andy_robinson Exp $ '''
 
 import os, sys, distutils
+from distutils.core import setup, Extension
+
 
 # from Zope - App.Common.package_home
 
@@ -32,7 +34,7 @@ def run():
 An Open Source Python library for generating PDFs and graphics.
 """,
 
-            author="The boys from SW19",
+            author="Robinson, Watters, Becker, Precedo and many more...",
             author_email="info@reportlab.com",
             url="http://www.reportlab.com/",
 
@@ -67,50 +69,50 @@ An Open Source Python library for generating PDFs and graphics.
                     'reportlab.tools.pythonpoint.styles',
                      ],
               data_files = [(pjoin(package_path, 'docs', 'images'),
-                                ['docs/images/Edit_Prefs.gif',
-                                 'docs/images/Python_21.gif',
-                                 'docs/images/Python_21_HINT.gif',
-                                 'docs/images/fileExchange.gif',
-                                 'docs/images/jpn.gif',
-                                 'docs/images/jpnchars.jpg',
-                                 'docs/images/lj8100.jpg',
-                                 'docs/images/replogo.a85',
-                                 'docs/images/replogo.gif']),
+                                ['reportlab/docs/images/Edit_Prefs.gif',
+                                 'reportlab/docs/images/Python_21.gif',
+                                 'reportlab/docs/images/Python_21_HINT.gif',
+                                 'reportlab/docs/images/fileExchange.gif',
+                                 'reportlab/docs/images/jpn.gif',
+                                 'reportlab/docs/images/jpnchars.jpg',
+                                 'reportlab/docs/images/lj8100.jpg',
+                                 'reportlab/docs/images/replogo.a85',
+                                 'reportlab/docs/images/replogo.gif']),
                             (pjoin(package_path, 'fonts'), 
-                                ['fonts/LeERC___.AFM',
-                                 'fonts/LeERC___.PFB',
-                                 'fonts/luxiserif.ttf',
-                                 'fonts/luxiserif_license.txt',
-                                 'fonts/rina.ttf',
-                                 'fonts/rina_license.txt']),
-			    (package_path,
-				['README',
-				 'changes',
-				 'license.txt']),
-			    (pjoin(package_path, 'test'),
-				['test/pythonpowered.gif',]),
-			    (pjoin(package_path, 'lib'),
-				['lib/hyphen.mashed',]),
-			],
+                                ['reportlab/fonts/LeERC___.AFM',
+                                 'reportlab/fonts/LeERC___.PFB',
+                                 'reportlab/fonts/luxiserif.ttf',
+                                 'reportlab/fonts/luxiserif_license.txt',
+                                 'reportlab/fonts/rina.ttf',
+                                 'reportlab/fonts/rina_license.txt']),
+                            (package_path,
+                                ['README',
+                                 'changes',
+                                 'license.txt']),
+                            (pjoin(package_path, 'test'),
+                                ['test/pythonpowered.gif',]),
+                            (pjoin(package_path, 'lib'),
+                                ['lib/hyphen.mashed',]),
+                            ],
 
             ext_modules =   [Extension( '_rl_accel',
-                                        ['lib/_rl_accel.c'],
+                                        ['reportlab/lib/_rl_accel.c'],
                                         include_dirs=[],
                                         define_macros=[],
                                         library_dirs=[],
                                         libraries=LIBS, # libraries to link against
                                         ),
                              Extension( 'sgmlop',
-                                        ['lib/sgmlop.c'],
+                                        ['reportlab/lib/sgmlop.c'],
                                         include_dirs=[],
                                         define_macros=[],
                                         library_dirs=[],
                                         libraries=LIBS, # libraries to link against
                                         ),
                              Extension( 'pyHnj',
-                                        ['lib/pyHnjmodule.c',
-                                         'lib/hyphen.c',
-                                         'lib/hnjalloc.c'],
+                                        ['reportlab/lib/pyHnjmodule.c',
+                                         'reportlab/lib/hyphen.c',
+                                         'reportlab/lib/hnjalloc.c'],
                                         include_dirs=[],
                                         define_macros=[],
                                         library_dirs=[],
