@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.51 2001/10/04 16:23:51 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.52 2001/10/05 12:24:25 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -151,7 +151,7 @@ class BarChart(Widget):
 			for d in _data:
 				for i in xrange(len(d)):
 					data[i] += d[i] or 0
-			data = _data + [data]
+			data = list(_data) + [data]
 		self._configureData = data
 
 	def _getMinMax(self):
