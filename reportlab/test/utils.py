@@ -93,7 +93,7 @@ class GlobDirectoryWalker:
             self.directory = directory[len(__loader__.archive)+len(os.sep):]
             pfx = self.directory+os.sep
             n = len(pfx)
-            self.files = map(lambda x: x[n:],filter(lambda x: x.startswith(pfx),__loader__._files.keys()))
+            self.files = map(lambda x, n=n: x[n:],filter(lambda x,pfx=pfx: x.startswith(pfx),__loader__._files.keys()))
             self.stack = []
 
     def __getitem__(self, index):

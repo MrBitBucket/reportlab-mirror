@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.68 2004/03/23 17:34:11 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.68 2004/03/23 17:34:11 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.69 2004/03/23 18:57:33 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.69 2004/03/23 18:57:33 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -394,7 +394,7 @@ def rl_glob(pattern,glob=glob.glob,fnmatch=fnmatch.fnmatch, _RL_DIR=_RL_DIR,pjoi
     c, pfn = __startswith_rl(pattern)
     r = glob(pattern)
     if c or r==[]:
-        r += map(lambda x: pjoin(_RL_DIR,x),filter(lambda x: fnmatch(x,pattern),__loader__._files.keys()))
+        r += map(lambda x,_RL_DIR=_RL_DIR,pjoin=pjoin: pjoin(_RL_DIR,x),filter(lambda x,pattern=pattern,fnmatch=fnmatch: fnmatch(x,pattern),__loader__._files.keys()))
     return r
 del glob, fnmatch
 
@@ -441,7 +441,7 @@ def rl_isdir(pn,os_path_isdir=os.path.isdir):
     if os_path_isdir(pn): return True
     if _isFSD or __loader__ is None: return False
     pn = _startswith_rl(pn)
-    return len(filter(lambda x: x.startswith(pn),__loader__._files.keys()))>0
+    return len(filter(lambda x,pn=pn: x.startswith(pn),__loader__._files.keys()))>0
 
 class ImageReader:
     "Wraps up either PIL or Java to get data from bitmaps"
