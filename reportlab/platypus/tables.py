@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.32 2000/10/26 11:21:38 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.32 2000/10/26 11:21:38 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.33 2000/12/13 15:14:22 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.33 2000/12/13 15:14:22 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -132,7 +132,7 @@ class Table(Flowable):
 						dW,t = _listCellGeom(v,w,s)
 						dW = dW + s.leftPadding + s.rightPadding
 						if dW>w:
-							raise "LayoutError", "Flowable (%sx%s points) too wide for frame (%sx* points)." % (dW,t,w)
+							raise "LayoutError", "Flowable (%sx%s points) too wide for cell (%sx* points)." % (dW,t,w)
 					else:
 						if t is not StringType:
 							v = v is None and '' or str(v)
