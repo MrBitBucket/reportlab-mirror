@@ -17,7 +17,6 @@ def _getFragLines(frags):
 			tleft = t[i+1:]
 			w.text = t[:i]
 			cline.append(w)
-			if len(cline)==1 and cline[0].text=='': cline[0].text = ' '
 			lines.append(cline)
 			cline = []
 			if tleft!='':
@@ -26,8 +25,26 @@ def _getFragLines(frags):
 			cline.append(w)
 	if cline!=[]:
 		lines.append(cline)
-		if len(cline)==1 and cline[0].text=='': cline[0].text = ' '
 	return lines
+
+def _getFragWords(frags):
+	'''	given a fragment list return a list of lists
+		[[size, (f00,w00), ..., (f0n,w0n)],....,[size, (fm0,wm0), ..., (f0n,wmn)]]
+		each pair f,w represents a style and some string
+	'''
+	R = []
+	W = []
+	n = 0
+	for f in frags:
+		text = f.text[:]
+		W.append((f,text))
+		n = n + stringWidth(text, f.fontName, f.fontSize)
+		#del f.text	# we can't do this until we sort out splitting
+					# of paragraphs
+	W.insert(0,n)
+	R.append(W)
+
+	return R
 
 class XPreformatted(Paragraph):
 	def __init__(self, text, style, bulletText = None, dedent=0, frags=None):
@@ -105,13 +122,10 @@ class XPreformatted(Paragraph):
 				maxSize = 0
 				currentWidth = 0
 				words = []
-				first = 1
 				for w in _getFragWords(L):
 					spaceWidth = stringWidth(' ',w[-1][0].fontName, w[-1][0].fontSize)
-					if not n: currentWidth = -spaceWidth	# hack to get around extra space for word 1
 					wordWidth = w[0]
 					f = w[1][0]
-					space_available = maxWidth - (currentWidth + spaceWidth + wordWidth)
 					n = n + 1
 					maxSize = max(maxSize,f.fontSize)
 					nText = w[1][1]
@@ -119,17 +133,10 @@ class XPreformatted(Paragraph):
 						words = [f.clone()]
 						words[-1].text = nText
 					elif not _sameFrag(words[-1],f):
-						ok = nText!='' and nText[0]!=' '
-						if first or ok:
-							words[-1].text = words[-1].text + ' '
-							if first and ok: first=0
 						words.append(f.clone())
 						words[-1].text = nText
 					else:
-						ok = nText!='' and nText[0]!=' '
-						if first or ok:
-							words[-1].text = words[-1].text + ' ' + nText
-							if first and ok: first=0
+						words[-1].text = words[-1].text + nText
 
 					for i in w[2:]:
 						f = i[0].clone()
@@ -137,7 +144,7 @@ class XPreformatted(Paragraph):
 						words.append(f)
 						maxSize = max(maxSize,f.fontSize)
 
-					currentWidth = currentWidth + spaceWidth + wordWidth
+					currentWidth = currentWidth + wordWidth
 
 				lineno = lineno+1
 				maxWidth = lineno<len(maxWidths) and maxWidths[lineno] or maxWidths[-1]
