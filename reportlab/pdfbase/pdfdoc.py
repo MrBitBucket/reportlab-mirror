@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.48 2001/08/22 19:04:48 aaron_watters Exp $
-__version__=''' $Id: pdfdoc.py,v 1.48 2001/08/22 19:04:48 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.49 2001/09/03 14:06:14 andy_robinson Exp $
+__version__=''' $Id: pdfdoc.py,v 1.49 2001/09/03 14:06:14 andy_robinson Exp $ '''
 __doc__=""" 
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The 
@@ -299,36 +299,6 @@ class PDFDocument:
         return fontnames
 
 
-    def addFont(self, userFont):
-        """Add a new font object to the document."""
-        #UGLY ALERT - not O-O, should find a cleaner way to locate
-        #the right font class.
-        from reportlab.pdfbase import pdfmetrics        
-        internalName = 'F' + repr(len(self.fontMapping)+1)
-        if isinstance(userFont, pdfmetrics.Font):
-            # construct a Type 1 Font internal object
-            pdfFont = PDFType1Font()
-            pdfFont.Name = internalName
-            pdfFont.BaseFont = userFont.face.name
-            pdfFont.__Comment__ = 'Font %s' % userFont.name
-            if type(userFont.encoding) is types.StringType:
-                pdfFont.Encoding = PDFName(userFont.encoding)
-            else:
-                enc = makePDFEncoding(userFont.encoding)
-                pdfFont.Encoding = enc
-        elif isinstance(userFont, pdfmetrics.EmbeddedType1Font):
-            
-            pass
-        # now link it in
-        ref = self.Reference(pdfFont, internalName)
-
-        # also refer to it in the BasicFonts dictionary
-        fontDict = self.idToObject['BasicFonts'].dict
-        fontDict[internalName] = pdfFont
-
-        # and in the font mappings
-        self.fontMapping[userFont.name] = '/' + internalName
-        #print 'Font.addObjects called for %s -> %s' % (self.name, internalName)
 
     def format(self):
         # register the Catalog/INfo and then format the objects one by one until exhausted
@@ -1570,132 +1540,46 @@ class PDFType1Font:
         PD = PDFDictionary(D)
         return PD.format(document)
 
-
-class PDFTrueTypeFont(PDFType1Font):
-    Subtype = "TrueType"
-    #local_attributes = string.split("FirstChar LastChar Widths Encoding FontDescriptor") #same
-
-class PDFMMType1Font(PDFType1Font):
-    Subtype = "MMType1"
-
-class PDFType3Font(PDFType1Font):
-    Subtype = "Type3"
-    local_attributes = string.split(
-        "FirstChar LastChar Widths CharProcs FontBBox FontMatrix Resources Encoding")
-
-class PDFType0Font(PDFType1Font):
-    Subtype = "Type0"
-    local_attributes = string.split(
-        "DescendantFonts Encoding")
-
-class PDFCIDFontType0(PDFType1Font):
-    Subtype = "CIDFontType0"
-    local_attributes = string.split(
-        "CIDSystemInfo FontDescriptor DW W DW2 W2 Registry Ordering Supplement")
-
-class PDFCIDFontType0(PDFType1Font):
-    Subtype = "CIDFontType2"
-    local_attributes = string.split(
-        "BaseFont CIDToGIDMap CIDSystemInfo FontDescriptor DW W DW2 W2")
-
-class PDFEncoding(PDFType1Font):
-    Type = "Encoding"
-    name_attributes = string.split("Type BaseEncoding")
-    # these attributes are assumed to already be of the right type
-    local_attributes = ["Differences"]
-
+## These attribute listings will be useful in future, even if we
+## put them elsewhere
+##
+##class PDFTrueTypeFont(PDFType1Font):
+##    Subtype = "TrueType"
+##    #local_attributes = string.split("FirstChar LastChar Widths Encoding FontDescriptor") #same
+##
+##class PDFMMType1Font(PDFType1Font):
+##    Subtype = "MMType1"
+##
+##class PDFType3Font(PDFType1Font):
+##    Subtype = "Type3"
+##    local_attributes = string.split(
+##        "FirstChar LastChar Widths CharProcs FontBBox FontMatrix Resources Encoding")
+##
+##class PDFType0Font(PDFType1Font):
+##    Subtype = "Type0"
+##    local_attributes = string.split(
+##        "DescendantFonts Encoding")
+##
+##class PDFCIDFontType0(PDFType1Font):
+##    Subtype = "CIDFontType0"
+##    local_attributes = string.split(
+##        "CIDSystemInfo FontDescriptor DW W DW2 W2 Registry Ordering Supplement")
+##
+##class PDFCIDFontType0(PDFType1Font):
+##    Subtype = "CIDFontType2"
+##    local_attributes = string.split(
+##        "BaseFont CIDToGIDMap CIDSystemInfo FontDescriptor DW W DW2 W2")
+##
+##class PDFEncoding(PDFType1Font):
+##    Type = "Encoding"
+##    name_attributes = string.split("Type BaseEncoding")
+##    # these attributes are assumed to already be of the right type
+##    local_attributes = ["Differences"]
+##
 
 # UGLY ALERT - this needs turning into something O-O, it was hacked
 # across from the pdfmetrics.Encoding class to avoid circularity
 
-def makePDFEncoding(userEnc):
-    """Returns a PDF Dictionary representing a single-byte encoding.
-
-    If it is identical to a base one, it just returns the name"""
-    from reportlab.pdfbase import pdfdoc
-    D = {}
-    baseEnc = pdfmetrics.getEncoding(userEnc.baseEncodingName)
-    differences = userEnc.getDifferences(baseEnc) #[None] * 256)
-
-    # if no differences, we just need the base name
-    if differences == []:
-        return pdfdoc.PDFName(userEnc.baseEncodingName)
-    else:
-        #make up a dictionary describing the new encoding
-        diffArray = []
-        for range in differences:
-            diffArray.append(range[0])  # numbers go 'as is'
-            for glyphName in range[1:]:
-                if glyphName is not None:
-                    # there is no way to 'unset' a character in the base font.
-                    diffArray.append('/' + glyphName)
-
-        #print 'diffArray = %s' % diffArray
-        D["Differences"] = pdfdoc.PDFArray(diffArray)
-        D["BaseEncoding"] = pdfdoc.PDFName(userEnc.baseEncodingName)
-        D["Type"] = pdfdoc.PDFName("Encoding")
-        PD = pdfdoc.PDFDictionary(D)
-        return PD
-
-
-def makePDFFont(userFont):
-    """This creates the necessary PDF Objects based on thhe user font object passed in"""
-    pass
-    def addObjects(self, doc):
-        """Adds necessary PDF objects to document"""
-        internalName = 'F' + repr(len(doc.fontMapping)+1)
-
-        if type(self.encoding) is StringType:
-            enc = pdfdoc.PDFName(self.encoding)
-        else:
-            enc = self.encoding.makePDFObject()
-
-
-        fontFile = pdfdoc.PDFStream()
-        fontFile.content = self._binaryData
-        #fontFile.dictionary['Length'] = self._length
-        fontFile.dictionary['Length1'] = self._length1
-        fontFile.dictionary['Length2'] = self._length2
-        fontFile.dictionary['Length3'] = self._length3
-
-        fontFileRef = doc.Reference(fontFile, 'fontFile:' + self.pfbFileName)
-
-        fontDescriptor = pdfdoc.PDFDictionary({
-            'Ascent':851,
-            'CapHeight':663,
-            'Descent':-258,
-            'Flags': 34,
-            'FontBBox':pdfdoc.PDFArray([-200, -258, 1144, 851]),
-            'FontName':pdfdoc.PDFName(self.baseFontName),
-            'ItalicAngle':0,
-            'StemV':75,
-            'XHeight':397,
-            'FontFile': fontFileRef
-            })
-        fontDescriptorRef = doc.Reference(fontDescriptor, 'fontDescriptor:' + self.name)    
-
-        fontObj = pdfdoc.PDFDictionary({
-            'Type':'/Font',
-            'Subtype':'/Type1',
-            'Name': '/'+internalName, #<-- the internal name
-            'BaseFont': '/' + self.baseFontName,
-            'Encoding': enc,
-            'FirstChar': 0,
-            'LastChar': 255,
-            'Widths': pdfdoc.PDFArray(self.widths),
-            'FontDescriptor': fontDescriptorRef
-            })
-        
-
-        # now link it in
-        ref = doc.Reference(fontObj, internalName)
-
-        # also refer to it in the BasicFonts dictionary
-        fontDict = doc.idToObject['BasicFonts'].dict
-        fontDict[internalName] = ref
-
-        # and in the font mappings
-        doc.fontMapping[self.name] = '/' + internalName
 
 
 

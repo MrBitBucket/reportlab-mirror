@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.44 2001/08/23 00:38:31 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.45 2001/09/03 14:06:14 andy_robinson Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -287,6 +287,10 @@ class Font:
         self.encoding= getEncoding(encName)
         self._calcWidths()
 
+        # multi byte fonts do their own stringwidth calculations.
+        # signal this here.
+        self._multiByte = 0 
+
     def _calcWidths(self):
         """Vector of widths for stringWidth function"""
         #synthesize on first request
@@ -492,12 +496,13 @@ def registerFont(font):
     "Registers a font, including setting up info for accelerated stringWidth"
     #assert isinstance(font, Font), 'Not a Font: %s' % font
     _fonts[font.fontName] = font
-    if _stringWidth:
-        _rl_accel.setFontInfo(string.lower(font.fontName),
-                              _dummyEncoding,
-                              font.face.ascent,
-                              font.face.descent,
-                              font.widths)
+    if not font._multiByte:
+        if _stringWidth:
+            _rl_accel.setFontInfo(string.lower(font.fontName),
+                                  _dummyEncoding,
+                                  font.face.ascent,
+                                  font.face.descent,
+                                  font.widths)
 
 
 def getTypeFace(faceName):
@@ -572,8 +577,11 @@ if _stringWidth:
         '''
         try:
             font = getFont(fontName)
-            registerFont(font)
-            return _stringWidth(text,fontName,fontSize,encoding)
+            if font._multiByte:
+                return font.stringWidth(text, fontSize)
+            else:
+                registerFont(font)
+                return _stringWidth(text,fontName,fontSize,encoding)
         except:
             warnOnce('Font %s:%s not found - using Courier:%s for widths'%(fontName,encoding,encoding))
             return _stringWidth(text,'courier',fontSize,encoding)
