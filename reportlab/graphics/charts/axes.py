@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.31 2001/07/19 00:09:21 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.32 2001/09/01 13:39:54 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -633,7 +633,7 @@ class ValueAxis(Widget):
 
         if self.valueStep is None:
             rawRange = self._valueMax - self._valueMin
-            rawInterval = rawRange / min(self.maximumTicks-1,(float(self._length)/self.minimumTickSpacing ))
+            rawInterval = rawRange / min(float(self.maximumTicks-1),(float(self._length)/self.minimumTickSpacing ))
             niceInterval = nextRoundNumber(rawInterval)
             self._valueStep = niceInterval
         else:
