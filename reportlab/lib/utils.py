@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.19 2001/10/26 17:02:41 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.19 2001/10/26 17:02:41 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.20 2001/10/30 08:47:09 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.20 2001/10/30 08:47:09 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -71,36 +71,45 @@ def getArgvDict(**kw):
 		Attempts to be smart about conversions, but the value can be an instance
 		of ArgDictValue to allow specifying a conversion function.
 	'''
+	def handleValue(v,av,func):
+		if func:
+			v = func(av)
+		else:
+			t = type(v)
+			if t is StringType:
+				v = av
+			elif t is FloatType:
+				v = float(av)
+			elif t is IntType:
+				v = int(av)
+			elif t is ListType:
+				v = list(eval(av))
+			elif t is TupleType:
+				v = tuple(eval(av))
+			else:
+				raise TypeError, "Can't convert string '%s' to %s" % (av,str(t))
+		return v
+
 	A = sys.argv[1:]
+	R = {}
 	for k, v in kw.items():
 		if isinstance(v,ArgvDictValue):
 			v, func = v.value, v.func
 		else:
 			func = None
+		handled = 0
 		ke = k+'='
 		for a in A:
 			if string.find(a,ke)==0:
 				av = a[len(ke):]
 				A.remove(a)
-				if func:
-					v = func(av)
-				else:
-					t = type(v)
-					if t is StringType:
-						v = av
-					elif t is FloatType:
-						v = float(av)
-					elif t is IntType:
-						v = int(av)
-					elif t is ListType:
-						v = list(eval(av))
-					elif t is TupleType:
-						v = tuple(eval(av))
-					else:
-						raise TypeError, "Can't convert string '%s' to %s" % (av,str(t))
-				kw[k] = v
+				R[k] = handleValue(v,av,func)
+				handled = 1
 				break
-	return kw
+
+		if not handled: R[k] = handleValue(v,v,func)
+
+	return R
 
 def getHyphenater(hDict=None):
 	try:
