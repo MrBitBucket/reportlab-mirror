@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.99 2002/03/28 09:20:59 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.99 2002/03/28 09:20:59 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.100 2002/03/29 08:47:06 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.100 2002/03/29 08:47:06 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -62,7 +62,7 @@ if sys.hexversion >= 0x02000000:
 else:
     # hexdigest not available in 1.5
     def _digester(s):
-        return string.join(map(lambda x : "%0x" % ord(x), md5.md5(s).digest()), '')
+        return string.join(map(lambda x : "%02x" % ord(x), md5.md5(s).digest()), '')
 
 class Canvas:
     """This class is the programmer's interface to the PDF file format.  Methods
