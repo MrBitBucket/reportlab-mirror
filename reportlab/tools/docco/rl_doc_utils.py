@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/rl_doc_utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/rl_doc_utils.py,v 1.6 2003/04/17 22:42:03 andy_robinson Exp $
-__version__=''' $Id: rl_doc_utils.py,v 1.6 2003/04/17 22:42:03 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/tools/docco/rl_doc_utils.py,v 1.7 2004/04/28 14:41:56 rgbecker Exp $
+__version__=''' $Id: rl_doc_utils.py,v 1.7 2004/04/28 14:41:56 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -405,5 +405,8 @@ def handnote(xoffset=0, size=None, fillcolor=tan, strokecolor=green):
 #make a singleton, created when requested rather
 #than each time a chapter imports it.
 _story = []
+def setStory(story=[]):
+    global _story
+    _story = story
 def getStory():
     return _story
