@@ -277,7 +277,7 @@ def getCommentary():
     story.append(Paragraph(
                 "The next example uses a custom font",
                 styleSheet['Italic']))
-    def code(txt,story=story):
+    def code(txt,story=story,styleSheet=styleSheet):
         story.append(Preformatted(txt,styleSheet['Code']))
     code('''import reportlab.rl_config
     reportlab.rl_config.warnOnMissingFontGlyphs = 0
