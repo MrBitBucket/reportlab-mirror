@@ -29,6 +29,18 @@ def frange(start, end=None, inc=None):
     return L
 
 
+def makeDistancesList(list):
+    """Returns a list of distances between adjacent numbers in some input list.
+
+    E.g. [1, 1, 2, 3, 5, 7] -> [0, 1, 1, 2, 2]
+    """
+
+    d = []
+    for i in range(len(list[:-1])):
+        d.append(list[i+1] - list[i])
+    return d
+
+
 class Grid0(Widget):
     """This makes a rectangular grid of equidistant stripes.
 
@@ -110,6 +122,33 @@ class Grid0(Widget):
         return group
 
 
+    def makeLinePosList(self, start, isX=0):
+        "Returns a list of positions where to place lines."
+
+        w, h = self.width, self.height
+        
+        if self.deltaSteps:
+            r = [start + self.delta0]
+            i = 0
+            while 1:
+                if r[-1] > start + w:
+                    del r[-1]
+                    break
+                r.append(r[-1] + self.deltaSteps[i % len(self.deltaSteps)])
+                i = i + 1
+        else:
+            if isX:
+                r = frange(start + self.delta0, start + w, self.delta)
+            else:
+                r = frange(start + self.delta0, start + h, self.delta)
+
+        r.append(start + w)
+        if self.delta0 != 0:
+            r.insert(0, start)
+
+        return r
+    
+
     def makeInnerLines(self):
         # inner grid lines
         group = Group()
@@ -118,26 +157,15 @@ class Grid0(Widget):
 
         if self.useLines == 1:
             if self.orientation == 'vertical':
-                r = frange(self.x + self.delta0, self.x + w, self.delta)
-                r.append(self.x + w)
-                if self.delta0 != 0:
-                    r.insert(0, self.x)
-
-                for j in range(len(r)):
-                    x = r[j]
+                r = self.makeLinePosList(self.x, isX=1)
+                for x in r:
                     line = Line(x, self.y, x, self.y + h)
                     line.strokeColor = self.strokeColor
                     line.strokeWidth = self.strokeWidth
                     group.add(line)
-
             elif self.orientation == 'horizontal':
-                r = frange(self.y + self.delta0, self.y + h, self.delta)
-                r.append(self.y + w)
-                if self.delta0 != 0:
-                    r.insert(0, self.y)
-
-                for j in range(len(r)):
-                    y = r[j]
+                r = self.makeLinePosList(self.y, isX=0)
+                for y in r:
                     line = Line(self.x, y, self.x + w, y)
                     line.strokeColor = self.strokeColor
                     line.strokeWidth = self.strokeWidth
@@ -155,75 +183,26 @@ class Grid0(Widget):
         # inner grid stripes (solid rectangles)
         if self.useRects == 1:
             cols = self.stripeColors
+
             if self.orientation == 'vertical':
-                i = 0
-                r = frange(self.x + self.delta0, self.x + w, self.delta)
-                for j in range(len(r)):
-                    x = r[j]
-                    try:
-                        stripe = Rect(x, self.y, r[j+1]-x, h)
-                        stripe.fillColor = cols[i % len(cols)] 
-                        stripe.strokeColor = None
-                        group.add(stripe)
-                        i = i + 1
-                    except IndexError:
-                        if self.delta0 == 0:
-                            if x + self.delta > self.x + w:
-                                w1 = self.x + w - x
-                            else:
-                                w1 = self.delta
-                            stripe = Rect(x, self.y, w1, h)
-                            stripe.fillColor = cols[i % len(cols)] 
-                            stripe.strokeColor = None
-                            group.add(stripe)
-                            i = i + 1
-                # if offset != 0 we need to draw left- and rightmost
-                # stripe seperately
-                if self.delta0 != 0:
-                    lmStripe = Rect(self.x, self.y, self.delta0, h)
-                    lmStripe.fillColor = cols[-1] 
-                    lmStripe.strokeColor = None
-                    group.add(lmStripe)
-
-                    rmStripe = Rect(x, self.y, self.x + w - x, h)
-                    rmStripe.fillColor = cols[i % len(cols)] 
-                    rmStripe.strokeColor = None
-                    group.add(rmStripe)
-
+                r = self.makeLinePosList(self.x, isX=1)
             elif self.orientation == 'horizontal':
-                i = 0
-                r = frange(self.y + self.delta0, self.y + h, self.delta)
-                for j in range(len(r)):
-                    y = r[j]
-                    try:
-                        stripe = Rect(self.x, y, w, r[j+1]-y)
-                        stripe.fillColor = cols[i % len(cols)]
-                        stripe.strokeColor = None
-                        group.add(stripe)
-                        i = i + 1
-                    except IndexError:
-                        if self.delta0 == 0:
-                            if y + self.delta > self.y + w:
-                                h1 = self.y + w - y
-                            else:
-                                h1 = self.delta
-                            stripe = Rect(self.x, y, w, h1)
-                            stripe.fillColor = cols[i % len(cols)] 
-                            stripe.strokeColor = None
-                            group.add(stripe)
-                            i = i + 1
-                # if offset != 0 we need to draw upper- and lowermost
-                # stripe seperately
-                if self.delta0 != 0:
-                    lmStripe = Rect(self.x, self.y, w, self.delta0)
-                    lmStripe.fillColor = cols[-1] 
-                    lmStripe.strokeColor = None
-                    group.add(lmStripe)
+                r = self.makeLinePosList(self.y, isX=0)
 
-                    umStripe = Rect(self.x, self.y + w - self.delta0, w, self.y + h - y)
-                    umStripe.fillColor = cols[i % len(cols)] 
-                    umStripe.strokeColor = None
-                    group.add(umStripe)
+            dist = makeDistancesList(r)
+            
+            i = 0
+            for j in range(len(dist)):
+                if self.orientation == 'vertical':
+                    x = r[j]
+                    stripe = Rect(x, self.y, dist[j], h)
+                elif self.orientation == 'horizontal':
+                    y = r[j]
+                    stripe = Rect(self.x, y, w, dist[j])
+                stripe.fillColor = cols[i % len(cols)] 
+                stripe.strokeColor = None
+                group.add(stripe)
+                i = i + 1
 
         return group
 
@@ -378,7 +357,7 @@ def test():
     for row in range(10):
         y = 530 - row*d
         if row == 0:
-            for col in range(3):
+            for col in range(4):
                 x = 20 + col*d
                 g = Grid0()
                 g.x = x
@@ -393,10 +372,12 @@ def test():
                     g.delta0 = 10
                 elif col == 2:
                     g.orientation = 'horizontal'
+                elif col == 3:
+                    g.deltaSteps = [5, 10, 20, 30]
                 g.demo()
                 D.add(g)
         elif row == 1:
-            for col in range(3):
+            for col in range(4):
                 x = 20 + col*d 
                 g = Grid0()
                 g.y = y
@@ -409,6 +390,10 @@ def test():
                     g.delta0 = 10
                 elif col == 2:
                     g.orientation = 'horizontal'
+                elif col == 3:
+                    g.deltaSteps = [5, 10, 20, 30]
+                    g.useRects = 1
+                    g.useLines = 0
                 g.demo()
                 D.add(g)
         elif row == 2:
