@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.8 2001/05/08 14:28:03 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.9 2001/05/09 07:57:42 dinu_gherman Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -116,10 +116,6 @@ class Pie(Widget):
 
 
     def draw(self):
-        ### ATTENTION: MUST USE defaultStyles[i % wedgeCount]
-        ### INSTEAD OF defaultStyles[i], OTHERWISE THE NUMBER
-        ### OF SLICES GETS CHANGED!!!
-
         # normalize slice data
         sum = 0.0
         for number in self.data:
@@ -152,6 +148,10 @@ class Pie(Widget):
         
         startAngle = self.startAngle #% 360
         for angle in normData:
+            ### ATTENTION: MUST USE i = i % wedgeCount HERE,
+            ### OTHERWISE THE NUMBER OF SLICES GETS CHANGED!!!
+            i = i % wedgeCount
+
             endAngle = (startAngle + (angle * whichWay)) #% 360
             if startAngle < endAngle:
                 a1 = startAngle
@@ -162,13 +162,15 @@ class Pie(Widget):
             else:  #equal, do not draw
                 continue
 
+            wedgeStyle = self.defaultStyles[i]
+
             # is it a popout?
             cx, cy = centerx, centery
-            if self.defaultStyles[i % wedgeCount].popout <> 0:
+            if wedgeStyle.popout <> 0:
                 # pop out the wedge
                 averageAngle = (a1+a2)/2.0
                 aveAngleRadians = averageAngle * pi/180.0
-                popdistance = self.defaultStyles[i % wedgeCount].popout
+                popdistance = self.defaultStyles[i].popout
                 cx = centerx + popdistance * cos(aveAngleRadians)
                 cy = centery + popdistance * sin(aveAngleRadians)
 
@@ -177,7 +179,6 @@ class Pie(Widget):
             elif len(normData) == 1:
                 theWedge = Ellipse(cx, cy, xradius, yradius)
 
-            wedgeStyle = self.defaultStyles[i % wedgeCount]
             theWedge.fillColor = wedgeStyle.fillColor
             theWedge.strokeColor = wedgeStyle.strokeColor
             theWedge.strokeWidth = wedgeStyle.strokeWidth
@@ -189,15 +190,15 @@ class Pie(Widget):
             if labels[i] <> "":
                 averageAngle = (a1+a2)/2.0
                 aveAngleRadians = averageAngle*pi/180.0
-                labelRadius = self.defaultStyles[i % wedgeCount].labelRadius
+                labelRadius = wedgeStyle.labelRadius
                 labelX = centerx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
                 labelY = centery + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
                 
                 theLabel = String(labelX, labelY, labels[i])
                 theLabel.textAnchor = "middle"
-                theLabel.fontSize = self.defaultStyles[i % wedgeCount].fontSize
-                theLabel.fontName = self.defaultStyles[i % wedgeCount].fontName
-                theLabel.fillColor = self.defaultStyles[i % wedgeCount].fontColor
+                theLabel.fontSize = wedgeStyle.fontSize
+                theLabel.fontName = wedgeStyle.fontName
+                theLabel.fillColor = wedgeStyle.fontColor
 
                 g.add(theLabel)
                 
