@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.28  2000/04/15 14:58:32  aaron_watters
+#	Completed addOutlineEntry0 api
+#
 #	Revision 1.27  2000/04/14 11:28:32  andy_robinson
 #	Removed illegal append statement usage in canvas.grid()
-#
+#	
 #	Revision 1.26  2000/04/12 16:26:51  rgbecker
 #	XML Tagged Paragraph parser changes
 #	
@@ -109,7 +112,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.27 2000/04/14 11:28:32 andy_robinson Exp $ '''
+__version__=''' $Id: canvas.py,v 1.28 2000/04/15 14:58:32 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -273,12 +276,36 @@ class Canvas:
     def setAuthor(self, author):
         self._doc.setAuthor(author)
 
-    def addOutlineEntry0(self, title, key, level=1):
+    def addOutlineEntry0(self, title, key, level=0):
         """Adds a new entry to the outline.  If not specified,
         this gos at the top level.  If specified, it must be
-        no more than 1 greater thsan the current outline level."""
+        no more than 1 greater than the current outline level.
+        
+        Example
+           c.addOutlineEntry0("first section", "section1")
+           c.addOutlineEntry0("introduction", "s1s1", 1)
+           c.addOutlineEntry0("body", "s1s2", 1)
+           c.addOutlineEntry0("detail1", "s1s2s1", 2)
+           c.addOutlineEntry0("detail2", "s1s2s2", 2)
+           c.addOutlineEntry0("conclusion", "s1s3", 1)
+           c.addOutlineEntry0("further reading", "s1s3s1", 2)
+           c.addOutlineEntry0("second section", "section1")
+           c.addOutlineEntry0("introduction", "s2s1", 1)
+           c.addOutlineEntry0("body", "s2s2", 1)
+           c.addOutlineEntry0("detail1", "s2s2s1", 2)
+           c.addOutlineEntry0("detail2", "s2s2s2", 2)
+           c.addOutlineEntry0("conclusion", "s2s3", 1)
+           c.addOutlineEntry0("further reading", "s2s3s1", 2)
+           
+        note that you can jump from level 5 to level 3 but not
+        from 3 to 5: instead you need to provide all intervening
+        levels going down (4 in this case).  Note that titles can
+        collide but keys cannot.
+        
+        """
         #to be completed
-        self._outlines.append(title)
+        #self._outlines.append(title)
+        self._doc.outline.addOutlineEntry(key, level, title)
         
         
     def setOutlineNames0(self, *nametree):
@@ -416,6 +443,10 @@ class Canvas:
         self._doc.addForm(name, form)
         self._restartAccumulators()
         
+    def forceCodeInsert0(self, code):
+        """I know a whole lot about PDF and I want to add a bunch of code I know will work..."""
+        self._code.append(code)
+        
     def textAnnotation0(self, contents, Rect=None, addtopage=1, name=None, **kw):
         if not Rect:
             (w,h) = self._pagesize# default to whole page (?)
@@ -465,7 +496,7 @@ class Canvas:
         if len(self._code):  
             self.showPage()
 
-        self._doc.SaveToFile(self._filename)
+        self._doc.SaveToFile(self._filename, self)
         if self._verbosity > 0:
             print 'saved', self._filename
 
