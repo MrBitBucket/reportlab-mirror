@@ -3,12 +3,8 @@
 <presentation filename="pythonpoint.pdf" pageDuration="3">
   <stylesheet module="standard" function="getParagraphStyles"/>
   <title>PythonPoint Demonstration</title>
-  <author>
-        Andy Robinson
-    </author>
-  <subject>
-        Reportlab Sample Applications
-    </subject>
+  <author>Andy Robinson</author>
+  <subject>Reportlab Sample Applications</subject>
   <section name="Main">
     <!-- any graphics in the section go on all its pages as a backdrop -->
     <rectangle height="555" fill="ReportLabBlue" x="20" width="96" y="20"/>
