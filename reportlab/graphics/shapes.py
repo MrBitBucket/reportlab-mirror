@@ -285,6 +285,7 @@ class Shape:
         """This adds the ability to check every attribite assignment as it is made.
         It slows down shapes but is a big help when developing. It does not
         get defined if config.shapeChecking = 0"""
+        #print 'shapeChecking = 1, defining setattr'
         def __setattr__(self, attr, value):
             """By default we verify.  This could be off
             in some parallel base classes."""
@@ -300,6 +301,8 @@ class Shape:
             #if we are still here, set it.
             self.__dict__[attr] = value
             #print 'set %s.%s = %s' % (self.__class__.__name__, attr, value)
+    #else:
+    #    print 'shapeChecking = 0, not defining setattr'
 
 class Drawing(Shape, Flowable):
     """Outermost container; the thing a renderer works on.

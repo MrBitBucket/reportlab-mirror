@@ -89,7 +89,7 @@ def getDrawing2():
     D.add(Line(50,100, 300,50,
                strokeColor=colors.blue,
                strokeWidth=0.5*cm,
-               strokeDashArray=[1, 10, 20],
+               strokeDashArray=[5, 10, 15],
                ))
 
     #x = 1/0 # Comment this to see the actual drawing!
@@ -118,7 +118,6 @@ def getDrawing3():
                  'Hello World',
                  fontName='Courier',
                  fontSize=36))
-
     return D
 
 
@@ -187,6 +186,7 @@ def getDrawing6():
 
     D.add(Rect(120,150, 60,30,
                strokeWidth=10,
+               strokeColor=colors.yellow,
                fillColor=purple))  #square corners
     
     D.add(Rect(220, 150, 60, 30, 10, 10, fillColor=purple))  #round corners    
@@ -283,6 +283,37 @@ def getDrawing8():
     D.add(fourthAxisGroup)
 
     
+    return D
+
+def getDrawing9():
+    """This tests rotated strings
+
+    Some renderers will have a separate mechanism for font drawing.  This test
+    just makes sure strings get transformed the same way as regular graphics."""
+    D = Drawing(400, 200)
+
+    fontName = "Times-Roman"
+    fontSize = 12
+    text = "I should be totally horizontal and enclosed in a box"
+    textWidth = stringWidth(text, fontName, fontSize)
+
+
+    g1 = Group(
+            String(20, 20, text, fontName=fontName, fontSize = fontSize),
+            Rect(18, 18, textWidth + 4, fontSize + 4, fillColor=None)
+            )
+    D.add(g1)
+
+    text = "I should slope up by 15 degrees, so my right end is higher than my left"
+    textWidth = stringWidth(text, fontName, fontSize)
+    g2 = Group(
+            String(20, 20, text, fontName=fontName, fontSize = fontSize),
+            Rect(18, 18, textWidth + 4, fontSize + 4, fillColor=None)
+            )
+    g2.translate(0, 50)
+    g2.rotate(15)
+    D.add(g2)
+
     return D
 
 def getAllFunctionDrawingNames():

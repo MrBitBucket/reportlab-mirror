@@ -135,7 +135,7 @@ def testStateTracker():
 
 
 class Renderer:
-    """Virtual superclass for Pingo renderers."""
+    """Virtual superclass for graphics renderers."""
 
     def __init__(self):
         self._tracker = StateTracker()
@@ -188,7 +188,7 @@ class Renderer:
             #print "drawWedge"
             self.drawWedge(node)
         else:
-            print 'DrawingError','Unexpected element %s in pingo drawing!' % str(node)
+            print 'DrawingError','Unexpected element %s in drawing!' % str(node)
         #print "done dispatching"
             
     _restores = {'stroke':'_stroke','stroke_width': '_lineWidth','stroke_linecap':'_lineCap',
