@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.15 2001/10/10 13:55:25 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.15 2001/10/10 13:55:25 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.16 2001/11/13 14:27:08 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.16 2001/11/13 14:27:08 rgbecker Exp $ '''
 """Usage:
 	from reportlab.graphics import renderPM
 	renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -247,6 +247,20 @@ class PMCanvas:
 		s = StringIO()
 		self.saveToFile(s,fmt=fmt)
 		return s.getvalue()
+
+	def _saveToBMP(self,f):
+		'''
+		Niki Spahiev, <niki@vintech.bg>, asserts that this is a respectable way to get BMP without PIL
+		f is a file like object to which the BMP is written
+		'''
+		import struct
+		gs = self._gs
+		pix, width, height = gs.pixBuf, gs.width, gs.height
+		f.write(struct.pack('=2sLLLLLLhh24x','BM',len(pix)+54,0,54,40,width,height,1,24))
+		rowb = width * 3
+		for o in range(len(pix),0,-rowb):
+			f.write(pix[o-rowb:o])
+		f.write( '\0' * 14 )
 
 	def setFont(self,fontName,fontSize):
 		_setFont(self._gs,fontName,fontSize)
