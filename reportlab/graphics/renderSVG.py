@@ -104,7 +104,7 @@ class SVGCanvas:
             self._font = self._fontSize = self._lineCap = \
             self._lineJoin = self._color = None
 
-        implementation = getDOMImplementation()
+        implementation = getDOMImplementation('minidom')
         self.doc = implementation.createDocument(None, "svg", None)
         self.svg = self.doc.documentElement
         self.svg.setAttribute("width", str(size[0]))
