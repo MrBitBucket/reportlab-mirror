@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.72 2002/11/04 16:17:08 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.72 2002/11/04 16:17:08 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.73 2002/11/06 11:30:57 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.73 2002/11/06 11:30:57 rgbecker Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -227,18 +227,20 @@ class PDFDocument:
         self.Reference(self.info)
         outline = self.outline
         outline.prepare(self, canvas)
-        from types import StringType
-        if type(filename) is StringType:
-            myfile = 1
-            f = open(filename, "wb")
-        else:
+        if callable(getattr(filename, "write",None)):
             myfile = 0
-            f = filename # IT BETTER BE A FILE-LIKE OBJECT!
+            f = filename
+            filename = str(getattr(filename,'name',''))
+        else :
+            myfile = 1
+            filename = str(filename)
+            f = open(filename, "wb")
         txt = self.format()
         f.write(txt)
         if myfile:
             f.close()
             markfilename(filename) # do platform specific file junk
+        if getattr(canvas,'_verbosity',None): print 'saved', filename
 
     def inPage(self):
         """specify the current object as a page (enables reference binding and other page features)"""
