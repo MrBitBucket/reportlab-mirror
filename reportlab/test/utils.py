@@ -194,10 +194,11 @@ class ScriptThatMakesFileTest(unittest.TestCase):
     """Runs a Python script at OS level, expecting it to produce a file.
 
     It CDs to the working directory to run the script."""
-    def __init__(self, scriptDir, scriptName, outFileName):
+    def __init__(self, scriptDir, scriptName, outFileName, verbose=0):
         self.scriptDir = scriptDir
         self.scriptName = scriptName
         self.outFileName = outFileName
+        self.verbose = verbose
         # normally, each instance is told which method to run)
         unittest.TestCase.__init__(self)
         
@@ -222,7 +223,8 @@ class ScriptThatMakesFileTest(unittest.TestCase):
     def runTest(self):
         p = os.popen('%s %s' % (sys.executable,self.scriptName),'r')
         out = p.read()
-        print out
+        if self.verbose:
+            print out
         status = p.close()
         assert os.path.isfile(self.outFileName), "File %s not created!" % self.outFileName
         
