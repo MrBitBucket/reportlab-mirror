@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.18  2000/08/17 15:50:37  rgbecker
+#	Various brutal changes to paragraph, canvas and textobject for speed/size
+#
 #	Revision 1.17  2000/07/14 10:29:50  rgbecker
 #	The Paragraph.split method was wrongly assuming that the firstLineIndent
 #	should reset to zero. It should always reset to leftIndent!
-#
+#	
 #	Revision 1.16  2000/07/03 15:39:51  rgbecker
 #	Documentation fixes
 #	
@@ -83,7 +86,7 @@
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.17 2000/07/14 10:29:50 rgbecker Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.18 2000/08/17 15:50:37 rgbecker Exp $ '''
 import string
 import types
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -107,24 +110,21 @@ def cleanBlockQuotedText(text):
 	return string.join(trimmed_lines, ' ')
 
 def	_leftDrawParaLine( tx, offset, extraspace, words, last=0):
-	tx.moveCursor(offset, 0)
+	tx.setXPos(offset)
 	tx._textOut(string.join(words),1)
-	tx.moveCursor(-offset, 0)
 
 def	_centerDrawParaLine( tx, offset, extraspace, words, last=0):
 	m = offset + 0.5 * extraspace
-	tx.moveCursor(m, 0)
+	tx.setXPos(m)
 	tx._textOut(string.join(words),1)
-	tx.moveCursor(-m, 0)
 
 def	_rightDrawParaLine( tx, offset, extraspace, words, last=0):
 	m = offset + extraspace
-	tx.moveCursor(m, 0)
+	tx.setXPos(m)
 	tx._textOut(string.join(words),1)
-	tx.moveCursor(-m, 0)
 
 def	_justifyDrawParaLine( tx, offset, extraspace, words, last=0):
-	tx.moveCursor(offset, 0)
+	tx.setXPos(offset)
 	text  = string.join(words)
 	if last:
 		#last one, left align
@@ -133,7 +133,6 @@ def	_justifyDrawParaLine( tx, offset, extraspace, words, last=0):
 		tx.setWordSpace(extraspace / float(len(words)-1))
 		tx._textOut(text,1)
 		tx.setWordSpace(0)
-	tx.moveCursor(-offset, 0)
 
 def	_putFragLine(tx,words):
 	for f in words:
@@ -148,34 +147,29 @@ def	_putFragLine(tx,words):
 		tx._textOut(f.text,f is words[-1])	# cheap textOut
 
 def	_leftDrawParaLineX( tx, offset, line, last=0):
-	tx.moveCursor(offset, 0)
+	tx.setXPos(offset)
 	_putFragLine(tx, line.words)
-	tx.moveCursor(-offset, 0)
 
 def	_centerDrawParaLineX( tx, offset, line, last=0):
 	m = offset+0.5*line.extraSpace
-	tx.moveCursor(m, 0)
+	tx.setXPos(m)
 	_putFragLine(tx, line.words)
-	tx.moveCursor(-m, 0)
 
 def	_rightDrawParaLineX( tx, offset, line, last=0):
 	m = offset+line.extraSpace
-	tx.moveCursor(m, 0)
+	tx.setXPos(m)
 	_putFragLine(tx, line.words)
-	tx.moveCursor(-m, 0)
 
 def	_justifyDrawParaLineX( tx, offset, line, last=0):
-	tx.moveCursor(offset, 0)
 	if last:
 		#last one, left align
-		tx.moveCursor(offset, 0)
+		tx.setXPos(offset)
 		_putFragLine(tx, line.words)
-		tx.moveCursor(-offset, 0)
 	else:
+		tx.setXPos(offset)
 		tx.setWordSpace(line.extraSpace / float(line.wordCount-1))
 		_putFragLine(tx, line.words)
 		tx.setWordSpace(0)
-	tx.moveCursor(-offset, 0)
 
 def	_sameFrag(f,g):
 	'returns 1 if two frags map out the same'
@@ -462,7 +456,8 @@ class Paragraph(Flowable):
 						words.append(f.clone())
 						words[-1].text = nText
 					else:
-						words[-1].text = words[-1].text + ' ' + nText
+						if nText!='' and nText[0]!=' ':
+							words[-1].text = words[-1].text + ' ' + nText
 
 					for i in w[2:]:
 						f = i[0].clone()
@@ -626,6 +621,21 @@ if __name__=='__main__':	#NORUNTESTS
 				print "%d:'%s'"%(w,words[w].text),
 			print
 
+	def dumpParagraphFrags(P):
+		print 'dumpParagraphLines(%s)' % str(P)
+		frags = P.frags
+		n =len(frags)
+		for l in range(n):
+			print "frag%d: '%s'" % (l, frags[l].text)
+	
+		l = 0
+		for W in _getFragWords(frags):
+			print "fragword%d: size=%d" % (l, W[0]),
+			for w in W[1:]:
+				print "'%s'" % w[1],
+			print
+			l = l + 1
+
 	from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 	styleSheet = getSampleStyleSheet()
 	B = styleSheet['BodyText']
@@ -639,10 +649,11 @@ combination of the <font name=courier color=green>CMY</font> pigments generally 
 black -- instead producing a muddy color -- so, to get black printers
 don't use the <font name=courier color=green>CMY</font> pigments but use a direct black ink.  Because
 <font name=courier color=green>CMYK</font> maps more directly to the way printer hardware works it may
-be the case that colors specified in <font name=courier color=green>CMYK</font> will provide better fidelity
+be the case that &amp;| &amp; | colors specified in <font name=courier color=green>CMYK</font> will provide better fidelity
 and better control when printed.
 '''
 	P=Paragraph(text,style)
+	dumpParagraphFrags(P)
 	aW, aH = 456.0, 42.8
 	w,h = P.wrap(aW, aH)
 	dumpParagraphLines(P)

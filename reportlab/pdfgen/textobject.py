@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: textobject.py,v $
+#	Revision 1.16  2000/08/17 15:50:36  rgbecker
+#	Various brutal changes to paragraph, canvas and textobject for speed/size
+#
 #	Revision 1.15  2000/08/01 11:28:33  rgbecker
 #	Converted to using fp_str
-#
+#	
 #	Revision 1.14  2000/08/01 05:22:23  andy_robinson
 #	Updated old doc string
 #	
@@ -75,7 +78,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: textobject.py,v 1.15 2000/08/01 11:28:33 rgbecker Exp $ '''
+__version__=''' $Id: textobject.py,v 1.16 2000/08/17 15:50:36 rgbecker Exp $ '''
 __doc__=""" 
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -139,7 +142,25 @@ class PDFTextObject:
         """Moves to a point dx, dy away from the start of the
         current line - NOT from the current point! So if
         you call it in mid-sentence, watch out."""
-        if dx!=0 or dy!=0: self._code.append('%s %s Td' % (dx, -dy))
+        if self._code[-1][-3:]==' Td':
+            L = string.split(self._code[-1])
+            if len(L)==3:
+                del self._code[-1]
+            else:
+                self._code[-1] = string.join(L[:-4])
+        if dx<>0 or dy<>0: self._code.append('%s Td' % fp_str(dx, -dy))
+ 
+    def setXPos(self, dx):
+        """Moves to a point dx away from the start of the
+        current line - NOT from the current point! So if
+        you call it in mid-sentence, watch out."""
+        if self._code[-1][-3:]==' Td':
+            L = string.split(self._code[-1])
+            if len(L)==3:
+                del self._code[-1]
+            else:
+                self._code[-1] = string.join(L[:-4])
+        if dx<>0: self._code.append('%s 0 Td' % fp_str(dx))
 
     def getCursor(self):
         """Returns current text position relative to the last origin."""

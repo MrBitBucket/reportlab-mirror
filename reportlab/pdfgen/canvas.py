@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.47  2000/08/17 15:50:36  rgbecker
+#	Various brutal changes to paragraph, canvas and textobject for speed/size
+#
 #	Revision 1.46  2000/08/01 11:28:33  rgbecker
 #	Converted to using fp_str
-#
+#	
 #	Revision 1.45  2000/07/31 12:03:23  rgbecker
 #	B Herzog fix to dimension formats
 #	
@@ -168,7 +171,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.46 2000/08/01 11:28:33 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.47 2000/08/17 15:50:36 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -701,11 +704,17 @@ class Canvas:
         """adjoin a mathematical transform to the current graphics state matrix.
            Not recommended for beginners."""
         #"""How can Python track this?"""
-        a0,b0,c0,d0,e0,f0 = self._currentMatrix
-        self._currentMatrix = (a0*a+c0*b,    b0*a+d0*b,
-                               a0*c+c0*d,    b0*c+d0*d,
-                               a0*e+c0*f+e0, b0*e+d0*f+f0)
-        self._code.append('%s cm' % fp_str(a,b,c,d,e,f))
+        #a0,b0,c0,d0,e0,f0 = self._currentMatrix
+        #self._currentMatrix = (a0*a+c0*b,    b0*a+d0*b,
+        #                       a0*c+c0*d,    b0*c+d0*d,
+        #                       a0*e+c0*f+e0, b0*e+d0*f+f0)
+        if self._code[-1][-3:]==' cm':
+            L = string.split(self._code[-1])
+            a0, b0, c0, d0, e0, f0 = map(float,L[-7:-1])
+            s = len(L)>7 and string.join(L)+ ' %s cm' or '%s cm'
+            self._code[-1] = s % fp_str(a0*a+c0*b,b0*a+d0*b,a0*c+c0*d,b0*c+d0*d,a0*e+c0*f+e0,b0*e+d0*f+f0)
+        else:
+            self._code.append('%s cm' % fp_str(a,b,c,d,e,f))
 
     def translate(self, dx, dy):
         """move the origin from the current (0,0) point to the (dx,dy) point
@@ -1227,12 +1236,8 @@ class Canvas:
             height = imgheight
         
         # this says where and how big to draw it
-        #self._code.append('ET')
-        #self._code.append('q %0.2f 0 0 %0.2f %0.2f %0.2f cm' % (width, height, x, y+height))
-        if self.bottomup:
-            self._code.append('q %s 0 0 %s cm' % (fp_str(width), fp_str(height, x, y)))
-        else:
-            self._code.append('q %s 0 0 %s cm' % (fp_str(width), fp_str(height, x, y+height)))
+        if not self.bottomup: y = y+height
+        self._code.append('q %s 0 0 %s cm' % (fp_str(width), fp_str(height, x, y)))
 
         # self._code.extend(imagedata) if >=python-1.5.2
         for line in imagedata:
