@@ -1,6 +1,6 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/flags.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.14 2001/10/05 16:32:20 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.15 2001/10/11 16:15:10 rgbecker Exp $
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 
@@ -177,7 +177,7 @@ class Flag(_Symbol):
 		f = self._cache.get(kind)
 		if not f:
 			f = getattr(self,'_Flag_'+kind)()
-			self._cache[kind] = f
+			self._cache[kind] = f._explode()
 		return self._borderDraw(f)
 
 	def clone(self):
