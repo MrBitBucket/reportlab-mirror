@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.17  2000/04/28 09:08:42  rgbecker
+#	Fix typo in SaveToFile
+#
 #	Revision 1.16  2000/04/27 18:11:56  rgbecker
 #	Dinu's SaveFile patch
-#
+#	
 #	Revision 1.15  2000/04/25 20:19:07  aaron_watters
 #	added support for closed outline entries
 #	
@@ -70,7 +73,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.16 2000/04/27 18:11:56 rgbecker Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.17 2000/04/28 09:08:42 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -280,10 +283,10 @@ class PDFDocument:
         the file.  Keep track of the file position at each point for
         use in the index at the end"""
 
-        if type(f)==type(''):
+        if type(filename)==type(''):
             f = open(filename, 'wb')
         else:
-            f = filename
+            f = filename #assume it's a file type object
 
         i = 1
         self.xref = []
