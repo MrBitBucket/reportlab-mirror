@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.90 2003/04/17 13:25:16 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.91 2003/04/29 17:12:18 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.90 2003/04/17 13:25:16 rgbecker Exp $ '''
+__version__=''' $Id: shapes.py,v 1.91 2003/04/29 17:12:18 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -627,13 +627,13 @@ class Drawing(Group, Flowable):
 
     def asString(self, format, verbose=None):
         """Converts to an 8 bit string in given format."""
-        assert format in ['pdf','ps','eps','gif','png','jpg','jpeg','tiff','tif','py'], 'Unknown file format "%s"' % format
+        assert format in ['pdf','ps','eps','gif','png','jpg','jpeg','bmp','ppm','tiff','tif','py','pict','pct'], 'Unknown file format "%s"' % format
         from reportlab import rl_config
         #verbose = verbose is not None and (verbose,) or (getattr(self,'verbose',verbose),)[0]
         if format == 'pdf':
             from reportlab.graphics import renderPDF
             return renderPDF.drawToString(self)
-        elif format in ['gif','png','tif','jpg']:
+        elif format in ['gif','png','tif','jpg','pct','pict','bmp','ppm']:
             from reportlab.graphics import renderPM
             return renderPM.drawToString(self, fmt=format)
         elif format == 'eps':
@@ -646,7 +646,6 @@ class Drawing(Group, Flowable):
             return renderPS.drawToString(self, showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
         elif format == 'py':
             return self._renderPy()
-
 
 class _DrawingEditorMixin:
     '''This is a mixin to provide functionality for edited drawings'''
