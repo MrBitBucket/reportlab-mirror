@@ -84,7 +84,7 @@ so you can use expressions like""")
 
 eg("""from reportlab.lib.pagesizes import letter, A4
 myCanvas = Canvas('myfile.pdf', pagesize=letter)
-width, height = pagesize.letter  #keep for later
+width, height = letter  #keep for later
 """)
 
 pencilnote()
