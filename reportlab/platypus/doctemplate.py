@@ -141,6 +141,13 @@ class _FrameBreak(ActionFlowable):
 FrameBreak = _FrameBreak('frameEnd')
 PageBegin = ActionFlowable('pageBegin')
 
+def _evalMeasurement(n):
+    if type(n) is type(''):
+        from paraparser import _num
+        n = _num(n)
+        if type(n) is type(()): n = n[1]
+    return n
+
 class Indenter(ActionFlowable):
     """Increases or decreases left and right margins of frame.
 
@@ -149,8 +156,8 @@ class Indenter(ActionFlowable):
     """
 
     def __init__(self, left=0, right=0):
-        self.left = left
-        self.right = right
+        self.left = _evalMeasurement(left)
+        self.right = _evalMeasurement(right)
 
     def apply(self, doc):
         doc.frame._leftExtraIndent = doc.frame._leftExtraIndent + self.left

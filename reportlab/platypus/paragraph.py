@@ -255,11 +255,11 @@ def _drawBullet(canvas, offset, cur_y, bulletText, style):
             tx2.setFillColor(f.textColor)
             tx2.textOut(f.text)
 
+    canvas.drawText(tx2)
     #AR making definition lists a bit less ugly
     #bulletEnd = tx2.getX()
     bulletEnd = tx2.getX() + style.bulletFontSize * 0.6
-    offset = max(offset, bulletEnd - style.leftIndent)
-    canvas.drawText(tx2)
+    offset = max(offset,bulletEnd - style.leftIndent)
     return offset
 
 def _handleBulletWidth(bulletText,style,maxWidths):
@@ -512,7 +512,7 @@ class Paragraph(Flowable):
         #for bullets, work out width and ensure we wrap the right amount onto line one
         _handleBulletWidth(self.bulletText,style,maxWidths)
 
-        maxWidth = maxWidths[lineno]
+        maxWidth = maxWidths[0]
 
         self.height = 0
         frags = self.frags

@@ -10,5 +10,5 @@ from reportlab.platypus.paraparser import ParaFrag
 from reportlab.platypus.tables import Table, TableStyle, CellStyle
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate, PageTemplate, ActionFlowable, \
-                        SimpleDocTemplate, FrameBreak, PageBegin
+                        SimpleDocTemplate, FrameBreak, PageBegin, Indenter
 from xpreformatted import XPreformatted
