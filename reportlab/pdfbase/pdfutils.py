@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfutils.py,v $
+#	Revision 1.9  2000/08/01 10:56:24  rgbecker
+#	moved accelerators to lib
+#
 #	Revision 1.8  2000/07/05 12:20:27  rgbecker
 #	Ascii85 fixes/additions
-#
+#	
 #	Revision 1.7  2000/06/30 15:29:59  rgbecker
 #	Allow for non-caching of images
 #	
@@ -54,7 +57,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfutils.py,v 1.8 2000/07/05 12:20:27 rgbecker Exp $ '''
+__version__=''' $Id: pdfutils.py,v 1.9 2000/08/01 10:56:24 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -206,8 +209,7 @@ def _AsciiHexTest(text='What is the average velocity of a sparrow?'):
         print 'Failed!'
     
 try:
-    import _streams
-    _AsciiBase85Encode = _streams.ASCII85Encode
+    from reportlab.lib._rl_accel import _AsciiBase85Encode
 except ImportError:
     def _AsciiBase85Encode(input):
         """This is a compact encoding used for binary data within

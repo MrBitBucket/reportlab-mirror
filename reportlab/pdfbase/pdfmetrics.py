@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfmetrics.py,v $
+#	Revision 1.9  2000/08/01 10:56:24  rgbecker
+#	moved accelerators to lib
+#
 #	Revision 1.8  2000/07/26 12:01:10  rgbecker
 #	Accelerator rearrangements
-#
+#	
 #	Revision 1.7  2000/07/19 19:06:39  rgbecker
 #	Added _pdfmetrics.c
 #	
@@ -52,7 +55,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfmetrics.py,v 1.8 2000/07/26 12:01:10 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.9 2000/08/01 10:56:24 rgbecker Exp $ '''
 __doc__="""This contains pre-canned text metrics for the PDFgen package, and may also
 be used for any other PIDDLE back ends or packages which use the standard
 Type 1 postscript fonts.
@@ -127,8 +130,7 @@ widths={
 	}
 ascent_descent = {'courier': (629, -157), 'courier-bold': (626, -142), 'courier-boldoblique': (626, -142), 'courier-oblique': (629, -157), 'helvetica': (718, -207), 'helvetica-bold': (718, -207), 'helvetica-boldoblique': (718, -207), 'helvetica-oblique': (718, -207), 'symbol': (0, 0), 'times-bold': (676, -205), 'times-bolditalic': (699, -205), 'times-italic': (683, -205), 'times-roman': (683, -217), 'zapfdingbats': (0, 0)}
 try:
-	import _pdfmetrics
-	_stringWidth = _pdfmetrics.stringWidth
+	from reportlab.lib._rl_accel import _stringWidth
 except ImportError:
 	_stringWidth = None
 
