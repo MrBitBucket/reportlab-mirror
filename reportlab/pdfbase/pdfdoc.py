@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.82 2003/07/08 12:51:39 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.82 2003/07/08 12:51:39 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.83 2003/07/08 22:15:17 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.83 2003/07/08 22:15:17 rgbecker Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -165,8 +165,10 @@ class PDFDocument:
         sig = self.signature = md5.new()
         sig.update("a reportlab document")
         if not self.invariant:
-            import time
-            sig.update(repr(time.time())) # initialize with timestamp digest
+            cat = _getTimeStamp()
+        else:
+            cat = 946684800.0
+        sig.update(repr(cat)) # initialize with timestamp digest
         # mapping of internal identifier ("Page001") to PDF objectnumber and generation number (34, 0)
         self.idToObjectNumberAndVersion = {}
         # mapping of internal identifier ("Page001") to PDF object (PDFPage instance)
@@ -1411,19 +1413,23 @@ class PDFRectangle:
         A = PDFArray([self.llx, self.lly, self.ulx, self.ury])
         return format(A, document)
 
-_NOW=None
+_NOWT=None
+def _getTimeStamp():
+    global _NOWT
+    if not _NOWT:
+        import time
+        _NOWT = time.time()
+    return _NOWT
+
 class PDFDate:
     # gmt offset not yet suppported
     def __init__(self, yyyy=None, mm=None, dd=None, hh=None, m=None, s=None, invariant=rl_config.invariant):
         if None in (yyyy, mm, dd, hh, m, s):
             if invariant:
-                now = 1900,01,01,00,00,00,0
+                now = (2000,01,01,00,00,00,0)
             else:
-                global _NOW
-                if _NOW is None:
-                    import time
-                    _NOW = tuple(time.localtime(time.time())[:6])
-                now = _NOW
+                import time
+                now = tuple(time.localtime(_getTimeStamp())[:6])
         if yyyy is None: yyyy=now[0]
         if mm is None: mm=now[1]
         if dd is None: dd=now[2]
