@@ -31,6 +31,7 @@ class BarChartProperties(PropHolder):
         fillColor = AttrMapValue(isColorOrNone, desc='Color of the bar interior area.'),
         strokeWidth = AttrMapValue(isNumber, desc='Width of the bar border.'),
         symbol = AttrMapValue(None, desc='A widget to be used instead of a normal bar.'),
+        text = AttrMapValue(isString, desc='A text to be associated with a bar (eg seriesname)'),
         )
 
     def __init__(self):

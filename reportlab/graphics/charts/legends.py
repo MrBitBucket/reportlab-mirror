@@ -416,10 +416,37 @@ class SmartSwatch(PropHolder):
         self.obj = self.style = None
 
 class SwatchCollection(TypedPropertyCollection):
+
+    def __init__(self):
+        TypedPropertyCollection.__init__(self,SmartSwatch)
+
     def count(self):
         obj = self.obj
         if obj is None: return 5
         count = obj._seriesCount
+
+    def wKlassFactory(self,Klass):
+        class WKlass(Klass):
+            def __getattr__(self,name):
+                try:
+                    return self.__class__.__bases__[0].__getattr__(self,name)
+                except:
+                    if self._index and self._parent._children.has_key(self._index) \
+                        and self._parent._children[self._index].__dict__.has_key(name):
+                        return getattr(self._parent._children[self._index],name)
+                    v = getattr(self._parent,name)
+                    if isAuto(v):
+                        return self._parent.getAutoValue(self,name)
+                    return v
+        return WKlass
+
+    def __iter__(self):
+        self.__iter = -1
+
+    def next(self):
+        self.__iter += 1
+        if self.__iter>self.count(): raise StopIteration
+        return self[self.__iter]
 
 class SmartLegend(PlotArea):
     """A simple legend containing swatches and strings.
@@ -453,7 +480,7 @@ class SmartLegend(PlotArea):
         # Max. number of items per column.
         self.columnMaximum = 3
 
-        swatches = self.swatches = TypedPropertyCollection(SmartSwatch)
+        swatches = self.swatches = SwatchCollection()
 
         # Color/name pairs.
         for color, text in [(colors.red, "red"),
@@ -467,91 +494,96 @@ class SmartLegend(PlotArea):
     def _calculateMaxWidth(self, colorNamePairs):
         "Calculate the maximum width of some given strings."
         m = 0
-        for t in map(lambda p:str(p[1]),colorNamePairs):
+        for s in self.swatches:
+            if not s.visible: continue
+            t = s.text
             if t:
-                for s in string.split(t,'\n'):
-                    m = max(m,stringWidth(s, self.fontName, self.fontSize))
+                for s in t.split('\n'):
+                    m = max(m,stringWidth(s, s.fontName, s.fontSize))
         return m
 
     def _calcHeight(self):
-        deltay = self.deltay
-        dy = self.dy
-        thisy = upperlefty = self.y - dy
-        ascent=getFont(self.fontName).face.ascent/1000.
-        if ascent==0: ascent=0.718 # default (from helvetica)
-        leading = self.fontSize*1.2
         columnCount = 0
         count = 0
-        lowy = upperlefty
-        for unused, name in colorNamePairs:
-            T = string.split(name and str(name) or '','\n')
+        lowy = upperlefty = 0
+        deltay = self.deltay
+        for s in self.swatches:
+            if not count:
+                thisy = self.y - s.dy
+                if not columnCount: upperlefty = thisy
+                else: upperlefty = max(upperlefty,thisy)
+            dy = s.dy
+            T = (text and str(text) or '').split('\n')
             S = []
             # thisy+dy/2 = y+leading/2
+            ascent = getFont(s.fontName).face.ascent/1000.
+            if ascent==0: ascent=0.718 # default (from helvetica)
+            ascent *= fontSize
+            leading = s.fontSize*1.2
             y = thisy+(dy-ascent)*0.5-leading
             newy = thisy-max(deltay,len(S)*leading)
-            lowy = min(y,newy)
+            lowy = min(lowy,y,newy)
             if count == columnMaximum-1:
                 count = 0
-                thisy = upperlefty
                 columnCount = columnCount + 1
             else:
                 thisy = newy
                 count = count+1
         return upperlefty - lowy
 
-    def setupFromChart(self):
-        self._adapter = self._adapters[self.obj]
-
     def draw(self):
         g = Group()
-        thisx = upperleftx = self.x
-        thisy = upperlefty = self.y - self.dy
-        dx, dy, alignment, columnMaximum = self.dx, self.dy, self.alignment, self.columnMaximum
-        deltax, deltay, dxTextSpace = self.deltax, self.deltay, self.dxTextSpace
-        fontName, fontSize, fillColor = self.fontName, self.fontSize, self.fillColor
-        strokeWidth, strokeColor = self.strokeWidth, self.strokeColor
-        leading = fontSize*1.2
-        if not deltay:
-            deltay = max(dy,leading)+self.autoYPadding
-        if not deltax:
-            maxWidth = self._calculateMaxWidth(colorNamePairs)
-            deltax = maxWidth+dx+dxTextSpace+self.autoXPadding
-        else:
-            if alignment=='left': maxWidth = self._calculateMaxWidth(colorNamePairs)
-
-        def gAdd(t,g=g,fontName=fontName,fontSize=fontSize,fillColor=fillColor):
-            t.fontName = fontName
-            t.fontSize = fontSize
-            t.fillColor = fillColor
-            return g.add(t)
-
-        ascent=getFont(fontName).face.ascent/1000.
-        if ascent==0: ascent=0.718 # default (from helvetica)
-        ascent=ascent*fontSize # normalize
-
         columnCount = 0
         count = 0
+        columnMaximum = self.columnMaximum
+        deltax = self.deltax
+        deltay = self.deltay
         callout = getattr(self,'callout',None)
-        for col, name in colorNamePairs:
-            T = string.split(name and str(name) or '','\n')
+        for s in self.swatches:
+            dx = s.dx
+            dy = s.dy
+            alignment = s.alignment
+            col = s.fillColor
+            thisx = self.x
+            thisy = self.y - dy
+            if not count: upperlefty = thisy
+            dxTextSpace = s.dxTextSpace
+            fontName = s.fontName
+            fontSize = s.fontSize
+            fillColor = s.fillColor
+            fontColor = s.fontColor
+            strokeWidth = s.strokeWidth
+            strokeColor = s.strokeColor
+            leading = fontSize*1.2
+            if not deltay:
+                deltay = max(dy,leading)+self.autoYPadding
+            if not deltax:
+                maxWidth = self._calculateMaxWidth(colorNamePairs)
+                deltax = maxWidth+dx+dxTextSpace+self.autoXPadding
+            else:
+                if alignment=='left': maxWidth = self._calculateMaxWidth(colorNamePairs)
+            ascent=getFont(fontName).face.ascent/1000.
+            if ascent==0: ascent=0.718          # default (from helvetica)
+            ascent=ascent*fontSize              # normalize
+
+            text = s.text
+            T = (text and str(text) or '').split('\n')
             S = []
             # thisy+dy/2 = y+leading/2
             y = thisy+(dy-ascent)*0.5
-            if callout: callout(self,g,thisx,y,colorNamePairs[count])
+            if callout: callout(self,g,thisx,y,(text,fillColor))
             if alignment == "left":
                 for t in T:
                     # align text to left
-                    s = String(thisx+maxWidth,y,t)
-                    s.textAnchor = "end"
-                    S.append(s)
+                    S.append(String(thisx+maxWidth,y,t,fontName=fontName,fontSize=fontSize,fillColor=fontColor,
+                            textAnchor = "end"))
                     y = y-leading
                 x = thisx+maxWidth+dxTextSpace
             elif alignment == "right":
                 for t in T:
                     # align text to right
-                    s = String(thisx+dx+dxTextSpace, y, t)
-                    s.textAnchor = "start"
-                    S.append(s)
+                    S.append(String(thisx+dx+dxTextSpace,y,t,fontName=fontName,fontSize=fontSize,fillColor=fontColor,
+                            textAnchor = "start"))
                     y = y-leading
                 x = thisx
             else:
@@ -576,18 +608,16 @@ class SmartLegend(PlotArea):
                 except:
                     pass
 
-            map(gAdd,S)
+            map(g.add,S)
 
             if count%columnMaximum == columnMaximum-1:
                 thisx = thisx+deltax
-                thisy = upperlefty
                 columnCount = columnCount + 1
             else:
                 thisy = thisy-max(deltay,len(S)*leading)
             count = count+1
 
         return g
-
 
 def sample1c():
     "Make sample legend."
