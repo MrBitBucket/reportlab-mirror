@@ -14,7 +14,8 @@ __version__ = 0,1
 import sys, os, re, types, string, getopt, pickle
 from string import find, join, split, replace, expandtabs, rstrip
 
-from docpy0 import *
+from reportlab.lib.docpy0 import *
+from reportlab.lib.docpy0 import _reduceDocStringLength
 
 from reportlab.pdfgen import canvas
 from reportlab.lib import inspect
