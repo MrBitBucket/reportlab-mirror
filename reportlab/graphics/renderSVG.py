@@ -7,7 +7,7 @@ objects download the svglib module here:
   http://python.net/~gherman/#svglib
 """
 
-import math, string, cStringIO, types, sys, os
+import math, string, types, sys, os
 from types import StringType
 from operator import getitem
 
@@ -18,6 +18,7 @@ from reportlab.graphics.renderbase import StateTracker, getStateDelta, Renderer
 from reportlab.graphics.shapes import STATE_DEFAULTS, Path, UserNode
 from reportlab.graphics.shapes import * # (only for test0)
 from reportlab import rl_config
+from reportlab.lib.utils import getStringIO
 
 from xml.dom import getDOMImplementation
 
