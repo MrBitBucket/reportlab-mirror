@@ -1,6 +1,5 @@
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfgen import fonts
 from reportlab.test import unittest
 
 class EncodingTestCase(unittest.TestCase):
@@ -14,7 +13,7 @@ class EncodingTestCase(unittest.TestCase):
         c.drawString(100, 700, 'The text below should be in a custom encoding in which all vowels become "z"')
 
         # invent a new language where vowels are replaced with letter 'z'
-        zenc = fonts.Encoding('EncodingWithoutVowels', 'WinAnsiEncoding')
+        zenc = pdfmetrics.Encoding('EncodingWithoutVowels', 'WinAnsiEncoding')
         for ch in 'aeiou':
             zenc[ord(ch)] = 'z'
         for ch in 'AEIOU':
@@ -22,7 +21,7 @@ class EncodingTestCase(unittest.TestCase):
         pdfmetrics.registerEncoding(zenc)
         
         # now we can make a font based on this encoding
-        f = fonts.Font('FontWithoutVowels', 'Helvetica-Oblique', 'EncodingWithoutVowels')
+        f = pdfmetrics.Font('FontWithoutVowels', 'Helvetica-Oblique', 'EncodingWithoutVowels')
         pdfmetrics.registerFont(f)
         
 
@@ -34,20 +33,20 @@ class EncodingTestCase(unittest.TestCase):
         c.drawString(100, 650, "MacRoman encoding lacks a Euro.  We'll make a Mac font with the Euro at #219:")
 
         # WinAnsi Helvetica
-        pdfmetrics.registerFont(fonts.Font('Helvetica-WinAnsi', 'Helvetica-Oblique', 'WinAnsiEncoding'))
+        pdfmetrics.registerFont(pdfmetrics.Font('Helvetica-WinAnsi', 'Helvetica-Oblique', 'WinAnsiEncoding'))
         c.setFont('Helvetica-WinAnsi', 12)
         c.drawString(125, 625, 'WinAnsi with Euro: character 128 = "\200"')
 
-        pdfmetrics.registerFont(fonts.Font('MacHelvNoEuro', 'Helvetica-Oblique', 'MacRomanEncoding'))
+        pdfmetrics.registerFont(pdfmetrics.Font('MacHelvNoEuro', 'Helvetica-Oblique', 'MacRomanEncoding'))
         c.setFont('MacHelvNoEuro', 12)
         c.drawString(125, 600, 'Standard MacRoman, no Euro: Character 219 = "\333"') # oct(219)=0333
 
         # now make our hacked encoding
-        euroMac = fonts.Encoding('MacWithEuro', 'MacRomanEncoding')
+        euroMac = pdfmetrics.Encoding('MacWithEuro', 'MacRomanEncoding')
         euroMac[219] = 'Euro'
         pdfmetrics.registerEncoding(euroMac)
         
-        pdfmetrics.registerFont(fonts.Font('MacHelvWithEuro', 'Helvetica-Oblique', 'MacWithEuro'))
+        pdfmetrics.registerFont(pdfmetrics.Font('MacHelvWithEuro', 'Helvetica-Oblique', 'MacWithEuro'))
 
         c.setFont('MacHelvWithEuro', 12)
         c.drawString(125, 575, 'Hacked MacRoman with Euro: Character 219 = "\333"') # oct(219)=0333
@@ -63,7 +62,7 @@ class EncodingTestCase(unittest.TestCase):
         w = c.stringWidth(sample, 'Helvetica-Oblique', 12)
         c.rect(125, 475, w, 12)
 
-        narrowEnc = fonts.Encoding('m-to-i')
+        narrowEnc = pdfmetrics.Encoding('m-to-i')
         narrowEnc[ord('m')] = 'i'
         narrowEnc[ord('M')] = 'I'
         pdfmetrics.registerEncoding(narrowEnc)

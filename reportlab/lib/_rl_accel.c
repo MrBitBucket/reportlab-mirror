@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.12 2001/03/22 19:21:47 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.13 2001/04/20 16:14:32 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.12 2001/03/22 19:21:47 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.13 2001/04/20 16:14:32 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -25,6 +25,11 @@ static __version__=" $Id: _rl_accel.c,v 1.12 2001/03/22 19:21:47 rgbecker Exp $ 
 #endif
 #define VERSION "0.31"
 #define MODULE "_rl_accel"
+#ifndef	ATTRDICT
+	#if PY_MAJOR_VERSION>=2
+	#	define ATTRDICT 1
+	#endif
+#endif
 static PyObject *moduleVersion;
 
 typedef struct _fI_t {
@@ -416,6 +421,7 @@ PyObject *_fp_str(PyObject *self, PyObject *args)
 		}
 }
 
+#ifdef	ATTRDICT
 static PyTypeObject _AttrDictType = {
 	PyObject_HEAD_INIT(0)
 	0,								/*ob_size*/
@@ -533,6 +539,7 @@ static PyMappingMethods _AttrDict_as_mapping = {
 	(binaryfunc)_AttrDict_subscript, /*mp_subscript*/
 	(objobjargproc)_AttrDict_ass_sub, /*mp_ass_subscript*/
 };
+#endif
 
 static char *__doc__=
 "_rl_accel contains various accelerated utilities\n\
@@ -544,9 +551,12 @@ static char *__doc__=
 	\n\
 	_AsciiBase85Encode does what is says\n\
 	\n\
-	fp_str converts numeric arguments to a single blank separated string\n\
-	_AttrDict creates a dict object which can do setattr/getattr type things\n\
-";
+	fp_str converts numeric arguments to a single blank separated string\n"
+
+#ifdef	ATTRDICT
+"	_AttrDict creates a dict object which can do setattr/getattr type things\n"
+#endif
+;
 
 static struct PyMethodDef _methods[] = {
 	{"defaultEncoding", _pdfmetrics_defaultEncoding, 1, "defaultEncoding([encoding])\ngets/sets the default encoding."},
@@ -561,7 +571,9 @@ static struct PyMethodDef _methods[] = {
 					"return None to retry or the correct result."},
 	{"_AsciiBase85Encode", _a85_encode, METH_VARARGS, "_AsciiBase85Encode(\".....\") return encoded string"},
 	{"fp_str", _fp_str, METH_VARARGS, "fp_str(a0, a1,...) convert numerics to blank separated string"},
+#ifdef	ATTRDICT
 	{"_AttrDict", _AttrDict, METH_VARARGS, "_AttrDict() create a dict which can use attribute notation"},
+#endif
 	{NULL,		NULL}		/* sentinel */
 	};
 
@@ -571,6 +583,13 @@ void init_rl_accel()
 	PyObject *m, *d, *v;
 	int i=0;
 
+	/*Create the module and add the functions */
+	m = Py_InitModule("_rl_accel", _methods);
+
+	/*Add some symbolic constants to the module */
+	d = PyModule_GetDict(m);
+
+#ifdef	ATTRDICT
 	/*set up our modified dictionary type*/
 	_AttrDictType = PyDict_Type;
 	_AttrDictType.tp_doc = _AttrDict_tp_doc;
@@ -581,18 +600,13 @@ void init_rl_accel()
 	dict_subscript = _AttrDictType.tp_as_mapping->mp_subscript;
 	dict_ass_sub = _AttrDictType.tp_as_mapping->mp_ass_subscript;
 	_AttrDictType.tp_as_mapping = &_AttrDict_as_mapping;
-
-	/*Create the module and add the functions */
-	m = Py_InitModule("_rl_accel", _methods);
-
-	/*Add some symbolic constants to the module */
-	d = PyModule_GetDict(m);
 	v = PyObject_GetAttrString(d,"has_key");
 	_AttrDict_MethodChain[0].methods = mapp_methods;
 	_AttrDict_MethodChain[0].link = &_AttrDict_MethodChain[1];
 	_AttrDict_MethodChain[1].methods = (PyMethodDef*)(((PyCFunctionObject*)v)->m_ml);
 	_AttrDict_MethodChain[1].link = NULL;
 	Py_DECREF(v);
+#endif
 	ErrorObject = PyString_FromString("_rl_accel.error");
 	PyDict_SetItemString(d, "error", ErrorObject);
 	moduleVersion = PyString_FromString(VERSION);

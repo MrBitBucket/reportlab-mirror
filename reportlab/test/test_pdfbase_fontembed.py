@@ -2,7 +2,6 @@ import os
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.test import unittest
-from reportlab.pdfgen import fonts
 
 class EmbeddingTestCase(unittest.TestCase):
     "Make documents with embedded fonts"
@@ -28,7 +27,7 @@ class EmbeddingTestCase(unittest.TestCase):
 
 
         # a normal text font
-        garaFace = fonts.EmbeddedType1Face('GDB_____.AFM','GDB_____.PFB')
+        garaFace = pdfmetrics.EmbeddedType1Face('GDB_____.AFM','GDB_____.PFB')
         faceName = 'AGaramond-Bold'  # pulled from AFM file
         pdfmetrics.registerTypeFace(garaFace)
 
@@ -39,7 +38,7 @@ class EmbeddingTestCase(unittest.TestCase):
         c.drawString(100, 650, 'This should be in AGaramond-Bold')
         
         # one with a custom encoding
-        cartaFace = fonts.EmbeddedType1Face('CR______.AFM','CR______.PFB')
+        cartaFace = pdfmetrics.EmbeddedType1Face('CR______.AFM','CR______.PFB')
         faceName = 'Carta'  # pulled from AFM file
         pdfmetrics.registerTypeFace(cartaFace)
 
