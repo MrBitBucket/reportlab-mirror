@@ -31,16 +31,19 @@
 #
 ###############################################################################
 #	$Log: pdfutils.py,v $
+#	Revision 1.5  2000/03/03 10:53:55  rgbecker
+#	Added missing import glob
+#
 #	Revision 1.4  2000/02/17 02:07:23  rgbecker
 #	Docstring & other fixes
-#
+#	
 #	Revision 1.3  2000/02/15 17:55:59  rgbecker
 #	License text fixes
 #	
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfutils.py,v 1.4 2000/02/17 02:07:23 rgbecker Exp $ '''
+__version__=''' $Id: pdfutils.py,v 1.5 2000/03/03 10:53:55 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -97,7 +100,7 @@ def preProcessImages(spec):
     of image filenames, crunches them all to save time.  Run this
     to save huge amounts of time when repeatedly building image
     documents."""
-    import types
+    import types, glob
     if type(spec) is types.StringType:
         filelist = glob.glob(spec)
     else:  #list or tuple OK
