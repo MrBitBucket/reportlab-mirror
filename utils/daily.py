@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/local/bin/env python
 ###############################################################################
 #
 #	ReportLab Public License Version 1.0
@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.11  2000/04/06 14:08:00  rgbecker
+#	Changed release naming convention
+#
 #	Revision 1.10  2000/04/06 13:01:58  rgbecker
 #	Added import of time
-#
+#	
 #	Revision 1.9  2000/04/06 12:59:48  rgbecker
 #	ext-->pserver for release
 #	
@@ -62,11 +65,11 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.10 2000/04/06 13:01:58 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.11 2000/04/06 14:08:00 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
-import os, sys, string, traceback, re, time
+import os, sys, string, traceback, re
 
 #this is where we extract files etc
 groupdir=os.path.normcase(os.path.normpath('/home/groups/ftp/pub/reportlab'))
@@ -123,9 +126,7 @@ def cvs_checkout(d):
 		os.exit(1)
 
 	if release:
-		print release, USER
 		os.environ['CVSROOT']=':pserver:%s@cvs1:/cvsroot/reportlab' % USER
-		#do_exec(cvs+(' rtag %s' % release), 'the tag phase')
 		do_exec(cvs+(' co -r %s reportlab'%release), 'the download phase')
 	else:
 		os.environ['CVSROOT']=':pserver:%s@cvs1:/cvsroot/reportlab' % USER
@@ -143,7 +144,7 @@ def do_zip(d):
 	src_files = []
 	os.path.walk(projdir,find_src_files,src_files)
 	if release:
-		b = "reportlab_%4d%02d%02d" %time.gmtime(time.time())[:3]
+		b = "%s" % release
 	else:
 		b = "current"
 
