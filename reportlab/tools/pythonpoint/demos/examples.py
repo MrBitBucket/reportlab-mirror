@@ -768,7 +768,7 @@ class PlatIllust:
 class PingoIllust:
     #wrap the above for PP#
     def __init__(self, x, y, scale=1):
-        print 'Pingo illustration %f, %f, %f' % (x,y,scale)
+##        print 'Pingo illustration %f, %f, %f' % (x,y,scale)
         self.x = x
         self.y = y
         self.scale = scale

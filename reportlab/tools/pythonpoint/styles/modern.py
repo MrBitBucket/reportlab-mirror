@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/styles_modern.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/pythonpoint/styles/modern.py,v 1.1 2001/08/17 15:15:35 dinu_gherman Exp $
-__version__=''' $Id: modern.py,v 1.1 2001/08/17 15:15:35 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/tools/pythonpoint/styles/modern.py,v 1.2 2001/08/29 12:31:43 dinu_gherman Exp $
+__version__=''' $Id: modern.py,v 1.2 2001/08/29 12:31:43 dinu_gherman Exp $ '''
 # style_modern.py
 __doc__="""This is an example style sheet.  You can create your own, and
 have them loaded by the presentation.  A style sheet is just a
@@ -81,7 +81,7 @@ def getParagraphStyles():
     para.firstLineIndent = -18
     para.leftIndent = 72
     para.spaceBefore = 6
-    #para.bulletFontName = 'Symbol'
+    para.bulletFontName = 'Symbol'
     para.bulletFontSize = 24
     para.bulletIndent = 36
     stylesheet['Bullet'] = para
