@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.41 2003/11/22 14:41:24 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.41 2003/11/22 14:41:24 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.42 2003/12/01 23:40:28 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.42 2003/12/01 23:40:28 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -92,7 +92,7 @@ class _PMRenderer(Renderer):
             if showBoundary: canvas.rect(x, y, drawing.width, drawing.height)
             canvas.saveState()
             deltas = STATE_DEFAULTS.copy()
-            deltas['transform'] = [1,0,0,1,x,y]
+            deltas['transform'] = canvas._baseCTM[0:4]+(x,y)
             self._tracker.push(deltas)
             self.applyState()
             self.drawNode(drawing)
@@ -522,8 +522,8 @@ class PMCanvas:
     restoreState = saveState
 
 def drawToPMCanvas(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config.showBoundary):
-    w = int(d.width+0.5)
-    h = int(d.height+0.5)
+    w = int(d.width*dpi/72.0+0.5)
+    h = int(d.height*dpi/72.0+0.5)
     c = PMCanvas(w, h, dpi=dpi, bg=bg, configPIL=configPIL)
     draw(d, c, 0, 0)
     return c
