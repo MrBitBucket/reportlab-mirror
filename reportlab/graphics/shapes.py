@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.55 2001/09/28 13:55:54 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.56 2001/09/28 14:05:29 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -446,7 +446,7 @@ class Drawing(Group, Flowable):
 			try:
 				fnRoot = fnRoot % getattr(self,'chartId',0)
 			except TypeError, err:
-				if err != 'not all arguments converted': raise
+				if str(err) != 'not all arguments converted': raise
 
 		if os.path.isabs(fnRoot):
 			outDir, fnRoot = os.path.split(fnRoot)
