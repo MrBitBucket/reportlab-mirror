@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.9 2001/06/26 14:45:30 andy_robinson Exp $
-__version__=''' $Id: renderPM.py,v 1.9 2001/06/26 14:45:30 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.10 2001/07/12 14:16:20 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.10 2001/07/12 14:16:20 rgbecker Exp $ '''
 """Usage:
 	from reportlab.graphics import renderPM
 	renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -185,7 +185,15 @@ class _PMRenderer(Renderer):
 			self._canvas.drawString(x,y,text)
 
 	def drawPath(self, path):
-		warnOnce('Warning: PMRenderer.drawPath Not Done Yet')
+		from reportlab.graphics.shapes import _renderPath
+		c = self._canvas
+		c.pathBegin()
+		drawFuncs = (c.moveTo, c.lineTo, c.curveTo, c.pathClose)
+		isClosed = _renderPath(path, drawFuncs)
+		if isClosed:
+			c.pathFill()
+		c.pathStroke()
+
 
 BEZIER_ARC_MAGIC = 0.5522847498		#constant for drawing circular arcs w/ Beziers
 class PMCanvas:

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.35 2001/07/02 16:50:07 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.36 2001/07/12 14:16:20 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -496,9 +496,74 @@ class SolidShape(Shape):
 		Shape.__init__(self, kw)
 
 
+# path operator  constants
+_MOVETO, _LINETO, _CURVETO, _CLOSEPATH = range(4)
+
+def _renderPath(path, drawFuncs):
+	"""Helper function for renderers."""
+	# this could be a method of Path...
+	argCount = (2, 2, 6, 0)  # [moveTo, lineTo, curveTo, closePath]
+	points = path.points
+	i = 0
+	hadClosePath = 0
+	hadMoveTo = 0
+	for op in path.operators:
+		nArgs = argCount[op]
+		func = drawFuncs[op]
+		j = i + nArgs
+		apply(func, points[i:j])
+		i = j
+		if op == _CLOSEPATH:
+			hadClosePath = hadClosePath + 1
+		if op == _MOVETO:
+			hadMoveTo = hadMoveTo + 1
+	return hadMoveTo == hadClosePath
+
+
 class Path(SolidShape):
-	# same as current implementation; to do
-	pass
+	"""Path, made up of straight lines and bezier curves."""
+	
+	_attrMap = AttrMap(
+		strokeColor = AttrMapValue(None),
+		strokeWidth = AttrMapValue(isNumber),
+		strokeLineCap = AttrMapValue(None),
+		strokeLineJoin = AttrMapValue(None),
+		strokeMiterLimit = AttrMapValue(None),
+		strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
+		fillColor = AttrMapValue(None),
+		points = AttrMapValue(isListOfNumbers),
+		operators = AttrMapValue(isListOfNumbers),
+		)
+
+	def __init__(self, points=None, operators=None, **kw):
+		SolidShape.__init__(self, kw)
+		if points is None:
+			points = []
+		if operators is None:
+			operators = []
+		assert len(points) % 2 == 0, 'Point list must have even number of elements!'
+		self.points = points
+		self.operators = operators
+
+	def copy(self):
+		new = Path(self.points[:], self.operators[:])
+		new.setProperties(self.getProperties())
+		return new
+
+	def moveTo(self, x, y):
+		self.points.extend([x, y])
+		self.operators.append(_MOVETO)
+
+	def lineTo(self, x, y):
+		self.points.extend([x, y])
+		self.operators.append(_LINETO)
+
+	def curveTo(self, x1, y1, x2, y2, x3, y3):
+		self.points.extend([x1, y1, x2, y2, x3, y3])
+		self.operators.append(_CURVETO)
+
+	def closePath(self):
+		self.operators.append(_CLOSEPATH)
 
 
 class Rect(SolidShape):

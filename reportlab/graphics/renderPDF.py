@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPDF.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.9 2001/06/11 07:52:09 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.10 2001/07/12 14:16:20 rgbecker Exp $
 # renderPDF - draws Drawings onto a canvas
 """Usage:
     import renderpdf
@@ -180,8 +180,19 @@ class _PDFRenderer(Renderer):
                     raise ValueError, 'bad value for textAnchor '+str(text_anchor)
             self._canvas.addLiteral('BT 1 0 0 1 %0.2f %0.2f Tm (%s) Tj ET' % (x, y, self._canvas._escape(text)))
 
-    #def drawPath(self, path):
-    
+    def drawPath(self, path):
+        from reportlab.graphics.shapes import _renderPath
+        pdfPath = self._canvas.beginPath()
+        drawFuncs = (pdfPath.moveTo, pdfPath.lineTo, pdfPath.curveTo, pdfPath.close)
+        isClosed = _renderPath(path, drawFuncs)
+        if isClosed:
+            fill = self._fill
+        else:
+            fill = 0
+        self._canvas.drawPath(pdfPath, 
+                    fill=fill,
+                    stroke=self._stroke)
+
     def applyStateChanges(self, delta, newState):
         """This takes a set of states, and outputs the PDF operators
         needed to set those properties"""

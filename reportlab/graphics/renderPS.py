@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPS.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.7 2001/05/23 16:46:51 rgbecker Exp $
-__version__=''' $Id: renderPS.py,v 1.7 2001/05/23 16:46:51 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.8 2001/07/12 14:16:20 rgbecker Exp $
+__version__=''' $Id: renderPS.py,v 1.8 2001/07/12 14:16:20 rgbecker Exp $ '''
 import string, cStringIO, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str
@@ -25,8 +25,9 @@ class PSCanvas:
 %%!PS-Adobe-3.0 EPSF-3.0
 %%%%BoundingBox: 0 0 %d %d
 %%%% Initialization:
-/m {moveto} def
-/l {lineto} def
+/m {moveto} bind def
+/l {lineto} bind def
+/c {curveto} bind def
 ''' % size)
 
         self.setFont(STATE_DEFAULTS['fontName'],STATE_DEFAULTS['fontSize'])
@@ -293,6 +294,12 @@ class PSCanvas:
 
     def lineTo(self,x,y):
         self.code.append('%s l' % fp_str(x, y))
+
+    def curveTo(self,x1,y1,x2,y2,x3,y3):
+        self.code.append('%s c' % fp_str(x1,y1,x2,y2,x3,y3))
+
+    def closePath(self):
+        self.code.append('closepath')
 
     def polyLine(self, p):
         assert len(p) >= 2, 'Polyline must have 2 or more points'
@@ -677,7 +684,13 @@ class _PSRenderer(Renderer):
             self._canvas.drawString(text,x,y)
 
     def drawPath(self, path):
-        print 'Warning: _PSRendered.drawPath Not Done Yet'
+        from reportlab.graphics.shapes import _renderPath
+        c = self._canvas
+        drawFuncs = (c.moveTo, c.lineTo, c.curveTo, c.closePath)
+        isClosed = _renderPath(path, drawFuncs)
+        if not isClosed:
+            c._fillColor = None
+        c._fillAndStroke([])
 
     def applyStateChanges(self, delta, newState):
         """This takes a set of states, and outputs the operators
