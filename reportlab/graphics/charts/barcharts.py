@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.70 2002/12/23 00:46:57 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.71 2003/05/29 00:02:01 andy_robinson Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -9,7 +9,7 @@ vertical versions.
 
 Stacked and percentile bar charts to follow...
 """
-__version__=''' $Id: barcharts.py,v 1.70 2002/12/23 00:46:57 andy_robinson Exp $ '''
+__version__=''' $Id: barcharts.py,v 1.71 2003/05/29 00:02:01 andy_robinson Exp $ '''
 
 import string, copy
 from types import FunctionType, StringType
@@ -56,6 +56,7 @@ class BarChart(PlotArea):
         barLabels = AttrMapValue(None, desc='Handle to the list of bar labels.'),
         barLabelFormat = AttrMapValue(None, desc='Formatting string or function used for bar labels.'),
         barLabelCallOut = AttrMapValue(None, desc='Callout function(label)\nlabel._callOutInfo = (self,g,rowNo,colNo,x,y,width,height,x00,y00,x0,y0)'),
+        barLabelArray = AttrMapValue(None, desc='explicit array of bar label values, must match size of data if present.'),
         reversePlotOrder = AttrMapValue(isBoolean, desc='If true, reverse common category plot order.'),
         naLabel = AttrMapValue(NoneOrInstanceOfNA_Label, desc='Label to use for N/A values.'),
         )
@@ -86,7 +87,7 @@ class BarChart(PlotArea):
         self.barLabels.boxAnchor = 'c'
         self.barLabels.textAnchor = 'middle'
         self.barLabelFormat = None
-
+        self.barLabelArray = None
         # this says whether the origin is inside or outside
         # the bar - +10 means put the origin ten points
         # above the tip of the bar if value > 0, or ten
@@ -160,6 +161,17 @@ class BarChart(PlotArea):
         self.calcBarPositions()
         g = Group()
         g.add(self.makeBackground())
+
+        # ensure any axes have correct spacing set
+        # for grids. It sucks that we have to do
+        # this here.
+        if self._flipXY == 0:
+            vA.gridEnd = self.width
+            cA.gridEnd = self.height
+        else:
+            vA.gridEnd = self.height
+            cA.gridEnd = self.width
+        
         cA.makeGrid(g)
         vA.makeGrid(g)
         g.add(self.makeBars())
@@ -271,6 +283,8 @@ class BarChart(PlotArea):
         labelFmt = self.barLabelFormat
         if labelFmt is None:
             labelText = None
+        elif labelFmt == 'values':
+            labelText = self.barLabelArray[rowNo][colNo]
         elif type(labelFmt) is StringType:
             labelText = labelFmt % self.data[rowNo][colNo]
         elif callable(labelFmt):

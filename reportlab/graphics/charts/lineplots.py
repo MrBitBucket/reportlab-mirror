@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.40 2003/05/27 19:17:13 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.41 2003/05/29 00:02:02 andy_robinson Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.40 2003/05/27 19:17:13 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.41 2003/05/29 00:02:02 andy_robinson Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -96,6 +96,9 @@ class LinePlot(PlotArea):
 
         # New line chart attributes.
         self.joinedLines = 1 # Connect items with straight lines.
+
+        #private attributes
+        self._inFill = None
 
     def demo(self):
         """Shows basic use of a line chart."""
