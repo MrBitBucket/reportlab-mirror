@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.21 2004/03/23 16:18:29 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.22 2004/04/05 14:17:29 rgbecker Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -58,7 +58,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.21 2004/03/23 16:18:29 rgbecker Exp $'
+__version__ = '$Id: ttfonts.py,v 1.22 2004/04/05 14:17:29 rgbecker Exp $'
 
 import string
 from types import StringType
@@ -83,7 +83,6 @@ parse_latin1 = lambda x, decode=latin_1_decode: map(ord,decode(x)[0])
 def latin1_to_utf8(text):
     "helper to convert when needed from latin input"
     return utf_8_encode(latin_1_decode(text)[0])[0]
-    
 
 def makeToUnicodeCMap(fontname, subset):
     """Creates a ToUnicode CMap for a given subset.  See Adobe
@@ -123,6 +122,7 @@ def _set_ushort(stream, offset, value):
     offset and returns the resulting stream (the original is unchanged)"""
     return splice(stream, offset, pack(">H", value))
 
+import sys
 try:
     import _rl_accel
 except ImportError:
@@ -135,8 +135,21 @@ try:
     hex32 = _rl_accel.hex32
 except:
     def hex32(i):
-        return '0X%8.8X' % i
-        
+        return '0X%8.8X' % (long(i)&0xFFFFFFFFL)
+try:
+    add32 = _rl_accel.add32
+except:
+    if sys.hexversion>=0x02030000:
+        def add32(x, y):
+            "Calculate (x + y) modulo 2**32"
+            return _L2U32((long(x)+y) & 0xffffffffL)
+    else:
+        def add32(x, y):
+            "Calculate (x + y) modulo 2**32"
+            lo = (x & 0xFFFF) + (y & 0xFFFF)
+            hi = (x >> 16) + (y >> 16) + (lo >> 16)
+            return (hi << 16) | (lo & 0xFFFF)
+
 try:
     calcChecksum = _rl_accel.calcChecksum
 except:
@@ -145,19 +158,9 @@ except:
         if len(data)&3: data = data + (4-(len(data)&3))*"\0"
         sum = 0
         for n in unpack(">%dl" % (len(data)>>2), data):
-            lo = (sum & 0xFFFF) + (n & 0xFFFF)
-            hi = (sum >> 16) + (n >> 16) + (lo >> 16)
-            sum = (hi << 16) | (lo & 0xFFFF)
+            sum = add32(sum,n)
         return sum
-try:
-    add32 = _rl_accel.add32
-except:
-    def add32(x, y):
-        "Calculate (x + y) modulo 2**32"
-        lo = (x & 0xFFFF) + (y & 0xFFFF)
-        hi = (x >> 16) + (y >> 16) + (lo >> 16)
-        return (hi << 16) | (lo & 0xFFFF)
-del _rl_accel
+del _rl_accel, sys
 #
 # TrueType font handling
 #
@@ -378,7 +381,6 @@ class TTFontMaker:
         stm.write(pack('>L', checksum))
 
         return stm.getvalue()
-
 
 class TTFontFile(TTFontParser):
     "TTF file parser and generator"
