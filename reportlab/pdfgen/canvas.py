@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.20  2000/04/03 09:36:15  andy_robinson
+#	Using trailing zero convention for new form and link API
+#
 #	Revision 1.19  2000/04/02 02:53:49  aaron_watters
 #	added support for outline trees
-#
+#	
 #	Revision 1.18  2000/03/26 20:45:01  aaron_watters
 #	added beginForm..endForm and fixed some naming convention issues.
 #	
@@ -84,7 +87,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.19 2000/04/02 02:53:49 aaron_watters Exp $ '''
+__version__=''' $Id: canvas.py,v 1.20 2000/04/03 09:36:15 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -236,7 +239,7 @@ class Canvas:
     def setAuthor(self, author):
         self._doc.setAuthor(author)
         
-    def setOutlineNames(self, *nametree):
+    def setOutlineNames0(self, *nametree):
         """nametree should can be a recursive tree like so
            c.setOutlineNames(
              "chapter1dest",
@@ -263,7 +266,8 @@ class Canvas:
         "Info function - app can call it after showPage to see if it needs a save"
         return len(self._code) == 0
         
-    def showOutline(self):
+    def showOutline0(self):
+        "Specify that Acrobat Reader should start with the outline tree visible"
         self._doc._catalog.showOutline()
     
     def showPage(self):
@@ -305,7 +309,7 @@ class Canvas:
             result = d[name] = pdfdoc.Destination(name) # newly defined, unbound
         return result
         
-    def bookmarkPage(self, name):
+    def bookmarkPage0(self, name):
         """bind a bookmark (destination) to the current page"""
         # XXXX there are a lot of other ways a bookmark destination can be bound: should be implemented.
         # XXXX the other ways require tracking of the graphics state....
@@ -315,7 +319,7 @@ class Canvas:
         dest.setPageRef(pageref)
         return dest
         
-    def bookmarkHorizontalAbsolute(self, name, yhorizontal):
+    def bookmarkHorizontalAbsolute0(self, name, yhorizontal):
         """bind a bookmark (destination to the current page at a horizontal position"""
         dest = self._bookmarkReference(name)
         pageref = self._doc.thisPageRef()
@@ -323,15 +327,15 @@ class Canvas:
         dest.setPageRef(pageref)
         return dest
         
-    def inPage(self):
+    def _inPage0(self):
         """declare a page, enable page features"""
         self._doc.inPage()
         
-    def inForm(self):
+    def _inForm0(self):
         "deprecated in favore of beginForm...endForm"
         self._doc.inForm()
             
-    def doForm(self, name):
+    def doForm0(self, name):
         """use a form XObj in current operation stream"""
         internalname = self._doc.hasForm(name)
         if not internalname:
@@ -346,16 +350,16 @@ class Canvas:
         self._annotationrefs = []
         self._formData = None
         
-    def beginForm(self, name, lowerx=0, lowery=0, upperx=None, uppery=None):
+    def beginForm0(self, name, lowerx=0, lowery=0, upperx=None, uppery=None):
         "declare the current graphics stream to be a form"
         self._formData = (name, lowerx, lowery, upperx, uppery)
-        self.inForm()
+        self._inForm0()
         
-    def endForm(self):
+    def endForm0(self):
         (name, lowerx, lowery, upperx, uppery) = self._formData
-        self.makeForm(name, lowerx, lowery, upperx, uppery)
+        self.makeForm0(name, lowerx, lowery, upperx, uppery)
         
-    def makeForm(self, name, lowerx=0, lowery=0, upperx=None, uppery=None):
+    def makeForm0(self, name, lowerx=0, lowery=0, upperx=None, uppery=None):
         """Like showpage, but make a form using accumulated operations instead"""
         # deprecated in favor or beginForm(...)... endForm()
         (w,h) = self._pagesize
@@ -369,14 +373,14 @@ class Canvas:
         self._doc.addForm(name, form)
         self._restartAccumulators()
         
-    def textAnnotation(self, contents, Rect=None, addtopage=1, name=None, **kw):
+    def textAnnotation0(self, contents, Rect=None, addtopage=1, name=None, **kw):
         if not Rect:
             (w,h) = self._pagesize# default to whole page (?)
             Rect = (0,0,w,h)
         annotation = apply(pdfdoc.TextAnnotation, (Rect, contents), kw)
         self._addAnnotation(annotation, name, addtopage)
         
-    def inkAnnotation(self, contents, InkList=None, Rect=None, addtopage=1, name=None, **kw):
+    def inkAnnotation0(self, contents, InkList=None, Rect=None, addtopage=1, name=None, **kw):
         "not working?"
         (w,h) = self._pagesize
         if not Rect:
@@ -386,7 +390,7 @@ class Canvas:
         annotation = apply(pdfdoc.InkAnnotation, (Rect, contents, InkList), kw)
         self.addAnnotation(annotation, name, addtopage)
     
-    def linkAbsolute(self, contents, destinationname, Rect=None, addtopage=1, name=None, **kw):
+    def linkAbsolute0(self, contents, destinationname, Rect=None, addtopage=1, name=None, **kw):
         """link annotation positioned wrt the default user space"""
         destination = self._bookmarkReference(destinationname) # permitted to be undefined... must bind later...
         (w,h) = self._pagesize
