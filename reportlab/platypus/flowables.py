@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.39 2003/09/08 16:08:15 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.39 2003/09/08 16:08:15 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.40 2003/09/18 09:07:37 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.40 2003/09/18 09:07:37 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -269,27 +269,50 @@ class Preformatted(Flowable):
 class Image(Flowable):
     """an image (digital picture).  Formats supported by PIL/Java 1.4 (the Python/Java Imaging Library
        are supported.  At the present time images as flowables are always centered horozontally
-       in the frame.
+       in the frame. We allow for two kinds of lazyness to allow for many images in a document
+       which could lead to file handle starvation.
+       lazy=1 don't open image until required.
+       lazy=2 open image when required then shut it.
     """
     _fixedWidth = 1
     _fixedHeight = 1
-    def __init__(self, filename, width=None, height=None, kind='direct', mask="auto"):
+    def __init__(self, filename, width=None, height=None, kind='direct', mask="auto", lazy=1):
         """If size to draw at not specified, get it from the image."""
-        self._filename = self.filename = filename
         self.hAlign = 'CENTER'
         self._mask = mask
         # if it is a JPEG, will be inlined within the file -
         # but we still need to know its size now
-        if type(filename) is StringType and os.path.splitext(filename)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
-            info = pdfutils.readJPEGInfo(open(filename, 'rb'))
+        fp = hasattr(filename,'read')
+        if fp:
+            self.filename = `filename`
+        else:
+            self.filename = filename
+        if not fp and os.path.splitext(filename)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
+            f = open(filename, 'rb')
+            info = pdfutils.readJPEGInfo(f)
+            f.close()
             self.imageWidth = info[0]
             self.imageHeight = info[1]
+            self._setup(width,height,kind,0)
+            self._img = None
+        elif fp:
+            self._setup(width,height,kind,0)
         else:
-            from reportlab.lib.utils import ImageReader  #this may raise an error
-            # we have to assume this is a file like object
-            self.filename = img = ImageReader(filename)
-            (self.imageWidth, self.imageHeight) = img.getSize()
+            self._setup(width,height,kind,lazy)
 
+    def _setup(self,width,height,kind,lazy):
+        self._lazy = lazy
+        self._width = width
+        self._height = height
+        self._kind = kind
+        if lazy<=0: self._setup_inner()
+
+    def _setup_inner(self):
+        width = self._width
+        height = self._height
+        kind = self._kind
+        (self.imageWidth, self.imageHeight) = self._img.getSize()
+        if self._lazy>=2: del self._img
         if kind in ['direct','absolute']:
             self.drawWidth = width or self.imageWidth
             self.drawHeight = height or self.imageHeight
@@ -301,24 +324,38 @@ class Image(Flowable):
             self.drawWidth = self.imageWidth*factor
             self.drawHeight = self.imageHeight*factor
 
+    def __getattr__(self,a):
+        if a=='_img':
+            from reportlab.lib.utils import ImageReader  #this may raise an error
+            self._img = ImageReader(self.filename)
+            return self._img
+        elif a in ('drawWidth','drawHeight','imageWidth','imageHeight'):
+            self._setup_inner()
+            return self.__dict__[a]
+        raise AttributeError(a)
+
     def wrap(self, availWidth, availHeight):
         #the caller may decide it does not fit.
         return (self.drawWidth, self.drawHeight)
 
     def draw(self):
-        #center it
-        self.canv.drawImage(self.filename,
+        lazy = self._lazy
+        if lazy>=2: self._lazy = 1
+        self.canv.drawImage(    self._img or self.filename,
                                 0,
                                 0,
                                 self.drawWidth,
                                 self.drawHeight,
                                 mask=self._mask,
                                 )
+        if lazy>=2:
+            self._img = None
+            self._lazy = lazy
 
     def identity(self,maxLen):
         r = Flowable.identity(self,maxLen)
-        if r[-4:]=='>...' and type(self._filename) is StringType:
-            r = "%s filename=%s>" % (r[:-4],self._filename)
+        if r[-4:]=='>...' and type(self.filename) is StringType:
+            r = "%s filename=%s>" % (r[:-4],self.filename)
         return r
 
 class Spacer(Flowable):
