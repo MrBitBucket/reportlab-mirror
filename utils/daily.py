@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.14  2000/04/19 14:08:47  rgbecker
+#	py2pdf additions
+#
 #	Revision 1.13  2000/04/07 09:58:10  rgbecker
 #	Fixed missing programs problems
-#
+#	
 #	Revision 1.12  2000/04/06 14:10:10  rgbecker
 #	Made anonymous
 #	
@@ -71,7 +74,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.13 2000/04/07 09:58:10 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.14 2000/04/19 14:08:47 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -82,6 +85,7 @@ groupdir=os.path.normcase(os.path.normpath('%s/public_ftp'%os.environ['HOME']))
 projdir = os.path.normcase(os.path.normpath('reportlab'))
 cvsdir = os.path.join(groupdir,projdir)
 release=0		#1 if making a release
+py2pdf=0		#1 if doing a special py2pdf zip/tgz
 #USER=os.environ['USER']
 USER='anonymous'
 
@@ -136,7 +140,16 @@ def cvs_checkout(d):
 	if release:
 		do_exec(cvs+(' export -r %s reportlab'%release), 'the export phase')
 	else:
-		do_exec(cvs+' co reportlab', 'the checkout phase')
+		if py2pdf:
+			do_exec(cvs+' export reportlab', 'the checkout phase')
+			# now we need to move the files & delete those we don't need
+			os.mkdir("py2pdf")
+			do_exec("mv reportlab/demos/py2pdf/py2pdf.py py2pdf", "mv py2pdf.py")
+			do_exec("mv reportlab/demos/py2pdf/pyfontify.py reportlab", "mv pyfontify.py")
+			do_exec("rm -r reportlab/demos reportlab/platypus reportlab/lib/styles.py reportlab/README.pdfgen.txt", "rm")
+			do_exec("mv reportlab py2pdf")
+		else:
+			do_exec(cvs+' co reportlab', 'the checkout phase')
 
 def do_zip(d):
 	'create .tgz and .zip file archives of d/reportlab'
@@ -145,10 +158,14 @@ def do_zip(d):
 	if release:
 		b = release
 	else:
-		b = "current"
+		b = py2pdf and "py2pdf" or "current"
 
 	tarfile = '%s/%s.tgz' % (groupdir,b)
 	zipfile = '%s/%s.zip' % (groupdir,b)
+
+	if py2pdf:
+		projdir = 'py2pdf'
+		cvsdir = os.path.join(groupdir,projdir)
 
 	tar = find_exe('tar')
 	if tar is not None:
@@ -172,8 +189,13 @@ def do_zip(d):
 			os.symlink(tarfile,ltarfile)
 
 if __name__=='__main__':
-	release = '-release' in sys.argv[1:]
+	userArgs = sys.argv[1:}
+	release = '-release' in userArgs
+	py2pdf = '-py2pdf' in userArgs
 	if release:
+		if py2pdf:
+			print "Can't have -release and -py2pdf options"
+			sys.exit(1)
 		if len(sys.argv)!=3 or sys.argv[1]!='-release':
 			print 'Usage:\n    python daily.py [-release tag]'
 			sys.exit(1)
