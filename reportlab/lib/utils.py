@@ -1,13 +1,16 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.69 2004/03/23 18:57:33 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.69 2004/03/23 18:57:33 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.70 2004/03/24 09:42:22 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.70 2004/03/24 09:42:22 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
 from reportlab.lib.logger import warnOnce
 SeqTypes = (ListType,TupleType)
+if sys.hexversion<0x2030000:
+    True = 1
+    False = 0
 
 def _findFiles(dirList,ext='.ttf'):
     from os.path import isfile, isdir, join as path_join
