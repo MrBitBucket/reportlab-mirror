@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.18  2000/04/25 15:42:04  rgbecker
+#	Factored out BasicFrame from SimpleFrame
+#
 #	Revision 1.17  2000/04/14 16:12:11  rgbecker
 #	Debugging xml changes
-#
+#	
 #	Revision 1.16  2000/04/14 11:54:57  rgbecker
 #	Splitting layout.py
 #	
@@ -79,7 +82,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.17 2000/04/14 16:12:11 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.18 2000/04/25 15:42:04 rgbecker Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -267,13 +270,77 @@ class Macro(Flowable):
 	def draw(self):
 		exec self.command in globals(), {'canvas':self.canv}
 
-#############################################################
-#
-#		Basic paragraph-drawing routine.  Not sure where
-#		this should go, so did it as a separate function.
-#
-#############################################################
+class BasicFrame:
+	'''Abstraction for the definitional part of a Frame
 
+	            width                    x2,y2
+		+---------------------------------+
+		| l  top padding                r | h
+		| e +-------------------------+ i | e
+		| f |                         | g | i
+		| t |                         | h | g
+		|   |                         | t | h
+		| p |                         |   | t
+		| a |                         | p |
+		| d |                         | a |
+		|   |                         | d |
+		|   +-------------------------+   |
+		|    bottom padding				  |
+		+---------------------------------+
+		(x1,y1)
+	'''
+	def __init__(self, x1, y1, width,height, leftPadding=6, bottomPadding=6,
+			rightPadding=6, topPadding=6, id=None, showBoundary=0):
+
+		self.id = id
+
+		#these say where it goes on the page
+		self.x1 = x1
+		self.y1 = y1
+		self.x2 = x1 + width
+		self.y2 = y1 + height
+
+		#these create some padding.
+		self.leftPadding = leftPadding
+		self.bottomPadding = bottomPadding
+		self.rightPadding = rightPadding
+		self.topPadding = topPadding
+
+		# if we want a boundary to be shown
+		self.showBoundary = showBoundary
+
+		self._reset()
+
+	def	_reset(self):
+		#work out the available space
+		self.width = self.x2 - self.x1 - self.leftPadding - self.rightPadding
+		self.height = self.y2 - self.y1 - self.topPadding - self.bottomPadding
+		#drawing starts at top left
+		self.x = self.x1 + self.leftPadding
+		self.y = self.y2 - self.topPadding
+
+	def _add(self, flowable, canv, trySplit=0):
+		""" Draws the flowable at the current position.
+		Returns 1 if successful, 0 if it would not fit.
+		Raises a LayoutError if the object is too wide,
+		or if it is too high for a totally empty frame,
+		to avoid infinite loops"""
+		y = self.y
+		p = self.y1 + self.bottomPadding
+		w, h = flowable.wrap(self.width, y - p )
+
+		y = y - h
+		if y < p:
+			if ((h > self.height and not trySplit) or w > self.width):
+				raise "LayoutError", "Flowable (%dx%d points) too large for frame (%dx%d points)." % (w,h, self.width,self.height)
+			return 0
+		else:
+			#now we can draw it, and update the current point.
+			flowable.drawOn(canv, self.x, y)
+			self.y = y
+			return 1
+
+	add = _add
 
 #############################################################
 #
@@ -284,7 +351,7 @@ class Macro(Flowable):
 FrameFullError = "FrameFullError"
 LayoutError = "LayoutError"
 
-class SimpleFrame:
+class SimpleFrame(BasicFrame):
 	"""A region into which flowable objects are to be packed.
 	Flows downwards.  A more general solution is needed which
 	will allow flows in any direction, including 'across and then
@@ -292,54 +359,15 @@ class SimpleFrame:
 	many languages now, as long as each object is 'full-width'
 	(i.e. a paragraph and not a word)."""
 	def __init__(self, canvas, x1, y1, width,height):
+		BasicFrame.__init__(self, x1, y1, width,height, leftPadding=6, bottomPadding=6,
+			rightPadding=6, topPadding=6, id=None, showBoundary=0)
 		self.canvas = canvas
-
-		#these say where it goes on the page
-		x2 = x1 + width
-		y2 = y1 + height
-		self.x1 = x1
-		self.y1 = y1
-		self.x2 = x2
-		self.y2 = y2
-
-		#these create some padding.
-		self.leftPadding = 6
-		self.bottomPadding = 6
-		self.rightPadding = 6
-		self.topPadding = 6
-
-		#work out the available space
-		self.width = x2 - x1 - self.leftPadding - self.rightPadding
-		self.height = y2 - y1 - self.topPadding - self.bottomPadding
 		self.objects = []	#it keeps a list of objects
-		self.showBoundary = 0
-		#drawing starts at top left
-		self.x = x1 + self.leftPadding
-		self.y = y2 - self.topPadding
 
 	def add(self, flowable):
-		""" Draws the object at the current position.
-		Returns 1 if successful, 0 if it would not fit.
-		Raises a LayoutError if the object is too wide,
-		or if it is too high for a totally empty frame,
-		to avoid infinite loops"""
-		y = self.y
-		p = self.y1 + self.bottomPadding
-		w, h = flowable.wrap(self.width, y - p )
-
-		if h > self.height:
-			raise "LayoutError", "Object (%d points) too high for frame (%d points)." % (h, self.height)
-		if w > self.width:
-			raise "LayoutError", "Object (%d points) too wide for frame (%d points)." % (w, self.width)
-		y = y - h
-		if y < p:
-			return 0
-		else:
-			#now we can draw it, and update the current point.
-			flowable.drawOn(self.canvas, self.x, y)
-			self.y = y
-			self.objects.append(flowable)
-			return 1
+		r = self._add(flowable, self.canvas)
+		if r: self.objects.append(flowable)
+		return r
 
 	def addFromList(self, drawlist):
 		"""Consumes objects from the front of the list until the
