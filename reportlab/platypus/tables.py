@@ -667,12 +667,16 @@ class Table(Flowable):
         W = list(self._argW)
         width = 0
         elementWidth = self._elementWidth
-        for colNo, w in enumerate(W):
+        rowNos = xrange(self._nrows)
+        values = self._cellvalues
+        styles = self._cellStyles
+        for colNo in xrange(len(W)):
+            w = W[colNo]
             if w is None or w=='*' or _endswith(w,'%'):
                 final = 0
-                for rowNo in range(self._nrows):
-                    value = self._cellvalues[rowNo][colNo]
-                    style = self._cellStyles[rowNo][colNo]
+                for rowNo in rowNos:
+                    value = values[rowNo][colNo]
+                    style = styles[rowNo][colNo]
                     new = (elementWidth(value,style)+
                            style.leftPadding+style.rightPadding)
                     final = max(final, new)
