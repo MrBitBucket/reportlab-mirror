@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.25 2003/04/14 18:37:53 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.25 2003/04/14 18:37:53 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.26 2003/04/16 18:22:48 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.26 2003/04/16 18:22:48 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -233,6 +233,16 @@ def _setFont(gs,fontName,fontSize):
             raise RenderPMError, "Can't setFont(%s) missing the T1 files?\nOriginally %s: %s" % (fontName,s1,s2)
         gs.setFont(fontName,fontSize)
 
+def _convert2pilp(im):
+    Image = _getImage()
+    return im.convert("P", dither=Image.NONE, palette=Image.ADAPTIVE)
+
+def _saveAsPICT(im,fn,fmt):
+    im = _convert2pilp(im)
+    cols, rows = im.size
+    s = _renderPM.pil2pict(cols,rows,im.tostring(),im.im.getpalette())
+    open(os.path.splitext(fn)[0]+'.'+string.lower(fmt),'wb').write(s)
+
 BEZIER_ARC_MAGIC = 0.5522847498     #constant for drawing circular arcs w/ Beziers
 class PMCanvas:
     def __init__(self,w,h,dpi=72,bg=0xffffff,configPIL=None):
@@ -272,8 +282,9 @@ class PMCanvas:
         else:
             fmt = string.upper(fmt)
             if fmt in ['GIF']:
-                Image = _getImage()
-                im = im.convert("P", dither=Image.NONE, palette=Image.ADAPTIVE)
+                im = _convert2pilp(im)
+            elif fmt in ['PCT','PICT']:
+                return _saveAsPICT(im,fn,fmt)
             elif fmt in ['PNG','TIFF','BMP', 'PPM', 'TIF']:
                 if fmt=='TIF': fmt = 'TIFF'
                 if fmt=='PNG':
@@ -539,8 +550,8 @@ if __name__=='__main__':
                 h = int(drawing.height)
                 html.append('<hr><h2>Drawing %s %d</h2>\n<pre>%s</pre>' % (name, i, docstring))
 
-                for k in ['gif','tiff', 'png', 'jpg']:
-                    if k in ['gif','png','jpg']:
+                for k in ['gif','tiff', 'png', 'jpg', 'pict']:
+                    if k in ['gif','png','jpg','pict']:
                         html.append('<p>%s format</p>\n' % string.upper(k))
                     try:
                         filename = 'renderPM%d.%s' % (i, ext(k))
@@ -548,7 +559,7 @@ if __name__=='__main__':
                         if os.path.isfile(fullpath):
                             os.remove(fullpath)
                         drawToFile(drawing,fullpath,fmt=k)
-                        if k in ['gif','png','jpg']:
+                        if k in ['gif','png','jpg','pict']:
                             html.append('<img src="%s" border="1"><br>\n' % filename)
                         print 'wrote',fullpath
                     except AttributeError:
