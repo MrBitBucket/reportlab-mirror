@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.39 2004/04/05 07:47:18 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.40 2004/04/05 12:59:56 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.39 2004/04/05 07:47:18 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.40 2004/04/05 12:59:56 rgbecker Exp $ "
 #endif
 #include "Python.h"
 #include <stdlib.h>
@@ -28,7 +28,7 @@ static __version__=" $Id: _rl_accel.c,v 1.39 2004/04/05 07:47:18 rgbecker Exp $ 
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.47"
+#define VERSION "0.48"
 #define MODULE "_rl_accel"
 
 
