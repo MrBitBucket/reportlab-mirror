@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/t_parse.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/Attic/t_parse.py,v 1.2 2000/10/25 08:57:45 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/Attic/t_parse.py,v 1.3 2001/08/09 10:47:53 rgbecker Exp $
 """
 Template parsing module inspired by REXX (with thanks to Donn Cave for discussion).
 
@@ -79,7 +79,7 @@ Template directives:
 
 """
 
-import regex, string
+import re, string
 from types import StringType
 from string import find
 
@@ -115,7 +115,7 @@ class Template:
        self.marker_dict = marker_dict = {}
        for (mark, rgex) in marker_to_regex_dict.items():
            if type(rgex) == StringType:
-              rgex = regex.compile(rgex)
+              rgex = re.compile(rgex)
            marker_dict[mark] = rgex
        # determine the parse sequence
        parse_seq = []
@@ -148,7 +148,7 @@ class Template:
              while index<last and not template[index] in markers:
                 index = index+1
              parse_seq.append( (None, template[start:index]) )
-          # otherwise it must be a regex marker
+          # otherwise it must be a re marker
           else:
              rgex = marker_dict[thischar]
              parse_seq.append( (thischar, rgex) )
@@ -185,7 +185,7 @@ class Template:
                     last = len(str)
                  # otherwise must look at next directive to find end of wildcard
                  else:
-                    # next directive must be regex or literal
+                    # next directive must be re or literal
                     (nextindicator, nextdata) = parse_seq[parse_index+1]
                     if nextindicator is None:
                        # search for literal
@@ -194,11 +194,11 @@ class Template:
                           raise ValueError, \
                            "couldn't terminate wild with lit "+`currentindex`
                     else:
-                       # data is a regex, search for it
+                       # data is a re, search for it
                        last = nextdata.search(str, currentindex)
                        if last<currentindex:
                           raise ValueError, \
-                           "couldn't terminate wild with regex "+`currentindex`
+                           "couldn't terminate wild with re "+`currentindex`
               elif indicator == single_char:
                  # data is length to eat
                  last = currentindex + data
@@ -206,7 +206,7 @@ class Template:
                  # other directives are always regular expressions
                  last = data.match(str, currentindex) + currentindex
                  if last<currentindex:
-                    raise ValueError, "couldn't match regex at "+`currentindex`
+                    raise ValueError, "couldn't match re at "+`currentindex`
               #print "accepting", str[currentindex:last]
               result[current_directive_index] = str[currentindex:last]
               current_directive_index = current_directive_index+1
@@ -221,9 +221,9 @@ USERNAMEREGEX = \
   "["+string.letters+"]["+string.letters+string.digits+"_]*"
 STRINGLITREGEX = "'[^\n']*'"
 SIMPLEINTREGEX = "["+string.digits+"]+"
-id = regex.compile(USERNAMEREGEX)
-str = regex.compile(STRINGLITREGEX)
-int = regex.compile(SIMPLEINTREGEX)
+id = re.compile(USERNAMEREGEX)
+str = re.compile(STRINGLITREGEX)
+int = re.compile(SIMPLEINTREGEX)
 
 def test():
     global T, T1, T2, T3
