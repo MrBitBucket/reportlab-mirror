@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.21 2003/04/03 12:29:17 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.22 2003/05/24 12:57:38 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.21 2003/04/03 12:29:17 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.22 2003/05/24 12:57:38 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,7 +31,7 @@ static char* __version__=" $Id: pyRXP.c,v 1.21 2003/04/03 12:29:17 rgbecker Exp 
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "0.97"
+#define VERSION "0.98"
 #define MAX_DEPTH 256
 
 #if CHAR_SIZE==16
@@ -54,6 +54,7 @@ static PyObject *moduleVersion;
 static PyObject *RXPVersion;
 static PyObject *commentTagName;
 static PyObject *piTagName;
+static PyObject *CDATATagName;
 static PyObject *recordLocation;
 static PyObject *parser_flags;
 static char *moduleDoc =
@@ -212,6 +213,10 @@ The python module exports the following\n\
             in every 4-item tuple or list in the returned tree\n\
         MakeMutableTree false (default) or true.  If false, nodes in the returned tree\n\
             are 4-item tuples; if true, 4-item lists.\n\
+        ReturnCDATASectionsAsTuples = 0\n\
+            If this is on, the parser returns for each CDATA section a tuple\n\
+            with name field equal to CDATATagName containing a single string\n\
+            in its third field that is the CDATA section.\n\
 ";
 
 /*alter the integer values to change the module defaults*/
@@ -254,12 +259,14 @@ static struct {char* k;long v;} flag_vals[]={
 	{"ExpandEmpty",0},
 	{"MakeMutableTree",0},
 	{"ReturnProcessingInstructions",0},
+	{"ReturnCDATASectionsAsTuples",0},
 	{0}};
 #define LASTRXPFLAG ProcessDTD
 #define ReturnList (ParserFlag)(1+(int)LASTRXPFLAG)
 #define ExpandEmpty (ParserFlag)(1+(int)ReturnList)
 #define MakeMutableTree (ParserFlag)(1+(int)ExpandEmpty)
 #define ReturnProcessingInstructions (ParserFlag)(1+(int)MakeMutableTree )
+#define ReturnCDATASectionsAsTuples (ParserFlag)(1+(int)ReturnProcessingInstructions)
 #define __GetFlag(p, flag) \
   ((((flag) < 32) ? ((p)->flags[0] & (1u << (flag))) : ((p)->flags[1] & (1u << ((flag)-32))))!=0)
 #ifdef	_DEBUG
@@ -444,9 +451,22 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 			Py_DECREF(t);
 			break;
 		case XBIT_cdsect:
-			t = PYSTRING(bit->cdsect_chars);
-			PyList_Append(PDGetItem(stack[*depth],2),t);
-			Py_DECREF(t);
+			if(ParserGetFlag(p,ReturnCDATASectionsAsTuples)){
+				t = _makeNodePD( pd, CDATATagName,Py_None, 0);
+				if(pd->fourth==recordLocation) _reverseSrcInfoTuple(PyTuple_GET_ITEM(t,3));
+				Py_INCREF(CDATATagName);
+				Py_INCREF(Py_None);
+				s = PYSTRING(bit->cdsect_chars);
+				PyList_Append(PDGetItem(t,2),s);
+				Py_DECREF(s);
+				PyList_Append(PDGetItem(stack[*depth],2),t);
+				Py_DECREF(t);
+				}
+			else {
+				t = PYSTRING(bit->cdsect_chars);
+				PyList_Append(PDGetItem(stack[*depth],2),t);
+				Py_DECREF(t);
+				}
 			break;
 		case XBIT_dtd:
 			break;
@@ -531,7 +551,7 @@ int	checkFirstProperNode(ParserDetails *pd,PyObject *t)
 		PyErr_Clear();
 		return 0;
 		}
-	return n!=piTagName && n!=commentTagName;
+	return n!=piTagName && n!=commentTagName && n!=CDATATagName;
 }
 
 /*return non zero for error*/
@@ -882,10 +902,18 @@ static struct PyMethodDef moduleMethods[] = {
 	{NULL,	NULL}	/*sentinel*/
 };
 
+#if	defined(_DEBUG) && defined(WIN32)
+#	include <crtdbg.h>
+#endif
 DL_EXPORT(void) initpyRXP(void)
 {
 	PyObject *m, *d, *v, *t;
 	int	i;
+#if	defined(_DEBUG) && defined(WIN32)
+	i = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+	i |= _CRTDBG_CHECK_ALWAYS_DF;
+	_CrtSetDbgFlag(i);
+#endif
 
 	/*set up the types by hand*/
 	pyRXPParserType.ob_type = &PyType_Type;
@@ -905,6 +933,8 @@ DL_EXPORT(void) initpyRXP(void)
 	PyDict_SetItemString(d, "piTagName", piTagName );
 	commentTagName = PYSTRING8("<!--");
 	PyDict_SetItemString(d, "commentTagName", commentTagName );
+	CDATATagName = PYSTRING8("<![CDATA[");
+	PyDict_SetItemString(d, "CDATATagName", CDATATagName );
 	recordLocation = PyString_FromString("recordLocation");
 	PyDict_SetItemString(d, "recordLocation",recordLocation);
 	parser_flags = PyDict_New();
