@@ -4,6 +4,7 @@ from reportlab.test.utils import makeSuiteForClasses, outputfile
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase import pdfutils
 import re
 
 import codecs
@@ -11,12 +12,11 @@ import codecs
 textPat = re.compile(r'\([^(]*\)')
 
 #test sentences
-testLatin1 = 'copyright %s trademark %s registered %s ReportLab! Ol%s!' % (chr(169), chr(153),chr(174), chr(0xe9))
-testUni = unicode(testLatin1, 'latin-1')
-testUTF8 = testUni.encode('utf-8')
+testCp1252 = 'copyright %s trademark %s registered %s ReportLab! Ol%s!' % (chr(169), chr(153),chr(174), chr(0xe9))
+testUni = unicode(testCp1252, 'cp1252')
+testUTF8 = testUni.encode('utf_8')
 # expected result is octal-escaped text in the PDF
-expectedLatin1 = "copyright \\251 trademark \\231 registered \\256 ReportLab! Ol\\351!"
-expectedUTF8 = r"\000\001\002\003\004\005\006\007\010\011\012\011\010\004\013\014\015\016\013\004\017\011\020\011\004\015\006\005\021\010\015\004\015\014\011\022\011\023\015\002\001\004\010\024\013\025\026\011\027\030\031\026"
+expectedCp1252 = pdfutils._escape(testCp1252)
 
 
 def extractText(pdfOps):
@@ -51,11 +51,9 @@ class TextEncodingTestCase(unittest.TestCase):
         #warmup - is my text extraction working?
         self.assertEquals(extractText(c.getCurrentPageContent()), ['hello'])
 
-
-
-        c.drawString(100,700, testLatin1)
+        c.drawString(100,700, testCp1252)
         extracted = extractText(c.getCurrentPageContent())
-        self.assertEquals(extracted[1], expectedLatin1)
+        self.assertEquals(extracted[1], expectedCp1252)
 
         #now we register a unicode truetype font
         pdfmetrics.registerFont(TTFont("Rina", "rina.ttf"))
@@ -70,35 +68,47 @@ class TextEncodingTestCase(unittest.TestCase):
         except:
             UnicodeDecodeError = UnicodeError
 
-        self.assertRaises(UnicodeDecodeError, c.drawString, 100,100,testLatin1)
+        self.assertRaises(UnicodeDecodeError, c.drawString, 100,100,testCp1252)
+
+        # But if we pass in UTF8, it should appear ok
         c.drawString(100, 600, testUTF8)
-        #print 'utf8-',testUTF8
+
+        # And Unicode strings should always be converted
+        c.drawString(100, 500, testUni)
+
         c.save()
 
 
-    def testLatinCanvas(self):
+    def testCp1252Canvas(self):
 
-        """Verify canvas declared as latin autoconverts.
+        """Verify canvas declared as cp1252 autoconverts.
 
-        This assumes winansi (~latin-1) input. It converts to the
-        encoding of the underlying font, so both text lines APPEAR
+        This assumes winansi (cp1252) input. It converts to the
+        encoding of the underlying font, so both all lines APPEAR
         the same."""
 
-        pdfmetrics.registerFont(TTFont("Luxi", "luxiserif.ttf"))
 
         c = Canvas(outputfile('test_pdfbase_encodings_cp1252.pdf'), encoding='cp1252')
-        c.drawString(100,700, testLatin1)
-        extracted = extractText(c.getCurrentPageContent())
-        self.assertEquals(extracted[0], expectedLatin1)
-        
 
-        c.setFont('Luxi', 12)
-        #this should convert on the fly and see the characters in the output...
-        c.drawString(100,600, testLatin1)
+        c.drawString(100,700, testCp1252)
         extracted = extractText(c.getCurrentPageContent())
-        self.assertEquals(extracted[1], expectedUTF8)
+        # Assuming default font's encoding is cp1252
+        self.assertEquals(extracted[0], expectedCp1252)
         
-        
+        # Set a font with UTF8 encoding
+        luxi = TTFont("Luxi", "luxiserif.ttf")
+        pdfmetrics.registerFont(luxi)
+        c.setFont('Luxi', 12)
+
+        # This should convert on the fly from cp1252 to UTF8
+        c.drawString(100,600, testCp1252)
+        # and this should convert from Unicode to UTF8
+        c.drawString(100,500, testUni)
+        extracted = extractText(c.getCurrentPageContent())
+        # Because of font-subsetting this extracted data doesn't really tell us if the 
+        # output is correct, but we can compare the outputs for different input
+        # encoding and ensure they are the same
+        self.assertEquals(extracted[1], extracted[2])
 
         #uncomment this to see some PDF for fun...
         #print c.getCurrentPageContent()
@@ -112,30 +122,25 @@ class TextEncodingTestCase(unittest.TestCase):
         This assumes utf8 input. It converts to the encoding of the
         underlying font, so both text lines APPEAR the same."""
 
-        pdfmetrics.registerFont(TTFont("Luxi", "luxiserif.ttf"))
 
         c = Canvas(outputfile('test_pdfbase_encodings_utf8.pdf'), encoding='utf-8')
-        #it dies here...
 
-##        c.drawString(100,700, testUTF8)
-##        extracted = extractText(c.getCurrentPageContent())
-##        self.assertEquals(extracted[0], expectedUTF8)
-##        
-##
-##        c.setFont('Luxi', 12)
-##        #this should convert on the fly and see the characters in the output...
-##        c.drawString(100,600, testUTF8)
-##        extracted = extractText(c.getCurrentPageContent())
-##        self.assertEquals(extracted[1], expectedUTF8)
-##        
-##        
-##
-##        #uncomment this to see some PDF for fun...
-##        #print c.getCurrentPageContent()
-##        c.save()
+        c.drawString(100,700, testUTF8)
+        extracted = extractText(c.getCurrentPageContent())
+        # Input UTF8 should be encoded to font's cp1252
+        self.assertEquals(extracted[0], expectedCp1252)
+        
+        # Set a font with UTF8 encoding
+        pdfmetrics.registerFont(TTFont("Luxi", "luxiserif.ttf"))
+        c.setFont('Luxi', 12)
 
+        # This should pass the UTF8 through unchanged
+        c.drawString(100,600, testUTF8)
+        # and this should convert from Unicode to UTF8
+        c.drawString(100,500, testUni)
+        extracted = extractText(c.getCurrentPageContent())
 
-    
+        c.save()
 
 
 
