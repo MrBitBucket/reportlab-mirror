@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pyfiles.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pyfiles.py,v 1.6 2001/05/29 16:26:06 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pyfiles.py,v 1.7 2001/08/26 17:34:18 andy_robinson Exp $
 """Tests performed on all Python source files of the ReportLab distribution.
 """
 
@@ -132,13 +132,17 @@ class FilenameTestCase(unittest.TestCase):
         allPyFiles = GlobDirectoryWalker(RL_HOME, '*.py')
 
         for path in allPyFiles:
-            basename = os.path.splitext(path)[0]
-            truncPath = path[string.find(path, 'reportlab'):]
-            msg = "Filename %s contains trailing digits." % truncPath
-            assert basename[-1] not in string.digits, msg
+            #hack - exclude barcode extensions from this test
+            if string.find(path, 'barcode'):
+                pass
+            else:
+                basename = os.path.splitext(path)[0]
+                truncPath = path[string.find(path, 'reportlab'):]
+                msg = "Filename %s contains trailing digits." % truncPath
+                assert basename[-1] not in string.digits, msg
 
-##            if basename[-1] in string.digits:
-##                print truncPath
+    ##            if basename[-1] in string.digits:
+    ##                print truncPath
 
 
 class FirstLineTestCase(SecureTestCase):
