@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.15 2003/03/13 14:35:18 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.16 2003/03/13 16:03:08 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.15 2003/03/13 14:35:18 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.16 2003/03/13 16:03:08 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -81,8 +81,8 @@ The python module exports the following\n\
 \n\
         srcName '[unknown]', name used to refer to the parser src\n\
             in error and warning messages.\n\
-\n"
-"        warnCB  0, should either be None, 0, or a\n\
+\n""\
+        warnCB  0, should either be None, 0, or a\n\
             callable method with a single argument which will\n\
             receive warning messages. If None is used then warnings\n\
             are thrown away. If the default 0 value is used then\n\
