@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.70 2004/03/24 09:42:22 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.70 2004/03/24 09:42:22 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.71 2004/03/24 14:03:31 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.71 2004/03/24 14:03:31 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -196,6 +196,20 @@ if ',' in fp_str(0.25):
     _FP_STR = fp_str
     def fp_str(*a):
         return string.replace(apply(_FP_STR,a),',','.')
+
+_rl_tempdir=None
+def get_rl_tempdir(*subdirs):
+    global _rl_tempdir
+    if _rl_tempdir is None:
+        import tempfile
+        _rl_tempdir = os.path.join(tempfile.gettempdir(),'ReportLab_tmp%s' % (sys.platform=='unix' and `os.getuid()` or ''))
+    d = _rl_tempdir
+    if subdirs: d = os.path.join(*((d,)+subdirs))
+    try:
+        os.makedirs(d)
+    except:
+        pass
+    return d
 
 def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     """Dynamically imports possible packagized module, or raises ImportError"""
