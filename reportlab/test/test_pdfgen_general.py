@@ -2,12 +2,12 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.20 2004/03/12 23:54:11 andy_robinson Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.20 2004/03/12 23:54:11 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.21 2004/03/23 15:37:53 rgbecker Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.21 2004/03/23 15:37:53 rgbecker Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 
-import string
+import os, string
 
 from reportlab.test import unittest
 from reportlab.test.utils import makeSuiteForClasses
@@ -659,7 +659,8 @@ cost to performance.""")
     c.drawText(t)
 
     if haveImages:
-        c.drawInlineImage('pythonpowered.gif',2*inch, 7*inch)
+        gif = os.path.join(os.path.dirname(unittest.__file__),'pythonpowered.gif')
+        c.drawInlineImage(gif,2*inch, 7*inch)
     else:
         c.rect(2*inch, 7*inch, 110, 44)
 
@@ -668,7 +669,7 @@ cost to performance.""")
     c.drawString(4.5 * inch, 7.25*inch, 'inline image drawn at natural size')
 
     if haveImages:
-        c.drawInlineImage('pythonpowered.gif',2*inch, 5*inch, inch, inch)
+        c.drawInlineImage(gif,2*inch, 5*inch, inch, inch)
     else:
         c.rect(2*inch, 5*inch, inch, inch)
 
@@ -681,7 +682,7 @@ cost to performance.""")
 
     for i in range(5):
         if haveImages:
-            (w, h) = c.drawImage('pythonpowered.gif', (1.5 + i)*inch, 3*inch)
+            (w, h) = c.drawImage(gif, (1.5 + i)*inch, 3*inch)
         else:
             c.rect((1.5 + i)*inch, 3*inch, 110, 44)
 
@@ -691,7 +692,7 @@ cost to performance.""")
     c.drawString(1.5 * inch, 2.1*inch, "spanning these RGB values:  %s.  The background vanishes!!" % myMask)
     c.drawString(2.5*inch, 1.2*inch, 'This would normally be obscured')
     if haveImages:
-        c.drawImage('pythonpowered.gif', 3*inch, 1.2*inch, w, h, mask=myMask)
+        c.drawImage(gif, 3*inch, 1.2*inch, w, h, mask=myMask)
     else:
         c.rect(3*inch, 1.2*inch, 110, 44)
 
