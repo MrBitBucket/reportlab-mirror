@@ -244,6 +244,8 @@ class Legend(Widget):
                 if isAuto(swatchMarker):
                     col = swatchMarker
                     col.index = i
+                if isAuto(name):
+                    name = getattr(swatchMarker,'chart',getattr(swatchMarker,'obj',None)).getSeriesName(i,'series %d' % i)
             T = (name and str(name) or '').split('\n')
             S = []
             j = int(i/columnMaximum)

@@ -23,7 +23,8 @@ from reportlab.lib.validators import isColor, isNumber, isListOfNumbersOrNone,\
                                     isBoolean, isListOfColors, isNumberOrNone,\
                                     isNoneOrListOfNoneOrStrings, isTextAnchor,\
                                     isNoneOrListOfNoneOrNumbers, isBoxAnchor,\
-                                    isStringOrNone
+                                    isStringOrNone, NoneOr
+from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.attrmap import *
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS, ArcPath, Polygon, Rect
@@ -84,6 +85,7 @@ class WedgeProperties(PropHolder):
         label_leftPadding = AttrMapValue(isNumber,'padding at left of box'),
         label_rightPadding = AttrMapValue(isNumber,'padding at right of box'),
         label_bottomPadding = AttrMapValue(isNumber,'padding at bottom of box'),
+        swatchMarker = AttrMapValue(NoneOr(isSymbol), desc="None or makeMarker('Diamond') ..."),
         )
 
     def __init__(self):
@@ -163,7 +165,10 @@ class AbstractPieChart(PlotArea):
         strokeColor = getattr(style, 'strokeColor', getattr(baseStyle,'strokeColor',None))
         fillColor = getattr(style, 'fillColor', getattr(baseStyle,'fillColor',None))
         strokeDashArray = getattr(style, 'strokeDashArray', getattr(baseStyle,'strokeDashArray',None))
-        strokeWidth = getattr(style, 'strokeWidth', getattr(style, 'strokeWidth',None))
+        strokeWidth = getattr(style, 'strokeWidth', getattr(baseStyle, 'strokeWidth',None))
+        swatchMarker = getattr(style, 'swatchMarker', getattr(baseStyle, 'swatchMarker',None))
+        if swatchMarker:
+            return uSymbol2Symbol(swatchMarker,x+width/2.,y+height/2.,fillColor)
         return Rect(x,y,width,height,strokeWidth=strokeWidth,strokeColor=strokeColor,
                     strokeDashArray=strokeDashArray,fillColor=fillColor)
 
@@ -174,7 +179,7 @@ class AbstractPieChart(PlotArea):
         except:
             text = default
         if not self.simpleLabels:
-            _text = getattr(getattr(self,self._styleName)[i],'label_text')
+            _text = getattr(self.slices[i],'label_text','')
             if _text is not None: text = _text
         return text
 

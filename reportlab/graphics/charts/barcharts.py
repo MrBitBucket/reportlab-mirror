@@ -15,14 +15,15 @@ from types import FunctionType, StringType
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isString,\
-            isListOfStrings, SequenceOf, isBoolean, isNoneOrShape, isStringOrNone
+            isListOfStrings, SequenceOf, isBoolean, isNoneOrShape, isStringOrNone,\
+            NoneOr
+from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.formatters import Formatter
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing, NotImplementedError
-from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
-from reportlab.graphics.charts.axes import YCategoryAxis, XValueAxis
+from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis, YCategoryAxis, XValueAxis
 from reportlab.graphics.charts.textlabels import BarChartLabel, NA_Label, NoneOrInstanceOfNA_Label
 from reportlab.graphics.charts.areas import PlotArea
 
@@ -33,6 +34,7 @@ class BarChartProperties(PropHolder):
         strokeWidth = AttrMapValue(isNumber, desc='Width of the bar border.'),
         symbol = AttrMapValue(None, desc='A widget to be used instead of a normal bar.'),
         name = AttrMapValue(isString, desc='Text to be associated with a bar (eg seriesname)'),
+        swatchMarker = AttrMapValue(Noneor(isSymbol), desc="None or makeMarker('Diamond') ..."),
         )
 
     def __init__(self):
@@ -71,6 +73,8 @@ class BarChart(PlotArea):
         fillColor = getattr(style, 'fillColor', getattr(baseStyle,'fillColor',None))
         strokeDashArray = getattr(style, 'strokeDashArray', getattr(baseStyle,'strokeDashArray',None))
         strokeWidth = getattr(style, 'strokeWidth', getattr(style, 'strokeWidth',None))
+        if swatchMarker:
+            return uSymbol2Symbol(swatchMarker,x+width/2.,y+height/2.,fillColor)
         return Rect(x,y,width,height,strokeWidth=strokeWidth,strokeColor=strokeColor,
                     strokeDashArray=strokeDashArray,fillColor=fillColor)
 
