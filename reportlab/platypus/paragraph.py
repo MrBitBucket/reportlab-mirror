@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.57 2001/08/23 08:38:59 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.57 2001/08/23 08:38:59 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.58 2001/10/26 14:05:58 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.58 2001/10/26 14:05:58 rgbecker Exp $ '''
 from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
@@ -139,12 +139,15 @@ def _justifyDrawParaLineX( tx, offset, line, last=0):
 			_putFragLine(tx, line.words)
 	setXPos(tx,-offset)
 
-def _sameFrag(f,g):
-	'returns 1 if two ParaFrags map out the same'
-	if hasattr(f,'cbDefn') or hasattr(g,'cbDefn'): return 0
-	for a in ('fontName', 'fontSize', 'textColor', 'rise'):
-		if getattr(f,a)!=getattr(g,a): return 0
-	return 1
+try:
+	from _rl_accel import _sameFrag
+except:
+	def _sameFrag(f,g):
+		'returns 1 if two ParaFrags map out the same'
+		if hasattr(f,'cbDefn') or hasattr(g,'cbDefn'): return 0
+		for a in ('fontName', 'fontSize', 'textColor', 'rise'):
+			if getattr(f,a)!=getattr(g,a): return 0
+		return 1
 
 def _getFragWords(frags):
 	''' given a Parafrag list return a list of fragwords

@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.22 2001/09/05 11:16:20 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.23 2001/10/26 14:03:13 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.22 2001/09/05 11:16:20 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.23 2001/10/26 14:03:13 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -27,7 +27,7 @@ static __version__=" $Id: _rl_accel.c,v 1.22 2001/09/05 11:16:20 rgbecker Exp $ 
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.36"
+#define VERSION "0.37"
 #define MODULE "_rl_accel"
 #ifndef	ATTRDICT
 	#if PY_MAJOR_VERSION>=2
@@ -623,6 +623,37 @@ static PyObject *_instanceEscapePDF(PyObject *unused, PyObject* args)
 	return _escapePDF(text,textLen);
 }
 
+static PyObject *_sameFrag(PyObject *self, PyObject* args)
+{
+	PyObject *f, *g;
+	static char *names[] = {"fontName", "fontSize", "textColor", "rise", NULL};
+	int	r=0, t;
+	char **p;
+	if (!PyArg_ParseTuple(args, "OO:_sameFrag", &f, &g)) return NULL;
+	if(PyObject_HasAttrString(f,"cbDefn")||PyObject_HasAttrString(g,"cbDefn")) goto L0;
+	for(p=names;*p;p++){
+		PyObject *fa, *ga;
+		fa = PyObject_GetAttrString(f,*p);
+		if(!fa){
+L1:			Py_DECREF(fa);
+L2:			Py_INCREF(Py_None);
+			return Py_None;
+			}
+		ga = PyObject_GetAttrString(g,*p);
+		if(!fa){
+			Py_DECREF(ga);
+			goto L1;
+			}
+		t = PyObject_Compare(fa,ga);
+		Py_DECREF(fa);
+		Py_DECREF(ga);
+		if(PyErr_Occurred()) goto L2;
+		if(t) goto L0;
+		}
+	r = 1;
+L0:	return PyInt_FromLong((long)r);
+}
+
 static char *__doc__=
 "_rl_accel contains various accelerated utilities\n\
     stringWidth a fast string width function\n\
@@ -658,6 +689,7 @@ static struct PyMethodDef _methods[] = {
 	{"escapePDF", escapePDF, METH_VARARGS, "escapePDF(s) return PDF safed string"},
 	{"_instanceEscapePDF", _instanceEscapePDF, METH_VARARGS, "_instanceEscapePDF(s) return PDF safed string"},
 	{"fp_str", _fp_str, METH_VARARGS, "fp_str(a0, a1,...) convert numerics to blank separated string"},
+	{"_sameFrag", _sameFrag, 1, "_sameFrag(f,g) return 1 if fragments have same style"},
 #ifdef	ATTRDICT
 	{"_AttrDict", _AttrDict, METH_VARARGS, "_AttrDict() create a dict which can use attribute notation"},
 #endif
