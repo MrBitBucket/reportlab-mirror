@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/grids.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.27 2002/08/11 09:59:57 rgbecker Exp $
-__version__=''' $Id: grids.py,v 1.27 2002/08/11 09:59:57 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.28 2002/08/12 11:02:27 rgbecker Exp $
+__version__=''' $Id: grids.py,v 1.28 2002/08/12 11:02:27 rgbecker Exp $ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColorOrNone, isBoolean, isListOfNumbers, OneOf, isListOfColors
@@ -439,8 +439,7 @@ def colorRange(c0, c1, n):
 
 def centroid(P):
     '''compute average point of a set of points'''
-    fn = float(len(P))
-    return reduce(lambda x,y: (x[0]+y[0]/fn,x[1]+y[1]/fn),P,(0,0))
+    return reduce(lambda x,y, fn=float(len(P)): (x[0]+y[0]/fn,x[1]+y[1]/fn),P,(0,0))
 
 def rotatedEnclosingRect(P, angle, rect):
     '''
