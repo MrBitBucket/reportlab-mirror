@@ -15,7 +15,7 @@ import os
 import imp
 
 import docs.tools.yaml
-
+from docs.tools.rltemplate import RLDocTemplate
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import *
 from reportlab.lib.pagesizes import A4
@@ -26,31 +26,6 @@ from reportlab.lib.units import inch
 
 from docs.tools.stylesheet import getStyleSheet
 
-def decoratePage(canvas, doc):
-    canvas.saveState()
-    canvas.setFont('Times-Roman', 10)
-    canvas.drawCentredString(doc.pagesize[0] / 2, 0.75*inch, 'Page %d' % canvas.getPageNumber())
-    canvas.restoreState()
-
-class MyPageTemplate(PageTemplate):
-    def __init__(self, id):
-        myFrame = Frame(inch, inch, 6*inch, 10*inch, id='normal')
-        PageTemplate.__init__(self, id, [myFrame])  # note lack of onPage
-
-    def drawPage(self, canvas, doc):
-        canvas.saveState()
-        canvas.setFont('Times-Roman', 10)
-        canvas.drawCentredString(doc.pagesize[0] / 2, 0.75*inch, 'Page %d' % canvas.getPageNumber())
-        canvas.restoreState()
-
-
-class MyDocTemplate(BaseDocTemplate):
-    _invalidInitArgs = ('pageTemplates',)
-    def __init__(self, filename, **kw):
-        apply(BaseDocTemplate.__init__,(self,filename),kw)
-
-        #give it a single PageTemplate
-        self.addPageTemplates(MyPageTemplate('Normal'))
 
 def run(infilename, outfilename):
     p = docs.tools.yaml.Parser()
@@ -108,7 +83,7 @@ def run(infilename, outfilename):
             
 
     #print it
-    doc = MyDocTemplate(outfilename, pagesize=A4)
+    doc = RLDocTemplate(outfilename, pagesize=A4)
     doc.build(story)
 
 
