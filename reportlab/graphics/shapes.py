@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.51 2001/09/25 11:01:00 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.52 2001/09/25 16:07:53 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -301,7 +301,7 @@ class Group(Shape):
 		if i<0:
 			self.contents[i:i] =[n]
 		else:
-			slf.contents.insert(i,n)
+			self.contents.insert(i,n)
 		self._addNamedNode(name,n)
 
 	def expandUserNodes(self):
