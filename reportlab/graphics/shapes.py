@@ -1,18 +1,19 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.41 2001/08/31 14:56:05 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.42 2001/09/01 12:14:03 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
 
-import string
+import string, os
 from math import pi, cos, sin, tan
 from types import FloatType, IntType, ListType, TupleType, StringType
 from pprint import pprint
 
 from reportlab.platypus import Flowable
-from reportlab.rl_config import shapeChecking
+from reportlab.rl_config import shapeChecking, _verbose
+from reportlab.lib import logger
 from reportlab.lib import colors
 from reportlab.lib.validators import *
 from reportlab.lib.attrmap import *
@@ -429,6 +430,66 @@ class Drawing(Group, Flowable):
 
 	def asGroup(self):
 		return self._copy(Group())
+
+	def save(self, formats=['pdf'], verbose=None, fnRoot=None):
+		"Saves copies of self in desired location and formats"
+		ext = ''
+		fnroot = os.path.join(getattr(self,'outDir','.'), fnRoot or (getattr(self,'fileNamePattern',(self.__class__.__name__+'%03d') % getattr(self,'chartId',0))))
+
+		plotMode, verbose = formats or getattr(self,'formats',[]), verbose or getattr(self,'verbose',_verbose)
+		_saved = logger.warnOnce.enabled, logger.infoOnce.enabled
+		logger.warnOnce.enabled = logger.infoOnce.enabled = verbose
+		if 'pdf' in plotMode:
+			from reportlab.graphics import renderPDF
+			filename = fnroot+'.pdf'
+			if verbose: print "generating PDF file %s" % repr(filename)
+			renderPDF.drawToFile(self, filename, fnroot)
+			ext = ext +  '/.pdf'
+
+		if 'gif' in plotMode:
+			from reportlab.graphics import renderPM
+			filename = fnroot+'.gif'
+			if verbose: print "generating GIF file %s" % repr(filename)
+			renderPM.drawToFile(self, filename,fmt='GIF')
+			ext = ext +  '/.gif'
+
+		if 'png' in plotMode:
+			from reportlab.graphics import renderPM
+			filename = fnroot+'.png'
+			if verbose: print "generating PNG file %s" % repr(filename)
+			renderPM.drawToFile(self, filename,fmt='PNG')
+			ext = ext +  '/.png'
+
+		if 'tif' in plotMode:
+			from reportlab.graphics import renderPM
+			filename = fnroot+'.tif'
+			if verbose: print "generating TIFF file %s" % repr(filename)
+			renderPM.drawToFile(self, filename,fmt='TIFF')
+			ext = ext +  '/.tif'
+
+		if 'jpg' in plotMode:
+			from reportlab.graphics import renderPM
+			filename = fnroot+'.jpg'
+			if verbose: print "generating JPG file %s" % repr(filename)
+			renderPM.drawToFile(self, filename,fmt='JPEG')
+			ext = ext +  '/.jpg'
+
+		if 'eps' in plotMode:
+			from fidelity.epscharts import renderPS_SEP
+			filename = fnroot+'.eps'
+			if verbose: print "generating EPS file %s" % repr(filename)
+			renderPS_SEP.drawToFile(self,
+								filename,
+								title = fnroot,
+								dept = self.EPS_info[0],
+								company = self.EPS_info[1],
+								preview = self.preview,
+								showBorder=self.showBorder)
+
+			ext = ext +  '/.eps'
+
+		logger.warnOnce.enabled, logger.infoOnce.enabled = _saved
+		return ext and fnroot+ext[1:] or ''
 
 class _DrawingEditorMixin:
 	'''This is a mixin to provide functionality for edited drawings'''
