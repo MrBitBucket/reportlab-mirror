@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.7  2000/05/16 14:28:55  rgbecker
+#	Fixes/Changes to get testplatypus to work with new framework
+#
 #	Revision 1.6  2000/05/15 13:36:11  rgbecker
 #	Splitting changes
-#
+#	
 #	Revision 1.5  2000/05/13 16:03:23  rgbecker
 #	Fix extraspace calculation
 #	
@@ -49,7 +52,7 @@
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.6 2000/05/15 13:36:11 rgbecker Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.7 2000/05/16 14:28:55 rgbecker Exp $ '''
 import string
 import types
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -450,7 +453,6 @@ class Paragraph(Flowable):
 			canvas.saveState()
 			canvas.addLiteral('% textcanvas.drawParagraph()')
 			alignment = style.alignment
-			#is there a bullet?  if so, draw it first
 			offset = style.firstLineIndent - style.leftIndent
 			lim = nLines-1
 			noJustifyLast = not (hasattr(self,'_JustifyLast') and self._JustifyLast)
@@ -470,6 +472,7 @@ class Paragraph(Flowable):
 				if self.bulletText <> None:
 					tx2 = canvas.beginText(style.bulletIndent, cur_y)
 					tx2.setFont(style.bulletFontName, style.bulletFontSize)
+					tx2.setFillColor(hasattr(style,'bulletColor') and style.bulletColor or style.textColor)
 					tx2.textOut(self.bulletText)
 					bulletEnd = tx2.getX()
 					offset = max(offset, bulletEnd - style.leftIndent)

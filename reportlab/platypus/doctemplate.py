@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.7  2000/05/16 14:28:55  rgbecker
+#	Fixes/Changes to get testplatypus to work with new framework
+#
 #	Revision 1.6  2000/05/15 15:07:32  rgbecker
 #	Added drawPage
-#
+#	
 #	Revision 1.5  2000/05/13 08:33:53  rgbecker
 #	fix typo in import
 #	
@@ -49,7 +52,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.6 2000/05/15 15:07:32 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.7 2000/05/16 14:28:55 rgbecker Exp $ '''
 __doc__="""
 More complicated Document model
 """
@@ -82,7 +85,10 @@ class ActionFlowable(Flowable):
 			t, v, None = sys.exc_info()
 			raise t, "%s\n   handle_%s args=%s"%(v,action,args)
 
-FrameBreak = ActionFlowable('frameBegin')
+	def __call__(self):
+		return self
+
+FrameBreak = ActionFlowable('frameEnd')
 PageBegin = ActionFlowable('pageBegin')
 
 class NextPageTemplate(ActionFlowable):
@@ -129,7 +135,8 @@ class BaseDocTemplate:
 	4)	The document instances can override the base handler routines.
 	"""
 	def __init__(self, filename, pagesize=DEFAULT_PAGE_SIZE, pageTemplates=[], showBoundary=0,
-				leftMargin=inch, rightMargin=inch, topMargin=inch, bottomMargin=inch):
+				leftMargin=inch, rightMargin=inch, topMargin=inch, bottomMargin=inch,
+				allowSplitting=1):
 
 		self.pageTemplates = []
 		self.addPageTemplates(pageTemplates)
@@ -142,6 +149,8 @@ class BaseDocTemplate:
 		self.width = self.rightMargin - self.leftMargin
 		self.height = self.topMargin - self.bottomMargin
 		self.pagesize = pagesize
+		self.allowSplitting = allowSplitting
+		self._pageBreakQuick = 1
 
 	def clean_hanging(self):
 		while len(self._hanging):
@@ -182,7 +191,7 @@ class BaseDocTemplate:
 
 	def handle_pageBreak(self):
 		'''some might choose not to end all the frames'''
-		if 1:
+		if self._pageBreakQuick:
 			self.handle_pageEnd()
 		else:
 			n = len(self._hanging)
@@ -191,7 +200,7 @@ class BaseDocTemplate:
 
 	def handle_frameBegin(self,*args):
 		self.frame._reset()
-		if self.showBoundary:
+		if self.showBoundary or self.frame.showBoundary:
 			self.canv.rect(
 						self.frame.x1,
 						self.frame.y1,
@@ -209,6 +218,7 @@ class BaseDocTemplate:
 			self.handle_frameBegin()
 		elif hasattr(self.frame,'lastFrame') or self.frame is self.pageTemplate.frames[-1]:
 			self.handle_pageEnd()
+			self.frame = None
 		else:
 			f = self.frame
 			self.frame = self.pageTemplate.frames[self.pageTemplate.frames.index(f) + 1]
@@ -254,6 +264,7 @@ class BaseDocTemplate:
 			raise TypeError, "argument fx should be string or integer"
 
 	def handle_flowable(self,flowables):
+		'''try to handle one flowable from the front of list flowables.'''
 		f = flowables[0]
 		del flowables[0]
 
@@ -263,10 +274,14 @@ class BaseDocTemplate:
 			f.apply(self)
 		else:
 			#general case we have to do something
-			if not self.frame.add(f, self.canv, trySplit=1):
-				# see if this is a splittable thing
-				S = self.frame.split(f)
-				n = len(S)
+			if not self.frame.add(f, self.canv, trySplit=self.allowSplitting):
+				if self.allowSplitting:
+					# see if this is a splittable thing
+					S = self.frame.split(f)
+					n = len(S)
+				else:
+					n = 0
+
 				if n:
 					if not self.frame.add(S[0], self.canv, trySplit=0):
 						raise "LayoutError", "splitting error"
@@ -288,15 +303,11 @@ class BaseDocTemplate:
 	_handle_currentFrame = handle_currentFrame
 	_handle_nextFrame = handle_nextFrame
 
-	def build(self, flowables):
-		assert filter(lambda x: not isinstance(x,Flowable), flowables)==[], "flowables argument error"
+	def _startBuild(self):
 		self.canv = canvas.Canvas(self.filename)
 		self.handle_documentBegin()
 
-		while len(flowables):
-			self.clean_hanging()
-			self.handle_flowable(flowables)
-
+	def _endBuild(self):
 		if self._hanging!=[] and self._hanging[-1] is PageBegin:
 			del self._hanging[-1]
 			self.clean_hanging()
@@ -306,3 +317,13 @@ class BaseDocTemplate:
 
 		self.canv.save()
 		del self.frame, self.pageTemplate
+
+	def build(self, flowables):
+		assert filter(lambda x: not isinstance(x,Flowable), flowables)==[], "flowables argument error"
+		self._startBuild()
+
+		while len(flowables):
+			self.clean_hanging()
+			self.handle_flowable(flowables)
+
+		self._endBuild()

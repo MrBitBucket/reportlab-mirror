@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: paraparser.py,v $
+#	Revision 1.17  2000/05/16 14:28:55  rgbecker
+#	Fixes/Changes to get testplatypus to work with new framework
+#
 #	Revision 1.16  2000/05/15 12:15:29  rgbecker
 #	CDATA handler added
-#
+#	
 #	Revision 1.15  2000/05/13 16:04:06  rgbecker
 #	made size alias of fontsize for <para>
 #	
@@ -44,7 +47,7 @@
 #	Revision 1.13  2000/04/25 13:07:57  rgbecker
 #	Added license
 #	
-__version__=''' $Id: paraparser.py,v 1.16 2000/05/15 12:15:29 rgbecker Exp $ '''
+__version__=''' $Id: paraparser.py,v 1.17 2000/05/16 14:28:55 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -106,6 +109,7 @@ _paraAttrMap = {'font': ('fontName', None),
 				'bfont': ('bulletFontName', None),
 				'bfontsize': ('bulletFontIndent',_num),
 				'bindent': ('bulletFontIndent',_num),
+				'bcolor': ('bulletColor',stringToColor),
 				'color':('textColor',stringToColor),
 				'fg': ('textColor',stringToColor)}
 
