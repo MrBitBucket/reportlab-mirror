@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/Attic/test_japanese.py,v 1.4 2001/09/19 22:38:13 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/Attic/test_japanese.py,v 1.5 2001/09/25 21:18:53 andy_robinson Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -37,10 +37,11 @@ class JapaneseFontTests(unittest.TestCase):
             from reportlab.pdfbase.cidfonts import CIDFont, findCMapFile
             findCMapFile('90ms-RKSJ-H')
             findCMapFile('90msp-RKSJ-H')
-            findCMapFile('UCS2-H')
+            findCMapFile('Unijis-UCS2-H')
             findCMapFile('EUC-H')
         except:
             #don't have the font pack.  return silently
+            raise
             return
 
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90ms-RKSJ-H'))
@@ -117,15 +118,77 @@ class JapaneseFontTests(unittest.TestCase):
             """)
         c.drawText(tx)
 
+        c.showPage()
+        # kuten table.  Much of the character set is based on a 94x94 grid
+        # which is encoded through various transformations.
+        c.setFont('Helvetica', 24)
+        c.drawString(100,700, 'Characters available in JIS 0208-1997')
+        tx = c.beginText(100, 650)
+        tx.setFont('Helvetica',12)
+        tx.textLines("""This shows a 94x94 block of glyphs constructed
+        programmatically.  The double-byte characters in the JIS 0208
+        standard are all defined within this space.  Depending on the
+        exact encoding used, certain extra vendor specific characters
+        may be present.  See the CJKV book for details.
+            """)
+        c.drawText(tx)        
+        c.setFont('HeiseiMin-W3-EUC-H',4.2)
+        x0 = 100
+        y0 = 500
+        dx = 4.5
+        dy = 4
+        for row in range(94):
+            y = y0 - row*dy
+            c.drawString(50, y, str(row))
+            for cell in range(94):
+                s = chr(row+161) + chr(cell+161)
+                x = x0 + cell*dx
+                c.drawString(x,y,s)
         c.save()
-        if VERBOSE:
-            print 'saved test_japanese.pdf'
         
 
+        if VERBOSE:
+            print 'saved test_japanese.pdf'
+
+    
+    def ___test2_all(self):
+        """Dumps out ALl GLYPHS in a CID font.
+
+        Reach for your microscope :-)"""
+        try:
+            from reportlab.pdfbase.cidfonts import CIDFont, findCMapFile
+            findCMapFile('90ms-RKSJ-H')
+            findCMapFile('Identity-H')
+        except:
+            #don't have the font pack.  return silently
+            return
+
+        pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','Identity-H'))
+    
+        c = Canvas('test_japanese_2.pdf')
+        c.setFont('Helvetica', 30)
+        c.drawString(100,800, 'All Glyphs in Adobe-Japan-1-2 collection!')
+        
+        # the two typefaces
+        c.setFont('HeiseiMin-W3-Identity-H', 2)
+
+        x0 = 50
+        y0 = 700
+        dx = 2
+        dy = 2
+        for row in range(256):
+            for cell in range(256):
+                s = chr(row) + chr(cell)
+                x = x0 + cell*dx
+                y = y0 - row*dy
+                c.drawString(x,y,s)
+                
+        c.save()
+        if VERBOSE:
+            print 'saved test_japanese2.pdf'
+
 def makeSuite():
-    suite = unittest.TestSuite()
-    suite.addTest(JapaneseFontTests('test1'))
-    return suite
+    return unittest.makeSuite(JapaneseFontTests,'test')
 
 #noruntests
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/_cidfontdata.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: _cidfontdata.py,v 1.2 2001/09/10 02:39:30 andy_robinson Exp $ '''
+__version__=''' $Id: _cidfontdata.py,v 1.3 2001/09/25 21:18:53 andy_robinson Exp $ '''
 __doc__="""
 This defines additional static data to support CID fonts.
 
@@ -13,36 +13,118 @@ through Distiller, then examining the resulting PDFs.
 
 Each font is described as a big nested dictionary.  This lets us keep
 code out of the module altogether and avoid circular dependencies.
+
+The encoding and font data are grouped by some standard 'language
+prefixes':
+   chs = Chinese Simplified (mainland)
+   cht = Chinese Traditional (Taiwan)
+   kor = Korean
+   jpn = Japanese
 """
 languages = ['japanese', 'korean']
 
-allowedTypeFaces = ['HeiseiMin-W3', 'HeiseiKakuGo-W5', '\xB9\xD9\xC5\xC1\xC3\xBC']
-allowedEncodings = [
-    # list of official encoding names we support, from PDF Spec
-    '83pv-RKSJ-H', #Macintosh, JIS X 0208 character set with KanjiTalk6 extensions, Shift-JIS encoding, Script Manager code 1
-    '90ms-RKSJ-H', #Microsoft Code Page 932 (lfCharSet 0x80), JIS X 0208 character set with NEC and IBM extensions
-    '90ms-RKSJ-V', #Vertical version of 90ms-RKSJ-H
-    '90msp-RKSJ-H', #Same as 90ms-RKSJ-H, but replaces half-width Latin characters with proportional forms
-    '90msp-RKSJ-V', #Vertical version of 90msp-RKSJ-H
-    '90pv-RKSJ-H', #Macintosh, JIS X 0208 character set with KanjiTalk7 extensions, Shift-JIS encoding, Script Manager code 1
-    'Add-RKSJ-H', #JIS X 0208 character set with Fujitsu FMR extensions, Shift-JIS encoding
-    'Add-RKSJ-V', #Vertical version of Add-RKSJ-H
-    'EUC-H', #JIS X 0208 character set, EUC-JP encoding
-    'EUC-V', #Vertical version of EUC-H
-    'Ext-RKSJ-H', #JIS C 6226 (JIS78) character set with NEC extensions, Shift-JIS encoding
-    'Ext-RKSJ-V', #Vertical version of Ext-RKSJ-H
-    'H', #JIS X 0208 character set, ISO-2022-JP encoding,
-    'V', #Vertical version of H
-    'UniJIS-UCS2-H', #Unicode (UCS-2) encoding for the Adobe-Japan1 character collection
-    'UniJIS-UCS2-V', #Vertical version of UniJIS-UCS2-H
-    'UniJIS-UCS2-HW-H', #Same as UniJIS-UCS2-H, but replaces proportional Latin characters with half-width forms
-    'UniJIS-UCS2-HW-V', #Vertical version of UniJIS-UCS2-HW-H
+#breaking down the lists let us check if something is present
+#for a specific language
+typeFaces_chs = [] # to do
+typeFaces_cht = [] # to do
+typeFaces_jpn = ['HeiseiMin-W3', 'HeiseiKakuGo-W5']
+typeFaces_kor = ['HYSMyeongJoStd-Medium-Acro']
 
-    #Korean font
-    'KSCms-UHC-H'    
+allowedTypeFaces = typeFaces_chs + typeFaces_cht + typeFaces_jpn + typeFaces_kor
+
+
+
+
+encodings_jpn = [
+    # official encoding names, comments taken verbatim from PDF Spec
+    '83pv-RKSJ-H',      #Macintosh, JIS X 0208 character set with KanjiTalk6
+                        #extensions, Shift-JIS encoding, Script Manager code 1
+    '90ms-RKSJ-H',      #Microsoft Code Page 932 (lfCharSet 0x80), JIS X 0208
+                        #character set with NEC and IBM extensions
+    '90ms-RKSJ-V',      #Vertical version of 90ms-RKSJ-H
+    '90msp-RKSJ-H',     #Same as 90ms-RKSJ-H, but replaces half-width Latin
+                        #characters with proportional forms
+    '90msp-RKSJ-V',     #Vertical version of 90msp-RKSJ-H
+    '90pv-RKSJ-H',      #Macintosh, JIS X 0208 character set with KanjiTalk7
+                        #extensions, Shift-JIS encoding, Script Manager code 1
+    'Add-RKSJ-H',       #JIS X 0208 character set with Fujitsu FMR extensions,
+                        #Shift-JIS encoding
+    'Add-RKSJ-V',       #Vertical version of Add-RKSJ-H
+    'EUC-H',            #JIS X 0208 character set, EUC-JP encoding
+    'EUC-V',            #Vertical version of EUC-H
+    'Ext-RKSJ-H',       #JIS C 6226 (JIS78) character set with NEC extensions,
+                        #Shift-JIS encoding
+    'Ext-RKSJ-V',       #Vertical version of Ext-RKSJ-H
+    'H',                #JIS X 0208 character set, ISO-2022-JP encoding,
+    'V',                #Vertical version of H
+    'UniJIS-UCS2-H',    #Unicode (UCS-2) encoding for the Adobe-Japan1 character
+                        #collection
+    'UniJIS-UCS2-V',    #Vertical version of UniJIS-UCS2-H
+    'UniJIS-UCS2-HW-H', #Same as UniJIS-UCS2-H, but replaces proportional Latin
+                        #characters with half-width forms
+    'UniJIS-UCS2-HW-V'  #Vertical version of UniJIS-UCS2-HW-H
+    ]
+encodings_kor = [
+    'KSC-EUC-H',        # KS X 1001:1992 character set, EUC-KR encoding
+    'KSC-EUC-V',        # Vertical version of KSC-EUC-H
+    'KSCms-UHC-H',      # Microsoft Code Page 949 (lfCharSet 0x81), KS X 1001:1992
+                        #character set plus 8,822 additional hangul, Unified Hangul
+                        #Code (UHC) encoding
+    'KSCms-UHC-V',      #Vertical version of KSCms-UHC-H
+    'KSCms-UHC-HW-H',   #Same as KSCms-UHC-H, but replaces proportional Latin
+                        # characters with halfwidth forms
+    'KSCms-UHC-HW-V',   #Vertical version of KSCms-UHC-HW-H
+    'KSCpc-EUC-H',      #Macintosh, KS X 1001:1992 character set with MacOS-KH
+                        #extensions, Script Manager Code 3
+    'UniKS-UCS2-H',     #Unicode (UCS-2) encoding for the Adobe-Korea1 character collection
+    'UniKS-UCS2-V'      #Vertical version of UniKS-UCS2-H
+    
     ]
 
+encodings_chs = [
+
+    'GB-EUC-H',         # Microsoft Code Page 936 (lfCharSet 0x86), GB 2312-80
+                        # character set, EUC-CN encoding
+    'GB-EUC-V',         # Vertical version of GB-EUC-H
+    'GBpc-EUC-H',       # Macintosh, GB 2312-80 character set, EUC-CN encoding,
+                        # Script Manager code 2
+    'GBpc-EUC-V',       # Vertical version of GBpc-EUC-H
+    'GBK-EUC-H',        # Microsoft Code Page 936 (lfCharSet 0x86), GBK character
+                        # set, GBK encoding
+    'GBK-EUC-V',        # Vertical version of GBK-EUC-V
+    'UniGB-UCS2-H',     # Unicode (UCS-2) encoding for the Adobe-GB1
+                        # character collection
+    'UniGB-UCS2-V'     # Vertical version of UniGB-UCS2-H.
+    ]
+
+encodings_cht = [
+    'B5pc-H',           # Macintosh, Big Five character set, Big Five encoding,
+                        # Script Manager code 2
+    'B5pc-V',           # Vertical version of B5pc-H
+    'ETen-B5-H',        # Microsoft Code Page 950 (lfCharSet 0x88), Big Five
+                        # character set with ETen extensions
+    'ETen-B5-V',        # Vertical version of ETen-B5-H
+    'ETenms-B5-H',      # Microsoft Code Page 950 (lfCharSet 0x88), Big Five
+                        # character set with ETen extensions; this uses proportional
+                        # forms for half-width Latin characters.
+    'ETenms-B5-V',      # Vertical version of ETenms-B5-H
+    'CNS-EUC-H',        # CNS 11643-1992 character set, EUC-TW encoding
+    'CNS-EUC-V',        # Vertical version of CNS-EUC-H
+    'UniCNS-UCS2-H',    # Unicode (UCS-2) encoding for the Adobe-CNS1
+                        # character collection
+    'UniCNS-UCS2-V'    # Vertical version of UniCNS-UCS2-H.
+    ]
+
+allowedEncodings = (['Identity-H', 'Identity-V'] +
+                    encodings_chs +
+                    encodings_cht +
+                    encodings_jpn +
+                    encodings_kor
+                    )
+
+
 CIDFontInfo = {}
+#statically describe the fonts in Adobe's Japanese Language Packs
 CIDFontInfo['HeiseiMin-W3'] = {
             'Type':'/Font',
             'Subtype':'/Type0',
@@ -136,14 +218,14 @@ CIDFontInfo['HeiseiKakuGo-W5'] =  {'Type':'/Font',
             }
 
 
-CIDFontInfo['\xB9\xD9\xC5\xC1\xC3\xBC'] =  {'Type':'/Font',
+CIDFontInfo['HYSMyeongJoStd-Medium-Acro'] =  {'Type':'/Font',
             'Subtype':'/Type0',
             'Name': '/%(internalName)s', #<-- the internal name
-            'BaseFont': '/\xB9\xD9\xC5\xC1\xC3\xBC',
+            'BaseFont': '/' + 'HYSMyeongJoStd-Medium-Acro',
             'Encoding': '/%(encodings)s',
             'DescendantFonts': [{'Type':'/Font',
                 'Subtype':'/CIDFontType2',
-                'BaseFont':'/\xB9\xD9\xC5\xC1\xC3\xBC',
+                'BaseFont':'/'+'HYSMyeongJoStd-Medium-Acro',
                 'FontDescriptor': {
                     'Type': '/FontDescriptor',
                     'Ascent': 858,
@@ -152,7 +234,7 @@ CIDFontInfo['\xB9\xD9\xC5\xC1\xC3\xBC'] =  {'Type':'/Font',
                     'Descent': -142,
                     'Flags': 7,
                     'FontBBox': [-100, -142, 1100, 1000],
-                    'FontName': '/#b#d#c#c#c#b',
+                    'FontName': '/'+'HYSMyeongJoStd-Medium-Acro',
                     'ItalicAngle': 0,
                     'Leading': 148,
                     'MaxWidth': 1000,
