@@ -1,4 +1,201 @@
 #################################################################################
+#################### RELEASE 1.11 at 14:00 GMT 12/December/2001 #################
+#################################################################################
+##### 2001/12/12 #####
+	utils/daily.py 1.52 rgbecker
+		 Rely on existing files in the HTML area
+##### 2001/12/11 #####
+	docs/userguide/genuserguide.py 1.9 rgbecker
+		 Fix misspelling
+	docs/userguide/genuserguide.py 1.8 rgbecker
+		 Added default page size to run
+##### 2001/12/10 #####
+	lib/PyFontify.py 1.2 dinu_gherman
+		 Moved 2.0 string method to using 1.5.2-style string module.
+	graphics/widgets/flags.py 1.18 dinu_gherman
+		 Added new flag.
+##### 2001/12/08 #####
+	lib/pagesizes.py 1.8 andy_robinson
+		 portrait/landscape functions fixed
+##### 2001/12/07 #####
+	utils/daily.py 1.51 rgbecker
+		 After debugging on zelaza
+	docs/genAll.py 1.5 rgbecker
+		 better error reporting
+	docs/genAll.py 1.4 rgbecker
+		 Added missing sys import
+	utils/daily.py 1.50 rgbecker
+		 Move to fewer spawnings
+	docs/genAll.py 1.3 rgbecker
+		 Allow for use in daily.py
+##### 2001/12/06 #####
+	graphics/widgets/grids.py 1.19 rgbecker
+		 Fix frange numerical problems
+	graphics/charts/barcharts.py 1.57 rgbecker
+		 Added in primitive gridding on Axes and bar charts
+	graphics/charts/axes.py 1.48 rgbecker
+		 Added in primitive gridding on Axes and bar charts
+	graphics/charts/legends.py 1.17 rgbecker
+		 Fixed legend to use ascent for vertical centring
+	graphics/renderPS.py 1.14 rgbecker
+		 made PS polyline fail same as PDF one
+##### 2001/12/05 #####
+	graphics/charts/textlabels.py 1.23 rgbecker
+		 Changes needed for labeldecorator
+	graphics/charts/barcharts.py 1.56 rgbecker
+		 Changes needed for labeldecorator
+##### 2001/12/04 #####
+	graphics/charts/legends.py 1.16 rgbecker
+		 Fixed up multiline legend text
+##### 2001/11/30 #####
+	tools/py2pdf/py2pdf.py 1.2 dinu_gherman
+		 Fixed top-level function process() to work as expected. And added 'verbose' to list of allowed options.
+##### 2001/11/29 #####
+	test/test_tools_pythonpoint.py 1.3 rgbecker
+		 allow for pythonpoint.exe
+	docs/userguide/genuserguide.py 1.7 rgbecker
+		 Generate directly to ../docs
+	graphics/shapes.py 1.69 rgbecker
+		 Added .ps Drawing.save support
+##### 2001/11/28 #####
+	platypus/tables.py 1.47 rgbecker
+		 Fixed case when commands enetered as tuple
+	pdfbase/pdfmetrics.py 1.49 rgbecker
+		 Added Paul Winkler's extension case patch
+	graphics/testshapes.py 1.15 rgbecker
+		 Added Paul Winkler's font test
+##### 2001/11/27 #####
+	platypus/tableofcontents.py 1.4 andy_robinson
+		 Missed a checkin
+	test/test_platypus_xref.py 1.1 andy_robinson
+		 whoops, stray print statement
+##### 2001/11/26 #####
+	pdfgen/canvas.py 1.94 andy_robinson
+		 Better doc string for linkURL
+	test/test_pdfgen_general.py 1.9 andy_robinson
+		 Link borders now finished
+	pdfgen/canvas.py 1.93 andy_robinson
+		 Link borders now finished
+	tools/docco/graphdocpy.py 1.11 andy_robinson
+		 Removed 0 from multiBuild stuff prior to further changes; ensured test suite really does run silently when making manuals.
+	tools/docco/docpy.py 1.3 andy_robinson
+		 Removed 0 from multiBuild stuff prior to further changes; ensured test suite really does run silently when making manuals.
+	test/test_platypus_toc.py 1.7 andy_robinson
+		 Removed 0 from multiBuild stuff prior to further changes; ensured test suite really does run silently when making manuals.
+	test/test_platypus_paragraphs.py 1.7 andy_robinson
+		 Removed 0 from multiBuild stuff prior to further changes; ensured test suite really does run silently when making manuals.
+	test/test_platypus_breaking.py 1.3 andy_robinson
+		 Removed 0 from multiBuild stuff prior to further changes; ensured test suite really does run silently when making manuals.
+	test/test_hello.py 1.1 andy_robinson
+		 Removed 0 from multiBuild stuff prior to further changes; ensured test suite really does run silently when making manuals.
+	test/test_docs_build.py 1.2 andy_robinson
+		 Removed 0 from multiBuild stuff prior to further changes; ensured test suite really does run silently when making manuals.
+	test/test_charts_textlabels.py 1.2 andy_robinson
+		 Removed 0 from multiBuild stuff prior to further changes; ensured test suite really does run silently when making manuals.
+	platypus/tableofcontents.py 1.3 andy_robinson
+		 Removed 0 from multiBuild stuff prior to further changes; ensured test suite really does run silently when making manuals.
+	platypus/doctemplate.py 1.49 andy_robinson
+		 Removed 0 from multiBuild stuff prior to further changes; ensured test suite really does run silently when making manuals.
+	lib/tocindex.py 1.8 andy_robinson
+		 Removed 0 from multiBuild stuff prior to further changes; ensured test suite really does run silently when making manuals.
+	lib/abag.py 1.5 andy_robinson
+		 Removed 0 from multiBuild stuff prior to further changes; ensured test suite really does run silently when making manuals.
+	test/test_pdfgen_general.py 1.8 andy_robinson
+		 Hyperlink borders can be on or off
+	pdfgen/canvas.py 1.92 andy_robinson
+		 Hyperlink borders can be on or off
+	tools/pythonpoint/stdparser.py 1.3 rgbecker
+		 More changes to eliminate FS dependencies
+	tools/pythonpoint/stdparser.py 1.2 rgbecker
+		 Changes to support exe version
+	tools/pythonpoint/pythonpoint.py 1.7 rgbecker
+		 Changes to support exe version
+##### 2001/11/24 #####
+	graphics/charts/barcharts.py 1.55 andy_robinson
+		 Got rid of += for 1.5.2 compatibility
+##### 2001/11/23 #####
+	platypus/tables.py 1.46 rgbecker
+		 Added _opts to TableStyle for possible keepWithNext
+##### 2001/11/22 #####
+	tools/pythonpoint/demos/lj8100.jpg 1.1 dinu_gherman
+		 Added mysteriously missing image file.
+	tools/pythonpoint/demos/pythonpoint.xml 1.5 dinu_gherman
+		 Changed presentation to new ReportLab vector logo and color.
+	tools/pythonpoint/customshapes.py 1.3 dinu_gherman
+		 Changed presentation to new ReportLab vector logo and color.
+##### 2001/11/21 #####
+	pdfbase/pdfmetrics.py 1.48 rgbecker
+		 Changed to lower case glob for afm
+	test/test_pdfgen_general.py 1.7 andy_robinson
+		 Added linkURL method and test
+	pdfgen/canvas.py 1.91 andy_robinson
+		 Added linkURL method and test
+##### 2001/11/19 #####
+	pdfbase/pdfdoc.py 1.54 aaron_watters
+		 support for getting form bounding boxes
+	lib/colors.py 1.29 dinu_gherman
+		 Added ReportLabLightBlue.
+	platypus/doctemplate.py 1.48 rgbecker
+		 Fixed up keepWithNext so it works
+	test/test_platypus_breaking.py 1.2 rgbecker
+		 Allowed for dubgging runs
+	platypus/flowables.py 1.23 rgbecker
+		 Add getKeepWithNext to Flowable
+##### 2001/11/18 #####
+	platypus/doctemplate.py 1.47 andy_robinson
+		 Experiments with platypus
+##### 2001/11/17 #####
+	test/test_platypus_breaking.py 1.1 andy_robinson
+		 KeepWithNext experiments
+##### 2001/11/16 #####
+	graphics/widgets/flags.py 1.17 rgbecker
+		 Fix stray stroke line
+##### 2001/11/13 #####
+	tools/docco/rl_doc_utils.py 1.2 dinu_gherman
+		 Removed platdemos.py (now platypus/figures.py), changed refs in rl_doc_utils.py.
+	tools/docco/platdemos.py 1.3 dinu_gherman
+		 Removed platdemos.py (now platypus/figures.py), changed refs in rl_doc_utils.py.
+	pdfbase/pdfutils.py 1.28 aaron_watters
+		 took python implementation of base85 encoding out of conditional
+	platypus/figures.py 1.1 dinu_gherman
+		 Initial checkin, copy of tools/docco/platdemos.py.
+	rl_addons/renderPM/setup.py 1.6 rgbecker
+		 Added linux2 following email from Niki Spahiev
+	graphics/renderPM.py 1.16 rgbecker
+		 Added useful method from Niki Spahiev
+##### 2001/11/08 #####
+	docs/userguide/ch1_intro.py 1.4 johnprecedo
+		 Added a section ('Learning More About Python')
+	docs/graphguide/ch1_intro.py 1.5 johnprecedo
+		 Fixed a typo.
+	docs/graphguide/ch1_intro.py 1.4 johnprecedo
+		 Stripped out redundant stuff that was identical to the User Guide. Added some general description and introduction.
+	docs/graphguide/ch2_concepts.py 1.3 johnprecedo
+		 Small wording change.
+	graphics/shapes.py 1.68 rgbecker
+		 Moved PS_SEP to rlextra/graphics
+##### 2001/11/07 #####
+	graphics/shapes.py 1.67 rgbecker
+		 Improved save(verbose=0) and .transform output in _repr
+	graphics/shapes.py 1.66 rgbecker
+		 Added .py save format for Drawings, seems to work
+	docs/graphguide/ch1_intro.py 1.3 johnprecedo
+		 Brought into line with USer Guide chapter 1 (various updates). Page 1 now calls it the 'Graphics Guide' rather than the 'User Guide'.
+	docs/userguide/ch1_intro.py 1.3 johnprecedo
+		 Modified installation iistructions - now refers to correct tests and Python 2.1 rather than 1.5.2. Mac install instructions updated with bits from EPSCharts Mac install docs.
+	docs/images/fileExchange.gif 1.1 johnprecedo
+		 New Mac images for the documentation.
+	docs/images/Python_21_HINT.gif 1.1 johnprecedo
+		 New Mac images for the documentation.
+	docs/images/Python_21.gif 1.1 johnprecedo
+		 New Mac images for the documentation.
+	docs/images/Python_1.6a2_HINT.gif 1.2 johnprecedo
+		 Outdated - removed ready for replacement by Python 2.1 versions.
+	docs/images/Python_1.6a2.gif 1.2 johnprecedo
+		 Outdated - removed ready for replacement by Python 2.1 versions.
+	license.txt 1.3 rgbecker
+		 BSD license: OWNER=ReportLab Inc. ORG=Company REGENTS=OFFICERS
+#################################################################################
 #################### RELEASE 1.10 at 14:00 GMT 06/November/2001 #################
 #################################################################################
 ##### 2001/11/06 #####
