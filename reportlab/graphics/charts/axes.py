@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.17 2001/05/01 09:18:53 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.18 2001/05/01 12:30:20 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -209,15 +209,15 @@ class XCategoryAxis(CategoryAxis):
     def makeTicks(self):
         g = Group()
         
-        if (self.tickUp != self.tickDown):
+        if self.tickUp or self.tickDown:
             for i in range(self._catCount + 1):
-                x = self._x + (1.0 * i * self._barWidth)
-                tick = Line(x, self._y + self.tickUp,
-                            x, self._y - self.tickDown)
-                tick.strokeColor = self.strokeColor
-                tick.strokeWidth = self.strokeWidth
-                tick.strokeDashArray = self.strokeDashArray
-                g.add(tick)
+                if self.tickUp or self.tickDown:
+                    x = self._x + (1.0 * i * self._barWidth)
+                    tick = Line(x, self._y + self.tickUp, x, self._y - self.tickDown)
+                    tick.strokeColor = self.strokeColor
+                    tick.strokeWidth = self.strokeWidth
+                    tick.strokeDashArray = self.strokeDashArray
+                    g.add(tick)
 
         return g
 
@@ -370,15 +370,15 @@ class YCategoryAxis(CategoryAxis):
     def makeTicks(self):
         g = Group()
 
-        if (self.tickLeft != self.tickRight):
+        if self.tickLeft or self.tickRight:
             for i in range(self._catCount + 1):
-                y = self._y + (1.0 * i * self._barWidth)
-                tick = Line(self._x - self.tickLeft, y,
-                            self._x + self.tickRight, y)
-                tick.strokeColor = self.strokeColor
-                tick.strokeWidth = self.strokeWidth
-                tick.strokeDashArray = self.strokeDashArray
-                g.add(tick)
+                if self.tickLeft or self.tickRight:
+                    y = self._y + (1.0 * i * self._barWidth)
+                    tick = Line(self._x - self.tickLeft, y, self._x + self.tickRight, y)
+                    tick.strokeColor = self.strokeColor
+                    tick.strokeWidth = self.strokeWidth
+                    tick.strokeDashArray = self.strokeDashArray
+                    g.add(tick)
 
         return g
 
@@ -609,6 +609,32 @@ class ValueAxis(Widget):
             self._valueStep = self.valueStep
 
 
+    def makeTickLabels(self):
+        g = Group()
+
+        f = self.labelTextFormat
+        pos = [self._x, self._y]
+        d = self._dataIndex
+        labels = self.labels
+
+
+        i = 0
+        for tick in self._tickValues:
+            if f:
+                v = self.scale(tick)
+                if type(f) is StringType: txt = f % tick
+                elif type(f) in (TupleType,ListType): txt = f[i]
+                else: txt = f(tick)
+                label = labels[i]
+                pos[d] = v
+                apply(label.setOrigin,pos)
+                label.setText(txt)
+                g.add(label)
+            i = i + 1
+
+        return g
+
+
     def draw(self):
         g = Group()
 
@@ -633,10 +659,11 @@ class XValueAxis(ValueAxis):
         'joinAxisMode':OneOf(('bottom', 'top', 'value', 'points', None)),
         'joinAxisPos':isNumberOrNone,
         })
+ 
+    _dataIndex = 0
 
     def __init__(self):
         ValueAxis.__init__(self)
-        self._dataIndex = 0
         self.labels.boxAnchor = 'n'
         self.labels.dx = 0
         self.labels.dy = -5
@@ -726,10 +753,9 @@ class XValueAxis(ValueAxis):
 
         i = 0
         for tickValue in self._tickValues:
-            x = self.scale(tickValue)
-            if (self.tickUp != self.tickDown):
-                tick = Line(x, self._y - self.tickDown,
-                            x, self._y + self.tickUp)
+            if self.tickUp or self.tickDown:
+                x = self.scale(tickValue)
+                tick = Line(x, self._y - self.tickDown, x, self._y + self.tickUp)
                 tick.strokeColor = self.strokeColor
                 tick.strokeWidth = self.strokeWidth
                 tick.strokeDashArray = self.strokeDashArray
@@ -738,28 +764,6 @@ class XValueAxis(ValueAxis):
         return g
 
 
-    def makeTickLabels(self):
-        g = Group()
-
-        formatFunc = self.labelTextFormat
-
-        i = 0
-        for tickValue in self._tickValues:
-            x = self.scale(tickValue)
-            if formatFunc:
-                if type(formatFunc) is StringType:
-                    labelText = formatFunc % tickValue
-                else:
-                    labelText = formatFunc(tickValue)
-                label = self.labels[i]
-                label.setOrigin(x, self._y)
-                label.setText(labelText)
-                g.add(label)
-            i = i + 1
-
-        return g
-
-        
 class YValueAxis(ValueAxis):
     "Y/value axis"
 
@@ -771,10 +775,10 @@ class YValueAxis(ValueAxis):
         'joinAxisMode':OneOf(('left', 'right', 'value', 'points', None)),
         'joinAxisPos':isNumberOrNone,
         })
+    _dataIndex = 1
 
     def __init__(self):
         ValueAxis.__init__(self)
-        self._dataIndex = 1
         self.labels.boxAnchor = 'e'
         self.labels.dx = -5
         self.labels.dy = 0
@@ -864,40 +868,16 @@ class YValueAxis(ValueAxis):
 
         i = 0
         for tickValue in self._tickValues:
-            y = self.scale(tickValue)
-            if (self.tickLeft != self.tickRight):
-                tick = Line(self._x - self.tickLeft, y,
-                            self._x + self.tickRight, y)
+            if self.tickLeft or self.tickRight:
+                y = self.scale(tickValue)
+                tick = Line(self._x - self.tickLeft, y, self._x + self.tickRight, y)
                 tick.strokeColor = self.strokeColor
                 tick.strokeWidth = self.strokeWidth
                 tick.strokeDashArray = self.strokeDashArray
                 g.add(tick)
 
         return g
-
-
-    def makeTickLabels(self):
-        g = Group()
-
-        formatFunc = self.labelTextFormat
-
-        i = 0
-        for tickValue in self._tickValues:
-            y = self.scale(tickValue)
-            if formatFunc:
-                if type(formatFunc) is StringType:
-                    labelText = formatFunc % tickValue
-                else:
-                    labelText = formatFunc(tickValue)
-                label = self.labels[i]
-                label.setOrigin(self._x, y)
-                label.setText(labelText)
-                g.add(label)
-            i = i + 1
-
-        return g
-
-        
+ 
 # Deprecated!!! Will change!!!
 
 ##class XTimeValueAxis(XValueAxis):
