@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.94 2003/08/03 12:46:23 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.95 2003/08/03 14:50:14 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.94 2003/08/03 12:46:23 andy_robinson Exp $ '''
+__version__=''' $Id: shapes.py,v 1.95 2003/08/03 14:50:14 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -196,7 +196,7 @@ def getRectsBounds(rectList):
         if elem is not None:
             rectList2.append(elem)
     xMin, yMin, xMax, yMax = rectList2[0]
-    
+
     for (x1, y1, x2, y2) in rectList2[1:]:
         if x1 < xMin:
             xMin = x1
@@ -208,24 +208,22 @@ def getRectsBounds(rectList):
             yMax = y2
     return (xMin, yMin, xMax, yMax)
 
-def getPointsBounds(pointList):
-    "Helper function for list of points"
-    xs = []
-    ys = []
-    first = pointList[0]
-    if type(first) in (ListType, TupleType):
-        # pairs of things
-        for (x, y) in pointList:
-            xs.append(x)
-            ys.append(y)
-    else:
-        points = pointList[:]
-        while points:
-            xs.append(points[0])
-            ys.append(points[1])
-            points = points[2:]
+def getPathBounds(points):
+    n = len(points)
+    f = lambda i,p = points: p[i]
+    xs = map(f,xrange(0,n,2))
+    ys = map(f,xrange(1,n,2))
     return (min(xs), min(ys), max(xs), max(ys))
 
+def getPointsBounds(pointList):
+    "Helper function for list of points"
+    first = pointList[0]
+    if type(first) in (ListType, TupleType):
+        xs = map(lambda xy: xy[0],pointList)
+        ys = map(lambda xy: xy[1],pointList)
+        return (min(xs), min(ys), max(xs), max(ys))
+    else:
+        return getPathBounds(pointList)
 
 #################################################################
 #
@@ -308,8 +306,8 @@ class Shape(_SetKeyWordArgs,_DrawTimeResizeable):
     def getBounds(self):
         "Returns bounding rectangle of object as (x1,y1,x2,y2)"
         raise NotImplementedError("Shapes and widgets must implement getBounds")
-        
-        
+
+
 
 class Group(Shape):
     """Groups elements together.  May apply a transform
@@ -494,7 +492,7 @@ class Group(Shape):
             #nothing has been added to yet.  The alternative is
             #to handle None as an allowed return value everywhere.
             return None
-        
+
 def _addObjImport(obj,I,n=None):
     '''add an import of obj's class to a dictionary of imports'''
     from inspect import getmodule
@@ -785,7 +783,7 @@ class Line(LineShape):
     def getBounds(self):
         "Returns bounding rectangle of object as (x1,y1,x2,y2)"
         return (self.x1, self.y1, self.x2, self.y2)
-    
+
 
 class SolidShape(LineShape):
     # base for anything with outline and content
@@ -866,15 +864,8 @@ class Path(SolidShape):
         self.operators.append(_CLOSEPATH)
 
     def getBounds(self):
-        xs = []
-        ys = []
-        points = self.points[:]
-        while points:
-            xs.append(points[0])
-            ys.append(points[1])
-            points = points[2:]
-        return (min(xs), min(ys), max(xs), max(ys))
-    
+        return getPathBounds(self.points)
+
 EmptyClipPath=Path()    #special path
 
 def definePath(pathSegs=[],isClipPath=0, dx=0, dy=0, **kw):
@@ -927,7 +918,7 @@ class Rect(SolidShape):
 
     def getBounds(self):
         return (self.x, self.y, self.x + self.width, self.y + self.height)
-    
+
 
 class Image(SolidShape):
     """Bitmap image."""
@@ -1088,7 +1079,7 @@ class Wedge(SolidShape):
 
     def getBounds(self):
         return self.asPolygon().getBounds()
-        
+
 class Polygon(SolidShape):
     """Defines a closed shape; Is implicitly
     joined back to the start for you."""
@@ -1185,7 +1176,6 @@ class String(Shape):
             x = self.x - w
         return (x, self.y - 0.2 * self.fontSize, x+w, self.y + self.fontSize)
 
-    
 class UserNode(_DrawTimeResizeable):
     """A simple template for creating a new node.  The user (Python
     programmer) may subclasses this.  provideNode() must be defined to
