@@ -68,11 +68,22 @@ class CodeChartBase(Flowable):
                     self.boxSize, self.boxSize, stroke=0, fill=1)
                 self.canv.setFillGray(0.0)
             else:
-                self.canv.drawCentredString(
+                try:
+                    self.canv.drawCentredString(
                             (col+1.5) * self.boxSize,
                             (self.rows - row - 0.875) * self.boxSize,
-                            ch
+                            ch,
                             )
+                except:
+                    self.canv.setFillGray(0.9)
+                    self.canv.rect((1+col) * self.boxSize, (self.rows - row - 1) * self.boxSize,
+                        self.boxSize, self.boxSize, stroke=0, fill=1)
+                    self.canv.drawCentredString(
+                            (col+1.5) * self.boxSize,
+                            (self.rows - row - 0.875) * self.boxSize,
+                            '?',
+                            )
+                    self.canv.setFillGray(0.0)
             col = col + 1
             if col == self.charsPerRow:
                 row = row + 1
