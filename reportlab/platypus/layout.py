@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.21  2000/05/10 09:54:40  rgbecker
+#	Flowable.split should return list
+#
 #	Revision 1.20  2000/04/28 13:39:12  rgbecker
 #	Fix _doNothing argument name
-#
+#	
 #	Revision 1.19  2000/04/26 11:07:15  andy_robinson
 #	Tables changed to use reportlab.lib.colors instead of
 #	the six hard-coded color strings there previously.
@@ -89,7 +92,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.20 2000/04/28 13:39:12 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.21 2000/05/10 09:54:40 rgbecker Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -149,7 +152,7 @@ class Flowable:
 		"""This will be called by more sophisticated frames when
 		wrap fails. Stupid flowables should return (). Clever flowables
 		should split themselves and return a list of flowables"""
-		return ()
+		return []
 
 class XBox(Flowable):
 	"""Example flowable - a box with an x through it and a caption.
