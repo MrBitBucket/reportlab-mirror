@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/grids.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.23 2002/06/03 15:26:38 dinu_gherman Exp $
-__version__=''' $Id: grids.py,v 1.23 2002/06/03 15:26:38 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.24 2002/06/18 19:27:44 rgbecker Exp $
+__version__=''' $Id: grids.py,v 1.24 2002/06/18 19:27:44 rgbecker Exp $ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *
@@ -365,63 +365,53 @@ class ShadedRect(Widget):
 
 		return D
 
-
 	def _flipRectCorners(self):
 		"Flip rectangle's corners if width or height is negative."
-
-		if self.width < 0 and self.height > 0:
-			self.x = self.x + self.width 
-			self.width = -self.width 
-			if self.orientation == 'vertical':
-				self.fillColorStart, self.fillColorEnd = self.fillColorEnd, self.fillColorStart
-		elif self.height < 0 and self.width > 0:
-			self.y = self.y + self.height 
-			self.height = -self.height 
-			if self.orientation == 'horizontal':
-				self.fillColorStart, self.fillColorEnd = self.fillColorEnd, self.fillColorStart
-		elif self.height < 0 and self.height < 0:
-			self.x = self.x + self.width 
-			self.width = -self.width 
-			self.y = self.y + self.height 
-			self.height = -self.height 
-
+		x, y, width, height, fillColorStart, fillColorEnd = self.x, self.y, self.width, self.height, self.fillColorStart, self.fillColorEnd 
+		if width < 0 and height > 0:
+			x = x + width 
+			width = -width 
+			if self.orientation=='vertical': fillColorStart, fillColorEnd = fillColorEnd, fillColorStart
+		elif height<0 and width>0:
+			y = y + height 
+			height = -height 
+			if self.orientation=='horizontal': fillColorStart, fillColorEnd = fillColorEnd, fillColorStart
+		elif height < 0 and height < 0:
+			x = x + width 
+			width = -width 
+			y = y + height 
+			height = -height 
+		return x, y, width, height, fillColorStart, fillColorEnd
 
 	def draw(self):
 		# general widget bits
 		group = Group()
-
-		self._flipRectCorners()
-		
-		w, h = self.width, self.height
-
-		rect = Rect(self.x, self.y, w, h)
+		x, y, w, h, fillColorStart, fillColorEnd = self._flipRectCorners()
+		rect = Rect(x, y, w, h)
 		rect.strokeColor = self.strokeColor
 		rect.strokeWidth = self.strokeWidth
 		rect.fillColor = None
 		group.add(rect)
-
-		c0, c1 = self.fillColorStart, self.fillColorEnd
+		c0, c1 = fillColorStart, fillColorEnd
 		numShades = self.numShades
 		if self.cylinderMode:
 			if not numShades%2: numShades = numShades+1
 			halfNumShades = (numShades-1)/2 + 1
 		num = float(numShades) # must make it float!
-
-		
 		vertical = self.orientation == 'vertical'
 		if vertical:
 			if numShades == 1:
-				V = [self.x]
+				V = [x]
 			else:
-				V = frange(self.x, self.x + w, w/num)
+				V = frange(x, x + w, w/num)
 		else:
 			if numShades == 1:
-				V = [self.y]
+				V = [y]
 			else:
-				V = frange(self.y, self.y + h, h/num)
+				V = frange(y, y + h, h/num)
 
 		for v in V:
-			stripe = vertical and Rect(v, self.y, w/num, h) or Rect(self.x, v, w, h/num)
+			stripe = vertical and Rect(v, y, w/num, h) or Rect(x, v, w, h/num)
 			if self.cylinderMode:
 				if V.index(v)>=halfNumShades:
 					col = colors.linearlyInterpolatedColor(c1,c0,V[halfNumShades],V[-1], v)
