@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.13 2001/08/22 21:10:02 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.14 2001/08/30 14:51:03 johnprecedo Exp $
 """This will be a collection of legends to be used with charts.
 """
 
@@ -119,7 +119,7 @@ class Legend(Widget):
         g = Group()
         colorNamePairs = self.colorNamePairs
         thisx = upperleftx = self.x
-        thisy = upperlefty = self.y - self.dx
+        thisy = upperlefty = self.y - self.dy
         dx, dy = self.dx, self.dy
 
         columnCount = 0
