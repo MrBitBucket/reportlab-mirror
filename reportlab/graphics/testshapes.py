@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/testshapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.11 2001/05/15 13:28:05 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.12 2001/05/18 16:24:53 rgbecker Exp $
 
 # testshapes.py - draws shapes onto a PDF canvas.
 
@@ -388,9 +388,9 @@ def getAllFunctionDrawingNames():
 
     return funcNames
 
-def _evalFuncDrawing(name, D):
+def _evalFuncDrawing(name, D, l=None, g=None):
 	try:
-		d = eval(name + '()')
+		d = eval(name + '()', g or globals(), l or locals())
 	except:
 		d = getFailedDrawing(name)
 	D.append((d, eval(name + '.__doc__'), name[3:]))
