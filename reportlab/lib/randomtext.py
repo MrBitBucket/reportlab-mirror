@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/randomtext.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/randomtext.py,v 1.6 2001/02/07 15:16:11 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/lib/randomtext.py,v 1.7 2001/04/26 11:46:17 johnprecedo Exp $
 
-__version__=''' $Id: randomtext.py,v 1.6 2001/02/07 15:16:11 johnprecedo Exp $ '''
+__version__=''' $Id: randomtext.py,v 1.7 2001/04/26 11:46:17 johnprecedo Exp $ '''
 
 import string
 
@@ -25,6 +25,14 @@ There are currently six themes provided:
 	STARTREK (Star Trek),
 	PRINTING (print-related terms)
 	PYTHON (snippets and quotes from Monty Python)
+
+EXAMPLE USAGE:
+	from reportlab.lib import randomtext
+	print randomtext.randomText(randomtext.PYTHON, 10)
+
+	This prints a random number of random sentences (up to a limit
+	of ten) using the theme 'PYTHON'.
+	
 """
 
 #theme one :-)
@@ -180,15 +188,15 @@ PYTHON = ['Good evening ladies and Bruces','I want to buy some cheese', 'You do 
 
 
 
-def randomText(theme=STARTUP):
+def randomText(theme=STARTUP, sentences=5):
 	#this may or may not be appropriate in your company
 	from random import randint, choice
 
 	RANDOMWORDS = theme
 
-	sentences = 5
+#	sentences = 5
 	output = ""
-	for sentenceno in range(randint(1,5)):
+	for sentenceno in range(randint(1,sentences)):
 		output = output + 'Blah'
 		for wordno in range(randint(10,25)):
 			if randint(0,4)==0:
