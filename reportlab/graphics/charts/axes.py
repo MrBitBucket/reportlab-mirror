@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.11 2001/04/11 11:39:31 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.12 2001/04/11 13:13:40 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -363,6 +363,21 @@ class YCategoryAxis(CategoryAxis):
 
         return g
 
+def _findMin(V, x):
+    '''find minimum over V[i][x]'''
+    selector = lambda T, x=x: T[x]
+    m = min(map(selector, V[0]))
+    for v in V[1:]:
+        m = min(m,min(map(selector, v)))
+    return m
+
+def _findMax(V, x):
+    '''find maximum over V[i][x]'''
+    selector = lambda T, x=x: T[x]
+    m = max(map(selector, V[0]))
+    for v in V[1:]:
+        m = max(m,max(map(selector, v)))
+    return m
     
 # Value axes.
 
@@ -415,27 +430,13 @@ class ValueAxis(Widget):
 
         Returns a min, max tuple.
         """
-
-        try:
-            minFound = dataSeries[0][0]
-            maxFound = dataSeries[0][0]
-            for ser in dataSeries:
-                for num in ser:
-                    if num < minFound:
-                        minFound = num
-                    if num > maxFound:
-                        maxFound = num
-        except IndexError:
-            minFound = self.valueMin
-            maxFound = self.valueMax
-        
         if self.valueMin == Auto:
-            valueMin = minFound
+            valueMin = _findMin(dataSeries,self._dataIndex)
         else:
             valueMin = self.valueMin
 
         if self.valueMax == Auto:
-            valueMax = maxFound
+            valueMax = _findMax(dataSeries,self._dataIndex)
         else:
             valueMax = self.valueMax
         self._valueMin, self._valueMax = (valueMin, valueMax)
@@ -527,6 +528,7 @@ class XValueAxis(ValueAxis):
     def __init__(self):
 
         self._configured = 0
+        self._dataIndex = 0
         # private properties set by methods.  The initial values
         # here are to make demos easy; they would always be
         # overridden in real life.        
@@ -698,6 +700,7 @@ class YValueAxis(ValueAxis):
     def __init__(self):
 
         self._configured = 0
+        self._dataIndex = 1
         # private properties set by methods.  The initial values
         # here are to make demos easy; they would always be
         # overridden in real life.        
