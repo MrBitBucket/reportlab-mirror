@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.34 2001/01/19 08:41:22 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.35 2001/02/08 21:44:05 dinu_gherman Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.34 2001/01/19 08:41:22 dinu_gherman Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.35 2001/02/08 21:44:05 dinu_gherman Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -514,7 +514,7 @@ class BaseDocTemplate:
 		passes = 0
 		while 1:
 			passes = passes + 1
-			print 'building pass '+str(passes) + '...',
+			## print 'building pass '+str(passes) + '...',
 
 			for fl in self._indexingFlowables:
 				fl.beforeBuild()
@@ -537,14 +537,14 @@ class BaseDocTemplate:
 			happy = self._allSatisfied0()
 
 			if happy:
-				print 'OK'
+				## print 'OK'
 				break
-			else:
-				print 'failed'
+			## else:
+				## print 'failed'
 			if passes > maxPasses:
 				raise IndexError, "Index entries not resolved after %d passes" % maxPasses
 		
-		print 'saved', filename
+		## print 'saved', filename
 
 	#these are pure virtuals override in derived classes
 	#NB these get called at suitable places by the base class
