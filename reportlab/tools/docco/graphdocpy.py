@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.5 2001/09/26 22:02:19 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.6 2001/10/03 11:50:51 rgbecker Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -57,6 +57,8 @@ from reportlab.graphics import renderPM
 
 VERBOSE = 0
 VERIFY = 1
+
+_abstractclasserr_re = re.compile(r'^\s*abstract\s*class\s*(\w+)\s*instantiated',re.I)
 
 ####################################################################
 # 
@@ -376,7 +378,11 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         if hasattr(aClass, '_nodoc'):
             pass
         elif issubclass(aClass, Widget):
-            widget = aClass()
+            try:
+                widget = aClass()
+            except AssertionError, err:
+				if _abstractclasserr_re.match(str(err)): return
+				raise
             self.story.append(Spacer(0*cm, 0.5*cm))
             self._showWidgetDemoCode(widget)
             self.story.append(Spacer(0*cm, 0.5*cm))
@@ -864,7 +870,7 @@ Examples:
 
     python graphdocpy.py reportlab.graphics
     python graphdocpy.py -m signsandsymbols.py -f Pdf
-    python graphdocpy.py -m flags0.py -f Html
+    python graphdocpy.py -m flags.py -f Html
     python graphdocpy.py -m barchart1.py
 """
 
