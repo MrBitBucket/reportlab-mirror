@@ -28,7 +28,7 @@ class ImageTestCase(unittest.TestCase):
         for img in IMAGES:
             d.add(img)
         outPath = "test_graphics_images.pdf"
-        renderPDF.drawToFile(d, outPath, '')
+        renderPDF.drawToFile(d, outPath) #, '')
         assert os.path.exists(outPath) == 1
 
 
@@ -39,10 +39,7 @@ class ImageTestCase(unittest.TestCase):
         inPath = "pythonpowered.gif"
         img = Image(0, 0, 110, 44, inPath)
         d.add(img)
-        outPath = os.path.splitext(inPath)[0] + ".pdf"
-        renderPDF.drawToFile(d, outPath, '')
-        assert os.path.exists(outPath) == 1
-        os.remove(outPath)
+        IMAGES.append(img)
 
 
     def test1(self):
