@@ -1,8 +1,8 @@
 #!/bin/env python
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_pycanvas.py,v 1.1 2002/10/01 12:55:02 andy_robinson Exp $
-__version__=''' $Id: test_pdfgen_pycanvas.py,v 1.1 2002/10/01 12:55:02 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_pycanvas.py,v 1.2 2002/10/02 13:23:49 andy_robinson Exp $
+__version__=''' $Id: test_pdfgen_pycanvas.py,v 1.2 2002/10/02 13:23:49 andy_robinson Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas and the pycanvas module to output Python source code.
 
@@ -746,6 +746,7 @@ def run(filename):
     c = makeDocument(filename)
     c.save()
     source = str(c)
+    open("test_pdfgen_pycanvas_out.txt","w").write(source)
     import reportlab.rl_config
     if reportlab.rl_config.verbose:
         print source
