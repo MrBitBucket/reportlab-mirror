@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.2 2001/10/27 22:37:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.3 2001/11/07 13:15:20 johnprecedo Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 import reportlab
 
@@ -154,19 +154,21 @@ list("""If you want to work with bitmap images, install and
 test the Python Imaging Library""")
 list("""Unpack the reportlab package (reportlab.zip
 or reportlab.tgz) into a directory on your path""")
-list("""$cd$ to ^reportlab/pdfgen/test^ and execute $testpdfgen.py$,
-which will create a file 'testpdfgen.pdf'.""")
+list("""$cd$ to ^reportlab/test^ and execute $test_pdfgen_general.py$,
+which will create a file 'test_pdfgen_general.pdf'.""")
+list("""Execute $runAll.py$ to do a run of all the tests in this
+directory, and make sure that none of them fail.""")
 disc(" ")
 disc("""If you have any problems, check the 'Detailed Instructions' section below.""")
 
 heading3("A note on available versions")
-disc("""The $reportlab$
-library can be found at $ftp.reportlab.com$ in the top-level directory.
-Each successive version is stored in both zip and tgz format, but the
-contents are identical.  Versions are numbered:  $ReportLab_0_85.zip$,
-$ReportLab_0_86.zip$ and so on.  The latest stable version is also
-available as just $reportlab.zip$ (or $reportlab.tgz$), which
-is actually a symbolic link to the latest numbered version.""")
+disc("""The $reportlab$ library can be found at $ftp.reportlab.com$ in
+the top-level directory. Each successive version is stored in both zip
+and tgz format, but the contents are identical.  Versions are
+numbered:  $ReportLab_1_00.zip$, $ReportLab_1_01.zip$ and so on. The
+latest stable version is also available as just $reportlab.zip$ (or
+$reportlab.tgz$), which is actually a symbolic link to the latest
+numbered version.""")
 
 disc("""We also make nightly snapshots of our CVS 
 (version control) tree available.  In
@@ -191,29 +193,35 @@ you have the binaries at hand.""")
 restartList()
 
 list("""Get and install Python from $http://www.python.org/.$
-Follow the links to 'Download' and get the latest official
-version.  Currently this is Python 1.5.2 in the file $py152.exe$.
-It will prompt you for a directory location, which by default is
+Reportlab works with Python 1.5.2 upwards, but you will want something
+more up to date!  Follow the links to 'Download' and get the latest
+official version.  Currently this is Python 2.1 in the file
+$Python-2.1.exe$. It will prompt you for a directory location, which
+by default is
 $C:\Program Files\Python$. This works, but we recommend entering
-$C:\Python15$.  Python 1.6 will be out shortly and will adopt
-$C:\Python16$ as its default; and quite often one wants to change directory into the
+$C:\Python21$.  Quite often one wants to change directory into the
 Python directory from a command prompt, so a path without spaces saves
 a lot of typing!  After installing, you should be able to run the
 'Python (command line)' option from the Start Menu.""")
 
-list("""If on Win9x, we recommend either copying python.exe to a
-location on your path, or adding your Python directory to the path, so
+list("""If on Win9x, we recommend either adding your Python directory
+to the path , or copying python.exe to a location on your path, so
 that you can execute Python from any directory.""")
 
-list("""If you want a nice editing environment or might need to
-access Microsoft applications, get the Pythonwin add-on package from
-the same page.  Once this is installed, you can start Pythonwin from
-the Start Menu and get a GUI application.""")
+list("""If you want a nice editing environment or might need to access
+Microsoft applications, get the Pythonwin add-on package from
+$http://aspn.activestate.com/ASPN/Downloads/ ActivePython/Extensions/Win32all$.
+The version that works with Python 2.1 is 'win32all.exe, build 140' in
+the file $win32all-140.exe$.  Once this is installed, you can start
+Pythonwin from the Start Menu and get a GUI application.""")
 
 disc("""The next step is optional and only necessary if you want to
 include images in your reports; it can also be carried out later.""")
 
-list("Install the Python Imaging Library ($PIL$).  (todo:  make up a bundle that works)")
+list("""Install the Python Imaging Library ($PIL$).  Follow the
+directions from $http://www.python.org/sigs/image-sig/Imaging.html$ or
+get it directly from $http://www.pythonware.com/products/pil/$.
+""")
 
 list("Add the $DLL$s in $PIL$ to your $Python\DLLs$ directory")
 
@@ -230,14 +238,18 @@ command line interpreter and type $import reportlab$ without getting
 an error message.""")
 
 list("""Open up a $MS-DOS$ command prompt and CD to
-"..\\reportlab\\pdfgen\\test".  On NT, enter "testpdfgen.py"; on
-Win9x, enter "python testpdfgen.py".  After a couple of seconds,
-the script completes and the file testpdfgen.pdf should be ready for
+"$..\\reportlab\\test$".  On NT, enter "$test_pdfgen_general.py$"; on
+Win9x, enter "$python test_pdfgen_general.py$".  After a couple of seconds,
+the script completes and the file test_pdfgen_general.pdf should be ready for
 viewing.  If PIL is installed, there should be a "Python Powered"
-image on the last page.  You're done!""")
+image on page 7.""")
+list("""$test_pdfgen_general.py$ tests most of the functions that you 
+will need. To run all the tests and make sure that absolutely 
+everything works, type $runAll.py$. If none of the tests fail, you're 
+done!""")
 
 disc("""
-[Note: the "couple of seconds" delay is mainly due to
+[Note: the "couple of seconds" delay in step 8 is mainly due to
 compilation of the python scripts in the ReportLab package.
 The next time the ReportLab modules are used the execution
 will be noticably faster because the $pyc$ compiled python
@@ -256,9 +268,10 @@ binaries
 get the latest RPM or DEB or whatever package and install (or get your
 super user (system administrator) to do the work).""")
 
-list("""If you are building Python yourself, unpack the sources into a temporary directory using a tar command
-e.g. $tar xzvf py152.tgz$; this will create a subdirectory called Python-1.5.2
-(or whatever) cd into this directory. Then read the file $README$! It contains the 
+list("""If you are building Python yourself, unpack the sources into a 
+temporary directory using a tar command e.g. $tar xzvf py152.tgz$; 
+this will create a subdirectory called Python-1.5.2 (or whatever) cd 
+into this directory. Then read the file $README$! It contains the 
 latest information on how to install Python.""")
 
 list("""If your system has the gzip libz library installed
@@ -295,23 +308,75 @@ list("""You should now be able to run python and execute the python statement
 """,doBullet=0)
 eg("""import reportlab""",after=0.1)
 list("""If you want to use images you should certainly consider
-getting &amp; installing the Python Imaging Library from
-<font color=blue>http://www.pythonware.com/products/pil</font>.
-""")
+getting &amp; installing the Python Imaging Library - follow the
+directions from
+$http://www.python.org/sigs/image-sig/Imaging.html$ or get it directly from
+$http://www.pythonware.com/products/pil/$.""")
+
 
 heading3("Instructions for Python novices: Mac")
 #this stuff was provided by humbert@ls12.cs.uni-dortmund.de
+#updated with stuff from EPSChartsDocs by John Precedo (7/11/2001)
 disc("""
-First install Python,
-the latest stable release is 1.52, but it is also possible to run Reportlab with 1.6a2
-and probably with 1.6b1/b2.
-You get the software (ready to run) at font color=blue>http://www.python.org</font>
-When this is successful done you should have the following folder structure.
+First install Python.  The latest stable release is 2.1, but it is
+also possible to run Reportlab with any official Python from 1.5.2
+upwards.  You get the software (ready to run) by following the link from
+$http://www.python.org/download/download_mac.html$.
+Currently, you should go to 'Jack's MacPython page' and download 
+$MacPython21active.bin$.
 """)
-image('Python_1.6a2.gif', 3*inch, 3*inch )
+
+disc("""
+After a while a file should appear on your desktop called
+$MacPython21Active$. This file appears in this way if the 'helper
+applications' are correctly set up in your browser. If you are asked
+to 'select an alternate program', choose Stuffit Expander. If you get
+a dialogue saying 'The Document "MacPython21active.bin" could not be
+opened, because the application program that created it could not be
+found", you will have to do this manually. Find where Stuffit Expander
+is located on your system (using Sherlock if you have to), and then
+drag the icon for MacPython21active.bin onto Stuffit's icon. Stuffit
+should then unpack it for you.
+""")
+
+disc("""
+Double-click MacPython21Active. Say yes or continue to all the
+defaults. This will put Python 2.1 in your applications folder. Once
+you get to the 'the software was successfully installed' dialogue,
+click on 'OK'. The Finder should pop up a window called Python 2.1
+which contains the Python IDE, Interpreter etc with a folder
+structure like this:
+""")
+
+image('Python_21.gif', 3*inch, 3*inch )
+
+
+disc("""
+We should now tell the OS about Python files, so you get the right 
+icons and so the operating system knows that  .py files are text 
+files. Open the File Exchange control panel. Click the Add button. 
+Wait for a list of applications to be generated.
+""")
+
+image('fileExchange.gif', 3*inch, 3*inch )
+
+disc("""
+If you cannot see all of the dialogue features, click 'Show Advanced
+Options' and the dialogue should resemble the one above.
+""")
+
+disc("""
+Enter the extension ".py". Next to 'file type', click the 'Select'
+button and choose "Python Interpreter" from the list of applications.
+The 'File Type' box should then show 'text' and a logo like the one
+above. Fill in the same options on the right hand side as in the
+illustration above. Click 'change', then close the control panel. 
+""")
+
 disc("""
 Now you can put Extensions in the Extensions-Folder;
-which is where you should unpack the <b>reportlab.zip</b> with your favorite unpack-utility.
+which is where you should unpack the <b>reportlab.zip</b> with your
+favorite unpack-utility (Stuffit also does this).
 You'll get a subfolder named <b>reportlab</b>.
 """)
 
@@ -319,7 +384,7 @@ disc("""
 After this step, you have to tell the PythonInterpreter, where to look for extensions.
 Start EditPythonPrefs (by double-clicking the icon).
 """)
-image('Python_1.6a2_HINT.gif',3*inch,3*inch)
+image('Python_21_HINT.gif',3*inch,3*inch)
 disc("""
 You should get the following modal dialog.
 This is the point, where your special data goes in.
@@ -327,13 +392,21 @@ Reportlab is on the path in Extensions. So all you have to do is add
 the last line 
 <b>$(PYTHON):Extensions</b>. 
 """)
+
 image('Edit_Prefs.gif',3*inch,3*inch)
+
 disc("""
-Now you should test one or more of the demo scripts include with with the sources; eg
-<b>reportlab:demos:pythonpoint:pythonpoint.py</b>.
-One Problem on the Mac is solved gracefully in Python:
-if you want a script that takes some arguments, hold down the alt or option-key,
-while activating Python.
+You should find a folder under reportlab called test - inside that are
+all the test scripts. For the moment, double click on the file
+'test_pdfgen_general.py'. You should see a window called Python
+Interpreter.Out with some text appearing in it, and after that it
+should create a PDF file called 'test_pdfgen_general.pdf'. Make sure
+that a pdf file actually is output, and that you can view it from
+Adobe Acrobat. If this PDF file works, then you have successfully
+installed both Python and the basic ReportLab package. If you want to
+do a full test of everything, execute the script reportlab:test:runAll
+with a double click. It runs lots of tests for a few minutes and
+eventually says 'OK'. 
 """)
 
 
