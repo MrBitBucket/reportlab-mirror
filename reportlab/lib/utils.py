@@ -767,3 +767,10 @@ def flatten(L):
     R = []
     _flatten(L,R.append)
     return R
+
+def find_locals(func,depth=0):
+    '''apply func to the locals at each stack frame till func returns a non false value'''
+    while 1:
+        _ = func(sys._getframe(depth).f_locals)
+        if _: return _
+        depth += 1
