@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.19  2000/04/19 15:00:32  rgbecker
+#	pyfontify-->PyFontify
+#
 #	Revision 1.18  2000/04/19 14:56:07  rgbecker
 #	Added CVS_remove
-#
+#	
 #	Revision 1.17  2000/04/19 14:35:04  rgbecker
 #	Used -D for py2pdf export
 #	
@@ -86,7 +89,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.18 2000/04/19 14:56:07 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.19 2000/04/19 15:00:32 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -170,7 +173,7 @@ def cvs_checkout(d):
 			# now we need to move the files & delete those we don't need
 			os.mkdir("py2pdf")
 			do_exec("mv reportlab/demos/py2pdf/py2pdf.py py2pdf", "mv py2pdf.py")
-			do_exec("mv reportlab/demos/py2pdf/pyfontify.py reportlab", "mv pyfontify.py")
+			do_exec("mv reportlab/demos/py2pdf/PyFontify.py reportlab", "mv pyfontify.py")
 			do_exec("rm -r reportlab/demos reportlab/platypus reportlab/lib/styles.py reportlab/README.pdfgen.txt", "rm")
 			do_exec("mv reportlab py2pdf")
 			CVS_remove('py2pdf')
