@@ -2,11 +2,11 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/corp.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/corp.py,v 1.7 2001/10/16 10:52:25 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/corp.py,v 1.8 2001/10/17 11:51:37 rgbecker Exp $
 """ This module includes some reusable routines for ReportLab's
  'Corporate Image' - the logo, standard page backdrops and
  so on - you are advised to do the same for your own company!"""
-__version__=''' $Id: corp.py,v 1.7 2001/10/16 10:52:25 rgbecker Exp $ '''
+__version__=''' $Id: corp.py,v 1.8 2001/10/17 11:51:37 rgbecker Exp $ '''
 
 from reportlab.lib.units import inch,cm
 from reportlab.lib.validators import *
@@ -27,6 +27,8 @@ class RL_CorpLogo(Widget):
 		fillColor = AttrMapValue(isColorOrNone, 'Logo lettering fill color'),
 		strokeWidth = AttrMapValue(isNumber,'Logo lettering stroke width'),
 		background = AttrMapValue(isColorOrNone,desc="Logo background color"),
+		border = AttrMapValue(isColorOrNone,desc="Logo border color"),
+		borderWidth = AttrMapValue(isNumber,desc="Logo border width (1)"),
 		shadow = AttrMapValue(isNumberOrNone,desc="None or fraction of background for shadowing" ),
 		width = AttrMapValue(isNumber, desc="width in points of the logo (default 129)"),
 		height = AttrMapValue(isNumber, desc="height in points of the logo (default 86)"),
@@ -40,6 +42,8 @@ class RL_CorpLogo(Widget):
 		self.strokeColor = None
 		self.strokeWidth = 0.1
 		self.background = ReportLabBlue
+		self.border = None
+		self.borderWidth = 1
 		self.shadow = 0.5
 		self.height = 86
 		self.width = 130
@@ -75,10 +79,13 @@ class RL_CorpLogo(Widget):
 		strokeColor = self.strokeColor
 		g = Group()
 		bg = self.background
+		bd = self.border
+		bdw = self.borderWidth
 		shadow = self.shadow
 		x, y = self.x, self.y
 		if bg:
-			shadow = Color(bg.red*shadow,bg.green*shadow,bg.blue*shadow)
+			if shadow is not None and 0<=shadow<1:
+				shadow = Color(bg.red*shadow,bg.green*shadow,bg.blue*shadow)
 			self._paintLogo(g,dy=-2.5, dx=2,fillColor=shadow)
 		self._paintLogo(g,fillColor=fillColor,strokeColor=strokeColor)
 		g.skew(kx=self.skewX, ky=self.skewY)
@@ -87,7 +94,8 @@ class RL_CorpLogo(Widget):
 		G.add(g)
 		_w, _h = 130, 86
 		w, h = self.width, self.height
-		if bg is not None: G.insert(0,Rect(0,0,_w,_h,fillColor=bg,strokeColor=None))
+		if bg or (bd and bdw):
+			G.insert(0,Rect(0,0,_w,_h,fillColor=bg,strokeColor=bd,strokeWidth=bdw))
 		if w!=_w or h!=_h: G.scale(w/float(_w),h/float(_h))
 
 		angle = self.angle
