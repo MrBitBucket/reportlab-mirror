@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.13  2000/03/06 20:06:36  rgbecker
+#	Typo self._currentPageHasImages = 1
+#
 #	Revision 1.12  2000/03/02 12:58:58  rgbecker
 #	Remove over officious import checks Imag/zlib
-#
+#	
 #	Revision 1.11  2000/03/02 10:28:54  rgbecker
 #	[].extend illegal in 1.5.1
 #	
@@ -65,7 +68,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.12 2000/03/02 12:58:58 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.13 2000/03/06 20:06:36 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -613,7 +616,7 @@ class Canvas:
         Also allow file names as well as images.  This allows a
         caching mechanism"""
             
-        self.currentPageHasImages = 1
+        self._currentPageHasImages = 1
 
         if type(image) == StringType:
             if os.path.splitext(image)[1] in ['.jpg', '.JPG']:
