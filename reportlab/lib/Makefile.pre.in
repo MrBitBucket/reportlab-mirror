@@ -297,13 +297,11 @@ clean:
 	 	rm -f `find . -name '*.pyc'`
 	 	rm -f `find . -name '*.o'`
 	 	rm -f `find . -name '*~'`
-		cd expat ; make clean
 
 # Handy target to remove everything that is easily regenerated
 clobber:	clean
 		-rm -f *.a tags TAGS config.c Makefile.pre $(TARGET) sedscript
 		-rm -f *.so *.sl so_locations
-		cd expat ; make clobber
 
 # Handy target to remove everything you don't want to distribute
 distclean:	clobber

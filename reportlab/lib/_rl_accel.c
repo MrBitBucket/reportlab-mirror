@@ -1,4 +1,19 @@
 #include <Python.h>
+#include <stdlib.h>
+#include <math.h>
+#if defined(__GNUC__)
+#	define STRICMP strcasecmp
+#elif defined(_MSC_VER)
+#	define STRICMP stricmp
+#else
+#	error "Don't know how to define STRICMP"
+#endif
+#ifndef max
+#	define max(a,b) ((a)>(b)?(a):(b))
+#endif
+#ifndef min
+#	define min(a,b) ((a)<(b)?(a):(b))
+#endif
 typedef struct _fI_t {
 		char*			name;
 		int				ascent, descent;
@@ -21,13 +36,13 @@ static PyObject *ErrorObject;
 static	eI_t*	find_encoding(char* name)
 {
 	eI_t*	e = Encodings;
-	for(;e;e=e->next) if(!stricmp(name,e->name)) return e;
+	for(;e;e=e->next) if(!STRICMP(name,e->name)) return e;
 	return (eI_t*)0;
 }
 
 static	fI_t* find_font(char* name, fI_t* f)
 {
-	for(;f;f=f->next) if(!stricmp(name,f->name)) return f;
+	for(;f;f=f->next) if(!STRICMP(name,f->name)) return f;
 	return (fI_t*)0;
 }
 
