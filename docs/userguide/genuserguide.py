@@ -32,6 +32,9 @@
 #
 ###############################################################################
 #   $Log: genuserguide.py,v $
+#   Revision 1.32  2000/07/18 13:29:19  dinu_gherman
+#   removed header dashes.
+#
 #   Revision 1.31  2000/07/14 10:49:22  rgbecker
 #   Added space, optional bullet and eg after spacing
 #
@@ -129,7 +132,7 @@
 #   Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #   initial checkin. user guide generation framework.
 #   
-__version__=''' $Id: genuserguide.py,v 1.31 2000/07/14 10:49:22 rgbecker Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.32 2000/07/18 13:29:19 dinu_gherman Exp $ '''
 
 
 __doc__ = """
@@ -294,7 +297,7 @@ def heading1(text):
     """Use this for chapters.  Lessons within a big chapter
     should now use heading2 instead.  Chapters get numbered."""
     getStory().append(PageBreak())
-    p = Paragraph('Chapter <seq id="Chapter"/> - ' + quickfix(text), H1)
+    p = Paragraph('Chapter <seq id="Chapter"/> ' + quickfix(text), H1)
     getStory().append(p)
 
 def Appendix1(text,):
@@ -304,13 +307,13 @@ def Appendix1(text,):
         seq.setFormat('Chapter','A')
         seq.reset('Chapter')
         appmode = 1
-    p = Paragraph('Appendix <seq id="Chapter"/> - ' + quickfix(text), H1)
+    p = Paragraph('Appendix <seq id="Chapter"/> ' + quickfix(text), H1)
     getStory().append(p)
 
 def heading2(text):
     """Used to be 'lesson'"""
     getStory().append(CondPageBreak(inch))
-    p = Paragraph('<seq template="%(Chapter)s.%(Section+)s - "/>' + quickfix(text), H2)
+    p = Paragraph('<seq template="%(Chapter)s.%(Section+)s "/>' + quickfix(text), H2)
     getStory().append(p)
 
 def heading3(text):
