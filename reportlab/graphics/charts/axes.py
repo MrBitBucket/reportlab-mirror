@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.69 2003/06/10 11:02:37 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.70 2003/06/13 15:46:42 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.69 2003/06/10 11:02:37 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.70 2003/06/13 15:46:42 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -668,7 +668,9 @@ class ValueAxis(Widget):
     def makeTickLabels(self):
         g = Group()
 
-        f = self._labelTextFormat or '%d'
+        f = self._labelTextFormat       # perhaps someone already set it
+        if f is None:
+            f = self.labelTextFormat or '%d'
         pos = [self._x, self._y]
         d = self._dataIndex
         labels = self.labels
