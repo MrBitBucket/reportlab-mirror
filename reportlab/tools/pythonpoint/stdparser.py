@@ -15,8 +15,12 @@ from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.tools.pythonpoint import pythonpoint
 
 def getModule(modulename,fromPath='reportlab.tools.pythonpoint.styles'):
-    exec 'from reportlab.tools.pythonpoint.styles import '+modulename
-    return eval(modulename)
+    try:
+        exec 'from reportlab.tools.pythonpoint import '+modulename
+        return eval(modulename)
+    except ImportError:
+        exec 'from reportlab.tools.pythonpoint.styles import '+modulename
+        return eval(modulename)
 
 class PPMLParser(xmllib.XMLParser):
     attributes = {
