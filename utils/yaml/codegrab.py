@@ -9,8 +9,11 @@ import types
 import string
 import os
 
+class Animal:
+    def yell(self):
+        print 'appropriate noise'
 
-class Dog:
+class Dog(Animal):
     def woof(self):
         print 'bark'
 
@@ -24,16 +27,20 @@ def getStuffDefinedIn(modulename, path=None):
     useful_stuff = []
     for name in dir(mod):
         value = getattr(mod, name)
-        if type(value) in (types.FunctionType, types.MethodType, types.ClassType):
+        if type(value) is types.FunctionType:
             #we're possibly interested in it
             if os.path.splitext(value.func_code.co_filename)[0] == modulename:
                 #it was defined here
                 useful_stuff.append((name, value))
+        elif type(value) == types.ClassType:
+            if value.__module__ == modulename:
+                useful_stuff.append((name, value))
+            
 
     return useful_stuff
 
 
-def getPrototype(f):
+def getFunctionPrototype(f):
     # finds the first line of code
     lines = open(f.func_code.co_filename, 'r').readlines()
     firstLineNo = f.func_code.co_firstlineno - 1
@@ -54,11 +61,46 @@ def getPrototype(f):
     usefulLines = map(string.rstrip, lines[firstLineNo:lineNo+1])
     return string.join(usefulLines, '\n')
 
+def getClassMethods(module, classname):
+    cls = getattr(module, classname)
+    stuff = []
+
+    # loop over dict finding methods defined here
+    items = cls.__dict__.items()
+    items.sort()
+    for (key, value) in items:
+        if key[0:1] == '_':
+            break #private, to whatever degree
+        elif type(value) <> MethodType:
+            break # not a method
+        elif value.im_class <> cls:
+            break # defined in base class
+        else:
+            #we want it
+            proto = getFunctionPrototype(value)
+            docco = value.docco
+            stuff.append(proto, docco)            
+
+    return stuff
+
+
 def test():
+    import codegrab
     stuff = getStuffDefinedIn('codegrab', ['c:\\home\\utils\\yaml'])
     for (name, value) in stuff:
-        print getPrototype(value)
-        print value.__doc__
+        if type(value) is types.FunctionType:
+            print 'Function:'
+            print getPrototype(value)
+            print value.__doc__
+        elif type(value) is types.ClassType:
+            print
+            print 'Class', name
+            print value.__doc__
+            methods = getClassMethods(codegrab, name)
+            for (proto, doc) in methods:
+                print
+                print proto
+                print doc
         
 
 
