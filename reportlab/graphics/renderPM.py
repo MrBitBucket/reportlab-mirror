@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.16 2001/11/13 14:27:08 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.16 2001/11/13 14:27:08 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.17 2002/04/13 15:18:51 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.17 2002/04/13 15:18:51 rgbecker Exp $ '''
 """Usage:
 	from reportlab.graphics import renderPM
 	renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -14,7 +14,7 @@ from reportlab.graphics.renderbase import StateTracker, getStateDelta
 from reportlab.pdfbase.pdfmetrics import getFont
 from reportlab.lib.logger import warnOnce
 from math import sin, cos, pi, ceil
-from StringIO import StringIO
+from reportlab.lib.utils import getStringIO
 from reportlab import rl_config
 
 class RenderPMError(Exception):
@@ -244,7 +244,7 @@ class PMCanvas:
 				raise RenderPMError,"Unknown image kind %s" % fmt
 
 	def saveToString(self,fmt='GIF'):
-		s = StringIO()
+		s = getStringIO()
 		self.saveToFile(s,fmt=fmt)
 		return s.getvalue()
 
@@ -447,7 +447,7 @@ def drawToFile(d,fn,fmt='GIF', dpi=72, bg=0xfffffff, quality=-1, showBoundary=rl
 	c.saveToFile(fn,fmt)
 
 def drawToString(d,fmt='GIF', dpi=72, bg=0xfffffff, quality=-1, showBoundary=rl_config.showBoundary):
-	s = StringIO()
+	s = getStringIO()
 	drawToFile(d,s,fmt=fmt, dpi=dpi, bg=bg, quality=quality)
 	return s.getvalue()
 
