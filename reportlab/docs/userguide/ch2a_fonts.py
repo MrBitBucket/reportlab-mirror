@@ -1,10 +1,11 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.11 2004/01/20 22:50:31 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.12 2004/04/28 14:40:21 rgbecker Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.lib.codecharts import SingleByteEncodingChart
 from reportlab.platypus import Image
+import reportlab
 
 heading1("Fonts and encodings")
 
@@ -246,7 +247,7 @@ disc("""Since many users will not have the font packs installed, we have include
 a rather grainy ^bitmap^ of some Japanese characters.  We will discuss below what is needed to
 generate them.""")
 # include a bitmap of some Asian text
-I=os.path.join(os.path.dirname(__file__),'..','images','jpnchars.jpg')
+I=os.path.join(os.path.dirname(reportlab.__file__),'docs','images','jpnchars.jpg')
 try:
     getStory().append(Image(I))
 except:

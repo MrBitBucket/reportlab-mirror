@@ -1,9 +1,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch6_tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch6_tables.py,v 1.6 2002/09/26 06:06:55 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch6_tables.py,v 1.7 2004/04/28 14:40:21 rgbecker Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.platypus import Image
+import reportlab
 
 heading1("Tables and TableStyles")
 disc("""
@@ -336,7 +337,7 @@ then they determine the dimension of the displayed image in <i>points</i>. If ei
 not specified (or specified as $None$) then the corresponding pixel dimension of the image is assumed
 to be in <i>points</i> and used.
 """)
-I=os.path.join(os.path.dirname(__file__),'..','images','lj8100.jpg')
+I=os.path.join(os.path.dirname(reportlab.__file__),'docs','images','lj8100.jpg')
 eg("""
 Image("lj8100.jpg")
 """,after=0.1)

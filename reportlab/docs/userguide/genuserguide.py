@@ -2,56 +2,50 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/genuserguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/genuserguide.py,v 1.12 2002/07/24 19:56:36 andy_robinson Exp $
-
-__version__=''' $Id: genuserguide.py,v 1.12 2002/07/24 19:56:36 andy_robinson Exp $ '''
-
+#$Header: /tmp/reportlab/reportlab/docs/userguide/genuserguide.py,v 1.13 2004/04/28 14:39:23 rgbecker Exp $
+__version__=''' $Id: genuserguide.py,v 1.13 2004/04/28 14:39:23 rgbecker Exp $ '''
 __doc__ = """
 This module contains the script for building the user guide.
 """
-
-from reportlab.tools.docco.rl_doc_utils import *
-
-def run(pagesize=defaultPageSize, verbose=0, outDir=None):
-
-    # copy to target
-    import reportlab
-    if not outDir: outDir = os.path.join(os.path.dirname(reportlab.__file__),'docs')
+def run(pagesize=None, verbose=0, outDir=None):
+    import os
+    from reportlab.tools.docco.rl_doc_utils import setStory, getStory, RLDocTemplate, defaultPageSize
+    from reportlab.tools.docco import rl_doc_utils
+    from reportlab.lib.utils import open_and_read, _RL_DIR
+    if not outDir: outDir = os.path.join(_RL_DIR,'docs')
     destfn = os.path.join(outDir,'userguide.pdf')
-    doc = RLDocTemplate(destfn,pagesize = pagesize)
+    doc = RLDocTemplate(destfn,pagesize = pagesize or defaultPageSize)
 
     #this builds the story
-    #resetStory()
-
-    import ch1_intro
-    import ch2_graphics
-    import ch2a_fonts
-    import ch3_pdffeatures
-    import ch4_platypus_concepts
-    import ch5_paragraphs
-    import ch6_tables
-    import ch7_custom
-    import ch9_future
-
-    import app_demos
+    setStory()
+    G = {}
+    exec 'from reportlab.tools.docco.rl_doc_utils import *' in G, G
+    for f in ('ch1_intro',
+        'ch2_graphics',
+        'ch2a_fonts',
+        'ch3_pdffeatures',
+        'ch4_platypus_concepts',
+        'ch5_paragraphs',
+        'ch6_tables',
+        'ch7_custom',
+        'ch9_future',
+        'app_demos',
+        ):
+        exec open_and_read(f+'.py',mode='t') in G, G
+    del G
 
     story = getStory()
     if verbose: print 'Built story contains %d flowables...' % len(story)
     doc.build(story)
     if verbose: print 'Saved "%s"' % destfn
 
-    # remove *.pyc files
-    pat = os.path.join(os.path.dirname(sys.argv[0]), '*.pyc')
-    for file in glob.glob(pat):
-        os.remove(file)
-
-
 def makeSuite():
     "standard test harness support - run self as separate process"
     from reportlab.test.utils import ScriptThatMakesFileTest
     return ScriptThatMakesFileTest('../docs/userguide', 'genuserguide.py', 'userguide.pdf')
 
-if __name__=="__main__":
+def main():
+    import sys
     outDir = filter(lambda x: x[:9]=='--outdir=',sys.argv)
     if outDir:
         outDir = outDir[0]
@@ -68,22 +62,24 @@ if __name__=="__main__":
 
     if len(sys.argv) > 1:
         try:
-            (w, h) = eval(sys.argv[1])
+            pagesize = (w,h) = eval(sys.argv[1])
         except:
             print 'Expected page size in argument 1', sys.argv[1]
             raise
         if verbose:
             print 'set page size to',sys.argv[1]
     else:
-        (w, h) = defaultPageSize
+        pagesize = None
     if timing:
         from time import time
         t0 = time()
-        run((w, h), verbose,outDir)
+        run(pagesize, verbose,outDir)
         if verbose:
             print 'Generation of userguide took %.2f seconds' % (time()-t0)
     elif prof:
         import profile
-        profile.run('run((w, h),verbose,outDir)','genuserguide.stats')
+        profile.run('run(pagesize,verbose,outDir)','genuserguide.stats')
     else:
-        run((w, h), verbose,outDir)
+        run(pagesize, verbose,outDir)
+if __name__=="__main__":
+    main()
