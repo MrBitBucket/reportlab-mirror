@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.74 2002/11/07 13:32:11 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.74 2002/11/07 13:32:11 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.75 2002/11/28 18:36:46 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.75 2002/11/28 18:36:46 rgbecker Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -1745,7 +1745,7 @@ class PDFImageXObject:
         self._filters = 'A85','Fl'
         if IMG: self._checkTransparency(IMG[0])
         else: self.mask = None
-        self.streamContent = string.join(imagedata[2:-1],'')
+        self.streamContent = string.join(imagedata[3:-1],'')
 
     def loadImageFromJPEG(self,imageFile):
         info = pdfutils.readJPEGInfo(imageFile)
