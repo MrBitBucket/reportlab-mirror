@@ -32,6 +32,9 @@
 #
 ###############################################################################
 #   $Log: genuserguide.py,v $
+#   Revision 1.19  2000/07/07 15:09:21  rgbecker
+#   Start on Paragraph
+#
 #   Revision 1.18  2000/07/06 15:38:15  rgbecker
 #   Started on Tables added EmbeddedCode utility
 #
@@ -89,7 +92,7 @@
 #   Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #   initial checkin. user guide generation framework.
 #   
-__version__=''' $Id: genuserguide.py,v 1.18 2000/07/06 15:38:15 rgbecker Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.19 2000/07/07 15:09:21 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -211,12 +214,7 @@ def eg(text):
 def EmbeddedCode(code,name='t', fn='embedded.tmp'):
     eg(code)
     disc("produces")
-    open(fn,'w').write(code+("\nBODY.append(%s)\n"%name))
-    try:
-        #execfile(StringIO(code+("\nBODY.append(%s)"%name)))
-        execfile(fn)
-    finally:
-        os.remove(fn)
+    exec code+("\nBODY.append(%s)\n"%name)
 
 def title(text):
     """Use this for the document title only"""
@@ -343,6 +341,34 @@ todo("rationale - from Andy")
 
 heading2("About Python")
 todo("If they don't know Python, rave a little then tell them where to get it")
+heading3("What is Python?")
+disc("""<para lindent=+36>
+<b>python</b>, (<i>Gr. Myth.</i> An enormous serpent that lurked in the cave of Mount Parnassus and was slain
+by Apollo) <b>1.</b> any of a genus of large, non-poisonous snakes of Asia, Africa and Australia that
+suffocate their prey to death. <b>2.</b> popularly, any large snake that crushes its prey. <b>3.</b> totally awesome,
+bitchin' language that will someday crush the $'s out of certain <i>other</i> so-called VHLL's ;-)</para>
+""")
+disc("""
+Python is an <i>interpreted, interactive, object-oriented</i> programming language. It is often compared to Tcl, Perl,
+Scheme or Java. 
+""")
+
+disc("""
+Python combines remarkable power with very clear syntax. It has modules, classes, exceptions, very high level
+dynamic data types, and dynamic typing. There are interfaces to many system calls and libraries, as well as to
+various windowing systems (X11, Motif, Tk, Mac, MFC). New built-in modules are easily written in C or C++.
+Python is also usable as an extension language for applications that need a programmable interface. 
+""")
+
+disc("""
+The Python implementation is portable: it runs on many brands of UNIX, on Windows, DOS, OS/2, Mac, Amiga... If
+your favorite system isn't listed here, it may still be supported, if there's a C compiler for it. Ask around on
+comp.lang.python -- or just try compiling Python yourself. 
+""")
+
+disc("""
+Python is copyrighted but <b>freely usable and distributable, even for commercial use</b>. 
+""")
 
 heading2("Installation and Setup")
 todo("need notes on packages, Windows, PIL and zlib; how to test it works")
@@ -1514,9 +1540,154 @@ eg("""
     handle_pageBreak(self)
     handle_pageEnd(self)
 """)
+heading3("$PageTemplates$")
+disc("""
+The $PageTemplate class$ is a container class with fairly minimal semantics. Each instance
+contains a list of $Frames$ and has methods which should be called at the start and end
+of each page.
+""")
+eg("PageTemplate(id=None,frames=[],onPage=_doNothing,onPageEnd=_doNothing)")
+disc("""
+is used to initialize an instance, the $frames$ argument should be a list of $Frames$
+whilst the optional $onPage$ and $onPageEnd$ arguments are callables which should have signature
+$def XXX(canvas,document)$ where $canvas$ and $document$
+are the canvas and document being drawn. These routines are intended to be used to paint non-flowing (ie standard)
+parts of pages. These attribute functions are exactly parallel to the pure virtual methods
+$PageTemplate.beforPage$ and $PageTemplate.afterPage$ which have signature
+$beforPage(self,canvas,document)$. The methods allow class derivation to be used to define
+standard behaviour, whilst the attributes allow instance changes. The $id$ argument is used at
+run time to perform $PageTemplate$ switching so $id='FirstPage'$ or $id='TwoColumns'$ are typical.
+""")
 
-heading2("Frames and Flowables")
+heading2("Frames")
+disc("""
+$Frames$ are active containers which are themselves contained in $PageTemplates$.
+$Frames$ have a location and size and maintain a concept of remaining drawable
+space.
+""")
+
+eg("""
+	Frame(x1, y1, width,height, leftPadding=6, bottomPadding=6,
+			rightPadding=6, topPadding=6, id=None, showBoundary=0)
+""")
+disc("""Creates a $Frame$ instance with lower left hand corner at coordinate $(x1,y1)$
+(relative to the canvas at use time) and with dimensions $width$ x $height$. The $Padding$
+arguments are positive quantities used to reduce the space available for drawing.
+The $id$ argument is an identifier for use at runtime eg 'LeftColumn' or 'Rightcolumn' etc.
+If the $showBoundary$ argument is non-zero then the boundary of the frame will get drawn
+at run time (this is useful sometimes).
+""")
+heading3("$Frame$ User Methods")
+eg("""
+	Frame.addFromList(drawlist, canvas)
+""")
+disc("""Consumes $Flowables$ from the front of $drawlist$ until the
+	frame is full.	If it cannot fit one object, raises
+	an exception.""")
+
+eg("""
+	Frame.split(flowable,canv)
+""")
+disc('''Ask the flowable to split using up the available space and return
+the list of flowables.
+''')
+
+eg("""
+	Frame.drawBoundary(canvas)
+""")
+disc("draw the frame boundary as a rectangle (primarily for debugging).")
+
+heading2("$Flowables$")
+disc("""
+$Flowables$ are things which can be drawn and which have $wrap$, $draw$ and perhaps $split$ methods.
+$Flowable$ is an abstract base class for things to be drawn an instance knows its size
+and draws in its own coordinate system (this requires the base API to provide an absolute coordinate
+system when the $Flowable.draw$ method is called). To get an instance use $f=Flowable()$.
+""")
+heading3("$Flowable$ User Methods")
+eg("""
+	Flowable.draw()
+""")
+disc("""This will be called to ask the flowable to actually render itself.
+The calling code should ensure that the flowable has an attribute $canv$
+which is the $pdfgen.Canvas$ which should be drawn to an that the $Canvas$
+is in an appropriate state (as regards translations rotations etc).
+""")
+eg("""
+	Flowable.wrap(availWidth, availHeight)
+""")
+disc("""This will be called by the enclosing frame before objects
+are asked their size, drawn or whatever.  It returns the
+size actually used.""")
+eg("""
+	Flowable.split(self, availWidth, availheight):
+""")
+disc("""This will be called by more sophisticated frames when
+		wrap fails. Stupid flowables should return []. Clever flowables
+		should split themselves and return a list of flowables""")
+eg("""
+	Flowable.getSpaceAfter(self):
+""")
+disc("""returns how much space should follow this item if another item follows on the same page.""")
+eg("""
+	Flowable.getSpaceBefore(self):
+""")
+disc("""returns how much space should precede this item if another item precedess on the same page.""")
 heading2("Paragraphs in detail")
+disc("""
+The $reportlab.platypus.Paragraph class$ is one of the most useful of the Platypus $Flowables$;
+it can format fairly arbitrary text and provides for in line font style and colour changes using
+an xml style markup. The overall shape of the formatted text can be justified, right or left ragged
+or centered. The xml markup can even be used to insert greek characters or to do subscripts.
+""")
+eg("""Paragraph(text, style, bulletText=None)""")
+disc("""
+Creates an instance of the $Paragraph$ class. The $text$ argument contains the text of the
+paragraph; excess white space is removed from the text at the ends and internally after
+linefeeds. This allows easy use of indented triple quoted text in <b>Python</b> scripts.
+The $bulletText$ argument provides the text of a default bullet for the paragraph
+The font and other properties for the paragraph text and bullet are set using the style argument.
+""")
+disc("""
+The $style$ argument should be an instance of $class ParagraphStyle$ obtained typically
+using""")
+eg("""
+from reportlab.lib.styles import ParagraphStyle
+""")
+disc("""
+this container class provides for the setting of multiple default paragraph attributes
+in a structured way. The styles are arranged in a dictionary style object called a $stylesheet$
+which allows for the styles to be accessed as $stylesheet['BodyText']$. A sample style
+sheet is provided
+""")
+eg("""
+from reportlab.lib.styles import getSampleStyleSheet
+stylesheet=getSampleStyleSheet()
+normalStyle = stylesheet['Normal']
+""")
+disc("""
+The options which can be set for a $Paragraph$ can be seen from the $ParagraphStyle$ defaults.
+""")
+heading4("$class ParagraphStyle$")
+eg("""
+class ParagraphStyle(PropertySet):
+    defaults = {
+        'fontName':'Times-Roman',
+        'fontSize':10,
+        'leading':12,
+        'leftIndent':0,
+        'rightIndent':0,
+        'firstLineIndent':0,
+        'alignment':TA_LEFT,
+        'spaceBefore':0,
+        'spaceAfter':0,
+        'bulletFontName':'Times-Roman',
+        'bulletFontSize':10,
+        'bulletIndent':0,
+        'textColor': black
+        }
+""")
+heading3("Paragraph XML Markup Tags")
 heading2("Tables and TableStyles")
 disc("""
 The $Table class$ is derived from the $Flowable class$ and is intended
@@ -1604,7 +1775,10 @@ disc("""The first element of each command is its identifier,
 the second and third arguments determine the cell coordinates of
 the box of cells which are affected with negative coordinates
 counting backwards from the limit values as in <b>Python</b>
-indexing. The top left cell is (0,0) the bottom right is (-1,-1). Depending on
+indexing. The coordinates are given as
+(column,row) which follows the spreadsheet 'A1' model, but not
+the more natural (for mathematicians) 'RC' ordering.
+The top left cell is (0,0) the bottom right is (-1,-1). Depending on
 the command various extra occur at indeces beginning at 3 on.
 """)
 heading4("""$TableStyle$ Cell Formatting Commands""")
@@ -1620,6 +1794,7 @@ RIGHTPADDING            - takes an integer, defaults to 6.
 BOTTOMPADDING           - takes an integer, defaults to 3.
 TOPPADDING              - takes an integer, defaults to 3.
 BACKGROUND              - takes a color.
+VALIGN                  - takes one of TOP, MIDDLE or the default BOTTOM
 """)
 disc("""This sets the background cell color in the relevant cells.
 The following example shows the $BACKGROUND$, and $TEXTCOLOR$ commands in action""")
@@ -1632,14 +1807,33 @@ t=Table(5*[None], 4*[None], data)
 t.setStyle(TableStyle([('BACKGROUND',(1,1),(-2,-2),colors.green),
                         ('TEXTCOLOR',(0,0),(1,-1),colors.red)]))
 """)
+disc("""To see the effects of the alignment styles we need  some widths
+and a grid, but it should be easy to see where the styles come from.""")
+EmbeddedCode("""
+data=  [['00', '01', '02', '03', '04'],
+        ['10', '11', '12', '13', '14'],
+        ['20', '21', '22', '23', '24'],
+        ['30', '31', '32', '33', '34']]
+t=Table(5*[0.4*inch], 4*[0.4*inch], data)
+t.setStyle(TableStyle([('ALIGN',(1,1),(-2,-2),'RIGHT'),
+                        ('TEXTCOLOR',(1,1),(-2,-2),colors.red),
+                        ('VALIGN',(0,0),(0,-1),'TOP'),
+                        ('TEXTCOLOR',(0,0),(0,-1),colors.blue),
+                        ('ALIGN',(0,-1),(-1,-1),'CENTER'),
+                        ('VALIGN',(0,-1),(-1,-1),'MIDDLE'),
+                        ('TEXTCOLOR',(0,-1),(-1,-1),colors.green),
+                        ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+                        ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+                        ]))
+""")
 heading4("""$TableStyle$ Line Commands""")
 disc("""
-	Line commands begin with the identfier, the start and stop cell coordinates
+    Line commands begin with the identfier, the start and stop cell coordinates
     and always follow this with the thickness (in points) and color of the desired lines. Colors can be names,
-	or they can be specified as a (R,G,B) tuple, where R, G and B are floats and (0,0,0) is black. The line
-	command names are: GRID, BOX, OUTLINE, INNERGRID, LINEBELOW, LINEABOVE, LINEBEFORE
-	and LINEAFTER. BOX and OUTLINE are equivalent, and GRID is the equivalent of applying both BOX and
-	INNERGRID.
+    or they can be specified as a (R,G,B) tuple, where R, G and B are floats and (0,0,0) is black. The line
+    command names are: GRID, BOX, OUTLINE, INNERGRID, LINEBELOW, LINEABOVE, LINEBEFORE
+    and LINEAFTER. BOX and OUTLINE are equivalent, and GRID is the equivalent of applying both BOX and
+    INNERGRID.
 """)
 disc("""We can see some line commands in action with the following example.
 """)
