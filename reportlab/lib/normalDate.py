@@ -7,6 +7,12 @@
 #	__radd__, __rsub__ methods
 #	formatMS stuff
 
+# derived from an original version created
+# by Jeff Bauer of Rubicon Research and used
+# with his kind permission
+
+
+
 _bigBangScalar = -4345732  # based on (-9999, 1, 1) BC/BCE minimum
 _bigCrunchScalar = 2958463	# based on (9999,12,31) AD/CE maximum
 _daysInMonthNormal = [31,28,31,30,31,30,31,31,30,31,30,31]
