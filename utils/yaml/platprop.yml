@@ -4,6 +4,9 @@
 CVS Revision History
 .beginPre Code
 $Log: platprop.yml,v $
+Revision 1.6  2000/05/17 16:30:09  rgbecker
+Removal of SimpleFrame
+
 Revision 1.5  2000/05/16 15:40:25  andy_robinson
 It now actually says something - checking in before going home
 
@@ -311,7 +314,7 @@ within a paragraph. Color can be set to <font color="red">red</font>, <font colo
 ]]></font>
 
 
-Paragraphs permit two escaping mechanisms which you can use when you really want  to print things which might be mistaken for XML.  The first is to use standard HTML entity references.  Thus <b><!CDATA[[&lt;]]></b> produces the character %lt;.  This is the easiest to use for mathematical formulae and code (although no XML processing is done on Preformatted objects, which are the preferred form for printing code).  The second is the standard XML CDATA escaping mechanism.  Anything found between the escape sequences <b>%lt;!CDATA[[</b> and <b>]]&gt;</b> will not be checked for tags; this is thus a very useful mechanism when writing an entire paragraph of XML tags.
+Paragraphs permit two escaping mechanisms which you can use when you really want  to print things which might be mistaken for XML.  The first is to use standard HTML entity references.  Thus <b><![CDATA[&lt;]]></b> produces the character <b>&lt;</b>.  This is the easiest to use for mathematical formulae and code (although no XML processing is done on Preformatted objects, which are the preferred form for printing code).  The second is the standard XML CDATA escaping mechanism.  Anything found between the escape sequences <b>%lt;!CDATA[[</b> and <b>]]&gt;</b> will not be checked for tags; this is thus a very useful mechanism when writing an entire paragraph of XML tags.
 
 The tags which may be used within a paragraph are listed below.  The meanings should be obvious:
 

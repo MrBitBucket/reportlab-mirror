@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.17  2000/05/17 16:29:40  rgbecker
+#	Removal of SimpleFrame
+#
 #	Revision 1.16  2000/05/16 23:48:00  andy_robinson
 #	Allowed intra-paragraph text; fixed various bugs
-#
+#	
 #	Revision 1.15  2000/04/28 17:04:28  andy_robinson
 #	Changed to display multiple outline levels
 #	
@@ -84,7 +87,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.16 2000/05/16 23:48:00 andy_robinson Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.17 2000/05/17 16:29:40 rgbecker Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -237,23 +240,20 @@ class PPFrame:
 
     def drawOn(self, canv):
         #make a layout frame
-        frame = layout.SimpleFrame(canv,
-                                   self.x,
+        frame = layout.BasicFrame( self.x,
                                    self.y,
                                    self.width,
-                                   self.height)
-                    
-        frame.showBoundary = self.showBoundary
-        
+                                   self.height,
+                                   showBoundary=1)
+ 
         #build a story for the frame
         story = []
         for thingy in self.content:
             #ask it for any flowables
             story.append(thingy.getFlowable())
         #draw it
-        frame.addFromList(story)
-
-        
+        frame.addFromList(story,canv)
+ 
 class PPPara:
     """This is a placeholder for a paragraph."""
     def __init__(self):

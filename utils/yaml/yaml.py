@@ -138,7 +138,7 @@ class Parser:
         
         
 
-if __name__=='__main__':
+if __name__=='__main__': #NORUNTESTS
     if len(sys.argv) <> 2:
         print 'usage: aml.py source.txt'
     else:

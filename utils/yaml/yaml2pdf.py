@@ -216,7 +216,7 @@ def getStyleSheet():
                                   textColor=colors.navy,
                                   alignment=TA_CENTER),
                    alias='u')
-        
+ 
     stylesheet.add(ParagraphStyle(name='centred',
                                   parent=stylesheet['Normal'],
                                   alignment=TA_CENTER
@@ -224,9 +224,7 @@ def getStyleSheet():
     
     return stylesheet
 
-
-
-if __name__ == '__main__':
+if __name__ == '__main__': #NORUNTESTS
     if len(sys.argv) == 2:
         infilename = sys.argv[1]
         outfilename = os.path.splitext(infilename)[0] + '.pdf'
@@ -236,7 +234,3 @@ if __name__ == '__main__':
             print 'File not found %s' % infilename
     else:
         print __doc__
-            
-
-
-    

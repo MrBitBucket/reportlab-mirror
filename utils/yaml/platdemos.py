@@ -3,7 +3,7 @@
 from reportlab.lib import colors
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.platypus.layout import SimpleFrame, Flowable
+from reportlab.platypus.layout import BasicFrame, Flowable
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER
@@ -98,14 +98,13 @@ class PlatPropFigure1(PageFigure):
 
 
 def demo1(canvas):
-    frame = SimpleFrame(
-                    canvas,
+    frame = BasicFrame(
                     2*inch,     # x
                     4*inch,     # y at bottom
                     4*inch,     # width
-                    5*inch     # height
+                    5*inch,     # height
+                    showBoundary = 1  # helps us see what's going on
                     )
-    frame.showBoundary = 1  # helps us see what's going on
 
     bodyStyle = ParagraphStyle('Body',
                        fontName='Times-Roman',
@@ -120,15 +119,14 @@ def demo1(canvas):
 
     #this does the packing and drawing.  The frame will consume
     #items from the front of the list as it prints them
-    frame.addFromList(mydata)
+    frame.addFromList(mydata,canvas)
 
 
 def test1():
     c  = Canvas('platdemos.pdf')
-    f = SimpleFrame(c, inch, inch, 6*inch, 9*inch)
-    f.showBoundary = 1
+    f = BasicFrame(inch, inch, 6*inch, 9*inch, showBoundary=1)
     v = PlatPropFigure1()
-    f.addFromList([v])
+    f.addFromList([v],c)
     c.save()
     
 if __name__ == '__main__':

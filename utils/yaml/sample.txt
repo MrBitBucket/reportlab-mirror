@@ -3,7 +3,7 @@
 .Heading2 What is ReportLab?
 
 ReportLab is a new generation reporting tool for the 
-Internet era.  <b>The core is a software library</b> which 
+Internet era.  <b>The <font color=red>core</font> is a software library</b> which 
 directly generates PDF documents, without the need 
 for Acrobat Distiller, PostScript or any print drivers.  
 Every report consists of a script which can

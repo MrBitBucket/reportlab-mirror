@@ -139,8 +139,9 @@ and so forth.
 
 .H stuff for HTML ONLY you've been warned RGB :)
 """
-from reportlab.platypus import layout
-inch = layout.inch
+from reportlab.platypus.doctemplate import *
+from reportlab.platypus.paragraph import Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
 import string
 
 do_images = 1
@@ -152,12 +153,12 @@ class DocStyle0PDF:
 	def __init__(self):
 		self.elts = []
 		self.paragraph = []
-		styles = layout.getSampleStyleSheet()
+		styles = getSampleStyleSheet()
 		self.paraStyle = styles["Normal"]
 		self.headerStyle = styles["Heading3"]
 		self.preStyle = styles["Code"]
 		self.modeStyles = {"normal": self.paraStyle, "preformatted": self.preStyle}
-		self.modeFormat = {"normal": layout.Paragraph, "preformatted": layout.Preformatted}
+		self.modeFormat = {"normal": Paragraph, "preformatted": Preformatted}
 		self.mode = "normal"
 
 	def add_text(self, text):
@@ -188,11 +189,11 @@ class DocStyle0PDF:
 		self.paragraph = []
 
 	def emit_paragraph(self, body):
-		#s1 = layout.Spacer(0.2*inch, 0.2*inch)
+		#s1 = Spacer(0.2*inch, 0.2*inch)
 		style = self.modeStyles[self.mode]
 		formatter = self.modeFormat[self.mode]
 		t = formatter(body, style)
-		s2 = layout.Spacer(10, 10)
+		s2 = Spacer(10, 10)
 		e = self.elts
 		e.append(t)
 		e.append(s2)
@@ -202,13 +203,13 @@ class DocStyle0PDF:
 
 	def addHeader(self, header):
 		self.addItem(header)
-		s2 = layout.Spacer(0.2*inch, 0.2*inch)
+		s2 = Spacer(0.2*inch, 0.2*inch)
 		e = self.elts
 		e.append(s2)
 		
 	def addItem(self, item):
-		s1 = layout.Spacer(0.2*inch, 0.2*inch)
-		t = layout.Paragraph(item, self.headerStyle)
+		s1 = Spacer(0.2*inch, 0.2*inch)
+		t = Paragraph(item, self.headerStyle)
 		e = self.elts
 		e.append(s1)
 		e.append(t)
@@ -223,13 +224,13 @@ class DocStyle0PDF:
 		canvas.rect(20,20,90,802,stroke=0, fill=1)
 		#if do_images:
 		#	canvas.drawInlineImage("images/replog.gif",20,750,90,60)
-		#	canvas.drawInlineImage("images/reppow.jpg", 2*inch, layout.PAGE_HEIGHT-3*inch)
+		#	canvas.drawInlineImage("images/reppow.jpg", 2*inch, PAGE_HEIGHT-3*inch)
 		canvas.setStrokeColorRGB(1,0,0)
 		canvas.setLineWidth(5)
 		canvas.setFont("Helvetica-Bold",16)
-		canvas.drawCentredString(4*inch, layout.PAGE_HEIGHT-4*inch, self.Title)
+		canvas.drawCentredString(4*inch, PAGE_HEIGHT-4*inch, self.Title)
 		canvas.setFont('Times-Roman',9)
-		canvas.drawString(2*inch, layout.PAGE_HEIGHT-0.50 * inch, "First Page / %s" % self.Title)
+		canvas.drawString(2*inch, PAGE_HEIGHT-0.50 * inch, "First Page / %s" % self.Title)
 		canvas.restoreState()
 	
 	def myLaterPages(self, canvas, doc):
@@ -240,7 +241,7 @@ class DocStyle0PDF:
 		#	canvas.drawInlineImage("images/replog.gif",20,750,90,60)
 		canvas.setFont('Times-Roman',9)
 		pageinfo=self.Title
-		canvas.drawString(2*inch, layout.PAGE_HEIGHT-0.5 * inch, "Page %d %s" % (doc.page, pageinfo))
+		canvas.drawString(2*inch, PAGE_HEIGHT-0.5 * inch, "Page %d %s" % (doc.page, pageinfo))
 		canvas.restoreState()
 
 	def process(self, lines, tofilename):
@@ -272,12 +273,12 @@ class DocStyle0PDF:
 			self.finish(tofilename)
 
 	def finish(self, tofilename):
-		doc = layout.SimpleFlowDocument(tofilename, layout.DEFAULT_PAGE_SIZE)
+		doc = SimpleDocTemplate(tofilename, DEFAULT_PAGE_SIZE)
 		doc.onFirstPage = self.myFirstPage
-		doc.onNewPage = self.myLaterPages
+		doc.onLaterPages = self.myLaterPages
 		doc.leftMargin = 144
 		elts = self.elts
-		elts.insert(0, layout.Spacer(4*inch, 4*inch)) # make space for title
+		elts.insert(0, Spacer(4*inch, 4*inch)) # make space for title
 		doc.build(self.elts)
 
 	def processfile(self, fn, tofilename):
@@ -332,11 +333,10 @@ class DocStyle0HTML(DocStyle0PDF):
 if __name__=='__main__':
 	if len(sys.argv) <> 2:
 		print 'Usage: simple_doc.py myfile.txt  will create HTML and PDF versions'
+		filename = 'sample.txt'
 	else:
 		filename = sys.argv[1]
-		if os.path.isfile(filename):
-			DoDualFormatPages([filename])
-		else:
-			print '%s not found' % filename
-			
-	
+	if os.path.isfile(filename):
+		DoDualFormatPages([filename])
+	else:
+		print '%s not found' % filename

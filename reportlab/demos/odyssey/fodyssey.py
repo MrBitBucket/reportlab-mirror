@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: fodyssey.py,v $
+#	Revision 1.10  2000/05/17 16:29:39  rgbecker
+#	Removal of SimpleFrame
+#
 #	Revision 1.9  2000/05/17 15:37:33  rgbecker
 #	Changes related to removal of SimpleFlowDocument
-#
+#	
 #	Revision 1.8  2000/05/13 09:23:45  rgbecker
 #	Fix spacing bugs
 #	
@@ -58,7 +61,7 @@
 #	Revision 1.1  2000/04/06 08:58:09  rgbecker
 #	Paragraph formatting version of odyssey.py
 #	
-__version__=''' $Id: fodyssey.py,v 1.9 2000/05/17 15:37:33 rgbecker Exp $ '''
+__version__=''' $Id: fodyssey.py,v 1.10 2000/05/17 16:29:39 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -85,7 +88,7 @@ def myLaterPages(canvas, doc):
 	canvas.restoreState()
 	
 def go():
-	doc = SimpleDocTemplate('fodyssey.pdf',DEFAULT_PAGE_SIZE,showBoundary=0)
+	doc = SimpleDocTemplate('fodyssey.pdf',DEFAULT_PAGE_SIZE,showBoundary='showboundary' in sys.argv)
 	doc.allowSplitting = not 'nosplitting' in sys.argv
 	doc.build(Elements,myFirstPage,myLaterPages)
 

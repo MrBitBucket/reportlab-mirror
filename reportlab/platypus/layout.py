@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.27  2000/05/17 16:29:40  rgbecker
+#	Removal of SimpleFrame
+#
 #	Revision 1.26  2000/05/16 16:15:16  rgbecker
 #	Changes related to removal of SimpleFlowDocument
-#
+#	
 #	Revision 1.25  2000/05/15 13:36:11  rgbecker
 #	Splitting changes
 #	
@@ -107,7 +110,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.26 2000/05/16 16:15:16 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.27 2000/05/17 16:29:40 rgbecker Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -401,47 +404,25 @@ class BasicFrame:
 		s = self.atTop and 0 or flowable.getSpaceBefore()
 		return flowable.split(self.width, y-p-s)
 
+	def drawBoundary(self,canv):
+		canv.rect(
+				self.x1,
+				self.y1,
+				self.x2 - self.x1,
+				self.y2 - self.y1
+				)
 
-#############################################################
-#	A Frame, and a Document Model
-#############################################################
-FrameFullError = "FrameFullError"
-LayoutError = "LayoutError"
-
-class SimpleFrame(BasicFrame):
-	"""A region into which flowable objects are to be packed.
-	Flows downwards.  A more general solution is needed which
-	will allow flows in any direction, including 'across and then
-	down' for small objects, but this is useful for
-	many languages now, as long as each object is 'full-width'
-	(i.e. a paragraph and not a word)."""
-	def __init__(self, canvas, x1, y1, width,height):
-		BasicFrame.__init__(self, x1, y1, width,height, leftPadding=6, bottomPadding=6,
-			rightPadding=6, topPadding=6, id=None, showBoundary=0)
-		self.canvas = canvas
-		self.objects = []	#it keeps a list of objects
-
-	def add(self, flowable):
-		r = self._add(flowable, self.canvas)
-		if r: self.objects.append(flowable)
-		return r
-
-	def addFromList(self, drawlist):
+	def addFromList(self, drawlist, canv):
 		"""Consumes objects from the front of the list until the
 		frame is full.	If it cannot fit one object, raises
 		an exception."""
 
 		if self.showBoundary:
-			self.canvas.rect(
-						self.x1,
-						self.y1,
-						self.x2 - self.x1,
-						self.y2 - self.y1
-						)
+			self.drawBoundary(canv)
 
 		while len(drawlist) > 0:
 			head = drawlist[0]
-			if self.add(head):
+			if self.add(head,canv,trySplit=0):
 				del drawlist[0]
 			else:
 				#leave it in the list for later
@@ -481,67 +462,3 @@ class Sequencer:
 def _doNothing(canvas, doc):
 	"Dummy callback for onPage"
 	pass
-
-##########################################################
-#
-#
-#
-##########################################################
-class SimpleFlowDocument:
-	"""A sample document that uses a single frame on each page.
-	The intention is for programmers to create their own document
-	models as needed.  This one accepts a list of flowables. You
-	can provide callbacks to decorate the first page and
-	subsequent pages; these should do headers, footers, sidebars
-	as needed."""
-	def __init__(self, filename, pagesize, showBoundary=0):
-		self.filename = filename
-		self.pagesize = pagesize
-		self.showBoundary=showBoundary
-		#sensibel defaults; override if you wish
-		self.leftMargin =  inch
-		self.bottomMargin = inch
-		self.rightMargin = self.pagesize[0] - inch
-		self.topMargin = self.pagesize[1] - inch
-
-		# 1-based counting is friendlier for readers
-		self.page = 1
-		#set these to drawing procedures of your own
-		self.onFirstPage = _doNothing
-		self.onNewPage = _doNothing
-
-
-	def build(self, flowables):
-		canv = canvas.Canvas(self.filename)
-		#canv.setPageTransition('Dissolve')
-
-		# do page 1
-		self.onFirstPage(canv, self)
-		frame1 = SimpleFrame(
-					canv,
-					self.leftMargin,
-					self.bottomMargin,
-					self.rightMargin - self.leftMargin,
-					self.topMargin - inch - self.bottomMargin
-							)
-		frame1.showBoundary = self.showBoundary
-		frame1.addFromList(flowables)
-		#print 'drew page %d, %d objects remaining' % (self.page, len(flowables))
-		# do subsequent pages
-		while len(flowables) > 0:
-			canv.showPage()
-			self.page = self.page + 1
-			self.onNewPage(canv, self)
-			frame = SimpleFrame(
-					canv,
-					self.leftMargin,
-					self.bottomMargin,
-					self.rightMargin - self.leftMargin,
-					self.topMargin - self.bottomMargin
-							)
-			frame.showBoundary = self.showBoundary
-			frame.addFromList(flowables)
-
-			#print 'drew page %d, %d objects remaining' % (self.page, len(flowables))
-
-		canv.save()

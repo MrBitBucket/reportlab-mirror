@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.10  2000/05/17 16:29:40  rgbecker
+#	Removal of SimpleFrame
+#
 #	Revision 1.9  2000/05/17 15:37:33  rgbecker
 #	Changes related to removal of SimpleFlowDocument
-#
+#	
 #	Revision 1.8  2000/05/16 16:15:16  rgbecker
 #	Changes related to removal of SimpleFlowDocument
 #	
@@ -58,7 +61,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.9 2000/05/17 15:37:33 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.10 2000/05/17 16:29:40 rgbecker Exp $ '''
 __doc__="""
 More complicated Document model
 """
@@ -207,12 +210,7 @@ class BaseDocTemplate:
 	def handle_frameBegin(self,*args):
 		self.frame._reset()
 		if self.showBoundary or self.frame.showBoundary:
-			self.canv.rect(
-						self.frame.x1,
-						self.frame.y1,
-						self.frame.x2 - self.frame.x1,
-						self.frame.y2 - self.frame.y1
-						)
+			self.frame.drawBoundary(self.canv)
 
 	def handle_frameEnd(self):
 		'''	Handles the semantics of the end of a frame. This includes the selection of
