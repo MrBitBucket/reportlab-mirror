@@ -958,13 +958,24 @@ def setStyles(newStyleSheet):
 ##    p.getPresentation().save()
 ##    p.close()
 
-
+_pyRXP_Parser = None
 def validate(rawdata):
-    try:
-        import pyRXP
-    except ImportError:
-        return
-    pars = pyRXP.Parser().parse(rawdata)
+    global _pyRXP_Parser
+    if not _pyRXP_Parser:
+        try:
+            import pyRXP
+        except ImportError:
+            return
+        from reportlab.lib.utils import open_and_read, _RL_DIR, rl_isfile
+        dtd = 'pythonpoint.dtd'
+        if not rl_isfile(dtd):
+            dtd = os.path.join(_RL_DIR,'tools','pythonpoint','pythonpoint.dtd')
+            if not rl_isfile(dtd): return
+        def eocb(URI,dtdText=open_and_read(dtd),dtd=dtd):
+            if os.path.basename(URI)=='pythonpoint.dtd': return dtd,dtdText
+            return URI
+        _pyRXP_Parser = pyRXP.Parser(eoCB=eocb)
+    return _pyRXP_Parser.parse(rawdata)
 
 def process(datafile, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=None, datafilename=None):
     "Process one PythonPoint source file."
