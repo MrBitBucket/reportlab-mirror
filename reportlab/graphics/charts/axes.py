@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.21 2001/05/07 16:28:05 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.22 2001/05/09 09:36:32 dinu_gherman Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -87,6 +87,19 @@ def _findMax(V, x, default):
 class CategoryAxis(Widget):
     "Abstract category axis, unusable in itself."
 
+    _attrMap = {
+        'visible':isNumber,
+        'visibleAxis':isNumber,
+        'visibleTicks':isNumber,
+        'strokeWidth':isNumber,
+        'strokeColor':isColorOrNone,
+        'strokeDashArray':isListOfNumbersOrNone,
+        'labels':None,
+        'categoryNames':isListOfStringsOrNone,
+        'joinAxis':None,
+        'joinAxisPos':isNumberOrNone,
+        }
+
 ##    def __init__(self):
 ##        msg = "This is an abstract class and must be subclassed to be used!"
 ##        raise "NotImplementedError", msg
@@ -120,19 +133,12 @@ class CategoryAxis(Widget):
 class XCategoryAxis(CategoryAxis):
     "X/category axis"
 
-    _attrMap = {
-        'visible':isNumber,
-        'strokeWidth':isNumber,
-        'strokeColor':isColorOrNone,
-        'strokeDashArray':isListOfNumbersOrNone,
+    _attrMap = CategoryAxis._attrMap.copy()
+    _attrMap.update({
         'tickUp':isNumber,
         'tickDown':isNumber,
-        'labels':None,
-        'categoryNames':isListOfStringsOrNone,
-        'joinAxis':None,
         'joinAxisMode':OneOf(('bottom', 'top', 'value', 'points', None)),
-        'joinAxisPos':isNumberOrNone,
-        }
+        })
 
     def __init__(self):
         # private properties set by methods.  The initial values
@@ -145,6 +151,8 @@ class XCategoryAxis(CategoryAxis):
         # public properties
 
         self.visible = 1
+        self.visibleAxis = 1
+        self.visibleTicks = 1
 
         self.strokeWidth = 1
         self.strokeColor = STATE_DEFAULTS['strokeColor']
@@ -218,6 +226,9 @@ class XCategoryAxis(CategoryAxis):
     def makeAxis(self):
         g = Group()
 
+        if not self.visibleAxis:
+            return g
+
         ja = self.joinAxis
         if ja:
             jam = self.joinAxisMode
@@ -255,6 +266,9 @@ class XCategoryAxis(CategoryAxis):
 
     def makeTickLabels(self):
         g = Group()
+
+        if not self.visibleTicks:
+            return g
         
         if not (self.categoryNames is None):
             assert len(self.categoryNames) == self._catCount, \
@@ -275,19 +289,12 @@ class XCategoryAxis(CategoryAxis):
 class YCategoryAxis(CategoryAxis):
     "Y/category axis"
 
-    _attrMap = {
-        'visible':isNumber,
-        'strokeWidth':isNumber,
-        'strokeColor':isColorOrNone,
-        'strokeDashArray':isListOfNumbersOrNone,
+    _attrMap = CategoryAxis._attrMap.copy()
+    _attrMap.update({
         'tickLeft':isNumber,
         'tickRight':isNumber,
-        'labels':None,
-        'categoryNames':isListOfStringsOrNone,
-        'joinAxis':None,
         'joinAxisMode':OneOf(('left', 'right', 'value', 'points', None)),
-        'joinAxisPos':isNumberOrNone,
-        }
+        })
 
     def __init__(self):
         # private properties set by methods.  The initial values
@@ -300,6 +307,8 @@ class YCategoryAxis(CategoryAxis):
         # public properties
 
         self.visible = 1
+        self.visibleAxis = 1
+        self.visibleTicks = 1
 
         self.strokeWidth = 1
         self.strokeColor = STATE_DEFAULTS['strokeColor']
@@ -373,6 +382,9 @@ class YCategoryAxis(CategoryAxis):
     def makeAxis(self):
         g = Group()
 
+        if not self.visibleAxis:
+            return g
+
         ja = self.joinAxis
         if ja:
             jam = self.joinAxisMode
@@ -412,6 +424,9 @@ class YCategoryAxis(CategoryAxis):
     def makeTickLabels(self):
         g = Group()
 
+        if not self.visibleTicks:
+            return g
+
         if not (self.categoryNames is None):
             assert len(self.categoryNames) == self._catCount, \
                    "expected %d category names but found %d in axis" % (
@@ -435,6 +450,8 @@ class ValueAxis(Widget):
 
     _attrMap = {
         'visible':isNumber,
+        'visibleAxis':isNumber,
+        'visibleTicks':isNumber,
         'strokeWidth':isNumber,
         'strokeColor':isColorOrNone,
         'strokeDashArray':isListOfNumbersOrNone,
@@ -459,6 +476,8 @@ class ValueAxis(Widget):
         
         # public properties
         self.visible = 1
+        self.visibleAxis = 1
+        self.visibleTicks = 1
         
         self.strokeWidth = 1
         self.strokeColor = STATE_DEFAULTS['strokeColor']
@@ -713,6 +732,9 @@ class XValueAxis(ValueAxis):
     def makeAxis(self):
         g = Group()
 
+        if not self.visibleAxis:
+            return g
+
         ja = self.joinAxis
         if ja:
             jam = self.joinAxisMode
@@ -734,6 +756,9 @@ class XValueAxis(ValueAxis):
 
     def makeTicks(self):
         g = Group()
+
+        if not self.visibleTicks:
+            return g
 
         i = 0
         for tickValue in self._tickValues:
@@ -780,12 +805,14 @@ class YValueAxis(ValueAxis):
 
 
     def demo(self):
-        self.setPosition(40, 10, 80)
-        self.configure([(10,20,30)])
+        data = [(10, 20, 30, 42)]
+        self.setPosition(100, 10, 80)
+        self.configure(data)
 
-        d = Drawing(200, 100)
-        d.add(self)
-        return d
+        drawing = Drawing(200, 100)
+        drawing.add(self)
+        return drawing
+
 
         
     def joinToAxis(self, xAxis, mode='left', pos=None):
@@ -828,6 +855,9 @@ class YValueAxis(ValueAxis):
     def makeAxis(self):
         g = Group()
 
+        if not self.visibleAxis:
+            return g
+
         ja = self.joinAxis
         if ja:
             jam = self.joinAxisMode
@@ -849,6 +879,9 @@ class YValueAxis(ValueAxis):
 
     def makeTicks(self):
         g = Group()
+
+        if not self.visibleTicks:
+            return g
 
         i = 0
         for tickValue in self._tickValues:
@@ -1157,6 +1190,33 @@ def sample4c():
     xAxis.joinAxis = yAxis
     xAxis.joinAxisMode = 'bottom'
     xAxis.configure(data)
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample4c1():
+    "xvalue/yvalue axes, without drawing axis lines/ticks."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.configure(data)
+    yAxis.visibleAxis = 0
+    yAxis.visibleTicks = 0
+
+    xAxis = XValueAxis()
+    xAxis._length = 300
+    xAxis.joinAxis = yAxis
+    xAxis.joinAxisMode = 'bottom'
+    xAxis.configure(data)
+    xAxis.visibleAxis = 0
+    xAxis.visibleTicks = 0
 
     drawing.add(xAxis)
     drawing.add(yAxis)
