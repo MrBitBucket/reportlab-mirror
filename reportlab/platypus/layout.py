@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.11  2000/04/10 14:08:19  rgbecker
+#	fixes related to offset
+#
 #	Revision 1.10  2000/04/10 12:25:10  rgbecker
 #	Typo fixes for justified paras
-#
+#	
 #	Revision 1.9  2000/04/07 12:31:29  rgbecker
 #	Color fixes/changes
 #	
@@ -58,7 +61,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.10 2000/04/10 12:25:10 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.11 2000/04/10 14:08:19 rgbecker Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -497,9 +500,11 @@ class Paragraph(Drawable):
                 tx.textLine(text)
                 tx.moveCursor(-offset + extraspace, 0)
             elif self.style.alignment == TA_JUSTIFY:
+                tx.moveCursor(-offset, 0)
                 tx.setWordSpace(extraspace / float(len(words)-1))
                 tx.textLine(text)
                 tx.setWordSpace(0.0)
+                tx.moveCursor(-offset, 0)
 
             cur_y = cur_y + self.style.leading
 
@@ -512,13 +517,13 @@ class Paragraph(Drawable):
                 if self.style.alignment == TA_LEFT:
                     tx.textLine(text)
                 elif self.style.alignment == TA_CENTER:
-                    tx.moveCursor(offset + 0.5 * extraspace, 0)
+                    tx.moveCursor(0.5 * extraspace, 0)
                     tx.textLine(text)
-                    tx.moveCursor(-offset + 0.5 * extraspace, 0)
+                    tx.moveCursor(0.5 * extraspace, 0)
                 elif self.style.alignment == TA_RIGHT:
-                    tx.moveCursor(offset + extraspace, 0)
+                    tx.moveCursor(extraspace, 0)
                     tx.textLine(text)
-                    tx.moveCursor(-offset + extraspace, 0)
+                    tx.moveCursor(extraspace, 0)
                 elif self.style.alignment == TA_JUSTIFY:
                     if lineno == len(self.lines) - 1:
                         #last one, left align
