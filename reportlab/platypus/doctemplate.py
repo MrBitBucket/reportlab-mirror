@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.52 2002/03/12 15:18:03 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.53 2002/07/07 22:29:02 andy_robinson Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.52 2002/03/12 15:18:03 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.53 2002/07/07 22:29:02 andy_robinson Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -284,8 +284,12 @@ class BaseDocTemplate:
 		self._indexingFlowables = []
 
 
-		#callback facility
+		#callback facility for progress monitoring
 		self._onPage = None
+		self._onProgress = None
+		self._flowableCount = 0  # so we know how far to go
+
+		
 		self._calc()
 		self.afterInit()
 
@@ -296,8 +300,12 @@ class BaseDocTemplate:
 		self.height = self._topMargin - self.bottomMargin
 
 	def setPageCallBack(self, func):
-		'Progress monitor - func(pageNo) called on each new page'
+		'Simple progress monitor - func(pageNo) called on each new page'
 		self._onPage = func
+
+	def setProgressCallBack(self, func):
+		'''Cleverer progress monitor - func(typ, value) called regularly'''
+		self._onProgress = func
 
 	def clean_hanging(self):
 		'handle internal postponed actions'
@@ -558,13 +566,21 @@ class BaseDocTemplate:
 		   operations).
 		"""
 		#assert filter(lambda x: not isinstance(x,Flowable), flowables)==[], "flowables argument error"
+		flowableCount = len(flowables)
+		if self._onProgress:
+			self._onProgress('STARTED',0)
+			self._onProgress('SIZE_EST', len(flowables))
 		self._startBuild(filename,canvasmaker)
 
 		while len(flowables):
 			self.clean_hanging()
 			self.handle_flowable(flowables)
+			if self._onProgress:
+				self._onProgress('PROGRESS',flowableCount - len(flowables))
 
 		self._endBuild()
+		if self._onProgress:
+			self._onProgress('FINISHED',0)
 
 	def _allSatisfied(self):
 		"""Called by multi-build - are all cross-references resolved?"""
@@ -603,6 +619,8 @@ class BaseDocTemplate:
 		passes = 0
 		while 1:
 			passes = passes + 1
+			if self._onProgress:
+				self.onProgress('PASS', passes)
 			if verbose: print 'building pass '+str(passes) + '...',
 
 			for fl in self._indexingFlowables:
