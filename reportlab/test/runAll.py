@@ -32,6 +32,7 @@ def makeSuite(folder, exclude=[],nonImportable=[],pattern='test_*.py'):
 def main(pattern='test_*.py'):
     try:
         folder = os.path.dirname(__file__)
+        assert folder
     except:
         folder = os.path.dirname(sys.argv[0]) or os.getcwd()
     from reportlab.lib.utils import isSourceDistro
