@@ -133,27 +133,20 @@ class Label(Widget):
         bottomPadding = AttrMapValue(isNumber,'padding at bottom of box'),
         )
 
-    def __init__(self):
-        self.x = 0
-        self.y = 0
-        self._text = 'Multi-Line\nString'
-
-        self.dx = 0
-        self.dy = 0
-        self.topPadding = self.leftPadding = self.rightPadding = self.bottomPadding = 0
-        self.angle = 0
-        self.boxAnchor = 'c'
-        self.boxStrokeColor = None  #boxStroke
-        self.boxStrokeWidth = 0.5 #boxStrokeWidth
-        self.boxFillColor = None
-        self.fillColor = STATE_DEFAULTS['fillColor']
-        self.strokeColor = None
-        self.strokeWidth = 0.1
-        self.fontName = STATE_DEFAULTS['fontName']
-        self.fontSize = STATE_DEFAULTS['fontSize']
-        self.leading =  self.width = self.maxWidth = self.height = None
-        self.textAnchor = 'start'
-        self.visible = 1
+    def __init__(self,**kw):
+        pop = kw.pop
+        self._text = pop('_text','Multi-Line\nString')
+        for _ in 'angle', 'x','y','dx','dy','topPadding','leftPadding','rightPadding','bottomPadding':
+            setattr(self,_,pop(_,0))
+        self.boxAnchor = pop('boxAnchor','c')
+        self.boxStrokeWidth = pop('boxStrokeWidth',0.5) #boxStrokeWidth
+        for _ in 'boxStrokeColor', 'strokeColor', 'boxFillColor', 'leading', 'width','maxWidth', 'height':
+            setattr(self,_,pop(_,None))
+        for _ in 'fillColor','fontName','fontSize':
+            setattr(self,_,pop(_,STATE_DEFAULTS[_]))
+        self.strokeWidth = pop('strokeWidth',0.1)
+        self.textAnchor = pop('textAnchor','start')
+        self.visible = pop('visible',1)
 
     def setText(self, text):
         """Set the text property.  May contain embedded newline characters.
