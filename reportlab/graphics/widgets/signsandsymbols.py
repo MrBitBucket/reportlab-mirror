@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/signsandsymbols.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.16 2001/09/20 22:22:29 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.17 2001/09/25 12:54:53 rgbecker Exp $
 # signsandsymbols.py
 # A collection of new widgets
 # author: John Precedo (johnp@reportlab.com)
@@ -9,21 +9,21 @@
 """This file is a collection of widgets to produce some common signs and symbols.
 
 Widgets include:
-- ETriangle0 (an equilateral triangle),
-- RTriangle0 (a right angled triangle),
-- Octagon0,
-- Crossbox0,
-- Tickbox0,
+- ETriangle (an equilateral triangle),
+- RTriangle (a right angled triangle),
+- Octagon,
+- Crossbox,
+- Tickbox,
 - SmileyFace,
-- StopSign0,
-- NoEntry0,
-- NotAllowed0 (the red roundel from 'no smoking' signs),
-- NoSmoking0,
-- DangerSign0 (a black exclamation point in a yellow triangle),
-- YesNo0 (returns a tickbox or a crossbox depending on a testvalue),
-- FloppyDisk0,
-- ArrowOne0, and
-- ArrowTwo0
+- StopSign,
+- NoEntry,
+- NotAllowed (the red roundel from 'no smoking' signs),
+- NoSmoking,
+- DangerSign (a black exclamation point in a yellow triangle),
+- YesNo (returns a tickbox or a crossbox depending on a testvalue),
+- FloppyDisk,
+- ArrowOne, and
+- ArrowTwo
 
 """
 
@@ -35,44 +35,46 @@ from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics import renderPDF
 
 
-class ETriangle0(Widget):
-	"""This draws an equilateral triangle.
-
-		possible attributes:
-		'x', 'y', 'size', 'color', 'strokeColor'
-
-		"""
-
+class _Symbol(Widget):
+	"""Abstract base widget
+	possible attributes:
+	'x', 'y', 'size', 'fillColor', 'strokeColor'
+	"""
 	_attrMap = AttrMap(
 		x = AttrMapValue(isNumber),
 		y = AttrMapValue(isNumber),
 		size = AttrMapValue(isNumber),
-		color = AttrMapValue(isColorOrNone),
+		fillColor = AttrMapValue(isColorOrNone),
 		strokeColor = AttrMapValue(isColorOrNone),
 		strokeWidth = AttrMapValue(isNumber),
 		)
-
 	def __init__(self):
+		assert self.__class__.__name__!='_Symbol', 'Abstract class _Symbol instantiated'
 		self.x = 0
 		self.y = 0
 		self.size = 100
-		self.color = colors.red
+		self.fillColor = colors.red
 		self.strokeColor = None
 		self.strokeWidth = 0.1
 
 	def demo(self):
 		D = shapes.Drawing(200, 100)
+		s = float(self.size)
 		ob = self.__class__()
-		s = float(ob.size)
 		ob.x=50
 		ob.y=0
 		ob.draw()
 		D.add(ob)
-		labelFontSize = 10
-		D.add(shapes.String(ob.x+(s/2),(ob.y-(1.2*labelFontSize)),
-							self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
-							fontSize=labelFontSize))
+		D.add(shapes.String(ob.x+(s/2),(ob.y-12),
+							ob.__class__.__name__, fillColor=colors.black, textAnchor='middle',
+							fontSize=10))
 		return D
+
+class ETriangle(_Symbol):
+	"""This draws an equilateral triangle."""
+
+	def __init__(self):
+		AbstractSymbol
 
 	def draw(self):
 		# general widget bits
@@ -85,17 +87,17 @@ class ETriangle0(Widget):
 			self.x, self.y,
 			self.x+s, self.y,
 			self.x+(s/2),self.y+s],
-			   fillColor = self.color,
+			   fillColor = self.fillColor,
 			   strokeColor = self.strokeColor,
 			   strokeWidth=s/50.)
 		g.add(triangle)
 		return g
 
-class RTriangle0(ETriangle0):
+class RTriangle(_Symbol):
 	"""This draws a right-angled triangle.
 
 		possible attributes:
-		'x', 'y', 'size', 'color', 'strokeColor'
+		'x', 'y', 'size', 'fillColor', 'strokeColor'
 
 		"""
 
@@ -103,7 +105,7 @@ class RTriangle0(ETriangle0):
 		self.x = 0
 		self.y = 0
 		self.size = 100
-		self.color = colors.green
+		self.fillColor = colors.green
 		self.strokeColor = None
 
 	def draw(self):
@@ -117,17 +119,17 @@ class RTriangle0(ETriangle0):
 			self.x, self.y,
 			self.x+s, self.y,
 			self.x,self.y+s],
-			   fillColor = self.color,
+			   fillColor = self.fillColor,
 			   strokeColor = self.strokeColor,
 			   strokeWidth=s/50.)
 		g.add(triangle)
 		return g
 
-class Octagon0(ETriangle0):
+class Octagon(_Symbol):
 	"""This widget draws an Octagon.
 
 		possible attributes:
-		'x', 'y', 'size', 'color', 'strokeColor'
+		'x', 'y', 'size', 'fillColor', 'strokeColor'
 
 	"""
 
@@ -135,7 +137,7 @@ class Octagon0(ETriangle0):
 		self.x = 0
 		self.y = 0
 		self.size = 100
-		self.color = colors.yellow
+		self.fillColor = colors.yellow
 		self.strokeColor = None
 
 	def draw(self):
@@ -155,22 +157,21 @@ class Octagon0(ETriangle0):
 											  self.x+s, self.y+athird,
 											  self.x+(athird*2), self.y],
 									  strokeColor = self.strokeColor,
-									  fillColor = self.color,
+									  fillColor = self.fillColor,
 									  strokeWidth=10)
 		g.add(octagon)
 		return g
 
-class Crossbox0(ETriangle0):
+class Crossbox(_Symbol):
 	"""This draws a black box with a red cross in it - a 'checkbox'.
 
 		possible attributes:
-		'x', 'y', 'size', 'crossColor', 'boxColor', 'crosswidth'
+		'x', 'y', 'size', 'crossColor', 'strokeColor', 'crosswidth'
 
 	"""
 
-	_attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor', 'color'),
+	_attrMap = AttrMap(BASE=_Symbol,
 		crossColor = AttrMapValue(isColorOrNone),
-		boxColor = AttrMapValue(isColorOrNone),
 		crosswidth = AttrMapValue(isNumber),
 		)
 
@@ -178,8 +179,9 @@ class Crossbox0(ETriangle0):
 		self.x = 0
 		self.y = 0
 		self.size = 100
+		self.fillColor = colors.white
 		self.crossColor = colors.red
-		self.boxColor = colors.black
+		self.strokeColor = colors.black
 		self.crosswidth = 10
 
 	def draw(self):
@@ -189,8 +191,8 @@ class Crossbox0(ETriangle0):
 
 		# crossbox specific bits
 		box = shapes.Rect(self.x+1, self.y+1, s-2, s-2,
-			   fillColor = None,
-			   strokeColor = self.boxColor,
+			   fillColor = self.fillColor,
+			   strokeColor = self.strokeColor,
 			   strokeWidth=2)
 		g.add(box)
 
@@ -209,17 +211,16 @@ class Crossbox0(ETriangle0):
 		return g
 
 
-class Tickbox0(ETriangle0):
+class Tickbox(_Symbol):
 	"""This draws a black box with a red tick in it - another 'checkbox'.
 
 		possible attributes:
-		'x', 'y', 'size', 'tickColor', 'boxColor', 'tickwidth'
+		'x', 'y', 'size', 'tickColor', 'strokeColor', 'tickwidth'
 
 """
 
-	_attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor', 'color'),
+	_attrMap = AttrMap(BASE=_Symbol,
 		tickColor = AttrMapValue(isColorOrNone),
-		boxColor = AttrMapValue(isColorOrNone),
 		tickwidth = AttrMapValue(isNumber),
 		)
 
@@ -228,7 +229,8 @@ class Tickbox0(ETriangle0):
 		self.y = 0
 		self.size = 100
 		self.tickColor = colors.red
-		self.boxColor = colors.black
+		self.strokeColor = colors.black
+		self.fillColor = colors.white
 		self.tickwidth = 10
 
 	def draw(self):
@@ -238,8 +240,8 @@ class Tickbox0(ETriangle0):
 
 		# tickbox specific bits
 		box = shapes.Rect(self.x+1, self.y+1, s-2, s-2,
-			   fillColor = None,
-			   strokeColor = self.boxColor,
+			   fillColor = self.fillColor,
+			   strokeColor = self.strokeColor,
 			   strokeWidth=2)
 		g.add(box)
 
@@ -252,20 +254,21 @@ class Tickbox0(ETriangle0):
 
 		return g
 
-class SmileyFace(ETriangle0):
+class SmileyFace(_Symbol):
 	"""This draws a classic smiley face.
 
 		possible attributes:
-		'x', 'y', 'size', 'color'
+		'x', 'y', 'size', 'fillColor'
 
-"""
+	"""
 
 	def __init__(self):
-		ETriangle0.__init__(self)
+		_Symbol.__init__(self)
 		self.x = 0
 		self.y = 0
 		self.size = 100
-		self.color = colors.yellow
+		self.fillColor = colors.yellow
+		self.strokeColor = colors.black
 
 	def draw(self):
 		# general widget bits
@@ -274,7 +277,7 @@ class SmileyFace(ETriangle0):
 
 		# SmileyFace specific bits
 		g.add(shapes.Circle(cx=self.x+(s/2), cy=self.y+(s/2), r=s/2,
-				fillColor=self.color, strokeColor=self.strokeColor,
+				fillColor=self.fillColor, strokeColor=self.strokeColor,
 				strokeWidth=max(s/38.,self.strokeWidth)))
 
 		for i in (1,2):
@@ -317,20 +320,24 @@ class SmileyFace(ETriangle0):
 
 		return g
 
-class StopSign0(ETriangle0):
+class StopSign(_Symbol):
 	"""This draws a (British) stop sign.
 
 		possible attributes:
 		'x', 'y', 'size'
 
 		"""
-	_attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor', 'color'),
+	_attrMap = AttrMap(BASE=_Symbol,
+		stopColor = AttrMapValue(isColorOrNone,desc='color of the word stop'),
 		)
 
 	def __init__(self):
 		self.x = 0
 		self.y = 0
 		self.size = 100
+		self.strokeColor = colors.black
+		self.fillColor = colors.orangered
+		self.stopColor = colors.ghostwhite
 
 	def draw(self):
 		# general widget bits
@@ -348,7 +355,7 @@ class StopSign0(ETriangle0):
 											  self.x+s, self.y+(athird*2),
 											  self.x+s, self.y+athird,
 											  self.x+(athird*2), self.y],
-									  strokeColor = colors.black,
+									  strokeColor = self.strokeColor,
 									  fillColor = None,
 									  strokeWidth=1)
 		g.add(outerOctagon)
@@ -362,18 +369,19 @@ class StopSign0(ETriangle0):
 											  (self.x+s)-(s/75), self.y+athird+(s/75),
 											  self.x+(athird*2)-(s/75), self.y+(s/75)],
 									  strokeColor = None,
-									  fillColor = colors.orangered,
+									  fillColor = self.fillColor,
 									  strokeWidth=0)
 		g.add(innerOctagon)
 
-		g.add(shapes.String(self.x+(s*0.5),self.y+(s*0.4),
-							'STOP', fillColor=colors.ghostwhite, textAnchor='middle',
+		if self.stopColor:
+			g.add(shapes.String(self.x+(s*0.5),self.y+(s*0.4),
+							'STOP', fillColor=self.stopColor, textAnchor='middle',
 							fontSize=s/3, fontName="Helvetica-Bold"))
 
 		return g
 
 
-class NoEntry0(ETriangle0):
+class NoEntry(_Symbol):
 	"""This draws a (British) No Entry sign - a red circle with a white line on it.
 
 		possible attributes:
@@ -381,13 +389,17 @@ class NoEntry0(ETriangle0):
 
 		"""
 
-	_attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor', 'color'),
+	_attrMap = AttrMap(BASE=_Symbol,
+		innerBarColor = AttrMapValue(isColorOrNone,desc='color of the inner bar'),
 		)
 
 	def __init__(self):
 		self.x = 0
 		self.y = 0
 		self.size = 100
+		self.strokeColor = colors.black
+		self.fillColor = colors.orangered
+		self.innerBarColor = colors.ghostwhite
 
 	def draw(self):
 		# general widget bits
@@ -395,30 +407,18 @@ class NoEntry0(ETriangle0):
 		g = shapes.Group()
 
 		# no-entry-sign specific bits
-		outerCircle = shapes.Circle(cx = (self.x+(s/2)), cy = (self.y+(s/2)), r = s/2,
-			   fillColor = None,
-			   strokeColor = colors.black,
-			   strokeWidth=1)
-		g.add(outerCircle)
+		if self.strokeColor:
+			g.add(shapes.Circle(cx = (self.x+(s/2)), cy = (self.y+(s/2)), r = s/2, fillColor = None, strokeColor = self.strokeColor, strokeWidth=1))
 
-		innerCircle = shapes.Circle(cx = (self.x+(s/2)), cy =(self.y+(s/2)), r = ((s/2)-(s/50)),
-			   fillColor = colors.orangered,
-			   strokeColor = None,
-			   strokeWidth=0)
-		g.add(innerCircle)
+		if self.fillColor:
+			g.add(shapes.Circle(cx = (self.x+(s/2)), cy =(self.y+(s/2)), r = ((s/2)-(s/50)), fillColor = self.fillColor, strokeColor = None, strokeWidth=0))
 
-		innerBar = shapes.Rect(self.x+(s*0.1), self.y+(s*0.4),
-							   width=s*0.8,
-							   height=s*0.2,
-			   fillColor = colors.ghostwhite,
-			   strokeColor = colors.ghostwhite,
-			   strokeLineCap = 1,
-			   strokeWidth = 0)
-		g.add(innerBar)
-
+		innerBarColor = self.innerBarColor
+		if innerBarColor:
+			g.add(shapes.Rect(self.x+(s*0.1), self.y+(s*0.4), width=s*0.8, height=s*0.2, fillColor = innerBarColor, strokeColor = innerBarColor, strokeLineCap = 1, strokeWidth = 0))
 		return g
 
-class NotAllowed0(ETriangle0):
+class NotAllowed(_Symbol):
 	"""This draws a 'forbidden' roundel (as used in the no-smoking sign).
 
 		possible attributes:
@@ -426,24 +426,24 @@ class NotAllowed0(ETriangle0):
 
 		"""
 
-	_attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor', 'color'),
+	_attrMap = AttrMap(BASE=_Symbol,
 		)
 
 	def __init__(self):
 		self.x = 0
 		self.y = 0
 		self.size = 100
+		self.strokeColor = colors.red
+		self.fillColor = colors.white
 
 	def draw(self):
 		# general widget bits
 		s = float(self.size)  # abbreviate as we will use this a lot
 		g = shapes.Group()
+		strokeColor = self.strokeColor
 
 		# not=allowed specific bits
-		outerCircle = shapes.Circle(cx = (self.x+(s/2)), cy = (self.y+(s/2)), r = (s/2)-(s/10),
-			   fillColor = None,
-			   strokeColor = colors.red,
-			   strokeWidth=s/10.)
+		outerCircle = shapes.Circle(cx = (self.x+(s/2)), cy = (self.y+(s/2)), r = (s/2)-(s/10), fillColor = self.fillColor, strokeColor = strokeColor, strokeWidth=s/10.)
 		g.add(outerCircle)
 
 		centerx=self.x+s
@@ -462,25 +462,19 @@ class NotAllowed0(ETriangle0):
 		startangle = startangledegrees*degreestoradians
 		endangle = endangledegrees*degreestoradians
 		while endangle<startangle:
-			  endangle = endangle+2*pi
+			endangle = endangle+2*pi
 		angle = startangle
 		while angle<endangle:
 			x = centerx + cos(angle)*radius
 			y = centery + sin(angle)*yradius
 			a(x); a(y)
 			angle = angle+radiansdelta
-
-		crossbar = shapes.PolyLine(pointslist,
-			   fillColor = colors.red,
-			   strokeColor = colors.red,
-			   strokeWidth = s/10.)
-
+		crossbar = shapes.PolyLine(pointslist, fillColor = strokeColor, strokeColor = strokeColor, strokeWidth = s/10.)
 		g.add(crossbar)
-
 		return g
 
 
-class NoSmoking0(NotAllowed0):
+class NoSmoking(NotAllowed):
 	"""This draws a no-smoking sign.
 
 		possible attributes:
@@ -489,90 +483,66 @@ class NoSmoking0(NotAllowed0):
 		"""
 
 	def __init__(self):
-		self.x = 0
-		self.y = 0
-		self.size = 100
+		NotAllowed.__init__(self)
 
 	def draw(self):
 		# general widget bits
 		s = float(self.size)  # abbreviate as we will use this a lot
-		g = shapes.Group()
+		g = NotAllowed.draw(self)
 
 		# no-smoking-sign specific bits
 		newx = self.x+(s/2)-(s/3.5)
 		newy = self.y+(s/2)-(s/32)
 		cigarrette1 = shapes.Rect(x = newx, y = newy, width = (s/2), height =(s/16),
-			   fillColor = colors.ghostwhite,
-			   strokeColor = colors.gray,
-			   strokeWidth=0)
+				fillColor = colors.ghostwhite, strokeColor = colors.gray, strokeWidth=0)
 		newx=newx+(s/2)+(s/64)
-		g.add(cigarrette1)
-
+		g.insert(-1,cigarrette1)
 
 		cigarrette2 = shapes.Rect(x = newx, y = newy, width = (s/80), height =(s/16),
-		   fillColor = colors.orangered,
-		   strokeColor = None,
-		   strokeWidth=0)
+				fillColor = colors.orangered, strokeColor = None, strokeWidth=0)
 		newx= newx+(s/35)
-		g.add(cigarrette2)
+		g.insert(-1,cigarrette2)
 
 		cigarrette3 = shapes.Rect(x = newx, y = newy, width = (s/80), height =(s/16),
-		   fillColor = colors.orangered,
-		   strokeColor = None,
-		   strokeWidth=0)
+				fillColor = colors.orangered, strokeColor = None, strokeWidth=0)
 		newx= newx+(s/35)
-		g.add(cigarrette3)
+		g.insert(-1,cigarrette3)
 
 		cigarrette4 = shapes.Rect(x = newx, y = newy, width = (s/80), height =(s/16),
-		   fillColor = colors.orangered,
-		   strokeColor = None,
-		   strokeWidth=0)
+				fillColor = colors.orangered, strokeColor = None, strokeWidth=0)
 		newx= newx+(s/35)
-		g.add(cigarrette4)
-
-		roundel = NotAllowed0()
-		roundel.draw()
-		roundel.x = self.x
-		roundel.y = self.y
-		roundel.size = self.size
-		g.add(roundel)
+		g.insert(-1,cigarrette4)
 
 		return g
 
 
-class DangerSign0(ETriangle0):
+class DangerSign(_Symbol):
 	"""This draws a 'danger' sign: a yellow box with a black exclamation point.
 
 		possible attributes:
-		'x', 'y', 'size', 'exmarkColor', 'backColor', 'exmarkWidth'
+		'x', 'y', 'size', 'strokeColor', 'fillColor', 'strokeWidth'
 
 		"""
-
-	_attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor', 'color'),
-		exmarkColor = AttrMapValue( isColorOrNone),
-		backColor = AttrMapValue( isColorOrNone),
-		exmarkWidth = AttrMapValue( isNumber),
-		)
 
 	def __init__(self):
 		self.x = 0
 		self.y = 0
 		self.size = 100
-		self.exmarkColor = colors.black
-		self.backColor = colors.gold
-		self.exmarkWidth = self.size*0.125
+		self.strokeColor = colors.black
+		self.fillColor = colors.gold
+		self.strokeWidth = self.size*0.125
 
 	def draw(self):
 		# general widget bits
 		s = float(self.size)  # abbreviate as we will use this a lot
 		g = shapes.Group()
-		ew = self.exmarkWidth
+		ew = self.strokeWidth
 		ae = s*0.125			#(ae = 'an eighth')
 
 
 		# danger sign specific bits
 
-		ew = self.exmarkWidth
+		ew = self.strokeWidth
 		ae = s*0.125			#(ae = 'an eighth')
 
 		outerTriangle = shapes.Polygon(points = [
@@ -580,7 +550,7 @@ class DangerSign0(ETriangle0):
 			self.x+s, self.y,
 			self.x+(s/2),self.y+s],
 			   fillColor = None,
-			   strokeColor = self.exmarkColor,
+			   strokeColor = self.strokeColor,
 			   strokeWidth=0)
 		g.add(outerTriangle)
 
@@ -588,7 +558,7 @@ class DangerSign0(ETriangle0):
 			self.x+(s/50), self.y+(s/75),
 			(self.x+s)-(s/50), self.y+(s/75),
 			self.x+(s/2),(self.y+s)-(s/50)],
-			   fillColor = self.backColor,
+			   fillColor = self.fillColor,
 			   strokeColor = None,
 			   strokeWidth=0)
 		g.add(innerTriangle)
@@ -598,7 +568,7 @@ class DangerSign0(ETriangle0):
 			((self.x+s/2)+ew/2), self.y+ae*2.5,
 			((self.x+s/2)+((ew/2))+(ew/6)), self.y+ae*5.5,
 			((self.x+s/2)-((ew/2))-(ew/6)), self.y+ae*5.5],
-			   fillColor = self.exmarkColor,
+			   fillColor = self.strokeColor,
 			   strokeColor = None)
 		g.add(exmark)
 
@@ -607,14 +577,14 @@ class DangerSign0(ETriangle0):
 			((self.x+s/2)+ew/2), self.y+ae,
 			((self.x+s/2)+ew/2), self.y+ae*2,
 			((self.x+s/2)-ew/2), self.y+ae*2],
-			   fillColor = self.exmarkColor,
+			   fillColor = self.strokeColor,
 			   strokeColor = None)
 		g.add(exdot)
 
 		return g
 
 
-class YesNo0(ETriangle0):
+class YesNo(_Symbol):
 	"""This widget draw a tickbox or crossbox depending on 'testValue'.
 
 		If this widget is supplied with a 'True' or 1 as a value for
@@ -626,7 +596,7 @@ class YesNo0(ETriangle0):
 
 """
 
-	_attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor', 'color'),
+	_attrMap = AttrMap(BASE=_Symbol,
 		tickcolor = AttrMapValue(isColor),
 		crosscolor = AttrMapValue(isColor),
 		testValue = AttrMapValue(isBoolean),
@@ -642,10 +612,10 @@ class YesNo0(ETriangle0):
 
 	def draw(self):
 		if self.testValue:
-			yn=Tickbox0()
+			yn=Tickbox()
 			yn.tickColor=self.tickcolor
 		else:
-			yn=Crossbox0()
+			yn=Crossbox()
 			yn.crossColor=self.crosscolor
 		yn.x=self.x
 		yn.y=self.y
@@ -656,14 +626,14 @@ class YesNo0(ETriangle0):
 
 	def demo(self):
 		D = shapes.Drawing(200, 100)
-		yn = YesNo0()
+		yn = YesNo()
 		yn.x = 15
 		yn.y = 25
 		yn.size = 70
 		yn.testValue = 0
 		yn.draw()
 		D.add(yn)
-		yn2 = YesNo0()
+		yn2 = YesNo()
 		yn2.x = 120
 		yn2.y = 25
 		yn2.size = 70
@@ -683,7 +653,7 @@ class YesNo0(ETriangle0):
 							fontSize=labelFontSize))
 		return D
 
-class FloppyDisk0(ETriangle0):
+class FloppyDisk(_Symbol):
 	"""This widget draws an icon of a floppy disk.
 
 		possible attributes:
@@ -691,7 +661,7 @@ class FloppyDisk0(ETriangle0):
 
 		"""
 
-	_attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor', 'color'),
+	_attrMap = AttrMap(BASE=_Symbol,
 		diskColor = AttrMapValue(isColor),
 		)
 
@@ -759,22 +729,18 @@ class FloppyDisk0(ETriangle0):
 
 		return g
 
-class ArrowOne0(ETriangle0):
+class ArrowOne(_Symbol):
 	"""This widget draws an arrow (style one).
 
 		possible attributes:
-		'x', 'y', 'size', 'color'
+		'x', 'y', 'size', 'fillColor'
 
 		"""
-
-	_attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor',),
-		)
-
 	def __init__(self):
 		self.x = 0
 		self.y = 0
 		self.size = 100
-		self.color = colors.red
+		self.fillColor = colors.red
 
 	def draw(self):
 		# general widget bits
@@ -784,7 +750,7 @@ class ArrowOne0(ETriangle0):
 
 		# arrow specific bits
 		body = shapes.Rect(x=self.x, y=(self.y+(s/2))-(s/6), width=2*(s/3), height=(s/3),
-			   fillColor = self.color,
+			   fillColor = self.fillColor,
 			   strokeColor = None,
 			   strokeWidth=0)
 		g.add(body)
@@ -793,18 +759,18 @@ class ArrowOne0(ETriangle0):
 									   self.x+(3*(s/6)), self.y+8*(s/10),
 									   self.x+s, self.y+(s/2),
 									   self.x+(3*(s/6)), self.y+2*(s/10)],
-			   fillColor = self.color,
+			   fillColor = self.fillColor,
 			   strokeColor = None,
 			   strokeWidth=0)
 		g.add(head)
 
 		return g
 
-class ArrowTwo0(ArrowOne0):
+class ArrowTwo(ArrowOne):
 	"""This widget draws an arrow (style two).
 
 		possible attributes:
-		'x', 'y', 'size', 'color'
+		'x', 'y', 'size', 'fillColor'
 
 		"""
 
@@ -812,7 +778,7 @@ class ArrowTwo0(ArrowOne0):
 		self.x = 0
 		self.y = 0
 		self.size = 100
-		self.color = colors.blue
+		self.fillColor = colors.blue
 
 	def draw(self):
 		# general widget bits
@@ -822,7 +788,7 @@ class ArrowTwo0(ArrowOne0):
 
 		# arrow specific bits
 		body = shapes.Rect(x=self.x, y=(self.y+(s/2))-(s/24), width=9*(s/10), height=(s/12),
-			   fillColor = self.color,
+			   fillColor = self.fillColor,
 			   strokeColor = None,
 			   strokeWidth=0)
 		g.add(body)
@@ -831,7 +797,7 @@ class ArrowTwo0(ArrowOne0):
 									   self.x+(4*(s/6)), self.y+4*(s/6),
 									   self.x+s, self.y+(s/2),
 									   self.x+(4*(s/6)), self.y+2*(s/6)],
-			   fillColor = self.color,
+			   fillColor = self.fillColor,
 			   strokeColor = None,
 			   strokeWidth=0)
 		g.add(head)
@@ -844,29 +810,26 @@ def test():
 	"""
 	labelFontSize = 10
 	D = shapes.Drawing(450,650)
-	cb = Crossbox0()
+	cb = Crossbox()
 	cb.x = 20
 	cb.y = 530
-	cb.demo()
 	D.add(cb)
 	D.add(shapes.String(cb.x+(cb.size/2),(cb.y-(1.2*labelFontSize)),
 						   cb.__class__.__name__, fillColor=colors.black, textAnchor='middle',
 						   fontSize=labelFontSize))
 
-	tb = Tickbox0()
+	tb = Tickbox()
 	tb.x = 170
 	tb.y = 530
-	tb.demo()
 	D.add(tb)
 	D.add(shapes.String(tb.x+(tb.size/2),(tb.y-(1.2*labelFontSize)),
 							tb.__class__.__name__, fillColor=colors.black, textAnchor='middle',
 							fontSize=labelFontSize))
 
 
-	yn = YesNo0()
+	yn = YesNo()
 	yn.x = 320
 	yn.y = 530
-	yn.demo()
 	D.add(yn)
 	tempstring = yn.__class__.__name__ + '*'
 	D.add(shapes.String(yn.x+(tb.size/2),(yn.y-(1.2*labelFontSize)),
@@ -877,82 +840,73 @@ def test():
 							fontSize=labelFontSize*0.75))
 
 
-	ss = StopSign0()
+	ss = StopSign()
 	ss.x = 20
 	ss.y = 400
-	ss.demo()
 	D.add(ss)
 	D.add(shapes.String(ss.x+(ss.size/2), ss.y-(1.2*labelFontSize),
 							ss.__class__.__name__, fillColor=colors.black, textAnchor='middle',
 							fontSize=labelFontSize))
 
-	ne = NoEntry0()
+	ne = NoEntry()
 	ne.x = 170
 	ne.y = 400
-	ne.demo()
 	D.add(ne)
 	D.add(shapes.String(ne.x+(ne.size/2),(ne.y-(1.2*labelFontSize)),
 							ne.__class__.__name__, fillColor=colors.black, textAnchor='middle',
 							fontSize=labelFontSize))
 
-	sf = SmileyFace0()
+	sf = SmileyFace()
 	sf.x = 320
 	sf.y = 400
-	sf.demo()
 	D.add(sf)
 	D.add(shapes.String(sf.x+(sf.size/2),(sf.y-(1.2*labelFontSize)),
 							sf.__class__.__name__, fillColor=colors.black, textAnchor='middle',
 							fontSize=labelFontSize))
 
-	ds = DangerSign0()
+	ds = DangerSign()
 	ds.x = 20
 	ds.y = 270
-	ds.demo()
 	D.add(ds)
 	D.add(shapes.String(ds.x+(ds.size/2),(ds.y-(1.2*labelFontSize)),
 							ds.__class__.__name__, fillColor=colors.black, textAnchor='middle',
 							fontSize=labelFontSize))
 
-	na = NotAllowed0()
+	na = NotAllowed()
 	na.x = 170
 	na.y = 270
-	na.demo()
 	D.add(na)
 	D.add(shapes.String(na.x+(na.size/2),(na.y-(1.2*labelFontSize)),
 							na.__class__.__name__, fillColor=colors.black, textAnchor='middle',
 							fontSize=labelFontSize))
 
-	ns = NoSmoking0()
+	ns = NoSmoking()
 	ns.x = 320
 	ns.y = 270
-	ns.demo()
 	D.add(ns)
 	D.add(shapes.String(ns.x+(ns.size/2),(ns.y-(1.2*labelFontSize)),
 							ns.__class__.__name__, fillColor=colors.black, textAnchor='middle',
 							fontSize=labelFontSize))
 
-	a1 = ArrowOne0()
+	a1 = ArrowOne()
 	a1.x = 20
 	a1.y = 140
-	a1.demo()
 	D.add(a1)
 	D.add(shapes.String(a1.x+(a1.size/2),(a1.y-(1.2*labelFontSize)),
 							a1.__class__.__name__, fillColor=colors.black, textAnchor='middle',
 							fontSize=labelFontSize))
 
-	a2 = ArrowTwo0()
+	a2 = ArrowTwo()
 	a2.x = 170
 	a2.y = 140
-	a2.demo()
 	D.add(a2)
 	D.add(shapes.String(a2.x+(a2.size/2),(a2.y-(1.2*labelFontSize)),
 							a2.__class__.__name__, fillColor=colors.black, textAnchor='middle',
 							fontSize=labelFontSize))
 
-	fd = FloppyDisk0()
+	fd = FloppyDisk()
 	fd.x = 320
 	fd.y = 140
-	fd.demo()
 	D.add(fd)
 	D.add(shapes.String(fd.x+(fd.size/2),(fd.y-(1.2*labelFontSize)),
 							fd.__class__.__name__, fillColor=colors.black, textAnchor='middle',

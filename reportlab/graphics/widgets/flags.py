@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/flags.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.8 2001/09/21 18:06:07 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.9 2001/09/25 12:54:53 rgbecker Exp $
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 
@@ -35,7 +35,7 @@ from reportlab.lib.attrmap import *
 from reportlab.graphics import shapes
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics import renderPDF
-from signsandsymbols import ETriangle0
+from signsandsymbols import _Symbol
 
 validFlag=OneOf(None,
 				'UK',
@@ -61,14 +61,14 @@ validFlag=OneOf(None,
 				'EU',
 				)
 
-class Star(ETriangle0):
+class Star(_Symbol):
 	"""This draws a 5-pointed star.
 
 		possible attributes:
-		'x', 'y', 'size', 'color', 'strokeColor'
+		'x', 'y', 'size', 'fillColor', 'strokeColor'
 
 		"""
-	_attrMap = AttrMap(BASE=ETriangle0,
+	_attrMap = AttrMap(BASE=_Symbol,
 			angle = AttrMapValue(isNumber, desc='angle'),
 			)
 
@@ -121,18 +121,18 @@ class Star(ETriangle0):
 		
 		return g
 
-class Flag(ETriangle0):
+class Flag(_Symbol):
 	"""This is a generic flag class that all the flags in this file use as a basis.
 	
 		This class basically provides edges and a tidy-up routine to hide any bits of
 		line that overlap the 'outside' of the flag
 
 		possible attributes:
-		'x', 'y', 'size', 'background'
+		'x', 'y', 'size', 'fillColor'
 	""" 
 
-	_attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('color'),
-			background = AttrMapValue(isColor, desc='Background color'),
+	_attrMap = AttrMap(BASE=_Symbol,
+			fillColor = AttrMapValue(isColor, desc='Background color'),
 			border = AttrMapValue(isBoolean, 'Whether a background is drawn'),
 			kind = AttrMapValue(validFlag, desc='Which flag'),
 			)
@@ -141,7 +141,7 @@ class Flag(ETriangle0):
 		self.x = 0
 		self.y = 0
 		self.size = 100
-		self.background = colors.white
+		self.fillColor = colors.white
 		self.border=1
 		self.kind = None
 
@@ -230,7 +230,7 @@ class Flag(ETriangle0):
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
 		g.add(shapes.Rect(self.x-1, self.y-1, width=(s*2)+2, height=s+2,
-				fillColor = None, strokeColor = self.background, strokeWidth=0))
+				fillColor = None, strokeColor = self.fillColor, strokeWidth=0))
 
 		if self.border:
 			g.add(shapes.Rect(self.x, self.y, width=s*2, height=s,
@@ -785,11 +785,11 @@ class Flag(ETriangle0):
 			innercounter=innercounter+2
 			
 		box = shapes.Rect(self.x, self.y, width=s/4, height=s,
-				fillColor = self.background, strokeColor = None, strokeWidth=0)
+				fillColor = self.fillColor, strokeColor = None, strokeWidth=0)
 		g.add(box)
 
 		box2 = shapes.Rect(self.x+((s*2)-s/4), self.y, width=s/4, height=s,
-				fillColor = self.background, strokeColor = None, strokeWidth=0)
+				fillColor = self.fillColor, strokeColor = None, strokeWidth=0)
 		g.add(box2)
 
 		g.add(self.borderdraw())
