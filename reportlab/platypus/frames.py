@@ -1,4 +1,4 @@
-__version__=''' $Id: frames.py,v 1.8 2000/10/02 14:41:50 rgbecker Exp $ '''
+__version__=''' $Id: frames.py,v 1.9 2000/10/02 14:57:28 rgbecker Exp $ '''
 __doc__="""
 """
 _geomAttr=('x1','y1','width','height', 'leftPadding', 'bottomPadding', 'rightPadding', 'topPadding')
@@ -123,7 +123,7 @@ class Frame:
 		y = self._y
 		p = self._y1p
 		s = 0
-		if self._atTop: s = flowable.getSpaceBefore()
+		if not self._atTop: s = flowable.getSpaceBefore()
 		flowable.canv = canv	#some flowables might need this
 		r = flowable.split(self._aW, y-p-s)
 		del flowable.canv
@@ -187,9 +187,12 @@ class Frame:
 #
 ###############################################################################
 #	$Log: frames.py,v $
+#	Revision 1.9  2000/10/02 14:57:28  rgbecker
+#	Fixed the atTop test again
+#
 #	Revision 1.8  2000/10/02 14:41:50  rgbecker
 #	Fixed the atTop test
-#
+#	
 #	Revision 1.7  2000/10/01 12:53:33  rgbecker
 #	Fixed atTop bugs thanks to the effbot
 #	
