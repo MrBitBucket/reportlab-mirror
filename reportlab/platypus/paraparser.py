@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.37 2000/12/11 00:40:57 rgbecker Exp $
-__version__=''' $Id: paraparser.py,v 1.37 2000/12/11 00:40:57 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.38 2000/12/13 17:09:55 rgbecker Exp $
+__version__=''' $Id: paraparser.py,v 1.38 2000/12/13 17:09:55 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -70,6 +70,7 @@ _paraAttrMap = {'font': ('fontName', None),
 				'color':('textColor',toColor),
 				'backcolor':('backColor',toColor),
 				'bgcolor':('backColor',toColor),
+				'bg':('backColor',toColor),
 				'fg': ('textColor',toColor)}
 
 _bulletAttrMap = {

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.41 2000/12/13 16:20:24 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.41 2000/12/13 16:20:24 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.42 2000/12/13 17:09:55 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.42 2000/12/13 17:09:55 rgbecker Exp $ '''
 from string import split, strip, join
 from operator import truth
 from types import StringType, ListType
@@ -48,7 +48,7 @@ def cleanBlockQuotedText(text,joiner=' '):
 	"""This is an internal utility which takes triple-
 	quoted text form within the document and returns
 	(hopefully) the paragraph the user intended originally."""
-	L = map(_lineClean, split(text, '\n'))
+	L=filter(truth,map(_lineClean, split(text, '\n')))
 	return join(L, joiner)
 
 def setXPos(tx,dx):

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testplatypus.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/test/Attic/testplatypus.py,v 1.19 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: testplatypus.py,v 1.19 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/test/Attic/testplatypus.py,v 1.20 2000/12/13 17:09:55 rgbecker Exp $
+__version__=''' $Id: testplatypus.py,v 1.20 2000/12/13 17:09:55 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -193,7 +193,7 @@ def getCommentary():
 		""", styleSheet['BodyText']))
 	#we can use the bullet feature to do a definition list
 	story.append(Paragraph("""
-		<para color=green bcolor=red>This is a contrived object to give an example of a Flowable -
+		<para color=green bcolor=red bg=pink>This is a contrived object to give an example of a Flowable -
 		just a fixed-size box with an X through it and a centred string.</para>""",
 			styleSheet['Definition'],
 			bulletText='XBox  '  #hack - spot the extra space after
