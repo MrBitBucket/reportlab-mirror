@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.9 2001/07/04 14:59:24 uid22986 Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.10 2001/07/04 15:02:28 uid22986 Exp $
 import string
 
 from reportlab.lib import colors
-from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, isTextAnchor
+from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, isTextAnchor, isBoxAnchor
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.shapes import Drawing, Group, Circle, Rect, String, STATE_DEFAULTS
