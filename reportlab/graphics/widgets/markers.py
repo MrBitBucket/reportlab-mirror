@@ -1,13 +1,16 @@
 """
 This modules defines a collection of markers used in charts.
 """
+from types import FunctionType, ClassType
 from reportlab.graphics.shapes import Rect, Line, Circle, Polygon, Drawing, Group
 from reportlab.graphics.widgets.signsandsymbols import SmileyFace
 from reportlab.graphics.widgetbase import Widget
-from reportlab.lib.validators import isNumber, isColorOrNone, OneOf
+from reportlab.lib.validators import isNumber, isColorOrNone, OneOf, Validator
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
 from reportlab.lib.colors import black
+from reportlab.graphics.widgets.flags import Flag
 from math import sin, cos, pi
+import copy
 _toradians = pi/180.0
 
 class Marker(Widget):
@@ -39,6 +42,9 @@ class Marker(Widget):
 		self.fillColor = None
 		self.size = 5
 		self.x = self.y = self.dx = self.dy = self.angle = 0
+
+	def clone(self):
+		return copy.copy(self)
 
 	def _Smiley(self):
 		d = self.size/2.0
@@ -148,6 +154,46 @@ class Marker(Widget):
 		else:
 			m = Group()
 		return m
+
+def uSymbol2Symbol(uSymbol,x,y,color):
+	if type(uSymbol) == FunctionType:
+		symbol = uSymbol(x, y, 5, color)
+	elif type(uSymbol) == ClassType and issubclass(uSymbol,Widget):
+		size = 10.
+		symbol = uSymbol()
+		symbol.x = x - (size/2)
+		symbol.y = y - (size/2)
+		try:
+			symbol.size = size
+			symbol.color = color
+		except:
+			pass
+	elif isinstance(uSymbol,Marker) or isinstance(uSymbol,Flag):
+		symbol = uSymbol.clone()
+		if isinstance(uSymbol,Marker): symbol.fillColor = symbol.fillColor or color
+		symbol.x, symbol.y = x, y
+	else:
+		symbol = None
+	return symbol
+
+class _isSymbol(Validator):
+	def test(self,x):
+		return callable(x) or isinstance(x,Marker) or isinstance(x,Flag) \
+				or (type(uSymbol)==ClassType and issubclass(uSymbol,Widget))
+
+isSymbol = _isSymbol()
+
+def makeMarker(name):
+	if Marker._attrMap['kind'].validate(name):
+		m = Marker()
+		m.kind = name
+	elif Flag._attrMap['kind'].validate(name):
+		m = Flag()
+		m.kind = name
+		m.size = 10
+	else:
+		raise ValueError, "Invalid marker name %s" % name
+	return m
 
 if __name__=='__main__':
 	D = Drawing()
