@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.47 2001/07/10 13:44:06 aaron_watters Exp $
-__version__=''' $Id: pdfdoc.py,v 1.47 2001/07/10 13:44:06 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.48 2001/08/22 19:04:48 aaron_watters Exp $
+__version__=''' $Id: pdfdoc.py,v 1.48 2001/08/22 19:04:48 aaron_watters Exp $ '''
 __doc__=""" 
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The 
@@ -290,6 +290,11 @@ class PDFDocument:
 
     def getAvailableFonts(self):
         fontnames = self.fontMapping.keys()
+        # the standard 14 are also always available! (even if not initialized yet)
+        import _fontdata
+        for name in _fontdata.standardFonts:
+            if name not in fontnames:
+                fontnames.append(name)
         fontnames.sort()
         return fontnames
 
