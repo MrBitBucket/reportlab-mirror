@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.69 2001/11/29 11:30:24 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.70 2002/01/17 10:53:21 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -287,13 +287,14 @@ class Group(Shape):
 			setattr(self, name, node)
 
 	def add(self, node, name=None):
-		"""Appends child node to the 'contents' attribute.	In addition,
-		if a name is provided, it is subsequently accessible by name"""
-
+		"""Appends non-None child node to the 'contents' attribute.	In addition,
+		if a name is provided, it is subsequently accessible by name
+		"""
 		# propagates properties down
-		assert isValidChild(node), "Can only add Shape or UserNode objects to a Group"
-		self.contents.append(node)
-		self._addNamedNode(name,node)
+		if node is not None:
+			assert isValidChild(node), "Can only add Shape or UserNode objects to a Group"
+			self.contents.append(node)
+			self._addNamedNode(name,node)
 
 	def _nn(self,node):
 		self.add(node)
@@ -301,12 +302,13 @@ class Group(Shape):
 
 	def insert(self, i, n, name=None):
 		'Inserts sub-node n in contents at specified location'
-		assert isValidChild(n), "Can only insert Shape or UserNode objects in a Group"
-		if i<0:
-			self.contents[i:i] =[n]
-		else:
-			self.contents.insert(i,n)
-		self._addNamedNode(name,n)
+		if n is not None:
+			assert isValidChild(n), "Can only insert Shape or UserNode objects in a Group"
+			if i<0:
+				self.contents[i:i] =[n]
+			else:
+				self.contents.insert(i,n)
+			self._addNamedNode(name,n)
 
 	def expandUserNodes(self):
 		"""Return a new object which only contains primitive shapes."""
