@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.120 2004/01/20 22:50:31 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.120 2004/01/20 22:50:31 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.121 2004/02/10 00:12:21 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.121 2004/02/10 00:12:21 andy_robinson Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -153,6 +153,8 @@ class Canvas:
         self._annotationCount = 0
 
         self._outlines = [] # list for a name tree
+        self._psCommandsBeforePage = [] #for postscript tray/font commands
+        self._psCommandsAfterPage = [] #for postscript tray/font commands
 
         #PostScript has the origin at bottom left. It is easy to achieve a top-
         #down coord system by translating to the top of the page and setting y
@@ -359,6 +361,7 @@ class Canvas:
 
     def showPage(self):
         """Close the current page and possibly start on a new page."""
+
         # ensure a space at the end of the stream - Acrobat does
         # not mind, but Ghostscript dislikes 'Qendstream' even if
         # the length marker finishes after 'Q'
@@ -373,7 +376,9 @@ class Canvas:
         if self._pageDuration is not None:
             page.Dur = self._pageDuration
         #print stream
-        page.setStream([self._preamble] + self._code)
+
+        strm =  self._psCommandsBeforePage + [self._preamble] + self._code + self._psCommandsAfterPage
+        page.setStream(strm)
         self._setXObjects(page)
         self._setAnnotations(page)
         self._doc.addPage(page)
@@ -624,6 +629,7 @@ class Canvas:
             (self._code, self._formsinuse, self._annotationrefs, self._formData) = saved
         else:
             self._code = []    # ready for more...
+            self._psCommandsAfterPage = []
             self._currentPageHasImages = 1 # for safety...
             self._formsinuse = []
             self._annotationrefs = []
@@ -679,9 +685,14 @@ class Canvas:
         self.pop_state_stack()
 
 
-    def addPostScriptCommand(self, command):
+    def addPostScriptCommand(self, command, position=1):
         """Embed literal Postscript in the document.
 
+        With position=0, it goes at very beginning of page stream;
+        with position=1, at current point; and
+        with position=2, at very end of page stream.  What that does
+        to the resulting Postscript depends on Adobe's header :-)
+        
         Use with extreme caution, but sometimes needed for printer tray commands.
         Acrobat 4.0 will export Postscript to a printer or file containing
         the given commands.  Adobe Reader 6.0 no longer does as this feature is
@@ -701,7 +712,13 @@ class Canvas:
             self._setXObjects(psObj)
             self._doc.Reference(psObj, regName)
             self._doc.addForm(rawName, psObj)
-        self._code.append("/%s Do" % regName)
+        if position == 0:
+            self._psCommandsBeforePage.append("/%s Do" % regName)
+        elif position==1:
+            self._code.append("/%s Do" % regName)
+        else:
+            self._psCommandsAfterPage.append("/%s Do" % regName)
+        
         self._formsinuse.append(rawName)
 
 

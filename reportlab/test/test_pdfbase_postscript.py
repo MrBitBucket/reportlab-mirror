@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/test_hello.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_postscript.py,v 1.2 2004/01/20 22:50:32 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_postscript.py,v 1.3 2004/02/10 00:12:21 andy_robinson Exp $
 __version__=''' $Id'''
 __doc__="""Tests Postscript XObjects.
 
@@ -35,6 +35,12 @@ class PostScriptTestCase(unittest.TestCase):
         c.drawString(100,620, 'we expect to see nothing.')
         c.addPostScriptCommand('/Helvetica findfont 48 scalefont setfont 100 400 moveto (Hello PostScript) show')
 
+
+        c.drawString(100,500, 'This document also inserts two postscript')
+        c.drawString(100,480, ' comments at beginning and endof the stream;')
+        c.drawString(100,460, 'search files for "%PS_BEFORE" and "%PS_AFTER".')
+        c.addPostScriptCommand('%PS_BEFORE', position=0)
+        c.addPostScriptCommand('%PS_AFTER', position=2)
 
         c.save()
 
