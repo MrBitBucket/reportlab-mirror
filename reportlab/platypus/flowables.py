@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.37 2003/07/29 08:18:17 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.37 2003/07/29 08:18:17 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.38 2003/08/20 16:10:35 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.38 2003/08/20 16:10:35 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -221,9 +221,7 @@ class Preformatted(Flowable):
         H = "Preformatted("
         if bT is not None:
             H = "Preformatted(bulletText=%s," % repr(bT)
-        import string
-        text = join(self.lines, "\n")
-        return "%s'''\\ \n%s''')" % (H, text)
+        return "%s'''\\ \n%s''')" % (H, string.join(self.lines,'\n'))
 
     def wrap(self, availWidth, availHeight):
         self.width = availWidth
