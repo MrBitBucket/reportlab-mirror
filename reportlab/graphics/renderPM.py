@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.26 2003/04/16 18:22:48 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.26 2003/04/16 18:22:48 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.27 2003/04/17 08:26:11 andy_robinson Exp $
+__version__=''' $Id: renderPM.py,v 1.27 2003/04/17 08:26:11 andy_robinson Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -550,8 +550,8 @@ if __name__=='__main__':
                 h = int(drawing.height)
                 html.append('<hr><h2>Drawing %s %d</h2>\n<pre>%s</pre>' % (name, i, docstring))
 
-                for k in ['gif','tiff', 'png', 'jpg', 'pict']:
-                    if k in ['gif','png','jpg','pict']:
+                for k in ['gif','tiff', 'png', 'jpg', 'pct']:
+                    if k in ['gif','png','jpg','pct']:
                         html.append('<p>%s format</p>\n' % string.upper(k))
                     try:
                         filename = 'renderPM%d.%s' % (i, ext(k))
@@ -559,7 +559,7 @@ if __name__=='__main__':
                         if os.path.isfile(fullpath):
                             os.remove(fullpath)
                         drawToFile(drawing,fullpath,fmt=k)
-                        if k in ['gif','png','jpg','pict']:
+                        if k in ['gif','png','jpg','pct']:
                             html.append('<img src="%s" border="1"><br>\n' % filename)
                         print 'wrote',fullpath
                     except AttributeError:
