@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.20 2002/05/23 15:07:28 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.21 2002/07/01 17:35:13 rgbecker Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -12,7 +12,7 @@
 This permits you to customize and pop out individual wedges;
 supports elliptical and circular pies.
 """
-__version__=''' $Id: piecharts.py,v 1.20 2002/05/23 15:07:28 rgbecker Exp $ '''
+__version__=''' $Id: piecharts.py,v 1.21 2002/07/01 17:35:13 rgbecker Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -167,62 +167,60 @@ class Pie(Widget):
 		startAngle = self.startAngle #% 360
 		for angle in normData:
 			endAngle = (startAngle + (angle * whichWay)) #% 360
-			if startAngle < endAngle:
-				a1 = startAngle
-				a2 = endAngle
-			elif endAngle < startAngle:
-				a1 = endAngle
-				a2 = startAngle
-			else:  #equal, do not draw
-				continue
+			if abs(startAngle-endAngle)>=1e-5:
+				if startAngle < endAngle:
+					a1 = startAngle
+					a2 = endAngle
+				else:
+					a1 = endAngle
+					a2 = startAngle
 
-			#if we didn't use %stylecount here we'd end up with the later wedges
-			#all having the default style
-			wedgeStyle = self.slices[i%styleCount]
+				#if we didn't use %stylecount here we'd end up with the later wedges
+				#all having the default style
+				wedgeStyle = self.slices[i%styleCount]
 
-			# is it a popout?
-			cx, cy = centerx, centery
-			if wedgeStyle.popout <> 0:
-				# pop out the wedge
-				averageAngle = (a1+a2)/2.0
-				aveAngleRadians = averageAngle * pi/180.0
-				popdistance = wedgeStyle.popout
-				cx = centerx + popdistance * cos(aveAngleRadians)
-				cy = centery + popdistance * sin(aveAngleRadians)
+				# is it a popout?
+				cx, cy = centerx, centery
+				if wedgeStyle.popout <> 0:
+					# pop out the wedge
+					averageAngle = (a1+a2)/2.0
+					aveAngleRadians = averageAngle * pi/180.0
+					popdistance = wedgeStyle.popout
+					cx = centerx + popdistance * cos(aveAngleRadians)
+					cy = centery + popdistance * sin(aveAngleRadians)
 
-			if n > 1:
-				theWedge = Wedge(cx, cy, xradius, a1, a2, yradius=yradius)
-			elif n==1:
-				theWedge = Ellipse(cx, cy, xradius, yradius)
+				if n > 1:
+					theWedge = Wedge(cx, cy, xradius, a1, a2, yradius=yradius)
+				elif n==1:
+					theWedge = Ellipse(cx, cy, xradius, yradius)
 
-			theWedge.fillColor = wedgeStyle.fillColor
-			theWedge.strokeColor = wedgeStyle.strokeColor
-			theWedge.strokeWidth = wedgeStyle.strokeWidth
-			theWedge.strokeDashArray = wedgeStyle.strokeDashArray
+				theWedge.fillColor = wedgeStyle.fillColor
+				theWedge.strokeColor = wedgeStyle.strokeColor
+				theWedge.strokeWidth = wedgeStyle.strokeWidth
+				theWedge.strokeDashArray = wedgeStyle.strokeDashArray
 
-			g.add(theWedge)
-				
-			# now draw a label
-			if labels[i] <> "":
-				averageAngle = (a1+a2)/2.0
-				aveAngleRadians = averageAngle*pi/180.0
-				labelRadius = wedgeStyle.labelRadius
-				labelX = centerx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
-				labelY = centery + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
-				
-				theLabel = String(labelX, labelY, labels[i])
-				theLabel.textAnchor = "middle"
-				theLabel.fontSize = wedgeStyle.fontSize
-				theLabel.fontName = wedgeStyle.fontName
-				theLabel.fillColor = wedgeStyle.fontColor
+				g.add(theWedge)
+					
+				# now draw a label
+				if labels[i] <> "":
+					averageAngle = (a1+a2)/2.0
+					aveAngleRadians = averageAngle*pi/180.0
+					labelRadius = wedgeStyle.labelRadius
+					labelX = centerx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
+					labelY = centery + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
+					
+					theLabel = String(labelX, labelY, labels[i])
+					theLabel.textAnchor = "middle"
+					theLabel.fontSize = wedgeStyle.fontSize
+					theLabel.fontName = wedgeStyle.fontName
+					theLabel.fillColor = wedgeStyle.fontColor
 
-				g.add(theLabel)
+					g.add(theLabel)
 
 			startAngle = endAngle
 			i = i + 1
 
 		return g
-
 
 	def draw(self):
 		g = Group()
