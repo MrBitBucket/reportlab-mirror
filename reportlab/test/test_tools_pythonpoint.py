@@ -16,7 +16,7 @@ class PythonPointTestCase(SecureTestCase):
 
         import reportlab
         rlFolder = os.path.dirname(reportlab.__file__)
-        ppFolder = os.path.join(rlFolder, 'demos', 'pythonpoint')        
+        ppFolder = os.path.join(rlFolder, 'tools', 'pythonpoint')
         os.chdir(ppFolder)
 
         try:
@@ -27,9 +27,9 @@ class PythonPointTestCase(SecureTestCase):
 ##        sys.argv.insert(0, ppFolder)
 ##        import pythonpoint
 ##        pythonpoint.process('pythonpoint.xml')
-        os.system("python pythonpoint.py pythonpoint.xml")
+        os.system("python pythonpoint.py demos" + os.sep + "pythonpoint.xml")
 
-        assert os.path.exists('pythonpoint.pdf')
+        assert os.path.exists(os.path.join('demos','pythonpoint.pdf'))
 
 
 def makeSuite():
