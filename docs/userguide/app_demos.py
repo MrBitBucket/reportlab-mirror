@@ -26,7 +26,7 @@ disc("""Simple formatting is shown by the odyssey.py script. It runs quite fast,
 but all it does is gather the text and force it onto the canvas pages. It does no paragraph
 manipulation at all so you get to see the XML &lt;  &amp; &gt; tags.
 """)
-disc("""The scripts fodyssey.py and dodussey.py handle paragraph formatting so you get
+disc("""The scripts fodyssey.py and dodyssey.py handle paragraph formatting so you get
 to see colour changes etc. Both scripts
 use the document template class and the dodyssey.py script shows the ability to do dual column
 layout and uses multiple page templates.
