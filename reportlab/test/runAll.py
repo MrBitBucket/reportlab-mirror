@@ -2,19 +2,19 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/runAll.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.10 2003/04/14 14:29:06 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.11 2003/04/22 16:12:58 rgbecker Exp $
 
 """Runs all test files in all subfolders.
 """
 
 
-import os, glob, sys, string
+import os, glob, sys, string, traceback
 
 from reportlab.test import unittest
 from reportlab.test.utils import GlobDirectoryWalker
 
 
-def makeSuite(folder, exclude=[]):
+def makeSuite(folder, exclude=[],nonImportable=[]):
     "Build a test suite of all available test files."
 
     allTests = unittest.TestSuite()
@@ -26,8 +26,10 @@ def makeSuite(folder, exclude=[]):
             try:
                 module = __import__(modname)
                 allTests.addTest(module.makeSuite())
-            except ImportError:
-                pass
+            except:
+                tt, tv, tb = sys.exc_info()[:]
+                nonImportable.append((filename,traceback.format_exception(tt,tv,tb)))
+                del tt,tv,tb
     del sys.path[0]
 
     return allTests
@@ -46,7 +48,12 @@ if __name__ == '__main__':
             for filename in GlobDirectoryWalker(folder, pattern):
                 os.remove(filename)
 
-    testSuite = makeSuite(folder)
+    NI = []
+    testSuite = makeSuite(folder,nonImportable=NI)
     unittest.TextTestRunner().run(testSuite)
     for filename in GlobDirectoryWalker(folder, '*.pyc'):
         os.remove(filename)
+    if NI:
+        print >>sys.stderr, '\n###################### the following tests could not be imported'
+        for f,tb in NI:
+            print 'file: "%s"\n%s\n' % (f,string.join(tb,''))

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_charts_textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_charts_textlabels.py,v 1.4 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_charts_textlabels.py,v 1.5 2003/04/22 16:12:59 rgbecker Exp $
 """
 Tests for the text Label class.
 """
@@ -22,8 +22,7 @@ from reportlab.platypus.flowables import Spacer, PageBreak
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame
-from reportlab.platypus.doctemplate \
-     import PageTemplate, BaseDocTemplate
+from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate
 
 
 def myMainPageFrame(canvas, doc):
