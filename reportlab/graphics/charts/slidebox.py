@@ -17,7 +17,7 @@ class SlideBox(Widget):
         startColor = AttrMapValue(isColor, desc='Color of first box'),
         endColor = AttrMapValue(isColor, desc='Color of last box'),
         numberOfBoxes = AttrMapValue(isInt, desc='How many boxes there are'),
-        trianglePosition = AttrMapValue(isInt, desc='Which box is hilighted by the triangles'),
+        trianglePosition = AttrMapValue(isInt, desc='Which box is highlighted by the triangles'),
         triangleHeight = AttrMapValue(isNumber, desc="Height of indicator triangles"),
         triangleWidth = AttrMapValue(isNumber, desc="Width of indicator triangles"),
         triangleFillColor = AttrMapValue(isColor, desc="Colour of indicator triangles"),
@@ -71,17 +71,11 @@ class SlideBox(Widget):
         self.sourceLabelFillColor = black
         
     def _getDrawingDimensions(self):
-        #find width of boxes+spacers
         tx=(self.numberOfBoxes*self.boxWidth)
-        if self.numberOfBoxes>1:
-            tx=tx+((self.numberOfBoxes-1)*self.boxSpacing)
-        #add padding
+        if self.numberOfBoxes>1: tx=tx+((self.numberOfBoxes-1)*self.boxSpacing)
         tx=tx+self.leftPadding+self.rightPadding
-        #find height of grid+triangles
         ty=self.boxHeight+self.triangleHeight
-        #add padding (and offset)
         ty=ty+self.topPadding+self.bottomPadding+self.sourceLabelOffset+self.sourceLabelFontSize
-        #print (tx, ty)
         return (tx,ty)
 
     def _getColors(self):
@@ -113,9 +107,8 @@ class SlideBox(Widget):
                        strokeWidth=0,
                        fillColor=self.background))
 
-        ascent=getFont(self.labelFontName).face.ascent
-        if ascent==0:
-            ascent=0.718 # default (from helvetica)
+        ascent=getFont(self.labelFontName).face.ascent/1000.
+        if ascent==0: ascent=0.718 # default (from helvetica)
         ascent=ascent*self.labelFontSize # normalize
 
         colorsList = self._getColors()
@@ -135,14 +128,14 @@ class SlideBox(Widget):
             sr.strokeColor = None
             sr.strokeWidth = 0
             
-            g.add(sr.draw())
+            g.add(sr)
 
             g.add(Rect(x,0,self.boxWidth,self.boxHeight,
                    strokeColor=self.boxOutlineColor,
                    strokeWidth=self.boxOutlineWidth,
                    fillColor=None))
 
-            g.add(String(x+(self.boxWidth/2),((self.boxHeight/2)-(ascent/2)),
+            g.add(String(x+self.boxWidth/2.,(self.boxHeight-ascent)/2.),
                    text = str(f+1),
                    fillColor = self.labelFillColor,
                    strokeColor=self.labelStrokeColor,
@@ -163,7 +156,7 @@ class SlideBox(Widget):
             points=[xt,self.boxHeight-(self.triangleHeight/2),
                     xt-(self.triangleWidth/2),self.boxHeight+(self.triangleHeight/2),
                     xt+(self.triangleWidth/2),self.boxHeight+(self.triangleHeight/2),
-                    xt,self.boxHeight-(self.triangleHeight/2)]))
+                        xt,self.boxHeight-(self.triangleHeight/2)]))
         g.add(Polygon(
             strokeColor = self.triangleStrokeColor,
             strokeWidth = self.triangleStrokeWidth,
