@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.73 2003/06/17 17:24:16 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.74 2003/06/19 13:23:00 andy_robinson Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.73 2003/06/17 17:24:16 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.74 2003/06/19 13:23:00 andy_robinson Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -73,6 +73,7 @@ class CategoryAxis(Widget):
         visible = AttrMapValue(isBoolean, desc='Display entire object, if true.'),
         visibleAxis = AttrMapValue(isBoolean, desc='Display axis line, if true.'),
         visibleTicks = AttrMapValue(isBoolean, desc='Display axis ticks, if true.'),
+        visibleLabels = AttrMapValue(isBoolean, desc='Display axis labels, if true.'),
         visibleGrid = AttrMapValue(isBoolean, desc='Display axis grid, if true.'),
         strokeWidth = AttrMapValue(isNumber, desc='Width of axis line and ticks.'),
         strokeColor = AttrMapValue(isColorOrNone, desc='Color of axis line and ticks.'),
@@ -105,6 +106,7 @@ class CategoryAxis(Widget):
         self.visible = 1
         self.visibleAxis = 1
         self.visibleTicks = 1
+        self.visibleLabels = 1
         self.visibleGrid = 0
 
         self.strokeWidth = 1
@@ -288,14 +290,14 @@ class XCategoryAxis(CategoryAxis):
     def makeTickLabels(self):
         g = Group()
 
-        if not self.visibleTicks:
+        if not self.visibleLabels:
             return g
 
         if not (self.categoryNames is None):
             catCount = self._catCount
             assert len(self.categoryNames) == catCount, \
-                "expected %d category names but found %d in axis" % (
-                len(self.categoryNames), catCount
+                "expected %d category names but found %d in axis. \n categories = %s" % (
+                len(self.categoryNames), catCount, repr(self.categoryNames)
                 )
             reverseDirection = self.reverseDirection
             barWidth = self._barWidth
