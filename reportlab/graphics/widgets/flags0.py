@@ -132,6 +132,13 @@ class Flag0(Widget):
         D.add(shapes.String(fx.x+(fx.size/2),(fx.y-(1.2*labelFontSize)),
                             fx.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
+        labelFontSize = int(fx.size/4)
+#        D.add(shapes.String(fx.x+(fx.size),(fx.y+((fx.size/2)-1.2*labelFontSize)),
+#                            "SAMPLE", fillColor=colors.gold, textAnchor='middle',
+#                            fontSize=labelFontSize))
+        D.add(shapes.String(fx.x+(fx.size),(fx.y+((fx.size/2))),
+                            "SAMPLE", fillColor=colors.gold, textAnchor='middle',
+                            fontSize=labelFontSize, fontName="Helvetica-Bold"))
         return D
      
     def draw(self):
@@ -155,10 +162,10 @@ class Flag0(Widget):
         s = self.size  # abbreviate as we will use this a lot 
         g = shapes.Group() 
         
-        outerborder = shapes.Rect(self.x-2, self.y-2, width=(s*2)+3, height=s+4,
+        outerborder = shapes.Rect(self.x-1, self.y-1, width=(s*2)+2, height=s+2,
                fillColor = None,
                strokeColor = self.background,
-               strokeWidth=5)
+               strokeWidth=1)
         g.add(outerborder)
 
         if self.border:
@@ -443,13 +450,13 @@ class FlagAustria0(Flag0):
         g.add(box)
 
 
-        redbox1 = shapes.Rect(self.x, self.y, width=s*2, height=s/3,
+        redbox1 = shapes.Rect(self.x, self.y, width=s*2.0, height=s/3.0,
                fillColor = colors.red,
                strokeColor = None,
                strokeWidth=0)
         g.add(redbox1)
         
-        redbox2 = shapes.Rect(self.x, self.y+((s/3)*2), width=s*2, height=s/3,
+        redbox2 = shapes.Rect(self.x, self.y+((s/3.0)*2.0), width=s*2.0, height=s/3.0,
                fillColor = colors.red,
                strokeColor = None,
                strokeWidth=0)
@@ -508,19 +515,19 @@ class FlagBelgium0(Flag0):
         g.add(box)
 
 
-        box1 = shapes.Rect(self.x, self.y, width=(s/3)*2, height=s,
+        box1 = shapes.Rect(self.x, self.y, width=(s/3.0)*2.0, height=s,
                fillColor = colors.black,
                strokeColor = None,
                strokeWidth=0)
         g.add(box1)
         
-        box2 = shapes.Rect(self.x+((s/3)*2), self.y, width=(s/3)*2, height=s,
+        box2 = shapes.Rect(self.x+((s/3.0)*2.0), self.y, width=(s/3.0)*2.0, height=s,
                fillColor = colors.gold,
                strokeColor = None,
                strokeWidth=0)
         g.add(box2)
 
-        box3 = shapes.Rect(self.x+((s/3)*4), self.y, width=(s/3)*2, height=s,
+        box3 = shapes.Rect(self.x+((s/3.0)*4.0), self.y, width=(s/3.0)*2.0, height=s,
                fillColor = colors.red,
                strokeColor = None,
                strokeWidth=0)
@@ -597,7 +604,7 @@ class FlagDenmark0(Flag0):
         outerbox = shapes.Rect(self.x, self.y, (s*2)*0.70, s,
                                fillColor = None,
                                strokeColor = colors.white,
-               strokeWidth=1)
+               strokeWidth=0)
         g.add(outerbox)
         outerbox = shapes.Rect(self.x, self.y, (s*2)*0.70, s,
                                fillColor = None,
@@ -676,7 +683,7 @@ class FlagFrance0(Flag0):
     """This draws the French tricolor.
 
         possible attributes:
-        'x', 'y', 'size', 'background', , border
+        'x', 'y', 'size', 'background', border
     """ 
 
     _attrMap = {
@@ -719,19 +726,19 @@ class FlagFrance0(Flag0):
                strokeWidth=0)
         g.add(box)
 
-        bluebox = shapes.Rect(self.x, self.y, width=((s/3)*2), height=s,
+        bluebox = shapes.Rect(self.x, self.y, width=((s/3.0)*2.0), height=s,
                fillColor = colors.blue,
                strokeColor = None,
                strokeWidth=0)
         g.add(bluebox)
         
-        whitebox = shapes.Rect(self.x+((s/3)*2), self.y, width=((s/3)*2), height=s,
+        whitebox = shapes.Rect(self.x+((s/3.0)*2.0), self.y, width=((s/3.0)*2.0), height=s,
                fillColor = colors.mintcream,
                strokeColor = None,
                strokeWidth=0)
         g.add(whitebox)
 
-        redbox = shapes.Rect(self.x+((s/3)*4), self.y, width=((s/3)*2), height=s,
+        redbox = shapes.Rect(self.x+((s/3.0)*4.0), self.y, width=((s/3.0)*2.0), height=s,
                fillColor = colors.red,
                strokeColor = None,
                strokeWidth=0)
@@ -791,13 +798,13 @@ class FlagGermany0(Flag0):
         g.add(box)
 
 
-        blackbox1 = shapes.Rect(self.x, self.y+((s/3)*2), width=s*2, height=s/3,
+        blackbox1 = shapes.Rect(self.x, self.y+((s/3.0)*2.0), width=s*2.0, height=s/3.0,
                fillColor = colors.black,
                strokeColor = None,
                strokeWidth=0)
         g.add(blackbox1)
         
-        redbox1 = shapes.Rect(self.x, self.y+(s/3), width=s*2, height=s/3,
+        redbox1 = shapes.Rect(self.x, self.y+(s/3.0), width=s*2.0, height=s/3.0,
                fillColor = colors.orangered,
                strokeColor = None,
                strokeWidth=0)
@@ -939,13 +946,13 @@ class FlagIreland0(Flag0):
         g.add(box)
 
 
-        whitebox = shapes.Rect(self.x+((s*2)/3), self.y, width=(2*(s*2)/3), height=s,
+        whitebox = shapes.Rect(self.x+((s*2.0)/3.0), self.y, width=(2.0*(s*2.0)/3.0), height=s,
                fillColor = colors.mintcream,
                strokeColor = None,
                strokeWidth=0)
         g.add(whitebox)
         
-        orangebox = shapes.Rect(self.x+((2*(s*2)/3)), self.y, width=(s*2)/3, height=s,
+        orangebox = shapes.Rect(self.x+((2.0*(s*2.0)/3.0)), self.y, width=(s*2.0)/3.0, height=s,
                fillColor = colors.darkorange,
                strokeColor = None,
                strokeWidth=0)
@@ -1003,13 +1010,13 @@ class FlagItaly0(Flag0):
         g.add(box)
 
 
-        whitebox = shapes.Rect(self.x+((s*2)/3), self.y, width=(2*(s*2)/3), height=s,
+        whitebox = shapes.Rect(self.x+((s*2.0)/3.0), self.y, width=(2.0*(s*2.0)/3.0), height=s,
                fillColor = colors.mintcream,
                strokeColor = None,
                strokeWidth=0)
         g.add(whitebox)
         
-        redbox = shapes.Rect(self.x+((2*(s*2)/3)), self.y, width=(s*2)/3, height=s,
+        redbox = shapes.Rect(self.x+((2.0*(s*2.0)/3.0)), self.y, width=(s*2.0)/3.0, height=s,
                fillColor = colors.red,
                strokeColor = None,
                strokeWidth=0)
@@ -1068,13 +1075,13 @@ class FlagLuxembourg0(Flag0):
         g.add(box)
 
 
-        redbox = shapes.Rect(self.x, self.y+((s/3)*2), width=s*2, height=s/3,
+        redbox = shapes.Rect(self.x, self.y+((s/3.0)*2.0), width=s*2.0, height=s/3.0,
                fillColor = colors.red,
                strokeColor = None,
                strokeWidth=0)
         g.add(redbox)
         
-        bluebox = shapes.Rect(self.x, self.y, width=s*2, height=s/3,
+        bluebox = shapes.Rect(self.x, self.y, width=s*2.0, height=s/3.0,
                fillColor = colors.dodgerblue,
                strokeColor = None,
                strokeWidth=0)
@@ -1133,13 +1140,13 @@ class FlagHolland0(Flag0):
         g.add(box)
 
 
-        redbox = shapes.Rect(self.x, self.y+((s/3)*2), width=s*2, height=s/3,
+        redbox = shapes.Rect(self.x, self.y+((s/3.0)*2.0), width=s*2.0, height=s/3.0,
                fillColor = colors.red,
                strokeColor = None,
                strokeWidth=0)
         g.add(redbox)
         
-        bluebox = shapes.Rect(self.x, self.y, width=s*2, height=s/3,
+        bluebox = shapes.Rect(self.x, self.y, width=s*2.0, height=s/3.0,
                fillColor = colors.darkblue,
                strokeColor = None,
                strokeWidth=0)
@@ -1154,6 +1161,12 @@ class FlagPortugal0(Flag0):
     for most countries this just appears on the "state" flag. Since this
     is more difficult than the majority of flags, providing an adequate
     representation of it is "left as an exercise for the reader". """
+
+    def __init__(self):
+        pass
+    
+    def demo(self):
+        pass
 
 
 class FlagSpain0(Flag0):
@@ -1284,11 +1297,11 @@ class FlagSweden0(Flag0):
 
         g.add(self.borderdraw())
 
-        outerbox = shapes.Rect(self.x, self.y, (s*2)*0.70, s,
-                               fillColor = None,
-                               strokeColor = colors.white,
-               strokeWidth=1)
-        g.add(outerbox)
+#        outerbox = shapes.Rect(self.x, self.y, (s*2)*0.70, s,
+#                               fillColor = None,
+#                               strokeColor = colors.white,
+#               strokeWidth=1)
+#        g.add(outerbox)
         outerbox = shapes.Rect(self.x, self.y, (s*2)*0.70, s,
                                fillColor = None,
                                strokeColor = colors.black,
@@ -1351,7 +1364,7 @@ class FlagNorway0(Flag0):
         g.add(box)
 
         # flag specific bits
-        box = shapes.Rect(self.x, self.y, (s*2)*0.70, s,
+        box = shapes.Rect(self.x, self.y, (s*2)*0.7, s,
                fillColor = colors.red,
                           strokeColor = colors.black,
                strokeWidth=0)
@@ -1382,11 +1395,12 @@ class FlagNorway0(Flag0):
                strokeWidth=0)
         g.add(blueline2)
         
-        outerbox = shapes.Rect(self.x, self.y, (s*2)*0.70, s,
-                               fillColor = None,
-                               strokeColor = colors.white,
-               strokeWidth=1)
-        g.add(outerbox)
+#        outerbox = shapes.Rect(self.x, self.y, (s*2)*0.70, s,
+#                               fillColor = None,
+#                               strokeColor = colors.white,
+#               strokeWidth=1)
+#        g.add(outerbox)
+        
         outerbox = shapes.Rect(self.x, self.y, (s*2)*0.70, s,
                                fillColor = None,
                                strokeColor = colors.black,
