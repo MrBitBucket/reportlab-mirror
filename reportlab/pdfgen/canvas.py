@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.108 2002/11/06 11:32:42 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.108 2002/11/06 11:32:42 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.109 2003/02/02 08:37:33 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.109 2003/02/02 08:37:33 andy_robinson Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -115,13 +115,16 @@ class Canvas:
                  bottomup = 1,
                  pageCompression=None,
                  encoding=rl_config.defaultEncoding,
+                 invariant=rl_config.invariant,
                  verbosity=0):
         """Create a canvas of a given size. etc.
         Most of the attributes are private - we will use set/get methods
         as the preferred interface.  Default page size is A4."""
         self._filename = filename
         self._encodingName = encoding
-        self._doc = pdfdoc.PDFDocument(encoding,compression=pageCompression)
+        self._doc = pdfdoc.PDFDocument(encoding,
+                                       compression=pageCompression,
+                                       invariant=invariant)
 
         #this only controls whether it prints 'saved ...' - 0 disables
         self._verbosity = verbosity

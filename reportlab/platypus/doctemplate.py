@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.59 2003/01/06 11:36:18 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.60 2003/02/02 08:37:33 andy_robinson Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.59 2003/01/06 11:36:18 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.60 2003/02/02 08:37:33 andy_robinson Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -500,6 +500,7 @@ class BaseDocTemplate:
                 if self.allowSplitting:
                     # see if this is a splittable thing
                     S = self.frame.split(f,self.canv)
+                    #print '%d parts to sequence on page %d' % (len(S), self.page)
                     n = len(S)
                 else:
                     n = 0
@@ -522,8 +523,8 @@ class BaseDocTemplate:
                         #HACK = it seems within tables we sometimes
                         #get an empty paragraph that won't fit and this
                         #causes it to fall over.  FIXME FIXME FIXME
-                        raise "LayoutError", message
-##                  f.postponed = 1
+                        #raise "LayoutError", message
+##                    f.postponed = 1
                     f._postponed = 1
                     flowables.insert(0,f)           # put the flowable back
                     self.handle_frameEnd()

@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/frames.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.18 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.19 2003/02/02 08:37:33 andy_robinson Exp $
 
-__version__=''' $Id: frames.py,v 1.18 2002/07/24 19:56:38 andy_robinson Exp $ '''
+__version__=''' $Id: frames.py,v 1.19 2003/02/02 08:37:33 andy_robinson Exp $ '''
 
 __doc__="""
 """
@@ -141,6 +141,8 @@ class Frame:
         s = 0
         if not self._atTop: s = flowable.getSpaceBefore()
         flowable.canv = canv    #some flowables might need this
+        
+        #print 'asked table to split.  _aW = %0.2f, y-p-s=%0.2f' % (self._aW, y-p-s)
         r = flowable.split(self._aW, y-p-s)
         del flowable.canv
         return r

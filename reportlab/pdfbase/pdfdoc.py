@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.75 2002/11/28 18:36:46 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.75 2002/11/28 18:36:46 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.76 2003/02/02 08:37:33 andy_robinson Exp $
+__version__=''' $Id: pdfdoc.py,v 1.76 2003/02/02 08:37:33 andy_robinson Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -151,7 +151,11 @@ class PDFDocument:
     defaultStreamFilters = None
     encrypt = NoEncryption() # default no encryption
     pageCounter = 1
-    def __init__(self, encoding=rl_config.defaultEncoding, dummyoutline=0,compression=rl_config.pageCompression):
+    def __init__(self,
+                 encoding=rl_config.defaultEncoding,
+                 dummyoutline=0,
+                 compression=rl_config.pageCompression,
+                 invariant=rl_config.invariant):
         #self.defaultStreamFilters = [PDFBase85Encode, PDFZCompress] # for testing!
         #self.defaultStreamFilters = [PDFZCompress] # for testing!
         assert encoding in ['MacRomanEncoding',
@@ -161,6 +165,11 @@ class PDFDocument:
         if encoding[-8:] <> 'Encoding':
             encoding = encoding + 'Encoding'
 
+        # allow None value to be passed in to mean 'give system defaults'
+        if invariant is None:
+            self.invariant = rl_config.invariant
+        else:
+            self.invariant = invariant
         self.setCompression(compression)
         self.encoding = encoding
         # signature for creating PDF ID
@@ -186,6 +195,7 @@ class PDFDocument:
         self.Outlines = self.outline = outlines
         cat.Outlines = outlines
         self.info = PDFInfo()
+        self.info.invariant = self.invariant
         #self.Reference(self.Catalog)
         #self.Reference(self.Info)
         self.fontMapping = {}
@@ -205,14 +215,19 @@ class PDFDocument:
         self.signature.update(str(thing))
 
     def ID(self):
+        "A unique fingerprint for the file (unless in invariant mode)"
         if self._ID:
             return self._ID
-        digest = self.signature.digest()
-        doc = DummyDoc()
-        ID = PDFString(digest)
-        IDs = ID.format(doc)
-        self._ID = "%s %% ReportLab generated PDF document -- digest (http://www.reportlab.com) %s [%s %s] %s" % (
-            LINEEND, LINEEND, IDs, IDs, LINEEND)
+        if self.invariant:
+            s = PDFString('constantconstant')
+            self._ID = PDFArray([s,s])
+        else:
+            digest = self.signature.digest()
+            doc = DummyDoc()
+            ID = PDFString(digest)
+            IDs = ID.format(doc)
+            self._ID = "%s %% ReportLab generated PDF document -- digest (http://www.reportlab.com) %s [%s %s] %s" % (
+                LINEEND, LINEEND, IDs, IDs, LINEEND)
         return self._ID
 
     def SaveToFile(self, filename, canvas):
@@ -220,6 +235,7 @@ class PDFDocument:
         for fnt in self.delayedFonts:
             fnt.addObjects(self)
         # add info stuff to signature
+        self.info.invariant = self.invariant
         self.info.digest(self.signature)
         ### later: maybe add more info to sig?
         # prepare outline
@@ -366,7 +382,7 @@ class PDFDocument:
                 IOf = IO.format(self)
                 # add a comment to the PDF output
                 if DoComments:
-                    File.add("%% %s %s %s" % (repr(id), repr(repr(obj)[:50]), LINEEND))
+                    File.add("%% %s: class %s %s" % (repr(id), obj.__class__.__name__[:50], LINEEND))
                 offset = File.add(IOf)
                 idToOf[id] = offset
                 ids.append(id)
@@ -1286,6 +1302,7 @@ class PDFInfo:
     File | Document Info in Acrobat Reader.  If this is wrong, you get
     Postscript errors while printing, even though it does not print."""
     def __init__(self):
+        self.invariant = 1
         self.title = "untitled"
         self.author = "anonymous"
         self.subject = "unspecified"
@@ -1300,7 +1317,10 @@ class PDFInfo:
         D = {}
         D["Title"] = PDFString(self.title)
         D["Author"] = PDFString(self.author)
-        D["CreationDate"] = PDFDate()
+        if self.invariant:
+            D["CreationDate"] = PDFString('19001231000000')
+        else:
+            D["CreationDate"] = PDFDate()
         D["Producer"] = PDFString("ReportLab http://www.reportlab.com")
         D["Subject"] = PDFString(self.subject)
         PD = PDFDictionary(D)
