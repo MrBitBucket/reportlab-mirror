@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.36  2000/05/18 17:11:12  aaron_watters
+#	removed 0's on stable linkage and outline operations.
+#
 #	Revision 1.35  2000/05/18 09:05:08  andy_robinson
 #	Resynchronization
-#
+#	
 #	Revision 1.34  2000/04/28 17:33:44  andy_robinson
 #	Added font encoding support and changed default encoding to WinAnsi
 #	
@@ -135,7 +138,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.35 2000/05/18 09:05:08 andy_robinson Exp $ '''
+__version__=''' $Id: canvas.py,v 1.36 2000/05/18 17:11:12 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -307,28 +310,32 @@ class Canvas:
     def setAuthor(self, author):
         self._doc.setAuthor(author)
 
-    def addOutlineEntry0(self, title, key, level=0, closed=None):
-        """Adds a new entry to the outline.  If not specified,
-        this gos at the top level.  If specified, it must be
-        no more than 1 greater than the current outline level.
+    def addOutlineEntry(self, title, key, level=0, closed=None):
+        """Adds a new entry to the outline at given level.  If LEVEL not specified,
+        entry goes at the top level.  If level specified, it must be
+        no more than 1 greater than the outline level in the last call.
+        
+        The key must be the (unique) name of a bookmark.
+        the title is the (non-unique) name to be displayed for the entry.
         
         If closed is set then the entry should show no subsections by default
+        when displayed.
         
         Example
-           c.addOutlineEntry0("first section", "section1")
-           c.addOutlineEntry0("introduction", "s1s1", 1)
-           c.addOutlineEntry0("body", "s1s2", 1)
-           c.addOutlineEntry0("detail1", "s1s2s1", 2)
-           c.addOutlineEntry0("detail2", "s1s2s2", 2)
-           c.addOutlineEntry0("conclusion", "s1s3", 1)
-           c.addOutlineEntry0("further reading", "s1s3s1", 2)
-           c.addOutlineEntry0("second section", "section1")
-           c.addOutlineEntry0("introduction", "s2s1", 1)
-           c.addOutlineEntry0("body", "s2s2", 1)
-           c.addOutlineEntry0("detail1", "s2s2s1", 2)
-           c.addOutlineEntry0("detail2", "s2s2s2", 2)
-           c.addOutlineEntry0("conclusion", "s2s3", 1)
-           c.addOutlineEntry0("further reading", "s2s3s1", 2)
+           c.addOutlineEntry("first section", "section1")
+           c.addOutlineEntry("introduction", "s1s1", 1, closed=1)
+           c.addOutlineEntry("body", "s1s2", 1)
+           c.addOutlineEntry("detail1", "s1s2s1", 2)
+           c.addOutlineEntry("detail2", "s1s2s2", 2)
+           c.addOutlineEntry("conclusion", "s1s3", 1)
+           c.addOutlineEntry("further reading", "s1s3s1", 2)
+           c.addOutlineEntry("second section", "section1")
+           c.addOutlineEntry("introduction", "s2s1", 1)
+           c.addOutlineEntry("body", "s2s2", 1, closed=1)
+           c.addOutlineEntry("detail1", "s2s2s1", 2)
+           c.addOutlineEntry("detail2", "s2s2s2", 2)
+           c.addOutlineEntry("conclusion", "s2s3", 1)
+           c.addOutlineEntry("further reading", "s2s3s1", 2)
            
         note that you can jump from level 5 to level 3 but not
         from 3 to 5: instead you need to provide all intervening
@@ -341,7 +348,7 @@ class Canvas:
         self._doc.outline.addOutlineEntry(key, level, title, closed=closed)
         
         
-    def setOutlineNames0(self, *nametree):
+    def setOutlineNames0(self, *nametree):   # keep this for now (?)
         """nametree should can be a recursive tree like so
            c.setOutlineNames(
              "chapter1dest",
@@ -369,7 +376,7 @@ class Canvas:
         "Info function - app can call it after showPage to see if it needs a save"
         return len(self._code) == 0
         
-    def showOutline0(self):
+    def showOutline(self):
         "Specify that Acrobat Reader should start with the outline tree visible"
         self._doc._catalog.showOutline()
     
@@ -412,7 +419,7 @@ class Canvas:
             result = d[name] = pdfdoc.Destination(name) # newly defined, unbound
         return result
         
-    def bookmarkPage0(self, name):
+    def bookmarkPage(self, name):
         """bind a bookmark (destination) to the current page"""
         # XXXX there are a lot of other ways a bookmark destination can be bound: should be implemented.
         # XXXX the other ways require tracking of the graphics state....
@@ -423,8 +430,8 @@ class Canvas:
         dest.setPageRef(pageref)
         return dest
         
-    def bookmarkHorizontalAbsolute0(self, name, yhorizontal):
-        """bind a bookmark (destination to the current page at a horizontal position"""
+    def bookmarkHorizontalAbsolute(self, name, yhorizontal):
+        """bind a bookmark (destination) to the current page at a horizontal position"""
         dest = self._bookmarkReference(name)
         self._doc.inPage() # try to enable page-only features
         pageref = self._doc.thisPageRef()
@@ -440,7 +447,7 @@ class Canvas:
     #    "deprecated in favore of beginForm...endForm"
     #    self._doc.inForm()
             
-    def doForm0(self, name):
+    def doForm(self, name):
         """use a form XObj in current operation stream"""
         internalname = self._doc.hasForm(name)
         if not internalname:
@@ -455,13 +462,15 @@ class Canvas:
         self._annotationrefs = []
         self._formData = None
         
-    def beginForm0(self, name, lowerx=0, lowery=0, upperx=None, uppery=None):
-        "declare the current graphics stream to be a form"
+    def beginForm(self, name, lowerx=0, lowery=0, upperx=None, uppery=None):
+        "declare the current graphics stream to be a named form"
         self._formData = (name, lowerx, lowery, upperx, uppery)
         self._doc.inForm()
         #self._inForm0()
         
-    def endForm0(self):
+    def endForm(self):
+        """emit the current collection of graphics operations as a Form
+           as declared previously in beginForm"""
         (name, lowerx, lowery, upperx, uppery) = self._formData
         #self.makeForm0(name, lowerx, lowery, upperx, uppery)
         # fall through!  makeForm0 disallowed
@@ -479,11 +488,13 @@ class Canvas:
         self._doc.addForm(name, form)
         self._restartAccumulators()
         
-    def forceCodeInsert0(self, code):
-        """I know a whole lot about PDF and I want to add a bunch of code I know will work..."""
-        self._code.append(code)
+    #def forceCodeInsert0(self, code):
+    #    """I know a whole lot about PDF and I want to add a bunch of code I know will work..."""
+    #    self._code.append(code)
         
     def textAnnotation0(self, contents, Rect=None, addtopage=1, name=None, **kw):
+        """Experimental.
+        """
         if not Rect:
             (w,h) = self._pagesize# default to whole page (?)
             Rect = (0,0,w,h)
@@ -491,7 +502,7 @@ class Canvas:
         self._addAnnotation(annotation, name, addtopage)
         
     def inkAnnotation0(self, contents, InkList=None, Rect=None, addtopage=1, name=None, **kw):
-        "not working?"
+        "Experimental"
         (w,h) = self._pagesize
         if not Rect:
             Rect = (0,0,w,h)
@@ -500,8 +511,15 @@ class Canvas:
         annotation = apply(pdfdoc.InkAnnotation, (Rect, contents, InkList), kw)
         self.addAnnotation(annotation, name, addtopage)
     
-    def linkAbsolute0(self, contents, destinationname, Rect=None, addtopage=1, name=None, **kw):
-        """link annotation positioned wrt the default user space"""
+    def linkAbsolute(self, contents, destinationname, Rect=None, addtopage=1, name=None, **kw):
+        """rectangular link annotation positioned wrt the default user space
+           Rect identifies (lowerx, lowery, upperx, uppery) for lower left
+           and upperright points of the rectangle.  Translations and other transforms
+           are IGNORED (absolute position wrt the default user space).
+           destinationname should be the name of a bookmark (which may be defined later
+           but must be defined before the document is generated).
+           You may want to use the keyword argument Border='[0 0 0]' to
+           suppress the visible rectangle around the link."""
         destination = self._bookmarkReference(destinationname) # permitted to be undefined... must bind later...
         (w,h) = self._pagesize
         if not Rect:
