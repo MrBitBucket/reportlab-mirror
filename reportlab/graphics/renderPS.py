@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPS.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.20 2002/07/24 19:56:36 andy_robinson Exp $
-__version__=''' $Id: renderPS.py,v 1.20 2002/07/24 19:56:36 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.21 2002/12/13 10:34:28 rgbecker Exp $
+__version__=''' $Id: renderPS.py,v 1.21 2002/12/13 10:34:28 rgbecker Exp $ '''
 import string, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str, getStringIO
@@ -808,6 +808,12 @@ def drawToFile(d,fn, showBoundary=rl_config.showBoundary):
     c = PSCanvas((d.width,d.height))
     draw(d, c, 0, 0, showBoundary=showBoundary)
     c.save(fn)
+
+def drawToString(d, showBoundary=rl_config.showBoundary):
+    "Returns a PS as a string in memory, without touching the disk"
+    s = getStringIO()
+    drawToFile(d, s, showBoundary=showBoundary)
+    return s.getvalue()
 
 #########################################################
 #
