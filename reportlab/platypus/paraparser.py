@@ -32,13 +32,16 @@
 #
 ###############################################################################
 #	$Log: paraparser.py,v $
+#	Revision 1.15  2000/05/13 16:04:06  rgbecker
+#	made size alias of fontsize for <para>
+#
 #	Revision 1.14  2000/05/11 14:05:17  rgbecker
 #	Use reportlab.lib.xmllib
-#
+#	
 #	Revision 1.13  2000/04/25 13:07:57  rgbecker
 #	Added license
 #	
-__version__=''' $Id: paraparser.py,v 1.14 2000/05/11 14:05:17 rgbecker Exp $ '''
+__version__=''' $Id: paraparser.py,v 1.15 2000/05/13 16:04:06 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -49,11 +52,13 @@ import copy
 #try:
 #	from xml.parsers import xmllib
 #	_xmllib_newStyle = 1
-#except ImportError:
-#	import xmllib
-#	_xmllib_newStyle = 0
-from reportlab.lib import xmllib
-_xmllib_newStyle = 1
+try:
+	from reportlab.lib import xmllib
+	_xmllib_newStyle = 1
+except ImportError:
+	import xmllib
+	_xmllib_newStyle = 0
+
 
 from reportlab.lib.colors import stringToColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
@@ -87,6 +92,7 @@ def _align(s):
 
 _paraAttrMap = {'font': ('fontName', None),
 				'fontsize': ('fontSize', _num),
+				'size': ('fontSize', _num),
 				'leading': ('leading', _num),
 				'lindent': ('leftIndent', _num),
 				'rindent': ('rightIndent', _num),
@@ -454,7 +460,7 @@ if __name__=='__main__':
 	'''
 	check_text(text)
 	check_text('<para> </para>')
-
+	check_text('<para font="times-bold" size=24 leading=28.8 spaceAfter=72>ReportLab -- Reporting for the Internet Age</para>')
 	check_text('''
 	<font color=red>&tau;</font>Tell me, O muse, of that ingenious hero who travelled far and wide
 	after he had sacked the famous town of Troy. Many cities did he visit,
