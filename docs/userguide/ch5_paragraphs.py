@@ -167,7 +167,7 @@ def getAttrs(A):
         D.append((k,S[k]))
     cols=2*[None]
     rows=len(D)*[None]
-    return cols,rows,D
+    return D,cols,rows
 
 t=apply(Table,getAttrs(_paraAttrMap))
 t.setStyle(TableStyle([

@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: testtables.py,v $
+#	Revision 1.11  2000/07/12 14:23:12  rgbecker
+#	Table argument order changed
+#
 #	Revision 1.10  2000/06/01 16:27:56  rgbecker
 #	pageSize is wrong at present
-#
+#	
 #	Revision 1.9  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #	
@@ -60,20 +63,19 @@
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #
-__version__=''' $Id: testtables.py,v 1.10 2000/06/01 16:27:56 rgbecker Exp $ '''
+__version__=''' $Id: testtables.py,v 1.11 2000/07/12 14:23:12 rgbecker Exp $ '''
 __doc__='Test script for reportlab.tables'
 from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 
 def getTable():
-    t = Table(
-            (72,36,36,36,36),
-            (24, 16,16,18),
-            (('','North','South','East','West'),
+    t = Table((('','North','South','East','West'),
              ('Quarter 1',100,200,300,400),
              ('Quarter 2',100,400,600,800),
-             ('Total',300,600,900,'1,200'))
+             ('Total',300,600,900,'1,200')),
+             (72,36,36,36,36),
+             (24, 16,16,18)
             )
     return t
 

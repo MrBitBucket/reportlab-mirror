@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: testplatypus.py,v $
+#	Revision 1.18  2000/07/12 14:23:12  rgbecker
+#	Table argument order changed
+#
 #	Revision 1.17  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
-#
+#	
 #	Revision 1.16  2000/05/17 22:17:38	rgbecker
 #	Renamed BasicFrame to Frame
 #	
@@ -80,7 +83,7 @@
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testplatypus.py,v 1.17 2000/06/01 15:23:06 rgbecker Exp $ '''
+__version__=''' $Id: testplatypus.py,v 1.18 2000/07/12 14:23:12 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -450,12 +453,12 @@ def getExamples():
 	story.append(platypus.Spacer(0, 12))
 	
 	g = platypus.Table(
-			(72,36,36,36,36),
-			(24, 16,16,18),
 			(('','North','South','East','West'),
 			 ('Quarter 1',100,200,300,400),
 			 ('Quarter 2',100,200,300,400),
-			 ('Total',200,400,600,800))
+			 ('Total',200,400,600,800)),
+			(72,36,36,36,36),
+			(24, 16,16,18)
 			)
 
 	style = platypus.TableStyle([('ALIGN', (1,1), (-1,-1), 'RIGHT'),

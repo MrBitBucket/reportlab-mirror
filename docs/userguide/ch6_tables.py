@@ -20,17 +20,8 @@ A primitive automatic row height and or column width calculation mechanism is pr
 heading2('$class Table$ User Methods')
 disc("""These are the main methods which are of interest to the client programmer""")
 
-heading4('$Table(colWidths, rowHeights, data)$')
-
-disc("""The arguments are fairly obvious, the $colWidths$ argument is a sequence
-of numbers or possibly $None$, representing the widths of the rows. The number of elements
-in $colWidths$ determines the number of columns in the table.
-A value of $None$ means that the corresponding column width should be calculated automatically""")
-
-disc("""The $rowHeights$ argument is a sequence
-of numbers or possibly $None$, representing the heights of the rows. The number of elements
-in $rowHeights$ determines the number of rows in the table.
-A value of $None$ means that the corresponding row height should be calculated automatically""")
+heading4("""$Table(data, colWidths=None, rowHeights=None, style=None, splitByRow=1,
+repeatRows=0, repeatCols=0)$""")
 
 disc("""The $data$ argument is a sequence of sequences of cell values each of which
 should be convertible to a string value using the $str$ function. The first row of cell values
@@ -38,7 +29,23 @@ is in $data[0]$ ie the values are in row order. The $i$, $j$<sup>th.</sup> cell 
 $data[i][j]$. Newline characters $'\\n'$ in cell values are treated as line split characters and
 are used at <i>draw</i> time to format the cell into lines.
 """)
+disc("""The other arguments are fairly obvious, the $colWidths$ argument is a sequence
+of numbers or possibly $None$, representing the widths of the columns. The number of elements
+in $colWidths$ determines the number of columns in the table.
+A value of $None$ means that the corresponding column width should be calculated automatically.""")
 
+disc("""The $rowHeights$ argument is a sequence
+of numbers or possibly $None$, representing the heights of the rows. The number of elements
+in $rowHeights$ determines the number of rows in the table.
+A value of $None$ means that the corresponding row height should be calculated automatically.""")
+
+disc("""The $style$ argument can be an initial style for the table.""")
+disc("""The $splitByRow$ argument is a boolean indicating that the $Table$ should split itself
+by row before attempting to split itself by column when too littel space is available in
+the current drawing area and the caller wants the $Table$ to split.""")
+
+disc("""The $repeatRows$ and $repeatCols$ arguments specify the number of leading rows and columns
+that should be repeated when the $Table$ is asked to split itself.""")
 heading4('$Table.$setStyle(tblStyle)$')
 disc("""
 This method applies a particular instance of $class TableStyle$ (discussed below)
@@ -117,7 +124,7 @@ data=  [['00', '01', '02', '03', '04'],
         ['10', '11', '12', '13', '14'],
         ['20', '21', '22', '23', '24'],
         ['30', '31', '32', '33', '34']]
-t=Table(5*[None], 4*[None], data)
+t=Table(data)
 t.setStyle(TableStyle([('BACKGROUND',(1,1),(-2,-2),colors.green),
                         ('TEXTCOLOR',(0,0),(1,-1),colors.red)]))
 """)
@@ -128,7 +135,7 @@ data=  [['00', '01', '02', '03', '04'],
         ['10', '11', '12', '13', '14'],
         ['20', '21', '22', '23', '24'],
         ['30', '31', '32', '33', '34']]
-t=Table(5*[0.4*inch], 4*[0.4*inch], data)
+t=Table(data,5*[0.4*inch], 4*[0.4*inch])
 t.setStyle(TableStyle([('ALIGN',(1,1),(-2,-2),'RIGHT'),
                         ('TEXTCOLOR',(1,1),(-2,-2),colors.red),
                         ('VALIGN',(0,0),(0,-1),'TOP'),
@@ -156,7 +163,7 @@ data=  [['00', '01', '02', '03', '04'],
         ['10', '11', '12', '13', '14'],
         ['20', '21', '22', '23', '24'],
         ['30', '31', '32', '33', '34']]
-t=Table(5*[None], 4*[None], data)
+t=Table(data)
 t.setStyle(TableStyle([('GRID',(1,1),(-2,-2),1,colors.green),
                         ('BOX',(0,0),(1,-1),2,colors.red)]))
 """)

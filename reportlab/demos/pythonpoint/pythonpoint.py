@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.24  2000/07/12 14:23:12  rgbecker
+#	Table argument order changed
+#
 #	Revision 1.23  2000/07/12 06:33:43  andy_robinson
 #	Added Speaker Notes facility
-#
+#	
 #	Revision 1.22  2000/07/10 15:25:47  andy_robinson
 #	Added tables to PythonPoint
 #	
@@ -105,7 +108,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.23 2000/07/12 06:33:43 andy_robinson Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.24 2000/07/12 14:23:12 rgbecker Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -330,9 +333,9 @@ class PPTable:
     def getFlowable(self):
         self.parseData()
         t = Table(
+				self.data,
                 self.widths,
-                self.heights,
-                self.data)
+                self.heights)
         if self.style:
             t.setStyle(getStyles()[self.style])
 

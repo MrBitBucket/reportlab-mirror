@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.22  2000/07/12 14:23:12  rgbecker
+#	Table argument order changed
+#
 #	Revision 1.21  2000/07/12 09:05:17  rgbecker
 #	Fixed tuple size bug
-#
+#	
 #	Revision 1.20  2000/07/11 14:29:45  rgbecker
 #	Table splitting start
 #	
@@ -92,7 +95,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.21 2000/07/12 09:05:17 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.22 2000/07/12 14:23:12 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -113,6 +116,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
 import operator, string
 
+from types import TupleType, ListType
 _stringtype = type('')
 
 class CellStyle(PropertySet):
@@ -142,17 +146,27 @@ class TableStyle:
 		return self._cmds
 
 TableStyleType = type(TableStyle())
-		
+_SeqType = (TupleType, ListType)
+
+def _rowLen(x):
+	return type(x) not in _SeqType and 1 or len(x)
+
 class Table(Flowable):
-	def __init__(self, colWidths, rowHeights, data, style=None,
+	def __init__(self, data, colWidths=None, rowHeights=None, style=None,
 				repeatRows=0, repeatCols=0, splitByRow=1):
-		if not colWidths:
-			raise ValueError, "Table must have at least 1 column"
-		if not rowHeights:
+		nrows = len(data)
+		if len(data)==0 or type(data) not in _SeqType:
 			raise ValueError, "Table must have at least 1 row"
-		nrows = self._nrows = len(rowHeights)
-		if len(data) != nrows:
-			raise ValueError, "Data error - %d rows in data but %d in grid" % (len(data), nrows)
+		ncols = max(map(_rowLen,data))
+		if not ncols:
+			raise ValueError, "Table must have at least 1 column"
+		if colWidths is None: colWidths = ncols*[None]
+		elif len(colWidths) != ncols:
+			raise ValueError, "Data error - %d columns in data but %d in grid" % (ncols, len(colWidths))
+		if rowHeights is None: rowHeights = nrows*[None]
+		elif len(rowHeights) != nrows:
+			raise ValueError, "Data error - %d rows in data but %d in grid" % (nrows, len(rowHeights))
+		self._nrows = nrows
 		ncols = self._ncols = len(colWidths)
 		for i in range(nrows):
 			if len(data[i]) != ncols:
@@ -362,7 +376,7 @@ class Table(Flowable):
 		data = self._cellvalues
 
 		#we're going to split into two superRows
-		R0 = Table( self._argW, self._argH[:n], data[:n],
+		R0 = Table( data[:n], self._argW, self._argH[:n],
 				repeatRows=repeatRows, repeatCols=repeatCols,
 				splitByRow=splitByRow)
 
@@ -372,15 +386,15 @@ class Table(Flowable):
 		R0._cr_0(n,self._bkgrndcmds)
 
 		if repeatRows:
-			R1 = Table(self._argW, self._argH[:repeatRows]+self._argH[n:],
-					data[:repeatRows]+data[n:],
+			R1 = Table(data[:repeatRows]+data[n:],
+					self._argW, self._argH[:repeatRows]+self._argH[n:],
 					repeatRows=repeatRows, repeatCols=repeatCols,
 					splitByRow=splitByRow)
 			R1._cellStyles = self._cellStyles[:repeatRows]+self._cellStyles[n:]
 			R1._cr_1_1(n,repeatRows,self._linecmds)
 			R1._cr_1_1(n,repeatRows,self._bkgrndcmds)
 		else:
-			R1 = Table(self._argW, self._argH[n:],data[n:],
+			R1 = Table(data[n:], self._argW, self._argH[n:],
 					repeatRows=repeatRows, repeatCols=repeatCols,
 					splitByRow=splitByRow)
 			R1._cellStyles = self._cellStyles[n:]
@@ -565,7 +579,7 @@ def test():
 		('Hats', 893, 912, '1,212', 643, 789, 159,
 			 888, '1,298', 832, 453, '1,344','2,843')
 		)	
-	t = Table(colwidths, rowheights,  data)
+	t = Table(data, colwidths, rowheights)
 	""", styleSheet['Code'], dedent=4))
 	lst.append(Paragraph("""
 	You can then give the Table a TableStyle object to control its format. The first TableStyle used was
@@ -613,13 +627,13 @@ GRID_STYLE = TableStyle(
 	lst.append(Paragraph("""
 	A tablestyle is applied to a table by calling Table.setStyle(tablestyle).
 	""", styleSheet['BodyText']))
-	t = Table(colwidths, rowheights,  data)
+	t = Table(data, colwidths, rowheights)
 	t.setStyle(GRID_STYLE)
 	lst.append(PageBreak())
 	lst.append(Paragraph("This is GRID_STYLE\n", styleSheet['BodyText']))
 	lst.append(t)
 	
-	t = Table(colwidths, rowheights,  data)
+	t = Table(data, colwidths, rowheights)
 	t.setStyle(BOX_STYLE)
 	lst.append(Paragraph("This is BOX_STYLE\n", styleSheet['BodyText']))
 	lst.append(t)
@@ -633,11 +647,11 @@ BOX_STYLE = TableStyle(
 	)
 	""", styleSheet['Code']))
 	
-	t = Table(colwidths, rowheights,  data)
+	t = Table(data, colwidths, rowheights)
 	t.setStyle(LABELED_GRID_STYLE)
 	lst.append(Paragraph("This is LABELED_GRID_STYLE\n", styleSheet['BodyText']))
 	lst.append(t)
-	t = Table(colwidths, rowheights2,  data2)
+	t = Table(data2, colwidths, rowheights2)
 	t.setStyle(LABELED_GRID_STYLE)
 	lst.append(Paragraph("This is LABELED_GRID_STYLE ILLUSTRATES EXPLICIT LINE SPLITTING WITH NEWLINE (different heights and data)\n", styleSheet['BodyText']))
 	lst.append(t)
@@ -655,7 +669,7 @@ LABELED_GRID_STYLE = TableStyle(
 	""", styleSheet['Code']))
 	lst.append(PageBreak())
 	
-	t = Table(colwidths, rowheights,  data)
+	t = Table(data, colwidths, rowheights)
 	t.setStyle(COLORED_GRID_STYLE)
 	lst.append(Paragraph("This is COLORED_GRID_STYLE\n", styleSheet['BodyText']))
 	lst.append(t)
@@ -672,7 +686,7 @@ COLORED_GRID_STYLE = TableStyle(
 	)
 	""", styleSheet['Code']))
 	
-	t = Table(colwidths, rowheights,  data)
+	t = Table(data, colwidths, rowheights)
 	t.setStyle(LIST_STYLE)
 	lst.append(Paragraph("This is LIST_STYLE\n", styleSheet['BodyText']))
 	lst.append(t)
@@ -688,7 +702,7 @@ LIST_STYLE = TableStyle(
 	)
 	""", styleSheet['Code']))
    
-	t = Table(colwidths, rowheights,  data)
+	t = Table(data, colwidths, rowheights)
 	ts = TableStyle(
 	[('LINEABOVE', (0,0), (-1,0), 2, colors.green),
 	 ('LINEABOVE', (0,1), (-1,-1), 0.25, colors.black),
@@ -723,7 +737,7 @@ LIST_STYLE = TableStyle(
 	c = list(colwidths)
 	c[0] = None
 	c[8] = None
-	t = Table(c, [None]+list(rowheights[1:]),  data)
+	t = Table(data, c, [None]+list(rowheights[1:]))
 	t.setStyle(LIST_STYLE)
 	lst.append(Paragraph("""
 		This is a LIST_STYLE table with the first rowheight set to None ie automatic.
@@ -739,7 +753,7 @@ LIST_STYLE = TableStyle(
 			['X10y', 'X11y', 'X12y', 'X13y', 'X14y'],
 			['X20y', 'X21y', 'X22y', 'X23y', 'X24y'],
 			['X30y', 'X31y', 'X32y', 'X33y', 'X34y']]
-	t=Table(5*[0.4*inch], 4*[0.4*inch], data)
+	t=Table(data, 5*[0.4*inch], 4*[0.4*inch])
 	t.setStyle([('ALIGN',(1,1),(-2,-2),'LEFT'),
 				('TEXTCOLOR',(1,1),(-2,-2),colors.red),
 
@@ -769,14 +783,14 @@ LIST_STYLE = TableStyle(
 			('spaceAfter', 'spaceafter\012spacea'),
 			('spaceBefore', 'spacebefore\012spaceb'),
 			('textColor', 'fg\012textcolor\012color')]
-	t = Table(2*[None], len(data)*[None], data)
+	t = Table(data)
 	t.setStyle([
             ('VALIGN',(0,0),(-1,-1),'TOP'),
             ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
             ('BOX', (0,0), (-1,-1), 0.25, colors.black),
             ])
 	lst.append(t)
-	t=apply(Table,([None, None], [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None], [('Attribute', 'Synonyms'), ('alignment', 'align, alignment'), ('bulletColor', 'bulletcolor, bcolor'), ('bulletFontName', 'bfont, bulletfontname'), ('bulletFontSize', 'bfontsize, bulletfontsize'), ('bulletIndent', 'bindent, bulletindent'), ('firstLineIndent', 'findent, firstlineindent'), ('fontName', 'face, fontname, font'), ('fontSize', 'size, fontsize'), ('leading', 'leading'), ('leftIndent', 'leftindent, lindent'), ('rightIndent', 'rightindent, rindent'), ('spaceAfter', 'spaceafter, spacea'), ('spaceBefore', 'spacebefore, spaceb'), ('textColor', 'fg, textcolor, color')]))
+	t=apply(Table,([('Attribute', 'Synonyms'), ('alignment', 'align, alignment'), ('bulletColor', 'bulletcolor, bcolor'), ('bulletFontName', 'bfont, bulletfontname'), ('bulletFontSize', 'bfontsize, bulletfontsize'), ('bulletIndent', 'bindent, bulletindent'), ('firstLineIndent', 'findent, firstlineindent'), ('fontName', 'face, fontname, font'), ('fontSize', 'size, fontsize'), ('leading', 'leading'), ('leftIndent', 'leftindent, lindent'), ('rightIndent', 'rightindent, rindent'), ('spaceAfter', 'spaceafter, spacea'), ('spaceBefore', 'spacebefore, spaceb'), ('textColor', 'fg, textcolor, color')],))
 	t.repeatRows = 1
 	t.setStyle([
 				('FONT',(0,0),(-1,1),'Times-Bold',10,12),
@@ -793,7 +807,7 @@ LIST_STYLE = TableStyle(
 				('ALIGN', (1, 1), (1, -1), 'CENTER'),
 				])
 	lst.append(t)
-	SimpleDocTemplate('testtables.pdf', showBoundary=1).build(lst)
+	SimpleDocTemplate('tables.pdf', showBoundary=1).build(lst)
 
 if __name__ == '__main__':
 	test()
