@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.72 2002/03/26 11:49:10 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.73 2002/04/13 15:12:15 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.72 2002/03/26 11:49:10 rgbecker Exp $ '''
+__version__=''' $Id: shapes.py,v 1.73 2002/04/13 15:12:15 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -343,7 +343,11 @@ class Group(Shape):
 			if isinstance(n, UserNode):
 				P.append(n.provideNode())
 			elif isinstance(n, Group):
-				obj.add(n._explode())
+				n = n._explode()
+				if n.transform==(1,0,0,1,0,0):
+					obj.contents.extend(n.contents)
+				else:
+					obj.add(n)
 			else:
 				obj.add(n)
 		return obj
@@ -749,13 +753,13 @@ class Path(SolidShape):
 	"""Path, made up of straight lines and bezier curves."""
 	
 	_attrMap = AttrMap(
-		strokeColor = AttrMapValue(None),
+		strokeColor = AttrMapValue(isColorOrNone),
 		strokeWidth = AttrMapValue(isNumber),
 		strokeLineCap = AttrMapValue(None),
 		strokeLineJoin = AttrMapValue(None),
 		strokeMiterLimit = AttrMapValue(None),
 		strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
-		fillColor = AttrMapValue(None),
+		fillColor = AttrMapValue(isColorOrNone),
 		points = AttrMapValue(isListOfNumbers),
 		operators = AttrMapValue(isListOfNumbers),
 		isClipPath = AttrMapValue(isBoolean),
