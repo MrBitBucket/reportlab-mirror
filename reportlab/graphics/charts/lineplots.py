@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.47 2003/09/10 14:47:17 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.48 2003/09/15 11:55:50 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.47 2003/09/10 14:47:17 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.48 2003/09/15 11:55:50 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -164,7 +164,7 @@ class LinePlot(PlotArea):
                 line.append((x, y))
             self._positions.append(line)
 
-    def drawLabel(self, group, rowNo, colNo, x, y):
+    def _innerDrawLabel(self, rowNo, colNo, x, y):
         "Draw a label for a given item in the list."
 
         labelFmt = self.lineLabelFormat
@@ -193,7 +193,14 @@ class LinePlot(PlotArea):
             else:
                 label.setOrigin(x, y - self.lineLabelNudge)
             label.setText(labelText)
-            group.add(label)
+        else:
+            label = None
+        return label
+
+    def drawLabel(self, G, rowNo, colNo, x, y):
+        '''Draw a label for a given item in the list.
+        G must have an add method'''
+        G.add(self._innerDrawLabel(rowNo,colNo,x,y))
 
     def makeLines(self):
         g = Group()
@@ -334,6 +341,126 @@ class LinePlot(PlotArea):
         xA.makeGrid(g,parent=self)
         yA.makeGrid(g,parent=self)
         g.add(self.makeLines())
+        return g
+
+class LinePlot3D(LinePlot):
+    _attrMap = AttrMap(BASE=LinePlot,
+        theta_x = AttrMapValue(isNumber, desc='dx/dz'),
+        theta_y = AttrMapValue(isNumber, desc='dy/dz'),
+        zDepth = AttrMapValue(isNumber, desc='depth of an individual series'),
+        zSpace = AttrMapValue(isNumber, desc='z gap around series'),
+        )
+    theta_x = .5
+    theta_y = .5
+    zDepth = 10
+    zSpace = 1.5
+
+    def calcPositions(self):
+        LinePlot.calcPositions(self)
+        nSeries = self._seriesCount
+        zSpace = self.zSpace
+        zDepth = self.zDepth
+        if self.xValueAxis.style=='parallel_3d':
+            _3d_depth = nSeries*zDepth+(nSeries+1)*self.zSpace
+        else:
+            _3d_depth = zDepth + 2*zSpace
+        self._3d_dx = self.theta_x*_3d_depth
+        self._3d_dy = self.theta_y*_3d_depth
+
+    def _calc_z0(self,rowNo):
+        zSpace = self.zSpace
+        if self.xValueAxis.style=='parallel_3d':
+            z0 = rowNo*(self.zDepth+zSpace)+zSpace
+        else:
+            z0 = zSpace
+        return z0
+
+    def _zadjust(self,x,y,z):
+        return x+z*self.theta_x*x, y+z*self.theta_y*y
+
+    def makeLines(self):
+        bubblePlot = getattr(self,'_bubblePlot',None)
+        assert not bubblePlot, "_bubblePlot not supported for 3d yet"
+        #if bubblePlot:
+        #   yA = self.yValueAxis
+        #   xA = self.xValueAxis
+        #   bubbleR = min(yA._bubbleRadius,xA._bubbleRadius)
+        #   bubbleMax = xA._bubbleMax
+
+        labelFmt = self.lineLabelFormat
+
+        P = range(len(self._positions))
+        if self.reversePlotOrder: P.reverse()
+        inFill = getattr(self,'_inFill',None)
+        assert not inFill, "inFill not supported for 3d yet"
+        #if inFill:
+        #   inFillY = self.xValueAxis._y
+        #   inFillX0 = self.yValueAxis._x
+        #   inFillX1 = inFillX0 + self.xValueAxis._length
+        #   inFillG = getattr(self,'_inFillG',g)
+        zDepth = self.zDepth
+        _zadjust = self._zadjust
+        theta_x = self.theta_x
+        theta_y = self.theta_y
+        from linecharts import _FakeGroup
+        F = _FakeGroup()
+        from utils3d import _make_3d_line_info
+        # Iterate over data rows.
+        styleCount = len(self.lines)
+        for rowNo in P:
+            row = self._positions[rowNo]
+            n = len(row)
+            rowStyle = self.lines[rowNo % styleCount]
+            rowColor = rowStyle.strokeColor
+            dash = getattr(rowStyle, 'strokeDashArray', None)
+            z0 = self._calc_z0(rowNo)
+            z1 = z0 + zDepth
+
+            if hasattr(rowStyle, 'strokeWidth'):
+                width = rowStyle.strokeWidth
+            elif hasattr(self.lines, 'strokeWidth'):
+                width = self.lines.strokeWidth
+            else:
+                width = None
+
+            # Iterate over data columns.
+            if self.joinedLines:
+                if n:
+                    x0, y0 = row[0]
+                    for colNo in xrange(1,n):
+                        x1, y1 = row[colNo]
+                        _make_3d_line_info( F, x0, x1, y0, y1, z0, z1,
+                                theta_x, theta_y,
+                                rowColor, fillColorShaded=None, xdelta=1,
+                                strokeColor=None, strokeWidth=None, strokeDashArray=None,
+                                shading=0.1)
+                        x0, y0 = x1, y1
+
+            if hasattr(rowStyle, 'symbol'):
+                uSymbol = rowStyle.symbol
+            elif hasattr(self.lines, 'symbol'):
+                uSymbol = self.lines.symbol
+            else:
+                uSymbol = None
+
+            zL = (z0+z1)*0.5
+            if uSymbol:
+                for xy in row:
+                    x1, y1 = row[colNo]
+                    x1, y1 = _zadjust(x1,y1,zL)
+                    symbol = uSymbol2Symbol(uSymbol,xy[0],xy[1],rowColor)
+                    if symbol: F.add((2,zL,zL,x1,y1,symbol))
+
+            # Draw data labels.
+            for colNo in xrange(n):
+                x1, y1 = row[colNo]
+                x1, y1 = _zadjust(x1,y1,zL)
+                L = self._innerDrawLabel(rowNo, colNo, x1, y1)
+                if L: F.add((2,zL,zL,x1,y1,L))
+
+        F.sort()
+        g = Group()
+        map(lambda x,a=g.add: a(x[-1]),F.value())
         return g
 
 _monthlyIndexData = [[(19971202, 100.0),

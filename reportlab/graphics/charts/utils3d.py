@@ -101,7 +101,7 @@ def _make_3d_line_info( G, x0, x1, y0, y1, z0, z1,
         X = []
         while x<=x1:
             xn = x+xdelta
-            X.append((x,xn))
+            X.append([x,xn])
             x = xn
         if X[-1][0]==x1: del X[-1]
         else: X[-1][1] = x1

@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.34 2003/09/15 09:34:21 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.35 2003/09/15 11:55:50 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
-__version__=''' $Id: linecharts.py,v 1.34 2003/09/15 09:34:21 rgbecker Exp $ '''
+__version__=''' $Id: linecharts.py,v 1.35 2003/09/15 11:55:50 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType
@@ -409,6 +409,7 @@ class HorizontalLineChart3D(HorizontalLineChart):
         # Iterate over data rows.
         for rowNo in P:
             row = self._positions[rowNo]
+            n = len(row)
             styleCount = len(self.lines)
             styleIdx = rowNo % styleCount
             rowStyle = self.lines[styleIdx]
@@ -426,7 +427,6 @@ class HorizontalLineChart3D(HorizontalLineChart):
 
             # Iterate over data columns.
             if self.joinedLines:
-                n = len(row)
                 if n:
                     x0, y0 = row[0]
                     for colNo in xrange(1,n):
@@ -447,14 +447,14 @@ class HorizontalLineChart3D(HorizontalLineChart):
 
             zL = (z0+z1)*0.5
             if uSymbol:
-                for colNo in range(len(row)):
+                for colNo in xrange(n):
                     x1, y1 = row[colNo]
                     x1, y1 = _zadjust(x1,y1,zL)
-                    symbol = uSymbol2Symbol(uSymbol,x1,y1,rowStyle.strokeColor)
+                    symbol = uSymbol2Symbol(uSymbol,x1,y1,rowColor)
                     if symbol: F.add((2,zL,zL,x1,y1,symbol))
 
             # Draw item labels.
-            for colNo in range(len(row)):
+            for colNo in xrange(n):
                 x1, y1 = row[colNo]
                 x1, y1 = _zadjust(x1,y1,zL)
                 L = self._innerDrawLabel(rowNo, colNo, x1, y1)
