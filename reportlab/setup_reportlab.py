@@ -25,7 +25,7 @@ def run():
                     'reportlab.demos.odyssey',
                     'reportlab.demos.rlzope',
                     'reportlab.demos.stdfonts',
-                    'reportlab.demos.tests',                    
+                    'reportlab.demos.tests',
                     'reportlab.docs',
                     'reportlab.docs.graphguide',
                     'reportlab.docs.reference',

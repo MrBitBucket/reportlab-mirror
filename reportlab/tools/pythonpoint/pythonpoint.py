@@ -971,7 +971,7 @@ def handleOptions():
                'silent':0,
                'outDir': None}
 
-    args = sys.argv[1:] 
+    args = sys.argv[1:]
     args = filter(lambda x: x and x[0]=='-',args) + filter(lambda x: not x or x[0]!='-',args)
     try:
         shortOpts = 'hnvs'

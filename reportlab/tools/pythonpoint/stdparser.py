@@ -18,7 +18,7 @@ from reportlab.tools.pythonpoint import pythonpoint
 def getModule(modulename,fromPath='reportlab.tools.pythonpoint.styles'):
     """Get a module containing style declarations.
 
-    Search order is: 
+    Search order is:
         reportlab/tools/pythonpoint/
         reportlab/tools/pythonpoint/styles/
         ./

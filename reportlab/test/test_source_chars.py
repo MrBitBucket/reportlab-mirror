@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_source_chars.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_source_chars.py,v 1.2 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_source_chars.py,v 1.3 2002/11/04 00:11:49 andy_robinson Exp $
 
 """This tests for things in source files.  Initially, absence of tabs :-)
 """
@@ -58,10 +58,20 @@ def zapTrailingWhitespace(dirname):
         return
     w = GlobDirectoryWalker(dirname, '*.py')
     for filename in w:
-        lines = open(filename, 'r').readlines()
-        lines = map(string.rstrip, lines)
-        open(filename, 'w').write(string.join(lines, '\n'))
-        print 'processed %s' % filename
+        # trim off final newline and detect real changes
+        txt = open(filename, 'r').read()
+        badChars = 0
+        cleaned = []
+        for line in string.split(txt, '\n'):
+            stripped = string.rstrip(line)
+            cleaned.append(stripped)
+            spaces = len(line) - len(stripped)  # OK, so they might be trailing tabs, who cares?
+            if spaces:
+                badChars = badChars + spaces
+
+        if badChars <> 0:
+            open(filename, 'w').write(string.join(cleaned, '\n'))
+            print "file %s contained %d trailing spaces, FIXED" % (filename, badChars)
     print 'done'
 
 def makeSuite():

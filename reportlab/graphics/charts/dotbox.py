@@ -1,6 +1,6 @@
 from reportlab.lib.colors import blue, _PCMYK_black
 from reportlab.graphics.charts.textlabels import Label
-from reportlab.graphics.shapes import Circle, Drawing, Group, Line, Rect, String 
+from reportlab.graphics.shapes import Circle, Drawing, Group, Line, Rect, String
 from reportlab.graphics.widgetbase import Widget
 from reportlab.lib.attrmap import *
 from reportlab.lib.validators import *
@@ -42,7 +42,7 @@ class DotBox(Widget):
         y = AttrMapValue(isNumber,
             desc='Y Position of dotbox'),
         )
-    
+
     def __init__(self):
         self.xlabels=["Value", "Blend", "Growth"]
         self.ylabels=["Small", "Medium", "Large"]
@@ -80,7 +80,7 @@ class DotBox(Widget):
     def demo(self,drawing=None):
         if not drawing:
             tx,ty=self._getDrawingDimensions()
-            drawing = Drawing(tx,ty)        
+            drawing = Drawing(tx,ty)
         drawing.add(self.draw())
         return drawing
 
@@ -92,7 +92,7 @@ class DotBox(Widget):
                    strokeColor=self.gridColor,
                    strokeWidth=self.strokeWidth,
                    fillColor=None))
-        
+
         #internal gridding
         for f in range (1,len(self.ylabels)):
             #horizontal
@@ -124,7 +124,7 @@ class DotBox(Widget):
         if ascent==0:
             ascent=0.718 # default (from helvetica)
         ascent=ascent*self.labelFontSize # normalize
-        
+
         #do y-labels
         if self.ylabels != None:
             for f in range (len(self.ylabels)-1,-1,-1):
@@ -155,7 +155,7 @@ class DotBox(Widget):
                     l.draw()
                     g.add(l)
 
-        return g        
+        return g
 
 
 

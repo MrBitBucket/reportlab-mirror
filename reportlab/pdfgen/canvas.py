@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.106 2002/11/03 23:47:05 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.106 2002/11/03 23:47:05 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.107 2002/11/04 00:11:48 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.107 2002/11/04 00:11:48 andy_robinson Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -1316,7 +1316,7 @@ class Canvas:
         by the 'duration' argument to setPageTransition; this controls
         the time spent looking at the page.  This is effective for all
         subsequent pages."""
-        
+
         self._pageDuration = duration
 
     def setPageTransition(self, effectname=None, duration=1,

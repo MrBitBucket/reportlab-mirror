@@ -24,18 +24,18 @@ Ie, xml tag translates to a tuple:
 
 where miscellaneousinfo can be anything, (but defaults to None)
 (with the intention of adding, eg, line number information)
-    
+
 special cases: name of "" means "top level, no containing tag".
 Top level parse always looks like this
 
    ("", list, None, None)
 
  contained text of None means <simple_tag\>
-    
+
 In order to support stuff like
 
    <this></this><one></one>
-   
+
 AT THE MOMENT &amp; ETCETERA ARE IGNORED. THEY MUST BE PROCESSED
 IN A POST-PROCESSING STEP.
 
@@ -75,7 +75,7 @@ try:
             return oneOutermostTag and p or ('',None,[p],None)
 except ImportError:
     simpleparse = 1
-    
+
 NONAME = ""
 NAMEKEY = 0
 CONTENTSKEY = 1
@@ -111,7 +111,7 @@ def parseFile(filename):
     raw = open(filename, 'r').read()
     return parsexml(raw)
 
-    
+
 verbose = 0
 
 def skip_prologue(text, cursor):
@@ -138,8 +138,8 @@ def skip_prologue(text, cursor):
             done=1
     #print "done skipping"
     return cursor
-    
-def parsexml0(xmltext, startingat=0, toplevel=1, 
+
+def parsexml0(xmltext, startingat=0, toplevel=1,
         # snarf in some globals
         strip=string.strip, split=string.split, find=string.find,
         #len=len, None=None
@@ -343,7 +343,7 @@ def parsexml0(xmltext, startingat=0, toplevel=1,
                     raise ValueError, \
                        "at lines %s...%s close tag name doesn't match %s...%s %s" %(
                        linenum, endlinenum, `name`, `closename`, repr(xmltext[cursor: cursor+100]))
-                remainder = xmltext[cursor:nextopenbracket]   
+                remainder = xmltext[cursor:nextopenbracket]
                 if remainder:
                     #if verbose: print "remainder", repr(remainder)
                     L.append(remainder)
@@ -356,7 +356,7 @@ def parsexml0(xmltext, startingat=0, toplevel=1,
                 remainder = xmltext[cursor:nextopenbracket]
                 if remainder:
                     L.append(remainder)
-                #if verbose: 
+                #if verbose:
                 #    #print "skipping", repr(remainder)
                 #    #print "--- recursively parsing starting at", xmltext[nextopenbracket:nextopenbracket+20]
                 (parsetree, cursor) = parsexml0(xmltext, startingat=nextopenbracket, toplevel=None)
@@ -371,7 +371,7 @@ def parsexml0(xmltext, startingat=0, toplevel=1,
         ContentList = unEscapeContentList(ContentList)
     t = (NameString, AttDict, ContentList, ExtraStuff)
     return (t, cursor)
-    
+
 import types
 def pprettyprint(parsedxml):
     """pretty printer mainly for testing"""
@@ -415,7 +415,7 @@ def testparse(s):
         print "============== reformatting"
         p = pprettyprint(D)
         print p
-    
+
 def test():
     testparse("""<this type="xml">text &lt;&gt;<b>in</b> <funnytag foo="bar"/> xml</this>
                  <!-- comment -->
@@ -423,14 +423,14 @@ def test():
                  <this type="xml">text <b>in</b> xml</this> ]]>
                  <tag with="<brackets in values>">just testing brackets feature</tag>
                  """)
-                 
+
 filenames = [ #"../../reportlab/demos/pythonpoint/pythonpoint.xml",
               "samples/hamlet.xml"]
 
 #filenames = ["moa.xml"]
 
 dump=1
-                 
+
 if __name__=="__main__":
     test()
     from time import time
@@ -440,7 +440,7 @@ if __name__=="__main__":
         print "parsing", f
         testparse(t)
     print "elapsed", time()-now
-    
 
-        
-    
+
+
+

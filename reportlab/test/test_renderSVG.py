@@ -37,9 +37,9 @@ try:
     HAVE_XML_PARSER = 1
 except SAXReaderNotAvailable:
     HAVE_XML_PARSER = 0
-    
-     
-    
+
+
+
 
 def load(path):
     "Helper function to read the generated SVG again."
@@ -67,7 +67,7 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
         if not HAVE_XML_PARSER:
             warnIgnoredRestofTest()
             return
-            
+
         svg = load(path)
         fg = svg.getElementsByTagName('g')[0]           # flipping group
         dg = fg.getElementsByTagName('g')[0]            # diagram group
@@ -93,7 +93,7 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
         if not HAVE_XML_PARSER:
             warnIgnoredRestofTest()
             return
-            
+
         svg = load(path)
         fg = svg.getElementsByTagName('g')[0]           # flipping group
         dg = fg.getElementsByTagName('g')[0]            # diagram group
@@ -123,7 +123,7 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
         if not HAVE_XML_PARSER:
             warnIgnoredRestofTest()
             return
-            
+
         svg = load(path)
         fg = svg.getElementsByTagName('g')[0]           # flipping group
         dg = fg.getElementsByTagName('g')[0]            # diagram group

@@ -40,7 +40,7 @@ class SlideBox(Widget):
         sourceLabelFontSize = AttrMapValue(isNumber, desc="Font size for the 'source' label"),
         sourceLabelFillColor = AttrMapValue(isColorOrNone, desc="Colour ink for the 'source' label (bottom right)"),
         )
-    
+
     def __init__(self):
         self.labelFontName = "Helvetica-Bold"
         self.labelFontSize = 10
@@ -70,7 +70,7 @@ class SlideBox(Widget):
         self.sourceLabelFontName = "Helvetica-Oblique"
         self.sourceLabelFontSize = 6
         self.sourceLabelFillColor = black
-        
+
     def _getDrawingDimensions(self):
         tx=(self.numberOfBoxes*self.boxWidth)
         if self.numberOfBoxes>1: tx=tx+((self.numberOfBoxes-1)*self.boxSpacing)
@@ -94,10 +94,10 @@ class SlideBox(Widget):
         from reportlab.lib import colors
         if not drawing:
             tx,ty=self._getDrawingDimensions()
-            drawing = Drawing(tx,ty)        
+            drawing = Drawing(tx,ty)
         drawing.add(self.draw())
         return drawing
-    
+
     def draw(self):
         g = Group()
         ys = self.bottomPadding+(self.triangleHeight/2)+self.sourceLabelOffset+self.sourceLabelFontSize
@@ -128,7 +128,7 @@ class SlideBox(Widget):
             sr.fillColorEnd = colorsList[f+1]
             sr.strokeColor = None
             sr.strokeWidth = 0
-            
+
             g.add(sr)
 
             g.add(Rect(x,0,self.boxWidth,self.boxHeight,

@@ -15,7 +15,7 @@ def run():
             author="The boys from SW19",
             author_email="info@reportlab.com",
             url="http://www.reportlab.com/",
-          
+
             package_dir = {'': '..'},
 
             packages=[ # include anything with an __init__
@@ -48,7 +48,7 @@ def run():
                                      'fonts/luxiserif.ttf',
                                      'fonts/rina.ttf']
                      )],
-            
+
             ext_modules =   [Extension( '_rl_accel',
                                         ['lib/_rl_accel.c'],
                                         include_dirs=[],

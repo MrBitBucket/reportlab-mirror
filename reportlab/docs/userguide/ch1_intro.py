@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.12 2002/09/07 08:54:21 dragan1 Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.13 2002/11/04 00:11:48 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 import reportlab
 
@@ -442,7 +442,7 @@ restartList()
 
 list("""
 Before installing Jython, make sure you have a supported version of
-Java Virtual Machine installed. For the list of supported JVM's see 
+Java Virtual Machine installed. For the list of supported JVM's see
 $http://www.jython.org/platform.html$
 """)
 

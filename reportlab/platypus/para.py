@@ -127,7 +127,7 @@ class paragraphEngine:
             val = state[0]
             del state[0]
             setattr(self, var, val)
-    
+
     def format(self, maxwidth, maxheight, program, leading=0):
         "return program with line operations added if at least one line fits"
         # note: a generated formatted segment should not be formatted again
@@ -440,7 +440,7 @@ class paragraphEngine:
                     h.remove(handler)
                     self.lineOpHandlers = h
                     line.append(opcode)
-                
+
                 else:
                     raise ValueError, "at format time don't understand indicator "+repr(indicator)
             else:
@@ -516,7 +516,7 @@ class paragraphEngine:
                 result[-1] = expanded
             cursor = cursor+1
         return result
-    
+
 ##                if not first:
 ##                    #if debug: print "shifting", shift, e
 ##                    #result.append(shift)
@@ -586,7 +586,7 @@ class paragraphEngine:
             else:
                 result.append(e)
             index = index+1
-            
+
         return result
     def cleanProgram(self, line):
         "collapse adjacent spacings"
@@ -869,83 +869,83 @@ def simpleJustifyAlign(line, currentLength, maxLength):
 from reportlab.lib.colors import black
 
 def readBool(text):
-	if string.upper(text) in ("Y", "YES", "TRUE", "1"):
-		return 1
-	elif string.upper(text) in ("N", "NO", "FALSE", "0"):
-		return 0
-	else:
-		raise RMLError, "true/false attribute has illegal value '%s'" % text
+    if string.upper(text) in ("Y", "YES", "TRUE", "1"):
+        return 1
+    elif string.upper(text) in ("N", "NO", "FALSE", "0"):
+        return 0
+    else:
+        raise RMLError, "true/false attribute has illegal value '%s'" % text
 
 def readAlignment(text):
-	from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
-	up = string.upper(text)
-	if up == 'LEFT':
-		return TA_LEFT
-	elif up == 'RIGHT':
-		return TA_RIGHT
-	elif up in ['CENTER', 'CENTRE']:
-		return TA_CENTER
-	elif up == 'JUSTIFY':
-		return TA_JUSTIFY
+    from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
+    up = string.upper(text)
+    if up == 'LEFT':
+        return TA_LEFT
+    elif up == 'RIGHT':
+        return TA_RIGHT
+    elif up in ['CENTER', 'CENTRE']:
+        return TA_CENTER
+    elif up == 'JUSTIFY':
+        return TA_JUSTIFY
 
 def readLength(text):
-	"""Read a dimension measurement: accept "3in", "5cm",
-	"72 pt" and so on."""
-	text = string.strip(text)
-	try:
-		return float(text)
-	except ValueError:
-		text = string.lower(text)
-		numberText, units = text[:-2],text[-2:]
-		numberText = string.strip(numberText)
-		try:
-			number = float(numberText)
-		except ValueError:
-			raise ValueError, "invalid length attribute '%s'" % text
-		try:
-			multiplier = {
-				'in':72,
-				'cm':28.3464566929,  #72/2.54; is this accurate?
-				'mm':2.83464566929,
-				'pt':1
-				}[units]
-		except KeyError:
-			raise RMLError, "invalid length attribute '%s'" % text
+    """Read a dimension measurement: accept "3in", "5cm",
+    "72 pt" and so on."""
+    text = string.strip(text)
+    try:
+        return float(text)
+    except ValueError:
+        text = string.lower(text)
+        numberText, units = text[:-2],text[-2:]
+        numberText = string.strip(numberText)
+        try:
+            number = float(numberText)
+        except ValueError:
+            raise ValueError, "invalid length attribute '%s'" % text
+        try:
+            multiplier = {
+                'in':72,
+                'cm':28.3464566929,  #72/2.54; is this accurate?
+                'mm':2.83464566929,
+                'pt':1
+                }[units]
+        except KeyError:
+            raise RMLError, "invalid length attribute '%s'" % text
 
-		return number * multiplier		   
+        return number * multiplier
 
 def lengthSequence(s, converter=readLength):
-	"""from "(2, 1)" or "2,1" return [2,1], for example"""
-	from string import split, strip
-	s = strip(s)
-	if s[:1]=="(" and s[-1:]==")":
-		s = s[1:-1]
-	sl = split(s, ",")
-	sl = map(strip, sl)
-	sl = map(converter, sl)
-	return sl
+    """from "(2, 1)" or "2,1" return [2,1], for example"""
+    from string import split, strip
+    s = strip(s)
+    if s[:1]=="(" and s[-1:]==")":
+        s = s[1:-1]
+    sl = split(s, ",")
+    sl = map(strip, sl)
+    sl = map(converter, sl)
+    return sl
 
 
 def readColor(text):
-	"""Read color names or tuples, RGB or CMYK, and return a Color object."""
-	if not text:
-		return None
-	from reportlab.lib import colors
-	if text[0] in string.letters:
-		return colors.__dict__[text]
-	tup = lengthSequence(text)
+    """Read color names or tuples, RGB or CMYK, and return a Color object."""
+    if not text:
+        return None
+    from reportlab.lib import colors
+    if text[0] in string.letters:
+        return colors.__dict__[text]
+    tup = lengthSequence(text)
 
-	msg = "Color tuple must have 3 (or 4) elements for RGB (or CMYC)."
-	assert 3 <= len(tup) <= 4, msg
-	msg = "Color tuple must have all elements <= 1.0."
-	for i in range(len(tup)):
-		assert tup[i] <= 1.0, msg
+    msg = "Color tuple must have 3 (or 4) elements for RGB (or CMYC)."
+    assert 3 <= len(tup) <= 4, msg
+    msg = "Color tuple must have all elements <= 1.0."
+    for i in range(len(tup)):
+        assert tup[i] <= 1.0, msg
 
-	if len(tup) == 3:
-		colClass = colors.Color
-	elif len(tup) == 4:
-		colClass = colors.CMYKColor
-	return apply(colClass, tup)
+    if len(tup) == 3:
+        colClass = colors.Color
+    elif len(tup) == 4:
+        colClass = colors.CMYKColor
+    return apply(colClass, tup)
 
 class StyleAttributeConverters:
     fontSize=[readLength]
@@ -960,7 +960,7 @@ class StyleAttributeConverters:
     bulletIndent=[readLength]
     textColor=[readColor]
     backColor=[readColor]
-    
+
 class SimpleStyle:
     "simplified paragraph style without all the fancy stuff"
     name = "basic"
@@ -996,14 +996,14 @@ class SimpleStyle:
 
 
 DEFAULT_ALIASES = {
-	"h1.defaultStyle": "Heading1",
-	"h2.defaultStyle": "Heading2",
-	"h3.defaultStyle": "Heading3",
-	"title.defaultStyle": "Title",
-	"para.defaultStyle": "Normal",
-	"pre.defaultStyle": "Code",
-	"li.defaultStyle": "Definition"
-	}                
+    "h1.defaultStyle": "Heading1",
+    "h2.defaultStyle": "Heading2",
+    "h3.defaultStyle": "Heading3",
+    "title.defaultStyle": "Title",
+    "para.defaultStyle": "Normal",
+    "pre.defaultStyle": "Code",
+    "li.defaultStyle": "Definition"
+    }
 
 class FastPara(Flowable):
     "paragraph with no special features (not even a single ampersand!)"
@@ -1168,13 +1168,13 @@ class FastPara(Flowable):
         return self.style.spaceAfter
 
 def defaultContext():
-	result = {}
-	from reportlab.lib.styles import getSampleStyleSheet
-	styles = getSampleStyleSheet()
-	for (stylenamekey, stylenamevalue) in DEFAULT_ALIASES.items():
-		result[stylenamekey] = styles[stylenamevalue]
-	return result
-        
+    result = {}
+    from reportlab.lib.styles import getSampleStyleSheet
+    styles = getSampleStyleSheet()
+    for (stylenamekey, stylenamevalue) in DEFAULT_ALIASES.items():
+        result[stylenamekey] = styles[stylenamevalue]
+    return result
+
 class Para(Flowable):
     spaceBefore = 0
     spaceAfter = 0
@@ -1182,7 +1182,7 @@ class Para(Flowable):
         #print id(self), "para", parsedText
         self.baseindent = baseindent
         if context is None:
-			context = defaultContext()
+            context = defaultContext()
         self.context = context
         self.parsedText = parsedText
         self.bulletText = bulletText
@@ -1332,8 +1332,8 @@ class Para(Flowable):
             print "-"*44
         laststate = p.runOpCodes(formattedProgram, c, t)
         #print laststate["x"], laststate["y"]
-        c.drawText(t)        
-        
+        c.drawText(t)
+
     def compileProgram(self, parsedText, program=None):
         style = self.style1
         # standard parameters
@@ -1437,7 +1437,7 @@ class Para(Flowable):
         elif ttext is types.TupleType:
             (tagname, attdict, content, extra) = parsedText
             if not attdict:
-				attdict = {}
+                attdict = {}
             compilername = "compile_"+tagname
             compiler = getattr(self, compilername, None)
             if compiler is not None:
@@ -1477,7 +1477,7 @@ class Para(Flowable):
         if font!=oldfont:
             program.append( ("face", font ) )
         return oldfontinfo
-        
+
     def compile_(self, attdict, content, extra, program):
         # "anonymous" tag: just do the content
         for e in content:
@@ -1536,7 +1536,7 @@ class Para(Flowable):
                     newatts.update(attdict1)
                 bulletmaker.makeBullet(newatts)
                 self.compile_para(newatts, content1, extra, program)
-                
+
     def compile_ol(self, attdict, content, extra, program):
         return self.compile_ul(attdict, content, extra, program, tagname="ol")
 
@@ -1585,7 +1585,7 @@ class Para(Flowable):
                     bullet = "" # don't use this bullet again
         if bullet:
             raise ValueError, "dt will not be displayed unless followed by a dd"+repr(bullet)
-        
+
     def compile_super(self, attdict, content, extra, program):
         size = self.size
         self.size = newsize = size * 0.7
@@ -1815,7 +1815,7 @@ class SeqObject(EvalStringObject):
             return op
         elif attr.has_key('id'):
             id = attr['id']
-        else: 
+        else:
             id = None
         op = self.op = globalsequencer.nextf(id)
         return op
@@ -1837,7 +1837,7 @@ class SeqDefaultObject(NameObject):
         globalsequencer.setDefaultCounter(default)
         self.op = ""
         return ""
-        
+
 class SeqResetObject(NameObject):
     def getOp(self, tuple, engine):
         from reportlab.lib.sequencer import getSequencer
@@ -1855,7 +1855,7 @@ class SeqResetObject(NameObject):
         globalsequencer.reset(id, base)
         self.op = ""
         return ""
-    
+
 class GetNameObject(EvalStringObject):
     tagname = "getName"
 
@@ -1903,7 +1903,7 @@ def EmbedInRml2pdf():
         def translate(self, nodetuple, controller, context, overrides):
             thepara = ("para", {}, [nodetuple], None)
             return theParaMapper.translate(thepara, controller, context, overrides)
-        
+
     # override rml2pdf interpreters (should be moved to rml2pdf)
     theListMapper = ulMapper()
     Controller["ul"] = theListMapper
@@ -1923,22 +1923,22 @@ This is Text.
 <i>This is italic text.</i>
 
 <ul>
-	<li> this is an element at 1 
+    <li> this is an element at 1
 more text and even more text and on and on and so forth
 more text and even more text and on and on and so forth
 more text and even more text and on and on and so forth
 more text and even more text and on and on and so forth
 more text and even more text and on and on and so forth
 
-	<ul>
-		<li> this is an element at 2
-	
+    <ul>
+        <li> this is an element at 2
+
 more text and even more text and on and on and so forth
 more text and even more text and on and on and so forth
 
-		<ul>
-			<li> this is an element at 3
-		
+        <ul>
+            <li> this is an element at 3
+
 more text and even more text and on and on and so forth
 
 
@@ -1950,69 +1950,69 @@ more text and even more text and on and on and so forth
 
 more text and even more text and on and on and so forth
 
-			<ul>
-				<li> this is an element at 4
-			
-more text and even more text and on and on and so forth
-more text and even more text and on and on and so forth
-
-				</li>
-			</ul>
+            <ul>
+                <li> this is an element at 4
 
 more text and even more text and on and on and so forth
 more text and even more text and on and on and so forth
 
-			</li>
-		</ul>
+                </li>
+            </ul>
+
 more text and even more text and on and on and so forth
 more text and even more text and on and on and so forth
 
-		</li>
+            </li>
+        </ul>
+more text and even more text and on and on and so forth
+more text and even more text and on and on and so forth
 
-	</ul>
+        </li>
+
+    </ul>
 <u><b>UNDERLINED</b> more text and even more text and on and on and so forth
 more text and even more text and on and on and so forth</u>
 
 <ol type="a">
-	<li>first element of the alpha list
+    <li>first element of the alpha list
 
- 	 <ul type="square">
-		<li>first element of the square unnumberred list</li>
+     <ul type="square">
+        <li>first element of the square unnumberred list</li>
 
-		<li>second element of the unnumberred list</li>
+        <li>second element of the unnumberred list</li>
 
-		<li>third element of the unnumberred list 
-		third element of the unnumberred list 
-		third element of the unnumberred list 
-		third element of the unnumberred list 
-		third element of the unnumberred list 
-		third element of the unnumberred list 	
-		third element of the unnumberred list 
-		</li>
+        <li>third element of the unnumberred list
+        third element of the unnumberred list
+        third element of the unnumberred list
+        third element of the unnumberred list
+        third element of the unnumberred list
+        third element of the unnumberred list
+        third element of the unnumberred list
+        </li>
 
-		<li>fourth element of the unnumberred list</li>
+        <li>fourth element of the unnumberred list</li>
 
-	  </ul>
+      </ul>
 
-	</li>
+    </li>
 
-	<li>second element of the alpha list</li>
+    <li>second element of the alpha list</li>
 
-	<li>third element of the alpha list 
-	third element of the unnumberred list 
-	third element of the unnumberred list 
-	third element of the unnumberred list 
-	third element of the unnumberred list 
-	third element of the unnumberred list 	
-	third element of the unnumberred list 
-	</li>
+    <li>third element of the alpha list
+    third element of the unnumberred list
+    third element of the unnumberred list
+    third element of the unnumberred list
+    third element of the unnumberred list
+    third element of the unnumberred list
+    third element of the unnumberred list
+    </li>
 
-	<li>fourth element of the alpha list</li>
+    <li>fourth element of the alpha list</li>
 
   </ol>
 
 
-	</li>
+    </li>
 </ul>
 
 <a href="http://www.reportlab.com">goto www.reportlab.com</a>.
@@ -2236,7 +2236,7 @@ def splitspace(text):
         result.append(e+" ")
     return result
 
-testlink = HotLink("http://www.reportlab.com")        
+testlink = HotLink("http://www.reportlab.com")
 
 test_program = [
     ('push',),
@@ -2323,6 +2323,6 @@ def test():
             print "="*30, "x=", laststate["x"], "y=", laststate["y"]
     c.save()
     print fn
-                    
+
 if __name__=="__main__":
     test()

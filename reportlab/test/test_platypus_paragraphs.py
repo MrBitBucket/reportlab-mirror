@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_paragraphs.py,v 1.10 2002/11/03 14:50:43 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_paragraphs.py,v 1.11 2002/11/04 00:11:49 andy_robinson Exp $
 """Tests for the reportlab.platypus.paragraphs module.
 """
 
@@ -72,10 +72,10 @@ series of paragraphs around the image
 so that once the bottom of the image is reached, then text will flow back to the
 left margin. I know that it would be possible to something like this
 using tables, but I can't see how to have a generic solution.
-There are two examples of this in the demonstration section of the reportlab 
+There are two examples of this in the demonstration section of the reportlab
 site.
-If you look at the "minimal" euro python conference brochure, at the end of the 
-timetable section (page 8), there are adverts for "AdSu" and "O'Reilly". I can 
+If you look at the "minimal" euro python conference brochure, at the end of the
+timetable section (page 8), there are adverts for "AdSu" and "O'Reilly". I can
 see how the AdSu one might be done generically, but the O'Reilly, unsure...
 I guess I'm hoping that I've missed something, and that
 it's actually easy to do using platypus.
