@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: genuserguide.py,v $
+#	Revision 1.11  2000/06/28 14:52:43  rgbecker
+#	Documentation changes
+#
 #	Revision 1.10  2000/06/27 10:09:48  rgbecker
 #	Minor cosmetic changes
-#
+#	
 #	Revision 1.9  2000/06/23 21:09:03  aaron_watters
 #	text text and more text
 #	
@@ -62,31 +65,46 @@
 #	Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #	initial checkin. user guide generation framework.
 #	
-__version__=''' $Id: genuserguide.py,v 1.10 2000/06/27 10:09:48 rgbecker Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.11 2000/06/28 14:52:43 rgbecker Exp $ '''
 
 
 __doc__ = """
 This module contains the script for building the user guide.
 """
 
+_oldStyle=0		#change to 1 to get Aaron's original
+if _oldStyle:
+	from reportlab.lib.styles import getSampleStyleSheet
+	styleSheet = getSampleStyleSheet()
+else:
+	import os, sys
+	sys.path.insert(0,os.path.abspath(os.path.join('..','tools')))
+	from rltemplate import RLDocTemplate
+	from stylesheet import getStyleSheet
+	styleSheet = getStyleSheet()
+
 from reportlab.platypus.doctemplate import SimpleDocTemplate
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import Paragraph, Spacer, Preformatted, PageBreak, CondPageBreak
-from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
 import examples
 
-styleSheet = getSampleStyleSheet()
 from reportlab.lib.corp import ReportLabLogo
 LOGO = ReportLabLogo(0.25*inch, 0.25*inch, inch, 0.75*inch)
 
 from t_parse import Template
 QFcodetemplate = Template("X$X$", "X")
-codesubst = "%s<font name=courier color=green>%s</font>"
 QFreptemplate = Template("X^X^", "X")
-QFsubst = "%s<font name=Helvetica color=blue><i>%s</i></font>"
+if _oldStyle:
+	codesubst = "%s<font name=courier color=green>%s</font>"
+	QFsubst = "%s<font name=Helvetica color=blue><i>%s</i></font>"
+else:
+	codesubst = "%s<b><font name=courier>i</b>%s</font>"
+	QFsubst = "%s<font name=Helvetica><i>%s</i></font>"
+	
 
 def quickfix(text):
     """inside text find any subsequence of form $subsequence$.
@@ -117,44 +135,53 @@ def quickfix(text):
     return text
 #print quickfix("$testing$ testing $one$ ^two^ $three(^four^)$")
 
-class PageAnnotations:
-    """ "closure" containing onfirstpage, onnextpage actions
-        and any data they might want to use.
-    """
-    pagesize = letter
-    pagenumber = 1
-    def onFirstPage(self, canvas, doc):
-        (xsize, ysize) = self.pagesize
-        LOGO.draw(canvas)
-        #  width=6.25*inch,height=0.62*inch)
-        canvas.setFont("Helvetica", 12)
-        canvas.drawRightString(xsize-inch, ysize-0.8*inch, "ReportLab User Guide")
-        self.pagenumber = self.pagenumber+1
-    def onNextPage(self, canvas, doc):
-        canvas.saveState()
-        (xsize, ysize) = self.pagesize
-        canvas.setFont("Helvetica", 12)
-        canvas.drawString(inch, ysize-0.8*inch, "Page %s" % self.pagenumber)
-        self.onFirstPage(canvas, doc)
-        canvas.restoreState()
+if _oldStyle:
+	class PageAnnotations:
+		""" "closure" containing onfirstpage, onnextpage actions
+			and any data they might want to use.
+		"""
+		pagesize = letter
+		pagenumber = 1
+		def onFirstPage(self, canvas, doc):
+			(xsize, ysize) = self.pagesize
+			LOGO.draw(canvas)
+			#  width=6.25*inch,height=0.62*inch)
+			canvas.setFont("Helvetica", 12)
+			canvas.drawRightString(xsize-inch, ysize-0.8*inch, "ReportLab User Guide")
+			self.pagenumber = self.pagenumber+1
+		def onNextPage(self, canvas, doc):
+			canvas.saveState()
+			(xsize, ysize) = self.pagesize
+			canvas.setFont("Helvetica", 12)
+			canvas.drawString(inch, ysize-0.8*inch, "Page %s" % self.pagenumber)
+			self.onFirstPage(canvas, doc)
+			canvas.restoreState()
         
 class Guide:
     def __init__(self):
-        self.myannotations = PageAnnotations()
+        if _oldStyle:
+            self.myannotations = PageAnnotations()
         self.story = story()
     def go(self, filename="userguide.pdf"):
         # generate the doc...
-	doc = SimpleDocTemplate(filename,pagesize = letter ,showBoundary=0,
-	  leftMargin=inch, rightMargin=inch, topMargin=1*inch, bottomMargin=inch)
-	story = self.story
-	doc.build(story, self.myannotations.onFirstPage, self.myannotations.onNextPage)
+        doc = RLDocTemplate(filename,pagesize = letter)
+        story = self.story
+        if _oldStyle:
+            doc.build(story, self.myannotations.onFirstPage, self.myannotations.onNextPage)
+        else:
+            doc.build(story)
 
-H = styleSheet['Heading2']
-lessonnamestyle = ParagraphStyle("lessonname", parent=H)
-lessonnamestyle.fontName = 'Helvetica-Bold'
+H1 = styleSheet['Heading1']
+H2 = styleSheet['Heading2']
 B = styleSheet['BodyText']
-discussiontextstyle = ParagraphStyle("discussiontext", parent=B)
-discussiontextstyle.fontName= 'Helvetica'
+if _oldStyle:
+	lessonnamestyle = ParagraphStyle("lessonname", parent=H2)
+	lessonnamestyle.fontName = 'Helvetica-Bold'
+	discussiontextstyle = ParagraphStyle("discussiontext", parent=B)
+	discussiontextstyle.fontName= 'Helvetica'
+else:
+	lessonnamestyle = H2
+	discussiontextstyle = B
 exampletextstyle = styleSheet['Code']
 # size for every example
 examplefunctionxinches = 5.5
@@ -184,15 +211,18 @@ def eg(text):
 #    an 
 #     example""")
     
-def head(text):
+def head(text,style=lessonnamestyle):
     BODY.append(CondPageBreak(inch))
-    disc(text, style=lessonnamestyle)
+    disc(text, style=style)
+
+def title(text):
+	disc(text,style=styleSheet['Title'])
     
 #head("this is a header")
     
 def lesson(text):
     BODY.append(PageBreak())
-    head(text)
+    head(text,style=H1)
     
 def canvasdemo(function):
     BODY.append(Spacer(0.1*inch, 0.1*inch))
@@ -242,7 +272,8 @@ def pencilnote():
 
 #pencilnote()
 
-head("ReportLab User Guide")
+title("ReportLab User Guide")
+head("Introduction",style=H1)
 
 disc("""
 This document is intended to be a conversational introduction

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.22  2000/06/28 14:52:43  rgbecker
+#	Documentation changes
+#
 #	Revision 1.21  2000/06/26 15:58:22  rgbecker
 #	Simple fix to widths problem
-#
+#	
 #	Revision 1.20  2000/06/21 12:27:42	rgbecker
 #	remove UserDocTemplate, but add Andy's hook methods
 #	
@@ -96,7 +99,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.21 2000/06/26 15:58:22 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.22 2000/06/28 14:52:43 rgbecker Exp $ '''
 __doc__="""
 This module contains the core structure of platypus.
 
@@ -226,9 +229,9 @@ class BaseDocTemplate:
 	EXCEPTION: doctemplate.build(...) must be called for most reasonable uses
 	since it builds a document using the page template.
 	
-		Each document template builds exactly one document into a file specified
-		by the filename argument on initialization.
-	
+	Each document template builds exactly one document into a file specified
+	by the filename argument on initialization.
+
 	Possible keyword arguments for the initialization:
 	
 	pageTemplates: A list of templates.  Must be nonempty.	Names
@@ -238,7 +241,7 @@ class BaseDocTemplate:
 	  a chapter and two more for the interior of a chapter on odd and even pages.
 	  If this argument is omitted then at least one pageTemplate should be provided
 	  using the addPageTemplates method before the document is built.
-	showBoundary: (for debugging) if set draw a box around the frame boundaries.
+	showBoundary: if set draw a box around the frame boundaries.
 	leftMargin:
 	rightMargin:
 	topMargin:

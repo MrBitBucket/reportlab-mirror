@@ -92,6 +92,17 @@ based more on balancing the module lengths than on any
 particular programming interface.  The __init__ module
 imports the key classes into the top level of the package.
 
+.h2 Overall Structure
+
+Abstractly Platypus currently can be thought of has having four
+levels: documents, pages, frames and flowables (things which can fit into frames in some way).
+In practice there is a fifth level, the canvas, so that if you want
+you can do anything that pdfgen's canvas allows.
+
+.h2 BaseDocTemplate
+.getClassDoc reportlab.platypus.doctemplate BaseDocTemplate
+
+.h2 Flowables
 .getClassDoc reportlab.platypus.paragraph Paragraph
 
 .pageBreak
@@ -126,6 +137,9 @@ applications.
 .h1 Appendix A - CVS Revision History
 .beginPre Code
 $Log: reference.yml,v $
+Revision 1.9  2000/06/28 14:52:43  rgbecker
+Documentation changes
+
 Revision 1.8  2000/06/19 23:52:31  andy_robinson
 rltemplate now simple, based on UserDocTemplate
 
