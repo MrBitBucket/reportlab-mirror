@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.15 2001/04/11 19:57:06 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.16 2001/04/24 16:07:18 dinu_gherman Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -38,7 +38,7 @@ from types import FunctionType, StringType, TupleType, ListType
 
 from reportlab.graphics.shapes import Drawing, Line, Group, Auto
 from reportlab.graphics.shapes import STATE_DEFAULTS
-from reportlab.graphics.shapes import isNumber, isNumberOrAuto, isListOfNumbers, isColorOrNone
+from reportlab.graphics.shapes import isNumber, isNumberOrNone, isNumberOrAuto, isListOfNumbers, isColorOrNone, OneOf
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.utils import nextRoundNumber
@@ -90,7 +90,10 @@ class XCategoryAxis(CategoryAxis):
         'tickUp':isNumber,
         'tickDown':isNumber,
         'labels':None,
-        'categoryNames':None
+        'categoryNames':None,
+        'joinAxis':None,
+        'joinAxisMode':OneOf(('bottom', 'top', 'value', 'points', None)),
+        'joinAxisPos':isNumberOrNone,
         }
 
     def __init__(self):
@@ -126,6 +129,10 @@ class XCategoryAxis(CategoryAxis):
         # you need one name per data point and they are
         # used for label text.
         self.categoryNames = None
+
+        self.joinAxis = None
+        self.joinAxisMode = None
+        self.joinAxisPos = None
 
 
     def demo(self):
@@ -177,6 +184,18 @@ class XCategoryAxis(CategoryAxis):
     
     def makeAxis(self):
         g = Group()
+
+        ja = self.joinAxis
+        if ja:
+            jam = self.joinAxisMode
+            jap = self.joinAxisPos
+            jta = self.joinToAxis
+            if jam in ('bottom', 'top'):
+                jta(ja, mode=jam)
+            elif jam == 'value':
+                jta(ja, mode='fixedValue', value=jap)
+            elif jam == 'points':
+                jta(ja, mode='fixedPoints', points=jap)
 
         axis = Line(self._x, self._y, self._x + self._length, self._y)
         axis.strokeColor = self.strokeColor
@@ -233,7 +252,10 @@ class YCategoryAxis(CategoryAxis):
         'tickLeft':isNumber,
         'tickRight':isNumber,
         'labels':None,
-        'categoryNames':None
+        'categoryNames':None,
+        'joinAxis':None,
+        'joinAxisMode':OneOf(('left', 'right', 'value', 'points', None)),
+        'joinAxisPos':isNumberOrNone,
         }
 
     def __init__(self):
@@ -269,6 +291,10 @@ class YCategoryAxis(CategoryAxis):
         # you need one name per data point and they are
         # used for label text.
         self.categoryNames = None
+
+        self.joinAxis = None
+        self.joinAxisMode = None
+        self.joinAxisPos = None
 
 
     def demo(self):
@@ -320,6 +346,18 @@ class YCategoryAxis(CategoryAxis):
     def makeAxis(self):
         g = Group()
 
+        ja = self.joinAxis
+        if ja:
+            jam = self.joinAxisMode
+            jap = self.joinAxisPos
+            jta = self.joinToAxis
+            if jam in ('left', 'right'):
+                jta(ja, mode=jam)
+            elif jam == 'value':
+                jta(ja, mode='fixedValue', value=jap)
+            elif jam == 'points':
+                jta(ja, mode='fixedPoints', points=jap)
+
         axis = Line(self._x, self._y, self._x, self._y + self._length)
         axis.strokeColor = self.strokeColor
         axis.strokeWidth = self.strokeWidth
@@ -363,6 +401,7 @@ class YCategoryAxis(CategoryAxis):
 
         return g
 
+
 def _findMin(V, x, default):
     '''find minimum over V[i][x]'''
     try:
@@ -378,6 +417,7 @@ def _findMin(V, x, default):
     except IndexError:
             m = default
     return m
+
 
 def _findMax(V, x, default):
     '''find maximum over V[i][x]'''
@@ -396,6 +436,7 @@ def _findMax(V, x, default):
 
     return m
     
+
 # Value axes.
 
 class ValueAxis(Widget):
@@ -413,7 +454,7 @@ class ValueAxis(Widget):
         'valueMin':isNumberOrAuto,
         'valueMax':isNumberOrAuto,
         'valueStep':isNumberOrAuto,
-        'valueSteps':isListOfNumbers,
+        'valueSteps':isListOfNumbers
         }
 
     def __init__(self):
@@ -513,12 +554,14 @@ class ValueAxis(Widget):
         self._valueMin, self._valueMax = (valueMin, valueMax)
         self._rangeAdjust()
 
+
     def _rangeAdjust(self):
         ''' override this if you want to alter the calculated range
             eg want a minumamum range of 30%
             or don't want 100% as the first point
         '''
         pass
+
 
     def _calcScaleFactor(self):
         """Calculate the axis' scale factor.
@@ -554,6 +597,7 @@ class ValueAxis(Widget):
 
         return tickmarkPositions
 
+
     def _calcValueStep(self):
         '''Calculate _valueStep for the axis or get from valueStep''' 
         if self.valueStep == Auto:
@@ -563,6 +607,7 @@ class ValueAxis(Widget):
             self._valueStep = niceInterval
         else:
             self._valueStep = self.valueStep
+
 
     def draw(self):
         g = Group()
@@ -579,10 +624,14 @@ class ValueAxis(Widget):
 
 class XValueAxis(ValueAxis):
     "X/value axis"
+
     _attrMap = ValueAxis._attrMap.copy()
     _attrMap.update({
         'tickUp':isNumber,
         'tickDown':isNumber,
+        'joinAxis':None,
+        'joinAxisMode':OneOf(('bottom', 'top', 'value', 'points', None)),
+        'joinAxisPos':isNumberOrNone,
         })
 
     def __init__(self):
@@ -593,6 +642,10 @@ class XValueAxis(ValueAxis):
         self.labels.dy = -5
         self.tickUp = 0     # how far up of axis does tick go?
         self.tickDown = 5   # how far down does tick go?
+
+        self.joinAxis = None
+        self.joinAxisMode = None
+        self.joinAxisPos = None
 
 
     def demo(self):
@@ -647,6 +700,18 @@ class XValueAxis(ValueAxis):
     def makeAxis(self):
         g = Group()
 
+        ja = self.joinAxis
+        if ja:
+            jam = self.joinAxisMode
+            jap = self.joinAxisPos
+            jta = self.joinToAxis
+            if jam in ('bottom', 'top'):
+                jta(ja, mode=jam)
+            elif jam == 'value':
+                jta(ja, mode='fixedValue', value=jap)
+            elif jam == 'points':
+                jta(ja, mode='fixedPoints', points=jap)
+        
         axis = Line(self._x, self._y, self._x + self._length, self._y)
         axis.strokeColor = self.strokeColor
         axis.strokeWidth = self.strokeWidth
@@ -697,10 +762,14 @@ class XValueAxis(ValueAxis):
         
 class YValueAxis(ValueAxis):
     "Y/value axis"
+
     _attrMap = ValueAxis._attrMap.copy()
     _attrMap.update({
         'tickLeft':isNumber,
         'tickRight':isNumber,
+        'joinAxis':None,
+        'joinAxisMode':OneOf(('left', 'right', 'value', 'points', None)),
+        'joinAxisPos':isNumberOrNone,
         })
 
     def __init__(self):
@@ -711,6 +780,11 @@ class YValueAxis(ValueAxis):
         self.labels.dy = 0
         self.tickRight = 0  # how far to right of axis does tick go?
         self.tickLeft = 5   # how far to left does tick go?
+
+        self.joinAxis = None
+        self.joinAxisMode = None
+        self.joinAxisPos = None
+
 
     def demo(self):
         self.setPosition(40, 10, 80)
@@ -763,6 +837,18 @@ class YValueAxis(ValueAxis):
 
     def makeAxis(self):
         g = Group()
+
+        ja = self.joinAxis
+        if ja:
+            jam = self.joinAxisMode
+            jap = self.joinAxisPos
+            jta = self.joinToAxis
+            if jam in ('left', 'right'):
+                jta(ja, mode=jam)
+            elif jam == 'value':
+                jta(ja, mode='fixedValue', value=jap)
+            elif jam == 'points':
+                jta(ja, mode='fixedPoints', points=jap)
 
         axis = Line(self._x, self._y, self._x, self._y + self._length)
         axis.strokeColor = self.strokeColor
@@ -934,7 +1020,7 @@ class YValueAxis(ValueAxis):
 # Sample functions.
 
 def sample0a():
-    "Make sample drawing with one axis and two buckets."
+    "Sample drawing with one xcat axis and two buckets."
 
     drawing = Drawing(400, 200)
 
@@ -952,7 +1038,7 @@ def sample0a():
 
 
 def sample0b():
-    "Make sample drawing with one axis and one bucket only."
+    "Sample drawing with one xcat axis and one bucket only."
 
     drawing = Drawing(400, 200)
 
@@ -970,7 +1056,7 @@ def sample0b():
 
 
 def sample1():
-    "Make sample drawing containing two unconnected axes."
+    "Sample drawing containing two unconnected axes."
 
     drawing = Drawing(400, 200)
 
@@ -994,152 +1080,174 @@ def sample1():
     return drawing
 
 
-def sample2a():
-    "Make sample drawing with two axes, x connected at top of y."
+##def sample2a():
+##    "Make sample drawing with two axes, x connected at top of y."
+##
+##    drawing = Drawing(400, 200)
+##
+##    data = [(10, 20, 30, 42)]        
+##
+##    yAxis = YValueAxis()
+##    yAxis.setPosition(50, 50, 125)
+##    yAxis.configure(data)
+##
+##    xAxis = XCategoryAxis()
+##    xAxis._length = 300
+##    xAxis.configure(data)
+##    xAxis.joinToAxis(yAxis, mode='top')
+##    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+##    xAxis.labels.boxAnchor = 'n'
+##
+##    drawing.add(xAxis)
+##    drawing.add(yAxis)
+##
+##    return drawing
+##
+##
+##def sample2b():
+##    "Make two axes, x connected at bottom of y."
+##
+##    drawing = Drawing(400, 200)
+##
+##    data = [(10, 20, 30, 42)]        
+##
+##    yAxis = YValueAxis()
+##    yAxis.setPosition(50, 50, 125)
+##    yAxis.configure(data)
+##
+##    xAxis = XCategoryAxis()
+##    xAxis._length = 300
+##    xAxis.configure(data)
+##    xAxis.joinToAxis(yAxis, mode='bottom')
+##    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+##    xAxis.labels.boxAnchor = 'n'
+##
+##    drawing.add(xAxis)
+##    drawing.add(yAxis)
+##
+##    return drawing
+##
+##
+##def sample2c():
+##    "Make two axes, x connected at fixed value (in points) of y."
+##
+##    drawing = Drawing(400, 200)
+##
+##    data = [(10, 20, 30, 42)]        
+##
+##    yAxis = YValueAxis()
+##    yAxis.setPosition(50, 50, 125)
+##    yAxis.configure(data)
+##
+##    xAxis = XCategoryAxis()
+##    xAxis._length = 300
+##    xAxis.configure(data)
+##    xAxis.joinToAxis(yAxis, mode='fixedPoints', points=100)
+##    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+##    xAxis.labels.boxAnchor = 'n'
+##
+##    drawing.add(xAxis)
+##    drawing.add(yAxis)
+##
+##    return drawing
+##
+##
+##def sample2d():
+##    "Make two axes, x connected at fixed value (of y-axes) of y."
+##
+##    drawing = Drawing(400, 200)
+##
+##    data = [(10, 20, 30, 42)]        
+##
+##    yAxis = YValueAxis()
+##    yAxis.setPosition(50, 50, 125)
+##    yAxis.configure(data)
+##
+##    xAxis = XCategoryAxis()
+##    xAxis._length = 300
+##    xAxis.configure(data)
+##    xAxis.joinToAxis(yAxis, mode='fixedValue', value=20)
+##    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+##    xAxis.labels.boxAnchor = 'n'
+##
+##    drawing.add(xAxis)
+##    drawing.add(yAxis)
+##
+##    return drawing
+##
+##
+##def sample3a():
+##    "Make sample drawing with two axes, y connected at left of x."
+##
+##    drawing = Drawing(400, 200)
+##
+##    data = [(10, 20, 30, 42)]        
+##
+##    xAxis = XCategoryAxis()
+##    xAxis._length = 300
+##    xAxis.configure(data)
+##    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+##    xAxis.labels.boxAnchor = 'n'
+##
+##    yAxis = YValueAxis()
+##    yAxis.setPosition(50, 50, 125)
+##    yAxis.configure(data)
+##    yAxis.joinToAxis(xAxis, mode='left')
+##
+##    drawing.add(xAxis)
+##    drawing.add(yAxis)
+##
+##    return drawing
+##
+##
+##def sample3b():
+##    "Make sample drawing with two axes, y connected at right of x."
+##
+##    drawing = Drawing(400, 200)
+##
+##    data = [(10, 20, 30, 42)]        
+##
+##    xAxis = XCategoryAxis()
+##    xAxis._length = 300
+##    xAxis.configure(data)
+##    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+##    xAxis.labels.boxAnchor = 'n'
+##
+##    yAxis = YValueAxis()
+##    yAxis.setPosition(50, 50, 125)
+##    yAxis.configure(data)
+##    yAxis.joinToAxis(xAxis, mode='right')
+##
+##    drawing.add(xAxis)
+##    drawing.add(yAxis)
+##
+##    return drawing
+##
+##
+##def sample3c():
+##    "Make two axes, y connected at fixed value (in points) of x."
+##
+##    drawing = Drawing(400, 200)
+##
+##    data = [(10, 20, 30, 42)]        
+##
+##    yAxis = YValueAxis()
+##    yAxis.setPosition(50, 50, 125)
+##    yAxis.configure(data)
+##
+##    xAxis = XValueAxis()
+##    xAxis._length = 300
+##    xAxis.configure(data)
+##    xAxis.joinToAxis(yAxis, mode='fixedPoints', points=100)
+##
+##    drawing.add(xAxis)
+##    drawing.add(yAxis)
+##
+##    return drawing
 
-    drawing = Drawing(400, 200)
 
-    data = [(10, 20, 30, 42)]        
-
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.configure(data)
-
-    xAxis = XCategoryAxis()
-    xAxis._length = 300
-    xAxis.configure(data)
-    xAxis.joinToAxis(yAxis, mode='top')
-    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
-    xAxis.labels.boxAnchor = 'n'
-
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-
-    return drawing
-
-
-def sample2b():
-    "Make two axes, x connected at bottom of y."
-
-    drawing = Drawing(400, 200)
-
-    data = [(10, 20, 30, 42)]        
-
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.configure(data)
-
-    xAxis = XCategoryAxis()
-    xAxis._length = 300
-    xAxis.configure(data)
-    xAxis.joinToAxis(yAxis, mode='bottom')
-    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
-    xAxis.labels.boxAnchor = 'n'
-
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-
-    return drawing
-
-
-def sample2c():
-    "Make two axes, x connected at fixed value (in points) of y."
-
-    drawing = Drawing(400, 200)
-
-    data = [(10, 20, 30, 42)]        
-
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.configure(data)
-
-    xAxis = XCategoryAxis()
-    xAxis._length = 300
-    xAxis.configure(data)
-    xAxis.joinToAxis(yAxis, mode='fixedPoints', points=100)
-    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
-    xAxis.labels.boxAnchor = 'n'
-
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-
-    return drawing
-
-
-def sample2d():
-    "Make two axes, x connected at fixed value (of y-axes) of y."
-
-    drawing = Drawing(400, 200)
-
-    data = [(10, 20, 30, 42)]        
-
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.configure(data)
-
-    xAxis = XCategoryAxis()
-    xAxis._length = 300
-    xAxis.configure(data)
-    xAxis.joinToAxis(yAxis, mode='fixedValue', value=20)
-    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
-    xAxis.labels.boxAnchor = 'n'
-
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-
-    return drawing
-
-
-def sample3a():
-    "Make sample drawing with two axes, y connected at left of x."
-
-    drawing = Drawing(400, 200)
-
-    data = [(10, 20, 30, 42)]        
-
-    xAxis = XCategoryAxis()
-    xAxis._length = 300
-    xAxis.configure(data)
-    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
-    xAxis.labels.boxAnchor = 'n'
-
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.configure(data)
-    yAxis.joinToAxis(xAxis, mode='left')
-
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-
-    return drawing
-
-
-def sample3b():
-    "Make sample drawing with two axes, y connected at right of x."
-
-    drawing = Drawing(400, 200)
-
-    data = [(10, 20, 30, 42)]        
-
-    xAxis = XCategoryAxis()
-    xAxis._length = 300
-    xAxis.configure(data)
-    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
-    xAxis.labels.boxAnchor = 'n'
-
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.configure(data)
-    yAxis.joinToAxis(xAxis, mode='right')
-
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-
-    return drawing
-
-
-def sample3c():
-    "Make two axes, y connected at fixed value (in points) of x."
+def sample4a():
+    "Sample drawing, xvalue/yvalue axes, y connected at 100 pts to x."
 
     drawing = Drawing(400, 200)
 
@@ -1151,8 +1259,378 @@ def sample3c():
 
     xAxis = XValueAxis()
     xAxis._length = 300
+    xAxis.joinAxis = yAxis
+    xAxis.joinAxisMode = 'points'
+    xAxis.joinAxisPos = 100
     xAxis.configure(data)
-    xAxis.joinToAxis(yAxis, mode='fixedPoints', points=100)
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample4b():
+    "Sample drawing, xvalue/yvalue axes, y connected at value 35 of x."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.configure(data)
+
+    xAxis = XValueAxis()
+    xAxis._length = 300
+    xAxis.joinAxis = yAxis
+    xAxis.joinAxisMode = 'value'
+    xAxis.joinAxisPos = 35
+    xAxis.configure(data)
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample4c():
+    "Sample drawing, xvalue/yvalue axes, y connected to bottom of x."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.configure(data)
+
+    xAxis = XValueAxis()
+    xAxis._length = 300
+    xAxis.joinAxis = yAxis
+    xAxis.joinAxisMode = 'bottom'
+    xAxis.configure(data)
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample4d():
+    "Sample drawing, xvalue/yvalue axes, y connected to top of x."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.configure(data)
+
+    xAxis = XValueAxis()
+    xAxis._length = 300
+    xAxis.joinAxis = yAxis
+    xAxis.joinAxisMode = 'top'
+    xAxis.configure(data)
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample5a():
+    "Sample drawing, xvalue/yvalue axes, y connected at 100 pts to x."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    xAxis = XValueAxis()
+    xAxis.setPosition(50, 50, 300)
+    xAxis.configure(data)
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.joinAxis = xAxis
+    yAxis.joinAxisMode = 'points'
+    yAxis.joinAxisPos = 100
+    yAxis.configure(data)
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample5b():
+    "Sample drawing, xvalue/yvalue axes, y connected at value 35 of x."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    xAxis = XValueAxis()
+    xAxis.setPosition(50, 50, 300)
+    xAxis.configure(data)
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.joinAxis = xAxis
+    yAxis.joinAxisMode = 'value'
+    yAxis.joinAxisPos = 35
+    yAxis.configure(data)
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample5c():
+    "Sample drawing, xvalue/yvalue axes, y connected at right of x."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    xAxis = XValueAxis()
+    xAxis.setPosition(50, 50, 300)
+    xAxis.configure(data)
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.joinAxis = xAxis
+    yAxis.joinAxisMode = 'right'
+    yAxis.configure(data)
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample5d():
+    "Sample drawing, xvalue/yvalue axes, y connected at left of x."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    xAxis = XValueAxis()
+    xAxis.setPosition(50, 50, 300)
+    xAxis.configure(data)
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.joinAxis = xAxis
+    yAxis.joinAxisMode = 'left'
+    yAxis.configure(data)
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample6a():
+    "Sample drawing, xcat/yvalue axes, x connected at top of y."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.configure(data)
+
+    xAxis = XCategoryAxis()
+    xAxis._length = 300
+    xAxis.configure(data)
+    xAxis.joinAxis = yAxis
+    xAxis.joinAxisMode = 'top'
+    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+    xAxis.labels.boxAnchor = 'n'
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample6b():
+    "Sample drawing, xcat/yvalue axes, x connected at bottom of y."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.configure(data)
+
+    xAxis = XCategoryAxis()
+    xAxis._length = 300
+    xAxis.configure(data)
+    xAxis.joinAxis = yAxis
+    xAxis.joinAxisMode = 'bottom'
+    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+    xAxis.labels.boxAnchor = 'n'
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample6c():
+    "Sample drawing, xcat/yvalue axes, x connected at 100 pts to y."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.configure(data)
+
+    xAxis = XCategoryAxis()
+    xAxis._length = 300
+    xAxis.configure(data)
+    xAxis.joinAxis = yAxis
+    xAxis.joinAxisMode = 'points'
+    xAxis.joinAxisPos = 100
+    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+    xAxis.labels.boxAnchor = 'n'
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample6d():
+    "Sample drawing, xcat/yvalue axes, x connected at value 20 of y."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.configure(data)
+
+    xAxis = XCategoryAxis()
+    xAxis._length = 300
+    xAxis.configure(data)
+    xAxis.joinAxis = yAxis
+    xAxis.joinAxisMode = 'value'
+    xAxis.joinAxisPos = 20
+    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+    xAxis.labels.boxAnchor = 'n'
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample7a():
+    "Sample drawing, xvalue/ycat axes, y connected at right of x."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    xAxis = XValueAxis()
+    xAxis._length = 300
+    xAxis.configure(data)
+
+    yAxis = YCategoryAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.joinAxis = xAxis
+    yAxis.joinAxisMode = 'right'
+    yAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+    yAxis.labels.boxAnchor = 'e'
+    yAxis.configure(data)
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample7b():
+    "Sample drawing, xvalue/ycat axes, y connected at left of x."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    xAxis = XValueAxis()
+    xAxis._length = 300
+    xAxis.configure(data)
+
+    yAxis = YCategoryAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.joinAxis = xAxis
+    yAxis.joinAxisMode = 'left'
+    yAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+    yAxis.labels.boxAnchor = 'e'
+    yAxis.configure(data)
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample7c():
+    "Sample drawing, xvalue/ycat axes, y connected at value 30 of x."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    xAxis = XValueAxis()
+    xAxis._length = 300
+    xAxis.configure(data)
+
+    yAxis = YCategoryAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.joinAxis = xAxis
+    yAxis.joinAxisMode = 'value'
+    yAxis.joinAxisPos = 30
+    yAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+    yAxis.labels.boxAnchor = 'e'
+    yAxis.configure(data)
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample7d():
+    "Sample drawing, xvalue/ycat axes, y connected at 200 pts to x."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    xAxis = XValueAxis()
+    xAxis._length = 300
+    xAxis.configure(data)
+
+    yAxis = YCategoryAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.joinAxis = xAxis
+    yAxis.joinAxisMode = 'points'
+    yAxis.joinAxisPos = 200
+    yAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+    yAxis.labels.boxAnchor = 'e'
+    yAxis.configure(data)
 
     drawing.add(xAxis)
     drawing.add(yAxis)
