@@ -143,23 +143,28 @@ try:
     _archivedirpfx = _archivedir + os.sep
     _archivepfxlen = len(_archivepfx)
     _archivedirpfxlen = len(_archivedirpfx)
-    if sys.platform=='win32':
-        def __startswith_rl(fn,_archivepfx=_archivepfx.upper(),_archivedirpfx=_archivedirpfx.upper(),_archive=_archive.upper(),_archivedir=_archivedir.upper(),os_path_normpath=os.path.normpath):
-            '''if the name starts with a known prefix strip it off'''
-            fn = os_path_normpath(fn.replace('/',os.sep))
-            fnu = fn.upper()
-            if fnu in (_archivedir,_archive): return 1,''
-            if fnu.startswith(_archivepfx): return 1,fn[_archivepfxlen:]
-            if fnu.startswith(_archivedirpfx): return 1,fn[_archivedirpfxlen:]
-            return not os.path.isabs(fn),fn
-    else:
-        def __startswith_rl(fn,os_path_normpath=os.path.normpath):
-            '''if the name starts with a known prefix strip it off'''
-            fn = os_path_normpath(fn.replace('/',os.sep))
-            if fn in (_archivedir,_archive): return 1,''
-            if fn.startswith(_archivepfx): return 1,fn[_archivepfxlen:]
-            if fn.startswith(_archivedirpfx): return 1,fn[_archivedirpfxlen:]
-            return not os.path.isabs(fn),fn
+    def __startswith_rl(fn,
+                    _archivepfx=os.path.normcase(_archivepfx),
+                    _archivedirpfx=os.path.normcase(_archivedirpfx),
+                    _archive=os.path.normcase(_archive),
+                    _archivedir=os.path.normcase(_archivedir),
+                    os_path_normpath=os.path.normpath,
+                    os_path_normcase=os.path.normcase,
+                    os_getcwd=os.getcwd,
+                    os_sep=os.sep,
+                    os_sep_len = len(os.sep)):
+        '''if the name starts with a known prefix strip it off'''
+        fn = os_path_normpath(fn.replace('/',os_sep))
+        nfn = os_path_normcase(fn)
+        if nfn in (_archivedir,_archive): return 1,''
+        if nfn.startswith(_archivepfx): return 1,fn[_archivepfxlen:]
+        if nfn.startswith(_archivedirpfx): return 1,fn[_archivedirpfxlen:]
+        cwd = os_path_normcase(os_getcwd())
+        n = len(cwd)
+        if nfn.startswith(cwd):
+            if fn[n:].startswith(os_sep): return 1, fn[n+os_sep_len:]
+            if n==len(fn): return 1,''
+        return not os.path.isabs(fn),fn
 
     def _startswith_rl(fn):
         return __startswith_rl(fn)[1]
