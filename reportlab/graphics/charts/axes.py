@@ -801,8 +801,8 @@ class ValueAxis(_AxisG):
 
         f = self._labelTextFormat       # perhaps someone already set it
         if f is None:
-            f = self.labelTextFormat or (self._allIntTicks() and '%d' or str)
-        elif f is str and self._allIntTicks(): f = '%d'
+            f = self.labelTextFormat or (self._allIntTicks() and '%.0f' or str)
+        elif f is str and self._allIntTicks(): f = '%.0f'
         post = self.labelTextPostFormat
         scl = self.labelTextScale
         pos = [self._x, self._y]
