@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.20  2000/06/23 17:51:22  aaron_watters
+#	/Producer (ReportLab http://www.reportlab.com) in document
+#
 #	Revision 1.19  2000/06/01 09:44:26  rgbecker
 #	SaveToFile: only close the file if we opened it.
 #	Aggregated from types imports to module level.
-#
+#	
 #	Revision 1.18  2000/04/28 17:33:44  andy_robinson
 #	Added font encoding support and changed default encoding to WinAnsi
 #	
@@ -80,7 +83,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.19 2000/06/01 09:44:26 rgbecker Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.20 2000/06/23 17:51:22 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -568,7 +571,7 @@ class PDFInfo(PDFObject):
                 "<</Title (%s)",
                 "/Author (%s)",
                 "/CreationDate (D:%s)",
-                "/Producer (PDFgen)",
+                "/Producer (ReportLab http://www.reportlab.com)",
                 "/Subject (%s)",
                 ">>"
                 ], LINEEND
