@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.8 2001/03/30 17:29:59 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.9 2001/03/30 18:13:51 dinu_gherman Exp $
 
 from gengraphguide import *
 
@@ -774,24 +774,20 @@ Here are a handful of simple widgets available in the module
 <i>signsandsymbols.py</i>:
 """)
 
+from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.widgets import signsandsymbols
+
 d = Drawing(230, 230)
 
 ne = signsandsymbols.NoEntry0()
-ne.x=10
-ne.y=10
-
 ds = signsandsymbols.DangerSign0()
-ds.x=120
-ds.y=10
-
 fd = signsandsymbols.FloppyDisk0()
-fd.x=10
-fd.y=120
-
 ns = signsandsymbols.NoSmoking0()
-ns.x=120
-ns.y=120
+
+ne.x, ne.y = 10, 10
+ds.x, ds.y = 120, 10
+fd.x, fd.y = 10, 120
+ns.x, ns.y = 120, 120
 
 d.add(ne)
 d.add(ds)
@@ -799,6 +795,32 @@ d.add(fd)
 d.add(ns)
 
 draw(d, 'A few samples from signsandsymbols.py')
+
+disc("""
+And this is the code needed to generate them as seen in the drawing above:
+""")
+
+eg("""
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.widgets import signsandsymbols
+
+d = Drawing(230, 230)
+
+ne = signsandsymbols.NoEntry0()
+ds = signsandsymbols.DangerSign0()
+fd = signsandsymbols.FloppyDisk0()
+ns = signsandsymbols.NoSmoking0()
+
+ne.x, ne.y = 10, 10
+ds.x, ds.y = 120, 10
+fd.x, fd.y = 10, 120
+ns.x, ns.y = 120, 120
+
+d.add(ne)
+d.add(ds)
+d.add(fd)
+d.add(ns)
+""")
 
 
 heading2("Compound Widgets")
@@ -1223,10 +1245,32 @@ disc("""Axes are responsible for determining the mapping from data to image
 disc("""This drawing shows two axes, one of each kind, which have been created 
        directly without reference to any chart:""")
 
-# Hack to force a new paragraph before the todo() :-(
-disc("")
 
-todo("add image")
+from reportlab.graphics import shapes
+from reportlab.graphics.charts.axes import XCategoryAxis,YValueAxis 
+
+drawing = Drawing(400, 200)
+
+data = [(10, 20, 30, 40), (15, 22, 37, 42)]        
+
+xAxis = XCategoryAxis()
+xAxis.setPosition(75, 75, 300)
+xAxis.configure(data)
+xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+xAxis.labels.boxAnchor = 'n'
+xAxis.labels[3].dy = -15
+xAxis.labels[3].angle = 30
+xAxis.labels[3].fontName = 'Times-Bold'
+
+yAxis = YValueAxis()
+yAxis.setPosition(50, 50, 125)
+yAxis.configure(data)
+
+drawing.add(xAxis)
+drawing.add(yAxis)
+
+draw(drawing, 'Two isolated axes')
+
 
 disc("Here is the code that created them: ")
 
@@ -1236,13 +1280,12 @@ from reportlab.graphics.charts.axes import XCategoryAxis,YValueAxis
 
 drawing = Drawing(400, 200)
 
-data = [(10, 20, 30, 40),
-        (15, 22, 37, 42)]        
+data = [(10, 20, 30, 40), (15, 22, 37, 42)]        
 
 xAxis = XCategoryAxis()
 xAxis.setPosition(75, 75, 300)
 xAxis.configure(data)
-xAxis.categoryNames = ['Beer','Wine','Meat','Cannelloni']
+xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
 xAxis.labels.boxAnchor = 'n'
 xAxis.labels[3].dy = -15
 xAxis.labels[3].angle = 30
@@ -1442,8 +1485,46 @@ disc("""
 As usual, we will start with an example:
 """)
 
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.charts.barcharts import VerticalBarChart 
+
+drawing = Drawing(400, 200)
+
+data = [
+        (13, 5, 20, 22, 37, 45, 19, 4),
+        (14, 6, 21, 23, 38, 46, 20, 5)
+        ]
+            
+bc = VerticalBarChart()
+bc.x = 50
+bc.y = 50
+bc.height = 125
+bc.width = 300
+bc.data = data
+bc.strokeColor = colors.black
+
+bc.valueAxis.valueMin = 0
+bc.valueAxis.valueMax = 50
+bc.valueAxis.valueStep = 10
+
+bc.categoryAxis.labels.boxAnchor = 'ne'
+bc.categoryAxis.labels.dx = 8
+bc.categoryAxis.labels.dy = -2
+bc.categoryAxis.labels.angle = 30
+bc.categoryAxis.categoryNames = ['Jan-99','Feb-99','Mar-99',
+       'Apr-99','May-99','Jun-99','Jul-99','Aug-99']
+
+drawing.add(bc)
+
+draw(drawing, 'Simple bar chart with two data series')
+
+
 eg("""
     # code to produce the above chart
+
+    from reportlab.graphics.shapes import Drawing
+    from reportlab.graphics.charts.barcharts import VerticalBarChart 
+
     drawing = Drawing(400, 200)
 
     data = [
@@ -1457,28 +1538,27 @@ eg("""
     bc.height = 125
     bc.width = 300
     bc.data = data
-
-    bc.strokeColor = colors.yellow    
+    bc.strokeColor = colors.black
 
     bc.valueAxis.valueMin = 0
-    bc.valueAxis.valueMax = 60
-    bc.valueAxis.valueStep = 15
+    bc.valueAxis.valueMax = 50
+    bc.valueAxis.valueStep = 10
     
     bc.categoryAxis.labels.boxAnchor = 'ne'
     bc.categoryAxis.labels.dx = 8
     bc.categoryAxis.labels.dy = -2
     bc.categoryAxis.labels.angle = 30
-    
     bc.categoryAxis.categoryNames = ['Jan-99','Feb-99','Mar-99',
            'Apr-99','May-99','Jun-99','Jul-99','Aug-99']
+
     drawing.add(bc)
-    
-    return drawing
 """)
 
-disc("""Most of the code above is concerned with setting up the axes and 
-       labels, which we have already covered. Here are the top-level 
-       properties of the $VerticalBarChart$ class:""")
+disc("""
+Most of this code is concerned with setting up the axes and 
+labels, which we have already covered.
+Here are the top-level properties of the $VerticalBarChart$ class:
+""")
 
 disc("")
 
@@ -1540,6 +1620,63 @@ t.setStyle(TableStyle([
             ]))
 getStory().append(t)
 caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - VerticalBarChart properties""")
+
+
+disc("""
+From this table we deduce that adding the following lines to our code
+above should double the spacing between bar groups (the $groupSpacing$
+attribute has a default value of five points) and we should also see
+some tiny space between bars of the same group ($barSpacing$).
+""")
+
+eg("""
+    bc.groupSpacing = 10
+    bc.barSpacing = 2.5
+""")
+
+disc("""
+And, in fact, this is exactly what we can see after adding these
+lines to the code above.
+Notice how the width of the individual bars has changed as well.
+This is because the space added between the bars has to be 'taken'
+from somewhere as the total chart width stays unchanged.
+""")
+
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.charts.barcharts import VerticalBarChart 
+
+drawing = Drawing(400, 200)
+
+data = [
+        (13, 5, 20, 22, 37, 45, 19, 4),
+        (14, 6, 21, 23, 38, 46, 20, 5)
+        ]
+            
+bc = VerticalBarChart()
+bc.x = 50
+bc.y = 50
+bc.height = 125
+bc.width = 300
+bc.data = data
+bc.strokeColor = colors.black
+
+bc.groupSpacing = 10
+bc.barSpacing = 2.5
+
+bc.valueAxis.valueMin = 0
+bc.valueAxis.valueMax = 50
+bc.valueAxis.valueStep = 10
+
+bc.categoryAxis.labels.boxAnchor = 'ne'
+bc.categoryAxis.labels.dx = 8
+bc.categoryAxis.labels.dy = -2
+bc.categoryAxis.labels.angle = 30
+bc.categoryAxis.categoryNames = ['Jan-99','Feb-99','Mar-99',
+       'Apr-99','May-99','Jun-99','Jul-99','Aug-99']
+
+drawing.add(bc)
+
+draw(drawing, 'Like before, but with modified spacing')
 
 
 ##Property Value 
