@@ -1,4 +1,4 @@
-# a Pythonesque Canvas v0.6
+# a Pythonesque Canvas v0.7
 # Author : Jerome Alet - <alet@librelogiciel.com>
 # License : ReportLab's license
 #
@@ -173,8 +173,16 @@ class PDFAction :
             self._postcomment() 
         self._parent._parent._in = self._parent._parent._in + 1 
         retcode = apply(getattr(self._parent._object, self._action), args, kwargs)
-        self._parent._parent._in -= 1
+        self._parent._parent._in = self._parent._parent._in - 1
         return retcode
+        
+    def __str__(self) :
+        """Needed for Python 2.1"""
+        return str(getattr(self._parent._object, self._action))
+    
+    def __coerce__(self, other) :
+        """Needed for Python 2.1"""
+        return coerce(getattr(self._parent._object, self._action), other)
         
     def _precomment(self) : 
         """To be overriden."""
@@ -237,7 +245,7 @@ class Canvas :
                 self._parent._PyWrite("\n    # Saves context level %i %s" % (self._parent._contextlevel, state))
                 self._parent._contextlevel = self._parent._contextlevel + 1
             elif self._action == "restoreState" :    
-                self._parent._contextlevel -= 1
+                self._parent._contextlevel = self._parent._contextlevel - 1
                 self._parent._PyWrite("\n    # Restores context level %i %s" % (self._parent._contextlevel, self._parent._object.state_stack[-1]))
             elif self._action == "beginForm" :    
                 self._parent._formnumber = self._parent._formnumber + 1
@@ -252,7 +260,7 @@ class Canvas :
             if self._action == "showPage" :
                 self._parent._pagenumber = self._parent._pagenumber + 1
                 self._parent._PyWrite("\n    # Begins page %i" % self._parent._pagenumber)
-            elif self._action == "endForm" :    
+            elif self._action in [ "endForm", "drawPath", "clipPath" ] :    
                 self._parent._PyWrite("")
 
     _name = "c"
