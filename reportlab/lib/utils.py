@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.80 2004/05/28 14:04:25 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.80 2004/05/28 14:04:25 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.81 2004/06/03 11:26:44 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.81 2004/06/03 11:26:44 rgbecker Exp $ '''
 
 import string, os, sys, imp
 from types import *
@@ -429,29 +429,26 @@ def open_for_read_by_name(name,mode='b'):
     try:
         return open(name,mode)
     except IOError:
-        t, v = sys.exc_info()[:2]
         if _isFSD or __loader__ is None: raise
-        try:
-            #we have a __loader__, perhaps the filename starts with
-            #the dirname(reportlab.__file__) or is relative
-            name = _startswith_rl(name)
-            s = __loader__.get_data(name)
-            if 'b' not in mode and os.linesep!='\n': s = s.replace(os.linesep,'\n')
-            return getStringIO(s)
-        except:
-            raise t, v
+        #we have a __loader__, perhaps the filename starts with
+        #the dirname(reportlab.__file__) or is relative
+        name = _startswith_rl(name)
+        s = __loader__.get_data(name)
+        if 'b' not in mode and os.linesep!='\n': s = s.replace(os.linesep,'\n')
+        return getStringIO(s)
 
-import urllib, urlparse
-def open_for_read(name,mode='b', urlparse=urlparse.urlparse, urlopen=urllib.urlopen):
+import urllib
+def open_for_read(name,mode='b', urlopen=urllib.urlopen):
     '''attempt to open a file or URL for reading'''
     if hasattr(name,'read'): return name
     try:
-        P = urlparse(name)
-        if not P[0] or P[0]=='file': raise ValueError
-        return getStringIO(urlopen(name).read())
+        return open_for_read_by_name(name,mode)
     except:
-        return open_for_read_by_name(P[2],mode)
-del urllib, urlparse
+        try:
+            return getStringIO(urlopen(name).read())
+        except:
+            raise IOError('Cannot open resource "%s"' % name)
+del urllib
 
 def open_and_read(name,mode='b'):
     return open_for_read(name,mode).read()
