@@ -1,18 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.3 2001/03/26 20:16:35 johnprecedo Exp $
+#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.4 2001/03/27 15:57:13 johnprecedo Exp $
 from genuserguide import *
-
-##heading1("Writing your own $Flowable$ Objects")
-##disc("""
-##
-##""")
-##
-##heading2("")
-##
-##disc("""
-##""")
 
 heading1("Platform Independent Graphics using $reportlab/graphics$")
 
@@ -128,6 +118,17 @@ eg("""
 
 disc("This will produce a PDF file containing the following graphic: ")
 
+##    from reportlab.lib import colors
+##    from reportlab.graphics.shapes import * 
+## 
+##    D = Drawing(400, 200)
+##    D.add(Rect(50, 50, 300, 100, fillColor=colors.yellow))
+##    D.add(String(150,100, 'Hello World',
+##                 fontSize=18, fillColor=colors.red))
+## 
+##    from reportlab.graphics import renderPDF 
+##    renderPDF.drawToFile(D, 'example1.pdf', 'My First Drawing') 
+
  
 disc("""The Y coordinate counts from the bottom up. This is correct for PDF 
        and Postscript, and appears to be natural for people, especially when 
@@ -138,9 +139,13 @@ disc("""Each renderer is allowed to do whatever is appropriate for its format,
        usually has a $drawToFile$ function, and that's all you need to know 
        about the renderer. Let's save this file as Encapsulated Postscript: """)
 
+##eg("""
+##    from reportlab.graphics import renderPS 
+##    renderPS.drawToFile(D, 'example1.eps', 'My First Drawing') 
+##""")
 eg("""
     from reportlab.graphics import renderPS 
-    renderPS.drawToFile(D, 'example1.eps', 'My First Drawing') 
+    renderPS.drawToFile(D, 'example1.eps') 
 """)
 
 disc("""This will produce an EPS file with the identical drawing, which may be 
@@ -148,7 +153,7 @@ disc("""This will produce an EPS file with the identical drawing, which may be
 
 heading2("""Shapes """)
 
-disc("""Drawings are made up of $Shapes$. Absolutely anything can be built up by 
+disc("""Drawings are made up of Shapes. Absolutely anything can be built up by 
        combining the same set of primitive shapes.""")
 
 disc("""The module $shapes.py$ supplies a number of primitive shapes and 
@@ -162,8 +167,9 @@ bullet("Polygon ")
 bullet("Line ")
 bullet("PolyLine ")
 bullet("String ")
-bullet("Path ")
 bullet("Group ")
+bullet("Path (<i>not implemented yet, but will be added in the future</i>)")
+
 
 disc("This drawing, taken from our test suite, shows most of the basic shapes. : ")
 
@@ -297,39 +303,46 @@ eg("""
 """)
 
 heading3("""Paths """)
-disc("""Postscript paths are a widely understood concept in graphics. A Path 
-       is a way of defining a region in space. You put an imaginary pen down, 
-       draw straight and curved segments, and even pick the pen up and move 
-       it. At the end of this you have described a region, which may consist 
-       of several distinct close shapes or unclosed lines. At the end, this 
-       'path' is 'stroked and filled' according to its properties. A Path has 
-       the same style properties as a solid shape. It can be used to create 
-       any irregular shape.""")
+disc("""Postscript paths are a widely understood concept in graphics.
+There are not implement in $reportlab\graphics$ as yet, but they will be
+soon.""")
 
-disc("""In Postscript-based imaging models such as PDF, Postscript and SVG, 
-       everything is done with paths. All the specific shapes covered above 
-       are instances of paths; even text strings (which are shapes in which 
-       each character is an outline to be filled). Here we begin creating a 
-       path with a straight line and a bezier curve:""")
+# NB This commented out section is for 'future compatibility' - paths haven't
+#    been implemented yet, but when they are we can uncomment this back in.
 
-eg("""
->>> P = Path(0,0, strokeWidth=3, strokeColor=red) 
->>> P.lineTo(0, 50) 
->>> P.curveTo(10,50,80,80,100,30) 
->>> 
-""")
+    ##disc("""Postscript paths are a widely understood concept in graphics. A Path 
+    ##       is a way of defining a region in space. You put an imaginary pen down, 
+    ##       draw straight and curved segments, and even pick the pen up and move 
+    ##       it. At the end of this you have described a region, which may consist 
+    ##       of several distinct close shapes or unclosed lines. At the end, this 
+    ##       'path' is 'stroked and filled' according to its properties. A Path has 
+    ##       the same style properties as a solid shape. It can be used to create 
+    ##       any irregular shape.""")
+    ##
+    ##disc("""In Postscript-based imaging models such as PDF, Postscript and SVG, 
+    ##       everything is done with paths. All the specific shapes covered above 
+    ##       are instances of paths; even text strings (which are shapes in which 
+    ##       each character is an outline to be filled). Here we begin creating a 
+    ##       path with a straight line and a bezier curve:""")
+    ##
+    ##eg("""
+    ##>>> P = Path(0,0, strokeWidth=3, strokeColor=red) 
+    ##>>> P.lineTo(0, 50) 
+    ##>>> P.curveTo(10,50,80,80,100,30) 
+    ##>>> 
+    ##""")
 
-disc("""As well as being the only way to draw complex shapes, paths offer some 
-       performance advantages in renderers which support them. If you want to 
-       create a scatter plot with 5000 blue circles of different sizes, you 
-       can create 5000 circles, or one path object. With the latter, you only 
-       need to set the color and line width once. PINGO just remembers the 
-       drawing sequence, and writes it out into the file. In renderers which 
-       do not support paths, the renderer will still have to decompose it 
-       into 5000 circles so you won't save anything.""")
-
-disc("""Note that our current path implementation is an approximation; it 
-       should be finished off accurately for PDF and PS.""")
+    ##disc("""As well as being the only way to draw complex shapes, paths offer some 
+    ##       performance advantages in renderers which support them. If you want to 
+    ##       create a scatter plot with 5000 blue circles of different sizes, you 
+    ##       can create 5000 circles, or one path object. With the latter, you only 
+    ##       need to set the color and line width once. PINGO just remembers the 
+    ##       drawing sequence, and writes it out into the file. In renderers which 
+    ##       do not support paths, the renderer will still have to decompose it 
+    ##       into 5000 circles so you won't save anything.""")
+    ##
+    ##disc("""<b>Note that our current path implementation is an approximation; it 
+    ##         should be finished off accurately for PDF and PS.</b>""")
 
 heading3("2.5 Groups")
 disc("""Finally, we have Group objects. A group has a list of contents, which 
@@ -422,6 +435,7 @@ Traceback (innermost last):
   File "<interactive input>", line 1, in ? 
   File "C:\code\users\andy\graphics\shapes.py", line 190, in __setattr__ 
     raise AttributeError, "Illegal attribute '%s' in class %s" %\
+    
       (attr, self.__class__.__name__) 
 AttributeError: Illegal attribute 'fullColor' in class Rect 
 >>>  
@@ -445,9 +459,9 @@ disc("""Currently the penalty seems to be about 25% on batches of charts, so
        shrink to almost nothing and the saving from verification would be 
        significant.""")
 
-disc("""Each object, including the drawing itself, has a verify() method. This 
+disc("""Each object, including the drawing itself, has a $verify()$ method. This 
        either succeeds, or raises an exception. If you turn off automatic 
-       verification, then you shoudl explictly call verify() in testing when 
+       verification, then you shoudl explictly call $verify()$ in testing when 
        developing the code, or perhaps once in a batch process.""")
 
 heading3("""Property Editing """)
@@ -464,8 +478,8 @@ disc("""Another goal is to be able to create GUIs and config files for
        properties of all the components in a chart, and be merged with a 
        database query to make a batch of charts.""")
 
-disc("""To support these applications we have two interfaces, getProperties 
-       and setProperties, as well as a convenience method dumpProperties. The 
+disc("""To support these applications we have two interfaces, $getProperties$ 
+       and $setProperties$, as well as a convenience method $dumpProperties$. The 
        first returns a dictionary of the editable properties of an object; 
        the second sets them en masse. If an object has publicly exposed 
        'children' then one can recursively set and get their properties too. 
@@ -505,13 +519,15 @@ width = 200
 x = 20 
 y = 30 
 >>>  """)
+disc("""<i>($pprint$ is the standard Python library module that allows you to 'pretty print' output
+over multiple lines rather than having one very long line.)</i>""")
 
 disc("""These three methods don't seem to do much here, but as we will see 
        they make our widgets framework much more powerful when dealing with 
        non-primitive objects.""")
 
 heading3("Naming Children")
-disc("""You can add objects to the Drawing and Group objects. These normally 
+disc("""You can add objects to the $Drawing$ and $Group$ objects. These normally 
        go into a list of contents. However, you may also give objects a name 
        when adding them. This allows you to refer to and possibly change any 
        element of a drawing after constructing it.""")
@@ -553,13 +569,13 @@ disc("""The Widget standard is a standard built on top of the shapes module.
 
 bullet("A widget is a reusable shape ")
 bullet("""it can be initialized with no arguments 
-       when its draw() method is called it creates a primitive Shape or a 
+       when its $draw()$ method is called it creates a primitive Shape or a 
        Group to represent itself""")
 bullet("""It can have any parameters you want, and they can drive the way it is 
        drawn""")
-bullet("""it has a demo() method which should return an attractively drawn 
+bullet("""it has a $demo()$ method which should return an attractively drawn 
        example if itself in a 200x100 rectangle. This is the cornerstone of 
-       the automatic documentation tools. The demo() method should also have 
+       the automatic documentation tools. The $demo()$ method should also have 
        a well written docstring, since that is printed too!""")
 
 disc("""Widgets run contrary to the idea that a drawing is just a bundle of 
@@ -576,14 +592,22 @@ disc("""Let's imagine a simple new widget. We will use a widget to draw a
        face, then show how it was implemented.""")
 
 eg("""
->>> import renderPDF
+>>> import reportlab.lib.colors 
+>>> import reportlab.graphics.shapes 
+>>> import reportlab.graphics.renderPDF
 >>> d = shapes.Drawing(400, 200)
->>> f = widgets.Face()
+>>> f = widgetbase.Face()
 >>> f.skinColor = colors.yellow
 >>> f.mood = "sad"
 >>> d.add(f)
 >>> renderPDF.drawToFile(d, 'face.pdf', 'A Face')""")
 
+
+##d = shapes.Drawing(400, 200)
+##f = widgetbase.Face()
+##f.skinColor = colors.yellow
+##f.mood = "sad"
+##d.add(f)
 
 disc("""Let's see what properties it has available, using the setProperties 
        interface we saw earlier:""")
@@ -606,14 +630,14 @@ disc("""One thing which seems strange about the above code is that we did not
        window, and you move or resize them by setting properties such as
        x, y, width and so on after creation.""")
 
-disc("""In addition, a widget always provides a demo() method. Simple ones 
+disc("""In addition, a widget always provides a $demo()$ method. Simple ones 
        like this always do something sensible before setting properties, but 
        more complex ones like a chart would not have any data to plot. The 
-       documentation tool calls demo() so that your fancy new chart class can 
+       documentation tool calls $demo()$ so that your fancy new chart class can 
        create a drawing showing what it can do.""")
 
 disc("""Here are a handful of simple widgets available in the module 
-       signsandsymbols.py:""")
+       <i>signsandsymbols.py</i>:""")
 
 
 
@@ -622,7 +646,7 @@ disc("""Let's imagine a compound widget which draws two faces side by side.
        This is easy to build when you have the Face widget.""")
 
 eg("""
->>> tf = widgets.TwoFaces() 
+>>> tf = widgetbase.TwoFaces() 
 >>> tf.faceOne.mood 
 'happy' 
 >>> tf.faceTwo.mood 
@@ -682,7 +706,7 @@ class Face(Widget):
 """)
 
 disc("""We left out all the code to draw the shapes in this document, but you 
-       can find it in the distribution in widgets.py.""")
+       can find it in the distribution in $widgetbase.py$.""")
 
 disc("""By default, any attribute without a leading underscore is returned by 
        setProperties. This is a deliberate policy to encourage consistent 
@@ -690,9 +714,9 @@ disc("""By default, any attribute without a leading underscore is returned by
 
 disc("""Once your widget works, you probably want to add support for 
        verification. This involves adding a dictionary to the class called 
-       _verifyMap, which map from attribute names to 'checking functions'. 
-       The widgets.py module defines a bunch of checking functions with names 
-       like isNumber, isLIstOfShapes and so on. You can also simply use None, 
+       $_verifyMap$, which map from attribute names to 'checking functions'. 
+       The $widgets.py$ module defines a bunch of checking functions with names 
+       like $isNumber$, $isLIstOfShapes$ and so on. You can also simply use $None$, 
        which means that the attribute must be present but can have any type. 
        And you can and should write your own checking functions. We want to 
        restrict the "mood" custom attribute to the values "happy", "sad" or 
@@ -716,7 +740,7 @@ class Face(Widget):
 """)
 
 disc("""This checking will be performed on every attribute assignment; or, if 
-       config.shapeChecking is off, whenever you call myFace.verify().""")
+       $config.shapeChecking$ is off, whenever you call $myFace.verify()$.""")
 
 
 heading3("""Documenting Widgets """)
@@ -734,20 +758,15 @@ disc("""This tool will mean that we can have guaranteed up-to-date
        documentation on our widgets and chart, both on the web site and in 
        print; and that you can do the same for your own widgets too!""")
 
-disc("""In case this sounds like vapor, you can look at this PDF document 
-       (135kb) from a preliminary version of the tool developed as part of 
-       the PINGO project.""")
-
-
 heading3("""Widget Design Strategies """)
 disc("""We could not come up with a consistent architecture for designing 
        widgets, so we are leaving that problem to the authors! If you do not 
        like the default verifiction strategy, or the way 
-       setProperties/getProperties works, you can override them yourself.""")
+       $setProperties/getProperties$ works, you can override them yourself.""")
 
 disc("""For simple widgets it is recommended that you do what we did above: 
        select non-overlapping properties, initialize every property on 
-       __init__and construct everything when draw() is called. You can 
+       __init__and construct everything when $draw()$ is called. You can 
        instead have __setattr__ hooks and have things updated when certain 
        attributes are set. Consider a pie chart. If you want to expose the 
        individual wedges, you might write code like this:""")
@@ -759,6 +778,8 @@ pc.defaultColors = [navy, blue, sky] #used in rotation
 pc.data = [10,30,50,25] 
 pc.wedges[7].lineWidth = 5 
 """)
+
+todo("We need more of an explainatiuon of what $__setattr__$ hooks' are")
 
 disc("""The last line is problematic as we have only created four wedges - in 
        fact we might not have created them yet. Does pc.wedges[7] raise an 
