@@ -58,7 +58,7 @@ Recently added features are:
 - add pyRXP support (TODO)
 """
 
-import os, sys, imp, string, pprint, getopt, glob
+import os, sys, imp, string, pprint, getopt, glob, cStringIO
 
 from reportlab import rl_config
 from reportlab.lib import styles
@@ -328,11 +328,14 @@ class PPPresentation:
         if self.verbose:
             print 'saving presentation...'
         pageSize = (self.pageWidth, self.pageHeight)
-        filename = os.path.splitext(self.sourceFilename)[0] + '.pdf'
+        if self.sourceFilename:
+            filename = os.path.splitext(self.sourceFilename)[0] + '.pdf'
         if self.outDir: filename = os.path.join(self.outDir,os.path.basename(filename))
         if self.verbose:
             print filename
-        canv = canvas.Canvas(filename, pagesize = pageSize)
+        #canv = canvas.Canvas(filename, pagesize = pageSize)
+        outfile = cStringIO.StringIO()
+        canv = canvas.Canvas(outfile, pagesize = pageSize)
         canv.setPageCompression(self.compression)
 
         if self.title:
@@ -361,6 +364,7 @@ class PPPresentation:
             canv.showOutline()
 
         canv.save()
+        return self.savetofile(outfile, filename)
 
 
     def saveAsHandout(self):
@@ -370,9 +374,11 @@ class PPPresentation:
         h1 = styleSheet['Heading1']
         bt = styleSheet['BodyText']
 
-        filename = os.path.splitext(self.sourceFilename)[0] + '.pdf'
-        doc = SimpleDocTemplate(filename, pagesize=rl_config.defaultPageSize, showBoundary=0)
-
+        if self.sourceFilename :
+            filename = os.path.splitext(self.sourceFilename)[0] + '.pdf'
+        
+        outfile = cStringIO.StringIO()
+        doc = SimpleDocTemplate(outfile, pagesize=rl_config.defaultPageSize, showBoundary=0)
         doc.leftMargin = 1*cm
         doc.rightMargin = 1*cm
         doc.topMargin = 2*cm
@@ -389,15 +395,29 @@ class PPPresentation:
 ##            doc.canv.showOutline()
 
         doc.build(story)
+        return self.savetofile(outfile, filename)
+
+    def savetofile(self, pseudofile, filename):
+        """Save the pseudo file to disk and return its content as a 
+        string of text."""
+        pseudofile.flush()
+        content = pseudofile.getvalue()
+        pseudofile.close()
+        if filename :
+            outf = open(filename, "wb")
+            outf.write(content)
+            outf.close()
+        return content
+ 
 
 
     def save(self):
         "Save the PDF document."
 
         if self.handout:
-            self.saveAsHandout()
+            return self.saveAsHandout()
         else:
-            self.saveAsPresentation()
+            return self.saveAsPresentation()
 
 
 #class PPSection:
@@ -887,9 +907,17 @@ def setStyles(newStyleSheet):
 def process(datafilename, notes=0, handout=0, cols=0, verbose=0, outDir=None):
     "Process one PythonPoint source file."
     from reportlab.tools.pythonpoint.stdparser import PPMLParser
+
     parser = PPMLParser()
+    if not hasattr(datafilename, "read") :
+        datafile = open(datafilename)
+    else :
+        datafile = datafilename
+        datafilename = "PseudoFile"
+    rawdata = datafile.read()
+
+
     parser.sourceFilename = datafilename
-    rawdata = open(datafilename).read()
     parser.feed(rawdata)
     pres = parser.getPresentation()
     pres.sourceFilename = datafilename
@@ -900,13 +928,13 @@ def process(datafilename, notes=0, handout=0, cols=0, verbose=0, outDir=None):
     pres.verbose = verbose
 
     #this does all the work
-    pres.save()
+    pdfcontent = pres.save()
 
     if verbose:
         print 'saved presentation %s.pdf' % os.path.splitext(datafilename)[0]
     parser.close()
 
-
+    return pdfcontent
 ##class P:
 ##    def feed(self, text):
 ##        parser = stdparser.PPMLParser()
