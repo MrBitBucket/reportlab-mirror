@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/cidfonts?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: cidfonts.py,v 1.8 2001/10/21 17:05:01 andy_robinson Exp $ '''
+__version__=''' $Id: cidfonts.py,v 1.9 2001/10/21 23:48:15 andy_robinson Exp $ '''
 __doc__="""CID (Asian multi-byte) font support.
 
 This defines classes to represent CID fonts.  They know how to calculate
@@ -64,15 +64,17 @@ class CIDEncoding(pdfmetrics.Encoding):
         self._codeSpaceRanges = []
         self._notDefRanges = []
         self._cmap = {}
-
+        self.source = None
         fontmapdir = os.path.join(
                 os.path.dirname(reportlab.__file__),
                 'fonts')
         if useCache:
             if os.path.isfile(fontmapdir + os.sep + name + '.fastmap'):
                 self.fastLoad(fontmapdir)
+                self.source = fontmapdir + os.sep + name + '.fastmap'
             else:
                 self.parseCMAPFile(name)
+                self.source = 'CMAP: ' + name
                 self.fastSave(fontmapdir)
         else:
             self.parseCMAPFile(name)
@@ -305,7 +307,7 @@ class CIDFont(pdfmetrics.Font):
 
 
     def addObjects(self, doc):
-        """The explicit code in addMichoObjects and addGothicObjects
+        """The explicit code in addMinchoObjects and addGothicObjects
         will be replaced by something that pulls the data from
         _cidfontdata.py in the next few days."""
         internalName = 'F' + repr(len(doc.fontMapping)+1)

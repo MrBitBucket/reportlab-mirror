@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/Attic/test_japanese.py,v 1.10 2001/10/06 20:45:06 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/Attic/test_japanese.py,v 1.11 2001/10/21 23:48:15 andy_robinson Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -16,7 +16,7 @@ from reportlab.test import unittest
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import colors
-
+from reportlab.lib.codecharts import KutenRowCodeChart
 global VERBOSE
 VERBOSE = 0
 
@@ -149,31 +149,44 @@ Reader\x82\xc5\x82\xe0\x8aJ\x82\xad\x82\xb1\x82\xc6\x82\xaa\x82\xc5\x82\xab\x82\
         tx.textLines(sample)
         c.drawText(tx)
         c.showPage()
+        # full kuten chart in EUC
+        c.setFont('Helvetica', 24)
+        c.drawString(72,750, 'Characters available in JIS 0208-1997')
+        y = 600
+        for row in range(1, 95):
+            KutenRowCodeChart(row, 'HeiseiMin-W3','EUC-H').drawOn(c, 72, y)
+            y = y - 125
+            if y < 50:
+                c.showPage()
+                y = 700
+        
+
+        
         # kuten table.  Much of the character set is based on a 94x94 grid
         # which is encoded through various transformations.
-        c.setFont('Helvetica', 24)
-        c.drawString(100,700, 'Characters available in JIS 0208-1997')
-        tx = c.beginText(100, 650)
-        tx.setFont('Helvetica',12)
-        tx.textLines("""This shows a 94x94 block of glyphs constructed
-        programmatically.  The double-byte characters in the JIS 0208
-        standard are all defined within this space.  Depending on the
-        exact encoding used, certain extra vendor specific characters
-        may be present.  See the CJKV book for details.
-            """)
-        c.drawText(tx)        
-        c.setFont('HeiseiMin-W3-EUC-H',4.2)
-        x0 = 100
-        y0 = 500
-        dx = 4.5
-        dy = 4
-        for row in range(94):
-            y = y0 - row*dy
-            c.drawString(50, y, str(row))
-            for cell in range(94):
-                s = chr(row+161) + chr(cell+161)
-                x = x0 + cell*dx
-                c.drawString(x,y,s)
+##        c.setFont('Helvetica', 24)
+##        c.drawString(100,700, 'Characters available in JIS 0208-1997')
+##        tx = c.beginText(100, 650)
+##        tx.setFont('Helvetica',12)
+##        tx.textLines("""This shows a 94x94 block of glyphs constructed
+##        programmatically.  The double-byte characters in the JIS 0208
+##        standard are all defined within this space.  Depending on the
+##        exact encoding used, certain extra vendor specific characters
+##        may be present.  See the CJKV book for details.
+##            """)
+##        c.drawText(tx)        
+##        c.setFont('HeiseiMin-W3-EUC-H',4.2)
+##        x0 = 100
+##        y0 = 500
+##        dx = 4.5
+##        dy = 4
+##        for row in range(94):
+##            y = y0 - row*dy
+##            c.drawString(50, y, str(row))
+##            for cell in range(94):
+##                s = chr(row+161) + chr(cell+161)
+##                x = x0 + cell*dx
+##                c.drawString(x,y,s)
         c.save()
         
 

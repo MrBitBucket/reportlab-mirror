@@ -73,7 +73,7 @@ class CodeChartBase(Flowable):
                 row = row + 1
                 col = 0
 
-    def drawLabels(self):
+    def drawLabels(self, topLeft = ''):
         """Writes little labels in the top row and first column"""
         self.canv.setFillGray(0.8)
         self.canv.rect(0, self.ylist[-2], self.width, self.boxSize, fill=1, stroke=0)
@@ -95,7 +95,13 @@ class CodeChartBase(Flowable):
                                         self.formatByte(col)
                                         )
 
-
+        if topLeft:
+            self.canv.setFont('Helvetica-BoldOblique',0.5 * self.boxSize)
+            self.canv.drawCentredString(0.5 * self.boxSize,
+                                        (self.rows + 0.25) * self.boxSize,
+                                        'R' + topLeft
+                                        )
+            
 class SingleByteEncodingChart(CodeChartBase):
     def __init__(self, faceName='Helvetica', encodingName='WinAnsiEncoding',
                  charsPerRow=16, boxSize=14, hex=1):
@@ -165,7 +171,7 @@ class KutenRowCodeChart(CodeChartBase):
         return cells
                 
     def draw(self):
-        self.drawLabels()
+        self.drawLabels(topLeft=str(self.row))
 
         # work out which characters we need for the row
         assert string.find(self.encodingName, 'EUC') > -1, 'Only handles EUC encoding today!'
