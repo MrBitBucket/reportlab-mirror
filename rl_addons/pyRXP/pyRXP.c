@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.16 2003/03/13 16:03:08 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.17 2003/03/13 16:14:58 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.16 2003/03/13 16:03:08 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.17 2003/03/13 16:14:58 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -97,7 +97,9 @@ The python module exports the following\n\
         fourth  argument should be None (default) or a callable method with\n\
             no arguments. If callable, will be called to get or generate the\n\
             4th item of every 4-item tuple or list in the returned tree.\n\
-            May also be the special value pyRXP.recordLocation\n\
+            May also be the special value pyRXP.recordLocation in which\n\
+            case the 4th item is set to the tuple\n\
+            ((startsrc,startline,startchar),(endsrc,endline,endchar)).\n\
 \n\
         Flag attributes corresponding to the rxp flags;\n\
             the values are the module standard defaults.\n\
