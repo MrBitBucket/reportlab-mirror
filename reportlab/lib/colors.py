@@ -1,8 +1,9 @@
+
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.15 2001/02/16 10:41:20 dinu_gherman Exp $
-__version__=''' $Id: colors.py,v 1.15 2001/02/16 10:41:20 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.16 2001/03/12 22:44:13 andy_robinson Exp $
+__version__=''' $Id: colors.py,v 1.16 2001/03/12 22:44:13 andy_robinson Exp $ '''
 
 import string
 import math
@@ -30,6 +31,58 @@ class Color:
 		if dsum > 0: return 1
 		if dsum < 0: return -1
 		return 0
+
+class CMYKColor(Color):
+	"""This represents colors using the CMYK (cyan, magenta, yellow, black)
+	model commonly used in professional printing.  This is implemented
+	as a derived class so that renderers which only know about RGB "see it"
+	as an RGB color through its 'red','green' and 'blue' attributes, according
+	to an approximate function.
+
+	The RGB approximation is worked out when the object in constructed, so
+	the color attributes should not be changed afterwards.
+
+	Extra attributes may be attached to the class to support specific ink models,
+	and renderers may look for these."""
+
+	def __init__(self, cyan=0, magenta=0, yellow=0, black=0):
+		"Initialize with four colors in range [0-1]."
+		self.cyan = cyan
+		self.magenta = magenta
+		self.yellow = yellow
+		self.black = black
+
+		# now work out the RGB approximation.  You could override
+		# this if you want
+		
+		self.red, self.green, self.blue = cmyk2rgb( (cyan, magenta, yellow, black) )
+
+	def __repr__(self):
+		return "CMYKColor(%1.2f,%1.2f,%1.2f,%1.2f)" % (
+			self.cyan, self.magenta, self.yellow, self.black)
+
+	def __hash__(self):
+		return hash( (self.cyan, self.magenta, self.yellow, self.black) )
+
+	def __cmp__(self,other):
+		"""Partial ordering of colors according to a notion of distance.
+
+		Comparing across the two color models is of limited use."""
+		# why the try-except?  What can go wrong?
+		if isinstance(other, CMYKColor):
+			dsum = (8 * self.cyan - 8 * other.cyan
+					+ 4 * self.magenta - 4 * other.magenta
+					+ 2 * self.yellow - 2 * other.yellow
+					+ self.black - other.black)
+		else:  # do the RGB comparison
+			try:
+				dsum = 4*self.red-4*other.red + 2*self.green-2*other.green + self.blue-other.blue
+			except: # or just return 'not equal' if not a color
+				return -1
+		if dsum > 0: return 1
+		if dsum < 0: return -1
+		return 0
+	
 
 def cmyk2rgb(cmyktuple):
 	"Convert from a CMYK color tuple to an RGB color tuple"

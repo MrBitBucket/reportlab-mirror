@@ -81,8 +81,29 @@ class ColorTestCase(unittest.TestCase):
             deltas = map(abs, (r1-r2, g1-g2, b1-b2))
             assert deltas < [math.pow(10, -N)] * 3
 
-
     def test5(self):
+        "Construct CMYK instances and test round trip conversion"
+
+        #rgbCols = colors.getAllNamedColors()
+        # del rgbCols['transparent'] - not needed, already deleted
+        rgbCols = colors.getAllNamedColors().items()
+        
+        # Make a roundtrip test (RGB > CMYK > RGB).
+        for name, rgbCol in rgbCols:
+            r1, g1, b1 = rgbCol.red, rgbCol.green, rgbCol.blue
+            c, m, y, k = colors.rgb2cmyk(r1, g1, b1)
+            cmykCol = colors.CMYKColor(c,m,y,k)
+            r2, g2, b2 = cmykCol.red, cmykCol.green, cmykCol.blue #colors.cmyk2rgb((c, m, y, k))
+            rgbCol2 = colors.Color(r2, g2, b2)
+            
+            # Make sure the differences for each RGB component
+            # isreally small (< power(10, -N)!
+            N = 16 # max. value found to work on Python2.0 and Win2K.
+            deltas = map(abs, (r1-r2, g1-g2, b1-b2))
+            assert deltas < [math.pow(10, -N)] * 3
+
+
+    def test6(self):
         "List and display all named colors and their gray equivalents."
         
         canvas = reportlab.pdfgen.canvas.Canvas('test_lib_colors.pdf')
@@ -120,6 +141,7 @@ def makeSuite():
     suite.addTest(ColorTestCase('test3'))
     suite.addTest(ColorTestCase('test4'))
     suite.addTest(ColorTestCase('test5'))
+    suite.addTest(ColorTestCase('test6'))
 
     return suite
 
