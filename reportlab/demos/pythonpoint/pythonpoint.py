@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/pythonpoint.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.32 2001/04/10 21:33:42 andy_robinson Exp $
-__version__=''' $Id: pythonpoint.py,v 1.32 2001/04/10 21:33:42 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.33 2001/07/25 06:46:59 dinu_gherman Exp $
+__version__=''' $Id: pythonpoint.py,v 1.33 2001/07/25 06:46:59 dinu_gherman Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -58,9 +58,10 @@ from reportlab.platypus import Preformatted, Paragraph, Frame, Image, \
      Table, TableStyle, Spacer
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib import styles
-import stdparser 
-from reportlab.rl_config import defaultPageSize
 from reportlab.lib import colors
+from reportlab.rl_config import defaultPageSize
+import stdparser 
+
 
 class PPPresentation:
     def __init__(self):
@@ -153,8 +154,6 @@ class PPSlide:
             canv.bookmarkPage(tag)
             canv.addOutlineEntry(tag, tag, self.outlineLevel)
             
-            
-        
         if self.section:
             self.section.drawOn(canv)
                 
@@ -163,6 +162,7 @@ class PPSlide:
             
         for frame in self.frames:
             frame.drawOn(canv)
+
 
 class PPFrame:
     def __init__(self, x, y, width, height):
@@ -189,6 +189,7 @@ class PPFrame:
             story.append(thingy.getFlowable())
         #draw it
         frame.addFromList(story,canv)
+
  
 class PPPara:
     """This is a placeholder for a paragraph."""
@@ -204,6 +205,7 @@ class PPPara:
                     )
         return p
 
+
 class PPPreformattedText:
     """Use this for source code, or stuff you do not want to wrap"""
     def __init__(self):
@@ -212,6 +214,7 @@ class PPPreformattedText:
 
     def getFlowable(self):
         return Preformatted(self.rawtext, getStyles()[self.style])
+
 
 class PPImage:
     """Flowing image within the text"""
@@ -222,6 +225,7 @@ class PPImage:
 
     def getFlowable(self):
         return Image(self.filename, self.width, self.height)
+
 
 class PPTable:
     """Designed for bulk loading of data for use in presentations."""
@@ -262,7 +266,6 @@ class PPTable:
         if not self.heights:
             self.heights = [None] * len(self.data)
         
-    
 ##        import pprint
 ##        print 'table data:'
 ##        print 'style=',self.style
@@ -272,12 +275,14 @@ class PPTable:
 ##        print 'rowDelim=',repr(self.rowDelim)
 ##        pprint.pprint(self.data)
 
+
 class PPSpacer:
     def __init__(self):
         self.height = 24  #points
 
     def getFlowable(self):
         return Spacer(72, self.height)
+
 
     #############################################################
     #
@@ -301,14 +306,22 @@ class PPFixedImage(PPDrawingElement):
         self.height = None
 
     def drawOn(self, canv):
-        if self.filename:
-            canv.drawInlineImage(
-                                self.filename,
-                                self.x,
-                                self.y,
-                                self.width,
-                                self.height
-                                   )
+        filename = self.filename
+        if filename:
+            internalname = canv._doc.hasForm(filename)
+            if not internalname:
+                canv.beginForm(filename)
+                canv.saveState()
+                x, y = self.x, self.y
+                w, h = self.width, self.height
+                canv.drawInlineImage(filename, x, y, w, h)
+                canv.restoreState()
+                canv.endForm()
+                canv.doForm(filename)
+            else:
+                canv.doForm(filename)
+
+
 class PPRectangle:
     def __init__(self, x, y, width, height):
         self.x = x
@@ -334,6 +347,7 @@ class PPRectangle:
                     )
         canv.restoreState()
                                    
+
 class PPRoundRect:
     def __init__(self, x, y, width, height, radius):
         self.x = x
@@ -361,6 +375,7 @@ class PPRoundRect:
                     )
         canv.restoreState()
 
+
 class PPLine:
     def __init__(self, x1, y1, x2, y2):
         self.x1 = x1
@@ -371,7 +386,6 @@ class PPLine:
         self.strokeColor = (1,1,1)
         self.lineWidth=0
         
-
     def drawOn(self, canv):
         canv.saveState()
         canv.setLineWidth(self.lineWidth)
@@ -380,6 +394,7 @@ class PPLine:
             canv.setStrokeColorRGB(r,g,b)
         canv.line(self.x1, self.y1, self.x2, self.y2)
         canv.restoreState()
+
 
 class PPEllipse:
     def __init__(self, x1, y1, x2, y2):
@@ -391,7 +406,6 @@ class PPEllipse:
         self.strokeColor = (1,1,1)
         self.lineWidth=0
         
-
     def drawOn(self, canv):
         canv.saveState()
         canv.setLineWidth(self.lineWidth)
@@ -407,6 +421,7 @@ class PPEllipse:
                      )
         canv.restoreState()
 
+
 class PPPolygon:
     def __init__(self, pointlist):
         self.points = pointlist
@@ -414,7 +429,6 @@ class PPPolygon:
         self.strokeColor = (1,1,1)
         self.lineWidth=0
         
-
     def drawOn(self, canv):
         canv.saveState()
         canv.setLineWidth(self.lineWidth)
@@ -608,6 +622,7 @@ def getSampleStyleSheet():
 
     return stylesheet
 
+
 #make a singleton and a function to access it        
 _styles = None
 def getStyles():
@@ -615,6 +630,7 @@ def getStyles():
     if not _styles:
         _styles = getSampleStyleSheet()
     return _styles
+
 
 def setStyles(newStyleSheet):
     global _styles
@@ -637,6 +653,7 @@ def process(datafilename, speakerNotes=0):
     print 'saved presentation %s.pdf' % os.path.splitext(datafilename)[0]
     parser.close()
 
+
 if __name__ == '__main__':
     import sys
     #see if there is a '/n' argument
@@ -650,7 +667,7 @@ if __name__ == '__main__':
     if len(sys.argv) == 1 and os.path.isfile('pythonpoint.xml'):
 		sys.argv.append('pythonpoint.xml')
     if len(sys.argv) == 1:
-        print """PythonPoint - copyright ReportLab Inc. 1999-2000
+        print """PythonPoint - copyright ReportLab Inc. 1999-2001
 usage:
     pythonpoint.py my_presentation.xml
 
