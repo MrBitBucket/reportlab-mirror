@@ -4,7 +4,7 @@ See docstring for class ExternalTestCase for more information.
 """
 
 
-import os, string, fnmatch, re
+import os, string, fnmatch, re, sys
 
 import reportlab
 from reportlab.test import unittest
@@ -54,10 +54,14 @@ class ExternalTestCase(SecureTestCase):
 
         # read module paths from file
         extraModulenames = open(extraFilename).readlines()
-        extraModulenames = map(lambda f:f[:-1], extraModulenames)
+        extraModulenames = map(string.strip, extraModulenames)
 
         # expand pathnames as much as possible
         for f in extraModulenames:
+            if f == '':
+                continue
+            if f[0] == '#':
+                continue
             f = os.path.expanduser(f)
             f = os.path.expandvars(f)
             if not os.path.isabs(f):
@@ -69,13 +73,15 @@ class ExternalTestCase(SecureTestCase):
                 folder = os.path.dirname(f)
                 modname = os.path.splitext(os.path.basename(f))[0]
                 os.chdir(folder)
+                sys.path.insert(0, folder)
+                
                 module = __import__(modname) # seems to fail sometimes...
                 if 'makeSuite' in dir(module):
                     print "running", f
                     testSuite = module.makeSuite()
                     unittest.TextTestRunner().run(testSuite)
                 os.chdir(cwd)
-            
+                sys.path = sys.path[1:]
 
 def makeSuite():
     suite = unittest.TestSuite()    
