@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch2_graphics.py,v 1.12 2001/03/30 10:24:21 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch2_graphics.py,v 1.13 2001/07/31 11:31:42 dinu_gherman Exp $
 from genuserguide import *
 
 heading1("Graphics and Text with $pdfgen$")
@@ -226,7 +226,7 @@ eg("""canvas.grid(xlist, ylist) """)
 eg("""canvas.bezier(x1, y1, x2, y2, x3, y3, x4, y4)""")
 eg("""canvas.arc(x1,y1,x2,y2) """)
 eg("""canvas.rect(x, y, width, height, stroke=1, fill=0) """)
-eg("""canvas.ellipse(x, y, width, height, stroke=1, fill=0)""")
+eg("""canvas.ellipse(x1,y1, x2,y2, stroke=1, fill=0)""")
 eg("""canvas.wedge(x1,y1, x2,y2, startAng, extent, stroke=1, fill=0) """)
 eg("""canvas.circle(x_cen, y_cen, r, stroke=1, fill=0)""")
 eg("""canvas.roundRect(x, y, width, height, radius, stroke=1, fill=0) """)
