@@ -2,17 +2,20 @@
 """
 """
 
-from types import FloatType, IntType, ListType, TupleType, StringType
-from pprint import pprint
 import string
 from math import pi, cos, sin, tan
+from types import FloatType, IntType, ListType, TupleType, StringType
+from pprint import pprint
+
 from reportlab.platypus import Flowable
 from reportlab.rl_config import shapeChecking
-
 from reportlab.lib import colors
+
 
 class NotImplementedError(Exception):
     pass
+
+
 # two constants for filling rules
 NON_ZERO_WINDING = 'Non-Zero Winding'
 EVEN_ODD = 'Even-Odd'
@@ -45,11 +48,20 @@ STATE_DEFAULTS = {   # sensible defaults for all
     'textAnchor':  'start' # can be start, middle, end, inherited
     }
 
-# singleton value for automatic
+
+# Singleton value for automatic numerals.
+
 class _Auto:
-    def repr(self):
+    "Class for a numeral whose value is determined when needed."
+
+    def __repr__(self):
         return 'Auto'
+
+    def __str__(self):
+        return 'Auto'
+
 Auto = _Auto()
+
 
     ################################################################
     #
@@ -171,6 +183,7 @@ class OneOf:
     def __call__(self, arg):
         return arg in self._choices
 
+
 class SequenceOf:
     """Make validator functions for sequence of things:
     >>> isListOfColors = shapes.SequenceOf(isColor)
@@ -192,6 +205,7 @@ class SequenceOf:
     # math utilities.  These could probably be moved into lib
     # somewhere.
     ####################################################################
+
 # constructors for matrices:
 def nullTransform():
     return (1, 0, 0, 1, 0, 0)
@@ -259,6 +273,7 @@ def _rotatedBoxLimits( x, y, w, h, angle):
     Y = map(lambda x: x[1], C)
     return min(X), max(X), min(Y), max(Y), C
 
+
     #################################################################
     #
     #    And now the shapes themselves....
@@ -272,22 +287,27 @@ class Shape:
     convenience methods for verification but do not
     check attribiute assignments or use any clever setattr
     tricks this time."""
+
     _attrMap = None
+
     def __init__(self, keywords={}):
         """In general properties may be supplied to the
         constructor."""
+
         for key, value in keywords.items():
             #print 'setting keyword %s.%s = %s' % (self, key, value)
             setattr(self, key, value)
 
     def copy0(self):
         """Return a clone of this shape."""
+
         # implement this in the descendants as they need the right init methods.
         raise NotImplementedError, "No copy method implemented for %s" % self.__class__.__name__
        
     def getProperties(self):
         """Interface to make it easy to extract automatic
         documentation"""
+
         #basic nodes have no children so this is easy.
         #for more complex objects like widgets you
         #may need to override this.
@@ -300,6 +320,7 @@ class Shape:
     def setProperties(self, props):
         """Supports the bulk setting if properties from,
         for example, a GUI application or a config file."""
+
         self.__dict__.update(props)
         #self.verify()
 
@@ -307,6 +328,7 @@ class Shape:
         """Convenience. Lists them on standard output.  You
         may provide a prefix - mostly helps to generate code
         samples for documentation."""
+
         propList = self.getProperties().items()
         propList.sort()
         if prefix:
@@ -321,6 +343,7 @@ class Shape:
         are present; and (if a checking function is found)
         checks each attribute.  Either succeeds or raises
         an informative exception."""
+
         if self._attrMap is not None:
             for key in self.__dict__.keys():
                 if key[0] <> '_':
@@ -335,6 +358,7 @@ class Shape:
         """This adds the ability to check every attribute assignment as it is made.
         It slows down shapes but is a big help when developing. It does not
         get defined if rl_config.shapeChecking = 0"""
+
         #print 'shapeChecking = 1, defining setattr'
         def __setattr__(self, attr, value):
             """By default we verify.  This could be off
@@ -359,7 +383,12 @@ class Drawing(Shape, Flowable):
     """Outermost container; the thing a renderer works on.
     This has no properties except a height, width and list
     of contents."""
-    _attrMap = {'width':isNumber, 'height':isNumber, 'contents':isListOfShapes, 'canv':None}
+
+    _attrMap = {
+        'width':isNumber,
+        'height':isNumber,
+        'contents':isListOfShapes,
+        'canv':None}
     
     def __init__(self, width, height, *nodes):
         # Drawings need _attrMap to be an instance rather than
@@ -375,6 +404,7 @@ class Drawing(Shape, Flowable):
         """Adds a shape to a drawing.  If a name is provided, it may
         subsequently be accessed by name and becomes a regular
         attribute of the drawing."""
+
         assert isValidChild(node), "Can only add Shape or UserNode objects to a drawing"
         self.contents.append(node)
         if name:
@@ -388,6 +418,7 @@ class Drawing(Shape, Flowable):
         """This is used by the Platypus framework to let the document
         draw itself in a story.  It is specific to PDF and should not
         be used directly."""
+
         import renderPDF
         R = renderPDF._PDFRenderer()
         R.draw(self, self.canv, 0, 0)
@@ -485,6 +516,7 @@ class Group(Shape):
     def add(self, node, name=None):
         """Appends child node to the 'contents' attribute.  In addition,
         if a name is provided, it is subsequently accessible by name"""
+
         # propagates properties down
         assert isValidChild(node), "Can only add Shape or UserNode objects to a Group"
         self.contents.append(node)
@@ -499,6 +531,7 @@ class Group(Shape):
         """Returns a new group with recursively copied contents.
 
         Expands all user nodes if they do not define a copy method."""
+
         newGroup = Group()
         newGroup.transform = self.transform[:]
         for child in self.contents:
@@ -553,9 +586,9 @@ class Group(Shape):
         self.transform = mmult(mmult(self.transform, skewX(kx)),skewY(ky))
     
 
-
 class LineShape(Shape):
     # base for types of lines
+
     _attrMap = {
         'strokeColor':isColorOrNone,
         'strokeWidth':isNumber,
@@ -564,6 +597,7 @@ class LineShape(Shape):
         'strokeMiterLimit':isNumber,
         'strokeDashArray':None,
         }
+
     def __init__(self, kw):
         self.strokeColor = STATE_DEFAULTS['strokeColor']
         self.strokeWidth = 1
@@ -572,6 +606,7 @@ class LineShape(Shape):
         self.strokeMiterLimit = 0
         self.strokeDashArray = None
         self.setProperties(kw)
+
 
 class Line(LineShape):
     _attrMap = {
@@ -597,6 +632,7 @@ class Line(LineShape):
     
 class SolidShape(Shape):
     # base for anything with outline and content
+
     _attrMap = {
         'strokeColor':isColorOrNone,
         'strokeWidth':isNumber,
@@ -606,6 +642,7 @@ class SolidShape(Shape):
         'strokeDashArray':None,
         'fillColor':isColorOrNone
         }
+
     def __init__(self, kw):
         self.strokeColor = STATE_DEFAULTS['strokeColor']
         self.strokeWidth = 1
@@ -618,12 +655,15 @@ class SolidShape(Shape):
         #the above settings
         Shape.__init__(self, kw)
         
+
 class Path(SolidShape):
     # same as current implementation; to do
     pass
+
   
 class Rect(SolidShape):
     """Rectangle, possibly with rounded corners."""    
+
     _attrMap = {
         'strokeColor': isColorOrNone,
         'strokeWidth': isNumber,
@@ -654,7 +694,9 @@ class Rect(SolidShape):
         new.setProperties(self.getProperties())
         return new
     
+
 class Circle(SolidShape):
+
     _attrMap = {
         'strokeColor': None,
         'strokeWidth': isNumber,
@@ -679,7 +721,9 @@ class Circle(SolidShape):
         new.setProperties(self.getProperties())
         return new
 
+
 class Ellipse(SolidShape):
+
     _attrMap = {
         'strokeColor': None,
         'strokeWidth': isNumber,
@@ -693,6 +737,7 @@ class Ellipse(SolidShape):
         'rx': isNumber,
         'ry': isNumber
         }
+
     def __init__(self, cx, cy, rx, ry, **kw):
         SolidShape.__init__(self, kw)
         self.cx = cx
@@ -705,9 +750,11 @@ class Ellipse(SolidShape):
         new.setProperties(self.getProperties())
         return new
 
+
 class Wedge(SolidShape):
     """A "slice of a pie" by default translates to a polygon moves anticlockwise
        from start angle to end angle"""
+
     _attrMap = {
         'strokeColor': None,
         'strokeWidth': isNumber,
@@ -723,7 +770,9 @@ class Wedge(SolidShape):
         'endangledegrees': isNumber,
         'yradius':isNumberOrNone
         }
+
     degreedelta = 1 # jump every 1 degrees
+
     def __init__(self, centerx, centery, radius, startangledegrees, endangledegrees, yradius=None, **kw):
         if yradius is None: yradius = radius
         SolidShape.__init__(self, kw)
@@ -733,9 +782,11 @@ class Wedge(SolidShape):
         self.centerx, self.centery, self.radius, self.startangledegrees, self.endangledegrees = \
            centerx, centery, radius, startangledegrees, endangledegrees
         self.yradius = yradius
+
     #def __repr__(self):
     #        return "Wedge"+repr((self.centerx, self.centery, self.radius, self.startangledegrees, self.endangledegrees ))
     #__str__ = __repr__
+
     def asPolygon(self):
         #print "asPolygon"
         centerx, centery, radius, startangledegrees, endangledegrees = \
@@ -780,6 +831,7 @@ class Wedge(SolidShape):
 class Polygon(SolidShape):
     """Defines a closed shape; Is implicitly
     joined back to the start for you."""
+
     _attrMap = {
         'strokeColor': None,
         'strokeWidth': isNumber,
@@ -790,6 +842,7 @@ class Polygon(SolidShape):
         'fillColor': None,
         'points': isListOfNumbers,
         }
+
     def __init__(self, points=[], **kw):
         SolidShape.__init__(self, kw)
         assert len(points) % 2 == 0, 'Point list must have even number of elements!'
@@ -800,10 +853,12 @@ class Polygon(SolidShape):
         new.setProperties(self.getProperties())
         return new
 
+
 class PolyLine(LineShape):
     """Series of line segments.  Does not define a
     closed shape; never filled even if apparently joined.
     Put the numbers in the list, not two-tuples."""
+
     _attrMap = {
         'strokeColor':isColorOrNone,
         'strokeWidth':isNumber,
@@ -813,6 +868,7 @@ class PolyLine(LineShape):
         'strokeDashArray':None,
         'points':isListOfNumbers
         }
+
     def __init__(self, points=[], **kw):
         LineShape.__init__(self, kw)
         lenPoints = len(points)
@@ -832,9 +888,11 @@ class PolyLine(LineShape):
         new.setProperties(self.getProperties())
         return new
 
+
 class String(Shape):
     """Not checked against the spec, just a way to make something work.
     Can be anchored left, middle or end."""
+
     # to do.
     _attrMap = {
         'x': isNumber,
@@ -845,6 +903,7 @@ class String(Shape):
         'fillColor':isColorOrNone,
         'textAnchor':isTextAnchor
         }
+
     def __init__(self, x, y, text, **kw):
         self.x = x
         self.y = y
@@ -860,6 +919,7 @@ class String(Shape):
         new.setProperties(self.getProperties())
         return new
 
+
 class UserNode:
     """A simple template for creating a new node.  The user (Python
     programmer) may subclasses this.  provideNode() must be defined to
@@ -872,9 +932,9 @@ class UserNode:
         """Override this to create your own node. This lets widgets be
         added to drawings; they must create a shape (typically a group)
         so that the renderer can draw the custom node."""
+
         raise NotImplementedError, "this method must be redefined by the user/programmer"
     
-
 
 def test():
     r = Rect(10,10,200,50)
@@ -896,4 +956,3 @@ def test():
 
 if __name__=='__main__':
     test()
-    
