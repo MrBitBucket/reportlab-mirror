@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.35 2003/09/15 11:55:50 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.36 2003/09/15 14:30:33 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
-__version__=''' $Id: linecharts.py,v 1.35 2003/09/15 11:55:50 rgbecker Exp $ '''
+__version__=''' $Id: linecharts.py,v 1.36 2003/09/15 14:30:33 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType
@@ -386,7 +386,7 @@ class HorizontalLineChart3D(HorizontalLineChart):
         return z0
 
     def _zadjust(self,x,y,z):
-        return x+z*self.theta_x*x, y+z*self.theta_y*y
+        return x+z*self.theta_x, y+z*self.theta_y
 
     def makeLines(self):
         labelFmt = self.lineLabelFormat

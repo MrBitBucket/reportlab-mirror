@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.48 2003/09/15 11:55:50 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.49 2003/09/15 14:30:33 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.48 2003/09/15 11:55:50 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.49 2003/09/15 14:30:33 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -376,7 +376,7 @@ class LinePlot3D(LinePlot):
         return z0
 
     def _zadjust(self,x,y,z):
-        return x+z*self.theta_x*x, y+z*self.theta_y*y
+        return x+z*self.theta_x, y+z*self.theta_y
 
     def makeLines(self):
         bubblePlot = getattr(self,'_bubblePlot',None)
