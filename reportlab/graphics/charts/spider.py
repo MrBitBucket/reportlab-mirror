@@ -1,7 +1,7 @@
     #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/spider.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/spider.py,v 1.3 2002/12/03 15:37:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/spider.py,v 1.4 2002/12/03 15:46:02 rgbecker Exp $
 # spider chart, also known as radar chart
 
 """Spider Chart
@@ -10,7 +10,7 @@ Normal use shows variation of 5-10 parameters against some 'norm' or target.
 When there is more than one series, place the series with the largest
 numbers first, as it will be overdrawn by each successive one.
 """
-__version__=''' $Id: spider.py,v 1.3 2002/12/03 15:37:12 rgbecker Exp $ '''
+__version__=''' $Id: spider.py,v 1.4 2002/12/03 15:46:02 rgbecker Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -33,13 +33,11 @@ from textlabels import Label
 _ANGLE2ANCHOR={0:'w', 45:'sw', 90:'s', 135:'se', 180:'e', 225:'ne', 270:'n', 315: 'nw'}
 def _findNearestAngleValue(angle,D):
     angle =  angle % 360
-    print 'Angle: ', angle,
     m = 900
     for k in D.keys():
         d = min((angle-k)%360,(k-angle)%360)
         if d<m:
             m, v = d, k
-    print '-->', m, v, D[v],
     return D[v]
 
 class StrandProperties(PropHolder):

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.28 2002/12/03 15:37:12 rgbecker Exp $
-__version__=''' $Id: textlabels.py,v 1.28 2002/12/03 15:37:12 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.29 2002/12/03 15:45:11 rgbecker Exp $
+__version__=''' $Id: textlabels.py,v 1.29 2002/12/03 15:45:11 rgbecker Exp $ '''
 import string
 
 from reportlab.lib import colors
@@ -231,7 +231,6 @@ class Label(Widget):
         '''This can be overridden to allow special effects'''
         ta = self.textAnchor
         if ta=='boxauto': ta = _BA2TA[self.boxAnchor]
-        print self.boxAnchor, ta
         return ta
 
     def draw(self):
