@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.58 2001/10/09 14:50:50 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.59 2001/10/09 15:00:50 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -686,11 +686,15 @@ def definePath(pathSegs=[],isClipPath=0,**kw):
 	O = []
 	P = []
 	for seg in pathSegs:
-		opName = seg[0]
+		if type(seg) not in [ListType,TupleType]: 
+			opName = seg
+			args = []
+		else:
+			opName = seg[0]
+			args = seg[1:]
 		if opName not in _PATH_OP_NAMES:
 			raise ValueError, 'bad operator name %s' % opName
 		op = _PATH_OP_NAMES.index(opName)
-		args = seg[1:]
 		if len(args)!=_PATH_OP_ARG_COUNT[op]:
 			raise ValueError, '%s bad arguments %s' % (opName,str(args))
 		O.append(op)
