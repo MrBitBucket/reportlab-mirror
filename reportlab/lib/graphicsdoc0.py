@@ -12,6 +12,7 @@ __version__ = '0.8'
 
 
 import sys, os, re, types, string, getopt, pickle, copy, time
+import StringIO, pprint
 from string import find, join, split, replace, expandtabs, rstrip
 
 from reportlab.lib.docpy0 import PackageSkeleton0, ModuleSkeleton0
@@ -394,10 +395,30 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         lines = []
         for key in keys:
             value = props[key]
+
+            # Method 3
+            f = StringIO.StringIO('')
+            pprint.pprint(value, f)
+            f.read()
+            value = f.buf[:-1]
+            valueLines = string.split(value, '\n')
+            for i in range(1, len(valueLines)):
+                valueLines[i] = ' '*(len(key)+3) + valueLines[i]    
+            value = string.join(valueLines, '\n')
+
             lines.append('%s = %s' % (key, value))
         text = join(lines, '\n')
         self.story.append(Paragraph("<i>Properties of Example Widget</i>", self.bt))
         self.story.append(Paragraph("", self.bt))
+
+##        # Method 1
+##        self.story.append(Preformatted(text, self.code))
+
+##        # Method 2
+##        f = StringIO.StringIO('')
+##        pprint.pprint(props, f)
+##        text = f.read().buf
+
         self.story.append(Preformatted(text, self.code))
 
 
@@ -569,6 +590,17 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
         lines = []
         for key in keys:
             value = props[key]
+
+            # Method 3
+            f = StringIO.StringIO('')
+            pprint.pprint(value, f)
+            f.read()
+            value = f.buf[:-1]
+            valueLines = string.split(value, '\n')
+            for i in range(1, len(valueLines)):
+                valueLines[i] = ' '*(len(key)+3) + valueLines[i]    
+            value = string.join(valueLines, '\n')
+
             lines.append('%s = %s' % (key, value))
         text = join(lines, '\n')
         self.outLines.append('<H3>Properties of Example Widget</H3>')
