@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.87 2003/10/02 14:41:42 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.88 2003/11/09 10:46:26 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.87 2003/10/02 14:41:42 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.88 2003/11/09 10:46:26 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -341,8 +341,7 @@ class XCategoryAxis(CategoryAxis):
     def makeTickLabels(self):
         g = Group()
 
-        if not self.visibleLabels:
-            return g
+        if not self.visibleLabels: return g
 
         if not (self.categoryNames is None):
             catCount = self._catCount
@@ -504,6 +503,7 @@ class ValueAxis(_AxisG):
         forceZero = AttrMapValue(EitherOr((isBoolean,OneOf('near'))), desc='Ensure zero in range if true.'),
         visible = AttrMapValue(isBoolean, desc='Display entire object, if true.'),
         visibleAxis = AttrMapValue(isBoolean, desc='Display axis line, if true.'),
+        visibleLabels = AttrMapValue(isBoolean, desc='Display axis labels, if true.'),
         visibleTicks = AttrMapValue(isBoolean, desc='Display axis ticks, if true.'),
         visibleGrid = AttrMapValue(isBoolean, desc='Display axis grid, if true.'),
         strokeWidth = AttrMapValue(isNumber, desc='Width of axis line and ticks.'),
@@ -543,6 +543,7 @@ class ValueAxis(_AxisG):
         # public properties
         self.visible = 1
         self.visibleAxis = 1
+        self.visibleLabels = 1
         self.visibleTicks = 1
         self.visibleGrid = 0
         self.forceZero = 0
@@ -781,6 +782,7 @@ class ValueAxis(_AxisG):
 
     def makeTickLabels(self):
         g = Group()
+        if not self.visibleLabels: return g
 
         f = self._labelTextFormat       # perhaps someone already set it
         if f is None:
