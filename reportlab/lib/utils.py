@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.73 2004/05/07 15:28:33 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.73 2004/05/07 15:28:33 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.74 2004/05/07 16:56:29 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.74 2004/05/07 16:56:29 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -570,10 +570,17 @@ class DebugMemo:
     in addition to the payload variables the dump records many useful bits
     of information which are also printed in the show() method.
     '''
-    def __init__(self,fn='rl_dbgmemo.dbg',mode='w',getScript=1,modules=(),capture_traceback=1, **kw):
+    def __init__(self,fn='rl_dbgmemo.dbg',mode='w',getScript=1,modules=(),capture_traceback=1, stdout=None, **kw):
         import time, socket
         self.fn = fn
         if mode!='w': return
+        if not stdout: 
+            self.stdout = sys.stdout
+        else:
+            if hasattr(stdout,'write'):
+                self.stdout = stdout
+            else:
+                self.stdout = open(stdout,'w')
         self.store = store = {}
         if capture_traceback and sys.exc_info() != (None,None,None):
             import traceback
@@ -586,35 +593,41 @@ class DebugMemo:
         store.update({  'gmt': time.asctime(time.gmtime(time.time())),
                         'platform': sys.platform,
                         'version': sys.version,
+                        'hexversion': hex(sys.hexversion),
                         'executable': sys.executable,
+                        'exec_prefix': sys.exec_prefix,
                         'prefix': sys.prefix,
                         'path': sys.path,
                         'argv': sys.argv,
                         'cwd': cwd,
                         'hostname': socket.gethostname(),
                         'lcwd': lcwd,
+                        'byteorder': sys.byteorder,
+                        'maxint': sys.maxint,
+                        'maxint': getattr(sys,'maxunicode','????'),
+                        'api_version': getattr(sys,'api_version','????'),
+                        'version_info': getattr(sys,'version_info','????'),
+                        'winver': getattr(sys,'winver','????'),
                         })
+        for M,A in (
+                (sys,('getwindowsversion','getfilesystemencoding')),
+                (os,('uname', 'ctermid', 'getgid', 'getuid', 'getegid',
+                    'geteuid', 'getlogin', 'getgroups', 'getpgrp', 'getpid', 'getppid',
+                    )),
+                ):
+            for a in A:
+                if hasattr(M,a):
+                    store[a] = getattr(M,a)()
         if exed!=cwd: store.update({'exed': exed,
                                     'lexed': os.listdir(exed),
                                     })
-        if hasattr(os,'uname'):
-            store.update({
-                'uname': os.uname(),
-                'ctermid': os.ctermid(),
-                'getgid': os.getgid(),
-                'getuid': os.getuid(),
-                'getegid': os.getegid(),
-                'geteuid': os.geteuid(),
-                'getlogin': os.getlogin(),
-                'getgroups': os.getgroups(),
-                'getpgrp': os.getpgrp(),
-                'getpid': os.getpid(),
-                'getppid': os.getppid(),
-                })
         if getScript:
             fn = os.path.abspath(sys.argv[0])
             if os.path.isfile(fn):
-                store['__script'] = open(fn,'r').read()
+                try:
+                    store['__script'] = (fn,open(fn,'r').read())
+                except:
+                    pass
         module_versions = {}
         for n,m in sys.modules.items():
             if n=='reportlab' or n=='rlextra' or n[:10]=='reportlab.' or n[:8]=='rlextra.':
@@ -641,7 +654,7 @@ class DebugMemo:
         self.store = pickle.load(open(self.fn,'rb'))
 
     def _show_module_versions(self,k,v):
-        print k[2:]
+        self._writeln(k[2:])
         K = v.keys()
         K.sort()
         for k in K:
@@ -652,10 +665,10 @@ class DebugMemo:
             except:
                 m = None
                 d = '??????unknown??????'
-            print '  %s = %s (%s)' % (k,vk,d)
+            self._writeln('  %s = %s (%s)' % (k,vk,d))
 
     def _banner(self,k,what):
-        print '###################%s %s##################' % (what,k[2:])
+        self._writeln('###################%s %s##################' % (what,k[2:]))
 
     def _start(self,k):
         self._banner(k,'Start  ')
@@ -665,26 +678,30 @@ class DebugMemo:
 
     def _show_lines(self,k,v):
         self._start(k)
-        print v
+        self._writeln(v)
         self._finish(k)
+
+    def _show_file(self,k,v):
+        k = '%s %s' % (k,os.path.basename(v[0]))
+        self._show_lines(k,v[1])
 
     def _show_payload(self,k,v):
         if v:
             import pprint
             self._start(k)
-            pprint.pprint(v)
+            pprint.pprint(v,self.stdout)
             self._finish(k)
 
     specials = {'__module_versions': _show_module_versions,
                 '__payload': _show_payload,
                 '__traceback': _show_lines,
-                '__script': _show_lines,
+                '__script': _show_file,
                 }
     def show(self):
         K = self.store.keys()
         K.sort()
         for k in K:
-            if k not in self.specials.keys(): print '%-15s = %s' % (k,self.store[k])
+            if k not in self.specials.keys(): self._writeln('%-15s = %s' % (k,self.store[k]))
         for k in K:
             if k in self.specials.keys(): apply(self.specials[k],(self,k,self.store[k]))
 
@@ -696,3 +713,6 @@ class DebugMemo:
 
     def __getitem__(self,name):
         return self.store['__payload'][name]
+
+    def _writeln(self,msg):
+        self.stdout.write(msg+'\n')
