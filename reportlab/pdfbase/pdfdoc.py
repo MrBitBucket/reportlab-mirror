@@ -31,9 +31,13 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.19  2000/06/01 09:44:26  rgbecker
+#	SaveToFile: only close the file if we opened it.
+#	Aggregated from types imports to module level.
+#
 #	Revision 1.18  2000/04/28 17:33:44  andy_robinson
 #	Added font encoding support and changed default encoding to WinAnsi
-#
+#	
 #	Revision 1.17  2000/04/28 09:08:42  rgbecker
 #	Fix typo in SaveToFile
 #	
@@ -76,7 +80,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.18 2000/04/28 17:33:44 andy_robinson Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.19 2000/06/01 09:44:26 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -97,7 +101,7 @@ import string
 import time
 import tempfile
 import cStringIO
-from types import *
+from types import IntType, TupleType, StringType, ListType, DictType
 from math import sin, cos, pi, ceil
 
 try:
@@ -295,7 +299,7 @@ class PDFDocument:
         the file.  Keep track of the file position at each point for
         use in the index at the end"""
 
-        if type(filename)==type(''):
+        if type(filename)==StringType:
             f = open(filename, 'wb')
         else:
             f = filename #assume it's a file type object
@@ -318,7 +322,8 @@ class PDFDocument:
         self.writeXref(f)
         self.writeTrailer(f)
         f.write('%%EOF')  # no lineend needed on this one!
-        f.close()
+
+        if f is not filename: f.close()
         # with the Mac, we need to tag the file in a special
         #way so the system knows it is a PDF file.
         #This supplied by Joe Strout
@@ -615,11 +620,11 @@ class PDFOutline(PDFObject):
         self.levelstack = []
         self.buildtree = []
         self.closedict = {} # dictionary of "closed" destinations in the outline
+
     def addOutlineEntry(self, destinationname, level=0, title=None, closed=None):
         """destinationname of None means "close the tree" """
         if destinationname is None and level!=0:
             raise ValueError, "close tree must have level of 0"
-        from types import IntType, TupleType
         if type(level) is not IntType: raise ValueError, "level must be integer, got %s" % type(level)
         if level<0: raise ValueError, "negative levels not allowed"
         if title is None: title = destinationname
@@ -673,7 +678,6 @@ class PDFOutline(PDFObject):
         
     def translateNames(self, canvas, object):
         "recursively translate tree of names into tree of destinations"
-        from types import ListType, TupleType, StringType
         Ot = type(object)
         destinationnamestotitles = self.destinationnamestotitles
         destinationstotitles = self.destinationstotitles
@@ -717,7 +721,6 @@ class PDFOutline(PDFObject):
         (self.first, self.last) = self.maketree(document, self.mydestinations, toplevel=1)
         self.ready = 1
     def maketree(self, document, destinationtree, Parent=None, toplevel=0):
-        from types import ListType, TupleType, DictType
         if toplevel:
             levelname = "Outline"
             Parent = document.objectReference("Outline")
@@ -775,7 +778,6 @@ class PDFOutline(PDFObject):
         
 def count(tree, closedict=None): 
     """utility for outline: recursively count leaves in a tuple/list tree"""
-    from types import TupleType, ListType
     from operator import add
     tt = type(tree)
     if tt is TupleType:
@@ -1014,7 +1016,6 @@ class Annotation(PDFObject):
     def cvtdict(self, d):
         """transform dict args from python form to pdf string rep as needed"""
         Rect = d["Rect"]
-        from types import StringType
         if type(Rect) is not StringType:
             d["Rect"] = apply(BasicPDFArrayString, tuple(Rect))
         d["Contents"] = PDFString(d["Contents"])
