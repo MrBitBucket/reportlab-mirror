@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: runtests.py,v $
+#	Revision 1.13  2000/08/01 11:23:41  rgbecker
+#	Added -time flag
+#
 #	Revision 1.12  2000/07/19 13:44:54  rgbecker
 #	Added -prof option
-#
+#	
 #	Revision 1.11  2000/05/17 15:39:10  rgbecker
 #	Changes related to removal of SimpleFlowDocument
 #	
@@ -69,7 +72,7 @@
 #	New infrastructure
 #	
 #	
-__version__=''' $Id: runtests.py,v 1.12 2000/07/19 13:44:54 rgbecker Exp $ '''
+__version__=''' $Id: runtests.py,v 1.13 2000/08/01 11:23:41 rgbecker Exp $ '''
 '''
 script for testing ReportLab
 '''
@@ -108,7 +111,7 @@ def find_executable_py_files(d):
 				break
 	return L
 
-def do_tests(d,cyc,prof):
+def do_tests(d,cyc,prof,timing):
 	global _ecount
 
 	def find_test_files(L,d,N):
@@ -138,6 +141,7 @@ def do_tests(d,cyc,prof):
 		sys.argv[0] = fn
 		os.chdir(os.path.dirname(fn))
 		g = copy.copy(_globals)
+		xtra = ''
 		try:
 			if cyc is not None:
 				z = Cyclops.CycleFinder()
@@ -158,9 +162,14 @@ def do_tests(d,cyc,prof):
 				s = pstats.Stats(p)
 				if 't' in prof[0]: s.sort_stats('time').print_stats(prof[1])
 				if 'c' in prof[0]: s.sort_stats('cumulative').print_stats(prof[1])
+			elif timing is not None:
+				from time import time
+				t = time()
+				execfile(fn,g)
+				xtra = ' in %0.2f"' % (time()-t)
 			else:
 				execfile(fn,g)
-			print '##### Test %s finished ok' % bn
+			print '##### Test %s finished ok%s' % (bn,xtra)
 		except:
 			traceback.print_exc(None,sys.stdout)
 			_ecount = _ecount + 1
@@ -184,7 +193,7 @@ def clean_files(d):
 	os.path.walk('.',find_cleanable_files,None)
 
 if __name__=='__main__': #NORUNTESTS
-	legal_options = ['-cycles', '-dir', '-help','-notest','-clean', '-fclean', '-prof']
+	legal_options = ['-cycles', '-dir', '-help','-notest','-clean', '-fclean', '-prof', '-time']
 	def usage(code=0, msg=''):
 		f = code and sys.stderr or sys.stdout
 		if msg is not None: f.write(msg+'\n')
@@ -198,7 +207,8 @@ Usage
     -help           print this message and exit
     -cycles[=flags] check for cycles using Tim Peter's Cyclops cycle finder
                     flags=s(tats), a(rcs), C(omponents), c(ycles), o(bjects)
-	-prof[=flags]	do profiling flags=c(umulative), t(ime)
+    -prof[=flags]	do profiling flags=c(umulative), t(ime)
+    -time			do timing
     -notest         don't carry out tests
     -clean          cleanup if no errors
     -fclean         cleanup even if some errors occur
@@ -206,7 +216,7 @@ Usage
 		sys.exit(code)
 
 	dir='.'
-	cyc = prof = None
+	cyc = prof = timing = None
 	options = sys.argv[1:]
 	sys.argv[1:]=[]
 
@@ -245,6 +255,7 @@ Usage
 							usage(code=1,msg="Bad profile option '%s'"%i)
 		elif k=='-cycles': cyc = 'sc'
 		elif k=='-prof': prof = ['t', 10]
+		elif k=='-time': timing = 1
 		if k not in legal_options:
 			usage(code=1,msg="unknown option '%s'" % k)
 
@@ -255,7 +266,7 @@ Usage
 	if '-help' in options: usage()
 
 	if '-notest' not in options:
-		do_tests(dir, cyc, prof)
+		do_tests(dir, cyc, prof, timing)
 
 	if ((_ecount==0 and '-clean' in options) or '-fclean' in options):
 		clean_files(dir)
