@@ -1,13 +1,21 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/odyssey/dodyssey.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/odyssey/dodyssey.py,v 1.10 2001/02/28 19:28:04 rgbecker Exp $
-__version__=''' $Id: dodyssey.py,v 1.10 2001/02/28 19:28:04 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/odyssey/dodyssey.py,v 1.11 2002/05/22 12:22:42 rgbecker Exp $
+__version__=''' $Id: dodyssey.py,v 1.11 2002/05/22 12:22:42 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
 import sys, copy, string, os
 from reportlab.platypus import *
+_NEW_PARA=os.environ.get('NEW_PARA','0')[0] in ('y','Y','1')
+_REDCAP=int(os.environ.get('REDCAP','0'))
+_CALLBACK=os.environ.get('CALLBACK','0')[0] in ('y','Y','1')
+if _NEW_PARA:
+	def Paragraph(s,style):
+		from rlextra.radxml.para import Paragraph as PPPP
+		return PPPP(s,style)
+
 from reportlab.lib.units import inch
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -72,7 +80,10 @@ def chapter(txt, style=ChapterStyle):
 	Elements.append(NextPageTemplate('OneCol'))
 	newPage()
 	chNum = chNum + 1
-	Elements.append(Paragraph(('foo<onDraw name=myOnDrawCB label="chap %d"> '%chNum)+txt, style))
+	if _NEW_PARA or not _CALLBACK:
+		Elements.append(Paragraph(('chap %d'%chNum)+txt, style))
+	else:
+		Elements.append(Paragraph(('foo<onDraw name="myOnDrawCB" label="chap %d"/> '%chNum)+txt, style))
 	Elements.append(Spacer(0.2*inch, 0.3*inch))
 	if useTwoCol:
 		Elements.append(NextPageTemplate('TwoCol'))
@@ -99,6 +110,26 @@ def spacer(inches):
 	Elements.append(Spacer(0.1*inch, inches*inch))
 
 def p(txt, style=ParaStyle):
+	if _REDCAP:
+		fs, fe = '<font color="red" size="+2">', '</font>'
+		n = len(txt)
+		for i in xrange(n):
+			if 'a'<=txt[i]<='z' or 'A'<=txt[i]<='Z':
+				txt = (txt[:i]+(fs+txt[i]+fe))+txt[i+1:]
+				break
+		if _REDCAP>=2 and n>20:
+			j = i+len(fs)+len(fe)+1+int((n-1)/2)
+			while not ('a'<=txt[j]<='z' or 'A'<=txt[j]<='Z'): j += 1
+			txt = (txt[:j]+('<b><i><font size="+2" color="blue">'+txt[j]+'</font></i></b>'))+txt[j+1:]
+
+		if _REDCAP==3 and n>20:
+			n = len(txt)
+			fs = '<font color="green" size="+1">'
+			for i in xrange(n-1,-1,-1):
+				if 'a'<=txt[i]<='z' or 'A'<=txt[i]<='Z':
+					txt = txt[:i]+((fs+txt[i]+fe)+txt[i+1:])
+					break
+
 	Elements.append(Paragraph(txt, style))
 
 firstPre = 1
@@ -156,8 +187,8 @@ def parseOdyssey(fn):
 		if k: break
 
 	E.append([spacer,2])
-	E.append([fTitle,'<font color=red>%s</font>' % Title, InitialStyle])
-	E.append([fTitle,'<font size=-4>by</font> <font color=green>%s</font>' % Author, InitialStyle])
+	E.append([fTitle,'<font color="red">%s</font>' % Title, InitialStyle])
+	E.append([fTitle,'<font size="-4">by</font> <font color="green">%s</font>' % Author, InitialStyle])
 
 	while 1:
 		if f>=len(L): break
