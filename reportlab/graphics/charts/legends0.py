@@ -171,7 +171,7 @@ def sample2c():
 def sample3c():
     "Make sample swatches."
 
-    d = sample2a()
+    d = sample2()
     
     swatches = Swatches0()
     swatches.alignment = 'right'

@@ -60,7 +60,8 @@ class Pie(Widget):
         'labels':isListOfStringsOrNone,
         'startAngle':isNumber,
         'direction': lambda x: x in ['clockwise','anticlockwise'],
-        'wedges':None   # could be improved
+        'wedges':None,   # could be improved,
+        'defaultColors':SequenceOf(isColor)
         }
     
     def __init__(self):
