@@ -325,7 +325,7 @@ class YCategoryAxis(Widget):
 
     def configure(self, multiSeries):
         self._catCount = len(multiSeries[0])
-        self._barWidth = self._length / self._catCount
+        self._barWidth = self._length / (self._catCount or 1)
 
         
     def scale(self, idx):
