@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.12 2003/03/03 16:17:13 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.13 2003/03/08 14:29:21 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.12 2003/03/03 16:17:13 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.13 2003/03/08 14:29:21 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,12 +24,14 @@ static char* __version__=" $Id: pyRXP.c,v 1.12 2003/03/03 16:17:13 rgbecker Exp 
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "0.92"
+#define VERSION "0.95"
 #define MODULE "pyRXP"
 #define MAX_DEPTH 256
 static PyObject *moduleError;
 static PyObject *moduleVersion;
 static PyObject *RXPVersion;
+static PyObject *commentTagName;
+static PyObject *piTagName;
 static PyObject *parser_flags;
 static char *moduleDoc =
 "\n\
@@ -56,6 +58,8 @@ The python module exports the following\n\
 					embedded in the module\n\
 	parser_flags	a dictionary of parser flags\n\
 					the values are the defaults for parsers\n\
+	piTagName		special tagname used for processing instructions\n\
+	commenTagName	special tagname used for comments\n\
 \n\
 \n\
 	Parser(*kw)		Create a parser\n\
@@ -250,7 +254,7 @@ typedef	struct {
 #define PDGetItem pd->GetItem
 #define PDSetItem pd->SetItem
 #define PDNode_New pd->Node_New
-static	PyObject* get_attrs(ParserDetails* pd, ElementDefinition e, Attribute a)
+static	PyObject* get_attrs(ParserDetails* pd, Attribute a)
 {
 	int		useNone = pd->none_on_empty && !a;
 
@@ -269,10 +273,10 @@ static	PyObject* get_attrs(ParserDetails* pd, ElementDefinition e, Attribute a)
 		}
 }
 
-static	PyObject* makeNode(ParserDetails* pd, char *name, PyObject* attr, int empty)
+static	PyObject* _makeNode(ParserDetails* pd, PyObject *pyName, PyObject* attr, int empty)
 {
 	PyObject	*t = PDNode_New(4);
-	PDSetItem(t, 0, PyString_FromString(name));
+	PDSetItem(t, 0, pyName);	/*Note we borrow this*/
 	PDSetItem(t, 1, attr);
 	if(empty && pd->none_on_empty){
 		attr = Py_None;
@@ -290,11 +294,23 @@ static	PyObject* makeNode(ParserDetails* pd, char *name, PyObject* attr, int emp
 	return t;
 }
 
+static	PyObject* makeNode(ParserDetails* pd, char *name, PyObject* attr, int empty)
+{
+	return _makeNode(pd, PyString_FromString(name), attr, empty);
+}
+
+/*_makeNode for predefined python objects*/
+static	PyObject* _makeNodePD(ParserDetails* pd, PyObject *pyName, PyObject* attr, int empty)
+{
+	Py_INCREF(pyName);
+	return _makeNode(pd, pyName, attr, empty);
+}
+
 
 static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 {
 	int	r = 0, empty;
-	PyObject	*t;
+	PyObject	*t, *s;
 	ParserDetails*	pd = (ParserDetails*)(p->callback_arg);
 	switch(bit->type) {
 		case XBIT_eof: break;
@@ -303,7 +319,6 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 			r = 1;
 			break;
 		case XBIT_start:
-			fprintf(stderr,"start chars\n");
 		case XBIT_empty:
 			if(*depth==MAX_DEPTH){
 				Fprintf(Stderr,"Internal error, stack limit reached!\n");
@@ -313,7 +328,7 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 
 			empty = bit->type == XBIT_empty;
 			t = makeNode( pd, (char*)bit->element_definition->name,
-					get_attrs(pd, bit->element_definition, bit->attributes), empty);
+					get_attrs(pd, bit->attributes), empty);
 			if(empty){
 				PyList_Append(PDGetItem(stack[*depth],2),t);
 				Py_DECREF(t);
@@ -336,32 +351,16 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 			break;
 		case XBIT_pi:
 			if(ParserGetFlag(p,ReturnProcessingInstructions)){
-#if CHAR_SIZE==8
-				char* c = (char*)PyMem_Malloc(strlen(bit->pi_chars)+strlen(bit->pi_name)+6);
-				strcpy(c,"<?");
-				strcat(c,bit->pi_name);
-				strcat(c," ");
-				strcat(c,bit->pi_chars);
-				strcat(c,"?>");
-				t = PyString_FromString(c);
-#else
-				char* c = (char*)PyMem_Malloc((strlen(bit->pi_chars)+strlen(bit->pi_name)+6)*2);
-				Char* z = strdup_char8_to_Char("<?");
-				Strcpy(c,z);
-				free(z);
-				Strcat(c,bit->pi_name);
-				z = strdup_char8_to_Char(" ");
-				Strcat(c,z);
-				free(z);
-				Strcat(c,bit->pi_chars);
-				z = strdup_char8_to_Char("?>");
-				Strcat(c,z);
-				free(z);
-				t = PYSTRING(c);
-#endif
+				s = PyDict_New();
+				PyDict_SetItemString(s, "name", t=PyString_FromString(bit->pi_name));
+				Py_DECREF(t);
+				t = _makeNodePD( pd, piTagName, s, 0);
+				Py_INCREF(piTagName);
+				s = PyString_FromString(bit->pi_chars);
+				PyList_Append(PDGetItem(t,2),s);
+				Py_DECREF(s);
 				PyList_Append(PDGetItem(stack[*depth],2),t);
 				Py_DECREF(t);
-				PyMem_Free(c);
 				}
 			break;
 		case XBIT_pcdata:
@@ -378,14 +377,14 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 			break;
 		case XBIT_comment:
 			if(ParserGetFlag(p,ReturnComments)){
-				char* c = (char*)PyMem_Malloc(strlen(bit->comment_chars)+8);
-				strcpy(c,"<!--");
-				strcat(c,bit->comment_chars);
-				strcat(c,"-->");
-				t = PyString_FromString(c);
+				t = _makeNodePD( pd, commentTagName, Py_None, 0);
+				Py_INCREF(Py_None);
+				Py_INCREF(commentTagName);
+				s = PyString_FromString(bit->comment_chars);
+				PyList_Append(PDGetItem(t,2),s);
+				Py_DECREF(s);
 				PyList_Append(PDGetItem(stack[*depth],2),t);
 				Py_DECREF(t);
-				PyMem_Free(c);
 				}
 			break;
 		default:
@@ -808,6 +807,10 @@ DL_EXPORT(void) initpyRXP(void)
 	PyDict_SetItemString(d, "RXPVersion", RXPVersion );
 	moduleError = PyErr_NewException(MODULE ".Error",NULL,NULL);
 	PyDict_SetItemString(d,"error",moduleError);
+	piTagName = PyString_FromString("<?");
+	PyDict_SetItemString(d, "piTagName", piTagName );
+	commentTagName = PyString_FromString("<!--");
+	PyDict_SetItemString(d, "commentTagName", commentTagName );
 	parser_flags = PyDict_New();
 	for(i=0;flag_vals[i].k;i++){
 		PyDict_SetItemString(parser_flags, flag_vals[i].k, t=PyInt_FromLong(flag_vals[i].v));
