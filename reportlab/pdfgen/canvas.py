@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.24  2000/04/06 09:52:02  andy_robinson
+#	Removed some old comments; tweaks to experimental Outline methods.
+#
 #	Revision 1.23  2000/04/05 16:26:36  rgbecker
 #	Fixes to setFill/StrokeColor
-#
+#	
 #	Revision 1.22  2000/04/05 16:21:02  rgbecker
 #	Added _SeqTypes for efficiency
 #	
@@ -96,7 +99,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.23 2000/04/05 16:26:36 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.24 2000/04/06 09:52:02 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -190,6 +193,8 @@ class Canvas:
         #self._code = []    #where the current page's marking operators accumulate
         self._restartAccumulators()  # restart all accumulation state (generalized, arw)
         self._annotationCount = 0
+
+        self._outlines = [] # list for a name tree
         
         #PostScript has the origin at bottom left. It is easy to achieve a top-
         #down coord system by translating to the top of the page and setting y
@@ -249,6 +254,14 @@ class Canvas:
     #info functions - non-standard
     def setAuthor(self, author):
         self._doc.setAuthor(author)
+
+    def addOutlineEntry0(self, title, key, level=1):
+        """Adds a new entry to the outline.  If not specified,
+        this gos at the top level.  If specified, it must be
+        no more than 1 greater thsan the current outline level."""
+        #to be completed
+        self._outlines.append(title)
+        
         
     def setOutlineNames0(self, *nametree):
         """nametree should can be a recursive tree like so
@@ -265,6 +278,7 @@ class Canvas:
           each of the string names inside must be bound to a bookmark
           before the document is generated.
         """
+        #print nametree
         apply(self._doc.outline.setNames, (self,)+nametree)
         
     def setTitle(self, title):
@@ -432,6 +446,7 @@ class Canvas:
         a showPage() to save them having to."""
         if len(self._code):  
             self.showPage()
+
         self._doc.SaveToFile(self._filename)
         print 'saved', self._filename
 

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.8  2000/04/06 09:52:02  andy_robinson
+#	Removed some old comments; tweaks to experimental Outline methods.
+#
 #	Revision 1.7  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
-#
+#	
 #	Revision 1.6  2000/02/23 10:53:33  rgbecker
 #	GMCM's memleak fixed
 #	
@@ -49,7 +52,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.7 2000/03/08 13:06:39 andy_robinson Exp $ '''
+__version__=''' $Id: layout.py,v 1.8 2000/04/06 09:52:02 andy_robinson Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -589,6 +592,7 @@ class Image(Drawable):
         """If size to draw at not specified, get it from the image."""
         import Image  #this will raise an error if they do not have PIL.
         self.filename = filename
+        print 'Creating Image for', filename
         img = Image.open(filename)
         (self.imageWidth, self.imageHeight) = img.size
         if width:
@@ -614,171 +618,6 @@ class Image(Drawable):
                                   self.drawWidth,
                                   self.drawHeight
                                   )
-##
-##class BaseGrid(Drawable):
-##    """Base class for all further grids.  Currently
-##    just lays out the lines.  Every table is created
-##    with a list of column and row sizes, and drawn
-##    at a given x and y coordinate.  The assumption
-##    is that you know the size and number of rows
-##    before you start, and never change it - this is
-##    for printing after all."""
-##    #inherit from Drawable when I am reunited with my code
-##
-##    def __init__(self, colWidths, rowHeights):
-##        assert len(colWidths) > 1, "Must have at least 1 column width"
-##        assert len(rowHeights) > 1, "Must have at least 1 row height"
-##
-##        #user specifies top row height first, but we want reverse order - fix
-##        tmp = list(rowHeights)
-##        tmp.reverse()
-##        rowHeights = tuple(tmp)
-##
-##        #work out width and height, and keep the x and y lines handy
-##        self._height = 0
-##        self._horzLines = [self._height]
-##        for h in rowHeights:
-##                self._height = self._height + h
-##                self._horzLines.append(self._height)
-##        self._horzLines.reverse()
-##
-##        self._width = 0
-##        self._vertLines = [self._width]
-##        for w in colWidths:
-##                self._width = self._width + w
-##                self._vertLines.append(self._width)
-##
-##        self._rowHeights = rowHeights
-##        self._colWidths = colWidths
-##        self._rows = len(self._rowHeights)
-##        self._cols = len(self._colWidths)
-##        self._right = self._width  #obviously, since origin is (0,0), but
-##        self._top = self._height   #makes some code clearer.
-##
-##    def wrap(self, availWidth, availHeight):
-##        #nice and easy, since they are predetermined size
-##        self.availWidth = availWidth
-##        return (self._width, self._height)
-##
-##
-##    def draw(self):
-##        """Just does the basic grid in current line
-##        styles.  Centre it in the frame for now"""
-##        nudge = 0.5 * (self.availWidth - self._width)
-##        self.canv.translate(nudge, 0)
-##        y = 0
-##        self.canv.setLineWidth(0.1)
-##        self.canv.line(0, y, self._width, y)
-##        for dy in self._rowHeights:
-##            y = y + dy
-##            self.canv.line(0, y, self._width, y)
-##
-##        x = 0
-##        self.canv.line(x, 0, x, self._height)
-##        for dx in self._colWidths:
-##            x = x + dx
-##            self.canv.line(x, 0, x, self._height)
-##
-##
-##class TextGrid(BaseGrid):
-##    """A TextGrid allows one string per (or object, which will
-##    be converted with str()) per cell.  Each cell has a set of
-##    properties which may be set individually, and which draw the
-##    text.  Prepare a matrix of your data and pass it to the
-##    constructor."""
-##    def __init__(self, colWidths, rowHeights, data):
-##        BaseGrid.__init__(self, colWidths, rowHeights)
-##
-##        #check the data is square and matches
-##        assert len(data) == len(rowHeights), "Data error - %d rows in data but %d in grid" % (len(data), len(self._rowHeights))
-##        cols = len(colWidths)
-##        for i in range(len(data)):
-##            assert len(data[i]) == cols, "Not enough data points in row %d!" % i
-##
-##        #OK, keep it
-##        self._data = data
-##
-##        #keeping line properties for each segment would get complex,
-##        #so we keep a list of line drawing instructions
-##        self._lineSegments = []
-##
-##        #space to hold cell properties
-##        self._cellStyles = {}
-##        self._defaultCellStyle = CellStyle('<generic>')  #make a style on the fly
-##
-##    def addLines(self, col1, row1, col2, row2, width=1):
-##        """Adds line segments to be drawn later on.  You may use negative
-##        indices for any number. The four coords you give specify a sub-grid
-##        within the main one which will be drawn as specified."""
-##
-##        # turn all args to positive numbers
-##        if col1 < 0:
-##            col1 = self._cols + 1 + col1
-##        if row1 < 0:
-##            row1 = self._rows + 1 + row1
-##        if col2 < 0:
-##            col2 = self._cols + 1 + col2
-##        if row2 < 0:
-##            row2 = self._rows + 1 + row2
-##
-##        assert 0 <= col1  <= self._cols, "Illegal Column Index"
-##        assert 0 <= row1  <= self._rows, "Illegal Row Index"
-##        assert 0 <= col2  <= self._cols, "Illegal Column Index"
-##        assert 0 <= row2  <= self._rows, "Illegal Row Index"
-##
-##
-##        self._lineSegments.append(col1, row1, col2, row2, width)
-##
-##
-##    def draw(self):
-##        nudge = 0.5 * (self.availWidth - self._width)
-##        self.canv.translate(nudge, 0)
-##        self.drawLines()
-##        self.drawText()
-##
-##    def drawLines(self):
-##        """Called by draw, does all the line segments"""
-##        for (col1, row1, col2, row2, width) in self._lineSegments:
-##            self.canv.setLineWidth(width)
-##            #work out the row and column coordinates
-##
-##            #draw the verticals if there are any
-##            if row1 <> row2:
-##                for col in range(col1, col2+1):
-##                    x1 = self._vertLines[col]
-##                    y1 = self._horzLines[row1]
-##                    x2 = self._vertLines[col]
-##                    y2 = self._horzLines[row2]
-##                    self.canv.line(x1, y1, x2, y2)
-##
-##            #draw the horizontals if there are any
-##            if col1 <> col2:
-##                for row in range(row1, row2+1):
-##                    x1 = self._vertLines[col1]
-##                    y1 = self._horzLines[row]
-##                    x2 = self._vertLines[col2]
-##                    y2 = self._horzLines[row]
-##                    self.canv.line(x1, y1, x2, y2)
-##
-##    def getCellRect(self, col, row):
-##        """Returns the bounding rectangle for a cell"""
-##        left = self._vertLines[col]
-##        bottom = self._horzLines[row+1]
-##        right = self._vertLines[col+1]
-##        top = self._horzLines[row]
-##        return (left, bottom, right, top)
-##
-##
-##    def drawText(self):
-##        """Called by Draw, does the strings.  No format options yet"""
-##        #cheat and pick a font
-##        self.canv.setFont('Times-Roman', 10, 12)
-##
-##        for col in range(self._cols):
-##            for row in range(self._rows):
-##                (left, bottom, right, top) = self.getCellRect(col, row)
-##                self.canv.drawString(left+6, bottom + 3, str(self._data[row][col]))
-##
 class Spacer(Drawable):
     """A spacer just takes up space and doesn't draw anything - it can
     ensure a gap between objects."""

@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.12  2000/04/06 09:52:02  andy_robinson
+#	Removed some old comments; tweaks to experimental Outline methods.
+#
 #	Revision 1.11  2000/04/02 02:52:39  aaron_watters
 #	added support for outline trees
-#
+#	
 #	Revision 1.10  2000/03/24 21:03:51  aaron_watters
 #	Added forms, destinations, linkages and other features
 #	
@@ -56,7 +59,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.11 2000/04/02 02:52:39 aaron_watters Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.12 2000/04/06 09:52:02 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -586,6 +589,12 @@ class PDFOutline(PDFObject):
     def setNames(self, canvas, *nametree):
         desttree = self.translateNames(canvas, nametree)
         self.setDestinations(desttree)
+        
+    def setNameList(self, canvas, nametree):
+        "Explicit list so I don't need to do apply(...) in the caller"
+        desttree = self.translateNames(canvas, nametree)
+        self.setDestinations(desttree)
+        
     def translateNames(self, canvas, object):
         "recursively translate tree of names into tree of destinations"
         from types import ListType, TupleType, StringType
