@@ -338,6 +338,79 @@ class TableTestCase(unittest.TestCase):
         of ReportLab tables:  (1) fix the widths if you can, (2) don't use
         a paragraph when a string will do.
         """, styNormal))
+        
+        lst.append(Paragraph("""Unsized columns that contain flowables without
+        precise widths, such as paragraphs and nested tables,
+        still need to try and keep their content within borders and ideally 
+        even honor percentage requests.  This can be tricky--and expensive.  
+        But sometimes you can't follow the golden rules.
+        """, styNormal))
+
+        lst.append(Paragraph("""The code first calculates the minimum width
+        for each unsized column by iterating over every flowable in each column
+        and remembering the largest minimum width.  It then allocates
+        available space to accomodate the minimum widths.  Any remaining space
+        is divided up, treating a width of '*' as greedy, a width of None as
+        non-greedy, and a percentage as a weight.  If a column is already
+        wider than its percentage warrants, it is not further expanded, and
+        the other widths accomodate it.
+        """, styNormal))
+        
+        lst.append(Paragraph("""For instance, consider this tortured table.
+        It contains four columns, with widths of None, None, 60%, and 20%,
+        respectively, and a single row.  The first cell contains a paragraph.
+        The second cell contains a table with fixed column widths that total 
+        about 50% of the total available table width.  The third cell contains
+        a string.  The last cell contains a table with no set widths but a 
+        single cell containing a paragraph.
+        """, styNormal))
+        ministy = TableStyle([
+            ('GRID', (0,0), (-1,-1), 1.0, colors.black),
+            ])
+        nested1 = [Paragraph(
+            'This is a paragraph.  The column has a width of None.', 
+            styNormal)]
+        nested2 = [Table(
+            [[Paragraph(
+                'This table is set to take up two and a half inches.  The '
+                'column that holds it has a width of None.', styNormal)]],
+            colWidths=(180,),
+            rowHeights=None,
+            style=ministy)]
+        nested3 = '60% width'
+        nested4 = [Table(
+            [[[Paragraph(
+                "This is a table with a paragraph in it but no width set.  "
+                "The column width in the containing table is 20%.", 
+                styNormal)]]],
+            colWidths=(None,),
+            rowHeights=None,
+            style=ministy)]
+        t = Table([[nested1, nested2, nested3, nested4]],
+                  colWidths=(None, None, '60%', '20%'),
+                  rowHeights=None,
+                  style=ministy)
+        lst.append(t)
+        
+        lst.append(Paragraph("""Notice that the second column does expand to
+        account for the minimum size of its contents; and that the remaining
+        space goes to the third column, in an attempt to honor the '60%' 
+        request as much as possible.  This is reminiscent of the typical HTML
+        browser approach to tables.""", styNormal))
+
+        lst.append(Paragraph("""To get an idea of how potentially expensive
+        this is, consider the case of the last column: the table gets the
+        minimum width of every flowable of every cell in the column.  In this
+        case one of the flowables is a table with a column without a set
+        width, so the nested table must itself iterate over its flowables. 
+        The contained paragraph then calculates the width of every word in it
+        to see what the biggest word is, given the set font face and size.  It
+        is easy to imagine creating a structure of this sort that took an
+        unacceptably large amount of time to calculate.  Remember the golden
+        rule, if you can. """, styNormal))
+        
+        lst.append(Paragraph("""This code does not yet handle spans well.""",
+        styNormal))
 
         SimpleDocTemplate(outputfile('test_table_layout.pdf'), showBoundary=1).build(lst)
 

@@ -190,6 +190,12 @@ def _convert2int(value, map, low, high, name, cmd):
             pass
     raise ValueError('Bad %s value %s in %s'%(name,value,str(cmd)))
 
+def _endswith(obj,s):
+    try:
+        return obj.endswith(s)
+    except:
+        return 0
+
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
                 repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None, ident=None):
@@ -378,8 +384,7 @@ class Table(Flowable):
                 if type(w) in (FloatType,IntType): return w
             except AttributeError:
                 pass
-        if t is not StringType: v = v is not None and str(v) or ''
-        v = string.split(v, "\n")
+        v = string.split(v is not None and str(v) or '', "\n")
         return max(map(lambda a, b=s.fontname, c=s.fontsize,d=pdfmetrics.stringWidth: d(a,b,c), v))
 
     def _calc_height(self, availHeight, availWidth, H=None, W=None):
@@ -435,9 +440,7 @@ class Table(Flowable):
                             if not rl_config.allowTableBoundsErrors and dW>w:
                                 raise "LayoutError", "Flowable %s (%sx%s points) too wide for cell(%d,%d) (%sx* points) in\n%s" % (v[0].identity(30),fp_str(dW),fp_str(t),i,j, fp_str(w), self.identity(30))
                         else:
-                            if t is not StringType:
-                                v = v is None and '' or str(v)
-                            v = string.split(v, "\n")
+                            v = string.split(v is not None and str(v) or '', "\n")
                             t = s.leading*len(v)
                         t = t+s.bottomPadding+s.topPadding
                     if t>h: h = t   #record a new maximum
@@ -532,7 +535,7 @@ class Table(Flowable):
             elif w == '*':
                 numberUndefined += 1
                 numberGreedyUndefined += 1
-            elif type(w) is StringType and w.endswith('%'):
+            elif _endswith(w,'%'):
                 percentDefined += 1
                 percentTotal += float(w[:-1])
             else:
@@ -550,7 +553,7 @@ class Table(Flowable):
         elementWidth = self._elementWidth
         for colNo in range(self._ncols):
             w = W[colNo]
-            if w is None or w=='*' or (type(w) is StringType and w.endswith('%')):
+            if w is None or w=='*' or _endswith(w,'%'):
                 siz = 1
                 current = final = None
                 for rowNo in range(self._nrows):
@@ -586,43 +589,97 @@ class Table(Flowable):
                 percentTotal = 100
                 defaultDesired = (defaultWeight/percentTotal)*availWidth
             else:
-                defaultWeight = defaultDesired = 0
-            
-            desiredWidths = {}
-            difference = 0
+                defaultWeight = defaultDesired = 1
+            # we now calculate how wide each column wanted to be, and then
+            # proportionately shrink that down to fit the remaining available
+            # space.  A column may not shrink less than its minimum width,
+            # however, which makes this a bit more complicated.
+            desiredWidths = []
+            totalDesired = 0
+            effectiveRemaining = remaining
             for colNo, minimum in minimums.items():
                 w = W[colNo]
-                if w is not None and w.endswith('%'):
+                if _endswith(w,'%'):
                     desired = (float(w[:-1])/percentTotal)*availWidth
                 elif w == '*':
                     desired = defaultDesired
                 else:
-                    desired = not numberGreedyUndefined and defaultDesired or 0
+                    desired = not numberGreedyUndefined and defaultDesired or 1
                 if desired <= minimum:
                     W[colNo] = minimum
                 else:
-                    desiredWidths[colNo] = desired
-                    difference += desired-minimum
-            disappointment = (difference-remaining)/len(desiredWidths)
-            for colNo, desired in desiredWidths.items():
-                adjusted = desired - disappointment
-                minimum = minimums[colNo]
-                if minimum > adjusted:
-                    W[colNo] = minimum
-                    del desiredWidths[colNo]
-                    difference += minimum-adjusted
-                    disappointment = (difference-remaining)/len(desiredWidths)
-            for colNo, desired in desiredWidths.items():
-                adjusted = desired - disappointment
-                minimum = minimums[colNo]
-                assert adjusted >= minimum
-                W[colNo] = adjusted
+                    desiredWidths.append(
+                        (desired-minimum, minimum, desired, colNo))
+                    totalDesired += desired
+                    effectiveRemaining += minimum
+            if desiredWidths: # else we're done
+                # let's say we have two variable columns.  One wanted
+                # 88 points, and one wanted 264 points.  The first has a 
+                # minWidth of 66, and the second of 55.  We have 71 points
+                # to divide up in addition to the totalMinimum (i.e., 
+                # remaining==71).  Our algorithm tries to keep the proportion
+                # of these variable columns.
+                #
+                # To do this, we add up the minimum widths of the variable
+                # columns and the remaining width.  That's 192.  We add up the
+                # totalDesired width.  That's 352.  That means we'll try to
+                # shrink the widths by a proportion of 192/352--.545454.
+                # That would make the first column 48 points, and the second
+                # 144 points--adding up to the desired 192.
+                #
+                # Unfortunately, that's too small for the first column.  It 
+                # must be 66 points.  Therefore, we go ahead and save that 
+                # column width as 88 points.  That leaves (192-88==) 104
+                # points remaining.  The proportion to shrink the remaining
+                # column is (104/264), which, multiplied  by the desired
+                # width of 264, is 104: the amount assigned to the remaining
+                # column.
+                proportion = effectiveRemaining/totalDesired
+                # we sort the desired widths by difference between desired and
+                # and minimum values, a value called "disappointment" in the 
+                # code.  This means that the columns with a bigger 
+                # disappointment will have a better chance of getting more of 
+                # the available space.
+                desiredWidths.sort()
+                finalSet = []
+                for disappointment, minimum, desired, colNo in desiredWidths:
+                    adjusted = proportion * desired
+                    if adjusted < minimum:
+                        W[colNo] = minimum
+                        totalDesired -= desired
+                        effectiveRemaining -= minimum
+                        if totalDesired:
+                            proportion = effectiveRemaining/totalDesired
+                    else:
+                        finalSet.append((minimum, desired, colNo))
+                for minimum, desired, colNo in finalSet:
+                    adjusted = proportion * desired
+                    assert adjusted >= minimum
+                    W[colNo] = adjusted
         else:
             for colNo, minimum in minimums.items():
                 W[colNo] = minimum
         if verbose: print 'new widths are:', W
         self._argW = self._colWidths = W
         return W
+
+    def minWidth(self):
+        W = list(self._argW)
+        width = 0
+        elementWidth = self._elementWidth
+        for colNo, w in enumerate(W):
+            if w is None or w=='*' or _endswith(w,'%'):
+                final = 0
+                for rowNo in range(self._nrows):
+                    value = self._cellvalues[rowNo][colNo]
+                    style = self._cellStyles[rowNo][colNo]
+                    new = (elementWidth(value,style)+
+                           style.leftPadding+style.rightPadding)
+                    final = max(final, new)
+                width += final
+            else:
+                width += float(w)
+        return width # XXX + 1/2*(left and right border widths)
 
     def _calcSpanRanges(self):
         """Work out rects for tables which do row and column spanning.
@@ -1174,9 +1231,7 @@ class Table(Flowable):
                 x = colpos + colwidth - cellstyle.rightPadding
             else:
                 raise ValueError, 'Invalid justification %s' % just
-            if n is StringType: val = cellval
-            else: val = str(cellval)
-            vals = string.split(val, "\n")
+            vals = string.split(str(cellval), "\n")
             n = len(vals)
             leading = cellstyle.leading
             fontsize = cellstyle.fontsize
