@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.35 2000/12/04 13:22:34 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.35 2000/12/04 13:22:34 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.36 2000/12/06 12:29:10 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.36 2000/12/06 12:29:10 rgbecker Exp $ '''
 import string
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -371,11 +371,11 @@ class Paragraph(Flowable):
 			currentWidth = - spaceWidth   # hack to get around extra space for word 1
 			for word in words:
 				wordWidth = stringWidth(word, fontName, fontSize)
-				space_available = maxWidth - (currentWidth + spaceWidth + wordWidth)
-				if space_available > 0 or len(cLine)==0:
+				newWidth = currentWidth + spaceWidth + wordWidth
+				if newWidth<=maxWidth or len(cLine)==0:
 					# fit one more on this line
 					cLine.append(word)
-					currentWidth = currentWidth + spaceWidth + wordWidth
+					currentWidth = newWidth
 				else:
 					if currentWidth>self.width: self.width = currentWidth
 					#end of line
@@ -409,8 +409,11 @@ class Paragraph(Flowable):
 
 				wordWidth = w[0]
 				f = w[1][0]
-				space_available = maxWidth - (currentWidth + spaceWidth + wordWidth)
-				if space_available > 0 or n==0:
+				if wordWidth>0:
+					newWidth = currentWidth + spaceWidth + wordWidth
+				else:
+					newWidth = currentWidth
+				if newWidth<=maxWidth or n==0:
 					# fit one more on this line
 					n = n + 1
 					maxSize = max(maxSize,f.fontSize)
@@ -433,7 +436,7 @@ class Paragraph(Flowable):
 						words.append(f)
 						maxSize = max(maxSize,f.fontSize)
 						
-					currentWidth = currentWidth + spaceWidth + wordWidth
+					currentWidth = newWidth
 				else:
 					if currentWidth>self.width: self.width = currentWidth
 					#end of line
