@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.117 2003/09/08 16:08:15 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.117 2003/09/08 16:08:15 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.118 2004/01/13 11:22:17 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.118 2004/01/13 11:22:17 rgbecker Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -378,10 +378,12 @@ class Canvas:
         self._setAnnotations(page)
         self._doc.addPage(page)
 
-        if self._onPage:
-            self._onPage(self._pageNumber)
+        if self._onPage: self._onPage(self._pageNumber)
+        self._startPage()
+
+    def _startPage(self):
         #now get ready for the next one
-        self._pageNumber = self._pageNumber + 1
+        self._pageNumber = self._pageNumber+1
         self._restartAccumulators()
         self.init_graphics_state()
         self.state_stack = []
