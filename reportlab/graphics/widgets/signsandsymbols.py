@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/signsandsymbols.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.8 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.9 2001/04/28 16:28:36 rgbecker Exp $
 # signsandsymbols.py
 # A collection of new widgets
 # author: John Precedo (johnp@reportlab.com)
@@ -81,7 +81,7 @@ class ETriangle0(Widget):
             self.x+(s/2),self.y+s],
                fillColor = self.color,
                strokeColor = self.strokecolor,
-               strokeWidth=s/50)
+               strokeWidth=s/50.)
         g.add(triangle)
         return g
 
@@ -134,7 +134,7 @@ class RTriangle0(Widget):
             self.x,self.y+s],
                fillColor = self.color,
                strokeColor = self.strokecolor,
-               strokeWidth=s/50)
+               strokeWidth=s/50.)
         g.add(triangle)
         return g  
 
@@ -366,7 +366,7 @@ class SmileyFace0(Widget):
         outerCircle = shapes.Circle(cx = (self.x+(s/2)), cy = (self.y+(s/2)), r = s/2,
                fillColor = self.color,
                strokeColor = colors.black,
-               strokeWidth=s/38)
+               strokeWidth=s/38.)
         g.add(outerCircle)
 
         leftEye = shapes.Ellipse(self.x+(s/3),self.y+(s/3)*2, s/30, s/10, fillColor=colors.black)
@@ -406,7 +406,7 @@ class SmileyFace0(Widget):
         smile = shapes.PolyLine(pointslist,
                fillColor = colors.black,
                strokeColor = colors.black,
-               strokeWidth = s/40)
+               strokeWidth = s/40.)
         g.add(smile)
 
         return g
@@ -591,7 +591,7 @@ class NotAllowed0(Widget):
         outerCircle = shapes.Circle(cx = (self.x+(s/2)), cy = (self.y+(s/2)), r = (s/2)-(s/10),
                fillColor = None,
                strokeColor = colors.red,
-               strokeWidth=s/10)
+               strokeWidth=s/10.)
         g.add(outerCircle)
         
         centerx=self.x+s
@@ -621,7 +621,7 @@ class NotAllowed0(Widget):
         crossbar = shapes.PolyLine(pointslist,
                fillColor = colors.red,
                strokeColor = colors.red,
-               strokeWidth = s/10)
+               strokeWidth = s/10.)
 
         g.add(crossbar)
 
