@@ -33,14 +33,17 @@
 #
 ###############################################################################
 #	$Log: pagesizes.py,v $
+#	Revision 1.2  2000/03/08 13:40:49  rgbecker
+#	Added DEFAULT_PAGE_SIZE at end
+#
 #	Revision 1.1  2000/03/08 12:55:07  andy_robinson
 #	initial checkin
-#
+#	
 
 """This module defines a few common page sizes in points (1/72 inch).
 To be expanded to include things like label sizes, envelope windows
 etc."""
-__version__=''' $Id: pagesizes.py,v 1.1 2000/03/08 12:55:07 andy_robinson Exp $ '''
+__version__=''' $Id: pagesizes.py,v 1.2 2000/03/08 13:40:49 rgbecker Exp $ '''
 
 from units import cm, inch
 
@@ -67,3 +70,5 @@ B2 = (_BW*2, _BH*2)
 B1 = (_BH*4, _BW*2)
 B0 = (_BW*4, _BH*4)
 
+#change this to suit your average needs
+DEFAULT_PAGE_SIZE = A4
