@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/frames.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.14 2001/06/22 08:52:38 aaron_watters Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.15 2001/09/24 15:29:23 aaron_watters Exp $
 
-__version__=''' $Id: frames.py,v 1.14 2001/06/22 08:52:38 aaron_watters Exp $ '''
+__version__=''' $Id: frames.py,v 1.15 2001/09/24 15:29:23 aaron_watters Exp $ '''
 
 __doc__="""
 """
@@ -11,6 +11,8 @@ __doc__="""
 _geomAttr=('x1', 'y1', 'width', 'height', 'leftPadding', 'bottomPadding', 'rightPadding', 'topPadding')
 
 _FUZZ=1e-6 # to avoid numerical difficulties we use this as an error band
+
+from reportlab import rl_config
 
 class Frame:
 	'''
@@ -118,7 +120,7 @@ class Frame:
 			# width test disabled!  Just allow it to overflow and let the user
 			# fix the problem (XXXX MAYBE CHANGE THIS TO OPTIONAL WARNING/ERROR)
 			#if ((h > self._aH and not trySplit) or w > self._aW):
-			if (h > self._aH and not trySplit):
+			if (not rl_config.allowTableBoundsErrors) and (h > self._aH and not trySplit):
 				raise "LayoutError", "Flowable %s (%sx%s points) too large for frame (%sx%s points)." % (
 					flowable.__class__, w,h, self._aW,self._aH)
 			return 0
