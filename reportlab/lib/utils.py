@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.37 2002/12/23 00:46:57 andy_robinson Exp $
-__version__=''' $Id: utils.py,v 1.37 2002/12/23 00:46:57 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.38 2003/01/15 11:37:54 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.38 2003/01/15 11:37:54 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -42,12 +42,14 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     parts = string.split(modulename, '.')
     name = parts[0]
 
-    #this hosed my brain..redo it slowly  (AR).
-    #path = list(baseDir and (type(baseDir) not in SeqTypes and [baseDir] or filter(None,baseDir)) or None)
     if baseDir is None:
         path = sys.path[:]
     else:
-        path = [baseDir]
+        if type(baseDir) not in SeqTypes
+            path = [baseDir]
+        else:
+            path = list(baseDir)
+    path = filter(None,basDir)
 
     if noCWD:
         if '.' in path:
