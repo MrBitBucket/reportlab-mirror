@@ -449,7 +449,7 @@ def _flowableSublist(V):
     "if it isn't a list or tuple, wrap it in a list"
     if type(V) not in (ListType, TupleType): V = V is not None and [V] or []
     from doctemplate import LCActionFlowable
-    assert not filter(lambda x: isinstance(x,LCActionFlowable),V),'LCActionFlowables not allowed in sublists'
+    assert not [x for x in V if isinstance(x,LCActionFlowable)],'LCActionFlowables not allowed in sublists'
     return V
 
 class KeepTogether(Flowable):
