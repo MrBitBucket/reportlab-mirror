@@ -107,7 +107,7 @@ class RTriangle0(Widget):
 
     def demo(self):
         D = shapes.Drawing(200, 100)
-        et = ETriangle0()
+        et = RTriangle0()
         et.x=50
         et.y=0
         et.draw()
@@ -220,7 +220,7 @@ class Crossbox0(Widget):
         self.crosswidth = 10
         
     def demo(self):
-        D = shapes.Drawing(200, 200)
+        D = shapes.Drawing(200, 100)
         labelFontSize = 10
         cb = Crossbox0()
         cb.x=50
@@ -644,13 +644,13 @@ class NoSmoking0(NotAllowed0):
         
     def demo(self):
         D = shapes.Drawing(200, 100)
-        na = NoSmoking0()
-        na.x=50
-        na.y=0
-        na.draw()
-        D.add(na)
+        ns = NoSmoking0()
+        ns.x=50
+        ns.y=0
+        ns.draw()
+        D.add(ns)
         labelFontSize = 10
-        D.add(shapes.String(na.x+(na.size/2),(na.y-(1.2*labelFontSize)),
+        D.add(shapes.String(ns.x+(ns.size/2),(ns.y-(1.2*labelFontSize)),
                             self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
@@ -839,13 +839,28 @@ class YesNo0(Widget):
     def demo(self):
         D = shapes.Drawing(200, 100)
         yn = YesNo0()
-        yn.x = 50
-        yn.y = 0
-        yn.testValue = 1
+        yn.x = 15
+        yn.y = 25
+        yn.size = 70
+        yn.testValue = 0
         yn.draw()
         D.add(yn)
-        labelFontSize = 10
+        yn2 = YesNo0()
+        yn2.x = 120
+        yn2.y = 25
+        yn2.size = 70
+        yn2.testValue = 1
+        yn2.draw()
+        D.add(yn2)
+        labelFontSize = 8
         D.add(shapes.String(yn.x+(yn.size/2),(yn.y-(1.2*labelFontSize)),
+                            'testValue=0', fillColor=colors.black, textAnchor='middle',
+                            fontSize=labelFontSize))
+        D.add(shapes.String(yn2.x+(yn2.size/2),(yn2.y-(1.2*labelFontSize)),
+                            'testValue=1', fillColor=colors.black, textAnchor='middle',
+                            fontSize=labelFontSize))
+        labelFontSize = 10
+        D.add(shapes.String(yn.x+85,(yn.y-20),
                             self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
@@ -1023,7 +1038,7 @@ class ArrowTwo0(Widget):
 
     def demo(self):
         D = shapes.Drawing(200, 100)
-        a2 = ArrowOne0()
+        a2 = ArrowTwo0()
         a2.x=50
         a2.y=0
         a2.draw()
@@ -1060,6 +1075,8 @@ class ArrowTwo0(Widget):
 
 
 def test():
+    """This function produces a pdf with examples of all the signs and symbols from this file.
+    """
     labelFontSize = 10
     D = shapes.Drawing(450,650)
     cb = Crossbox0()
