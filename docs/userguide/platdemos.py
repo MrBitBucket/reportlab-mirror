@@ -16,23 +16,26 @@ captionStyle = ParagraphStyle('Caption',
 
 
 class Figure(Flowable):
-    def __init__(self, width, height):
+    def __init__(self, width, height, caption=""):
         Flowable.__init__(self)
         self.width = width
         self.figureHeight = height
         self.captionHeight = 0  # work out later
-        self.caption = None
+        self.caption = caption
         self.captionStyle = ParagraphStyle('Caption',
                        fontName='Times-Italic',
                        fontSize=12,
                        spaceBefore=6,
                        alignment=TA_CENTER)
+        #must build paragraph now to get sequencing in synch
+        #with rest of story
+        self.captionPara = Paragraph(self.caption, self.captionStyle)
+
         self.spaceBefore = 12
         self.spaceAfter = 12
 
     def wrap(self, availWidth, availHeight):
         # try to get the caption aligned
-        self.captionPara = Paragraph(self.caption, self.captionStyle)
         (w, h) = self.captionPara.wrap(self.width, availHeight - self.figureHeight)
         self.captionHeight = h
         self.height = self.captionHeight + self.figureHeight

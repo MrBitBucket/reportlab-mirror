@@ -81,6 +81,7 @@ def getStyleSheet():
                                   parent=stylesheet['Normal'],
                                   firstLineIndent=36,
                                   leftIndent=36,
+                                  bulletIndent=18,
                                   spaceBefore=0,
                                   bulletFontName='Symbol'),
                    alias='bu')
