@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.80 2003/06/24 11:55:28 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.80 2003/06/24 11:55:28 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.81 2003/07/03 14:29:08 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.81 2003/07/03 14:29:08 rgbecker Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -161,10 +161,12 @@ class PDFDocument:
         self.setCompression(compression)
         self.encoding = encoding
         # signature for creating PDF ID
-        import md5, time
+        import md5
         sig = self.signature = md5.new()
         sig.update("a reportlab document")
-        sig.update(repr(time.time())) # initialize with timestamp digest
+        if not self.invariant:
+            import time
+            sig.update(repr(time.time())) # initialize with timestamp digest
         # mapping of internal identifier ("Page001") to PDF objectnumber and generation number (34, 0)
         self.idToObjectNumberAndVersion = {}
         # mapping of internal identifier ("Page001") to PDF object (PDFPage instance)
@@ -1297,12 +1299,11 @@ class PDFInfo:
     File | Document Info in Acrobat Reader.  If this is wrong, you get
     Postscript errors while printing, even though it does not print."""
     def __init__(self):
-        self.invariant = 1
+        self.invariant = rl_config.invariant
         self.title = "untitled"
         self.author = "anonymous"
         self.subject = "unspecified"
-        #now = time.localtime(time.time())
-        #self.datestr = '%04d%02d%02d%02d%02d%02d' % tuple(now[0:6])
+
     def digest(self, md5object):
         # add self information to signature
         for x in (self.title, self.author, self.subject):
@@ -1312,10 +1313,7 @@ class PDFInfo:
         D = {}
         D["Title"] = PDFString(self.title)
         D["Author"] = PDFString(self.author)
-        if self.invariant:
-            D["CreationDate"] = PDFString('19001231000000')
-        else:
-            D["CreationDate"] = PDFDate()
+        D["CreationDate"] = PDFDate(invariant=self.invariant)
         D["Producer"] = PDFString("ReportLab http://www.reportlab.com")
         D["Subject"] = PDFString(self.subject)
         PD = PDFDictionary(D)
@@ -1417,16 +1415,29 @@ class PDFRectangle:
         A = PDFArray([self.llx, self.lly, self.ulx, self.ury])
         return format(A, document)
 
-DATEFMT = '%04d%02d%02d%02d%02d%02d'
-import time
-(nowyyyy, nowmm, nowdd, nowhh, nowm, nows) = tuple(time.localtime(time.time())[:6])
-
+_NOW=None
 class PDFDate:
     # gmt offset not yet suppported
-    def __init__(self, yyyy=nowyyyy, mm=nowmm, dd=nowdd, hh=nowhh, m=nowm, s=nows):
+    def __init__(self, yyyy=None, mm=None, dd=None, hh=None, m=None, s=None, invariant=rl_config.invariant):
+        if None in (yyyy, mm, dd, hh, m, s):
+            if invariant:
+                now = 1900,01,01,00,00,00,0
+            else:
+                global _NOW
+                if _NOW is None:
+                    import time
+                    _NOW = tuple(time.localtime(time.time())[:6])
+                now = _NOW
+        if yyyy is None: yyyy=now[0]
+        if mm is None: mm=now[1]
+        if dd is None: dd=now[2]
+        if hh is None: hh=now[3]
+        if m is None: m=now[4]
+        if s is None: s=now[5]
         self.yyyy=yyyy; self.mm=mm; self.dd=dd; self.hh=hh; self.m=m; self.s=s
+
     def format(self, doc):
-        S = PDFString(DATEFMT % (self.yyyy, self.mm, self.dd, self.hh, self.m, self.s))
+        S = PDFString('%04d%02d%02d%02d%02d%02d' % (self.yyyy, self.mm, self.dd, self.hh, self.m, self.s))
         return format(S, doc)
 
 
