@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.27 2003/06/19 15:28:40 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.28 2003/07/07 16:40:12 rgbecker Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -12,7 +12,7 @@
 This permits you to customize and pop out individual wedges;
 supports elliptical and circular pies.
 """
-__version__=''' $Id: piecharts.py,v 1.27 2003/06/19 15:28:40 rgbecker Exp $ '''
+__version__=''' $Id: piecharts.py,v 1.28 2003/07/07 16:40:12 rgbecker Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -38,7 +38,7 @@ class WedgeLabel(Label):
         if not (na % 90): # we have a right angle case
             da = (self._pmv - na) % 360
             if abs(da)>5:
-                na += da>0 and 45 or -45
+                na = na + (da>0 and 45 or -45)
         return _ANGLE2BOXANCHOR[na]
 
 class WedgeProperties(PropHolder):
