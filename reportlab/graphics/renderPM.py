@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.42 2003/12/01 23:40:28 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.42 2003/12/01 23:40:28 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.43 2003/12/10 10:29:20 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.43 2003/12/10 10:29:20 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -12,7 +12,6 @@ Execute the script to see some test drawings."""
 from reportlab.graphics.shapes import *
 from reportlab.graphics.renderbase import StateTracker, getStateDelta
 from reportlab.pdfbase.pdfmetrics import getFont
-from reportlab.lib.logger import warnOnce
 from math import sin, cos, pi, ceil
 from reportlab.lib.utils import getStringIO
 from reportlab import rl_config
