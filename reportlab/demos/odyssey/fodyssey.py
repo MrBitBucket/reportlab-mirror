@@ -31,13 +31,16 @@
 #
 ###############################################################################
 #	$Log: fodyssey.py,v $
+#	Revision 1.3  2000/04/13 14:48:41  rgbecker
+#	<para> tag added in layout.py paraparser.py
+#
 #	Revision 1.2  2000/04/12 16:24:34  rgbecker
 #	XML Tagged Paragraph parser changes
-#
+#	
 #	Revision 1.1  2000/04/06 08:58:09  rgbecker
 #	Paragraph formatting version of odyssey.py
 #	
-__version__=''' $Id: fodyssey.py,v 1.2 2000/04/12 16:24:34 rgbecker Exp $ '''
+__version__=''' $Id: fodyssey.py,v 1.3 2000/04/13 14:48:41 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -84,8 +87,17 @@ def chapter(txt, style=ChapterStyle):
 	Elements.append(layout.Paragraph(txt, style))
 	Elements.append(layout.Spacer(0.2*inch, 0.3*inch))
 
-ParaStyle = copy.copy(styles["Normal"])
-ParaStyle.alignment = layout.TA_JUSTIFY
+ParaStyle = copy.deepcopy(styles["Normal"])
+if 'right' in sys.argv:
+	ParaStyle.alignment = layout.TA_RIGHT
+elif 'left' in sys.argv:
+	ParaStyle.alignment = layout.TA_LEFT
+elif 'justify' in sys.argv:
+	ParaStyle.alignment = layout.TA_JUSTIFY
+elif 'center' in sys.argv or 'centre' in sys.argv:
+	ParaStyle.alignment = layout.TA_CENTER
+else:
+	ParaStyle.alignment = layout.TA_JUSTIFY
 
 def p(txt, style=ParaStyle):
 	Elements.append(layout.Spacer(0.2*inch, 0.1*inch))
@@ -102,14 +114,13 @@ def pre(txt, style=PreStyle):
 	p = layout.Preformatted(txt, PreStyle)
 	Elements.append(p)
 
-
 def parseOdyssey(fn):
 	from time import time
 	E = []
 	t0=time()
 	L = open(fn,'r').readlines()
 	t1 = time()
-	print "open(%s,'r').readlines() too %.4f seconds" %(fn,t1-t0)
+	print "open(%s,'r').readlines() took %.4f seconds" %(fn,t1-t0)
 	for i in xrange(len(L)):
 		if L[i][-1]=='\012':
 			L[i] = L[i][:-1]

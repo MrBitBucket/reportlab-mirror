@@ -1,5 +1,6 @@
 import string
-import types
+import re
+from types import TupleType
 import sys
 import os
 import copy
@@ -13,16 +14,70 @@ except ImportError:
 
 from reportlab.lib.colors import stringToColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
+from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
+
+_re_para = re.compile('^\\s*<\\s*para(\\s+|>)')
 
 sizeDelta = 2		# amount to reduce font size by for super and sub script
 subFraction = 0.5	# fraction of font size that a sub script should be lowered
 superFraction = 0.5	# fraction of font size that a super script should be raised
 
 def _num(s):
-	try:
-		return int(s)
-	except ValueError:
-		return float(s)
+	if s[0] in ['+','-']:
+		try:
+			return ('relative',int(s))
+		except ValueError:
+			return ('relative',float(s))
+	else:
+		try:
+			return int(s)
+		except ValueError:
+			return float(s)
+
+def _align(s):
+	s = string.lower(s)
+	if s=='left': return TA_LEFT
+	elif s=='right': return TA_RIGHT
+	elif s=='justify': return TA_JUSTIFY
+	elif s in ('centre','center'): return TA_CENTER
+	else: raise ValueError
+
+_paraAttrMap = {'font': ('fontName', None),
+				'fontsize': ('fontSize', _num),
+				'leading': ('leading', _num),
+				'lindent': ('leftIndent', _num),
+				'rindent': ('rightIndent', _num),
+				'findent': ('firstLineIndent', _num),
+				'align': ('alignment', _align),
+				'spaceb': ('spaceBefore', _num),
+				'spacea': ('spaceAfter', _num),
+				'bfont': ('bulletFontName', None),
+				'bfontsize': ('bulletFontIndent',_num),
+				'bindent': ('bulletFontIndent',_num),
+				'color':('textColor',stringToColor),
+				'fg': ('textColor',stringToColor)}
+
+#things which are valid font attributes
+_fontAttrMap = {'size': ('fontSize', _num),
+				'name': ('fontName', None),
+				'fg': 	('textColor', stringToColor),
+				'color':('textColor', stringToColor)}
+
+def _addAttributeNames(m):
+	K = m.keys()
+	for k in K:
+		n = string.lower(m[k][0])
+		if not m.has_key(n):
+			m[n] = m[k]
+
+_addAttributeNames(_paraAttrMap)
+_addAttributeNames(_fontAttrMap)
+
+def _applyAttributes(obj, attr):
+	for k, v in attr.items():
+		if type(v) is TupleType and v[0]=='relative':
+			v = v[1]+getattr(obj,k,0)
+		setattr(obj,k,v)
 
 #characters not supported: epsi, Gammad, gammad, kappav, rhov, Upsi, upsi
 greeks = {
@@ -88,6 +143,8 @@ class ParaFrag:
 #	   < super > < /super > - superscript
 #	   < sub > < /sub > - subscript
 #	   <font name=fontfamily/fontname color=colorname size=float>
+#
+#		The whole may be surrounded by <para> </para> tags
 #
 # It will also be able to handle any MathML specified Greek characters.
 #------------------------------------------------------------------
@@ -162,29 +219,39 @@ class ParaParser(xmllib.XMLParser):
 	def end_greek(self):
 		self._pop(greek=1)
 
-	#things which are valid font attributes
-	_fontAttrMap = {'size': ('fontSize',_num),
-					'name': ('fontName', None),
-					'color':('textColor',stringToColor)}
+
 	def start_font(self,attr):
-		A = {}
-		for i, j in self._fontAttrMap.items():
-			if attr.has_key(i):
-				func = j[1]
-				val  = attr[i]
-				try:
-					A[j[0]] = (func is None) and val or apply(func,(val,))
-				except:
-					self.syntax_error('%s: invalid value %s'%(i,val))
+		A = self.getAttributes(attr,_fontAttrMap)
 		apply(self._push,(),A)
 
 	def end_font(self):
 		self._pop()
 
-	def _push(self,**kw):
+	def start_para(self,attr):
+		style = self._style
+		if attr!={}:
+			style = copy.deepcopy(style)
+			_applyAttributes(style,self.getAttributes(attr,_paraAttrMap))
+			self._style = style
+
+		# initialize semantic values
+		frag = ParaFrag()
+		frag.sub = 0
+		frag.super = 0
+		frag.rise = 0
+		frag.fontName, frag.bold, frag.italic = ps2tt(style.fontName)
+		frag.fontSize = style.fontSize
+		frag.underline = 0
+		frag.textColor = style.textColor
+		frag.greek = 0
+		self._stack = [frag]
+
+	def end_para(self):
+		self._pop()
+
+	def _push(self,**attr):
 		frag = copy.copy(self._stack[-1])
-		for k, v in kw.items():
-			setattr(frag,k,v)
+		_applyAttributes(frag,attr)
 		self._stack.append(frag)
 
 	def _pop(self,**kw):
@@ -193,6 +260,21 @@ class ParaParser(xmllib.XMLParser):
 		for k, v in kw.items():
 			assert getattr(frag,k)==v
 		return frag
+
+	def getAttributes(self,attr,attrMap):
+		A = {}
+		for k, v in attr.items():
+			k = string.lower(k)
+			if k in attrMap.keys():
+				j = attrMap[k]
+				func = j[1]
+				try:
+					A[j[0]] = (func is None) and val or apply(func,(v,))
+				except:
+					self.syntax_error('%s: invalid value %s'%(k,v))
+			else:
+				self.syntax_error('invalid attribute name %s'%k)
+		return A
 
 	#----------------------------------------------------------------
 
@@ -228,18 +310,8 @@ class ParaParser(xmllib.XMLParser):
 		# initialize list of string segments to empty
 		self.errors = []
 		self.fragList = []
+		self._style = style
 
-		# initialize frag values
-		frag = ParaFrag()
-		frag.sub = 0
-		frag.super = 0
-		frag.rise = 0
-		frag.fontName, frag.bold, frag.italic = ps2tt(style.fontName)
-		frag.fontSize = style.fontSize
-		frag.underline = 0
-		frag.greek = 0
-		frag.textColor = style.textColor
-		self._stack = [frag]
 
 	def syntax_error(self,message):
 		if message[:11]=="attribute `" and message[-18:]=="' value not quoted": return
@@ -283,14 +355,18 @@ class ParaParser(xmllib.XMLParser):
 		# tags, therefore we must throw some unused flags around the
 		# given string
 		self._reset(style)	# reinitialise the parser
-		self.feed("<ReportLabParagraph>"+text+"</ReportLabParagraph>")
+		if not(len(text)>=6 and text[0]=='<' and _re_para.match(text)):
+			text = "<para>"+text+"</para>"
+		self.feed(text)
 		self.close()	# force parsing to complete
+		style = self._style
+		del self._style
 		if len(self.errors)==0:
 			fragList = self.fragList
 			self.fragList = []
-			return fragList
+			return style, fragList
 		else:
-			return None
+			return style, None
 
 if __name__=='__main__':
 	from reportlab.platypus.layout import cleanBlockQuotedText
@@ -317,7 +393,7 @@ if __name__=='__main__':
 	text = cleanBlockQuotedText(text)
 	rv = _parser.parse(text,style)
 	if rv is None:
-		for l in _parser.errors:
+		for (None,l) in _parser.errors:
 			print l
 	else:
 		for l in rv:

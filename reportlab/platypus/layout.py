@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.13  2000/04/13 14:48:41  rgbecker
+#	<para> tag added in layout.py paraparser.py
+#
 #	Revision 1.12  2000/04/12 16:26:51  rgbecker
 #	XML Tagged Paragraph parser changes
-#
+#	
 #	Revision 1.11  2000/04/10 14:08:19  rgbecker
 #	fixes related to offset
 #	
@@ -64,7 +67,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.12 2000/04/12 16:26:51 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.13 2000/04/13 14:48:41 rgbecker Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -87,12 +90,9 @@ from reportlab.platypus.paraparser import ParaParser, ParaFrag
 #our one and only parser
 _parser=ParaParser()
 
-DEFAULT_PAGE_SIZE = (595.27,841.89)
+from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
 PAGE_HEIGHT = DEFAULT_PAGE_SIZE[1]
-TA_LEFT = 0
-TA_CENTER = 1
-TA_RIGHT = 2
-TA_JUSTIFY = 4
+from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 
 ###########################################################
 #	Styles.  This class provides an 'instance inheritance'
@@ -355,11 +355,10 @@ def	_justifyDrawParaLine( tx, offset, extraspace, words, last=0):
 		tx.setWordSpace(0)
 	tx.moveCursor(-offset, 0)
 
-def	_putFragLine(tx,words,leading):
+def	_putFragLine(tx,words):
 	for f in words:
 		if (tx._fontname,tx._fontsize)!=(f.fontName,f.fontSize):
 			tx._setFont(f.fontName, f.fontSize)
-		if tx._leading != leading: tx.setLeading(leading)
 		if tx.XtraState.textColor!=f.textColor:
 			tx.XtraState.textColor = f.textColor
 			tx.setFillColor(f.textColor)
@@ -368,31 +367,31 @@ def	_putFragLine(tx,words,leading):
 			tx.setRise(f.rise)
 		tx._textOut(f.text,f is words[-1])	# cheap textOut
 
-def	_leftDrawParaLineX( tx, offset, line, leading, last=0):
+def	_leftDrawParaLineX( tx, offset, line, last=0):
 	tx.moveCursor(offset, 0)
-	_putFragLine(tx, line.words, leading)
+	_putFragLine(tx, line.words)
 	tx.moveCursor(-offset, 0)
 
-def	_centerDrawParaLineX( tx, offset, line, leading, last=0):
+def	_centerDrawParaLineX( tx, offset, line, last=0):
 	tx.moveCursor(offset + 0.5 * line.extraSpace, 0)
-	_putFragLine(tx, line.words, leading)
+	_putFragLine(tx, line.words)
 	tx.moveCursor(-offset + 0.5 * line.extraSpace, 0)
 
-def	_rightDrawParaLineX( tx, offset, line, leading, last=0):
+def	_rightDrawParaLineX( tx, offset, line, last=0):
 	tx.moveCursor(offset + line.extraSpace, 0)
-	_putFragLine(tx, line.words, leading)
+	_putFragLine(tx, line.words)
 	tx.moveCursor(-offset + line.extraSpace, 0)
 
-def	_justifyDrawParaLineX( tx, offset, line, leading, last=0):
+def	_justifyDrawParaLineX( tx, offset, line, last=0):
 	tx.moveCursor(offset, 0)
 	if last:
 		#last one, left align
 		tx.moveCursor(offset, 0)
-		_putFragLine(tx, line.words, leading)
+		_putFragLine(tx, line.words)
 		tx.moveCursor(-offset, 0)
 	else:
 		tx.setWordSpace(line.extraSpace / float(line.wordCount-1))
-		_putFragLine(tx, line.words, leading)
+		_putFragLine(tx, line.words)
 		tx.setWordSpace(0)
 	tx.moveCursor(-offset, 0)
 
@@ -449,9 +448,9 @@ def _getFragWords(frags):
 class Paragraph(Drawable):
 	def __init__(self, text, style, bulletText = None):
 		text = cleanBlockQuotedText(text)
-		rv = _parser.parse(text,style)
+		style, rv = _parser.parse(text,style)
 		if rv is None:
-			raise '''xml parser error (%s) in paragraph beginning\n'%s'''\
+			raise "xml parser error (%s) in paragraph beginning\n'%s'"\
 					% (_parser.errors[0],text[:min(30,len(text))])
 		self.frags = rv
 		self.style = style
@@ -554,14 +553,12 @@ class Paragraph(Drawable):
 
 			#deal with any leftovers on the final line
 			if cLine!=[]: lines.append((space_available, cLine))
-			leading=f.fontSize*sLeading/fFontSize
-			self.height = self.height + len(lines) * leading
-			return f.clone(kind=0, leading=leading, lines=lines)
+			self.height = self.height + len(lines) * sLeading
+			return f.clone(kind=0, lines=lines)
 		elif nFrags<=0:
 			return ParaFrag(kind=0, fontSize=style.fontSize, fontName=style.fontName,
-							textColor=style.textColor, leading=sLeading, lines=[])
+							textColor=style.textColor, lines=[])
 		else:
-			height = 0
 			n = 0
 			for w in _getFragWords(frags):
 				spacewidth = stringWidth(' ',w[-1][0].fontName, w[-1][0].fontSize)
@@ -597,10 +594,8 @@ class Paragraph(Drawable):
 					currentwidth = currentwidth + spacewidth + wordwidth
 				else:
 					#end of line
-					leading=maxSize*sLeading/fFontSize
 					lines.append(ParaFrag(extraSpace=(maxwidth - currentwidth),wordCount=n,
-										words=words, fontSize=maxSize, leading=leading))
-					height = height+leading
+										words=words, fontSize=maxSize))
 
 					#start new line
 					lineno = lineno + 1
@@ -622,12 +617,9 @@ class Paragraph(Drawable):
 
 			#deal with any leftovers on the final line
 			if words<>[]:
-				leading=maxSize*sLeading/fFontSize
 				lines.append(ParaFrag(extraSpace=(maxwidth - currentwidth),wordCount=n,
-									words=words, fontSize=maxSize, leading=leading))
-				height = height+leading
-
-			self.height = self.height + height
+									words=words, fontSize=maxSize))
+			self.height = self.height + len(lines) * sLeading
 			return ParaFrag(kind=1, lines=lines)
 
 		return lines
@@ -701,14 +693,12 @@ class Paragraph(Drawable):
 				tx = canvas.beginText(cur_x, cur_y)
 
 				#now the font for the rest of the paragraph
-				tx.setFont(f.fontName, f.fontSize, f.leading)
+				tx.setFont(f.fontName, f.fontSize, style.leading)
 				dpl( tx, offset, lines[0][0], lines[0][1], nLines==1)
-				#cur_y = cur_y + f.leading
 
 				#now the middle of the paragraph, aligned with the left margin which is our origin.
 				for i in range(1, nLines):
 					dpl( tx, 0, lines[i][0], lines[i][1], i==lim)
-					#cur_y = cur_y - f.leading
 			else:
 				f = lines[0]
 				cur_y = self.height - f.fontSize - style.spaceBefore
@@ -734,15 +724,14 @@ class Paragraph(Drawable):
 				tx.XtraState=ParaFrag()
 				tx.XtraState.textColor=None
 				tx.XtraState.rise=0
-				dpl( tx, offset, lines[0], nLines==1 and lines[0].leading or lines[1].leading, nLines==1)
-				#cur_y = cur_y + f.leading
+				tx.setLeading(style.leading)
+				dpl( tx, offset, lines[0], nLines==1)
 
 				#now the middle of the paragraph, aligned with the left margin which is our origin.
 				for i in range(1, nLines):
 					f = lines[i]
-					dpl( tx, 0, f, i==lim and f.leading or lines[i+1].leading, i==lim)
-					#cur_y = cur_y - f.leading
-				
+					dpl( tx, 0, f, i==lim)
+
 			canvas.drawText(tx)
 			canvas.restoreState()
 
