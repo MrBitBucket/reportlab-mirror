@@ -31,9 +31,13 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.19  2000/04/26 11:07:15  andy_robinson
+#	Tables changed to use reportlab.lib.colors instead of
+#	the six hard-coded color strings there previously.
+#
 #	Revision 1.18  2000/04/25 15:42:04  rgbecker
 #	Factored out BasicFrame from SimpleFrame
-#
+#	
 #	Revision 1.17  2000/04/14 16:12:11  rgbecker
 #	Debugging xml changes
 #	
@@ -82,7 +86,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.18 2000/04/25 15:42:04 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.19 2000/04/26 11:07:15 andy_robinson Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -108,6 +112,7 @@ PAGE_HEIGHT = DEFAULT_PAGE_SIZE[1]
 #	One is just a box to get some metrics.	We also have
 #	a paragraph, an image and a special 'page break'
 #	object which fills the space.
+#############################################################
 class Flowable:
 	"""Abstract base class for things to be drawn.	Key concepts:
 	1. It knows its size

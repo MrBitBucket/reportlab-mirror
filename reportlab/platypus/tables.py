@@ -31,9 +31,13 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.8  2000/04/26 11:07:15  andy_robinson
+#	Tables changed to use reportlab.lib.colors instead of
+#	the six hard-coded color strings there previously.
+#
 #	Revision 1.7  2000/04/14 12:17:05  rgbecker
 #	Splitting layout.py
-#
+#	
 #	Revision 1.6  2000/04/14 11:54:57  rgbecker
 #	Splitting layout.py
 #	
@@ -49,7 +53,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.7 2000/04/14 12:17:05 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.8 2000/04/26 11:07:15 andy_robinson Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -58,6 +62,7 @@ color and weight of the lines (if any), and the font, alignment and padding of t
 from reportlab.platypus import layout
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet
+from reportlab.lib import colors
 import operator
 
 _stringtype = type('')
@@ -72,7 +77,7 @@ class CellStyle(PropertySet):
         'topPadding':3,
         'bottomPadding':3,
         'firstLineIndent':0,
-        'color':(0,0,0),
+        'color':colors.black,
         'alignment': 'LEFT',
         'background': (1,1,1),
         }
@@ -173,10 +178,8 @@ class Table(layout.Flowable):
         self._drawHLines((sc, sr+1), (ec, er), weight, color)
         self._drawVLines((sc+1, sr), (ec, er), weight, color)
     def _prepLine(self, weight, color):
-        if type(color) is _stringtype:
-            color = COLORS.get(color, (0,0,0))
         if color != self._curcolor:
-            apply(self.canv.setStrokeColorRGB, color)
+            self.canv.setStrokeColor(color)
             self._curcolor = color
         if weight != self._curweight:
             self.canv.setLineWidth(weight)
@@ -221,7 +224,7 @@ class Table(layout.Flowable):
             y0 = self._rowpositions[sr]
             x1 = self._colpositions[ec+1]
             y1 = self._rowpositions[er+1]
-            apply(self.canv.setFillColorRGB, color)
+            self.canv.setFillColor(color)
             self.canv.rect(x0, y0, x1-x0, y1-y0,stroke=0,fill=1)
     def _drawCell(self, cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight)):
         #print "cellstyle is ", repr(cellstyle), id(cellstyle)
@@ -229,7 +232,7 @@ class Table(layout.Flowable):
             cur = self._curcellstyle
             if cur is None or cellstyle.color != cur.color:
                 #print "setting cell color to %s" % `cellstyle.color`
-                apply(self.canv.setFillColorRGB, cellstyle.color)
+                self.canv.setFillColor(cellstyle.color)
             if cur is None or cellstyle.leading != cur.leading or cellstyle.fontname != cur.fontname or cellstyle.fontsize != cur.fontsize:
                 #print "setting font: %s, %s, %s" % (cellstyle.fontname, cellstyle.fontsize, cellstyle.leading)
                 self.canv.setFont(cellstyle.fontname, cellstyle.fontsize, cellstyle.leading)
@@ -260,13 +263,6 @@ class Table(layout.Flowable):
 LINECOMMANDS = (
     'GRID', 'BOX', 'OUTLINE', 'INNERGRID', 'LINEBELOW', 'LINEABOVE', 'LINEBEFORE', 'LINEAFTER', )
 
-COLORS = {
-    'BLACK': (0,0,0),
-    'RED': (1,0,0),
-    'GREEN': (0,1,0),
-    'BLUE': (0,0,1),
-    'WHITE':(1,1,1),
-    }
 
 def _isLineCommand(cmd):
     return cmd[0] in LINECOMMANDS
@@ -294,31 +290,31 @@ def _setCellStyle(cellstyles, i, j, op, values):
         new.bottomPadding = values[0]
 
 GRID_STYLE = TableStyle(
-    [('GRID', (0,0), (-1,-1), 0.25, 'BLACK'),
+    [('GRID', (0,0), (-1,-1), 0.25, colors.black),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
 BOX_STYLE = TableStyle(
-    [('BOX', (0,0), (-1,-1), 0.50, 'BLACK'),
+    [('BOX', (0,0), (-1,-1), 0.50, colors.black),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
 LABELED_GRID_STYLE = TableStyle(
-    [('INNERGRID', (0,0), (-1,-1), 0.25, 'BLACK'),
-     ('BOX', (0,0), (-1,-1), 2, 'BLACK'),
-     ('LINEBELOW', (0,0), (-1,0), 2, 'BLACK'),
-     ('LINEAFTER', (0,0), (0,-1), 2, 'BLACK'),
+    [('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+     ('BOX', (0,0), (-1,-1), 2, colors.black),
+     ('LINEBELOW', (0,0), (-1,0), 2, colors.black),
+     ('LINEAFTER', (0,0), (0,-1), 2, colors.black),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
 COLORED_GRID_STYLE = TableStyle(
-    [('INNERGRID', (0,0), (-1,-1), 0.25, 'BLACK'),
-     ('BOX', (0,0), (-1,-1), 2, 'RED'),
-     ('LINEBELOW', (0,0), (-1,0), 2, 'BLACK'),
-     ('LINEAFTER', (0,0), (0,-1), 2, 'BLACK'),
+    [('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+     ('BOX', (0,0), (-1,-1), 2, colors.red),
+     ('LINEBELOW', (0,0), (-1,0), 2, colors.black),
+     ('LINEAFTER', (0,0), (0,-1), 2, colors.black),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
 LIST_STYLE = TableStyle(
-    [('LINEABOVE', (0,0), (-1,0), 2, 'GREEN'),
-     ('LINEABOVE', (0,1), (-1,-1), 0.25, 'BLACK'),
-     ('LINEBELOW', (0,-1), (-1,-1), 2, 'GREEN'),
+    [('LINEABOVE', (0,0), (-1,0), 2, colors.green),
+     ('LINEABOVE', (0,1), (-1,-1), 0.25, colors.black),
+     ('LINEBELOW', (0,-1), (-1,-1), 2, colors.green),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
 
@@ -358,7 +354,7 @@ def test():
     """, styleSheet['BodyText']))
     lst.append(layout.Preformatted("""
 GRID_STYLE = TableStyle(
-    [('GRID', (0,0), (-1,-1), 0.25, 'BLACK'),
+    [('GRID', (0,0), (-1,-1), 0.25, colors.black),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
     """, styleSheet['Code']))
@@ -413,7 +409,7 @@ GRID_STYLE = TableStyle(
     """, styleSheet['BodyText']))
     lst.append(layout.Preformatted("""
 BOX_STYLE = TableStyle(
-    [('BOX', (0,0), (-1,-1), 0.50, 'BLACK'),
+    [('BOX', (0,0), (-1,-1), 0.50, colors.black),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
     """, styleSheet['Code']))
@@ -427,10 +423,10 @@ BOX_STYLE = TableStyle(
     """, styleSheet['BodyText']))
     lst.append(layout.Preformatted("""
 LABELED_GRID_STYLE = TableStyle(
-    [('INNERGRID', (0,0), (-1,-1), 0.25, 'BLACK'),
-     ('BOX', (0,0), (-1,-1), 2, 'BLACK'),
-     ('LINEBELOW', (0,0), (-1,0), 2, 'BLACK'),
-     ('LINEAFTER', (0,0), (0,-1), 2, 'BLACK'),
+    [('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+     ('BOX', (0,0), (-1,-1), 2, colors.black),
+     ('LINEBELOW', (0,0), (-1,0), 2, colors.black),
+     ('LINEAFTER', (0,0), (0,-1), 2, colors.black),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
     """, styleSheet['Code']))
@@ -445,10 +441,10 @@ LABELED_GRID_STYLE = TableStyle(
     """, styleSheet['BodyText']))
     lst.append(layout.Preformatted("""
 COLORED_GRID_STYLE = TableStyle(
-    [('INNERGRID', (0,0), (-1,-1), 0.25, 'BLACK'),
-     ('BOX', (0,0), (-1,-1), 2, 'RED'),
-     ('LINEBELOW', (0,0), (-1,0), 2, 'BLACK'),
-     ('LINEAFTER', (0,0), (0,-1), 2, 'BLACK'),
+    [('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+     ('BOX', (0,0), (-1,-1), 2, colors.red),
+     ('LINEBELOW', (0,0), (-1,0), 2, colors.black),
+     ('LINEAFTER', (0,0), (0,-1), 2, colors.black),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
     """, styleSheet['Code']))
@@ -462,21 +458,21 @@ COLORED_GRID_STYLE = TableStyle(
     """, styleSheet['BodyText']))
     lst.append(layout.Preformatted("""
 LIST_STYLE = TableStyle(
-    [('LINEABOVE', (0,0), (-1,0), 2, 'GREEN'),
-     ('LINEABOVE', (0,1), (-1,-1), 0.25, 'BLACK'),
-     ('LINEBELOW', (0,-1), (-1,-1), 2, 'GREEN'),
+    [('LINEABOVE', (0,0), (-1,0), 2, colors.green),
+     ('LINEABOVE', (0,1), (-1,-1), 0.25, colors.black),
+     ('LINEBELOW', (0,-1), (-1,-1), 2, colors.green),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
     """, styleSheet['Code']))
    
     t = Table(colwidths, rowheights,  data)
     ts = TableStyle(
-    [('LINEABOVE', (0,0), (-1,0), 2, 'GREEN'),
-     ('LINEABOVE', (0,1), (-1,-1), 0.25, 'BLACK'),
-     ('LINEBELOW', (0,-1), (-1,-1), 2, 'GREEN'),
+    [('LINEABOVE', (0,0), (-1,0), 2, colors.green),
+     ('LINEABOVE', (0,1), (-1,-1), 0.25, colors.black),
+     ('LINEBELOW', (0,-1), (-1,-1), 2, colors.green),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT'),
-     ('TEXTCOLOR', (0,1), (0,-1), 'RED'),
-     ('BACKGROUND', (0,0), (-1,0), (0,0.7,0.7))]
+     ('TEXTCOLOR', (0,1), (0,-1), colors.red),
+     ('BACKGROUND', (0,0), (-1,0), colors.Color(0,0.7,0.7))]
     )
     t.setStyle(ts)
     lst.append(Paragraph("This is a custom style\n", styleSheet['BodyText']))
@@ -486,12 +482,12 @@ LIST_STYLE = TableStyle(
     """, styleSheet['BodyText']))
     lst.append(layout.Preformatted("""
    ts = TableStyle(
-    [('LINEABOVE', (0,0), (-1,0), 2, 'GREEN'),
-     ('LINEABOVE', (0,1), (-1,-1), 0.25, 'BLACK'),
-     ('LINEBELOW', (0,-1), (-1,-1), 2, 'GREEN'),
+    [('LINEABOVE', (0,0), (-1,0), 2, colors.green),
+     ('LINEABOVE', (0,1), (-1,-1), 0.25, colors.black),
+     ('LINEBELOW', (0,-1), (-1,-1), 2, colors.green),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT'),
-     ('TEXTCOLOR', (0,1), (0,-1), 'RED'),
-     ('BACKGROUND', (0,0), (-1,0), (0,0.7,0.7))]
+     ('TEXTCOLOR', (0,1), (0,-1), colors.red),
+     ('BACKGROUND', (0,0), (-1,0), colors.Color(0,0.7,0.7))]
     )
     """, styleSheet['Code']))
     doc.build(lst)

@@ -32,9 +32,13 @@
 #
 ###############################################################################
 #	$Log: testplatypus.py,v $
+#	Revision 1.14  2000/04/26 11:07:15  andy_robinson
+#	Tables changed to use reportlab.lib.colors instead of
+#	the six hard-coded color strings there previously.
+#
 #	Revision 1.13  2000/04/14 12:42:35  rgbecker
 #	Minor textual and spacing adjustments
-#
+#	
 #	Revision 1.12  2000/04/14 11:54:57  rgbecker
 #	Splitting layout.py
 #	
@@ -68,7 +72,7 @@
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testplatypus.py,v 1.13 2000/04/14 12:42:35 rgbecker Exp $ '''
+__version__=''' $Id: testplatypus.py,v 1.14 2000/04/26 11:07:15 andy_robinson Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -85,6 +89,7 @@ from reportlab.platypus import layout, tables
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.lib.units import inch, cm
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
 
 #################################################################
 #
@@ -470,10 +475,10 @@ def getExamples():
 ##    g.addLines(0, -1, -1, -1, 2)  #fattish bottom 2 lines
     style = tables.TableStyle([('ALIGN', (1,1), (-1,-1), 'RIGHT'),
                                ('ALIGN', (0,0), (-1,0), 'CENTRE'),
-                               ('GRID', (0,0), (-1,-1), 0.25, 'BLACK'),
-                               ('LINEBELOW', (0,0), (-1,0), 2, 'BLACK'),
+                               ('GRID', (0,0), (-1,-1), 0.25, colors.black),
+                               ('LINEBELOW', (0,0), (-1,0), 2, colors.black),
                                ('LINEBELOW',(1,-1), (-1, -1), 2, (0.5, 0.5, 0.5)),
-                               ('TEXTCOLOR', (0,1), (0,-1), 'RED'),
+                               ('TEXTCOLOR', (0,1), (0,-1), colors.black),
                                ('BACKGROUND', (0,0), (-1,0), (0,0.7,0.7))
                                ])
     g.setStyle(style)
