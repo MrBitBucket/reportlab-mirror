@@ -23,11 +23,16 @@ As the table of contents need at least two passes over the Platypus
 story which is why the moultiBuild0() method must be called.
 
 The level<NUMBER>ParaStyle variables are the paragraph styles used
-to render the entries in the table of contents.
+to format the entries in the table of contents. Their indentation
+is calculated like this: each entry starts at a multiple of some
+constant named delta. If one entry spans more than one line, all
+lines after the first are indented by the same constant named
+epsilon. 
 """
 
 
 from reportlab.lib import enums
+from reportlab.lib.units import cm
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.doctemplate import IndexingFlowable0
@@ -35,40 +40,48 @@ from reportlab.platypus.tables import TableStyle, Table
 
 
 # Default paragraph styles for tables of contents.
+# (This could also be generated automatically or even
+# on-demand if it is not known how many levels the
+# TOC will finally need to display...)
+
+delta = 1*cm
+epsilon = 0.5*cm
 
 levelZeroParaStyle = \
     ParagraphStyle(name='LevelZero',
                    fontName='Times-Roman',
                    fontSize=10,
-                   leading=11)
+                   leading=11,
+                   firstLineIndent = -epsilon,
+                   leftIndent = 0*delta + epsilon)
 
 levelOneParaStyle = \
     ParagraphStyle(name='LevelOne',
                    parent = levelZeroParaStyle,
                    leading=11,
-                   firstLineIndent = 12,
-                   leftIndent = 12)
+                   firstLineIndent = -epsilon,
+                   leftIndent = 1*delta + epsilon)
 
 levelTwoParaStyle = \
     ParagraphStyle(name='LevelTwo',
                    parent = levelOneParaStyle,
                    leading=11,
-                   firstLineIndent = 24,
-                   leftIndent = 24)
+                   firstLineIndent = -epsilon,
+                   leftIndent = 2*delta + epsilon)
 
 levelThreeParaStyle = \
     ParagraphStyle(name='LevelThree',
                    parent = levelTwoParaStyle,
                    leading=11,
-                   firstLineIndent = 36,
-                   leftIndent = 36)
+                   firstLineIndent = -epsilon,
+                   leftIndent = 3*delta + epsilon)
 
 levelFourParaStyle = \
     ParagraphStyle(name='LevelFour',
                    parent = levelTwoParaStyle,
                    leading=11,
-                   firstLineIndent = 48,
-                   leftIndent = 48)
+                   firstLineIndent = -epsilon,
+                   leftIndent = 4*delta + epsilon)
 
 defaultTableStyle = \
     TableStyle([('VALIGN', (0,0), (-1,-1), 'TOP')])
