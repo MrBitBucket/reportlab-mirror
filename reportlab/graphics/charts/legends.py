@@ -1,19 +1,19 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.23 2002/07/24 19:56:36 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.24 2003/10/24 16:59:35 johnprecedo Exp $
 """This will be a collection of legends to be used with charts.
 """
-__version__=''' $Id: legends.py,v 1.23 2002/07/24 19:56:36 andy_robinson Exp $ '''
+__version__=''' $Id: legends.py,v 1.24 2003/10/24 16:59:35 johnprecedo Exp $ '''
 
 import string, copy
 
 from reportlab.lib import colors
-from reportlab.lib.validators import isNumber, OneOf, isString, isColorOrNone, isNumberOrNone
+from reportlab.lib.validators import isNumber, OneOf, isString, isColorOrNone, isNumberOrNone, isListOfNumbersOrNone
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth, getFont
 from reportlab.graphics.widgetbase import Widget
-from reportlab.graphics.shapes import Drawing, Group, String, Rect, STATE_DEFAULTS
+from reportlab.graphics.shapes import Drawing, Group, String, Rect, Line, STATE_DEFAULTS
 
 
 class Legend(Widget):
@@ -211,6 +211,180 @@ class Legend(Widget):
             count = count+1
 
         return g
+
+
+class LineSwatch(Widget):
+    """basically a Line with properties added so it can be used in a LineLegend"""
+    _attrMap = AttrMap(
+        x = AttrMapValue(isNumber, desc="x-coordinate for swatch line start point"),
+        y = AttrMapValue(isNumber, desc="y-coordinate for swatch line start point"),
+        width = AttrMapValue(isNumber, desc="length of swatch line"),
+        height = AttrMapValue(isNumber, desc="used for line strokeWidth"),
+        strokeColor = AttrMapValue(isColorOrNone, desc="color of swatch line"),
+        strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc="dash array for swatch line"),
+    )
+
+    def __init__(self):
+        from reportlab.lib.colors import red
+        from reportlab.graphics.shapes import Line
+        self.x = 0
+        self.y = 0
+        self.width  = 20
+        self.height = 1
+        self.strokeColor = red
+        self.strokeDashArray = None
+
+    def draw(self):
+        l = Line(self.x,self.y,self.x+self.width,self.y)
+        l.strokeColor = self.strokeColor
+        l.strokeDashArray  = self.strokeDashArray
+        l.strokeWidth = self.height
+        return l
+
+class LineLegend(Legend):
+    """A subclass of Legend for drawing legends with lines as the
+    swatches rather than rectangles. Useful for lineCharts and
+    linePlots. Should be similar in all other ways the the standard
+    Legend class.
+    """
+
+    _attrMap = AttrMap(
+        x = AttrMapValue(isNumber, desc="x-coordinate of upper-left reference point"),
+        y = AttrMapValue(isNumber, desc="y-coordinate of upper-left reference point"),
+        deltax = AttrMapValue(isNumberOrNone, desc="x-distance between neighbouring line-swatches"),
+        deltay = AttrMapValue(isNumberOrNone, desc="y-distance between neighbouring line-swatches"),
+        dxTextSpace = AttrMapValue(isNumber, desc="Distance between line-swatches and text"),
+        autoXPadding = AttrMapValue(isNumber, desc="x Padding between columns if deltax=None"),
+        autoYPadding = AttrMapValue(isNumber, desc="y Padding between rows if deltay=None"),
+        dx = AttrMapValue(isNumber, desc="Width of line-swatch"),
+        dy = AttrMapValue(isNumber, desc="Height of line-swatch"),
+        columnMaximum = AttrMapValue(isNumber, desc="Max. number of items per column"),
+        alignment = AttrMapValue(OneOf("left", "right"), desc="Alignment of text with respect to line-swatches"),
+        colorNamePairs = AttrMapValue(None, desc="List of color/name tuples (color can also be widget)"),
+        fontName = AttrMapValue(isString, desc="Font name of the strings"),
+        fontSize = AttrMapValue(isNumber, desc="Font size of the strings"),
+        fillColor = AttrMapValue(isColorOrNone, desc=""),
+        strokeColor = AttrMapValue(isColorOrNone, desc="Stroke color of the line-swatches"),
+        strokeWidth = AttrMapValue(isNumber, desc="Width of the line-swatches"),
+        callout = AttrMapValue(None, desc="a user callout(self,g,x,y,(color,text))"),
+       )
+
+    def __init__(self):
+        Legend.__init__(self)
+
+        # Size of swatch rectangle.
+        self.dx = 10 #width of line
+        self.dy = 2  #strokeWidth for line
+
+        # Color/name pairs.
+        self.colorNamePairs = []
+        for col, colName in [ (colors.red, "red"),
+                                (colors.blue, "blue"),
+                                (colors.green, "green"),
+                                (colors.pink, "pink"),
+                                (colors.yellow, "yellow") ]:
+            l =  LineSwatch()
+            l.strokeColor = col
+            self.colorNamePairs.append((l, colName))
+
+        # Font name and size of the labels.
+        self.fillColor = STATE_DEFAULTS['fillColor']
+        self.strokeColor = STATE_DEFAULTS['strokeColor']
+        self.strokeWidth = STATE_DEFAULTS['strokeWidth']
+
+    def draw(self):
+        g = Group()
+        colorNamePairs = self.colorNamePairs
+        thisx = upperleftx = self.x
+        thisy = upperlefty = self.y - self.dy
+        dx, dy, alignment, columnMaximum = self.dx, self.dy, self.alignment, self.columnMaximum
+        deltax, deltay, dxTextSpace = self.deltax, self.deltay, self.dxTextSpace
+        fontName, fontSize, fillColor = self.fontName, self.fontSize, self.fillColor
+        strokeWidth, strokeColor = self.strokeWidth, self.strokeColor
+        leading = fontSize*1.2
+        if not deltay:
+            deltay = max(dy,leading)+self.autoYPadding
+        if not deltax:
+            maxWidth = self._calculateMaxWidth(colorNamePairs)
+            deltax = maxWidth+dx+dxTextSpace+self.autoXPadding
+        else:
+            if alignment=='left': maxWidth = self._calculateMaxWidth(colorNamePairs)
+
+        def gAdd(t,g=g,fontName=fontName,fontSize=fontSize,fillColor=fillColor):
+            t.fontName = fontName
+            t.fontSize = fontSize
+            t.fillColor = fillColor
+            return g.add(t)
+
+        ascent=getFont(fontName).face.ascent/1000.
+        if ascent==0: ascent=0.718 # default (from helvetica)
+        ascent=ascent*fontSize # normalize
+
+        columnCount = 0
+        count = 0
+        callout = getattr(self,'callout',None)
+        for col, name in colorNamePairs:
+            T = string.split(name and str(name) or '','\n')
+            S = []
+            # thisy+dy/2 = y+leading/2
+            y = thisy+(dy-ascent)*0.5
+            if callout: callout(self,g,thisx,y,colorNamePairs[count])
+            if alignment == "left":
+                for t in T:
+                    # align text to left
+                    s = String(thisx+maxWidth,y,t)
+                    s.textAnchor = "end"
+                    S.append(s)
+                    y = y-leading
+                x = thisx+maxWidth+dxTextSpace
+            elif alignment == "right":
+                for t in T:
+                    # align text to right
+                    s = String(thisx+dx+dxTextSpace, y, t)
+                    s.textAnchor = "start"
+                    S.append(s)
+                    y = y-leading
+                x = thisx
+            else:
+                raise ValueError, "bad alignment"
+
+            # Make a 'normal' color line-swatch...
+            if isinstance(col, colors.Color):
+                l =  LineSwatch()
+                l.strokeColor = col
+                if dy < ascent:
+                    l.y = thisy+((ascent/2.0)-(dy*2.0))
+                else:
+                    l.y = thisy
+                g.add(l.draw())
+            else:
+                #try and see if we should do better.
+                try:
+                    c = copy.deepcopy(col)
+                    c.x = x
+                    c.y = thisy
+                    if dy < ascent:
+                        c.y = thisy+((ascent/2.0)-(dy*2.0))
+                    else:
+                        c.y = thisy
+                    c.width = dx
+                    c.height = dy
+                    g.add(c)
+                except:
+                    pass
+
+            map(gAdd,S)
+
+            if count%columnMaximum == columnMaximum-1:
+                thisx = thisx+deltax
+                thisy = upperlefty
+                columnCount = columnCount + 1
+            else:
+                thisy = thisy-max(deltay,len(S)*leading)
+            count = count+1
+
+        return g
+
 
 
     def demo(self):
