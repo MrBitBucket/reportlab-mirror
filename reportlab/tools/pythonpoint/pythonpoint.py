@@ -73,8 +73,6 @@ from reportlab.platypus.xpreformatted import PythonPreformatted
 from reportlab.platypus import Preformatted, Paragraph, Frame, \
      Image, Table, TableStyle, Spacer
 
-import stdparser
-
 
 USAGE_MESSAGE = """\
 PythonPoint - a tool for making presentations in PDF.
@@ -856,7 +854,7 @@ class PPString:
 
 
 def getSampleStyleSheet():
-    from styles.standard import getParagraphStyles
+    from reportlab.tools.pythonpoint.styles.standard import getParagraphStyles
     return getParagraphStyles()
 
 
@@ -883,7 +881,8 @@ def setStyles(newStyleSheet):
 
 def process(datafilename, notes=0, handout=0, cols=0, verbose=0):
     "Process one PythonPoint source file."
-    parser = stdparser.PPMLParser()
+    from reportlab.tools.pythonpoint.stdparser import PPMLParser
+    parser = PPMLParser()
     parser.sourceFilename = datafilename
     rawdata = open(datafilename).read()
     parser.feed(rawdata)
@@ -962,8 +961,7 @@ def handleOptions():
 
     return options, args
 
-
-if __name__ == '__main__':
+def main():
     options, args = handleOptions()
 
     if options['help']:
@@ -985,3 +983,6 @@ if __name__ == '__main__':
                 process(file, notes, handout, cols, verbose)
             else:
                 print 'Data file not found:', datafile
+
+if __name__ == '__main__':
+    main()

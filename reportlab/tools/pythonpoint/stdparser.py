@@ -13,7 +13,7 @@ from reportlab.lib import xmllib
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 
-import pythonpoint
+from reportlab.tools.pythonpoint import pythonpoint
 
 
 class PPMLParser(xmllib.XMLParser):
@@ -265,11 +265,14 @@ class PPMLParser(xmllib.XMLParser):
         path.append('styles')
         modulename = self._arg('stylesheet', args, 'module')
         funcname = self._arg('stylesheet', args, 'function')
-        found = imp.find_module(modulename, path)
-        assert found, "StyleSheet %s not found" % modulename
-        (file, pathname, description) = found
-        mod = imp.load_module(modulename, file, pathname, description)
-        
+        try:
+            found = imp.find_module(modulename, path)
+            (file, pathname, description) = found
+            mod = imp.load_module(modulename, file, pathname, description)
+        except ImportError:
+            #last gasp
+            exec 'from reportlab.tools.pythonpoint.styles import %s as mod' % modulename
+ 
         #now get the function
         func = getattr(mod, funcname)
         pythonpoint.setStyles(func())
