@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.6 2002/09/02 15:08:39 mgedmin Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.7 2002/09/02 16:17:29 mgedmin Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -58,7 +58,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.6 2002/09/02 15:08:39 mgedmin Exp $'
+__version__ = '$Id: ttfonts.py,v 1.7 2002/09/02 16:17:29 mgedmin Exp $'
 
 import string
 from types import StringType
@@ -465,7 +465,7 @@ class TTFontFile(TTFontParser):
         self.seek_table("head")
         ver_maj, ver_min = self.read_ushort(), self.read_ushort()
         if ver_maj != 1:
-            raise TTFError, 'Unknown head table version %d.%04x' % (ver_maj, ver.min)
+            raise TTFError, 'Unknown head table version %d.%04x' % (ver_maj, ver_min)
         self.skip(8)
         magic = self.read_ulong()
         if magic != 0x5F0F3CF5:
@@ -523,7 +523,7 @@ class TTFontFile(TTFontParser):
         self.seek_table("post")
         ver_maj, ver_min = self.read_ushort(), self.read_ushort()
         if ver_maj not in (1, 2, 3):
-            raise TTFError, 'Unknown post table version %d.%04x' % (ver_maj, ver.min)
+            raise TTFError, 'Unknown post table version %d.%04x' % (ver_maj, ver_min)
         self.italicAngle = self.read_short() + self.read_ushort() / 65536.0
         self.skip(2*2)
         isFixedPitch = self.read_ulong()
@@ -543,7 +543,7 @@ class TTFontFile(TTFontParser):
         self.seek_table("hhea")
         ver_maj, ver_min = self.read_ushort(), self.read_ushort()
         if ver_maj != 1:
-            raise TTFError, 'Unknown hhea table version %d.%04x' % (ver_maj, ver.min)
+            raise TTFError, 'Unknown hhea table version %d.%04x' % (ver_maj, ver_min)
         self.skip(28)
         metricDataFormat = self.read_ushort()
         if metricDataFormat != 0:
@@ -556,7 +556,7 @@ class TTFontFile(TTFontParser):
         self.seek_table("maxp")
         ver_maj, ver_min = self.read_ushort(), self.read_ushort()
         if ver_maj != 1:
-            raise TTFError, 'Unknown maxp table version %d.%04x' % (ver_maj, ver.min)
+            raise TTFError, 'Unknown maxp table version %d.%04x' % (ver_maj, ver_min)
         numGlyphs = self.read_ushort()
 
         if not charInfo:
