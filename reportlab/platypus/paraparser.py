@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: paraparser.py,v $
+#	Revision 1.19  2000/05/26 09:49:23  rgbecker
+#	Color fixes; thanks to J Alet
+#
 #	Revision 1.18  2000/05/20 15:36:42  andy_robinson
 #	Removed 1.5.2-style getattr call
-#
+#	
 #	Revision 1.17  2000/05/16 14:28:55  rgbecker
 #	Fixes/Changes to get testplatypus to work with new framework
 #	
@@ -50,7 +53,7 @@
 #	Revision 1.13  2000/04/25 13:07:57  rgbecker
 #	Added license
 #	
-__version__=''' $Id: paraparser.py,v 1.18 2000/05/20 15:36:42 andy_robinson Exp $ '''
+__version__=''' $Id: paraparser.py,v 1.19 2000/05/26 09:49:23 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -69,7 +72,7 @@ except ImportError:
 	_xmllib_newStyle = 0
 
 
-from reportlab.lib.colors import stringToColor, white, black, red, Color
+from reportlab.lib.colors import toColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 
@@ -112,15 +115,15 @@ _paraAttrMap = {'font': ('fontName', None),
 				'bfont': ('bulletFontName', None),
 				'bfontsize': ('bulletFontIndent',_num),
 				'bindent': ('bulletFontIndent',_num),
-				'bcolor': ('bulletColor',stringToColor),
-				'color':('textColor',stringToColor),
-				'fg': ('textColor',stringToColor)}
+				'bcolor': ('bulletColor',toColor),
+				'color':('textColor',toColor),
+				'fg': ('textColor',toColor)}
 
 #things which are valid font attributes
 _fontAttrMap = {'size': ('fontSize', _num),
 				'name': ('fontName', None),
-				'fg': 	('textColor', stringToColor),
-				'color':('textColor', stringToColor)}
+				'fg': 	('textColor', toColor),
+				'color':('textColor', toColor)}
 
 def _addAttributeNames(m):
 	K = m.keys()

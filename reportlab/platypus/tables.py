@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.10  2000/05/26 09:49:23  rgbecker
+#	Color fixes; thanks to J Alet
+#
 #	Revision 1.9  2000/05/16 16:15:16  rgbecker
 #	Changes related to removal of SimpleFlowDocument
-#
+#	
 #	Revision 1.8  2000/04/26 11:07:15  andy_robinson
 #	Tables changed to use reportlab.lib.colors instead of
 #	the six hard-coded color strings there previously.
@@ -56,7 +59,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.9 2000/05/16 16:15:16 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.10 2000/05/26 09:49:23 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -221,14 +224,14 @@ class Table(Flowable):
             if ec < 0: ec = ec + self._ncols
             if sr < 0: sr = sr + self._nrows
             if er < 0: er = er + self._nrows
-            if type(color) is _stringtype:
-                color = COLORS.get(values[0], (1,1,1))
+            color = colors.toColor(color, colors.Color(1,1,1))
             x0 = self._colpositions[sc]
             y0 = self._rowpositions[sr]
             x1 = self._colpositions[ec+1]
             y1 = self._rowpositions[er+1]
             self.canv.setFillColor(color)
             self.canv.rect(x0, y0, x1-x0, y1-y0,stroke=0,fill=1)
+
     def _drawCell(self, cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight)):
         #print "cellstyle is ", repr(cellstyle), id(cellstyle)
         if self._curcellstyle is not cellstyle:
@@ -277,10 +280,7 @@ def _setCellStyle(cellstyles, i, j, op, values):
         new.fontname = values[0]
         new.fontsize = values[1]
     elif op == 'TEXTCOLOR':
-        if type(values[0]) is _stringtype:
-            new.color = COLORS.get(values[0], (0,0,0))
-        else:
-            new.color = values[0]
+        new.color = colors.toColor(values[0], colors.Color(0,0,0))
     elif op in ('ALIGN', 'ALIGNMENT'):
         new.alignment = values[0]
     elif op == 'LEFTPADDING':
