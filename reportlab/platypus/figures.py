@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/platdemos.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.13 2003/12/10 18:37:40 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.14 2004/01/07 13:18:49 rgbecker Exp $
 """This includes some demos of platypus for use in the API proposal"""
-__version__=''' $Id: figures.py,v 1.13 2003/12/10 18:37:40 rgbecker Exp $ '''
+__version__=''' $Id: figures.py,v 1.14 2004/01/07 13:18:49 rgbecker Exp $ '''
 
 import os
 
@@ -27,35 +27,40 @@ class Figure(Flowable):
         Flowable.__init__(self)
         self.width = width
         self.figureHeight = height
-        self.captionHeight = 0  # work out later
         self.caption = caption
         self.background = background
-        self.captionStyle = ParagraphStyle(
-            'Caption',
-            fontName=captionFont,
-            fontSize=captionSize,
-            leading=1.2*captionSize,
-            spaceBefore=captionSize * 0.5,
-            alignment=TA_CENTER)
-        #must build paragraph now to get sequencing in synch
-        #with rest of story
-        self.captionPara = Paragraph(self.caption, self.captionStyle)
+        if self.caption:
+            self.captionHeight = 0  # work out later
+            self.captionStyle = ParagraphStyle(
+                'Caption',
+                fontName=captionFont,
+                fontSize=captionSize,
+                leading=1.2*captionSize,
+                spaceBefore=captionSize * 0.5,
+                alignment=TA_CENTER)
+            #must build paragraph now to get sequencing in synch with rest of story
+            self.captionPara = Paragraph(self.caption, self.captionStyle)
 
         self.spaceBefore = 12
         self.spaceAfter = 12
 
     def wrap(self, availWidth, availHeight):
         # try to get the caption aligned
-        (w, h) = self.captionPara.wrap(self.width, availHeight - self.figureHeight)
-        self.captionHeight = h
-        self.height = self.captionHeight + self.figureHeight
+        if self.caption:
+            (w, h) = self.captionPara.wrap(self.width, availHeight - self.figureHeight)
+            self.captionHeight = h
+            self.height = self.captionHeight + self.figureHeight
+            if w>self.width: self.width = w
+        else:
+            self.height = self.figureHeight
         self.dx = 0.5 * (availWidth - self.width)
         return (self.width, self.height)
 
     def draw(self):
         self.canv.translate(self.dx, 0)
-        self.drawCaption()
-        self.canv.translate(0, self.captionHeight)
+        if self.caption:
+            self.drawCaption()
+            self.canv.translate(0, self.captionHeight)
         if self.background:
             self.drawBackground()
         self.drawBorder()
@@ -106,8 +111,6 @@ def drawPage(canvas,x, y, width, height):
     canvas.setFillColorRGB(0,0,0)
     canvas.setStrokeColorRGB(0,0,0)
 
-
-
 class PageFigure(Figure):
     """Shows a blank page in a frame, and draws on that.  Used in
     illustrations of how PLATYPUS works."""
@@ -150,23 +153,24 @@ class FlexFigure(Figure):
             spaceBefore=9, #3,
             alignment=TA_CENTER
             )
-        self._scaledWidth = None
+        self._scaleFactor = None
         self.background = background
 
     def wrap(self, availWidth, availHeight):
         "Rescale to fit according to the rules, but only once"
-        if self._scaledWidth <> availWidth:
-            self._scaledWidth = availWidth
-            #scale factor None means auto
+        if self._scaleFactor is None or self.width>availWidth or self.height>availHeight:
+            w, h = Figure.wrap(self, availWidth, availHeight)
+            captionHeight = h - self.figureHeight
             if self.scaleFactor is None:
-                self._scaleFactor = availWidth / self.width
+                #scale factor None means auto
+                self._scaleFactor = min(availWidth/self.width,(availHeight-captionHeight)/self.figureHeight)
             else: #they provided a factor
                 self._scaleFactor = self.scaleFactor
-            if self._scaleFactor < 1 and self.shrinkToFit:
+            if self._scaleFactor<1 and self.shrinkToFit:
                 self.width = self.width * self._scaleFactor - 0.0001
                 self.figureHeight = self.figureHeight * self._scaleFactor
-            elif self._scaleFactor > 1 and self.growToFit:
-                self.width = self.width * self._scaleFactor - 0.0001
+            elif self._scaleFactor>1 and self.growToFit:
+                self.width = self.width*self._scaleFactor - 0.0001
                 self.figureHeight = self.figureHeight * self._scaleFactor
         return Figure.wrap(self, availWidth, availHeight)
 
@@ -183,7 +187,6 @@ class ImageFigure(FlexFigure):
         self.canv.drawInlineImage(self.filename,
                                   0, 0,self.width, self.figureHeight)
         
-
 class DrawingFigure(FlexFigure):
     """Drawing with a caption below it.  Clunky, scaling fails."""
     def __init__(self, modulename, classname, caption, baseDir=None, background=None):
@@ -202,26 +205,23 @@ class DrawingFigure(FlexFigure):
         self.drawing.drawOn(self.canv, 0, 0)
 
 
+try:
+    from rlextra.pageCatcher.pageCatcher import restoreForms, storeForms, storeFormsInMemory, restoreFormsInMemory
+    _hasPageCatcher = 1
+except ImportError:
+    _hasPageCatcher = 0
+if _hasPageCatcher:
     ####################################################################
     #
     #    PageCatcher plugins
     # These let you use our PageCatcher product to add figures
     # to other documents easily.
     ####################################################################
-
-try:
-    from rlextra.pageCatcher.pageCatcher import restoreForms, storeForms
-    _hasPageCatcher = 1
-except ImportError:
-    _hasPageCatcher = 0
-if _hasPageCatcher:
-
     class PageCatcherCachingMixIn:
         "Helper functions to cache pages for figures"
 
         def getFormName(self, pdfFileName, pageNo):
-            #naming scheme works within a directory
-            #only
+            #naming scheme works within a directory only
             dirname, filename = os.path.split(pdfFileName)
             root, ext = os.path.splitext(filename)
             return '%s_page%d' % (root, pageNo)
@@ -242,43 +242,10 @@ if _hasPageCatcher:
             storeForms(pdfFileName, formName + '.frm',
                                     prefix= formName + '_',
                                     pagenumbers=[pageNo])
-            print 'stored %s.frm' % formName
+            #print 'stored %s.frm' % formName
             return formName + '.frm'
 
-        
-    class PageCatcherFigure(FlexFigure, PageCatcherCachingMixIn):
-        """PageCatcher page with a caption below it.  Presumes A4, Portrait.
-        This needs our commercial PageCatcher product, or you'll get a blank."""
-
-        def __init__(self, filename, pageNo, caption, width=595, height=842, background=None):
-            self.dirname, self.filename = os.path.split(filename)
-            if self.dirname == '':
-                self.dirname = os.curdir
-            self.pageNo = pageNo
-            self.formName = self.getFormName(self.filename, self.pageNo) + '_' + str(pageNo)
-            FlexFigure.__init__(self, width, height, caption, background)
-            #print 'self.width=%0.2f, self.figureHeight=%0.2f' % (self.width, self.figureHeight)
-            
-
-        def drawFigure(self):
-            #print 'drawing ',self.formName
-            #print 'self.width=%0.2f, self.figureHeight=%0.2f' % (self.width, self.figureHeight)
-            self.canv.saveState()
-            if not self.canv.hasForm(self.formName):
-                restorePath = self.dirname + os.sep + self.filename
-                #does the form file exist?  if not, generate it.
-                formFileName = self.getFormName(restorePath, self.pageNo) + '.frm'
-                if self.needsProcessing(restorePath, self.pageNo):
-                    print 'preprocessing PDF %s page %s' % (restorePath, self.pageNo)
-                    self.processPDF(restorePath, self.pageNo)
-                names = restoreForms(formFileName, self.canv)
-                #print 'restored',names
-            self.canv.scale(self._scaleFactor, self._scaleFactor)
-            #print 'doing form',self.formName
-            self.canv.doForm(self.formName)
-            self.canv.restoreState()
-
-    class PageCatcherFigureNonA4(FlexFigure, PageCatcherCachingMixIn):
+    class cachePageCatcherFigureNonA4(FlexFigure, PageCatcherCachingMixIn):
         """PageCatcher page with a caption below it.  Size to be supplied."""
         # This should merge with PageFigure into one class that reuses
         # form information to determine the page orientation...
@@ -297,14 +264,48 @@ if _hasPageCatcher:
                 #does the form file exist?  if not, generate it.
                 formFileName = self.getFormName(restorePath, self.pageNo) + '.frm'
                 if self.needsProcessing(restorePath, self.pageNo):
-                    print 'preprocessing PDF %s page %s' % (restorePath, self.pageNo)
+                    #print 'preprocessing PDF %s page %s' % (restorePath, self.pageNo)
                     self.processPDF(restorePath, self.pageNo)
                 names = restoreForms(formFileName, self.canv)
             self.canv.scale(self._scaleFactor, self._scaleFactor)
             self.canv.doForm(self.formName)
             self.canv.restoreState()
 
+    class cachePageCatcherFigure(cachePageCatcherFigureNonA4):
+        """PageCatcher page with a caption below it.  Presumes A4, Portrait.
+        This needs our commercial PageCatcher product, or you'll get a blank."""
+        def __init__(self, filename, pageNo, caption, width=595, height=842, background=None):
+            cachePageCatcherFigureNonA4.__init__(self, filename, pageNo, caption, width, height, background=background)
 
+    class PageCatcherFigureNonA4(FlexFigure):
+        """PageCatcher page with a caption below it.  Size to be supplied."""
+        # This should merge with PageFigure into one class that reuses
+        # form information to determine the page orientation...
+        def __init__(self, filename, pageNo, caption, width, height, background=None):
+            fn = self.filename = filename
+            self.pageNo = pageNo
+            fn = fn.replace(os.sep,'_').replace('/','_').replace('\\','_').replace('-','_').replace(':','_')
+            self.prefix = fn.replace('.','_')+'_'+str(pageNo)+'_'
+            self.formName = self.prefix + str(pageNo)
+            FlexFigure.__init__(self, width, height, caption, background)
+
+        def drawFigure(self):
+            self.canv.saveState()
+            if not self.canv.hasForm(self.formName):
+                f = open(self.filename,'rb')
+                pdf = f.read()
+                f.close()
+                f, data = storeFormsInMemory(pdf, pagenumbers=[self.pageNo], prefix=self.prefix)
+                f = restoreFormsInMemory(data, self.canv)
+            self.canv.scale(self._scaleFactor, self._scaleFactor)
+            self.canv.doForm(self.formName)
+            self.canv.restoreState()
+
+    class PageCatcherFigure(PageCatcherFigureNonA4):
+        """PageCatcher page with a caption below it.  Presumes A4, Portrait.
+        This needs our commercial PageCatcher product, or you'll get a blank."""
+        def __init__(self, filename, pageNo, caption, width=595, height=842, background=None):
+            PageCatcherFigureNonA4.__init__(self, filename, pageNo, caption, width, height, background=background)
 
 def demo1(canvas):
     frame = Frame(
@@ -314,18 +315,14 @@ def demo1(canvas):
                     5*inch,     # height
                     showBoundary = 1  # helps us see what's going on
                     )
-
     bodyStyle = ParagraphStyle('Body', fontName='Times-Roman', fontSize=24, leading=28, spaceBefore=6)
-
     para1 = Paragraph('Spam spam spam spam. ' * 5, bodyStyle)
     para2 = Paragraph('Eggs eggs eggs. ' * 5, bodyStyle)
-
     mydata = [para1, para2]
 
     #this does the packing and drawing.  The frame will consume
     #items from the front of the list as it prints them
     frame.addFromList(mydata,canvas)
-
 
 def test1():
     c  = Canvas('figures.pdf')
@@ -333,7 +330,6 @@ def test1():
     v = PlatPropFigure1()
     f.addFromList([v],c)
     c.save()
-
 
 if __name__ == '__main__':
     test1()
