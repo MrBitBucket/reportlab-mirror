@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/gengraphguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/gengraphguide.py,v 1.2 2001/04/05 09:30:11 rgbecker Exp $
-__version__=''' $Id: gengraphguide.py,v 1.2 2001/04/05 09:30:11 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/docs/graphguide/gengraphguide.py,v 1.3 2001/08/07 10:17:36 dinu_gherman Exp $
+__version__=''' $Id: gengraphguide.py,v 1.3 2001/08/07 10:17:36 dinu_gherman Exp $ '''
 
 
 __doc__ = """
@@ -414,7 +414,10 @@ def run(pagesize):
     #resetStory()
 
     import ch1_intro
-    import ch2_graphics
+    import ch2_concepts
+    import ch3_shapes
+    import ch4_widgets
+    import ch5_charts
 
     # I don't know WHAT is going on here.
     # the submodules all do 'import *',
@@ -424,7 +427,7 @@ def run(pagesize):
     #if I just call getStory, it has no
     #items!
     
-    story = ch2_graphics.getStory()
+    story = ch5_charts.getStory()
     print 'Built story contains %d flowables...' % len(story)
     doc.build(story)
     print 'Saved graphguide.pdf'
