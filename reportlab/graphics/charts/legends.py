@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.17 2001/12/06 16:15:45 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.18 2002/01/17 11:33:37 rgbecker Exp $
 """This will be a collection of legends to be used with charts.
 """
 
@@ -123,7 +123,7 @@ class Legend(Widget):
 			t.fillColor = fillColor
 			return g.add(t)
 
-		ascent=getFont(fontName).face.ascent
+		ascent=getFont(fontName).face.ascent/1000.
 		if ascent==0: ascent=0.718 # default (from helvetica)
 		ascent=ascent*fontSize # normalize
 
