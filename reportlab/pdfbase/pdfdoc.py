@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.34 2001/02/02 21:42:39 aaron_watters Exp $
-__version__=''' $Id: pdfdoc.py,v 1.34 2001/02/02 21:42:39 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.35 2001/02/05 15:09:34 aaron_watters Exp $
+__version__=''' $Id: pdfdoc.py,v 1.35 2001/02/05 15:09:34 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -470,7 +470,7 @@ class PDFStream:
         if filters is None:
             filters = document.defaultStreamFilters
         # only apply filters if they haven't been applied elsewhere
-        if filters is not None and not dictionary.has_key("Filters"):
+        if filters is not None and not dictionary.dict.has_key("Filters"):
             # apply filters in reverse order listed
             rf = list(filters)
             rf.reverse()
