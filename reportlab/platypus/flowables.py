@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.13 2000/12/13 23:31:18 aaron_watters Exp $
-__version__=''' $Id: flowables.py,v 1.13 2000/12/13 23:31:18 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.14 2000/12/25 11:52:18 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.14 2000/12/25 11:52:18 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -25,7 +25,7 @@ higher level components).
 import os
 import string
 from copy import deepcopy
-from types import ListType, TupleType
+from types import ListType, TupleType, StringType
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
@@ -230,7 +230,7 @@ class Image(Flowable):
 		self.hAlign = 'CENTER'
 		# if it is a JPEG, will be inlined within the file -
 		# but we still need to know its size now
-		if os.path.splitext(filename)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
+		if type(filename) is StringType and os.path.splitext(filename)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
 			info = pdfutils.readJPEGInfo(open(filename, 'rb'))
 			self.imageWidth = info[0]
 			self.imageHeight = info[1]
