@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.64 2002/10/15 14:49:54 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.64 2002/10/15 14:49:54 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.65 2003/04/22 12:32:23 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.65 2003/04/22 12:32:23 rgbecker Exp $ '''
 from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
@@ -59,18 +59,21 @@ def _leftDrawParaLine( tx, offset, extraspace, words, last=0):
     setXPos(tx,offset)
     tx._textOut(join(words),1)
     setXPos(tx,-offset)
+    return offset
 
 def _centerDrawParaLine( tx, offset, extraspace, words, last=0):
     m = offset + 0.5 * extraspace
     setXPos(tx,m)
     tx._textOut(join(words),1)
     setXPos(tx,-m)
+    return m
 
 def _rightDrawParaLine( tx, offset, extraspace, words, last=0):
     m = offset + extraspace
     setXPos(tx,m)
     tx._textOut(join(words),1)
     setXPos(tx,-m)
+    return m
 
 def _justifyDrawParaLine( tx, offset, extraspace, words, last=0):
     setXPos(tx,offset)
@@ -87,8 +90,10 @@ def _justifyDrawParaLine( tx, offset, extraspace, words, last=0):
         else:
             tx._textOut(text,1)
     setXPos(tx,-offset)
+    return offset
 
 def _putFragLine(tx,words):
+    cur_x = 0
     for f in words:
         if hasattr(f,'cbDefn'):
             func = getattr(tx._canvas,f.cbDefn.name,None)
@@ -106,23 +111,37 @@ def _putFragLine(tx,words):
                 tx.XtraState.rise=f.rise
                 tx.setRise(f.rise)
             tx._textOut(f.text,f is words[-1])  # cheap textOut
+            txtlen = tx._canvas.stringWidth(f.text, tx._fontname, tx._fontsize)
+            if not tx.XtraState.underline and f.underline:
+                tx.XtraState.underline = 1
+                tx.XtraState.underline_x = cur_x
+            elif tx.XtraState.underline and not f.underline:
+                tx.XtraState.underline = 0
+                spacelen = tx._canvas.stringWidth(' ', tx._fontname, tx._fontsize)
+                tx.XtraState.underlines.append( (tx.XtraState.underline_x, cur_x-spacelen) )
+            cur_x = cur_x + txtlen
+    if tx.XtraState.underline:
+        tx.XtraState.underlines.append( (tx.XtraState.underline_x, cur_x) )
 
 def _leftDrawParaLineX( tx, offset, line, last=0):
     setXPos(tx,offset)
     _putFragLine(tx, line.words)
     setXPos(tx,-offset)
+    return offset
 
 def _centerDrawParaLineX( tx, offset, line, last=0):
     m = offset+0.5*line.extraSpace
     setXPos(tx,m)
     _putFragLine(tx, line.words)
     setXPos(tx,-m)
+    return m
 
 def _rightDrawParaLineX( tx, offset, line, last=0):
     m = offset+line.extraSpace
     setXPos(tx,m)
     _putFragLine(tx, line.words)
     setXPos(tx,-m)
+    return m
 
 def _justifyDrawParaLineX( tx, offset, line, last=0):
     setXPos(tx,offset)
@@ -141,13 +160,16 @@ def _justifyDrawParaLineX( tx, offset, line, last=0):
 
 try:
     from _rl_accel import _sameFrag
-except:
-    def _sameFrag(f,g):
-        'returns 1 if two ParaFrags map out the same'
-        if hasattr(f,'cbDefn') or hasattr(g,'cbDefn'): return 0
-        for a in ('fontName', 'fontSize', 'textColor', 'rise'):
-            if getattr(f,a)!=getattr(g,a): return 0
-        return 1
+except ImportError:
+    try:
+        from reportlab.lib._rl_accel import _sameFrag
+    except ImportError:
+        def _sameFrag(f,g):
+            'returns 1 if two ParaFrags map out the same'
+            if hasattr(f,'cbDefn') or hasattr(g,'cbDefn'): return 0
+            for a in ('fontName', 'fontSize', 'textColor', 'rise', 'underline'):
+                if getattr(f,a)!=getattr(g,a): return 0
+            return 1
 
 def _getFragWords(frags):
     ''' given a Parafrag list return a list of fragwords
@@ -217,7 +239,7 @@ def _split_blParaHard(blPara,start,stop):
             i = len(f)-1
             while hasattr(f[i],'cbDefn'): i = i-1
             g = f[i]
-            if g.text[-1]!=' ': g.text = g.text+' '
+            if g.text and g.text[-1]!=' ': g.text = g.text+' '
     return f
 
 def _drawBullet(canvas, offset, cur_y, bulletText, style):
@@ -314,6 +336,19 @@ def splitLines0(frags,widths):
                 line.append(g)
             if j==lim:
                 i=i+1
+
+def _do_under_lines(i, t_off, tx):
+    y = tx.XtraState.cur_y - i*tx.XtraState.style.leading - tx.XtraState.f.fontSize/8.0 # 8.0 factor copied from para.py
+    text = join(lines[i][1])
+    textlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
+    tx._canvas.line(t_off, y, t_off+textlen, y)
+
+def _do_under(i, t_off, tx):
+    y = tx.XtraState.cur_y - i*tx.XtraState.style.leading - tx.XtraState.f.fontSize/8.0 # 8.0 factor copied from para.py
+    for x1,x2 in tx.XtraState.underlines:
+        tx._canvas.line(t_off+x1, y, t_off+x2, y)
+    tx.XtraState.underlines = []
+    tx.XtraState.underline=0
 
 class Paragraph(Flowable):
     """ Paragraph(text, style, bulletText=None)
@@ -602,6 +637,9 @@ class Paragraph(Flowable):
 
         return lines
 
+    def beginText(self, x, y):
+        return self.canv.beginText(x, y)
+
     def drawPara(self,debug=0):
         """Draws a paragraph according to the given style.
         Returns the final y position at the bottom. Not safe for
@@ -673,15 +711,27 @@ class Paragraph(Flowable):
                 #set up the font etc.
                 canvas._code.append('%s %s %s rg' % (f.textColor.red, f.textColor.green, f.textColor.blue))
 
-                tx = canvas.beginText(cur_x, cur_y)
+                tx = self.beginText(cur_x, cur_y)
 
                 #now the font for the rest of the paragraph
                 tx.setFont(f.fontName, f.fontSize, style.leading)
-                dpl( tx, offset, lines[0][0], lines[0][1], noJustifyLast and nLines==1)
+                t_off = dpl( tx, offset, lines[0][0], lines[0][1], noJustifyLast and nLines==1)
+                if f.underline:
+                    tx.XtraState=ABag()
+                    tx.XtraState.cur_y = cur_y
+                    tx.XtraState.f = f
+                    tx.XtraState.style = style
+                    tx.XtraState.lines = lines
+                    _do_under_lines(0, t_off, tx)
 
-                #now the middle of the paragraph, aligned with the left margin which is our origin.
-                for i in range(1, nLines):
-                    dpl( tx, 0, lines[i][0], lines[i][1], noJustifyLast and i==lim)
+                    #now the middle of the paragraph, aligned with the left margin which is our origin.
+                    for i in range(1, nLines):
+                        t_off = dpl( tx, 0, lines[i][0], lines[i][1], noJustifyLast and i==lim)
+                        if f.underline:
+                            _do_under_lines(i, t_off, tx)
+                else:
+                    for i in range(1, nLines):
+                        dpl( tx, 0, lines[i][0], lines[i][1], noJustifyLast and i==lim)
             else:
                 f = lines[0]
                 cur_y = self.height - f.fontSize
@@ -701,20 +751,29 @@ class Paragraph(Flowable):
                     raise ValueError, "bad align %s" % repr(alignment)
 
                 #set up the font etc.
-                tx = canvas.beginText(cur_x, cur_y)
+                tx = self.beginText(cur_x, cur_y)
                 tx.XtraState=ABag()
                 tx.XtraState.textColor=None
                 tx.XtraState.rise=0
+                tx.XtraState.underline=0
+                tx.XtraState.underlines=[]
                 tx.setLeading(style.leading)
+                tx.XtraState.cur_y = cur_y
+                tx.XtraState.f = f
+                tx.XtraState.style = style
                 #f = lines[0].words[0]
                 #tx._setFont(f.fontName, f.fontSize)
+
+
                 tx._fontname,tx._fontsize = None, None
-                dpl( tx, offset, lines[0], noJustifyLast and nLines==1)
+                t_off = dpl( tx, offset, lines[0], noJustifyLast and nLines==1)
+                _do_under(0, t_off, tx)
 
                 #now the middle of the paragraph, aligned with the left margin which is our origin.
                 for i in range(1, nLines):
                     f = lines[i]
-                    dpl( tx, 0, f, noJustifyLast and i==lim)
+                    t_off = dpl( tx, 0, f, noJustifyLast and i==lim)
+                    _do_under(i, t_off, tx)
 
             canvas.drawText(tx)
             canvas.restoreState()
