@@ -1,12 +1,13 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.11 2001/05/09 15:20:58 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.12 2001/05/10 08:42:50 dinu_gherman Exp $
 import string
 
 from reportlab.graphics import shapes
 from reportlab import rl_config
 from reportlab.lib import colors
+from reportlab.lib.validators import *
 
 
 class PropHolder:
@@ -81,7 +82,7 @@ class PropHolder:
             if name[0:1] <> '_':
                 component = getattr(self, name)
 
-                if shapes.isValidChild(component):
+                if isValidChild(component):
                     # child object, get its properties too
                     childProps = component.getProperties()
                     for (childKey, childValue) in childProps.items():
@@ -143,7 +144,7 @@ class PropHolder:
             print '%s%s = %s' % (prefix, name, value)
 
 
-class Widget(PropHolder,shapes.UserNode):
+class Widget(PropHolder, shapes.UserNode):
     """Base for all user-defined widgets.  Keep as simple as possible. Does
     not inherit from Shape so that we can rewrite shapes without breaking
     widgets and vice versa."""
@@ -250,15 +251,15 @@ class StyleProperties(PropHolder):
 	"""
 	
 	_attrMap = {
-		'strokeWidth': shapes.isNumber,
-		'strokeLineCap': shapes.isNumber,
-		'strokeLineJoin': shapes.isNumber,
+		'strokeWidth': isNumber,
+		'strokeLineCap': isNumber,
+		'strokeLineJoin': isNumber,
 		'strokeMiterLimit': None,
-		'strokeDashArray': shapes.isListOfNumbersOrNone,
-		'strokeOpacity': shapes.isNumber,
-		'strokeColor': shapes.isColorOrNone,
-		'fillColor': shapes.isColorOrNone,
-		'desc':shapes.isString
+		'strokeDashArray': isListOfNumbersOrNone,
+		'strokeOpacity': isNumber,
+		'strokeColor': isColorOrNone,
+		'fillColor': isColorOrNone,
+		'desc':isString
 		}
 
 	def __init__(self, **kwargs):
@@ -309,11 +310,11 @@ class Face(Widget):
         return (moodName in ('happy','sad','ok'))
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'skinColor':shapes.isColorOrNone,
-        'eyeColor': shapes.isColorOrNone,
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'skinColor':isColorOrNone,
+        'eyeColor': isColorOrNone,
         'mood': checkMood 
         }
 

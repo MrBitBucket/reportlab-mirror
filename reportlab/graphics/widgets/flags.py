@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/flags.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.2 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.3 2001/05/10 08:41:11 dinu_gherman Exp $
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 
@@ -30,6 +30,7 @@ USA, Czech Republic, European Union, Switzerland, Turkey
 """
 
 from reportlab.lib import colors
+from reportlab.lib.validators import *
 from reportlab.graphics import shapes
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics import renderPDF
@@ -44,11 +45,11 @@ class Star0(Widget):
         """
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'color': shapes.isColorOrNone,
-        'strokecolor': shapes.isColorOrNone
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'color': isColorOrNone,
+        'strokecolor': isColorOrNone
         }
 
     def __init__(self):
@@ -110,11 +111,11 @@ class Flag0(Widget):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -180,7 +181,6 @@ class Flag0(Widget):
         return g
 
 
-
 class FlagUK0(Flag0):
     """This draws the Union Flag, as used by the United Kingdom.
 
@@ -189,11 +189,11 @@ class FlagUK0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -316,11 +316,11 @@ class FlagUSA0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -398,8 +398,6 @@ class FlagUSA0(Flag0):
                 littlestar.draw()
                 g.add(littlestar)        
 
-
-
         g.add(self.borderdraw())
         
         return g
@@ -413,11 +411,11 @@ class FlagAustria0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -478,11 +476,11 @@ class FlagBelgium0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -549,11 +547,11 @@ class FlagDenmark0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -588,7 +586,6 @@ class FlagDenmark0(Flag0):
                           strokeColor = colors.black,
                strokeWidth=0)
         g.add(box)
-
 
         whitebox1 = shapes.Rect(self.x+((s/5)*2), self.y, width=s/6, height=s,
                fillColor = colors.mintcream,
@@ -626,11 +623,11 @@ class FlagFinland0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -690,11 +687,11 @@ class FlagFrance0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -752,7 +749,6 @@ class FlagFrance0(Flag0):
         return g
 
 
-
 class FlagGermany0(Flag0):
     """This draws the national flag of Germany.
 
@@ -761,11 +757,11 @@ class FlagGermany0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -800,7 +796,6 @@ class FlagGermany0(Flag0):
                strokeWidth=0)
         g.add(box)
 
-
         blackbox1 = shapes.Rect(self.x, self.y+((s/3.0)*2.0), width=s*2.0, height=s/3.0,
                fillColor = colors.black,
                strokeColor = None,
@@ -826,11 +821,11 @@ class FlagGreece0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -878,7 +873,6 @@ class FlagGreece0(Flag0):
                    strokeWidth=20)
             g.add(blueorwhiteline)   
 
-
         bluebox1 = shapes.Rect(self.x, self.y+((s)-stripeheight*5), width=(stripeheight*5), height=stripeheight*5,
                fillColor = colors.deepskyblue,
                strokeColor = None,
@@ -901,6 +895,7 @@ class FlagGreece0(Flag0):
         
         return g
 
+
 class FlagIreland0(Flag0):
     """This draws the national flag of Ireland.
 
@@ -909,11 +904,11 @@ class FlagIreland0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -948,7 +943,6 @@ class FlagIreland0(Flag0):
                strokeWidth=0)
         g.add(box)
 
-
         whitebox = shapes.Rect(self.x+((s*2.0)/3.0), self.y, width=(2.0*(s*2.0)/3.0), height=s,
                fillColor = colors.mintcream,
                strokeColor = None,
@@ -965,6 +959,7 @@ class FlagIreland0(Flag0):
         
         return g
 
+
 class FlagItaly0(Flag0):
     """This draws the national flag of Italy.
 
@@ -973,11 +968,11 @@ class FlagItaly0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -1012,7 +1007,6 @@ class FlagItaly0(Flag0):
                strokeWidth=0)
         g.add(box)
 
-
         whitebox = shapes.Rect(self.x+((s*2.0)/3.0), self.y, width=(2.0*(s*2.0)/3.0), height=s,
                fillColor = colors.mintcream,
                strokeColor = None,
@@ -1038,11 +1032,11 @@ class FlagLuxembourg0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -1077,7 +1071,6 @@ class FlagLuxembourg0(Flag0):
                strokeWidth=0)
         g.add(box)
 
-
         redbox = shapes.Rect(self.x, self.y+((s/3.0)*2.0), width=s*2.0, height=s/3.0,
                fillColor = colors.red,
                strokeColor = None,
@@ -1103,11 +1096,11 @@ class FlagHolland0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -1142,7 +1135,6 @@ class FlagHolland0(Flag0):
                strokeWidth=0)
         g.add(box)
 
-
         redbox = shapes.Rect(self.x, self.y+((s/3.0)*2.0), width=s*2.0, height=s/3.0,
                fillColor = colors.red,
                strokeColor = None,
@@ -1158,6 +1150,7 @@ class FlagHolland0(Flag0):
         g.add(self.borderdraw())
         
         return g
+
 
 class FlagPortugal0(Flag0):
     """For PORTUGAL, the national flag contains a complex coat of arms -
@@ -1180,11 +1173,11 @@ class FlagSpain0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -1219,7 +1212,6 @@ class FlagSpain0(Flag0):
                strokeWidth=0)
         g.add(box)
 
-
         redbox1 = shapes.Rect(self.x, self.y+((s/4)*3), width=s*2, height=s/4,
                fillColor = colors.red,
                strokeColor = None,
@@ -1245,11 +1237,11 @@ class FlagSweden0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -1285,7 +1277,6 @@ class FlagSweden0(Flag0):
                strokeWidth=0)
         g.add(box)
 
-
         box1 = shapes.Rect(self.x+((s/5)*2), self.y, width=s/6, height=s,
                fillColor = colors.gold,
                strokeColor = None,
@@ -1313,10 +1304,6 @@ class FlagSweden0(Flag0):
         return g
 
 
-
-
-
-
 class FlagNorway0(Flag0):
     """This draws the Norgegian national flag.
 
@@ -1325,11 +1312,11 @@ class FlagNorway0(Flag0):
         """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean,
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean,
         }
 
     def __init__(self):
@@ -1372,7 +1359,6 @@ class FlagNorway0(Flag0):
                           strokeColor = colors.black,
                strokeWidth=0)
         g.add(box)
-
 
         whiteline1 = shapes.Rect(self.x+((s*0.2)*2), self.y, width=s*0.2, height=s,
                fillColor = colors.ghostwhite,
@@ -1420,11 +1406,11 @@ class FlagCzechRepublic0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -1479,7 +1465,6 @@ class FlagCzechRepublic0(Flag0):
         return g
 
 
-
 class FlagTurkey0(Flag0):
     """This draws the national flag of the Republic of Turkey.
 
@@ -1488,11 +1473,11 @@ class FlagTurkey0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -1567,11 +1552,11 @@ class FlagSwitzerland0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -1629,10 +1614,6 @@ class FlagSwitzerland0(Flag0):
         return g
 
 
-
-
-
-
 class FlagEU0(Flag0):
     """This draws the flag of the European Union.
 
@@ -1641,11 +1622,11 @@ class FlagEU0(Flag0):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'background': shapes.isColor,
-        'border': shapes.isBoolean
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'background': isColor,
+        'border': isBoolean
         }
 
     def __init__(self):
@@ -1730,6 +1711,7 @@ class FlagEU0(Flag0):
         g.add(self.borderdraw())
         
         return g
+
 
 def test():
     """This function produces two pdf files with examples of all the signs and symbols from this file.
@@ -1903,7 +1885,6 @@ def test():
                         nor.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                         fontSize=labelFontSize))
 
-
     cze = FlagCzechRepublic0()
     cze.x = 20
     cze.y = 140
@@ -1924,8 +1905,6 @@ def test():
                         tur.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                         fontSize=labelFontSize))
     
-    
-    
     eu = FlagEU0()
     eu.border=0
     eu.x = 20
@@ -1936,7 +1915,6 @@ def test():
     D.add(shapes.String(eu.x+(eu.size/2),(eu.y-(1.2*labelFontSize)),
                             eu.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
-
 
     che = FlagSwitzerland0()
     che.border=0
@@ -1955,4 +1933,3 @@ def test():
     
 if __name__=='__main__':
     test()
-

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/signsandsymbols.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.9 2001/04/28 16:28:36 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.10 2001/05/10 08:41:11 dinu_gherman Exp $
 # signsandsymbols.py
 # A collection of new widgets
 # author: John Precedo (johnp@reportlab.com)
@@ -28,9 +28,11 @@ Widgets include:
 """
 
 from reportlab.lib import colors
+from reportlab.lib.validators import *
 from reportlab.graphics import shapes
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics import renderPDF
+
 
 class ETriangle0(Widget):
     """This draws an equilateral triangle.
@@ -41,11 +43,11 @@ class ETriangle0(Widget):
         """
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'color': shapes.isColorOrNone,
-        'strokecolor': shapes.isColorOrNone
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'color': isColorOrNone,
+        'strokecolor': isColorOrNone
         }
 
     def __init__(self):
@@ -94,11 +96,11 @@ class RTriangle0(Widget):
         """
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'color': shapes.isColorOrNone,
-        'strokecolor': shapes.isColorOrNone
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'color': isColorOrNone,
+        'strokecolor': isColorOrNone
         }
 
     def __init__(self):
@@ -147,11 +149,11 @@ class Octagon0(Widget):
         """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'color': shapes.isColorOrNone,
-        'strokecolor': shapes.isColorOrNone
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'color': isColorOrNone,
+        'strokecolor': isColorOrNone
         }
 
     def __init__(self):
@@ -206,12 +208,12 @@ class Crossbox0(Widget):
     """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'crossColor': shapes.isColorOrNone,
-        'boxColor': shapes.isColorOrNone, 
-        'crosswidth': shapes.isNumber 
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'crossColor': isColorOrNone,
+        'boxColor': isColorOrNone, 
+        'crosswidth': isNumber 
         }
 
     def __init__(self):
@@ -271,12 +273,12 @@ class Tickbox0(Widget):
 """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'tickColor': shapes.isColorOrNone,
-        'boxColor': shapes.isColorOrNone, 
-        'tickwidth': shapes.isNumber 
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'tickColor': isColorOrNone,
+        'boxColor': isColorOrNone, 
+        'tickwidth': isNumber 
         }
 
     def __init__(self):
@@ -331,10 +333,10 @@ class SmileyFace0(Widget):
 """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'color': shapes.isColor
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'color': isColor
         }
 
     def __init__(self):
@@ -422,9 +424,9 @@ class StopSign0(Widget):
         """ 
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber
         }
 
     def __init__(self):
@@ -496,9 +498,9 @@ class NoEntry0(Widget):
         """
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
         }
 
     def __init__(self):
@@ -558,9 +560,9 @@ class NotAllowed0(Widget):
         """
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
         }
 
     def __init__(self):
@@ -637,9 +639,9 @@ class NoSmoking0(NotAllowed0):
         """
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
         }
 
     def __init__(self):
@@ -717,12 +719,12 @@ class DangerSign0(Widget):
         """
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'exmarkColor': shapes.isColorOrNone,
-        'backColor': shapes.isColorOrNone, 
-        'exmarkWidth': shapes.isNumber 
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'exmarkColor': isColorOrNone,
+        'backColor': isColorOrNone, 
+        'exmarkWidth': isNumber 
         }
 
     def __init__(self):
@@ -811,12 +813,12 @@ class YesNo0(Widget):
 """
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'tickcolor': shapes.isColor,
-        'crosscolor': shapes.isColor,
-        'size': shapes.isNumber,
-        'testValue': shapes.isBoolean,
+        'x': isNumber,
+        'y': isNumber,
+        'tickcolor': isColor,
+        'crosscolor': isColor,
+        'size': isNumber,
+        'testValue': isBoolean,
         }
 
     def __init__(self):
@@ -879,10 +881,10 @@ class FloppyDisk0(Widget):
         """
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'diskColor': shapes.isColor
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'diskColor': isColor
         }
 
     def __init__(self):
@@ -971,10 +973,10 @@ class ArrowOne0(Widget):
         """
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'color': shapes.isColor
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'color': isColor
         }
 
     def __init__(self):
@@ -1029,10 +1031,10 @@ class ArrowTwo0(Widget):
         """
 
     _attrMap = {
-        'x': shapes.isNumber,
-        'y': shapes.isNumber,
-        'size': shapes.isNumber,
-        'color': shapes.isColor
+        'x': isNumber,
+        'y': isNumber,
+        'size': isNumber,
+        'color': isColor
         }
 
     def __init__(self):
