@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.10 2001/06/27 15:01:01 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.11 2001/07/02 09:41:34 andy_robinson Exp $
 
 """Generate documentation of graphical Python objects.
 
@@ -192,11 +192,14 @@ assert indentLevel('\t hello') == 5, 'error in indentLevel'
 
 # This may well be replaceable by something in the inspect module.
 def getFunctionBody(f, linesInFile):
-    """Pass in the function object and the lines in the file.
+    """Get the full source code for a function or method.
 
-    Since we will typically grab several things out of
-    the same file.  it extracts a multiline text block.
-    Works with methods too."""
+    Works with a list of lines since we will typically grab
+    several things out of the same file.  It extracts a
+    multiline text block.  It can be fooled by devious
+    use of dedentation inside brackets, which could be
+    fixed in a future version that watched the nesting
+    level."""
 
     if hasattr(f, 'im_func'):
         #it's a method, drill down and get its function
@@ -208,18 +211,21 @@ def getFunctionBody(f, linesInFile):
     extracted.append(linesInFile[firstLineNo])
     #brackets = 0
     for line in linesInFile[firstLineNo+1:]:
-        ind = indentLevel(line)
-        if ind <= startingIndent:
-            break
+        # ignore comments and whitespace lines
+        # for the purpose of getting indentation.
+        stripped = string.strip(line)
+        if len(stripped) == 0:
+            continue
+        elif stripped[0] == '#':
+            continue
         else:
-            extracted.append(line)
+            ind = indentLevel(line)
+            if ind <= startingIndent:
+                break
+            else:
+                extracted.append(line)
          # we are not indented
     return string.join(extracted, '\n')
-
-    # ???
-    usefulLines = lines[firstLineNo:lineNo+1]
-    return string.join(usefulLines, '\n')
-
 
 ####################################################################
 # 
@@ -374,6 +380,8 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
 
 
     def beginFunctions(self, names):
+        srch = string.join(names, ' ')
+        print 'name searching "%s"' % srch
         if string.find(string.join(names, ' '), ' sample') > -1:
             PdfDocBuilder0.beginFunctions(self, names)
 
