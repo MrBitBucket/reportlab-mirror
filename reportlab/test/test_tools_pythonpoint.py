@@ -2,7 +2,6 @@
 """
 
 import os, sys, string
-
 from reportlab.test import unittest
 from reportlab.test.utils import makeSuiteForClasses
 
@@ -18,20 +17,24 @@ class PythonPointTestCase(unittest.TestCase):
         join, dirname, isfile, abspath = os.path.join, os.path.dirname, os.path.isfile, os.path.abspath
         rlDir = abspath(dirname(reportlab.__file__))
         from reportlab.tools.pythonpoint import pythonpoint
+        from reportlab.lib.utils import isCompactDistro, open_for_read
         ppDir = dirname(pythonpoint.__file__)
         xml = join(ppDir, 'demos', 'pythonpoint.xml')
-        outDir = join(rlDir, 'test')
-        pdf = join(outDir, 'pythonpoint.pdf')
+        datafilename = 'pythonpoiint.pdf'
+        if isCompactDistro():
+            cwd = None
+            outDir = '.'
+            xml = open_for_read(xml)
+        else:
+            outDir = join(rlDir, 'test')
+            cwd = os.getcwd()
+            os.chdir(join(ppDir, 'demos'))
+        pdf = join(outDir, datafilename)
         if isfile(pdf): os.remove(pdf)
-
-        cwd = os.getcwd()
-        os.chdir(join(ppDir, 'demos'))
-        pythonpoint.process(xml, outDir=outDir, verbose=0)
-        os.chdir(cwd)
-
+        pythonpoint.process(xml, outDir=outDir, verbose=0, datafilename=datafilename)
+        if cwd: os.chdir(cwd)
         assert os.path.exists(pdf)
         os.remove(pdf)
-
 
 def makeSuite():
     return makeSuiteForClasses(PythonPointTestCase)
