@@ -19,7 +19,7 @@
 
 /* Various utility functions RLL finds useful. */
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(macintosh)
 #	include <unistd.h>
 #endif
 #include <stdio.h>
