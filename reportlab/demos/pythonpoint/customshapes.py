@@ -31,31 +31,16 @@
 #
 ###############################################################################
 #	$Log: customshapes.py,v $
+#	Revision 1.2  2000/04/06 09:48:42  andy_robinson
+#	Removed some stray comments
+#
 #	Revision 1.1  2000/04/06 09:47:20  andy_robinson
 #	Added several new shape tags.
 #	Broke out parser into separate module, to
 #	allow for alternative parsers in future.
 #	Broke out 'user guide' into pythonpoint.xml
-#
-#	Revision 1.6  2000/03/21 19:36:37  rgbecker
-#	8bit character fixes
 #	
-#	Revision 1.5  2000/02/23 15:09:23  rgbecker
-#	Memory leak fixes
-#	
-#	Revision 1.4  2000/02/17 02:06:28  rgbecker
-#	Docstring & other fixes
-#	
-#	Revision 1.3  2000/02/16 09:42:50  rgbecker
-#	Conversion to reportlab package
-#	
-#	Revision 1.2  2000/02/15 17:55:59  rgbecker
-#	License text fixes
-#	
-#	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
-#	Initial setup of demos directory and contents.
-#	
-__version__=''' $Id: customshapes.py,v 1.1 2000/04/06 09:47:20 andy_robinson Exp $ '''
+__version__=''' $Id: customshapes.py,v 1.2 2000/04/06 09:48:42 andy_robinson Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
