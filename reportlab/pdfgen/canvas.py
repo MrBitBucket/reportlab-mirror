@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.118 2004/01/13 11:22:17 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.118 2004/01/13 11:22:17 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.119 2004/01/20 09:42:10 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.119 2004/01/20 09:42:10 andy_robinson Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -679,9 +679,33 @@ class Canvas:
         self.pop_state_stack()
 
 
-    #def forceCodeInsert0(self, code):
-    #    """I know a whole lot about PDF and I want to add a bunch of code I know will work..."""
-    #    self._code.append(code)
+    def addPostScriptCommand(self, command):
+        """Embed literal Postscript in the document.
+
+        Use with extreme caution, but sometimes needed for printer tray commands.
+        Acrobat 4.0 will export Postscript to a printer or file containing
+        the given commands.  Adobe Reader 6.0 no longer does as this feature is
+        deprecated.  5.0, I don't know about (please let us know!). This was
+        funded by Bob Marshall of Vector.co.uk and tested on a Lexmark 750.
+        See test_pdfbase_postscript.py for 2 test cases - one will work on
+        any Postscript device, the other uses a 'setpapertray' command which
+        will error in Distiller but work on printers supporting it.
+        """
+        #check if we've done this one already...
+        rawName = 'PS' + md5.md5(command).hexdigest()
+        regName = self._doc.getXObjectName(rawName)
+        psObj = self._doc.idToObject.get(regName, None)
+        if not psObj:
+            #first use of this chunk of Postscript, make an object
+            psObj = pdfdoc.PDFPostScriptXObject(command + '\r\n')
+            self._setXObjects(psObj)
+            self._doc.Reference(psObj, regName)
+            self._doc.addForm(rawName, psObj)
+        self._code.append("/%s Do" % regName)
+        self._formsinuse.append(rawName)
+        
+        
+        #
 
     def textAnnotation0(self, contents, Rect=None, addtopage=1, name=None, **kw):
         """Experimental.
