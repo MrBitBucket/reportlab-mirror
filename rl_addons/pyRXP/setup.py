@@ -2,10 +2,16 @@
 #copyright ReportLab Inc. 2000-2002
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/setup.py,v 1.3 2002/04/01 22:38:39 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/setup.py,v 1.4 2002/04/12 11:22:47 rgbecker Exp $
 if __name__=='__main__': #NO RUNTESTS
 	import os, sys
 	from distutils.core import setup, Extension
+
+	def raiseConfigError(msg):
+		import exceptions 
+		class ConfigError(exceptions.Exception): 
+			pass 
+		raise ConfigError(msg)
 
 	RXPDIR='rxp'
 	RXPLIBSOURCES=[]
@@ -19,14 +25,16 @@ if __name__=='__main__': #NO RUNTESTS
 		LIBS=['nsl', 'socket', 'dl']
 	elif sys.platform=="aix4":
 		LIBS=['nsl_r', 'dl']
-	elif sys.platform=="freebsd4":
-		LIBS=[]
-	elif sys.platform=="darwin":
-		LIBS=[]
-	elif sys.platform=="mac":
+	elif sys.platform in ("freebsd4", "darwin", "mac"):
 		LIBS=[]
 	else:
-		print "Don't know about other systems"
+		msg = "Don't know about system %s" % sys.platform
+		if int(os.environ.get('LIBERROR',1)): 
+			raiseConfigError(msg+'\nset environment LIBERROR=0 to try no extra libs')
+		else:
+			print msg
+			LIBS=[]
+
 
 	setup(	name = "pyRXP",
 			version = "0.5",
