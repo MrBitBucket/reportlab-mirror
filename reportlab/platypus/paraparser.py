@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.31 2000/11/13 17:54:34 rgbecker Exp $
-__version__=''' $Id: paraparser.py,v 1.31 2000/11/13 17:54:34 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.32 2000/11/23 16:54:48 rgbecker Exp $
+__version__=''' $Id: paraparser.py,v 1.32 2000/11/23 16:54:48 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -439,25 +439,28 @@ class ParaParser(xmllib.XMLParser):
 		"Creates an intermediate representation of string segments."
 
 		frag = copy.copy(self._stack[-1])
-		#save our data
-		if hasattr(self,'cbDefn') and data!='': syntax_error('Only <onDraw> tag allowed')
-		frag.text = data
+		if hasattr(frag,'cbDefn'):
+			if data!='': syntax_error('Only <onDraw> tag allowed')
+		else:
+			# if sub and super are both one they will cancel each other out
+			if frag.sub == 1 and frag.super == 1:
+				frag.sub = 0
+				frag.super = 0
 
-		# if sub and super are both one they will cancel each other out
-		if frag.sub == 1 and frag.super == 1:
-			frag.sub = 0
-			frag.super = 0
+			if frag.sub:
+				frag.rise = -frag.fontSize*subFraction
+				frag.fontSize = max(frag.fontSize-sizeDelta,3)
+			elif frag.super:
+				frag.rise = frag.fontSize*superFraction
+				frag.fontSize = max(frag.fontSize-sizeDelta,3)
 
-		if frag.sub:
-			frag.rise = -frag.fontSize*subFraction
-			frag.fontSize = max(frag.fontSize-sizeDelta,3)
-		elif frag.super:
-			frag.rise = frag.fontSize*superFraction
-			frag.fontSize = max(frag.fontSize-sizeDelta,3)
+			if frag.greek: frag.fontName = 'symbol'
 
-		if frag.greek: frag.fontName = 'symbol'
 		# bold, italic, and underline
 		frag.fontName = tt2ps(frag.fontName,frag.bold,frag.italic)
+
+		#save our data
+		frag.text = data
 
 		if hasattr(frag,'isBullet'):
 			delattr(frag,'isBullet')
