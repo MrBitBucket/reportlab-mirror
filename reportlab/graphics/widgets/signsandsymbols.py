@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/signsandsymbols.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.10 2001/05/10 08:41:11 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.11 2001/05/11 10:57:06 dinu_gherman Exp $
 # signsandsymbols.py
 # A collection of new widgets
 # author: John Precedo (johnp@reportlab.com)
@@ -43,11 +43,11 @@ class ETriangle0(Widget):
         """
 
     _attrMap = {
-        'x': isNumber,
-        'y': isNumber,
-        'size': isNumber,
-        'color': isColorOrNone,
-        'strokecolor': isColorOrNone
+        'x': isNumber(),
+        'y': isNumber(),
+        'size': isNumber(),
+        'color': isColorOrNone(),
+        'strokecolor': isColorOrNone()
         }
 
     def __init__(self):
@@ -96,11 +96,11 @@ class RTriangle0(Widget):
         """
 
     _attrMap = {
-        'x': isNumber,
-        'y': isNumber,
-        'size': isNumber,
-        'color': isColorOrNone,
-        'strokecolor': isColorOrNone
+        'x': isNumber(),
+        'y': isNumber(),
+        'size': isNumber(),
+        'color': isColorOrNone(),
+        'strokecolor': isColorOrNone()
         }
 
     def __init__(self):
@@ -149,11 +149,11 @@ class Octagon0(Widget):
         """ 
 
     _attrMap = {
-        'x': isNumber,
-        'y': isNumber,
-        'size': isNumber,
-        'color': isColorOrNone,
-        'strokecolor': isColorOrNone
+        'x': isNumber(),
+        'y': isNumber(),
+        'size': isNumber(),
+        'color': isColorOrNone(),
+        'strokecolor': isColorOrNone()
         }
 
     def __init__(self):
@@ -208,12 +208,12 @@ class Crossbox0(Widget):
     """ 
 
     _attrMap = {
-        'x': isNumber,
-        'y': isNumber,
-        'size': isNumber,
-        'crossColor': isColorOrNone,
-        'boxColor': isColorOrNone, 
-        'crosswidth': isNumber 
+        'x': isNumber(),
+        'y': isNumber(),
+        'size': isNumber(),
+        'crossColor': isColorOrNone(),
+        'boxColor': isColorOrNone(), 
+        'crosswidth': isNumber() 
         }
 
     def __init__(self):
@@ -273,12 +273,12 @@ class Tickbox0(Widget):
 """ 
 
     _attrMap = {
-        'x': isNumber,
-        'y': isNumber,
-        'size': isNumber,
-        'tickColor': isColorOrNone,
-        'boxColor': isColorOrNone, 
-        'tickwidth': isNumber 
+        'x': isNumber(),
+        'y': isNumber(),
+        'size': isNumber(),
+        'tickColor': isColorOrNone(),
+        'boxColor': isColorOrNone(), 
+        'tickwidth': isNumber() 
         }
 
     def __init__(self):
@@ -333,10 +333,10 @@ class SmileyFace0(Widget):
 """ 
 
     _attrMap = {
-        'x': isNumber,
-        'y': isNumber,
-        'size': isNumber,
-        'color': isColor
+        'x': isNumber(),
+        'y': isNumber(),
+        'size': isNumber(),
+        'color': isColor()
         }
 
     def __init__(self):
@@ -424,9 +424,9 @@ class StopSign0(Widget):
         """ 
 
     _attrMap = {
-        'x': isNumber,
-        'y': isNumber,
-        'size': isNumber
+        'x': isNumber(),
+        'y': isNumber(),
+        'size': isNumber()
         }
 
     def __init__(self):
@@ -498,9 +498,9 @@ class NoEntry0(Widget):
         """
 
     _attrMap = {
-        'x': isNumber,
-        'y': isNumber,
-        'size': isNumber,
+        'x': isNumber(),
+        'y': isNumber(),
+        'size': isNumber(),
         }
 
     def __init__(self):
@@ -560,9 +560,9 @@ class NotAllowed0(Widget):
         """
 
     _attrMap = {
-        'x': isNumber,
-        'y': isNumber,
-        'size': isNumber,
+        'x': isNumber(),
+        'y': isNumber(),
+        'size': isNumber(),
         }
 
     def __init__(self):
@@ -639,9 +639,9 @@ class NoSmoking0(NotAllowed0):
         """
 
     _attrMap = {
-        'x': isNumber,
-        'y': isNumber,
-        'size': isNumber,
+        'x': isNumber(),
+        'y': isNumber(),
+        'size': isNumber(),
         }
 
     def __init__(self):
@@ -719,12 +719,12 @@ class DangerSign0(Widget):
         """
 
     _attrMap = {
-        'x': isNumber,
-        'y': isNumber,
-        'size': isNumber,
-        'exmarkColor': isColorOrNone,
-        'backColor': isColorOrNone, 
-        'exmarkWidth': isNumber 
+        'x': isNumber(),
+        'y': isNumber(),
+        'size': isNumber(),
+        'exmarkColor': isColorOrNone(),
+        'backColor': isColorOrNone(), 
+        'exmarkWidth': isNumber() 
         }
 
     def __init__(self):
@@ -813,12 +813,12 @@ class YesNo0(Widget):
 """
 
     _attrMap = {
-        'x': isNumber,
-        'y': isNumber,
-        'tickcolor': isColor,
-        'crosscolor': isColor,
-        'size': isNumber,
-        'testValue': isBoolean,
+        'x': isNumber(),
+        'y': isNumber(),
+        'tickcolor': isColor(),
+        'crosscolor': isColor(),
+        'size': isNumber(),
+        'testValue': isBoolean(),
         }
 
     def __init__(self):
@@ -881,10 +881,10 @@ class FloppyDisk0(Widget):
         """
 
     _attrMap = {
-        'x': isNumber,
-        'y': isNumber,
-        'size': isNumber,
-        'diskColor': isColor
+        'x': isNumber(),
+        'y': isNumber(),
+        'size': isNumber(),
+        'diskColor': isColor()
         }
 
     def __init__(self):
@@ -973,10 +973,10 @@ class ArrowOne0(Widget):
         """
 
     _attrMap = {
-        'x': isNumber,
-        'y': isNumber,
-        'size': isNumber,
-        'color': isColor
+        'x': isNumber(),
+        'y': isNumber(),
+        'size': isNumber(),
+        'color': isColor()
         }
 
     def __init__(self):
@@ -1031,10 +1031,10 @@ class ArrowTwo0(Widget):
         """
 
     _attrMap = {
-        'x': isNumber,
-        'y': isNumber,
-        'size': isNumber,
-        'color': isColor
+        'x': isNumber(),
+        'y': isNumber(),
+        'size': isNumber(),
+        'color': isColor()
         }
 
     def __init__(self):
