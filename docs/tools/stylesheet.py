@@ -36,6 +36,7 @@ def getStyleSheet():
     stylesheet.add(ParagraphStyle(name='Heading1',
                                   parent=stylesheet['Normal'],
                                   fontName = 'Times-Bold',
+                                  alignment=TA_CENTER,
                                   fontSize=18,
                                   leading=22,
                                   spaceAfter=6),

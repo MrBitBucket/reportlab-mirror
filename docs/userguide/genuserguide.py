@@ -1,12 +1,12 @@
 #!/bin/env python
 ###############################################################################
 #
-#	ReportLab Public License Version 1.0
+#   ReportLab Public License Version 1.0
 #
 #   Except for the change of names the spirit and intention of this
 #   license is the same as that of Python
 #
-#	(C) Copyright ReportLab Inc. 1998-2000.
+#   (C) Copyright ReportLab Inc. 1998-2000.
 #
 #
 # All Rights Reserved
@@ -31,63 +31,68 @@
 # PERFORMANCE OF THIS SOFTWARE. 
 #
 ###############################################################################
-#	$Log: genuserguide.py,v $
-#	Revision 1.13  2000/07/03 09:51:38  rgbecker
-#	abspath is 1.5.2 only
+#   $Log: genuserguide.py,v $
+#   Revision 1.14  2000/07/03 15:50:31  andy_robinson
+#   Pushed down most existing lessons one level; added
+#   functions heading1..heading3 for building story
+#   unambiguously; spelled Hugh Hefner right!
 #
-#	Revision 1.12  2000/06/28 16:10:00  rgbecker
-#	Fix unwanted 'i'
-#	
-#	Revision 1.11  2000/06/28 14:52:43  rgbecker
-#	Documentation changes
-#	
-#	Revision 1.10  2000/06/27 10:09:48  rgbecker
-#	Minor cosmetic changes
-#	
-#	Revision 1.9  2000/06/23 21:09:03  aaron_watters
-#	text text and more text
-#	
-#	Revision 1.8  2000/06/22 19:05:24  aaron_watters
-#	added quickhack for font changes in paragraphs and lots of new text
-#	
-#	Revision 1.7  2000/06/22 13:55:59  aaron_watters
-#	showPage resets all state parameters warning.
-#	
-#	Revision 1.6  2000/06/22 13:35:28  aaron_watters
-#	textobject and pathobject methods, among other things
-#	
-#	Revision 1.5  2000/06/21 21:19:29  aaron_watters
-#	colors, line styles, more examples
-#	
-#	Revision 1.4  2000/06/21 15:16:05  aaron_watters
-#	Lots of graphical examples added
-#	
-#	Revision 1.3  2000/06/20 20:31:42  aaron_watters
-#	typos and more examples
-#	
-#	Revision 1.2  2000/06/19 21:13:02  aaron_watters
-#	2nd try. more text
-#	
-#	Revision 1.1  2000/06/17 02:57:56  aaron_watters
-#	initial checkin. user guide generation framework.
-#	
-__version__=''' $Id: genuserguide.py,v 1.13 2000/07/03 09:51:38 rgbecker Exp $ '''
+#   Revision 1.13  2000/07/03 09:51:38  rgbecker
+#   abspath is 1.5.2 only
+#   
+#   Revision 1.12  2000/06/28 16:10:00  rgbecker
+#   Fix unwanted 'i'
+#   
+#   Revision 1.11  2000/06/28 14:52:43  rgbecker
+#   Documentation changes
+#   
+#   Revision 1.10  2000/06/27 10:09:48  rgbecker
+#   Minor cosmetic changes
+#   
+#   Revision 1.9  2000/06/23 21:09:03  aaron_watters
+#   text text and more text
+#   
+#   Revision 1.8  2000/06/22 19:05:24  aaron_watters
+#   added quickhack for font changes in paragraphs and lots of new text
+#   
+#   Revision 1.7  2000/06/22 13:55:59  aaron_watters
+#   showPage resets all state parameters warning.
+#   
+#   Revision 1.6  2000/06/22 13:35:28  aaron_watters
+#   textobject and pathobject methods, among other things
+#   
+#   Revision 1.5  2000/06/21 21:19:29  aaron_watters
+#   colors, line styles, more examples
+#   
+#   Revision 1.4  2000/06/21 15:16:05  aaron_watters
+#   Lots of graphical examples added
+#   
+#   Revision 1.3  2000/06/20 20:31:42  aaron_watters
+#   typos and more examples
+#   
+#   Revision 1.2  2000/06/19 21:13:02  aaron_watters
+#   2nd try. more text
+#   
+#   Revision 1.1  2000/06/17 02:57:56  aaron_watters
+#   initial checkin. user guide generation framework.
+#   
+__version__=''' $Id: genuserguide.py,v 1.14 2000/07/03 15:50:31 andy_robinson Exp $ '''
 
 
 __doc__ = """
 This module contains the script for building the user guide.
 """
 
-_oldStyle=0		#change to 1 to get Aaron's original
+_oldStyle=0     #change to 1 to get Aaron's original
 if _oldStyle:
-	from reportlab.lib.styles import getSampleStyleSheet
-	styleSheet = getSampleStyleSheet()
+    from reportlab.lib.styles import getSampleStyleSheet
+    styleSheet = getSampleStyleSheet()
 else:
-	import os, sys
-	sys.path.insert(0,os.path.join(os.path.dirname(sys.argv[0]),'..','tools'))
-	from rltemplate import RLDocTemplate
-	from stylesheet import getStyleSheet
-	styleSheet = getStyleSheet()
+    import os, sys
+    sys.path.insert(0,os.path.join(os.path.dirname(sys.argv[0]),'..','tools'))
+    from rltemplate import RLDocTemplate
+    from stylesheet import getStyleSheet
+    styleSheet = getStyleSheet()
 
 from reportlab.platypus.doctemplate import SimpleDocTemplate
 from reportlab.platypus.flowables import Flowable
@@ -96,6 +101,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.platypus import Paragraph, Spacer, Preformatted, PageBreak, CondPageBreak
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
+from reportlab.lib.sequencer import getSequencer
 import examples
 
 from reportlab.lib.corp import ReportLabLogo
@@ -105,12 +111,12 @@ from t_parse import Template
 QFcodetemplate = Template("X$X$", "X")
 QFreptemplate = Template("X^X^", "X")
 if _oldStyle:
-	codesubst = "%s<font name=courier color=green>%s</font>"
-	QFsubst = "%s<font name=Helvetica color=blue><i>%s</i></font>"
+    codesubst = "%s<font name=courier color=green>%s</font>"
+    QFsubst = "%s<font name=Helvetica color=blue><i>%s</i></font>"
 else:
-	codesubst = "%s<b><font name=courier></b>%s</font>"
-	QFsubst = "%s<font name=Helvetica><i>%s</i></font>"
-	
+    codesubst = "%s<b><font name=courier></b>%s</font>"
+    QFsubst = "%s<font name=Helvetica><i>%s</i></font>"
+    
 
 def quickfix(text):
     """inside text find any subsequence of form $subsequence$.
@@ -142,26 +148,26 @@ def quickfix(text):
 #print quickfix("$testing$ testing $one$ ^two^ $three(^four^)$")
 
 if _oldStyle:
-	class PageAnnotations:
-		""" "closure" containing onfirstpage, onnextpage actions
-			and any data they might want to use.
-		"""
-		pagesize = letter
-		pagenumber = 1
-		def onFirstPage(self, canvas, doc):
-			(xsize, ysize) = self.pagesize
-			LOGO.draw(canvas)
-			#  width=6.25*inch,height=0.62*inch)
-			canvas.setFont("Helvetica", 12)
-			canvas.drawRightString(xsize-inch, ysize-0.8*inch, "ReportLab User Guide")
-			self.pagenumber = self.pagenumber+1
-		def onNextPage(self, canvas, doc):
-			canvas.saveState()
-			(xsize, ysize) = self.pagesize
-			canvas.setFont("Helvetica", 12)
-			canvas.drawString(inch, ysize-0.8*inch, "Page %s" % self.pagenumber)
-			self.onFirstPage(canvas, doc)
-			canvas.restoreState()
+    class PageAnnotations:
+        """ "closure" containing onfirstpage, onnextpage actions
+            and any data they might want to use.
+        """
+        pagesize = letter
+        pagenumber = 1
+        def onFirstPage(self, canvas, doc):
+            (xsize, ysize) = self.pagesize
+            LOGO.draw(canvas)
+            #  width=6.25*inch,height=0.62*inch)
+            canvas.setFont("Helvetica", 12)
+            canvas.drawRightString(xsize-inch, ysize-0.8*inch, "ReportLab User Guide")
+            self.pagenumber = self.pagenumber+1
+        def onNextPage(self, canvas, doc):
+            canvas.saveState()
+            (xsize, ysize) = self.pagesize
+            canvas.setFont("Helvetica", 12)
+            canvas.drawString(inch, ysize-0.8*inch, "Page %s" % self.pagenumber)
+            self.onFirstPage(canvas, doc)
+            canvas.restoreState()
         
 class Guide:
     def __init__(self):
@@ -176,18 +182,22 @@ class Guide:
             doc.build(story, self.myannotations.onFirstPage, self.myannotations.onNextPage)
         else:
             doc.build(story)
+seq = getSequencer()
 
 H1 = styleSheet['Heading1']
 H2 = styleSheet['Heading2']
+H3 = styleSheet['Heading3']
 B = styleSheet['BodyText']
+Comment = styleSheet['Comment']
+
 if _oldStyle:
-	lessonnamestyle = ParagraphStyle("lessonname", parent=H2)
-	lessonnamestyle.fontName = 'Helvetica-Bold'
-	discussiontextstyle = ParagraphStyle("discussiontext", parent=B)
-	discussiontextstyle.fontName= 'Helvetica'
+    lessonnamestyle = ParagraphStyle("lessonname", parent=H2)
+    lessonnamestyle.fontName = 'Helvetica-Bold'
+    discussiontextstyle = ParagraphStyle("discussiontext", parent=B)
+    discussiontextstyle.fontName= 'Helvetica'
 else:
-	lessonnamestyle = H2
-	discussiontextstyle = B
+    lessonnamestyle = H2
+    discussiontextstyle = B
 exampletextstyle = styleSheet['Code']
 # size for every example
 examplefunctionxinches = 5.5
@@ -216,19 +226,48 @@ def eg(text):
 #  is 
 #    an 
 #     example""")
+
+##def head(text,style=lessonnamestyle):
+##    BODY.append(CondPageBreak(inch))
+##    disc(text, style=style)
     
-def head(text,style=lessonnamestyle):
-    BODY.append(CondPageBreak(inch))
-    disc(text, style=style)
 
 def title(text):
-	disc(text,style=styleSheet['Title'])
+    """Use this for the document title only"""
+    disc(text,style=styleSheet['Title'])
+
+##def lesson(text):
+##    BODY.append(PageBreak())
+##    heading3(text,style=H1)
     
-#head("this is a header")
-    
-def lesson(text):
+#heading3("this is a header")
+
+#AR 3/7/2000 - defining three new levels of headings; code
+#should be swapped over to using them.
+
+def heading1(text):
+    """Use this for chapters.  Lessons within a big chapter
+    should now use heading2 instead.  Chapters get numbered."""
     BODY.append(PageBreak())
-    head(text,style=H1)
+    p = Paragraph('Chapter <seq id="Chapter"/> - ' + quickfix(text), H1)
+    BODY.append(p)
+    
+def heading2(text):
+    """Used to be 'lesson'"""
+    BODY.append(CondPageBreak(inch))
+    p = Paragraph('<seq template="%(Chapter)s.%(Section+)s - "/>' + quickfix(text), H2)
+    BODY.append(p)
+
+def heading3(text):
+    """Used to be most of the plain old 'head' sections"""
+    BODY.append(CondPageBreak(inch))
+    p = Paragraph(quickfix(text), H3)
+    BODY.append(p)
+    
+def todo(text):
+    """Used for notes to ourselves"""
+    BODY.append(Paragraph(quickfix(text), Comment))
+    
     
 def canvasdemo(function):
     BODY.append(Spacer(0.1*inch, 0.1*inch))
@@ -262,7 +301,7 @@ def pencilnote():
 ###### testing...
 #canvasdemo(NOP)
 
-#lesson("this is a new lesson")
+#heading2("this is a new lesson")
 
 #disc("this explains the example")
 
@@ -279,7 +318,17 @@ def pencilnote():
 #pencilnote()
 
 title("ReportLab User Guide")
-head("Introduction",style=H1)
+
+todo("""To-do items to authors, or points under discussion,
+appear in italics like this.""")
+todo("""The examples should go in slightly smaller boxes,
+centred in the frame, with a 'Figure 1.2...' style caption
+beneath them.  We can just scale things down a little.
+A Figure widget can be found in platdemos.py; they should
+draw inside that.""")
+
+
+heading1("Introduction")
 
 disc("""
 This document is intended to be a conversational introduction
@@ -288,7 +337,15 @@ is presumed and familiarity with the Python Programming language is
 recommended.
 """)
 
+heading2("What is PDFgen all about")
+todo("rationale - from Andy")
 #canvasdemo(NOP) # execute some code
+
+heading2("About Python")
+todo("If they don't know Python, rave a little then tell them where to get it")
+
+heading2("Installation and Setup")
+todo("need notes on packages, Windows, PIL and zlib; how to test it works")
 
 pencilnote()
 
@@ -296,8 +353,9 @@ disc("""
 This document is in a <em>very</em> preliminary form.
 """)
 
-lesson("Introduction to $pdfgen$")
+heading1("Graphics and Text with $pdfgen$")
 
+heading2("Basic Concepts")
 disc("""
 The $pdfgen$ package is the lowest level interface for
 generating PDF documents.  A $pdfgen$ program is essentially
@@ -376,7 +434,7 @@ the following graphics.
 
 canvasdemo(examples.hello)
 
-head("About the demos in this document")
+heading3("About the demos in this document")
 
 disc("""
 This document contains demonstrations of the code discussed like the one shown
@@ -386,7 +444,7 @@ and %s inches tall.  The demo displays show the actual output of the demo
 code.
 """ % (examplefunctionxinches, examplefunctionyinches))
 
-lesson('The tools: the "draw" operations')
+heading2('The tools: the "draw" operations')
 
 disc("""
 This section briefly lists the tools available to the program
@@ -395,7 +453,7 @@ These will be discussed in detail in later sections.  They are listed
 here for easy reference and for summary purposes.
 """)
 
-head("Line methods")
+heading3("Line methods")
 
 eg("""canvas.line(x1,y1,x2,y2)""")
 eg("""canvas.lines(linelist)""")
@@ -404,7 +462,7 @@ disc("""
 The line methods draw straight line segments on the canvas.
 """)
 
-head("Shape methods")
+heading3("Shape methods")
 
 eg("""canvas.grid(xlist, ylist) """)
 eg("""canvas.bezier(x1, y1, x2, y2, x3, y3, x4, y4)""")
@@ -419,7 +477,7 @@ disc("""
 The shape methods draw common complex shapes on the canvas.
 """)
 
-head("String drawing methods")
+heading3("String drawing methods")
 
 eg("""canvas.drawString(x, y, text):""")
 eg("""canvas.drawRightString(x, y, text) """)
@@ -429,7 +487,7 @@ disc("""
 The draw string methods draw single lines of text on the canvas.
 """)
 
-head("The text object methods")
+heading3("The text object methods")
 eg("""textobject = canvas.beginText(x, y) """)
 eg("""canvas.drawText(textobject) """)
 
@@ -442,17 +500,17 @@ Finally the textobject is drawn onto the canvas using
 drawText.
 """)
 
-head("The path object methods")
+heading3("The path object methods")
 
 eg("""path = canvas.beginPath() """)
 eg("""canvas.drawPath(path, stroke=1, fill=0) """)
 eg("""canvas.clipPath(path, stroke=1, fill=0) """)
 
-head("Image methods")
+heading3("Image methods")
 
 eg("""canvas.drawInlineImage(self, image, x,y, width=None,height=None) """)
 
-head("Ending a page")
+heading3("Ending a page")
 
 eg("""canvas.showPage()""")
 
@@ -465,7 +523,7 @@ disc("""Warning!  All state changes (font changes, color settings, geometry tran
 are FORGOTTEN when you advance to a new page in $pdfgen$.  Any state settings you wish to preserve
 must be set up again before the program proceeds with drawing!""")
 
-lesson('The toolbox: the "state change" operations')
+heading2('The toolbox: the "state change" operations')
 
 disc("""
 This section briefly lists the ways to switch the tools used by the
@@ -474,7 +532,7 @@ for painting information onto a page using the canvas interface.
 These too will be discussed in detail in later sections.
 """)
 
-head("Changing Colors")
+heading3("Changing Colors")
 eg("""canvas.setFillColorCMYK(c, m, y, k) """)
 eg("""canvas.setStrikeColorCMYK(c, m, y, k) """)
 eg("""canvas.setFillColorRGB(r, g, b) """)
@@ -484,10 +542,10 @@ eg("""canvas.setStrokeColor(acolor) """)
 eg("""canvas.setFillGray(gray) """)
 eg("""canvas.setStrokeGray(gray) """)
 
-head("Changing Fonts")
+heading3("Changing Fonts")
 eg("""canvas.setFont(psfontname, size, leading = None) """)
 
-head("Changing Graphical Styles")
+heading3("Changing Graphical Styles")
 
 eg("""canvas.setLineWidth(width) """)
 eg("""canvas.setLineCap(mode) """)
@@ -495,7 +553,7 @@ eg("""canvas.setLineJoin(mode) """)
 eg("""canvas.setMiterLimit(limit) """)
 eg("""canvas.setDash(self, array=[], phase=0) """)
 
-head("Changing Geometry")
+heading3("Changing Geometry")
 
 eg("""canvas.setPageSize(pair) """)
 eg("""canvas.transform(a,b,c,d,e,f): """)
@@ -504,13 +562,13 @@ eg("""canvas.scale(x, y) """)
 eg("""canvas.rotate(theta) """)
 eg("""canvas.skew(alpha, beta) """)
 
-head("State control")
+heading3("State control")
 
 eg("""canvas.saveState() """)
 eg("""canvas.restoreState() """)
 
 
-lesson("Other canvas methods.")
+heading2("Other canvas methods.")
 
 disc("""
 Not all methods of the canvas object fit into the "tool" or "toolbox"
@@ -540,7 +598,7 @@ eg("""
 """)
 
 
-lesson('Coordinates (default user space)')
+heading2('Coordinates (default user space)')
 
 disc("""
 By default locations on a page are identified by a pair of numbers.
@@ -560,7 +618,7 @@ left corner.  Executing the $coords$ function in the default user space
 
 canvasdemo(examples.coords)
 
-head("Moving the origin: the $translate$ method")
+heading3("Moving the origin: the $translate$ method")
 
 disc("""Often it is useful to "move the origin" to a new point off
 the lower left corner.  The $canvas.translate(^x,y^)$ method moves the origin
@@ -589,7 +647,7 @@ entire drawing off the visible area of the page.  If a program produces a blank 
 it is possible that all the drawn objects are off the page.
 """)
 
-head("Shrinking and growing: the scale operation")
+heading3("Shrinking and growing: the scale operation")
 
 disc("""Another important operation is scaling.  The scaling operation $canvas.scale(^dx,dy^)$
 stretches or shrinks the ^x^ and ^y^ dimensions by the ^dx^, ^dy^ factors respectively.  Often
@@ -641,7 +699,7 @@ to shrink to the point where they disappear.  For engineering or scientific purp
 such as these scale and translate
 the units externally before rendering them using the canvas.""")
 
-head("Saving and restoring the canvas state: $saveState$ and $restoreState$")
+heading3("Saving and restoring the canvas state: $saveState$ and $restoreState$")
 
 disc("""
 The $scaletranslate$ function used an important feature of the canvas object:
@@ -656,7 +714,7 @@ preserved across page breaks, and the save/restore mechanism does not work
 across page breaks.
 """)
 
-head("Mirror image")
+heading3("Mirror image")
 
 disc("""
 It is interesting although perhaps not terribly useful to note that
@@ -675,7 +733,7 @@ disc("""
 Notice that the text strings are painted backwards.
 """)
 
-lesson("Colors")
+heading2("Colors")
 
 disc("""
 There are four way to specify colors in $pdfgen$: by name (using the $color$
@@ -706,7 +764,7 @@ and better control when printed.
 
 canvasdemo(examples.colors)
 
-lesson('Painting back to front')
+heading2('Painting back to front')
 
 disc("""
 Objects may be painted over other objects to good effect in $pdfgen$.  As
@@ -747,7 +805,7 @@ and scoops layer over eachother as well.
 canvasdemo(examples.spumoni2)
 
 
-lesson('Fonts and text objects')
+heading2('Fonts and text objects')
 
 disc("""
 Text may be drawn in many different colors, fonts, and sizes in $pdfgen$.
@@ -779,7 +837,7 @@ disc("""
 Other fonts can be added to a PDF document as well.
 """)
 
-lesson("Text object methods")
+heading2("Text object methods")
 
 disc("""
 For the dedicated presentation of text in a PDF document, use a text object.
@@ -844,7 +902,7 @@ to the $textLine$ function which does move down.
 
 canvasdemo(examples.cursormoves2)
 
-head("Character Spacing")
+heading3("Character Spacing")
 
 eg("""textobject.setCharSpace(charSpace)""")
 
@@ -859,7 +917,7 @@ It produces the following page.""")
 
 canvasdemo(examples.charspace)
 
-head("Word Spacing")
+heading3("Word Spacing")
 
 eg("""textobject.setWordSpace(wordSpace)""")
 
@@ -872,7 +930,7 @@ look like below.""")
 
 canvasdemo(examples.wordspace)
 
-head("Horizontal Scaling")
+heading3("Horizontal Scaling")
 
 eg("""textobject.setHorizScale(horizScale)""")
 
@@ -887,7 +945,7 @@ shown below looks skinny.
 """)
 canvasdemo(examples.horizontalscale)
 
-head("Interline spacing (Leading)")
+heading3("Interline spacing (Leading)")
 
 eg("""textobject.setLeading(leading)""")
 
@@ -904,7 +962,7 @@ in the previous line.""")
 
 canvasdemo(examples.leading)
 
-head("Other text object methods")
+heading3("Other text object methods")
 
 eg("""textobject.setTextRenderMode(mode)""")
 
@@ -926,7 +984,7 @@ disc("""
 These color change operations change the <font color=darkviolet>color</font> of the text and are otherwise
 similar to the color methods for the canvas object.""")
 
-lesson('Paths and Lines')
+heading2('Paths and Lines')
 
 disc("""Just as textobjects are designed for the dedicated presentation
 of text, path objects are designed for the dedicated construction of
@@ -950,7 +1008,7 @@ various line style parameters supported by $pdfgen$.
 
 canvasdemo(examples.star)
 
-head("Line join settings")
+heading3("Line join settings")
 
 disc("""
 The $setLineJoin$ method can adjust whether line segments meet in a point
@@ -966,7 +1024,7 @@ it cannot be seen clearly for thin lines.
 
 canvasdemo(examples.joins)
 
-head("Line cap settings")
+heading3("Line cap settings")
 
 disc("""The line cap setting, adjusted using the $setLineCap$ method,
 determines whether a terminating line
@@ -981,7 +1039,7 @@ visible when the lines are thick.""")
 
 canvasdemo(examples.caps)
 
-head("Dashes and broken lines")
+heading3("Dashes and broken lines")
 
 disc("""
 The $setDash$ method allows lines to be broken into dots or dashes.
@@ -996,7 +1054,7 @@ or they can be specified in a complex repeating pattern.
 
 canvasdemo(examples.dashes)
 
-head("Creating complex figures with path objects")
+heading3("Creating complex figures with path objects")
 
 disc("""
 Combinations of lines, curves, arcs and other figures
@@ -1018,7 +1076,7 @@ drawn over it using a new path object.
 
 canvasdemo(examples.penciltip)
 
-lesson('Rectangles, circles, ellipses')
+heading2('Rectangles, circles, ellipses')
 
 disc("""
 The $pdfgen$ module supports a number of generally useful shapes
@@ -1042,7 +1100,7 @@ and the "tip" paints over part of the yellow rectangle.
 
 canvasdemo(examples.pencil)
 
-lesson('Bezier curves')
+heading2('Bezier curves')
 
 disc("""
 Programs that wish to construct figures with curving borders
@@ -1070,7 +1128,7 @@ a bezier curves, the tangent lines defined by the control points
 and the convex figure with vertices at the control points.
 """)
 
-head("Smoothly joining bezier curve sequences")
+heading3("Smoothly joining bezier curve sequences")
 
 disc("""
 It is often useful to join several bezier curves to form a
@@ -1089,7 +1147,7 @@ illustrated below.
 
 canvasdemo(examples.bezier2)
 
-lesson("Path object methods")
+heading2("Path object methods")
 
 eg("""pathobject.moveTo(x,y)""")
 
@@ -1121,15 +1179,37 @@ canvasdemo(examples.hand2)
 
 ##### FILL THEM IN
 
-lesson("...more lessons...")
+
+heading1("Exposing PDF Special Capabilities")
+disc("""PDF provides a number of features to make electronic
+    document viewing more efficient and comfortable, and
+    our library exposes a number of these.""")
+
+heading2("Forms")
+heading2("Links and Destinations")
+heading2("Outline Trees")
+heading2("Page Transition Effects")
+
+
+
 
 #####################################################################################################3
 
-lesson("Introduction to Platypus")
-
-lesson("A very simple Flowable")
+heading1("PLATYPUS - Page Layout and Typography Using Scripts")
+heading2("Design Goals")
+heading2("Frames and Flowables")
+heading2("Paragraphs in detail")
+heading2("Tables")
+heading2("Custom Flowable Objects")
+heading3("A very simple Flowable")
 
 eg(examples.testnoteannotation)
+
+heading2("Document Templates")
+
+heading1("Future Directions")
+
+
     
 if __name__=="__main__":
     g = Guide()

@@ -318,7 +318,7 @@ well she hit Net Solutions
 and she registered her own .com site now
 and filled it up with yahoo profile pics 
 she snarfed in one night now
-and she made 50 million when Hugh Heffner
+and she made 50 million when Hugh Hefner
 bought up the rights now
 and she'll have fun fun fun
 til her Daddy takes the keyboard away'''
