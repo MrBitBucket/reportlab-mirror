@@ -22,9 +22,10 @@ class ImporterTestCase(unittest.TestCase):
 
     def test2(self):
         "try under a directory NOT on the path"
-        rlDir = os.path.dirname(reportlab.__file__)
-        ppDir = os.path.join(rlDir, 'tools','pythonpoint')
-        m1 = recursiveImport('stdparser', baseDir=ppDir)
+        D = os.path.join(os.path.dirname(reportlab.__file__), 'tools','pythonpoint')
+        fn = os.path.join(D,'stdparser.py')
+        if os.path.isfile(fn) or os.path.isfile(fn+'c') or os.path.isfile(fn+'o'):
+            m1 = recursiveImport('stdparser', baseDir=D)
         
     def test3(self):
         "ensure CWD is on the path"
