@@ -1,5 +1,7 @@
 .t ReportLab API Reference
 
+.h1 Introduction
+
 This is the API reference for the ReportLab library.  All public
 classes, functions and methods are documented here.
 
@@ -124,6 +126,9 @@ applications.
 .h1 Appendix A - CVS Revision History
 .beginPre Code
 $Log: reference.yml,v $
+Revision 1.8  2000/06/19 23:52:31  andy_robinson
+rltemplate now simple, based on UserDocTemplate
+
 Revision 1.7  2000/06/17 07:46:45  andy_robinson
 Small text changes
 
