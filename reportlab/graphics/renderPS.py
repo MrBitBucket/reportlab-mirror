@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPS.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.23 2003/06/12 18:01:43 rgbecker Exp $
-__version__=''' $Id: renderPS.py,v 1.23 2003/06/12 18:01:43 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.24 2004/01/29 17:06:24 rgbecker Exp $
+__version__=''' $Id: renderPS.py,v 1.24 2004/01/29 17:06:24 rgbecker Exp $ '''
 import string, types
-from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
+from reportlab.pdfbase.pdfmetrics import getFont, stringWidth # for font info
 from reportlab.lib.utils import fp_str, getStringIO
 from reportlab.lib.colors import black
 from reportlab.graphics.renderbase import StateTracker, getStateDelta
@@ -75,7 +75,7 @@ class PSCanvas:
             self._lineJoin = self._color = None
 
 
-        self._fontsUsed = {}  # track them as we go
+        self._fontsUsed =   [] # track them as we go
 
         self.setFont(STATE_DEFAULTS['fontName'],STATE_DEFAULTS['fontSize'])
         self.setStrokeColor(STATE_DEFAULTS['strokeColor'])
@@ -119,7 +119,7 @@ class PSCanvas:
 
         # for each font used, reencode the vectors
         fontReencode = []
-        for fontName in self._fontsUsed.keys():
+        for fontName in self._fontsUsed:
             fontReencode.append('WinAnsiEncoding /%s /%s RE' % (fontName, fontName))
         self.code.insert(1, string.join(fontReencode, self._sep))
 
@@ -186,10 +186,11 @@ class PSCanvas:
             self.code.append('%s setlinewidth' % width)
 
     def setFont(self,font,fontSize):
-        self._fontsUsed[font] = 1
         if self._font!=font or self._fontSize!=fontSize:
-            self._font,self._fontSize = (font,fontSize)
-            self.code.append('(%s) findfont %s scalefont setfont' % (font,fp_str(fontSize)))
+            self._fontCodeLoc = len(self.code)
+            self._font = font
+            self._fontSize = fontSize
+            self.code.append('')
 
     def line(self, x1, y1, x2, y2):
         if self._strokeColor != None:
@@ -209,6 +210,11 @@ class PSCanvas:
 
     def drawString(self, s, x, y, angle=0):
         if self._fillColor != None:
+            if not self.code[self._fontCodeLoc]:
+                psName = getFont(self._font).face.name
+                self.code[self._fontCodeLoc]='(%s) findfont %s scalefont setfont' % (psName,fp_str(self._fontSize))
+                if psName not in self._fontsUsed:
+                    self._fontsUsed.append(psName)
             self.setColor(self._fillColor)
             s = self._escape(s)
 ## before inverting...
