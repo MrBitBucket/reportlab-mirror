@@ -7,6 +7,7 @@ from reportlab.lib.validators import *
 from reportlab.lib.units import cm
 from reportlab.pdfbase.pdfmetrics import stringWidth, getFont
 from reportlab.graphics.widgets.grids import ShadedRect, Grid
+
 class SlideBox(Widget):
     """Returns a slidebox widget"""
     _attrMap = AttrMap(
@@ -178,3 +179,8 @@ class SlideBox(Widget):
         g.shift(self.leftPadding, ys)
 
         return g
+
+
+if __name__ == "__main__":
+    d = SlideBox()
+    d.demo().save(fnRoot="slidebox")
