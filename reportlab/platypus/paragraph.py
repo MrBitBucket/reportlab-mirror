@@ -373,9 +373,8 @@ class Paragraph(Flowable):
 
         It will also be able to handle any MathML specified Greek characters.
     """
-    def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1, encoding=None):
+    def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1):
         self.caseSensitive = caseSensitive
-        self.encoding = encoding
         self._setup(text, style, bulletText, frags, cleanBlockQuotedText)
 
 
@@ -523,12 +522,11 @@ class Paragraph(Flowable):
             fontSize = f.fontSize
             fontName = f.fontName
             words = hasattr(f,'text') and split(f.text, ' ') or f.words
-            spaceWidth = stringWidth(' ', fontName, fontSize, self.encoding)
+            spaceWidth = stringWidth(' ', fontName, fontSize)
             cLine = []
             currentWidth = - spaceWidth   # hack to get around extra space for word 1
             for word in words:
-                #this underscores my feeling that Unicode throughout would be easier!
-                wordWidth = stringWidth(word, fontName, fontSize, self.encoding)
+                wordWidth = stringWidth(word, fontName, fontSize)
                 newWidth = currentWidth + spaceWidth + wordWidth
                 if newWidth<=maxWidth or len(cLine)==0:
                     # fit one more on this line

@@ -75,11 +75,6 @@ class Flowable:
         self._traceInfo = None
         self._showBoundary = None
 
-        #many flowables handle text and must be processed in the
-        #absence of a canvas.  tagging them with their encoding
-        #helps us to get conversions right.  Use Python codec names.
-        self.encoding = None        
-
 
     def _drawOn(self,canv):
         '''ensure canv is set on and then draw'''

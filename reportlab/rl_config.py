@@ -5,9 +5,7 @@ __version__=''' $Id$ '''
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
-defaultEncoding =           'WinAnsiEncoding'       # 'WinAnsi' or 'MacRoman'.
-                                                    # should switch to cp1252, utf-8 or latin-1 on next release!
-                                                    
+defaultEncoding =           'WinAnsiEncoding'       # 'WinAnsi' or 'MacRoman'
 pageCompression =           1                       # default page compression mode
 defaultPageSize =           'A4'                    #default page size
 defaultImageCaching =       0                       #set to zero to remove those annoying cached images
@@ -20,7 +18,6 @@ invariant=                  0                       #produces repeatable,identic
 eps_preview_transparent=    None                    #set to white etc
 overlapAttachedSpace=       None                    #if set non false then adajacent flowable space after
                                                     #and space before are merged (max space is used).
-autoConvertEncoding  =      0                       #convert internally as needed (experimental)
 
 # places to look for T1Font information
 T1SearchPath =  (

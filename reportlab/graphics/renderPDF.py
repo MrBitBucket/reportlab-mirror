@@ -172,10 +172,10 @@ class _PDFRenderer(Renderer):
     def drawString(self, stringObj):
         if self._fill:
             S = self._tracker.getState()
-            text_anchor, x, y, text, enc = S['textAnchor'], stringObj.x,stringObj.y,stringObj.text, stringObj.encoding
+            text_anchor, x, y, text = S['textAnchor'], stringObj.x,stringObj.y,stringObj.text
             if not text_anchor in ['start','inherited']:
                 font, font_size = S['fontName'], S['fontSize']
-                textLen = stringWidth(text, font, font_size, enc)
+                textLen = stringWidth(text, font,font_size)
                 if text_anchor=='end':
                     x = x-textLen
                 elif text_anchor=='middle':

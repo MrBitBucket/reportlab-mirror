@@ -997,6 +997,7 @@ class Circle(SolidShape):
         return (self.cx - self.r, self.cy - self.r, self.cx + self.r, self.cy + self.r)
 
 class Ellipse(SolidShape):
+
     _attrMap = AttrMap(BASE=SolidShape,
         cx = AttrMapValue(isNumber),
         cy = AttrMapValue(isNumber),
@@ -1174,7 +1175,6 @@ class String(Shape):
         fontSize = AttrMapValue(isNumber),
         fillColor = AttrMapValue(isColorOrNone),
         textAnchor = AttrMapValue(isTextAnchor),
-        encoding = AttrMapValue(isString),
         )
 
     def __init__(self, x, y, text, **kw):
@@ -1186,10 +1186,9 @@ class String(Shape):
         self.fontSize = STATE_DEFAULTS['fontSize']
         self.fillColor = STATE_DEFAULTS['fillColor']
         self.setProperties(kw)
-        self.encoding = 'cp1252'  #matches only fonts we have!
 
     def getEast(self):
-        return self.x + stringWidth(self.text,self.fontName,self.fontSize, self.encoding)
+        return self.x + stringWidth(self.text,self.fontName,self.fontSize)
 
     def copy(self):
         new = String(self.x, self.y, self.text)
@@ -1198,7 +1197,7 @@ class String(Shape):
 
     def getBounds(self):
         # assumes constant drop of 0.2*size to baseline
-        w = stringWidth(self.text,self.fontName,self.fontSize, self.encoding)
+        w = stringWidth(self.text,self.fontName,self.fontSize)
         if self.textAnchor == 'start':
             x = self.x
         elif self.textAnchor == 'middle':

@@ -4,7 +4,7 @@
 __version__=''' $Id$ '''
 import string
 import re
-from types import TupleType, UnicodeType, StringType
+from types import TupleType
 import sys
 import os
 import copy
@@ -786,18 +786,6 @@ class ParaParser(xmllib.XMLParser):
         If errors occur None will be returned and the
         self.errors holds a list of the error messages.
         """
-        # AR 20040612 - when we feed Unicode strings in, sgmlop
-        # tries to coerce to ASCII.  Must intercept, coerce to
-        # any 8-bit encoding which defines most of 256 points,
-        # and revert at end.  Yuk.  Preliminary step prior to
-        # removal of parser altogether.
-        enc = 'cp1252' #our legacy default
-        if type(text) is UnicodeType:
-            UNI = 1
-            text = text.encode(enc)
-        else:
-            UNI = 0
-
         self._seq = reportlab.lib.sequencer.getSequencer()
         self._reset(style)  # reinitialise the parser
 
@@ -817,16 +805,6 @@ class ParaParser(xmllib.XMLParser):
             self._iReset()
         else:
             fragList = bFragList = None
-
-        if UNI:
-            #reconvert to unicode
-            if fragList:
-                for frag in fragList:
-                    frag.text = unicode(frag.text, enc)
-            if bFragList:
-                for frag in bFragList:
-                    frag.text = unicode(frag.text, enc)
-            
         return style, fragList, bFragList
 
 if __name__=='__main__':

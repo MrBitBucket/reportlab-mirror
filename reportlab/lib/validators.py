@@ -64,7 +64,7 @@ class _isBoolean(Validator):
 
 class _isString(Validator):
     def test(self,x):
-        return type(x) in (StringType, UnicodeType)
+        return type(x) is StringType
 
 class _isNumber(Validator):
     def test(self,x):

@@ -121,23 +121,11 @@ class Canvas:
         Most of the attributes are private - we will use set/get methods
         as the preferred interface.  Default page size is A4."""
         if pagesize is None: pagesize = rl_config.defaultPageSize
-        #if encoding is None: encoding = rl_config.defaultEncoding
+        if encoding is None: encoding = rl_config.defaultEncoding
         if invariant is None: invariant = rl_config.invariant
         self._filename = filename
-
-        # encoding is (for historical reasons) one of WinAnsiEncoding or MacRomanEncoding
-        # this is being adapted on 28/5/04 to flag the encoding used for input 8-bit text.
-        # You may supply Unicode strings anywhere.
-        # If you supply 8-bit strings, the are assumed to be in the given 8-bit
-        # encoding.  Preferred long term default will be utf-8 but latin-1 will be
-        # supported forever.
-        # None means 'unknown, do not convert'
-        self.encoding = encoding
-        self.encodingErrorMode = 'strict'
-
-        
-        
-        self._doc = pdfdoc.PDFDocument(rl_config.defaultEncoding,
+        self._encodingName = encoding
+        self._doc = pdfdoc.PDFDocument(encoding,
                                        compression=pageCompression,
                                        invariant=invariant)
 
@@ -184,8 +172,6 @@ class Canvas:
         self._y = 0
         self._fontname = 'Times-Roman'
         self._fontsize = 12
-        self._fontencoding = 'cp1252'
-        
         self._dynamicFont = 0
         self._textMode = 0  #track if between BT/ET
         self._leading = 14.4
@@ -1272,29 +1258,6 @@ class Canvas:
         names.sort()
         return names
 
-    def _convertText(self, text, codecName=pdfmetrics.codecName):
-        "Convert to correct encoding for current font"
-        if type(text) is UnicodeType:
-            # If text is unicode always convert
-            uni = text
-            converted = uni.encode(codecName(self._fontencoding), self.encodingErrorMode)
-        elif self.encoding is None:
-            # If no encoding specified, 8-bit no conversion
-            converted = text
-        else:
-            # Otherwise assume in specified encoding and decode
-            docEnc = codecName(self.encoding)
-            fontEnc = codecName(self._fontencoding)
-            if docEnc==fontEnc:
-                converted = text
-            else:
-                #uni = text.decode(docEnc)  #hack #won't work in 2.1
-                uni = unicode(text, docEnc, getattr(self,'decodingErrorMode',self.encodingErrorMode)) #works in 2.1
-                converted = uni.encode(fontEnc, self.encodingErrorMode)
-##        print '  ->', converted
-        return converted
-
-
     def setFont(self, psfontname, size, leading = None):
         """Sets the font.  If leading not specified, defaults to 1.2 x
         font size. Raises a readable exception if an illegal font
@@ -1307,13 +1270,6 @@ class Canvas:
             leading = size * 1.2
         self._leading = leading
         font = pdfmetrics.getFont(self._fontname)
-
-        #track codec name for auto-conversion
-        encName = font.encoding.name
-        if encName == 'WinAnsiEncoding':
-            encName = 'cp1252'
-        self._fontencoding = encName.lower()  #python codec name
-
         self._dynamicFont = getattr(font, '_dynamicFont', 0)
         if not self._dynamicFont:
             pdffontname = self._doc.getInternalFontName(psfontname)
@@ -1562,15 +1518,6 @@ class Canvas:
         for (key, value) in args:
             transDict[key] = value
         self._pageTransition = transDict
-
-    def getCurrentPageContent(self):
-        """Return uncompressed contents of current page buffer.
-
-        This is useful in creating test cases and assertions of what
-        got drawn, without necessarily saving pages to disk"""
-        return '\n'.join(self._code)
-
-
 
 if _instanceEscapePDF:
     import new

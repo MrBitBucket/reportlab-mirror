@@ -18,14 +18,6 @@ from reportlab.lib.colors import ColorType
 from reportlab.lib.utils import fp_str
 from reportlab.pdfbase import pdfmetrics
 
-#compatibility/migration hook for encoding conversion.
-#let peoples' hand-edited config files still work.
-try:
-    from reportlab.rl_config import autoConvertEncoding
-except:
-    autoConvertEncoding = 0
-
-
 _SeqTypes=(TupleType,ListType)
 
 
@@ -153,13 +145,6 @@ class PDFTextObject:
         self._fontname = psfontname
         self._fontsize = size
         font = pdfmetrics.getFont(self._fontname)
-
-        #track codec name for auto-conversion
-        encName = font.encoding.name
-        if encName == 'WinAnsiEncoding':
-            encName = 'cp1252'
-        self._fontencoding = self._canvas._fontencoding = encName.lower()  #python codec name
-
         self._dynamicFont = getattr(font, '_dynamicFont', 0)
         if self._dynamicFont:
             self._curSubset = -1
@@ -178,13 +163,6 @@ class PDFTextObject:
             leading = size * 1.2
         self._leading = leading
         font = pdfmetrics.getFont(self._fontname)
-
-        #track codec name for auto-conversion
-        encName = font.encoding.name
-        if encName == 'WinAnsiEncoding':
-            encName = 'cp1252'
-        self._fontencoding = self._canvas._fontencoding = encName.lower()  #python codec name
-
         self._dynamicFont = getattr(font, '_dynamicFont', 0)
         if self._dynamicFont:
             self._curSubset = -1
@@ -302,23 +280,30 @@ class PDFTextObject:
 
     def _formatText(self, text):
         "Generates PDF text output operator(s)"
-        canv = self._canvas
         if self._dynamicFont:
             #it's a truetype font and should be utf8.  If an error is raised,
+            
             results = []
             font = pdfmetrics.getFont(self._fontname)
-            stuff = font.splitString(text, canv._doc,encoding=canv.encoding)
+            try: #assume UTF8
+                stuff = font.splitString(text, self._canvas._doc)
+            except UnicodeDecodeError:
+                #assume latin1 as fallback
+                from reportlab.pdfbase.ttfonts import latin1_to_utf8
+                from reportlab.lib.logger import warnOnce
+                warnOnce('non-utf8 data fed to truetype font, assuming latin-1 data')
+                text = latin1_to_utf8(text)
+                stuff = font.splitString(text, self._canvas._doc)
             for subset, chunk in stuff:
                 if subset != self._curSubset:
-                    pdffontname = font.getSubsetInternalName(subset, canv._doc)
+                    pdffontname = font.getSubsetInternalName(subset, self._canvas._doc)
                     results.append("%s %s Tf %s TL" % (pdffontname, fp_str(self._fontsize), fp_str(self._leading)))
                     self._curSubset = subset
-                chunk = canv._escape(chunk)
+                chunk = self._canvas._escape(chunk)
                 results.append("(%s) Tj" % chunk)
             return string.join(results, ' ')
         else:
-            #convert to current doc encoding and escape
-            text = canv._escape(canv._convertText(text))
+            text = self._canvas._escape(text)
             return "(%s) Tj" % text
 
     def _textOut(self, text, TStar=0):
@@ -346,8 +331,6 @@ class PDFTextObject:
         self._y0 = self._y
 
         # Output the text followed by a PDF newline command
-##        if type(text) == type(u''):
-##            print "doing unicode textline on", text.encode('cp1252')
         self._code.append('%s T*' % self._formatText(text))
 
     def textLines(self, stuff, trim=1):

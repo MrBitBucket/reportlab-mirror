@@ -205,13 +205,6 @@ def makeDocument(filename, pageCallBack=None):
     framePage(c, 'PDFgen graphics API test script')
     makesubsection(c, "PDFgen", 10*inch)
 
-    #quickie encoding test: when canvas encoding not set,
-    #the following should do (tm), (r) and (c)
-    c.drawString(100, 100, 'copyright %s trademark %s registered %s ReportLab!' % (chr(169), chr(153),chr(174)))
-
-    
-
-
     t = c.beginText(inch, 10*inch)
     t.setFont('Times-Roman', 10)
     drawCrossHairs(c, t.getX(),t.getY())
