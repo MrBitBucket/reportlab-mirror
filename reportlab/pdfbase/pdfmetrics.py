@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfmetrics.py,v 1.18 2000/12/14 13:36:34 rgbecker Exp $
-__version__=''' $Id: pdfmetrics.py,v 1.18 2000/12/14 13:36:34 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfmetrics.py,v 1.19 2001/02/28 11:53:55 rgbecker Exp $
+__version__=''' $Id: pdfmetrics.py,v 1.19 2001/02/28 11:53:55 rgbecker Exp $ '''
 __doc__="""This contains pre-canned text metrics for the PDFgen package, and may also
 be used for any other PIDDLE back ends or packages which use the standard
 Type 1 postscript fonts.
@@ -88,10 +88,12 @@ ascent_descent = {'courier': (629, -157), 'courier-bold': (626, -142), 'courier-
 try:
 	try:
 		from reportlab.lib import _rl_accel		# works if we built it
-	except ImportError:
+	except ImportError, errMsg:
+		if errMsg!='No module named _rl_accel': raise
 		import _rl_accel						# works if builtin or on the path?
 	_stringWidth = _rl_accel.stringWidth
-except ImportError:
+except ImportError, errMsg:
+	if errMsg!='No module named _rl_accel': raise
 	_stringWidth = None
 
 	####################################################################################

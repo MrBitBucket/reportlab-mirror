@@ -8,7 +8,8 @@ import string
 
 try:
     import sgmlop	# this works for both builtin on the path or relative
-except ImportError:
+except ImportError, errMsg:
+    if errMsg!='No module named sgmlop': raise
     sgmlop = None
 
 # standard entity defs

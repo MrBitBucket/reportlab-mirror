@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.37 2001/02/09 19:33:49 aaron_watters Exp $
-__version__=''' $Id: pdfdoc.py,v 1.37 2001/02/09 19:33:49 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.38 2001/02/28 11:53:55 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.38 2001/02/28 11:53:55 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -421,17 +421,15 @@ class PDFDictionary:
 class PDFStreamFilterZCompress:
     pdfname = "FlateDecode"
     def encode(self, text):
-        try:
-            from zlib import compress
-        except:
-            raise ImportError, "cannot z-compress zlib unavailable"
-        return compress(text)
+        from reportlab.lib.utils import import_zlib
+        zlib = import_zlib()
+        if not zlib: raise ImportError, "cannot z-compress zlib unavailable"
+        return zlib.compress(text)
     def decode(self, encoded):
-        try:
-            from zlib import decompress
-        except:
-            raise ImportError, "cannot z-compress zlib unavailable"
-        return decompress(encoded)
+        from reportlab.lib.utils import import_zlib
+        zlib = import_zlib()
+        if not zlib: raise ImportError, "cannot z-decompress zlib unavailable"
+        return zlib.decompress(encoded)
 
 # need only one of these, unless we implement parameters later
 PDFZCompress = PDFStreamFilterZCompress()    

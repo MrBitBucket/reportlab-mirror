@@ -1,11 +1,12 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.7 2001/01/12 21:36:57 dinu_gherman Exp $
-__version__=''' $Id: utils.py,v 1.7 2001/01/12 21:36:57 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.8 2001/02/28 11:54:21 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.8 2001/02/28 11:54:21 rgbecker Exp $ '''
 
 import string, os
 from types import *
+from reportlab.lib.logger import warnOnce
 SeqTypes = (ListType,TupleType)
 
 try:
@@ -14,9 +15,11 @@ try:
 	### IN CASE THEY ARE "LAZY OBJECTS".  ACCELLERATOR DOESN'T DO THIS (YET)
 	try:
 		from reportlab.lib._rl_accel import fp_str	# specific
-	except ImportError:
+	except ImportError, errMsg:
+		if errMsg!='No module named _rl_accel': raise
 		from _rl_accel import fp_str				# in case of builtin version
-except ImportError:
+except ImportError, errMsg:
+	if errMsg!='No module named _rl_accel': raise
 	def fp_str(*a):
 		if len(a)==1 and type(a[0]) in SeqTypes: a = a[0]
 		s = []
@@ -24,12 +27,35 @@ except ImportError:
 			s.append('%0.2f' % i)
 		return string.join(s)
 
+def import_zlib():
+	try:
+		import zlib
+	except ImportError, errMsg:
+		if errMsg!='No module named zlib': raise
+		zlib = None
+		warnOnce('zlib not available')
+	return zlib
+
+def import_Image():
+	try:
+		import Image
+	except ImportError, errMsg:
+		if errMsg!='No module named Image': raise
+		try:
+			from PIL import Image
+		except ImportError, errMsg:
+			if errMsg!='No module named PIL': raise
+			Image = None
+			warnOnce('Python Imaging Library not available')
+	return Image
+
 def getHyphenater(hDict=None):
 	try:
 		from reportlab.lib.pyHnj import Hyphen
 		if hDict is None: hDict=os.path.join(os.path.dirname(__file__),'hyphen.mashed')
 		return Hyphen(hDict)
-	except ImportError:
+	except ImportError, errMsg:
+		if errMsg!='No module named pyHnj': raise
 		return None
 
 def _className(self):
