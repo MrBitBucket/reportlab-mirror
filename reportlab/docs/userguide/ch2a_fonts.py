@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.7 2002/07/25 11:18:08 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.8 2003/11/17 16:40:42 johnprecedo Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.lib.codecharts import SingleByteEncodingChart
 from reportlab.platypus import Image
@@ -555,7 +555,7 @@ for printing""")
 CPage(5)
 heading2("TrueType Font Support")
 disc("""
-Marius Gedminas $mgedmin@codeworks.lt$ with the help of Viktorija Zaksien $viktorija@codeworks.lt$
+Marius Gedminas ($mgedmin@centras.lt$) with the help of Viktorija Zaksien ($viktorija@codeworks.lt$)
 have contributed support for embedded TrueType fonts and preliminary Unicode translation using UTF-8!""")
 
 disc("""The current support should be regarded as experimental, but it seems to work and doesn't
@@ -612,6 +612,42 @@ disc("""we only have Rina regular so we map all to the same internal fontname. A
 the Rina font as above we can use paragraph text like""")
 parabox2("""<font name="Times-Roman" size="14">This is in Times-Roman</font>
 <font name="Rina" color="magenta" size="14">and this is in magenta Rina!</font>""","Using TTF fonts in paragraphs")
+
+
+CPage(5)
+heading2("RenderPM tests")
+
+disc("""This may also be the best place to mention the test function of $reportlab/graphics/renderPM.py$,
+which can be considered the cannonical place for tests which exercise renderPM (the "PixMap Renderer",
+as opposed to renderPDF, renderPS or renderSVG).""")
+
+disc("""If you run this from the command line, you should see lots of output like the following.""")
+
+eg("""C:\\code\\reportlab\\graphics>renderPM.py
+wrote pmout\\renderPM0.gif
+wrote pmout\\renderPM0.tif
+wrote pmout\\renderPM0.png
+wrote pmout\\renderPM0.jpg
+wrote pmout\\renderPM0.pct
+...
+wrote pmout\\renderPM12.gif
+wrote pmout\\renderPM12.tif
+wrote pmout\\renderPM12.png
+wrote pmout\\renderPM12.jpg
+wrote pmout\\renderPM12.pct
+wrote pmout\\index.html""")
+
+disc("""This runs a number of tests progressing from a "Hello World" test, through various tests of  
+Lines; text strings in a number of sizes, fonts, colours and alignments; the basic shapes; translated
+and rotated groups; scaled coordinates; rotated strings; nested groups; anchoring and non-standard fonts.""")
+
+disc("""It creates a subdirectory called $pmout$, writes the image files into it, and writes an
+$index.html$ page which makes it easy to refer to all the results.""")
+
+disc("""The font-related tests which you may wish to look at are test #11 ('Text strings in a non-standard font')
+and test #12 ('Test Various Fonts').""")
+
+
 
 
 ##### FILL THEM IN
