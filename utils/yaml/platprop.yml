@@ -4,6 +4,9 @@
 CVS Revision History
 .beginPre Code
 $Log: platprop.yml,v $
+Revision 1.8  2000/05/18 11:27:18  rgbecker
+Minor textual changes
+
 Revision 1.7  2000/05/17 22:18:09  rgbecker
 Renamed BasicFrame to Frame
 
@@ -106,12 +109,10 @@ Frame has an <i>addFromList</i> method to display content.  It consumes objects 
 
 Note that there is a certain amount of space between the frame and the paragraphs within it.  Frames have four 'padding' attributes which can control this. The attributes can be seen below in the method signature for initializing a frame.
 
-.Comment  At the moment we have a Frame class which defines the space a frame will take up and which is used by DocTemplate; SimpleFrame descends from this and has the addFromList method to allow one to create and use a frame as we did above.  We hope to abolish the distinction so users interact with a class called Frame or BaseFrame.
-
 
 .beginPre Code
 class Frame:
-	'''Abstraction for the definitional part of a Frame
+	'''Abstraction for a Frame
 
                 width                    x2,y2
     	+---------------------------------+
@@ -147,7 +148,7 @@ A new flowable should implement the methods wrap(), split() and draw().  Here's 
 
 .beginPre Code
 
-    class Box:
+    class Box(Flowable):
         def __init__(self, width, height, text):
                 """Size is specified up front so we just keep it handy"""
                 self.width = width
@@ -182,7 +183,38 @@ A new flowable should implement the methods wrap(), split() and draw().  Here's 
 
 The base Flowable class tried to make drawing easy - it saves and restores the canvas around whatever you do in draw(), so preceding objects cannot affect the way it is drawn, and translates the canvas so that (0,0) is at the lower left of the region the Flowable has requested.
 
-Flowables also have two 'magic' attributes called spaceBefore and spaceAfter, which are zero by default.  These do not belong to the object itself and availHeight should exvude them.  spaceBefore will be added before all objects expect the first in a frame; spaceAfter is added after all objects except the last in a frame.  Paragraphs styles make heavy use of spaceBefore and spaceAfter, getting the information from their associated style objects.
+Flowables also have two methods called getSpaceBefore and getSpaceAfter
+which try to obtain values for spaceBefore and spaceAfter, first from the object directly
+and if that fails then the object's style attribute (if any) is consulted. If all else
+fails a default value of zero is assumed.
+These attributes do not belong to the object itself and it should not make use of them in any
+wrap, split or draw methods.
+SpaceBefore will be added before all objects expect the first in a frame; spaceAfter
+is added after all objects except the last in a frame.
+Paragraph styles make heavy use of spaceBefore and spaceAfter,
+getting the information from their associated style objects.
+
+.beginPre Code
+
+    class Dimbo(Flowable):
+        def __init__(self, width, height, text):
+            """Size is specified up front so we just keep it handy"""
+            self.width = width
+            self.height = height
+            self.text = text
+            self.spaceBefore = 72
+
+        def wrap(self,avavailWidth,havailHeight):
+            ''' doesn't make use of spaceBefore or spaceAfter'''
+            return (self.width, self.height)
+
+    ------
+
+    d = Dimbo(144,144,'A bit of text')
+    s = d.getSpaceBefore()   # is 72
+    s = d.getSpaceAfter()    # is 0
+
+.endPre
 
 .h2 Flowable objects provided "out of the box"
 
