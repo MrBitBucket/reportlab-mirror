@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.24 2001/09/28 10:31:10 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.25 2001/10/03 19:00:02 johnprecedo Exp $
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =				1
@@ -17,8 +17,10 @@ showBoundary =				0						# turns on and off boundary behaviour in Drawing
 
 # places to look for T1Font information
 T1SearchPath =	('c:/Program Files/Adobe/Acrobat 4.0/Resource/Font', #Win32
+				'c:/Program Files/Adobe/Acrobat 5.0/Resource/Font', #Win32, Acrobat 5
 				'%(disk)s/Applications/Python %(sys_version)s/reportlab/fonts', #Mac?
 				'/usr/lib/Acrobat4/Resource/Font', #Linux
+				'/usr/lib/Acrobat5/Resource/Font', #Linux, Acrobat 5?
 				'%(REPORTLAB_DIR)s/lib/fontDir', #special
 				)
 
