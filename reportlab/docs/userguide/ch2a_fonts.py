@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.2 2001/11/06 11:50:24 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.3 2001/11/06 12:05:21 johnprecedo Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.lib.codecharts import SingleByteEncodingChart
 from reportlab.platypus import Image
@@ -155,7 +155,7 @@ reportlab.rl_config.warnOnMissingFontGlyphs = 0
 
 
 
-heading2("Single-Byte Font Encodings")
+heading2("Standard Single-Byte Font Encodings")
 disc("""
 Every time you draw some text, you presume an encoding.
 The Reportlab PDF library offers very fine-grained control
@@ -203,8 +203,34 @@ illust(lambda canv: cht3.drawOn(canv, 0, 0), "ZapfDingbats and its one and only 
 cht4 = SingleByteEncodingChart(faceName='Symbol',encodingName='SymbolEncoding',charsPerRow=32, boxSize=12)
 illust(lambda canv: cht4.drawOn(canv, 0, 0), "Symbol and its one and only encoding", cht4.width, cht4.height)
 
-todo(""""Complete this section with examples of synthesizing new encodings
-and fonts, based on test_pdfbase_encodings.py""")
+
+heading2("Custom Font Encodings")
+
+disc("""
+It is possible to create your own single-byte encodings.  This may be necessary if you are
+designing fonts, or want to use a character which is provided in the font but not in the
+current encoding.  Adobe's fonts commonly contain 300 or more glyphs (covering symbols, ligatures
+and various things used in professional publishing), but only 256 can be referenced in any one
+encoding.
+""")
+
+disc("""
+The code below comes from $test_pdfbase_encodings.py$ and shows a simple example.  The MacRoman
+encoding lacks a Euro character, but it is there in the fonts.  You get hold of an encoding
+object (which must be based on an existing standard encoding), and treat it like a dictionary,
+assigning the byte values ("code points") you wish to change.  Then register it.  We'll make a
+Mac font with the Euro at position 219 to demonstrate this. """)
+eg("""
+# now make our hacked encoding
+euroMac = pdfmetrics.Encoding('MacWithEuro', 'MacRomanEncoding')
+euroMac[219] = 'Euro'
+pdfmetrics.registerEncoding(euroMac)
+
+pdfmetrics.registerFont(pdfmetrics.Font('MacHelvWithEuro', 'Helvetica-Oblique', 'MacWithEuro'))
+
+c.setFont('MacHelvWithEuro', 12)
+c.drawString(125, 575, 'Hacked MacRoman with Euro: Character 219 = "\333"') # oct(219)=0333
+""")
 
 heading2("Asian Font Support")
 disc("""The Reportlab PDF Library aims to expose full support for Asian fonts.
@@ -278,7 +304,7 @@ height=435*0.50), 'Output from test_multibyte_jpn.py')
 caption("""
 Output from test_multibyte_jpn.py
 """)
-heading2("Available typefaces and encodings")
+heading2("Available Asian typefaces and encodings")
 disc("""
 The encoding and font data are grouped by some standard 'language
 prefixes':
