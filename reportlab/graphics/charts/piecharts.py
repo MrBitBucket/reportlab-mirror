@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.24 2002/11/20 11:22:09 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.25 2003/01/14 18:33:54 rgbecker Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -12,7 +12,7 @@
 This permits you to customize and pop out individual wedges;
 supports elliptical and circular pies.
 """
-__version__=''' $Id: piecharts.py,v 1.24 2002/11/20 11:22:09 rgbecker Exp $ '''
+__version__=''' $Id: piecharts.py,v 1.25 2003/01/14 18:33:54 rgbecker Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -92,7 +92,6 @@ class Pie(Widget):
         self.slices[2].fillColor = colors.blue
         self.slices[3].fillColor = colors.cyan
 
-
     def demo(self):
         d = Drawing(200, 100)
 
@@ -124,7 +123,7 @@ class Pie(Widget):
     def normalizeData(self):
         from operator import add
         data = self.data
-        sum = float(reduce(add,data))
+        sum = float(reduce(add,data,0))
         return abs(sum)>=1e-8 and map(lambda x,f=360./sum: f*x, data) or len(data)*[0]
 
     def makeWedges(self):
