@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.31  2000/04/28 09:10:20  rgbecker
+#	Changed zlib error handling
+#
 #	Revision 1.30  2000/04/25 20:20:13  aaron_watters
 #	Added support for closed outline entries
-#
+#	
 #	Revision 1.29  2000/04/18 19:52:35  aaron_watters
 #	eliminated inForm/inPage apis in favor of only beginForm..endForm
 #	(page mode is automatically inferred when page-only operations are
@@ -120,7 +123,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.30 2000/04/25 20:20:13 aaron_watters Exp $ '''
+__version__=''' $Id: canvas.py,v 1.31 2000/04/28 09:10:20 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -167,6 +170,11 @@ from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
 from reportlab.lib.colors import ColorType
+
+try:
+	import zlib
+except ImportError:
+	zlib = None
 
 _SeqTypes=(TupleType,ListType)
 
@@ -217,7 +225,7 @@ class Canvas:
         self._pageTransitionString = ''
         self._destinations = {} # dictionary of destinations for cross indexing.
 
-        self._pageCompression = pageCompression  #off by default - turn on when we're happy!
+        self.setPageCompression(pageCompression)
         self._pageNumber = 1   # keep a count
         #self._code = []    #where the current page's marking operators accumulate
         self._restartAccumulators()  # restart all accumulation state (generalized, arw)
@@ -960,15 +968,14 @@ class Canvas:
                 imagedata.append('EI')
             else:
                 if not pdfutils.cachedImageExists(image):
+                    if not zlib:
+                        print 'zlib not available'
+                        return
+
                     try:
                         import Image
                     except ImportError:
                         print 'Python Imaging Library not available'
-                        return
-                    try:
-                        import zlib
-                    except ImportError:
-                        print 'zlib not available'
                         return
                     pdfutils.cacheImageFile(image)
 
@@ -985,9 +992,7 @@ class Canvas:
         else:
             #PIL Image
             #work out all dimensions
-            try:
-                import zlib
-            except ImportError:
+            if not zlib:
                 print 'zlib not available'
                 return
             myimage = image.convert('RGB')
@@ -1095,6 +1100,9 @@ class Canvas:
         smaller files, but takes a little longer to create the files.
         This applies to all subsequent pages, or until setPageCompression()
         is next called."""
+        if onoff and not zlib:
+            print 'zlib not available'
+            return
         self._pageCompression = onoff
         
 
