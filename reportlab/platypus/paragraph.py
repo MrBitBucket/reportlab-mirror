@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.59 2001/11/04 00:11:10 andy_robinson Exp $
-__version__=''' $Id: paragraph.py,v 1.59 2001/11/04 00:11:10 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.60 2001/11/05 07:57:16 andy_robinson Exp $
+__version__=''' $Id: paragraph.py,v 1.60 2001/11/05 07:57:16 andy_robinson Exp $ '''
 from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
@@ -251,7 +251,7 @@ def _handleBulletWidth(bulletText,style,maxWidths):
 			bulletWidth = 0
 			for f in bulletText:
 				bulletWidth = bulletWidth + stringWidth(f.text, f.fontName, f.fontSize)
-		bulletRight = style.bulletIndent + bulletWidth
+		bulletRight = style.bulletIndent + bulletWidth + 0.6 * style.bulletFontSize
 		indent = style.leftIndent+style.firstLineIndent
 		if bulletRight > indent:
 			#..then it overruns, and we have less space available on line 1
