@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.104 2002/07/24 19:56:37 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.104 2002/07/24 19:56:37 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.105 2002/07/29 12:47:13 mgedmin Exp $
+__version__=''' $Id: canvas.py,v 1.105 2002/07/29 12:47:13 mgedmin Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -222,7 +222,7 @@ class Canvas:
             d[i] = stateatts[i] #setattr(self, stateatts[i], state[i])
 
     STATE_ATTRIBUTES = split("""
-     _x _y _fontname _fontsize _textMode _leading _currentMatrix _fillMode
+     _x _y _fontname _fontsize _dynamicFont _textMode _leading _currentMatrix _fillMode
      _fillMode _charSpace _wordSpace _horizScale _textRenderMode _rise _textLineMatrix
      _textMatrix _lineCap _lineJoin _lineDash _lineWidth _mitreLimit _fillColorRGB
      _strokeColorRGB""")
