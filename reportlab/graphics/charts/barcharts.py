@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.13 2001/05/17 16:21:33 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.14 2001/05/22 12:18:19 dinu_gherman Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -107,6 +107,7 @@ class BarChart(Widget):
         # cycle to set the fill color of each series.
         self.defaultStyles = TypedPropertyCollection(BarChartProperties)
         self.defaultStyles.strokeWidth = 1
+        self.defaultStyles.strokeColor = colors.black
         self.defaultStyles[0].fillColor = colors.red
         self.defaultStyles[1].fillColor = colors.green
         self.defaultStyles[2].fillColor = colors.blue
@@ -297,7 +298,7 @@ class BarChart(Widget):
                 (x, y, width, height) = barPos
                 r = Rect(x, y, width, height)
                 r.fillColor = rowStyle.fillColor
-                r.strokeColor = colors.black
+                r.strokeColor = rowStyle.strokeColor
                 g.add(r)
 
                 if labelFmt is None:
