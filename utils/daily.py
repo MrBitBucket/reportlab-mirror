@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.22  2000/04/19 15:11:58  rgbecker
+#	Fixed do_exec call
+#
 #	Revision 1.21  2000/04/19 15:07:34  rgbecker
 #	Syntax error fix
-#
+#	
 #	Revision 1.20  2000/04/19 15:06:28  rgbecker
 #	Added py2pdf_dir
 #	
@@ -95,7 +98,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.21 2000/04/19 15:07:34 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.22 2000/04/19 15:11:58 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -173,10 +176,10 @@ def cvs_checkout(d):
 
 	os.environ['CVSROOT']=':pserver:%s@cvs.reportlab.sourceforge.net:/cvsroot/reportlab' % USER
 	if release:
-		do_exec(cvs+(' export -r %s reportlab' % tagname), 'the export phase')
+		do_exec(cvs+(' export -r %s %s' % (tagname,projdir)), 'the export phase')
 	else:
+		do_exec(cvs+' co %s' % projdir, 'the checkout phase')
 		if py2pdf:
-			do_exec(cvs+' co reportlab', 'the checkout phase')
 			# now we need to move the files & delete those we don't need
 			dst = py2pdf_dir
 			recursive_rmdir(dst)
@@ -184,10 +187,8 @@ def cvs_checkout(d):
 			do_exec("mv reportlab/demos/py2pdf/py2pdf.py %s"%dst, "mv py2pdf.py")
 			do_exec("mv reportlab/demos/py2pdf/PyFontify.py %s" % dst, "mv pyfontify.py")
 			do_exec("rm -r reportlab/demos reportlab/platypus reportlab/lib/styles.py reportlab/README.pdfgen.txt", "rm")
-			do_exec("mv reportlab %s" % dst)
+			do_exec("mv %s %s" % (projdir,dst), "moving %s to %s" %(projdir,py2pdf_dir))
 			CVS_remove(dst)
-		else:
-			do_exec(cvs+' co reportlab', 'the checkout phase')
 
 def do_zip(d):
 	'create .tgz and .zip file archives of d/reportlab'
