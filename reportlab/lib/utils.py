@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.20 2001/10/30 08:47:09 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.20 2001/10/30 08:47:09 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.21 2001/10/31 00:46:13 andy_robinson Exp $
+__version__=''' $Id: utils.py,v 1.21 2001/10/31 00:46:13 andy_robinson Exp $ '''
 
 import string, os, sys
 from types import *
@@ -35,6 +35,29 @@ if ',' in fp_str(0.25):
 	_FP_STR = fp_str
 	def fp_str(*a):
 		return string.replace(apply(_FP_STR,a),',','.')
+
+def recursiveImport(modulename, baseDir=None):
+	"""Dynamically imports possible packagized module, or raises ImportError"""
+	import imp
+	parts = string.split(modulename, '.')
+	part = parts[0]
+	if baseDir:
+		path = [baseDir]
+	else:
+		path = None
+	(file, pathname, description) = imp.find_module(part, path)
+	childModule = parentModule = imp.load_module(part, file, pathname, description)
+	for name in parts[1:]:
+		(file, pathname, description) = imp.find_module(name, parentModule.__path__)
+		childModule = imp.load_module(name, file, pathname, description)
+		setattr(parentModule, name, childModule)
+		parentModule = childModule
+	return childModule
+
+
+	
+		
+
 
 def import_zlib():
 	try:
