@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.32 2003/07/31 17:28:55 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.32 2003/07/31 17:28:55 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.33 2003/08/05 17:02:04 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.33 2003/08/05 17:02:04 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -237,14 +237,15 @@ def _convert2pilp(im):
     Image = _getImage()
     return im.convert("P", dither=Image.NONE, palette=Image.ADAPTIVE)
 
-def _saveAsPICT(im,fn,fmt):
+def _saveAsPICT(im,fn,fmt,transparent=None):
     im = _convert2pilp(im)
     cols, rows = im.size
-    s = _renderPM.pil2pict(cols,rows,im.tostring(),im.im.getpalette())
+    s = _renderPM.pil2pict(cols,rows,im.tostring(),im.im.getpalette(),transparent is not None and Color2Hex(transparent) or -1)
     if not hasattr(fn,'write'):
         open(os.path.splitext(fn)[0]+'.'+string.lower(fmt),'wb').write(s)
-        from reportlab.lib.utils import markfilename
-        markfilename(fn,creatorcode='ogle',filetype='PICT')
+        if os.name=='mac':
+            from reportlab.lib.utils import markfilename
+            markfilename(fn,ext='PICT')
     else:
         fn.write(s)
 
@@ -286,11 +287,12 @@ class PMCanvas:
             if type(fn) is not StringType:
                 raise ValueError, "Invalid type '%s' for fn when fmt is None" % type(fn)
         else:
+            configPIL = self.configPIL or {}
             fmt = string.upper(fmt)
             if fmt in ['GIF']:
                 im = _convert2pilp(im)
             elif fmt in ['PCT','PICT']:
-                return _saveAsPICT(im,fn,fmt)
+                return _saveAsPICT(im,fn,fmt,transparent=configPIL.get('transparent',None))
             elif fmt in ['PNG','TIFF','BMP', 'PPM', 'TIF']:
                 if fmt=='TIF': fmt = 'TIFF'
                 if fmt=='PNG':
@@ -302,11 +304,8 @@ class PMCanvas:
                 fmt = 'JPEG'
             else:
                 raise RenderPMError,"Unknown image kind %s" % fmt
-            configPIL = self.configPIL or {}
             if fmt=='TIFF':
-                tc = configPIL.get('transparentColor',None)
-                if not tc and os.environ.get('FORCE_TIFF_TRANSPARENT',None) in ('1','yes'):
-                    from reportlab.lib.colors import white as tc
+                tc = configPIL.get('transparent',None)
                 if tc:
                     from PIL import ImageChops, Image
                     T = 768*[0]
@@ -318,9 +317,9 @@ class PMCanvas:
                 for a,d in ('resolution',self._dpi),('resolution unit','inch'):
                     configPIL[a] = configPIL.get(a,d)
             apply(im.save,(fn,fmt),configPIL)
-            if not hasattr(fn,'write'):
+            if not hasattr(fn,'write') and os.name=='mac':
                 from reportlab.lib.utils import markfilename
-                markfilename(fn,creatorcode='ogle',filetype='PICT')
+                markfilename(fn,ext=fmt)
 
     def saveToString(self,fmt='GIF'):
         s = getStringIO()
@@ -581,7 +580,11 @@ def test():
                     fullpath = os.path.join('pmout', filename)
                     if os.path.isfile(fullpath):
                         os.remove(fullpath)
-                    drawToFile(drawing,fullpath,fmt=k)
+                    if k=='pct':
+                        from reportlab.lib.colors import white
+                        drawToFile(drawing,fullpath,fmt=k,configPIL={'transparent':white})
+                    else:
+                        drawToFile(drawing,fullpath,fmt=k)
                     if k in ['gif','png','jpg']:
                         html.append('<img src="%s" border="1"><br>\n' % filename)
                     print 'wrote',fullpath
