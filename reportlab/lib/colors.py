@@ -1,13 +1,13 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.31 2002/06/16 12:26:58 rgbecker Exp $
-__version__=''' $Id: colors.py,v 1.31 2002/06/16 12:26:58 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.32 2002/06/20 10:26:58 rgbecker Exp $
+__version__=''' $Id: colors.py,v 1.32 2002/06/20 10:26:58 rgbecker Exp $ '''
 
-import string
-import math
+import string, math
 from types import StringType, ListType, TupleType
 from reportlab.lib.utils import fp_str
+_SeqTypes = (ListType,TupleType)
 
 class Color:
 	"""This class is used to represent color.  Components red, green, blue
@@ -258,6 +258,9 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
 #transparent = Color(-1, -1, -1)
 
 _CMYK_white=CMYKColor(0,0,0,0)
+_PCMYK_white=PCMYKColor(0,0,0,0)
+_CMYK_black=CMYKColor(0,0,0,1)
+_PCMYK_black=PCMYKColor(0,0,0,100)
 
 # Special colors 
 ReportLabBlue =		HexColor(0x4e5688)
@@ -476,15 +479,19 @@ def describe(aColor,mode=0):
 
 def toColor(arg,default=None):
 	'''try to map an arbitrary arg to a color instance'''
+	if isinstance(arg,Color): return arg
 	tArg = type(arg)
-	if tArg is ColorType:
-		return arg
-	elif tArg in [ListType,TupleType]:
+	if tArg in _SeqTypes:
 		return Color(arg[0],arg[1],arg[2])
 	elif tArg == StringType:
 		C = getAllNamedColors()
 		s = string.lower(arg)
 		if C.has_key(s): return C[s]
+		try:
+			s = eval(arg)
+			if isinstance(s,Color): return s
+		except:
+			pass
 
 	try:
 		return HexColor(arg)
@@ -517,3 +524,21 @@ def setColors(**kw):
 	for k, c in assigned.items():
 		globals()[k] = c
 		if isinstance(c,Color): _namedColors[k] = c
+
+def Whiter(c,f):
+	'''given a color combine with white as c*f w*(1-f) 0<=f<=1'''
+	c = toColor(c)
+	if isinstance(c,PCMYKColor):
+		w = _PCMYK_white
+	elif isinstance(c,CMYKColor): w = _CMYK_white
+	else: w = white
+	return linearlyInterpolatedColor(w, c, 0, 1, f)
+
+def Blacker(c,f):
+	'''given a color combine with black as c*f w*(1-f) 0<=f<=1'''
+	c = toColor(c)
+	if isinstance(c,PCMYKColor):
+		b = _PCMYK_black
+	elif isinstance(c,CMYKColor): w = _CMYK_black
+	else: b = black
+	return linearlyInterpolatedColor(b, c, 0, 1, f)
