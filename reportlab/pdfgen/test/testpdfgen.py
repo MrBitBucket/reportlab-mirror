@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: testpdfgen.py,v $
+#	Revision 1.12  2000/04/18 19:53:47  aaron_watters
+#	eliminated canvas._inPage0() (now disallowed)
+#
 #	Revision 1.11  2000/04/15 14:57:31  aaron_watters
 #	added demonstration of new AddOutlineEntry0 api
-#
+#	
 #	Revision 1.10  2000/04/03 09:35:37  andy_robinson
 #	Using traling zero convention for new form and link APIs.
 #	
@@ -63,7 +66,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testpdfgen.py,v 1.11 2000/04/15 14:57:31 aaron_watters Exp $ '''
+__version__=''' $Id: testpdfgen.py,v 1.12 2000/04/18 19:53:47 aaron_watters Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
@@ -113,7 +116,7 @@ titlelist = []
     
 def framePage(canvas, title):
     titlelist.append(title)
-    canvas._inPage0()  # do we need this at all?  would be good to eliminate it
+    #canvas._inPage0()  # do we need this at all?  would be good to eliminate it
     canvas.saveState()
     canvas.setFont('Times-BoldItalic',20)
     
