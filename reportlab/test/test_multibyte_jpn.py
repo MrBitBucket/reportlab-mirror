@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/test_multibyte_jpn.py,v 1.4 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_multibyte_jpn.py,v 1.5 2003/11/25 00:42:33 rptlab Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -38,7 +38,7 @@ class JapaneseFontTests(unittest.TestCase):
             from reportlab.pdfbase.cidfonts import CIDFont, findCMapFile
             findCMapFile('90ms-RKSJ-H')
             findCMapFile('90msp-RKSJ-H')
-            findCMapFile('Unijis-UCS2-H')
+            findCMapFile('UniJIS-UCS2-H')
             findCMapFile('EUC-H')
         except:
             #don't have the font pack.  return silently
