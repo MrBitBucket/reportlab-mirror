@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.2 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.3 2001/04/25 08:26:53 dinu_gherman Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -27,7 +27,8 @@ class WedgeFormatter(Widget):
     It is not to be confused with the 'wedge itself'; this just holds
     a recipe for how to format one, and does not allow you to hack the
     angles.  It can format a genuine Wedge object for you with its
-    format method. """
+    format method."""
+
     _attrMap = {
         'strokeWidth':isNumber,
         'strokeColor':isColorOrNone,
@@ -64,7 +65,7 @@ class Pie(Widget):
         'data':isListOfNumbers,
         'labels':isListOfStringsOrNone,
         'startAngle':isNumber,
-        'direction': lambda x: x in ['clockwise','anticlockwise'],
+        'direction': lambda x: x in ['clockwise', 'anticlockwise'],
         'wedges':None,   # could be improved,
         'defaultColors':SequenceOf(isColor)
         }
@@ -156,17 +157,18 @@ class Pie(Widget):
                 cx = centerx + popdistance * math.cos(aveAngleRadians)
                 cy = centery + popdistance * math.sin(aveAngleRadians)
 
-            theWedge = Wedge(cx,
-                             cy,
-                             xradius,
-                             a1,
-                             a2,
-                             yradius=yradius)
+            if len(normData) > 1:
+                theWedge = Wedge(cx, cy, xradius, a1, a2, yradius=yradius)
+            elif len(normData) == 1:
+                theWedge = Ellipse(cx, cy, xradius, yradius)
+
             theWedge.fillColor = thisWedgeColor
             theWedge.strokeColor = self.wedges[i].strokeColor
             theWedge.strokeWidth = self.wedges[i].strokeWidth
             theWedge.strokeDashArray = self.wedges[i].strokeDashArray
+
             g.add(theWedge)
+
             # now draw a label
             if labels[i] <> "":
                 averageAngle = (a1+a2)/2.0
@@ -188,13 +190,53 @@ class Pie(Widget):
         return g
 
 
-def test():
+def sample0a():
+    "Make a degenerated pie chart with only one slice."
+
     d = Drawing(400, 200)
+
     pc = Pie()
     pc.x = 150
     pc.y = 50
-    pc.data = [10,20,30,40,50,60]
-    pc.labels = ['a','b','c','d','e','f']
+    pc.data = [10]
+    pc.labels = ['a']
+    pc.wedges.strokeWidth=0.5
+    
+    d.add(pc)
+
+    return d
+
+
+def sample0b():
+    "Make a degenerated pie chart with only one slice."
+
+    d = Drawing(400, 200)
+
+    pc = Pie()
+    pc.x = 150
+    pc.y = 50
+    pc.width = 120
+    pc.height = 100
+    pc.data = [10]
+    pc.labels = ['a']
+    pc.wedges.strokeWidth=0.5
+    
+    d.add(pc)
+
+    return d
+
+
+def sample1():
+    "Make a typical pie chart with with one slice treated in a special way."
+
+    d = Drawing(400, 200)
+
+    pc = Pie()
+    pc.x = 150
+    pc.y = 50
+    pc.data = [10, 20, 30, 40, 50, 60]
+    pc.labels = ['a', 'b', 'c', 'd', 'e', 'f']
+
     pc.wedges.strokeWidth=0.5
     pc.wedges[3].popout = 20
     pc.wedges[3].strokeWidth = 2
@@ -204,16 +246,4 @@ def test():
     
     d.add(pc)
 
-    d.drawOn(c, 100, 200)
-
-    c.setFont('Times-Roman', 20)
-    c.drawString(100, 420, "Pie chart with wedges collection")
-    c.setFont('Times-Roman', 12)
-    c.drawString(100, 405, "Allows customisation of individual slices (but not their angles!)")
-    
-    c.save()
-    print 'saved piechart.pdf'
-
-
-if __name__=='__main__':
-    test()        
+    return d
