@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/styles.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/styles.py,v 1.13 2000/12/14 17:11:03 rgbecker Exp $
-__version__=''' $Id: styles.py,v 1.13 2000/12/14 17:11:03 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/styles.py,v 1.14 2001/03/17 15:22:25 rgbecker Exp $
+__version__=''' $Id: styles.py,v 1.14 2001/03/17 15:22:25 rgbecker Exp $ '''
 
 from reportlab.lib.colors import white, black
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
@@ -94,19 +94,6 @@ class LineStyle(PropertySet):
         canvas.setLineWidth(1)
         #etc. etc.
 
-class CellStyle(PropertySet):
-    defaults = {
-        'fontName':'Times-Roman',
-        'fontsize':10,
-        'leading':12,
-        'leftPadding':6,
-        'rightPadding':6,
-        'topPadding':3,
-        'bottomPadding':3,
-        'firstLineIndent':0,
-        'color':white,
-        'alignment': 'LEFT',
-        }
 class StyleSheet1:
     """This may or may not be used.  The idea is to
     1. slightly simplify construction of stylesheets;
