@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.28  2000/04/21 13:22:17  rgbecker
+#	Remove pdfgen/test in py2pdf mode
+#
 #	Revision 1.27  2000/04/20 10:51:07  rgbecker
 #	Added mv idle_print.py
-#
+#	
 #	Revision 1.26  2000/04/20 08:39:59  rgbecker
 #	Made cvsdir local everywhere
 #	
@@ -113,7 +116,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.27 2000/04/20 10:51:07 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.28 2000/04/21 13:22:17 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -202,7 +205,7 @@ def cvs_checkout(d):
 			do_exec("mv reportlab/demos/py2pdf/py2pdf.py %s"%dst, "mv py2pdf.py")
 			do_exec("mv reportlab/demos/py2pdf/PyFontify.py %s" % dst, "mv pyfontify.py")
 			do_exec("mv reportlab/demos/py2pdf/idle_print.py %s" % dst, "mv idle_print.py")
-			do_exec("rm -r reportlab/demos reportlab/platypus reportlab/lib/styles.py reportlab/README.pdfgen.txt", "rm")
+			do_exec("rm -r reportlab/demos reportlab/platypus reportlab/lib/styles.py reportlab/README.pdfgen.txt reportlab/pdfgen/test", "rm")
 			do_exec("mv %s %s" % (projdir,dst), "moving %s to %s" %(projdir,py2pdf_dir))
 			CVS_remove(dst)
 
