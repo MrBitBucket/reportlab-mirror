@@ -352,6 +352,30 @@ def test():
     sr.demo()
     D.add(sr)
 
+    g = Grid0()
+    g.x = 20
+    g.y = 110
+    g.useLines = 1
+    g.demo()
+    D.add(g)
+
+    g = Grid0()
+    g.x = 140
+    g.y = 110
+    g.delta0 = 10
+    g.useLines = 1
+    g.useRects = 0
+    g.demo()
+    D.add(g)
+
+    g = Grid0()
+    g.x = 260
+    g.y = 110
+    g.orientation = 'horizontal'
+    g.useLines = 1
+    g.demo()
+    D.add(g)
+
     renderPDF.drawToFile(D, 'grids.pdf', 'grids.py')
     print 'wrote file: grids.pdf'
     
