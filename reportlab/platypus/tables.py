@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.77 2004/04/01 11:17:02 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.77 2004/04/01 11:17:02 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.78 2004/04/05 18:07:42 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.78 2004/04/05 18:07:42 rgbecker Exp $ '''
 
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
@@ -80,7 +80,6 @@ class CellStyle1(PropertySet):
         for name in dir(self):
             setattr(result, name, gettattr(self, name))
         return result
-
 CellStyle = CellStyle1
 
 class TableStyle:
@@ -142,6 +141,7 @@ def _calc_pc(V,avail):
                 j(len(R))
             else:
                 v = float(v)
+                s -= v
         elif v is None:
             n += 1
         else:
@@ -422,7 +422,7 @@ class Table(Flowable):
         #cells.  If so, apply a different algorithm
         #and assign some withs in a dumb way.
         #this CHANGES the widths array.
-        if None in self._colWidths and self._hasVariWidthElements():
+        if (None in self._colWidths or '*' in self._colWidths) and self._hasVariWidthElements():
             W = self._calcPreliminaryWidths(availWidth) #widths
         else:
             W = None
@@ -570,10 +570,9 @@ class Table(Flowable):
             if y0 > y1:
                 y0, y1 = y1, y0
 
-            # unset/clobber all the ones it
-            # overwrites
-            for y in range(y0, y1+1):
-                for x in range(x0, x1+1):
+            # unset/clobber all the ones it overwrites
+            for y in xrange(y0, y1+1):
+                for x in xrange(x0, x1+1):
                     spanRanges[x, y] = None
 
             # set the main entry
