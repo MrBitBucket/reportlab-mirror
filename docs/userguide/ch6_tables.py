@@ -1,6 +1,7 @@
 #ch6_tables
 
 from genuserguide import *
+from reportlab.platypus import Image
 
 heading1("Tables and TableStyles")
 disc("""
@@ -24,7 +25,10 @@ heading4("""$Table(data, colWidths=None, rowHeights=None, style=None, splitByRow
 repeatRows=0, repeatCols=0)$""")
 
 disc("""The $data$ argument is a sequence of sequences of cell values each of which
-should be convertible to a string value using the $str$ function. The first row of cell values
+should be convertible to a string value using the $str$ function or should be a Flowable instance (such as a $Paragraph$) or a list (or tuple) of such instances.
+If a cell value is a $Flowable$ or list of $Flowables$ these must either have a determined width
+or the containing column must have a fixed width.
+The first row of cell values
 is in $data[0]$ i.e. the values are in row order. The $i$, $j$<sup>th.</sup> cell value is in
 $data[i][j]$. Newline characters $'\\n'$ in cell values are treated as line split characters and
 are used at <i>draw</i> time to format the cell into lines.
@@ -173,6 +177,87 @@ t=Table(data,style=[('GRID',(1,1),(-2,-2),1,colors.green),
 					('LINEBEFORE',(2,1),(2,-2),1,colors.pink),
 					])
 """)
+disc("""Line commands cause problems for tables when they split; the following example
+shows a table being split in various positions""")
+EmbeddedCode("""
+data=  [['00', '01', '02', '03', '04'],
+		['10', '11', '12', '13', '14'],
+		['20', '21', '22', '23', '24'],
+		['30', '31', '32', '33', '34']]
+t=Table(data,style=[
+				('GRID',(0,0),(-1,-1),0.5,colors.grey),
+				('GRID',(1,1),(-2,-2),1,colors.green),
+				('BOX',(0,0),(1,-1),2,colors.red),
+				('BOX',(0,0),(-1,-1),2,colors.black),
+				('LINEABOVE',(1,2),(-2,2),1,colors.blue),
+				('LINEBEFORE',(2,1),(2,-2),1,colors.pink),
+				('BACKGROUND', (0, 0), (0, 1), colors.pink),
+				('BACKGROUND', (1, 1), (1, 2), colors.lavender),
+				('BACKGROUND', (2, 2), (2, 3), colors.orange),
+				])
+""")
+t=getStory()[-1]
+getStory().append(Spacer(0,6))
+for s in t.split(4*inch,30):
+	getStory().append(s)
+	getStory().append(Spacer(0,6))
+getStory().append(Spacer(0,6))
+for s in t.split(4*inch,36):
+	getStory().append(s)
+	getStory().append(Spacer(0,6))
+
+disc("""When unsplit and split at the first or second row.""")
+
+CPage(4.0)
+heading3("""Complex Cell Values""")
+disc("""
+As mentioned above we can have complicated cell values including $Paragraphs$, $Images$ and other $Flowables$
+or lists of the same. To see this in operation consider the following code and the table it produces.
+Note that the $Image$ has a white background which will obscure any background you choose for the cell.
+To get better results you should use a transparent background.
+""")
+import os, reportlab.platypus
+I = '../images/replogo.gif'
+EmbeddedCode("""
+I = Image('%s')
+I.drawHeight = 1.25*inch*I.drawHeight / I.drawWidth
+I.drawWidth = 1.25*inch
+I.noImageCaching = 1
+P0 = Paragraph('''
+               <b>A pa<font color=red>r</font>a<i>graph</i></b>
+               <super><font color=yellow>1</font></super>''',
+               styleSheet["BodyText"])
+P = Paragraph('''
+       <para align=center spaceb=3>The <b>ReportLab Left
+       <font color=red>Logo</font></b>
+       Image</para>''',
+       styleSheet["BodyText"])
+data=  [['A',   'B', 'C',     P0, 'D'],
+		['00', '01', '02', [I,P], '04'],
+		['10', '11', '12', [P,I], '14'],
+		['20', '21', '22',  '23', '24'],
+		['30', '31', '32',  '33', '34']]
+
+t=Table(data,style=[('GRID',(1,1),(-2,-2),1,colors.green),
+					('BOX',(0,0),(1,-1),2,colors.red),
+					('LINEABOVE',(1,2),(-2,2),1,colors.blue),
+					('LINEBEFORE',(2,1),(2,-2),1,colors.pink),
+					('BACKGROUND', (0, 0), (0, 1), colors.pink),
+					('BACKGROUND', (1, 1), (1, 2), colors.lavender),
+					('BACKGROUND', (2, 2), (2, 3), colors.orange),
+					('BOX',(0,0),(-1,-1),2,colors.black),
+					('GRID',(0,0),(-1,-1),0.5,colors.black),
+					('VALIGN',(3,0),(3,0),'BOTTOM'),
+					('BACKGROUND',(3,0),(3,0),colors.limegreen),
+					('BACKGROUND',(3,1),(3,1),colors.khaki),
+					('ALIGN',(3,1),(3,1),'CENTER'),
+					('BACKGROUND',(3,2),(3,2),colors.beige),
+					('ALIGN',(3,2),(3,2),'LEFT'),
+					])
+
+t._argW[3]=1.5*inch
+"""%I)
+
 heading1("""Other Useful $Flowables$""")
 heading2("""$Image(filename, width=None, height=None)$""")
 disc("""Create a flowable which will contain the image defined by the data in file $filename$.
@@ -182,7 +267,6 @@ then they determine the dimension of the displayed image in <i>points</i>. If ei
 not specified (or specified as $None$) then the corresponding pixel dimension of the image is assumed
 to be in <i>points</i> and used.
 """)
-from reportlab.platypus import Image
 I=os.path.join(os.path.dirname(__file__),'..','images','lj8100.jpg')
 eg("""
 Image("lj8100.jpg")

@@ -32,6 +32,9 @@
 #
 ###############################################################################
 #   $Log: genuserguide.py,v $
+#   Revision 1.33  2000/08/02 13:11:31  rgbecker
+#   Table cell updates
+#
 #   Revision 1.32  2000/07/18 13:29:19  dinu_gherman
 #   removed header dashes.
 #
@@ -132,7 +135,7 @@
 #   Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #   initial checkin. user guide generation framework.
 #   
-__version__=''' $Id: genuserguide.py,v 1.32 2000/07/18 13:29:19 dinu_gherman Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.33 2000/08/02 13:11:31 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -152,7 +155,7 @@ from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import Paragraph, Spacer, Preformatted,\
             PageBreak, CondPageBreak, Flowable, Table, TableStyle, \
-            NextPageTemplate, KeepTogether
+            NextPageTemplate, KeepTogether, Image
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.sequencer import getSequencer
@@ -273,7 +276,7 @@ def eg(text,before=0.1,after=0):
 def space(inches=1./6):
 	if inches: getStory().append(Spacer(0,inches*inch))
 
-def EmbeddedCode(code,name='t', fn='embedded.tmp'):
+def EmbeddedCode(code,name='t'):
     eg(code)
     disc("produces")
     exec code+("\ngetStory().append(%s)\n"%name)
