@@ -1,4 +1,439 @@
 #################################################################################
+#################### RELEASE 1.08 at 12:00 BST 19/June/2001 #####################
+#################################################################################
+##### 2001/06/19 #####
+	test/test_graphics_speed.py 1.10 dinu_gherman
+		 Renamed chart attribute names to bars/lines/slices.
+	test/test_graphics_charts.py 1.12 dinu_gherman
+		 Renamed chart attribute names to bars/lines/slices.
+	graphics/charts/piecharts.py 1.17 dinu_gherman
+		 Renamed chart attribute names to bars/lines/slices.
+	graphics/charts/lineplots.py 1.17 dinu_gherman
+		 Renamed chart attribute names to bars/lines/slices.
+	graphics/charts/linecharts.py 1.12 dinu_gherman
+		 Renamed chart attribute names to bars/lines/slices.
+	graphics/charts/barcharts.py 1.18 dinu_gherman
+		 Renamed chart attribute names to bars/lines/slices.
+##### 2001/06/18 #####
+	docs/graphguide/ch2_graphics.py 1.21 rgbecker
+		 Changed from defaultStyles to pieStyles
+	graphics/widgetbase.py 1.25 rgbecker
+		 Added recur arg to allow non-recurring
+	graphics/shapes.py 1.32 rgbecker
+		 Added recur arg to allow non-recurring
+	test/test_graphics_speed.py 1.9 dinu_gherman
+		 Renamed defaultStyles attribute with barStyles, lineStyles, pieStyles.
+	test/test_graphics_charts.py 1.11 dinu_gherman
+		 Renamed defaultStyles attribute with barStyles, lineStyles, pieStyles.
+	graphics/charts/piecharts.py 1.16 dinu_gherman
+		 Renamed defaultStyles attribute with barStyles, lineStyles, pieStyles.
+	graphics/charts/lineplots.py 1.16 dinu_gherman
+		 Renamed defaultStyles attribute with barStyles, lineStyles, pieStyles.
+	graphics/charts/linecharts.py 1.11 dinu_gherman
+		 Renamed defaultStyles attribute with barStyles, lineStyles, pieStyles.
+	graphics/charts/barcharts.py 1.17 dinu_gherman
+		 Renamed defaultStyles attribute with barStyles, lineStyles, pieStyles.
+##### 2001/06/16 #####
+	graphics/shapes.py 1.31 rgbecker
+		 Added Null _DrawingEditorMixin class
+##### 2001/06/15 #####
+	pdfbase/pdfdoc.py 1.45 aaron_watters
+		 added missing PDFText() function for consistency (needed by pagecatcher)
+##### 2001/06/13 #####
+	rl_addons/renderPM/setup.py 1.4 jvr
+		 some changes to make it potentially work under MacOS with the CodeWarrior compiler. Unfortunately it still doesn't :-(
+	lib/setup.py 1.8 jvr
+		 minor patch: building the sgmlop, _rl_accel and pyHnj now simply *works* with distutils under MacOS with codeWarrior. Good Stuff. (haven't added any install smartness yet)
+	graphics/renderPM.py 1.8 jvr
+		 Test program: use os.path.join() for path manipulation instead of things like 'pmout%s%s'%(os.sep,filename) as this gets it wrong under MacOS.
+	rl_addons/renderPM/libart_lgpl/art_misc.c 1.2 jvr
+		 extended #ifndef _WIN32 to also check for undefined-ness of 'macintosh'
+	rl_addons/renderPM/gt1/gt1-parset1.c 1.2 jvr
+		 change to make it compile under MacOS: added strdup() hack for Mac
+	rl_addons/renderPM/_renderPM.c 1.3 jvr
+		 changes to make it compile under MacOS: - added strdup() hack for Mac - changed size_t fields in gstateObject to int -- otherwise I'd have to add   casts to each and every bpath_add_point() call (can't implicitly go from size_t   to int) - repaired "illegal constant expression" in gstate like Robin suggested
+	lib/_rl_accel.c 1.18 rgbecker
+		 Just's Mac patch
+	graphics/widgetbase.py 1.24 andy_robinson
+		 Changes to support customer project: allow nulls in bar charts, and added some missing but obvious properties e.g. strokeColor for bar and legend borders.
+	graphics/charts/piecharts.py 1.15 andy_robinson
+		 Changes to support customer project: allow nulls in bar charts, and added some missing but obvious properties e.g. strokeColor for bar and legend borders.
+	graphics/charts/legends.py 1.9 andy_robinson
+		 Changes to support customer project: allow nulls in bar charts, and added some missing but obvious properties e.g. strokeColor for bar and legend borders.
+	graphics/charts/barcharts.py 1.16 andy_robinson
+		 Changes to support customer project: allow nulls in bar charts, and added some missing but obvious properties e.g. strokeColor for bar and legend borders.
+	graphics/charts/axes.py 1.27 andy_robinson
+		 Changes to support customer project: allow nulls in bar charts, and added some missing but obvious properties e.g. strokeColor for bar and legend borders.
+##### 2001/06/11 #####
+	pdfgen/canvas.py 1.80 rgbecker
+		 Made canvas default to rl_config.pageCompression
+	rl_config.py 1.9 rgbecker
+		 Added pageCompression
+	graphics/renderPDF.py 1.9 andy_robinson
+		 Added autoSize option to rendderPDF, and allowed "no border" around bars in bar charts.  To support QIR project.
+	graphics/charts/barcharts.py 1.15 andy_robinson
+		 Added autoSize option to rendderPDF, and allowed "no border" around bars in bar charts.  To support QIR project.
+##### 2001/06/09 #####
+	platypus/frames.py 1.13 rgbecker
+		 added _FUZZ and changed frame add test
+##### 2001/06/07 #####
+	platypus/paragraph.py 1.55 rgbecker
+		 Remove explicit £ character to stop Dinu moaning
+	test/test_pdfgen_pagemodes.py 1.5 rgbecker
+		 Try to shorten filenames
+	test/test_widgetbase_tpc.py 1.1 rgbecker
+		 Shortened names
+	test/test_graphics_widgetbase_tpc.py 1.2 rgbecker
+		 Shortened names
+	test/test_graphics_charts_textlabels.py 1.4 rgbecker
+		 Shortened names
+	test/test_charts_textlabels.py 1.1 rgbecker
+		 Shortened names
+	lib/utils.py 1.16 rgbecker
+		 Imported PIL_WARNINGS
+	graphics/widgetbase.py 1.23 rgbecker
+		 Allow TypedPropertyCollection exemplar class to have getattr etc
+##### 2001/06/06 #####
+	graphics/widgetbase.py 1.22 rgbecker
+		 Fbot's suggested fix
+	lib/setup.py 1.7 rgbecker
+		 Fixed up MovePYDs
+	rl_addons/renderPM/setup.py 1.3 rgbecker
+		 Fixed up MovePYDs
+	rl_addons/renderPM/_renderPM.c 1.2 rgbecker
+		 Niki Spahiev's PyMem_New patch for 1.5.2
+##### 2001/05/30 #####
+	test/test_pdfbase_pdfmetrics.py 1.7 rgbecker
+		 Fixes for 2.1 whining
+	test/runAll.py 1.6 rgbecker
+		 Fixes for 2.1 whining
+	rl_addons/renderPM/setup.py 1.2 rgbecker
+		 Moved pyds to DLLs
+	lib/setup.py 1.6 rgbecker
+		 Moved pyds to DLLs
+##### 2001/05/29 #####
+	docs/graphguide/ch2_graphics.py 1.20 johnprecedo
+		 A number of small changes made - mainly changing import statements in the examples so that they actually work as given without producing an errors. Done up to page 15.
+	pdfgen/canvas.py 1.79 rgbecker
+		 Fix the 2.1 _escape fix
+	rl_config.py 1.8 rgbecker
+		 Changes for 2.1 escape fix
+	pdfgen/canvas.py 1.78 rgbecker
+		 Changes for 2.1 escape fix
+	lib/_rl_accel.c 1.17 rgbecker
+		 Changes for 2.1 escape fix
+	test/test_pyfiles.py 1.6 dinu_gherman
+		 Added a test for first lines containing #!...python...
+##### 2001/05/28 #####
+	platypus/paragraph.py 1.54 rgbecker
+		 Add some pound signs to test 5
+##### 2001/05/26 #####
+	utils/daily.py 1.43 rgbecker
+		 Fixed precedence
+	utils/daily.py 1.42 rgbecker
+		 Fixed error print' daily.py
+##### 2001/05/25 #####
+	graphics/charts/legends.py 1.8 dinu_gherman
+		 Added font attributes for text in legends.
+	lib/_rl_accel.c 1.16 rgbecker
+		 Fix special case ','
+	lib/_rl_accel.c 1.15 rgbecker
+		 Added fix for comma decimal point
+	lib/utils.py 1.15 rgbecker
+		 Attempt to fix the locale mismatch problem
+	lib/graphdocpy.py 1.8 rgbecker
+		 removed use of renderGD
+	pdfgen/pathobject.py 1.9 rgbecker
+		 Changed a few %f formats to use %s and fp_str
+	pdfgen/canvas.py 1.77 rgbecker
+		 Changed a few %f formats to use %s and fp_str
+##### 2001/05/23 #####
+	graphics/charts/textlabels.py 1.7 rgbecker
+		 Standardize nattribute names
+	graphics/renderPS.py 1.7 rgbecker
+		 Synchronize backend to PDF standard
+	graphics/renderPM.py 1.7 rgbecker
+		 Synchronize backend to PDF standard
+	graphics/renderPDF.py 1.8 rgbecker
+		 Synchronize backend to PDF standard
+	graphics/widgetbase.py 1.21 rgbecker
+		 Correct names and factorise some behaviour
+	graphics/shapes.py 1.30 rgbecker
+		 Correct names and factorise some behaviour
+##### 2001/05/22 #####
+	graphics/charts/barcharts.py 1.14 dinu_gherman
+		 Made strokeColor attribute for the bars be really used.
+	graphics/charts/textlabels.py 1.6 dinu_gherman
+		 Added missing fillColor attribute for the string itself.
+	graphics/charts/piecharts.py 1.14 rgbecker
+		 Fixes to piechart label handling
+	lib/__BUILD.dsw 1.4 rgbecker
+		 Indicated usage of setup.py
+	lib/README.extensions 1.3 rgbecker
+		 Indicated usage of setup.py
+##### 2001/05/21 #####
+	graphics/widgetbase.py 1.20 rgbecker
+		 Fixed _ItemWrapper name and made it really cache
+	graphics/widgetbase.py 1.19 rgbecker
+		 Improved element wrapping seems to work
+	test/test_graphics_widgetbase_tpc.py 1.1 dinu_gherman
+		 Initial checkin.
+	graphics/widgetbase.py 1.18 rgbecker
+		 Added element wrapper and fixed getitem so collections work better
+	test/test_docstrings.py 1.7 dinu_gherman
+		 Substantial rewrite.
+##### 2001/05/20 #####
+	pdfbase/_fontdata.py 1.10 rgbecker
+		 Fix typo
+	rl_config.py 1.7 rgbecker
+		 Better Font handling for linux2
+	pdfbase/_fontdata.py 1.9 rgbecker
+		 Better Font handling for linux2
+	rl_config.py 1.6 rgbecker
+		 Font handling patches for linux2 from L Catucci
+	pdfbase/_fontdata.py 1.8 rgbecker
+		 Font handling patches for linux2 from L Catucci
+	test/unittest.py 1.4 rgbecker
+		 Fix linesep for non-JPython
+	rl_config.py 1.5 rgbecker
+		 Added PIL_WARNINGS/ZLIB_WARNINGS
+	lib/utils.py 1.14 rgbecker
+		 Added PIL_WARNINGS/ZLIB_WARNINGS
+##### 2001/05/18 #####
+	test/test_docstrings.py 1.6 dinu_gherman
+		 Applied Robin's patch.
+	graphics/testshapes.py 1.12 rgbecker
+		 Added locals & globals to the eval
+	graphics/charts/piecharts.py 1.13 rgbecker
+		 Need some real strokeWidths
+	rl_addons/renderPM/pfm.py 1.2 rgbecker
+		 Remove above 127 characters
+	test/runAll.py 1.5 dinu_gherman
+		 Sorted order in which test module are executed (using sort()).
+	test/test_docstrings.py 1.5 dinu_gherman
+		 Fixed bug where files got written everywhere by using new SecureTestCase.
+	test/utils.py 1.1 dinu_gherman
+		 Initial checkin.
+	platypus/paragraph.py 1.53 rgbecker
+		 added minWidth method to Flowable, Paragraph
+	platypus/flowables.py 1.19 rgbecker
+		 added minWidth method to Flowable, Paragraph
+	graphics/widgetbase.py 1.17 rgbecker
+		 Make setVector more friendly
+	graphics/shapes.py 1.29 rgbecker
+		 Fixed expandUserNode method
+	graphics/widgetbase.py 1.16 rgbecker
+		 Added TypedPropertyCollection.setVector
+##### 2001/05/17 #####
+	docs/graphguide/ch2_graphics.py 1.19 rgbecker
+		 Pies don't seem to have  a wedges collection any longer
+	graphics/shapes.py 1.28 rgbecker
+		 Use canned routine validateSetattr
+	lib/validators.py 1.6 rgbecker
+		 New AttrMap emplacement
+	lib/attrmap.py 1.2 rgbecker
+		 New AttrMap emplacement
+	graphics/widgets/signsandsymbols.py 1.12 rgbecker
+		 New AttrMap emplacement
+	graphics/widgets/flags.py 1.5 rgbecker
+		 New AttrMap emplacement
+	graphics/charts/textlabels.py 1.5 rgbecker
+		 New AttrMap emplacement
+	graphics/charts/piecharts.py 1.12 rgbecker
+		 New AttrMap emplacement
+	graphics/charts/lineplots.py 1.15 rgbecker
+		 New AttrMap emplacement
+	graphics/charts/linecharts.py 1.10 rgbecker
+		 New AttrMap emplacement
+	graphics/charts/legends.py 1.7 rgbecker
+		 New AttrMap emplacement
+	graphics/charts/barcharts.py 1.13 rgbecker
+		 New AttrMap emplacement
+	graphics/charts/axes.py 1.26 rgbecker
+		 New AttrMap emplacement
+	graphics/widgetbase.py 1.15 rgbecker
+		 New AttrMap emplacement
+	graphics/shapes.py 1.27 rgbecker
+		 New AttrMap emplacement
+	graphics/shapes.py 1.26 rgbecker
+		 Removal of the Auto Thing
+	graphics/charts/linecharts.py 1.9 rgbecker
+		 Removal of the Auto Thing
+	graphics/charts/barcharts.py 1.12 rgbecker
+		 Removal of the Auto Thing
+	graphics/charts/axes.py 1.25 rgbecker
+		 Removal of the Auto Thing
+	docs/graphguide/ch2_graphics.py 1.18 rgbecker
+		 Removal of the Auto Thing
+	lib/attrmap.py 1.1 rgbecker
+		 Initial version
+	lib/validators.py 1.5 rgbecker
+		 New Scheme Validators
+	test/test_lib_validators.py 1.4 rgbecker
+		 New Scheme Validators
+##### 2001/05/16 #####
+	graphics/renderPM.py 1.6 rgbecker
+		 Added drawToString
+	test/test_graphics_charts.py 1.10 rgbecker
+		 Renamed Legend0 to Legend, fixed _attrmap typo
+	graphics/charts/legends.py 1.6 rgbecker
+		 Renamed Legend0 to Legend, fixed _attrmap typo
+##### 2001/05/15 #####
+	graphics/charts/lineplots.py 1.14 dinu_gherman
+		 Added strokeDashArray attribute to LinePlotProperties class.
+	test/test_lib_validators.py 1.3 dinu_gherman
+		 Removed isNumberOrAuto validator.
+	lib/validators.py 1.4 dinu_gherman
+		 Removed isNumberOrAuto validator.
+	graphics/charts/axes.py 1.24 dinu_gherman
+		 Removed isNumberOrAuto validator.
+	graphics/widgetbase.py 1.14 dinu_gherman
+		 Adapted to use Validator instances in validators.py.
+	graphics/shapes.py 1.25 dinu_gherman
+		 Adapted to use Validator instances in validators.py.
+	graphics/testshapes.py 1.11 rgbecker
+		 Improvements to testshapse.py
+	graphics/renderPM.py 1.5 rgbecker
+		 Improvements to testshapse.py
+	platypus/paragraph.py 1.52 rgbecker
+		 Added find to imports
+	test/test_paragraphs.py 1.10 rgbecker
+		 Added in line font changes
+##### 2001/05/11 #####
+	platypus/doctemplate.py 1.40 rgbecker
+		 Dynamic page sizes
+	lib/graphdocpy.py 1.7 dinu_gherman
+		 Fixed buglet.
+	graphics/widgets/signsandsymbols.py 1.11 dinu_gherman
+		 Adapted to using vlaidator classes.
+	graphics/widgets/flags.py 1.4 dinu_gherman
+		 Adapted to using vlaidator classes.
+	lib/graphdocpy.py 1.6 dinu_gherman
+		 Added display of documented public widget attributes.
+	graphics/charts/textlabels.py 1.4 dinu_gherman
+		 Adapted to using validator classes in attribute maps.
+	graphics/charts/piecharts.py 1.11 dinu_gherman
+		 Adapted to using validator classes in attribute maps.
+	graphics/charts/lineplots.py 1.13 dinu_gherman
+		 Adapted to using validator classes in attribute maps.
+	graphics/charts/linecharts.py 1.8 dinu_gherman
+		 Adapted to using validator classes in attribute maps.
+	graphics/charts/legends.py 1.5 dinu_gherman
+		 Adapted to using validator classes in attribute maps.
+	graphics/charts/barcharts.py 1.11 dinu_gherman
+		 Adapted to using validator classes in attribute maps.
+	graphics/charts/axes.py 1.23 dinu_gherman
+		 Adapted to using validator classes in attribute maps.
+	test/test_lib_validators.py 1.2 dinu_gherman
+		 Changed validator functions into classes. Adapted test cases. Added a tiny change to widgetbase.py.
+	lib/validators.py 1.3 dinu_gherman
+		 Changed validator functions into classes. Adapted test cases. Added a tiny change to widgetbase.py.
+	graphics/widgetbase.py 1.13 dinu_gherman
+		 Changed validator functions into classes. Adapted test cases. Added a tiny change to widgetbase.py.
+	test/test_coordtracking.py 1.2 rgbecker
+		 Removed for for later correction
+##### 2001/05/10 #####
+	test/test_coordtracking.py 1.1 aaron_watters
+		 test file for coordinate tracking and links
+	pdfgen/canvas.py 1.76 aaron_watters
+		 canvas coordinate matrix tracking and related linkage support
+	graphics/widgetbase.py 1.12 dinu_gherman
+		 Switched to using lib.validators module.
+	graphics/widgets/signsandsymbols.py 1.10 dinu_gherman
+		 Switched to using lib.validators module.
+	graphics/widgets/flags.py 1.3 dinu_gherman
+		 Switched to using lib.validators module.
+##### 2001/05/09 #####
+	lib/setup.py 1.5 rgbecker
+		 Compatibility fixes
+	lib/_rl_accel.c 1.14 rgbecker
+		 Compatibility fixes
+	graphics/widgetbase.py 1.11 dinu_gherman
+		 Code and docstring enhancements.
+	test/test_graphics_speed.py 1.8 dinu_gherman
+		 Switched to using defaultStyles attribute.
+	test/test_graphics_charts.py 1.9 dinu_gherman
+		 Switched to using defaultStyles attribute.
+	graphics/charts/axes.py 1.22 dinu_gherman
+		 Added visibleAxis/visibleTicks attributes.
+	graphics/charts/piecharts.py 1.10 dinu_gherman
+		 Broken draw method apart (well...).
+	graphics/charts/piecharts.py 1.9 dinu_gherman
+		 Done some slight code enhancements.
+	graphics/charts/lineplots.py 1.12 dinu_gherman
+		 Switched to using PropHolder superclass for LinePlotProperties. Added strokeWidth attribute to LinePlotProperties.
+	test/test_lib_validators.py 1.1 dinu_gherman
+		 Initial checkin.
+##### 2001/05/08 #####
+	graphics/charts/barcharts.py 1.10 dinu_gherman
+		 Switched to using defaultStyles attribute.
+	graphics/charts/linecharts.py 1.7 dinu_gherman
+		 Switched to using typed collection styles.
+	graphics/charts/piecharts.py 1.8 dinu_gherman
+		 Made more consistent use of typed collections.
+	graphics/charts/lineplots.py 1.11 dinu_gherman
+		 Removed dead code. Removed references to usedSymbol attribute. Made defaultStyles attribute a typed collection.
+	graphics/widgetbase.py 1.10 dinu_gherman
+		 Added a __len__ method to TypedPropertyCOllection.
+	graphics/charts/lineplots.py 1.10 dinu_gherman
+		 Removed references to defaultColors.
+	lib/graphdocpy.py 1.5 dinu_gherman
+		 Opening now showing PDF outline (with closed function sections). Minor fixes.
+##### 2001/05/07 #####
+	graphics/renderPDF.py 1.7 aaron_watters
+		 get rid of automatic boundary box option
+	graphics/charts/axes.py 1.21 dinu_gherman
+		 Reduced number of arguments for joinToAxis() methods.
+	lib/validators.py 1.2 dinu_gherman
+		 Extracted validator functions into lib.validators. Modified import statements.
+	graphics/shapes.py 1.24 dinu_gherman
+		 Extracted validator functions into lib.validators. Modified import statements.
+	graphics/charts/textlabels.py 1.3 dinu_gherman
+		 Extracted validator functions into lib.validators. Modified import statements.
+	graphics/charts/piecharts.py 1.7 dinu_gherman
+		 Extracted validator functions into lib.validators. Modified import statements.
+	graphics/charts/lineplots.py 1.9 dinu_gherman
+		 Extracted validator functions into lib.validators. Modified import statements.
+	graphics/charts/linecharts.py 1.6 dinu_gherman
+		 Extracted validator functions into lib.validators. Modified import statements.
+	graphics/charts/legends.py 1.4 dinu_gherman
+		 Extracted validator functions into lib.validators. Modified import statements.
+	graphics/charts/barcharts.py 1.9 dinu_gherman
+		 Extracted validator functions into lib.validators. Modified import statements.
+	graphics/charts/axes.py 1.20 dinu_gherman
+		 Extracted validator functions into lib.validators. Modified import statements.
+	lib/validators.py 1.1 dinu_gherman
+		 Added future validators module (stripped off from shapes.py).
+	graphics/charts/piecharts.py 1.6 dinu_gherman
+		 Various minor changes.
+	graphics/charts/lineplots.py 1.8 dinu_gherman
+		 Various minor changes.
+	graphics/charts/linecharts.py 1.5 dinu_gherman
+		 Various minor changes.
+	graphics/charts/legends.py 1.3 dinu_gherman
+		 Various minor changes.
+	graphics/charts/barcharts.py 1.8 dinu_gherman
+		 Various minor changes.
+	graphics/charts/axes.py 1.19 dinu_gherman
+		 Various minor changes.
+##### 2001/05/05 #####
+	platypus/tables.py 1.39 aaron_watters
+		 hacky fix to nudge bug
+	pdfgen/canvas.py 1.75 aaron_watters
+		 fix for major font metrics state tracking bug
+##### 2001/05/04 #####
+	platypus/tables.py 1.38 aaron_watters
+		 use round caps for miter limit
+	graphics/renderPM.py 1.4 rgbecker
+		 Readded import checks and improved messages
+	graphics/renderPM.py 1.3 rgbecker
+		 Added fix for png files
+##### 2001/05/03 #####
+	graphics/renderPM.py 1.2 rgbecker
+		 ImportError checks for _renderPM
+	graphics/renderPM.py 1.1 rgbecker
+		 Moved from rlextra/graphics/Csrc/renderPM
+#################################################################################
 #################### RELEASE 1.07 at 11:54 BST ##################################
 #################################################################################
 ##### 2001/05/02 #####
