@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/_fontdata.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: _fontdata.py,v 1.7 2001/04/23 13:34:45 rgbecker Exp $ '''
+__version__=''' $Id: _fontdata.py,v 1.8 2001/05/20 09:23:31 rgbecker Exp $ '''
 __doc__=""" 
 	database of font related things
 	standardFonts		tuple of the 14 standard string font names
@@ -12,7 +12,7 @@ __doc__="""
 	widthsByFontGlyph	fontname x glyphname --> width of glyph
 	widthVectorsByFont	fontName -> vector of widths
 """
-import string, UserDict, os
+import string, UserDict, os, sys
 
 # mapping of name to width vector, starts empty until fonts are added
 # e.g. widths['Courier'] = [...600,600,600,...]
@@ -27,7 +27,26 @@ standardFonts = (
     'Symbol','ZapfDingbats')
 
 #this maps fontnames to the equivalent filename root.
-_font2fnrMap={
+if sys.platform=='linux2':
+    _font2fnrMap={
+    	'symbol': 'Symbol',
+	'zapfdingbats': 'ZapfDingbats',
+	'helvetica': 'Arial',
+	'helvetica-bold': 'Arial-Bold',
+	'helvetica-boldoblique': 'Arial-BoldItalic',
+	'helvetica-oblique': 'Arial-Italic',
+	'times-bold': 'TimesNewRoman-Bold',
+	'times-bolditalic':'TimesNewRoman-BoldItalic',
+	'times-italic': 'TimesNewRoman-Italic',
+	'times-roman': 'TimesNewRoman',
+	'courier-bold': 'Courier-Bold',
+	'courier-boldoblique': 'Courier-BoldOblique',
+	'courier': 'Courier',
+	'courier-oblique': 'Courier-Oblique',
+	}
+
+else:
+    _font2fnrMap={
 	'symbol':					'Sy______',
 	'zapfdingbats':				'Zd______',
 	'helvetica':				'_a______',

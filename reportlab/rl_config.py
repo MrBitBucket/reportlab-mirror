@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.5 2001/05/20 09:08:23 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.6 2001/05/20 09:23:31 rgbecker Exp $
 import sys
 from reportlab.lib import pagesizes
 shapeChecking = 1
@@ -13,6 +13,8 @@ defaultImageCaching = 1					#set to zero to remove those annoying cached images
 #places to search for Type 1 Font files
 if sys.platform=='win32':
 	T1SearchPath=['c:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\Font']
+elif sys.platform=='linux2':
+	T1SearchPath=['/usr/lib/Acrobat4/Resource/Font']
 else:
 	T1SearchPath=[]
 
