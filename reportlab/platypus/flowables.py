@@ -312,8 +312,8 @@ class Image(Flowable):
             f.close()
             self.imageWidth = info[0]
             self.imageHeight = info[1]
-            self._setup(width,height,kind,0)
             self._img = None
+            self._setup(width,height,kind,0)
         elif fp:
             self._setup(width,height,kind,0)
         else:
@@ -330,7 +330,8 @@ class Image(Flowable):
         width = self._width
         height = self._height
         kind = self._kind
-        (self.imageWidth, self.imageHeight) = self._img.getSize()
+        img = self._img
+        if img: self.imageWidth, self.imageHeight = img.getSize()
         if self._lazy>=2: del self._img
         if kind in ['direct','absolute']:
             self.drawWidth = width or self.imageWidth
