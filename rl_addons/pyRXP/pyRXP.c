@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.9 2002/10/20 22:03:03 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.10 2002/10/25 15:27:40 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.9 2002/10/20 22:03:03 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.10 2002/10/25 15:27:40 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,7 +24,7 @@ static char* __version__=" $Id: pyRXP.c,v 1.9 2002/10/20 22:03:03 rgbecker Exp $
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "0.8"
+#define VERSION "0.9"
 #define MODULE "pyRXP"
 #define MAX_DEPTH 256
 static PyObject *moduleError;
@@ -300,7 +300,7 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 		case XBIT_start:
 		case XBIT_empty:
 			if(*depth==MAX_DEPTH){
-				PyErr_SetString(moduleError,"Internal error, stack limit reached!");
+				Fprintf(Stderr,"Internal error, stack limit reached!\n");
 				r = 2;
 				break;
 				}
@@ -319,7 +319,7 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 			break;
 		case XBIT_end:
 			if(*depth==0){
-				PyErr_SetString(moduleError,"Internal error, stack underflow!");
+				Fprintf(Stderr,"Internal error, stack underflow!\n");
 				r = 2;
 				break;
 				}
@@ -398,6 +398,18 @@ static InputSource entity_open(Entity e, void *info)
 	return EntityOpen(e);
 }
 
+void PyErr_FromStderr(Parser p, char *msg){
+	struct _FILE16 {
+		void *handle;
+		int handle2, handle3;
+		};
+	char *buf=((struct _FILE16*)Stderr)->handle;
+	if(p->errbuf) Fprintf(Stderr,"%s\n", p->errbuf);
+	Fprintf(Stderr,"%s\n", msg);
+	buf[((struct _FILE16*)Stderr)->handle2] = 0;
+	PyErr_SetString(moduleError,buf);
+}
+
 /*return non zero for error*/
 PyObject *ProcessSource(Parser p, InputSource source)
 {
@@ -408,7 +420,7 @@ PyObject *ProcessSource(Parser p, InputSource source)
 	ParserDetails*	pd = (ParserDetails*)(p->callback_arg);
 
 	if(ParserPush(p, source) == -1) {
-		PyErr_SetString(moduleError,"Internal error, ParserPush failed!");
+		PyErr_FromStderr(p,"Internal error, ParserPush failed!");
 		return NULL;
 		}
 
@@ -448,18 +460,10 @@ PyObject *ProcessSource(Parser p, InputSource source)
 		PyErr_Clear();
 		}
 	else {
-		if(!r){
-			PyErr_SetString(moduleError,"Internal error, stack not fully popped!");
-			}
-		else if(r==1){
-			struct _FILE16 {
-				void *handle;
-				int handle2, handle3;
-				};
-
-			char *buf=((struct _FILE16*)Stderr)->handle;
-			buf[((struct _FILE16*)Stderr)->handle2] = 0;
-			PyErr_SetString(moduleError,buf);
+		if(!r) PyErr_FromStderr(p,"Internal error, stack not fully popped!");
+		else {
+			Fprintf(Stderr,"error return=%d\n",r);
+			PyErr_FromStderr(p,"Parse Failed!");
 			}
 		for(i=0;i<=depth;i++){
 			Py_DECREF(stack[i]);
