@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.15  2000/06/23 13:13:54  rgbecker
+#	Fixes to splitting code
+#
 #	Revision 1.14  2000/06/19 23:51:23  andy_robinson
 #	Added UserDocTemplate class, and paragraph.getPlainText()
-#
+#	
 #	Revision 1.13  2000/06/19 11:14:03  andy_robinson
 #	Global sequencer put in the 'story builder'.
 #	
@@ -73,7 +76,7 @@
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.14 2000/06/19 23:51:23 andy_robinson Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.15 2000/06/23 13:13:54 rgbecker Exp $ '''
 import string
 import types
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -188,6 +191,7 @@ def _getFragWords(frags):
 					# of paragraphs
 		if text!='':
 			S = string.split(text,' ')
+			if S[-1]=='': del S[-1]
 			if W!=[] and text[0] in [' ','\t']:
 				W.insert(0,n)
 				R.append(W)
@@ -214,8 +218,6 @@ def _getFragWords(frags):
 		W.insert(0,n)
 		R.append(W)
 
-	for r in R:
-		f = r[1][0]
 	return R
 
 def	_split_bfragSimple(bfrag,start,stop):
@@ -231,9 +233,12 @@ def	_split_bfragSimple(bfrag,start,stop):
 
 def	_split_bfragHard(bfrag,start,stop):
 	f = []
-	for l in bfrag.lines[start:stop-1]:
+	lines = bfrag.lines[start:stop]
+	for l in lines:
 		for w in l.words:
 			f.append(w)
+		if l is not lines[-1]:
+			f[-1].text = f[-1].text+' '
 	return f
 
 def _drawBullet(canvas, offset, cur_y, bulletText, style):
@@ -435,15 +440,17 @@ class Paragraph(Flowable):
 					# fit one more on this line
 					n = n + 1
 					maxSize = max(maxSize,f.fontSize)
+					nText = w[1][1]
 					if words==[]:
 						words = [f.clone()]
-						words[-1].text = w[1][1]
+						words[-1].text = nText
 					elif not _sameFrag(words[-1],f):
-						words[-1].text = words[-1].text+' '
+						if nText!='' and nText[0]!=' ':
+							words[-1].text = words[-1].text + ' ' 
 						words.append(f.clone())
-						words[-1].text = w[1][1]
+						words[-1].text = nText
 					else:
-						words[-1].text = words[-1].text + ' ' + w[1][1]
+						words[-1].text = words[-1].text + ' ' + nText
 
 					for i in w[2:]:
 						f = i[0].clone()
@@ -592,3 +599,43 @@ class Paragraph(Flowable):
 		for frag in self.frags:
 			plains.append(frag.text)
 		return string.join(plains, '')
+
+if __name__=='__main__':	#NORUNTESTS
+	def dumpParagraphLines(P):
+		print 'dumpParagraphLines(%s)' % str(P)
+		lines = P.bfrags.lines
+		n =len(lines)
+		for l in range(n):
+			line = lines[l]
+			words = line.words
+			nwords = len(words)
+			print 'line%d: %d(%d)\n  ' % (l,nwords,line.wordCount),
+			for w in range(nwords):
+				print "%d:'%s'"%(w,words[w].text),
+			print
+
+	from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+	styleSheet = getSampleStyleSheet()
+	B = styleSheet['BodyText']
+	style = ParagraphStyle("discussiontext", parent=B)
+	style.fontName= 'Helvetica'
+	text='''The <font name=courier color=green>CMYK</font> or subtractive method follows the way a printer
+mixes three pigments (cyan, magenta, and yellow) to form colors.
+Because mixing chemicals is more difficult than combining light there
+is a fourth parameter for darkness.  For example a chemical
+combination of the <font name=courier color=green>CMY</font> pigments generally never makes a perfect
+black -- instead producing a muddy color -- so, to get black printers
+don't use the <font name=courier color=green>CMY</font> pigments but use a direct black ink.  Because
+<font name=courier color=green>CMYK</font> maps more directly to the way printer hardware works it may
+be the case that colors specified in <font name=courier color=green>CMYK</font> will provide better fidelity
+and better control when printed.
+'''
+	P=Paragraph(text,style)
+	aW, aH = 456.0, 42.8
+	w,h = P.wrap(aW, aH)
+	dumpParagraphLines(P)
+	S = P.split(aW,aH)
+	for s in S:
+		s.wrap(aW,aH)
+		dumpParagraphLines(s)
+		aH = 500
