@@ -60,6 +60,13 @@ def getStyleSheet():
                                   spaceAfter=6),
                    alias='h3')
 
+    stylesheet.add(ParagraphStyle(name='Heading4',
+                                  parent=stylesheet['Normal'],
+                                  fontName = 'Times-BoldItalic',
+                                  spaceBefore=10,
+                                  spaceAfter=4),
+                   alias='h4')
+
     stylesheet.add(ParagraphStyle(name='Title',
                                   parent=stylesheet['Normal'],
                                   fontName = 'Times-Bold',
