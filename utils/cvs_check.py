@@ -32,13 +32,16 @@
 #
 ###############################################################################
 #	$Log: cvs_check.py,v $
+#	Revision 1.6  2000/05/17 15:39:10  rgbecker
+#	Changes related to removal of SimpleFlowDocument
+#
 #	Revision 1.5  2000/02/17 01:59:34  rgbecker
 #	Changes to test search
-#
+#	
 #	Revision 1.4  2000/02/16 14:07:14  rgbecker
 #	Fixes for package reportlab
 #	
-__version__=''' $Id: cvs_check.py,v 1.5 2000/02/17 01:59:34 rgbecker Exp $ '''
+__version__=''' $Id: cvs_check.py,v 1.6 2000/05/17 15:39:10 rgbecker Exp $ '''
 '''
 script for testing ReportLab anonymous cvs download and test
 '''
@@ -188,7 +191,7 @@ def do_tests(d):
 			traceback.print_exc(None,sys.stdout)
 			_ecount = _ecount + 1
 
-if __name__=='__main__':
+if __name__=='__main__': #NORUNTESTS
 	legal_options = ['-dir', '-help','-nocvs','-notest','-clean', '-fclean', '-zip' ]
 	def usage(code=0, msg=''):
 		f = code and sys.stderr or sys.stdout

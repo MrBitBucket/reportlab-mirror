@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: runtests.py,v $
+#	Revision 1.11  2000/05/17 15:39:10  rgbecker
+#	Changes related to removal of SimpleFlowDocument
+#
 #	Revision 1.10  2000/05/11 09:54:43  rgbecker
 #	Fixed dir argument handling
-#
+#	
 #	Revision 1.9  2000/04/12 13:34:33  rgbecker
 #	Fixes to exception handling
 #	
@@ -63,7 +66,7 @@
 #	New infrastructure
 #	
 #	
-__version__=''' $Id: runtests.py,v 1.10 2000/05/11 09:54:43 rgbecker Exp $ '''
+__version__=''' $Id: runtests.py,v 1.11 2000/05/17 15:39:10 rgbecker Exp $ '''
 '''
 script for testing ReportLab
 '''
@@ -169,7 +172,7 @@ def clean_files(d):
 	os.chdir(d)
 	os.path.walk('.',find_cleanable_files,None)
 
-if __name__=='__main__':
+if __name__=='__main__': #NORUNTESTS
 	legal_options = ['-cycles', '-dir', '-help','-notest','-clean', '-fclean']
 	def usage(code=0, msg=''):
 		f = code and sys.stderr or sys.stdout

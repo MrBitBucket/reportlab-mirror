@@ -32,10 +32,13 @@
 #
 ###############################################################################
 #	$Log: testtables.py,v $
+#	Revision 1.8  2000/05/17 15:37:33  rgbecker
+#	Changes related to removal of SimpleFlowDocument
+#
 #	Revision 1.7  2000/04/26 11:07:15  andy_robinson
 #	Tables changed to use reportlab.lib.colors instead of
 #	the six hard-coded color strings there previously.
-#
+#	
 #	Revision 1.6  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
 #	
@@ -51,13 +54,12 @@
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #
-__version__=''' $Id: testtables.py,v 1.7 2000/04/26 11:07:15 andy_robinson Exp $ '''
+__version__=''' $Id: testtables.py,v 1.8 2000/05/17 15:37:33 rgbecker Exp $ '''
 __doc__='Test script for reportlab.tables'
-from reportlab.platypus import layout
+from reportlab.platypus.doctemplate import Spacer, SimpleDocTemplate
 from reportlab.platypus import tables
 from reportlab.lib.units import inch
 from reportlab.lib import colors
-
 
 def getTable():
     t = tables.Table(
@@ -85,7 +87,7 @@ def makeStyles():
     return styles
 
 def run():
-    doc = layout.SimpleFlowDocument('testtables.pdf', (8.5*inch, 11*inch), 1)
+    doc = SimpleDocTemplate('testtables.pdf', (8.5*inch, 11*inch), showBoundary=1)
     styles = makeStyles()
     lst = []
     for style in styles:
@@ -96,7 +98,7 @@ def run():
 ##            for s in rowstyle:
 ##                print s.alignment
         lst.append(t)
-        lst.append(layout.Spacer(0,12))
+        lst.append(Spacer(0,12))
     doc.build(lst)
 
 run()

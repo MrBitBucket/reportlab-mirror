@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
-#	Revision 1.8  2000/05/16 16:15:16  rgbecker
+#	Revision 1.9  2000/05/17 15:37:33  rgbecker
 #	Changes related to removal of SimpleFlowDocument
 #
+#	Revision 1.8  2000/05/16 16:15:16  rgbecker
+#	Changes related to removal of SimpleFlowDocument
+#	
 #	Revision 1.7  2000/05/16 14:28:55  rgbecker
 #	Fixes/Changes to get testplatypus to work with new framework
 #	
@@ -55,7 +58,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.8 2000/05/16 16:15:16 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.9 2000/05/17 15:37:33 rgbecker Exp $ '''
 __doc__="""
 More complicated Document model
 """
@@ -340,6 +343,10 @@ class SimpleDocTemplate(BaseDocTemplate):
 		frameT = BasicFrame(self.leftMargin, self.bottomMargin, self.width, self.height, id='normal')
 		self.addPageTemplates([PageTemplate(id='First',frames=frameT, onPage=onFirstPage),
 						PageTemplate(id='Later',frames=frameT, onPage=onLaterPages)])
+		if onFirstPage is _doNothing and hasattr(self,'onFirstPage'):
+			self.pageTemplates[0].drawPage = self.onFirstPage
+		if onLaterPages is _doNothing and hasattr(self,'onLaterPages'):
+			self.pageTemplates[1].drawPage = self.onLaterPages
 		BaseDocTemplate.build(self,flowables)
 
 if __name__ == '__main__':
@@ -394,6 +401,7 @@ if __name__ == '__main__':
 		objects_to_draw = []
 		from reportlab.lib.styles import ParagraphStyle
 		from paragraph import Paragraph
+		from doctemplate import SimpleDocTemplate
 
 		#need a style
 		normal = ParagraphStyle('normal')

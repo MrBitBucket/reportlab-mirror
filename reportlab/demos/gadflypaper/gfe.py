@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: gfe.py,v $
+#	Revision 1.9  2000/05/17 15:37:33  rgbecker
+#	Changes related to removal of SimpleFlowDocument
+#
 #	Revision 1.8  2000/05/11 13:51:21  rgbecker
 #	Fixes for xml<
-#
+#	
 #	Revision 1.7  2000/04/14 12:17:05  rgbecker
 #	Splitting layout.py
 #	
@@ -55,13 +58,13 @@
 #	Revision 1.1.1.1  2000/02/15 15:15:57  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: gfe.py,v 1.8 2000/05/11 13:51:21 rgbecker Exp $ '''
+__version__=''' $Id: gfe.py,v 1.9 2000/05/17 15:37:33 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
 import sys
-from reportlab.platypus import layout
 from reportlab.platypus.paragraph import Paragraph
+from reportlab.platypus.doctemplate import *
 from reportlab.lib.styles import getSampleStyleSheet
 
 styles = getSampleStyleSheet()
@@ -94,7 +97,7 @@ def myFirstPage(canvas, doc):
     #canvas.setLineWidth(5)
     #canvas.line(66,72,66,PAGE_HEIGHT-72)
     canvas.setFont('Times-Bold',16)
-    canvas.drawString(108, layout.PAGE_HEIGHT-108, Title)
+    canvas.drawString(108, PAGE_HEIGHT-108, Title)
     canvas.setFont('Times-Roman',9)
     canvas.drawString(inch, 0.75 * inch, "First Page / %s" % pageinfo)
     canvas.restoreState()
@@ -110,17 +113,16 @@ def myLaterPages(canvas, doc):
     canvas.restoreState()
     
 def go():
-    doc = layout.SimpleFlowDocument('gfe.pdf',layout.DEFAULT_PAGE_SIZE)
-    doc.onFirstPage = myFirstPage
-    doc.onNewPage = myLaterPages
-    doc.build(Elements)
+    Elements.insert(0,Spacer(0,inch))
+    doc = SimpleDocTemplate('gfe.pdf',DEFAULT_PAGE_SIZE)
+    doc.build(Elements,onFirstPage=myFirstPage, onLaterPages=myLaterPages)
 
 Elements = []
 
 HeaderStyle = styles["Heading1"] # XXXX
 
 def header(txt, style=HeaderStyle, klass=Paragraph, sep=0.3):
-    s = layout.Spacer(0.2*inch, sep*inch)
+    s = Spacer(0.2*inch, sep*inch)
     Elements.append(s)
     para = klass(txt, style)
     Elements.append(para)
@@ -135,9 +137,9 @@ def p(txt):
 PreStyle = styles["Code"] 
 
 def pre(txt):
-    s = layout.Spacer(0.1*inch, 0.1*inch)
+    s = Spacer(0.1*inch, 0.1*inch)
     Elements.append(s)
-    p = layout.Preformatted(txt, PreStyle)
+    p = Preformatted(txt, PreStyle)
     Elements.append(p)
 
 #header(Title, sep=0.1. style=ParaStyle)
@@ -307,7 +309,7 @@ explicitly make use of indices.
 """)
 
 # HACK
-Elements.append(layout.PageBreak())
+Elements.append(PageBreak())
 
 p("""
 While it must be admitted that there are application

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: fodyssey.py,v $
+#	Revision 1.9  2000/05/17 15:37:33  rgbecker
+#	Changes related to removal of SimpleFlowDocument
+#
 #	Revision 1.8  2000/05/13 09:23:45  rgbecker
 #	Fix spacing bugs
-#
+#	
 #	Revision 1.7  2000/05/12 16:19:07  rgbecker
 #	Title leading changes
 #	
@@ -55,13 +58,13 @@
 #	Revision 1.1  2000/04/06 08:58:09  rgbecker
 #	Paragraph formatting version of odyssey.py
 #	
-__version__=''' $Id: fodyssey.py,v 1.8 2000/05/13 09:23:45 rgbecker Exp $ '''
+__version__=''' $Id: fodyssey.py,v 1.9 2000/05/17 15:37:33 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
 import sys, copy, string, os
-from reportlab.platypus import layout
 from reportlab.platypus.paragraph import Paragraph
+from reportlab.platypus.doctemplate import *
 from reportlab.lib.units import inch
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -82,10 +85,9 @@ def myLaterPages(canvas, doc):
 	canvas.restoreState()
 	
 def go():
-	doc = layout.SimpleFlowDocument('fodyssey.pdf',layout.DEFAULT_PAGE_SIZE,showBoundary=0)
-	doc.onFirstPage = myFirstPage
-	doc.onNewPage = myLaterPages
-	doc.build(Elements)
+	doc = SimpleDocTemplate('fodyssey.pdf',DEFAULT_PAGE_SIZE,showBoundary=0)
+	doc.allowSplitting = not 'nosplitting' in sys.argv
+	doc.build(Elements,myFirstPage,myLaterPages)
 
 Elements = []
 
@@ -98,12 +100,12 @@ InitialStyle.leading = 20
 PreStyle = styles["Code"] 
 
 def newPage():
-	Elements.append(layout.PageBreak())
+	Elements.append(PageBreak())
 
 def chapter(txt, style=ChapterStyle):
 	newPage()
 	Elements.append(Paragraph(txt, style))
-	Elements.append(layout.Spacer(0.2*inch, 0.3*inch))
+	Elements.append(Spacer(0.2*inch, 0.3*inch))
 
 def fTitle(txt,style=InitialStyle):
 	Elements.append(Paragraph(txt, style))
@@ -122,14 +124,14 @@ else:
 	ParaStyle.alignment = TA_JUSTIFY
 
 def spacer(inches):
-	Elements.append(layout.Spacer(0.1*inch, inches*inch))
+	Elements.append(Spacer(0.1*inch, inches*inch))
 
 def p(txt, style=ParaStyle):
 	Elements.append(Paragraph(txt, style))
 
 def pre(txt, style=PreStyle):
 	spacer(0.1)
-	p = layout.Preformatted(txt, style)
+	p = Preformatted(txt, style)
 	Elements.append(p)
 
 def parseOdyssey(fn):

@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.30  2000/05/17 15:39:10  rgbecker
+#	Changes related to removal of SimpleFlowDocument
+#
 #	Revision 1.29  2000/04/26 12:57:38  rgbecker
 #	-py2pdf chmod commands added
-#
+#	
 #	Revision 1.28  2000/04/21 13:22:17  rgbecker
 #	Remove pdfgen/test in py2pdf mode
 #	
@@ -119,7 +122,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.29 2000/04/26 12:57:38 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.30 2000/05/17 15:39:10 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -252,7 +255,7 @@ def do_zip(d):
 			os.symlink(zipfile,lzipfile)
 			os.symlink(tarfile,ltarfile)
 
-if __name__=='__main__':
+if __name__=='__main__': #NORUNTESTS
 	def Usage(msg=None):
 		if msg is not None: print msg
 		print 'Usage:\n    python daily.py [-release tag] | [-py2pdf]'

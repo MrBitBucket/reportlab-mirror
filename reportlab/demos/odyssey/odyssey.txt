@@ -11,6 +11,7 @@ Translated by Samuel Butler
 ----------------------------------------------------------------------
 
 BOOK I
+<para align=center font="times-bold" size=24 leading=28.8 spaceAfter=72>ReportLab -- Reporting for the Internet Age</para>
 
 <font color=green><b><i>Tell</i></b></font> me, O muse, of that ingenious hero who travelled far and wide
 after he had sacked the famous town of <font color=red size=12><b>Troy</b></font>. Many cities did he visit,
