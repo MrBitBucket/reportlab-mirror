@@ -9,6 +9,10 @@ def libart_version():
 			D[string.strip(l[0])] = string.strip(l[1])
 			if len(D)==3: break
 	return (sys.platform == 'win32' and '\\"%s\\"' or '"%s"') % string.join(map(lambda k,D=D: D.get(k,'?'),K),'.')
+def BIGENDIAN(macname,value=None):
+	'define a macro if bigendian'
+	return sys.byteorder=='big' and [(macname,value)] or []
+
 if __name__=='__main__': #NO RUNTESTS
 	import os, sys, string
 	cwd = os.getcwd()
@@ -47,7 +51,7 @@ if __name__=='__main__': #NO RUNTESTS
 						{
 						'sources':	LIBART_SRCS,
 						'include_dirs': [DEVEL_DIR,LIBART_DIR,],
-						'macros': [('LIBART_COMPILATION',None),]+ROBIN_DEBUG,
+						'macros': [('LIBART_COMPILATION',None),]+BIGENDIAN('WORDS_BIGENDIAN')+ROBIN_DEBUG,
 						#'extra_compile_args':['/Z7'],
 						}
 						),
