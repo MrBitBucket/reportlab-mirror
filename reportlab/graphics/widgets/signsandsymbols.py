@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/signsandsymbols.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.15 2001/09/20 17:44:22 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.16 2001/09/20 22:22:29 andy_robinson Exp $
 # signsandsymbols.py
 # A collection of new widgets
 # author: John Precedo (johnp@reportlab.com)
@@ -261,6 +261,7 @@ class SmileyFace(ETriangle0):
 """
 
 	def __init__(self):
+		ETriangle0.__init__(self)
 		self.x = 0
 		self.y = 0
 		self.size = 100
