@@ -2,6 +2,7 @@ if  __name__=='__main__':
     import sys, os, traceback
     import _renderPM
     from reportlab.graphics import shapes, renderPM
+    from reportlab.rl_config import verbose
 
     def test_base():
         class dummy:
@@ -11,23 +12,23 @@ if  __name__=='__main__':
             g.aaa = 3
             print 'Wrong handling of bad attribute'
         except AttributeError:
-            pass
+            if verbose: print 'bad attribute handled ok'
 
         for fontName, fontSize in (('aaa',10),('Times-Roman','10'),('Times-Roman',-10),(1,10)):
             try:
                 g.setFont(fontName,fontSize)
                 print 'Wrong handling of setFont(%s,%s)' % (fontName,fontSize)
             except _renderPM.Error:
-                pass
+                if verbose: print '_renderPM.error detected OK'
             except TypeError:
-                pass
+                if verbose: print 'Type detected OK'
 
         for a in ('strokeColor','fillColor'):
             try:
                 setattr(g,a,(1,2,3))
                 print 'Wrong handling of bad '+a
             except ValueError:
-                pass
+                if verbose: print 'wrong handling of bad %s detected OK' % a
 
             try:
                 c=dummy()
@@ -37,6 +38,7 @@ if  __name__=='__main__':
                 for v,r in ((None,None),(0xfffafb,0xfffafb),(c,0xffafbf)):
                     setattr(g,a,v)
                     assert getattr(g,a)==r, "%s should be %s" % (a,hex(r))
+                if verbose: print 'setattr(%s) OK' % a
             except:
                 print 'wrong handling of good %s' % a
                 traceback.print_exc()
@@ -47,10 +49,11 @@ if  __name__=='__main__':
                 g.dashArray=v
                 print 'Wrong handling of dashArray %s' % v
             except ValueError:
-                pass
+                if verbose: print 'Wrong handling of dashArray %s detected OK' % v
         try:
             g.dashArray=7,(1,2,3)
             assert g.dashArray==(7.0,(1.0,2.0,3.0)), "should be (7.0,(1.0,2.0,3.0))"
+            if verbose: print 'dashArray obtained OK'
         except:
             print 'wrong handling of dashArray'
             traceback.print_exc()
@@ -65,6 +68,7 @@ if  __name__=='__main__':
             g.pathClose()
             good = (('moveToClosed', 0.0, 0.0), ('lineTo', 1.0, 0.0), ('lineTo', 1.0, 1.0), ('lineTo', 0.0, 1.0), ('lineTo', 0.0, 0.0))
             assert good==g.path, 'Wrong path should be %s' % str(good)
+            if verbose: print 'path attribute obtained OK'
         except:
             print 'wrong handling of path'
             traceback.print_exc()
