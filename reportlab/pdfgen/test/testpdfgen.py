@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: testpdfgen.py,v $
+#	Revision 1.13  2000/04/25 20:21:12  aaron_watters
+#	added demonstration of usage of closed outline entries
+#
 #	Revision 1.12  2000/04/18 19:53:47  aaron_watters
 #	eliminated canvas._inPage0() (now disallowed)
-#
+#	
 #	Revision 1.11  2000/04/15 14:57:31  aaron_watters
 #	added demonstration of new AddOutlineEntry0 api
 #	
@@ -66,7 +69,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testpdfgen.py,v 1.12 2000/04/18 19:53:47 aaron_watters Exp $ '''
+__version__=''' $Id: testpdfgen.py,v 1.13 2000/04/25 20:21:12 aaron_watters Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
@@ -113,8 +116,10 @@ def framePageForm(c):
     c.endForm0()
     
 titlelist = []
+closeit = 0
     
 def framePage(canvas, title):
+    global closeit
     titlelist.append(title)
     #canvas._inPage0()  # do we need this at all?  would be good to eliminate it
     canvas.saveState()
@@ -123,7 +128,8 @@ def framePage(canvas, title):
     canvas.drawString(inch, 10.5 * inch, title)
     canvas.bookmarkHorizontalAbsolute0(title, 10.8*inch)
     #newsection(title)
-    canvas.addOutlineEntry0(title+" section", title, level=0)
+    canvas.addOutlineEntry0(title+" section", title, level=0, closed=closeit)
+    closeit = not closeit # close every other one
     canvas.setFont('Times-Roman',10)
     canvas.drawCentredString(4.135 * inch, 0.75 * inch,
                             'Page %d' % canvas.getPageNumber())
