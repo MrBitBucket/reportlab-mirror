@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.25 2003/01/14 18:33:54 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.26 2003/05/29 15:49:28 fuzzypuffin Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -12,7 +12,7 @@
 This permits you to customize and pop out individual wedges;
 supports elliptical and circular pies.
 """
-__version__=''' $Id: piecharts.py,v 1.25 2003/01/14 18:33:54 rgbecker Exp $ '''
+__version__=''' $Id: piecharts.py,v 1.26 2003/05/29 15:49:28 fuzzypuffin Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -326,7 +326,7 @@ class LegendedPie(Pie):
                     pass
                 elif type(lNF) is StringType:
                     ldf = lNF % ldf
-                elif callable(type(lNF)):
+                elif callable(lNF):
                     ldf = lNF(ldf)
                 else:
                     p = self.legend_names[f]
@@ -337,7 +337,7 @@ class LegendedPie(Pie):
                         pass
                     elif type(lNF) is StringType:
                         ldf = lNF % ldf
-                    elif callable(type(lNF)):
+                    elif callable(lNF):
                         ldf = lNF(ldf)
                     else:
                         msg = "Unknown formatter type %s, expected string or function" % self.legendNumberFormat
