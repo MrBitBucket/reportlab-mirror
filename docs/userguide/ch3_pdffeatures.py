@@ -92,7 +92,7 @@ eg("""
 
 disc("""
 defines horizontal location on the currently drawn page with the identifier
-$Meaning_of_life$.  And the invocation
+$Meaning_of_life$.  And the invocation (???)
 """)
 
 eg("""
@@ -183,7 +183,7 @@ eg("""
  
 disc("""
 These methods have no automatically seen visible effect on the document.
-They add internal annotations to the document.  These annotations can may be
+They add internal annotations to the document.  These annotations can be
 viewed using the "Document Info" menu item of the browser and they also can
 be used as a simple standard way of providing basic information about the
 document to archiving software which need not parse the entire

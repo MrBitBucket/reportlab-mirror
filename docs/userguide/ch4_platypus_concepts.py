@@ -18,7 +18,7 @@ documents with a minimum of effort.
 
 disc("""
 The design of Platypus seeks to separate "high level" layout decisions
-from the document content as much as possible.  Thus, for example paragraphs
+from the document content as much as possible.  Thus, for example, paragraphs
 are constructed using paragraph styles and pages are constructed
 using page templates with the intention that hundreds of
 documents with thousands of pages can be reformatted to different
@@ -28,7 +28,7 @@ shared file which contains the paragraph styles and page layout specifications.
 
 
 disc("""
-The overall design of PLATYPUS can be thought of has having
+The overall design of Platypus can be thought of has having
 several layers, top down, these are""")
 
 disc("<b>$DocTemplates$</b> the outermost container for the document;")
@@ -38,7 +38,7 @@ disc("<b>$PageTemplates$</b> specifications for layouts of pages of various kind
 disc("<b>$Frames$</b> specifications of regions in pages that can contain flowing text or graphics.")
  
 disc("""<b>$Flowables$</b> text or graphic elements that should be "flowed 
-   into the document (ie things like images, paragraphs and tables, but not things
+   into the document (i.e. things like images, paragraphs and tables, but not things
    like page footers or fixed page graphics).""")
    
 disc("""<b>$pdfgen.Canvas$</b> the lowest level which ultimately receives the painting of the
@@ -55,7 +55,7 @@ disc("""
 
 disc("""
 $DocTemplates$ contain one or more $PageTemplates$ each of which contain one or more
-$Frames$. $Flowables$ are things which can be <i>flowed</i> into a $Frame$ eg
+$Frames$. $Flowables$ are things which can be <i>flowed</i> into a $Frame$ e.g.
 a $Paragraph$ or a $Table$.
 """)
 
@@ -76,7 +76,7 @@ first time.
 
 disc("""
 A Platypus story consists of a sequence of basic elements called $Flowables$
-and these elements drive the data driven platypus formatting engine.
+and these elements drive the data driven Platypus formatting engine.
 To modify the behavior of the engine
 a special kind of flowable, $ActionFlowables$, tell the layout engine to,
 for example, skip to the next
@@ -111,7 +111,7 @@ the pages.
 eg(examples.platypusgo)
 
 disc("""
-Finally we create a story and build the document.
+Finally, we create a story and build the document.
 Note that we are using a "canned" document template here which
 comes pre-built with page templates.  We are also using a pre-built
 paragraph style.  We are only using two types of flowables here
@@ -130,7 +130,7 @@ generate the Platypus output $phello.pdf$.
 heading2("$Flowables$")
 disc("""
 $Flowables$ are things which can be drawn and which have $wrap$, $draw$ and perhaps $split$ methods.
-$Flowable$ is an abstract base class for things to be drawn an instance knows its size
+$Flowable$ is an abstract base class for things to be drawn and an instance knows its size
 and draws in its own coordinate system (this requires the base API to provide an absolute coordinate
 system when the $Flowable.draw$ method is called). To get an instance use $f=Flowable()$.
 """)
@@ -171,7 +171,7 @@ disc("""This will be called to ask the flowable to actually render itself.
 The $Flowable$ class does not implement $draw$.
 The calling code should ensure that the flowable has an attribute $canv$
 which is the $pdfgen.Canvas$ which should be drawn to an that the $Canvas$
-is in an appropriate state (as regards translations rotations etc). Normally
+is in an appropriate state (as regards translations rotations, etc). Normally
 this method will only be called internally by the $drawOn$ method. Derived classes
 must implement this method.
 """)
@@ -210,31 +210,31 @@ eg("""
 	Flowable.getSpaceBefore(self):
 """)
 disc("""These methods return how much space should follow or precede
-the flowable. The space doesn't belong to the flowable itself ie the flowable's
+the flowable. The space doesn't belong to the flowable itself i.e. the flowable's
 $draw$ method shouldn't consider it when rendering. Controlling programs
 will use the values returned in determining how much space is required by
 a particular flowable in context.
 """)
 
 disc("""The chapters which follow will cover the most important
-specific types of flowables - Paragraphs and Tables""")
+specific types of flowables: Paragraphs and Tables.""")
 
 
 heading2("Frames")
 disc("""
 $Frames$ are active containers which are themselves contained in $PageTemplates$.
 $Frames$ have a location and size and maintain a concept of remaining drawable
-space.
+space. The command
 """)
 
 eg("""
 	Frame(x1, y1, width,height, leftPadding=6, bottomPadding=6,
 			rightPadding=6, topPadding=6, id=None, showBoundary=0)
 """)
-disc("""Creates a $Frame$ instance with lower left hand corner at coordinate $(x1,y1)$
+disc("""creates a $Frame$ instance with lower left hand corner at coordinate $(x1,y1)$
 (relative to the canvas at use time) and with dimensions $width$ x $height$. The $Padding$
 arguments are positive quantities used to reduce the space available for drawing.
-The $id$ argument is an identifier for use at runtime eg 'LeftColumn' or 'Rightcolumn' etc.
+The $id$ argument is an identifier for use at runtime e.g. 'LeftColumn' or 'RightColumn' etc.
 If the $showBoundary$ argument is non-zero then the boundary of the frame will get drawn
 at run time (this is useful sometimes).
 """)
@@ -242,21 +242,21 @@ heading3("$Frame$ User Methods")
 eg("""
 	Frame.addFromList(drawlist, canvas)
 """)
-disc("""Consumes $Flowables$ from the front of $drawlist$ until the
+disc("""consumes $Flowables$ from the front of $drawlist$ until the
 	frame is full.	If it cannot fit one object, raises
 	an exception.""")
 
 eg("""
 	Frame.split(flowable,canv)
 """)
-disc('''Ask the flowable to split using up the available space and return
+disc('''Asks the flowable to split using up the available space and return
 the list of flowables.
 ''')
 
 eg("""
 	Frame.drawBoundary(canvas)
 """)
-disc("draw the frame boundary as a rectangle (primarily for debugging).")
+disc("draws the frame boundary as a rectangle (primarily for debugging).")
 heading3("Using $Frames$")
 disc("""
 $Frames$ can be used directly with canvases and flowables to create documents.
@@ -313,7 +313,7 @@ eg("""
 """)
 
 disc("""
-Creates a document template suitable for creating a basic document. It comes with quite a lot
+creates a document template suitable for creating a basic document. It comes with quite a lot
 of internal machinery, but no default page templates. The required $filename$ can be a string,
 the name of a file to  receive the created <b>PDF</b> document; alternatively it
 can be an object which has a $write$ method such as a $StringIO$ or $file$ or $socket$.
@@ -322,7 +322,7 @@ can be an object which has a $write$ method such as a $StringIO$ or $file$ or $s
 disc("""
 The allowed arguments should be self explanatory, but $showBoundary$ controls whether or
 not $Frame$ boundaries are drawn which can be useful for debugging purposes. The
-$allowSplitting$ argument determines whether the builtin methods shoudl try to <i>split</i>
+$allowSplitting$ argument determines whether the builtin methods should try to <i>split</i>
 individual $Flowables$ across $Frames$. The $_pageBreakQuick$ argument determines whether
 an attempt to do a page break should try to end all the frames on the page or not, before ending
 the page.
@@ -343,11 +343,11 @@ eg("""
     BaseDocTemplate.build(self, flowables, filename=None, canvasmaker=canvas.Canvas)
 """)
 disc("""
-This is the main method which is of interst to the application
+This is the main method which is of interest to the application
 programmer. Assuming that the document instance is correctly set up the 
 $build$ method takes the <i>story</i> in the shape of the list of flowables
 (the $flowables$ argument) and loops through the list forcing the flowables
-one at a time thhrough the formatting machinery. Effectively this causes
+one at a time through the formatting machinery. Effectively this causes
 the $BaseDocTemplate$ instance to issue calls to the instance $handle_XXX$ methods
 to process the various events.
 """)
@@ -393,7 +393,7 @@ disc("""This is called at the beginning of page
 		processing, and immediately before the
 		beforeDrawPage method of the current page
 		template. It could be used to reset page specific
-        information holders.""")
+		information holders.""")
 
 eg("""
     BaseDocTemplate.filterFlowables(self,flowables)
@@ -415,7 +415,7 @@ heading4("$BaseDocTemplate$ Event handler Methods")
 disc("""
 These methods constitute the greater part of the layout engine. Programmers shouldn't
 have to call or override these methods directly unless they are trying to modify the layout engine.
-Of course the experienced programmer who wants to intervene at a particular event, $XXX$,
+Of course, the experienced programmer who wants to intervene at a particular event, $XXX$,
 which does not correspond to one of the virtual methods can always override and
 call the base method from the drived class version. We make this easy by providing
 a base class synonym for each of the handler methods with the same name prefixed by an underscore '_'.
@@ -474,7 +474,7 @@ doc.build(story)
 """)
 heading3("$PageTemplates$")
 disc("""
-The $PageTemplate class$ is a container class with fairly minimal semantics. Each instance
+The $PageTemplate$ class is a container class with fairly minimal semantics. Each instance
 contains a list of $Frames$ and has methods which should be called at the start and end
 of each page.
 """)
@@ -483,7 +483,7 @@ disc("""
 is used to initialize an instance, the $frames$ argument should be a list of $Frames$
 whilst the optional $onPage$ and $onPageEnd$ arguments are callables which should have signature
 $def XXX(canvas,document)$ where $canvas$ and $document$
-are the canvas and document being drawn. These routines are intended to be used to paint non-flowing (ie standard)
+are the canvas and document being drawn. These routines are intended to be used to paint non-flowing (i.e. standard)
 parts of pages. These attribute functions are exactly parallel to the pure virtual methods
 $PageTemplate.beforPage$ and $PageTemplate.afterPage$ which have signature
 $beforPage(self,canvas,document)$. The methods allow class derivation to be used to define

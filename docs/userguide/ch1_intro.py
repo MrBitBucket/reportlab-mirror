@@ -38,13 +38,13 @@ bullet("How do I get everything set up and running?")
 todo("""
 Be warned! This document is in a <em>very</em> preliminary form.  We need
 your help to make sure it is complete and helpful.  Please send any
-feedback to our mailing list, reportlab-users@egroups.com.
+feedback to our user mailing list, reportlab-users@egroups.com.
 """)
 
 heading2("What is ReportLab?")
-disc("""ReportLab is a software library lets you directly create documents
-in Adobe's Portabe Document Format (PDF) using the Python programming
-language. """)
+disc("""ReportLab is a software library that lets you directly
+create documents in Adobe's Portabe Document Format (PDF) using
+the Python programming language. """)
 
 disc("""PDF is the global standard for electronic documents. It
 supports high-quality printing yet is totally portable across
@@ -53,13 +53,13 @@ application which previously generated hard copy reports can
 benefit from making PDF documents instead; these can be archived,
 emailed, placed on the web, or printed out the old-fashioned way.
 However, the PDF file format is a complex
-indexed binary format which is impossible to write directly.
+indexed binary format which is impossible to type directly.
 The PDF format specification is more than 600 pages long and
 PDF files must provide precise byte offsets -- a single extra
 character placed anywhere in a valid PDF document can render it
 invalid.
 Until now, most of the world's PDF documents have been produced
-by Adobe's Acrobat tools, which act as a 'print driver.
+by Adobe's Acrobat tools, which act as a 'print driver'.
 """)
 
 disc("""The ReportLab library directly creates PDF based on
@@ -155,7 +155,7 @@ or reportlab.tgz) into a directory on your path""")
 list("""$cd$ to ^reportlab/pdfgen/test^ and execute $testpdfen.py$,
 which will create a file 'testpdfgen.pdf'.""")
 disc(" ")
-disc("""If you have any problems, check the 'Detailed Instructions' section below""")
+disc("""If you have any problems, check the 'Detailed Instructions' section below.""")
 
 heading3("A note on available versions")
 disc("""The $reportlab$
@@ -172,7 +172,7 @@ general, these are very stable because we have a comprehensive test
 suite that all developers can run at any time.
 New modules and functions within the overall package may be in a state
 of flux, but stable features can be assumed to be stable.  If a bug is
-reported and fix, we assume people who need the fix in a hurry will
+reported and fixed, we assume people who need the fix in a hurry will
 get $current.zip$""")
 
 heading3("Instructions for novices: Windows")
@@ -255,14 +255,14 @@ get the latest RPM or DEB or whatever package and install (or get your
 super user (system administrator) to do the work).""")
 
 list("""If you are building Python yourself, unpack the sources into a temporary directory using a tar command
-eg $tar xzvf py152.tgz$; this will create a subdirectory called Python-1.5.2
+e.g. $tar xzvf py152.tgz$; this will create a subdirectory called Python-1.5.2
 (or whatever) cd into this directory. Then read the file $README$! It contains the 
 latest information on how to install Python.""")
 
 list("""If your system has the gzip libz library installed
 check that the zlib extension will be installed by default by editing
 the file Modules/Setup.in and ensuring that (near line 405) the line
-containing zlib zlibmodule.c is uncommented ie has no hash '#' character at the
+containing zlib zlibmodule.c is uncommented i.e. has no hash '#' character at the
 beginning. You also need to decide if you will be installing in the default location
 (/usr/local/) or in some other place.
 The zlib module is needed if you want compressed PDF and for some images.""")
@@ -292,9 +292,9 @@ export PYTHONPATH
 list("""You should now be able to run python and execute the python statement
 """,doBullet=0)
 eg("""import reportlab""",after=0.1)
-list("""
-If you want to use images you should certainly consider getting &amp; installing the Python Imaging Library
-from <font color=blue>http://www.pythonware.com/products/pil</font>.
+list("""If you want to use images you should certainly consider
+getting &amp; installing the Python Imaging Library from
+<font color=blue>http://www.pythonware.com/products/pil</font>.
 """)
 
 heading3("Instructions for Python novices: Mac")
@@ -309,8 +309,8 @@ from these modules.  We also welcome help from the community
 as much as any other Open Source project.  There are many
 ways in which you can help:""")
 
-bullet("""General feedback on the core A.P.I. Does it work for you?
-are there any rough edges?  Does anything feel clunky and awkward?""")
+bullet("""General feedback on the core API. Does it work for you?
+Are there any rough edges?  Does anything feel clunky and awkward?""")
 
 bullet("""New objects to put in reports, or useful utilities for the library.
 We have an open standard for report objects, so if you have written a nice

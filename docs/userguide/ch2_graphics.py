@@ -646,7 +646,7 @@ eg(examples.testfonts)
 
 disc("""
 The $fonts$ function lists the fonts that are always available.
-These don;t need to be stored in a PDF document, since they
+These don't need to be stored in a PDF document, since they
 are guaranteed to be present in Acrobat Reader.
 """)
 
@@ -809,7 +809,7 @@ heading2('Paths and Lines')
 
 disc("""Just as textobjects are designed for the dedicated presentation
 of text, path objects are designed for the dedicated construction of
-graphical figures.  When path objects are drawn onto a $canvas$ they are
+graphical figures.  When path objects are drawn onto a $canvas$ they
 are drawn as one figure (like a rectangle) and the mode of drawing
 for the entire figure can be adjusted: the lines of the figure can
 be drawn (stroked) or not; the interior of the figure can be filled or
