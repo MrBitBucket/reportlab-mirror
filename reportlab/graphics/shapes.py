@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.56 2001/09/28 14:05:29 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.57 2001/10/09 14:47:05 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -324,6 +324,10 @@ class Group(Shape):
 		self._copyNamedContents(obj)
 		return obj
 
+	def _explode(self):
+		''' return a fully expanded object'''
+		obj = self.__class__()
+
 	def _copyContents(self,obj):
 		for child in self.contents:
 			obj.contents.append(child)
@@ -608,17 +612,18 @@ class SolidShape(Shape):
 
 # path operator  constants
 _MOVETO, _LINETO, _CURVETO, _CLOSEPATH = range(4)
+_PATH_OP_ARG_COUNT = (2, 2, 6, 0)  # [moveTo, lineTo, curveTo, closePath]
+_PATH_OP_NAMES=['moveTo','lineTo','curveTo','closePath']
 
 def _renderPath(path, drawFuncs):
 	"""Helper function for renderers."""
 	# this could be a method of Path...
-	argCount = (2, 2, 6, 0)  # [moveTo, lineTo, curveTo, closePath]
 	points = path.points
 	i = 0
 	hadClosePath = 0
 	hadMoveTo = 0
 	for op in path.operators:
-		nArgs = argCount[op]
+		nArgs = _PATH_OP_ARG_COUNT[op]
 		func = drawFuncs[op]
 		j = i + nArgs
 		apply(func, points[i:j])
@@ -677,6 +682,20 @@ class Path(SolidShape):
 	def closePath(self):
 		self.operators.append(_CLOSEPATH)
 
+def pathDefine(pathSegs=[],isClipPath=0,**kw):
+	O = []
+	P = []
+	for seg in pathSegs:
+		opName = seg[0]
+		if opName not in _PATH_OP_NAMES:
+			raise ValueError, 'bad operator name %s' % opName
+		op = _PATH_OP_NAMES.index(opName)
+		args = seg[1:]
+		if len(args)!=_PATH_OP_ARG_COUNT[op]:
+			raise ValueError, '%s bad arguments %s' % (opName,str(args))
+		O.append(op)
+		P.extend(args)
+	return apply(Path,(P,O,isClipPath),kw)
 
 class Rect(SolidShape):
 	"""Rectangle, possibly with rounded corners."""
