@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.17 2001/03/13 01:07:49 andy_robinson Exp $
-__version__=''' $Id: colors.py,v 1.17 2001/03/13 01:07:49 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.18 2001/05/01 17:50:47 johnprecedo Exp $
+__version__=''' $Id: colors.py,v 1.18 2001/05/01 17:50:47 johnprecedo Exp $ '''
 
 import string
 import math
@@ -147,6 +147,9 @@ def HexColor(val):
 # special case -- indicates no drawing should be done
 # this is a hangover from PIDDLE - suggest we ditch it since it is not used anywhere
 #transparent = Color(-1, -1, -1)
+
+# Special color 
+ReportLabBlue =		HexColor(0x0000CC)
 
 # color constants -- mostly from HTML standard
 aliceblue =		HexColor(0xF0F8FF)
