@@ -1,4 +1,5 @@
 #chartparts - candidate components for a chart library.
+import string
 from types import FunctionType
 
 
@@ -193,7 +194,6 @@ def sample1():
             (13, 5, 20, 22, 37, 45, 19, 4),
             (14, 6, 21, 23, 38, 46, 20, 5)
             ]
-            
     
     bc = VerticalBarChart()
     bc.x = 50
@@ -208,13 +208,14 @@ def sample1():
     bc.valueAxis.valueMax = 60
     bc.valueAxis.valueStep = 15
     
-    
     bc.categoryAxis.labels.boxAnchor = 'ne'
     bc.categoryAxis.labels.dx = 8
     bc.categoryAxis.labels.dy = -2
     bc.categoryAxis.labels.angle = 30
-    
-    bc.categoryAxis.categoryNames = ['Jan-99','Feb-99','Mar-99','Apr-99','May-99','Jun-99','Jul-99','Aug-99']
+
+    catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
+    catNames = map(lambda n:n+'-99', catNames)
+    bc.categoryAxis.categoryNames = catNames
     drawing.add(bc)
     bc.dumpProperties()
     return drawing    
