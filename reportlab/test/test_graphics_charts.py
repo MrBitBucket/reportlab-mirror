@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_graphics_charts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_graphics_charts.py,v 1.7 2001/04/05 09:30:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_graphics_charts.py,v 1.8 2001/04/09 22:43:51 dinu_gherman Exp $
 """
 Tests for chart class.
 """
@@ -25,7 +25,7 @@ from reportlab.platypus.doctemplate \
      import PageTemplate, BaseDocTemplate
 
 from reportlab.graphics.charts.barcharts import VerticalBarChart
-from reportlab.graphics.charts.linecharts import LineChart
+from reportlab.graphics.charts.linecharts import HorizontalLineChart
 from reportlab.graphics.charts.piecharts import Pie
 from reportlab.graphics.charts.legends import Legend0
 
@@ -93,7 +93,7 @@ def sample2bar(data=[(13, 5, 20, 22, 37, 45, 19, 4),
 def sample1line(data=[(13, 5, 20, 22, 37, 45, 19, 4)]):
     drawing = Drawing(400, 200)
     
-    bc = LineChart()
+    bc = HorizontalLineChart()
     bc.x = 50
     bc.y = 50
     bc.height = 125
