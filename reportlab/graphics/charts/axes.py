@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.58 2002/07/24 19:56:36 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.59 2002/11/27 17:48:06 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,14 +31,14 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.58 2002/07/24 19:56:36 andy_robinson Exp $ '''
+__version__=''' $Id: axes.py,v 1.59 2002/11/27 17:48:06 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
 
 from reportlab.lib.validators import    isNumber, isNumberOrNone, isListOfStringsOrNone, isListOfNumbers, \
                                         isListOfNumbersOrNone, isColorOrNone, OneOf, isBoolean, SequenceOf, \
-                                        isString
+                                        isString, EitherOr
 from reportlab.lib.attrmap import *
 from reportlab.lib import normalDate
 from reportlab.graphics.shapes import Drawing, Line, Group, STATE_DEFAULTS, _textBoxLimits, _rotatedBoxLimits
@@ -1116,7 +1116,7 @@ class AdjYValueAxis(YValueAxis):
         leftAxisPercent = AttrMapValue(isBoolean, desc='When true add percent sign to label values.'),
         leftAxisOrigShiftIPC = AttrMapValue(isNumber, desc='Lowest label shift interval ratio.'),
         leftAxisOrigShiftMin = AttrMapValue(isNumber, desc='Minimum amount to shift.'),
-        leftAxisSkipLL0 = AttrMapValue(isBoolean, desc='Skip lowest tick label when true.')
+        leftAxisSkipLL0 = AttrMapValue(EitherOr((isBoolean,isListOfNumbers)), desc='Skip/Keep lowest tick label when true/false.\nOr skiplist')
         )
 
     def __init__(self):
@@ -1173,6 +1173,12 @@ class AdjYValueAxis(YValueAxis):
             self._valueMin = self._valueMin - m
 
         if self.leftAxisSkipLL0:
+            if type(self.leftAxisSkipLL0) in (ListType,TupleType):
+                for x in self.leftAxisSkipLL0:
+                    try:
+                        L[x] = ''
+                    except IndexError:
+                        pass
             L[0] = ''
 
 # Sample functions.
