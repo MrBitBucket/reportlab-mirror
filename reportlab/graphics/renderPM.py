@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.40 2003/11/20 17:10:43 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.40 2003/11/20 17:10:43 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.41 2003/11/22 14:41:24 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.41 2003/11/22 14:41:24 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -301,6 +301,11 @@ class PMCanvas:
                         from PIL import PngImagePlugin
                     except ImportError:
                         import PngImagePlugin
+                elif fmt=='BMP':
+                    try:
+                        from PIL import BmpImagePlugin
+                    except ImportError:
+                        import BmpImagePlugin
             elif fmt in ('JPG','JPEG'):
                 fmt = 'JPEG'
             else:
