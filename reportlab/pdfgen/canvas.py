@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.80 2001/06/11 10:30:27 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.80 2001/06/11 10:30:27 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.81 2001/06/21 13:29:21 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.81 2001/06/21 13:29:21 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -1179,7 +1179,6 @@ class Canvas:
                 else:
                     if not pdfutils.cachedImageExists(image):
                         if not zlib:
-                            print 'zlib not available'
                             return
                         if not PIL_Image: return
                         pdfutils.cacheImageFile(image)
@@ -1198,7 +1197,6 @@ class Canvas:
             #PIL Image
             #work out all dimensions
             if not zlib:
-                print 'zlib not available'
                 return
             myimage = image.convert('RGB')
             imgwidth, imgheight = myimage.size
@@ -1249,7 +1247,6 @@ class Canvas:
         is next called."""
         if pageCompression is None: pageCompression = rl_config.pageCompression
         if pageCompression and not zlib:
-            print 'zlib not available'
             self._pageCompression = 0
         else:
             self._pageCompression = pageCompression
