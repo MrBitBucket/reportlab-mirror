@@ -1,10 +1,12 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/customshapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/pythonpoint/customshapes.py,v 1.2 2001/08/29 12:42:37 dinu_gherman Exp $
-__version__=''' $Id: customshapes.py,v 1.2 2001/08/29 12:42:37 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/tools/pythonpoint/customshapes.py,v 1.3 2001/11/22 09:51:06 dinu_gherman Exp $
+__version__=''' $Id: customshapes.py,v 1.3 2001/11/22 09:51:06 dinu_gherman Exp $ '''
+
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
+
 __doc__="""
 This demonstrates a custom shape for use with the <customshape> tag.
 The shape must fulfil a very simple interface, which may change in
@@ -25,16 +27,17 @@ Then, it will call
     
 Thus your object must be fully defined by the constructor.
 For this one, we pass three argumenyts: x, y and scale.
-This does a five-tile jigsaw over which words can be overlaid; based
-on work done for a customer's presentation.
-
-
+This does a five-tile jigsaw over which words can be overlaid;
+based on work done for a customer's presentation.
 """
+
 
 import reportlab.pdfgen.canvas
 from reportlab.lib import colors
-## custom shape for use with PythonPoint.
-        
+from reportlab.lib.corp import RL_CorpLogo
+from reportlab.graphics.shapes import Drawing
+
+## custom shape for use with PythonPoint.        
 
 class Jigsaw:
     """This draws a jigsaw patterm.  By default it is centred on 0,0
@@ -50,6 +53,7 @@ class Jigsaw:
         self.x = x
         self.y = y
         self.scale = scale
+
 
     def drawOn(self, canvas):
         canvas.saveState()
@@ -69,6 +73,7 @@ class Jigsaw:
 
         canvas.restoreState()
 
+
     def curveThrough(self, path, pointlist):
         """Helper to curve through set of control points."""
         assert len(pointlist) % 3 == 1, "No. of points must be 3n+1 for integer n"
@@ -79,6 +84,7 @@ class Jigsaw:
             p1, p2, p3 = pointlist[idx:idx+3]
             path.curveTo(p1[0], p1[1], p2[0], p2[1], p3[0], p3[1])
             idx = idx + 3
+
             
     def drawShape(self, canvas, controls, color):
         """Utlity to draw a closed shape through a list of control points;
@@ -109,7 +115,6 @@ class Jigsaw:
                 (30,15),(35,10),(40,10),
                 (45,10),(50,5),(50,0),
 
-
                 #bottom right edge
                 (50, -5), (45,-10), (40,-10),
                 (35,-10), (30,-15), (30, -20),
@@ -135,6 +140,7 @@ class Jigsaw:
 
         self.drawShape(canvas, controls, colors.yellow)
 
+
     def drawTopLeft(self, canvas):
         controls = [(-100,70),
             (-100,69),(-100,1),(-100,0),
@@ -158,6 +164,7 @@ class Jigsaw:
             (-1,70),(-99,70),(-100,70)
             ]
         self.drawShape(canvas, controls, colors.teal)
+
 
     def drawBottomLeft(self, canvas):
         
@@ -257,8 +264,28 @@ class Jigsaw:
             (91, 0), (99, 0), (100, 0)
                     ]
         
-        self.drawShape(canvas, controls, colors.magenta)
-        
+        self.drawShape(canvas, controls, colors.magenta)        
+
+
+class Logo:
+    """This draws a ReportLab Logo."""
+
+    def __init__(self, x, y, width, height):
+        logo = RL_CorpLogo()
+        logo.x = x
+        logo.y = y
+        logo.width = width
+        logo.height = height
+        self.logo = logo
+
+    def drawOn(self, canvas):
+        logo = self.logo
+        x, y = logo.x, logo.y
+        w, h = logo.width, logo.height
+    	D = Drawing(w, h)
+        D.add(logo)
+        D.drawOn(canvas, 0, 0)
+
 
 def run():
     c = reportlab.pdfgen.canvas.Canvas('customshape.pdf')
@@ -267,6 +294,6 @@ def run():
     J.drawOn(c)
     c.save()
 
+
 if __name__ == '__main__':
     run()
-    
