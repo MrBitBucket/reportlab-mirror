@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.55 2003/11/28 17:32:15 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.56 2003/11/29 17:13:01 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.55 2003/11/28 17:32:15 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.56 2003/11/29 17:13:01 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -393,8 +393,9 @@ class LinePlot3D(LinePlot):
         #   bubbleMax = xA._bubbleMax
 
         labelFmt = self.lineLabelFormat
+        positions = self._positions
 
-        P = range(len(self._positions))
+        P = range(len(positions))
         if self.reversePlotOrder: P.reverse()
         inFill = getattr(self,'_inFill',None)
         assert not inFill, "inFill not supported for 3d yet"
@@ -409,14 +410,33 @@ class LinePlot3D(LinePlot):
         theta_y = self.theta_y
         from linecharts import _FakeGroup
         F = _FakeGroup()
-        from utils3d import _make_3d_line_info
-        tileWidth = getattr(self,'_3d_tilewidth',None)
-        if not tileWidth and self.xValueAxis.style!='parallel_3d': tileWidth = 1
+
+        from utils3d import _make_3d_line_info, find_intersections
+        if self.xValueAxis.style!='parallel_3d':
+            tileWidth = getattr(self,'_3d_tilewidth',1)
+            if getattr(self,'_find_intersections',None):
+                from copy import copy
+                fpositions = map(copy,positions)
+                I = find_intersections(fpositions,small=tileWidth)
+                ic = None
+                for i,j,x,y in I:
+                    if ic!=i:
+                        ic = i
+                        jc = 0
+                    else:
+                        jc+=1
+                    fpositions[i].insert(j+jc,(x,y))
+                tileWidth = None
+            else:
+                fpositions = positions
+        else:
+            tileWidth = None
+            fpositions = positions
 
         # Iterate over data rows.
         styleCount = len(self.lines)
         for rowNo in P:
-            row = self._positions[rowNo]
+            row = positions[rowNo]
             n = len(row)
             rowStyle = self.lines[rowNo % styleCount]
             rowColor = rowStyle.strokeColor
@@ -434,12 +454,13 @@ class LinePlot3D(LinePlot):
             # Iterate over data columns.
             if self.joinedLines:
                 if n:
-                    x0, y0 = row[0]
-                    for colNo in xrange(1,n):
-                        x1, y1 = row[colNo]
+                    frow = fpositions[rowNo]
+                    x0, y0 = frow[0]
+                    for colNo in xrange(1,len(frow)):
+                        x1, y1 = frow[colNo]
                         _make_3d_line_info( F, x0, x1, y0, y1, z0, z1,
                                 theta_x, theta_y,
-                                rowColor, fillColorShaded=None, xdelta=tileWidth,
+                                rowColor, fillColorShaded=None, tileWidth=tileWidth,
                                 strokeColor=None, strokeWidth=None, strokeDashArray=None,
                                 shading=0.1)
                         x0, y0 = x1, y1

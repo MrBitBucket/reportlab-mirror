@@ -51,52 +51,10 @@ class _YStrip:
 def _ystrip_poly( x0, x1, y0, y1, xoff, yoff):
     return [x0,y0,x0+xoff,y0+yoff,x1+xoff,y1+yoff,x1,y1]
 
-def _draw_3d_line( G, x0, x1, y0, y1,
-                    xdepth, ydepth,
-                    fillColor, fillColorShaded=None, xdelta=1, shading=0.1):
-    depth_slope  = xdepth==0 and 1e150 or -ydepth/float(xdepth)
-    if not hasattr(y0,'__getitem__'): y0 = (y0,)
-    n = len(y0)
-    if not hasattr(y1,'__getitem__'): y1 = (y1,)
-    if not hasattr(fillColor,'__getitem__'): fillColor = (fillColor,)
-    if fillColorShaded is None: fillColorShaded = n*[None]
-    elif not hasattr(fillColorShaded,'__getitem__'): fillColorShaded = (fillColorShaded,)
-
-    I = xrange(n)
-    x = float(x1-x0)
-    slope = x==0 and n*[1e150] or map(lambda y1,y0,x=x: (y1-y0)/x,y1,y0)
-
-    def F(x,i, slope=slope, y0=y0, x0=x0):
-        return float((x-x0)*slope[i]+y0[i])
-
-    tileStrokeWidth = 0.6
-    if x0>=x1: X=[(x0,x0)]
-    else:
-        if xdelta is None:
-            X = [(x0,x1)]
-        else:
-            x = x0
-            X = []
-            while x<=x1:
-                xn = x+xdelta
-                X.append((x,xn))
-                x = xn
-            if X[-1][0]==x1: del X[-1]
-            else: X[-1][1] = x1
-            tileStrokeWidth *= xdelta
-    Y = n*[None]
-    for x in X:
-        for i in I:
-            Y[i] = _YStrip(F(x[0],i),F(x[1],i),slope[i],fillColor[i],fillColorShaded[i],shading)
-        Y.sort(_ystrip_cmp)
-        for y in Y:
-            c = y.slope>depth_slope and y.fillColorShaded or y.fillColor
-            G.add(Polygon(_ystrip_poly(x[0], x[1], y.y0, y.y1, xdepth, ydepth),
-                fillColor = c, strokeColor=c, strokeWidth=tileStrokeWidth))
 
 def _make_3d_line_info( G, x0, x1, y0, y1, z0, z1,
                     theta_x, theta_y,
-                    fillColor, fillColorShaded=None, xdelta=1,
+                    fillColor, fillColorShaded=None, tileWidth=1,
                     strokeColor=None, strokeWidth=None, strokeDashArray=None,
                     shading=0.1):
     zwidth = abs(z1-z0)
@@ -107,36 +65,38 @@ def _make_3d_line_info( G, x0, x1, y0, y1, z0, z1,
     x = float(x1-x0)
     slope = x==0 and 1e150 or (y1-y0)/x
 
-    def F(x, slope=slope, y0=y0, x0=x0):
-        return float((x-x0)*slope+y0)
-
-    tileStrokeWidth = 0.6
-    if x0>=x1: X=[(x0,x0)]
-    else:
-        if xdelta is None:
-            X = [(x0,x1)]
-        else:
-            x = x0
-            X = []
-            while x<=x1:
-                xn = x+xdelta
-                X.append([x,xn])
-                x = xn
-            if X[-1][0]==x1: del X[-1]
-            else: X[-1][1] = x1
-            tileStrokeWidth *= xdelta
-    a = G.add
     c = slope>depth_slope and _getShaded(fillColor,fillColorShaded,shading) or fillColor
     zy0 = z0*theta_y
     zx0 = z0*theta_x
-    for x in X:
-        y_0 = F(x[0])+zy0
-        y_1 = F(x[1])+zy0
-        x_0 = x[0]+zx0
-        x_1 = x[1]+zx0
+
+    tileStrokeWidth = 0.6
+    if tileWidth is None:
+        D = [(x1,y1)]
+    else:
+        T = ((y1-y0)**2+(x1-x0)**2)**0.5
+        tileStrokeWidth *= tileWidth
+        if T<tileWidth:
+            D = [(x1,y1)]
+        else:
+            n = int(T/float(tileWidth))+1
+            dx = float(x1-x0)/n
+            dy = float(y1-y0)/n
+            D = []
+            a = D.append
+            for i in xrange(1,n):
+                a((x0+dx*i,y0+dy*i))
+
+    a = G.add
+    x_0 = x0+zx0
+    y_0 = y0+zy0
+    for x,y in D:
+        x_1 = x+zx0
+        y_1 = y+zy0
         P = Polygon(_ystrip_poly(x_0, x_1, y_0, y_1, xdepth, ydepth),
                     fillColor = c, strokeColor=c, strokeWidth=tileStrokeWidth)
         a((0,z0,z1,x_0,y_0,P))
+        x_0 = x_1
+        y_0 = y_1
 
 from math import pi, sin, cos
 _pi_2 = pi*0.5
@@ -159,6 +119,104 @@ def _360(a):
     if a<-1e-6: a += 360
     return a
 
+_ZERO = 1e-8
+_ONE = 1-_ZERO
+class _Segment:
+    def __init__(self,s,i,data):
+        S = data[s]
+        x0 = S[i-1][0]
+        y0 = S[i-1][1]
+        x1 = S[i][0]
+        y1 = S[i][1]
+        if x1<x0:
+            x0,y0,x1,y1 = x1,y1,x0,y0
+        # (y-y0)*(x1-x0) = (y1-y0)*(x-x0)
+        # (x1-x0)*y + (y0-y1)*x = y0*(x1-x0)+x0*(y0-y1)
+        # a*y+b*x = c
+        self.a = float(x1-x0)
+        self.b = float(y1-y0)
+        self.x0 = x0
+        self.x1 = x1
+        self.y0 = y0
+        self.y1 = y1
+        self.series = s
+        self.i = i
+        self.s = s
+
+    def __str__(self):
+        return '[(%s,%s),(%s,%s)]' % (self.x0,self.y0,self.x1,self.y1)
+
+    __repr__ = __str__
+
+    def intersect(self,o,I):
+        '''try to find an intersection with _Segment o
+        '''
+        x0 = self.x0
+        ox0 = o.x0
+        assert x0<=ox0
+        if ox0>self.x1: return 1
+        if o.s==self.s and o.i in (self.i-1,self.i+1): return
+        a = self.a
+        b = self.b
+        oa = o.a
+        ob = o.b
+        det = ob*a - oa*b
+        if -1e-8<det<1e-8: return
+        dx = x0 - ox0
+        dy = self.y0 - o.y0
+        u = (oa*dy - ob*dx)/det
+        ou = (a*dy - b*dx)/det
+        if u<0 or u>1 or ou<0 or ou>1: return
+        x = x0 + u*a
+        y = self.y0 + u*b
+        if _ZERO<u<_ONE:
+            t = self.s,self.i,x,y
+            if t not in I: I.append(t)
+        if _ZERO<ou<_ONE:
+            t = o.s,o.i,x,y
+            if t not in I:  I.append(t)
+
+def _segCmp(a,b):
+    return cmp((a.x0,a.x1,a.y0,a.y1,a.s,a.i),(b.x0,b.x1,b.y0,b.y1,b.s,b.i))
+
+def find_intersections(data,small=0):
+    '''
+    data is a sequence of series
+    each series is a list of (x,y) coordinates
+    where x & y are ints or floats
+
+    find_intersections returns a sequence of 4-tuples
+        i, j, x, y
+    
+    where i is a data index j is an insertion position for data[i]
+    and x, y are coordinates of an intersection of series data[i]
+    with some other series. If correctly implemented we get all such
+    intersections. We don't count endpoint intersections and consider
+    parallel lines as non intersecting (even when coincident).
+    We ignore segments that have an estimated size less than small.
+    '''
+
+    #find all line segments
+    S = []
+    a = S.append
+    for s in xrange(len(data)):
+        ds = data[s]
+        if not ds: continue
+        n = len(ds)
+        if n==1: continue
+        for i in xrange(1,n):
+            seg = _Segment(s,i,data)
+            if seg.a+abs(seg.b)>=small: a(seg)
+    S.sort(_segCmp)
+    I = []
+    n = len(S)
+    for i in xrange(0,n-1):
+        s = S[i]
+        for j in xrange(i+1,n):
+            if s.intersect(S[j],I)==1: break
+    I.sort()
+    return I
+
 if __name__=='__main__':
     from reportlab.graphics.shapes import Drawing
     from reportlab.lib.colors import lightgrey, pink
@@ -166,6 +224,10 @@ if __name__=='__main__':
     _draw_3d_bar(D, 10, 20, 10, 50, 5, 5, fillColor=lightgrey, strokeColor=pink)
     _draw_3d_bar(D, 30, 40, 10, 45, 5, 5, fillColor=lightgrey, strokeColor=pink)
 
-    #_draw_3d_line(D, 50, 55, 10, 45, 5, 5, fillColor=lightgrey)
-    #_draw_3d_line(D, 55, 60, 45, 10, 5, 5, fillColor=lightgrey)
     D.save(formats=['pdf'],outDir='.',fnRoot='_draw_3d_bar')
+
+    print find_intersections([[(0,0.5),(1,0.5),(0.5,0),(0.5,1)],[(2666666667,0.4),(0.1,0.4),(0.1,0.2),(0,0),(1,1)],[(0,1),(0.4,0.1),(1,0.1)]])
+    print find_intersections([[(0.1, 0.2), (0.1, 0.4)], [(0, 1), (0.4, 0.1)]])
+    print find_intersections([[(0.2, 0.4), (0.1, 0.4)], [(0.1, 0.8), (0.4, 0.1)]])
+    print find_intersections([[(0,0),(1,1)],[(0.4,0.1),(1,0.1)]])
+    print find_intersections([[(0,0.5),(1,0.5),(0.5,0),(0.5,1)],[(0,0),(1,1)],[(0.1,0.8),(0.4,0.1),(1,0.1)]])
