@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.29 2002/03/27 13:34:43 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.29 2002/03/27 13:34:43 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.30 2002/04/12 13:54:18 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.30 2002/04/12 13:54:18 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -155,6 +155,18 @@ def _className(self):
 		return name
 	except AttributeError:
 		return str(self)
+
+def open_for_read(name,mode='b'):
+	'''attempt to open a file or URL for reading'''
+	import urllib
+	try:
+		t, o = urllib.splittype(name)
+		if not t or t=='file': raise ValueError
+		o = urllib.urlopen(name)
+		import StringIO
+		return StringIO.StringIO(o.read())
+	except:
+		return open(name,'r'+mode)
 
 class DebugMemo:
 	'''Intended as a simple report back encapsulator
