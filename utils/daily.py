@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/daily.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/daily.py,v 1.43 2001/05/26 13:13:24 rgbecker Exp $
-__version__=''' $Id: daily.py,v 1.43 2001/05/26 13:13:24 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/utils/daily.py,v 1.44 2001/10/05 11:22:07 rgbecker Exp $
+__version__=''' $Id: daily.py,v 1.44 2001/10/05 11:22:07 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -114,7 +114,7 @@ def cvs_checkout(d):
 	else:
 		do_exec(cvs+' co docs')
 		dst = os.path.join(d,"reportlab","docs")
-		do_exec("mkdir %s" % dst)
+		if not os.path.isdir(dst): do_exec("mkdir %s" % dst)
 
 		P=os.path.join(os.environ['HOME'],'python_stuff','lib')
 		PP=os.path.join(P,'PIL')
@@ -146,7 +146,6 @@ def cvs_checkout(d):
 		os.chdir(d)
 		do_exec('cp docs/graphguide/*.pdf %s' % htmldir)
 		do_exec('mv docs/graphguide/*.pdf %s' % dst)
-
 
 		recursive_rmdir('docs')
 		pyc_remove(cvsdir)
