@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.9  2000/05/16 16:15:16  rgbecker
+#	Changes related to removal of SimpleFlowDocument
+#
 #	Revision 1.8  2000/05/16 15:58:27  rgbecker
 #	Fixed font setting bug
-#
+#	
 #	Revision 1.7  2000/05/16 14:28:55  rgbecker
 #	Fixes/Changes to get testplatypus to work with new framework
 #	
@@ -55,12 +58,12 @@
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.8 2000/05/16 15:58:27 rgbecker Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.9 2000/05/16 16:15:16 rgbecker Exp $ '''
 import string
 import types
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus.paraparser import ParaParser, ParaFrag
-from reportlab.platypus.layout import Flowable
+from layout import Flowable
 from reportlab.lib.colors import Color
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from copy import deepcopy

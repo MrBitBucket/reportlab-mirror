@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.26  2000/05/16 16:15:16  rgbecker
+#	Changes related to removal of SimpleFlowDocument
+#
 #	Revision 1.25  2000/05/15 13:36:11  rgbecker
 #	Splitting changes
-#
+#	
 #	Revision 1.24  2000/05/12 12:52:00  rgbecker
 #	Fixes to BasicFrame split method
 #	
@@ -104,7 +107,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.25 2000/05/15 13:36:11 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.26 2000/05/16 16:15:16 rgbecker Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -542,76 +545,3 @@ class SimpleFlowDocument:
 			#print 'drew page %d, %d objects remaining' % (self.page, len(flowables))
 
 		canv.save()
-	##########################################################
-	##
-	##	 testing
-	##
-	##########################################################
-
-def randomText():
-	#this may or may not be appropriate in your company
-	from random import randint, choice
-
-	RANDOMWORDS = ['strategic','direction','proactive',
-	'reengineering','forecast','resources',
-	'forward-thinking','profit','growth','doubletalk',
-	'venture capital','IPO']
-
-	sentences = 5
-	output = ""
-	for sentenceno in range(randint(1,5)):
-		output = output + 'Blah'
-		for wordno in range(randint(10,25)):
-			if randint(0,4)==0:
-				word = choice(RANDOMWORDS)
-			else:
-				word = 'blah'
-			output = output + ' ' +word
-		output = output+'.'
-	return output
-
-def myFirstPage(canvas, doc):
-	canvas.saveState()
-	canvas.setStrokeColor(red)
-	canvas.setLineWidth(5)
-	canvas.line(66,72,66,PAGE_HEIGHT-72)
-	canvas.setFont('Times-Bold',24)
-	canvas.drawString(108, PAGE_HEIGHT-108, "PLATYPUS")
-	canvas.setFont('Times-Roman',12)
-	canvas.drawString(4 * inch, 0.75 * inch, "First Page")
-	canvas.restoreState()
-
-def myLaterPages(canvas, doc):
-	#canvas.drawImage("snkanim.gif", 36, 36)
-	canvas.saveState()
-	canvas.setStrokeColor(red)
-	canvas.setLineWidth(5)
-	canvas.line(66,72,66,PAGE_HEIGHT-72)
-	canvas.setFont('Times-Roman',12)
-	canvas.drawString(4 * inch, 0.75 * inch, "Page %d" % doc.page)
-	canvas.restoreState()
-
-def run():
-	objects_to_draw = []
-	from reportlab.lib.styles import ParagraphStyle
-	from reportlab.platypus.paragraph import Paragraph
-
-	#need a style
-	normal = ParagraphStyle('normal')
-	normal.firstLineIndent = 18
-	normal.spaceBefore = 6
-	import random
-	for i in range(15):
-		height = 0.5 + (2*random.random())
-		box = XBox(6 * inch, height * inch, 'Box Number %d' % i)
-		objects_to_draw.append(box)
-		para = Paragraph(randomText(), normal)
-		objects_to_draw.append(para)
-
-	doc = SimpleFlowDocument('platypus.pdf',DEFAULT_PAGE_SIZE)
-	doc.onFirstPage = myFirstPage
-	doc.onNewPage = myLaterPages
-	doc.build(objects_to_draw)
-
-if __name__ == '__main__':
-	run()

@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.9  2000/05/16 16:15:16  rgbecker
+#	Changes related to removal of SimpleFlowDocument
+#
 #	Revision 1.8  2000/04/26 11:07:15  andy_robinson
 #	Tables changed to use reportlab.lib.colors instead of
 #	the six hard-coded color strings there previously.
-#
+#	
 #	Revision 1.7  2000/04/14 12:17:05  rgbecker
 #	Splitting layout.py
 #	
@@ -53,13 +56,13 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.8 2000/04/26 11:07:15 andy_robinson Exp $ '''
+__version__=''' $Id: tables.py,v 1.9 2000/05/16 16:15:16 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
 color and weight of the lines (if any), and the font, alignment and padding of the text.
 """
-from reportlab.platypus import layout
+from reportlab.platypus.doctemplate import *
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet
 from reportlab.lib import colors
@@ -92,7 +95,7 @@ class TableStyle:
     def getCommands(self):
         return self._cmds
         
-class Table(layout.Flowable):
+class Table(Flowable):
     def __init__(self, colWidths, rowHeights, data):
         if not colWidths:
             raise ValueError, "Table must have at least 1 column"
@@ -328,13 +331,12 @@ def test():
         ('Key Ring', 0,0,0,0,0,0,1,0,0,0,2,13),
         ('Hats', 893, 912, '1,212', 643, 789, 159, 888, '1,298', 832, 453, '1,344','2,843')
         )
-    doc = layout.SimpleFlowDocument('testtables.pdf', layout.DEFAULT_PAGE_SIZE, 1)
     styleSheet = getSampleStyleSheet()
     lst = []
     lst.append(Paragraph("Tables", styleSheet['Heading1']))
     lst.append(Paragraph(__doc__, styleSheet['BodyText']))
     lst.append(Paragraph("The Tables (shown in different styles below) were created using the following code:", styleSheet['BodyText']))
-    lst.append(layout.Preformatted("""
+    lst.append(Preformatted("""
     colwidths = (50, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32)
     rowheights = (24, 16, 16, 16, 16)
     data = (
@@ -352,7 +354,7 @@ def test():
     You can then give the Table a TableStyle object to control its format. The first TableStyle used was
     created as follows:
     """, styleSheet['BodyText']))
-    lst.append(layout.Preformatted("""
+    lst.append(Preformatted("""
 GRID_STYLE = TableStyle(
     [('GRID', (0,0), (-1,-1), 0.25, colors.black),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
@@ -396,7 +398,7 @@ GRID_STYLE = TableStyle(
     """, styleSheet['BodyText']))
     t = Table(colwidths, rowheights,  data)
     t.setStyle(GRID_STYLE)
-    lst.append(layout.PageBreak())
+    lst.append(PageBreak())
     lst.append(Paragraph("This is GRID_STYLE\n", styleSheet['BodyText']))
     lst.append(t)
     
@@ -407,7 +409,7 @@ GRID_STYLE = TableStyle(
     lst.append(Paragraph("""
     It was created as follows:
     """, styleSheet['BodyText']))
-    lst.append(layout.Preformatted("""
+    lst.append(Preformatted("""
 BOX_STYLE = TableStyle(
     [('BOX', (0,0), (-1,-1), 0.50, colors.black),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
@@ -421,7 +423,7 @@ BOX_STYLE = TableStyle(
     lst.append(Paragraph("""
     It was created as follows:
     """, styleSheet['BodyText']))
-    lst.append(layout.Preformatted("""
+    lst.append(Preformatted("""
 LABELED_GRID_STYLE = TableStyle(
     [('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
      ('BOX', (0,0), (-1,-1), 2, colors.black),
@@ -430,7 +432,7 @@ LABELED_GRID_STYLE = TableStyle(
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
     """, styleSheet['Code']))
-    lst.append(layout.PageBreak())
+    lst.append(PageBreak())
     
     t = Table(colwidths, rowheights,  data)
     t.setStyle(COLORED_GRID_STYLE)
@@ -439,7 +441,7 @@ LABELED_GRID_STYLE = TableStyle(
     lst.append(Paragraph("""
     It was created as follows:
     """, styleSheet['BodyText']))
-    lst.append(layout.Preformatted("""
+    lst.append(Preformatted("""
 COLORED_GRID_STYLE = TableStyle(
     [('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
      ('BOX', (0,0), (-1,-1), 2, colors.red),
@@ -456,7 +458,7 @@ COLORED_GRID_STYLE = TableStyle(
     lst.append(Paragraph("""
     It was created as follows:
     """, styleSheet['BodyText']))
-    lst.append(layout.Preformatted("""
+    lst.append(Preformatted("""
 LIST_STYLE = TableStyle(
     [('LINEABOVE', (0,0), (-1,0), 2, colors.green),
      ('LINEABOVE', (0,1), (-1,-1), 0.25, colors.black),
@@ -480,7 +482,7 @@ LIST_STYLE = TableStyle(
     lst.append(Paragraph("""
     It was created as follows:
     """, styleSheet['BodyText']))
-    lst.append(layout.Preformatted("""
+    lst.append(Preformatted("""
    ts = TableStyle(
     [('LINEABOVE', (0,0), (-1,0), 2, colors.green),
      ('LINEABOVE', (0,1), (-1,-1), 0.25, colors.black),
@@ -490,7 +492,7 @@ LIST_STYLE = TableStyle(
      ('BACKGROUND', (0,0), (-1,0), colors.Color(0,0.7,0.7))]
     )
     """, styleSheet['Code']))
-    doc.build(lst)
+    SimpleDocTemplate('testtables.pdf', DEFAULT_PAGE_SIZE, showBoundary=1).build(lst)
 
 if __name__ == '__main__':
     test()
