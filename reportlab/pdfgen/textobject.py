@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/textobject.py?cvsroot=reportlab
 #$Header: /tmp/reportlab/reportlab/pdfgen/textobject.py,v 1.30 2004/06/10 00:43:21 andy_robinson Exp $
-__version__=''' $Id: textobject.py,v 1.30 2004/06/10 00:43:21 andy_robinson Exp $ '''
+__version__=''' $Id$ '''
 __doc__="""
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -297,8 +297,7 @@ class PDFTextObject:
     def _formatText(self, text):
         "Generates PDF text output operator(s)"
         #convert to current doc encoding
-        if self._canvas.encoding is not None:
-            text = self._canvas._convertText(text)
+        text = self._canvas._convertText(text)
 
         if self._dynamicFont:
             #it's a truetype font and should be utf8.  If an error is raised,

@@ -1275,24 +1275,24 @@ class Canvas:
 
     def _convertText(self, text):
         "Convert to correct encoding for current font"
-        #print 'convert %s from %s to %s' % (repr(text), self.encoding, self._fontencoding)
-        if self.encoding is None:
+        if type(text) is type(u''):
+            # If text is unicode always convert
+            uni = text
+        elif self.encoding is None:
+            # If no encoding specified, no conversion
             return text
-        elif self.encoding == 'MacRomanEncoding':
-            #give up, codecs cannot handle it
-            return text
-        elif type(text) is type(u''):
-            return text.encode(self._fontencoding, self.encodingErrorMode)
         else:
-            #ordinary string, go to unicode
+            # Otherwise assume in specified encoding and decode
             if self.encoding == 'WinAnsiEncoding':
                 docEnc = 'cp1252'
+            elif self.encoding == 'MacRomanEncoding':
+                docEnc = 'mac_roman'
             else:
                 docEnc = self.encoding
             #uni = text.decode(docEnc)  #hack #won't work in 2.1
-            uni = unicode(text,docEnc,getattr(self,'decodingErrorMode',self.encodingErrorMode)) #works in 2.1
-            return uni.encode(self._fontencoding, self.encodingErrorMode)
-    
+            uni = unicode(text, docEnc, getattr(self,'decodingErrorMode',self.encodingErrorMode)) #works in 2.1
+        return uni.encode(self._fontencoding, self.encodingErrorMode)
+
 
     def setFont(self, psfontname, size, leading = None):
         """Sets the font.  If leading not specified, defaults to 1.2 x
