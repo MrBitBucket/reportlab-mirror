@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.8 2001/05/25 13:53:30 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.9 2001/06/22 08:23:11 andy_robinson Exp $
 
 """Generate documentation of graphical Python objects.
 
@@ -19,6 +19,7 @@ import sys, os, re, types, string, getopt, pickle, copy, time
 sys.path.insert(0, '.')
 import StringIO, pprint
 from string import find, join, split, replace, expandtabs, rstrip
+import traceback
 
 from reportlab.lib.docpy import PackageSkeleton0, ModuleSkeleton0
 from reportlab.lib.docpy import DocBuilder0, PdfDocBuilder0, HtmlDocBuilder0
@@ -61,6 +62,8 @@ except ImportError, errMsg:
     if str(errMsg)!='No module named renderPM':
         pass
 
+
+VERBOSE = 1
 
 ####################################################################
 # 
@@ -145,7 +148,13 @@ class MyTemplate(BaseDocTemplate):
                     c.addOutlineEntry(title, key, level=lev, closed=isClosed)
                     c.showOutline()
                 except:
-                    pass
+                    if VERBOSE:
+                        # AR hacking in exception handlers
+                        print 'caught exception in MyTemplate.afterFlowable with heading text %s' % f.text
+                        traceback.print_exc()
+                    else:
+                        pass
+                    
 
 
 ####################################################################
@@ -299,7 +308,8 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
 
     def beginClass(self, name, doc, bases):
         "Append a graphic demo of a widget at the end of a class."
-        
+        if VERBOSE:
+            print 'GraphPdfDocBuilder.beginClass(%s...)' % name
         aClass = eval('self.skeleton.moduleSpace.' + name)
         if issubclass(aClass, Widget):
             if self.shouldDisplayModule:
@@ -381,6 +391,8 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         if name[:6] != 'sample':
             return
         
+        if VERBOSE:
+            print 'GraphPdfDocBuilder.endFunction(%s...)' % name
         PdfDocBuilder0.endFunction(self, name, doc, sig)    
         aFunc = eval('self.skeleton.moduleSpace.' + name)
         drawing = aFunc()
@@ -422,7 +434,11 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
             self.story.append(flo)
             self.story.append(Spacer(6,6))
         except:
-            pass
+            if VERBOSE:
+                print 'caught exception in _showDrawingDemo'
+                traceback.print_exc()
+            else:
+                pass
 
 
     def _showWidgetDemo(self, widget):
@@ -439,8 +455,11 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
             self.story.append(flo)
             self.story.append(Spacer(6,6))
         except:
-            pass
-
+            if VERBOSE:
+                print 'caught exception in _showWidgetDemo'
+                traceback.print_exc()
+            else:
+                pass
 
     def _showWidgetDemoCode(self, widget):
         """Show a demo code of the widget."""
@@ -615,7 +634,11 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
             self.outLines.append('<H3>Demo</H3>')
             self.outLines.append(makeHtmlInlineImage(path))
         except:
-            pass
+            if VERBOSE:
+                print 'caught exception in GraphHTMLDocBuilder._showDrawingDemo'
+                traceback.print_exc()
+            else:
+                pass
 
 
     def _showWidgetDemo(self, widget):
@@ -633,7 +656,12 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
             self.outLines.append('<H3>Demo</H3>')
             self.outLines.append(makeHtmlInlineImage(path))
         except:
-            pass
+            if VERBOSE:
+                
+                print 'caught exception in GraphHTMLDocBuilder._showWidgetDemo'
+                traceback.print_exc()
+            else:
+                pass
 
 
     def _showWidgetDemoCode(self, widget):
