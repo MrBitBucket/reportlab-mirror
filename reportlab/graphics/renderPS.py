@@ -1,4 +1,4 @@
-__version__=''' $Id: renderPS.py,v 1.2 2001/01/30 00:29:45 andy_robinson Exp $ '''
+__version__=''' $Id: renderPS.py,v 1.3 2001/02/06 00:50:53 andy_robinson Exp $ '''
 import string, cStringIO, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str
@@ -522,10 +522,10 @@ class PSCanvas:
         self.code.append('> % end of image data') # > is EOD for hex encoded filterfor clarity
         self.code.append('grestore') # return coordinates to normal
 
-# pingopdf - draws them onto a canvas
+# renderpdf - draws them onto a canvas
 """Usage:
-    from pingo import pingoPS
-    pingoPS.draw(drawing, canvas, x, y)
+    from reportlab.graphics import renderPS
+    renderPS.draw(drawing, canvas, x, y)
 Execute the script to see some test drawings."""
 from shapes import *
 from renderbase import Renderer

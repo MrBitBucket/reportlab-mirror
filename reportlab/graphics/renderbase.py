@@ -100,6 +100,7 @@ class StateTracker:
         reverseDelta = {}
         #print 'pop()...'
         for key, curValue in lastDelta.items():
+            #print '   key=%s, value=%s' % (key, curValue)
             prevValue = newState[key]
             if prevValue <> curValue:
                 #print '    state popping "%s"="%s"' % (key, curValue)
@@ -155,8 +156,10 @@ class Renderer:
         """This is the top level function, which
         draws the drawing at the given location.
         The recursive part is handled by drawNode."""
+        print 'enter Renderer.draw()'
         self.undefined("draw")
-
+        print 'enter Renderer.draw()'
+        
     def drawNode(self, node):
         """This is the recursive method called for each node
         in the tree"""

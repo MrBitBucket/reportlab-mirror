@@ -175,7 +175,11 @@ class VerticalBarChart(Widget):
                     raise Exception, "Unknown formatter type %s, expected string or function" % labelFmt
                 if labelText:
                     label = self.barLabels[(rowNo, colNo)]
-                    label.setOrigin(x + 0.5*width, y + height)
+                    #hack to make sure labels are outside the bar
+                    if height > 0:
+                        label.setOrigin(x + 0.5*width, y + height + 3)
+                    else:
+                        label.setOrigin(x + 0.5*width, y + height - 3 - self.barLabels.fontSize)
                     label.setText(labelText)
                     g.add(label)
         return g
