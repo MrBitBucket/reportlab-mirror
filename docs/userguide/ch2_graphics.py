@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch2_graphics.py,v 1.16 2001/08/11 14:35:52 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch2_graphics.py,v 1.17 2001/10/05 01:07:18 andy_robinson Exp $
 from rl_doc_utils import *
 
 heading1("Graphics and Text with $pdfgen$")
@@ -669,7 +669,7 @@ arbitrary fonts in your documents. Just van Rossum has kindly
 donated a font named <i>LettErrorRobot-Chrome</i> which we may
 use for testing and/or documenting purposes (and which you may
 use as well). It comes bundled with the ReportLab distribution in the
-directory $reportlab/test$.
+directory $reportlab/fonts$.
 """)
 
 disc("""
@@ -677,7 +677,7 @@ Right now font-embedding relies on font description files in
 the Adobe AFM and PFB format. The former is an ASCII file and
 contains font metrics information while the latter is a
 binary file that describes the shapes of the font. The
-$reportlab/test$ directory contains the files $'LeERC___.AFM'$
+$reportlab/fonts$ directory contains the files $'LeERC___.AFM'$
 and $'LeERC___.PFB'$ that are used as an example font.
 """)
 
@@ -698,7 +698,7 @@ reportlab.rl_config.warnOnMissingFontGlyphs = 0
 
 import os
 import reportlab.test
-folder = os.path.dirname(reportlab.test.__file__)
+folder = os.path.dirname(reportlab.__file__) + os.sep + 'fonts'
 afmFile = os.path.join(folder, 'LeERC___.AFM')
 pfbFile = os.path.join(folder, 'LeERC___.PFB')
 
