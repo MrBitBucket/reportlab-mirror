@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "$Revision: 1.6 $"
+#define VERSION "$Revision: 1.7 $"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -372,6 +372,7 @@ static	void _vpath_reverse(ArtVpath *p)
 		q = p;
 		}
 }
+
 static void _gstate_pathFill(gstateObject* self,int endIt, int vpReverse)
 {
 	ArtVpath*	vpath;
@@ -621,6 +622,91 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 	return Py_None;
 }
 
+static PyObject* _fmtPathElement(ArtBpath *p, char* name, int n)
+{
+	PyObject	*P = PyTuple_New(n+1);
+	PyTuple_SET_ITEM(P, 0, PyString_FromString(name));
+	if(n==6){
+		PyTuple_SET_ITEM(P, 1, PyFloat_FromDouble(p->x1));
+		PyTuple_SET_ITEM(P, 2, PyFloat_FromDouble(p->y1));
+		PyTuple_SET_ITEM(P, 3, PyFloat_FromDouble(p->x2));
+		PyTuple_SET_ITEM(P, 4, PyFloat_FromDouble(p->y2));
+		PyTuple_SET_ITEM(P, 5, PyFloat_FromDouble(p->x3));
+		PyTuple_SET_ITEM(P, 6, PyFloat_FromDouble(p->y3));
+		}
+	else {
+		PyTuple_SET_ITEM(P, 1, PyFloat_FromDouble(p->x3));
+		PyTuple_SET_ITEM(P, 2, PyFloat_FromDouble(p->y3));
+		}
+	return P;
+}
+
+static PyObject* _get_gstatePath(int n, ArtBpath* path)
+{
+	PyObject	*P = PyTuple_New(n);
+	PyObject	*e;
+	ArtBpath	*p;
+	int			i;
+	for(i=0;i<n;i++){
+		p = path+i;
+		switch(p->code){
+			case ART_MOVETO_OPEN:
+				e = _fmtPathElement(p,"moveTo",2);
+				break;
+			case ART_MOVETO:
+				e = _fmtPathElement(p,"moveToClosed",2);
+				break;
+			case ART_LINETO:
+				e = _fmtPathElement(p,"lineTo",2);
+				break;
+			case ART_CURVETO:
+				e = _fmtPathElement(p,"curveTo",6);
+				break;
+			}
+		PyTuple_SET_ITEM(P, i, e);
+		}
+	return P;
+}
+
+static PyObject* gstate_stringPath(gstateObject* self, PyObject* args)
+{
+	double	gw;
+	char*	text;
+	PyObject *P, *e, *p;
+	ArtBpath	*path, *pp;
+	int		n, i, m, c;
+	if(!self->font){
+		PyErr_SetString(moduleError, "No font set!");
+		return NULL;
+		}
+	if(!PyArg_ParseTuple(args,"s:stringPath", &text)) return NULL;
+
+	n = strlen(text);
+	P = PyTuple_New(n);
+	for(i=0;i<n;i++){
+		c = text[i]&0xff;
+		e = PyTuple_New(2);
+		path = gt1_get_glyph_outline(self->font, c, &gw);	/*ascii encoding for the moment*/
+		if(path){
+			m = 0;
+			pp = path;
+			while((pp++)->code!=ART_END) m++;
+			p = _get_gstatePath(m,path);
+			PyMem_Free(self->path);
+			}
+		else {
+			fprintf(stderr, "No glyph outline for code %d!\n", c);
+			gw = 1000;
+			Py_INCREF(Py_None);
+			p = Py_None;
+			}
+		PyTuple_SET_ITEM(e, 0, p);
+		PyTuple_SET_ITEM(e, 1, PyFloat_FromDouble(gw));
+		PyTuple_SET_ITEM(P, i, e);
+		}
+	return P;
+}
+
 static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
 {
 	char	*fontName;
@@ -657,6 +743,7 @@ static struct PyMethodDef gstate_methods[] = {
 	{"pathFill", (PyCFunction)gstate_pathFill, METH_VARARGS, "pathFill()"},
 	{"pathStroke", (PyCFunction)gstate_pathStroke, METH_VARARGS, "pathStroke()"},
 	{"setFont", (PyCFunction)gstate_setFont, METH_VARARGS, "setFont(fontName,fontSize)"},
+	{"stringPath", (PyCFunction)gstate_stringPath, METH_VARARGS, "stringPath(text)"},
 	{NULL, NULL}		/* sentinel */
 };
 
@@ -865,52 +952,6 @@ static PyObject* _get_gstateFontName(Gt1EncodedFont *f)
 	return Py_None;
 }
 
-static PyObject* _fmtPathElement(ArtBpath *p, char* name, int n)
-{
-	PyObject	*P = PyTuple_New(n+1);
-	PyTuple_SET_ITEM(P, 0, PyString_FromString(name));
-	if(n==6){
-		PyTuple_SET_ITEM(P, 1, PyFloat_FromDouble(p->x1));
-		PyTuple_SET_ITEM(P, 2, PyFloat_FromDouble(p->y1));
-		PyTuple_SET_ITEM(P, 3, PyFloat_FromDouble(p->x2));
-		PyTuple_SET_ITEM(P, 4, PyFloat_FromDouble(p->y2));
-		PyTuple_SET_ITEM(P, 5, PyFloat_FromDouble(p->x3));
-		PyTuple_SET_ITEM(P, 6, PyFloat_FromDouble(p->y3));
-		}
-	else {
-		PyTuple_SET_ITEM(P, 1, PyFloat_FromDouble(p->x3));
-		PyTuple_SET_ITEM(P, 2, PyFloat_FromDouble(p->y3));
-		}
-	return P;
-}
-
-static PyObject* _get_gstatePath(int n, ArtBpath* path)
-{
-	PyObject	*P = PyTuple_New(n);
-	PyObject	*e;
-	ArtBpath	*p;
-	int			i;
-	for(i=0;i<n;i++){
-		p = path+i;
-		switch(p->code){
-			case ART_MOVETO_OPEN:
-				e = _fmtPathElement(p,"moveTo",2);
-				break;
-			case ART_MOVETO:
-				e = _fmtPathElement(p,"moveToClosed",2);
-				break;
-			case ART_LINETO:
-				e = _fmtPathElement(p,"lineTo",2);
-				break;
-			case ART_CURVETO:
-				e = _fmtPathElement(p,"curveTo",6);
-				break;
-			}
-		PyTuple_SET_ITEM(P, i, e);
-		}
-	return P;
-}
-
 static PyObject* gstate_getattr(gstateObject *self, char *name)
 {
 #ifdef	ROBIN_DEBUG
@@ -1036,6 +1077,7 @@ gstates have the following methods\n\
  pathFill()  fill current path\n\
  pathStroke() stroke current path\n\
  setFont(fontName,fontSize) set the font from the gt1 cache\n\
+ stringPath(text) return path dump of text\n\
 \n\
 gstates have the following attributes\n\
 ctm			6vec float transformation matrix\n\
@@ -1054,6 +1096,7 @@ fontSize	float readonly\n\
 width		int	readonly pixBuf width\n\
 height		int readonly pixBuf height\n\
 depth		int readonly pixBuf depth\n\
+path		readonly tuple describing the path\n\
 pathLen		int readonly number of path segments\n\
 pixBuf		str readonly the pixBuf\n\
 "
