@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/fonts0.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.29 2001/03/17 15:21:22 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.30 2001/03/31 14:05:01 rgbecker Exp $ '''
 __doc__=""" 
 This provides the character widths database for calculating
 text metrics.  Everything for the base 14 fonts is pre-computed
@@ -195,6 +195,20 @@ if _stringWidth:
 	import new
 	Font.stringWidth = new.instancemethod(_rl_accel._instanceStringWidth,None,Font)
 	stringWidth = _stringWidth
+
+	def _SWRecover(text, fontName, fontSize, encoding):
+		'''This is called when _rl_accel's database doesn't know about a font.
+		Currently encoding is always a dummy.
+		'''
+		try:
+			font = fontsByName[fontName]
+			_rl_accel.setFontInfo(fontName,_dummyEncoding,font.ascent,font.descent,font._calcWidths())
+			return _stringWidth(text,font,fontSize,encoding)
+		except:
+			warnOnce('Font %s:%s not found - using Courier:%s for widths'%(font,encoding,encoding))
+			return _stringWidth(text,'courier',fontSize,encoding)
+
+	_rl_accel._SWRecover(_SWRecover)
 else:
 	def stringWidth(text, fontName, fontSize):
 		try:
@@ -277,7 +291,7 @@ def addFont(name,baseFontName,encoding):
 	font = fontsByBaseEnc.get(x,None)
 	if not font:
 		font = Type1Font(name,baseFontName,encoding)
-	elif fontsByName.has_key(name) and fontByName[name] is not font:
+	elif fontsByName.has_key(name) and fontsByName[name] is not font:
 		raise ValueError, "Attempted to addFont(%s,%s,%s) font %s aready added" %(name,baseFontName,encoding,name)
 	return font
 
