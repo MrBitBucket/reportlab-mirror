@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.19 2001/08/30 08:32:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.20 2001/08/30 08:37:38 rgbecker Exp $
 
 shapeChecking =				1
 defaultEncoding =			'WinAnsiEncoding'		# 'WinAnsi' or 'MacRoman'
@@ -49,7 +49,8 @@ def	_startUp():
 
 	P=[]
 	for p in T1SearchPath:
-		d = apply(os.path.join,string.split(p % D,'/'))
+		d = string.replace(p % D,'/',os.sep)
+		print d
 		if os.path.isdir(d): P.append(d)
 	_setOpt('T1SearchPath',P)
 
