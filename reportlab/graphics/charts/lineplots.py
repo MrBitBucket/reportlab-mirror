@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.45 2003/08/04 16:56:22 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.46 2003/08/14 10:48:40 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.45 2003/08/04 16:56:22 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.46 2003/08/14 10:48:40 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -54,6 +54,7 @@ class LinePlot(PlotArea):
         lineLabelNudge = AttrMapValue(isNumber, desc='Distance between a data point and its label.'),
         lineLabels = AttrMapValue(None, desc='Handle to the list of data point labels.'),
         lineLabelFormat = AttrMapValue(None, desc='Formatting string or function used for data point labels.'),
+        lineLabelArray = AttrMapValue(None, desc='explicit array of line label values, must match size of data if present.'),
         joinedLines = AttrMapValue(isNumber, desc='Display data points joined with lines if true.'),
         strokeColor = AttrMapValue(isColorOrNone, desc='Color used for background border of plot area.'),
         fillColor = AttrMapValue(isColorOrNone, desc='Color used for background interior of plot area.'),
@@ -83,6 +84,7 @@ class LinePlot(PlotArea):
 
         self.lineLabels = TypedPropertyCollection(Label)
         self.lineLabelFormat = None
+        self.lineLabelArray = None
 
         # this says whether the origin is inside or outside
         # the bar - +10 means put the origin ten points
@@ -171,7 +173,10 @@ class LinePlot(PlotArea):
         if labelFmt is None:
             labelText = None
         elif type(labelFmt) is StringType:
-            labelText = labelFmt % labelValue
+            if labelFmt == 'values':
+                labelText = self.lineLabelArray[rowNo][colNo]
+            else:
+                labelText = labelFmt % labelValue
         elif type(labelFmt) is FunctionType:
             labelText = labelFmt(labelValue)
         elif isinstance(labelFmt, Formatter):

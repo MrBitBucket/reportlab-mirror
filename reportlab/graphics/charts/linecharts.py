@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.29 2003/07/29 20:10:15 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.30 2003/08/14 10:48:40 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
-__version__=''' $Id: linecharts.py,v 1.29 2003/07/29 20:10:15 rgbecker Exp $ '''
+__version__=''' $Id: linecharts.py,v 1.30 2003/08/14 10:48:40 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType
@@ -202,10 +202,11 @@ class HorizontalLineChart(LineChart):
 
         if labelFmt is None:
             labelText = None
-        elif labelFmt == 'values':
-            labelText = self.lineLabelArray[rowNo][colNo]
         elif type(labelFmt) is StringType:
-            labelText = labelFmt % labelValue
+            if labelFmt == 'values':
+                labelText = self.lineLabelArray[rowNo][colNo]
+            else:
+                labelText = labelFmt % labelValue
         elif type(labelFmt) is FunctionType:
             labelText = labelFmt(labelValue)
         elif isinstance(labelFmt, Formatter):
