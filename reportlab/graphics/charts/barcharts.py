@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.26 2001/07/19 00:09:22 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.27 2001/07/21 11:16:57 dinu_gherman Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -1675,13 +1675,13 @@ def sampleSymbol1():
     bc.categoryAxis.labels.boxAnchor = 'e'
     bc.categoryAxis.categoryNames = ['Ying', 'Yang']
 
-    sym1 = ShadedRect0()
+    sym1 = ShadedRect()
     sym1.fillColorStart = colors.black
     sym1.fillColorEnd = colors.blue
     sym1.orientation = 'horizontal'
     sym1.strokeWidth = 0
 
-    sym2 = ShadedRect0()
+    sym2 = ShadedRect()
     sym2.fillColorStart = colors.black
     sym2.fillColorEnd = colors.pink
     sym2.orientation = 'horizontal'
