@@ -356,7 +356,9 @@ class YValueAxis(Widget):
         return g
 
 
-if __name__=='__main__':
+def sample1():
+    "Make sample drawing."
+
     drawing = Drawing(400, 200)
 
     data = [(10, 20, 30, 40),
@@ -369,8 +371,7 @@ if __name__=='__main__':
     xAxis.labels.boxAnchor = 'n'
     xAxis.labels[3].dy = -15
     xAxis.labels[3].angle = 30
-    xAxis.labels[3].fontName = 'Times-Bold'
-    
+    xAxis.labels[3].fontName = 'Times-Bold'    
 
     yAxis = YValueAxis()
     yAxis.setPosition(50, 50, 125)
@@ -378,6 +379,4 @@ if __name__=='__main__':
     drawing.add(xAxis)
     drawing.add(yAxis)
 
-    from reportlab.graphics import renderPDF
-    renderPDF.drawToFile(drawing, 'axes0.pdf', 'Axes')
-    print 'saved axes0.pdf'
+    return drawing
