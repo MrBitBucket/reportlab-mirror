@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.6  2000/05/15 15:07:32  rgbecker
+#	Added drawPage
+#
 #	Revision 1.5  2000/05/13 08:33:53  rgbecker
 #	fix typo in import
-#
+#	
 #	Revision 1.4  2000/05/12 16:21:02  rgbecker
 #	_donothing explicit import
 #	
@@ -46,7 +49,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.5 2000/05/13 08:33:53 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.6 2000/05/15 15:07:32 rgbecker Exp $ '''
 __doc__="""
 More complicated Document model
 """
@@ -78,7 +81,6 @@ class ActionFlowable(Flowable):
 		except:
 			t, v, None = sys.exc_info()
 			raise t, "%s\n   handle_%s args=%s"%(v,action,args)
-				
 
 FrameBreak = ActionFlowable('frameBegin')
 PageBegin = ActionFlowable('pageBegin')
@@ -91,6 +93,7 @@ class PageTemplate:
 	"""
 	essentially a list of BasicFrames and an onPage routine to call at the start
 	of a page when this is selected.
+	derived classes can also implement drawPage if they want
 	"""
 	def __init__(self,id=None,frames=[],onPage=None):
 		if type(frames) not in (ListType,TupleType): frames = [frames]
@@ -98,6 +101,12 @@ class PageTemplate:
 		self.id = id
 		self.frames = frames
 		self.onPage = onPage or _doNothing
+
+	def drawPage(self,canv,doc):
+		'''	Override this if you want additional functionality or prefer a class
+			based page routine
+		'''
+		pass
 
 class BaseDocTemplate:
 	"""
@@ -153,6 +162,7 @@ class BaseDocTemplate:
 	def handle_pageBegin(self):
 		'''shouldn't normally be called directly'''
 		self.page = self.page + 1
+		self.pageTemplate.drawPage(self.canv,self)
 		self.pageTemplate.onPage(self.canv,self)
 		if hasattr(self,'_nextFrameIndex'):
 			del self._nextFrameIndex
