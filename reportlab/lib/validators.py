@@ -27,7 +27,15 @@ class Validator:
 		except:
 			return 0
 
-class isBoolean(Validator):
+class _isAnything(Validator):
+	def test(self,x):
+		return 1
+
+class _isNothing(Validator):
+	def test(self,x):
+		return 0
+
+class _isBoolean(Validator):
 	def test(self,x):
 		if type(x) is IntType: return x in (0,1)
 		return self.normalizeTest(x)
@@ -42,11 +50,11 @@ class isBoolean(Validator):
 		if S in ('NO','FALSE'): return 0
 		raise ValueError, 'Must be boolean'
 
-class isString(Validator):
+class _isString(Validator):
 	def test(self,x):
 		return type(x) is StringType
 
-class isNumber(Validator):
+class _isNumber(Validator):
 	def test(self,x):
 		if type(x) in _NumberTypes: return 1
 		return self.normalizeTest(x)
@@ -57,26 +65,26 @@ class isNumber(Validator):
 		except:
 			return int(x)
 
-class isNumberOrNone(isNumber):
+class _isNumberOrNone(_isNumber):
 	def test(self,x):
 		return x is None or isNumber(x)
 
 	def normalize(self,x):
 		if x is None: return x
-		return isNumber.normalize(x)
+		return _isNumber.normalize(x)
 
-class isTextAnchor(Validator):
+class _isTextAnchor(Validator):
 	"TextAnchor validator class."
 	def test(self, x):
 		return x in ('start', 'middle', 'end')
 
-class isListOfNumbersOrNone(Validator):
+class _isListOfNumbersOrNone(Validator):
 	"ListOfNumbersOrNone validator class."
 	def test(self, x):
 		if x is None: return 1
 		return isListOfNumbers(x)
 
-class isListOfShapes(Validator):
+class _isListOfShapes(Validator):
 	"ListOfShapes validator class."
 	def test(self, x):
 		from reportlab.graphics.shapes import Shape
@@ -89,14 +97,14 @@ class isListOfShapes(Validator):
 		else:
 			return 0
 
-class isListOfStringsOrNone(Validator):
+class _isListOfStringsOrNone(Validator):
 	"ListOfStringsOrNone validator class."
 
 	def test(self, x):
 		if x is None: return 1
 		return isListOfStrings(x)
 
-class isTransform(Validator):
+class _isTransform(Validator):
 	"Transform validator class."
 	def test(self, x):
 		if type(x) in _SequenceTypes:
@@ -110,18 +118,18 @@ class isTransform(Validator):
 		else:
 			return 0
 
-class isColor(Validator):
+class _isColor(Validator):
 	"Color validator class."
 	def test(self, x):
 		return isinstance(x, colors.Color)
 
-class isColorOrNone(Validator):
+class _isColorOrNone(Validator):
 	"ColorOrNone validator class."
 	def test(self, x):
 		if x is None: return 1
 		return isColor(x)
 
-class isValidChild(Validator):
+class _isValidChild(Validator):
 	"ValidChild validator class."
 	def test(self, x):
 		"""Is this child allowed in a drawing or group?
@@ -161,17 +169,19 @@ class SequenceOf(Validator):
 			if not self._elemTest(e): return 0
 		return 1
 
-isBoolean = isBoolean()
-isString = isString()
-isNumber = isNumber()
-isNumberOrNone = isNumberOrNone()
-isTextAnchor = isTextAnchor()
+isBoolean = _isBoolean()
+isString = _isString()
+isNumber = _isNumber()
+isNumberOrNone = _isNumberOrNone()
+isTextAnchor = _isTextAnchor()
 isListOfNumbers = SequenceOf(isNumber,'isListOfNumbers')
-isListOfNumbersOrNone = isListOfNumbersOrNone()
-isListOfShapes = isListOfShapes()
+isListOfNumbersOrNone = _isListOfNumbersOrNone()
+isListOfShapes = _isListOfShapes()
 isListOfStrings = SequenceOf(isString,'isListOfStrings')
-isListOfStringsOrNone = isListOfStringsOrNone()
-isTransform = isTransform()
-isColor = isColor()
-isColorOrNone = isColorOrNone()
-isValidChild = isValidChild()
+isListOfStringsOrNone = _isListOfStringsOrNone()
+isTransform = _isTransform()
+isColor = _isColor()
+isColorOrNone = _isColorOrNone()
+isValidChild = _isValidChild()
+isAnything = _isAnything()
+isNothing = _isNothing()

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/flags.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.4 2001/05/11 10:57:06 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.5 2001/05/17 16:21:33 rgbecker Exp $
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 
@@ -31,26 +31,20 @@ USA, Czech Republic, European Union, Switzerland, Turkey
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *
+from reportlab.lib.attrmap import *
 from reportlab.graphics import shapes
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics import renderPDF
+from signsandsymbols import ETriangle0
 
 
-class Star0(Widget):
+class Star0(ETriangle0):
     """This draws a 5-pointed star.
 
         possible attributes:
         'x', 'y', 'size', 'color', 'strokecolor'
 
         """
-
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'color': isColorOrNone(),
-        'strokecolor': isColorOrNone()
-        }
 
     def __init__(self):
         self.x = 0
@@ -100,7 +94,7 @@ class Star0(Widget):
 
 
 
-class Flag0(Widget):
+class Flag0(ETriangle0):
     """This is a generic flag class that all the flags in this file use as a basis.
     
         This class basically provides edges and a tidy-up routine to hide any bits of
@@ -110,13 +104,10 @@ class Flag0(Widget):
         'x', 'y', 'size', 'background'
     """ 
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
+    _attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor', 'color'),
+        background = AttrMapValue(isColor),
+        border = AttrMapValue(isBoolean),
+        )
 
     def __init__(self):
         self.x = 0
@@ -187,14 +178,6 @@ class FlagUK0(Flag0):
         possible attributes:
         'x', 'y', 'size', 'background', , border
     """ 
-
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
 
     def __init__(self):
         self.x = 0
@@ -315,14 +298,6 @@ class FlagUSA0(Flag0):
         'x', 'y', 'size', 'background', , border
     """ 
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
-
     def __init__(self):
         self.x = 0
         self.y = 0
@@ -410,14 +385,6 @@ class FlagAustria0(Flag0):
         'x', 'y', 'size', 'background', border
     """ 
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
-
     def __init__(self):
         self.x = 0
         self.y = 0
@@ -474,14 +441,6 @@ class FlagBelgium0(Flag0):
         possible attributes:
         'x', 'y', 'size', 'background', border
     """ 
-
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
 
     def __init__(self):
         self.x = 0
@@ -545,14 +504,6 @@ class FlagDenmark0(Flag0):
         possible attributes:
         'x', 'y', 'size', 'background', border
     """ 
-
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
 
     def __init__(self):
         self.x = 0
@@ -622,14 +573,6 @@ class FlagFinland0(Flag0):
 
     """ 
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
-
     def __init__(self):
         self.x = 0
         self.y = 0
@@ -685,14 +628,6 @@ class FlagFrance0(Flag0):
         possible attributes:
         'x', 'y', 'size', 'background', border
     """ 
-
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
 
     def __init__(self):
         self.x = 0
@@ -756,14 +691,6 @@ class FlagGermany0(Flag0):
         'x', 'y', 'size', 'background', border
     """ 
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
-
     def __init__(self):
         self.x = 0
         self.y = 0
@@ -819,14 +746,6 @@ class FlagGreece0(Flag0):
         possible attributes:
         'x', 'y', 'size', 'background', border
     """ 
-
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
 
     def __init__(self):
         self.x = 0
@@ -903,14 +822,6 @@ class FlagIreland0(Flag0):
         'x', 'y', 'size', 'background', border
     """ 
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
-
     def __init__(self):
         self.x = 0
         self.y = 0
@@ -966,14 +877,6 @@ class FlagItaly0(Flag0):
         possible attributes:
         'x', 'y', 'size', 'background', border
     """ 
-
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
 
     def __init__(self):
         self.x = 0
@@ -1031,14 +934,6 @@ class FlagLuxembourg0(Flag0):
         'x', 'y', 'size', 'background', border
     """ 
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
-
     def __init__(self):
         self.x = 0
         self.y = 0
@@ -1094,14 +989,6 @@ class FlagHolland0(Flag0):
         possible attributes:
         'x', 'y', 'size', 'background', border
     """ 
-
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
 
     def __init__(self):
         self.x = 0
@@ -1172,14 +1059,6 @@ class FlagSpain0(Flag0):
         'x', 'y', 'size', 'background', border
     """ 
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
-
     def __init__(self):
         self.x = 0
         self.y = 0
@@ -1235,14 +1114,6 @@ class FlagSweden0(Flag0):
         possible attributes:
         'x', 'y', 'size', 'background', border
     """ 
-
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
 
     def __init__(self):
         self.x = 0
@@ -1310,14 +1181,6 @@ class FlagNorway0(Flag0):
         possible attributes:
         'x', 'y', 'size', 'background', 'border'
         """ 
-
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean(),
-        }
 
     def __init__(self):
         self.x = 0
@@ -1405,14 +1268,6 @@ class FlagCzechRepublic0(Flag0):
         'x', 'y', 'size', 'background', border
     """ 
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
-
     def __init__(self):
         self.x = 0
         self.y = 0
@@ -1471,14 +1326,6 @@ class FlagTurkey0(Flag0):
         possible attributes:
         'x', 'y', 'size', 'background', border
     """ 
-
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
 
     def __init__(self):
         self.x = 0
@@ -1551,14 +1398,6 @@ class FlagSwitzerland0(Flag0):
         'x', 'y', 'size', 'background', , border
     """ 
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
-
     def __init__(self):
         self.x = 0
         self.y = 0
@@ -1620,14 +1459,6 @@ class FlagEU0(Flag0):
         possible attributes:
         'x', 'y', 'size', 'background', border
     """ 
-
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'background': isColor(),
-        'border': isBoolean()
-        }
 
     def __init__(self):
         self.x = 0

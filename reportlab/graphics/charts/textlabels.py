@@ -1,11 +1,12 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.4 2001/05/11 10:08:55 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.5 2001/05/17 16:21:33 rgbecker Exp $
 import string
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, isTextAnchor
+from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.shapes import Drawing, Group, Circle, Rect, String, STATE_DEFAULTS
 from reportlab.graphics.widgetbase import Widget
@@ -21,22 +22,22 @@ class Label(Widget):
 	# fairly straight port of Robin Becker's textbox.py to new widgets
 	# framework.
 
-	_attrMap = {
-		'dx':isNumber(),
-		'dy':isNumber(),
-		'angle':isNumber(),
-		'boxAnchor':OneOf(('nw','n','ne','w','c','e','sw','s','se')),
-		'boxStrokeColor':isColorOrNone(),
-		'boxStrokeWidth':isNumber(),
-		'boxFillColor':isColorOrNone(),
-		'text':isString(),
-		'fontName':isString(),
-		'fontSize':isNumber(),
-		'leading':isNumberOrNone(),
-		'width':isNumberOrNone(),
-		'height':isNumberOrNone(),
-		'textAnchor':isTextAnchor(),
-		}
+	_attrMap = AttrMap(
+		dx = AttrMapValue(isNumber),
+		dy = AttrMapValue(isNumber),
+		angle = AttrMapValue(isNumber),
+		boxAnchor = AttrMapValue(OneOf(('nw','n','ne','w','c','e','sw','s','se'))),
+		boxStrokeColor = AttrMapValue(isColorOrNone),
+		boxStrokeWidth = AttrMapValue(isNumber),
+		boxFillColor = AttrMapValue(isColorOrNone),
+		text = AttrMapValue(isString),
+		fontName = AttrMapValue(isString),
+		fontSize = AttrMapValue(isNumber),
+		leading = AttrMapValue(isNumberOrNone),
+		width = AttrMapValue(isNumberOrNone),
+		height = AttrMapValue(isNumberOrNone),
+		textAnchor = AttrMapValue(isTextAnchor),
+		)
 
 	def __init__(self):
 		self._x = 100

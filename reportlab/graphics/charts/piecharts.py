@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.11 2001/05/11 10:08:55 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.12 2001/05/17 16:21:33 rgbecker Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -18,6 +18,7 @@ from math import sin, cos, pi
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isColor, isNumber, isListOfNumbersOrNone, isListOfNumbers, isColorOrNone, isString, isListOfStringsOrNone, OneOf, SequenceOf
+from reportlab.lib.attrmap import *
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
@@ -32,17 +33,17 @@ class WedgeProperties(PropHolder):
     format method.
     """
 
-    _attrMap = {
-        'strokeWidth':isNumber(),
-        'fillColor':isColorOrNone(),
-        'strokeColor':isColorOrNone(),
-        'strokeDashArray':isListOfNumbersOrNone(),
-        'popout':isNumber(),
-        'fontName':isString(),
-        'fontSize':isNumber(),
-        'fontColor':isColorOrNone(),
-        'labelRadius':isNumber()
-        }
+    _attrMap = AttrMap(
+        strokeWidth = AttrMapValue(isNumber),
+        fillColor = AttrMapValue(isColorOrNone),
+        strokeColor = AttrMapValue(isColorOrNone),
+        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
+        popout = AttrMapValue(isNumber),
+        fontName = AttrMapValue(isString),
+        fontSize = AttrMapValue(isNumber),
+        fontColor = AttrMapValue(isColorOrNone),
+        labelRadius = AttrMapValue(isNumber),
+        )
 
     def __init__(self):
         self.strokeWidth = 0
@@ -57,19 +58,17 @@ class WedgeProperties(PropHolder):
 
 
 class Pie(Widget):
-    _attrMap = {
-        'x':isNumber(
-            desc='X position of the chart.'),
-        'y':isNumber(
-            desc='Y position of the chart.'),
-        'width':isNumber(),
-        'height':isNumber(),
-        'data':isListOfNumbers(),
-        'labels':isListOfStringsOrNone(),
-        'startAngle':isNumber(),
-        'direction': OneOf(('clockwise', 'anticlockwise')),
-        'defaultStyles':None
-        }
+    _attrMap = AttrMap(
+        x = AttrMapValue(isNumber, desc='X position of the chart.'),
+        y = AttrMapValue(isNumber, desc='Y position of the chart.'),
+        width = AttrMapValue(isNumber),
+        height = AttrMapValue(isNumber),
+        data = AttrMapValue(isListOfNumbers),
+        labels = AttrMapValue(isListOfStringsOrNone),
+        startAngle = AttrMapValue(isNumber),
+        direction = AttrMapValue( OneOf(('clockwise', 'anticlockwise'))),
+        defaultStyles = AttrMapValue(None),
+        )
     
     def __init__(self):
         self.x = 0

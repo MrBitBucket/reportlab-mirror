@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.6 2001/05/16 09:58:03 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.7 2001/05/17 16:21:33 rgbecker Exp $
 """This will be a collection of legends to be used with charts.
 """
 
@@ -10,6 +10,7 @@ import string
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, OneOf
+from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics.shapes import Drawing, Group, String, Rect
@@ -21,18 +22,18 @@ class Legend(Widget):
     Strings can be nicely aligned left or right to the swatches.
     """
     
-    _attrMap = {
-        "x": isNumber(),
-        "y": isNumber(),
-        "deltax": isNumber(),
-        "deltay": isNumber(),
-        "dxTextSpace": isNumber(),
-        "dx": isNumber(),
-        "dy": isNumber(),
-        "columnMaximum": isNumber(),
-        "alignment": OneOf(("left", "right")),
-        "colorNamePairs": None, # fix this
-        }
+    _attrMap = AttrMap(
+        x = AttrMapValue(isNumber),
+        y = AttrMapValue(isNumber),
+        deltax = AttrMapValue(isNumber),
+        deltay = AttrMapValue(isNumber),
+        dxTextSpace = AttrMapValue(isNumber),
+        dx = AttrMapValue(isNumber),
+        dy = AttrMapValue(isNumber),
+        columnMaximum = AttrMapValue(isNumber),
+        alignment = AttrMapValue(OneOf(("left", "right"))),
+        colorNamePairs = AttrMapValue(None),
+        )
 
     def __init__(self):
         # Upper-left reference point.

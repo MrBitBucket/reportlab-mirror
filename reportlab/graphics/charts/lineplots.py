@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.14 2001/05/15 20:00:55 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.15 2001/05/17 16:21:33 rgbecker Exp $
 """
 This modules defines a very preliminary Line Plot example.
 """
@@ -11,6 +11,7 @@ from types import FunctionType
 
 from reportlab.lib import colors 
 from reportlab.lib.validators import * 
+from reportlab.lib.attrmap import *
 from reportlab.graphics.shapes import Drawing, Group, Rect, Line, PolyLine
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.widgets.signsandsymbols import SmileyFace0
@@ -23,12 +24,12 @@ from reportlab.graphics.charts.markers import *
 # This might be moved again from here...
 
 class LinePlotProperties(PropHolder):
-    _attrMap = {
-        'strokeWidth':isNumber(),
-        'strokeColor':isColorOrNone(),
-        'strokeDashArray':isListOfNumbersOrNone(),
-        'symbol':None
-        }
+    _attrMap = AttrMap(
+        strokeWidth = AttrMapValue(isNumber),
+        strokeColor = AttrMapValue(isColorOrNone),
+        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
+        symbol = AttrMapValue(None),
+        )
 
 
 class LinePlot(Widget):
@@ -38,30 +39,30 @@ class LinePlot(Widget):
     X and Y versions of this class).
     """
 
-    _attrMap = {
-        'debug':isNumber(),
-        'x':isNumber(),
-        'y':isNumber(),
-        'width':isNumber(),
-        'height':isNumber(),
+    _attrMap = AttrMap(
+        debug = AttrMapValue(isNumber),
+        x = AttrMapValue(isNumber),
+        y = AttrMapValue(isNumber),
+        width = AttrMapValue(isNumber),
+        height = AttrMapValue(isNumber),
 
-        'useAbsolute':isNumber(),
-        'lineLabelNudge':isNumber(),
-        'lineLabels':None,
-        'lineLabelFormat':None,
-        'groupSpacing':isNumber(),
+        useAbsolute = AttrMapValue(isNumber),
+        lineLabelNudge = AttrMapValue(isNumber),
+        lineLabels = AttrMapValue(None),
+        lineLabelFormat = AttrMapValue(None),
+        groupSpacing = AttrMapValue(isNumber),
 
-        'joinedLines':isNumber(),
+        joinedLines = AttrMapValue(isNumber),
 
-        'strokeColor':isColorOrNone(),
-        'fillColor':isColorOrNone(),
+        strokeColor = AttrMapValue(isColorOrNone),
+        fillColor = AttrMapValue(isColorOrNone),
 
-        'defaultStyles':None,
+        defaultStyles = AttrMapValue(None),
 
-        'xValueAxis':None,
-        'yValueAxis':None,
-        'data':None
-        }
+        xValueAxis = AttrMapValue(None),
+        yValueAxis = AttrMapValue(None),
+        data = AttrMapValue(None),
+        )
 
     def __init__(self):
         self.debug = 0

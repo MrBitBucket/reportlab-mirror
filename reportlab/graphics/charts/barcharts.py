@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.12 2001/05/17 11:17:16 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.13 2001/05/17 16:21:33 rgbecker Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -16,6 +16,7 @@ from types import FunctionType, StringType
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf
+from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing
@@ -47,11 +48,11 @@ from reportlab.graphics.charts.textlabels import Label
 
 
 class BarChartProperties(PropHolder):
-    _attrMap = {
-        'strokeColor':isColor(),
-        'fillColor':isColor(),
-        'strokeWidth':isNumber()
-        }
+    _attrMap = AttrMap(
+        strokeColor = AttrMapValue(isColor),
+        fillColor = AttrMapValue(isColor),
+        strokeWidth = AttrMapValue(isNumber),
+		)
 
 
 # Bar chart classes.
@@ -59,31 +60,31 @@ class BarChartProperties(PropHolder):
 class BarChart(Widget):
     "Abstract base class, unusable by itself."
 
-    _attrMap = {
-        'debug':isNumber(),
-        'x':isNumber(),
-        'y':isNumber(),
-        'width':isNumber(),
-        'height':isNumber(),
+    _attrMap = AttrMap(
+        debug = AttrMapValue(isNumber),
+        x = AttrMapValue(isNumber),
+        y = AttrMapValue(isNumber),
+        width = AttrMapValue(isNumber),
+        height = AttrMapValue(isNumber),
 
-        'useAbsolute':isNumber(),
-        'barWidth':isNumber(),
-        'barLabelNudge':isNumber(),
-        'groupSpacing':isNumber(),
-        'barSpacing':isNumber(),
+        useAbsolute = AttrMapValue(isNumber),
+        barWidth = AttrMapValue(isNumber),
+        barLabelNudge = AttrMapValue(isNumber),
+        groupSpacing = AttrMapValue(isNumber),
+        barSpacing = AttrMapValue(isNumber),
 
-        'strokeColor':isColorOrNone(),
-        'fillColor':isColorOrNone(),
+        strokeColor = AttrMapValue(isColorOrNone),
+        fillColor = AttrMapValue(isColorOrNone),
 
-        'defaultStyles':None,
+        defaultStyles = AttrMapValue(None),
 
-        'categoryAxis':None,
-        'categoryNames':isListOfStrings(),
-        'valueAxis':None,
-        'data':None,
-        'barLabels':None,
-        'barLabelFormat':None
-        }
+        categoryAxis = AttrMapValue(None),
+        categoryNames = AttrMapValue(isListOfStrings),
+        valueAxis = AttrMapValue(None),
+        data = AttrMapValue(None),
+        barLabels = AttrMapValue(None),
+        barLabelFormat = AttrMapValue(None),
+        )
 
     def __init__(self):
         self.debug = 0

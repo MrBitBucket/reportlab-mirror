@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.25 2001/05/17 11:17:16 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.26 2001/05/17 16:21:33 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -36,6 +36,7 @@ the former axes in its own coordinate system.
 from types import FunctionType, StringType, TupleType, ListType
 
 from reportlab.lib.validators import isNumber, isNumberOrNone, isListOfStringsOrNone, isListOfNumbers, isListOfNumbersOrNone, isColorOrNone, OneOf
+from reportlab.lib.attrmap import *
 from reportlab.graphics.shapes import Drawing, Line, Group, STATE_DEFAULTS
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.charts.textlabels import Label
@@ -87,22 +88,18 @@ def _findMax(V, x, default):
 class CategoryAxis(Widget):
     "Abstract category axis, unusable in itself."
 
-    _attrMap = {
-        'visible':isNumber(),
-        'visibleAxis':isNumber(),
-        'visibleTicks':isNumber(),
-        'strokeWidth':isNumber(),
-        'strokeColor':isColorOrNone(),
-        'strokeDashArray':isListOfNumbersOrNone(),
-        'labels':None,
-        'categoryNames':isListOfStringsOrNone(),
-        'joinAxis':None,
-        'joinAxisPos':isNumberOrNone(),
-        }
-
-##    def __init__(self):
-##        msg = "This is an abstract class and must be subclassed to be used!"
-##        raise "NotImplementedError", msg
+    _attrMap = AttrMap(
+        visible = AttrMapValue(isNumber),
+        visibleAxis = AttrMapValue(isNumber),
+        visibleTicks = AttrMapValue(isNumber),
+        strokeWidth = AttrMapValue(isNumber),
+        strokeColor = AttrMapValue(isColorOrNone),
+        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
+        labels = AttrMapValue(None),
+        categoryNames = AttrMapValue(isListOfStringsOrNone),
+        joinAxis = AttrMapValue(None),
+        joinAxisPos = AttrMapValue(isNumberOrNone),
+        )
 
     def setPosition(self, x, y, length):
         # ensure floating point
@@ -132,12 +129,11 @@ class CategoryAxis(Widget):
 class XCategoryAxis(CategoryAxis):
     "X/category axis"
 
-    _attrMap = CategoryAxis._attrMap.copy()
-    _attrMap.update({
-        'tickUp':isNumber(),
-        'tickDown':isNumber(),
-        'joinAxisMode':OneOf(('bottom', 'top', 'value', 'points', None)),
-        })
+    _attrMap = AttrMap(BASE=CategoryAxis,
+        tickUp = AttrMapValue(isNumber),
+        tickDown = AttrMapValue(isNumber),
+        joinAxisMode = AttrMapValue(OneOf(('bottom', 'top', 'value', 'points', None))),
+        )
 
     def __init__(self):
         # private properties set by methods.  The initial values
@@ -288,12 +284,11 @@ class XCategoryAxis(CategoryAxis):
 class YCategoryAxis(CategoryAxis):
     "Y/category axis"
 
-    _attrMap = CategoryAxis._attrMap.copy()
-    _attrMap.update({
-        'tickLeft':isNumber(),
-        'tickRight':isNumber(),
-        'joinAxisMode':OneOf(('left', 'right', 'value', 'points', None)),
-        })
+    _attrMap = AttrMap(BASE=CategoryAxis,
+        tickLeft = AttrMapValue(isNumber),
+        tickRight = AttrMapValue(isNumber),
+        joinAxisMode = AttrMapValue(OneOf(('left', 'right', 'value', 'points', None))),
+        )
 
     def __init__(self):
         # private properties set by methods.  The initial values
@@ -447,22 +442,22 @@ class YCategoryAxis(CategoryAxis):
 class ValueAxis(Widget):
     "Abstract value axis, unusable in itself."
 
-    _attrMap = {
-        'visible':isNumber(),
-        'visibleAxis':isNumber(),
-        'visibleTicks':isNumber(),
-        'strokeWidth':isNumber(),
-        'strokeColor':isColorOrNone(),
-        'strokeDashArray':isListOfNumbersOrNone(),
-        'minimumTickSpacing':isNumber(),
-        'maximumTicks':isNumber(),
-        'labels':None,
-        'labelTextFormat':None,
-        'valueMin':isNumberOrNone(),
-        'valueMax':isNumberOrNone(),
-        'valueStep':isNumberOrNone(),
-        'valueSteps':isListOfNumbers()
-        }
+    _attrMap = AttrMap(
+        visible = AttrMapValue(isNumber),
+        visibleAxis = AttrMapValue(isNumber),
+        visibleTicks = AttrMapValue(isNumber),
+        strokeWidth = AttrMapValue(isNumber),
+        strokeColor = AttrMapValue(isColorOrNone),
+        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
+        minimumTickSpacing = AttrMapValue(isNumber),
+        maximumTicks = AttrMapValue(isNumber),
+        labels = AttrMapValue(None),
+        labelTextFormat = AttrMapValue(None),
+        valueMin = AttrMapValue(isNumberOrNone),
+        valueMax = AttrMapValue(isNumberOrNone),
+        valueStep = AttrMapValue(isNumberOrNone),
+        valueSteps = AttrMapValue(isListOfNumbers),
+        )
 
     def __init__(self):
         self._configured = 0
@@ -655,14 +650,13 @@ class ValueAxis(Widget):
 class XValueAxis(ValueAxis):
     "X/value axis"
 
-    _attrMap = ValueAxis._attrMap.copy()
-    _attrMap.update({
-        'tickUp':isNumber(),
-        'tickDown':isNumber(),
-        'joinAxis':None,
-        'joinAxisMode':OneOf(('bottom', 'top', 'value', 'points', None)),
-        'joinAxisPos':isNumberOrNone(),
-        })
+    _attrMap = AttrMap(BASE=ValueAxis,
+        tickUp = AttrMapValue(isNumber),
+        tickDown = AttrMapValue(isNumber),
+        joinAxis = AttrMapValue(None),
+        joinAxisMode = AttrMapValue(OneOf(('bottom', 'top', 'value', 'points', None))),
+        joinAxisPos = AttrMapValue(isNumberOrNone),
+        )
 
     # Indicate the dimension of the data we're interested in. 
     _dataIndex = 0
@@ -776,14 +770,13 @@ class XValueAxis(ValueAxis):
 class YValueAxis(ValueAxis):
     "Y/value axis"
 
-    _attrMap = ValueAxis._attrMap.copy()
-    _attrMap.update({
-        'tickLeft':isNumber(),
-        'tickRight':isNumber(),
-        'joinAxis':None,
-        'joinAxisMode':OneOf(('left', 'right', 'value', 'points', None)),
-        'joinAxisPos':isNumberOrNone(),
-        })
+    _attrMap = AttrMap(BASE=ValueAxis,
+        tickLeft = AttrMapValue(isNumber),
+        tickRight = AttrMapValue(isNumber),
+        joinAxis = AttrMapValue(None),
+        joinAxisMode = AttrMapValue(OneOf(('left', 'right', 'value', 'points', None))),
+        joinAxisPos = AttrMapValue(isNumberOrNone),
+        )
 
     # Indicate the dimension of the data we're interested in. 
     _dataIndex = 1

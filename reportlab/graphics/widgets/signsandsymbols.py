@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/signsandsymbols.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.11 2001/05/11 10:57:06 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.12 2001/05/17 16:21:33 rgbecker Exp $
 # signsandsymbols.py
 # A collection of new widgets
 # author: John Precedo (johnp@reportlab.com)
@@ -29,6 +29,7 @@ Widgets include:
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *
+from reportlab.lib.attrmap import *
 from reportlab.graphics import shapes
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics import renderPDF
@@ -42,13 +43,13 @@ class ETriangle0(Widget):
 
         """
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'color': isColorOrNone(),
-        'strokecolor': isColorOrNone()
-        }
+    _attrMap = AttrMap(
+        x = AttrMapValue( isNumber),
+        y = AttrMapValue( isNumber),
+        size = AttrMapValue( isNumber),
+        color = AttrMapValue( isColorOrNone),
+        strokecolor = AttrMapValue( isColorOrNone)
+        )
 
     def __init__(self):
         self.x = 0
@@ -87,21 +88,13 @@ class ETriangle0(Widget):
         g.add(triangle)
         return g
 
-class RTriangle0(Widget):
+class RTriangle0(ETriangle0):
     """This draws a right-angled triangle.
 
         possible attributes:
         'x', 'y', 'size', 'color', 'strokecolor'
 
         """
-
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'color': isColorOrNone(),
-        'strokecolor': isColorOrNone()
-        }
 
     def __init__(self):
         self.x = 0
@@ -140,21 +133,13 @@ class RTriangle0(Widget):
         g.add(triangle)
         return g  
 
-class Octagon0(Widget):
+class Octagon0(ETriangle0):
     """This widget draws an Octagon.
 
         possible attributes:
         'x', 'y', 'size', 'color', 'strokecolor'
 
-        """ 
-
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'color': isColorOrNone(),
-        'strokecolor': isColorOrNone()
-        }
+    """ 
 
     def __init__(self):
         self.x = 0
@@ -199,7 +184,7 @@ class Octagon0(Widget):
         g.add(octagon)
         return g
 
-class Crossbox0(Widget):
+class Crossbox0(ETriangle0):
     """This draws a black box with a red cross in it - a 'checkbox'.
 
         possible attributes:
@@ -207,14 +192,11 @@ class Crossbox0(Widget):
 
     """ 
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'crossColor': isColorOrNone(),
-        'boxColor': isColorOrNone(), 
-        'crosswidth': isNumber() 
-        }
+    _attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor', 'color'),
+        crossColor = AttrMapValue(isColorOrNone),
+        boxColor = AttrMapValue(isColorOrNone), 
+        crosswidth = AttrMapValue(isNumber),
+        )
 
     def __init__(self):
         self.x = 0
@@ -264,7 +246,7 @@ class Crossbox0(Widget):
         return g
 
 
-class Tickbox0(Widget):
+class Tickbox0(ETriangle0):
     """This draws a black box with a red tick in it - another 'checkbox'.
 
         possible attributes:
@@ -272,14 +254,11 @@ class Tickbox0(Widget):
 
 """ 
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'tickColor': isColorOrNone(),
-        'boxColor': isColorOrNone(), 
-        'tickwidth': isNumber() 
-        }
+    _attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor', 'color'),
+        tickColor = AttrMapValue(isColorOrNone),
+        boxColor = AttrMapValue(isColorOrNone), 
+        tickwidth = AttrMapValue(isNumber),
+        )
 
     def __init__(self):
         self.x = 0
@@ -324,7 +303,7 @@ class Tickbox0(Widget):
 
         return g
 
-class SmileyFace0(Widget):
+class SmileyFace0(ETriangle0):
     """This draws a classic smiley face.
     
         possible attributes:
@@ -332,12 +311,8 @@ class SmileyFace0(Widget):
 
 """ 
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'color': isColor()
-        }
+    _attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor',),
+		)
 
     def __init__(self):
         self.x = 0
@@ -415,7 +390,7 @@ class SmileyFace0(Widget):
 
 
 
-class StopSign0(Widget):
+class StopSign0(ETriangle0):
     """This draws a (British) stop sign.
 
         possible attributes:
@@ -423,11 +398,8 @@ class StopSign0(Widget):
 
         """ 
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber()
-        }
+    _attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor', 'color'),
+		)
 
     def __init__(self):
         self.x = 0
@@ -489,7 +461,7 @@ class StopSign0(Widget):
         return g
 
 
-class NoEntry0(Widget):
+class NoEntry0(ETriangle0):
     """This draws a (British) No Entry sign - a red circle with a white line on it.
     
         possible attributes:
@@ -497,11 +469,8 @@ class NoEntry0(Widget):
 
         """
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        }
+    _attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor', 'color'),
+		)
 
     def __init__(self):
         self.x = 0
@@ -551,7 +520,7 @@ class NoEntry0(Widget):
 
         return g
 
-class NotAllowed0(Widget):
+class NotAllowed0(ETriangle0):
     """This draws a 'forbidden' roundel (as used in the no-smoking sign).
     
         possible attributes:
@@ -559,11 +528,8 @@ class NotAllowed0(Widget):
 
         """
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        }
+    _attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor', 'color'),
+		)
 
     def __init__(self):
         self.x = 0
@@ -638,12 +604,6 @@ class NoSmoking0(NotAllowed0):
 
         """
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        }
-
     def __init__(self):
         self.x = 0
         self.y = 0
@@ -710,7 +670,7 @@ class NoSmoking0(NotAllowed0):
         return g
 
 
-class DangerSign0(Widget):
+class DangerSign0(ETriangle0):
     """This draws a 'danger' sign: a yellow box with a black exclamation point.
 
         possible attributes:
@@ -718,14 +678,11 @@ class DangerSign0(Widget):
 
         """
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'exmarkColor': isColorOrNone(),
-        'backColor': isColorOrNone(), 
-        'exmarkWidth': isNumber() 
-        }
+    _attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor', 'color'),
+        exmarkColor = AttrMapValue( isColorOrNone),
+        backColor = AttrMapValue( isColorOrNone), 
+        exmarkWidth = AttrMapValue( isNumber),
+		)
 
     def __init__(self):
         self.x = 0
@@ -800,7 +757,7 @@ class DangerSign0(Widget):
         return g
 
 
-class YesNo0(Widget):
+class YesNo0(ETriangle0):
     """This widget draw a tickbox or crossbox depending on 'testValue'.
 
         If this widget is supplied with a 'True' or 1 as a value for
@@ -812,14 +769,11 @@ class YesNo0(Widget):
 
 """
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'tickcolor': isColor(),
-        'crosscolor': isColor(),
-        'size': isNumber(),
-        'testValue': isBoolean(),
-        }
+    _attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor', 'color'),
+        tickcolor = AttrMapValue(isColor),
+        crosscolor = AttrMapValue(isColor),
+        testValue = AttrMapValue(isBoolean),
+        )
 
     def __init__(self):
         self.x = 0
@@ -872,7 +826,7 @@ class YesNo0(Widget):
                             fontSize=labelFontSize))
         return D
      
-class FloppyDisk0(Widget):
+class FloppyDisk0(ETriangle0):
     """This widget draws an icon of a floppy disk.
 
         possible attributes:
@@ -880,12 +834,9 @@ class FloppyDisk0(Widget):
 
         """
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'diskColor': isColor()
-        }
+    _attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor', 'color'),
+        diskColor = AttrMapValue(isColor),
+        )
 
     def __init__(self):
         self.x = 0
@@ -964,7 +915,7 @@ class FloppyDisk0(Widget):
 
         return g
 
-class ArrowOne0(Widget):
+class ArrowOne0(ETriangle0):
     """This widget draws an arrow (style one).
 
         possible attributes:
@@ -972,12 +923,8 @@ class ArrowOne0(Widget):
 
         """
 
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'color': isColor()
-        }
+    _attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor',),
+        )
 
     def __init__(self):
         self.x = 0
@@ -1022,20 +969,13 @@ class ArrowOne0(Widget):
 
         return g
 
-class ArrowTwo0(Widget):
+class ArrowTwo0(ArrowOne0):
     """This widget draws an arrow (style two).
 
         possible attributes:
         'x', 'y', 'size', 'color'
 
         """
-
-    _attrMap = {
-        'x': isNumber(),
-        'y': isNumber(),
-        'size': isNumber(),
-        'color': isColor()
-        }
 
     def __init__(self):
         self.x = 0

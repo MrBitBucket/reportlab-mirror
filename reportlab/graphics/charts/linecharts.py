@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.9 2001/05/17 11:17:16 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.10 2001/05/17 16:21:33 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
@@ -11,6 +11,7 @@ from types import FunctionType, ClassType, StringType
 
 from reportlab.lib import colors 
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, isListOfStringsOrNone, SequenceOf
+from reportlab.lib.attrmap import *
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing
 from reportlab.graphics.widgets.signsandsymbols import NoEntry0
@@ -20,11 +21,11 @@ from reportlab.graphics.charts.markers import *
 
 
 class LineChartProperties(PropHolder):
-    _attrMap = {
-        'strokeColor':isColor(),
-        'strokeWidth':isNumber(),
-        'symbol':None
-        }
+    _attrMap = AttrMap(
+        strokeColor = AttrMapValue(isColor),
+        strokeWidth = AttrMapValue(isNumber),
+        symbol = AttrMapValue(None),
+        )
 
 
 class LineChart(Widget):
@@ -69,30 +70,30 @@ class HorizontalLineChart(LineChart):
         data: chart data, a list of data series of equal length
     """
 
-    _attrMap = {
-        'x':isNumber(),
-        'y':isNumber(),
-        'width':isNumber(),
-        'height':isNumber(),
+    _attrMap = AttrMap(
+        x = AttrMapValue(isNumber),
+        y = AttrMapValue(isNumber),
+        width = AttrMapValue(isNumber),
+        height = AttrMapValue(isNumber),
 
-        'useAbsolute':isNumber(),
-        'lineLabelNudge':isNumber(),
-        'lineLabels':None,
-        'lineLabelFormat':None,
-        'groupSpacing':isNumber(),
+        useAbsolute = AttrMapValue(isNumber),
+        lineLabelNudge = AttrMapValue(isNumber),
+        lineLabels = AttrMapValue(None),
+        lineLabelFormat = AttrMapValue(None),
+        groupSpacing = AttrMapValue(isNumber),
 
-        'joinedLines':isNumber(),
+        joinedLines = AttrMapValue(isNumber),
 
-        'strokeColor':isColorOrNone(),
-        'fillColor':isColorOrNone(),
-        'defaultStyles':None,
+        strokeColor = AttrMapValue(isColorOrNone),
+        fillColor = AttrMapValue(isColorOrNone),
+        defaultStyles = AttrMapValue(None),
 
-        'valueAxis':None,
-        'categoryAxis':None,
-        'categoryNames':isListOfStringsOrNone(),
+        valueAxis = AttrMapValue(None),
+        categoryAxis = AttrMapValue(None),
+        categoryNames = AttrMapValue(isListOfStringsOrNone),
 
-        'data':None
-        }
+        data = AttrMapValue(None),
+        )
 
     def __init__(self):
         self.x = 0
