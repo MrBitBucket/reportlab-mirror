@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: stdparser.py,v $
+#	Revision 1.9  2000/07/10 15:25:47  andy_robinson
+#	Added tables to PythonPoint
+#
 #	Revision 1.8  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
-#
+#	
 #	Revision 1.7  2000/05/16 23:52:38  andy_robinson
 #	Bug in Image tag
 #	
@@ -118,6 +121,13 @@ class PPMLParser(xmllib.XMLParser):
             'width':'None',
             'height':'None'
             },
+        'table': {
+            'widths':'None',
+            'heights':'None',
+            'fieldDelim':',',
+            'rowDelim':'\n',
+            'style':'None'
+            },
         'rectangle': {
             'x':'0',
             'y':'0',
@@ -184,6 +194,9 @@ class PPMLParser(xmllib.XMLParser):
     
     def __init__(self):
         self.presentations = []
+        #yes, I know a generic stack would be easier...
+        #still, testing if we are 'in' something gives
+        #a degree of validation.
         self._curPres = None
         self._curSection = None
         self._curSlide = None
@@ -191,6 +204,7 @@ class PPMLParser(xmllib.XMLParser):
         self._curPara = None  #the only places we are interested in
         self._curPrefmt = None
         self._curString = None
+        self._curTable = None
         xmllib.XMLParser.__init__(self)
 
     def _arg(self,tag,args,name):
@@ -218,7 +232,8 @@ class PPMLParser(xmllib.XMLParser):
         
     def handle_data(self, data):
         #the only data should be paragraph text, preformatted para
-        #text, or 'string text' for a fixed string on the page
+        #text, 'string text' for a fixed string on the page,
+        #or table data
         
         if self._curPara:
             self._curPara.rawtext = self._curPara.rawtext + data
@@ -226,6 +241,8 @@ class PPMLParser(xmllib.XMLParser):
             self._curPrefmt.rawtext = self._curPrefmt.rawtext + data
         elif  self._curString:
             self._curString.text = self._curString.text + data
+        elif self._curTable:
+            self._curTable.rawBlocks.append(data)
             
     def handle_cdata(self, data):
         #just append to current paragraph text, so we can quote XML
@@ -346,6 +363,31 @@ class PPMLParser(xmllib.XMLParser):
         self._curFrame.content.append(self._curImage)
         self._curImage = None
 
+    def start_table(self, args):
+        self._curTable = pythonpoint.PPTable()
+        self._curTable.widths = self.ceval('table',args,'widths')
+        self._curTable.heights = self.ceval('table',args,'heights')
+        #these may contain escapes like tabs - handle with
+        #a bit more care.
+        if args.has_key('fieldDelim'):
+            self._curTable.fieldDelim = eval('"' + args['fieldDelim'] + '"')
+        if args.has_key('rowDelim'):
+            self._curTable.rowDelim = eval('"' + args['rowDelim'] + '"')
+        if args.has_key('style'):
+            self._curTable.style = args['style']
+        
+        
+        
+    def end_table(self):
+        self._curFrame.content.append(self._curTable)
+        self._curTable = None
+
+    def start_spacer(self, args):
+        """No contents so deal with it here."""
+        sp = pythonpoint.PPSpacer()
+        sp.height = eval(args['height'])
+        self._curFrame.content.append(sp)
+        
 
     ## the graphics objects - go into either the current section
     ## or the current slide.

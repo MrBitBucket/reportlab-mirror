@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.22  2000/07/10 15:25:47  andy_robinson
+#	Added tables to PythonPoint
+#
 #	Revision 1.21  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
-#
+#	
 #	Revision 1.20  2000/05/23 14:06:45  andy_robinson
 #	Preformatted objects now know how to split themselves.
 #	
@@ -99,7 +102,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.21 2000/06/01 15:23:06 rgbecker Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.22 2000/07/10 15:25:47 andy_robinson Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -131,6 +134,8 @@ The currently available 'Presentation Objects' are:
         PPPara - flowing text
         PPPreformatted - text with line breaks and tabs, for code..
         PPImage
+        PPTable - bulk formatted tabular data
+        PPSpacer
 
     Things to draw directly on the page...
         PPRect
@@ -147,11 +152,13 @@ import pprint
 import imp
 
 from reportlab.pdfgen import canvas
-from reportlab.platypus import Preformatted, Paragraph, Frame, Image
+from reportlab.platypus import Preformatted, Paragraph, Frame, Image, \
+     Table, TableStyle, Spacer
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib import styles
 import stdparser 
 from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
+from reportlab.lib import colors
 
 class PPPresentation:
     def __init__(self):
@@ -295,7 +302,61 @@ class PPImage:
     def getFlowable(self):
         return Image(self.filename, self.width, self.height)
 
+class PPTable:
+    """Designed for bulk loading of data for use in presentations."""
+    def __init__(self):
+        self.rawBlocks = [] #parser stuffs things in here...
+        self.fieldDelim = ','  #tag args can override
+        self.rowDelim = '\n'   #tag args can override
+        self.data = None
+        self.style = None  #tag args must specify
+        self.widths = None  #tag args can override
+        self.heights = None #tag args can override
 
+    def getFlowable(self):
+        self.parseData()
+        t = Table(
+                self.widths,
+                self.heights,
+                self.data)
+        if self.style:
+            t.setStyle(getStyles()[self.style])
+
+        return t
+                
+    def parseData(self):
+        """Try to make sense of the table data!"""
+        rawdata = string.strip(string.join(self.rawBlocks, ''))
+        lines = string.split(rawdata, self.rowDelim)
+        #clean up...
+        lines = map(string.strip, lines)
+        self.data = []
+        for line in lines:
+            cells = string.split(line, self.fieldDelim)
+            self.data.append(cells)
+
+        #get the width list if not given
+        if not self.widths:
+            self.widths = [None] * len(self.data[0])
+        if not self.heights:
+            self.heights = [None] * len(self.data)
+        
+    
+##        import pprint
+##        print 'table data:'
+##        print 'style=',self.style
+##        print 'widths=',self.widths
+##        print 'heights=',self.heights
+##        print 'fieldDelim=',repr(self.fieldDelim)
+##        print 'rowDelim=',repr(self.rowDelim)
+##        pprint.pprint(self.data)
+
+class PPSpacer:
+    def __init__(self):
+        self.height = 24  #points
+
+    def getFlowable(self):
+        return Spacer(72, self.height)
 
     #############################################################
     #
@@ -496,7 +557,9 @@ class PPString:
 
 def getSampleStyleSheet():
     """Returns a dictionary of styles to get you started.  We will
-    provide a way to specify a module of these."""
+    provide a way to specify a module of these.  Note that this
+    ust includes TableStyles as well as ParagraphStyles for any
+    tables you wish to use."""
     stylesheet = {}
     ParagraphStyle = styles.ParagraphStyle
     
@@ -580,6 +643,19 @@ def getSampleStyleSheet():
     para.leading = 18
     para.leftIndent = 36
     stylesheet['Code'] = para
+
+    #now for a table
+    ts = TableStyle([
+         ('FONT', (0,0), (-1,-1), 'Times-Roman', 24),
+         ('LINEABOVE', (0,0), (-1,0), 2, colors.green),
+         ('LINEABOVE', (0,1), (-1,-1), 0.25, colors.black),
+         ('LINEBELOW', (0,-1), (-1,-1), 2, colors.green),
+         ('LINEBEFORE', (-1,0), (-1,-1), 2, colors.black),
+         ('ALIGN', (1,1), (-1,-1), 'RIGHT'),   #all numeric cells right aligned
+         ('TEXTCOLOR', (0,1), (0,-1), colors.red),
+         ('BACKGROUND', (0,0), (-1,0), colors.Color(0,0.7,0.7))
+         ])
+    stylesheet['table1'] = ts
 
     return stylesheet
 

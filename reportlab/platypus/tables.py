@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.19  2000/07/10 15:25:47  andy_robinson
+#	Added tables to PythonPoint
+#
 #	Revision 1.18  2000/07/08 15:30:04  rgbecker
 #	Cosmetics and error testing
-#
+#	
 #	Revision 1.17  2000/07/07 16:22:10  rgbecker
 #	Fix auto hieght stuff
 #	
@@ -83,7 +86,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.18 2000/07/08 15:30:04 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.19 2000/07/10 15:25:47 andy_robinson Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -135,7 +138,7 @@ class TableStyle:
 TableStyleType = type(TableStyle())
 		
 class Table(Flowable):
-	def __init__(self, colWidths, rowHeights, data):
+	def __init__(self, colWidths, rowHeights, data, style=None):
 		if not colWidths:
 			raise ValueError, "Table must have at least 1 column"
 		if not rowHeights:
@@ -157,6 +160,9 @@ class Table(Flowable):
 		self._bkgrndcmds = []
 		self._linecmds = []
 		self._curweight = self._curcolor = self._curcellstyle = None
+
+		if style:
+			self.setStyle(style)
 
 	def _calc(self):
 		if hasattr(self,'_argH'):

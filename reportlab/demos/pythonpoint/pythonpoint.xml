@@ -183,6 +183,26 @@
         <customshape module="customshapes" class="Jigsaw" initargs="(700,200,1)"/>
     </slide>
 
+	<slide id="Slide008a" title="Tables" effectname='Glitter' outlinelevel='1'>
+        <frame x="120" y="72" width="700" height="468" 
+			leftmargin="36" rightmargin="36">
+            <para style='Heading1'>Tables</para>
+            <para>The Table tag lets you paste in bulk data and format it attractively:</para>
+			<spacer height="24"/>
+			<table widths="(144,72,72,72,108)" 
+				   heights="(28,28,28,28,28)"
+				   style="table1"
+				   >
+				Division,Jan,Feb,Mar,Q1 Total
+				North,100,115,120,335
+				South,215,145,180,540
+				East,75,90,135,300
+				West,100,120,115,335
+			</table>
+        </frame>
+
+    </slide>
+
 	<slide id="Slide009" title="Future Features" effectname='Glitter' outlinelevel='1'>
         <frame x="120" y="72" width="700" height="468" 
 			leftmargin="36" rightmargin="36">
