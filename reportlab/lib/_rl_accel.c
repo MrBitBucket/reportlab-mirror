@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.11 2001/03/22 00:23:38 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.12 2001/03/22 19:21:47 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.11 2001/03/22 00:23:38 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.12 2001/03/22 19:21:47 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -446,13 +446,39 @@ static char* _AttrDict_tp_doc=
 \n\
 ";
 
-static getattrfunc dict_getattr;
+static PyObject * _AttrDict_copy(register PyObject *self, PyObject *args)
+{
+	PyObject *r;
+	if (!PyArg_NoArgs(args)) return NULL;
+	self->ob_type=&PyDict_Type;
+	r = PyDict_Copy((PyObject*)self);
+	self->ob_type=&_AttrDictType;
+	if(r) r->ob_type=&_AttrDictType;
+	return r;
+}
+static PyObject * _AttrDict_clear(register PyObject *self, PyObject *args)
+{
+	if (!PyArg_NoArgs(args)) return NULL;
+	self->ob_type=&PyDict_Type;
+	PyDict_Clear(self);
+	self->ob_type=&_AttrDictType;
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
+static PyMethodDef mapp_methods[] = {
+	{"clear",	(PyCFunction)_AttrDict_clear, METH_OLDARGS, "D.clear() -> None.  Remove all items from D."},
+	{"copy",	(PyCFunction)_AttrDict_copy, METH_OLDARGS, "D.copy() -> a shallow copy of D"},
+	{NULL,		NULL}		/* sentinel */
+	};
+static PyMethodChain _AttrDict_MethodChain[2];
+
 static	PyObject *_AttrDict_getattr(PyObject* self, char* name)
 {
 	PyObject* r;
 	self->ob_type=&PyDict_Type;
 	r = PyDict_GetItemString(self,name);
-	if(!r) r = dict_getattr(self,name);
+	if(!r) r = Py_FindMethodInChain(&_AttrDict_MethodChain[0],self,name);
 	self->ob_type=&_AttrDictType;
 	return r;
 }
@@ -461,7 +487,12 @@ static int _AttrDict_setattr(PyObject* self, char *name, PyObject* value)
 {
 	int	r;
 	self->ob_type=&PyDict_Type;
-	r = PyDict_SetItemString(self,name,value);
+	if(value){
+		r = PyDict_SetItemString(self,name,value);
+		}
+	else {
+		r = PyDict_DelItemString(self,name);
+		}
 	self->ob_type=&_AttrDictType;
 	return r;
 }
@@ -469,7 +500,7 @@ static int _AttrDict_setattr(PyObject* self, char *name, PyObject* value)
 static PyObject *_AttrDict(PyObject *self, PyObject *args)
 {
 	PyObject *r;
-	if (!PyArg_NoArgs(args)) return NULL;
+	if (!PyArg_ParseTuple(args,":_attrDict")) return NULL;
 
 	r = PyDict_New();
 	if(!r) return NULL;
@@ -537,14 +568,13 @@ static struct PyMethodDef _methods[] = {
 /*Initialization function for the module (*must* be called init_pdfmetrics)*/
 void init_rl_accel()
 {
-	PyObject *m, *d;
+	PyObject *m, *d, *v;
 	int i=0;
 
 	/*set up our modified dictionary type*/
 	_AttrDictType = PyDict_Type;
 	_AttrDictType.tp_doc = _AttrDict_tp_doc;
 	_AttrDictType.tp_name = "_AttrDict";
-	dict_getattr = _AttrDictType.tp_getattr;
 	_AttrDictType.tp_getattr = _AttrDict_getattr;
 	_AttrDictType.tp_setattr = _AttrDict_setattr;
 	_AttrDict_as_mapping.mp_length = _AttrDictType.tp_as_mapping->mp_length;
@@ -557,6 +587,12 @@ void init_rl_accel()
 
 	/*Add some symbolic constants to the module */
 	d = PyModule_GetDict(m);
+	v = PyObject_GetAttrString(d,"has_key");
+	_AttrDict_MethodChain[0].methods = mapp_methods;
+	_AttrDict_MethodChain[0].link = &_AttrDict_MethodChain[1];
+	_AttrDict_MethodChain[1].methods = (PyMethodDef*)(((PyCFunctionObject*)v)->m_ml);
+	_AttrDict_MethodChain[1].link = NULL;
+	Py_DECREF(v);
 	ErrorObject = PyString_FromString("_rl_accel.error");
 	PyDict_SetItemString(d, "error", ErrorObject);
 	moduleVersion = PyString_FromString(VERSION);
