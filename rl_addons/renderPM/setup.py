@@ -18,14 +18,10 @@ if __name__=='__main__': #NO RUNTESTS
 	LIBART_SRCS=glob(pJoin(LIBART_DIR, 'art_*.c'))
 	GT1_DIR=pJoin(DEVEL_DIR,'gt1')
 	GLIB_DIR=pJoin(DEVEL_DIR,'glib')
-	if sys.platform=="win32":
-		LIBS=[]
-	elif sys.platform=="sunos5":
-		LIBS=[]
-	elif sys.platform=="mac":
+	if sys.platform in ['win32', 'sunos5', 'freebsd4', 'mac',]:
 		LIBS=[]
 	else:
-		print "Don't know about other systems"
+		raise ValueError, "Don't know about other systems"
 
 	setup(	name = "_renderPM",
 			version = "0.0",
