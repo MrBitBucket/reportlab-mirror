@@ -1,16 +1,16 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/cvs_status.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/cvs_status.py,v 1.2 2001/04/05 09:30:12 rgbecker Exp $
+#$Header: /tmp/reportlab/utils/cvs_status.py,v 1.3 2002/01/19 19:06:21 rgbecker Exp $
 from string import find, strip
 import os
 def cvs_status(path):
-	"Extract a list of paths from a CVS statuts command response file."
+	"Extract a list of paths from a CVS status command response file."
 	cwd = os.getcwd()
 	try:
 		os.chdir(path)
 		repos = open(os.path.join('CVS','Repository'),'r').readlines()[0][:-1]+'/'
-		cmd = os.popen('CVS -z9 status','r')
+		cmd = os.popen('CVS -z3 status','r')
 		lines = cmd.readlines()
 		cmd.close()
 		unknown = filter(lambda x:find(x, "? ") == 0, lines)

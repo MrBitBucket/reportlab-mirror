@@ -1,16 +1,14 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/cvslh.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/cvslh.py,v 1.4 2000/10/25 08:57:46 rgbecker Exp $
+#$Header: /tmp/reportlab/utils/cvslh.py,v 1.5 2002/01/19 19:06:21 rgbecker Exp $
 #
-#	after cvs -z7 log >\tmp\log
-#
-#	python cvslh.py -d"2000/04/10 14:00:00" <\tmp\log >\tmp\hacked_log
+#	python cvslh.py -d"2000/04/10 14:00:00" >\tmp\hacked_log
 #
 #	makes a reasonably formatted file of the log entries since the specified
-#	date.
+#	date. Use -r to reverse the time order, -f to get just a list of the modified files.
 #
-import re, sys, getopt, string
+import re, sys, os, getopt, string, tempfile
 class logFileEntry:
 	def __init__(self, version):
 		self.version = version
@@ -49,7 +47,7 @@ class Change:
 reWorking=re.compile('^Working +file: +(.*)$')
 reVersion=re.compile('^revision +(.*)$')
 reDate=re.compile('^date: +([^;]*); +author: +([^;]*)')
-opt={'-d': None}
+opt={'-d': '7 days ago'}
 def findWorking():
 	global i, lines
 	while i<len(lines):
@@ -79,11 +77,7 @@ def findVersion(F):
 					i = i + 1
 				E.comment = l
 				i = i + 1
-			if opt['-d']:
-				ok = opt['-d']<=E.date
-			else:
-				ok = 1
-			if ok: F.addEntry(E)
+			F.addEntry(E)
 		else:
 			if reWorking.search(lines[i]): return None
 			i = i + 1
@@ -95,38 +89,50 @@ def sortFunc(a, b):
 	elif a.name<b.name: return -1
 	elif a.name>b.name: return 1
 	else: return 0
+
 def sortFuncR(a,b):
 	return -sortFunc(a,b)
 
-opts, argv= getopt.getopt(sys.argv[1:],'rsd:')
-for k,v in opts: opt[k]=v
-if len(argv):
-	lines = open(argv[0],'r').readlines()
-else:
-	lines = sys.stdin.readlines()
-i = 0
-cL = []
-sortFlag = opt.has_key('-s')
-reverseSort = opt.has_key('-r')
-while 1:
-	f = findWorking()
-	if f is None: break
-	F = logFile(f)
-	while findVersion(F):
-		pass
-	if sortFlag:
+if __name__=='__main__': #noruntests
+	opts, argv= getopt.getopt(sys.argv[1:],'rfd:')
+	for k,v in opts: opt[k]=v
+	#cmd = 'cvs -z3 log -d"%s<now"%s' % (opt['-d'], ' '.join(argv))
+	#sin, sout, serr = os.popen3(cmd,'t')
+	#lines = sout.readlines()
+	#err = serr.read()
+	#print >>sys.stderr, err
+	try:
+		tmp = tempfile.mktemp("_cvslh_%d.tmp" % os.getpid())
+		os.system('cvs -z3 log -d"%s<now"%s >"%s"' % (opt['-d'], ' '.join(argv),tmp))
+		lines = open(tmp,'r').readlines()
+	finally:
+		if os.path.isfile(tmp): os.remove(tmp)
+	i = 0
+	cL = []
+	reverseSort = opt.has_key('-r')
+	filesOnly = opt.has_key('-f')
+	while 1:
+		f = findWorking()
+		if f is None: break
+		F = logFile(f)
+		while findVersion(F):
+			pass
 		F.getChanges(cL)
-	elif F.E != []:
-		print str(F)
 
-if sortFlag:
-	cL.sort(reverseSort and sortFuncR or sortFunc)
-	d = ''
-	for c in cL:
-		if c.date[:10]!=d:
-			d = c.date[:10]
-			print '##### %s #####' % d
-		print '\t%s %s %s' % (c.name, c.version, c.author)
-		C = string.split(c.comment,'\n')
-		for c in C:
-			print '\t\t' + c
+	if not filesOnly:
+		cL.sort(reverseSort and sortFuncR or sortFunc)
+		d = ''
+		for c in cL:
+			if c.date[:10]!=d:
+				d = c.date[:10]
+				print '##### %s #####' % d
+			print '\t%s %s %s' % (c.name, c.version, c.author)
+			C = string.split(c.comment,'\n')
+			for c in C:
+				print '\t\t' + c
+	else:
+		L = []
+		for c in cL:
+			if c.name not in L: L.append(c.name)
+		L.sort()
+		print ' '.join(L)
