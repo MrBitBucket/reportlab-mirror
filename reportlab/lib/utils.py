@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: utils.py,v $
+#	Revision 1.2  2000/08/24 18:19:47  rgbecker
+#	Added _className func
+#
 #	Revision 1.1  2000/08/01 10:50:20  rgbecker
 #	Initial version
-#
-__version__=''' $Id: utils.py,v 1.1 2000/08/01 10:50:20 rgbecker Exp $ '''
+#	
+__version__=''' $Id: utils.py,v 1.2 2000/08/24 18:19:47 rgbecker Exp $ '''
 from types import *
 SeqTypes = (ListType,TupleType)
 import string
@@ -48,3 +51,13 @@ except ImportError:
 		for i in a:
 			s.append('%0.2f' % i)
 		return string.join(s)
+
+def _className(self):
+	'''Return a shortened class name'''
+	try:
+		name = self.__class__.__name__
+		i=string.rfind(name,'.')
+		if i>=0: return name[i+1:]
+		return name
+	except AttributeError:
+		return str(self)
