@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.27  2000/10/18 16:26:17  aaron_watters
+#	moved the outline preprocessing step into the format method (fixes testing error)
+#
 #	Revision 1.26  2000/10/18 05:03:21  aaron_watters
 #	complete revision of pdfdoc.  Not finished (compression missing, testing needed)
 #	I got Robin's last change in at the last moment :)
-#
+#	
 #	Revision 1.24  2000/09/08 10:04:08  rgbecker
 #	Paul Eddington's unix tell() returns a LongIntType bugfix
 #	
@@ -99,7 +102,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.26 2000/10/18 05:03:21 aaron_watters Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.27 2000/10/18 16:26:17 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -229,9 +232,6 @@ class PDFDocument:
 
     def SaveToFile(self, filename, canvas):
         from types import StringType
-        # prepare outline
-        outline = self.outline
-        outline.prepare(self, canvas)
         if type(filename) is StringType:
             myfile = 1
             f = open(filename, "wb")
@@ -319,6 +319,9 @@ class PDFDocument:
     def format(self):
         # register the Catalog/INfo and then format the objects one by one until exhausted
         # (possible infinite loop if there is a bug that continually makes new objects/refs...)
+        # prepare outline
+        outline = self.outline
+        outline.prepare(self, canvas)
         cat = self.Catalog
         info = self.Info
         self.Reference(self.Catalog)
