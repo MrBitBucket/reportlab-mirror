@@ -32,6 +32,9 @@
 #
 ###############################################################################
 #   $Log: genuserguide.py,v $
+#   Revision 1.28  2000/07/13 12:18:32  rgbecker
+#   begin app_demos.py
+#
 #   Revision 1.27  2000/07/13 11:59:45  rgbecker
 #   Added some more
 #
@@ -117,7 +120,7 @@
 #   Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #   initial checkin. user guide generation framework.
 #   
-__version__=''' $Id: genuserguide.py,v 1.27 2000/07/13 11:59:45 rgbecker Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.28 2000/07/13 12:18:32 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -144,7 +147,7 @@ from reportlab.lib.sequencer import getSequencer
 import examples
 import platdemos
 import StringIO
-
+appmode=0
 
 
 from reportlab.lib.corp import ReportLabLogo
@@ -279,11 +282,12 @@ def heading1(text):
     p = Paragraph('Chapter <seq id="Chapter"/> - ' + quickfix(text), H1)
     getStory().append(p)
 
-def Appendix1(text,init=0):
+def Appendix1(text,):
     getStory().append(PageBreak())
-    if init:
+    if not appmode:
         seq.setFormat('Chapter','A')
         seq.reset('Chapter')
+        appmode = 1
     p = Paragraph('Appendix <seq id="Chapter"/> - ' + quickfix(text), H1)
     getStory().append(p)
 
@@ -493,6 +497,7 @@ def run():
     import ch7_custom
     import ch8_future
     
+    import app_demos
 
     # I don't know WHAT is going on here.
     # the submodules all do 'import *',
