@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/doughnut.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/doughnut.py,v 1.5 2003/09/08 17:55:27 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/doughnut.py,v 1.6 2003/09/09 09:58:00 johnprecedo Exp $
 # doughnut chart
 
 """Doughnut chart
@@ -10,7 +10,7 @@ Produces a circular chart like the doughnut charts produced by Excel.
 Can handle multiple series (which produce concentric 'rings' in the chart).
 
 """
-__version__=''' $Id: doughnut.py,v 1.5 2003/09/08 17:55:27 johnprecedo Exp $ '''
+__version__=''' $Id: doughnut.py,v 1.6 2003/09/09 09:58:00 johnprecedo Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -148,7 +148,7 @@ class Doughnut(Widget):
                 labels = [''] * n
             else:
                 for m in n:
-                    labels = labels + [''] * m
+                    labels = list(labels) + [''] * m
         else:
             labels = self.labels
             #there's no point in raising errors for less than enough errors if
@@ -156,14 +156,14 @@ class Doughnut(Widget):
             if type(n) not in (ListType,TupleType):
                 i = n-len(labels)
                 if i>0:
-                    labels = labels + ['']*i
+                    labels = list(labels) + [''] * i
             else:
                 tlab = 0
                 for m in n:
                     tlab = tlab+m
                 i = tlab-len(labels)
                 if i>0:
-                    labels = labels + ['']*i
+                    labels = list(labels) + [''] * i
 
         xradius = self.width/2.0
         yradius = self.height/2.0
