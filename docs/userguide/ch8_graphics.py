@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.4 2001/03/27 15:57:13 johnprecedo Exp $
+#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.5 2001/03/27 16:40:08 johnprecedo Exp $
 from genuserguide import *
 
 heading1("Platform Independent Graphics using $reportlab/graphics$")
@@ -715,8 +715,8 @@ disc("""By default, any attribute without a leading underscore is returned by
 disc("""Once your widget works, you probably want to add support for 
        verification. This involves adding a dictionary to the class called 
        $_verifyMap$, which map from attribute names to 'checking functions'. 
-       The $widgets.py$ module defines a bunch of checking functions with names 
-       like $isNumber$, $isLIstOfShapes$ and so on. You can also simply use $None$, 
+       The $widgetbase.py$ module defines a bunch of checking functions with names 
+       like $isNumber$, $isListOfShapes$ and so on. You can also simply use $None$, 
        which means that the attribute must be present but can have any type. 
        And you can and should write your own checking functions. We want to 
        restrict the "mood" custom attribute to the values "happy", "sad" or 
@@ -767,22 +767,23 @@ disc("""We could not come up with a consistent architecture for designing
 disc("""For simple widgets it is recommended that you do what we did above: 
        select non-overlapping properties, initialize every property on 
        __init__and construct everything when $draw()$ is called. You can 
-       instead have __setattr__ hooks and have things updated when certain 
+       instead have $__setattr__$ hooks and have things updated when certain 
        attributes are set. Consider a pie chart. If you want to expose the 
        individual wedges, you might write code like this:""")
 
 eg("""
-pc = PieChart() 
-pc.backColor = yellow 
-pc.defaultColors = [navy, blue, sky] #used in rotation 
+from reportlab.graphics.charts import piecharts
+pc = piecharts.Pie()
+pc.defaultColors = [navy, blue, skyblue] #used in rotation 
 pc.data = [10,30,50,25] 
-pc.wedges[7].lineWidth = 5 
+pc.wedges[7].strokeWidth = 5 
 """)
-
-todo("We need more of an explainatiuon of what $__setattr__$ hooks' are")
+#removed 'pc.backColor = yellow' from above code example
+disc("")
+todo("We need more of an explaination of what '$__setattr__$ hooks' are")
 
 disc("""The last line is problematic as we have only created four wedges - in 
-       fact we might not have created them yet. Does pc.wedges[7] raise an 
+       fact we might not have created them yet. Does $pc.wedges[7]$ raise an 
        error? Is it a prescription for what should happen if a seventh wedge 
        is defined, used to override the default settings? We dump this 
        problem squarely on the widget author for now, and recommend that you 
@@ -804,35 +805,35 @@ disc("""For now have a look at the following sample code using an early
 
 
 eg("""
-    d = Drawing(400,200)
+from reportlab.lib.colors import *
+from reportlab.graphics import shapes,renderPDF 
+from reportlab.graphics.charts.piecharts import Pie
 
-    d.add(String(100,175,"Without labels", textAnchor="middle"))
-    d.add(String(300,175,"With labels", textAnchor="middle"))
-
-    pc = Pie()
-    pc.x = 25
-    pc.y = 50
-    pc.data = [10,20,30,40,50,60]
-    pc.popouts[0] = 5
-    d.add(pc, 'pie1')
-    
-    pc2 = Pie()
-    pc2.x = 150
-    pc2.y = 50
-    pc2.data = [10,20,30,40,50,60]
-    pc2.labels = ['a','b','c','d','e','f']
-    d.add(pc2, 'pie2')
-
-    pc3 = Pie()
-    pc3.x = 275
-    pc3.y = 50
-    pc3.data = [10,20,30,40,50,60]
-    pc3.labels = ['a','b','c','d','e','f']
-    pc3.labelRadius = 0.65
-    pc3.labelFontName = "Helvetica-Bold"
-    pc3.labelFontSize = 16
-    pc3.labelColor = colors.yellow
-    d.add(pc3, 'pie3')""")
+d = Drawing(400,200)
+d.add(String(100,175,"Without labels", textAnchor="middle"))
+d.add(String(300,175,"With labels", textAnchor="middle"))
+pc = Pie()
+pc.x = 25
+pc.y = 50
+pc.data = [10,20,30,40,50,60]
+pc.wedges[0].popout = 5
+d.add(pc, 'pie1')
+pc2 = Pie()
+pc2.x = 150
+pc2.y = 50
+pc2.data = [10,20,30,40,50,60]
+pc2.labels = ['a','b','c','d','e','f']
+d.add(pc2, 'pie2')
+pc3 = Pie()
+pc3.x = 275
+pc3.y = 50
+pc3.data = [10,20,30,40,50,60]
+pc3.labels = ['a','b','c','d','e','f']
+pc3.wedges.labelRadius = 0.65
+pc3.wedges.fontName = "Helvetica-Bold"
+pc3.wedges.fontSize = 16
+pc3.wedges.fontColor = colors.yellow
+d.add(pc3, 'pie3')""")
 
 
 heading2("Charts ")
@@ -878,17 +879,20 @@ disc("""<para lindent=+36>We use smart collection classes that let you customize
        experimental pie chart:""")
 
 eg("""
-    pc = PieWithWedges()
-    pc.x = 150
-    pc.y = 50
-    pc.data = [10,20,30,40,50,60]
-    pc.labels = ['a','b','c','d','e','f']
-    pc.wedges.strokeWidth=0.5
-    pc.wedges[3].popout = 20
-    pc.wedges[3].strokeWidth = 2
-    pc.wedges[3].strokeDashArray = [2,2]
-    pc.wedges[3].labelRadius = 1.75
-    pc.wedges[3].fontColor = colors.red""")
+d = Drawing(400,200)
+pc = Pie()
+pc.x = 150
+pc.y = 50
+pc.data = [10,20,30,40,50,60]
+pc.labels = ['a','b','c','d','e','f']
+pc.wedges.strokeWidth=0.5
+pc.wedges[3].popout = 20
+pc.wedges[3].strokeWidth = 2
+pc.wedges[3].strokeDashArray = [2,2]
+pc.wedges[3].labelRadius = 1.75
+pc.wedges[3].fontColor = colors.red
+d.add(pc, '')
+""")
  
 disc("""<para lindent=+36>pc.wedges[3] actually lazily creates a little object which holds 
        information about the slice in question; this will be used to format a 
@@ -955,8 +959,8 @@ disc("""You can subclass any chart component and use your replacement instead
        properties.""")
 
 heading3("Labels")
-disc("""One of the most important building blocks is the Label, defined in 
-       reportlab/graphics/charts/textlabel0.py. A label is a string of text 
+disc("""One of the most important building blocks is the <i>Label</i>, defined in 
+       $reportlab/graphics/charts/textlabels.py$. A label is a string of text 
        attached to some chart element. They are used on axes, for titles or 
        alongside axes, or attached to individual data points.""")
 
