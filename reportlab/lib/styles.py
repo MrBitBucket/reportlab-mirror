@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/styles.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/styles.py,v 1.12 2000/12/10 14:04:31 andy_robinson Exp $
-__version__=''' $Id: styles.py,v 1.12 2000/12/10 14:04:31 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/styles.py,v 1.13 2000/12/14 17:11:03 rgbecker Exp $
+__version__=''' $Id: styles.py,v 1.13 2000/12/14 17:11:03 rgbecker Exp $ '''
 
 from reportlab.lib.colors import white, black
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
@@ -245,13 +245,13 @@ def getSampleStyleSheet():
 
     stylesheet.add(ParagraphStyle(name='Bullet',
                                   parent=stylesheet['Normal'],
-                                  firstLineIndent=36,
+                                  firstLineIndent=0,
                                   spaceBefore=3),
                    alias='bu')
 
     stylesheet.add(ParagraphStyle(name='Definition',
                                   parent=stylesheet['Normal'],
-                                  firstLineIndent=36,
+                                  firstLineIndent=0,
                                   leftIndent=36,
                                   bulletIndent=0,
                                   spaceBefore=6,
@@ -263,7 +263,7 @@ def getSampleStyleSheet():
                                   fontName='Courier',
                                   fontSize=8,
                                   leading=8.8,
-                                  firstLineIndent=36,
+                                  firstLineIndent=0,
                                   leftIndent=36))
     
     

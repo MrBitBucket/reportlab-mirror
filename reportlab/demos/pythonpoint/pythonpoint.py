@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/pythonpoint.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.28 2000/11/06 08:05:41 andy_robinson Exp $
-__version__=''' $Id: pythonpoint.py,v 1.28 2000/11/06 08:05:41 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.29 2000/12/14 17:11:03 rgbecker Exp $
+__version__=''' $Id: pythonpoint.py,v 1.29 2000/12/14 17:11:03 rgbecker Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -515,7 +515,7 @@ def getSampleStyleSheet():
     #Indented, for lists
     para = ParagraphStyle('Indent', stylesheet['Normal'])
     para.leftIndent = 36
-    para.firstLineIndent = 36
+    para.firstLineIndent = 0
     stylesheet['Indent'] = para
 
     para = ParagraphStyle('Centered', stylesheet['Normal'])
@@ -563,7 +563,7 @@ def getSampleStyleSheet():
     stylesheet['Heading4'] = para
 
     para = ParagraphStyle('Bullet', stylesheet['Normal'])
-    para.firstLineIndent = 40
+    para.firstLineIndent = -16
     para.leftIndent = 56
     para.spaceBefore = 6
     para.bulletFontName = 'Symbol'
@@ -573,7 +573,7 @@ def getSampleStyleSheet():
 
     para = ParagraphStyle('Definition', stylesheet['Normal'])
     #use this for definition lists
-    para.firstLineIndent = 72
+    para.firstLineIndent = 0
     para.leftIndent = 72
     para.bulletIndent = 0
     para.spaceBefore = 12

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testplatypus.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/test/Attic/testplatypus.py,v 1.20 2000/12/13 17:09:55 rgbecker Exp $
-__version__=''' $Id: testplatypus.py,v 1.20 2000/12/13 17:09:55 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/test/Attic/testplatypus.py,v 1.21 2000/12/14 17:11:03 rgbecker Exp $
+__version__=''' $Id: testplatypus.py,v 1.21 2000/12/14 17:11:03 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -266,7 +266,7 @@ def getExamples():
 	sty = ParagraphStyle('obvious', None)
 	sty.leftIndent = 18
 	sty.rightIndent = 18
-	sty.firstLineIndent = 36
+	sty.firstLineIndent = 18
 	sty.spaceBefore = 6
 	sty.spaceAfter = 6
 	story.append(Paragraph("""Now for some demo stuff - we need some on this page,

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/stylesheet.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/tools/stylesheet.py,v 1.7 2000/10/25 08:57:45 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/tools/stylesheet.py,v 1.8 2000/12/14 17:11:03 rgbecker Exp $
 #standard stylesheet for our manuals
 from reportlab.lib.styles import StyleSheet1, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
@@ -25,7 +25,7 @@ def getStyleSheet():
 
     stylesheet.add(ParagraphStyle(name='Indent1',
                                   leftIndent=36,
-                                  firstLineIndent=36)
+                                  firstLineIndent=0)
                    )
     
     stylesheet.add(ParagraphStyle(name='BodyText',
@@ -83,7 +83,7 @@ def getStyleSheet():
 
     stylesheet.add(ParagraphStyle(name='Bullet',
                                   parent=stylesheet['Normal'],
-                                  firstLineIndent=36,
+                                  firstLineIndent=0,
                                   leftIndent=36,
                                   bulletIndent=18,
                                   spaceBefore=0,
@@ -92,7 +92,7 @@ def getStyleSheet():
 
     stylesheet.add(ParagraphStyle(name='Definition',
                                   parent=stylesheet['Normal'],
-                                  firstLineIndent=36,
+                                  firstLineIndent=0,
                                   leftIndent=36,
                                   bulletIndent=0,
                                   spaceBefore=6,
@@ -106,7 +106,7 @@ def getStyleSheet():
                                   fontSize=8,
                                   leading=8.8,
                                   leftIndent=36,
-                                  firstLineIndent=36))
+                                  firstLineIndent=0))
 
     stylesheet.add(ParagraphStyle(name='FunctionHeader',
                                   parent=stylesheet['Normal'],

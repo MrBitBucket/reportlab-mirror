@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/tocindex.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/tocindex.py,v 1.4 2000/12/04 13:19:05 rgbecker Exp $
-__version__=''' $Id: tocindex.py,v 1.4 2000/12/04 13:19:05 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/tocindex.py,v 1.5 2000/12/14 17:11:03 rgbecker Exp $
+__version__=''' $Id: tocindex.py,v 1.5 2000/12/14 17:11:03 rgbecker Exp $ '''
 __doc__=''
 """
 This module will contain standard Table of Contents and Index objects.
@@ -38,15 +38,15 @@ levelZeroParaStyle = ParagraphStyle(name='LevelZero',
                                   leading=12)
 levelOneParaStyle = ParagraphStyle(name='LevelOne',
                                    parent = levelZeroParaStyle,
-                                   firstLineIndent = 18,
+                                   firstLineIndent = 0,
                                    leftIndent = 18)
 levelTwoParaStyle = ParagraphStyle(name='LevelTwo',
                                    parent = levelOneParaStyle,
-                                   firstLineIndent = 36,
+                                   firstLineIndent = 0,
                                    leftIndent = 36)
 levelThreeParaStyle = ParagraphStyle(name='LevelThree',
                                    parent = levelTwoParaStyle,
-                                   firstLineIndent = 54,
+                                   firstLineIndent = 0,
                                    leftIndent = 54)
 
 defaultTableStyle = tables.TableStyle([

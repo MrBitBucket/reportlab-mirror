@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch5_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch5_paragraphs.py,v 1.6 2000/10/25 08:57:45 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch5_paragraphs.py,v 1.7 2000/12/14 17:11:03 rgbecker Exp $
 from genuserguide import *
 
 #begin chapter oon paragraphs
@@ -105,17 +105,17 @@ parabox(sample,
 
 disc("""The $firstLineIndent$, $leftIndent$ and $rightIndent$ attributes do exactly
 what you would expect.  If you want a straight left edge, remember
-to set $firstLineIndent$ equal to $leftIndent$.""")
+to set $firstLineIndent$ equal to 0.""")
 
 parabox(sample,
         ParagraphStyle('indented',
-                       firstLineIndent=48,
+                       firstLineIndent=+24,
                        leftIndent=24,
                        rightIndent=24),
         'one third inch indents at left and right, two thirds on first line'
         )
 
-disc("""Setting $firstLineIndent$ equal to zero, $leftIndent$
+disc("""Setting $firstLineIndent$ equal to a negative number, $leftIndent$
 much higher, and using a
 different font (we'll show you how later!) can give you a
 definition list:.""")
