@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/genuserguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/genuserguide.py,v 1.1 2001/10/05 12:33:33 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/genuserguide.py,v 1.2 2001/10/26 13:15:41 rgbecker Exp $
 
-__version__=''' $Id: genuserguide.py,v 1.1 2001/10/05 12:33:33 rgbecker Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.2 2001/10/26 13:15:41 rgbecker Exp $ '''
 
 __doc__ = """
 This module contains the script for building the user guide.
@@ -60,6 +60,8 @@ def makeSuite():
 								   'userguide.pdf')
 
 if __name__=="__main__":
+	prof = '-prof' in sys.argv
+	if prof: sys.argv.remove('-prof')
 	if len(sys.argv) > 1:
 		try:
 			(w, h) = eval(sys.argv[1])
@@ -69,4 +71,8 @@ if __name__=="__main__":
 		print 'set page size to',sys.argv[1]
 	else:
 		(w, h) = defaultPageSize
-	run((w, h))
+	if prof:
+		import profile
+		profile.run('run((w, h))','genuserguide.stats')
+	else:
+		run((w, h))
