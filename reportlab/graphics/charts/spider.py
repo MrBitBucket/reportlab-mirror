@@ -1,7 +1,7 @@
     #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/spider.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/spider.py,v 1.6 2003/03/04 15:23:10 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/spider.py,v 1.7 2003/06/09 17:41:25 johnprecedo Exp $
 # spider chart, also known as radar chart
 
 """Spider Chart
@@ -10,7 +10,7 @@ Normal use shows variation of 5-10 parameters against some 'norm' or target.
 When there is more than one series, place the series with the largest
 numbers first, as it will be overdrawn by each successive one.
 """
-__version__=''' $Id: spider.py,v 1.6 2003/03/04 15:23:10 rgbecker Exp $ '''
+__version__=''' $Id: spider.py,v 1.7 2003/06/09 17:41:25 johnprecedo Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -29,6 +29,7 @@ from reportlab.graphics.shapes import Group, Drawing, Line, Rect, Polygon, Ellip
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.areas import PlotArea
 from textlabels import Label
+from reportlab.graphics.widgets.markers import Marker
 
 _ANGLE2ANCHOR={0:'w', 45:'sw', 90:'s', 135:'se', 180:'e', 225:'ne', 270:'n', 315: 'nw'}
 def _findNearestAngleValue(angle,D):
@@ -55,6 +56,9 @@ class StrandProperties(PropHolder):
         fontSize = AttrMapValue(isNumber),
         fontColor = AttrMapValue(isColorOrNone),
         labelRadius = AttrMapValue(isNumber),
+        markers = AttrMapValue(isBoolean),
+        markerType = AttrMapValue(isAnything),
+        markerSize = AttrMapValue(isNumber)
         )
 
     def __init__(self):
@@ -66,6 +70,9 @@ class StrandProperties(PropHolder):
         self.fontSize = STATE_DEFAULTS["fontSize"]
         self.fontColor = STATE_DEFAULTS["fillColor"]
         self.labelRadius = 1.2
+        self.markers = 0
+        self.markerType = None
+        self.markerSize = 0
 
 class SpiderChart(PlotArea):
     _attrMap = AttrMap(BASE=PlotArea,
@@ -155,6 +162,7 @@ class SpiderChart(PlotArea):
         direction = self.direction == "clockwise" and -1 or 1
         angleBetween = direction*(2 * pi)/n
         labels = self.labels
+        markers = self.strands.markers
         for i in xrange(n):
             car = cos(angle)*radius
             sar = sin(angle)*radius
@@ -206,6 +214,19 @@ class SpiderChart(PlotArea):
 
                 g.add(strand)
 
+                # put in a marker, if it needs one
+                if markers:
+                    marker = Marker(kind = self.strands[rowIdx].markerType,
+                                    size = self.strands[rowIdx].markerSize,
+                                    x =  centerx+car*r,
+                                    y = centery+sar*r,
+                                    fillColor = self.strands[rowIdx].fillColor,
+                                    strokeColor = self.strands[rowIdx].strokeColor,
+                                    strokeWidth = self.strands[rowIdx].strokeWidth,
+                                    angle = 0,
+                                    )
+                    g.add(marker)
+
             rowIdx = rowIdx + 1
 
         # spokes go over strands
@@ -232,8 +253,38 @@ def sample1():
     return d
 
 
+def sample2():
+    "Make a spider chart with markers, but no fill"
+
+    d = Drawing(400, 400)
+
+    pc = SpiderChart()
+    pc.x = 50
+    pc.y = 50
+    pc.width = 300
+    pc.height = 300
+    pc.data = [[10,12,14,16,14,12], [6,8,10,12,9,15],[7,8,17,4,12,8,3]]
+    pc.labels = ['U','V','W','X','Y','Z']
+    pc.strands.strokeWidth = 2
+    pc.strands[0].fillColor = None
+    pc.strands[1].fillColor = None
+    pc.strands[2].fillColor = None
+    pc.strands[0].strokeColor = colors.red
+    pc.strands[1].strokeColor = colors.blue
+    pc.strands[2].strokeColor = colors.green
+    pc.strands.markers = 1
+    pc.strands.markerType = "FilledDiamond"
+    pc.strands.markerSize = 6
+
+    d.add(pc)
+
+    return d
+
+
 if __name__=='__main__':
     d = sample1()
     from reportlab.graphics.renderPDF import drawToFile
     drawToFile(d, 'spider.pdf')
+    d = sample2()
+    drawToFile(d, 'spider2.pdf')
     #print 'saved spider.pdf'
