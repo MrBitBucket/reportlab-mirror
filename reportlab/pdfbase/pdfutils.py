@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.35 2002/11/21 11:21:56 rgbecker Exp $
-__version__=''' $Id: pdfutils.py,v 1.35 2002/11/21 11:21:56 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.36 2002/11/27 20:16:24 rgbecker Exp $
+__version__=''' $Id: pdfutils.py,v 1.36 2002/11/27 20:16:24 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -30,7 +30,7 @@ def cacheImageFile(filename, returnInMemory=0, IMG=None):
     cachedname = os.path.splitext(filename)[0] + '.a85'
     if filename==cachedname:
         if cachedImageExists(filename):
-            if returnInMemory: return split(open_for_read(cachedname,'t').read(),LINEEND)[:-1]
+            if returnInMemory: return split(open_for_read(cachedname).read(),LINEEND)[:-1]
         else:
             raise IOError, 'No such cached image %s' % filename
     else:
