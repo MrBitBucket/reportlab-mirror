@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.11 2001/03/28 20:49:26 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.12 2001/03/28 22:09:32 dinu_gherman Exp $
 
 from genuserguide import *
 
@@ -79,9 +79,10 @@ disc("""The charting requirements are based on a commercial sponsor who
 needs to create batches of charts rapidly with precise control over
 layout.""")
 
-heading3("Using reportlab/graphics")
 
-heading4("Drawings and Renderers")
+heading2("General Concepts")
+
+heading3("Drawings and Renderers")
 
 disc("""A Drawing is a platform-independent description of a collection of 
        shapes. It is not directly associated with PDF, Postscript or any 
@@ -113,166 +114,22 @@ disc("""The PDF renderer has "special privileges" - a Drawing object is a
        the PDF renderer has a utility function to make a one-page PDF 
        quickly.""")
 
-##heading4("Getting Started")
-##
-##disc("""Let's create a simple drawing containing the string "Hello World", 
-##       displayed on top of a coloured rectangle. We will then save it to a 
-##       standalone file.""")
-##
-##eg("""
-##    from reportlab.lib import colors
-##    from reportlab.graphics import renderPDF 
-##    from reportlab.graphics.shapes import Drawing, Rect, String
-## 
-##    D = Drawing(400, 200)
-##    D.add(Rect(50, 50, 300, 100, fillColor=colors.yellow))
-##    D.add(String(150,100, 'Hello World',
-##                 fontSize=18, fillColor=colors.red))
-## 
-##    renderPDF.drawToFile(D, 'example1.pdf', 'My First Drawing') 
-##""")
-##
-##disc("This will produce a PDF file containing the following graphic: ")
-##
-##from reportlab.graphics.shapes import * 
-##from reportlab.graphics import testshapes
-##t=testshapes.getDrawing01()
-##draw(t, "'Hello World'")
-## 
-##disc("""The Y coordinate counts from the bottom up. This is correct for PDF 
-##       and Postscript, and appears to be natural for people, especially when 
-##       working with charts.""")
-##
-##disc("""Each renderer is allowed to do whatever is appropriate for its format, 
-##       and may have whatever API is needed. If it refers to a file format, it 
-##       usually has a $drawToFile$ function, and that's all you need to know 
-##       about the renderer. Let's save this file as Encapsulated Postscript: """)
-##
-####eg("""
-####    from reportlab.graphics import renderPS 
-####    renderPS.drawToFile(D, 'example1.eps', 'My First Drawing') 
-####""")
-##eg("""
-##    from reportlab.graphics import renderPS 
-##    renderPS.drawToFile(D, 'example1.eps') 
-##""")
-##
-##disc("""This will produce an EPS file with the identical drawing, which may be 
-##       imported into publishing tools such as Quark Express.""")
-
-heading2("""Shapes """)
-
-disc("""Drawings are made up of Shapes. Any graphical object can be
-built up by using the same set of simple shapes.
-The module $shapes.py$ supplies a number of primitive shapes and 
-constructs which can be added to a drawing:""")
-
-bullet("Rect (optionally with rounded corners) ")
-bullet("Circle ")
-bullet("Ellipse ")
-bullet("Wedge (a pie slice) ")
-bullet("Polygon ")
-bullet("Line ")
-bullet("PolyLine ")
-bullet("String ")
-bullet("Group ")
-bullet("Path (<i>not implemented yet, but will be added in the future</i>)")
-
-
-##disc("This drawing, taken from our test suite, shows most of the basic shapes: ")
-##todo("add image")
-##
-##t=testshapes.getDrawing06()
-##draw(t, "Basic shapes")
- 
-heading3("Shape Properties")
-
-disc("""Shapes have two kinds of properties - some to define their geometry 
-and some to define their style.
-All shapes have a number of properties which can be set.
-At an interactive prompt, we can use their <i>dumpProperties()</i> method
-to list these.
-Here's what you can use to configure a Rect:""")
-
-eg("""
->>> r.dumpProperties()
-fillColor = Color(1.00,0.00,0.00)
-height = 100
-rx = 0
-ry = 0
-strokeColor = Color(0.00,0.50,0.00)
-strokeDashArray = None
-strokeLineCap = 0
-strokeLineJoin = 0
-strokeMiterLimit = 0
-strokeWidth = 3
-width = 200
-x = 5
-y = 5
->>> 
-""")
-
-disc("""Shapes generally have <i>style properties</i> and <i>geometry properties</i>. <i>x</i>, <i>y</i>, 
-       <i>width</i> and <i>height</i> are part of the geometry and must be provided when 
-       creating the rectangle, since it does not make much sense without 
-       those properties. The others are optional and come with sensible 
-       defaults.
-       You may set other properties on subsequent lines, or by passing them 
-       as optional arguments to the constructor.""")
-
-
-heading3("Groups")
-
-disc("""Finally, we have Group objects. A group has a list of contents, which 
-       are other nodes. It can also apply a transformation - its contents can 
-       be rotated, scaled or shifted. If you know the math, you can set the 
-       transform directly. Otherwise it provides methods to rotate, scale and 
-       so on.""")
-
-disc("""Groups provide a tool for reuse. You can make a bunch of shapes to 
-       represent some component - say, a coordinate system - and put them in 
-       one group called "Axis". You can then put that group into other 
-       groups, each with a different translation and rotation, and you get a 
-       bunch of axis. It is still the same group, being drawn in different 
-       places.""")
-
 
 heading3("""Verification """)
 
-disc("""The framework so far would be ideally suited to a type-safe language 
-       like Java or Delphi. Python is very dynamic and lets us type things 
-       which just don't make sense:""")
+disc("""Python is very dynamic and lets us execute statements at run time
+that can easily be the source for unexpected behaviour.
+One subtle 'error' is when assigning to an attribute that the framework
+doesn't know about because the attribute's name contains a typo.
+Python lets you get away with it, but the graphics framework will
+not detect the typo immediately.""")
 
-disc("""These statements would be caught by the compiler in a statically typed 
-       language, but Python lets you get away with it. The first error could 
-       leave you staring at the picture trying to figure out why the colors 
-       were wrong. The second error would probably become clear only later, 
-       when some back end tries to draw the rectangle. The third, though less 
-       likely, results in an invalid object that would not know how to draw 
-       itself.""")
-
-disc("""We have provided two verification techniques. The default is for every 
-       object to check every assignment at run time. This is what happend by 
-       default. So if you make a mistake in an assignment, you get something 
-       like this:""")
-
-disc("""This imposes a performance penalty, so this behaviour can be turned 
-       off when you need it to be. To do this, you should use the following 
-       lines of code before you first import reportlab.graphics.shapes:""")
-
-disc("""Once you turn off shapeChecking, the classes are actually built 
-       without the verification hook; code should get faster.""")
-
-disc("""Currently the penalty seems to be about 25% on batches of charts, so 
-       it is hardly worth disabling. However, if we move the renderers to C 
-       in future (which is eminently possible)), the remaining 75% would 
-       shrink to almost nothing and the saving from verification would be 
-       significant.""")
-
-disc("""Each object, including the drawing itself, has a $verify()$ method. This 
-       either succeeds, or raises an exception. If you turn off automatic 
-       verification, then you shoudl explictly call $verify()$ in testing when 
-       developing the code, or perhaps once in a batch process.""")
+disc("""There are two verification techniques to avoid this situation.
+The default is for every object to check every assignment at run time,
+such that you can only assign to 'legal' attributes.
+This is what happens by default.
+As this imposes a small performance penalty, this behaviour
+can be turned off when you need it to be.""")
 
 
 heading3("""Property Editing """)
@@ -299,184 +156,144 @@ disc("""To support these applications we have two interfaces, $getProperties$
        we need to put the support into the base of the framework.""")
 
 
-disc("""<i>($pprint$ is the standard Python library module that allows you to 'pretty print' output
-over multiple lines rather than having one very long line.)</i>""")
+heading3("""Automatic Documentation""")
 
-disc("""These three methods don't seem to do much here, but as we will see 
-       they make our widgets framework much more powerful when dealing with 
-       non-primitive objects.""")
+disc("""There is work under way on a generic tool to document any
+Python package or module; this will be checked into ReportLab and
+will be used to generate a reference for the ReportLab package.
+When it encounters elements of the graphics library, it will add
+extra sections to the manual.
+So far this works for Widgets (see below), therefore the information
+includes:""")
+
+bullet("the doc string for your Widget class,")
+bullet("""the code snippet from your <i>demo()</i> method, so people
+can see how to use it,""")
+bullet("the Drawing produced by the <i>demo()</i> method and")
+bullet("the property dump for the Widget in the Drawing.")
+
+disc("""This tool means that we can have guaranteed up-to-date 
+documentation on our widgets and chart, both on the web site and in 
+print; and that you can do the same for your own widgets too!""")
 
 
 heading3("Naming Children")
 
-disc("""You can add objects to the $Drawing$ and $Group$ objects. These normally 
-       go into a list of contents. However, you may also give objects a name 
-       when adding them. This allows you to refer to and possibly change any 
-       element of a drawing after constructing it.""")
+disc("""You can add objects to the $Drawing$ and $Group$ objects.
+These normally go into a list of contents.
+However, you may also give objects a name when adding them.
+This allows you to refer to and possibly change any 
+element of a drawing after constructing it.""")
 
-disc("""Note that you can use the same shape instance in several contexts in a 
-       drawing; if you choose to use the same Circle object in many locations 
-       (e.g. a scatter plot) and use different names to access it, it will 
-       still be a shared object and the changes will be global.""")
+disc("""Note that you can use the same shape instance in several
+contexts in a drawing; if you choose to use the same Circle object
+in many locations (e.g. a scatter plot) and use different names
+to access it, it will still be a shared object and the changes
+will be global.""")
 
-disc("""This provides one paradigm for creating and modifying interactive 
-       drawings.""")
+disc("""This provides one paradigm for creating and modifying
+interactive drawings.""")
+
+
+heading2("""Shapes""")
+
+disc("""Drawings are made up of Shapes. Any graphical object can be
+built up by using the same set of simple shapes.
+The module $shapes.py$ supplies a number of primitive shapes and 
+constructs which can be added to a drawing:""")
+
+bullet("Rect (optionally with rounded corners)")
+bullet("Circle")
+bullet("Ellipse")
+bullet("Wedge (a pie slice)")
+bullet("Polygon")
+bullet("Line")
+bullet("PolyLine")
+bullet("String")
+bullet("Group")
+bullet("Path (<i>not implemented yet, but will be added in the future</i>)")
+
+disc("""Shapes generally have <i>style properties</i> and <i>geometry
+properties</i>. <i>x</i>, <i>y</i>, <i>width</i> and <i>height</i> are
+part of the geometry and must be provided when 
+creating the rectangle, since it does not make much sense without 
+those properties.
+You may set other properties on subsequent lines, or by passing them 
+as optional arguments to the constructor.
+The others are optional and come with sensible defaults.
+All shapes have a number of properties which can be set by the user.
+The <i>dumpProperties()</i> method can be used at an interactive prompt
+to list these properties.
+""")
+
+disc("""
+The graphical shapes in the list above are more or less what you
+would expect from reading their names.
+In addition there are also Group objects.
+Groups provide a tool for reuse.
+You can make a bunch of shapes to represent some component - say,
+a coordinate system - and put them in one group called "Axis".
+You can then put that group into other groups, each with a different
+translation and rotation, and you get a bunch of axis.
+It is still the same group, being drawn in different places.""")
 
 
 heading2("""Widgets""") 
 
-disc("""Up until now, Drawings have been 'pure data'. There is no code in them 
-       to actually do anything, except assist the programmer in checking and 
-       inspecting the drawing. In fact, that's the cornerstone of the whole 
-       concept and is what lets us achieve portability - a renderer only 
-       needs to implement the primitive shapes.""")
+disc("""Up until now, Drawings have been 'pure data'.
+In fact, this is what grants portability - a renderer only 
+needs to implement the primitive shapes.""")
 
-disc("""We want to build reusable graphic objects, including a powerful chart 
-       library. To do this we need to reuse more tangible things than 
-       rectangles and circles. We should be able to write objects for other 
-       to reuse - arrows, gears, text boxes, UML diagram nodes, even fully 
-       fledged charts.""")
+disc("""To implement a powerful chart library though, you need
+to reuse more tangible things than rectangles and circles.
+We should be able to write objects for other to reuse - arrows,
+gears, text boxes, UML diagram nodes, even fully fledged charts.""")
 
-disc("""The Widget standard is a standard built on top of the shapes module. 
-       Anyone can write new widgets, and we can build up libraries of them. 
-       Widgets support getProperties and setProperties, so you can inspect 
-       and modify as well as document them in a uniform way.""")
+disc("""This is what widgets are made for, building on top of the
+shapes module. 
+Anyone can write new widgets, and build up libraries of them. 
+Widgets support getProperties and setProperties, so you can inspect 
+and modify as well as document them in a uniform way:""")
 
-bullet("A widget is a reusable shape ")
-bullet("""it can be initialized with no arguments 
+bullet("A widget is a reusable shape.")
+bullet("""It can be initialized with no arguments 
        when its $draw()$ method is called it creates a primitive Shape or a 
-       Group to represent itself""")
+       Group to represent itself.""")
 bullet("""It can have any parameters you want, and they can drive the way it is 
-       drawn""")
-bullet("""it has a $demo()$ method which should return an attractively drawn 
+       drawn.""")
+bullet("""It has a $demo()$ method which should return an attractively drawn 
        example if itself in a 200x100 rectangle. This is the cornerstone of 
        the automatic documentation tools. The $demo()$ method should also have 
        a well written docstring, since that is printed too!""")
 
-disc("""Widgets run contrary to the idea that a drawing is just a bundle of 
-       shapes; surely they have their own code? The way they work is that a 
-       widget can convert itself to a group of primitive shapes. If some of 
-       its components are themselves widgets, they will get converted too. 
-       This happens automatically during rendering; the renderer will not see 
-       your chart widget, but just a collection of rectangles, lines and 
-       strings. You can also explicitly 'flatten out' a drawing, causing all 
-       widgets to be converted to primitives.""")
+disc("""Widgets run contrary to the idea that a drawing is just a
+bundle of shapes.
+The way they work is that a widget can convert itself to a group
+of primitive shapes.
+If some of its components are themselves widgets, they will get
+converted, too. 
+This happens automatically during rendering; the renderer will not
+see a chart widget, but just a collection of rectangles, lines
+and strings.
+A drawing can also explicitly be 'flattened out', causing all 
+widgets to be converted to primitives.""")
 
+disc("""There is one necessary trade-off to allow a uniform
+interface for constructing widgets and documenting them - they
+cannot require arguments in their $__init__$ method.
+Instead, they are generally designed to fit in a 200 x 100 
+window, and you move or resize them by setting properties such
+as x, y, width and so on after creation.""")
 
-
-disc("""One thing which seems strange about the above code is that we did not 
-       set the size or position when we made the face. This is a necessary 
-       trade-off to allow a uniform interface for constructing widgets and 
-       documenting them - they cannot require arguments in their __init__ 
-       method. Instead, they are generally designed to fit in a 200 x 100 
-       window, and you move or resize them by setting properties such as
-       x, y, width and so on after creation.""")
-
-disc("""In addition, a widget always provides a $demo()$ method. Simple ones 
-       like this always do something sensible before setting properties, but 
-       more complex ones like a chart would not have any data to plot. The 
-       documentation tool calls $demo()$ so that your fancy new chart class can 
-       create a drawing showing what it can do.""")
-
-
-heading3("""Compound Widgets """)
-disc("""Let's imagine a compound widget which draws two faces side by side. 
-       This is easy to build when you have the Face widget.""")
-
-
-
-heading3("""Verifying Widgets """)
-
-disc("""The widget designer decides the policy on verification, but by default 
-       they work like shapes - checking every assignment - if the designer 
-       has provided the checking information.""")
-
-
-heading3("""Implementing a Widget """)
-
-disc("""We tried to make it as easy to implement widgets as possible. Here's 
-       the code for a Face widget which does not do any type checking:""")
-
-disc("""We left out all the code to draw the shapes in this document, but you 
-       can find it in the distribution in $widgetbase.py$.""")
-
-disc("""By default, any attribute without a leading underscore is returned by 
-       setProperties. This is a deliberate policy to encourage consistent 
-       coding conventions.""")
-
-disc("""Once your widget works, you probably want to add support for 
-       verification. This involves adding a dictionary to the class called 
-       $_verifyMap$, which map from attribute names to 'checking functions'. 
-       The $widgetbase.py$ module defines a bunch of checking functions with names 
-       like $isNumber$, $isListOfShapes$ and so on. You can also simply use $None$, 
-       which means that the attribute must be present but can have any type. 
-       And you can and should write your own checking functions. We want to 
-       restrict the "mood" custom attribute to the values "happy", "sad" or 
-       "ok". So we do this:""")
-
-disc("""This checking will be performed on every attribute assignment; or, if 
-       $config.shapeChecking$ is off, whenever you call $myFace.verify()$.""")
-
-
-heading3("""Documenting Widgets """)
-
-disc("""We are working on a generic tool to document any Python package or 
-       module; this will be checked into ReportLab an will be used to 
-       generate a reference for the ReportLab package. When it encounters 
-       widgets, it will add extra sections to the manual including""")
-
-bullet("the doc string for your widget class ")
-bullet("the code snippet from your <i>demo()</i> method, so people can see how to use it")
-bullet("the drawing produced by the <i>demo()</i> method ")
-bullet("the property dump for the widget in the drawing. ")
-
-disc("""This tool will mean that we can have guaranteed up-to-date 
-       documentation on our widgets and chart, both on the web site and in 
-       print; and that you can do the same for your own widgets too!""")
-
-
-heading3("""Widget Design Strategies """)
-
-disc("""We could not come up with a consistent architecture for designing 
-       widgets, so we are leaving that problem to the authors! If you do not 
-       like the default verifiction strategy, or the way 
-       $setProperties/getProperties$ works, you can override them yourself.""")
-
-disc("""For simple widgets it is recommended that you do what we did above: 
-       select non-overlapping properties, initialize every property on 
-       __init__and construct everything when $draw()$ is called. You can 
-       instead have $__setattr__$ hooks and have things updated when certain 
-       attributes are set. Consider a pie chart. If you want to expose the 
-       individual wedges, you might write code like this:""")
-
-disc("""The last line is problematic as we have only created four wedges - in 
-       fact we might not have created them yet. Does $pc.wedges[7]$ raise an 
-       error? Is it a prescription for what should happen if a seventh wedge 
-       is defined, used to override the default settings? We dump this 
-       problem squarely on the widget author for now, and recommend that you 
-       get a simple one working before exposing 'child objects' whose 
-       existence depends on other propereties' values :-)""")
-
-disc("""We also discussed rules by which parent widgets could pass properties 
-       to their children. There seems to be a general desire for a global way 
-       to say that 'all wedges get their lineWidth from the lineWidth of 
-       their parent' without a lot of repetitive coding. We do not have a 
-       universal solution, so again leave that to widget authors. We hope 
-       people will experimate with push-down, pull-down and pattern-matching 
-       approaches and come up with something nice. In the meantime, we 
-       certainly can write monolithic chart widgets which work like the ones 
-       in, say, Visual Basic and Delphi.""")
-
-disc("""For now have a look at the following sample code using an early 
-       version of a pie chart widget and the output it generates:""")
+disc("""In addition, a widget always provides a $demo()$ method.
+Simple ones like this always do something sensible before setting
+properties, but more complex ones like a chart would not have any
+data to plot.
+The documentation tool calls $demo()$ so that your fancy new chart
+class can create a drawing showing what it can do.""")
 
 
 heading2("Charts ")
-
-disc("""The motivation for much of this is to create a flexible chart package. 
-       We've done several chart programs with PINGO, on which this package is 
-       based. So far, each one has been a specific program to make a specific 
-       kind of chart. A general framework is much harder!""")
 
 disc("""This section is not finalized and will evolve further. For now we'll 
        try to give a flavour of the isues we are dealing with, and firm them 
@@ -484,7 +301,6 @@ disc("""This section is not finalized and will evolve further. For now we'll
        it right!""")
 
 heading3("Design Goals")
-disc("Here are some of the design goals: ")
 
 disc("<i>Make simple top-level use really simple </i>")
 disc("""<para lindent=+36>It should be possible to create a simple chart with minimum lines of 
@@ -576,6 +392,7 @@ disc("""You can subclass any chart component and use your replacement instead
        of the original provided you implement the essential methods and 
        properties.""")
 
+
 heading3("Labels")
 
 disc("""One of the most important building blocks is the <i>Label</i>, defined in 
@@ -601,6 +418,7 @@ disc("""At present labels have the following properties, which we believe are
 
 todo("""Note: need to turn these into pretty tables with explanations """)
 
+
 heading3("Axes")
 
 disc("""We identify two basic kinds of axes - <i>Value</i> and <i>Category</i> Axes. Both 
@@ -621,45 +439,7 @@ disc("""Remember that you won't have to create axes directly; when using a
        the chart uses to configure it and take care of the geometry. However, 
        we will talk through them in detail below.""")
 
-heading3("XCategoryAxis class")
 
-disc("""A Category Axis doesn't really have a scale; it just divides itself 
-       into equal-sized buckets. It is simpler than a value axis. The chart 
-       (or programmer) sets its location with the method setPosition(x, y, 
-       length). The next stage is to show it the data so that it can 
-       configure itself. This is easy for a category axis - it just counts 
-       the number of data points in one of the data series. When the drawing 
-       is drawn, the axis can provide some help to the chart with its scale() 
-       method, which tells the chart where a given category begins and ends 
-       on the page. We have not yet seen any need to let people override the 
-       widths or positions of categories.""")
-
-
-heading3("""YValueAxis""")
-
-disc("""The left axis in the diagram is a YValueAxis. The XValueAxis 
-       flavour will shortly be available as well! A Value Axis differs from a 
-       Category Axis in that each point along its length corresponds to a y 
-       value in chart space. It is the job of the axis to configure itself, 
-       and to convert Y values from chart space to points on demand to assist 
-       the parent chart in plotting""")
-
-disc("""<i>setPosition(x, y, length)</i> and <i>configure(data)</i> work exactly as 
-       for a category axis. If you have not fully specified the maximum, 
-       minimum and tick interval, then configure() results in the axis 
-       choosing suitable values. One configured, the value axis can convert y 
-       data values to drawing space with the scale() method. Thus:""")
-
-disc("""By default, the highest data point is aligned with the top of the 
-       axis, the lowest with the bottom of the axis, and the axis choose 
-       'nice round numbers' for its tickmark points. You may override these 
-       settings with the properties below. """)
-
-disc("""We hope to add an advanced property to let you explicitly specify the 
-       tick mark locations, so you don't have to follow regular intervals. 
-       You could then plot month ends and month end dates with a couple of 
-       helper functions, and without needing special time series chart 
-       classes.""")
 
 heading3("""Bar Charts""")
 
@@ -764,4 +544,4 @@ disc("""This has not been an exhaustive look at all the chart classes. Those cla
        it on other modules or packages, $graphdocpy.py -h$ print a help
        message that will tell you how.)""")
 
-disc("This is the tool that was mentioned in the section on 'Documenting Widgets'")
+disc("This is the tool that was mentioned in the section on 'Automatic Documentation'")
