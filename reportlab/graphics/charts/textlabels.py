@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.14 2001/09/12 14:58:14 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.15 2001/09/25 16:57:39 rgbecker Exp $
 import string
 
 from reportlab.lib import colors
@@ -192,8 +192,8 @@ class BarChartLabel(Label):
 		visible = AttrMapValue(isBoolean,desc="True if the label is to be drawn"),
 		lineStrokeWidth = AttrMapValue(isNumberOrNone, desc="Non-zero for a drawn line"),
 		lineStrokeColor = AttrMapValue(isColorOrNone, desc="Color for a drawn line"),
-		fixedEnd = AttrMapValue(isNumberOrNone, desc="Non-zero for a fixed draw end"),
-		fixedStart = AttrMapValue(isNumberOrNone, desc="Non-zero for a fixed draw start"),
+		fixedEnd = AttrMapValue(isNumberPair, desc="None or fixed draw ends +/-"),
+		fixedStart = AttrMapValue(isNumberPair, desc="None or fixed draw starts +/-"),
 		nudge = AttrMapValue(isNumber, desc="Non-zero sign dependent nudge"),
 		)
 
