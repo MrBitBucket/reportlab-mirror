@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.62 2003/05/01 22:46:17 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.63 2003/05/11 11:01:30 rgbecker Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.62 2003/05/01 22:46:17 andy_robinson Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.63 2003/05/11 11:01:30 rgbecker Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -166,7 +166,7 @@ class PageTemplate:
     derived classes can also implement beforeDrawPage and afterDrawPage if they want
     """
     def __init__(self,id=None,frames=[],onPage=_doNothing, onPageEnd=_doNothing,
-                 pagesize=defaultPageSize):
+                 pagesize=None):
         if type(frames) not in (ListType,TupleType): frames = [frames]
         assert filter(lambda x: not isinstance(x,Frame), frames)==[], "frames argument error"
         self.id = id
@@ -183,7 +183,7 @@ class PageTemplate:
 
     def checkPageSize(self,canv,doc):
         '''This gets called by the template framework
-        If canv size != doc size then the canv size is set to
+        If canv size != template size then the canv size is set to
         the template size or if that's not available to the
         doc size.
         '''
