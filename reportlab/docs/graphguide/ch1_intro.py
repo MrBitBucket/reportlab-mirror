@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/graphguide/ch1_intro.py,v 1.4 2001/11/08 17:25:37 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/docs/graphguide/ch1_intro.py,v 1.5 2001/11/08 17:30:21 johnprecedo Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 import reportlab
 
@@ -53,7 +53,7 @@ feedback to our user mailing list, reportlab-users@egroups.com.
 
 heading2("What is ReportLab?")
 disc("""ReportLab is a software library that lets you directly
-create documents in Adobe's Portabe Document Format (PDF) using
+create documents in Adobe's Portable Document Format (PDF) using
 the Python programming language. """)
 
 disc("""The ReportLab library directly creates PDF based on
