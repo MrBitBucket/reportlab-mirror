@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.59 2004/03/08 18:36:05 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.59 2004/03/08 18:36:05 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.60 2004/03/17 14:35:51 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.60 2004/03/17 14:35:51 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -119,23 +119,33 @@ else:
     def markfilename(filename,creatorcode=None,filetype=None):
         pass
 
+#Attempt to detect if this copy of reportlab is running in a
+#file system (as opposed to mostly running in a zip or McMillan
+#archive or Jar file).  This is used by test cases, so that
+#we can write test cases that don't get activated in a compiled
+_isFSD=None
+if _isFSD is None:
+    try:
+        __file__
+    except:
+        __file__ = sys.argv[0]
+    try:
+        _isFSD = not __loader__
+    except:
+        _isFSD = os.path.isfile(__file__)   #slight risk of wrong path
+    _isFSSD = _isFSD and os.path.isfile(os.path.splitext(__file__)[0] +'.py')
+
 def isFileSystemDistro():
-    """Attempt to detect if this copy of reportlab is running in a
-    file system (as opposed to mostly running in a zip or McMillan
-    archive or Jar file).  This is used by test cases, so that
-    we can write test cases that don't get activated in a compiled
-    distribution."""
-    # is this safe enough?
-    import reportlab.pdfgen.canvas
-    hypothetical_location = reportlab.pdfgen.canvas
-    return os.path.isfile(hypothetical_location)
+    '''return truth if a file system distribution'''
+    return _isFSD
 
 def isCompactDistro():
-    return not isFileSystemDistro()
+    '''return truth if not a file system distribution'''
+    return not _isFSD
 
 def isSourceDistro():
-    import reportlab.pdfgen.canvas
-    hypothetical_location = reportlab.pdfgen.canvas
+    '''return truth if a source file system distribution'''
+    return _isFSSD
 
 try:
     #raise ImportError
@@ -364,6 +374,9 @@ def open_for_read(name,mode='b'):
     except:
         return open(name,'r'+mode)
 
+def open_and_read(name,mode='b'):
+    return open_for_read(name,mode).read()
+
 class ImageReader:
     "Wraps up either PIL or Java to get data from bitmaps"
     def __init__(self, fileName):
@@ -443,7 +456,6 @@ class ImageReader:
                 return map(ord, palette[transparency:transparency+3])
             else:
                 return None
-
 
 def getImageData(imageFileName):
     "Get width, height and RGB pixels from image file.  Wraps Java/PIL"
