@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.4 2001/04/18 10:48:50 rgbecker Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.4 2001/04/18 10:48:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.5 2001/08/08 19:16:08 rgbecker Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.5 2001/08/08 19:16:08 rgbecker Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
@@ -33,7 +33,7 @@ def framePageForm(c):
     #                        'Page %d' % c.getPageNumber())
     
     #draw a border
-    c.setFillColorRGB(0,0,0.95)
+    c.setFillColor(colors.ReportLabBlue)
     c.rect(0.3*inch, inch, 0.5*inch, 10*inch, fill=1)
     from reportlab.lib import corp
     c.translate(0.8*inch, 9.6*inch)
