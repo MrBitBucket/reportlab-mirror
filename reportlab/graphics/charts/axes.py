@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.8 2001/04/09 14:51:29 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.9 2001/04/09 15:09:25 dinu_gherman Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -442,6 +442,47 @@ class ValueAxis(Widget):
         return valueMin, valueMax
 
 
+    def _calcScaleFactor(self):
+        """Calculate the axis' scale factor.
+
+        This should be called only *after* the axis' range is set.
+        
+        Returns a number.
+        """
+        
+        return self._length * 1.0 / (self._valueMax - self._valueMin) 
+
+
+    def _calcTickmarkPositions(self):
+        """Calculate a list of tick positions on the axis.
+
+        Returns a list of numbers.
+        """
+        
+        # now work out where to put tickmarks.
+        tickmarkPositions = []
+
+        # now work out where to put tickmarks.
+        if self.valueStep == Auto:
+            rawRange = self._valueMax - self._valueMin
+            rawInterval = rawRange * (1.0 * self.minimumTickSpacing / self._length)
+            niceInterval = nextRoundNumber(rawInterval)
+            self._valueStep = niceInterval
+        else:
+            self._valueStep = self.valueStep
+
+        tickmarkPositions = []
+        tick = int(self._valueMin / self._valueStep) * self._valueStep
+        if tick >= self._valueMin:
+            tickmarkPositions.append(tick)
+        tick = tick + self._valueStep
+        while tick <= self._valueMax:
+            tickmarkPositions.append(tick)
+            tick = tick + self._valueStep
+
+        return tickmarkPositions
+
+
     def draw(self):
         g = Group()
 
@@ -558,47 +599,6 @@ class XValueAxis(ValueAxis):
         elif mode == 'fixedPoints':
             self._x = yAxis._x * 1.0
             self._y = points * 1.0
-
-
-    def _calcScaleFactor(self):
-        """Calculate the axis' scale factor.
-
-        This should be called only *after* the axis' range is set.
-        
-        Returns a number.
-        """
-        
-        return self._length * 1.0 / (self._valueMax - self._valueMin) 
-
-
-    def _calcTickmarkPositions(self):
-        """Calculate a list of tick positions on the axis.
-
-        Returns a list of numbers.
-        """
-        
-        # now work out where to put tickmarks.
-        tickmarkPositions = []
-
-        # now work out where to put tickmarks.
-        if self.valueStep == Auto:
-            rawRange = self._valueMax - self._valueMin
-            rawInterval = rawRange * (1.0 * self.minimumTickSpacing / self._length)
-            niceInterval = nextRoundNumber(rawInterval)
-            self._valueStep = niceInterval
-        else:
-            self._valueStep = self.valueStep
-
-        tickmarkPositions = []
-        tick = int(self._valueMin / self._valueStep) * self._valueStep
-        if tick >= self._valueMin:
-            tickmarkPositions.append(tick)
-        tick = tick + self._valueStep
-        while tick <= self._valueMax:
-            tickmarkPositions.append(tick)
-            tick = tick + self._valueStep
-
-        return tickmarkPositions
 
 
     def scale(self, value):
@@ -769,47 +769,6 @@ class YValueAxis(ValueAxis):
         elif mode == 'fixedPoints':
             self._x = points * 1.0
             self._y = xAxis._y * 1.0
-
-
-    def _calcScaleFactor(self):
-        """Calculate the axis' scale factor.
-
-        This should be called only *after* the axis' range is set.
-        
-        Returns a number.
-        """
-        
-        return self._length * 1.0 / (self._valueMax - self._valueMin) 
-
-
-    def _calcTickmarkPositions(self):
-        """Calculate a list of tick positions on the axis.
-
-        Returns a list of numbers.
-        """
-        
-        # now work out where to put tickmarks.
-        tickmarkPositions = []
-
-        # now work out where to put tickmarks.
-        if self.valueStep == Auto:
-            rawRange = self._valueMax - self._valueMin
-            rawInterval = rawRange * (1.0 * self.minimumTickSpacing / self._length)
-            niceInterval = nextRoundNumber(rawInterval)
-            self._valueStep = niceInterval
-        else:
-            self._valueStep = self.valueStep
-
-        tickmarkPositions = []
-        tick = int(self._valueMin / self._valueStep) * self._valueStep
-        if tick >= self._valueMin:
-            tickmarkPositions.append(tick)
-        tick = tick + self._valueStep
-        while tick <= self._valueMax:
-            tickmarkPositions.append(tick)
-            tick = tick + self._valueStep
-
-        return tickmarkPositions
 
 
     def scale(self, value):
