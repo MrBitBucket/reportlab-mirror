@@ -789,7 +789,8 @@ class Paragraph(Flowable):
         if frags:
             plains = []
             for frag in frags:
-                plains.append(frag.text)
+                if hasattr(frag, 'text'):
+                    plains.append(frag.text)
             return join(plains, '')
         elif identify:
             text = getattr(self,'text',None)
