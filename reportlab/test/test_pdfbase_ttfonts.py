@@ -164,11 +164,16 @@ class TTFontFileTestCase(unittest.TestCase):
     def testSubsetting(self):
         "Tests TTFontFile and TTF parsing code"
         ttf = TTFontFile("luxiserif.ttf")
-        subset = ttf.makeSubset([0x2260])
+        subset = ttf.makeSubset([0x41, 0x42])
         subset = TTFontFile(StringIO(subset), 0)
         for tag in ('cmap', 'head', 'hhea', 'hmtx', 'maxp', 'name', 'OS/2',
                     'post', 'cvt ', 'fpgm', 'glyf', 'loca', 'prep'):
             self.assert_(subset.get_table(tag))
+
+        subset.seek_table('loca')
+        for n in range(4):
+            pos = subset.read_ushort()    # this is actually offset / 2
+            self.failIf(pos % 2 != 0, "glyph %d at +%d should be long aligned" % (n, pos * 2))
 
         self.assertEquals(subset.name, "LuxiSerif")
         self.assertEquals(subset.flags, FF_SYMBOLIC)

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.8 2002/09/06 15:53:51 mgedmin Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.9 2002/10/07 11:27:07 mgedmin Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -58,7 +58,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.8 2002/09/06 15:53:51 mgedmin Exp $'
+__version__ = '$Id: ttfonts.py,v 1.9 2002/10/07 11:27:07 mgedmin Exp $'
 
 import string
 from types import StringType
@@ -802,6 +802,10 @@ class TTFontFile(TTFontParser):
                         pos_in_glyph = pos_in_glyph + 8
             glyf.append(data)
             pos = pos + glyphLen
+            if pos % 4 != 0:
+                padding = 4 - pos % 4
+                glyf.append('\0' * padding)
+                pos = pos + padding
         offsets.append(pos)
         output.add('glyf', string.join(glyf, ""))
 
