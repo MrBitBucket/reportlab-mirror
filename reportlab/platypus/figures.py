@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/platdemos.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.12 2003/12/09 16:51:20 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.13 2003/12/10 18:37:40 rgbecker Exp $
 """This includes some demos of platypus for use in the API proposal"""
-__version__=''' $Id: figures.py,v 1.12 2003/12/09 16:51:20 andy_robinson Exp $ '''
+__version__=''' $Id: figures.py,v 1.13 2003/12/10 18:37:40 rgbecker Exp $ '''
 
 import os
 
@@ -142,7 +142,7 @@ class FlexFigure(Figure):
                         background=None)
         self.shrinkToFit = 1 #if set and wrap is too tight, shrinks
         self.growToFit = 1 #if set and wrap is too tight, shrinks
-        self.scaleFactor = 1
+        self.scaleFactor = None
         self.captionStyle = ParagraphStyle(
             'Caption',
             fontName='Times', #'Helvetica-Oblique',
@@ -157,20 +157,18 @@ class FlexFigure(Figure):
         "Rescale to fit according to the rules, but only once"
         if self._scaledWidth <> availWidth:
             self._scaledWidth = availWidth
-            #scale factor None means 'auto'
+            #scale factor None means auto
             if self.scaleFactor is None:
                 self._scaleFactor = availWidth / self.width
             else: #they provided a factor
                 self._scaleFactor = self.scaleFactor
-            #print 'width=%d, scale=%0.2f' % (self.width, self.scaleFactor)
             if self._scaleFactor < 1 and self.shrinkToFit:
-                self.width = self.width * self._scaleFactor
+                self.width = self.width * self._scaleFactor - 0.0001
                 self.figureHeight = self.figureHeight * self._scaleFactor
             elif self._scaleFactor > 1 and self.growToFit:
-                self.width = self.width * self._scaleFactor
+                self.width = self.width * self._scaleFactor - 0.0001
                 self.figureHeight = self.figureHeight * self._scaleFactor
         return Figure.wrap(self, availWidth, availHeight)
-
 
 class ImageFigure(FlexFigure):
     """Image with a caption below it"""
@@ -200,7 +198,7 @@ class DrawingFigure(FlexFigure):
         self.growToFit = 1
         
     def drawFigure(self):
-        self.canv.scale(self.scaleFactor, self.scaleFactor)
+        self.canv.scale(self._scaleFactor, self._scaleFactor)
         self.drawing.drawOn(self.canv, 0, 0)
 
 
@@ -253,7 +251,6 @@ if _hasPageCatcher:
         This needs our commercial PageCatcher product, or you'll get a blank."""
 
         def __init__(self, filename, pageNo, caption, width=595, height=842, background=None):
-            FlexFigure.__init__(self, width, height, caption, background)
             self.dirname, self.filename = os.path.split(filename)
             if self.dirname == '':
                 self.dirname = os.curdir
@@ -303,7 +300,7 @@ if _hasPageCatcher:
                     print 'preprocessing PDF %s page %s' % (restorePath, self.pageNo)
                     self.processPDF(restorePath, self.pageNo)
                 names = restoreForms(formFileName, self.canv)
-            self.canv.scale(self.scaleFactor, self.scaleFactor)
+            self.canv.scale(self._scaleFactor, self._scaleFactor)
             self.canv.doForm(self.formName)
             self.canv.restoreState()
 
