@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.12 2002/03/25 00:34:56 andy_robinson Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.12 2002/03/25 00:34:56 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.13 2002/05/24 11:25:54 dinu_gherman Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.13 2002/05/24 11:25:54 dinu_gherman Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
@@ -613,8 +613,7 @@ cost to performance.""")
 
     #now reset canvas to get rid of the clipping mask    
     c.restoreState()
-    
-    
+        
 
 #########################################################################
 #
@@ -625,11 +624,9 @@ cost to performance.""")
     framePage(c, "Images")
     c.setFont('Times-Roman', 12)
     t = c.beginText(inch, 10 * inch)
-    if PIL_Image is None:
-        t.textOut("Python Imaging Library not found!  You need it to see images.")
-        c.save()
-        return
-
+    if not PIL_Image:
+        c.drawString(inch, 11*inch, 
+                     "Python Imaging Library not found! Below you see rectangles instead of images.")
         
     t.textLines("""PDFgen uses the Python Imaging Library to process a very wide variety of image formats.
         This page shows image capabilities.  If I've done things right, the bitmap should have
@@ -643,12 +640,20 @@ cost to performance.""")
     
     c.drawText(t)
 
-    c.drawInlineImage('pythonpowered.gif',2*inch, 7*inch)
+    if PIL_Image:
+        c.drawInlineImage('pythonpowered.gif',2*inch, 7*inch)
+    else:
+        c.rect(2*inch, 7*inch, 110, 44)
+
     c.line(1.5*inch, 7*inch, 4*inch, 7*inch)
     c.line(2*inch, 6.5*inch, 2*inch, 8*inch)
     c.drawString(4.5 * inch, 7.25*inch, 'inline image drawn at natural size')
 
-    c.drawInlineImage('pythonpowered.gif',2*inch, 5*inch, inch, inch)
+    if PIL_Image:
+        c.drawInlineImage('pythonpowered.gif',2*inch, 5*inch, inch, inch)
+    else:
+        c.rect(2*inch, 5*inch, inch, inch)
+
     c.line(1.5*inch, 5*inch, 4*inch, 5*inch)
     c.line(2*inch, 4.5*inch, 2*inch, 6*inch)
     c.drawString(4.5 * inch, 5.25*inch, 'inline image distorted to fit box')
@@ -657,15 +662,21 @@ cost to performance.""")
     c.drawString(1.5 * inch, 3.75*inch, 'This results in faster generation and much smaller files.')
 
     for i in range(5):
-        (w, h) = c.drawImage('pythonpowered.gif', (1.5 + i)*inch, 3*inch)
+        if PIL_Image:
+            (w, h) = c.drawImage('pythonpowered.gif', (1.5 + i)*inch, 3*inch)
+        else:
+            c.rect((1.5 + i)*inch, 3*inch, 110, 44)
 
     myMask = [254,255,222,223,0,1]
     c.drawString(1.5 * inch, 2.5*inch, "The optional 'mask' parameter lets you define transparent colors. We used a color picker")
     c.drawString(1.5 * inch, 2.3*inch, "to determine that the yellow in the image above is RGB=(225,223,0).  We then define a mask")
     c.drawString(1.5 * inch, 2.1*inch, "spanning these RGB values:  %s.  The background vanishes!!" % myMask)
     c.drawString(2.5*inch, 1.2*inch, 'This would normally be obscured')
-    c.drawImage('pythonpowered.gif', 3*inch, 1.2*inch, w, h, mask=myMask)
-    
+    if PIL_Image:
+        c.drawImage('pythonpowered.gif', 3*inch, 1.2*inch, w, h, mask=myMask)
+    else:
+        c.rect(3*inch, 1.2*inch, 110, 44)
+
 
 #########################################################################
 #
