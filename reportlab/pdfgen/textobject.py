@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: textobject.py,v $
+#	Revision 1.13  2000/07/28 00:00:42  rgbecker
+#	Bernhard herzog inspired fixes
+#
 #	Revision 1.12  2000/04/11 15:41:04  rgbecker
 #	Added _setFont for use in layout
-#
+#	
 #	Revision 1.11  2000/04/11 14:43:43  rgbecker
 #	Added _textOut for use in layout
 #	
@@ -66,7 +69,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: textobject.py,v 1.12 2000/04/11 15:41:04 rgbecker Exp $ '''
+__version__=''' $Id: textobject.py,v 1.13 2000/07/28 00:00:42 rgbecker Exp $ '''
 __doc__=""" 
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -118,8 +121,10 @@ class PDFTextObject:
 
     def setTextTransform(self, a, b, c, d, e, f):
         "Like setTextOrigin, but does rotation, scaling etc."
-        self._code.append('%0.2f %0.2f %0.2f -%0.2f %0.2f %0.2f Tm' % (a, b, c, d, e, f))  #top down
-        #self._code.append('%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f Tm' % (a, b, c, d, e, f)) #bottom up
+        if not self._canvas.bottomup:
+            c = -c    #reverse bottom row of the 2D Transform
+            d = -d
+        self._code.append('%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f Tm' % (a, b, c, d, e, f))
         #we only measure coords relative to present text matrix
         self._x = e
         self._y = f

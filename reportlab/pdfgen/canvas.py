@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.44  2000/07/28 00:00:41  rgbecker
+#	Bernhard herzog inspired fixes
+#
 #	Revision 1.43  2000/06/30 15:27:55  rgbecker
 #	Allow for non-caching of images
-#
+#	
 #	Revision 1.42  2000/06/26 15:58:22  rgbecker
 #	Simple fix to widths problem
 #	
@@ -159,7 +162,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.43 2000/06/30 15:27:55 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.44 2000/07/28 00:00:41 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -738,7 +741,7 @@ class Canvas:
             canvas.setFont("Helvetica", 20)
             canvas.saveState()
             ...
-            canvas.setFont("Courier, 9)
+            canvas.setFont("Courier", 9)
             ...
             canvas.restoreState()
             # if the save/restore pairs match then font is Helvetica 20 again.
@@ -1024,7 +1027,7 @@ class Canvas:
         if type(array) == IntType or type(array) == FloatType:
             self._code.append('[%s %s] 0 d' % (array, phase))
         elif type(array) == ListType or type(array) == TupleType:
-            assert phase <= len(array), "setDash phase must be l.t.e. length of array"
+            assert phase >= 0, "phase is a length in user space"
             textarray = string.join(map(str, array))
             self._code.append('[%s] %s d' % (textarray, phase))
         
@@ -1101,13 +1104,13 @@ class Canvas:
     
     def drawPath(self, aPath, stroke=1, fill=0):
         "Draw the path object in the mode indicated"
-        op = PATH_OPS[stroke, fill, self._fillMode]
-        self._code.append(aPath.getCode() + ' ' + op)
+        self._code.append(aPath.getCode() + ' ' + PATH_OPS[stroke, fill, self._fillMode])
 
     def clipPath(self, aPath, stroke=1, fill=0):
         "clip as well as drawing"
-        op = PATH_OPS[stroke, fill, self._fillMode]
-        self._code.append(aPath.getCode() + ' W ' + op)
+        self._code.append(  aPath.getCode()
+                           + (self._fillMode == FILL_EVEN_ODD and ' W* ' or ' W ')
+                           + PATH_OPS[stroke,fill,self._fillMode])
 
     def beginText(self, x=0, y=0):
         """Returns a fresh text object.  Text objects are used
