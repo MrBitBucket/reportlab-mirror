@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.36 2000/12/06 12:29:10 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.36 2000/12/06 12:29:10 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.37 2000/12/07 23:54:32 aaron_watters Exp $
+__version__=''' $Id: paragraph.py,v 1.37 2000/12/07 23:54:32 aaron_watters Exp $ '''
 import string
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -70,7 +70,8 @@ def	_justifyDrawParaLine( tx, offset, extraspace, words, last=0):
 		#last one, left align
 		tx._textOut(text,1)
 	else:
-		tx.setWordSpace(extraspace / float(len(words)-1))
+		nspaces = max(len(words)-1, 1)
+		tx.setWordSpace(extraspace / float(nspaces))
 		tx._textOut(text,1)
 		tx.setWordSpace(0)
 
