@@ -8,7 +8,7 @@ def libart_version():
 		if len(l)>1 and string.strip(l[0]) in K:
 			D[string.strip(l[0])] = string.strip(l[1])
 			if len(D)==3: break
-	return '\\"%s\\"' % string.join(map(lambda k,D=D: D.get(k,'?'),K),'.')
+	return (sys.platform == 'win32' and '\\"%s\\"' or '"%s"') % string.join(map(lambda k,D=D: D.get(k,'?'),K),'.')
 if __name__=='__main__': #NO RUNTESTS
 	import os, sys, string
 	cwd = os.getcwd()
