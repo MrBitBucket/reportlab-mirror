@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.77 2003/06/25 17:22:14 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.78 2003/07/02 11:26:58 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.77 2003/06/25 17:22:14 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.78 2003/07/02 11:26:58 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -624,6 +624,7 @@ class ValueAxis(Widget):
                 elif valueMin>0: valueMin = 0
 
         abf = self.avoidBoundFrac
+        if type(abf) not in (TupleType,ListType): abf = abf, abf
         do_rr = not getattr(self,'valueSteps',None)
         do_abf = abf and do_rr
         do_rr = rangeRound is not 'none' and do_rr
@@ -633,15 +634,12 @@ class ValueAxis(Widget):
             if do_abf:
                 valueStep, T, fuzz = self._getValueStepAndTicks(valueMin, valueMax, cache)
                 fuzz = 1e-8*valueStep
-                if type(abf) not in (TupleType,ListType):
-                    i0 = i1 = valueStep*abf
-                else:
-                    i0 = valueStep*abf[0]
-                    i1 = valueStep*abf[1]
+                i0 = valueStep*abf[0]
+                i1 = valueStep*abf[1]
                 _n = getattr(self,'_cValueMin',T[0])
                 _x = getattr(self,'_cValueMax',T[-1])
-                if _n - T[0] < i0-fuzz: valueMin = valueMin - i0
-                if T[-1]-_x < i1-fuzz: valueMax = valueMax + i1
+                if abs(T[0])>fuzz and _n - T[0] < i0-fuzz: valueMin = valueMin - i0
+                if abs(T[-1])>fuzz and T[-1]-_x < i1-fuzz: valueMax = valueMax + i1
 
             go = 0
             if do_rr:
