@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.43 2004/05/03 08:09:52 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.44 2004/05/24 12:19:53 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.43 2004/05/03 08:09:52 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.44 2004/05/24 12:19:53 rgbecker Exp $ "
 #endif
 #include "Python.h"
 #include <stdlib.h>
@@ -28,7 +28,7 @@ static __version__=" $Id: _rl_accel.c,v 1.43 2004/05/03 08:09:52 rgbecker Exp $ 
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.50"
+#define VERSION "0.51"
 #define MODULE "_rl_accel"
 
 
@@ -1084,22 +1084,29 @@ static struct PyMethodDef _methods[] = {
 /*Initialization function for the module (*must* be called init_pdfmetrics)*/
 void init_rl_accel(void)
 {
-	PyObject *m, *d;
+	PyObject *m;
+#if PY_VERSION_HEX<0x02000000
+	PyObject *d;
+#endif
 
 	/*Create the module and add the functions and module doc string*/
 	m = Py_InitModule3("_rl_accel", _methods,__doc__);
 
 	/*Add some symbolic constants to the module */
-	d = PyModule_GetDict(m);
-
 	if(!ErrorObject){
 		ErrorObject = PyErr_NewException("_rl_accel.error", NULL, NULL);
 		if(!ErrorObject) goto err;
 		}
 	Py_INCREF(ErrorObject);
-	PyModule_AddObject(m, "error", ErrorObject);
 	moduleVersion = PyString_FromString(VERSION);
+#if PY_VERSION_HEX>=0x02000000
+	PyModule_AddObject(m, "error", ErrorObject);
+	PyModule_AddObject(m, "version", moduleVersion );
+#else
+	d = PyModule_GetDict(m);
+	PyDict_SetItemString(d, "error", ErrorObject );
 	PyDict_SetItemString(d, "version", moduleVersion );
+#endif
 
 #ifdef	HAVE_BOX
 	BoxType.ob_type = &PyType_Type;
