@@ -7,6 +7,7 @@ from reportlab.graphics.shapes import *
 from reportlab.graphics.widgetbase import Widget
 from reportlab.lib import colors
 from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.graphics.charts.barchart1 import sample2
 
 
 # This one was originally written by Aaron (for Pingo, I think).
@@ -127,7 +128,7 @@ class Swatches0(Widget):
         return d
 
 
-def sample1():
+def sample1c():
     "Make sample swatches."
     
     d = Drawing(200, 100)
@@ -146,7 +147,7 @@ def sample1():
     return d
 
 
-def sample2():
+def sample2c():
     "Make sample swatches."
 
     d = Drawing(200, 100)
@@ -160,6 +161,26 @@ def sample2():
     swatches.columnMaximum = 4
     items = string.split('red green blue yellow pink black white', ' ')
     items = map(lambda i:(getattr(colors, i), i), items)
+    swatches.colorNamePairs = items
+
+    d.add(swatches, 'legend')
+
+    return d
+
+
+def sample3c():
+    "Make sample swatches."
+
+    d = sample2()
+    
+    swatches = Swatches0()
+    swatches.alignment = 'right'
+    swatches.x = 80
+    swatches.y = 190
+    swatches.deltax = 60
+    swatches.dxTextSpace = 10
+    swatches.columnMaximum = 4
+    items = [(colors.red, 'before'), (colors.green, 'after')]
     swatches.colorNamePairs = items
 
     d.add(swatches, 'legend')
