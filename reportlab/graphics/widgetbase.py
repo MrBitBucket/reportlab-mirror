@@ -134,6 +134,11 @@ class Widget(PropHolder, shapes.UserNode):
     not inherit from Shape so that we can rewrite shapes without breaking
     widgets and vice versa."""
 
+    def _setKeywords(self,**kw):
+        for k,v in kw.items():
+            if not self.__dict__.has_key(k):
+                setattr(self,k,v)
+
     def draw(self):
         msg = "draw() must be implemented for each Widget!"
         raise shapes.NotImplementedError, msg

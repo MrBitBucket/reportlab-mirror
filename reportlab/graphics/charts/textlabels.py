@@ -134,19 +134,34 @@ class Label(Widget):
         )
 
     def __init__(self,**kw):
-        pop = kw.pop
-        self._text = pop('_text','Multi-Line\nString')
-        for _ in 'angle', 'x','y','dx','dy','topPadding','leftPadding','rightPadding','bottomPadding':
-            setattr(self,_,pop(_,0))
-        self.boxAnchor = pop('boxAnchor','c')
-        self.boxStrokeWidth = pop('boxStrokeWidth',0.5) #boxStrokeWidth
-        for _ in 'boxStrokeColor', 'strokeColor', 'boxFillColor', 'leading', 'width','maxWidth', 'height':
-            setattr(self,_,pop(_,None))
-        for _ in 'fillColor','fontName','fontSize':
-            setattr(self,_,pop(_,STATE_DEFAULTS[_]))
-        self.strokeWidth = pop('strokeWidth',0.1)
-        self.textAnchor = pop('textAnchor','start')
-        self.visible = pop('visible',1)
+        self._setKeywords(**kw)
+        self._setKeywords(
+                _text = 'Multi-Line\nString',
+                boxAnchor = 'c',
+                angle = 0,
+                x = 0,
+                y = 0,
+                dx = 0,
+                dy = 0,
+                topPadding = 0,
+                leftPadding = 0,
+                rightPadding = 0,
+                bottomPadding = 0,
+                boxStrokeWidth = 0.5,
+                boxStrokeColor = None,
+                strokeColor = None,
+                boxFillColor = None,
+                leading = None,
+                width = None,
+                maxWidth = None,
+                height = None,
+                fillColor = STATE_DEFAULTS['fillColor'],
+                fontName = STATE_DEFAULTS['fontName'],
+                fontSize = STATE_DEFAULTS['fontSize'],
+                strokeWidth = 0.1,
+                textAnchor = 'start',
+                visible = 1,
+                )
 
     def setText(self, text):
         """Set the text property.  May contain embedded newline characters.
