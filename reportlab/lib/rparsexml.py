@@ -174,7 +174,7 @@ def parsexml0(xmltext, startingat=0, toplevel=1,
                 #D = {NAMEKEY: NONAME, CONTENTSKEY: [xmltext[cursor:]]}
                 ContentList = [xmltext[cursor:]]
                 if entityReplacer: ContentList = entityReplacer(ContentList)
-                return (NameString, AttDict, ContentList, ExtraStuff)
+                return (NameString, AttDict, ContentList, ExtraStuff), len(xmltext)
             else:
                 raise ValueError, "no tags at non-toplevel %s" % `xmltext[cursor:cursor+20]`
     #D = {}
