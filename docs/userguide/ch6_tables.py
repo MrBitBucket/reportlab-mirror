@@ -107,10 +107,10 @@ disc("""The cell formatting commands all begin with an identifier, followed by
 the start and stop cell definitions and the perhaps other arguments.
 the cell formatting commands are:""")
 eg("""
-FONT                    - takes fontname, optional fontsize and (optional) leading.
-FONTNAME (or FACE)      - takes fontname
-FONTSIZE (or SIZE)      - takes fontsize in points
-LEADING                 - takes leading in points
+FONT                    - takes fontname, optional fontsize and optional leading.
+FONTNAME (or FACE)      - takes fontname.
+FONTSIZE (or SIZE)      - takes fontsize in points; leading may get out of sync.
+LEADING                 - takes leading in points.
 TEXTCOLOR               - takes a color name or (R,G,B) tuple.
 ALIGNMENT (or ALIGN)    - takes one of LEFT, RIGHT and CENTRE (or CENTER).
 LEFTPADDING             - takes an integer, defaults to 6.
