@@ -1422,7 +1422,7 @@ static PyObject* pil2pict(PyObject* self, PyObject* args)
 	lpos = (obs->p-obs->buf) - HEADER_SIZE;
 	obs->p = obs->buf + HEADER_SIZE;
 	pict_putShort(obs, (short)(lpos & 0xffff));
-	result = PyString_FromStringAndSize(obs->buf,len);
+	result = PyString_FromStringAndSize((const char *)obs->buf,len);
 	free(obs->buf);
 	return result;
 }
