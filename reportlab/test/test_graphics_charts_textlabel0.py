@@ -77,7 +77,7 @@ class LabelTestCase(unittest.TestCase):
         return protoLabel
 
 
-    def _makeDrawings(self, protoLabel):
+    def _makeDrawings(self, protoLabel, text=None):
         # Set drawing dimensions.
         w, h = drawWidth, drawHeight = 400, 100
 
@@ -96,8 +96,8 @@ class LabelTestCase(unittest.TestCase):
                 # Modify label, put it on a drawing.
                 label = copy.deepcopy(protoLabel)
                 label.boxAnchor = boxAnchor
-                args = {'ba':boxAnchor} 
-                label.setText('(%(ba)s) Hello World! (%(ba)s)' % args)
+                args = {'ba':boxAnchor, 'text':text or 'Hello World!'} 
+                label.setText('(%(ba)s) %(text)s (%(ba)s)' % args)
                 labels.append(label)
                 
             for label in labels:
@@ -128,7 +128,7 @@ canonical points of a box: sw, se, nw, ne, w, e, n, s or c (standing for
 <i>southwest</i>, <i>southeast</i>... and <i>center</i>).""", bt))
         story.append(Spacer(0, 0.5*cm))
 
-        # Round 1
+        # Round 1a
         story.append(Paragraph('Helvetica 10pt', h3))
         story.append(Spacer(0, 0.5*cm))
 
@@ -145,7 +145,7 @@ canonical points of a box: sw, se, nw, ne, w, e, n, s or c (standing for
 
         story.append(PageBreak())
 
-        # Round 2
+        # Round 1b
         story.append(Paragraph('Helvetica 18pt', h3))
         story.append(Spacer(0, 0.5*cm))
 
@@ -162,18 +162,38 @@ canonical points of a box: sw, se, nw, ne, w, e, n, s or c (standing for
 
         story.append(PageBreak())
 
-        story.append(Paragraph('Testing text (and box) anchors', h2))
-        story.append(Paragraph("""This should display labels as before,
-but also show some effect of setting the textAnchor attribute.""", bt))
+        # Round 1c
+        story.append(Paragraph('Helvetica 18pt, multi-line', h3))
         story.append(Spacer(0, 0.5*cm))
 
-        # Round 3
+        w, h = drawWidth, drawHeight = 400, 100
+        protoLabel = self._makeProtoLabel()
+        protoLabel.setOrigin(drawWidth/2, drawHeight/2)
+        protoLabel.textAnchor = 'start'
+        protoLabel.fontName = 'Helvetica'
+        protoLabel.fontSize = 18
+        drawings = self._makeDrawings(protoLabel, text='Hello\nWorld!')
+        for d in drawings:
+            story.append(d)
+            story.append(Spacer(0, 1*cm))
+
+        story.append(PageBreak())
+
+        story.append(Paragraph('Testing text (and box) anchors', h2))
+        story.append(Paragraph("""This should display labels as before,
+but now with a fixes size and showing some effect of setting the
+textAnchor attribute.""", bt))
+        story.append(Spacer(0, 0.5*cm))
+
+        # Round 2a
         story.append(Paragraph("Helvetica 10pt, textAnchor='start'", h3))
         story.append(Spacer(0, 0.5*cm))
 
         w, h = drawWidth, drawHeight = 400, 100
         protoLabel = self._makeProtoLabel()
         protoLabel.setOrigin(drawWidth/2, drawHeight/2)
+        protoLabel.width = 4*cm
+        protoLabel.height = 1.5*cm
         protoLabel.textAnchor = 'start'
         protoLabel.fontName = 'Helvetica'
         protoLabel.fontSize = 10
@@ -184,13 +204,15 @@ but also show some effect of setting the textAnchor attribute.""", bt))
 
         story.append(PageBreak())
 
-        # Round 4
+        # Round 2b
         story.append(Paragraph("Helvetica 10pt, textAnchor='middle'", h3))
         story.append(Spacer(0, 0.5*cm))
 
         w, h = drawWidth, drawHeight = 400, 100
         protoLabel = self._makeProtoLabel()
         protoLabel.setOrigin(drawWidth/2, drawHeight/2)
+        protoLabel.width = 4*cm
+        protoLabel.height = 1.5*cm
         protoLabel.textAnchor = 'middle'
         protoLabel.fontName = 'Helvetica'
         protoLabel.fontSize = 10
@@ -201,13 +223,15 @@ but also show some effect of setting the textAnchor attribute.""", bt))
 
         story.append(PageBreak())
 
-        # Round 5
+        # Round 2c
         story.append(Paragraph("Helvetica 10pt, textAnchor='end'", h3))
         story.append(Spacer(0, 0.5*cm))
 
         w, h = drawWidth, drawHeight = 400, 100
         protoLabel = self._makeProtoLabel()
         protoLabel.setOrigin(drawWidth/2, drawHeight/2)
+        protoLabel.width = 4*cm
+        protoLabel.height = 1.5*cm
         protoLabel.textAnchor = 'end'
         protoLabel.fontName = 'Helvetica'
         protoLabel.fontSize = 10
@@ -217,6 +241,26 @@ but also show some effect of setting the textAnchor attribute.""", bt))
             story.append(Spacer(0, 1*cm))
 
         story.append(PageBreak())
+
+        # Round 2d
+        story.append(Paragraph("Helvetica 10pt, multi-line, textAnchor='start'", h3))
+        story.append(Spacer(0, 0.5*cm))
+
+        w, h = drawWidth, drawHeight = 400, 100
+        protoLabel = self._makeProtoLabel()
+        protoLabel.setOrigin(drawWidth/2, drawHeight/2)
+        protoLabel.width = 4*cm
+        protoLabel.height = 1.5*cm
+        protoLabel.textAnchor = 'start'
+        protoLabel.fontName = 'Helvetica'
+        protoLabel.fontSize = 10
+        drawings = self._makeDrawings(protoLabel, text='Hello\nWorld!')
+        for d in drawings:
+            story.append(d)
+            story.append(Spacer(0, 1*cm))
+
+        story.append(PageBreak())
+        
 
         pdfPath = 'test_graphics_charts_textlabel0.pdf'
         tempfile.tempdir = os.curdir
