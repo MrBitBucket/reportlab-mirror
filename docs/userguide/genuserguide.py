@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: genuserguide.py,v $
+#	Revision 1.13  2000/07/03 09:51:38  rgbecker
+#	abspath is 1.5.2 only
+#
 #	Revision 1.12  2000/06/28 16:10:00  rgbecker
 #	Fix unwanted 'i'
-#
+#	
 #	Revision 1.11  2000/06/28 14:52:43  rgbecker
 #	Documentation changes
 #	
@@ -68,7 +71,7 @@
 #	Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #	initial checkin. user guide generation framework.
 #	
-__version__=''' $Id: genuserguide.py,v 1.12 2000/06/28 16:10:00 rgbecker Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.13 2000/07/03 09:51:38 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -81,7 +84,7 @@ if _oldStyle:
 	styleSheet = getSampleStyleSheet()
 else:
 	import os, sys
-	sys.path.insert(0,os.path.abspath(os.path.join('..','tools')))
+	sys.path.insert(0,os.path.join(os.path.dirname(sys.argv[0]),'..','tools'))
 	from rltemplate import RLDocTemplate
 	from stylesheet import getStyleSheet
 	styleSheet = getStyleSheet()
