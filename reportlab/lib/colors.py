@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.30 2001/12/27 13:00:56 rgbecker Exp $
-__version__=''' $Id: colors.py,v 1.30 2001/12/27 13:00:56 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.31 2002/06/16 12:26:58 rgbecker Exp $
+__version__=''' $Id: colors.py,v 1.31 2002/06/16 12:26:58 rgbecker Exp $ '''
 
 import string
 import math
@@ -405,6 +405,7 @@ white =		HexColor(0xFFFFFF)
 whitesmoke =	HexColor(0xF5F5F5)
 yellow =	HexColor(0xFFFF00)
 yellowgreen =	HexColor(0x9ACD32)
+fidblue=HexColor(0x3366cc)
 
 ColorType=type(black)
 
@@ -482,13 +483,37 @@ def toColor(arg,default=None):
 		return Color(arg[0],arg[1],arg[2])
 	elif tArg == StringType:
 		C = getAllNamedColors()
-		str = string.lower(arg)
-		if C.has_key(str):
-			return C[str]
+		s = string.lower(arg)
+		if C.has_key(s): return C[s]
 
 	try:
-		return HexColor(str)
+		return HexColor(arg)
 	except:
 		if default is None:
-			raise 'Invalid color value', str
+			raise 'Invalid color value', str(arg)
 		return default
+
+def setColors(**kw):
+	UNDEF = []
+	progress = 1
+	assigned = {}
+	while kw and progress:
+		progress = 0
+		for k, v in kw.items():
+			if type(v) in (type(()),type([])):
+				c = map(lambda x,UNDEF=UNDEF: toColor(x,UNDEF),v)
+				if type(v) is type(()): c = tuple(c)
+				ok = UNDEF not in c
+			else:
+				c = toColor(v,UNDEF)
+				ok = c is not UNDEF
+			if ok:
+				assigned[k] = c
+				del kw[k]
+				progress = 1
+
+	if kw: raise ValueError("Can't convert\n%s" % str(kw))
+	getAllNamedColors()
+	for k, c in assigned.items():
+		globals()[k] = c
+		if isinstance(c,Color): _namedColors[k] = c
