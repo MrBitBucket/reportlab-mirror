@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.6 2001/05/16 16:47:52 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.6 2001/05/16 16:47:52 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.7 2001/05/23 16:46:51 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.7 2001/05/23 16:46:51 rgbecker Exp $ '''
 """Usage:
 	from reportlab.graphics import renderPM
 	renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -91,6 +91,8 @@ class _PMRenderer(Renderer):
 				self._tracker.push({'transform':translate(x,y)})
 
 			for node in drawing.contents:
+				# it might be a user node, if so decompose it into a bunch of shapes
+				if isinstance(node, UserNode): node = node.provideNode()
 				self.drawNode(node)
 
 			self.pop()
