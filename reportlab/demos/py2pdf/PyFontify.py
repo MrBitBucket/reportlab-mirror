@@ -12,7 +12,6 @@ The tuple contents are always like this:
 tag is one of 'keyword', 'string', 'comment' or 'identifier'
 sublist is not used, hence always None. 
 """
-
 # Based on FontText.py by Mitchell S. Chapman,
 # which was modified by Zachary Roadhouse,
 # then un-Tk'd by Just van Rossum.
@@ -25,7 +24,7 @@ sublist is not used, hence always None.
 #	Tim Peters,
 #	Just van Rossum
 
-__version__ = "0.3.1"
+__version__ = "0.3.3"
 
 import string, regex
 
@@ -37,6 +36,7 @@ def replace(where, what, with):
 # This list of keywords is taken from ref/node13.html of the
 # Python 1.3 HTML documentation. ("access" is intentionally omitted.)
 keywordsList = [
+	"assert", "exec",
 	"del", "from", "lambda", "return",
 	"and", "elif", "global", "not", "try",
 	"break", "else", "if", "or", "while",
@@ -85,7 +85,7 @@ for keyword in keywordsList:
 	keyPat = keyPat + keyword + "\|"
 keyPat = keyPat[:-2] + "\)" + nonKeyPat
 
-matchPat = keyPat + "\|" + commentPat + "\|" + tripleQuotePat + "\|" + quotePat
+matchPat = commentPat + "\|" + keyPat + "\|" + tripleQuotePat + "\|" + quotePat
 matchRE = regex.compile(matchPat)
 
 idKeyPat = "[ \t]*[A-Za-z_][A-Za-z_0-9.]*"	# Ident w. leading whitespace.
