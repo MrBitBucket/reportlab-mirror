@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.28  2000/10/18 16:37:22  aaron_watters
+#	undid last checkin and added an option for a default outline (different fix)
+#
 #	Revision 1.27  2000/10/18 16:26:17  aaron_watters
 #	moved the outline preprocessing step into the format method (fixes testing error)
-#
+#	
 #	Revision 1.26  2000/10/18 05:03:21  aaron_watters
 #	complete revision of pdfdoc.  Not finished (compression missing, testing needed)
 #	I got Robin's last change in at the last moment :)
@@ -102,7 +105,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.27 2000/10/18 16:26:17 aaron_watters Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.28 2000/10/18 16:37:22 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -208,7 +211,7 @@ class PDFDocument:
     # set this to define filters 
     defaultStreamFilters = None
     pageCounter = 1
-    def __init__(self, encoding=DEFAULT_ENCODING):
+    def __init__(self, encoding=DEFAULT_ENCODING, dummyoutline=0):
         self.encoding = encoding
         # mapping of internal identifier ("Page001") to PDF objectnumber and generation number (34, 0)
         self.idToObjectNumberAndVersion = {}
@@ -221,7 +224,11 @@ class PDFDocument:
         cat = self.Catalog = self._catalog = PDFCatalog()
         pages = self.Pages = PDFPages()
         cat.Pages = pages
-        outlines = self.Outlines = self.outline = PDFOutlines()
+        if dummyoutline:
+            outlines = PDFOutlines0()
+        else:
+            outlines = PDFOutlines()
+        self.Outlines = self.outline = outlines
         cat.Outlines = outlines
         self.info = self.Info = PDFInfo()
         self.Reference(self.Catalog)
@@ -231,6 +238,9 @@ class PDFDocument:
         MakeStandardEnglishFontObjects(self, encoding)
 
     def SaveToFile(self, filename, canvas):
+        # prepare outline
+        outline = self.outline
+        outline.prepare(self, canvas)
         from types import StringType
         if type(filename) is StringType:
             myfile = 1
@@ -319,9 +329,6 @@ class PDFDocument:
     def format(self):
         # register the Catalog/INfo and then format the objects one by one until exhausted
         # (possible infinite loop if there is a bug that continually makes new objects/refs...)
-        # prepare outline
-        outline = self.outline
-        outline.prepare(self, canvas)
         cat = self.Catalog
         info = self.Info
         self.Reference(self.Catalog)
@@ -873,9 +880,8 @@ def testpage(document):
     P.Resources = resources
     pages.addPage(P)
 
-#### DUMMY OUTLINES IMPLEMENTATION FOR NOW
+#### DUMMY OUTLINES IMPLEMENTATION FOR testing
 
-'''    
 DUMMYOUTLINE = """
 <<
   /Count
@@ -884,13 +890,13 @@ DUMMYOUTLINE = """
       /Outlines
 >>"""
 
-class PDFOutlines:
+class PDFOutlines0:
     __Comment__ = "TEST OUTLINE!"
     text = string.replace(DUMMYOUTLINE, "\n", LINEEND)
     __RefOnly__ = 1
     def format(self, document):
         return self.text
-        '''
+        
 
 class OutlineEntryObject:
 	"an entry in an outline"
@@ -1549,7 +1555,7 @@ if __name__=="__main__":
     # first test
     print "line end is", repr(LINEEND)
     print "PDFName", PDFName("test")
-    D = PDFDocument()
+    D = PDFDocument(dummyoutline=1)
     print "PDFDict", PDFDictionary({"this":1}).format(D)
     testpage(D)
     txt = D.format()
