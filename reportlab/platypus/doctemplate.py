@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.18  2000/06/19 23:51:23  andy_robinson
+#	Added UserDocTemplate class, and paragraph.getPlainText()
+#
 #	Revision 1.17  2000/06/19 11:14:03  andy_robinson
 #	Global sequencer put in the 'story builder'.
-#
+#	
 #	Revision 1.16  2000/06/16 13:49:20  aaron_watters
 #	new build parameters to allow alternate filename and canvas implementation
 #	(in order to support slideshow summary mode, for example, or embedding one
@@ -84,7 +87,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.17 2000/06/19 11:14:03 andy_robinson Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.18 2000/06/19 23:51:23 andy_robinson Exp $ '''
 __doc__="""
 This module contains the core structure of platypus.
 
@@ -174,12 +177,19 @@ class PageTemplate:
 		self.frames = frames
 		self.onPage = onPage or _doNothing
 
-	def drawPage(self,canv,doc):
-		'''	Override this if you want additional functionality or prefer a class
-			based page routine
-		'''
+	def beforeDrawPage(self,canv,doc):
+		"""Override this if you want additional functionality or prefer
+		a class based page routine.  Called before any flowables for
+		this page are processed."""
 		pass
 
+	def afterDrawPage(self, canv, doc):
+		"""This is called after the last flowable for the page has
+		been processed.  You might use this if the page header or
+		footer needed knowledge of what flowables were drawn on
+		this page."""
+		pass
+		
 class BaseDocTemplate:
 	"""
 	First attempt at defining a document template class.
@@ -261,8 +271,6 @@ class BaseDocTemplate:
 		self.addPageTemplates(p)
 		self._calc()
 
-		self.seq = reportlab.lib.sequencer.Sequencer()
-		
 
 	def _calc(self):
 		self._rightMargin = self.pagesize[0] - self.rightMargin
@@ -293,7 +301,7 @@ class BaseDocTemplate:
 		'''Perform actions required at beginning of page.
 		shouldn't normally be called directly'''
 		self.page = self.page + 1
-		self.pageTemplate.drawPage(self.canv,self)
+		self.pageTemplate.beforeDrawPage(self.canv,self)
 		self.pageTemplate.onPage(self.canv,self)
 		if hasattr(self,'_nextFrameIndex'):
 			del self._nextFrameIndex
@@ -305,6 +313,7 @@ class BaseDocTemplate:
 			check the next page template
 			hang a page begin
 		'''
+		self.pageTemplate.afterDrawPage(self.canv, self)
 		self.canv.showPage()
 		if hasattr(self,'_nextPageTemplateIndex'):
 			self.pageTemplate = self.pageTemplates[self._nextPageTemplateIndex]
@@ -383,16 +392,27 @@ class BaseDocTemplate:
 
 	def handle_flowable(self,flowables):
 		'''try to handle one flowable from the front of list flowables.'''
+		
 		f = flowables[0]
+		#allow document a chance to look at, modify or ignore
+		#the object about to be processed
+		f = self.handle_beforeFlowable(f)
 		del flowables[0]
+		if f is None:
+			return
+		
 
 		if isinstance(f,PageBreak):
 			self.handle_pageBreak()
+			self.handle_afterFlowable(f)
 		elif isinstance(f,ActionFlowable):
 			f.apply(self)
+			self.handle_afterFlowable(f)
 		else:
 			#general case we have to do something
-			if not self.frame.add(f, self.canv, trySplit=self.allowSplitting):
+			if self.frame.add(f, self.canv, trySplit=self.allowSplitting):
+				self.handle_afterFlowable(f)
+			else:
 				if self.allowSplitting:
 					# see if this is a splittable thing
 					S = self.frame.split(f)
@@ -401,7 +421,9 @@ class BaseDocTemplate:
 					n = 0
 
 				if n:
-					if not self.frame.add(S[0], self.canv, trySplit=0):
+					if self.frame.add(S[0], self.canv, trySplit=0):
+						self.handle_afterFlowable(f)
+					else:
 						raise "LayoutError", "splitting error"
 					del S[0]
 					for f in xrange(n-1):
@@ -413,6 +435,11 @@ class BaseDocTemplate:
 					flowables.insert(0,f)			# put the flowable back
 					self.handle_frameEnd()
 
+	def handle_beforeFlowable(self, flowable):
+		return flowable
+
+	def handle_afterFlowable(self, flowable):
+		pass
 
 	#these are provided so that deriving classes can refer to them
 	_handle_documentBegin = handle_documentBegin
@@ -424,6 +451,8 @@ class BaseDocTemplate:
 	_handle_nextPageTemplate = handle_nextPageTemplate
 	_handle_currentFrame = handle_currentFrame
 	_handle_nextFrame = handle_nextFrame
+	_handle_beforeFlowable = handle_beforeFlowable
+	_handle_afterFlowable = handle_afterFlowable
 
 	def _startBuild(self, canvasmaker=None, filename=None):
 		if canvasmaker is None: canvasmaker = canvas.Canvas
@@ -464,6 +493,79 @@ class BaseDocTemplate:
 
 		self._endBuild()
 
+class UserDocTemplate(BaseDocTemplate):
+	"""This is a descendant of BaseDocTemplate
+	which provides easy hooks for straightforward
+	document processing. Use this as a base class.
+	The methods are mostly 'contract-free' - they
+	require that the programmer do little or nothing.
+	To distinguish them, they are generally called
+	'beforeEvent' or 'afterEvent'."""
+
+	#-----these methods are redefined to call the user hooks---
+	def __init__(self, filename, **kw):
+		apply(BaseDocTemplate.__init__,(self,filename),kw)
+		self.afterInit()
+		
+	def handle_documentBegin(self):
+		self._handle_documentBegin()
+		self.beforeDocument()
+
+	def handle_pageBegin(self):
+		self._handle_pageBegin()
+		self.beforePage()
+
+	def handle_pageEnd(self):
+		#trickier, need to rewrite
+		self.afterPage()
+		self._handle_pageEnd()
+
+	def handle_beforeFlowable(self, flowable):
+		return self.beforeFlowable(flowable)
+
+	def handle_afterFlowable(self, flowable):
+		self.afterFlowable(flowable)
+		
+	#-----these are the default implementation of the user hooks
+	def afterInit(self):
+		"""This is called after initialisation.
+		Hooking into this rather than overriding
+		__init__ means that one need not worry
+		about passing a complex sequence of arguments
+		to the base class."""
+		pass
+	
+	def beforeDocument(self):
+		"""This is called before any processing is
+		done on the document."""
+		pass
+
+	def beforePage(self):
+		"""This is called at the beginning of page
+		processing, and immediately before the
+		beforeDrawPage method of the current page
+		template."""
+		pass
+
+	def afterPage(self):
+		"""This is called after page processing, and
+		immediately after the afterDrawPage method
+		of the current page template."""
+		pass
+
+	def beforeFlowable(self, flowable):
+		"""This is called before a flowable is processed.
+		It may modify it or substitute another flowable,
+		or even return None to signify that it should
+		not be processed.  If you just want to examine
+		the object, be sure to return it."""
+		return flowable
+
+	def afterFlowable(self, flowable):
+		"""This is called after a flowable is processed.
+		"""
+		pass
+
 class SimpleDocTemplate(BaseDocTemplate):
 	"""A special case document template that will handle many simple documents.
 	   See documentation for BaseDocTemplate.  No pageTemplates are required 
@@ -494,9 +596,9 @@ class SimpleDocTemplate(BaseDocTemplate):
 		self.addPageTemplates([PageTemplate(id='First',frames=frameT, onPage=onFirstPage),
 						PageTemplate(id='Later',frames=frameT, onPage=onLaterPages)])
 		if onFirstPage is _doNothing and hasattr(self,'onFirstPage'):
-			self.pageTemplates[0].drawPage = self.onFirstPage
+			self.pageTemplates[0].beforeDrawPage = self.onFirstPage
 		if onLaterPages is _doNothing and hasattr(self,'onLaterPages'):
-			self.pageTemplates[1].drawPage = self.onLaterPages
+			self.pageTemplates[1].beforeDrawPage = self.onLaterPages
 		BaseDocTemplate.build(self,flowables)
 
 if __name__ == '__main__':

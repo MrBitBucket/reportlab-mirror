@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.14  2000/06/19 23:51:23  andy_robinson
+#	Added UserDocTemplate class, and paragraph.getPlainText()
+#
 #	Revision 1.13  2000/06/19 11:14:03  andy_robinson
 #	Global sequencer put in the 'story builder'.
-#
+#	
 #	Revision 1.12  2000/06/13 13:03:31  aaron_watters
 #	more documentation changes
 #	
@@ -70,7 +73,7 @@
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.13 2000/06/19 11:14:03 andy_robinson Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.14 2000/06/19 23:51:23 andy_robinson Exp $ '''
 import string
 import types
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -581,3 +584,11 @@ class Paragraph(Flowable):
 
 			canvas.drawText(tx)
 			canvas.restoreState()
+
+	def getPlainText(self):
+		"""Convenience function for templates which want access
+		to the raw text, without XML tags. """
+		plains = []
+		for frag in self.frags:
+			plains.append(frag.text)
+		return string.join(plains, '')

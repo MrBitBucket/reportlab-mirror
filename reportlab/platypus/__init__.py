@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: __init__.py,v $
+#	Revision 1.6  2000/06/19 23:51:23  andy_robinson
+#	Added UserDocTemplate class, and paragraph.getPlainText()
+#
 #	Revision 1.5  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
-#
+#	
 #	Revision 1.4  2000/02/17 02:09:05  rgbecker
 #	Docstring & other fixes
 #	
@@ -43,12 +46,12 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: __init__.py,v 1.5 2000/06/01 15:23:06 rgbecker Exp $ '''
+__version__=''' $Id: __init__.py,v 1.6 2000/06/19 23:51:23 andy_robinson Exp $ '''
 __doc__=''
-from flowables import Flowable, Image, Macro, PageBreak, Preformatted, Spacer, XBox
-from paragraph import Paragraph, cleanBlockQuotedText
-from paraparser import ParaFrag
-from tables import Table, TableStyle, CellStyle
-from frames import Frame
-from doctemplate import BaseDocTemplate, NextPageTemplate, PageTemplate, ActionFlowable, \
-						SimpleDocTemplate, FrameBreak
+from reportlab.platypus.flowables import Flowable, Image, Macro, PageBreak, Preformatted, Spacer, XBox
+from reportlab.platypus.paragraph import Paragraph, cleanBlockQuotedText
+from reportlab.platypus.paraparser import ParaFrag
+from reportlab.platypus.tables import Table, TableStyle, CellStyle
+from reportlab.platypus.frames import Frame
+from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate, PageTemplate, ActionFlowable, \
+						UserDocTemplate, SimpleDocTemplate, FrameBreak
