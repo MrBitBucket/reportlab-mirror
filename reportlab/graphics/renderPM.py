@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.19 2002/07/17 22:46:22 andy_robinson Exp $
-__version__=''' $Id: renderPM.py,v 1.19 2002/07/17 22:46:22 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.20 2002/07/24 09:38:32 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.20 2002/07/24 09:38:32 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -130,6 +130,22 @@ class _PMRenderer(Renderer):
             c.moveTo(line.x1,line.y1)
             c.lineTo(line.x2,line.y2)
             c.pathStroke()
+
+    def drawImage(self, image):
+        if image.path and os.path.exists(image.path):
+            if type(image.path) is type(''):
+                import PIL
+                im = PIL.Image.open(image.path).convert('RGB')
+            else:
+                im = image.path.convert('RGB')
+            srcW, srcH = im.size
+            dstW, dstH = image.width, image.height
+            if dstW is None: dstW = srcW
+            if dstH is None: dstH = srcH
+            self._canvas._aapixbuf(
+                    image.x, image.y, dstW, dstH,
+                    im.tostring(), srcW, srcH, 3,
+                    )
 
     def drawCircle(self, circle):
         c = self._canvas

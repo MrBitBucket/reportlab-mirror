@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.76 2002/07/17 22:46:22 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.77 2002/07/24 09:38:32 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.76 2002/07/17 22:46:22 andy_robinson Exp $ '''
+__version__=''' $Id: shapes.py,v 1.77 2002/07/24 09:38:32 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -875,8 +875,8 @@ class Image(SolidShape):
         fillColor = AttrMapValue(None),
         x = AttrMapValue(isNumber),
         y = AttrMapValue(isNumber),
-        width = AttrMapValue(isNumber),
-        height = AttrMapValue(isNumber),
+        width = AttrMapValue(isNumberOrNone),
+        height = AttrMapValue(isNumberOrNone),
         path = AttrMapValue(None),
         )
 
