@@ -405,14 +405,14 @@ is therefore never zero. '''),
 #char DeviceName[]
 #The DeviceName character buffer is a null-terminated string
 #containing the name of the printer driver family. PFM files
-#for Type-1 fonts have the string »PostScript«, PFM files for
-#PCL fonts have the string »PCL/HP LaserJet«. 
+#for Type-1 fonts have the string 'PostScript', PFM files for
+#PCL fonts have the string 'PCL/HP LaserJet'. 
 #char FaceName[]
 #The FaceName character buffer is a null-terminated string
 #containing the name of the font face. In PFM files for Type-1
 #fonts this is normally
 #the PostScript name of the font without suffixes like
-#»-Bold«, »-Italic« etc. 
+#'-Bold', '-Italic' etc. 
 	_extTextMetrics_struct_info = (('h','etmSize', 
 '''This field contains the size (in bytes) of the
 EXTTEXTMETRIC structure. The value is always 0x0034. '''),
@@ -450,7 +450,7 @@ the number of units per em) in this field. '''),
 device units. The minimum valid point size can then be calculated
 as follows:
 (etmMinScale * points-per-inch) / dfVertRes
-The value for »points-per-inch« is normally 72, the dfVertRes
+The value for 'points-per-inch' is normally 72, the dfVertRes
 field can be found in the PFMHEADER structure, it contains the
 vertical resolution at which the font was digitized (this
 value is in dots per inch). 
@@ -509,7 +509,7 @@ from the upright version of the font. The value is typically not zero only for
 an italic or oblique font. 
 
 For Type-1 fonts you may find this value in the AFM file
-(search for the entry »ItalicAngle« and multiply it by 10). '''),
+(search for the entry 'ItalicAngle' and multiply it by 10). '''),
 
 ('h','etmSuperScript', 
 '''This field contains the recommended amount (in font units)
