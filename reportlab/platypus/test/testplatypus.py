@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: testplatypus.py,v $
+#	Revision 1.13  2000/04/14 12:42:35  rgbecker
+#	Minor textual and spacing adjustments
+#
 #	Revision 1.12  2000/04/14 11:54:57  rgbecker
 #	Splitting layout.py
-#
+#	
 #	Revision 1.11  2000/04/14 08:56:20  rgbecker
 #	Drawable ==> Flowable
 #	
@@ -65,7 +68,7 @@
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testplatypus.py,v 1.12 2000/04/14 11:54:57 rgbecker Exp $ '''
+__version__=''' $Id: testplatypus.py,v 1.13 2000/04/14 12:42:35 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -147,7 +150,7 @@ def getCommentary():
     level page layout library which lets you programmatically create complex
     documents with a minimum of effort.
 
-    This document is toth the user guide and the output of the test script.
+    This document is both the user guide and the output of the test script.
     In other words, a script used platypus to create the document you are now
     reading, and the fact that you are reading it proves that it works.  Or
     rather, that it worked for this script anyway.  It is a first release!  
@@ -211,9 +214,8 @@ def getCommentary():
         The most fundamental Flowable Objects in most documents are likely to be
         paragraphs, tables, diagrams/charts and images - but there is no
         restriction.  You can write your own easily, and I hope that people
-        will start to contribute them.  (Note for PIDDLE users - we'll provide a "PIDDLE drawing" object to let
-        you insert platform-independent graphics into the flow of a document
-        in the next couple of weeks)
+        will start to contribute them.  PINGO users - we provide a "PINGO flowable" object to let
+        you insert platform-independent graphics into the flow of a document.
 
         When you write a flowable object, you inherit from Flowable and
         must implement two methods.  object.wrap(availWidth, availHeight) will be called by other parts of
@@ -358,9 +360,9 @@ def getExamples():
     p.debug = 1   #show me the borders
     story.append(p)
 
-    story.append(Paragraph("""Same but with justification .5 extra leading""", styleSheet['BodyText']))
+    story.append(Paragraph("""Same but with justification 1.5 extra leading and green text.""", styleSheet['BodyText']))
     p = Paragraph("""
-        <para align=justify leading=+1><font color=red>Platypus</font> is all about fitting objects into frames on the page.  You
+        <para align=justify leading=+1.5 fg=green><font color=red>Platypus</font> is all about fitting objects into frames on the page.  You
         are looking at a fairly simple Platypus paragraph in Debug mode.
         It has some gridlines drawn around it to show the left and right indents,
         and the space before and after, all of which are attributes set in
@@ -495,7 +497,7 @@ def run():
     firstPage = 1
     while (len(examples) > 0 or len(commentary) > 0):
         framePage(cnvs)
-        frame1 = layout.SimpleFrame(cnvs, inch, 5.8*inch, 6 * inch, 5 * inch)
+        frame1 = layout.SimpleFrame(cnvs, inch, 5.6*inch, 6 * inch, 5.2 * inch)
         frame2 = layout.SimpleFrame(cnvs, inch, inch, 6 * inch, 4.5 * inch)
         frame2.showBoundary = 1
         frame1.addFromList(commentary)
