@@ -31,9 +31,13 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.53  2000/10/18 05:03:21  aaron_watters
+#	complete revision of pdfdoc.  Not finished (compression missing, testing needed)
+#	I got Robin's last change in at the last moment :)
+#
 #	Revision 1.52  2000/10/15 21:57:13  andy_robinson
 #	Added showFullScreen0
-#
+#	
 #	Revision 1.51  2000/09/04 08:06:15  rgbecker
 #	Fix spurious comment reference to layout
 #	
@@ -186,7 +190,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.52 2000/10/15 21:57:13 andy_robinson Exp $ '''
+__version__=''' $Id: canvas.py,v 1.53 2000/10/18 05:03:21 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -545,7 +549,7 @@ class Canvas:
         self._doc.inPage() # try to enable page-only features
         pageref = self._doc.thisPageRef()
         dest.fit()
-        dest.setPageRef(pageref)
+        dest.setPage(pageref) # formatter won't make a ref to a ref
         return dest
         
     def bookmarkHorizontalAbsolute(self, key, yhorizontal):
@@ -560,7 +564,7 @@ class Canvas:
         self._doc.inPage() # try to enable page-only features
         pageref = self._doc.thisPageRef()
         dest.fith(yhorizontal)
-        dest.setPageRef(pageref)
+        dest.setPage(pageref)
         return dest
         
     #def _inPage0(self):  disallowed!
