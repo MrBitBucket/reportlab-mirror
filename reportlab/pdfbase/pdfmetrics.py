@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/fonts0.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.26 2001/03/15 10:46:21 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.27 2001/03/16 14:35:30 rgbecker Exp $ '''
 __doc__=""" 
 This provides the character widths database for calculating
 text metrics.  Everything for the base 14 fonts is pre-computed
@@ -31,8 +31,9 @@ When _rl_accel is present, it maintains a similar database for itself.
 import string
 from types import ListType, TupleType, StringType
 from reportlab.pdfbase import pdfdoc
-from reportlab import config
+from reportlab import rl_config
 from _fontdata import *
+_dummyEncoding=' _not an encoding_ '
 
 # conditional import - try both import techniques, and set a flag
 try:
@@ -41,7 +42,9 @@ try:
 	except ImportError, errMsg:
 		if str(errMsg)!='cannot import name _rl_accel': raise
 		import _rl_accel
+	assert _rl_accel.version>="0.3", "bad _rl_accel"
 	_stringWidth = _rl_accel.stringWidth
+	_rl_accel.defaultEncoding(_dummyEncoding)
 except ImportError, errMsg:
 	if str(errMsg)!='No module named _rl_accel': raise
 	_stringWidth = None
@@ -56,7 +59,7 @@ class Encoding:
 			assert not self._requiredLen or len(vector) == self._requiredLen, 'Encoding vector must have %d elements' % self._requiredLen
 			self.vector = tuple(vector)
 			self._encodingName = None
-			self._baseEncodingName = config.defaultEncoding
+			self._baseEncodingName = rl_config.defaultEncoding
 		elif type(vector) is StringType:
 			try:
 				self.vector = encodings[vector]	#This is a tuple so ca'nt be messed with
@@ -145,22 +148,56 @@ class Encoding:
 
 WinAnsiEncoding = Encoding('WinAnsiEncoding')
 MacRomanEncoding = Encoding('MacRomanEncoding')
-defaultEncoding = Encoding(config.defaultEncoding)
+defaultEncoding = Encoding(rl_config.defaultEncoding)
 
 class Font:
 	"""Base class for a font.  Not sure yet what it needs to do"""
-	def __init__(self):
-		self.ascent = None
-		self.descent = None
-		self._widths = None
+	def __init__(self,name):
+		if ascent_descent.has_key(name):
+			self.ascent = ascent_descent[name][0]
+			self.descent = ascent_descent[name][1]
+		else:
+			self.ascent = 0
+			self.descent = 0
+		self.name = name
+		fontsByName[name] = self
+		widths = self._calcWidths()
+		if _stringWidth:
+			_rl_accel.setFontInfo(name,_dummyEncoding,self.ascent,self.descent,widths)
+		else:
+			_widthVectorsByName[name] = widths
 
-	def addObjects(self, doc):
-		"""Adds PDF objects to the document as needed to represent self."""
-		pass
+	def getWidths(self):
+		"Returns width array"
+		if _stringWidth:
+			return _rl_accel.getFontInfo(self.fontName)[0]
+		else:
+			return _widthVectorsByFont[self.fontName]
 
-	def stringWidth(self, text, size):
-		"Calculates width of text for given point size"
-		pass
+	if not _stringWidth:
+		def stringWidth(self, text, size):
+			w = 0
+			widths = self.getWidths()
+			for ch in text:
+				w = w + widths[ord(ch)]
+			return w * 0.001 * size
+
+if _stringWidth:
+	import new
+	Font.stringWidth = new.instancemethod(_rl_accel._instanceStringWidth,None,Font)
+	stringWidth = _stringWidth
+else:
+	def stringWidth(text, fontName, fontSize):
+		try:
+			widths = _widthVectorsByFont[fontName]
+			w = 0
+			for char in text:
+				w = w + widths[ord(char)]
+			return w*fontSize*0.001
+		except KeyError:
+			# CID Font?  ask the font itself
+			font = fontsByName[fontName]
+			return font.stringWidth(text, fontSize)
 
 class Type1Font(Font):
 	"""Defines a font with a possibly with a new encoding."""
@@ -173,14 +210,10 @@ class Type1Font(Font):
 		Encoding object."""
 
 		assert baseFontName in standardFonts, "baseFontName must be one of the following: %s" % StandardFonts
-		Font.__init__(self)
 		self.baseFontName = baseFontName
 		self.encoding = encoding
-		self._widths = None
-		self._calcWidths()
-		self.name = name
-		fontsByName[name] = self
 		fontsByBaseEnc[(baseFontName,encoding)] = self
+		Font.__init__(self,name)
 
 	def addObjects(self, doc):
 		"""Makes and returns one or more PDF objects to be added
@@ -211,36 +244,20 @@ class Type1Font(Font):
 		doc.fontMapping[self.name] = '/' + internalName
 
 	def _calcWidths(self):
-		"Computes widths array, if not done already"
-		if self._widths:
-			return self._widths
+		"Computes widths array"
+		widthVector = []
+		thisFontWidths = widthsByFontGlyph[self.baseFontName]
+		if type(self.encoding) is StringType:
+			vector = encodings[self.encoding]
 		else:
-			widthVector = []
-			thisFontWidths = widthsByFontGlyph[self.baseFontName]
-			if type(self.encoding) is StringType:
-				vector = encodings[self.encoding]
-			else:
-				vector = self.encoding
-			for glyphName in vector:
-				try:
-					glyphWidth = thisFontWidths[glyphName]
-				except KeyError:
-					glyphWidth = 0 # None?
-				widthVector.append(glyphWidth)
-			self._widths = widthVector
-			return self._widths
-
-	def getWidths(self):
-		"Returns width array for use in optimized database"
-
-		return self._widths
-
-	def stringWidth(self, text, size):
-		# weakness - assumes getWidths called.	do the latter on _init_
-		w = 0
-		for ch in text:
-			w = w + self._widths[ord(ch)]
-		return w * 0.001 * size
+			vector = self.encoding
+		for glyphName in vector:
+			try:
+				glyphWidth = thisFontWidths[glyphName]
+			except KeyError:
+				glyphWidth = 0 # None?
+			widthVector.append(glyphWidth)
+		return widthVector
 
 def addFont(name,baseFontName,encoding):
 	'''
@@ -253,8 +270,6 @@ def addFont(name,baseFontName,encoding):
 		font = Type1Font(name,baseFontName,encoding)
 	elif fontsByName.has_key(name) and fontByName[name] is not font:
 		raise ValueError, "Attempted to addFont(%s,%s,%s) font %s aready added" %(name,baseFontName,encoding,name)
-	if hasattr(font, 'getWidths'):
-		widthVectorsByFont[font.name] = font.getWidths()
 	return font
 
 #add all the standard Fonts
@@ -262,24 +277,12 @@ for fontName in standardFonts:
 	addFont(fontName,fontName, fontName in ('Symbol','ZapfDingbats') and fontName or defaultEncoding)
 del fontName
 
-def stringWidth(text, fontName, fontSize):
-	try:
-		widths = widthVectorsByFont[fontName]
-		w = 0
-		for char in text:
-			w = w + widths[ord(char)]
-		return w*fontSize*0.001
-	except KeyError:
-		# CID Font?  ask the font itself
-		font = fontsByName[fontName]
-		return font.stringWidth(text, fontSize)
-
 def testMetrics():
 	# load the standard ones:
 	for baseFontName in standardFonts:
 		encoding = WinAnsiEncoding
 		fontName = baseFontName + '-WinAnsi'
-		font = fonts0.Type1Font(fontName, baseFontName, encoding)
+		font = Type1Font(fontName, baseFontName, encoding)
 		addWidths(fontName, font.getWidths())
 		#test it
 		msg = 'Hello World'
