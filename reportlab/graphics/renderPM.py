@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.28 2003/04/17 11:28:28 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.28 2003/04/17 11:28:28 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.29 2003/04/29 13:27:44 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.29 2003/04/29 13:27:44 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -541,7 +541,7 @@ if __name__=='__main__':
         drawings = []
         if not os.path.isdir('pmout'):
             os.mkdir('pmout')
-        htmlTop = """<html><head><title>renderGD output results</title></head>
+        htmlTop = """<html><head><title>renderPM output results</title></head>
         <body>
         <h1>renderPM results of output</h1>
         """
