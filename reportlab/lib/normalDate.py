@@ -22,6 +22,19 @@ _SeqTypes = (ListType,TupleType)
 import string, re, time
 
 _fmtPat = re.compile('\\{(m{1,5}|yyyy|yy|d{1,4})\\}',re.MULTILINE|re.IGNORECASE)
+_iso_re = re.compile(r'(\d\d\d\d|\d\d)-(\d\d)-(\d\d)')
+
+def getStdMonthNames():
+	return map(string.lower,_monthName)
+
+def getStdShortMonthNames():
+	return map(lambda x: x[:3],getStdMonthNames())
+
+def getStdDayNames():
+	return map(string.lower,_dayOfWeekName)
+
+def getStdShortDayNames():
+	return map(lambda x: x[:3],getStdDayNames())
 
 def isLeapYear(year):
 	"""determine if specified year is leap year, returns Python boolean"""
@@ -425,14 +438,20 @@ class NormalDate:
 		if tn is IntType:
 			self.normalDate = normalDate
 		elif tn is StringType:
-			self.normalDate = int(normalDate)
+			try:
+				self.normalDate = int(normalDate)
+			except:
+				m = _iso_re.match(normalDate)
+				if m:
+					self.setNormalDate(m.group(1)+m.group(2)+m.group(3))
+				else:
+					raise NormalDateException("unable to setNormalDate(%s)" % `normalDate`)
 		elif tn in _SeqTypes:
 			self.normalDate = int("%04d%02d%02d" % normalDate[:3])
 		elif tn is _NDType:
 			self.normalDate = normalDate.normalDate
 		if not self._isValidNormalDate(self.normalDate):
-			msg = "unable to setNormalDate(%s)" % `normalDate`
-			raise NormalDateException(msg)
+			raise NormalDateException("unable to setNormalDate(%s)" % `normalDate`)
 
 	def setYear(self, year):
 		if year == 0:
