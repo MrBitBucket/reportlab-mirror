@@ -189,7 +189,7 @@ class Parser:
         
 if __name__=='__main__': #NORUNTESTS
     if len(sys.argv) <> 2:
-        print 'usage: aml.py source.txt'
+        print 'usage: yaml.py source.txt'
     else:
         p = Parser()
         results = p.parseFile(sys.argv[1])
