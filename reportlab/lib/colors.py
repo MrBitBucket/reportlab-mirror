@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.24 2001/09/20 12:53:30 rgbecker Exp $
-__version__=''' $Id: colors.py,v 1.24 2001/09/20 12:53:30 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.25 2001/10/05 16:33:15 rgbecker Exp $
+__version__=''' $Id: colors.py,v 1.25 2001/10/05 16:33:15 rgbecker Exp $ '''
 
 import string
 import math
@@ -197,7 +197,7 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
 		return c1
 
 	cname = c0.__class__.__name__
-	dx = x1-x0
+	dx = float(x1-x0)
 	x = x-x0
 
 	if cname is 'Color': # RGB
@@ -213,15 +213,39 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
 		k = c0.black+x*(c1.black - c0.black)/dx
 		d = c0.density+x*(c1.density - c0.density)/dx
 		return CMYKColor(c,m,y,k, density=d)
-	
-	elif cname is 'PCMYKColor': 
-		c = c0.cyan+x*(c1.cyan - c0.cyan)/dx
-		m = c0.magenta+x*(c1.magenta - c0.magenta)/dx
-		y = c0.yellow+x*(c1.yellow - c0.yellow)/dx
-		k = c0.black+x*(c1.black - c0.black)/dx
-		d = c0.density+x*(c1.density - c0.density)/dx
-		return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100)
-
+	elif cname is 'PCMYKColor':
+		if cmykDistance(c0,c1)<1e-8:
+			#colors same do density and preserve spotName if any
+			assert c0.spotName == c1.spotName, "Identical cmyk, but different spotName"
+			c = c0.cyan
+			m = c0.magenta
+			y = c0.yellow
+			k = c0.black
+			d = c0.density+x*(c1.density - c0.density)/dx
+			return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100, spotName=c0.spotName)
+		elif cmykDistance(c0,_CMYKWhite)<1e-8:
+			#one of the colours is white
+			c = c1.cyan
+			m = c1.magenta
+			y = c1.yellow
+			k = c1.black
+			d = x*c1.density/dx
+			return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100, spotName=c1.spotName)
+		elif cmykDistance(c1,_CMYKWhite)<1e-8:
+			#one of the colours is white
+			c = c0.cyan
+			m = c0.magenta
+			y = c0.yellow
+			k = c0.black
+			d = x*c0.density/dx
+			return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100, spotName=c0.spotName)
+		else:
+			c = c0.cyan+x*(c1.cyan - c0.cyan)/dx
+			m = c0.magenta+x*(c1.magenta - c0.magenta)/dx
+			y = c0.yellow+x*(c1.yellow - c0.yellow)/dx
+			k = c0.black+x*(c1.black - c0.black)/dx
+			d = c0.density+x*(c1.density - c0.density)/dx
+			return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100)
 	else:
 		raise ValueError, "Can't interpolate: Unknown color class %s!" % cname
 
@@ -393,6 +417,17 @@ def colorDistance(col1, col2):
 			(col1.red - col2.red)**2 +
 			(col1.green - col2.green)**2 +
 			(col1.blue - col2.blue)**2
+			)
+
+def cmykDistance(col1, col2):
+	"""Returns a number between 0 and root(4) stating how similar
+	two colours are - distance in r,g,b, space.  Only used to find
+	names for things."""
+	return math.sqrt(
+			(col1.cyan - col2.cyan)**2 +
+			(col1.magenta - col2.magenta)**2 +
+			(col1.yellow - col2.yellow)**2 +
+			(col1.black - col2.black)**2
 			)
 
 _namedColors = None
