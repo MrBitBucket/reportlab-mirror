@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/Attic/test_japanese.py,v 1.9 2001/10/04 16:01:08 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/Attic/test_japanese.py,v 1.10 2001/10/06 20:45:06 andy_robinson Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -40,7 +40,6 @@ class JapaneseFontTests(unittest.TestCase):
             findCMapFile('EUC-H')
         except:
             #don't have the font pack.  return silently
-            raise
             return
 
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90ms-RKSJ-H'))
