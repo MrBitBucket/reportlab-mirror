@@ -157,6 +157,7 @@ class CategoryAxis(_AxisG):
         reverseDirection = AttrMapValue(isBoolean, desc='If true reverse category direction.'),
         style = AttrMapValue(OneOf('parallel','stacked','parallel_3d'),"How common category bars are plotted"),
         labelAxisMode = AttrMapValue(OneOf('high','low','axis'), desc="Like joinAxisMode, but for the axis labels"),
+        tickShift = AttrMapValue(isBoolean, desc='Tick shift typically'),
         )
 
     def __init__(self):
@@ -197,6 +198,7 @@ class CategoryAxis(_AxisG):
 
         #various private things which need to be initialized
         self._labelTextFormat = None
+        self.tickShift = 0
 
     def setPosition(self, x, y, length):
         # ensure floating point
@@ -211,7 +213,11 @@ class CategoryAxis(_AxisG):
         self._calcTickmarkPositions()
 
     def _calcTickmarkPositions(self):
-        self._tickValues = range(self._catCount+1)
+        n = self._catCount
+        if self.tickShift:
+            self._tickValues = [t+0.5 for t in range(n)]
+        else:
+            self._tickValues = range(n+1)
 
     def draw(self):
         g = Group()
