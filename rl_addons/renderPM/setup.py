@@ -58,7 +58,7 @@ if __name__=='__main__': #NO RUNTESTS
 							],
 			)
 
-	if sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
+	if sys.hexversion<0x20200a0 and sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
 		def MovePYDs(*F):
 			for x in sys.argv:
 				if x[:18]=='--install-platlib=': return

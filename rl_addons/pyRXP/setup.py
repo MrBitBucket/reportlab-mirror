@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2002
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/setup.py,v 1.1 2002/03/22 11:07:52 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/setup.py,v 1.2 2002/03/23 19:25:50 rgbecker Exp $
 if __name__=='__main__': #NO RUNTESTS
 	import os, sys
 	from distutils.core import setup, Extension
@@ -45,7 +45,7 @@ if __name__=='__main__': #NO RUNTESTS
 							]
 			)
 
-	if sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
+	if sys.hexversion<0x20200a0 and sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
 		def MovePYDs(*F):
 			for x in sys.argv:
 				if x[:18]=='--install-platlib=': return
