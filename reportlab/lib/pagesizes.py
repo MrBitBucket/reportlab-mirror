@@ -33,10 +33,13 @@
 #
 ###############################################################################
 #	$Log: pagesizes.py,v $
+#	Revision 1.4  2000/06/14 21:17:30  andy_robinson
+#	Some relative imports fixed
+#
 #	Revision 1.3  2000/04/26 11:13:28  andy_robinson
 #	Fixed some broken pagesizes and added a
 #	landscape() function.
-#
+#	
 #	Revision 1.2  2000/03/08 13:40:49  rgbecker
 #	Added DEFAULT_PAGE_SIZE at end
 #	
@@ -47,9 +50,9 @@
 """This module defines a few common page sizes in points (1/72 inch).
 To be expanded to include things like label sizes, envelope windows
 etc."""
-__version__=''' $Id: pagesizes.py,v 1.3 2000/04/26 11:13:28 andy_robinson Exp $ '''
+__version__=''' $Id: pagesizes.py,v 1.4 2000/06/14 21:17:30 andy_robinson Exp $ '''
 
-from units import cm, inch
+from reportlab.lib.units import cm, inch
 
 _W, _H = (21*cm, 29.7*cm)
 

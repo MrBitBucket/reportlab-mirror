@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: colors.py,v $
+#	Revision 1.9  2000/06/14 21:17:30  andy_robinson
+#	Some relative imports fixed
+#
 #	Revision 1.8  2000/05/26 09:43:44  rgbecker
 #	stringToColor-->toColor
-#
+#	
 #	Revision 1.7  2000/04/06 18:10:35  rgbecker
 #	Fixed type in stringToColor
 #	
@@ -53,15 +56,15 @@
 #	Revision 1.2  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
 #	
-__version__=''' $Id: colors.py,v 1.8 2000/05/26 09:43:44 rgbecker Exp $ '''
+__version__=''' $Id: colors.py,v 1.9 2000/06/14 21:17:30 andy_robinson Exp $ '''
 
 import string
 import math
 from types import StringType, ListType, TupleType
 
 class Color:
-    "This class is used to represent color.  Components red, green, blue \
-    are in the range 0 (dark) to 1 (full intensity)."
+    """This class is used to represent color.  Components red, green, blue
+    are in the range 0 (dark) to 1 (full intensity)."""
 
     def __init__(self, red=0, green=0, blue=0):
         "Initialize with red, green, blue in range [0-1]."
@@ -94,7 +97,7 @@ def cmyk2rgb(cmyktuple):
     return (r,g,b)
 
 def HexColor(val):
-    """This class converts a hex string, or an actual integer number,
+    """This function converts a hex string, or an actual integer number,
     into the corresponding color.  E.g., in "AABBCC" or 0xAABBCC,
     AA is the red, BB is the green, and CC is the blue (00-FF).
 
