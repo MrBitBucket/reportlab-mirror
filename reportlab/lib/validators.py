@@ -1,3 +1,8 @@
+#copyright ReportLab Inc. 2000-2001
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/validators.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.21 2002/03/27 10:39:21 rgbecker Exp $
+__version__=''' $Id: validators.py,v 1.21 2002/03/27 10:39:21 rgbecker Exp $ '''
 """
 This module contains some standard verifying functions which can be
 used in an attribute map.

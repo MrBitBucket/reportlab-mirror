@@ -1,7 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/attrmap.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/attrmap.py,v 1.3 2002/03/23 16:47:27 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/attrmap.py,v 1.4 2002/03/27 10:39:21 rgbecker Exp $
+__version__=''' $Id: attrmap.py,v 1.4 2002/03/27 10:39:21 rgbecker Exp $ '''
 from UserDict import UserDict
 from reportlab.lib.validators import isAnything, _SequenceTypes
 

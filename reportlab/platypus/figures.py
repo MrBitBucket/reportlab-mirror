@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/platdemos.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.1 2001/11/13 17:29:56 dinu_gherman Exp $
-
+#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.2 2002/03/27 10:39:22 rgbecker Exp $
 """This includes some demos of platypus for use in the API proposal"""
+__version__=''' $Id: figures.py,v 1.2 2002/03/27 10:39:22 rgbecker Exp $ '''
 
 from reportlab.lib import colors
 from reportlab.pdfgen.canvas import Canvas

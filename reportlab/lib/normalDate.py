@@ -10,6 +10,7 @@
 # derived from an original version created
 # by Jeff Bauer of Rubicon Research and used
 # with his kind permission
+__version__=''' $Id: normalDate.py,v 1.5 2002/03/27 10:39:21 rgbecker Exp $ '''
 
 
 

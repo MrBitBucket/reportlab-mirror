@@ -1,7 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/abag.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/abag.py,v 1.5 2001/11/26 21:49:01 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/lib/abag.py,v 1.6 2002/03/27 10:39:21 rgbecker Exp $
+__version__=''' $Id: abag.py,v 1.6 2002/03/27 10:39:21 rgbecker Exp $ '''
 
 class ABag:
 	"""
