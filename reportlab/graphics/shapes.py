@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.84 2003/01/14 19:10:31 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.85 2003/01/15 12:23:36 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.84 2003/01/14 19:10:31 rgbecker Exp $ '''
+__version__=''' $Id: shapes.py,v 1.85 2003/01/15 12:23:36 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -321,7 +321,7 @@ class Group(Shape):
         """Return a new object which only contains primitive shapes."""
 
         # many limitations - shared nodes become multiple ones,
-        obj = self.__class__()
+        obj = isinstance(self,Drawing) and Drawing(self.width,self.height) or Group()
         obj._attrMap = self._attrMap.clone()
         if hasattr(obj,'transform'): obj.transform = self.transform[:]
 
