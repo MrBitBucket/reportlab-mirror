@@ -693,8 +693,8 @@ class Canvas:
 
         self._formsinuse.append(rawName)
 
-    def textAnnotation0(self, contents, Rect=None, addtopage=1, name=None, **kw):
-        """Experimental.
+    def textAnnotation(self, contents, Rect=None, addtopage=1, name=None, **kw):
+        """Experimental, but works.
         """
         if not Rect:
             (w,h) = self._pagesize# default to whole page (?)
@@ -702,7 +702,10 @@ class Canvas:
         annotation = apply(pdfdoc.TextAnnotation, (Rect, contents), kw)
         self._addAnnotation(annotation, name, addtopage)
 
+    textAnnotation0 = textAnnotation    #deprecated
+
     def inkAnnotation0(self, contents, InkList=None, Rect=None, addtopage=1, name=None, **kw):
+        raise NotImplementedError
         "Experimental"
         (w,h) = self._pagesize
         if not Rect:
@@ -710,7 +713,7 @@ class Canvas:
         if not InkList:
             InkList = ( (100,100,100,h-100,w-100,h-100,w-100,100), )
         annotation = apply(pdfdoc.InkAnnotation, (Rect, contents, InkList), kw)
-        self.addAnnotation(annotation, name, addtopage)
+        self._addAnnotation(annotation, name, addtopage)
 
     def linkAbsolute(self, contents, destinationname, Rect=None, addtopage=1, name=None, **kw):
         """rectangular link annotation positioned wrt the default user space.

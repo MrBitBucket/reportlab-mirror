@@ -406,6 +406,7 @@ substring.
     c.drawPath(p)
     c.drawString(4*inch, 3*inch, 'dash pattern, join and cap style interacting - ')
     c.drawString(4*inch, 3*inch - 12, 'round join & miter results in sausages')
+    c.textAnnotation('Annotation',Rect=(4*inch, 3*inch-72, inch,inch-12))
 
     c.showPage()
 

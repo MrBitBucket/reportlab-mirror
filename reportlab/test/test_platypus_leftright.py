@@ -144,7 +144,7 @@ class LeftRightTestCase(unittest.TestCase):
 
 
         #doc = MyDocTemplate(outputfile('test_platypus_leftright.pdf'))
-        doc = MyDocTemplate('test_platypus_leftright.pdf')
+        doc = MyDocTemplate(outputfile('test_platypus_leftright.pdf'))
         doc.multiBuild(story)
 
 
