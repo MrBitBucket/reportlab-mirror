@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPDF.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.6 2001/04/12 16:02:43 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.7 2001/05/07 20:16:27 aaron_watters Exp $
 # renderPDF - draws Drawings onto a canvas
 """Usage:
     import renderpdf
@@ -24,6 +24,8 @@ def draw(drawing, canvas, x, y, showBoundary=1):
 
 from renderbase import Renderer, StateTracker, getStateDelta
 
+### this is a hack... I didn't know how to turn off boundaries
+SHOWBOUNDARYDEFAULT = 1
     
 class _PDFRenderer(Renderer):
     """This draws onto a PDF document.  It needs to be a class
@@ -35,11 +37,13 @@ class _PDFRenderer(Renderer):
         self._fill = 0
         self._tracker = StateTracker()
 
-    def draw(self, drawing, canvas, x, y, showBoundary=1):
+    def draw(self, drawing, canvas, x, y, showBoundary="DEFAULT"):
         """This is the top level function, which
         draws the drawing at the given location.
         The recursive part is handled by drawNode."""
         #stash references for the other objects to draw on
+        if showBoundary=="DEFAULT":
+            showBoundary = SHOWBOUNDARYDEFAULT
         self._canvas = canvas
         self._drawing = drawing
         try:
