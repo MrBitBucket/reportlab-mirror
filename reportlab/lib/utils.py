@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.33 2002/04/13 18:38:18 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.33 2002/04/13 18:38:18 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.34 2002/06/12 15:02:59 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.34 2002/06/12 15:02:59 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -49,7 +49,7 @@ def recursiveImport(modulename, baseDir=None, noCWD=0):
 		(file, pathname, description) = imp.find_module(part, path)
 		childModule = parentModule = imp.load_module(part, file, pathname, description)
 		for name in parts[1:]:
-			(file, pathname, description) = imp.find_module(name, parentModule.__path__)
+			(file, pathname, description) = imp.find_module(name, parentModule.__file__)
 			childModule = imp.load_module(name, file, pathname, description)
 			setattr(parentModule, name, childModule)
 			parentModule = childModule
