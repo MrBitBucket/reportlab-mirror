@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.86 2003/09/12 15:45:30 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.87 2003/10/02 14:41:42 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.86 2003/09/12 15:45:30 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.87 2003/10/02 14:41:42 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -106,7 +106,7 @@ class _AxisG(Widget):
         if _3d_dx is not None:
             _3d_dy = getattr(parent,'_3d_dy',None)
             f = self._dataIndex and self._cyLine3d or self._cxLine3d
-            return lambda v, s=start, e=end, f=f: f(v,s,e,_3d_dx=_3d_dx,_3d_dy=_3d_dy)
+            return lambda v, s=start, e=end, f=f,_3d_dx=_3d_dx,_3d_dy=_3d_dy: f(v,s,e,_3d_dx=_3d_dx,_3d_dy=_3d_dy)
         else:
             f = self._dataIndex and self._cyLine or self._cxLine
             return lambda v, s=start, e=end, f=f: f(v,s,e)
