@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/simpledoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/simpledoc.py,v 1.5 2001/03/07 18:57:12 rgbecker Exp $
-__version__=''' $Id: simpledoc.py,v 1.5 2001/03/07 18:57:12 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/utils/simpledoc.py,v 1.6 2001/03/16 14:49:57 rgbecker Exp $
+__version__=''' $Id: simpledoc.py,v 1.6 2001/03/16 14:49:57 rgbecker Exp $ '''
 __doc__="""
 simple document formatting (quickhack) for pdf:
 
@@ -25,7 +25,7 @@ and so forth.
 import string
 from reportlab.platypus import *
 from reportlab.lib.styles import getSampleStyleSheeet
-from reportlab.config import defaultPageSize
+from reportlab.rl_config import defaultPageSize
 
 do_images = 1
 
