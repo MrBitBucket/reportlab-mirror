@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: runtests.py,v $
+#	Revision 1.8  2000/04/11 10:45:56  rgbecker
+#	CLEAN_EXCEPTIONS & sys.argv[0] setting
+#
 #	Revision 1.7  2000/04/07 09:21:29  rgbecker
 #	Fixed import bug
-#
+#	
 #	Revision 1.6  2000/04/06 15:08:53  rgbecker
 #	Changes to way dir is handled
 #	
@@ -54,7 +57,7 @@
 #	New infrastructure
 #	
 #	
-__version__=''' $Id: runtests.py,v 1.7 2000/04/07 09:21:29 rgbecker Exp $ '''
+__version__=''' $Id: runtests.py,v 1.8 2000/04/11 10:45:56 rgbecker Exp $ '''
 '''
 script for testing ReportLab
 '''
@@ -63,6 +66,9 @@ _globals=globals().copy()				#make a copy of out globals
 _globals['__name__'] = "__main__"	#for passing to execfile
 
 import os, sys, string, traceback, re, copy
+
+#if a file matches this it won't be cleaned
+CLEAN_EXCEPTIONS=['demos/pythonpoint/logo.a85']
 
 _ecount = 0	# count of errors
 
@@ -103,12 +109,14 @@ def do_tests(d,cyc):
 		if t not in test_files:
 			test_files.append(t)
 
+	oldArgv0 =sys.argv[0]
 	for t in test_files:
 		fn =os.path.normcase(os.path.normpath(os.path.join(d,t)))
 		bn = os.path.basename(fn)
 		print '##### Test %s starting' % bn
 		dn = os.path.dirname(fn)
 		sys.path.insert(0,dn)
+		sys.argv[0] = fn
 		os.chdir(os.path.dirname(fn))
 		g = copy.copy(_globals)
 		try:
@@ -132,13 +140,21 @@ def do_tests(d,cyc):
 			traceback.print_exc(None,sys.stdout)
 			_ecount = _ecount + 1
 		del sys.path[0]
+	sys.argv[0] = oldArgv0
+
+def is_exceptional(fn,exceptions):
+	for x in exceptions:
+		xfn = os.normcase(os.normpath(x))
+		if fn[-len(xfn):]==xfn: return 1
+	return 0
 
 def clean_files(d):
 	def find_cleanable_files(L,d,N):
 		n = os.path.basename(d)
 		for n in filter(lambda n: n[-4:] in ['.PYC','.PDF','.A85','.PNG','.IMG'],map(string.upper,N)):
 			fn = os.path.normcase(os.path.normpath(os.path.join(d,n)))
-			if os.path.isfile(fn): os.remove(fn)
+			if os.path.isfile(fn) and not is_exceptional(fn,CLEAN_EXCEPTIONS):
+				os.remove(fn)
 	os.chdir(d)
 	os.path.walk('.',find_cleanable_files,None)
 
