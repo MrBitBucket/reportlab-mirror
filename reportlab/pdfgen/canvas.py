@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.61 2001/02/21 17:13:11 aaron_watters Exp $
-__version__=''' $Id: canvas.py,v 1.61 2001/02/21 17:13:11 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.62 2001/02/28 11:53:20 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.62 2001/02/28 11:53:20 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -48,13 +48,10 @@ from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
 from reportlab.lib.colors import ColorType, toColor
-
-try:
-    import zlib
-except ImportError:
-    zlib = None
-
+from reportlab.lib.utils import import_zlib, import_Image
 from reportlab.lib.utils import fp_str
+
+zlib = import_zlib()
 _SeqTypes=(TupleType,ListType)
 
 # Robert Kern
@@ -1048,12 +1045,8 @@ class Canvas:
                         if not zlib:
                             print 'zlib not available'
                             return
-
-                        try:
-                            import Image
-                        except ImportError:
-                            print 'Python Imaging Library not available'
-                            return
+                        Image = import_Image()
+                        if not Image: return
                         pdfutils.cacheImageFile(image)
 
                     #now we have one cached, slurp it in

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pdfimages.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.7 2001/01/12 21:36:57 dinu_gherman Exp $
-__version__=''' $Id: pdfimages.py,v 1.7 2001/01/12 21:36:57 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.8 2001/02/28 11:53:20 rgbecker Exp $
+__version__=''' $Id: pdfimages.py,v 1.8 2001/02/28 11:53:20 rgbecker Exp $ '''
 __doc__="""
 Image functionality sliced out of canvas.py for generalization
 """
@@ -13,14 +13,8 @@ import cStringIO
 from types import StringType
 from reportlab.pdfbase import pdfutils
 from reportlab.lib.utils import fp_str
-from reportlab.lib.logger import warnOnce
 
-
-try:
-    import zlib
-except ImportError:
-    zlib = None
-
+from reportlab.lib.utils import import_zlib, import_Image
 
 class PDFImage:
     def __init__(self, image, x,y, width=None, height=None):
@@ -58,14 +52,10 @@ class PDFImage:
     def cache_imagedata(self):
         image = self.image
         if not pdfutils.cachedImageExists(image):
-            if not zlib:
-                warnOnce('zlib not available')
-                return
-            try:
-                import Image
-            except ImportError:
-                warnOnce('Python Imaging Library not available')
-                return
+            zlib = import_zlib()
+            if not zlib: return
+            Image = import_Image()
+            if not Image: return
             pdfutils.cacheImageFile(image)
 
         #now we have one cached, slurp it in
@@ -76,9 +66,8 @@ class PDFImage:
         return imagedata
 
     def PIL_imagedata(self):
-        if not zlib:
-            warnOnce('zlib not available')
-            return
+        lib = import_zlib()
+        if not zlib: return
         image = self.image
         myimage = image.convert('RGB')
         imgwidth, imgheight = myimage.size
