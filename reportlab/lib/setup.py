@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/setup.py,v 1.4 2001/04/05 09:30:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/setup.py,v 1.5 2001/05/09 22:31:04 rgbecker Exp $
 if __name__=='__main__': #NO RUNTESTS
 	import os, sys
 	if sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
@@ -16,6 +16,8 @@ if __name__=='__main__': #NO RUNTESTS
 	if sys.platform=="win32":
 		LIBS=[]
 	elif sys.platform=="sunos5":
+		LIBS=[]
+	elif sys.platform=="aix4":
 		LIBS=[]
 	else:
 		print "Don't know about other systems"
