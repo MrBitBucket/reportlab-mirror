@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.24  2000/07/05 12:22:21  rgbecker
+#	Force _calc in SimpleDocTemplae.build
+#
 #	Revision 1.23  2000/07/03 15:39:51  rgbecker
 #	Documentation fixes
-#
+#	
 #	Revision 1.22  2000/06/28 14:52:43  rgbecker
 #	Documentation changes
 #	
@@ -102,7 +105,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.23 2000/07/03 15:39:51 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.24 2000/07/05 12:22:21 rgbecker Exp $ '''
 __doc__="""
 This module contains the core structure of platypus.
 
@@ -552,6 +555,7 @@ class SimpleDocTemplate(BaseDocTemplate):
 	   A document which has all pages with the same look except for the first
 	   page may can be built using this special approach.
 	"""
+	_invalidInitArgs = ('pageTemplates',)
 	def handle_pageBegin(self):
 		'''override base method to add a change of page template after the firstpage.
 		'''
@@ -571,6 +575,7 @@ class SimpleDocTemplate(BaseDocTemplate):
 			   footers, etcetera. They can use external variables to vary
 			   the look (for example providing page numbering or section names).
 		"""
+		self._calc()	#in case we changed margins sizes etc
 		frameT = Frame(self.leftMargin, self.bottomMargin, self.width, self.height, id='normal')
 		self.addPageTemplates([PageTemplate(id='First',frames=frameT, onPage=onFirstPage),
 						PageTemplate(id='Later',frames=frameT, onPage=onLaterPages)])
