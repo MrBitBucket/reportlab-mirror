@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.9 2002/08/10 10:18:23 dragan1 Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.10 2002/08/10 10:28:52 dragan1 Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 import reportlab
 
@@ -40,7 +40,7 @@ bullet("How do I get everything set up and running?")
 todo("""
 Be warned! This document is a work in progress.  We need your help to
 make sure it is complete and helpful.  Please send any feedback to our
-user mailing list, reportlab-users@egroups.com.
+user mailing list, reportlab-users@reportlab.com.
 """)
 
 heading2("What is ReportLab?")
