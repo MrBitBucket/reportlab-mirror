@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.81 2003/10/09 17:45:57 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.82 2003/10/14 14:24:09 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -9,7 +9,7 @@ vertical versions.
 
 Stacked and percentile bar charts to follow...
 """
-__version__=''' $Id: barcharts.py,v 1.81 2003/10/09 17:45:57 rgbecker Exp $ '''
+__version__=''' $Id: barcharts.py,v 1.82 2003/10/14 14:24:09 rgbecker Exp $ '''
 
 import string, copy
 from types import FunctionType, StringType
@@ -62,7 +62,7 @@ class BarChart(PlotArea):
         )
 
     def __init__(self):
-        assert self.__class__.__name__!='BarChart', 'Abstract Class BarChart Instantiated'
+        assert self.__class__.__name__ not in ('BarChart','BarChart3D'), 'Abstract Class %s Instantiated' % self.__class__.__name__
 
         if self._flipXY:
             self.categoryAxis = YCategoryAxis()
