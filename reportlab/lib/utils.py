@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.53 2003/10/06 15:34:21 dragan1 Exp $
-__version__=''' $Id: utils.py,v 1.53 2003/10/06 15:34:21 dragan1 Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.54 2003/11/19 09:00:58 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.54 2003/11/19 09:00:58 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -307,9 +307,9 @@ class ImageReader:
         if sys.platform[0:4] == 'java':
             from javax.imageio import ImageIO
             if type(fileName) is type(''):
-		fp = open(fileName,'rb')
+                fp = open(fileName,'rb')
             else:
-		fp = fileName
+                fp = fileName
             self._image = ImageIO.read(fp)
         else:
             import PIL.Image
