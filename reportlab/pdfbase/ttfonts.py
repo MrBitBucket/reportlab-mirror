@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.7 2002/09/02 16:17:29 mgedmin Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.8 2002/09/06 15:53:51 mgedmin Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -58,7 +58,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.7 2002/09/02 16:17:29 mgedmin Exp $'
+__version__ = '$Id: ttfonts.py,v 1.8 2002/09/06 15:53:51 mgedmin Exp $'
 
 import string
 from types import StringType
@@ -522,7 +522,11 @@ class TTFontFile(TTFontParser):
         # (needs data from OS/2 table)
         self.seek_table("post")
         ver_maj, ver_min = self.read_ushort(), self.read_ushort()
-        if ver_maj not in (1, 2, 3):
+        if ver_maj not in (1, 2, 3, 4):
+            # Adobe/MS documents 1, 2, 2.5, 3; Apple also has 4.
+            # From Apple docs it seems that we do not need to care
+            # about the exact version, so if you get this error, you can
+            # try to remove this check altogether.
             raise TTFError, 'Unknown post table version %d.%04x' % (ver_maj, ver_min)
         self.italicAngle = self.read_short() + self.read_ushort() / 65536.0
         self.skip(2*2)
@@ -807,7 +811,7 @@ class TTFontFile(TTFontParser):
             indexToLocFormat = 1        # long format
             for offset in offsets:
                 loca.append(offset)
-            loca = apply(pack, [">%d:" % len(loca)] + loca)
+            loca = apply(pack, [">%dL" % len(loca)] + loca)
         else:
             indexToLocFormat = 0        # short format
             for offset in offsets:
