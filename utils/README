@@ -66,6 +66,10 @@ Release Procedure
 			cvs -z3 upd -A -P -d to create a working copy
 		i)	cvs -z3 tag ReportLab_x_yz
 
+	If there are problems and you need to go back to step 1 and restart it mey be useful
+	to know that you can add a -F to the tag command to allow you to retag a modified
+	source file ie cvs -z3 tag -F ReportLab_d_xy
+
 5)	Login to othala.pair.com
 
 	cd bin
