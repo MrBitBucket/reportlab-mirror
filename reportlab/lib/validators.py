@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/validators.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.28 2003/11/09 10:45:25 rgbecker Exp $
-__version__=''' $Id: validators.py,v 1.28 2003/11/09 10:45:25 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.29 2003/11/10 17:10:49 rgbecker Exp $
+__version__=''' $Id: validators.py,v 1.29 2003/11/10 17:10:49 rgbecker Exp $ '''
 """
 This module contains some standard verifying functions which can be
 used in an attribute map.
@@ -13,6 +13,9 @@ from types import *
 _SequenceTypes = (ListType,TupleType)
 _NumberTypes = (FloatType,IntType)
 from reportlab.lib import colors
+if sys.hexversion<0x2030000:
+    True = 1
+    False = 0
 
 class Validator:
     "base validator class"
@@ -28,17 +31,17 @@ class Validator:
     def normalizeTest(self,x):
         try:
             self.normalize(x)
-            return 1
+            return True
         except:
-            return 0
+            return False
 
 class _isAnything(Validator):
     def test(self,x):
-        return 1
+        return True
 
 class _isNothing(Validator):
     def test(self,x):
-        return 0
+        return False
 
 class _isBoolean(Validator):
     if sys.hexversion>=0x2030000:
@@ -56,8 +59,8 @@ class _isBoolean(Validator):
             S = string.upper(x)
         except:
             raise ValueError, 'Must be boolean'
-        if S in ('YES','TRUE'): return 1
-        if S in ('NO','FALSE',None): return 0
+        if S in ('YES','TRUE'): return True
+        if S in ('NO','FALSE',None): return False
         raise ValueError, 'Must be boolean'
 
 class _isString(Validator):
@@ -66,7 +69,7 @@ class _isString(Validator):
 
 class _isNumber(Validator):
     def test(self,x):
-        if type(x) in _NumberTypes: return 1
+        if type(x) in _NumberTypes: return True
         return self.normalizeTest(x)
 
     def normalize(self,x):
@@ -77,7 +80,7 @@ class _isNumber(Validator):
 
 class _isInt(Validator):
     def test(self,x):
-        if type(x) not in (IntType,StringType): return 0
+        if type(x) not in (IntType,StringType): return False
         return self.normalizeTest(x)
 
     def normalize(self,x):
@@ -94,7 +97,7 @@ class _isNumberOrNone(_isNumber):
 class _isListOfNumbersOrNone(Validator):
     "ListOfNumbersOrNone validator class."
     def test(self, x):
-        if x is None: return 1
+        if x is None: return True
         return isListOfNumbers(x)
 
 class _isListOfShapes(Validator):
@@ -108,13 +111,13 @@ class _isListOfShapes(Validator):
                     answer = 0
             return answer
         else:
-            return 0
+            return False
 
 class _isListOfStringsOrNone(Validator):
     "ListOfStringsOrNone validator class."
 
     def test(self, x):
-        if x is None: return 1
+        if x is None: return True
         return isListOfStrings(x)
 
 class _isTransform(Validator):
@@ -124,12 +127,12 @@ class _isTransform(Validator):
             if len(x) == 6:
                 for element in x:
                     if not isNumber(element):
-                        return 0
-                return 1
+                        return False
+                return True
             else:
-                return 0
+                return False
         else:
-            return 0
+            return False
 
 class _isColor(Validator):
     "Color validator class."
@@ -139,7 +142,7 @@ class _isColor(Validator):
 class _isColorOrNone(Validator):
     "ColorOrNone validator class."
     def test(self, x):
-        if x is None: return 1
+        if x is None: return True
         return isColor(x)
 
 class _isValidChild(Validator):
@@ -192,13 +195,13 @@ class SequenceOf(Validator):
     def test(self, x):
         if type(x) not in _SequenceTypes:
             if x is None: return self._NoneOK
-            return 0
+            return False
         if x==[] or x==():
             return self._emptyOK
-        elif not self._lo<=len(x)<=self._hi: return 0
+        elif not self._lo<=len(x)<=self._hi: return False
         for e in x:
-            if not self._elemTest(e): return 0
-        return 1
+            if not self._elemTest(e): return False
+        return True
 
 class EitherOr(Validator):
     def __init__(self,tests,name=None):
@@ -208,8 +211,8 @@ class EitherOr(Validator):
 
     def test(self, x):
         for t in self._tests:
-            if t(x): return 1
-        return 0
+            if t(x): return True
+        return False
 
 class NoneOr(Validator):
     def __init__(self,elemTest,name=None):
@@ -217,7 +220,7 @@ class NoneOr(Validator):
         if name: self._str = name
 
     def test(self, x):
-        if x is None: return 1
+        if x is None: return True
         return self._elemTest(x)
 
 class isInstanceOf(Validator):
