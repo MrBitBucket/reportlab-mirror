@@ -111,14 +111,13 @@ def parseFile(filename):
     raw = open(filename, 'r').read()
     return parsexml(raw)
 
-
 verbose = 0
 
 def skip_prologue(text, cursor):
     """skip any prologue found after cursor, return index of rest of text"""
     ### NOT AT ALL COMPLETE!!! definitely can be confused!!!
     from string import find
-    prologue_elements = ("!DOCTYPE", "?xml", )
+    prologue_elements = ("!DOCTYPE", "?xml", "!--")
     done = None
     while done is None:
         #print "trying to skip:", repr(text[cursor:cursor+20])
@@ -430,7 +429,6 @@ filenames = [ #"../../reportlab/demos/pythonpoint/pythonpoint.xml",
 #filenames = ["moa.xml"]
 
 dump=1
-
 if __name__=="__main__":
     test()
     from time import time
@@ -440,7 +438,3 @@ if __name__=="__main__":
         print "parsing", f
         testparse(t)
     print "elapsed", time()-now
-
-
-
-
