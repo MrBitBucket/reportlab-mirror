@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.29 2003/04/29 13:27:44 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.29 2003/04/29 13:27:44 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.30 2003/05/07 10:37:44 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.30 2003/05/07 10:37:44 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -528,55 +528,55 @@ def drawToString(d,fmt='GIF', dpi=72, bg=0xfffffff, configPIL=None, showBoundary
 
 save = drawToFile
 
-if __name__=='__main__':
+def test():
     def ext(x):
         if x=='tiff': x='tif'
         return x
+    #grab all drawings from the test module and write out.
+    #make a page of links in HTML to assist viewing.
+    import os
+    from reportlab.graphics.testshapes import getAllTestDrawings
+    drawings = []
+    if not os.path.isdir('pmout'):
+        os.mkdir('pmout')
+    htmlTop = """<html><head><title>renderPM output results</title></head>
+    <body>
+    <h1>renderPM results of output</h1>
+    """
+    htmlBottom = """</body>
+    </html>
+    """
+    html = [htmlTop]
 
-    def test():
-        #grab all drawings from the test module and write out.
-        #make a page of links in HTML to assist viewing.
-        import os
-        from reportlab.graphics.testshapes import getAllTestDrawings
-        drawings = []
-        if not os.path.isdir('pmout'):
-            os.mkdir('pmout')
-        htmlTop = """<html><head><title>renderPM output results</title></head>
-        <body>
-        <h1>renderPM results of output</h1>
-        """
-        htmlBottom = """</body>
-        </html>
-        """
-        html = [htmlTop]
+    i = 0
+    #print in a loop, with their doc strings
+    for (drawing, docstring, name) in getAllTestDrawings():
+        if 1 or i==10:
+            w = int(drawing.width)
+            h = int(drawing.height)
+            html.append('<hr><h2>Drawing %s %d</h2>\n<pre>%s</pre>' % (name, i, docstring))
 
-        i = 0
-        #print in a loop, with their doc strings
-        for (drawing, docstring, name) in getAllTestDrawings():
-            if 1 or i==10:
-                w = int(drawing.width)
-                h = int(drawing.height)
-                html.append('<hr><h2>Drawing %s %d</h2>\n<pre>%s</pre>' % (name, i, docstring))
-
-                for k in ['gif','tiff', 'png', 'jpg', 'pct']:
+            for k in ['gif','tiff', 'png', 'jpg', 'pct']:
+                if k in ['gif','png','jpg','pct']:
+                    html.append('<p>%s format</p>\n' % string.upper(k))
+                try:
+                    filename = 'renderPM%d.%s' % (i, ext(k))
+                    fullpath = os.path.join('pmout', filename)
+                    if os.path.isfile(fullpath):
+                        os.remove(fullpath)
+                    drawToFile(drawing,fullpath,fmt=k)
                     if k in ['gif','png','jpg','pct']:
-                        html.append('<p>%s format</p>\n' % string.upper(k))
-                    try:
-                        filename = 'renderPM%d.%s' % (i, ext(k))
-                        fullpath = os.path.join('pmout', filename)
-                        if os.path.isfile(fullpath):
-                            os.remove(fullpath)
-                        drawToFile(drawing,fullpath,fmt=k)
-                        if k in ['gif','png','jpg','pct']:
-                            html.append('<img src="%s" border="1"><br>\n' % filename)
-                        print 'wrote',fullpath
-                    except AttributeError:
-                        print 'Problem drawing %s file'%k
-                        raise
-            i = i + 1
-            #if i==10: break
-        html.append(htmlBottom)
-        htmlFileName = os.path.join('pmout', 'index.html')
-        open(htmlFileName, 'w').writelines(html)
-        print 'wrote %s' % htmlFileName
+                        html.append('<img src="%s" border="1"><br>\n' % filename)
+                    print 'wrote',fullpath
+                except AttributeError:
+                    print 'Problem drawing %s file'%k
+                    raise
+        i = i + 1
+        #if i==10: break
+    html.append(htmlBottom)
+    htmlFileName = os.path.join('pmout', 'index.html')
+    open(htmlFileName, 'w').writelines(html)
+    print 'wrote %s' % htmlFileName
+
+if __name__=='__main__':
     test()
