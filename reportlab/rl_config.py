@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.23 2001/09/13 19:06:43 aaron_watters Exp $
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.24 2001/09/28 10:31:10 rgbecker Exp $
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =				1
@@ -13,6 +13,7 @@ PIL_WARNINGS =				1						#set to zero to remove those annoying warnings
 ZLIB_WARNINGS =				1						
 warnOnMissingFontGlyphs =	1						#if 1, warns of each missing glyph
 _verbose =					0
+showBoundary =				0						# turns on and off boundary behaviour in Drawing
 
 # places to look for T1Font information
 T1SearchPath =	('c:/Program Files/Adobe/Acrobat 4.0/Resource/Font', #Win32
@@ -26,7 +27,7 @@ CMapSearchPath = ('/usr/local/Acrobat4/Resource/CMap',
 				'C:\\Program Files\\Adobe\\Acrobat\\Resource\\CMap',
 				'C:\\Program Files\\Adobe\\Acrobat 5.0\\Resource\\CMap',
 				'C:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\CMap'
-				  )
+				)
 
 
 #### Normally don't need to edit below here ####
