@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/runtests.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/runtests.py,v 1.14 2000/10/25 08:57:46 rgbecker Exp $
-__version__=''' $Id: runtests.py,v 1.14 2000/10/25 08:57:46 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/utils/runtests.py,v 1.15 2000/11/08 10:54:40 andy_robinson Exp $
+__version__=''' $Id: runtests.py,v 1.15 2000/11/08 10:54:40 andy_robinson Exp $ '''
 '''
 script for testing ReportLab
 '''
@@ -15,7 +15,7 @@ import os, sys, string, traceback, re, copy
 
 #if a file matches this it won't be cleaned
 CLEAN_EXCEPTIONS=['demos/pythonpoint/leftlogo.a85', 'demos/pythonpoint/spectrum.png']
-
+DO_NOT_RUN = ['unittest.py']
 _ecount = 0	# count of errors
 
 def makeabs(dir):
@@ -27,7 +27,13 @@ def find_py_files(d):
 	def _py_files(L,d,N):
 		for n in filter(lambda x: x[-3:]=='.py', N):
 			fn = os.path.normcase(os.path.normpath(os.path.join(d,n)))
-			if os.path.isfile(fn): L.append(fn)
+			if os.path.isfile(fn):
+				#check for explicit exclusions
+				dirname, filename = os.path.split(fn)
+				if filename in DO_NOT_RUN:
+					pass
+				else:
+					L.append(fn)
 	L=[]
 	os.path.walk(d,_py_files,L)
 	return L
