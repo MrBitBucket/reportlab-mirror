@@ -21,11 +21,25 @@ from reportlab.test.utils import makeSuiteForClasses, outputfile
 from reportlab.pdfgen import canvas
 from reportlab import platypus
 from reportlab.platypus import BaseDocTemplate, PageTemplate, Flowable, FrameBreak
-from reportlab.platypus import Paragraph
+from reportlab.platypus import Paragraph, Preformatted
 from reportlab.lib.units import inch, cm
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.rl_config import defaultPageSize
+from reportlab.lib.utils import haveImages, _RL_DIR, rl_isfile, open_for_read
+if haveImages:
+    _GIF = os.path.join(_RL_DIR,'test','pythonpowered.gif')
+    if not rl_isfile(_GIF): _GIF = None
+else:
+    _GIF = None
+_JPG = os.path.join(_RL_DIR,'docs','images','lj8100.jpg')
+if not rl_isfile(_JPG): _JPG = None
+
+def getFurl(fn):
+    furl = fn.replace(os.sep,'/')
+    if sys.platform=='win32' and furl[1]==':': furl = furl[0]+'|'+furl[2:]
+    if furl[0]!='/': furl = '/'+furl
+    return 'file://'+furl
 
 PAGE_HEIGHT = defaultPageSize[1]
 
@@ -263,8 +277,55 @@ def getCommentary():
     story.append(Paragraph(
                 "The next example uses a custom font",
                 styleSheet['Italic']))
+    def code(txt):
+        story.append(Preformatted(txt,styleSheet['Code']))
+    code('''import reportlab.rl_config
+    reportlab.rl_config.warnOnMissingFontGlyphs = 0
+
+    from reportlab.pdfbase import pdfmetrics
+    fontDir = os.path.join(os.path.dirname(reportlab.__file__),'fonts')
+    face = pdfmetrics.EmbeddedType1Face(os.path.join(fontDir,'LeERC___.AFM'),
+            os.path.join(fontDir,'LeERC___.PFB'))
+    faceName = face.name  # should be 'LettErrorRobot-Chrome'
+    pdfmetrics.registerTypeFace(face)
+    font = pdfmetrics.Font(faceName, faceName, 'WinAnsiEncoding')
+    pdfmetrics.registerFont(font)
+
+
+    # put it inside a paragraph.
+    story.append(Paragraph(
+        """This is an ordinary paragraph, which happens to contain
+        text in an embedded font:
+        <font name="LettErrorRobot-Chrome">LettErrorRobot-Chrome</font>.
+        Now for the real challenge...""", styleSheet['Normal']))
+
+
+    styRobot = ParagraphStyle('Robot', styleSheet['Normal'])
+    styRobot.fontSize = 16
+    styRobot.leading = 20
+    styRobot.fontName = 'LettErrorRobot-Chrome'
+
+    story.append(Paragraph(
+                "This whole paragraph is 16-point Letterror-Robot-Chrome.",
+                styRobot))''')
 
     story.append(FrameBreak())
+    if _GIF:
+        story.append(Paragraph("""We can use images via the file name""", styleSheet['BodyText']))
+        code('''    story.append(platypus.Image('%s'))'''%_GIF)
+        code('''    story.append(platypus.Image('%s'.encode('utf8')))''' % _GIF)
+        story.append(Paragraph("""They can also be used with a file URI or from an open python file!""", styleSheet['BodyText']))
+        code('''    story.append(platypus.Image('%s'))'''% getFurl(_GIF))
+        code('''    story.append(platypus.Image(open_for_read('%s','b')))''' % _GIF)
+        story.append(FrameBreak())
+        story.append(Paragraph("""Images can even be obtained from the internet.""", styleSheet['BodyText']))
+        code('''    img = platypus.Image('http://www.reportlab.com/rsrc/encryption.gif')
+    story.append(img)''')
+        story.append(FrameBreak())
+
+    if _JPG:
+        story.append(Paragraph("""JPEGs are a native PDF image format. They should be available even if PIL cannot be used.""", styleSheet['BodyText']))
+        story.append(FrameBreak())
     return story
 
 def getExamples():
@@ -359,7 +420,7 @@ def getExamples():
         return (self.width, self.height)
     '''
 
-    story.append(platypus.Preformatted(code, styleSheet['Code'], dedent=4))
+    story.append(Preformatted(code, styleSheet['Code'], dedent=4))
     story.append(FrameBreak())
     #######################################################################
     #     Examples Page 3
@@ -372,41 +433,6 @@ def getExamples():
     story.append(Paragraph("This is a bullet point", styleSheet['Bullet'], bulletText='O'))
     story.append(Paragraph("Another bullet point", styleSheet['Bullet'], bulletText='O'))
 
-    from reportlab.lib.utils import haveImages, _RL_DIR, rl_isfile, open_for_read
-    if haveImages:
-        gif = os.path.join(_RL_DIR,'test','pythonpowered.gif')
-        if rl_isfile(gif):
-            data = []
-            t = data.append
-            furl = gif.replace(os.sep,'/')
-            if sys.platform=='win32' and furl[1]==':': furl = furl[0]+'|'+furl[2:]
-            if furl[0]!='/': furl = '/'+furl
-            furl = 'file://'+furl
-            t([ Paragraph("Here is an Image flowable obtained from a string filename.",styleSheet['Italic']),
-                    platypus.Image(gif),
-
-                Paragraph("Here is an Image flowable obtained from a string file url.",styleSheet['Italic']),
-                    platypus.Image(furl)])
-
-            t([ Paragraph("Here is an Image flowable obtained from a string http url.",styleSheet['Italic']),
-                    platypus.Image('http://www.reportlab.com/rsrc/encryption.gif'),
-
-                Paragraph( "Here is an Image flowable obtained from a utf8 filename.", styleSheet['Italic']),
-                    platypus.Image(gif.encode('utf8'))])
-
-            t([Paragraph("Here is an Image flowable obtained from an open file.",styleSheet['Italic']),
-                platypus.Image(open_for_read(gif,'b')),
-                '',''])
-            story.append(platypus.Table(data,[96,None,96,None], [None, None,None]))
-
-        jpg = os.path.join(_RL_DIR,'docs','images','lj8100.jpg')
-        if rl_isfile(jpg):
-            story.append(Paragraph("Here is an JPEG Image flowable obtained from a filename.",styleSheet['Italic']))
-            img = platypus.Image(jpg)
-            story.append(img)
-            story.append(Paragraph("Here is an JPEG Image flowable obtained from an open file.",styleSheet['Italic']))
-            img = platypus.Image(open_for_read(jpg,'b'))
-            story.append(img)
 
     story.append(Paragraph("""Here is a Table, which takes all kinds of formatting options...""",
                 styleSheet['Italic']))
@@ -435,8 +461,6 @@ def getExamples():
     #######################################################################
     #     Examples Page 4 - custom fonts
     #######################################################################
-
-
     # custom font with LettError-Robot font
     import reportlab.rl_config
     reportlab.rl_config.warnOnMissingFontGlyphs = 0
@@ -467,6 +491,33 @@ def getExamples():
                 "This whole paragraph is 16-point Letterror-Robot-Chrome.",
                 styRobot))
     story.append(FrameBreak())
+
+    if _GIF:
+        story.append(Paragraph("Here is an Image flowable obtained from a string filename.",styleSheet['Italic']))
+        story.append(platypus.Image(_GIF))
+        story.append(Paragraph( "Here is an Image flowable obtained from a utf8 filename.", styleSheet['Italic']))
+        story.append(platypus.Image(_GIF.encode('utf8')))
+        story.append(Paragraph("Here is an Image flowable obtained from a string file url.",styleSheet['Italic']))
+        story.append(platypus.Image(getFurl(_GIF)))
+        story.append(Paragraph("Here is an Image flowable obtained from an open file.",styleSheet['Italic']))
+        story.append(platypus.Image(open_for_read(_GIF,'b')))
+        story.append(FrameBreak())
+        try:
+            img = platypus.Image('http://www.reportlab.com/rsrc/encryption.gif')
+            story.append(Paragraph("Here is an Image flowable obtained from a string http url.",styleSheet['Italic']))
+            story.append(img)
+        except:
+            story.append(Paragraph("The image could not be obtained from a string http url.",styleSheet['Italic']))
+        story.append(FrameBreak())
+
+    if _JPG:
+        img = platypus.Image(_JPG)
+        story.append(Paragraph("Here is an JPEG Image flowable obtained from a filename.",styleSheet['Italic']))
+        story.append(img)
+        story.append(Paragraph("Here is an JPEG Image flowable obtained from an open file.",styleSheet['Italic']))
+        img = platypus.Image(open_for_read(_JPG,'b'))
+        story.append(img)
+        story.append(FrameBreak())
 
 
     return story
