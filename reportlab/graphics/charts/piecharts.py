@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.36 2003/09/11 10:20:37 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.37 2003/09/15 15:36:09 rgbecker Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -12,7 +12,7 @@
 This permits you to customize and pop out individual wedges;
 supports elliptical and circular pies.
 """
-__version__=''' $Id: piecharts.py,v 1.36 2003/09/11 10:20:37 rgbecker Exp $ '''
+__version__=''' $Id: piecharts.py,v 1.37 2003/09/15 15:36:09 rgbecker Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -638,12 +638,13 @@ class Pie3d(Pie):
         for i in xrange(n):
             style = slices[i]
             if not style.visible: continue
-            fillColor = _getShaded(style.fillColor,style.fillColorShaded,style.shading)
-            strokeColor = _getShaded(style.strokeColor,style.strokeColorShaded,style.shading) or fillColor
-            strokeWidth = style.strokeWidth
             sl = _sl3d[i]
             lo = angle0 = sl.lo
             hi = angle1 = sl.hi
+            if abs(hi-lo)<=1e-7: continue
+            fillColor = _getShaded(style.fillColor,style.fillColorShaded,style.shading)
+            strokeColor = _getShaded(style.strokeColor,style.strokeColorShaded,style.shading) or fillColor
+            strokeWidth = style.strokeWidth
             cx0 = CX(i,0)
             cy0 = CY(i,0)
             cx1 = CX(i,1)
