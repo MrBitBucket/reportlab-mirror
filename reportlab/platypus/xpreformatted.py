@@ -27,24 +27,31 @@ def _getFragLines(frags):
 		lines.append(cline)
 	return lines
 
-def _getFragWords(frags):
+def _countSpaces(text):
+	i = 0
+	s = 0
+	while 1:
+		j = string.find(text,' ',i)
+		if j<0: return s
+		s = s + 1
+		i = j + 1
+
+def _getFragWord(frags):
 	'''	given a fragment list return a list of lists
-		[[size, (f00,w00), ..., (f0n,w0n)],....,[size, (fm0,wm0), ..., (f0n,wmn)]]
+		[size, spaces, (f00,w00), ..., (f0n,w0n)]
 		each pair f,w represents a style and some string
 	'''
-	R = []
 	W = []
 	n = 0
+	s = 0
 	for f in frags:
 		text = f.text[:]
 		W.append((f,text))
 		n = n + stringWidth(text, f.fontName, f.fontSize)
+		s = s + _countSpaces(text)
 		#del f.text	# we can't do this until we sort out splitting
 					# of paragraphs
-	W.insert(0,n)
-	R.append(W)
-
-	return R
+	return n, s, W
 
 class XPreformatted(Paragraph):
 	def __init__(self, text, style, bulletText = None, dedent=0, frags=None):
@@ -118,33 +125,17 @@ class XPreformatted(Paragraph):
 							textColor=style.textColor, lines=[])
 		else:
 			for L in _getFragLines(frags):
-				n = 0
 				maxSize = 0
-				currentWidth = 0
-				words = []
-				for w in _getFragWords(L):
-					spaceWidth = stringWidth(' ',w[-1][0].fontName, w[-1][0].fontSize)
-					wordWidth = w[0]
-					f = w[1][0]
-					n = n + 1
+				currentWidth, n, w = _getFragWord(L)
+				f = w[0][0]
+				maxSize = max(maxSize,f.fontSize)
+				words = [f.clone()]
+				words[-1].text = w[0][1]
+				for i in w[1:]:
+					f = i[0].clone()
+					f.text=i[1]
+					words.append(f)
 					maxSize = max(maxSize,f.fontSize)
-					nText = w[1][1]
-					if words==[]:
-						words = [f.clone()]
-						words[-1].text = nText
-					elif not _sameFrag(words[-1],f):
-						words.append(f.clone())
-						words[-1].text = nText
-					else:
-						words[-1].text = words[-1].text + nText
-
-					for i in w[2:]:
-						f = i[0].clone()
-						f.text=i[1]
-						words.append(f)
-						maxSize = max(maxSize,f.fontSize)
-
-					currentWidth = currentWidth + wordWidth
 
 				lineno = lineno+1
 				maxWidth = lineno<len(maxWidths) and maxWidths[lineno] or maxWidths[-1]
