@@ -1,15 +1,15 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/validators.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.27 2003/06/19 17:53:59 rgbecker Exp $
-__version__=''' $Id: validators.py,v 1.27 2003/06/19 17:53:59 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.28 2003/11/09 10:45:25 rgbecker Exp $
+__version__=''' $Id: validators.py,v 1.28 2003/11/09 10:45:25 rgbecker Exp $ '''
 """
 This module contains some standard verifying functions which can be
 used in an attribute map.
 """
 
-import string
-from types import FloatType, IntType, ListType, TupleType, StringType
+import string, sys
+from types import *
 _SequenceTypes = (ListType,TupleType)
 _NumberTypes = (FloatType,IntType)
 from reportlab.lib import colors
@@ -41,9 +41,14 @@ class _isNothing(Validator):
         return 0
 
 class _isBoolean(Validator):
-    def test(self,x):
-        if type(x) is IntType: return x in (0,1)
-        return self.normalizeTest(x)
+    if sys.hexversion>=0x2030000:
+        def test(self,x):
+            if type(x) in (IntType,BooleanType): return x in (0,1)
+            return self.normalizeTest(x)
+    else:
+        def test(self,x):
+            if type(x) is IntType: return x in (0,1)
+            return self.normalizeTest(x)
 
     def normalize(self,x):
         if x in (0,1): return x
