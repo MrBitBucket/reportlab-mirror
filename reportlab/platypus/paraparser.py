@@ -269,7 +269,7 @@ class ParaParser(xmllib.XMLParser):
 				j = attrMap[k]
 				func = j[1]
 				try:
-					A[j[0]] = (func is None) and val or apply(func,(v,))
+					A[j[0]] = (func is None) and v or apply(func,(v,))
 				except:
 					self.syntax_error('%s: invalid value %s'%(k,v))
 			else:
@@ -391,10 +391,9 @@ if __name__=='__main__':
 	of Jove, from whatsoever source you<super>1</super> may know them.
 	'''
 	text = cleanBlockQuotedText(text)
-	rv = _parser.parse(text,style)
+	l,rv = _parser.parse(text,style)
 	if rv is None:
-		for (None,l) in _parser.errors:
+		for l in _parser.errors:
 			print l
 	else:
-		for l in rv:
-			print l.fontName,l.fontSize,l.textColor,l.bold, l.rise, l.text[:25]
+		print l.fontName,l.fontSize,l.textColor,l.bold, l.rise, l.text[:25]
