@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.68 2003/12/19 13:22:08 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.68 2003/12/19 13:22:08 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.69 2004/01/07 15:56:21 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.69 2004/01/07 15:56:21 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -212,13 +212,14 @@ class Table(Flowable):
 
         return "<%s at %d %d rows x %s cols>%s" % (self.__class__.__name__, id(self), nr, nc, vx)
 
-    def _listCellGeom(self, V,w,s,W=None,H=None):
+    def _listCellGeom(self, V,w,s,W=None,H=None,aH=72000):
         aW = w-s.leftPadding-s.rightPadding
+        aH = aH - s.topPadding - s.bottomPadding
         t = 0
         w = 0
         canv = getattr(self,'canv',None)
         for v in V:
-            vw, vh = v.wrapOn(canv,aW, 72000)
+            vw, vh = v.wrapOn(canv,aW, aH)
             if W is not None: W.append(vw)
             if H is not None: H.append(vh)
             w = max(w,vw)
@@ -908,7 +909,7 @@ class Table(Flowable):
             # we assume it's a list of Flowables
             W = []
             H = []
-            w, h = self._listCellGeom(cellval,colwidth,cellstyle,W=W, H=H)
+            w, h = self._listCellGeom(cellval,colwidth,cellstyle,W=W, H=H,aH=rowheight)
             if valign=='TOP':
                 y = rowpos + rowheight - cellstyle.topPadding
             elif valign=='BOTTOM':
