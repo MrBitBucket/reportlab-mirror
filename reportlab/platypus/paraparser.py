@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.32 2000/11/23 16:54:48 rgbecker Exp $
-__version__=''' $Id: paraparser.py,v 1.32 2000/11/23 16:54:48 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.33 2000/11/29 17:28:50 rgbecker Exp $
+__version__=''' $Id: paraparser.py,v 1.33 2000/11/29 17:28:50 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -11,6 +11,7 @@ import os
 import copy
 
 import reportlab.lib.sequencer
+from reportlab.lib.abag import ABag
 #try:
 #	from xml.parsers import xmllib
 #	_xmllib_newStyle = 1
@@ -149,18 +150,10 @@ greeks = {
 }
 
 #------------------------------------------------------------------------
-class ParaFrag:
+class ParaFrag(ABag):
 	"""class ParaFrag contains the intermediate representation of string
 	segments as they are being parsed by the XMLParser.
 	"""
-	def __init__(self,**attr):
-		for k,v in attr.items():
-			setattr(self,k,v)
-
-	def clone(self,**attr):
-		n = apply(ParaFrag,(),self.__dict__)
-		if attr != {}: apply(ParaFrag.__init__,(n,),attr)
-		return n
 
 #------------------------------------------------------------------
 # !!! NOTE !!! THIS TEXT IS NOW REPLICATED IN PARAGRAPH.PY !!!

@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/xpreformatted.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/xpreformatted.py,v 1.11 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: xpreformatted.py,v 1.11 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/xpreformatted.py,v 1.12 2000/11/29 17:28:50 rgbecker Exp $
+__version__=''' $Id: xpreformatted.py,v 1.12 2000/11/29 17:28:50 rgbecker Exp $ '''
 import string
 from types import StringType, ListType
-from paragraph import Paragraph, cleanBlockQuotedText, _handleBulletWidth, ParaFrag, _getFragWords, \
+from paragraph import Paragraph, cleanBlockQuotedText, _handleBulletWidth, ParaLines, _getFragWords, \
 	stringWidth, _sameFrag
 from flowables import _dedenter
 
@@ -31,11 +31,11 @@ def _getFragLines(frags):
 		lines.append(cline)
 	return lines
 
-def	_split_bfrag(bfrag,start,stop):
-	f = bfrag.clone()
+def	_split_blPara(blPara,start,stop):
+	f = blPara.clone()
 	for a in ('lines', 'text'):
 		if hasattr(f,a): delattr(f,a)
-	f.lines = bfrag.lines[start:stop]
+	f.lines = blPara.lines[start:stop]
 	return [f]
 
 def _countSpaces(text):
@@ -140,7 +140,7 @@ class XPreformatted(Paragraph):
 			self.width = max(self.width,requiredWidth)
 			return f.clone(kind=kind, lines=lines)
 		elif nFrags<=0:
-			return ParaFrag(kind=0, fontSize=style.fontSize, fontName=style.fontName,
+			return ParaLines(kind=0, fontSize=style.fontSize, fontName=style.fontName,
 							textColor=style.textColor, lines=[])
 		else:
 			for L in _getFragLines(frags):
@@ -160,21 +160,21 @@ class XPreformatted(Paragraph):
 				maxWidth = lineno<len(maxWidths) and maxWidths[lineno] or maxWidths[-1]
 				requiredWidth = max(currentWidth,requiredWidth)
 				extraSpace = maxWidth - currentWidth
-				lines.append(ParaFrag(extraSpace=extraSpace,wordCount=n, words=words, fontSize=maxSize, currentWidth=currentWidth))
+				lines.append(ParaLines(extraSpace=extraSpace,wordCount=n, words=words, fontSize=maxSize, currentWidth=currentWidth))
 
 			self.width = max(self.width,requiredWidth)
-			return ParaFrag(kind=1, lines=lines)
+			return ParaLines(kind=1, lines=lines)
 
 		return lines
 
 	# we need this her to get the right splitter
-	def _get_split_bFragFunc(self):
-		return _split_bfrag
+	def _get_split_blParaFunc(self):
+		return _split_blPara
 
 if __name__=='__main__':	#NORUNTESTS
 	def dumpXPreformattedLines(P):
 		print '\n############dumpXPreforemattedLines(%s)' % str(P)
-		lines = P.bfrags.lines
+		lines = P.blPara.lines
 		n =len(lines)
 		for l in range(n):
 			line = lines[l]

@@ -1,17 +1,21 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.32 2000/11/24 12:37:13 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.32 2000/11/24 12:37:13 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.33 2000/11/29 17:28:50 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.33 2000/11/29 17:28:50 rgbecker Exp $ '''
 import string
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from reportlab.platypus.paraparser import ParaParser, ParaFrag
+from reportlab.platypus.paraparser import ParaParser
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib.colors import Color
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import _className
 from copy import deepcopy
+from reportlab.lib.abag import ABag
+class ParaLines(ABag):
+	"""class ParaLines contains the broken into lines representation of Paragraphs
+	"""
 
 #our one and only parser
 # XXXXX if the parser has any internal state using only one is probably a BAD idea!
@@ -96,14 +100,14 @@ def	_justifyDrawParaLineX( tx, offset, line, last=0):
 		tx.setWordSpace(0)
 
 def	_sameFrag(f,g):
-	'returns 1 if two frags map out the same'
+	'returns 1 if two ParaFrags map out the same'
 	if hasattr(f,'cbDefn') or hasattr(g,'cbDefn'): return 0
 	for a in ('fontName', 'fontSize', 'textColor', 'rise'):
 		if getattr(f,a)!=getattr(g,a): return 0
 	return 1
 
 def _getFragWords(frags):
-	'''	given a fragment list return a list of lists
+	'''	given a Parafrag list return a list of lists
 		[[size, (f00,w00), ..., (f0n,w0n)],....,[size, (fm0,wm0), ..., (f0n,wmn)]]
 		each pair f,w represents a style and some string
 		each sublist represents a word
@@ -154,20 +158,20 @@ def _getFragWords(frags):
 
 	return R
 
-def	_split_bfragSimple(bfrag,start,stop):
-	f = bfrag.clone()
+def	_split_blParaSimple(blPara,start,stop):
+	f = blPara.clone()
 	for a in ('lines', 'kind', 'text'):
 		if hasattr(f,a): delattr(f,a)
 
 	f.words = []
-	for l in bfrag.lines[start:stop]:
+	for l in blPara.lines[start:stop]:
 		for w in l[1]:
 			f.words.append(w)
 	return [f]
 
-def	_split_bfragHard(bfrag,start,stop):
+def	_split_blParaHard(blPara,start,stop):
 	f = []
-	lines = bfrag.lines[start:stop]
+	lines = blPara.lines[start:stop]
 	for l in lines:
 		for w in l.words:
 			f.append(w)
@@ -238,11 +242,11 @@ class Paragraph(Flowable):
 	def _setup(self, text, style, bulletText, frags, cleaner):
 		if frags is None:
 			text = cleaner(text)
-			style, frags, bFrags = _parser.parse(text,style)
+			style, frags, bulletTextFrags = _parser.parse(text,style)
 			if frags is None:
 				raise "xml parser error (%s) in paragraph beginning\n'%s'"\
 					% (_parser.errors[0],text[:min(30,len(text))])
-			if bFrags: bulletText = bFrags
+			if bulletTextFrags: bulletText = bulletTextFrags
 
 		#AR hack
 		self.text = text
@@ -256,37 +260,37 @@ class Paragraph(Flowable):
 		self.width = availWidth
 		first_line_width = availWidth - self.style.firstLineIndent - self.style.rightIndent
 		later_widths = availWidth - self.style.leftIndent - self.style.rightIndent
-		self.bfrags = self.breakLines([first_line_width, later_widths])
-		self.height = len(self.bfrags.lines) * self.style.leading
+		self.blPara = self.breakLines([first_line_width, later_widths])
+		self.height = len(self.blPara.lines) * self.style.leading
 
 		#estimate the size
 		return (self.width, self.height)
 
-	def _get_split_bFragFunc(self):
-		return self.bfrags.kind==0 and _split_bfragSimple or _split_bfragHard
+	def _get_split_blParaFunc(self):
+		return self.blPara.kind==0 and _split_blParaSimple or _split_blParaHard
 
 	def split(self,availWidth, availHeight):
 		if len(self.frags)<=0: return []
 
-		#the split information is all inside self.bfrags
-		if not hasattr(self,'bfrags'):
+		#the split information is all inside self.blPara
+		if not hasattr(self,'blPara'):
 			self.wrap(availWidth,availHeight)
-		bfrags = self.bfrags
+		blPara = self.blPara
 		style = self.style
 		leading = style.leading
-		lines = bfrags.lines
+		lines = blPara.lines
 		n = len(lines)
 		s = int(availHeight/leading)
 		if s<=1: return []
 		if n<=s: return [self]
-		func = self._get_split_bFragFunc()
+		func = self._get_split_blParaFunc()
 
-		P1=self.__class__(None,style,bulletText=self.bulletText,frags=func(bfrags,0,s))
+		P1=self.__class__(None,style,bulletText=self.bulletText,frags=func(blPara,0,s))
 		P1._JustifyLast = 1
 		if style.firstLineIndent != style.leftIndent:
 			style = deepcopy(style)
 			style.firstLineIndent = style.leftIndent
-		P2=self.__class__(None,style,bulletText=None,frags=func(bfrags,s,n))
+		P2=self.__class__(None,style,bulletText=None,frags=func(blPara,s,n))
 		return [P1,P2]
 
 	def draw(self):
@@ -372,7 +376,7 @@ class Paragraph(Flowable):
 
 			return f.clone(kind=0, lines=lines)
 		elif nFrags<=0:
-			return ParaFrag(kind=0, fontSize=style.fontSize, fontName=style.fontName,
+			return ParaLines(kind=0, fontSize=style.fontSize, fontName=style.fontName,
 							textColor=style.textColor, lines=[])
 		else:
 			n = 0
@@ -414,7 +418,7 @@ class Paragraph(Flowable):
 				else:
 					if currentWidth>self.width: self.width = currentWidth
 					#end of line
-					lines.append(ParaFrag(extraSpace=(maxWidth - currentWidth),wordCount=n,
+					lines.append(ParaLines(extraSpace=(maxWidth - currentWidth),wordCount=n,
 										words=words, fontSize=maxSize))
 
 					#start new line
@@ -438,9 +442,9 @@ class Paragraph(Flowable):
 			#deal with any leftovers on the final line
 			if words<>[]:
 				if currentWidth>self.width: self.width = currentWidth
-				lines.append(ParaFrag(extraSpace=(maxWidth - currentWidth),wordCount=n,
+				lines.append(ParaLines(extraSpace=(maxWidth - currentWidth),wordCount=n,
 									words=words, fontSize=maxSize))
-			return ParaFrag(kind=1, lines=lines)
+			return ParaLines(kind=1, lines=lines)
 
 		return lines
 
@@ -453,8 +457,8 @@ class Paragraph(Flowable):
 		#stash the key facts locally for speed
 		canvas = self.canv
 		style = self.style
-		bfrags = self.bfrags
-		lines = bfrags.lines
+		blPara = self.blPara
+		lines = blPara.lines
 
 		#work out the origin for line 1
 		cur_x = style.leftIndent
@@ -487,7 +491,7 @@ class Paragraph(Flowable):
 			lim = nLines-1
 			noJustifyLast = not (hasattr(self,'_JustifyLast') and self._JustifyLast)
 
-			if bfrags.kind==0:
+			if blPara.kind==0:
 				if alignment == TA_LEFT:
 					dpl = _leftDrawParaLine
 				elif alignment == TA_CENTER:
@@ -496,7 +500,7 @@ class Paragraph(Flowable):
 					dpl = _rightDrawParaLine
 				elif self.style.alignment == TA_JUSTIFY:
 					dpl = _justifyDrawParaLine
-				f = bfrags
+				f = blPara
 				cur_y = self.height - f.fontSize
 				if bulletText <> None:
 					offset = _drawBullet(canvas,offset,cur_y,bulletText,style)
@@ -529,7 +533,7 @@ class Paragraph(Flowable):
 
 				#set up the font etc.
 				tx = canvas.beginText(cur_x, cur_y)
-				tx.XtraState=ParaFrag()
+				tx.XtraState=ABag()
 				tx.XtraState.textColor=None
 				tx.XtraState.rise=0
 				tx.setLeading(style.leading)
@@ -561,14 +565,14 @@ class Paragraph(Flowable):
 		useful for seeing if paragraphs will fit in spaces."""
 		assert hasattr(self, 'width'), "Cannot call this method before wrap()"
 		w = []
-		for frag in self.bfrags.lines:
+		for frag in self.blPara.lines:
 			w.append(self.width - frag.extraSpace)
 		return w
 
 if __name__=='__main__':	#NORUNTESTS
 	def dumpParagraphLines(P):
 		print 'dumpParagraphLines(%s)' % str(P)
-		lines = P.bfrags.lines
+		lines = P.blPara.lines
 		n =len(lines)
 		for l in range(n):
 			line = lines[l]
