@@ -1,6 +1,450 @@
 #################################################################################
+#################### RELEASE 1.19 at 18:00 GMT  21/Jan/2004     #################
+#################################################################################
+##### 2004/01/21 #####
+	pdfbase/ttfonts.py 1.18 rgbecker  Improve error handling & naming
+##### 2004/01/14 #####
+	rl_addons/renderPM/pfm.py 1.3 rgbecker  Changes for 2.3 compatibility
+##### 2004/01/13 #####
+	pdfgen/canvas.py 1.118 rgbecker  Allow for possible restarts
+	platypus/doctemplate.py 1.71 rgbecker  Allow for simple loop detection
+##### 2004/01/10 #####
+	platypus/figures.py 1.16 rgbecker  Added optional memory caching
+##### 2004/01/09 #####
+	platypus/tables.py 1.71 rgbecker  Modified version of Henning von Bargen's LongTables optimisation
+##### 2004/01/08 #####
+	platypus/doctemplate.py 1.70 andy_robinson  Upped empty page limit to 10
+##### 2004/01/07 #####
+	platypus/flowables.py 1.44 andy_robinson  Candidate fix for infinite looping
+	platypus/doctemplate.py 1.69 andy_robinson  Candidate fix for infinite looping
+	lib/codecharts.py 1.8 andy_robinson  Candidate fix for infinite looping
+	platypus/figures.py 1.15 rgbecker  Fix up caption and split methods etc
+	platypus/tables.py 1.70 dragan1  merging Jython-branch
+	platypus/tables.py 1.69 rgbecker  Make _listCellGeom more specific
+	platypus/__init__.py 1.16.2.2 dragan1  added conditional import linee for jython compatilibity
+	platypus/figures.py 1.14 rgbecker  Improved FlexFigure scaling, in memory PageCatcherFigures
+##### 2004/01/05 #####
+	rl_addons/renderPM/_renderPM.c 1.31 rgbecker  Fix bad long field value
+##### 2003/12/23 #####
+	lib/_rl_accel.c 1.37 rgbecker  Added hex32
+##### 2003/12/19 #####
+	platypus/tables.py 1.68 rgbecker  Added splitfirst/last handling
+##### 2003/12/18 #####
+	tools/pythonpoint/styles/standard.py 1.3.4.1 dragan1  Platypus import structure changes
+	tools/pythonpoint/styles/htu.py 1.1.4.1 dragan1  Platypus import structure changes
+	tools/pythonpoint/pythonpoint.py 1.27.2.1 dragan1  Platypus import structure changes
+	tools/pythonpoint/demos/examples.py 1.3.4.1 dragan1  Platypus import structure changes
+	tools/docco/yaml2pdf.py 1.2.4.1 dragan1  Platypus import structure changes
+	tools/docco/rltemplate.py 1.3.4.1 dragan1  Platypus import structure changes
+	tools/docco/rl_doc_utils.py 1.6.4.1 dragan1  Platypus import structure changes
+	tools/docco/examples.py 1.4.4.1 dragan1  Platypus import structure changes
+	test/test_table_layout.py 1.1.4.1 dragan1  Platypus import structure changes
+	test/test_rl_accel.py 1.3.2.1 dragan1  Platypus import structure changes
+	test/test_platypus_xref.py 1.3.4.1 dragan1  Platypus import structure changes
+	test/test_platypus_tables.py 1.3.4.1 dragan1  Platypus import structure changes
+	test/test_platypus_paragraphs.py 1.11.4.1 dragan1  Platypus import structure changes
+	test/test_platypus_indents.py 1.1.4.1 dragan1  Platypus import structure changes
+	test/test_platypus_general.py 1.13.2.1 dragan1  Platypus import structure changes
+	test/test_platypus_breaking.py 1.6.4.1 dragan1  Platypus import structure changes
+	test/test_paragraphs.py 1.17.2.1 dragan1  Platypus import structure changes
+	test/test_graphics_speed.py 1.12.4.1 dragan1  Platypus import structure changes
+	test/test_graphics_charts.py 1.14.4.1 dragan1  Platypus import structure changes
+	platypus/tables.py 1.67.2.1 dragan1  Platypus import structure changes
+	platypus/paraparser.py 1.53.2.1 dragan1  Platypus import structure changes
+	platypus/figures.py 1.13.2.1 dragan1  Platypus import structure changes
+	platypus/__init__.py 1.16.2.1 dragan1  Platypus import structure changes
+	lib/tocindex.py 1.10.2.1 dragan1  Platypus import structure changes
+	lib/codecharts.py 1.7.4.1 dragan1  Platypus import structure changes
+	graphics/shapes.py 1.100.2.1 dragan1  Platypus import structure changes
+	graphics/renderPDF.py 1.24.2.1 dragan1  Platypus import structure changes
+	docs/userguide/ch7_custom.py 1.4.4.1 dragan1  Platypus import structure changes
+	docs/userguide/ch6_tables.py 1.6.4.1 dragan1  Platypus import structure changes
+	docs/userguide/ch4_platypus_concepts.py 1.4.4.1 dragan1  Platypus import structure changes
+	docs/userguide/ch2a_fonts.py 1.10.2.1 dragan1  Platypus import structure changes
+	demos/rlzope/rlzope.py 1.5.4.1 dragan1  Platypus import structure changes
+	demos/odyssey/fodyssey.py 1.17.4.1 dragan1  Platypus import structure changes
+	demos/gadflypaper/gfe.py 1.15.4.1 dragan1  Platypus import structure changes
+##### 2003/12/17 #####
+	graphics/testshapes.py 1.20 rgbecker  Attempt to control ttf usage
+	graphics/renderPM.py 1.44 rgbecker  Attempt to control ttf usage
+	platypus/paragraph.py 1.71 rgbecker  Fix missing return
+##### 2003/12/16 #####
+	platypus/paragraph.py 1.70 rgbecker  Underline alignment fix from Marc Stober
+##### 2003/12/15 #####
+	test/test_lib_sequencer.py 1.7 dragan1  changed method call from this to _this - java keyword
+	lib/sequencer.py 1.14 dragan1  renamed methid this to _this - java keyword
+##### 2003/12/14 #####
+	tools/pythonpoint/styles/modern.py 1.4 andy_robinson  Permits style file to live in local directory
+	tools/pythonpoint/stdparser.py 1.20 andy_robinson  Permits style file to live in local directory
+##### 2003/12/12 #####
+	lib/rparsexml.py 1.6 rgbecker  Allow for both to have the fake entityReplacer thing
+	rl_addons/pyRXP/examples/benchmarks.py 1.2 rgbecker  -->reportlab.lib.rparsexml
+##### 2003/12/11 #####
+	lib/rparsexml.py 1.5 rgbecker  Add some support for <!-- in the prolog stuff
+##### 2003/12/10 #####
+	platypus/figures.py 1.13 rgbecker  I can only get gensampler to work with these changes
+	lib/validators.py 1.30 rgbecker  Allow autox/y boxanchor
+	graphics/charts/textlabels.py 1.31 rgbecker  Allow autox/autoy boxanchor
+	platypus/paragraph.py 1.69 rgbecker  Fixes to cope with rml2pdf weirds
+	platypus/flowables.py 1.43 rgbecker  Fixes to cope with rml2pdf weirds
+	graphics/renderPM.py 1.43 rgbecker  remove spurious import
+##### 2003/12/09 #####
+	tools/pythonpoint/stdparser.py 1.19 andy_robinson  Pythonpoint fixups
+	tools/pythonpoint/pythonpoint.py 1.27 andy_robinson  Pythonpoint fixups
+	platypus/figures.py 1.12 andy_robinson  Pythonpoint fixups
+##### 2003/12/08 #####
+	tools/pythonpoint/stdparser.py 1.18 andy_robinson  Enabled changing the page sizes
+	tools/pythonpoint/pythonpoint.dtd 1.6 andy_robinson  Enabled changing the page sizes
+	tools/pythonpoint/demos/slidebox.py 1.1 william_ng  Andy forgot to check in drawing
+	tools/pythonpoint/demos/pythonpoint.xml 1.9 william_ng  Andy forgot to check in drawing
+	tools/pythonpoint/stdparser.py 1.17 andy_robinson  New pagecatcher and drawing tags (experimental)
+	tools/pythonpoint/pythonpoint.py 1.26 andy_robinson  New pagecatcher and drawing tags (experimental)
+	tools/pythonpoint/pythonpoint.dtd 1.5 andy_robinson  New pagecatcher and drawing tags (experimental)
+	tools/pythonpoint/demos/figures.xml 1.1 andy_robinson  New pagecatcher and drawing tags (experimental)
+	platypus/figures.py 1.11 andy_robinson  New pagecatcher and drawing tags (experimental)
+##### 2003/12/05 #####
+	lib/_rl_accel.java 1.1 rgbecker  Moved from Dragan's home space
+	lib/corp.py 1.12 rgbecker  Allow X/Y reversal in logo
+##### 2003/12/03 #####
+	platypus/figures.py 1.10 johnprecedo  Previous change caused unforseen problems with borders, so we're reversing it.
+	platypus/figures.py 1.9 johnprecedo  Minor change - borders now appear over pagefigures, not under them.
+	platypus/figures.py 1.8 johnprecedo  Added a background attribute (default None) to most figures - if it's a colour, it creates a coloured rectangle under the figure before drawing it on the page. Useful for when putting figures onto a coloured background.
+##### 2003/12/02 #####
+	test/test_lib_utils.py 1.3 rgbecker  Fix already imprted test module
+	lib/utils.py 1.57 rgbecker  Minor changes to recursiveimport
+	platypus/figures.py 1.7 andy_robinson  Bug in one figure
+	tools/pythonpoint/demos/pythonpoint.xml 1.8 andy_robinson  Whoops, platform specific slashes.
+	tools/pythonpoint/demos/monterey.xml 1.5 andy_robinson  Whoops, platform specific slashes.
+	tools/pythonpoint/demos/htu.xml 1.5 andy_robinson  Whoops, platform specific slashes.
+	test/test_tools_pythonpoint.py 1.11 andy_robinson  Whoops, platform specific slashes.
+	platypus/flowables.py 1.42 andy_robinson  Whoops, platform specific slashes.
+	platypus/figures.py 1.6 andy_robinson  Whoops, platform specific slashes.
+	tools/pythonpoint/demos/pythonpoint.xml 1.7 andy_robinson  Added figure classes, made XML editable in XML-SPY
+	tools/pythonpoint/demos/monterey.xml 1.4 andy_robinson  Added figure classes, made XML editable in XML-SPY
+	tools/pythonpoint/demos/htu.xml 1.4 andy_robinson  Added figure classes, made XML editable in XML-SPY
+	tools/pythonpoint/pythonpoint.py 1.25 andy_robinson  Added figure classes, made XML editable in XML-SPY
+	tools/pythonpoint/pythonpoint.dtd 1.4 andy_robinson  Added figure classes, made XML editable in XML-SPY
+	test/test_invariant.py 1.4 andy_robinson  Added figure classes, made XML editable in XML-SPY
+	platypus/figures.py 1.5 andy_robinson  Added figure classes, made XML editable in XML-SPY
+	lib/tocindex.py 1.10 andy_robinson  Added figure classes, made XML editable in XML-SPY
+	lib/corp.py 1.11 andy_robinson  Added figure classes, made XML editable in XML-SPY
+	lib/utils.py 1.56 rgbecker  First attempt at using import rather than imp
+##### 2003/12/01 #####
+	graphics/renderPM.py 1.42 rgbecker  Fix up dpi stuff
+	lib/colors.py 1.45 rgbecker  Fix to use latest blue
+##### 2003/11/30 #####
+	graphics/charts/utils3d.py 1.14 rgbecker  Fix overlong integer
+##### 2003/11/29 #####
+	graphics/charts/utils3d.py 1.13 rgbecker  Fixes to 3D lines
+	graphics/charts/lineplots.py 1.56 rgbecker  Fixes to 3D lines
+	graphics/charts/linecharts.py 1.44 rgbecker  Fixes to 3D lines
+##### 2003/11/28 #####
+	graphics/charts/utils3d.py 1.12 rgbecker  Allow for non-tiling!
+	graphics/charts/lineplots.py 1.55 rgbecker  Allow for non-tiling!
+	graphics/charts/linecharts.py 1.43 rgbecker  Allow for non-tiling!
+##### 2003/11/27 #####
+	rl_addons/pyRXP/docs/PyRXP_Documentation.rml 1.5 dragan1  changed the address
+##### 2003/11/26 #####
+	rl_addons/pyRXP/MANIFEST.in 1.1 rgbecker  Added at Dirk Datzert's request as needed by RPM
+##### 2003/11/25 #####
+	test/test_multibyte_jpn.py 1.5 rptlab  Correct case errtor with UniJIS encoding
+##### 2003/11/24 #####
+	graphics/charts/lineplots.py 1.54 rgbecker  Add annotations
+	graphics/charts/linecharts.py 1.42 rgbecker  Add annotations
+	graphics/charts/barcharts.py 1.83 rgbecker  Add annotations
+##### 2003/11/22 #####
+	graphics/shapes.py 1.100 rgbecker  Improve bmp handling
+	graphics/renderPM.py 1.41 rgbecker  Improve bmp handling
+##### 2003/11/21 #####
+	graphics/charts/linecharts.py 1.41 rgbecker  Missing import
+	graphics/charts/lineplots.py 1.53 rgbecker  Add dasharray to allowed attributes for linechart lines
+	graphics/charts/linecharts.py 1.40 rgbecker  Add dasharray to allowed attributes for linechart lines
+##### 2003/11/20 #####
+	graphics/testshapes.py 1.19 rgbecker  move drawing 13 to testshapes
+	graphics/renderPM.py 1.40 rgbecker  move drawing 13 to testshapes
+	graphics/renderPDF.py 1.24 rgbecker  Convert to using textobjects
+##### 2003/11/19 #####
+	graphics/renderPM.py 1.39 rgbecker  Fix typo
+	graphics/renderPM.py 1.38 rgbecker  We can do drawing 12 even on the Mac
+	lib/utils.py 1.55 rgbecker  Make fp_str more like _rl_accel(C/java) versions
+	test/test_pdfbase_ttfonts.py 1.11 rgbecker  Allow for standard compression setting
+	demos/odyssey/odyssey.txt 1.10 rgbecker  Minor textual changes
+	demos/odyssey/dodyssey.py 1.16 rgbecker  Minor textual changes
+	lib/colors.py 1.44 rgbecker  Fix doc comment
+	pdfbase/pdfdoc.py 1.88 rgbecker  I think this should be virtual
+	utils/daily.py 1.54 rgbecker  Force up to date
+	utils/cvslh.py 1.7 rgbecker  Force up to date
+	lib/utils.py 1.54 rgbecker  Fix tabs reported by Steve Holden
+##### 2003/11/18 #####
+	docs/userguide/ch2a_fonts.py 1.10 johnprecedo  Updated contact details for Viktorija Zaksiene.
+##### 2003/11/17 #####
+	docs/userguide/ch2a_fonts.py 1.9 johnprecedo  Updated contact details.
+	docs/userguide/ch2a_fonts.py 1.8 johnprecedo  Added section on renderPM.py tests.
+##### 2003/11/14 #####
+	pdfbase/ttfonts.py 1.17 rgbecker  Remove 2.1 problem constants
+	test/test_pdfbase_ttfonts.py 1.10 rgbecker  Remove 2.1 problem constants
+	rl_addons/renderPM/setup.py 1.17 rgbecker  Disallow ft with <Python-2.0
+##### 2003/11/13 #####
+	platypus/doctemplate.py 1.68 william_ng  Allowing for strange flowables with no _traceIfo object
+##### 2003/11/12 #####
+	graphics/renderPM.py 1.37 rgbecker  Added better test example
+	pdfbase/pdfmetrics.py 1.65 rgbecker  Fix isEqual as suggested by Peter Borocz (Fisher Investments)
+##### 2003/11/10 #####
+	graphics/renderPM.py 1.36 rgbecker  Attempt ttfonts in testing
+	pdfbase/ttfonts.py 1.16 rgbecker  Change to _ttf_data
+	test/test_pdfbase_ttfonts.py 1.9 rgbecker  Change to _ttf_data
+	rl_addons/renderPM/_renderPM.c 1.30 rgbecker  Fix unset field change to _ttf_data
+	rl_addons/pyRXP/setup.py 1.10 rgbecker  Fix for no move to DLLs
+	lib/validators.py 1.29 rgbecker  Allow for True/False
+##### 2003/11/09 #####
+	rl_addons/pyRXP/pyRXP.c 1.24 rgbecker  Fix early free (thanks to Max Neunhöffer)
+	rl_addons/renderPM/setup.py 1.16 rgbecker  Fix setup.py VERSION and destination
+	lib/setup.py 1.16 rgbecker  Fix setup.py VERSIOn and destination
+	graphics/charts/axes.py 1.88 rgbecker  Add visibleLabels to value Axes
+	lib/validators.py 1.28 rgbecker  Attempt at allowing isBoolean(True)
+	rl_addons/renderPM/_renderPM.c 1.29 rgbecker  TTFONTS Render
+	platypus/flowables.py 1.41 andy_robinson  Preliminary support for tracing through doc builds
+	platypus/doctemplate.py 1.67 andy_robinson  Preliminary support for tracing through doc builds
+	platypus/__init__.py 1.16 andy_robinson  Preliminary support for tracing through doc builds
+##### 2003/11/08 #####
+	graphics/testshapes.py 1.18 rgbecker  Added _FONTS
+##### 2003/11/07 #####
+	rl_addons/renderPM/_renderPM.c 1.28 rgbecker  Now compiles and runs, fails to draw TTF though
+##### 2003/11/05 #####
+	rl_addons/renderPM/_renderPM.c 1.27 rgbecker  Fixed memory family problems
+	rl_addons/pyRXP/test/testRXPbasic.py 1.4 rgbecker  Add location + attributes test
+##### 2003/11/04 #####
+	rl_addons/renderPM/_renderPM.c 1.26 rgbecker  Now compiles&links cleanly
+##### 2003/11/02 #####
+	test/test_pdfbase_ttfonts.py 1.8 rgbecker  Back to int checksum & add32
+	pdfbase/ttfonts.py 1.15 rgbecker  Back to int checksum & add32
+	lib/_rl_accel.c 1.36 rgbecker  Back to int checksum & add32
+##### 2003/11/01 #####
+	rl_addons/pyRXP/test/testRXPbasic.py 1.3 rgbecker  Remove assignment to None
+	graphics/charts/legends.py 1.26 rgbecker  Remove assignment to None
+##### 2003/10/28 #####
+	platypus/doctemplate.py 1.66 rgbecker  Allow for different first page template index
+##### 2003/10/27 #####
+	graphics/charts/legends.py 1.25 johnprecedo  LineLegend now works correctly when passed either a widget or a color as part of ColourNamePairs. Corrected minor problem with line positioning. Also added a couple of samples of LineLegends (vanilla and using a dash array).
+	lib/sequencer.py 1.13 rgbecker  Add missing global statement
+##### 2003/10/26 #####
+	setup.py 1.10 rgbecker  Fix to use version from __init__
+##### 2003/10/24 #####
+	graphics/charts/legends.py 1.24 johnprecedo  Added a LineLegend class - similar to the standard Legend class, but uses lines for the swatches rather than rectangles. Useful for adding to LinePlots and LineCharts.
+	graphics/charts/lineplots.py 1.52 johnprecedo  JoinAxis fix - similar to one in lineCharts
+##### 2003/10/22 #####
+	platypus/doctemplate.py 1.65 rgbecker  Eliminate 2.3 problem assignement to None
+##### 2003/10/21 #####
+	rl_addons/renderPM/_renderPM.c 1.25 rgbecker  Added in preliminary FT support
+##### 2003/10/14 #####
+	pdfbase/ttfonts.py 1.14 rgbecker  Added lambda speedup
+	test/test_rl_accel.py 1.3 rgbecker  Fix missing test problem
+	test/unittest.py 1.7 rgbecker  Update to 2.2 version
+	pdfbase/pdfmetrics.py 1.64 dragan1  fixed weirdness for jython compatibility
+	graphics/charts/barcharts.py 1.82 rgbecker  Make BarChart3D abstract
+##### 2003/10/13 #####
+	graphics/charts/linecharts.py 1.39 rgbecker  Fix up for joinAxis modes
+##### 2003/10/10 #####
+	lib/_rl_accel.c 1.35 rgbecker  Add getFonts method
+##### 2003/10/09 #####
+	graphics/charts/barcharts.py 1.81 rgbecker  Inheritance/Factorization improved, HorizontalBarChart3D added
+	pdfbase/pdfmetrics.py 1.63 rgbecker  Remove excess import
+##### 2003/10/06 #####
+	lib/utils.py 1.53 dragan1  fixed java file read bug
+	lib/utils.py 1.52 rgbecker  Revert towards Andy's code
+	lib/utils.py 1.51 rgbecker  fix mispelling
+	lib/randomtext.py 1.10 rgbecker  Allow for rl_config.invariant
+	platypus/doctemplate.py 1.64 rgbecker  Use randomText from lib
+##### 2003/10/02 #####
+	graphics/charts/axes.py 1.87 rgbecker  Attempt to fix 2.2ism
+##### 2003/09/22 #####
+	graphics/charts/barcharts.py 1.80 rgbecker  Correct way that reversePlotOrder works
+##### 2003/09/18 #####
+	platypus/flowables.py 1.40 rgbecker  Added in lazy Image stuff
+##### 2003/09/17 #####
+	graphics/charts/lineplots.py 1.51 rgbecker  Set reasonable zSpace
+	graphics/charts/linecharts.py 1.38 rgbecker  Set reasonable zSpace
+	graphics/charts/utils3d.py 1.11 rgbecker  Fix up John's special scalings
+	graphics/charts/barcharts.py 1.79 rgbecker  Fix up John's special scalings
+##### 2003/09/16 #####
+	graphics/charts/utils3d.py 1.10 johnprecedo  changes to make 3d vertical barchart more 'Excel-like'
+	graphics/charts/barcharts.py 1.78 johnprecedo  changes to make 3d vertical barchart more 'Excel-like'
+	graphics/charts/areas.py 1.6 johnprecedo  changes to make 3d vertical barchart more 'Excel-like'
+	graphics/charts/utils3d.py 1.9 johnprecedo  Changed to make 3D barcharts look more 'Excel-like' - there is now a different level of shading on the bar tops than on their sides.
+	graphics/charts/barcharts.py 1.77 johnprecedo  Changed to make 3D barcharts look more 'Excel-like' - there is now a different level of shading on the bar tops than on their sides.
+	graphics/charts/piecharts.py 1.38 rgbecker  Fix the stupid x offset radius dependency
+##### 2003/09/15 #####
+	graphics/charts/piecharts.py 1.37 rgbecker  Add restriction to remove zero pies from 3D
+	graphics/charts/areas.py 1.5 johnprecedo  Added dark floor in Plot Areas for use in 3D column charts (as per Ilan's request).
+	graphics/charts/lineplots.py 1.50 rgbecker  Furniture should be at low z
+	graphics/charts/linecharts.py 1.37 rgbecker  Furniture should be at low z
+	graphics/charts/lineplots.py 1.49 rgbecker  Added in lineplot3d and got data labels working
+	graphics/charts/linecharts.py 1.36 rgbecker  Added in lineplot3d and got data labels working
+	graphics/charts/utils3d.py 1.8 rgbecker  Minor adjustmenst and added LinePlot3D
+	graphics/charts/lineplots.py 1.48 rgbecker  Minor adjustmenst and added LinePlot3D
+	graphics/charts/linecharts.py 1.35 rgbecker  Minor adjustmenst and added LinePlot3D
+	graphics/charts/linecharts.py 1.34 rgbecker  Fix up parallel_3d style
+##### 2003/09/12 #####
+	graphics/charts/utils3d.py 1.7 rgbecker  Working HorizontalLineCharts3D
+	graphics/charts/linecharts.py 1.33 rgbecker  Working HorizontalLineCharts3D
+	graphics/charts/axes.py 1.86 rgbecker  Working HorizontalLineCharts3D
+##### 2003/09/11 #####
+	test/test_invariant.py 1.3 andy_robinson  Now deterministically formats all numbers
+	pdfbase/pdfdoc.py 1.87 andy_robinson  Now deterministically formats all numbers
+	test/test_rl_accel.py 1.2 andy_robinson  Prove that jython fp_str is wrong
+	demos/odyssey/dodyssey.py 1.15 andy_robinson  Tried again to get invariant
+	demos/odyssey/dodyssey.py 1.14 andy_robinson  Added an invariant testing digest
+	demos/odyssey/odyssey.py 1.13 andy_robinson  Added an invariant digest printer
+	test/test_invariant.py 1.2 andy_robinson  added an image
+	test/test_invariant.py 1.1 andy_robinson  New test to help check invariance
+	test/test_images.py 1.3 andy_robinson  New test to help check invariance
+	demos/odyssey/odyssey.py 1.12 andy_robinson  Better readme and more helpful printouts
+	demos/odyssey/00readme.txt 1.2 andy_robinson  Better readme and more helpful printouts
+	lib/utils.py 1.50 dragan1  ImageReader can now take File objects as well as Strings
+	test/test_rl_accel.py 1.1 dragan1  initial
+	lib/utils.py 1.49 rptlab  Fixed so that file creator and types are now correctly set on the Mac again (had a missing import).
+	graphics/charts/piecharts.py 1.36 rgbecker  remove spurious print
+##### 2003/09/10 #####
+	graphics/charts/utils3d.py 1.6 rgbecker  Fix up line join for 3d bars and remove print
+	graphics/charts/piecharts.py 1.35 rgbecker  Factorise axes a bit and make them more 3d aware
+	graphics/charts/lineplots.py 1.47 rgbecker  Factorise axes a bit and make them more 3d aware
+	graphics/charts/linecharts.py 1.32 rgbecker  Factorise axes a bit and make them more 3d aware
+	graphics/charts/barcharts.py 1.76 rgbecker  Factorise axes a bit and make them more 3d aware
+	graphics/charts/axes.py 1.85 rgbecker  Factorise axes a bit and make them more 3d aware
+	graphics/charts/areas.py 1.4 rgbecker  Factorise axes a bit and make them more 3d aware
+##### 2003/09/09 #####
+	platypus/paraparser.py 1.53 rgbecker  Removed checkImportError
+	pdfbase/pdfutils.py 1.39 rgbecker  Removed checkImportError
+	pdfbase/pdfmetrics.py 1.62 rgbecker  Removed checkImportError
+	lib/xmllib.py 1.10 rgbecker  Removed checkImportError
+	lib/utils.py 1.48 rgbecker  Removed checkImportError
+	graphics/renderPM.py 1.35 johnprecedo  Now uses markfilename from lib.utils for setting the filetype for the index.html file (if on a Mac).
+	lib/utils.py 1.47 johnprecedo  Added HTML to the Mac markfilename routine - HTML files should now 'know' that they are HTML and created by MSIE.
+	graphics/charts/doughnut.py 1.6 johnprecedo  Fix to labels allowing it to work with quickchart (now doesn't attempt to add a list to a tuple).
+##### 2003/09/08 #####
+	graphics/charts/barcharts.py 1.75 rgbecker  Fix up to allow for a spce vefore and aft in 3d vertical bar charts
+	graphics/charts/doughnut.py 1.5 johnprecedo  Some fixes to doughnut - labels in a multi-series doughnut act slighly more sanely. They at least appear now! May still need more fixes at a later date.
+	lib/colors.py 1.43 dragan1  jython compatibility hack
+	pdfgen/pdfimages.py 1.18 rgbecker  hack to ImageReader
+	test/test_platypus_general.py 1.13 rgbecker  hack to ImageReader
+	test/test_pdfgen_pycanvas.py 1.4 rgbecker  hack to ImageReader
+	test/test_pdfgen_general.py 1.19 rgbecker  hack to ImageReader
+	test/test_paragraphs.py 1.17 rgbecker  hack to ImageReader
+	test/test_images.py 1.2 rgbecker  hack to ImageReader
+	test/test_docstrings.py 1.11 rgbecker  hack to ImageReader
+	platypus/flowables.py 1.39 rgbecker  hack to ImageReader
+	pdfgen/canvas.py 1.117 rgbecker  hack to ImageReader
+	pdfbase/pdfutils.py 1.38 rgbecker  hack to ImageReader
+	pdfbase/pdfdoc.py 1.86 rgbecker  hack to ImageReader
+	lib/utils.py 1.46 rgbecker  hack to ImageReader
+	tools/pythonpoint/stdparser.py 1.16 andy_robinson  Various work on abstracting out images, plus outstanding patches on Pythonpoint for Drawings and Turgut Uyar's changes
+	tools/pythonpoint/pythonpoint.dtd 1.3 andy_robinson  Various work on abstracting out images, plus outstanding patches on Pythonpoint for Drawings and Turgut Uyar's changes
+	tools/pythonpoint/demos/htu.xml 1.3 andy_robinson  Various work on abstracting out images, plus outstanding patches on Pythonpoint for Drawings and Turgut Uyar's changes
+	test/test_pdfgen_pycanvas.py 1.3 andy_robinson  Various work on abstracting out images, plus outstanding patches on Pythonpoint for Drawings and Turgut Uyar's changes
+	test/test_pdfgen_general.py 1.18 andy_robinson  Various work on abstracting out images, plus outstanding patches on Pythonpoint for Drawings and Turgut Uyar's changes
+	test/test_images.py 1.1 andy_robinson  Various work on abstracting out images, plus outstanding patches on Pythonpoint for Drawings and Turgut Uyar's changes
+	pdfgen/pdfimages.py 1.17 andy_robinson  Various work on abstracting out images, plus outstanding patches on Pythonpoint for Drawings and Turgut Uyar's changes
+	rl_config.py 1.39 andy_robinson  Various work on abstracting out images, plus outstanding patches on Pythonpoint for Drawings and Turgut Uyar's changes
+	pdfbase/pdfutils.py 1.37 andy_robinson  Various work on abstracting out images, plus outstanding patches on Pythonpoint for Drawings and Turgut Uyar's changes
+	lib/utils.py 1.45 andy_robinson  Various work on abstracting out images, plus outstanding patches on Pythonpoint for Drawings and Turgut Uyar's changes
+	docs/userguide/ch1_intro.py 1.14 andy_robinson  Various work on abstracting out images, plus outstanding patches on Pythonpoint for Drawings and Turgut Uyar's changes
+	tools/pythonpoint/pythonpoint.py 1.24 andy_robinson  Added PPDrawing class to make Diagra drawings easy to show
+	rl_addons/renderPM/_renderPM.c 1.24 rgbecker  Attempt to eliminate small area fills
+##### 2003/09/05 #####
+	graphics/widgets/markers.py 1.14 rgbecker  Fix mispelling
+	graphics/shapes.py 1.99 rgbecker  Attempt to be slightly cleverer about small segments
+	graphics/charts/piecharts.py 1.34 rgbecker  Attempt to fix bit leakage
+##### 2003/09/04 #####
+	graphics/charts/linecharts.py 1.31 rgbecker  Fix type of symbol for linechart properties
+	graphics/charts/piecharts.py 1.33 rgbecker  Use strokeLineJoin=1 for 3d wedges
+##### 2003/09/03 #####
+	graphics/charts/utils3d.py 1.5 rgbecker  First changes needed for 3d bars
+	graphics/charts/barcharts.py 1.74 rgbecker  First changes needed for 3d bars
+	graphics/charts/axes.py 1.84 rgbecker  First changes needed for 3d bars
+	graphics/charts/barcharts.py 1.73 rgbecker  Fixed up data labels for stacked bars
+##### 2003/09/01 #####
+	graphics/charts/areas.py 1.3 rgbecker  Added _3d options for use with 3d charts
+##### 2003/08/28 #####
+	rl_addons/renderPM/_renderPM.c 1.23 rgbecker  Make pict transparent color optional
+	lib/colors.py 1.42 johnprecedo  Fixed a typo in function Blacker.
+##### 2003/08/27 #####
+	graphics/shapes.py 1.98 johnprecedo  Andy's fix for turning on or off previews in EPS output.
+	graphics/charts/utils3d.py 1.4 rgbecker  Fix up 2.2ism
+	graphics/charts/piecharts.py 1.32 rgbecker  Fix up 2.2ism
+	graphics/charts/axes.py 1.83 rgbecker  Fix up 2.2ism
+	graphics/charts/piecharts.py 1.31 rgbecker  Added dynamic Wedgelabel3d class
+##### 2003/08/26 #####
+	lib/attrmap.py 1.9 rgbecker  Add check for shapeChecking to validateSetattr
+##### 2003/08/22 #####
+	graphics/charts/utils3d.py 1.3 rgbecker  Fix up depth sign for 3d line segments
+##### 2003/08/21 #####
+	lib/attrmap.py 1.8 rgbecker  Change name of hook func
+	rl_addons/renderPM/_renderPM.c 1.22 rgbecker  Fix up error case
+##### 2003/08/20 #####
+	platypus/flowables.py 1.38 rgbecker  Fix typo found by Christoph Devenoges
+	graphics/charts/utils3d.py 1.2 rgbecker  Some progress on ribbons
+##### 2003/08/19 #####
+	pdfgen/canvas.py 1.116 rgbecker  Fix missing = :( stupid robin
+	pdfgen/canvas.py 1.115 rgbecker  Fix up Canvas argument processing so defaults are dynamically taken
+##### 2003/08/15 #####
+	graphics/charts/piecharts.py 1.30 rgbecker  Pie3d now shares code with Pie
+##### 2003/08/14 #####
+	graphics/charts/lineplots.py 1.46 rgbecker  Fixes to lineLabelArray detection
+	graphics/charts/linecharts.py 1.30 rgbecker  Fixes to lineLabelArray detection
+##### 2003/08/13 #####
+	graphics/charts/utils3d.py 1.1 rgbecker  Working 3D Pie chart
+	graphics/charts/piecharts.py 1.29 rgbecker  Working 3D Pie chart
+##### 2003/08/12 #####
+	graphics/widgets/grids.py 1.32 rgbecker  Comment problematic PICT code
+	graphics/shapes.py 1.97 rgbecker  Comment problematic PICT code
+	graphics/renderPM.py 1.34 rgbecker  Comment problematic PICT code
+##### 2003/08/11 #####
+	rl_addons/renderPM/_renderPM.c 1.21 rgbecker  Quark PICT testing
+	graphics/shapes.py 1.96 rgbecker  Added getArcPoints & ArcPath
+	platypus/frames.py 1.21 rgbecker  I think we actually need a width check
+	platypus/tables.py 1.67 rgbecker  Allow for special case width overflows
+##### 2003/08/05 #####
+	rl_addons/renderPM/_renderPM.c 1.20 rgbecker  Attempt at transparancy by rendering
+	pdfbase/pdfdoc.py 1.85 rgbecker  Added import of os
+	pdfbase/pdfdoc.py 1.84 rgbecker  Slight change to markfilename usage
+	graphics/renderPM.py 1.33 rgbecker  Test PICT transparency & move to better markfilename
+	lib/utils.py 1.44 rgbecker  Added John's mac type dict to markfilename
+##### 2003/08/04 #####
+	graphics/charts/lineplots.py 1.45 rgbecker  Add proper data for AreaLinePlot
+##### 2003/08/03 #####
+	graphics/shapes.py 1.95 rgbecker  Slight efficiency saving & code reuse
+	test/test_graphics_layout.py 1.1 andy_robinson  Added getBounds() logic throughout graphics hierarchy
+	graphics/widgetbase.py 1.34 andy_robinson  Added getBounds() logic throughout graphics hierarchy
+	graphics/shapes.py 1.94 andy_robinson  Added getBounds() logic throughout graphics hierarchy
+##### 2003/08/01 #####
+	rl_config.py 1.38 rgbecker  Added eps_preview_transparent
+	lib/colors.py 1.41 rgbecker  Fix type problem
+##### 2003/07/31 #####
+	lib/colors.py 1.40 rgbecker  Added bitmap_rgb function
+	graphics/renderPM.py 1.32 rgbecker  Allow for tiff transparency
+	lib/utils.py 1.43 rptlab  Added more debugs and allowed for multiple removes
+##### 2003/07/30 #####
+	graphics/charts/lineplots.py 1.44 rgbecker  Fixup for bubble charts
+	graphics/charts/axes.py 1.82 rgbecker  Fixup for bubble charts
+	rl_addons/pyRXP/pyRXP.c 1.23 rgbecker  Fix bugs in fourth argument found by Max Neunhöffer
+##### 2003/07/29 #####
+	graphics/charts/lineplots.py 1.43 rgbecker  dded in stuff for area plots, fixes to axis formatting etc
+	graphics/charts/linecharts.py 1.29 rgbecker  dded in stuff for area plots, fixes to axis formatting etc
+	graphics/charts/axes.py 1.81 rgbecker  dded in stuff for area plots, fixes to axis formatting etc
+	graphics/charts/linecharts.py 1.28 rgbecker  Added inFill stuff/reversePlotOrder for LineChart
+	platypus/flowables.py 1.37 rgbecker  Attempt to allow for overlong KeepTogethers
+##### 2003/07/26 #####
+	graphics/renderPM.py 1.31 rgbecker  Fix up resolution for TIFF
+##### 2003/07/25 #####
+	platypus/paragraph.py 1.68 rgbecker  Attempt to fix lines access
+##### 2003/07/22 #####
+	lib/colors.py 1.39 fuzzypuffin  added ReportLabGreen
+#################################################################################
 #################### RELEASE 1.18 at 12:00 GMT  9/Jul/2003      #################
 #################################################################################
+##### 2003/07/09 #####
+	changes 1.20 rgbecker  Release 1.18
+	__init__.py 1.26 rgbecker  Release 1.18
 ##### 2003/07/09 #####
 	platypus/tables.py 1.66 rgbecker  Attempt to fix up identity for early errors
 ##### 2003/07/08 #####
