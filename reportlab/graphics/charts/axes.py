@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.34 2001/09/17 15:45:43 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.35 2001/09/18 10:08:15 dinu_gherman Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -263,6 +263,9 @@ class XCategoryAxis(CategoryAxis):
 	def makeTicks(self):
 		g = Group()
 
+		if not self.visibleTicks:
+			return g
+
 		if self.tickUp or self.tickDown:
 			for i in range(self._catCount + 1):
 				if self.tickUp or self.tickDown:
@@ -421,6 +424,9 @@ class YCategoryAxis(CategoryAxis):
 
 	def makeTicks(self):
 		g = Group()
+
+		if not self.visibleTicks:
+			return g
 
 		if self.tickLeft or self.tickRight:
 			for i in range(self._catCount + 1):
