@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.80 2003/09/22 11:06:58 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.81 2003/10/09 17:45:57 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -9,7 +9,7 @@ vertical versions.
 
 Stacked and percentile bar charts to follow...
 """
-__version__=''' $Id: barcharts.py,v 1.80 2003/09/22 11:06:58 rgbecker Exp $ '''
+__version__=''' $Id: barcharts.py,v 1.81 2003/10/09 17:45:57 rgbecker Exp $ '''
 
 import string, copy
 from types import FunctionType, StringType
@@ -63,6 +63,14 @@ class BarChart(PlotArea):
 
     def __init__(self):
         assert self.__class__.__name__!='BarChart', 'Abstract Class BarChart Instantiated'
+
+        if self._flipXY:
+            self.categoryAxis = YCategoryAxis()
+            self.valueAxis = XValueAxis()
+        else:
+            self.categoryAxis = XCategoryAxis()
+            self.valueAxis = YValueAxis()
+
         PlotArea.__init__(self)
         self.barSpacing = 0
         self.reversePlotOrder = 0
@@ -449,21 +457,16 @@ class BarChart(PlotArea):
 
 class VerticalBarChart(BarChart):
     "Vertical bar chart with multiple side-by-side bars."
-
     _flipXY = 0
 
-    def __init__(self):
-        self.categoryAxis = XCategoryAxis()
-        self.valueAxis = YValueAxis()
-        BarChart.__init__(self)
-
-def _cmpFakeItem(a,b):
-    '''t, z0, z1, x, y = a[:5]'''
-    return cmp((-a[1],a[3],a[0],-a[4]),(-b[1],b[3],b[0],-b[4]))
+class HorizontalBarChart(BarChart):
+    "Horizontal bar chart with multiple side-by-side bars."
+    _flipXY = 1
 
 class _FakeGroup:
-    def __init__(self):
+    def __init__(self, cmp=None):
         self._data = []
+        self._cmp = cmp
 
     def add(self,what):
         self._data.append(what)
@@ -472,11 +475,10 @@ class _FakeGroup:
         return self._data
 
     def sort(self):
-        self._data.sort(_cmpFakeItem)
-        #for t in self._data: print t
+        self._data.sort(self._cmp)
 
-class VerticalBarChart3D(VerticalBarChart):
-    _attrMap = AttrMap(BASE=VerticalBarChart,
+class BarChart3D(BarChart):
+    _attrMap = AttrMap(BASE=BarChart,
         theta_x = AttrMapValue(isNumber, desc='dx/dz'),
         theta_y = AttrMapValue(isNumber, desc='dy/dz'),
         zDepth = AttrMapValue(isNumber, desc='depth of an individual series'),
@@ -488,7 +490,7 @@ class VerticalBarChart3D(VerticalBarChart):
     zSpace = None
 
     def calcBarPositions(self):
-        VerticalBarChart.calcBarPositions(self)
+        BarChart.calcBarPositions(self)
         seriesCount = self._seriesCount
         zDepth = self.zDepth
         if zDepth is None: zDepth = self.barWidth
@@ -520,11 +522,15 @@ class VerticalBarChart3D(VerticalBarChart):
         if zSpace is None: zSpace = self.barSpacing
         z0 = self._calc_z0(rowNo)
         z1 = z0 + zDepth*self._normFactor
-        if height<0:
-            y += height
-            height = -height
-        x += z0*self.theta_x+zSpace
+        if width<0:
+            x += width
+            width = -width
+        x += z0*self.theta_x
         y += z0*self.theta_y
+        if self._flipXY:
+            y += zSpace
+        else:
+            x += zSpace
         g.add((0,z0,z1,x,y,width,height,rowNo,style))
 
     def _addBarLabel(self, g, rowNo, colNo, x, y, width, height):
@@ -532,13 +538,17 @@ class VerticalBarChart3D(VerticalBarChart):
         zSpace = self.zSpace
         if zSpace is None: zSpace = self.barSpacing
         z1 = z0
-        x += z0*self.theta_x+zSpace
+        x += z0*self.theta_x
         y += z0*self.theta_y
+        if self._flipXY:
+            y += zSpace
+        else:
+            x += zSpace
         g.add((1,z0,z1,x,y,width,height,rowNo,colNo))
 
     def makeBars(self):
         from utils3d import _draw_3d_bar
-        fg = _FakeGroup()
+        fg = _FakeGroup(cmp=self._cmpZ)
         self._makeBars(fg,fg)
         fg.sort()
         g = Group()
@@ -547,7 +557,7 @@ class VerticalBarChart3D(VerticalBarChart):
         for t in fg.value():
             if t[0]==1:
                 z0,z1,x,y,width,height,rowNo,colNo = t[1:]
-                VerticalBarChart._addBarLabel(self,g,rowNo,colNo,x,y,width,height)
+                BarChart._addBarLabel(self,g,rowNo,colNo,x,y,width,height)
             elif t[0]==0:
                 z0,z1,x,y,width,height,rowNo,style = t[1:]
                 dz = z1 - z0
@@ -557,18 +567,13 @@ class VerticalBarChart3D(VerticalBarChart):
                             shading=0.45)
         return g
 
-class HorizontalBarChart(BarChart):
-    "Horizontal bar chart with multiple side-by-side bars."
+class VerticalBarChart3D(BarChart3D,VerticalBarChart):
+    _cmpZ=lambda self,a,b:cmp((-a[1],a[3],a[0],-a[4]),(-b[1],b[3],b[0],-b[4]))
 
-    _flipXY = 1
-
-    def __init__(self):
-        self.categoryAxis = YCategoryAxis()
-        self.valueAxis = XValueAxis()
-        BarChart.__init__(self)
+class HorizontalBarChart3D(BarChart3D,HorizontalBarChart):
+    _cmpZ = lambda self,a,b: cmp((-a[1],a[4],a[0],-a[3]),(-b[1],b[4],b[0],-b[3]))   #t, z0, z1, x, y = a[:5]
 
 # Vertical samples.
-
 def sampleV0a():
     "A slightly pathologic bar chart with only TWO data items."
 
