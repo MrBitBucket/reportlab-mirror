@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/randomtext.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/randomtext.py,v 1.2 2001/01/02 14:57:46 johnprecedo Exp $
-__version__=''' $Id: randomtext.py,v 1.2 2001/01/02 14:57:46 johnprecedo Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/randomtext.py,v 1.3 2001/01/02 15:17:42 johnprecedo Exp $
+__version__=''' $Id: randomtext.py,v 1.3 2001/01/02 15:17:42 johnprecedo Exp $ '''
 import string
 ###############################################################################
 #	generates so-called 'Greek Text' for use in filling documents.
@@ -36,25 +36,25 @@ COMPUTERS = ['Python', 'Perl', 'Pascal', 'Java', 'Javascript',
     'cgi', 'cgi-bin', 'Amiga', 'Macintosh', 'Dell', 'Microsoft',
     'firewall', 'server', 'Linux', 'Unix', 'MacOS', 'BeOS', 'AS/400',
     'sendmail', 'TCP/IP', 'SMTP', 'RFC822-compliant', 'dynamic',
-    'Internet', 'A/UX', 'Amiga OS', 'BIOS', 'Boot Managers', 'CP/M',
-    'DOS', 'File System', 'FreeBSD', 'Freeware', 'GEOS', 'GNU',
-    'Hurd', 'Linux', 'Mach', 'Macintosh OS', 'Mailing Lists', 'Minix',
+    'Internet', 'A/UX', 'Amiga OS', 'BIOS', 'boot managers', 'CP/M',
+    'DOS', 'file system', 'FreeBSD', 'Freeware', 'GEOS', 'GNU',
+    'Hurd', 'Linux', 'Mach', 'Macintosh OS', 'mailing lists', 'Minix',
     'Multics', 'NetWare', 'NextStep', 'OS/2', 'Plan 9', 'Realtime',
-    'UNIX', 'VMS', 'Windows', 'X Windows', 'Xinu', 'Security', 'Intel', 
-    'Encryption', 'PGP' , 'software', 'ActiveX', 'AppleScript', 'awk',
+    'UNIX', 'VMS', 'Windows', 'X Windows', 'Xinu', 'security', 'Intel', 
+    'encryption', 'PGP' , 'software', 'ActiveX', 'AppleScript', 'awk',
     'BETA', 'COBOL', 'Delphi', 'Dylan', 'Eiffel', 'extreme programming',
     'Forth', 'Fortran', 'functional languages', 'Guile', 'format your hard drive',
     'Icon', 'IDL', 'Infer', 'Intercal', 'J', 'Java', 'JavaScript', 'CD-ROM',
-    'JCL', 'Lisp', '"literate programming"', 'Logo', 'MUMPS', 'C: Drive',
-    'Modula-2', 'Modula-3', 'Oberon', 'Occam', 'OpenGL', 'Parallel Languages',
+    'JCL', 'Lisp', '"literate programming"', 'Logo', 'MUMPS', 'C: drive',
+    'Modula-2', 'Modula-3', 'Oberon', 'Occam', 'OpenGL', 'parallel languages',
     'Pascal', 'Perl', 'PL/I', 'PostScript', 'Prolog', 'hardware', 'Blue Screen of Death',
     'Rexx', 'RPG', 'Scheme', 'scripting languages', 'Smalltalk', 'crash!', 'disc crash',
-    'Spanner', 'SQL', 'Tcl/Tk', 'TeX', 'TOM', 'Visual', 'Visual Basic',
+    'Spanner', 'SQL', 'Tcl/Tk', 'TeX', 'TOM', 'Visual', 'Visual Basic', '4GL',
     'VRML', 'Virtual Reality Modeling Language', 'difference engine', '...went into "yo-yo mode"', 
     'Sun', 'Sun Microsystems', 'Hewlett Packard', 'output device',
     'CPU', 'memory', 'registers', 'monitor', 'TFT display', 'plasma screen', 
     'bug report', '"mis-feature"', '...millions of bugs!', 'pizza',
-    '"illiterate programming"''...lots of pizza!', 'pepperoni pizza',
+    '"illiterate programming"','...lots of pizza!', 'pepperoni pizza',
     'coffee', 'Jolt Cola[TM]', 'beer', 'BEER!']
 
 #theme three - 'blah' - for when you want to be subtle. :-)
