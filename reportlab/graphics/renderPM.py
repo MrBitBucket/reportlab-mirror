@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.39 2003/11/19 18:53:07 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.39 2003/11/19 18:53:07 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.40 2003/11/20 17:10:43 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.40 2003/11/20 17:10:43 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -565,56 +565,9 @@ def test():
     """
     html = [htmlTop]
 
-    TD = getAllTestDrawings()
-
-    if hasattr(_renderPM,'ft_get_face'):
-        from reportlab.pdfbase import pdfmetrics, ttfonts
-        pdfmetrics.registerFont(ttfonts.TTFont("LuxiSerif", "luxiserif.ttf"))
-        pdfmetrics.registerFont(ttfonts.TTFont("Rina", "rina.ttf"))
-        testshapes._FONTS[1] = 'LuxiSerif'
-        testshapes._FONTS[2] = 'Rina'
-        F = ['Times-Roman','LuxiSerif', 'Rina']
-        if sys.platform=='win32':
-            for name, ttf in [('Adventurer Light SF','Advlit.ttf'),('ArialMS','ARIAL.TTF'),
-                ('Book Antiqua','BKANT.TTF'),
-                ('Century Gothic','GOTHIC.TTF'),
-                ('Comic Sans MS', 'COMIC.TTF'),
-                ('Elementary Heavy SF Bold','Vwagh.ttf'),
-                ('Firenze SF','flot.ttf'),
-                ('Garamond','GARA.TTF'),
-                ('Jagger','Rols.ttf'),
-                ('Monotype Corsiva','MTCORSVA.TTF'),
-                ('Seabird SF','seag.ttf'),
-                ('Tahoma','TAHOMA.TTF'),
-                ('VerdanaMS','VERDANA.TTF'),
-                ]:
-                for D in ('c:\WINNT','c:\Windows'):
-                    fn = os.path.join(D,'Fonts',ttf)
-                    if os.path.isfile(fn):
-                        pdfmetrics.registerFont(ttfonts.TTFont(name, fn))
-                        F.append(name)
-        def drawit(F,w=400,h=200,fontSize=12,slack=2,gap=5):
-            D = Drawing(w,h)
-            th = 2*gap + fontSize*1.2
-            gh = gap + .2*fontSize
-            y = h
-            maxx = 0
-            for fontName in F:
-                y -= th
-                text = fontName+": I should be totally horizontal and enclosed in a box"
-                textWidth = stringWidth(text, fontName, fontSize)
-                maxx = max(maxx,textWidth+20)
-                D.add(
-                    Group(Rect(8, y-gh, textWidth + 4, th, strokeColor=colors.red, strokeWidth=.5, fillColor=colors.lightgrey),
-                        String(10, y, text, fontName=fontName, fontSize = fontSize)))
-                y -= 5
-            return maxx, h-y+gap, D
-        maxx, maxy, D = drawit(F)
-        if maxx>400 or maxy>200: _,_,D = drawit(F,maxx,maxy)
-        TD.append((D,'Test Various Fonts','FontTest'))
     i = 0
     #print in a loop, with their doc strings
-    for (drawing, docstring, name) in TD:
+    for (drawing, docstring, name) in getAllTestDrawings():
         fnRoot = 'renderPM%d' % i
         if 1 or i==10:
             w = int(drawing.width)

@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/testshapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.18 2003/11/08 18:40:09 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.19 2003/11/20 17:10:43 rgbecker Exp $
 
 # testshapes.py - draws shapes onto a PDF canvas.
 
@@ -390,6 +390,54 @@ def getDrawing12():
                      'Hello World',
                      fontName=faceName,
                      fontSize=size))
+    return D
+
+def getDrawing13():
+    'Test Various TTF Fonts'
+    from reportlab.pdfbase import pdfmetrics, ttfonts
+    pdfmetrics.registerFont(ttfonts.TTFont("LuxiSerif", "luxiserif.ttf"))
+    pdfmetrics.registerFont(ttfonts.TTFont("Rina", "rina.ttf"))
+    _FONTS[1] = 'LuxiSerif'
+    _FONTS[2] = 'Rina'
+    F = ['Times-Roman','LuxiSerif', 'Rina']
+    if sys.platform=='win32':
+        for name, ttf in [('Adventurer Light SF','Advlit.ttf'),('ArialMS','ARIAL.TTF'),
+            ('Book Antiqua','BKANT.TTF'),
+            ('Century Gothic','GOTHIC.TTF'),
+            ('Comic Sans MS', 'COMIC.TTF'),
+            ('Elementary Heavy SF Bold','Vwagh.ttf'),
+            ('Firenze SF','flot.ttf'),
+            ('Garamond','GARA.TTF'),
+            ('Jagger','Rols.ttf'),
+            ('Monotype Corsiva','MTCORSVA.TTF'),
+            ('Seabird SF','seag.ttf'),
+            ('Tahoma','TAHOMA.TTF'),
+            ('VerdanaMS','VERDANA.TTF'),
+            ]:
+            for D in ('c:\WINNT','c:\Windows'):
+                fn = os.path.join(D,'Fonts',ttf)
+                if os.path.isfile(fn):
+                    pdfmetrics.registerFont(ttfonts.TTFont(name, fn))
+                    F.append(name)
+
+    def drawit(F,w=400,h=200,fontSize=12,slack=2,gap=5):
+        D = Drawing(w,h)
+        th = 2*gap + fontSize*1.2
+        gh = gap + .2*fontSize
+        y = h
+        maxx = 0
+        for fontName in F:
+            y -= th
+            text = fontName+": I should be totally horizontal and enclosed in a box"
+            textWidth = stringWidth(text, fontName, fontSize)
+            maxx = max(maxx,textWidth+20)
+            D.add(
+                Group(Rect(8, y-gh, textWidth + 4, th, strokeColor=colors.red, strokeWidth=.5, fillColor=colors.lightgrey),
+                    String(10, y, text, fontName=fontName, fontSize = fontSize)))
+            y -= 5
+        return maxx, h-y+gap, D
+    maxx, maxy, D = drawit(F)
+    if maxx>400 or maxy>200: _,_,D = drawit(F,maxx,maxy)
     return D
 
 def getAllFunctionDrawingNames():
