@@ -61,7 +61,7 @@ def _draw_3d_line( G, x0, x1, y0, y1,
     x = float(x1-x0)
     slope = x==0 and n*[1e150] or map(lambda y1,y0,x=x: (y1-y0)/x,y1,y0)
 
-    def F(x,i, slope=slope, y0=y0):
+    def F(x,i, slope=slope, y0=y0, x0=x0):
         return float((x-x0)*slope[i]+y0[i])
     if x0>=x1: X=[(x0,x0)]
     else:
