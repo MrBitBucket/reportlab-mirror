@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/Attic/test_japanese.py,v 1.2 2001/09/04 09:58:18 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/Attic/test_japanese.py,v 1.3 2001/09/10 02:26:37 andy_robinson Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -21,6 +21,12 @@ from reportlab.lib import colors
 
 
 class JapaneseFontTests(unittest.TestCase):
+    def hDraw(self, c, msg, fnt, x, y):
+        "Helper - draws it with a box around"
+        c.setFont(fnt, 16)
+        c.drawString(x, y, msg)
+        c.rect(x,y,pdfmetrics.stringWidth(msg, fnt, 16),16,stroke=1,fill=0)
+        
     def test1(self):
         "A basic document drawing some strings"
 
@@ -37,6 +43,7 @@ class JapaneseFontTests(unittest.TestCase):
         c.setFont('Helvetica', 30)
         c.drawString(100,700, 'Japanese Font Support')
 
+        c.setStrokeColor(colors.red)
 
         # the two typefaces
         c.setFont('HeiseiMin-W3-90ms-RKSJ-H', 16)
@@ -45,34 +52,36 @@ class JapaneseFontTests(unittest.TestCase):
         # system, print the string to see Kanji
         message1 = '\202\261\202\352\202\315\225\275\220\254\226\276\222\251\202\305\202\267\201B'
         c.drawString(100, 675, message1)
+        wid = pdfmetrics.stringWidth(message1, 'HeiseiMin-W3-90ms-RKSJ-H', 16)
+        c.rect(100,675,wid,16,stroke=1,fill=0)
 
         c.setFont('HeiseiKakuGo-W5-90ms-RKSJ-H', 16)
         # this says "This is HeiseiKakugo" in shift-JIS
         message2 = '\202\261\202\352\202\315\225\275\220\254\212p\203S\203V\203b\203N\202\305\202\267\201B'
         c.drawString(100, 650, message2) 
+        wid = pdfmetrics.stringWidth(message1, 'HeiseiKakuGo-W5-90ms-RKSJ-H', 16)
+        c.rect(100,650,wid,16,stroke=1,fill=0)
+
         
 
-        #print 'width of message1 = %0.2f' % pdfmetrics.stringWidth(message1, 'HeiseiMin-W3-90ms-RKSJ-H', 16)
+        self.hDraw(c, '\223\214\213\236 says Tokyo in Shift-JIS', 'HeiseiMin-W3-90ms-RKSJ-H', 100, 600)
 
-        c.setFont('HeiseiMin-W3-90ms-RKSJ-H', 16)
-        c.drawString(100, 600, '\223\214\213\236 says Tokyo in Shift-JIS')
 
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90msp-RKSJ-H'))
-        c.setFont('HeiseiMin-W3-90msp-RKSJ-H', 16)
-        c.drawString(100, 575, '\223\214\213\236 proportional Shift-JIS')
-
+        self.hDraw(c, '\223\214\213\236 proportional Shift-JIS', 'HeiseiMin-W3-90msp-RKSJ-H', 100, 575)
+        
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','EUC-H'))
-        c.setFont('HeiseiMin-W3-EUC-H', 16)
-        c.drawString(100, 550, '\xC5\xEC\xB5\xFE says Tokyo in EUC')
+        self.hDraw(c, '\xC5\xEC\xB5\xFE says Tokyo in EUC', 'HeiseiMin-W3-EUC-H', 100, 550)
 
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','UniJIS-UCS2-H'))
-        c.setFont('HeiseiMin-W3-UniJIS-UCS2-H', 16)
         def asciiToUCS2(text):
             s = ''
             for ch in text:
                 s = s + chr(0) + ch
             return s
-        c.drawString(100, 525, '\x67\x71\x4E\xAC' + asciiToUCS2(' says Tokyo in UCS2'))
+        self.hDraw(c, '\x67\x71\x4E\xAC' + asciiToUCS2(' says Tokyo in UCS2'),
+                   'HeiseiMin-W3-UniJIS-UCS2-H', 100, 525)
+                    
 
         # now try verticals
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90ms-RKSJ-V'))
