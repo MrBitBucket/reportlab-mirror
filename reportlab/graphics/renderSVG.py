@@ -169,7 +169,14 @@ class SVGCanvas:
         include = string.split(include)
         keys = self.style.keys()
         if include:
-            keys = filter(lambda k: k in include, keys)
+            #2.1-safe version of the line below follows:
+            #keys = filter(lambda k: k in include, keys)
+            tmp = []
+            for word in keys:
+                if word in include:
+                    tmp.append(word)
+            keys = tmp
+            
         items = []
         for k in keys:
             items.append((k, self.style[k]))
