@@ -64,7 +64,6 @@ from reportlab.platypus.flowables import Flowable
 from reportlab.lib import colors
 
 from types import StringType, UnicodeType, InstanceType, TupleType, ListType, FloatType
-from string import letters as LETTERS, whitespace as WHITESPACE, atoi
 
 # SET THIS TO CAUSE A VIEWING BUG WITH ACROREAD 3 (for at least one input)
 # CAUSEERROR = 0
@@ -939,7 +938,8 @@ def readColor(text):
     if not text:
         return None
     from reportlab.lib import colors
-    if text[0] in LETTERS:
+    from string import letters
+    if text[0] in letters:
         return colors.__dict__[text]
     tup = lengthSequence(text)
 
@@ -2124,7 +2124,7 @@ def test2(canv):
 
 def handleSpecialCharacters(engine, text, program=None):
     from paraparser import greeks, symenc
-    from string import whitespace
+    from string import whitespace, atoi, atoi_error
     standard={'lt':'<', 'gt':'>', 'amp':'&'}
     # add space prefix if space here
     if text[0:1] in whitespace:
@@ -2166,7 +2166,7 @@ def handleSpecialCharacters(engine, text, program=None):
                         (f,b,i) = engine.shiftfont(program, face="symbol")
                         program.append(symenc[n])
                         engine.shiftfont(program, face=f)
-                        if fragment and fragment[0] in WHITESPACE:
+                        if fragment and fragment[0] in whitespace:
                             program.append(" ") # follow with a space
                     else:
                         fragment = "&"+fragment
@@ -2178,7 +2178,7 @@ def handleSpecialCharacters(engine, text, program=None):
                     (f,b,i) = engine.shiftfont(program, face="symbol")
                     program.append(greeksub)
                     engine.shiftfont(program, face=f)
-                    if fragment and fragment[0] in WHITESPACE:
+                    if fragment and fragment[0] in whitespace:
                         program.append(" ") # follow with a space
                 else:
                     # add back the &
@@ -2193,7 +2193,7 @@ def handleSpecialCharacters(engine, text, program=None):
         # does the last one need a space?
         if sfragment and fragment:
             # reader 3 used to go nuts if you don't special case the last frag, but it's fixed?
-            if fragment[-1] in WHITESPACE: # or fragment==lastfrag:
+            if fragment[-1] in whitespace: # or fragment==lastfrag:
                 program.append( sfragment[-1]+" " )
             else:
                 last = sfragment[-1].strip()
