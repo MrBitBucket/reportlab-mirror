@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.34 2002/11/20 17:37:25 rgbecker Exp $
-__version__=''' $Id: pdfutils.py,v 1.34 2002/11/20 17:37:25 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.35 2002/11/21 11:21:56 rgbecker Exp $
+__version__=''' $Id: pdfutils.py,v 1.35 2002/11/21 11:21:56 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -355,14 +355,11 @@ except ImportError, errMsg:
 try:
     try:
         from _rl_accel import _AsciiBase85Decode                # builtin or on the path
-        #_AsciiBase85DecodeC = _AsciiBase85Decode
-        #def _AsciiBase85Decode(inp):
-            #return _AsciiBase85DecodeC(join(split(inp),''))
     except ImportError, errMsg:
-        _checkImportError(errMsg)
+        #_checkImportError(errMsg)
         from reportlab.lib._rl_accel import _AsciiBase85Decode  # where we think it should be
 except ImportError, errMsg:
-    _checkImportError(errMsg)
+    #_checkImportError(errMsg)
     _AsciiBase85Decode = _AsciiBase85DecodePYTHON
 
 def _wrap(input, columns=60):
