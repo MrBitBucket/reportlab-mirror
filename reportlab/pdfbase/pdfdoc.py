@@ -766,7 +766,7 @@ class PDFFile:
         return result
     def format(self, document):
         strings = map(str, self.strings) # final conversion, in case of lazy objects
-        return string.join(self.strings, "")
+        return string.join(strings, "")
 
 XREFFMT = '%0.10d %0.5d n'
 
