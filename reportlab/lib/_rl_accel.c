@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.36 2003/11/02 22:13:58 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.37 2003/12/23 18:15:08 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.36 2003/11/02 22:13:58 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.37 2003/12/23 18:15:08 rgbecker Exp $ "
 #endif
 #include "Python.h"
 #include <stdlib.h>
@@ -27,7 +27,7 @@ static __version__=" $Id: _rl_accel.c,v 1.36 2003/11/02 22:13:58 rgbecker Exp $ 
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.44"
+#define VERSION "0.45"
 #define MODULE "_rl_accel"
 #ifndef	ATTRDICT
 	#if PY_MAJOR_VERSION>=2
@@ -823,6 +823,27 @@ static PyObject *ttfonts_add32(PyObject *self, PyObject* args)
 	return PyInt_FromLong(x);
 }
 
+static PyObject *hex32(PyObject *self, PyObject* args)
+{
+	unsigned long x;
+	char	buf[20];
+#if PY_MAJOR_VERSION>=2 && PY_MINOR_VERSION>=3
+	PyObject	*ox;
+	if(!PyArg_ParseTuple(args, "O:hex32", &ox)) return NULL;
+	if(PyLong_Check(ox)){
+		x = PyLong_AsUnsignedLongMask(ox);
+		}
+	else{
+		x = PyInt_AsLong(ox);
+		if(PyErr_Occurred()) return NULL;
+		}
+#else
+	if(!PyArg_ParseTuple(args, "i:hex32", &x)) return NULL;
+#endif
+	sprintf(buf,"0X%8.8X",x);
+	return PyString_FromString(buf);
+}
+
 static char *__doc__=
 "_rl_accel contains various accelerated utilities\n\
 	stringWidth a fast string width function\n\
@@ -844,6 +865,8 @@ static char *__doc__=
 "	_AttrDict creates a dict object which can do setattr/getattr type things\n"
 #endif
 	"calcChecksum calculate checksums for TTFs\n"
+	"add32 32 bit unsigned addition\n"
+	"hex32 32 bit unsigned to 0X8.8X string\n"
 ;
 
 static struct PyMethodDef _methods[] = {
@@ -869,6 +892,7 @@ static struct PyMethodDef _methods[] = {
 #endif
 	{"calcChecksum", ttfonts_calcChecksum, METH_VARARGS, "calcChecksum(string) calculate checksums for TTFs"},
 	{"add32", ttfonts_add32, METH_VARARGS, "add32(x,y)  32 bit unsigned x+y"},
+	{"hex32", hex32, METH_VARARGS, "hex32(x)  32 bit unsigned-->0X8.8X string"},
 	{NULL,		NULL}		/* sentinel */
 	};
 
