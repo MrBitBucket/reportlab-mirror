@@ -1,5 +1,5 @@
 # idle_print [py2pdf_options] filename
-__version__=''' $Id: idle_print.py,v 1.5 2000/04/27 10:46:34 rgbecker Exp $ '''
+__version__=''' $Id: idle_print.py,v 1.6 2000/05/06 22:58:33 rgbecker Exp $ '''
 # you should adjust the globals below to configure for your system
 
 import sys, os, py2pdf, string, time
@@ -23,7 +23,7 @@ else:
 			cmd = "%s -toPostScript < %s | lpr" % (acrord,pdfname)
 		os.system(cmd)
 
-args = ['--format=pdf']
+args = ['--input=python']
 files = []
 for f in sys.argv[1:]:
 	if f[:2]=='--':
