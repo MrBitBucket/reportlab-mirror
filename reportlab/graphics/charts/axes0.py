@@ -20,12 +20,20 @@ below to/left of the X/Y-axis, respectively.
   interval.
 
 The charts using axis tell them where the labels should be placed.
+
+Axes of complementary X/Y flavours can be connected to each other
+in various ways, i.e. with a specific reference point, like an
+x/value axis to a y/value (or category) axis. In this case the
+connection can be either at the top or bottom of the former or
+at any absolute value (specified in points) or at some value of
+the former axes in its own coordinate system.
 """
 
 
 from types import FunctionType
 
 from reportlab.graphics.shapes import *
+##from reportlab.graphics.shapes import Group, Line, Drawing # ...
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics.charts.piechart0 import TypedPropertyCollection
 from reportlab.graphics.charts.textlabel0 import Label
@@ -40,11 +48,10 @@ def nextRoundNumber(x):
     Tries the series 1,2,5,10,20,50,100.., going up or down as needed."""
     
     #guess to nearest order of magnitude
-    if x == 0:
-        return 0
-    elif x == 1:
-        return 1
-    elif x < 0:
+    if x in (0, 1):
+        return x
+
+    if x < 0:
         return -1.0 * nextRoundNumber(-x)
     else:
         from math import log10
