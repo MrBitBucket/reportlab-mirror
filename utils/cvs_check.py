@@ -32,10 +32,13 @@
 #
 ###############################################################################
 #	$Log: cvs_check.py,v $
+#	Revision 1.5  2000/02/17 01:59:34  rgbecker
+#	Changes to test search
+#
 #	Revision 1.4  2000/02/16 14:07:14  rgbecker
 #	Fixes for package reportlab
-#
-__version__=''' $Id: cvs_check.py,v 1.4 2000/02/16 14:07:14 rgbecker Exp $ '''
+#	
+__version__=''' $Id: cvs_check.py,v 1.5 2000/02/17 01:59:34 rgbecker Exp $ '''
 '''
 script for testing ReportLab anonymous cvs download and test
 '''
@@ -43,7 +46,7 @@ script for testing ReportLab anonymous cvs download and test
 _globals=globals().copy()			#make a copy of out globals
 _globals['__name__'] = "__main__"	#for passing to execfile
 
-import os, sys, string, traceback
+import os, sys, string, traceback, re
 
 #this is what we need to write to .cvspass for anonymous access
 _cvspass=':pserver:anonymous@cvs.reportlab.sourceforge.net:/cvsroot/reportlab A'
@@ -135,21 +138,44 @@ def do_zip(d):
 	zip = find_exe('zip')
 	do_exec('%s -u %s %s' % (zip, zipfile, src_files), 'zip creation' )
 
+def find_py_files(d):
+	def _py_files(L,d,N):
+ 		for n in filter(lambda x: x[-3:]=='.py', N):
+			fn = os.path.normcase(os.path.normpath(os.path.join(d,n)))
+			if os.path.isfile(fn): L.append(fn)
+	L=[]
+	os.path.walk(d,_py_files,L)
+	return L
+
+def find_executable_py_files(d):
+	prog=re.compile('^( |\t)*if( |\t)+__name__( |\t)*==( |\t)*(\'|\")__main__(\'|\")( |\t)*:')
+	L=[]
+	for n in find_py_files(d):
+		for l in open(n,'r').readlines():
+			if prog.match(l) is not None:
+				L.append(n)
+				break
+	return L
+
 def do_tests(d):
 	global _ecount
 
 	def find_test_files(L,d,N):
 		n = os.path.basename(d)
-		if n!='test' and n!='tests': return
+		if n!='test' : return
 		for n in filter(lambda n: n[-3:]=='.py',N):
 			fn = os.path.normcase(os.path.normpath(os.path.join(d,n)))
 			if os.path.isfile(fn): L.append(fn)
 
-	#fn = os.path.normcase(os.path.normpath(os.path.join(d,'reportlab')))
-	fn = os.path.normcase(os.path.normpath(d))
-	if fn not in sys.path: sys.path.insert(0,fn)
+	fn = os.path.normcase(os.path.normpath(os.path.join(d,'reportlab')))		
+	d = os.path.normcase(os.path.normpath(d))
+	if d not in sys.path: sys.path.insert(0,d)
 	test_files = []
 	os.path.walk(fn,find_test_files,test_files)
+	for t in find_executable_py_files(fn):
+		if t not in test_files:
+			test_files.append(t)
+
 	for t in test_files:
 		fn =os.path.normcase(os.path.normpath(os.path.join(d,t)))
 		bn = os.path.basename(fn)
