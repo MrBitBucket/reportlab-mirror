@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/platdemos.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.6 2003/12/02 16:20:52 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.7 2003/12/02 17:24:29 andy_robinson Exp $
 """This includes some demos of platypus for use in the API proposal"""
-__version__=''' $Id: figures.py,v 1.6 2003/12/02 16:20:52 andy_robinson Exp $ '''
+__version__=''' $Id: figures.py,v 1.7 2003/12/02 17:24:29 andy_robinson Exp $ '''
 
 import os
 
@@ -209,7 +209,7 @@ if _hasPageCatcher:
                 return 1
 
         def processPDF(self, pdfFileName, pageNo):
-            formName = getFormName(pdfFileName, pageNo)
+            formName = self.getFormName(pdfFileName, pageNo)
             storeForms(pdfFileName, formName + '.frm',
                                     prefix= formName + '_',
                                     pagenumbers=[pageNo])
