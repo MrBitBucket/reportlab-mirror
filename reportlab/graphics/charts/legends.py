@@ -41,6 +41,7 @@ class Legend(Widget):
         dxTextSpace = AttrMapValue(isNumber, desc="Distance between swatch rectangle and text"),
         autoXPadding = AttrMapValue(isNumber, desc="x Padding between columns if deltax=None"),
         autoYPadding = AttrMapValue(isNumber, desc="y Padding between rows if deltay=None"),
+        yGap = AttrMapValue(isNumber, desc="Additional gap between rows"),
         dx = AttrMapValue(isNumber, desc="Width of swatch rectangle"),
         dy = AttrMapValue(isNumber, desc="Height of swatch rectangle"),
         columnMaximum = AttrMapValue(isNumber, desc="Max. number of items per column"),
@@ -53,7 +54,7 @@ class Legend(Widget):
         strokeWidth = AttrMapValue(isNumber, desc="Width of the border color of the swatches"),
         swatchMarker = AttrMapValue(NoneOr(AutoOr(isSymbol)), desc="None, Auto() or makeMarker('Diamond') ..."),
         callout = AttrMapValue(None, desc="a user callout(self,g,x,y,(color,text))"),
-        boxAnchor = AttrMapValue(isBoxAnchor),
+        boxAnchor = AttrMapValue(isBoxAnchor,'Anchor point for the legend area'),
        )
 
     def __init__(self):
@@ -95,6 +96,7 @@ class Legend(Widget):
         self.strokeWidth = STATE_DEFAULTS['strokeWidth']
         self.swatchMarker = None
         self.boxAnchor = 'ne'
+        self.yGap = 0
 
     def _getChartStyleName(self,chart):
         for a in 'lines', 'bars', 'slices', 'strands':
@@ -122,25 +124,27 @@ class Legend(Widget):
         return m
 
     def _calcHeight(self):
-        deltay = self.deltay
         dy = self.dy
+        yGap = self.yGap
         thisy = upperlefty = self.y - dy
         fontSize = self.fontSize
         ascent=getFont(self.fontName).face.ascent/1000.
         if ascent==0: ascent=0.718 # default (from helvetica)
         ascent *= fontSize
         leading = fontSize*1.2
+        deltay = self.deltay
+        if not deltay: deltay = max(dy,leading)+self.autoYPadding
         columnCount = 0
         count = 0
         lowy = upperlefty
-        for name in self._getTexts(colorNamePairs):
+        lim = self.columnMaximum - 1
+        for name in self._getTexts(self.colorNamePairs):
             T = string.split(name and str(name) or '','\n')
             S = []
-            # thisy+dy/2 = y+leading/2
             y = thisy+(dy-ascent)*0.5-leading
-            newy = thisy-max(deltay,len(S)*leading)
+            newy = thisy-max(deltay,len(S)*leading)-yGap
             lowy = min(y,newy)
-            if count == columnMaximum-1:
+            if count==lim:
                 count = 0
                 thisy = upperlefty
                 columnCount = columnCount + 1
@@ -171,11 +175,20 @@ class Legend(Widget):
                 chart = getattr(swatchMarker,'chart',getattr(swatchMarker,'obj',None))
                 swatchMarker = Auto(obj=chart)
             n = len(colorNamePairs)
-        dx, dy, alignment, columnMaximum = self.dx, self.dy, self.alignment, self.columnMaximum
-        deltax, deltay, dxTextSpace = self.deltax, self.deltay, self.dxTextSpace
-        fontName, fontSize, fillColor = self.fontName, self.fontSize, self.fillColor
-        strokeWidth, strokeColor = self.strokeWidth, self.strokeColor
+        dx = self.dx
+        dy = self.dy
+        alignment = self.alignment
+        columnMaximum = self.columnMaximum
+        deltax = self.deltax
+        deltay = self.deltay
+        dxTextSpace = self.dxTextSpace
+        fontName = self.fontName
+        fontSize = self.fontSize
+        fillColor = self.fillColor
+        strokeWidth = self.strokeWidth
+        strokeColor = self.strokeColor
         leading = fontSize*1.2
+        yGap = self.yGap
         if not deltay:
             deltay = max(dy,leading)+self.autoYPadding
         if not deltax:
@@ -193,7 +206,7 @@ class Legend(Widget):
                 thisy += height/2.
             else:
                 thisy += height
-        if ba not in ('ne','e','se','autox'):
+        if ba not in ('nw','w','sw','autox'):
             width = int((n+columnMaximum-1)/columnMaximum)*deltax
             if ba in ('n','c','s'):
                 thisx -= width/2
@@ -274,7 +287,7 @@ class Legend(Widget):
                 thisy = upperlefty
                 columnCount = columnCount + 1
             else:
-                thisy = thisy-max(deltay,len(S)*leading)
+                thisy = thisy-max(deltay,len(S)*leading)-yGap
             count = count+1
 
         return g

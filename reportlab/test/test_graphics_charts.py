@@ -150,7 +150,9 @@ def sample3(drawing=None):
 
 
 def sample4pie():
-    d = Drawing(400, 200)
+    width = 300
+    height = 150
+    d = Drawing(width, height)
     pc = Pie()
     pc.x = 150
     pc.y = 50
@@ -163,19 +165,32 @@ def sample4pie():
     pc.slices[3].labelRadius = 1.75
     pc.slices[3].fontColor = colors.red
     d.add(pc)
+    legend = Legend()
+    legend.x = width-5
+    legend.y = height-5
+    legend.dx = 20
+    legend.dy = 5
+    legend.deltax = 0
+    legend.boxAnchor = 'ne'
+    legend.colorNamePairs=Auto(chart=pc)
+    d.add(legend)
     return d
 
-def autoLegender(i,legend,chart,styleObj,sym='symbol'):
+def autoLegender(i,chart,styleObj,sym='symbol'):
     if sym:
         setattr(styleObj[0],sym, makeMarker('Diamond',size=6))
         setattr(styleObj[1],sym,makeMarker('Square'))
-    legend.x = 100
-    legend.y = 190
+    width = 300
+    height = 150
+    legend = Legend()
+    legend.x = width-5
+    legend.y = height-5
     legend.dx = 20
     legend.dy = 5
+    legend.boxAnchor = 'ne'
     if i=='col auto':
         legend.colorNamePairs[0]=(Auto(chart=chart),'auto chart=self.chart')
-        legend.colorNamePairs[0]=(Auto(obj=chart,index=1),'auto  chart=self.chart index=1')
+        legend.colorNamePairs[1]=(Auto(obj=chart,index=1),'auto  chart=self.chart index=1')
     elif i=='full auto':
         legend.colorNamePairs=Auto(chart=chart)
     elif i=='swatch set':
@@ -183,35 +198,30 @@ def autoLegender(i,legend,chart,styleObj,sym='symbol'):
         legend.swatchMarker.size = 10
     elif i=='swatch auto':
         legend.swatchMarker=Auto(chart=chart)
-    d = Drawing(400,200)
+    d = Drawing(width,height)
     d.add(chart)
     d.add(legend)
     return d
 
 def lpleg(i=None):
     chart = LinePlot()
-    legend = Legend()
-    return autoLegender(i,legend,chart,chart.lines)
+    return autoLegender(i,chart,chart.lines)
 
 def hlcleg(i=None):
     chart = HorizontalLineChart()
-    legend = Legend()
-    return autoLegender(i,legend,chart,chart.lines)
+    return autoLegender(i,chart,chart.lines)
 
 def bcleg(i=None):
     chart = VerticalBarChart()
-    legend = Legend()
-    return autoLegender(i,legend,chart,chart.bars,None)
+    return autoLegender(i,chart,chart.bars,None)
 
 def pcleg(i=None):
     chart = Pie()
-    legend = Legend()
-    return autoLegender(i,legend,chart,chart.slices,None)
+    return autoLegender(i,chart,chart.slices,None)
 
 def scleg(i=None):
     chart = SpiderChart()
-    legend = Legend()
-    return autoLegender(i,legend,chart,chart.strands,None)
+    return autoLegender(i,chart,chart.strands,None)
 
 def notFail(d):
     try:
