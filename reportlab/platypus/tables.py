@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.65 2003/04/22 17:32:01 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.65 2003/04/22 17:32:01 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.66 2003/07/09 08:17:44 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.66 2003/07/09 08:17:44 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -147,15 +147,9 @@ class Table(Flowable):
         for i in range(nrows):
             if len(data[i]) != ncols:
                 raise ValueError, "%s not enough data points in row %d!" % (self.identity(),i)
+        self._cellvalues = data
         self._rowHeights = self._argH = rowHeights
         self._colWidths = self._argW = colWidths
-        self._cellvalues = data
-##      dflt = CellStyle('<default>')
-##
-##      self._cellStyles = [None]*nrows
-##      for i in range(nrows):
-##          self._cellStyles[i] = [dflt]*ncols
-        # make unique cell styles for each entry
         cellrows = []
         for i in range(nrows):
             cellcols = []
@@ -186,12 +180,10 @@ class Table(Flowable):
     def identity(self, maxLen=30):
         '''Identify our selves as well as possible'''
         vx = None
-        nr = self._nrows
-        if not hasattr(self,'_ncols'):
-            nc = 'unknown'
-        else:
-            nc = self._ncols
-            cv = self._cellvalues
+        nr = getattr(self,'_nrows','unknown')
+        nc = getattr(self,'_ncols','unknown')
+        cv = self._cellvalues
+        if cv and 'unknown' not in (nr,nc):
             b = 0
             for i in xrange(nr):
                 for j in xrange(nc):
