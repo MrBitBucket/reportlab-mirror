@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.8 2001/04/10 21:44:03 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.9 2001/04/11 11:38:13 rgbecker Exp $
 import string
 
 from reportlab.graphics import shapes
@@ -185,6 +185,73 @@ class TypedPropertyCollection(PropHolder):
                     props[newKey] = value
 
         return props
+
+class StyleProperties(PropHolder):
+	"""A container class for attributes used in charts and legends.
+
+	Attributes contained can be those for any graphical element
+	(shape?) in the ReportLab graphics package. The idea for this
+	container class is to be useful in combination with legends
+	and/or the individual appearance of data series in charts.
+
+	A legend could be as simple as a wrapper around a list of style
+	properties, where the 'desc' attribute contains a descriptive
+	string and the rest could be used by the legend e.g. to draw 
+	something like a color swatch. The graphical presentation of
+	the legend would be its own business, though.
+
+	A chart could be inspecting a legend or, more directly, a list
+	of style properties to pick individual attributes that it knows
+	about in order to render a particular row of the data. A bar
+	chart e.g. could simply use 'strokeColor' and 'fillColor' for
+	drawing the bars while a line chart could also use additional
+	ones like strokeWidth.
+	"""
+	
+	_attrMap = {
+		'strokeWidth': shapes.isNumber,
+		'strokeLineCap': shapes.isNumber,
+		'strokeLineJoin': shapes.isNumber,
+		'strokeMiterLimit': None,
+		'strokeDashArray': shapes.isListOfNumbersOrNone,
+		'strokeOpacity': shapes.isNumber,
+
+		'strokeColor': shapes.isColorOrNone,
+		'fillColor': shapes.isColorOrNone,
+
+# Not sure if needed...
+##		  'fontSize': isNumber,
+##		  'fontName': isString,
+
+		'desc':shapes.isString	   # 
+		}
+
+	def __init__(self, **kwargs):
+		"Initialize with attributes if any."
+
+		for k, v in kwargs.items():
+			setattr(self, k, v)
+			
+
+	def __setattr__(self, name, value):
+		"Verify attribute name and value, before setting it."
+		
+		# Make sure attribute is allowed.
+		if self._attrMap != None and name[0] != '_':
+			className = self.__class__.__name__
+			try:
+				checker = self._attrMap[name]
+				if checker and not checker(value):
+					msg = "Illegal assignment of '%s' to '%s' in class %s" \
+						  % (value, name, className)
+					raise AttributeError, msg
+			except KeyError:
+				msg = "Illegal attribute '%s' in class %s" \
+					  % (name, className)
+				raise AttributeError, msg
+
+		# Now set it.
+		self.__dict__[name] = value
 
 class TwoCircles(Widget):
     def __init__(self):
