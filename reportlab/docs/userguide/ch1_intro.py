@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.11 2002/09/06 12:56:51 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.12 2002/09/07 08:54:21 dragan1 Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 import reportlab
 
@@ -431,7 +431,7 @@ At the moment, it seems that most of ReportLab toolkit features work under
 Jython. However, things that need OS specific features, like os.chdir()
 will not work, because they're not supported by Java. This is especially
 true for the set of test suites.
-Reportlab toolkit has been tested under Sun's J2SDK 1.3.1. It is known that under
+ReportLab toolkit has been tested under Sun's J2SDK 1.3.1. It is known that under
 J2SDK 1.4.0_01 $test_pdfbase_ttfonts.py$ fails horribly with an outOfMemory
 exception, probably caused by a JVM bug.
 """)
@@ -441,7 +441,7 @@ disc("")
 restartList()
 
 list("""
-Before installing jython, make sure you have a supported version of
+Before installing Jython, make sure you have a supported version of
 Java Virtual Machine installed. For the list of supported JVM's see 
 $http://www.jython.org/platform.html$
 """)
