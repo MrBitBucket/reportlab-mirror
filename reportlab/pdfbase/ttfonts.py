@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.20 2004/03/09 23:24:34 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.21 2004/03/23 16:18:29 rgbecker Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -58,7 +58,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.20 2004/03/09 23:24:34 andy_robinson Exp $'
+__version__ = '$Id: ttfonts.py,v 1.21 2004/03/23 16:18:29 rgbecker Exp $'
 
 import string
 from types import StringType
@@ -180,8 +180,9 @@ def TTFOpenFile(fn):
     '''Opens a TTF file possibly after searching TTFSearchPath
     returns (filename,file)
     '''
+    from reportlab.lib.utils import rl_isfile, open_for_read
     try:
-        f = open(fn,'rb')
+        f = open_for_read(fn,'rb')
         return fn, f
     except IOError:
         import os
@@ -189,8 +190,8 @@ def TTFOpenFile(fn):
             from reportlab import rl_config
             for D in rl_config.TTFSearchPath:
                 tfn = os.path.join(D,fn)
-                if os.path.isfile(tfn):
-                    f = open(tfn,'rb')
+                if rl_isfile(tfn):
+                    f = open_for_read(tfn,'rb')
                     return tfn, f
         raise TTFError('Can\'t open file "%s"' % fn)
 
