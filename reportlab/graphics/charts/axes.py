@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.3 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.4 2001/04/06 12:46:47 andy_robinson Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -501,23 +501,14 @@ class XValueAxis(Widget):
             self._y = points * 1.0
 
 
-    def configure(self, dataSeries):
-        """Let the axis configure its scale and range based on the data.
-        
-        Called after setPosition. Let it look at a list of lists of
-        numbers determine the tick mark intervals.  If valueMin,
-        valueMax and valueStep are configured then it
-        will use them; if any of them are set to Auto it
-        will look at the data and make some sensible decision.
-        You may override this to build custom axes with
-        irregular intervals.  It creates an internal
-        variable self._values, which is a list of numbers
-        to use in plotting."""
+    def _setRange(self, dataSeries):
+        """Set minimum and maximum axis values.
 
-##        msg = "Need at least one real data series to configure the axis"
-##        assert len(dataSeries) > 0, msg
-##        msg = "Need at least one element in a data series to configure the axis"
-##        assert len(dataSeries[0]) >= 1, msg
+        The dataSeries argument is assumed to be a list of data
+        vectors. Each vector is itself a list or tuple of numbers.
+
+        Returns a min, max tuple.
+        """
 
         try:
             minFound = dataSeries[0][0]
@@ -533,23 +524,40 @@ class XValueAxis(Widget):
             maxFound = self.valueMax
         
         if self.valueMin == Auto:
-            self._valueMin = minFound
+            valueMin = minFound
         else:
-            self._valueMin = self.valueMin
+            valueMin = self.valueMin
 
         if self.valueMax == Auto:
-            self._valueMax = maxFound
+            valueMax = maxFound
         else:
-            self._valueMax = self.valueMax
+            valueMax = self.valueMax
 
-        self._scaleFactor = self._length * 1.0 / (self._valueMax - self._valueMin) 
-            
+        return valueMin, valueMax
+
+
+    def _calcScaleFactor(self):
+        """Calculate the axis' scale factor.
+
+        This should be called only *after* the axis' range is set.
+        
+        Returns a number.
+        """
+        
+        return self._length * 1.0 / (self._valueMax - self._valueMin) 
+
+
+    def _calcTickmarkPositions(self):
+        """Calculate a list of tick positions on the axis.
+
+        Returns a list of numbers.
+        """
+        
+        # now work out where to put tickmarks.
+        tickmarkPositions = []
+
+        # now work out where to put tickmarks.
         if self.valueStep == Auto:
-            # this needs refining - aim
-            # to choose intervals 10 points apart at the
-            # moment.  Later, base this on the label orientation
-            # and height so they do not collide.
-            
             rawRange = self._valueMax - self._valueMin
             rawInterval = rawRange * (1.0 * self.minimumTickSpacing / self._length)
             niceInterval = nextRoundNumber(rawInterval)
@@ -557,21 +565,42 @@ class XValueAxis(Widget):
         else:
             self._valueStep = self.valueStep
 
-        # now work out where to put tickmarks.
-        self._tickValues = []
+        tickmarkPositions = []
         tick = int(self._valueMin / self._valueStep) * self._valueStep
         if tick >= self._valueMin:
-            self._tickValues.append(tick)
+            tickmarkPositions.append(tick)
         tick = tick + self._valueStep
         while tick <= self._valueMax:
-            self._tickValues.append(tick)
+            tickmarkPositions.append(tick)
             tick = tick + self._valueStep
 
+        return tickmarkPositions
+
+
+    def configure(self, dataSeries):
+        """Let the axis configure its scale and range based on the data.
+        
+        Called after setPosition. Let it look at a list of lists of
+        numbers determine the tick mark intervals.  If valueMin,
+        valueMax and valueStep are configured then it
+        will use them; if any of them are set to Auto it
+        will look at the data and make some sensible decision.
+        You may override this to build custom axes with
+        irregular intervals.  It creates an internal
+        variable self._values, which is a list of numbers
+        to use in plotting.
+        """
+
+        # Set range.
+        self._valueMin, self._valueMax = self._setRange(dataSeries)
+
+        # Set scale factor.
+        self._scaleFactor = self._calcScaleFactor() 
+            
+        # Work out where to put tickmarks.
+        self._tickValues = self._calcTickmarkPositions()
+
         self._configured = 1            
-##        print 'min = %0.2f' % self._valueMin
-##        print 'max = %0.2f' % self._valueMax
-##        print 'step = %0.2f' % self._valueStep
-##        print 'ticks = %s' % self._tickValues
 
 
     def scale(self, value):
@@ -627,6 +656,8 @@ class XValueAxis(Widget):
                         
         return g
 
+
+# Deprecated!!! Will change!!!
 
 class XTimeValueAxis(XValueAxis):
     "X time value axis"
@@ -856,23 +887,14 @@ class YValueAxis(Widget):
             self._y = xAxis._y * 1.0
 
 
-    def configure(self, dataSeries):
-        """Let the axis configure its scale and range based on the data.
-        
-        Called after setPosition. Let it look at a list of lists of
-        numbers determine the tick mark intervals.  If valueMin,
-        valueMax and valueStep are configured then it
-        will use them; if any of them are set to Auto it
-        will look at the data and make some sensible decision.
-        You may override this to build custom axes with
-        irregular intervals.  It creates an internal
-        variable self._values, which is a list of numbers
-        to use in plotting."""
+    def _setRange(self, dataSeries):
+        """Set minimum and maximum axis values.
 
-##        msg = "Need at least one real data series to configure the axis"
-##        assert len(dataSeries) > 0, msg
-##        msg = "Need at least one element in a data series to configure the axis"
-##        assert len(dataSeries[0]) >= 1, msg
+        The dataSeries argument is assumed to be a list of data
+        vectors. Each vector is itself a list or tuple of numbers.
+
+        Returns a min, max tuple.
+        """
 
         try:
             minFound = dataSeries[0][0]
@@ -888,23 +910,40 @@ class YValueAxis(Widget):
             maxFound = self.valueMax
         
         if self.valueMin == Auto:
-            self._valueMin = minFound
+            valueMin = minFound
         else:
-            self._valueMin = self.valueMin
+            valueMin = self.valueMin
 
         if self.valueMax == Auto:
-            self._valueMax = maxFound
+            valueMax = maxFound
         else:
-            self._valueMax = self.valueMax
+            valueMax = self.valueMax
 
-        self._scaleFactor = self._length * 1.0 / (self._valueMax - self._valueMin) 
-            
+        return valueMin, valueMax
+
+
+    def _calcScaleFactor(self):
+        """Calculate the axis' scale factor.
+
+        This should be called only *after* the axis' range is set.
+        
+        Returns a number.
+        """
+        
+        return self._length * 1.0 / (self._valueMax - self._valueMin) 
+
+
+    def _calcTickmarkPositions(self):
+        """Calculate a list of tick positions on the axis.
+
+        Returns a list of numbers.
+        """
+        
+        # now work out where to put tickmarks.
+        tickmarkPositions = []
+
+        # now work out where to put tickmarks.
         if self.valueStep == Auto:
-            # this needs refining - aim
-            # to choose intervals 10 points apart at the
-            # moment.  Later, base this on the label orientation
-            # and height so they do not collide.
-            
             rawRange = self._valueMax - self._valueMin
             rawInterval = rawRange * (1.0 * self.minimumTickSpacing / self._length)
             niceInterval = nextRoundNumber(rawInterval)
@@ -912,21 +951,42 @@ class YValueAxis(Widget):
         else:
             self._valueStep = self.valueStep
 
-        # now work out where to put tickmarks.
-        self._tickValues = []
+        tickmarkPositions = []
         tick = int(self._valueMin / self._valueStep) * self._valueStep
         if tick >= self._valueMin:
-            self._tickValues.append(tick)
+            tickmarkPositions.append(tick)
         tick = tick + self._valueStep
         while tick <= self._valueMax:
-            self._tickValues.append(tick)
+            tickmarkPositions.append(tick)
             tick = tick + self._valueStep
 
+        return tickmarkPositions
+
+
+    def configure(self, dataSeries):
+        """Let the axis configure its scale and range based on the data.
+        
+        Called after setPosition. Let it look at a list of lists of
+        numbers determine the tick mark intervals.  If valueMin,
+        valueMax and valueStep are configured then it
+        will use them; if any of them are set to Auto it
+        will look at the data and make some sensible decision.
+        You may override this to build custom axes with
+        irregular intervals.  It creates an internal
+        variable self._values, which is a list of numbers
+        to use in plotting.
+        """
+
+        # Set range.
+        self._valueMin, self._valueMax = self._setRange(dataSeries)
+
+        # Set scale factor.
+        self._scaleFactor = self._calcScaleFactor() 
+            
+        # Work out where to put tickmarks.
+        self._tickValues = self._calcTickmarkPositions()
+
         self._configured = 1            
-##        print 'min = %0.2f' % self._valueMin
-##        print 'max = %0.2f' % self._valueMax
-##        print 'step = %0.2f' % self._valueStep
-##        print 'ticks = %s' % self._tickValues
 
             
     def scale(self, value):
