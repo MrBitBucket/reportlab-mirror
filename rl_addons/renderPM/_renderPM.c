@@ -6,6 +6,13 @@
 #include <string.h>
 #include "libart_lgpl/libart.h"
 #include "gt1/gt1-parset1.h"
+
+#if defined(macintosh)
+#	include <extras.h>
+#	define strdup _strdup
+#endif
+
+
 #define VERSION "0.0"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
@@ -125,7 +132,7 @@ typedef struct {
 	double		fontSize;
 	ArtSVP*		clipSVP;
 	pixBufT*	pixBuf;
-	size_t		pathLen, pathMax;	/*current and maximum sizes*/
+	int			pathLen, pathMax;	/*current and maximum sizes*/
 	ArtBpath*	path;				/*the vector path data*/
 	ArtVpathDash	dash;			/*for doing dashes*/
 	Gt1EncodedFont*		font;		/*the currently set external font or NULL*/
@@ -882,7 +889,7 @@ static PyObject* gstate_getattr(gstateObject *self, char *name)
 	else if(!strcmp(name,"pixBuf")){
 		pixBufT* p = self->pixBuf;
 		int	nw = p->width*p->nchan;
-		PyObject *v = PyString_FromStringAndSize(p->buf, p->height*nw);
+		PyObject *v = PyString_FromStringAndSize((char *)p->buf, p->height*nw);
 		char	*r1 = PyString_AS_STRING(v);
 		char	*r2 = r1 + (p->height-1)*p->rowstride;
 		while(r1<r2){
@@ -1004,13 +1011,15 @@ pixBuf		str readonly the pixBuf\n\
 "
 };
 
+
+static  art_u32			bgv = 0xffffffff;
+
 static	gstateObject* gstate(PyObject* module, PyObject* args, PyObject* keywds)
 {
 	gstateObject*		self=NULL;
 	int					w, h, d=3, m=12;
 	char				*kwlist[] = {"w","h","depth","bg",NULL};
 	PyObject			*pbg=NULL;
-	art_u32				bgv = 0xffffffff;
 	gstateColorX		bg = {1,1,0,(art_u8*)&bgv};	/*default white background*/
 
 	if(!PyArg_ParseTupleAndKeywords(args,keywds,"ii|iO:gstate",kwlist,&w,&h,&d,&pbg)) return NULL;
