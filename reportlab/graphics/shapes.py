@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/runtests.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.14 2001/04/05 09:08:37 rgbecker Exp $
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.15 2001/04/05 09:19:51 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -516,6 +516,7 @@ class Group(Shape):
         self.transform = mmult(mmult(self.transform, skewX(kx)),skewY(ky))
 
     def asDrawing(self, width, height):
+		"""Convenience function to make a drawing from a group"""
         self.__class__ = Drawing
         self.__Drawing_init__(width,height)
 
