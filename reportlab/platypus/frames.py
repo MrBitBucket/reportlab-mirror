@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/frames.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.15 2001/09/24 15:29:23 aaron_watters Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.16 2002/06/14 15:23:13 rgbecker Exp $
 
-__version__=''' $Id: frames.py,v 1.15 2001/09/24 15:29:23 aaron_watters Exp $ '''
+__version__=''' $Id: frames.py,v 1.16 2002/06/14 15:23:13 rgbecker Exp $ '''
 
 __doc__="""
 """
@@ -147,12 +147,22 @@ class Frame:
 
 	def drawBoundary(self,canv):
 		"draw the frame boundary as a rectangle (primarily for debugging)."
+		from reportlab.lib.colors import Color, CMYKColor, toColor
+		sb = self.showBoundary
+		isColor = type(sb) in (type(''),type(()),type([])) or isinstance(sb,Color)
+		if isColor:
+			sb = toColor(sb,self)
+			if sb is self: isColor = 0
+			else:
+				canv.saveState()
+				canv.setStrokeColor(sb)
 		canv.rect(
 				self._x1,
 				self._y1,
 				self._x2 - self._x1,
 				self._y2 - self._y1
 				)
+		if isColor: canv.restoreState()
 		
 	def addFromList(self, drawlist, canv):
 		"""Consumes objects from the front of the list until the
