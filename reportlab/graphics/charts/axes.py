@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.51 2002/02/04 17:16:27 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.52 2002/03/14 10:37:05 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -577,7 +577,17 @@ class ValueAxis(Widget):
 		if rangeRound is not 'neither' and not getattr(self,'valueSteps',None):
 			self._valueMin, self._valueMax = valueMin, valueMax
 			P = self._calcTickPositions()
-			valueStep = P[1]-P[0]
+			if len(P)>1:
+				valueStep = P[1]-P[0]
+			else:
+				oVS = self.valueStep
+				self.valueStep = None
+				P = self._calcTickPositions()
+				self.valueStep = oVS
+				if len(P)>1:
+					valueStep = P[1]-P[0]
+				else:
+					valueStep = self._valueStep
 			fuzz = 1e-8*valueStep
 			if rangeRound in ['both','floor'] and valueMin<P[0]-fuzz: valueMin = P[0]-valueStep
 			if rangeRound in ['both','ceiling'] and valueMax>P[-1]+fuzz: valueMax = P[-1]+valueStep
