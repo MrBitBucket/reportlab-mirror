@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/fonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.3 2001/03/02 15:34:21 rgbecker Exp $
-__version__=''' $Id: fonts.py,v 1.3 2001/03/02 15:34:21 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.4 2001/03/02 15:35:43 rgbecker Exp $
+__version__=''' $Id: fonts.py,v 1.4 2001/03/02 15:35:43 rgbecker Exp $ '''
 import string, sys, os
 ###############################################################################
 #	A place to put useful font stuff
@@ -90,7 +90,6 @@ _font2fnrMap={
 	'courier-oblique': 'coo_____',
 	}
 
-import sys, os
 if sys.platform=='win32':
 	_T1Path=['c:\\program Files\\Adobe\\Acrobat 4.0\\Resource\\Font']
 else:
