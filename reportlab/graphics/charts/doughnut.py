@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/doughnut.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/doughnut.py,v 1.2 2003/06/13 11:07:17 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/doughnut.py,v 1.3 2003/06/13 12:08:20 johnprecedo Exp $
 # doughnut chart
 
 """Doughnut chart
@@ -10,7 +10,7 @@ Produces a circular chart like the doughnut charts produced by Excel.
 Can handle multiple series (which produce concentric 'rings' in the chart).
 
 """
-__version__=''' $Id: doughnut.py,v 1.2 2003/06/13 11:07:17 johnprecedo Exp $ '''
+__version__=''' $Id: doughnut.py,v 1.3 2003/06/13 12:08:20 johnprecedo Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -84,7 +84,7 @@ class Doughnut(Widget):
         data = AttrMapValue(None, desc='list of numbers defining sector sizes; need not sum to 1'),
         labels = AttrMapValue(isListOfStringsOrNone, desc="optional list of labels to use for each data point"),
         startAngle = AttrMapValue(isNumber, desc="angle of first slice; like the compass, 0 is due North"),
-        direction = AttrMapValue( OneOf('clockwise', 'anticlockwise'), desc="'clockwise' or 'anticlockwise'"),
+        direction = AttrMapValue(OneOf('clockwise', 'anticlockwise'), desc="'clockwise' or 'anticlockwise'"),
         slices = AttrMapValue(None, desc="collection of sector descriptor objects"),
         )
 
@@ -206,8 +206,7 @@ class Doughnut(Widget):
                     if n > 1:
                         theSector = Wedge(cx, cy, xradius+(sn*iradius)-iradius, a1, a2, yradius=yradius+(sn*iradius)-iradius, radius1=yradius+(sn*iradius)-(2*iradius))
                     elif n==1:
-                        theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, iradius=iradius)
-                        #theSector = Ellipse(cx, cy, xradius, yradius)
+                        theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, radius1=iradius)
 
                     theSector.fillColor = sectorStyle.fillColor
                     theSector.strokeColor = sectorStyle.strokeColor
