@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<!DOCTYPE presentation SYSTEM "../pythonpoint.dtd">
+<presentation filename="pythonpoint.pdf" pageDuration="3">
+  <stylesheet module="standard" function="getParagraphStyles"/>
+  <title>Conferefnce Kit Demo</title>
+  <author>Kirpal Sachdev</author>
+  <subject>Conference Kit Demo</subject>
+  <section name="Main">
+    <!-- any graphics in the section go on all its pages as a backdrop -->
+    <rectangle height="555" fill="ReportLabBlue" x="20" width="96" y="20"/>
+    <!--fixedimage height="64" filename="leftlogo.gif" x="20" width="96" y="510"/-->
+    <customshape module="customshapes" class="Logo" initargs="(20,510,96,64)"/>
+    <!--infostring size="14" align="right" x="800" y="36">
+            &#187;%(title)s, page %(page)s&#171;
+        </infostring-->
+    <!-- Now for the slides -->
+    <slide title="Introduction" id="Slide001" effectname="Wipe">
+      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+        <para style="Heading1">
+                    Conference Kit Demo
+                </para>
+        <para style="Centered">
+                   By,</para>
+		<para style="Centered">		   
+				   Richard Austin</para>
+		<para style="Centered">
+				   Kirpal Sachdev</para>
+
+      </frame>
+    </slide>
+    <slide title="Introduction" id="Slide001" effectname="Blinds" effectdirection="0" outlinelevel="1">
+      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+        <para style="Heading1">
+                    Introduction
+                </para>
+        <para style="Bullet">
+					What is it?</para>
+		<para style="Bullet">
+					Who is it aimed at?</para>
+		<para style="Bullet">
+					What does it produce?</para>
+		<para style="Bullet">
+					What size can it support?</para>
+					</frame>
+    </slide>
+    <slide title="What is it" id="Slide003" effectname="Box" outlinelevel="1">
+      <frame height="468" border="true" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+        <para style="Heading1">
+                    What is it?
+                </para>
+        <para style="Bullet">
+					Conferences &amp; Events
+                </para>
+        <para style="Bullet">
+                    Hosted Solution
+                </para>
+        <para style="Bullet">
+                    PDF Technology
+                </para>
+        <para style="Bullet">
+                   A Great Time Saver!!!!
+                </para>
+        <para style="Bullet">
+                    Medium to large
+                </para>
+      </frame>
+    </slide>
+    <slide title="Who is it aimed at" id="Slide004" effectname="Wipe" outlinelevel="1">
+      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+        <para style="Heading1">
+                   Who is it aimed at?
+                </para>
+		<para style="Heading2">
+					Conference Managers
+				</para>
+        <para style="Bullet">
+					Saves Time
+                </para>
+		<para style="Bullet">
+					Ability to adjust timetables
+				</para>
+	    <para style="Bullet">
+					Quick Access to Information
+     			</para>
+      </frame>
+    </slide>
+    <slide title="Who is it aimed at1" id="Slide005" effectname="Dissolve" outlinelevel="1">
+      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+        <para style="Heading1">
+                    Who is it aimed at?
+                </para>
+        <para style="Heading2">
+					Exhibitors &amp; Sponsors
+                </para>
+        <para style="Bullet">
+					Target Marketing
+                </para>
+		<para style="Bullet">
+					Save time &amp; effort
+                </para>
+		<para style="Bullet">
+					Print out bulk amounts
+               </para>
+      </frame>
+    </slide>
+    <slide title="Who is it aimed at2" id="Slide006" effectname="Dissolve" outlinelevel="1">
+      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+        <para style="Heading1">
+                    Who is it aimed at
+                </para>
+        <para style="Heading2">
+					Event Management Companies
+                </para>
+        <para style="Bullet">
+                    Database
+                </para>
+        <para style="Bullet">
+                    Organisation
+                </para>
+        <para style="Bullet">
+                    Save time
+                </para>
+        <para style="Bullet">
+                    Save money
+                </para>
+      </frame>
+    </slide>
+    <slide title="Who is it aimed at3" id="Slide007" effectname="Wipe" outlinelevel="1">
+      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+        <para style="Heading1">
+                    Who is it aimed at?
+                </para>
+        <para style="Heading2">
+					Speakers
+                </para>
+        <para style="Bullet">
+					Ability to upload own data
+                </para>
+		<para style="Bullet">
+					Ability to Network
+                </para>
+		<para style="Bullet">
+					Photos expected soon
+                </para>
+      </frame>
+    </slide>
+    <slide title="Who is it aimed at4" id="Slide008" effectname="Wipe" outlinelevel="1">
+      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+        <para style="Heading1">
+                    Who is it aimed at?
+                </para>
+		<para style="Heading2">
+					Delegates
+                </para>
+		<para style="Bullet">
+					Relevant Information
+                </para>
+		<para style="Bullet">
+					High Quality Brochure
+                </para>
+		<para style="Bullet">
+					Saves Time
+                </para>
+      </frame>
+    </slide>
+    <slide title="What does it produce" id="Slide008a" effectname="Glitter" outlinelevel="1">
+      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+        <para style="Heading1">
+                    What does it produce
+                </para>
+		<para style="Heading2">
+                Personalised Programme    
+				</para>
+		<para style="Bullet">
+					Dynamic PDF, personalised programme, delivered electronically
+                </para>
+		<para style="Heading2">
+                Admin Interface   
+				</para>
+		<para style="Heading2">
+                Badge Wizard  
+				</para>
+		<para style="Bullet">
+					Personalised badges, lunch &amp; reception tickets
+                </para>
+        <para style="Heading2">
+               Timetables
+				</para>
+		<para style="Heading2">
+                Brochures &amp; Handouts 
+				</para>
+      </frame>
+    </slide>
+    <slide title="Pricing" id="Slide009" effectname="Glitter" outlinelevel="1">
+      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+        <para style="Heading1">
+                    Pricing &amp; Availability
+                </para>
+        <para style="Bullet">
+                    Test
+                </para>
+        <para style="Bullet">
+                    Market Price
+                </para>
+        <para style="Bullet">
+                    Availabilty
+                </para>
+      </frame>
+    </slide>
+    
+    <slide title="Finally" id="Slide200" effectname="Blinds" effectdirection="0" outlinelevel="1">
+      <frame height="510" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+        <para style="Heading1">
+                    Finally
+                </para>
+        <para style="Bullet">
+                    Wesbite
+                </para>
+		<para style="Bullet">
+                    Admin Interface
+                </para>
+		<para style="Bullet">
+                    Any Questions?
+                </para>
+       
+      </frame>
+    </slide>
+  </section>
+</presentation>
