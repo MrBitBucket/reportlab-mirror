@@ -173,3 +173,49 @@ t=Table(data,style=[('GRID',(1,1),(-2,-2),1,colors.green),
 					('LINEBEFORE',(2,1),(2,-2),1,colors.pink),
 					])
 """)
+heading1("""Other Useful $Flowables$""")
+heading2("""$Image(filename, width=None, height=None)$""")
+disc("""Create a flowable which will contain the image defined by the data in file $filename$.
+The default <b>PDF</b> image type <i>jpeg</i> is supported and if the <b>PIL</b> extension to <b>Python</b>
+is installed the other image types can also be handled. If $width$ and or $height$ are specified
+then they determine the dimension of the displayed image in <i>points</i>. If either dimension is
+not specified (or specified as $None$) then the corresponding pixel dimension of the image is assumed
+to be in <i>points</i> and used.
+""")
+from reportlab.platypus import Image
+I=os.path.join(os.path.dirname(__file__),'..','..','demos','pythonpoint','lj8100.jpg')
+eg("""
+Image("../../demos/pythonpoint/lj8100.jpg")
+""",after=0.1)
+disc("""will display as""")
+getStory().append(Image(I))
+disc("""whereas""")
+eg("""
+Image("../../demos/pythonpoint/lj8100.jpg", width=2*inch, height=2*inch)
+""", after=0.1)
+disc('produces')
+getStory().append(Image(I, width=2*inch, height=2*inch))
+heading2("""$Spacer(width, height)$""")
+disc("""This does exactly as would be expected; it adds a certain amount of space into the story.
+At present this only works for vertical space.
+""")
+CPage(1)
+heading2("""$PageBreak()$""")
+disc("""This $Flowable$ represents a page break. It works by effectively consuming all vertical
+space given to it. This is sufficient for a single $frame$ document, but would only be a
+frame break for multiple frames so the $BaseDocTemplate$ mechanism
+detects $pageBreaks$ internally and handles them specially.
+""")
+CPage(1)
+heading2("""$CondPageBreak(height)$""")
+disc("""This $flowable$ attempts to force a $Frame$ break if insufficient vertical space remains 
+in the current $Frame$. It is thus probably wrongly named. And should probably be renamed as
+$CondFrameBreak$.
+""")
+CPage(1)
+heading2("""$KeepTogether(flowables)$""")
+disc("""
+This compound $Flowable$ takes a list of $Flowables$ and attempts to keep them in the same $Frame$.
+If the total height of the $Flowables$ in the list $flowables$ exceeds the current frame's available
+space then all the space is used and a frame break is forced.
+""")
