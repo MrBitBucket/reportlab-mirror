@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.19 2001/09/06 10:58:40 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.20 2001/09/14 15:23:28 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
 
@@ -45,33 +45,25 @@ class LinePlot(Widget):
     _attrMap = AttrMap(
         debug = AttrMapValue(isNumber,
             desc='Used only for debugging.'),
-        x = AttrMapValue(isNumber,
-            desc='X position of the lower-left corner of the chart.'),
-        y = AttrMapValue(isNumber,
-            desc='Y position of the lower-left corner of the chart.'),
-        width = AttrMapValue(isNumber,
-            desc='Width of the chart.'),
-        height = AttrMapValue(isNumber,
-            desc='Height of the chart.'),
-
+        x = AttrMapValue(isNumber, desc='X position of the lower-left corner of the chart.'),
+        y = AttrMapValue(isNumber, desc='Y position of the lower-left corner of the chart.'),
+        firstOnTop= AttrMapValue(isBoolean, desc='First plotted are on top'),
+        width = AttrMapValue(isNumber, desc='Width of the chart.'),
+        height = AttrMapValue(isNumber, desc='Height of the chart.'),
         lineLabelNudge = AttrMapValue(isNumber,
             desc='Distance between a data point and its label.'),
         lineLabels = AttrMapValue(None,
             desc='Handle to the list of data point labels.'),
         lineLabelFormat = AttrMapValue(None,
             desc='Formatting string or function used for data point labels.'),
-
         joinedLines = AttrMapValue(isNumber,
             desc='Display data points joined with lines if true.'),
-
         strokeColor = AttrMapValue(isColorOrNone,
             desc='Color used for background border of plot area.'),
         fillColor = AttrMapValue(isColorOrNone,
             desc='Color used for background interior of plot area.'),
-
         lines = AttrMapValue(None,
             desc='Handle of the lines.'),
-
         xValueAxis = AttrMapValue(None,
             desc='Handle of the x axis.'),
         yValueAxis = AttrMapValue(None,
@@ -85,6 +77,7 @@ class LinePlot(Widget):
 
         self.x = 0
         self.y = 0
+        self.firstOnTop = 0
         self.width = 200
         self.height = 100
 
@@ -228,8 +221,10 @@ class LinePlot(Widget):
 
         labelFmt = self.lineLabelFormat
 
-        # Iterate over data rows.        
-        for rowNo in range(len(self._positions)):
+        P = range(len(self._positions))
+        if self.firstOnTop: P.reverse()
+        # Iterate over data rows.
+        for rowNo in P:
             row = self._positions[rowNo]
 
             styleCount = len(self.lines)
