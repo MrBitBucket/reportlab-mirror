@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: textobject.py,v $
+#	Revision 1.7  2000/03/22 16:29:04  andy_robinson
+#	Added methods for CMYK color model
+#
 #	Revision 1.6  2000/03/08 13:40:03  andy_robinson
 #	Canvas has two methods setFillColor(aColor) and setStrokeColor(aColor)
 #	which accepts color objects directly.
-#
+#	
 #	Revision 1.5  2000/02/18 11:00:58  rgbecker
 #	trailing text/Odyssey fix
 #	
@@ -47,7 +50,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: textobject.py,v 1.6 2000/03/08 13:40:03 andy_robinson Exp $ '''
+__version__=''' $Id: textobject.py,v 1.7 2000/03/22 16:29:04 andy_robinson Exp $ '''
 __doc__=""" 
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -186,6 +189,16 @@ class PDFTextObject:
         self._fillColorRGB = (r, g, b)
         self._code.append('%0.2f %0.2f %0.2f rg' % (r,g,b))
  
+    def setFillColorCMYK(self, c, m, y, k):
+        """Takes 4 arguments between 0.0 and 1.0"""
+        self._fillColorCMYK = (c, m, y, k)
+        self._code.append('%0.2f %0.2f %0.2f %0.2f k' % (c, m, y, k))
+        
+    def setStrokeColorCMYK(self, c, m, y, k):
+        """Takes 4 arguments between 0.0 and 1.0"""
+        self._strokeColorCMYK = (c, m, y, k)
+        self._code.append('%0.2f %0.2f %0.2f %0.2f K' % (c, m, y, k))
+
     def setFillColor(self, aColor):
         """Takes a color object, allowing colors to be referred to by name"""
         r, g, b = aColor.red, aColor.green, aColor.blue
