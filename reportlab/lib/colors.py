@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.38 2003/02/27 15:07:02 rgbecker Exp $
-__version__=''' $Id: colors.py,v 1.38 2003/02/27 15:07:02 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.39 2003/07/22 09:35:52 fuzzypuffin Exp $
+__version__=''' $Id: colors.py,v 1.39 2003/07/22 09:35:52 fuzzypuffin Exp $ '''
 
 import string, math
 from types import StringType, ListType, TupleType
@@ -270,6 +270,8 @@ ReportLabBlue = HexColor(0x4e5688)
 ReportLabLightBlue = HexColor(0xb7b9d3)
 ReportLabFidBlue=HexColor(0x3366cc)
 ReportLabFidRed=HexColor(0xcc0033)
+ReportLabGreen = HexColor(0x336600)
+ReportLabLightGreen = HexColor(0x339933)
 
 # color constants -- mostly from HTML standard
 aliceblue =     HexColor(0xF0F8FF)
