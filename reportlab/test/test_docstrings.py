@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_docstrings.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_docstrings.py,v 1.12 2004/03/26 14:20:44 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_docstrings.py,v 1.13 2004/05/03 08:11:48 rgbecker Exp $
 
 """This is a test on a package level that find all modules,
 classes, methods and functions that do not have a doc string
@@ -22,7 +22,7 @@ from reportlab.test.utils import SecureTestCase, GlobDirectoryWalker, outputfile
 
 RL_HOME = os.path.dirname(reportlab.__file__)
 
-def getModuleObjects(folder, rootName, typ):
+def getModuleObjects(folder, rootName, typ, pattern='*.py'):
     "Get a list of all objects defined *somewhere* in a package."
 
     # Define some abbreviations.
@@ -32,7 +32,7 @@ def getModuleObjects(folder, rootName, typ):
 
     objects = []
     lookup = {}
-    for file in GlobDirectoryWalker(folder, '*.py'):
+    for file in GlobDirectoryWalker(folder, pattern):
         folder = os.path.dirname(file)
 
         if os.path.basename(file) == '__init__.py':
@@ -99,9 +99,7 @@ def getModuleObjects(folder, rootName, typ):
         # Restore sys.path and working directory.
         os.chdir(cwd)
         del sys.path[0]
-
     return objects
-
 
 class DocstringTestCase(SecureTestCase):
     "Testing if objects in the ReportLab package have docstrings."
@@ -150,39 +148,27 @@ class DocstringTestCase(SecureTestCase):
 
         file.close()
 
-
     def test0(self):
         "Test if functions have a doc string."
-
         self._writeLogFile(FunctionType)
-
 
     def test1(self):
         "Test if classes have a doc string."
-
         self._writeLogFile(ClassType)
-
 
     def test2(self):
         "Test if methods have a doc string."
-
         self._writeLogFile(MethodType)
-
 
     def test3(self):
         "Test if modules have a doc string."
-
         self._writeLogFile(ModuleType)
-
 
 def makeSuite():
     suite = unittest.TestSuite()
     loader = unittest.TestLoader()
-    if sys.platform[:4] != 'java':
-        suite.addTest(loader.loadTestsFromTestCase(DocstringTestCase))
-
+    if sys.platform[:4] != 'java': suite.addTest(loader.loadTestsFromTestCase(DocstringTestCase))
     return suite
-
 
 #noruntests
 if __name__ == "__main__":
