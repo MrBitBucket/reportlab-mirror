@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPDF.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.15 2002/03/26 11:49:09 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.16 2002/04/16 17:58:06 rgbecker Exp $
 # renderPDF - draws Drawings onto a canvas
 """Usage:
     import renderpdf
@@ -9,7 +9,7 @@
 Execute the script to see some test drawings.
 changed
 """
-__version__=''' $Id: renderPDF.py,v 1.15 2002/03/26 11:49:09 rgbecker Exp $ '''
+__version__=''' $Id: renderPDF.py,v 1.16 2002/04/16 17:58:06 rgbecker Exp $ '''
 
 from reportlab.graphics.shapes import *
 from reportlab.pdfgen.canvas import Canvas
@@ -137,7 +137,7 @@ class _PDFRenderer(Renderer):
         x2 = ellipse.cx + ellipse.rx
         y1 = ellipse.cy - ellipse.ry
         y2 = ellipse.cy + ellipse.ry
-        self._canvas.ellipse(x1,y1,x2,y2,fill=1)
+        self._canvas.ellipse(x1,y1,x2,y2,fill=self._fill,stroke=self._stroke)
 
     def drawPolygon(self, polygon):
         assert len(polygon.points) >= 2, 'Polyline must have 2 or more points'
