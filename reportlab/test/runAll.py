@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/runAll.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.14 2004/03/22 18:08:50 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.15 2004/03/23 14:46:35 rgbecker Exp $
 """Runs all test files in all subfolders.
 """
 import os, glob, sys, string, traceback
@@ -30,7 +30,7 @@ def makeSuite(folder, exclude=[],nonImportable=[],pattern='test_*.py'):
     return allTests
 
 
-def main():
+def main(pattern='test_*.py'):
     try:
         folder = os.path.dirname(__file__)
     except:
@@ -43,12 +43,12 @@ def main():
     # want this if reusing runAll anywhere else.
     if string.find(folder, 'reportlab' + os.sep + 'test') > -1:
         #print 'cleaning up previous output'
-        for pattern in ('*.pdf', '*.log'):
-            for filename in GlobDirectoryWalker(folder, pattern):
+        for pat in ('*.pdf', '*.log'):
+            for filename in GlobDirectoryWalker(folder, pattern=pat):
                 os.remove(filename)
 
     NI = []
-    testSuite = makeSuite(folder,nonImportable=NI,pattern='test_*.py'+(not haveSRC and 'c' or ''))
+    testSuite = makeSuite(folder,nonImportable=NI,pattern=pattern+(not haveSRC and 'c' or ''))
     unittest.TextTestRunner().run(testSuite)
     if haveSRC:
         for filename in GlobDirectoryWalker(folder, '*.pyc'):
