@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testplatypus.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.10 2002/07/24 19:56:38 andy_robinson Exp $
-__version__=''' $Id: test_platypus_general.py,v 1.10 2002/07/24 19:56:38 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.11 2002/09/26 20:59:36 andy_robinson Exp $
+__version__=''' $Id: test_platypus_general.py,v 1.11 2002/09/26 20:59:36 andy_robinson Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -93,7 +93,7 @@ def getCommentary():
     level page layout library which lets you programmatically create complex
     documents with a minimum of effort.
 
-    This document is both the user guide and the output of the test script.
+    This document is both the user guide &amp; the output of the test script.
     In other words, a script used platypus to create the document you are now
     reading, and the fact that you are reading it proves that it works.  Or
     rather, that it worked for this script anyway.  It is a first release!
@@ -503,4 +503,4 @@ if __name__ == "__main__":
     if '-debug' in sys.argv:
         run()
     else:
-        unittest.TextTestRunner().run(makeSuite)
+        unittest.TextTestRunner().run(makeSuite())
