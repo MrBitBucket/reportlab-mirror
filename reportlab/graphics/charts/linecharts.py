@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.41 2003/11/21 14:52:10 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.42 2003/11/24 22:40:44 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
-__version__=''' $Id: linecharts.py,v 1.41 2003/11/21 14:52:10 rgbecker Exp $ '''
+__version__=''' $Id: linecharts.py,v 1.42 2003/11/24 22:40:44 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType
@@ -88,6 +88,7 @@ class HorizontalLineChart(LineChart):
         data = AttrMapValue(None, desc='Data to be plotted, list of (lists of) numbers.'),
         inFill = AttrMapValue(isBoolean, desc='Whether infilling should be done.'),
         reversePlotOrder = AttrMapValue(isBoolean, desc='If true reverse plot order.'),
+        annotations = AttrMapValue(None, desc='list of callables, will be called with self, xscale, yscale.'),
         )
 
     def __init__(self):
@@ -336,7 +337,7 @@ class HorizontalLineChart(LineChart):
         cA.makeGrid(g,parent=self)
         vA.makeGrid(g,parent=self)
         g.add(self.makeLines())
-
+        for a in getattr(self,'annotations',()): g.add(a(self,cA.scale,vA.scale))
         return g
 
 def _cmpFakeItem(a,b):

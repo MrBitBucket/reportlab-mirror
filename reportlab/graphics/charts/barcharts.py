@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.82 2003/10/14 14:24:09 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.83 2003/11/24 22:40:44 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -9,7 +9,7 @@ vertical versions.
 
 Stacked and percentile bar charts to follow...
 """
-__version__=''' $Id: barcharts.py,v 1.82 2003/10/14 14:24:09 rgbecker Exp $ '''
+__version__=''' $Id: barcharts.py,v 1.83 2003/11/24 22:40:44 rgbecker Exp $ '''
 
 import string, copy
 from types import FunctionType, StringType
@@ -59,6 +59,7 @@ class BarChart(PlotArea):
         barLabelArray = AttrMapValue(None, desc='explicit array of bar label values, must match size of data if present.'),
         reversePlotOrder = AttrMapValue(isBoolean, desc='If true, reverse common category plot order.'),
         naLabel = AttrMapValue(NoneOrInstanceOfNA_Label, desc='Label to use for N/A values.'),
+        annotations = AttrMapValue(None, desc='list of callables, will be called with self, xscale, yscale.'),
         )
 
     def __init__(self):
@@ -189,6 +190,7 @@ class BarChart(PlotArea):
         g.add(self.makeBars())
         g.add(cA)
         g.add(vA)
+        for a in getattr(self,'annotations',()): g.add(a(self,cA.scale,vA.scale))
         del self._configureData
         return g
 

@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.53 2003/11/21 14:44:47 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.54 2003/11/24 22:40:44 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.53 2003/11/21 14:44:47 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.54 2003/11/24 22:40:44 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -63,6 +63,7 @@ class LinePlot(PlotArea):
         xValueAxis = AttrMapValue(None, desc='Handle of the x axis.'),
         yValueAxis = AttrMapValue(None, desc='Handle of the y axis.'),
         data = AttrMapValue(None, desc='Data to be plotted, list of (lists of) x/y tuples.'),
+        annotations = AttrMapValue(None, desc='list of callables, will be called with self, xscale, yscale.'),
         )
 
     def __init__(self):
@@ -344,6 +345,7 @@ class LinePlot(PlotArea):
         xA.makeGrid(g,parent=self)
         yA.makeGrid(g,parent=self)
         g.add(self.makeLines())
+        for a in getattr(self,'annotations',()): g.add(a(self,xA.scale,yA.scale))
         return g
 
 class LinePlot3D(LinePlot):
