@@ -31,9 +31,14 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.16  2000/06/16 13:49:20  aaron_watters
+#	new build parameters to allow alternate filename and canvas implementation
+#	(in order to support slideshow summary mode, for example, or embedding one
+#	document in another).
+#
 #	Revision 1.15  2000/06/13 13:03:31  aaron_watters
 #	more documentation changes
-#
+#	
 #	Revision 1.14  2000/06/01 16:27:56  rgbecker
 #	pageSize is wrong at present
 #	
@@ -76,7 +81,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.15 2000/06/13 13:03:31 aaron_watters Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.16 2000/06/16 13:49:20 aaron_watters Exp $ '''
 __doc__="""
 This module contains the core structure of platypus.
 
@@ -411,9 +416,11 @@ class BaseDocTemplate:
 	_handle_currentFrame = handle_currentFrame
 	_handle_nextFrame = handle_nextFrame
 
-	def _startBuild(self):
+	def _startBuild(self, canvasmaker=None, filename=None):
+		if canvasmaker is None: canvasmaker = canvas.Canvas
+		if filename is None: filename = self.filename
 		self._calc()
-		self.canv = canvas.Canvas(self.filename)
+		self.canv = canvasmaker(filename) #canvas.Canvas(self.filename)
 		self.handle_documentBegin()
 
 	def _endBuild(self):
@@ -427,10 +434,20 @@ class BaseDocTemplate:
 		self.canv.save()
 		del self.frame, self.pageTemplate
 
-	def build(self, flowables):
-		"""Build the document from a list of flowables."""
+	def build(self, flowables, filename=None, canvasmaker=canvas.Canvas):
+		"""Build the document from a list of flowables.
+		   If the filename argument is provided then that filename is used
+		   rather than the one provided upon initialization.
+		   If the canvasmaker argument is provided then it will be used
+		   instead of the default.  For example a slideshow might use
+		   an alternate canvas which places 6 slides on a page (by
+		   doing translations, scalings and redefining the page break
+		   operations).
+		"""
 		#assert filter(lambda x: not isinstance(x,Flowable), flowables)==[], "flowables argument error"
-		self._startBuild()
+		if filename is None:
+		    filename = self.filename
+		self._startBuild(canvasmaker, filename)
 
 		while len(flowables):
 			self.clean_hanging()
