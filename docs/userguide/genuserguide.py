@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: genuserguide.py,v $
+#	Revision 1.10  2000/06/27 10:09:48  rgbecker
+#	Minor cosmetic changes
+#
 #	Revision 1.9  2000/06/23 21:09:03  aaron_watters
 #	text text and more text
-#
+#	
 #	Revision 1.8  2000/06/22 19:05:24  aaron_watters
 #	added quickhack for font changes in paragraphs and lots of new text
 #	
@@ -59,7 +62,7 @@
 #	Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #	initial checkin. user guide generation framework.
 #	
-__version__=''' $Id: genuserguide.py,v 1.9 2000/06/23 21:09:03 aaron_watters Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.10 2000/06/27 10:09:48 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -70,7 +73,7 @@ from reportlab.platypus.doctemplate import SimpleDocTemplate
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import Paragraph, Spacer, Preformatted, PageBreak
+from reportlab.platypus import Paragraph, Spacer, Preformatted, PageBreak, CondPageBreak
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 import examples
@@ -142,7 +145,7 @@ class Guide:
     def go(self, filename="userguide.pdf"):
         # generate the doc...
 	doc = SimpleDocTemplate(filename,pagesize = letter ,showBoundary=0,
-	  leftMargin=inch, rightMargin=inch, topMargin=1.7*inch, bottomMargin=inch+90)
+	  leftMargin=inch, rightMargin=inch, topMargin=1*inch, bottomMargin=inch)
 	story = self.story
 	doc.build(story, self.myannotations.onFirstPage, self.myannotations.onNextPage)
 
@@ -182,6 +185,7 @@ def eg(text):
 #     example""")
     
 def head(text):
+    BODY.append(CondPageBreak(inch))
     disc(text, style=lessonnamestyle)
     
 #head("this is a header")
@@ -492,7 +496,7 @@ eg("""
  canvas.getPageNumber()
  canvas.addLiteral()
  canvas.getAvailableFonts()
- canvas.stringWidth(self, text, fontName, fontSize)
+ canvas.stringWidth(self, text, fontName, fontSize, encoding=None)
  canvas.setPageCompression(onoff=1)
  canvas.setPageTransition(self, effectname=None, duration=1, 
                         direction=0,dimension='H',motion='I')

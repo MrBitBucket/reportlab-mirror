@@ -415,7 +415,7 @@ def cursormoves1(canvas):
         textobject.textLine(line)
     textobject.setFillGray(0.4)
     textobject.textLines('''
-    With many apologeze to the Beach Boys
+    With many apologies to the Beach Boys
     and anyone else who finds this objectionable
     ''')
     canvas.drawText(textobject)
@@ -432,7 +432,7 @@ def cursormoves2(canvas):
         textobject.moveCursor(14,14) # POSITIVE Y moves down!!!
     textobject.setFillColorRGB(0.4,0,1)
     textobject.textLines('''
-    With many apologeze to the Beach Boys
+    With many apologies to the Beach Boys
     and anyone else who finds this objectionable
     ''')
     canvas.drawText(textobject)
@@ -451,7 +451,7 @@ def charspace(canvas):
         charspace = charspace+0.5
     textobject.setFillGray(0.4)
     textobject.textLines('''
-    With many apologeze to the Beach Boys
+    With many apologies to the Beach Boys
     and anyone else who finds this objectionable
     ''')
     canvas.drawText(textobject)
@@ -470,7 +470,7 @@ def wordspace(canvas):
         wordspace = wordspace+2.5
     textobject.setFillColorCMYK(0.4,0,0.4,0.2)
     textobject.textLines('''
-    With many apologeze to the Beach Boys
+    With many apologies to the Beach Boys
     and anyone else who finds this objectionable
     ''')
     canvas.drawText(textobject)
@@ -488,7 +488,7 @@ def horizontalscale(canvas):
         horizontalscale = horizontalscale+10
     textobject.setFillColorCMYK(0.0,0.4,0.4,0.2)
     textobject.textLines('''
-    With many apologeze to the Beach Boys
+    With many apologies to the Beach Boys
     and anyone else who finds this objectionable
     ''')
     canvas.drawText(textobject)
@@ -506,7 +506,7 @@ def leading(canvas):
         leading = leading+2.5
     textobject.setFillColorCMYK(0.8,0,0,0.3)
     textobject.textLines('''
-    With many apologeze to the Beach Boys
+    With many apologies to the Beach Boys
     and anyone else who finds this objectionable
     ''')
     canvas.drawText(textobject)
