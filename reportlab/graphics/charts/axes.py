@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.84 2003/09/03 15:33:58 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.85 2003/09/10 14:47:17 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.84 2003/09/03 15:33:58 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.85 2003/09/10 14:47:17 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -41,7 +41,7 @@ from reportlab.lib.validators import    isNumber, isNumberOrNone, isListOfString
                                         isString, EitherOr
 from reportlab.lib.attrmap import *
 from reportlab.lib import normalDate
-from reportlab.graphics.shapes import Drawing, Line, Group, STATE_DEFAULTS, _textBoxLimits, _rotatedBoxLimits
+from reportlab.graphics.shapes import Drawing, Line, PolyLine, Group, STATE_DEFAULTS, _textBoxLimits, _rotatedBoxLimits
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.utils import nextRoundNumber
@@ -68,9 +68,59 @@ def _findMax(V, x, default,special=None):
     '''find maximum over V[i][x]'''
     return _findMinMaxValue(V,x,default,max,special=special)
 
-
 class _AxisG(Widget):
-    def makeGrid(self,g,dim=None):
+    def _get_line_pos(self,v):
+        v = self.scale(v)
+        try:
+            v = v[0]
+        except:
+            pass
+        return v
+
+    def _cxLine(self,x,start,end):
+        x = self._get_line_pos(x)
+        return Line(x, self._y + start, x, self._y + end)
+
+    def _cyLine(self,y,start,end):
+        y = self._get_line_pos(y)
+        return Line(self._x + start, y, self._x + end, y)
+
+    def _cxLine3d(self,x,start,end,_3d_dx,_3d_dy):
+        x = self._get_line_pos(x)
+        y0 = self._y + start
+        y1 = self._y + end
+        y0, y1 = min(y0,y1),max(y0,y1)
+        x1 = x + _3d_dx
+        return PolyLine([x,y0,x1,y0+_3d_dy,x1,y1+_3d_dy],strokeLineJoin=1)
+
+    def _cyLine3d(self,y,start,end,_3d_dx,_3d_dy):
+        y = self._get_line_pos(y)
+        x0 = self._x + start
+        x1 = self._x + end
+        x0, x1 = min(x0,x1),max(x0,x1)
+        y1 = y + _3d_dy
+        return PolyLine([x0,y,x0+_3d_dx,y1,x1+_3d_dx,y1],strokeLineJoin=1)
+
+    def _getLineFunc(self, start, end, parent=None):
+        _3d_dx = getattr(parent,'_3d_dx',None)
+        if _3d_dx is not None:
+            _3d_dy = getattr(parent,'_3d_dy',None)
+            f = self._dataIndex and self._cyLine3d or self._cxLine3d
+            return lambda v, s=start, e=end, f=f: f(v,s,e,_3d_dx=_3d_dx,_3d_dy=_3d_dy)
+        else:
+            f = self._dataIndex and self._cyLine or self._cxLine
+            return lambda v, s=start, e=end, f=f: f(v,s,e)
+
+    def _makeLines(self,g,start,end,strokeColor,strokeWidth,strokeDashArray,parent=None):
+        func = self._getLineFunc(start,end,parent)
+        for t in self._tickValues:
+                L = func(t)
+                L.strokeColor = strokeColor
+                L.strokeWidth = strokeWidth
+                L.strokeDashArray = strokeDashArray
+                g.add(L)
+
+    def makeGrid(self,g,dim=None,parent=None):
         '''this is only called by a container object'''
         s = self.gridStart
         e = self.gridEnd
@@ -81,7 +131,7 @@ class _AxisG(Widget):
         if self.visibleGrid and (s or e) and c is not None:
             if self._dataIndex: offs = self._x
             else: offs = self._y
-            self._makeLines(g,s-offs,e-offs,c,self.gridStrokeWidth,self.gridStrokeDashArray)
+            self._makeLines(g,s-offs,e-offs,c,self.gridStrokeWidth,self.gridStrokeDashArray,parent=parent)
 
 # Category axes.
 class CategoryAxis(_AxisG):
@@ -159,6 +209,10 @@ class CategoryAxis(_AxisG):
     def configure(self, multiSeries,barWidth=None):
         self._catCount = max(map(len,multiSeries))
         self._barWidth = barWidth or (self._length/float(self._catCount or 1))
+        self._calcTickmarkPositions()
+
+    def _calcTickmarkPositions(self):
+        self._tickValues = range(self._catCount+1)
 
     def draw(self):
         g = Group()
@@ -239,11 +293,9 @@ class XCategoryAxis(CategoryAxis):
             self._x = yAxis._x
             self._y = pos
 
-
     def scale(self, idx):
         """returns the x position and width in drawing units of the slice"""
         return (self._x + self._scale(idx)*self._barWidth, self._barWidth)
-
 
     def makeAxis(self):
         g = Group()
@@ -267,16 +319,6 @@ class XCategoryAxis(CategoryAxis):
         axis.strokeDashArray = self.strokeDashArray
         g.add(axis)
 
-        return g
-
-    def _makeLines(self,g,start,end,strokeColor,strokeWidth,strokeDashArray):
-        for i in range(self._catCount+1):
-            x = self._x + i*self._barWidth
-            L = Line(x, self._y + start, x, self._y + end)
-            L.strokeColor = strokeColor
-            L.strokeWidth = strokeWidth
-            L.strokeDashArray = strokeDashArray
-            g.add(L)
         return g
 
     def makeTicks(self):
@@ -381,11 +423,9 @@ class YCategoryAxis(CategoryAxis):
             self._x = pos * 1.0
             self._y = xAxis._y * 1.0
 
-
     def scale(self, idx):
         "Returns the y position and width in drawing units of the slice."
         return (self._y + self._scale(idx)*self._barWidth, self._barWidth)
-
 
     def makeAxis(self):
         g = Group()
@@ -410,16 +450,6 @@ class YCategoryAxis(CategoryAxis):
         g.add(axis)
 
         return g
-
-
-    def _makeLines(self,g,start,end,strokeColor,strokeWidth,strokeDashArray):
-        for i in range(self._catCount + 1):
-            y = self._y + i*self._barWidth
-            L = Line(self._x+start, y, self._x+end, y)
-            L.strokeColor = strokeColor
-            L.strokeWidth = strokeWidth
-            L.strokeDashArray = strokeDashArray
-            g.add(L)
 
     def makeTicks(self):
         g = Group()
@@ -789,19 +819,6 @@ class ValueAxis(_AxisG):
 
         return g
 
-    def _makeLines(self,g,start,end,strokeColor,strokeWidth,strokeDashArray):
-        i = 0
-        for tickValue in self._tickValues:
-                v = self.scale(tickValue)
-                if not self._dataIndex:
-                    L = Line(v, self._y + start, v, self._y + end)
-                else:
-                    L = Line(self._x + start, v, self._x + end, v)
-                L.strokeColor = strokeColor
-                L.strokeWidth = strokeWidth
-                L.strokeDashArray = strokeDashArray
-                g.add(L)
-
     def draw(self):
         g = Group()
 
@@ -873,7 +890,6 @@ class XValueAxis(ValueAxis):
         elif mode == 'points':
             self._x = yAxis._x * 1.0
             self._y = pos * 1.0
-
 
     def scale(self, value):
         """Converts a numeric value to a Y position.
@@ -1142,7 +1158,6 @@ class YValueAxis(ValueAxis):
         elif mode == 'points':
             self._x = pos * 1.0
             self._y = xAxis._y * 1.0
-
 
     def scale(self, value):
         """Converts a numeric value to a Y position.

@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/areas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/areas.py,v 1.3 2003/09/01 14:20:54 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/areas.py,v 1.4 2003/09/10 14:47:17 rgbecker Exp $
 """This module defines a Area mixin classes
 """
-__version__=''' $Id: areas.py,v 1.3 2003/09/01 14:20:54 rgbecker Exp $ '''
+__version__=''' $Id: areas.py,v 1.4 2003/09/10 14:47:17 rgbecker Exp $ '''
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isNoneOrShape
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics.shapes import Rect, Group, Line, Polygon
@@ -66,19 +66,25 @@ class PlotArea(Widget):
                 w = self.width
                 if _3d_dy is not None:
                     _3d_dx = self._3d_dx
-                    bg = Polygon([x,y,x,y+h,x+_3d_dx,y+h+_3d_dy,x+w+_3d_dx,y+h+_3d_dy,x+w+_3d_dx,y+_3d_dy,x+w,y], 
-                        strokeColor=strokeColor, strokeWidth=strokeWidth, fillColor=fillColor)
-                    if fillColor:
+                    if fillColor and not strokeColor:
                         from reportlab.lib.colors import Blacker
-                        g.add(bg)
                         c = Blacker(fillColor, getattr(self,'_3d_blacken',0.7))
+                    else:
+                        c = strokeColor
+                    if not strokeWidth: strokeWidth = 0.5
+                    if fillColor or strokeColor or c:
+                        bg = Polygon([x,y,x,y+h,x+_3d_dx,y+h+_3d_dy,x+w+_3d_dx,y+h+_3d_dy,x+w+_3d_dx,y+_3d_dy,x+w,y], 
+                            strokeColor=strokeColor or c or grey, strokeWidth=strokeWidth, fillColor=fillColor)
+                        g.add(bg)
                         g.add(Line(x,y,x+_3d_dx,y+_3d_dy, strokeWidth=0.5, strokeColor=c))
                         g.add(Line(x+_3d_dx,y+_3d_dy, x+_3d_dx,y+h+_3d_dy,strokeWidth=0.5, strokeColor=c))
                         bg = Line(x+_3d_dx,y+_3d_dy, x+w+_3d_dx,y+_3d_dy,strokeWidth=0.5, strokeColor=c)
+                    else:
+                        bg = None
                 else:
                     bg = Rect(x, y, w, h,
                         strokeColor=strokeColor, strokeWidth=strokeWidth, fillColor=fillColor)
-                g.add(bg)
+                if bg: g.add(bg)
                 return g
             else:
                 return None

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.75 2003/09/08 18:13:00 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.76 2003/09/10 14:47:17 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -9,7 +9,7 @@ vertical versions.
 
 Stacked and percentile bar charts to follow...
 """
-__version__=''' $Id: barcharts.py,v 1.75 2003/09/08 18:13:00 rgbecker Exp $ '''
+__version__=''' $Id: barcharts.py,v 1.76 2003/09/10 14:47:17 rgbecker Exp $ '''
 
 import string, copy
 from types import FunctionType, StringType
@@ -176,8 +176,8 @@ class BarChart(PlotArea):
             vA.gridStart = cA._y
             vA.gridEnd = cA._y+cA._length
         
-        cA.makeGrid(g)
-        vA.makeGrid(g)
+        cA.makeGrid(g,parent=self)
+        vA.makeGrid(g,parent=self)
         g.add(self.makeBars())
         g.add(cA)
         g.add(vA)
