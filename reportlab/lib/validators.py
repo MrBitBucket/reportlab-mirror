@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/validators.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.29 2003/11/10 17:10:49 rgbecker Exp $
-__version__=''' $Id: validators.py,v 1.29 2003/11/10 17:10:49 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.30 2003/12/10 14:40:13 rgbecker Exp $
+__version__=''' $Id: validators.py,v 1.30 2003/12/10 14:40:13 rgbecker Exp $ '''
 """
 This module contains some standard verifying functions which can be
 used in an attribute map.
@@ -250,7 +250,7 @@ isNoneOrShape = isValidChildOrNone = _isValidChildOrNone()
 isAnything = _isAnything()
 isNothing = _isNothing()
 isXYCoord = SequenceOf(isNumber,lo=2,hi=2,emptyOK=0)
-isBoxAnchor = OneOf('nw','n','ne','w','c','e','sw','s','se')
+isBoxAnchor = OneOf('nw','n','ne','w','c','e','sw','s','se', 'autox', 'autoy')
 isNoneOrString = NoneOr(isString,'NoneOrString')
 isNoneOrListOfNoneOrStrings=SequenceOf(isNoneOrString,'isNoneOrListOfNoneOrStrings',NoneOK=1)
 isListOfNoneOrString=SequenceOf(isNoneOrString,'isListOfNoneOrString',NoneOK=0)
