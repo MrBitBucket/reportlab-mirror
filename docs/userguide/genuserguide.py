@@ -32,6 +32,9 @@
 #
 ###############################################################################
 #   $Log: genuserguide.py,v $
+#   Revision 1.20  2000/07/07 16:18:37  rgbecker
+#   More on paragraphs
+#
 #   Revision 1.19  2000/07/07 15:09:21  rgbecker
 #   Start on Paragraph
 #
@@ -92,7 +95,7 @@
 #   Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #   initial checkin. user guide generation framework.
 #   
-__version__=''' $Id: genuserguide.py,v 1.19 2000/07/07 15:09:21 rgbecker Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.20 2000/07/07 16:18:37 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -1687,7 +1690,46 @@ class ParagraphStyle(PropertySet):
         'textColor': black
         }
 """)
+CPage(5.0)
 heading3("Paragraph XML Markup Tags")
+disc("""
+The paragraph text may optionally be surrounded by
+&lt;para attributes....&gt;
+&lt;/para&gt;
+tags. The attributes if any of the opening &lt;para&gt; tag affect the style that is used
+with the $Pargraph$ $text$ and/or $bulletText$.
+""")
+CPage(5.0)
+heading4("&lt;para&gt; Attributes and Synonyms")
+from reportlab.platypus.paraparser import _addAttributeNames, _paraAttrMap
+
+def getAttrs(A):
+    _addAttributeNames(A)
+    S={}
+    for k, v in _paraAttrMap.items():
+        a = v[0]
+        if not S.has_key(a):
+            S[a] = k
+        else:
+            S[a] = "%s\n%s" %(S[a],k)
+
+    K = S.keys()
+    K.sort()
+    D=[]
+    for k in K:
+        D.append((k,S[k]))
+    cols=2*[None]
+    rows=len(D)*[None]
+    return cols,rows,D
+
+t=apply(Table,getAttrs(_paraAttrMap))
+t.setStyle(TableStyle([
+            ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ]))
+BODY.append(t)
+
 heading2("Tables and TableStyles")
 disc("""
 The $Table class$ is derived from the $Flowable class$ and is intended
