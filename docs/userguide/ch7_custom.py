@@ -1,21 +1,5 @@
-#most_chapters.py
-"""In order to rationalize this guide, I am pulling out all the story-making
-stuff into this module.  genuserguide.py contains pure definitions - stuff
-any chapter needs - and does not create story content.  most_chapters.py
-can be imported and will add to the BODY.  We can then break it down
-into separate modules ch1_intro, ch2_pdfgen and so on, and a central
-functions can import the lot."""
-
-
-
+#ch_custom.py
 from genuserguide import *
-
-
-
-
-
-
-
 
 heading1("Writing your own Flowable Objects")
 disc("""
