@@ -127,7 +127,7 @@ list("""If you want to produce compressed PDF files (recommended),
 check zlib is installed.""")
 list("""If you want to work with bitmap images, install and
 test the Python Imaging Library""")
-list("""Unzip the reportlab package (reportlab.zip
+list("""Unpack the reportlab package (reportlab.zip
 or reportlab.tgz) into a directory on your path""")
 list("""$cd$ to ^reportlab/pdfgen/test^ and execute $testpdfen.py$,
 which will create a file 'testpdfgen.pdf'.""")
@@ -200,15 +200,58 @@ prompt and type $import reportlab$ without getting
 an error message.""")
 
 list("""Open up a DOS prompt and CD to
-"..\reportlab\pdfgen\test".  On NT, enter "testpdfgen.py"; on
+"..\\reportlab\\pdfgen\\test".  On NT, enter "testpdfgen.py"; on
 Win9x, enter "python testpdfgen.py".  After a couple of seconds,
 the script completes and the file testpdfgen.pdf should be ready for
 viewing.  If PIL is installed, there should be a "Python Powered"
 image on the last page.  You're done!""")
 
 heading3("Instructions for Python novices: Unix")
-todo("""Aaron? Robin?""")
+restartList()
+list("""First you need to decide if you want to install the Python sources
+and compile these yourself or if you only want to install a binary package
+for one of the many variants of Linux or Unix. If yes download the latest
+sources from http://www.python.org (currently the latest source is
+in http://www.python.org/ftp/python/src/py152.tgz). Otherwise
+get the latest RPM or DEB or whatever package and install (or get your
+super user to do the work).""")
 
+list("""If you are building yourself, unpack the sources into a temporary directory using a tar command
+eg $tar xzvf py152.tgz$; this will create a subdirectory called Python-1.5.2
+(or whatever) cd into this directory. Then read the file $README$! It contains the 
+latest information on how to install Python.""")
+
+list("""Check that the zlib extension will be installed by default by editing
+the file Modules/Setup.in and ensuring that (near line 405) the line
+containing zlib zlibmodule.c is uncommented ie has no hash '#' character at the
+beginning. You also need to decide if you will be installing in the default location
+(/usr/local/) or in some other place.""")
+
+list("""Invoke the command $./configure --prefix=/usr/local$ this should configure
+the source directory for building. Then you can build the binaries with
+a $make$ command. If your $make$ command is not up to it try building
+with $make MAKE=make$. If all goes well install with $make install$.""")
+
+list("""If all has gone well and python is in the execution search path
+you should now be able to type $python$ and see a <b>Python</b> prompt.
+Once you can do that it's time to try and install ReportLab.
+First get the latest reportlab.tgz.
+If ReportLab is to be available to all then the reportlab archive should be unpacked in
+the lib/site-python directory (typically /usr/local/lib/site-python) if neccessary by
+a superuser.
+Otherwise unpack in a directory of your choice and arrange for that directory to be on your
+$PYTHONPATH$ variable.
+""")
+eg("""
+#put something like this in your
+#shell rcfile
+PYTHONPATH=$HOME/mypythonpackages
+export PYTHONPATH
+""")
+
+disc("""You should now be able to run python and execute the python statement
+""")
+eg("""import reportlab""")
 heading3("Instructions for Python novices: Mac")
 todo("Just?")
 
