@@ -59,24 +59,23 @@ class Label(Widget):
         """This shows a label positioned with its top right corner
         at the top centre of the drawing, and rotated 45 degrees."""
         d = Drawing(200, 100)
-        
-        self.boxStrokeColor = colors.green
-        self.boxFillColor = colors.beige
-        self.boxAnchor = 'ne'
-        self.angle = 45
-        self.setOrigin(100,100)
-        self.setText('Another\nMulti-Line\nString')
 
-        g = Group(transform=translate(0, -100))
+        # mark the origin of the label
+        d.add(Circle(100,90, 5, fillColor=colors.green))
 
-        #BUG - if I do
-        #g.add(self) then the transform of self gets ignored
-        #by the renderer
-        
-        g.add(self.draw())
-        d.add(g)
-        #d.add(self)
+        lab = Label()
+        lab.setOrigin(100,90)
+        lab.boxAnchor = 'ne'
+        lab.angle = 45
+        lab.dx = 0
+        lab.dy = -20
+        lab.boxStrokeColor = colors.green
+        lab.setText('Another\nMulti-Line\nString')
+
+        d.add(lab)
         return d
+
+        
 
     def computeSize(self):
         # the thing will draw in its own coordinate system

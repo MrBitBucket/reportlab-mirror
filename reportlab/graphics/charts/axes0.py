@@ -359,22 +359,23 @@ class YValueAxis(Widget):
 if __name__=='__main__':
     drawing = Drawing(400, 200)
 
-    data = [(10, 20, 30),
-            (15, 22, 37)]        
+    data = [(10, 20, 30, 40),
+            (15, 22, 37, 42)]        
 
     xAxis = XCategoryAxis()
-    xAxis.setPosition(75, 50, 300)
+    xAxis.setPosition(75, 75, 300)
     xAxis.configure(data)
-    xAxis.categoryNames = ['One','Two','Three']
+    xAxis.categoryNames = ['Beer','Wine','Meat','Cannelloni']
     xAxis.labels.boxAnchor = 'n'
-    xAxis.labels[4].boxAnchor = 'e'
-    xAxis.labels[4].angle = 90
-
+    xAxis.labels[3].dy = -15
+    xAxis.labels[3].angle = 30
+    xAxis.labels[3].fontName = 'Times-Bold'
+    
 
     yAxis = YValueAxis()
     yAxis.setPosition(50, 50, 125)
     yAxis.configure(data)
-
+    yAxis.dumpProperties()
     drawing.add(xAxis)
     drawing.add(yAxis)
 

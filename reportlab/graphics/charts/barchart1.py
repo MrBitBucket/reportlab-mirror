@@ -29,7 +29,7 @@ class VerticalBarChart(Widget):
     
     def __init__(self):
         self.debug = 0
-        
+
         self.x = 0
         self.y = 0
         self.width = 200
@@ -197,7 +197,7 @@ def sample1():
     bc.width = 300
     bc.data = data
 
-    bc.strokeColor = colors.yellow    
+    bc.strokeColor = colors.yellow  # visible border
 
     bc.valueAxis.valueMin = 0
     bc.valueAxis.valueMax = 60
@@ -211,7 +211,7 @@ def sample1():
     
     bc.categoryAxis.categoryNames = ['Jan-99','Feb-99','Mar-99','Apr-99','May-99','Jun-99','Jul-99','Aug-99']
     drawing.add(bc)
-    
+    bc.dumpProperties()
     return drawing    
     
 def sample2():
@@ -322,5 +322,11 @@ if __name__=='__main__':
     c.save()    
     print 'saved barchart1.pdf'
 
+    from rlextra.graphics import renderGD
+    renderGD.drawToFile(sample1(), 'barchart1_1.jpg', kind="JPG")
+    #renderGD.drawToFile(sample2(), 'barchart1_2.jpg', kind="JPG")
+    #renderGD.drawToFile(sample3(), 'barchart1_3.jpg', kind="JPG")
+    print 'saved JPEG versions'
+        
 
     

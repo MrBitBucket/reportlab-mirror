@@ -90,7 +90,7 @@ class StateTracker:
     def pop(self):
         """steps back one, and returns a state dictionary with the
         deltas to reverse out of wherever you are.  Depending
-        on your back endm, you may not need the return value,
+        on your back end, you may not need the return value,
         since you can get the complete state afterwards with getState()"""
         del self.__combined[-1]
         newState = self.__combined[-1]
@@ -98,9 +98,11 @@ class StateTracker:
         del  self.__deltas[-1]
         #need to diff this against the last one in the state
         reverseDelta = {}
+        #print 'pop()...'
         for key, curValue in lastDelta.items():
             prevValue = newState[key]
             if prevValue <> curValue:
+                #print '    state popping "%s"="%s"' % (key, curValue)
                 if key == 'transform':
                     reverseDelta[key] = inverse(lastDelta['transform'])
                 else:  #just return to previous state
