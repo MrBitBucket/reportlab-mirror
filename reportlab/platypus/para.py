@@ -1150,7 +1150,10 @@ class FastPara(Flowable):
                 extra = basicWidth - length
                 wordspace = extra*1.0/nwords
                 if count<nlines:
-                    textobject.setWordSpace(wordspace)
+                    
+                    # patch from doug@pennatus.com, 9 Nov 2002
+                    # was: textobject.setWordSpace(wordspace)
+                    textobject.setWordSpace((extra*1.0/(nwords - 1)))
                 else:
                     textobject.setWordSpace(0.0)
             textobject.setTextOrigin(x,y)
