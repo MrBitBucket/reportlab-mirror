@@ -18,6 +18,28 @@ from reportlab.graphics.charts.axes0 import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.axes0 import YCategoryAxis, XValueAxis
       
 
+### Helpers (maybe put this into Drawing... or shapes)
+##
+##def grid(group, x, y, width, height, dist=100):
+##    "Make a rectangular grid given a distance between two adjacent lines."
+##
+##    g = group
+##
+##    # Vertical lines
+##    for x0 in range(x, x+width, dist):
+##        lineWidth = 0
+##        if x0 % 5 == 0:
+##            lineWidth = 1
+##        g.add(Line(x0, 0, x0, y+height, strokeWidth=lineWidth))
+##
+##    # Horizontal lines
+##    for y0 in range(y, y+height, dist):
+##        lineWidth = 0
+##        if y0 % 5 == 0:
+##            lineWidth = 1
+##        g.add(Line(0, y0, x+width, y0, strokeWidth=lineWidth))
+
+
 # Bar chart classes
 
 class VerticalBarChart(Widget):
@@ -139,58 +161,6 @@ class VerticalBarChart(Widget):
         return m, M
     
 
-    def calcBarPositions0(self):
-        """Works out where they go.
-
-        Sets an attribute _barPositions which is a list of
-        lists of (x, y, width, height) matching the data."""
-
-        self._seriesCount = len(self.data)
-        self._rowLength = len(self.data[0])
-        
-        if self.useAbsolute:
-            # bar dimensions are absolute
-            normFactor = 1.0
-        else:
-            # bar dimensions are normalized to fit.  How wide
-            # notionally is one group of bars?
-            normWidth = (self.groupSpacing 
-                        + (self._seriesCount * self.barWidth) 
-                        + ((self._seriesCount - 1) * self.barSpacing)
-                        )
-            availWidth = self.categoryAxis.scale(0)[1]
-            normFactor = availWidth / normWidth
-            if self.debug:
-                print '%d series, %d points per series' % (self._seriesCount, self._rowLength)
-                print 'width = %d group + (%d bars * %d barWidth) + (%d gaps * %d interBar) = %d total' % (
-                    self.groupSpacing, self._seriesCount, self.barWidth,
-                    self._seriesCount - 1, self.barSpacing, normWidth)
-        
-        self._barPositions = []
-        for rowNo in range(len(self.data)):
-            barRow = []
-            for colNo in range(len(self.data[0])):
-                datum = self.data[rowNo][colNo]
-
-                (groupX, groupWidth) = self.categoryAxis.scale(colNo)
-                x = (groupX +
-                     (0.5 * self.groupSpacing * normFactor) +
-                     (rowNo * self.barWidth * normFactor) +
-                     (rowNo * self.barSpacing * normFactor)
-                     )
-                width = self.barWidth * normFactor
-
-                y = self.valueAxis.scale(0)
-                height = self.valueAxis.scale(datum) - y
-
-                barRow.append((x, y, width, height))
-                if self.debug:
-                    print "x, y, width, height:", x, y, width, height
-                    print "self.valueAxis.scale(10)", self.valueAxis.scale(self.valueAxis.valueMin)
-
-            self._barPositions.append(barRow)
-
-
     def calcBarPositions(self):
         """Works out where they go.
 
@@ -217,34 +187,41 @@ class VerticalBarChart(Widget):
                 print 'width = %d group + (%d bars * %d barWidth) + (%d gaps * %d interBar) = %d total' % (
                     self.groupSpacing, self._seriesCount, self.barWidth,
                     self._seriesCount - 1, self.barSpacing, normWidth)
-        
+
         self._barPositions = []
         for rowNo in range(len(self.data)):
             barRow = []
             for colNo in range(len(self.data[0])):
                 datum = self.data[rowNo][colNo]
 
-                (groupX, groupWidth) = self.categoryAxis.scale(colNo)
-                x = (groupX +
-                     (0.5 * self.groupSpacing * normFactor) +
-                     (rowNo * self.barWidth * normFactor) +
-                     (rowNo * self.barSpacing * normFactor)
-                     )
+                # Ufff...
+                if self.useAbsolute:
+                    groupX = len(self.data) * self.barWidth + \
+                             len(self.data) * self.barSpacing + \
+                             self.groupSpacing
+                    groupX = groupX * colNo + 0.5 * self.groupSpacing + self.x
+                    x = groupX + rowNo * (self.barWidth + self.barSpacing)
+                else:
+                    (groupX, groupWidth) = self.categoryAxis.scale(colNo)
+                    x = groupX + normFactor * (0.5 * self.groupSpacing \
+                                               + rowNo * (self.barWidth + self.barSpacing))
                 width = self.barWidth * normFactor
 
                 # 'Baseline' correction...
-                if Auto in (self.valueAxis.valueMin, self.valueAxis.valueMax):
-                    y = self.valueAxis.scale(self._findMinMaxValues()[0])
-                elif self.valueAxis.valueMin <= 0 <= self.valueAxis.valueMax:
-                    y = self.valueAxis.scale(0)
-                elif 0 < self.valueAxis.valueMin:
-                    y = self.valueAxis.scale(self.valueAxis.valueMin)
-                elif self.valueAxis.valueMax < 0:
-                    y = self.valueAxis.scale(self.valueAxis.valueMax)
+                scale = self.valueAxis.scale
+                vm, vM = self.valueAxis.valueMin, self.valueAxis.valueMax
+                if Auto in (vm, vM):
+                    y = scale(self._findMinMaxValues()[0])
+                elif vm <= 0 <= vM:
+                    y = scale(0)
+                elif 0 < vm:
+                    y = scale(vm)
+                elif vM < 0:
+                    y = scale(vM)
 
                 height = self.valueAxis.scale(datum) - y
                 barRow.append((x, y, width, height))
-
+                    
             self._barPositions.append(barRow)
         
 
@@ -276,7 +253,7 @@ class VerticalBarChart(Widget):
         g.add(self.valueAxis)
 
         labelFmt = self.barLabelFormat
-        
+
         for rowNo in range(len(self._barPositions)):
             row = self._barPositions[rowNo]
             colorCount = len(self.defaultColors)
@@ -753,7 +730,9 @@ def sample4d():
 
 ###
 
-dataSample5 = [(10, 20), (20, 30), (30, 40), (40, 50), (50, 60)]
+##dataSample5 = [(10, 20), (20, 30), (30, 40), (40, 50), (50, 60)]
+##dataSample5 = [(10, 60), (20, 50), (30, 40), (40, 30), (50, 20)]
+dataSample5 = [(10, 60), (20, 50), (30, 40), (40, 30)]
 
 def sample5a():
     "Make a simple bar chart with no expressed spacing attributes."
@@ -816,7 +795,106 @@ def sample5b():
     return drawing
 
     
-def sample5c():
+def sample5c1():
+    "Make sampe simple bar chart but with absolute spacing."
+    
+    drawing = Drawing(400, 200)
+
+    data = dataSample5
+    
+    bc = VerticalBarChart()
+    bc.x = 50
+    bc.y = 50
+    bc.height = 125
+    bc.width = 300
+    bc.data = data
+    bc.strokeColor = colors.black
+
+    bc.useAbsolute = 1
+    bc.barWidth = 40
+    bc.groupSpacing = 0
+    bc.barSpacing = 0
+
+    bc.valueAxis.valueMin = 0
+    bc.valueAxis.valueMax = 60
+    bc.valueAxis.valueStep = 15
+    
+    bc.categoryAxis.labels.boxAnchor = 'n'
+    bc.categoryAxis.labels.dy = -5
+    bc.categoryAxis.categoryNames = ['Ying', 'Yang']
+
+    drawing.add(bc)
+
+    return drawing    
+
+
+def sample5c2():
+    "Make sampe simple bar chart but with absolute spacing."
+    
+    drawing = Drawing(400, 200)
+
+    data = dataSample5
+    
+    bc = VerticalBarChart()
+    bc.x = 50
+    bc.y = 50
+    bc.height = 125
+    bc.width = 300
+    bc.data = data
+    bc.strokeColor = colors.black
+
+    bc.useAbsolute = 1
+    bc.barWidth = 40
+    bc.groupSpacing = 20
+    bc.barSpacing = 0
+
+    bc.valueAxis.valueMin = 0
+    bc.valueAxis.valueMax = 60
+    bc.valueAxis.valueStep = 15
+    
+    bc.categoryAxis.labels.boxAnchor = 'n'
+    bc.categoryAxis.labels.dy = -5
+    bc.categoryAxis.categoryNames = ['Ying', 'Yang']
+
+    drawing.add(bc)
+
+    return drawing    
+
+
+def sample5c3():
+    "Make sampe simple bar chart but with absolute spacing."
+    
+    drawing = Drawing(400, 200)
+
+    data = dataSample5
+    
+    bc = VerticalBarChart()
+    bc.x = 50
+    bc.y = 50
+    bc.height = 125
+    bc.width = 300
+    bc.data = data
+    bc.strokeColor = colors.black
+
+    bc.useAbsolute = 1
+    bc.barWidth = 40
+    bc.groupSpacing = 0
+    bc.barSpacing = 10
+
+    bc.valueAxis.valueMin = 0
+    bc.valueAxis.valueMax = 60
+    bc.valueAxis.valueStep = 15
+    
+    bc.categoryAxis.labels.boxAnchor = 'n'
+    bc.categoryAxis.labels.dy = -5
+    bc.categoryAxis.categoryNames = ['Ying', 'Yang']
+
+    drawing.add(bc)
+
+    return drawing    
+
+
+def sample5c4():
     "Make sampe simple bar chart but with absolute spacing."
     
     drawing = Drawing(400, 200)
