@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.27 2001/05/17 16:21:32 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.28 2001/05/17 16:52:48 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -251,17 +251,7 @@ class Shape:
 		def __setattr__(self, attr, value):
 			"""By default we verify.  This could be off
 			in some parallel base classes."""
-			if self._attrMap is not None:
-				if attr[0] <> '_':
-					try:
-						checker = self._attrMap[attr].validate
-						if not checker(value):
-							raise AttributeError, "Illegal assignment of '%s' to '%s' in class %s" % (value, attr, self.__class__.__name__)
-					except KeyError:
-						raise AttributeError, "Illegal attribute '%s' in class %s" % (attr, self.__class__.__name__)
-			#if we are still here, set it.
-			self.__dict__[attr] = value
-			#print 'set %s.%s = %s' % (self.__class__.__name__, attr, value)
+			validateSetattr(self,attr,value)	#from reportlab.lib.attrmap
 	#else:
 	#	 print 'shapeChecking = 0, not defining setattr'
 		
