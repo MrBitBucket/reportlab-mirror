@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.17 2003/03/13 16:14:58 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.18 2003/03/13 18:38:18 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.17 2003/03/13 16:14:58 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.18 2003/03/13 18:38:18 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -130,8 +130,8 @@ The python module exports the following\n\
             If this is set, processing instructions are returned, otherwise\n\
             they are ignored.\n\
         CaseInsensitive = 0\n\
-        ErrorOnUndefinedElements = 0\n\
-        ErrorOnUndefinedAttributes = 0\n""\
+        ErrorOnUndefinedElements = 0\n""\
+        ErrorOnUndefinedAttributes = 0\n\
             If these are set and there is a DTD, references to undeclared elements\n\
             and attributes are an error.\n\
         WarnOnRedefinitions = 0\n\
