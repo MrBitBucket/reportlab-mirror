@@ -31,9 +31,14 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.29  2000/04/18 19:52:35  aaron_watters
+#	eliminated inForm/inPage apis in favor of only beginForm..endForm
+#	(page mode is automatically inferred when page-only operations are
+#	attempted...)
+#
 #	Revision 1.28  2000/04/15 14:58:32  aaron_watters
 #	Completed addOutlineEntry0 api
-#
+#	
 #	Revision 1.27  2000/04/14 11:28:32  andy_robinson
 #	Removed illegal append statement usage in canvas.grid()
 #	
@@ -112,7 +117,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.28 2000/04/15 14:58:32 aaron_watters Exp $ '''
+__version__=''' $Id: canvas.py,v 1.29 2000/04/18 19:52:35 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -384,6 +389,7 @@ class Canvas:
         # XXXX there are a lot of other ways a bookmark destination can be bound: should be implemented.
         # XXXX the other ways require tracking of the graphics state....
         dest = self._bookmarkReference(name)
+        self._doc.inPage() # try to enable page-only features
         pageref = self._doc.thisPageRef()
         dest.fit()
         dest.setPageRef(pageref)
@@ -392,18 +398,19 @@ class Canvas:
     def bookmarkHorizontalAbsolute0(self, name, yhorizontal):
         """bind a bookmark (destination to the current page at a horizontal position"""
         dest = self._bookmarkReference(name)
+        self._doc.inPage() # try to enable page-only features
         pageref = self._doc.thisPageRef()
         dest.fith(yhorizontal)
         dest.setPageRef(pageref)
         return dest
         
-    def _inPage0(self):
-        """declare a page, enable page features"""
-        self._doc.inPage()
+    #def _inPage0(self):  disallowed!
+    #    """declare a page, enable page features"""
+    #    self._doc.inPage()
         
-    def _inForm0(self):
-        "deprecated in favore of beginForm...endForm"
-        self._doc.inForm()
+    #def _inForm0(self):
+    #    "deprecated in favore of beginForm...endForm"
+    #    self._doc.inForm()
             
     def doForm0(self, name):
         """use a form XObj in current operation stream"""
@@ -423,13 +430,14 @@ class Canvas:
     def beginForm0(self, name, lowerx=0, lowery=0, upperx=None, uppery=None):
         "declare the current graphics stream to be a form"
         self._formData = (name, lowerx, lowery, upperx, uppery)
-        self._inForm0()
+        self._doc.inForm()
+        #self._inForm0()
         
     def endForm0(self):
         (name, lowerx, lowery, upperx, uppery) = self._formData
-        self.makeForm0(name, lowerx, lowery, upperx, uppery)
-        
-    def makeForm0(self, name, lowerx=0, lowery=0, upperx=None, uppery=None):
+        #self.makeForm0(name, lowerx, lowery, upperx, uppery)
+        # fall through!  makeForm0 disallowed
+        #def makeForm0(self, name, lowerx=0, lowery=0, upperx=None, uppery=None):
         """Like showpage, but make a form using accumulated operations instead"""
         # deprecated in favor or beginForm(...)... endForm()
         (w,h) = self._pagesize
