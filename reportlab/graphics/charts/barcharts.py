@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.68 2002/07/31 12:45:08 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.69 2002/11/22 13:37:02 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -9,7 +9,7 @@ vertical versions.
 
 Stacked and percentile bar charts to follow...
 """
-__version__=''' $Id: barcharts.py,v 1.68 2002/07/31 12:45:08 rgbecker Exp $ '''
+__version__=''' $Id: barcharts.py,v 1.69 2002/11/22 13:37:02 rgbecker Exp $ '''
 
 import string, copy
 from types import FunctionType, StringType
@@ -55,6 +55,7 @@ class BarChart(PlotArea):
         data = AttrMapValue(None, desc='Data to be plotted, list of (lists of) numbers.'),
         barLabels = AttrMapValue(None, desc='Handle to the list of bar labels.'),
         barLabelFormat = AttrMapValue(None, desc='Formatting string or function used for bar labels.'),
+        barLabelCallOut = AttrMapValue(None, desc='Callout function(label)\nlabel._callOutInfo = (self,g,rowNo,colNo,x,y,width,height,x00,y00,x0,y0)'),
         reversePlotOrder = AttrMapValue(isBoolean, desc='If true, reverse common category plot order.'),
         naLabel = AttrMapValue(NoneOrInstanceOfNA_Label, desc='Label to use for N/A values.'),
         )
