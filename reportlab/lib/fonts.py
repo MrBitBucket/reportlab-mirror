@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/fonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.6 2001/03/16 14:51:50 rgbecker Exp $
-__version__=''' $Id: fonts.py,v 1.6 2001/03/16 14:51:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.7 2001/04/23 13:09:14 rgbecker Exp $
+__version__=''' $Id: fonts.py,v 1.7 2001/04/23 13:09:14 rgbecker Exp $ '''
 import string, sys, os
 ###############################################################################
 #	A place to put useful font stuff
@@ -71,33 +71,3 @@ def tt2ps(fn,b,i):
 	if _tt2ps_map.has_key(K):
 		return _tt2ps_map[K]
 	raise "Can't map PS font", fn
-
-#this maps fontnames to the equivalent filename root.
-_font2fnrMap={
-	'symbol':					'Sy______',
-	'zapfdingbats':				'Zd______',
-	'helvetica':				'_a______',
-	'helvetica-bold':			'_ab_____',
-	'helvetica-boldoblique':	'_abi____',
-	'helvetica-oblique':		'_ai_____',
-	'times-bold':				'_eb_____',
-	'times-bolditalic':			'_ebi____',
-	'times-italic':				'_ei_____',
-	'times-roman':				'_er_____',
-	'courier-bold':				'cob_____',
-	'courier-boldoblique':		'cobo____',
-	'courier':					'com_____',
-	'courier-oblique':			'coo_____',
-	}
-
-def _findFNR(fontName):
-	return _font2fnrMap[string.lower(fontName)]
-
-def findT1File(fontName,ext='.pfb'):
-	from reportlab.rl_config import T1SearchPath
-	assert T1SearchPath!=[]
-	n = _findFNR(fontName)+ext
-	for d in T1SearchPath:
-		f = os.path.join(d,n)
-		if os.path.isfile(f): return f
-	return None
