@@ -233,6 +233,7 @@ class ParaParser(xmllib.XMLParser):
 		frag = ParaFrag()
 		frag.sub = 0
 		frag.super = 0
+		frag.rise = 0
 		frag.fontName, frag.bold, frag.italic = ps2tt(style.fontName)
 		frag.fontSize = style.fontSize
 		frag.underline = 0
@@ -256,6 +257,13 @@ class ParaParser(xmllib.XMLParser):
 		if frag.sub == 1 and frag.super == 1:
 			frag.sub = 0
 			frag.super = 0
+
+		if frag.sub:
+			frag.rise = -frag.fontSize*subFraction
+			frag.fontSize = max(frag.fontSize-sizeDelta,3)
+		elif frag.sub:
+			frag.rise = frag.fontSize*superFraction
+			frag.fontSize = min(frag.fontSize-sizeDelta,3)
 
 		if frag.greek: frag.fontName = 'symbol'
 		# bold, italic, and underline
