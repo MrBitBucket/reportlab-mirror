@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.26 2002/03/21 18:10:18 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.26 2002/03/21 18:10:18 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.27 2002/03/22 11:37:58 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.27 2002/03/22 11:37:58 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -157,8 +157,21 @@ def _className(self):
 		return str(self)
 
 class DebugMemo:
-	'''Intended as a simple report back encapsulator'''
-	def __init__(self,fn='rl_dbgpkg.pickle',mode='w',getScript=1,modules=(),**kw):
+	'''Intended as a simple report back encapsulator
+	Typical usages
+	1) To reord error data
+		dbg = DebugMemo(fn='dbgmemo.dbg',myVar=value)
+		dbg.dump()
+
+	2) To show the recorded info
+	dbg = DebugMemo(fn='dbgmemo.dbg',mode='r')
+	dbg.show()
+
+	3) To re-use recorded information
+	dbg = DebugMemo(fn='dbgmemo.dbg',mode='r')
+	myTestFunc(dbg.payload('myVar'))
+	'''
+	def __init__(self,fn='rl_dbgmemo.dbg',mode='w',getScript=1,modules=(),**kw):
 		import time, socket
 		self.fn = fn
 		if mode!='w': return
@@ -170,6 +183,7 @@ class DebugMemo:
 			store['__traceback'] = s.getvalue()
 		cwd=os.getcwd()
 		lcwd = os.listdir(cwd)
+		exed = os.path.abspath(os.path.dirname(sys.argv[0]))
 		store.update({	'gmt': time.asctime(time.gmtime(time.time())),
 						'platform': sys.platform,
 						'version': sys.version,
@@ -179,8 +193,11 @@ class DebugMemo:
 						'argv': sys.argv,
 						'cwd': cwd,
 						'hostname': socket.gethostname(),
-						'listdir': lcwd,
+						'lcwd': lcwd,
 						})
+		if exed!=cwd: store.update({'exed': exed,
+									'lexed': os.listdir(exed),
+									})
 		if hasattr(os,'uname'):
 			store.update({
 				'uname': os.uname(),
@@ -265,7 +282,12 @@ class DebugMemo:
 				'__script': _show_lines,
 				}
 	def show(self):
-		for k, v in self.store.items():
-			if k not in self.specials.keys(): print '%-15s = %s' % (k,v)
-		for k, v in self.store.items():
-			if k in self.specials.keys(): apply(self.specials[k],(self,k,v))
+		K = self.store.keys()
+		K.sort()
+		for k in K:
+			if k not in self.specials.keys(): print '%-15s = %s' % (k,self.store[k])
+		for k in K:
+			if k in self.specials.keys(): apply(self.specials[k],(self,k,self.store[k]))
+
+	def payload(self,name):
+		return self.store['__payload'][name]
