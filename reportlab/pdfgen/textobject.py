@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: textobject.py,v $
+#	Revision 1.9  2000/04/10 14:13:14  rgbecker
+#	cursor move optimisation
+#
 #	Revision 1.8  2000/04/10 09:21:21  andy_robinson
 #	Color methods in textobject and canvas now synchronised.
 #	Added 'verbosity' keyword to allow hiding of 'save myfile.pdf' messages.
-#
+#	
 #	Revision 1.7  2000/03/22 16:29:04  andy_robinson
 #	Added methods for CMYK color model
 #	
@@ -54,7 +57,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: textobject.py,v 1.8 2000/04/10 09:21:21 andy_robinson Exp $ '''
+__version__=''' $Id: textobject.py,v 1.9 2000/04/10 14:13:14 rgbecker Exp $ '''
 __doc__=""" 
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -114,7 +117,7 @@ class PDFTextObject:
         """Moves to a point dx, dy away from the start of the
         current line - NOT from the current point! So if
         you call it in mid-sentence, watch out."""
-        self._code.append('%s %s Td' % (dx, -dy))
+        if dx!=0 or dy!=0: self._code.append('%s %s Td' % (dx, -dy))
 
     def getCursor(self):
         """Returns current text position relative to the last origin."""
