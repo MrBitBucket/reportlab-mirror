@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_paragraphs.py,v 1.9 2001/04/05 09:30:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_paragraphs.py,v 1.10 2001/05/15 07:28:31 rgbecker Exp $
 # tests some paragraph styles
 
 from reportlab.test import unittest
@@ -106,6 +106,12 @@ class ParagraphTestCase(unittest.TestCase):
             Paragraph("""\n\tThis has newlines and tabs on the front but no para tag""", styNormal))
         story.append(
             Paragraph("""  This has spaces on the front but no para tag""", styNormal))
+
+        story.append(Paragraph("""This has <font color=blue>blue text</font> here.""", styNormal))
+        story.append(Paragraph("""This has <i>italic text</i> here.""", styNormal))
+        story.append(Paragraph("""This has <b>bold text</b> here.""", styNormal))
+        story.append(Paragraph("""This has m<super>2</super> a superscript.""", styNormal))
+        story.append(Paragraph("""This has m<sub>2</sub> a subscript.""", styNormal))
 
         template = SimpleDocTemplate('test_paragraphs.pdf',
                                      showBoundary=1)
