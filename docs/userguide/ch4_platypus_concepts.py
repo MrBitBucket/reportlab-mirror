@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch4_platypus_concepts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch4_platypus_concepts.py,v 1.8 2000/10/25 08:57:45 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch4_platypus_concepts.py,v 1.9 2000/12/06 13:55:20 aaron_watters Exp $
 from genuserguide import *
 
 #####################################################################################################3
@@ -158,7 +158,7 @@ eg("""
     aW = 460    # available width and height
     aH = 800
     w,h = P.wrap(aW, aH)    # find required space
-    if w<aW and h<aH:
+    if w<=aW and h<=aH:
         P.drawOn(canv,0,aH)
         aH = aH - h         # reduce the available height
         canv.save()
