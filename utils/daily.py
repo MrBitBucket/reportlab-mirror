@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.15  2000/04/19 14:16:07  rgbecker
+#	Got rid of userArgs
+#
 #	Revision 1.14  2000/04/19 14:08:47  rgbecker
 #	py2pdf additions
-#
+#	
 #	Revision 1.13  2000/04/07 09:58:10  rgbecker
 #	Fixed missing programs problems
 #	
@@ -74,7 +77,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.14 2000/04/19 14:08:47 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.15 2000/04/19 14:16:07 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -189,9 +192,8 @@ def do_zip(d):
 			os.symlink(tarfile,ltarfile)
 
 if __name__=='__main__':
-	userArgs = sys.argv[1:}
-	release = '-release' in userArgs
-	py2pdf = '-py2pdf' in userArgs
+	release = '-release' in sys.argv[1:]
+	py2pdf = '-py2pdf' in sys.argv[1:]
 	if release:
 		if py2pdf:
 			print "Can't have -release and -py2pdf options"
