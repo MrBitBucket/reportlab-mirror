@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.31 2001/06/16 00:40:07 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.32 2001/06/18 12:48:06 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -193,7 +193,7 @@ class Shape:
 		# implement this in the descendants as they need the right init methods.
 		raise NotImplementedError, "No copy method implemented for %s" % self.__class__.__name__
 
-	def getProperties(self):
+	def getProperties(self,recur=1):
 		"""Interface to make it easy to extract automatic
 		documentation"""
 

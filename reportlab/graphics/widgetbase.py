@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.24 2001/06/13 06:19:14 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.25 2001/06/18 12:48:06 rgbecker Exp $
 import string
 
 from reportlab.graphics import shapes
@@ -50,7 +50,7 @@ class PropHolder:
 			validateSetattr(self,name,value)
 
 
-	def getProperties(self):
+	def getProperties(self,recur=1):
 		"""Returns a list of all properties which can be edited and
 		which are not marked as private. This may include 'child
 		widgets' or 'primitive shapes'.  You are free to override
@@ -68,9 +68,9 @@ class PropHolder:
 			if name[0:1] <> '_':
 				component = getattr(self, name)
 
-				if isValidChild(component):
+				if recur and isValidChild(component):
 					# child object, get its properties too
-					childProps = component.getProperties()
+					childProps = component.getProperties(recur=recur)
 					for (childKey, childValue) in childProps.items():
 						#key might be something indexed like '[2].fillColor'
 						#or simple like 'fillColor'; in the former case we
@@ -205,16 +205,16 @@ class TypedPropertyCollection(PropHolder):
 	def __len__(self):
 		return len(self._children.keys())
 		
-	def getProperties(self):
+	def getProperties(self,recur=1):
 		# return any children which are defined and whatever
 		# differs from the parent
 		props = {}
 
-		for (key, value) in self._value.getProperties().items():
+		for (key, value) in self._value.getProperties(recur=recur).items():
 			props['%s' % key] = value
 
 		for idx in self._children.keys():
-			childProps = self._children[idx].getProperties()
+			childProps = self._children[idx].getProperties(recur=recur)
 			for (key, value) in childProps.items():
 				parentValue = getattr(self, key)
 				if parentValue <> value:
