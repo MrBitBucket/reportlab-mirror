@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPDF.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.23 2003/07/01 11:56:59 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.24 2003/11/20 17:09:42 rgbecker Exp $
 # renderPDF - draws Drawings onto a canvas
 """Usage:
     import renderpdf
@@ -9,7 +9,7 @@
 Execute the script to see some test drawings.
 changed
 """
-__version__=''' $Id: renderPDF.py,v 1.23 2003/07/01 11:56:59 johnprecedo Exp $ '''
+__version__=''' $Id: renderPDF.py,v 1.24 2003/11/20 17:09:42 rgbecker Exp $ '''
 
 from reportlab.graphics.shapes import *
 from reportlab.pdfgen.canvas import Canvas
@@ -183,7 +183,9 @@ class _PDFRenderer(Renderer):
                     x = x - textLen/2
                 else:
                     raise ValueError, 'bad value for textAnchor '+str(text_anchor)
-            self._canvas.addLiteral('BT 1 0 0 1 %0.2f %0.2f Tm (%s) Tj ET' % (x, y, self._canvas._escape(text)))
+            t = self._canvas.beginText(x,y)
+            t.textLine(text)
+            self._canvas.drawText(t)
 
     def drawPath(self, path):
         from reportlab.graphics.shapes import _renderPath
@@ -282,6 +284,7 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config.showBoundary, autoSize=1):
         y = y - d.height
         draw(d, c, 80, y, showBoundary=showBoundary)
 
+    c.showPage()
     c.save()
     if sys.platform=='mac' and not hasattr(fn, "write"):
         try:
@@ -346,6 +349,7 @@ def test():
         y = y - drawing.height
         draw(drawing, c, 80, y)
         i = i + 1
+    if y!=740: c.showPage()
 
     c.save()
     print 'saved renderPDF.pdf'
