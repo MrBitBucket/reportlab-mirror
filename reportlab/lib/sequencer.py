@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/sequencer.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/sequencer.py,v 1.13 2003/10/27 11:50:07 rgbecker Exp $
-__version__=''' $Id: sequencer.py,v 1.13 2003/10/27 11:50:07 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/sequencer.py,v 1.14 2003/12/15 15:34:04 dragan1 Exp $
+__version__=''' $Id: sequencer.py,v 1.14 2003/12/15 15:34:04 dragan1 Exp $ '''
 """This module defines a single public class, Sequencer, which aids in
 numbering and formatting lists."""
 #
@@ -81,7 +81,7 @@ class _Counter:
             counter.reset()
         return v
 
-    def this(self):
+    def _this(self):
         return self._value
 
     def nextf(self):
@@ -89,7 +89,7 @@ class _Counter:
         return self._formatter(self.next())
 
     def thisf(self):
-        return self._formatter(self.this())
+        return self._formatter(self._this())
 
     def chain(self, otherCounter):
         if not otherCounter in self._resets:
@@ -139,12 +139,12 @@ class Sequencer:
             self._counters[counter] = cnt
             return cnt
 
-    def this(self, counter=None):
+    def _this(self, counter=None):
         """Retrieves counter value but does not increment. For
         new counters, sets base value to 1."""
         if not counter:
             counter = self._defaultCounter
-        return self._getCounter(counter).this()
+        return self._getCounter(counter)._this()
 
     def next(self, counter=None):
         """Retrieves the numeric value for the given counter, then
@@ -211,7 +211,7 @@ class Sequencer:
         print 'Sequencer dump:'
         for (key, counter) in counters:
             print '    %s: value = %d, base = %d, format example = %s' % (
-                key, counter.this(), counter._base, counter.thisf())
+                key, counter._this(), counter._base, counter.thisf())
 
 
 """Your story builder needs to set this to"""
