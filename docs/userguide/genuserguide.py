@@ -32,6 +32,9 @@
 #
 ###############################################################################
 #   $Log: genuserguide.py,v $
+#   Revision 1.15  2000/07/03 16:03:31  andy_robinson
+#   Changes to heading structure
+#
 #   Revision 1.14  2000/07/03 15:50:31  andy_robinson
 #   Pushed down most existing lessons one level; added
 #   functions heading1..heading3 for building story
@@ -76,7 +79,7 @@
 #   Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #   initial checkin. user guide generation framework.
 #   
-__version__=''' $Id: genuserguide.py,v 1.14 2000/07/03 15:50:31 andy_robinson Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.15 2000/07/03 16:03:31 andy_robinson Exp $ '''
 
 
 __doc__ = """
@@ -103,6 +106,9 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.sequencer import getSequencer
 import examples
+
+
+
 
 from reportlab.lib.corp import ReportLabLogo
 LOGO = ReportLabLogo(0.25*inch, 0.25*inch, inch, 0.75*inch)
@@ -189,6 +195,14 @@ H2 = styleSheet['Heading2']
 H3 = styleSheet['Heading3']
 B = styleSheet['BodyText']
 Comment = styleSheet['Comment']
+
+#set up numbering
+seq = getSequencer()
+seq.setFormat('Chapter','1')
+seq.setFormat('Section','1')
+seq.setFormat('Appendix','A')
+seq.chain('Chapter','Section')
+
 
 if _oldStyle:
     lessonnamestyle = ParagraphStyle("lessonname", parent=H2)
@@ -321,11 +335,15 @@ title("ReportLab User Guide")
 
 todo("""To-do items to authors, or points under discussion,
 appear in italics like this.""")
+todo("")
 todo("""The examples should go in slightly smaller boxes,
 centred in the frame, with a 'Figure 1.2...' style caption
 beneath them.  We can just scale things down a little.
 A Figure widget can be found in platdemos.py; they should
 draw inside that.""")
+todo("")
+todo("""Sequencer is post-incrementing chapters, so all
+section numbers are getting a chapter number one too high!""")
 
 
 heading1("Introduction")
