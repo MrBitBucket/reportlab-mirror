@@ -98,11 +98,10 @@ class RenderSvgAxesTestCase(unittest.TestCase):
         "Test two strings in drawing."
 
         path = "svgout/axestest0.svg"
-        import renderSVG3
         from reportlab.graphics.charts.axes import XCategoryAxis
 
         d = XCategoryAxis().demo()
-        renderSVG3.drawToFile(d, path)
+        renderSVG.drawToFile(d, path)
 
 
 
