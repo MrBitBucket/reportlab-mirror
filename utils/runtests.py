@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/runtests.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/runtests.py,v 1.15 2000/11/08 10:54:40 andy_robinson Exp $
-__version__=''' $Id: runtests.py,v 1.15 2000/11/08 10:54:40 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/utils/runtests.py,v 1.16 2001/03/26 12:22:23 rgbecker Exp $
+__version__=''' $Id: runtests.py,v 1.16 2001/03/26 12:22:23 rgbecker Exp $ '''
 '''
 script for testing ReportLab
 '''
@@ -39,13 +39,12 @@ def find_py_files(d):
 	return L
 
 def find_executable_py_files(d):
-	prog=re.compile('^((( |\t)*if( |\t)+__name__( |\t)*==( |\t)*(\'|\")__main__(\'|\")( |\t)*:)|#REPORTLAB_TEST_SCRIPT)( |\t)*$')
+	nprog = re.compile('#( |\t)*no(run|)test(s|)( |\t)*$',re.M|re.I)
+	prog=re.compile('.*^((( |\t)*if( |\t)+__name__( |\t)*==( |\t)*(\'|\")__main__(\'|\")( |\t)*:)|#REPORTLAB_TEST_SCRIPT)( |\t)*$',re.M)
 	L=[]
 	for n in find_py_files(d):
-		for l in open(n,'r').readlines():
-			if prog.match(l) is not None:
-				L.append(n)
-				break
+		l = open(n,'r').read()
+		if prog.search(l) and not nprog.search(l): L.append(n)
 	return L
 
 def do_tests(d,cyc,prof,timing):
