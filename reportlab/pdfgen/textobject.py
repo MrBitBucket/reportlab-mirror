@@ -303,26 +303,23 @@ class PDFTextObject:
 
     def _formatText(self, text):
         "Generates PDF text output operator(s)"
-        #convert to current doc encoding
-        #print '_formatText',repr(text),'as',self._canvas._fontencoding,'->',
-        text = self._canvas._convertText(text)
-        #print repr(text)
+        canv = self._canvas
         if self._dynamicFont:
             #it's a truetype font and should be utf8.  If an error is raised,
-            
             results = []
             font = pdfmetrics.getFont(self._fontname)
-            stuff = font.splitString(text, self._canvas._doc)
+            stuff = font.splitString(text, canv._doc,encoding=canv.encoding)
             for subset, chunk in stuff:
                 if subset != self._curSubset:
-                    pdffontname = font.getSubsetInternalName(subset, self._canvas._doc)
+                    pdffontname = font.getSubsetInternalName(subset, canv._doc)
                     results.append("%s %s Tf %s TL" % (pdffontname, fp_str(self._fontsize), fp_str(self._leading)))
                     self._curSubset = subset
-                chunk = self._canvas._escape(chunk)
+                chunk = canv._escape(chunk)
                 results.append("(%s) Tj" % chunk)
             return string.join(results, ' ')
         else:
-            text = self._canvas._escape(text)
+            #convert to current doc encoding and escape
+            text = canv._escape(canv._convertText(text))
             return "(%s) Tj" % text
 
     def _textOut(self, text, TStar=0):
