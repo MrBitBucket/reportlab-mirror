@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/frames.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.19 2003/02/02 08:37:33 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.20 2003/05/01 22:46:17 andy_robinson Exp $
 
-__version__=''' $Id: frames.py,v 1.19 2003/02/02 08:37:33 andy_robinson Exp $ '''
+__version__=''' $Id: frames.py,v 1.20 2003/05/01 22:46:17 andy_robinson Exp $ '''
 
 __doc__="""
 """
@@ -63,6 +63,12 @@ class Frame:
         self.__dict__['_rightPadding'] = rightPadding
         self.__dict__['_topPadding'] = topPadding
 
+        # these two should NOT be set on a frame.
+        # they are used when Indenter flowables want
+        # to adjust edges e.g. to do nested lists
+        self._leftExtraIndent = 0.0
+        self._rightExtraIndent = 0.0
+        
         # if we want a boundary to be shown
         self.showBoundary = showBoundary
 
@@ -95,6 +101,9 @@ class Frame:
         self._y = self._y2 - self._topPadding
         self._atTop = 1
 
+    def _getAvailableWidth(self):
+        return self._aW - self._leftExtraIndent - self._rightExtraIndent
+    
     def _add(self, flowable, canv, trySplit=0):
         """ Draws the flowable at the current position.
         Returns 1 if successful, 0 if it would not fit.
@@ -108,7 +117,7 @@ class Frame:
         h = y - p - s
         if h>0:
             flowable.canv = canv #so they can use stringWidth etc
-            w, h = flowable.wrap(self._aW, h)
+            w, h = flowable.wrap(self._getAvailableWidth(), h)
             del flowable.canv
         else:
             return 0
@@ -122,11 +131,11 @@ class Frame:
             #if ((h > self._aH and not trySplit) or w > self._aW):
             if (not rl_config.allowTableBoundsErrors) and (h > self._aH and not trySplit):
                 raise "LayoutError", "Flowable %s (%sx%s points) too large for frame (%sx%s points)." % (
-                    flowable.__class__, w,h, self._aW,self._aH)
+                    flowable.__class__, w,h, self._getAvailableWidth(),self._aH)
             return 0
         else:
             #now we can draw it, and update the current point.
-            flowable.drawOn(canv, self._x, y, _sW=self._aW-w)
+            flowable.drawOn(canv, self._x + self._leftExtraIndent, y, _sW=self._getAvailableWidth()-w)
             y = y - flowable.getSpaceAfter()
             if y<>self._y: self._atTop = 0
             self._y = y

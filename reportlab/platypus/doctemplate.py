@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.61 2003/02/02 08:46:47 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.62 2003/05/01 22:46:17 andy_robinson Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.61 2003/02/02 08:46:47 andy_robinson Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.62 2003/05/01 22:46:17 andy_robinson Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -137,6 +137,21 @@ class _FrameBreak(ActionFlowable):
 FrameBreak = _FrameBreak('frameEnd')
 PageBegin = ActionFlowable('pageBegin')
 
+class Indenter(ActionFlowable):
+    """Increases or decreases left and right margins of frame.
+
+    This allows one to have a 'context-sensitive' indentation
+    and makes nested lists way easier.
+    """    
+
+    def __init__(self, left=0, right=0):
+        self.left = left
+        self.right = right
+
+    def apply(self, doc):
+        doc.frame._leftExtraIndent = doc.frame._leftExtraIndent + self.left
+        doc.frame._rightExtraIndent = doc.frame._rightExtraIndent + self.right
+        
 
 class NextPageTemplate(ActionFlowable):
     """When you get to the next page, use the template specified (change to two column, for example)  """
@@ -290,7 +305,10 @@ class BaseDocTemplate:
         self._onProgress = None
         self._flowableCount = 0  # so we know how far to go
 
-
+        #context sensitive margins - set by story, not from outside
+        self._leftExtraIndent = 0.0
+        self._rightExtraIndent = 0.0
+        
         self._calc()
         self.afterInit()
 
@@ -374,11 +392,17 @@ class BaseDocTemplate:
         if f._atTop:
             if self.showBoundary or self.frame.showBoundary:
                 self.frame.drawBoundary(self.canv)
+        f._leftExtraIndent = self._leftExtraIndent
+        f._rightExtraIndent = self._rightExtraIndent
 
     def handle_frameEnd(self,resume=0):
         ''' Handles the semantics of the end of a frame. This includes the selection of
             the next frame or if this is the last frame then invoke pageEnd.
         '''
+        
+        self._leftExtraIndent = self.frame._leftExtraIndent
+        self._rightExtraIndent = self.frame._rightExtraIndent
+
         if hasattr(self,'_nextFrameIndex'):
             frame = self.pageTemplate.frames[self._nextFrameIndex]
             del self._nextFrameIndex
