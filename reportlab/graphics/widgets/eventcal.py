@@ -1,16 +1,17 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/eventcal.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/eventcal.py,v 1.2 2003/04/01 07:17:15 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/eventcal.py,v 1.3 2003/04/01 09:13:42 andy_robinson Exp $
 # Event Calendar widget
 # author: Andy Robinson
 """This file is a 
 """
-__version__=''' $Id: eventcal.py,v 1.2 2003/04/01 07:17:15 andy_robinson Exp $ '''
+__version__=''' $Id: eventcal.py,v 1.3 2003/04/01 09:13:42 andy_robinson Exp $ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *
 from reportlab.lib.attrmap import *
 from reportlab.graphics.shapes import Line, Rect, Polygon, Drawing, Group, String, Circle, Wedge
+from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics import renderPDF
 
@@ -119,8 +120,9 @@ class EventCalendar(Widget):
         return y
             
 
-    def getTalkRect(self, startTime, duration, trackId):
+    def getTalkRect(self, startTime, duration, trackId, text):
         "Return shapes for a specific talk"
+        g = Group()
         y_bottom = self.scaleTime(startTime + duration)
         y_top = self.scaleTime(startTime)
         y_height = y_top - y_bottom
@@ -135,9 +137,21 @@ class EventCalendar(Widget):
             x = self._colLeftEdges[trackId]
             width = self._colWidths[trackId]
 
+        lab = Label()
+        lab.setText(text)
+        lab.setOrigin(x + 0.5*width, y_bottom+0.5*y_height)
+        lab.boxAnchor = 'c'
+        lab.width = width
+        lab.height = y_height
+        lab.fontSize = 6
+
         r = Rect(x, y_bottom, width, y_height, fillColor=colors.cyan)
+        g.add(r)
+        g.add(lab)
+
+        #now for a label        
         # would expect to color-code and add text
-        return r
+        return g
             
     def draw(self):
         self.computeSize()
@@ -159,8 +173,9 @@ class EventCalendar(Widget):
 
         for talk in self._talksVisible:
             (title, speaker, trackId, day, start, duration) = talk
-            talkShapes = self.getTalkRect(start, duration, trackId) 
-            g.add(talkShapes)
+            r = self.getTalkRect(start, duration, trackId, title + '\n' + speaker) 
+            g.add(r)
+
 
         return g
     
