@@ -11,7 +11,7 @@ Translated by Samuel Butler
 ----------------------------------------------------------------------
 
 BOOK I
-<bullet indent=-18><font name=courier size=13 color=blue>I</fontt></bullet><font color=green><b><i>Tell</i></b></font> me, O muse, of that ingenious hero who travelled far and wide
+<bullet indent=-18><font name=courier size=13 color=blue>I</font></bullet><font color=green><b><i>Tell</i></b></font> me, O muse, of that ingenious hero who travelled far and wide
  a b c &amp;| &amp; | <b>A</b>' <b>A</b> ' after he had sacked the famous town of <font color=red size=12><b>Troy</b></font>. Many cities did he visit,
 and many were the nations with whose manners and customs he was acquainted;
 moreover he suffered much by sea while trying to save his own life
