@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPDF.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.8 2001/05/23 16:46:51 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.9 2001/06/11 07:52:09 andy_robinson Exp $
 # renderPDF - draws Drawings onto a canvas
 """Usage:
     import renderpdf
@@ -240,17 +240,28 @@ class GraphicsFlowable(Flowable):
     def draw(self):
         draw(self.drawing, self.canv, 0, 0)
 
-def drawToFile(d,fn,msg, showBoundary=1):
+def drawToFile(d,fn,msg, showBoundary=1, autoSize=1):
+    """Makes a one-page PDF with just the drawing.
+    
+    If autoSize=1, the PDF will be the same size as
+    the drawing; if 0, it will place the drawing on
+    an A4 page with a title above it - possibly overflowing
+    if too big."""
     c = Canvas(fn)
     c.setFont('Times-Roman', 36)
     c.drawString(80, 750, msg)
-
-    #print in a loop, with their doc strings
-    c.setFont('Times-Roman', 12)
-    y = 740
-    i = 1
-    y = y - d.height
-    draw(d, c, 80, y, showBoundary=showBoundary)
+    c.setTitle(msg)
+        
+    if autoSize:
+        c.setPageSize((d.width, d.height))
+        draw(d, c, 0, 0)
+    else:
+    #show with a title
+        c.setFont('Times-Roman', 12)
+        y = 740
+        i = 1
+        y = y - d.height
+        draw(d, c, 80, y, showBoundary=showBoundary)
 
     c.save()
 

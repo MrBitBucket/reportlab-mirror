@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.14 2001/05/22 12:18:19 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.15 2001/06/11 07:52:09 andy_robinson Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -49,10 +49,10 @@ from reportlab.graphics.charts.textlabels import Label
 
 class BarChartProperties(PropHolder):
     _attrMap = AttrMap(
-        strokeColor = AttrMapValue(isColor),
-        fillColor = AttrMapValue(isColor),
+        strokeColor = AttrMapValue(isColorOrNone),
+        fillColor = AttrMapValue(isColorOrNone),
         strokeWidth = AttrMapValue(isNumber),
-		)
+        )
 
 
 # Bar chart classes.
