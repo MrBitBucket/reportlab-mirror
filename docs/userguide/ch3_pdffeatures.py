@@ -33,8 +33,86 @@ disc("""PDF supports internal hyperlinks.  There is a very wide
     range of link types, destination types and events which
     can be triggered by a click.  At the moment we just
     support the basic ability to jump from one part of a document
-    to another.  """)
-todo("code example here...")
+    to another.  The bookmark methods define a destination that is the endpoint
+    of a jump.""")
+#todo("code example here...")
+
+eg("""
+ canvas.bookmarkPage(name)
+ canvas.bookmarkHorizontalAbsolute(name, yhorizontal)""")
+ 
+disc("""
+    The $bookmarkPage$ method bookmarks the entire page.
+    After jumping to an endpoint defined by $bookmarkPage$ the
+    PDF browser will display the whole page on the screen.""")
+    
+disc("""
+    By contrast, $bookmarkHorizontalAbsolute$ defines a destination
+    associated with a horizontal position on a page.  When the PDF browser
+    jumps to a destination defined by $bookmarkHorizontalAbsolute$ the
+    screen will show a part of the page with the horizontal line at
+    ^y=$yhorizontal$^ near the top, omitting parts of the rest of the page
+    if appropriate.
+""")
+
+pencilnote()
+
+disc("""
+<i>Note:</i> The horizontal position $yhorizontal$ must be specified in terms
+of the <i>default user space</i>.  In particular $bookmarkHorizontalAbsolute$
+ignores any modified geometric transform in effect in the canvas graphics state.
+""")
+
+eg("""
+ canvas.linkAbsolute(contents, destinationname, Rect=None, addtopage=1, name=None, **kw)
+ """)
+ 
+disc("""
+    The $linkAbsolute$ method defines a starting point for a jump.  When the user
+    is browsing the generated document using a dynamic viewer (such as Acrobat Reader)
+    when the mouse is clicked when the pointer is within the rectangle specified
+    by $Rect$ the viewer will jump to the endpoint associated with $destinationname$.
+    As in the case with $bookmarkHorizontalAbsolute$ the rectangle $Rect$ must be
+    specified in terms of the default user space.  The $contents$ parameter specifies
+    a chunk of text which displays in the viewer if the user left-clicks on the region.
+""")
+
+disc("""
+The rectangle $Rect$ must be specified in terms of a tuple ^(x1,y1,x2,y2)^ identifying
+the lower left and upper right points of the rectangle in default user space.
+""")
+
+disc("""
+For example the code
+""")
+
+eg("""
+    canvas.bookmarkHorizontalAbsolute("Meaning_of_life", 5*inch)
+""")
+
+disc("""
+defines horizontal location on the currently drawn page with the identifier
+$Meaning_of_life$.  And the invocation
+""")
+
+eg("""
+ canvas.linkAbsolute("Find the Meaning of Life", "Meaning_of_life", 
+                     (inch, inch, 6*inch, 2*inch))
+""")
+
+disc("""
+By default during interactive viewing a rectangle appears around the
+link.
+Use the keyword argument $Border='[0 0 0]'$ to
+suppress the visible rectangle around the during viewing link.
+For example
+""")
+
+eg("""
+ canvas.linkAbsolute("Meaning of Life", "Meaning_of_life", 
+                     (inch, inch, 6*inch, 2*inch), Border='[0 0 0]')
+""")
+
 
 heading2("Outline Trees")
 disc("""Acrobat Reader has a navigation page which can hold a
@@ -75,8 +153,22 @@ if paragraph.style == 'Heading1':
     key = 'ch%d' % self.chapterNo
     self.canv.bookmarkPage(key)
     self.canv.addOutlineEntry(paragraph.getPlainText(),
+                                            key, 0, 0)
     """)
     
 heading2("Page Transition Effects")
 
 
+eg("""
+ canvas.setPageTransition(self, effectname=None, duration=1, 
+                        direction=0,dimension='H',motion='I')
+                        """)
+                        
+disc("""
+The $setPageTransition$ method specifies how one page will be replaced with
+the next.  By setting the page transition effect to "dissolve" for example
+the current page will appear to melt away when it is replaced by the next
+page during interactive viewing.  These effects are useful in spicing up
+slide presentations, mong other places.
+Please see the reference manual for more detail on how to use this method.
+""")
