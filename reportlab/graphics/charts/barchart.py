@@ -124,6 +124,25 @@ class VerticalBarGroupFormatter(Widget):
 class HorizontalBarGroupFormatter(VerticalBarGroupFormatter):
     orientation = "horizontal"
 
+class LabelledVerticalBarGroupFormatter(Widget):
+    orientation = "vertical"
+    _attrMap = {
+        "colors": isColorSequence,
+        "x": isNumber,
+        "y": isNumber,
+        "delta": isNumber,
+        #"barWidth": isNumber,
+        "bars": None, # fix this
+        }
+    def __init__(self):
+        self.colors = defaultColors
+        self.x = self.y = 0
+        self.delta = 15
+        #self.barWidth = 10
+        self.bars = TypedPropertyCollection(BarFormatter)
+        self.bars.orientation = self.orientation
+        self.bars.width = 10
+
 class VerticalBarStack(VerticalBarGroup):
     def getformatter(self):
         return VerticalBarStackFormatter()
@@ -279,17 +298,22 @@ class LabelFormatter(Widget):
                 anchor = "start"
         else:
             raise ValueError, "bad orientation %s" % orientation
-        R = String(upperleftx, upperlefty, text)
-        R.textAnchor = anchor
-        if self.color is not None:
-            R.fillColor = self.color
-        elif self.defaultColor is not None:
-            R.fillColor = self.defaultColor
-        if self.size is not None:
-            R.fontSize = self.size
-        if self.font is not None:
-            R.fontName = self.font
-        return [R]
+        textlist = string.split(text, "\n")
+        result = []
+        for text1 in textlist:
+            R = String(upperleftx, upperlefty, text1)
+            upperlefty = upperlefty-self.size*1.1 # XXX this should be an adjustable parameter
+            R.textAnchor = anchor
+            if self.color is not None:
+                R.fillColor = self.color
+            elif self.defaultColor is not None:
+                R.fillColor = self.defaultColor
+            if self.size is not None:
+                R.fontSize = self.size
+            if self.font is not None:
+                R.fontName = self.font
+            result.append(R)
+        return result
 
 
 class VerticalLabelGroup(Widget):
@@ -366,6 +390,8 @@ class Swatches(Widget):
         "dx": isNumber, "dy": isNumber,
         "columnMaximum": isNumber,
         "alignment": OneOf(("left", "right")), # align text on the left or right
+        "fontName": isString,
+        "fontSize": isNumber,
         "colorNamePairs": None, # fix this
         }
     def __init__(self):
@@ -374,6 +400,8 @@ class Swatches(Widget):
         self.deltax = 75; self.deltay = 20
         self.dx = self.dy = 10
         self.columnMaximum = 3
+        self.fontName="Helvetica"; self.fonbtSize=10
+        self.fontSize = 10
         from reportlab.lib.colors import red, blue, green, pink, yellow
         self.colorNamePairs = [ (red, "red"), (blue, "blue"), (green, "green"), (pink, "pink"), (yellow, "yellow") ]
     def draw(self):
@@ -397,6 +425,8 @@ class Swatches(Widget):
                 C = Rect(thisx-dx,thisy,dx,dy)
             else: raise ValueError, "bad alignment"
             C.fillColor = c
+            T.fontName = self.fontName
+            T.fontSize = self.fontSize
             G.add(T); G.add(C)
             if count>=self.columnMaximum:
                 count = 0
@@ -416,6 +446,8 @@ class VScale(Widget):
         "nLabels": isNumber, # the maximum number of labels to use
         "labelFormat": isString,
         "extraOffset": isNumber,
+        "font": isString,
+        "fontSize": isNumber,
         # XXX add color, line style, font stuff... etc....
         }
     def __init__(self):
@@ -425,6 +457,8 @@ class VScale(Widget):
         self.nLabels = 4
         self.labelFormat = "%5.2f"
         self.extraOffset = 15
+        self.font = "Helvetica"
+        self.fontSize = 10
     def factor(self):
         "return the scaling factor for points from domain space to canvas space"
         return self.length*1.0/(self.maximum - self.minimum)
@@ -451,20 +485,22 @@ class VScale(Widget):
         # the cross lines and labels
         lineposition = startpoint - self.minimum
         factor = self.factor()
-        print "factor is", factor
+        #print "factor is", factor
         while lineposition+self.minimum<self.maximum:
             text = string.strip(fmt % (lineposition+self.minimum))
             clineposition = factor * lineposition
-            print "lineposition, clineposition", lineposition, clineposition
+            #print "lineposition, clineposition", lineposition, clineposition
             linedata.append( (0, clineposition, self.width, clineposition) )
             textdata.append( (0, clineposition, text) )
             lineposition = lineposition + delta
-        print "done with lines"
+        #print "done with lines"
         if orientation=="vertical":
             for (x1, y1, x2, y2) in linedata:
                 G.add(Line(x+x1, y+y1, x+x2, y+y2))
             for (x1, y1, t) in textdata:
                 S = String(x+x1-self.extraOffset, y+y1, t)
+                S.fontName = self.font
+                S.fontSize = self.fontSize
                 S.textAnchor = "end"
                 G.add(S)
         elif orientation=="horizontal":
@@ -511,11 +547,125 @@ def scaleParameters(x,y,maxlabels):
     (below2, remainder2) = divmod(remainder, delta)
     startpoint = below*orderofmagnitude + (below2+1)*delta
     return (delta, startpoint)
+
+def dd(__parent_dictionary__=None, **kw):
+    result = {}
+    if __parent_dictionary__ is not None:
+        result.update(__parent_dictionary__)
+    result.update(kw)
+    return result
     
+class HScaledBarChart(Widget):
+    orientation = "horizontal"
+    _attrmap = dd(
+        x=isNumber, y=isNumber,
+        barVertical=isNumber, # vertical space allowed for all bars
+        fontSize=isNumber,
+        #barWidth=isNumber,
+        delta=isNumber,
+        #maxLabels=isNumber,
+        titleText=isString,
+        titlex=isNumber, titley=isNumber, 
+        title=None, #TextWidget,
+        ruler=None, #HRuler,
+        bars=None, #VBarGroup,
+        scale=None, #VScale,
+        labels=None, #HLabelSequence,
+        data=None
+        ) 
+    def __init__(self):
+        self.titleText = "Fund"
+        if self.orientation=="horizontal":
+            self.title = LabelFormatter()
+            self.ruler = HorizontalAxis()
+            self.bars = VerticalBarGroup()
+            self.scale = VScale()
+            self.labels = HorizontalLabelGroup()
+        else:
+            self.title = LabelFormatter()
+            self.ruler = VerticalAxis()
+            self.bars = HorizontalBarGroup()
+            self.scale = HScale()
+            self.labels = VerticalLabelGroup()
+        self.x = 50; self.y = 30
+        self.scale.nLabels = 4
+        self.scale.labelFormat = "%d"
+        self.scale.extraOffset = 5
+        self.bars.format.bars.width = 20; #self.bars.delta = 25
+        self.title.size = 6
+        self.title.extraOffset = 0
+        self.title.orientation = "vertical" # ie, center it :)
+        #self.barWidth = 20; self.barSpacing = 5;
+        self.delta = 25
+        self.barVertical = 40
+        self.titlex = 100; self.titley = 100
+        #self.labels.y = 65
+        self.labels.format.labels.extraOffset = -10
+        self.fontSize = 6
+        self.ruler.tickStart = -3; self.ruler.tickEnd = 0
+        self.data = [ ("Jan\n99", 23),
+             ("Feb\n99", 31),
+             ("Mar\n99", 69.2),
+             ("Apr\n99", 58),
+        ]
+
+    def draw(self):
+        (self.scale.x, self.scale.y) = (self.ruler.x, self.ruler.y) = (self.bars.format.x, self.bars.format.y) = \
+                             (self.x, self.y)
+        self.ruler.firstTick = 0
+        self.ruler.delta = self.delta
+        self.scale.minimum = 0
+        if self.orientation=="horizontal":
+            self.labels.format.y = self.y
+            self.labels.format.x = self.x + self.bars.format.bars.width/2.0
+        else:
+            self.labels.format.y = self.y - self.bars.format.bars.width/2.0
+            self.labels.format.x = self.x
+        self.bars.format.delta = self.labels.format.delta = self.delta
+        self.labels.format.labels.size = self.scale.fontSize = self.fontSize
+        labeltexts = []
+        values = []
+        for (t, v) in self.data:
+            labeltexts.append(t)
+            values.append(v)
+        mvalue = max(values)
+        self.scale.maximum = mvalue
+        self.ruler.length = self.scale.width = self.delta * len(self.data)
+        self.scale.length = self.barVertical
+        # XXXX this should probably be 
+        converter = self.barVertical *1.0/mvalue
+        cvalues = []
+        for v in values:
+            cvalues.append(converter*v)
+        self.bars.data = cvalues
+        self.labels.texts = labeltexts
+        self.labels.offsets = [-1.5*self.fontSize] # 1.5 below the bars (should be parameter)
+        G = Group()
+        m = self.title.materialize(self.titleText, 0, (self.titlex, self.titley), 0, 0)
+        for x in ([self.scale.draw(), self.ruler.draw(), self.bars.draw(), self.labels.draw()] + m):
+            G.add(x)
+        return G
+    
+class VScaledBarChart(HScaledBarChart):
+    orientation = "vertical"
     
 def test():
     fn = "barchart.pdf"
     c = Canvas(fn)
+    d = Drawing(400,200)
+    x = 25
+    for B in (HScaledBarChart,VScaledBarChart,):
+        print B
+        pc = B()
+        pc.x = x
+        x = x+200
+        d.add(pc, 'chart1')
+    c.setFont('Times-Roman', 20)
+    c.drawString(100, 720, "bar chart")
+    c.setFont('Times-Roman', 12)
+    #BUG - currently the drawing gets the most recently used font as its default.
+    d.drawOn(c, 100, 500)
+    c.showPage()
     d = Drawing(400,200)
     x = 25
     for B in (HorizontalBarGroup, VerticalBarGroup):
