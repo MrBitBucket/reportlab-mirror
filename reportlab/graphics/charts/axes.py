@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.82 2003/07/30 18:43:51 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.83 2003/08/27 14:07:49 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.82 2003/07/30 18:43:51 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.83 2003/08/27 14:07:49 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -52,7 +52,7 @@ from reportlab.graphics.charts.utils import nextRoundNumber
 def _findMinMaxValue(V, x, default, func, special=None):
     if type(V[0][0]) in (TupleType,ListType):
         if special:
-            f=lambda T,x=x,special=special: special(T,x,func)
+            f=lambda T,x=x,special=special,func=func: special(T,x,func)
         else:
             f=lambda T,x=x: T[x]
         V=map(lambda e,f=f: map(f,e),V)
