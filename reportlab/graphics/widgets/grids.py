@@ -22,7 +22,9 @@ def frange(start, end=None, inc=None):
     L = []
     while 1:
         next = start + len(L) * inc
-        if next >= end:
+        if inc > 0 and next >= end:
+            break
+        elif inc < 0 and next <= end:
             break
         L.append(next)
         
