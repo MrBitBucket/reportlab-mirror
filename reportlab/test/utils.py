@@ -80,11 +80,21 @@ class GlobDirectoryWalker:
     "A forward iterator that traverses files in a directory tree."
 
     def __init__(self, directory, pattern='*'):
-        self.stack = [directory]
-        self.pattern = pattern
-        self.files = []
         self.index = 0
-
+        self.pattern = pattern
+        directory.replace('/',os.sep)
+        if os.path.isdir(directory):
+            self.stack = [directory]
+            self.files = []
+        else:
+            from reportlab.lib.utils import isCompactDistro, __loader__, _RL_DIR
+            if not isCompactDistro() or not __loader__ or not directory.startswith(_RL_DIR):
+                raise ValueError('"%s" is not a directory' % directory)
+            self.directory = directory[len(__loader__.archive)+len(os.sep):]
+            pfx = self.directory+os.sep
+            n = len(pfx)
+            self.files = map(lambda x: x[n:],filter(lambda x: x.startswith(pfx),__loader__._files.keys()))
+            self.stack = []
 
     def __getitem__(self, index):
         while 1:
@@ -101,11 +111,12 @@ class GlobDirectoryWalker:
             else:
                 # got a filename
                 fullname = os.path.join(self.directory, file)
+                print fullname
                 if os.path.isdir(fullname) and not os.path.islink(fullname):
                     self.stack.append(fullname)
                 if fnmatch.fnmatch(file, self.pattern):
+                    print 'returning',fullname
                     return fullname
-
 
     def filterFiles(self, folder, files):
         "Filter hook, overwrite in subclasses as needed."

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pyfiles.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pyfiles.py,v 1.10 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pyfiles.py,v 1.11 2004/03/22 13:21:06 rgbecker Exp $
 """Tests performed on all Python source files of the ReportLab distribution.
 """
 
@@ -49,38 +49,6 @@ def unique(seq):
         return string.join(seq2, '')
     else:
         return seq2
-
-
-# This class is more or less the same as one suggested by /F.
-
-class GlobDirectoryWalker:
-    "A forward iterator that traverses a directory tree."
-
-    def __init__(self, directory, pattern='*'):
-        self.stack = [directory]
-        self.pattern = pattern
-        self.files = []
-        self.index = 0
-
-
-    def __getitem__(self, index):
-        while 1:
-            try:
-                file = self.files[self.index]
-                self.index = self.index + 1
-            except IndexError:
-                # pop next directory from stack
-                self.directory = self.stack.pop()
-                self.files = os.listdir(self.directory)
-                self.index = 0
-            else:
-                # got a filename
-                fullname = os.path.join(self.directory, file)
-                if os.path.isdir(fullname) and not os.path.islink(fullname):
-                    self.stack.append(fullname)
-                if fnmatch.fnmatch(file, self.pattern):
-                    return fullname
-
 
 class SelfTestCase(unittest.TestCase):
     "Test unique() function."
@@ -165,7 +133,6 @@ class FirstLineTestCase(SecureTestCase):
 
         return paths
 
-
     def test1(self):
         "Test if all Python files have a Unix-like first line."
 
@@ -181,14 +148,12 @@ class FirstLineTestCase(SecureTestCase):
 
         file.close()
 
-
 def makeSuite():
     suite = makeSuiteForClasses(SelfTestCase, AsciiFileTestCase, FilenameTestCase)
     if sys.platform[:4] != 'java':
         loader = unittest.TestLoader()
         suite.addTest(loader.loadTestsFromTestCase(FirstLineTestCase))
     return suite
-
 
 #noruntests
 if __name__ == "__main__":
