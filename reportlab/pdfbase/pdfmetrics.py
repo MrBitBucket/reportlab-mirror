@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.68 2004/03/09 23:24:34 andy_robinson Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.69 2004/03/23 17:35:42 rgbecker Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -23,6 +23,7 @@ import string, os
 from types import StringType, ListType, TupleType
 from reportlab.pdfbase import _fontdata
 from reportlab.lib.logger import warnOnce
+from reportlab.lib.utils import rl_isfile, open_and_read, open_and_readlines 
 from reportlab.rl_config import defaultEncoding
 
 standardFonts = _fontdata.standardFonts
@@ -57,7 +58,7 @@ def parseAFMFile(afmFileName):
     options for what data you wwanted, and preserve the
     order."""
 
-    lines = open(afmFileName, 'r').readlines()
+    lines = open_and_readlines(afmFileName, 'r')
     if len(lines)<=1:
         #likely to be a MAC file
         lines = string.split(lines,'\r')
@@ -163,7 +164,7 @@ class TypeFace:
         if hasattr(self,'pfbFileName'):
             r_basename = os.path.splitext(self.pfbFileName)[0]
             for e in possible_exts:
-                if os.path.isfile(r_basename + e):
+                if rl_isfile(r_basename + e):
                     return r_basename + e
         try:
             r = _fontdata.findT1File(self.name)
@@ -173,7 +174,7 @@ class TypeFace:
                 if string.lower(ext) == '.pfb':
                     for e in possible_exts:
                         pfb = os.path.splitext(afm)[0] + e
-                        if os.path.isfile(pfb):
+                        if rl_isfile(pfb):
                             r = pfb
                         else:
                             r = None
@@ -451,8 +452,8 @@ class EmbeddedType1Face(TypeFace):
     def _loadGlyphs(self, pfbFileName):
         """Loads in binary glyph data, and finds the four length
         measurements needed for the font descriptor"""
-        assert os.path.isfile(pfbFileName), 'file %s not found' % pfbFileName
-        d = open(pfbFileName, 'rb').read()
+        assert rl_isfile(pfbFileName), 'file %s not found' % pfbFileName
+        d = open_and_read(pfbFileName, 'b')
         s1, l1 = _pfbCheck(0,d,PFB_ASCII,pfbFileName)
         s2, l2 = _pfbCheck(l1,d,PFB_BINARY,pfbFileName)
         s3, l3 = _pfbCheck(l2,d,PFB_ASCII,pfbFileName)
@@ -604,8 +605,8 @@ def getTypeFace(faceName):
             if afm:
                 for e in ('.pfb', '.PFB'):
                     pfb = os.path.splitext(afm)[0] + e
-                    if os.path.isfile(pfb): break
-                assert os.path.isfile(pfb), 'file %s not found!' % pfb
+                    if rl_isfile(pfb): break
+                assert rl_isfile(pfb), 'file %s not found!' % pfb
                 face = EmbeddedType1Face(afm, pfb)
                 registerTypeFace(face)
                 return face
