@@ -6,8 +6,9 @@
 
     options:
      -h  or  --help    print help (this message)
-     -                 read from stdin, write to stdout (disabled)
-     --stdout          read from files, write to stdout (disabled)
+     -                 read from stdin (writes to stdout)
+     --stdout          read from file, write to stdout
+                         (restricted to first file only)
      --title=<title>   specify title
      --config=<file>   read configuration options from <file> 
      --input=<type>    set input file type
@@ -48,17 +49,17 @@
  
     * Uses Just van Rossum's PyFontify version 0.3.3 to tag Python  
       scripts. You can get it via his homepage on the starship:
-          http://starship.skyport.net/crew/just 
+          http://starship.python.net/crew/just 
 
     * Uses the ReportLab library version 0.92 (from 2000-04-10) to 
-      generate PDF. You can get it from ReportLab:
+      generate PDF. You can get it without charge from ReportLab:
           http://www.reportlab.com
 
     * Parts of this code still borrow heavily from Marc-Andre 
       Lemburg's py2html who has kindly given permission to 
       include them in py2pdf. Thanks, M.-A.!
-
 """
+
 __copyright__ = """
 ----------------------------------------------------------------------
 (c) Copyright by Dinu C. Gherman, 2000  (gherman@europemail.com)
@@ -84,7 +85,7 @@ __copyright__ = """
 
 __version__ = '0.5'
 __author__  = 'Dinu C. Gherman'
-__date__    = '2000-05-03'
+__date__    = '2000-05-08'
 __url__     = 'http://starship.python.net/crew/gherman/programs/py2pdf'
 
 
@@ -212,6 +213,24 @@ class PaperFormat:
             self.setLandscape(landscape)
         
 
+    def __repr__(self):
+        """Return a string representation of ourself.
+
+        The returned string can also be used to recreate 
+        the same PaperFormat object again.
+        """
+        
+        if self.name != 'custom':
+            nos = `self.name`
+        else:
+            nos = `self.size`
+            
+        format = "PaperFormat(nameOrSize=%s, landscape=%d)"
+        tuple = (nos, self.landscape)
+        
+        return format % tuple
+
+
     def setSize(self, size=None):
         "Set explicit paper size."
         
@@ -288,24 +307,6 @@ class PaperFormat:
                 self.name = 'custom'
         
 
-    def __repr__(self):
-        """Return a string representation of ourself.
-
-        The returned string can also be used to recreate 
-        the same PaperFormat object again.
-        """
-        
-        if self.name != 'custom':
-            nos = `self.name`
-        else:
-            nos = `self.size`
-            
-        format = "PaperFormat(nameOrSize=%s, landscape=%d)"
-        tuple = (nos, self.landscape)
-        
-        return format % tuple
-
-
 class Options:
     """Container class for options from command line and config files.
 
@@ -337,6 +338,12 @@ class Options:
         self.setDefaults()
 
 
+    def __getattr__(self, name):
+        "Turn attribute access into dictionary lookup."
+        
+        return self.pool.get(name)
+        
+    
     def setDefaults(self):
         "Set default options."
 
@@ -363,13 +370,8 @@ class Options:
         # Add a default 'real' paper format object.
         pf = PaperFormat(self.paperFormat, self.landscape)
         self.pool.update({'realPaperFormat' : pf})
+        self.pool.update({'files' : []})
 
-    
-    def __getattr__(self, name):
-        "Turn attribute access into dictionary lookup."
-        
-        return self.pool.get(name)
-        
     
     def display(self):
         "Display all current option names and values."
@@ -504,7 +506,9 @@ class Options:
             
         elif name == 'stdout':
             self.pool['stdout'] = 1
-            print `name`, `self.pool['stdout']`
+
+        elif name == 'files':
+            self.pool['files'] = value
 
         else:
             # Set the value found or 1 for options without values.
@@ -522,7 +526,7 @@ class Options:
 
 ### Layouting classes.
 
-class Layouter:
+class PDFLayouter:
     """A class to layout a simple PDF document.
     
     This is intended to help generate PDF documents where all pages 
@@ -566,16 +570,24 @@ class Layouter:
     def setPDFMetaInfo(self):
         "Set PDF meta information."
 
-        if self.srcPath == sys.stdout:
-            filename = 'stdout'
+        o = self.options
+        c = self.canvas
+        c.setAuthor('py2pdf %s' % __version__)        
+        c.setSubject('')
+
+        # Set filename.
+        filename = ''
+        
+        # For stdin use title option or empty...
+        if self.srcPath == sys.stdin:
+            if o.title:
+                filename = o.title
+        # otherwise take the input file's name.
         else:
             path = os.path.basename(self.srcPath)
-            filename = self.options.title or path
-        
-        c = self.canvas    
-        c.setAuthor('py2pdf %s' % __version__)        
+            filename = o.title or path
+
         c.setTitle(filename)
-        c.setSubject('')
 
     
     def setFillColorAndFont(self, color, font):
@@ -598,8 +610,17 @@ class Layouter:
         self.pageNum = 0 
         self.numLines = numLines
         self.srcPath = srcPath
-        self.pdfPath = os.path.splitext(srcPath)[0] + '.pdf'
-        
+
+        # Set output filename (stdout if desired).        
+        o = self.options
+        if o.stdout:
+            self.pdfPath = sys.stdout
+        else:
+            if srcPath != sys.stdin:
+                self.pdfPath = os.path.splitext(srcPath)[0] + '.pdf'
+            else:
+                self.pdfPath = sys.stdout
+
 
     def beginDocument(self):
         """Things to do when a new document should be started.
@@ -647,7 +668,11 @@ class Layouter:
             tm, bm, lm, rm = self.frame
             self.text = self.canvas.beginText(lm, tm - o.fontSize)
             self.setFillColorAndFont(self.currColor, self.currFont)
-        else:        
+        else:
+            # Fail if stdout desired (with multiPage).
+            if o.stdout:
+                raise "IOError", "Can't create multiple pages on stdout!"
+                
             # Create canvas with a modified path name.
             base, ext = os.path.splitext(self.pdfPath)
             newPath = "%s-%d%s" % (base, self.pageNum, ext)            
@@ -667,7 +692,7 @@ class Layouter:
             self.text = self.canvas.beginText(lm, tm - o.fontSize)
             self.setFillColorAndFont(self.currColor, self.currFont)
 
-        self.drawPageDecoration()
+        self.putPageDecoration()
 
 
     def beginLine(self, wrapped=0):
@@ -884,7 +909,7 @@ class Layouter:
         self.endLine()
         
     
-    def drawPageDecoration(self):
+    def putPageDecoration(self):
         "Draw some decoration on each page."
         
         # Use some abbreviations.
@@ -900,7 +925,7 @@ class Layouter:
         # Background color.
         c.setFillColor(o.bgCol)
         pf = o.realPaperFormat.size
-        c.rect(0, 0, pf[0], pf[1], 0, 1)
+        c.rect(0, 0, pf[0], pf[1], stroke=0, fill=1)
     
         # Header.
         c.setFillColorRGB(0, 0, 0)
@@ -923,7 +948,7 @@ class Layouter:
         # c.rect(lm, bm, rm - lm, tm - bm)
                 
 
-class PDFLayouter (Layouter):
+class PythonPDFLayouter (PDFLayouter):
     """A class to layout a simple multi-page PDF document.
     """
 
@@ -1069,7 +1094,7 @@ class PDFLayouter (Layouter):
     ### End of API.
 
 
-class PDFEmptyLayouter (PDFLayouter):
+class EmptyPythonPDFLayouter (PythonPDFLayouter):
     """A PDF layout with no decoration and no margins.
     
     The main frame extends fully to all paper edges. This is
@@ -1086,7 +1111,7 @@ class PDFEmptyLayouter (PDFLayouter):
         self.frame = height, 0, 0, width
             
     
-    def drawPageDecoration(self):
+    def putPageDecoration(self):
         "Draw no decoration at all."
 
         pass
@@ -1094,8 +1119,8 @@ class PDFEmptyLayouter (PDFLayouter):
 
 ### Pretty-printing classes.
 
-class PrettyPrinter:
-    """Generic Pretty Printer class.
+class PDFPrinter:
+    """Generic PDF Printer class.
     
     Does not do much, but write a PDF file created from 
     any ASCII input file.
@@ -1104,14 +1129,17 @@ class PrettyPrinter:
     outFileExt = '.pdf'
     
 
-    def __init__(self):
+    def __init__(self, options=None):
         "Initialisation."
     
         self.data = None     # Contains the input file.
         self.inPath = None   # Path of input file.
+        self.Layouter = PDFLayouter
 
-        self.options = Options()
-        self.Layouter = Layouter
+        if type(options) != type(None):
+            self.options = options
+        else:
+            self.options = Options()
 
     
     ### I/O.
@@ -1119,18 +1147,17 @@ class PrettyPrinter:
     def readFile(self, path):
         "Read the content of a file."
 
-        if type(path) == type(''):
-            self.inPath = path
-            f = open(self.inPath)
-        else:
+        if path == sys.stdin:
             f = path
-            self.inPath = '-'
+        else:
+            f = open(path)
         
-        self.data = f.read()
+        self.inPath = path
+        
+        data = f.read()
+        o = self.options
+        self.data = re.sub('\t', ' '*o.tabSize, data)                
         f.close()
-
-        # Also need access to options to do this:
-        # self.data = re.sub('\t', ' '*o.tabSize, self.data)                
         
 
     def formatLine(self, line, eol=0):
@@ -1169,10 +1196,13 @@ class PrettyPrinter:
     def writeFile(self, data, inPath=None, outPath=None):
         "Write some data into a file."
 
-        if not outPath:
-            path = os.path.splitext(self.inPath)[0]
-            self.outPath = path + self.outFileExt
-   
+        if inPath == sys.stdin:
+            self.outPath = sys.stdout            
+        else:
+            if not outPath:
+                path = os.path.splitext(self.inPath)[0]
+                self.outPath = path + self.outFileExt
+
         self.writeData(data, inPath, outPath or self.outPath)
         
 
@@ -1183,7 +1213,7 @@ class PrettyPrinter:
         self.writeFile(self.data, inPath, outPath)
      
 
-class PDFPrettyPrinter (PrettyPrinter):
+class PythonPDFPrinter (PDFPrinter):
     """A class to nicely format tagged Python source code.
     
     """
@@ -1197,18 +1227,20 @@ class PDFPrettyPrinter (PrettyPrinter):
     outFileExt = '.pdf'
 
 
-    def __init__(self):
+    def __init__(self, options=None):
         "Initialisation, calling self._didInit() at the end."
 
-        self.tagFunc = loadFontifier()
+        if type(options) != type(None):
+            self.options = options
+        else:
+            self.options = Options()
+        
         self._didInit()
         
 
     def _didInit(self):
         "Post-Initialising"
 
-        self.options = Options()
-                
         # Define regular expression patterns.
         s = self
         comp = re.compile
@@ -1240,7 +1272,7 @@ class PDFPrettyPrinter (PrettyPrinter):
             (s2Match, 'TripleStringEnd'), 
             (aMatch, 'Rest'))
 
-        self.Layouter = PDFLayouter
+        self.Layouter = PythonPDFLayouter
 
         # Load fontifier.
         self.tagFunc = loadFontifier(self.options)
@@ -1267,7 +1299,6 @@ class PDFPrettyPrinter (PrettyPrinter):
         "Format a Python identifier."
 
         before, id, after = groups
-        
         self.formatLine(before, -1)
         self.layouter.addIdent(id)
         self.formatLine(after, eol)
@@ -1277,7 +1308,6 @@ class PDFPrettyPrinter (PrettyPrinter):
         "Format a Python parameter."
 
         before, param, after = groups
-        
         self.formatLine(before, -1)
         self.layouter.addParam(before)
         self.formatLine(after, eol)
@@ -1346,9 +1376,7 @@ class PDFPrettyPrinter (PrettyPrinter):
         # Loop over all tagged source lines, dissect them into
         # Python entities ourself and let the layouter do the 
         # rendering.
-        splitCodeLines = string.split(srcCodeLines, '\n')
-        
-        ### Must also handle the case of outPath being sys.stdout!!
+        splitCodeLines = string.split(srcCodeLines, '\n')        
         l.begin(inPath, len(splitCodeLines))
         l.beginDocument()
         
@@ -1454,7 +1482,7 @@ def main(cmdline):
         print __doc__
         sys.exit()
         
-    # Apply modest consistency check and exit if needed.
+    # Apply modest consistency checks and exit if needed.
     cmdStr = string.join(cmdline, ' ')
     find = string.find
     if find(cmdStr, 'paperSize') >= 0 and find(cmdStr, 'paperFormat') >= 0:
@@ -1462,49 +1490,36 @@ def main(cmdline):
         details = detail + "but not both!"
         raise 'ValueError', details
 
+    # Create PDF converter and pass options to it.
     if options.input:
         input = string.lower(options.input)
         
         if input == 'python':
-            PP = PDFPrettyPrinter
+            P = PythonPDFPrinter
         elif input == 'ascii':
-            PP = PrettyPrinter
+            P = PDFPrinter
         else:
             details = "Input file type must be 'python' or 'ascii'."
             raise 'ValueError', details
     
     else:
-        PP = PDFPrettyPrinter
+        P = PythonPDFPrinter
 
-    # Create converting object.
-    pp = PP()
-    pp.options = options
-    
+    p = P(options)
+
+    # Display options if needed.    
     if options.v or options.verbose:
-        pp.options.display()
+        pass # p.options.display()
 
     # Start working.
-
-#    if '-' in options: # Not tested.
-#        pp.process(sys.stdin, sys.stdout)
-#        sys.exit()
-
-    if options.stdout:
-        print "stdout !!!"
-        filebreak = '-'*72
-        
-        for f in options.files:
-            try:
-                if len(options.files) > 1:
-                    print filebreak
-                    print 'File:', f
-                    print filebreak
-                pp.process(f, sys.stdout)
-            except IOError:
-                pass
+    verbose = options.v or options.verbose
     
+    if options.stdout:
+        if len(options.files) > 1 and verbose:
+            print "Warning: will only convert first file on command line."
+        f = options.files[0]
+        p.process(f, sys.stdout)    
     else:
-        verbose = options.v or options.verbose
         if verbose:
             print 'py2pdf: working on:'
         
@@ -1512,7 +1527,10 @@ def main(cmdline):
             try:
                 if verbose: 
                     print '  %s' % f
-                pp.process(f)
+                if f != '-':
+                    p.process(f)
+                else:
+                    p.process(sys.stdin, sys.stdout)
             except IOError:
                 if verbose: 
                     print '(IOError!)',
