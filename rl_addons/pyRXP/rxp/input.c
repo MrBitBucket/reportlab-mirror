@@ -122,7 +122,6 @@ void SourceClose(InputSource source)
     Fclose(source->file16);
     if(source->entity->type == ET_external)
 	Free(source->line);
-	FreeEntity(source->entity);
     Free(source);
 }
 

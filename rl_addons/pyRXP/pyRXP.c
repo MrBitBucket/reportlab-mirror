@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.5 2002/04/18 17:34:56 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.6 2002/04/18 18:20:31 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.5 2002/04/18 17:34:56 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.6 2002/04/18 18:20:31 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -591,6 +591,7 @@ static PyObject* pyRXPParser_parse(pyRXPParserObject* xself, PyObject* args, PyO
 	f = MakeFILE16FromString(src,srcLen,"r");
 	source = SourceFromFILE16(PyString_AsString(self->srcName),f);
 	retVal = ProcessSource(p,source);
+	FreeEntity(source->entity);
 	Fclose(Stderr);
 	FreeDtd(p->dtd);
 	FreeParser(p);
