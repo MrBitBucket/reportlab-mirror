@@ -40,6 +40,7 @@ def makeDistancesList(list):
     d = []
     for i in range(len(list[:-1])):
         d.append(list[i+1] - list[i])
+
     return d
 
 
@@ -48,11 +49,11 @@ class Grid(Widget):
 
     The grid contains an outer border rectangle, and stripes
     inside which can be drawn with lines and/or as solid tiles.
-    The darwing order is outer rectangle, then lines and tiles.
+    The drawing order is: outer rectangle, then lines and tiles.
 
     The stripes' width is indicated as 'delta'. The sequence of
     stripes can have an offset named 'delta0'. Both values need
-    to be positive.
+    to be positive!
     """
 
     _attrMap = AttrMap(
@@ -282,7 +283,7 @@ class DoubleGrid(Widget):
         self.grid1 = g1
 
 
-##    # This give an AttributeError:
+##    # This gives an AttributeError:
 ##    #   DoubleGrid instance has no attribute 'grid0'
 ##    def __setattr__(self, name, value):
 ##        if name in ('x', 'y', 'width', 'height'):
@@ -320,7 +321,8 @@ class ShadedRect(Widget):
 
     Colors are interpolated linearly between 'fillColorStart'
     and 'fillColorEnd', both of which appear at the margins.
-    If 'numShades' is set to one only 'fillColorStart' is used.    
+    If 'numShades' is set to one, though, only 'fillColorStart'
+    is used.    
     """
 
     _attrMap = AttrMap(
@@ -445,7 +447,9 @@ class ShadedRect(Widget):
         return group
 
 
-def test():
+def test1():
+    "Generate a PDF document full of uncommented samples."
+    
     D = Drawing(450, 650)
 
     d = 80
@@ -589,12 +593,95 @@ def test():
                 sr.demo()
                 D.add(sr)
 
-    renderPDF.drawToFile(D, 'grids.pdf', 'grids.py')
-    print 'wrote file: grids.pdf'
+    renderPDF.drawToFile(D, 'grids1.pdf', 'grids1.py')
+    print 'wrote file: grids1.pdf'
+
+
+def test2():
+    "Generate a PDF document with some uncommented samples."
+
+    D = Drawing(450, 650)
+
+    d = 80
+    s = 50
+    
+    for row in range(2):
+        y = 530 - row*d
+        if row == 0:
+            for col in range(4):
+                x = 20 + col*d
+                g = DoubleGrid()
+                g.x = x
+                g.y = y
+                g.width = s
+                g.height = s
+
+                # This should be done implicitely...
+                g.grid0.x = x
+                g.grid0.y = y
+                g.grid1.x = x
+                g.grid1.y = y
+                g.grid0.width = s
+                g.grid0.height = s
+                g.grid1.width = s
+                g.grid1.height = s
+
+                if col == 0:
+                    pass
+                elif col == 1:
+                    g.grid0.delta0 = 10
+                elif col == 2:
+                    g.grid0.delta0 = 5
+                elif col == 3:
+                    g.grid0.deltaSteps = [5, 10, 20, 30]
+                g.demo()
+                D.add(g)
+        elif row == 1:
+            for col in range(4):
+                x = 20 + col*d 
+                g = DoubleGrid()
+                g.x = x
+                g.y = y
+                g.width = s
+                g.height = s
+
+                # This should be done implicitely...
+                g.grid0.x = x
+                g.grid0.y = y
+                g.grid1.x = x
+                g.grid1.y = y
+                g.grid0.width = s
+                g.grid0.height = s
+                g.grid1.width = s
+                g.grid1.height = s
+
+                if col == 0:
+                    g.grid0.useRects = 0
+                    g.grid0.useLines = 1
+                    g.grid1.useRects = 0
+                    g.grid1.useLines = 1
+                elif col == 1:
+                    g.grid0.useRects = 1
+                    g.grid0.useLines = 1
+                    g.grid1.useRects = 0
+                    g.grid1.useLines = 1
+                elif col == 2:
+                    g.grid0.useRects = 1
+                    g.grid0.useLines = 0
+                    g.grid1.useRects = 0
+                    g.grid1.useLines = 1
+                elif col == 3:
+                    g.grid0.useRects = 1
+                    g.grid0.useLines = 0
+                    g.grid1.useRects = 1
+                    g.grid1.useLines = 0
+                g.demo()
+                D.add(g)
+
+    renderPDF.drawToFile(D, 'grids2.pdf', 'grids2.py')
+    print 'wrote file: grids2.pdf'
     
 
 if __name__=='__main__':
-##    print frange(10)
-##    print frange(10, 20)
-##    print frange(10, 20, 1.5)
-    test()
+    test1()
+    test2()
