@@ -31,16 +31,20 @@
 #
 ###############################################################################
 #	$Log: odyssey.py,v $
+#	Revision 1.4  2000/02/17 02:05:25  rgbecker
+#	Docstring & other fixes
+#
 #	Revision 1.3  2000/02/16 09:42:50  rgbecker
 #	Conversion to reportlab package
-#
+#	
 #	Revision 1.2  2000/02/15 17:55:59  rgbecker
 #	License text fixes
 #	
 #	Revision 1.1.1.1  2000/02/15 15:09:29  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: odyssey.py,v 1.3 2000/02/16 09:42:50 rgbecker Exp $ '''
+__version__=''' $Id: odyssey.py,v 1.4 2000/02/17 02:05:25 rgbecker Exp $ '''
+___doc__=''
 #odyssey.py
 #
 #Demo/benchmark of PDFgen rendering Homer's Odyssey.

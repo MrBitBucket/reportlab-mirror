@@ -1,7 +1,10 @@
 Installation
 ============
 Either unpack reportlab.zip or reportlab.tgz to some directory say
-d:\ReportLab.  Create a .pth file, say reportlab.pth in your Python
+d:\ReportLab. If you can, ensure that the  line terminator style is
+correct for your OS (man zip programs have a text mode option eg -a).
+
+Create a .pth file, say reportlab.pth in your Python
 home directory.  It should have one line:
 d:/ReportLab.
 
@@ -31,3 +34,17 @@ import pdfgen       ->  from reportlab.pdfgen import canvas
 
 import platypus     ->  from report.platypus import layout
                         from report.platypus import tables
+
+Testing
+=======
+You can run all python scripts in directories named test or tests.
+At present there are tests in reportlab/pdfgen/test, reportlab/platypus/test
+and reportlab/demos/tests.
+
+The scripts in other subdirectories of demos are fairly useful.
+
+Other executable scripts are
+	./pdfbase/pdfdoc.py
+	./pdfgen/canvas.py
+	./platypus/layout.py
+	./platypus/tables.py

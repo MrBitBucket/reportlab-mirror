@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: testplatypus.py,v $
+#	Revision 1.6  2000/02/17 02:09:05  rgbecker
+#	Docstring & other fixes
+#
 #	Revision 1.5  2000/02/16 14:13:00  rgbecker
 #	Final Fixes for Linux
-#
+#	
 #	Revision 1.4  2000/02/16 09:42:50  rgbecker
 #	Conversion to reportlab package
 #	
@@ -44,10 +47,10 @@
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testplatypus.py,v 1.5 2000/02/16 14:13:00 rgbecker Exp $ '''
+__version__=''' $Id: testplatypus.py,v 1.6 2000/02/17 02:09:05 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
-"""This is not obvious so here's a brief explanation.  This module is both
+__doc__="""This is not obvious so here's a brief explanation.  This module is both
 the test script and user guide for layout.  Each page has two frames on it:
 one for commentary, and one for demonstration objects which may be drawn in
 various esoteric ways.  The two functions getCommentary() and getExamples()

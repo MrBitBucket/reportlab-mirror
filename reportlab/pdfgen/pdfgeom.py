@@ -31,14 +31,17 @@
 #
 ###############################################################################
 #	$Log: pdfgeom.py,v $
+#	Revision 1.4  2000/02/17 02:08:04  rgbecker
+#	Docstring & other fixes
+#
 #	Revision 1.3  2000/02/15 17:55:59  rgbecker
 #	License text fixes
-#
+#	
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfgeom.py,v 1.3 2000/02/15 17:55:59 rgbecker Exp $ '''
-"""
+__version__=''' $Id: pdfgeom.py,v 1.4 2000/02/17 02:08:04 rgbecker Exp $ '''
+__doc__="""
 This module includes any mathematical methods needed for PIDDLE.
 It should have no dependencies beyond the Python library.
 

@@ -32,13 +32,17 @@
 #
 ###############################################################################
 #	$Log: testdemos.py,v $
+#	Revision 1.4  2000/02/17 02:07:23  rgbecker
+#	Docstring & other fixes
+#
 #	Revision 1.3  2000/02/16 09:42:50  rgbecker
 #	Conversion to reportlab package
-#
+#	
 #	Revision 1.2  2000/02/15 17:55:59  rgbecker
 #	License text fixes
 #	
-__version__=''' $Id: testdemos.py,v 1.3 2000/02/16 09:42:50 rgbecker Exp $ '''
+__version__=''' $Id: testdemos.py,v 1.4 2000/02/17 02:07:23 rgbecker Exp $ '''
+__doc__='Test all demos'
 _globals=globals().copy()
 import os, sys
 from reportlab import pdfgen

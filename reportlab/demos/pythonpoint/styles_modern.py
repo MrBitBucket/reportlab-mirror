@@ -31,18 +31,21 @@
 #
 ###############################################################################
 #	$Log: styles_modern.py,v $
+#	Revision 1.4  2000/02/17 02:06:28  rgbecker
+#	Docstring & other fixes
+#
 #	Revision 1.3  2000/02/16 09:42:50  rgbecker
 #	Conversion to reportlab package
-#
+#	
 #	Revision 1.2  2000/02/15 17:55:59  rgbecker
 #	License text fixes
 #	
 #	Revision 1.1.1.1  2000/02/15 15:09:12  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: styles_modern.py,v 1.3 2000/02/16 09:42:50 rgbecker Exp $ '''
+__version__=''' $Id: styles_modern.py,v 1.4 2000/02/17 02:06:28 rgbecker Exp $ '''
 # style_modern.py
-"""This is an example style sheet.  You can create your own, and
+__doc__="""This is an example style sheet.  You can create your own, and
 have them loaded by the presentation.  A style sheet is just a
 dictionary, where they keys are style names and the values are
 layout.ParagraphStyle objects.

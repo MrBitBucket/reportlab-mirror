@@ -31,19 +31,22 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.4  2000/02/17 02:09:05  rgbecker
+#	Docstring & other fixes
+#
 #	Revision 1.3  2000/02/15 17:55:59  rgbecker
 #	License text fixes
-#
+#	
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.3 2000/02/15 17:55:59 rgbecker Exp $ '''
-"""
+__version__=''' $Id: tables.py,v 1.4 2000/02/17 02:09:05 rgbecker Exp $ '''
+__doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
 color and weight of the lines (if any), and the font, alignment and padding of the text.
 """
-import layout
+from reportlab.platypus import layout
 import operator
 
 _stringtype = type('')
@@ -318,7 +321,7 @@ def test():
         ('Key Ring', 0,0,0,0,0,0,1,0,0,0,2,13),
         ('Hats', 893, 912, '1,212', 643, 789, 159, 888, '1,298', 832, 453, '1,344','2,843')
         )
-    doc = layout.SimpleFlowDocument('testtables.pdf', platypus.DEFAULT_PAGE_SIZE, 1)
+    doc = layout.SimpleFlowDocument('testtables.pdf', layout.DEFAULT_PAGE_SIZE, 1)
     styleSheet = layout.getSampleStyleSheet()
     lst = []
     lst.append(layout.Paragraph("Tables", styleSheet['Heading1']))

@@ -31,7 +31,12 @@
 #
 ###############################################################################
 #	$Log: __init__.py,v $
+#	Revision 1.2  2000/02/17 02:03:53  rgbecker
+#	Docstring & other fixes
+#
 #	Revision 1.1  2000/02/16 09:42:49  rgbecker
 #	Conversion to reportlab package
-#
-__version__=''' $Id: __init__.py,v 1.1 2000/02/16 09:42:49 rgbecker Exp $ '''
+#	
+__version__=''' $Id: __init__.py,v 1.2 2000/02/17 02:03:53 rgbecker Exp $ '''
+__doc__="""
+"""

@@ -31,19 +31,23 @@
 #
 ###############################################################################
 #	$Log: stdfonts.py,v $
+#	Revision 1.4  2000/02/17 02:06:28  rgbecker
+#	Docstring & other fixes
+#
 #	Revision 1.3  2000/02/16 09:42:50  rgbecker
 #	Conversion to reportlab package
-#
+#	
 #	Revision 1.2  2000/02/15 17:55:59  rgbecker
 #	License text fixes
 #	
 #	Revision 1.1.1.1  2000/02/15 15:15:57  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: stdfonts.py,v 1.3 2000/02/16 09:42:50 rgbecker Exp $ '''
-# standardfonts.py
-#
-# shows the 14 standard fonts in our encoding
+__version__=''' $Id: stdfonts.py,v 1.4 2000/02/17 02:06:28 rgbecker Exp $ '''
+__doc__="""
+standardfonts.py
+shows the 14 standard fonts in our encoding
+"""
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas

@@ -31,17 +31,20 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.5  2000/02/17 02:08:04  rgbecker
+#	Docstring & other fixes
+#
 #	Revision 1.4  2000/02/16 09:42:50  rgbecker
 #	Conversion to reportlab package
-#
+#	
 #	Revision 1.3  2000/02/15 17:55:59  rgbecker
 #	License text fixes
 #	
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.4 2000/02/16 09:42:50 rgbecker Exp $ '''
-""" 
+__version__=''' $Id: canvas.py,v 1.5 2000/02/17 02:08:04 rgbecker Exp $ '''
+__doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
 foundation for piddlePDF, the PDF back end for PIDDLE.
@@ -85,9 +88,7 @@ from math import sin, cos, tan, pi, ceil
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
-import pdfgeom
-import pathobject
-import textobject
+from reportlab.pdfgen  import pdfgeom, pathobject, textobject
 
 # Robert Kern
 # Constants for closing paths.

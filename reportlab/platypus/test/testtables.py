@@ -32,16 +32,20 @@
 #
 ###############################################################################
 #	$Log: testtables.py,v $
+#	Revision 1.5  2000/02/17 02:09:05  rgbecker
+#	Docstring & other fixes
+#
 #	Revision 1.4  2000/02/16 09:42:50  rgbecker
 #	Conversion to reportlab package
-#
+#	
 #	Revision 1.3  2000/02/15 17:55:59  rgbecker
 #	License text fixes
 #	
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #
-__version__=''' $Id: testtables.py,v 1.4 2000/02/16 09:42:50 rgbecker Exp $ '''
+__version__=''' $Id: testtables.py,v 1.5 2000/02/17 02:09:05 rgbecker Exp $ '''
+__doc__='Test script for reportlab.tables'
 from reportlab.platypus import layout
 from reportlab.platypus import tables
 

@@ -31,17 +31,20 @@
 #
 ###############################################################################
 #	$Log: monterey.py,v $
+#	Revision 1.3  2000/02/17 02:06:28  rgbecker
+#	Docstring & other fixes
+#
 #	Revision 1.2  2000/02/15 17:55:59  rgbecker
 #	License text fixes
-#
+#	
 #	Revision 1.1.1.1  2000/02/15 15:07:38  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: monterey.py,v 1.2 2000/02/15 17:55:59 rgbecker Exp $ '''
-"""This builds the document for my talk at Monterey."""
+__version__=''' $Id: monterey.py,v 1.3 2000/02/17 02:06:28 rgbecker Exp $ '''
+__doc__="""This builds the document for my talk at Monterey."""
 
 from piddle import *
-import platypus
+from reportlab.platypus import layout
 import textcanvas
 import pagesizes
 import pythonpoint_old
@@ -194,7 +197,7 @@ def run():
     a4width, a4height = pagesizes.A4
     mysize = (a4height, a4width)   # flip it to landscape
     
-    doc = platypus.SimpleFlowDocument('monterey.pdf',mysize)
+    doc = layout.SimpleFlowDocument('monterey.pdf',mysize)
     #doc.showBoundary = 1
     doc.leftmargin =  2 * inch  # all default to one inch if not given
     doc.onFirstPage = myPageBorder
