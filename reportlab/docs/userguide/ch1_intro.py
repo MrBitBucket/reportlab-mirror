@@ -182,7 +182,7 @@ latest stable version is also available as just $reportlab.zip$ (or
 $reportlab.tgz$), which is actually a symbolic link to the latest
 numbered version.""")
 
-disc("""We also make nightly snapshots of our CVS
+disc("""We also make nightly snapshots of our SVN
 (version control) tree available.  In
 general, these are very stable because we have a comprehensive test
 suite that all developers can run at any time.
