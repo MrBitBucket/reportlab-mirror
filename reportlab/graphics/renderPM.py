@@ -102,24 +102,12 @@ class _PMRenderer(Renderer):
         c = self._canvas
         if rect.rx == rect.ry == 0:
             #plain old rectangle, draw clockwise (x-axis to y-axis) direction
-            c.pathBegin()
-            c.moveTo(rect.x, rect.y)
-            c.lineTo(rect.x+rect.width, rect.y)
-            c.lineTo(rect.x+rect.width, rect.y + rect.height)
-            c.lineTo(rect.x, rect.y + rect.height)
-            c.pathClose()
+            c.rect(rect.x,rect.y, rect.width, rect.height)
         else:
             c.roundRect(rect.x,rect.y, rect.width, rect.height, rect.rx, rect.ry)
-        c.fillstrokepath()
 
     def drawLine(self, line):
-        c = self._canvas
-        if c.strokeColor is not None:
-            c = self._canvas
-            c.pathBegin()
-            c.moveTo(line.x1,line.y1)
-            c.lineTo(line.x2,line.y2)
-            c.pathStroke()
+        self._canvas.line(line.x1,line.y1,line.x2,line.y2)
 
     def drawImage(self, image):
         if image.path and os.path.exists(image.path):
@@ -241,6 +229,8 @@ class PMCanvas:
     def __init__(self,w,h,dpi=72,bg=0xffffff,configPIL=None):
         '''configPIL dict is passed to image save method'''
         scale = dpi/72.0
+        w = int(w*scale+0.5)
+        h = int(h*scale+0.5)
         self.__dict__['_gs'] = _renderPM.gstate(w,h,bg=bg)
         self.__dict__['_bg'] = bg
         self.__dict__['_baseCTM'] = (scale,0,0,scale,0,0)
@@ -333,7 +323,7 @@ class PMCanvas:
             f.write(pix[o-rowb:o])
         f.write( '\0' * 14 )
 
-    def setFont(self,fontName,fontSize):
+    def setFont(self,fontName,fontSize,leading=None):
         _setFont(self._gs,fontName,fontSize)
 
     def __setattr__(self,name,value):
@@ -342,9 +332,9 @@ class PMCanvas:
     def __getattr__(self,name):
         return getattr(self._gs,name)
 
-    def fillstrokepath(self):
-        self.pathFill()
-        self.pathStroke()
+    def fillstrokepath(self,stroke=1,fill=1):
+        if fill: self.pathFill()
+        if stroke: self.pathStroke()
 
     def _bezierArcSegmentCCW(self, cx,cy, rx,ry, theta0, theta1):
         """compute the control points for a bezier arc with theta1-theta0 <= 90.
@@ -422,6 +412,35 @@ class PMCanvas:
         for ((x1,y1), (x2,y2),(x3,y3)) in ctrlpts:
             self.curveTo(x1,y1,x2,y2,x3,y3)
 
+    def drawCentredString(self, x, y, text, text_anchor='middle'):
+        if self.fillColor is not None:
+            font, font_size = self.fontName, self.fontSize
+            textLen = stringWidth(text, font,font_size)
+            if text_anchor=='end':
+                x = x-textLen
+            elif text_anchor=='middle':
+                x = x - textLen/2
+            self.drawString(x,y,text)
+
+    def drawRightString(self, text, x, y):
+        self.drawCentredString(text,x,y,text_anchor='end')
+
+    def line(self,x1,y1,x2,y2):
+        if self.strokeColor is not None:
+            self.pathBegin()
+            self.moveTo(x1,y1)
+            self.lineTo(x2,y2)
+            self.pathStroke()
+
+    def rect(self,x,y,width,height,stroke=1,fill=1):
+        self.pathBegin()
+        self.moveTo(x, y)
+        self.lineTo(x+width, y)
+        self.lineTo(x+width, y + height)
+        self.lineTo(x, y + height)
+        self.pathClose()
+        self.fillstrokepath(stroke=stroke,fill=fill)
+
     def roundRect(self, x, y, width, height, rx,ry):
         """rect(self, x, y, width, height, rx,ry):
         Draw a rectangle if rx or rx and ry are specified the corners are
@@ -438,6 +457,7 @@ class PMCanvas:
         self.addEllipsoidalArc(x+rx, y2-ry, rx, ry, 90, 180)
         self.addEllipsoidalArc(x+rx, y+ry, rx, ry, 180,  270)
         self.pathClose()
+        self.fillstrokepath()
 
     def circle(self, cx, cy, r):
         "add closed path circle with center cx,cy and axes r: counter-clockwise orientation"
@@ -514,10 +534,15 @@ class PMCanvas:
 
     restoreState = saveState
 
+    # compatibility routines
+    def setLineCap(self,cap):
+        self.lineCap = cap
+
+    def setLineWidth(self,width):
+        self.strokeWidth = width
+
 def drawToPMCanvas(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_):
-    w = int(d.width*dpi/72.0+0.5)
-    h = int(d.height*dpi/72.0+0.5)
-    c = PMCanvas(w, h, dpi=dpi, bg=bg, configPIL=configPIL)
+    c = PMCanvas(d.width, d.height, dpi=dpi, bg=bg, configPIL=configPIL)
     draw(d, c, 0, 0, showBoundary=showBoundary)
     return c
 

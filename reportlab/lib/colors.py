@@ -420,6 +420,7 @@ whitesmoke =    HexColor(0xF5F5F5)
 yellow =    HexColor(0xFFFF00)
 yellowgreen =   HexColor(0x9ACD32)
 fidblue=HexColor(0x3366cc)
+fidlightblue=HexColor("#d6e0f5")
 
 ColorType=type(black)
 
