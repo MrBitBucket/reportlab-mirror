@@ -9,10 +9,13 @@ from reportlab.lib import colors
 from reportlab.pdfbase.pdfmetrics import stringWidth
 
 
-# This was originally written by Aaron (for Pingo, I think).
+# This one was originally written by Aaron (for Pingo, I think).
 
 class Swatches0(Widget):
-    "A very simple legend containing rectangular swatches and strings."
+    """A very simple legend containing rectangular swatches and strings.
+
+    Strings can be nicely aligned left or right to the swatches.
+    """
     
     _attrmap = {
         "x": isNumber,
@@ -28,8 +31,7 @@ class Swatches0(Widget):
         }
 
     def __init__(self):
-        # Lower-left reference point
-        # (should perhaps become upper-left).
+        # Upper-left reference point.
         self.x = 0
         self.y = 0
         # Alginment of text with respect to swatches.
@@ -59,8 +61,10 @@ class Swatches0(Widget):
         widths = []
         for i in range(len(texts)):
             texts[i] = String(0,0, str(texts[i]))
-            widths.append(stringWidth(texts[i].text, texts[i].fontName, texts[i].fontSize))
+            ti = texts[i]
+            widths.append(stringWidth(ti.text, ti.fontName, ti.fontSize))
         maxWidth = max(widths)
+
         return maxWidth
 
 
@@ -77,7 +81,8 @@ class Swatches0(Widget):
             if self.alignment == "left":
                 # align text to left
                 t = String(thisx, thisy, str(name))
-                d = self._calculateMaxWidth(colorNamePairs[columnCount*self.columnMaximum:])
+                j = columnCount*self.columnMaximum
+                d = self._calculateMaxWidth(colorNamePairs[j:])
                 t.x = t.x + d
                 t.textAnchor = "end"
                 r = Rect(thisx+d+self.dxTextSpace,thisy, dx, dy)
@@ -104,6 +109,8 @@ class Swatches0(Widget):
 
 
     def demo(self):
+        "Make sample swatches."
+
         d = Drawing(200, 100)
         
         swatches = Swatches0()
