@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.42 2000/12/13 17:09:55 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.42 2000/12/13 17:09:55 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.43 2000/12/13 23:31:18 aaron_watters Exp $
+__version__=''' $Id: paragraph.py,v 1.43 2000/12/13 23:31:18 aaron_watters Exp $ '''
 from string import split, strip, join
 from operator import truth
 from types import StringType, ListType
@@ -278,6 +278,23 @@ class Paragraph(Flowable):
 	"""
 	def __init__(self, text, style, bulletText = None, frags=None):
 		self._setup(text, style, bulletText, frags, cleanBlockQuotedText)
+
+
+	def __repr__(self):
+		import string
+		n = self.__class__.__name__
+		L = [n+"("]
+		keys = self.__dict__.keys()
+		for k in keys:
+			v = getattr(self, k)
+			rk = repr(k)
+			rv = repr(v)
+			rk = "  "+string.replace(rk, "\n", "\n  ")
+			rv = "    "+string.replace(rv, "\n", "\n    ")
+			L.append(rk)
+			L.append(rv)
+		L.append(") #"+n)
+		return string.join(L, "\n")		
 
 	def _setup(self, text, style, bulletText, frags, cleaner):
 		if frags is None:

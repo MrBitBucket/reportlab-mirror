@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/frames.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.10 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: frames.py,v 1.10 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.11 2000/12/13 23:31:18 aaron_watters Exp $
+__version__=''' $Id: frames.py,v 1.11 2000/12/13 23:31:18 aaron_watters Exp $ '''
 __doc__="""
 """
 _geomAttr=('x1','y1','width','height', 'leftPadding', 'bottomPadding', 'rightPadding', 'topPadding')
@@ -110,7 +110,8 @@ class Frame:
 
 		if y < p:
 			if ((h > self._aH and not trySplit) or w > self._aW):
-				raise "LayoutError", "Flowable (%sx%s points) too large for frame (%sx%s points)." % (w,h, self.aW,self.aH)
+				raise "LayoutError", "Flowable %s (%sx%s points) too large for frame (%sx%s points)." % (
+					flowable.__class__, w,h, self._aW,self._aH)
 			return 0
 		else:
 			#now we can draw it, and update the current point.

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.33 2000/12/13 15:14:22 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.33 2000/12/13 15:14:22 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.34 2000/12/13 23:31:18 aaron_watters Exp $
+__version__=''' $Id: tables.py,v 1.34 2000/12/13 23:31:18 aaron_watters Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -49,6 +49,11 @@ class TableStyle:
 			self._cmds = []
 	def add(self, *cmd):
 		self._cmds.append(cmd)
+	def __repr__(self):
+		L = map(repr, self._cmds)
+		import string
+		L = string.join(L, "  \n")
+		return "TableStyle(\n%s\n) # end TableStyle" % L
 	def getCommands(self):
 		return self._cmds
 
@@ -108,6 +113,15 @@ class Table(Flowable):
 
 		if style:
 			self.setStyle(style)
+	def __repr__(self):
+		"incomplete, but better than nothing"
+		r = self._rowHeights
+		c = self._colWidths
+		cv = self._cellvalues
+		import pprint, string
+		cv = pprint.pformat(cv)
+		cv = string.replace(cv, "\n", "\n  ")
+		return "Table(\n rowHeights=%s,\n colWidths=%s,\n%s\n) # end table" % (r,c,cv)
 
 	def _calc(self):
 		if hasattr(self,'_width'): return
@@ -132,7 +146,7 @@ class Table(Flowable):
 						dW,t = _listCellGeom(v,w,s)
 						dW = dW + s.leftPadding + s.rightPadding
 						if dW>w:
-							raise "LayoutError", "Flowable (%sx%s points) too wide for cell (%sx* points)." % (dW,t,w)
+							raise "LayoutError", "Flowable %s (%sx%s points) too wide for cell (%sx* points)." % (v,dW,t,w)
 					else:
 						if t is not StringType:
 							v = v is None and '' or str(v)

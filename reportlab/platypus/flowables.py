@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.12 2000/11/23 14:01:59 andy_robinson Exp $
-__version__=''' $Id: flowables.py,v 1.12 2000/11/23 14:01:59 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.13 2000/12/13 23:31:18 aaron_watters Exp $
+__version__=''' $Id: flowables.py,v 1.13 2000/12/13 23:31:18 aaron_watters Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -113,6 +113,9 @@ class XBox(Flowable):
 		self.height = height
 		self.text = text
 
+	def __repr__(self):
+		return "XBox(w=%s, h=%s, t=%s)" % (self.width, self.height, self.text)
+
 	def draw(self):
 		self.canv.rect(0, 0, self.width, self.height)
 		self.canv.line(0, 0, self.width, self.height)
@@ -162,6 +165,15 @@ class Preformatted(Flowable):
 		self.style = style
 		self.bulletText = bulletText
 		self.lines = _dedenter(text,dedent)
+
+	def __repr__(self):
+		bT = self.bulletText
+		H = "Preformatted("
+		if bT is not None:
+			H = "Preformatted(bulletText=%s," % repr(bT)
+		import string
+		text = join(self.lines, "\n")
+		return "%s'''\\ \n%s''')" % (H, text)
 
 	def wrap(self, availWidth, availHeight):
 		self.width = availWidth
@@ -253,6 +265,9 @@ class Spacer(Flowable):
 		self.width = width
 		self.height = height
 
+	def __repr__(self):
+		return "Spacer(%s, %s)" % (self.width, self.height)
+
 	def wrap(self, availWidth, availHeight):
 		return (self.width, self.height)
 
@@ -264,6 +279,9 @@ class PageBreak(Spacer):
 	   This works by consuming all remaining space in the frame!"""
 	def __init__(self):
 		pass
+	
+	def __repr__(self):
+		return "PageBreak()"
 
 	def wrap(self, availWidth, availHeight):
 		self.width = availWidth
@@ -274,6 +292,9 @@ class CondPageBreak(Spacer):
 	"""Throw a page if not enough vertical space"""
 	def __init__(self, height):
 		self.height = height
+		
+	def __repr__(self):
+		return "CondPageBreak(%s)" %(self.height,)
 
 	def wrap(self, availWidth, availHeight):
 		if availHeight<self.height:
@@ -287,6 +308,14 @@ class KeepTogether(Flowable):
 			self._flowables = [flowables]
 		else:
 			self._flowables = flowables
+
+	def __repr__(self):
+		f = self._flowables
+		L = map(repr,f)
+		import string
+		L = "\n"+string.join(L, "\n")
+		L = string.replace(L, "\n", "\n  ")
+		return "KeepTogether(%s) # end KeepTogether" % L
 
 	def wrap(self, aW, aH):
 		W = 0
@@ -312,6 +341,8 @@ class Macro(Flowable):
 	access to the canvas through the object 'canvas'"""
 	def __init__(self, command):
 		self.command = command
+	def __repr__(self):
+		return "Macro(%s)" % repr(self.command)
 	def wrap(self, availWidth, availHeight):
 		return (0,0)
 	def draw(self):
