@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.23  2000/10/03 09:19:11  rgbecker
+#	Justified XPreformatteds are OK
+#
 #	Revision 1.22  2000/10/02 13:13:21  rgbecker
 #	Splitting fixes. Mostly caused by XPreformatted not doing it right.
-#
+#	
 #	Revision 1.21  2000/08/25 11:35:37  rgbecker
 #	Further tweaks of XPreformatted
 #	
@@ -98,7 +101,7 @@
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.22 2000/10/02 13:13:21 rgbecker Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.23 2000/10/03 09:19:11 rgbecker Exp $ '''
 import string
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -362,7 +365,7 @@ class Paragraph(Flowable):
 		func = self._get_split_bFragFunc()
 
 		P1=self.__class__(None,style,bulletText=self.bulletText,frags=func(bfrags,0,s))
-		if self.__class__ is Paragraph: P1._JustifyLast = 1
+		P1._JustifyLast = 1
 		if style.firstLineIndent != style.leftIndent:
 			style = deepcopy(style)
 			style.firstLineIndent = style.leftIndent
