@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.87 2003/03/18 00:01:03 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.88 2003/03/19 14:42:11 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.87 2003/03/18 00:01:03 andy_robinson Exp $ '''
+__version__=''' $Id: shapes.py,v 1.88 2003/03/19 14:42:11 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -585,33 +585,13 @@ class Drawing(Group, Flowable):
             renderPDF.drawToFile(self, filename, title, showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
             ext = ext +  '/.pdf'
 
-        if 'gif' in plotMode:
-            from reportlab.graphics import renderPM
-            filename = fnroot+'.gif'
-            if verbose: print "generating GIF file %s" % filename
-            renderPM.drawToFile(self, filename,fmt='GIF',showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
-            ext = ext +  '/.gif'
-
-        if 'png' in plotMode:
-            from reportlab.graphics import renderPM
-            filename = fnroot+'.png'
-            if verbose: print "generating PNG file %s" % filename
-            renderPM.drawToFile(self, filename,fmt='PNG',showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
-            ext = ext +  '/.png'
-
-        if 'tif' in plotMode:
-            from reportlab.graphics import renderPM
-            filename = fnroot+'.tif'
-            if verbose: print "generating TIFF file %s" % filename
-            renderPM.drawToFile(self, filename,fmt='TIFF',showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
-            ext = ext +  '/.tif'
-
-        if 'jpg' in plotMode:
-            from reportlab.graphics import renderPM
-            filename = fnroot+'.jpg'
-            if verbose: print "generating JPG file %s" % filename
-            renderPM.drawToFile(self, filename,fmt='JPEG',showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
-            ext = ext +  '/.jpg'
+        for bmFmt in ['gif','png','tif','jpg']:
+            if bmFmt in plotMode:
+                from reportlab.graphics import renderPM
+                filename = '%s.%s' % (fnroot,bmFmt)
+                if verbose: print "generating %s file %s" % (bmFmt,filename)
+                renderPM.drawToFile(self, filename,fmt=bmFmt,showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
+                ext = ext + '/.' + bmFmt
 
         if 'eps' in plotMode:
             from rlextra.graphics import renderPS_SEP
