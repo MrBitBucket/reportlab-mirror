@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.79 2003/09/17 18:26:20 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.80 2003/09/22 11:06:58 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -9,7 +9,7 @@ vertical versions.
 
 Stacked and percentile bar charts to follow...
 """
-__version__=''' $Id: barcharts.py,v 1.79 2003/09/17 18:26:20 rgbecker Exp $ '''
+__version__=''' $Id: barcharts.py,v 1.80 2003/09/22 11:06:58 rgbecker Exp $ '''
 
 import string, copy
 from types import FunctionType, StringType
@@ -251,8 +251,11 @@ class BarChart(PlotArea):
         reversePlotOrder = self.reversePlotOrder
         for rowNo in range(seriesCount):
             barRow = []
-            xVal = 0.5*groupSpacing+rowNo*bGap
-            if reversePlotOrder: rowNo = seriesCount-1 - rowNo
+            if reversePlotOrder:
+                xVal = seriesCount-1 - rowNo
+            else:
+                xVal = rowNo
+            xVal = 0.5*groupSpacing+xVal*bGap
             for colNo in COLUMNS:
                 datum = data[rowNo][colNo]
 
@@ -382,10 +385,8 @@ class BarChart(PlotArea):
 
     def _makeBars(self,g,lg):
         lenData = len(self.data)
-        reversePlotOrder = self.reversePlotOrder
         bars = self.bars
         for rowNo in range(lenData):
-            if reversePlotOrder: rowNo = lenData-1 - rowNo
             row = self._barPositions[rowNo]
             styleCount = len(bars)
             styleIdx = rowNo % styleCount
