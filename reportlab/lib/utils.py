@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.77 2004/05/23 10:39:30 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.77 2004/05/23 10:39:30 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.78 2004/05/25 21:12:31 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.78 2004/05/25 21:12:31 rgbecker Exp $ '''
 
 import string, os, sys, imp
 from types import *
@@ -135,13 +135,45 @@ try:
     __file__
 except:
     __file__ = sys.argv[0]
+import glob, fnmatch
 try:
     _isFSD = not __loader__
-    _loaderpfxlenR = len(__loader__.archive+os.sep)
-    _loaderpfxlen = _loaderpfxlenR+len(_RL_DIR)-len(__RL_DIR)
+    _archivepfx = __loader__.archive + os.sep
+    _archivedirpfx = os.path.dirname(__loader__.archive) + os.sep
+    _archivepfxlen = len(_archivepfx)
+    _archivedirpfxlen = len(_archivedirpfx)
+    if sys.platform=='win32':
+        def __startswith_rl(fn,_archivepfx=_archivepfx.upper(),_archivedirpfx=_archivedirpfx.upper()):
+            '''if the name starts with a known prefix strip it off'''
+            fn = fn.replace('/',os.sep)
+            if fn.upper().startswith(_archivepfx): return 1,fn[_archivepfxlen:]
+            if fn.upper().startswith(_archivedirpfx): return 1,fn[_archivedirpfxlen:]
+            return 0,fn
+    else:
+        def __startswith_rl(fn):
+            '''if the name starts with a known prefix strip it off'''
+            fn = fn.replace('/',os.sep)
+            if fn.upper().startswith(_archivepfx): return 1,fn[_archivepfxlen:]
+            if fn.startswith(_archivedirpfx): return 1,fn[_archivedirpfxlen:]
+            return 0,fn
+
+    def _startswith_rl(fn):
+        return __startswith_rl(fn)[1]
+
+    def rl_glob(pattern,glob=glob.glob,fnmatch=fnmatch.fnmatch, _RL_DIR=_RL_DIR,pjoin=os.path.join):
+        c, pfn = __startswith_rl(pattern)
+        r = glob(pattern)
+        if c or r==[]:
+            r += map(lambda x,_RL_DIR=_RL_DIR,pjoin=pjoin: pjoin(_RL_DIR,x),filter(lambda x,pattern=pattern,fnmatch=fnmatch: fnmatch(x,pattern),__loader__._files.keys()))
+        return r
 except:
     _isFSD = os.path.isfile(__file__)   #slight risk of wrong path
     __loader__ = None
+    def _startswith_rl(fn):
+        return fn
+    def rl_glob(pattern,glob=glob.glob):
+        return glob(pattern)
+del glob, fnmatch
 _isFSSD = _isFSD and os.path.isfile(os.path.splitext(__file__)[0] +'.py')
 
 def isFileSystemDistro():
@@ -393,34 +425,6 @@ def _className(self):
         return name
     except AttributeError:
         return str(self)
-
-
-import glob, fnmatch
-if sys.platform=='win32':
-    def __startswith_rl(fn,_RL_DIR=_RL_DIR.upper(),__RL_DIR=__RL_DIR.upper()):
-        '''if the name starts with a known prefix strip it off'''
-        fn = fn.replace('/',os.sep)
-        if fn.upper().startswith(_RL_DIR): return 1,fn[_loaderpfxlen:]
-        if fn.upper().startswith(__RL_DIR): return 1,fn[_loaderpfxlenR:]
-        return 0,fn
-else:
-    def __startswith_rl(fn):
-        '''if the name starts with a known prefix strip it off'''
-        fn = fn.replace('/',os.sep)
-        if fn.startswith(_RL_DIR): return 1,fn[_loaderpfxlen:]
-        if fn.startswith(__RL_DIR): return 1,fn[_loaderpfxlenR:]
-        return 0,fn
-
-def _startswith_rl(fn):
-    return __startswith_rl(fn)[1]
-
-def rl_glob(pattern,glob=glob.glob,fnmatch=fnmatch.fnmatch, _RL_DIR=_RL_DIR,pjoin=os.path.join):
-    c, pfn = __startswith_rl(pattern)
-    r = glob(pattern)
-    if c or r==[]:
-        r += map(lambda x,_RL_DIR=_RL_DIR,pjoin=pjoin: pjoin(_RL_DIR,x),filter(lambda x,pattern=pattern,fnmatch=fnmatch: fnmatch(x,pattern),__loader__._files.keys()))
-    return r
-del glob, fnmatch
 
 def open_for_read(name,mode='b'):
     '''attempt to open a file or URL for reading'''
