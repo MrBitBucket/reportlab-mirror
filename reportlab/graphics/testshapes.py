@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/testshapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.13 2001/09/20 17:44:22 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.14 2001/09/25 16:34:03 rgbecker Exp $
 
 # testshapes.py - draws shapes onto a PDF canvas.
 
@@ -354,7 +354,7 @@ def getDrawing11():
 		"Make a smiley data item representation."
 		d = size
 		s = SmileyFace()
-		s.color = color
+		s.fillColor = color
 		s.x = x-d
 		s.y = y-d
 		s.size = d*2
