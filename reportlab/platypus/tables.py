@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.35 2001/03/07 18:57:12 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.35 2001/03/07 18:57:12 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.36 2001/03/19 23:48:00 aaron_watters Exp $
+__version__=''' $Id: tables.py,v 1.36 2001/03/19 23:48:00 aaron_watters Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -40,6 +40,33 @@ class CellStyle(PropertySet):
 		'background': (1,1,1),
 		'valign': 'BOTTOM',
 		}
+
+# experimental replacement
+class CellStyle1(PropertySet):
+	fontname = "Times-Roman"
+	fontsize = 10
+	leading = 12
+	leftPadding = 6
+	rightPadding = 6
+	topPadding = 3
+	bottomPadding = 3
+	firstLineIndent = 0
+	color = colors.black
+	alignment = 'LEFT'
+	background = (1,1,1)
+	valign = "BOTTOM"
+	def __init__(self, name, parent=None):
+		self.name = name
+		if parent is not None:
+			parent.copy(self)
+	def copy(self, result=None):
+		if result is None:
+			result = CellStyle1()
+		for name in dir(self):
+			setattr(result, name, gettattr(self, name))
+		return result
+
+CellStyle = CellStyle1
 
 class TableStyle:
 	def __init__(self, cmds=None):
@@ -97,11 +124,19 @@ class Table(Flowable):
 		self._rowHeights = self._argH = rowHeights
 		self._colWidths = self._argW = colWidths
 		self._cellvalues = data
-		dflt = CellStyle('<default>')
-
-		self._cellStyles = [None]*nrows
+##		dflt = CellStyle('<default>')
+##
+##		self._cellStyles = [None]*nrows
+##		for i in range(nrows):
+##			self._cellStyles[i] = [dflt]*ncols
+		# make unique cell styles for each entry
+		cellrows = []
 		for i in range(nrows):
-			self._cellStyles[i] = [dflt]*ncols
+			cellcols = []
+			for j in range(ncols):
+				cellcols.append(CellStyle(`(i,j)`))
+			cellrows.append(cellcols)
+		self._cellStyles = cellrows
 
 		self._bkgrndcmds = []
 		self._linecmds = []
@@ -512,8 +547,10 @@ def _isLineCommand(cmd):
 	return cmd[0] in LINECOMMANDS
 
 def _setCellStyle(cellStyles, i, j, op, values):
-	new = CellStyle('<%d, %d>' % (i,j), cellStyles[i][j])
-	cellStyles[i][j] = new
+	#new = CellStyle('<%d, %d>' % (i,j), cellStyles[i][j])
+	#cellStyles[i][j] = new
+	## modify in place!!!
+	new = cellStyles[i][j]
 	if op == 'FONT':
 		n = len(values)
 		new.fontname = values[0]
