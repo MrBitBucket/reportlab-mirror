@@ -93,8 +93,9 @@ class PDFMetricsTestCase(unittest.TestCase):
 
 def makeSuite():
     return unittest.makeSuite(PDFMetricsTestCase,'test')
-    
 
+
+#noruntests
 if __name__=='__main__':
     usage = """Usage:
     (1) test_pdfbase_pdfmetrics.py     -  makes doc for all standard fonts
@@ -114,4 +115,3 @@ if __name__=='__main__':
 
     runner = unittest.TextTestRunner()
     runner.run(makeSuite())
-    

@@ -48,7 +48,7 @@ def suite(folder):
         
     return allTests
 
-
+#noruntests
 if __name__ == '__main__':
     folder = os.path.dirname(sys.argv[0])
 

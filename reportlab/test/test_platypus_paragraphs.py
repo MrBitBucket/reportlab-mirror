@@ -105,6 +105,6 @@ def makeSuite():
     return suite
 
 
+#noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
-    

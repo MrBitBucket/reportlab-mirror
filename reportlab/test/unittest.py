@@ -30,7 +30,7 @@ SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 __author__ = "Steve Purcell (stephen_purcell@yahoo.com)"
-__version__ = "$Revision: 1.2 $"[11:-2]
+__version__ = "$Revision: 1.3 $"[11:-2]
 
 import time
 import sys
@@ -689,5 +689,6 @@ main = TestProgram
 # Executing this module from the command line
 ##############################################################################
 
+#noruntests
 if __name__ == "__main__":
     main(module=None)
