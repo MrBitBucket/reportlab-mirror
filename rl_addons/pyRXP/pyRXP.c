@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.3 2002/04/17 13:45:05 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.4 2002/04/17 17:33:29 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.3 2002/04/17 13:45:05 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.4 2002/04/17 17:33:29 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,7 +24,7 @@ static char* __version__=" $Id: pyRXP.c,v 1.3 2002/04/17 13:45:05 rgbecker Exp $
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "0.6"
+#define VERSION "0.61"
 #define MODULE "pyRXP"
 #define MAX_DEPTH 256
 static PyObject *moduleError;
@@ -71,7 +71,7 @@ The python module exports the following\n\
 				The __call__ attribute of Parser instances is equivalent to\n\
 				the parse attribute.\n\
 \n\
-		srcName '<unknown>', name used to refer to the parser src\n\
+		srcName '[unknown]', name used to refer to the parser src\n\
 				in error and warning messages.\n\
 \n\
 		warnCB	0, should either be None, 0, or a\n\
@@ -462,8 +462,7 @@ static void myWarnCB(XBit bit, void *info)
 
 typedef struct {
 	PyObject_HEAD
-	char		*srcName;
-	PyObject	*warnCB, *eoCB;
+	PyObject	*warnCB, *eoCB, *srcName;
 	int			flags[2];
 	} pyRXPParserObject;
 
@@ -509,8 +508,9 @@ static int pyRXPParser_setattr(pyRXPParserObject *self, char *name, PyObject* va
 			return -1;
 			}
 		else {
-			free(self->srcName);
-			self->srcName = strdup(PyString_AsString(value));
+			if(self->srcName) Py_DECREF(self->srcName);
+			self->srcName = value;
+			Py_INCREF(value);
 			return 0;
 			}
 		}
@@ -542,22 +542,22 @@ static PyObject* pyRXPParser_parse(pyRXPParserObject* xself, PyObject* args, PyO
 	char		*src;
 	FILE16		*f;
 	InputSource source;
-	PyObject	*retVal;
+	PyObject	*retVal=NULL;
 	char		errBuf[512];
 	CB_info_t	CB_info;
 	Parser		p;
 	pyRXPParserObject	dummy = *xself;
 	pyRXPParserObject*	self = &dummy;
+	if(self->warnCB) Py_INCREF(self->warnCB);
+	if(self->eoCB) Py_INCREF(self->eoCB);
+	if(self->srcName) Py_INCREF(self->srcName);
 
-	if(!PyArg_ParseTuple(args, "s#", &src, &srcLen)) return NULL;
-	printf("xself: %8.8x %s %8.8x %8.8x %8.8x %8.8x\n", xself, xself->srcName, xself->warnCB, xself->eoCB, xself->flags[0], xself->flags[1]);
-	printf(" self: %8.8x %s %8.8x %8.8x %8.8x %8.8x\n", self, self->srcName, self->warnCB, self->eoCB, self->flags[0], self->flags[1]);
-	printf("kw = %p\n",kw);
+	if(!PyArg_ParseTuple(args, "s#", &src, &srcLen)) goto L_1;
 	if(kw){
 		PyObject *key, *value;
 		i = 0;
 		while(PyDict_Next(kw,&i,&key,&value))
-			if(pyRXPParser_setattr(self, PyString_AsString(key), value)) return NULL;
+			if(pyRXPParser_setattr(self, PyString_AsString(key), value))  goto L_1;
 		}
 
 	if(self->warnCB){
@@ -584,12 +584,16 @@ static PyObject* pyRXPParser_parse(pyRXPParserObject* xself, PyObject* args, PyO
 	Fclose(Stderr);
 	Stderr = MakeFILE16FromString(errBuf,sizeof(errBuf)-1,"w");
 	f = MakeFILE16FromString(src,srcLen,"r");
-	source = SourceFromFILE16(self->srcName,f);
+	source = SourceFromFILE16(PyString_AsString(self->srcName),f);
 	retVal = ProcessSource(p,source);
 	Fclose(Stderr);
 	FreeDtd(p->dtd);
 	FreeParser(p);
 	deinit_parser();
+L_1:
+	if(self->warnCB) Py_DECREF(self->warnCB);
+	if(self->eoCB) Py_DECREF(self->eoCB);
+	if(self->srcName) Py_DECREF(self->srcName);
 	return retVal;
 }
 
@@ -615,7 +619,10 @@ static PyObject* pyRXPParser_getattr(pyRXPParserObject *self, char *name)
 	int	i;
 	if(!strcmp(name,"warnCB")) return _get_OB(name,self->warnCB);
 	else if(!strcmp(name,"eoCB")) return _get_OB(name,self->eoCB);
-	else if(!strcmp(name,"srcName")) return PyString_FromString(self->srcName);
+	else if(!strcmp(name,"srcName")){
+		Py_INCREF(self->srcName);
+		return self->srcName;
+		}
 	else {
 		for(i=0;flag_vals[i].k;i++)
 			if(!strcmp(flag_vals[i].k,name))
@@ -627,7 +634,7 @@ static PyObject* pyRXPParser_getattr(pyRXPParserObject *self, char *name)
 
 static void pyRXPParserFree(pyRXPParserObject* self)
 {
-	if(self->srcName) PyMem_Free(self->srcName);
+	if(self->srcName) Py_DECREF(self->srcName);
 	if(self->warnCB) Py_DECREF(self->warnCB);
 	if(self->eoCB) Py_DECREF(self->eoCB);
 #if	0
@@ -671,7 +678,7 @@ static pyRXPParserObject* pyRXPParser(PyObject* module, PyObject* args, PyObject
 	if(!PyArg_ParseTuple(args, ":Parser")) return NULL;
 	if(!(self = PyObject_NEW(pyRXPParserObject, &pyRXPParserType))) return NULL;
 	self->warnCB = self->eoCB = (void*)self->srcName = NULL;
-	if(!(self->srcName=strdup("[unknown]"))){
+	if(!(self->srcName=PyString_FromString("[unknown]"))){
 		PyErr_SetString(moduleError,"Internal error, memory limit reached!");
 Lfree:	pyRXPParserFree(self);
 		return NULL;
