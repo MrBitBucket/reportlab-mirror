@@ -28,7 +28,7 @@ class ManualTestCase(SecureTestCase):
         if os.path.isfile('graphics_reference.pdf'):
             os.remove('graphics_reference.pdf')
 
-        os.system("python genAll.py -s")
+        os.system("%s genAll.py -s" % sys.executable)
 
         assert os.path.isfile('userguide.pdf'), 'genAll.py failed to generate userguide.pdf!'
         assert os.path.isfile('graphguide.pdf'), 'genAll.py failed to generate graphguide.pdf!'
