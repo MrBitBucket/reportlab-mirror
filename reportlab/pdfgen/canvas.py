@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.112 2003/05/30 09:46:23 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.112 2003/05/30 09:46:23 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.113 2003/06/24 11:55:28 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.113 2003/06/24 11:55:28 rgbecker Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -817,6 +817,13 @@ class Canvas:
            After this operation the canvas must not be used further."""
         if len(self._code): self.showPage()
         self._doc.SaveToFile(self._filename, self)
+
+    def getpdfdata(self):
+        """Returns the PDF data that would normally be written to a file.
+        If there is current data a ShowPage is executed automatically.
+        After this operation the canvas must not be used further."""
+        if len(self._code): self.showPage()
+        return self._doc.GetPDFData(self)
 
     def setPageSize(self, size):
         """accepts a 2-tuple in points for paper size for this
