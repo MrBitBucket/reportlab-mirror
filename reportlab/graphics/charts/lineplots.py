@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.35 2002/11/27 20:21:42 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.36 2002/12/02 16:30:59 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.35 2002/11/27 20:21:42 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.36 2002/12/02 16:30:59 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -261,6 +261,35 @@ class LinePlot(PlotArea):
             if shader: shader.shade(self,g,rowNo,rowColor,row)
 
         return g
+
+    def makeSwatchSample(self,rowNo, x, y, width, height):
+        styleCount = len(self.lines)
+        styleIdx = rowNo % styleCount
+        rowColor = self.lines[styleIdx].strokeColor
+
+        if self.joinedLines:
+            dash = getattr(self.lines[styleIdx], 'strokeDashArray', getattr(self.lines,'strokeDashArray',None))
+            strokeWidth= getattr(self.lines[styleIdx], 'strokeWidth', getattr(self.lines[styleIdx], 'strokeWidth',None))
+            L = Line(x,y,x+width,y+height,strokeColor=rowColor,strokeLineCap=0)
+            if strokeWidth: L.strokeWidth = strokeWidth
+            if dash: L.strokeDashArray = dash
+        else:
+            L = None
+
+        if hasattr(self.lines[styleIdx], 'symbol'):
+            S = self.lines[styleIdx].symbol
+        elif hasattr(self.lines, 'symbol'):
+            S = self.lines.symbol
+        else:
+            S = None
+
+        if S: S = uSymbol2Symbol(S,x+width/2.,y+height/2.,rowColor)
+        if S and L:
+            g = Group()
+            g.add(S)
+            g.add(L)
+            return g
+        return S or L
 
 
     def draw(self):
