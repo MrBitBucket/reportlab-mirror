@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.44 2003/07/30 18:43:51 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.45 2003/08/04 16:56:22 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.44 2003/07/30 18:43:51 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.45 2003/08/04 16:56:22 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -553,6 +553,7 @@ class AreaLinePlot(LinePlot):
         LinePlot.__init__(self)
         self._inFill = 1
         self.reversePlotOrder = 1
+        self.data = [(1,20,100,30),(2,11,50,15),(3,15,70,40)]
 
     def draw(self):
         try:
