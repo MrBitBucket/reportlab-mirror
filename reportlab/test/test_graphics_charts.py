@@ -123,7 +123,7 @@ def sample2line(data=[(13, 5, 20, 22, 37, 45, 19, 4),
 def sample3(drawing=None):
     "Add sample swatches to a diagram."
 
-    d = drawing
+    d = drawing or Drawing(400, 200)
     
     swatches = Legend0()
     swatches.alignment = 'right'
