@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.12  2000/03/02 12:58:58  rgbecker
+#	Remove over officious import checks Imag/zlib
+#
 #	Revision 1.11  2000/03/02 10:28:54  rgbecker
 #	[].extend illegal in 1.5.1
-#
+#	
 #	Revision 1.10  2000/02/24 17:28:13  andy_robinson
 #	Added methods setFillGray(g), setStrokeGray(g) where 0 <= g <= 1
 #	
@@ -62,7 +65,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.11 2000/03/02 10:28:54 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.12 2000/03/02 12:58:58 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -605,27 +608,17 @@ class Canvas:
         #
         ######################################################
     def drawInlineImage(self, image, x,y, width=None,height=None):
-        """Draw a PIL Image into the specified rectangle.  If width and
+        """Draw an Image into the specified rectangle.  If width and
         height are omitted, they are calculated from the image size.
         Also allow file names as well as images.  This allows a
         caching mechanism"""
-        try: 
-            import Image
-        except ImportError:
-            print 'Python Imaging Library not available'
-            return
-        try:
-            import zlib
-        except ImportError:
-            print 'zlib not available'
-            return
             
         self.currentPageHasImages = 1
 
         if type(image) == StringType:
             if os.path.splitext(image)[1] in ['.jpg', '.JPG']:
-            #directly process JPEG files
-            #open file, needs some error handling!!
+                #directly process JPEG files
+                #open file, needs some error handling!!
                 imageFile = open(image, 'rb')
                 info = self.readJPEGInfo(imageFile)
                 imgwidth, imgheight = info[0], info[1]
@@ -655,7 +648,18 @@ class Canvas:
                 imagedata.append('EI')
             else:
                 if not pdfutils.cachedImageExists(image):
+                    try:
+                        import Image
+                    except ImportError:
+                        print 'Python Imaging Library not available'
+                        return
+                    try:
+                        import zlib
+                    except ImportError:
+                        print 'zlib not available'
+                        return
                     pdfutils.cacheImageFile(image)
+
                 #now we have one cached, slurp it in
                 cachedname = os.path.splitext(image)[0] + '.a85'
                 imagedata = open(cachedname,'rb').readlines()
@@ -669,6 +673,11 @@ class Canvas:
         else:
             #PIL Image
             #work out all dimensions
+            try:
+                import zlib
+            except ImportError:
+                print 'zlib not available'
+                return
             myimage = image.convert('RGB')
             imgwidth, imgheight = myimage.size
             imagedata = []
