@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.25 2002/01/17 11:45:59 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.25 2002/01/17 11:45:59 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.26 2002/01/18 12:11:00 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.26 2002/01/18 12:11:00 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -17,6 +17,9 @@ vAlign and hAlign may be used by 'packers' as hints as to how the object should 
 
 Some Flowables also know how to "split themselves".  For example a
 long paragraph might split itself between one page and the next.
+
+Packers should set the canv attribute during wrap, split & draw operations to allow
+the flowable to work out sizes etc in the proper context.
 
 The "text" of a document usually consists mainly of a sequence of flowables which
 flow into a document from top to bottom (with column and page breaks controlled by
