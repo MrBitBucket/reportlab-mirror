@@ -32,6 +32,9 @@
 #
 ###############################################################################
 #   $Log: genuserguide.py,v $
+#   Revision 1.35  2000/08/24 13:33:13  rgbecker
+#   Added  Mac Intro
+#
 #   Revision 1.34  2000/08/24 11:30:29  rgbecker
 #   Preformatted docco added
 #
@@ -138,7 +141,7 @@
 #   Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #   initial checkin. user guide generation framework.
 #   
-__version__=''' $Id: genuserguide.py,v 1.34 2000/08/24 11:30:29 rgbecker Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.35 2000/08/24 13:33:13 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -327,6 +330,13 @@ def heading3(text):
     getStory().append(CondPageBreak(inch))
     p = Paragraph(quickfix(text), H3)
     getStory().append(p)
+
+def image(path, width=None, height=None ):
+	s = startKeep()
+	space(.2)
+	getStory().append(Image(os.path.join(os.path.dirname(sys.argv[0]),'..','images',path),width,height))
+	space(.2)
+	endKeep(s)
  
 def heading4(text):
     """Used to be most of the plain old 'head' sections"""

@@ -298,8 +298,42 @@ getting &amp; installing the Python Imaging Library from
 """)
 
 heading3("Instructions for Python novices: Mac")
+#this stuff was provided by humbert@ls12.cs.uni-dortmund.de
+disc("""
+First install Python,
+the latest stable release is 1.52, but it is also possible to run Reportlab with 1.6a2
+and probably with 1.6b1/b2.
+You get the software (ready to run) at font color=blue>http://www.python.org</font>
+When this is successful done you should have the following folder structure.
+""")
+image('Python_1.6a2.gif', 3*inch, 3*inch )
+disc("""
+Now you can put Extensions in the Extensions-Folder;
+which is where you should unpack the <b>reportlab.zip</b> with your favorite unpack-utility.
+You¹ll get a subfolder named <b>reportlab</b>.
+""")
 
-todo("[Earth to Just van Rossum, come in Just!?]")
+disc("""
+After this step, you have to tell the PythonInterpreter, where to look for extensions.
+Start EditPythonPrefs (by double-clicking the icon).
+""")
+image('Python_1.6a2_HINT.gif',3*inch,3*inch)
+disc("""
+You should get the following modal dialog.
+This is the point, where your special data goes in.
+Reportlab is on the path in Extensions. So all you have to do is add
+the last line 
+<b>$(PYTHON):Extensions</b>. 
+""")
+image('Edit_Prefs.gif',3*inch,3*inch)
+disc("""
+Now you should test one or more of the demo scripts include with with the sources; eg
+<b>reportlab:demos:pythonpoint:pythonpoint.py</b>.
+One Problem on the Mac is solved gracefully in Python:
+if you want a script that takes some arguments, hold down the alt or option-key,
+while activating Python.
+""")
+
 
 heading2("Getting Involved")
 disc("""ReportLab is an Open Source project.  Although we are
