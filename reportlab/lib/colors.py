@@ -1,4 +1,3 @@
-#!/bin/env python
 ###############################################################################
 #
 #	ReportLab Public License Version 1.0
@@ -33,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: colors.py,v $
+#	Revision 1.8  2000/05/26 09:43:44  rgbecker
+#	stringToColor-->toColor
+#
 #	Revision 1.7  2000/04/06 18:10:35  rgbecker
 #	Fixed type in stringToColor
-#
+#	
 #	Revision 1.6  2000/04/05 15:55:52  rgbecker
 #	Fixed getAllNamedColors, needed global etc
 #	
@@ -51,11 +53,11 @@
 #	Revision 1.2  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
 #	
-__version__=''' $Id: colors.py,v 1.7 2000/04/06 18:10:35 rgbecker Exp $ '''
+__version__=''' $Id: colors.py,v 1.8 2000/05/26 09:43:44 rgbecker Exp $ '''
 
 import string
 import math
-import types
+from types import StringType, ListType, TupleType
 
 class Color:
     "This class is used to represent color.  Components red, green, blue \
@@ -103,7 +105,7 @@ def HexColor(val):
     otherwise a pure integer is converted as decimal rgb
     """
 
-    if type(val) == types.StringType:
+    if type(val) == StringType:
         b = 10
         if val[:1] == '#':
             val = val[1:]
@@ -310,15 +312,22 @@ def describe(aColor):
             closest = (distance, name, color)
     print 'best match is %s, distance %0.4f' % (closest[1], closest[0])
 
-def stringToColor(str):
-	'''try to map an arbitrary string to a color instance'''
-	if type(str) == types.StringType:
+def toColor(arg,default=None):
+	'''try to map an arbitrary arg to a color instance'''
+	tArg = type(arg)
+	if tArg is ColorType:
+		return arg
+	elif tArg in [ListType,TupleType]:
+		return Color(arg[0],arg[1],arg[2])
+	elif tArg == StringType:
 		C = getAllNamedColors()
-		str = string.lower(str)
+		str = string.lower(arg)
 		if C.has_key(str):
 			return C[str]
 
 	try:
 		return HexColor(str)
 	except:
-		raise 'Invalid color value', str
+		if default is None:
+			raise 'Invalid color value', str
+		return default
