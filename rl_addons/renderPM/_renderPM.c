@@ -107,7 +107,7 @@ ERR:
 PyObject*	_pdfmetrics__fonts=0;
 static PyObject *_get_pdfmetrics__fonts(void){
 	if(!_pdfmetrics__fonts){
-		PyObject *mod=PyImport_ImportModuleEx("reportlab.pdfbase.pdfmetrics",NULL,NULL,NULL);
+		PyObject *mod=PyImport_ImportModule("reportlab.pdfbase.pdfmetrics");
 		if(mod){
 			_pdfmetrics__fonts = PyObject_GetAttrString(mod,"_fonts");
 			Py_DECREF(mod);
@@ -131,37 +131,40 @@ static py_FT_FontObject *_get_ft_face(char *fontName)
 {
     int				error = 1;
 	PyObject		*_fonts=_get_pdfmetrics__fonts();
-	PyObject		*font = NULL, *_data=NULL;
+	PyObject		*font, *face, *_data;
 	py_FT_FontObject *ft_face;
 
 	if(!_fonts) return NULL;
 	font = PyDict_GetItemString(_fonts,fontName);
 	if(!font) return NULL;
 	ft_face = (py_FT_FontObject*)PyObject_GetAttrString(font,"_ft_face");
-	if(!ft_face){
-    	if(!ft_library){
-        	error = FT_Init_FreeType(&ft_library);
-        	if(error){
-            	PyErr_SetString(PyExc_IOError,"cannot initialize FreeType library");
-				goto RET;
-        		}
-    		}
-
-    	ft_face = PyObject_NEW(py_FT_FontObject, &py_FT_Font_Type);
-    	if(!ft_face) goto ERR;
-		_data = PyObject_GetAttrString(font,"_data");
-		if(_data){
-    		error = FT_New_Memory_Face(ft_library, PyString_AsString(_data), PyString_GET_SIZE(_data), 0, &ft_face->face);
-			Py_DECREF(_data);
-			}
-    	if (error){
-ERR:		PyErr_SetString(PyExc_IOError, "cannot load font");
+	if(ft_face) return ft_face;
+	PyErr_Clear();
+	if(!ft_library){
+		if(FT_Init_FreeType(&ft_library)){
+			PyErr_SetString(PyExc_IOError,"cannot initialize FreeType library");
 			goto RET;
-    		}
-		PyObject_SetAttrString(font,"_ft_face",(PyObject*)ft_face);
+			}
 		}
-RET:if(font) Py_DECREF(font);
-	if(error && ft_face){
+
+	ft_face = PyObject_NEW(py_FT_FontObject, &py_FT_Font_Type);
+	if(!ft_face){
+		PyErr_Format(PyExc_MemoryError, "Cannot allocate ft_face for TTFont %s", fontName);
+		goto RET;
+		}
+	face = PyObject_GetAttrString(font,"face");
+	if(!face) goto RET;
+	_data = PyObject_GetAttrString(face,"_data");
+	Py_DECREF(face);
+	if(!_data) goto RET;
+	error = FT_New_Memory_Face(ft_library, PyString_AsString(_data), PyString_GET_SIZE(_data), 0, &ft_face->face);
+	Py_DECREF(_data);
+	if(error){
+		PyErr_Format(PyExc_IOError, "FT_New_Memory_Face(%s) Failed!", fontName);
+		goto RET;
+		}
+	PyObject_SetAttrString(font,"_ft_face",(PyObject*)ft_face);
+RET:if(error && ft_face){
 		Py_DECREF(ft_face);
 		ft_face  = NULL;
 		}
@@ -779,7 +782,7 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 	A2DMX	orig, trans = {1,0,0,1,0,0}, scaleMat = {1,0,0,1,0,0};
 	double	scaleFactor, x, y, gw;
 	char*	text;
-	int		c, textlen;
+	int		c, textlen, i;
 	ArtBpath	*saved_path;
 	void	*font = self->font;
 #ifdef	RENDERPM_FT
@@ -823,16 +826,16 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 
 	/*here we render each character one by one, lacks efficiency once again*/
 	trans[5] = 0;
-	while(*text){
+	for(i=0;i<textlen;i++){
 #ifdef	RENDERPM_FT
 		if(ft_font){
 			_ft_data.pathLen = 0;
-			c = (*utext++);
+			c = utext[i];
 			self->path = _ft_get_glyph_outline((FT_Face)font,c,&_ft_data);
 			}
 		else{
 #endif
-		c = (*text++)&0xff;
+		c = (text[i])&0xff;
 		self->path = gt1_get_glyph_outline((Gt1EncodedFont*)font, c, &gw);	/*ascii encoding for the moment*/
 #ifdef	RENDERPM_FT
 		}
