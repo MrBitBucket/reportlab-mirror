@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.50 2001/03/06 17:38:15 andy_robinson Exp $
-__version__=''' $Id: paragraph.py,v 1.50 2001/03/06 17:38:15 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.51 2001/03/07 18:55:26 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.51 2001/03/07 18:55:26 rgbecker Exp $ '''
 from string import split, strip, join, whitespace
 from operator import truth
 from types import StringType, ListType
@@ -817,3 +817,10 @@ umfassend zu sein."""
 		w0,h0 = S[0].wrap(aW,aH)
 		print 'After split wrap',w0,h0
 		dumpParagraphLines(S[0])
+
+	if '5' in TESTS:
+		text = """<para><![CDATA[</font></b>& < >]]></para>"""
+		P=Paragraph(text, styleSheet['Code'])
+		dumpParagraphFrags(P)
+		w,h = P.wrap(6*72, 9.7*72)
+		dumpParagraphLines(P)
