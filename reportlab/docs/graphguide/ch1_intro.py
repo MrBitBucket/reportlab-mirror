@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/graphguide/ch1_intro.py,v 1.6 2002/07/24 19:56:35 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/graphguide/ch1_intro.py,v 1.7 2002/08/10 10:35:25 dragan1 Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 import reportlab
 
@@ -48,7 +48,7 @@ disc("")
 todo("""
 Be warned! This document is in a <em>very</em> preliminary form.  We need
 your help to make sure it is complete and helpful.  Please send any
-feedback to our user mailing list, reportlab-users@egroups.com.
+feedback to our user mailing list, reportlab-users@reportlab.com.
 """)
 
 heading2("What is ReportLab?")
@@ -98,10 +98,9 @@ to refine or to implement.  If you are missing some features or
 just want to help out, let us know!""")
 
 disc("""The first step for anyone wanting to learn more or
-get involved is to join the mailing list.  Just send an email
-with the subject "Subscribe" to
-$reportlab-users-subscribe@egroups.com$.  You can also browse
-through the group's archives and contributions at
-$http://www.egroups.com/group/reportlab-users$.  This list is
+get involved is to join the mailing list.  To Subscribe visit
+$http://two.pairlist.net/mailman/listinfo/reportlab-users$.
+From there you can also browse through the group's archives
+and contributions.  The mailing list is
 the place to report bugs and get support. """)
 
