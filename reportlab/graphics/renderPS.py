@@ -1,11 +1,10 @@
-__version__=''' $Id: renderPS.py,v 1.4 2001/02/28 11:54:55 rgbecker Exp $ '''
+__version__=''' $Id: renderPS.py,v 1.5 2001/03/26 07:47:22 rgbecker Exp $ '''
 import string, cStringIO, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str
 from reportlab.lib.colors import black
 from reportlab.graphics.renderbase import StateTracker, getStateDelta
 from reportlab.graphics.shapes import STATE_DEFAULTS
-from reportlab.lib.utils import import_Image
 import math
 from types import StringType
 from operator import getitem
@@ -366,8 +365,6 @@ class PSCanvas:
         """drawImage(self,image,x1,y1,x2=None,y2=None) : If x2 and y2 are ommitted, they are
         calculated from image size. (x1,y1) is upper left of image, (x2,y2) is lower right of
         image in piddle coordinates."""
-        Image=import_Image()
-        if not Image: return
         # For now let's start with 24 bit RGB images (following piddlePDF again)
         print "Trying to drawImage in piddlePS"
         component_depth = 8

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.20 2001/02/28 19:30:34 rgbecker Exp $
-__version__=''' $Id: pdfutils.py,v 1.20 2001/02/28 19:30:34 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.21 2001/03/26 07:48:42 rgbecker Exp $
+__version__=''' $Id: pdfutils.py,v 1.21 2001/03/26 07:48:42 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -23,10 +23,11 @@ LINEEND = '\015\012'
 def cacheImageFile(filename, returnInMemory=0):
     "Processes image as if for encoding, saves to a file with .a85 extension."
 
-    import Image
+    from reportlab.lib.utils import PIL_Image
     import zlib
 
-    img1 = Image.open(filename)
+
+    img1 = PIL_Image.open(filename)
     img = img1.convert('RGB')
     imgwidth, imgheight = img.size
     code = []

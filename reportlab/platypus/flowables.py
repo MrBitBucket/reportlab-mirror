@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.17 2001/03/16 14:51:50 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.17 2001/03/16 14:51:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.18 2001/03/26 07:49:41 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.18 2001/03/26 07:49:41 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -225,7 +225,7 @@ class Image(Flowable):
 	"""
 	def __init__(self, filename, width=None, height=None):
 		"""If size to draw at not specified, get it from the image."""
-		import Image  #this will raise an error if they do not have PIL.
+		from reportlab.lib.utils import PIL_Image  #this will raise an error if they do not have PIL.
 		self.filename = filename
 		self.hAlign = 'CENTER'
 		# if it is a JPEG, will be inlined within the file -
@@ -235,7 +235,7 @@ class Image(Flowable):
 			self.imageWidth = info[0]
 			self.imageHeight = info[1]
 		else:
-			img = Image.open(filename)
+			img = PIL_Image.open(filename)
 			(self.imageWidth, self.imageHeight) = img.size
 		if width:
 			self.drawWidth = width

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pdfimages.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.10 2001/03/21 14:12:02 rgbecker Exp $
-__version__=''' $Id: pdfimages.py,v 1.10 2001/03/21 14:12:02 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.11 2001/03/26 07:49:11 rgbecker Exp $
+__version__=''' $Id: pdfimages.py,v 1.11 2001/03/26 07:49:11 rgbecker Exp $ '''
 __doc__="""
 Image functionality sliced out of canvas.py for generalization
 """
@@ -13,7 +13,7 @@ import cStringIO
 from types import StringType
 from reportlab.pdfbase import pdfutils
 from reportlab.lib.utils import fp_str
-from reportlab.lib.utils import import_zlib, import_Image
+from reportlab.lib.utils import import_zlib, PIL_Image
 
 class PDFImage:
     def __init__(self, image, x,y, width=None, height=None):
@@ -53,8 +53,7 @@ class PDFImage:
         if not pdfutils.cachedImageExists(image):
             zlib = import_zlib()
             if not zlib: return
-            Image = import_Image()
-            if not Image: return
+            if not PIL_Image: return
             pdfutils.cacheImageFile(image)
 
         #now we have one cached, slurp it in

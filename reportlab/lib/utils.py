@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.9 2001/02/28 19:30:33 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.9 2001/02/28 19:30:33 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.10 2001/03/26 07:48:14 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.10 2001/03/26 07:48:14 rgbecker Exp $ '''
 
 import string, os
 from types import *
@@ -36,18 +36,18 @@ def import_zlib():
 		warnOnce('zlib not available')
 	return zlib
 
-def import_Image():
+try:
+	import Image
+except ImportError, errMsg:
+	if str(errMsg)!='No module named Image': raise
 	try:
-		import Image
+		from PIL import Image
 	except ImportError, errMsg:
-		if str(errMsg)!='No module named Image': raise
-		try:
-			from PIL import Image
-		except ImportError, errMsg:
-			if str(errMsg)!='No module named PIL': raise
-			Image = None
-			warnOnce('Python Imaging Library not available')
-	return Image
+		if str(errMsg)!='No module named PIL': raise
+		Image = None
+		warnOnce('Python Imaging Library not available')
+PIL_Image = Image
+del Image
 
 def getHyphenater(hDict=None):
 	try:

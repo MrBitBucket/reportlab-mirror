@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.71 2001/03/21 14:12:02 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.71 2001/03/21 14:12:02 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.72 2001/03/26 07:49:11 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.72 2001/03/26 07:49:11 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -24,7 +24,7 @@ from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
 from reportlab.lib.colors import Color, CMYKColor, toColor
-from reportlab.lib.utils import import_zlib, import_Image
+from reportlab.lib.utils import import_zlib, PIL_Image
 from reportlab.lib.utils import fp_str
 
 zlib = import_zlib()
@@ -1053,8 +1053,7 @@ class Canvas:
                         if not zlib:
                             print 'zlib not available'
                             return
-                        Image = import_Image()
-                        if not Image: return
+                        if not PIL_Image: return
                         pdfutils.cacheImageFile(image)
 
                     #now we have one cached, slurp it in

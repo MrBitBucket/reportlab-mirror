@@ -2,14 +2,15 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/test/Attic/testpdfgen.py,v 1.16 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: testpdfgen.py,v 1.16 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/test/Attic/testpdfgen.py,v 1.17 2001/03/26 07:49:11 rgbecker Exp $
+__version__=''' $Id: testpdfgen.py,v 1.17 2001/03/26 07:49:11 rgbecker Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
 from reportlab.pdfgen import canvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
+from reportlab.lib.utils import PIL_Image
 
 #################################################################
 #
@@ -599,9 +600,7 @@ cost to performance.""")
     framePage(c, "Images")
     c.setFont('Times-Roman', 12)
     t = c.beginText(inch, 10 * inch)
-    try:
-        import Image
-    except:
+    if PIL_Image is None:
         t.textOut("Python Imaging Library not found!  You need it to see images.")
         c.save()
         return
