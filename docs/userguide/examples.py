@@ -16,8 +16,7 @@ def g(n):
     
 testhello = """
 def hello(c):
-    from reportlab.platypus import layout
-    inch = layout.inch
+    from reportlab.lib.units import inch
     # move the origin up and to the left
     c.translate(inch,inch) 
     # define a large font
