@@ -17,7 +17,7 @@ from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.axes import XValueAxis, YValueAxis, AdjYValueAxis, NormalDateXValueAxis
 from reportlab.graphics.charts.utils import *
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol, makeMarker
-from reportlab.graphics.widgets.grids import Grid, DoubleGrid, ShadedRect
+from reportlab.graphics.widgets.grids import Grid, DoubleGrid, ShadedRect, ShadedPolygon
 from reportlab.pdfbase.pdfmetrics import stringWidth, getFont
 from reportlab.graphics.charts.areas import PlotArea
 
@@ -29,6 +29,7 @@ class LinePlotProperties(PropHolder):
         strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array of a line.'),
         symbol = AttrMapValue(None, desc='Widget placed at data points.'),
         shader = AttrMapValue(None, desc='Shader Class.'),
+        filler = AttrMapValue(None, desc='Filler Class.'),
         )
 
 class Shader(_SetKeyWordArgs):
@@ -42,6 +43,18 @@ class Shader(_SetKeyWordArgs):
         c = getattr(self,'colors',c) or c
         if not c[0]: c[0] = getattr(lp,'fillColor',colors.white)
         if not c[1]: c[1] = rowColor
+
+class Filler:
+    '''mixin providing simple polygon fill'''
+    def fill(self, lp, g, rowNo, rowColor, points):
+        self.points[:] = points
+        g.add(self)
+
+class ShadedPolyFiller(Filler,ShadedPolygon):
+    pass
+
+class PolyFiller(Filler,Polygon):
+    pass
 
 class LinePlot(PlotArea):
     """Line plot with multiple lines.
@@ -244,7 +257,11 @@ class LinePlot(PlotArea):
                     points = points + [xy[0], xy[1]]
                 if inFill:
                     points = points + [inFillX1,inFillY,inFillX0,inFillY]
-                    inFillG.add(Polygon(points,fillColor=rowColor,strokeColor=rowColor,strokeWidth=0.1))
+                    filler = getattr(rowStyle, 'filler', None)
+                    if filler:
+                        filler.fill(self,inFillG,rowNo,rowColor,points)
+                    else:
+                        inFillG.add(Polygon(points,fillColor=rowColor,strokeColor=rowColor,strokeWidth=0.1))
                 else:
                     line = PolyLine(points,strokeColor=rowColor,strokeLineCap=0,strokeLineJoin=1)
                     if width:
@@ -278,6 +295,7 @@ class LinePlot(PlotArea):
 
             shader = getattr(rowStyle, 'shader', None)
             if shader: shader.shade(self,g,rowNo,rowColor,row)
+
 
         return g
 
