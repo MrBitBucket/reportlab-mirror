@@ -581,7 +581,7 @@ class PDFLayouter:
 
             # Create document meta information.
             c.setAuthor('py2pdf %s' % __version__)
-            c.setTitle(o.title and  o.title or os.path.basename(self.path))
+            c.setTitle(o.title or os.path.basename(self.path))
             c.setSubject('')
             #c.setKeywords('') # How to get it into PDFdoc.py?
 
@@ -622,7 +622,7 @@ class PDFLayouter:
 
             # Create document meta information.
             c.setAuthor('%s' % __version__)
-            c.setTitle(o.title and  o.title or os.path.basename(newPath))
+            c.setTitle(o.title or os.path.basename(newPath))
             c.setSubject('')
             #c.setKeywords('') # How to get it into PDFdoc.py?
 
@@ -1014,7 +1014,7 @@ class PDFLayouter:
         c.setFillColorRGB(0, 0, 0)
         c.line(lm, tm + .5*cm, rm, tm + .5*cm)
         c.setFont('Times-Italic', 12)
-        c.drawString(lm, tm + 0.5*cm + 2, o.title and o.title or os.path.basename(self.path))
+        c.drawString(lm, tm + 0.5*cm + 2, o.title or os.path.basename(self.path))
 
         # Footer.
         c.line(lm, bm - .5*cm, rm, bm - .5*cm)
