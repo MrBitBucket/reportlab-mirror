@@ -1,4 +1,4 @@
-# $Header: /tmp/reportlab/reportlab/demos/rlzope/rlzope.py,v 1.4 2002/07/24 19:56:35 andy_robinson Exp $
+# $Header: /tmp/reportlab/reportlab/demos/rlzope/rlzope.py,v 1.5 2002/08/23 13:51:19 johnprecedo Exp $
 #
 # Using the ReportLab toolkit from within Zope
 #
@@ -56,7 +56,7 @@ class MyPDFDoc :
                 return None
 
             # Convert it to PIL
-            image = PIL_Image.open(cStringIO.StringIO(logo.data))
+            image = PIL_Image.open(cStringIO.StringIO(str(logo.data)))
             (width, height) = image.size
 
             # scale it to be 0.75 inch high
