@@ -1,11 +1,12 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.8 2001/05/29 17:05:42 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.9 2001/06/11 10:29:37 rgbecker Exp $
 import sys, string
 from reportlab.lib import pagesizes
 shapeChecking = 1
 defaultEncoding = 'WinAnsiEncoding'		# 'WinAnsi' or 'MacRoman'
+pageCompression = 1						# the default page compression mode
 defaultPageSize=pagesizes.A4			#check in reportlab/lib/pagesizes for other possibilities
 
 defaultImageCaching = 1					#set to zero to remove those annoying cached images
