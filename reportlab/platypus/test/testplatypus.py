@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: testplatypus.py,v $
+#	Revision 1.10  2000/04/13 17:10:38  rgbecker
+#	minor adjustments
+#
 #	Revision 1.9  2000/04/13 14:48:41  rgbecker
 #	<para> tag added in layout.py paraparser.py
-#
+#	
 #	Revision 1.8  2000/04/12 16:26:51  rgbecker
 #	XML Tagged Paragraph parser changes
 #	
@@ -56,7 +59,7 @@
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testplatypus.py,v 1.9 2000/04/13 14:48:41 rgbecker Exp $ '''
+__version__=''' $Id: testplatypus.py,v 1.10 2000/04/13 17:10:38 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -361,7 +364,7 @@ def getExamples():
     p.debug = 1   #show me the borders
     story.append(p)
 
-    story.append(layout.XBox(4*inch, 1*inch,
+    story.append(layout.XBox(4*inch, 0.75*inch,
             'This is a box with a fixed size'))
 
     story.append(layout.Paragraph("""
