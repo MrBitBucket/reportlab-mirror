@@ -15,7 +15,7 @@
         </infostring-->
     <!-- Now for the slides -->
     <slide title="Main" id="Slide001" effectname="Wipe">
-      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+      <frame height="468" border="true" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
                     Conference Kit Demo
                 </para>
@@ -32,7 +32,7 @@
       </frame>
     </slide>
     <slide title="Introduction" id="Slide002" effectname="Blinds" effectdirection="0" outlinelevel="1">
-      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+      <frame height="468" border="true" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
                     Introduction
                 </para>
@@ -54,7 +54,7 @@
 		<spacer height="30"></spacer>
 					</frame>
     </slide>
-    <slide title="What is it" id="Slide003" effectname="Box" outlinelevel="1">
+    <slide title="What is it" id="Slide003" effectname="Blinds" effectdirection="0" outlinelevel="1">
       <frame height="468" border="true" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
                     What is it?
@@ -83,7 +83,7 @@
       </frame>
     </slide>
     <slide title="Who is it aimed at" id="Slide004" effectname="Wipe" outlinelevel="1">
-      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+      <frame height="468" border="true" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
                    Who is it aimed at?
                 </para>
@@ -107,7 +107,7 @@
       </frame>
     </slide>
     <slide title="How does it help" id="Slide005" effectname="Dissolve" outlinelevel="1">
-      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+      <frame height="468" border="true" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
                     How does it help?
                 </para>
@@ -131,7 +131,7 @@
       </frame>
     </slide>
     <slide title="How does it help1" id="Slide006" effectname="Dissolve" outlinelevel="1">
-      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+      <frame height="468" border="true" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
                    How does it help?
                 </para>
@@ -159,7 +159,7 @@
       </frame>
     </slide>
     <slide title="How does it help2" id="Slide007" effectname="Wipe" outlinelevel="1">
-      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+      <frame height="468" border="true" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
                     How does it help?
                 </para>
@@ -183,7 +183,7 @@
       </frame>
     </slide>
     <slide title="How does it help3" id="Slide008" effectname="Wipe" outlinelevel="1">
-      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+      <frame height="468" border="true" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
                     How does it help?
                 </para>
@@ -207,7 +207,7 @@
       </frame>
     </slide>
     <slide title="What does it produce" id="Slide009" effectname="Glitter" outlinelevel="1">
-      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+      <frame height="468" border="true" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
                     What does it produce
                 </para>
@@ -243,7 +243,7 @@
       </frame>
     </slide>
     <slide title="Pricing" id="Slide010" effectname="Glitter" outlinelevel="1">
-      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+      <frame height="468" border="true" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
                     Pricing and Availability
                 </para>
@@ -264,7 +264,7 @@
     </slide>
     
     <slide title="Finally" id="Slide011" effectname="Blinds" effectdirection="0" outlinelevel="1">
-      <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
+      <frame height="468" border="true" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
                     Finally
                 </para>
