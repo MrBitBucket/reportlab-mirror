@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.9  2000/03/21 19:36:37  rgbecker
+#	8bit character fixes
+#
 #	Revision 1.8  2000/03/16 20:28:12  rgbecker
 #	fixed off by one error in obj ref accounting, made font dict external object
-#
+#	
 #	Revision 1.7  2000/02/23 15:09:23  rgbecker
 #	Memory leak fixes
 #	
@@ -52,7 +55,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.8 2000/03/16 20:28:12 rgbecker Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.9 2000/03/21 19:36:37 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -234,7 +237,7 @@ class PDFDocument:
         i = 1
         self.xref = []
         f.write("%PDF-1.2" + LINEEND)  # for CID support
-        f.write("%םל¶¾" + LINEEND)
+        f.write("%\355\354\266\276" + LINEEND)
         for obj in self.objects:
             pos = f.tell()
             self.xref.append(pos)
@@ -260,7 +263,7 @@ class PDFDocument:
     def printPDF(self):
         "prints it to standard output.  Logs positions for doing trailer"
         print "%PDF-1.0"
-        print "%םל¶¾"
+        print "%\355\354\266\276"
         i = 1
         self.xref = []
         for obj in self.objects:

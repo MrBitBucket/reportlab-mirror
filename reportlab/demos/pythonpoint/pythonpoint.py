@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.6  2000/03/21 19:36:37  rgbecker
+#	8bit character fixes
+#
 #	Revision 1.5  2000/02/23 15:09:23  rgbecker
 #	Memory leak fixes
-#
+#	
 #	Revision 1.4  2000/02/17 02:06:28  rgbecker
 #	Docstring & other fixes
 #	
@@ -46,7 +49,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.5 2000/02/23 15:09:23 rgbecker Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.6 2000/03/21 19:36:37 rgbecker Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -126,10 +129,10 @@ sample = """
                 The Page Layout model comes from PLATYPUS (Page Layout and Typography Using Scripts),
                 a key component of the toolkit.  This covers concepts such as:
             </para>
-            <para style='Bullet' bullettext = '¥'>Reusable 'Drawable Objects'</para>
-            <para style='Bullet' bullettext = '¥'>Frames into which objects flow (like this)</para>
-            <para style='Bullet' bullettext = '¥'>Style Sheets for text, table cells, line styles etc.</para>
-            <para style='Bullet' bullettext = '¥'>Wrapping, page breaking an document management logic</para>
+            <para style='Bullet' bullettext = '\245'>Reusable 'Drawable Objects'</para>
+            <para style='Bullet' bullettext = '\245'>Frames into which objects flow (like this)</para>
+            <para style='Bullet' bullettext = '\245'>Style Sheets for text, table cells, line styles etc.</para>
+            <para style='Bullet' bullettext = '\245'>Wrapping, page breaking an document management logic</para>
             <para style='BodyText'>Everything is open and extensible.  I hope a library of reusable objects
             such as charts and diagrams will grow up.</para>
         </frame>
@@ -185,12 +188,12 @@ sample = """
                 Acrobat Reader supports tags to define page transition effects.  If you
 				are reading this on screen, you should have seen a selection of these:
             </para>
-	        <para style='Bullet' bullettext = '¥'>Split</para>
-	        <para style='Bullet' bullettext = '¥'>Blinds</para>
-	        <para style='Bullet' bullettext = '¥'>Box</para>
-	        <para style='Bullet' bullettext = '¥'>Wipe</para>
-	        <para style='Bullet' bullettext = '¥'>Dissolve</para>
-	        <para style='Bullet' bullettext = '¥'>Glitter</para>
+	        <para style='Bullet' bullettext = '\245'>Split</para>
+	        <para style='Bullet' bullettext = '\245'>Blinds</para>
+	        <para style='Bullet' bullettext = '\245'>Box</para>
+	        <para style='Bullet' bullettext = '\245'>Wipe</para>
+	        <para style='Bullet' bullettext = '\245'>Dissolve</para>
+	        <para style='Bullet' bullettext = '\245'>Glitter</para>
     		<para style='BodyText'>
 				Each has a range of options to fine-tune.
             </para>
@@ -208,14 +211,14 @@ sample = """
             <para style='BodyText'>
                 This is the first version that runs.  A lot can now be added fairly easily:
             </para>
-            <para style='Bullet' bullettext = '¥'>Preprocessor to let you enter paragraphs 
+            <para style='Bullet' bullettext = '\245'>Preprocessor to let you enter paragraphs 
 				and bullets as one block of text, with less tag typing!</para>
-            <para style='Bullet' bullettext = '¥'>PIDDLE drawings</para>
-            <para style='Bullet' bullettext = '¥'>Inline images within the frames</para>
-            <para style='Bullet' bullettext = '¥'>'Object Graphics' tags with grouping and coordinate transformations</para>
-            <para style='Bullet' bullettext = '¥'>Speaker notes and a mode to print them</para>
-            <para style='Bullet' bullettext = '¥'>Tools to archive slides in a database and build presentations to order</para>
-            <para style='Italic' bullettext = '¥'>...what else can YOU think of?</para>
+            <para style='Bullet' bullettext = '\245'>PIDDLE drawings</para>
+            <para style='Bullet' bullettext = '\245'>Inline images within the frames</para>
+            <para style='Bullet' bullettext = '\245'>'Object Graphics' tags with grouping and coordinate transformations</para>
+            <para style='Bullet' bullettext = '\245'>Speaker notes and a mode to print them</para>
+            <para style='Bullet' bullettext = '\245'>Tools to archive slides in a database and build presentations to order</para>
+            <para style='Italic' bullettext = '\245'>...what else can YOU think of?</para>
         </frame>
     </slide>
 

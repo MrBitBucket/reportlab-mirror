@@ -31,16 +31,19 @@
 #
 ###############################################################################
 #	$Log: pdfgeom.py,v $
+#	Revision 1.5  2000/03/21 19:36:37  rgbecker
+#	8bit character fixes
+#
 #	Revision 1.4  2000/02/17 02:08:04  rgbecker
 #	Docstring & other fixes
-#
+#	
 #	Revision 1.3  2000/02/15 17:55:59  rgbecker
 #	License text fixes
 #	
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfgeom.py,v 1.4 2000/02/17 02:08:04 rgbecker Exp $ '''
+__version__=''' $Id: pdfgeom.py,v 1.5 2000/03/21 19:36:37 rgbecker Exp $ '''
 __doc__="""
 This module includes any mathematical methods needed for PIDDLE.
 It should have no dependencies beyond the Python library.
@@ -52,7 +55,7 @@ So far, just Robert Kern's bezierArc.
 from math import sin, cos, pi, ceil
 
 def bezierArc(x1,y1, x2,y2, startAng=0, extent=90):
-    """bezierArc(x1,y1, x2,y2, startAng=0, extent=90) --> List of BÈzier
+    """bezierArc(x1,y1, x2,y2, startAng=0, extent=90) --> List of Bezier
 curve control points.
 
 (x1, y1) and (x2, y2) are the corners of the enclosing rectangle.  The
@@ -64,7 +67,7 @@ semi-circle.
 
 The resulting coordinates are of the form (x1,y1, x2,y2, x3,y3, x4,y4)
 such that the curve goes from (x1, y1) to (x4, y4) with (x2, y2) and
-(x3, y3) as their respective BÈzier control points."""
+(x3, y3) as their respective Bezier control points."""
 
     x1,y1, x2,y2 = min(x1,x2), max(y1,y2), max(x1,x2), min(y1,y2)
 
