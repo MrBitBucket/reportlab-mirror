@@ -1,12 +1,15 @@
 """Axes for charts.
+
+Axes come in X and Y flavours.
+
 """
 
 
 from types import FunctionType
 
+from reportlab.graphics.shapes import *
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics.charts.piechart0 import TypedPropertyCollection
-from reportlab.graphics.shapes import *
 from reportlab.graphics.charts.textlabel0 import Label
 
 
@@ -50,7 +53,7 @@ def nextRoundNumber(x):
 
 
 class XCategoryAxis(Widget):
-    """Comes in 'X' and 'Y' flavours.  A 'category axis' has an ordering
+    """A 'category axis' has an ordering
     but no metric.  It is divided into a number of equal-sized buckets.
     There may be tick marks or labels BETWEEN the buckets, and a label
     below it. The chart tells it where to go"""
@@ -123,13 +126,18 @@ class XCategoryAxis(Widget):
 
 
     def joinToAxis(self, yAxis, mode='bottom', value=None, points=None):
-        "Join with y-axis at some mode."
+        "Join with y-axis using some mode."
 
         # Make sure only one of the value or points parameter is passed.
         v, p = value, points
         if mode[:3] == 'fix':
             assert (v == None and p != None) or (v != None and p == None)
-            
+
+        # Make sure we connect only to a y-axis.
+        axisClassName = yAxis.__class__.__name__
+        msg = "Cannot connect to other axes (%s), but Y- ones." % axisClassName
+        assert axisClassName[0] == 'Y', msg
+        
         if mode == 'bottom':        
             self._x = yAxis._x * 1.0
             self._y = yAxis._y * 1.0
@@ -167,7 +175,7 @@ class XCategoryAxis(Widget):
         axis.strokeDashArray = self.strokeDashArray
         g.add(axis)
 
-        if (self.tickUp <> self.tickDown):
+        if (self.tickUp != self.tickDown):
             for i in range(self._catCount + 1):
                 x = self._x + (1.0 * i * self._barWidth)
                 # draw tick marks
@@ -198,7 +206,7 @@ class XCategoryAxis(Widget):
 
 
 class YCategoryAxis(Widget):
-    """Comes in 'X' and 'Y' flavours.  A 'category axis' has an ordering
+    """A 'category axis' has an ordering
     but no metric.  It is divided into a number of equal-sized buckets.
     There may be tick marks or labels BETWEEN the buckets, and a label
     below it. The chart tells it where to go"""
@@ -250,12 +258,12 @@ class YCategoryAxis(Widget):
 
 
     def demo(self):
-        self.setPosition(10, 10, 90)
+        self.setPosition(50, 10, 80)
         self.configure([(10,20,30)])
         self.categoryNames = ['One','Two','Three']
         # all labels top-centre aligned apart from the last
         self.labels.boxAnchor = 'e'
-        self.labels[2].boxAnchor = 'n'
+        self.labels[2].boxAnchor = 's'
         self.labels[2].angle = 90
         
         d = Drawing(200, 100)
@@ -271,12 +279,17 @@ class YCategoryAxis(Widget):
 
 
     def joinToAxis(self, xAxis, mode='bottom', value=None, points=None):
-        "Join with x-axis at some mode."
+        "Join with x-axis using some mode."
 
         # Make sure only one of the value or points parameter is passed.
         v, p = value, points
         if mode[:3] == 'fix':
             assert (v == None and p != None) or (v != None and p == None)
+
+        # Make sure we connect only to a y-axis.
+        axisClassName = xAxis.__class__.__name__
+        msg = "Cannot connect to other axes (%s), but X- ones." % axisClassName
+        assert axisClassName[0] == 'X', msg
 
         # Untested.
         if mode == 'left':
@@ -316,12 +329,13 @@ class YCategoryAxis(Widget):
         axis.strokeDashArray = self.strokeDashArray
         g.add(axis)
 
-        if (self.tickLeft <> self.tickRight):
+        if (self.tickLeft != self.tickRight):
             for i in range(self._catCount + 1):
                 y = self._y + (1.0 * i * self._barWidth)
+                print y
                 # draw tick marks
-                tick = Line(self._x - self.tickLeft, self._y,
-                            self._x + self.tickRight, self._y)
+                tick = Line(self._x - self.tickLeft, y,
+                            self._x + self.tickRight, y)
 
                 tick.strokeColor = self.strokeColor
                 tick.strokeWidth = self.strokeWidth
@@ -349,7 +363,7 @@ class YCategoryAxis(Widget):
 class XValueAxis(Widget):
     """Axis corresponding to a numeric quantity.
     
-    Comes in 'X' and 'Y' flavours.  A 'value axis' has a real number
+    A 'value axis' has a real number
     quantity associated with it.  The chart tells it where to go.
     The most basic axis divides the number line into equal spaces
     and has tickmarks and labels associated with each; later we
@@ -409,7 +423,7 @@ class XValueAxis(Widget):
 
 
     def demo(self):
-        self.setPosition(20, 20, 100)
+        self.setPosition(20, 50, 150)
         self.configure([(10,20,30,40,50)])
         d = Drawing(200, 100)
         d.add(self)
@@ -434,8 +448,11 @@ class XValueAxis(Widget):
         irregular intervals.  It creates an internal
         variable self._values, which is a list of numbers
         to use in plotting."""
-        assert len(dataSeries) > 0, "Need at least one real data series to configure the axis"
-        assert len(dataSeries[0]) > 2, "Need at least two elements in a data series to configure the axis"
+
+        msg = "Need at least one real data series to configure the axis"
+        assert len(dataSeries) > 0, msg
+        mag = "Need at least two elements in a data series to configure the axis"
+        assert len(dataSeries[0]) > 2, msg
         
         minFound = dataSeries[0][0]
         maxFound = dataSeries[0][0]
@@ -496,7 +513,9 @@ class XValueAxis(Widget):
         lines or bars.  You could override this to do
         logarithmic axes."""
 
-        assert self._configured, "Axis cannot scale numbers before it is configured"
+        msg = "Axis cannot scale numbers before it is configured"
+        assert self._configured, msg
+
         return self._x + self._scaleFactor * (value - self._valueMin)
     
 
@@ -516,7 +535,7 @@ class XValueAxis(Widget):
         i = 0
         for tickValue in self._tickValues:
             x = self.scale(tickValue)
-            if (self.tickUp <> self.tickDown):
+            if (self.tickUp != self.tickDown):
                 # draw tick marks
                 tick = Line(x, self._y - self.tickDown,
                             x, self._y + self.tickUp)
@@ -543,7 +562,7 @@ class XValueAxis(Widget):
 class YValueAxis(Widget):
     """Axis corresponding to a numeric quantity.
     
-    Comes in 'X' and 'Y' flavours.  A 'value axis' has a real number
+    A 'value axis' has a real number
     quantity associated with it.  The chart tells it where to go.
     The most basic axis divides the number line into equal spaces
     and has tickmarks and labels associated with each; later we
@@ -628,8 +647,11 @@ class YValueAxis(Widget):
         irregular intervals.  It creates an internal
         variable self._values, which is a list of numbers
         to use in plotting."""
-        assert len(dataSeries) > 0, "Need at least one real data series to configure the axis"
-        assert len(dataSeries[0]) > 2, "Need at least two elements in a data series to configure the axis"
+
+        msg = "Need at least one real data series to configure the axis"
+        assert len(dataSeries) > 0, msg
+        msg = "Need at least two elements in a data series to configure the axis"
+        assert len(dataSeries[0]) > 2, msg
         
         minFound = dataSeries[0][0]
         maxFound = dataSeries[0][0]
@@ -690,7 +712,9 @@ class YValueAxis(Widget):
         lines or bars.  You could override this to do
         logarithmic axes."""
 
-        assert self._configured, "Axis cannot scale numbers before it is configured"
+        msg = "Axis cannot scale numbers before it is configured"
+        assert self._configured, msg
+
         return self._y + self._scaleFactor * (value - self._valueMin)
     
 
@@ -710,7 +734,7 @@ class YValueAxis(Widget):
         i = 0
         for tickValue in self._tickValues:
             y = self.scale(tickValue)
-            if (self.tickLeft <> self.tickRight):
+            if (self.tickLeft != self.tickRight):
                 # draw tick marks
                 tick = Line(self._x - self.tickLeft, y,
                             self._x + self.tickRight, y)
@@ -734,8 +758,10 @@ class YValueAxis(Widget):
         return g
 
 
+# Sample functions.
+
 def sample1():
-    "Make sample drawing."
+    "Make sample drawing containing two unconnected axes."
 
     drawing = Drawing(400, 200)
 
@@ -761,7 +787,7 @@ def sample1():
 
 
 def sample2a():
-    "Make sample drawing with some experimental features."
+    "Make sample drawing with two axes, x connected at top of y."
 
     drawing = Drawing(400, 200)
 
@@ -775,7 +801,7 @@ def sample2a():
     xAxis = XCategoryAxis()
     xAxis._length = 300
     xAxis.configure(data)
-    xAxis.joinToAxis(yAxis, mode='top') # !
+    xAxis.joinToAxis(yAxis, mode='top')
     xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
     xAxis.labels.boxAnchor = 'n'
 
@@ -786,7 +812,7 @@ def sample2a():
 
 
 def sample2b():
-    "Make sample drawing with some experimental features."
+    "Make two axes, x connected at bottom of y."
 
     drawing = Drawing(400, 200)
 
@@ -800,7 +826,7 @@ def sample2b():
     xAxis = XCategoryAxis()
     xAxis._length = 300
     xAxis.configure(data)
-    xAxis.joinToAxis(yAxis, mode='bottom') # !
+    xAxis.joinToAxis(yAxis, mode='bottom')
     xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
     xAxis.labels.boxAnchor = 'n'
 
@@ -811,7 +837,7 @@ def sample2b():
 
 
 def sample2c():
-    "Make sample drawing with some experimental features."
+    "Make two axes, x connected at fixed value (in points) of y."
 
     drawing = Drawing(400, 200)
 
@@ -825,7 +851,7 @@ def sample2c():
     xAxis = XCategoryAxis()
     xAxis._length = 300
     xAxis.configure(data)
-    xAxis.joinToAxis(yAxis, mode='fixedPoints', points=100) # !
+    xAxis.joinToAxis(yAxis, mode='fixedPoints', points=100)
     xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
     xAxis.labels.boxAnchor = 'n'
 
@@ -836,7 +862,7 @@ def sample2c():
 
 
 def sample2d():
-    "Make sample drawing with some experimental features."
+    "Make two axes, x connected at fixed value (of y-axes) of y."
 
     drawing = Drawing(400, 200)
 
@@ -850,7 +876,7 @@ def sample2d():
     xAxis = XCategoryAxis()
     xAxis._length = 300
     xAxis.configure(data)
-    xAxis.joinToAxis(yAxis, mode='fixedValue', value=20) # !
+    xAxis.joinToAxis(yAxis, mode='fixedValue', value=20)
     xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
     xAxis.labels.boxAnchor = 'n'
 
