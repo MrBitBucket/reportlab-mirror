@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pdfimages.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.20 2004/02/05 18:21:50 rgbecker Exp $
-__version__=''' $Id: pdfimages.py,v 1.20 2004/02/05 18:21:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.21 2004/03/17 00:21:39 rgbecker Exp $
+__version__=''' $Id: pdfimages.py,v 1.21 2004/03/17 00:21:39 rgbecker Exp $ '''
 __doc__="""
 Image functionality sliced out of canvas.py for generalization
 """
@@ -86,7 +86,6 @@ class PDFImage:
         return imagedata
 
     def PIL_imagedata(self):
-        print 'PIL_imagedata called for %s' % self.image
         self.source = 'PIL'
         zlib = import_zlib()
         if not zlib: return
