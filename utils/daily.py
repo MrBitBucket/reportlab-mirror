@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.26  2000/04/20 08:39:59  rgbecker
+#	Made cvsdir local everywhere
+#
 #	Revision 1.25  2000/04/20 08:21:12  rgbecker
 #	Fixes to projdir usage
-#
+#	
 #	Revision 1.24  2000/04/19 15:16:13  rgbecker
 #	os.path.isdir not os.isdir
 #	
@@ -107,7 +110,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.25 2000/04/20 08:21:12 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.26 2000/04/20 08:39:59 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -117,7 +120,6 @@ import os, sys, string, traceback, re
 groupdir=os.path.normcase(os.path.normpath('%s/public_ftp'%os.environ['HOME']))
 projdir = 'reportlab'
 py2pdf_dir = 'py2pdf'
-cvsdir = os.path.join(groupdir,projdir)
 release=0		#1 if making a release
 py2pdf=0		#1 if doing a special py2pdf zip/tgz
 #USER=os.environ['USER']
@@ -177,6 +179,7 @@ def do_exec(cmd, cmdname):
 
 def cvs_checkout(d):
 	os.chdir(d)
+	cvsdir = os.path.join(groupdir,projdir)
 	recursive_rmdir(cvsdir)
 
 	cvs = find_exe('cvs')
@@ -213,9 +216,9 @@ def do_zip(d):
 
 	if py2pdf:
 		pdir = py2pdf_dir
-		cvsdir = os.path.join(groupdir,pdir)
 	else:
 		pdir = projdir
+	cvsdir = os.path.join(groupdir,pdir)
 
 	tar = find_exe('tar')
 	if tar is not None:
