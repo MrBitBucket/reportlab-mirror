@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.15 2001/10/02 19:43:52 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.16 2001/10/03 08:21:16 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
@@ -360,7 +360,7 @@ def sample1():
 	lc.width = 300
 	lc.data = data
 	lc.joinedLines = 1
-	lc.lines.symbol = makeFilledDiamond
+	lc.lines.symbol = makeMarker('FilledDiamond')
 	lc.lineLabelFormat = '%2.0f'
 
 	catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
@@ -439,7 +439,7 @@ def sample1a():
 	lc.joinedLines = 1
 	lc.strokeColor = colors.white
 	lc.fillColor = colors.HexColor(0xCCCCCC)
-	lc.lines.symbol = makeFilledDiamond
+	lc.lines.symbol = makeMarker('FilledDiamond')
 	lc.lineLabelFormat = '%2.0f'
 
 	catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
@@ -471,9 +471,7 @@ def sample2():
 	lc.width = 300
 	lc.data = data
 	lc.joinedLines = 1
-	lc.lines.symbol = makeSmiley
-	lc.lines.symbol = Marker()
-	lc.lines.symbol.kind = 'Smiley'
+	lc.lines.symbol = makeMarker('Smiley')
 	lc.lineLabelFormat = '%2.0f'
 	lc.strokeColor = colors.black
 	lc.fillColor = colors.lightblue
