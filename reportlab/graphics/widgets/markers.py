@@ -7,19 +7,26 @@ from reportlab.graphics.widgetbase import Widget
 from reportlab.lib.validators import isNumber, isColorOrNone, OneOf
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
 from reportlab.lib.colors import black
+from math import sin, cos, pi
+_toradians = pi/180.0
 
 class Marker(Widget):
 	'''A polymorphic class of markers'''
 	_attrMap = AttrMap(BASE=Widget,
 					kind = AttrMapValue(
-							OneOf(None, 'Square', 'Diamond', 'Circle', 'Cross', 'Smiley',
-								'FilledSquare', 'FilledCircle', 'FilledDiamond', 'FilledCross'),
+							OneOf(None, 'Square', 'Diamond', 'Circle', 'Cross', 'Triangle', 'StarSix',
+								'Pentagon', 'Hexagon', 'Heptagon', 'Octagon',
+								'FilledSquare', 'FilledCircle', 'FilledDiamond', 'FilledCross',
+								'FilledTriangle','FilledStarSix', 'FilledPentagon', 'FilledHexagon',
+								'FilledHeptagon', 'FilledOctagon',
+								'Smiley'),
 							desc='marker type name'),
 					size = AttrMapValue(isNumber,desc='marker size'),
 					x = AttrMapValue(isNumber,desc='marker x coordinate'),
 					y = AttrMapValue(isNumber,desc='marker y coordinate'),
 					dx = AttrMapValue(isNumber,desc='marker x coordinate adjustment'),
 					dy = AttrMapValue(isNumber,desc='marker y coordinate adjustment'),
+					angle = AttrMapValue(isNumber,desc='marker rotation'),
 					fillColor = AttrMapValue(isColorOrNone, desc='marker fill colour'),
 					strokeColor = AttrMapValue(isColorOrNone, desc='marker stroke colour'),
 					strokeWidth = AttrMapValue(isNumber, desc='marker stroke width'),
@@ -31,22 +38,22 @@ class Marker(Widget):
 		self.strokeWidth = 0.1
 		self.fillColor = None
 		self.size = 5
-		self.x = self.y = self.dx = self.dy = 0
+		self.x = self.y = self.dx = self.dy = self.angle = 0
 
 	def _Smiley(self):
-		d = self.size
+		d = self.size/2.0
 		s = SmileyFace()
 		s.fillColor = self.fillColor
 		s.strokeWidth = self.strokeWidth
 		s.strokeColor = self.strokeColor
-		s.x = self.x+self.dx-d
-		s.y = self.y+self.dy-d
+		s.x = -d
+		s.y = -d
 		s.size = d*2
 		return s
 
 	def _Square(self):
 		d = self.size/2.0
-		s = Rect(self.x+self.dx-d, self.y+self.dy-d, 2*d, 2*d)
+		s = Rect(-d, -d, 2*d, 2*d)
 		s.fillColor = self.fillColor
 		s.strokeColor = self.strokeColor
 		s.strokeWidth = self.strokeWidth
@@ -54,15 +61,10 @@ class Marker(Widget):
 
 	def _Diamond(self):
 		d = self.size/2.0
-		x, y = self.x+self.dx, self.y+self.dy
-		s = Polygon((x-d, y, x,y+d, x+d,y, x, y-d))
-		s.fillColor = self.fillColor
-		s.strokeColor = self.strokeColor
-		s.strokeWidth = self.strokeWidth
-		return s
+		return self._doPolygon((-d,0,0,d,d,0,0,-d))
 
 	def _Circle(self):
-		s = Circle(self.x+self.dx, self.y+self.dy, self.size/2.0)
+		s = Circle(0, 0, self.size/2.0)
 		s.fillColor = self.fillColor
 		s.strokeColor = self.strokeColor
 		s.strokeWidth = self.strokeWidth
@@ -71,12 +73,39 @@ class Marker(Widget):
 	def _Cross(self):
 		s = float(self.size)
 		h, s = s/2, s/6
-		x, y = self.x+self.dx, self.y+self.dy
-		return Polygon([x-s,y-h,x-s,y-s,x-h,y-s,x-h,y+s,x-s,y+s,x-s,y+h,
-						x+s,y+h,x+s,y+s,x+h,y+s,x+h,y-s,x+s,y-s,x+s,y-h],
-						strokeWidth = self.strokeWidth, strokeColor= self.strokeColor,
-						fillColor=self.fillColor)
+		return self._doPolygon((-s,-h,-s,-s,-h,-s,-h,s,-s,s,-s,h,s,h,s,s,h,s,h,-s,s,-s,s,-h))
 
+	def _Triangle(self):
+		r = float(self.size)/2
+		c = 30*_toradians
+		s = sin(30*_toradians)*r
+		c = cos(c)*r
+		return self._doPolygon((0,r,-c,-s,c,-s))
+
+	def _StarSix(self):
+		r = float(self.size)/2
+		c = 30*_toradians
+		s = sin(30*_toradians)*r
+		c = cos(c)*r
+		z = s/2
+		g = c/2
+		x, y = self.x+self.dx, self.y+self.dy
+		return self._doPolygon((0,r,-z,s,-c,s,-s,0,-c,-s,-z,-s,0,-r,z,-s,c,-s,s,0,c,s,z,s))
+
+	def _Pentagon(self):
+		return self._doNgon(5)
+
+	def _Hexagon(self):
+		return self._doNgon(6)
+
+	def _Heptagon(self):
+		return self._doNgon(7)
+
+	def _Octagon(self):
+		return self._doNgon(8)
+
+	def _doPolygon(self,P):
+		return Polygon(P, strokeWidth = self.strokeWidth, strokeColor= self.strokeColor, fillColor=self.fillColor)
 
 	def _doFill(self):
 		old = self.fillColor
@@ -86,13 +115,39 @@ class Marker(Widget):
 		self.fillColor = old
 		return r
 
+	def _doNgon(self,n):
+		P = []
+		size = float(self.size)/2
+		for i in xrange(n):
+			r = (2.*i/n+0.5)*pi
+			P.append(size*cos(r))
+			P.append(size*sin(r))
+		return self._doPolygon(P)
+			
 	_FilledCircle = _doFill
 	_FilledSquare = _doFill
 	_FilledDiamond = _doFill
 	_FilledCross = _doFill
+	_FilledTriangle = _doFill
+	_FilledStarSix = _doFill
+	_FilledPentagon = _doFill
+	_FilledHexagon = _doFill
+	_FilledHeptagon = _doFill
+	_FilledOctagon = _doFill
 
 	def draw(self):
-		return (self.kind and getattr(self,'_'+self.kind) or Group)()
+		if self.kind:
+			m = getattr(self,'_'+self.kind)()
+			x, y, angle = self.x+self.dx, self.y+self.dy, self.angle
+			if x or y or angle:
+				if not isinstance(m,Group):
+					_m, m = m, Group()
+					m.add(_m)
+				if angle: m.rotate(angle)
+				if x or y: m.shift(x,y)
+		else:
+			m = Group()
+		return m
 
 if __name__=='__main__':
 	D = Drawing()
