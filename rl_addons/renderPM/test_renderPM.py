@@ -144,32 +144,60 @@ if	__name__=='__main__':
 			doTest0(c,vp, 168, 168, c0=0xff00, c1=0xff, angle=45)
 			do_save(c,0)
 
-		if flagged(1):
-			def doCPath1(c):
-				c.moveTo(110-85,100-85)
-				c.curveTo(110-85,94.477152501999996-85, 105.522847498-85,90-85, 100-85,90-85)
-				c.curveTo(94.477152501999996-85,90-85, 90-85,94.477152501999996-85, 90-85,100-85)
-				c.curveTo(90-85,105.522847498-85, 94.477152501999996-85,110-85, 100-85,110-85)
-				c.curveTo(105.522847498-85,110-85, 110-85,105.522847498-85, 110-85,100-85)
-				c.pathClose()
-				c.pathFill()
-				c.pathStroke()
+		def doCPath1(c):
+			c.moveTo(110-85,100-85)
+			c.curveTo(110-85,94.477152501999996-85, 105.522847498-85,90-85, 100-85,90-85)
+			c.curveTo(94.477152501999996-85,90-85, 90-85,94.477152501999996-85, 90-85,100-85)
+			c.curveTo(90-85,105.522847498-85, 94.477152501999996-85,110-85, 100-85,110-85)
+			c.curveTo(105.522847498-85,110-85, 110-85,105.522847498-85, 110-85,100-85)
+			c.pathClose()
+			c.pathFill()
+			c.pathStroke()
 
+		def doCPath2(c):
+			c.moveTo(5,5)
+			c.lineTo(5,20)
+			c.lineTo(20,20)
+			c.lineTo(20,5)
+			c.pathClose()
+			c.pathFill()
+
+		def rotate_alpha_blend_text(can,off_x, text, dw, n, end_alpha):
+			"decrease alpha linearly over the range of n points"
+			dalpha = end_alpha/n
+			for ii in range(n):
+				can.gsave()
+				can.rotate(dw*ii)
+				# print dw*ii
+				can.gstate.fill_opacity = end_alpha-ii*dalpha
+				print "alpha = ", can.gstate.fill_opacity
+				can.drawString(off_x,0, text)
+				can.grestore()
+
+		def doCPath4(c):
+			c.moveTo(5,5)
+			c.lineTo(5,20)
+			c.lineTo(20,20)
+			c.lineTo(20,5)
+			c.pathClose()
+			c.pathFill()
+			c.pathStroke()
+
+		def doCPath5(c):
+			c.moveTo(5,5)
+			c.lineTo(5,20)
+			c.lineTo(20,20)
+			c.lineTo(20,5)
+			c.pathClose()
+			c.pathStroke()
+
+		if flagged(1):
 			c = renderPM.PMCanvas(25, 25, bg=0xffffff)
 			c.setFont('Times-Roman',18)
-
 			doCTest(doCPath1, c, 0, 0 )
 			do_save(c,1)
 
 		if flagged(2):
-			def doCPath2(c):
-				c.moveTo(5,5)
-				c.lineTo(5,20)
-				c.lineTo(20,20)
-				c.lineTo(20,5)
-				c.pathClose()
-				c.pathFill()
-
 			c = renderPM.PMCanvas(25, 25, bg=0xffffff)
 			doCTest(doCPath2, c, 0, 0 )
 			do_save(c,2,txt=1,pil=1)
@@ -178,19 +206,6 @@ if	__name__=='__main__':
 			c = renderPM.PMCanvas(256, 256, bg=0xffffff)
 			c.fillColor = 0x000000
 			c.setFont('Times-Roman',18)
-
-			def rotate_alpha_blend_text(can,off_x, text, dw, n, end_alpha):
-				"decrease alpha linearly over the range of n points"
-				dalpha = end_alpha/n
-				for ii in range(n):
-					can.gsave()
-					can.rotate(dw*ii)
-					# print dw*ii
-					can.gstate.fill_opacity = end_alpha-ii*dalpha
-					print "alpha = ", can.gstate.fill_opacity
-					can.drawString(off_x,0, text)
-					can.grestore()
-
 			text = "ABC"
 			c.ctm=(1,0,0,("invert" in sys.argv) and -1 or 1, 127.5,127.5)
 			c.drawString(0, 0, text)
@@ -200,28 +215,19 @@ if	__name__=='__main__':
 			do_save(c,3)
 
 		if flagged(4):
-			def doCPath4(c):
-				c.moveTo(5,5)
-				c.lineTo(5,20)
-				c.lineTo(20,20)
-				c.lineTo(20,5)
-				c.pathClose()
-				c.pathFill()
-				c.pathStroke()
-
 			c = renderPM.PMCanvas(25, 25, bg=0xffffff)
 			doCTest(doCPath4, c, 0, 0, c0=0x8000, c1=0xff0000)
 			do_save(c,4)
 
 		if flagged(5):
-			def doCPath5(c):
-				c.moveTo(5,5)
-				c.lineTo(5,20)
-				c.lineTo(20,20)
-				c.lineTo(20,5)
-				c.pathClose()
-				c.pathStroke()
-
 			c = renderPM.PMCanvas(25, 25, bg=0xffffff)
 			doCTest(doCPath5, c, 0, 0 )
 			do_save(c,5)
+
+		if flagged(6):
+			c = renderPM.PMCanvas(25, 25, bg=0xffffff)
+			doCTest(doCPath5, c, 0, 0 )
+			c.clipPathSet()
+			doCTest(doCPath4, c, 0, 0, c0=0x8000, c1=0xff0000)
+			c.clipPathClear()
+			do_save(c,6)
