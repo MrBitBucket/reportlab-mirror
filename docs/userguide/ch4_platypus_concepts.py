@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch4_platypus_concepts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch4_platypus_concepts.py,v 1.10 2001/03/07 18:57:11 rgbecker Exp $
-from genuserguide import *
+#$Header: /tmp/reportlab/docs/userguide/ch4_platypus_concepts.py,v 1.11 2001/08/11 14:35:52 rgbecker Exp $
+from rl_doc_utils import *
 
 #####################################################################################################3
 

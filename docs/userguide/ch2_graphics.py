@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch2_graphics.py,v 1.15 2001/08/03 10:23:33 dinu_gherman Exp $
-from genuserguide import *
+#$Header: /tmp/reportlab/docs/userguide/ch2_graphics.py,v 1.16 2001/08/11 14:35:52 rgbecker Exp $
+from rl_doc_utils import *
 
 heading1("Graphics and Text with $pdfgen$")
 

@@ -1,9 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch2_concepts.py,v 1.2 2001/08/10 16:00:08 dinu_gherman Exp $
-
-from gengraphguide import *
+#$Header: /tmp/reportlab/docs/graphguide/ch2_concepts.py,v 1.3 2001/08/11 14:33:58 rgbecker Exp $
+from rl_doc_utils import *
 
 heading1("General Concepts")
 

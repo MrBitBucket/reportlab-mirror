@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/app_demos.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/app_demos.py,v 1.7 2000/10/25 08:57:45 rgbecker Exp $
-from genuserguide import *
+#$Header: /tmp/reportlab/docs/userguide/app_demos.py,v 1.8 2001/08/11 14:35:52 rgbecker Exp $
+from rl_doc_utils import *
 
 Appendix1("ReportLab Demos")
 disc("""In the subdirectories of $reportlab/demos$ there are a number of working examples showing

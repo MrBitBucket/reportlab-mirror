@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch7_custom.py,v 1.7 2001/03/21 14:12:02 rgbecker Exp $
-from genuserguide import *
+#$Header: /tmp/reportlab/docs/userguide/ch7_custom.py,v 1.8 2001/08/11 14:35:52 rgbecker Exp $
+from rl_doc_utils import *
 
 heading1("Writing your own $Flowable$ Objects")
 disc("""
