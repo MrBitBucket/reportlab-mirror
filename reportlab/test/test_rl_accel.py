@@ -7,8 +7,15 @@ from reportlab.test.utils import makeSuiteForClasses
 class RlAccelTestCase(unittest.TestCase):
     
     def testFpStr(self):
+        # should give siz decimal places if less than 1.
+        # if more, give up to seven sig figs
         from _rl_accel import fp_str
         assert fp_str(1,2,3)=='1 2 3'
+        assert fp_str(1) == '1'
+
+        assert fp_str(595.275574) == '595.2756'
+        assert fp_str(59.5275574) == '59.52756'
+        assert fp_str(5.95275574) == '5.952756'
 
     def test_AsciiBase85Encode(self):
         from _rl_accel import _AsciiBase85Encode
