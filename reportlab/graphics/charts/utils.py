@@ -171,16 +171,17 @@ def ticks(lower, upper, n=(4,5,6,7,8,9), split=1, percent=0, grid=None):
 			format = '%'+`digits+2`+'.'+`digits`+'f'
 	
 	if percent: format=format+'%%'
-	ticks = []
+	T = []
+	n = int(float(hi-t)/grid+0.1)+1
 	if split:
 		labels = []
-		while t <= hi and len(ticks) < 200:
-			ticks.append(t)
-			labels.append(format % (t,))
-			t = t + grid
-		return ticks, labels
+		for i in xrange(n):
+			v = t+grid*i
+			T.append(v)
+			labels.append(format % v)
+		return T, labels
 	else:
-		while t <= hi and len(ticks) < 200:
-			ticks.append(t, format % (t,))
-			t = t + grid
-		return ticks
+		for i in xrange(n):
+			v = t+grid*i
+			T.append((v, format % v))
+		return T
