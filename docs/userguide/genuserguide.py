@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: genuserguide.py,v $
+#	Revision 1.12  2000/06/28 16:10:00  rgbecker
+#	Fix unwanted 'i'
+#
 #	Revision 1.11  2000/06/28 14:52:43  rgbecker
 #	Documentation changes
-#
+#	
 #	Revision 1.10  2000/06/27 10:09:48  rgbecker
 #	Minor cosmetic changes
 #	
@@ -65,7 +68,7 @@
 #	Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #	initial checkin. user guide generation framework.
 #	
-__version__=''' $Id: genuserguide.py,v 1.11 2000/06/28 14:52:43 rgbecker Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.12 2000/06/28 16:10:00 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -102,7 +105,7 @@ if _oldStyle:
 	codesubst = "%s<font name=courier color=green>%s</font>"
 	QFsubst = "%s<font name=Helvetica color=blue><i>%s</i></font>"
 else:
-	codesubst = "%s<b><font name=courier>i</b>%s</font>"
+	codesubst = "%s<b><font name=courier></b>%s</font>"
 	QFsubst = "%s<font name=Helvetica><i>%s</i></font>"
 	
 
