@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: stdparser.py,v $
+#	Revision 1.10  2000/07/11 15:00:39  rgbecker
+#	Added end_spacer
+#
 #	Revision 1.9  2000/07/10 15:25:47  andy_robinson
 #	Added tables to PythonPoint
-#
+#	
 #	Revision 1.8  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #	
@@ -387,7 +390,9 @@ class PPMLParser(xmllib.XMLParser):
         sp = pythonpoint.PPSpacer()
         sp.height = eval(args['height'])
         self._curFrame.content.append(sp)
-        
+
+    def end_spacer(self):
+        pass
 
     ## the graphics objects - go into either the current section
     ## or the current slide.
