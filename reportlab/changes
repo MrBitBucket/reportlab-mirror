@@ -1,3 +1,347 @@
+#################################################################################
+#################### RELEASE 1.07 at 11:54 BST ##################################
+#################################################################################
+##### 2001/05/02 #####
+	lib/units.py 1.3 rgbecker
+		 Added toLength function
+##### 2001/05/01 #####
+	lib/colors.py 1.18 johnprecedo
+		 Added special color - ReportLabBlue.
+	graphics/charts/axes.py 1.18 rgbecker
+		 makeLabels/Ticks changed
+	graphics/testshapes.py 1.10 rgbecker
+		 strokeDashArray fixes
+	graphics/shapes.py 1.23 rgbecker
+		 strokeDashArray fixes
+	graphics/charts/axes.py 1.17 rgbecker
+		 strokeDashArray fixes
+##### 2001/04/30 #####
+	pdfbase/pdfmetrics.py 1.37 rgbecker
+		 Added some imports for compatibility/efficiency
+##### 2001/04/28 #####
+	graphics/widgets/signsandsymbols.py 1.9 rgbecker
+		 try and ensure float division
+##### 2001/04/26 #####
+	graphics/charts/lineplots.py 1.7 dinu_gherman
+		 Changed defaultColors to defaultStyles.
+	pdfgen/pdfimages.py 1.12 rgbecker
+		 Fixed typo zlib (not lib)
+	lib/randomtext.py 1.7 johnprecedo
+		 Minor changes. Now allows you to specify the maximum number of sentences for the randomtext as an argument. Also added an example usage to the docstring.
+##### 2001/04/25 #####
+	license.txt 1.2 andy_robinson
+		 Trivial change to test CVS write access
+	graphics/charts/piecharts.py 1.5 dinu_gherman
+		 Added more samples.
+	graphics/charts/piecharts.py 1.4 johnprecedo
+		 Added a new example.
+	graphics/charts/piecharts.py 1.3 dinu_gherman
+		 Removed sector line for single sliced pie charts.
+##### 2001/04/24 #####
+	graphics/charts/axes.py 1.16 dinu_gherman
+		 Made joining of axes possible via axes attributes.
+##### 2001/04/23 #####
+	pdfbase/pdfmetrics.py 1.36 rgbecker
+		 Added findT1File to base Face, and _fontdata
+	pdfbase/_fontdata.py 1.7 rgbecker
+		 Added findT1File to base Face, and _fontdata
+	lib/fonts.py 1.7 rgbecker
+		 Moved T1 search stuff into pdfbase.fontdata
+	pdfbase/pdfmetrics.py 1.35 rgbecker
+		 Remove debug prints
+##### 2001/04/20 #####
+	test/test_pdfbase_fontembed.py 1.2 rgbecker
+		 Merged pdfgen.fonts into pdfmetrics again
+	test/test_pdfbase_encodings.py 1.2 rgbecker
+		 Merged pdfgen.fonts into pdfmetrics again
+	pdfgen/fonts.py 1.2 rgbecker
+		 Merged pdfgen.fonts into pdfmetrics again
+	pdfbase/pdfmetrics.py 1.34 rgbecker
+		 Merged pdfgen.fonts into pdfmetrics again
+	pdfbase/_fontdata.py 1.6 rgbecker
+		 Merged pdfgen.fonts into pdfmetrics again
+	lib/_rl_accel.c 1.13 rgbecker
+		 Merged pdfgen.fonts into pdfmetrics again
+	utils/daily.py 1.41 rgbecker
+		 Fix graphguide generation
+	utils/daily.py 1.40 rgbecker
+		 Add graphguide generation
+	pdfgen/canvas.py 1.74 rgbecker
+		 pageCompression fix from Mark Charlebois (was undefined if zlib not present); removed stray print statements on font registration.
+	pdfbase/pdfmetrics.py 1.33 rgbecker
+		 pageCompression fix from Mark Charlebois (was undefined if zlib not present); removed stray print statements on font registration.
+##### 2001/04/18 #####
+	test/test_pdfbase_fontembed.py 1.1 rgbecker
+		 New font embedding mechanism
+	test/test_pdfbase_encodings.py 1.1 rgbecker
+		 New font embedding mechanism
+	pdfgen/fonts.py 1.1 rgbecker
+		 New font embedding mechanism
+	test/test_pdfgen_general.py 1.4 rgbecker
+		 New font embedding stuff.
+	test/test_pdfbase_pdfmetrics.py 1.6 rgbecker
+		 New font embedding stuff.
+	pdfgen/canvas.py 1.73 rgbecker
+		 New font embedding stuff.
+	pdfbase/pdfmetrics.py 1.32 rgbecker
+		 New font embedding stuff.
+	pdfbase/pdfdoc.py 1.44 rgbecker
+		 New font embedding stuff.
+	README 1.5 rgbecker
+		 Testing write access to CVS, only whitespace changed
+	testfile.txt 1.2 johnprecedo
+		 removed test file
+	testfile.txt 1.1 johnprecedo
+		 nitial checkin to test CVS write access
+##### 2001/04/17 #####
+	rl_config.py 1.4 rgbecker
+		 Fix typo in T1SearchPath name
+	pdfbase/afm2w.py 1.2 rgbecker
+		 Removed file added for test
+	pdfbase/afm2w.py 1.1 rgbecker
+		 Adding afm2w as a test
+	docs/userguide/testfile.txt 1.1 andy_robinson
+		 Testing checkin rights
+	docs/userguide/ch9_future.py 1.3 andy_robinson
+		 Testing SF commit ability
+##### 2001/04/16 #####
+	__init__.py 1.13 rgbecker
+		 Changed copyright dates
+	README 1.4 andy_robinson
+		 Whitespace change to test CVS write access
+##### 2001/04/13 #####
+	test/test_pdfgen_general.py 1.3 rgbecker
+		 Added sausages
+	test/test_pdfgen_general.py 1.2 andy_robinson
+		 filename case change for an embedded GIF
+	test/test_platypus_general.py 1.2 andy_robinson
+		 General pdfgen test moved to here
+	test/test_pdfgen_general.py 1.1 andy_robinson
+		 General pdfgen test moved to here
+	test/test_platypus_tables.py 1.1 andy_robinson
+		 Added tests formerly under platypus/test
+	test/test_platypus_general.py 1.1 andy_robinson
+		 Added tests formerly under platypus/test
+	test/pythonpowered.gif 1.1 andy_robinson
+		 Added tests formerly under platypus/test
+##### 2001/04/12 #####
+	graphics/charts/barcharts.py 1.7 rgbecker
+		 Moved functionality into the base Barchart class
+	graphics/renderPDF.py 1.6 rgbecker
+		 Added showBoundary arg
+##### 2001/04/11 #####
+	graphics/charts/axes.py 1.15 rgbecker
+		 Move common value axis bits into base class
+	graphics/charts/axes.py 1.14 rgbecker
+		 Try and make min/max finding as complicated as possible
+	graphics/charts/axes.py 1.13 rgbecker
+		 Moved some common stuff into ValueAxis, added maximumTicks
+	graphics/shapes.py 1.22 rgbecker
+		 Improved comment somewhat
+	graphics/charts/axes.py 1.12 rgbecker
+		 Added _findMax/Min funcs
+	graphics/charts/axes.py 1.11 rgbecker
+		 Added _calcValueStep and _rangeAdjust methods
+	graphics/widgetbase.py 1.9 rgbecker
+		 Added StyleProeprties class
+##### 2001/04/10 #####
+	graphics/widgetbase.py 1.8 andy_robinson
+		 Robin's refactoring to separate propholder and Widget
+	demos/pythonpoint/pythonpoint.py 1.32 andy_robinson
+		 Removing pingo dependency
+	graphics/charts/markers.py 1.2 dinu_gherman
+		 Added two funcions and tidied-up.
+	lib/normalDate.py 1.1 dinu_gherman
+		 Initial checkin.
+	lib/pagesizes.py 1.7 andy_robinson
+		 Fixed size of legal
+##### 2001/04/09 #####
+	graphics/charts/lineplots.py 1.6 dinu_gherman
+		 Fixed import buglet.
+	test/test_graphics_charts.py 1.8 dinu_gherman
+		 Adapted to new LineChart class names.
+	graphics/charts/markers.py 1.1 dinu_gherman
+		 Initial checkin.
+	graphics/charts/lineplots.py 1.5 dinu_gherman
+		 Splitted draw() method. Removed marker functions. Removed usage of XTimeSeriesAxis. Lots of tiny changes.
+	graphics/charts/linecharts.py 1.4 dinu_gherman
+		 Aplitted draw method. Moved marker functions into markers.py. Many tiny modifications.
+	graphics/charts/barcharts.py 1.6 dinu_gherman
+		 Minimal doc string changes.
+	graphics/charts/axes.py 1.10 dinu_gherman
+		 Added attribute valueSteps to X- and YValueAxis. Commented XTimeSeriesAxes.
+	graphics/charts/barcharts.py 1.5 dinu_gherman
+		 Added abstract BarChart base class. Applied various code simplifications. Removed 'import *'.
+	graphics/charts/barcharts.py 1.4 dinu_gherman
+		 Tiny changes (to verify CVS works).
+	graphics/charts/barcharts.py 1.3 dinu_gherman
+		 Split draw() methods into makeBars() and makeBackground(). Fixed one possible bug (reverted order of configure and setPosition()).
+	graphics/charts/utils.py 1.2 dinu_gherman
+		 Added Robin's stuff from rgb_ticks.py.
+	graphics/charts/axes.py 1.9 dinu_gherman
+		 Factorized two more methods into ValueAxis.
+	graphics/charts/axes.py 1.8 dinu_gherman
+		 Factorized some more methods into abstract base classes.
+	graphics/charts/axes.py 1.7 dinu_gherman
+		 Added new abstract base classes CategoryAxis and ValueAxis. Factorized some methods in X/Y axes and moved to these base classes. Split draw methods into three new methods.
+	graphics/charts/lineplots.py 1.4 dinu_gherman
+		 Removed commented code.
+	graphics/charts/utils.py 1.1 dinu_gherman
+		 Moved utility functions into new module utils.py.
+	graphics/charts/lineplots.py 1.3 dinu_gherman
+		 Moved utility functions into new module utils.py.
+	graphics/charts/axes.py 1.6 dinu_gherman
+		 Moved utility functions into new module utils.py.
+	graphics/charts/axes.py 1.5 dinu_gherman
+		 Removed 'import *'.
+##### 2001/04/06 #####
+	lib/graphdocpy.py 1.4 andy_robinson
+		 Now adds the current directory to the path; makes it easier to run it over other modules.
+	graphics/charts/axes.py 1.4 andy_robinson
+		 Changes received from Dinu - required for demo, not sure what's in it (Andy)
+	graphics/shapes.py 1.21 rgbecker
+		 Fix indent
+	graphics/shapes.py 1.20 rgbecker
+		 _updater was silly
+	lib/utils.py 1.13 rgbecker
+		 _updater was silly
+	lib/utils.py 1.12 rgbecker
+		 Added dict _updater func
+	graphics/shapes.py 1.19 rgbecker
+		 Group/Drawing slightly cleaner python
+##### 2001/04/05 #####
+	graphics/shapes.py 1.18 rgbecker
+		 Added Group insert method
+	graphics/shapes.py 1.17 rgbecker
+		 Added stringWidth import
+	utils/cvs_status.py 1.2 rgbecker
+		 License text changes
+	test/test_pyfiles.py 1.5 rgbecker
+		 License text changes
+	test/test_platypus_toc.py 1.6 rgbecker
+		 License text changes
+	test/test_platypus_paragraphs.py 1.6 rgbecker
+		 License text changes
+	test/test_pdfgen_pagemodes.py 1.4 rgbecker
+		 License text changes
+	test/test_pdfbase_pdfutils.py 1.3 rgbecker
+		 License text changes
+	test/test_pdfbase_pdfmetrics.py 1.5 rgbecker
+		 License text changes
+	test/test_paragraphs.py 1.9 rgbecker
+		 License text changes
+	test/test_lib_sequencer.py 1.4 rgbecker
+		 License text changes
+	test/test_lib_colors.py 1.6 rgbecker
+		 License text changes
+	test/test_graphics_speed.py 1.7 rgbecker
+		 License text changes
+	test/test_graphics_charts_textlabels.py 1.3 rgbecker
+		 License text changes
+	test/test_graphics_charts.py 1.7 rgbecker
+		 License text changes
+	test/test_docstrings.py 1.4 rgbecker
+		 License text changes
+	test/runAll.py 1.4 rgbecker
+		 License text changes
+	test/__init__.py 1.2 rgbecker
+		 License text changes
+	platypus/tableofcontents.py 1.2 rgbecker
+		 License text changes
+	pdfbase/pdfmetrics.py 1.31 rgbecker
+		 License text changes
+	pdfbase/_fontdata.py 1.5 rgbecker
+		 License text changes
+	lib/yaml.py 1.2 rgbecker
+		 License text changes
+	lib/setup.py 1.4 rgbecker
+		 License text changes
+	lib/graphdocpy.py 1.3 rgbecker
+		 License text changes
+	rl_config.py 1.3 rgbecker
+		 License text changes
+	lib/docpy.py 1.4 rgbecker
+		 License text changes
+	graphics/widgets/signsandsymbols.py 1.8 rgbecker
+		 License text changes
+	graphics/widgets/flags.py 1.2 rgbecker
+		 License text changes
+	graphics/widgets/__init__.py 1.2 rgbecker
+		 License text changes
+	graphics/widgetbase.py 1.7 rgbecker
+		 License text changes
+	graphics/testshapes.py 1.9 rgbecker
+		 License text changes
+	graphics/testdrawings.py 1.2 rgbecker
+		 License text changes
+	graphics/renderbase.py 1.9 rgbecker
+		 License text changes
+	graphics/renderPS.py 1.6 rgbecker
+		 License text changes
+	graphics/renderPDF.py 1.5 rgbecker
+		 License text changes
+	graphics/charts/textlabels.py 1.2 rgbecker
+		 License text changes
+	graphics/charts/piecharts.py 1.2 rgbecker
+		 License text changes
+	graphics/charts/lineplots.py 1.2 rgbecker
+		 License text changes
+	graphics/charts/linecharts.py 1.3 rgbecker
+		 License text changes
+	graphics/charts/legends.py 1.2 rgbecker
+		 License text changes
+	graphics/charts/barcharts.py 1.2 rgbecker
+		 License text changes
+	graphics/charts/axes.py 1.3 rgbecker
+		 License text changes
+	graphics/charts/__init__.py 1.2 rgbecker
+		 License text changes
+	graphics/__init__.py 1.2 rgbecker
+		 License text changes
+	docs/userguide/ch9_future.py 1.2 rgbecker
+		 License text changes
+	docs/graphguide/t_parse.py 1.2 rgbecker
+		 License text changes
+	docs/graphguide/platdemos.py 1.2 rgbecker
+		 License text changes
+	docs/graphguide/gengraphguide.py 1.2 rgbecker
+		 License text changes
+	docs/graphguide/examples.py 1.2 rgbecker
+		 License text changes
+	docs/graphguide/ch2_graphics.py 1.17 rgbecker
+		 License text changes
+	docs/graphguide/ch1_intro.py 1.7 rgbecker
+		 License text changes
+	graphics/shapes.py 1.16 rgbecker
+		 Fixed indentation
+	graphics/shapes.py 1.15 rgbecker
+		 Added missing comment
+	graphics/shapes.py 1.14 rgbecker
+		 Made Drawings inherit from Group
+	utils/copyr.txt 1.2 rgbecker
+		 Changed copyright period
+	utils/copyrite.py 1.2 rgbecker
+		 Removed spurious assignnments
+##### 2001/04/04 #####
+	lib/logger.py 1.3 rgbecker
+		 Added enable attribute to the WarnOnce class
+	graphics/shapes.py 1.13 rgbecker
+		 Added _textBoxLimits
+##### 2001/04/03 #####
+	docs/graphguide/ch2_graphics.py 1.16 johnprecedo
+		 Spellchecked - fixed 15 typos.
+	docs/graphguide/ch2_graphics.py 1.15 johnprecedo
+		 Minor changes - resolved a conflict.
+	docs/graphguide/ch2_graphics.py 1.14 johnprecedo
+		 Added another sample Pie.
+##### 2001/04/02 #####
+	docs/graphguide/ch1_intro.py 1.6 johnprecedo
+		 Corrected a couple of typoes.
+	docs/graphguide/ch2_graphics.py 1.13 johnprecedo
+		 Corrected a couple of typoes.
+#################################################################################
+#################### RELEASE 1.06 at 14:00 BST ##################################
+#################################################################################
 ##### 2001/03/30 #####
 	docs/graphguide/ch2_graphics.py 1.11 dinu_gherman
 		 Minor changes.
