@@ -16,8 +16,8 @@
 # copyright notice and this permission notice appear in supporting
 # documentation, and that the name of ReportLab not be used
 # in advertising or publicity pertaining to distribution of the software
-# without specific, written prior permission. 
-# 
+# without specific, written prior permission.
+#
 #
 # Disclaimer
 #
@@ -27,13 +27,16 @@
 # OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
 # OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 # OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-# PERFORMANCE OF THIS SOFTWARE. 
+# PERFORMANCE OF THIS SOFTWARE.
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.6  2000/02/23 10:53:33  rgbecker
+#	GMCM's memleak fixed
+#
 #	Revision 1.5  2000/02/17 02:09:05  rgbecker
 #	Docstring & other fixes
-#
+#	
 #	Revision 1.4  2000/02/16 09:42:50  rgbecker
 #	Conversion to reportlab package
 #	
@@ -43,7 +46,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.5 2000/02/17 02:09:05 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.6 2000/02/23 10:53:33 rgbecker Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -81,7 +84,7 @@ TA_JUSTIFY = 4
 
 class PropertySet:
     defaults = {}
-    
+
     def __init__(self, name, parent=None):
         self.name = name
         self.parent = parent
@@ -92,7 +95,7 @@ class PropertySet:
             self.attributes[key] = value
         else:
             self.__dict__[key] = value
-            
+
     def __getattr__(self, key):
         if self.defaults.has_key(key):
             if self.attributes.has_key(key):
@@ -107,7 +110,7 @@ class PropertySet:
 
     def __repr__(self):
         return "<%s '%s'>" % (self.__class__.__name__, self.name)
-    
+
     def listAttrs(self):
         print 'name =', self.name
         print 'parent =', self.parent
@@ -125,8 +128,8 @@ class PropertySet:
                     value = self.defaults[key]
                     print '%s = %s (class default)' % (key, value)
 
-                    
-                    
+
+
 class ParagraphStyle(PropertySet):
     defaults = {
         'fontName':'Times-Roman',
@@ -207,14 +210,14 @@ def getSampleStyleSheet():
     para.fontSize = 18
     para.spaceAfter = 6
     stylesheet['Heading1'] = para
-    
+
     para = ParagraphStyle('Heading2', stylesheet['Normal'])
     para.fontName = 'Times-Bold'
     para.fontSize = 14
     para.spaceBefore = 12
     para.spaceAfter = 6
     stylesheet['Heading2'] = para
-    
+
     para = ParagraphStyle('Heading3', stylesheet['Normal'])
     para.fontName = 'Times-BoldItalic'
     para.fontSize = 12
@@ -243,10 +246,10 @@ def getSampleStyleSheet():
     para.leading = 8.8
     para.leftIndent = 36
     stylesheet['Code'] = para
-        
-    
+
+
     return stylesheet
-    
+
 
 def cleanBlockQuotedText(text):
     """This is an internal utility which takes triple-
@@ -257,9 +260,9 @@ def cleanBlockQuotedText(text):
     trimmed_lines = map(string.lstrip, lines)
     return string.join(trimmed_lines, ' ')
 
-        
-    
-    
+
+
+
 #############################################################
 #
 #       Drawable Objects - a base class and a few examples.
@@ -279,7 +282,7 @@ class Drawable:
         self.width = 0
         self.height = 0
         self.wrapped = 0
-        
+
     def drawOn(self, canvas, x, y):
         "Tell it to draw itself on the canvas.  Do not override"
         self.canv = canvas
@@ -290,8 +293,8 @@ class Drawable:
 
         self.canv.restoreState()
         del self.canv
-    
-        
+
+
     def wrap(self, availWidth, availHeight):
         """This will be called by the enclosing frame before objects
         are asked their size, drawn or whatever.  It returns the
@@ -315,7 +318,7 @@ class XBox(Drawable):
         #centre the text
         self.canv.setFont('Times-Roman',12)
         self.canv.drawCentredString(0.5*self.width, 0.5*self.height, self.text)
-        
+
 
 class Paragraph(Drawable):
     def __init__(self, text, style, bulletText = None):
@@ -323,7 +326,7 @@ class Paragraph(Drawable):
         self.style = style
         self.bulletText = bulletText
         self.debug = 0   #turn this on to see a pretty one with all the margins etc.
-            
+
     def wrap(self, availWidth, availHeight):
         # work out widths array for breaking
         self.width = availWidth
@@ -333,7 +336,7 @@ class Paragraph(Drawable):
 
         # break it up and store the results internally
         self.lines = self.breakLines(self.text, wrap_widths, self.style.fontName, self.style.fontSize)
-        
+
         linecount = len(self.lines)
 
         #estimate the size
@@ -362,7 +365,7 @@ class Paragraph(Drawable):
             maxwidths = width
         lines = []
         spacewidth = pdfmetrics.stringwidth(' ', fontName) * 0.001 * fontSize
-        words = string.split(text, ' ')  
+        words = string.split(text, ' ')
         currentline = []
         lineno = 0
         maxwidth = maxwidths[lineno]
@@ -378,7 +381,7 @@ class Paragraph(Drawable):
             if bulletRight > self.style.firstLineIndent:
                 #..then it overruns, and we have less space available on line 1
                 maxwidths[0] = maxwidths[0] - (bulletRight - self.style.firstLineIndent)
-        
+
         for word in words:
             wordwidth = pdfmetrics.stringwidth(word, fontName) * 0.001 * fontSize
             space_available = maxwidth - (currentwidth + spacewidth + wordwidth)
@@ -398,13 +401,13 @@ class Paragraph(Drawable):
                     maxwidth = maxwidths[lineno]
                 except IndexError:
                     maxwidth = maxwidths[-1]  # use the last one
-        #deal with any leftovers on the final line                
+        #deal with any leftovers on the final line
         if currentline <> []:
             lines.append((space_available, currentline))
 
         return lines
 
-    
+
 
     def drawPara(self,debug=0):
         """Draws a paragraph according to the given style.
@@ -416,11 +419,11 @@ class Paragraph(Drawable):
         #stash the key facts locally for speed
         text = self.text
         canvas = self.canv
-        
+
         #work out the origin for line 1
-        cur_x = self.style.leftIndent   
+        cur_x = self.style.leftIndent
         cur_y = self.height - self.style.fontSize - self.style.spaceBefore
-        
+
         if debug:
             # This boxes and shades stuff to show how the paragraph
             # uses its space.  Useful for self-documentation so
@@ -438,29 +441,29 @@ class Paragraph(Drawable):
             canvas.rect(0, self.height - self.style.spaceBefore, self.width,  self.style.spaceBefore)
             canvas.rect(0, 0, self.width, self.style.spaceAfter)
             canvas.restoreState()
-            
+
             #self.drawLine(x + style.leftIndent, y, x + style.leftIndent, cur_y)
-            
+
 
         canvas.addLiteral('% textcanvas.drawParagraph()')
         #set up the font etc.
-        
+
     ##    color = style.textColor
     ##    r,g,b = color.red, color.green, color.blue
     ##    self.code.append('%s %s %s rg' % (r,g,b))
-    ##    
+    ##
         #is there a bullet?  if so, draw it first
-        
+
         if len(self.lines) > 0:
             #begin drawing line one.  Unless the wrapping was
             #perfect, we will have a few mm of extra space to allocate;
             #this means moving the line origin to the right depending
             #on whether it is centred, right-aligned or left-aligned
             offset = self.style.firstLineIndent - self.style.leftIndent
-            
+
 
             if self.bulletText <> None:
-                tx2 = canvas.beginText(self.style.bulletIndent, cur_y)  
+                tx2 = canvas.beginText(self.style.bulletIndent, cur_y)
                 tx2.setFont(self.style.bulletFontName, self.style.bulletFontSize)
                 tx2.textOut(self.bulletText)
                 bulletEnd = tx2.getX()
@@ -468,7 +471,7 @@ class Paragraph(Drawable):
                 canvas.drawText(tx2)
 
             tx = canvas.beginText(cur_x, cur_y)
-            
+
             #now the font for the rest of the paragraph
             tx.setFont(self.style.fontName,
                    self.style.fontSize,
@@ -492,12 +495,12 @@ class Paragraph(Drawable):
                 tx.setTextWordSpacing(1.0 * extraspace / len(words))
                 tx.textLine(text)
                 tx.setTextWordSpacing()
-                    
+
             cur_y = cur_y + self.style.leading
-            
+
         #now the middle of the paragraph, aligned with the left margin which is our
         #origin.
-            
+
             for lineno in range(1, len(self.lines)):
                 (extraspace, words) = self.lines[lineno]
                 text = string.join(words)
@@ -519,11 +522,11 @@ class Paragraph(Drawable):
                         tx.setTextWordSpacing(1.0 * extraspace / len(words))
                         tx.textLine(text)
                         tx.setTextWordSpacing()
-                
-                cur_y = cur_y - self.style.leading   
+
+                cur_y = cur_y - self.style.leading
         canvas.drawText(tx)
         #move down a bit, correct for the extra fontSize move at the  start
-        
+
 class Preformatted(Drawable):
     """This is like the HTML <PRE> tag.  The line breaks are exactly where you put
     them, and it will not be wrapped.  So it is much simpler to implement!"""
@@ -535,7 +538,7 @@ class Preformatted(Drawable):
         #indent code within a source script, you can supply an arg to dedent
         #and it will chop off that many character, otherwise it leaves
         #left edge intact.
-        
+
         templines = string.split(text, '\n')
         self.lines = []
         for line in templines:
@@ -546,35 +549,35 @@ class Preformatted(Drawable):
             self.lines = self.lines[1:]
         while string.strip(self.lines[-1]) == '':
             self.lines = self.lines[:-1]
-        
-            
-            
+
+
+
     def wrap(self, availWidth, availHeight):
         self.width = availWidth
         self.height = (self.style.spaceBefore +
                       self.style.leading * len(self.lines) +
                       self.style.spaceAfter)
         return (self.width, self.height)
-    
+
     def draw(self):
         #call another method for historical reasons.  Besides, I
         #suspect I will be playing with alternate drawing routines
         #so not doing it here makes it easier to switch.
-        
-        cur_x = self.style.leftIndent   
+
+        cur_x = self.style.leftIndent
         cur_y = self.height - self.style.spaceBefore - self.style.fontSize
         self.canv.addLiteral('%PreformattedPara')
 
-        tx = self.canv.beginText(cur_x, cur_y)  
+        tx = self.canv.beginText(cur_x, cur_y)
         #set up the font etc.
         tx.setFont(self.style.fontName,
                    self.style.fontSize,
                    self.style.leading)
-                
+
         for text in self.lines:
             tx.textLine(text)
         self.canv.drawText(tx)
-        
+
 
 
 
@@ -593,7 +596,7 @@ class Image(Drawable):
             self.drawHeight = height
         else:
             self.drawHeight = self.imageHeight
-        
+
     def wrap(self, availWidth, availHeight):
         #the caller may decide it does not fit.
         self.availWidth = availWidth
@@ -627,7 +630,7 @@ class Image(Drawable):
 ##        tmp = list(rowHeights)
 ##        tmp.reverse()
 ##        rowHeights = tuple(tmp)
-##        
+##
 ##        #work out width and height, and keep the x and y lines handy
 ##        self._height = 0
 ##        self._horzLines = [self._height]
@@ -635,13 +638,13 @@ class Image(Drawable):
 ##                self._height = self._height + h
 ##                self._horzLines.append(self._height)
 ##        self._horzLines.reverse()
-##        
+##
 ##        self._width = 0
 ##        self._vertLines = [self._width]
 ##        for w in colWidths:
 ##                self._width = self._width + w
 ##                self._vertLines.append(self._width)
-##        
+##
 ##        self._rowHeights = rowHeights
 ##        self._colWidths = colWidths
 ##        self._rows = len(self._rowHeights)
@@ -653,8 +656,8 @@ class Image(Drawable):
 ##        #nice and easy, since they are predetermined size
 ##        self.availWidth = availWidth
 ##        return (self._width, self._height)
-##    
-##        
+##
+##
 ##    def draw(self):
 ##        """Just does the basic grid in current line
 ##        styles.  Centre it in the frame for now"""
@@ -699,7 +702,7 @@ class Image(Drawable):
 ##        #space to hold cell properties
 ##        self._cellStyles = {}
 ##        self._defaultCellStyle = CellStyle('<generic>')  #make a style on the fly
-##    
+##
 ##    def addLines(self, col1, row1, col2, row2, width=1):
 ##        """Adds line segments to be drawn later on.  You may use negative
 ##        indices for any number. The four coords you give specify a sub-grid
@@ -719,23 +722,23 @@ class Image(Drawable):
 ##        assert 0 <= row1  <= self._rows, "Illegal Row Index"
 ##        assert 0 <= col2  <= self._cols, "Illegal Column Index"
 ##        assert 0 <= row2  <= self._rows, "Illegal Row Index"
-##        
+##
 ##
 ##        self._lineSegments.append(col1, row1, col2, row2, width)
 ##
-##            
+##
 ##    def draw(self):
 ##        nudge = 0.5 * (self.availWidth - self._width)
 ##        self.canv.translate(nudge, 0)
 ##        self.drawLines()
 ##        self.drawText()
-##        
+##
 ##    def drawLines(self):
 ##        """Called by draw, does all the line segments"""
 ##        for (col1, row1, col2, row2, width) in self._lineSegments:
 ##            self.canv.setLineWidth(width)
 ##            #work out the row and column coordinates
-##                
+##
 ##            #draw the verticals if there are any
 ##            if row1 <> row2:
 ##                for col in range(col1, col2+1):
@@ -744,7 +747,7 @@ class Image(Drawable):
 ##                    x2 = self._vertLines[col]
 ##                    y2 = self._horzLines[row2]
 ##                    self.canv.line(x1, y1, x2, y2)
-##                    
+##
 ##            #draw the horizontals if there are any
 ##            if col1 <> col2:
 ##                for row in range(row1, row2+1):
@@ -761,18 +764,18 @@ class Image(Drawable):
 ##        right = self._vertLines[col+1]
 ##        top = self._horzLines[row]
 ##        return (left, bottom, right, top)
-##        
-##            
+##
+##
 ##    def drawText(self):
 ##        """Called by Draw, does the strings.  No format options yet"""
 ##        #cheat and pick a font
 ##        self.canv.setFont('Times-Roman', 10, 12)
-##        
+##
 ##        for col in range(self._cols):
 ##            for row in range(self._rows):
 ##                (left, bottom, right, top) = self.getCellRect(col, row)
 ##                self.canv.drawString(left+6, bottom + 3, str(self._data[row][col]))
-##        
+##
 class Spacer(Drawable):
     """A spacer just takes up space and doesn't draw anything - it can
     ensure a gap between objects."""
@@ -793,7 +796,7 @@ class PageBreak(Drawable):
         self.width = availWidth
         self.height = availHeight
         return (availWidth,availHeight)  #step back a point
-        
+
     def draw(self):
         pass
         #
@@ -807,7 +810,7 @@ class PageBreak(Drawable):
         #w = self.canv.stringWidth(self.text, f)
         #x = 0.5 * (self.width - w)
         #y = 0.33 * (self.height + f.size)
-        
+
         #self.canv.drawString(self.text, x, y, font=f)
 
 class Macro(Drawable):
@@ -822,8 +825,8 @@ class Macro(Drawable):
         exec self.command in globals(), {'canvas':self.canv}
 
 
-        
-        
+
+
 #############################################################
 #
 #       Basic paragraph-drawing routine.  Not sure where
@@ -865,16 +868,16 @@ class SimpleFrame:
         self.rightPadding = 6
         self.topPadding = 6
 
-        #work out the available space        
+        #work out the available space
         self.width = x2 - x1 - self.leftPadding - self.rightPadding
         self.height = y2 - y1 - self.topPadding - self.bottomPadding
-        self.objects = []   #it keeps a list of objects 
+        self.objects = []   #it keeps a list of objects
         self.showBoundary = 0
         #drawing starts at top left
         self.x = x1 + self.leftPadding
         self.y = y2 - self.topPadding
 
-    
+
     def add(self, drawable):
         """ Draws the object at the current position.
         Returns 1 if successful, 0 if it would not fit.
@@ -908,7 +911,7 @@ class SimpleFrame:
                         self.rightMargin - self.leftMargin,
                         self.topMargin - self.bottomMargin
                         )
-            
+
         while len(drawlist) > 0:
             head = drawlist[0]
             if self.add(head):
@@ -936,23 +939,26 @@ class Sequencer:
     """
     def __init__(self):
         self.dict = {}
-        
+
     def next(self, category):
         if self.dict.has_key(category):
             self.dict[category] = self.dict[category] + 1
         else:
             self.dict[category] = 1
         return self.dict[category]
-    
+
     def reset(self, category):
         self.dict[category] = 0
 
-    ##########################################################
-    #
-    #   
-    #
-    ##########################################################
+def _doNothing(drawables, doc):
+    "Dummy callback for onFirstPage and onNewPage"
+    pass
 
+##########################################################
+#
+#
+#
+##########################################################
 class SimpleFlowDocument:
     """A sample document that uses a single frame on each page.
     The intention is for programmers to create their own document
@@ -963,23 +969,20 @@ class SimpleFlowDocument:
     def __init__(self, filename, pagesize, showBoundary=0):
         self.filename = filename
         self.pagesize = pagesize
-        self.showBoundary=showBoundary   
+        self.showBoundary=showBoundary
         #sensibel defaults; override if you wish
         self.leftMargin =  inch
         self.bottomMargin = inch
         self.rightMargin = self.pagesize[0] - inch
         self.topMargin = self.pagesize[1] - inch
 
-        # 1-based counting is friendlier for readers        
-        self.page = 1   
+        # 1-based counting is friendlier for readers
+        self.page = 1
         #set these to drawing procedures of your own
-        self.onFirstPage = self.doNothing
-        self.onNewPage = self.doNothing
-        
-    def doNothing(self, drawables, doc):
-        "Dummy callback for onFirstPage and onNewPage"
-        pass
-    
+        self.onFirstPage = _doNothing
+        self.onNewPage = _doNothing
+
+
     def build(self, drawables):
         canv = canvas.Canvas(self.filename)
         #canv.setPageTransition('Dissolve')
@@ -996,7 +999,7 @@ class SimpleFlowDocument:
         frame1.showBoundary = self.showBoundary
         frame1.addFromList(drawables)
         #print 'drew page %d, %d objects remaining' % (self.page, len(drawables))
-        # do subsequent pages        
+        # do subsequent pages
         while len(drawables) > 0:
             canv.showPage()
             self.page = self.page + 1
@@ -1010,9 +1013,9 @@ class SimpleFlowDocument:
                             )
             frame.showBoundary = self.showBoundary
             frame.addFromList(drawables)
-            
+
             #print 'drew page %d, %d objects remaining' % (self.page, len(drawables))
-        
+
         canv.save()
     ##########################################################
     ##
@@ -1023,7 +1026,7 @@ class SimpleFlowDocument:
 def randomText():
     #this may or may not be appropriate in your company
     from random import randint, choice
-    
+
     RANDOMWORDS = ['strategic','direction','proactive',
     'reengineering','forecast','resources',
     'forward-thinking','profit','growth','doubletalk',
@@ -1053,7 +1056,7 @@ def myFirstPage(canvas, doc):
     canvas.setFont('Times-Roman',12)
     canvas.drawString(4 * inch, 0.75 * inch, "First Page")
     canvas.restoreState()
-    
+
 def myLaterPages(canvas, doc):
     #canvas.drawImage("snkanim.gif", 36, 36)
     canvas.saveState()
@@ -1063,7 +1066,7 @@ def myLaterPages(canvas, doc):
     canvas.setFont('Times-Roman',12)
     canvas.drawString(4 * inch, 0.75 * inch, "Page %d" % doc.page)
     canvas.restoreState()
-    
+
 
 
 def run():
@@ -1081,7 +1084,7 @@ def run():
         para = Paragraph(randomText(), normal)
         objects_to_draw.append(para)
 
-            
+
     doc = SimpleFlowDocument('platypus.pdf',DEFAULT_PAGE_SIZE)
     doc.onFirstPage = myFirstPage
     doc.onNewPage = myLaterPages
