@@ -2,395 +2,238 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.31 2001/04/05 09:30:12 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.32 2001/04/18 10:48:50 rgbecker Exp $ '''
 __doc__=""" 
-This provides the character widths database for calculating
-text metrics.  Everything for the base 14 fonts is pre-computed
-and available in dictionaries and lists in this module.  The
-machinery is also available to parse AFM files annd add new fonts
-and encodings of fonts at run-time.
+This provides a database of font metric information.
 
-There are two steps to adding a new font.  First, the width of each names
-glyph in the font must be added to the glyphs-by-name database. Then
-for a particular encoding of a font, # how to explain this.
-loadAFMFile() loads an AFM file, adding the glyph widths by name to the
-database.
-
-The static database portion (in _fontdata.py) contains three dictionaries
-keyed on font names and leading to more data:
-	ascent_descent - ascent and descent for each font
-	widthsByName - glyph names and widths for each glyph in each font
-	encodings - encoding vectors for standard encodings
-
-When the C accelerator module _rl_accel is not present, a dictionary
-widthVectorsByFont is populated each time a font is added.	This has
-vectors of 256 elements and is the data used by the stringWidth function.
-When _rl_accel is present, it maintains a similar database for itself.
-
+It is independent of the canvas or any particular context.  It keeps
+a registry of Font, TypeFace and Encoding objects.  Ideally these
+would be pre-loaded, but due to a nasty circularity problem we
+trap attempts to access them and do it on first access.
 """
 import string
-from types import ListType, TupleType, StringType
-from reportlab.pdfbase import pdfdoc
-from reportlab import rl_config
-from _fontdata import *
-_dummyEncoding=' _not an encoding_ '
+from types import StringType, ListType, TupleType
+from reportlab.rl_config import defaultEncoding
+from reportlab.pdfbase import _fontdata
+from reportlab.lib.logger import warnOnce
+from reportlab.pdfgen.fonts import FontError, FontNotFoundError, TypeFace, Encoding, Font
+
 
 # conditional import - try both import techniques, and set a flag
+_dummyEncoding=' _not an encoding_ '
 try:
-	try:
-		from reportlab.lib import _rl_accel
-	except ImportError, errMsg:
-		if str(errMsg)!='cannot import name _rl_accel': raise
-		import _rl_accel
-	assert _rl_accel.version>="0.3", "bad _rl_accel"
-	_stringWidth = _rl_accel.stringWidth
-	_rl_accel.defaultEncoding(_dummyEncoding)
-	del widthVectorsByFont
+    try:
+        from reportlab.lib import _rl_accel
+## I don't get exactly the message given so this bombs for me
+##    except ImportError, errMsg:
+##        if str(errMsg)!='cannot import name _rl_accel': raise
+    except ImportError:
+        import _rl_accel
+    assert _rl_accel.version>="0.3", "bad _rl_accel"
+    _stringWidth = _rl_accel.stringWidth
+    _rl_accel.defaultEncoding(_dummyEncoding)
+    #del widthVectorsByFont
 except ImportError, errMsg:
-	if str(errMsg)!='No module named _rl_accel': raise
-	_stringWidth = None
+    if str(errMsg)!='No module named _rl_accel': raise
+    _stringWidth = None
 
-class Encoding:
-	"""This is a class for encodings. It represents single byte encodings by default.
-	"""
-	_requiredLen = 256
-	def __init__(self, vector):
-		errMsg = "Single-byte encodings may only be initialized with the strings 'MacRomanEncoding' or 'WinAnsiEncoding', or a 256-element list"
-		if type(vector) in (ListType, TupleType):
-			assert not self._requiredLen or len(vector) == self._requiredLen, 'Encoding vector must have %d elements' % self._requiredLen
-			self.vector = tuple(vector)
-			self._encodingName = None
-			self._baseEncodingName = rl_config.defaultEncoding
-		elif type(vector) is StringType:
-			try:
-				self.vector = encodings[vector]	#This is a tuple so ca'nt be messed with
-				self._encodingName = vector
-				self._baseEncodingName = vector
-			except KeyError:
-				raise KeyError('Unknown font encoding "%s", allowed values are %s' % (vector, encodings.keys()))
-		else:
-			raise TypeError, errMsg
 
-	def __getitem__(self, index):
-		"Return glyph name for that code point, or None"
-		return self.vector[index]
 
-	def __setitem__(self, index, value):
-		if self.vector[index]!=value:
-			L = list(self.vector)
-			L[index] = value
-			self.vector = tuple(L)
+_typefaces = {}
+_encodings = {}
+_fonts = {}
 
-	def getGlyphs(self):
-		"Return glyph names"
-		return filter(lambda x: x, self.vector)
+def registerTypeFace(face):
+    assert isinstance(face, TypeFace), 'Not a TypeFace: %s' % face
+    _typefaces[face.name] = face
 
-	def modifyRange(self, base, newNames):
-		"""Set a group of character names starting at the code point 'base'."""
-		idx = base
-		for name in newNames:
-			self.vector[idx] = name
-			idx = idx + 1
+def registerEncoding(enc):
+    assert isinstance(enc, Encoding), 'Not an Encoding: %s' % enc
+    if _encodings.has_key(enc.name):
+        # already got one, complain if they are not the same
+        if enc.isEqual(_encodings[enc.name]):
+            enc.freeze()
+        else:
+            raise FontError('Encoding "%s" already registered with a different name vector!' % enc.Name)
+    else:
+        _encodings[enc.name] = enc
+        enc.freeze()
+    # have not yet dealt with immutability!
 
-	def getDifferences(self, otherEnc):
-		"""Return a compact list of the code points differing between two encodings
+def registerFont(font):
+    "Registers a font, including setting up info for accelerated stringWidth"
+    #assert isinstance(font, Font), 'Not a Font: %s' % font
+    _fonts[font.name] = font
+    if _stringWidth:
+        #TODO - add the accelerator info
+        _rl_accel.setFontInfo(string.lower(font.name),
+                              _dummyEncoding,
+                              font.face.ascent,
+                              font.face.descent,
+                              font.widths)
+        
 
-		This is in the Adobe format: list of
-		   [[b1, name1, name2, name3],
-		   [b2, name4]]
-		where b1...bn is the starting code point, and the glyph names following
-		are assigned consecutive code points."""
+def getTypeFace(faceName):
+    """Lazily construct known typefaces if not found"""
+    try:
+        return _typefaces[faceName]
+    except KeyError:
+        # not found, construct it if known
+        if faceName in _fontdata.standardFonts:
+            face = TypeFace(faceName)
+            registerTypeFace(face)
+            #print 'auto-constructing type face %s' % face.name
+            return face
+        else:
+            raise
+        
+def getEncoding(encName):
+    """Lazily construct known encodings if not found"""
+    try:
+        return _encodings[encName]
+    except KeyError:
+        if encName in _fontdata.standardEncodings:
+            enc = Encoding(encName)
+            registerEncoding(enc)
+            #print 'auto-constructing encoding %s' % encName
+            return enc
+        else:
+            raise
+    
+def getFont(fontName):
+    """Lazily constructs known fonts if not found.
 
-		ranges = []
-		curRange = None
-		for i in xrange(len(self.vector)):
-			glyph = self[i]
-			if glyph == otherEnc[i]:
-				if curRange:
-					ranges.append(curRange)
-					curRange = []
-			else:
-				if curRange:
-					curRange.append(glyph)
-				else:
-					curRange = [i, glyph]
-		if curRange:
-			ranges.append(curRange)
-		return ranges
+    Names of form 'face-encoding' will be built if
+    face and encoding are known.  Also if the name is
+    just one of the standard 14, it will make up a font
+    in the default encoding."""
+    try:
+        return _fonts[fontName]
+    except KeyError:
+        #it might have a font-specific encoding e.g. Symbol
+        # or Dingbats.  If not, take the default.
+        face = getTypeFace(fontName)
+        if face.requiredEncoding:
+            font = Font(fontName, fontName, face.requiredEncoding)
+        else:
+            font = Font(fontName, fontName, defaultEncoding)
+        registerFont(font)
+        return font
 
-	def makePDFObject(self):
-		"Returns a PDF Object representing self"
-		#if self._encodingName:
-			# it's a predefined one, we only need a string
+    
+        
+def _slowStringWidth(text, fontName, fontSize):
+    """Define this anyway so it can be tested, but whether it is used or not depends on _rl_accel"""
+    font = getFont(fontName)
+    return font.stringWidth(text, fontSize)
+    #this is faster, but will need more special-casing for multi-byte fonts. 
+    #wid = getFont(fontName).widths
+    #w = 0
+    #for ch in text:
+    #    w = w + wid[ord(ch)]
+    #return 0.001 * w * fontSize
 
-		D = {}
-		baseEnc = encodings[self._baseEncodingName]
-		differences = self.getDifferences(baseEnc) #[None] * 256)
-
-		# if no differences, we just need the base name
-		if differences == []:
-			return pdfdoc.PDFName(self._baseEncodingName)
-		else:
-			#make up a dictionary describing the new encoding
-			diffArray = []
-			for range in differences:
-				diffArray.append(range[0])	# numbers go 'as is'
-				for glyphName in range[1:]:
-					if glyphName is not None:
-						# there is no way to 'unset' a character in the base font.
-						diffArray.append('/' + glyphName)
-
-			#print 'diffArray = %s' % diffArray
-			D["Differences"] = pdfdoc.PDFArray(diffArray)
-			D["BaseEncoding"] = pdfdoc.PDFName(self._baseEncodingName)
-			D["Type"] = pdfdoc.PDFName("Encoding")
-			PD = pdfdoc.PDFDictionary(D)
-			return PD
-
-WinAnsiEncoding = Encoding('WinAnsiEncoding')
-MacRomanEncoding = Encoding('MacRomanEncoding')
-defaultEncoding = Encoding(rl_config.defaultEncoding)
-
-class Font:
-	"""Base class for a font.  Not sure yet what it needs to do"""
-	def __init__(self,name):
-		if ascent_descent.has_key(name):
-			self.ascent = ascent_descent[name][0]
-			self.descent = ascent_descent[name][1]
-		else:
-			self.ascent = 0
-			self.descent = 0
-		self.name = name
-		fontsByName[name] = self
-		widths = self._calcWidths()
-		if _stringWidth:
-			_rl_accel.setFontInfo(name,_dummyEncoding,self.ascent,self.descent,widths)
-		else:
-			widthVectorsByFont[name] = widths
-
-	def getWidths(self):
-		"Returns width array"
-		if _stringWidth:
-			return _rl_accel.getFontInfo(self.fontName)[0]
-		else:
-			return widthVectorsByFont[self.fontName]
-
-	if not _stringWidth:
-		def stringWidth(self, text, size):
-			w = 0
-			widths = self.getWidths()
-			for ch in text:
-				w = w + widths[ord(ch)]
-			return w * 0.001 * size
-
-		def getWidths(self):
-			"Returns width array"
-			return _rl_accel.getFontInfo(self.fontName)[0]
-	else:
-		def getWidths(self):
-			"Returns width array"
-			return widthVectorsByFont[self.fontName]
 
 if _stringWidth:
-	import new
-	Font.stringWidth = new.instancemethod(_rl_accel._instanceStringWidth,None,Font)
-	stringWidth = _stringWidth
+    import new
+    #Font.stringWidth = new.instancemethod(_rl_accel._instanceStringWidth,None,Font)
+    stringWidth = _stringWidth
 
-	def _SWRecover(text, fontName, fontSize, encoding):
-		'''This is called when _rl_accel's database doesn't know about a font.
-		Currently encoding is always a dummy.
-		'''
-		try:
-			font = fontsByName[fontName]
-			_rl_accel.setFontInfo(fontName,_dummyEncoding,font.ascent,font.descent,font._calcWidths())
-			return _stringWidth(text,font,fontSize,encoding)
-		except:
-			warnOnce('Font %s:%s not found - using Courier:%s for widths'%(font,encoding,encoding))
-			return _stringWidth(text,'courier',fontSize,encoding)
+    def _SWRecover(text, fontName, fontSize, encoding):
+        '''This is called when _rl_accel's database doesn't know about a font.
+        Currently encoding is always a dummy.
+        '''
+        try:
+            font = getFont(fontName)
+            registerFont(font)
+            print 'registered font %s' % fontName
+            dumpFontData()
+            return _stringWidth(text,fontName,fontSize,encoding)
+        except:
+            warnOnce('Font %s:%s not found - using Courier:%s for widths'%(fontName,encoding,encoding))
+            return _stringWidth(text,'courier',fontSize,encoding)
 
-	_rl_accel._SWRecover(_SWRecover)
+    _rl_accel._SWRecover(_SWRecover)
 else:
-	def stringWidth(text, fontName, fontSize):
-		try:
-			widths = widthVectorsByFont[fontName]
-			w = 0
-			for char in text:
-				w = w + widths[ord(char)]
-			return w*fontSize*0.001
-		except KeyError:
-			# CID Font?  ask the font itself
-			font = fontsByName[fontName]
-			return font.stringWidth(text, fontSize)
+    stringWidth = _slowStringWidth
+    
 
-class Type1Font(Font):
-	"""Defines a font with a possibly with a new encoding."""
-	def __init__(self, name, baseFontName, encoding):
-		"""
-		The name should be distinct
-		baseFontName is one of the standard
-		14 fonts.  encoding is either a predefined string such
-		as 'WinAnsiEncoding' or 'MacRomanEncoding', or a valid
-		Encoding object."""
 
-		assert baseFontName in standardFonts, "baseFontName must be one of the following: %s" % StandardFonts
-		self.baseFontName = baseFontName
-		self.encoding = encoding
-		fontsByBaseEnc[(baseFontName,encoding)] = self
-		Font.__init__(self,name)
+def dumpFontData():
+    print 'Registered Encodings:'
+    keys = _encodings.keys()
+    keys.sort()
+    for encName in keys:
+        print '   ',encName
 
-	def addObjects(self, doc):
-		"""Makes and returns one or more PDF objects to be added
-		to the document.  The caller supplies the internal name
-		to be used (typically F1, F2... in sequence) """
+    print
+    print 'Registered Typefaces:'
+    faces = _typefaces.keys()
+    faces.sort()
+    for faceName in faces:
+        print '   ',faceName
 
-		# construct a Type 1 Font internal object
-		internalName = 'F' + repr(len(doc.fontMapping)+1)
-		pdfFont = pdfdoc.PDFType1Font()
-		pdfFont.Name = internalName
-		pdfFont.BaseFont = self.baseFontName
-		pdfFont.__Comment__ = 'Font %s' % self.name
-		if type(self.encoding) is StringType:
-			pdfFont.Encoding = pdfdoc.PDFName(self.encoding)
-		else:
-			enc = self.encoding.makePDFObject()
-			pdfFont.Encoding = enc
-			#objects.append(enc)
 
-		# now link it in
-		ref = doc.Reference(pdfFont, internalName)
+    print
+    print 'Registered Fonts:'
+    k = _fonts.keys()
+    k.sort()
+    for key in k:
+        font = _fonts[key]
+        print '    %s (%s/%s)' % (font.name, font.face.name, font.encoding.name)
 
-		# also refer to it in the BasicFonts dictionary
-		fontDict = doc.idToObject['BasicFonts'].dict
-		fontDict[internalName] = pdfFont
 
-		# and in the font mappings
-		doc.fontMapping[self.name] = '/' + internalName
 
-	def _calcWidths(self):
-		"Computes widths array"
-		widthVector = []
-		thisFontWidths = widthsByFontGlyph[self.baseFontName]
-		if type(self.encoding) is StringType:
-			vector = encodings[self.encoding]
-		else:
-			vector = self.encoding
-		for glyphName in vector:
-			try:
-				glyphWidth = thisFontWidths[glyphName]
-			except KeyError:
-				glyphWidth = 0 # None?
-			widthVector.append(glyphWidth)
-		return widthVector
+def test3widths(texts):
+    # checks all 3 algorithms give same answer, note speed
+    import time
+    for fontName in _fontdata.standardFonts[0:1]:
+        t0 = time.time()
+        for text in texts:
+            l1 = _stringWidth(text, fontName, 10)
+        t1 = time.time()
+        print 'fast stringWidth took %0.4f' % (t1 - t0)
 
-def addFont(name,baseFontName,encoding):
-	'''
-	This function either finds an existing font or creates one
-	'''
-	if type(encoding) is StringType: encoding = Encoding(encoding)
-	x=(baseFontName,encoding.vector)
-	font = fontsByBaseEnc.get(x,None)
-	if not font:
-		font = Type1Font(name,baseFontName,encoding)
-	elif fontsByName.has_key(name) and fontsByName[name] is not font:
-		raise ValueError, "Attempted to addFont(%s,%s,%s) font %s aready added" %(name,baseFontName,encoding,name)
-	return font
+        t0 = time.time()
+        w = getFont(fontName).widths
+        for text in texts:
+            l2 = 0
+            for ch in text:
+                l2 = l2 + w[ord(ch)]
+        t1 = time.time()
+        print 'slow stringWidth took %0.4f' % (t1 - t0)
+        
+        t0 = time.time()
+        for text in texts:
+            l3 = getFont(fontName).stringWidth(text, 10)
+        t1 = time.time()
+        print 'class lookup and stringWidth took %0.4f' % (t1 - t0)
+        print
 
-#add all the standard Fonts
-for fontName in standardFonts:
-	addFont(fontName,fontName, fontName in ('Symbol','ZapfDingbats') and fontName or defaultEncoding)
-del fontName
+def testStringWidthAlgorithms():
+    rawdata = open('../../rlextra/rml2pdf/doc/rml_user_guide.rml').read()
+    print 'rawdata length %d' % len(rawdata)
+    print 'test one huge string...'
+    test3widths([rawdata])
+    print
+    words = string.split(rawdata)
+    print 'test %d shorter strings (average length %0.2f chars)...' % (len(words), 1.0*len(rawdata)/len(words))
+    test3widths(words)
+    
+    
+def test():
+    helv = TypeFace('Helvetica')
+    registerTypeFace(helv)
+    print helv.glyphNames[0:30]
+    
+    wombat = TypeFace('Wombat')
+    print wombat.glyphNames
+    registerTypeFace(wombat)
 
-def testMetrics():
-	def fontDataDump():
-		print 'fontsByName'
-		for k,i in fontsByName.items():
-			print k, i
-		print 'fontsByBaseEnc'
-		for k,i in fontsByBaseEnc.items():
-			print k, i
-	fontDataDump()
-	# load the standard ones:
-	for baseFontName in standardFonts:
-		encoding = WinAnsiEncoding
-		fontName = baseFontName + '-WinAnsi'
-		font = Type1Font(fontName, baseFontName, encoding)
-		#test it
-		msg = 'Hello World'
-		w = stringWidth(msg, fontName, 10)#
-		print 'width of "%s" in 10-point %s = %0.2f' % (msg, fontName, w)
-	fontDataDump()
+    dumpFontData()
 
-def testFonts():
-	# make a custom encoded font.
-	import reportlab.pdfgen.canvas
-	c = reportlab.pdfgen.canvas.Canvas('testfonts.pdf')
-	c.setPageCompression(0)
-	c.setFont('Helvetica', 12)
-	c.drawString(100, 700, 'The text below should be in a custom encoding in which all vowels become "z"')
-
-	# invent a new language where vowels are replaced with letter 'z'
-	zenc = Encoding('WinAnsiEncoding')
-	for ch in 'aeiou':
-		zenc[ord(ch)] = 'z'
-	for ch in 'AEIOU':
-		zenc[ord(ch)] = 'Z'
-	f = Type1Font('FontWithoutVowels', 'Helvetica-Oblique', zenc)
-	c.addFont(f)
-
-	c.setFont('FontWithoutVowels', 12)
-	c.drawString(125, 675, "The magic word is squamish ossifrage")
-
-	# now demonstrate adding a Euro to MacRoman, which lacks one
-	c.setFont('Helvetica', 12)
-	c.drawString(100, 650, "MacRoman encoding lacks a Euro.  We'll make a Mac font with the Euro at #219:")
-
-	# WinAnsi Helvetica
-	c.addFont(Type1Font('Helvetica-WinAnsi', 'Helvetica-Oblique', WinAnsiEncoding))
-	c.setFont('Helvetica-WinAnsi', 12)
-	c.drawString(125, 625, 'WinAnsi with Euro: character 128 = "\200"')
-
-	c.addFont(Type1Font('MacHelvNoEuro', 'Helvetica-Oblique', MacRomanEncoding))
-	c.setFont('MacHelvNoEuro', 12)
-	c.drawString(125, 600, 'Standard MacRoman, no Euro: Character 219 = "\333"') # oct(219)=0333
-
-	# now make our hacked encoding
-	euroMac = Encoding('MacRomanEncoding')
-	euroMac[219] = 'Euro'
-	c.addFont(Type1Font('MacHelvWithEuro', 'Helvetica-Oblique', euroMac))
-	c.setFont('MacHelvWithEuro', 12)
-	c.drawString(125, 575, 'Hacked MacRoman with Euro: Character 219 = "\333"') # oct(219)=0333
-
-	# now test width setting with and without _rl_accel - harder
-	# make an encoding where 'm' becomes 'i'
-	c.setFont('Helvetica', 12)
-	c.drawString(100, 500, "Recode 'm' to 'i' and check we can measure widths.	Boxes should surround letters.")
-	sample = 'Mmmmm. ' * 6 + 'Mmmm'
-
-	c.setFont('Helvetica-Oblique',12)
-	c.drawString(125, 475, sample)
-	w = c.stringWidth(sample, 'Helvetica-Oblique', 12)
-	c.rect(125, 475, w, 12)
-
-	narrowEnc = Encoding('WinAnsiEncoding')
-	narrowEnc[ord('m')] = 'i'
-	narrowEnc[ord('M')] = 'I'
-	c.addFont(Type1Font('narrow', 'Helvetica-Oblique', narrowEnc))
-	c.setFont('narrow', 12)
-	c.drawString(125, 450, sample)
-	w = c.stringWidth(sample, 'narrow', 12)
-	c.rect(125, 450, w, 12)
-
-	c.setFont('Helvetica', 12)
-	c.drawString(100, 400, "Symbol & Dingbats fonts - check we still get valid PDF in StandardEncoding")
-	c.setFont('Symbol', 12)
-	c.drawString(100, 375, 'abcdefghijklmn')
-	c.setFont('ZapfDingbats', 12)
-	c.drawString(300, 375, 'abcdefghijklmn')
-
-	c.save()
-
-	print 'saved testfonts.pdf'
-
+    
 if __name__=='__main__':
-	testMetrics()
-	testFonts()
+    test()
+    #testStringWidthAlgorithms()
+    

@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.3 2001/04/13 19:42:57 rgbecker Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.3 2001/04/13 19:42:57 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.4 2001/04/18 10:48:50 rgbecker Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.4 2001/04/18 10:48:50 rgbecker Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
@@ -185,6 +185,7 @@ def drawCode(canvas, code):
 
 def run():
     c = canvas.Canvas('test_pdfgen_general.pdf')
+    c.setPageCompression(0)
     framePageForm(c) # define the frame form
     c.showOutline()
     
@@ -366,9 +367,19 @@ substring.
     p.moveTo(inch, 4.0*inch)
     p.lineTo(3*inch, 4.0*inch)
     c.drawPath(p)
-    c.drawString(4*inch, 4.0*inch, 'dash growing - setDash([1,2,3,4,5,6],0) setLineCap(0)')
+    c.drawString(4*inch, 4*inch, 'dash growing - setDash([1,2,3,4,5,6],0) setLineCap(0)')
 
-    c.setDash()
+    c.setLineCap(1)
+    c.setLineJoin(1)
+    c.setDash(32,12)
+    p = c.beginPath()
+    p.moveTo(inch, 3.0*inch)
+    p.lineTo(2.5*inch, 3.0*inch)
+    p.lineTo(inch, 2*inch)
+    c.drawPath(p)
+    c.drawString(4*inch, 3*inch, 'dash pattern, join and cap style interacting - ')
+    c.drawString(4*inch, 3*inch - 12, 'round join & miter results in sausages')
+    
 
     
     c.showPage()

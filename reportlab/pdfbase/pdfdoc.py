@@ -2,12 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.43 2001/03/21 20:57:51 aaron_watters Exp $
-__version__=''' $Id: pdfdoc.py,v 1.43 2001/03/21 20:57:51 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.44 2001/04/18 10:48:50 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.44 2001/04/18 10:48:50 rgbecker Exp $ '''
 __doc__=""" 
-PDFgen is a library to generate PDF files containing text and graphics.  It is the 
-foundation for a complete reporting solution in Python.  
-
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The 
 'inner structure' - the page descriptions - are presumed to be generated before 
@@ -15,21 +12,20 @@ each page is saved.
 pdfgen.py calls this and provides a 'canvas' object to handle page marking operators.
 piddlePDF calls pdfgen and offers a high-level interface.
 
-2000-10-13 gmcm Packagize
+The classes within this generally mirror structures in the PDF file
+and are not part of any public interface.  Instead, canvas and font
+classes are made available elsewhere for users to manipulate.
 """
-"""extremely anally  retentive structured version of pdfdoc"""
 
+import string, types
+from reportlab.pdfbase import pdfutils
+from reportlab.pdfbase.pdfutils import LINEEND   # this constant needed in both
 from reportlab import rl_config
-ALLOWED_ENCODINGS = ('WinAnsiEncoding', 'MacRomanEncoding')
 
-PDFError = 'PDFError'
 
-StandardEnglishFonts = [
-    'Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique',  
-    'Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique', 
-    'Helvetica-BoldOblique',
-    'Times-Roman', 'Times-Bold', 'Times-Italic', 'Times-BoldItalic',
-    'Symbol','ZapfDingbats']
+class PDFError(Exception):
+    pass
+
 
 # set this flag to get more vertical whitespace (and larger files)
 LongFormat = 1
@@ -55,9 +51,6 @@ Pages = "Pages"
 
 ### generic utilities
 
-import string, types
-from reportlab.pdfbase import pdfutils
-from reportlab.pdfbase.pdfutils import LINEEND   # this constant needed in both
 
 # for % substitutions
 LINEENDDICT = {"LINEEND": LINEEND, "PERCENT": "%"}
@@ -112,7 +105,7 @@ class PDFDocument:
     # set this to define filters 
     defaultStreamFilters = None
     pageCounter = 1
-    def __init__(self, encoding=rl_config.defaultEncoding, dummyoutline=0, doFonts=0):
+    def __init__(self, encoding=rl_config.defaultEncoding, dummyoutline=0):
         #self.defaultStreamFilters = [PDFBase85Encode, PDFZCompress] # for testing!
         #self.defaultStreamFilters = [PDFZCompress] # for testing!
         assert encoding in ['MacRomanEncoding',
@@ -143,16 +136,12 @@ class PDFDocument:
         self.info = PDFInfo()
         #self.Reference(self.Catalog)
         #self.Reference(self.Info)
-        # make std fonts (this could be made optional
         self.fontMapping = {}
-        if doFonts:
-            MakeStandardEnglishFontObjects(self, encoding)
-        else:
-            #make an empty font dictionary
-            DD = PDFDictionary({})
-            DD.__Comment__ = "The standard fonts dictionary"
-            DDR = self.Reference(DD, BasicFonts)
-    
+        #make an empty font dictionary
+        DD = PDFDictionary({})
+        DD.__Comment__ = "The standard fonts dictionary"
+        DDR = self.Reference(DD, BasicFonts)
+
 
     def SaveToFile(self, filename, canvas):
         # prepare outline
@@ -193,7 +182,15 @@ class PDFDocument:
         if fm.has_key(psfontname):
             return fm[psfontname]
         else:
-            raise PDFError, "Font %s not available in document" % repr(psfontname)
+            try:
+                # does pdfmetrics know about it? if so, add
+                from reportlab.pdfbase import pdfmetrics                
+                fontObj = pdfmetrics.getFont(psfontname)
+                fontObj.addObjects(self)
+                #self.addFont(fontObj)
+                return fm[psfontname]
+            except KeyError:
+                raise PDFError, "Font %s not known!" % repr(psfontname)
 
     def thisPageName(self):
         return "Page"+repr(self.pageCounter)
@@ -247,11 +244,36 @@ class PDFDocument:
         return fontnames
 
 
-    def addFont(self, font):
-        """Add a new font object to the document.
-        Called from canvas.addFont.
-        """
-        font.addObjects(self)
+    def addFont(self, userFont):
+        """Add a new font object to the document."""
+        #UGLY ALERT - not O-O, should find a cleaner way to locate
+        #the right font class.
+        from reportlab.pdfbase import pdfmetrics        
+        internalName = 'F' + repr(len(self.fontMapping)+1)
+        if isinstance(userFont, pdfmetrics.Font):
+            # construct a Type 1 Font internal object
+            pdfFont = PDFType1Font()
+            pdfFont.Name = internalName
+            pdfFont.BaseFont = userFont.face.name
+            pdfFont.__Comment__ = 'Font %s' % userFont.name
+            if type(userFont.encoding) is types.StringType:
+                pdfFont.Encoding = PDFName(userFont.encoding)
+            else:
+                enc = makePDFEncoding(userFont.encoding)
+                pdfFont.Encoding = enc
+        elif isinstance(userFont, pdfmetrics.EmbeddedType1Font):
+            
+            pass
+        # now link it in
+        ref = self.Reference(pdfFont, internalName)
+
+        # also refer to it in the BasicFonts dictionary
+        fontDict = self.idToObject['BasicFonts'].dict
+        fontDict[internalName] = pdfFont
+
+        # and in the font mappings
+        self.fontMapping[userFont.name] = '/' + internalName
+        #print 'Font.addObjects called for %s -> %s' % (self.name, internalName)
 
     def format(self):
         # register the Catalog/INfo and then format the objects one by one until exhausted
@@ -676,7 +698,7 @@ TRAILERFMT = ("trailer%(LINEEND)s"
               "%(dict)s%(LINEEND)s"
               "startxref%(LINEEND)s"
               "%(startxref)s%(LINEEND)s"
-              "%(PERCENT)s%(PERCENT)sEOF")
+              "%(PERCENT)s%(PERCENT)sEOF%(LINEEND)s")
 
 class PDFTrailer:
 
@@ -1413,6 +1435,14 @@ class PDFResourceDictionary:
         DD = PDFDictionary(D)
         return format(DD, document)
 
+    ##############################################################################
+    #
+    #   Font objects - the PDFDocument.addFont() method knows which of these
+    #   to construct when given a user-facing Font object
+    #
+    ##############################################################################
+
+
 class PDFType1Font:
     """no init: set attributes explicitly"""
     __RefOnly__ = 1
@@ -1436,33 +1466,6 @@ class PDFType1Font:
         PD = PDFDictionary(D)
         return PD.format(document)
 
-def MakeStandardEnglishFontObjects(document, encoding=rl_config.defaultEncoding):
-    # make the standard fonts and the standard font dictionary
-    if encoding not in ALLOWED_ENCODINGS:
-        raise ValueError, "bad encoding %s" % repr(encoding)
-    D = {}
-    count = 1
-    fontmapping = document.fontMapping
-    for name in StandardEnglishFonts:
-        F = PDFType1Font()
-        F.BaseFont = name
-        if name in ('Symbol', 'ZapfDingbats'):
-            # the concept of an encoding does not apply to these two;
-            # they should be taken in the order they appear in the font file
-            F.Encoding = PDFName('StandardEncoding')
-        else:
-            F.Encoding = PDFName(rl_config.defaultEncoding)
-        F.__Comment__ = "Standard English Font %s" % repr(name)
-        fname = "F"+repr(count)
-        F.Name = fname
-        R = document.Reference(F, fname)
-        D[fname] = R
-        fontmapping[name] = "/"+fname # record the external to internal name map (NOT REALLY A PDFNAME: PAGE DESC)
-        count = count+1
-    DD = PDFDictionary(D)
-    DD.__Comment__ = "The standard fonts dictionary"
-    DDR = document.Reference(DD, BasicFonts)
-    return DDR
 
 class PDFTrueTypeFont(PDFType1Font):
     Subtype = "TrueType"
@@ -1496,6 +1499,102 @@ class PDFEncoding(PDFType1Font):
     name_attributes = string.split("Type BaseEncoding")
     # these attributes are assumed to already be of the right type
     local_attributes = ["Differences"]
+
+
+# UGLY ALERT - this needs turning into something O-O, it was hacked
+# across from the pdfmetrics.Encoding class to avoid circularity
+
+def makePDFEncoding(userEnc):
+    """Returns a PDF Dictionary representing a single-byte encoding.
+
+    If it is identical to a base one, it just returns the name"""
+    from reportlab.pdfbase import pdfdoc
+    D = {}
+    baseEnc = pdfmetrics.getEncoding(userEnc.baseEncodingName)
+    differences = userEnc.getDifferences(baseEnc) #[None] * 256)
+
+    # if no differences, we just need the base name
+    if differences == []:
+        return pdfdoc.PDFName(userEnc.baseEncodingName)
+    else:
+        #make up a dictionary describing the new encoding
+        diffArray = []
+        for range in differences:
+            diffArray.append(range[0])  # numbers go 'as is'
+            for glyphName in range[1:]:
+                if glyphName is not None:
+                    # there is no way to 'unset' a character in the base font.
+                    diffArray.append('/' + glyphName)
+
+        #print 'diffArray = %s' % diffArray
+        D["Differences"] = pdfdoc.PDFArray(diffArray)
+        D["BaseEncoding"] = pdfdoc.PDFName(userEnc.baseEncodingName)
+        D["Type"] = pdfdoc.PDFName("Encoding")
+        PD = pdfdoc.PDFDictionary(D)
+        return PD
+
+
+def makePDFFont(userFont):
+    """This creates the necessary PDF Objects based on thhe user font object passed in"""
+    pass
+    def addObjects(self, doc):
+        """Adds necessary PDF objects to document"""
+        internalName = 'F' + repr(len(doc.fontMapping)+1)
+
+        if type(self.encoding) is StringType:
+            enc = pdfdoc.PDFName(self.encoding)
+        else:
+            enc = self.encoding.makePDFObject()
+
+
+        fontFile = pdfdoc.PDFStream()
+        fontFile.content = self._binaryData
+        #fontFile.dictionary['Length'] = self._length
+        fontFile.dictionary['Length1'] = self._length1
+        fontFile.dictionary['Length2'] = self._length2
+        fontFile.dictionary['Length3'] = self._length3
+
+        fontFileRef = doc.Reference(fontFile, 'fontFile:' + self.pfbFileName)
+
+        fontDescriptor = pdfdoc.PDFDictionary({
+            'Ascent':851,
+            'CapHeight':663,
+            'Descent':-258,
+            'Flags': 34,
+            'FontBBox':pdfdoc.PDFArray([-200, -258, 1144, 851]),
+            'FontName':pdfdoc.PDFName(self.baseFontName),
+            'ItalicAngle':0,
+            'StemV':75,
+            'XHeight':397,
+            'FontFile': fontFileRef
+            })
+        fontDescriptorRef = doc.Reference(fontDescriptor, 'fontDescriptor:' + self.name)    
+
+        fontObj = pdfdoc.PDFDictionary({
+            'Type':'/Font',
+            'Subtype':'/Type1',
+            'Name': '/'+internalName, #<-- the internal name
+            'BaseFont': '/' + self.baseFontName,
+            'Encoding': enc,
+            'FirstChar': 0,
+            'LastChar': 255,
+            'Widths': pdfdoc.PDFArray(self.widths),
+            'FontDescriptor': fontDescriptorRef
+            })
+        
+
+        # now link it in
+        ref = doc.Reference(fontObj, internalName)
+
+        # also refer to it in the BasicFonts dictionary
+        fontDict = doc.idToObject['BasicFonts'].dict
+        fontDict[internalName] = ref
+
+        # and in the font mappings
+        doc.fontMapping[self.name] = '/' + internalName
+
+
+
 
 # skipping CMaps
 

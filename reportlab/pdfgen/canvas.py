@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.72 2001/03/26 07:49:11 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.72 2001/03/26 07:49:11 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.73 2001/04/18 10:48:50 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.73 2001/04/18 10:48:50 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -168,15 +168,17 @@ class Canvas:
         self._fillColorRGB = (0,0,0)
         self._strokeColorRGB = (0,0,0)
 
-        self._addStandardFonts()
+        #self._addStandardFonts()
         
     def _make_preamble(self):
+        # yuk
+        iName = self._doc.getInternalFontName('Helvetica')
         if self.bottomup:
-            #set initial font
-            self._preamble = '1 0 0 1 0 0 cm BT /F9 12 Tf 14.4 TL ET'
+            #must set an initial font
+            self._preamble = '1 0 0 1 0 0 cm BT %s 12 Tf 14.4 TL ET' % iName
         else:
             #switch coordinates, flip text and set font
-            self._preamble = '1 0 0 -1 0 %s cm BT /F9 12 Tf 14.4 TL ET' % fp_str(self._pagesize[1])
+            self._preamble = '1 0 0 -1 0 %s cm BT %s 12 Tf 14.4 TL ET' % (fp_str(self._pagesize[1]), iName)
 
     def _escape(self, s):
         """PDF escapes are like Python ones, but brackets need slashes before them too.
@@ -291,6 +293,10 @@ class Canvas:
 
     def showPage(self):
         """Close the current page and possibly start on a new page."""
+        # ensure a space at the end of the stream - Acrobat does
+        # not mind, but Ghostscript dislikes 'Qendstream' even if
+        # the length marker finishes after 'Q'
+        self._code.append(' ')
         page = pdfdoc.PDFPage()
         page.pagewidth = self._pagesize[0]
         page.pageheight = self._pagesize[1]

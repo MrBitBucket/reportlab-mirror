@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pdfbase_pdfmetrics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_pdfmetrics.py,v 1.5 2001/04/05 09:30:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_pdfmetrics.py,v 1.6 2001/04/18 10:48:50 rgbecker Exp $
 #test_pdfbase_pdfmetrics_widths
 """
 Various tests for PDF metrics.
@@ -12,11 +12,12 @@ glyph in every standard font.  Long!
 from reportlab.test import unittest
 
 from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase import _fontdata
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import colors
 
 verbose = 0
-fontNamesToTest = pdfmetrics.standardFonts #[0:12]  #leaves out Symbol and Dingbats for now
+fontNamesToTest = _fontdata.standardFonts #[0:12]  #leaves out Symbol and Dingbats for now
 
 def decoratePage(c, header):
     c.setFont('Helvetica-Oblique',10)
@@ -36,15 +37,10 @@ def makeWidthTestForAllGlyphs(canv, fontName):
     canv.addOutlineEntry(fontName,'GlyphWidths:' + fontName, level=1)
 
     y = 720
-    thisFontWidths = pdfmetrics.widthsByFontGlyph[fontName]
+    thisFont = pdfmetrics.getFont(fontName)
+    widths = thisFont.widths
+    glyphNames = thisFont.encoding.vector
     # need to get the right list of names for the font in question
-    if fontName == 'Symbol':
-        glyphNames = pdfmetrics.encodings['SymbolEncoding']
-    elif fontName == 'ZapfDingbats':
-        glyphNames = pdfmetrics.encodings['ZapfDingbatsEncoding']
-    else:            
-        # ordinary font with standard character names    
-        glyphNames = pdfmetrics.encodings['WinAnsiEncoding']
     for i in range(256):
         if y < 72:
             canv.showPage()
@@ -55,7 +51,7 @@ def makeWidthTestForAllGlyphs(canv, fontName):
             canv.setFont('Helvetica', 10)
             canv.drawString(80, y, '%03d   %s ' % (i, glyphName))
             try:
-                glyphWidth = thisFontWidths[glyphName]
+                glyphWidth = thisFont.face.glyphWidths[glyphName]
                 canv.setFont(fontName, 10)
                 canv.drawString(200, y, chr(i) * 30)
 
