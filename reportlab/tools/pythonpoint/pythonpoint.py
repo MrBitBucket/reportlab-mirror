@@ -318,6 +318,7 @@ class PPPresentation:
         self.effectName = None
         self.showOutline = 1   #should it be displayed when opening?
         self.compression = rl_config.pageCompression
+        self.pageDuration = None
         #assume landscape
         self.pageWidth = rl_config.defaultPageSize[1]
         self.pageHeight = rl_config.defaultPageSize[0]
@@ -338,7 +339,7 @@ class PPPresentation:
         outfile = getStringIO()
         canv = canvas.Canvas(outfile, pagesize = pageSize)
         canv.setPageCompression(self.compression)
-
+        canv.setPageDuration(self.pageDuration)
         if self.title:
             canv.setTitle(self.title)
         if self.author:

@@ -1,4 +1,4 @@
-<presentation filename="pythonpoint.pdf">
+<presentation filename="pythonpoint.pdf" pageDuration="3">
     <stylesheet module="standard" function="getParagraphStyles"/>
     <title>PythonPoint Demonstration</title>
     <author>

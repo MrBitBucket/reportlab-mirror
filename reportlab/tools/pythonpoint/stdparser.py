@@ -243,6 +243,7 @@ class PPMLParser(xmllib.XMLParser):
         self._curPres = pythonpoint.PPPresentation()
         self._curPres.filename = self._arg('presentation',args,'filename')
         self._curPres.effectName = self._arg('presentation',args,'effect')
+        self._curPres.pageDuration = self._arg('presentation',args,'pageDuration')
 
 
     def end_presentation(self):

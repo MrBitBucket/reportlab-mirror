@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.105 2002/07/29 12:47:13 mgedmin Exp $
-__version__=''' $Id: canvas.py,v 1.105 2002/07/29 12:47:13 mgedmin Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.106 2002/11/03 23:47:05 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.106 2002/11/03 23:47:05 andy_robinson Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -132,6 +132,7 @@ class Canvas:
         self._pagesize = pagesize
         #self._currentPageHasImages = 0
         self._pageTransition = None
+        self._pageDuration = None
         self._destinations = {} # dictionary of destinations for cross indexing.
 
         self.setPageCompression(pageCompression)
@@ -359,6 +360,8 @@ class Canvas:
         page.hasImages = self._currentPageHasImages
         page.setPageTransition(self._pageTransition)
         page.setCompression(self._pageCompression)
+        if self._pageDuration is not None:
+            page.Dur = self._pageDuration
         #print stream
         page.setStream([self._preamble] + self._code)
         self._setXObjects(page)
@@ -1304,6 +1307,18 @@ class Canvas:
             self._pageCompression = pageCompression
         self._doc.setCompression(self._pageCompression)
 
+    def setPageDuration(self, duration=None):
+        """Allows hands-off animation of presentations :-)
+
+        If this is set to a number, in full screen mode, Acrobat Reader
+        will advance to the next page after this many seconds. The
+        duration of the transition itself (fade/flicker etc.) is controlled
+        by the 'duration' argument to setPageTransition; this controls
+        the time spent looking at the page.  This is effective for all
+        subsequent pages."""
+        
+        self._pageDuration = duration
+
     def setPageTransition(self, effectname=None, duration=1,
                         direction=0,dimension='H',motion='I'):
         """PDF allows page transition effects for use when giving
@@ -1370,7 +1385,7 @@ class Canvas:
         # now build the dictionary
         transDict = {}
         transDict['Type'] = '/Trans'
-        transDict['D'] = '/%d' % duration
+        transDict['D'] = '%d' % duration
         transDict['S'] = '/' + effectname
         for (key, value) in args:
             transDict[key] = value
