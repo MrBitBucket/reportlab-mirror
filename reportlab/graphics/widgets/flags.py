@@ -1,6 +1,6 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/flags.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.11 2001/10/02 19:43:53 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.12 2001/10/03 14:53:37 rgbecker Exp $
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 
@@ -36,12 +36,14 @@ from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics import renderPDF
 from signsandsymbols import _Symbol
 import copy
+from math import sin, cos, pi
 
 validFlag=OneOf(None,
 				'UK',
 				'USA',
 				'Austria',
 				'Belgium',
+				'China',
 				'Denmark',
 				'Finland',
 				'France',
@@ -49,9 +51,11 @@ validFlag=OneOf(None,
 				'Greece',
 				'Ireland',
 				'Italy',
+				'Japan',
 				'Luxembourg',
 				'Holland',
 				'Portugal',
+				'Russia',
 				'Spain',
 				'Sweden',
 				'Norway',
@@ -69,7 +73,7 @@ class Star(_Symbol):
 
 		"""
 	_attrMap = AttrMap(BASE=_Symbol,
-			angle = AttrMapValue(isNumber, desc='angle'),
+			angle = AttrMapValue(isNumber, desc='angle in degrees'),
 			)
 
 	def __init__(self):
@@ -92,7 +96,6 @@ class Star(_Symbol):
 		return D
 
 	def draw(self):
-		# general widget bits
 		s = float(self.size)  #abbreviate as we will use this a lot
 		g = Group()
 
@@ -148,17 +151,15 @@ class Flag(_Symbol):
 		return filter(lambda x: x is not None, self._attrMap['kind'].validate._enum)
 
 	def _Flag_None(self):
-		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot
 		g = Group()
 		g.add(Rect(self.x+self.dx, self.y+self.dy, s*2, s, fillColor = colors.purple, strokeColor = colors.black, strokeWidth=0))
 		return g
 
 	def _borderDraw(self,g):
-		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot
 		x, y, sW = self.x+self.dx, self.y+self.dy, self.strokeWidth/2.
-		g.insert(0,Rect(x-sW, y-sW, width=getattr(self,'_width',2*s)+2*sW, height=getattr(self,'_height',s)+2*sW,
+		g.insert(0,Rect(x-sW, y-sW, width=getattr(self,'_width',2*s)+3*sW, height=getattr(self,'_height',s)+2*sW,
 				fillColor = None, strokeColor = self.strokeColor, strokeWidth=sW*2))
 		return g
 
@@ -208,12 +209,10 @@ class Flag(_Symbol):
 		return g
 
 	def _Flag_USA(self):
-		# general widget bits
-		s = self.size  # abbreviate as we will use this a lot
+		s = float(self.size)  # abbreviate as we will use this a lot
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
 
-		# flag specific bits
 		box = Rect(x, y, s*2, s, fillColor = colors.mintcream, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
@@ -255,12 +254,10 @@ class Flag(_Symbol):
 		return g
 
 	def _Flag_Austria(self):
-		# general widget bits
-		s = self.size  # abbreviate as we will use this a lot
+		s = float(self.size)  # abbreviate as we will use this a lot
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
 
-		# flag specific bits
 		box = Rect(x, y, s*2, s, fillColor = colors.mintcream,
 			strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
@@ -276,12 +273,10 @@ class Flag(_Symbol):
 		return g
 
 	def _Flag_Belgium(self):
-		# general widget bits
-		s = self.size  # abbreviate as we will use this a lot
+		s = float(self.size)
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
 
-		# flag specific bits
 		box = Rect(x, y, s*2, s,
 			fillColor = colors.black, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
@@ -300,14 +295,35 @@ class Flag(_Symbol):
 		g.add(box3)
 		return g
 
+	def _Flag_China(self):
+		s = float(self.size)
+		g = Group()
+		x, y = self.x+self.dx, self.y+self.dy
+		self._width = w = s*1.5
+		g.add(Rect(x, y, w, s, fillColor=colors.red, strokeColor=None, strokeWidth=0))
+
+		def addStar(x,y,size,angle,g=g,w=s/20,x0=x,y0=y+s/2):
+			s = Star()
+			s.fillColor=colors.yellow
+			s.angle = angle
+			s.size = size*w
+			s.x = x*w+x0
+			s.y = y*w+y0
+			g.add(s)
+
+		addStar(5,5,3, 0)
+		addStar(10,2,1,36.86989765)
+		addStar(12,4,1,8.213210702)
+		addStar(12,7,1,16.60154960)
+		addStar(10,9,1,53.13010235)
+		return g
+
 	def _Flag_Denmark(self):
-		# general widget bits
-		s = self.size  # abbreviate as we will use this a lot
+		s = float(self.size)
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
 		self._width = w = s*1.4
 
-		# flag specific bits
 		box = Rect(x, y, w, s,
 			fillColor = colors.red, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
@@ -322,8 +338,7 @@ class Flag(_Symbol):
 		return g
 
 	def _Flag_Finland(self):
-		# general widget bits
-		s = self.size  # abbreviate as we will use this a lot
+		s = float(self.size)
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
 
@@ -342,12 +357,10 @@ class Flag(_Symbol):
 		return g
 
 	def _Flag_France(self):
-		# general widget bits
-		s = self.size  # abbreviate as we will use this a lot
+		s = float(self.size)
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
 
-		# flag specific bits
 		box = Rect(x, y, s*2, s, fillColor = colors.navy, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
@@ -367,12 +380,10 @@ class Flag(_Symbol):
 		return g
 
 	def _Flag_Germany(self):
-		# general widget bits
-		s = self.size  # abbreviate as we will use this a lot
+		s = float(self.size)
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
 
-		# flag specific bits
 		box = Rect(x, y, s*2, s,
 				fillColor = colors.gold, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
@@ -387,12 +398,10 @@ class Flag(_Symbol):
 		return g
 
 	def _Flag_Greece(self):
-		# general widget bits
-		s = self.size  # abbreviate as we will use this a lot
+		s = float(self.size)
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
 
-		# flag specific bits
 		box = Rect(x, y, s*2, s, fillColor = colors.gold,
 						strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
@@ -423,12 +432,10 @@ class Flag(_Symbol):
 		return g
 
 	def _Flag_Ireland(self):
-		# general widget bits
-		s = self.size  # abbreviate as we will use this a lot
+		s = float(self.size)
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
 
-		# flag specific bits
 		box = Rect(x, y, s*2, s,
 			fillColor = colors.forestgreen, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
@@ -443,32 +450,28 @@ class Flag(_Symbol):
 		return g
 
 	def _Flag_Italy(self):
-		# general widget bits
-		s = self.size  # abbreviate as we will use this a lot
+		s = float(self.size)
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
+		g.add(Rect(x,y,s*2,s,fillColor=colors.forestgreen,strokeColor=None, strokeWidth=0))
+		g.add(Rect(x+(2*s)/3, y, width=(s*4)/3, height=s, fillColor = colors.mintcream, strokeColor = None, strokeWidth=0))
+		g.add(Rect(x+(4*s)/3, y, width=(s*2)/3, height=s, fillColor = colors.red, strokeColor = None, strokeWidth=0))
+		return g
 
-		# flag specific bits
-		box = Rect(x, y, s*2, s,
-				fillColor = colors.forestgreen, strokeColor = colors.black, strokeWidth=0)
-		g.add(box)
-
-		whitebox = Rect(x+((s*2.0)/3.0), y, width=(2.0*(s*2.0)/3.0), height=s,
-				fillColor = colors.mintcream, strokeColor = None, strokeWidth=0)
-		g.add(whitebox)
-
-		redbox = Rect(x+((2.0*(s*2.0)/3.0)), y, width=(s*2.0)/3.0, height=s,
-				fillColor = colors.red, strokeColor = None, strokeWidth=0)
-		g.add(redbox)
+	def _Flag_Japan(self):
+		s = float(self.size)
+		g = Group()
+		x, y = self.x+self.dx, self.y+self.dy
+		w = self._width = s*1.5
+		g.add(Rect(x,y,w,s,fillColor=colors.mintcream,strokeColor=None, strokeWidth=0))
+		g.add(Circle(cx=x+w/2,cy=y+s/2,r=0.3*w,fillColor=colors.red,strokeColor=None, strokeWidth=0))
 		return g
 
 	def _Flag_Luxembourg(self):
-		# general widget bits
-		s = self.size  # abbreviate as we will use this a lot
+		s = float(self.size)
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
 
-		# flag specific bits
 		box = Rect(x, y, s*2, s,
 			fillColor = colors.mintcream, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
@@ -483,12 +486,10 @@ class Flag(_Symbol):
 		return g
 
 	def _Flag_Holland(self):
-		# general widget bits
-		s = self.size  # abbreviate as we will use this a lot
+		s = float(self.size)
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
 
-		# flag specific bits
 		box = Rect(x, y, s*2, s,
 			fillColor = colors.mintcream, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
@@ -505,34 +506,29 @@ class Flag(_Symbol):
 	def _Flag_Portugal(self):
 		return Group()
 
-	def _Flag_Spain(self):
-		# general widget bits
-		s = self.size  # abbreviate as we will use this a lot
+	def _Flag_Russia(self):
+		s = float(self.size)
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
+		w = self._width = s*1.5
+		t = s/3
+		g.add(Rect(x, y, width=w, height=t, fillColor = colors.red, strokeColor = None, strokeWidth=0))
+		g.add(Rect(x, y+t, width=w, height=t, fillColor = colors.blue, strokeColor = None, strokeWidth=0))
+		g.add(Rect(x, y+2*t, width=w, height=t, fillColor = colors.mintcream, strokeColor = None, strokeWidth=0))
+		return g
 
-		# flag specific bits
-		box = Rect(x, y, s*2, s,
-				fillColor = colors.yellow, strokeColor = colors.black, strokeWidth=0)
-		g.add(box)
-
-		redbox1 = Rect(x, y+((s/4)*3), width=s*2, height=s/4,
-			fillColor = colors.red, strokeColor = None, strokeWidth=0)
-		g.add(redbox1)
-
-		redbox2 = Rect(x, y, width=s*2, height=s/4,
-			fillColor = colors.red,
-			strokeColor = None,
-			strokeWidth=0)
-		g.add(redbox2)
+	def _Flag_Spain(self):
+		s = float(self.size)
+		g = Group()
+		x, y = self.x+self.dx, self.y+self.dy
+		g.add(Rect(x, y, width=s*2, height=s, fillColor = colors.red, strokeColor = None, strokeWidth=0))
+		g.add(Rect(x, y+((s/4)*3), width=s*2, height=s/4, fillColor = colors.red, strokeColor = None, strokeWidth=0))
 		return g
 
 	def _Flag_Sweden(self):
-		# general widget bits
-		s = self.size  # abbreviate as we will use this a lot
+		s = float(self.size)
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
-		# flag specific bits
 		self._width = s*1.4
 		box = Rect(x, y, self._width, s,
 			fillColor = colors.dodgerblue, strokeColor = colors.black, strokeWidth=0)
@@ -550,7 +546,7 @@ class Flag(_Symbol):
 		return g
 
 	def _Flag_Norway(self):
-		s = self.size  # abbreviate as we will use this a lot
+		s = float(self.size)
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
 		self._width = s*1.4
@@ -581,11 +577,9 @@ class Flag(_Symbol):
 		return g
 
 	def _Flag_CzechRepublic(self):
-		# general widget bits
-		s = self.size  # abbreviate as we will use this a lot
+		s = float(self.size)
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
-		# flag specific bits
 		box = Rect(x, y, s*2, s,
 			fillColor = colors.mintcream,
 						strokeColor = colors.black,
@@ -604,12 +598,10 @@ class Flag(_Symbol):
 		return g
 
 	def _Flag_Turkey(self):
-		# general widget bits
-		s = float(self.size)  # abbreviate as we will use this a lot
+		s = float(self.size)
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
 
-		# flag specific bits
 		box = Rect(x, y, s*2, s,
 			fillColor = colors.red,
 						strokeColor = colors.black,
@@ -639,13 +631,11 @@ class Flag(_Symbol):
 		return g
 
 	def _Flag_Switzerland(self):
-		# general widget bits
-		s = float(self.size)  # abbreviate as we will use this a lot
+		s = float(self.size)
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
 		self._width = s
 
-		# flag specific bits
 		g.add(Rect(x, y, s, s, fillColor = colors.red, strokeColor = colors.black, strokeWidth=0))
 		g.add(Line(x+(s/2), y+(s/5.5), x+(s/2), y+(s-(s/5.5)),
 			fillColor = colors.mintcream, strokeColor = colors.mintcream, strokeWidth=(s/5)))
@@ -654,13 +644,11 @@ class Flag(_Symbol):
 		return g
 
 	def _Flag_EU(self):
-		# general widget bits
-		s = float(self.size)  # abbreviate as we will use this a lot
+		s = float(self.size)
 		g = Group()
 		x, y = self.x+self.dx, self.y+self.dy
 		w = self._width = 1.5*s
 
-		# flag specific bits
 		g.add(Rect(x, y, w, s, fillColor = colors.darkblue, strokeColor = None, strokeWidth=0))
 		centerx=x+w/2
 		centery=y+s/2
@@ -668,7 +656,6 @@ class Flag(_Symbol):
 		yradius = radius
 		xradius = radius
 		nStars = 12
-		from math import sin, cos, pi
 		delta = 2*pi/nStars
 		for i in range(nStars):
 			rad = i*delta
