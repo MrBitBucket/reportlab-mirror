@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/fonts0.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: fonts0.py,v 1.2 2001/03/07 18:57:11 rgbecker Exp $ '''
+__version__=''' $Id: fonts0.py,v 1.3 2001/03/08 15:27:42 rgbecker Exp $ '''
 __doc__=""" 
 This is an attempt to break out fonts as user-accessible objects.  You can explicitly
 construct a font object with any desired encoding and add it to the document.  The
@@ -237,7 +237,7 @@ class BuiltInType1Font(Font):
         Encoding object."""
         
         Font.__init__(self)
-        assert baseFontName in pdfmetrics.standardEnglishFonts, "baseFontName must be one of the following: %s" % pdfmetrics.StandardEnglishFonts
+        assert baseFontName in pdfmetrics.standardFonts, "baseFontName must be one of the following: %s" % pdfmetrics.StandardFonts
         self.name = newName
         self.baseFontName = baseFontName
         #assert isinstance(encoding, Encoding)
@@ -280,24 +280,19 @@ class BuiltInType1Font(Font):
         if self._widths:
             return self._widths
         else:
-            if self.baseFontName == 'Symbol':
-                self._widths = pdfmetrics.SymbolWidths[:]
-            elif self.baseFontName == 'ZapfDingbats':
-                self._widths = pdfmetrics.ZapfDingbatsWidths[:]
+            widthVector = []
+            thisFontWidths = pdfmetrics.widthsByFontGlyph[self.baseFontName]
+            if type(self.encoding) is types.StringType:
+                vector = pdfmetrics.encodings[self.encoding]
             else:
-                widthVector = []
-                thisFontWidths = pdfmetrics.widthsByName[self.baseFontName]
-                if type(self.encoding) is types.StringType:
-                    vector = pdfmetrics.encodings[self.encoding]
-                else:
-                    vector = self.encoding
-                for glyphName in vector:
-                    try:
-                        glyphWidth = thisFontWidths[glyphName]
-                    except KeyError:
-                        glyphWidth = 0 # None?
-                    widthVector.append(glyphWidth)
-                self._widths = widthVector
+                vector = self.encoding
+            for glyphName in vector:
+                try:
+                    glyphWidth = thisFontWidths[glyphName]
+                except KeyError:
+                    glyphWidth = 0 # None?
+                widthVector.append(glyphWidth)
+            self._widths = widthVector
             return self._widths
 
     

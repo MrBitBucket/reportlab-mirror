@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.64 2001/03/07 18:57:11 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.64 2001/03/07 18:57:11 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.65 2001/03/08 15:27:42 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.65 2001/03/08 15:27:42 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -838,7 +838,7 @@ class Canvas:
         
         from reportlab.pdfgen import fonts0
         enc = fonts0.defaultEncoding
-        for fontName in pdfmetrics.standardEnglishFonts[0:12]:
+        for fontName in pdfmetrics.standardFonts[0:12]:
             fontObj = fonts0.BuiltInType1Font(fontName, fontName, enc)
             self.registerFont0(fontObj)
         for fontName in ['Symbol','ZapfDingbats']:

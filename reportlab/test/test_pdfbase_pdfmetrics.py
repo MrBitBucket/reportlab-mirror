@@ -12,7 +12,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import colors
 
 verbose = 0
-fontNamesToTest = pdfmetrics.standardEnglishFonts #[0:12]  #leaves out Symbol and Dingbats for now
+fontNamesToTest = pdfmetrics.standardFonts #[0:12]  #leaves out Symbol and Dingbats for now
 
 def decoratePage(c, header):
     c.setFont('Helvetica-Oblique',10)
