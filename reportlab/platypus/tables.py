@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.64 2003/04/21 22:27:47 andy_robinson Exp $
-__version__=''' $Id: tables.py,v 1.64 2003/04/21 22:27:47 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.65 2003/04/22 17:32:01 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.65 2003/04/22 17:32:01 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -267,13 +267,10 @@ class Table(Flowable):
                         #print 'sizing a spanned cell (%d, %d) with content "%s"' % (j, i, str(v))
                         t = 0.0
                     else:#work out size
-                        t = type(v)
-                        if t in _SeqTypes or isinstance(v,Flowable):
+                        t = self._elementWidth(v,s)
+                        if t is None:
                             raise ValueError, "Flowable %s in cell(%d,%d) can't have auto width\n%s" % (v.identity(30),i,j,self.identity(30))
-                        elif t is not StringType: v = v is None and '' or str(v)
-                        v = string.split(v, "\n")
-                        t = s.leftPadding+s.rightPadding + max(map(lambda a, b=s.fontname,
-                                    c=s.fontsize,d=pdfmetrics.stringWidth: d(a,b,c), v))
+                        t = t + s.leftPadding+s.rightPadding
                     if t>w: w = t   #record a new maximum
                     i = i + 1
 
@@ -289,6 +286,22 @@ class Table(Flowable):
         #print "final width", width
 
         self._width = width
+
+    def _elementWidth(self,v,s):
+        t = type(v)
+        if t in _SeqTypes:
+            w = 0
+            for e in v:
+                ew = self._elementWidth(self,v)
+                if ew is None: return None
+                w = max(w,ew)
+            return w
+        elif isinstance(v,Flowable) and v._fixedWidth:
+            return v.width
+        else:
+            if t is not StringType: v = v is None and '' or str(v)
+            v = string.split(v, "\n")
+            return max(map(lambda a, b=s.fontname, c=s.fontsize,d=pdfmetrics.stringWidth: d(a,b,c), v))
 
     def _calc_height(self):
 
@@ -358,7 +371,7 @@ class Table(Flowable):
         #and assign some withs in a dumb way.
         #this CHANGES the widths array.
         if None in self._colWidths:
-            if self._hasUnsizableElements():
+            if self._hasVariWidthElements():
                 self._calcPreliminaryWidths(availWidth)
 
         # need to know which cells are part of spanned
@@ -385,7 +398,7 @@ class Table(Flowable):
             #from the underlying grid
             self._calcSpanRects()
 
-    def _hasUnsizableElements(self, upToRow=None):
+    def _hasVariWidthElements(self, upToRow=None):
         """Check for flowables in table cells and warn up front.
 
         Allow a couple which we know are fixed size such as
@@ -395,20 +408,20 @@ class Table(Flowable):
         for row in range(min(self._nrows, upToRow)):
             for col in range(self._ncols):
                 value = self._cellvalues[row][col]
-                if not self._canSize(value):
+                if not self._canGetWidth(value):
                     bad = 1
                     #raise Exception('Unsizable elements found at row %d column %d in table with content:\n %s' % (row, col, value))
         return bad
 
-    def _canSize(self, thing):
+    def _canGetWidth(self, thing):
         "Can we work out the width quickly?"
         if type(thing) in (ListType, TupleType):
             for elem in thing:
-                if not self._canSize(elem):
+                if not self._canGetWidth(elem):
                     return 0
             return 1
         elif isinstance(thing, Flowable):
-            return 0  # must loosen this up
+            return thing._fixedWidth  # must loosen this up
         else: #string, number, None etc.
             #anything else gets passed to str(...)
             # so should be sizable
@@ -441,7 +454,7 @@ class Table(Flowable):
                 siz = 1
                 for rowNo in range(self._nrows):
                     value = self._cellvalues[rowNo][colNo]
-                    if not self._canSize(value):
+                    if not self._canGetWidth(value):
                         siz = 0
                         break
                 if siz:
@@ -472,7 +485,6 @@ class Table(Flowable):
         self._argW = newColWidths
         if verbose: print 'new widths are:', self._colWidths
         
-
     def _calcSpanRanges(self):
         """Work out rects for tables which do row and column spanning.
 

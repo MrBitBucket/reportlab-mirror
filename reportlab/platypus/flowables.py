@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.35 2003/04/05 22:07:51 andy_robinson Exp $
-__version__=''' $Id: flowables.py,v 1.35 2003/04/05 22:07:51 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.36 2003/04/22 17:32:01 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.36 2003/04/22 17:32:01 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -50,6 +50,9 @@ class Flowable:
     2. It draws in its own coordinate system (this requires the
         base API to provide a translate() function.
     """
+    _fixedWidth = 0         #assume wrap results depend on arguments?
+    _fixedHeight = 0
+
     def __init__(self):
         self.width = 0
         self.height = 0
@@ -270,6 +273,8 @@ class Image(Flowable):
        are supported.  At the present time images as flowables are always centered horozontally
        in the frame.
     """
+    _fixedWidth = 1
+    _fixedHeight = 1
     def __init__(self, filename, width=None, height=None, kind='direct', mask="auto"):
         """If size to draw at not specified, get it from the image."""
         from reportlab.lib.utils import PIL_Image  #this will raise an error if they do not have PIL.
@@ -321,6 +326,8 @@ class Image(Flowable):
 class Spacer(Flowable):
     """A spacer just takes up space and doesn't draw anything - it guarantees
        a gap between objects."""
+    _fixedWidth = 1
+    _fixedHeight = 1
     def __init__(self, width, height):
         self.width = width
         self.height = height
