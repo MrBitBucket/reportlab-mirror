@@ -1147,7 +1147,7 @@ class FastPara(Flowable):
                 x = thisindent + extra
             elif alignment==TA_JUSTIFY:
                 x = thisindent
-                if count<nlines:
+                if count<nlines and nwords>1:
                     # patch from doug@pennatus.com, 9 Nov 2002, no extraspace on last line
                     textobject.setWordSpace((basicWidth-length)/(nwords-1.0))
                 else:
