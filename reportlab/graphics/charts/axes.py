@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.40 2001/09/27 18:10:49 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.41 2001/10/02 11:03:35 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -49,42 +49,20 @@ from reportlab.graphics.charts.utils import nextRoundNumber
 
 # Helpers.
 
+def _findMinMaxValue(V, x, default, func):
+	if type(V[0][0]) in (TupleType,ListType):
+		V=map(lambda e,f=lambda T,x=x: T[x]: map(f,e),V)
+	V = filter(len,map(lambda x: filter(lambda x: x is not None,x),V))
+	if len(V)==0: return default
+	return func(map(func,V))
+
 def _findMin(V, x, default):
 	'''find minimum over V[i][x]'''
-
-	try:
-		if type(V[0][0]) in (TupleType,ListType):
-			selector = lambda T, x=x: T[x]
-			m = min(map(selector, V[0]))
-			for v in V[1:]:
-				m = min(m,min(map(selector, v)))
-		else:
-			m = min(V[0])
-			for v in V[1:]:
-				m = min(m,min(v))
-	except IndexError:
-			m = default
-
-	return m
-
+	return _findMinMaxValue(V,x,default,min)
 
 def _findMax(V, x, default):
 	'''find maximum over V[i][x]'''
-
-	try:
-		if type(V[0][0]) in (TupleType,ListType):
-			selector = lambda T, x=x: T[x]
-			m = max(map(selector, V[0]))
-			for v in V[1:]:
-				m = max(m,max(map(selector, v)))
-		else:
-			m = max(V[0])
-			for v in V[1:]:
-				m = max(m,max(v))
-	except IndexError:
-		m = default
-
-	return m
+	return _findMinMaxValue(V,x,default,max)
 
 
 # Category axes.
@@ -552,16 +530,9 @@ class ValueAxis(Widget):
 		variable self._values, which is a list of numbers
 		to use in plotting.
 		"""
-
-		# Set range.
 		self._setRange(dataSeries)
-
-		# Set scale factor.
-		self._scaleFactor = self._calcScaleFactor()
-
-		# Work out where to put tickmarks.
-		self._tickValues = self._calcTickmarkPositions()
-
+		self._calcScaleFactor()
+		self._calcTickmarkPositions()
 		self._configured = 1
 
 
@@ -594,6 +565,11 @@ class ValueAxis(Widget):
 
 		pass
 
+	def _adjustAxisTicks(self):
+		'''Override if you want to put slack at the ends of the axis
+		eg if you don't want the last tick to be at the bottom etc
+		'''
+		pass
 
 	def _calcScaleFactor(self):
 		"""Calculate the axis' scale factor.
@@ -603,7 +579,8 @@ class ValueAxis(Widget):
 		Returns a number.
 		"""
 
-		return self._length / float(self._valueMax - self._valueMin)
+		self._scaleFactor = self._length / float(self._valueMax - self._valueMin)
+		return self._scaleFactor
 
 
 	def _calcTickmarkPositions(self):
@@ -626,8 +603,9 @@ class ValueAxis(Widget):
 		while tick <= self._valueMax:
 			tickmarkPositions.append(tick)
 			tick = tick + self._valueStep
-
-		return tickmarkPositions
+		self._tickValues = tickmarkPositions
+		self._adjustAxisTicks()
+		return self._tickValues
 
 
 	def _calcValueStep(self):
