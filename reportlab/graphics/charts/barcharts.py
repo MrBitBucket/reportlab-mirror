@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.47 2001/10/03 11:13:38 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.48 2001/10/03 19:01:55 johnprecedo Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -152,24 +152,19 @@ class BarChart(Widget):
 			data = _data + [data]
 		self._configureData = data
 
-	def _getMinMax(self):
-		'''Attempt to return the data range'''
-		self._getConfigureData()
-		self.valueAxis._setRange(self._configureData)
-		return self.valueAxis._valueMin, self.valueAxis._valueMax
 
 	def _drawBegin(self,org,length):
 		'''Position and configure value axis, return crossing value'''
-		vA = self.valueAxis
-		vA.setPosition(self.x, self.y, length)
+		self.valueAxis.setPosition(self.x, self.y, length)
 		self._getConfigureData()
-		vA.configure(self._configureData)
+		self.valueAxis.configure(self._configureData)
 
-		# if zero is in chart, put the other axis there, otherwise use low
-		crossesAt = vA.scale(0)
+		# if zero is in chart, put x axis there, otherwise use bottom.
+		crossesAt = self.valueAxis.scale(0)
 		if crossesAt > org+length or crossesAt<org:
 			crossesAt = org
 		return crossesAt
+
 
 	def _drawFinish(self):
 		'''finalize the drawing of a barchart'''
@@ -264,6 +259,7 @@ class BarChart(Widget):
 
 				if datum is None:
 					height = None
+					y = None
 				else:
 					if style!='parallel':
 						y = vScale(accum[colNo])
@@ -273,9 +269,6 @@ class BarChart(Widget):
 					else:
 						y = baseLine
 					height = vScale(datum) - y
-					if -1e-8<height<=1e-8:
-						height = 1e-8
-						if datum<-1e-8: height = -1e-8
 				barRow.append(flipXY and (y,x,height,width) or (x, y, width, height))
 
 			self._barPositions.append(barRow)
@@ -414,11 +407,15 @@ class BarChart(Widget):
 		cA, vA = self.categoryAxis, self.valueAxis
 		if vA: ovAjA, vA.joinAxis = vA.joinAxis, cA
 		if cA: ocAjA, cA.joinAxis = cA.joinAxis, vA
-		if self._flipXY:
-			cA.setPosition(self._drawBegin(self.x,self.width), self.y, self.height)
-		else:
-			cA.setPosition(self.x, self._drawBegin(self.y,self.height), self.width)
-		return self._drawFinish()
+		try:
+			if self._flipXY:
+				cA.setPosition(self._drawBegin(self.x,self.width), self.y, self.height)
+			else:
+				cA.setPosition(self.x, self._drawBegin(self.y,self.height), self.width)
+			return self._drawFinish()
+		finally:
+			if vA: vA.joinAxis = ovAjA
+			if cA: cA.joinAxis = ocAjA
 
 class VerticalBarChart(BarChart):
 	"Vertical bar chart with multiple side-by-side bars."
