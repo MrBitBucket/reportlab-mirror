@@ -1,8 +1,9 @@
-# a Pythonesque Canvas v0.7
+# a Pythonesque Canvas v0.8
 # Author : Jerome Alet - <alet@librelogiciel.com>
 # License : ReportLab's license
 #
-
+# $Id: pycanvas.py,v 1.8 2002/11/06 17:11:15 rgbecker Exp $
+#
 __doc__ = """pycanvas.Canvas : a Canvas class which can also output Python source code.
 
 pycanvas.Canvas class works exactly like canvas.Canvas, but you can
@@ -176,12 +177,11 @@ class PDFAction :
         self._parent._parent._in = self._parent._parent._in - 1
         return retcode
 
-    def __str__(self) :
-        """Needed for Python 2.1"""
-        return str(getattr(self._parent._object, self._action))
+    def __hash__(self) :
+        return hash(getattr(self._parent._object, self._action))
 
     def __coerce__(self, other) :
-        """Needed for Python 2.1"""
+        """Needed."""
         return coerce(getattr(self._parent._object, self._action), other)
 
     def _precomment(self) :
