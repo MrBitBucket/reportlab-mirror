@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch1_intro.py,v 1.12 2001/03/08 00:22:44 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch1_intro.py,v 1.13 2001/03/30 10:24:21 rgbecker Exp $
 from genuserguide import *
 import reportlab
 
@@ -218,7 +218,7 @@ list("Install the Python Imaging Library ($PIL$).  (todo:  make up a bundle that
 list("Add the $DLL$s in $PIL$ to your $Python\DLLs$ directory")
 
 list("""To verify,
-start the Python interpreter (command line) and type $import Image$, followed by
+start the Python interpreter (command line) and type $from PIL import Image$, followed by
 $import _imaging$.  If you see no error messages, all is well.""")
 
 disc("""Now you are ready to install reportlab itself.""")
@@ -371,3 +371,16 @@ through the group's archives and contributions at
 $http://www.egroups.com/group/reportlab-users$.  This list is
 the place to report bugs and get support. """)
 
+
+heading2("Site Configuration")
+disc("""There are a number of options which most likely need to be configured globally for a site.
+The python script module $reportlab/rl_config.py$ may be edited to change the values of several
+important sitewide properties.""")
+bullet("""shapeChecking: set this to zero to turn off a lot of error checking in the graphis modules""") 
+bullet("""defaultEncoding: set this to WinAnsiEncoding or MacRomanEncoding.""")
+bullet("""defaultPageSize: set this to one of the values defined in reportlab/lib/pagesizes.py; as delivered
+it is set to pagesizes.A4; other values are pagesizes.letter etc.""")
+bullet("""defaultImageCaching: set to zero to inhibit the creation of .a85 files on your
+hard-drive. The default is to create these preprocessed PDF compatible image files for faster loading""")
+bullet("""T1SearchPathPath: this is a python list of strings representing directories that
+may be queried for information on Type 1 fonts""")

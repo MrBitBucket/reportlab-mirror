@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch2_graphics.py,v 1.11 2001/03/16 14:51:50 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch2_graphics.py,v 1.12 2001/03/30 10:24:21 rgbecker Exp $
 from genuserguide import *
 
 heading1("Graphics and Text with $pdfgen$")
@@ -1110,6 +1110,38 @@ they overlap.
 """)
 
 illust(examples.hand2, "the finished hand, filled")
+
+
+
+heading2("Further Reading: The ReportLab Graphics Library")
+
+disc("""
+So far the graphics we have seen was created on a fairly low level.
+It should be noted, though, that there is another way of creating
+much more sophisticated graphics using the emerging dedicated
+high-level <i>ReportLab Graphics Library</i>.
+""")
+
+disc("""
+It can be used to produce high-quality, platform-independant,
+reusable graphics for different output formats (vector and bitmap)
+like PDF, EPS and soon others like SVG.
+""")
+
+disc("""
+A thorough description of its philsophy and features is beyond the
+scope of this general user guide and the reader is recommended to
+continue with the <i>"ReportLab Graphics Guide"</i>.
+There she will find information about the existing components and
+how to create customized ones.
+""")
+
+disc("""
+Also, the graphics guide contains a presentation of an emerging
+charting package and its components (labels, axes, legends and
+different types of charts like bar, line and pie charts) that
+builds directly on the graphics library.
+""")
 
 
 ##### FILL THEM IN
