@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.28 2001/05/17 16:52:48 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.29 2001/05/18 10:43:21 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -417,9 +417,10 @@ class Drawing(Group, Flowable):
 			newDrawing.contents.append(newChild)
 		# they may have names.	reproduce them
 
+		self_contents = self.contents
 		for (oldKey, oldValue) in self.__dict__.items():
-			if oldValue in self.contents:
-				pos = mylist.index(oldValue)
+			if oldValue in self_contents:
+				pos = self_contents.index(oldValue)
 				setattr(newDrawing, oldKey, newDrawing.contents[pos])
 
 		return newDrawing
