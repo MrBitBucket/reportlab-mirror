@@ -54,9 +54,16 @@ Each package is documented in turn.
 .h1 pdfgen subpackage API Reference
 .getModuleDoc reportlab.pdfgen.canvas
 .pageBreak
+.getModuleDoc reportlab.pdfgen.pathobject
+.pageBreak
+.getModuleDoc reportlab.pdfgen.textobject
+.pageBreak
 .h1 Appendix A - CVS Revision History
 .beginPre Code
 $Log: reference.yml,v $
+Revision 1.3  2000/06/09 01:44:24  aaron_watters
+added automatic generation for pathobject and textobject modules.
+
 Revision 1.2  2000/06/07 13:39:22  andy_robinson
 Added some text to the first page of reference, and a build batch file
 
