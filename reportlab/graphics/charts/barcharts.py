@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.56 2001/12/05 19:46:18 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.57 2001/12/06 18:11:21 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -177,13 +177,15 @@ class BarChart(Widget):
 	def _drawFinish(self):
 		'''finalize the drawing of a barchart'''
 		cA = self.categoryAxis
+		vA = self.valueAxis
 		cA.configure(self._configureData)
 		self.calcBarPositions()
 		g = Group()
 		g.add(self.makeBackground())
+		vA.makeGrid(g)
 		g.add(self.makeBars())
 		g.add(cA)
-		g.add(self.valueAxis)
+		g.add(vA)
 		del self._configureData
 		return g
 

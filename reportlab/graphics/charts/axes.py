@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.47 2001/10/23 13:42:31 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.48 2001/12/06 18:11:21 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -73,9 +73,15 @@ class CategoryAxis(Widget):
 		visible = AttrMapValue(isBoolean, desc='Display entire object, if true.'),
 		visibleAxis = AttrMapValue(isBoolean, desc='Display axis line, if true.'),
 		visibleTicks = AttrMapValue(isBoolean, desc='Display axis ticks, if true.'),
+		visibleGrid = AttrMapValue(isBoolean, desc='Display axis grid, if true.'),
 		strokeWidth = AttrMapValue(isNumber, desc='Width of axis line and ticks.'),
 		strokeColor = AttrMapValue(isColorOrNone, desc='Color of axis line and ticks.'),
 		strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array used for axis line.'),
+		gridStrokeWidth = AttrMapValue(isNumber, desc='Width of grid lines.'),
+		gridStrokeColor = AttrMapValue(isColorOrNone, desc='Color of grid lines.'),
+		gridStrokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array used for grid lines.'),
+		gridStart = AttrMapValue(isNumber, desc='Start of grid lines wrt axis origin'),
+		gridEnd = AttrMapValue(isNumber, desc='End of grid lines wrt axis origin'),
 		labels = AttrMapValue(None, desc='Handle of the axis labels.'),
 		categoryNames = AttrMapValue(isListOfStringsOrNone, desc='List of category names.'),
 		joinAxis = AttrMapValue(None, desc='Join both axes if true.'),
@@ -99,10 +105,15 @@ class CategoryAxis(Widget):
 		self.visible = 1
 		self.visibleAxis = 1
 		self.visibleTicks = 1
+		self.visibleGrid = 0
 
 		self.strokeWidth = 1
 		self.strokeColor = STATE_DEFAULTS['strokeColor']
 		self.strokeDashArray = STATE_DEFAULTS['strokeDashArray']
+		self.gridStrokeWidth = 0.25
+		self.gridStrokeColor = STATE_DEFAULTS['strokeColor']
+		self.gridStrokeDashArray = STATE_DEFAULTS['strokeDashArray']
+		self.gridStart = self.gridEnd = 0
 		self.labels = TypedPropertyCollection(Label)
 		# if None, they don't get labels. If provided,
 		# you need one name per data point and they are
@@ -141,6 +152,11 @@ class CategoryAxis(Widget):
 	def _scale(self,idx):
 		if self.reverseDirection: idx = self._catCount-idx-1
 		return idx
+
+	def makeGrid(self,g):
+		'''this is only called by a container object'''
+		if self.visibleGrid and (self.gridStart or self.gridEnd):
+			self._makeLines(g,self.gridStart,self.gridStart,self.gridStrokeColor,self.gridStrokeWidth,self.gridStrokeDashArray)
 
 
 class XCategoryAxis(CategoryAxis):
@@ -231,22 +247,21 @@ class XCategoryAxis(CategoryAxis):
 
 		return g
 
+	def _makeLines(self,g,start,end,strokeColor,strokeWidth,strokeDashArray):
+		for i in range(self._catCount+1):
+			x = self._x + i*self._barWidth
+			L = Line(x, self._y + start, x, self._y + end)
+			L.strokeColor = strokeColor
+			L.strokeWidth = strokeWidth
+			L.strokeDashArray = strokeDashArray
+			g.add(L)
+		return g
+
 	def makeTicks(self):
 		g = Group()
-
-		if not self.visibleTicks:
-			return g
-
+		if not self.visibleTicks: return g
 		if self.tickUp or self.tickDown:
-			for i in range(self._catCount + 1):
-				if self.tickUp or self.tickDown:
-					x = self._x + (1.0 * i * self._barWidth)
-					tick = Line(x, self._y + self.tickUp, x, self._y - self.tickDown)
-					tick.strokeColor = self.strokeColor
-					tick.strokeWidth = self.strokeWidth
-					tick.strokeDashArray = self.strokeDashArray
-					g.add(tick)
-
+			self._makeLines(g,self.tickUp,-self.tickDown,self.strokeColor,self.strokeWidth,self.strokeDashArray)
 		return g
 
 	def _labelAxisPos(self):
@@ -376,23 +391,20 @@ class YCategoryAxis(CategoryAxis):
 		return g
 
 
+	def _makeLines(self,g,start,end,strokeColor,strokeWidth,strokeDashArray):
+		for i in range(self._catCount + 1):
+			y = self._y + i*self._barWidth
+			L = Line(self._x+start, y, self._x+end, y)
+			L.strokeColor = self.strokeColor
+			L.strokeWidth = self.strokeWidth
+			L.strokeDashArray = self.strokeDashArray
+			g.add(L)
+
 	def makeTicks(self):
 		g = Group()
-
-		if not self.visibleTicks:
-			return g
-
+		if not self.visibleTicks: return g
 		if self.tickLeft or self.tickRight:
-			for i in range(self._catCount + 1):
-				if self.tickLeft or self.tickRight:
-					y = self._y + (1.0 * i * self._barWidth)
-					tick = Line(self._x - self.tickLeft, y,
-								self._x + self.tickRight, y)
-					tick.strokeColor = self.strokeColor
-					tick.strokeWidth = self.strokeWidth
-					tick.strokeDashArray = self.strokeDashArray
-					g.add(tick)
-
+			self._makeLines(g,-self.tickLeft,self.tickRight,self.strokeColor,self.strokeWidth,self.strokeDashArray)
 		return g
 
 	def _labelAxisPos(self):
@@ -443,9 +455,15 @@ class ValueAxis(Widget):
 		visible = AttrMapValue(isBoolean, desc='Display entire object, if true.'),
 		visibleAxis = AttrMapValue(isBoolean, desc='Display axis line, if true.'),
 		visibleTicks = AttrMapValue(isBoolean, desc='Display axis ticks, if true.'),
+		visibleGrid = AttrMapValue(isBoolean, desc='Display axis grid, if true.'),
 		strokeWidth = AttrMapValue(isNumber, desc='Width of axis line and ticks.'),
 		strokeColor = AttrMapValue(isColorOrNone, desc='Color of axis line and ticks.'),
 		strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array used for axis line.'),
+		gridStrokeWidth = AttrMapValue(isNumber, desc='Width of grid lines.'),
+		gridStrokeColor = AttrMapValue(isColorOrNone, desc='Color of grid lines.'),
+		gridStrokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array used for grid lines.'),
+		gridStart = AttrMapValue(isNumber, desc='Start of grid lines wrt axis origin'),
+		gridEnd = AttrMapValue(isNumber, desc='End of grid lines wrt axis origin'),
 		minimumTickSpacing = AttrMapValue(isNumber, desc='Minimum value for distance between ticks.'),
 		maximumTicks = AttrMapValue(isNumber, desc='Maximum number of ticks.'),
 		labels = AttrMapValue(None, desc='Handle of the axis labels.'),
@@ -471,11 +489,16 @@ class ValueAxis(Widget):
 		self.visible = 1
 		self.visibleAxis = 1
 		self.visibleTicks = 1
+		self.visibleGrid = 0
 		self.forceZero = 0
 
 		self.strokeWidth = 1
 		self.strokeColor = STATE_DEFAULTS['strokeColor']
 		self.strokeDashArray = STATE_DEFAULTS['strokeDashArray']
+		self.gridStrokeWidth = 0.25
+		self.gridStrokeColor = STATE_DEFAULTS['strokeColor']
+		self.gridStrokeDashArray = STATE_DEFAULTS['strokeDashArray']
+		self.gridStart = self.gridEnd = 0
 
 		self.labels = TypedPropertyCollection(Label)
 		self.labels.angle = 0
@@ -653,6 +676,24 @@ class ValueAxis(Widget):
 
 		return g
 
+	def _makeLines(self,g,start,end,strokeColor,strokeWidth,strokeDashArray):
+		i = 0
+		for tickValue in self._tickValues:
+				v = self.scale(tickValue)
+				if not self._dataIndex:
+					L = Line(v, self._y + start, v, self._y + end)
+				else:
+					L = Line(self._x + start, v, self._x + end, v)
+				L.strokeColor = strokeColor
+				L.strokeWidth = strokeWidth
+				L.strokeDashArray = strokeDashArray
+				g.add(L)
+
+	def makeGrid(self,g):
+		'''this is only called by a container object'''
+		if self.visibleGrid and (self.gridStart or self.gridEnd):
+			self._makeLines(g,self.gridStart,self.gridEnd,self.gridStrokeColor,self.gridStrokeWidth,self.gridStrokeDashArray)
+
 
 	def draw(self):
 		g = Group()
@@ -772,24 +813,10 @@ class XValueAxis(ValueAxis):
 
 		return g
 
-
 	def makeTicks(self):
 		g = Group()
-
-		if not self.visibleTicks:
-			return g
-
-		i = 0
-		for tickValue in self._tickValues:
-			if self.tickUp or self.tickDown:
-				x = self.scale(tickValue)
-				tick = Line(x, self._y - self.tickDown,
-							x, self._y + self.tickUp)
-				tick.strokeColor = self.strokeColor
-				tick.strokeWidth = self.strokeWidth
-				tick.strokeDashArray = self.strokeDashArray
-				g.add(tick)
-
+		if self.visibleTicks and (self.tickUp or self.tickDown):
+			self._makeLines(g,-self.tickDown,self.tickUp,self.strokeColor,self.strokeWidth,self.strokeDashArray)
 		return g
 
 class NormalDateXValueAxis(XValueAxis):
@@ -1058,24 +1085,10 @@ class YValueAxis(ValueAxis):
 
 		return g
 
-
 	def makeTicks(self):
 		g = Group()
-
-		if not self.visibleTicks:
-			return g
-
-		i = 0
-		for tickValue in self._tickValues:
-			if self.tickLeft or self.tickRight:
-				y = self.scale(tickValue)
-				tick = Line(self._x - self.tickLeft, y,
-							self._x + self.tickRight, y)
-				tick.strokeColor = self.strokeColor
-				tick.strokeWidth = self.strokeWidth
-				tick.strokeDashArray = self.strokeDashArray
-				g.add(tick)
-
+		if self.visibleTicks and (self.tickLeft or self.tickRight):
+			self._makeLines(g,-self.tickLeft,self.tickRight,self.strokeColor,self.strokeWidth,self.strokeDashArray)
 		return g
 
 
