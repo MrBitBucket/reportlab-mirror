@@ -47,11 +47,10 @@
     Takes the input, assuming it is Python source code and formats 
     it into PDF. 
  
-    * Uses Just van Rossum's PyFontify version 0.3.3 to tag Python  
-      scripts. You can get it via his homepage on the starship:
-          http://starship.python.net/crew/just 
+    * Uses Just van Rossum's PyFontify version 0.4 to tag Python  
+      scripts, now included in reportlab.lib. 
 
-    * Uses the ReportLab library version 0.92 (from 2000-04-10) to 
+    * Uses the ReportLab library (version 0.92 or higher) to 
       generate PDF. You can get it without charge from ReportLab:
           http://www.reportlab.com
 
@@ -139,7 +138,7 @@ def loadFontifier(options=None):
         # Load Just's.
         
         try:
-            import PyFontify
+            from reportlab.lib import PyFontify
             
             if PyFontify.__version__ < '0.3': 
                 raise ValueError
@@ -148,8 +147,8 @@ def loadFontifier(options=None):
         
         except:
             print """
-    Sorry, but this script needs the PyFontify.py module version 0.3;
-    You can download it from Just's homepage at
+    Sorry, but this script needs the PyFontify.py module version 0.3
+    or higher; You can download it from Just's homepage at
 
        URL: http://starship.python.net/crew/just
 """
