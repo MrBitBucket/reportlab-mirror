@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.5 2001/05/17 16:21:33 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.6 2001/05/22 12:16:58 dinu_gherman Exp $
 import string
 
 from reportlab.lib import colors
@@ -30,6 +30,7 @@ class Label(Widget):
 		boxStrokeColor = AttrMapValue(isColorOrNone),
 		boxStrokeWidth = AttrMapValue(isNumber),
 		boxFillColor = AttrMapValue(isColorOrNone),
+		fillColor = AttrMapValue(isColorOrNone),
 		text = AttrMapValue(isString),
 		fontName = AttrMapValue(isString),
 		fontSize = AttrMapValue(isNumber),
@@ -51,6 +52,7 @@ class Label(Widget):
 		self.boxStrokeColor = None	#boxStroke
 		self.boxStrokeWidth = 0.5 #boxStrokeWidth
 		self.boxFillColor = None
+		self.fillColor = STATE_DEFAULTS['fillColor']
 		self.fontName = STATE_DEFAULTS['fontName']
 		self.fontSize = STATE_DEFAULTS['fontSize']
 		self.leading = None
@@ -157,6 +159,7 @@ class Label(Widget):
 			s.textAnchor = self.textAnchor
 			s.fontName = self.fontName
 			s.fontSize = self.fontSize
+			s.fillColor = self.fillColor
 			g.add(s)
 			y = y - (self.leading or 1.2*self.fontSize)
 
