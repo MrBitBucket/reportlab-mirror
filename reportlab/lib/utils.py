@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.27 2002/03/22 11:37:58 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.27 2002/03/22 11:37:58 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.28 2002/03/22 13:46:20 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.28 2002/03/22 13:46:20 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -158,18 +158,25 @@ def _className(self):
 
 class DebugMemo:
 	'''Intended as a simple report back encapsulator
+
 	Typical usages
-	1) To reord error data
-		dbg = DebugMemo(fn='dbgmemo.dbg',myVar=value)
+	1) To record error data		
+		dbg = DebugMemo(fn='dbgmemo.dbg',myVar=value)		
+		dbg.add(anotherPayload='aaaa',andagain='bbb')
 		dbg.dump()
 
 	2) To show the recorded info
-	dbg = DebugMemo(fn='dbgmemo.dbg',mode='r')
-	dbg.show()
+		dbg = DebugMemo(fn='dbgmemo.dbg',mode='r')
+		dbg.load()
+		dbg.show()
 
 	3) To re-use recorded information
-	dbg = DebugMemo(fn='dbgmemo.dbg',mode='r')
-	myTestFunc(dbg.payload('myVar'))
+		dbg = DebugMemo(fn='dbgmemo.dbg',mode='r')
+			dbg.load()
+		myTestFunc(dbg.payload('myVar'),dbg.payload('andagain'))
+
+	in addition to the payload variables the dump records many useful bits
+	of information which are also printed in the show() method.
 	'''
 	def __init__(self,fn='rl_dbgmemo.dbg',mode='w',getScript=1,modules=(),**kw):
 		import time, socket
