@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.1 2001/04/13 16:09:35 andy_robinson Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.1 2001/04/13 16:09:35 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.2 2001/04/13 16:15:21 andy_robinson Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.2 2001/04/13 16:15:21 andy_robinson Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
@@ -618,12 +618,12 @@ cost to performance.""")
     
     c.drawText(t)
 
-    c.drawInlineImage('PythonPowered.gif',2*inch, 7*inch)
+    c.drawInlineImage('pythonpowered.gif',2*inch, 7*inch)
     c.line(1.5*inch, 7*inch, 4*inch, 7*inch)
     c.line(2*inch, 6.5*inch, 2*inch, 8*inch)
     c.drawString(4.5 * inch, 7.25*inch, 'image drawn at natural size')
 
-    c.drawInlineImage('PythonPowered.gif',2*inch, 4*inch, inch, inch)
+    c.drawInlineImage('pythonpowered.gif',2*inch, 4*inch, inch, inch)
     c.line(1.5*inch, 4*inch, 4*inch, 4*inch)
     c.line(2*inch, 3.5*inch, 2*inch, 5*inch)
     c.drawString(4.5 * inch, 4.25*inch, 'image distorted to fit box')
