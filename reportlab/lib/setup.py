@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 import os, sys
+if sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
+	exe = sys.argv[0]
+	if not os.path.isabs(exe):
+		exe = os.path.join(os.getcwd(),exe)
+	sys.argv.append('--install-platlib='+os.path.dirname(exe))
+
 from distutils.core import setup, Extension
 
 if sys.platform=="win32":
@@ -23,5 +29,19 @@ setup(	name = "_rl_accel",
 									library_dirs=[],
 									libraries=LIBS,	# libraries to link against
 									),
-						]
+						Extension(	'sgmlop',
+									['sgmlop.c'],
+									include_dirs=[],
+									define_macros=[],
+									library_dirs=[],
+									libraries=LIBS,	# libraries to link against
+									),
+						Extension(	'pyHnj',
+									['pyHnjmodule.c','hyphen.c', 'hnjalloc.c'],
+									include_dirs=[],
+									define_macros=[],
+									library_dirs=[],
+									libraries=LIBS,	# libraries to link against
+									),
+						],
 		)
