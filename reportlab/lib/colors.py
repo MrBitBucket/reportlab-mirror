@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.44 2003/11/19 10:19:47 rgbecker Exp $
-__version__=''' $Id: colors.py,v 1.44 2003/11/19 10:19:47 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.45 2003/12/01 15:32:27 rgbecker Exp $
+__version__=''' $Id: colors.py,v 1.45 2003/12/01 15:32:27 rgbecker Exp $ '''
 
 import string, math
 from types import StringType, ListType, TupleType
@@ -269,7 +269,9 @@ _CMYK_black=CMYKColor(0,0,0,1)
 _PCMYK_black=PCMYKColor(0,0,0,100)
 
 # Special colors
-ReportLabBlue = HexColor(0x4e5688)
+ReportLabBlueOLD = HexColor(0x4e5688)
+ReportLabBlue = HexColor(0x00337f)
+ReportLabBluePCMYK = PCMYKColor(100,65,0,30,spotName='Pantone 288U')
 ReportLabLightBlue = HexColor(0xb7b9d3)
 ReportLabFidBlue=HexColor(0x3366cc)
 ReportLabFidRed=HexColor(0xcc0033)
