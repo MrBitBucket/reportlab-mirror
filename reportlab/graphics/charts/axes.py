@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.70 2003/06/13 15:46:42 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.71 2003/06/13 19:31:17 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.70 2003/06/13 15:46:42 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.71 2003/06/13 19:31:17 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -458,7 +458,7 @@ class ValueAxis(Widget):
     "Abstract value axis, unusable in itself."
 
     _attrMap = AttrMap(
-        forceZero = AttrMapValue(isBoolean, desc='Ensure zero in range if true.'),
+        forceZero = AttrMapValue(EitherOr((isBoolean,OneOf('near'))), desc='Ensure zero in range if true.'),
         visible = AttrMapValue(isBoolean, desc='Display entire object, if true.'),
         visibleAxis = AttrMapValue(isBoolean, desc='Display axis line, if true.'),
         visibleTicks = AttrMapValue(isBoolean, desc='Display axis ticks, if true.'),
@@ -535,7 +535,6 @@ class ValueAxis(Widget):
         self._y = y * 1.0
         self._length = length * 1.0
 
-
     def configure(self, dataSeries):
         """Let the axis configure its scale and range based on the data.
 
@@ -550,10 +549,31 @@ class ValueAxis(Widget):
         to use in plotting.
         """
         self._setRange(dataSeries)
-        self._calcScaleFactor()
         self._calcTickmarkPositions()
+        self._calcScaleFactor()
         self._configured = 1
 
+    def _getValueStepAndTicks(self, valueMin, valueMax,cache={}):
+        try:
+            K = (valueMin,valueMax)
+            r = cache[K]
+        except:
+            self._valueMin = valueMin
+            self._valueMax = valueMax
+            T = self._calcTickPositions()
+            if len(T)>1:
+                valueStep = T[1]-T[0]
+            else:
+                oVS = self.valueStep
+                self.valueStep = None
+                T = self._calcTickPositions()
+                self.valueStep = oVS
+                if len(T)>1:
+                    valueStep = T[1]-T[0]
+                else:
+                    valueStep = self._valueStep
+            r = cache[K] = valueStep, T, valueStep*1e-8
+        return r
 
     def _setRange(self, dataSeries):
         """Set minimum and maximum axis values.
@@ -575,31 +595,47 @@ class ValueAxis(Widget):
                 a = abs(valueMax)
                 valueMax = valueMax + a
                 valueMin = valueMin - a
-        if self.forceZero:
-            if valueMax<0: valueMax=0
-            elif valueMin>0: valueMin = 0
 
-        if rangeRound is not 'neither' and not getattr(self,'valueSteps',None):
-            self._valueMin, self._valueMax = valueMin, valueMax
-            P = self._calcTickPositions()
-            if len(P)>1:
-                valueStep = P[1]-P[0]
-            else:
-                oVS = self.valueStep
-                self.valueStep = None
-                P = self._calcTickPositions()
-                self.valueStep = oVS
-                if len(P)>1:
-                    valueStep = P[1]-P[0]
+        forceZero = self.forceZero
+        if forceZero:
+            if forceZero=='near':
+                forceZero = min(abs(valueMin),abs(valueMax)) <= 5*(valueMax-valueMin)
+            if forceZero:
+                if valueMax<0: valueMax=0
+                elif valueMin>0: valueMin = 0
+
+        abf = self.avoidBoundFrac
+        do_rr = not getattr(self,'valueSteps',None)
+        do_abf = abf and do_rr
+        do_rr = rangeRound is not 'none' and do_rr
+        go = do_rr or do_abf
+        cache = {}
+        while go:
+            if do_abf:
+                valueStep, T, fuzz = self._getValueStepAndTicks(valueMin, valueMax, cache)
+                fuzz = 1e-8*valueStep
+                if type(abf) not in (TupleType,ListType):
+                    i0 = i1 = valueStep*abf
                 else:
-                    valueStep = self._valueStep
-            fuzz = 1e-8*valueStep
-            if rangeRound in ['both','floor'] and valueMin<P[0]-fuzz: valueMin = P[0]-valueStep
-            if rangeRound in ['both','ceiling'] and valueMax>P[-1]+fuzz: valueMax = P[-1]+valueStep
+                    i0 = valueStep*abf[0]
+                    i1 = valueStep*abf[1]
+                _n = getattr(self,'_cValueMin',T[0])
+                _x = getattr(self,'_cValueMax',T[-1])
+                if _n - T[0] < i0-fuzz: valueMin = valueMin - i0
+                if T[-1]-_x < i1-fuzz: valueMax = valueMax + i1
+
+            go = 0
+            if do_rr:
+                valueStep, T, fuzz = self._getValueStepAndTicks(valueMin, valueMax, cache)
+                if rangeRound in ['both','floor'] and valueMin<T[0]-fuzz:
+                    valueMin = T[0]-valueStep
+                    go = 1
+                if rangeRound in ['both','ceiling'] and valueMax>T[-1]+fuzz:
+                    valueMax = T[-1]+valueStep
+                    go = 1
 
         self._valueMin, self._valueMax = valueMin, valueMax
         self._rangeAdjust()
-
 
     def _rangeAdjust(self):
         """Override this if you want to alter the calculated range.
@@ -607,7 +643,6 @@ class ValueAxis(Widget):
         E.g. if want a minumamum range of 30% or don't want 100%
         as the first point.
         """
-
         pass
 
     def _adjustAxisTicks(self):
@@ -618,12 +653,9 @@ class ValueAxis(Widget):
 
     def _calcScaleFactor(self):
         """Calculate the axis' scale factor.
-
         This should be called only *after* the axis' range is set.
-
         Returns a number.
         """
-
         self._scaleFactor = self._length / float(self._valueMax - self._valueMin)
         return self._scaleFactor
 
@@ -641,29 +673,21 @@ class ValueAxis(Widget):
         return P
 
     def _calcTickmarkPositions(self):
-        """Calculate a list of tick positions on the axis.
-
-        Returns a list of numbers.
-        """
-
+        """Calculate a list of tick positions on the axis.  Returns a list of numbers."""
         self._tickValues = getattr(self,'valueSteps',None)
         if self._tickValues: return self._tickValues
-
         self._tickValues = self._calcTickPositions()
         self._adjustAxisTicks()
         return self._tickValues
 
     def _calcValueStep(self):
         '''Calculate _valueStep for the axis or get from valueStep.'''
-
         if self.valueStep is None:
             rawRange = self._valueMax - self._valueMin
             rawInterval = rawRange / min(float(self.maximumTicks-1),(float(self._length)/self.minimumTickSpacing))
-            niceInterval = nextRoundNumber(rawInterval)
-            self._valueStep = niceInterval
+            self._valueStep = nextRoundNumber(rawInterval)
         else:
             self._valueStep = self.valueStep
-
 
     def makeTickLabels(self):
         g = Group()
