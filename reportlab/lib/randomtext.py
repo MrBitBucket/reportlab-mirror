@@ -315,7 +315,13 @@ del rl_config
 
 def randomText(theme=STARTUP, sentences=5):
     #this may or may not be appropriate in your company
-    if theme.lower()=='chomsky': return chomsky(sentences)
+    if type(theme)==type(''):
+        if theme.lower()=='chomsky': return chomsky(sentences)
+        elif theme.upper() in ('STARTUP','COMPUTERS','BLAH','BUZZWORD','STARTREK','PRINTING','PYTHON'):
+            theme = globals()[theme]
+        else:
+            raise ValueError('Unknown theme "%s"' % theme)
+
     from random import randint, choice
 
     RANDOMWORDS = theme
