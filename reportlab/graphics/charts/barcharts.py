@@ -1,9 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.23 2001/07/16 07:40:30 andy_robinson Exp $
-"""
-This modules defines a variety of Bar Chart components.
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.24 2001/07/16 12:25:04 dinu_gherman Exp $
+"""This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
 vertical versions.
@@ -68,29 +67,48 @@ class BarChart(Widget):
     "Abstract base class, unusable by itself."
 
     _attrMap = AttrMap(
-        debug = AttrMapValue(isNumber),
-        x = AttrMapValue(isNumber),
-        y = AttrMapValue(isNumber),
-        width = AttrMapValue(isNumber),
-        height = AttrMapValue(isNumber),
+        debug = AttrMapValue(isNumber,
+            desc='Used only for debugging.'),
+        x = AttrMapValue(isNumber,
+            desc='X position of the lower-left corner of the chart.'),
+        y = AttrMapValue(isNumber,
+            desc='Y position of the lower-left corner of the chart.'),
+        width = AttrMapValue(isNumber,
+            desc='Width of the chart.'),
+        height = AttrMapValue(isNumber,
+            desc='Height of the chart.'),
 
-        useAbsolute = AttrMapValue(isNumber),
-        barWidth = AttrMapValue(isNumber),
-        barLabelNudge = AttrMapValue(isNumber),
-        groupSpacing = AttrMapValue(isNumber),
-        barSpacing = AttrMapValue(isNumber),
+        useAbsolute = AttrMapValue(isNumber,
+            desc='Flag to use absolute spacing values.'),
+        barWidth = AttrMapValue(isNumber,
+            desc='The width of an individual bar.'),
+        barLabelNudge = AttrMapValue(isNumber,
+            desc='Distance between a bar and its label.'),
+        groupSpacing = AttrMapValue(isNumber,
+            desc='Width between groups of bars.'),
+        barSpacing = AttrMapValue(isNumber,
+            desc='Width between individual bars.'),
 
-        strokeColor = AttrMapValue(isColorOrNone),
-        fillColor = AttrMapValue(isColorOrNone),
+        strokeColor = AttrMapValue(isColorOrNone,
+            desc='Color of the bar border.'),
+        fillColor = AttrMapValue(isColorOrNone,
+            desc='Color of the bar interior area.'),
 
-        bars = AttrMapValue(None),
+        bars = AttrMapValue(None,
+            desc='Handle of the individual bars.'),
 
-        categoryAxis = AttrMapValue(None),
-        categoryNames = AttrMapValue(isListOfStrings),
-        valueAxis = AttrMapValue(None),
-        data = AttrMapValue(None),
-        barLabels = AttrMapValue(None),
-        barLabelFormat = AttrMapValue(None),
+        valueAxis = AttrMapValue(None,
+            desc='Handle of the value axis.'),
+        categoryAxis = AttrMapValue(None,
+            desc='Handle of the category axis.'),
+        categoryNames = AttrMapValue(isListOfStrings,
+            desc='List of category names.'),
+        data = AttrMapValue(None,
+            desc='Data to be plotted, list of (lists of) numbers.'),
+        barLabels = AttrMapValue(None,
+            desc='Handle to the list of bar labels.'),
+        barLabelFormat = AttrMapValue(None,
+            desc='Formatting string or function used for bar labels.'),
         )
 
     def __init__(self):
@@ -1661,7 +1679,7 @@ def sampleSymbol1():
 
     sym2 = ShadedRect0()
     sym2.fillColorStart = colors.black
-    sym2.fillColorEnd = colors.red
+    sym2.fillColorEnd = colors.pink
     sym2.orientation = 'horizontal'
     sym2.strokeWidth = 0
 

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.29 2001/07/02 16:50:53 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.30 2001/07/16 12:25:04 dinu_gherman Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -89,16 +89,26 @@ class CategoryAxis(Widget):
     "Abstract category axis, unusable in itself."
 
     _attrMap = AttrMap(
-        visible = AttrMapValue(isNumber),
-        visibleAxis = AttrMapValue(isNumber),
-        visibleTicks = AttrMapValue(isNumber),
-        strokeWidth = AttrMapValue(isNumber),
-        strokeColor = AttrMapValue(isColorOrNone),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
-        labels = AttrMapValue(None),
-        categoryNames = AttrMapValue(isListOfStringsOrNone),
-        joinAxis = AttrMapValue(None),
-        joinAxisPos = AttrMapValue(isNumberOrNone),
+        visible = AttrMapValue(isNumber,
+            desc='Display entire object, if true.'),
+        visibleAxis = AttrMapValue(isNumber,
+            desc='Display axis line, if true.'),
+        visibleTicks = AttrMapValue(isNumber,
+            desc='Display axis ticks, if true.'),
+        strokeWidth = AttrMapValue(isNumber,
+            desc='Width of axis line and ticks.'),
+        strokeColor = AttrMapValue(isColorOrNone,
+            desc='Color of axis line and ticks.'),
+        strokeDashArray = AttrMapValue(isListOfNumbersOrNone,
+            desc='Dash array used for axis line.'),
+        labels = AttrMapValue(None,
+            desc='Handle of the axis labels.'),
+        categoryNames = AttrMapValue(isListOfStringsOrNone,
+            desc='List of category names.'),
+        joinAxis = AttrMapValue(None,
+            desc='Join both axes if true.'),
+        joinAxisPos = AttrMapValue(isNumberOrNone,
+            desc='Position at which to join with other axis.'),
         )
 
     def setPosition(self, x, y, length):
@@ -130,9 +140,12 @@ class XCategoryAxis(CategoryAxis):
     "X/category axis"
 
     _attrMap = AttrMap(BASE=CategoryAxis,
-        tickUp = AttrMapValue(isNumber),
-        tickDown = AttrMapValue(isNumber),
-        joinAxisMode = AttrMapValue(OneOf('bottom', 'top', 'value', 'points', None)),
+        tickUp = AttrMapValue(isNumber,
+            desc='Tick length up the axis.'),
+        tickDown = AttrMapValue(isNumber,
+            desc='Tick length down the axis.'),
+        joinAxisMode = AttrMapValue(OneOf('bottom', 'top', 'value', 'points', None),
+            desc="Mode used for connecting axis ('bottom', 'top', 'value', 'points', None)."),
         )
 
     def __init__(self):
@@ -285,10 +298,14 @@ class YCategoryAxis(CategoryAxis):
     "Y/category axis"
 
     _attrMap = AttrMap(BASE=CategoryAxis,
-        tickLeft = AttrMapValue(isNumber),
-        tickRight = AttrMapValue(isNumber),
-        joinAxisMode = AttrMapValue(OneOf(('left', 'right', 'value', 'points', None))),
+        tickLeft = AttrMapValue(isNumber,
+            desc='Tick length left of the axis.'),
+        tickRight = AttrMapValue(isNumber,
+            desc='Tick length right of the axis.'),
+        joinAxisMode = AttrMapValue(OneOf(('left', 'right', 'value', 'points', None)),
+            desc="Mode used for connecting axis ('left', 'right', 'value', 'points', None)."),
         )
+
 
     def __init__(self):
         # private properties set by methods.  The initial values
@@ -443,20 +460,34 @@ class ValueAxis(Widget):
     "Abstract value axis, unusable in itself."
 
     _attrMap = AttrMap(
-        visible = AttrMapValue(isNumber),
-        visibleAxis = AttrMapValue(isNumber),
-        visibleTicks = AttrMapValue(isNumber),
-        strokeWidth = AttrMapValue(isNumber),
-        strokeColor = AttrMapValue(isColorOrNone),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
-        minimumTickSpacing = AttrMapValue(isNumber),
-        maximumTicks = AttrMapValue(isNumber),
-        labels = AttrMapValue(None),
-        labelTextFormat = AttrMapValue(None),
-        valueMin = AttrMapValue(isNumberOrNone),
-        valueMax = AttrMapValue(isNumberOrNone),
-        valueStep = AttrMapValue(isNumberOrNone),
-        valueSteps = AttrMapValue(isListOfNumbersOrNone),
+        visible = AttrMapValue(isNumber,
+            desc='Display entire object, if true.'),
+        visibleAxis = AttrMapValue(isNumber,
+            desc='Display axis line, if true.'),
+        visibleTicks = AttrMapValue(isNumber,
+            desc='Display axis ticks, if true.'),
+        strokeWidth = AttrMapValue(isNumber,
+            desc='Width of axis line and ticks.'),
+        strokeColor = AttrMapValue(isColorOrNone,
+            desc='Color of axis line and ticks.'),
+        strokeDashArray = AttrMapValue(isListOfNumbersOrNone,
+            desc='Dash array used for axis line.'),
+        minimumTickSpacing = AttrMapValue(isNumber,
+            desc='Minimum value for distance between ticks.'),
+        maximumTicks = AttrMapValue(isNumber,
+            desc='Maximum number of ticks.'),
+        labels = AttrMapValue(None,
+            desc='Handle of the axis labels.'),
+        labelTextFormat = AttrMapValue(None,
+            desc='Formatting string or function used for axis labels.'),
+        valueMin = AttrMapValue(isNumberOrNone,
+            desc='Minimum value on axis.'),
+        valueMax = AttrMapValue(isNumberOrNone,
+            desc='Maximum value on axis.'),
+        valueStep = AttrMapValue(isNumberOrNone,
+            desc='Step size used between ticks.'),
+        valueSteps = AttrMapValue(isListOfNumbersOrNone,
+            desc='List of step sizes used between ticks.'),
         )
 
     def __init__(self):
@@ -651,11 +682,16 @@ class XValueAxis(ValueAxis):
     "X/value axis"
 
     _attrMap = AttrMap(BASE=ValueAxis,
-        tickUp = AttrMapValue(isNumber),
-        tickDown = AttrMapValue(isNumber),
-        joinAxis = AttrMapValue(None),
-        joinAxisMode = AttrMapValue(OneOf(('bottom', 'top', 'value', 'points', None))),
-        joinAxisPos = AttrMapValue(isNumberOrNone),
+        tickUp = AttrMapValue(isNumber,
+            desc='Tick length up the axis.'),
+        tickDown = AttrMapValue(isNumber,
+            desc='Tick length down the axis.'),
+        joinAxis = AttrMapValue(None,
+            desc='Join both axes if true.'),
+        joinAxisMode = AttrMapValue(OneOf('bottom', 'top', 'value', 'points', None),
+            desc="Mode used for connecting axis ('bottom', 'top', 'value', 'points', None)."),
+        joinAxisPos = AttrMapValue(isNumberOrNone,
+            desc='Position at which to join with other axis.'),
         )
 
     # Indicate the dimension of the data we're interested in. 
@@ -772,11 +808,16 @@ class YValueAxis(ValueAxis):
     "Y/value axis"
 
     _attrMap = AttrMap(BASE=ValueAxis,
-        tickLeft = AttrMapValue(isNumber),
-        tickRight = AttrMapValue(isNumber),
-        joinAxis = AttrMapValue(None),
-        joinAxisMode = AttrMapValue(OneOf(('left', 'right', 'value', 'points', None))),
-        joinAxisPos = AttrMapValue(isNumberOrNone),
+        tickLeft = AttrMapValue(isNumber,
+            desc='Tick length left of the axis.'),
+        tickRight = AttrMapValue(isNumber,
+            desc='Tick length right of the axis.'),
+        joinAxis = AttrMapValue(None,
+            desc='Join both axes if true.'),
+        joinAxisMode = AttrMapValue(OneOf(('left', 'right', 'value', 'points', None)),
+            desc="Mode used for connecting axis ('left', 'right', 'value', 'points', None)."),
+        joinAxisPos = AttrMapValue(isNumberOrNone,
+            desc='Position at which to join with other axis.'),
         )
 
     # Indicate the dimension of the data we're interested in. 

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.12 2001/06/19 09:56:29 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.13 2001/07/16 12:25:04 dinu_gherman Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
@@ -22,9 +22,12 @@ from reportlab.graphics.charts.markers import *
 
 class LineChartProperties(PropHolder):
     _attrMap = AttrMap(
-        strokeColor = AttrMapValue(isColor),
-        strokeWidth = AttrMapValue(isNumber),
-        symbol = AttrMapValue(None),
+        strokeWidth = AttrMapValue(isNumber,
+            desc='Width of a line.'),
+        strokeColor = AttrMapValue(isColorOrNone,
+            desc='Color of a line.'),
+        symbol = AttrMapValue(None,
+            desc='Widget placed at data points.'),
         )
 
 
@@ -71,28 +74,45 @@ class HorizontalLineChart(LineChart):
     """
 
     _attrMap = AttrMap(
-        x = AttrMapValue(isNumber),
-        y = AttrMapValue(isNumber),
-        width = AttrMapValue(isNumber),
-        height = AttrMapValue(isNumber),
+        x = AttrMapValue(isNumber,
+            desc='X position of the lower-left corner of the chart.'),
+        y = AttrMapValue(isNumber,
+            desc='Y position of the lower-left corner of the chart.'),
+        width = AttrMapValue(isNumber,
+            desc='Width of the chart.'),
+        height = AttrMapValue(isNumber,
+            desc='Height of the chart.'),
 
-        useAbsolute = AttrMapValue(isNumber),
-        lineLabelNudge = AttrMapValue(isNumber),
-        lineLabels = AttrMapValue(None),
-        lineLabelFormat = AttrMapValue(None),
-        groupSpacing = AttrMapValue(isNumber),
+        useAbsolute = AttrMapValue(isNumber,
+            desc='Flag to use absolute spacing values.'),
+        lineLabelNudge = AttrMapValue(isNumber,
+            desc='Distance between a data point and its label.'),
+        lineLabels = AttrMapValue(None,
+            desc='Handle to the list of data point labels.'),
+        lineLabelFormat = AttrMapValue(None,
+            desc='Formatting string or function used for data point labels.'),
+        groupSpacing = AttrMapValue(isNumber,
+            desc='? - Likely to disappear.'),
 
-        joinedLines = AttrMapValue(isNumber),
+        joinedLines = AttrMapValue(isNumber,
+            desc='Display data points joined with lines if true.'),
 
-        strokeColor = AttrMapValue(isColorOrNone),
-        fillColor = AttrMapValue(isColorOrNone),
-        lines = AttrMapValue(None),
+        strokeColor = AttrMapValue(isColorOrNone,
+            desc='Color used for background border of plot area.'),
+        fillColor = AttrMapValue(isColorOrNone,
+            desc='Color used for background interior of plot area.'),
 
-        valueAxis = AttrMapValue(None),
-        categoryAxis = AttrMapValue(None),
-        categoryNames = AttrMapValue(isListOfStringsOrNone),
+        lines = AttrMapValue(None,
+            desc='Handle of the lines.'),
 
-        data = AttrMapValue(None),
+        valueAxis = AttrMapValue(None,
+            desc='Handle of the value axis.'),
+        categoryAxis = AttrMapValue(None,
+            desc='Handle of the category axis.'),
+        categoryNames = AttrMapValue(isListOfStringsOrNone,
+            desc='List of category names.'),
+        data = AttrMapValue(None,
+            desc='Data to be plotted, list of (lists of) numbers.'),
         )
 
     def __init__(self):

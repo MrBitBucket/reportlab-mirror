@@ -1,9 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.17 2001/06/19 09:56:29 dinu_gherman Exp $
-"""
-This modules defines a very preliminary Line Plot example.
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.18 2001/07/16 12:25:04 dinu_gherman Exp $
+"""This module defines a very preliminary Line Plot example.
 """
 
 import string, time
@@ -25,10 +24,14 @@ from reportlab.graphics.charts.markers import *
 
 class LinePlotProperties(PropHolder):
     _attrMap = AttrMap(
-        strokeWidth = AttrMapValue(isNumber),
-        strokeColor = AttrMapValue(isColorOrNone),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
-        symbol = AttrMapValue(None),
+        strokeWidth = AttrMapValue(isNumber,
+            desc='Width of a line.'),
+        strokeColor = AttrMapValue(isColorOrNone,
+            desc='Color of a line.'),
+        strokeDashArray = AttrMapValue(isListOfNumbersOrNone,
+            desc='Dash array of a line.'),
+        symbol = AttrMapValue(None,
+            desc='Widget placed at data points.'),
         )
 
 
@@ -40,28 +43,45 @@ class LinePlot(Widget):
     """
 
     _attrMap = AttrMap(
-        debug = AttrMapValue(isNumber),
-        x = AttrMapValue(isNumber),
-        y = AttrMapValue(isNumber),
-        width = AttrMapValue(isNumber),
-        height = AttrMapValue(isNumber),
+        debug = AttrMapValue(isNumber,
+            desc='Used only for debugging.'),
+        x = AttrMapValue(isNumber,
+            desc='X position of the lower-left corner of the chart.'),
+        y = AttrMapValue(isNumber,
+            desc='Y position of the lower-left corner of the chart.'),
+        width = AttrMapValue(isNumber,
+            desc='Width of the chart.'),
+        height = AttrMapValue(isNumber,
+            desc='Height of the chart.'),
 
-        useAbsolute = AttrMapValue(isNumber),
-        lineLabelNudge = AttrMapValue(isNumber),
-        lineLabels = AttrMapValue(None),
-        lineLabelFormat = AttrMapValue(None),
-        groupSpacing = AttrMapValue(isNumber),
+        useAbsolute = AttrMapValue(isNumber,
+            desc='Flag to use absolute spacing values.'),
+        lineLabelNudge = AttrMapValue(isNumber,
+            desc='Distance between a data point and its label.'),
+        lineLabels = AttrMapValue(None,
+            desc='Handle to the list of data point labels.'),
+        lineLabelFormat = AttrMapValue(None,
+            desc='Formatting string or function used for data point labels.'),
+        groupSpacing = AttrMapValue(isNumber,
+            desc='? - Likely to disappear.'),
 
-        joinedLines = AttrMapValue(isNumber),
+        joinedLines = AttrMapValue(isNumber,
+            desc='Display data points joined with lines if true.'),
 
-        strokeColor = AttrMapValue(isColorOrNone),
-        fillColor = AttrMapValue(isColorOrNone),
+        strokeColor = AttrMapValue(isColorOrNone,
+            desc='Color used for background border of plot area.'),
+        fillColor = AttrMapValue(isColorOrNone,
+            desc='Color used for background interior of plot area.'),
 
-        lines = AttrMapValue(None),
+        lines = AttrMapValue(None,
+            desc='Handle of the lines.'),
 
-        xValueAxis = AttrMapValue(None),
-        yValueAxis = AttrMapValue(None),
-        data = AttrMapValue(None),
+        xValueAxis = AttrMapValue(None,
+            desc='Handle of the x axis.'),
+        yValueAxis = AttrMapValue(None,
+            desc='Handle of the y axis.'),
+        data = AttrMapValue(None,
+            desc='Data to be plotted, list of (lists of) x/y tuples.'),
         )
 
     def __init__(self):
