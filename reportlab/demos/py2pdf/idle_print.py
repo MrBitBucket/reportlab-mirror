@@ -32,10 +32,13 @@
 #
 ###############################################################################
 #	$Log: idle_print.py,v $
+#	Revision 1.2  2000/04/21 13:15:22  rgbecker
+#	Changed to spawnve
+#
 #	Revision 1.1  2000/04/20 12:19:35  rgbecker
 #	Initial interface script for idle
-#
-__version__=''' $Id: idle_print.py,v 1.1 2000/04/20 12:19:35 rgbecker Exp $ '''
+#	
+__version__=''' $Id: idle_print.py,v 1.2 2000/04/21 13:15:22 rgbecker Exp $ '''
 # this is a simple script to convert a specified input file to pdf
 # it should have only filename arguments; these are assumed temporary
 # and will be removed unless there's a -noremove flag.
@@ -52,28 +55,21 @@ py2pdf_options = ['--format=pdf','--mode=color','--paperFormat=A4']
 #how to call up your acrobat reader, '---file---' will get changed at run time
 if sys.platform=='win32':
 	# under win32 we can't get to a PS file so use acrord32 to come up as normal
-	acrord = '"C:\\Program Files\\Adobe\\Acrobat 4.0\\Reader\\AcroRd32.exe" %s'
-	sleeptime = 15
+	acrord = 'C:\\Program Files\\Adobe\\Acrobat 4.0\\Reader\\AcroRd32.exe'
+	argstr = '%s'
 else:
+	# change /opt to /usr/local if that's where you installed Acrobat4
 	# change the /dev/lp to whatever the postcript should be sent to
-	acrord = '/opt/Acrobat4/bin/acroread -toPostScript -pairs %s /dev/lp'
-	sleeptime = 0
+	acrord = '/opt/Acrobat4/bin/acroread'
+	argstr = '-toPostScript,-pairs,%s,/dev/lp'
 
 for f in sys.argv[1:]:
 	py2pdf.main(py2pdf_options + [f])
-	pdfname = os.path.splitext(f)[0]+'.pdf'
-	os.system(acrord % pdfname)
 	if auto_rm_in: os.remove(f)
-	if auto_rm_out:
-		# we try to clean up; on windows since the process detaches the script continues
-		# and we need to delay before attempting to delete the files
-		while 1:
-			time.sleep(sleeptime)
-			try:
-				os.remove(pdfname)
-				break
-			except OSError:
-				pass
+	pdfname = os.path.splitext(f)[0]+'.pdf'
+	args = [acrord] + string.split(argstr%pdfname,',')
+	os.spawnve(os.P_WAIT,args[0],args,os.environ)
+	if auto_rm_out: os.remove(pdfname)
 
 #########################################################################
 # the script ends here the stuff below is for info only
