@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.10 2002/02/03 21:25:57 andy_robinson Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.10 2002/02/03 21:25:57 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.11 2002/03/23 22:58:17 andy_robinson Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.11 2002/03/23 22:58:17 andy_robinson Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
@@ -631,28 +631,44 @@ cost to performance.""")
         return
 
         
-    t.textLines("""This shows image capabilities.  If I've done things
-        right, the bitmap should have its bottom left corner aligned
-        with the crosshairs.""")
-    t.textLines("""PDFgen uses the Python Imaging Library to process
-        a very wide variety of image formats.  Although some processing
-        is required, cached versions of the image are prepared and
-        stored in the project directory, so that subsequent builds of
-        an image-rich document are very fast indeed.""")
+    t.textLines("""PDFgen uses the Python Imaging Library to process a very wide variety of image formats.
+        This page shows image capabilities.  If I've done things right, the bitmap should have
+        its bottom left corner aligned with the crosshairs.
+        There are two methods for drawing images.  The recommended use is defineImage once,
+        then drawImage as many times as needed.  This produces the smallest PDFs and the
+        fastest generation times as each image's binary data is only embedded once in the file.
+        Also you can use advanced features like transparency masks.
+        You can also use drawInlineImage, which puts images in the page stream directly.
+        This is slightly faster for Acrobat to render or for very small images, but wastes
+        space if you use images more than once.""")
     
     c.drawText(t)
 
     c.drawInlineImage('pythonpowered.gif',2*inch, 7*inch)
     c.line(1.5*inch, 7*inch, 4*inch, 7*inch)
     c.line(2*inch, 6.5*inch, 2*inch, 8*inch)
-    c.drawString(4.5 * inch, 7.25*inch, 'image drawn at natural size')
+    c.drawString(4.5 * inch, 7.25*inch, 'inline image drawn at natural size')
 
-    c.drawInlineImage('pythonpowered.gif',2*inch, 4*inch, inch, inch)
-    c.line(1.5*inch, 4*inch, 4*inch, 4*inch)
-    c.line(2*inch, 3.5*inch, 2*inch, 5*inch)
-    c.drawString(4.5 * inch, 4.25*inch, 'image distorted to fit box')
+    c.drawInlineImage('pythonpowered.gif',2*inch, 5*inch, inch, inch)
+    c.line(1.5*inch, 5*inch, 4*inch, 5*inch)
+    c.line(2*inch, 4.5*inch, 2*inch, 6*inch)
+    c.drawString(4.5 * inch, 5.25*inch, 'inline image distorted to fit box')
+
+    c.drawString(1.5 * inch, 4*inch, 'Image XObjects can be defined once in the file and drawn many times.')
+    c.drawString(1.5 * inch, 3.75*inch, 'This results in faster generation and much smaller files.')
+
+    w, h = c.defineImage('power','pythonpowered.gif')
+    for i in range(5):
+        c.drawImage('power', (1.5 + i)*inch, 3*inch, w, h)
+
+    myMask = [254,255,222,223,0,1]
+    c.drawString(1.5 * inch, 2.5*inch, "The optional 'mask' parameter lets you define transparent colors. We used a color picker")
+    c.drawString(1.5 * inch, 2.3*inch, "to determine that the yellow in the image above is RGB=(225,223,0).  We then define a mask")
+    c.drawString(1.5 * inch, 2.1*inch, "spanning these RGB values:  %s.  The background vanishes!!" % myMask)
+    w, h = c.defineImage('power_trans','pythonpowered.gif', mask=myMask)
+    c.drawString(2.5*inch, 1.2*inch, 'This would normally be obscured')
+    c.drawImage('power_trans', 3*inch, 1.2*inch, w, h)
     
-
 
 #########################################################################
 #
