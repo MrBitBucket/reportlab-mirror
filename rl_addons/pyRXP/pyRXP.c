@@ -1,10 +1,9 @@
 /****************************************************************************
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.27 2004/03/26 10:48:43 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/rl_addons/pyRXP/pyRXP.c
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.27 2004/03/26 10:48:43 rgbecker Exp $ ";
+static char* __version__=" $Id$ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>

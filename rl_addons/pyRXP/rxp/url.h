@@ -1,6 +1,5 @@
 /* url.h	-- Henry Thompson
  *
- * $Header: /tmp/reportlab/rl_addons/pyRXP/rxp/url.h,v 1.2 2003/04/01 16:06:36 rgbecker Exp $
  */
 
 #ifndef _URL_H

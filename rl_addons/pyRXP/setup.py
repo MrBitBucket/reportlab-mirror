@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-#copyright ReportLab Inc. 2000-2002
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/setup.py,v 1.10 2003/11/10 18:38:24 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/rl_addons/pyRXP/setup.py
 if __name__=='__main__': #NO RUNTESTS
 	import os, sys, shutil, re
 	from distutils.core import setup, Extension
