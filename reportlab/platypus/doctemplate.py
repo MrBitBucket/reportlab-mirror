@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.23  2000/07/03 15:39:51  rgbecker
+#	Documentation fixes
+#
 #	Revision 1.22  2000/06/28 14:52:43  rgbecker
 #	Documentation changes
-#
+#	
 #	Revision 1.21  2000/06/26 15:58:22  rgbecker
 #	Simple fix to widths problem
 #	
@@ -99,7 +102,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.22 2000/06/28 14:52:43 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.23 2000/07/03 15:39:51 rgbecker Exp $ '''
 __doc__="""
 This module contains the core structure of platypus.
 
@@ -145,12 +148,18 @@ class ActionFlowable(Flowable):
 		self.action = action
 
 	def wrap(self, availWidth, availHeight):
+		'''Should never be called.'''
 		raise NotImplementedError
 
 	def draw(self):
+		'''Should never be called.'''
 		raise NotImplementedError
 
 	def apply(self,doc):
+		'''
+		This is called by the doc.build processing to allow the instance to
+		implement its behaviour
+		'''
 		action = self.action[0]
 		args = tuple(self.action[1:])
 		arn = 'handle_'+action
@@ -544,6 +553,8 @@ class SimpleDocTemplate(BaseDocTemplate):
 	   page may can be built using this special approach.
 	"""
 	def handle_pageBegin(self):
+		'''override base method to add a change of page template after the firstpage.
+		'''
 		self._handle_pageBegin()
 		self._handle_nextPageTemplate('Later')
 
@@ -556,7 +567,7 @@ class SimpleDocTemplate(BaseDocTemplate):
 					  # do annotations and modify the document
 					  ...
 					  
-			   The functions can do thing like draw logos, page numbers,
+			   The functions can do things like draw logos, page numbers,
 			   footers, etcetera. They can use external variables to vary
 			   the look (for example providing page numbering or section names).
 		"""

@@ -99,9 +99,28 @@ levels: documents, pages, frames and flowables (things which can fit into frames
 In practice there is a fifth level, the canvas, so that if you want
 you can do anything that pdfgen's canvas allows.
 
-.h2 BaseDocTemplate
+.h2 Document Templates
+.h3 BaseDocTemplate
+
+The basic document template class; it provides for initialisation and 
+rendering of documents. A whole bunch of methods 
+<b><font name=courier>handle_XXX</font></b> handle document
+rendering events. These event routines all contain some
+significant semantics so while these may be overridden that
+may require some detailed knowledge. Some other methods are
+completely virtual and are designed to be overridden.
+.h3 BaseDocTemplate
 .getClassDoc reportlab.platypus.doctemplate BaseDocTemplate
 
+.pageBreak
+A simple document processor can be made using derived class,
+<b><font name=courier>SimpleDocTemplate</font></b>.
+
+.pageBreak
+.h3 SimpleDocTemplate
+.getClassDoc reportlab.platypus.doctemplate SimpleDocTemplate
+
+.pageBreak
 .h2 Flowables
 .getClassDoc reportlab.platypus.paragraph Paragraph
 
@@ -137,6 +156,9 @@ applications.
 .h1 Appendix A - CVS Revision History
 .beginPre Code
 $Log: reference.yml,v $
+Revision 1.10  2000/07/03 15:39:51  rgbecker
+Documentation fixes
+
 Revision 1.9  2000/06/28 14:52:43  rgbecker
 Documentation changes
 

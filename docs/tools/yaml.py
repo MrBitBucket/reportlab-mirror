@@ -85,7 +85,6 @@ class Parser:
             #is it a parser method?
             if hasattr(self.__class__, cmd):
                 method = eval('self.'+cmd)
-                apply(method, tuple(args))
                 #this was very bad; any type error in the method was hidden
                 #we have to hack the traceback
                 try:

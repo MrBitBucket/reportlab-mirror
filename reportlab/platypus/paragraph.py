@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.16  2000/07/03 15:39:51  rgbecker
+#	Documentation fixes
+#
 #	Revision 1.15  2000/06/23 13:13:54  rgbecker
 #	Fixes to splitting code
-#
+#	
 #	Revision 1.14  2000/06/19 23:51:23  andy_robinson
 #	Added UserDocTemplate class, and paragraph.getPlainText()
 #	
@@ -76,7 +79,7 @@
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.15 2000/06/23 13:13:54 rgbecker Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.16 2000/07/03 15:39:51 rgbecker Exp $ '''
 import string
 import types
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -260,20 +263,25 @@ def _drawBullet(canvas, offset, cur_y, bulletText, style):
 	return offset
 
 class Paragraph(Flowable):
-	"""format a block of text into a paragraph with a given style
+	"""	Paragraph(text, style, bulletText=None)
+		text a string of stuff to go into the paragraph.
+		style is a style definition as in reportlab.lib.styles.
+		bulletText is an optional bullet defintion.
+
+		This class is a flowable that can format a block of text
+		into a paragraph with a given style.
 	
-	   The paragraph Text can contain XML-like markup including the 
-	   tags:
-	   <b> ... </b> - bold
-	   <i> ... </i> - italics
-	   <u> ... </u> - underline
-	   <super> ... </super> - superscript
-	   <sub> ... </sub> - subscript
-	   <font name=fontfamily/fontname color=colorname size=float>
+		The paragraph Text can contain XML-like markup including the tags:
+		<b> ... </b> - bold
+		<i> ... </i> - italics
+		<u> ... </u> - underline
+		<super> ... </super> - superscript
+		<sub> ... </sub> - subscript
+		<font name=fontfamily/fontname color=colorname size=float>
 
 		The whole may be surrounded by <para> </para> tags
 
-	 It will also be able to handle any MathML specified Greek characters.
+		It will also be able to handle any MathML specified Greek characters.
 	"""
 	def __init__(self, text, style, bulletText = None, frags=None):
 		
