@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch5_charts.py,v 1.2 2001/08/07 10:50:21 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/ch5_charts.py,v 1.3 2001/08/07 11:15:45 dinu_gherman Exp $
 
 from gengraphguide import *
 
@@ -360,12 +360,11 @@ caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - XCategoryAxis proper
 
 heading3("YValueAxis")
 
-disc("""The left axis in the diagram is a YValueAxis. The XValueAxis 
-       flavour will shortly be available as well! A Value Axis differs from a 
+disc("""The left axis in the diagram is a YValueAxis. A Value Axis differs from a 
        Category Axis in that each point along its length corresponds to a y 
        value in chart space. It is the job of the axis to configure itself, 
        and to convert Y values from chart space to points on demand to assist 
-       the parent chart in plotting""")
+       the parent chart in plotting.""")
 
 disc("""<i>setPosition(x, y, length)</i> and <i>configure(data)</i> work exactly as 
        for a category axis. If you have not fully specified the maximum, 
@@ -416,6 +415,8 @@ this to a 'round number' so data bars do not quite reach the top."""],
 None, and the chart tries to pick 'nice round numbers' which are
 just wider than the minimumTickSpacing below."""],
 
+      ["valueSteps", """A list of numbers at which to place ticks."""],
+
       ["minimumTickSpacing", """This is used when valueStep is set to None, and ignored
 otherwise. The designer specified that tick marks should be no
 closer than X points apart (based, presumably, on considerations
@@ -445,28 +446,54 @@ t.setStyle(TableStyle([
 getStory().append(t)
 caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - XCategoryAxis properties""")
 
-##Property Meaning
-##visible Is it drawn at all? 
-##strokeColor Color of the axis 
-##strokeDashArray Whether to draw axis with a dash and, if so, what kind. Defaults to None 
-##strokeWidth Width of axis in points 
-##tickLeft How far to the left of the axis should the tick marks protrude?  
-##tickRight How far to the right of the axis should the tick mark protrude? (Note that making this equal to chart width gives you a gridline) 
+disc("""
+The $valueSteps$ property lets you explicitly specify the 
+tick mark locations, so you don't have to follow regular intervals. 
+Hence, you can plot month ends and month end dates with a couple of 
+helper functions, and without needing special time series chart 
+classes.
+The following code show how to create a simple $XValueAxis$ with special
+tick intervals. Make sure to set the $valueSteps$ attribute before calling
+the configure method!
+""")
 
-##valueMin The y value to which the bottom of the axis should correspond. Default value is None in which case the axis sets it to the lowest actual data point (e.g. 10 in the example above). It is common to set this to zero to avoid misleading the eye. 
-##valueMax The y value to which the top of the axis should correspond. Default value is None in which case the axis sets it to the highest actual data point (e.g. 42 in the example above). It is common to set this to a 'round number' so data bars do not quite reach the top. 
-##valueStep The y change between tick intervals. By default this is None, and the chart tries to pick 'nice round numbers' which are just wider than the minimumTickSpacing below. 
+eg("""
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.charts.axes import XValueAxis 
 
-##minimumTickSpacing This is used when valueStep is set to None, and ignored otherwise. The designer specified that tick marks should be no closer than X points apart (based, presumably, on considerations of the label font size and angle). The chart tries values of the type 1,2,5,10,20,50,100... (going down below 1 if necessary) until it finds an interval which is greater than the desired spacing, and uses this for the step.  
-##labelTextFormat This determines what goes in the labels. Unlike a category axis which accepts fixed strings, the labels on a ValueAxis are supposed to be numbers. You may provide either a 'format string' like '%0.2f' (show two decimal places), or an arbitrary function which accepts a number and returns a string. One use for the latter is to convert a timestamp to a readable year-month-day format. 
-##title Not Implemented Yet. This needs to be like a label, but also let you set the text directly. It would have a default location to the left of the axis and inclined by 90 degrees. 
+drawing = Drawing(400, 100)
+
+data = [(10, 20, 30, 40)]        
+
+xAxis = XValueAxis()
+xAxis.setPosition(75, 50, 300)
+xAxis.valueSteps = [10, 15, 20, 30, 35, 40]
+xAxis.configure(data)
+xAxis.labels.boxAnchor = 'n'
+
+drawing.add(xAxis)
+""")
+
+   
+from reportlab.graphics import shapes
+from reportlab.graphics.charts.axes import XValueAxis 
+
+drawing = Drawing(400, 100)
+
+data = [(10, 20, 30, 40)]        
+
+xAxis = XValueAxis()
+xAxis.setPosition(75, 50, 300)
+xAxis.valueSteps = [10, 15, 20, 30, 35, 40]
+xAxis.configure(data)
+xAxis.labels.boxAnchor = 'n'
+
+drawing.add(xAxis)
+
+draw(drawing, 'An axis with non-equidistant tick marks')
 
 
-disc("""We hope to add an advanced property to let you explicitly specify the 
-       tick mark locations, so you don't have to follow regular intervals. 
-       You could then plot month ends and month end dates with a couple of 
-       helper functions, and without needing special time series chart 
-       classes.""")
+
 
 
 heading2("Bar Charts")
