@@ -1,8 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.69 2004/01/07 15:56:21 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.69 2004/01/07 15:56:21 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.70 2004/01/07 16:07:17 dragan1 Exp $
+__version__=''' $Id: tables.py,v 1.70 2004/01/07 16:07:17 dragan1 Exp $ '''
+
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -18,13 +19,19 @@ See the test output from running this module as a script for a discussion of the
 tables and table styles.
 """
 
-from reportlab.platypus import *
+from reportlab.platypus.flowables import Flowable, Image, Macro, PageBreak, Preformatted, Spacer, XBox, \
+                         CondPageBreak, KeepTogether, TraceInfo, FailOnWrap, FailOnDraw
+from reportlab.platypus.paragraph import Paragraph, cleanBlockQuotedText, ParaLines
+from reportlab.platypus.paraparser import ParaFrag
+from reportlab.platypus.frames import Frame
+from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate, PageTemplate, ActionFlowable, \
+                         SimpleDocTemplate, FrameBreak, PageBegin
+from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab import rl_config
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.utils import fp_str
 from reportlab.pdfbase import pdfmetrics
-from reportlab.platypus.flowables import PageBreak
 
 import operator, string
 
@@ -252,7 +259,7 @@ class Table(Flowable):
                 S = map(f,self._cellStyles)  #styles for this column
                 w = 0
                 i = 0
-                
+
                 for v, s in map(None, V, S):
                     #if the current cell is part of a spanned region,
                     #assume a zero size.
@@ -372,7 +379,7 @@ class Table(Flowable):
         # in sizing
         if self._spanCmds:
             self._calcSpanRanges()
-            
+
         # calculate the full table height
         #print 'during calc, self._colWidths=', self._colWidths
         self._calc_height()
@@ -385,7 +392,7 @@ class Table(Flowable):
         # calculate the full table width
         self._calc_width()
 
-        
+
         if self._spanCmds:
             #now work out the actual rect for each spanned cell
             #from the underlying grid
@@ -477,7 +484,7 @@ class Table(Flowable):
         self._colWidths = newColWidths
         self._argW = newColWidths
         if verbose: print 'new widths are:', self._colWidths
-        
+
     def _calcSpanRanges(self):
         """Work out rects for tables which do row and column spanning.
 
@@ -503,7 +510,7 @@ class Table(Flowable):
             if x1 < 0: x1 = x1 + self._ncols
             if y0 < 0: y0 = y0 + self._nrows
             if y1 < 0: y1 = y1 + self._nrows
-            
+
             if x0 > x1:
                 x0, x1 = x1, x0
             if y0 > y1:
@@ -515,7 +522,7 @@ class Table(Flowable):
                 for x in range(x0, x1+1):
                     spanRanges[x, y] = None
 
-            # set the main entry            
+            # set the main entry
             spanRanges[x0,y0] = (x0, y0, x1, y1)
 ##            from pprint import pprint as pp
 ##            pp(spanRanges)
@@ -547,16 +554,16 @@ class Table(Flowable):
                 else:
                     rowSpannedCells[key] = 1
         self._rowSpannedCells = rowSpannedCells
-        
+
 
     def _calcSpanRects(self):
         """Work out rects for tables which do row and column spanning.
 
         Based on self._spanRanges, which is already known,
-        and the widths which were given or previously calculated, 
+        and the widths which were given or previously calculated,
         self._spanRects shows the real coords for drawing:
           (col, row) -> (x, y, width, height)
-        
+
         for each cell.  Any cell which 'does not exist' as another
         has spanned over it will get a None entry on the right
         """
@@ -572,9 +579,9 @@ class Table(Flowable):
                 width = self._colpositions[col1+1] - x
                 height = self._rowpositions[row0] - y
                 spanRects[coord] = (x, y, width, height)
-                
+
         self._spanRects = spanRects
-            
+
 
     def setStyle(self, tblstyle):
         if type(tblstyle) is not TableStyleType:
@@ -870,7 +877,7 @@ class Table(Flowable):
                         cellval = self._cellvalues[rowNo][colNo]
                         cellstyle = self._cellStyles[rowNo][colNo]
                         self._drawCell(cellval, cellstyle, (x, y), (width, height))
-            
+
 
     def _drawBkgrnd(self):
         nrows = self._nrows
@@ -1418,14 +1425,14 @@ LIST_STYLE = TableStyle(
             ('SPAN',(0,2),(-1,2)),
 
 
-            #span 'AAA'down entire left column            
+            #span 'AAA'down entire left column
             ('SPAN',(0,0), (0, 1)),
             ('BACKGROUND',(0,0),(0,0),colors.cyan),
             ('LINEBELOW', (0,'splitlast'), (-1,'splitlast'), 1, colors.white,'butt'),
            ]
     t=Table(data,style=sty, colWidths = [20] * 5, rowHeights = [20]*5)
     lst.append(t)
-    
+
 
     SimpleDocTemplate('tables.pdf', showBoundary=1).build(lst)
 
