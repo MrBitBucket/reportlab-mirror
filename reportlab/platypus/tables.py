@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.17  2000/07/07 16:22:10  rgbecker
+#	Fix auto hieght stuff
+#
 #	Revision 1.16  2000/07/07 10:23:36  rgbecker
 #	First attempt at VALIGN
-#
+#	
 #	Revision 1.15  2000/07/06 14:05:55	rgbecker
 #	Adjusted doc string
 #	
@@ -77,7 +80,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.16 2000/07/07 10:23:36 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.17 2000/07/07 16:22:10 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -151,12 +154,21 @@ class Table(Flowable):
 		self._curweight = self._curcolor = self._curcellstyle = None
 
 	def _calc(self):
+		if hasattr(self,'_argH'):
+			self._rowHeights = self._argH
+			del self._argH
+
+		if hasattr(self,'_argW'):
+			self._colWidths = self._argW
+			del self._argW
+
 		H = self._rowHeights
 		W = self._colWidths
 
 		if None in H:
+			self._argH = H
 			H = H[:]	#make a copy as we'll change it
-			self._rowHeghts = H
+			self._rowHeights = H
 			while None in H:
 				i = H.index(None)
 				V = self._cellvalues[i]
@@ -170,6 +182,7 @@ class Table(Flowable):
 				H[i] = h
 
 		if None in W:
+			self._argW = H
 			W = W[:]
 			self._colWidths = W
 			while None in W:
@@ -624,8 +637,29 @@ LIST_STYLE = TableStyle(
 						('VALIGN',(0,-1),(-1,-1),'MIDDLE'),
 						('TEXTCOLOR',(0,-1),(-1,-1),colors.green),
 						('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
-	 					('BOX', (0,0), (-1,-1), 0.25, colors.black),
+						('BOX', (0,0), (-1,-1), 0.25, colors.black),
 						]))
+	lst.append(t)
+	data = [('alignment', 'align\012alignment'),
+			('bulletColor', 'bulletcolor\012bcolor'),
+			('bulletFontName', 'bfont\012bulletfontname'),
+			('bulletFontSize', 'bfontsize\012bulletfontsize'),
+			('bulletIndent', 'bindent\012bulletindent'),
+			('firstLineIndent', 'findent\012firstlineindent'),
+			('fontName', 'face\012fontname\012font'),
+			('fontSize', 'size\012fontsize'),
+			('leading', 'leading'),
+			('leftIndent', 'leftindent\012lindent'),
+			('rightIndent', 'rightindent\012rindent'),
+			('spaceAfter', 'spaceafter\012spacea'),
+			('spaceBefore', 'spacebefore\012spaceb'),
+			('textColor', 'fg\012textcolor\012color')]
+	t = Table(2*[None], len(data)*[None], data)
+	t.setStyle(TableStyle([
+            ('VALIGN',(0,0),(-1,-1),'TOP'),
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ]))
 	lst.append(t)
 	SimpleDocTemplate('testtables.pdf', showBoundary=1).build(lst)
 
