@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.45  2000/07/31 12:03:23  rgbecker
+#	B Herzog fix to dimension formats
+#
 #	Revision 1.44  2000/07/28 00:00:41  rgbecker
 #	Bernhard herzog inspired fixes
-#
+#	
 #	Revision 1.43  2000/06/30 15:27:55  rgbecker
 #	Allow for non-caching of images
 #	
@@ -162,7 +165,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.44 2000/07/28 00:00:41 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.45 2000/07/31 12:03:23 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -1131,7 +1134,7 @@ class Canvas:
         height are omitted, they are calculated from the image size.
         Also allow file names as well as images.  This allows a
         caching mechanism"""
-            
+
         self._currentPageHasImages = 1
 
         if type(image) == StringType:
@@ -1147,15 +1150,10 @@ class Canvas:
                     colorSpace = 'DeviceRGB'
                 else: #maybe should generate an error, is this right for CMYK?
                     colorSpace = 'DeviceCMYK'
-                imageFile.seek(0)		#reset file pointer
+                imageFile.seek(0) #reset file pointer
                 imagedata = []
-                imagedata.append('BI')   # begin image
-                # this describes what is in the image itself
-                imagedata.append('/Width %0.2f /Height %0.2f' %(info[0], info[1]))
-                imagedata.append('/BitsPerComponent 8')
-                imagedata.append('/ColorSpace /%s' % colorSpace)
-                imagedata.append('/Filter [ /ASCII85Decode /DCTDecode]')
-                imagedata.append('ID')   
+                #imagedata.append('BI /Width %d /Height /BitsPerComponent 8 /ColorSpace /%s /Filter [/Filter [ /ASCII85Decode /DCTDecode] ID' % (info[0], info[1], colorSpace))
+                imagedata.append('BI /W %d /H %d /BPC 8 /CS /%s /F [/A85 /DCT] ID' % (info[0], info[1], colorSpace))
                 #write in blocks of (??) 60 characters per line to a list
                 compressed = imageFile.read()
                 encoded = pdfutils._AsciiBase85Encode(compressed)
@@ -1200,11 +1198,11 @@ class Canvas:
             myimage = image.convert('RGB')
             imgwidth, imgheight = myimage.size
             imagedata = []
-            imagedata.append('BI')   # begin image
 
             # this describes what is in the image itself
-            imagedata.append('/W %0.2f /H %0.2f /BPC 8 /CS /RGB /F [/A85 /Fl]' % (imgwidth, imgheight))
-            imagedata.append('ID')   
+            # *NB* according to the spec you can only use the short form in inline images
+            #imagedata.append('BI /Width %d /Height /BitsPerComponent 8 /ColorSpace /%s /Filter [/Filter [ /ASCII85Decode /FlateDecode] ID' % (imgwidth, imgheight,'RGB'))
+            imagedata.append('BI /W %d /H %d /BPC 8 /CS /RGB /F [/A85 /Fl] ID' % (imgwidth, imgheight))
 
             #use a flate filter and Ascii Base 85 to compress
             raw = myimage.tostring()
