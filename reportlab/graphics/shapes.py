@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.100 2003/11/22 14:41:24 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.101 2004/04/14 13:10:51 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.100 2003/11/22 14:41:24 rgbecker Exp $ '''
+__version__=''' $Id: shapes.py,v 1.101 2004/04/14 13:10:51 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -189,15 +189,11 @@ class _SetKeyWordArgs:
 
 def getRectsBounds(rectList):
     # filter out any None objects, e.g. empty groups
-    rectList2 = []
-    for elem in rectList:
-        if elem == (0,0,0,0):
-            print 'got an empty one'
-        if elem is not None:
-            rectList2.append(elem)
-    xMin, yMin, xMax, yMax = rectList2[0]
+    L = filter(lambda x: x is not None, rectList)
+    if not L: return None
 
-    for (x1, y1, x2, y2) in rectList2[1:]:
+    xMin, yMin, xMax, yMax = L[0]
+    for (x1, y1, x2, y2) in L[1:]:
         if x1 < xMin:
             xMin = x1
         if x2 > xMax:
@@ -477,7 +473,9 @@ class Group(Shape):
             b = []
             for elem in self.contents:
                 b.append(elem.getBounds())
-            (x1, y1, x2, y2) = getRectsBounds(b)
+            x1 = getRectsBounds(b)
+            if x1 is None: return None
+            x1, y1, x2, y2 = x1
             trans = self.transform
             corners = [[x1,y1], [x1, y2], [x2, y1], [x2,y2]]
             newCorners = []
