@@ -81,6 +81,7 @@ def _runTests(pyRXP):
 	failTest('<?xml version="1.0" encoding="LATIN-1"?></a>',"Error Unknown declared encoding LATIN-1\nInternal error, ParserPush failed!\n")
 	goodTest('<?work version="1.0" encoding="utf-8"?><a/>',[('<?',{'name':'work'}, ['version="1.0" encoding="utf-8"'],None), ('a', None, None, None)],IgnorePlacementErrors=1,ReturnList=1,ReturnProcessingInstructions=1,ReturnComments=1)
 	goodTest('<a>\nHello\n<b>cruel\n</b>\nWorld\n</a>',('a', None, ['\nHello\n', ('b', None, ['cruel\n'], (('aaa', 2, 3), ('aaa', 3, 4))), '\nWorld\n'], (('aaa', 0, 3), ('aaa', 5, 4))),fourth=pyRXP.recordLocation,srcName='aaa')
+	goodTest('<a aname="ANAME" aother="AOTHER">\nHello\n<b bname="BNAME" bother="BOTHER">cruel\n</b>\nWorld\n</a>',('a', {"aname": "ANAME", "aother": "AOTHER"}, ['\nHello\n', ('b', {"bname": "BNAME", "bother": "BOTHER"}, ['cruel\n'], (('aaa', 2, 33), ('aaa', 3, 4))), '\nWorld\n'], (('aaa', 0, 33), ('aaa', 5, 4))),fourth=pyRXP.recordLocation,srcName='aaa')
 	goodTest('<a><![CDATA[<a>]]></a>',('a', None, ['<a>'], None))
 	goodTest('<a><![CDATA[<a>]]></a>',('a', None, [('<![CDATA[', None, ['<a>'], None)], None),ReturnCDATASectionsAsTuples=1)
 
