@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.26 2001/09/19 22:38:13 andy_robinson Exp $
-__version__=''' $Id: pdfutils.py,v 1.26 2001/09/19 22:38:13 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.27 2001/10/24 16:39:53 rgbecker Exp $
+__version__=''' $Id: pdfutils.py,v 1.27 2001/10/24 16:39:53 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -28,38 +28,43 @@ def cacheImageFile(filename, returnInMemory=0):
     from reportlab.lib.utils import PIL_Image
     import zlib
 
-
-    img1 = PIL_Image.open(filename)
-    img = img1.convert('RGB')
-    imgwidth, imgheight = img.size
-    code = []
-    code.append('BI')   # begin image
-    # this describes what is in the image itself
-    code.append('/W %s /H %s /BPC 8 /CS /RGB /F [/A85 /Fl]' % (imgwidth, imgheight))
-    code.append('ID')
-    #use a flate filter and Ascii Base 85
-    raw = img.tostring()
-    assert(len(raw) == imgwidth * imgheight, "Wrong amount of data for image")
-    compressed = zlib.compress(raw)   #this bit is very fast...
-    encoded = _AsciiBase85Encode(compressed) #...sadly this isn't
-    
-    #write in blocks of 60 characters per line
-    outstream = cStringIO.StringIO(encoded)
-    dataline = outstream.read(60)
-    while dataline <> "":
-        code.append(dataline)
-        dataline = outstream.read(60)
-    
-    code.append('EI')
-    if returnInMemory: return code
-
-    #save it to a file
     cachedname = os.path.splitext(filename)[0] + '.a85'
-    f = open(cachedname,'wb')
-    f.write(join(code, LINEEND)+LINEEND)
-    f.close()
-    if rl_config._verbose:
-        print 'cached image as %s' % cachedname
+    if filename==cachedname:
+        if cachedImageExists(filename):
+            if returnInMemory: return split(open(cachedname,'rb').read(),LINEEND)[:-1]
+        else:
+            raise IOError, 'No such cached image %s' % filename
+    else:
+        img1 = PIL_Image.open(filename)
+        img = img1.convert('RGB')
+        imgwidth, imgheight = img.size
+        code = []
+        code.append('BI')   # begin image
+        # this describes what is in the image itself
+        code.append('/W %s /H %s /BPC 8 /CS /RGB /F [/A85 /Fl]' % (imgwidth, imgheight))
+        code.append('ID')
+        #use a flate filter and Ascii Base 85
+        raw = img.tostring()
+        assert(len(raw) == imgwidth * imgheight, "Wrong amount of data for image")
+        compressed = zlib.compress(raw)   #this bit is very fast...
+        encoded = _AsciiBase85Encode(compressed) #...sadly this isn't
+        
+        #write in blocks of 60 characters per line
+        outstream = cStringIO.StringIO(encoded)
+        dataline = outstream.read(60)
+        while dataline <> "":
+            code.append(dataline)
+            dataline = outstream.read(60)
+        
+        code.append('EI')
+        if returnInMemory: return code
+
+        #save it to a file
+        f = open(cachedname,'wb')
+        f.write(join(code, LINEEND)+LINEEND)
+        f.close()
+        if rl_config._verbose:
+            print 'cached image as %s' % cachedname
 
 
 def preProcessImages(spec):
