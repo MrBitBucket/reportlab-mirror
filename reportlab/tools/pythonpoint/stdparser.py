@@ -614,10 +614,12 @@ class PPMLParser(xmllib.XMLParser):
 
         modulename = self._arg('customshape',args,'module')
         funcname = self._arg('customshape',args,'class')
-        found = imp.find_module(modulename, path)
-        assert found, "CustomShape %s not found" % modulename
-        (file, pathname, description) = found
-        mod = imp.load_module(modulename, file, pathname, description)
+        try:
+            found = imp.find_module(modulename, path)
+            (file, pathname, description) = found
+            mod = imp.load_module(modulename, file, pathname, description)
+        except ImportError:
+            exec 'from reportlab.tools.pythonpoint import %s as mod' % modulename
         
         #now get the function
         
