@@ -1,10 +1,11 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/attrmap.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/attrmap.py,v 1.8 2003/08/21 14:03:27 rgbecker Exp $
-__version__=''' $Id: attrmap.py,v 1.8 2003/08/21 14:03:27 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/attrmap.py,v 1.9 2003/08/26 17:09:32 rgbecker Exp $
+__version__=''' $Id: attrmap.py,v 1.9 2003/08/26 17:09:32 rgbecker Exp $ '''
 from UserDict import UserDict
 from reportlab.lib.validators import isAnything, _SequenceTypes
+from reportlab import rl_config
 
 class CallableValue:
     '''a class to allow callable initial values'''
@@ -71,14 +72,15 @@ class AttrMap(UserDict):
 
 def validateSetattr(obj,name,value):
     '''validate setattr(obj,name,value)'''
-    map = obj._attrMap
-    if map and name[0]!= '_':
-        try:
-            validate = map[name].validate
-            if not validate(value):
-                raise AttributeError, "Illegal assignment of '%s' to '%s' in class %s" % (value, name, obj.__class__.__name__)
-        except KeyError:
-            raise AttributeError, "Illegal attribute '%s' in class %s" % (name, obj.__class__.__name__)
+    if rl_config.shapeChecking:
+        map = obj._attrMap
+        if map and name[0]!= '_':
+            try:
+                validate = map[name].validate
+                if not validate(value):
+                    raise AttributeError, "Illegal assignment of '%s' to '%s' in class %s" % (value, name, obj.__class__.__name__)
+            except KeyError:
+                raise AttributeError, "Illegal attribute '%s' in class %s" % (name, obj.__class__.__name__)
     obj.__dict__[name] = value
 
 def _privateAttrMap(obj,ret=0):
