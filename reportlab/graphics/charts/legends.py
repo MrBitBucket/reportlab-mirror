@@ -5,7 +5,7 @@
 """
 __version__=''' $Id$ '''
 
-import string, copy
+import copy, operator
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, OneOf, isString, isColorOrNone,\
@@ -55,6 +55,7 @@ class Legend(Widget):
         swatchMarker = AttrMapValue(NoneOr(AutoOr(isSymbol)), desc="None, Auto() or makeMarker('Diamond') ..."),
         callout = AttrMapValue(None, desc="a user callout(self,g,x,y,(color,text))"),
         boxAnchor = AttrMapValue(isBoxAnchor,'Anchor point for the legend area'),
+        variColumn = AttrMapValue(isBoolean,'If true column widths may vary (default is false)'),
        )
 
     def __init__(self):
@@ -95,8 +96,9 @@ class Legend(Widget):
         self.strokeColor = STATE_DEFAULTS['strokeColor']
         self.strokeWidth = STATE_DEFAULTS['strokeWidth']
         self.swatchMarker = None
-        self.boxAnchor = 'ne'
+        self.boxAnchor = 'nw'
         self.yGap = 0
+        self.variColumn = 0
 
     def _getChartStyleName(self,chart):
         for a in 'lines', 'bars', 'slices', 'strands':
@@ -116,12 +118,12 @@ class Legend(Widget):
 
     def _calculateMaxWidth(self, colorNamePairs):
         "Calculate the maximum width of some given strings."
-        m = 0
+        M = []
+        a = M.append
         for t in self._getTexts(colorNamePairs):
-            if t:
-                for s in string.split(t,'\n'):
-                    m = max(m,stringWidth(s, self.fontName, self.fontSize))
-        return m
+            m = [stringWidth(s, self.fontName, self.fontSize) for s in t.split('\n')]
+            M.append(m and max(m) or 0)
+        return self.variColumn and [max(M[r:r+3]) for r in range(0,len(M),self.columnMaximum)] or max(M)
 
     def _calcHeight(self):
         dy = self.dy
@@ -139,11 +141,11 @@ class Legend(Widget):
         lowy = upperlefty
         lim = self.columnMaximum - 1
         for name in self._getTexts(self.colorNamePairs):
-            T = string.split(name and str(name) or '','\n')
+            T = (name and str(name) or '').split('\n')
             S = []
             y = thisy+(dy-ascent)*0.5-leading
             newy = thisy-max(deltay,len(S)*leading)-yGap
-            lowy = min(y,newy)
+            lowy = min(y,newy,lowy)
             if count==lim:
                 count = 0
                 thisy = upperlefty
@@ -191,23 +193,28 @@ class Legend(Widget):
         yGap = self.yGap
         if not deltay:
             deltay = max(dy,leading)+self.autoYPadding
-        if not deltax:
-            maxWidth = self._calculateMaxWidth(colorNamePairs)
-            deltax = maxWidth+dx+dxTextSpace+self.autoXPadding
+        ba = self.boxAnchor
+        baw = ba not in ('nw','w','sw','autox')
+        maxWidth = self._calculateMaxWidth(colorNamePairs)
+        nCols = int((n+columnMaximum-1)/columnMaximum)
+        xW = dx+dxTextSpace+self.autoXPadding
+        variColumn = self.variColumn
+        if variColumn:
+            width = reduce(operator.add,maxWidth,0)+xW*nCols
         else:
-            if alignment=='left': maxWidth = self._calculateMaxWidth(colorNamePairs)
+            deltax = max(maxWidth+xW,deltax)
+            width = nCols*deltax
+            maxWidth = nCols*[maxWidth]
 
         thisx = self.x
         thisy = self.y - self.dy
-        ba = self.boxAnchor
         if ba not in ('ne','n','nw','autoy'):
             height = self._calcHeight()
             if ba in ('e','c','w'):
                 thisy += height/2.
             else:
                 thisy += height
-        if ba not in ('nw','w','sw','autox'):
-            width = int((n+columnMaximum-1)/columnMaximum)*deltax
+        if baw:
             if ba in ('n','c','s'):
                 thisx -= width/2
             else:
@@ -225,8 +232,7 @@ class Legend(Widget):
         if ascent==0: ascent=0.718 # default (from helvetica)
         ascent *= fontSize # normalize
 
-        columnCount = 0
-        count = 0
+        lim = columnMaximum - 1
         callout = getattr(self,'callout',None)
         for i in xrange(n):
             if autoCP:
@@ -238,18 +244,20 @@ class Legend(Widget):
                 if isAuto(swatchMarker):
                     col = swatchMarker
                     col.index = i
-            T = string.split(name and str(name) or '','\n')
+            T = (name and str(name) or '').split('\n')
             S = []
+            j = int(i/columnMaximum)
+
             # thisy+dy/2 = y+leading/2
             y = thisy+(dy-ascent)*0.5
             if callout: callout(self,g,thisx,y,colorNamePairs[count])
             if alignment == "left":
                 for t in T:
                     # align text to left
-                    S.append(String(thisx+maxWidth,y,t,fontName=fontName,fontSize=fontSize,fillColor=fillColor,
+                    S.append(String(thisx+maxWidth[j],y,t,fontName=fontName,fontSize=fontSize,fillColor=fillColor,
                             textAnchor = "end"))
                     y -= leading
-                x = thisx+maxWidth+dxTextSpace
+                x = thisx+maxWidth[j]+dxTextSpace
             elif alignment == "right":
                 for t in T:
                     # align text to right
@@ -282,13 +290,14 @@ class Legend(Widget):
 
             map(gAdd,S)
 
-            if count%columnMaximum == columnMaximum-1:
-                thisx = thisx+deltax
+            if i%columnMaximum==lim:
+                if variColumn:
+                    thisx += maxWidth[j]+xW
+                else:
+                    thisx = thisx+deltax
                 thisy = upperlefty
-                columnCount = columnCount + 1
             else:
                 thisy = thisy-max(deltay,len(S)*leading)-yGap
-            count = count+1
 
         return g
 
@@ -302,7 +311,7 @@ class Legend(Widget):
         legend.x = 0
         legend.y = 100
         legend.dxTextSpace = 5
-        items = string.split('red green blue yellow pink black white', ' ')
+        items = 'red green blue yellow pink black white'.split()
         items = map(lambda i:(getattr(colors, i), i), items)
         legend.colorNamePairs = items
 
@@ -371,7 +380,7 @@ def sample1c():
     legend.x = 0
     legend.y = 100
     legend.dxTextSpace = 5
-    items = string.split('red green blue yellow pink black white', ' ')
+    items = 'red green blue yellow pink black white'.split()
     items = map(lambda i:(getattr(colors, i), i), items)
     legend.colorNamePairs = items
 
@@ -392,7 +401,7 @@ def sample2c():
     legend.deltax = 60
     legend.dxTextSpace = 10
     legend.columnMaximum = 4
-    items = string.split('red green blue yellow pink black white', ' ')
+    items = 'red green blue yellow pink black white'.split()
     items = map(lambda i:(getattr(colors, i), i), items)
     legend.colorNamePairs = items
 
@@ -412,7 +421,7 @@ def sample3():
     legend.deltax = 60
     legend.dxTextSpace = 10
     legend.columnMaximum = 4
-    items = string.split('red green blue yellow pink black white', ' ')
+    items = 'red green blue yellow pink black white'.split()
     items = map(lambda i:(getattr(colors, i), i), items)
     legend.colorNamePairs = items
     d.add(legend, 'legend')
@@ -432,7 +441,7 @@ def sample3a():
     legend.deltax = 60
     legend.dxTextSpace = 10
     legend.columnMaximum = 4
-    items = string.split('red green blue yellow pink black white', ' ')
+    items = 'red green blue yellow pink black white'.split()
     darrays = ([2,1], [2,5], [2,2,5,5], [1,2,3,4], [4,2,3,4], [1,2,3,4,5,6], [1])
     cnp = []
     for i in range(0, len(items)):
