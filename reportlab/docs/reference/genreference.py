@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/reference/genreference.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/reference/genreference.py,v 1.4 2002/07/24 19:56:35 andy_robinson Exp $
-__version__=''' $Id: genreference.py,v 1.4 2002/07/24 19:56:35 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/docs/reference/genreference.py,v 1.5 2003/04/17 22:41:35 andy_robinson Exp $
+__version__=''' $Id: genreference.py,v 1.5 2003/04/17 22:41:35 andy_robinson Exp $ '''
 __doc__ = """
 This module contains the script for building the reference.
 """
@@ -13,12 +13,15 @@ import shutil
 import reportlab
 
 
-def run(verbose=1):
+def run(verbose=1, outDir=None):
+
     sys.path.insert(0, '../tools')
     from reportlab.tools.docco import yaml2pdf
     yaml2pdf.run('reference.yml','reference.pdf')
     if verbose: print 'Saved reference.pdf'
     docdir = os.path.dirname(reportlab.__file__) + os.sep + 'docs'
+    if outDir:
+        docDir = outDir
     destfn = docdir + os.sep + 'reference.pdf'
     shutil.copyfile('reference.pdf',
                     destfn)
