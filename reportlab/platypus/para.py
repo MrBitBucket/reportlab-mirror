@@ -63,7 +63,8 @@ from reportlab.lib.utils import fp_str
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib import colors
 
-import string
+from types import StringType, UnicodeType, InstanceType, TupleType, ListType, FloatType
+from string import letters as LETTERS, whitespace as WHITESPACE
 
 # SET THIS TO CAUSE A VIEWING BUG WITH ACROREAD 3 (for at least one input)
 # CAUSEERROR = 0
@@ -91,7 +92,6 @@ class paragraphEngine:
             program = []
         self.lineOpHandlers = [] # for handling underlining and hyperlinking, etc
         self.program = program
-        #self.
         self.indent = self.rightIndent = 0.0
         self.baseindent = 0.0 # adjust this to add more indentation for bullets, eg
         self.fontName = "Helvetica"
@@ -102,10 +102,12 @@ class paragraphEngine:
         from reportlab.lib.enums import TA_LEFT
         self.alignment = TA_LEFT
         self.textStateStack = []
+
     TEXT_STATE_VARIABLES = ("indent", "rightIndent", "fontName", "fontSize",
                             "leading", "fontColor", "lineOpHandlers", "rise",
                             "alignment")
                             #"textStateStack")
+
     def pushTextState(self):
         state = []
         for var in self.TEXT_STATE_VARIABLES:
@@ -116,6 +118,7 @@ class paragraphEngine:
         #print "push", self.textStateStack
         #print "push", len(self.textStateStack), state
         return state
+
     def popTextState(self):
         state = self.textStateStack[-1]
         self.textStateStack = self.textStateStack[:-1]
@@ -136,7 +139,6 @@ class paragraphEngine:
         remainder = program[:]
         #program1 = remainder[:] # debug only
         lineprogram = []
-        from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
         #if maxheight<TOOSMALLSPACE:
         #    raise ValueError, "attempt to format inside too small a height! "+repr(maxheight)
         heightremaining = maxheight-leading
@@ -150,9 +152,11 @@ class paragraphEngine:
             linewidth = maxwidth - indent - rightIndent
             beforelinestate = self.__dict__.copy()
             if linewidth<TOOSMALLSPACE:
-                raise ValueError, "indents %s %s too wide for space %s" % (self.indent, self.rightIndent, maxwidth)
+                raise ValueError, "indents %s %s too wide for space %s" % (self.indent, self.rightIndent, \
+                                                                           maxwidth)
             try:
-                (lineIsFull, line, cursor, currentLength, usedIndent, maxLength, justStrings) = self.fitLine(remainder, maxwidth)
+                (lineIsFull, line, cursor, currentLength, \
+                 usedIndent, maxLength, justStrings) = self.fitLine(remainder, maxwidth)
             except:
 ##                print "failed to fit line near", cursorcount # debug
 ##                for i in program1[max(0,cursorcount-10): cursorcount]:
@@ -235,20 +239,23 @@ class paragraphEngine:
         self.__dict__.update(startstate)
         heightused = maxheight - heightremaining
         return (lineprogram, remainder, laststate, heightused)
+
     def getState(self):
         # inlined
         return self.__dict__.copy()
+
     def resetState(self, state):
         # primarily inlined
         self.__dict__.update(state)
+
 ##    def sizeOfWord(self, word):
 ##        inlineThisFunctionForEfficiency
 ##        return float(stringWidth(word, self.fontName, self.fontSize))
+
     def fitLine(self, program, totalLength):
         "fit words (and other things) onto a line"
         # assuming word lengths and spaces have not been yet added
         # fit words onto a line up to maxlength, adding spaces and respecting extra space
-        from types import StringType, TupleType, InstanceType, FloatType
         from reportlab.pdfbase.pdfmetrics import stringWidth
         usedIndent = self.indent
         maxLength = totalLength - usedIndent - self.rightIndent
@@ -269,7 +276,7 @@ class paragraphEngine:
             opcode = program[cursor]
             #if debug: print "opcode", cursor, opcode
             topcode = type(opcode)
-            if topcode is StringType or topcode is InstanceType:
+            if topcode in (StringType, UnicodeType, InstanceType):
                 lastneedspace = needspace
                 needspace = 0
                 if topcode is InstanceType:
@@ -278,7 +285,7 @@ class paragraphEngine:
                     needspace = 0
                 else:
                     saveopcode = opcode
-                    opcode = opcode.strip() #string.strip(opcode)
+                    opcode = opcode.strip()
                     if opcode:
                         width = stringWidth(opcode, fontName, fontSize)
                     else:
@@ -342,7 +349,7 @@ class paragraphEngine:
                     oldcolor = self.fontColor
                     (i, colorname) = opcode
                     #print "opcode", opcode
-                    if type(colorname) is StringType:
+                    if type(colorname) in (StringType, UnicodeType):
                         color = self.fontColor = getattr(colors, colorname)
                     else:
                         color = self.fontColor = colorname # assume its something sensible :)
@@ -357,7 +364,7 @@ class paragraphEngine:
                     # change font size
                     (i, fontsize) = opcode
                     size = abs(float(fontsize))
-                    if type(fontsize) is StringType:
+                    if type(fontsize) in (StringType, UnicodeType):
                         if fontsize[:1]=="+":
                             fontSize = self.fontSize = self.fontSize + size
                         elif fontsize[:1]=="-":
@@ -457,41 +464,43 @@ class paragraphEngine:
             line.append( ("nextLine", 0) )
         #print "fitline", line
         return (lineIsFull, line, cursor, currentLength, usedIndent, maxLength, justStrings)
+
     def centerAlign(self, line, lineLength, maxLength):
         diff = maxLength-lineLength
         shift = diff/2.0
         if shift>TOOSMALLSPACE:
             return self.insertShift(line, shift)
         return line
+
     def rightAlign(self, line, lineLength, maxLength):
         shift = maxLength-lineLength
         #die
         if shift>TOOSMALLSPACE:
             return self.insertShift(line, shift)
         return line
+
     def insertShift(self, line, shift):
         # insert shift just before first visible element in line
-        from types import StringType, InstanceType
         result = []
         first = 1
         for e in line:
             te = type(e)
-            if first and (te is StringType or te is InstanceType):
+            if first and (te in (StringType, UnicodeType, InstanceType)):
                 result.append(shift)
                 first = 0
             result.append(e)
         return result
+
     def justifyAlign(self, line, lineLength, maxLength):
         diff = maxLength-lineLength
         # count EXPANDABLE SPACES AFTER THE FIRST VISIBLE
-        from types import InstanceType, StringType, TupleType, FloatType
         spacecount = 0
         visible = 0
         for e in line:
             te = type(e)
             if te is FloatType and e>TOOSMALLSPACE and visible:
                 spacecount = spacecount+1
-            elif te is StringType or te is InstanceType:
+            elif te in (StringType, UnicodeType, InstanceType):
                 visible = 1
         #if debug: print "diff is", diff, "wordcount", wordcount #; die
         if spacecount<1:
@@ -509,7 +518,7 @@ class paragraphEngine:
             e = line[cursor]
             te = type(e)
             result.append(e)
-            if (te is InstanceType or te is StringType):
+            if (te in (StringType, UnicodeType, InstanceType)):
                 visible = 1
             elif te is FloatType and e>TOOSMALLSPACE and visible:
                 expanded = e+shift
@@ -545,25 +554,23 @@ class paragraphEngine:
 ##                first = 0
 ##            cursor = cursor+1
 ##        return result
+
     def shrinkWrap(self, line):
         # for non justified text, collapse adjacent text/shift's into single operations
-        #return line # for testing
         result = []
         index = 0
         maxindex = len(line)
-        from types import FloatType, StringType, InstanceType
-        from string import join
         while index<maxindex:
             e = line[index]
             te = type(e)
-            if te is StringType and index<maxindex-1:
+            if te in (StringType, UnicodeType) and index<maxindex-1:
                 # collect strings and floats
                 thestrings = [e]
                 thefloats = 0.0
                 index = index+1
                 nexte = line[index]
                 tnexte = type(nexte)
-                while index<maxindex and (tnexte is FloatType or tnexte is StringType):
+                while index<maxindex and (tnexte in (FloatType, StringType, UnicodeType)):
                     # switch to expandable space if appropriate
                     if tnexte is FloatType:
                         if thefloats<0 and nexte>0:
@@ -571,14 +578,14 @@ class paragraphEngine:
                         if nexte<0 and thefloats>0:
                             nexte = -nexte
                         thefloats = thefloats + nexte
-                    elif tnexte is StringType:
+                    elif tnexte in (StringType, UnicodeType):
                         thestrings.append(nexte)
                     index = index+1
                     if index<maxindex:
                         nexte = line[index]
                         tnexte = type(nexte)
                 # wrap up the result
-                s = string.join(thestrings)
+                s = ' '.join(thestrings)
                 result.append(s)
                 result.append(float(thefloats))
                 # back up for unhandled element
@@ -588,12 +595,12 @@ class paragraphEngine:
             index = index+1
 
         return result
+
     def cleanProgram(self, line):
         "collapse adjacent spacings"
         #return line # for debugging
         result = []
         last = 0
-        from types import FloatType, TupleType, StringType, InstanceType
         for e in line:
             if type(e) is FloatType:
                 # switch to expandable space if appropriate
@@ -634,7 +641,9 @@ class paragraphEngine:
                 tthis = type(this)
                 tnext = type(next)
                 # don't swap visibles
-                if tthis is StringType or tnext is StringType or this is InstanceType or tnext is InstanceType:
+                if tthis in (StringType, UnicodeType) or \
+                   tnext in (StringType, UnicodeType) or \
+                   this is InstanceType or tnext is InstanceType:
                     doswap = 0
                 # only swap two tuples if the second one is an end operation and the first is something else
                 elif tthis is TupleType:
@@ -654,10 +663,10 @@ class paragraphEngine:
                     result[nextindex] = this
                     change = 1
         return result
+
     def runOpCodes(self, program, canvas, textobject):
         "render the line(s)"
-        #import types
-        from types import StringType, TupleType, InstanceType, FloatType
+
         escape = canvas._escape
         code = textobject._code
         startstate = self.__dict__.copy()
@@ -672,7 +681,7 @@ class paragraphEngine:
         indented = 0
         for opcode in program:
             topcode = type(opcode)
-            if topcode is StringType or topcode is InstanceType:
+            if topcode in (StringType, UnicodeType, InstanceType):
                 if not indented:
                     if abs(thislineindent)>TOOSMALLSPACE:
                         #if debug: print "INDENTING", thislineindent
@@ -688,7 +697,7 @@ class paragraphEngine:
                     font = self.fontName
                     size = self.fontSize
                     textobject.setFont(font, size)
-                if topcode is StringType:
+                if topcode in (StringType, UnicodeType):
                     #textobject.textOut(opcode)
                     text = escape(opcode)
                     code.append('(%s) Tj' % text)
@@ -723,7 +732,7 @@ class paragraphEngine:
                     oldcolor = self.fontColor
                     (i, colorname) = opcode
                     #print "opcode", opcode
-                    if type(colorname) is StringType:
+                    if type(colorname) in (StringType, UnicodeType):
                         color = self.fontColor = getattr(colors, colorname)
                     else:
                         color = self.fontColor = colorname # assume its something sensible :)
@@ -744,7 +753,7 @@ class paragraphEngine:
                     # change font size
                     (i, fontsize) = opcode
                     size = abs(float(fontsize))
-                    if type(fontsize) is StringType:
+                    if type(fontsize) in (StringType, UnicodeType):
                         if fontsize[:1]=="+":
                             fontSize = self.fontSize = self.fontSize + size
                         elif fontsize[:1]=="-":
@@ -834,12 +843,12 @@ class paragraphEngine:
 
 def stringLine(line, length):
     "simple case: line with just strings and spacings which can be ignored"
+
     strings = []
-    from types import StringType
     for x in line:
-        if type(x) is StringType:
+        if type(x) in (StringType, UnicodeType):
             strings.append(x)
-    text = string.join(strings)
+    text = ' '.join(strings)
     result = [text, float(length)]
     nextlinemark = ("nextLine", 0)
     if line and line[-1]==nextlinemark:
@@ -848,14 +857,14 @@ def stringLine(line, length):
 
 def simpleJustifyAlign(line, currentLength, maxLength):
     "simple justification with only strings"
+
     strings = []
-    from types import StringType
     for x in line[:-1]:
-        if type(x) is StringType:
+        if type(x) in (StringType, UnicodeType):
             strings.append(x)
     nspaces = len(strings)-1
     slack = maxLength-currentLength
-    text = string.join(strings)
+    text = ' '.join(strings)
     if nspaces>0 and slack>0:
         wordspacing = slack/float(nspaces)
         result = [("wordSpacing", wordspacing), text, maxLength, ("wordSpacing", 0)]
@@ -869,16 +878,15 @@ def simpleJustifyAlign(line, currentLength, maxLength):
 from reportlab.lib.colors import black
 
 def readBool(text):
-    if string.upper(text) in ("Y", "YES", "TRUE", "1"):
+    if text.upper() in ("Y", "YES", "TRUE", "1"):
         return 1
-    elif string.upper(text) in ("N", "NO", "FALSE", "0"):
+    elif text.upper() in ("N", "NO", "FALSE", "0"):
         return 0
     else:
         raise RMLError, "true/false attribute has illegal value '%s'" % text
 
 def readAlignment(text):
-    from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
-    up = string.upper(text)
+    up = text.upper()
     if up == 'LEFT':
         return TA_LEFT
     elif up == 'RIGHT':
@@ -891,13 +899,13 @@ def readAlignment(text):
 def readLength(text):
     """Read a dimension measurement: accept "3in", "5cm",
     "72 pt" and so on."""
-    text = string.strip(text)
+    text = text.strip()
     try:
         return float(text)
     except ValueError:
-        text = string.lower(text)
+        text = text.lower()
         numberText, units = text[:-2],text[-2:]
-        numberText = string.strip(numberText)
+        numberText = numberText.strip()
         try:
             number = float(numberText)
         except ValueError:
@@ -916,13 +924,12 @@ def readLength(text):
 
 def lengthSequence(s, converter=readLength):
     """from "(2, 1)" or "2,1" return [2,1], for example"""
-    from string import split, strip
-    s = strip(s)
+    s = s.strip()
     if s[:1]=="(" and s[-1:]==")":
         s = s[1:-1]
-    sl = split(s, ",")
-    sl = map(strip, sl)
-    sl = map(converter, sl)
+    sl = s.split(',')
+    sl = [s.strip() for s in sl]
+    sl = [converter(s) for s in sl]
     return sl
 
 
@@ -931,7 +938,7 @@ def readColor(text):
     if not text:
         return None
     from reportlab.lib import colors
-    if text[0] in string.letters:
+    if text[0] in LETTERS:
         return colors.__dict__[text]
     tup = lengthSequence(text)
 
@@ -978,6 +985,7 @@ class SimpleStyle:
     bulletIndent=0
     textColor=black
     backColor=None
+
     def __init__(self, name, parent=None, **kw):
         mydict = self.__dict__
         if parent:
@@ -985,6 +993,7 @@ class SimpleStyle:
                 mydict[a]=b
         for (a,b) in kw.items():
             mydict[a] =  b
+
     def addAttributes(self, dictionary):
         for key in dictionary.keys():
             value = dictionary[key]
@@ -999,14 +1008,21 @@ DEFAULT_ALIASES = {
     "h1.defaultStyle": "Heading1",
     "h2.defaultStyle": "Heading2",
     "h3.defaultStyle": "Heading3",
+    "h4.defaultStyle": "Heading4",
+    "h5.defaultStyle": "Heading5",
+    "h6.defaultStyle": "Heading6",
     "title.defaultStyle": "Title",
+    "subtitle.defaultStyle": "SubTitle",
     "para.defaultStyle": "Normal",
     "pre.defaultStyle": "Code",
-    "li.defaultStyle": "Definition"
+    "ul.defaultStyle": "UnorderedList",
+    "ol.defaultStyle": "OrderedList",
+    "li.defaultStyle": "Definition",
     }
 
 class FastPara(Flowable):
     "paragraph with no special features (not even a single ampersand!)"
+
     def __init__(self, style, simpletext):
         #if debug:
         #    print "FAST", id(self)
@@ -1015,6 +1031,7 @@ class FastPara(Flowable):
         self.style = style
         self.simpletext = simpletext
         self.lines = None
+
     def wrap(self, availableWidth, availableHeight):
         simpletext = self.simpletext
         self.availableWidth = availableWidth
@@ -1027,7 +1044,7 @@ class FastPara(Flowable):
         size = style.fontSize
         firstindent = style.firstLineIndent
         #textcolor = style.textColor
-        words = string.split(simpletext)
+        words = simpletext.split()
         lines = []
         from reportlab.pdfbase.pdfmetrics import stringWidth
         spacewidth = stringWidth(" ", font, size)
@@ -1062,18 +1079,18 @@ class FastPara(Flowable):
                     #print "currentline", currentline
                 else:
                     # emit the line
-                    lines.append( (string.join(currentline), currentlength, len(currentline)) )
+                    lines.append( (' '.join(currentline), currentlength, len(currentline)) )
                     currentline = []
                     currentlength = 0
                     heightused = heightused+leading
                     if heightused+leading>availableHeight:
                         done = 1
             if currentlength and not done:
-                lines.append( (string.join(currentline), currentlength, len(currentline) ))
+                lines.append( (' '.join(currentline), currentlength, len(currentline) ))
                 heightused = heightused+leading
             self.lines = lines
             self.height = heightused
-            remainder = self.remainder = string.join(words[cursor:])
+            remainder = self.remainder = ' '.join(words[cursor:])
             #print "lines", lines
             #print "remainder is", remainder
         else:
@@ -1086,6 +1103,7 @@ class FastPara(Flowable):
             result = (availableWidth, heightused)
         #if debug: print "wrap is", (availableWidth, availableHeight), result, len(lines)
         return result
+
     def split(self, availableWidth, availableHeight):
         style = self.style
         leading = style.leading
@@ -1102,7 +1120,6 @@ class FastPara(Flowable):
             return [self]
 
     def draw(self):
-        from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
         style = self.style
         lines = self.lines
         rightIndent = style.rightIndent
@@ -1158,10 +1175,12 @@ class FastPara(Flowable):
             #textobject.textOut(text)
             y = y-leading
         c.drawText(textobject)
+
     def getSpaceBefore(self):
         #if debug:
         #    print "got space before", self.spaceBefore
         return self.style.spaceBefore
+
     def getSpaceAfter(self):
         #print "got space after", self.spaceAfter
         return self.style.spaceAfter
@@ -1174,15 +1193,35 @@ def defaultContext():
         result[stylenamekey] = styles[stylenamevalue]
     return result
 
+def buildContext(stylesheet=None):
+    result = {}
+    from reportlab.lib.styles import getSampleStyleSheet
+    if stylesheet is not None:
+        # Copy styles with the same name as aliases
+        for (stylenamekey, stylenamevalue) in DEFAULT_ALIASES.items():
+            if stylesheet.has_key(stylenamekey):
+                result[stylenamekey] = stylesheet[stylenamekey]
+        # Then make aliases
+        for (stylenamekey, stylenamevalue) in DEFAULT_ALIASES.items():
+            if stylesheet.has_key(stylenamevalue):
+                result[stylenamekey] = stylesheet[stylenamevalue]
+
+    styles = getSampleStyleSheet()
+    # Then, fill in defaults if they were not filled yet.
+    for (stylenamekey, stylenamevalue) in DEFAULT_ALIASES.items():
+        if not result.has_key(stylenamekey) and styles.has_key(stylenamevalue):
+            result[stylenamekey] = styles[stylenamevalue]
+    return result
+
 class Para(Flowable):
+
     spaceBefore = 0
     spaceAfter = 0
+
     def __init__(self, style, parsedText=None, bulletText=None, state=None, context=None, baseindent=0):
         #print id(self), "para", parsedText
         self.baseindent = baseindent
-        if context is None:
-            context = defaultContext()
-        self.context = context
+        self.context = buildContext(context)
         self.parsedText = parsedText
         self.bulletText = bulletText
         self.style1 = style # make sure Flowable doesn't use this unless wanted! call it style1 NOT style
@@ -1199,15 +1238,18 @@ class Para(Flowable):
         #    print "spaceBefore is", self.spaceBefore, self.parsedText
         self.bold = 0
         self.italic = 0
-        self.face = "times"
-        self.size = 10
+        self.face = style.fontName
+        self.size = style.fontSize
+
     def getSpaceBefore(self):
         #if debug:
         #    print "got space before", self.spaceBefore
         return self.spaceBefore
+
     def getSpaceAfter(self):
         #print "got space after", self.spaceAfter
         return self.spaceAfter
+
     def wrap(self, availableWidth, availableHeight):
         if debug:
             print "WRAPPING", id(self), availableWidth, availableHeight
@@ -1242,7 +1284,8 @@ class Para(Flowable):
         if not program:
             self.program = program = self.compileProgram(parsedText)
         if not self.formattedProgram:
-            (formattedProgram, remainder, laststate, heightused) = p.format(availableWidth, availableHeight, program, leading)
+            (formattedProgram, remainder, \
+             laststate, heightused) = p.format(availableWidth, availableHeight, program, leading)
             self.formattedProgram = formattedProgram
             self.height = heightused
             self.laststate = laststate
@@ -1259,7 +1302,8 @@ class Para(Flowable):
             height = availableHeight + 1
             #print "laststate is", laststate
             #print "saving remainder", remainder
-            self.remainder = Para(self.style1, parsedText=None, bulletText=None, state=laststate)
+            self.remainder = Para(self.style1, parsedText=None, bulletText=None, \
+                                  state=laststate, context=self.context)
             self.remainder.program = remainder
             self.remainder.spaceAfter = self.spaceAfter
             self.spaceAfter = 0
@@ -1277,6 +1321,7 @@ class Para(Flowable):
                 print "exact match???" + repr(availableHeight, h)
             print "wrap is", (availableWidth, availableHeight), result
         return result
+
     def split(self, availableWidth, availableHeight):
         #if debug:
         #    print "SPLITTING", id(self), availableWidth, availableHeight
@@ -1300,6 +1345,7 @@ class Para(Flowable):
             result= [self]
         #if debug: print "split is", result
         return result
+
     def draw(self):
         p = self.myengine #paragraphEngine()
         formattedProgram = self.formattedProgram
@@ -1362,11 +1408,10 @@ class Para(Flowable):
         # now look for a place where to insert the unindent after the first line
         if style.firstLineIndent:
             count = 0
-            from types import StringType, InstanceType
             for x in program:
                 count = count+1
                 tx = type(x)
-                if tx is StringType or tx is InstanceType:
+                if tx in (StringType, UnicodeType, InstanceType):
                     break
             program.insert( count, ("indent", -style.firstLineIndent ) ) # defaults to end if no visibles
         #print "="*8, id(self), "program is"
@@ -1376,7 +1421,6 @@ class Para(Flowable):
 ##        # check pushes and pops
 ##        stackcount = 0
 ##        dump = 0
-##        from types import TupleType
 ##        for x in program:
 ##            if dump:
 ##                print "dump:", x
@@ -1393,6 +1437,7 @@ class Para(Flowable):
 ##                    print "STACK UNDERFLOW!"
 ##        if dump: stop
         return program
+
     def linearize(self, program = None, parsedText=None):
         #print "LINEARIZING", self
         #program = self.program = []
@@ -1417,23 +1462,24 @@ class Para(Flowable):
             program.append( ("leading", 0) )
         program.append( ("nextLine", 0) )
         program.append( ("pop",) )
+
     def compileComponent(self, parsedText, program):
         import types
         ttext = type(parsedText)
         #program = self.program
-        if ttext is types.StringType:
+        if ttext in (StringType, UnicodeType):
             # handle special characters here...
             # short cut
             if parsedText:
-                stext = parsedText.strip() #string.strip(parsedText)
+                stext = parsedText.strip()
                 if not stext:
                     program.append(" ") # contract whitespace to single space
                 else:
                     handleSpecialCharacters(self, parsedText, program)
-        elif ttext is types.ListType:
+        elif ttext is ListType:
             for e in parsedText:
                 self.compileComponent(e, program)
-        elif ttext is types.TupleType:
+        elif ttext is TupleType:
             (tagname, attdict, content, extra) = parsedText
             if not attdict:
                 attdict = {}
@@ -1455,10 +1501,11 @@ class Para(Flowable):
                         a("</%s>" % tagname)
                     else:
                         a("/>")
-                    t = string.join(L, "")
+                    t = ''.join(L)
                     handleSpecialCharacters(self, t, program)
                 else:
                     raise ValueError, "don't know how to handle tag " + repr(tagname)
+
     def shiftfont(self, program, face=None, bold=None, italic=None):
         oldface = self.face
         oldbold = self.bold
@@ -1482,18 +1529,22 @@ class Para(Flowable):
         for e in content:
             self.compileComponent(e, program)
     #compile_para = compile_ # at least for now...
+
     def compile_pageNumber(self, attdict, content, extra, program):
         program.append(PageNumberObject())
+
     def compile_b(self, attdict, content, extra, program):
         (f,b,i) = self.shiftfont(program, bold=1)
         for e in content:
             self.compileComponent(e, program)
         self.shiftfont(program, bold=b)
+
     def compile_i(self, attdict, content, extra, program):
         (f,b,i) = self.shiftfont(program, italic=1)
         for e in content:
             self.compileComponent(e, program)
         self.shiftfont(program, italic=i)
+
     def compile_u(self, attdict, content, extra, program):
         # XXXX must eventually add things like alternative colors
         #program = self.program
@@ -1501,6 +1552,7 @@ class Para(Flowable):
         for e in content:
             self.compileComponent(e, program)
         program.append( ('endLineOperation', UNDERLINE) )
+
     def compile_sub(self, attdict, content, extra, program):
         size = self.size
         self.size = newsize = size * 0.7
@@ -1520,13 +1572,12 @@ class Para(Flowable):
         atts = attdict.copy()
         bulletmaker = bulletMaker(tagname, atts, self.context)
         # now do each element as a separate paragraph
-        import types
         for e in content:
             te = type(e)
-            if te is types.StringType:
-                if e.strip(): #string.strip(e):
+            if te in (StringType, UnicodeType):
+                if e.strip():
                     raise ValueError, "don't expect CDATA between list elements"
-            elif te is types.TupleType:
+            elif te is TupleType:
                 (tagname, attdict1, content1, extra) = e
                 if tagname!="li":
                     raise ValueError, "don't expect %s inside list" % repr(tagname)
@@ -1548,33 +1599,31 @@ class Para(Flowable):
         atts = attdict.copy()
         bulletmaker = bulletMaker("dl", atts, self.context)
         # now do each element as a separate paragraph
-        import types
         contentcopy = list(content) # copy for destruction
         bullet = ""
         while contentcopy:
             e = contentcopy[0]
             del contentcopy[0]
             te = type(e)
-            if te is types.StringType:
-                if e.strip(): #string.strip(e):
+            if te in (StringType, UnicodeType):
+                if e.strip():
                     raise ValueError, "don't expect CDATA between list elements"
                 elif not contentcopy:
                     break # done at ending whitespace
                 else:
                     continue # ignore intermediate whitespace
-            elif te is types.TupleType:
+            elif te is TupleType:
                 (tagname, attdict1, content1, extra) = e
                 if tagname!="dd" and tagname!="dt":
-                    raise ValueError, "don't expect %s here inside list, expect 'dd' or 'dt'" % repr(tagname)
+                    raise ValueError, "don't expect %s here inside list, expect 'dd' or 'dt'" % \
+                          repr(tagname)
                 if tagname=="dt":
                     if bullet:
                         raise ValueError, "dt will not be displayed unless followed by a dd: "+repr(bullet)
                     if content1:
-                        if len(content1)!=1:
-                            raise ValueError, "only simple strings supported in dd content currently: "+repr(content1)
-                        bullet = content1[0]
-                        if type(bullet) is not types.StringType:
-                            raise ValueError, "only simple strings supported in dd content currently: "+repr(content1)
+                        self.compile_para(attdict1, content1, extra, program)
+                        # raise ValueError, \
+                        # "only simple strings supported in dd content currently: "+repr(content1)
                 elif tagname=="dd":
                     newatts = atts.copy()
                     if attdict1:
@@ -1597,6 +1646,7 @@ class Para(Flowable):
         program.append( ('size', size) )
         self.size = size
         program.append( ('rise', -rise) )
+
     def compile_font(self, attdict, content, extra, program):
         #program = self.program
         program.append( ("push",) ) # store current data
@@ -1618,6 +1668,7 @@ class Para(Flowable):
         for e in content:
             self.compileComponent(e, program)
         program.append( ("pop",) ) # restore as before
+
     def compile_a(self, attdict, content, extra, program):
         url = attdict["href"]
         colorname = attdict.get("color", "blue")
@@ -1632,6 +1683,7 @@ class Para(Flowable):
         program.append( ('endLineOperation', UNDERLINE) )
         program.append( ('endLineOperation', Link) )
         program.append( ("pop",) ) # restore as before
+
     def compile_link(self, attdict, content, extra, program):
         dest = attdict["destination"]
         colorname = attdict.get("color", None)
@@ -1647,6 +1699,7 @@ class Para(Flowable):
         program.append( ('endLineOperation', UNDERLINE) )
         program.append( ('endLineOperation', Link) )
         program.append( ("pop",) ) # restore as before
+
     def compile_setLink(self, attdict, content, extra, program):
         dest = attdict["destination"]
         colorname = attdict.get("color", "blue")
@@ -1664,16 +1717,18 @@ class Para(Flowable):
             program.append( ('endLineOperation', UNDERLINE) )
         program.append( ('endLineOperation', Link) )
         program.append( ("pop",) ) # restore as before
+
     #def compile_p(self, attdict, content, extra, program):
     #    # have to be careful about base indent here!
     #    not finished
+
     def compile_bullet(self, attdict, content, extra, program):
-        from types import StringType
         ### eventually should allow things like images and graphics in bullets too XXXX
-        if len(content)!=1 or type(content[0]) is not StringType:
+        if len(content)!=1 or type(content[0]) not in (StringType, UnicodeType):
             raise ValueError, "content for bullet must be a single string"
         text = content[0]
         self.do_bullet(text, program)
+
     def do_bullet(self, text, program):
         style = self.style1
         #program = self.program
@@ -1681,26 +1736,37 @@ class Para(Flowable):
         font = style.bulletFontName
         size = style.bulletFontSize
         program.append( ("bullet", text, indent, font, size) )
+
     def compile_tt(self, attdict, content, extra, program):
         (f,b,i) = self.shiftfont(program, face="Courier")
         for e in content:
             self.compileComponent(e, program)
         self.shiftfont(program, face=f)
+
     def compile_greek(self, attdict, content, extra, program):
         self.compile_font({"face": "symbol"}, content, extra, program)
+
     def compile_evalString(self, attdict, content, extra, program):
         program.append( EvalStringObject(attdict, content, extra, self.context) )
+
     def compile_name(self, attdict, content, extra, program):
         program.append( NameObject(attdict, content, extra, self.context) )
+
     def compile_getName(self, attdict, content, extra, program):
         program.append( GetNameObject(attdict, content, extra, self.context) )
+
     def compile_seq(self, attdict, content, extra, program):
         program.append( SeqObject(attdict, content, extra, self.context) )
+
     def compile_seqReset(self, attdict, content, extra, program):
         program.append( SeqResetObject(attdict, content, extra, self.context) )
+
     def compile_seqDefault(self, attdict, content, extra, program):
         program.append( SeqDefaultObject(attdict, content, extra, self.context) )
+
     def compile_para(self, attdict, content, extra, program, stylename = "para.defaultStyle"):
+        if attdict is None:
+            attdict = {}
         context = self.context
         stylename = attdict.get("style", stylename)
         style = context[stylename]
@@ -1708,21 +1774,14 @@ class Para(Flowable):
         newstyle.addAttributes(attdict)
         bulletText = attdict.get("bulletText", None)
         mystyle = self.style1
-        #newstyle.bulletIndent = mystyle.leftIndent+newstyle.bulletIndent
-        #print "attdict", attdict
-        #print "leftindent, baseindent", mystyle.leftIndent
-        #print "bulletIndent", newstyle.bulletIndent
-        thepara = Para(newstyle, content, context=context, bulletText=bulletText) # possible ref loop on context, break later
+        thepara = Para(newstyle, content, context=context, bulletText=bulletText)
+        # possible ref loop on context, break later
         # now compile it and add it to the program
         mybaseindent = self.baseindent
         self.baseindent = thepara.baseindent = mystyle.leftIndent + self.baseindent
         thepara.linearize(program=program)
-        #print "program so far"
-        #for x in program:
-        #    print x
         program.append( ("nextLine", 0) )
         self.baseindent = mybaseindent
-
 
 class bulletMaker:
     def __init__(self, tagname, atts, context):
@@ -1742,6 +1801,7 @@ class bulletMaker:
             indent = stringWidth("XXX", "Courier", size)
             atts["leftIndent"] = str(indent)
         self.count = 0
+
     def makeBullet(self, atts, bl=None):
         count = self.count = self.count+1
         typ = self.typ
@@ -1778,7 +1838,9 @@ class bulletMaker:
 
 class EvalStringObject:
     "this will only work if rml2pdf is present"
+
     tagname = "evalString"
+
     def __init__(self, attdict, content, extra, context):
         if not attdict:
             attdict = {}
@@ -1786,11 +1848,13 @@ class EvalStringObject:
         self.content = content
         self.context = context
         self.extra = extra
+
     def getOp(self, tuple, engine):
         from rlextra.rml2pdf.rml2pdf import Controller
         #print "tuple", tuple
         op = self.op = Controller.processTuple(tuple, self.context, {})
         return op
+
     def width(self, engine):
         from reportlab.pdfbase.pdfmetrics import stringWidth
         content = self.content
@@ -1803,10 +1867,12 @@ class EvalStringObject:
         #print self
         s = str(op)
         return stringWidth(s, engine.fontName, engine.fontSize)
+
     def execute(self, engine, textobject, canvas):
         textobject.textOut(str(self.op))
 
 class SeqObject(EvalStringObject):
+
     def getOp(self, tuple, engine):
         from reportlab.lib.sequencer import getSequencer
         globalsequencer = getSequencer()
@@ -1830,6 +1896,7 @@ class NameObject(EvalStringObject):
         pass # name doesn't produce any output
 
 class SeqDefaultObject(NameObject):
+
     def getOp(self, tuple, engine):
         from reportlab.lib.sequencer import getSequencer
         globalsequencer = getSequencer()
@@ -1843,6 +1910,7 @@ class SeqDefaultObject(NameObject):
         return ""
 
 class SeqResetObject(NameObject):
+
     def getOp(self, tuple, engine):
         from reportlab.lib.sequencer import getSequencer
         import math
@@ -1864,11 +1932,14 @@ class GetNameObject(EvalStringObject):
     tagname = "getName"
 
 class PageNumberObject:
+
     def __init__(self, example="XXX"):
         self.example = example # XXX SHOULD ADD THE ABILITY TO PASS IN EXAMPLES
+
     def width(self, engine):
         from reportlab.pdfbase.pdfmetrics import stringWidth
         return stringWidth(self.example, engine.fontName, engine.fontSize)
+
     def execute(self, engine, textobject, canvas):
         n = canvas.getPageNumber()
         textobject.textOut(str(n))
@@ -1894,7 +1965,7 @@ def EmbedInRml2pdf():
             result = None
             if not bulletText and len(content)==1:
                 text = content[0]
-                if type(text) is types.StringType and "&" not in text:
+                if type(text) in (StringType, UnicodeType) and "&" not in text:
                     result = FastPara(mystyle, text)
             if result is None:
                 result = Para(mystyle, content, context=context, bulletText=bulletText) # possible ref loop on context, break later
@@ -2119,7 +2190,7 @@ def handleSpecialCharacters(engine, text, program=None, greeks=greeks):
     for fragment in amptext:
         if not first:
             # check for special chars
-            semi = string.find(fragment, ";")
+            semi = fragment.find(";")
             if semi>0:
                 name = fragment[:semi]
                 if greeks.has_key(name):
@@ -2128,7 +2199,7 @@ def handleSpecialCharacters(engine, text, program=None, greeks=greeks):
                     (f,b,i) = engine.shiftfont(program, face="symbol")
                     program.append(greeksub)
                     engine.shiftfont(program, face=f)
-                    if fragment and fragment[0] in string.whitespace:
+                    if fragment and fragment[0] in WHITESPACE:
                         program.append(" ") # follow the greek with a space
                 else:
                     # add back the &
@@ -2143,10 +2214,10 @@ def handleSpecialCharacters(engine, text, program=None, greeks=greeks):
         # does the last one need a space?
         if sfragment and fragment:
             # reader 3 used to go nuts if you don't special case the last frag, but it's fixed?
-            if fragment[-1] in string.whitespace: # or fragment==lastfrag:
+            if fragment[-1] in WHITESPACE: # or fragment==lastfrag:
                 program.append( sfragment[-1]+" " )
             else:
-                last = sfragment[-1].strip() #string.strip(sfragment[-1])
+                last = sfragment[-1].strip()
                 if last:
                     #print "last is", repr(last)
                     program.append( last )
@@ -2154,7 +2225,7 @@ def handleSpecialCharacters(engine, text, program=None, greeks=greeks):
     #print "HANDLED", program
     return program
 
-def Paragraph(text, style, bulletText=None, frags=None):
+def Paragraph(text, style, bulletText=None, frags=None, context=None):
     """ Paragraph(text, style, bulletText=None)
     intended to be like a platypus Paragraph but better.
     """
@@ -2165,7 +2236,7 @@ def Paragraph(text, style, bulletText=None, frags=None):
         # use the fully featured one.
         from reportlab.lib import rparsexml
         parsedpara = rparsexml.parsexmlSimple(text)
-        return Para(style, parsedText=parsedpara, bulletText=bulletText, state=None)
+        return Para(style, parsedText=parsedpara, bulletText=bulletText, state=None, context=context)
 
 ##class Paragraph(Para):
 ##    """ Paragraph(text, style, bulletText=None)
@@ -2206,8 +2277,10 @@ class UnderLineHandler:
 UNDERLINE = UnderLineHandler()
 
 class HotLink(UnderLineHandler):
+
     def __init__(self, url):
         self.url = url
+
     def end_at(self, x, y, para, canvas, textobject):
         fontsize = para.fontSize
         rect = [self.xStart, self.yStart, x,y+fontsize]
@@ -2215,27 +2288,31 @@ class HotLink(UnderLineHandler):
             print "LINKING RECTANGLE", rect
             #canvas.rect(self.xStart, self.yStart, x-self.xStart,y+fontsize-self.yStart, stroke=1)
         self.link(rect, canvas)
+
     def link(self, rect, canvas):
         canvas.linkURL(self.url, rect, relative=1)
 
 class InternalLink(HotLink):
+
     def link(self, rect, canvas):
         destinationname = self.url
         contents = ""
         canvas.linkRect(contents, destinationname, rect, Border="[0 0 0]")
 
 class DefDestination(HotLink):
+
     defined = 0
+
     def link(self, rect, canvas):
         destinationname = self.url
         if not self.defined:
             [x, y, x1, y1] = rect
-            canvas.bookmarkHorizontal(destinationname, x,y1) # use the upper y
+            canvas.bookmarkHorizontal(destinationname, x, y1) # use the upper y
             self.defined = 1
 
 def splitspace(text):
     # split on spacing but include spaces at element ends
-    stext = string.split(text)
+    stext = text.split()
     result = []
     for e in stext:
         result.append(e+" ")
