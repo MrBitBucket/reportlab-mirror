@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.75 2003/06/20 13:06:19 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.76 2003/06/25 14:52:29 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.75 2003/06/20 13:06:19 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.76 2003/06/25 14:52:29 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -483,6 +483,7 @@ class ValueAxis(Widget):
         valueSteps = AttrMapValue(isListOfNumbersOrNone, desc='List of step sizes used between ticks.'),
         avoidBoundFrac = AttrMapValue(EitherOr((isNumberOrNone,SequenceOf(isNumber,emptyOK=0,lo=2,hi=2))), desc='Fraction of interval to allow above and below.'),
         rangeRound=AttrMapValue(OneOf('none','both','ceiling','floor'),'How to round the axis limits'),
+        zrangePref = AttrMapValue(isNumberOrNone, desc='Zero range axis limit preference.'),
         )
 
     def __init__(self):
@@ -529,7 +530,7 @@ class ValueAxis(Widget):
         self.valueStep = None
         self.avoidBoundFrac = None
         self.rangeRound = 'none'
-        
+        self.zrangePref = 0
 
     def setPosition(self, x, y, length):
         # ensure floating point
@@ -591,8 +592,21 @@ class ValueAxis(Widget):
         if valueMax is None: self._cValueMax = valueMax = _findMax(dataSeries,self._dataIndex,0)
         if valueMin == valueMax:
             if valueMax==0:
-                valueMax = 0.01
-                valueMin = -0.01
+                if self.valueMin is None and self.valueMax is None:
+                    zrp = getattr(self,'zrangePref',0)
+                    if zrp>0:
+                        valueMax = zrp
+                        valueMin = 0
+                    elif zrp<0:
+                        valueMax = 0
+                        valueMin = zrp
+                    else:
+                        valueMax = 0.01
+                        valueMin = -0.01
+                elif self.valueMin is None:
+                    valueMin = -0.01
+                else:
+                    valueMax = 0.01
             else:
                 if valueMax>0:
                     valueMax = 1.2*valueMax
