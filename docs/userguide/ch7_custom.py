@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch7_custom.py,v 1.8 2001/08/11 14:35:52 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch7_custom.py,v 1.9 2001/09/14 13:02:44 rgbecker Exp $
 from rl_doc_utils import *
 
 heading1("Writing your own $Flowable$ Objects")
@@ -78,4 +78,5 @@ class RotatedImage(Image):
 		self.canv.rotate(90)
 		Image.draw(self)
 I = RotatedImage('%s')
+I.hAlign = 'CENTER'
 """ % I,'I')

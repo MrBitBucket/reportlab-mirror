@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch6_tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch6_tables.py,v 1.18 2001/08/11 14:35:52 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch6_tables.py,v 1.19 2001/09/14 13:02:44 rgbecker Exp $
 from rl_doc_utils import *
 from reportlab.platypus import Image
 
@@ -311,10 +311,13 @@ except:
 	disc("""An image should have appeared here.""")
 disc("""whereas""")
 eg("""
-Image("lj8100.jpg", width=2*inch, height=2*inch)
+im = Image("lj8100.jpg", width=2*inch, height=2*inch)
+im.hAlign = 'CENTER'
 """, after=0.1)
 disc('produces')
 try:
+	im = Image(I, width=2*inch, height=2*inch)
+	im.hAlign = 'CENTER'
 	getStory().append(Image(I, width=2*inch, height=2*inch))
 except:
 	disc("""An image should have appeared here.""")
