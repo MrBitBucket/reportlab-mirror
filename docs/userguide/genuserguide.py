@@ -32,6 +32,9 @@
 #
 ###############################################################################
 #   $Log: genuserguide.py,v $
+#   Revision 1.25  2000/07/10 14:20:15  andy_robinson
+#   Broke up the user guide into chapters.
+#
 #   Revision 1.24  2000/07/10 12:00:17  andy_robinson
 #   More work on chapter 1
 #
@@ -108,7 +111,7 @@
 #   Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #   initial checkin. user guide generation framework.
 #   
-__version__=''' $Id: genuserguide.py,v 1.24 2000/07/10 12:00:17 andy_robinson Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.25 2000/07/10 14:20:15 andy_robinson Exp $ '''
 
 
 __doc__ = """
@@ -388,38 +391,45 @@ def pencilnote():
     getStory().append(examples.NoteAnnotation())
         
 
-_story = []
-
+#make a singleton, created when requested rather
+#than each time a chapter imports it.
+_story = None
 def getStory():
+    global _story
+    if _story is None:
+        _story = []
     return _story
 
-def setStory(st):
-    tmp = _story
-    _story = st
-    return tmp
-
-def resetStory():
-    _story = []
-
-def extendStory(lst):
-    for item in lst:
-        _story.append(item)
         
 def run():
     doc = RLDocTemplate('userguide.pdf',pagesize = letter)
 
 
     #this builds the story    
-    resetStory()
+    #resetStory()
 
     import ch1_intro
-    #extendStory(ch1_intro.getStory())
+    import ch2_graphics
+    import ch3_pdffeatures
+    import ch4_platypus_concepts
+    import ch5_paragraphs
+    import ch6_tables
+    import ch7_custom
+    import ch8_future
     
-    import most_chapters
-    extendStory(most_chapters.getStory())
+
+    # I don't know WHAT is going on here.
+    # the submodules all do 'import *',
+    # and the story they have access to
+    # contains it all; but the one defined
+    # in this module seems to be empty.
+    #if I just call getStory, it has no
+    #items!
     
-    doc.build(getStory())
-    print 'userguide.pdf is ready'
+    story = ch8_future.getStory()
+    print 'Built story contains %d flowables...' % len(story)
+    doc.build(story)
+    print 'Saved userguide.pdf'
 
     
     

@@ -1,0 +1,344 @@
+#ch4_platypus_concepts
+from genuserguide import *
+
+#####################################################################################################3
+
+
+heading1("PLATYPUS - Page Layout and Typography Using Scripts")
+
+heading2("Design Goals")
+
+disc("""
+Platypus stands for &quot;Page Layout and Typography Using Scripts&quot;.  It is a high
+level page layout library which lets you programmatically create complex
+documents with a minimum of effort.
+""")
+
+disc("""
+The overall design of PLATYPUS can be thought of has having
+several layers these are
+1) DocTemplate,
+2) PageTemplates,
+3) Frames,
+4) Flowables (ie things like images, paragraphs and tables),
+5) last but not least the lowest level a $pdfgen.Canvas$.
+""")
+
+disc("""
+$DocTemplates$ contain one or more $PageTemplates$ each of which contain one or more
+$Frames$. $Flowables$ are things which can be <i>flowed</i> into a $Frame$ eg
+a $Paregraph$ or a $Table$.
+""")
+
+disc("""
+To use platypus you do approximately the following:
+create a document from a $DocTemplate$ class and pass
+a list of $Flowable$s to its $build$ method. The document
+$build$ method knows how to process the list of flowables
+into something reasonable.
+""")
+
+disc("""
+Internally the $DocTemplate$ class implements page layout and formatting
+using various events. Each of the events has a corresponding handler method
+called $handle_XXX$ where $XXX$ is the event name. A typical event is
+$frameBegin$ which occurs when the machinery begins to use a frame for the
+first time.
+""")
+
+disc("""
+The logic behind this is that the story consists of basic elements called $Flowables$
+and these can be used to drive the machinery which leads to a data driven approach, but
+instead of producing another macro driven troff like language we are programming
+in python and can use $ActionFlowables$ to tell the layout engine to skip to the next
+column or change to another $PageTemplate$.
+""")
+
+disc("""
+An example is provided by the software that generated this document
+itself which is coded thusly:
+""")
+
+eg("""
+    BODY = []
+    def story():
+        return BODY
+    
+    def disc(text, klass=Paragraph, style=discussiontextstyle):
+        text = quickfix(text)
+        P = klass(text, style)
+        BODY.append(P)
+        
+    def eg(text):
+        BODY.append(Spacer(0.1*inch, 0.1*inch))
+
+    disc('An extreme.....')
+    disc('.....')
+    
+    story = []
+    doc = RLDocTemplate(filename,pagesize = letter)
+    doc.build(story)
+""")
+
+heading2("Documents and Templates")
+
+disc("""
+The $BaseDocTemplate$ class implements the basic machinery for document
+formatting. An instance of the class contains a list of one or more
+$PageTemplates$ that can be used to describe the layout of information
+on a single page. The $build$ method can be used to process
+a list of $Flowables$ to produce a <b>PDF</b> document.
+""")
+
+CPage(3.0)
+heading3("The $BaseDocTemplate$ class")
+
+eg("""
+    BaseDocTemplate(self, filename,
+					pagesize=DEFAULT_PAGE_SIZE,
+					pageTemplates=[],
+					showBoundary=0,
+					leftMargin=inch,
+					rightMargin=inch,
+					topMargin=inch,
+					bottomMargin=inch,
+					allowSplitting=1,
+					title=None,
+					author=None,
+					_pageBreakQuick=1)
+""")
+
+disc("""
+Creates a document template suitable for creating a basic document. It comes with quite a lot
+of internal machinery, but no default page templates. The required $filename$ can be a string,
+the name of a file to  receive the created <b>PDF</b> document; alternatively it
+can be an object which has a $write$ method such as a $StringIO$ or $file$ or $socket$.
+""")
+
+disc("""
+The allowed arguments should be self explanatory, but $showBoundary$ controls whether or
+not $Frame$ boundaries are drawn which can be useful for debugging purposes. The
+$allowSplitting$ argument determines whether the builtin methods shoudl try to <i>split</i>
+individual $Flowables$ across $Frames$. The $_pageBreakQuick$ argument determines whether
+an attempt to do a page break should try to end all the frames on the page or not, before ending
+the page.
+""")
+
+heading4("User $BaseDocTemplate$ Methods")
+
+disc("""These are of direct interest to client programmers
+in that they are normally expected to be used.
+""")
+eg("""
+    BaseDocTemplate.addPageTemplates(self,pageTemplates)
+""")
+disc("""
+This method is used to add one or a list of $PageTemplates$ to an existing documents.
+""")
+eg("""
+    BaseDocTemplate.build(self, flowables, filename=None, canvasmaker=canvas.Canvas)
+""")
+disc("""
+This is the main method which is of interst to the application
+programmer. Assuming that the document instance is correctly set up the 
+$build$ method takes the <i>story</i> in the shape of the list of flowables
+(the $flowables$ argument) and loops through the list forcing the flowables
+one at a time thhrough the formatting machinery. Effectively this causes
+the $BaseDocTemplate$ instance to issue calls to the instance $handle_XXX$ methods
+to process the various events.
+""")
+heading4("User Virtual $BaseDocTemplate$ Methods")
+disc("""
+These have no semantics at all in the base class. They are intended as pure virtual hooks
+into the layout machinery. Creators of immediately derived classes can override these
+without worrying about affecting the properties of the layout engine.
+""")
+eg("""
+    BaseDocTemplate.afterInit(self)
+""")
+disc("""
+This is called after initialisation of the base class; a derived class could overide
+the method to add default $PageTemplates$.
+""")
+
+eg("""
+    BaseDocTemplate.afterPage(self)
+""")
+disc("""This is called after page processing, and
+		immediately after the afterDrawPage method
+		of the current page template. A derived class could
+use this to do things which are dependent on information in the page
+such as the first and last word on the page of a dictionary.
+""")
+
+eg("""
+    BaseDocTemplate.beforeDocument(self)
+""")
+
+disc("""This is called before any processing is
+done on the document, but after the processing machinery
+is ready. It can therefore be used to do things to the instance\'s
+$pdfgen.canvas$ and the like.
+""")
+
+eg("""
+    BaseDocTemplate.beforePage(self)
+""")
+
+disc("""This is called at the beginning of page
+		processing, and immediately before the
+		beforeDrawPage method of the current page
+		template. It could be used to reset page specific
+        information holders.""")
+
+eg("""
+    BaseDocTemplate.filterFlowables(self,flowables)
+""")
+
+disc("""This is called to filter flowables at the start of the main handle_flowable method.
+		Upon return if flowables[0] has been set to None it is discarded and the main
+		method returns immediately.
+		""")
+
+eg("""
+    BaseDocTemplate.afterFlowable(self, flowable)
+""")
+
+disc("""Called after a flowable has been rendered. An interested class could use this
+hook to gather information about what information is present on a particular page or frame.""")
+
+heading4("$BaseDocTemplate$ Event handler Methods")
+disc("""
+These methods constitute the greater part of the layout engine. Programmers shouldn't
+have to call or override these methods directly unless they are trying to modify the layout engine.
+Of course the experienced programmer who wants to intervene at a particular event, $XXX$,
+which does not correspond to one of the virtual methods can always override and
+call the base method from the drived class version. We make this easy by providing
+a base class synonym for each of the handler methods with the same name prefixed by an underscore '_'.
+""")
+
+eg("""
+    def handle_pageBegin(self):
+        doStuff()
+        BaseDocTemplate.handle_pageBegin(self)
+        doMoreStuff()
+
+    #using the synonym
+    def handle_pageEnd(self):
+        doStuff()
+        self._handle_pageEnd()
+        doMoreStuff()
+""")
+disc("""
+Here we list the methods only as an indication of the events that are being
+handled.
+Interested programmers can take a look at the source.
+""")
+eg("""
+    handle_currentFrame(self,fx)
+    handle_documentBegin(self)
+    handle_flowable(self,flowables)
+    handle_frameBegin(self,*args)
+    handle_frameEnd(self)
+    handle_nextFrame(self,fx)
+    handle_nextPageTemplate(self,pt)
+    handle_pageBegin(self)
+    handle_pageBreak(self)
+    handle_pageEnd(self)
+""")
+heading3("$PageTemplates$")
+disc("""
+The $PageTemplate class$ is a container class with fairly minimal semantics. Each instance
+contains a list of $Frames$ and has methods which should be called at the start and end
+of each page.
+""")
+eg("PageTemplate(id=None,frames=[],onPage=_doNothing,onPageEnd=_doNothing)")
+disc("""
+is used to initialize an instance, the $frames$ argument should be a list of $Frames$
+whilst the optional $onPage$ and $onPageEnd$ arguments are callables which should have signature
+$def XXX(canvas,document)$ where $canvas$ and $document$
+are the canvas and document being drawn. These routines are intended to be used to paint non-flowing (ie standard)
+parts of pages. These attribute functions are exactly parallel to the pure virtual methods
+$PageTemplate.beforPage$ and $PageTemplate.afterPage$ which have signature
+$beforPage(self,canvas,document)$. The methods allow class derivation to be used to define
+standard behaviour, whilst the attributes allow instance changes. The $id$ argument is used at
+run time to perform $PageTemplate$ switching so $id='FirstPage'$ or $id='TwoColumns'$ are typical.
+""")
+
+heading2("Frames")
+disc("""
+$Frames$ are active containers which are themselves contained in $PageTemplates$.
+$Frames$ have a location and size and maintain a concept of remaining drawable
+space.
+""")
+
+eg("""
+	Frame(x1, y1, width,height, leftPadding=6, bottomPadding=6,
+			rightPadding=6, topPadding=6, id=None, showBoundary=0)
+""")
+disc("""Creates a $Frame$ instance with lower left hand corner at coordinate $(x1,y1)$
+(relative to the canvas at use time) and with dimensions $width$ x $height$. The $Padding$
+arguments are positive quantities used to reduce the space available for drawing.
+The $id$ argument is an identifier for use at runtime eg 'LeftColumn' or 'Rightcolumn' etc.
+If the $showBoundary$ argument is non-zero then the boundary of the frame will get drawn
+at run time (this is useful sometimes).
+""")
+heading3("$Frame$ User Methods")
+eg("""
+	Frame.addFromList(drawlist, canvas)
+""")
+disc("""Consumes $Flowables$ from the front of $drawlist$ until the
+	frame is full.	If it cannot fit one object, raises
+	an exception.""")
+
+eg("""
+	Frame.split(flowable,canv)
+""")
+disc('''Ask the flowable to split using up the available space and return
+the list of flowables.
+''')
+
+eg("""
+	Frame.drawBoundary(canvas)
+""")
+disc("draw the frame boundary as a rectangle (primarily for debugging).")
+
+heading2("$Flowables$")
+disc("""
+$Flowables$ are things which can be drawn and which have $wrap$, $draw$ and perhaps $split$ methods.
+$Flowable$ is an abstract base class for things to be drawn an instance knows its size
+and draws in its own coordinate system (this requires the base API to provide an absolute coordinate
+system when the $Flowable.draw$ method is called). To get an instance use $f=Flowable()$.
+""")
+heading3("$Flowable$ User Methods")
+eg("""
+	Flowable.draw()
+""")
+disc("""This will be called to ask the flowable to actually render itself.
+The calling code should ensure that the flowable has an attribute $canv$
+which is the $pdfgen.Canvas$ which should be drawn to an that the $Canvas$
+is in an appropriate state (as regards translations rotations etc).
+""")
+eg("""
+	Flowable.wrap(availWidth, availHeight)
+""")
+disc("""This will be called by the enclosing frame before objects
+are asked their size, drawn or whatever.  It returns the
+size actually used.""")
+eg("""
+	Flowable.split(self, availWidth, availheight):
+""")
+disc("""This will be called by more sophisticated frames when
+		wrap fails. Stupid flowables should return []. Clever flowables
+		should split themselves and return a list of flowables""")
+eg("""
+	Flowable.getSpaceAfter(self):
+""")
+disc("""returns how much space should follow this item if another item follows on the same page.""")
+eg("""
+	Flowable.getSpaceBefore(self):
+""")
+disc("""returns how much space should precede this item if another item precedess on the same page.""")
+
+disc("""The chapters which follow will cover the most important
+specific types of flowables - Paragraphs and Tables""")
