@@ -3,8 +3,6 @@ if __name__=='__main__': #NO RUNTESTS
 	import os, sys
 	ROBIN_DEBUG=[('ROBIN_DEBUG',None)]
 	ROBIN_DEBUG=[]
-	if sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
-		sys.argv.append('--install-platlib='+os.path.join(sys.exec_prefix,'DLLs'))
 	from glob import glob
 	from distutils.core import setup, Extension
 	pJoin=os.path.join
@@ -61,3 +59,13 @@ if __name__=='__main__': #NO RUNTESTS
 										),
 							],
 			)
+
+	if sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
+		def MovePYDs(*F):
+			for x in sys.argv:
+				if x[:18]=='--install-platlib=': return
+			src = sys.exec_prefix
+			dst = os.path.join(src,'DLLs')
+			for f in F:
+				os.rename(os.path.join(src,f),os.path.join(dst,f))
+		MovePYDs('_renderPM.pyd')

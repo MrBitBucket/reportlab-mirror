@@ -2,15 +2,9 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/setup.py,v 1.5 2001/05/09 22:31:04 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/setup.py,v 1.6 2001/05/30 14:08:01 rgbecker Exp $
 if __name__=='__main__': #NO RUNTESTS
 	import os, sys
-	if sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
-		exe = sys.argv[0]
-		if not os.path.isabs(exe):
-			exe = os.path.join(os.getcwd(),exe)
-		sys.argv.append('--install-platlib='+os.path.dirname(exe))
-
 	from distutils.core import setup, Extension
 
 	if sys.platform=="win32":
@@ -52,3 +46,13 @@ if __name__=='__main__': #NO RUNTESTS
 										),
 							],
 			)
+
+	if sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
+		def MovePYDs(*F):
+			for x in sys.argv:
+				if x[:18]=='--install-platlib=': return
+			src = sys.exec_prefix
+			dst = os.path.join(src,'DLLs')
+			for f in F:
+				os.rename(os.path.join(src,f),os.path.join(dst,f))
+		MovePYDs('sgmlop.pyd','_rl_accel.pyd','pyHnj.pyd')
