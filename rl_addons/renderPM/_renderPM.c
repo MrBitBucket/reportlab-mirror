@@ -1179,6 +1179,7 @@ static	PyObject*	makeT1Font(PyObject* self, PyObject* args)
 	if((ok=(i==N))){
 		if(!gt1_create_encoded_font(name,pfbPath,names,N)){
 			PyErr_SetString(moduleError, "can't make font");
+			ok = 0;
 			}
 		}
 	while(i--){
