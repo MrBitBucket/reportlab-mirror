@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.22 2003/05/24 12:57:38 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.23 2003/07/30 16:55:26 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.22 2003/05/24 12:57:38 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.23 2003/07/30 16:55:26 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,7 +31,7 @@ static char* __version__=" $Id: pyRXP.c,v 1.22 2003/05/24 12:57:38 rgbecker Exp 
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "0.98"
+#define VERSION "0.99"
 #define MAX_DEPTH 256
 
 #if CHAR_SIZE==16
@@ -358,7 +358,7 @@ static	PyObject* _makeNode(ParserDetails* pd, PyObject *pyName, PyObject* attr, 
 		if(pd->fourth==recordLocation){
 			attr = PyTuple_New(2);
 			PyTuple_SET_ITEM(attr,0,_getSrcInfo(pd));
-			PyTuple_SET_ITEM(t,1,Py_None);
+			PyTuple_SET_ITEM(attr,1,Py_None);
 			Py_INCREF(Py_None);
 			}
 		else attr = PyObject_CallObject(pd->fourth, 0);
@@ -423,7 +423,7 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 				}
 			t = stack[*depth];
 			if(pd->fourth==recordLocation){
-				PyTuple_SET_ITEM(PyTuple_GET_ITEM(t,3),1,_getSrcInfo(pd));
+				PyTuple_SET_ITEM(PDGetItem(t,3),1,_getSrcInfo(pd));
 				Py_DECREF(Py_None);
 				}
 			*depth = *depth-1;
