@@ -31,13 +31,16 @@
 #
 ###############################################################################
 #	$Log: styles.py,v $
+#	Revision 1.3  2000/04/19 12:44:57  rgbecker
+#	Typo fix thanks to Daniel G. Rusch
+#
 #	Revision 1.2  2000/04/14 11:54:56  rgbecker
 #	Splitting layout.py
-#
+#	
 #	Revision 1.1  2000/04/14 10:51:56  rgbecker
 #	Moved out of layout.py
 #	
-__version__=''' $Id: styles.py,v 1.2 2000/04/14 11:54:56 rgbecker Exp $ '''
+__version__=''' $Id: styles.py,v 1.3 2000/04/19 12:44:57 rgbecker Exp $ '''
 
 from reportlab.lib.colors import white, black
 from reportlab.lib.enums import TA_LEFT
@@ -123,7 +126,7 @@ class LineStyle(PropertySet):
 
 class CellStyle(PropertySet):
 	defaults = {
-		'fontname':'Times-Roman',
+		'fontName':'Times-Roman',
 		'fontsize':10,
 		'leading':12,
 		'leftPadding':6,
