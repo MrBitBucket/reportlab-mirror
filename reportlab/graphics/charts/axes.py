@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.45 2001/10/11 12:48:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.46 2001/10/11 16:08:50 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -609,7 +609,7 @@ class ValueAxis(Widget):
 
 		if self.valueStep is None:
 			rawRange = self._valueMax - self._valueMin
-			rawInterval = rawRange / min(float(self.maximumTicks-1),(float(self._length)/self.minimumTickSpacing ))
+			rawInterval = rawRange / min(float(self.maximumTicks-1),(float(self._length)/self.minimumTickSpacing))
 			niceInterval = nextRoundNumber(rawInterval)
 			self._valueStep = niceInterval
 		else:
@@ -635,7 +635,10 @@ class ValueAxis(Widget):
 						txt = f[i]
 					else:
 						txt = ''
-				else: txt = f(tick)
+				elif callable(f):
+					txt = f(tick)
+				else:
+					raise ValueError, 'Invalid labelTextFormat %s' % f
 				label = labels[i]
 				pos[d] = v
 				apply(label.setOrigin,pos)
