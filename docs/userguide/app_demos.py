@@ -2,8 +2,8 @@
 from genuserguide import *
 
 Appendix1("ReportLab Demos")
-disc("""In the subdirectories of reportlab/demos there are a number of working examples showing
-almost all aspects of reportLab in use.""")
+disc("""In the subdirectories of $reportlab/demos$ there are a number of working examples showing
+almost all aspects of reportlab in use.""")
 
 heading2("""Odyssey""")
 disc("""
@@ -33,23 +33,22 @@ layout and uses multiple page templates.
 """)
 
 heading2("""Standard Fonts and Colors""")
-disc("""In reportlab/demos/stdfonts the script stdfonts.py can be used to illustrate
+disc("""In $reportlab/demos/stdfonts$ the script stdfonts.py can be used to illustrate
 ReportLab's standard fonts. Run the script using""")
 eg("""
 cd reportlab\\demos\\stdfonts
 python stdfonts.py
 """)
 disc("""
-to produce two <b>PDF</b> documents, StandardFonts_MacRoman.pdf &amp;
+to produce two PDF documents, StandardFonts_MacRoman.pdf &amp;
 StandardFonts_WinAnsi.pdf which show the two most common built in
 font encodings.
 """)
-heading3("""Colors""")
-disc("""The colortest.py script in reportlab/demos/colors demonstrates the different ways in which
+disc("""The colortest.py script in $reportlab/demos/colors$ demonstrates the different ways in which
 reportlab can set up and use colors.""")
 disc("""Try running the script and viewing the output document, colortest.pdf. This shows
 different color spaces and a large selection of the colors which are named
-in the reportlab.lib.colors module.
+in the $reportlab.lib.colors$ module.
 """)
 heading2("""Py2pdf""")
 disc("""Dinu Gherman (&lt;gherman@europemail.com&gt;) contributed this useful script
@@ -70,7 +69,7 @@ simple introduction; consult the comments at the start of the script.
 """)
 heading2("Gadflypaper")
 disc("""
-The Python script, gfe.py, in reportlab/demos/gadflypaper uses an inline style of
+The Python script, gfe.py, in $reportlab/demos/gadflypaper$ uses an inline style of
 document preparation. The script almost entirely produced by Aaron Watters produces a document
 describing Aaron's $gadfly$ in memory database for Python. To generate the document use
 """)
@@ -92,7 +91,7 @@ p("""The revamped query engine design in Gadfly 2 supports
 and integration.""")
 ''')
 heading2("""Pythonpoint""")
-disc("""Andy Robinson has refined the pythonpoint.py script (in reportlab\\demos\\pythonpoint)
+disc("""Andy Robinson has refined the pythonpoint.py script (in $reportlab\\demos\\pythonpoint$)
 until it is a really useful script. It takes an input file containing an XML markup
 and uses an xmllib style parser to map the tags into PDF slides. When run in its own directory
 pythonpoint.py takes as a default input the file pythonpoint.xml and produces pythonpoint.pdf

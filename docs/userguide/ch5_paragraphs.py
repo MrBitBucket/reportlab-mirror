@@ -5,21 +5,21 @@ from genuserguide import *
 #begin chapter oon paragraphs
 heading1("Paragraphs")
 disc("""
-The $reportlab.platypus.Paragraph class$ is one of the most useful of the Platypus $Flowables$;
+The $reportlab.platypus.Paragraph$ class is one of the most useful of the Platypus $Flowables$;
 it can format fairly arbitrary text and provides for inline font style and colour changes using
-an xml style markup. The overall shape of the formatted text can be justified, right or left ragged
-or centered. The xml markup can even be used to insert greek characters or to do subscripts.
+an XML style markup. The overall shape of the formatted text can be justified, right or left ragged
+or centered. The XML markup can even be used to insert greek characters or to do subscripts.
 """)
-disc("""The following text Creates an instance of the $Paragraph$ class:""") 
+disc("""The following text creates an instance of the $Paragraph$ class:""") 
 eg("""Paragraph(text, style, bulletText=None)""")
 disc("""The $text$ argument contains the text of the
 paragraph; excess white space is removed from the text at the ends and internally after
 linefeeds. This allows easy use of indented triple quoted text in <b>Python</b> scripts.
-The $bulletText$ argument provides the text of a default bullet for the paragraph
+The $bulletText$ argument provides the text of a default bullet for the paragraph.
 The font and other properties for the paragraph text and bullet are set using the style argument.
 """)
 disc("""
-The $style$ argument should be an instance of $class ParagraphStyle$ obtained typically
+The $style$ argument should be an instance of class $ParagraphStyle$ obtained typically
 using""")
 eg("""
 from reportlab.lib.styles import ParagraphStyle
@@ -28,7 +28,7 @@ disc("""
 this container class provides for the setting of multiple default paragraph attributes
 in a structured way. The styles are arranged in a dictionary style object called a $stylesheet$
 which allows for the styles to be accessed as $stylesheet['BodyText']$. A sample style
-sheet is provided
+sheet is provided.
 """)
 eg("""
 from reportlab.lib.styles import getSampleStyleSheet
@@ -80,7 +80,7 @@ say, except at the top or bottom of a frame. At the top of a frame,
 $spaceBefore$ is ignored, and at the bottom, $spaceAfter$ is ignored.
 This means that you could specify that a 'Heading2' style had two
 inches of space before when it occurs in mid-page, but will not
-get acres fo whitespace at the top of a page.  These two attributes
+get acres of whitespace at the top of a page.  These two attributes
 should be thought of as 'requests' to the Frame and are not part
 of the space occupied by the Paragraph itself.""")
 
@@ -194,7 +194,7 @@ disc("""'<![CDATA[Within each paragraph, we use a basic set of XML tags
 to provide markup.  The most basic of these are bold (<b>...</b>)
 and italic (<i>...</i>).  It is also legal to use an underline
 tag (<u>...</u> but it has no effect; PostScript fonts don't
-support underlining, and neither do we yet.]]>""")
+support underlining, and neither do we, yet.]]>""")
 
 parabox2("""<b>You are hereby charged</b> that on the 28th day of May, 1970, you did
 willfully, unlawfully, and <i>with malice of forethought</i>, publish an
@@ -229,7 +229,7 @@ tag, or with mathML entity names.]]>""")
 ##<greek>pi</greek></super> = -1""", "Greek letters and subscripts")
 
 parabox2("""Equation (&alpha;): <greek>e</greek> <super><greek>ip</greek></super>  = -1""",
-         "Greek letters and subscripts")
+         "Greek letters and superscripts")
 
 heading3("Numbering Paragraphs and Lists")
 disc("""The $&lt;seq&gt;$ tag provides comprehensive support
@@ -251,7 +251,7 @@ Reset<seqreset id="spam"/>.  <seq id="spam"/>, <seq id="spam"/>,
 disc("""You can save specifying an ID by designating a counter ID
 as the <i>default</i> using the &lt;seqdefault id="Counter"&gt;
 tag; it will then be used whenever a counter ID
-is not spbecified.  This saves some typing, especially when
+is not specified.  This saves some typing, especially when
 doing multi-level lists; you just change counter ID when
 stepping in or out a level.""")
 
@@ -300,7 +300,7 @@ t.setStyle([
 getStory().append(t)
 
 caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - &lt;bullet&gt; attributes &amp; synonyms""")
-disc("""The &lt;bullet&gt; tag is only allowed onec in a given paragraph and its use
+disc("""The &lt;bullet&gt; tag is only allowed once in a given paragraph and its use
 overrides the implied bullet style and ^bulletText^ specified in the  ^Paragraph^
 creation.
 """)

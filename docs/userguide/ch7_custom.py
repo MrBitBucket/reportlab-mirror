@@ -1,15 +1,15 @@
 #ch_custom.py
 from genuserguide import *
 
-heading1("Writing your own Flowable Objects")
+heading1("Writing your own $Flowable$ Objects")
 disc("""
-Flowable are intended to be an open standard for creating
+Flowables are intended to be an open standard for creating
 reusable report content, and you can easily create your
 own objects.  We hope that over time we will build up
 a library of contributions, giving reportlab users a
 rich selection of charts, graphics and other "report
 widgets" they can use in their own reports. This section
-shows you how to create our own flowables.""")
+shows you how to create your own flowables.""")
 
 todo("""we should put the Figure class in the
 standard library, as it is a very useful base.""")
@@ -17,7 +17,7 @@ standard library, as it is a very useful base.""")
 
 
 
-heading2("A very simple Flowable")
+heading2("A very simple $Flowable$")
 
 disc("""
 Recall the $hand$ function from the $pdfgen$ section of this user guide which

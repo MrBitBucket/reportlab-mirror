@@ -4,7 +4,7 @@ from genuserguide import *
 
 heading1("Tables and TableStyles")
 disc("""
-The $Table class$ is derived from the $Flowable class$ and is intended
+The $Table$ class is derived from the $Flowable$ class and is intended
 as a simple textual gridding mechanism. $Table$ cells can hold anything which can be converted to
 a <b>Python</b> $string$. 
 """)
@@ -17,15 +17,15 @@ color and weight of the lines (if any), and the font, alignment and padding of t
 A primitive automatic row height and or column width calculation mechanism is provided for.
 """)
 
-heading2('$class Table$ User Methods')
-disc("""These are the main methods which are of interest to the client programmer""")
+heading2('$Table$ User Methods')
+disc("""These are the main methods which are of interest to the client programmer.""")
 
 heading4("""$Table(data, colWidths=None, rowHeights=None, style=None, splitByRow=1,
 repeatRows=0, repeatCols=0)$""")
 
 disc("""The $data$ argument is a sequence of sequences of cell values each of which
 should be convertible to a string value using the $str$ function. The first row of cell values
-is in $data[0]$ ie the values are in row order. The $i$, $j$<sup>th.</sup> cell value is in
+is in $data[0]$ i.e. the values are in row order. The $i$, $j$<sup>th.</sup> cell value is in
 $data[i][j]$. Newline characters $'\\n'$ in cell values are treated as line split characters and
 are used at <i>draw</i> time to format the cell into lines.
 """)
@@ -40,29 +40,29 @@ in $rowHeights$ determines the number of rows in the table.
 A value of $None$ means that the corresponding row height should be calculated automatically.""")
 
 disc("""The $style$ argument can be an initial style for the table.""")
-disc("""The $splitByRow$ argument is a boolean indicating that the $Table$ should split itself
-by row before attempting to split itself by column when too littel space is available in
+disc("""The $splitByRow$ argument is a Boolean indicating that the $Table$ should split itself
+by row before attempting to split itself by column when too little space is available in
 the current drawing area and the caller wants the $Table$ to split.""")
 
 disc("""The $repeatRows$ and $repeatCols$ arguments specify the number of leading rows and columns
 that should be repeated when the $Table$ is asked to split itself.""")
-heading4('$Table.$setStyle(tblStyle)$')
+heading4('$Table.setStyle(tblStyle)$')
 disc("""
-This method applies a particular instance of $class TableStyle$ (discussed below)
+This method applies a particular instance of class $TableStyle$ (discussed below)
 to the $Table$ instance. This is the only way to get $tables$ to appear
 in a nicely formatted way.
 """)
 disc("""
 Successive uses of the $setStyle$ method apply the styles in an additive fashion.
-That is later applications override earlier ones where thes overlap.
+That is, later applications override earlier ones where they overlap.
 """)
 
-heading2('$class TableStyle$')
+heading2('$TableStyle$')
 disc("""
-This $class$ is created by passing it a sequence of <i>commands</i>, each command
+This class is created by passing it a sequence of <i>commands</i>, each command
 is a tuple identified by its first element which is a string; the remaining
-elements of the command tuple represent the start and finish cell coordinates
-of the command and possibly thickness and colors etc.
+elements of the command tuple represent the start and stop cell coordinates
+of the command and possibly thickness and colors, etc.
 """)
 heading2("$TableStyle$ User Methods")
 heading3("$TableStyle(commandSequence)$")
@@ -78,7 +78,7 @@ eg("""
 """)
 heading3("$TableStyle.add(commandSequence)$")
 disc("""This method allows you to add commands to an existing
-$TableStyle$, ie you can build up $TableStyles$ in multiple statements.
+$TableStyle$, i.e. you can build up $TableStyles$ in multiple statements.
 """)
 eg("""
     LIST_STYLE.add([('BACKGROUND', (0,0), (-1,0), colors.Color(0,0.7,0.7))])
@@ -97,10 +97,10 @@ the second and third arguments determine the cell coordinates of
 the box of cells which are affected with negative coordinates
 counting backwards from the limit values as in <b>Python</b>
 indexing. The coordinates are given as
-(column,row) which follows the spreadsheet 'A1' model, but not
+(column, row) which follows the spreadsheet 'A1' model, but not
 the more natural (for mathematicians) 'RC' ordering.
-The top left cell is (0,0) the bottom right is (-1,-1). Depending on
-the command various extra occur at indeces beginning at 3 on.
+The top left cell is (0, 0) the bottom right is (-1, -1). Depending on
+the command various extra (???) occur at indices beginning at 3 on.
 """)
 heading3("""$TableStyle$ Cell Formatting Commands""")
 disc("""The cell formatting commands all begin with an identifier, followed by
@@ -121,7 +121,7 @@ BACKGROUND              - takes a color.
 VALIGN                  - takes one of TOP, MIDDLE or the default BOTTOM
 """)
 disc("""This sets the background cell color in the relevant cells.
-The following example shows the $BACKGROUND$, and $TEXTCOLOR$ commands in action""")
+The following example shows the $BACKGROUND$, and $TEXTCOLOR$ commands in action:""")
 EmbeddedCode("""
 data=  [['00', '01', '02', '03', '04'],
         ['10', '11', '12', '13', '14'],
@@ -152,9 +152,9 @@ t.setStyle(TableStyle([('ALIGN',(1,1),(-2,-2),'RIGHT'),
 """)
 heading3("""$TableStyle$ Line Commands""")
 disc("""
-    Line commands begin with the identfier, the start and stop cell coordinates
+    Line commands begin with the identifier, the start and stop cell coordinates
     and always follow this with the thickness (in points) and color of the desired lines. Colors can be names,
-    or they can be specified as a (R,G,B) tuple, where R, G and B are floats and (0,0,0) is black. The line
+    or they can be specified as a (R, G, B) tuple, where R, G and B are floats and (0, 0, 0) is black. The line
     command names are: GRID, BOX, OUTLINE, INNERGRID, LINEBELOW, LINEABOVE, LINEBEFORE
     and LINEAFTER. BOX and OUTLINE are equivalent, and GRID is the equivalent of applying both BOX and
     INNERGRID.
@@ -208,14 +208,14 @@ At present this only works for vertical space.
 CPage(1)
 heading2("""$PageBreak()$""")
 disc("""This $Flowable$ represents a page break. It works by effectively consuming all vertical
-space given to it. This is sufficient for a single $frame$ document, but would only be a
+space given to it. This is sufficient for a single $Frame$ document, but would only be a
 frame break for multiple frames so the $BaseDocTemplate$ mechanism
 detects $pageBreaks$ internally and handles them specially.
 """)
 CPage(1)
 heading2("""$CondPageBreak(height)$""")
-disc("""This $flowable$ attempts to force a $Frame$ break if insufficient vertical space remains 
-in the current $Frame$. It is thus probably wrongly named. And should probably be renamed as
+disc("""This $Flowable$ attempts to force a $Frame$ break if insufficient vertical space remains 
+in the current $Frame$. It is thus probably wrongly named and should probably be renamed as
 $CondFrameBreak$.
 """)
 CPage(1)
