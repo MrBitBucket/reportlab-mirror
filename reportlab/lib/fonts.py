@@ -2,9 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/fonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.8 2001/07/13 09:33:34 andy_robinson Exp $
-__version__=''' $Id: fonts.py,v 1.8 2001/07/13 09:33:34 andy_robinson Exp $ '''
-import string, sys, os
+#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.9 2001/07/13 09:43:21 rgbecker Exp $
+__version__=''' $Id: fonts.py,v 1.9 2001/07/13 09:43:21 rgbecker Exp $ '''
+from reportlab.pdfbase.pdfmetrics import _fonts
+from string import lower
 ###############################################################################
 #	A place to put useful font stuff
 ###############################################################################
@@ -56,26 +57,23 @@ _tt2ps_map = {
 _ps2tt_map={}
 for k,v in _tt2ps_map.items():
 	if not _ps2tt_map.has_key(k):
-		_ps2tt_map[string.lower(v)] = k
+		_ps2tt_map[lower(v)] = k
 
 def ps2tt(psfn):
 	'ps fontname to family name, bold, italic'
-	psfn = string.lower(psfn)
+	psfn = lower(psfn)
 	if _ps2tt_map.has_key(psfn):
 		return _ps2tt_map[psfn]
+	if psfn in _fonts.keys(): return lower(psfn)
 	raise "Can't map PS font", psfn
 
 def tt2ps(fn,b,i):
 	'family name + bold & italic to ps font name'
-	K = (string.lower(fn),b,i)
+	K = (lower(fn),b,i)
 	if _tt2ps_map.has_key(K):
 		return _tt2ps_map[K]
-	raise "Can't map PS font", fn
-
-def addMapping(face, bold, italic, psname):
-	'allow a custom font to be put in the mapping'
-	_tt2ps_map[(face, bold, italic)] = psname
-	# rebuild inverse - inefficient
-	for k,v in _tt2ps_map.items():
-		if not _ps2tt_map.has_key(k):
-			_ps2tt_map[string.lower(v)] = k
+	F = _fonts.keys()
+	try:
+		return F[map(lower,_fonts.keys()).index(K[0])]
+	except:
+		raise "Can't map PS font", fn
