@@ -2,16 +2,23 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.19 2003/04/01 16:10:20 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.20 2003/04/03 00:07:51 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.19 2003/04/01 16:10:20 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.20 2003/04/03 00:07:51 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 
-#ifndef CHAR_SIZE
-#define CHAR_SIZE 8
+#if !defined(CHAR_SIZE)
+#	error CHAR_SIZE not specified
+#elif CHAR_SIZE == 16
+#	define initpyRXP initpyRXPU
+#	define MODULE "pyRXPU"
+#elif CHAR_SIZE == 8
+#	define PYSTRING(s) PyString_FromString(s)
+#	define MODULE "pyRXP"
+#	define initpyRXP initpyRXP
 #endif
 
 #include "system.h"
@@ -25,8 +32,23 @@ static char* __version__=" $Id: pyRXP.c,v 1.19 2003/04/01 16:10:20 rgbecker Exp 
 #include "version.h"
 #include "namespaces.h"
 #define VERSION "0.97"
-#define MODULE "pyRXP"
 #define MAX_DEPTH 256
+
+#if CHAR_SIZE==16
+PyObject* PYSTRING(const Char* s)
+{
+	return PyUnicode_Decode((const char*)s, (int)Strlen(s)*2, "utf16", NULL);
+}
+PyObject* PYSTRING8(const char* s)
+{
+	return PyUnicode_DecodeUTF8((const char*)s, (int)strlen(s), NULL);
+}
+#	define EmptyCharStr (Char*)"\0"
+#else
+#	define PYSTRING(s) PyString_FromString(s)
+#	define PYSTRING8(s) PyString_FromString(s)
+#	define EmptyCharStr (Char*)""
+#endif
 static PyObject *moduleError;
 static PyObject *moduleVersion;
 static PyObject *RXPVersion;
@@ -265,11 +287,14 @@ static	PyObject* get_attrs(ParserDetails* pd, Attribute a)
 	int		useNone = pd->none_on_empty && !a;
 
 	if(!useNone){
-		PyObject	*attrs=PyDict_New(), *t;
+		PyObject *attrs=PyDict_New(), *t, *s;
 		for(; a; a=a->next){
-			PyDict_SetItemString(attrs, (char*)a->definition->name,
-							t=PyString_FromString(a->value));
+			PyDict_SetItem(attrs,
+				t=PYSTRING((Char*)a->definition->name),
+				s=PYSTRING((Char*)a->value)
+				);
 			Py_DECREF(t);
+			Py_DECREF(s);
 			}
 		return attrs;
 		}
@@ -285,7 +310,7 @@ static	PyObject* _getSrcInfo(ParserDetails *pd)
 	PyObject *t = PyTuple_New(3);
 	const char *name = EntityDescription(s->entity);
 	int lnum, cnum;
-	PyTuple_SET_ITEM(t,0,PyString_FromString(name));
+	PyTuple_SET_ITEM(t,0,PYSTRING8(name));
 	switch(SourceLineAndChar(s, &lnum, &cnum)){
 		case 0:
 		case 1:
@@ -339,9 +364,9 @@ static	PyObject* _makeNode(ParserDetails* pd, PyObject *pyName, PyObject* attr, 
 	return t;
 }
 
-static	PyObject* makeNode(ParserDetails* pd, char *name, PyObject* attr, int empty)
+static	PyObject* makeNode(ParserDetails* pd, const Char *name, PyObject* attr, int empty)
 {
-	return _makeNode(pd, PyString_FromString(name), attr, empty);
+	return _makeNode(pd, PYSTRING(name), attr, empty);
 }
 
 /*_makeNode for predefined python objects*/
@@ -372,7 +397,7 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 				}
 
 			empty = bit->type == XBIT_empty;
-			t = makeNode( pd, (char*)bit->element_definition->name,
+			t = makeNode( pd, bit->element_definition->name,
 					get_attrs(pd, bit->attributes), empty);
 			if(empty){
 				PyList_Append(PDGetItem(stack[*depth],2),t);
@@ -401,12 +426,12 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 		case XBIT_pi:
 			if(ParserGetFlag(p,ReturnProcessingInstructions)){
 				s = PyDict_New();
-				PyDict_SetItemString(s, "name", t=PyString_FromString(bit->pi_name));
+				PyDict_SetItemString(s, "name", t=PYSTRING(bit->pi_name));
 				Py_DECREF(t);
 				t = _makeNodePD( pd, piTagName, s, 0);
 				if(pd->fourth==recordLocation) _reverseSrcInfoTuple(PyTuple_GET_ITEM(t,3));
 				Py_INCREF(piTagName);
-				s = PyString_FromString(bit->pi_chars);
+				s = PYSTRING(bit->pi_chars);
 				PyList_Append(PDGetItem(t,2),s);
 				Py_DECREF(s);
 				PyList_Append(PDGetItem(stack[*depth],2),t);
@@ -414,12 +439,12 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 				}
 			break;
 		case XBIT_pcdata:
-			t = PyString_FromString(bit->pcdata_chars);
+			t = PYSTRING(bit->pcdata_chars);
 			PyList_Append(PDGetItem(stack[*depth],2),t);
 			Py_DECREF(t);
 			break;
 		case XBIT_cdsect:
-			t = PyString_FromString(bit->cdsect_chars);
+			t = PYSTRING(bit->cdsect_chars);
 			PyList_Append(PDGetItem(stack[*depth],2),t);
 			Py_DECREF(t);
 			break;
@@ -431,7 +456,7 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 				if(pd->fourth==recordLocation) _reverseSrcInfoTuple(PyTuple_GET_ITEM(t,3));
 				Py_INCREF(Py_None);
 				Py_INCREF(commentTagName);
-				s = PyString_FromString(bit->comment_chars);
+				s = PYSTRING(bit->comment_chars);
 				PyList_Append(PDGetItem(t,2),s);
 				Py_DECREF(s);
 				PyList_Append(PDGetItem(stack[*depth],2),t);
@@ -456,7 +481,7 @@ static InputSource entity_open(Entity e, void *info)
 	if(e->type==ET_external){
 		PyObject		*arglist;
 		PyObject		*result;
-		arglist = Py_BuildValue("(s)",e->systemid);
+		arglist = Py_BuildValue("(s)",e->systemid);	/*NB 8 bit*/
 		result = PyEval_CallObject(eoCB, arglist);
 		if(result){
 			if(PyString_Check(result)){
@@ -483,11 +508,21 @@ void PyErr_FromStderr(Parser p, char *msg){
 		void *handle;
 		int handle2, handle3;
 		};
+#if CHAR_SIZE == 8
 	char *buf=((struct _FILE16*)Stderr)->handle;
 	if(p->errbuf) Fprintf(Stderr,"%s\n", p->errbuf);
 	Fprintf(Stderr,"%s\n", msg);
 	buf[((struct _FILE16*)Stderr)->handle2] = 0;
 	PyErr_SetString(moduleError,buf);
+#else
+	Char *buf=((struct _FILE16*)Stderr)->handle;
+	PyObject* t;
+	if(p->errbuf) Fprintf(Stderr,"%s\n", p->errbuf);
+	Fprintf(Stderr,"%s\n", msg);
+	t = PyUnicode_Decode(buf, ((struct _FILE16*)Stderr)->handle2, "utf16", NULL);
+	PyErr_SetObject(moduleError,t);
+	Py_DECREF(t);
+#endif
 }
 
 int	checkFirstProperNode(ParserDetails *pd,PyObject *t)
@@ -515,7 +550,7 @@ PyObject *ProcessSource(Parser p, InputSource source)
 		}
 
 	depth = 0;
-	stack[0] = makeNode( pd, "", Py_None, 0);	/*stealing a reference to Py_None*/
+	stack[0] = makeNode( pd, EmptyCharStr, Py_None, 0);	/*stealing a reference to Py_None*/
 	Py_INCREF(Py_None);					/*so we must correct for it*/
 	while(1){
 		XBitType bt;
@@ -576,6 +611,7 @@ static void myWarnCB(XBit bit, void *info)
 	str = MakeFILE16FromString(buf,sizeof(buf)-1,"w");
 	_ParserPerror(str, pd->p, bit);
 	Fclose(str);
+	/* TODO: This probably needs to be unicode as well */
 	arglist = Py_BuildValue("(s)",buf);
 	result = PyEval_CallObject(pd->warnCB, arglist);
 	Py_DECREF(arglist);
@@ -870,9 +906,9 @@ DL_EXPORT(void) initpyRXP(void)
 	PyDict_SetItemString(d, "RXPVersion", RXPVersion );
 	moduleError = PyErr_NewException(MODULE ".Error",NULL,NULL);
 	PyDict_SetItemString(d,"error",moduleError);
-	piTagName = PyString_FromString("<?");
+	piTagName = PYSTRING8("<?");
 	PyDict_SetItemString(d, "piTagName", piTagName );
-	commentTagName = PyString_FromString("<!--");
+	commentTagName = PYSTRING8("<!--");
 	PyDict_SetItemString(d, "commentTagName", commentTagName );
 	recordLocation = PyString_FromString("recordLocation");
 	PyDict_SetItemString(d, "recordLocation",recordLocation);
