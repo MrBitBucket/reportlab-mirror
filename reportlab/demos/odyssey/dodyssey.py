@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: dodyssey.py,v $
+#	Revision 1.6  2000/06/01 09:41:11  rgbecker
+#	test filename case fix
+#
 #	Revision 1.5  2000/05/17 22:15:58  rgbecker
 #	Renamed BasicFrame to Frame
-#
+#	
 #	Revision 1.4  2000/05/13 09:23:45  rgbecker
 #	Fix spacing bugs
 #	
@@ -58,7 +61,7 @@
 #	Revision 1.1  2000/04/06 08:58:09  rgbecker
 #	Paragraph formatting version of odyssey.py
 #	
-__version__=''' $Id: dodyssey.py,v 1.5 2000/05/17 22:15:58 rgbecker Exp $ '''
+__version__=''' $Id: dodyssey.py,v 1.6 2000/06/01 09:41:11 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -239,7 +242,7 @@ def parseOdyssey(fn):
 	print "saving to PDF took %.4f seconds" %(t7-t6)
 	print "Total run took %.4f seconds"%(t7-t0)
 
-for fn in ('Odyssey.full.txt','Odyssey.txt'):
+for fn in ('odyssey.full.txt','odyssey.txt'):
 	if os.path.isfile(fn):
 		break
 

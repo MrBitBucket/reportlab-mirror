@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: fodyssey.py,v $
+#	Revision 1.11  2000/06/01 09:41:12  rgbecker
+#	test filename case fix
+#
 #	Revision 1.10  2000/05/17 16:29:39  rgbecker
 #	Removal of SimpleFrame
-#
+#	
 #	Revision 1.9  2000/05/17 15:37:33  rgbecker
 #	Changes related to removal of SimpleFlowDocument
 #	
@@ -61,7 +64,7 @@
 #	Revision 1.1  2000/04/06 08:58:09  rgbecker
 #	Paragraph formatting version of odyssey.py
 #	
-__version__=''' $Id: fodyssey.py,v 1.10 2000/05/17 16:29:39 rgbecker Exp $ '''
+__version__=''' $Id: fodyssey.py,v 1.11 2000/06/01 09:41:12 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -219,7 +222,7 @@ def parseOdyssey(fn):
 	print "saving to PDF took %.4f seconds" %(t7-t6)
 	print "Total run took %.4f seconds"%(t7-t0)
 
-for fn in ('Odyssey.full.txt','Odyssey.txt'):
+for fn in ('odyssey.full.txt','odyssey.txt'):
 	if os.path.isfile(fn):
 		break
 if __name__=='__main__':

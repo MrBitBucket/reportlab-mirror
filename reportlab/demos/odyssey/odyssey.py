@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: odyssey.py,v $
+#	Revision 1.8  2000/06/01 09:41:12  rgbecker
+#	test filename case fix
+#
 #	Revision 1.7  2000/04/06 08:51:06  rgbecker
 #	Fix to timing page count, try to read full text
-#
+#	
 #	Revision 1.6  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
 #	
@@ -52,7 +55,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:09:29  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: odyssey.py,v 1.7 2000/04/06 08:51:06 rgbecker Exp $ '''
+__version__=''' $Id: odyssey.py,v 1.8 2000/06/01 09:41:12 rgbecker Exp $ '''
 ___doc__=''
 #odyssey.py
 #
@@ -129,7 +132,7 @@ def run():
     canv.setFont('Times-Roman', 12)
     tx = canv.beginText(left_margin, top_margin - 0.5*inch)
     
-    for fn in ('Odyssey.full.txt','Odyssey.txt'):
+    for fn in ('odyssey.full.txt','odyssey.txt'):
         if os.path.isfile(fn):
             break
 
@@ -171,10 +174,6 @@ def run():
     speed =  pages / elapsed
     print '%d pages in %0.2f seconds = %0.2f pages per second' % (
                 pages, elapsed, speed)
-    
-    
-
-
-
+ 
 if __name__=='__main__':
     run()
