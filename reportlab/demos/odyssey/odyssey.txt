@@ -11,12 +11,12 @@ Translated by Samuel Butler
 ----------------------------------------------------------------------
 
 BOOK I
-<bullet indent=-18><font name=courier size=13 color=blue>I</font></bullet><font color=green><b><i>Tell</i></b></font> me, O muse, of that ingenious hero who travelled far and wide
- a b c &amp;| &amp; | <b>A</b>' <b>A</b> ' after he had sacked the famous town of <font color=red size=12><b>Troy</b></font>. Many cities did he visit,
+<bullet indent="-18"><font name="courier" size="13" color="blue">I</font></bullet><font color="green"><b><i>Tell</i></b></font> me, O muse, of that ingenious hero who travelled far and wide
+ a b c &amp;| &amp; | <b>A</b>' <b>A</b> ' after he had sacked the famous town of <font color="red" size="12"><b>Troy</b></font>. Many cities did he visit,
 and many were the nations with whose manners and customs he was acquainted;
 moreover he suffered much by sea while trying to save his own life
 and bring his men safely home; but do what he might he could not
-save<super><font color=red>1</font></super>
+save<super><font color="red">1</font></super>
 his men, for they perished through their own sheer folly in eating
 the cattle of the Sun-god Hyperion; so the god prevented them from
 ever reaching home. Tell me, too, about all these things, O daughter
@@ -32,7 +32,7 @@ troubles were not yet over; nevertheless all the gods had now begun
 to pity him except Neptune, who still persecuted him without ceasing
 and would not let him get home. 
 
-<font color=green>Now Neptune had gone off to the Ethiopians, who are at the world's
+<font color="green">Now Neptune had gone off to the Ethiopians, who are at the world's
 end, and lie in two halves, the one looking West and the other East.
 He had gone there to accept a hecatomb of sheep and oxen, and was
 enjoying himself at his festival; but the other gods met in the house
