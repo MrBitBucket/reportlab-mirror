@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.46 2001/10/11 16:08:50 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.47 2001/10/23 13:42:31 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -454,6 +454,7 @@ class ValueAxis(Widget):
 		valueMax = AttrMapValue(isNumberOrNone, desc='Maximum value on axis.'),
 		valueStep = AttrMapValue(isNumberOrNone, desc='Step size used between ticks.'),
 		valueSteps = AttrMapValue(isListOfNumbersOrNone, desc='List of step sizes used between ticks.'),
+		avoidBoundFrac = AttrMapValue(isNumberOrNone, desc='Fraction of interval to allow above and below.'),
 		)
 
 	def __init__(self):
@@ -496,6 +497,7 @@ class ValueAxis(Widget):
 		self.valueMin = None
 		self.valueMax = None
 		self.valueStep = None
+		self.avoidBoundFrac = None
 
 
 	def setPosition(self, x, y, length):
@@ -542,9 +544,12 @@ class ValueAxis(Widget):
 			valueMax = _findMax(dataSeries,self._dataIndex,0)
 		if valueMin == valueMax:
 			if valueMax==0:
-				valueMax = 1
+				valueMax = 0.01
+				valueMin = -0.01
 			else:
-				valueMax = valueMin+1
+				a = abs(valueMax)
+				valueMax = valueMax + a
+				valueMin = valueMin - a
 		if self.forceZero:
 			if valueMax<0: valueMax=0
 			elif valueMin>0: valueMin = 0
