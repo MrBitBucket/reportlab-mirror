@@ -5,7 +5,7 @@
 """
 
 
-import os, glob, sys
+import os, glob, sys, string
 from reportlab.test import unittest
 
 
@@ -26,7 +26,7 @@ def removeFiles(rootFolder, ext):
     for sub in [rootFolder] + subFolders:
         for f in glob.glob(os.path.join(sub, '*' + ext)):
             os.remove(f)
-
+            
 
 def suite(folder):
     "Build a test suite of all test files found."
@@ -51,5 +51,14 @@ def suite(folder):
 
 if __name__ == '__main__':
     folder = os.path.dirname(sys.argv[0])
+
+    # special case for reportlab/test directory - clean up
+    # all PDF & log files before starting run.  You don't
+    # want this if reusing runAll anywhere else.
+    if string.find(folder, 'reportlab' + os.sep + 'test') > -1:
+        #print 'cleaning up previous output'
+        removeFiles(folder, '.pdf')
+        removeFiles(folder, '.log')
+        
     unittest.TextTestRunner().run(suite(folder)).wasSuccessful()
     removeFiles(folder, '.pyc')

@@ -16,7 +16,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus import Flowable
 from reportlab.graphics.shapes import *
-from reportlab.graphics.charts.piechart0 import PieWithWedges
+from reportlab.graphics.charts.piechart0 import Pie
 
 
 class GraphicsSpeedTestCase(unittest.TestCase):
@@ -37,7 +37,7 @@ class GraphicsSpeedTestCase(unittest.TestCase):
         d = Drawing(400, 200)
         num = 100
         for i in range(num):
-            pc = PieWithWedges()
+            pc = Pie()
             pc.x = 150
             pc.y = 50
             pc.data = [10,20,30,40,50,60]
