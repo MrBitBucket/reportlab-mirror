@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.57 2002/04/25 19:52:40 andy_robinson Exp $
-__version__=''' $Id: tables.py,v 1.57 2002/04/25 19:52:40 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.58 2002/06/18 18:17:12 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.58 2002/06/18 18:17:12 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -569,18 +569,25 @@ class Table(Flowable):
 	def _drawBkgrnd(self):
 		nrows = self._nrows
 		ncols = self._ncols
-		for cmd, (sc, sr), (ec, er), color in self._bkgrndcmds:
+		for cmd, (sc, sr), (ec, er), arg in self._bkgrndcmds:
 			if sc < 0: sc = sc + ncols
 			if ec < 0: ec = ec + ncols
 			if sr < 0: sr = sr + nrows
 			if er < 0: er = er + nrows
-			color = colors.toColor(color)
 			x0 = self._colpositions[sc]
 			y0 = self._rowpositions[sr]
 			x1 = self._colpositions[min(ec+1,ncols)]
 			y1 = self._rowpositions[min(er+1,nrows)]
-			self.canv.setFillColor(color)
-			self.canv.rect(x0, y0, x1-x0, y1-y0,stroke=0,fill=1)
+			w, h = x1-x0, y1-y0
+			canv = self.canv
+			if type(arg) in _SeqTypes:
+				func, arg = arg[0], tuple(arg[1:])
+				apply(func,(self,canv, x0, y0, w, h)+arg)
+			elif callable(arg):
+				apply(arg,(self,canv, x0, y0, w, h))
+			else:
+				canv.setFillColor(colors.toColor(arg))
+				canv.rect(x0, y0, w, h, stroke=0,fill=1)
 
 	def _drawCell(self, cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight)):
 		if self._curcellstyle is not cellstyle:
