@@ -2,12 +2,13 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.18 2001/05/01 17:50:47 johnprecedo Exp $
-__version__=''' $Id: colors.py,v 1.18 2001/05/01 17:50:47 johnprecedo Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.19 2001/06/27 11:25:22 rgbecker Exp $
+__version__=''' $Id: colors.py,v 1.19 2001/06/27 11:25:22 rgbecker Exp $ '''
 
 import string
 import math
 from types import StringType, ListType, TupleType
+from utils import fp_str
 
 class Color:
 	"""This class is used to represent color.  Components red, green, blue
@@ -18,7 +19,7 @@ class Color:
 		self.red, self.green, self.blue = red,green,blue
 
 	def __repr__(self):
-		return "Color(%1.2f,%1.2f,%1.2f)" % (self.red, self.green, self.blue)
+		return "Color(%s)" % string.replace(fp_str(self.red, self.green, self.blue),' ',',')
 
 	def __hash__(self):
 		return hash( (self.red, self.green, self.blue) )
@@ -49,21 +50,38 @@ class CMYKColor(Color):
 	Extra attributes may be attached to the class to support specific ink models,
 	and renderers may look for these."""
 
-	def __init__(self, cyan=0, magenta=0, yellow=0, black=0):
-		"Initialize with four colors in range [0-1]."
+	def __init__(self, cyan=0, magenta=0, yellow=0, black=0,
+				spotName=None, density=1):
+		"""
+		Initialize with four colors in range [0-1]. the optional
+		spotName and density may be of use to specific renderers. The spotName
+		is intended for use as an identifier to the rendere not client programs.
+		"""
 		self.cyan = cyan
 		self.magenta = magenta
 		self.yellow = yellow
 		self.black = black
+		self.spotName = spotName
+		self.density = max(min(density,1),0)	# force into right range
 
-		# now work out the RGB approximation.  You could override
-		# this if you want
-		
+		# now work out the RGB approximation. override
 		self.red, self.green, self.blue = cmyk2rgb( (cyan, magenta, yellow, black) )
 
+		#density adjustment of rgb approximants
+		if spotName and density < 1:
+			# the RGB equivalents are not the ones from the default CMYK
+			# in this case - water them down a little!
+			r, g, b = self.red, self.green, self.blue
+			r = density*(r-1)*1.+1
+			g = density*(g-1)*1.+1
+			b = density*(b-1)*1.+1
+			self.red, self.green, self.blue = (r,g,b)
+
 	def __repr__(self):
-		return "CMYKColor(%1.2f,%1.2f,%1.2f,%1.2f)" % (
-			self.cyan, self.magenta, self.yellow, self.black)
+		return "CMYKColor(%s%s%s)" % (
+			string.replace(fp_str(self.cyan, self.magenta, self.yellow, self.black),' ',','),
+			(self.density!=1 and (',density='+fp_str(self.density)) or ''),
+			(self.spotName and (',spotName='+repr(self.spotName)) or ''))
 
 	def __hash__(self):
 		return hash( (self.cyan, self.magenta, self.yellow, self.black) )
@@ -91,10 +109,23 @@ class CMYKColor(Color):
 		"Returns a tuple of four color components - syntactic sugar"
 		return (self.cyan, self.magenta, self.yellow, self.black)
 
-def cmyk2rgb(cmyktuple):
+	def _density_str(self):
+		return fp_str(self.density)
+
+class PCMYKColor(CMYKColor):
+	'''100 based CMYKColor with density and a spotName; just like Rimas uses'''
+	def __init__(self,cyan,magenta,yellow,black,density=100,spotName=None):
+		CMYKColor.__init__(self,cyan/100.,magenta/100.,yellow/100.,black/100.,spotName,density/100.)
+
+	def __repr__(self):
+		return "PCMYKColor(%s%s%s)" % (
+			string.replace(fp_str(self.cyan*100, self.magenta*100, self.yellow*100, self.black*100),' ',','),
+			(self.density!=1 and (',density='+fp_str(self.density*100)) or ''),
+			(self.spotName and (',spotName='+repr(self.spotName)) or ''))
+
+def cmyk2rgb((c,m,y,k),density=1):
 	"Convert from a CMYK color tuple to an RGB color tuple"
 	# From the Adobe Postscript Ref. Manual 2nd ed.
-	(c,m,y,k) = cmyktuple
 	r = 1.0 - min(1.0, c + k)
 	g = 1.0 - min(1.0, m + k)
 	b = 1.0 - min(1.0, y + k)
