@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "$Revision: 1.15 $"
+#define VERSION "$Revision: 1.16 $"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -386,17 +386,17 @@ static double _vpath_segment_area(ArtVpath *p, ArtVpath *q)
 static double _vpath_area(ArtVpath *p)
 {
 	double a=0.0, t;
-	ArtVpath	*q = p;
+	ArtVpath	*q = p, *p0=p;
 	while(q->code!=ART_END){
 		while((++p)->code==ART_LINETO);
 		t = _vpath_segment_area( q, p);
 #ifdef	ROBIN_DEBUG
 		printf("	closed segment area=%g\n", t );
 #endif
-		if(t<=-1e-8) _vpath_segment_reverse( q, p-1 );
 		a += t;
 		q = p;
 		}
+	if(a<=-1e-8) _vpath_reverse( p0 );
 	return a;
 }
 
@@ -430,9 +430,9 @@ static void _gstate_pathFill(gstateObject* self,int endIt, int vpReverse)
 		if(endIt) gstate_pathEnd(self);
 		dump_path(self);
 		vpath = art_bez_path_to_vec(self->path, 0.25);
-		if(vpReverse) _vpath_reverse(vpath);
+		if(0 && vpReverse) _vpath_reverse(vpath);
 		trVpath =  art_vpath_affine_transform(vpath, self->ctm);
-		if(self->clipSVP && !vpReverse) _vpath_area(trVpath);
+		_vpath_area(trVpath);
 		svp = art_svp_from_vpath(trVpath);
 		if(self->clipSVP) {
 			tmp_svp = svp;
@@ -491,7 +491,7 @@ static PyObject* gstate_pathStroke(gstateObject* self, PyObject* args)
 			}
 		dump_vpath("stroke vpath", vpath);
 		trVpath = art_vpath_affine_transform(vpath, self->ctm);
-		if(self->clipSVP) _vpath_area(trVpath);
+		_vpath_area(trVpath);
 		svp = art_svp_vpath_stroke(trVpath, self->lineJoin, self->lineCap, self->strokeWidth, 4, 0.5);
 		art_free(trVpath);
 		if(self->clipSVP){
