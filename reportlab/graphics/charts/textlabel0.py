@@ -4,6 +4,7 @@ from reportlab.graphics.widgetbase import Widget
 from reportlab.lib import colors
 from reportlab.pdfbase.pdfmetrics import stringWidth
 
+
 class Label(Widget):
     """A text label to attach to something else, such as a chart axis.
 
@@ -13,6 +14,7 @@ class Label(Widget):
     """
     # fairly straight port of Robin Becker's textbox.py to new widgets
     # framework.
+
     _attrMap = {
         'dx':isNumber,
         'dy':isNumber,
@@ -25,8 +27,10 @@ class Label(Widget):
         'fontName':isString,
         'fontSize':isNumber,
         'leading':isNumber,
-        'textAnchor':OneOf(('start','middle','end'))
+##        'textAnchor':OneOf(('start', 'middle', 'end'))
+        'textAnchor':isTextAnchor
         }
+
     def __init__(self):
         self._x = 100
         self._y = 75
@@ -44,20 +48,24 @@ class Label(Widget):
         self.leading = self.fontSize * 1.2
         self.textAnchor = 'start'
 
+
     def setText(self, text):
         """Set the text property.  May contain embedded newline characters.
         Called by the containing chart or axis."""
         self._text = text
+
 
     def setOrigin(self, x, y):
         """Set the origin.  This would be the tick mark or bar top relative to
         which it is defined.  Called by the containing chart or axis."""
         self._x = x
         self._y = y
+
         
     def demo(self):
         """This shows a label positioned with its top right corner
         at the top centre of the drawing, and rotated 45 degrees."""
+
         d = Drawing(200, 100)
 
         # mark the origin of the label
@@ -71,11 +79,10 @@ class Label(Widget):
         lab.dy = -20
         lab.boxStrokeColor = colors.green
         lab.setText('Another\nMulti-Line\nString')
-
         d.add(lab)
+        
         return d
 
-        
 
     def computeSize(self):
         # the thing will draw in its own coordinate system
@@ -117,7 +124,6 @@ class Label(Widget):
         g.translate(self._x + self.dx, self._y + self.dy)
         g.rotate(self.angle)
 
-
         y = self._top - self.fontSize
         if self.textAnchor == 'start':
             x = self._left
@@ -137,7 +143,6 @@ class Label(Widget):
                        strokeWidth=self.boxStrokeWidth,
                        fillColor=self.boxFillColor)
                   )
-
             
         for line in self._lines:
             s = String(x, y, line)
@@ -150,10 +155,9 @@ class Label(Widget):
         return g
     
         
-
-if __name__=='__main__':
-    from reportlab.graphics.renderPDF import drawToFile
-    tx = Label()
-    d = tx.demo()
-    drawToFile(d, 'textlabel.pdf', 'example text label')
+##if __name__=='__main__':
+##    from reportlab.graphics.renderPDF import drawToFile
+##    tx = Label()
+##    d = tx.demo()
+##    drawToFile(d, 'textlabel.pdf', 'example text label')
     
