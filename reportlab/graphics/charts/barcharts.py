@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.50 2001/10/04 14:18:25 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.51 2001/10/04 16:23:51 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -313,6 +313,7 @@ class BarChart(Widget):
 	def _addNABarLabel(self, g, rowNo, colNo, x, y, width, height):
 		na = self.naLabel
 		if na and na.text:
+			na = copy.copy(na)
 			v = self.valueAxis._valueMax<=0 and -1e-8 or 1e-8
 			if width is None: width = v
 			if height is None: height = v
