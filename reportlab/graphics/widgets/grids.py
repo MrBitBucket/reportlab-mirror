@@ -1,16 +1,14 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/grids.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.26 2002/07/24 19:56:36 andy_robinson Exp $
-__version__=''' $Id: grids.py,v 1.26 2002/07/24 19:56:36 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.27 2002/08/11 09:59:57 rgbecker Exp $
+__version__=''' $Id: grids.py,v 1.27 2002/08/11 09:59:57 rgbecker Exp $ '''
 
 from reportlab.lib import colors
-from reportlab.lib.validators import *
-from reportlab.lib.attrmap import *
-from reportlab.graphics.shapes import Drawing, Group, Line, Rect
+from reportlab.lib.validators import isNumber, isColorOrNone, isBoolean, isListOfNumbers, OneOf, isListOfColors
+from reportlab.lib.attrmap import AttrMap, AttrMapValue
+from reportlab.graphics.shapes import Drawing, Group, Line, Rect, LineShape, definePath, EmptyClipPath
 from reportlab.graphics.widgetbase import Widget
-from reportlab.graphics import renderPDF
-
 
 def frange(start, end=None, inc=None):
     "A range function, that does accept float increments..."
@@ -343,7 +341,7 @@ class ShadedRect(Widget):
         cylinderMode = AttrMapValue(isBoolean, desc='True if shading reverses in middle.'),
         )
 
-    def __init__(self):
+    def __init__(self,**kw):
         self.x = 0
         self.y = 0
         self.width = 100
@@ -355,11 +353,10 @@ class ShadedRect(Widget):
         self.strokeColor = colors.black
         self.strokeWidth = 2
         self.cylinderMode = 0
-
+        self.setProperties(kw)
 
     def demo(self):
         D = Drawing(100, 100)
-
         g = ShadedRect()
         D.add(g)
 
@@ -439,3 +436,85 @@ def colorRange(c0, c1, n):
             C.append(colors.linearlyInterpolatedColor(c0,c1,0,lim, i))
     return C
 
+
+def centroid(P):
+    '''compute average point of a set of points'''
+    fn = float(len(P))
+    return reduce(lambda x,y: (x[0]+y[0]/fn,x[1]+y[1]/fn),P,(0,0))
+
+def rotatedEnclosingRect(P, angle, rect):
+    '''
+    given P a sequence P of x,y coordinate pairs and an angle in degrees
+    find the centroid of P and the axis at angle theta through it
+    find the extreme points of P wrt axis parallel distance and axis
+    orthogonal distance. Then compute the least rectangle that will still
+    enclose P when rotated by angle.
+
+    The class R
+    '''
+    from math import pi, cos, sin, tan
+    x0, y0 = centroid(P)
+    theta = (angle/180.)*pi
+    s,c=sin(theta),cos(theta)
+    def parallelAxisDist((x,y),s=s,c=c,x0=x0,y0=y0):
+        return (s*(y-y0)+c*(x-x0))
+    def orthogonalAxisDist((x,y),s=s,c=c,x0=x0,y0=y0):
+        return (c*(y-y0)+s*(x-x0))
+    L = map(parallelAxisDist,P)
+    L.sort()
+    a0, a1 = L[0], L[-1]
+    L = map(orthogonalAxisDist,P)
+    L.sort()
+    b0, b1 = L[0], L[-1]
+    rect.x, rect.width = a0, a1-a0
+    rect.y, rect.height = b0, b1-b0
+    g = Group(transform=(c,s,-s,c,x0,y0))
+    g.add(rect)
+    return g
+
+class ShadedPolygon(Widget,LineShape):
+    _attrMap = AttrMap(BASE=LineShape,
+        angle = AttrMapValue(isNumber,desc="Shading angle"),
+        fillColorStart = AttrMapValue(isColorOrNone),
+        fillColorEnd = AttrMapValue(isColorOrNone),
+        numShades = AttrMapValue(isNumber, desc='The number of interpolating colors.'),
+        cylinderMode = AttrMapValue(isBoolean, desc='True if shading reverses in middle.'),
+        points = AttrMapValue(isListOfNumbers),
+        )
+
+    def __init__(self,**kw):
+        self.angle = 90
+        self.fillColorStart = colors.red
+        self.fillColorEnd = colors.green
+        self.cylinderMode = 0
+        self.numShades = 50
+        self.points = [-1,-1,2,2,3,-1]
+        LineShape.__init__(self,kw)
+
+    def draw(self):
+        P = self.points
+        P = map(lambda i, P=P:(P[i],P[i+1]),xrange(0,len(P),2))
+        path = definePath([('moveTo',)+P[0]]+map(lambda x: ('lineTo',)+x,P[1:])+['closePath'],
+            fillColor=None, strokeColor=None)
+        path.isClipPath = 1
+        g = Group()
+        g.add(path)
+        rect = ShadedRect(strokeWidth=0,strokeColor=None)
+        for k in 'fillColorStart', 'fillColorEnd', 'numShades', 'cylinderMode':
+            setattr(rect,k,getattr(self,k))
+        g.add(rotatedEnclosingRect(P, self.angle, rect))
+        g.add(EmptyClipPath)
+        path = path.copy()
+        path.isClipPath = 0
+        path.strokeColor = self.strokeColor
+        path.strokeWidth = self.strokeWidth
+        g.add(path)
+        return g
+
+if __name__=='__main__': #noruntests
+    from reportlab.lib.colors import blue
+    from reportlab.graphics.shapes import Drawing
+    angle=45
+    D = Drawing(120,120)
+    D.add(ShadedPolygon(points=(10,10,60,60,110,10),strokeColor=None,strokeWidth=1,angle=90,numShades=97,cylinderMode=0))
+    D.save(formats=['gif'],fnRoot='shobj',outDir='/tmp')

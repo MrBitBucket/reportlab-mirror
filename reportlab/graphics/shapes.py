@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.79 2002/08/08 22:45:05 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.80 2002/08/11 09:59:57 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.79 2002/08/08 22:45:05 rgbecker Exp $ '''
+__version__=''' $Id: shapes.py,v 1.80 2002/08/11 09:59:57 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -686,13 +686,7 @@ class LineShape(Shape):
 
 
 class Line(LineShape):
-    _attrMap = AttrMap(
-        strokeColor = AttrMapValue(isColorOrNone),
-        strokeWidth = AttrMapValue(isNumber),
-        strokeLineCap = AttrMapValue(None),
-        strokeLineJoin = AttrMapValue(None),
-        strokeMiterLimit = AttrMapValue(isNumber),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
+    _attrMap = AttrMap(BASE=LineShape,
         x1 = AttrMapValue(isNumber),
         y1 = AttrMapValue(isNumber),
         x2 = AttrMapValue(isNumber),
@@ -707,30 +701,18 @@ class Line(LineShape):
         self.y2 = y2
 
 
-class SolidShape(Shape):
+class SolidShape(LineShape):
     # base for anything with outline and content
 
-    _attrMap = AttrMap(
-        strokeColor = AttrMapValue(isColorOrNone),
-        strokeWidth = AttrMapValue(isNumber),
-        strokeLineCap = AttrMapValue(None),
-        strokeLineJoin = AttrMapValue(None),
-        strokeMiterLimit = AttrMapValue(isNumber),
-        strokeDashArray = AttrMapValue(None),
+    _attrMap = AttrMap(BASE=LineShape,
         fillColor = AttrMapValue(isColorOrNone),
         )
 
     def __init__(self, kw):
-        self.strokeColor = STATE_DEFAULTS['strokeColor']
-        self.strokeWidth = 1
-        self.strokeLineCap = 0
-        self.strokeLineJoin = 0
-        self.strokeMiterLimit = 0
-        self.strokeDashArray = None
         self.fillColor = STATE_DEFAULTS['fillColor']
         # do this at the end so keywords overwrite
         #the above settings
-        Shape.__init__(self, kw)
+        LineShape.__init__(self, kw)
 
 
 # path operator  constants
@@ -760,14 +742,7 @@ def _renderPath(path, drawFuncs):
 class Path(SolidShape):
     """Path, made up of straight lines and bezier curves."""
 
-    _attrMap = AttrMap(
-        strokeColor = AttrMapValue(isColorOrNone),
-        strokeWidth = AttrMapValue(isNumber),
-        strokeLineCap = AttrMapValue(None),
-        strokeLineJoin = AttrMapValue(None),
-        strokeMiterLimit = AttrMapValue(None),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
-        fillColor = AttrMapValue(isColorOrNone),
+    _attrMap = AttrMap(BASE=SolidShape,
         points = AttrMapValue(isListOfNumbers),
         operators = AttrMapValue(isListOfNumbers),
         isClipPath = AttrMapValue(isBoolean),
@@ -831,14 +806,7 @@ def definePath(pathSegs=[],isClipPath=0, dx=0, dy=0, **kw):
 class Rect(SolidShape):
     """Rectangle, possibly with rounded corners."""
 
-    _attrMap = AttrMap(
-        strokeColor = AttrMapValue(isColorOrNone),
-        strokeWidth = AttrMapValue(isNumber),
-        strokeLineCap = AttrMapValue(None),
-        strokeLineJoin = AttrMapValue(None),
-        strokeMiterLimit = AttrMapValue(None),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
-        fillColor = AttrMapValue(isColorOrNone),
+    _attrMap = AttrMap(BASE=SolidShape,
         x = AttrMapValue(isNumber),
         y = AttrMapValue(isNumber),
         width = AttrMapValue(isNumber),
@@ -865,15 +833,7 @@ class Rect(SolidShape):
 class Image(SolidShape):
     """Bitmap image."""
 
-        # Should get rid off stroke* attributes...
-    _attrMap = AttrMap(
-        strokeColor = AttrMapValue(None),
-        strokeWidth = AttrMapValue(isNumber),
-        strokeLineCap = AttrMapValue(None),
-        strokeLineJoin = AttrMapValue(None),
-        strokeMiterLimit = AttrMapValue(None),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
-        fillColor = AttrMapValue(None),
+    _attrMap = AttrMap(BASE=SolidShape,
         x = AttrMapValue(isNumber),
         y = AttrMapValue(isNumber),
         width = AttrMapValue(isNumberOrNone),
@@ -897,14 +857,7 @@ class Image(SolidShape):
 
 class Circle(SolidShape):
 
-    _attrMap = AttrMap(
-        strokeColor = AttrMapValue(None),
-        strokeWidth = AttrMapValue(isNumber),
-        strokeLineCap = AttrMapValue(None),
-        strokeLineJoin = AttrMapValue(None),
-        strokeMiterLimit = AttrMapValue(None),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
-        fillColor = AttrMapValue(None),
+    _attrMap = AttrMap(BASE=SolidShape,
         cx = AttrMapValue(isNumber),
         cy = AttrMapValue(isNumber),
         r = AttrMapValue(isNumber),
@@ -924,14 +877,7 @@ class Circle(SolidShape):
 
 class Ellipse(SolidShape):
 
-    _attrMap = AttrMap(
-        strokeColor = AttrMapValue(None),
-        strokeWidth = AttrMapValue(isNumber),
-        strokeLineCap = AttrMapValue(None),
-        strokeLineJoin = AttrMapValue(None),
-        strokeMiterLimit = AttrMapValue(None),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
-        fillColor = AttrMapValue(None),
+    _attrMap = AttrMap(BASE=SolidShape,
         cx = AttrMapValue(isNumber),
         cy = AttrMapValue(isNumber),
         rx = AttrMapValue(isNumber),
@@ -955,14 +901,7 @@ class Wedge(SolidShape):
     """A "slice of a pie" by default translates to a polygon moves anticlockwise
        from start angle to end angle"""
 
-    _attrMap = AttrMap(
-        strokeColor = AttrMapValue(None),
-        strokeWidth = AttrMapValue(isNumber),
-        strokeLineCap = AttrMapValue(None),
-        strokeLineJoin = AttrMapValue(None),
-        strokeMiterLimit = AttrMapValue(None),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
-        fillColor = AttrMapValue(None),
+    _attrMap = AttrMap(BASE=SolidShape,
         centerx = AttrMapValue(isNumber),
         centery = AttrMapValue(isNumber),
         radius = AttrMapValue(isNumber),
@@ -1032,14 +971,7 @@ class Polygon(SolidShape):
     """Defines a closed shape; Is implicitly
     joined back to the start for you."""
 
-    _attrMap = AttrMap(
-        strokeColor = AttrMapValue(None),
-        strokeWidth = AttrMapValue(isNumber),
-        strokeLineCap = AttrMapValue(None),
-        strokeLineJoin = AttrMapValue(None),
-        strokeMiterLimit = AttrMapValue(None),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
-        fillColor = AttrMapValue(None),
+    _attrMap = AttrMap(BASE=SolidShape,
         points = AttrMapValue(isListOfNumbers),
         )
 
@@ -1059,13 +991,7 @@ class PolyLine(LineShape):
     closed shape; never filled even if apparently joined.
     Put the numbers in the list, not two-tuples."""
 
-    _attrMap = AttrMap(
-        strokeColor = AttrMapValue(isColorOrNone),
-        strokeWidth = AttrMapValue(isNumber),
-        strokeLineCap = AttrMapValue(None),
-        strokeLineJoin = AttrMapValue(None),
-        strokeMiterLimit = AttrMapValue(isNumber),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
+    _attrMap = AttrMap(BASE=LineShape,
         points = AttrMapValue(isListOfNumbers),
         )
 
