@@ -19,10 +19,13 @@ def frange(start, end=None, inc=None):
     if inc == None:
         inc = 1.0
 
-    L = [start]
-    while L[-1] + inc < end:
-        L.append(L[-1] + inc)
-
+    L = []
+    while 1:
+        next = start + len(L) * inc
+        if next >= end:
+            break
+        L.append(next)
+        
     return L
 
 
@@ -167,8 +170,9 @@ class Grid0(Widget):
             if self.orientation == 'vertical':
                 i = 0
                 r = frange(self.x + self.delta0, self.x + w, self.delta)
-                for j in map(int, frange(len(r))):
-                    x = r[int(j)]
+##                for j in map(int, frange(len(r))):
+                for j in range(len(r)):
+                    x = r[j]
                     try:
                         stripe = Rect(x, self.y, r[j+1]-x, h)
                         stripe.fillColor = cols[i % len(cols)] 
@@ -198,7 +202,8 @@ class Grid0(Widget):
             elif self.orientation == 'horizontal':
                 i = 0
                 r = frange(self.y + self.delta0, self.y + h, self.delta)
-                for j in frange(len(r)):
+##                for j in frange(len(r)):
+                for j in range(len(r)):
                     y = r[j]
                     try:
                         stripe = Rect(self.x, y, w, r[j+1]-y)
