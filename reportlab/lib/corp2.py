@@ -765,18 +765,6 @@ _LOGODATA = {'CreateDocumentVersion': '1',
 # Math helpers
 ######################################################################
 
-def sign(x):
-    "Return sign of x."
-    # Funny, but this is still not in the standard module 'math'...
-
-    if x < 0:
-        return -1
-    elif x > 0:
-        return 1
-    else:
-        return 0
-
-
 def scaleBackAfterSkew(width, height, skewTransform, _debug=0):
     "Returns a scaling transform to re-fit a skewed rect into its original size rect."
 
@@ -870,50 +858,82 @@ class RLVectorLogo(Widget):
     """Vectorised ReportLab logo.
 
     This is based on a Create XML file that was transformed into
-    a canned Python dictionary containing the data.
-
+    a canned Python dictionary containing the polygon path data.
     For further information about Create see www.stone.com.
+
+    The logo can be drawn either fully vertical, skewed, boxed and/
+    or shadowed. The shadow consists of an identical logo copy being
+    drawn behind the 'real' logo in a color-mix composed of a 50-50
+    blend between the logo's stroke and fill/background color, weigh-
+    ted by the shadow factor attribute.
+    
+    Instances are guaranteed to draw only inside the area defined by
+    the rectangle (x, y, width, height), independant of the skewing
+    values or the border width of the enclosing box if provided.
+    This was tested only for 'reasonable' values, though. The only
+    exception is when setting 'noRescale' to 1, which suppress all
+    rescaling (this can be useful for ensuring the original aspect
+    ratio, but you should use it only when you know what you do!).
     """
 
     _attrMap = AttrMap(
-        x = AttrMapValue(isNumber,'Logo x-coord'),
-        y = AttrMapValue(isNumber,'Logo y-coord'),
-        width = AttrMapValue(isNumber, desc="width in points of the logo (default 129)"),
-        height = AttrMapValue(isNumber, desc="height in points of the logo (default 86)"),
-        strokeColor = AttrMapValue(isColorOrNone, 'Logo lettering stroke color'),
-        fillColor = AttrMapValue(isColorOrNone, 'Logo lettering fill color'),
-        skewValues = AttrMapValue(isListOfNumbers),
-        strokeWidth = AttrMapValue(isNumber,'Logo lettering stroke width'),
-        borderWidth = AttrMapValue(isNumber),
-        )
+        x = AttrMapValue(isNumber,
+            desc='x-coord (default 0)'),
+        y = AttrMapValue(isNumber,
+            desc='y-coord (default 0)'),
+        width = AttrMapValue(isNumber,
+            desc='width (default 129)'),
+        height = AttrMapValue(isNumber,
+            desc='height (default 86)'),
 
-##        angle = AttrMapValue(isNumber,'Logo rotation'),
-##        background = AttrMapValue(isColorOrNone,desc="Logo background color"),
-##        shadow = AttrMapValue(isNumberOrNone,desc="None or fraction of background for shadowing" ),
-##        skewX = AttrMapValue(isNumber, desc="x-skew of the logo (default 10)"),
-##        skewY = AttrMapValue(isNumber, desc="y-skew of the logo (default 0)"),
-##        showPage = AttrMapValue(isBoolean, desc="If true show the page lines"),
+        shadow = AttrMapValue(isNumberOrNone,
+            desc='None or fraction (default 0.75)'),
+        dx = AttrMapValue(isNumber,
+            desc='shadow x-displacement (default 2)'),
+        dy = AttrMapValue(isNumber,
+            desc='shadow y-displacement (default 2)'),
+        skewX = AttrMapValue(isNumber,
+            desc='x-skew (default 10)'),
+        skewY = AttrMapValue(isNumber,
+            desc='y-skew (default 0)'),
+        noRescale = AttrMapValue(isNumber,
+            desc='allow drawing outside regular area (default 0)'),
+
+        strokeColor = AttrMapValue(isColorOrNone,
+            desc='lettering stroke color'),
+        fillColor = AttrMapValue(isColorOrNone,
+            desc='background color'),
+
+        strokeWidth = AttrMapValue(isNumber,
+            desc='lettering stroke width (default 0)'),
+        borderWidth = AttrMapValue(isNumber,
+            desc='enclosing border width (default 0)'),
+        )
 
     def __init__(self):
         self.x = 0
         self.y = 0
-        self.width = 136.5
-        self.height = 90.5
+        self.width = 129
+        self.height = 86
+
+        self.dx = 2
+        self.dy = 2
+        self.shadow = 0.75
 
         self.strokeColor = black # Or ReportLabBlue, mostly...
-        self.fillColor = white
+        self.fillColor = white   # Used for enclosing box.
 
-        self.skewValues = (10, 0)
+        self.skewX = 10
+        self.skewY = 0
         self.strokeWidth = 0
         self.borderWidth = 0
+        self.noRescale = 1       # should be set to 0 by default
 
         self._showPoints = 0
         self._debug = 0
 
-        self._dict = _LOGODATA
-
         # Find outer bounds of the graphic.
-        bounds = self._dict['PageList'][0]['GraphicsList'][0]['Bounds']        
+        bounds = _LOGODATA['PageList'][0]['GraphicsList'][0]['Bounds']        
         bounds = bounds2rect(bounds)
         bounds = map(float, bounds)
         self._width, self._height = bounds[2:4]
@@ -924,6 +944,18 @@ class RLVectorLogo(Widget):
         d.add(self)
 
         return d
+
+
+    def makeShadowColor(self, color1, color2, fraction):
+        "Derive a shadow color from two colors and a weight fraction."
+
+        c1, c2 = color1, color2
+        f = fraction
+        shadowColor = Color((c1.red + c2.red)/2.*f,
+                            (c1.green + c2.green)/2.*f,
+                            (c1.blue + c2.blue)/2.*f)
+
+        return shadowColor
 
 
     def _addDisks(self, drawing, pts):
@@ -940,7 +972,7 @@ class RLVectorLogo(Widget):
             drawing.add(disk)
 
 
-    def _addPaths(self, group, ops, pts):
+    def _addPaths(self, group, ops, pts, isShadow=0):
         # This could, perhaps also use Path(points, operators) syntax...
         # (if it gets the winding right).
 
@@ -979,8 +1011,12 @@ class RLVectorLogo(Widget):
                 lines.append((cpt1, cpt2))
             elif op == 3:
                 path.closePath()
-                path.strokeColor = strokeColor
-                path.fillColor = strokeColor
+                if isShadow:
+                    path.strokeColor = fillColor
+                    path.fillColor = fillColor
+                else:
+                    path.strokeColor = strokeColor
+                    path.fillColor = strokeColor
                 j = j - 1
                 circleLists.append(points)
                 points = []
@@ -989,8 +1025,12 @@ class RLVectorLogo(Widget):
 
         if points:
             path.closePath()
-            path.strokeColor = strokeColor
-            path.fillColor = strokeColor
+            if isShadow:
+                path.strokeColor = self._shadowColor
+                path.fillColor = self._shadowColor
+            else:
+                path.strokeColor = strokeColor
+                path.fillColor = strokeColor
             circleLists.append(points)
 
         g.add(path)
@@ -1000,8 +1040,8 @@ class RLVectorLogo(Widget):
                 self._addDisks(g, points)
 
 
-    def _addBorder(self):
-        "Make the logo's filled background rectangle."
+    def _addBox(self):
+        "Add the logo's filled enclosing box."
 
         g = Group()
 
@@ -1013,15 +1053,20 @@ class RLVectorLogo(Widget):
         return g
 
 
-    def _addRect(self, group, bounds, rot):
+    def _addRect(self, group, bounds, rot, isShadow):
         "Add a rectangle."
         
         x, y, width, height = bounds
+        strokeColor, fillColor = self.strokeColor, self.fillColor
 
         rect = Rect(x, y, width, height)
         rect.strokeWidth = self.strokeWidth
-        rect.strokeColor = self.strokeColor
-        rect.fillColor = self.strokeColor
+        if isShadow:
+            rect.strokeColor = self._shadowColor
+            rect.fillColor = self._shadowColor
+        else:
+            rect.strokeColor = strokeColor
+            rect.fillColor = strokeColor
 
         if rot != 0:
             rect.strokeColor = red
@@ -1047,23 +1092,28 @@ class RLVectorLogo(Widget):
         mm = mmult
 
         stuff = []
-        
+
         tr = translate(self.x, self.y)
-        skx = skewX(self.skewValues[0])
-        sky = skewY(self.skewValues[1])
+        skx = skewX(self.skewX)
+        sky = skewY(self.skewY)
         trans0 = mm(skx, sky)
         x0, y0 = transformPoint(tr, (m, m))
         scaleBack = scaleBackAfterSkew(self.width, self.height, trans0)
         trans1 = mm(tr, scaleBack)
         x1, y1 = transformPoint(trans1, (self.width-m, self.height-m))
-        
+        trans2 = mm(tr, trans0)
+        x2, y2 = transformPoint(trans2, (self.width-m, self.height-m))
+
         f = Group()
         c0 = Circle(x0, y0, 5)
         c1 = Circle(x1, y1, 5)
+        c2 = Circle(x2, y2, 5)
         c0.fillColor = red
         c1.fillColor = red
+        c2.fillColor = green
         f.add(c0)
         f.add(c1)
+        f.add(c2)
         stuff.append(f)
 
         rect = Rect(self.x, self.y, self.width, self.height)
@@ -1079,29 +1129,29 @@ class RLVectorLogo(Widget):
             stuff.append(rect)
 
         return stuff
-    
 
-    def drawCreateElementInBounds(self, g, el, bounds=None):
+
+    def drawCreateElementInBounds(self, g, el, bounds=None, isShadow=0):
         "Add a Create element to a group after converting it to some shapes."
         
         klass = el['Class']
         if klass == 'Group':
             for sel in el['GroupGraphics']:
-                self.drawCreateElementInBounds(g, sel, bounds)
+                self.drawCreateElementInBounds(g, sel, bounds, isShadow)
         elif klass == 'Spline':
             ops, pts, elBounds = bezierDict2data(el)
             pts = map(lambda p:(p[0],-p[1]), pts)
             dx, dy = elBounds[0:2]
             dpts = displacePoints(pts, 0, self._height)
             dpts = displacePoints(dpts, dx, -dy)
-            self._addPaths(g, ops, dpts)
+            self._addPaths(g, ops, dpts, isShadow)
         elif klass == 'Rectangle':
             elBounds, rot = rectDict2data(el)
             x, y, width, height = elBounds
             x = x + bounds[0]
             y = self._height - y - height
             elBounds = x, y, width, height
-            self._addRect(g, elBounds, rot)
+            self._addRect(g, elBounds, rot, isShadow)
         elif klass == 'MultiLine':
             ops, pts, elBounds = bezierDict2data(el)
             pts = map(lambda p:(p[0],-p[1]), pts)
@@ -1109,42 +1159,46 @@ class RLVectorLogo(Widget):
             dx, dy = dx + bounds[0], dy + bounds[1]
             dpts = displacePoints(pts, 0, self._height)
             dpts = displacePoints(dpts, dx, -dy)
-            self._addPaths(g, ops, dpts)
+            self._addPaths(g, ops, dpts, isShadow)
         else:
             print 'Unknown Create element: %s' % klass
 
 
-    def draw(self):
-        total = Group() # will contain everything
-        g = Group() # will contain glyphs and paper border
+    def _addLogo(self, total, isShadow=0):
+        g = Group() # will contain text glyphs and paper border
 
-        dict = self._dict
+        # transform data into shapes
+        dict = _LOGODATA
         groupGraph = dict['PageList'][0]['GraphicsList'][0]['GroupGraphics']
         for el in groupGraph:
             bounds = bounds2rect(el['Bounds'])
-            self.drawCreateElementInBounds(g, el, bounds)
-        
-        # add background
-        m = self.borderWidth
-        if self.borderWidth:
-            h = Group()
-            h.add(self._addBorder())
-            h.scale((self.width)/self._width, (self.height)/self._height)
-            h.shift(self.x, self.y)
-            total.add(h)
+            self.drawCreateElementInBounds(g, el, bounds, isShadow)
 
         # add real logo
-        g.scale((self.width-2*m)/self._width, (self.height-2*m)/self._height)
-        apply(g.skew, self.skewValues)
+        m = self.borderWidth
+        if self.shadow:
+            g.scale((self.width-2*m-self.dx)/self._width,
+                    (self.height-2*m-self.dy)/self._height)
+        else:
+            g.scale((self.width-2*m)/self._width,
+                    (self.height-2*m)/self._height)
+        g.skew(self.skewX, self.skewY)
 
-        # rescale logo if needed
-        skx = skewX(self.skewValues[0])
-        sky = skewY(self.skewValues[1])
-        mm = mmult
-        sk = mm(skx, sky)
+        # rescale logo if needed to fit into original area
+        skx = skewX(self.skewX)
+        sky = skewY(self.skewY)
+        sk = mmult(skx, sky)
         scaleBack = scaleBackAfterSkew(self.width, self.height, sk)
-        g.scale(scaleBack[0], scaleBack[3])
-        g.shift(self.x+m, self.y+m)
+        scaleBackBox = scaleBackAfterSkew(self.width-2*m, self.height-2*m, sk)
+        self._rescaleX, self._rescaleY = scaleBackBox[0], scaleBackBox[3]
+
+        if not self.noRescale:
+            g.scale(scaleBack[0], scaleBack[3])
+
+        if isShadow:
+            g.shift(self.x + m + self.dx, self.y + m + self.dy)
+        else:
+            g.shift(self.x + m, self.y + m)
 
         total.add(g)
 
@@ -1152,7 +1206,37 @@ class RLVectorLogo(Widget):
         if self._debug:
             for stuff in self._addDebuggingAids():
                 total.add(stuff)
-            
+
+
+    def draw(self):
+        total = Group() # will contain everything
+
+        # add shadow logo
+        if self.shadow != None and 0 <= self.shadow <= 1:
+            msc = self.makeShadowColor
+            self._shadowColor = msc(self.strokeColor, self.fillColor, self.shadow)
+            self._addLogo(total, isShadow=1)
+
+        # add real logo
+        self._addLogo(total)
+
+        # add enclosing box as first group element
+        h = Group()
+        h.add(self._addBox())
+        m = self.borderWidth
+        ex = self.width
+        ey = self.height
+        if self.noRescale:
+            # we now draw outside the original area...
+            fx, fy = self._rescaleX, self._rescaleY
+            ex = (self.width-2*m) * (1./fx) + 2*m
+            ey = (self.height-2*m) * (1./fy) + 2*m
+        scx = (ex)/self._width
+        scy = (ey)/self._height
+        h.scale(scx, scy)
+        h.shift(self.x, self.y)
+        total.insert(0, h)
+
         return total
 
 
@@ -1161,15 +1245,13 @@ def main():
 
     # make first PDF page with reasonable logos
     top = 27.7*cm
-    left = 2*cm
+    left = 0.5*cm
     
     l1 = RLVectorLogo()
     l1.x = left
     l1.y = top - 100
     l1.width = 150
     l1.height = 100
-    # l1.skewValues = (10, 20)
-    # l1.borderWidth = 5   ###
 
     l2 = RLVectorLogo()
     l2.x = left + 200
@@ -1177,7 +1259,18 @@ def main():
     l2.width = 150
     l2.height = 100
     l2.strokeColor = ReportLabBlue
-    l2.skewValues = (0, 0)
+    l2.skewX = 0
+    l2.skewY = 0
+
+    l11 = RLVectorLogo()
+    l11.x = left + 400
+    l11.y = top - 100
+    l11.width = 150
+    l11.height = 100
+    l11.shadow = None
+    l11.strokeColor = ReportLabBlue
+    l11.skewX = 0
+    l11.skewY = 0
 
     l3 = RLVectorLogo()
     l3.x = left
@@ -1192,12 +1285,21 @@ def main():
     l4.height = 100
     l4.strokeColor = ReportLabBlue
 
+    l12 = RLVectorLogo()
+    l12.x = left + 400
+    l12.y = top - 100 - 150
+    l12.width = 150
+    l12.height = 100
+    l12.shadow = None
+    l12.strokeColor = black
+
     l5 = RLVectorLogo()
     l5.x = left
     l5.y = top - 100 - 2*150
     l5.width = 150
     l5.height = 100
-    l5.skewValues = (20, 10)
+    l5.skewX = 20
+    l5.skewY = 10
 
     l6 = RLVectorLogo()
     l6.x = left + 200
@@ -1205,14 +1307,27 @@ def main():
     l6.width = 150
     l6.height = 100
     l6.strokeColor = ReportLabBlue
-    l6.skewValues = (20, 10)
+    l6.skewX = 20
+    l6.skewY = 10
+
+    l15 = RLVectorLogo()
+    l15.x = left + 400
+    l15.y = top - 100 - 2*150
+    l15.width = 150
+    l15.height = 100
+    l15.strokeColor = yellow
+    l15.fillColor = navy
+    l15.borderWidth = 5
+    l15.skewX = 10
+    l15.skewY = 0
 
     l7 = RLVectorLogo()
     l7.x = left
     l7.y = top - 100 - 3*150
     l7.width = 150
     l7.height = 100
-    l7.skewValues = (0, 0)
+    l7.skewX = 0
+    l7.skewY = 0
     l7.borderWidth = 5
     l7.strokeColor = white
     l7.fillColor = black
@@ -1222,16 +1337,30 @@ def main():
     l8.y = top - 100 - 3*150
     l8.width = 150
     l8.height = 100
-    l8.skewValues = (0, 0)
+    l8.skewX = 0
+    l8.skewY = 0
     l8.borderWidth = 5
     l8.strokeColor = white
     l8.fillColor = ReportLabBlue
+
+    l13 = RLVectorLogo()
+    l13.x = left + 400
+    l13.y = top - 100 - 3*150
+    l13.width = 150
+    l13.height = 100
+    l13.skewX = 0
+    l13.skewY = 0
+    l13.borderWidth = 5
+    l13.strokeColor = white
+    l13.shadow = None
+    l13.fillColor = ReportLabBlue
 
     l9 = RLVectorLogo()
     l9.x = left
     l9.y = top - 100 - 4*150
     l9.width = 150
     l9.height = 100
+##    l9.skewY = 10
     l9.borderWidth = 5
     l9.strokeColor = white
     l9.fillColor = black
@@ -1245,48 +1374,21 @@ def main():
     l10.strokeColor = white
     l10.fillColor = ReportLabBlue
 
+    l14 = RLVectorLogo()
+    l14.x = left + 400
+    l14.y = top - 100 - 4*150
+    l14.width = 150
+    l14.height = 100
+    l14.borderWidth = 5
+    l14.strokeColor = white
+    l14.shadow = None
+    l14.fillColor = black
+
     d = Drawing(21*cm, 29.7*cm)
-    for logo in (l1, l2, l3, l4, l5, l6, l7, l8, l9, l10):
+    for logo in (l1, l2, l3, l4, l5, l6, l7, l8, l9, l10,
+                 l11, l12, l13, l14, l15):
         d.add(logo)
     filename = 'rllogos.pdf'
-    renderPDF.drawToFile(d, filename, '')
-    if _verbose:
-        print "saved %s" % filename
-
-    # make second PDF page with less reasonable logos
-    L1a = RLVectorLogo()
-    L1a.x = left
-    L1a.y = top - 100
-    L1a.width = 150
-    L1a.height = 100
-    L1a.strokeColor = black
-    L1a.strokeWidth = 12
-
-    L1b = RLVectorLogo()
-    L1b.x = left
-    L1b.y = top - 100
-    L1b.width = 150
-    L1b.height = 100
-    L1b.strokeColor = ReportLabBlue
-
-    L2a = RLVectorLogo()
-    L2a.x = left + 200
-    L2a.y = top - 100
-    L2a.width = 150
-    L2a.height = 100
-    L2a.strokeColor = grey
-
-    L2b = RLVectorLogo()
-    L2b.x = left + 200 - 3
-    L2b.y = top - 100 - 3
-    L2b.width = 150
-    L2b.height = 100
-    L2b.strokeColor = black
-
-    d = Drawing(21*cm, 29.7*cm)
-    for logo in (L1a, L1b, L2a, L2b):
-        d.add(logo)
-    filename = 'rllogos_q.pdf'
     renderPDF.drawToFile(d, filename, '')
     if _verbose:
         print "saved %s" % filename
