@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.74 2003/09/03 15:33:59 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.75 2003/09/08 18:13:00 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -9,7 +9,7 @@ vertical versions.
 
 Stacked and percentile bar charts to follow...
 """
-__version__=''' $Id: barcharts.py,v 1.74 2003/09/03 15:33:59 rgbecker Exp $ '''
+__version__=''' $Id: barcharts.py,v 1.75 2003/09/08 18:13:00 rgbecker Exp $ '''
 
 import string, copy
 from types import FunctionType, StringType
@@ -475,24 +475,29 @@ class _FakeGroup:
         #for t in self._data: print t
 
 class VerticalBarChart3D(VerticalBarChart):
-    _theta_x = .5
-    _theta_y = .5
+    _attrMap = AttrMap(BASE=VerticalBarChart,
+        theta_x = AttrMapValue(isNumber, desc='dx/dz'),
+        theta_y = AttrMapValue(isNumber, desc='dy/dz'),
+        )
+    theta_x = .5
+    theta_y = .5
+
     def calcBarPositions(self):
         VerticalBarChart.calcBarPositions(self)
         seriesCount = self._seriesCount
         if self.categoryAxis.style=='parallel_3d':
-            _3d_depth = seriesCount*self.barWidth+(seriesCount-1)*self.barSpacing
+            _3d_depth = seriesCount*self.barWidth+(seriesCount+1)*self.barSpacing
         else:
-            _3d_depth = self.barWidth
+            _3d_depth = self.barWidth + 2*self.barSpacing
         _3d_depth *= self._normFactor
-        self._3d_dx = self._theta_x*_3d_depth
-        self._3d_dy = self._theta_y*_3d_depth
+        self._3d_dx = self.theta_x*_3d_depth
+        self._3d_dy = self.theta_y*_3d_depth
 
     def _calc_z0(self,rowNo):
         if self.categoryAxis.style=='parallel_3d':
-            z0 = self._normFactor*rowNo*(self.barWidth+self.barSpacing)
+            z0 = self._normFactor*(rowNo*(self.barWidth+self.barSpacing)+self.barSpacing)
         else:
-            z0 = 0
+            z0 = self._normFactor*self.barSpacing
         return z0
 
     def _makeBar(self,g,x,y,width,height,rowNo,style):
@@ -501,15 +506,15 @@ class VerticalBarChart3D(VerticalBarChart):
         if height<0:
             y += height
             height = -height
-        x += z0*self._theta_x
-        y += z0*self._theta_y
+        x += z0*self.theta_x
+        y += z0*self.theta_y
         g.add((0,z0,z1,x,y,width,height,rowNo,style))
 
     def _addBarLabel(self, g, rowNo, colNo, x, y, width, height):
         z0 = self._calc_z0(rowNo)
         z1 = z0
-        x += z0*self._theta_x
-        y += z0*self._theta_y
+        x += z0*self.theta_x
+        y += z0*self.theta_y
         g.add((1,z0,z1,x,y,width,height,rowNo,colNo))
 
     def makeBars(self):
@@ -518,8 +523,8 @@ class VerticalBarChart3D(VerticalBarChart):
         self._makeBars(fg,fg)
         fg.sort()
         g = Group()
-        theta_x = self._theta_x
-        theta_y = self._theta_y
+        theta_x = self.theta_x
+        theta_y = self.theta_y
         for t in fg.value():
             if t[0]==1:
                 z0,z1,x,y,width,height,rowNo,colNo = t[1:]
