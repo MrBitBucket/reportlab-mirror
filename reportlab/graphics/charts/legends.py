@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.20 2002/06/12 20:25:21 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.21 2002/07/03 10:22:29 rgbecker Exp $
 """This will be a collection of legends to be used with charts.
 """
-__version__=''' $Id: legends.py,v 1.20 2002/06/12 20:25:21 rgbecker Exp $ '''
+__version__=''' $Id: legends.py,v 1.21 2002/07/03 10:22:29 rgbecker Exp $ '''
 
 import string, copy
 
@@ -100,12 +100,12 @@ class Legend(Widget):
 
 
 	def _calcHeight(self):
-		thisy = upperlefty = self.y - self.dy
+		deltay = self.deltay
+		dy = self.dy
+		thisy = upperlefty = self.y - dy
 		ascent=getFont(self.fontName).face.ascent/1000.
 		if ascent==0: ascent=0.718 # default (from helvetica)
 		leading = self.fontSize*1.2
-		deltay = self.deltay
-		dy = self.dy
 		columnCount = 0
 		count = 0
 		lowy = upperlefty
