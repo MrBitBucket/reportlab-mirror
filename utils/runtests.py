@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: runtests.py,v $
+#	Revision 1.10  2000/05/11 09:54:43  rgbecker
+#	Fixed dir argument handling
+#
 #	Revision 1.9  2000/04/12 13:34:33  rgbecker
 #	Fixes to exception handling
-#
+#	
 #	Revision 1.8  2000/04/11 10:45:56  rgbecker
 #	CLEAN_EXCEPTIONS & sys.argv[0] setting
 #	
@@ -60,7 +63,7 @@
 #	New infrastructure
 #	
 #	
-__version__=''' $Id: runtests.py,v 1.9 2000/04/12 13:34:33 rgbecker Exp $ '''
+__version__=''' $Id: runtests.py,v 1.10 2000/05/11 09:54:43 rgbecker Exp $ '''
 '''
 script for testing ReportLab
 '''
@@ -193,7 +196,7 @@ Usage
 	sys.argv[1:]=[]
 
 	if options!=[] and options[0][0]!='-':
-		dir = options[0][0]
+		dir = options[0]
 		del options[0]
 
 	for k in options:
