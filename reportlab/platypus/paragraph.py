@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.34 2000/12/01 01:53:50 aaron_watters Exp $
-__version__=''' $Id: paragraph.py,v 1.34 2000/12/01 01:53:50 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.35 2000/12/04 13:22:34 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.35 2000/12/04 13:22:34 rgbecker Exp $ '''
 import string
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -13,8 +13,27 @@ from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import _className
 from copy import deepcopy
 from reportlab.lib.abag import ABag
+
 class ParaLines(ABag):
-	"""class ParaLines contains the broken into lines representation of Paragraphs
+	"""
+	class ParaLines contains the broken into lines representation of Paragraphs
+		kind=0	Simple
+		fontName, fontSize, textColor apply to whole Paragraph
+		lines	[(extraSpace1,words1),....,(extraspaceN,wordsN)]
+
+
+		kind==1	Complex
+		lines	[FragLine1,...,FragLineN]
+	"""
+
+class FragLine(ABag):
+	"""class FragLine contains a styled line (ie a line with more than one style)
+
+	extraSpace	unused space for justification only
+	wordCount	1+spaces in line for justification purposes
+	words		[ParaFrags] style text lumps to be concatenated together
+	fontSize	maximum fontSize seen on the line; not used at present,
+				but could be used for line spacing.
 	"""
 
 #our one and only parser
@@ -418,7 +437,7 @@ class Paragraph(Flowable):
 				else:
 					if currentWidth>self.width: self.width = currentWidth
 					#end of line
-					lines.append(ParaLines(extraSpace=(maxWidth - currentWidth),wordCount=n,
+					lines.append(FragLine(extraSpace=(maxWidth - currentWidth),wordCount=n,
 										words=words, fontSize=maxSize))
 
 					#start new line
@@ -632,4 +651,22 @@ and better control when printed.
 	P=Paragraph("""Price<super><font color="red">*</font></super>""", styleSheet['Normal'])
 	dumpParagraphFrags(P)
 	w,h = P.wrap(24, 200)
+	dumpParagraphLines(P)
+
+	text = """Dieses Kapitel bietet eine schnelle <b><font color=red>Programme :: starten</font></b>
+<onDraw name=myIndex label="Programme :: starten">
+<b><font color=red>Eingabeaufforderung :: (&gt;&gt;&gt;)</font></b>
+<onDraw name=myIndex label="Eingabeaufforderung :: (&gt;&gt;&gt;)">
+<b><font color=red>&gt;&gt;&gt; (Eingabeaufforderung)</font></b>
+<onDraw name=myIndex label="&gt;&gt;&gt; (Eingabeaufforderung)">
+Einführung in Python <b><font color=red>Python :: Einführung</font></b>
+<onDraw name=myIndex label="Python :: Einführung">.
+Das Ziel ist, die grundlegenden Eigenschaften von Python darzustellen, ohne
+sich zu sehr in speziellen Regeln oder Details zu verstricken. Dazu behandelt
+dieses Kapitel kurz die wesentlichen Konzepte wie Variablen, Ausdrücke,
+Kontrollfluss, Funktionen sowie Ein- und Ausgabe. Es erhebt nicht den Anspruch,
+umfassend zu sein."""
+	P=Paragraph(text, styleSheet['Code'])
+	dumpParagraphFrags(P)
+	w,h = P.wrap(6*72, 9.7*72)
 	dumpParagraphLines(P)
