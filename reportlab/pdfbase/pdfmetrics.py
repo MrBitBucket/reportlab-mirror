@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.62 2003/09/09 18:13:33 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.63 2003/10/09 13:55:18 rgbecker Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -21,7 +21,6 @@ trap attempts to access them and do it on first access.
 """
 import string, os
 from types import StringType, ListType, TupleType
-from reportlab.rl_config import defaultEncoding
 from reportlab.pdfbase import _fontdata
 from reportlab.lib.logger import warnOnce
 from reportlab.rl_config import defaultEncoding
