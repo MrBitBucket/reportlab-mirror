@@ -208,10 +208,21 @@ class ParaParser(xmllib.XMLParser):
 				self._pop(greek=1)
 			else:
 				xmllib.XMLParser.handle_entityref(self,name)
+
+		def syntax_error(self,lineno,message):
+			self._syntax_error(message)
+
 	else:
 		def start_greekLetter(self, attributes,letter):
 			self._push(greek=1)
 			self.handle_data(letter)
+
+		def syntax_error(self,message):
+			self._syntax_error(message)
+
+	def _syntax_error(self,message):
+		if message[:10]=="attribute " and message[-17:]==" value not quoted": return
+		self.errors.append(message)
 
 	def start_greek(self, attributes):
 		self._push(greek=1)
@@ -271,9 +282,9 @@ class ParaParser(xmllib.XMLParser):
 				try:
 					A[j[0]] = (func is None) and v or apply(func,(v,))
 				except:
-					self.syntax_error('%s: invalid value %s'%(k,v))
+					self._syntax_error('%s: invalid value %s'%(k,v))
 			else:
-				self.syntax_error('invalid attribute name %s'%k)
+				self._syntax_error('invalid attribute name %s'%k)
 		return A
 
 	#----------------------------------------------------------------
@@ -313,11 +324,6 @@ class ParaParser(xmllib.XMLParser):
 		self.errors = []
 		self.fragList = []
 		self._style = style
-
-
-	def syntax_error(self,message):
-		if message[:11]=="attribute `" and message[-18:]=="' value not quoted": return
-		self.errors.append(message)
 
 	#----------------------------------------------------------------
 	def handle_data(self,data):
