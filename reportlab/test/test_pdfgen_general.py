@@ -736,7 +736,6 @@ cost to performance.""")
         c.drawString(xmargin, yposition, title)
         c.linkAbsolute(title, title, (xmargin-ydelta/4, yposition-ydelta/4, xmax, yposition+ydelta/2))
 
-
     # test URLs
     r1 = (inch, 3*inch, 5*inch, 3.25*inch) # this is x1,y1,x2,y2
     c.linkURL('http://www.reportlab.com/', r1, thickness=1, color=colors.green)
@@ -752,6 +751,12 @@ cost to performance.""")
                       dashArray=[2,4],
                       color=colors.magenta)
     c.drawString(inch+3, 2*inch+6, 'Hyperlink with custom border style')
+
+    xpdf = outputfile('test_hello.pdf').replace('\\','/')
+    link = 'Hard link to %s, with red border' % xpdf
+    r1 = (inch, 1.5*inch, inch+2*3+c.stringWidth(link,c._fontname, c._fontsize), 1.75*inch) # this is x1,y1,x2,y2
+    c.linkURL(xpdf, r1, thickness=1, color=colors.red, kind='GoToR')
+    c.drawString(inch+3, 1.5*inch+6, link )
 
     ### now do stuff for the outline
     #for x in outlinenametree: print x

@@ -760,7 +760,7 @@ class Canvas:
             Rect = (xmin, ymin, xmax, ymax)
         return apply(self.linkAbsolute, (contents, destinationname, Rect, addtopage, name), kw)
 
-    def linkURL(self, url, rect, relative=0, thickness=0, color=None, dashArray=None):
+    def linkURL(self, url, rect, relative=0, thickness=0, color=None, dashArray=None, kind="URI"):
         """Create a rectangular URL 'hotspot' in the given rectangle.
 
         if relative=1, this is in the current coord system, otherwise
@@ -795,8 +795,16 @@ class Canvas:
         # the action is a separate dictionary
         A = PDFDictionary()
         A["Type"] = PDFName("Action") # not needed?
-        A["S"] = PDFName("URI")
-        A["URI"] = PDFString(url)
+        uri = PDFString(url)
+        A['S'] = PDFName(kind)
+        if kind=="URI":
+            A["URI"] = uri
+        elif kind=='GoToR':
+            A["F"] = uri
+            A["D"] = "[ 0 /XYZ null null null ]"
+        else:
+            raise ValueError("Unknown linkURI kind '%s'" % kind)
+
         ann["A"] = A
 
         # now for formatting stuff.
