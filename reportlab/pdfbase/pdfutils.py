@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.27 2001/10/24 16:39:53 rgbecker Exp $
-__version__=''' $Id: pdfutils.py,v 1.27 2001/10/24 16:39:53 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.28 2001/11/13 18:37:17 aaron_watters Exp $
+__version__=''' $Id: pdfutils.py,v 1.28 2001/11/13 18:37:17 aaron_watters Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -197,15 +197,8 @@ def _AsciiHexDecode(input):
     return output.read()
 
 
-try:
-    try:
-        from _rl_accel import _AsciiBase85Encode                # builtin or on the path
-    except ImportError, errMsg:
-        _checkImportError(errMsg)
-        from reportlab.lib._rl_accel import _AsciiBase85Encode  # where we think it should be
-except ImportError, errMsg:
-    _checkImportError(errMsg)
-    def _AsciiBase85Encode(input):
+if 1: # for testing always define this
+    def _AsciiBase85EncodePYTHON(input):
         """Encodes input using ASCII-Base85 coding.
 
         This is a compact encoding used for binary data within
@@ -276,7 +269,16 @@ except ImportError, errMsg:
         outstream.write('~>')
         outstream.reset()
         return outstream.read()
-        
+
+try:
+    try:
+        from _rl_accel import _AsciiBase85Encode                # builtin or on the path
+    except ImportError, errMsg:
+        _checkImportError(errMsg)
+        from reportlab.lib._rl_accel import _AsciiBase85Encode  # where we think it should be
+except ImportError, errMsg:
+    _checkImportError(errMsg)
+    _AsciiBase85Encode = _AsciiBase85EncodePYTHON
 
 def _AsciiBase85Decode(input):
     """Decodes input using ASCII-Base85 coding.
