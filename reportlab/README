@@ -1,9 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/README?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/README,v 1.4 2001/04/16 10:15:01 andy_robinson Exp $
-
-
+#$Header: /tmp/reportlab/reportlab/README,v 1.5 2001/04/18 09:45:12 rgbecker Exp $
 
 Release 1.0
 ===========
