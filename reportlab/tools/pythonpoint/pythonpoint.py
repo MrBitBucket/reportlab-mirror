@@ -85,6 +85,7 @@ Usage:
         -h / --help     prints this message
         -n / --notes    leave room for comments
         -v / --verbose  verbose mode
+        -s / --silent   silent mode (NO output)
         --handout       produce handout document
         --cols          specify number of columns
                         on handout pages (default: 2)
@@ -329,7 +330,8 @@ class PPPresentation:
         pageSize = (self.pageWidth, self.pageHeight)
         filename = os.path.splitext(self.sourceFilename)[0] + '.pdf'
         if self.outDir: filename = os.path.join(self.outDir,os.path.basename(filename))
-        print filename
+        if self.verbose:
+            print filename
         canv = canvas.Canvas(filename, pagesize = pageSize)
         canv.setPageCompression(self.compression)
 
@@ -929,6 +931,7 @@ def handleOptions():
                'help':0,
                'notes':0,
                'verbose':rl_config._verbose,
+               'silent':0,
                'outDir': None}
 
     try:
@@ -964,6 +967,13 @@ def handleOptions():
     if filter(lambda ov: ov[0] in ('v', 'verbose'), optList):
         options['verbose'] = 1
 
+    #takes priority over verbose.  Used by our test suite etc.
+        #to ensure no output at all
+    if filter(lambda ov: ov[0] in ('s', 'silent'), optList):
+        optiona['silent'] = 1
+        options['verbose'] = 0
+        
+    
     return options, args
 
 def main():

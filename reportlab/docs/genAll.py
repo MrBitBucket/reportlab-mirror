@@ -1,6 +1,6 @@
 #!/bin/env python
 import os, sys
-def _genAll(d=None,verbose=None):
+def _genAll(d=None,verbose=1):
 	if not d: d = '.'
 	if not os.path.isabs(d):
 		d = os.path.normpath(os.path.join(os.getcwd(),d))
@@ -10,15 +10,20 @@ def _genAll(d=None,verbose=None):
 			  '../tools/docco/graphdocpy.py'):
 		os.chdir(d)
 		os.chdir(os.path.dirname(p))
-		cmd = '%s %s %s' % (sys.executable,os.path.basename(p), verbose and '-s' or '')
-		if verbose>=2: print cmd
+		if verbose:
+			verboseSuffix = ''
+		else:
+			verboseSuffix = '-s'
+		cmd = '%s %s %s' % (sys.executable,os.path.basename(p), verboseSuffix)
+		if verbose:
+			print cmd
 		os.system(cmd)
 
 """Runs the manual-building scripts"""
 if __name__=='__main__':
 	#need a quiet mode for the test suite	
 	if '-s' in sys.argv:  # 'silent
-		quiet = '-s'
+		verbose = 0
 	else:
-		quiet = ''
-	_genAll(os.path.dirname(sys.argv[0]),quiet)
+		verbose = 1
+	_genAll(os.path.dirname(sys.argv[0]),verbose)
