@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.87 2001/07/31 10:04:16 dinu_gherman Exp $
-__version__=''' $Id: canvas.py,v 1.87 2001/07/31 10:04:16 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.88 2001/10/05 19:50:50 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.88 2001/10/05 19:50:50 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -1009,11 +1009,11 @@ class Canvas:
     def setFillColor(self, aColor):
         """Takes a color object, allowing colors to be referred to by name"""
         if isinstance(aColor, CMYKColor):
-            c,m,y,k = (aColor.cyan, aColor.magenta, aColor.yellow, aColor.black)
+            d = aColor.density
+            c,m,y,k = (d*aColor.cyan, d*aColor.magenta, d*aColor.yellow, d*aColor.black)
             self._fillColorCMYK = (c, m, y, k)
             self._code.append('%s k' % fp_str(c, m, y, k))
         elif isinstance(aColor, Color): 
-        #if type(aColor) == ColorType:
             rgb = (aColor.red, aColor.green, aColor.blue)
             self._fillColorRGB = rgb
             self._code.append('%s rg' % fp_str(rgb) )
@@ -1034,7 +1034,8 @@ class Canvas:
     def setStrokeColor(self, aColor):
         """Takes a color object, allowing colors to be referred to by name"""
         if isinstance(aColor, CMYKColor):
-            c,m,y,k = (aColor.cyan, aColor.magenta, aColor.yellow, aColor.black)
+            d = aColor.density
+            c,m,y,k = (d*aColor.cyan, d*aColor.magenta, d*aColor.yellow, d*aColor.black)
             self._strokeColorCMYK = (c, m, y, k)
             self._code.append('%s K' % fp_str(c, m, y, k))
         elif isinstance(aColor, Color): 
