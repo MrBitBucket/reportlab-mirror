@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.19 2004/03/09 22:22:26 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.20 2004/03/09 23:24:34 andy_robinson Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -58,7 +58,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.19 2004/03/09 22:22:26 andy_robinson Exp $'
+__version__ = '$Id: ttfonts.py,v 1.20 2004/03/09 23:24:34 andy_robinson Exp $'
 
 import string
 from types import StringType
@@ -77,44 +77,13 @@ class TTFError(pdfdoc.PDFError):
 # Helpers
 #
 
-try:
-    import codecs
-    parse_utf8=lambda x, decode=codecs.lookup('utf8')[1]: map(ord,decode(x)[0])
-    del codecs
-except:
-    def parse_utf8(c):
-        "Parses a UTF-8 encoded string into a list of UCS character codes"
-        result = []
-        i = 0
-        n = len(c)
-        while i < n:
-            first = ord(c[i])
-            i = i + 1
-            if first < 0x80:
-                result.append(first)
-            elif first < 0xC0:
-                raise ValueError, "Invalid UTF-8 string"
-            elif first < 0xE0:
-                second = ord(c[i])
-                if second < 0x80 or second >= 0xC0:
-                    raise ValueError, "Invalid UTF-8 string"
-                result.append(((first & 0x1F) << 6) + \
-                              (second & 0x3F))
-
-                i = i + 1
-            elif first < 0xF0:
-                second = ord(c[i])
-                third = ord(c[i+1])
-                if second < 0x80 or second >= 0xC0 or \
-                   third < 0x80 or third >= 0xC0:
-                    raise ValueError, "Invalid UTF-8 string"
-                result.append(((first & 0x0F) << 12) + \
-                              ((second & 0x3F) << 6) + \
-                              (third & 0x3F))
-                i = i + 2
-            else:
-                raise ValueError, "UTF-8 characters outside 16-bit range not supported"
-        return result
+from codecs import utf_8_encode, utf_8_decode, latin_1_decode
+parse_utf8=lambda x, decode=utf_8_decode: map(ord,decode(x)[0])
+parse_latin1 = lambda x, decode=latin_1_decode: map(ord,decode(x)[0])
+def latin1_to_utf8(text):
+    "helper to convert when needed from latin input"
+    return utf_8_encode(latin_1_decode(text)[0])[0]
+    
 
 def makeToUnicodeCMap(fontname, subset):
     """Creates a ToUnicode CMap for a given subset.  See Adobe

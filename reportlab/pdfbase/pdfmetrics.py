@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.67 2004/03/09 22:22:26 andy_robinson Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.68 2004/03/09 23:24:34 andy_robinson Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -671,9 +671,7 @@ if _stringWidth:
     #if accelerator present, make sure we at least
     #register Courier font, since it will fall back to Courier
     #as its default font.
-    face = TypeFace('Courier')
-    (face.familyName, face.bold, face.italic) = _fontdata.standardFontAttributes['Courier']
-    registerTypeFace(face)
+    f = getFont('Courier')
 
 
     def _SWRecover(text, fontName, fontSize, encoding):
