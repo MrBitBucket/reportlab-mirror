@@ -1,11 +1,19 @@
-Unpack reportlab.zip to some directory, say d:\ReportLab.
+Installation
+============
+Either unpack reportlab.zip or reportlab.tgz to some directory say
+d:\ReportLab.  Create a .pth file, say reportlab.pth in your Python
+home directory.  It should have one line:
+d:/ReportLab.
 
-Create a .pth file, say reportlab.pth in your Python
-home directory. It should have one line:
-d:/ReportLab
+Alternatively unpack the archive into a directory which is already on your
+python path.
 
-Then reportlab.pdfbase, reportlab.pdfgen and reportlab.platypus are available packages.
+Then reportlab.pdfbase, reportlab.pdfgen and reportlab.platypus are
+available packages.
 
+
+Existing Code
+=============
 Modifying existing code to work with the package structure:
 
 import pdfmetrics   ->  from reportlab.pdfbase import pdfmetrics
