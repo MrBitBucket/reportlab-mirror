@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/tocindex.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/tocindex.py,v 1.3 2000/11/23 14:01:58 andy_robinson Exp $
-__version__=''' $Id: tocindex.py,v 1.3 2000/11/23 14:01:58 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/tocindex.py,v 1.4 2000/12/04 13:19:05 rgbecker Exp $
+__version__=''' $Id: tocindex.py,v 1.4 2000/12/04 13:19:05 rgbecker Exp $ '''
 __doc__=''
 """
 This module will contain standard Table of Contents and Index objects.
@@ -56,10 +56,10 @@ defaultTableStyle = tables.TableStyle([
                         ])
 
 
-        
-        
 
-    
+
+
+
 class TableOfContents0(IndexingFlowable0):
     """This creates a formatted table of contents.  It presumes
     a correct block of data is passed in.  The data block contains
@@ -81,7 +81,7 @@ class TableOfContents0(IndexingFlowable0):
         # keep track of the last run
         self._lastEntries = self._entries[:]
         self.clearEntries()
-        
+
     def isIndexing(self):
         return 1
 
@@ -106,8 +106,8 @@ class TableOfContents0(IndexingFlowable0):
 ##            print 'Current Entries first 5:'
 ##            for (level, text, pageNum) in self._lastEntries[0:5]:
 ##                print (level, text[0:30], pageNum),
-            
-    
+
+
     def clearEntries(self):
         self._entries = []
 
@@ -126,7 +126,7 @@ class TableOfContents0(IndexingFlowable0):
         get sensible output on the first run."""
         for (level, text, pageNum) in listOfEntries:
             self.addEntry(level, text, pageNum)
-            
+
     def wrap(self, availWidth, availHeight):
         """All table properties should be known by now."""
         widths = (availWidth - self.rightColumnWidth,
@@ -168,32 +168,27 @@ class TableOfContents0(IndexingFlowable0):
         draw(); we are hooking this in order to delegate ALL the drawing
         work to the embedded table object"""
         self._table.drawOn(canvas, x, y, _sW)
-        
+
 
 
     #################################################################################
     #
     # everything from here down is concerned with creating a good example document
     # i.e. test code as well as tutorial
-
-
 PAGE_HEIGHT = reportlab.lib.pagesizes.DEFAULT_PAGE_SIZE[1]
-
-    
-
 def getSampleTOCData(depth=3):
     """Returns a longish block of page numbers and headings over 3 levels"""
     from random import randint
     pgNum = 2
     data = []
     for chapter in range(1,8):
-        data.append(0, """Chapter %d with a really long name which will hopefully
+        data.append((0, """Chapter %d with a really long name which will hopefully
         wrap onto a second line, fnding out if the right things happen with
-        full paragraphs n the table of contents""" % chapter, pgNum)
+        full paragraphs n the table of contents""" % chapter, pgNum))
         pgNum = pgNum + randint(0,2)
         if depth > 1:
             for section in range(1,5):
-                data.append(1, 'Chapter %d Section %d' % (chapter, section), pgNum)
+                data.append((1, 'Chapter %d Section %d' % (chapter, section), pgNum))
                 pgNum = pgNum + randint(0,2)
                 if depth > 2:
                     for subSection in range(1,6):
@@ -201,7 +196,7 @@ def getSampleTOCData(depth=3):
                                     (chapter, section, subSection),
                                     pgNum)
                         pgNum = pgNum + randint(0,1)
-    return data        
+    return data
 
 
 def getSampleStory(depth=3):
@@ -222,7 +217,7 @@ def getSampleStory(depth=3):
 
     # the next full page should switch to internal page style
     story.append(NextPageTemplate("Body"))
-            
+
     # now make some paragraphs to correspond to it
     for (level, text, pageNum) in TOCData:
         if level == 0:
@@ -254,14 +249,14 @@ class MyDocTemplate(BaseDocTemplate):
         # and set up a counter variable here
         self._uniqueKey = 0
 
-    
+
     def afterFlowable(self, flowable):
         """Our rule for the table of contents is simply to take
         the text of H1, H2 and H3 elements. We broadcast a
         notification to the DocTemplate, which should inform
         the TOC and let it pull them out. Also build an outline"""
         self._uniqueKey = self._uniqueKey + 1
-        
+
         if hasattr(flowable, 'style'):
             if flowable.style.name == 'Heading1':
                 self.notify0('TOCEntry', (0, flowable.getPlainText(), self.page))
@@ -272,13 +267,12 @@ class MyDocTemplate(BaseDocTemplate):
                 self.notify0('TOCEntry', (1, flowable.getPlainText(), self.page))
                 self.canv.bookmarkPage(str(self._uniqueKey))
                 self.canv.addOutlineEntry(flowable.getPlainText(), str(self._uniqueKey), 1)
-                
+
             elif flowable.style.name == 'Heading3':
                 self.notify0('TOCEntry', (2, flowable.getPlainText(), self.page))
                 self.canv.bookmarkPage(str(self._uniqueKey))
                 self.canv.addOutlineEntry(flowable.getPlainText(), str(self._uniqueKey), 2)
 
-        
     def beforePage(self):
         """decorate the page"""
         self.canv.saveState()
@@ -289,15 +283,11 @@ class MyDocTemplate(BaseDocTemplate):
         self.canv.drawString(4 * inch, 0.75 * inch, "Page %d" % doc.page)
         self.canv.restoreState()
 
-
-
-    
-
 if __name__=='__main__':
     from reportlab.platypus import SimpleDocTemplate
     doc = MyDocTemplate('tocindex.pdf')
 
     #change this to depth=3 for a BIG document
     story = getSampleStory(depth=2)
-    
+
     doc.multiBuild0(story, 'tocindex.pdf')
