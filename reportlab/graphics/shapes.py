@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.54 2001/09/28 10:29:18 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.55 2001/09/28 13:55:54 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -455,6 +455,9 @@ class Drawing(Group, Flowable):
 		if not os.path.isabs(outDir): outDir = os.path.join(os.path.dirname(sys.argv[0]),outDir)
 		if not os.path.isdir(outDir): os.makedirs(outDir)
 		fnroot = os.path.normpath(os.path.join(outDir,fnRoot))
+		plotMode = os.path.splitext(fnroot)
+		if string.lower(plotMode[1][1:]) in ['pdf','eps','gif','png','jpg','jpeg','tiff','tif']:
+			fnroot = plotMode[0]
 
 		plotMode, verbose = formats or getattr(self,'formats',['pdf']), verbose or getattr(self,'verbose',_verbose)
 		_saved = logger.warnOnce.enabled, logger.infoOnce.enabled
