@@ -1,12 +1,12 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pyfiles.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pyfiles.py,v 1.7 2001/08/26 17:34:18 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pyfiles.py,v 1.8 2002/05/24 14:38:09 dinu_gherman Exp $
 """Tests performed on all Python source files of the ReportLab distribution.
 """
 
 
-import os, string, fnmatch, re
+import os, sys, string, fnmatch, re
 
 import reportlab
 from reportlab.test import unittest
@@ -186,7 +186,8 @@ def makeSuite():
     suite.addTest(SelfTestCase('testUnique'))
     suite.addTest(AsciiFileTestCase('testAscii'))
     suite.addTest(FilenameTestCase('testTrailingDigits'))
-    suite.addTest(FirstLineTestCase('test1'))
+    if sys.platform[:4] != 'java':
+        suite.addTest(FirstLineTestCase('test1'))
 
     return suite
 

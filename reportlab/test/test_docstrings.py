@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_docstrings.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_docstrings.py,v 1.7 2001/05/21 06:38:03 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_docstrings.py,v 1.8 2002/05/24 14:38:09 dinu_gherman Exp $
 
 """This is a test on a package level that find all modules,
 classes, methods and functions that do not have a doc string
@@ -179,10 +179,11 @@ class DocstringTestCase(SecureTestCase):
 def makeSuite():
     suite = unittest.TestSuite()
 
-    suite.addTest(DocstringTestCase('test1'))
-    suite.addTest(DocstringTestCase('test2'))
-    suite.addTest(DocstringTestCase('test3'))
-    suite.addTest(DocstringTestCase('test4'))
+    if sys.platform[:4] != 'java':
+        suite.addTest(DocstringTestCase('test1'))
+        suite.addTest(DocstringTestCase('test2'))
+        suite.addTest(DocstringTestCase('test3'))
+        suite.addTest(DocstringTestCase('test4'))
 
     return suite
 

@@ -14,6 +14,7 @@ from reportlab.test.utils import SecureTestCase
 RL_HOME = os.path.dirname(reportlab.__file__)
 EXTRA_FILE = 'extra.txt'
 
+
 class ExternalTestCase(SecureTestCase):
     """Test case starting cases external to the normal RL suite.
 
@@ -81,17 +82,20 @@ class ExternalTestCase(SecureTestCase):
                 os.chdir(cwd)
                 sys.path = sys.path[1:]
 
+
 def makeSuite():
-    suite = unittest.TestSuite()    
-    suite.addTest(ExternalTestCase('test1'))
+    suite = unittest.TestSuite()
+    
+    if sys.platform[:4] != 'java':   
+        suite.addTest(ExternalTestCase('test1'))
+    
     return suite
 
 
 #noruntests
 if __name__ == "__main__":
-    import sys
     if len(sys.argv) > 1:
         EXTRA_FILE = sys.argv[1]
         assert os.path.isfile(EXTRA_FILE), 'file %s not found!' % EXTRA_FILE
-    #otherwise, extra.txt will be used
+    # otherwise, extra.txt will be used
     unittest.TextTestRunner().run(makeSuite())
