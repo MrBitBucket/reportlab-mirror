@@ -12,19 +12,19 @@ class ImporterTestCase(unittest.TestCase):
     "Test import utilities"
 
     def setUp(self):
+        from time import time
         try:
             from tempfile import mkdtemp
             self._tempdir = mkdtemp()
         except:
             from tempfile import gettempdir
-            import time
-            self._tempdir = os.path.join(gettempdir(),'tmp_%d' % time.time())
+            self._tempdir = os.path.join(gettempdir(),'tmp_%d' % time())
             os.mkdir(self._tempdir,0700)
-        _testmodulename = 'test_module.py'
+        _testmodulename = os.path.join(self._tempdir,'test_module_%d.py' % time())
         f = open(_testmodulename,'w')
         f.write('__all__=[]\n')
         f.close()
-        self._testmodulename = _testmodulename[:-3]
+        self._testmodulename = os.path.splitext(os.path.basename(_testmodulename))[0]
 
     def tearDown(self):
         from shutil import rmtree
@@ -64,7 +64,7 @@ class ImporterTestCase(unittest.TestCase):
                 pass
             self.assertRaises(ImportError,
                               recursiveImport,
-                              'test_lib_colors',
+                              self._testmodulename,
                               noCWD=1)
         finally:
             os.chdir(cwd)

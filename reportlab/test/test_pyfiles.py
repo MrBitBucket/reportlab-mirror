@@ -1,19 +1,17 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pyfiles.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pyfiles.py,v 1.11 2004/03/22 13:21:06 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pyfiles.py,v 1.12 2004/03/23 14:28:47 rgbecker Exp $
 """Tests performed on all Python source files of the ReportLab distribution.
 """
 
 
 import os, sys, string, fnmatch, re
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
-
 import reportlab
-from reportlab.test.utils import SecureTestCase, GlobDirectoryWalker
-
+from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses, SecureTestCase, GlobDirectoryWalker
+from reportlab.lib.utils import open_and_read, open_and_readlines
 
 RL_HOME = os.path.dirname(reportlab.__file__)
 
@@ -81,7 +79,7 @@ class AsciiFileTestCase(unittest.TestCase):
         allPyFiles = GlobDirectoryWalker(RL_HOME, '*.py')
 
         for path in allPyFiles:
-            fileContent = open(path).read()
+            fileContent = open_and_read(path,'r')
             nonAscii = filter(lambda c: ord(c)>127, fileContent)
             nonAscii = unique(nonAscii)
 
@@ -127,7 +125,7 @@ class FirstLineTestCase(SecureTestCase):
         for file in GlobDirectoryWalker(folder, '*.py'):
             if os.path.basename(file) == '__init__.py':
                 continue
-            firstLine = open(file).readline()
+            firstLine = open_and_readlines(file)[0]
             if not firstLinePat.match(firstLine):
                 paths.append(file)
 
