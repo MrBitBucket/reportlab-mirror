@@ -200,7 +200,6 @@ class ChartTestCase(unittest.TestCase):
         drawing = sample1bar()
         story.append(drawing)
         story.append(Spacer(0, 1*cm))
-        story.append(PageBreak())
         
 
     def test2(self):
@@ -213,7 +212,6 @@ class ChartTestCase(unittest.TestCase):
         drawing = sample2bar()
         story.append(drawing)
         story.append(Spacer(0, 1*cm))
-        story.append(PageBreak())
         
 
     def test3(self):
@@ -227,7 +225,6 @@ class ChartTestCase(unittest.TestCase):
         drawing = sample3(drawing)
         story.append(drawing)
         story.append(Spacer(0, 1*cm))
-        story.append(PageBreak())
 
         
     def test4(self):
@@ -240,7 +237,6 @@ class ChartTestCase(unittest.TestCase):
         drawing = sample1line()
         story.append(drawing)
         story.append(Spacer(0, 1*cm))
-        story.append(PageBreak())
         
 
     def test5(self):
@@ -253,7 +249,6 @@ class ChartTestCase(unittest.TestCase):
         drawing = sample2line()
         story.append(drawing)
         story.append(Spacer(0, 1*cm))
-        story.append(PageBreak())
         
 
     def test6(self):
@@ -266,7 +261,6 @@ class ChartTestCase(unittest.TestCase):
         drawing = sample4pie()
         story.append(drawing)
         story.append(Spacer(0, 1*cm))
-        story.append(PageBreak())
 
         # This triggers the document build operation (hackish).
         global FINISHED

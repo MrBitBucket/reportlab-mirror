@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.37 2001/03/07 18:57:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.38 2001/03/13 08:38:11 dinu_gherman Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.37 2001/03/07 18:57:11 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.38 2001/03/13 08:38:11 dinu_gherman Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -413,7 +413,8 @@ class BaseDocTemplate:
 						flowables.insert(f,S[f])	# put split flowables back on the list
 				else:
 					# this must be cleared when they are finally drawn!
-					if hasattr(f,'postponed'):
+##					if hasattr(f,'postponed'):
+					if hasattr(f,'_postponed'):
 						message = "Flowable %s too large on page %d" % (f, self.page)
 						#show us, it might be handy
 						#HACK = it seems within tables we sometimes
@@ -423,7 +424,8 @@ class BaseDocTemplate:
 							print 'Offending Paragraph:'
 							print f.getPlainText()
 						raise "LayoutError", message
-					f.postponed = 1
+##					f.postponed = 1
+					f._postponed = 1
 					flowables.insert(0,f)			# put the flowable back
 					self.handle_frameEnd()
 
@@ -528,8 +530,10 @@ class BaseDocTemplate:
 			#packer might have tacked an attribute onto some
 			#paragraphs
 			for elem in story:
-				if hasattr(elem, 'postponed'):
-					del elem.postponed
+##				if hasattr(elem, 'postponed'):
+##					del elem.postponed
+				if hasattr(elem, '_postponed'):
+					del elem._postponed
 
 			for fl in self._indexingFlowables:
 				fl.afterBuild()

@@ -321,8 +321,9 @@ class Shape:
                 if checkerFunc:
                     value = getattr(self, attr)
                     assert checkerFunc(value), "Invalid value %s for attribute %s in class %s" % (value, attr, self.__class__.__name__)
+
     if shapeChecking:
-        """This adds the ability to check every attribite assignment as it is made.
+        """This adds the ability to check every attribute assignment as it is made.
         It slows down shapes but is a big help when developing. It does not
         get defined if config.shapeChecking = 0"""
         #print 'shapeChecking = 1, defining setattr'
@@ -330,7 +331,7 @@ class Shape:
             """By default we verify.  This could be off
             in some parallel base classes."""
             if self._attrMap is not None:
-                if attr[0:1] <> '_':
+                if attr[0] <> '_':
                     try:
                         checker = self._attrMap[attr]
                         if checker:
@@ -343,6 +344,7 @@ class Shape:
             #print 'set %s.%s = %s' % (self.__class__.__name__, attr, value)
     #else:
     #    print 'shapeChecking = 0, not defining setattr'
+
 
 class Drawing(Shape, Flowable):
     """Outermost container; the thing a renderer works on.
