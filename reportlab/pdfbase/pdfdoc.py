@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.31 2000/11/05 17:46:15 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.31 2000/11/05 17:46:15 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.32 2000/11/08 10:13:20 andy_robinson Exp $
+__version__=''' $Id: pdfdoc.py,v 1.32 2000/11/08 10:13:20 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -112,6 +112,13 @@ class PDFDocument:
     def __init__(self, encoding=DEFAULT_ENCODING, dummyoutline=0):
         #self.defaultStreamFilters = [PDFBase85Encode, PDFZCompress] # for testing!
         #self.defaultStreamFilters = [PDFZCompress] # for testing!
+        assert encoding in ['MacRomanEncoding',
+                            'WinAnsiEncoding',
+                            'MacRoman',
+                            'WinAnsi'], 'Unsupported encoding %s' % encoding
+        if encoding[-8:] <> 'Encoding':
+            encoding = encoding + 'Encoding'
+            
         self.encoding = encoding
         # mapping of internal identifier ("Page001") to PDF objectnumber and generation number (34, 0)
         self.idToObjectNumberAndVersion = {}
