@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testplatypus.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.1 2001/04/13 16:02:55 andy_robinson Exp $
-__version__=''' $Id: test_platypus_general.py,v 1.1 2001/04/13 16:02:55 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.2 2001/04/13 16:09:35 andy_robinson Exp $
+__version__=''' $Id: test_platypus_general.py,v 1.2 2001/04/13 16:09:35 andy_robinson Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -445,5 +445,3 @@ if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
 
 
-if __name__ == "__main__":
-	run()
