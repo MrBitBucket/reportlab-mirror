@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/platdemos.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.11 2003/12/08 13:12:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.12 2003/12/09 16:51:20 andy_robinson Exp $
 """This includes some demos of platypus for use in the API proposal"""
-__version__=''' $Id: figures.py,v 1.11 2003/12/08 13:12:38 andy_robinson Exp $ '''
+__version__=''' $Id: figures.py,v 1.12 2003/12/09 16:51:20 andy_robinson Exp $ '''
 
 import os
 
@@ -264,8 +264,8 @@ if _hasPageCatcher:
             
 
         def drawFigure(self):
-            print 'drawing ',self.formName
-            print 'self.width=%0.2f, self.figureHeight=%0.2f' % (self.width, self.figureHeight)
+            #print 'drawing ',self.formName
+            #print 'self.width=%0.2f, self.figureHeight=%0.2f' % (self.width, self.figureHeight)
             self.canv.saveState()
             if not self.canv.hasForm(self.formName):
                 restorePath = self.dirname + os.sep + self.filename

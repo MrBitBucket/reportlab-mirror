@@ -931,7 +931,6 @@ class PPFigure:
     def __init__(self):
         self.figure = None
     def getFlowable(self):
-        print 'getFigure(%s)' % self.figure.__class__.__name__
         return self.figure
 
 def getSampleStyleSheet():

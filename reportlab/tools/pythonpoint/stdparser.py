@@ -292,8 +292,13 @@ class PPMLParser(xmllib.XMLParser):
         self._curPres.filename = self._arg('presentation',args,'filename')
         self._curPres.effectName = self._arg('presentation',args,'effect')
         self._curPres.pageDuration = self._arg('presentation',args,'pageDuration')
-        self._curPres.pageHeight = self._arg('presentation',args,'pageHeight')
-        self._curPres.pageWidth = self._arg('presentation',args,'pageWidth')
+
+        h = self._arg('presentation',args,'pageHeight')
+        if h:
+            self._curPres.pageHeight = h
+        w = self._arg('presentation',args,'pageWidth')
+        if w:
+            self._curPres.pageWidth = w
         #print 'page size =', self._curPres.pageSize
 
 
