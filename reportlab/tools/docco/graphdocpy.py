@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.6 2001/10/03 11:50:51 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.7 2001/10/04 17:05:29 rgbecker Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -1023,6 +1023,30 @@ def main():
     if not isSilent:
         print "Saved %s." % builder.outPath
 
+def makeSuite():
+	import unittest
+	class AppTest(unittest.TestCase):
+		def setUp(self):
+			import reportlab
+			self.cwd = os.getcwd()
+			self.rl_dir = os.path.dirname(reportlab.__file__)
+			self.fn = __file__
+			os.chdir(self.rl_dir)
+			self.outFN = 'reportlab.graphics.pdf'
+			if os.path.isfile(self.outFN): os.remove(self.outFN)
+
+		def tearDown(self):
+			os.chdir(self.cwd)
+
+		def runsTest(self):
+			p = os.popen('%s %s' % (sys.executable,self.fn),'r')
+			out = p.read()
+			status = p.close()
+			assert os.path.isfile(self.outFN), "File %s not created!" % self.outFN
+	
+	suite = unittest.TestSuite()    
+	suite.addTest(AppTest('runsTest'))
+	return suite
 
 if __name__ == '__main__':
     main()
