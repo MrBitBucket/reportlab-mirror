@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.18  2000/07/08 15:30:04  rgbecker
+#	Cosmetics and error testing
+#
 #	Revision 1.17  2000/07/07 16:22:10  rgbecker
 #	Fix auto hieght stuff
-#
+#	
 #	Revision 1.16  2000/07/07 10:23:36  rgbecker
 #	First attempt at VALIGN
 #	
@@ -80,7 +83,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.17 2000/07/07 16:22:10 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.18 2000/07/08 15:30:04 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -128,6 +131,8 @@ class TableStyle:
 		self._cmds.append(cmd)
 	def getCommands(self):
 		return self._cmds
+
+TableStyleType = type(TableStyle())
 		
 class Table(Flowable):
 	def __init__(self, colWidths, rowHeights, data):
@@ -214,6 +219,8 @@ class Table(Flowable):
 		self._width = width
 
 	def setStyle(self, tblstyle):
+		if type(tblstyle) is not TableStyleType:
+			tblstyle = TableStyle(tblstyle)
 		for cmd in tblstyle.getCommands():
 			if cmd[0] == 'BACKGROUND':
 				self._bkgrndcmds.append(cmd)
@@ -331,9 +338,12 @@ class Table(Flowable):
 		elif just in ('CENTRE', 'CENTER'):
 			draw = self.canv.drawCentredString
 			x = colpos + colwidth * 0.5
-		else:
+		elif just == 'RIGHT':
 			draw = self.canv.drawRightString
 			x = colpos + colwidth - cellstyle.rightPadding
+		else:
+			raise ValueError, 'Invalid justification %s' % just
+
 		if type(cellval) is _stringtype:
 			val = cellval
 		else:
@@ -345,7 +355,7 @@ class Table(Flowable):
 		if valign=='BOTTOM':
 			y = rowpos + cellstyle.bottomPadding+n*leading
 		elif valign=='TOP':
-			y = rowpos + rowheight - cellstyle.topPadding - leading
+			y = rowpos + rowheight - cellstyle.topPadding - cellstyle.fontsize
 		elif valign=='MIDDLE':
 			y = rowpos + (cellstyle.bottomPadding + rowheight - cellstyle.topPadding+n*leading)/2.0
 		else:
@@ -623,22 +633,25 @@ LIST_STYLE = TableStyle(
 		The red numbers should be aligned LEFT &amp; BOTTOM, the blue RIGHT &amp; TOP
 		and the green CENTER &amp; MIDDLE.
 	""", styleSheet['BodyText']))
-	data=	[['00', '01', '02', '03', '04'],
-			['10', '11', '12', '13', '14'],
-			['20', '21', '22', '23', '24'],
-			['30', '31', '32', '33', '34']]
+	data=	[['X00y', 'X01y', 'X02y', 'X03y', 'X04y'],
+			['X10y', 'X11y', 'X12y', 'X13y', 'X14y'],
+			['X20y', 'X21y', 'X22y', 'X23y', 'X24y'],
+			['X30y', 'X31y', 'X32y', 'X33y', 'X34y']]
 	t=Table(5*[0.4*inch], 4*[0.4*inch], data)
-	t.setStyle(TableStyle([('ALIGN',(1,1),(-2,-2),'LEFT'),
-						('TEXTCOLOR',(1,1),(-2,-2),colors.red),
-						('VALIGN',(0,0),(1,-1),'TOP'),
-						('ALIGN',(0,0),(1,-1),'RIGHT'),
-						('TEXTCOLOR',(0,0),(1,-1),colors.blue),
-						('ALIGN',(0,-1),(-1,-1),'CENTER'),
-						('VALIGN',(0,-1),(-1,-1),'MIDDLE'),
-						('TEXTCOLOR',(0,-1),(-1,-1),colors.green),
-						('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
-						('BOX', (0,0), (-1,-1), 0.25, colors.black),
-						]))
+	t.setStyle([('ALIGN',(1,1),(-2,-2),'LEFT'),
+				('TEXTCOLOR',(1,1),(-2,-2),colors.red),
+
+				('VALIGN',(0,0),(1,-1),'TOP'),
+				('ALIGN',(0,0),(1,-1),'RIGHT'),
+				('TEXTCOLOR',(0,0),(1,-1),colors.blue),
+
+				('ALIGN',(0,-1),(-1,-1),'CENTER'),
+				('VALIGN',(0,-1),(-1,-1),'MIDDLE'),
+				('TEXTCOLOR',(0,-1),(-1,-1),colors.green),
+
+				('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+				('BOX', (0,0), (-1,-1), 0.25, colors.black),
+				])
 	lst.append(t)
 	data = [('alignment', 'align\012alignment'),
 			('bulletColor', 'bulletcolor\012bcolor'),
@@ -655,11 +668,11 @@ LIST_STYLE = TableStyle(
 			('spaceBefore', 'spacebefore\012spaceb'),
 			('textColor', 'fg\012textcolor\012color')]
 	t = Table(2*[None], len(data)*[None], data)
-	t.setStyle(TableStyle([
+	t.setStyle([
             ('VALIGN',(0,0),(-1,-1),'TOP'),
             ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
             ('BOX', (0,0), (-1,-1), 0.25, colors.black),
-            ]))
+            ])
 	lst.append(t)
 	SimpleDocTemplate('testtables.pdf', showBoundary=1).build(lst)
 
