@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.34 2002/07/31 12:45:08 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.35 2002/11/27 20:21:42 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.34 2002/07/31 12:45:08 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.35 2002/11/27 20:21:42 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -12,7 +12,7 @@ from types import FunctionType
 from reportlab.lib import colors
 from reportlab.lib.validators import *
 from reportlab.lib.attrmap import *
-from reportlab.graphics.shapes import Drawing, Group, Rect, Line, PolyLine
+from reportlab.graphics.shapes import Drawing, Group, Rect, Line, PolyLine, _SetKeyWordArgs
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.axes import XValueAxis, YValueAxis, AdjYValueAxis, NormalDateXValueAxis
@@ -25,16 +25,23 @@ from reportlab.graphics.charts.areas import PlotArea
 # This might be moved again from here...
 class LinePlotProperties(PropHolder):
     _attrMap = AttrMap(
-        strokeWidth = AttrMapValue(isNumber,
-            desc='Width of a line.'),
-        strokeColor = AttrMapValue(isColorOrNone,
-            desc='Color of a line.'),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone,
-            desc='Dash array of a line.'),
-        symbol = AttrMapValue(None,
-            desc='Widget placed at data points.'),
+        strokeWidth = AttrMapValue(isNumber, desc='Width of a line.'),
+        strokeColor = AttrMapValue(isColorOrNone, desc='Color of a line.'), strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array of a line.'),
+        symbol = AttrMapValue(None, desc='Widget placed at data points.'),
+        shader = AttrMapValue(None, desc='Shader Class.'),
         )
 
+class Shader(_SetKeyWordArgs):
+    _attrMap = AttrMap(BASE=PlotArea,
+        vertical = AttrMapValue(isBoolean, desc='If true shade to x axis'),
+        colors = AttrMapValue(SequenceOf(isColorOrNone,lo=2,hi=2), desc='(AxisColor, LineColor)'),
+        )
+
+    def shade(self, lp, g, rowNo, rowColor, row):
+        c = [None,None]
+        c = getattr(self,'colors',c) or c
+        if not c[0]: c[0] = getattr(lp,'fillColor',colors.white)
+        if not c[1]: c[1] = rowColor
 
 class LinePlot(PlotArea):
     """Line plot with multiple lines.
@@ -249,6 +256,9 @@ class LinePlot(PlotArea):
             for colNo in range(len(row)):
                 x1, y1 = row[colNo]
                 self.drawLabel(g, rowNo, colNo, x1, y1)
+
+            shader = getattr(self.lines[styleIdx], 'shader', None)
+            if shader: shader.shade(self,g,rowNo,rowColor,row)
 
         return g
 
