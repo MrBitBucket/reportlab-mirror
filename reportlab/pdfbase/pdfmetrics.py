@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.60 2002/12/28 08:07:46 andy_robinson Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.61 2002/12/28 08:18:54 andy_robinson Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -560,7 +560,7 @@ def registerFont(font):
         #need to set mappings so it can go in a paragraph even if within
         # bold tags
         from reportlab.lib import fonts
-        ttname = string.lower(font.face.name)
+        ttname = string.lower(font.fontName)
         fonts.addMapping(ttname, 0, 0, font.fontName)
         fonts.addMapping(ttname, 1, 0, font.fontName)
         fonts.addMapping(ttname, 0, 1, font.fontName)
