@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.14 2001/04/11 15:46:17 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.15 2001/04/11 19:57:06 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -416,9 +416,50 @@ class ValueAxis(Widget):
         'valueSteps':isListOfNumbers,
         }
 
-##    def __init__(self):
-##        msg = "This is an abstract class and must be subclassed to be used!"
-##        raise "NotImplementedError", msg
+    def __init__(self):
+        self._configured = 0
+        # private properties set by methods.  The initial values
+        # here are to make demos easy; they would always be
+        # overridden in real life.        
+        self._x = 50
+        self._y = 50
+        self._length = 100
+        
+        # public properties
+        self.visible = 1
+        
+        self.strokeWidth = 1
+        self.strokeColor = STATE_DEFAULTS['strokeColor']
+        self.strokeDashArray = STATE_DEFAULTS['strokeColor']
+
+        self.labels = TypedPropertyCollection(Label)
+        self.labels.angle = 0        
+
+        # how close can the ticks be?        
+        self.minimumTickSpacing = 10
+        self.maximumTicks = 7
+      
+        # this may be either of (a) a format string like '%0.2f'
+        # or (b) a function which takes the value as an argument
+        # and returns a chunk of text.  So you can write a
+        # 'formatMonthEndDate' function and use that on irregular
+        # data points.
+        self.labelTextFormat = '%d'
+        # if set to auto, these will be worked out for you.
+        # if you override any or all of them, your values
+        # will be used.
+        self.valueMin = Auto
+        self.valueMax = Auto
+        self.valueStep = Auto
+        
+        # alternative which is more flexible - provide a list
+        # of values to use, allowing equal spacing.  So you
+        # can give month end timestamps, which are not equally
+        # spaced mathematically.
+        #
+        # This overrides the above three if present.
+        # self.valueList = None
+        # or should it be in a subclass for TimeAxis?
 
 
     def setPosition(self, x, y, length):
@@ -545,57 +586,13 @@ class XValueAxis(ValueAxis):
         })
 
     def __init__(self):
-
-        self._configured = 0
+        ValueAxis.__init__(self)
         self._dataIndex = 0
-        # private properties set by methods.  The initial values
-        # here are to make demos easy; they would always be
-        # overridden in real life.        
-        self._x = 50
-        self._y = 50
-        self._length = 100
-        
-        # public properties
-        self.visible = 1
-        
-        self.strokeWidth = 1
-        self.strokeColor = STATE_DEFAULTS['strokeColor']
-        self.strokeDashArray = STATE_DEFAULTS['strokeColor']
-
-        self.labels = TypedPropertyCollection(Label)
         self.labels.boxAnchor = 'n'
         self.labels.dx = 0
         self.labels.dy = -5
-        self.labels.angle = 0        
-
-        self.tickUp = 0  # how far up of axis does tick go?
-        self.tickDown = 5  # how far down does tick go?
-
-        # how close can the ticks be?        
-        self.minimumTickSpacing = 10
-        self.maximumTicks = 7
-      
-        # this may be either of (a) a format string like '%0.2f'
-        # or (b) a function which takes the value as an argument
-        # and returns a chunk of text.  So you can write a
-        # 'formatMonthEndDate' function and use that on irregular
-        # data points.
-        self.labelTextFormat = '%d'
-        # if set to auto, these will be worked out for you.
-        # if you override any or all of them, your values
-        # will be used.
-        self.valueMin = Auto
-        self.valueMax = Auto
-        self.valueStep = Auto
-        
-        # alternative which is more flexible - provide a list
-        # of values to use, allowing equal spacing.  So you
-        # can give month end timestamps, which are not equally
-        # spaced mathematically.
-        #
-        # This overrides the above three if present.
-        # self.valueList = None
-        # or should it be in a subclass for TimeAxis?
+        self.tickUp = 0     # how far up of axis does tick go?
+        self.tickDown = 5   # how far down does tick go?
 
 
     def demo(self):
@@ -707,57 +704,13 @@ class YValueAxis(ValueAxis):
         })
 
     def __init__(self):
+        ValueAxis.__init__(self)
         self._dataIndex = 1
-        self._configured = 0
-        # private properties set by methods.  The initial values
-        # here are to make demos easy; they would always be
-        # overridden in real life.        
-        self._x = 50
-        self._y = 50
-        self._length = 100
-        
-        # public properties
-        self.visible = 1
-        
-        self.strokeWidth = 1
-        self.strokeColor = STATE_DEFAULTS['strokeColor']
-        self.strokeDashArray = STATE_DEFAULTS['strokeColor']
-
-        self.labels = TypedPropertyCollection(Label)
         self.labels.boxAnchor = 'e'
         self.labels.dx = -5
         self.labels.dy = 0
-        self.labels.angle = 0        
-
         self.tickRight = 0  # how far to right of axis does tick go?
-        self.tickLeft = 5  # how far to left does tick go?
-
-        # how close can the ticks be?        
-        self.minimumTickSpacing = 10
-        self.maximumTicks = 7
-      
-        # this may be either of (a) a format string like '%0.2f'
-        # or (b) a function which takes the value as an argument
-        # and returns a chunk of text.  So you can write a
-        # 'formatMonthEndDate' function and use that on irregular
-        # data points.
-        self.labelTextFormat = '%d'
-        # if set to auto, these will be worked out for you.
-        # if you override any or all of them, your values
-        # will be used.
-        self.valueMin = Auto
-        self.valueMax = Auto
-        self.valueStep = Auto
-        
-        # alternative which is more flexible - provide a list
-        # of values to use, allowing equal spacing.  So you
-        # can give month end timestamps, which are not equally
-        # spaced mathematically.
-        #
-        # This overrides the above three if present.
-        # self.valueList = None
-        # or should it be in a subclass for TimeAxis?
-
+        self.tickLeft = 5   # how far to left does tick go?
 
     def demo(self):
         self.setPosition(40, 10, 80)
