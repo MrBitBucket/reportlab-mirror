@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.64 2003/10/14 15:02:27 dragan1 Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.65 2003/11/12 15:23:01 rgbecker Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -238,7 +238,7 @@ class Encoding:
         self.frozen = 1
 
     def isEqual(self, other):
-        return ((enc.name == other.name) and (enc.vector == other.vector))
+        return ((self.name == other.name) and (self.vector == other.vector))
 
     def modifyRange(self, base, newNames):
         """Set a group of character names starting at the code point 'base'."""
