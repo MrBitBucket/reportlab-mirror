@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPS.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.13 2001/10/09 17:28:27 rgbecker Exp $
-__version__=''' $Id: renderPS.py,v 1.13 2001/10/09 17:28:27 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.14 2001/12/06 14:37:45 rgbecker Exp $
+__version__=''' $Id: renderPS.py,v 1.14 2001/12/06 14:37:45 rgbecker Exp $ '''
 import string, cStringIO, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str
@@ -312,7 +312,7 @@ class PSCanvas:
         self.code.append('closepath')
 
     def polyLine(self, p):
-        assert len(p) >= 2, 'Polyline must have 2 or more points'
+        assert len(p) >= 1, 'Polyline must have 1 or more points'
         if self._strokeColor != None:
             self.setColor(self._strokeColor)
             self.moveTo(p[0][0], p[0][1])
