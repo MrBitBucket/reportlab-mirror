@@ -171,7 +171,7 @@ def sample4pie():
     legend.dx = 20
     legend.dy = 5
     legend.deltax = 0
-    legend.boxAnchor = 'ne'
+    legend.boxAnchor = 'nw'
     legend.colorNamePairs=Auto(chart=pc)
     d.add(legend)
     return d
@@ -184,10 +184,11 @@ def autoLegender(i,chart,styleObj,sym='symbol'):
     height = 150
     legend = Legend()
     legend.x = width-5
-    legend.y = height-5
+    legend.y = 5
     legend.dx = 20
     legend.dy = 5
-    legend.boxAnchor = 'ne'
+    legend.deltay = 0
+    legend.boxAnchor = 'se'
     if i=='col auto':
         legend.colorNamePairs[0]=(Auto(chart=chart),'auto chart=self.chart')
         legend.colorNamePairs[1]=(Auto(obj=chart,index=1),'auto  chart=self.chart index=1')
@@ -199,8 +200,15 @@ def autoLegender(i,chart,styleObj,sym='symbol'):
     elif i=='swatch auto':
         legend.swatchMarker=Auto(chart=chart)
     d = Drawing(width,height)
+    d.background = Rect(0,0,width,height,strokeWidth=1,strokeColor=colors.red,fillColor=None)
+    m = makeMarker('Cross')
+    m.x = width-5
+    m.y = 5
+    m.fillColor = colors.red
+    m.strokeColor = colors.yellow
     d.add(chart)
     d.add(legend)
+    d.add(m)
     return d
 
 def lpleg(i=None):
