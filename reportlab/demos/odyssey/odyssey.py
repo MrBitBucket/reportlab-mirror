@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: odyssey.py,v $
+#	Revision 1.5  2000/02/18 11:00:57  rgbecker
+#	trailing text/Odyssey fix
+#
 #	Revision 1.4  2000/02/17 02:05:25  rgbecker
 #	Docstring & other fixes
-#
+#	
 #	Revision 1.3  2000/02/16 09:42:50  rgbecker
 #	Conversion to reportlab package
 #	
@@ -43,7 +46,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:09:29  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: odyssey.py,v 1.4 2000/02/17 02:05:25 rgbecker Exp $ '''
+__version__=''' $Id: odyssey.py,v 1.5 2000/02/18 11:00:57 rgbecker Exp $ '''
 ___doc__=''
 #odyssey.py
 #
@@ -145,6 +148,11 @@ def run():
             if pg % 10 == 0:
                 print 'formatted page %d' % canv.getPageNumber()
 
+    if tx:
+        canv.drawText(tx)
+        canv.showPage()
+        drawPageFrame(canv)
+		
     print 'about to write to disk...'
     
     canv.save()

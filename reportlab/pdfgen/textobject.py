@@ -31,16 +31,19 @@
 #
 ###############################################################################
 #	$Log: textobject.py,v $
+#	Revision 1.5  2000/02/18 11:00:58  rgbecker
+#	trailing text/Odyssey fix
+#
 #	Revision 1.4  2000/02/17 02:08:04  rgbecker
 #	Docstring & other fixes
-#
+#	
 #	Revision 1.3  2000/02/15 17:55:59  rgbecker
 #	License text fixes
 #	
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: textobject.py,v 1.4 2000/02/17 02:08:04 rgbecker Exp $ '''
+__version__=''' $Id: textobject.py,v 1.5 2000/02/18 11:00:58 rgbecker Exp $ '''
 __doc__=""" 
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -64,8 +67,7 @@ class PDFTextObject:
     with beginText(x, y).  Do not construct one directly. It keeps
     track of x and y coordinates relative to its origin."""
     def __init__(self, canvas, x=0,y=0):
-        self._code = []
-        self._code.append('BT')
+        self._code = ['BT']    #no point in [] then append RGB
         self._canvas = canvas  #canvas sets this so it has access to size info
         self._fontname = self._canvas._fontname
         self._fontsize = self._canvas._fontsize
@@ -223,4 +225,7 @@ class PDFTextObject:
             else:
                 self._y = self._y + self._leading
         self._x = self._x0
-        
+
+    def __nonzero__(self):
+        'PDFTextObject is true if it has something done after the init'
+        return self._code != ['BT']
