@@ -650,7 +650,9 @@ class PDFLayouter:
 
         if not o.multiPage:        
             # Create canvas.
-            self.canvas = canvas.Canvas(self.path, o.realPaperFormat.size)
+            self.canvas = canvas.Canvas(self.path,
+                                o.realPaperFormat.size,
+                                verbosity=0)  #added by AR
             c = self.canvas
             c.setPageCompression(1)
             c.setFont(o.fontName, o.fontSize)                
@@ -679,7 +681,9 @@ class PDFLayouter:
             # Create canvas with a modified path name.
             base, ext = os.path.splitext(self.path)
             newPath = "%s-%d%s" % (base, self.pageNum, ext)            
-            self.canvas = canvas.Canvas(newPath, o.realPaperFormat.size)
+            self.canvas = canvas.Canvas(newPath,
+                                        o.realPaperFormat.size,
+                                        verbosity=0) #added by AR
             c = self.canvas
             c.setPageCompression(1)
             c.setFont(o.fontName, o.fontSize)                
