@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.10 2001/03/30 18:28:55 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.11 2001/03/30 18:36:12 dinu_gherman Exp $
 
 from gengraphguide import *
 
@@ -1708,8 +1708,7 @@ is is a bit too early to start making them really public.
 Nevertheless, here is a list of things that are under way:
 """)
 
-list("""
-Vertical position of X axis - by default the X axis sits at the bottom.
+list("""Vertical position of X axis - by default the X axis sits at the bottom.
 One will be able to specify if it sits at the top, the bottom or at
 a specific Y value (either in absolute coordinates or in those of the
 axis itself).
@@ -1726,7 +1725,8 @@ list("""
 Color specification - right now the chart has an undocumented property 
 $defaultColors$, which provides a list of colors to cycle through,
 such that each data series gets its own color.
-If you introduce a legend, it should share the list of colors.
+Right now, if you introduce a legend, you need to make sure it shares
+the same list of colors.
 Most likely, this will be replaced with a scheme to specify a kind
 of legend containing attributes with different values for each data
 series.
@@ -1734,10 +1734,9 @@ This legend can then also be shared by several charts, but need not
 be visible itself.
 """)
 
-disc("""
-When the current design will have become more stable, we expect to add 
-variants of bar charts to deal with stacked and percentile bars as well as 
-the side-by-side variant seen here.
+list("""Additional chart types - when the current design will have become
+more stable, we expect to add variants of bar charts to deal with stacked
+and percentile bars as well as the side-by-side variant seen here.
 """)
 
 
