@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: frames.py,v $
+#	Revision 1.7  2000/10/01 12:53:33  rgbecker
+#	Fixed atTop bugs thanks to the effbot
+#
 #	Revision 1.6  2000/08/03 14:12:53  rgbecker
 #	Changing to packer led positioning
-#
+#	
 #	Revision 1.5  2000/07/30 22:32:29  rgbecker
 #	geometry changing attributes now work
 #	
@@ -49,7 +52,7 @@
 #	Revision 1.1  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #	
-__version__=''' $Id: frames.py,v 1.6 2000/08/03 14:12:53 rgbecker Exp $ '''
+__version__=''' $Id: frames.py,v 1.7 2000/10/01 12:53:33 rgbecker Exp $ '''
 __doc__="""
 """
 _geomAttr=('x1','y1','width','height', 'leftPadding', 'bottomPadding', 'rightPadding', 'topPadding')
@@ -142,7 +145,8 @@ class Frame:
 		to avoid infinite loops"""
 		y = self._y
 		p = self._y1p
-		s = self._atTop and 0 or flowable.getSpaceBefore()
+		s = 0
+		if self._atTop: s = flowable.getSpaceBefore()
 		h = y - p - s
 		if h>0:
 			flowable.canv = canv #so they can use stringWidth etc
@@ -162,7 +166,7 @@ class Frame:
 			#now we can draw it, and update the current point.
 			flowable.drawOn(canv, self._x, y, _sW=self._aW-w)
 			y = y - flowable.getSpaceAfter()
-			self._atTop = 0
+			if y<>self._y: self._atTop = 0
 			self._y = y
 			return 1
 
@@ -172,7 +176,8 @@ class Frame:
 		'''Ask the flowable to split using up the available space.'''
 		y = self._y
 		p = self._y1p
-		s = self._atTop and 0 or flowable.getSpaceBefore()
+		s = 0
+		if self._atTop: s = flowable.getSpaceBefore()
 		flowable.canv = canv	#some flowables might need this
 		r = flowable.split(self._aW, y-p-s)
 		del flowable.canv
