@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.29 2001/08/23 15:29:12 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.30 2001/09/01 12:15:08 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -175,21 +175,8 @@ class BarChart(Widget):
 
     def _findMinMaxValues(self):
         "Find the minimum and maximum value of the data we have."
-
-        data = self.data
-        m, M = None, None
-        for row in data:
-            for val in row:
-                if val is None:  # support missing values
-                    val = 0
-                if val is None:
-                    val = 0
-                if val < m:
-                    m = val
-                if val > M:
-                    M = val
-
-        return m, M
+        data = map(lambda x: map(lambda x: x is not None and x or 0,x), self.data)
+        return min(min(data)), max(max(data))
 
 
     def makeBackground(self):
@@ -286,6 +273,18 @@ class BarChart(Widget):
                     self.groupSpacing, self._seriesCount, self.barWidth,
                     self._seriesCount - 1, self.barSpacing, normWidth)
 
+        # 'Baseline' correction...
+        scale = self.valueAxis.scale
+        vm, vM = self.valueAxis.valueMin, self.valueAxis.valueMax
+        if None in (vm, vM):
+            y = scale(self._findMinMaxValues()[0])
+        elif vm <= 0 <= vM:
+            y = scale(0)
+        elif 0 < vm:
+            y = scale(vm)
+        elif vM < 0:
+            y = scale(vM)
+
         self._barPositions = []
         for rowNo in range(len(self.data)):
             barRow = []
@@ -304,18 +303,6 @@ class BarChart(Widget):
                     x = g + normFactor * (0.5 * self.groupSpacing \
                                                + rowNo * (self.barWidth + self.barSpacing))
                 width = self.barWidth * normFactor
-
-                # 'Baseline' correction...
-                scale = self.valueAxis.scale
-                vm, vM = self.valueAxis.valueMin, self.valueAxis.valueMax
-                if None in (vm, vM):
-                    y = scale(self._findMinMaxValues()[0])
-                elif vm <= 0 <= vM:
-                    y = scale(0)
-                elif 0 < vm:
-                    y = scale(vm)
-                elif vM < 0:
-                    y = scale(vM)
 
                 height = self.valueAxis.scale(datum) - y
                 barRow.append(flipXY and (y,x,height,width) or (x, y, width, height))
