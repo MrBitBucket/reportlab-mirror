@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.34 2003/05/16 09:39:20 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.35 2003/10/10 12:01:46 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.34 2003/05/16 09:39:20 johnprecedo Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.35 2003/10/10 12:01:46 rgbecker Exp $ "
 #endif
 #include "Python.h"
 #include <stdlib.h>
@@ -27,7 +27,7 @@ static __version__=" $Id: _rl_accel.c,v 1.34 2003/05/16 09:39:20 johnprecedo Exp
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.42"
+#define VERSION "0.43"
 #define MODULE "_rl_accel"
 #ifndef	ATTRDICT
 	#if PY_MAJOR_VERSION>=2
@@ -164,6 +164,27 @@ badSeq:	PyErr_SetString(ErrorObject,"widths should be a length 256 sequence of i
 
 	Py_INCREF(Py_None);
 	return Py_None;
+}
+
+static PyObject *_pdfmetrics_getFonts(PyObject *self, PyObject *args)
+{
+	char		*encoding=0;
+	fI_t*		f;
+	eI_t*		e;
+	int			nf;
+	PyObject	*r;
+	if (!PyArg_ParseTuple(args, "|s:getFonts", &encoding)) return NULL;
+	if(!(e=encoding?find_encoding(encoding):defaultEncoding)){
+		PyErr_SetString(ErrorObject,"unknown encoding");
+		return NULL;
+		}
+
+	for(nf=0,f=e->fonts;f;f=f->next) nf++;
+
+	r = PyList_New(nf);
+	for(nf=0,f=e->fonts;f;f=f->next) PyList_SetItem(r,nf++,PyString_FromString(f->name));
+
+	return r;
 }
 
 static PyObject *_pdfmetrics_getFontInfo(PyObject *self, PyObject* args)
@@ -781,6 +802,7 @@ static char *__doc__=
 	stringWidth a fast string width function\n\
 	_instanceStringWidth a method version of stringWidth\n\
 	defaultEncoding gets/sets the default encoding for stringWidth\n\
+	getFonts gets font names from the internal table\n\
 	getFontInfo gets font info from the internal table\n\
 	setFontInfo adds a font to the internal table\n\
 	_SWRecover gets/sets a callback for stringWidth recovery\n\
@@ -800,6 +822,7 @@ static char *__doc__=
 
 static struct PyMethodDef _methods[] = {
 	{"defaultEncoding", _pdfmetrics_defaultEncoding, 1, "defaultEncoding([encoding])\ngets/sets the default encoding."},
+	{"getFonts", _pdfmetrics_getFonts, 1, "getFonts()\nreturns font names."},
 	{"getFontInfo", _pdfmetrics_getFontInfo, 1, "getFontInfo(fontName,encoding)\nreturns info ([widths],ascent,descent)."},
 	{"setFontInfo", _pdfmetrics_setFontInfo, 1, "setFontInfo(fontName,encoding,ascent, descent, widths)\nadds the font to the table for encoding"},
 	{"stringWidth", _pdfmetrics_stringWidth, 1, "stringWidth(text,fontName,fontSize,[encoding]) returns width of text in points"},
