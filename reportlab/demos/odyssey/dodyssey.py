@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: dodyssey.py,v $
+#	Revision 1.5  2000/05/17 22:15:58  rgbecker
+#	Renamed BasicFrame to Frame
+#
 #	Revision 1.4  2000/05/13 09:23:45  rgbecker
 #	Fix spacing bugs
-#
+#	
 #	Revision 1.3  2000/05/12 16:19:07  rgbecker
 #	Title leading changes
 #	
@@ -55,7 +58,7 @@
 #	Revision 1.1  2000/04/06 08:58:09  rgbecker
 #	Paragraph formatting version of odyssey.py
 #	
-__version__=''' $Id: dodyssey.py,v 1.4 2000/05/13 09:23:45 rgbecker Exp $ '''
+__version__=''' $Id: dodyssey.py,v 1.5 2000/05/17 22:15:58 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -85,11 +88,11 @@ def go():
 	doc = doctemplate.BaseDocTemplate('dodyssey.pdf',showBoundary=0)
 
 	#normal frame as for SimpleFlowDocument
-	frameT = doctemplate.BasicFrame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id='normal')
+	frameT = doctemplate.Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id='normal')
 
 	#Two Columns
-	frame1 = doctemplate.BasicFrame(doc.leftMargin, doc.bottomMargin, doc.width/2-6, doc.height, id='col1')
-	frame2 = doctemplate.BasicFrame(doc.leftMargin+doc.width/2+6, doc.bottomMargin, doc.width/2-6,
+	frame1 = doctemplate.Frame(doc.leftMargin, doc.bottomMargin, doc.width/2-6, doc.height, id='col1')
+	frame2 = doctemplate.Frame(doc.leftMargin+doc.width/2+6, doc.bottomMargin, doc.width/2-6,
 						doc.height, id='col2')
 	doc.addPageTemplates([doctemplate.PageTemplate(id='First',frames=frameT, onPage=myTitlePage),
 						doctemplate.PageTemplate(id='OneCol',frames=frameT, onPage=myLaterPages),

@@ -35,7 +35,7 @@ def decoratePage(canvas, doc):
 
 class MyPageTemplate(PageTemplate):
     def __init__(self, id):
-        myFrame = BasicFrame(inch, inch, 6*inch, 10*inch, id='normal')
+        myFrame = Frame(inch, inch, 6*inch, 10*inch, id='normal')
         PageTemplate.__init__(self, id, [myFrame])  # note lack of onPage
 
     def drawPage(self, canvas, doc):

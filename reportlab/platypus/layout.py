@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.28  2000/05/17 22:17:38  rgbecker
+#	Renamed BasicFrame to Frame
+#
 #	Revision 1.27  2000/05/17 16:29:40  rgbecker
 #	Removal of SimpleFrame
-#
+#	
 #	Revision 1.26  2000/05/16 16:15:16  rgbecker
 #	Changes related to removal of SimpleFlowDocument
 #	
@@ -110,7 +113,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.27 2000/05/17 16:29:40 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.28 2000/05/17 22:17:38 rgbecker Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -312,7 +315,7 @@ class Macro(Flowable):
 	def draw(self):
 		exec self.command in globals(), {'canvas':self.canv}
 
-class BasicFrame:
+class Frame:
 	'''Abstraction for the definitional part of a Frame
 
                 width                    x2,y2

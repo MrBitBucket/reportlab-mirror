@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: testplatypus.py,v $
+#	Revision 1.16  2000/05/17 22:17:38  rgbecker
+#	Renamed BasicFrame to Frame
+#
 #	Revision 1.15  2000/05/16 14:28:55  rgbecker
 #	Fixes/Changes to get testplatypus to work with new framework
-#
+#	
 #	Revision 1.14  2000/04/26 11:07:15  andy_robinson
 #	Tables changed to use reportlab.lib.colors instead of
 #	the six hard-coded color strings there previously.
@@ -74,7 +77,7 @@
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testplatypus.py,v 1.15 2000/05/16 14:28:55 rgbecker Exp $ '''
+__version__=''' $Id: testplatypus.py,v 1.16 2000/05/17 22:17:38 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -469,8 +472,8 @@ class AndyTemplate(BaseDocTemplate):
 	def __init__(self, filename, pagesize=layout.DEFAULT_PAGE_SIZE, showBoundary=0,
 				leftMargin=inch, rightMargin=inch, topMargin=inch, bottomMargin=inch,
 				allowSplitting=0):
-		frame1 = layout.BasicFrame(inch, 5.6*inch, 6*inch, 5.2*inch,id='F1')
-		frame2 = layout.BasicFrame(inch, inch, 6*inch, 4.5*inch, showBoundary=1,id='F2')
+		frame1 = layout.Frame(inch, 5.6*inch, 6*inch, 5.2*inch,id='F1')
+		frame2 = layout.Frame(inch, inch, 6*inch, 4.5*inch, showBoundary=1,id='F2')
 		BaseDocTemplate.__init__(self, filename, pagesize=pagesize,
 				pageTemplates=PageTemplate('normal',[frame1,frame2],framePage),
 				showBoundary=showBoundary, leftMargin=leftMargin, rightMargin=rightMargin,

@@ -4,6 +4,9 @@
 CVS Revision History
 .beginPre Code
 $Log: platprop.yml,v $
+Revision 1.7  2000/05/17 22:18:09  rgbecker
+Renamed BasicFrame to Frame
+
 Revision 1.6  2000/05/17 16:30:09  rgbecker
 Removal of SimpleFrame
 
@@ -72,8 +75,7 @@ do this.  Here's some code which would create a frame and add two paragraphs to 
 .beginPre Code 
     canvas = Canvas('figure1.pdf')
 
-    frame = SimpleFrame(
-                    canvas,
+    frame = Frame(
                     2*inch,     # x
                     4*inch,     # y at bottom
                     4*inch,     # width
@@ -92,7 +94,7 @@ do this.  Here's some code which would create a frame and add two paragraphs to 
 
     mydata = [para1, para2]
 
-    frame.addFromList(mydata)
+    frame.addFromList(mydata,canvas)
     canvas.save()
 .endPre
 
@@ -100,15 +102,15 @@ This will result in a page like the one below:
 
 .custom platdemos PlatPropFigure1
 
-SimpleFrame has an <i>addFromList</i> method to display content.  It consumes objects from the front of the list until no more can fit in its client area or until the list is empty.
+Frame has an <i>addFromList</i> method to display content.  It consumes objects from the front of the list until no more can fit in its client area or until the list is empty.
 
 Note that there is a certain amount of space between the frame and the paragraphs within it.  Frames have four 'padding' attributes which can control this. The attributes can be seen below in the method signature for initializing a frame.
 
-.Comment  At the moment we have a BasicFrame class which defines the space a frame will take up and which isu used by DocTenplate; SimpleFrame descends from this and has the addFromList method to allow one to create and use a frame as we did above.  We hope to abolish the distinction so users interact with a class called Frame or BaseFrame.
+.Comment  At the moment we have a Frame class which defines the space a frame will take up and which is used by DocTemplate; SimpleFrame descends from this and has the addFromList method to allow one to create and use a frame as we did above.  We hope to abolish the distinction so users interact with a class called Frame or BaseFrame.
 
 
 .beginPre Code
-class BasicFrame:
+class Frame:
 	'''Abstraction for the definitional part of a Frame
 
                 width                    x2,y2
@@ -366,7 +368,7 @@ def decoratePage(canvas, doc):
 
 class MyPageTemplate(PageTemplate):
     def __init__(self, id):
-        myFrame = BasicFrame(inch, inch, 6*inch, 10*inch, id='normal')
+        myFrame = Frame(inch, inch, 6*inch, 10*inch, id='normal')
         PageTemplate.__init__(self, id, [myFrame], onPage=decoratePage)
 
 .endPre
@@ -377,7 +379,7 @@ when the page starts to drw.
 .beginPre Code
 class MyPageTemplate(PageTemplate):
     def __init__(self, id):
-        myFrame = BasicFrame(inch, inch, 6*inch, 10*inch, id='normal')
+        myFrame = Frame(inch, inch, 6*inch, 10*inch, id='normal')
         PageTemplate.__init__(self, id, [myFrame])  # note lack of onPage
 
     def drawPage(self, canvas, doc):

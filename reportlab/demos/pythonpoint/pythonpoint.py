@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.18  2000/05/17 22:17:38  rgbecker
+#	Renamed BasicFrame to Frame
+#
 #	Revision 1.17  2000/05/17 16:29:40  rgbecker
 #	Removal of SimpleFrame
-#
+#	
 #	Revision 1.16  2000/05/16 23:48:00  andy_robinson
 #	Allowed intra-paragraph text; fixed various bugs
 #	
@@ -87,7 +90,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.17 2000/05/17 16:29:40 rgbecker Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.18 2000/05/17 22:17:38 rgbecker Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -240,11 +243,11 @@ class PPFrame:
 
     def drawOn(self, canv):
         #make a layout frame
-        frame = layout.BasicFrame( self.x,
-                                   self.y,
-                                   self.width,
-                                   self.height,
-                                   showBoundary=1)
+        frame = layout.Frame( self.x,
+                              self.y,
+                              self.width,
+                              self.height,
+                              showBoundary=1)
  
         #build a story for the frame
         story = []

@@ -3,7 +3,7 @@
 from reportlab.lib import colors
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.platypus.layout import BasicFrame, Flowable
+from reportlab.platypus.layout import Frame, Flowable
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER
@@ -98,7 +98,7 @@ class PlatPropFigure1(PageFigure):
 
 
 def demo1(canvas):
-    frame = BasicFrame(
+    frame = Frame(
                     2*inch,     # x
                     4*inch,     # y at bottom
                     4*inch,     # width
@@ -124,7 +124,7 @@ def demo1(canvas):
 
 def test1():
     c  = Canvas('platdemos.pdf')
-    f = BasicFrame(inch, inch, 6*inch, 9*inch, showBoundary=1)
+    f = Frame(inch, inch, 6*inch, 9*inch, showBoundary=1)
     v = PlatPropFigure1()
     f.addFromList([v],c)
     c.save()

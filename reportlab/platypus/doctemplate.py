@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.11  2000/05/17 22:17:38  rgbecker
+#	Renamed BasicFrame to Frame
+#
 #	Revision 1.10  2000/05/17 16:29:40  rgbecker
 #	Removal of SimpleFrame
-#
+#	
 #	Revision 1.9  2000/05/17 15:37:33  rgbecker
 #	Changes related to removal of SimpleFlowDocument
 #	
@@ -61,7 +64,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.10 2000/05/17 16:29:40 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.11 2000/05/17 22:17:38 rgbecker Exp $ '''
 __doc__="""
 More complicated Document model
 """
@@ -106,13 +109,13 @@ class NextPageTemplate(ActionFlowable):
 
 class PageTemplate:
 	"""
-	essentially a list of BasicFrames and an onPage routine to call at the start
+	essentially a list of Frames and an onPage routine to call at the start
 	of a page when this is selected.
 	derived classes can also implement drawPage if they want
 	"""
 	def __init__(self,id=None,frames=[],onPage=None):
 		if type(frames) not in (ListType,TupleType): frames = [frames]
-		assert filter(lambda x: not isinstance(x,BasicFrame), frames)==[], "frames argument error"
+		assert filter(lambda x: not isinstance(x,Frame), frames)==[], "frames argument error"
 		self.id = id
 		self.frames = frames
 		self.onPage = onPage or _doNothing
@@ -338,7 +341,7 @@ class SimpleDocTemplate(BaseDocTemplate):
 		self._handle_nextPageTemplate('Later')
 
 	def build(self,flowables,onFirstPage=_doNothing, onLaterPages=_doNothing):
-		frameT = BasicFrame(self.leftMargin, self.bottomMargin, self.width, self.height, id='normal')
+		frameT = Frame(self.leftMargin, self.bottomMargin, self.width, self.height, id='normal')
 		self.addPageTemplates([PageTemplate(id='First',frames=frameT, onPage=onFirstPage),
 						PageTemplate(id='Later',frames=frameT, onPage=onLaterPages)])
 		if onFirstPage is _doNothing and hasattr(self,'onFirstPage'):
