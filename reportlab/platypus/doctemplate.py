@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.2  2000/05/12 14:45:31  rgbecker
+#	Single actions only in ActionFlowables
+#
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
-#
-__version__=''' $Id: doctemplate.py,v 1.1 2000/05/12 12:53:33 rgbecker Exp $ '''
+#	
+__version__=''' $Id: doctemplate.py,v 1.2 2000/05/12 14:45:31 rgbecker Exp $ '''
 __doc__="""
 More complicated Document model
 """
@@ -44,10 +47,10 @@ import sys
 
 class ActionFlowable(Flowable):
 	'''This Flowable is never drawn, it can be used for data driven controls'''
-	def __init__(self,actions=[]):
-		if type(actions) not in (ListType, TupleType):
-			actions = (actions,)
-		self.actions = actions
+	def __init__(self,action=[]):
+		if type(action) not in (ListType, TupleType):
+			action = (action,)
+		self.action = action
 
 	def wrap(self, availWidth, availHeight):
 		raise NotImplementedError
@@ -56,20 +59,15 @@ class ActionFlowable(Flowable):
 		raise NotImplementedError
 
 	def apply(self,doc):
-		for a in self.actions:
-			if type(a) in (ListType, TupleType):
-				action = a[0]
-				args = tuple(a[1:])
-			else:
-				action = a
-				args = ()
-			try:
-				apply(getattr(doc,'handle_'+action), args)
-			except AttributeError:
-				raise NotImplementedError, "Can't handle ActionFlowable(%s)" % action
-			except:
-				t, v, None = sys.exc_info()
-				raise t, "%s\n   handle_%s args=%s"%(v,action,args)
+		action = self.action[0]
+		args = tuple(self.action[1:])
+		try:
+			apply(getattr(doc,'handle_'+action), args)
+		except AttributeError:
+			raise NotImplementedError, "Can't handle ActionFlowable(%s)" % action
+		except:
+			t, v, None = sys.exc_info()
+			raise t, "%s\n   handle_%s args=%s"%(v,action,args)
 				
 
 FrameBreak = ActionFlowable('frameBegin')
@@ -77,7 +75,7 @@ PageBegin = ActionFlowable('pageBegin')
 
 class NextPageTemplate(ActionFlowable):
 	def __init__(self,pt):
-		ActionFlowable.__init__(self,(('nextPageTemplate',pt),))
+		ActionFlowable.__init__(self,('nextPageTemplate',pt))
 
 class PageTemplate:
 	"""
