@@ -2137,6 +2137,7 @@ static int parse_pcdata(Parser p)
 		s->next = next + 3;
 		require(parse_comment(p, 1, 0));
                 NF16StartCheck(p);
+		buf = s->line;
 		buflen = s->line_length;
 		next = s->next;
 	    }
