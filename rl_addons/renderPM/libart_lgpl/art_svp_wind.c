@@ -193,7 +193,7 @@ x_order (ArtPoint z0, ArtPoint z1, ArtPoint z2, ArtPoint z3)
 	    {
 	      if (d1 > 0) return 1;
 	      else if (d1 < 0) return -1;
-	      else printf ("case 1 degenerate\n");
+	      else fprintf (stderr,"case 1 degenerate\n");
 	      return 0;
 	    }
 	  else /* d0 < 0 */
@@ -231,7 +231,7 @@ x_order (ArtPoint z0, ArtPoint z1, ArtPoint z2, ArtPoint z3)
 	{
 	  if (d3 > 0) return -1;
 	  else if (d3 < 0) return 1;
-	  else printf ("case 2 degenerate\n");
+	  else fprintf (stderr, "case 2 degenerate\n");
 	  return 0;
 	}
       else /* d2 < 0 */
