@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.79 2004/04/21 16:39:36 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.79 2004/04/21 16:39:36 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.80 2004/04/22 17:36:41 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.80 2004/04/22 17:36:41 rgbecker Exp $ '''
 
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
@@ -18,23 +18,13 @@ cause the value to wrap (ie are like a traditional linefeed).
 See the test output from running this module as a script for a discussion of the method for constructing
 tables and table styles.
 """
-
-from reportlab.platypus.flowables import Flowable, Image, Macro, PageBreak, Preformatted, Spacer, XBox, \
-                         CondPageBreak, KeepTogether, TraceInfo, FailOnWrap, FailOnDraw
-from reportlab.platypus.paragraph import Paragraph, cleanBlockQuotedText, ParaLines
-from reportlab.platypus.paraparser import ParaFrag
-from reportlab.platypus.frames import Frame
-from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate, PageTemplate, ActionFlowable, \
-                         SimpleDocTemplate, FrameBreak, PageBegin
-from reportlab.platypus.xpreformatted import XPreformatted
+from reportlab.platypus.flowables import Flowable, Preformatted
 from reportlab import rl_config
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.utils import fp_str
 from reportlab.pdfbase import pdfmetrics
-
 import operator, string
-
 from types import TupleType, ListType, StringType
 
 class CellStyle(PropertySet):
@@ -163,7 +153,6 @@ def _calc_pc(V,avail):
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
                 repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None):
-        #print "colWidths", colWidths
         self.hAlign = 'CENTER'
         self.vAlign = 'MIDDLE'
         if type(data) not in _SeqTypes:
@@ -281,18 +270,13 @@ class Table(Flowable):
         return w, t - V[0].getSpaceBefore()-V[-1].getSpaceAfter()
 
     def _calc_width(self,availWidth,W=None):
-        #comments added by Andy to Robin's slightly
-        #terse variable names
+        if getattr(self,'_width_calculated_once',None): return
+        #comments added by Andy to Robin's slightly terse variable names
         if not W: W = _calc_pc(self._argW,availWidth)   #widths array
-        #print 'widths array = %s' % str(self._colWidths)
-        canv = getattr(self,'canv',None)
-        saved = None
-
         if None in W:  #some column widths are not given
-            if self._spanCmds:
-                colspans = self._colSpannedCells
-            else:
-                colspans = {}
+            canv = getattr(self,'canv',None)
+            saved = None
+            colSpanCells = self._spanCmds and self._colSpanCells or ()
             if W is self._argW: W = W[:]
             while None in W:
                 j = W.index(None) #find first unspecified column
@@ -305,8 +289,7 @@ class Table(Flowable):
                 for v, s in map(None, V, S):
                     #if the current cell is part of a spanned region,
                     #assume a zero size.
-                    if colspans.has_key((j, i)):
-                        #print 'sizing a spanned cell (%d, %d) with content "%s"' % (j, i, str(v))
+                    if (j, i) in colSpanCells:
                         t = 0.0
                     else:#work out size
                         t = self._elementWidth(v,s)
@@ -316,19 +299,17 @@ class Table(Flowable):
                     if t>w: w = t   #record a new maximum
                     i = i + 1
 
-                #print 'max width for column %d is %0.2f' % (j, w)
                 W[j] = w
 
         self._colWidths = W
         width = 0
         self._colpositions = [0]        #index -1 is right side boundary; we skip when processing cells
         for w in W:
-            #print w, width
             width = width + w
             self._colpositions.append(width)
-        #print "final width", width
 
         self._width = width
+        self._width_calculated_once = 1
 
     def _elementWidth(self,v,s):
         t = type(v)
@@ -351,20 +332,20 @@ class Table(Flowable):
         H = self._argH
         if not W: W = _calc_pc(self._argW,availWidth)   #widths array
 
-        canv = getattr(self,'canv',None)
-        saved = None
-
-        #get a handy list of any cells which span rows.
-        #these should be ignored for sizing
-        if self._spanCmds:
-            spans = self._rowSpannedCells
-        else:
-            spans = {}
-
         hmax = lim = len(H)
         longTable = getattr(self,'_longTableOptimize',None)
 
         if None in H:
+            canv = getattr(self,'canv',None)
+            saved = None
+            #get a handy list of any cells which span rows. should be ignored for sizing
+            if self._spanCmds:
+                rowSpanCells = self._rowSpanCells
+                colSpanCells = self._colSpanCells
+                spanRanges = self._spanRanges
+                colpositions = self._colpositions
+            else:
+                rowSpanCells = colSpanCells = ()
             if canv: saved = canv._fontname, canv._fontsize, canv._leading
             H = H[:]    #make a copy as we'll change it
             self._rowHeights = H
@@ -380,7 +361,8 @@ class Table(Flowable):
                 h = 0
                 j = 0
                 for v, s, w in map(None, V, S, W): # value, style, width (lengths must match)
-                    if spans.has_key((j, i)):
+                    ji = j,i
+                    if ji in rowSpanCells:
                         t = 0.0  # don't count it, it's either occluded or unreliable
                     else:
                         t = type(v)
@@ -389,9 +371,11 @@ class Table(Flowable):
                             if w is None:
                                 raise ValueError, "Flowable %s in cell(%d,%d) can't have auto width in\n%s" % (v[0].identity(30),i,j,self.identity(30))
                             if canv: canv._fontname, canv._fontsize, canv._leading = s.fontname, s.fontsize, s.leading or 1.2*s.fontsize
+                            if ji in colSpanCells:
+                                t = spanRanges[ji]
+                                w = max(colpositions[t[2]+1]-colpositions[t[0]],w)
                             dW,t = self._listCellGeom(v,w,s)
                             if canv: canv._fontname, canv._fontsize, canv._leading = saved
-                            #print "leftpadding, rightpadding", s.leftPadding, s.rightPadding
                             dW = dW + s.leftPadding + s.rightPadding
                             if not rl_config.allowTableBoundsErrors and dW>w:
                                 raise "LayoutError", "Flowable %s (%sx%s points) too wide for cell(%d,%d) (%sx* points) in\n%s" % (v[0].identity(30),fp_str(dW),fp_str(t),i,j, fp_str(w), self.identity(30))
@@ -407,7 +391,6 @@ class Table(Flowable):
             if None not in H: hmax = lim
 
         height = self._height = reduce(operator.add, H[:hmax], 0)
-        #print "height, H", height, H
         self._rowpositions = [height]    # index 0 is actually topline; we skip when processing cells
         for h in H[:hmax]:
             height = height - h
@@ -432,22 +415,17 @@ class Table(Flowable):
         # in sizing
         if self._spanCmds:
             self._calcSpanRanges()
+            if None in self._argH:
+                self._calc_width(availWidth,W=W)
 
         # calculate the full table height
-        #print 'during calc, self._colWidths=', self._colWidths
         self._calc_height(availHeight,availWidth,W=W)
-
-        # if the width has already been calculated, don't calculate again
-        # there's surely a better, more pythonic way to short circuit this FIXME FIXME
-        if hasattr(self,'_width_calculated_once'): return
-        self._width_calculated_once = 1
 
         # calculate the full table width
         self._calc_width(availWidth,W=W)
 
         if self._spanCmds:
-            #now work out the actual rect for each spanned cell
-            #from the underlying grid
+            #now work out the actual rect for each spanned cell from the underlying grid
             self._calcSpanRects()
 
     def _hasVariWidthElements(self, upToRow=None):
@@ -550,11 +528,14 @@ class Table(Flowable):
 
         Any cell not in the key is not part of a spanned region
         """
-        spanRanges = {}
-        for row in range(self._nrows):
-            for col in range(self._ncols):
-                spanRanges[(col, row)] = (col, row, col, row)
-
+        self._spanRanges = spanRanges = {}
+        for x in xrange(self._ncols):
+            for y in xrange(self._nrows):
+                spanRanges[x,y] = (x, y, x, y)
+        self._colSpanCells = []
+        self._rowSpanCells = []
+        csa = self._colSpanCells.append
+        rsa = self._rowSpanCells.append
         for (cmd, start, stop) in self._spanCmds:
             x0, y0 = start
             x1, y1 = stop
@@ -564,50 +545,26 @@ class Table(Flowable):
             if x1 < 0: x1 = x1 + self._ncols
             if y0 < 0: y0 = y0 + self._nrows
             if y1 < 0: y1 = y1 + self._nrows
+            if x0 > x1: x0, x1 = x1, x0
+            if y0 > y1: y0, y1 = y1, y0
 
-            if x0 > x1:
-                x0, x1 = x1, x0
-            if y0 > y1:
-                y0, y1 = y1, y0
+            if x0!=x1 or y0!=y1:
+                #column span
+                if x0!=x1:
+                    for y in xrange(y0, y1+1):
+                        for x in xrange(x0,x1+1):
+                            csa((x,y))
+                #row span
+                if y0!=y1:
+                    for y in xrange(y0, y1+1):
+                        for x in xrange(x0,x1+1):
+                            rsa((x,y))
 
-            # unset/clobber all the ones it overwrites
-            for y in xrange(y0, y1+1):
-                for x in xrange(x0, x1+1):
-                    spanRanges[x, y] = None
-
-            # set the main entry
-            spanRanges[x0,y0] = (x0, y0, x1, y1)
-##            from pprint import pprint as pp
-##            pp(spanRanges)
-        self._spanRanges = spanRanges
-
-        #now produce a "listing" of all cells which
-        #are part of a spanned region, so the normal
-        #sizing algorithm can not bother sizing such cells
-        colSpannedCells = {}
-        for (key, value) in spanRanges.items():
-            if value is None:
-                colSpannedCells[key] = 1
-            elif len(value) == 4:
-                if value[0] == value[2]:
-                    #not colspanned
-                    pass
-                else:
-                    colSpannedCells[key] = 1
-        self._colSpannedCells = colSpannedCells
-        #ditto for row-spanned ones.
-        rowSpannedCells = {}
-        for (key, value) in spanRanges.items():
-            if value is None:
-                rowSpannedCells[key] = 1
-            elif len(value) == 4:
-                if value[1] == value[3]:
-                    #not rowspanned
-                    pass
-                else:
-                    rowSpannedCells[key] = 1
-        self._rowSpannedCells = rowSpannedCells
-
+                for y in xrange(y0, y1+1):
+                    for x in xrange(x0,x1+1):
+                        spanRanges[x,y] = None
+                # set the main entry
+                spanRanges[x0,y0] = (x0, y0, x1, y1)
 
     def _calcSpanRects(self):
         """Work out rects for tables which do row and column spanning.
@@ -620,6 +577,7 @@ class Table(Flowable):
         for each cell.  Any cell which 'does not exist' as another
         has spanned over it will get a None entry on the right
         """
+        if getattr(self,'_spanRects',None): return
         spanRects = {}
         for (coord, value) in self._spanRanges.items():
             if value is None:
@@ -634,7 +592,6 @@ class Table(Flowable):
                 spanRects[coord] = (x, y, width, height)
 
         self._spanRects = spanRects
-
 
     def setStyle(self, tblstyle):
         if type(tblstyle) is not TableStyleType:
@@ -1148,6 +1105,9 @@ LIST_STYLE = TableStyle(
 
 def test():
     from reportlab.lib.units import inch, cm
+    from reportlab.platypus.flowables import Image, PageBreak, Spacer, XBox
+    from reportlab.platypus.paragraph import Paragraph
+    from reportlab.platypus.doctemplate import SimpleDocTemplate
     rowheights = (24, 16, 16, 16, 16)
     rowheights2 = (24, 16, 16, 16, 30)
     colwidths = (50, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32)
