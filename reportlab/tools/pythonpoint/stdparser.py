@@ -12,9 +12,11 @@ import string, imp, os
 from reportlab.lib import xmllib
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
-
 from reportlab.tools.pythonpoint import pythonpoint
 
+def getModule(modulename,fromPath='reportlab.tools.pythonpoint.styles'):
+    exec 'from reportlab.tools.pythonpoint.styles import '+modulename
+    return eval(modulename)
 
 class PPMLParser(xmllib.XMLParser):
     attributes = {
@@ -271,7 +273,7 @@ class PPMLParser(xmllib.XMLParser):
             mod = imp.load_module(modulename, file, pathname, description)
         except ImportError:
             #last gasp
-            exec 'from reportlab.tools.pythonpoint.styles import %s as mod' % modulename
+            mod = getModule(modulename)
  
         #now get the function
         func = getattr(mod, funcname)
@@ -619,7 +621,7 @@ class PPMLParser(xmllib.XMLParser):
             (file, pathname, description) = found
             mod = imp.load_module(modulename, file, pathname, description)
         except ImportError:
-            exec 'from reportlab.tools.pythonpoint import %s as mod' % modulename
+            mod = getModule(modulename)
         
         #now get the function
         
