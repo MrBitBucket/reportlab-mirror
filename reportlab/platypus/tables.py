@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.81 2004/05/18 17:16:55 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.81 2004/05/18 17:16:55 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.82 2004/06/07 16:30:37 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.82 2004/06/07 16:30:37 rgbecker Exp $ '''
 
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
@@ -1107,6 +1107,7 @@ def test():
     from reportlab.lib.units import inch, cm
     from reportlab.platypus.flowables import Image, PageBreak, Spacer, XBox
     from reportlab.platypus.paragraph import Paragraph
+    from reportlab.platypus.xpreformatted import XPreformatted
     from reportlab.platypus.doctemplate import SimpleDocTemplate
     rowheights = (24, 16, 16, 16, 16)
     rowheights2 = (24, 16, 16, 16, 30)
@@ -1561,6 +1562,16 @@ LIST_STYLE = TableStyle(
             [Paragraph('World Domination: The First Five Years', styleSheet['BodyText'])],
             ]
     t=Table(data, style=[], colWidths = [11*cm], rowHeights = [None]*3)
+    lst.append(t)
+
+    lst.append(Spacer(18,18))
+    lst.append(Paragraph('xpre example', styleSheet['Heading1']))
+    data=  [    [
+                XPreformatted('Account Details', styleSheet['Heading3']),
+                '', XPreformatted('Client Details', styleSheet['Heading3']),
+                ],  #end of row 0
+            ]
+    t=Table(data, style=[], colWidths = [80,230.0,80], rowHeights = [None]*1)
     lst.append(t)
 
     lst.append(PageBreak())
