@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.21 2001/10/10 13:56:36 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.22 2001/10/12 11:08:51 rgbecker Exp $
 import string
 
 from reportlab.lib import colors
@@ -32,7 +32,11 @@ def _simpleSplit(txt,mW,SW):
 	if O!=[]: L.append(string.join(O,' '))
 	return L
 
-def _processGlyph(G,rev=0):
+def _pathNumTrunc(n):
+	if int(n)==n: return int(n)
+	return round(n,5)
+
+def _processGlyph(G, truncate=1, pathReverse=0):
 	O = []
 	P = []
 	R = []
@@ -41,7 +45,7 @@ def _processGlyph(G,rev=0):
 		if O and op in ['moveTo', 'moveToClosed','end']:
 			if O[0]=='moveToClosed':
 				O = O[1:]
-				if rev:
+				if pathReverse:
 					for i in xrange(0,len(P),2):
 						P[i+1], P[i] = P[i:i+2]
 					P.reverse()
@@ -49,6 +53,7 @@ def _processGlyph(G,rev=0):
 				O.insert(0,'moveTo')
 				O.append('closePath')
 			i = 0
+			if truncate: P = map(_pathNumTrunc,P)
 			for o in O:
 				j = i + _PATH_OP_ARG_COUNT[_PATH_OP_NAMES.index(o)]
 				if o=='closePath':
@@ -62,7 +67,8 @@ def _processGlyph(G,rev=0):
 		P.extend(g[1:])
 	return R
 
-def _text2Path(text, x, y, fontName, fontSize, anchor):
+def _text2PathDescription(text, x=0, y=0, fontName='Times-Roman', fontSize=1000,
+							anchor='start', truncate=1, pathReverse=0):
 	global _gs
 	if not _gs:
 		import _renderPM
@@ -77,8 +83,13 @@ def _text2Path(text, x, y, fontName, fontSize, anchor):
 		elif text_anchor=='middle':
 			x = x - textLen/2.
 	for g in _gs._stringPath(text,x,y):
-		P.extend(_processGlyph(g))
-	return definePath(P)
+		P.extend(_processGlyph(g,truncate=truncate,pathReverse=pathReverse))
+	return P
+
+def _text2Path(text, x=0, y=0, fontName='Times-Roman', fontSize=1000,
+				anchor='start', truncate=1, pathReverse=0):
+	return definePath(_text2PathDescription(text,x=x,y=y,fontName=fontName,
+					fontSize=fontSize,anchor=anchor,truncate=truncate,pathReverse=pathReverse))
 
 class Label(Widget):
 	"""A text label to attach to something else, such as a chart axis.
