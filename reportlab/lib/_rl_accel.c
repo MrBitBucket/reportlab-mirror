@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.14 2001/05/09 22:31:04 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.15 2001/05/25 14:22:14 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.14 2001/05/09 22:31:04 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.15 2001/05/25 14:22:14 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -23,7 +23,7 @@ static __version__=" $Id: _rl_accel.c,v 1.14 2001/05/09 22:31:04 rgbecker Exp $ 
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.31"
+#define VERSION "0.32"
 #define MODULE "_rl_accel"
 #ifndef	ATTRDICT
 	#if PY_MAJOR_VERSION>=2
@@ -362,6 +362,7 @@ static	char *_fp_one(PyObject *pD)
 	double d;
 	static	char s[30];
 	int l;
+	char*	dot;
 	if((pD=PyNumber_Float(pD))) d = PyFloat_AS_DOUBLE(pD);
 	else {
 		PyErr_SetString(ErrorObject, "bad numeric value");
@@ -371,11 +372,12 @@ static	char *_fp_one(PyObject *pD)
 	sprintf(s,_fp_fmts[l], d);
 	l = strlen(s)-1;
 	while(l && s[l]=='0') l--;
-	if(s[l]=='.') s[l]=0;
+	if(s[l]=='.' || s[l]==',') s[l]=0;
 	else {
 		s[l+1]=0;
-		if(s[0]=='0' && s[1]=='.') return s+1;
+		if(s[0]=='0' && (s[1]=='.'||s[1]==',')) return s+1;
 		}
+	if((dot=strchr(s,','))) *dot = '.';
 	return s;
 }
 
