@@ -1815,7 +1815,8 @@ class PDFImageXObject:
             else:
                 self.mask = None
         elif hasattr(self.mask,'rgb'):
-            self.mask = self.mask.rgb()+self.mask.rgb()
+            _ = self.mask.rgb()
+            self.mask = _[0],_[0],_[1],_[1],_[2],_[2]
 
     def loadImageFromSRC(self, im):
         "Extracts the stream, width and height"
