@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPS.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.8 2001/07/12 14:16:20 rgbecker Exp $
-__version__=''' $Id: renderPS.py,v 1.8 2001/07/12 14:16:20 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.9 2001/07/15 21:31:34 jvr Exp $
+__version__=''' $Id: renderPS.py,v 1.9 2001/07/15 21:31:34 jvr Exp $ '''
 import string, cStringIO, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str
@@ -104,7 +104,11 @@ class PSCanvas:
     def setColor(self, color):
         if self._color!=color:
             self._color = color
-            if color: self.code.append('%s setrgbcolor' % fp_str(color.red, color.green, color.blue))
+            if color:
+                if hasattr(color, "cyan"):
+                    self.code.append('%s setcmykcolor' % fp_str(color.cyan, color.magenta, color.yellow, color.black))
+                else:
+                    self.code.append('%s setrgbcolor' % fp_str(color.red, color.green, color.blue))
 
     def setFillColor(self, color):
         self._fillColor = color
@@ -734,9 +738,9 @@ class _PSRenderer(Renderer):
                 fontsize = delta.get('fontSize', self._canvas._fontSize)
                 self._canvas.setFont(fontname, fontsize)
 
-def drawToFile(d,fn):
+def drawToFile(d,fn, showBorder=1):
     c = PSCanvas((d.width,d.height))
-    draw(d, c, 0, 0)
+    draw(d, c, 0, 0, showBorder=showBorder)
     c.save(fn)
 
 #########################################################
