@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.13 2001/04/11 15:14:02 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.14 2001/04/11 15:46:17 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -34,7 +34,7 @@ the former axes in its own coordinate system.
 """
 
 
-from types import FunctionType, StringType
+from types import FunctionType, StringType, TupleType, ListType
 
 from reportlab.graphics.shapes import Drawing, Line, Group, Auto
 from reportlab.graphics.shapes import STATE_DEFAULTS
@@ -363,20 +363,37 @@ class YCategoryAxis(CategoryAxis):
 
         return g
 
-def _findMin(V, x):
+def _findMin(V, x, default):
     '''find minimum over V[i][x]'''
-    selector = lambda T, x=x: T[x]
-    m = min(map(selector, V[0]))
-    for v in V[1:]:
-        m = min(m,min(map(selector, v)))
+    try:
+        if type(V[0][0]) in (TupleType,ListType):
+            selector = lambda T, x=x: T[x]
+            m = min(map(selector, V[0]))
+            for v in V[1:]:
+                m = min(m,min(map(selector, v)))
+        else:
+            m = min(V[0])
+            for v in V[1:]:
+                m = min(m,min(v))
+    except IndexError:
+            m = default
     return m
 
-def _findMax(V, x):
+def _findMax(V, x, default):
     '''find maximum over V[i][x]'''
-    selector = lambda T, x=x: T[x]
-    m = max(map(selector, V[0]))
-    for v in V[1:]:
-        m = max(m,max(map(selector, v)))
+    try:
+        if type(V[0][0]) in (TupleType,ListType):
+            selector = lambda T, x=x: T[x]
+            m = max(map(selector, V[0]))
+            for v in V[1:]:
+                m = max(m,max(map(selector, v)))
+        else:
+            m = max(V[0])
+            for v in V[1:]:
+                m = max(m,max(v))
+    except IndexError:
+        m = default
+
     return m
     
 # Value axes.
@@ -445,15 +462,13 @@ class ValueAxis(Widget):
 
         Returns a min, max tuple.
         """
+        valueMin = self.valueMin
         if self.valueMin == Auto:
-            valueMin = _findMin(dataSeries,self._dataIndex)
-        else:
-            valueMin = self.valueMin
+            valueMin = _findMin(dataSeries,self._dataIndex,valueMin)
 
+        valueMax = self.valueMax
         if self.valueMax == Auto:
-            valueMax = _findMax(dataSeries,self._dataIndex)
-        else:
-            valueMax = self.valueMax
+            valueMax = _findMax(dataSeries,self._dataIndex,valueMax)
         self._valueMin, self._valueMax = (valueMin, valueMax)
         self._rangeAdjust()
 
