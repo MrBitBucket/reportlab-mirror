@@ -24,6 +24,8 @@ from reportlab.lib import colors
 
 import reportlab.lib.styles
 
+
+
 def run(infilename, outfilename):
     p = yaml.Parser()
     results = p.parseFile(infilename)
@@ -53,12 +55,14 @@ def run(infilename, outfilename):
             except KeyError:
                 print 'Preformatted style "%s" not found in stylesheet, using Normal instead' % stylename
                 style = ss['Normal']
-            story.append(Paragraph(text, style, bulletText=bulletText))
+            story.append(Preformatted(text, style, bulletText=bulletText))
         elif typ == 'Image':
             filename = thingy[1]
-            img = reportlab.platypus.layout.Image(filename)
+            img = Image(filename)
             story.append(img)
-            
+        elif typ == 'VSpace':
+            height = thingy[1]
+            story.append(Spacer(0, height))
         else:
             print 'skipping',typ, 'for now'
 
@@ -77,6 +81,15 @@ def getStyleSheet():
                                   leading=12)
                    )
 
+    stylesheet.add(ParagraphStyle(name='Comment',
+                                  fontName='Times-Italic')
+                   )
+
+    stylesheet.add(ParagraphStyle(name='Indent1',
+                                  leftIndent=36,
+                                  firstLineIndent=36)
+                   )
+    
     stylesheet.add(ParagraphStyle(name='BodyText',
                                   parent=stylesheet['Normal'],
                                   spaceBefore=6)
@@ -90,6 +103,7 @@ def getStyleSheet():
                                   parent=stylesheet['Normal'],
                                   fontName = 'Times-Bold',
                                   fontSize=18,
+                                  leading=22,
                                   spaceAfter=6),
                    alias='h1')
 
@@ -97,6 +111,7 @@ def getStyleSheet():
                                   parent=stylesheet['Normal'],
                                   fontName = 'Times-Bold',
                                   fontSize=14,
+                                  leading=17,
                                   spaceBefore=12,
                                   spaceAfter=6),
                    alias='h2')
@@ -105,6 +120,7 @@ def getStyleSheet():
                                   parent=stylesheet['Normal'],
                                   fontName = 'Times-BoldItalic',
                                   fontSize=12,
+                                  leading=14,
                                   spaceBefore=12,
                                   spaceAfter=6),
                    alias='h3')

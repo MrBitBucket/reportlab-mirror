@@ -90,13 +90,20 @@ class Parser:
     def image(self, filename):
         self.endPara()
         self._results.append(('Image', filename))
+
+    def vSpace(self, points):
+        """Inserts a vertical spacer"""
+        self._results.append(('VSpace', points))
         
     def readLine(self, line):    
         #this is the inner loop
         self._lineNo = self._lineNo + 1
         stripped = string.lstrip(line)
         if len(stripped) == 0:
-            self.endPara()
+            if self._mode == PLAIN:
+                self.endPara()
+            else:  #preformatted, append it
+                self._buf.append(line)
         elif stripped[0]=='.':
             # we have a command of some kind
             self.endPara()

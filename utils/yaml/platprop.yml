@@ -1,10 +1,13 @@
 .t PLATYPUS Proposal
 
-.beginPre
+CVS Revision History
+.beginPre Code
 $Log: platprop.yml,v $
+Revision 1.2  2000/05/15 13:37:53  andy_robinson
+Preliminary docco on Paragraphs and ParagraphStyles
+
 Revision 1.1  2000/05/15 10:58:54  andy_robinson
 Platypus Proposal
-
 .endPre
 
 
@@ -14,4 +17,143 @@ The most common Flowable objects in most applications will almost certainly be p
 
 
 .h3 Initialisation
-We have abstracted many of the formatting options out of Paragraph cclass itself into a separate class called ParagraphStyle.  This 
+
+We have abstracted many of the formatting options out of Paragraph class itself into a separate class called ParagraphStyle.  The idea is that a project will generally define a collection of styles once (in a StyleSheet - see below) and each paragraph will refer to a Style.  This offers consistency benefits for the document, and allows global style changes to be made simply by switching or modifying stylesheets.  It also saves memory - a document with a thousand paragraphs (or, more likely at some point soon, thousands of table cells each of which contains paragraphs) may only need perhaps ten ParagraphStyle objects.
+
+Paragraphs are constructed as follows:
+
+.beginPre Code
+from reportlab.platypus.paragraph import Paragraph
+myStyle = myStyleSheet['Normal']   # get hold of a style from somewhere
+myPara = Paragraph("Nobody Expects The Spanish Inquisition!", myStyle)
+.endPre
+
+Constructing a paragraph is a cheap operation - it just keeps the text internally, and no work is done until a frame tries to wrap and draw it.
+
+Paragraphs also have a third attribute which can be passed in on initialisation, <i>bulletText</i>, which is None by default.  This defines the content for a separate string to be drawn on the first line, typically off to the left.  This can be used for various bullet styles, or for numbering paragraphs according to various conventions.  We'll see bullets flying around later.
+
+.h3 StyleSheets and ParagraphStyle Objects
+
+A <i>StyleSheet</i> (defined in <i>reportlab.lib.styles</i> is a container for a bunch of named styles.  A project will typically define a Python function somewhere to create the standard StyleSheet; one such function is <font name='Courier'>getSampleStyleSheet()</font> in <i>reportlab.lib.styles</i>.
+We'll just show an excerpt from this here:
+.beginPre Code
+
+def getSampleStyleSheet1():
+    """Returns a stylesheet object"""
+    stylesheet = StyleSheet1()
+
+    stylesheet.add(ParagraphStyle(name='Normal',
+                                  fontName='Times-Roman',
+                                  fontSize=10,
+                                  leading=12)
+                   )
+
+    stylesheet.add(ParagraphStyle(name='BodyText',
+                                  parent=stylesheet['Normal'],
+                                  spaceBefore=6)
+                   )
+    stylesheet.add(ParagraphStyle(name='Italic',
+                                  parent=stylesheet['BodyText'],
+                                  fontName = 'Times-Italic')
+                   )
+
+    stylesheet.add(ParagraphStyle(name='Heading1',
+                                  parent=stylesheet['Normal'],
+                                  fontName = 'Times-Bold',
+                                  fontSize=18,
+                                  spaceAfter=6),
+                   alias='h1')
+    # snip - many styles removed
+    return stylesheet
+.endPre
+
+
+
+The stylesheet can be accessed exactly as it it was a dictionary, except that one may use the style name or an alias to find a style:
+.beginPre Code
+hdg = myStyleSheet['Heading1']
+hdg = myStyleSheet['h1']
+.endPre
+
+
+ParagraphStyles have the following attributes which affect the way the associated paragraph is drawn.
+.df <font name='Courier'>fontName</font> - one of the standard 14 fonts
+.df <font name='Courier'>fontSize</font> - size in points
+.df <font name='Courier'>leading</font> - inter-line separation in points.  <i>This should default to 1.2 * font size if not directly specified - not done at present</i>
+.df <font name='Courier'>fontSize</font> - size in points
+.df <font name='Courier'>textColor</font> - a standard ReportLab color object as defined in <i>reportlab/lib/colors.py</i>
+.df <font name='Courier'>firstLine</font> - indentation of first line of text relative to the usable area of the frame.  Thus if a frame has a border and leftPadding of 12 points, and the paragraph style has firstLineIndent of 36 points, the paragraph will be 48 points from the frame border.
+.df <font name='Courier'>leftIndent</font> - indentation of lines 2 onwards relative to the left usable edge of the frame
+.df <font name='Courier'>rightIndent</font> - indentation of all lines relative to the right usable edge of the frame
+.df <font name='Courier'>alignment</font> - one of the four constants TA_LEFT, TA_RIGHT, TA_CENTER and TA_JUSTIFY defined in <i>reportlab.lib.enums</i>
+.df <font name='Courier'>bulletFontName</font> - font to be used for the bullet string, if the paragraph has one.
+.df <font name='Courier'>bulletFontSize</font> - font to be used for the bullet string, if the paragraph has one.
+.df <font name='Courier'>bulletIndent</font> - left indentation of the start of the bullet string, if the paragraph has one.  Note that this needs to be smaller than the <font name='Courier'>firstLine</font> or they will overwrite each other.  
+.df <font name='Courier'>spaceBefore</font> - number of points of space to precede the paragraph, except when it is the first item in a frame when there will be no preceding space
+.df <font name='Courier'>spaceBefore</font> - number of points of space to follow the paragraph, except when it is the last item in a Frame in which case there will not necessarily be a following space.
+
+Note that <font name='Courier'>spaceBefore</font> and <font name='Courier'>spaceAfter</font> are <i>soft</i> spaces - the Paragraph will ask Platypus for it politely, but may not get it, and the space does not "belong to" the Paragraph itself.  We might generalize these spaces in future to have a degree of stretchiness.
+
+The choice of attributes is based loosely on those in Word, Publisher and other such programs and we feel they are capable of most common tasks.  
+
+
+.h3 Intra-Paragraph Formatting
+
+To specify changes in font within each paragraph, we use XML tags.  We'll show you a paragraph containing most of the things that can be done:
+
+.df Substrings within paragraphs can be tagged as <b>bold</b>, <i>italic</i> or <u>underlined</u> using the same tags as HTML.  We currently don't implement underlining.  It is also possibly to explicitly choose a font like <font name="Courier">Courier</font> or 
+<font size="+1">even</font>
+<font size="+2">vary</font>
+<font size="+3">the</font>
+<font size="+4">font</font>
+<font size="+5">size</font>
+within a paragraph. Color can be set to <font color="red">red</font>, <font color="green">green</font> or anything else you fancy.  We can have superscripts like x<super>2</super> or subscripts like A<sub>ij</sub>.  Greek letters such as "alpha" (<greek>a</greek>) can either be entered as the equivalent letters inside a "greek" tag, or be entered as HTML entity references "alpha".  Options traders will be disappointed to discover that vega, which they use for volatility, is a star in the constellation of Arcturus and not a 25th letter of the Greek alphabet; they should use "nu" (&nu;) instead.
+
+
+To create the paragraph above, the input source text was as follows:
+
+.df <font name='Courier'><![CDATA[
+Substrings within paragraphs can be tagged as <b>bold</b>, <i>italic</i> or <u>underlined</u> using the same tags as HTML.  We currently don't implement underlining.  It is also possibly to explicitly choose a font like <font name="Courier">Courier</font> or 
+<font size="+1">even</font>
+<font size="+2">vary</font>
+<font size="+3">the</font>
+<font size="+4">font</font>
+<font size="+5">size</font>
+within a paragraph. Color can be set to <font color="red">red</font>, <font color="green">green</font> or anything else you fancy.  We can have superscripts like x<super>2</super> or subscripts like A<sub>ij</sub>.  Greek letters such as "alpha" (<greek>a</greek>) can either be entered as the equivalent letters inside a "greek" tag, or be entered as HTML entity references "alpha".  Options traders will be disappointed to discover that vega, which they use for volatility, is a star in the constellation of Arcturus and not a 25th letter of the Greek alphabet; they should use "nu" (&nu;) instead.
+]]></font>
+
+
+Paragraphs permit two escaping mechanisms which you can use when you really want  to print things which might be mistaken for XML.  The first is to use standard HTML entity references.  Thus <b><!CDATA[[&lt;]]></b> produces the character %lt;.  This is the easiest to use for mathematical formulae and code (although no XML processing is done on Preformatted objects, which are the preferred form for printing code).  The second is the standard XML CDATA escaping mechanism.  Anything found between the escape sequences <b>%lt;!CDATA[[</b> and <b>]]&gt;</b> will not be checked for tags; this is thus a very useful mechanism when writing an entire paragraph of XML tags.
+
+The tags which may be used within a paragraph are listed below.  The meanings should be obvious:
+
+.df <![CDATA[<font name="courier" size=14 color="red">...</font>]]>  
+This tag can accept any or all of the arguments.  Font names should be lower case equivalents of the PostScript font names.  fg is also permitted as a synonym for color <i>(do we need both?)</i>.  Note that there is no such thing as Bold or Italic for PostScript fonts; one can achieve such effects by choosing such fonts as "Courier_Bold".  Colors are parsed by the function <i>reportlab/lib/colors.stringToColor</i> and support HTML named colors or RGB values like "AABBCC", "0xAABBCC" or "#AABBCC".
+
+
+.h3 Outermost &lt;para&gt; tag
+
+There can also be an outermost tag around each paragraph which can override the style.  This might be useful if you want the formatting to be totally data-driven (i.e. encoded in the story) rather than dependent on an external style sheet.  This tag can accept arguments corresponding to the properties of ParagraphStyle.  We also provide aliases for some of these attributes which are faster to type, lowercase throughout, or equivalent to HTML:
+
+.df font, fontName, fontname -> fontName, 
+.df fontsize, fontSize -> fontsize
+.df leading -> leading
+.df lindent, leftIndent -> leftIndent
+.df rindent, rightIndent -> rightIndent
+.df findent, firstLineIndent -> firstLineIndent
+.df align -> alignment
+.df spaceb -> spaceBefore
+.df spacea -> spaceAfter
+.df bfont -> bulletFontName
+.df bfontsize -> bulletFontSize
+.df bindent -> bulletIndent
+.df color, fg -> textColor
+
+
+
+
+
+
+
+
+
