@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfutils.py,v $
+#	Revision 1.10  2000/08/03 19:11:49  rgbecker
+#	Robin's take on Bernhard Herzog's fix to A85 decode
+#
 #	Revision 1.9  2000/08/01 10:56:24  rgbecker
 #	moved accelerators to lib
-#
+#	
 #	Revision 1.8  2000/07/05 12:20:27  rgbecker
 #	Ascii85 fixes/additions
 #	
@@ -57,7 +60,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfutils.py,v 1.9 2000/08/01 10:56:24 rgbecker Exp $ '''
+__version__=''' $Id: pdfutils.py,v 1.10 2000/08/03 19:11:49 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -330,7 +333,8 @@ def _AsciiBase85Decode(input):
         c3 = ord(lastbit[2]) - 33
         c4 = ord(lastbit[3]) - 33
         c5 = ord(lastbit[4]) - 33
-        num = ((85L**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5    
+        num = (((85*c1+c2)*85+c3)*85+c4)*85L + (c5
+                 +(0,0,0xFFFFFF,0xFFFF,0xFF)[remainder_size])
         temp, b4 = divmod(num,256)
         temp, b3 = divmod(temp,256)
         b1, b2 = divmod(temp, 256)
@@ -342,11 +346,11 @@ def _AsciiBase85Decode(input):
         #data by rounding the number to x bytes, and when
         #divided repeatedly we get one less
         if remainder_size == 2:
-            lastword = chr(b1+1)
+            lastword = chr(b1)
         elif remainder_size == 3:
-            lastword = chr(b1) + chr(b2+1)
+            lastword = chr(b1) + chr(b2)
         elif remainder_size == 4:
-            lastword = chr(b1) + chr(b2) + chr(b3+1)
+            lastword = chr(b1) + chr(b2) + chr(b3)
         outstream.write(lastword)
 
     #terminator code for ascii 85    
