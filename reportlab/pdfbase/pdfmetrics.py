@@ -57,7 +57,7 @@ def codecName(encName):
     if encName[0:7] == 'winansi':
         return 'cp1252'
     elif encName[0:8] == 'MacRomanEncoding':
-        return 'mac-roman'
+        return 'mac_roman'
     elif encName == 'zapfdingbatsencoding':
         return 'cp1252'
     elif encName == 'symbolencoding':

@@ -1273,26 +1273,25 @@ class Canvas:
         names.sort()
         return names
 
-    def _convertText(self, text):
+    def _convertText(self, text, codecName=pdfmetrics.codecName):
         "Convert to correct encoding for current font"
         if type(text) is UnicodeType:
             # If text is unicode always convert
             uni = text
-            converted = uni.encode(self._fontencoding, self.encodingErrorMode)
+            converted = uni.encode(codecName(self._fontencoding), self.encodingErrorMode)
         elif self.encoding is None:
             # If no encoding specified, 8-bit no conversion
             converted = text
         else:
             # Otherwise assume in specified encoding and decode
-            if self.encoding == 'WinAnsiEncoding':
-                docEnc = 'cp1252'
-            elif self.encoding == 'MacRomanEncoding':
-                docEnc = 'mac_roman'
+            docEnc = codecName(self.encoding)
+            fontEnc = codecName(self._fontencoding)
+            if docEnc==fontEnc:
+                converted = text
             else:
-                docEnc = self.encoding
-            #uni = text.decode(docEnc)  #hack #won't work in 2.1
-            uni = unicode(text, docEnc, getattr(self,'decodingErrorMode',self.encodingErrorMode)) #works in 2.1
-            converted = uni.encode(self._fontencoding, self.encodingErrorMode)
+                #uni = text.decode(docEnc)  #hack #won't work in 2.1
+                uni = unicode(text, docEnc, getattr(self,'decodingErrorMode',self.encodingErrorMode)) #works in 2.1
+                converted = uni.encode(fontEnc, self.encodingErrorMode)
 ##        print '  ->', converted
         return converted
 
