@@ -32,13 +32,16 @@
 #
 ###############################################################################
 #	$Log: testplatypus.py,v $
+#	Revision 1.4  2000/02/16 09:42:50  rgbecker
+#	Conversion to reportlab package
+#
 #	Revision 1.3  2000/02/15 17:55:59  rgbecker
 #	License text fixes
-#
+#	
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testplatypus.py,v 1.3 2000/02/15 17:55:59 rgbecker Exp $ '''
+__version__=''' $Id: testplatypus.py,v 1.4 2000/02/16 09:42:50 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 """This is not obvious so here's a brief explanation.  This module is both
@@ -50,8 +53,8 @@ builds a special "document model" in which the frames are added to each page
 and drawn into.
 """
 import string
-from pdfgen import canvas
-from platypus import layout, tables
+from reportlab.pdfgen import canvas
+from reportlab.platypus import layout, tables
 
 inch = INCH = 72
 cm = CM = inch / 2.54

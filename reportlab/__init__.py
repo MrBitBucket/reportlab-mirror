@@ -30,53 +30,8 @@
 # PERFORMANCE OF THIS SOFTWARE. 
 #
 ###############################################################################
-#	$Log: stdfonts.py,v $
-#	Revision 1.3  2000/02/16 09:42:50  rgbecker
+#	$Log: __init__.py,v $
+#	Revision 1.1  2000/02/16 09:42:49  rgbecker
 #	Conversion to reportlab package
 #
-#	Revision 1.2  2000/02/15 17:55:59  rgbecker
-#	License text fixes
-#	
-#	Revision 1.1.1.1  2000/02/15 15:15:57  rgbecker
-#	Initial setup of demos directory and contents.
-#	
-__version__=''' $Id: stdfonts.py,v 1.3 2000/02/16 09:42:50 rgbecker Exp $ '''
-# standardfonts.py
-#
-# shows the 14 standard fonts in our encoding
-
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfgen import canvas
-
-def run():
-
-    canv = canvas.Canvas('standardfonts.pdf')
-    canv.setPageCompression(0)
-    
-    for fontname in pdfmetrics.StandardEnglishFonts:
-        canv.setFont('Times-Bold', 18)
-        canv.drawString(80, 744, fontname)
-        
-        #for dingbats, we need to use another font for the numbers.
-        #do two parallel text objects.
-        if fontname == 'ZapfDingbats':
-            labelfont = 'Helvetica'
-        else:
-            labelfont = fontname
-
-        for byt in range(32, 256):
-            col, row = divmod(byt - 32, 32)
-            x = 72 + (66*col)
-            y = 720 - (18*row)
-            canv.setFont(labelfont, 14)
-            canv.drawString(x, y, '%d =' % byt)
-            canv.setFont(fontname, 14)
-            canv.drawString(x + 44, y , chr(byt))
-
-        canv.showPage()            
-            
-
-    canv.save()
-
-if __name__ == '__main__':
-    run()
+__version__=''' $Id: __init__.py,v 1.1 2000/02/16 09:42:49 rgbecker Exp $ '''

@@ -31,13 +31,16 @@
 #
 ###############################################################################
 #	$Log: styles_horrible.py,v $
+#	Revision 1.3  2000/02/16 09:42:50  rgbecker
+#	Conversion to reportlab package
+#
 #	Revision 1.2  2000/02/15 17:55:59  rgbecker
 #	License text fixes
-#
+#	
 #	Revision 1.1.1.1  2000/02/15 15:09:05  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: styles_horrible.py,v 1.2 2000/02/15 17:55:59 rgbecker Exp $ '''
+__version__=''' $Id: styles_horrible.py,v 1.3 2000/02/16 09:42:50 rgbecker Exp $ '''
 # style_modern.py
 """This is an example style sheet.  You can create your own, and
 have them loaded by the presentation.  A style sheet is just a
@@ -55,7 +58,7 @@ easily.
 A style sheet MUST define a style called 'Normal'.
 """
 
-from platypus import layout
+from reportlab.platypus import layout
 def getParagraphStyles():
     """Returns a dictionary of styles based on Helvetica"""
     stylesheet = {}

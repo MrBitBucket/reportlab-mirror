@@ -31,13 +31,16 @@
 #
 ###############################################################################
 #	$Log: odyssey.py,v $
+#	Revision 1.3  2000/02/16 09:42:50  rgbecker
+#	Conversion to reportlab package
+#
 #	Revision 1.2  2000/02/15 17:55:59  rgbecker
 #	License text fixes
-#
+#	
 #	Revision 1.1.1.1  2000/02/15 15:09:29  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: odyssey.py,v 1.2 2000/02/15 17:55:59 rgbecker Exp $ '''
+__version__=''' $Id: odyssey.py,v 1.3 2000/02/16 09:42:50 rgbecker Exp $ '''
 #odyssey.py
 #
 #Demo/benchmark of PDFgen rendering Homer's Odyssey.
@@ -55,7 +58,7 @@ __version__=''' $Id: odyssey.py,v 1.2 2000/02/15 17:55:59 rgbecker Exp $ '''
 # With page compression and textLine():
 # 239 pages in 39.39 seconds = 6 pages per second
 
-from pdfgen import canvas
+from reportlab.pdfgen import canvas
 import time
 
 

@@ -31,13 +31,16 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.4  2000/02/16 09:42:50  rgbecker
+#	Conversion to reportlab package
+#
 #	Revision 1.3  2000/02/15 17:55:59  rgbecker
 #	License text fixes
-#
+#	
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.3 2000/02/15 17:55:59 rgbecker Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.4 2000/02/16 09:42:50 rgbecker Exp $ '''
 """ 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -67,7 +70,7 @@ except:
     print "zlib not available, page compression not available"
 
 
-from pdfgen.pdfgeom import bezierArc
+from reportlab.pdfgen.pdfgeom import bezierArc
 
 import pdfutils
 from pdfutils import LINEEND   # this constant needed in both

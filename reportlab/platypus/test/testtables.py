@@ -32,15 +32,18 @@
 #
 ###############################################################################
 #	$Log: testtables.py,v $
+#	Revision 1.4  2000/02/16 09:42:50  rgbecker
+#	Conversion to reportlab package
+#
 #	Revision 1.3  2000/02/15 17:55:59  rgbecker
 #	License text fixes
-#
+#	
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #
-__version__=''' $Id: testtables.py,v 1.3 2000/02/15 17:55:59 rgbecker Exp $ '''
-from platypus import layout
-from platypus import tables
+__version__=''' $Id: testtables.py,v 1.4 2000/02/16 09:42:50 rgbecker Exp $ '''
+from reportlab.platypus import layout
+from reportlab.platypus import tables
 
 INCH = 72
 

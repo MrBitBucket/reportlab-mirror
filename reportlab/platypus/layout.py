@@ -31,13 +31,16 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.4  2000/02/16 09:42:50  rgbecker
+#	Conversion to reportlab package
+#
 #	Revision 1.3  2000/02/15 17:55:59  rgbecker
 #	License text fixes
-#
+#	
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.3 2000/02/15 17:55:59 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.4 2000/02/16 09:42:50 rgbecker Exp $ '''
 #platypus - Page Layout And TYPography Using Scripts
 # a page layout API on top of PDFgen
 #currently working on paragraph wrapping stuff.
@@ -49,8 +52,8 @@ __version__=''' $Id: layout.py,v 1.3 2000/02/15 17:55:59 rgbecker Exp $ '''
 import string
 import types
 
-from pdfbase import pdfmetrics
-from pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfgen import canvas
 
 inch = 72.0
 cm = inch / 2.54

@@ -31,13 +31,16 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.3  2000/02/16 09:42:50  rgbecker
+#	Conversion to reportlab package
+#
 #	Revision 1.2  2000/02/15 17:55:59  rgbecker
 #	License text fixes
-#
+#	
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.2 2000/02/15 17:55:59 rgbecker Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.3 2000/02/16 09:42:50 rgbecker Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 """
@@ -63,8 +66,8 @@ import xmllib
 import pprint
 import imp
 
-from pdfgen import canvas
-from platypus import layout
+from reportlab.pdfgen import canvas
+from reportlab.platypus import layout
 
 sample = """
 <presentation filename='pythonpoint.pdf'>
