@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/genuserguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/genuserguide.py,v 1.5 2001/10/28 21:18:03 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/genuserguide.py,v 1.6 2001/11/06 11:13:53 johnprecedo Exp $
 
-__version__=''' $Id: genuserguide.py,v 1.5 2001/10/28 21:18:03 andy_robinson Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.6 2001/11/06 11:13:53 johnprecedo Exp $ '''
 
 __doc__ = """
 This module contains the script for building the user guide.
@@ -21,6 +21,7 @@ def run(pagesize, verbose=0):
 
 	import ch1_intro
 	import ch2_graphics
+	import ch2a_fonts
 	import ch3_pdffeatures
 	import ch4_platypus_concepts
 	import ch5_paragraphs
