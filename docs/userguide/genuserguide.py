@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: genuserguide.py,v $
+#	Revision 1.8  2000/06/22 19:05:24  aaron_watters
+#	added quickhack for font changes in paragraphs and lots of new text
+#
 #	Revision 1.7  2000/06/22 13:55:59  aaron_watters
 #	showPage resets all state parameters warning.
-#
+#	
 #	Revision 1.6  2000/06/22 13:35:28  aaron_watters
 #	textobject and pathobject methods, among other things
 #	
@@ -53,7 +56,7 @@
 #	Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #	initial checkin. user guide generation framework.
 #	
-__version__=''' $Id: genuserguide.py,v 1.7 2000/06/22 13:55:59 aaron_watters Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.8 2000/06/22 19:05:24 aaron_watters Exp $ '''
 
 
 __doc__ = """
@@ -72,6 +75,41 @@ import examples
 styleSheet = getSampleStyleSheet()
 from reportlab.lib.corp import ReportLabLogo
 LOGO = ReportLabLogo(0.25*inch, 0.25*inch, inch, 0.75*inch)
+
+from t_parse import Template
+QFcodetemplate = Template("X$X$", "X")
+codesubst = "%s<font name=courier color=green>%s</font>"
+QFreptemplate = Template("X^X^", "X")
+QFsubst = "%s<font name=Helvetica color=blue><i>%s</i></font>"
+
+def quickfix(text):
+    """inside text find any subsequence of form $subsequence$.
+       Format the subsequence as code.  If similarly if text contains ^arg^
+       format the arg as replaceable.  The escape sequence for literal
+       $ is $\\$ (^ is ^\\^.
+    """
+    from string import join
+    for (template,subst) in [(QFcodetemplate, codesubst), (QFreptemplate, QFsubst)]:
+        fragment = text
+        parts = []
+        try:
+            while fragment:
+                try:
+                    (matches, index) = template.PARSE(fragment)
+                except: raise ValueError
+                else:
+                    [prefix, code] = matches
+                    if code == "\\":
+                        part = fragment[:index]
+                    else:
+                        part = subst % (prefix, code)
+                    parts.append(part)
+                    fragment = fragment[index:]
+        except ValueError:
+            parts.append(fragment)
+        text = join(parts, "")
+    return text
+#print quickfix("$testing$ testing $one$ ^two^ $three(^four^)$")
 
 class PageAnnotations:
     """ "closure" containing onfirstpage, onnextpage actions
@@ -126,6 +164,7 @@ def story():
     return BODY
 
 def disc(text, klass=Paragraph, style=discussiontextstyle):
+    text = quickfix(text)
     P = klass(text, style)
     BODY.append(P)
     
@@ -213,22 +252,22 @@ disc("""
 This document is in a <em>very</em> preliminary form.
 """)
 
-lesson("Introduction to pdfgen")
+lesson("Introduction to $pdfgen$")
 
 disc("""
-The pdfgen package is the lowest level interface for
-generating PDF documents.  A pdfgen program is essentially
+The $pdfgen$ package is the lowest level interface for
+generating PDF documents.  A $pdfgen$ program is essentially
 a sequence of instructions for "painting" a document onto
 a sequence of pages.  The interface object which provides the
-painting operations is the pdfgen canvas.  
+painting operations is the $pdfgen$ canvas.  
 """)
 
 disc("""
 The canvas should be thought of as a sheet of white paper
-with points on the sheet identified using Cartesian (X,Y) coordinates
-which by default have the (0,0) origin point at the lower
-left corner of the page.  Furthermore the first coordinate (x)
-goes to the right and the second coordinate (y) goes up, by
+with points on the sheet identified using Cartesian ^(X,Y)^ coordinates
+which by default have the ^(0,0)^ origin point at the lower
+left corner of the page.  Furthermore the first coordinate ^x^
+goes to the right and the second coordinate ^y^ goes up, by
 default.""")
 
 disc("""
@@ -245,23 +284,23 @@ eg("""
 """)
 
 disc("""
-The above code creates a canvas object which will generate
-a PDF file named hello.pdf in the current working directory.
-It then calls the hello function passing the canvas as an argument.
-Finally the showPage method saves the current page of the canvas
-and the save method stores the file and closes the canvas.""")
+The above code creates a $canvas$ object which will generate
+a PDF file named $hello.pdf$ in the current working directory.
+It then calls the $hello$ function passing the $canvas$ as an argument.
+Finally the $showPage$ method saves the current page of the canvas
+and the $save$ method stores the file and closes the canvas.""")
 
 disc("""
-The showPage method causes the canvas to stop drawing on the
+The $showPage$ method causes the $canvas$ to stop drawing on the
 current page and any further operations will draw on a subsequent
 page (if there are any further operations -- if not no
-new page is created).  The save method must be called after the
+new page is created).  The $save$ method must be called after the
 construction of the document is complete -- it generates the PDF
-document, which is the whole purpose of the canvas object.
+document, which is the whole purpose of the $canvas$ object.
 """)
 
 disc("""
-Suppose the hello function referenced above is implemented as
+Suppose the $hello$ function referenced above is implemented as
 follows (we will not explain each of the operations in detail
 yet).
 """)
@@ -283,7 +322,7 @@ the canvas the "draw" operations apply paint to the canvas using
 the current set of tools (colors, line styles, fonts, etcetera)
 and the "state change" operations change one of the current tools
 (changing the fill color from whatever it was to blue, or changing
-the current font to Times-Roman in 15 points, for example).
+the current font to $Times-Roman$ in 15 points, for example).
 """)
 
 disc("""
@@ -336,7 +375,7 @@ disc("""
 The shape methods draw common complex shapes on the canvas.
 """)
 
-head("The draw string methods")
+head("String drawing methods")
 
 eg("""canvas.drawString(x, y, text):""")
 eg("""canvas.drawRightString(x, y, text) """)
@@ -379,7 +418,7 @@ be done on another page.""")
 pencilnote()
 
 disc("""Warning!  All state changes (font changes, color settings, geometry transforms, etcetera)
-are FORGOTTEN when you advance to a new page in pdfgen.  Any state settings you wish to preserve
+are FORGOTTEN when you advance to a new page in $pdfgen$.  Any state settings you wish to preserve
 must be set up again before the program proceeds with drawing!""")
 
 lesson('The toolbox: the "state change" operations')
@@ -461,7 +500,7 @@ lesson('Coordinates (default user space)')
 
 disc("""
 By default locations on a page are identified by a pair of numbers.
-For example the pair (4.5*inch, 1*inch) identifies the location
+For example the pair $(4.5*inch, 1*inch)$ identifies the location
 found on the page by starting at the lower left corner and moving to
 the right 4.5 inches and up one inch.
 """)
@@ -471,17 +510,17 @@ a number of elements on a canvas.""")
 
 eg(examples.testcoords)
 
-disc("""In the default user space the (0,0) point is at the lower
-left corner.  Executing the coords function in the default user space
+disc("""In the default user space the "origin" ^(0,0)^ point is at the lower
+left corner.  Executing the $coords$ function in the default user space
 (for the "demo minipage") we obtain the following.""")
 
 canvasdemo(examples.coords)
 
-head("Moving the origin: the translate method")
+head("Moving the origin: the $translate$ method")
 
 disc("""Often it is useful to "move the origin" to a new point off
-the lower left corner.  The canvas.translate(x,y) method moves the origin
-for the current page to the point currently identified by (x,y).""")
+the lower left corner.  The $canvas.translate(^x,y^)$ method moves the origin
+for the current page to the point currently identified by ^(x,y)^.""")
 
 disc("""For example the following translate function first moves
 the origin before drawing the same objects as shown above.""")
@@ -499,7 +538,7 @@ pencilnote()
 
 
 disc("""
-<em>Note:</em> As illustrated in the example it is perfectly possible to draw objects 
+<i>Note:</i> As illustrated in the example it is perfectly possible to draw objects 
 or parts of objects "off the page".
 In particular a common confusing bug is a translation operation that translates the
 entire drawing off the visible area of the page.  If a program produces a blank page
@@ -508,11 +547,11 @@ it is possible that all the drawn objects are off the page.
 
 head("Shrinking and growing: the scale operation")
 
-disc("""Another important operation is scaling.  The scaling operation canvas.scale(dx,dy)
-stretches or shrinks the x and y dimensions by the dx, dy factors respectively.  Often
-dx and dy are the same -- for example to reduce a drawing by half in all dimensions use
-dx = dy = 0.5.  However for the purposes of illustration we show an example where
-dx and dy are different.
+disc("""Another important operation is scaling.  The scaling operation $canvas.scale(^dx,dy^)$
+stretches or shrinks the ^x^ and ^y^ dimensions by the ^dx^, ^dy^ factors respectively.  Often
+^dx^ and ^dy^ are the same -- for example to reduce a drawing by half in all dimensions use
+$dx = dy = 0.5$.  However for the purposes of illustration we show an example where
+$dx$ and $dy$ are different.
 """)
 
 eg(examples.testscale)
@@ -527,7 +566,7 @@ canvasdemo(examples.scale)
 pencilnote()
 
 
-disc("""<em>Note:</em> scaling may also move objects or parts of objects off the page,
+disc("""<i>Note:</i> scaling may also move objects or parts of objects off the page,
 or may cause objects to "shrink to nothing." """)
 
 disc("""Scaling and translation can be combined, but the order of the
@@ -536,9 +575,9 @@ operations are important.""")
 eg(examples.testscaletranslate)
 
 disc("""This example function first saves the current canvas state
-and then does a scaling followed by a translate.  Afterward the function
+and then does a $scale$ followed by a $translate$.  Afterward the function
 restores the state (effectively removing the effects of the scaling and
-translation) and then does the <em>same</em> operations in a different order.
+translation) and then does the <i>same</i> operations in a different order.
 Observe the effect below.""")
 
 canvasdemo(examples.scaletranslate)
@@ -558,17 +597,19 @@ to shrink to the point where they disappear.  For engineering or scientific purp
 such as these scale and translate
 the units externally before rendering them using the canvas.""")
 
-head("Saving and restoring the canvas state: saveState and restoreState")
+head("Saving and restoring the canvas state: $saveState$ and $restoreState$")
 
 disc("""
-The scaletranslate function used an important feature of the canvas object:
+The $scaletranslate$ function used an important feature of the canvas object:
 the ability to save and restore the current parameters of the canvas.
-By enclosing a sequence of operations in a matching pair of canvas.saveState()
-an canvas.restoreState() operations all changes of font, color, line style,
+By enclosing a sequence of operations in a matching pair of $canvas.saveState()$
+an $canvas.restoreState()$ operations all changes of font, color, line style,
 scaling, translation, or other aspects of the canvas graphics state can be
-restored to the state at the point of the saveState().  Remember that the save/restore
+restored to the state at the point of the $saveState()$.  Remember that the save/restore
 calls must match: a stray save or restore operation may cause unexpected
-and undesirable behavior.
+and undesirable behavior.  Also, remember that <i>no</i> canvas state is
+preserved across page breaks, and the save/restore mechanism does not work
+across page breaks.
 """)
 
 head("Mirror image")
@@ -581,7 +622,7 @@ scale factors can be negative.  For example the following function
 eg(examples.testmirror)
 
 disc("""
-creates a mirror image of the elements drawn by the coord function.
+creates a mirror image of the elements drawn by the $coord$ function.
 """)
 
 canvasdemo(examples.mirror)
@@ -592,28 +633,115 @@ Notice that the text strings are painted backwards.
 
 lesson("Colors")
 
+disc("""
+There are four way to specify colors in $pdfgen$: by name (using the $color$
+module, by red/green/blue (additive, $RGB$) value,
+by cyan/magenta/yellow/darkness (subtractive, $CMYK$), or by gray level.
+The $colors$ function below exercises each of the four methods.
+""")
+
 eg(examples.testcolors)
+
+disc("""
+The $RGB$ or additive color specification follows the way a computer
+screen adds different levels of the red, green, or blue light to make
+any color, where white is formed by turning all three lights on full
+$(1,1,1)$.""")
+
+disc("""The $CMYK$ or subtractive method follows the way a printer
+mixes three pigments (cyan, magenta, and yellow) to form colors.
+Because mixing chemicals is more difficult than combining light there
+is a fourth parameter for darkness.  For example a chemical
+combination of the $CMY$ pigments generally never makes a perfect
+black -- instead producing a muddy color -- so, to get black printers
+don't use the $CMY$ pigments but use a direct black ink.  Because
+$CMYK$ maps more directly to the way printer hardware works it may
+be the case that colors specified in $CMYK$ will provide better fidelity
+and better control when printed.
+""")
 
 canvasdemo(examples.colors)
 
 lesson('Painting back to front')
 
+disc("""
+Objects may be painted over other objects to good effect in $pdfgen$.  As
+in painting with oils the object painted last will show up on top.  For
+example, the $spumoni$ function below paints up a base of colors and then
+paints a white text over the base.
+""")
+
 eg(examples.testspumoni)
+
+disc("""
+The word "SPUMONI" is painted in white over the colored rectangles,
+with the apparent effect of "removing" the color inside the body of
+the word.
+""")
 
 canvasdemo(examples.spumoni)
 
+disc("""
+The last letters of the word are not visible because the default canvas
+background is white and painting white letters over a white background
+leaves no visible effect.
+""")
+
+disc("""
+This method of building up complex paintings in layers can be done
+in very many layers in $pdfgen$ -- there are fewer physical limitations
+than there are when dealing with physical paints.
+""")
+
 eg(examples.testspumoni2)
 
+disc("""
+The $spumoni2$ function layers an ice cream cone over the
+$spumoni$ drawing.  Note that different parts of the cone
+and scoops layer over eachother as well.
+""")
 canvasdemo(examples.spumoni2)
 
 
 lesson('Fonts and text objects')
 
+disc("""
+Text may be drawn in many different colors, fonts, and sizes in $pdfgen$.
+The $textsize$ function demonstrates how to change the color and font and
+size of text and how to place text on the page.
+""")
+
 eg(examples.testtextsize)
+
+disc("""
+The $textsize$ function generates the following page.
+""")
 
 canvasdemo(examples.textsize)
 
+disc("""
+A number of different fonts are always available in $pdfgen$.
+""")
+
+eg(examples.testfonts)
+
+disc("""
+The $fonts$ function lists the fonts that are always available.
+""")
+
+canvasdemo(examples.fonts)
+
+disc("""
+Other fonts can be added to a PDF document as well.
+""")
+
 lesson("Text object methods")
+
+disc("""
+For the dedicated presentation of text in a PDF document, use a text object.
+The text object interface provides detailed control of text layout parameters
+not available directly at the canvas level.
+""")
 
 eg("""textobject.setTextOrigin(x,y)""")
 
@@ -633,19 +761,61 @@ eg("""textobject.textLine(text='')""")
 
 eg("""textobject.textLines(stuff, trim=1)""")
 
+disc("""
+The text object methods shown above relate to basic text geometry.
+""")
+
+disc("""
+A text object maintains a text cursor which moves about the page when 
+text is drawn.  For example the $setTextOrigin$ places the cursor
+in a known position and the $textLine$ and $textLines$ methods move
+the text cursor down past the lines that have been missing.
+""")
+
 eg(examples.testcursormoves1)
+
+disc("""
+The $testcursormoves1$ function relies on the automatic
+movement of the text cursor for placing text after the origin
+has been set.
+""")
 
 canvasdemo(examples.cursormoves1)
 
+disc("""
+It is also possible to control the movement of the cursor
+more explicitly by using the $moveCursor$ method (which moves
+the cursor as an offset from the start of the current <i>line</i>
+NOT the current cursor, and which also has positive ^y^ offsets
+move <i>down</i> (in contrast to the normal geometry where
+positive ^y^ usually moves up.
+""")
+
 eg(examples.testcursormoves2)
+
+disc("""
+Here the $textOut$ does not move the down a line in contrast
+to the $textLine$ function which does move down.
+""")
 
 canvasdemo(examples.cursormoves2)
 
+head("Character Spacing")
+
 eg("""textobject.setCharSpace(charSpace)""")
+
+disc("""The $setCharSpace$ method adjusts one of the parameters of text -- the inter-character
+spacing.""")
 
 eg(examples.testcharspace)
 
-canvasdemo(examples.charspace)
+disc("""The 
+$charspace$ function exercises various spacing settings.
+It produces the following page.""")
+
+canvasdemo(examples.charspace)\
+
+head("Word Spacing")
 
 eg("""textobject.setWordSpace(wordSpace)""")
 
@@ -730,6 +900,16 @@ eg("""pathobject.ellipse(x, y, width, height)""")
 eg("""pathobject.circle(x_cen, y_cen, r) """)
 
 eg("""pathobject.close() """)
+
+eg(examples.testhand)
+
+canvasdemo(examples.hand)
+
+
+eg(examples.testhand2)
+
+canvasdemo(examples.hand2)
+
 
 ##### FILL THEM IN
 
