@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.11 2001/11/26 21:49:01 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.12 2002/02/05 18:20:09 rgbecker Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -53,7 +53,6 @@ from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics.shapes import Drawing
 from reportlab.graphics import shapes
 from reportlab.graphics import renderPDF
-from reportlab.graphics import renderPM
 
 VERBOSE = 0
 VERIFY = 1
@@ -668,6 +667,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
         # Ignored if no GD rendering available
         # or the demo method does not return a drawing.
         try:
+            from reportlab.graphics import renderPM
             modName = self.skeleton.getModuleName()
             path = '%s-%s.jpg' % (modName, name)
             renderPM.drawToFile(drawing, path, fmt='JPG')
@@ -688,6 +688,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
         # Ignored if no GD rendering available
         # or the demo method does not return a drawing.
         try:
+            from reportlab.graphics import renderPM
             drawing = widget.demo()
             if VERIFY:
                 widget.verify()
