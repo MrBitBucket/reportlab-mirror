@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.6 2001/03/13 15:49:57 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.7 2001/03/13 16:57:18 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.6 2001/03/13 15:49:57 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.7 2001/03/13 16:57:18 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -58,7 +58,6 @@ static	fI_t* find_font(char* name, fI_t* f)
 	for(;f;f=f->next) if(!STRICMP(name,f->name)) return f;
 	return (fI_t*)0;
 }
-
 
 static	int _parseSequenceInt(PyObject* e, int i, int *x)
 {
