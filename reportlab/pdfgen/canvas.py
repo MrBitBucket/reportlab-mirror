@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.97 2002/03/23 23:36:49 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.97 2002/03/23 23:36:49 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.98 2002/03/25 00:34:56 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.98 2002/03/25 00:34:56 andy_robinson Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -18,6 +18,7 @@ import tempfile
 import cStringIO
 from types import *
 from math import sin, cos, tan, pi, ceil
+import md5
 
 from reportlab import rl_config
 from reportlab.pdfbase import pdfutils
@@ -445,65 +446,92 @@ class Canvas:
     def hasForm(self, name):
         """Query whether form XObj really exists yet."""
         return self._doc.hasForm(name)
-    
-    def defineImage(self, name, image, mask=None):
-        """
-        Defines an Image object to be drawn later by drawImage.
-        
-        The 'name' must be unique within the document.  You can
-        just use the filename if you wish.  The 'image' parameter
-        is either a filename, in which case PIL will open it, or
-        a PIL Image object (which lets you use dynamic images from
-        other applications).  This method returns the width and
-        height of the image as a 2-tuple.
+
+
+        ######################################################
+        #
+        #   Image routines
+        #
+        ######################################################
+
+    def drawInlineImage(self, image, x,y, width=None,height=None):
+        """Draw an Image into the specified rectangle.  If width and
+        height are omitted, they are calculated from the image size.
+        Also allow file names as well as images.  The size in pixels
+        of the image is returned."""
+
+        self._currentPageHasImages = 1
+        from pdfimages import PDFImage
+        img_obj = PDFImage(image, x,y, width, height)
+        img_obj.drawInlineImage(self)
+        return (img_obj.width, img_obj.height)
+
+    def drawImage(self, image, x, y, width=None, height=None, mask=None):
+        """Draws the image (PIL Image object or filename) as specified.
+
+        "image" may be an image filename or a PIL Image object.  If width
+        and height are not given, the "natural" width and height in pixels
+        is used at a scale of 1 point to 1 pixel.
 
         The mask parameter takes 6 numbers and defines the range of
         RGB values which will be masked out or treated as transparent.
         For example with [0,2,40,42,136,139], it will mask out any
         pixels with a Red value from 0-2, Green from 40-42 and
         Blue from 136-139  (on a scale of 0-255)
-        """
-        img = pdfdoc.PDFImageXObject(name, image, mask=mask)
-        img.name = name
-        self._setXObjects(img)
-        regName = self._doc.getXObjectName(name)
-        self._doc.Reference(img, regName)
-        self._doc.addForm(name, img)
-        return img.width, img.height
 
+        The method returns the width and height of the underlying image since
+        this is often useful for layout algorithms.
 
-    def drawImage(self, name, x, y, width=None, height=None):
-        """Draw a predefined (or soon-to-be-defined) image.  
-        
-        If width and height not given but the image is already defined,
-        it is drawn at the 'natural' scaling of 1 point per pixel.  Thus
-        a 100x30 image will be that size in points.  If the image has not
-        yet been defined, and you do not give a size, an exception will
-        be raised.
-        
-        You can get the 'natural' width and height when you call defineImage.
-        If the image name is not defined at save time, an exception will be
-        raised.
-        """
+        Unlike drawInlineImage, this creates 'external images' which
+        are only stored once in the PDF file but can be drawn many times.
+        If you give it the same filename twice, even at different locations
+        and sizes, it will reuse the first occurrence.  If you use PIL image
+        objects, it tests whether the image content has changed before deciding
+        whether to reuse it.
 
-        # is the image defined yet?
+        In general you should use drawImage in preference to drawInlineImage
+        unless you have read the PDF Spec and understand the tradeoffs."""
+        self._currentPageHasImages = 1
+
+        # first, generate a unique name/signature for the image.  If ANYTHING
+        # is different, even the mask, this should be different.  
+        if type(image) == type(''):
+            #filename, use it
+            name = md5.md5('%s%s' % (image, mask)).hexdigest()
+        else:
+            rawdata = image.convert('RGB').tostring()            
+            name = md5.md5(rawdata).hexdigest()
+
+        # in the pdf document, this will be prefixed with something to
+        # say it is an XObject.  Does it exist yet?
         regName = self._doc.getXObjectName(name)
         imgObj = self._doc.idToObject.get(regName, None)
-        if imgObj is None and (width is None or height is None):
-            raise ValueError, "If the image is not yet defined, you must supply width and height!"
+        if not imgObj:
+            #first time seen, create and register the PDFImageXobject
+            imgObj = pdfdoc.PDFImageXObject(name, image, mask=mask)
+            imgObj.name = name
+            self._setXObjects(imgObj)
+            self._doc.Reference(imgObj, regName)
+            self._doc.addForm(name, imgObj)
+
+        # ensure we have a size, as PDF will make it 1x1 pixel otherwise!        
         if width is None:
             width = imgObj.width
         if height is None:
             height = imgObj.height
 
+        # scale and draw
         self.saveState()
         self.translate(x, y)
         self.scale(width, height)
-        self._code.append("/%s Do" % self._doc.getXObjectName(name))
+        self._code.append("/%s Do" % regName)
         self.restoreState()
-        
+
+        # track what's been used on this page        
         self._formsinuse.append(name)
         
+        return (imgObj.width, imgObj.height)
+    
     def _restartAccumulators(self):
         if self._codeStack:
             # restore the saved code
@@ -1251,26 +1279,6 @@ class Canvas:
         """Draws a text object"""
         self._code.append(str(aTextObject.getCode()))
         
-        ######################################################
-        #
-        #   Image routines
-        #
-        ######################################################
-
-    def drawInlineImage(self, image, x,y, width=None,height=None):
-        """Draw an Image into the specified rectangle.  If width and
-        height are omitted, they are calculated from the image size.
-        Also allow file names as well as images.  This allows a
-        caching mechanism"""
-        #return # XXXX debug
-
-        self._currentPageHasImages = 1
-        # new here
-        from pdfimages import PDFImage
-        img_obj = PDFImage(image, x,y, width, height)
-        img_obj.drawInlineImage(self)
-        return
-
     def setPageCompression(self, pageCompression=1):
         """Possible values None, 1 or 0
         If None the value from rl_config will be used.
