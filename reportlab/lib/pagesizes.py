@@ -2,12 +2,12 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/pagesizes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/pagesizes.py,v 1.7 2001/04/10 07:07:41 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/lib/pagesizes.py,v 1.8 2001/12/08 22:05:19 andy_robinson Exp $
 
 """This module defines a few common page sizes in points (1/72 inch).
 To be expanded to include things like label sizes, envelope windows
 etc."""
-__version__=''' $Id: pagesizes.py,v 1.7 2001/04/10 07:07:41 andy_robinson Exp $ '''
+__version__=''' $Id: pagesizes.py,v 1.8 2001/12/08 22:05:19 andy_robinson Exp $ '''
 
 from reportlab.lib.units import cm, inch
 
@@ -21,9 +21,14 @@ A2 = (_W*2, _H*2)
 A1 = (_H*2, _W*4)
 A0 = (_W*4, _H*4)
 
-letter = (8.5*inch, 11*inch)
-legal = (8.5*inch, 14*inch)
-elevenSeventeen = (11*inch, 17*inch)
+LETTER = (8.5*inch, 11*inch)
+LEGAL = (8.5*inch, 14*inch)
+ELEVENSEVENTEEN = (11*inch, 17*inch)
+# lower case is deprecated as of 12/2001, but here
+# for compatability
+letter=LETTER
+legal=LEGAL
+elevenSeventeen = ELEVENSEVENTEEN
 
 _BW, _BH = (25*cm, 35.3*cm)
 B6 = (_BW*.5, _BH*.5)
@@ -35,5 +40,17 @@ B1 = (_BH*4, _BW*2)
 B0 = (_BW*4, _BH*4)
 
 def landscape(pagesize):
-	"""Use this to invert any pagesize"""
-	return (pagesize[1], pagesize[0])
+	"""Use this to get page orientation right"""
+	a, b = pagesize
+	if a < b:
+		return (b, a)
+	else:
+		return (a, b)
+
+def portrait(pagesize):
+	"""Use this to get page orientation right"""
+	a, b = pagesize
+	if a >= b:
+		return (b, a)
+	else:
+		return (a, b)
