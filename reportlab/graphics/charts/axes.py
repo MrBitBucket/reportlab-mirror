@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.66 2003/06/03 12:36:10 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.67 2003/06/05 16:33:05 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.66 2003/06/03 12:36:10 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.67 2003/06/05 16:33:05 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -479,7 +479,7 @@ class ValueAxis(Widget):
         valueMax = AttrMapValue(isNumberOrNone, desc='Maximum value on axis.'),
         valueStep = AttrMapValue(isNumberOrNone, desc='Step size used between ticks.'),
         valueSteps = AttrMapValue(isListOfNumbersOrNone, desc='List of step sizes used between ticks.'),
-        avoidBoundFrac = AttrMapValue(isNumberOrNone, desc='Fraction of interval to allow above and below.'),
+        avoidBoundFrac = AttrMapValue(EitherOr((isNumberOrNone,SequenceOf(isNumber,emptyOK=0,lo=2,hi=2))), desc='Fraction of interval to allow above and below.'),
         rangeRound=AttrMapValue(OneOf('none','both','ceiling','floor'),'How to round the axis limits'),
         )
 
@@ -1158,11 +1158,16 @@ class AdjYValueAxis(YValueAxis):
         T, L = ticks(self._valueMin, self._valueMax, split=1, n=n, percent=self.leftAxisPercent,grid=valueStep)
         abf = self.avoidBoundFrac
         if abf:
+            i1 = (T[1]-T[0])
+            if type(abf) not in (TupleType,ListType):
+                i0 = i1 = i1*abf
+            else:
+                i0 = i1*abf[0]
+                i1 = i1*abf[1]
             _n = getattr(self,'_cValueMin',T[0])
             _x = getattr(self,'_cValueMax',T[-1])
-            i = (T[1]-T[0])*abf
-            if _n - T[0] < i: self._valueMin = self._valueMin - i
-            if T[-1]-_x < i: self._valueMax = self._valueMax + i
+            if _n - T[0] < i0: self._valueMin = self._valueMin - i0
+            if T[-1]-_x < i1: self._valueMax = self._valueMax + i1
             T, L = ticks(self._valueMin, self._valueMax, split=1, n=n, percent=self.leftAxisPercent,grid=valueStep)
 
         self._valueMin = T[0]
