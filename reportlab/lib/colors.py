@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.14 2001/01/18 15:17:55 rgbecker Exp $
-__version__=''' $Id: colors.py,v 1.14 2001/01/18 15:17:55 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.15 2001/02/16 10:41:20 dinu_gherman Exp $
+__version__=''' $Id: colors.py,v 1.15 2001/02/16 10:41:20 dinu_gherman Exp $ '''
 
 import string
 import math
@@ -51,6 +51,15 @@ def rgb2cmyk(r,g,b):
 	y = min(1,max(0,y-k))
 	k = min(1,max(0,k))
 	return (c,m,y,k)
+
+def color2bw(colorRGB):
+    "Transform an RGB color to a black and white equivalent."
+
+    col = colorRGB
+    r, g, b = col.red, col.green, col.blue
+    n = (r + g + b) / 3.0
+    bwColorRGB = Color(n, n, n)
+    return bwColorRGB
 
 def HexColor(val):
 	"""This function converts a hex string, or an actual integer number,
