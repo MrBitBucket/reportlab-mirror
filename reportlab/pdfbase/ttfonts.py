@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.1 2002/05/28 15:33:57 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.2 2002/07/02 21:28:29 dinu_gherman Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -56,7 +56,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.1 2002/05/28 15:33:57 rgbecker Exp $'
+__version__ = '$Id: ttfonts.py,v 1.2 2002/07/02 21:28:29 dinu_gherman Exp $'
 
 import string
 from types import StringType
@@ -433,13 +433,28 @@ class TTFontFile(TTFontParser):
                 self.seek(string_data_offset + offset)
                 if length % 2 != 0:
                     raise TTFError, "PostScript name is UTF-16BE string of odd length"
+                length = length / 2
                 psName = ""
-                while length > 1:
+                while length > 0:
                     char = self.read_ushort()
-                    if char < 0x20 or char > 0x7E:
+                    if char < 33 or char > 126 or chr(char) in \
+                       ('[', ']', '(', ')', '{', '}', '<', '>', '/', '%'):
                         raise TTFError, "PostScript contains invalid character U+%04X" % char
                     psName = psName + chr(char)
-                    length = length - 2
+                    length = length - 1
+                break
+            elif platformId == 1 and encodingId == 0 and languageId == 0 \
+               and nameId == 6: # Macintosh, Roman, English, PS Name
+                # According to OpenType spec, if PS name exists, it must exist
+                # both in MS Unicode and Macintosh Roman formats.  Apparently,
+                # you can find live TTF fonts which only have Macintosh format.
+                psName = self.get_chunk(string_data_offset + offset, length)
+                for char in psName:
+                    char = ord(char)
+                    if char < 33 or char > 126 or chr(char) in \
+                       ('[', ']', '(', ')', '{', '}', '<', '>', '/', '%'):
+                        raise TTFError, "PostScript contains invalid character %02X" % char
+                break
         if not psName:
             raise TTFError, "Could not find PostScript font name"
         self.name = psName
@@ -556,8 +571,14 @@ class TTFontFile(TTFontParser):
                 format = self.get_ushort(cmap_offset + offset)
                 if format == 4:
                     unicode_cmap_offset = cmap_offset + offset
+                    break
+            elif platformID == 0: # Unicode -- assume all encodings are compatible
+                format = self.get_ushort(cmap_offset + offset)
+                if format == 4:
+                    unicode_cmap_offset = cmap_offset + offset
+                    break
         if unicode_cmap_offset is None:
-            raise TTFError, 'Font does not have cmap for Unicode (platform 3, encoding 1, format 4)'
+            raise TTFError, 'Font does not have cmap for Unicode (platform 3, encoding 1, format 4 or platform 0 any encoding format 4)'
         self.seek(unicode_cmap_offset + 6)
         segCount = self.read_ushort() / 2
         self.skip(6)
