@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2002
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/setup.py,v 1.8 2003/04/15 17:22:46 dragan1 Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/setup.py,v 1.9 2003/04/16 18:37:25 rgbecker Exp $
 if __name__=='__main__': #NO RUNTESTS
 	import os, sys, shutil, re
 	from distutils.core import setup, Extension
@@ -20,27 +20,6 @@ if __name__=='__main__': #NO RUNTESTS
 			pass 
 		raise ConfigError(msg)
 
-	# We copy the rxp source - we need to build it a second time for uRXP
-	# with different compile time flags
-	RXPUDIR=os.path.join('build','_pyRXPU')
-	RXPDIR='rxp'
-	if os.path.exists(RXPUDIR):
-		shutil.rmtree(RXPUDIR)
-	os.makedirs(RXPUDIR)
-	RXPLIBSOURCES=[]
-	uRXPLIBSOURCES=[]
-	for f in ('xmlparser.c', 'url.c', 'charset.c', 'string16.c', 'ctype16.c', 
-                'dtd.c', 'input.c', 'stdio16.c', 'system.c', 'hash.c', 
-                'version.c', 'namespaces.c', 'http.c'):
-		RXP_file = os.path.join(RXPDIR,f)
-		uRXP_file = os.path.join(RXPUDIR,f.replace('.','U.'))
-		RXPLIBSOURCES.append(RXP_file)
-		shutil.copy2(RXP_file,uRXP_file)
-		uRXPLIBSOURCES.append(uRXP_file)
-	pyRXPU_c = os.path.join(RXPUDIR,'pyRXPU.c')
-	shutil.copy2('pyRXP.c',pyRXPU_c)
-	uRXPLIBSOURCES.append(pyRXPU_c)
-
 	if sys.platform=="win32":
 		LIBS=['wsock32']
 	elif sys.platform=="sunos5":
@@ -57,6 +36,49 @@ if __name__=='__main__': #NO RUNTESTS
 			print msg
 			LIBS=[]
 
+	rxpFiles = ('xmlparser.c', 'url.c', 'charset.c', 'string16.c', 'ctype16.c', 
+                'dtd.c', 'input.c', 'stdio16.c', 'system.c', 'hash.c', 
+                'version.c', 'namespaces.c', 'http.c')
+	RXPLIBSOURCES=[]
+	RXPDIR='rxp'
+	for f in rxpFiles:
+		RXPLIBSOURCES.append(os.path.join(RXPDIR,f))
+	EXT_MODULES =	[Extension(	'pyRXP',
+								['pyRXP.c']+RXPLIBSOURCES,
+								include_dirs=[RXPDIR],
+								define_macros=[('CHAR_SIZE', 8),],
+								library_dirs=[],
+								# libraries to link against
+								libraries=LIBS,
+								),
+							]
+
+	buildU = sys.version >= '2.0.0'
+	if buildU:
+		# We copy the rxp source - we need to build it a second time for uRXP
+		# with different compile time flags
+		RXPUDIR=os.path.join('build','_pyRXPU')
+		if os.path.exists(RXPUDIR):
+			shutil.rmtree(RXPUDIR)
+		os.makedirs(RXPUDIR)
+		uRXPLIBSOURCES=[]
+		for f in rxpFiles:
+			uRXP_file = os.path.join(RXPUDIR,f.replace('.','U.'))
+			shutil.copy2(os.path.join(RXPDIR,f),uRXP_file)
+			uRXPLIBSOURCES.append(uRXP_file)
+		pyRXPU_c = os.path.join(RXPUDIR,'pyRXPU.c')
+		shutil.copy2('pyRXP.c',pyRXPU_c)
+		uRXPLIBSOURCES.append(pyRXPU_c)
+		EXT_MODULES.append(Extension('pyRXPU',
+						uRXPLIBSOURCES,
+						include_dirs=[RXPDIR],
+						define_macros=[('CHAR_SIZE', 16),],
+						library_dirs=[],
+						# libraries to link against
+						libraries=LIBS,
+						))
+
+
 	setup(	name = "pyRXP",
 			version = VERSION,
 			description = "Python RXP interface - fast validating XML parser",
@@ -64,23 +86,7 @@ if __name__=='__main__': #NO RUNTESTS
 			author_email = "robin@reportlab.com",
 			url = "http://www.reportlab.com",
 			packages = [],
-			ext_modules = 	[Extension(	'pyRXP',
-										['pyRXP.c']+RXPLIBSOURCES,
-										include_dirs=[RXPDIR],
-										define_macros=[('CHAR_SIZE', 8),],
-										library_dirs=[],
-										# libraries to link against
-										libraries=LIBS,
-										),
-							Extension(	'pyRXPU',
-										uRXPLIBSOURCES,
-										include_dirs=[RXPDIR],
-										define_macros=[('CHAR_SIZE', 16),],
-										library_dirs=[],
-										# libraries to link against
-										libraries=LIBS,
-										),
-							],
+			ext_modules = EXT_MODULES,
 			#license = open(os.path.join('rxp','COPYING')).read(),
             classifiers = [
 				'Development Status :: 5 - Production/Stable',
@@ -112,4 +118,4 @@ if __name__=='__main__': #NO RUNTESTS
 				os.rename(srcf,dstf)
 				print 'Renaming %s to %s' % (srcf, dstf)
 		MovePYDs('pyRXP.pyd',)
-		MovePYDs('pyRXPU.pyd',)
+		if buildU: MovePYDs('pyRXPU.pyd',)
