@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.53 2002/03/26 11:49:10 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.54 2002/04/30 17:13:50 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.53 2002/03/26 11:49:10 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.54 2002/04/30 17:13:50 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -560,8 +560,8 @@ class ValueAxis(Widget):
 		"""
 
 		valueMin, valueMax, rangeRound = self.valueMin, self.valueMax, self.rangeRound
-		if valueMin is None: valueMin = _findMin(dataSeries,self._dataIndex,0)
-		if valueMax is None: valueMax = _findMax(dataSeries,self._dataIndex,0)
+		if valueMin is None: self._cValueMin = valueMin = _findMin(dataSeries,self._dataIndex,0)
+		if valueMax is None: self._cValueMax = valueMax = _findMax(dataSeries,self._dataIndex,0)
 		if valueMin == valueMax:
 			if valueMax==0:
 				valueMax = 0.01
