@@ -3,6 +3,11 @@
 This is the API reference for the ReportLab library.  All public
 classes, functions and methods are documented here.
 
+Most of the reference text is built automatically from the
+documentation strings in each class, method and function.
+That's why it uses preformatted text and doesn't look very
+pretty.
+
 Please note the following points:
 .bu <seqdefault id='list'/><bullet>(<seq/>)</bullet>Items with one leading underscore are considered private
 to the modules they are defined in; they are not documented
@@ -55,16 +60,64 @@ notation but should not be thought of as packages.
 Each package is documented in turn.
 
 .pageBreak
-.h1 pdfgen subpackage API Reference
-.getModuleDoc reportlab.pdfgen.canvas
+.h1 <i>reportlab.pdfgen</i> subpackage
+
+This package contains three modules, canvas.py, textobject.py
+and pathobject.py, which define three classes of corresponding 
+names.  The only class users should construct directly is
+the Canvas, defined in reportlab.pdfgen.canvas; it provides
+methods to obtain PathObjects and TextObjects.
+
+
+.getClassDoc reportlab.pdfgen.canvas Canvas
 .pageBreak
-.getModuleDoc reportlab.pdfgen.pathobject
+The method Canvas.beginPath allows users to construct
+a PDFPathObject, which is defined in reportlab/pdfgen/pathobject.py.
+
+.getClassDoc reportlab.pdfgen.pathobject PDFPathObject
 .pageBreak
-.getModuleDoc reportlab.pdfgen.textobject
+The method Canvas.beginText allows users to construct
+a PDFTextObject, which is defined in reportlab/pdfgen/textobject.py.
+
+.getClassDoc reportlab.pdfgen.textobject PDFTextObject
+.pageBreak
+.h1 <i>reportlab.platypus</i> subpackage
+
+.pageBreak
+.h1 <i>reportlab.lib</i> subpackage
+
+This package contains a number of modules which either add utility
+to pdfgen and platypus, or which are of general use in graphics
+applications.
+
+.h2 <i>reportlab.lib.colors</i> module
+.getModuleDoc reportlab.lib.colors
+
+.h2 <i>reportlab.lib.corp</i> module
+.getModuleDoc reportlab.lib.corp
+
+.h2 <i>reportlab.lib.enums</i> module
+.getModuleDoc reportlab.lib.enums
+
+.h2 <i>reportlab.lib.fonts</i> module
+.getModuleDoc reportlab.lib.fonts
+
+.h2 <i>reportlab.lib.pagesizes</i> module
+.getModuleDoc reportlab.lib.pagesizes
+
+.h2 <i>reportlab.lib.sequencer</i> module
+.getModuleDoc reportlab.lib.sequencer
+
+
+
+
 .pageBreak
 .h1 Appendix A - CVS Revision History
 .beginPre Code
 $Log: reference.yml,v $
+Revision 1.6  2000/06/14 21:22:52  andy_robinson
+Added docs for library
+
 Revision 1.5  2000/06/12 11:26:34  andy_robinson
 Numbered list added
 

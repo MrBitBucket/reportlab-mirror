@@ -147,31 +147,28 @@ class Parser:
         """Documents the entire module at this point by making
         paragraphs and preformatted objects"""
         docco = docs.tools.codegrab.getObjectsDefinedIn(modulename, pathname)
+        if docco.doc <> None:
+            self._results.append(('Paragraph', 'DocString', docco.doc))
         if len(docco.functions) > 0:
-            self._results.append(('Paragraph','Heading2', 'Functions in ' + modulename))
             for fn in docco.functions:
                 if fn.status == 'official':
                     self._results.append(('Preformatted','FunctionHeader', fn.proto))
                     self._results.append(('Preformatted','DocString', fn.doc))
-        else:
-            self._results.append(('Paragraph','Heading2', 'No Functions Defined in ' + modulename))
 
         if len(docco.classes) > 0:
-            self._results.append(('Paragraph','Heading2', 'Classes in ' + modulename))
             for cls in docco.classes:
-                self._results.append(('Preformatted','FunctionHeader', 'Class %s:' % cls.name))
-                self._results.append(('Preformatted','DocString', cls.doc))
-                for mth in cls.methods:
-                    if mth.status == 'official':
-                        self._results.append(('Preformatted','FunctionHeader', mth.proto))
-                        self._results.append(('Preformatted','DocStringIndent', mth.doc))
+                if cls.status == 'official':
+                    self._results.append(('Preformatted','FunctionHeader', 'Class %s:' % cls.name))
+                    self._results.append(('Preformatted','DocString', cls.doc))
+                    for mth in cls.methods:
+                        if mth.status == 'official':
+                            self._results.append(('Preformatted','FunctionHeader', mth.proto))
+                            self._results.append(('Preformatted','DocStringIndent', mth.doc))
                     
-        else:
-            self._results.append(('Paragraph','Heading2', 'No Classes Defined in ' + modulename))
 
     def getClassDoc(self, modulename, classname, pathname=None):
         """Documents the class and its public methods"""
-        docco = codegrab.getObjectsDefinedIn(modulename, pathname)
+        docco = docs.tools.codegrab.getObjectsDefinedIn(modulename, pathname)
         found = 0
         for cls in docco.classes:
             if cls.name == classname:

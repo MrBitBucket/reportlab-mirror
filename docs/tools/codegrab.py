@@ -54,11 +54,14 @@ def getObjectsDefinedIn(modulename, directory=None):
     result = Struct()
     result.functions = []
     result.classes = []
+    result.doc = mod.__doc__
     for name in dir(mod):
         value = getattr(mod, name)
         if type(value) is types.FunctionType:
+            path, file = os.path.split(value.func_code.co_filename)
+            root, ext = os.path.splitext(file)
             #we're possibly interested in it
-            if os.path.splitext(value.func_code.co_filename)[0] == modulename:
+            if root == modulename:
                 #it was defined here
                 funcObj = value
                 fn = Struct()
@@ -68,6 +71,14 @@ def getObjectsDefinedIn(modulename, directory=None):
                     fn.doc = dedent(funcObj.__doc__)
                 else:
                     fn.doc = '(no documentation string)'
+                #is it official?
+                if name[0:1] == '_':
+                     fn.status = 'private'
+                elif name[-1] in '0123456789':
+                    fn.status = 'experimental'
+                else:
+                    fn.status = 'official'
+                        
                 result.functions.append(fn)
         elif type(value) == types.ClassType:
             if value.__module__ == modulename:
@@ -81,6 +92,12 @@ def getObjectsDefinedIn(modulename, directory=None):
                 cl.bases = []
                 for base in value.__bases__:
                     cl.bases.append(base.__name__)
+                if name[0:1] == '_':
+                    cl.status = 'private'
+                elif name[-1] in '0123456789':
+                    cl.status = 'experimental'
+                else:
+                    cl.status = 'official'
                 
                 cl.methods = []
                 #loop over dict finding methods defined here

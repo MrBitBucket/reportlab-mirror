@@ -105,6 +105,7 @@ def getStyleSheet():
                                   parent=stylesheet['Normal'],
                                   fontName='Courier',
                                   fontSize=8,
+                                  leftIndent=18,
                                   leading=8.8))
 
     stylesheet.add(ParagraphStyle(name='DocStringIndent',
