@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.2 2001/04/13 16:15:21 andy_robinson Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.2 2001/04/13 16:15:21 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.3 2001/04/13 19:42:57 rgbecker Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.3 2001/04/13 19:42:57 rgbecker Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
@@ -350,15 +350,23 @@ substring.
     p.moveTo(inch, 5*inch)
     p.lineTo(3*inch, 5*inch)
     c.drawPath(p)
-    c.drawString(4*inch, 5*inch, 'dash pattern 6 points on, 3 off- setDash(6,3)')
+    c.drawString(4*inch, 5*inch, 'dash 6 points on, 6 off- setDash(6,6) setLineCap(0)')
     makesubsection(c, "dash patterns", 5*inch)
 
-    c.setDash([1,2,3,4,5,6],0)
+    c.setLineCap(1)
     p = c.beginPath()
     p.moveTo(inch, 4.5*inch)
     p.lineTo(3*inch, 4.5*inch)
     c.drawPath(p)
-    c.drawString(4*inch, 4.5*inch, 'dash pattern lengths growing - setDash([1,2,3,4,5,6],0)')
+    c.drawString(4*inch, 4.5*inch, 'dash 6 points on, 6 off- setDash(6,6) setLineCap(1)')
+
+    c.setLineCap(0)
+    c.setDash([1,2,3,4,5,6],0)
+    p = c.beginPath()
+    p.moveTo(inch, 4.0*inch)
+    p.lineTo(3*inch, 4.0*inch)
+    c.drawPath(p)
+    c.drawString(4*inch, 4.0*inch, 'dash growing - setDash([1,2,3,4,5,6],0) setLineCap(0)')
 
     c.setDash()
 
