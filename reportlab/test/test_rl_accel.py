@@ -56,9 +56,11 @@ def makeSuite():
     # only run the tests if _rl_accel is present
     try:
         import _rl_accel
-        return makeSuiteForClasses(RlAccelTestCase)
-    except ImportError:
-        return None
+        Klass = RlAccelTestCase
+    except:
+        class Klass(unittest.TestCase):
+            pass
+    return makeSuiteForClasses(Klass)
 
 #noruntests
 if __name__ == "__main__":
