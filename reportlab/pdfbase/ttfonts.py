@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.2 2002/07/02 21:28:29 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.3 2002/07/24 19:22:17 andy_robinson Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -56,7 +56,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.2 2002/07/02 21:28:29 dinu_gherman Exp $'
+__version__ = '$Id: ttfonts.py,v 1.3 2002/07/24 19:22:17 andy_robinson Exp $'
 
 import string
 from types import StringType
@@ -709,7 +709,13 @@ class TTFontFile(TTFontParser):
 
         # The following tables are simply copied from the original
         for tag in ('name', 'OS/2', 'cvt ', 'fpgm', 'prep'):
-            output.add(tag, self.get_table(tag))
+            try:
+                output.add(tag, self.get_table(tag))
+            except KeyError:
+                # Apparently some of the tables are optional (cvt, fpgm, prep).
+                # The lack of the required ones (name, OS/2) would have already
+                # been caught before.
+                pass
 
         # post - PostScript
         post = "\x00\x03\x00\x00" + self.get_table('post')[4:16] + "\x00" * 16
