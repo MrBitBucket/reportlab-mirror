@@ -43,7 +43,7 @@ def getCVSEntries(folder, files=1, folders=0):
 # to be able to filter filenames.
 
 class GlobDirectoryWalker:
-    "A forward iterator that traverses a directory tree."
+    "A forward iterator that traverses files in a directory tree."
 
     def __init__(self, directory, pattern='*'):
         self.stack = [directory]
@@ -77,8 +77,39 @@ class GlobDirectoryWalker:
         "Filter hook, overwrite in subclasses as needed."
 
         return files
-
     
+
+class RestrictedGlobDirectoryWalker(GlobDirectoryWalker):
+    "An restricted directory tree iterator."
+
+    def __init__(self, directory, pattern='*', ignore=None):
+        apply(GlobDirectoryWalker.__init__, (self, directory, pattern))
+        
+        if ignore == None:
+            ignore = []
+        self.ignoredPatterns = []
+        if type(ignore) == type([]):
+            for p in ignore:
+                self.ignoredPatterns.append(p)
+        elif type(ignore) == type(''):
+            self.ignoredPatterns.append(ignore)
+
+
+    def filterFiles(self, folder, files):
+        "Filters all items from files matching patterns to ignore."
+
+        indicesToDelete = []
+        for i in xrange(len(files)):
+            f = files[i]
+            for p in self.ignoredPatterns:
+                if fnmatch.fnmatch(f, p):
+                    indicesToDelete.append(i)
+        indicesToDelete.reverse()
+        for i in indicesToDelete:
+            del files[i]
+
+        return files
+
 
 class CVSGlobDirectoryWalker(GlobDirectoryWalker):
     "An directory tree iterator that checks for CVS data."
