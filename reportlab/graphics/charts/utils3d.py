@@ -40,9 +40,6 @@ class _YStrip:
         self.fillColor = fillColor
         self.fillColorShaded = _getShaded(fillColor,fillColorShaded,shading)
 
-def _ystrip_cmp(a,b):
-    return cmp(a.y1,b.y1)
-
 def _ystrip_poly( x0, x1, y0, y1, xoff, yoff):
     return [x0,y0,x0+xoff,y0+yoff,x1+xoff,y1+yoff,x1,y1]
 
@@ -83,6 +80,44 @@ def _draw_3d_line( G, x0, x1, y0, y1,
             G.add(Polygon(_ystrip_poly(x[0], x[1], y.y0, y.y1, xdepth, ydepth),
                 fillColor = c, strokeColor=c, strokeWidth=xdelta*0.6))
 
+def _make_3d_line_info( G, x0, x1, y0, y1, z0, z1,
+                    theta_x, theta_y,
+                    fillColor, fillColorShaded=None, xdelta=1,
+                    strokeColor=None, strokeWidth=None, strokeDashArray=None,
+                    shading=0.1):
+    zwidth = abs(z1-z0)
+    xdepth = zwidth*theta_x
+    ydepth = zwidth*theta_y
+    depth_slope  = xdepth==0 and 1e150 or -ydepth/float(xdepth)
+
+    x = float(x1-x0)
+    slope = x==0 and 1e150 or (y1-y0)/x
+
+    def F(x, slope=slope, y0=y0, x0=x0):
+        return float((x-x0)*slope+y0)
+    if x0>=x1: X=[(x0,x0)]
+    else:
+        x = x0
+        X = []
+        while x<=x1:
+            xn = x+xdelta
+            X.append((x,xn))
+            x = xn
+        if X[-1][0]==x1: del X[-1]
+        else: X[-1][1] = x1
+    a = G.add
+    c = slope>depth_slope and _getShaded(fillColor,fillColorShaded,shading) or fillColor
+    zy0 = z0*theta_y
+    zx0 = z0*theta_x
+    for x in X:
+        y_0 = F(x[0])+zy0
+        y_1 = F(x[1])+zy0
+        x_0 = x[0]+zx0
+        x_1 = x[1]+zx0
+        P = Polygon(_ystrip_poly(x_0, x_1, y_0, y_1, xdepth, ydepth),
+                    fillColor = c, strokeColor=c, strokeWidth=xdelta*0.6)
+        a((0,z0,z1,x_0,y_0,P))
+
 from math import pi, sin, cos
 _pi_2 = pi*0.5
 _2pi = 2*pi
@@ -111,6 +146,6 @@ if __name__=='__main__':
     _draw_3d_bar(D, 10, 20, 10, 50, 5, 5, fillColor=lightgrey, strokeColor=pink)
     _draw_3d_bar(D, 30, 40, 10, 45, 5, 5, fillColor=lightgrey, strokeColor=pink)
 
-    _draw_3d_line(D, 50, 55, 10, 45, 5, 5, fillColor=lightgrey)
-    _draw_3d_line(D, 55, 60, 45, 10, 5, 5, fillColor=lightgrey)
+    #_draw_3d_line(D, 50, 55, 10, 45, 5, 5, fillColor=lightgrey)
+    #_draw_3d_line(D, 55, 60, 45, 10, 5, 5, fillColor=lightgrey)
     D.save(formats=['pdf'],outDir='.',fnRoot='_draw_3d_bar')

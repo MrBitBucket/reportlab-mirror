@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.32 2003/09/10 14:47:17 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.33 2003/09/12 15:45:30 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
-__version__=''' $Id: linecharts.py,v 1.32 2003/09/10 14:47:17 rgbecker Exp $ '''
+__version__=''' $Id: linecharts.py,v 1.33 2003/09/12 15:45:30 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType
@@ -194,7 +194,7 @@ class HorizontalLineChart(LineChart):
             self._positions.append(lineRow)
 
 
-    def drawLabel(self, group, rowNo, colNo, x, y):
+    def _innerDrawLabel(self, rowNo, colNo, x, y):
         "Draw a label for a given item in the list."
 
         labelFmt = self.lineLabelFormat
@@ -223,8 +223,14 @@ class HorizontalLineChart(LineChart):
             else:
                 label.setOrigin(x, y - self.lineLabelNudge)
             label.setText(labelText)
+        else:
+            label = None
+        return label
 
-            group.add(label)
+    def drawLabel(self, G, rowNo, colNo, x, y):
+        '''Draw a label for a given item in the list.
+        G must have an add method'''
+        G.add(self._innerDrawLabel(rowNo,colNo,x,y))
 
     def makeLines(self):
         g = Group()
@@ -329,6 +335,135 @@ class HorizontalLineChart(LineChart):
 
         return g
 
+def _cmpFakeItem(a,b):
+    '''t, z0, z1, x, y = a[:5]'''
+    return cmp((-a[1],a[3],a[0],-a[4]),(-b[1],b[3],b[0],-b[4]))
+
+class _FakeGroup:
+    def __init__(self):
+        self._data = []
+
+    def add(self,what):
+        if what: self._data.append(what)
+
+    def value(self):
+        return self._data
+
+    def sort(self):
+        self._data.sort(_cmpFakeItem)
+        #for t in self._data: print t
+
+class HorizontalLineChart3D(HorizontalLineChart):
+    _attrMap = AttrMap(BASE=HorizontalLineChart,
+        theta_x = AttrMapValue(isNumber, desc='dx/dz'),
+        theta_y = AttrMapValue(isNumber, desc='dy/dz'),
+        zDepth = AttrMapValue(isNumber, desc='depth of an individual series'),
+        zSpace = AttrMapValue(isNumber, desc='z gap around series'),
+        )
+    theta_x = .5
+    theta_y = .5
+    zDepth = 10
+    zSpace = 1.5
+
+    def calcPositions(self):
+        HorizontalLineChart.calcPositions(self)
+        nSeries = self._seriesCount
+        zSpace = self.zSpace
+        zDepth = self.zDepth
+        if self.categoryAxis.style=='parallel_3d':
+            _3d_depth = nSeries*zDepth+(n+1)*self.zSpace
+        else:
+            _3d_depth = zDepth + 2*zSpace
+        self._3d_dx = self.theta_x*_3d_depth
+        self._3d_dy = self.theta_y*_3d_depth
+
+    def _calc_z0(self,rowNo):
+        zSpace = self.zSpace
+        if self.categoryAxis.style=='parallel_3d':
+            z0 = rowNo*(self.zDepth+zSpace)+zSpace
+        else:
+            z0 = zSpace
+        return z0
+
+    def _zadjust(self,x,y,z):
+        return x+z*self.theta_x*x, y+z*self.theta_y*y
+
+    def makeLines(self):
+        labelFmt = self.lineLabelFormat
+        P = range(len(self._positions))
+        if self.reversePlotOrder: P.reverse()
+        inFill = self.inFill
+        assert not inFill, "inFill not supported for 3d yet"
+        #if inFill:
+            #inFillY = self.categoryAxis._y
+            #inFillX0 = self.valueAxis._x
+            #inFillX1 = inFillX0 + self.categoryAxis._length
+            #inFillG = getattr(self,'_inFillG',g)
+        zDepth = self.zDepth
+        _zadjust = self._zadjust
+        theta_x = self.theta_x
+        theta_y = self.theta_y
+        F = _FakeGroup()
+        from utils3d import _make_3d_line_info
+
+        # Iterate over data rows.
+        for rowNo in P:
+            row = self._positions[rowNo]
+            styleCount = len(self.lines)
+            styleIdx = rowNo % styleCount
+            rowStyle = self.lines[styleIdx]
+            rowColor = rowStyle.strokeColor
+            dash = getattr(rowStyle, 'strokeDashArray', None)
+            z0 = self._calc_z0(rowNo)
+            z1 = z0 + zDepth
+
+            if hasattr(self.lines[styleIdx], 'strokeWidth'):
+                strokeWidth = self.lines[styleIdx].strokeWidth
+            elif hasattr(self.lines, 'strokeWidth'):
+                strokeWidth = self.lines.strokeWidth
+            else:
+                strokeWidth = None
+
+            # Iterate over data columns.
+            if self.joinedLines:
+                n = len(row)
+                if n:
+                    x0, y0 = row[0]
+                    for colNo in xrange(1,n):
+                        x1, y1 = row[colNo]
+                        _make_3d_line_info( F, x0, x1, y0, y1, z0, z1,
+                                theta_x, theta_y,
+                                rowColor, fillColorShaded=None, xdelta=1,
+                                strokeColor=None, strokeWidth=None, strokeDashArray=None,
+                                shading=0.1)
+                        x0, y0 = x1, y1
+
+            if hasattr(self.lines[styleIdx], 'symbol'):
+                uSymbol = self.lines[styleIdx].symbol
+            elif hasattr(self.lines, 'symbol'):
+                uSymbol = self.lines.symbol
+            else:
+                uSymbol = None
+
+            zL = (z0+z1)*0.5
+            if uSymbol:
+                for colNo in range(len(row)):
+                    x1, y1 = row[colNo]
+                    x1, y1 = _zadjust(x1,y1,zL)
+                    symbol = uSymbol2Symbol(uSymbol,x1,y1,rowStyle.strokeColor)
+                    if symbol: F.add((2,zL,zL,x1,y1,symbol))
+
+            # Draw item labels.
+            for colNo in range(len(row)):
+                x1, y1 = row[colNo]
+                x1, y1 = _zadjust(x1,y1,zL)
+                L = self._innerDrawLabel(rowNo, colNo, x1, y1)
+                if L: F.add((2,zL,zL,x1,y1,L))
+
+        F.sort()
+        g = Group()
+        map(lambda x,a=g.add: a(x[-1]),F.value())
+        return g
 
 class VerticalLineChart(LineChart):
     pass

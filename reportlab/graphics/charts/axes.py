@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.85 2003/09/10 14:47:17 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.86 2003/09/12 15:45:30 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.85 2003/09/10 14:47:17 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.86 2003/09/12 15:45:30 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -527,6 +527,7 @@ class ValueAxis(_AxisG):
         avoidBoundFrac = AttrMapValue(EitherOr((isNumberOrNone,SequenceOf(isNumber,emptyOK=0,lo=2,hi=2))), desc='Fraction of interval to allow above and below.'),
         rangeRound=AttrMapValue(OneOf('none','both','ceiling','floor'),'How to round the axis limits'),
         zrangePref = AttrMapValue(isNumberOrNone, desc='Zero range axis limit preference.'),
+        style = AttrMapValue(OneOf('normal','stacked','parallel_3d'),"How values are plotted!"),
         )
 
     def __init__(self):
@@ -574,6 +575,7 @@ class ValueAxis(_AxisG):
         self.avoidBoundFrac = None
         self.rangeRound = 'none'
         self.zrangePref = 0
+        self.style = 'normal'
 
     def setPosition(self, x, y, length):
         # ensure floating point
