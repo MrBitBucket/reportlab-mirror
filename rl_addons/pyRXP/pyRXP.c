@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.24 2003/11/09 13:59:54 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.25 2004/03/16 15:28:26 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.24 2003/11/09 13:59:54 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.25 2004/03/16 15:28:26 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,13 +31,13 @@ static char* __version__=" $Id: pyRXP.c,v 1.24 2003/11/09 13:59:54 rgbecker Exp 
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "1.00"
+#define VERSION "1.01"
 #define MAX_DEPTH 256
 
 #if CHAR_SIZE==16
 PyObject* PYSTRING(const Char* s)
 {
-	return PyUnicode_Decode((const char*)s, (int)Strlen(s)*2, "utf16", NULL);
+	return PyUnicode_FromUnicode((Py_UNICODE*)s, (int)Strlen(s));
 }
 PyObject* PYSTRING8(const char* s)
 {
