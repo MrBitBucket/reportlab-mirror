@@ -75,6 +75,13 @@ def isNumberOrNone(x):
     else:
         return (type(x) in (FloatType, IntType))
 
+def isNumberOrAuto(x):
+    """Don't think we really want complex numbers for widths!"""
+    if x == Auto:
+        return 1
+    else:
+        return (type(x) in (FloatType, IntType))
+
 def isTextAnchor(x):
     return (x in ('start','middle','end'))
 
@@ -136,11 +143,13 @@ def isTransform(x):
 def isColor(x):
     return isinstance(x, colors.Color)
 
+
 def isColorOrNone(x):
     if x is None:
         return 1
     else:
         return isinstance(x, colors.Color)
+
 
 def isValidChild(x):
     """Is it allowed in a drawing or group?  i.e.
