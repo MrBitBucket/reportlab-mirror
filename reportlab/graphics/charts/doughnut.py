@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/doughnut.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/doughnut.py,v 1.4 2003/06/19 15:28:40 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/doughnut.py,v 1.5 2003/09/08 17:55:27 johnprecedo Exp $
 # doughnut chart
 
 """Doughnut chart
@@ -10,7 +10,7 @@ Produces a circular chart like the doughnut charts produced by Excel.
 Can handle multiple series (which produce concentric 'rings' in the chart).
 
 """
-__version__=''' $Id: doughnut.py,v 1.4 2003/06/19 15:28:40 rgbecker Exp $ '''
+__version__=''' $Id: doughnut.py,v 1.5 2003/09/08 17:55:27 johnprecedo Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -83,7 +83,7 @@ class Doughnut(Widget):
         self.y = 0
         self.width = 100
         self.height = 100
-        self.data = [1]
+        self.data = [1,1]
         self.labels = None  # or list of strings
         self.startAngle = 90
         self.direction = "clockwise"
@@ -132,23 +132,38 @@ class Doughnut(Widget):
         if type(self.data) in (ListType, TupleType) and type(self.data[0]) in (ListType, TupleType):
             #it's a nested list, more than one sequence
             normData = []
+            n = []
             for l in self.data:
                 t = self.normalizeData(l)
                 normData.append(t)
+                n.append(len(t))
         else:
             normData = self.normalizeData(self.data)
-        n = len(normData)
+            n = len(normData)
 
         #labels
         if self.labels is None:
-            labels = [''] * n
+            labels = []
+            if type(n) not in (ListType,TupleType):
+                labels = [''] * n
+            else:
+                for m in n:
+                    labels = labels + [''] * m
         else:
             labels = self.labels
             #there's no point in raising errors for less than enough errors if
             #we silently create all for the extreme case of no labels.
-            i = n-len(labels)
-            if i>0:
-                labels = labels + ['']*i
+            if type(n) not in (ListType,TupleType):
+                i = n-len(labels)
+                if i>0:
+                    labels = labels + ['']*i
+            else:
+                tlab = 0
+                for m in n:
+                    tlab = tlab+m
+                i = tlab-len(labels)
+                if i>0:
+                    labels = labels + ['']*i
 
         xradius = self.width/2.0
         yradius = self.height/2.0
@@ -163,10 +178,11 @@ class Doughnut(Widget):
         g  = Group()
         i  = 0
         sn = 0
-        styleCount = len(self.slices)
 
         startAngle = self.startAngle #% 360
         if type(self.data[0]) in (ListType, TupleType):
+            #multi-series doughnut
+            styleCount = len(self.slices)
             iradius = (self.height/5.0)/len(self.data)
             for series in normData:
                 for angle in series:
@@ -193,9 +209,9 @@ class Doughnut(Widget):
                         cx = centerx + popdistance * cos(aveAngleRadians)
                         cy = centery + popdistance * sin(aveAngleRadians)
 
-                    if n > 1:
+                    if type(n) in (ListType,TupleType): 
                         theSector = Wedge(cx, cy, xradius+(sn*iradius)-iradius, a1, a2, yradius=yradius+(sn*iradius)-iradius, radius1=yradius+(sn*iradius)-(2*iradius))
-                    elif n==1:
+                    else:
                         theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, radius1=iradius)
 
                     theSector.fillColor = sectorStyle.fillColor
@@ -205,29 +221,26 @@ class Doughnut(Widget):
 
                     g.add(theSector)
                     startAngle = endAngle
-                    i  = i + 1
+
+                    if labels[i] != "":
+                        averageAngle = (a1+a2)/2.0
+                        aveAngleRadians = averageAngle*pi/180.0
+                        labelRadius = sectorStyle.labelRadius
+                        labelX = centerx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
+                        labelY = centery + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
+
+                        theLabel = String(labelX, labelY, labels[i])
+                        theLabel.textAnchor = "middle"
+                        theLabel.fontSize = sectorStyle.fontSize
+                        theLabel.fontName = sectorStyle.fontName
+                        theLabel.fillColor = sectorStyle.fontColor
+                        g.add(theLabel)
+                    i = i + 1
                 sn = sn + 1
 
-            # now draw the labels
-            i = 0
-            if labels[i] != "":
-                averageAngle = (a1+a2)/2.0
-                aveAngleRadians = averageAngle*pi/180.0
-                labelRadius = sectorStyle.labelRadius
-                labelX = centerx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
-                labelY = centery + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
-
-                theLabel = String(labelX, labelY, labels[i])
-                theLabel.textAnchor = "middle"
-                theLabel.fontSize = sectorStyle.fontSize
-                theLabel.fontName = sectorStyle.fontName
-                theLabel.fillColor = sectorStyle.fontColor
-
-                g.add(theLabel)
-                i = i + 1
-
-
         else:
+            #single series doughnut
+            styleCount = len(self.slices)
             iradius = self.height/5.0
             for angle in normData:
                 endAngle = (startAngle + (angle * whichWay)) #% 360
@@ -255,10 +268,8 @@ class Doughnut(Widget):
 
                 if n > 1:
                     theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, radius1=iradius)
-                    #theWedge = Wedge(cx, cy, xradius, a1, a2, yradius=yradius)
                 elif n==1:
                     theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, iradius=iradius)
-                    #theSector = Ellipse(cx, cy, xradius, yradius)
 
                 theSector.fillColor = sectorStyle.fillColor
                 theSector.strokeColor = sectorStyle.strokeColor
