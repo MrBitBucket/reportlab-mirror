@@ -1,0 +1,16 @@
+.t ReportLab API Reference
+.pageBreak
+.h1 pdfgen subpackage API Reference
+.getModuleDoc reportlab.pdfgen.canvas
+.pageBreak
+.h1 Appendix A - CVS Revision History
+.beginPre Code
+$Log: reference.yml,v $
+Revision 1.1  2000/06/05 16:39:04  andy_robinson
+Initial revision
+
+.endPre
+
+
+
+
