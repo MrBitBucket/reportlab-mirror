@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "0.91"
+#define VERSION "0.92"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -1207,6 +1207,7 @@ static PyObject* delCache(PyObject* self, PyObject* args)
 
 /* Opcodes */
 #define PICT_picVersion		0x11
+#define PICT_background		0x1b
 #define	PICT_headerOp		0x0C00
 #define PICT_clipRgn		0x01
 #define PICT_PackBitsRect	0x98
@@ -1340,14 +1341,14 @@ static int pict_putRow(BYTE_STREAM* fd, int row, int cols, pixel* rowpixels, cha
 static PyObject* pil2pict(PyObject* self, PyObject* args)
 {
 	PyObject *result;
-	int		rows, cols, colors, i, row, oc, len, npixels;
+	int		rows, cols, colors, i, row, oc, len, npixels, tc;
 	char	*packed;
 	long	lpos;
 	pixel	*palette, *pixels;
 	BYTE_STREAM	OBS;
 	BYTE_STREAM	*obs = &OBS;
 
-	if(!PyArg_ParseTuple(args,"iis#s#:pil2pict",&cols,&rows,&pixels,&npixels,&palette,&colors)) return NULL;
+	if(!PyArg_ParseTuple(args,"iis#s#i:pil2pict",&cols,&rows,&pixels,&npixels,&palette,&colors,&tc)) return NULL;
 
 	colors /= 3;
 	len = HEADER_SIZE*4+colors*4*sizeof(short)+cols*rows*sizeof(pixel);	/*generous estimate of maximum size*/
@@ -1370,6 +1371,15 @@ static PyObject* pil2pict(PyObject* self, PyObject* args)
 	pict_putFixed(obs, cols, 0);
 	pict_putFixed(obs, rows, 0);
 	pict_putFill(obs, 4);
+
+	if(tc!=-1){
+		pict_putShort(obs, PICT_background);
+		pict_putShort(obs, (short)(((unsigned long)((tc>>16)&0xFF)*65535L)/255L));
+		pict_putShort(obs, (short)(((unsigned long)((tc>>8)&0xFF)*65535L)/255L));
+		pict_putShort(obs, (short)(((unsigned long)(tc&0xFF)*65535L)/255L));
+		pict_putShort(obs, 0x0f);				/*bkcolor*/
+		pict_putLong(obs, (unsigned long)tc);
+		}
 
 	/* seems to be needed by many PICT2 programs */
 	pict_putShort(obs, PICT_clipRgn);
@@ -1404,9 +1414,9 @@ static PyObject* pil2pict(PyObject* self, PyObject* args)
 		pict_putShort(obs, (short)(((unsigned long)palette[3*i+2]*65535L)/255L));
 		}
 
-	pict_putRect(obs, 0, 0, rows, cols);	/* srcRect */
-	pict_putRect(obs, 0, 0, rows, cols);	/* dstRect */
-	pict_putShort(obs, 0);				/* mode */
+	pict_putRect(obs, 0, 0, rows, cols);		/*srcRect*/
+	pict_putRect(obs, 0, 0, rows, cols);		/*dstRect*/
+	pict_putShort(obs,tc!=-1 ? 36 : 0);			/*transfer mode*/
 
 	/*write out the pixel data.*/
 	packed = (char*) malloc((unsigned)(cols+cols/MAX_COUNT+1));
