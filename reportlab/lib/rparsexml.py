@@ -94,11 +94,11 @@ def unEscapeContentList(contentList):
         result.append(e)
     return result
 
-def parsexmlSimple(xmltext, oneOutermostTag=0,eoCB=None):
+def parsexmlSimple(xmltext, oneOutermostTag=0,eoCB=None,entityReplacer=unEscapeContentList):
     """official interface: discard unused cursor info"""
     if RequirePyRXP:
         raise ImportError, "pyRXP not found, fallback parser disabled"
-    (result, cursor) = parsexml0(xmltext)
+    (result, cursor) = parsexml0(xmltext,entityReplacer=entityReplacer)
     if oneOutermostTag:
         return result[2][0]
     else:
@@ -141,7 +141,7 @@ def skip_prologue(text, cursor):
 
 def parsexml0(xmltext, startingat=0, toplevel=1,
         # snarf in some globals
-        strip=string.strip, split=string.split, find=string.find,
+        strip=string.strip, split=string.split, find=string.find, entityReplacer=unEscapeContentList,
         #len=len, None=None
         #LENCDATAMARKER=LENCDATAMARKER, CDATAMARKER=CDATAMARKER
         ):
@@ -173,7 +173,7 @@ def parsexml0(xmltext, startingat=0, toplevel=1,
             if toplevel is not None:
                 #D = {NAMEKEY: NONAME, CONTENTSKEY: [xmltext[cursor:]]}
                 ContentList = [xmltext[cursor:]]
-                ContentList = unEscapeContentList(ContentList)
+                if entityReplacer: ContentList = entityReplacer(ContentList)
                 return (NameString, AttDict, ContentList, ExtraStuff)
             else:
                 raise ValueError, "no tags at non-toplevel %s" % `xmltext[cursor:cursor+20]`
@@ -359,7 +359,7 @@ def parsexml0(xmltext, startingat=0, toplevel=1,
                 #if verbose:
                 #    #print "skipping", repr(remainder)
                 #    #print "--- recursively parsing starting at", xmltext[nextopenbracket:nextopenbracket+20]
-                (parsetree, cursor) = parsexml0(xmltext, startingat=nextopenbracket, toplevel=None)
+                (parsetree, cursor) = parsexml0(xmltext, startingat=nextopenbracket, toplevel=None, entityReplacer=entityReplacer)
                 if parsetree:
                     L.append(parsetree)
         # maybe should check for trailing garbage?
@@ -368,7 +368,7 @@ def parsexml0(xmltext, startingat=0, toplevel=1,
         #    if remainder:
         #        raise ValueError, "trailing garbage at top level %s" % repr(remainder[:20])
     if ContentList:
-        ContentList = unEscapeContentList(ContentList)
+        if entityReplacer: ContentList = entityReplacer(ContentList)
     t = (NameString, AttDict, ContentList, ExtraStuff)
     return (t, cursor)
 
