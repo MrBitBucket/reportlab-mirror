@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.55 2002/03/15 19:42:55 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.55 2002/03/15 19:42:55 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.56 2002/03/18 14:00:45 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.56 2002/03/18 14:00:45 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -368,20 +368,26 @@ class Table(Flowable):
 			self._curweight = weight
 
 	def _drawHLines(self, (sc, sr), (ec, er), weight, color):
+		ecp = self._colpositions[sc:ec+2]
+		rp = self._rowpositions[sr:er+1]
+		if len(ecp)<=1 or len(rp)<1: return
 		self._prepLine(weight, color)
-		scp = self._colpositions[sc]
-		ecp = self._colpositions[ec+1]
-		for rowpos in self._rowpositions[sr:er+1]:
+		scp = ecp[0]
+		ecp = ecp[-1]
+		for rowpos in rp:
 			self.canv.line(scp, rowpos, ecp, rowpos)
 
 	def _drawHLinesB(self, (sc, sr), (ec, er), weight, color):
 		self._drawHLines((sc, sr+1), (ec, er+1), weight, color)
 
 	def _drawVLines(self, (sc, sr), (ec, er), weight, color):
+		erp = self._rowpositions[sr:er+2]
+		cp  = self._colpositions[sc:ec+1]
+		if len(erp)<=1 or len(cp)<1: return
 		self._prepLine(weight, color)
-		srp = self._rowpositions[sr]
-		erp = self._rowpositions[er+1]
-		for colpos in self._colpositions[sc:ec+1]:
+		srp = erp[0]
+		erp = erp[-1]
+		for colpos in cp:
 			self.canv.line(colpos, srp, colpos, erp)
 
 	def _drawVLinesA(self, (sc, sr), (ec, er), weight, color):
@@ -537,16 +543,18 @@ class Table(Flowable):
 				self._drawCell(cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight))
 
 	def _drawBkgrnd(self):
+		nrows = self._nrows
+		ncols = self._ncols
 		for cmd, (sc, sr), (ec, er), color in self._bkgrndcmds:
-			if sc < 0: sc = sc + self._ncols
-			if ec < 0: ec = ec + self._ncols
-			if sr < 0: sr = sr + self._nrows
-			if er < 0: er = er + self._nrows
+			if sc < 0: sc = sc + ncols
+			if ec < 0: ec = ec + ncols
+			if sr < 0: sr = sr + nrows
+			if er < 0: er = er + nrows
 			color = colors.toColor(color)
 			x0 = self._colpositions[sc]
 			y0 = self._rowpositions[sr]
-			x1 = self._colpositions[ec+1]
-			y1 = self._rowpositions[er+1]
+			x1 = self._colpositions[min(ec+1,ncols)]
+			y1 = self._rowpositions[min(er+1,nrows)]
 			self.canv.setFillColor(color)
 			self.canv.rect(x0, y0, x1-x0, y1-y0,stroke=0,fill=1)
 
@@ -1018,7 +1026,7 @@ LIST_STYLE = TableStyle(
 		lst.append(Spacer(0,6))
 
 	import os, reportlab.platypus
-	I = Image(os.path.join(os.path.dirname(reportlab.platypus.__file__),'..','demos','pythonpoint','leftlogo.gif'))
+	I = Image(os.path.join(os.path.dirname(reportlab.platypus.__file__),'..','tools','pythonpoint','demos','leftlogo.gif'))
 	I.drawHeight = 1.25*inch*I.drawHeight / I.drawWidth
 	I.drawWidth = 1.25*inch
 	#I.drawWidth = 9.25*inch #uncomment to see better messaging
