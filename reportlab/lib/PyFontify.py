@@ -38,7 +38,7 @@ def replace(where, what, with):
 # This list of keywords is taken from ref/node13.html of the
 # Python 1.3 HTML documentation. ("access" is intentionally omitted.)
 keywordsList = [
-	"assert", "exec",
+	"as", "assert", "exec",
 	"del", "from", "lambda", "return",
 	"and", "elif", "global", "not", "try",
 	"break", "else", "if", "or", "while",
