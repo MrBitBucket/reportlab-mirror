@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.27 2001/10/05 16:42:19 rgbecker Exp $
-__version__=''' $Id: colors.py,v 1.27 2001/10/05 16:42:19 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.28 2001/10/05 17:10:33 rgbecker Exp $
+__version__=''' $Id: colors.py,v 1.28 2001/10/05 17:10:33 rgbecker Exp $ '''
 
 import string
 import math
@@ -66,14 +66,12 @@ class CMYKColor(Color):
 		# now work out the RGB approximation. override
 		self.red, self.green, self.blue = cmyk2rgb( (cyan, magenta, yellow, black) )
 
-		#density adjustment of rgb approximants
-		if spotName and density < 1:
-			# the RGB equivalents are not the ones from the default CMYK
-			# in this case - water them down a little!
+		if density<1:
+			#density adjustment of rgb approximants, effectively mix with white
 			r, g, b = self.red, self.green, self.blue
-			r = density*(r-1)*1.+1
-			g = density*(g-1)*1.+1
-			b = density*(b-1)*1.+1
+			r = density*(r-1)+1
+			g = density*(g-1)+1
+			b = density*(b-1)+1
 			self.red, self.green, self.blue = (r,g,b)
 
 	def __repr__(self):
@@ -205,7 +203,6 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
 		g = c0.green+x*(c1.green- c0.green)/dx
 		b = c0.blue+x*(c1.blue - c0.blue)/dx
 		return Color(r,g,b)
-		
 	elif cname is 'CMYKColor': 
 		c = c0.cyan+x*(c1.cyan - c0.cyan)/dx
 		m = c0.magenta+x*(c1.magenta - c0.magenta)/dx
@@ -224,7 +221,7 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
 			d = c0.density+x*(c1.density - c0.density)/dx
 			return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100, spotName=c0.spotName)
 		elif cmykDistance(c0,_CMYK_white)<1e-8:
-			#one of the colours is white
+			#special c0 is white
 			c = c1.cyan
 			m = c1.magenta
 			y = c1.yellow
@@ -232,12 +229,13 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
 			d = x*c1.density/dx
 			return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100, spotName=c1.spotName)
 		elif cmykDistance(c1,_CMYK_white)<1e-8:
-			#one of the colours is white
+			#special c1 is white
 			c = c0.cyan
 			m = c0.magenta
 			y = c0.yellow
 			k = c0.black
 			d = x*c0.density/dx
+			d = c0.density*(1-x/dx)
 			return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100, spotName=c0.spotName)
 		else:
 			c = c0.cyan+x*(c1.cyan - c0.cyan)/dx
