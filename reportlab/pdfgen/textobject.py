@@ -31,9 +31,13 @@
 #
 ###############################################################################
 #	$Log: textobject.py,v $
+#	Revision 1.8  2000/04/10 09:21:21  andy_robinson
+#	Color methods in textobject and canvas now synchronised.
+#	Added 'verbosity' keyword to allow hiding of 'save myfile.pdf' messages.
+#
 #	Revision 1.7  2000/03/22 16:29:04  andy_robinson
 #	Added methods for CMYK color model
-#
+#	
 #	Revision 1.6  2000/03/08 13:40:03  andy_robinson
 #	Canvas has two methods setFillColor(aColor) and setStrokeColor(aColor)
 #	which accepts color objects directly.
@@ -50,7 +54,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: textobject.py,v 1.7 2000/03/22 16:29:04 andy_robinson Exp $ '''
+__version__=''' $Id: textobject.py,v 1.8 2000/04/10 09:21:21 andy_robinson Exp $ '''
 __doc__=""" 
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -62,6 +66,7 @@ Progress Reports:
 import string
 from types import *
 from reportlab.lib import colors
+from reportlab.lib.colors import ColorType
 
 class PDFTextObject:
     """PDF logically separates text and graphics drawing; you can
@@ -201,15 +206,51 @@ class PDFTextObject:
 
     def setFillColor(self, aColor):
         """Takes a color object, allowing colors to be referred to by name"""
-        r, g, b = aColor.red, aColor.green, aColor.blue
-        self._strokeColorRGB = (r, g, b)
-        self._code.append('%0.2f %0.2f %0.2f rg' % (r,g,b))
+        if type(aColor) == ColorType:
+            rgb = (aColor.red, aColor.green, aColor.blue)
+            self._fillColorRGB = rgb
+            self._code.append('%0.2f %0.2f %0.2f rg' % rgb )
+        elif type(aColor) in _SeqTypes:
+            l = len(aColor)
+            if l==3:
+                self._fillColorRGB = aColor
+                self._code.append('%0.2f %0.2f %0.2f rg' % aColor )
+            elif l==4:
+                self.setFillColorCMYK(self, aColor[0], aColor[1], aColor[2], aColor[3])
+            else:
+                raise 'Unknown color', str(aColor)
+        else:
+            raise 'Unknown color', str(aColor)
+
         
     def setStrokeColor(self, aColor):
         """Takes a color object, allowing colors to be referred to by name"""
-        r, g, b = aColor.red, aColor.green, aColor.blue
-        self._strokeColorRGB = (r, g, b)
-        self._code.append('%0.2f %0.2f %0.2f RG' % (r,g,b))
+        if type(aColor) == ColorType:
+            rgb = (aColor.red, aColor.green, aColor.blue)
+            self._strokeColorRGB = rgb
+            self._code.append('%0.2f %0.2f %0.2f RG' % rgb )
+        elif type(aColor) in _SeqTypes:
+            l = len(aColor)
+            if l==3:
+                self._strokeColorRGB = aColor
+                self._code.append('%0.2f %0.2f %0.2f RG' % aColor )
+            elif l==4:
+                self.setStrokeColorCMYK(self, aColor[0], aColor[1], aColor[2], aColor[3])
+            else:
+                raise 'Unknown color', str(aColor)
+        else:
+            raise 'Unknown color', str(aColor)
+
+    def setFillGray(self, gray):
+        """Sets the gray level; 0.0=black, 1.0=white"""
+        self._fillColorRGB = (gray, gray, gray)
+        self._code.append('%0.2f g' % gray)
+        
+    def setStrokeGray(self, gray):
+        """Sets the gray level; 0.0=black, 1.0=white"""
+        self._strokeColorRGB = (gray, gray, gray)
+        self._code.append('%0.2f G' % gray)
+
 
     def textOut(self, text):
         "prints string at current point, text cursor moves across"

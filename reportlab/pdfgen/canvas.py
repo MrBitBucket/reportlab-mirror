@@ -31,9 +31,13 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.25  2000/04/10 09:21:21  andy_robinson
+#	Color methods in textobject and canvas now synchronised.
+#	Added 'verbosity' keyword to allow hiding of 'save myfile.pdf' messages.
+#
 #	Revision 1.24  2000/04/06 09:52:02  andy_robinson
 #	Removed some old comments; tweaks to experimental Outline methods.
-#
+#	
 #	Revision 1.23  2000/04/05 16:26:36  rgbecker
 #	Fixes to setFill/StrokeColor
 #	
@@ -99,7 +103,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.24 2000/04/06 09:52:02 andy_robinson Exp $ '''
+__version__=''' $Id: canvas.py,v 1.25 2000/04/10 09:21:21 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -178,11 +182,19 @@ class Canvas:
     state'.  Just started development at 5/9/99, not in use yet.
 
     """
-    def __init__(self,filename,pagesize=(595.27,841.89), bottomup = 1, pageCompression=0 ):
+    def __init__(self,filename,
+                 pagesize=(595.27,841.89),
+                 bottomup = 1,
+                 pageCompression=0,
+                 verbosity=1):
         """Most of the attributes are private - we will use set/get methods
         as the preferred interface.  Default page size is A4."""
         self._filename = filename
         self._doc = pdfdoc.PDFDocument()
+
+        #this only controls whether it prints 'saved ...' - 0 disables
+        self._verbosity = verbosity
+        
         self._pagesize = pagesize
         #self._currentPageHasImages = 0
         self._pageTransitionString = ''
@@ -448,7 +460,8 @@ class Canvas:
             self.showPage()
 
         self._doc.SaveToFile(self._filename)
-        print 'saved', self._filename
+        if self._verbosity > 0:
+            print 'saved', self._filename
 
     def setPageSize(self, size):
         """accepts a 2-tuple in points for paper size for this
