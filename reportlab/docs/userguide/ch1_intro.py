@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.5 2002/02/13 21:15:33 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.6 2002/05/28 15:06:55 rgbecker Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 import reportlab
 
@@ -141,7 +141,14 @@ heading2("Acknowledgements")
 disc("""Many people have contributed to ReportLab.  We would like to thank
 in particular (in approximately chronological order) Chris Lee, Magnus Lie Hetland,
 Robert Kern, Jeff Bauer (who contributed normalDate.py) and Jerome Alet (numerous patches
-and the rlzope demo).  """)
+and the rlzope demo).""")
+
+disc("""Special thanks go to Just van Rossum for his valuable assistance with
+font technicalities and the LettErrorRobot-Chrome type 1 font.""")
+
+disc("""Marius Gedminas deserves a big hand for contributing the work on TrueType fonts and we
+are glad to include these in the toolkit. Finally we thank Bigelow & Holmes Inc ($design@bigelowandholmes.com$) 
+for Luxi Serif Regular and Ray Larabie ($http://www.larabiefonts.com$) for the Rina TrueType font.""")
 
 heading2("Installation and Setup")
 
@@ -455,6 +462,7 @@ heading2("Site Configuration")
 disc("""There are a number of options which most likely need to be configured globally for a site.
 The python script module $reportlab/rl_config.py$ may be edited to change the values of several
 important sitewide properties.""")
+bullet("""verbose: set to integer values to control diagnostic output.""")
 bullet("""shapeChecking: set this to zero to turn off a lot of error checking in the graphics modules""") 
 bullet("""defaultEncoding: set this to WinAnsiEncoding or MacRomanEncoding.""")
 bullet("""defaultPageSize: set this to one of the values defined in reportlab/lib/pagesizes.py; as delivered
@@ -463,6 +471,17 @@ bullet("""defaultImageCaching: set to zero to inhibit the creation of .a85 files
 hard-drive. The default is to create these preprocessed PDF compatible image files for faster loading""")
 bullet("""T1SearchPathPath: this is a python list of strings representing directories that
 may be queried for information on Type 1 fonts""")
+bullet("""TTFSearchPathPath: this is a python list of strings representing directories that
+may be queried for information on TrueType fonts""")
+bullet("""CMapSearchPathPath: this is a python list of strings representing directories that
+may be queried for information on font code maps.""")
+bullet("""showBoundary: set to non-zero to get boundary lines drawn.""")
+bullet("""PIL_WARNINGS: set to non-zero to get warnings if the Python imaging library is not found.""")
+bullet("""ZLIB_WARNINGS: set to non-zero to get warnings if the Python compression extension is not found.""")
+bullet("""pageComression: set to non-zero to try and get compressed PDF.""")
+bullet("""allowtableBoundsErrors: set to 0 to force an error on very large Platypus table elements""")
+bullet("""emptyTableAction: Controls behaviour for empty tables, can be 'error' (default), 'indicate' or 'ignore'.""")
+
 
 
 heading2("Learning More About Python")

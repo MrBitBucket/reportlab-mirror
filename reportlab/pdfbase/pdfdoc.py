@@ -1,9 +1,8 @@
-
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.64 2002/05/27 11:30:40 dinu_gherman Exp $
-__version__=''' $Id: pdfdoc.py,v 1.64 2002/05/27 11:30:40 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.65 2002/05/28 15:06:55 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.65 2002/05/28 15:06:55 rgbecker Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -23,11 +22,9 @@ from reportlab.pdfbase.pdfutils import LINEEND   # this constant needed in both
 from reportlab import rl_config
 from reportlab.lib.utils import import_zlib, PIL_Image, open_for_read
 
-
-# workaround for list()-bug in Jython 2.1 (should be fixed in 2.2)
-
 from sys import platform, version_info
 if platform[:4] == 'java' and version_info[:2] == (2, 1):
+	# workaround for list()-bug in Jython 2.1 (should be fixed in 2.2)
     def list(sequence):
         def f(x):
             return x
@@ -146,7 +143,7 @@ class PDFDocument:
     defaultStreamFilters = None
     encrypt = NoEncryption() # default no encryption
     pageCounter = 1
-    def __init__(self, encoding=rl_config.defaultEncoding, dummyoutline=0):
+    def __init__(self, encoding=rl_config.defaultEncoding, dummyoutline=0,compression=rl_config.pageCompression):
         #self.defaultStreamFilters = [PDFBase85Encode, PDFZCompress] # for testing!
         #self.defaultStreamFilters = [PDFZCompress] # for testing!
         assert encoding in ['MacRomanEncoding',
@@ -156,6 +153,7 @@ class PDFDocument:
         if encoding[-8:] <> 'Encoding':
             encoding = encoding + 'Encoding'
 
+        self.setCompression(compression)
         self.encoding = encoding
         # signature for creating PDF ID
         import md5, time
@@ -187,6 +185,11 @@ class PDFDocument:
         DD = PDFDictionary({})
         DD.__Comment__ = "The standard fonts dictionary"
         DDR = self.Reference(DD, BasicFonts)
+        self.delayedFonts = []
+
+    def setCompression(self, onoff):
+        # XXX: maybe this should also set self.defaultStreamFilters?
+        self.compression = onoff
 
     def updateSignature(self, thing):
         "add information to the signature"
@@ -205,6 +208,9 @@ class PDFDocument:
         return self._ID
 
     def SaveToFile(self, filename, canvas):
+        # realize delayed fonts
+        for fnt in self.delayedFonts:
+            fnt.addObjects(self)
         # add info stuff to signature
         self.info.digest(self.signature)
         ### later: maybe add more info to sig?
@@ -250,6 +256,8 @@ class PDFDocument:
                 # does pdfmetrics know about it? if so, add
                 from reportlab.pdfbase import pdfmetrics
                 fontObj = pdfmetrics.getFont(psfontname)
+                if getattr(fontObj, '_dynamicFont', 0):
+                    raise PDFError, "getInternalFontName(%s) called for a dynamic font" % repr(psfontname)
                 fontObj.addObjects(self)
                 #self.addFont(fontObj)
                 return fm[psfontname]
@@ -1554,11 +1562,11 @@ class PDFType1Font:
     """no init: set attributes explicitly"""
     __RefOnly__ = 1
     # note! /Name appears to be an undocumented attribute....
-    name_attributes = string.split("Type Subtype BaseFont ToUnicode Name")
+    name_attributes = string.split("Type Subtype BaseFont Name")
     Type = "Font"
     Subtype = "Type1"
     # these attributes are assumed to already be of the right type
-    local_attributes = string.split("FirstChar LastChar Widths Encoding FontDescriptor")
+    local_attributes = string.split("FirstChar LastChar Widths Encoding ToUnicode FontDescriptor")
     def format(self, document):
         D = {}
         for name in self.name_attributes:
@@ -1575,11 +1583,11 @@ class PDFType1Font:
 
 ## These attribute listings will be useful in future, even if we
 ## put them elsewhere
-##
-##class PDFTrueTypeFont(PDFType1Font):
-##    Subtype = "TrueType"
-##    #local_attributes = string.split("FirstChar LastChar Widths Encoding FontDescriptor") #same
-##
+
+class PDFTrueTypeFont(PDFType1Font):
+    Subtype = "TrueType"
+    #local_attributes = string.split("FirstChar LastChar Widths Encoding ToUnicode FontDescriptor") #same
+
 ##class PDFMMType1Font(PDFType1Font):
 ##    Subtype = "MMType1"
 ##

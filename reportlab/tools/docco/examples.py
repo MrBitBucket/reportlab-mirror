@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/examples.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/examples.py,v 1.1 2001/10/27 22:37:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/examples.py,v 1.2 2002/05/28 15:06:55 rgbecker Exp $
 import string
 
 testannotations="""
@@ -472,6 +472,21 @@ def customfont1(canvas):
 	canvas.setFont('LettErrorRobot-Chrome', 32)
 	canvas.drawString(10, 150, 'This should be in')
 	canvas.drawString(10, 100, 'LettErrorRobot-Chrome')
+"""
+
+testttffont1 = """
+def ttffont1(canvas):
+	# we know some glyphs are missing, suppress warnings
+	import reportlab.rl_config
+	reportlab.rl_config.warnOnMissingFontGlyphs = 0
+	from reportlab.pdfbase import pdfmetrics
+	from reportlab.pdfbase.ttfonts import TTFont
+	pdfmetrics.registerFont(TTFont('Rina', 'rina.ttf'))
+	from reportlab.pdfgen.canvas import Canvas
+
+	canvas.setFont('Rina', 32)
+	canvas.drawString(10, 150, "Some UTF-8 text encoded")
+	canvas.drawString(10, 100, "in the Rina TT Font!")
 """
 
 testcursormoves1 = """

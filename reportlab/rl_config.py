@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.31 2002/03/27 10:39:21 rgbecker Exp $
-__version__=''' $Id: rl_config.py,v 1.31 2002/03/27 10:39:21 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.32 2002/05/28 15:06:55 rgbecker Exp $
+__version__=''' $Id: rl_config.py,v 1.32 2002/05/28 15:06:55 rgbecker Exp $ '''
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =				1
@@ -25,6 +25,14 @@ T1SearchPath =	('c:/Program Files/Adobe/Acrobat 5.0/Resource/Font', #Win32, Acro
 				 '/usr/lib/Acrobat4/Resource/Font', #Linux, Acrobat 4
 				 '%(REPORTLAB_DIR)s/fonts' #special
 				 )
+
+# places to look for TT Font information
+TTFSearchPath = (
+				'c:/winnt/fonts',
+				'c:/windows/fonts',
+				'/usr/lib/X11/fonts/TrueType/',
+			 	'%(REPORTLAB_DIR)s/fonts' #special
+				)
 
 # places to look for CMap files - should ideally merge with above
 CMapSearchPath = ('/usr/local/Acrobat5/Resource/CMap',
@@ -54,8 +62,9 @@ def	_startUp():
 	'''This function allows easy resetting to the global defaults
 	If the environment contains 'RL_xxx' then we use the value
 	else we use the given default'''
-	V = ('T1SearchPath','CMapSearchPath','shapeChecking', 'defaultEncoding', 'pageCompression',
-				'defaultPageSize', 'defaultImageCaching', 'PIL_WARNINGS',
+	V = ('T1SearchPath','CMapSearchPath', 'TTFSearchPath',
+				'shapeChecking', 'defaultEncoding',
+				'pageCompression', 'defaultPageSize', 'defaultImageCaching', 'PIL_WARNINGS',
 				'ZLIB_WARNINGS', 'warnOnMissingFontGlyphs', 'verbose', 'emptyTableAction',
 				)
 
@@ -65,24 +74,19 @@ def	_startUp():
 
 	#places to search for Type 1 Font files
 	import reportlab
-	D = {'REPORTLAB_DIR': os.path.dirname(reportlab.__file__),
+	D = {'REPORTLAB_DIR': os.path.abspath(os.path.dirname(reportlab.__file__)),
 		'disk': string.split(os.getcwd(), ':')[0],
 		'sys_version': sys_version,
 		}
 
-	P=[]
-	for p in _SAVED['T1SearchPath']:
-		d = string.replace(p % D,'/',os.sep)
-		if os.path.isdir(d): P.append(d)
-	_setOpt('T1SearchPath',P)
+	for name in ('T1SearchPath','TTFSearchPath','CMapSearchPath'):
+		P=[]
+		for p in _SAVED[name]:
+			d = string.replace(p % D,'/',os.sep)
+			if os.path.isdir(d): P.append(d)
+		_setOpt(name,P)
 
-	P=[]
-	for p in _SAVED['CMapSearchPath']:
-		d = string.replace(p % D,'/',os.sep)
-		if os.path.isdir(d): P.append(d)
-	_setOpt('CMapSearchPath',P)
-
-	for k in V[1:]:
+	for k in V[3:]:
 		v = _SAVED[k]
 		if type(v)==type(1): conv = int
 		elif k=='defaultPageSize': conv = lambda v,M=pagesizes: getattr(M,v)

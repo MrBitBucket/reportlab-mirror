@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.102 2002/04/13 15:48:48 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.102 2002/04/13 15:48:48 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.103 2002/05/28 15:06:55 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.103 2002/05/28 15:06:55 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -121,7 +121,7 @@ class Canvas:
         as the preferred interface.  Default page size is A4."""
         self._filename = filename
         self._encodingName = encoding
-        self._doc = pdfdoc.PDFDocument(encoding)
+        self._doc = pdfdoc.PDFDocument(encoding,compression=pageCompression)
 
         #this only controls whether it prints 'saved ...' - 0 disables
         self._verbosity = verbosity
@@ -161,6 +161,7 @@ class Canvas:
         self._y = 0
         self._fontname = 'Times-Roman'
         self._fontsize = 12
+        self._dynamicFont = 0
         self._textMode = 0  #track if between BT/ET
         self._leading = 14.4
         self._currentMatrix = (1., 0., 0., 1., 0., 0.)
@@ -1134,11 +1135,14 @@ class Canvas:
         #print "setFont", (psfontname, size, leading)
         self._fontname = psfontname
         self._fontsize = size
-        pdffontname = self._doc.getInternalFontName(psfontname)
         if leading is None:
             leading = size * 1.2
         self._leading = leading
-        self._code.append('BT %s %s Tf %s TL ET' % (pdffontname, fp_str(size), fp_str(leading)))
+        font = pdfmetrics.getFont(self._fontname)
+        self._dynamicFont = getattr(font, '_dynamicFont', 0)
+        if not self._dynamicFont:
+            pdffontname = self._doc.getInternalFontName(psfontname)
+            self._code.append('BT %s %s Tf %s TL ET' % (pdffontname, fp_str(size), fp_str(leading)))
 
     def stringWidth(self, text, fontName, fontSize, encoding=None):
         "gets width of a string in the given font and size"
@@ -1298,6 +1302,7 @@ class Canvas:
             self._pageCompression = 0
         else:
             self._pageCompression = pageCompression
+        self._doc.setCompression(self._pageCompression)
         
     def setPageTransition(self, effectname=None, duration=1, 
                         direction=0,dimension='H',motion='I'):

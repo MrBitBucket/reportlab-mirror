@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/textobject.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/textobject.py,v 1.22 2001/01/12 21:36:57 dinu_gherman Exp $
-__version__=''' $Id: textobject.py,v 1.22 2001/01/12 21:36:57 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/textobject.py,v 1.23 2002/05/28 15:06:55 rgbecker Exp $
+__version__=''' $Id: textobject.py,v 1.23 2002/05/28 15:06:55 rgbecker Exp $ '''
 __doc__=""" 
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -17,6 +17,7 @@ from types import *
 from reportlab.lib import colors
 from reportlab.lib.colors import ColorType
 from reportlab.lib.utils import fp_str
+from reportlab.pdfbase import pdfmetrics
 
 _SeqTypes=(TupleType,ListType)
 
@@ -38,7 +39,10 @@ class PDFTextObject:
         self._fontname = self._canvas._fontname
         self._fontsize = self._canvas._fontsize
         self._leading = self._canvas._leading
-        
+        font = pdfmetrics.getFont(self._fontname)
+        self._dynamicFont = getattr(font, '_dynamicFont', 0)
+        self._curSubset = -1
+
         self.setTextOrigin(x, y)
             
     def getCode(self):
@@ -104,8 +108,13 @@ class PDFTextObject:
         of font anme and size for metrics."""
         self._fontname = psfontname
         self._fontsize = size
-        pdffontname = self._canvas._doc.getInternalFontName(psfontname)
-        self._code.append('%s %s Tf' % (pdffontname, fp_str(size)))
+        font = pdfmetrics.getFont(self._fontname)
+        self._dynamicFont = getattr(font, '_dynamicFont', 0)
+        if self._dynamicFont:
+            self._curSubset = -1
+        else:
+            pdffontname = self._canvas._doc.getInternalFontName(psfontname)
+            self._code.append('%s %s Tf' % (pdffontname, fp_str(size)))
 
     def setFont(self, psfontname, size, leading = None):
         """Sets the font.  If leading not specified, defaults to 1.2 x
@@ -114,11 +123,16 @@ class PDFTextObject:
         of font anme and size for metrics."""
         self._fontname = psfontname
         self._fontsize = size
-        pdffontname = self._canvas._doc.getInternalFontName(psfontname)
         if leading is None:
             leading = size * 1.2
         self._leading = leading
-        self._code.append('%s %s Tf %s TL' % (pdffontname, fp_str(size), fp_str(leading)))
+        font = pdfmetrics.getFont(self._fontname)
+        self._dynamicFont = getattr(font, '_dynamicFont', 0)
+        if self._dynamicFont:
+            self._curSubset = -1
+        else:
+            pdffontname = self._canvas._doc.getInternalFontName(psfontname)
+            self._code.append('%s %s Tf %s TL' % (pdffontname, fp_str(size), fp_str(leading)))
 
     def setCharSpace(self, charSpace):
          """Adjusts inter-character spacing"""
@@ -200,7 +214,6 @@ class PDFTextObject:
         else:
             raise 'Unknown color', str(aColor)
 
-        
     def setStrokeColor(self, aColor):
         """Takes a color object, allowing colors to be referred to by name"""
         if type(aColor) == ColorType:
@@ -229,29 +242,41 @@ class PDFTextObject:
         self._strokeColorRGB = (gray, gray, gray)
         self._code.append('%s G' % fp_str(gray))
 
+    def _formatText(self, text):
+        "Generates PDF text output operator(s)"
+        if self._dynamicFont:
+            results = []
+            font = pdfmetrics.getFont(self._fontname)
+            for subset, chunk in font.splitString(text):
+                if subset != self._curSubset:
+                    pdffontname = font.getSubsetInternalName(subset, self._canvas._doc)
+                    results.append("%s %s Tf %s TL" % (pdffontname, fp_str(self._fontsize), fp_str(self._leading)))
+                    self._curSubset = subset
+                chunk = self._canvas._escape(chunk)
+                results.append("(%s) Tj" % chunk)
+            return string.join(results, ' ')
+        else:
+            text = self._canvas._escape(text)
+            return "(%s) Tj" % text
 
     def _textOut(self, text, TStar=0):
         "prints string at current point, ignores text cursor"
-        text = self._canvas._escape(text)
-        self._code.append('(%s) Tj%s' % (text,(TStar and ' T*' or '')))
+        self._code.append('%s%s' % (self._formatText(text), (TStar and ' T*' or '')))
 
     def textOut(self, text):
         """prints string at current point, text cursor moves across."""
-        escapedText = self._canvas._escape(text)
-        self._x = self._x + self._canvas.stringWidth(
-                    text, self._fontname, self._fontsize)
-        self._code.append('(%s) Tj' % escapedText)
+        self._x = self._x + self._canvas.stringWidth(text, self._fontname, self._fontsize)
+       	self._code.append(self._formatText(text))
 
     def textLine(self, text=''):
         """prints string at current point, text cursor moves down.
         Can work with no argument to simply move the cursor down."""
-        text = self._canvas._escape(text)
         self._x = self._x0
         if self._canvas.bottomup:
             self._y = self._y - self._leading
         else:
             self._y = self._y + self._leading
-        self._code.append('(%s) Tj T*' % text)
+        self._code.append('%s T*' % self._formatText(text))
 
     def textLines(self, stuff, trim=1):
         """prints multi-line or newlined strings, moving down.  One
@@ -271,8 +296,7 @@ class PDFTextObject:
             assert 1==0, "argument to textlines must be string,, list or tuple"
         
         for line in lines:
-            escaped_text = self._canvas._escape(line)
-            self._code.append('(%s) Tj T*' % escaped_text)
+            self._code.append('%s T*' % self._formatText(line))
             if self._canvas.bottomup:
                 self._y = self._y - self._leading
             else:

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.3 2001/11/06 12:05:21 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.4 2002/05/28 15:06:55 rgbecker Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.lib.codecharts import SingleByteEncodingChart
 from reportlab.platypus import Image
@@ -19,8 +19,8 @@ feedback and help in this area.
 """)
 
 disc("""
-Support for custom fonts and encoding is new in this release of 
-reportlab (Release 1.10, 6 Nov. 2001), and as such some things may 
+Support for custom fonts and encoding is was new
+in reportlab (Release 1.10, 6 Nov. 2001), and may 
 change in the future. The canvas methods  $setFont$, $getFont$, 
 $registerEncoding$ and $registerTypeFace$ can all be considered 
 stable. Other things such as how reportlab searches for fonts are more 
@@ -551,5 +551,67 @@ implement and then accelerate the correct paragraph wrapping rules for paragraph
 bullet("""
 support Unicode documents with automatic selection of the underlying encoding
 for printing""")
+
+CPage(5)
+heading2("TrueType Font Support")
+disc("""
+Marius Gedminas $<mgedmin@codeworks.lt>$ with the help of Viktorija Zaksien $<viktorija@codeworks.lt>$
+have contributed support for embedded TrueType fonts and preliminary Unicode translation using UTF-8!""")
+
+disc("""The current support should be regarded as experimental, but it seems to work and doesn't
+interfere with anything else. Marius' patch worked almost out of the box and only some additional
+support for finding TTF files was added.""")
+
+CPage(3)
+disc("""Simple things are done simply; we use <b>$reportlab.pdfbase.ttfonts.TTFont<$</b> to create a true type
+font object and register using <b>$reportlab.pdfbase.pdfmetrics.registerFont$</b>.
+In pdfgen drawing directly to the canvas we can do""")
+eg("""
+# we know some glyphs are missing, suppress warnings
+import reportlab.rl_config
+reportlab.rl_config.warnOnMissingFontGlyphs = 0
+
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+pdfmetrics.registerFont(TTFont('Rina', 'rina.ttf'))
+canvas.setFont(Rina, 32)
+canvas.drawString(10, 150, "Some text encoded in UTF-8")
+canvas.drawString(10, 100, "In the Rina TT Font!")
+""")
+illust(examples.ttffont1, "Using a the Rina TrueType Font")
+disc("""In the above example the true type font object is created using""")
+eg("""
+	TTFont(name,filename)
+""")
+disc("""so that the ReportLab internal name is given by the first argument and the second argument
+is a string(or file like object) denoting the font's TTF file. In Marius' original patch the filename
+was supposed to be exactly correct, but we have modified things so that if the filename is relative
+then a search for the corresponding file is done in the current directory and then in directories
+specified by $reportlab.rl_config.TTFSearchpath$!""")
+
+from reportlab.lib.styles import ParagraphStyle
+
+from reportlab.lib.fonts import addMapping
+addMapping('Rina', 0, 0, 'Rina')
+addMapping('Rina', 0, 1, 'Rina')
+addMapping('Rina', 1, 0, 'Rina')
+addMapping('Rina', 1, 1, 'Rina')
+
+disc("""Before using the TT Fonts in Platypus we should add a mapping from the family name to the
+individual font names that describe the behaviour under the $<b>$ and $<i>$ attributes.""")
+
+eg("""
+from reportlab.lib.fonts import addMapping
+addMapping('Rina', 0, 0, 'Rina')	#normal
+addMapping('Rina', 0, 1, 'Rina')	#italic
+addMapping('Rina', 1, 0, 'Rina')	#bold
+addMapping('Rina', 1, 1, 'Rina')	#italic and bold
+""")
+
+disc("""we only have Rina regular so we map all to the same internal fontname. After registering and mapping
+the Rina font as above we can use paragraph text like""")
+parabox2("""<font name="Times-Roman" size="14">This is in Times-Roman</font>
+<font name="Rina" color="magenta" size="14">and this is in magenta Rina!</font>""","Using TTF fonts in paragraphs")
+
 
 ##### FILL THEM IN
