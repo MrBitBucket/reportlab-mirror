@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderbase.py,v 1.10 2001/07/16 13:29:28 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderbase.py,v 1.11 2002/05/15 15:54:35 dinu_gherman Exp $
 """
 Superclass for renderers to factor out common functionality and default implementations.
 """
@@ -178,6 +178,8 @@ class Renderer:
 
         if isinstance(node, Line):
             self.drawLine(node)
+        elif isinstance(node, Image):
+            self.drawImage(node)
         elif isinstance(node, Rect):
             self.drawRect(node)
         elif isinstance(node, Circle):

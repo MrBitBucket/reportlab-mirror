@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.73 2002/04/13 15:12:15 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.74 2002/05/15 15:54:35 dinu_gherman Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.73 2002/04/13 15:12:15 rgbecker Exp $ '''
+__version__=''' $Id: shapes.py,v 1.74 2002/05/15 15:54:35 dinu_gherman Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -848,6 +848,39 @@ class Rect(SolidShape):
 
 	def copy(self):
 		new = Rect(self.x, self.y, self.width, self.height)
+		new.setProperties(self.getProperties())
+		return new
+
+
+class Image(SolidShape):
+	"""Bitmap image."""
+
+        # Should get rid off stroke* attributes...
+	_attrMap = AttrMap(
+		strokeColor = AttrMapValue(None),
+		strokeWidth = AttrMapValue(isNumber),
+		strokeLineCap = AttrMapValue(None),
+		strokeLineJoin = AttrMapValue(None),
+		strokeMiterLimit = AttrMapValue(None),
+		strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
+		fillColor = AttrMapValue(None),
+		x = AttrMapValue(isNumber),
+		y = AttrMapValue(isNumber),
+		width = AttrMapValue(isNumber),
+		height = AttrMapValue(isNumber),
+		path = AttrMapValue(None),
+		)
+
+	def __init__(self, x, y, width, height, path, **kw):
+		SolidShape.__init__(self, kw)
+		self.x = x
+		self.y = y
+		self.width = width
+		self.height = height
+		self.path = path
+
+	def copy(self):
+		new = Image(self.x, self.y, self.width, self.height, self.path)
 		new.setProperties(self.getProperties())
 		return new
 

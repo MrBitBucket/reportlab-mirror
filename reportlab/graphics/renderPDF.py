@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPDF.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.16 2002/04/16 17:58:06 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.17 2002/05/15 15:54:35 dinu_gherman Exp $
 # renderPDF - draws Drawings onto a canvas
 """Usage:
     import renderpdf
@@ -9,7 +9,7 @@
 Execute the script to see some test drawings.
 changed
 """
-__version__=''' $Id: renderPDF.py,v 1.16 2002/04/16 17:58:06 rgbecker Exp $ '''
+__version__=''' $Id: renderPDF.py,v 1.17 2002/05/15 15:54:35 dinu_gherman Exp $ '''
 
 from reportlab.graphics.shapes import *
 from reportlab.pdfgen.canvas import Canvas
@@ -94,6 +94,15 @@ class _PDFRenderer(Renderer):
                     rect.width, rect.height, rect.rx,
                     fill=self._fill,
                     stroke=self._stroke
+                    )
+
+    def drawImage(self, image):
+        # currently not implemented in other renderers
+        if image.path and os.path.exists(image.path):
+            self._canvas.drawInlineImage(
+                    image.path,
+                    image.x, image.y,
+                    image.width, image.height
                     )
 
     def drawLine(self, line):
