@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.12 2001/03/28 22:09:32 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.13 2001/03/29 09:24:47 dinu_gherman Exp $
 
 from genuserguide import *
 
-heading1("Platform Independent Graphics using $reportlab/graphics$ (DRAFT SHORT VERSION)")
+heading1("Platform Independent Graphics using $reportlab/graphics$ (DRAFT)")
 
 heading2("Introduction")
 
@@ -18,17 +18,20 @@ heading2("Introduction")
 
 disc("""
 The ReportLab library is a general document toolkit aiming to help
-generate documents for reporting solutions. One important aspect of
-such applications is to present data with graphics like diagrams or
-charts.
+generate documents for reporting solutions.
+One important aspect of such applications is to present data with
+graphics like diagrams or charts.
 Ideally, these graphics could be used not only to generate PDF
-documents, but other output formats, bitmap or vector ones, as well.
+documents, but other output formats, bitmap or vector ones, as
+well.
 ReportLab is in the process of adding such a graphics package to its
-standard distribution. Because of the size of the graphics library
-this document aims only at sketching its design briefly while leaving
-a detailed presentation to an additional document, the "ReportLab
-Graphics User Guide", that provides a more tutorial-like approach.
+standard distribution.
+Because of the size of the graphics library this document aims only
+at sketching its design briefly while leaving a detailed presentation
+to an additional document, the "ReportLab Graphics User Guide", that
+provides a more tutorial-like approach.
 """)
+
 
 heading3("Requirements")
 
@@ -115,7 +118,7 @@ disc("""The PDF renderer has "special privileges" - a Drawing object is a
        quickly.""")
 
 
-heading3("""Verification """)
+heading3("Verification")
 
 disc("""Python is very dynamic and lets us execute statements at run time
 that can easily be the source for unexpected behaviour.
@@ -132,7 +135,7 @@ As this imposes a small performance penalty, this behaviour
 can be turned off when you need it to be.""")
 
 
-heading3("""Property Editing """)
+heading3("Property Editing")
 
 disc("""A cornerstone of the reportlab/graphics which we will cover below is 
        that you can automatically document widgets. This means getting hold 
@@ -156,7 +159,7 @@ disc("""To support these applications we have two interfaces, $getProperties$
        we need to put the support into the base of the framework.""")
 
 
-heading3("""Automatic Documentation""")
+heading3("Automatic Documentation")
 
 disc("""There is work under way on a generic tool to document any
 Python package or module; this will be checked into ReportLab and
@@ -195,7 +198,7 @@ disc("""This provides one paradigm for creating and modifying
 interactive drawings.""")
 
 
-heading2("""Shapes""")
+heading2("Shapes")
 
 disc("""Drawings are made up of Shapes. Any graphical object can be
 built up by using the same set of simple shapes.
@@ -238,7 +241,7 @@ translation and rotation, and you get a bunch of axis.
 It is still the same group, being drawn in different places.""")
 
 
-heading2("""Widgets""") 
+heading2("Widgets") 
 
 disc("""Up until now, Drawings have been 'pure data'.
 In fact, this is what grants portability - a renderer only 
@@ -293,7 +296,7 @@ The documentation tool calls $demo()$ so that your fancy new chart
 class can create a drawing showing what it can do.""")
 
 
-heading2("Charts ")
+heading2("Charts")
 
 disc("""This section is not finalized and will evolve further. For now we'll 
        try to give a flavour of the isues we are dealing with, and firm them 
@@ -393,155 +396,174 @@ disc("""You can subclass any chart component and use your replacement instead
        properties.""")
 
 
-heading3("Labels")
+heading2("Further Reading")
 
-disc("""One of the most important building blocks is the <i>Label</i>, defined in 
-       $reportlab/graphics/charts/textlabels.py$. A label is a string of text 
-       attached to some chart element. They are used on axes, for titles or 
-       alongside axes, or attached to individual data points.""")
-
-disc("Labels may contain newline characters, but only one font.")
-
-disc("""The text and 'origin' of a label are typically set by its parent 
-       object. They are accessed by methods rather than properties. Thus, the 
-       X axis decides the 'reference point' for each tickmark label and the 
-       numeric or date text for each label. However, the end user can set 
-       properties of the label (or collection of labels) directly to affect 
-       its positon relative to this origin and all of its formatting.""")
-
-disc("""In the drawing above, the label is defined relative to the green blob. 
-       The text box should have its north-east corner ten points down from 
-       the origin, and be rotated by 45 degrees about that corner.""")
-
-disc("""At present labels have the following properties, which we believe are 
-       sufficient for all charts we have seen to date:""")
-
-todo("""Note: need to turn these into pretty tables with explanations """)
+disc("""
+At this point it is recommended to continue reading the "ReportLab
+Graphics Guide" which provides much more detailed information about
+the existing components for the charting package.
+Among them you will find building blocks like labels, axes, legends
+and different types of charts like bar, line and pie charts.
+A thorough description of all these would blow-up this document
+which is kept on purpose rather general.
+""")
 
 
-heading3("Axes")
-
-disc("""We identify two basic kinds of axes - <i>Value</i> and <i>Category</i> Axes. Both 
-       come in horizontal and vertical flavors. Both can be subclassed to 
-       make very specific kinds of axis. For example, if you have complex 
-       rules for which dates to display in a time series application, or want 
-       irregular scaling, you override the axis and make a new one.""")
-
-disc("""Axes are responsible for determining the mapping from data to image 
-       coordinates; transforming points on request from the chart; drawing 
-       themselves and their tickmarks, gridlines and axis labels.""")
-
-disc("""This drawing shows two axes, one of each kind, which have been created 
-       directly without reference to any chart:""")
-
-disc("""Remember that you won't have to create axes directly; when using a 
-       standard chart, it comes with ready-made axes. The methods are what 
-       the chart uses to configure it and take care of the geometry. However, 
-       we will talk through them in detail below.""")
-
-
-
-heading3("""Bar Charts""")
-
-disc("""This describes our current VerticalBarChart class, which uses the axes 
-       and labels above. We think it is step in the right direction but is is 
-       far from final. As usual, we will start with an example:""")
-
-disc("""Note that people we speak to are divided about 50/50 on whether to 
-       call this a 'Vertical' or 'Horizontal' bar chart. We chose this name 
-       because 'Vertical' appears next to 'Bar', so we take it to mean that 
-       the bars rather than the category axis are vertical.""")
-
-disc("""Most of the code above is concerned with setting up the axes and 
-       labels, which we have already covered. Here are the top-level 
-       properties of the VerticalBarChart class:""")
-
-disc("There are several open issues:")
-
-list("""vertical position of X Axis - by default the X Axis sits at the 
-       bottom. One should be able to specify if it sits at the top, the 
-       bottom or at a specific y value (e.g. y=0).""")
-list("""bar labelling - in cases with some negative bars, the label should 
-       appear BELOW the negative labels and ABOVE the positive ones. How can 
-       we specify this?""")
-list("""color specification - right now the chart has an undocumented property 
-       defaultColors, which provides a list of colors to cycle through. If 
-       you introduce a legend, it should share the list of colors. What's 
-       more, several charts can share a legend. Should we sppecify colors and 
-       line styles on a legend object and attach charts to that, ruling that 
-       the legend need not be visible? Similar issues appear to x-y charts.""")
-
-disc("""When we are a bit more confident of the design, we expect to add 
-       variants of bar charts to deal with stacked and 100% bars as well as 
-       the side-by-side variant seen here, and variants with vertical and 
-       horizontal orientation. For now, if you want one oriented the other 
-       way, just put it in a group and rotate it - here's a VerticalBarChart 
-       where we just turned the labels and the whole chart around by 90 
-       degrees, and hid one of the axes:""")
-
-
-heading3("""Pie Charts""")
-
-disc("""We've already seen a pie chart example above. This is provisional but 
-       seems to do most things. At the very least we need to change the name. 
-       For completeness we will cover it here.""")
-
-
-disc("""Properties are covered below. The pie has a 'wedges' collection and we 
-       document wedge properties in the same table. This was invented before 
-       we finished the Label class and will probably be reworked to use 
-       Labels shortly.""")
-
-
-heading3("""Legends""")
-
-disc("""Various preliminary legend classes can be found but need a cleanup to 
-       be consistent with this model. Legends are the natural place to 
-       specify the colors and line styles of charts; we propose that each 
-       chart is created with a Legend attribute which is invisible. One would 
-       then do the following to specify colors:""")
-
-disc("""One could also define a group of charts sharing the same legend:""")
-
-heading3("Other Charts")
-
-disc("""It will take some time to deal with the full range of chart types. We 
-       expect to finalize bars and pies and to produce trial implementations 
-       of more general plots in February.""")
-
-heading4("X-Y Plots")
-
-disc("""Most other plots involve two value axes and directly plotting x-y data 
-       in some form. The series can be plotted as lines, marker symbols, 
-       both, or custom graphics such as open-high-low-close graphics. All 
-       share the concepts of scaling and axis/title formatting. At a certain 
-       point, a routine will loop over the data series and 'do something' 
-       with the data points at given x-y locations. Given a basic line plot, 
-       it should be very easy to derive a custom chart type just by 
-       overriding a single method - say, drawSeries().""")
-
-heading4("""Marker customisation and custom shapes""")
-disc("""Well known plotting packages such as excel, Mathematica and Excel 
-       offer ranges of marker types to add to charts. We can do better - you 
-       can write any kind of chart widget you want and just tell the chart 
-       to use it as an example.""")
-
-heading4("""Combination plots""")
-disc("""Combining multiple plot types is really easy. You can just draw 
-       several charts (bar, line or whatever) in the same rectangle, 
-       suppressing axes as needed. So a chart could correlate a line with 
-       Scottish typhoid cases over a 15 year period on the left axis with a 
-       set of bars showing inflation rates on the right axis. If anyone can 
-       remind us where this example came from we'll attribute it, and happily 
-       show the well-known graph as an example.""")
-
-heading3("""Other chart classes""")
-
-disc("""This has not been an exhaustive look at all the chart classes. Those classes 
-       are constantly being worked on. To see exactly what is in the current 
-       distribution, use the $graphdocpy.py$ utility. By default, it will run 
-       on reportlab/graphics, and produce a full report. (If you want to run
-       it on other modules or packages, $graphdocpy.py -h$ print a help
-       message that will tell you how.)""")
-
-disc("This is the tool that was mentioned in the section on 'Automatic Documentation'")
+##heading3("Labels")
+##
+##disc("""One of the most important building blocks is the <i>Label</i>, defined in 
+##       $reportlab/graphics/charts/textlabels.py$. A label is a string of text 
+##       attached to some chart element. They are used on axes, for titles or 
+##       alongside axes, or attached to individual data points.""")
+##
+##disc("Labels may contain newline characters, but only one font.")
+##
+##disc("""The text and 'origin' of a label are typically set by its parent 
+##       object. They are accessed by methods rather than properties. Thus, the 
+##       X axis decides the 'reference point' for each tickmark label and the 
+##       numeric or date text for each label. However, the end user can set 
+##       properties of the label (or collection of labels) directly to affect 
+##       its positon relative to this origin and all of its formatting.""")
+##
+##disc("""In the drawing above, the label is defined relative to the green blob. 
+##       The text box should have its north-east corner ten points down from 
+##       the origin, and be rotated by 45 degrees about that corner.""")
+##
+##disc("""At present labels have the following properties, which we believe are 
+##       sufficient for all charts we have seen to date:""")
+##
+##todo("""Note: need to turn these into pretty tables with explanations """)
+##
+##
+##heading3("Axes")
+##
+##disc("""We identify two basic kinds of axes - <i>Value</i> and <i>Category</i> Axes. Both 
+##       come in horizontal and vertical flavors. Both can be subclassed to 
+##       make very specific kinds of axis. For example, if you have complex 
+##       rules for which dates to display in a time series application, or want 
+##       irregular scaling, you override the axis and make a new one.""")
+##
+##disc("""Axes are responsible for determining the mapping from data to image 
+##       coordinates; transforming points on request from the chart; drawing 
+##       themselves and their tickmarks, gridlines and axis labels.""")
+##
+##disc("""This drawing shows two axes, one of each kind, which have been created 
+##       directly without reference to any chart:""")
+##
+##disc("""Remember that you won't have to create axes directly; when using a 
+##       standard chart, it comes with ready-made axes. The methods are what 
+##       the chart uses to configure it and take care of the geometry. However, 
+##       we will talk through them in detail below.""")
+##
+##
+##heading3("Bar Charts")
+##
+##disc("""This describes our current VerticalBarChart class, which uses the axes 
+##       and labels above. We think it is step in the right direction but is is 
+##       far from final. As usual, we will start with an example:""")
+##
+##disc("""Note that people we speak to are divided about 50/50 on whether to 
+##       call this a 'Vertical' or 'Horizontal' bar chart. We chose this name 
+##       because 'Vertical' appears next to 'Bar', so we take it to mean that 
+##       the bars rather than the category axis are vertical.""")
+##
+##disc("""Most of the code above is concerned with setting up the axes and 
+##       labels, which we have already covered. Here are the top-level 
+##       properties of the VerticalBarChart class:""")
+##
+##disc("There are several open issues:")
+##
+##list("""vertical position of X Axis - by default the X Axis sits at the 
+##       bottom. One should be able to specify if it sits at the top, the 
+##       bottom or at a specific y value (e.g. y=0).""")
+##list("""bar labelling - in cases with some negative bars, the label should 
+##       appear BELOW the negative labels and ABOVE the positive ones. How can 
+##       we specify this?""")
+##list("""color specification - right now the chart has an undocumented property 
+##       defaultColors, which provides a list of colors to cycle through. If 
+##       you introduce a legend, it should share the list of colors. What's 
+##       more, several charts can share a legend. Should we sppecify colors and 
+##       line styles on a legend object and attach charts to that, ruling that 
+##       the legend need not be visible? Similar issues appear to x-y charts.""")
+##
+##disc("""When we are a bit more confident of the design, we expect to add 
+##       variants of bar charts to deal with stacked and 100% bars as well as 
+##       the side-by-side variant seen here, and variants with vertical and 
+##       horizontal orientation. For now, if you want one oriented the other 
+##       way, just put it in a group and rotate it - here's a VerticalBarChart 
+##       where we just turned the labels and the whole chart around by 90 
+##       degrees, and hid one of the axes:""")
+##
+##
+##heading3("Pie Charts")
+##
+##disc("""We've already seen a pie chart example above. This is provisional but 
+##       seems to do most things. At the very least we need to change the name. 
+##       For completeness we will cover it here.""")
+##
+##
+##disc("""Properties are covered below. The pie has a 'wedges' collection and we 
+##       document wedge properties in the same table. This was invented before 
+##       we finished the Label class and will probably be reworked to use 
+##       Labels shortly.""")
+##
+##
+##heading3("Legends")
+##
+##disc("""Various preliminary legend classes can be found but need a cleanup to 
+##       be consistent with this model. Legends are the natural place to 
+##       specify the colors and line styles of charts; we propose that each 
+##       chart is created with a Legend attribute which is invisible. One would 
+##       then do the following to specify colors:""")
+##
+##disc("""One could also define a group of charts sharing the same legend:""")
+##
+##
+##heading3("Other Charts")
+##
+##disc("""It will take some time to deal with the full range of chart types. We 
+##       expect to finalize bars and pies and to produce trial implementations 
+##       of more general plots in February.""")
+##
+##
+##heading4("X-Y Plots")
+##
+##disc("""Most other plots involve two value axes and directly plotting x-y data 
+##       in some form. The series can be plotted as lines, marker symbols, 
+##       both, or custom graphics such as open-high-low-close graphics. All 
+##       share the concepts of scaling and axis/title formatting. At a certain 
+##       point, a routine will loop over the data series and 'do something' 
+##       with the data points at given x-y locations. Given a basic line plot, 
+##       it should be very easy to derive a custom chart type just by 
+##       overriding a single method - say, drawSeries().""")
+##
+##
+##heading4("Marker customisation and custom shapes")
+##
+##disc("""Well known plotting packages such as excel, Mathematica and Excel 
+##       offer ranges of marker types to add to charts. We can do better - you 
+##       can write any kind of chart widget you want and just tell the chart 
+##       to use it as an example.""")
+##
+##
+##heading4("Combination Plots")
+##
+##disc("""Combining multiple plot types is really easy. You can just draw 
+##       several charts (bar, line or whatever) in the same rectangle, 
+##       suppressing axes as needed. So a chart could correlate a line with 
+##       Scottish typhoid cases over a 15 year period on the left axis with a 
+##       set of bars showing inflation rates on the right axis. If anyone can 
+##       remind us where this example came from we'll attribute it, and happily 
+##       show the well-known graph as an example.""")
+##
+##
+##heading3("Other chart classes")
+##
+##disc("""This has not been an exhaustive look at all the chart classes. Those classes 
+##       are constantly being worked on. To see exactly what is in the current 
+##       distribution, use the $graphdocpy.py$ utility. By default, it will run 
+##       on reportlab/graphics, and produce a full report. (If you want to run
+##       it on other modules or packages, $graphdocpy.py -h$ print a help
+##       message that will tell you how.)""")
+##
+##disc("This is the tool that was mentioned in the section on 'Automatic Documentation'")
