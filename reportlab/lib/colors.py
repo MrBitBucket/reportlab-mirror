@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.21 2001/08/08 19:16:57 rgbecker Exp $
-__version__=''' $Id: colors.py,v 1.21 2001/08/08 19:16:57 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.22 2001/08/22 19:31:23 johnprecedo Exp $
+__version__=''' $Id: colors.py,v 1.22 2001/08/22 19:31:23 johnprecedo Exp $ '''
 
 import string
 import math
@@ -173,6 +173,53 @@ def HexColor(val):
 			val = val[2:]
 		val = string.atoi(val,b)
 	return Color(((val>>16)&0xFF)/255.0,((val>>8)&0xFF)/255.0,(val&0xFF)/255.0)
+
+def linearlyInterpolatedColor(c0, c1, x0, x1, x):
+	"""
+	Linearly interpolates colors. Can handle RGB, CMYK and PCMYK
+	colors - give ValueError if colours aren't the same.
+	Doesn't currently handle 'Spot Color Interpolation'.
+	"""
+
+	if c0.__class__ != c1.__class__:
+		raise ValueError, "Color classes must be the same for interpolation!"
+	if x1<x0:
+		x0,x1,c0,c1 = x1,x0,c1,c0 # normalized so x1>x0
+	if x<x0-1e-8 or x>x1+1e-8: # fudge factor for numerical problems
+		raise ValueError, "Can't interpolate: x=%f is not between %f and %f!" % (x,x0,x1)
+	if x<=x0:
+		return c0
+	elif x>=x1:
+		return c1
+
+	cname = c0.__class__.__name__
+	dx = x1-x0
+	x = x-x0
+
+	if cname is 'Color': # RGB
+		r = c0.red+x*(c1.red - c0.red)/dx
+		g = c0.green+x*(c1.green- c0.green)/dx
+		b = c0.blue+x*(c1.blue - c0.blue)/dx
+		return Color(r,g,b)
+		
+	elif cname is 'CMYKColor': 
+		c = c0.cyan+x*(c1.cyan - c0.cyan)/dx
+		m = c0.magenta+x*(c1.magenta - c0.magenta)/dx
+		y = c0.yellow+x*(c1.yellow - c0.yellow)/dx
+		k = c0.black+x*(c1.black - c0.black)/dx
+		d = c0.density+x*(c1.density - c0.density)/dx
+		return CMYKColor(c,m,y,k, density=d)
+	
+	elif cname is 'PCMYKColor': 
+		c = c0.cyan+x*(c1.cyan - c0.cyan)/dx
+		m = c0.magenta+x*(c1.magenta - c0.magenta)/dx
+		y = c0.yellow+x*(c1.yellow - c0.yellow)/dx
+		k = c0.black+x*(c1.black - c0.black)/dx
+		d = c0.density+x*(c1.density - c0.density)/dx
+		return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100)
+
+	else:
+		raise ValueError, "Can't interpolate: Unknown color class %s!" % cname
 
 # special case -- indicates no drawing should be done
 # this is a hangover from PIDDLE - suggest we ditch it since it is not used anywhere

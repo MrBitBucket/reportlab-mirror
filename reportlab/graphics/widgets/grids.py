@@ -405,7 +405,6 @@ class ShadedRect(Widget):
         group.add(rect)
 
         c0, c1 = self.fillColorStart, self.fillColorEnd
-        r, g, b = c0.red, c0.green, c0.blue
         num = float(self.numShades) # must make it float!
 
         if self.orientation == 'vertical':
@@ -416,15 +415,11 @@ class ShadedRect(Widget):
 
             for x in xVals:
                 stripe = Rect(x, self.y, w/num, h)
-                col = colors.Color(r, g, b)
+                col = colors.linearlyInterpolatedColor(c0,c1,xVals[0],xVals[-1], x)
                 stripe.fillColor = col
                 stripe.strokeColor = None
                 stripe.strokeWidth = 0
                 group.add(stripe)
-                if num > 1:
-                    r = r + (c1.red - c0.red) / (num-1)
-                    g = g + (c1.green - c0.green) / (num-1)
-                    b = b + (c1.blue - c0.blue) / (num-1)
  
         elif self.orientation == 'horizontal':
             if num == 1:
@@ -434,16 +429,12 @@ class ShadedRect(Widget):
 
             for y in yVals:
                 stripe = Rect(self.x, y, w, h/num)
-                col = colors.Color(r, g, b)
+                col = colors.linearlyInterpolatedColor(c0,c1,yVals[0],yVals[-1], y)
                 stripe.fillColor = col
                 stripe.strokeColor = None
                 stripe.strokeWidth = 0
                 group.add(stripe)
-                if num > 1:
-                    r = r + (c1.red - c0.red) / (num-1)
-                    g = g + (c1.green - c0.green) / (num-1)
-                    b = b + (c1.blue - c0.blue) / (num-1)
-
+#
         return group
 
 
