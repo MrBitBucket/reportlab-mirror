@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch6_tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch6_tables.py,v 1.5 2002/09/12 10:47:20 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch6_tables.py,v 1.6 2002/09/26 06:06:55 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.platypus import Image
 
@@ -123,7 +123,7 @@ disc("""This method allows you to add commands to an existing
 $TableStyle$, i.e. you can build up $TableStyles$ in multiple statements.
 """)
 eg("""
-    LIST_STYLE.add([('BACKGROUND', (0,0), (-1,0), colors.Color(0,0.7,0.7))])
+    LIST_STYLE.add('BACKGROUND', (0,0), (-1,0), colors.Color(0,0.7,0.7))
 """)
 heading3("$TableStyle.getCommands()$")
 disc("""This method returns the sequence of commands of the instance.""")
