@@ -104,6 +104,7 @@ class VerticalBarChart(Widget):
 
     def demo(self):
         """Shows basic use of a bar chart"""
+
         drawing = Drawing(200, 100)
 
         data = [
@@ -117,7 +118,9 @@ class VerticalBarChart(Widget):
         bc.height = 85
         bc.width = 90
         bc.data = data
+
         drawing.add(bc)
+
         return drawing
 
 
@@ -161,10 +164,11 @@ class VerticalBarChart(Widget):
                      (rowNo * self.barSpacing * normFactor)
                      )
                 width = self.barWidth * normFactor
-                     
+
                 y = self.valueAxis.scale(0)
                 height = self.valueAxis.scale(datum) - y
                 barRow.append((x, y, width, height))
+
             self._barPositions.append(barRow)
         
 
@@ -551,3 +555,190 @@ def sample3():
     drawing.add(g)    
 
     return drawing
+
+
+###
+
+def sample4a():
+    "Make a bar chart showing value axis region staring at *exactly* zero."
+    
+    drawing = Drawing(400, 200)
+
+    data = [(13, 20)]
+    
+    bc = VerticalBarChart()
+    bc.x = 50
+    bc.y = 50
+    bc.height = 125
+    bc.width = 300
+    bc.data = data
+
+    bc.strokeColor = colors.black
+
+    bc.valueAxis.valueMin = 0 ###
+    bc.valueAxis.valueMax = 60
+    bc.valueAxis.valueStep = 15
+    
+    bc.categoryAxis.labels.boxAnchor = 'n'
+    bc.categoryAxis.labels.dy = -5
+    bc.categoryAxis.categoryNames = ['Ying', 'Yang']
+
+    drawing.add(bc)
+
+    return drawing    
+
+    
+def sample4b():
+    "Make a bar chart showing value axis region staring *below* zero."
+    
+    drawing = Drawing(400, 200)
+
+    data = [(13, 20)]
+    
+    bc = VerticalBarChart()
+    bc.x = 50
+    bc.y = 50
+    bc.height = 125
+    bc.width = 300
+    bc.data = data
+
+    bc.strokeColor = colors.black
+
+    bc.valueAxis.valueMin = -10 ###
+    bc.valueAxis.valueMax = 60
+    bc.valueAxis.valueStep = 15
+    
+    bc.categoryAxis.labels.boxAnchor = 'n'
+    bc.categoryAxis.labels.dy = -5
+    bc.categoryAxis.categoryNames = ['Ying', 'Yang']
+
+    drawing.add(bc)
+
+    return drawing    
+
+    
+def sample4c():
+    "Make a bar chart showing value axis region staring *above* zero."
+    
+    drawing = Drawing(400, 200)
+
+    data = [(13, 20)]
+    
+    bc = VerticalBarChart()
+    bc.x = 50
+    bc.y = 50
+    bc.height = 125
+    bc.width = 300
+    bc.data = data
+
+    bc.strokeColor = colors.black
+
+    bc.valueAxis.valueMin = 10 ###
+    bc.valueAxis.valueMax = 60
+    bc.valueAxis.valueStep = 15
+    
+    bc.categoryAxis.labels.boxAnchor = 'n'
+    bc.categoryAxis.labels.dy = -5
+    bc.categoryAxis.categoryNames = ['Ying', 'Yang']
+
+    drawing.add(bc)
+
+    return drawing    
+
+
+###
+
+dataSample5 = [(10, 20), (20, 30), (30, 40), (40, 50), (50, 60)]
+
+def sample5a():
+    "Make a simple bar chart with no expressed spacing attributes."
+    
+    drawing = Drawing(400, 200)
+
+    data = dataSample5
+    
+    bc = VerticalBarChart()
+    bc.x = 50
+    bc.y = 50
+    bc.height = 125
+    bc.width = 300
+    bc.data = data
+    bc.strokeColor = colors.black
+
+    bc.valueAxis.valueMin = 0
+    bc.valueAxis.valueMax = 60
+    bc.valueAxis.valueStep = 15
+    
+    bc.categoryAxis.labels.boxAnchor = 'n'
+    bc.categoryAxis.labels.dy = -5
+    bc.categoryAxis.categoryNames = ['Ying', 'Yang']
+
+    drawing.add(bc)
+
+    return drawing
+
+    
+def sample5b():
+    "Make a simple bar chart with proportional spacing."
+    
+    drawing = Drawing(400, 200)
+
+    data = dataSample5
+    
+    bc = VerticalBarChart()
+    bc.x = 50
+    bc.y = 50
+    bc.height = 125
+    bc.width = 300
+    bc.data = data
+    bc.strokeColor = colors.black
+
+    bc.useAbsolute = 0
+    bc.barWidth = 40
+    bc.groupSpacing = 20
+    bc.barSpacing = 10
+
+    bc.valueAxis.valueMin = 0
+    bc.valueAxis.valueMax = 60
+    bc.valueAxis.valueStep = 15
+    
+    bc.categoryAxis.labels.boxAnchor = 'n'
+    bc.categoryAxis.labels.dy = -5
+    bc.categoryAxis.categoryNames = ['Ying', 'Yang']
+
+    drawing.add(bc)
+
+    return drawing
+
+    
+def sample5c():
+    "Make sampe simple bar chart but with absolute spacing."
+    
+    drawing = Drawing(400, 200)
+
+    data = dataSample5
+    
+    bc = VerticalBarChart()
+    bc.x = 50
+    bc.y = 50
+    bc.height = 125
+    bc.width = 300
+    bc.data = data
+    bc.strokeColor = colors.black
+
+    bc.useAbsolute = 1
+    bc.barWidth = 40
+    bc.groupSpacing = 20
+    bc.barSpacing = 10
+
+    bc.valueAxis.valueMin = 0
+    bc.valueAxis.valueMax = 60
+    bc.valueAxis.valueStep = 15
+    
+    bc.categoryAxis.labels.boxAnchor = 'n'
+    bc.categoryAxis.labels.dy = -5
+    bc.categoryAxis.categoryNames = ['Ying', 'Yang']
+
+    drawing.add(bc)
+
+    return drawing    
