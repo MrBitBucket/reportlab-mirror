@@ -67,46 +67,55 @@ eg("""    def __init__(self,filename,
                  verbosity=0):
                  """)
 
-disc("""The $filename$ argument is obvious and controls the
-name of the final PDF file.  Due to popular demand, you
-may also pass in any open file object (such as $sys.stdout$)
+disc("""The $filename$ argument controls the
+name of the final PDF file.  You
+may also pass in any open file object (such as $sys.stdout$, the python process standard output)
 and the PDF document will be written to that.  Since PDF
 is a binary format, you should take care when writing other
 stuff before or after it; you can't deliver PDF documents
 inline in the middle of an HTML page!""")
 
 disc("""The $pagesize$ argument is a tuple of two numbers
-in points (1/72 of an inch). The canvas defaults to A4,
+in points (1/72 of an inch). The canvas defaults to $A4$ (an international standard
+page size which differs from the American standard page size of $letter$),
 but it is better to explicitly specify it.  Most common page
-sizes are found in the library module <i>reportlab.lib.pagesizes</i>,
+sizes are found in the library module $reportlab.lib.pagesizes$,
 so you can use expressions like""")
+
 eg("""from reportlab.lib.pagesizes import letter, A4
 myCanvas = Canvas('myfile.pdf', pagesize=letter)
 width, height = pagesize.letter  #keep for later
 """)
+
+pencilnote()
+
+disc("""If you have problems printing your document make sure you
+are using the right page size (usually either $A4$ or $letter$).
+Some printers do not work well with pages that are too large or too small.""")
+
 disc("""Very often, you will want to calculate things based on
 the page size.  In the example above we extracted the width and
-height; defining a right margin as $width - inch$ rather than
-a constant means that the margin will still work if you change
-paper sizes.""")
+height.  Later in the program we may use the $width$ variable to 
+define a right margin as $width - inch$ rather than using
+a constant.  By using variables the margin will still make sense even 
+if the page size changes.""")
 
-disc("""The $bottomup$ argument is an attempt to let you
-switch coordinate systems.  Some graphics systems (like PDF
+disc("""The $bottomup$ argument
+switches coordinate systems.  Some graphics systems (like PDF
 and PostScript) place (0,0) at the bottom left of the page
-others (like most GUIs) place it at the top.  This argument
-is deprecated and may well be dropped.""")
+others (like many graphical user interfaces [GUI's]) place the origen at the top left.  The
+$bottomup$ argument is deprecated and may be dropped in future""")
+
 todo("""Need to see if it really works for all tasks, and if not
      then get rid of it""")
 
-disc("""The $pageCompression$ option determines whether the chunk
-of PDF operations for each page should be compressed.  By default
-it is off, because the compression currently involves a slow
-byte-level loop encoding the output; compressed documents will
-be smaller, but slower to generate.  We are working on a small
-C extension which will make this go hundreds of times faster,
-removing the penalty, at which point compression will be the norm.
-Note that images are <i>always</i> compressed, and this option
-will only save space if you have a lot of text and vector graphics.""")
+disc("""The $pageCompression$ option determines whether the stream
+of PDF operations for each page is compressed.  By default
+page streams are not compressed, because the compression slows the file generation process.
+If output size is important set $pageCompression=1$, but remember that, compressed documents will
+be smaller, but slower to generate.  Note that images are <i>always</i> compressed, and this option
+will only save space if you have a very large amount of text and vector graphics
+on each page.""")
 
 disc("""The $encoding$ argument determines which font encoding
 is used for the standard fonts; this should correspond to
@@ -114,7 +123,7 @@ the encoding on your system.  It has two values at present:
 $pdfdoc.WINANSI_ENCODING$ or $pdfdoc.MACROMAN_ENCODING$.  The
 $pdfdoc.DEFAULT_ENCODING$ above points to the former, which
 is standard on Windows and many Unices (including Linux). If
-you are a Mac user and want to make a global change, hack the
+you are a Mac user and want to make a global change, modify the
 line at the top of <i>reportlab/pdfbase/pdfdoc.py</i> to switch it
 over.""")
 
@@ -125,7 +134,7 @@ to ensure that your string data is in an encoding matching that
 of the font.  If conversions are needed, the Unicode library
 in Python 1.6 can be of great help.""")
 
-disc("""The demo script <i>reportlab/demos/stdfonts.py</i>
+disc("""The demo script $reportlab/demos/stdfonts.py$
 will print out two test documents showing all code points
 in all fonts, so you can look up characters.  Special
 characters can be inserted into string commands with
@@ -187,6 +196,7 @@ This document contains demonstrations of the code discussed like the one shown
 in the rectangle above.  These demos are drawn on a "tiny page" embedded
 within the real pages of the guide.  The tiny pages are %s inches wide
 and %s inches tall. The demo displays show the actual output of the demo code.
+For convenience the size of the output has been reduced slightly.
 """ % (examplefunctionxinches, examplefunctionyinches))
 
 heading2('The tools: the "draw" operations')
@@ -238,10 +248,10 @@ eg("""canvas.drawText(textobject) """)
 
 disc("""
 Text objects are used to format text in ways that
-are not supported directly by the canvas interface.
-A program creates a text object from the canvas using beginText
-and then formats text by invoking textobject methods.
-Finally the textobject is drawn onto the canvas using
+are not supported directly by the $canvas$ interface.
+A program creates a text object from the $canvas$ using $beginText$
+and then formats text by invoking $textobject$ methods.
+Finally the $textobject$ is drawn onto the canvas using
 drawText.
 """)
 
@@ -273,7 +283,7 @@ heading2('The toolbox: the "state change" operations')
 disc("""
 This section briefly lists the ways to switch the tools used by the
 program
-for painting information onto a page using the canvas interface.
+for painting information onto a page using the $canvas$ interface.
 These too will be discussed in detail in later sections.
 """)
 
@@ -290,13 +300,19 @@ eg("""canvas.setStrokeGray(gray) """)
 heading3("Changing Fonts")
 eg("""canvas.setFont(psfontname, size, leading = None) """)
 
-heading3("Changing Graphical Styles")
+heading3("Changing Graphical Line Styles")
 
 eg("""canvas.setLineWidth(width) """)
 eg("""canvas.setLineCap(mode) """)
 eg("""canvas.setLineJoin(mode) """)
 eg("""canvas.setMiterLimit(limit) """)
 eg("""canvas.setDash(self, array=[], phase=0) """)
+
+disc("""
+Lines drawn in PDF can be presented in a number of graphical styles.
+Lines can have different widths, they can end in differing cap styles,
+they can meet in different join styles, and they can be continuous or
+they can be dotted or dashed.  The above methods adjust these various parameters.""")
 
 heading3("Changing Geometry")
 
@@ -307,16 +323,33 @@ eg("""canvas.scale(x, y) """)
 eg("""canvas.rotate(theta) """)
 eg("""canvas.skew(alpha, beta) """)
 
+disc("""
+All PDF drawings fit into a specified page size.  Elements drawn outside of the specified
+page size are ignored.  Furthermore all drawn elements are passed through an affine
+transformation which may adjust their location and/or distort their appearence.  The
+$setPageSize$ method adjusts the current page size.  The $transform$, $translate$, $scale$,
+$rotate$, and $skew$ methods add additional transformations to the current transformation.
+It is important to remember that these transformations are <i>incremental</i> -- a new
+transform modifies the current transform (but does not replace it).
+""")
+
 heading3("State control")
 
 eg("""canvas.saveState() """)
 eg("""canvas.restoreState() """)
 
+disc("""
+Very often it is important to save the current font, graphics transform, line styles and
+other graphics state in order to restore them later. The $saveState$ method marks the
+current graphics state for later restoration by a matching $restoreState$.  Note that
+the save and restore method invokation must match -- a restore call restores the state to
+the most recently saved state.  You cannot save the state on one page and restore
+it on the next, however -- no state is preserved between pages.""")
 
-heading2("Other canvas methods.")
+heading2("Other $canvas$ methods.")
 
 disc("""
-Not all methods of the canvas object fit into the "tool" or "toolbox"
+Not all methods of the $canvas$ object fit into the "tool" or "toolbox"
 categories.  Below are some of the misfits, included here for completeness.
 """)
 
@@ -353,7 +386,7 @@ the right 4.5 inches and up one inch.
 """)
 
 disc("""For example, the following function draws
-a number of elements on a canvas.""")
+a number of elements on a $canvas$.""")
 
 eg(examples.testcoords)
 
@@ -421,7 +454,7 @@ operations are important.""")
 
 eg(examples.testscaletranslate)
 
-disc("""This example function first saves the current canvas state
+disc("""This example function first saves the current $canvas$ state
 and then does a $scale$ followed by a $translate$.  Afterward the function
 restores the state (effectively removing the effects of the scaling and
 translation) and then does the <i>same</i> operations in a different order.
@@ -444,17 +477,17 @@ to shrink to the point where they disappear.  For engineering or scientific purp
 such as these scale and translate
 the units externally before rendering them using the canvas.""")
 
-heading3("Saving and restoring the canvas state: $saveState$ and $restoreState$")
+heading3("Saving and restoring the $canvas$ state: $saveState$ and $restoreState$")
 
 disc("""
-The $scaletranslate$ function used an important feature of the canvas object:
-the ability to save and restore the current parameters of the canvas.
+The $scaletranslate$ function used an important feature of the $canvas$ object:
+the ability to save and restore the current parameters of the $canvas$.
 By enclosing a sequence of operations in a matching pair of $canvas.saveState()$
 an $canvas.restoreState()$ operations all changes of font, color, line style,
-scaling, translation, or other aspects of the canvas graphics state can be
+scaling, translation, or other aspects of the $canvas$ graphics state can be
 restored to the state at the point of the $saveState()$.  Remember that the save/restore
 calls must match: a stray save or restore operation may cause unexpected
-and undesirable behavior.  Also, remember that <i>no</i> canvas state is
+and undesirable behavior.  Also, remember that <i>no</i> $canvas$ state is
 preserved across page breaks, and the save/restore mechanism does not work
 across page breaks.
 """)
@@ -529,7 +562,7 @@ the word.
 illust(examples.spumoni, "Painting over colors")
 
 disc("""
-The last letters of the word are not visible because the default canvas
+The last letters of the word are not visible because the default $canvas$
 background is white and painting white letters over a white background
 leaves no visible effect.
 """)
@@ -590,7 +623,7 @@ heading2("Text object methods")
 disc("""
 For the dedicated presentation of text in a PDF document, use a text object.
 The text object interface provides detailed control of text layout parameters
-not available directly at the canvas level.  In addition, it results in smaller
+not available directly at the $canvas$ level.  In addition, it results in smaller
 PDF that will render faster than many separate calls to the $drawString$ methods.
 """)
 
@@ -731,13 +764,13 @@ textobject.setStrokeColor(self, aColor)
 
 disc("""
 These color change operations change the <font color=darkviolet>color</font> of the text and are otherwise
-similar to the color methods for the canvas object.""")
+similar to the color methods for the $canvas$ object.""")
 
 heading2('Paths and Lines')
 
 disc("""Just as textobjects are designed for the dedicated presentation
 of text, path objects are designed for the dedicated construction of
-graphical figures.  When path objects are drawn onto a canvas they are
+graphical figures.  When path objects are drawn onto a $canvas$ they are
 are drawn as one figure (like a rectangle) and the mode of drawing
 for the entire figure can be adjusted: the lines of the figure can
 be drawn (stroked) or not; the interior of the figure can be filled or
@@ -831,7 +864,7 @@ disc("""
 The $pdfgen$ module supports a number of generally useful shapes
 such as rectangles, rounded rectangles, ellipses, and circles.
 Each of these figures can be used in path objects or can be drawn
-directly on a canvas.  For example the $pencil$ function below
+directly on a $canvas$.  For example the $pencil$ function below
 draws a pencil icon using rectangles and rounded rectangles with
 various fill colors and a few other annotations.
 """)
