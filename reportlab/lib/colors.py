@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.25 2001/10/05 16:33:15 rgbecker Exp $
-__version__=''' $Id: colors.py,v 1.25 2001/10/05 16:33:15 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.26 2001/10/05 16:39:08 rgbecker Exp $
+__version__=''' $Id: colors.py,v 1.26 2001/10/05 16:39:08 rgbecker Exp $ '''
 
 import string
 import math
@@ -223,7 +223,7 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
 			k = c0.black
 			d = c0.density+x*(c1.density - c0.density)/dx
 			return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100, spotName=c0.spotName)
-		elif cmykDistance(c0,_CMYKWhite)<1e-8:
+		elif cmykDistance(c0,_CMYK_white)<1e-8:
 			#one of the colours is white
 			c = c1.cyan
 			m = c1.magenta
@@ -231,7 +231,7 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
 			k = c1.black
 			d = x*c1.density/dx
 			return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100, spotName=c1.spotName)
-		elif cmykDistance(c1,_CMYKWhite)<1e-8:
+		elif cmykDistance(c1,_CMYK_white)<1e-8:
 			#one of the colours is white
 			c = c0.cyan
 			m = c0.magenta
@@ -252,6 +252,8 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
 # special case -- indicates no drawing should be done
 # this is a hangover from PIDDLE - suggest we ditch it since it is not used anywhere
 #transparent = Color(-1, -1, -1)
+
+_CMYK_white
 
 # Special color 
 ReportLabBlue =		HexColor(0x4e5688)
