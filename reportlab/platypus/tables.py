@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.75 2004/03/15 23:49:48 andy_robinson Exp $
-__version__=''' $Id: tables.py,v 1.75 2004/03/15 23:49:48 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.76 2004/03/26 15:44:24 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.76 2004/03/26 15:44:24 rgbecker Exp $ '''
 
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
@@ -113,6 +113,52 @@ _SeqTypes = (TupleType, ListType)
 def _rowLen(x):
     return type(x) not in _SeqTypes and 1 or len(x)
 
+def _calc_pc(V,avail):
+    '''check list V for percentage or * values
+    1) absolute values go through unchanged
+    2) percentages are used as weights for unconsumed space
+    3) if no None values were seen '*' weights are
+    set equally with unclaimed space
+    otherwise * weights are assigned as None'''
+    R = []
+    r = R.append
+    I = []
+    i = I.append
+    J = []
+    j = J.append
+    s = avail
+    w = n = 0.
+    for v in V:
+        if type(v) is type(""):
+            v = v.strip()
+            if not v:
+                v = None
+                n += 1
+            elif v.endswith('%'):
+                v = float(v[:-1])
+                w += v
+                i(len(R))
+            elif v=='*':
+                j(len(R))
+            else:
+                v = float(v)
+        elif v is None:
+            n += 1
+        else:
+            s -= v
+        r(v)
+    s = max(0.,s)
+    f = s/max(100.,w)
+    for i in I:
+        R[i] *= f
+        s -= R[i]
+    s = max(0.,s)
+    m = len(J)
+    if m:
+        v =  n==0 and s/m or None
+        for j in J:
+            R[j] = v
+    return R
 
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
@@ -234,10 +280,10 @@ class Table(Flowable):
             t = t + vh + v.getSpaceBefore()+v.getSpaceAfter()
         return w, t - V[0].getSpaceBefore()-V[-1].getSpaceAfter()
 
-    def _calc_width(self):
+    def _calc_width(self,availWidth,W=None):
         #comments added by Andy to Robin's slightly
         #terse variable names
-        W = self._argW  #widths array
+        if not W: W = _calc_pc(self._argW,availWidth)   #widths array
         #print 'widths array = %s' % str(self._colWidths)
         canv = getattr(self,'canv',None)
         saved = None
@@ -304,10 +350,10 @@ class Table(Flowable):
             v = string.split(v, "\n")
             return max(map(lambda a, b=s.fontname, c=s.fontsize,d=pdfmetrics.stringWidth: d(a,b,c), v))
 
-    def _calc_height(self, availHeight):
+    def _calc_height(self, availHeight, availWidth, H=None, W=None):
 
         H = self._argH
-        W = self._argW
+        if not W: W = _calc_pc(self._argW,availWidth)   #widths array
 
         canv = getattr(self,'canv',None)
         saved = None
@@ -380,9 +426,10 @@ class Table(Flowable):
         #cells.  If so, apply a different algorithm
         #and assign some withs in a dumb way.
         #this CHANGES the widths array.
-        if None in self._colWidths:
-            if self._hasVariWidthElements():
-                self._calcPreliminaryWidths(availWidth)
+        if None in self._colWidths and self._hasVariWidthElements():
+            W = self._calcPreliminaryWidths(availWidth) #widths
+        else:
+            W = None
 
         # need to know which cells are part of spanned
         # ranges, so _calc_height and _calc_width can ignore them
@@ -392,7 +439,7 @@ class Table(Flowable):
 
         # calculate the full table height
         #print 'during calc, self._colWidths=', self._colWidths
-        self._calc_height(availHeight)
+        self._calc_height(availHeight,availWidth,W=W)
 
         # if the width has already been calculated, don't calculate again
         # there's surely a better, more pythonic way to short circuit this FIXME FIXME
@@ -400,8 +447,7 @@ class Table(Flowable):
         self._width_calculated_once = 1
 
         # calculate the full table width
-        self._calc_width()
-
+        self._calc_width(availWidth,W=W)
 
         if self._spanCmds:
             #now work out the actual rect for each spanned cell
@@ -444,10 +490,12 @@ class Table(Flowable):
         paragraphs might be present, do a preliminary scan
         and assign some sensible values - just divide up
         all unsizeable columns by the remaining space."""
+
+        W = _calc_pc(self._argW,availWidth) #widths array
         verbose = 0
         totalDefined = 0.0
         numberUndefined = 0
-        for w in self._colWidths:
+        for w in W:
             if w is None:
                 numberUndefined = numberUndefined + 1
             else:
@@ -460,7 +508,7 @@ class Table(Flowable):
         sizeable = []
         unsizeable = []
         for colNo in range(self._ncols):
-            if self._colWidths[colNo] is None:
+            if W[colNo] is None:
                 siz = 1
                 for rowNo in range(self._nrows):
                     value = self._cellvalues[rowNo][colNo]
@@ -482,7 +530,7 @@ class Table(Flowable):
         #how much width is left:
         # on the next iteration we could size the sizeable ones, for now I'll just
         # divide up the space
-        newColWidths = list(self._colWidths)
+        newColWidths = list(W)
         guessColWidth = (availWidth - totalDefined) / (len(unsizeable)+len(sizeable))
         assert guessColWidth >= 0, "table is too wide already, cannot choose a sane width for undefined columns"
         if verbose: print 'assigning width %0.2f to all undefined columns' % guessColWidth
@@ -491,9 +539,9 @@ class Table(Flowable):
         for colNo in unsizeable:
             newColWidths[colNo] = guessColWidth
 
-        self._colWidths = newColWidths
-        self._argW = newColWidths
-        if verbose: print 'new widths are:', self._colWidths
+        if verbose: print 'new widths are:', newColWidths
+        self._argW = self._colWidths = newColWidths
+        return newColWidths
 
     def _calcSpanRanges(self):
         """Work out rects for tables which do row and column spanning.
@@ -1501,8 +1549,6 @@ LIST_STYLE = TableStyle(
 
     # now for an attempt at column spanning.
     lst.append(PageBreak())
-    colWidths = [24] * 5
-    rowHeight = [20] * 5
     data=  [['A', 'BBBBB', 'C', 'D', 'E'],
             ['00', '01', '02', '03', '04'],
             ['10', '11', '12', '13', '14'],
@@ -1532,7 +1578,17 @@ LIST_STYLE = TableStyle(
     t=Table(data,style=sty, colWidths = [20] * 5, rowHeights = [20]*5)
     lst.append(t)
 
-    # und jetzt noch eine Tabelle mit 5000 Zeilen:
+    # now for an attempt at percentage widths
+    lst.append(Paragraph("This table has colWidths=5*['14%']!", styleSheet['BodyText']))
+    t=Table(data,style=sty, colWidths = ['14%'] * 5, rowHeights = [20]*5)
+    lst.append(t)
+
+    lst.append(Paragraph("This table has colWidths=['14%','10%','19%','22%','*']!", styleSheet['BodyText']))
+    t=Table(data,style=sty, colWidths = ['14%','10%','19%','22%','*'], rowHeights = [20]*5)
+    lst.append(t)
+
+    lst.append(PageBreak())
+    lst.append(Paragraph("und jetzt noch eine Tabelle mit 5000 Zeilen:", styleSheet['BodyText']))
     sty = [ ('GRID',(0,0),(-1,-1),1,colors.green),
             ('BOX',(0,0),(-1,-1),2,colors.red),
            ]
