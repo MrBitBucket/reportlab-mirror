@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/formatters.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/formatters.py,v 1.3 2001/12/17 14:09:18 rgbecker Exp $
-__version__=''' $Id: formatters.py,v 1.3 2001/12/17 14:09:18 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/formatters.py,v 1.4 2002/03/22 14:43:43 rgbecker Exp $
+__version__=''' $Id: formatters.py,v 1.4 2002/03/22 14:43:43 rgbecker Exp $ '''
 __doc__="""
 These help format numbers and dates in a user friendly way.
 
@@ -37,14 +37,14 @@ class DecimalFormatter(Formatter):
 
 	def format(self, num):
 		# positivize the numbers
-		absNum = abs(num)
-		if absNum == num:
-			sign = 1
-		else:
-			sign = -1
-			
-		intPart, fracPart = divmod(absNum, 1.0)
-		strInt = str(long(intPart))
+		sign=num<0
+		if sign:
+			num = -num
+		places, sep = self.decimalPlaces, self.decimalSeparator
+		strip = places<=0
+		if places and strip: places = -places
+		strInt, strFrac = (('%.' + str(places) + 'f') % num).split('.')
+
 		if self.thousandSeparator is not None:
 			strNew = ''
 			while strInt:
@@ -56,16 +56,11 @@ class DecimalFormatter(Formatter):
 					strNew = self.thousandSeparator + right + strNew
 				strInt = left
 			strInt = strNew
-		places, sep = self.decimalPlaces, self.decimalSeparator
-		strip = places<=0
-		if places and strip: places = -places
-		pattern = '%0.' + str(places) + 'f'
-		strFrac = sep + (pattern % fracPart)[2:]
+		strFrac = sep + strFrac
 		if strip:
 			while strFrac and strFrac[-1] in ['0',sep]: strFrac = strFrac[:-1]
 		strBody = strInt + strFrac
-		if sign == -1:
-			strBody = '-' + strBody
+		if sign: strBody = '-' + strBody
 		if self.prefix:
 			strBody = self.prefix + strBody
 		if self.suffix:
