@@ -111,11 +111,9 @@ class GlobDirectoryWalker:
             else:
                 # got a filename
                 fullname = os.path.join(self.directory, file)
-                print fullname
                 if os.path.isdir(fullname) and not os.path.islink(fullname):
                     self.stack.append(fullname)
                 if fnmatch.fnmatch(file, self.pattern):
-                    print 'returning',fullname
                     return fullname
 
     def filterFiles(self, folder, files):
