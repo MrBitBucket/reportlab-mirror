@@ -64,7 +64,6 @@ from reportlab import rl_config
 from reportlab.lib import styles
 from reportlab.lib import colors
 from reportlab.lib.units import cm
-from reportlab.lib.utils import getStringIO
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
@@ -86,7 +85,6 @@ Usage:
         -h / --help     prints this message
         -n / --notes    leave room for comments
         -v / --verbose  verbose mode
-        -s / --silent   silent mode (NO output)
         --handout       produce handout document
         --cols          specify number of columns
                         on handout pages (default: 2)
@@ -306,7 +304,6 @@ class PPPresentation:
     def __init__(self):
         self.sourceFilename = None
         self.filename = None
-        self.outDir = None
         self.description = None
         self.title = None
         self.author = None
@@ -321,7 +318,7 @@ class PPPresentation:
         #assume landscape
         self.pageWidth = rl_config.defaultPageSize[1]
         self.pageHeight = rl_config.defaultPageSize[0]
-        self.verbose = rl_config.verbose
+        self.verbose = rl_config._verbose
 
 
     def saveAsPresentation(self):
@@ -329,14 +326,8 @@ class PPPresentation:
         if self.verbose:
             print 'saving presentation...'
         pageSize = (self.pageWidth, self.pageHeight)
-        if self.sourceFilename:
-            filename = os.path.splitext(self.sourceFilename)[0] + '.pdf'
-        if self.outDir: filename = os.path.join(self.outDir,os.path.basename(filename))
-        if self.verbose:
-            print filename
-        #canv = canvas.Canvas(filename, pagesize = pageSize)
-        outfile = getStringIO()
-        canv = canvas.Canvas(outfile, pagesize = pageSize)
+        filename = os.path.splitext(self.sourceFilename)[0] + '.pdf'
+        canv = canvas.Canvas(filename, pagesize = pageSize)
         canv.setPageCompression(self.compression)
 
         if self.title:
@@ -365,7 +356,6 @@ class PPPresentation:
             canv.showOutline()
 
         canv.save()
-        return self.savetofile(outfile, filename)
 
 
     def saveAsHandout(self):
@@ -375,11 +365,9 @@ class PPPresentation:
         h1 = styleSheet['Heading1']
         bt = styleSheet['BodyText']
 
-        if self.sourceFilename :
-            filename = os.path.splitext(self.sourceFilename)[0] + '.pdf'
-        
-        outfile = getStringIO()
-        doc = SimpleDocTemplate(outfile, pagesize=rl_config.defaultPageSize, showBoundary=0)
+        filename = os.path.splitext(self.sourceFilename)[0] + '.pdf'
+        doc = SimpleDocTemplate(filename, pagesize=rl_config.defaultPageSize, showBoundary=0)
+
         doc.leftMargin = 1*cm
         doc.rightMargin = 1*cm
         doc.topMargin = 2*cm
@@ -396,29 +384,15 @@ class PPPresentation:
 ##            doc.canv.showOutline()
 
         doc.build(story)
-        return self.savetofile(outfile, filename)
-
-    def savetofile(self, pseudofile, filename):
-        """Save the pseudo file to disk and return its content as a 
-        string of text."""
-        pseudofile.flush()
-        content = pseudofile.getvalue()
-        pseudofile.close()
-        if filename :
-            outf = open(filename, "wb")
-            outf.write(content)
-            outf.close()
-        return content
- 
 
 
     def save(self):
         "Save the PDF document."
 
         if self.handout:
-            return self.saveAsHandout()
+            self.saveAsHandout()
         else:
-            return self.saveAsPresentation()
+            self.saveAsPresentation()
 
 
 #class PPSection:
@@ -621,7 +595,7 @@ class PPTable:
     def getFlowable(self):
         self.parseData()
         t = Table(
-                self.data,
+				self.data,
                 self.widths,
                 self.heights)
         if self.style:
@@ -689,7 +663,7 @@ class PPFixedImage:
         if self.filename:
             x, y = self.x, self.y
             w, h = self.width, self.height
-            canv.drawImage(self.filename, x, y, w, h)
+            canv.drawInlineImage(self.filename, x, y, w, h)
 
 
 class PPRectangle:
@@ -805,6 +779,9 @@ class PPPolygon:
         if self.strokeColor:
             r,g,b = checkColor(self.strokeColor)
             canv.setStrokeColorRGB(r,g,b)
+        if self.fillColor:
+            r,g,b = checkColor(self.fillColor)
+            canv.setFillColorRGB(r,g,b)
 
         path = canv.beginPath()
         (x,y) = self.points[0]
@@ -812,7 +789,9 @@ class PPPolygon:
         for (x,y) in self.points[1:]:
             path.lineTo(x,y)
         path.close()
-        canv.drawPath(path, stroke=(self.strokeColor<>None))
+        canv.drawPath(path,
+                      stroke=(self.strokeColor<>None),
+                      fill=(self.fillColor<>None))
         canv.restoreState()
 
 
@@ -827,20 +806,30 @@ class PPString:
         self.color = (0,0,0)
         self.hasInfo = 0  # these can have data substituted into them
 
-    def normalizeText(self):
-        """It contains literal XML text typed over several lines.
-        We want to throw away
-        tabs, newlines and so on, and only accept embedded string
-        like '\n'"""
-        lines = string.split(self.text, '\n')
-        newtext = []
-        for line in lines:
-            newtext.append(string.strip(line))
-        #accept all the '\n' as newlines
-
-        self.text = newtext
+##    def normalizeText(self):
+##        """It contains literal XML text typed over several lines.
+##        We want to throw away
+##        tabs, newlines and so on, and only accept embedded string
+##        like '\n'"""
+##        print "normalizeText", self.text
+##        lines = string.split(self.text, '\n')
+##        newtext = []
+##        for line in lines:
+##            newtext.append(string.strip(line))
+##        #accept all the '\n' as newlines
+##
+##        self.text = newtext
 
     def drawOn(self, canv):
+##        from reportlab.pdfbase import pdfmetrics
+##        from reportlab.pdfbase.cidfonts import CIDFont, findCMapFile
+##        pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90ms-RKSJ-H'))
+
+##        if self.font[:3] == 'Hei':
+##            import base64
+##            self.text = base64.decodestring(self.text)
+##        print "'!!!", self.font, self.text
+
         # for a string in a section, this will be drawn several times;
         # so any substitution into the text should be in a temporary
         # variable
@@ -859,11 +848,11 @@ class PPString:
 
         if self.color is None:
             return
-        lines = string.split(string.strip(drawText), '\\n')
+        # lines = string.split(string.strip(drawText), '\\n')
+        lines = [drawText]
         canv.saveState()
 
-        canv.setFont(self.font, self.size)
-
+        canv.setFont(self.font, 24)
         r,g,b = checkColor(self.color)
         canv.setFillColorRGB(r,g,b)
         cur_y = self.y
@@ -875,6 +864,13 @@ class PPString:
             elif self.align == TA_RIGHT:
                 canv.drawRightString(self.x, cur_y, line)
             cur_y = cur_y - 1.2*self.size
+
+##        print "'!!!", self.font
+##        c = canv
+##        c.setFont('HeiseiMin-W3-90ms-RKSJ-H', self.size)
+##        # c.setFont('%s-%s' % (self.fontname, self.cidname), 24)
+##        message1 = '\202\261\202\352\202\315\225\275\220\254\226\276\222\251\202\305\202\267\201B'
+##        c.drawString(10, 10, message1)
 
         canv.restoreState()
 
@@ -905,37 +901,28 @@ def setStyles(newStyleSheet):
 ##    p.close()
 
 
-def process(datafilename, notes=0, handout=0, cols=0, verbose=0, outDir=None):
+def process(datafilename, notes=0, handout=0, cols=0, verbose=0):
     "Process one PythonPoint source file."
     from reportlab.tools.pythonpoint.stdparser import PPMLParser
-
     parser = PPMLParser()
-    if not hasattr(datafilename, "read") :
-        datafile = open(datafilename)
-    else :
-        datafile = datafilename
-        datafilename = "PseudoFile"
-    rawdata = datafile.read()
-
-
     parser.sourceFilename = datafilename
+    rawdata = open(datafilename).read()
     parser.feed(rawdata)
     pres = parser.getPresentation()
     pres.sourceFilename = datafilename
-    pres.outDir = outDir
     pres.notes = notes
     pres.handout = handout
     pres.cols = cols
     pres.verbose = verbose
 
     #this does all the work
-    pdfcontent = pres.save()
+    pres.save()
 
     if verbose:
         print 'saved presentation %s.pdf' % os.path.splitext(datafilename)[0]
     parser.close()
 
-    return pdfcontent
+
 ##class P:
 ##    def feed(self, text):
 ##        parser = stdparser.PPMLParser()
@@ -959,13 +946,11 @@ def handleOptions():
                'handout':0,
                'help':0,
                'notes':0,
-               'verbose':rl_config.verbose,
-               'silent':0,
-               'outDir': None}
+               'verbose':rl_config._verbose}
 
     try:
         shortOpts = 'hnv'
-        longOpts = string.split('cols= outdir= handout help notes verbose')
+        longOpts = string.split('cols= handout help notes verbose', ' ')
         optList, args = getopt.getopt(sys.argv[1:], shortOpts, longOpts)
     except getopt.error, msg:
         options['help'] = 1
@@ -980,8 +965,8 @@ def handleOptions():
             o = o[1:]
         optList[i] = (o, v)
 
-        if o == 'cols': options['cols'] = int(v)
-        elif o=='outdir': options['outDir'] = v 
+        if o == 'cols':
+            options['cols'] = int(v)
 
     if filter(lambda ov: ov[0] == 'handout', optList):
         options['handout'] = 1
@@ -996,13 +981,6 @@ def handleOptions():
     if filter(lambda ov: ov[0] in ('v', 'verbose'), optList):
         options['verbose'] = 1
 
-    #takes priority over verbose.  Used by our test suite etc.
-        #to ensure no output at all
-    if filter(lambda ov: ov[0] in ('s', 'silent'), optList):
-        optiona['silent'] = 1
-        options['verbose'] = 0
-        
-    
     return options, args
 
 def main():
@@ -1024,7 +1002,7 @@ def main():
             if os.path.isfile(datafile):
                 file = os.path.join(os.getcwd(), datafile)
                 notes, handout, cols, verbose = options['notes'], options['handout'], options['cols'], options['verbose']
-                process(file, notes, handout, cols, verbose, options['outDir'])
+                process(file, notes, handout, cols, verbose)
             else:
                 print 'Data file not found:', datafile
 

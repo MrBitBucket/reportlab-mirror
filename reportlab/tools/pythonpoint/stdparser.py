@@ -558,6 +558,7 @@ class PPMLParser(xmllib.XMLParser):
     def start_polygon(self, args):
         self._curPolygon = pythonpoint.PPPolygon(self.ceval('polygon',args,'points'))
         self._curPolygon.strokeColor = self.ceval('polygon',args,'stroke')
+        self._curPolygon.fillColor = self.ceval('polygon',args,'fill')
 
 
     def end_polygon(self):
