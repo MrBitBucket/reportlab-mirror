@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.11  2000/03/02 10:28:54  rgbecker
+#	[].extend illegal in 1.5.1
+#
 #	Revision 1.10  2000/02/24 17:28:13  andy_robinson
 #	Added methods setFillGray(g), setStrokeGray(g) where 0 <= g <= 1
-#
+#	
 #	Revision 1.9  2000/02/24 09:12:55  andy_robinson
 #	
 #	Removed some constants which are no longer used.
@@ -59,7 +62,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.10 2000/02/24 17:28:13 andy_robinson Exp $ '''
+__version__=''' $Id: canvas.py,v 1.11 2000/03/02 10:28:54 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -702,7 +705,11 @@ class Canvas:
             self._code.append('q %0.2f 0 0 %0.2f %0.2f %0.2f cm' % (width, height, x, y))
         else:
             self._code.append('q %0.2f 0 0 %0.2f %0.2f %0.2f cm' % (width, height, x, y+height))
-        self._code.extend(imagedata)
+
+		# self._code.extend(imagedata) if >=python-1.5.2
+        for line in imagedata:
+       	    self._code.append(line)
+			
         self._code.append('Q')
         #self._code.append('BT')
 
