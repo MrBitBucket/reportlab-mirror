@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.60 2002/12/02 19:02:25 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.61 2002/12/02 19:38:57 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.60 2002/12/02 19:02:25 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.61 2002/12/02 19:38:57 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -158,6 +158,12 @@ class CategoryAxis(Widget):
         if self.visibleGrid and (self.gridStart or self.gridEnd):
             self._makeLines(g,self.gridStart,self.gridEnd,self.gridStrokeColor,self.gridStrokeWidth,self.gridStrokeDashArray)
 
+def _assertYAxis(axis):
+    acn = axis.__class__.__name__
+    assert acn[0]=='Y' or acn[:4]=='AdjY', "Cannot connect to other axes (%s), but Y- ones." % acn
+def _assertXAxis(axis):
+    acn = axis.__class__.__name__
+    assert acn[0]=='X' or acn[:11]=='NormalDateX', "Cannot connect to other axes (%s), but X- ones." % acn
 
 class XCategoryAxis(CategoryAxis):
     "X/category axis"
@@ -199,11 +205,7 @@ class XCategoryAxis(CategoryAxis):
     def joinToAxis(self, yAxis, mode='bottom', pos=None):
         "Join with y-axis using some mode."
 
-        # Make sure we connect only to a y-axis.
-        axisClassName = yAxis.__class__.__name__
-        msg = "Cannot connect to other axes (%s), but Y- ones." % axisClassName
-        assert axisClassName[0] == 'Y', msg
-
+        _assertYAxis(yAxis)
         if mode == 'bottom':
             self._x = yAxis._x
             self._y = yAxis._y
@@ -342,10 +344,7 @@ class YCategoryAxis(CategoryAxis):
     def joinToAxis(self, xAxis, mode='left', pos=None):
         "Join with x-axis using some mode."
 
-        # Make sure we connect only to a y-axis.
-        axisClassName = xAxis.__class__.__name__
-        msg = "Cannot connect to other axes (%s), but X- ones." % axisClassName
-        assert axisClassName[0] == 'X', msg
+        _assertXAxis(xAxis)
 
         if mode == 'left':
             self._x = xAxis._x * 1.0
@@ -769,12 +768,7 @@ class XValueAxis(ValueAxis):
 
     def joinToAxis(self, yAxis, mode='bottom', pos=None):
         "Join with y-axis using some mode."
-
-        # Make sure we connect only to a y-axis.
-        axisClassName = yAxis.__class__.__name__
-        msg = "Cannot connect to other axes (%s), but Y- ones." % axisClassName
-        assert axisClassName[0] == 'Y', msg
-
+        _assertYAxis(yAxis)
         if mode == 'bottom':
             self._x = yAxis._x * 1.0
             self._y = yAxis._y * 1.0
@@ -1038,12 +1032,7 @@ class YValueAxis(ValueAxis):
 
     def joinToAxis(self, xAxis, mode='left', pos=None):
         "Join with x-axis using some mode."
-
-        # Make sure we connect only to a y-axis.
-        axisClassName = xAxis.__class__.__name__
-        msg = "Cannot connect to other axes (%s), but X- ones." % axisClassName
-        assert axisClassName[0] == 'X', msg
-
+        _assertXAxis(xAxis)
         if mode == 'left':
             self._x = xAxis._x * 1.0
             self._y = xAxis._y * 1.0

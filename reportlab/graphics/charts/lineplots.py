@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.37 2002/12/02 19:04:01 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.38 2002/12/02 19:38:59 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.37 2002/12/02 19:04:01 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.38 2002/12/02 19:38:59 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -447,6 +447,8 @@ class GridLinePlot(LinePlot):
 
     def draw(self):
         xva, yva = self.xValueAxis, self.yValueAxis
+        if xva: xva.joinAxis = yva
+        if yva: yva.joinAxis = xva
 
         yva.setPosition(self.x, self.y, self.height)
         yva.configure(self.data)
