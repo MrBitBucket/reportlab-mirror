@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.8 2001/06/13 17:29:48 jvr Exp $
-__version__=''' $Id: renderPM.py,v 1.8 2001/06/13 17:29:48 jvr Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.9 2001/06/26 14:45:30 andy_robinson Exp $
+__version__=''' $Id: renderPM.py,v 1.9 2001/06/26 14:45:30 andy_robinson Exp $ '''
 """Usage:
 	from reportlab.graphics import renderPM
 	renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -196,13 +196,19 @@ class PMCanvas:
 		self.ctm = self._baseCTM
 
 	def toPIL(self):
-		from PIL import Image
+		try:
+			from PIL import Image
+		except ImportError:
+			import Image
 		im = Image.new('RGB', size=(self._gs.width, self._gs.height))
 		im.fromstring(self._gs.pixBuf)
 		return im
 
 	def saveToFile(self,fn,fmt=None):
-		from PIL import Image
+		try:
+			from PIL import Image
+		except ImportError:
+			import Image
 		im = self.toPIL()
 		if fmt is None:
 			if type(fn) is not StringType:
@@ -214,7 +220,11 @@ class PMCanvas:
 				im = im.convert("P", dither=Image.NONE, palette=Image.ADAPTIVE)
 				im.save(fn,fmt)
 			elif fmt in ['PNG','TIFF','BMP', 'PPM']:
-				if fmt=='PNG': from PIL import PngImagePlugin
+				if fmt=='PNG':
+					try:
+						from PIL import PngImagePlugin
+					except ImportError:
+						import PngImagePlugin
 				im.save(fn,fmt)
 			elif fmt in ('JPG','JPEG'):
 				im.save(fn,'JPEG')
