@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.81 2002/10/19 09:58:47 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.82 2002/11/27 17:26:46 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.81 2002/10/19 09:58:47 rgbecker Exp $ '''
+__version__=''' $Id: shapes.py,v 1.82 2002/11/27 17:26:46 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -1042,6 +1042,9 @@ class String(Shape):
         self.fontSize = STATE_DEFAULTS['fontSize']
         self.fillColor = STATE_DEFAULTS['fillColor']
         self.setProperties(kw)
+
+    def getEast(self):
+        return self.x + stringWidth(self.text,self.fontName,self.fontSize)
 
     def copy(self):
         new = String(self.x, self.y, self.text)
