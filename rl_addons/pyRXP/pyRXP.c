@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.13 2003/03/08 14:29:21 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.14 2003/03/08 16:35:50 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.13 2003/03/08 14:29:21 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.14 2003/03/08 16:35:50 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -439,6 +439,17 @@ void PyErr_FromStderr(Parser p, char *msg){
 	PyErr_SetString(moduleError,buf);
 }
 
+
+int	checkFirstProperNode(ParserDetails *pd,PyObject *t)
+{
+	PyObject* n=PDGetItem(t,0);
+	if(!n){
+		PyErr_Clear();
+		return 0;
+		}
+	return n!=piTagName && n!=commentTagName;
+}
+
 /*return non zero for error*/
 PyObject *ProcessSource(Parser p, InputSource source)
 {
@@ -476,8 +487,7 @@ PyObject *ProcessSource(Parser p, InputSource source)
 			int n = PyList_Size(l0);
 			for(i=0;i<n;i++){
 				retVal = PyList_GetItem(l0,i);
-				if(PyTuple_Check(retVal)) break;
-				if(PyList_Check(retVal)) break;
+				if(checkFirstProperNode(pd,retVal)) break;
 				}
 			if(i==n) retVal = Py_None;
 			Py_INCREF(retVal);
