@@ -297,6 +297,8 @@ class Table(Flowable):
             if H is not None: H.append(vh)
             w = max(w,vw)
             t = t + vh + v.getSpaceBefore()+v.getSpaceAfter()
+        else:
+            return w, t
         return w, t - V[0].getSpaceBefore()-V[-1].getSpaceAfter()
 
     def _calc_width(self,availWidth,W=None):
@@ -1073,7 +1075,7 @@ class Table(Flowable):
                 y = rowpos+cellstyle.bottomPadding + h
             else:
                 y = rowpos+(rowheight+cellstyle.bottomPadding-cellstyle.topPadding+h)/2.0
-            y = y+cellval[0].getSpaceBefore()
+            if cellval: y += cellval[0].getSpaceBefore()
             for v, w, h in map(None,cellval,W,H):
                 if just=='LEFT': x = colpos+cellstyle.leftPadding
                 elif just=='RIGHT': x = colpos+colwidth-cellstyle.rightPadding - w
@@ -1081,10 +1083,10 @@ class Table(Flowable):
                     x = colpos+(colwidth+cellstyle.leftPadding-cellstyle.rightPadding-w)/2.0
                 else:
                     raise ValueError, 'Invalid justification %s' % just
-                y = y - v.getSpaceBefore()
-                y = y - h
+                y -= v.getSpaceBefore()
+                y -= h
                 v.drawOn(self.canv,x,y)
-                y = y - v.getSpaceAfter()
+                y -= v.getSpaceAfter()
         else:
             if just == 'LEFT':
                 draw = self.canv.drawString
@@ -1118,7 +1120,7 @@ class Table(Flowable):
 
             for v in vals:
                 draw(x, y, v)
-                y = y-leading
+                y -= leading
 
 # for text,
 #   drawCentredString(self, x, y, text) where x is center
