@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "0.98"
+#define VERSION "0.99"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -28,7 +28,7 @@ Interface summary:\n\
 \n\
 	import _render\n\
 	gstate(width,height[,depth=3,bg=0xffffff])		#create an initialised graphics state\n\
-	makeT1Font(fontName,pfbPath,names)				#make a T1 font\n\
+	makeT1Font(fontName,pfbPath,names[,reader])		#make a T1 font\n\
 	delCache()										#delete all font info\n\
 	pil2pict(cols,rows,datastr,palette) return PICT version of im as a string\n"
 #ifdef	RENDERPM_FT
@@ -1510,15 +1510,43 @@ static	gstateObject* gstate(PyObject* module, PyObject* args, PyObject* keywds)
 	return self;
 }
 
-static	PyObject*	makeT1Font(PyObject* self, PyObject* args)
+static	char* my_pfb_reader(void *data, const char *filename, int *psize)
+{
+	char		*pfb = NULL;
+	PyObject	*reader = (PyObject*)data;
+	PyObject	*arglist;
+	PyObject	*result;
+	arglist = Py_BuildValue("(s)",filename);
+	result = PyEval_CallObject(reader, arglist);
+	Py_DECREF(arglist);
+	if(result){
+		if(PyString_Check(result)){
+			char	*pystr = PyString_AS_STRING(result);
+			int		size = PyString_GET_SIZE(result);
+			*psize = size;
+			memcpy(pfb=PyMem_Malloc(size),pystr,size);
+			}
+		Py_DECREF(result);
+		}
+	return pfb;
+}
+
+static	PyObject*	makeT1Font(PyObject* self, PyObject *args, PyObject *kw)
 {
 	char	*name, *pfbPath, **names;
 	size_t	N, i;
 	int		ok;
-	PyObject*	L;
+	PyObject	*L, *reader=NULL;
 	char	*s, *_notdef = ".notdef";
-
-	if(!PyArg_ParseTuple(args,"ssO:makeT1Font", &name, &pfbPath, &L)) return NULL;
+	static char *kwlist[] = {"name", "pfbPath", "encoding", "reader", NULL};
+	if(!PyArg_ParseTupleAndKeywords(args,kw,"ssO|O:makeT1Font", kwlist, &name, &pfbPath, &L, &reader)) return NULL;
+	if(reader){
+		if(reader==Py_None) reader=NULL;
+		else if(!PyCallable_Check(reader)){
+			PyErr_SetString(PyExc_ValueError, "makeT1Font reader should be callable, None or absent");
+			return NULL;
+			}
+		}
 	if(!PySequence_Check(L)){
 		PyErr_SetString(moduleError, "names should be a sequence object returning strings");
 		return NULL;
@@ -1542,7 +1570,14 @@ static	PyObject*	makeT1Font(PyObject* self, PyObject* args)
 		Py_DECREF(v);
 		}
 	if((ok=(i==N))){
-		if(!gt1_create_encoded_font(name,pfbPath,names,N)){
+		gt1_encapsulated_read_func_t rfunc, *prfunc;
+		if(!reader) prfunc=NULL;
+		else{
+			prfunc=&rfunc;
+			rfunc.data = reader;
+			rfunc.reader = my_pfb_reader;
+			}
+		if(!gt1_create_encoded_font(name,pfbPath,names,N,prfunc)){
 			PyErr_SetString(moduleError, "can't make font");
 			ok = 0;
 			}
@@ -1804,7 +1839,7 @@ static PyObject* pil2pict(PyObject* self, PyObject* args)
 
 static struct PyMethodDef moduleMethods[] = {
 	{"gstate", (PyCFunction)gstate, METH_VARARGS|METH_KEYWORDS, "gstate(width,height[,depth=3][,bg=0xffffff]) create an initialised graphics state"},
-	{"makeT1Font", (PyCFunction)makeT1Font, METH_VARARGS, "makeT1Font(fontName,pfbPath,names)"},
+	{"makeT1Font", (PyCFunction)makeT1Font, METH_VARARGS|METH_KEYWORDS, "makeT1Font(fontName,pfbPath,names)"},
 	{"delCache", (PyCFunction)delCache, METH_VARARGS, "delCache()"},
 	{"pil2pict", (PyCFunction)pil2pict, METH_VARARGS, "pil2pict(cols,rows,datastr,palette) return PICT version of im as a string"},
 #ifdef	RENDERPM_FT

@@ -2978,7 +2978,7 @@ static void _gt1_del_encodedFont (Gt1EncodedFont *font)
 	gt1_free(font->name);
 }
 
-Gt1EncodedFont* gt1_create_encoded_font(char* name, char *pfbPath, char **names, int n)
+Gt1EncodedFont* gt1_create_encoded_font(char* name, char *pfbPath, char **names, int n, gt1_encapsulated_read_func_t *reader)
 {
 	int				i=0;
 	Gt1EncodedFont	*e;
@@ -2987,7 +2987,7 @@ Gt1EncodedFont* gt1_create_encoded_font(char* name, char *pfbPath, char **names,
 	Gt1NameId		_notdef;
 
 	/*find the pfb info (possibly cached)*/
-	f = gt1_load_font(pfbPath);
+	f = gt1_load_font(pfbPath,reader);
 	if(!f) return NULL;
 	if((e = gt1_get_encoded_font(name))){
 		_gt1_del_encodedFont(e);
@@ -3010,15 +3010,13 @@ Gt1EncodedFont* gt1_create_encoded_font(char* name, char *pfbPath, char **names,
 	return e;
 }
 
-Gt1LoadedFont *gt1_load_font(const char *filename)
+Gt1LoadedFont *gt1_load_font(const char *filename, gt1_encapsulated_read_func_t *reader)
 {
 	Gt1LoadedFont *font;
 	Gt1Dict *fontdict;
-	FILE *f;
 
 	char *pfb;
-	int pfb_size, pfb_size_max;
-	int bytes_read;
+	int pfb_size;
 	Gt1TokenContext *tc;
 	Gt1PSContext *psc;
 	char *flat;
@@ -3031,20 +3029,24 @@ Gt1LoadedFont *gt1_load_font(const char *filename)
 		font = font->next;
 		}
 
-	f = fopen (filename, "rb");
-	if (f == NULL) return NULL;
+	pfb = reader ? reader->reader(reader->data,filename,&pfb_size) : NULL;
+	if(!pfb){
+		int pfb_size_max, bytes_read;
+		FILE *f;
+		f = fopen(filename, "rb");
+		if(f==NULL) return NULL;
 
-	pfb_size = 0;
-	pfb_size_max = 32768;
-	pfb = gt1_new (char, pfb_size_max);
-	while (1)
-		{
-			bytes_read = fread (pfb + pfb_size, 1, pfb_size_max - pfb_size, f);
-			if (bytes_read == 0) break;
+		pfb_size = 0;
+		pfb_size_max = 32768;
+		pfb = gt1_new(char, pfb_size_max);
+		while(1){
+			bytes_read = fread(pfb + pfb_size, 1, pfb_size_max - pfb_size, f);
+			if(bytes_read == 0) break;
 			pfb_size += bytes_read;
-			gt1_double (pfb, char, pfb_size_max);
+			gt1_double(pfb, char, pfb_size_max);
+			}
+		fclose(f);
 		}
-	fclose (f);
 
 	/*
 	fwrite (pfb, 1, pfb_size, stdout);
@@ -3052,7 +3054,7 @@ Gt1LoadedFont *gt1_load_font(const char *filename)
 
 	/* this is a good place to do a "magic" computation on the input file. */
 
-	if (pfb_size)
+	if(pfb_size)
 		{
 			if (((unsigned char *)pfb)[0] == 128) flat = pfb_to_flat (pfb, pfb_size);
 			else {

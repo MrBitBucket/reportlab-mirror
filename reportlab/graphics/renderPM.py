@@ -12,7 +12,7 @@ from reportlab.graphics.shapes import *
 from reportlab.graphics.renderbase import StateTracker, getStateDelta
 from reportlab.pdfbase.pdfmetrics import getFont
 from math import sin, cos, pi, ceil
-from reportlab.lib.utils import getStringIO
+from reportlab.lib.utils import getStringIO, open_and_read
 from reportlab import rl_config
 
 class RenderPMError(Exception):
@@ -225,7 +225,7 @@ def _setFont(gs,fontName,fontSize):
         #here's where we try to add a font to the canvas
         try:
             f = getFont(fontName)
-            _renderPM.makeT1Font(fontName,f.face.findT1File(),f.encoding.vector)
+            _renderPM.makeT1Font(fontName,f.face.findT1File(),f.encoding.vector,open_and_read)
         except:
             s1, s2 = map(str,sys.exc_info()[:2])
             raise RenderPMError, "Can't setFont(%s) missing the T1 files?\nOriginally %s: %s" % (fontName,s1,s2)
