@@ -209,6 +209,26 @@ def getStyleSheet():
                                   leftIndent=36,
                                   firstLineIndent=36))
 
+    stylesheet.add(ParagraphStyle(name='FunctionHeader',
+                                  parent=stylesheet['Normal'],
+                                  fontName='Courier-Bold',
+                                  textColor=colors.navy,
+                                  fontSize=8,
+                                  leading=8.8))
+
+    stylesheet.add(ParagraphStyle(name='DocString',
+                                  parent=stylesheet['Normal'],
+                                  fontName='Courier',
+                                  fontSize=8,
+                                  leading=8.8))
+
+    stylesheet.add(ParagraphStyle(name='DocStringIndent',
+                                  parent=stylesheet['Normal'],
+                                  fontName='Courier',
+                                  fontSize=8,
+                                  leftIndent=36,
+                                  leading=8.8))
+
     stylesheet.add(ParagraphStyle(name='URL',
                                   parent=stylesheet['Normal'],
                                   fontName='Courier',

@@ -38,6 +38,7 @@ Special commands understood at present are:
 import sys
 import string
 import imp
+import codegrab
 
 #modes:
 PLAIN = 1
@@ -65,36 +66,6 @@ class Parser:
             self.readLine(line[:-1])
         self.endPara()
         return self._results
-        
-    def endPara(self):
-        #ends the current paragraph, or preformatted block
-            
-        text = string.join(self._buf, ' ')
-        if text:
-            if self._mode == PREFORMATTED:
-                #item 3 is list of lines
-                self._results.append(('Preformatted', self._style,
-                                 string.join(self._buf,'\n')))
-            else:
-                self._results.append(('Paragraph', self._style, text))
-        self._buf = []
-        self._style = 'Normal'
-
-    def beginPre(self, stylename):
-        self._mode = PREFORMATTED
-        self._style = stylename
-        
-    def endPre(self):
-        self.endPara()
-        self._mode = PLAIN
-
-    def image(self, filename):
-        self.endPara()
-        self._results.append(('Image', filename))
-
-    def vSpace(self, points):
-        """Inserts a vertical spacer"""
-        self._results.append(('VSpace', points))
         
     def readLine(self, line):    
         #this is the inner loop
@@ -131,13 +102,68 @@ class Parser:
             #we have data, add to para
             self._buf.append(line)            
 
+    def endPara(self):
+        #ends the current paragraph, or preformatted block
+            
+        text = string.join(self._buf, ' ')
+        if text:
+            if self._mode == PREFORMATTED:
+                #item 3 is list of lines
+                self._results.append(('Preformatted', self._style,
+                                 string.join(self._buf,'\n')))
+            else:
+                self._results.append(('Paragraph', self._style, text))
+        self._buf = []
+        self._style = 'Normal'
+
+    def beginPre(self, stylename):
+        self._mode = PREFORMATTED
+        self._style = stylename
+        
+    def endPre(self):
+        self.endPara()
+        self._mode = PLAIN
+
+    def image(self, filename):
+        self.endPara()
+        self._results.append(('Image', filename))
+
+    def vSpace(self, points):
+        """Inserts a vertical spacer"""
+        self._results.append(('VSpace', points))
+        
+
     def custom(self, moduleName, funcName):
         """Goes and gets the Python object and adds it to the story"""
         self.endPara()
         self._results.append(('Custom',moduleName, funcName))
         
-        
+    def getModuleDoc(self, modulename, pathname=None):
+        """Documents the entire module at this point by making
+        paragraphs and preformatted objects"""
+        docco = codegrab.getObjectsDefinedIn(modulename, pathname)
+        if len(docco.functions) > 0:
+            self._results.append(('Paragraph','Heading2', 'Functions in ' + modulename))
+            for fn in docco.functions:
+                if fn.status == 'official':
+                    self._results.append(('Preformatted','FunctionHeader', fn.proto))
+                    self._results.append(('Preformatted','DocString', fn.doc))
+        else:
+            self._results.append(('Paragraph','Heading2', 'No Functions Defined in ' + modulename))
 
+        if len(docco.classes) > 0:
+            self._results.append(('Paragraph','Heading2', 'Classes in ' + modulename))
+            for cls in docco.classes:
+                self._results.append(('Paragraph','Heading3', 'Class %s:' % cls.name))
+                self._results.append(('Preformatted','DocString', cls.doc))
+                for mth in cls.methods:
+                    if mth.status == 'official':
+                        self._results.append(('Preformatted','FunctionHeader', mth.proto))
+                        self._results.append(('Preformatted','DocStringIndent', mth.doc))
+                    
+        else:
+            self._results.append(('Paragraph','Heading2', 'No Classes Defined in ' + modulename))
+        
 if __name__=='__main__': #NORUNTESTS
     if len(sys.argv) <> 2:
         print 'usage: aml.py source.txt'

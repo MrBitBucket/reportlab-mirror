@@ -8,41 +8,115 @@ import imp
 import types
 import string
 import os
+import sys
 
-class Animal:
-    def yell(self):
-        print 'appropriate noise'
+class Struct:
+    pass
 
-class Dog(Animal):
-    def woof(self):
-        print 'bark'
+def getObjectsDefinedIn(modulename, directory=None):
+    """Returns two tuple of (functions, classes) defined
+    in the given module.  'directory' must be the directory
+    containing the script; modulename should not include
+    the .py suffix"""
 
-def getStuffDefinedIn(modulename, path=None):
-    """Checks each item for where it
-    is defined."""
-    found = imp.find_module(modulename, path)
+    if directory:
+        searchpath = [directory]
+    else:
+        searchpath = sys.path   # searches usual Python path
+
+    #might be a package.  If so, check the top level
+    #package is there, then recalculate the path needed
+    words = string.split(modulename, '.')
+    if len(words) > 1:
+        packagename = words[0]
+        packagefound = imp.find_module(packagename, searchpath)
+        assert packagefound, "Package %s not found" % packagename
+        (file, packagepath, description) = packagefound
+        #now the full path should be known, if it is in the
+        #package
+        
+        directory = apply(os.path.join, [packagepath] + words[1:-1])
+        modulename = words[-1]
+        searchpath = [directory]
+
+
+
+    #find and import the module.
+    found = imp.find_module(modulename, searchpath)
     assert found, "Module %s not found" % modulename
     (file, pathname, description) = found
     mod = imp.load_module(modulename, file, pathname, description)
-    useful_stuff = []
+
+    #grab the code too, minus trailing newlines
+    lines = open(pathname, 'r').readlines()
+    lines = map(string.rstrip, lines)
+    
+    result = Struct()
+    result.functions = []
+    result.classes = []
     for name in dir(mod):
         value = getattr(mod, name)
         if type(value) is types.FunctionType:
             #we're possibly interested in it
             if os.path.splitext(value.func_code.co_filename)[0] == modulename:
                 #it was defined here
-                useful_stuff.append((name, value))
+                funcObj = value
+                fn = Struct()
+                fn.name = name
+                fn.proto = getFunctionPrototype(funcObj, lines)
+                if funcObj.__doc__:
+                    fn.doc = dedent(funcObj.__doc__)
+                else:
+                    fn.doc = '(no documentation string)'
+                result.functions.append(fn)
         elif type(value) == types.ClassType:
             if value.__module__ == modulename:
-                useful_stuff.append((name, value))
+                cl = Struct()
+                cl.name = name
+                if value.__doc__:
+                    cl.doc = dedent(value.__doc__)
+                else:
+                    cl.doc = "(no documentation string)"
             
+                cl.bases = []
+                for base in value.__bases__:
+                    cl.bases.append(base.__name__)
+                
+                cl.methods = []
+                #loop over dict finding methods defined here
+                # Q - should we show all methods?
+                # loop over dict finding methods defined here
+                items = value.__dict__.items()
+                items.sort()
+                for (key2, value2) in items:
+                    if type(value2) <> types.FunctionType:
+                        continue # not a method
+                    elif os.path.splitext(value2.func_code.co_filename)[0] == modulename:
+                        continue # defined in base class
+                    else:
+                        #we want it
+                        meth = Struct()
+                        meth.name = key2
+                        meth.proto = getFunctionPrototype(value2, lines)
+                        if value2.__doc__:
+                            meth.doc = dedent(value2.__doc__)
+                        else:
+                            meth.doc = "(no documentation string)"
+                        #is it official?
+                        if key2[0:1] == '_':
+                            meth.status = 'private'
+                        elif key2[-1] in '0123456789':
+                            meth.status = 'experimental'
+                        else:
+                            meth.status = 'official'
+                        cl.methods.append(meth)            
+                result.classes.append(cl)                
+    return result
 
-    return useful_stuff
 
-
-def getFunctionPrototype(f):
-    # finds the first line of code
-    lines = open(f.func_code.co_filename, 'r').readlines()
+def getFunctionPrototype(f, lines):
+    """Pass in the function object and list of lines;
+    it extracts the header as a multiline text block."""
     firstLineNo = f.func_code.co_firstlineno - 1
     lineNo = firstLineNo
     brackets = 0
@@ -58,52 +132,70 @@ def getFunctionPrototype(f):
         else:
             lineNo = lineNo + 1
 
-    usefulLines = map(string.rstrip, lines[firstLineNo:lineNo+1])
+    usefulLines = lines[firstLineNo:lineNo+1]
     return string.join(usefulLines, '\n')
 
-def getClassMethods(module, classname):
-    cls = getattr(module, classname)
-    stuff = []
 
-    # loop over dict finding methods defined here
-    items = cls.__dict__.items()
-    items.sort()
-    for (key, value) in items:
-        if key[0:1] == '_':
-            break #private, to whatever degree
-        elif type(value) <> MethodType:
-            break # not a method
-        elif value.im_class <> cls:
-            break # defined in base class
-        else:
-            #we want it
-            proto = getFunctionPrototype(value)
-            docco = value.docco
-            stuff.append(proto, docco)            
+def dedent(comment):
+    """Attempts to dedent the lines to the edge. Looks at no.
+    of leading spaces in line 2, and removes up to that number
+    of blanks from other lines."""
+    commentLines = string.split(comment, '\n')
+    if len(commentLines) < 2:
+        cleaned = map(string.lstrip, commentLines)
+    else:
+        spc = 0
+        for char in commentLines[1]:
+            if char in string.whitespace:
+                spc = spc + 1
+            else:
+                break
+        #now check other lines
+        cleaned = []
+        for line in commentLines:
+            for i in range(min(len(line),spc)):
+                if line[0] in string.whitespace:
+                    line = line[1:]
+            cleaned.append(line)
+    return string.join(cleaned, '\n')
+                           
+    
 
-    return stuff
+def dumpDoc(modulename, directory=None):
+    """Test support.  Just prints docco on the module
+    to standard output."""
+    docco = getObjectsDefinedIn(modulename, directory)
+    print 'codegrab.py - ReportLab Documentation Utility'
+    print 'documenting', modulename + '.py'
+    print '-------------------------------------------------------'
+    print
+    if docco.functions == []:
+        print 'No functions found'
+    else:
+        print 'Functions:'
+        for f in docco.functions:
+            print f.proto
+            print '    ' + f.doc
 
+    if docco.classes == []:
+        print 'No classes found'
+    else:
+        print 'Classes:'
+        for c in docco.classes:
+            print c.name
+            print '    ' + c.doc
+            for m in c.methods:
+                print m.proto  # it is already indented in the file!
+                print '        ' + m.doc
+            print
 
 def test():
-    import codegrab
-    stuff = getStuffDefinedIn('codegrab', ['c:\\home\\utils\\yaml'])
-    for (name, value) in stuff:
-        if type(value) is types.FunctionType:
-            print 'Function:'
-            print getPrototype(value)
-            print value.__doc__
-        elif type(value) is types.ClassType:
-            print
-            print 'Class', name
-            print value.__doc__
-            methods = getClassMethods(codegrab, name)
-            for (proto, doc) in methods:
-                print
-                print proto
-                print doc
-        
-
+    dumpDoc('reportlab.platypus.paragraph')
 
 if __name__=='__main__':
+    import sys
+    print 'Path to search:'
+    for line in sys.path:
+        print '   ',line
     test()
     

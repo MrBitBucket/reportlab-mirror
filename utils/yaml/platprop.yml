@@ -466,9 +466,17 @@ class MyPageTemplate(PageTemplate):
 
 .endPre
 
-CVS Revision History
+.h1 API Reference
+.getModuleDoc reportlab.pdfgen.canvas
+
+
+.h1 Appendix A - CVS Revision History
 .beginPre Code
 $Log: platprop.yml,v $
+Revision 1.10  2000/05/24 13:06:00  andy_robinson
+CodeGrab utility now working, used to getcanvas reference
+for documentation.
+
 Revision 1.9  2000/05/22 09:49:29  andy_robinson
 More accurate history a start of document
 
