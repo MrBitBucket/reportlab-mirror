@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.10 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.10 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.11 2000/10/26 11:21:38 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.11 2000/10/26 11:21:38 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -22,10 +22,6 @@ The "text" of a document usually consists mainly of a sequence of flowables whic
 flow into a document from top to bottom (with column and page breaks controlled by
 higher level components).
 """
-
-# 200-10-13 gmcm
-#	packagizing
-#	rewrote grid stuff - now in tables.py
 import os
 import string
 from copy import deepcopy

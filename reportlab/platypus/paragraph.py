@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.25 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.25 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.26 2000/10/26 11:21:38 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.26 2000/10/26 11:21:38 rgbecker Exp $ '''
 import string
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -333,11 +333,12 @@ class Paragraph(Flowable):
 			for word in words:
 				wordWidth = stringWidth(word, fontName, fontSize)
 				space_available = maxWidth - (currentWidth + spaceWidth + wordWidth)
-				if	space_available > 0:
+				if space_available > 0 or len(cLine)==0:
 					# fit one more on this line
 					cLine.append(word)
 					currentWidth = currentWidth + spaceWidth + wordWidth
 				else:
+					if currentWidth>self.width: self.width = currentWidth
 					#end of line
 					lines.append((maxWidth - currentWidth, cLine))
 					cLine = [word]
@@ -349,7 +350,10 @@ class Paragraph(Flowable):
 						maxWidth = maxWidths[-1]  # use the last one
 
 			#deal with any leftovers on the final line
-			if cLine!=[]: lines.append((maxWidth - currentWidth, cLine))
+			if cLine!=[]:
+				if currentWidth>self.width: self.width = currentWidth
+				lines.append((maxWidth - currentWidth, cLine))
+
 			return f.clone(kind=0, lines=lines)
 		elif nFrags<=0:
 			return ParaFrag(kind=0, fontSize=style.fontSize, fontName=style.fontName,
@@ -367,7 +371,7 @@ class Paragraph(Flowable):
 				wordWidth = w[0]
 				f = w[1][0]
 				space_available = maxWidth - (currentWidth + spaceWidth + wordWidth)
-				if	space_available > 0:
+				if space_available > 0 or n==0:
 					# fit one more on this line
 					n = n + 1
 					maxSize = max(maxSize,f.fontSize)
@@ -392,6 +396,7 @@ class Paragraph(Flowable):
 						
 					currentWidth = currentWidth + spaceWidth + wordWidth
 				else:
+					if currentWidth>self.width: self.width = currentWidth
 					#end of line
 					lines.append(ParaFrag(extraSpace=(maxWidth - currentWidth),wordCount=n,
 										words=words, fontSize=maxSize))
@@ -416,6 +421,7 @@ class Paragraph(Flowable):
 
 			#deal with any leftovers on the final line
 			if words<>[]:
+				if currentWidth>self.width: self.width = currentWidth
 				lines.append(ParaFrag(extraSpace=(maxWidth - currentWidth),wordCount=n,
 									words=words, fontSize=maxSize))
 			return ParaFrag(kind=1, lines=lines)
@@ -511,8 +517,9 @@ class Paragraph(Flowable):
 				tx.XtraState.textColor=None
 				tx.XtraState.rise=0
 				tx.setLeading(style.leading)
-				f = lines[0].words[0]
-				tx._setFont(f.fontName, f.fontSize)
+				#f = lines[0].words[0]
+				#tx._setFont(f.fontName, f.fontSize)
+				tx._fontname,tx._fontsize = None, None
 				dpl( tx, offset, lines[0], noJustifyLast and nLines==1)
 
 				#now the middle of the paragraph, aligned with the left margin which is our origin.
