@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.65 2002/07/26 19:35:15 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.66 2002/07/27 10:04:39 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -9,7 +9,7 @@ vertical versions.
 
 Stacked and percentile bar charts to follow...
 """
-__version__=''' $Id: barcharts.py,v 1.65 2002/07/26 19:35:15 rgbecker Exp $ '''
+__version__=''' $Id: barcharts.py,v 1.66 2002/07/27 10:04:39 rgbecker Exp $ '''
 
 import string, copy
 from types import FunctionType, StringType
@@ -387,14 +387,16 @@ class BarChart(Widget):
 
         lenData = len(self.data)
         reversePlotOrder = self.reversePlotOrder
+        bars = self.bars
         for rowNo in range(lenData):
             if reversePlotOrder: rowNo = lenData-1 - rowNo
             row = self._barPositions[rowNo]
-            styleCount = len(self.bars)
+            styleCount = len(bars)
             styleIdx = rowNo % styleCount
-            rowStyle = self.bars[styleIdx]
+            rowStyle = bars[styleIdx]
             for colNo in range(len(row)):
                 barPos = row[colNo]
+                style = bars.has_key((styleIdx,colNo)) and bars[(styleIdx,colNo)] or rowStyle
                 (x, y, width, height) = barPos
                 if None in (width,height):
                     self._addNABarLabel(g,rowNo,colNo,x,y,width,height)
@@ -403,8 +405,8 @@ class BarChart(Widget):
                 # Draw a rectangular symbol for each data item,
                 # or a normal colored rectangle.
                 symbol = None
-                if hasattr(self.bars[styleIdx], 'symbol'):
-                    symbol = copy.deepcopy(self.bars[styleIdx].symbol)
+                if hasattr(style, 'symbol'):
+                    symbol = copy.deepcopy(style.symbol)
                 elif hasattr(self.bars, 'symbol'):
                     symbol = self.bars.symbol
 
@@ -414,11 +416,11 @@ class BarChart(Widget):
                     symbol.width = width
                     symbol.height = height
                     g.add(symbol)
-                elif abs(width)>1e-7 and abs(height)>=1e-7 and (rowStyle.fillColor is not None or rowStyle.strokeColor is not None):
+                elif abs(width)>1e-7 and abs(height)>=1e-7 and (style.fillColor is not None or style.strokeColor is not None):
                     r = Rect(x, y, width, height)
-                    r.strokeWidth = rowStyle.strokeWidth
-                    r.fillColor = rowStyle.fillColor
-                    r.strokeColor = rowStyle.strokeColor
+                    r.strokeWidth = style.strokeWidth
+                    r.fillColor = style.fillColor
+                    r.strokeColor = style.strokeColor
                     g.add(r)
 
                 self._addBarLabel(g,rowNo,colNo,x,y,width,height)

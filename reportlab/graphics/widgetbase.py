@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.32 2002/07/24 19:56:36 andy_robinson Exp $
-__version__=''' $Id: widgetbase.py,v 1.32 2002/07/24 19:56:36 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.33 2002/07/27 10:04:39 rgbecker Exp $
+__version__=''' $Id: widgetbase.py,v 1.33 2002/07/27 10:04:39 rgbecker Exp $ '''
 import string
 
 from reportlab.graphics import shapes
@@ -195,8 +195,12 @@ class TypedPropertyCollection(PropHolder):
 
             child = WKlass()
             child._parent = self
-            if type(index) in (type(()),type([])) and len(index)>1:
-                child._index = index[:-1]
+            if type(index) in (type(()),type([])):
+                index = tuple(index)
+                if len(index)>1:
+                    child._index = tuple(index[:-1])
+                else:
+                    child._index = None
             else:
                 child._index = None
             for i in filter(lambda x,K=child.__dict__.keys(): x in K,child._attrMap.keys()):
@@ -204,6 +208,10 @@ class TypedPropertyCollection(PropHolder):
 
             self._children[index] = child
             return child
+
+    def has_key(self,key):
+        if type(key) in (type(()),type([])): key = tuple(key)
+        return self._children.has_key(key)
 
     def __setitem__(self, key, value):
         msg = "This collection can only hold objects of type %s" % self._value.__class__.__name__
