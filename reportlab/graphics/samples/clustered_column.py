@@ -79,4 +79,4 @@ class ClusteredColumn(_DrawingEditorMixin,Drawing):
 		self.YLabel._text           = "Y Axis"
 
 if __name__=="__main__": #NORUNTESTS
-	ClusteredColumn().save(formats=['pdf'],outDir='.',fnRoot='clustered_column')
+	ClusteredColumn().save(formats=['pdf'],outDir=None,fnRoot='clustered_column')

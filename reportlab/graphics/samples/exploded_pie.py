@@ -61,4 +61,4 @@ class ExplodedPie(_DrawingEditorMixin,Drawing):
 		self.background.width          = 110
 
 if __name__=="__main__": #NORUNTESTS
-	ExplodedPie().save(formats=['pdf'],outDir='.',fnRoot='exploded_pie')
+	ExplodedPie().save(formats=['pdf'],outDir=None,fnRoot='exploded_pie')

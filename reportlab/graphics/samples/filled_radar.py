@@ -50,4 +50,4 @@ class FilledRadarChart(_DrawingEditorMixin,Drawing):
 		self.Legend.alignment      ='right'
 
 if __name__=="__main__": #NORUNTESTS
-	FilledRadarChart().save(formats=['pdf'],outDir='.',fnRoot='filled_radar')
+	FilledRadarChart().save(formats=['pdf'],outDir=None,fnRoot='filled_radar')

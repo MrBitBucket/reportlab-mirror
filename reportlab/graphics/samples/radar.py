@@ -62,4 +62,4 @@ class RadarChart(_DrawingEditorMixin,Drawing):
 		self.chart.strands.strokeWidth     = 1
 
 if __name__=="__main__": #NORUNTESTS
-	RadarChart().save(formats=['pdf'],outDir='.',fnRoot='radar')
+	RadarChart().save(formats=['pdf'],outDir=None,fnRoot='radar')

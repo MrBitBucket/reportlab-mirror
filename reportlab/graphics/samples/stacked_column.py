@@ -80,4 +80,4 @@ class StackedColumn(_DrawingEditorMixin,Drawing):
 		self.chart.categoryAxis.style='stacked'
 
 if __name__=="__main__": #NORUNTESTS
-	StackedColumn().save(formats=['pdf'],outDir='.',fnRoot='stacked_column')
+	StackedColumn().save(formats=['pdf'],outDir=None,fnRoot='stacked_column')

@@ -57,4 +57,4 @@ class SimplePie(_DrawingEditorMixin,Drawing):
 		self.Legend.columnMaximum  = 10
 
 if __name__=="__main__": #NORUNTESTS
-	SimplePie().save(formats=['pdf'],outDir='.',fnRoot=None)
+	SimplePie().save(formats=['pdf'],outDir=None,fnRoot=None)

@@ -81,4 +81,4 @@ class StackedBar(_DrawingEditorMixin,Drawing):
 		self.chart.categoryAxis.style='stacked'
 
 if __name__=="__main__": #NORUNTESTS
-	StackedBar().save(formats=['pdf'],outDir='.',fnRoot='stacked_bar')
+	StackedBar().save(formats=['pdf'],outDir=None,fnRoot='stacked_bar')
