@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPDF.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.5 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.6 2001/04/12 16:02:43 rgbecker Exp $
 # renderPDF - draws Drawings onto a canvas
 """Usage:
     import renderpdf
@@ -17,10 +17,10 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 
 
 # the main entry point for users...
-def draw(drawing, canvas, x, y):
+def draw(drawing, canvas, x, y, showBoundary=1):
     """As it says"""
     R = _PDFRenderer()
-    R.draw(drawing, canvas, x, y)
+    R.draw(drawing, canvas, x, y, showBoundary=showBoundary)
 
 from renderbase import Renderer, StateTracker, getStateDelta
 
@@ -35,7 +35,7 @@ class _PDFRenderer(Renderer):
         self._fill = 0
         self._tracker = StateTracker()
 
-    def draw(self, drawing, canvas, x, y):
+    def draw(self, drawing, canvas, x, y, showBoundary=1):
         """This is the top level function, which
         draws the drawing at the given location.
         The recursive part is handled by drawNode."""
@@ -44,7 +44,7 @@ class _PDFRenderer(Renderer):
         self._drawing = drawing
         try:
             #bounding box
-            canvas.rect(x, y, drawing.width, drawing.height)
+            if showBoundary: canvas.rect(x, y, drawing.width, drawing.height)
 
             #set up coords:
             canvas.saveState()
@@ -239,7 +239,7 @@ class GraphicsFlowable(Flowable):
     def draw(self):
         draw(self.drawing, self.canv, 0, 0)
 
-def drawToFile(d,fn,msg):
+def drawToFile(d,fn,msg, showBoundary=1):
     c = Canvas(fn)
     c.setFont('Times-Roman', 36)
     c.drawString(80, 750, msg)
@@ -249,7 +249,7 @@ def drawToFile(d,fn,msg):
     y = 740
     i = 1
     y = y - d.height
-    draw(d, c, 80, y)
+    draw(d, c, 80, y, showBoundary=showBoundary)
 
     c.save()
 
