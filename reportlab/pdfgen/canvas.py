@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.58 2000/12/10 14:04:31 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.58 2000/12/10 14:04:31 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.59 2000/12/18 09:03:37 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.59 2000/12/18 09:03:37 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -51,9 +51,9 @@ from reportlab.pdfgen  import pdfgeom, pathobject, textobject
 from reportlab.lib.colors import ColorType, toColor
 
 try:
-	import zlib
+    import zlib
 except ImportError:
-	zlib = None
+    zlib = None
 
 from reportlab.lib.utils import fp_str
 _SeqTypes=(TupleType,ListType)
@@ -130,7 +130,7 @@ class Canvas:
                  pagesize=(595.27,841.89),
                  bottomup = 1,
                  pageCompression=0,
-				 encoding=pdfdoc.DEFAULT_ENCODING,
+                 encoding=pdfdoc.DEFAULT_ENCODING,
                  verbosity=0):
         """Create a canvas of a given size. etc.
         Most of the attributes are private - we will use set/get methods
@@ -142,7 +142,7 @@ class Canvas:
         #this only controls whether it prints 'saved ...' - 0 disables
         self._verbosity = verbosity
 
-		
+        
         self._pagesize = pagesize
         #self._currentPageHasImages = 0
         self._pageTransition = None
@@ -998,7 +998,7 @@ class Canvas:
         img_obj = PDFImage(image, x,y, width, height)
         img_obj.drawInlineImage(self)
         return
-		# the rest is historical (to delete)
+        # the rest is historical (to delete)
 
         if type(image) == StringType:
             if os.path.splitext(image)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
