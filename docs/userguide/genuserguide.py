@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/genuserguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/genuserguide.py,v 1.36 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: genuserguide.py,v 1.36 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/docs/userguide/genuserguide.py,v 1.37 2000/10/26 11:20:04 rgbecker Exp $
+__version__=''' $Id: genuserguide.py,v 1.37 2000/10/26 11:20:04 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -383,10 +383,8 @@ def getStory():
         _story = []
     return _story
 
-        
-def run():
-    doc = RLDocTemplate('userguide.pdf',pagesize = A4)
-
+def run(pagesize):
+    doc = RLDocTemplate('userguide.pdf',pagesize = pagesize)
 
     #this builds the story    
     #resetStory()
@@ -418,4 +416,7 @@ def run():
     
     
 if __name__=="__main__":
-    run()
+	pagesize = A4
+	if 'letter' in sys.argv: pagesize = letter
+	if 'A4' in sys.argv: pagesize = A4
+	run(pagesize)
