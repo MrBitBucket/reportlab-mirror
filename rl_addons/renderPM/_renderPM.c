@@ -645,8 +645,8 @@ static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
 }
 
 static struct PyMethodDef gstate_methods[] = {
-	{"clipPathClear", (PyCFunction)gstate_clipPAthClear, METH_VARARGS, "clipPathClear()"},
-	{"clipPathSet", (PyCFunction)gstate_clipPAthSet, METH_VARARGS, "clipPathSet()"},
+	{"clipPathClear", (PyCFunction)gstate_clipPathClear, METH_VARARGS, "clipPathClear()"},
+	{"clipPathSet", (PyCFunction)gstate_clipPathSet, METH_VARARGS, "clipPathSet()"},
 	{"curveTo", (PyCFunction)gstate_curveTo, METH_VARARGS, "curveTo(x1,y1,x2,y2,x3,y3)"},
 	{"drawString", (PyCFunction)gstate_drawString, METH_VARARGS, "drawString(x,y,text)"},
 	{"lineTo", (PyCFunction)gstate_lineTo, METH_VARARGS, "lineTo(x,y)"},
