@@ -171,7 +171,7 @@ RET:if(font) Py_DECREF(font);
 static FT_Face _ft_get_face(char *fontName)
 {
 	py_FT_FontObject	*ft_face = _get_ft_face(fontName);
-	if(!ft_face){
+	if(ft_face){
 		FT_Face	face = ft_face->face;
 		Py_DECREF(ft_face);
     	return face;
@@ -635,8 +635,8 @@ static void _gstate_pathFill(gstateObject* self,int endIt, int vpReverse)
 
 			art_svp_free(svp);
 			}
-		PyMem_Free(trVpath);
-		PyMem_Free(vpath);
+		art_free(trVpath);
+		art_free(vpath);
 		}
 }
 
@@ -664,7 +664,7 @@ static PyObject* gstate_pathStroke(gstateObject* self, PyObject* args)
 		if(self->dash.dash){
 			ArtVpath*	tvpath=vpath;
 			vpath = art_vpath_dash(tvpath, &self->dash);
-			PyMem_Free(tvpath);
+			art_free(tvpath);
 			}
 		dump_vpath("stroke vpath", vpath);
 		trVpath = art_vpath_affine_transform(vpath, self->ctm);
@@ -689,7 +689,7 @@ static PyObject* gstate_pathStroke(gstateObject* self, PyObject* args)
 						 p->rowstride,
 						 NULL);
 		art_svp_free(svp);
-		PyMem_Free(vpath);
+		art_free(vpath);
 		}
 	Py_INCREF(Py_None);
 	return Py_None;
@@ -840,7 +840,7 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 
 		if(self->path){
 			_gstate_pathFill(self,0,1);
-			PyMem_Free(self->path);
+			art_free(self->path);
 			}
 		else {
 			fprintf(stderr, "No glyph outline for code %d!\n", c);
@@ -946,7 +946,7 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 		if(ft_font){
 			_ft_data.pathLen = 0;
 			c = utext[i];
-			self->path = _ft_get_glyph_outline((FT_Face)font,c,&_ft_data);
+			path = _ft_get_glyph_outline((FT_Face)font,c,&_ft_data);
 			}
 		else{
 #endif
@@ -969,7 +969,7 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 				pp++;
 				}
 			p = _get_gstatePath(pp-path,path);
-			PyMem_Free(path);
+			art_free(path);
 			}
 		else {
 			fprintf(stderr, "No glyph outline for code %d!\n", c);
@@ -1027,7 +1027,7 @@ static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
 static	void _dashFree(gstateObject* self)
 {
 	if(self->dash.dash){
-		PyMem_Free(self->dash.dash);
+		art_free(self->dash.dash);
 		self->dash.dash = NULL;
 		}
 }
@@ -1136,7 +1136,7 @@ L1:			_safeDecr(&v);
 		if(!PyArg_Parse(v,"d",&offset)) goto L0;
 		pDash = PySequence_GetItem(value,1);
 		if(!PySequence_Check(pDash) || (n_dash=PySequence_Length(pDash))<1) goto L0;
-		dash = PyMem_Malloc(sizeof(double)*n_dash);
+		dash = art_new(double,n_dash);
 		for(i=0;i<n_dash;i++){
 			_safeDecr(&v);
 			v = PySequence_GetItem(pDash,i);
@@ -1379,10 +1379,10 @@ static	void gstateFree(gstateObject* self)
 	pixBufFree(&self->pixBuf);
 	_dashFree(self);
 	if(self->path){
-		PyMem_Free(self->path);
+		art_free(self->path);
 		}
 	if(self->clipSVP){
-		PyMem_Free(self->clipSVP);
+		art_free(self->clipSVP);
 		}
 	PyMem_DEL(self);
 }
@@ -1474,7 +1474,7 @@ static	gstateObject* gstate(PyObject* module, PyObject* args, PyObject* keywds)
 
 	if((self = PyObject_NEW(gstateObject, &gstateType))){
 		self->pixBuf = pixBufAlloc(w,h,d,bg);
-		self->path = PyMem_New(ArtBpath,m);
+		self->path = art_new(ArtBpath,m);
 		if(!self->pixBuf){
 			PyErr_SetString(moduleError, "no memory");
 			gstateFree(self);
@@ -1538,7 +1538,7 @@ static	PyObject*	makeT1Font(PyObject* self, PyObject* args)
 		}
 	while(i--){
 		s = names[i];
-		if(s!=_notdef) PyMem_Free(s);
+		if(s!=_notdef) free(s);
 		}
 	PyMem_Free(names);
 	if(!ok) return NULL;
