@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.51  2000/09/04 08:06:15  rgbecker
+#	Fix spurious comment reference to layout
+#
 #	Revision 1.50  2000/09/01 12:13:26  rgbecker
 #	Improved optimisation checks
-#
+#	
 #	Revision 1.49  2000/08/31 23:34:36  rgbecker
 #	Fix transform optimisation
 #	
@@ -180,7 +183,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.50 2000/09/01 12:13:26 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.51 2000/09/04 08:06:15 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -284,8 +287,7 @@ class Canvas:
     
     from reportlab.pdfgen import canvas
     c = canvas.Canvas("hello.pdf")
-    from reportlab.platypus import layout
-    inch = layout.inch
+    from reportlab.lib.units import inch
     # move the origin up and to the left
     c.translate(inch,inch) 
     # define a large font
