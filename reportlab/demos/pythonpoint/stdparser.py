@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: stdparser.py,v $
+#	Revision 1.8  2000/06/01 15:23:06  rgbecker
+#	Platypus re-organisation
+#
 #	Revision 1.7  2000/05/16 23:52:38  andy_robinson
 #	Bug in Image tag
-#
+#	
 #	Revision 1.6  2000/05/16 23:48:00  andy_robinson
 #	Allowed intra-paragraph text; fixed various bugs
 #	
@@ -70,7 +73,6 @@ from reportlab.lib import xmllib
 import string
 import imp
 import pythonpoint
-from reportlab.platypus import layout
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 
 class PPMLParser(xmllib.XMLParser):

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: styles_modern.py,v $
+#	Revision 1.6  2000/06/01 15:23:06  rgbecker
+#	Platypus re-organisation
+#
 #	Revision 1.5  2000/05/16 23:48:01  andy_robinson
 #	Allowed intra-paragraph text; fixed various bugs
-#
+#	
 #	Revision 1.4  2000/02/17 02:06:28  rgbecker
 #	Docstring & other fixes
 #	
@@ -46,12 +49,12 @@
 #	Revision 1.1.1.1  2000/02/15 15:09:12  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: styles_modern.py,v 1.5 2000/05/16 23:48:01 andy_robinson Exp $ '''
+__version__=''' $Id: styles_modern.py,v 1.6 2000/06/01 15:23:06 rgbecker Exp $ '''
 # style_modern.py
 __doc__="""This is an example style sheet.  You can create your own, and
 have them loaded by the presentation.  A style sheet is just a
 dictionary, where they keys are style names and the values are
-layout.ParagraphStyle objects.
+ParagraphStyle objects.
 
 You must provide a function called "getParagraphStyles()" to
 return it.  In future, we can put things like LineStyles,
@@ -64,7 +67,6 @@ easily.
 A style sheet MUST define a style called 'Normal'.
 """
 
-from reportlab.platypus import layout
 from reportlab.lib import styles
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: dodyssey.py,v $
+#	Revision 1.7  2000/06/01 15:23:06  rgbecker
+#	Platypus re-organisation
+#
 #	Revision 1.6  2000/06/01 09:41:11  rgbecker
 #	test filename case fix
-#
+#	
 #	Revision 1.5  2000/05/17 22:15:58  rgbecker
 #	Renamed BasicFrame to Frame
 #	
@@ -61,13 +64,12 @@
 #	Revision 1.1  2000/04/06 08:58:09  rgbecker
 #	Paragraph formatting version of odyssey.py
 #	
-__version__=''' $Id: dodyssey.py,v 1.6 2000/06/01 09:41:11 rgbecker Exp $ '''
+__version__=''' $Id: dodyssey.py,v 1.7 2000/06/01 15:23:06 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
 import sys, copy, string, os
-from reportlab.platypus import doctemplate
-from reportlab.platypus.paragraph import Paragraph
+from reportlab.platypus import *
 from reportlab.lib.units import inch
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -88,18 +90,18 @@ def myLaterPages(canvas, doc):
 	canvas.restoreState()
 	
 def go():
-	doc = doctemplate.BaseDocTemplate('dodyssey.pdf',showBoundary=0)
+	doc = BaseDocTemplate('dodyssey.pdf',showBoundary=0)
 
 	#normal frame as for SimpleFlowDocument
-	frameT = doctemplate.Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id='normal')
+	frameT = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id='normal')
 
 	#Two Columns
-	frame1 = doctemplate.Frame(doc.leftMargin, doc.bottomMargin, doc.width/2-6, doc.height, id='col1')
-	frame2 = doctemplate.Frame(doc.leftMargin+doc.width/2+6, doc.bottomMargin, doc.width/2-6,
+	frame1 = Frame(doc.leftMargin, doc.bottomMargin, doc.width/2-6, doc.height, id='col1')
+	frame2 = Frame(doc.leftMargin+doc.width/2+6, doc.bottomMargin, doc.width/2-6,
 						doc.height, id='col2')
-	doc.addPageTemplates([doctemplate.PageTemplate(id='First',frames=frameT, onPage=myTitlePage),
-						doctemplate.PageTemplate(id='OneCol',frames=frameT, onPage=myLaterPages),
-						doctemplate.PageTemplate(id='TwoCol',frames=[frame1,frame2], onPage=myLaterPages),
+	doc.addPageTemplates([PageTemplate(id='First',frames=frameT, onPage=myTitlePage),
+						PageTemplate(id='OneCol',frames=frameT, onPage=myLaterPages),
+						PageTemplate(id='TwoCol',frames=[frame1,frame2], onPage=myLaterPages),
 						])
 	doc.build(Elements)
 
@@ -114,15 +116,15 @@ InitialStyle.leading = 20
 PreStyle = styles["Code"] 
 
 def newPage():
-	Elements.append(doctemplate.PageBreak())
+	Elements.append(PageBreak())
 
 def chapter(txt, style=ChapterStyle):
-	Elements.append(doctemplate.NextPageTemplate('OneCol'))
+	Elements.append(NextPageTemplate('OneCol'))
 	newPage()
 	Elements.append(Paragraph(txt, style))
-	Elements.append(doctemplate.Spacer(0.2*inch, 0.3*inch))
+	Elements.append(Spacer(0.2*inch, 0.3*inch))
 	if useTwoCol:
-		Elements.append(doctemplate.NextPageTemplate('TwoCol'))
+		Elements.append(NextPageTemplate('TwoCol'))
 
 def fTitle(txt,style=InitialStyle):
 	Elements.append(Paragraph(txt, style))
@@ -143,7 +145,7 @@ else:
 useTwoCol = 'notwocol' not in sys.argv 
 
 def spacer(inches):
-	Elements.append(doctemplate.Spacer(0.1*inch, inches*inch))
+	Elements.append(Spacer(0.1*inch, inches*inch))
 
 def p(txt, style=ParaStyle):
 	Elements.append(Paragraph(txt, style))
@@ -152,12 +154,12 @@ firstPre = 1
 def pre(txt, style=PreStyle):
 	global firstPre
 	if firstPre:
-		Elements.append(doctemplate.NextPageTemplate('OneCol'))
+		Elements.append(NextPageTemplate('OneCol'))
 		newPage()
 		firstPre = 0
 
 	spacer(0.1)
-	p = doctemplate.Preformatted(txt, style)
+	p = Preformatted(txt, style)
 	Elements.append(p)
 
 def parseOdyssey(fn):

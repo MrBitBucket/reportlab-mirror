@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.39  2000/06/01 15:23:06  rgbecker
+#	Platypus re-organisation
+#
 #	Revision 1.38  2000/05/26 09:44:40  rgbecker
 #	generalised colors slightly
-#
+#	
 #	Revision 1.37  2000/05/23 14:06:45  andy_robinson
 #	Preformatted objects now know how to split themselves.
 #	
@@ -144,7 +147,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.38 2000/05/26 09:44:40 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.39 2000/06/01 15:23:06 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -934,7 +937,7 @@ class Canvas:
             else:
                 raise 'Unknown color', str(aColor)
         elif type(aColor) is StringType:
-			self.setFillColor(colors.toColor(aColor))
+			self.setFillColor(toColor(aColor))
         else:
             raise 'Unknown color', str(aColor)
 

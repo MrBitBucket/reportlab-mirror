@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.21  2000/06/01 15:23:06  rgbecker
+#	Platypus re-organisation
+#
 #	Revision 1.20  2000/05/23 14:06:45  andy_robinson
 #	Preformatted objects now know how to split themselves.
-#
+#	
 #	Revision 1.19  2000/05/19 08:20:01  rgbecker
 #	Bring in line with canvas changes
 #	
@@ -96,7 +99,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.20 2000/05/23 14:06:45 andy_robinson Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.21 2000/06/01 15:23:06 rgbecker Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -144,16 +147,12 @@ import pprint
 import imp
 
 from reportlab.pdfgen import canvas
-from reportlab.platypus import layout
-from reportlab.platypus.paragraph import Paragraph
+from reportlab.platypus import Preformatted, Paragraph, Frame, Image
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib import styles
 import stdparser 
+from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
 
-
-
-
-        
 class PPPresentation:
     def __init__(self):
         self.filename = None
@@ -163,8 +162,8 @@ class PPPresentation:
         self.showOutline = 1   #should it be displayed when opening?
         
         #assume landscape        
-        self.pageWidth = layout.DEFAULT_PAGE_SIZE[1]  
-        self.pageHeight = layout.DEFAULT_PAGE_SIZE[0]  
+        self.pageWidth = DEFAULT_PAGE_SIZE[1]  
+        self.pageHeight = DEFAULT_PAGE_SIZE[0]  
 
     def save(self):
         """This writes out the PDF document"""
@@ -247,8 +246,8 @@ class PPFrame:
         self.showBoundary = 0        
 
     def drawOn(self, canv):
-        #make a layout frame
-        frame = layout.Frame( self.x,
+        #make a frame
+        frame = Frame( self.x,
                               self.y,
                               self.width,
                               self.height
@@ -284,7 +283,7 @@ class PPPreformattedText:
         self.style = None
 
     def getFlowable(self):
-        return layout.Preformatted(self.rawtext, getStyles()[self.style])
+        return Preformatted(self.rawtext, getStyles()[self.style])
 
 class PPImage:
     """Flowing image within the text"""
@@ -294,7 +293,7 @@ class PPImage:
         self.height = None
 
     def getFlowable(self):
-        return layout.Image(self.filename, self.width, self.height)
+        return Image(self.filename, self.width, self.height)
 
 
 

@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: testtables.py,v $
+#	Revision 1.9  2000/06/01 15:23:06  rgbecker
+#	Platypus re-organisation
+#
 #	Revision 1.8  2000/05/17 15:37:33  rgbecker
 #	Changes related to removal of SimpleFlowDocument
-#
+#	
 #	Revision 1.7  2000/04/26 11:07:15  andy_robinson
 #	Tables changed to use reportlab.lib.colors instead of
 #	the six hard-coded color strings there previously.
@@ -54,15 +57,14 @@
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #
-__version__=''' $Id: testtables.py,v 1.8 2000/05/17 15:37:33 rgbecker Exp $ '''
+__version__=''' $Id: testtables.py,v 1.9 2000/06/01 15:23:06 rgbecker Exp $ '''
 __doc__='Test script for reportlab.tables'
-from reportlab.platypus.doctemplate import Spacer, SimpleDocTemplate
-from reportlab.platypus import tables
+from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 
 def getTable():
-    t = tables.Table(
+    t = Table(
             (72,36,36,36,36),
             (24, 16,16,18),
             (('','North','South','East','West'),
@@ -75,7 +77,7 @@ def getTable():
 def makeStyles():
     styles = []
     for i in range(5):
-        styles.append(tables.TableStyle([('ALIGN', (1,1), (-1,-1), 'RIGHT'),
+        styles.append(TableStyle([('ALIGN', (1,1), (-1,-1), 'RIGHT'),
                                          ('ALIGN', (0,0), (-1,0), 'CENTRE') ]))
     for style in styles[1:]:
         style.add('GRID', (0,0), (-1,-1), 0.25, colors.black)
@@ -87,7 +89,7 @@ def makeStyles():
     return styles
 
 def run():
-    doc = SimpleDocTemplate('testtables.pdf', (8.5*inch, 11*inch), showBoundary=1)
+    doc = SimpleDocTemplate('testtables.pdf', pageSize=(8.5*inch, 11*inch), showBoundary=1)
     styles = makeStyles()
     lst = []
     for style in styles:

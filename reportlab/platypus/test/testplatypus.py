@@ -31,26 +31,29 @@
 #
 ###############################################################################
 #	$Log: testplatypus.py,v $
-#	Revision 1.16  2000/05/17 22:17:38  rgbecker
-#	Renamed BasicFrame to Frame
+#	Revision 1.17  2000/06/01 15:23:06  rgbecker
+#	Platypus re-organisation
 #
-#	Revision 1.15  2000/05/16 14:28:55  rgbecker
+#	Revision 1.16  2000/05/17 22:17:38	rgbecker
+#	Renamed BasicFrame to Frame
+#	
+#	Revision 1.15  2000/05/16 14:28:55	rgbecker
 #	Fixes/Changes to get testplatypus to work with new framework
 #	
-#	Revision 1.14  2000/04/26 11:07:15  andy_robinson
+#	Revision 1.14  2000/04/26 11:07:15	andy_robinson
 #	Tables changed to use reportlab.lib.colors instead of
 #	the six hard-coded color strings there previously.
 #	
-#	Revision 1.13  2000/04/14 12:42:35  rgbecker
+#	Revision 1.13  2000/04/14 12:42:35	rgbecker
 #	Minor textual and spacing adjustments
 #	
-#	Revision 1.12  2000/04/14 11:54:57  rgbecker
+#	Revision 1.12  2000/04/14 11:54:57	rgbecker
 #	Splitting layout.py
 #	
-#	Revision 1.11  2000/04/14 08:56:20  rgbecker
+#	Revision 1.11  2000/04/14 08:56:20	rgbecker
 #	Drawable ==> Flowable
 #	
-#	Revision 1.10  2000/04/13 17:10:38  rgbecker
+#	Revision 1.10  2000/04/13 17:10:38	rgbecker
 #	minor adjustments
 #	
 #	Revision 1.9  2000/04/13 14:48:41  rgbecker
@@ -77,7 +80,7 @@
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testplatypus.py,v 1.16 2000/05/17 22:17:38 rgbecker Exp $ '''
+__version__=''' $Id: testplatypus.py,v 1.17 2000/06/01 15:23:06 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -90,12 +93,14 @@ and drawn into.
 """
 import string, copy
 from reportlab.pdfgen import canvas
-from reportlab.platypus import layout, tables
-from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate, Flowable, FrameBreak
-from reportlab.platypus.paragraph import Paragraph
+from reportlab import platypus
+from reportlab.platypus import BaseDocTemplate, PageTemplate, Flowable, FrameBreak
+from reportlab.platypus import Paragraph
 from reportlab.lib.units import inch, cm
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
+from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
+PAGE_HEIGHT = DEFAULT_PAGE_SIZE[1]
 
 #################################################################
 #
@@ -111,17 +116,16 @@ def framePage(canvas,doc):
 	canvas.saveState()
 	canvas.setStrokeColorRGB(1,0,0)
 	canvas.setLineWidth(5)
-	canvas.line(66,72,66,layout.PAGE_HEIGHT-72)
+	canvas.line(66,72,66,PAGE_HEIGHT-72)
 
 	canvas.setFont('Times-Italic',12)
-	canvas.drawRightString(523, layout.PAGE_HEIGHT - 56, "Platypus User Guide and Test Script")
+	canvas.drawRightString(523, PAGE_HEIGHT - 56, "Platypus User Guide and Test Script")
 	
 	canvas.setFont('Times-Roman',12)
 	canvas.drawString(4 * inch, 0.75 * inch,
 						"Page %d" % canvas.getPageNumber())
 	canvas.restoreState()
 	
-
 def getParagraphs(textBlock):
 	"""Within the script, it is useful to whack out a page in triple
 	quotes containing separate paragraphs. This breaks one into its
@@ -317,7 +321,7 @@ def getCommentary():
 	story.append(Paragraph("""
 		A FrameBreak causes the document to call its handle_frameEnd method.""",
 			styleSheet['Definition'],
-			bulletText='FrameBreak  '  #hack - spot the extra space after
+			bulletText='FrameBreak	'  #hack - spot the extra space after
 			))
 
 	story.append(Paragraph("""
@@ -372,7 +376,7 @@ def getExamples():
 	p.debug = 1   #show me the borders
 	story.append(p)
 
-	story.append(layout.XBox(4*inch, 0.75*inch,
+	story.append(platypus.XBox(4*inch, 0.75*inch,
 			'This is a box with a fixed size'))
 
 	story.append(Paragraph("""
@@ -422,7 +426,7 @@ def getExamples():
 		return (self.width, self.height)
 	'''
 	
-	story.append(layout.Preformatted(code, styleSheet['Code'], dedent=4))
+	story.append(platypus.Preformatted(code, styleSheet['Code'], dedent=4))
 	story.append(FrameBreak())
 	#######################################################################
 	#	  Examples Page 3
@@ -439,13 +443,13 @@ def getExamples():
 				"Here is an Image.	For now, these are always centred in the frame.",
 				styleSheet['Italic']))
 
-	story.append(layout.Image('pythonpowered.gif'))
+	story.append(platypus.Image('pythonpowered.gif'))
 
 	story.append(Paragraph("""Here is a Table, which takes all kinds of formatting options...""",
 				styleSheet['Italic']))
-	story.append(layout.Spacer(0, 12))
+	story.append(platypus.Spacer(0, 12))
 	
-	g = tables.Table(
+	g = platypus.Table(
 			(72,36,36,36,36),
 			(24, 16,16,18),
 			(('','North','South','East','West'),
@@ -454,7 +458,7 @@ def getExamples():
 			 ('Total',200,400,600,800))
 			)
 
-	style = tables.TableStyle([('ALIGN', (1,1), (-1,-1), 'RIGHT'),
+	style = platypus.TableStyle([('ALIGN', (1,1), (-1,-1), 'RIGHT'),
 							   ('ALIGN', (0,0), (-1,0), 'CENTRE'),
 							   ('GRID', (0,0), (-1,-1), 0.25, colors.black),
 							   ('LINEBELOW', (0,0), (-1,0), 2, colors.black),
@@ -469,16 +473,13 @@ def getExamples():
 	return story
 
 class AndyTemplate(BaseDocTemplate):
-	def __init__(self, filename, pagesize=layout.DEFAULT_PAGE_SIZE, showBoundary=0,
-				leftMargin=inch, rightMargin=inch, topMargin=inch, bottomMargin=inch,
-				allowSplitting=0):
-		frame1 = layout.Frame(inch, 5.6*inch, 6*inch, 5.2*inch,id='F1')
-		frame2 = layout.Frame(inch, inch, 6*inch, 4.5*inch, showBoundary=1,id='F2')
-		BaseDocTemplate.__init__(self, filename, pagesize=pagesize,
-				pageTemplates=PageTemplate('normal',[frame1,frame2],framePage),
-				showBoundary=showBoundary, leftMargin=leftMargin, rightMargin=rightMargin,
-				topMargin=topMargin, bottomMargin=bottomMargin,
-				allowSplitting=allowSplitting)
+	_invalidInitArgs = ('pageTemplates',)
+	def __init__(self, filename, **kw):
+		frame1 = platypus.Frame(inch, 5.6*inch, 6*inch, 5.2*inch,id='F1')
+		frame2 = platypus.Frame(inch, inch, 6*inch, 4.5*inch, showBoundary=1,id='F2')
+		self.allowSplitting = 0
+		apply(BaseDocTemplate.__init__,(self,filename),kw)
+		self.addPageTemplates(PageTemplate('normal',[frame1,frame2],framePage))
 
 	def	fillFrame(self,flowables):
 		f = self.frame

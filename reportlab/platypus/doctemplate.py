@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.13  2000/06/01 15:23:06  rgbecker
+#	Platypus re-organisation
+#
 #	Revision 1.12  2000/05/26 10:27:37  rgbecker
 #	Fixed infinite recursion bug
-#
+#	
 #	Revision 1.11  2000/05/17 22:17:38  rgbecker
 #	Renamed BasicFrame to Frame
 #	
@@ -67,14 +70,18 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.12 2000/05/26 10:27:37 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.13 2000/06/01 15:23:06 rgbecker Exp $ '''
 __doc__="""
 More complicated Document model
 """
-from layout import *
-from layout import _doNothing
+from flowables import *
+from frames import Frame
 from types import *
 import sys
+
+def _doNothing(canvas, doc):
+	"Dummy callback for onPage"
+	pass
 
 class ActionFlowable(Flowable):
 	'''This Flowable is never drawn, it can be used for data driven controls'''
@@ -149,23 +156,41 @@ class BaseDocTemplate:
 
 	4)	The document instances can override the base handler routines.
 	"""
-	def __init__(self, filename, pagesize=DEFAULT_PAGE_SIZE, pageTemplates=[], showBoundary=0,
-				leftMargin=inch, rightMargin=inch, topMargin=inch, bottomMargin=inch,
-				allowSplitting=1):
+	_initArgs = {	'pageSize':DEFAULT_PAGE_SIZE,
+					'pageTemplates':[],
+					'showBoundary':0,
+					'leftMargin':inch,
+					'rightMargin':inch,
+					'topMargin':inch,
+					'bottomMargin':inch,
+					'allowSplitting':1,
+					'title':None,
+					'author':None,
+					'_pageBreakQuick':1}
+	_invalidInitArgs = ()
 
-		self.pageTemplates = []
-		self.addPageTemplates(pageTemplates)
+	def __init__(self, filename, **kw):
 		self.filename = filename
-		self.showBoundary = showBoundary
-		self.leftMargin =  leftMargin
-		self.bottomMargin = bottomMargin
-		self.rightMargin = pagesize[0] - rightMargin
-		self.topMargin = pagesize[1] - topMargin
-		self.width = self.rightMargin - self.leftMargin
-		self.height = self.topMargin - self.bottomMargin
-		self.pagesize = pagesize
-		self.allowSplitting = allowSplitting
-		self._pageBreakQuick = 1
+
+		for k in self._initArgs.keys():
+			if not kw.has_key(k):
+				v = self._initArgs[k]
+			else:
+				if k in self._invalidInitArgs:
+					raise ValueError, "Invalid argument %s" % k
+				v = kw[k]
+			setattr(self,k,v)
+
+		p = self.pageTemplates
+		self.pageTemplates = []
+		self.addPageTemplates(p)
+		self._calc()
+
+	def _calc(self):
+		self._rightMargin = self.pageSize[0] - self.rightMargin
+		self._topMargin = self.pageSize[1] - self.topMargin
+		self.width = self._rightMargin - self.leftMargin
+		self.height = self._topMargin - self.bottomMargin
 
 	def clean_hanging(self):
 		'handle internal postponed actions'
@@ -322,6 +347,7 @@ class BaseDocTemplate:
 	_handle_nextFrame = handle_nextFrame
 
 	def _startBuild(self):
+		self._calc()
 		self.canv = canvas.Canvas(self.filename)
 		self.handle_documentBegin()
 
@@ -412,7 +438,7 @@ if __name__ == '__main__':
 	def run():
 		objects_to_draw = []
 		from reportlab.lib.styles import ParagraphStyle
-		from paragraph import Paragraph
+		#from paragraph import Paragraph
 		from doctemplate import SimpleDocTemplate
 
 		#need a style
@@ -427,7 +453,7 @@ if __name__ == '__main__':
 			para = Paragraph(randomText(), normal)
 			objects_to_draw.append(para)
 
-		SimpleDocTemplate('doctemplate.pdf',DEFAULT_PAGE_SIZE).build(objects_to_draw,
+		SimpleDocTemplate('doctemplate.pdf').build(objects_to_draw,
 			onFirstPage=myFirstPage,onLaterPages=myLaterPages)
 
 	run()

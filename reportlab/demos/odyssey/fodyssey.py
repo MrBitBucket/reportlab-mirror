@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: fodyssey.py,v $
+#	Revision 1.12  2000/06/01 15:23:06  rgbecker
+#	Platypus re-organisation
+#
 #	Revision 1.11  2000/06/01 09:41:12  rgbecker
 #	test filename case fix
-#
+#	
 #	Revision 1.10  2000/05/17 16:29:39  rgbecker
 #	Removal of SimpleFrame
 #	
@@ -64,16 +67,16 @@
 #	Revision 1.1  2000/04/06 08:58:09  rgbecker
 #	Paragraph formatting version of odyssey.py
 #	
-__version__=''' $Id: fodyssey.py,v 1.11 2000/06/01 09:41:12 rgbecker Exp $ '''
+__version__=''' $Id: fodyssey.py,v 1.12 2000/06/01 15:23:06 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
 import sys, copy, string, os
-from reportlab.platypus.paragraph import Paragraph
-from reportlab.platypus.doctemplate import *
+from reportlab.platypus import *
 from reportlab.lib.units import inch
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
+from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
 
 styles = getSampleStyleSheet()
 
@@ -91,7 +94,7 @@ def myLaterPages(canvas, doc):
 	canvas.restoreState()
 	
 def go():
-	doc = SimpleDocTemplate('fodyssey.pdf',DEFAULT_PAGE_SIZE,showBoundary='showboundary' in sys.argv)
+	doc = SimpleDocTemplate('fodyssey.pdf',pageSize=DEFAULT_PAGE_SIZE,showBoundary='showboundary' in sys.argv)
 	doc.allowSplitting = not 'nosplitting' in sys.argv
 	doc.build(Elements,myFirstPage,myLaterPages)
 

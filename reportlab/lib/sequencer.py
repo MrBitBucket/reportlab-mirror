@@ -30,25 +30,38 @@
 # PERFORMANCE OF THIS SOFTWARE. 
 #
 ###############################################################################
-#	$Log: __init__.py,v $
-#	Revision 1.5  2000/06/01 15:23:06  rgbecker
+#	$Log: sequencer.py,v $
+#	Revision 1.1  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #
-#	Revision 1.4  2000/02/17 02:09:05  rgbecker
-#	Docstring & other fixes
-#	
-#	Revision 1.3  2000/02/15 17:55:59  rgbecker
-#	License text fixes
-#	
-#	Revision 1.2  2000/02/15 15:47:09  rgbecker
-#	Added license, __version__ and Logi comment
-#	
-__version__=''' $Id: __init__.py,v 1.5 2000/06/01 15:23:06 rgbecker Exp $ '''
-__doc__=''
-from flowables import Flowable, Image, Macro, PageBreak, Preformatted, Spacer, XBox
-from paragraph import Paragraph, cleanBlockQuotedText
-from paraparser import ParaFrag
-from tables import Table, TableStyle, CellStyle
-from frames import Frame
-from doctemplate import BaseDocTemplate, NextPageTemplate, PageTemplate, ActionFlowable, \
-						SimpleDocTemplate, FrameBreak
+__version__=''' $Id: sequencer.py,v 1.1 2000/06/01 15:23:06 rgbecker Exp $ '''
+class Sequencer:
+	"""Something to make it easy to number paragraphs, sections,
+	images and anything else. Usage:
+		>>> seq = layout.Sequencer()
+		>>> seq.next('Bullets')
+		1
+		>>> seq.next('Bullets')
+		2
+		>>> seq.next('Bullets')
+		3
+		>>> seq.reset('Bullets')
+		>>> seq.next('Bullets')
+		1
+		>>> seq.next('Figures')
+		1
+		>>>
+	I plan to add multi-level linkages, so that Head2 could be reet
+	"""
+	def __init__(self):
+		self.dict = {}
+
+	def next(self, category):
+		if self.dict.has_key(category):
+			self.dict[category] = self.dict[category] + 1
+		else:
+			self.dict[category] = 1
+		return self.dict[category]
+
+	def reset(self, category):
+		self.dict[category] = 0

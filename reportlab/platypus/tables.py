@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.11  2000/06/01 15:23:06  rgbecker
+#	Platypus re-organisation
+#
 #	Revision 1.10  2000/05/26 09:49:23  rgbecker
 #	Color fixes; thanks to J Alet
-#
+#	
 #	Revision 1.9  2000/05/16 16:15:16  rgbecker
 #	Changes related to removal of SimpleFlowDocument
 #	
@@ -59,16 +62,16 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.10 2000/05/26 09:49:23 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.11 2000/06/01 15:23:06 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
 color and weight of the lines (if any), and the font, alignment and padding of the text.
 """
-from reportlab.platypus.doctemplate import *
-from reportlab.platypus.paragraph import Paragraph
+from reportlab.platypus import *
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet
 from reportlab.lib import colors
+from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
 import operator
 
 _stringtype = type('')
@@ -492,7 +495,7 @@ LIST_STYLE = TableStyle(
      ('BACKGROUND', (0,0), (-1,0), colors.Color(0,0.7,0.7))]
     )
     """, styleSheet['Code']))
-    SimpleDocTemplate('testtables.pdf', DEFAULT_PAGE_SIZE, showBoundary=1).build(lst)
+    SimpleDocTemplate('testtables.pdf', showBoundary=1).build(lst)
 
 if __name__ == '__main__':
     test()

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: styles_horrible.py,v $
+#	Revision 1.5  2000/06/01 15:23:06  rgbecker
+#	Platypus re-organisation
+#
 #	Revision 1.4  2000/02/17 02:06:28  rgbecker
 #	Docstring & other fixes
-#
+#	
 #	Revision 1.3  2000/02/16 09:42:50  rgbecker
 #	Conversion to reportlab package
 #	
@@ -43,12 +46,12 @@
 #	Revision 1.1.1.1  2000/02/15 15:09:05  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: styles_horrible.py,v 1.4 2000/02/17 02:06:28 rgbecker Exp $ '''
+__version__=''' $Id: styles_horrible.py,v 1.5 2000/06/01 15:23:06 rgbecker Exp $ '''
 # style_modern.py
 __doc__="""This is an example style sheet.  You can create your own, and
 have them loaded by the presentation.  A style sheet is just a
 dictionary, where they keys are style names and the values are
-layout.ParagraphStyle objects.
+ParagraphStyle objects.
 
 You must provide a function called "getParagraphStyles()" to
 return it.  In future, we can put things like LineStyles,
@@ -61,13 +64,12 @@ easily.
 A style sheet MUST define a style called 'Normal'.
 """
 
-from reportlab.platypus import layout
+from reportlab.lib import styles, enums
 def getParagraphStyles():
     """Returns a dictionary of styles based on Helvetica"""
     stylesheet = {}
-    ParagraphStyle = layout.ParagraphStyle
     
-    para = ParagraphStyle('Normal', None)   #the ancestor of all
+    para = styles.ParagraphStyle('Normal', None)   #the ancestor of all
     para.fontName = 'Courier'
     para.fontSize = 24
     para.leading = 28
@@ -79,7 +81,7 @@ def getParagraphStyles():
     
     para = ParagraphStyle('BigCentered', stylesheet['Normal'])
     para.spaceBefore = 12
-    para.alignment = layout.TA_CENTER
+    para.alignment = enums.TA_CENTER
     stylesheet['BigCentered'] = para
 
     para = ParagraphStyle('Italic', stylesheet['BodyText'])
@@ -91,7 +93,7 @@ def getParagraphStyles():
     para.fontSize = 48
     para.Leading = 58
     para.spaceAfter = 36
-    para.alignment = layout.TA_CENTER
+    para.alignment = enums.TA_CENTER
     stylesheet['Title'] = para
     
     para = ParagraphStyle('Heading1', stylesheet['Normal'])
@@ -99,7 +101,7 @@ def getParagraphStyles():
     para.fontSize = 36
     para.leading = 44
     para.spaceAfter = 36
-    para.alignment = layout.TA_CENTER
+    para.alignment = enums.TA_CENTER
     stylesheet['Heading1'] = para
     
     para = ParagraphStyle('Heading2', stylesheet['Normal'])
