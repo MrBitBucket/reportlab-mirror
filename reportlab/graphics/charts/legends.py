@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.25 2003/10/27 14:26:27 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.26 2003/11/01 18:52:34 rgbecker Exp $
 """This will be a collection of legends to be used with charts.
 """
-__version__=''' $Id: legends.py,v 1.25 2003/10/27 14:26:27 johnprecedo Exp $ '''
+__version__=''' $Id: legends.py,v 1.26 2003/11/01 18:52:34 rgbecker Exp $ '''
 
 import string, copy
 
@@ -109,7 +109,7 @@ class Legend(Widget):
         columnCount = 0
         count = 0
         lowy = upperlefty
-        for None, name in colorNamePairs:
+        for unused, name in colorNamePairs:
             T = string.split(name and str(name) or '','\n')
             S = []
             # thisy+dy/2 = y+leading/2
