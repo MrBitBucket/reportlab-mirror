@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pathobject.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pathobject.py,v 1.7 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: pathobject.py,v 1.7 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/pathobject.py,v 1.8 2001/01/12 21:36:57 dinu_gherman Exp $
+__version__=''' $Id: pathobject.py,v 1.8 2001/01/12 21:36:57 dinu_gherman Exp $ '''
 __doc__=""" 
 PDFPathObject is an efficient way to draw paths on a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -11,9 +11,11 @@ Progress Reports:
 8.83, 2000-01-13, gmcm:
     created from pdfgen.py
 """
+
 import string
 import reportlab.pdfgen.pdfgeom
 from reportlab.pdfgen import pdfgeom
+
 
 class PDFPathObject:
     """Represents a graphic path.  There are certain 'modes' to PDF
@@ -24,6 +26,7 @@ class PDFPathObject:
     into the canvas with one of the relevant operators.
     
     Path objects are probably not long, so we pack onto one line"""
+
     def __init__(self):
         self._code = []
         self._code.append('n')   #newpath
@@ -31,10 +34,13 @@ class PDFPathObject:
     def getCode(self):
         "pack onto one line; used internally"
         return string.join(self._code, ' ')
+
     def moveTo(self, x, y):
         self._code.append('%0.2f %0.2f m' % (x,y))
+
     def lineTo(self, x, y):
         self._code.append('%0.2f %0.2f l' % (x,y))
+
     def curveTo(self, x1, y1, x2, y2, x3, y3):
         self._code.append('%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f c' % (x1, y1, x2, y2, x3, y3))
     
@@ -62,7 +68,6 @@ class PDFPathObject:
         for curve in pointList:
             self._code.append('%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f c' % curve[2:])
     
-
     def rect(self, x, y, width, height):
         """Adds a rectangle to the path"""
         self._code.append('%0.2f %0.2f %0.2f %0.2f re' % (x, y, width, height))
@@ -83,7 +88,6 @@ class PDFPathObject:
         width = height = 2*r
         #self.ellipse(x_cen - r, y_cen - r, x_cen + r, y_cen + r)
         self.ellipse(x1, y1, width, height)
-        
         
     def close(self):
         "draws a line back to where it started"

@@ -1,11 +1,12 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pdfimages.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.6 2000/12/20 20:54:38 andy_robinson Exp $
-__version__=''' $Id: pdfimages.py,v 1.6 2000/12/20 20:54:38 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.7 2001/01/12 21:36:57 dinu_gherman Exp $
+__version__=''' $Id: pdfimages.py,v 1.7 2001/01/12 21:36:57 dinu_gherman Exp $ '''
 __doc__="""
 Image functionality sliced out of canvas.py for generalization
 """
+
 import os
 import string
 import cStringIO
@@ -14,10 +15,12 @@ from reportlab.pdfbase import pdfutils
 from reportlab.lib.utils import fp_str
 from reportlab.lib.logger import warnOnce
 
+
 try:
     import zlib
 except ImportError:
     zlib = None
+
 
 class PDFImage:
     def __init__(self, image, x,y, width=None, height=None):

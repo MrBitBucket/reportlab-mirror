@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/sequencer.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/sequencer.py,v 1.9 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: sequencer.py,v 1.9 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/sequencer.py,v 1.10 2001/01/12 21:36:57 dinu_gherman Exp $
+__version__=''' $Id: sequencer.py,v 1.10 2001/01/12 21:36:57 dinu_gherman Exp $ '''
 """This module defines a single public class, Sequencer, which aids in
 numbering and formatting lists."""
 #
@@ -12,10 +12,12 @@ numbering and formatting lists."""
 #
 # fredrik@pythonware.com
 # http://www.pythonware.com
-#
+
 _RN_TEMPLATES = [ 0, 01, 011, 0111, 012, 02, 021, 0211, 02111, 013 ]
 _RN_LETTERS = "IVXLCDM"
+
 from string import lower
+
 
 def _format_I(value):
     if value < 0 or value > 3999:
@@ -48,6 +50,7 @@ def _format_abc(num):
 	n = (num -1) % 26
 	return chr(n+97)
 
+
 class _Counter:
 	"""Private class used by Sequencer.  Each counter
 	knows its format, and the IDs of anything it
@@ -55,6 +58,7 @@ class _Counter:
 	and increments just before you get the new value,
 	so that it is still 'Chapter 5' and not 'Chapter 6'
 	when you print 'Figure 5.1'"""
+
 	def __init__(self):
 		self._base = 0
 		self._value = self._base
@@ -113,8 +117,8 @@ class Sequencer:
 		>>> seq.next('Figures')
 		1
 		>>>
-
 	"""
+
 	def __init__(self):
 		self._counters = {}  #map key to current number
 		self._defaultCounter = None
@@ -126,7 +130,6 @@ class Sequencer:
 			'a':_format_abc
 			}
 
-
 	def _getCounter(self, counter=None):
 		"""Creates one if not present"""
 		try:
@@ -135,8 +138,6 @@ class Sequencer:
 			cnt = _Counter()
 			self._counters[counter] = cnt
 			return cnt
-
-
 
 	def this(self, counter=None):
 		"""Retrieves counter value but does not increment. For
@@ -190,7 +191,6 @@ class Sequencer:
 		c = self._getCounter(child)
 		p.chain(c)
 
-
 	def __getitem__(self, key):
 		"""Allows compact notation to support the format function.
 		s['key'] gets current value, s['key+'] increments."""
@@ -216,6 +216,7 @@ class Sequencer:
 
 """Your story builder needs to set this to"""
 _sequencer = None
+
 def getSequencer():
 	global _sequencer
 	if _sequencer is None:

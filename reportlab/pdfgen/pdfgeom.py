@@ -1,17 +1,17 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pdfgeom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pdfgeom.py,v 1.6 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: pdfgeom.py,v 1.6 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/pdfgeom.py,v 1.7 2001/01/12 21:36:57 dinu_gherman Exp $
+__version__=''' $Id: pdfgeom.py,v 1.7 2001/01/12 21:36:57 dinu_gherman Exp $ '''
 __doc__="""
 This module includes any mathematical methods needed for PIDDLE.
 It should have no dependencies beyond the Python library.
 
 So far, just Robert Kern's bezierArc.
-
 """
 
 from math import sin, cos, pi, ceil
+
 
 def bezierArc(x1,y1, x2,y2, startAng=0, extent=90):
     """bezierArc(x1,y1, x2,y2, startAng=0, extent=90) --> List of Bezier

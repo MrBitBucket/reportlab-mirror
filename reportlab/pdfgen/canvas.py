@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.59 2000/12/18 09:03:37 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.59 2000/12/18 09:03:37 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.60 2001/01/12 21:36:57 dinu_gherman Exp $
+__version__=''' $Id: canvas.py,v 1.60 2001/01/12 21:36:57 dinu_gherman Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -32,9 +32,8 @@ Progress Reports:
 0.8,1999-10-07, AR:  all changed!
 """
 ##  0.81    1999-10-13:
-##                
-##
-##
+
+
 import os
 import sys
 import string
@@ -78,6 +77,7 @@ PATH_OPS = {(0, 0, FILL_EVEN_ODD) : 'n',  #no op
             (1, 1, FILL_EVEN_ODD) : 'B*',  #Stroke and Fill
             (1, 1, FILL_NON_ZERO) : 'B',  #Stroke and Fill
             }
+
 
 class Canvas:
     """This class is the programmer's interface to the PDF file format.  Methods
@@ -124,8 +124,8 @@ class Canvas:
     c.drawString(3*inch, -3*inch, "Hello World")
     c.showPage()
     c.save()
-
     """
+    
     def __init__(self,filename,
                  pagesize=(595.27,841.89),
                  bottomup = 1,
@@ -263,12 +263,10 @@ class Canvas:
         from 3 to 5: instead you need to provide all intervening
         levels going down (4 in this case).  Note that titles can
         collide but keys cannot.
-        
         """
         #to be completed
         #self._outlines.append(title)
         self._doc.outline.addOutlineEntry(key, level, title, closed=closed)
-        
         
     def setOutlineNames0(self, *nametree):   # keep this for now (?)
         """nametree should can be a recursive tree like so
@@ -531,13 +529,11 @@ class Canvas:
             s = self._escape(s) # convert to string for safety
         self._code.append(s)
 
-
         ######################################################################
         #
         #      coordinate transformations
         #
         ######################################################################
-
 
     def transform(self, a,b,c,d,e,f):
         """adjoin a mathematical transform to the current graphics state matrix.
@@ -585,8 +581,6 @@ class Canvas:
         #
         ######################################################################
 
-
-
     def saveState(self):
         """Save the current graphics state to be restored later by restoreState.
         
@@ -625,8 +619,8 @@ class Canvas:
         #   the inner loop; it is useful for drawing big grids
         ################################################################
 
-
         #--------first the line drawing methods-----------------------
+
     def line(self, x1,y1, x2,y2):
         """draw a line segment from (x1,y1) to (x2,y2) (with color, thickness and
         other attributes determined by the current graphics state)."""     
@@ -667,8 +661,7 @@ class Canvas:
                           (fp_str(x1, y1), fp_str(x2, y2, x3, y3, x4, y4))
                           )
     def arc(self, x1,y1, x2,y2, startAng=0, extent=90):
-        """
-        Draw a partial ellipse inscribed within the rectangle x1,y1,x2,y2,
+        """Draw a partial ellipse inscribed within the rectangle x1,y1,x2,y2,
         starting at startAng degrees and covering extent degrees.   Angles
         start with 0 to the right (+x) and increase counter-clockwise.
         These should have x1<x2 and y1<y2.
@@ -689,15 +682,14 @@ class Canvas:
         self._code.append('S')
 
         #--------now the shape drawing methods-----------------------
+
     def rect(self, x, y, width, height, stroke=1, fill=0):
         "draws a rectangle with lower left corner at (x,y) and width and height as given."
         self._code.append('n %s re ' % fp_str(x, y, width, height)
-                          + PATH_OPS[stroke, fill, self._fillMode])
-        
+                          + PATH_OPS[stroke, fill, self._fillMode])        
     
     def ellipse(self, x1, y1, x2, y2, stroke=1, fill=0):
-        """
-        Draw an ellipse with foci at (x1,y1) (x2,y2).
+        """Draw an ellipse with foci at (x1,y1) (x2,y2).
         
         Uses bezierArc, which conveniently handles 360 degrees.
         Special thanks to Robert Kern."""
@@ -710,7 +702,6 @@ class Canvas:
             self._code.append('%s c' % fp_str(curve[2:]))
         #finish
         self._code.append(PATH_OPS[stroke, fill, self._fillMode])
-
         
     def wedge(self, x1,y1, x2,y2, startAng, extent, stroke=1, fill=0):
         """Like arc, but connects to the centre of the ellipse.
@@ -780,8 +771,8 @@ class Canvas:
 
         self._code.append('h')  #close off, although it should be where it started anyway
         
-    
         self._code.append(PATH_OPS[stroke, fill, self._fillMode])
+
         ##################################################
         #
         #  Text methods
@@ -792,7 +783,6 @@ class Canvas:
         # use PDFTextObject for multi-line text.
         ##################################################
 
- 
     def setFillColorCMYK(self, c, m, y, k):
          """set the fill color useing negative color values
             (cyan, magenta, yellow and darkness value).
@@ -855,6 +845,7 @@ class Canvas:
         return pdfmetrics.stringWidth(text, fontName, fontSize)
         
     # basic graphics modes
+
     def setLineWidth(self, width):
         self._lineWidth = width
         self._code.append('%s w' % fp_str(width))
@@ -916,7 +907,6 @@ class Canvas:
         else:
             raise 'Unknown color', str(aColor)
 
-  
     def setStrokeColor(self, aColor):
         """Takes a color object, allowing colors to be referred to by name"""
         if type(aColor) == ColorType:
@@ -946,9 +936,9 @@ class Canvas:
         """Sets the gray level; 0.0=black, 1.0=white"""
         self._strokeColorRGB = (gray, gray, gray)
         self._code.append('%s G' % fp_str(gray))
-
         
     # path stuff - the separate path object builds it    
+
     def beginPath(self):
         """Returns a fresh path object.  Paths are used to draw
         complex figures.  The object returned follows the protocol
@@ -986,6 +976,7 @@ class Canvas:
         #   Image routines
         #
         ######################################################
+
     def drawInlineImage(self, image, x,y, width=None,height=None):
         """Draw an Image into the specified rectangle.  If width and
         height are omitted, they are calculated from the image size.
@@ -1098,7 +1089,6 @@ class Canvas:
         self._code.append('Q')
         #self._code.append('BT')
 
-
     def setPageCompression(self, onoff=1):
         """Possible values 1 or 0 (1 for 'on' is the default).
         If on, the page data will be compressed, leading to much
@@ -1110,7 +1100,6 @@ class Canvas:
             return
         self._pageCompression = onoff
         
-
     def setPageTransition(self, effectname=None, duration=1, 
                         direction=0,dimension='H',motion='I'):
         """PDF allows page transition effects for use when giving
@@ -1133,7 +1122,7 @@ class Canvas:
             'Glitter':[direction_arg]
             }
         Have fun!
-"""
+        """
         # This builds a Python dictionary with the right arguments
         # for the Trans dictionary in the PDFPage object,
         # and stores it in the variable _pageTransition.
@@ -1159,7 +1148,6 @@ class Canvas:
         else:
             raise'PDFError','motion values allowed are I and O'
 
-
         # this says which effects require which argument types from above
         PageTransitionEffects = {
             'Split': [direction_arg, motion_arg],
@@ -1183,6 +1171,7 @@ class Canvas:
         for (key, value) in args:
             transDict[key] = value
         self._pageTransition = transDict
+
 
 if __name__ == '__main__':
     print 'For test scripts, look in reportlab/test'

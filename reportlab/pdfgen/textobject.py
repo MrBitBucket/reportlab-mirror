@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/textobject.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/textobject.py,v 1.21 2000/12/13 16:17:37 rgbecker Exp $
-__version__=''' $Id: textobject.py,v 1.21 2000/12/13 16:17:37 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/textobject.py,v 1.22 2001/01/12 21:36:57 dinu_gherman Exp $
+__version__=''' $Id: textobject.py,v 1.22 2001/01/12 21:36:57 dinu_gherman Exp $ '''
 __doc__=""" 
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -11,6 +11,7 @@ Progress Reports:
 8.83, 2000-01-13, gmcm:
     created from pdfgen.py
 """
+
 import string
 from types import *
 from reportlab.lib import colors
@@ -18,6 +19,7 @@ from reportlab.lib.colors import ColorType
 from reportlab.lib.utils import fp_str
 
 _SeqTypes=(TupleType,ListType)
+
 
 class PDFTextObject:
     """PDF logically separates text and graphics drawing; text
@@ -29,6 +31,7 @@ class PDFTextObject:
     not multi-threaded!
     
     It keeps track of x and y coordinates relative to its origin."""
+
     def __init__(self, canvas, x=0,y=0):
         self._code = ['BT']    #no point in [] then append RGB
         self._canvas = canvas  #canvas sets this so it has access to size info
