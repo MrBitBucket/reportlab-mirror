@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/customshapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/pythonpoint/customshapes.py,v 1.1 2001/08/17 15:15:35 dinu_gherman Exp $
-__version__=''' $Id: customshapes.py,v 1.1 2001/08/17 15:15:35 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/tools/pythonpoint/customshapes.py,v 1.2 2001/08/29 12:42:37 dinu_gherman Exp $
+__version__=''' $Id: customshapes.py,v 1.2 2001/08/29 12:42:37 dinu_gherman Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -55,7 +55,7 @@ class Jigsaw:
         canvas.saveState()
         
         canvas.setFont('Helvetica-Bold',24)        
-        canvas.drawString(100,700,'A Custom Shape')
+        canvas.drawString(600, 100, 'A Custom Shape')
 
         canvas.translate(self.x, self.y)
         canvas.scale(self.scale, self.scale)
