@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.8  2000/04/06 12:57:38  rgbecker
+#	Print user
+#
 #	Revision 1.7  2000/04/06 12:54:29  rgbecker
 #	Removed rtag again.
-#
+#	
 #	Revision 1.6  2000/04/06 12:50:11  rgbecker
 #	Fixed user and rtag
 #	
@@ -53,7 +56,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.7 2000/04/06 12:54:29 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.8 2000/04/06 12:57:38 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -114,7 +117,7 @@ def cvs_checkout(d):
 		os.exit(1)
 
 	if release:
-		print release
+		print release, USER
 		os.environ['CVSROOT']=':ext:%s@cvs1:/cvsroot/reportlab' % USER
 		#do_exec(cvs+(' rtag %s' % release), 'the tag phase')
 		do_exec(cvs+(' co -r %s reportlab'%release), 'the download phase')
