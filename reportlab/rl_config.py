@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.27 2001/10/05 01:00:34 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.28 2001/11/01 20:53:27 johnprecedo Exp $
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =				1
@@ -16,20 +16,21 @@ _verbose =					0
 showBoundary =				0						# turns on and off boundary behaviour in Drawing
 
 # places to look for T1Font information
-T1SearchPath =	('c:/Program Files/Adobe/Acrobat 4.0/Resource/Font', #Win32
-				'c:/Program Files/Adobe/Acrobat 5.0/Resource/Font', #Win32, Acrobat 5
-				'%(disk)s/Applications/Python %(sys_version)s/reportlab/fonts', #Mac?
-				'/usr/lib/Acrobat4/Resource/Font', #Linux
-				'/usr/lib/Acrobat5/Resource/Font', #Linux, Acrobat 5?
-				'%(REPORTLAB_DIR)s/fonts' #special
-				)
+T1SearchPath =	('c:/Program Files/Adobe/Acrobat 5.0/Resource/Font', #Win32, Acrobat 5
+				 'c:/Program Files/Adobe/Acrobat 4.0/Resource/Font', #Win32, Acrobat 4
+				 '%(disk)s/Applications/Python %(sys_version)s/reportlab/fonts', #Mac?
+				 '/usr/lib/Acrobat5/Resource/Font', #Linux, Acrobat 5?
+				 '/usr/lib/Acrobat4/Resource/Font', #Linux, Acrobat 4
+				 '%(REPORTLAB_DIR)s/fonts' #special
+				 )
 
 # places to look for CMap files - should ideally merge with above
-CMapSearchPath = ('/usr/local/Acrobat4/Resource/CMap',
-				'C:\\Program Files\\Adobe\\Acrobat\\Resource\\CMap',
-				'C:\\Program Files\\Adobe\\Acrobat 5.0\\Resource\\CMap',
-				'C:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\CMap'
-				)
+CMapSearchPath = ('/usr/local/Acrobat5/Resource/CMap',
+				  '/usr/local/Acrobat4/Resource/CMap',
+				  'C:\\Program Files\\Adobe\\Acrobat\\Resource\\CMap',
+				  'C:\\Program Files\\Adobe\\Acrobat 5.0\\Resource\\CMap',
+				  'C:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\CMap'
+				  )
 
 #### Normally don't need to edit below here ####
 import os, sys, string
