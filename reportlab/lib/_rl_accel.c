@@ -2,12 +2,12 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.33 2003/04/22 12:30:19 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.34 2003/05/16 09:39:20 johnprecedo Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.33 2003/04/22 12:30:19 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.34 2003/05/16 09:39:20 johnprecedo Exp $ "
 #endif
-#include <Python.h>
+#include "Python.h"
 #include <stdlib.h>
 #include <math.h>
 #if defined(__GNUC__) || defined(sun) || defined(_AIX) || defined(__hpux)
@@ -396,9 +396,9 @@ PyObject *_a85_decode(PyObject *self, PyObject *args)
 	PyObject		*retVal;
 
 	if (!PyArg_ParseTuple(args, "z#", &inData, &length)) return NULL;
-	for(k=0,q=inData, p=q+length;q<p && (q=strchr(q,'z'));k++, q++);	/*count 'z'*/
+	for(k=0,q=inData, p=q+length;q<p && (q=(unsigned char*)strchr((const char*)q,'z'));k++, q++);	/*count 'z'*/
 	length += k*4;
-	tmp = q = (char*)malloc(length+1);
+	tmp = q = (unsigned char*)malloc(length+1);
 	while(inData<p && (k = *inData++)){
 		if(isspace(k)) continue;
 		if(k=='z'){
@@ -423,7 +423,7 @@ PyObject *_a85_decode(PyObject *self, PyObject *args)
 	blocks = length / 5;
 	extra = length % 5;
 
-	buf = (char*)malloc((blocks+1)*4);
+	buf = (unsigned char*)malloc((blocks+1)*4);
 	q = inData+blocks*5;
 	for(k=0;inData<q;inData+=5){
 		c1 = inData[0]-33;
@@ -454,7 +454,7 @@ PyObject *_a85_decode(PyObject *self, PyObject *args)
 				}
 			}
 		}
-	retVal = PyString_FromStringAndSize(buf, k);
+	retVal = PyString_FromStringAndSize((const char*)buf, k);
 	free(buf);
 	free(tmp);
 	return retVal;
