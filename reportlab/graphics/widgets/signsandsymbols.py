@@ -55,8 +55,8 @@ class ETriangle0(Widget):
     def demo(self):
         D = shapes.Drawing(200, 100)
         et = ETriangle0()
-        et.x=20
-        et.y=20
+        et.x=50
+        et.y=0
         et.draw()
         D.add(et)
         labelFontSize = 10
@@ -108,8 +108,8 @@ class RTriangle0(Widget):
     def demo(self):
         D = shapes.Drawing(200, 100)
         et = ETriangle0()
-        et.x=20
-        et.y=20
+        et.x=50
+        et.y=0
         et.draw()
         D.add(et)
         labelFontSize = 10
@@ -161,8 +161,8 @@ class Octagon0(Widget):
     def demo(self):
         D = shapes.Drawing(200, 100)
         o = Octagon0()
-        o.x=20
-        o.y=20
+        o.x=50
+        o.y=0
         o.draw()
         D.add(o)
         labelFontSize = 10
@@ -223,8 +223,8 @@ class Crossbox0(Widget):
         D = shapes.Drawing(200, 200)
         labelFontSize = 10
         cb = Crossbox0()
-        cb.x=20
-        cb.y=20
+        cb.x=50
+        cb.y=0
         cb.draw()
         D.add(cb)
         D.add(shapes.String(cb.x+(cb.size/2),(cb.y-(1.2*labelFontSize)),
@@ -287,8 +287,8 @@ class Tickbox0(Widget):
     def demo(self):
         D = shapes.Drawing(200, 100)
         tb = Tickbox0()
-        tb.x=20
-        tb.y=20
+        tb.x=50
+        tb.y=0
         tb.draw()
         D.add(tb)
         labelFontSize = 10
@@ -341,8 +341,8 @@ class SmileyFace0(Widget):
     def demo(self):
         D = shapes.Drawing(200, 100)
         sf = SmileyFace0()
-        sf.x=20
-        sf.y=20
+        sf.x=50
+        sf.y=0
         sf.draw()
         D.add(sf)
         labelFontSize = 10
@@ -430,8 +430,8 @@ class StopSign0(Widget):
     def demo(self):
         D = shapes.Drawing(200, 100)
         ss = StopSign0()
-        ss.x=20
-        ss.y=20
+        ss.x=50
+        ss.y=0
         ss.draw()
         D.add(ss)
         labelFontSize = 10
@@ -504,8 +504,8 @@ class NoEntry0(Widget):
     def demo(self):
         D = shapes.Drawing(200, 100)
         ne = NoEntry0()
-        ne.x=20
-        ne.y=20
+        ne.x=50
+        ne.y=0
         ne.draw()
         D.add(ne)
         labelFontSize = 10
@@ -566,8 +566,8 @@ class NotAllowed0(Widget):
     def demo(self):
         D = shapes.Drawing(200, 100)
         na = NotAllowed0()
-        na.x=20
-        na.y=20
+        na.x=50
+        na.y=0
         na.draw()
         D.add(na)
         labelFontSize = 10
@@ -645,8 +645,8 @@ class NoSmoking0(NotAllowed0):
     def demo(self):
         D = shapes.Drawing(200, 100)
         na = NoSmoking0()
-        na.x=20
-        na.y=20
+        na.x=50
+        na.y=0
         na.draw()
         D.add(na)
         labelFontSize = 10
@@ -731,8 +731,8 @@ class DangerSign0(Widget):
     def demo(self):
         D = shapes.Drawing(200, 100)
         ds = DangerSign0()
-        ds.x=20
-        ds.y=20
+        ds.x=50
+        ds.y=0
         ds.draw()
         D.add(ds)
         labelFontSize = 10
@@ -839,8 +839,8 @@ class YesNo0(Widget):
     def demo(self):
         D = shapes.Drawing(200, 100)
         yn = YesNo0()
-        yn.x = 20
-        yn.y = 20
+        yn.x = 50
+        yn.y = 0
         yn.testValue = 1
         yn.draw()
         D.add(yn)
@@ -874,8 +874,8 @@ class FloppyDisk0(Widget):
     def demo(self):
         D = shapes.Drawing(200, 100)
         fd = FloppyDisk0()
-        fd.x=20
-        fd.y=20
+        fd.x=50
+        fd.y=0
         fd.draw()
         D.add(fd)
         labelFontSize = 10
@@ -966,8 +966,8 @@ class ArrowOne0(Widget):
     def demo(self):
         D = shapes.Drawing(200, 100)
         a1 = ArrowOne0()
-        a1.x=20
-        a1.y=20
+        a1.x=50
+        a1.y=0
         a1.draw()
         D.add(a1)
         labelFontSize = 10
@@ -1024,8 +1024,8 @@ class ArrowTwo0(Widget):
     def demo(self):
         D = shapes.Drawing(200, 100)
         a2 = ArrowOne0()
-        a2.x=20
-        a2.y=20
+        a2.x=50
+        a2.y=0
         a2.draw()
         D.add(a2)
         labelFontSize = 10
