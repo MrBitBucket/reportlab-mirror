@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/textobject.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/textobject.py,v 1.25 2002/07/24 19:56:38 andy_robinson Exp $
-__version__=''' $Id: textobject.py,v 1.25 2002/07/24 19:56:38 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/textobject.py,v 1.26 2002/07/30 12:06:46 mgedmin Exp $
+__version__=''' $Id: textobject.py,v 1.26 2002/07/30 12:06:46 mgedmin Exp $ '''
 __doc__="""
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -247,7 +247,7 @@ class PDFTextObject:
         if self._dynamicFont:
             results = []
             font = pdfmetrics.getFont(self._fontname)
-            for subset, chunk in font.splitString(text):
+            for subset, chunk in font.splitString(text, self._canvas._doc):
                 if subset != self._curSubset:
                     pdffontname = font.getSubsetInternalName(subset, self._canvas._doc)
                     results.append("%s %s Tf %s TL" % (pdffontname, fp_str(self._fontsize), fp_str(self._leading)))

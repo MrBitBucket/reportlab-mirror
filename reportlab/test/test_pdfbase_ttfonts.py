@@ -242,26 +242,27 @@ class TTFontTestCase(unittest.TestCase):
 
     def testSplitString(self):
         "Tests TTFont.splitString"
+        doc = PDFDocument()
         font = TTFont("TestFont", "luxiserif.ttf")
         text = string.join(map(utf8, range(0, 512)), "")
         allchars = string.join(map(chr, range(0, 256)), "")
         chunks = [(0, allchars), (1, allchars)]
-        self.assertEquals(font.splitString(text), chunks)
+        self.assertEquals(font.splitString(text, doc), chunks)
         # Do it twice
-        self.assertEquals(font.splitString(text), chunks)
+        self.assertEquals(font.splitString(text, doc), chunks)
 
         text = string.join(map(utf8, range(511, -1, -1)), "")
         allchars = string.join(map(chr, range(255, -1, -1)), "")
         chunks = [(1, allchars), (0, allchars)]
-        self.assertEquals(font.splitString(text), chunks)
+        self.assertEquals(font.splitString(text, doc), chunks)
 
     def testSubsetInternalName(self):
         "Tests TTFont.getSubsetInternalName"
+        doc = PDFDocument()
         font = TTFont("TestFont", "luxiserif.ttf")
         # Actually generate some subsets
         text = string.join(map(utf8, range(0, 513)), "")
-        font.splitString(text)
-        doc = PDFDocument()
+        font.splitString(text, doc)
         self.assertRaises(IndexError, font.getSubsetInternalName, -1, doc)
         self.assertRaises(IndexError, font.getSubsetInternalName, 3, doc)
         self.assertEquals(font.getSubsetInternalName(0, doc), "/F1+0")
@@ -275,25 +276,37 @@ class TTFontTestCase(unittest.TestCase):
         doc = PDFDocument()
         font.addObjects(doc)
 
-    def testAddObjectsResets(self):
+    def no_longer_testAddObjectsResets(self):
         "Test that TTFont.addObjects resets the font"
         # Actually generate some subsets
+        doc = PDFDocument()
         font = TTFont("TestFont", "luxiserif.ttf")
-        font.splitString('a')                 # create some subset
+        font.splitString('a', doc)            # create some subset
         doc = PDFDocument()
         font.addObjects(doc)
         self.assertEquals(font.frozen, 0)
         self.assertEquals(font.nextCode, 0)
         self.assertEquals(font.subsets, [])
         self.assertEquals(font.assignments, {})
-        font.splitString('ba')                # should work
+        font.splitString('ba', doc)           # should work
+
+    def testParallelConstruction(self):
+        "Test that TTFont can be used for different documents at the same time"
+        doc1 = PDFDocument()
+        doc2 = PDFDocument()
+        font = TTFont("TestFont", "luxiserif.ttf")
+        self.assertEquals(font.splitString('ab', doc1), [(0, '\0\1')])
+        self.assertEquals(font.splitString('b', doc2), [(0, '\0')])
+        font.addObjects(doc1)
+        self.assertEquals(font.splitString('c', doc2), [(0, '\1')])
+        font.addObjects(doc2)
 
     def testAddObjects(self):
         "Test TTFont.addObjects"
         # Actually generate some subsets
-        font = TTFont("TestFont", "luxiserif.ttf")
-        font.splitString('a')                 # create some subset
         doc = PDFDocument()
+        font = TTFont("TestFont", "luxiserif.ttf")
+        font.splitString('a', doc)            # create some subset
         internalName = font.getSubsetInternalName(0, doc)[1:]
         font.addObjects(doc)
         pdfFont = doc.idToObject[internalName]

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.4 2002/07/24 19:56:37 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.5 2002/07/30 12:06:45 mgedmin Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -27,10 +27,12 @@ may lack a this attribute, you should use constructs like
 
 Dynamic fonts have the following additional functions:
 
-    def splitString(self, text):
+    def splitString(self, text, doc):
         '''Splits text into a number of chunks, each of which belongs to a
         single subset.  Returns a list of tuples (subset, string).  Use
-        subset numbers with getSubsetInternalName.'''
+        subset numbers with getSubsetInternalName.  Doc is used to identify
+        a document so that different documents may have different dynamically
+        constructed subsets.'''
 
     def getSubsetInternalName(self, subset, doc):
         '''Returns the name of a PDF Font object corresponding to a given
@@ -46,7 +48,7 @@ is simple:
 
 If you have a dynamic font, use this instead:
 
-   for subset, chunk in font.splitString(text):
+   for subset, chunk in font.splitString(text, doc):
        '%s 14 Tf (%s) Tj' % (font.getSubsetInternalName(subset, doc), chunk)
 
 (Tf is a font setting operator and Tj is a text ouput operator.  You should
@@ -56,7 +58,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.4 2002/07/24 19:56:37 andy_robinson Exp $'
+__version__ = '$Id: ttfonts.py,v 1.5 2002/07/30 12:06:45 mgedmin Exp $'
 
 import string
 from types import StringType
@@ -899,6 +901,14 @@ class TTFont:
         canvas.drawString(x, y, "Some text encoded in UTF-8")
     """
 
+    class State:
+        def __init__(self):
+            self.assignments = {}
+            self.nextCode = 0
+            self.subsets = []
+            self.internalName = None
+            self.frozen = 0
+
     def __init__(self, name, filename):
         """Loads a TrueType font from filename."""
         self.fontName = name
@@ -906,11 +916,7 @@ class TTFont:
         self.encoding = TTEncoding()
         self._multiByte = 1     # We want our own stringwidth
         self._dynamicFont = 1   # We want dynamic subsetting
-        self.assignments = {}
-        self.nextCode = 0
-        self.subsets = []
-        self.internalName = None
-        self.frozen = 0
+        self.state = {}
 
     def stringWidth(self, text, size):
         "Calculate text width"
@@ -920,25 +926,28 @@ class TTFont:
             w = w + width(code)
         return 0.001 * w * size
 
-    def splitString(self, text):
+    def splitString(self, text, doc):
         """Splits text into a number of chunks, each of which belongs to a
-        single subset.  Returns a list of tuples (subset, string).  Use
-        subset numbers with getSubsetInternalName."""
+        single subset.  Returns a list of tuples (subset, string).  Use subset
+        numbers with getSubsetInternalName.  Doc is needed for distinguishing
+        subsets when building different documents at the same time."""
+        try: state = self.state[doc]
+        except KeyError: state = self.state[doc] = TTFont.State()
         curSet = -1
         cur = []
         results = []
         for code in parse_utf8(text):
-            if self.assignments.has_key(code):
-                n = self.assignments[code]
+            if state.assignments.has_key(code):
+                n = state.assignments[code]
             else:
-                if self.frozen:
+                if state.frozen:
                     raise pdfdoc.PDFError, "Font %s is already frozen, cannot add new character U+%04X" % (self.fontName, code)
-                n = self.nextCode
-                self.nextCode = self.nextCode + 1
-                self.assignments[code] = n
+                n = state.nextCode
+                state.nextCode = state.nextCode + 1
+                state.assignments[code] = n
                 if (n & 0xFF) == 0:
-                    self.subsets.append([])
-                self.subsets[n >> 8].append(code)
+                    state.subsets.append([])
+                state.subsets[n >> 8].append(code)
             if (n >> 8) != curSet:
                 if cur:
                     results.append((curSet, string.join(map(chr, cur), "")))
@@ -953,13 +962,15 @@ class TTFont:
         """Returns the name of a PDF Font object corresponding to a given
         subset of this dynamic font.  Use this function instead of
         PDFDocument.getInternalFontName."""
-        if subset < 0 or subset >= len(self.subsets):
+        try: state = self.state[doc]
+        except KeyError: state = self.state[doc] = TTFont.State()
+        if subset < 0 or subset >= len(state.subsets):
             raise IndexError, 'Subset %d does not exist in font %s' % (subset, self.fontName)
-        if self.internalName is None:
-            self.internalName = 'F%d' % (len(doc.fontMapping) + 1)
-            doc.fontMapping[self.fontName] = '/' + self.internalName
+        if state.internalName is None:
+            state.internalName = 'F%d' % (len(doc.fontMapping) + 1)
+            doc.fontMapping[self.fontName] = '/' + state.internalName
             doc.delayedFonts.append(self)
-        return '/%s+%d' % (self.internalName, subset)
+        return '/%s+%d' % (state.internalName, subset)
 
     def addObjects(self, doc):
         """Makes  one or more PDF objects to be added to the document.  The
@@ -969,9 +980,11 @@ class TTFont:
         This method creates a number of Font and FontDescriptor objects.  Every
         FontDescriptor is a (no more than) 256 character subset of the original
         TrueType font."""
-        self.frozen = 1
-        for n in range(len(self.subsets)):
-            subset = self.subsets[n]
+        try: state = self.state[doc]
+        except KeyError: state = self.state[doc] = TTFont.State()
+        state.frozen = 1
+        for n in range(len(state.subsets)):
+            subset = state.subsets[n]
             internalName = self.getSubsetInternalName(n, doc)[1:]
             baseFontName = "SUBSET+%s+%d" % (self.face.name, n)
 
@@ -998,13 +1011,4 @@ class TTFont:
             ref = doc.Reference(pdfFont, internalName)
             fontDict = doc.idToObject['BasicFonts'].dict
             fontDict[internalName] = pdfFont
-        self.reset()
-
-    def reset(self):
-        """Resets the state of the font object so that it can be reused for
-        a different document."""
-        self.assignments = {}
-        self.nextCode = 0
-        self.subsets = []
-        self.internalName = None
-        self.frozen = 0
+        del self.state[doc]
