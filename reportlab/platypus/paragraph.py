@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.2  2000/04/19 13:14:06  rgbecker
+#	Fixed repeated breaklines bug
+#
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
-#
-__version__=''' $Id: paragraph.py,v 1.1 2000/04/14 13:21:52 rgbecker Exp $ '''
+#	
+__version__=''' $Id: paragraph.py,v 1.2 2000/04/19 13:14:06 rgbecker Exp $ '''
 import string
 import types
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -139,7 +142,8 @@ def _getFragWords(frags):
 	n = 0
 	for f in frags:
 		text = f.text
-		del f.text
+		#del f.text	# we can't do this until we sort out splitting
+					# of paragraphs
 		if text!='':
 			S = string.split(text,' ')
 			if W!=[] and text[0] in [' ','\t']:
