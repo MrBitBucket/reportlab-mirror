@@ -109,7 +109,7 @@ def getParagraphStyles():
     para.fontSize = 16
     para.leading = 18
     para.leftIndent = 36
-    stylesheet['Code'] = para
+    stylesheet['PythonCode'] = para
 
     para = ParagraphStyle('Small', stylesheet['Normal'])
     para.fontSize = 12
