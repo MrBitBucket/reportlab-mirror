@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.12 2001/04/06 10:02:44 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.12 2001/04/06 10:02:44 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.13 2001/04/06 12:17:47 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.13 2001/04/06 12:17:47 rgbecker Exp $ '''
 
 import string, os
 from types import *
@@ -68,9 +68,3 @@ def _className(self):
 		return name
 	except AttributeError:
 		return str(self)
-
-def _updater(D,X):
-	'''copy and update a dictionary'''
-	D=D.copy()
-	D.update(X)
-	return D
