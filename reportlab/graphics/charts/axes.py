@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.43 2001/10/03 13:36:54 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.44 2001/10/04 13:24:57 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -403,7 +403,7 @@ class YCategoryAxis(CategoryAxis):
 				return axis._x
 			elif mode == 'high':
 				return axis._x + axis._length
-		return self._y
+		return self._x
 
 	def makeTickLabels(self):
 		g = Group()

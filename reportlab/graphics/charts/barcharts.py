@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.48 2001/10/03 19:01:55 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.49 2001/10/04 13:24:57 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -21,7 +21,7 @@ from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropH
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing, NotImplementedError
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.axes import YCategoryAxis, XValueAxis
-from reportlab.graphics.charts.textlabels import BarChartLabel
+from reportlab.graphics.charts.textlabels import BarChartLabel, NA_Label, NoneOrInstanceOfNA_Label
 from reportlab.graphics.widgets.grids import ShadedRect
 
 class BarChartProperties(PropHolder):
@@ -62,6 +62,7 @@ class BarChart(Widget):
 		barLabels = AttrMapValue(None, desc='Handle to the list of bar labels.'),
 		barLabelFormat = AttrMapValue(None, desc='Formatting string or function used for bar labels.'),
 		reversePlotOrder = AttrMapValue(isBoolean, desc='If true, reverse common category plot order.'),
+		naLabel = AttrMapValue(NoneOrInstanceOfNA_Label, desc='Label to use for N/A values.'),
 		)
 
 	def __init__(self):
@@ -123,6 +124,7 @@ class BarChart(Widget):
 		self.bars[0].fillColor = colors.red
 		self.bars[1].fillColor = colors.green
 		self.bars[2].fillColor = colors.blue
+		self.naLabel = NA_Label()
 
 	def makeBackground(self):
 		g = Group()
@@ -152,19 +154,24 @@ class BarChart(Widget):
 			data = _data + [data]
 		self._configureData = data
 
+	def _getMinMax(self):
+		'''Attempt to return the data range'''
+		self._getConfigureData()
+		self.valueAxis._setRange(self._configureData)
+		return self.valueAxis._valueMin, self.valueAxis._valueMax
 
 	def _drawBegin(self,org,length):
 		'''Position and configure value axis, return crossing value'''
-		self.valueAxis.setPosition(self.x, self.y, length)
+		vA = self.valueAxis
+		vA.setPosition(self.x, self.y, length)
 		self._getConfigureData()
-		self.valueAxis.configure(self._configureData)
+		vA.configure(self._configureData)
 
-		# if zero is in chart, put x axis there, otherwise use bottom.
-		crossesAt = self.valueAxis.scale(0)
+		# if zero is in chart, put the other axis there, otherwise use low
+		crossesAt = vA.scale(0)
 		if crossesAt > org+length or crossesAt<org:
 			crossesAt = org
 		return crossesAt
-
 
 	def _drawFinish(self):
 		'''finalize the drawing of a barchart'''
@@ -259,7 +266,7 @@ class BarChart(Widget):
 
 				if datum is None:
 					height = None
-					y = None
+					y = baseLine
 				else:
 					if style!='parallel':
 						y = vScale(accum[colNo])
@@ -269,6 +276,9 @@ class BarChart(Widget):
 					else:
 						y = baseLine
 					height = vScale(datum) - y
+					if -1e-8<height<=1e-8:
+						height = 1e-8
+						if datum<-1e-8: height = -1e-8
 				barRow.append(flipXY and (y,x,height,width) or (x, y, width, height))
 
 			self._barPositions.append(barRow)
@@ -295,61 +305,68 @@ class BarChart(Widget):
 		else:
 			return x + 0.5*width, y + height + (height>=0 and 1 or -1) * label.nudge
 
-	def _addLabel(self, g, rowNo, colNo, x, y, width, height):
-		labelText = self._getLabelText(rowNo,colNo)
-		# We currently overwrite the boxAnchor with 'c' and display
-		# it at a constant offset to the bar's top/bottom determined
-		# by the barLabels.nudge attribute.
-		if labelText:
-			label = self.barLabels[(rowNo, colNo)]
-			if label.visible:
-				labelWidth = stringWidth(labelText, label.fontName, label.fontSize)
-				x0, y0 = self._labelXY(label,x,y,width,height)
-				flipXY = self._flipXY
-				if flipXY:
-					pm = width
-				else:
-					pm = height
-				label._pmv = pm	#the plus minus val
-				fixedEnd = getattr(label,'fixedEnd', None)
-				if fixedEnd is not None:
-					v = fixedEnd._getValue(self,pm)
-					x00, y00 = x0, y0
-					if flipXY:
-						x0 = v
-					else:
-						y0 = v
-				else:
-					if flipXY:
-						x00 = x0
-						y00 = y+height/2.0
-					else:
-						x00 = x+width/2.0
-						y00 = y0
-				fixedStart = getattr(label,'fixedStart', None)
-				if fixedStart is not None:
-					v = fixedStart._getValue(self,pm)
-					if flipXY:
-						x00 = v
-					else:
-						y00 = v
+	def _addBarLabel(self, g, rowNo, colNo, x, y, width, height):
+		text = self._getLabelText(rowNo,colNo)
+		if text:
+			self._addLabel(text, self.barLabels[(rowNo, colNo)], g, rowNo, colNo, x, y, width, height)
 
-				if pm<0:
-					if flipXY:
-						dx = -2*label.dx
-						dy = 0
-					else:
-						dy = -2*label.dy
-						dx = 0
+	def _addNABarLabel(self, g, rowNo, colNo, x, y, width, height):
+		na = self.naLabel
+		if na and na.text:
+			v = self.valueAxis._valueMax<=0 and -1e-8 or 1e-8
+			if width is None: width = v
+			if height is None: height = v
+			self._addLabel(na.text, na, g, rowNo, colNo, x, y, width, height)
+
+	def _addLabel(self, text, label, g, rowNo, colNo, x, y, width, height):
+		if label.visible:
+			labelWidth = stringWidth(text, label.fontName, label.fontSize)
+			x0, y0 = self._labelXY(label,x,y,width,height)
+			flipXY = self._flipXY
+			if flipXY:
+				pm = width
+			else:
+				pm = height
+			label._pmv = pm	#the plus minus val
+			fixedEnd = getattr(label,'fixedEnd', None)
+			if fixedEnd is not None:
+				v = fixedEnd._getValue(self,pm)
+				x00, y00 = x0, y0
+				if flipXY:
+					x0 = v
 				else:
-					dy = dx = 0
-				label.setOrigin(x0+dx, y0+dy)
-				label.setText(labelText)
-				sC, sW = label.lineStrokeColor, label.lineStrokeWidth
-				if sC and sW: g.insert(0,Line(x00,y00,x0,y0, strokeColor=sC, strokeWidth=sW))
-				g.add(label)
-				alx = getattr(self,'barLabelCallOut',None)
-				if alx: alx(g,rowNo,colNo,x,y,width,height,x00,y00,x0,y0)
+					y0 = v
+			else:
+				if flipXY:
+					x00 = x0
+					y00 = y+height/2.0
+				else:
+					x00 = x+width/2.0
+					y00 = y0
+			fixedStart = getattr(label,'fixedStart', None)
+			if fixedStart is not None:
+				v = fixedStart._getValue(self,pm)
+				if flipXY:
+					x00 = v
+				else:
+					y00 = v
+
+			if pm<0:
+				if flipXY:
+					dx = -2*label.dx
+					dy = 0
+				else:
+					dy = -2*label.dy
+					dx = 0
+			else:
+				dy = dx = 0
+			label.setOrigin(x0+dx, y0+dy)
+			label.setText(text)
+			sC, sW = label.lineStrokeColor, label.lineStrokeWidth
+			if sC and sW: g.insert(0,Line(x00,y00,x0,y0, strokeColor=sC, strokeWidth=sW))
+			g.add(label)
+			alx = getattr(self,'barLabelCallOut',None)
+			if alx: alx(g,rowNo,colNo,x,y,width,height,x00,y00,x0,y0)
 
 	def makeBars(self):
 		g = Group()
@@ -364,8 +381,10 @@ class BarChart(Widget):
 			rowStyle = self.bars[styleIdx]
 			for colNo in range(len(row)):
 				barPos = row[colNo]
-				if None in barPos[2:4]: continue
 				(x, y, width, height) = barPos
+				if None in (width,height):
+					self._addNABarLabel(g,rowNo,colNo,x,y,width,height)
+					continue
 
 				# Draw a rectangular symbol for each data item,
 				# or a normal colored rectangle.
@@ -388,7 +407,7 @@ class BarChart(Widget):
 					r.strokeColor = rowStyle.strokeColor
 					g.add(r)
 
-				self._addLabel(g,rowNo,colNo,x,y,width,height)
+				self._addBarLabel(g,rowNo,colNo,x,y,width,height)
 		return g
 
 	def _desiredCategoryAxisLength(self):
@@ -407,15 +426,11 @@ class BarChart(Widget):
 		cA, vA = self.categoryAxis, self.valueAxis
 		if vA: ovAjA, vA.joinAxis = vA.joinAxis, cA
 		if cA: ocAjA, cA.joinAxis = cA.joinAxis, vA
-		try:
-			if self._flipXY:
-				cA.setPosition(self._drawBegin(self.x,self.width), self.y, self.height)
-			else:
-				cA.setPosition(self.x, self._drawBegin(self.y,self.height), self.width)
-			return self._drawFinish()
-		finally:
-			if vA: vA.joinAxis = ovAjA
-			if cA: cA.joinAxis = ocAjA
+		if self._flipXY:
+			cA.setPosition(self._drawBegin(self.x,self.width), self.y, self.height)
+		else:
+			cA.setPosition(self.x, self._drawBegin(self.y,self.height), self.width)
+		return self._drawFinish()
 
 class VerticalBarChart(BarChart):
 	"Vertical bar chart with multiple side-by-side bars."

@@ -1,12 +1,12 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.19 2001/09/28 16:58:33 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.20 2001/10/04 13:24:57 rgbecker Exp $
 import string
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, \
-		isTextAnchor, isBoxAnchor, isBoolean, NoneOr, isInstanceOf
+		isTextAnchor, isBoxAnchor, isBoolean, NoneOr, isInstanceOf, isNoneOrString
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.shapes import Drawing, Group, Circle, Rect, String, STATE_DEFAULTS
@@ -244,21 +244,18 @@ class LabelOffset(PropHolder):
 				v = _v+val
 		return v+delta
 
-NoneOrIsInstanceOfLabelOffset=NoneOr(isInstanceOf(LabelOffset))
+NoneOrInstanceOfLabelOffset=NoneOr(isInstanceOf(LabelOffset))
 
 class BarChartLabel(Label):
 	"""
 	An extended Label allowing for nudging, lines visibility etc
 	"""
-	# fairly straight port of Robin Becker's textbox.py to new widgets
-	# framework.
-
 	_attrMap = AttrMap(
 		BASE=Label,
 		lineStrokeWidth = AttrMapValue(isNumberOrNone, desc="Non-zero for a drawn line"),
 		lineStrokeColor = AttrMapValue(isColorOrNone, desc="Color for a drawn line"),
-		fixedEnd = AttrMapValue(NoneOrIsInstanceOfLabelOffset, desc="None or fixed draw ends +/-"),
-		fixedStart = AttrMapValue(NoneOrIsInstanceOfLabelOffset, desc="None or fixed draw starts +/-"),
+		fixedEnd = AttrMapValue(NoneOrInstanceOfLabelOffset, desc="None or fixed draw ends +/-"),
+		fixedStart = AttrMapValue(NoneOrInstanceOfLabelOffset, desc="None or fixed draw starts +/-"),
 		nudge = AttrMapValue(isNumber, desc="Non-zero sign dependent nudge"),
 		)
 
@@ -279,3 +276,16 @@ class BarChartLabel(Label):
 		a = self.textAnchor
 		if self._pmv<0: a = {'start':'end', 'middle':'middle', 'end':'start'}[a]
 		return a
+
+class NA_Label(BarChartLabel):
+	"""
+	An extended Label allowing for nudging, lines visibility etc
+	"""
+	_attrMap = AttrMap(
+		BASE=BarChartLabel,
+		text = AttrMapValue(isNoneOrString, desc="Text to be used for N/A values"),
+		)
+	def __init__(self):
+		BarChartLabel.__init__(self)
+		self.text = 'n/a'
+NoneOrInstanceOfNA_Label=NoneOr(isInstanceOf(NA_Label))
