@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.49 2001/09/24 15:35:31 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.50 2001/09/24 15:38:35 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -435,9 +435,9 @@ class Drawing(Group, Flowable):
 		"Saves copies of self in desired location and formats"
 		ext = ''
 		if not fnRoot:
-			fnRoot = getattr(self,'fileNamePattern',(self.__class__.__name__+'%03d')
+			fnRoot = getattr(self,'fileNamePattern',(self.__class__.__name__+'%03d'))
 			try:
-				fnRoot = % getattr(self,'chartId',0)
+				fnRoot = fnRoot % getattr(self,'chartId',0)
 			except TypeError, err:
 				if err != 'not all arguments converted': raise
 
@@ -445,9 +445,9 @@ class Drawing(Group, Flowable):
 			outDir, fnRoot = os.path.split(fnRoot)
 		else:
 			outDir = outDir or getattr(self,'outDir','.')
-		fnroot = os.path.normpath(os.path.join(outDir,fnRoot))
 		if not os.path.isabs(outDir): outDir = os.path.join(os.path.dirname(sys.argv[0]),outDir)
 		if not os.path.isdir(outDir): os.makedirs(outDir)
+		fnroot = os.path.normpath(os.path.join(outDir,fnRoot))
 
 		plotMode, verbose = formats or getattr(self,'formats',['pdf']), verbose or getattr(self,'verbose',_verbose)
 		_saved = logger.warnOnce.enabled, logger.infoOnce.enabled
