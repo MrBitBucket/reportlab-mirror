@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.52 2001/09/25 16:07:53 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.53 2001/09/26 22:02:19 andy_robinson Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -399,6 +399,8 @@ class Drawing(Group, Flowable):
 		height = AttrMapValue(isNumber,desc="Drawing height in points."),
 		canv = AttrMapValue(None),
 		background = AttrMapValue(isValidChildOrNone,desc="Background widget for the drawing"),
+		hAlign = AttrMapValue(OneOf("LEFT", "RIGHT", "CENTER", "CENTRE"), desc="Alignment within parent document"),
+		vAlign = AttrMapValue(OneOf("TOP", "BOTTOM", "CENTER", "CENTRE"), desc="Alignment within parent document")
 		)
 
 	_attrMap = AttrMap(BASE=Group)
@@ -409,6 +411,8 @@ class Drawing(Group, Flowable):
 		apply(Group.__init__,(self,)+nodes,keywords)
 		self.width = width
 		self.height = height
+		self.hAlign = 'LEFT'
+		self.vAlign = 'BOTTOM'
 
 	def draw(self):
 		"""This is used by the Platypus framework to let the document

@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.4 2001/09/06 09:36:06 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.5 2001/09/26 22:02:19 andy_robinson Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -373,7 +373,9 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         PdfDocBuilder0.endClass(self, name, doc, bases)
 
         aClass = eval('self.skeleton.moduleSpace.' + name)
-        if issubclass(aClass, Widget):
+        if hasattr(aClass, '_nodoc'):
+            pass
+        elif issubclass(aClass, Widget):
             widget = aClass()
             self.story.append(Spacer(0*cm, 0.5*cm))
             self._showWidgetDemoCode(widget)
@@ -880,7 +882,6 @@ def documentModule0(pathOrName, builder, opts={}):
     The doc file will always be saved in the current directory with
     a basename equal to that of the module, e.g. docpy.
     """
-
     cwd = os.getcwd()
 
     # Append directory to Python search path if we get one.

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.38 2001/09/25 19:22:34 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.39 2001/09/26 22:02:19 andy_robinson Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -90,7 +90,7 @@ def _findMax(V, x, default):
 # Category axes.
 class CategoryAxis(Widget):
 	"Abstract category axis, unusable in itself."
-
+	_nodoc = 1
 	_attrMap = AttrMap(
 		visible = AttrMapValue(isNumber, desc='Display entire object, if true.'),
 		visibleAxis = AttrMapValue(isNumber, desc='Display axis line, if true.'),

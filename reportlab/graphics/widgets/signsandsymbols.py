@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/signsandsymbols.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.18 2001/09/25 13:35:37 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.19 2001/09/26 22:02:19 andy_robinson Exp $
 # signsandsymbols.py
 # A collection of new widgets
 # author: John Precedo (johnp@reportlab.com)
@@ -40,6 +40,7 @@ class _Symbol(Widget):
 	possible attributes:
 	'x', 'y', 'size', 'fillColor', 'strokeColor'
 	"""
+	_nodoc = 1
 	_attrMap = AttrMap(
 		x = AttrMapValue(isNumber,desc='symbol x coordinate'),
 		y = AttrMapValue(isNumber,desc='symbol y coordinate'),
@@ -75,7 +76,7 @@ class ETriangle(_Symbol):
 	"""This draws an equilateral triangle."""
 
 	def __init__(self):
-		AbstractSymbol
+		pass #AbstractSymbol
 
 	def draw(self):
 		# general widget bits
