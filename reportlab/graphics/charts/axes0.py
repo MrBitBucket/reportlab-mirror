@@ -10,6 +10,45 @@ from reportlab.graphics.shapes import *
 from reportlab.graphics.charts.textlabel0 import Label
 
 
+def nextRoundNumber(x):
+    """Return the first 'nice round number' greater than or equal to x
+
+    Used in selecting apropriate tick mark intervals; we say we want
+    an interval which places ticks at least 10 points apart, work out
+    what that is in chart space, and ask for the nextRoundNumber().
+    Tries the series 1,2,5,10,20,50,100.., going up or down as needed."""
+    
+    #guess to nearest order of magnitude
+    if x == 0:
+        return 0
+    elif x == 1:
+        return 1
+    elif x < 0:
+        return -1.0 * nextRoundNumber(-x)
+    else:
+        from math import log10
+        lg = int(log10(x))
+        if lg == 0:
+            if x < 1:
+                base = 0.1
+            else:
+                base = 1.0
+        elif lg < 0:
+            base = 10.0 ** (lg - 1)
+        else:
+            base = 10.0 ** lg    # e.g. base(153) = 100
+        # base will always be lower than x
+
+        if base >= x:
+            return base * 1.0
+        elif (base * 2) >= x:
+            return base * 2.0
+        elif (base * 5) >= x:
+            return base * 5.0
+        else:
+            return base * 10.0
+
+
 class XCategoryAxis(Widget):
     """Comes in 'X' and 'Y' flavours.  A 'category axis' has an ordering
     but no metric.  It is divided into a number of equal-sized buckets.
@@ -83,6 +122,30 @@ class XCategoryAxis(Widget):
         self._length = length * 1.0
 
 
+    def joinToAxis(self, yAxis, mode='bottom', value=None, points=None):
+        "Join with y-axis at some mode."
+
+        # Make sure only one of the value or points parameter is passed.
+        v, p = value, points
+        if mode[:3] == 'fix':
+            assert (v == None and p != None) or (v != None and p == None)
+##        else:
+##            assert v != None or p != None
+            
+        if mode == 'bottom':        
+            self._x = yAxis._x * 1.0
+            self._y = yAxis._y * 1.0
+        elif mode == 'top':        
+            self._x = yAxis._x * 1.0
+            self._y = (yAxis._y + yAxis._length) * 1.0
+        elif mode == 'fixedValue':
+            self._x = yAxis._x * 1.0
+            self._y = yAxis.scale(value) * 1.0
+        elif mode == 'fixedPoints':
+            self._x = yAxis._x * 1.0
+            self._y = points * 1.0
+
+
     def configure(self, multiSeries):
         self._catCount = len(multiSeries[0])
         self._barWidth = self._length / self._catCount
@@ -134,43 +197,6 @@ class XCategoryAxis(Widget):
                 g.add(label)
 
         return g
-
-
-def nextRoundNumber(x):
-    """Return the first 'nice round number' greater than or equal to x
-
-    Used in selecting apropriate tick mark intervals; we say we want
-    an interval which places ticks at least 10 points apart, work out
-    what that is in chart space, and ask for the nextRoundNumber().
-    Tries the series 1,2,5,10,20,50,100.., going up or down as needed."""
-    #guess to nearest order of magnitude
-    if x == 0:
-        return 0
-    elif x == 1:
-        return 1
-    elif x < 0:
-        return -1.0 * nextRoundNumber(-x)
-    else:
-        from math import log10
-        lg = int(log10(x))
-        if lg == 0:
-            if x < 1:
-                base = 0.1
-            else:
-                base = 1.0
-        elif lg < 0:
-            base = 10.0 ** (lg - 1)
-        else:
-            base = 10.0 ** lg    # e.g. base(153) = 100
-        # base will always be lowe than x
-        if base >= x:
-            return base * 1.0
-        elif (base * 2) >= x:
-            return base * 2.0
-        elif (base * 5) >= x:
-            return base * 5.0
-        else:
-            return base * 10.0
 
 
 class YValueAxis(Widget):
@@ -388,6 +414,106 @@ def sample1():
     yAxis = YValueAxis()
     yAxis.setPosition(50, 50, 125)
     yAxis.configure(data)
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample2a():
+    "Make sample drawing with some experimental features."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 40),
+            (15, 22, 37, 42)]        
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.configure(data)
+
+    xAxis = XCategoryAxis()
+    xAxis._length = 300
+    xAxis.configure(data)
+    xAxis.joinToAxis(yAxis, mode='top') # !
+    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+    xAxis.labels.boxAnchor = 'n'
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample2b():
+    "Make sample drawing with some experimental features."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 40),
+            (15, 22, 37, 42)]        
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.configure(data)
+
+    xAxis = XCategoryAxis()
+    xAxis._length = 300
+    xAxis.configure(data)
+    xAxis.joinToAxis(yAxis, mode='bottom') # !
+    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+    xAxis.labels.boxAnchor = 'n'
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample2c():
+    "Make sample drawing with some experimental features."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 40),
+            (15, 22, 37, 42)]        
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.configure(data)
+
+    xAxis = XCategoryAxis()
+    xAxis._length = 300
+    xAxis.configure(data)
+    xAxis.joinToAxis(yAxis, mode='fixedPoints', points=100) # !
+    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+    xAxis.labels.boxAnchor = 'n'
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample2d():
+    "Make sample drawing with some experimental features."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 40),
+            (15, 22, 37, 42)]        
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.configure(data)
+
+    xAxis = XCategoryAxis()
+    xAxis._length = 300
+    xAxis.configure(data)
+    xAxis.joinToAxis(yAxis, mode='fixedValue', value=20) # !
+    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+    xAxis.labels.boxAnchor = 'n'
+
     drawing.add(xAxis)
     drawing.add(yAxis)
 
