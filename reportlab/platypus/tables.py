@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
-#	Revision 1.15  2000/07/06 14:05:55  rgbecker
-#	Adjusted doc string
+#	Revision 1.16  2000/07/07 10:23:36  rgbecker
+#	First attempt at VALIGN
 #
-#	Revision 1.14  2000/07/06 12:41:47  rgbecker
+#	Revision 1.15  2000/07/06 14:05:55	rgbecker
+#	Adjusted doc string
+#	
+#	Revision 1.14  2000/07/06 12:41:47	rgbecker
 #	First try at auto sizing
 #	
 #	Revision 1.13  2000/06/29 17:55:19	aaron_watters
@@ -74,7 +77,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.15 2000/07/06 14:05:55 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.16 2000/07/07 10:23:36 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -110,6 +113,7 @@ class CellStyle(PropertySet):
 		'color':colors.black,
 		'alignment': 'LEFT',
 		'background': (1,1,1),
+		'valign': 'BOTTOM',
 		}
 
 class TableStyle:
@@ -188,7 +192,7 @@ class Table(Flowable):
 		for h in H:
 			height = height - h
 			self._rowpositions.append(height)
-		assert height == 0
+		assert abs(height)<1e-8, 'Internal height error'
 		width = 0
 		self._colpositions = [0]		#index -1 is right side boundary; we skip when processing cells
 		for w in W:
@@ -317,7 +321,6 @@ class Table(Flowable):
 		else:
 			draw = self.canv.drawRightString
 			x = colpos + colwidth - cellstyle.rightPadding
-		y = rowpos + cellstyle.bottomPadding
 		if type(cellval) is _stringtype:
 			val = cellval
 		else:
@@ -325,10 +328,19 @@ class Table(Flowable):
 		vals = string.split(val, "\n")
 		n = len(vals)-1
 		leading = cellstyle.leading
-		y2 = y+leading*n
+		valign = cellstyle.valign
+		if valign=='BOTTOM':
+			y = rowpos + cellstyle.bottomPadding+n*leading
+		elif valign=='TOP':
+			y = rowpos + rowheight - cellstyle.topPadding - leading
+		elif valign=='MIDDLE':
+			y = rowpos + (cellstyle.bottomPadding + rowheight - cellstyle.topPadding+n*leading)/2.0
+		else:
+			raise ValueError, "Bad valign: '%s'" % str(valign)
+
 		for v in vals:
-			draw(x, y2, v)
-			y2 = y2-leading
+			draw(x, y, v)
+			y = y-leading
 		
 # for text,
 #	drawCentredString(self, x, y, text) where x is center
@@ -352,6 +364,8 @@ def _setCellStyle(cellstyles, i, j, op, values):
 		new.color = colors.toColor(values[0], colors.Color(0,0,0))
 	elif op in ('ALIGN', 'ALIGNMENT'):
 		new.alignment = values[0]
+	elif op == 'VALIGN':
+		new.valign = values[0]
 	elif op == 'LEFTPADDING':
 		new.leftPadding = values[0]
 	elif op == 'RIGHTPADDING':
@@ -391,6 +405,7 @@ LIST_STYLE = TableStyle(
 	)
 
 def test():
+	from reportlab.lib.units import inch
 	rowheights = (24, 16, 16, 16, 16)
 	rowheights2 = (24, 16, 16, 16, 30)
 	colwidths = (50, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32)
@@ -590,6 +605,27 @@ LIST_STYLE = TableStyle(
 		The top row cells are split at a newline '\\n' character. The first and August
 		column widths were also set to None.
 	""", styleSheet['BodyText']))
+	lst.append(t)
+	lst.append(Paragraph("""
+		The red numbers should be aligned LEFT &amp; BOTTOM, the blue RIGHT &amp; TOP
+		and the green CENTER &amp; MIDDLE.
+	""", styleSheet['BodyText']))
+	data=	[['00', '01', '02', '03', '04'],
+			['10', '11', '12', '13', '14'],
+			['20', '21', '22', '23', '24'],
+			['30', '31', '32', '33', '34']]
+	t=Table(5*[0.4*inch], 4*[0.4*inch], data)
+	t.setStyle(TableStyle([('ALIGN',(1,1),(-2,-2),'LEFT'),
+						('TEXTCOLOR',(1,1),(-2,-2),colors.red),
+						('VALIGN',(0,0),(1,-1),'TOP'),
+						('ALIGN',(0,0),(1,-1),'RIGHT'),
+						('TEXTCOLOR',(0,0),(1,-1),colors.blue),
+						('ALIGN',(0,-1),(-1,-1),'CENTER'),
+						('VALIGN',(0,-1),(-1,-1),'MIDDLE'),
+						('TEXTCOLOR',(0,-1),(-1,-1),colors.green),
+						('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+	 					('BOX', (0,0), (-1,-1), 0.25, colors.black),
+						]))
 	lst.append(t)
 	SimpleDocTemplate('testtables.pdf', showBoundary=1).build(lst)
 
