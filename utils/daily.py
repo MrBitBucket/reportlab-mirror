@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/daily.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/daily.py,v 1.42 2001/05/26 13:08:57 rgbecker Exp $
-__version__=''' $Id: daily.py,v 1.42 2001/05/26 13:08:57 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/utils/daily.py,v 1.43 2001/05/26 13:13:24 rgbecker Exp $
+__version__=''' $Id: daily.py,v 1.43 2001/05/26 13:13:24 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -79,7 +79,7 @@ def do_exec(cmd, cmdname=None):
 	i = i.close()
 	if i is not None:
 		if cmdname is not None:
-			print 'Error: '+ cmdname or cmd
+			print 'Error: '+ (cmdname or cmd)
 		sys.exit(1)
 
 def cvs_checkout(d):
