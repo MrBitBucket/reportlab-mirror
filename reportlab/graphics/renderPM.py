@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.5 2001/05/15 13:28:05 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.5 2001/05/15 13:28:05 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.6 2001/05/16 16:47:52 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.6 2001/05/16 16:47:52 rgbecker Exp $ '''
 """Usage:
 	from reportlab.graphics import renderPM
 	renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -14,6 +14,7 @@ from reportlab.graphics.renderbase import StateTracker, getStateDelta
 from reportlab.pdfbase.pdfmetrics import getFont
 from reportlab.lib.logger import warnOnce
 from math import sin, cos, pi, ceil
+from StringIO import StringIO
 
 class RenderPMError(Exception):
 	pass
@@ -210,7 +211,7 @@ class PMCanvas:
 			if fmt in ['GIF']:
 				im = im.convert("P", dither=Image.NONE, palette=Image.ADAPTIVE)
 				im.save(fn,fmt)
-			elif fmt in ['PNG','TIFF','BMP']:
+			elif fmt in ['PNG','TIFF','BMP', 'PPM']:
 				if fmt=='PNG': from PIL import PngImagePlugin
 				im.save(fn,fmt)
 			elif fmt in ('JPG','JPEG'):
@@ -219,7 +220,6 @@ class PMCanvas:
 				raise RenderPMError,"Unknown image kind %s" % fmt
 
 	def saveToString(self,fmt='GIF'):
-		from StringIO import StringIO
 		s = StringIO()
 		self.saveToFile(s,fmt=fmt)
 		return s.getvalue()
@@ -402,11 +402,16 @@ class PMCanvas:
 
 def drawToFile(d,fn,fmt='GIF', dpi=72, bg=0xfffffff, quality=-1):
 	'''create a pixmap and draw drawing, d to it then save as a file'''
-	w = int(d.width+1)
-	h = int(d.height+1)
+	w = int(d.width+0.5)
+	h = int(d.height+0.5)
 	c = PMCanvas(w,h, dpi=dpi, bg=bg)
 	draw(d, c, 0, 0)
 	c.saveToFile(fn,fmt)
+
+def drawToString(d,fmt='GIF', dpi=72, bg=0xfffffff, quality=-1):
+	s = StringIO()
+	drawToFile(d,s,fmt=fmt, dpi=dpi, bg=bg, quality=quality)
+	return s.getvalue()
 
 save = drawToFile
 
