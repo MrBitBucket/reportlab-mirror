@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.41 2001/09/24 17:57:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.42 2001/09/25 19:22:34 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -241,15 +241,16 @@ class BarChart(Widget):
 		vScale = vA.scale
 		vm, vM = vA.valueMin, vA.valueMax
 		if None in (vm, vM):
-			y = self._findMinMaxValues()[0]
-			if vm is not None: y = min(y,vm)
-			y = vScale(y)
-		elif vm <= 0 <= vM:
+			y = self._findMinMaxValues()
+			vm = vm or y[0]
+			vM = vM or y[1]
+		if vm <= 0 <= vM:
 			y = vScale(0)
 		elif 0 < vm:
 			y = vScale(vm)
 		elif vM < 0:
 			y = vScale(vM)
+		self._baseLine = y
 
 		data = self.data
 		lenData = len(data)
@@ -316,13 +317,18 @@ class BarChart(Widget):
 			if label.visible:
 				labelWidth = stringWidth(labelText, label.fontName, label.fontSize)
 				x0, y0 = self._labelXY(label,x,y,width,height)
+				if self._flipXY:
+					pm = width
+				else:
+					pm = height
 				fixedEnd = getattr(label,'fixedEnd', None)
 				if fixedEnd is not None:
+					v = fixedEnd._getValue(self,pm)
 					x00, y00 = x0, y0
 					if self._flipXY:
-						x0 = x+fixedEnd
+						x0 = v
 					else:
-						y0 = y+fixedEnd
+						y0 = v
 				else:
 					if self._flipXY:
 						x00 = x0
@@ -332,10 +338,11 @@ class BarChart(Widget):
 						y00 = y0
 				fixedStart = getattr(label,'fixedStart', None)
 				if fixedStart is not None:
+					v = fixedStart._getValue(self,pm)
 					if self._flipXY:
-						x00 = x+fixedStart
+						x00 = v
 					else:
-						y00 = y+fixedStart
+						y00 = v
 
 				label.setOrigin(x0, y0)
 				label.setText(labelText)

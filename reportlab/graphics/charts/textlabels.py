@@ -1,16 +1,16 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.16 2001/09/25 17:53:18 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.17 2001/09/25 19:22:34 rgbecker Exp $
 import string
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, \
-		isTextAnchor, isBoxAnchor, isBoolean, isNoneOrNumberPair
+		isTextAnchor, isBoxAnchor, isBoolean, NoneOr, isInstanceOf
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.shapes import Drawing, Group, Circle, Rect, String, STATE_DEFAULTS
-from reportlab.graphics.widgetbase import Widget
+from reportlab.graphics.widgetbase import Widget, PropHolder
 
 
 class Label(Widget):
@@ -181,6 +181,39 @@ class Label(Widget):
 
 		return g
 
+class LabelOffset(PropHolder):
+	_attrMap = AttrMap(
+				mode = AttrMapValue(OneOf('high','low','axis'),desc="Where to base the value"),
+				pos = AttrMapValue(isNumber,desc='Value for positive elements'),
+				neg = AttrMapValue(isNumber,desc='Value for negative elements'),
+				)
+	def __init__(self):
+		self.mode='axis'
+		self.pos = self.neg = 0
+
+	def _getValue(self, chart, val):
+		flipXY = chart._flipXY
+		A = chart.categoryAxis
+		jA = A.joinAxis
+		mode = self.mode
+		if flipXY:
+			v = A._x
+		else:
+			v = A._y
+		if jA:
+			if flipXY:
+				_v = jA._x
+			else:
+				_v = jA._y
+			if mode=='high':
+				v = _v + jA.length
+			elif mode=='low':
+				v = _v
+		if val>=0: return v+self.pos
+		return v+self.neg
+
+NoneOrIsInstanceOfLabelOffset=NoneOr(isInstanceOf(LabelOffset))
+
 class BarChartLabel(Label):
 	"""
 	An extended Label allowing for nudging, lines visibility etc
@@ -193,8 +226,8 @@ class BarChartLabel(Label):
 		visible = AttrMapValue(isBoolean,desc="True if the label is to be drawn"),
 		lineStrokeWidth = AttrMapValue(isNumberOrNone, desc="Non-zero for a drawn line"),
 		lineStrokeColor = AttrMapValue(isColorOrNone, desc="Color for a drawn line"),
-		fixedEnd = AttrMapValue(isNoneOrNumberPair, desc="None or fixed draw ends +/-"),
-		fixedStart = AttrMapValue(isNoneOrNumberPair, desc="None or fixed draw starts +/-"),
+		fixedEnd = AttrMapValue(NoneOrIsInstanceOfLabelOffset, desc="None or fixed draw ends +/-"),
+		fixedStart = AttrMapValue(NoneOrIsInstanceOfLabelOffset, desc="None or fixed draw starts +/-"),
 		nudge = AttrMapValue(isNumber, desc="Non-zero sign dependent nudge"),
 		)
 

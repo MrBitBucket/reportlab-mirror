@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.37 2001/09/25 16:45:09 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.38 2001/09/25 19:22:34 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -104,6 +104,7 @@ class CategoryAxis(Widget):
 		joinAxisPos = AttrMapValue(isNumberOrNone, desc='Position at which to join with other axis.'),
 		reverseDirection = AttrMapValue(isBoolean, desc='If true reverse category direction.'),
 		style = AttrMapValue(OneOf('parallel','stacked'),"How common category bars are plotted"),
+		labelAxisMode = AttrMapValue(OneOf('high','low','axis'), desc="Like joinAxisMode, but for the axis labels"),
 		)
 
 	def __init__(self):
@@ -132,6 +133,7 @@ class CategoryAxis(Widget):
 		self.joinAxis = None
 		self.joinAxisPos = None
 		self.joinAxisMode = None
+		self.labelAxisMode = 'axis'
 		self.reverseDirection = 0
 		self.style = 'parallel'
 
@@ -183,7 +185,6 @@ class XCategoryAxis(CategoryAxis):
 		# and have same line style as axis - need more
 		self.tickUp = 0  # how far into chart does tick go?
 		self.tickDown = 5  # how far below axis does tick go?
-		self.joinAxisMode = None
 
 
 	def demo(self):
@@ -210,17 +211,17 @@ class XCategoryAxis(CategoryAxis):
 		assert axisClassName[0] == 'Y', msg
 
 		if mode == 'bottom':
-			self._x = yAxis._x * 1.0
-			self._y = yAxis._y * 1.0
+			self._x = yAxis._x
+			self._y = yAxis._y
 		elif mode == 'top':
-			self._x = yAxis._x * 1.0
-			self._y = (yAxis._y + yAxis._length) * 1.0
+			self._x = yAxis._x
+			self._y = yAxis._y + yAxis._length
 		elif mode == 'value':
-			self._x = yAxis._x * 1.0
-			self._y = yAxis.scale(pos) * 1.0
+			self._x = yAxis._x
+			self._y = yAxis.scale(pos)
 		elif mode == 'points':
-			self._x = yAxis._x * 1.0
-			self._y = pos * 1.0
+			self._x = yAxis._x
+			self._y = pos
 
 
 	def scale(self, idx):
@@ -252,7 +253,6 @@ class XCategoryAxis(CategoryAxis):
 
 		return g
 
-
 	def makeTicks(self):
 		g = Group()
 
@@ -271,6 +271,15 @@ class XCategoryAxis(CategoryAxis):
 
 		return g
 
+	def _labelAxisPos(self):
+		axis = self.joinAxis
+		if axis:
+			mode = self.labelAxisMode
+			if mode == 'low':
+				return axis._y
+			elif mode == 'high':
+				return axis._y + axis._length
+		return self._y
 
 	def makeTickLabels(self):
 		g = Group()
@@ -286,8 +295,8 @@ class XCategoryAxis(CategoryAxis):
 				)
 			reverseDirection = self.reverseDirection
 			barWidth = self._barWidth
+			_y = self._labelAxisPos()
 			_x = self._x
-			_y = self._y
 
 			for i in range(catCount):
 				x = _x + (i+0.5) * barWidth
@@ -408,6 +417,15 @@ class YCategoryAxis(CategoryAxis):
 
 		return g
 
+	def _labelAxisPos(self):
+		axis = self.joinAxis
+		if axis:
+			mode = self.labelAxisMode
+			if mode == 'low':
+				return axis._x
+			elif mode == 'high':
+				return axis._x + axis._length
+		return self._y
 
 	def makeTickLabels(self):
 		g = Group()
@@ -424,7 +442,7 @@ class YCategoryAxis(CategoryAxis):
 			reverseDirection = self.reverseDirection
 			barWidth = self._barWidth
 			labels = self.labels
-			_x = self._x
+			_x = self._labelAxisPos()
 			_y = self._y
 			for i in range(catCount):
 				y = _y + (i+0.5) * barWidth
