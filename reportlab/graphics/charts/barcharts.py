@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.21 2001/06/27 11:58:59 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.22 2001/06/28 12:28:34 andy_robinson Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -56,7 +56,11 @@ class BarChartProperties(PropHolder):
         symbol = AttrMapValue(None,
             desc='A widget to be used insteaad of a normal bar.'),
         )
-
+    def __init__(self):
+        self.strokeColor = None
+        self.fillColor = colors.blue
+        self.strokeWidth = 0.5
+        self.symbol = None
 
 # Bar chart classes.
 
