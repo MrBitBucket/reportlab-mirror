@@ -31,13 +31,16 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.3  2000/05/11 14:04:34  rgbecker
+#	Removed usage of spaceBefore/After in wrap methods
+#
 #	Revision 1.2  2000/04/19 13:14:06  rgbecker
 #	Fixed repeated breaklines bug
-#
+#	
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.2 2000/04/19 13:14:06 rgbecker Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.3 2000/05/11 14:04:34 rgbecker Exp $ '''
 import string
 import types
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -253,7 +256,7 @@ class Paragraph(Flowable):
 				#..then it overruns, and we have less space available on line 1
 				maxwidths[0] = maxwidths[0] - (bulletRight - style.firstLineIndent)
 
-		self.height = style.spaceBefore + style.spaceAfter
+		self.height = 0
 		frags = self.frags
 		nFrags= len(frags)
 		if nFrags==1:
@@ -384,8 +387,6 @@ class Paragraph(Flowable):
 			canvas.rect(self.width - style.rightIndent, 0, style.rightIndent, self.height)
 			# shade above and below
 			canvas.setFillColor(Color(1.0,1.0,0.0))
-			canvas.rect(0, self.height - style.spaceBefore, self.width,  style.spaceBefore)
-			canvas.rect(0, 0, self.width, style.spaceAfter)
 			canvas.restoreState()
 			#self.drawLine(x + style.leftIndent, y, x + style.leftIndent, cur_y)
 
@@ -408,7 +409,7 @@ class Paragraph(Flowable):
 				elif self.style.alignment == TA_JUSTIFY:
 					dpl = _justifyDrawParaLine
 				f = bfrags
-				cur_y = self.height - f.fontSize - style.spaceBefore
+				cur_y = self.height - f.fontSize
 
 				if self.bulletText <> None:
 					tx2 = canvas.beginText(style.bulletIndent, cur_y)
@@ -432,7 +433,7 @@ class Paragraph(Flowable):
 					dpl( tx, 0, lines[i][0], lines[i][1], i==lim)
 			else:
 				f = lines[0]
-				cur_y = self.height - f.fontSize - style.spaceBefore
+				cur_y = self.height - f.fontSize
 				if alignment == TA_LEFT:
 					dpl = _leftDrawParaLineX
 				elif alignment == TA_CENTER:

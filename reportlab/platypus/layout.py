@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.23  2000/05/11 14:02:14  rgbecker
+#	Removed usage of spaceBefore/After in wrap methods
+#
 #	Revision 1.22  2000/05/10 13:04:35  rgbecker
 #	Added softspace handling
-#
+#	
 #	Revision 1.21  2000/05/10 09:54:40  rgbecker
 #	Flowable.split should return list
 #	
@@ -95,7 +98,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.22 2000/05/10 13:04:35 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.23 2000/05/11 14:02:14 rgbecker Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -156,25 +159,15 @@ class Flowable:
 		should split themselves and return a list of flowables"""
 		return []
 
-	def restoreSpace(self):
-		if hasattr(self,'_spaceBefore'):
-			self.style.spaceBefore = self._spaceBefore
-			del self._spaceBefore
-		if hasattr(self,'_spaceAfter'):
-			self.style.spaceAfter = self._spaceAfter
-			del self._spaceAfter
-		
-	def saveSpace(self,atTop=0):
-		'''eliminate unwanted space'''
-		R = [0,0]
-		if hasattr(self,'style'):
-			if atTop and hasattr(self.style,'spaceBefore'):
-				R[0] = self._spaceBefore = self.style.spaceBefore
-				self.style.spaceBefore = 0
-			if hasattr(self.style,'spaceAfter'):
-				R[1] = self._spaceAfter = self.style.spaceAfter
-				self.style.spaceAfter = 0
-		return R
+	def getSpaceAfter(self):
+		if hasattr(self,'spaceAfter'): return self.spaceAfter
+		elif hasattr(self,'style') and hasattr(self.style,'spaceAfter'): return self.style.spaceAfter
+		else: return 0
+
+	def getSpaceBefore(self):
+		if hasattr(self,'spaceBefore'): return self.spaceBefore
+		elif hasattr(self,'style') and hasattr(self.style,'spaceBefore'): return self.style.spaceBefore
+		else: return 0
 
 class XBox(Flowable):
 	"""Example flowable - a box with an x through it and a caption.
@@ -219,9 +212,7 @@ class Preformatted(Flowable):
 
 	def wrap(self, availWidth, availHeight):
 		self.width = availWidth
-		self.height = (self.style.spaceBefore +
-					  self.style.leading * len(self.lines) +
-					  self.style.spaceAfter)
+		self.height = self.style.leading*len(self.lines)
 		return (self.width, self.height)
 
 	def draw(self):
@@ -230,7 +221,7 @@ class Preformatted(Flowable):
 		#so not doing it here makes it easier to switch.
 
 		cur_x = self.style.leftIndent
-		cur_y = self.height - self.style.spaceBefore - self.style.fontSize
+		cur_y = self.height - self.style.fontSize
 		self.canv.addLiteral('%PreformattedPara')
 
 		tx = self.canv.beginText(cur_x, cur_y)
@@ -345,6 +336,9 @@ class BasicFrame:
 		self.rightPadding = rightPadding
 		self.topPadding = topPadding
 
+		#efficiency
+		self.y1p = self.y1 + bottomPadding
+
 		# if we want a boundary to be shown
 		self.showBoundary = showBoundary
 
@@ -366,28 +360,33 @@ class BasicFrame:
 		or if it is too high for a totally empty frame,
 		to avoid infinite loops"""
 		y = self.y
-		p = self.y1 + self.bottomPadding
-		S = flowable.saveSpace(self.atTop)
-		y_p = y-p
-		w, h = flowable.wrap(self.width, y_p )
+		p = self.y1p
+		s = self.atTop and 0 or flowable.getSpaceBefore()
+		w, h = flowable.wrap(self.width, y-p-s)
+		h = h + s
 
 		y = y - h
 		if y < p:
-			flowable.restoreSpace()
 			if ((h > self.height and not trySplit) or w > self.width):
 				raise "LayoutError", "Flowable (%dx%d points) too large for frame (%dx%d points)." % (w,h, self.width,self.height)
-			self._availHeight = y_p
 			return 0
 		else:
 			#now we can draw it, and update the current point.
 			flowable.drawOn(canv, self.x, y)
-			flowable.restoreSpace()
-			y = y - S[1]	#space after
+			y = y - flowable.getSpaceAfter()
 			self.atTop = 0
 			self.y = y
 			return 1
 
+
 	add = _add
+
+	def split(self,flowable):
+		'''calls split on the flowable'''
+		y = self.y
+		p = self.y1p
+		s = self.atTop and 0 or flowable.getSpaceBefore()
+		return flowable.wrap(self.width, y-p-s)
 
 
 #############################################################
