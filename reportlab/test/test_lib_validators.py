@@ -102,6 +102,40 @@ class ValidatorTestCase(unittest.TestCase):
 		for c in ('a', 'b', 'c'):
 			assert OneOf(c) == 0, msg % c
 
+		OneOf = validators.OneOf('clockwise', 'anticlockwise')
+		for c in choices:
+			assert OneOf(c) == 1, msg % c
+		for c in ('a', 'b', 'c'):
+			assert OneOf(c) == 0, msg % c
+
+		try:
+			validators.OneOf(choices,'bongo')
+			raise AssertionError, "OneOf failed to detect bad arguments"
+		except ValueError:
+			pass
+
+	def test7(self):
+		"Test isInt validator"
+		msg = 'Validation failed for isInt %s!'
+		isInt = validators.isInt
+		for c in (1,2,-3,0,'-4','4'):
+			assert isInt(c), msg%c
+
+		for c in (1.2,0.0,-3.0,'-4.0','4.4','AAAA'):
+			assert not isInt(c), msg%c
+
+	def test8(self):
+		"test Sequence of validator"
+		msg = 'Validation failed for SequenceOf %s!'
+		v=validators.SequenceOf(validators.OneOf(('eps','pdf','png','gif','jpg','tif')),lo=1,hi=3,emptyOK=0)
+		for c in (['png'],('eps',),('eps','pdf')):
+			assert v(c), msg%c
+		v._lo = 2
+		for c in ([],(),('eps'),('eps','pdf','a'),['eps','pdf','png','gif']):
+			assert not v(c), msg%c
+		v._emptyOK=1
+		for c in ([],(),('eps','pdf')):
+			assert v(c), msg%c
 
 def makeSuite():
 	suite = unittest.TestSuite()
@@ -112,6 +146,8 @@ def makeSuite():
 	suite.addTest(ValidatorTestCase('test4'))
 	suite.addTest(ValidatorTestCase('test5'))
 	suite.addTest(ValidatorTestCase('test6'))
+	suite.addTest(ValidatorTestCase('test7'))
+	suite.addTest(ValidatorTestCase('test8'))
 
 	return suite
 

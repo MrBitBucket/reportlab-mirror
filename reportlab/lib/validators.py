@@ -65,6 +65,14 @@ class _isNumber(Validator):
 		except:
 			return int(x)
 
+class _isInt(Validator):
+	def test(self,x):
+		if type(x) not in (IntType,StringType): return 0
+		return self.normalizeTest(x)
+
+	def normalize(self,x):
+		return int(x)
+	
 class _isNumberOrNone(_isNumber):
 	def test(self,x):
 		return x is None or isNumber(x)
@@ -143,28 +151,35 @@ class OneOf(Validator):
 	"""Make validator functions for list of choices.
 
 	Usage:
-	>>> f = reportlab.lib.validators.OneOf(('happy','sad'))
-	>>> f('happy')
-	1
-	>>> f('grumpy')
-	0
-	>>> 
+	f = reportlab.lib.validators.OneOf('happy','sad')
+	or
+	f = reportlab.lib.validators.OneOf(('happy','sad'))
+	f('sad'),f('happy'), f('grumpy')
+	(1,1,0)
 	"""
-	def __init__(self, enum):
-		self._enum = enum
+	def __init__(self, enum,*args):
+		if type(enum) in [ListType,TupleType]:
+			if args!=():
+				raise ValueError, "Either all singleton args or a single sequence argument"
+			self._enum = tuple(enum)+args
+		else:
+			self._enum = (enum,)+args
 
 	def test(self, x):
 		return x in self._enum
 
 class SequenceOf(Validator):
-	def __init__(self,elemTest,name=None,emptyOK=1):
+	def __init__(self,elemTest,name=None,emptyOK=1,lo=0,hi=0x7fffffff):
 		self._elemTest = elemTest
 		self._emptyOK = emptyOK
+		self._lo, self._hi = lo, hi
 		if name: self._str = name
 
 	def test(self, x):
 		if type(x) not in _SequenceTypes: return 0
-		if x==[] and not self._emptyOK: return 0
+		if x==[] or x==():
+			return self._emptyOK
+		elif not self._lo<=len(x)<=self._hi: return 0
 		for e in x:
 			if not self._elemTest(e): return 0
 		return 1
@@ -172,6 +187,7 @@ class SequenceOf(Validator):
 isBoolean = _isBoolean()
 isString = _isString()
 isNumber = _isNumber()
+isInt = _isInt()
 isNumberOrNone = _isNumberOrNone()
 isTextAnchor = _isTextAnchor()
 isListOfNumbers = SequenceOf(isNumber,'isListOfNumbers')
