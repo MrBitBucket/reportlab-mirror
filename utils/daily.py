@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/daily.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/daily.py,v 1.45 2001/10/05 13:46:07 rgbecker Exp $
-__version__=''' $Id: daily.py,v 1.45 2001/10/05 13:46:07 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/utils/daily.py,v 1.46 2001/10/05 14:06:50 rgbecker Exp $
+__version__=''' $Id: daily.py,v 1.46 2001/10/05 14:06:50 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -113,8 +113,7 @@ def cvs_checkout(d):
 		CVS_remove(dst)
 	else:
 		dst = os.path.join(d,"reportlab","docs")
-		P=os.path.join(os.environ['HOME'],'python_stuff','lib')
-		PP = "%s:%s" % (d,P)
+		PP = "%s" % (d,)
 		#add our reportlab parent to the path so we import from there
 		if os.environ.has_key('PYTHONPATH'):
 			opp = os.environ['PYTHONPATH']
