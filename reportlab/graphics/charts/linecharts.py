@@ -34,15 +34,44 @@ class LineChartProperties(PropHolder):
         name = AttrMapValue(isStringOrNone, desc='Name of the line.'),
         )
 
-class LineChart(PlotArea):
+class AbstractLineChart(PlotArea):
 
     def makeSwatchSample(self,rowNo, x, y, width, height):
-        styleIdx = rowNo % len(self.lines)
         baseStyle = self.lines
+        styleIdx = rowNo % len(baseStyle)
         style = baseStyle[styleIdx]
         color = style.strokeColor
-        from legends import makeLineSwatch
-        return makeLineSwatch(self.joinedLines, style, baseStyle, color, x, y, width, height)
+        y = y+height/2.
+        if self.joinedLines:
+            dash = getattr(style, 'strokeDashArray', getattr(baseStyle,'strokeDashArray',None))
+            strokeWidth= getattr(style, 'strokeWidth', getattr(style, 'strokeWidth',None))
+            L = Line(x,y,x+width,y,strokeColor=color,strokeLineCap=0)
+            if strokeWidth: L.strokeWidth = strokeWidth
+            if dash: L.strokeDashArray = dash
+        else:
+            L = None
+
+        if hasattr(style, 'symbol'):
+            S = style.symbol
+        elif hasattr(baseStyle, 'symbol'):
+            S = baseStyle.symbol
+        else:
+            S = None
+
+        if S: S = uSymbol2Symbol(S,x+width/2.,y,color)
+        if S and L:
+            g = Group()
+            g.add(L)
+            g.add(S)
+            return g
+        return S or L
+
+    def getSeriesName(self,i,default=None):
+        '''return series name i or default'''
+        return getattr(self.lines[i],'name',default)
+
+class LineChart(AbstractLineChart):
+    pass
 
 # This is conceptually similar to the VerticalBarChart.
 # Still it is better named HorizontalLineChart... :-/

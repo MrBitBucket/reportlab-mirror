@@ -63,6 +63,21 @@ class BarChart(PlotArea):
         annotations = AttrMapValue(None, desc='list of callables, will be called with self, xscale, yscale.'),
         )
 
+    def makeSwatchSample(self, rowNo, x, y, width, height):
+        baseStyle = self.bars
+        styleIdx = rowNo % len(baseStyle)
+        style = baseStyle[styleIdx]
+        strokeColor = getattr(style, 'strokeColor', getattr(baseStyle,'strokeColor',None))
+        fillColor = getattr(style, 'fillColor', getattr(baseStyle,'fillColor',None))
+        strokeDashArray = getattr(style, 'strokeDashArray', getattr(baseStyle,'strokeDashArray',None))
+        strokeWidth = getattr(style, 'strokeWidth', getattr(style, 'strokeWidth',None))
+        return Rect(x,y,width,height,strokeWidth=strokeWidth,strokeColor=strokeColor,
+                    strokeDashArray=strokeDashArray,fillColor=fillColor)
+
+    def getSeriesName(self,i,default=None):
+        '''return series name i or default'''
+        return getattr(self.bars[i],'name',default)
+
     def __init__(self):
         assert self.__class__.__name__ not in ('BarChart','BarChart3D'), 'Abstract Class %s Instantiated' % self.__class__.__name__
 

@@ -26,8 +26,9 @@ from reportlab.lib.validators import isColor, isNumber, isListOfNumbersOrNone,\
                                     isStringOrNone
 from reportlab.lib.attrmap import *
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS, ArcPath, Polygon
+from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS, ArcPath, Polygon, Rect
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
+from reportlab.graphics.charts.areas import PlotArea
 from textlabels import Label
 
 _ANGLE2BOXANCHOR={0:'w', 45:'sw', 90:'s', 135:'se', 180:'e', 225:'ne', 270:'n', 315: 'nw', -45: 'nw'}
@@ -153,12 +154,32 @@ def _fixLabels(labels,n):
         if i>0: labels = labels + ['']*i
     return labels
 
-class Pie(Widget):
-    _attrMap = AttrMap(
-        x = AttrMapValue(isNumber, desc='X position of the chart within its container.'),
-        y = AttrMapValue(isNumber, desc='Y position of the chart within its container.'),
-        width = AttrMapValue(isNumber, desc='width of pie bounding box. Need not be same as width.'),
-        height = AttrMapValue(isNumber, desc='height of pie bounding box.  Need not be same as height.'),
+class AbstractPieChart(PlotArea):
+
+    def makeSwatchSample(self, rowNo, x, y, width, height):
+        baseStyle = self.slices
+        styleIdx = rowNo % len(baseStyle)
+        style = baseStyle[styleIdx]
+        strokeColor = getattr(style, 'strokeColor', getattr(baseStyle,'strokeColor',None))
+        fillColor = getattr(style, 'fillColor', getattr(baseStyle,'fillColor',None))
+        strokeDashArray = getattr(style, 'strokeDashArray', getattr(baseStyle,'strokeDashArray',None))
+        strokeWidth = getattr(style, 'strokeWidth', getattr(style, 'strokeWidth',None))
+        return Rect(x,y,width,height,strokeWidth=strokeWidth,strokeColor=strokeColor,
+                    strokeDashArray=strokeDashArray,fillColor=fillColor)
+
+    def getSeriesName(self,i,default=None):
+        '''return series name i or default'''
+        try:
+            text = str(self.labels[i])
+        except:
+            text = default
+        if not self.simpleLabels:
+            _text = getattr(getattr(self,self._styleName)[i],'label_text')
+            if _text is not None: text = _text
+        return text
+
+class Pie(AbstractPieChart):
+    _attrMap = AttrMap(BASE=AbstractPieChart,
         data = AttrMapValue(isListOfNumbers, desc='list of numbers defining wedge sizes; need not sum to 1'),
         labels = AttrMapValue(isListOfStringsOrNone, desc="optional list of labels to use for each data point"),
         startAngle = AttrMapValue(isNumber, desc="angle of first slice; like the compass, 0 is due North"),
@@ -174,7 +195,7 @@ class Pie(Widget):
         self.y = 0
         self.width = 100
         self.height = 100
-        self.data = [1]
+        self.data = [1,2.3,1.7,4.2]
         self.labels = None  # or list of strings
         self.startAngle = 90
         self.direction = "clockwise"
@@ -238,7 +259,8 @@ class Pie(Widget):
 
         g = Group()
         i = 0
-        self._seriesCount = styleCount = len(self.slices)
+        self._seriesCount = len(normData)
+        styleCount = len(self.slices)
 
         startAngle = self.startAngle #% 360
         for angle in normData:

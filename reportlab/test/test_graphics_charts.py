@@ -14,6 +14,7 @@ from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.validators import Auto
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.graphics.shapes import *
 from reportlab.graphics.charts.textlabels import Label
@@ -26,8 +27,12 @@ from reportlab.platypus.doctemplate \
 
 from reportlab.graphics.charts.barcharts import VerticalBarChart
 from reportlab.graphics.charts.linecharts import HorizontalLineChart
+from reportlab.graphics.charts.lineplots import LinePlot
 from reportlab.graphics.charts.piecharts import Pie
 from reportlab.graphics.charts.legends import Legend
+from reportlab.graphics.charts.spider import SpiderChart
+from reportlab.graphics.widgets.markers import makeMarker
+
 
 
 def myMainPageFrame(canvas, doc):
@@ -160,6 +165,61 @@ def sample4pie():
     d.add(pc)
     return d
 
+def autoLegender(i,legend,chart,styleObj,sym='symbol'):
+    if sym:
+        setattr(styleObj[0],sym, makeMarker('Diamond',size=6))
+        setattr(styleObj[1],sym,makeMarker('Square'))
+    legend.x = 100
+    legend.y = 190
+    legend.dx = 20
+    legend.dy = 5
+    if i=='col auto':
+        legend.colorNamePairs[0]=(Auto(chart=chart),'auto chart=self.chart')
+        legend.colorNamePairs[0]=(Auto(obj=chart,index=1),'auto  chart=self.chart index=1')
+    elif i=='full auto':
+        legend.colorNamePairs=Auto(chart=chart)
+    elif i=='swatch set':
+        legend.swatchMarker=makeMarker('Circle')
+        legend.swatchMarker.size = 10
+    elif i=='swatch auto':
+        legend.swatchMarker=Auto(chart=chart)
+    d = Drawing(400,200)
+    d.add(chart)
+    d.add(legend)
+    return d
+
+def lpleg(i=None):
+    chart = LinePlot()
+    legend = Legend()
+    return autoLegender(i,legend,chart,chart.lines)
+
+def hlcleg(i=None):
+    chart = HorizontalLineChart()
+    legend = Legend()
+    return autoLegender(i,legend,chart,chart.lines)
+
+def bcleg(i=None):
+    chart = VerticalBarChart()
+    legend = Legend()
+    return autoLegender(i,legend,chart,chart.bars,None)
+
+def pcleg(i=None):
+    chart = Pie()
+    legend = Legend()
+    return autoLegender(i,legend,chart,chart.slices,None)
+
+def scleg(i=None):
+    chart = SpiderChart()
+    legend = Legend()
+    return autoLegender(i,legend,chart,chart.strands,None)
+
+def notFail(d):
+    try:
+        return d.getContents()
+    except:
+        import traceback
+        traceback.print_exc()
+        return None
 
 STORY = []
 styleSheet = getSampleStyleSheet()
@@ -250,6 +310,17 @@ class ChartTestCase(unittest.TestCase):
         story.append(drawing)
         story.append(Spacer(0, 1*cm))
 
+    def test4b(self):
+        story = self.story
+        for code in (lpleg, hlcleg, bcleg, pcleg, scleg):
+            code_name = code.func_code.co_name
+            for i in ('standard', 'col auto', 'full auto', 'swatch set', 'swatch auto'):
+                d = code(i)
+                assert notFail(d),'getContents failed for %s %s' % (code_name,i)
+                story.append(Paragraph('%s %s' % (i,code_name), h2))
+                story.append(Spacer(0, 0.5*cm))
+                story.append(code(i))
+                story.append(Spacer(0, 1*cm))
 
     def test5(self):
         "Test pie charts."
@@ -265,7 +336,6 @@ class ChartTestCase(unittest.TestCase):
         # This triggers the document build operation (hackish).
         global FINISHED
         FINISHED = 1
-
 
 def makeSuite():
     return makeSuiteForClasses(ChartTestCase)

@@ -10,7 +10,7 @@ import string, copy
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, OneOf, isString, isColorOrNone,\
         isNumberOrNone, isListOfNumbersOrNone, isStringOrNone, isBoolean,\
-        NoneOr, AutoOr, isAuto, Auto
+        NoneOr, AutoOr, isAuto, Auto, isBoxAnchor
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth, getFont
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
@@ -18,31 +18,6 @@ from reportlab.graphics.shapes import Drawing, Group, String, Rect, Line, STATE_
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 
-def makeLineSwatch(joinedLines, style, baseStyle, color, x, y, width, height):
-    y = y+height/2.
-    if joinedLines:
-        dash = getattr(style, 'strokeDashArray', getattr(baseStyle,'strokeDashArray',None))
-        strokeWidth= getattr(style, 'strokeWidth', getattr(style, 'strokeWidth',None))
-        L = Line(x,y,x+width,y,strokeColor=color,strokeLineCap=0)
-        if strokeWidth: L.strokeWidth = strokeWidth
-        if dash: L.strokeDashArray = dash
-    else:
-        L = None
-
-    if hasattr(style, 'symbol'):
-        S = style.symbol
-    elif hasattr(baseStyle, 'symbol'):
-        S = baseStyle.symbol
-    else:
-        S = None
-
-    if S: S = uSymbol2Symbol(S,x+width/2.,y,color)
-    if S and L:
-        g = Group()
-        g.add(S)
-        g.add(L)
-        return g
-    return S or L
 
 class Legend(Widget):
     """A simple legend containing rectangular swatches and strings.
@@ -78,6 +53,7 @@ class Legend(Widget):
         strokeWidth = AttrMapValue(isNumber, desc="Width of the border color of the swatches"),
         swatchMarker = AttrMapValue(NoneOr(AutoOr(isSymbol)), desc="None, Auto() or makeMarker('Diamond') ..."),
         callout = AttrMapValue(None, desc="a user callout(self,g,x,y,(color,text))"),
+        boxAnchor = AttrMapValue(isBoxAnchor),
        )
 
     def __init__(self):
@@ -118,14 +94,22 @@ class Legend(Widget):
         self.strokeColor = STATE_DEFAULTS['strokeColor']
         self.strokeWidth = STATE_DEFAULTS['strokeWidth']
         self.swatchMarker = None
+        self.boxAnchor = 'ne'
+
+    def _getChartStyleName(self,chart):
+        for a in 'lines', 'bars', 'slices', 'strands':
+            if hasattr(chart,a): return a
+        return None
+
+    def _getChartStyle(self,chart):
+        return getattr(chart,self._getChartStyleName(chart),None)
 
     def _getTexts(self,colorNamePairs):
         if not isAuto(colorNamePairs):
             texts = [str(p[1]) for p in colorNamePairs]
         else:
             chart = colorNamePairs.chart
-            style = colorNamePairs.style
-            texts = [str(getattr(style[i],'name','series %d' % i)) for i in xrange(chart._seriesCount)]
+            texts = [str(chart.getSeriesName(i,'series %d' % i)) for i in xrange(chart._seriesCount)]
         return texts
 
     def _calculateMaxWidth(self, colorNamePairs):
@@ -187,8 +171,6 @@ class Legend(Widget):
                 chart = getattr(swatchMarker,'chart',getattr(swatchMarker,'obj',None))
                 swatchMarker = Auto(obj=chart)
             n = len(colorNamePairs)
-        thisx = upperleftx = self.x
-        thisy = upperlefty = self.y - self.dy
         dx, dy, alignment, columnMaximum = self.dx, self.dy, self.alignment, self.columnMaximum
         deltax, deltay, dxTextSpace = self.deltax, self.deltay, self.dxTextSpace
         fontName, fontSize, fillColor = self.fontName, self.fontSize, self.fillColor
@@ -201,6 +183,23 @@ class Legend(Widget):
             deltax = maxWidth+dx+dxTextSpace+self.autoXPadding
         else:
             if alignment=='left': maxWidth = self._calculateMaxWidth(colorNamePairs)
+
+        thisx = self.x
+        thisy = self.y - self.dy
+        ba = self.boxAnchor
+        if ba not in ('ne','n','nw','autoy'):
+            height = self._calcHeight()
+            if ba in ('e','c','w'):
+                thisy += height/2.
+            else:
+                thisy += height
+        if ba not in ('ne','e','se','autox'):
+            width = int((n+columnMaximum-1)/columnMaximum)*deltax
+            if ba in ('n','c','s'):
+                thisx -= width/2
+            else:
+                thisx -= width
+        upperlefty = thisy
 
         g = Group()
         def gAdd(t,g=g,fontName=fontName,fontSize=fontSize,fillColor=fillColor):
@@ -249,7 +248,9 @@ class Legend(Widget):
                 raise ValueError, "bad alignment"
 
             # Make a 'normal' color swatch...
-            if isAuto(col): g.add(col.obj.makeSwatchSample(col.index,x,thisy,dx,dy))
+            if isAuto(col):
+                chart = getattr(col,'chart',getattr(col,'obj',None))
+                g.add(chart.makeSwatchSample(getattr(col,'index',i),x,thisy,dx,dy))
             elif isinstance(col, colors.Color):
                 if isSymbol(swatchMarker):
                     g.add(uSymbol2Symbol(swatchMarker,x+dx/2.,thisy+dy/2.,col))

@@ -49,6 +49,7 @@ class StrandProperties(PropHolder):
         markers = AttrMapValue(isBoolean),
         markerType = AttrMapValue(isAnything),
         markerSize = AttrMapValue(isNumber),
+        name = AttrMapValue(isStringOrNone,desc='Series name'),
         label_dx = AttrMapValue(isNumber),
         label_dy = AttrMapValue(isNumber),
         label_angle = AttrMapValue(isNumber),
@@ -104,6 +105,41 @@ class SpiderChart(PlotArea):
         direction = AttrMapValue( OneOf('clockwise', 'anticlockwise'), desc="'clockwise' or 'anticlockwise'"),
         strands = AttrMapValue(None, desc="collection of strand descriptor objects"),
         )
+
+    def makeSwatchSample(self, rowNo, x, y, width, height):
+        baseStyle = self.strands
+        styleIdx = rowNo % len(baseStyle)
+        style = baseStyle[styleIdx]
+        strokeColor = getattr(style, 'strokeColor', getattr(baseStyle,'strokeColor',None))
+        fillColor = getattr(style, 'fillColor', getattr(baseStyle,'fillColor',None))
+        strokeDashArray = getattr(style, 'strokeDashArray', getattr(baseStyle,'strokeDashArray',None))
+        strokeWidth = getattr(style, 'strokeWidth', getattr(baseStyle, 'strokeWidth',0))
+        markers = getattr(style, 'markers', getattr(baseStyle, 'markers',None))
+        markerSize = getattr(style, 'markerSize', getattr(baseStyle, 'markerSize',0))
+        ym = y+height/2.0
+        if fillColor is None and strokeColor is not None and strokeWidth>0:
+            bg = Line(x,ym,x+width,ym,strokeWidth=strokeWidth,strokeColor=strokeColor,
+                    strokeDashArray=strokeDashArray)
+        elif fillColor is not None:
+            bg = Rect(x,y,width,height,strokeWidth=strokeWidth,strokeColor=strokeColor,
+                    strokeDashArray=strokeDashArray,fillColor=fillColor)
+        else:
+            bg = None
+        if markers and markerSize>0:
+            S = getattr(style, 'markerType', getattr(baseStyle, 'markerType',None))
+        else:
+            S = None
+        if S: S = uSymbol2Symbol(S,x+width/2.,ym,color)
+        if S and bg:
+            g = Group()
+            g.add(bg)
+            g.add(S)
+            return g
+        return S or bg
+
+    def getSeriesName(self,i,default=None):
+        '''return series name i or default'''
+        return getattr(self.strands[i],'name',default)
 
     def __init__(self):
         PlotArea.__init__(self)
@@ -165,7 +201,8 @@ class SpiderChart(PlotArea):
 
         data = self.normalizeData()
 
-        n = self._seriesCount = len(data[0])
+        self._seriesCount = len(data)
+        n = len(data[0])
 
         #labels
         if self.labels is None:

@@ -71,7 +71,8 @@ class ShadedPolyFiller(Filler,ShadedPolygon):
 class PolyFiller(Filler,Polygon):
     pass
 
-class LinePlot(PlotArea):
+from linecharts import AbstractLineChart
+class LinePlot(AbstractLineChart):
     """Line plot with multiple lines.
 
     Both x- and y-axis are value axis (so there are no seperate
@@ -312,14 +313,6 @@ class LinePlot(PlotArea):
             if shader: shader.shade(self,g,rowNo,rowColor,row)
 
         return g
-
-    def makeSwatchSample(self,rowNo, x, y, width, height):
-        styleIdx = rowNo % len(self.lines)
-        baseStyle = self.lines
-        style = baseStyle[styleIdx]
-        color = style.strokeColor
-        from legends import makeLineSwatch
-        return makeLineSwatch(self.joinedLines, style, baseStyle, color, x, y, width, height)
 
     def draw(self):
         yA = self.yValueAxis
