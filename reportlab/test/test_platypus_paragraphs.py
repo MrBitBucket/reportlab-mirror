@@ -55,6 +55,26 @@ class MyDocTemplate(BaseDocTemplate):
         self.addPageTemplates(template)
 
 
+class ParagraphCorners(unittest.TestCase):
+    "some corner cases which should parse"
+    def check(text,bt = getSampleStyleSheet()['BodyText']):
+        try:
+            P = Paragraph(text,st)
+        except:
+            raise AssertionError("'%s' should parse"%text)
+            
+    def test0(self):
+        self.check('<para />')
+        self.check('<para/>')
+        self.check('\t\t\t\n\n\n<para />')
+        self.check('\t\t\t\n\n\n<para/>')
+        self.check('<para\t\t\t\t/>')
+        self.check('<para></para>')
+        self.check('<para>      </para>')
+        self.check('\t\t\n\t\t\t   <para>      </para>')
+        
+
+
 class ParagraphSplitTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."
 

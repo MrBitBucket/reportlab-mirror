@@ -19,7 +19,7 @@ from reportlab.lib.colors import toColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.units import inch,mm,cm,pica
-_re_para = re.compile('^\\s*<\\s*para(\\s+|>)')
+_re_para = re.compile(r'^\s*<\s*para(?:\s+|>|/>)')
 
 sizeDelta = 2       # amount to reduce font size by for super and sub script
 subFraction = 0.5   # fraction of font size that a sub script should be lowered
