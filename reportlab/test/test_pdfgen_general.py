@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.5 2001/08/08 19:16:08 rgbecker Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.5 2001/08/08 19:16:08 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.6 2001/10/10 19:59:13 andy_robinson Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.6 2001/10/10 19:59:13 andy_robinson Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
@@ -183,8 +183,11 @@ def drawCode(canvas, code):
     canvas.setFont('Times-Roman',10)
     
 
-def run():
-    c = canvas.Canvas('test_pdfgen_general.pdf')
+def makeDocument(filename):
+    #the extra arg is a hack added later, so other
+    #tests can get hold of the canvas just before it is
+    #saved
+    c = canvas.Canvas(filename)
     c.setPageCompression(0)
     framePageForm(c) # define the frame form
     c.showOutline()
@@ -688,9 +691,11 @@ cost to performance.""")
     #for x in outlinenametree: print x
     #stop
     #apply(c.setOutlineNames0, tuple(outlinenametree))
+    return c
+    
+def run(filename):
+    c = makeDocument(filename)
     c.save()
-
-
 
 def pageShapes(c):
     """Demonstrates the basic lines and shapes"""
@@ -715,7 +720,7 @@ class PdfgenTestCase(unittest.TestCase):
     "Make documents with lots of Pdfgen features"
     def test1(self):
         "Make a PDFgen document with most graphics features"
-        run()
+        run('test_pdfgen_general.pdf')
 
 def makeSuite():
     suite = unittest.TestSuite()
