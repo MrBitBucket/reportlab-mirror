@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.42 2004/04/08 16:02:52 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.43 2004/05/03 08:09:52 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.42 2004/04/08 16:02:52 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.43 2004/05/03 08:09:52 rgbecker Exp $ "
 #endif
 #include "Python.h"
 #include <stdlib.h>
@@ -28,7 +28,7 @@ static __version__=" $Id: _rl_accel.c,v 1.42 2004/04/08 16:02:52 rgbecker Exp $ 
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.49"
+#define VERSION "0.50"
 #define MODULE "_rl_accel"
 
 
@@ -870,7 +870,7 @@ static BoxObject* Box(PyObject* module, PyObject* args, PyObject* kw)
 
 	if(!PyArg_ParseTupleAndKeywords(args,kw,"d|O:Box",kwlist,&w,&pC)) return NULL;
 	if(!(self = PyObject_NEW(BoxObject, &BoxType))) return NULL;
-	self->shrink = self->stretch = self->penalty = (double)(self->is_glue = self->is_penalty = 0);
+	self->shrink = self->stretch = self->penalty = (double)(self->is_glue = self->is_penalty = self->flagged = 0);
 	self->is_box = 1;
 	self->width = w;
 	if(Box_set_character(self, pC ? pC : Py_None)){
@@ -889,7 +889,7 @@ static BoxObject* Glue(PyObject* module, PyObject* args, PyObject* kw)
 
 	if(!PyArg_ParseTupleAndKeywords(args,kw,"ddd:Glue",kwlist,&width,&stretch,&shrink)) return NULL;
 	if(!(self = PyObject_NEW(BoxObject, &BoxType))) return NULL;
-	self->is_box = self->is_penalty = 0;
+	self->penalty = (double)(self->is_box = self->is_penalty = self->flagged = 0);
 	self->is_glue = self->is_none = 1;
 	self->width = width;
 	self->stretch = stretch;
