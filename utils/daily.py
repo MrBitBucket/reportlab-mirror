@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.25  2000/04/20 08:21:12  rgbecker
+#	Fixes to projdir usage
+#
 #	Revision 1.24  2000/04/19 15:16:13  rgbecker
 #	os.path.isdir not os.isdir
-#
+#	
 #	Revision 1.23  2000/04/19 15:14:33  rgbecker
 #	os.path.split not os.split
 #	
@@ -104,7 +107,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.24 2000/04/19 15:16:13 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.25 2000/04/20 08:21:12 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -112,8 +115,8 @@ import os, sys, string, traceback, re
 
 #this is where we extract files etc
 groupdir=os.path.normcase(os.path.normpath('%s/public_ftp'%os.environ['HOME']))
-projdir = os.path.normcase(os.path.normpath('reportlab'))
-py2pdf_dir = os.path.normcase(os.path.normpath('py2pdf'))
+projdir = 'reportlab'
+py2pdf_dir = 'py2pdf'
 cvsdir = os.path.join(groupdir,projdir)
 release=0		#1 if making a release
 py2pdf=0		#1 if doing a special py2pdf zip/tgz
@@ -209,18 +212,20 @@ def do_zip(d):
 	zipfile = '%s/%s.zip' % (groupdir,b)
 
 	if py2pdf:
-		projdir = py2pdf_dir
-		cvsdir = os.path.join(groupdir,projdir)
+		pdir = py2pdf_dir
+		cvsdir = os.path.join(groupdir,pdir)
+	else:
+		pdir = projdir
 
 	tar = find_exe('tar')
 	if tar is not None:
 		safe_remove(tarfile)
-		do_exec('%s czvf %s %s' % (tar, tarfile, projdir), 'tar creation')
+		do_exec('%s czvf %s %s' % (tar, tarfile, pdir), 'tar creation')
 
 	zip = find_exe('zip')
 	if zip is not None:
 		safe_remove(zipfile)
-		do_exec('%s -ur %s %s' % (zip, zipfile, projdir), 'zip creation')
+		do_exec('%s -ur %s %s' % (zip, zipfile, pdir), 'zip creation')
 	recursive_rmdir(cvsdir)
 
 	if release:
