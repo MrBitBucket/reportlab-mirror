@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/runAll.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.16 2004/03/26 14:20:44 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.17 2004/03/26 14:26:50 rgbecker Exp $
 """Runs all test files in all subfolders.
 """
 import os, glob, sys, string, traceback
@@ -40,7 +40,7 @@ def main(pattern='test_*.py'):
     _dbg = open('/tmp/_runAll.dbg','w')
     print >>_dbg, "outputfile('')",outputfile('')
 
-    def cleanup(folder,patterns=('*.pdf', '*.log','*.svg','runAll.txt')):
+    def cleanup(folder,patterns=('*.pdf', '*.log','*.svg','runAll.txt', 'test_*.txt')):
         for pat in patterns:
             for filename in GlobDirectoryWalker(folder, pattern=pat):
                 try:
