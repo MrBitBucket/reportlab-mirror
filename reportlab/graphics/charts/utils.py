@@ -127,28 +127,34 @@ def find_interval(lo,hi,I=5):
 	return n, x, ss, lo - n + x - hi
 
 
-def find_good_grid(lower,upper,n=(4,5,6,7,8,9)):
-	try:
-		n[0]
-	except TypeError:
-		n = xrange(max(1,n-2),max(n+3,2))
+def find_good_grid(lower,upper,n=(4,5,6,7,8,9), grid=None):
+	if grid:
+		t = divmod(lower,grid)[0] * grid
+		hi, z = divmod(upper,grid)
+		if z>1e-8: hi = hi+1
+		hi = hi*grid
+	else:
+		try:
+			n[0]
+		except TypeError:
+			n = xrange(max(1,n-2),max(n+3,2))
 
-	w = 1e308
-	for i in n:
-		z=find_interval(lower,upper,i)
-		if z[3]<w:
-			t, hi, grid = z[:3]
-			w=z[3]
+		w = 1e308
+		for i in n:
+			z=find_interval(lower,upper,i)
+			if z[3]<w:
+				t, hi, grid = z[:3]
+				w=z[3]
 	return t, hi, grid
 
 
-def ticks(lower, upper, n=(4,5,6,7,8,9), split=1, percent=0):
+def ticks(lower, upper, n=(4,5,6,7,8,9), split=1, percent=0, grid=None):
 	'''
 	return tick positions and labels for range lower<=x<=upper
 	n=number of intervals to try (can be a list or sequence)
 	split=1 return ticks then labels else (tick,label) pairs
 	'''
-	t, hi, grid = find_good_grid(lower, upper, n)
+	t, hi, grid = find_good_grid(lower, upper, n, grid)
 	power = floor(log10(grid))
 	if power==0: power = 1
 	w = grid/10.**power
