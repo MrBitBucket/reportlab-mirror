@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.48 2001/12/06 18:11:21 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.49 2001/12/17 14:15:15 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -446,7 +446,6 @@ class YCategoryAxis(CategoryAxis):
 
 
 # Value axes.
-
 class ValueAxis(Widget):
 	"Abstract value axis, unusable in itself."
 
@@ -473,6 +472,7 @@ class ValueAxis(Widget):
 		valueStep = AttrMapValue(isNumberOrNone, desc='Step size used between ticks.'),
 		valueSteps = AttrMapValue(isListOfNumbersOrNone, desc='List of step sizes used between ticks.'),
 		avoidBoundFrac = AttrMapValue(isNumberOrNone, desc='Fraction of interval to allow above and below.'),
+		rangeRound=AttrMapValue(OneOf('neither','both','ceiling','floor'),'How to round the axis limits'),
 		)
 
 	def __init__(self):
@@ -521,6 +521,7 @@ class ValueAxis(Widget):
 		self.valueMax = None
 		self.valueStep = None
 		self.avoidBoundFrac = None
+		self.rangeRound = 'both'
 
 
 	def setPosition(self, x, y, length):
@@ -558,13 +559,9 @@ class ValueAxis(Widget):
 		Returns a min, max tuple.
 		"""
 
-		valueMin = self.valueMin
-		if self.valueMin is None:
-			valueMin = _findMin(dataSeries,self._dataIndex,0)
-
-		valueMax = self.valueMax
-		if self.valueMax is None:
-			valueMax = _findMax(dataSeries,self._dataIndex,0)
+		valueMin, valueMax, rangeRound = self.valueMin, self.valueMax, self.rangeRound
+		if valueMin is None: valueMin = _findMin(dataSeries,self._dataIndex,0)
+		if valueMax is None: valueMax = _findMax(dataSeries,self._dataIndex,0)
 		if valueMin == valueMax:
 			if valueMax==0:
 				valueMax = 0.01
@@ -576,7 +573,16 @@ class ValueAxis(Widget):
 		if self.forceZero:
 			if valueMax<0: valueMax=0
 			elif valueMin>0: valueMin = 0
-		self._valueMin, self._valueMax = (valueMin, valueMax)
+
+		if rangeRound is not 'neither' and not getattr(self,'valueSteps',None):
+			self._valueMin, self._valueMax = valueMin, valueMax
+			P = self._calcTickPositions()
+			valueStep = P[1]-P[0]
+			fuzz = 1e-8*valueStep
+			if rangeRound in ['both','floor'] and valueMin<P[0]-fuzz: valueMin = P[0]-valueStep
+			if rangeRound in ['both','ceiling'] and valueMax>P[-1]+fuzz: valueMax = P[-1]+valueStep
+
+		self._valueMin, self._valueMax = valueMin, valueMax
 		self._rangeAdjust()
 
 
@@ -606,6 +612,18 @@ class ValueAxis(Widget):
 		self._scaleFactor = self._length / float(self._valueMax - self._valueMin)
 		return self._scaleFactor
 
+	def _calcTickPositions(self):
+		self._calcValueStep()
+		P = []
+		valueMin, valueMax, valueStep = self._valueMin, self._valueMax, self._valueStep
+		fuzz = 1e-8*valueStep
+		t = int((valueMin-fuzz)/valueStep) * valueStep
+		if t >= valueMin-fuzz: P.append(t)
+		t = t + valueStep
+		while t <= valueMax+fuzz:
+			P.append(t)
+			t = t + valueStep
+		return P
 
 	def _calcTickmarkPositions(self):
 		"""Calculate a list of tick positions on the axis.
@@ -613,24 +631,12 @@ class ValueAxis(Widget):
 		Returns a list of numbers.
 		"""
 
-		if hasattr(self, 'valueSteps') and self.valueSteps:
-			self._tickValues = self.valueSteps
-			return self._tickValues
+		self._tickValues = getattr(self,'valueSteps',None)
+		if self._tickValues: return self._tickValues
 
-		self._calcValueStep()
-
-		tickmarkPositions = []
-		tick = int(self._valueMin / self._valueStep) * self._valueStep
-		if tick >= self._valueMin:
-			tickmarkPositions.append(tick)
-		tick = tick + self._valueStep
-		while tick <= self._valueMax:
-			tickmarkPositions.append(tick)
-			tick = tick + self._valueStep
-		self._tickValues = tickmarkPositions
+		self._tickValues = self._calcTickPositions()
 		self._adjustAxisTicks()
 		return self._tickValues
-
 
 	def _calcValueStep(self):
 		'''Calculate _valueStep for the axis or get from valueStep.'''
