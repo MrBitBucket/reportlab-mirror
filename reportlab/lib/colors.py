@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.29 2001/11/19 11:41:33 dinu_gherman Exp $
-__version__=''' $Id: colors.py,v 1.29 2001/11/19 11:41:33 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.30 2001/12/27 13:00:56 rgbecker Exp $
+__version__=''' $Id: colors.py,v 1.30 2001/12/27 13:00:56 rgbecker Exp $ '''
 
 import string
 import math
@@ -50,11 +50,14 @@ class CMYKColor(Color):
 	and renderers may look for these."""
 
 	def __init__(self, cyan=0, magenta=0, yellow=0, black=0,
-				spotName=None, density=1):
+				spotName=None, density=1, knockout=None):
 		"""
 		Initialize with four colors in range [0-1]. the optional
-		spotName and density may be of use to specific renderers. The spotName
-		is intended for use as an identifier to the rendere not client programs.
+		spotName, density & knockout may be of use to specific renderers.
+		spotName is intended for use as an identifier to the renderer not client programs.
+		density is used to modify the overall amount of ink.
+		knockout is a renderer dependent option that determines whether the applied colour
+		knocksout (removes) existing colour; None means use the global default.
 		"""
 		self.cyan = cyan
 		self.magenta = magenta
@@ -62,6 +65,7 @@ class CMYKColor(Color):
 		self.black = black
 		self.spotName = spotName
 		self.density = max(min(density,1),0)	# force into right range
+		self.knockout = knockout
 
 		# now work out the RGB approximation. override
 		self.red, self.green, self.blue = cmyk2rgb( (cyan, magenta, yellow, black) )
@@ -75,10 +79,11 @@ class CMYKColor(Color):
 			self.red, self.green, self.blue = (r,g,b)
 
 	def __repr__(self):
-		return "CMYKColor(%s%s%s)" % (
+		return "CMYKColor(%s%s%s%s)" % (
 			string.replace(fp_str(self.cyan, self.magenta, self.yellow, self.black),' ',','),
 			(self.spotName and (',spotName='+repr(self.spotName)) or ''),
-			(self.density!=1 and (',density='+fp_str(self.density)) or '')
+			(self.density!=1 and (',density='+fp_str(self.density)) or ''),
+			(self.knockout is not None and (',knockout=%d' % self.knockout) or ''),
 			)
 
 	def __hash__(self):
@@ -114,14 +119,15 @@ class CMYKColor(Color):
 
 class PCMYKColor(CMYKColor):
 	'''100 based CMYKColor with density and a spotName; just like Rimas uses'''
-	def __init__(self,cyan,magenta,yellow,black,density=100,spotName=None):
-		CMYKColor.__init__(self,cyan/100.,magenta/100.,yellow/100.,black/100.,spotName,density/100.)
+	def __init__(self,cyan,magenta,yellow,black,density=100,spotName=None,knockout=None):
+		CMYKColor.__init__(self,cyan/100.,magenta/100.,yellow/100.,black/100.,spotName,density/100.,knockout=knockout)
 
 	def __repr__(self):
-		return "PCMYKColor(%s%s%s)" % (
+		return "PCMYKColor(%s%s%s%s)" % (
 			string.replace(fp_str(self.cyan*100, self.magenta*100, self.yellow*100, self.black*100),' ',','),
 			(self.spotName and (',spotName='+repr(self.spotName)) or ''),
-			(self.density!=1 and (',density='+fp_str(self.density*100)) or '')
+			(self.density!=1 and (',density='+fp_str(self.density*100)) or ''),
+			(self.knockout is not None and (',knockout=%d' % self.knockout) or ''),
 			)
 
 def cmyk2rgb((c,m,y,k),density=1):
