@@ -105,6 +105,8 @@ _fontAttrMap = {'size': ('fontSize', _num),
                 'name': ('fontName', None),
                 'fg':   ('textColor', toColor),
                 'color':('textColor', toColor),
+                'backcolor':('backColor',toColor),
+                'bgcolor':('backColor',toColor),
                 }
 
 def _addAttributeNames(m):
