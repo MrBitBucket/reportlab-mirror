@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.43 2003/07/29 20:10:15 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.44 2003/07/30 18:43:51 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.43 2003/07/29 20:10:15 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.44 2003/07/30 18:43:51 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -190,9 +190,14 @@ class LinePlot(PlotArea):
             label.setText(labelText)
             group.add(label)
 
-
     def makeLines(self):
         g = Group()
+        bubblePlot = getattr(self,'_bubblePlot',None)
+        if bubblePlot:
+            yA = self.yValueAxis
+            xA = self.xValueAxis
+            bubbleR = min(yA._bubbleRadius,xA._bubbleRadius)
+            bubbleMax = xA._bubbleMax
 
         labelFmt = self.lineLabelFormat
 
@@ -205,17 +210,15 @@ class LinePlot(PlotArea):
             inFillX1 = inFillX0 + self.xValueAxis._length
             inFillG = getattr(self,'_inFillG',g)
         # Iterate over data rows.
+        styleCount = len(self.lines)
         for rowNo in P:
             row = self._positions[rowNo]
+            rowStyle = self.lines[rowNo % styleCount]
+            rowColor = rowStyle.strokeColor
+            dash = getattr(rowStyle, 'strokeDashArray', None)
 
-            styleCount = len(self.lines)
-            styleIdx = rowNo % styleCount
-            rowColor = self.lines[styleIdx].strokeColor
-            dash = getattr(self.lines[styleIdx], 'strokeDashArray', None)
-
-            # width = getattr(self.lines[styleIdx], 'strokeWidth', None)
-            if hasattr(self.lines[styleIdx], 'strokeWidth'):
-                width = self.lines[styleIdx].strokeWidth
+            if hasattr(rowStyle, 'strokeWidth'):
+                width = rowStyle.strokeWidth
             elif hasattr(self.lines, 'strokeWidth'):
                 width = self.lines.strokeWidth
             else:
@@ -236,41 +239,31 @@ class LinePlot(PlotArea):
                     if dash:
                         line.strokeDashArray = dash
                     g.add(line)
-            else:
-                for colNo in range(len(row)):
-                    x1, y1 = row[colNo]
-                    if self.joinedLines == 1:
-                        if colNo > 0:
-                            # Draw lines between adjacent items.
-                            x2, y2 = row[colNo-1]
-                            line = Line(x1, y1, x2, y2,
-                                        strokeColor=rowColor,
-                                        strokeLineCap=1)
-                            if width:
-                                line.strokeWidth = width
-                            if dash:
-                                line.strokeDashArray = dash
-                            g.add(line)
 
-            if hasattr(self.lines[styleIdx], 'symbol'):
-                uSymbol = self.lines[styleIdx].symbol
+            if hasattr(rowStyle, 'symbol'):
+                uSymbol = rowStyle.symbol
             elif hasattr(self.lines, 'symbol'):
                 uSymbol = self.lines.symbol
             else:
                 uSymbol = None
 
             if uSymbol:
-                for colNo in range(len(row)):
-                    x1, y1 = row[colNo]
-                    symbol = uSymbol2Symbol(uSymbol,x1,y1,rowColor)
-                    if symbol: g.add(symbol)
+                j = -1
+                if bubblePlot: drow = self.data[rowNo]
+                for xy in row:
+                    j += 1
+                    symbol = uSymbol2Symbol(uSymbol,xy[0],xy[1],rowColor)
+                    if symbol:
+                        if bubblePlot:
+                            symbol.size = bubbleR*(drow[j][2]/bubbleMax)**0.5
+                        g.add(symbol)
 
-            # Draw item (bar) labels.
+            # Draw data labels.
             for colNo in range(len(row)):
                 x1, y1 = row[colNo]
                 self.drawLabel(g, rowNo, colNo, x1, y1)
 
-            shader = getattr(self.lines[styleIdx], 'shader', None)
+            shader = getattr(rowStyle, 'shader', None)
             if shader: shader.shade(self,g,rowNo,rowColor,row)
 
         return g
@@ -307,6 +300,8 @@ class LinePlot(PlotArea):
     def draw(self):
         yA = self.yValueAxis
         xA = self.xValueAxis
+        if getattr(self,'_bubblePlot',None):
+            yA._bubblePlot = xA._bubblePlot = 1
         yA.setPosition(self.x, self.y, self.height)
         yA.configure(self.data)
 

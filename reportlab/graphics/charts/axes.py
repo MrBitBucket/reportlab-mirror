@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.81 2003/07/29 20:10:15 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.82 2003/07/30 18:43:51 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.81 2003/07/29 20:10:15 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.82 2003/07/30 18:43:51 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -49,20 +49,24 @@ from reportlab.graphics.charts.utils import nextRoundNumber
 
 # Helpers.
 
-def _findMinMaxValue(V, x, default, func):
+def _findMinMaxValue(V, x, default, func, special=None):
     if type(V[0][0]) in (TupleType,ListType):
-        V=map(lambda e,f=lambda T,x=x: T[x]: map(f,e),V)
+        if special:
+            f=lambda T,x=x,special=special: special(T,x,func)
+        else:
+            f=lambda T,x=x: T[x]
+        V=map(lambda e,f=f: map(f,e),V)
     V = filter(len,map(lambda x: filter(lambda x: x is not None,x),V))
     if len(V)==0: return default
     return func(map(func,V))
 
-def _findMin(V, x, default):
+def _findMin(V, x, default,special=None):
     '''find minimum over V[i][x]'''
-    return _findMinMaxValue(V,x,default,min)
+    return _findMinMaxValue(V,x,default,min,special=special)
 
-def _findMax(V, x, default):
+def _findMax(V, x, default,special=None):
     '''find maximum over V[i][x]'''
-    return _findMinMaxValue(V,x,default,max)
+    return _findMinMaxValue(V,x,default,max,special=special)
 
 
 # Category axes.
@@ -595,12 +599,14 @@ class ValueAxis(Widget):
         Returns a min, max tuple.
         """
 
-        valueMin, valueMax, rangeRound = self.valueMin, self.valueMax, self.rangeRound
-        if valueMin is None: self._cValueMin = valueMin = _findMin(dataSeries,self._dataIndex,0)
-        if valueMax is None: self._cValueMax = valueMax = _findMax(dataSeries,self._dataIndex,0)
+        oMin = valueMin = self.valueMin
+        oMax = valueMax = self.valueMax
+        rangeRound = self.rangeRound
+        if valueMin is None: valueMin = self._cValueMin = _findMin(dataSeries,self._dataIndex,0)
+        if valueMax is None: valueMax = self._cValueMax = _findMax(dataSeries,self._dataIndex,0)
         if valueMin == valueMax:
             if valueMax==0:
-                if self.valueMin is None and self.valueMax is None:
+                if oMin is None and oMax is None:
                     zrp = getattr(self,'zrangePref',0)
                     if zrp>0:
                         valueMax = zrp
@@ -622,6 +628,23 @@ class ValueAxis(Widget):
                 else:
                     valueMax = 0.0
                     valueMin = 1.2*valueMin
+
+        if getattr(self,'_bubblePlot',None):
+            bubbleMax = float(_findMax(dataSeries,2,0))
+            frac=.25
+            bubbleV=frac*(valueMax-valueMin)
+            self._bubbleV = bubbleV
+            self._bubbleMax = bubbleMax
+            self._bubbleRadius = frac*self._length
+            def special(T,x,func,bubbleV=bubbleV,bubbleMax=bubbleMax):
+                try:
+                    v = T[2]
+                except IndexError:
+                    v = bubbleMAx*0.1
+                bubbleV *= (v/bubbleMax)**0.5
+                return func(T[x]+bubbleV,T[x]-bubbleV)
+            if oMin is None: valueMin = self._cValueMin = _findMin(dataSeries,self._dataIndex,0,special=special)
+            if oMax is None: valueMax = self._cValueMax = _findMax(dataSeries,self._dataIndex,0,special=special)
 
         forceZero = self.forceZero
         if forceZero:
