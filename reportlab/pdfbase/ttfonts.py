@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.9 2002/10/07 11:27:07 mgedmin Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.10 2002/10/10 10:13:46 mgedmin Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -58,7 +58,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.9 2002/10/07 11:27:07 mgedmin Exp $'
+__version__ = '$Id: ttfonts.py,v 1.10 2002/10/10 10:13:46 mgedmin Exp $'
 
 import string
 from types import StringType
@@ -204,7 +204,9 @@ class TTFontParser:
 
     def __init__(self, file, validate=1):
         """Loads and parses a TrueType font file.  file can be a filename or a
-        file object."""
+        file object.  If validate is set to a false values, skips checksum
+        validation.  This can save time, especially if the font is large.
+        """
 
         # Open the file
         if type(file) is StringType:
@@ -392,10 +394,14 @@ class TTFontMaker:
 class TTFontFile(TTFontParser):
     "TTF file parser and generator"
 
-    def __init__(self, file, charInfo=1):
-        """Loads and parses a TrueType font file.  file can be a filename or a
-        file object."""
-        TTFontParser.__init__(self, file)
+    def __init__(self, file, charInfo=1, validate=1):
+        """Loads and parses a TrueType font file.
+
+        file can be a filename or a file object.  If validate is set to a false
+        values, skips checksum validation.  This can save time, especially if
+        the font is large.  See TTFontFile.extractInfo for more information.
+        """
+        TTFontParser.__init__(self, file, validate=validate)
         self.extractInfo(charInfo)
 
     def extractInfo(self, charInfo=1):
@@ -414,6 +420,10 @@ class TTFontFile(TTFontParser):
             defaultWidth - default glyph width in 1/1000ths of a point
             charWidths   - dictionary of character widths for every supported
                            UCS character code
+
+        This will only work if the font has a Unicode cmap (platform 3,
+        encoding 1, format 4 or platform 0 any encoding format 4).  Setting
+        charInfo to false avoids this requirement.
         """
         # name - Naming table
         name_offset = self.seek_table("name")
@@ -852,10 +862,9 @@ class TTFontFace(TTFontFile):
     Conceptually similar to a single byte typeface, but the glyphs are
     identified by UCS character codes instead of glyph names."""
 
-    def __init__(self, filename):
+    def __init__(self, filename, validate=1):
         "Loads a TrueType font from filename."
-        TTFontFile.__init__(self, filename)
-        self.extractInfo()
+        TTFontFile.__init__(self, filename, validate=validate)
 
     def getCharWidth(self, code):
         "Returns the width of character U+<code>"
@@ -925,10 +934,14 @@ class TTFont:
             self.internalName = None
             self.frozen = 0
 
-    def __init__(self, name, filename):
-        """Loads a TrueType font from filename."""
+    def __init__(self, name, filename, validate=1):
+        """Loads a TrueType font from filename.
+
+        If validate is set to a false values, skips checksum validation.  This
+        can save time, especially if the font is large.
+        """
         self.fontName = name
-        self.face = TTFontFace(filename)
+        self.face = TTFontFace(filename, validate=validate)
         self.encoding = TTEncoding()
         self._multiByte = 1     # We want our own stringwidth
         self._dynamicFont = 1   # We want dynamic subsetting

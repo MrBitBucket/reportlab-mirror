@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.56 2002/07/24 19:56:37 andy_robinson Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.57 2002/10/10 10:13:45 mgedmin Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -565,6 +565,7 @@ def registerFont(font):
 
 def getTypeFace(faceName):
     """Lazily construct known typefaces if not found"""
+    faceName = str(faceName)
     try:
         return _typefaces[faceName]
     except KeyError:
