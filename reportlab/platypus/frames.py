@@ -31,16 +31,19 @@
 #
 ###############################################################################
 #	$Log: frames.py,v $
+#	Revision 1.4  2000/07/07 16:21:12  rgbecker
+#	Cosmetics
+#
 #	Revision 1.3  2000/07/06 12:40:38  rgbecker
 #	Push canvas into flowables during wrap/split
-#
+#	
 #	Revision 1.2  2000/06/13 13:03:31  aaron_watters
 #	more documentation changes
 #	
 #	Revision 1.1  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #	
-__version__=''' $Id: frames.py,v 1.3 2000/07/06 12:40:38 rgbecker Exp $ '''
+__version__=''' $Id: frames.py,v 1.4 2000/07/07 16:21:12 rgbecker Exp $ '''
 __doc__="""
 """
 class Frame:
@@ -144,7 +147,7 @@ class Frame:
 	add = _add
 
 	def split(self,flowable,canv):
-		'''As the flowable to split using up the available space.'''
+		'''Ask the flowable to split using up the available space.'''
 		y = self.y
 		p = self.y1p
 		s = self.atTop and 0 or flowable.getSpaceBefore()

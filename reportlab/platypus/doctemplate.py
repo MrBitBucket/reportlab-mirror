@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.26  2000/07/07 16:21:12  rgbecker
+#	Cosmetics
+#
 #	Revision 1.25  2000/07/06 12:40:37  rgbecker
 #	Push canvas into flowables during wrap/split
-#
+#	
 #	Revision 1.24  2000/07/05 12:22:21  rgbecker
 #	Force _calc in SimpleDocTemplae.build
 #	
@@ -108,7 +111,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.25 2000/07/06 12:40:37 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.26 2000/07/07 16:21:12 rgbecker Exp $ '''
 __doc__="""
 This module contains the core structure of platypus.
 
@@ -194,7 +197,7 @@ class NextPageTemplate(ActionFlowable):
 class PageTemplate:
 	"""
 	essentially a list of Frames and an onPage routine to call at the start
-	of a page when this is selected. onPageEnd gets calld at the end.
+	of a page when this is selected. onPageEnd gets called at the end.
 	derived classes can also implement beforeDrawPage and afterDrawPage if they want
 	"""
 	def __init__(self,id=None,frames=[],onPage=_doNothing, onPageEnd=_doNothing):
