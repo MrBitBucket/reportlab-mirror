@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.31 2003/07/26 08:54:19 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.31 2003/07/26 08:54:19 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.32 2003/07/31 17:28:55 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.32 2003/07/31 17:28:55 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -304,6 +304,17 @@ class PMCanvas:
                 raise RenderPMError,"Unknown image kind %s" % fmt
             configPIL = self.configPIL or {}
             if fmt=='TIFF':
+                tc = configPIL.get('transparentColor',None)
+                if not tc and os.environ.get('FORCE_TIFF_TRANSPARENT',None) in ('1','yes'):
+                    from reportlab.lib.colors import white as tc
+                if tc:
+                    from PIL import ImageChops, Image
+                    T = 768*[0]
+                    for o, c in zip((0,256,512), tc.bitmap_rgb()):
+                        T[o+c] = 255
+                    #if type(fn) is type(''): ImageChops.invert(im.point(T).convert('L').point(255*[0]+[255])).save(fn+'_mask.gif','GIF')
+                    im = Image.merge('RGBA', im.split()+(ImageChops.invert(im.point(T).convert('L').point(255*[0]+[255])),))
+                    #if type(fn) is type(''): im.save(fn+'_masked.gif','GIF')
                 for a,d in ('resolution',self._dpi),('resolution unit','inch'):
                     configPIL[a] = configPIL.get(a,d)
             apply(im.save,(fn,fmt),configPIL)
@@ -505,28 +516,28 @@ class PMCanvas:
 
     restoreState = saveState
 
-def drawToPMCanvas(d, dpi=72, bg=0xfffffff, configPIL=None, showBoundary=rl_config.showBoundary):
+def drawToPMCanvas(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config.showBoundary):
     w = int(d.width+0.5)
     h = int(d.height+0.5)
     c = PMCanvas(w, h, dpi=dpi, bg=bg, configPIL=configPIL)
     draw(d, c, 0, 0)
     return c
 
-def drawToPIL(d, dpi=72, bg=0xfffffff, configPIL=None, showBoundary=rl_config.showBoundary):
+def drawToPIL(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config.showBoundary):
     return drawToPMCanvas(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary).toPIL()
 
-def drawToPILP(d, dpi=72, bg=0xfffffff, configPIL=None, showBoundary=rl_config.showBoundary):
+def drawToPILP(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config.showBoundary):
     Image = _getImage()
     im = drawToPIL(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary)
     return im.convert("P", dither=Image.NONE, palette=Image.ADAPTIVE)
 
-def drawToFile(d,fn,fmt='GIF', dpi=72, bg=0xfffffff, configPIL=None, showBoundary=rl_config.showBoundary):
+def drawToFile(d,fn,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config.showBoundary):
     '''create a pixmap and draw drawing, d to it then save as a file
     configPIL dict is passed to image save method'''
     c = drawToPMCanvas(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary)
     c.saveToFile(fn,fmt)
 
-def drawToString(d,fmt='GIF', dpi=72, bg=0xfffffff, configPIL=None, showBoundary=rl_config.showBoundary):
+def drawToString(d,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config.showBoundary):
     s = getStringIO()
     drawToFile(d,s,fmt=fmt, dpi=dpi, bg=bg, configPIL=configPIL)
     return s.getvalue()
@@ -556,6 +567,7 @@ def test():
     i = 0
     #print in a loop, with their doc strings
     for (drawing, docstring, name) in getAllTestDrawings():
+        fnRoot = 'renderPM%d' % i
         if 1 or i==10:
             w = int(drawing.width)
             h = int(drawing.height)
@@ -565,17 +577,18 @@ def test():
                 if k in ['gif','png','jpg','pct']:
                     html.append('<p>%s format</p>\n' % string.upper(k))
                 try:
-                    filename = 'renderPM%d.%s' % (i, ext(k))
+                    filename = '%s.%s' % (fnRoot, ext(k))
                     fullpath = os.path.join('pmout', filename)
                     if os.path.isfile(fullpath):
                         os.remove(fullpath)
                     drawToFile(drawing,fullpath,fmt=k)
-                    if k in ['gif','png','jpg','pct']:
+                    if k in ['gif','png','jpg']:
                         html.append('<img src="%s" border="1"><br>\n' % filename)
                     print 'wrote',fullpath
                 except AttributeError:
                     print 'Problem drawing %s file'%k
                     raise
+        drawing.save(formats=['eps','pdf'],outDir='pmout',fnRoot=fnRoot)
         i = i + 1
         #if i==10: break
     html.append(htmlBottom)
