@@ -32,54 +32,37 @@ def makeWidthTestForAllGlyphs(canv, fontName):
     canv.addOutlineEntry(fontName,'GlyphWidths:' + fontName, level=1)
 
     y = 720
-    thisFontWidths = pdfmetrics.widthsByName[fontName]
-    # ZapfDingbats and Symbol don't have names (at least, they are not
-    # useful) so we just print them.
-    if fontName in ['Symbol','ZapfDingbats']:
-        for i in range(32, 256):
-            if y < 72:
-                canv.showPage()
-                decoratePage(canv, title)
-                y = 750
-            canv.setFont('Helvetica', 10)
-            canv.drawString(80, y, '%03d      ' % i)
-            canv.setFont(fontName, 10)
-            canv.drawString(200, y, chr(i) * 30)
-            # now work out width and put a red marker next to the end.
-            try:
-                w = canv.stringWidth(chr(i) * 30, fontName, 10)
-            except KeyError:
-                w = 0
-            canv.setFillColor(colors.red)
-            canv.rect(200 + w, y-1, 5, 10, stroke=0, fill=1)
-            canv.setFillColor(colors.black)
-            y = y - 12
-
+    thisFontWidths = pdfmetrics.widthsByFontGlyph[fontName]
+    # need to get the right list of names for the font in question
+    if fontName == 'Symbol':
+        glyphNames = pdfmetrics.encodings['SymbolEncoding']
+    elif fontName == 'ZapfDingbats':
+        glyphNames = pdfmetrics.encodings['ZapfDingbatsEncoding']
     else:            
         # ordinary font with standard character names    
         glyphNames = pdfmetrics.encodings['WinAnsiEncoding']
-        for i in range(256):
-            if y < 72:
-                canv.showPage()
-                decoratePage(canv, title)
-                y = 750
-            glyphName = glyphNames[i]
-            if glyphName is not None:
-                canv.setFont('Helvetica', 10)
-                canv.drawString(80, y, '%03d   %s ' % (i, glyphName))
-                try:
-                    glyphWidth = thisFontWidths[glyphName]
-                    canv.setFont(fontName, 10)
-                    canv.drawString(200, y, chr(i) * 30)
+    for i in range(256):
+        if y < 72:
+            canv.showPage()
+            decoratePage(canv, title)
+            y = 750
+        glyphName = glyphNames[i]
+        if glyphName is not None:
+            canv.setFont('Helvetica', 10)
+            canv.drawString(80, y, '%03d   %s ' % (i, glyphName))
+            try:
+                glyphWidth = thisFontWidths[glyphName]
+                canv.setFont(fontName, 10)
+                canv.drawString(200, y, chr(i) * 30)
 
-                    # now work out width and put a red marker next to the end.
-                    w = canv.stringWidth(chr(i) * 30, fontName, 10)
-                    canv.setFillColor(colors.red)
-                    canv.rect(200 + w, y-1, 5, 10, stroke=0, fill=1)
-                    canv.setFillColor(colors.black)
-                except KeyError:
-                    canv.drawString(200, y, 'Could not find glyph named "%s"' % glyphName)
-                y = y - 12
+                # now work out width and put a red marker next to the end.
+                w = canv.stringWidth(chr(i) * 30, fontName, 10)
+                canv.setFillColor(colors.red)
+                canv.rect(200 + w, y-1, 5, 10, stroke=0, fill=1)
+                canv.setFillColor(colors.black)
+            except KeyError:
+                canv.drawString(200, y, 'Could not find glyph named "%s"' % glyphName)
+            y = y - 12
                 
 
 

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.65 2001/03/08 15:27:42 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.65 2001/03/08 15:27:42 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.66 2001/03/12 16:52:45 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.66 2001/03/12 16:52:45 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -167,7 +167,7 @@ class Canvas:
         self._fillColorRGB = (0,0,0)
         self._strokeColorRGB = (0,0,0)
 
-        self._registerStandardFonts()
+        self._addStandardFonts()
         
     def _make_preamble(self):
         if self.bottomup:
@@ -824,36 +824,25 @@ class Canvas:
         fontnames.sort()
         return fontnames
 
-    def registerFont0(self, fontObj):
-        "Register a new font for subsequent use."
-        self._doc.addFont0(fontObj)
-
-        # extend the new metrics
-        pdfmetrics.addFont(fontObj)
-        
-    def _registerStandardFonts(self):
+    def addFont(self, fontObj):
+        "add a new font for subsequent use."
+        self._doc.addFont(fontObj)
+ 
+    def _addStandardFonts(self):
         """Ensures the standard 14 fonts are available in the system encoding.
-
         Called by canvas on initialization"""
-        
-        from reportlab.pdfgen import fonts0
-        enc = fonts0.defaultEncoding
-        for fontName in pdfmetrics.standardFonts[0:12]:
-            fontObj = fonts0.BuiltInType1Font(fontName, fontName, enc)
-            self.registerFont0(fontObj)
-        for fontName in ['Symbol','ZapfDingbats']:
-            fontObj = fonts0.BuiltInType1Font(fontName, fontName, 'StandardEncoding')
-            self.registerFont0(fontObj)
-            
-                    
-            
+        enc = pdfmetrics.defaultEncoding
+        for fontName in pdfmetrics.standardFonts:
+            fontObj = pdfmetrics.addFont(fontName,fontName,
+				fontName in ('Symbol','ZapfDingbats') and fontName or enc)
+            self.addFont(fontObj)
+
     def listLoadedFonts0(self):
         "Convenience function to list all loaded fonts"
         names = pdfmetrics.widths.keys()
         names.sort()
         return names
-    
-        
+
     def setFont(self, psfontname, size, leading = None):
         """Sets the font.  If leading not specified, defaults to 1.2 x
         font size. Raises a readable exception if an illegal font

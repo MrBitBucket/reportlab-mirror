@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/fonts0.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: _fontdata.py,v 1.1 2001/03/08 15:27:42 rgbecker Exp $ '''
+__version__=''' $Id: _fontdata.py,v 1.2 2001/03/12 16:52:45 rgbecker Exp $ '''
 __doc__=""" 
 	database of font related things
 	standardFonts		tuple of the 14 standard string font names
@@ -18,6 +18,7 @@ import string, UserDict
 # e.g. widths['Courier'] = [...600,600,600,...]
 widthVectorsByFont = {}
 fontsByName = {}
+fontsByBaseEnc = {}
 # this is a list of the standard 14 font names in Acrobat Reader
 standardFonts = (
     'Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique',

@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.40 2001/03/07 18:57:11 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.40 2001/03/07 18:57:11 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.41 2001/03/12 16:52:45 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.41 2001/03/12 16:52:45 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -246,34 +246,11 @@ class PDFDocument:
         return fontnames
 
 
-    def addFont0(self, font):
+    def addFont(self, font):
         """Add a new font object to the document.
-
-        Called from canvas.registerFont.  This does not handle extending
-        the font metrics database;  canvas.registerFont does that too."""
-        # may be several in succession
-        # get next font number
-##        nextFontId = 'F' + repr(len(self.fontMapping)+1)
-
+        Called from canvas.addFont.
+        """
         font.addObjects(self)
-        # font must return at least one object, the first in the
-        # list is 'THE' font.  CID fonts may create 3 objects.
-##        objects = font.makeObjects(nextFontId)
-##        fontObj = objects[0]
-##        fontObj.__Comment__ = 'User-defined font %s' % font.name
-##
-##        ref = self.Reference(fontObj, nextFontId)
-##        
-##        # establish naming from public to internal name
-##        self.fontMapping[font.name] = '/' + nextFontId
-##
-##        # gets the BasicFonts dictionary        
-##        fontDict = self.idToObject['BasicFonts'].dict
-##        fontDict[nextFontId] = fontObj
-##
-##        # add any other objects generated
-##        for obj in objects[1:]:
-##            ref = self.Reference(obj)
 
     def format(self):
         # register the Catalog/INfo and then format the objects one by one until exhausted

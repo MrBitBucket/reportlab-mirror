@@ -107,4 +107,3 @@ def makeSuite():
 
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
-
