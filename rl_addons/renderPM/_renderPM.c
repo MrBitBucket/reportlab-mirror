@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "0.1"
+#define VERSION "$Revision: 1.6 $"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -865,6 +865,52 @@ static PyObject* _get_gstateFontName(Gt1EncodedFont *f)
 	return Py_None;
 }
 
+static PyObject* _fmtPathElement(ArtBpath *p, char* name, int n)
+{
+	PyObject	*P = PyTuple_New(n+1);
+	PyTuple_SET_ITEM(P, 0, PyString_FromString(name));
+	if(n==6){
+		PyTuple_SET_ITEM(P, 1, PyFloat_FromDouble(p->x1));
+		PyTuple_SET_ITEM(P, 2, PyFloat_FromDouble(p->y1));
+		PyTuple_SET_ITEM(P, 3, PyFloat_FromDouble(p->x2));
+		PyTuple_SET_ITEM(P, 4, PyFloat_FromDouble(p->y2));
+		PyTuple_SET_ITEM(P, 5, PyFloat_FromDouble(p->x3));
+		PyTuple_SET_ITEM(P, 6, PyFloat_FromDouble(p->y3));
+		}
+	else {
+		PyTuple_SET_ITEM(P, 1, PyFloat_FromDouble(p->x3));
+		PyTuple_SET_ITEM(P, 2, PyFloat_FromDouble(p->y3));
+		}
+	return P;
+}
+
+static PyObject* _get_gstatePath(int n, ArtBpath* path)
+{
+	PyObject	*P = PyTuple_New(n);
+	PyObject	*e;
+	ArtBpath	*p;
+	int			i;
+	for(i=0;i<n;i++){
+		p = path+i;
+		switch(p->code){
+			case ART_MOVETO_OPEN:
+				e = _fmtPathElement(p,"moveTo",2);
+				break;
+			case ART_MOVETO:
+				e = _fmtPathElement(p,"moveToClosed",2);
+				break;
+			case ART_LINETO:
+				e = _fmtPathElement(p,"lineTo",2);
+				break;
+			case ART_CURVETO:
+				e = _fmtPathElement(p,"curveTo",6);
+				break;
+			}
+		PyTuple_SET_ITEM(P, i, e);
+		}
+	return P;
+}
+
 static PyObject* gstate_getattr(gstateObject *self, char *name)
 {
 #ifdef	ROBIN_DEBUG
@@ -883,6 +929,7 @@ static PyObject* gstate_getattr(gstateObject *self, char *name)
 	else if(!strcmp(name,"width")) return PyInt_FromLong(self->pixBuf->width);
 	else if(!strcmp(name,"height")) return PyInt_FromLong(self->pixBuf->height);
 	else if(!strcmp(name,"depth")) return PyInt_FromLong(self->pixBuf->nchan);
+	else if(!strcmp(name,"path")) return _get_gstatePath(self->pathLen,self->path);
 	else if(!strcmp(name,"pathLen")) return PyInt_FromLong(self->pathLen);
 	else if(!strcmp(name,"fontSize")) return PyFloat_FromDouble(self->fontSize);
 	else if(!strcmp(name,"fontName")) return _get_gstateFontName(self->font);
@@ -1131,7 +1178,8 @@ void init_renderPM()
 
 	/* Add some symbolic constants to the module */
 	d = PyModule_GetDict(m);
-	_version = PyString_FromString(VERSION);
+	_version = (PyObject*)(strchr(VERSION,' ')+1);
+	_version = PyString_FromStringAndSize((char*)_version, strchr((char*)_version,' ')-(char*)_version);
 	PyDict_SetItemString(d, "_version", _version );
 	moduleError = PyErr_NewException(MODULE ".Error",NULL,NULL);
 	PyDict_SetItemString(d, "Error", moduleError);
