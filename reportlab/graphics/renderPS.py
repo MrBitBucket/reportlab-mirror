@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPS.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.21 2002/12/13 10:34:28 rgbecker Exp $
-__version__=''' $Id: renderPS.py,v 1.21 2002/12/13 10:34:28 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.22 2003/04/17 11:28:28 rgbecker Exp $
+__version__=''' $Id: renderPS.py,v 1.22 2003/04/17 11:28:28 rgbecker Exp $ '''
 import string, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str, getStringIO
@@ -101,7 +101,7 @@ class PSCanvas:
         self.code.append('showpage') # ugh, this makes no sense oh well.
 
     def save(self,f=None):
-        if type(f) is StringType:
+        if not hasattr(f,'write'):
             file = open(f,'wb')
         else:
             file = f
@@ -124,7 +124,10 @@ class PSCanvas:
         self.code.insert(1, string.join(fontReencode, self._sep))
 
         file.write(string.join(self.code,self._sep))
-        if file is not f: file.close()
+        if file is not f:
+            file.close()
+            from reportlab.lib.utils import markfilename
+            markfilename(f,creatorcode='XPR3',filetype='EPSF')
 
     def saveState(self):
         self.code.append('gsave')

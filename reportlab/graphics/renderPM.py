@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.27 2003/04/17 08:26:11 andy_robinson Exp $
-__version__=''' $Id: renderPM.py,v 1.27 2003/04/17 08:26:11 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.28 2003/04/17 11:28:28 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.28 2003/04/17 11:28:28 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -241,7 +241,12 @@ def _saveAsPICT(im,fn,fmt):
     im = _convert2pilp(im)
     cols, rows = im.size
     s = _renderPM.pil2pict(cols,rows,im.tostring(),im.im.getpalette())
-    open(os.path.splitext(fn)[0]+'.'+string.lower(fmt),'wb').write(s)
+    if not hasattr(fn,'write'):
+        open(os.path.splitext(fn)[0]+'.'+string.lower(fmt),'wb').write(s)
+        from reportlab.lib.utils import markfilename
+        markfilename(fn,creatorcode='ogle',filetype='PICT')
+    else:
+        fn.write(s)
 
 BEZIER_ARC_MAGIC = 0.5522847498     #constant for drawing circular arcs w/ Beziers
 class PMCanvas:
@@ -297,6 +302,9 @@ class PMCanvas:
             else:
                 raise RenderPMError,"Unknown image kind %s" % fmt
             apply(im.save,(fn,fmt),self.configPIL or {})
+            if not hasattr(fn,'write'):
+                from reportlab.lib.utils import markfilename
+                markfilename(fn,creatorcode='ogle',filetype='PICT')
 
     def saveToString(self,fmt='GIF'):
         s = getStringIO()
