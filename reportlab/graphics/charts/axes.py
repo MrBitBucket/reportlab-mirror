@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.4 2001/04/06 12:46:47 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.5 2001/04/09 11:32:20 dinu_gherman Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -34,13 +34,17 @@ the former axes in its own coordinate system.
 """
 
 
-from types import FunctionType
 import time
+from types import FunctionType, StringType
 
-from reportlab.graphics.shapes import *
+from reportlab.graphics.shapes import Drawing, Line, Group, Auto
+from reportlab.graphics.shapes import STATE_DEFAULTS
+from reportlab.graphics.shapes import isNumber, isNumberOrAuto, isListOfNumbers, isColorOrNone
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.charts.textlabels import Label
 
+
+# Move these three functions into reportlab/charts/utils.py
 
 def str2seconds(timeString):
     "Convert a number of seconds since the epoch into a date string."
