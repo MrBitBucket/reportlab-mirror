@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.10 2002/10/10 10:13:46 mgedmin Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.11 2002/10/10 14:21:00 mgedmin Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -58,7 +58,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.10 2002/10/10 10:13:46 mgedmin Exp $'
+__version__ = '$Id: ttfonts.py,v 1.11 2002/10/10 14:21:00 mgedmin Exp $'
 
 import string
 from types import StringType
@@ -603,7 +603,10 @@ class TTFontFile(TTFontParser):
                     break
         if unicode_cmap_offset is None:
             raise TTFError, 'Font does not have cmap for Unicode (platform 3, encoding 1, format 4 or platform 0 any encoding format 4)'
-        self.seek(unicode_cmap_offset + 6)
+        self.seek(unicode_cmap_offset + 2)
+        length = self.read_ushort()
+        limit = unicode_cmap_offset + length
+        self.skip(2)
         segCount = self.read_ushort() / 2
         self.skip(6)
         endCount = map(lambda x, self=self: self.read_ushort(), range(segCount))
@@ -623,9 +626,13 @@ class TTFontFile(TTFontParser):
                 else:
                     offset = (unichar - startCount[n]) * 2 + idRangeOffset[n]
                     offset = idRangeOffset_start + 2 * n + offset
-                    glyph = self.get_ushort(offset)
-                    if glyph != 0:
-                        glyph = (glyph + idDelta[n]) & 0xFFFF
+                    if offset >= limit:
+                        # workaround for broken fonts (like Thryomanes)
+                        glyph = 0
+                    else:
+                        glyph = self.get_ushort(offset)
+                        if glyph != 0:
+                            glyph = (glyph + idDelta[n]) & 0xFFFF
                 charToGlyph[unichar] = glyph
                 if glyphToChar.has_key(glyph):
                     glyphToChar[glyph].append(unichar)
