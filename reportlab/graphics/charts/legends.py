@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.14 2001/08/30 14:51:03 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.15 2001/09/11 13:03:49 rgbecker Exp $
 """This will be a collection of legends to be used with charts.
 """
 
@@ -107,7 +107,7 @@ class Legend(Widget):
         texts = map(lambda p:p[1], colorNamePairs[:3])
         widths = []
         for i in range(len(texts)):
-            texts[i] = String(0,0, str(texts[i]))
+            texts[i] = String(0,0, texts[i] is not None and str(texts[i]) or '')
             ti = texts[i]
             widths.append(stringWidth(ti.text, ti.fontName, ti.fontSize))
         maxWidth = max(widths)
@@ -135,7 +135,7 @@ class Legend(Widget):
                 x, y, width, height = thisx+d+self.dxTextSpace, thisy, dx, dy
             elif self.alignment == "right":
                 # align text to right
-                t = String(thisx+self.dx+self.dxTextSpace, thisy, str(name))
+                t = String(thisx+self.dx+self.dxTextSpace, thisy, name is not None and str(name) or '')
                 t.textAnchor = "start"
                 x, y, width, height = thisx, thisy, dx, dy
             else:
