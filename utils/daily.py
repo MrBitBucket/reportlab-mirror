@@ -1,9 +1,9 @@
-#!/usr/local/bin/python
+#!/usr/home/rptlab/bin/python
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/daily.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/daily.py,v 1.50 2001/12/07 11:27:58 rgbecker Exp $
-__version__=''' $Id: daily.py,v 1.50 2001/12/07 11:27:58 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/utils/daily.py,v 1.51 2001/12/07 13:30:02 rgbecker Exp $
+__version__=''' $Id: daily.py,v 1.51 2001/12/07 13:30:02 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -18,6 +18,8 @@ release=0		#1 if making a release
 py2pdf=0		#1 if doing a special py2pdf zip/tgz
 #USER=os.environ['USER']
 USER='anonymous'
+verbose=os.environ.get('RL__verbose',0)
+sys.stderr = sys.stdout
 
 def get_path():
 	for i in os.environ.keys():
@@ -61,6 +63,7 @@ def CVS_remove(d):
 
 def rmdir(d):
 	'destroy directory d'
+	if verbose>=2: print 'rmdir(%s)' % d
 	if os.path.isdir(d):
 		for p in os.listdir(d):
 			fn = os.path.join(d,p)
@@ -76,9 +79,11 @@ def remove(f):
 
 def kill(f):
 	'remove directory or file unconditionally'
-	if os.path.isfile(f): os.remove(f)
-	elif os.path.isdir(f): rmdir(f)
-	elif '*' in f: map(kill,glob.glob(f))
+	if '*' in f: map(kill,glob.glob(f))
+	else:
+		if verbose>=2: print 'kill(%s)' % f
+		if os.path.isfile(f): os.remove(f)
+		elif os.path.isdir(f): rmdir(f)
 
 def rename(src,dst):
 	remove(dst)
@@ -92,11 +97,14 @@ def move(src,dst):
 	rename(src,dst)
 
 def copy(src,dst):
-	if os.path.isdir(dst): dst = os.path.join(dst,os.path.basename(src))
-	if os.path.isfile(dst): kill(dst)
-	if os.path.isfile(src): shutil.copy2(src,dst)
-	elif os.path.isdir(src): shutil.copyTree(src,dst)
-	elif '*' in src: map(lambda f,dst=dst: copy(f,dst),glob.glob(src))
+	if '*' in src: map(lambda f,dst=dst: copy(f,dst),glob.glob(src))
+	else:
+		if os.path.isdir(dst): dst = os.path.join(dst,os.path.basename(src))
+		if verbose>=2: print 'copy(%s,%s)' % (src,dst)
+		if os.path.isfile(src):
+			remove(dst)
+			shutil.copy2(src,dst)
+		elif os.path.isdir(src): shutil.copyTree(src,dst)
 
 def do_exec(cmd, cmdname=None):
 	i=os.popen(cmd,'r')
@@ -156,15 +164,17 @@ def cvs_checkout(d):
 		os.chdir(dst)
 		try:
 			# this creates PDFs in each manual's directory, and copies them to reportlab/docs
-			genAll()(quiet='-s')
+			genAll()(verbose=verbose)
+			os.chdir(dst)
 			# we copy them out to our html area
-			copy(os.path.join(dst,'*.pdf'),htmldir)
+			copy('*.pdf',htmldir)
 			# and then delete them
 			for f in ('*.pdf', 'userguide/*.pdf', 'graphguide/*.pdf' 'reference/*.pdf'): kill(f)
 		except:
 			print '????????????????????????????????'
 			print 'Failed to run genAll.py, cwd=%s' % os.getcwd()
 			do_exec('ls -l')
+			traceback.print_exc()
 			print '????????????????????????????????'
 		os.chdir(d)
 		pyc_remove(cvsdir)
