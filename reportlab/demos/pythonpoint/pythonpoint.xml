@@ -7,7 +7,7 @@
 
 
 	<!--Now for the slides-->
-    <slide id="Slide001" title="Introduction" effectname='Wipe'>
+     <slide id="Slide001" title="Introduction" effectname='Wipe'>
         <frame x="120" y="72" width="700" height="468" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading1'>Welcome to PythonPoint</para>
@@ -35,7 +35,7 @@
     </slide>
 
 
-    <slide id="Slide002" title="XML Notation" effectname='Blinds' effectdirection='0'>
+    <slide id="Slide002" title="XML Notation" effectname='Blinds' effectdirection='0' outlinelevel='1'>
         <frame x="120" y="72" width="700" height="468" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading1'>XML Notation</para>
@@ -61,7 +61,7 @@
         </frame>
     </slide>
 
-    <slide id="Slide003" title="Page Layout" effectname='Box'>
+    <slide id="Slide003" title="Page Layout" effectname='Box' outlinelevel='1'>
         <frame x="120" y="72" width="700" height="468" 
 			leftmargin="36" rightmargin="36" border='true'>
             <para style='Heading1'>Page Layout Model</para>
@@ -78,7 +78,7 @@
         </frame>
     </slide>
 
-    <slide id="Slide004" title="Reuse" effectname='Wipe'>
+    <slide id="Slide004" title="Reuse" effectname='Wipe' outlinelevel='1'>
         <frame x="120" y="72" width="700" height="468" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading1'>Reuse and Consistency - Sections</para>
@@ -103,7 +103,7 @@
 		</frame>
 	</slide>
 
-    <slide id="Slide005" title="Styles" effectname='Dissolve'>
+    <slide id="Slide005" title="Styles" effectname='Dissolve' outlinelevel='1'>
         <frame x="120" y="72" width="700" height="468" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading1'>Style Sheets</para>
@@ -123,7 +123,7 @@
         </frame>
     </slide>
 	
-    <slide id="Slide006" title="Special Effects" effectname='Dissolve'>
+    <slide id="Slide006" title="Special Effects" effectname='Dissolve' outlinelevel='1'>
         <frame x="120" y="72" width="700" height="468" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading1'>Special Effects</para>
@@ -148,7 +148,7 @@
         </frame>
     </slide>
 
-	<slide id="Slide007" title="Outlines and Hyperlinks" effectname='Wipe'>
+	<slide id="Slide007" title="Outlines and Hyperlinks" effectname='Wipe'  outlinelevel='1'>
         <frame x="120" y="72" width="700" height="468" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading1'>Outlines and Hyperlinks</para>
@@ -166,7 +166,7 @@
         </frame>
     </slide>
 	
-	<slide id="Slide008" title="Basic Shapes" effectname='Wipe'>
+	<slide id="Slide008" title="Basic Shapes" effectname='Wipe' outlinelevel='1'>
         <frame x="120" y="72" width="700" height="468" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading1'>Basic Shapes</para>
@@ -185,7 +185,7 @@
         <customshape module="customshapes" class="Jigsaw" initargs="(700,200,1)"/>
     </slide>
 
-	<slide id="Slide009" title="Future Features" effectname='Glitter'>
+	<slide id="Slide009" title="Future Features" effectname='Glitter' outlinelevel='1'>
         <frame x="120" y="72" width="700" height="468" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading1'>Features Coming Soon</para>
@@ -202,7 +202,7 @@
         </frame>
     </slide>
 
-    <slide id="Part2" title="Part 2" effectname='Blinds' effectdirection='0'>
+    <slide id="Part2" title="Part 2" effectname='Blinds' effectdirection='0' outlinelevel='0'>
         <frame x="120" y="72" width="700" height="468" 
 			leftmargin="36" rightmargin="36">
 			<para/>
@@ -215,7 +215,7 @@
     </slide>
 
     <slide id="Slide201" title="Tag: Presentation"
-		 effectname='Blinds' effectdirection='0'>
+		 effectname='Blinds' effectdirection='0' outlinelevel='1'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading2'>Tag "presentation"</para>
@@ -234,7 +234,7 @@
     </slide>
 
     <slide id="Slide202" title="Tag: Stylesheet"
-		 effectname='Blinds' effectdirection='0'>
+		 effectname='Blinds' effectdirection='0' outlinelevel='1'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading2'>Tag "stylesheet"</para>
@@ -261,7 +261,7 @@
 
 
     <slide id="Slide203" title="Tag: Section"
-		 effectname='Blinds' effectdirection='0'>
+		 effectname='Blinds' effectdirection='0' outlinelevel='1'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading2'>Tag "section"</para>
@@ -283,7 +283,7 @@
     </slide>
 
     <slide id="Slide204" title="Tag: Slide"
-		 effectname='Blinds' effectdirection='0'>
+		 effectname='Blinds' effectdirection='0' outlinelevel='1'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading2'>Tag "slide"</para>
@@ -307,7 +307,7 @@
     </slide>
 
     <slide id="Slide205" title="Tag: Frame"
-		 effectname='Blinds' effectdirection='0'>
+		 effectname='Blinds' effectdirection='0' outlinelevel='1'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading2'>Tag "frame"</para>
@@ -332,7 +332,7 @@
     </slide>
 
     <slide id="Slide206" title="Flowable Objects"
-		 effectname='Blinds' effectdirection='0'>
+		 effectname='Blinds' effectdirection='0' outlinelevel='1'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading2'>Tag family - "Flowable Objects"</para>
@@ -351,7 +351,7 @@
     </slide>
 
     <slide id="Slide207" title="Tag: para"
-		 effectname='Blinds' effectdirection='0'>
+		 effectname='Blinds' effectdirection='0' outlinelevel='2'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading2'>Tag "para" - Paragraphs</para>
@@ -379,7 +379,7 @@
     </slide>
 
     <slide id="Slide207" title="Tag: preformat"
-		 effectname='Blinds' effectdirection='0'>
+		 effectname='Blinds' effectdirection='0' outlinelevel='2'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading2'>Tag "preformat"</para>
@@ -398,7 +398,7 @@
     </slide>
 
     <slide id="Slide208" title="Tag: image"
-		 effectname='Blinds' effectdirection='0'>
+		 effectname='Blinds' effectdirection='0' outlinelevel='2'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading2'>Tag "image" - flowing images</para>
@@ -420,7 +420,7 @@
     </slide>
 
     <slide id="Slide209" title="Drawable Objects"
-		 effectname='Blinds' effectdirection='0'>
+		 effectname='Blinds' effectdirection='0' outlinelevel='1'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading2'>Tag family - "Drawable Objects"</para>
@@ -441,7 +441,7 @@
     </slide>
 
     <slide id="Slide210" title="Tag: FixedImage"
-		 effectname='Blinds' effectdirection='0'>
+		 effectname='Blinds' effectdirection='0' outlinelevel='2'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
             <para style='Heading2'>Tag "fixedimage"</para>
@@ -460,7 +460,7 @@
         </frame>
     </slide>
 
-    <slide id="Slide211" title="Tag: Rectangle" >
+    <slide id="Slide211" title="Tag: Rectangle" outlinelevel='2'>
 		 effectname='Blinds' effectdirection='0'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
@@ -477,7 +477,7 @@
         </frame>
     </slide>
 
-    <slide id="Slide212" title="Tag: RoundRect" >
+    <slide id="Slide212" title="Tag: RoundRect" outlinelevel='2'>
 		 effectname='Blinds' effectdirection='0'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
@@ -488,7 +488,7 @@
         </frame>
     </slide>
 
-    <slide id="Slide213" title="Tag: Ellipse" >
+    <slide id="Slide213" title="Tag: Ellipse" outlinelevel='2'>
 		 effectname='Blinds' effectdirection='0'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
@@ -509,7 +509,7 @@
         </frame>
     </slide>
 
-    <slide id="Slide214" title="Tag: Polygon" >
+    <slide id="Slide214" title="Tag: Polygon" outlinelevel='2'>
 		 effectname='Blinds' effectdirection='0'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
@@ -529,7 +529,7 @@
         </frame>
     </slide>
 
-    <slide id="Slide215" title="Tag: Line" >
+    <slide id="Slide215" title="Tag: Line" outlinelevel='2'>
 		 effectname='Blinds' effectdirection='0'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
@@ -548,7 +548,7 @@
         </frame>
     </slide>
 
-    <slide id="Slide215" title="Tag: String" >
+    <slide id="Slide215" title="Tag: String" outlinelevel='2'>
 		 effectname='Blinds' effectdirection='0'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
@@ -574,7 +574,7 @@
         </frame>
     </slide>
 
-    <slide id="Slide216" title="Tag: CustomShape" >
+    <slide id="Slide216" title="Tag: CustomShape" outlinelevel='2'>
 		 effectname='Blinds' effectdirection='0'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: stdparser.py,v $
+#	Revision 1.4  2000/04/28 17:04:28  andy_robinson
+#	Changed to display multiple outline levels
+#
 #	Revision 1.3  2000/04/14 12:17:05  rgbecker
 #	Splitting layout.py
-#
+#	
 #	Revision 1.2  2000/04/06 12:15:38  andy_robinson
 #	Updated example XML to include full tag reference
 #	
@@ -92,7 +95,8 @@ class PPMLParser(xmllib.XMLParser):
             'effectdimension':'H',   # H or V - horizontal or vertical
             'effectmotion':'I',     # Inwards or Outwards
             'effectduration':'1',    #seconds,
-            'outlineEntry':'None'
+            'outlineentry':'None',
+            'outlinelevel':'0'       # 1 is a child, 2 is a grandchild etc.
             },
         'para': {
             'style':'Normal',
@@ -250,8 +254,11 @@ class PPMLParser(xmllib.XMLParser):
 
 
         #HACK - may not belong here in the long run...
-        if args['outlineEntry'] <> 'None':
-            s.outlineEntry = args['outlineEntry']
+        if args['outlineentry'] <> 'None':
+            s.outlineEntry = args['outlineentry']
+        else:
+            s.outlineEntry = args['title']
+        s.outlineLevel = string.atoi(args['outlinelevel'])
         
 
         #let it know its section, which may be none

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.15  2000/04/28 17:04:28  andy_robinson
+#	Changed to display multiple outline levels
+#
 #	Revision 1.14  2000/04/25 14:37:18  rgbecker
 #	Commented out call of _inPage0
-#
+#	
 #	Revision 1.13  2000/04/14 12:17:05  rgbecker
 #	Splitting layout.py
 #	
@@ -78,7 +81,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.14 2000/04/25 14:37:18 rgbecker Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.15 2000/04/28 17:04:28 andy_robinson Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -142,7 +145,7 @@ class PPPresentation:
         self.description = None
         self.slides = []
         self.effectName = None
-        self.showOutline = 0   #should it be displayed when opening?
+        self.showOutline = 1   #should it be displayed when opening?
         
         #assume landscape        
         self.pageWidth = layout.DEFAULT_PAGE_SIZE[1]  
@@ -154,16 +157,12 @@ class PPPresentation:
                                 pagesize = (self.pageWidth, self.pageHeight)
                                )
         canv.setPageCompression(0)
-        canv.outlineNames = []   #HACK - not a normal attribute of a canvas, we are stashing
-                        #stuff here
             
         for slide in self.slides:
             slide.drawOn(canv)
             canv.showPage()
 
-        #draw the outline
-        if canv.outlineNames <> []:
-            apply(canv.setOutlineNames0, canv.outlineNames)
+        #ensure outline visible by default
         if self.showOutline:
             canv.showOutline0()
         canv.save()        
@@ -186,6 +185,7 @@ class PPSlide:
         self.id = None
         self.title = None
         self.outlineEntry = None
+        self.outlineLevel = 0   # can be higher for sub-headings
         self.effectName = None
         self.effectDirection = 0
         self.effectDimension = 'H'
@@ -202,12 +202,14 @@ class PPSlide:
                         dimension = self.effectDimension,
                         motion = self.effectMotion
                         )
-        if self.title:
+        if self.outlineEntry:
+            #gets an outline automatically
+            self.showOutline = 1
             #put an outline entry in the left pane
             tag = self.title
             #canv._inPage0()
             canv.bookmarkPage0(tag)
-            canv.outlineNames.append(tag)
+            canv.addOutlineEntry0(tag, tag, self.outlineLevel)
             
             
         
