@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/platdemos.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.8 2003/12/03 15:19:43 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.9 2003/12/03 16:49:47 johnprecedo Exp $
 """This includes some demos of platypus for use in the API proposal"""
-__version__=''' $Id: figures.py,v 1.8 2003/12/03 15:19:43 johnprecedo Exp $ '''
+__version__=''' $Id: figures.py,v 1.9 2003/12/03 16:49:47 johnprecedo Exp $ '''
 
 import os
 
@@ -58,8 +58,8 @@ class Figure(Flowable):
         self.canv.translate(0, self.captionHeight)
         if self.background:
             self.drawBackground()
-        self.drawBorder()
         self.drawFigure()
+        self.drawBorder() # makes sure border isn't overwritten
 
     def drawBorder(self):
         self.canv.rect(0, 0, self.width, self.figureHeight)
