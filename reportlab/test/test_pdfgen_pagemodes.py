@@ -1,8 +1,11 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testPageMode.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_pagemodes.py,v 1.1 2001/02/14 11:29:36 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_pagemodes.py,v 1.2 2001/02/19 13:22:29 dinu_gherman Exp $
 # full screen test
+
+"""Tests for PDF page modes support in reportlab.pdfgen.
+"""
 
 
 import os
