@@ -2,15 +2,49 @@
 Tests for the text Label class.
 """
 
-import os, sys, copy
+import os, sys, copy, tempfile
+from os.path import join, basename, splitext
 
 from reportlab.test import unittest
 from reportlab.lib import colors
 from reportlab.lib.units import cm
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.graphics.shapes import *
 from reportlab.graphics.charts.textlabel0 import Label
-from reportlab.graphics.renderPDF import drawToFile
+from reportlab.platypus.flowables import Spacer, PageBreak
+from reportlab.platypus.paragraph import Paragraph
+from reportlab.platypus.xpreformatted import XPreformatted
+from reportlab.platypus.frames import Frame
+from reportlab.platypus.doctemplate \
+     import PageTemplate, BaseDocTemplate
+
+
+def myMainPageFrame(canvas, doc):
+    "The page frame used for all PDF documents."
+    
+    canvas.saveState()
+
+    #canvas.rect(2.5*cm, 2.5*cm, 15*cm, 25*cm)
+    canvas.setFont('Times-Roman', 12)
+    pageNumber = canvas.getPageNumber()
+    canvas.drawString(10*cm, cm, str(pageNumber))
+
+    canvas.restoreState()
+    
+
+class MyDocTemplate(BaseDocTemplate):
+    "The document template used for all PDF documents."
+    
+    _invalidInitArgs = ('pageTemplates',)
+    
+    def __init__(self, filename, **kw):
+        frame1 = Frame(2.5*cm, 2.5*cm, 15*cm, 25*cm, id='F1')
+        self.allowSplitting = 0
+        apply(BaseDocTemplate.__init__, (self, filename), kw)
+        template = PageTemplate('normal', [frame1], myMainPageFrame)
+        self.addPageTemplates(template)
 
 
 class LabelTestCase(unittest.TestCase):
@@ -29,28 +63,26 @@ class LabelTestCase(unittest.TestCase):
         c.save()
 
 
-    def test1(self):
-        "Test all different box anchors."
-
-        pdfPath = 'test_graphics_charts_textlabel0.pdf'
-        c = Canvas(pdfPath)
-
-        # Set drawing dimensions.
-        w, h = drawWidth, drawHeight = 200, 100
-
-        # Create labels by making variabtions of one prototype.
+    def _makeProtoLabel(self):
+        "Return a label prototype for further modification."
+        
         protoLabel = Label()
         protoLabel.dx = 0
         protoLabel.dy = 0
         protoLabel.boxStrokeWidth = 0.1
         protoLabel.boxStrokeColor = colors.black
-        protoLabel.boxFillColor = colors.lemonchiffon
-        protoLabel.fontName = 'Helvetica'
-        protoLabel.fontSize = 12
+        protoLabel.boxFillColor = colors.yellow
         # protoLabel.text = 'Hello World!' # Does not work as expected.
-        protoLabel.setOrigin(drawWidth/2, drawHeight/2)
 
-        y = 1*cm
+        return protoLabel
+
+
+    def _makeDrawings(self, protoLabel):
+        # Set drawing dimensions.
+        w, h = drawWidth, drawHeight = 400, 100
+
+        drawings = []
+        
         for boxAnchors in ('sw se nw ne', 'w e n s', 'c'):
             boxAnchors = string.split(boxAnchors, ' ')
             
@@ -64,18 +96,133 @@ class LabelTestCase(unittest.TestCase):
                 # Modify label, put it on a drawing.
                 label = copy.deepcopy(protoLabel)
                 label.boxAnchor = boxAnchor
-                label.setText('Hello World! (%s)' % boxAnchor)
+                args = {'ba':boxAnchor} 
+                label.setText('(%(ba)s) Hello World! (%(ba)s)' % args)
                 labels.append(label)
                 
             for label in labels:
                 d.add(label)
 
-            lm = leftMargin = 2*cm
-            d.drawOn(c, lm, y)
+            drawings.append(d)
 
-            y = y + drawHeight + 1*cm
-            
-        c.save()
+        return drawings
+    
+    
+    def test1(self):
+        "Test all different box anchors."
+
+        # Build story.
+        story = []
+        styleSheet = getSampleStyleSheet()
+        bt = styleSheet['BodyText']
+        h1 = styleSheet['Heading1']
+        h2 = styleSheet['Heading2']
+        h3 = styleSheet['Heading3']
+
+        story.append(Paragraph('Tests for class <i>Label</i>', h1))
+        story.append(Paragraph('Testing box anchors', h2))
+        story.append(Paragraph("""This should display "Hello World" labels
+written as black text on a yellow box relative to the origin of the crosshair
+axes. The labels indicate their relative position being one of the nine
+canonical points of a box: sw, se, nw, ne, w, e, n, s or c (standing for
+<i>southwest</i>, <i>southeast</i>... and <i>center</i>).""", bt))
+        story.append(Spacer(0, 0.5*cm))
+
+        # Round 1
+        story.append(Paragraph('Helvetica 10pt', h3))
+        story.append(Spacer(0, 0.5*cm))
+
+        w, h = drawWidth, drawHeight = 400, 100
+        protoLabel = self._makeProtoLabel()
+        protoLabel.setOrigin(drawWidth/2, drawHeight/2)
+        protoLabel.textAnchor = 'start'
+        protoLabel.fontName = 'Helvetica'
+        protoLabel.fontSize = 10
+        drawings = self._makeDrawings(protoLabel)
+        for d in drawings:
+            story.append(d)
+            story.append(Spacer(0, 1*cm))
+
+        story.append(PageBreak())
+
+        # Round 2
+        story.append(Paragraph('Helvetica 18pt', h3))
+        story.append(Spacer(0, 0.5*cm))
+
+        w, h = drawWidth, drawHeight = 400, 100
+        protoLabel = self._makeProtoLabel()
+        protoLabel.setOrigin(drawWidth/2, drawHeight/2)
+        protoLabel.textAnchor = 'start'
+        protoLabel.fontName = 'Helvetica'
+        protoLabel.fontSize = 18
+        drawings = self._makeDrawings(protoLabel)
+        for d in drawings:
+            story.append(d)
+            story.append(Spacer(0, 1*cm))
+
+        story.append(PageBreak())
+
+        story.append(Paragraph('Testing text (and box) anchors', h2))
+        story.append(Paragraph("""This should display labels as before,
+but also show some effect of setting the textAnchor attribute.""", bt))
+        story.append(Spacer(0, 0.5*cm))
+
+        # Round 3
+        story.append(Paragraph("Helvetica 10pt, textAnchor='start'", h3))
+        story.append(Spacer(0, 0.5*cm))
+
+        w, h = drawWidth, drawHeight = 400, 100
+        protoLabel = self._makeProtoLabel()
+        protoLabel.setOrigin(drawWidth/2, drawHeight/2)
+        protoLabel.textAnchor = 'start'
+        protoLabel.fontName = 'Helvetica'
+        protoLabel.fontSize = 10
+        drawings = self._makeDrawings(protoLabel)
+        for d in drawings:
+            story.append(d)
+            story.append(Spacer(0, 1*cm))
+
+        story.append(PageBreak())
+
+        # Round 4
+        story.append(Paragraph("Helvetica 10pt, textAnchor='middle'", h3))
+        story.append(Spacer(0, 0.5*cm))
+
+        w, h = drawWidth, drawHeight = 400, 100
+        protoLabel = self._makeProtoLabel()
+        protoLabel.setOrigin(drawWidth/2, drawHeight/2)
+        protoLabel.textAnchor = 'middle'
+        protoLabel.fontName = 'Helvetica'
+        protoLabel.fontSize = 10
+        drawings = self._makeDrawings(protoLabel)
+        for d in drawings:
+            story.append(d)
+            story.append(Spacer(0, 1*cm))
+
+        story.append(PageBreak())
+
+        # Round 5
+        story.append(Paragraph("Helvetica 10pt, textAnchor='end'", h3))
+        story.append(Spacer(0, 0.5*cm))
+
+        w, h = drawWidth, drawHeight = 400, 100
+        protoLabel = self._makeProtoLabel()
+        protoLabel.setOrigin(drawWidth/2, drawHeight/2)
+        protoLabel.textAnchor = 'end'
+        protoLabel.fontName = 'Helvetica'
+        protoLabel.fontSize = 10
+        drawings = self._makeDrawings(protoLabel)
+        for d in drawings:
+            story.append(d)
+            story.append(Spacer(0, 1*cm))
+
+        story.append(PageBreak())
+
+        pdfPath = 'test_graphics_charts_textlabel0.pdf'
+        tempfile.tempdir = os.curdir
+        path = join(tempfile.tempdir, pdfPath)
+        doc = MyDocTemplate(path)
+        doc.multiBuild0(story)
 
 
 def makeSuite():
