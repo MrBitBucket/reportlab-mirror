@@ -1147,13 +1147,9 @@ class FastPara(Flowable):
                 x = thisindent + extra
             elif alignment==TA_JUSTIFY:
                 x = thisindent
-                extra = basicWidth - length
-                wordspace = extra*1.0/nwords
                 if count<nlines:
-                    
-                    # patch from doug@pennatus.com, 9 Nov 2002
-                    # was: textobject.setWordSpace(wordspace)
-                    textobject.setWordSpace((extra*1.0/(nwords - 1)))
+                    # patch from doug@pennatus.com, 9 Nov 2002, no extraspace on last line
+                    textobject.setWordSpace((basicWidth-length)/(nwords-1.0))
                 else:
                     textobject.setWordSpace(0.0)
             textobject.setTextOrigin(x,y)
