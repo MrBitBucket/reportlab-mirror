@@ -1,7 +1,7 @@
     #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/spider.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/spider.py,v 1.8 2003/06/19 15:28:40 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/spider.py,v 1.9 2003/06/19 17:33:00 rgbecker Exp $
 # spider chart, also known as radar chart
 
 """Spider Chart
@@ -10,7 +10,7 @@ Normal use shows variation of 5-10 parameters against some 'norm' or target.
 When there is more than one series, place the series with the largest
 numbers first, as it will be overdrawn by each successive one.
 """
-__version__=''' $Id: spider.py,v 1.8 2003/06/19 15:28:40 rgbecker Exp $ '''
+__version__=''' $Id: spider.py,v 1.9 2003/06/19 17:33:00 rgbecker Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -30,7 +30,7 @@ from reportlab.graphics.shapes import Group, Drawing, Line, Rect, Polygon, Ellip
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.areas import PlotArea
 from piecharts import WedgeLabel
-from reportlab.graphics.widgets.markers import Marker
+from reportlab.graphics.widgets.markers import makeMarker, uSymbol2Symbol
 
 class StrandProperties(PropHolder):
     """This holds descriptive information about concentric 'strands'.
@@ -256,16 +256,40 @@ class SpiderChart(PlotArea):
 
                 # put in a marker, if it needs one
                 if markers:
-                    marker = Marker(kind = self.strands[rowIdx].markerType,
-                                    size = self.strands[rowIdx].markerSize,
-                                    x =  centerx+car*r,
-                                    y = centery+sar*r,
-                                    fillColor = self.strands[rowIdx].fillColor,
-                                    strokeColor = self.strands[rowIdx].strokeColor,
-                                    strokeWidth = self.strands[rowIdx].strokeWidth,
-                                    angle = 0,
+                    if hasattr(self.strands[rowIdx], 'markerType'):
+                        uSymbol = self.strands[rowIdx].markerType
+                    elif hasattr(self.strands, 'markerType'):
+                        uSymbol = self.strands.markerType
+                    else:
+                        uSymbol = None
+                    m_x =  centerx+car*r
+                    m_y = centery+sar*r
+                    m_size = self.strands[rowIdx].markerSize
+                    m_fillColor = self.strands[rowIdx].fillColor
+                    m_strokeColor = self.strands[rowIdx].strokeColor
+                    m_strokeWidth = self.strands[rowIdx].strokeWidth
+                    m_angle = 0
+                    if type(uSymbol) is type(''):
+                        symbol = makeMarker(uSymbol,
+                                    size = m_size,
+                                    x =  m_x,
+                                    y = m_y,
+                                    fillColor = m_fillColor,
+                                    strokeColor = m_strokeColor,
+                                    strokeWidth = m_strokeWidth,
+                                    angle = m_angle,
                                     )
-                    g.add(marker)
+                    else:
+                        symbol = uSymbol2Symbol(uSymbol,m_x,m_y,m_fillColor)
+                        for k,v in (('size', m_size), ('fillColor', m_fillColor),
+                                    ('x', m_x), ('y', m_y),
+                                    ('strokeColor',m_strokeColor), ('strokeWidth',m_strokeWidth),
+                                    ('angle',m_angle),):
+                            try:
+                                setattr(uSymbol,k,v)
+                            except:
+                                pass
+                    g.add(symbol)
 
             rowIdx = rowIdx + 1
 
