@@ -4,7 +4,7 @@ class _BUILDER:
 	'''Virtual base helper class for structured file scanning'''
 	def _get_struct_fmt(self,info):
 		fmt = '<'
-		for f, None, None in info:
+		for f, _, _ in info:
 			fmt += f
 		return fmt
 
@@ -13,7 +13,7 @@ class _BUILDER:
 		size = struct.calcsize(fmt)
 		T = struct.unpack(fmt,f.read(size))
 		i = 0
-		for None, n, None in info:
+		for _, n, _ in info:
 			setattr(self,n,T[i])
 			i = i + 1
 
