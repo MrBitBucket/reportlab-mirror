@@ -161,12 +161,23 @@ def getFunctionBody(f, linesInFile):
 ####################################################################
 # 
 # Special-purpose document builders
-# (This will later be placed in a dedicated file.)
 # 
 ####################################################################
 
 class GraphPdfDocBuilder0(PdfDocBuilder0):
-    "A PDF document builder displaying widget drawings and other info."
+    """A PDF document builder displaying widgets and drawings.
+
+    This generates a PDF file where only methods named 'demo' are
+    listed for any class C. If C happens to be a subclass of Widget
+    and has a 'demo' method, this method is assumed to generate and
+    return a sample widget instance, that is then appended graphi-
+    cally to the Platypus story.
+
+    Something similar happens for functions. If their names start
+    with 'sample' they are supposed to generate and return a sample
+    drawing. This is then taken and appended graphically to the
+    Platypus story, as well.
+    """
 
     fileSuffix = '-graph.pdf'
 
@@ -174,6 +185,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
     def beginMethod(self, name, doc, sig):
         if name == 'demo':
             PdfDocBuilder0.beginMethod(self, name, doc, sig)
+
 
     def endMethod(self, name, doc, sig):
         if name == 'demo':
@@ -192,6 +204,42 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
             self._showWidgetDemoCode(widget)
             self._showWidgetProperties(widget)
             
+
+    # Skip non-sample functions.    
+    def beginFunction(self, name, doc, sig):
+        "Skip function for 'uninteresting' names."
+
+        if name[:6] == 'sample':
+            PdfDocBuilder0.beginFunction(self, name, doc, sig)
+
+
+    def endFunction(self, name, doc, sig):
+        "Append a drawing to the story for special function names."
+
+        if name[:6] != 'sample':
+            return
+        
+        PdfDocBuilder0.endFunction(self, name, doc, sig)    
+        aFunc = eval('self.skeleton.moduleSpace.' + name)
+        drawing = aFunc()
+    
+        self._showDrawingDemo(drawing)
+
+
+    def _showDrawingDemo(self, drawing):
+        """Show a graphical demo of the drawing."""
+
+        # Add the given drawing to the story.
+        # Ignored if no GD rendering available
+        # or the demo method does not return a drawing.
+        try:
+            flo = renderPDF.GraphicsFlowable(drawing)
+            self.story.append(Spacer(6,6))
+            self.story.append(flo)
+            self.story.append(Spacer(6,6))
+        except:
+            pass
+
 
     def _showWidgetDemo(self, widget):
         """Show a graphical demo of the widget."""
@@ -542,13 +590,10 @@ Usage: python graphicsdoc0.py [options]
 
 Examples:
 
-    python graphicsdoc0.py -h
-    python graphicsdoc0.py -m graphicsdoc0.py -f Ascii
-    python graphicsdoc0.py -m string -f Html
-    python graphicsdoc0.py -m signsandsymbols.py -f Pdf
-    python graphicsdoc0.py -p pingo -f Html
     python graphicsdoc0.py -m signsandsymbols.py -f GraphPdf
-    python graphicsdoc0.py -m signsandsymbols.py -f GraphHtml
+    python graphicsdoc0.py -m flags0.py -f GraphHtml
+    python graphicsdoc0.py -m flags0.py -f Platypus
+    python graphicsdoc0.py -m barchart1.py -f GraphPdf
 """
 
 
@@ -645,11 +690,6 @@ def main():
     
     opts, args = getopt.getopt(sys.argv[1:], 'hf:m:p:')
 
-##    # Without options run the previous main() generating lots of files.
-##    if opts == []:
-##        previousMain()
-##        sys.exit(0)
-##
     # On -h print usage and exit immediately.
     for o, a in opts:
         if o == '-h':
