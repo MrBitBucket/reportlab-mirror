@@ -41,7 +41,7 @@ Release Procedure
 
 1) edit reportlab/__init__.py and insert the new version number d.xy
 
-2) use cvs -z9 log >/tmp/log followed by
+2) use cvs -z3 log >/tmp/log followed by
    python utils/cvslh.py -d"2001/mm/dd hh:mm:ss" -s -r </tmp/log >/tmp/logh
    to get a list of the latest changes. The date & time should correspond to
    the previous release. Add the changes into the reportlab changes file at
@@ -51,7 +51,7 @@ Release Procedure
 
 4)	Assign a release tag to the repository for us this is done in a working
 	copy of ReportLab using
-		cvs -z7 tag ReportLab_d_xy
+		cvs -z3 tag ReportLab_d_xy
 	where d.xy was the version number entered into __init__.py
 
 	If you need to tag the repository in www.reportlab.co.uk it is possible
@@ -66,11 +66,13 @@ Release Procedure
 			cvs -z3 upd -A -P -d to create a working copy
 		i)	cvs -z3 tag ReportLab_x_yz
 
+	alternatively log in to co.uk and do an rtag command on the actual repository.
+
 	If there are problems and you need to go back to step 1 and restart it mey be useful
 	to know that you can add a -F to the tag command to allow you to retag a modified
 	source file ie cvs -z3 tag -F ReportLab_d_xy
 
-5)	Login to othala.pair.com
+5)	Login to zlaza.pair.com
 
 	cd bin
 	./daily.py -release ReportLab_d_xy
