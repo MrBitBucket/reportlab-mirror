@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.8  2000/05/16 15:58:27  rgbecker
+#	Fixed font setting bug
+#
 #	Revision 1.7  2000/05/16 14:28:55  rgbecker
 #	Fixes/Changes to get testplatypus to work with new framework
-#
+#	
 #	Revision 1.6  2000/05/15 13:36:11  rgbecker
 #	Splitting changes
 #	
@@ -52,7 +55,7 @@
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.7 2000/05/16 14:28:55 rgbecker Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.8 2000/05/16 15:58:27 rgbecker Exp $ '''
 import string
 import types
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -516,6 +519,8 @@ class Paragraph(Flowable):
 				tx.XtraState.textColor=None
 				tx.XtraState.rise=0
 				tx.setLeading(style.leading)
+				f = lines[0].words[0]
+				tx._setFont(f.fontName, f.fontSize)
 				dpl( tx, offset, lines[0], noJustifyLast and nLines==1)
 
 				#now the middle of the paragraph, aligned with the left margin which is our origin.
