@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.24 2003/10/24 16:59:35 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.25 2003/10/27 14:26:27 johnprecedo Exp $
 """This will be a collection of legends to be used with charts.
 """
-__version__=''' $Id: legends.py,v 1.24 2003/10/24 16:59:35 johnprecedo Exp $ '''
+__version__=''' $Id: legends.py,v 1.25 2003/10/27 14:26:27 johnprecedo Exp $ '''
 
 import string, copy
 
@@ -256,8 +256,8 @@ class LineLegend(Legend):
         dxTextSpace = AttrMapValue(isNumber, desc="Distance between line-swatches and text"),
         autoXPadding = AttrMapValue(isNumber, desc="x Padding between columns if deltax=None"),
         autoYPadding = AttrMapValue(isNumber, desc="y Padding between rows if deltay=None"),
-        dx = AttrMapValue(isNumber, desc="Width of line-swatch"),
-        dy = AttrMapValue(isNumber, desc="Height of line-swatch"),
+        dx = AttrMapValue(isNumber, desc="Width of line-swatch - ie length of the line"),
+        dy = AttrMapValue(isNumber, desc="Height of line-swatch - ie strokeWidth to be used for the line"),
         columnMaximum = AttrMapValue(isNumber, desc="Max. number of items per column"),
         alignment = AttrMapValue(OneOf("left", "right"), desc="Alignment of text with respect to line-swatches"),
         colorNamePairs = AttrMapValue(None, desc="List of color/name tuples (color can also be widget)"),
@@ -351,22 +351,18 @@ class LineLegend(Legend):
             # Make a 'normal' color line-swatch...
             if isinstance(col, colors.Color):
                 l =  LineSwatch()
+                l.x = x
+                l.y = thisy
+                l.width = dx
+                l.height = dy
                 l.strokeColor = col
-                if dy < ascent:
-                    l.y = thisy+((ascent/2.0)-(dy*2.0))
-                else:
-                    l.y = thisy
-                g.add(l.draw())
+                g.add(l)
             else:
                 #try and see if we should do better.
                 try:
                     c = copy.deepcopy(col)
                     c.x = x
                     c.y = thisy
-                    if dy < ascent:
-                        c.y = thisy+((ascent/2.0)-(dy*2.0))
-                    else:
-                        c.y = thisy
                     c.width = dx
                     c.height = dy
                     g.add(c)
@@ -441,6 +437,51 @@ def sample2c():
     items = map(lambda i:(getattr(colors, i), i), items)
     legend.colorNamePairs = items
 
+    d.add(legend, 'legend')
+
+    return d
+
+def sample3():
+    "Make sample legend with line swatches."
+
+    d = Drawing(200, 100)
+
+    legend = LineLegend()
+    legend.alignment = 'right'
+    legend.x = 20
+    legend.y = 90
+    legend.deltax = 60
+    legend.dxTextSpace = 10
+    legend.columnMaximum = 4
+    items = string.split('red green blue yellow pink black white', ' ')
+    items = map(lambda i:(getattr(colors, i), i), items)
+    legend.colorNamePairs = items
+    d.add(legend, 'legend')
+
+    return d
+
+
+def sample3a():
+    "Make sample legend with line swatches and dasharrays on the lines."
+
+    d = Drawing(200, 100)
+
+    legend = LineLegend()
+    legend.alignment = 'right'
+    legend.x = 20
+    legend.y = 90
+    legend.deltax = 60
+    legend.dxTextSpace = 10
+    legend.columnMaximum = 4
+    items = string.split('red green blue yellow pink black white', ' ')
+    darrays = ([2,1], [2,5], [2,2,5,5], [1,2,3,4], [4,2,3,4], [1,2,3,4,5,6], [1])
+    cnp = []
+    for i in range(0, len(items)):
+        l =  LineSwatch()
+        l.strokeColor = getattr(colors, items[i])
+        l.strokeDashArray = darrays[i]
+        cnp.append((l, items[i]))
+    legend.colorNamePairs = cnp
     d.add(legend, 'legend')
 
     return d
