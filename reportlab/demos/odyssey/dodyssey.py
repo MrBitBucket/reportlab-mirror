@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: dodyssey.py,v $
+#	Revision 1.2  2000/05/12 14:19:03  andy_robinson
+#	Added 'if __name__=='__main__'' handlers to demos
+#
 #	Revision 1.1  2000/05/12 12:45:27  rgbecker
 #	Initial doctemplate version of fodyssey.py
-#
+#	
 #	Revision 1.4  2000/04/14 12:17:05  rgbecker
 #	Splitting layout.py
 #	
@@ -46,7 +49,7 @@
 #	Revision 1.1  2000/04/06 08:58:09  rgbecker
 #	Paragraph formatting version of odyssey.py
 #	
-__version__=''' $Id: dodyssey.py,v 1.1 2000/05/12 12:45:27 rgbecker Exp $ '''
+__version__=''' $Id: dodyssey.py,v 1.2 2000/05/12 14:19:03 andy_robinson Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -227,4 +230,5 @@ for fn in ('Odyssey.full.txt','Odyssey.txt'):
 	if os.path.isfile(fn):
 		break
 
-parseOdyssey(fn)
+if __name__=='__main__':
+	parseOdyssey(fn)
