@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_paragraphs.py,v 1.14 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_paragraphs.py,v 1.15 2003/04/22 12:29:19 rgbecker Exp $
 # tests some paragraph styles
 
 from reportlab.test import unittest
@@ -112,6 +112,7 @@ class ParagraphTestCase(unittest.TestCase):
         story.append(Paragraph("""This has <font color=blue>blue text</font> here.""", styNormal))
         story.append(Paragraph("""This has <i>italic text</i> here.""", styNormal))
         story.append(Paragraph("""This has <b>bold text</b> here.""", styNormal))
+        story.append(Paragraph("""This has <u>underlined text</u> here.""", styNormal))
         story.append(Paragraph("""This has m<super>2</super> a superscript.""", styNormal))
         story.append(Paragraph("""This has m<sub>2</sub> a subscript.""", styNormal))
         story.append(Paragraph("""This has a font change to <font name=Helvetica>Helvetica</font>.""", styNormal))
