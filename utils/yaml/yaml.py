@@ -105,7 +105,7 @@ class Parser:
                 self.endPara()
             else:  #preformatted, append it
                 self._buf.append(line)
-        elif stripped[0]=='.':
+        elif line[0]=='.':
             # we have a command of some kind
             self.endPara()
             words = string.split(stripped[1:])

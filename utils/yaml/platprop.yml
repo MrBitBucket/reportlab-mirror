@@ -1,30 +1,6 @@
 """
 .t PLATYPUS Proposal
 
-CVS Revision History
-.beginPre Code
-$Log: platprop.yml,v $
-Revision 1.8  2000/05/18 11:27:18  rgbecker
-Minor textual changes
-
-Revision 1.7  2000/05/17 22:18:09  rgbecker
-Renamed BasicFrame to Frame
-
-Revision 1.6  2000/05/17 16:30:09  rgbecker
-Removal of SimpleFrame
-
-Revision 1.5  2000/05/16 15:40:25  andy_robinson
-It now actually says something - checking in before going home
-
-Revision 1.4  2000/05/16 11:18:10  andy_robinson
-Added the first of the demo drawings
-
-Revision 1.3  2000/05/15 16:02:41  andy_robinson
-More Paragraph Documentation
-
-Revision 1.1  2000/05/15 10:58:54  andy_robinson
-Platypus Proposal
-.endPre
 
 This document is only partly written.  Anticipated sections:
 .bu     What is PLATYPUS about?
@@ -37,35 +13,103 @@ This document is only partly written.  Anticipated sections:
 
 .h2 What is this document about?
 
-The ReportLab toolkit aims to be a new generation of reporting tool, with no limits to formatting.  We expect it to grow large, so have divided it into a number of subpackages with clear layers of functionality.
+The ReportLab toolkit aims to be a new generation of reporting tool,
+with no limits to formatting.  We expect it to grow large, so have
+divided it into a number of subpackages with clear layers of
+functionality.
 
-The most basic layer for mist users is the pdfgen subpackage.  This exposes a Canvas object with methods which correspond almost one-to-one with the page marking operators in the PDF file format.  This means that programmers can write code to do anything they want, and build up their own layers of reusable code on top.  However, many common requirements are not met by PDF directly - it does not do anything to help you wrap paragraphs or move down the page.  
+The fundamental layer is the pdfgen subpackage.  This
+exposes a Canvas object with methods which correspond almost
+one-to-one with the page marking operators in the PDF file format.
+This means that programmers can write code to do anything they want,
+and build up their own layers of reusable code on top.  However, many
+common requirements are not met by PDF directly - it does not do
+anything to help you wrap paragraphs or move down the page.
 
-PLATYPUS stands for "Page Layout and Typography Using Scripts".  It is the "next layer up" and deals with frames on pages, and "flowable objects" such as paragraphs, images or tables which can be placed within them.  Users will be able to generate "stories" containing paragraphs and other objects, and write "document templates" to process them, hopefully with very few limitations on the effects thatcan be achieved.
+PLATYPUS stands for "Page Layout and Typography Using Scripts".  It is
+"one layer up" and deals with frames on pages, and "flowable
+objects" such as paragraphs, images or tables which can be placed
+within them.  Users will be able to generate "stories" containing
+paragraphs and other objects, and write "document templates" to
+process them, hopefully with very few limitations on the effects
+thatcan be achieved.
 
-This was always an envisaged part of the package, but has taken a long time to get right.  The first try was done in July 1999 for the Open Source conference (in fact, it was needed to make the presentation slides), but was simply too hideous to release.  A second try was put together in November 1999 and progressively refined, appearing when PDFgen was renamed to ReportLab.  This made it possible to produce very basic flowing documents, but lacked many key features and still wasn't general enough.  
+.h2 Work to date
 
-We have been discussing better implementations for several months and now think we have something promising.  Robin Becker has just checked a trial implementation into CVS, and we have used it to create this document.  Our main goals in May and June are to get feedback on and solidify this API, and to use it to produce our own documentation.  We therefore invite comment from the ReportLab and Python community.   The content of this document will be updated as comments are received, and the formatting will hopefully get prettier as we learn how to make nice DocTemplates!
+PLATYPUS was always an envisaged part of the package, but has taken a
+long time to get into shape.  Andy Robinson did a first try for the
+Open Source conference in July 1999 (in fact, it was needed to make
+the presentation slides), but was simply too hideous to release. A
+second try was put together in November 1999 and progressively
+refined, appearing when PDFgen was renamed to ReportLab.  This made it
+possible to produce very basic flowing documents, but lacked many key
+features and still wasn't general enough.
 
-Please pay close attention - you will have to live with this for some time, and this I your chance to make sure it is clean and usable!
+In February and March, Gordon McMillan was asked to propose a revised
+API which separated the "story" and the "document template", with the
+general goal of "making it all data driven".  He delivered a basic
+framework in double-quick time.  In the meantime, we all worked on
+projects involving tables and text and began to understand the real
+requirements in more detail.  One major upshot was that while the
+"story" could easily be seen as data, the variety of formatting tasks
+we might want to carry out in the "document tamplate" was almost
+infinite; as we thought about extending the document template model to
+cope, we realised we were defining a new 'meta-language', and that it
+would not be a small one.
+
+Robin Becker then had a key insight:  he remarked that if we had to
+work in some language to define report templates, he'd prefer it was
+Python. We were working a lot with XML parsers at the time and we
+quickly ended up with the idea of the Document Template being a 'story
+processor' class which raised events you could hook into when changing
+pages, templates, paragraphs and so on. This instantly felt like the
+right idea:  no limits to what you could do, templates to be written
+in Python code, and above all it was simple and small.
+
+There was a lot of work to do on the details, especially splitting
+paragraphs.  Robin Becker has just checked a trial implementation into
+CVS, and we have used it to create this document.  Our main goals in
+May and June are to get feedback on and solidify this API, and to use
+it to produce our own documentation.  We therefore invite comment from
+the ReportLab and Python community.  The content of this document will
+be updated as comments are received, and the formatting will hopefully
+get prettier as we learn how to make nice DocTemplates!
+
+Please pay close attention - you will have to live with this for some
+time, and this I your chance to make sure it is clean and usable!
 
 
 .h2 Use Cases
 
 PLATYPUS should facilitate at least the following kinds of applications:
-.bu     Text Wrapping:  you are writing code to create a form, but this needs a few paragraphs of justified, wrapped text.  You don't want to do the wrapping yourself!
-.bu    Word-Processor style reports which automatically flow from one page to the next, with page headers and footers which can be related to the story content (e.g. page numbers, chapter headings in titles)
-.bu    Database style reports where a large data set is divided into groups with group headers and footers, each occupying a rectangular region on the page, and which flow from page to page
-.bu    Tables and box constructions in which each cell can contain flowing text, images and other graphic objects
+.bu     Text Wrapping:  you are writing code to create a form, but this
+        needs a few paragraphs of justified, wrapped text.  You don't
+        want to do the wrapping yourself!
+.bu     Word-Processor style reports which automatically flow from one
+        page to the next, with page headers and footers which can be
+        related to the story content (e.g. page numbers, chapter
+        headings in titles)
+.bu     Database style reports where a large data set is divided into
+        groups with group headers and footers, each occupying a rectangular
+        region on the page, and which flow from page to page
+.bu     Tables and box constructions in which each cell can contain
+        flowing text, images and other graphic objects
 
-Specifically, we would like to be able to build a book, or the Python Library Reference, automatically from source.
+Specifically, we would like to be able to build a book, or the Python
+Library Reference, automatically from source.
 
 PLATYPUS is NOT designed for
-.bu    Precision typesetting by hand - if you are hand-editing a document and want PDF, use something else (Word, FrameMaker, TeX) and distill the output to PDF instead.  ReportLab is about reports, where you want to automatically generate the same kind of document many times.
+.bu     Precision typesetting by hand - if you are hand-editing a document
+        and want PDF, use something else (Word, FrameMaker, TeX) and distill
+        the output to PDF instead.  ReportLab is about reports, where you
+        want to automatically generate the same kind of document many times.
 
-.bu   Mathematical typography.  While people no doubt could create some nice equation widgets in our framework, TEX will probably never be exceeded in this regard.
+.bu     Mathematical typography.  While people no doubt could create some
+        nice equation widgets in our framework, TEX will probably never be
+        exceeded in this regard.
 
-.bu     Quick and dirty database reports on Windows machines which go straight to a printer - Access, Crystal et al. handle this well already.
+.bu     Quick and dirty database reports on Windows machines which go straight
+        to a printer - Access, Crystal et al. handle this well already.
 
 
  
@@ -421,6 +465,35 @@ class MyPageTemplate(PageTemplate):
         canvas.restoreState()
 
 .endPre
+
+CVS Revision History
+.beginPre Code
+$Log: platprop.yml,v $
+Revision 1.9  2000/05/22 09:49:29  andy_robinson
+More accurate history a start of document
+
+Revision 1.8  2000/05/18 11:27:18  rgbecker
+Minor textual changes
+
+Revision 1.7  2000/05/17 22:18:09  rgbecker
+Renamed BasicFrame to Frame
+
+Revision 1.6  2000/05/17 16:30:09  rgbecker
+Removal of SimpleFrame
+
+Revision 1.5  2000/05/16 15:40:25  andy_robinson
+It now actually says something - checking in before going home
+
+Revision 1.4  2000/05/16 11:18:10  andy_robinson
+Added the first of the demo drawings
+
+Revision 1.3  2000/05/15 16:02:41  andy_robinson
+More Paragraph Documentation
+
+Revision 1.1  2000/05/15 10:58:54  andy_robinson
+Platypus Proposal
+.endPre
+
 """
 
 
