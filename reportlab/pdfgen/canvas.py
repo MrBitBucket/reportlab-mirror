@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.94 2001/11/26 23:11:54 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.94 2001/11/26 23:11:54 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.95 2001/12/19 18:41:00 aaron_watters Exp $
+__version__=''' $Id: canvas.py,v 1.95 2001/12/19 18:41:00 aaron_watters Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -176,22 +176,46 @@ class Canvas:
         self._strokeColorRGB = (0,0,0)
 
     def push_state_stack(self):
+        
         state = {}
+        d = self.__dict__
         for name in self.STATE_ATTRIBUTES:
-            state[name] = getattr(self, name)
+            state[name] = d[name] #getattr(self, name)
+        #state = d.copy() # this is no faster.
+        #del state["state_stack"]
+        self.state_stack.append(state)
+        return
+        
+        stateatts = self.STATE_ATTRIBUTES # list based alternative (not used)
+        staterange = self.STATE_RANGE
+        state = list(staterange)
+        d = self.__dict__
+        for i in staterange:
+            state[i] = d[stateatts[i]] #getattr(self, stateatts[i])
         self.state_stack.append(state)
 
     def pop_state_stack(self):
+        
         state = self.state_stack[-1]
         del self.state_stack[-1]
-        for name in self.STATE_ATTRIBUTES:
-            setattr(self, name, state[name])
+        d = self.__dict__
+        #for name in self.STATE_ATTRIBUTES:
+        #    d[name] = state[name] #setattr(self, name, state[name])
+        d.update(state)
+        return
+        
+        stateatts = self.STATE_ATTRIBUTES # list based alternative (not used)
+        staterange = self.STATE_RANGE
+        d = self.__dict__
+        for i in staterange:
+            d[i] = stateatts[i] #setattr(self, stateatts[i], state[i])
 
     STATE_ATTRIBUTES = split("""
      _x _y _fontname _fontsize _textMode _leading _currentMatrix _fillMode
      _fillMode _charSpace _wordSpace _horizScale _textRenderMode _rise _textLineMatrix
      _textMatrix _lineCap _lineJoin _lineDash _lineWidth _mitreLimit _fillColorRGB
      _strokeColorRGB""")
+    STATE_RANGE = range(len(STATE_ATTRIBUTES))
 
         #self._addStandardFonts()
         
