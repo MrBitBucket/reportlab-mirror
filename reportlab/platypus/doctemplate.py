@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.41 2001/08/01 13:01:44 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.42 2001/08/13 11:54:42 rgbecker Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.41 2001/08/01 13:01:44 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.42 2001/08/13 11:54:42 rgbecker Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -32,7 +32,7 @@ for the current frame).
 from reportlab.platypus.flowables import *
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
-from reportlab.rl_config import defaultPageSize
+from reportlab.rl_config import defaultPageSize, _verbose
 import reportlab.lib.sequencer
 
 from types import *
@@ -493,7 +493,7 @@ class BaseDocTemplate:
 			
 	def pageRef0(self, label):
 		"""hook to register a page number"""
-		print "pageRef called with label '%s' on page %d" % (
+		if _verbose: print "pageRef called with label '%s' on page %d" % (
 			label, self.page)
 		self._pageRefs[label] = self.page
 		
@@ -514,7 +514,7 @@ class BaseDocTemplate:
 		passes = 0
 		while 1:
 			passes = passes + 1
-			print 'building pass '+str(passes) + '...',
+			if _verbose: print 'building pass '+str(passes) + '...',
 
 			for fl in self._indexingFlowables:
 				fl.beforeBuild()
@@ -546,7 +546,7 @@ class BaseDocTemplate:
 			if passes > maxPasses:
 				raise IndexError, "Index entries not resolved after %d passes" % maxPasses
 		
-		print 'saved'
+		if _verbose: print 'saved'
 
 	#these are pure virtuals override in derived classes
 	#NB these get called at suitable places by the base class
