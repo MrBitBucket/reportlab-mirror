@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.14  2000/04/18 19:50:30  aaron_watters
+#	Minor support for inPage/inForm api elimination in canvas
+#
 #	Revision 1.13  2000/04/15 15:00:09  aaron_watters
 #	added support for addOutlineEntry0 api
-#
+#	
 #	Revision 1.12  2000/04/06 09:52:02  andy_robinson
 #	Removed some old comments; tweaks to experimental Outline methods.
 #	
@@ -62,7 +65,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.13 2000/04/15 15:00:09 aaron_watters Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.14 2000/04/18 19:50:30 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -322,6 +325,7 @@ class PDFDocument:
     def inPage(self):
         """specify the current object as a page (enables reference binding and other page features)"""
         if self.inObject is not None:
+            if self.inObject=="page": return
             raise ValueError, "can't go in page already in object %s" % self.inObject
         self.inObject = "page"
         pagenum = len(self.PageCol.PageList)+1
