@@ -1,5 +1,5 @@
-This direcctory is inteded to act as a placeholder for extending ReportLab
-with extra extensions. It has been packageised with an empty __init__.py.
+This directory is intended to act as a placeholder for extending ReportLab
+with extra extensions. It has been packagised with an empty __init__.py.
 
 So a typical extender should add his package extension as
 
