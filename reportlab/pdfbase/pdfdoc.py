@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.90 2004/01/20 22:50:31 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.90 2004/01/20 22:50:31 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.91 2004/03/18 15:55:50 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.91 2004/03/18 15:55:50 rgbecker Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -914,7 +914,7 @@ class PDFCatalog:
 #  ViewerPreferences, PageLabelDictionaries,
 
 class PDFPages(PDFCatalog):
-    """PAGES TREE WITH ONE INTERNAL NODE, FOR "BALANCING" CHANGE IMPLEMENATION"""
+    """PAGES TREE WITH ONE INTERNAL NODE, FOR "BALANCING" CHANGE IMPLEMENTATION"""
     __Comment__ = "page tree"
     __RefOnly__ = 1
     # note: could implement page attribute inheritance...
@@ -931,7 +931,7 @@ class PDFPages(PDFCatalog):
     def check_format(self, document):
         # convert all pages to page references
         pages = self.pages
-        kids = PDFArray(self.pages)
+        kids = PDFArray(pages)
         # make sure all pages are references
         kids.References(document)
         self.Kids = kids
@@ -1668,10 +1668,6 @@ class PDFTrueTypeFont(PDFType1Font):
 # UGLY ALERT - this needs turning into something O-O, it was hacked
 # across from the pdfmetrics.Encoding class to avoid circularity
 
-
-
-
-
 # skipping CMaps
 
 class PDFFormXObject:
@@ -1737,7 +1733,6 @@ class PDFFormXObject:
         sdict["Resources"] = resources
         return self.Contents.format(document)
 
-
 class PDFPostScriptXObject:
     "For embedding PD (e.g. tray commands) in PDF"
     def __init__(self, content=None):
@@ -1795,7 +1790,6 @@ class PDFImageXObject:
         self.bitsPerComponent = 8
         self._filters = 'ASCII85Decode','FlateDecode' #'A85','Fl'
         if IMG: self._checkTransparency(IMG[0])
-        else: self.mask = None
         self.streamContent = string.join(imagedata[3:-1],'')
 
     def loadImageFromJPEG(self,imageFile):
@@ -1825,16 +1819,21 @@ class PDFImageXObject:
 
     def loadImageFromSRC(self, im):
         "Extracts the stream, width and height"
-        zlib = import_zlib()
-        if not zlib: return
-        self.width, self.height = im.getSize()
-        raw = im.getRGBData()
-        assert(len(raw) == self.width*self.height, "Wrong amount of data for image")
-        self.streamContent = pdfutils._AsciiBase85Encode(zlib.compress(raw))
-        self.colorSpace = 'DeviceRGB'
-        self.bitsPerComponent = 8
-        self._filters = 'ASCII85Decode','FlateDecode' #'A85','Fl'
-        self._checkTransparency(im)
+        if im._image.format=='JPEG':
+            fp=image.fp
+            fp.seek(0)
+            self.loadImageFromJPEG(fp)
+        else:
+            zlib = import_zlib()
+            if not zlib: return
+            self.width, self.height = im.getSize()
+            raw = im.getRGBData()
+            assert(len(raw) == self.width*self.height, "Wrong amount of data for image")
+            self.streamContent = pdfutils._AsciiBase85Encode(zlib.compress(raw))
+            self.colorSpace = 'DeviceRGB'
+            self.bitsPerComponent = 8
+            self._filters = 'ASCII85Decode','FlateDecode' #'A85','Fl'
+            self._checkTransparency(im)
 
     def format(self, document):
         S = PDFStream()
@@ -1848,12 +1847,8 @@ class PDFImageXObject:
         dict["ColorSpace"] = PDFName(self.colorSpace)
         dict["Filter"] = PDFArray(map(PDFName,self._filters))
         dict["Length"] = len(self.streamContent)
-
-        if self.mask:
-            dict["Mask"] = PDFArray(self.mask)
-
+        if self.mask: dict["Mask"] = PDFArray(self.mask)
         return S.format(document)
-
 
 if __name__=="__main__":
     print "There is no script interpretation for pdfdoc."

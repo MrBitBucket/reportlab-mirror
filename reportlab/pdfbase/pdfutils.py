@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.40 2004/01/20 22:50:31 andy_robinson Exp $
-__version__=''' $Id: pdfutils.py,v 1.40 2004/01/20 22:50:31 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.41 2004/03/18 15:55:50 rgbecker Exp $
+__version__=''' $Id: pdfutils.py,v 1.41 2004/03/18 15:55:50 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -13,6 +13,11 @@ from string import join, replace, strip, split
 from reportlab.lib.utils import getStringIO, ImageReader
 
 LINEEND = '\015\012'
+
+def _chunker(src,dst=[],chunkSize=60):
+    for i in xrange(0,len(src),chunkSize):
+        dst.append(src[i:i+chunkSize])
+    return dst
 
 ##########################################################
 #
@@ -40,21 +45,17 @@ def cacheImageFile(filename, returnInMemory=0, IMG=None):
         raw = img.getRGBData()
 
         code = []
-        code.append('BI')   # begin image
         # this describes what is in the image itself
+        code.append('BI')
         code.append('/W %s /H %s /BPC 8 /CS /RGB /F [/A85 /Fl]' % (imgwidth, imgheight))
         code.append('ID')
         #use a flate filter and Ascii Base 85
         assert(len(raw) == imgwidth * imgheight, "Wrong amount of data for image")
         compressed = zlib.compress(raw)   #this bit is very fast...
-        encoded = _AsciiBase85Encode(compressed) #...sadly this isn't
+        encoded = _AsciiBase85Encode(compressed) #...sadly this may not be
 
-        #write in blocks of 60 characters per line
-        outstream = getStringIO(encoded)
-        dataline = outstream.read(60)
-        while dataline <> "":
-            code.append(dataline)
-            dataline = outstream.read(60)
+        #append in blocks of 60 characters
+        _chunker(encoded,code)
 
         code.append('EI')
         if returnInMemory: return code

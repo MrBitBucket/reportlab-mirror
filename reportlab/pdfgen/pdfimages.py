@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pdfimages.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.21 2004/03/17 00:21:39 rgbecker Exp $
-__version__=''' $Id: pdfimages.py,v 1.21 2004/03/17 00:21:39 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.22 2004/03/18 15:55:50 rgbecker Exp $
+__version__=''' $Id: pdfimages.py,v 1.22 2004/03/18 15:55:50 rgbecker Exp $ '''
 __doc__="""
 Image functionality sliced out of canvas.py for generalization
 """
@@ -35,17 +35,19 @@ class PDFImage:
         self.colorSpace = 'DeviceRGB'
         self.bitsPerComponent = 8
         self.filters = []
-        self.binaryData = []  # allow to be written in chunks
         self.source = None # JPEG or PIL, set later
-
-
         self.getImageData()
 
     def jpg_imagedata(self):
         #directly process JPEG files
         #open file, needs some error handling!!
+        fp = open(self.image, 'rb')
+        result = self._jpg_imagedata(fp)
+        fp.close()
+        return result
+
+    def _jpg_imagedata(self,imageFile):
         self.source = 'JPEG'
-        imageFile = open(self.image, 'rb')
         info = pdfutils.readJPEGInfo(imageFile)
         imgwidth, imgheight = info[0], info[1]
         if info[2] == 1:
@@ -61,12 +63,7 @@ class PDFImage:
         #write in blocks of (??) 60 characters per line to a list
         compressed = imageFile.read()
         encoded = pdfutils._AsciiBase85Encode(compressed)
-        outstream = getStringIO(encoded)
-        dataline = outstream.read(60)
-        while dataline <> "":
-            imagedata.append(dataline)
-            self.binaryData.append(dataline)
-            dataline = outstream.read(60)
+        pdfutils._chunker(encoded,imagedata)
         imagedata.append('EI')
         return (imagedata, imgwidth, imgheight)
 
@@ -86,10 +83,14 @@ class PDFImage:
         return imagedata
 
     def PIL_imagedata(self):
+        image = self.image
+        if image.format=='JPEG':
+            fp=image.fp
+            fp.seek(0)
+            return self._jpg_imagedata(fp)
         self.source = 'PIL'
         zlib = import_zlib()
         if not zlib: return
-        image = self.image
         myimage = image.convert('RGB')
         imgwidth, imgheight = myimage.size
 
@@ -102,17 +103,11 @@ class PDFImage:
         raw = myimage.tostring()
         assert(len(raw) == imgwidth * imgheight, "Wrong amount of data for image")
         compressed = zlib.compress(raw)   #this bit is very fast...
-        encoded = pdfutils._AsciiBase85Encode(compressed) #...sadly this isn't
-        #write in blocks of (??) 60 characters per line to a list
-        outstream = getStringIO(encoded)
-        dataline = outstream.read(60)
-        while dataline <> "":
-            imagedata.append(dataline)
-            self.binaryData.append(dataline)
-            dataline = outstream.read(60)
+        encoded = pdfutils._AsciiBase85Encode(compressed) #...sadly this may not be
+        #append in blocks of 60 characters
+        pdfutils._chunker(encoded,imagedata)
         imagedata.append('EI')
         return (imagedata, imgwidth, imgheight)
-
 
     def getImageData(self):
         "Gets data, height, width - whatever type of image"
@@ -153,17 +148,13 @@ class PDFImage:
         height are omitted, they are calculated from the image size.
         Also allow file names as well as images.  This allows a
         caching mechanism"""
-
         (x,y) = self.point
-
         # this says where and how big to draw it
         if not canvas.bottomup: y = y+self.height
         canvas._code.append('q %s 0 0 %s cm' % (fp_str(self.width), fp_str(self.height, x, y)))
-
         # self._code.extend(imagedata) if >=python-1.5.2
         for line in self.imageData:
             canvas._code.append(line)
-
         canvas._code.append('Q')
 
     def format(self, document):
@@ -194,5 +185,3 @@ if __name__=='__main__':
     doc = pdfdoc.PDFDocument()
     print 'source=',img.source
     print img.format(doc)
-    for row in img.binaryData:
-        print row

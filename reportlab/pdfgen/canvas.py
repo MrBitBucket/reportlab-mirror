@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.122 2004/03/12 23:54:11 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.122 2004/03/12 23:54:11 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.123 2004/03/18 15:55:49 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.123 2004/03/18 15:55:49 rgbecker Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -589,7 +589,7 @@ class Canvas:
             name = _digester('%s%s' % (image, mask))
         else:
             rawdata = image.getRGBData()
-            name = _digester(rawdata)
+            name = _digester(rawdata+str(mask))
 
         # in the pdf document, this will be prefixed with something to
         # say it is an XObject.  Does it exist yet?
