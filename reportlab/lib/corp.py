@@ -2,11 +2,11 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/corp.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/corp.py,v 1.12 2003/12/05 12:27:02 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/corp.py,v 1.13 2004/03/12 23:54:11 andy_robinson Exp $
 """ This module includes some reusable routines for ReportLab's
  'Corporate Image' - the logo, standard page backdrops and
  so on - you are advised to do the same for your own company!"""
-__version__=''' $Id: corp.py,v 1.12 2003/12/05 12:27:02 rgbecker Exp $ '''
+__version__=''' $Id: corp.py,v 1.13 2004/03/12 23:54:11 andy_robinson Exp $ '''
 
 from reportlab.lib.units import inch,cm
 from reportlab.lib.validators import *
@@ -410,18 +410,35 @@ class RL_BusinessCard(Widget):
 def test():
     """This function produces a pdf with examples. """
 
+    #wbite on blue
     rl = RL_CorpLogo()
     D = Drawing(rl.width,rl.height)
     D.add(rl)
     D.__dict__['verbose'] = 1
-    D.save(fnRoot='corplogo',formats=['pdf'])
+    D.save(fnRoot='corplogo_whiteonblue',formats=['pdf','eps'])
 
     rl.width = 129
     rl.height = 86
     D = Drawing(rl.width,rl.height)
     D.add(rl)
     D.__dict__['verbose'] = 1
-    D.save(fnRoot='corplogo',formats=['jpg','gif'])
+    D.save(fnRoot='corplogo_whiteonblue',formats=['jpg','gif'])
+
+
+    #blue on white
+    rl = RL_CorpLogoReversed()
+    D = Drawing(rl.width,rl.height)
+    D.add(rl)
+    D.__dict__['verbose'] = 1
+    D.save(fnRoot='corplogo_blueonwhite',formats=['pdf','eps'])
+    rl.width = 129
+    rl.height = 86
+    D = Drawing(rl.width,rl.height)
+    D.add(rl)
+    D.__dict__['verbose'] = 1
+    D.save(fnRoot='corplogo_whiteonblue',formats=['jpg','gif'])
+
+
 
     rl = RL_BusinessCard()
     rl.x=25

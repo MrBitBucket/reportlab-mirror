@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.72 2004/01/20 22:50:32 andy_robinson Exp $
-__version__=''' $Id: tables.py,v 1.72 2004/01/20 22:50:32 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.73 2004/03/12 23:54:11 andy_robinson Exp $
+__version__=''' $Id: tables.py,v 1.73 2004/03/12 23:54:11 andy_robinson Exp $ '''
 
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
@@ -609,9 +609,12 @@ class Table(Flowable):
             # we expect op, start, stop, weight, colour, cap, dashes, join
             cmd = tuple(cmd)
             if len(cmd)<5: raise ValueError('bad line command '+str(cmd))
-            if len(cmd)<6: cmd = cmd+(1,)
+
+            #determine line cap value at position 5. This can be string or numeric.
+            if len(cmd)<6:
+                cmd = cmd+(1,)  
             else:
-                cap = cmd[5]
+                cap = cmd[5]  
                 try:
                     if type(cap) is not type(int):
                         cap = LINECAPS[cap]
@@ -620,7 +623,10 @@ class Table(Flowable):
                     cmd = cmd[:5]+(cap,)+cmd[6:]
                 except:
                     ValueError('Bad cap value %s in %s'%(cap,str(cmd)))
+            #dashes at index 6 - this is a dash array:
             if len(cmd)<7: cmd = cmd+(None,)
+
+            #join mode at index 7 - can be string or numeric, look up as for caps
             if len(cmd)<8: cmd = cmd+(1,)
             else:
                 join = cmd[7]
@@ -632,6 +638,20 @@ class Table(Flowable):
                     cmd = cmd[:7]+(join,)
                 except:
                     ValueError('Bad join value %s in %s'%(join,str(cmd)))
+
+            #linecount at index 8.  Default is 1, set to 2 for double line.
+            if len(cmd)<9:
+                lineCount = 1
+                cmd = cmd + (lineCount,)
+            else:
+                lineCount = cmd[8]
+            assert lineCount >= 1
+            #linespacing at index 9. Not applicable unless 2+ lines, defaults to 2*line
+            #width so you get a visible gap between centres
+            if len(cmd)<10: cmd = cmd + (cmd[3],)
+
+            assert len(cmd) == 10
+            
             self._linecmds.append(cmd)
         else:
             (op, (sc, sr), (ec, er)), values = cmd[:3] , cmd[3:]
@@ -646,7 +666,7 @@ class Table(Flowable):
     def _drawLines(self):
         ccap, cdash, cjoin = None, None, None
         self.canv.saveState()
-        for op, (sc,sr), (ec,er), weight, color, cap, dash, join in self._linecmds:
+        for op, (sc,sr), (ec,er), weight, color, cap, dash, join, count, space in self._linecmds:
             if type(sr) is type('') and sr.startswith('split'): continue
             if sc < 0: sc = sc + self._ncols
             if ec < 0: ec = ec + self._ncols
@@ -655,26 +675,26 @@ class Table(Flowable):
             if ccap!=cap:
                 self.canv.setLineCap(cap)
                 ccap = cap
-            getattr(self,_LineOpMap.get(op, '_drawUnknown' ))( (sc, sr), (ec, er), weight, color)
+            getattr(self,_LineOpMap.get(op, '_drawUnknown' ))( (sc, sr), (ec, er), weight, color, count, space)
         self.canv.restoreState()
         self._curcolor = None
 
-    def _drawUnknown(self,  (sc, sr), (ec, er), weight, color):
+    def _drawUnknown(self,  (sc, sr), (ec, er), weight, color, count, space):
         raise ValueError, "Unknown line command '%s'" % op
 
-    def _drawGrid(self, (sc, sr), (ec, er), weight, color):
-        self._drawBox( (sc, sr), (ec, er), weight, color)
-        self._drawInnerGrid( (sc, sr), (ec, er), weight, color)
+    def _drawGrid(self, (sc, sr), (ec, er), weight, color, count, space):
+        self._drawBox( (sc, sr), (ec, er), weight, color, count, space)
+        self._drawInnerGrid( (sc, sr), (ec, er), weight, color, count, space)
 
-    def _drawBox(self,  (sc, sr), (ec, er), weight, color):
-        self._drawHLines((sc, sr), (ec, sr), weight, color)
-        self._drawHLines((sc, er+1), (ec, er+1), weight, color)
-        self._drawVLines((sc, sr), (sc, er), weight, color)
-        self._drawVLines((ec+1, sr), (ec+1, er), weight, color)
+    def _drawBox(self,  (sc, sr), (ec, er), weight, color, count, space):
+        self._drawHLines((sc, sr), (ec, sr), weight, color, count, space)
+        self._drawHLines((sc, er+1), (ec, er+1), weight, color, count, space)
+        self._drawVLines((sc, sr), (sc, er), weight, color, count, space)
+        self._drawVLines((ec+1, sr), (ec+1, er), weight, color, count, space)
 
-    def _drawInnerGrid(self, (sc, sr), (ec, er), weight, color):
-        self._drawHLines((sc, sr+1), (ec, er), weight, color)
-        self._drawVLines((sc+1, sr), (ec, er), weight, color)
+    def _drawInnerGrid(self, (sc, sr), (ec, er), weight, color, count, space):
+        self._drawHLines((sc, sr+1), (ec, er), weight, color, count, space)
+        self._drawVLines((sc+1, sr), (ec, er), weight, color, count, space)
 
     def _prepLine(self, weight, color):
         if color != self._curcolor:
@@ -684,7 +704,7 @@ class Table(Flowable):
             self.canv.setLineWidth(weight)
             self._curweight = weight
 
-    def _drawHLines(self, (sc, sr), (ec, er), weight, color):
+    def _drawHLines(self, (sc, sr), (ec, er), weight, color, count, space):
         ecp = self._colpositions[sc:ec+2]
         rp = self._rowpositions[sr:er+1]
         if len(ecp)<=1 or len(rp)<1: return
@@ -692,12 +712,20 @@ class Table(Flowable):
         scp = ecp[0]
         ecp = ecp[-1]
         for rowpos in rp:
-            self.canv.line(scp, rowpos, ecp, rowpos)
+            if count == 1:
+                self.canv.line(scp, rowpos, ecp, rowpos)
+            else: #double/triple lines
+                #position so count=1 and no space gives origin
+                offset = (count-1) * (weight + space)
+                for idx in range(count):
+                    y = rowpos + 0.5*offset - (idx * (weight+space))
+                    self.canv.line(scp, y, ecp, y)
 
-    def _drawHLinesB(self, (sc, sr), (ec, er), weight, color):
-        self._drawHLines((sc, sr+1), (ec, er+1), weight, color)
 
-    def _drawVLines(self, (sc, sr), (ec, er), weight, color):
+    def _drawHLinesB(self, (sc, sr), (ec, er), weight, color, count, space):
+        self._drawHLines((sc, sr+1), (ec, er+1), weight, color, count, space)
+
+    def _drawVLines(self, (sc, sr), (ec, er), weight, color, count, space):
         erp = self._rowpositions[sr:er+2]
         cp  = self._colpositions[sc:ec+1]
         if len(erp)<=1 or len(cp)<1: return
@@ -705,10 +733,17 @@ class Table(Flowable):
         srp = erp[0]
         erp = erp[-1]
         for colpos in cp:
-            self.canv.line(colpos, srp, colpos, erp)
+            if count == 1:
+                self.canv.line(colpos, srp, colpos, erp)
+            else: #double/triple lines
+                #position so count=1 and no space gives origin
+                offset = (count-1) * (weight + space)
+                for idx in range(count):
+                    x = colpos + 0.5*offset - (idx * (weight+space))
+                    self.canv.line(x, srp, x, erp)
 
-    def _drawVLinesA(self, (sc, sr), (ec, er), weight, color):
-        self._drawVLines((sc+1, sr), (ec+1, er), weight, color)
+    def _drawVLinesA(self, (sc, sr), (ec, er), weight, color, count, space):
+        self._drawVLines((sc+1, sr), (ec+1, er), weight, color, count, space)
 
     def wrap(self, availWidth, availHeight):
         self._calc(availWidth, availHeight)
@@ -787,9 +822,9 @@ class Table(Flowable):
 
         A = []
         # hack up the line commands
-        for op, (sc,sr), (ec,er), weight, color, cap, dash, join in self._linecmds:
+        for op, (sc,sr), (ec,er), weight, color, cap, dash, join, count, space in self._linecmds:
             if type(sr)is type('') and sr.startswith('split'):
-                A.append((op,(sc,sr), (ec,sr), weight, color, cap, dash, join))
+                A.append((op,(sc,sr), (ec,sr), weight, color, cap, dash, join, count, space))
                 if sr=='splitlast':
                     sr = er = n-1
                 elif sr=='splitfirst':
@@ -804,31 +839,31 @@ class Table(Flowable):
             if op in ('BOX','OUTLINE','GRID'):
                 if sr<n and er>=n:
                     # we have to split the BOX
-                    A.append(('LINEABOVE',(sc,sr), (ec,sr), weight, color, cap, dash, join))
-                    A.append(('LINEBEFORE',(sc,sr), (sc,er), weight, color, cap, dash, join))
-                    A.append(('LINEAFTER',(ec,sr), (ec,er), weight, color, cap, dash, join))
-                    A.append(('LINEBELOW',(sc,er), (ec,er), weight, color, cap, dash, join))
+                    A.append(('LINEABOVE',(sc,sr), (ec,sr), weight, color, cap, dash, join, count, space))
+                    A.append(('LINEBEFORE',(sc,sr), (sc,er), weight, color, cap, dash, join, count, space))
+                    A.append(('LINEAFTER',(ec,sr), (ec,er), weight, color, cap, dash, join, count, space))
+                    A.append(('LINEBELOW',(sc,er), (ec,er), weight, color, cap, dash, join, count, space))
                     if op=='GRID':
-                        A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color, cap, dash, join))
-                        A.append(('LINEABOVE',(sc,n), (ec,n), weight, color, cap, dash, join))
-                        A.append(('INNERGRID',(sc,sr), (ec,er), weight, color, cap, dash, join))
+                        A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color, cap, dash, join, count, space))
+                        A.append(('LINEABOVE',(sc,n), (ec,n), weight, color, cap, dash, join, count, space))
+                        A.append(('INNERGRID',(sc,sr), (ec,er), weight, color, cap, dash, join, count, space))
                 else:
-                    A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join))
+                    A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join, count, space))
             elif op in ('INNERGRID','LINEABOVE'):
                 if sr<n and er>=n:
-                    A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color, cap, dash, join))
-                    A.append(('LINEABOVE',(sc,n), (ec,n), weight, color, cap, dash, join))
-                A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join))
+                    A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color, cap, dash, join, count, space))
+                    A.append(('LINEABOVE',(sc,n), (ec,n), weight, color, cap, dash, join, count, space))
+                A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join, count, space))
             elif op == 'LINEBELOW':
                 if sr<n and er>=(n-1):
-                    A.append(('LINEABOVE',(sc,n), (ec,n), weight, color, cap, dash, join))
+                    A.append(('LINEABOVE',(sc,n), (ec,n), weight, color, cap, dash, join, count, space))
                 A.append((op,(sc,sr), (ec,er), weight, color))
             elif op == 'LINEABOVE':
                 if sr<=n and er>=n:
-                    A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color, cap, dash, join))
-                A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join))
+                    A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color, cap, dash, join, count, space))
+                A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join, count, space))
             else:
-                A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join))
+                A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join, count, space))
 
         R0._cr_0(n,A)
         R0._cr_0(n,self._bkgrndcmds)
@@ -953,6 +988,9 @@ class Table(Flowable):
                 x = colpos + colwidth * 0.5
             elif just == 'RIGHT':
                 draw = self.canv.drawRightString
+                x = colpos + colwidth - cellstyle.rightPadding
+            elif just == 'DECIMAL':
+                draw = self.canv.drawAlignedString
                 x = colpos + colwidth - cellstyle.rightPadding
             else:
                 raise ValueError, 'Invalid justification %s' % just
@@ -1266,6 +1304,51 @@ LIST_STYLE = TableStyle(
         column widths were also set to None.
     """, styleSheet['BodyText']))
     lst.append(t)
+
+    lst.append(Paragraph("""
+        This demonstrates a number of features useful in financial statements. The first is decimal alignment;
+        with ALIGN=DECIMAL the numbers align on the points; and the points are aligned based on
+        the LEFTPADDING, which is usually 3 points so you should set it higher.  The second is multiple lines;
+        one can specify double or triple lines and control the separation if desired. Finally, the coloured
+        negative numbers were (we regret to say) done in the style; we don't have a way to conditionally
+        format numbers based on value yet.
+    """, styleSheet['BodyText']))
+
+
+    t = Table([['Corporate Assets','Amount'],
+               ['Fixed Assets','1,234,567.89'],
+               ['Company Vehicle','1,234.8901'],
+               ['Petty Cash','42'],
+               ['Intellectual Property','(42,078,231.56)'],
+               ['Net Position','Deep Sh*t.Really']
+               ],
+              [144,72])
+
+    ts = TableStyle(
+        [#first the top row
+         ('ALIGN', (1,1), (-1,-1), 'CENTER'),
+         ('LINEABOVE', (0,0), (-1,0), 1, colors.purple),
+         ('LINEBELOW', (0,0), (-1,0), 1, colors.purple),
+         ('FONT', (0,0), (-1,0), 'Times-Bold'),
+
+        #bottom row has a line above, and two lines below
+         ('LINEABOVE', (0,-1), (-1,-1), 1, colors.purple),  #last 2 are count, sep
+         ('LINEBELOW', (0,-1), (-1,-1), 0.5, colors.purple, 1, None, None, 4,1),
+         ('LINEBELOW', (0,-1), (-1,-1), 1, colors.red),
+         ('FONT', (0,-1), (-1,-1), 'Times-Bold'),
+
+        #numbers column
+         ('ALIGN', (1,1), (-1,-1), 'DECIMAL'),
+         ('RIGHTPADDING', (1,1), (-1,-1), 36),
+         ('TEXTCOLOR', (1,4), (1,4), colors.red),
+
+        #red cell         
+        ]
+        )
+
+    t.setStyle(ts)
+    lst.append(t)
+    lst.append(Spacer(36,36))    
     lst.append(Paragraph("""
         The red numbers should be aligned LEFT &amp; BOTTOM, the blue RIGHT &amp; TOP
         and the green CENTER &amp; MIDDLE.
@@ -1459,3 +1542,4 @@ LIST_STYLE = TableStyle(
 
 if __name__ == '__main__':
     test()
+    print 'saved tables.pdf'

@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.19 2003/09/08 16:09:51 rgbecker Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.19 2003/09/08 16:09:51 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.20 2004/03/12 23:54:11 andy_robinson Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.20 2004/03/12 23:54:11 andy_robinson Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 
@@ -284,6 +284,22 @@ substring.
     t.textOut('Small text again.')
     drawCrossHairs(c, t.getX(),t.getY())
     c.drawText(t)
+
+    #try out the decimal tabs high on the right.
+    c.setStrokeColor(colors.silver)
+    c.line(7*inch, 6*inch, 7*inch, 4.5*inch)
+
+    c.setFillColor(colors.black)
+    c.setFont('Times-Roman',10)
+    c.drawString(6*inch, 6.2*inch, "Testing decimal alignment")
+    c.drawString(6*inch, 6.05*inch, "- aim for silver line")
+    c.line(7*inch, 6*inch, 7*inch, 4.5*inch)
+
+    c.drawAlignedString(7*inch, 5.8*inch, "1,234,567.89")
+    c.drawAlignedString(7*inch, 5.6*inch, "3,456.789")
+    c.drawAlignedString(7*inch, 5.4*inch, "123")
+    c.setFillColor(colors.red)
+    c.drawAlignedString(7*inch, 5.2*inch, "(7,192,302.30)")
 
     #mark the cursor where it stopped
     c.showPage()

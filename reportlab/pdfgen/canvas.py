@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.121 2004/02/10 00:12:21 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.121 2004/02/10 00:12:21 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.122 2004/03/12 23:54:11 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.122 2004/03/12 23:54:11 andy_robinson Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -1220,6 +1220,20 @@ class Canvas:
         t = self.beginText(x - 0.5*width, y)
         t.textLine(text)
         self.drawText(t)
+
+    def drawAlignedString(self, x, y, text, pivotChar="."):
+        """Draws a string aligned on the first '.' (or other pivot character).
+
+        The centre position of the pivot character will be used as x."""
+        parts = text.split(pivotChar,1)
+        pivW = self.stringWidth(pivotChar, self._fontname, self._fontsize)
+        leftText = parts[0]
+        self.drawRightString(x-0.5*pivW, y, leftText)
+        if len(parts) > 1:
+            rightText = pivotChar + parts[1]
+            self.drawString(x-0.5*pivW, y, rightText)
+        
+        
 
     def getAvailableFonts(self):
         """Returns the list of PostScript font names available.
