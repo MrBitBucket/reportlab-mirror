@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.43 2004/03/19 10:55:55 rgbecker Exp $
-__version__=''' $Id: rl_config.py,v 1.43 2004/03/19 10:55:55 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.44 2004/03/23 17:32:20 rgbecker Exp $
+__version__=''' $Id: rl_config.py,v 1.44 2004/03/23 17:32:20 rgbecker Exp $ '''
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -91,6 +91,7 @@ def _startUp():
     global sys_version
     sys_version = string.split(sys.version)[0]      #strip off the other garbage
     from reportlab.lib import pagesizes
+    from reportlab.lib.utils import rl_isdir
 
     if _SAVED=={}:
         for k in V:
@@ -107,7 +108,7 @@ def _startUp():
         P=[]
         for p in _SAVED[name]:
             d = string.replace(p % D,'/',os.sep)
-            if os.path.isdir(d): P.append(d)
+            if rl_isdir(d): P.append(d)
         _setOpt(name,P)
 
     for k in V[3:]:
