@@ -728,6 +728,7 @@ class HtmlDocBuilder0(DocBuilder0):
         self.currentBaseClasses = bases
 
         if bases:
+            bases = map(lambda b:b.__name__, bases) # hack
             self.outLines.append(makeHtmlSubSection('%s(%s)' % (name, join(bases, ', '))))
         else:
             self.outLines.append(makeHtmlSubSection('%s' % name))
@@ -847,6 +848,7 @@ class PdfDocBuilder0(DocBuilder0):
         bt = self.bt
         story = self.story
         if bases:
+            bases = map(lambda b:b.__name__, bases) # hack
             story.append(Paragraph('%s(%s)' % (name, join(bases, ', ')), self.makeHeadingStyle(self.indentLevel, 'class')))
         else:
             story.append(Paragraph(name, self.makeHeadingStyle(self.indentLevel, 'class')))
