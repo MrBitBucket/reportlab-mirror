@@ -1411,7 +1411,7 @@ The paragraph text may optionally be surrounded by
 &lt;para attributes....&gt;
 &lt;/para&gt;
 tags. The attributes if any of the opening &lt;para&gt; tag affect the style that is used
-with the $Pargraph$ $text$ and/or $bulletText$.
+with the $Paragraph$ $text$ and/or $bulletText$.
 """)
 
 from reportlab.platypus.paraparser import _addAttributeNames, _paraAttrMap

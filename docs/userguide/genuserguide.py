@@ -32,6 +32,9 @@
 #
 ###############################################################################
 #   $Log: genuserguide.py,v $
+#   Revision 1.24  2000/07/10 12:00:17  andy_robinson
+#   More work on chapter 1
+#
 #   Revision 1.23  2000/07/08 13:24:27  andy_robinson
 #   Broke out chapter 1
 #
@@ -105,7 +108,7 @@
 #   Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #   initial checkin. user guide generation framework.
 #   
-__version__=''' $Id: genuserguide.py,v 1.23 2000/07/08 13:24:27 andy_robinson Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.24 2000/07/10 12:00:17 andy_robinson Exp $ '''
 
 
 __doc__ = """
@@ -216,6 +219,14 @@ def disc(text, klass=Paragraph, style=discussiontextstyle):
     P = klass(text, style)
     getStory().append(P)
 
+def restartList():
+    getSequencer().reset('list1')
+
+def list(text):
+    text='<bullet><seq id="list1"/>.</bullet>' + quickfix(text)
+    P = Paragraph(text, BU)
+    getStory().append(P)
+    
 def bullet(text):
     text='<bullet><font name="Symbol">'+chr(183)+'</font></bullet>' + quickfix(text)
     P = Paragraph(text, BU)
