@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.43 2001/08/22 19:30:03 aaron_watters Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.44 2001/08/23 00:38:31 rgbecker Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -471,10 +471,9 @@ def registerTypeFace(face):
     ttname = string.lower(face.name)
     if not face.name in standardFonts:
         fonts.addMapping(ttname, 0, 0, face.name)
-    fonts.addMapping(ttname, 1, 0, face.name)
-    fonts.addMapping(ttname, 0, 1, face.name)
-    fonts.addMapping(ttname, 1, 1, face.name)
-
+        fonts.addMapping(ttname, 1, 0, face.name)
+        fonts.addMapping(ttname, 0, 1, face.name)
+        fonts.addMapping(ttname, 1, 1, face.name)
 
 def registerEncoding(enc):
     assert isinstance(enc, Encoding), 'Not an Encoding: %s' % enc
