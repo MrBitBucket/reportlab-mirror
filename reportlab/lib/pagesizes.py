@@ -2,12 +2,12 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/pagesizes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/pagesizes.py,v 1.6 2001/03/07 18:57:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/pagesizes.py,v 1.7 2001/04/10 07:07:41 andy_robinson Exp $
 
 """This module defines a few common page sizes in points (1/72 inch).
 To be expanded to include things like label sizes, envelope windows
 etc."""
-__version__=''' $Id: pagesizes.py,v 1.6 2001/03/07 18:57:11 rgbecker Exp $ '''
+__version__=''' $Id: pagesizes.py,v 1.7 2001/04/10 07:07:41 andy_robinson Exp $ '''
 
 from reportlab.lib.units import cm, inch
 
@@ -22,7 +22,7 @@ A1 = (_H*2, _W*4)
 A0 = (_W*4, _H*4)
 
 letter = (8.5*inch, 11*inch)
-legal = (8.5*inch, 17*inch)
+legal = (8.5*inch, 14*inch)
 elevenSeventeen = (11*inch, 17*inch)
 
 _BW, _BH = (25*cm, 35.3*cm)
