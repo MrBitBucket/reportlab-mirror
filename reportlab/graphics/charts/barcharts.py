@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.32 2001/09/11 18:14:30 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.33 2001/09/12 14:58:14 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -21,7 +21,7 @@ from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropH
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.axes import YCategoryAxis, XValueAxis
-from reportlab.graphics.charts.textlabels import Label
+from reportlab.graphics.charts.textlabels import BarChartLabel
 from reportlab.graphics.widgets.grids import ShadedRect
 
 
@@ -86,8 +86,6 @@ class BarChart(Widget):
 			desc='Flag to use absolute spacing values.'),
 		barWidth = AttrMapValue(isNumber,
 			desc='The width of an individual bar.'),
-		barLabelNudge = AttrMapValue(isNumber,
-			desc='Distance between a bar and its label.'),
 		groupSpacing = AttrMapValue(isNumber,
 			desc='Width between groups of bars.'),
 		barSpacing = AttrMapValue(isNumber,
@@ -147,7 +145,7 @@ class BarChart(Widget):
 		self.groupSpacing = 5
 		self.barSpacing = 0
 
-		self.barLabels = TypedPropertyCollection(Label)
+		self.barLabels = TypedPropertyCollection(BarChartLabel)
 		self.barLabels.boxAnchor = 'c'
 		self.barLabels.textAnchor = 'middle'
 		self.barLabelFormat = None
@@ -158,7 +156,8 @@ class BarChart(Widget):
 		# points inside if bar value < 0.  This is different
 		# to label dx/dy which are not dependent on the
 		# sign of the data.
-		self.barLabelNudge = 0
+		self.barLabels.nudge = 0
+
 		# if you have multiple series, by default they butt
 		# together.
 
@@ -330,21 +329,51 @@ class BarChart(Widget):
 			raise Exception, msg
 		return labelText
 
+	def _labelXY(self,label,x,y,width,height):
+		'Compute x, y for a label'
+		if self._flipXY:
+			return x + width + (width>=0 and 1 or -1) * label.nudge, y + 0.5*height
+		else:
+			return x + 0.5*width, y + height + (height>=0 and 1 or -1) * label.nudge
+
 	def _addLabel(self, g, rowNo, colNo, x, y, width, height):
 		labelText = self._getLabelText(rowNo,colNo)
 		# We currently overwrite the boxAnchor with 'c' and display
 		# it at a constant offset to the bar's top/bottom determined
-		# by the barLabelNudge attribute.
+		# by the barLabels.nudge attribute.
 		if labelText:
 			label = self.barLabels[(rowNo, colNo)]
 			if label.visible:
 				labelWidth = stringWidth(labelText, label.fontName, label.fontSize)
-				x0, y0 = self._labelXY(x,y,width,height)
+				x0, y0 = self._labelXY(label,x,y,width,height)
+				fixedEnd = getattr(label,'fixedEnd', None)
+				if fixedEnd is not None:
+					x00, y00 = x0, y0
+					if self._flipXY:
+						x0 = x+fixedEnd
+					else:
+						y0 = y+fixedEnd
+				else:
+					if self._flipXY:
+						x00 = x0
+						y00 = y+height/2.0
+					else:
+						x00 = x+width/2.0
+						y00 = y0
+				fixedStart = getattr(label,'fixedStart', None)
+				if fixedStart is not None:
+					if self._flipXY:
+						x00 = x+fixedStart
+					else:
+						y00 = y+fixedStart
+
 				label.setOrigin(x0, y0)
 				label.setText(labelText)
 				sC, sW = label.lineStrokeColor, label.lineStrokeWidth
-				if sC and sW: g.add(Line(x,y,x,y0, strokeColor=sC, strokeWidth=sW))
+				if sC and sW: g.insert(0,Line(x00,y00,x0,y0, strokeColor=sC, strokeWidth=sW))
 				g.add(label)
+				alx = getattr(self,'barLabelCallout',None)
+				if alx: alx(g,rowNo,colNo,x,y,width,height,x00,y00,x0,y0)
 
 	def makeBars(self):
 		g = Group()
@@ -394,10 +423,6 @@ class VerticalBarChart(BarChart):
 		self.categoryAxis = XCategoryAxis()
 		self.valueAxis = YValueAxis()
 
-	def _labelXY(self,x,y,width,height):
-		'Compute x, y for a label'
-		return x + 0.5*width, y + height + (height>=0 and 1 or -1) * self.barLabelNudge
-
 	def draw(self):
 		self.categoryAxis.setPosition(self.x, self._drawBegin(self.y,self.height), self.width)
 		return self._drawFinish()
@@ -412,10 +437,6 @@ class HorizontalBarChart(BarChart):
 		BarChart.__init__(self)
 		self.categoryAxis = YCategoryAxis()
 		self.valueAxis = XValueAxis()
-
-	def _labelXY(self,x,y,width,height):
-		'Compute x, y for a label'
-		return x + width + (width>=0 and 1 or -1) * self.barLabelNudge, y + 0.5*height
 
 	def draw(self):
 		self.categoryAxis.setPosition(self._drawBegin(self.x,self.width), self.y, self.height)
@@ -667,7 +688,7 @@ def sampleV2c():
 	bc.valueAxis.labels.textAnchor = 'middle'
 	bc.categoryAxis.labels.dy = -60
 
-	bc.barLabelNudge = 10
+	bc.barLabels.nudge = 10
 
 	bc.barLabelFormat = '%0.2f'
 	bc.barLabels.dx = 0
@@ -711,7 +732,7 @@ def sampleV3():
 	bc.barLabels.angle = 90
 	bc.barLabels.fontName = 'Helvetica'
 	bc.barLabels.fontSize = 6
-	bc.barLabelNudge = 10
+	bc.barLabels.nudge = 10
 
 	bc.valueAxis.visible = 0
 	bc.valueAxis.valueMin = -2
@@ -1289,7 +1310,7 @@ def sampleH2c():
 	bc.categoryAxis.labels.fontSize = 8
 	bc.categoryAxis.labels.dx = -150
 
-	bc.barLabelNudge = 10
+	bc.barLabels.nudge = 10
 
 	bc.barLabelFormat = '%0.2f'
 	bc.barLabels.dx = 0
@@ -1332,7 +1353,7 @@ def sampleH3():
 	bc.barLabels.boxAnchor = 'w' # irrelevant (becomes 'c')
 	bc.barLabels.fontName = 'Helvetica'
 	bc.barLabels.fontSize = 6
-	bc.barLabelNudge = 10
+	bc.barLabels.nudge = 10
 
 	bc.valueAxis.visible = 0
 	bc.valueAxis.valueMin = -2
