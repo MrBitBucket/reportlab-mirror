@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.4 2001/04/09 16:39:07 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.5 2001/04/09 17:07:20 dinu_gherman Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -12,13 +12,13 @@ Stacked and percentile bar charts to follow...
 """
 
 import string
-from types import FunctionType
+from types import FunctionType, StringType
 
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib import colors 
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
-##from reportlab.graphics.shapes import *
-from reportlab.graphics.shapes import Line, Rect, Group
+from reportlab.graphics.shapes import Line, Rect, Group, Drawing
+from reportlab.graphics.shapes import Auto, isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.axes import YCategoryAxis, XValueAxis
@@ -48,7 +48,36 @@ from reportlab.graphics.charts.axes import YCategoryAxis, XValueAxis
 
 # Bar chart classes
 
-class VerticalBarChart(Widget):
+class BarChart(Widget):
+    "Abstract base class, unusable by itself."
+    
+    def _findMinMaxValues(self):
+        """Find the minimum and maximum value of the data we have."""
+
+        data = self.data
+        m, M = Auto, Auto
+        for row in data:
+            for val in row:
+                if val < m:
+                    m = val
+                if val > M:
+                    M = val
+
+        return m, M
+    
+
+    def makeBackground(self):
+        g = Group()
+
+        g.add(Rect(self.x, self.y,
+                   self.width, self.height,
+                   strokeColor = self.strokeColor,
+                   fillColor= self.fillColor))
+        
+        return g
+
+
+class VerticalBarChart(BarChart):
     """Bar chart with multiple side-by-side bars.
 
     Variants will be provided for stacked and 100% charts,
@@ -152,21 +181,6 @@ class VerticalBarChart(Widget):
         return drawing
 
 
-    def _findMinMaxValues(self):
-        """Find the minimum and maximum value of the data we have."""
-
-        data = self.data
-        m, M = Auto, Auto
-        for row in data:
-            for val in row:
-                if val < m:
-                    m = val
-                if val > M:
-                    M = val
-
-        return m, M
-    
-
     def calcBarPositions(self):
         """Works out where they go.
 
@@ -231,17 +245,6 @@ class VerticalBarChart(Widget):
             self._barPositions.append(barRow)
         
 
-    def makeBackground(self):
-        g = Group()
-
-        g.add(Rect(self.x, self.y,
-                   self.width, self.height,
-                   strokeColor = self.strokeColor,
-                   fillColor= self.fillColor))
-        
-        return g
-    
-
     def makeBars(self):
         g = Group()
 
@@ -295,12 +298,12 @@ class VerticalBarChart(Widget):
         # if zero is in chart, put x axis there, otherwise
         # use bottom.
         xAxisCrossesAt = self.valueAxis.scale(0)
-        if ((xAxisCrossesAt > self.y + self.height) or (xAxisCrossesAt < self.y)):
-            x, y, w = self.x, self.y, self.width
+        if xAxisCrossesAt > self.y + self.height or xAxisCrossesAt < self.y:
+            y = self.y
         else:
-            x, y, w = self.x, xAxisCrossesAt, self.width
+            y = xAxisCrossesAt
 
-        self.categoryAxis.setPosition(x, y, w)
+        self.categoryAxis.setPosition(self.x, y, self.width)
         self.categoryAxis.configure(self.data)
         
         self.calcBarPositions()        
@@ -315,7 +318,7 @@ class VerticalBarChart(Widget):
         return g
         
 
-class HorizontalBarChart(Widget):
+class HorizontalBarChart(BarChart):
     """Bar chart with multiple side-by-side bars.
 
     Variants will be provided for stacked and 100% charts,
@@ -419,21 +422,6 @@ class HorizontalBarChart(Widget):
         return drawing
 
 
-    def _findMinMaxValues(self):
-        """Find the minimum and maximum value of the data we have."""
-
-        data = self.data
-        m, M = Auto, Auto
-        for row in data:
-            for val in row:
-                if val < m:
-                    m = val
-                if val > M:
-                    M = val
-
-        return m, M
-    
-
     def calcBarPositions(self):
         """Works out where they go.
 
@@ -496,18 +484,7 @@ class HorizontalBarChart(Widget):
                 barRow.append((x, y, width, height))
 
             self._barPositions.append(barRow)
-        
-
-    def makeBackground(self):
-        g = Group()
-
-        g.add(Rect(self.x, self.y,
-                   self.width, self.height,
-                   strokeColor = self.strokeColor,
-                   fillColor= self.fillColor))
-        
-        return g
-    
+            
 
     def makeBars(self):
         g = Group()
@@ -562,12 +539,12 @@ class HorizontalBarChart(Widget):
         # if zero is in chart, put y axis there, otherwise
         # use left.
         yAxisCrossesAt = self.valueAxis.scale(0)            
-        if ((yAxisCrossesAt > self.x + self.width) or (yAxisCrossesAt < self.x)):
-            x, y, h = self.x, self.y, self.height
+        if yAxisCrossesAt > self.x + self.width or yAxisCrossesAt < self.x:
+            x = self.x
         else:
-            x, y, h = yAxisCrossesAt, self.y, self.height
+            x = yAxisCrossesAt
 
-        self.categoryAxis.setPosition(x, y, h)
+        self.categoryAxis.setPosition(x, self.y, self.height)
         self.categoryAxis.configure(self.data)
 
         self.calcBarPositions()                
