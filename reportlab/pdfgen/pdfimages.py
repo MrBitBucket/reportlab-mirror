@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pdfimages.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.19 2004/01/20 22:50:31 andy_robinson Exp $
-__version__=''' $Id: pdfimages.py,v 1.19 2004/01/20 22:50:31 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.20 2004/02/05 18:21:50 rgbecker Exp $
+__version__=''' $Id: pdfimages.py,v 1.20 2004/02/05 18:21:50 rgbecker Exp $ '''
 __doc__="""
 Image functionality sliced out of canvas.py for generalization
 """
@@ -134,6 +134,7 @@ class PDFImage:
                 imgwidth = string.atoi(words[1])
                 imgheight = string.atoi(words[3])
         else:
+            import sys
             if sys.platform[0:4] == 'java':
                 #jython, PIL not available
                 (imagedata, imgwidth, imgheight) = self.JAVA_imagedata()
