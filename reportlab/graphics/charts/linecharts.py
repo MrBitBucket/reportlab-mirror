@@ -1,18 +1,18 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.30 2003/08/14 10:48:40 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.31 2003/09/04 13:49:46 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
-__version__=''' $Id: linecharts.py,v 1.30 2003/08/14 10:48:40 rgbecker Exp $ '''
+__version__=''' $Id: linecharts.py,v 1.31 2003/09/04 13:49:46 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, \
-                                    isListOfStringsOrNone, SequenceOf, isBoolean
+                                    isListOfStringsOrNone, SequenceOf, isBoolean, NoneOr
 from reportlab.lib.attrmap import *
 from reportlab.lib.formatters import Formatter
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
@@ -27,7 +27,7 @@ class LineChartProperties(PropHolder):
     _attrMap = AttrMap(
         strokeWidth = AttrMapValue(isNumber, desc='Width of a line.'),
         strokeColor = AttrMapValue(isColorOrNone, desc='Color of a line.'),
-        symbol = AttrMapValue(isSymbol, desc='Widget placed at data points.'),
+        symbol = AttrMapValue(NoneOr(isSymbol), desc='Widget placed at data points.'),
         )
 
 class LineChart(PlotArea):
