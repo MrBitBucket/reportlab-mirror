@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.2 2001/05/03 18:32:23 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.2 2001/05/03 18:32:23 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.3 2001/05/04 13:07:18 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.3 2001/05/04 13:07:18 rgbecker Exp $ '''
 """Usage:
 	from reportlab.graphics import renderPM
 	renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -19,14 +19,7 @@ class RenderPMError(Exception):
 	pass
 
 import string, os, sys
-
-try:
-	import _renderPM
-except ImportError, errMsg:
-	if str(errMsg)!='No module named _renderPM':
-		raise ImportError,  "No module named _renderPM\nit may be the wrong version or badly installed!"
-	raise ImportError, "No module named _renderPM\nsee http://www.reportlab.com/rl_addons.html"
-
+import _renderPM
 from types import TupleType, ListType
 _SeqTypes = (TupleType,ListType)
 
@@ -209,6 +202,7 @@ class PMCanvas:
 				im = im.convert("P", dither=Image.NONE, palette=Image.ADAPTIVE)
 				im.save(fn,fmt)
 			elif fmt in ['PNG','TIFF','BMP']:
+				if fmt=='PNG': from PIL import PngImagePlugin
 				im.save(fn,fmt)
 			elif fmt in ('JPG','JPEG'):
 				im.save(fn,'JPEG')
@@ -437,7 +431,7 @@ if __name__=='__main__':
 				h = int(drawing.height)
 				html.append('<hr><h2>Drawing %d</h2>\n<pre>%s</pre>' % (i, docstring))
 					
-				for k in ['gif','tiff']:
+				for k in ['gif','tiff', 'png', 'jpg']:
 					if k in ['gif','png','jpg']:
 						html.append('<p>%s format</p>\n' % string.upper(k))
 					try:
