@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.26 2002/07/24 19:56:36 andy_robinson Exp $
-__version__=''' $Id: textlabels.py,v 1.26 2002/07/24 19:56:36 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.27 2002/11/27 20:22:57 rgbecker Exp $
+__version__=''' $Id: textlabels.py,v 1.27 2002/11/27 20:22:57 rgbecker Exp $ '''
 import string
 
 from reportlab.lib import colors
@@ -250,7 +250,7 @@ class Label(Widget):
 
         # paint box behind text just in case they
         # fill it
-        if self.boxStrokeColor is not None:
+        if self.boxFillColor or (self.boxStrokeColor and self.boxStrokeWidth):
             g.add(Rect( self._left,
                         self._bottom,
                         self._width,

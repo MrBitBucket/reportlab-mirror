@@ -1,6 +1,6 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/flags.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.23 2002/08/13 13:25:19 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.24 2002/11/27 20:23:11 rgbecker Exp $
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 """This file is a collection of flag graphics as widgets.
@@ -28,7 +28,7 @@ USA, Czech Republic, European Union, Switzerland, Turkey, Brazil
 
 (Brazilian flag contributed by Publio da Costa Melo [publio@planetarium.com.br]).
 """
-__version__=''' $Id: flags.py,v 1.23 2002/08/13 13:25:19 johnprecedo Exp $ '''
+__version__=''' $Id: flags.py,v 1.24 2002/11/27 20:23:11 rgbecker Exp $ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *
@@ -99,7 +99,7 @@ class Star(_Symbol):
         et.y=0
         D.add(et)
         labelFontSize = 10
-        D.add(String(et.x+(et.size/2),(et.y-(1.2*labelFontSize)),
+        D.add(String(et.x+(et.size/2.0),(et.y-(1.2*labelFontSize)),
                             et.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
