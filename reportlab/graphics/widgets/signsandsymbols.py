@@ -237,7 +237,7 @@ class Crossbox0(Widget):
         g = shapes.Group() 
         
         # crossbox specific bits
-        box = shapes.Rect(self.x, self.y, s, s,
+        box = shapes.Rect(self.x+1, self.y+1, s-2, s-2,
                fillColor = None,
                strokeColor = self.boxColor,
                strokeWidth=2)
@@ -303,7 +303,7 @@ class Tickbox0(Widget):
         g = shapes.Group() 
         
         # tickbox specific bits
-        box = shapes.Rect(self.x, self.y, s, s,
+        box = shapes.Rect(self.x+1, self.y+1, s-2, s-2,
                fillColor = None,
                strokeColor = self.boxColor,
                strokeWidth=2)
@@ -905,7 +905,7 @@ class FloppyDisk0(Widget):
         
 
         # floppy disk specific bits
-        diskBody = shapes.Rect(x=self.x, y=self.y, width=s, height=s,
+        diskBody = shapes.Rect(x=self.x, y=self.y+(s/100), width=s, height=s-(s/100),
                fillColor = self.diskColor,
                strokeColor = None,
                strokeWidth=0)
@@ -942,13 +942,13 @@ class FloppyDisk0(Widget):
                strokeWidth=0)
         g.add(line3)
 
-        metalcover = shapes.Rect(x=self.x+(s*0.2), y=(self.y)-(s*0.01), width=s*0.5, height=s*0.35,
+        metalcover = shapes.Rect(x=self.x+(s*0.2), y=(self.y), width=s*0.5, height=s*0.35,
                fillColor = colors.silver,
                strokeColor = None,
                strokeWidth=0)
         g.add(metalcover)
 
-        coverslot = shapes.Rect(x=self.x+(s*0.28), y=(self.y)+(s*0.03), width=s*0.12, height=s*0.28,
+        coverslot = shapes.Rect(x=self.x+(s*0.28), y=(self.y)+(s*0.035), width=s*0.12, height=s*0.28,
                fillColor = self.diskColor,
                strokeColor = None,
                strokeWidth=0)
