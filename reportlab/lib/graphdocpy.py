@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.5 2001/05/08 08:53:04 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.6 2001/05/11 10:10:28 dinu_gherman Exp $
 
 """Generate documentation of graphical Python objects.
 
@@ -138,6 +138,8 @@ class MyTemplate(BaseDocTemplate):
                         isClosed = 0
                     else:
                         isClosed = 1
+
+                    #print title, isClosed
 
                     c.bookmarkPage(key)
                     c.addOutlineEntry(title, key, level=lev, closed=isClosed)
@@ -310,7 +312,31 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
                     self.story.append(Paragraph('Classes', self.makeHeadingStyle(self.indentLevel-1)))
                     self.shouldDisplayClasses = 0
 
+            #print '###', name
             PdfDocBuilder0.beginClass(self, name, doc, bases)
+
+            self.beginAttributes(aClass)
+
+
+    def beginAttributes(self, aClass):
+        "Append a list of annotated attributes of a class."
+
+        self.story.append(Paragraph(
+            'Public Attributes',
+            self.makeHeadingStyle(self.indentLevel+1)))
+        map = aClass._attrMap.items()
+        map.sort()
+        for name, typ in map:
+            if typ != None:
+                if hasattr(typ, 'desc'):
+                    desc = typ.desc
+                else:
+                    desc = '<i>%s</i>' % typ.__class__.__name__
+            else:
+                desc = '<i>None</i>'
+            self.story.append(Paragraph(
+                "<b>%s</b> %s" % (name, desc), self.bt))
+        self.story.append(Paragraph("", self.bt))
 
 
     def endClass(self, name, doc, bases):
