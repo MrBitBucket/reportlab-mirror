@@ -13,14 +13,16 @@ if __name__=='__main__': #NO RUNTESTS
 		return R
 
 	SOURCES=['_renderPM.c']
-	DEVEL_DIR='.'
+	DEVEL_DIR=os.curdir
 	LIBART_DIR=pJoin(DEVEL_DIR,'libart_lgpl')
-	LIBART_SRCS=glob(LIBART_DIR+'/art_*.c')
+	LIBART_SRCS=glob(pJoin(LIBART_DIR, 'art_*.c'))
 	GT1_DIR=pJoin(DEVEL_DIR,'gt1')
 	GLIB_DIR=pJoin(DEVEL_DIR,'glib')
 	if sys.platform=="win32":
 		LIBS=[]
 	elif sys.platform=="sunos5":
+		LIBS=[]
+	elif sys.platform=="mac":
 		LIBS=[]
 	else:
 		print "Don't know about other systems"
