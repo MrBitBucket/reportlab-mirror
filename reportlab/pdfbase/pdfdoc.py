@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.49 2001/09/03 14:06:14 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.49 2001/09/03 14:06:14 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.50 2001/10/05 17:05:35 aaron_watters Exp $
+__version__=''' $Id: pdfdoc.py,v 1.50 2001/10/05 17:05:35 aaron_watters Exp $ '''
 __doc__=""" 
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The 
@@ -354,7 +354,7 @@ class PDFDocument:
         # now add the trailer
         trailer = PDFTrailer(
             startxref = xrefoffset,
-            Size = lno,
+            Size = lno+1,
             Root = self.Reference(cat),
             Info = self.Reference(info),
             Encrypt = encryptref,
