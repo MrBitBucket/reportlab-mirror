@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.21 2001/10/31 00:46:13 andy_robinson Exp $
-__version__=''' $Id: utils.py,v 1.21 2001/10/31 00:46:13 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.22 2001/11/03 19:46:45 andy_robinson Exp $
+__version__=''' $Id: utils.py,v 1.22 2001/11/03 19:46:45 andy_robinson Exp $ '''
 
 import string, os, sys
 from types import *
@@ -45,13 +45,22 @@ def recursiveImport(modulename, baseDir=None):
 		path = [baseDir]
 	else:
 		path = None
-	(file, pathname, description) = imp.find_module(part, path)
-	childModule = parentModule = imp.load_module(part, file, pathname, description)
-	for name in parts[1:]:
-		(file, pathname, description) = imp.find_module(name, parentModule.__path__)
-		childModule = imp.load_module(name, file, pathname, description)
-		setattr(parentModule, name, childModule)
-		parentModule = childModule
+
+	#make import errors a bit more informative
+	try:
+		(file, pathname, description) = imp.find_module(part, path)
+		childModule = parentModule = imp.load_module(part, file, pathname, description)
+		for name in parts[1:]:
+			(file, pathname, description) = imp.find_module(name, parentModule.__path__)
+			childModule = imp.load_module(name, file, pathname, description)
+			setattr(parentModule, name, childModule)
+			parentModule = childModule
+	except ImportError:
+		msg = "cannot import '%s' while attempting recursive import of '%s'" % (part, modulename)
+		if baseDir:
+			msg = msg + " under directory '%s'" % baseDir
+		raise ImportError, msg
+
 	return childModule
 
 
