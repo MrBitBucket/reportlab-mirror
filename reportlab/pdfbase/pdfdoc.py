@@ -1,8 +1,9 @@
+
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.30 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.30 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.31 2000/11/05 17:46:15 andy_robinson Exp $
+__version__=''' $Id: pdfdoc.py,v 1.31 2000/11/05 17:46:15 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -748,6 +749,7 @@ class PDFPage(PDFCatalog):
     __NoDefault__ = string.split(""" Parent
         MediaBox Resources Contents CropBox Rotate Thumb Annots B Dur Hid Trans AA
         PieceInfo LastModified SeparationInfo ArtBox TrimBox BleedBox ID PZ
+        Trans
     """)
     __Refs__ = string.split("""
         Contents Parent ID
@@ -758,6 +760,7 @@ class PDFPage(PDFCatalog):
     hasImages = 0
     compression = 0
     XObjects = None
+    Trans = None
     # transitionstring?
     # xobjects?
     # annotations
@@ -774,6 +777,9 @@ class PDFPage(PDFCatalog):
         if type(code) is ListType:
             code = string.join(code, LINEEND)+LINEEND
         self.stream = code
+
+    def setPageTransition(self, tranDict):
+        self.Trans = PDFDictionary(tranDict)
         
     def check_format(self, document):
         # set up parameters unless usual behaviour is suppressed
@@ -1108,7 +1114,7 @@ class PDFInfo:
         D["Title"] = PDFString(self.title)
         D["Author"] = PDFString(self.author)
         D["CreationDate"] = PDFDate()
-        D["Producer"] = PDFString("ReporLab http://www.reportlab.com")
+        D["Producer"] = PDFString("ReportLab http://www.reportlab.com")
         D["Subject"] = PDFString(self.subject)
         PD = PDFDictionary(D)
         return PD.format(document)

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.55 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.55 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.56 2000/11/05 17:46:15 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.56 2000/11/05 17:46:15 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -145,7 +145,7 @@ class Canvas:
 		
         self._pagesize = pagesize
         #self._currentPageHasImages = 0
-        self._pageTransitionString = ''
+        self._pageTransition = None
         self._destinations = {} # dictionary of destinations for cross indexing.
 
         self.setPageCompression(pageCompression)
@@ -320,7 +320,7 @@ class Canvas:
         page.pagewidth = self._pagesize[0]
         page.pageheight = self._pagesize[1]
         page.hasImages = self._currentPageHasImages
-        page.pageTransitionString = self._pageTransitionString
+        page.setPageTransition(self._pageTransition)
         page.setCompression(self._pageCompression)
         #print stream
         page.setStream([self._preamble] + self._code)
@@ -1126,23 +1126,28 @@ class Canvas:
             }
         Have fun!
 """
+        # This builds a Python dictionary with the right arguments
+        # for the Trans dictionary in the PDFPage object,
+        # and stores it in the variable _pageTransition.
+        # showPage later passes this to the setPageTransition method
+        # of the PDFPage object, which turns it to a PDFDictionary.
+        self._pageTransition = {}
         if not effectname:
-            self._pageTransitionString = ''
             return
             
         #first check each optional argument has an allowed value
         if direction in [0,90,180,270]:
-            direction_arg = '/Di /%d' % direction
+            direction_arg = ('Di', '/%d' % direction)
         else:
             raise 'PDFError', ' directions allowed are 0,90,180,270'
         
         if dimension in ['H', 'V']:
-            dimension_arg = '/Dm /%s' % dimension
+            dimension_arg = ('Dm', '/' + dimension)
         else:
             raise'PDFError','dimension values allowed are H and V'
         
         if motion in ['I','O']:
-            motion_arg = '/M /%s' % motion
+            motion_arg = ('M', '/' + motion)
         else:
             raise'PDFError','motion values allowed are I and O'
 
@@ -1161,12 +1166,15 @@ class Canvas:
             args = PageTransitionEffects[effectname]
         except KeyError:
             raise 'PDFError', 'Unknown Effect Name "%s"' % effectname
-            self._pageTransitionString = ''
-            return
         
-
-        self._pageTransitionString = (('/Trans <</D %d /S /%s ' % (duration, effectname)) + 
-            string.join(args, ' ') + ' >>')
+        # now build the dictionary
+        transDict = {}
+        transDict['Type'] = '/Trans'
+        transDict['D'] = '/%d' % duration
+        transDict['S'] = '/' + effectname
+        for (key, value) in args:
+            transDict[key] = value
+        self._pageTransition = transDict
 
 if __name__ == '__main__':
-    print 'For test scripts, run testpdfgen.py'
+    print 'For test scripts, look in reportlab/test'

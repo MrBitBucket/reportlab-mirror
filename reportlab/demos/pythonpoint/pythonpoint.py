@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/pythonpoint.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.26 2000/10/25 08:57:44 rgbecker Exp $
-__version__=''' $Id: pythonpoint.py,v 1.26 2000/10/25 08:57:44 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.27 2000/11/05 17:46:15 andy_robinson Exp $
+__version__=''' $Id: pythonpoint.py,v 1.27 2000/11/05 17:46:15 andy_robinson Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -30,6 +30,8 @@ The currently available 'Presentation Objects' are:
         PPSlide
         PPFrame
 
+        PPAuthor, PPTitle and PPSubject are optional
+        
     Things to flow within frames...
         PPPara - flowing text
         PPPreformatted - text with line breaks and tabs, for code..
@@ -64,6 +66,9 @@ class PPPresentation:
     def __init__(self):
         self.filename = None
         self.description = None
+        self.title = None
+        self.author = None
+        self.subject = None
         self.speakerNotes = 0   # different printing mode
         self.slides = []
         self.effectName = None
@@ -78,11 +83,14 @@ class PPPresentation:
         canv = canvas.Canvas(self.filename,
                                 pagesize = (self.pageWidth, self.pageHeight)
                                )
+        if self.title:
+            canv.setTitle(self.title)
+        if self.author:
+            canv.setAuthor(self.author)
+        if self.subject:
+            canv.setSubject(self.subject)
         canv.setPageCompression(0)
-            
         for slide in self.slides:
-
-            
             if self.speakerNotes:
                 #frame and shift the slide
                 canv.scale(0.67, 0.67)
@@ -98,6 +106,7 @@ class PPPresentation:
         if self.showOutline:
             canv.showOutline()
         canv.save()        
+
 
 class PPSection:
     """A section can hold graphics which will be drawn on all
@@ -149,7 +158,6 @@ class PPSlide:
         if self.section:
             self.section.drawOn(canv)
                 
-        canv.drawRightString(800, 36, 'id: %s, title: %s' % (self.id, self.title))
         for graphic in self.graphics:
             graphic.drawOn(canv)
             
@@ -433,6 +441,7 @@ class PPString:
         self.font = 'Times-Roman'
         self.size = 12
         self.color = (0,0,0)
+        self.hasInfo = 0  # these can have data substituted into them
 
     def normalizeText(self):
         """It contains literal XML text typed over several lines.
@@ -448,9 +457,25 @@ class PPString:
         self.text = newtext
         
     def drawOn(self, canv):
+        # for a string in a section, this will be drawn several times;
+        # so any substitution into the text should be in a temporary
+        # variable
+        if self.hasInfo:
+            # provide a dictionary of stuff which might go into
+            # the string, so they can number pages, do headers
+            # etc.
+            info = {}
+            info['title'] = canv._doc.info.title
+            info['author'] = canv._doc.info.author
+            info['subject'] = canv._doc.info.subject
+            info['page'] = canv.getPageNumber()
+            drawText = self.text % info
+        else:
+            drawText = self.text
+
         if self.color is None:
             return
-        lines = string.split(string.strip(self.text), '\\n')
+        lines = string.split(string.strip(drawText), '\\n')
         canv.saveState()
         canv.setFont(self.font, self.size)
         r,g,b = self.color

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.29 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: doctemplate.py,v 1.29 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.30 2000/11/05 17:46:15 andy_robinson Exp $
+__version__=''' $Id: doctemplate.py,v 1.30 2000/11/05 17:46:15 andy_robinson Exp $ '''
 __doc__="""
 This module contains the core structure of platypus.
 
@@ -29,6 +29,7 @@ for the current frame).
 from reportlab.platypus.flowables import *
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
+from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
 import reportlab.lib.sequencer
 from types import *
 import sys
@@ -91,13 +92,15 @@ class PageTemplate:
 	of a page when this is selected. onPageEnd gets called at the end.
 	derived classes can also implement beforeDrawPage and afterDrawPage if they want
 	"""
-	def __init__(self,id=None,frames=[],onPage=_doNothing, onPageEnd=_doNothing):
+	def __init__(self,id=None,frames=[],onPage=_doNothing, onPageEnd=_doNothing,
+				 pagesize=DEFAULT_PAGE_SIZE):
 		if type(frames) not in (ListType,TupleType): frames = [frames]
 		assert filter(lambda x: not isinstance(x,Frame), frames)==[], "frames argument error"
 		self.id = id
 		self.frames = frames
 		self.onPage = onPage
 		self.onPageEnd = onPageEnd
+		self.pagesize = pagesize
 
 	def beforeDrawPage(self,canv,doc):
 		"""Override this if you want additional functionality or prefer

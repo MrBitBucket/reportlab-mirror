@@ -1,12 +1,12 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/stdparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/stdparser.py,v 1.12 2000/10/25 08:57:44 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/stdparser.py,v 1.13 2000/11/05 17:46:15 andy_robinson Exp $
 __version__=''' $Id $ '''
 __doc__="""
 Parser for PythonPoint using the xmllib.py in the standard Python
 distribution.  Slow, but always present.  We intend to add new parsers
-as Python 1.6 and the xml package spread in popularity.
+as Python 2.0 and the xml package spread in popularity ad stabilise.
 
 The parser has a getPresentation method; it is called from
 pythonpoint.py.
@@ -146,6 +146,10 @@ class PPMLParser(xmllib.XMLParser):
         self._curPrefmt = None
         self._curString = None
         self._curTable = None
+        self._curTitle = None
+        self._curAuthor = None
+        self._curSubject = None
+        
         xmllib.XMLParser.__init__(self)
 
     def _arg(self,tag,args,name):
@@ -184,13 +188,28 @@ class PPMLParser(xmllib.XMLParser):
             self._curString.text = self._curString.text + data
         elif self._curTable:
             self._curTable.rawBlocks.append(data)
+        elif self._curTitle <> None:  # need to allow empty strings,
+            # hence explicitly testing for None
+            self._curTitle = self._curTitle + data
+        elif self._curAuthor <> None:
+            self._curAuthor = self._curAuthor + data
+        elif self._curSubject <> None:
+            self._curSubject = self._curSubject + data
             
     def handle_cdata(self, data):
         #just append to current paragraph text, so we can quote XML
         if self._curPara:
             self._curPara.rawtext = self._curPara.rawtext + data
-        if self._curPrefmt:
+        elif self._curPrefmt:
             self._curPrefmt.rawtext = self._curPrefmt.rawtext + data
+        elif  self._curString:
+            self._curString.text = self._curString.text + data
+        elif self._curTable:
+            self._curTable.rawBlocks.append(data)
+        elif self._curAuthor <> None:
+            self._curAuthor = self._curAuthor + data
+        elif self._curSubject <> None:
+            self._curSubject = self._curSubject + data
         
             
     def start_presentation(self, args):
@@ -202,6 +221,27 @@ class PPMLParser(xmllib.XMLParser):
     def end_presentation(self):
         #print 'ended presentation'
         print 'Fully parsed presentation',self._curPres.filename
+
+    def start_title(self, args):
+        self._curTitle = ''
+
+    def end_title(self):
+        self._curPres.title = self._curTitle
+        self._curTitle = None
+
+    def start_author(self, args):
+        self._curAuthor = ''
+
+    def end_author(self):
+        self._curPres.author = self._curAuthor
+        self._curAuthor = None
+        
+    def start_subject(self, args):
+        self._curSubject = ''
+
+    def end_subject(self):
+        self._curPres.subject = self._curSubject
+        self._curSubject = None
 
     def start_stylesheet(self, args):
         #makes it the current style sheet.
@@ -463,6 +503,14 @@ class PPMLParser(xmllib.XMLParser):
             self._curSection.graphics.append(self._curString)
         self._curString = None
 
+    def start_infostring(self, args):
+        # like a string, but lets them embed page no, author etc.
+        self.start_string(args)
+        self._curString.hasInfo = 1
+
+    def end_infostring(self):
+        self.end_string()
+    
     def start_customshape(self, args):
         #loads one
         path = self._arg('customshape',args,'path')

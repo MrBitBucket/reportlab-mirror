@@ -6,11 +6,17 @@ the two lines below
 <!DOCTYPE presentation SYSTEM "pythonpoint.dtd"> 
 -->
 <presentation filename='pythonpoint.pdf'>
+  <title>PythonPoint Demonstration</title>
+  <author>Andy Robinson</author>
+  <subject>Reportlab Sample Applications</subject>
   <section name = 'Main'>
   	<!-- any graphics in the section go on all its pages as a backdrop -->
     <rectangle x="20" y="20" width="96" height="555" fill="(0,0,0.8)"/>
     <fixedimage  x="20" y="510" width="96" height="64" filename="leftlogo.gif"/>
-
+    <infostring align="right" x="800" y= "36" size="14" >
+            %(title)s, page %(page)s
+    </infostring>
+        
 	<!--Now for the slides-->
      <slide id="Slide001" title="Introduction" effectname='Wipe'>
         <frame x="120" y="72" width="700" height="468" 
