@@ -2,11 +2,11 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/corp.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/corp.py,v 1.11 2003/12/02 15:21:16 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/lib/corp.py,v 1.12 2003/12/05 12:27:02 rgbecker Exp $
 """ This module includes some reusable routines for ReportLab's
  'Corporate Image' - the logo, standard page backdrops and
  so on - you are advised to do the same for your own company!"""
-__version__=''' $Id: corp.py,v 1.11 2003/12/02 15:21:16 andy_robinson Exp $ '''
+__version__=''' $Id: corp.py,v 1.12 2003/12/05 12:27:02 rgbecker Exp $ '''
 
 from reportlab.lib.units import inch,cm
 from reportlab.lib.validators import *
@@ -35,6 +35,8 @@ class RL_CorpLogo(Widget):
         skewX = AttrMapValue(isNumber, desc="x-skew of the logo (default 10)"),
         skewY = AttrMapValue(isNumber, desc="y-skew of the logo (default 0)"),
         showPage = AttrMapValue(isBoolean, desc="If true show the page lines"),
+        xFlip = AttrMapValue(isBoolean, desc="If true do x reversal"),
+        yFlip = AttrMapValue(isBoolean, desc="If true do y reversal"),
         )
 
     def __init__(self):
@@ -104,7 +106,15 @@ class RL_CorpLogo(Widget):
             G.shift(-w,-h)
             G.rotate(angle)
             G.shift(w,h)
-        G.shift(x,y)
+        xFlip = getattr(self,'xFlip',0) and -1 or 0
+        yFlip = getattr(self,'yFlip',0) and -1 or 0
+        if xFlip or yFlip:
+            sx = xFlip or 1
+            sy = yFlip or 1
+            G.shift(sx*x+w*xFlip,sy*y+yFlip*h)
+            G = Group(G,transform=(sx,0,0,sy,0,0))
+        else:
+            G.shift(x,y)
         return G
 
 class RL_CorpLogoReversed(RL_CorpLogo):
