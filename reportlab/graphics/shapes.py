@@ -1,3 +1,7 @@
+#copyright ReportLab Inc. 2001
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/runtests.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.14 2001/04/05 09:08:37 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -411,114 +415,6 @@ class Shape:
             #print 'set %s.%s = %s' % (self.__class__.__name__, attr, value)
     #else:
     #    print 'shapeChecking = 0, not defining setattr'
-
-
-class Drawing(Shape, Flowable):
-    """Outermost container; the thing a renderer works on.
-    This has no properties except a height, width and list
-    of contents."""
-
-    _attrMap = {
-        'width':isNumber,
-        'height':isNumber,
-        'contents':isListOfShapes,
-        'canv':None}
-    
-    def __init__(self, width, height, *nodes):
-        # Drawings need _attrMap to be an instance rather than
-        # a class attribute, as it may be extended at run time.
-        self._attrMap = self._attrMap.copy()
-            
-        self.width = width
-        self.height = height
-        self.contents = list(nodes)
-        
-
-    def add(self, node, name=None):
-        """Adds a shape to a drawing.  If a name is provided, it may
-        subsequently be accessed by name and becomes a regular
-        attribute of the drawing."""
-
-        assert isValidChild(node), "Can only add Shape or UserNode objects to a drawing"
-        self.contents.append(node)
-        if name:
-            #it better be valid or the checker will scream; and we need
-            #to make _attrMap an instance rather than a class attribite
-            #at this point too
-            self._attrMap[name] = isValidChild
-            setattr(self, name, node)
-            
-    def draw(self):
-        """This is used by the Platypus framework to let the document
-        draw itself in a story.  It is specific to PDF and should not
-        be used directly."""
-
-        import renderPDF
-        R = renderPDF._PDFRenderer()
-        R.draw(self, self.canv, 0, 0)
-
-    def expandUserNodes0(self):
-        """Return a new drawing which only contains primitive shapes."""
-
-        # many limitations - shared nodes become multiple ones,
-        newDrawing = Drawing(self.width, self.height)
-        newDrawing._attrMap = self._attrMap.copy()
-
-        for child in self.contents:
-            if isinstance(child, UserNode):
-                newChild = child.provideNode()
-            elif isinstance(child, Group):
-                newChild = child.expandUserNodes0()
-            else:
-                newChild = child.copy0()
-            newDrawing.contents.append(newChild)
-        # they may have names.  reproduce them
-
-        for (oldKey, oldValue) in self.__dict__.items():
-            if oldValue in self.contents:
-                pos = mylist.index(oldValue)
-                setattr(newDrawing, oldKey, newDrawing.contents[pos])
-
-        return newDrawing
-
-    def copy0(self):
-        """Returns a deep copy of the drawing."""
-        
-        newDrawing = Drawing(self.width, self.height)
-        newDrawing._attrMap = self._attrMap.copy0()
-        for child in self.contents:
-            newDrawing.contents.append(child)
-
-        for (oldKey, oldValue) in self.__dict__.items():
-            if oldValue in self.contents:
-                pos = self.contents.index(oldValue)
-                setattr(newDrawing, oldKey, newDrawing.contents[pos])
-
-        return newDrawing
-            
-    def expandUserNodes0(self):
-        """Return a new group which only contains primitive shapes."""
-
-        # many limitations - shared nodes become multiple ones,
-        newDrawing = Drawing(self.width, self.height)
-        newDrawing._attrMap = self._attrMap.copy0()
-
-        for child in self.contents:
-            if isinstance(child, UserNode):
-                newChild = child.provideNode()
-            elif isinstance(child, Group):
-                newChild = child.expandUserNodes0()
-            else:
-                newChild = child.copy0()
-            newDrawing.contents.append(newChild)
-        # they may have names.  reproduce them
-
-        for (oldKey, oldValue) in self.__dict__.items():
-            if oldValue in self.contents:
-                pos = self.contents.index(oldValue)
-                setattr(newDrawing, oldKey, newDrawing.contents[pos])
-
-        return newDrawing
         
 
 class Group(Shape):
@@ -618,6 +514,101 @@ class Group(Shape):
     def skew(self, kx, ky):
         """Convenience to help you set transforms"""
         self.transform = mmult(mmult(self.transform, skewX(kx)),skewY(ky))
+
+    def asDrawing(self, width, height):
+        self.__class__ = Drawing
+        self.__Drawing_init__(width,height)
+
+class Drawing(Group, Flowable):
+    """Outermost container; the thing a renderer works on.
+    This has no properties except a height, width and list
+    of contents."""
+
+    _xtraAttrMap = {
+        'width':isNumber,
+        'height':isNumber,
+        'canv':None}
+    
+    def __init__(self, width, height, *nodes, **keywords):
+        apply(Group.__init__,(self,)+nodes,keywords)
+        self.__Drawing_init__(width,height)
+
+    def __Drawing_init__(self,width,height):
+        self._attrMap.update(self._xtraAttrMap)
+        self.width = width
+        self.height = height
+        
+    def draw(self):
+        """This is used by the Platypus framework to let the document
+        draw itself in a story.  It is specific to PDF and should not
+        be used directly."""
+
+        import renderPDF
+        R = renderPDF._PDFRenderer()
+        R.draw(self, self.canv, 0, 0)
+
+    def expandUserNodes0(self):
+        """Return a new drawing which only contains primitive shapes."""
+
+        # many limitations - shared nodes become multiple ones,
+        newDrawing = Drawing(self.width, self.height)
+        newDrawing._attrMap = self._attrMap.copy()
+
+        for child in self.contents:
+            if isinstance(child, UserNode):
+                newChild = child.provideNode()
+            elif isinstance(child, Group):
+                newChild = child.expandUserNodes0()
+            else:
+                newChild = child.copy0()
+            newDrawing.contents.append(newChild)
+        # they may have names.  reproduce them
+
+        for (oldKey, oldValue) in self.__dict__.items():
+            if oldValue in self.contents:
+                pos = mylist.index(oldValue)
+                setattr(newDrawing, oldKey, newDrawing.contents[pos])
+
+        return newDrawing
+
+    def copy0(self):
+        """Returns a deep copy of the drawing."""
+        
+        newDrawing = Drawing(self.width, self.height)
+        newDrawing._attrMap = self._attrMap.copy0()
+        for child in self.contents:
+            newDrawing.contents.append(child)
+
+        for (oldKey, oldValue) in self.__dict__.items():
+            if oldValue in self.contents:
+                pos = self.contents.index(oldValue)
+                setattr(newDrawing, oldKey, newDrawing.contents[pos])
+
+        return newDrawing
+            
+    def expandUserNodes0(self):
+        """Return a new group which only contains primitive shapes."""
+
+        # many limitations - shared nodes become multiple ones,
+        newDrawing = Drawing(self.width, self.height)
+        newDrawing._attrMap = self._attrMap.copy0()
+
+        for child in self.contents:
+            if isinstance(child, UserNode):
+                newChild = child.provideNode()
+            elif isinstance(child, Group):
+                newChild = child.expandUserNodes0()
+            else:
+                newChild = child.copy0()
+            newDrawing.contents.append(newChild)
+        # they may have names.  reproduce them
+
+        for (oldKey, oldValue) in self.__dict__.items():
+            if oldValue in self.contents:
+                pos = self.contents.index(oldValue)
+                setattr(newDrawing, oldKey, newDrawing.contents[pos])
+
+        return newDrawing
     
 
 class LineShape(Shape):
