@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.24 2003/03/19 14:48:17 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.24 2003/03/19 14:48:17 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.25 2003/04/14 18:37:53 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.25 2003/04/14 18:37:53 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -31,6 +31,13 @@ except ImportError, errMsg:
 
 from types import TupleType, ListType
 _SeqTypes = (TupleType,ListType)
+
+def _getImage():
+    try:
+        from PIL import Image
+    except ImportError:
+        import Image
+    return Image
 
 def Color2Hex(c):
     #assert isinstance(colorobj, colors.Color) #these checks don't work well RGB
@@ -134,8 +141,7 @@ class _PMRenderer(Renderer):
     def drawImage(self, image):
         if image.path and os.path.exists(image.path):
             if type(image.path) is type(''):
-                import PIL
-                im = PIL.Image.open(image.path).convert('RGB')
+                im = _getImage().open(image.path).convert('RGB')
             else:
                 im = image.path.convert('RGB')
             srcW, srcH = im.size
@@ -254,11 +260,7 @@ class PMCanvas:
         gs.setFont(fN,fS)
 
     def toPIL(self):
-        try:
-            from PIL import Image
-        except ImportError:
-            import Image
-        im = Image.new('RGB', size=(self._gs.width, self._gs.height))
+        im = _getImage().new('RGB', size=(self._gs.width, self._gs.height))
         im.fromstring(self._gs.pixBuf)
         return im
 
@@ -270,10 +272,7 @@ class PMCanvas:
         else:
             fmt = string.upper(fmt)
             if fmt in ['GIF']:
-                try:
-                    from PIL import Image
-                except ImportError:
-                    import Image
+                Image = _getImage()
                 im = im.convert("P", dither=Image.NONE, palette=Image.ADAPTIVE)
             elif fmt in ['PNG','TIFF','BMP', 'PPM', 'TIF']:
                 if fmt=='TIF': fmt = 'TIFF'
@@ -482,14 +481,25 @@ class PMCanvas:
 
     restoreState = saveState
 
+def drawToPMCanvas(d, dpi=72, bg=0xfffffff, configPIL=None, showBoundary=rl_config.showBoundary):
+    w = int(d.width+0.5)
+    h = int(d.height+0.5)
+    c = PMCanvas(w, h, dpi=dpi, bg=bg, configPIL=configPIL)
+    draw(d, c, 0, 0)
+    return c
+
+def drawToPIL(d, dpi=72, bg=0xfffffff, configPIL=None, showBoundary=rl_config.showBoundary):
+    return drawToPMCanvas(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary).toPIL()
+
+def drawToPILP(d, dpi=72, bg=0xfffffff, configPIL=None, showBoundary=rl_config.showBoundary):
+    Image = _getImage()
+    im = drawToPIL(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary)
+    return im.convert("P", dither=Image.NONE, palette=Image.ADAPTIVE)
 
 def drawToFile(d,fn,fmt='GIF', dpi=72, bg=0xfffffff, configPIL=None, showBoundary=rl_config.showBoundary):
     '''create a pixmap and draw drawing, d to it then save as a file
     configPIL dict is passed to image save method'''
-    w = int(d.width+0.5)
-    h = int(d.height+0.5)
-    c = PMCanvas(w,h, dpi=dpi, bg=bg)
-    draw(d, c, 0, 0)
+    c = drawToPMCanvas(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary)
     c.saveToFile(fn,fmt)
 
 def drawToString(d,fmt='GIF', dpi=72, bg=0xfffffff, configPIL=None, showBoundary=rl_config.showBoundary):
