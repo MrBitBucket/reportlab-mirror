@@ -614,7 +614,7 @@ class ParaParser(xmllib.XMLParser):
         except KeyError:
             id = None
         try:
-            base = math.atoi(attr['base'])
+            base = int(attr['base'])
         except:
             base=0
         self._seq.reset(id, base)
@@ -622,20 +622,39 @@ class ParaParser(xmllib.XMLParser):
     def end_seqreset(self):
         pass
 
+    def start_seqchain(self, attr):
+        try:
+            order = attr['order']
+        except KeyError:
+            order = ''
+        order = order.split()
+        seq = self._seq
+        for p,c in zip(order[:-1],order[1:]):
+            seq.chain(p, c)
+    end_seqchain = end_seqreset
+
+    def start_seqformat(self, attr):
+        try:
+            id = attr['id']
+        except KeyError:
+            id = None
+        try:
+            value = attr['value']
+        except KeyError:
+            value = '1'
+        self._seq.setFormat(id,value)
+    end_seqformat = end_seqreset
+
     # AR hacking in aliases to allow the proper casing for RML.
     # the above ones should be deprecated over time. 2001-03-22
-    def start_seqDefault(self, attr):
-        self.start_seqdefault(attr)
-
-    def end_seqDefault(self):
-        self.end_seqdefault()
-
-    def start_seqReset(self, attr):
-        self.start_seqreset(attr)
-
-    def end_seqReset(self):
-        self.end_seqreset()
-
+    start_seqDefault = start_seqdefault
+    end_seqDefault = end_seqdefault
+    start_seqReset = start_seqreset
+    end_seqReset = end_seqreset
+    start_seqChain = start_seqchain
+    end_seqChain = end_seqchain
+    start_seqFormat = start_seqformat
+    end_seqFormat = end_seqformat
 
     def start_seq(self, attr):
         #if it has a template, use that; otherwise try for id;

@@ -126,7 +126,9 @@ class Sequencer:
             # the formats it knows initially
             '1':_format_123,
             'A':_format_ABC,
-            'a':_format_abc
+            'a':_format_abc,
+            'I':_format_I,
+            'i':_format_i,
             }
 
     def _getCounter(self, counter=None):
