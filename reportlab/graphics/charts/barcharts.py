@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.28 2001/08/19 13:01:27 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.29 2001/08/23 15:29:12 johnprecedo Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -95,6 +95,8 @@ class BarChart(Widget):
 
         strokeColor = AttrMapValue(isColorOrNone,
             desc='Color of the plot area border.'),
+        strokeWidth = AttrMapValue(isNumber,
+            desc='Width plot area border.'),
         fillColor = AttrMapValue(isColorOrNone,
             desc='Color of the plot area interior.'),
 
@@ -351,6 +353,7 @@ class BarChart(Widget):
                     g.add(symbol)
                 else:
                     r = Rect(x, y, width, height)
+                    r.strokeWidth = rowStyle.strokeWidth ## added line - now actually uses strokeWidth
                     r.fillColor = rowStyle.fillColor
                     r.strokeColor = rowStyle.strokeColor
                     g.add(r)
