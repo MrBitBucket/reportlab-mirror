@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch3_shapes.py,v 1.4 2001/08/11 15:18:41 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/graphguide/ch3_shapes.py,v 1.5 2001/08/13 12:04:12 rgbecker Exp $
 
 from rl_doc_utils import *
 from reportlab.graphics.shapes import *
@@ -132,7 +132,7 @@ eg("""
 """)
 
 disc("""
-Let's run through the style properties. §fillColor§ is obvious.
+Let's run through the style properties. $fillColor$ is obvious.
 $stroke$ is publishing terminology for the edge of a shape;
 the stroke has a color, width, possibly a dash pattern, and
 some (rarely used) features for what happens when a line turns
