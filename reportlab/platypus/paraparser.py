@@ -290,8 +290,10 @@ class ParaParser(xmllib.XMLParser):
 							'super': (self.start_super, self.end_super),
 							'sub': (self.start_sub, self.end_sub),
 							'font': (self.start_font, self.end_font),
-							'greek': (self.start_greek, self.end_greek)
+							'greek': (self.start_greek, self.end_greek),
+							'para': (self.start_para, self.end_para)
 							}
+
 
 			# automatically add handlers for all of the greek characters
 			for item in greeks.keys():
