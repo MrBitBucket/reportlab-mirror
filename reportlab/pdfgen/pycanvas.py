@@ -147,9 +147,9 @@ def buildargs(*args, **kwargs) :
     """Constructs a printable list of arguments suitable for use in source function calls."""
     arguments = ""
     for arg in args :
-        arguments += "%s, " % repr(arg)
+        arguments = arguments + ("%s, " % repr(arg))
     for (kw, val) in kwargs.items() :
-        arguments += "%s=%s, " % (kw, repr(val))
+        arguments = arguments+ ("%s=%s, " % (kw, repr(val)))
     if arguments[-2:] == ", " :
         arguments = arguments[:-2]
     return arguments    
@@ -171,7 +171,7 @@ class PDFAction :
             self._precomment()
             self._parent._parent._PyWrite("    %s.%s(%s)" % (self._parent._name, self._action, apply(buildargs, args, kwargs)))
             self._postcomment() 
-        self._parent._parent._in += 1
+        self._parent._parent._in = self._parent._parent._in + 1 
         retcode = apply(getattr(self._parent._object, self._action), args, kwargs)
         self._parent._parent._in -= 1
         return retcode
@@ -203,7 +203,7 @@ class PDFObject :
     def __call__(self, *args, **kwargs) :
         """Real object initialisation is made here, because now we've got the arguments."""
         if not self._initdone :
-            self.__class__._number += 1
+            self.__class__._number = self.__class__._number + 1
             methodname = apply(self._postinit, args, kwargs)
             self._parent._PyWrite("\n    # create PDF%sObject number %i\n    %s = %s.%s(%s)" % (methodname[5:], self.__class__._number, self._name, self._parent._name, methodname, apply(buildargs, args, kwargs)))
             self._initdone = 1
@@ -235,12 +235,12 @@ class Canvas :
                 for name in self._parent._object.STATE_ATTRIBUTES:
                     state[name] = d[name] 
                 self._parent._PyWrite("\n    # Saves context level %i %s" % (self._parent._contextlevel, state))
-                self._parent._contextlevel += 1
+                self._parent._contextlevel = self._parent._contextlevel + 1
             elif self._action == "restoreState" :    
                 self._parent._contextlevel -= 1
                 self._parent._PyWrite("\n    # Restores context level %i %s" % (self._parent._contextlevel, self._parent._object.state_stack[-1]))
             elif self._action == "beginForm" :    
-                self._parent._formnumber += 1
+                self._parent._formnumber = self._parent._formnumber + 1
                 self._parent._PyWrite("\n    # Begins form %i" % self._parent._formnumber)
             elif self._action == "endForm" :    
                 self._parent._PyWrite("\n    # Ends form %i" % self._parent._formnumber)
@@ -250,7 +250,7 @@ class Canvas :
         def _postcomment(self) :
             """Outputs comments after the method call."""
             if self._action == "showPage" :
-                self._parent._pagenumber += 1
+                self._parent._pagenumber = self._parent._pagenumber + 1
                 self._parent._PyWrite("\n    # Begins page %i" % self._parent._pagenumber)
             elif self._action == "endForm" :    
                 self._parent._PyWrite("")
