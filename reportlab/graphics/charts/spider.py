@@ -1,7 +1,7 @@
     #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/spider.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/spider.py,v 1.5 2002/12/04 12:14:07 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/spider.py,v 1.6 2003/03/04 15:23:10 rgbecker Exp $
 # spider chart, also known as radar chart
 
 """Spider Chart
@@ -10,7 +10,7 @@ Normal use shows variation of 5-10 parameters against some 'norm' or target.
 When there is more than one series, place the series with the largest
 numbers first, as it will be overdrawn by each successive one.
 """
-__version__=''' $Id: spider.py,v 1.5 2002/12/04 12:14:07 rgbecker Exp $ '''
+__version__=''' $Id: spider.py,v 1.6 2003/03/04 15:23:10 rgbecker Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -154,6 +154,7 @@ class SpiderChart(PlotArea):
         angle = self.startAngle*pi/180
         direction = self.direction == "clockwise" and -1 or 1
         angleBetween = direction*(2 * pi)/n
+        labels = self.labels
         for i in xrange(n):
             car = cos(angle)*radius
             sar = sin(angle)*radius
@@ -161,22 +162,23 @@ class SpiderChart(PlotArea):
             spoke = Line(centerx, centery, centerx + car, centery + sar, strokeWidth = 0.5)
             #print 'added spoke (%0.2f, %0.2f) -> (%0.2f, %0.2f)' % (spoke.x1, spoke.y1, spoke.x2, spoke.y2)
             spokes.append(spoke)
-            text = self.labels[i]
-            if text:
-                si = self.strands[i]
-                labelRadius = si.labelRadius
-                ex = centerx + labelRadius*car
-                ey = centery + labelRadius*sar
-                L = Label()
-                L.setText(text)
-                L.x = ex
-                L.y = ey
-                L.boxAnchor = _findNearestAngleValue(angle*180/pi,_ANGLE2ANCHOR)
-                L.fontName = si.fontName
-                L.fontSize = si.fontSize
-                L.fillColor = si.fontColor
-                L.textAnchor = 'boxauto'
-                spokes.append(L)
+            if labels:
+                text = labels[i]
+                if text:
+                    si = self.strands[i]
+                    labelRadius = si.labelRadius
+                    ex = centerx + labelRadius*car
+                    ey = centery + labelRadius*sar
+                    L = Label()
+                    L.setText(text)
+                    L.x = ex
+                    L.y = ey
+                    L.boxAnchor = _findNearestAngleValue(angle*180/pi,_ANGLE2ANCHOR)
+                    L.fontName = si.fontName
+                    L.fontSize = si.fontSize
+                    L.fillColor = si.fontColor
+                    L.textAnchor = 'boxauto'
+                    spokes.append(L)
             angle = angle + angleBetween
 
         # now plot the polygons
