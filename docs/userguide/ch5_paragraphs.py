@@ -148,12 +148,12 @@ with the $Paragraph$ $text$ and/or $bulletText$.
 """)
 disc(" ")
 
-from reportlab.platypus.paraparser import _addAttributeNames, _paraAttrMap
+from reportlab.platypus.paraparser import _addAttributeNames, _paraAttrMap, _bulletAttrMap
 
 def getAttrs(A):
     _addAttributeNames(A)
     S={}
-    for k, v in _paraAttrMap.items():
+    for k, v in A.items():
         a = v[0]
         if not S.has_key(a):
             S[a] = k
@@ -232,7 +232,7 @@ parabox2("""Equation (&alpha;): <greek>e</greek> <super><greek>ip</greek></super
          "Greek letters and subscripts")
 
 heading3("Numbering Paragraphs and Lists")
-disc("""The $<seq>$ tag provides comprehensive support
+disc("""The $&lt;seq&gt;$ tag provides comprehensive support
 for numbering lists, chapter headings and so on.  It acts as
 an interface to the $Sequencer$ class in ^reportlab.lib.sequencer^.
 These are used to number headings and figures throughout this
@@ -241,7 +241,7 @@ You may create as many separate 'counters' as you wish, accessed
 with the $id$ attribute; these will be incremented by one each
 time they are accessed.  The $seqreset$ tag resets a counter.
 If you want it to resume from a number other than 1, use
-the syntax &lt;seqreset id="mycounter" base="42"&gt;. 
+the syntax &lt;seqreset id="mycounter" base="42"&gt;.
 Let's have a go:""")
 
 parabox2("""<seq id="spam"/>, <seq id="spam"/>, <seq id="spam"/>.
@@ -289,7 +289,21 @@ $bulletFontName$ attribute.  For genuine bullets, a good
 idea is to select the Symbol font in the style, and
 use a character such as $\\267)$:""")
 
+t=apply(Table,getAttrs(_bulletAttrMap))
+t.setStyle([
+            ('FONT',(0,0),(-1,1),'Times-Bold',10,12),
+            ('FONT',(0,1),(-1,-1),'Courier',8,8),
+            ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ])
+getStory().append(t)
 
+caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - &lt;bullet&gt; attributes &amp; synonyms""")
+disc("""The &lt;bullet&gt; tag is only allowed onec in a given paragraph and its use
+overrides the implied bullet style and ^bulletText^ specified in the  ^Paragraph^
+creation.
+""")
 parabox("""<bullet>\267</bullet>this is a bullet point.  Spam
 spam spam spam spam spam spam spam spam spam spam spam 
 spam spam spam spam spam spam spam spam spam spam """,

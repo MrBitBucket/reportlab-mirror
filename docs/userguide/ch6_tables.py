@@ -50,15 +50,15 @@ Successive uses of the $setStyle$ method apply the styles in an additive fashion
 That is later applications override earlier ones where thes overlap.
 """)
 
-heading3('$class TableStyle$')
+heading2('$class TableStyle$')
 disc("""
 This $class$ is created by passing it a sequence of <i>commands</i>, each command
 is a tuple identified by its first element which is a string; the remaining
 elements of the command tuple represent the start and finish cell coordinates
 of the command and possibly thickness and colors etc.
 """)
-heading3("$TableStyle$ User Methods")
-heading4("$TableStyle(commandSequence)$")
+heading2("$TableStyle$ User Methods")
+heading3("$TableStyle(commandSequence)$")
 disc("""The creation method initializes the $TableStyle$ with the argument
 command sequence as an example:""")
 eg("""
@@ -69,19 +69,19 @@ eg("""
         ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
         )
 """)
-heading4("$TableStyle.add(commandSequence)$")
+heading3("$TableStyle.add(commandSequence)$")
 disc("""This method allows you to add commands to an existing
 $TableStyle$, ie you can build up $TableStyles$ in multiple statements.
 """)
 eg("""
     LIST_STYLE.add([('BACKGROUND', (0,0), (-1,0), colors.Color(0,0.7,0.7))])
 """)
-heading4("$TableStyle.getCommands()$")
+heading3("$TableStyle.getCommands()$")
 disc("""This method returns the sequence of commands of the instance.""")
 eg("""
     cmds = LIST_STYLE.getCommands()
 """)
-heading3("$TableStyle$ Commands")
+heading2("$TableStyle$ Commands")
 disc("""The commands passed to $TableStyles$ come in three main groups
 which affect the table background, draw lines, or set cell styles.
 """)
@@ -95,7 +95,7 @@ the more natural (for mathematicians) 'RC' ordering.
 The top left cell is (0,0) the bottom right is (-1,-1). Depending on
 the command various extra occur at indeces beginning at 3 on.
 """)
-heading4("""$TableStyle$ Cell Formatting Commands""")
+heading3("""$TableStyle$ Cell Formatting Commands""")
 disc("""The cell formatting commands all begin with an identifier, followed by
 the start and stop cell definitions and the perhaps other arguments.
 the cell formatting commands are:""")
@@ -140,7 +140,7 @@ t.setStyle(TableStyle([('ALIGN',(1,1),(-2,-2),'RIGHT'),
                         ('BOX', (0,0), (-1,-1), 0.25, colors.black),
                         ]))
 """)
-heading4("""$TableStyle$ Line Commands""")
+heading3("""$TableStyle$ Line Commands""")
 disc("""
     Line commands begin with the identfier, the start and stop cell coordinates
     and always follow this with the thickness (in points) and color of the desired lines. Colors can be names,
