@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.13 2001/03/29 09:24:47 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.14 2001/03/29 20:40:03 dinu_gherman Exp $
 
 from genuserguide import *
 
@@ -28,7 +28,7 @@ ReportLab is in the process of adding such a graphics package to its
 standard distribution.
 Because of the size of the graphics library this document aims only
 at sketching its design briefly while leaving a detailed presentation
-to an additional document, the "ReportLab Graphics User Guide", that
+to an additional document, the "ReportLab Graphics Guide", that
 provides a more tutorial-like approach.
 """)
 
@@ -120,19 +120,23 @@ disc("""The PDF renderer has "special privileges" - a Drawing object is a
 
 heading3("Verification")
 
-disc("""Python is very dynamic and lets us execute statements at run time
+disc("""
+Python is very dynamic and lets us execute statements at run time
 that can easily be the source for unexpected behaviour.
 One subtle 'error' is when assigning to an attribute that the framework
 doesn't know about because the attribute's name contains a typo.
-Python lets you get away with it, but the graphics framework will
-not detect the typo immediately.""")
+Python lets you get away with it (adding a new attribute to an object,
+say), but the graphics framework will not detect the typo immediately.
+""")
 
-disc("""There are two verification techniques to avoid this situation.
+disc("""
+There are two verification techniques to avoid this situation.
 The default is for every object to check every assignment at run time,
 such that you can only assign to 'legal' attributes.
 This is what happens by default.
 As this imposes a small performance penalty, this behaviour
-can be turned off when you need it to be.""")
+can be turned off when you need it to be.
+""")
 
 
 heading3("Property Editing")
@@ -145,7 +149,7 @@ disc("""A cornerstone of the reportlab/graphics which we will cover below is
 disc("""Another goal is to be able to create GUIs and config files for 
        drawings. A generic GUI can be built to show all editable properties 
        of a drawing, and let you modify them and see the results. The Visual 
-       Basic or Delphi developmen environment are good examples of this kind 
+       Basic or Delphi development environments are good examples of this kind 
        of thing. In a batch charting application, a file could list all the 
        properties of all the components in a chart, and be merged with a 
        database query to make a batch of charts.""")
@@ -161,51 +165,64 @@ disc("""To support these applications we have two interfaces, $getProperties$
 
 heading3("Automatic Documentation")
 
-disc("""There is work under way on a generic tool to document any
-Python package or module; this will be checked into ReportLab and
-will be used to generate a reference for the ReportLab package.
+disc("""
+There is work under way on a generic tool to document any Python
+package or module; this will be checked into the general ReportLab
+distribution and will be used to generate a reference for the entire
+ReportLab library.
 When it encounters elements of the graphics library, it will add
 extra sections to the manual.
-So far this works for Widgets (see below), therefore the information
-includes:""")
+So far this works for widgets (see below), therefore the information
+includes:
+""")
 
-bullet("the doc string for your Widget class,")
+bullet("the doc string for your widget's class,")
 bullet("""the code snippet from your <i>demo()</i> method, so people
 can see how to use it,""")
-bullet("the Drawing produced by the <i>demo()</i> method and")
-bullet("the property dump for the Widget in the Drawing.")
+bullet("the drawing produced by the <i>demo()</i> method and")
+bullet("the property dump for the widget in the drawing.")
 
-disc("""This tool means that we can have guaranteed up-to-date 
+disc("""
+This tool means that we can have guaranteed up-to-date 
 documentation on our widgets and chart, both on the web site and in 
-print; and that you can do the same for your own widgets too!""")
+print; and that you can do the same for your own widgets, too!
+""")
 
 
 heading3("Naming Children")
 
-disc("""You can add objects to the $Drawing$ and $Group$ objects.
+disc("""
+You can add objects to the $Drawing$ and $Group$ objects.
 These normally go into a list of contents.
 However, you may also give objects a name when adding them.
 This allows you to refer to and possibly change any 
-element of a drawing after constructing it.""")
+element of a drawing after constructing it.
+""")
 
-disc("""Note that you can use the same shape instance in several
+disc("""
+Note that you can use the same shape instance in several
 contexts in a drawing; if you choose to use the same Circle object
 in many locations (e.g. a scatter plot) and use different names
 to access it, it will still be a shared object and the changes
-will be global.""")
+will be global.
+""")
 
-disc("""This provides one paradigm for creating and modifying
-interactive drawings.""")
+disc("""
+This provides one paradigm for creating and modifying
+interactive drawings.
+""")
 
 
 heading2("Shapes")
 
-disc("""Drawings are made up of Shapes. Any graphical object can be
-built up by using the same set of simple shapes.
+disc("""Drawings are made up of shapes.
+Any graphical object can be built up by using the same set of simple
+shapes.
 The module $shapes.py$ supplies a number of primitive shapes and 
-constructs which can be added to a drawing:""")
+constructs which can be added to a drawing:
+""")
 
-bullet("Rect (optionally with rounded corners)")
+bullet("Rect")
 bullet("Circle")
 bullet("Ellipse")
 bullet("Wedge (a pie slice)")
@@ -216,47 +233,53 @@ bullet("String")
 bullet("Group")
 bullet("Path (<i>not implemented yet, but will be added in the future</i>)")
 
-disc("""Shapes generally have <i>style properties</i> and <i>geometry
-properties</i>. <i>x</i>, <i>y</i>, <i>width</i> and <i>height</i> are
-part of the geometry and must be provided when 
-creating the rectangle, since it does not make much sense without 
-those properties.
+disc("""
+Shapes generally have <i>style properties</i> and <i>geometry
+properties</i>.
+$x$, $y$, $width$ and $height$ are part of the geometry and must be
+provided when creating the rectangle, since it does not make much
+sense without those properties.
 You may set other properties on subsequent lines, or by passing them 
 as optional arguments to the constructor.
 The others are optional and come with sensible defaults.
 All shapes have a number of properties which can be set by the user.
-The <i>dumpProperties()</i> method can be used at an interactive prompt
+The $dumpProperties()$ method can be used at an interactive prompt
 to list these properties.
 """)
 
 disc("""
 The graphical shapes in the list above are more or less what you
 would expect from reading their names.
-In addition there are also Group objects.
+In addition there are also $Group$ objects.
 Groups provide a tool for reuse.
 You can make a bunch of shapes to represent some component - say,
 a coordinate system - and put them in one group called "Axis".
 You can then put that group into other groups, each with a different
 translation and rotation, and you get a bunch of axis.
-It is still the same group, being drawn in different places.""")
+It is still the same group, being drawn in different places.
+""")
 
 
 heading2("Widgets") 
 
-disc("""Up until now, Drawings have been 'pure data'.
+disc("""
+Up until now, Drawings have been 'pure data'.
 In fact, this is what grants portability - a renderer only 
-needs to implement the primitive shapes.""")
-
-disc("""To implement a powerful chart library though, you need
+needs to implement the primitive shapes.
+To implement a powerful chart library though, you need
 to reuse more tangible things than rectangles and circles.
 We should be able to write objects for other to reuse - arrows,
-gears, text boxes, UML diagram nodes, even fully fledged charts.""")
+gears, text boxes, UML diagram nodes, even fully fledged charts.
+""")
 
-disc("""This is what widgets are made for, building on top of the
-shapes module. 
+disc("""
+This is what widgets are made for, building on top of the shapes
+module. 
 Anyone can write new widgets, and build up libraries of them. 
-Widgets support getProperties and setProperties, so you can inspect 
-and modify as well as document them in a uniform way:""")
+Widgets support $getProperties()$ and $setProperties()$ methods, so
+you can inspect and modify as well as document them in a uniform
+way:
+""")
 
 bullet("A widget is a reusable shape.")
 bullet("""It can be initialized with no arguments 
@@ -265,11 +288,12 @@ bullet("""It can be initialized with no arguments
 bullet("""It can have any parameters you want, and they can drive the way it is 
        drawn.""")
 bullet("""It has a $demo()$ method which should return an attractively drawn 
-       example if itself in a 200x100 rectangle. This is the cornerstone of 
+       example of itself in a 200x100 rectangle. This is the cornerstone of 
        the automatic documentation tools. The $demo()$ method should also have 
        a well written docstring, since that is printed too!""")
 
-disc("""Widgets run contrary to the idea that a drawing is just a
+disc("""
+Widgets run contrary to the idea that a drawing is just a
 bundle of shapes.
 The way they work is that a widget can convert itself to a group
 of primitive shapes.
@@ -279,21 +303,26 @@ This happens automatically during rendering; the renderer will not
 see a chart widget, but just a collection of rectangles, lines
 and strings.
 A drawing can also explicitly be 'flattened out', causing all 
-widgets to be converted to primitives.""")
+widgets to be converted to primitives.
+""")
 
-disc("""There is one necessary trade-off to allow a uniform
+disc("""
+There is one necessary trade-off to allow a uniform
 interface for constructing widgets and documenting them - they
-cannot require arguments in their $__init__$ method.
+cannot require arguments in their $__init__()$ method.
 Instead, they are generally designed to fit in a 200 x 100 
 window, and you move or resize them by setting properties such
-as x, y, width and so on after creation.""")
+as x, y, width and so on after creation.
+""")
 
-disc("""In addition, a widget always provides a $demo()$ method.
-Simple ones like this always do something sensible before setting
-properties, but more complex ones like a chart would not have any
-data to plot.
+disc("""
+In addition, a widget always provides a $demo()$ method.
+Simple ones always do something sensible before setting properties,
+but more complex ones like a chart would not have any data to
+plot.
 The documentation tool calls $demo()$ so that your fancy new chart
-class can create a drawing showing what it can do.""")
+class can create a drawing showing what it can do.
+""")
 
 
 heading2("Charts")
@@ -374,7 +403,7 @@ disc("""<para lindent=+36>(If you want to see the image, it is available on our 
 <font color=blue>http://www.reportlab.com/demos/provencio.pdf</font>)""")
 
 
-heading3("Key Concepts and Components")
+heading3("Overview")
 
 disc("""A chart or plot is an object which is placed on a drawing; it is not 
        itself a drawing. You can thus control where it goes, put several on 
@@ -401,169 +430,9 @@ heading2("Further Reading")
 disc("""
 At this point it is recommended to continue reading the "ReportLab
 Graphics Guide" which provides much more detailed information about
-the existing components for the charting package.
+the existing components for the graphics and charting package.
 Among them you will find building blocks like labels, axes, legends
 and different types of charts like bar, line and pie charts.
 A thorough description of all these would blow-up this document
 which is kept on purpose rather general.
 """)
-
-
-##heading3("Labels")
-##
-##disc("""One of the most important building blocks is the <i>Label</i>, defined in 
-##       $reportlab/graphics/charts/textlabels.py$. A label is a string of text 
-##       attached to some chart element. They are used on axes, for titles or 
-##       alongside axes, or attached to individual data points.""")
-##
-##disc("Labels may contain newline characters, but only one font.")
-##
-##disc("""The text and 'origin' of a label are typically set by its parent 
-##       object. They are accessed by methods rather than properties. Thus, the 
-##       X axis decides the 'reference point' for each tickmark label and the 
-##       numeric or date text for each label. However, the end user can set 
-##       properties of the label (or collection of labels) directly to affect 
-##       its positon relative to this origin and all of its formatting.""")
-##
-##disc("""In the drawing above, the label is defined relative to the green blob. 
-##       The text box should have its north-east corner ten points down from 
-##       the origin, and be rotated by 45 degrees about that corner.""")
-##
-##disc("""At present labels have the following properties, which we believe are 
-##       sufficient for all charts we have seen to date:""")
-##
-##todo("""Note: need to turn these into pretty tables with explanations """)
-##
-##
-##heading3("Axes")
-##
-##disc("""We identify two basic kinds of axes - <i>Value</i> and <i>Category</i> Axes. Both 
-##       come in horizontal and vertical flavors. Both can be subclassed to 
-##       make very specific kinds of axis. For example, if you have complex 
-##       rules for which dates to display in a time series application, or want 
-##       irregular scaling, you override the axis and make a new one.""")
-##
-##disc("""Axes are responsible for determining the mapping from data to image 
-##       coordinates; transforming points on request from the chart; drawing 
-##       themselves and their tickmarks, gridlines and axis labels.""")
-##
-##disc("""This drawing shows two axes, one of each kind, which have been created 
-##       directly without reference to any chart:""")
-##
-##disc("""Remember that you won't have to create axes directly; when using a 
-##       standard chart, it comes with ready-made axes. The methods are what 
-##       the chart uses to configure it and take care of the geometry. However, 
-##       we will talk through them in detail below.""")
-##
-##
-##heading3("Bar Charts")
-##
-##disc("""This describes our current VerticalBarChart class, which uses the axes 
-##       and labels above. We think it is step in the right direction but is is 
-##       far from final. As usual, we will start with an example:""")
-##
-##disc("""Note that people we speak to are divided about 50/50 on whether to 
-##       call this a 'Vertical' or 'Horizontal' bar chart. We chose this name 
-##       because 'Vertical' appears next to 'Bar', so we take it to mean that 
-##       the bars rather than the category axis are vertical.""")
-##
-##disc("""Most of the code above is concerned with setting up the axes and 
-##       labels, which we have already covered. Here are the top-level 
-##       properties of the VerticalBarChart class:""")
-##
-##disc("There are several open issues:")
-##
-##list("""vertical position of X Axis - by default the X Axis sits at the 
-##       bottom. One should be able to specify if it sits at the top, the 
-##       bottom or at a specific y value (e.g. y=0).""")
-##list("""bar labelling - in cases with some negative bars, the label should 
-##       appear BELOW the negative labels and ABOVE the positive ones. How can 
-##       we specify this?""")
-##list("""color specification - right now the chart has an undocumented property 
-##       defaultColors, which provides a list of colors to cycle through. If 
-##       you introduce a legend, it should share the list of colors. What's 
-##       more, several charts can share a legend. Should we sppecify colors and 
-##       line styles on a legend object and attach charts to that, ruling that 
-##       the legend need not be visible? Similar issues appear to x-y charts.""")
-##
-##disc("""When we are a bit more confident of the design, we expect to add 
-##       variants of bar charts to deal with stacked and 100% bars as well as 
-##       the side-by-side variant seen here, and variants with vertical and 
-##       horizontal orientation. For now, if you want one oriented the other 
-##       way, just put it in a group and rotate it - here's a VerticalBarChart 
-##       where we just turned the labels and the whole chart around by 90 
-##       degrees, and hid one of the axes:""")
-##
-##
-##heading3("Pie Charts")
-##
-##disc("""We've already seen a pie chart example above. This is provisional but 
-##       seems to do most things. At the very least we need to change the name. 
-##       For completeness we will cover it here.""")
-##
-##
-##disc("""Properties are covered below. The pie has a 'wedges' collection and we 
-##       document wedge properties in the same table. This was invented before 
-##       we finished the Label class and will probably be reworked to use 
-##       Labels shortly.""")
-##
-##
-##heading3("Legends")
-##
-##disc("""Various preliminary legend classes can be found but need a cleanup to 
-##       be consistent with this model. Legends are the natural place to 
-##       specify the colors and line styles of charts; we propose that each 
-##       chart is created with a Legend attribute which is invisible. One would 
-##       then do the following to specify colors:""")
-##
-##disc("""One could also define a group of charts sharing the same legend:""")
-##
-##
-##heading3("Other Charts")
-##
-##disc("""It will take some time to deal with the full range of chart types. We 
-##       expect to finalize bars and pies and to produce trial implementations 
-##       of more general plots in February.""")
-##
-##
-##heading4("X-Y Plots")
-##
-##disc("""Most other plots involve two value axes and directly plotting x-y data 
-##       in some form. The series can be plotted as lines, marker symbols, 
-##       both, or custom graphics such as open-high-low-close graphics. All 
-##       share the concepts of scaling and axis/title formatting. At a certain 
-##       point, a routine will loop over the data series and 'do something' 
-##       with the data points at given x-y locations. Given a basic line plot, 
-##       it should be very easy to derive a custom chart type just by 
-##       overriding a single method - say, drawSeries().""")
-##
-##
-##heading4("Marker customisation and custom shapes")
-##
-##disc("""Well known plotting packages such as excel, Mathematica and Excel 
-##       offer ranges of marker types to add to charts. We can do better - you 
-##       can write any kind of chart widget you want and just tell the chart 
-##       to use it as an example.""")
-##
-##
-##heading4("Combination Plots")
-##
-##disc("""Combining multiple plot types is really easy. You can just draw 
-##       several charts (bar, line or whatever) in the same rectangle, 
-##       suppressing axes as needed. So a chart could correlate a line with 
-##       Scottish typhoid cases over a 15 year period on the left axis with a 
-##       set of bars showing inflation rates on the right axis. If anyone can 
-##       remind us where this example came from we'll attribute it, and happily 
-##       show the well-known graph as an example.""")
-##
-##
-##heading3("Other chart classes")
-##
-##disc("""This has not been an exhaustive look at all the chart classes. Those classes 
-##       are constantly being worked on. To see exactly what is in the current 
-##       distribution, use the $graphdocpy.py$ utility. By default, it will run 
-##       on reportlab/graphics, and produce a full report. (If you want to run
-##       it on other modules or packages, $graphdocpy.py -h$ print a help
-##       message that will tell you how.)""")
-##
-##disc("This is the tool that was mentioned in the section on 'Automatic Documentation'")
