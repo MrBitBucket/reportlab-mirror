@@ -14,6 +14,10 @@ import string
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Flowable
 from reportlab.pdfbase import pdfmetrics, cidfonts
+from reportlab.graphics.shapes import Drawing, Group, String, Circle
+from reportlab.graphics.widgetbase import Widget
+from reportlab.lib import colors
+
 
 class CodeChartBase(Flowable):
     """Basic bits of drawing furniture used by
@@ -258,6 +262,30 @@ def hBoxText(msg, canvas, x, y, faceName, encName):
     canvas.setFont(fontName, 16,16)
     canvas.drawString(x,y,msg)
     canvas.restoreState()
+
+
+class CodeWidget(Widget):
+    """Block showing all the characters"""
+    def __init__(self):
+        self.width = 160
+        self.height = 160
+        
+    def draw(self):
+        dx = self.width / 16.0
+        dy = self.height / 16.0
+        g = Group()
+        for x in range(16):
+            for y in range(16):
+                charValue = y * 16 + x
+                if charValue > 32:
+                    s = String(x * dx, y*dy, chr(charValue))
+                    g.add(s)
+        return g
+        
+
+
+    
+
     
 def test():
     c = Canvas('codecharts.pdf')
@@ -283,7 +311,7 @@ def test():
     c.showPage()
     c.setFont('Helvetica-Bold', 24)
     c.drawString(72, 750, 'Big5 Code Chart Examples')
-    Big5CodeChart(0xA1, 'MSungStd-Light-Acro','ETenms-B5-H').drawOn(c, 72, 500)
+    #Big5CodeChart(0xA1, 'MSungStd-Light-Acro','ETenms-B5-H').drawOn(c, 72, 500)
 
     c.save()
     print 'saved codecharts.pdf'

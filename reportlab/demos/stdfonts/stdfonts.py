@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/stdfonts/stdfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/stdfonts/stdfonts.py,v 1.10 2001/03/08 15:27:42 rgbecker Exp $
-__version__=''' $Id: stdfonts.py,v 1.10 2001/03/08 15:27:42 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/stdfonts/stdfonts.py,v 1.11 2002/07/17 20:58:39 andy_robinson Exp $
+__version__=''' $Id: stdfonts.py,v 1.11 2002/07/17 20:58:39 andy_robinson Exp $ '''
 __doc__="""
 This generates tables showing the 14 standard fonts in both
 WinAnsi and MacRoman encodings, and their character codes.
@@ -32,30 +32,37 @@ def run(mode):
                 )
         canv.setPageCompression(0)
         
-        for fontname in pdfmetrics.standardFonts:
-            if fontname in ['Symbol', 'ZapfDingbats']:
+        for faceName in pdfmetrics.standardFonts:
+            if faceName in ['Symbol', 'ZapfDingbats']:
                 encLabel = 'StandardEncoding'
             else:
-                encLabel = enc
+                encLabel = enc + 'Encoding'
+
+            fontName = faceName + '-' + encLabel
+            pdfmetrics.registerFont(pdfmetrics.Font(fontName,
+                                        faceName,
+                                        encLabel)
+                        )
+                
             canv.setFont('Times-Bold', 18)
-            canv.drawString(80, 744, fontname + '-' + encLabel)
+            canv.drawString(80, 744, fontName)
             canv.setFont('Times-BoldItalic', 12)
             canv.drawRightString(515, 744, 'Labels in ' + caption)
             
             
             #for dingbats, we need to use another font for the numbers.
             #do two parallel text objects.
-            if fontname == 'ZapfDingbats':
+            if faceName == 'ZapfDingbats':
                 labelfont = 'Helvetica'
             else:
-                labelfont = fontname
+                labelfont = faceName
             for byt in range(32, 256):
                 col, row = divmod(byt - 32, 32)
                 x = 72 + (66*col)
                 y = 720 - (18*row)
                 canv.setFont(labelfont, 14)
                 canv.drawString(x, y, label_formatter % byt)
-                canv.setFont(fontname, 14)
+                canv.setFont(fontName, 14)
                 canv.drawString(x + 44, y , chr(byt))
             canv.showPage()            
         canv.save()
