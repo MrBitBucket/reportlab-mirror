@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/signsandsymbols.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.14 2001/08/24 13:16:55 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.15 2001/09/20 17:44:22 rgbecker Exp $
 # signsandsymbols.py
 # A collection of new widgets
 # author: John Precedo (johnp@reportlab.com)
@@ -14,7 +14,7 @@ Widgets include:
 - Octagon0,
 - Crossbox0,
 - Tickbox0,
-- SmileyFace0,
+- SmileyFace,
 - StopSign0,
 - NoEntry0,
 - NotAllowed0 (the red roundel from 'no smoking' signs),
@@ -44,11 +44,12 @@ class ETriangle0(Widget):
 		"""
 
 	_attrMap = AttrMap(
-		x = AttrMapValue( isNumber),
-		y = AttrMapValue( isNumber),
-		size = AttrMapValue( isNumber),
-		color = AttrMapValue( isColorOrNone),
-		strokeColor = AttrMapValue( isColorOrNone)
+		x = AttrMapValue(isNumber),
+		y = AttrMapValue(isNumber),
+		size = AttrMapValue(isNumber),
+		color = AttrMapValue(isColorOrNone),
+		strokeColor = AttrMapValue(isColorOrNone),
+		strokeWidth = AttrMapValue(isNumber),
 		)
 
 	def __init__(self):
@@ -57,6 +58,7 @@ class ETriangle0(Widget):
 		self.size = 100
 		self.color = colors.red
 		self.strokeColor = None
+		self.strokeWidth = 0.1
 
 	def demo(self):
 		D = shapes.Drawing(200, 100)
@@ -250,16 +252,13 @@ class Tickbox0(ETriangle0):
 
 		return g
 
-class SmileyFace0(ETriangle0):
+class SmileyFace(ETriangle0):
 	"""This draws a classic smiley face.
 
 		possible attributes:
 		'x', 'y', 'size', 'color'
 
 """
-
-	_attrMap = AttrMap(BASE=ETriangle0, UNWANTED=('strokeColor',),
-		)
 
 	def __init__(self):
 		self.x = 0
@@ -273,21 +272,17 @@ class SmileyFace0(ETriangle0):
 		g = shapes.Group()
 
 		# SmileyFace specific bits
-		outerCircle = shapes.Circle(cx = (self.x+(s/2)), cy = (self.y+(s/2)), r = s/2,
-			   fillColor = self.color,
-			   strokeColor = colors.black,
-			   strokeWidth=s/38.)
-		g.add(outerCircle)
+		g.add(shapes.Circle(cx=self.x+(s/2), cy=self.y+(s/2), r=s/2,
+				fillColor=self.color, strokeColor=self.strokeColor,
+				strokeWidth=max(s/38.,self.strokeWidth)))
 
-		leftEye = shapes.Ellipse(self.x+(s/3),self.y+(s/3)*2, s/30, s/10, fillColor=colors.black)
-		g.add(leftEye)
-
-		rightEye = shapes.Ellipse(self.x+(s/3)*2, self.y+(s/3)*2, s/30, s/10, fillColor=colors.black)
-		g.add(rightEye)
+		for i in (1,2):
+			g.add(shapes.Ellipse(self.x+(s/3)*i,self.y+(s/3)*2, s/30, s/10,
+					fillColor=self.strokeColor, strokeColor = self.strokeColor,
+					strokeWidth=max(s/38.,self.strokeWidth)))
 
 		# calculate a pointslist for the mouth
 		# THIS IS A HACK! - don't use if there is a 'shapes.Arc'
-
 		centerx=self.x+(s/2)
 		centery=self.y+(s/2)
 		radius=s/3
@@ -314,9 +309,9 @@ class SmileyFace0(ETriangle0):
 
 		# make the mouth
 		smile = shapes.PolyLine(pointslist,
-			   fillColor = colors.black,
-			   strokeColor = colors.black,
-			   strokeWidth = s/40)
+			   fillColor = self.strokeColor,
+			   strokeColor = self.strokeColor,
+			   strokeWidth = max(s/38.,self.strokeWidth))
 		g.add(smile)
 
 		return g

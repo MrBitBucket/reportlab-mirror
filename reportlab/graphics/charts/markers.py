@@ -7,7 +7,7 @@ the smiley.
 
 from reportlab.lib import colors 
 from reportlab.graphics.shapes import Rect, Line, Circle, Polygon
-from reportlab.graphics.widgets.signsandsymbols import SmileyFace0
+from reportlab.graphics.widgets.signsandsymbols import SmileyFace
 
 
 def makeEmptySquare(x, y, size, color):
@@ -69,7 +69,7 @@ def makeSmiley(x, y, size, color):
     "Make a smiley marker."
 
     d = size
-    s = SmileyFace0()
+    s = SmileyFace()
     s.color = color
     s.x = x-d
     s.y = y-d

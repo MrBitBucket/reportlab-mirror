@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/testshapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.12 2001/05/18 16:24:53 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.13 2001/09/20 17:44:22 rgbecker Exp $
 
 # testshapes.py - draws shapes onto a PDF canvas.
 
@@ -347,13 +347,13 @@ def getDrawing10():
         
     return D
 
-from widgets.signsandsymbols import SmileyFace0
+from widgets.signsandsymbols import SmileyFace
 def getDrawing11():
 	'''test of anchoring'''
 	def makeSmiley(x, y, size, color):
 		"Make a smiley data item representation."
 		d = size
-		s = SmileyFace0()
+		s = SmileyFace()
 		s.color = color
 		s.x = x-d
 		s.y = y-d
