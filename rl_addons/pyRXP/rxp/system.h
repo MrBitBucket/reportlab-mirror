@@ -13,3 +13,4 @@
 void *Malloc(int bytes);
 void *Realloc(void *mem, int bytes);
 void Free(void *mem);
+void CFree(void *mem);

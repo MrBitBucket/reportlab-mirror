@@ -23,3 +23,7 @@ void Free(void *mem)
     free(mem);
 }
 
+void CFree(void *mem)
+{
+	if(mem) free(mem);
+}

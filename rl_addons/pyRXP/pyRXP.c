@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.4 2002/04/17 17:33:29 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.5 2002/04/18 17:34:56 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.4 2002/04/17 17:33:29 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.5 2002/04/18 17:34:56 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -211,6 +211,9 @@ static struct {char* k;long v;} flag_vals[]={
 #define ReturnList (ParserFlag)(1+(int)LASTRXPFLAG)
 #define __GetFlag(p, flag) \
   ((((flag) < 32) ? ((p)->flags[0] & (1u << (flag))) : ((p)->flags[1] & (1u << ((flag)-32))))!=0)
+#ifdef	_DEBUG
+#	define Py_REFCOUNT(op) ((op)->ob_refcnt)
+#endif
 
 static	PyObject* get_attrs(ElementDefinition e, Attribute a)
 {
@@ -384,10 +387,13 @@ PyObject *ProcessSource(Parser p, InputSource source)
 	stack[0] = make4tuple("",Py_None,0);	/*stealing a reference to Py_None*/
 	Py_INCREF(Py_None);						/*so we must correct for it*/
 	while(1){
+		XBitType bt;
 		bit = ReadXBit(p);
 		r = handle_bit(p, bit, stack, &depth);
+		bt = bit->type;
+		FreeXBit(bit);
 		if(r) break;
-		if (bit->type == XBIT_eof){
+		if (bt == XBIT_eof){
 			r=0;
 			break;
 			}
@@ -426,11 +432,10 @@ PyObject *ProcessSource(Parser p, InputSource source)
 			PyErr_SetString(moduleError,buf);
 			}
 		for(i=0;i<=depth;i++){
-			Py_DECREF(stack[depth]);
+			Py_DECREF(stack[i]);
 			}
 		retVal = NULL;
 		}
-	FreeXBit(bit);
 	return retVal;
 }
 
@@ -598,7 +603,7 @@ L_1:
 }
 
 static struct PyMethodDef pyRXPParser_methods[] = {
-	{"parse", (PyCFunction)pyRXPParser_parse, METH_VARARGS|METH_KEYWORDS, "parse(src)"},
+	{"parse", (PyCFunction)pyRXPParser_parse, METH_VARARGS|METH_KEYWORDS, "parse(src,**kw)"},
 	{NULL, NULL}		/* sentinel */
 };
 

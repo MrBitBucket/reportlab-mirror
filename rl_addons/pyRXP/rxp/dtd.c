@@ -274,20 +274,20 @@ void FreeEntity(Entity e)
     if(!e)
 	return;
 
-    Free((void *)e->name);	/* The casts are to get rid of the const */
-    Free((void *)e->base_url);
-    Free((void *)e->url);
+    CFree((void *)e->name);	/* The casts are to get rid of the const */
+    CFree((void *)e->base_url);
+    CFree((void *)e->url);
     
     switch(e->type)
     {
     case ET_internal:
-	Free((void *)e->text);
+	CFree((void *)e->text);
 	break;
     case ET_external:
-	Free((void *)e->systemid);
-	Free((void *)e->publicid);
-	Free((void *)e->version_decl);
-	Free((void *)e->ddb_filename);
+	CFree((void *)e->systemid);
+	CFree((void *)e->publicid);
+	CFree((void *)e->version_decl);
+	CFree((void *)e->ddb_filename);
 	break;
     }
 
