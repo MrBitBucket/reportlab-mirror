@@ -1,49 +1,61 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.10 2001/03/28 16:14:39 johnprecedo Exp $
+#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.11 2001/03/28 20:49:26 dinu_gherman Exp $
+
 from genuserguide import *
 
-heading1("Platform Independent Graphics using $reportlab/graphics$")
+heading1("Platform Independent Graphics using $reportlab/graphics$ (DRAFT SHORT VERSION)")
 
 heading2("Introduction")
 
-heading3("Background")
-disc("""
-ReportLab is in the process of adding a graphics package to its
-standard distribution. This chapter is both the "design document" and
-the "tutorial".""")
+#heading3("Background")
 
 #seamless or what?
 #from reportlab.graphics.charts import barcharts
 #draw(barcharts.sampleH0a(), 'A Sample Drawing')
 # draw (drawing object, 'caption')
 
-disc("""The ReportLab library is a general document toolkit aiming to help
+disc("""
+The ReportLab library is a general document toolkit aiming to help
 generate documents for reporting solutions. One important aspect of
-such applications is to present data in graphic diagrams or charts.
-Ideally, these charts could be used not only to generate PDF
-documents, but other output formats, bitmap or vector ones, as well.""")
+such applications is to present data with graphics like diagrams or
+charts.
+Ideally, these graphics could be used not only to generate PDF
+documents, but other output formats, bitmap or vector ones, as well.
+ReportLab is in the process of adding such a graphics package to its
+standard distribution. Because of the size of the graphics library
+this document aims only at sketching its design briefly while leaving
+a detailed presentation to an additional document, the "ReportLab
+Graphics User Guide", that provides a more tutorial-like approach.
+""")
 
 heading3("Requirements")
 
-disc("The package should allow: ")
-bullet("creation of reusable shapes collections")
-bullet("support for paths, clipping, coordinate transformations")
+disc("""The graphics library should support the creation of custom
+graphical applications containing charts, diagrams, drawings, plans,
+etc. in various domains like business, finance, publishing, engineering
+and research.
+It is especially intended as a foundation for a chart library that
+happens to be the first major subpackage for a real-world client
+in the financial industry.
+""")
+
+disc("The general graphics package should help with the following activities: ")
+
+bullet("creating reusable shapes collections")
+bullet("supporting paths, clipping and coordinate transformations")
 bullet("writing output to PDF, Postscript, bitmap and vector formats")
-bullet("consistent font model (Type 1) with identical metrics on all platforms")
-bullet("""a framework for creating, documenting and reusing graphical "widgets" """)
+bullet("using a consistent font model (Type 1)")
+bullet("providing identical metrics on all platforms")
+bullet("""using a framework for creating, documenting and reusing graphical "widgets" """)
 
-disc("""This is intended as a foundation for a chart library. However, it
-should also support the creation of other kinds of custom graphical
-applications, such as UML diagrams, CAD, project plans or whatever
-people wish to use it for. Within the charting domain our aims are:""")
+disc("""Within the charting domain the target features are:""")
 
-bullet("horizontal and vertical bar charts")
-bullet("pie charts")
-bullet("horizontal and vertical line charts based on 'category' and 'value' axis")
-bullet("""time series charts based on genuine 'x' and 'y' values;
-       special knowledge of time series""")
+bullet("Horizontal/vertical bar charts based on category/value axes.")
+bullet("Horizontal/vertical line charts based on category/value axes.")
+bullet("""Special time series charts based on genuine x/y values.""")
+bullet("Simple pie charts.")
 bullet("""Compounding - one can define 'multiples' placing several charts on one 
        drawing, or arbitrary decorations around the chart. This technique 
        also allows easy overlaying of lines on bars, or of different axes on 
@@ -51,10 +63,9 @@ bullet("""Compounding - one can define 'multiples' placing several charts on one
 bullet("""'Plug-In Architecture' - with training, you can write a new chart type
        based on an existing one but only changing/adding the features you
        need to.""")
-bullet("Control over drawing size")
-bullet("Control over plot rectangle size and position within drawing")
-bullet("""Control over width, dash style, line cap style, line join style and
-       color for all lines""")
+bullet("Control over drawing size, plot rectangle size and position within drawing.")
+bullet("""Control over width, dash style, line cap/join style and
+       color for all lines.""")
 bullet("""Choice of any solid color (or gray level, or transparent) for any
        enclosed area. Fill patterns may be added later. The public library
        will be limited to RGB and possibly plain CMYK colors but we can
@@ -62,11 +73,11 @@ bullet("""Choice of any solid color (or gray level, or transparent) for any
 bullet("""Control over font name (any Type 1 font on the system) and size, plus
        the ability to scale, stretch and rotate the text
        right, left and centre alignment of label text strings with correct
-       metrics""")
+       metrics.""")
 
-disc("""The charting requirements are based on a commercial sponsor in the
-       financial industry who needs to create batches of charts rapidly with
-       precise control over layout.""")
+disc("""The charting requirements are based on a commercial sponsor who
+needs to create batches of charts rapidly with precise control over
+layout.""")
 
 heading3("Using reportlab/graphics")
 
@@ -102,60 +113,59 @@ disc("""The PDF renderer has "special privileges" - a Drawing object is a
        the PDF renderer has a utility function to make a one-page PDF 
        quickly.""")
 
-heading4("Getting Started")
-
-disc("""Let's create a simple drawing containing the string "Hello World", 
-       displayed on top of a coloured rectangle. We will then save it to a 
-       standalone file.""")
-
-eg("""
-    from reportlab.lib import colors
-    from reportlab.graphics.shapes import * 
- 
-    D = Drawing(400, 200)
-    D.add(Rect(50, 50, 300, 100, fillColor=colors.yellow))
-    D.add(String(150,100, 'Hello World',
-                 fontSize=18, fillColor=colors.red))
- 
-    from reportlab.graphics import renderPDF 
-    renderPDF.drawToFile(D, 'example1.pdf', 'My First Drawing') 
-""")
-
-disc("This will produce a PDF file containing the following graphic: ")
-
-from reportlab.graphics.shapes import * 
-from reportlab.graphics import testshapes
-t=testshapes.getDrawing01()
-draw(t, "'Hello World'")
- 
-disc("""The Y coordinate counts from the bottom up. This is correct for PDF 
-       and Postscript, and appears to be natural for people, especially when 
-       working with charts.""")
-
-disc("""Each renderer is allowed to do whatever is appropriate for its format, 
-       and may have whatever API is needed. If it refers to a file format, it 
-       usually has a $drawToFile$ function, and that's all you need to know 
-       about the renderer. Let's save this file as Encapsulated Postscript: """)
-
+##heading4("Getting Started")
+##
+##disc("""Let's create a simple drawing containing the string "Hello World", 
+##       displayed on top of a coloured rectangle. We will then save it to a 
+##       standalone file.""")
+##
+##eg("""
+##    from reportlab.lib import colors
+##    from reportlab.graphics import renderPDF 
+##    from reportlab.graphics.shapes import Drawing, Rect, String
+## 
+##    D = Drawing(400, 200)
+##    D.add(Rect(50, 50, 300, 100, fillColor=colors.yellow))
+##    D.add(String(150,100, 'Hello World',
+##                 fontSize=18, fillColor=colors.red))
+## 
+##    renderPDF.drawToFile(D, 'example1.pdf', 'My First Drawing') 
+##""")
+##
+##disc("This will produce a PDF file containing the following graphic: ")
+##
+##from reportlab.graphics.shapes import * 
+##from reportlab.graphics import testshapes
+##t=testshapes.getDrawing01()
+##draw(t, "'Hello World'")
+## 
+##disc("""The Y coordinate counts from the bottom up. This is correct for PDF 
+##       and Postscript, and appears to be natural for people, especially when 
+##       working with charts.""")
+##
+##disc("""Each renderer is allowed to do whatever is appropriate for its format, 
+##       and may have whatever API is needed. If it refers to a file format, it 
+##       usually has a $drawToFile$ function, and that's all you need to know 
+##       about the renderer. Let's save this file as Encapsulated Postscript: """)
+##
+####eg("""
+####    from reportlab.graphics import renderPS 
+####    renderPS.drawToFile(D, 'example1.eps', 'My First Drawing') 
+####""")
 ##eg("""
 ##    from reportlab.graphics import renderPS 
-##    renderPS.drawToFile(D, 'example1.eps', 'My First Drawing') 
+##    renderPS.drawToFile(D, 'example1.eps') 
 ##""")
-eg("""
-    from reportlab.graphics import renderPS 
-    renderPS.drawToFile(D, 'example1.eps') 
-""")
-
-disc("""This will produce an EPS file with the identical drawing, which may be 
-       imported into publishing tools such as Quark Express.""")
+##
+##disc("""This will produce an EPS file with the identical drawing, which may be 
+##       imported into publishing tools such as Quark Express.""")
 
 heading2("""Shapes """)
 
-disc("""Drawings are made up of Shapes. Absolutely anything can be built up by 
-       combining the same set of primitive shapes.""")
-
-disc("""The module $shapes.py$ supplies a number of primitive shapes and 
-       constructs which can be added to a drawing. They are:""")
+disc("""Drawings are made up of Shapes. Any graphical object can be
+built up by using the same set of simple shapes.
+The module $shapes.py$ supplies a number of primitive shapes and 
+constructs which can be added to a drawing:""")
 
 bullet("Rect (optionally with rounded corners) ")
 bullet("Circle ")
@@ -169,42 +179,20 @@ bullet("Group ")
 bullet("Path (<i>not implemented yet, but will be added in the future</i>)")
 
 
-disc("This drawing, taken from our test suite, shows most of the basic shapes: ")
-todo("add image")
-
-t=testshapes.getDrawing06()
-draw(t, "Basic shapes")
+##disc("This drawing, taken from our test suite, shows most of the basic shapes: ")
+##todo("add image")
+##
+##t=testshapes.getDrawing06()
+##draw(t, "Basic shapes")
  
-heading3("Solid Shapes")
+heading3("Shape Properties")
+
 disc("""Shapes have two kinds of properties - some to define their geometry 
-       and some to define their style. Let's create a red rectangle with 
-       3-point thick green borders:""")
-
-eg("""
->>> from reportlab.graphics.shapes import Rect
->>> from reportlab.lib.colors import red, green
->>> r = Rect(5, 5, 200, 100)
->>> r.fillColor = red
->>> r.strokeColor = green
->>> r.strokeWidth = 3
->>> 
-""")
-
-from reportlab.graphics.shapes import Rect
-from reportlab.lib.colors import red, green
-D = Drawing(220, 120)
-r = Rect(5, 5, 200, 100)
-r.fillColor = red
-r.strokeColor = green
-r.strokeWidth = 3
-D.add(r)
-draw(D, "red rectangle with green border")
-
-disc("""<i>In future examples we will omit the import statements.</i>""")
-
-disc("""All shapes have a number of properties which can be set. At an 
-       interactive prompt, we can use their <i>dumpProperties()</i> method to list 
-       these. Here's what you can use to configure a Rect:""")
+and some to define their style.
+All shapes have a number of properties which can be set.
+At an interactive prompt, we can use their <i>dumpProperties()</i> method
+to list these.
+Here's what you can use to configure a Rect:""")
 
 eg("""
 >>> r.dumpProperties()
@@ -228,170 +216,18 @@ disc("""Shapes generally have <i>style properties</i> and <i>geometry properties
        <i>width</i> and <i>height</i> are part of the geometry and must be provided when 
        creating the rectangle, since it does not make much sense without 
        those properties. The others are optional and come with sensible 
-       defaults.""")
-
-disc("""You may set other properties on subsequent lines, or by passing them 
-       as optional arguments to the constructor. We could also have created 
-       our rectangle this way:""")
-
-eg("""
->>> R = Rect(5, 5, 200, 100, 
-             fillColor=red, 
-             strokeColor=green, 
-             strokeWidth=3) 
-""")
-
-disc("""Let's run through the style properties. <i>fillColor</i> is obvious. <i>stroke</i>
-is publishing terminology for the edge of a shape; the stroke has a
-color, width, possibly a dash pattern, and some (rarely used) features
-for what happens when a line turns a corner. <i>rx</i> and <i>ry</i> are optional
-geometric properties and are used to define the corner radius for a
-rounded rectangle.""")
-
-disc("All the other solid shapes share the same style properties.")
-
-heading3("Lines")
-disc("""We provide single straight lines, PolyLines and curves. Lines have all 
-       the <i>stroke</i> properties, but no <i>fillColor</i>. Here are a few Line and 
-       PolyLine examples and the corresponding graphics output:""")
-
-eg("""
-    Line(50,50, 300,100,
-         strokeColor=colors.blue, strokeWidth=5)
-    Line(50,100, 300,50,
-         strokeColor=colors.red,
-         strokeWidth=10,
-         strokeDashArray=[10, 20])
-    PolyLine([120,110, 130,150, 140,110, 150,150, 160,110,
-              170,150, 180,110, 190,150, 200,110],
-             strokeWidth=2,
-             strokeColor=colors.purple)
-""")
-
-D = Drawing(400, 200)
-D.add(Line(50,50, 300,100,strokeColor=colors.blue, strokeWidth=5))
-D.add(Line(50,100, 300,50,
-           strokeColor=colors.red,
-           strokeWidth=10,
-           strokeDashArray=[10, 20]))
-D.add(PolyLine([120,110, 130,150, 140,110, 150,150, 160,110,
-          170,150, 180,110, 190,150, 200,110],
-         strokeWidth=2,
-         strokeColor=colors.purple))
-draw(D, "Line and PolyLine examples")
+       defaults.
+       You may set other properties on subsequent lines, or by passing them 
+       as optional arguments to the constructor.""")
 
 
- 
-heading3("Strings")
-disc("""ReportLab Graphics is not designed for fancy text layout, but it can 
-       place strings at desired locations and with left/rigth/center 
-       alignment. Let's specify a String and look at its properties:""")
-eg("""
->>> S = String(10, 50, 'Hello World')
->>> S.dumpProperties()
-fillColor = Color(0.00,0.00,0.00)
-fontName = Times-Roman
-fontSize = 10
-text = Hello World
-textAnchor = start
-x = 10
-y = 50
->>> 
-""")
+heading3("Groups")
 
-disc("""String have a textAnchor property, which may have the values 
-       'start','middle','end'. If this is set to 'start', x and y relate to 
-       the start of the string, and so on. This provides an easy way to align 
-       text.""")
-
-disc("""Strings use a common font standard: the Type 1 Postscript fonts 
-       present in Acrobat Reader. We can thus use the basic 14 fonts in 
-       ReportLab and get accurate metrics for them. We expect to add support 
-       for extra Type 1 fonts in the near future. Until now we have worked 
-       with bitmap renderers which have to use TrueType fonts and which make 
-       some subsitutions; this could lead to differences in text wrapping or 
-       even the number of labels on a chart between renderers. The 
-       (forthcoming) back ends will all know how to render Type 1 fonts.""")
-
-disc("Here is a more fancy example using the following code snippet:")
-
-eg("""
-    D = Drawing(400, 200)
-    for size in range(12, 36, 4):
-        D.add(String(10+size*2, 10+size*2, 'Hello World',
-                     fontName='Times-Roman',
-                     fontSize=size))
-
-    D.add(String(150, 150, 'Hello World',
-                 fontName='Courier',
-                 fontSize=36))
-""")
-
-D = Drawing(400, 200)
-for size in range(12, 36, 4):
-    D.add(String(10+size*2, 10+size*2, 'Hello World',
-                 fontName='Times-Roman',
-                 fontSize=size))
-
-D.add(String(150, 150, 'Hello World',
-             fontName='Courier',
-             fontSize=36))
-draw(D, 'fancy font example')
-
-heading3("""Paths""")
-disc("""Postscript paths are a widely understood concept in graphics.
-There are not implement in $reportlab\graphics$ as yet, but they will be
-soon.""")
-
-# NB This commented out section is for 'future compatibility' - paths haven't
-#    been implemented yet, but when they are we can uncomment this back in.
-
-    ##disc("""Postscript paths are a widely understood concept in graphics. A Path 
-    ##       is a way of defining a region in space. You put an imaginary pen down, 
-    ##       draw straight and curved segments, and even pick the pen up and move 
-    ##       it. At the end of this you have described a region, which may consist 
-    ##       of several distinct close shapes or unclosed lines. At the end, this 
-    ##       'path' is 'stroked and filled' according to its properties. A Path has 
-    ##       the same style properties as a solid shape. It can be used to create 
-    ##       any irregular shape.""")
-    ##
-    ##disc("""In Postscript-based imaging models such as PDF, Postscript and SVG, 
-    ##       everything is done with paths. All the specific shapes covered above 
-    ##       are instances of paths; even text strings (which are shapes in which 
-    ##       each character is an outline to be filled). Here we begin creating a 
-    ##       path with a straight line and a bezier curve:""")
-    ##
-    ##eg("""
-    ##>>> P = Path(0,0, strokeWidth=3, strokeColor=red) 
-    ##>>> P.lineTo(0, 50) 
-    ##>>> P.curveTo(10,50,80,80,100,30) 
-    ##>>> 
-    ##""")
-
-    ##disc("""As well as being the only way to draw complex shapes, paths offer some 
-    ##       performance advantages in renderers which support them. If you want to 
-    ##       create a scatter plot with 5000 blue circles of different sizes, you 
-    ##       can create 5000 circles, or one path object. With the latter, you only 
-    ##       need to set the color and line width once. PINGO just remembers the 
-    ##       drawing sequence, and writes it out into the file. In renderers which 
-    ##       do not support paths, the renderer will still have to decompose it 
-    ##       into 5000 circles so you won't save anything.""")
-    ##
-    ##disc("""<b>Note that our current path implementation is an approximation; it 
-    ##         should be finished off accurately for PDF and PS.</b>""")
-
-heading3("2.5 Groups")
 disc("""Finally, we have Group objects. A group has a list of contents, which 
        are other nodes. It can also apply a transformation - its contents can 
        be rotated, scaled or shifted. If you know the math, you can set the 
        transform directly. Otherwise it provides methods to rotate, scale and 
-       so on. Here we make a group which is rotated and translated:""")
-
-eg("""
->>> G =Group(shape1, shape2, shape3) 
->>> G.rotate(30) 
->>> G.translate(50, 200) 
-""")
+       so on.""")
 
 disc("""Groups provide a tool for reuse. You can make a bunch of shapes to 
        represent some component - say, a coordinate system - and put them in 
@@ -400,89 +236,12 @@ disc("""Groups provide a tool for reuse. You can make a bunch of shapes to
        bunch of axis. It is still the same group, being drawn in different 
        places.""")
 
-disc("""Let's do this with some only slightly more code:""")
-eg("""
 
-    D = Drawing(400, 200)
+heading3("""Verification """)
 
-    Axis = Group(
-        Line(0,0,100,0),  # x axis
-        Line(0,0,0,50),   # y axis
-        Line(0,10,10,10), # ticks on y axis
-        Line(0,20,10,20),
-        Line(0,30,10,30),
-        Line(0,40,10,40),
-        Line(10,0,10,10), # ticks on x axis
-        Line(20,0,20,10), 
-        Line(30,0,30,10), 
-        Line(40,0,40,10), 
-        Line(50,0,50,10), 
-        Line(60,0,60,10), 
-        Line(70,0,70,10), 
-        Line(80,0,80,10), 
-        Line(90,0,90,10),
-        String(20, 35, 'Axes', fill=colors.black)
-        )
-
-    firstAxisGroup = Group(Axis)
-    firstAxisGroup.translate(10,10)
-    D.add(firstAxisGroup)
-    
-    secondAxisGroup = Group(Axis)
-    secondAxisGroup.translate(150,10)
-    secondAxisGroup.rotate(15)
-    
-    D.add(secondAxisGroup)
-
-    thirdAxisGroup = Group(Axis, 
-                           transform=mmult(translate(300,10), 
-                                           rotate(30)))
-    D.add(thirdAxisGroup)
-""")
-
-D = Drawing(400, 200)
-Axis = Group(
-    Line(0,0,100,0),  # x axis
-    Line(0,0,0,50),   # y axis
-    Line(0,10,10,10), # ticks on y axis
-    Line(0,20,10,20),
-    Line(0,30,10,30),
-    Line(0,40,10,40),
-    Line(10,0,10,10), # ticks on x axis
-    Line(20,0,20,10), 
-    Line(30,0,30,10), 
-    Line(40,0,40,10), 
-    Line(50,0,50,10), 
-    Line(60,0,60,10), 
-    Line(70,0,70,10), 
-    Line(80,0,80,10), 
-    Line(90,0,90,10),
-    String(20, 35, 'Axes', fill=colors.black)
-    )
-firstAxisGroup = Group(Axis)
-firstAxisGroup.translate(10,10)
-D.add(firstAxisGroup)
-secondAxisGroup = Group(Axis)
-secondAxisGroup.translate(150,10)
-secondAxisGroup.rotate(15)
-D.add(secondAxisGroup)
-thirdAxisGroup = Group(Axis, 
-                       transform=mmult(translate(300,10), 
-                                       rotate(30)))
-D.add(thirdAxisGroup)
-draw(D, "Line and PolyLine examples")
-
- 
-heading3("""2.6 Verification """)
 disc("""The framework so far would be ideally suited to a type-safe language 
        like Java or Delphi. Python is very dynamic and lets us type things 
        which just don't make sense:""")
-
-eg("""
->>> R = Rect(10,10,200,100, fillColor=red) 
->>> R.fullColor = green    # note the typo 
->>> R.x = 'not a number'   # illegal argument type 
->>> del R.width            # that should confuse it """)
 
 disc("""These statements would be caught by the compiler in a statically typed 
        language, but Python lets you get away with it. The first error could 
@@ -496,27 +255,10 @@ disc("""We have provided two verification techniques. The default is for every
        object to check every assignment at run time. This is what happend by 
        default. So if you make a mistake in an assignment, you get something 
        like this:""")
-eg("""
->>> r = shapes.Rect(10,10,200,80) 
->>> r.fullColor = colors.green 
-Traceback (innermost last): 
-  File "<interactive input>", line 1, in ? 
-  File "C:\code\users\andy\graphics\shapes.py", line 190, in __setattr__ 
-    raise AttributeError, "Illegal attribute '%s' in class %s" %\
-    
-      (attr, self.__class__.__name__) 
-AttributeError: Illegal attribute 'fullColor' in class Rect 
->>>  
-""")
 
 disc("""This imposes a performance penalty, so this behaviour can be turned 
        off when you need it to be. To do this, you should use the following 
        lines of code before you first import reportlab.graphics.shapes:""")
-
-eg(""">>> import reportlab.config 
->>> reportlab.config.shapeChecking = 0 
->>> import reportlab.graphics.shapes 
->>>  """)
 
 disc("""Once you turn off shapeChecking, the classes are actually built 
        without the verification hook; code should get faster.""")
@@ -532,7 +274,9 @@ disc("""Each object, including the drawing itself, has a $verify()$ method. This
        verification, then you shoudl explictly call $verify()$ in testing when 
        developing the code, or perhaps once in a batch process.""")
 
+
 heading3("""Property Editing """)
+
 disc("""A cornerstone of the reportlab/graphics which we will cover below is 
        that you can automatically document widgets. This means getting hold 
        of all of their editable properties, including those of their 
@@ -554,39 +298,7 @@ disc("""To support these applications we have two interfaces, $getProperties$
        This will make much more sense when we look at Widgets later on, but 
        we need to put the support into the base of the framework.""")
 
-eg("""
->>> r = shapes.Rect(0,0,200,100) 
->>> import pprint 
->>> pprint.pprint(r.getProperties()) 
-{'fillColor': Color(0.00,0.00,0.00), 
- 'height': 100, 
- 'rx': 0, 
- 'ry': 0, 
- 'strokeColor': Color(0.00,0.00,0.00), 
- 'strokeDashArray': None, 
- 'strokeLineCap': 0, 
- 'strokeLineJoin': 0, 
- 'strokeLineWidth': 1, 
- 'strokeMiterLimit': 0, 
- 'width': 200, 
- 'x': 0, 
- 'y': 0} 
->>> r.setProperties({'x':20, 'y':30, 'strokeColor': colors.red}) 
->>> r.dumpProperties() 
-fillColor = Color(0.00,0.00,0.00) 
-height = 100 
-rx = 0 
-ry = 0 
-strokeColor = Color(1.00,0.00,0.00) 
-strokeDashArray = None 
-strokeLineCap = 0 
-strokeLineJoin = 0 
-strokeLineWidth = 1 
-strokeMiterLimit = 0 
-width = 200 
-x = 20 
-y = 30 
->>>  """)
+
 disc("""<i>($pprint$ is the standard Python library module that allows you to 'pretty print' output
 over multiple lines rather than having one very long line.)</i>""")
 
@@ -594,20 +306,13 @@ disc("""These three methods don't seem to do much here, but as we will see
        they make our widgets framework much more powerful when dealing with 
        non-primitive objects.""")
 
+
 heading3("Naming Children")
+
 disc("""You can add objects to the $Drawing$ and $Group$ objects. These normally 
        go into a list of contents. However, you may also give objects a name 
        when adding them. This allows you to refer to and possibly change any 
        element of a drawing after constructing it.""")
-
-eg("""
->>> D = shapes.Drawing(400, 200) 
->>> S = shapes.String(10, 10, 'Hello World') 
->>> D.add(S, 'caption') 
->>> D.caption.text 
-'Hello World' 
->>>  
-""")
 
 disc("""Note that you can use the same shape instance in several contexts in a 
        drawing; if you choose to use the same Circle object in many locations 
@@ -617,7 +322,9 @@ disc("""Note that you can use the same shape instance in several contexts in a
 disc("""This provides one paradigm for creating and modifying interactive 
        drawings.""")
 
+
 heading2("""Widgets""") 
+
 disc("""Up until now, Drawings have been 'pure data'. There is no code in them 
        to actually do anything, except assist the programmer in checking and 
        inspecting the drawing. In fact, that's the cornerstone of the whole 
@@ -655,43 +362,7 @@ disc("""Widgets run contrary to the idea that a drawing is just a bundle of
        strings. You can also explicitly 'flatten out' a drawing, causing all 
        widgets to be converted to primitives.""")
 
-heading3("""Using a Widget """)
-disc("""Let's imagine a simple new widget. We will use a widget to draw a 
-       face, then show how it was implemented.""")
 
-eg("""
->>> import reportlab.lib.colors 
->>> import reportlab.graphics.shapes 
->>> import reportlab.graphics.renderPDF
->>> d = shapes.Drawing(400, 200)
->>> f = widgetbase.Face()
->>> f.skinColor = colors.yellow
->>> f.mood = "sad"
->>> d.add(f)
->>> renderPDF.drawToFile(d, 'face.pdf', 'A Face')""")
-
-from reportlab.graphics import widgetbase
-d = Drawing(200, 120)
-f = widgetbase.Face()
-f.x = 50
-f.y = 10
-f.skinColor = colors.yellow
-f.mood = "sad"
-d.add(f)
-draw(d, 'A sample widget')
-
-disc("""Let's see what properties it has available, using the setProperties 
-       interface we saw earlier:""")
-
-eg("""
->>> f.dumpProperties() 
-eyeColor = Color(0.00,0.00,1.00) 
-mood = sad 
-size = 80 
-skinColor = Color(1.00,1.00,0.00) 
-x = 10 
-y = 10 
->>>  """)
 
 disc("""One thing which seems strange about the above code is that we did not 
        set the size or position when we made the face. This is a necessary 
@@ -707,80 +378,24 @@ disc("""In addition, a widget always provides a $demo()$ method. Simple ones
        documentation tool calls $demo()$ so that your fancy new chart class can 
        create a drawing showing what it can do.""")
 
-disc("""Here are a handful of simple widgets available in the module 
-       <i>signsandsymbols.py</i>:""")
-
-todo("add image")
-# This doesn't work - thes test method writes to a pdf file.
-##from reportlab.graphics.widgets import signsandsymbols
-##t=signsandsymbols.test()
-##draw(t, "Examples of widgets from 'signsandsymbols.py'")
-
-
 
 heading3("""Compound Widgets """)
 disc("""Let's imagine a compound widget which draws two faces side by side. 
        This is easy to build when you have the Face widget.""")
 
-eg("""
->>> tf = widgetbase.TwoFaces() 
->>> tf.faceOne.mood 
-'happy' 
->>> tf.faceTwo.mood 
-'sad' 
->>> tf.dumpProperties() 
-faceOne.eyeColor = Color(0.00,0.00,1.00) 
-faceOne.mood = happy 
-faceOne.size = 80 
-faceOne.skinColor = None 
-faceOne.x = 10 
-faceOne.y = 10 
-faceTwo.eyeColor = Color(0.00,0.00,1.00) 
-faceTwo.mood = sad 
-faceTwo.size = 80 
-faceTwo.skinColor = None 
-faceTwo.x = 100 
-faceTwo.y = 10 
->>>  """)
-
-
-disc("""The attributes 'faceOne' and 'faceTwo' are deliberately exposed so you 
-       can get at them directly. There could also be top-level attributes, 
-       but there aren't in this case.""")
 
 
 heading3("""Verifying Widgets """)
+
 disc("""The widget designer decides the policy on verification, but by default 
        they work like shapes - checking every assignment - if the designer 
        has provided the checking information.""")
 
 
 heading3("""Implementing a Widget """)
+
 disc("""We tried to make it as easy to implement widgets as possible. Here's 
        the code for a Face widget which does not do any type checking:""")
-
-eg("""
-class Face(Widget): 
-    \"\"\"This draws a face with two eyes, mouth and nose.\"\"\" 
-         
-    def __init__(self): 
-        self.x = 10 
-        self.y = 10 
-        self.size = 80 
-        self.skinColor = None 
-        self.eyeColor = colors.blue 
-        self.mood = 'happy' 
- 
-    def draw(self): 
-        s = self.size  # abbreviate as we will use this a lot 
-        g = shapes.Group() 
-        g.transform = [1,0,0,1,self.x, self.y] 
-        # background 
-        g.add(shapes.Circle(s * 0.5, s * 0.5, s * 0.5, 
-                            fillColor=self.skinColor)) 
-        # CODE OMITTED TO MAKE MORE SHAPES 
-        return g 
-""")
 
 disc("""We left out all the code to draw the shapes in this document, but you 
        can find it in the distribution in $widgetbase.py$.""")
@@ -799,28 +414,12 @@ disc("""Once your widget works, you probably want to add support for
        restrict the "mood" custom attribute to the values "happy", "sad" or 
        "ok". So we do this:""")
 
-eg("""
-class Face(Widget): 
-    \"\"\"This draws a face with two eyes.  It exposes a 
-    couple of properties to configure itself and hides 
-    all other details\"\"\" 
-    def checkMood(moodName): 
-        return (moodName in ('happy','sad','ok')) 
-    _verifyMap = { 
-        'x': shapes.isNumber, 
-        'y': shapes.isNumber, 
-        'size': shapes.isNumber, 
-        'skinColor':shapes.isColorOrNone, 
-        'eyeColor': shapes.isColorOrNone, 
-        'mood': checkMood  
-        } 
-""")
-
 disc("""This checking will be performed on every attribute assignment; or, if 
        $config.shapeChecking$ is off, whenever you call $myFace.verify()$.""")
 
 
 heading3("""Documenting Widgets """)
+
 disc("""We are working on a generic tool to document any Python package or 
        module; this will be checked into ReportLab an will be used to 
        generate a reference for the ReportLab package. When it encounters 
@@ -835,7 +434,9 @@ disc("""This tool will mean that we can have guaranteed up-to-date
        documentation on our widgets and chart, both on the web site and in 
        print; and that you can do the same for your own widgets too!""")
 
+
 heading3("""Widget Design Strategies """)
+
 disc("""We could not come up with a consistent architecture for designing 
        widgets, so we are leaving that problem to the authors! If you do not 
        like the default verifiction strategy, or the way 
@@ -847,17 +448,6 @@ disc("""For simple widgets it is recommended that you do what we did above:
        instead have $__setattr__$ hooks and have things updated when certain 
        attributes are set. Consider a pie chart. If you want to expose the 
        individual wedges, you might write code like this:""")
-
-eg("""
-from reportlab.graphics.charts import piecharts
-pc = piecharts.Pie()
-pc.defaultColors = [navy, blue, skyblue] #used in rotation 
-pc.data = [10,30,50,25] 
-pc.wedges[7].strokeWidth = 5 
-""")
-#removed 'pc.backColor = yellow' from above code example
-disc("")
-todo("We need more of an explaination of what '$__setattr__$ hooks' are")
 
 disc("""The last line is problematic as we have only created four wedges - in 
        fact we might not have created them yet. Does $pc.wedges[7]$ raise an 
@@ -881,41 +471,8 @@ disc("""For now have a look at the following sample code using an early
        version of a pie chart widget and the output it generates:""")
 
 
-eg("""
-from reportlab.lib.colors import *
-from reportlab.graphics import shapes,renderPDF 
-from reportlab.graphics.charts.piecharts import Pie
-
-d = Drawing(400,200)
-d.add(String(100,175,"Without labels", textAnchor="middle"))
-d.add(String(300,175,"With labels", textAnchor="middle"))
-pc = Pie()
-pc.x = 25
-pc.y = 50
-pc.data = [10,20,30,40,50,60]
-pc.wedges[0].popout = 5
-d.add(pc, 'pie1')
-pc2 = Pie()
-pc2.x = 150
-pc2.y = 50
-pc2.data = [10,20,30,40,50,60]
-pc2.labels = ['a','b','c','d','e','f']
-d.add(pc2, 'pie2')
-pc3 = Pie()
-pc3.x = 275
-pc3.y = 50
-pc3.data = [10,20,30,40,50,60]
-pc3.labels = ['a','b','c','d','e','f']
-pc3.wedges.labelRadius = 0.65
-pc3.wedges.fontName = "Helvetica-Bold"
-pc3.wedges.fontSize = 16
-pc3.wedges.fontColor = colors.yellow
-d.add(pc3, 'pie3')""")
-
-todo("add image")
-
-
 heading2("Charts ")
+
 disc("""The motivation for much of this is to create a flexible chart package. 
        We've done several chart programs with PINGO, on which this package is 
        based. So far, each one has been a specific program to make a specific 
@@ -956,22 +513,6 @@ disc("<i>Control child elements individually or as a group</i>")
 disc("""<para lindent=+36>We use smart collection classes that let you customize a group of 
        things, or just one of them. For example you can do this in our 
        experimental pie chart:""")
-
-eg("""
-d = Drawing(400,200)
-pc = Pie()
-pc.x = 150
-pc.y = 50
-pc.data = [10,20,30,40,50,60]
-pc.labels = ['a','b','c','d','e','f']
-pc.wedges.strokeWidth=0.5
-pc.wedges[3].popout = 20
-pc.wedges[3].strokeWidth = 2
-pc.wedges[3].strokeDashArray = [2,2]
-pc.wedges[3].labelRadius = 1.75
-pc.wedges[3].fontColor = colors.red
-d.add(pc, '')
-""")
  
 disc("""<para lindent=+36>pc.wedges[3] actually lazily creates a little object which holds 
        information about the slice in question; this will be used to format a 
@@ -986,15 +527,11 @@ disc("""<para lindent=+36>It would be wrong from a statistical viewpoint to let 
        functionality, but in general properties will be orthogonal.""")
 
 disc("<i>Composition and component based </i>")
+
 disc("""<para lindent=+36>Charts are built out of reusable child widgets. A Legend is an 
        easy-to-grasp example. If you need a specialized type of legend (e.g. 
        circular colour swatches), you should subclass the standard Legend 
        widget. Then you could either do something like...""")
-eg("""
-c = MyChartWithLegend()
-c.legend = MyNewLegendClass()    # just change it
-c.legend.swatchRadius = 5    # set a property only relevant to the new one
-c.data = [10,20,30]   #   and then configure as usual....""")
 
 disc("""<para lindent=+36>...or create/modify your own chart or drawing class which creates one 
        of these by default. This is also very relevant for time series 
@@ -1019,6 +556,7 @@ disc("""<para lindent=+36>(If you want to see the image, it is available on our 
 
 
 heading3("Key Concepts and Components")
+
 disc("""A chart or plot is an object which is placed on a drawing; it is not 
        itself a drawing. You can thus control where it goes, put several on 
        the same drawing, or add annotations.""")
@@ -1039,6 +577,7 @@ disc("""You can subclass any chart component and use your replacement instead
        properties.""")
 
 heading3("Labels")
+
 disc("""One of the most important building blocks is the <i>Label</i>, defined in 
        $reportlab/graphics/charts/textlabels.py$. A label is a string of text 
        attached to some chart element. They are used on axes, for titles or 
@@ -1053,29 +592,6 @@ disc("""The text and 'origin' of a label are typically set by its parent
        properties of the label (or collection of labels) directly to affect 
        its positon relative to this origin and all of its formatting.""")
 
-eg("""
-from reportlab.graphics import shapes
-from reportlab.graphics.charts.textlabels import Label
-
-d = Drawing(200, 100)
-
-# mark the origin of the label
-d.add(Circle(100,90, 5, fillColor=colors.green))
-
-lab = Label()
-lab.setOrigin(100,90)
-lab.boxAnchor = 'ne'
-lab.angle = 45
-lab.dx = 0
-lab.dy = -20
-lab.boxStrokeColor = colors.green
-lab.setText('Another\nMulti-Line\nString')
-
-d.add(lab)""")
-
-todo("add image")
-
-
 disc("""In the drawing above, the label is defined relative to the green blob. 
        The text box should have its north-east corner ten points down from 
        the origin, and be rotated by 45 degrees about that corner.""")
@@ -1084,21 +600,9 @@ disc("""At present labels have the following properties, which we believe are
        sufficient for all charts we have seen to date:""")
 
 todo("""Note: need to turn these into pretty tables with explanations """)
-eg("""
->>>lab.dumpProperties()
-angle = 45
-boxAnchor = ne
-boxFillColor = None
-boxStrokeColor = Color(0.00,0.50,0.00)
-boxStrokeWidth = 0.5
-dx = 0
-dy = -20
-fontName = Times-Roman
-fontSize = 10
-leading = 12.0
-textAnchor = start""")
 
 heading3("Axes")
+
 disc("""We identify two basic kinds of axes - <i>Value</i> and <i>Category</i> Axes. Both 
        come in horizontal and vertical flavors. Both can be subclassed to 
        make very specific kinds of axis. For example, if you have complex 
@@ -1112,41 +616,13 @@ disc("""Axes are responsible for determining the mapping from data to image
 disc("""This drawing shows two axes, one of each kind, which have been created 
        directly without reference to any chart:""")
 
-todo("add image")
-
-disc("Here is the code that created them: ")
-
-eg("""
-from reportlab.graphics import shapes
-from reportlab.graphics.charts.axes import XCategoryAxis,YValueAxis 
-
-drawing = Drawing(400, 200)
-
-data = [(10, 20, 30, 40),
-        (15, 22, 37, 42)]        
-
-xAxis = XCategoryAxis()
-xAxis.setPosition(75, 75, 300)
-xAxis.configure(data)
-xAxis.categoryNames = ['Beer','Wine','Meat','Cannelloni']
-xAxis.labels.boxAnchor = 'n'
-xAxis.labels[3].dy = -15
-xAxis.labels[3].angle = 30
-xAxis.labels[3].fontName = 'Times-Bold'
-
-yAxis = YValueAxis()
-yAxis.setPosition(50, 50, 125)
-yAxis.configure(data)
-
-drawing.add(xAxis)
-drawing.add(yAxis)""")
-
 disc("""Remember that you won't have to create axes directly; when using a 
        standard chart, it comes with ready-made axes. The methods are what 
        the chart uses to configure it and take care of the geometry. However, 
        we will talk through them in detail below.""")
 
 heading3("XCategoryAxis class")
+
 disc("""A Category Axis doesn't really have a scale; it just divides itself 
        into equal-sized buckets. It is simpler than a value axis. The chart 
        (or programmer) sets its location with the method setPosition(x, y, 
@@ -1158,43 +634,9 @@ disc("""A Category Axis doesn't really have a scale; it just divides itself
        on the page. We have not yet seen any need to let people override the 
        widths or positions of categories.""")
 
-disc("An XCategoryAxis has the following editable properties:")
-disc("")
-
-data=[["Property", "Meaning"],
-      ["visible", """Should the axis be drawn at all? Sometimes you don't want
-to display one or both axes, but they still need to be there as 
-they manage the scaling of points."""],
-      ["strokeColor", "Color of the axis"],
-      ["strokeDashArray", """Whether to draw axis with a dash and, if so, what kind.
-Defaults to None"""],
-      ["strokeWidth", "Width of axis in points"],
-      ["tickUp", """How far above the axis should the tick marks protrude?
-(Note that making this equal to chart height gives you a gridline)"""],
-      ["tickDown", """How far below the axis should the tick mark protrude?"""],
-      ["categoryNames", """Either None, or a list of strings. This should have the
-same length as each data series."""],
-      ["labels", """A collection of labels for the tick marks. By default the 'north'
-of each text label (i.e top centre) is positioned 5 points down
-from the centre of each category on the axis. You may redefine
-any property of the whole label group or of any one label. If
-categoryNames=None, no labels are drawn."""],
-      ["title", """Not Implemented Yet. This needs to be like a label, but also
-lets you set the text directly. It would have a default
-location below the axis."""]]
-t=Table(data, colWidths=(100,330))
-t.setStyle(TableStyle([
-            ('FONT',(0,0),(-1,1),'Times-Bold',10,12),
-            ('FONT',(0,1),(-1,-1),'Courier',8,8),
-            ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
-            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
-            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
-            ]))
-getStory().append(t)
-caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - XCategoryAxis properties""")
-
 
 heading3("""YValueAxis""")
+
 disc("""The left axis in the diagram is a YValueAxis. The XValueAxis 
        flavour will shortly be available as well! A Value Axis differs from a 
        Category Axis in that each point along its length corresponds to a y 
@@ -1208,36 +650,11 @@ disc("""<i>setPosition(x, y, length)</i> and <i>configure(data)</i> work exactly
        choosing suitable values. One configured, the value axis can convert y 
        data values to drawing space with the scale() method. Thus:""")
 
-eg("""
->>> yAxis = YValueAxis()
->>> yAxis.setPosition(50, 50, 125)
->>> data = [(10, 20, 30, 40),(15, 22, 37, 42)]   
->>> yAxis.configure(data)
->>> yAxis.scale(10)  # should be bottom of chart
-50.0
->>> yAxis.scale(40)  # should be near the top
-167.1875
->>>""")
-
 disc("""By default, the highest data point is aligned with the top of the 
        axis, the lowest with the bottom of the axis, and the axis choose 
        'nice round numbers' for its tickmark points. You may override these 
        settings with the properties below. """)
-##Property Meaning
-##visible Is it drawn at all? 
-##strokeColor Color of the axis 
-##strokeDashArray Whether to draw axis with a dash and, if so, what kind. Defaults to None 
-##strokeWidth Width of axis in points 
-##tickLeft How far to the left of the axis should the tick marks protrude?  
-##tickRight How far to the right of the exis should the tick mark protrude? (Note that making this equal to chart width gives you a gridline) 
-##valueMin The y value to which the bottom of the axis should correspond. Default value is 'Auto' in which case the axis sets it to the lowest actual data point (e.g. 10 in the example above). It is common to set this to zero to avoid misleading the eye. 
-##valueMax The y value to which the top of the axis should correspond. Default value is 'Auto' in which case the axis sets it to the highest actual data point (e.g. 42 in the example above). It is common to set this to a 'round number' so data bars do not quite reach the top. 
-##valueStep The y change between tick intervals. By default this is 'Auto', and the chart tries to pick 'nice round numbers' which are just wider than the minimumTickSpacing below. 
-##minimumTickSpacing This is used when valueStep is set to 'Auto', and ignored otherwise. The designer specified that tick marks should be no closer than X points apart (based, presumably, on considerations of the label font size and angle). The chart tries values of the type 1,2,5,10,20,50,100... (going down below 1 if necessary) until it finds an interval which is greater than the desired spacing, and uses this for the step.  
-##labelTextFormat This determines what goes in the labels. Unlike a category axis which accepts fixed strings, the labels on a ValueAxis are supposed to be numbers. You may provide either a 'format string' like '%0.2f' (show two decimal places), or an arbitrary function which accepts a number and returns a string. One use for the latter is to convert a timestamp to a readable year-month-day format. 
-##title Not Implemented Yet. This needs to be like a label, but also let you set the text directly. It would have a default location to the left of the axis and inclined by 90 degrees. 
-##
-##
+
 disc("""We hope to add an advanced property to let you explicitly specify the 
        tick mark locations, so you don't have to follow regular intervals. 
        You could then plot month ends and month end dates with a couple of 
@@ -1245,6 +662,7 @@ disc("""We hope to add an advanced property to let you explicitly specify the
        classes.""")
 
 heading3("""Bar Charts""")
+
 disc("""This describes our current VerticalBarChart class, which uses the axes 
        and labels above. We think it is step in the right direction but is is 
        far from final. As usual, we will start with an example:""")
@@ -1254,69 +672,12 @@ disc("""Note that people we speak to are divided about 50/50 on whether to
        because 'Vertical' appears next to 'Bar', so we take it to mean that 
        the bars rather than the category axis are vertical.""")
 
-eg("""
-    # code to produce the above chart
-    drawing = Drawing(400, 200)
-
-    data = [
-            (13, 5, 20, 22, 37, 45, 19, 4),
-            (14, 6, 21, 23, 38, 46, 20, 5)
-            ]
-            
-    
-    bc = VerticalBarChart()
-    bc.x = 50
-    bc.y = 50
-    bc.height = 125
-    bc.width = 300
-    bc.data = data
-
-    bc.strokeColor = colors.yellow    
-
-    bc.valueAxis.valueMin = 0
-    bc.valueAxis.valueMax = 60
-    bc.valueAxis.valueStep = 15
-    
-    
-    bc.categoryAxis.labels.boxAnchor = 'ne'
-    bc.categoryAxis.labels.dx = 8
-    bc.categoryAxis.labels.dy = -2
-    bc.categoryAxis.labels.angle = 30
-    
-    bc.categoryAxis.categoryNames = ['Jan-99','Feb-99','Mar-99',
-           'Apr-99','May-99','Jun-99','Jul-99','Aug-99']
-    drawing.add(bc)
-    
-    return drawing    """)
-
-
 disc("""Most of the code above is concerned with setting up the axes and 
        labels, which we have already covered. Here are the top-level 
        properties of the VerticalBarChart class:""")
-##
-##Property Value 
-##data This should be a "list of lists of numbers" or "list of tuples of numbers". If you have just one series, write it as
-##data = [(10,20,30,42),]
-## 
-##x, y, width, height These define the inner 'plot rectangle'. We highlighted this with a yellow border above. Note that it is your job to place the chart on the drawing in a way which leaves room for all the axis labels and tickmarks. We specify this 'inner rectangle' because it makes it vey easy to lay out multiple charts in a consistent manner. 
-##strokeColor Defaults to None. This will draw a border around the plot rectangle, which may be useful in debugging. Axes will overwrite this. 
-##fillColor Defaults to None. This will fill the plot rectangle with a solid color. (Note that we could implement dashArray etc. as for any other solid shape) 
-##barLabelFormat This is a format string or function used for displaying labels above each bar. We're working on ways to position these labels so that they work for positive and negative bars. 
-##useAbsolute Defaults to 0. If 1, the three properties below are absolute values in points (which means you can make a chart where the bars stick out from the plot rectangle); if 0, they are relative quantities and indicate the proprotional widths of the elements involved. 
-##barWidth As it says. Defaults to 10. 
-##groupSpacing Defaults to 5. This is the space between each group of bars. If you have only one series, use groupSpacing and not barSpacing to split them up. Half of the groupSpacing is used before the first bar in the chart, and another half at the end. 
-##barSpacing Defaults to 0. This is the spacing between bars in each group. If you wanted a little gap between green and red bars in the example above, you would make this non-zero. 
-##barLabelFormat Defaults to None. As with the YValueAxis, if you supply a function or format string then labels will be drawn next to each bar showing the numeric value. 
-##barLabels A collection of labels used to format all bar labels. Since this is a two-dimensional array, you may explicitly format the third label of the second series using this syntax:
-##    chart.barLabels[(1,2)].fontSize = 12
-## 
-##valueAxis The value axis, which may be formatted as described previously 
-##categoryAxis The categoryAxis, which may be formatted as described previously 
-##title, subTitle Not implemented yet. These would be label-like objects whose text could be set directly and which would appear in sensible locations. For now, you can just place extra strings on the drawing. 
-##  
-##
+
 disc("There are several open issues:")
-##
+
 list("""vertical position of X Axis - by default the X Axis sits at the 
        bottom. One should be able to specify if it sits at the top, the 
        bottom or at a specific y value (e.g. y=0).""")
@@ -1339,23 +700,11 @@ disc("""When we are a bit more confident of the design, we expect to add
        degrees, and hid one of the axes:""")
 
 
-heading3("""4.6 Pie Charts""")
+heading3("""Pie Charts""")
+
 disc("""We've already seen a pie chart example above. This is provisional but 
        seems to do most things. At the very least we need to change the name. 
        For completeness we will cover it here.""")
-
-eg("""
-    pc = PieWithWedges()
-    pc.x = 150
-    pc.y = 50
-    pc.data = [10,20,30,40,50,60]
-    pc.labels = ['a','b','c','d','e','f']
-    pc.wedges.strokeWidth=0.5
-    pc.wedges[3].popout = 20
-    pc.wedges[3].strokeWidth = 2
-    pc.wedges[3].strokeDashArray = [2,2]
-    pc.wedges[3].labelRadius = 1.75
-    pc.wedges[3].fontColor = colors.red""")
 
 
 disc("""Properties are covered below. The pie has a 'wedges' collection and we 
@@ -1363,56 +712,25 @@ disc("""Properties are covered below. The pie has a 'wedges' collection and we
        we finished the Label class and will probably be reworked to use 
        Labels shortly.""")
 
-##Property Value 
-##data a list or tuple of numbers 
-##x, y, width, height Bounding box of the pie. Note that x and y do NOT specify the centre but the bottom left corner, and that width and height do not have to be equal; pies may be elliptical and wedges will be drawn correctly. 
-##labels None, or a list of strings. Make it None if you don't want labels around the edge of the pie. Since it is impossible to know the size of slices, we generally discourage placing labels in or around pies; it is much better to put them in a legend alongside. 
-##startAngle Where is the start angle of the first pie slice? The default is '90' which is twelve o'clock. 
-##direction Which direction do slices progress in? The default is 'clockwise'. 
-##wedges Collection of wedges. This lets you customise each wedge, or individual ones. See below 
-##wedges.strokeWidth Border width for wedge 
-##wedges.strokeColor Border color 
-##wedges.strokeDashArray Solid or dashed line configuration for
-##wedges.popout How far out should the slice(s) stick from the centre of
-##the pie? default is zero.
-##wedges.fontName 
-##wedges.fontSize
-##wedges.fontColor Used for text labels 
-##wedges.labelRadius This controls the anchor point for a text label. It
-##is a fraction of the radius; 0.7 will place the text inside the pie,
-##1.2 will place it slightly outside. (note that if we add labels, we
-##will keep this to specify their anchor point)
-##
+
 heading3("""Legends""")
+
 disc("""Various preliminary legend classes can be found but need a cleanup to 
        be consistent with this model. Legends are the natural place to 
        specify the colors and line styles of charts; we propose that each 
        chart is created with a Legend attribute which is invisible. One would 
        then do the following to specify colors:""")
 
-eg("""
-myChart.legend.defaultColors = [red, green, blue]""")
-
 disc("""One could also define a group of charts sharing the same legend:""")
 
-eg("""
-myLegend = Legend()
-myLegend.defaultColor = [red, green.....] #yuck!
-myLegend.columns = 2
-# etc.
-chart1.legend = myLegend
-chart2.legend = myLegend
-chart3.legend = myLegend""")
-
-todo("""Does this work? Is it an acceptable complication over specifying chart
-colors directly?""")
-
 heading3("Other Charts")
+
 disc("""It will take some time to deal with the full range of chart types. We 
        expect to finalize bars and pies and to produce trial implementations 
        of more general plots in February.""")
 
-heading4("x-y plots")
+heading4("X-Y Plots")
+
 disc("""Most other plots involve two value axes and directly plotting x-y data 
        in some form. The series can be plotted as lines, marker symbols, 
        both, or custom graphics such as open-high-low-close graphics. All 
@@ -1442,7 +760,8 @@ heading3("""Other chart classes""")
 disc("""This has not been an exhaustive look at all the chart classes. Those classes 
        are constantly being worked on. To see exactly what is in the current 
        distribution, use the $graphdocpy.py$ utility. By default, it will run 
-       on reportlab\graphics, and produce a full report. (If you want to run
+       on reportlab/graphics, and produce a full report. (If you want to run
        it on other modules or packages, $graphdocpy.py -h$ print a help
        message that will tell you how.)""")
+
 disc("This is the tool that was mentioned in the section on 'Documenting Widgets'")
