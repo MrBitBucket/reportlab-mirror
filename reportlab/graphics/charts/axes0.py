@@ -1,7 +1,25 @@
-"""Axes for charts.
+"""Collection of axes for charts.
 
-Axes come in X and Y flavours.
+The current collection comprises axes for charts using cartesian
+coordinate systems. All axes might have tick marks and labels.
 
+There are two dichotomies for axes: one of X and Y flavours and
+another of category and value flavours.
+
+Category axes have an ordering but no metric. They are divided
+into a number of equal-sized buckets. Their tick marks or labels,
+if available, go BETWEEN the buckets, and the labels are placed
+below to/left of the X/Y-axis, respectively.
+
+  Value axes have an ordering AND metric. They correspond to a nu-
+  meric quantity. Value axis have a real number quantity associated
+  with it. The chart tells it where to go.
+  The most basic axis divides the number line into equal spaces
+  and has tickmarks and labels associated with each; later we
+  will add variants where you can specify the sampling
+  interval.
+
+The charts using axis tell them where the labels should be placed.
 """
 
 
@@ -53,10 +71,7 @@ def nextRoundNumber(x):
 
 
 class XCategoryAxis(Widget):
-    """A 'category axis' has an ordering
-    but no metric.  It is divided into a number of equal-sized buckets.
-    There may be tick marks or labels BETWEEN the buckets, and a label
-    below it. The chart tells it where to go"""
+    "X/category axis"
 
     _attrMap = {
         'visible':isNumber,
@@ -206,10 +221,7 @@ class XCategoryAxis(Widget):
 
 
 class YCategoryAxis(Widget):
-    """A 'category axis' has an ordering
-    but no metric.  It is divided into a number of equal-sized buckets.
-    There may be tick marks or labels BETWEEN the buckets, and a label
-    below it. The chart tells it where to go"""
+    "Y/category axis"
 
     _attrMap = {
         'visible':isNumber,
@@ -278,7 +290,7 @@ class YCategoryAxis(Widget):
         self._length = length * 1.0
 
 
-    def joinToAxis(self, xAxis, mode='bottom', value=None, points=None):
+    def joinToAxis(self, xAxis, mode='left', value=None, points=None):
         "Join with x-axis using some mode."
 
         # Make sure only one of the value or points parameter is passed.
@@ -291,19 +303,18 @@ class YCategoryAxis(Widget):
         msg = "Cannot connect to other axes (%s), but X- ones." % axisClassName
         assert axisClassName[0] == 'X', msg
 
-        # Untested.
         if mode == 'left':
             self._x = xAxis._x * 1.0
             self._y = xAxis._y * 1.0
         elif mode == 'right':
-            self._x = xAxis._x * 1.0
-            self._y = (xAxis._y + xAxis._length) * 1.0
+            self._x = (xAxis._x + xAxis._length) * 1.0
+            self._y = xAxis._y * 1.0
         elif mode == 'fixedValue':
-            self._x = xAxis._x * 1.0
-            self._y = xAxis.scale(value) * 1.0
+            self._x = xAxis.scale(value) * 1.0
+            self._y = xAxis._y * 1.0
         elif mode == 'fixedPoints':
-            self._x = xAxis._x * 1.0
-            self._y = points * 1.0
+            self._x = points * 1.0
+            self._y = xAxis._y * 1.0
 
 
     def configure(self, multiSeries):
@@ -332,7 +343,6 @@ class YCategoryAxis(Widget):
         if (self.tickLeft != self.tickRight):
             for i in range(self._catCount + 1):
                 y = self._y + (1.0 * i * self._barWidth)
-                print y
                 # draw tick marks
                 tick = Line(self._x - self.tickLeft, y,
                             self._x + self.tickRight, y)
@@ -361,14 +371,7 @@ class YCategoryAxis(Widget):
 
 
 class XValueAxis(Widget):
-    """Axis corresponding to a numeric quantity.
-    
-    A 'value axis' has a real number
-    quantity associated with it.  The chart tells it where to go.
-    The most basic axis divides the number line into equal spaces
-    and has tickmarks and labels associated with each; later we
-    will add variants where you can specify the sampling
-    interval."""
+    "X/value axis"
 
     def __init__(self):
 
@@ -434,6 +437,33 @@ class XValueAxis(Widget):
         self._x = x
         self._y = y
         self._length = length
+
+
+    def joinToAxis(self, yAxis, mode='bottom', value=None, points=None):
+        "Join with y-axis using some mode."
+
+        # Make sure only one of the value or points parameter is passed.
+        v, p = value, points
+        if mode[:3] == 'fix':
+            assert (v == None and p != None) or (v != None and p == None)
+
+        # Make sure we connect only to a y-axis.
+        axisClassName = yAxis.__class__.__name__
+        msg = "Cannot connect to other axes (%s), but Y- ones." % axisClassName
+        assert axisClassName[0] == 'Y', msg
+        
+        if mode == 'bottom':        
+            self._x = yAxis._x * 1.0
+            self._y = yAxis._y * 1.0
+        elif mode == 'top':        
+            self._x = yAxis._x * 1.0
+            self._y = (yAxis._y + yAxis._length) * 1.0
+        elif mode == 'fixedValue':
+            self._x = yAxis._x * 1.0
+            self._y = yAxis.scale(value) * 1.0
+        elif mode == 'fixedPoints':
+            self._x = yAxis._x * 1.0
+            self._y = points * 1.0
 
 
     def configure(self, dataSeries):
@@ -560,14 +590,7 @@ class XValueAxis(Widget):
 
 
 class YValueAxis(Widget):
-    """Axis corresponding to a numeric quantity.
-    
-    A 'value axis' has a real number
-    quantity associated with it.  The chart tells it where to go.
-    The most basic axis divides the number line into equal spaces
-    and has tickmarks and labels associated with each; later we
-    will add variants where you can specify the sampling
-    interval."""
+    "Y/value axis"
 
     def __init__(self):
 
@@ -633,6 +656,33 @@ class YValueAxis(Widget):
         self._x = x
         self._y = y
         self._length = length
+
+
+    def joinToAxis(self, xAxis, mode='left', value=None, points=None):
+        "Join with x-axis using some mode."
+
+        # Make sure only one of the value or points parameter is passed.
+        v, p = value, points
+        if mode[:3] == 'fix':
+            assert (v == None and p != None) or (v != None and p == None)
+
+        # Make sure we connect only to a y-axis.
+        axisClassName = xAxis.__class__.__name__
+        msg = "Cannot connect to other axes (%s), but X- ones." % axisClassName
+        assert axisClassName[0] == 'X', msg
+
+        if mode == 'left':
+            self._x = xAxis._x * 1.0
+            self._y = xAxis._y * 1.0
+        elif mode == 'right':
+            self._x = (xAxis._x + xAxis._length) * 1.0
+            self._y = xAxis._y * 1.0
+        elif mode == 'fixedValue':
+            self._x = xAxis.scale(value) * 1.0
+            self._y = xAxis._y * 1.0
+        elif mode == 'fixedPoints':
+            self._x = points * 1.0
+            self._y = xAxis._y * 1.0
 
 
     def configure(self, dataSeries):
@@ -765,8 +815,9 @@ def sample1():
 
     drawing = Drawing(400, 200)
 
-    data = [(10, 20, 30, 40),
-            (15, 22, 37, 42)]        
+##    data = [(10, 20, 30, 40),
+##            (15, 22, 37, 42)]        
+    data = [(10, 20, 30, 42)]        
 
     xAxis = XCategoryAxis()
     xAxis.setPosition(75, 75, 300)
@@ -791,8 +842,7 @@ def sample2a():
 
     drawing = Drawing(400, 200)
 
-    data = [(10, 20, 30, 40),
-            (15, 22, 37, 42)]        
+    data = [(10, 20, 30, 42)]        
 
     yAxis = YValueAxis()
     yAxis.setPosition(50, 50, 125)
@@ -816,8 +866,7 @@ def sample2b():
 
     drawing = Drawing(400, 200)
 
-    data = [(10, 20, 30, 40),
-            (15, 22, 37, 42)]        
+    data = [(10, 20, 30, 42)]        
 
     yAxis = YValueAxis()
     yAxis.setPosition(50, 50, 125)
@@ -841,8 +890,7 @@ def sample2c():
 
     drawing = Drawing(400, 200)
 
-    data = [(10, 20, 30, 40),
-            (15, 22, 37, 42)]        
+    data = [(10, 20, 30, 42)]        
 
     yAxis = YValueAxis()
     yAxis.setPosition(50, 50, 125)
@@ -866,8 +914,7 @@ def sample2d():
 
     drawing = Drawing(400, 200)
 
-    data = [(10, 20, 30, 40),
-            (15, 22, 37, 42)]        
+    data = [(10, 20, 30, 42)]        
 
     yAxis = YValueAxis()
     yAxis.setPosition(50, 50, 125)
@@ -884,3 +931,97 @@ def sample2d():
     drawing.add(yAxis)
 
     return drawing
+
+
+def sample3a():
+    "Make sample drawing with two axes, y connected at left of x."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    xAxis = XCategoryAxis()
+    xAxis._length = 300
+    xAxis.configure(data)
+    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+    xAxis.labels.boxAnchor = 'n'
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.configure(data)
+    yAxis.joinToAxis(xAxis, mode='left')
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample3b():
+    "Make sample drawing with two axes, y connected at right of x."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    xAxis = XCategoryAxis()
+    xAxis._length = 300
+    xAxis.configure(data)
+    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+    xAxis.labels.boxAnchor = 'n'
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.configure(data)
+    yAxis.joinToAxis(xAxis, mode='right')
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+def sample3c():
+    "Make two axes, y connected at fixed value (in points) of x."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 42)]        
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.configure(data)
+
+    xAxis = XValueAxis()
+    xAxis._length = 300
+    xAxis.configure(data)
+    xAxis.joinToAxis(yAxis, mode='fixedPoints', points=100)
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)
+
+    return drawing
+
+
+##def sample3d():
+##    "Make two axes, x connected at fixed value (of y-axes) of y."
+##
+##    drawing = Drawing(400, 200)
+##
+##    data = [(10, 20, 30, 42)]        
+##
+##    yAxis = YValueAxis()
+##    yAxis.setPosition(50, 50, 125)
+##    yAxis.configure(data)
+##
+##    xAxis = XCategoryAxis()
+##    xAxis._length = 300
+##    xAxis.configure(data)
+##    xAxis.joinToAxis(yAxis, mode='fixedValue', value=20)
+##    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+##    xAxis.labels.boxAnchor = 'n'
+##
+##    drawing.add(xAxis)
+##    drawing.add(yAxis)
+##
+##    return drawing
