@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.39 2001/03/16 14:51:50 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.40 2001/05/11 15:00:52 rgbecker Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.39 2001/03/16 14:51:50 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.40 2001/05/11 15:00:52 rgbecker Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -144,6 +144,14 @@ class PageTemplate:
 		this page are processed."""
 		pass
 
+	def checkPageSize(self,canv,doc):
+		'''This gets called by the template framework'''
+		if canv._pagesize != self.pagesize:
+			if self.pagesize:
+				canv.setPageSize(self.pagesize)
+			elif canv._pagesize != doc.pagesize:
+				canv.setPageSize(doc.pagesize)
+
 	def afterDrawPage(self, canv, doc):
 		"""This is called after the last flowable for the page has
 		been processed.  You might use this if the page header or
@@ -275,6 +283,7 @@ class BaseDocTemplate:
 		shouldn't normally be called directly'''
 		self.page = self.page + 1
 		self.pageTemplate.beforeDrawPage(self.canv,self)
+		self.pageTemplate.checkPageSize(self.canv,self)
 		self.pageTemplate.onPage(self.canv,self)
 		self.beforePage()
 		if hasattr(self,'_nextFrameIndex'):
