@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.29  2000/10/19 19:15:43  rgbecker
+#	Aaron's latest update from the newslist
+#
 #	Revision 1.28  2000/10/18 16:37:22  aaron_watters
 #	undid last checkin and added an option for a default outline (different fix)
-#
+#	
 #	Revision 1.27  2000/10/18 16:26:17  aaron_watters
 #	moved the outline preprocessing step into the format method (fixes testing error)
 #	
@@ -105,7 +108,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.28 2000/10/18 16:37:22 aaron_watters Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.29 2000/10/19 19:15:43 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -212,6 +215,8 @@ class PDFDocument:
     defaultStreamFilters = None
     pageCounter = 1
     def __init__(self, encoding=DEFAULT_ENCODING, dummyoutline=0):
+        #self.defaultStreamFilters = [PDFBase85Encode, PDFZCompress] # for testing!
+        #self.defaultStreamFilters = [PDFZCompress] # for testing!
         self.encoding = encoding
         # mapping of internal identifier ("Page001") to PDF objectnumber and generation number (34, 0)
         self.idToObjectNumberAndVersion = {}
@@ -445,6 +450,7 @@ def PDFString(str):
     return "(%s)" % pdfutils._escape(str)
     
 def PDFName(data):
+    # might need to change this to class for encryption
     # first convert the name
     ldata = list(data)
     index = 0
@@ -496,6 +502,38 @@ class PDFDictionary:
             Lj = string.join(L, " ")
         return "<< %s >>" % Lj
 
+# stream filters are objects to support round trip and
+# possibly in the future also support parameters
+class PDFStreamFilterZCompress:
+    pdfname = "FlateDecode"
+    def encode(self, text):
+        try:
+            from zlib import compress
+        except:
+            raise ImportError, "cannot z-compress zlib unavailable"
+        return compress(text)
+    def decode(self, encoded):
+        try:
+            from zlib import decompress
+        except:
+            raise ImportError, "cannot z-compress zlib unavailable"
+        return decompress(encoded)
+
+# need only one of these, unless we implement parameters later
+PDFZCompress = PDFStreamFilterZCompress()    
+
+class PDFStreamFilterBase85Encode:
+    pdfname = "ASCII85Decode"
+    def encode(self, text):
+        from pdfutils import _AsciiBase85Encode, _wrap
+        return _wrap(_AsciiBase85Encode(text))
+    def decode(self, text):
+        from pdfutils import _AsciiBase85Decode
+        return _AsciiBase85Decode(text)
+    
+# need only one of these too
+PDFBase85Encode = PDFStreamFilterBase85Encode()
+
 STREAMFMT = ("%(dictionary)s%(LINEEND)s" # dictionary
              "stream" # stream keyword
              "%(LINEEND)s" # a line end (could be just a \n)
@@ -521,10 +559,22 @@ class PDFStream:
         if filters is None:
             filters = document.defaultStreamFilters
         if filters is not None:
-            raise "oops", "filters for streams not yet implemented"
+            # apply filters in reverse order listed
+            rf = list(filters)
+            rf.reverse()
+            fnames = []
+            for f in rf:
+                #print "*****************content:"; print repr(content[:200])
+                #print "*****************filter", f.pdfname
+                content = f.encode(content)
+                fnames.insert(0, PDFName(f.pdfname))
+            #print "*****************finally:"; print content[:200]
+            #print "****** FILTERS", fnames
+            #stop
+            dictionary["Filter"] = PDFArray(fnames)
         fc = format(content, document)
         #print "type(content)", type(content)
-        if fc!=content: burp
+        #if fc!=content: burp
         # set dictionary length parameter
         dictionary["Length"] = len(content)
         fd = format(dictionary, document)
@@ -541,6 +591,7 @@ def teststream(content=None):
     content = string.replace(content, "\n", LINEEND) + LINEEND
     S = PDFStream()
     S.content = content
+    S.filters = [PDFBase85Encode, PDFZCompress]
     # nothing else needed...
     S.__Comment__ = "test stream"
     return S
@@ -848,8 +899,9 @@ class PDFPage(PDFCatalog):
                 self.Contents = teststream()
             else:
                 S = PDFStream()
+                if self.compression:
+                    S.filters = [PDFZCompress, PDFBase85Encode]
                 S.content = stream
-                # need to add filter stuff (?)
                 S.__Comment__ = "page stream"
                 self.Contents = S
         if not self.Resources:
@@ -1502,54 +1554,56 @@ class PDFEncoding(PDFType1Font):
 # skipping CMaps
 
 class PDFFormXObject:
-	# like page requires .info set by some higher level (doc)
-	# XXXX any resource used in a form must be propagated up to the page that (recursively) uses
-	#   the form!! (not implemented yet).
-	XObjects = Annots = BBox = Matrix = Contents = stream = Resources = None
-	hasImages = 1 # probably should change
-	compression = 0
-	def __init__(self, lowerx, lowery, upperx, uppery):
-		#not done
-		self.lowerx = lowerx; self.lowery=lowery; self.upperx=upperx; self.uppery=uppery
-		
-	def setStreamList(self, data):
-		if type(data) is types.ListType:
-			data = string.join(data, LINEEND)
-		self.stream = data
-		
-	def format(self, document):
-		self.BBox = self.BBox or PDFArray([self.lowerx, self.lowery, self.upperx, self.uppery])
-		self.Matrix = self.Matrix or PDFArray([1, 0, 0, 1, 0, 0])
-		if not self.Annots:
-			self.Annots = None
-		else:
-			raise ValueError, "annotations not reimplemented yet"
-		if not self.Contents:
-			stream = self.stream
-			if not stream:
-				self.Contents = teststream()
-			else:
-				S = PDFStream()
-				S.content = stream
-				# need to add filter stuff (?)
-				S.__Comment__ = "xobject form stream"
-				self.Contents = S
-		if not self.Resources:
-			resources = PDFResourceDictionary()
-			# fonts!
-			resources.basicFonts()
-			if self.hasImages:
-				resources.allProcs()
-			else:
-				resources.basicProcs()
-		sdict = self.Contents.dictionary
-		sdict["Type"] = PDFName("XObject")
-		sdict["Subtype"] = PDFName("Form")
-		sdict["FormType"] = 1
-		sdict["BBox"] = self.BBox
-		sdict["Matrix"] = self.Matrix
-		sdict["Resources"] = resources
-		return self.Contents.format(document)
+    # like page requires .info set by some higher level (doc)
+    # XXXX any resource used in a form must be propagated up to the page that (recursively) uses
+    #   the form!! (not implemented yet).
+    XObjects = Annots = BBox = Matrix = Contents = stream = Resources = None
+    hasImages = 1 # probably should change
+    compression = 0
+    def __init__(self, lowerx, lowery, upperx, uppery):
+        #not done
+        self.lowerx = lowerx; self.lowery=lowery; self.upperx=upperx; self.uppery=uppery
+        
+    def setStreamList(self, data):
+        if type(data) is types.ListType:
+            data = string.join(data, LINEEND)
+        self.stream = data
+        
+    def format(self, document):
+        self.BBox = self.BBox or PDFArray([self.lowerx, self.lowery, self.upperx, self.uppery])
+        self.Matrix = self.Matrix or PDFArray([1, 0, 0, 1, 0, 0])
+        if not self.Annots:
+            self.Annots = None
+        else:
+            raise ValueError, "annotations not reimplemented yet"
+        if not self.Contents:
+            stream = self.stream
+            if not stream:
+                self.Contents = teststream()
+            else:
+                S = PDFStream()
+                S.content = stream
+                # need to add filter stuff (?)
+                S.__Comment__ = "xobject form stream"
+                self.Contents = S
+        if not self.Resources:
+            resources = PDFResourceDictionary()
+            # fonts!
+            resources.basicFonts()
+            if self.hasImages:
+                resources.allProcs()
+            else:
+                resources.basicProcs()
+        if self.compression:
+            self.Contents.filters = [PDFBase85Encode, PDFZCompress]
+        sdict = self.Contents.dictionary
+        sdict["Type"] = PDFName("XObject")
+        sdict["Subtype"] = PDFName("Form")
+        sdict["FormType"] = 1
+        sdict["BBox"] = self.BBox
+        sdict["Matrix"] = self.Matrix
+        sdict["Resources"] = resources
+        return self.Contents.format(document)
 
 if __name__=="__main__":
     # first test
