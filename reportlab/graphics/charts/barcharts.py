@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.18 2001/06/19 09:56:29 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.19 2001/06/21 13:03:17 dinu_gherman Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -11,7 +11,7 @@ vertical versions.
 Stacked and percentile bar charts to follow...
 """
 
-import string
+import string, copy
 from types import FunctionType, StringType
 
 from reportlab.lib import colors
@@ -23,6 +23,7 @@ from reportlab.graphics.shapes import Line, Rect, Group, Drawing
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.axes import YCategoryAxis, XValueAxis
 from reportlab.graphics.charts.textlabels import Label
+from reportlab.graphics.widgets.grids import ShadedRect0
 
 
 ### Helpers (maybe put this into Drawing... or shapes)
@@ -52,6 +53,8 @@ class BarChartProperties(PropHolder):
         strokeColor = AttrMapValue(isColorOrNone),
         fillColor = AttrMapValue(isColorOrNone),
         strokeWidth = AttrMapValue(isNumber),
+        symbol = AttrMapValue(None,
+            desc='A widget to be used insteaad of a normal bar.'),
         )
 
 
@@ -106,6 +109,7 @@ class BarChart(Widget):
         # colors e.g. from Tufte.  These will be used in a
         # cycle to set the fill color of each series.
         self.bars = TypedPropertyCollection(BarChartProperties)
+##        self.bars.symbol = None
         self.bars.strokeWidth = 1
         self.bars.strokeColor = colors.black
         self.bars[0].fillColor = colors.red
@@ -300,10 +304,26 @@ class BarChart(Widget):
             for colNo in range(len(row)):
                 barPos = row[colNo]
                 (x, y, width, height) = barPos
-                r = Rect(x, y, width, height)
-                r.fillColor = rowStyle.fillColor
-                r.strokeColor = rowStyle.strokeColor
-                g.add(r)
+
+                # Draw a rectangular symbol for each data item,
+                # or a normal colored rectangle.
+                symbol = None
+                if hasattr(self.bars[styleIdx], 'symbol'):
+                    symbol = copy.deepcopy(self.bars[styleIdx].symbol)
+                elif hasattr(self.bars, 'symbol'):
+                    symbol = self.bars.symbol
+
+                if symbol:
+                    symbol.x = x
+                    symbol.y = y
+                    symbol.width = width
+                    symbol.height = height
+                    g.add(symbol)
+                else:
+                    r = Rect(x, y, width, height)
+                    r.fillColor = rowStyle.fillColor
+                    r.strokeColor = rowStyle.strokeColor
+                    g.add(r)
 
                 if labelFmt is None:
                     labelText = None
@@ -1594,6 +1614,51 @@ def sampleH5c4():
 
     bc.categoryAxis.labels.boxAnchor = 'e'
     bc.categoryAxis.categoryNames = ['Ying', 'Yang']
+
+    drawing.add(bc)
+
+    return drawing
+
+def sampleSymbol1():
+    "Simple bar chart using symbol attribute."
+
+    drawing = Drawing(400, 200)
+
+    data = dataSample5
+
+    bc = VerticalBarChart()
+    bc.x = 50
+    bc.y = 50
+    bc.height = 125
+    bc.width = 300
+    bc.data = data
+    bc.strokeColor = colors.black
+
+    bc.barWidth = 10
+    bc.groupSpacing = 15
+    bc.barSpacing = 3
+
+    bc.valueAxis.valueMin = 0
+    bc.valueAxis.valueMax = 60
+    bc.valueAxis.valueStep = 15
+
+    bc.categoryAxis.labels.boxAnchor = 'e'
+    bc.categoryAxis.categoryNames = ['Ying', 'Yang']
+
+    sym1 = ShadedRect0()
+    sym1.fillColorStart = colors.black
+    sym1.fillColorEnd = colors.blue
+    sym1.orientation = 'horizontal'
+    sym1.strokeWidth = 0
+
+    sym2 = ShadedRect0()
+    sym2.fillColorStart = colors.black
+    sym2.fillColorEnd = colors.red
+    sym2.orientation = 'horizontal'
+    sym2.strokeWidth = 0
+
+    bc.bars.symbol = sym1
+    bc.bars[2].symbol = sym2
 
     drawing.add(bc)
 
