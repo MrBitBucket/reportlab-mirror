@@ -1,7 +1,7 @@
-#copyright ReportLab Inc. 2000
+#copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.3 2001/11/07 13:15:20 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.4 2001/11/08 17:35:25 johnprecedo Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 import reportlab
 
@@ -28,7 +28,7 @@ recommended.  If you are new to Python, we tell you in the next section
 where to go for orientation.
 """)
 
-disc("""After working your way throught this, you should be ready to begin
+disc("""After working your way through this, you should be ready to begin
 writing programs to produce sophisticated reports.
 """)
 
@@ -38,14 +38,14 @@ bullet("What is Python?")
 bullet("How do I get everything set up and running?")
 
 todo("""
-Be warned! This document is in a <em>very</em> preliminary form.  We need
-your help to make sure it is complete and helpful.  Please send any
-feedback to our user mailing list, reportlab-users@egroups.com.
+Be warned! This document is a work in progress.  We need your help to
+make sure it is complete and helpful.  Please send any feedback to our
+user mailing list, reportlab-users@egroups.com.
 """)
 
 heading2("What is ReportLab?")
 disc("""ReportLab is a software library that lets you directly
-create documents in Adobe's Portabe Document Format (PDF) using
+create documents in Adobe's Portable Document Format (PDF) using
 the Python programming language. """)
 
 disc("""PDF is the global standard for electronic documents. It
@@ -79,7 +79,7 @@ slow, and very difficult to manage and maintain.
 disc("""In addition, because you are writing a program
 in a powerful general purpose language, there are no
 restrictions at all on where you get your data from,
-how you transform it, and the the kind of output
+how you transform it, and the kind of output
 you can create.  And you can reuse code across
 whole families of reports.""")
 
@@ -107,7 +107,7 @@ by Apollo) <b>1.</b> any of a genus of large, non-poisonous snakes of Asia, Afri
 suffocate their prey to death. <b>2.</b> popularly, any large snake that crushes its prey. <b>3.</b> totally awesome,
 bitchin' very high level programming language (which in <i>our</i> exceedingly humble opinions
 (for what they are worth)
-whallops the snot out of all the other contenders (but your
+wallops the snot out of all the other contenders (but your
 mileage may vary real soon now, as far as we know).</para>
 """)
 disc("""
@@ -252,7 +252,7 @@ disc("""
 [Note: the "couple of seconds" delay in step 8 is mainly due to
 compilation of the python scripts in the ReportLab package.
 The next time the ReportLab modules are used the execution
-will be noticably faster because the $pyc$ compiled python
+will be noticeably faster because the $pyc$ compiled python
 files will be used in place of the $py$ python source files.]""")
 
 heading3("Instructions for Python novices: Unix")
@@ -292,7 +292,7 @@ you should now be able to type $python$ and see a <b>Python</b> prompt.
 Once you can do that it's time to try and install ReportLab.
 First get the latest reportlab.tgz.
 If ReportLab is to be available to all then the reportlab archive should be unpacked in
-the lib/site-python directory (typically /usr/local/lib/site-python) if neccessary by
+the lib/site-python directory (typically /usr/local/lib/site-python) if necessary by
 a superuser.
 Otherwise unpack in a directory of your choice and arrange for that directory to be on your
 $PYTHONPATH$ variable.
@@ -401,7 +401,7 @@ all the test scripts. For the moment, double click on the file
 'test_pdfgen_general.py'. You should see a window called Python
 Interpreter.Out with some text appearing in it, and after that it
 should create a PDF file called 'test_pdfgen_general.pdf'. Make sure
-that a pdf file actually is output, and that you can view it from
+that a PDF file actually is output, and that you can view it from
 Adobe Acrobat. If this PDF file works, then you have successfully
 installed both Python and the basic ReportLab package. If you want to
 do a full test of everything, execute the script reportlab:test:runAll
@@ -449,7 +449,7 @@ heading2("Site Configuration")
 disc("""There are a number of options which most likely need to be configured globally for a site.
 The python script module $reportlab/rl_config.py$ may be edited to change the values of several
 important sitewide properties.""")
-bullet("""shapeChecking: set this to zero to turn off a lot of error checking in the graphis modules""") 
+bullet("""shapeChecking: set this to zero to turn off a lot of error checking in the graphics modules""") 
 bullet("""defaultEncoding: set this to WinAnsiEncoding or MacRomanEncoding.""")
 bullet("""defaultPageSize: set this to one of the values defined in reportlab/lib/pagesizes.py; as delivered
 it is set to pagesizes.A4; other values are pagesizes.letter etc.""")
@@ -457,3 +457,49 @@ bullet("""defaultImageCaching: set to zero to inhibit the creation of .a85 files
 hard-drive. The default is to create these preprocessed PDF compatible image files for faster loading""")
 bullet("""T1SearchPathPath: this is a python list of strings representing directories that
 may be queried for information on Type 1 fonts""")
+
+
+heading2("Learning More About Python")
+
+disc("""
+If you are a total beginner to Python, you should check out one or more from the 
+growing number of resources on Python programming. The following are freely
+available on the web:
+""")
+disc("")
+
+bullet("""<b>Introductory Material on Python.  </b>
+A list of tutorials on the Python.org web site.
+$http://www.python.org/doc/Intros.html$
+""")
+disc("")
+
+bullet("""<b>Python Tutorial.  </b>
+The official Python Tutorial by Guido van Rossum (edited by Fred L. Drake, Jr.)
+$http://www.python.org/doc/tut/$
+""")
+disc("")
+
+bullet("""<b>Learning to Program.  </b>
+A tutorial on programming by Alan Gauld. Has a heavy emphasis on
+Python, but also uses other languages.
+$http://www.freenetpages.co.uk/hp/alan.gauld/$
+""")
+disc("")
+
+bullet("""<b>How to think like a computer scientist</b> (Python version)</b>.  
+$http://www.ibiblio.org/obp/thinkCSpy/$
+""")
+disc("")
+
+bullet("""<b>Instant Python</b>.  
+A 6-page minimal crash course by Magnus Lie Hetland.  
+$http://www.hetland.org/python/instant-python.php$
+""")
+disc("")
+
+bullet("""<b>Dive Into Python</b>.  
+A free Python tutorial for experienced programmers.
+$http://diveintopython.org/$
+""")
+disc("")
