@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.18 2001/08/22 19:30:03 aaron_watters Exp $
-__version__=''' $Id: utils.py,v 1.18 2001/08/22 19:30:03 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.19 2001/10/26 17:02:41 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.19 2001/10/26 17:02:41 rgbecker Exp $ '''
 
-import string, os
+import string, os, sys
 from types import *
 from reportlab.lib.logger import warnOnce
 SeqTypes = (ListType,TupleType)
@@ -59,6 +59,48 @@ except ImportError, errMsg:
 		if PIL_WARNINGS: warnOnce('Python Imaging Library not available')
 PIL_Image = Image
 del Image
+
+class ArgvDictValue:
+	'''A type to allow clients of getArgvDict to specify a conversion function'''
+	def __init__(self,value,func):
+		self.value = value
+		self.func = func
+
+def getArgvDict(**kw):
+	'''	Builds a dictionary from its keyword arguments with overrides from sys.argv.
+		Attempts to be smart about conversions, but the value can be an instance
+		of ArgDictValue to allow specifying a conversion function.
+	'''
+	A = sys.argv[1:]
+	for k, v in kw.items():
+		if isinstance(v,ArgvDictValue):
+			v, func = v.value, v.func
+		else:
+			func = None
+		ke = k+'='
+		for a in A:
+			if string.find(a,ke)==0:
+				av = a[len(ke):]
+				A.remove(a)
+				if func:
+					v = func(av)
+				else:
+					t = type(v)
+					if t is StringType:
+						v = av
+					elif t is FloatType:
+						v = float(av)
+					elif t is IntType:
+						v = int(av)
+					elif t is ListType:
+						v = list(eval(av))
+					elif t is TupleType:
+						v = tuple(eval(av))
+					else:
+						raise TypeError, "Can't convert string '%s' to %s" % (av,str(t))
+				kw[k] = v
+				break
+	return kw
 
 def getHyphenater(hDict=None):
 	try:
