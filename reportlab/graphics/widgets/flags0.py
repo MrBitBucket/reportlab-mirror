@@ -2,11 +2,6 @@
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 
-from reportlab.lib import colors
-from reportlab.graphics import shapes
-from reportlab.graphics.widgetbase import Widget
-from reportlab.graphics import renderPDF
-
 """This file is a collection of flag graphics as widgets.
 
 All flags are represented at the ratio of 1:2, even where the official ratio for the flag is something else
@@ -30,6 +25,11 @@ Holland (The Netherlands), Spain, Sweden
 Others:
 USA, Czech Republic, European Union, Switzerland, Turkey
 """
+
+from reportlab.lib import colors
+from reportlab.graphics import shapes
+from reportlab.graphics.widgetbase import Widget
+from reportlab.graphics import renderPDF
 
 
 class Star0(Widget):
@@ -58,8 +58,8 @@ class Star0(Widget):
     def demo(self):
         D = shapes.Drawing(200, 100)
         et = Star0()
-        et.x=20
-        et.y=20
+        et.x=50
+        et.y=0
         et.draw()
         D.add(et)
         labelFontSize = 10
@@ -120,20 +120,36 @@ class Flag0(Widget):
         self.size = 100
         self.background = colors.white
         self.border=1
-        
+
     def demo(self):
         D = shapes.Drawing(200, 100)
-        flag = FlagUK0()
-        flag.x = 0
-        flag.y=20
-        flag.draw()
-        D.add(flag)
+        fx = Flag0()
+        fx.x = 0
+        fx.y = 0
+        fx.draw()
+        D.add(fx)
         labelFontSize = 10
-        D.add(shapes.String(uk.x+(uk.size/2),(uk.y-(1.2*labelFontSize)),
-                            flag.__class__.__name__, fillColor=colors.black, textAnchor='middle',
+        D.add(shapes.String(fx.x+(fx.size/2),(fx.y-(1.2*labelFontSize)),
+                            fx.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
      
+    def draw(self):
+        # general widget bits
+        s = self.size  # abbreviate as we will use this a lot 
+        g = shapes.Group() 
+        
+        # flag specific bits
+        box = shapes.Rect(self.x, self.y, s*2, s,
+               fillColor = colors.purple,
+                          strokeColor = colors.black,
+               strokeWidth=0)
+        g.add(box)
+
+        g.add(self.borderdraw())
+        
+        return g
+             
     def borderdraw(self):
         # general widget bits
         s = self.size  # abbreviate as we will use this a lot 
@@ -591,7 +607,7 @@ class FlagDenmark0(Flag0):
         return g
 
 
-class FlagFinland0(Widget):
+class FlagFinland0(Flag0):
     """This draws the Finnish flag.
     
         possible attributes:
@@ -602,13 +618,17 @@ class FlagFinland0(Widget):
     _attrMap = {
         'x': shapes.isNumber,
         'y': shapes.isNumber,
-        'size': shapes.isNumber
+        'size': shapes.isNumber,
+        'background': shapes.isColor,
+        'border': shapes.isBoolean
         }
 
     def __init__(self):
         self.x = 0
         self.y = 0
-        self.size = 100 
+        self.size = 100
+        self.background = colors.white
+        self.border=1
         
     def demo(self):
         D = shapes.Drawing(200, 100)
@@ -616,7 +636,7 @@ class FlagFinland0(Widget):
         fin.x = 0
         fin.y = 0
         fin.draw()
-        D.add(uk)
+        D.add(fin)
         labelFontSize = 10
         D.add(shapes.String(fin.x+(fin.size/2),(fin.y-(1.2*labelFontSize)),
                             fin.__class__.__name__, fillColor=colors.black, textAnchor='middle',
@@ -646,8 +666,11 @@ class FlagFinland0(Widget):
                strokeColor = None,
                strokeWidth=0)
         g.add(blueline2)
+
+        g.add(self.borderdraw())
         
         return g
+
 
 class FlagFrance0(Flag0):
     """This draws the French tricolor.
@@ -1692,7 +1715,8 @@ class FlagEU0(Flag0):
         return g
 
 def test():
-
+    """This function produces two pdf files with examples of all the signs and symbols from this file.
+    """
 # page 1
 
     labelFontSize = 10

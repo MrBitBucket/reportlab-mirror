@@ -2,12 +2,7 @@
 # A collection of new widgets
 # author: John Precedo (johnp@reportlab.com)
 
-from reportlab.lib import colors
-from reportlab.graphics import shapes
-from reportlab.graphics.widgetbase import Widget
-from reportlab.graphics import renderPDF
-
-"""This file is a collection of widgets.
+"""This file is a collection of widgets to produce some common signs and symbols.
 
 Widgets include:
 - ETriangle0 (an equilateral triangle),
@@ -28,6 +23,10 @@ Widgets include:
 
 """
 
+from reportlab.lib import colors
+from reportlab.graphics import shapes
+from reportlab.graphics.widgetbase import Widget
+from reportlab.graphics import renderPDF
 
 class ETriangle0(Widget):
     """This draws an equilateral triangle.
