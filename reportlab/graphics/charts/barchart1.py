@@ -113,15 +113,82 @@ class VerticalBarChart(Widget):
                 ]
         
         bc = VerticalBarChart()
-        bc.x = 10
+        bc.x = 20
         bc.y = 10
         bc.height = 85
-        bc.width = 90
+        bc.width = 180
         bc.data = data
 
         drawing.add(bc)
 
         return drawing
+
+
+    def _findMinMaxValues(self):
+        """Find the minimum and maximum value of the data we have."""
+
+        data = self.data
+        m, M = Auto, Auto
+        for row in data:
+            for val in row:
+                if val < m:
+                    m = val
+                if val > M:
+                    M = val
+
+        return m, M
+    
+
+    def calcBarPositions0(self):
+        """Works out where they go.
+
+        Sets an attribute _barPositions which is a list of
+        lists of (x, y, width, height) matching the data."""
+
+        self._seriesCount = len(self.data)
+        self._rowLength = len(self.data[0])
+        
+        if self.useAbsolute:
+            # bar dimensions are absolute
+            normFactor = 1.0
+        else:
+            # bar dimensions are normalized to fit.  How wide
+            # notionally is one group of bars?
+            normWidth = (self.groupSpacing 
+                        + (self._seriesCount * self.barWidth) 
+                        + ((self._seriesCount - 1) * self.barSpacing)
+                        )
+            availWidth = self.categoryAxis.scale(0)[1]
+            normFactor = availWidth / normWidth
+            if self.debug:
+                print '%d series, %d points per series' % (self._seriesCount, self._rowLength)
+                print 'width = %d group + (%d bars * %d barWidth) + (%d gaps * %d interBar) = %d total' % (
+                    self.groupSpacing, self._seriesCount, self.barWidth,
+                    self._seriesCount - 1, self.barSpacing, normWidth)
+        
+        self._barPositions = []
+        for rowNo in range(len(self.data)):
+            barRow = []
+            for colNo in range(len(self.data[0])):
+                datum = self.data[rowNo][colNo]
+
+                (groupX, groupWidth) = self.categoryAxis.scale(colNo)
+                x = (groupX +
+                     (0.5 * self.groupSpacing * normFactor) +
+                     (rowNo * self.barWidth * normFactor) +
+                     (rowNo * self.barSpacing * normFactor)
+                     )
+                width = self.barWidth * normFactor
+
+                y = self.valueAxis.scale(0)
+                height = self.valueAxis.scale(datum) - y
+
+                barRow.append((x, y, width, height))
+                if self.debug:
+                    print "x, y, width, height:", x, y, width, height
+                    print "self.valueAxis.scale(10)", self.valueAxis.scale(self.valueAxis.valueMin)
+
+            self._barPositions.append(barRow)
 
 
     def calcBarPositions(self):
@@ -165,7 +232,16 @@ class VerticalBarChart(Widget):
                      )
                 width = self.barWidth * normFactor
 
-                y = self.valueAxis.scale(0)
+                # 'Baseline' correction...
+                if Auto in (self.valueAxis.valueMin, self.valueAxis.valueMax):
+                    y = self.valueAxis.scale(self._findMinMaxValues()[0])
+                elif self.valueAxis.valueMin <= 0 <= self.valueAxis.valueMax:
+                    y = self.valueAxis.scale(0)
+                elif 0 < self.valueAxis.valueMin:
+                    y = self.valueAxis.scale(self.valueAxis.valueMin)
+                elif self.valueAxis.valueMax < 0:
+                    y = self.valueAxis.scale(self.valueAxis.valueMax)
+
                 height = self.valueAxis.scale(datum) - y
                 barRow.append((x, y, width, height))
 
@@ -560,7 +636,7 @@ def sample3():
 ###
 
 def sample4a():
-    "Make a bar chart showing value axis region staring at *exactly* zero."
+    "Make a bar chart showing value axis region starting at *exactly* zero."
     
     drawing = Drawing(400, 200)
 
@@ -575,7 +651,7 @@ def sample4a():
 
     bc.strokeColor = colors.black
 
-    bc.valueAxis.valueMin = 0 ###
+    bc.valueAxis.valueMin = 0
     bc.valueAxis.valueMax = 60
     bc.valueAxis.valueStep = 15
     
@@ -589,7 +665,7 @@ def sample4a():
 
     
 def sample4b():
-    "Make a bar chart showing value axis region staring *below* zero."
+    "Make a bar chart showing value axis region starting *below* zero."
     
     drawing = Drawing(400, 200)
 
@@ -604,7 +680,7 @@ def sample4b():
 
     bc.strokeColor = colors.black
 
-    bc.valueAxis.valueMin = -10 ###
+    bc.valueAxis.valueMin = -10
     bc.valueAxis.valueMax = 60
     bc.valueAxis.valueStep = 15
     
@@ -623,7 +699,7 @@ def sample4c():
     drawing = Drawing(400, 200)
 
     data = [(13, 20)]
-    
+
     bc = VerticalBarChart()
     bc.x = 50
     bc.y = 50
@@ -633,8 +709,37 @@ def sample4c():
 
     bc.strokeColor = colors.black
 
-    bc.valueAxis.valueMin = 10 ###
+    bc.valueAxis.valueMin = 10
     bc.valueAxis.valueMax = 60
+    bc.valueAxis.valueStep = 15
+    
+    bc.categoryAxis.labels.boxAnchor = 'n'
+    bc.categoryAxis.labels.dy = -5
+    bc.categoryAxis.categoryNames = ['Ying', 'Yang']
+
+    drawing.add(bc)
+
+    return drawing    
+
+
+def sample4d():
+    "Make a bar chart showing value axis region entirely *below* zero."
+    
+    drawing = Drawing(400, 200)
+
+    data = [(-13, -20)]
+
+    bc = VerticalBarChart()
+    bc.x = 50
+    bc.y = 50
+    bc.height = 125
+    bc.width = 300
+    bc.data = data
+
+    bc.strokeColor = colors.black
+
+    bc.valueAxis.valueMin = -30
+    bc.valueAxis.valueMax = -10
     bc.valueAxis.valueStep = 15
     
     bc.categoryAxis.labels.boxAnchor = 'n'
