@@ -244,7 +244,7 @@ art_render_gradient_linear_render_8 (ArtRenderCallback *self,
       (gradient->stops[n_stops-1].offset != 1.0))
   {
     extra_stops = 0;
-    tmp_stops = stops = alloca (sizeof (ArtGradientStop) * (n_stops + 2));
+    tmp_stops = stops = (void *)alloca (sizeof (ArtGradientStop) * (n_stops + 2));
     if (gradient->stops[0].offset != 0.0)
       {
 	memcpy (tmp_stops, gradient->stops, sizeof (ArtGradientStop));
@@ -277,7 +277,7 @@ art_render_gradient_linear_render_8 (ArtRenderCallback *self,
   if (spread == ART_GRADIENT_REFLECT)
     {
       tmp_stops = stops;
-      stops = alloca (sizeof (ArtGradientStop) * n_stops * 2);
+      stops = (void *)alloca (sizeof (ArtGradientStop) * n_stops * 2);
       memcpy (stops, tmp_stops, sizeof (ArtGradientStop) * n_stops);
 
       for (i = 0; i< n_stops; i++)
