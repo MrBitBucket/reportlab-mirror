@@ -209,7 +209,7 @@ class Grid0(Widget):
                     y = r[j]
                     try:
                         stripe = Rect(self.x, y, w, r[j+1]-y)
-                        stripe.fillColor = cols[i % len(cols)] 
+                        stripe.fillColor = cols[i % len(cols)]
                         stripe.strokeColor = None
                         group.add(stripe)
                         i = i + 1
@@ -299,7 +299,6 @@ class ShadedRect0(Widget):
         D = Drawing(100, 100)
 
         g = ShadedRect0()
-        g.draw()
         D.add(g)
 
         return D
@@ -307,18 +306,22 @@ class ShadedRect0(Widget):
 
     def _flipRectCorners(self):
         "Flip rectangle's corners if width or height is negative."
-        
-        if self.width < 0:
+
+        if self.width < 0 and self.height > 0:
             self.x = self.x + self.width 
             self.width = -self.width 
             if self.orientation == 'vertical':
                 self.fillColorStart, self.fillColorEnd = self.fillColorEnd, self.fillColorStart
-
-        if self.height < 0:
+        elif self.height < 0 and self.width > 0:
             self.y = self.y + self.height 
             self.height = -self.height 
             if self.orientation == 'horizontal':
                 self.fillColorStart, self.fillColorEnd = self.fillColorEnd, self.fillColorStart
+        elif self.height < 0 and self.height < 0:
+            self.x = self.x + self.width 
+            self.width = -self.width 
+            self.y = self.y + self.height 
+            self.height = -self.height 
 
 
     def draw(self):
@@ -336,7 +339,7 @@ class ShadedRect0(Widget):
         group.add(rect)
 
         c0, c1 = self.fillColorStart, self.fillColorEnd
-        r, g, b = c0.red, c0.green, c0.green
+        r, g, b = c0.red, c0.green, c0.blue
         num = float(self.numShades) # must make it float!
 
         if self.orientation == 'vertical':
@@ -499,9 +502,9 @@ def test():
             for col in range(3):
                 x = 20 + col*d
                 sr = ShadedRect0()
-                sr.x = x+s
+                sr.x = x
                 sr.y = y+s
-                sr.width = -s
+                sr.width = s
                 sr.height = -s
                 sr.fillColorStart = colors.white
                 sr.fillColorEnd = colors.green
