@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/pythonpoint.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.31 2001/03/16 14:51:50 rgbecker Exp $
-__version__=''' $Id: pythonpoint.py,v 1.31 2001/03/16 14:51:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.32 2001/04/10 21:33:42 andy_robinson Exp $
+__version__=''' $Id: pythonpoint.py,v 1.32 2001/04/10 21:33:42 andy_robinson Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -534,7 +534,7 @@ def getSampleStyleSheet():
     para = ParagraphStyle('Title', stylesheet['Normal'])
     para.fontName = 'Times-Roman'
     para.fontSize = 48
-    para.Leading = 58
+    para.leading = 58
     para.alignment = TA_CENTER
     stylesheet['Title'] = para
     
@@ -563,7 +563,7 @@ def getSampleStyleSheet():
     stylesheet['Heading4'] = para
 
     para = ParagraphStyle('Bullet', stylesheet['Normal'])
-    para.firstLineIndent = -16
+    para.firstLineIndent = 0
     para.leftIndent = 56
     para.spaceBefore = 6
     para.bulletFontName = 'Symbol'
