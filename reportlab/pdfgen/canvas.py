@@ -1321,7 +1321,7 @@ class Canvas:
     def stringWidth(self, text, fontName, fontSize, encoding=None):
         "gets width of a string in the given font and size"
         if encoding is not None:
-            import logger
+            from reportlab.lib import logger
             logger.warnOnce('encoding argument to Canvas.stringWidth is deprecated and has no effect!')
         #if encoding is None: encoding = self._doc.encoding
         return pdfmetrics.stringWidth(text, fontName, fontSize)
