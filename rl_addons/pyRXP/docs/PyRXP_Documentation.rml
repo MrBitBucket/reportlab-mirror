@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-1" standalone="no" ?> 
 <!DOCTYPE document SYSTEM "rml_1_0.dtd"> 
 <document filename="PyRXP_Documentation.pdf"> 
-<!-- Last Modified:             $Date: 2002/04/29 13:54:15 $ -->
-<!-- Document Version Number:   $Revision: 1.1 $            -->
+<!-- Last Modified:             $Date: 2003/03/13 16:01:46 $ -->
+<!-- Document Version Number:   $Revision: 1.2 $            -->
 
 <template pageSize="(595, 842)" 
         leftMargin="72" 
@@ -14,7 +14,7 @@
     <pageTemplate id="cover">
     <pageGraphics>
         <setFont name="Times-Bold" size="48"/>
-        <drawCentredString x="297" y="516">PyRXP 0.7</drawCentredString>
+        <drawCentredString x="297" y="516">PyRXP 0.96</drawCentredString>
         <setFont name="Times-Bold" size="12"/>
         <drawCentredString x="297" y="414">User Documentation</drawCentredString>
 
@@ -51,7 +51,7 @@
         </lines>
         <setFont name="Times-Roman" size="10"/>
         <drawString x="72" y="808">PyRXP User Documentation</drawString>
-        <drawRightString x="523" y="808">$Revision: 1.1 $</drawRightString>
+        <drawRightString x="523" y="808">$Revision: 1.2 $</drawRightString>
         <drawCentredString x="297.5" y="60">Page <pageNumber/></drawCentredString>
     </pageGraphics>
     <frame id="first" x1="72" y1="72" width="451" height="698"/>
@@ -291,7 +291,7 @@ PyRXP was written by Robin Becker at ReportLab.
 </para>
 
 <para>
-This documentation describes pyRXP-0.7 being used with RXP 1.2.5, as
+This documentation describes pyRXP-0.96 being used with RXP 1.2.5, as
 well as ReportLab's emerging XML toolkit which uses it.
 </para>
 
@@ -659,7 +659,7 @@ Python 2.1.1 (#20, Jul 20 2001, 01:19:29) [MSC 32 bit (Intel)] on win32
 Type "copyright", "credits" or "license" for more information.
 >>> import pyRXP 
 >>> pyRXP.version
-'0.7'
+'0.96'
 >>> pyRXP.RXPVersion
 'RXP 1.2.5 Copyright Richard Tobin, LTG, HCRC, University of Edinburgh'
 </pre>
@@ -1112,6 +1112,11 @@ colWidths = "100, 351">
 <tr><td><para><font face="Courier">RXPVersion</font></para></td><td>the version string of the rxp library embedded in the module</td></tr>
 <tr><td><para><font face="Courier">parser_flags</font></para></td><td>a dictionary of parser flags - the values are the defaults for parsers</td></tr>
 <tr><td><para><font face="Courier">Parser(*kw)</font></para></td><td>Create a parser</td></tr>
+<tr><td><para><font face="Courier">piTagName</font></para></td><td>special tagname used for processing instructions</td></tr>
+<tr><td><para><font face="Courier">commentTagName</font></para></td><td>special tagname used for comments</td></tr>
+<tr><td><para><font face="Courier">recordLocation</font></para></td><td>a special do nothing constant that can be used as
+the 'fourth' argument and causes location information
+to be recorded in the fourth position of each node.</td></tr>
 </blockTable>
 							   
 <h2>3.4    Parser Object Attributes and Methods</h2>
@@ -1164,6 +1169,13 @@ method should return a (possibly modified) URI.  So, you could intercept a decla
 referring to <i>http://some.slow.box/somefile.dtd</i> and point at at the local
 copy you know you have handy, or implement a DTD-caching scheme.
 </para>
+<para spaceAfter="0"><font face="Courier">fourth</font></para><para>
+This argument should be None (default) or a callable method with
+no arguments. If callable, will be called to get or generate the
+4<super>th.</super> item of every 4-item tuple or list in the returned tree.
+May also be the special value pyRXP.recordLocation to cause the 4<super>th.</super> item to
+be set to a location information tuple ((startname,startline,startchar),(endname,endline,endchar)).
+</para>
 
 <nextFrame/>
 
@@ -1208,9 +1220,8 @@ ErrorOnUnquotedAttributeValues</td><td>1
 <tr><td>
 ErrorOnValidityErrors</td><td>1
 </td></tr>
-<tr><td>
-ExpandCharacterEntities</td><td>1
-</td></tr>
+<tr><td>ExpandCharacterEntities</td><td>1</td></tr>
+<tr><td>ExpandEmpty</td><td>0</td></tr>
 <tr><td>
 ExpandGeneralEntities</td><td>1
 </td></tr>
@@ -1220,9 +1231,8 @@ IgnoreEntities</td><td>0
 <tr><td>
 IgnorePlacementErrors</td><td>0
 </td></tr>
-<tr><td>
-MaintainElementStack</td><td>1
-</td></tr>
+<tr><td>MaintainElementStack</td><td>1</td></tr>
+<tr><td>MakeMutableTree</td><td>0</td></tr>
 <tr><td>
 MergePCData</td><td>1
 </td></tr>
@@ -1238,15 +1248,13 @@ ProcessDTD</td><td>0
 <tr><td>
 RelaxedAny</td><td>0
 </td></tr>
-<tr><td>
-ReturnComments</td><td>0
-</td></tr>
+<tr><td>ReturnComments</td><td>0</td></tr>
+<tr><td>ReturnProcessingInstructions</td><td>0</td></tr>
 <tr><td>
 ReturnDefaultedAttributes</td><td>1
 </td></tr>
 <tr><td>
-ReturnList</td><td>0
-</td></tr>                              
+ReturnList</td><td>0</td></tr>                              
 <tr><td>
 ReturnNamespaceAttributes</td><td>0
 </td></tr>
@@ -1498,6 +1506,8 @@ If this is on, validity errors will be reported as errors rather than
 warnings.  This is useful if your program wants to rely on the
 validity of its input.
 </para>
+<para spaceAfter="3"><b>ExpandEmpty</b></para><para spaceAfter="3">Default: 0</para><para spaceAfter="0">Description:</para>
+<para>If false, empty attribute dicts and empty lists of children are changed into the value None in every 4-item tuple or list in the returned tree.</para>
 
 <para spaceAfter="3">
 <b>ExpandCharacterEntities</b>
@@ -1616,6 +1626,8 @@ Description:
 <para>
 <i>[to be added]</i>
 </para>
+<para spaceAfter="3"><b>MakeMutableTree</b></para><para spaceAfter="3">Default: 0</para><para spaceAfter="0">Description:</para>
+<para>If false, nodes in the returned tree are 4-item tuples; if true, 4-item lists.</para>
 
 
 <para spaceAfter="3">
@@ -1713,7 +1725,7 @@ Default: 0
 Description:
 </para>
 <para spaceAfter="3">
-If this is set, comments are returned, otherwise they are ignored.
+If this is set, comments are returned as nodes with tag name pyRXP.commentTagName, otherwise they are ignored.
 </para>
 <para spaceAfter="0">
 Example:
@@ -1791,6 +1803,10 @@ Description:
 </para>
 <para>
 <i>[to be added]</i>
+</para>
+<para spaceAfter="3"><b>ReturnProcessingInstructions</b></para><para spaceAfter="3">Default: 0</para><para spaceAfter="0">Description:</para>
+<para>If this is set, processing instructions are returned as nodes with tagname pyRXP.piTagname,
+otherwise they are ignored.
 </para>
 
 
