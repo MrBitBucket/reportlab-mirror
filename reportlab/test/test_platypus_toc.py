@@ -19,8 +19,8 @@ from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate \
      import PageTemplate, BaseDocTemplate
-from reportlab.platypus import tableofcontents0
-from reportlab.platypus.tableofcontents0 import TableOfContents0
+from reportlab.platypus import tableofcontents
+from reportlab.platypus.tableofcontents import TableOfContents0
 from reportlab.platypus.tables import TableStyle, Table
 
 
@@ -133,7 +133,7 @@ class TocTestCase(unittest.TestCase):
         # Create styles to be used for TOC entry lines
         # for headers on differnet levels.
         tocLevelStyles = []
-        d, e = tableofcontents0.delta, tableofcontents0.epsilon
+        d, e = tableofcontents.delta, tableofcontents.epsilon
         for i in range(maxLevels):
             tocLevelStyles.append(makeTocHeaderStyle(i, d, e))
 
