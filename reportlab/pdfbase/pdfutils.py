@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.14 2001/01/22 10:38:30 dinu_gherman Exp $
-__version__=''' $Id: pdfutils.py,v 1.14 2001/01/22 10:38:30 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.15 2001/02/22 09:31:31 dinu_gherman Exp $
+__version__=''' $Id: pdfutils.py,v 1.15 2001/02/22 09:31:31 dinu_gherman Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -335,19 +335,21 @@ def _wrap(input, columns=60):
         pos = columns * i
 
     return string.join(output, LINEEND)
-    
 
-def _AsciiBase85Test(text='What is the average velocity of a sparrow?'):
-    "Does the obvious test for whether Base 85 encoding works."
-    print 'Plain text:', text
-    encoded = _AsciiBase85Encode(text)
-    print 'Encoded:', encoded
-    decoded = _AsciiBase85Decode(encoded)
-    print 'Decoded:', decoded
-    if decoded == text:
-        print 'Passed'
-    else:
-        print 'Failed!'
+    
+## Moved to test suite.
+##
+##def _AsciiBase85Test(text='What is the average velocity of a sparrow?'):
+##    "Does the obvious test for whether Base 85 encoding works."
+##    print 'Plain text:', text
+##    encoded = _AsciiBase85Encode(text)
+##    print 'Encoded:', encoded
+##    decoded = _AsciiBase85Decode(encoded)
+##    print 'Decoded:', decoded
+##    if decoded == text:
+##        print 'Passed'
+##    else:
+##        print 'Failed!'
 
 
 #########################################################################
