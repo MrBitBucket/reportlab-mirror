@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.25  2000/10/15 21:57:12  andy_robinson
+#	Added showFullScreen0
+#
 #	Revision 1.24  2000/09/08 10:04:08  rgbecker
 #	Paul Eddington's unix tell() returns a LongIntType bugfix
-#
+#	
 #	Revision 1.23  2000/08/24 02:26:04  aaron_watters
 #	change to PDFLiteral to support "lazy string conversions" (to support lazy crosslinks)
 #	
@@ -95,7 +98,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.24 2000/09/08 10:04:08 rgbecker Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.25 2000/10/15 21:57:12 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -562,6 +565,8 @@ class PDFCatalog(PDFObject):
                         )
     def showOutline(self):
         self.PageMode = "/UseOutlines"
+    def showFullScreen(self):
+        self.PageMode = "/FullScreen"
     def save(self, file):
         file.write(self.template % (self.RefPages, self.RefOutlines, self.PageMode) + LINEEND)
 

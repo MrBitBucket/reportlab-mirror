@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.52  2000/10/15 21:57:13  andy_robinson
+#	Added showFullScreen0
+#
 #	Revision 1.51  2000/09/04 08:06:15  rgbecker
 #	Fix spurious comment reference to layout
-#
+#	
 #	Revision 1.50  2000/09/01 12:13:26  rgbecker
 #	Improved optimisation checks
 #	
@@ -183,7 +186,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.51 2000/09/04 08:06:15 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.52 2000/10/15 21:57:13 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -484,9 +487,17 @@ class Canvas:
         return len(self._code) == 0
         
     def showOutline(self):
-        "Specify that Acrobat Reader should start with the outline tree visible"
+        """Specify that Acrobat Reader should start with the outline tree visible.
+        showFullScreen() and showOutline() conflict; the one called last
+        wins."""
         self._doc._catalog.showOutline()
     
+    def showFullScreen0(self):
+        """Specify that Acrobat Reader should start in full screen mode.
+        showFullScreen() and showOutline() conflict; the one called last
+        wins."""
+        self._doc._catalog.showFullScreen()
+
     def showPage(self):
         """Close the current page and possibly start on a new page."""
         page = pdfdoc.PDFPage()
