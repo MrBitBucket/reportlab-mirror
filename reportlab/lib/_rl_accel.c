@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.37 2003/12/23 18:15:08 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.38 2004/02/02 08:43:51 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.37 2003/12/23 18:15:08 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.38 2004/02/02 08:43:51 rgbecker Exp $ "
 #endif
 #include "Python.h"
 #include <stdlib.h>
@@ -27,7 +27,7 @@ static __version__=" $Id: _rl_accel.c,v 1.37 2003/12/23 18:15:08 rgbecker Exp $ 
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.45"
+#define VERSION "0.46"
 #define MODULE "_rl_accel"
 #ifndef	ATTRDICT
 	#if PY_MAJOR_VERSION>=2
@@ -844,29 +844,368 @@ static PyObject *hex32(PyObject *self, PyObject* args)
 	return PyString_FromString(buf);
 }
 
+/*Box start**************/
+typedef struct {
+	PyObject_HEAD
+	unsigned	is_box:1;
+	unsigned	is_glue:1;
+	unsigned	is_penalty:1;
+	double		width;
+	char		character;
+	unsigned	character_isNone:1;
+	} BoxObject;
+
+static void BoxFree(BoxObject* self)
+{
+	PyMem_DEL(self);
+}
+
+static int Box_set_double(char* name, double* pd, PyObject *value)
+{
+	PyObject *v = PyNumber_Float(value);
+	if(!v) return -1;
+	*pd = PyFloat_AsDouble(v);
+	Py_DECREF(v);
+	return 0;
+}
+
+static int Box_set_character(BoxObject *self, PyObject *value)
+{
+	if(value==Py_None){
+		self->character_isNone = 1;
+		}
+	else {
+		char *v = PyString_AsString(value);
+		if(!v) return -1;
+		if(PyString_GET_SIZE(value)!=1){
+			PyErr_Format(PyExc_AttributeError,"Bad size %d('%s') for attribute character",PyString_GET_SIZE(value),v);
+			return -1;
+			}
+		self->character = v[0];
+		self->character_isNone = 0;
+		}
+
+	return 0;
+}
+
+static int Box_setattr(BoxObject *self, char *name, PyObject* value)
+{
+	if(!strcmp(name,"width")) return Box_set_double(name,&self->width,value);
+	else if(!strcmp(name,"character")) return Box_set_character(self,value);
+	else if(
+			!strcmp(name,"stretch") ||
+			!strcmp(name,"shrink") ||
+			!strcmp(name,"penalty") ||
+			!strcmp(name,"is_penalty") ||
+			!strcmp(name,"flagged") ||
+			!strcmp(name,"is_box") ||
+			!strcmp(name,"is_glue")
+			) PyErr_Format(PyExc_AttributeError, "readonly attribute %s", name);
+	else PyErr_Format(PyExc_AttributeError, "no attribute %s", name);
+	return -1;
+}
+
+static struct PyMethodDef Box_methods[] = {
+	{NULL, NULL}		/* sentinel */
+	};
+
+static PyObject* Box_get_character(unsigned isNone, char c)
+{
+	if(!isNone) return PyString_FromStringAndSize(&c,1);
+	else {
+		Py_INCREF(Py_None);
+		return Py_None;
+		}
+}
+
+static PyObject* Box_getattr(BoxObject *self, char *name)
+{
+	if(!strcmp(name,"width")) return PyFloat_FromDouble(self->width);
+	else if(!strcmp(name,"character")) return Box_get_character(self->character_isNone,self->character);
+	else if(!strcmp(name,"is_box")) return PyInt_FromLong(1L);
+	else if(
+			!strcmp(name,"stretch") ||
+			!strcmp(name,"shrink") ||
+			!strcmp(name,"penalty") ||
+			!strcmp(name,"flagged") ||
+			!strcmp(name,"is_penalty") ||
+			!strcmp(name,"is_glue")
+			)  return PyInt_FromLong(0L);
+	return Py_FindMethod(Box_methods, (PyObject *)self, name);
+}
+
+static PyTypeObject BoxType = {
+	PyObject_HEAD_INIT(0)
+	0,								/*ob_size*/
+	"Box",							/*tp_name*/
+	sizeof(BoxObject),				/*tp_basicsize*/
+	0,								/*tp_itemsize*/
+	/* methods */
+	(destructor)BoxFree,			/*tp_dealloc*/
+	(printfunc)0,					/*tp_print*/
+	(getattrfunc)Box_getattr,		/*tp_getattr*/
+	(setattrfunc)Box_setattr,		/*tp_setattr*/
+	(cmpfunc)0,						/*tp_compare*/
+	(reprfunc)0,					/*tp_repr*/
+	0,								/*tp_as_number*/
+	0,								/*tp_as_sequence*/
+	0,								/*tp_as_mapping*/
+	(hashfunc)0,					/*tp_hash*/
+	(ternaryfunc)0,					/*tp_call*/
+	(reprfunc)0,					/*tp_str*/
+
+	/* Space for future expansion */
+	0L,0L,0L,0L,
+	/* Documentation string */
+	"Box instance, see doc string for details."
+};
+
+static BoxObject* Box(PyObject* module, PyObject* args, PyObject* kw)
+{
+	BoxObject* self;
+	char	*kwlist[] = {"width","character",NULL};
+	PyObject	*pC=NULL;
+	double		w;
+
+	if(!PyArg_ParseTupleAndKeywords(args,kw,"d|O:Box",kwlist,&w,&pC)) return NULL;
+	if(!(self = PyObject_NEW(BoxObject, &BoxType))) return NULL;
+	self->is_glue = self->is_penalty = 0;
+	self->is_box = 1;
+	self->width = w;
+	if(Box_set_character(self, pC ? pC : Py_None)){
+		BoxFree(self);
+		return NULL;
+		}
+
+	return self;
+}
+/*Box end****************/
+/*Glue start**************/
+typedef struct {
+	PyObject_HEAD
+	unsigned	is_box:1;
+	unsigned	is_glue:1;
+	unsigned	is_penalty:1;
+	double		width;
+	double		stretch,shrink;
+	} GlueObject;
+
+static int Glue_setattr(GlueObject *self, char *name, PyObject* value)
+{
+	if(!strcmp(name,"width")) return Box_set_double(name,&self->width,value);
+	else if(!strcmp(name,"stretch")) return Box_set_double(name,&self->stretch,value);
+	else if(!strcmp(name,"shrink")) return Box_set_double(name,&self->shrink,value);
+	else if(
+			!strcmp(name,"character") ||
+			!strcmp(name,"penalty") ||
+			!strcmp(name,"is_penalty") ||
+			!strcmp(name,"flagged") ||
+			!strcmp(name,"is_box") ||
+			!strcmp(name,"is_glue")
+			) PyErr_Format(PyExc_AttributeError, "readonly attribute %s", name);
+	else PyErr_Format(PyExc_AttributeError, "no attribute %s", name);
+	return -1;
+}
+
+static double _Glue_compute_width(GlueObject *self, double r)
+{
+	return self->width+r*(r<0?self->shrink:self->stretch);
+}
+
+static PyObject* Glue_compute_width(GlueObject *self, PyObject *args)
+{
+	double r;
+	if(!PyArg_ParseTuple(args, "d:compute_width", &r)) return NULL;
+	return PyFloat_FromDouble(_Glue_compute_width(self,r));
+}
+
+static struct PyMethodDef Glue_methods[] = {
+	{"compute_width", (PyCFunction)Glue_compute_width, METH_VARARGS|METH_KEYWORDS, "compute_width(r)"},
+	{NULL, NULL}		/* sentinel */
+	};
+
+static PyObject* Glue_getattr(GlueObject *self, char *name)
+{
+	if(!strcmp(name,"width")) return PyFloat_FromDouble(self->width);
+	else if(!strcmp(name,"stretch")) return PyFloat_FromDouble(self->stretch);
+	else if(!strcmp(name,"shrink")) return PyFloat_FromDouble(self->shrink);
+	else if(!strcmp(name,"character")) return Box_get_character(1,0);
+	else if(!strcmp(name,"is_glue")) return PyInt_FromLong(1L);
+	else if(
+			!strcmp(name,"penalty") ||
+			!strcmp(name,"flagged") ||
+			!strcmp(name,"is_penalty") ||
+			!strcmp(name,"is_box")
+			)  return PyInt_FromLong(0L);
+	return Py_FindMethod(Glue_methods, (PyObject *)self, name);
+}
+
+static PyTypeObject GlueType = {
+	PyObject_HEAD_INIT(0)
+	0,								/*ob_size*/
+	"Glue",							/*tp_name*/
+	sizeof(GlueObject),				/*tp_basicsize*/
+	0,								/*tp_itemsize*/
+	/* methods */
+	(destructor)BoxFree,			/*tp_dealloc*/
+	(printfunc)0,					/*tp_print*/
+	(getattrfunc)Glue_getattr,		/*tp_getattr*/
+	(setattrfunc)Glue_setattr,		/*tp_setattr*/
+	(cmpfunc)0,						/*tp_compare*/
+	(reprfunc)0,					/*tp_repr*/
+	0,								/*tp_as_number*/
+	0,								/*tp_as_sequence*/
+	0,								/*tp_as_mapping*/
+	(hashfunc)0,					/*tp_hash*/
+	(ternaryfunc)0,					/*tp_call*/
+	(reprfunc)0,					/*tp_str*/
+
+	/* Space for future expansion */
+	0L,0L,0L,0L,
+	/* Documentation string */
+	"Glue instance, see doc string for details."
+};
+
+static GlueObject* Glue(PyObject* module, PyObject* args, PyObject* kw)
+{
+	GlueObject* self;
+	char	*kwlist[] = {"width","stretch","shrink",NULL};
+	double		width,stretch,shrink;
+
+	if(!PyArg_ParseTupleAndKeywords(args,kw,"ddd:Glue",kwlist,&width,&stretch,&shrink)) return NULL;
+	if(!(self = PyObject_NEW(GlueObject, &GlueType))) return NULL;
+	self->is_box = self->is_penalty = 0;
+	self->is_glue = 1;
+	self->width = width;
+	self->stretch = stretch;
+	self->shrink = shrink;
+
+	return self;
+}
+/*Glue end****************/
+/*Penalty start**************/
+typedef struct {
+	PyObject_HEAD
+	unsigned	is_box:1;
+	unsigned	is_glue:1;
+	unsigned	is_penalty:1;
+	double		width;
+	double		penalty;
+	int			flagged;
+	} PenaltyObject;
+
+static int Penalty_set_int(char* name, int* pd, PyObject *value)
+{
+	PyObject *v = PyNumber_Int(value);
+	if(!v) return -1;
+	*pd = PyInt_AsLong(v);
+	Py_DECREF(v);
+	return 0;
+}
+
+static int Penalty_setattr(PenaltyObject *self, char *name, PyObject* value)
+{
+	if(!strcmp(name,"width")) return Box_set_double(name,&self->width,value);
+	else if(!strcmp(name,"penalty")) return Box_set_double(name,&self->penalty,value);
+	else if(!strcmp(name,"flagged")) return Penalty_set_int(name,&self->flagged,value);
+	else if(
+			!strcmp(name,"stretch") ||
+			!strcmp(name,"shrink") ||
+			!strcmp(name,"is_penalty") ||
+			!strcmp(name,"character") ||
+			!strcmp(name,"is_box") ||
+			!strcmp(name,"is_glue")
+			) PyErr_Format(PyExc_AttributeError, "readonly attribute %s", name);
+	else PyErr_Format(PyExc_AttributeError, "no attribute %s", name);
+	return -1;
+}
+
+static PyObject* Penalty_getattr(PenaltyObject *self, char *name)
+{
+	if(!strcmp(name,"width")) return PyFloat_FromDouble(self->width);
+	else if(!strcmp(name,"penalty")) return PyFloat_FromDouble(self->penalty);
+	else if(!strcmp(name,"flagged")) return PyInt_FromLong(self->flagged);
+	else if(!strcmp(name,"character")) return Box_get_character(1,0);
+	else if(!strcmp(name,"is_penalty")) return PyInt_FromLong(1L);
+	else if(
+			!strcmp(name,"stretch") ||
+			!strcmp(name,"shrink") ||
+			!strcmp(name,"is_box") ||
+			!strcmp(name,"is_glue")
+			)  return PyInt_FromLong(0L);
+	return Py_FindMethod(Box_methods, (PyObject *)self, name);
+}
+
+static PyTypeObject PenaltyType = {
+	PyObject_HEAD_INIT(0)
+	0,								/*ob_size*/
+	"Penalty",							/*tp_name*/
+	sizeof(PenaltyObject),				/*tp_basicsize*/
+	0,								/*tp_itemsize*/
+	/* methods */
+	(destructor)BoxFree,			/*tp_dealloc*/
+	(printfunc)0,					/*tp_print*/
+	(getattrfunc)Penalty_getattr,		/*tp_getattr*/
+	(setattrfunc)Penalty_setattr,		/*tp_setattr*/
+	(cmpfunc)0,						/*tp_compare*/
+	(reprfunc)0,					/*tp_repr*/
+	0,								/*tp_as_number*/
+	0,								/*tp_as_sequence*/
+	0,								/*tp_as_mapping*/
+	(hashfunc)0,					/*tp_hash*/
+	(ternaryfunc)0,					/*tp_call*/
+	(reprfunc)0,					/*tp_str*/
+
+	/* Space for future expansion */
+	0L,0L,0L,0L,
+	/* Documentation string */
+	"Penalty instance, see doc string for details."
+};
+
+static PenaltyObject* Penalty(PyObject* module, PyObject* args, PyObject* kw)
+{
+	PenaltyObject* self;
+	char	*kwlist[] = {"width","penalty","flagged",NULL};
+	double	width,penalty;
+	int		flagged = 0;
+
+	if(!PyArg_ParseTupleAndKeywords(args,kw,"dd|i:Penalty",kwlist,&width,&penalty,&flagged)) return NULL;
+	if(!(self = PyObject_NEW(PenaltyObject, &PenaltyType))) return NULL;
+	self->is_box = self->is_glue = 0;
+	self->is_penalty = 1;
+	self->width = width;
+	self->penalty = penalty;
+	self->flagged = flagged;
+
+	return self;
+}
+/*Penalty end****************/
+
 static char *__doc__=
 "_rl_accel contains various accelerated utilities\n\
-	stringWidth a fast string width function\n\
-	_instanceStringWidth a method version of stringWidth\n\
-	defaultEncoding gets/sets the default encoding for stringWidth\n\
-	getFonts gets font names from the internal table\n\
-	getFontInfo gets font info from the internal table\n\
-	setFontInfo adds a font to the internal table\n\
-	_SWRecover gets/sets a callback for stringWidth recovery\n\
-	escapePDF makes a string safe for PDF\n\
-	_instanceEscapePDF method equivalent of escapePDF\n\
-	\n\
-	_AsciiBase85Encode does what is says\n\
-	_AsciiBase85Decode does what is says\n\
-	\n\
-	fp_str converts numeric arguments to a single blank separated string\n"
-
-#ifdef	ATTRDICT
-"	_AttrDict creates a dict object which can do setattr/getattr type things\n"
+\tstringWidth a fast string width function\n\
+\t_instanceStringWidth a method version of stringWidth\n\
+\tdefaultEncoding gets/sets the default encoding for stringWidth\n\
+\tgetFonts gets font names from the internal table\n\
+\tgetFontInfo gets font info from the internal table\n\
+\tsetFontInfo adds a font to the internal table\n\
+\t_SWRecover gets/sets a callback for stringWidth recovery\n\
+\tescapePDF makes a string safe for PDF\n\
+\t_instanceEscapePDF method equivalent of escapePDF\n\
+\n\
+\t_AsciiBase85Encode does what is says\n\
+\t_AsciiBase85Decode does what is says\n\
+\n\
+\tfp_str converts numeric arguments to a single blank separated string\n"
+#ifdef ATTRDICT
+"\t_AttrDict creates a dict object which can do setattr/getattr type things\n"
 #endif
-	"calcChecksum calculate checksums for TTFs\n"
-	"add32 32 bit unsigned addition\n"
-	"hex32 32 bit unsigned to 0X8.8X string\n"
+"\tcalcChecksum calculate checksums for TTFs\n"
+"\tadd32 32 bit unsigned addition\n"
+"\thex32 32 bit unsigned to 0X8.8X string\n"
+"\tBox(width,character=None) creates a Knuth character Box with the specified width.\n"
+"\tGlue(width,stretch,shrink) creates a Knuth glue Box with the specified width, stretch and shrink.\n"
+"\tPenalty(width,penalty,flagged=0) creates a Knuth penalty Box with the specified width and penalty.\n"
 ;
 
 static struct PyMethodDef _methods[] = {
@@ -893,6 +1232,9 @@ static struct PyMethodDef _methods[] = {
 	{"calcChecksum", ttfonts_calcChecksum, METH_VARARGS, "calcChecksum(string) calculate checksums for TTFs"},
 	{"add32", ttfonts_add32, METH_VARARGS, "add32(x,y)  32 bit unsigned x+y"},
 	{"hex32", hex32, METH_VARARGS, "hex32(x)  32 bit unsigned-->0X8.8X string"},
+	{"Box",	(PyCFunction)Box,	METH_VARARGS|METH_KEYWORDS, "Box(width,character=None) create a Knuth Box instance"},
+	{"Glue", (PyCFunction)Glue,	METH_VARARGS|METH_KEYWORDS, "Glue(width,stretch,shrink) create a Knuth Glue instance"},
+	{"Penalty", (PyCFunction)Penalty,	METH_VARARGS|METH_KEYWORDS, "Penalty(width,penalty,flagged=0) create a Knuth Penalty instance"},
 	{NULL,		NULL}		/* sentinel */
 	};
 
@@ -900,6 +1242,9 @@ static struct PyMethodDef _methods[] = {
 void init_rl_accel(void)
 {
 	PyObject *m, *d, *v;
+	BoxType.ob_type = &PyType_Type;
+	GlueType.ob_type = &PyType_Type;
+	PenaltyType.ob_type = &PyType_Type;
 
 	/*Create the module and add the functions */
 	m = Py_InitModule("_rl_accel", _methods);
