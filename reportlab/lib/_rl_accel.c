@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.40 2004/04/05 12:59:56 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.41 2004/04/08 14:17:42 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.40 2004/04/05 12:59:56 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.41 2004/04/08 14:17:42 rgbecker Exp $ "
 #endif
 #include "Python.h"
 #include <stdlib.h>
@@ -28,7 +28,7 @@ static __version__=" $Id: _rl_accel.c,v 1.40 2004/04/05 12:59:56 rgbecker Exp $ 
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.48"
+#define VERSION "0.49"
 #define MODULE "_rl_accel"
 
 
@@ -676,7 +676,7 @@ static PyObject *ttfonts_calcChecksum(PyObject *self, PyObject* args)
 static PyObject *ttfonts_add32(PyObject *self, PyObject* args)
 {
 	unsigned long x, y;
-#if PY_MAJOR_VERSION>=2 && PY_MINOR_VERSION>=3
+#if PY_VERSION_HEX>=0x02030000
 	PyObject	*ox, *oy;
 	if(!PyArg_ParseTuple(args, "OO:add32", &ox, &oy)) return NULL;
 	if(PyLong_Check(ox)){
@@ -704,7 +704,7 @@ static PyObject *hex32(PyObject *self, PyObject* args)
 {
 	unsigned long x;
 	char	buf[20];
-#if PY_MAJOR_VERSION>=2 && PY_MINOR_VERSION>=3
+#if PY_VERSION_HEX>=0x02030000
 	PyObject	*ox;
 	if(!PyArg_ParseTuple(args, "O:hex32", &ox)) return NULL;
 	if(PyLong_Check(ox)){
@@ -955,11 +955,11 @@ static PyObject *BoxList_specialmeth(PyObject *self, PyObject *args, PyObject *k
 }
 
 static PyMethodDef BoxList_methods[] = {
-	{"getstate", (PyCFunction)BoxList_getstate, METH_VARARGS, PyDoc_STR("getstate() -> state")},
-	{"setstate", (PyCFunction)BoxList_setstate, METH_VARARGS, PyDoc_STR("setstate(state)")},
+	{"getstate", (PyCFunction)BoxList_getstate, METH_VARARGS, "getstate() -> state"},
+	{"setstate", (PyCFunction)BoxList_setstate, METH_VARARGS, "setstate(state)"},
 	/* These entries differ only in the flags; they are used by the tests in test.test_descr. */
-	{"classmeth", (PyCFunction)BoxList_specialmeth, METH_VARARGS | METH_KEYWORDS | METH_CLASS, PyDoc_STR("classmeth(*args, **kw)")},
-	{"staticmeth", (PyCFunction)BoxList_specialmeth, METH_VARARGS | METH_KEYWORDS | METH_STATIC, PyDoc_STR("staticmeth(*args, **kw)")},
+	{"classmeth", (PyCFunction)BoxList_specialmeth, METH_VARARGS | METH_KEYWORDS | METH_CLASS, "classmeth(*args, **kw)"},
+	{"staticmeth", (PyCFunction)BoxList_specialmeth, METH_VARARGS | METH_KEYWORDS | METH_STATIC, "staticmeth(*args, **kw)"},
 	{NULL,	NULL},
 	};
 
