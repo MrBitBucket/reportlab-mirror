@@ -1,13 +1,15 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.5 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.5 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.6 2000/12/01 01:53:50 aaron_watters Exp $
+__version__=''' $Id: utils.py,v 1.6 2000/12/01 01:53:50 aaron_watters Exp $ '''
 from types import *
 SeqTypes = (ListType,TupleType)
 import string, os
 try:
 	#raise ImportError
+	### NOTE!  FP_STR SHOULD PROBABLY ALWAYS DO A PYTHON STR() CONVERSION ON ARGS
+	### IN CASE THEY ARE "LAZY OBJECTS".  ACCELLERATOR DOESN'T DO THIS (YET)
 	try:
 		from reportlab.lib._rl_accel import fp_str	# specific
 	except ImportError:

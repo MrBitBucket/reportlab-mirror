@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.33 2000/11/29 17:28:50 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.33 2000/11/29 17:28:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.34 2000/12/01 01:53:50 aaron_watters Exp $
+__version__=''' $Id: paragraph.py,v 1.34 2000/12/01 01:53:50 aaron_watters Exp $ '''
 import string
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -520,6 +520,8 @@ class Paragraph(Flowable):
 			else:
 				f = lines[0]
 				cur_y = self.height - f.fontSize
+				# default?
+				dpl = _leftDrawParaLineX
 				if bulletText <> None:
 					offset = _drawBullet(canvas,offset,cur_y,bulletText,style)
 				if alignment == TA_LEFT:
@@ -530,6 +532,8 @@ class Paragraph(Flowable):
 					dpl = _rightDrawParaLineX
 				elif self.style.alignment == TA_JUSTIFY:
 					dpl = _justifyDrawParaLineX
+				else:
+					raise ValueError, "bad align %s" % repr(alignment)
 
 				#set up the font etc.
 				tx = canvas.beginText(cur_x, cur_y)

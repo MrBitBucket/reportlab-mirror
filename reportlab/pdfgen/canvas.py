@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.56 2000/11/05 17:46:15 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.56 2000/11/05 17:46:15 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.57 2000/12/01 01:53:50 aaron_watters Exp $
+__version__=''' $Id: canvas.py,v 1.57 2000/12/01 01:53:50 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -526,8 +526,9 @@ class Canvas:
     def addLiteral(self, s, escaped=1):
         """introduce the literal text of PDF operations s into the current stream.
            Only use this if you are an expert in the PDF file format."""
+        s = str(s) # make sure its a string
         if escaped==0:
-            s = self._escape(s)
+            s = self._escape(s) # convert to string for safety
         self._code.append(s)
 
 
@@ -956,13 +957,20 @@ class Canvas:
     
     def drawPath(self, aPath, stroke=1, fill=0):
         "Draw the path object in the mode indicated"
-        self._code.append(aPath.getCode() + ' ' + PATH_OPS[stroke, fill, self._fillMode])
+        gc = aPath.getCode(); pathops = PATH_OPS[stroke, fill, self._fillMode]
+        item = "%s %s" % (gc, pathops) # ENSURE STRING CONVERSION
+        self._code.append(item)
+        #self._code.append(aPath.getCode() + ' ' + PATH_OPS[stroke, fill, self._fillMode])
 
     def clipPath(self, aPath, stroke=1, fill=0):
         "clip as well as drawing"
-        self._code.append(  aPath.getCode()
-                           + (self._fillMode == FILL_EVEN_ODD and ' W* ' or ' W ')
-                           + PATH_OPS[stroke,fill,self._fillMode])
+        gc = aPath.getCode(); pathops = PATH_OPS[stroke, fill, self._fillMode]
+        clip = (self._fillMode == FILL_EVEN_ODD and ' W* ' or ' W ')
+        item = "%s%s%s" % (gc, clip, pathops) # ensure string conversion
+        self._code.append(item)
+        #self._code.append(  aPath.getCode()
+        #                   + (self._fillMode == FILL_EVEN_ODD and ' W* ' or ' W ')
+        #                   + PATH_OPS[stroke,fill,self._fillMode])
 
     def beginText(self, x=0, y=0):
         """Returns a fresh text object.  Text objects are used
@@ -971,7 +979,7 @@ class Canvas:
 
     def drawText(self, aTextObject):
         """Draws a text object"""
-        self._code.append(aTextObject.getCode())
+        self._code.append(str(aTextObject.getCode()))
         
         ######################################################
         #
