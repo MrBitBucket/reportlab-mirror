@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.20 2001/10/04 13:24:57 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.21 2001/10/10 13:56:36 rgbecker Exp $
 import string
 
 from reportlab.lib import colors
@@ -10,7 +10,10 @@ from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrN
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.shapes import Drawing, Group, Circle, Rect, String, STATE_DEFAULTS
+from reportlab.graphics.shapes import _PATH_OP_ARG_COUNT, _PATH_OP_NAMES, definePath
 from reportlab.graphics.widgetbase import Widget, PropHolder
+
+_gs = None
 
 def _simpleSplit(txt,mW,SW):
 	L = []
@@ -28,7 +31,54 @@ def _simpleSplit(txt,mW,SW):
 			w = lt
 	if O!=[]: L.append(string.join(O,' '))
 	return L
-		
+
+def _processGlyph(G,rev=0):
+	O = []
+	P = []
+	R = []
+	for g in G+(('end',),):
+		op = g[0]
+		if O and op in ['moveTo', 'moveToClosed','end']:
+			if O[0]=='moveToClosed':
+				O = O[1:]
+				if rev:
+					for i in xrange(0,len(P),2):
+						P[i+1], P[i] = P[i:i+2]
+					P.reverse()
+					O.reverse()
+				O.insert(0,'moveTo')
+				O.append('closePath')
+			i = 0
+			for o in O:
+				j = i + _PATH_OP_ARG_COUNT[_PATH_OP_NAMES.index(o)]
+				if o=='closePath':
+					R.append(o)
+				else:
+					R.append((o,)+ tuple(P[i:j]))
+				i = j
+			O = []
+			P = []
+		O.append(op)
+		P.extend(g[1:])
+	return R
+
+def _text2Path(text, x, y, fontName, fontSize, anchor):
+	global _gs
+	if not _gs:
+		import _renderPM
+		_gs = _renderPM.gstate(1,1)
+	from reportlab.graphics import renderPM
+	renderPM._setFont(_gs,fontName,fontSize)
+	P = []
+	if not anchor =='start':
+		textLen = stringWidth(text, fontName,fontSize)
+		if text_anchor=='end':
+			x = x-textLen
+		elif text_anchor=='middle':
+			x = x - textLen/2.
+	for g in _gs._stringPath(text,x,y):
+		P.extend(_processGlyph(g))
+	return definePath(P)
 
 class Label(Widget):
 	"""A text label to attach to something else, such as a chart axis.
@@ -51,6 +101,8 @@ class Label(Widget):
 		boxStrokeWidth = AttrMapValue(isNumber),
 		boxFillColor = AttrMapValue(isColorOrNone),
 		fillColor = AttrMapValue(isColorOrNone),
+		strokeColor = AttrMapValue(isColorOrNone),
+		strokeWidth = AttrMapValue(isNumber),
 		text = AttrMapValue(isString),
 		fontName = AttrMapValue(isString),
 		fontSize = AttrMapValue(isNumber),
@@ -75,6 +127,8 @@ class Label(Widget):
 		self.boxStrokeWidth = 0.5 #boxStrokeWidth
 		self.boxFillColor = None
 		self.fillColor = STATE_DEFAULTS['fillColor']
+		self.strokeColor = None
+		self.strokeWidth = 0.1
 		self.fontName = STATE_DEFAULTS['fontName']
 		self.fontSize = STATE_DEFAULTS['fontSize']
 		self.leading =  self.width = self.maxWidth = self.height = None
@@ -194,14 +248,25 @@ class Label(Widget):
 						fillColor=self.boxFillColor)
 						)
 
-		for line in self._lines:
-			s = String(x, y, line)
-			s.textAnchor = textAnchor
-			s.fontName = self.fontName
-			s.fontSize = self.fontSize
-			s.fillColor = self.fillColor
-			g.add(s)
-			y = y - (self.leading or 1.2*self.fontSize)
+		fillColor, fontName, fontSize = self.fillColor, self.fontName, self.fontSize
+		strokeColor, strokeWidth, leading = self.strokeColor, self.strokeWidth, (self.leading or 1.2*fontSize)
+		if strokeColor:
+			for line in self._lines:
+				s = _text2Path(line, x, y, fontName, fontSize, textAnchor)
+				s.fillColor = fillColor
+				s.strokeColor = strokeColor
+				s.strokeWidth = strokeWidth
+				g.add(s)
+				y = y - leading
+		else:
+			for line in self._lines:
+				s = String(x, y, line)
+				s.textAnchor = textAnchor
+				s.fontName = fontName
+				s.fontSize = fontSize
+				s.fillColor = fillColor
+				g.add(s)
+				y = y - leading
 
 		return g
 
