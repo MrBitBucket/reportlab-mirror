@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPS.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.9 2001/07/15 21:31:34 jvr Exp $
-__version__=''' $Id: renderPS.py,v 1.9 2001/07/15 21:31:34 jvr Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.10 2001/07/16 13:29:28 rgbecker Exp $
+__version__=''' $Id: renderPS.py,v 1.10 2001/07/16 13:29:28 rgbecker Exp $ '''
 import string, cStringIO, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str
@@ -581,7 +581,7 @@ class _PSRenderer(Renderer):
             self._tracker.push(deltas)
             self.applyStateChanges(deltas, {})
 
-            for node in drawing.contents:
+            for node in drawing.getContents():
                 # it might be a user node, if so decompose it into a bunch of shapes
                 if isinstance(node, UserNode): node = node.provideNode()
                 self.drawNode(node)

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.10 2001/07/12 14:16:20 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.10 2001/07/12 14:16:20 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.11 2001/07/16 13:29:28 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.11 2001/07/16 13:29:28 rgbecker Exp $ '''
 """Usage:
 	from reportlab.graphics import renderPM
 	renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -90,7 +90,7 @@ class _PMRenderer(Renderer):
 			if x or y:
 				self._tracker.push({'transform':translate(x,y)})
 
-			for node in drawing.contents:
+			for node in drawing.getContents():
 				# it might be a user node, if so decompose it into a bunch of shapes
 				if isinstance(node, UserNode): node = node.provideNode()
 				self.drawNode(node)
@@ -112,12 +112,6 @@ class _PMRenderer(Renderer):
 
 		# restore the state
 		self.pop()
-
-	def drawGroup(self, group):
-		"""Not sure why, but I need to introduce a flip when
-		entering a group"""
-		
-		Renderer.drawGroup(self, group)
 
 	def drawRect(self, rect):
 		c = self._canvas

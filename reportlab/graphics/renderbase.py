@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderbase.py,v 1.9 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderbase.py,v 1.10 2001/07/16 13:29:28 rgbecker Exp $
 """
 Superclass for renderers to factor out common functionality and default implementations.
 """
@@ -208,7 +208,7 @@ class Renderer:
     def drawGroup(self, group):
         # just do the contents.  Some renderers might need to override this
         # if they need a flipped transform
-        for childNode in group.contents:
+        for childNode in group.getContents():
             if isinstance(childNode, UserNode):
                 node2 = childNode.provideNode()
             else:

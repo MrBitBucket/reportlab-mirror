@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.36 2001/07/12 14:16:20 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.37 2001/07/16 13:29:28 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -364,21 +364,31 @@ class Group(Shape):
 		self.width = width
 		self.height = height
 
+	def getContents(self):
+		'''Return the list of things to be rendered
+		override to get more complicated behaviour'''
+		b = getattr(self,'background',None)
+		C = self.contents
+		if b and b not in C: C = [b]+C
+		return C
+
 class Drawing(Group, Flowable):
 	"""Outermost container; the thing a renderer works on.
 	This has no properties except a height, width and list
 	of contents."""
 
 	_xtraAttrMap = AttrMap(
-		width = AttrMapValue(isNumber),
-		height = AttrMapValue(isNumber),
+		width = AttrMapValue(isNumber,desc="Drawing width in points."),
+		height = AttrMapValue(isNumber,desc="Drawing height in points."),
 		canv = AttrMapValue(None),
+		background = AttrMapValue(isValidChildOrNone,desc="Background widget for the drawing"),
 		)
 
 	_attrMap = AttrMap(BASE=Group)
 	_attrMap.update(_xtraAttrMap)
 
 	def __init__(self, width=400, height=200, *nodes, **keywords):
+		self.background = None
 		apply(Group.__init__,(self,)+nodes,keywords)
 		self.width = width
 		self.height = height

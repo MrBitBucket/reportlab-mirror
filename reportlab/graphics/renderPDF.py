@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPDF.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.11 2001/07/12 22:10:22 jvr Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.12 2001/07/16 13:29:28 rgbecker Exp $
 # renderPDF - draws Drawings onto a canvas
 """Usage:
     import renderpdf
@@ -60,7 +60,7 @@ class _PDFRenderer(Renderer):
             self._tracker.push(deltas)
             self.applyStateChanges(deltas, {})
 
-            for node in drawing.contents:
+            for node in drawing.getContents():
                 # it might be a user node, if so decompose it into a bunch of shapes
                 if isinstance(node, UserNode): node = node.provideNode()
                 self.drawNode(node)
