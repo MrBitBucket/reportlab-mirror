@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.98 2003/08/27 16:23:06 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.99 2003/09/05 14:54:23 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.98 2003/08/27 16:23:06 johnprecedo Exp $ '''
+__version__=''' $Id: shapes.py,v 1.99 2003/09/05 14:54:23 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -870,7 +870,6 @@ def getArcPoints(centerx, centery, radius, startangledegrees, endangledegrees, y
     degreedelta = degreedelta or 1
     if yradius is None: yradius = radius
     points = []
-    a = points.append
     from math import sin, cos, pi
     degreestoradians = pi/180.0
     radiansdelta = degreedelta*degreestoradians
@@ -878,12 +877,16 @@ def getArcPoints(centerx, centery, radius, startangledegrees, endangledegrees, y
     endangle = endangledegrees*degreestoradians
     while endangle<startangle:
         endangle = endangle+2*pi
-    angle = startangle
-    while angle<endangle:
-        a((centerx+radius*cos(angle),centery+yradius*sin(angle)))
-        angle = angle+radiansdelta
-    a((centerx+radius*cos(endangle),centery+yradius*sin(endangle)))
-    if reverse: points.reverse()
+    angle = float(endangle - startangle)
+    if angle>.001:
+        n = max(int(angle/radiansdelta+0.5),1)
+        radiansdelta = angle/n
+        a = points.append
+        for angle in xrange(n+1):
+            angle = startangle+angle*radiansdelta
+            a((centerx+radius*cos(angle),centery+yradius*sin(angle)))
+        #a((centerx+radius*cos(endangle),centery+yradius*sin(endangle)))
+        if reverse: points.reverse()
     return points
 
 class ArcPath(Path):
@@ -1067,8 +1070,6 @@ class Wedge(SolidShape):
         startangledegrees = self.startangledegrees
         endangledegrees = self.endangledegrees
         degreedelta = self.degreedelta
-        points = []
-        a = points.append
         from math import sin, cos, pi
         degreestoradians = pi/180.0
         radiansdelta = degreedelta*degreestoradians
@@ -1076,23 +1077,28 @@ class Wedge(SolidShape):
         endangle = endangledegrees*degreestoradians
         while endangle<startangle:
             endangle = endangle+2*pi
-        angle = startangle
-        CA = []
-        CAA = CA.append
-        while angle<endangle:
-            CAA((cos(angle),sin(angle)))
-            angle = angle+radiansdelta
-        CAA((cos(endangle),sin(endangle)))
-        for c,s in CA:
-            a(centerx+radius*c)
-            a(centery+yradius*s)
-        if (radius1==0 or radius1 is None) and (yradius1==0 or yradius1 is None):
-            a(centerx); a(centery)
-        else:
-            CA.reverse()
+        angle = float(endangle-startangle)
+        points = []
+        if angle>.001:
+            n = max(1,int(angle/radiansdelta+0.5))
+            radiansdelta = angle/n
+            a = points.append
+            CA = []
+            CAA = CA.append
+            for angle in xrange(n+1):
+                angle = startangle+angle*radiansdelta
+                CAA((cos(angle),sin(angle)))
+            #CAA((cos(endangle),sin(endangle)))
             for c,s in CA:
-                a(centerx+radius1*c)
-                a(centery+yradius1*s)
+                a(centerx+radius*c)
+                a(centery+yradius*s)
+            if (radius1==0 or radius1 is None) and (yradius1==0 or yradius1 is None):
+                a(centerx); a(centery)
+            else:
+                CA.reverse()
+                for c,s in CA:
+                    a(centerx+radius1*c)
+                    a(centery+yradius1*s)
         return Polygon(points)
 
     def copy(self):
