@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.17 2003/11/14 17:15:30 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.18 2004/01/21 10:09:34 rgbecker Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -58,7 +58,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.17 2003/11/14 17:15:30 rgbecker Exp $'
+__version__ = '$Id: ttfonts.py,v 1.18 2004/01/21 10:09:34 rgbecker Exp $'
 
 import string
 from types import StringType
@@ -162,7 +162,12 @@ except ImportError:
     except ImportError:
         _rl_accel = None
 
-
+try:
+    hex32 = _rl_accel.hex32
+except:
+    def hex32(i):
+        return '0X%8.8X' % i
+        
 try:
     calcChecksum = _rl_accel.calcChecksum
 except:
@@ -273,9 +278,8 @@ class TTFontParser:
 
         # Check the checksums for the whole file
         checkSum = calcChecksum(self._ttf_data)
-        checkSum = add32(_L2U32(0xB1B0AFBAL), -checkSum)
-        if checkSum != 0:
-            raise TTFError, 'Invalid font checksum'
+        if add32(_L2U32(0xB1B0AFBAL), -checkSum) != 0:
+            raise TTFError, 'Invalid checksum %s len: %d &3: %d' % (hex32(checkSum),len(self._ttf_data),(len(self._ttf_data)&3))
 
         # Check the checksums for all tables
         for t in self.tables:
@@ -285,7 +289,7 @@ class TTFontParser:
                 adjustment = unpack('>l', table[8:8+4])[0]
                 checkSum = add32(checkSum, -adjustment)
             if t['checksum'] != checkSum:
-                raise TTFError, 'Invalid checksum for table %s' % t['tag']
+                raise TTFError, 'Invalid checksum %s table: %s' % (hex32(checkSum),t['tag'])
 
     def get_table_pos(self, tag):
         "Returns the offset and size of a given TTF table."
@@ -447,7 +451,9 @@ class TTFontFile(TTFontParser):
             raise TTFError, "Unknown name table format (%d)" % format
         numRecords = self.read_ushort()
         string_data_offset = name_offset + self.read_ushort()
-        psName = None
+        names = {1:None,2:None,3:None,4:None,6:None}
+        K = names.keys()
+        nameCount = len(names)
         for i in range(numRecords):
             platformId = self.read_ushort()
             encodingId = self.read_ushort()
@@ -455,36 +461,41 @@ class TTFontFile(TTFontParser):
             nameId = self.read_ushort()
             length = self.read_ushort()
             offset = self.read_ushort()
-            if platformId == 3 and encodingId == 1 and languageId == 0x409 \
-               and nameId == 6: # Microsoft, Unicode, US English, PS Name
+            if nameId not in K: continue
+            N = None
+            if platformId == 3 and encodingId == 1 and languageId == 0x409: # Microsoft, Unicode, US English, PS Name
                 self.seek(string_data_offset + offset)
                 if length % 2 != 0:
                     raise TTFError, "PostScript name is UTF-16BE string of odd length"
-                length = length / 2
-                psName = ""
+                length /= 2
+                N = []
+                A = N.append
                 while length > 0:
                     char = self.read_ushort()
-                    if char < 33 or char > 126 or chr(char) in \
-                       ('[', ']', '(', ')', '{', '}', '<', '>', '/', '%'):
-                        raise TTFError, "PostScript contains invalid character U+%04X" % char
-                    psName = psName + chr(char)
-                    length = length - 1
-                break
-            elif platformId == 1 and encodingId == 0 and languageId == 0 \
-               and nameId == 6: # Macintosh, Roman, English, PS Name
+                    A(chr(char))
+                    length -= 1
+                N = ''.join(N)
+            elif platformId == 1 and encodingId == 0 and languageId == 0: # Macintosh, Roman, English, PS Name
                 # According to OpenType spec, if PS name exists, it must exist
                 # both in MS Unicode and Macintosh Roman formats.  Apparently,
                 # you can find live TTF fonts which only have Macintosh format.
-                psName = self.get_chunk(string_data_offset + offset, length)
-                for char in psName:
-                    char = ord(char)
-                    if char < 33 or char > 126 or chr(char) in \
-                       ('[', ']', '(', ')', '{', '}', '<', '>', '/', '%'):
-                        raise TTFError, "PostScript contains invalid character %02X" % char
-                break
+                N = self.get_chunk(string_data_offset + offset, length)
+            if N and names[nameId]==None:
+                names[nameId] = N
+                nameCount -= 1
+                if nameCount==0: break
+        psName = names[6]
         if not psName:
             raise TTFError, "Could not find PostScript font name"
+        for c in psName:
+            oc = ord(c)
+            if oc<33 or oc>126 or c in ('[', ']', '(', ')', '{', '}', '<', '>', '/', '%'):
+                raise TTFError, "psName contains invalid character '%s' ie U+%04X" % (c,ord(c))
         self.name = psName
+        self.familyName = names[1] or psName
+        self.styleName = names[2] or 'Regular'
+        self.fullName = names[4] or psName
+        self.uniqueFontID = names[3] or psName
 
         # head - Font header table
         self.seek_table("head")
