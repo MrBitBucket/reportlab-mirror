@@ -1,6 +1,6 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/flags.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.17 2001/11/16 14:22:53 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.18 2001/12/10 12:33:25 dinu_gherman Exp $
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 
@@ -45,6 +45,7 @@ validFlag=OneOf(None,
 				'Austria',
 				'Belgium',
 				'China',
+				'Cuba',
 				'Denmark',
 				'Finland',
 				'France',
@@ -343,6 +344,36 @@ class Flag(_Symbol):
 		addStar(12,3,1,8.213210702)
 		addStar(12,6,1,16.60154960)
 		addStar(10,8,1,53.13010235)
+		return g
+
+	def _Flag_Cuba(self):
+		s = _size
+		g = Group()
+
+		for i in range(5):
+			stripe = Rect(0, i*s/5, width=s*2, height=s/5,
+				fillColor = [colors.darkblue, colors.mintcream][i%2],
+				strokeColor = None,
+				strokeWidth=0)
+			g.add(stripe)
+
+		redwedge = Polygon(points = [ 0, 0, 4*s/5, (s/2), 0, s],
+					fillColor = colors.red, strokeColor = None, strokeWidth=0)
+		g.add(redwedge)
+
+		star = Star()
+		star.x = 2.5*s/10
+		star.y = s/2
+		star.size = 3*s/10
+		star.fillColor = colors.white
+		g.add(star)
+
+		box = Rect(0, 0, s*2, s,
+			fillColor = None,
+			strokeColor = colors.black,
+			strokeWidth=0)
+		g.add(box)
+
 		return g
 
 	def _Flag_Denmark(self):
@@ -724,6 +755,7 @@ def test():
 			'Austria',
 			'Belgium',
 			'Denmark',
+			'Cuba',
 			'Finland',
 			'France',
 			'Germany',
