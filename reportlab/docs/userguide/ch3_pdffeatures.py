@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch3_pdffeatures.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch3_pdffeatures.py,v 1.4 2003/03/14 00:05:15 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch3_pdffeatures.py,v 1.5 2003/04/05 22:02:26 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 
 
@@ -98,7 +98,7 @@ control the zoom directly use fitType="XYZ".
 """)
 
 eg("""
-canvas.bookmarkPage(‘my_bookmark’,fitType=”XYZ”,left=0,top=200)
+canvas.bookmarkPage('my_bookmark',fitType="XYZ",left=0,top=200)
 """)
 
 
@@ -110,7 +110,7 @@ user had it set to.
 """)
 
 eg("""
-canvas.bookmarkPage(‘my_bookmark’,fitType=”XYZ”,left=0,top=200,zoom=2)
+canvas.bookmarkPage('my_bookmark',fitType="XYZ",left=0,top=200,zoom=2)
 """)
 
 disc("""This time zoom is set to expand the page 2X its normal size.""")
