@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.48  2000/08/20 21:39:50  andy_robinson
+#	Changed an argument syntax for clarity
+#
 #	Revision 1.47  2000/08/17 15:50:36  rgbecker
 #	Various brutal changes to paragraph, canvas and textobject for speed/size
-#
+#	
 #	Revision 1.46  2000/08/01 11:28:33  rgbecker
 #	Converted to using fp_str
 #	
@@ -171,7 +174,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.47 2000/08/17 15:50:36 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.48 2000/08/20 21:39:50 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -515,18 +518,18 @@ class Canvas:
             result = d[name] = pdfdoc.Destination(name) # newly defined, unbound
         return result
         
-    def bookmarkPage(self, name):
+    def bookmarkPage(self, key):
         """bind a bookmark (destination) to the current page"""
         # XXXX there are a lot of other ways a bookmark destination can be bound: should be implemented.
         # XXXX the other ways require tracking of the graphics state....
-        dest = self._bookmarkReference(name)
+        dest = self._bookmarkReference(key)
         self._doc.inPage() # try to enable page-only features
         pageref = self._doc.thisPageRef()
         dest.fit()
         dest.setPageRef(pageref)
         return dest
         
-    def bookmarkHorizontalAbsolute(self, name, yhorizontal):
+    def bookmarkHorizontalAbsolute(self, key, yhorizontal):
         """Bind a bookmark (destination) to the current page at a horizontal position.
            Note that the yhorizontal of the book mark is with respect to the default
            user space (where the origin is at the lower left corner of the page)
@@ -534,7 +537,7 @@ class Canvas:
            etcetera) in effect for the current graphics state.  The programmer is
            responsible for making sure the bookmark matches an appropriate item on
            the page."""
-        dest = self._bookmarkReference(name)
+        dest = self._bookmarkReference(key)
         self._doc.inPage() # try to enable page-only features
         pageref = self._doc.thisPageRef()
         dest.fith(yhorizontal)
