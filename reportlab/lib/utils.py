@@ -774,31 +774,3 @@ def find_locals(func,depth=0):
         _ = func(sys._getframe(depth).f_locals)
         if _: return _
         depth += 1
-
-def makeRLContext(name=None):
-    class RL_Context:
-        def __init__(self):
-            self.name = name
-    return RL_Context()
-
-def getRLContext(getframe=sys._getframe, rlcn='__rl_context__'):
-    '''
-    Skeleton code
-    '''
-    depth = 1
-    while 1:
-        f = getframe(depth)
-        L = f.f_locals
-        if L.has_key(rlcn):
-            rl_context = L[rlcn]
-            break
-        if L.has_key('__name__') and L['__name__']=='__main__':
-            rl_context = L[rlcn] = makeRLContext()
-            break
-        depth += 1
-    depth -= 1
-    while depth>=1:
-        f = getframe(depth)
-        f.f_locals[rlcn] = rl_context
-        depth -= 1
-    return rl_context
