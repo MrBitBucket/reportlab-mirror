@@ -439,6 +439,7 @@ class Paragraph(Flowable):
         'Attempt to determine a minimum sensible width'
         frags = self.frags
         nFrags= len(frags)
+        if not nFrags: return 0
         if nFrags==1:
             f = frags[0]
             fS = f.fontSize

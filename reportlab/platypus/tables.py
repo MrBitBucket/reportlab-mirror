@@ -180,7 +180,8 @@ def _multiLine(scp,ecp,y,canvLine,ws,count):
 
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
-                repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None):
+                repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None, ident=None):
+        self.ident = ident
         self.hAlign = 'CENTER'
         self.vAlign = 'MIDDLE'
         if type(data) not in _SeqTypes:
@@ -252,6 +253,7 @@ class Table(Flowable):
 
     def identity(self, maxLen=30):
         '''Identify our selves as well as possible'''
+        if self.ident: return self.ident
         vx = None
         nr = getattr(self,'_nrows','unknown')
         nc = getattr(self,'_ncols','unknown')
@@ -348,16 +350,20 @@ class Table(Flowable):
         if t in _SeqTypes:
             w = 0
             for e in v:
-                ew = self._elementWidth(self,v)
+                ew = self._elementWidth(e,s)
                 if ew is None: return None
                 w = max(w,ew)
             return w
         elif isinstance(v,Flowable) and v._fixedWidth:
-            return v.width
-        else:
-            if t is not StringType: v = v is None and '' or str(v)
-            v = string.split(v, "\n")
-            return max(map(lambda a, b=s.fontname, c=s.fontsize,d=pdfmetrics.stringWidth: d(a,b,c), v))
+            if hasattr(v, 'width'): return v.width
+            if hasattr(v, 'drawWidth'): return v.drawWidth
+        # Even if something is fixedWidth, the attribute to check is not
+        # necessarily consistent (cf. Image.drawWidth).  Therefore, we'll
+        # be extra-careful and fall through to this code if necessary.
+        if hasattr(v, 'minWidth'): return v.minWidth() # should be all flowables
+        if t is not StringType: v = v is not None and str(v) or ''
+        v = string.split(v, "\n")
+        return max(map(lambda a, b=s.fontname, c=s.fontsize,d=pdfmetrics.stringWidth: d(a,b,c), v))
 
     def _calc_height(self, availHeight, availWidth, H=None, W=None):
 
@@ -435,7 +441,7 @@ class Table(Flowable):
 
         #in some cases there are unsizable things in
         #cells.  If so, apply a different algorithm
-        #and assign some withs in a dumb way.
+        #and assign some withs in a less (thanks to Gary Poster) dumb way.
         #this CHANGES the widths array.
         if (None in self._colWidths or '*' in self._colWidths) and self._hasVariWidthElements():
             W = self._calcPreliminaryWidths(availWidth) #widths
@@ -494,17 +500,26 @@ class Table(Flowable):
 
         Where exact width info not given but things like
         paragraphs might be present, do a preliminary scan
-        and assign some sensible values - just divide up
-        all unsizeable columns by the remaining space."""
+        and assign some best-guess values."""
 
-        W = _calc_pc(self._argW,availWidth) #widths array
+        W = list(self._argW) # _calc_pc(self._argW,availWidth)
         verbose = 0
         totalDefined = 0.0
+        percentDefined = 0
+        percentTotal = 0
         numberUndefined = 0
+        numberGreedyUndefined = 0
         for w in W:
             if w is None:
-                numberUndefined = numberUndefined + 1
+                numberUndefined += 1
+            elif w == '*':
+                numberUndefined += 1
+                numberGreedyUndefined += 1
+            elif isinstance(w,str) and w.endswith('%'):
+                percentDefined += 1
+                percentTotal += float(w[:-1])
             else:
+                assert isinstance(w, (int, float))
                 totalDefined = totalDefined + w
         if verbose: print 'prelim width calculation.  %d columns, %d undefined width, %0.2f units remain' % (
             self._ncols, numberUndefined, availWidth - totalDefined)
@@ -513,41 +528,84 @@ class Table(Flowable):
         given = []
         sizeable = []
         unsizeable = []
+        minimums = {}
+        totalMinimum = 0
+        elementWidth = self._elementWidth
         for colNo in range(self._ncols):
-            if W[colNo] is None:
+            w = W[colNo]
+            if w is None or w=='*' or (isinstance(w,str) and w.endswith('%')):
                 siz = 1
+                current = final = None
                 for rowNo in range(self._nrows):
                     value = self._cellvalues[rowNo][colNo]
-                    if not self._canGetWidth(value):
-                        siz = 0
-                        break
+                    style = self._cellStyles[rowNo][colNo]
+                    new = elementWidth(value,style)+style.leftPadding+style.rightPadding
+                    final = max(current, new)
+                    current = new
+                    siz = siz and self._canGetWidth(value) # irrelevant now?
                 if siz:
                     sizeable.append(colNo)
                 else:
                     unsizeable.append(colNo)
+                minimums[colNo] = final
+                totalMinimum += final
             else:
                 given.append(colNo)
         if len(given) == self._ncols:
             return
         if verbose: print 'predefined width:   ',given
         if verbose: print 'uncomputable width: ',unsizeable
-        if verbose: print 'computable width:    ',sizeable
+        if verbose: print 'computable width:   ',sizeable
 
-        #how much width is left:
-        # on the next iteration we could size the sizeable ones, for now I'll just
-        # divide up the space
-        newColWidths = list(W)
-        guessColWidth = (availWidth - totalDefined) / (len(unsizeable)+len(sizeable))
-        assert guessColWidth >= 0, "table is too wide already, cannot choose a sane width for undefined columns"
-        if verbose: print 'assigning width %0.2f to all undefined columns' % guessColWidth
-        for colNo in sizeable:
-            newColWidths[colNo] = guessColWidth
-        for colNo in unsizeable:
-            newColWidths[colNo] = guessColWidth
-
-        if verbose: print 'new widths are:', newColWidths
-        self._argW = self._colWidths = newColWidths
-        return newColWidths
+        # how much width is left:
+        remaining = availWidth - (totalMinimum + totalDefined)
+        if remaining > 0:
+            # we have some room left; fill it.
+            definedPercentage = (totalDefined/availWidth)*100
+            percentTotal += definedPercentage
+            if numberUndefined and percentTotal < 100:
+                undefined = numberGreedyUndefined or numberUndefined
+                defaultWeight = (100-percentTotal)/undefined
+                percentTotal = 100
+                defaultDesired = (defaultWeight/percentTotal)*availWidth
+            else:
+                defaultWeight = defaultDesired = 0
+            
+            desiredWidths = {}
+            difference = 0
+            for colNo, minimum in minimums.items():
+                w = W[colNo]
+                if w is not None and w.endswith('%'):
+                    desired = (float(w[:-1])/percentTotal)*availWidth
+                elif w == '*':
+                    desired = defaultDesired
+                else:
+                    desired = not numberGreedyUndefined and defaultDesired or 0
+                if desired <= minimum:
+                    W[colNo] = minimum
+                else:
+                    desiredWidths[colNo] = desired
+                    difference += desired-minimum
+            disappointment = (difference-remaining)/len(desiredWidths)
+            for colNo, desired in desiredWidths.items():
+                adjusted = desired - disappointment
+                minimum = minimums[colNo]
+                if minimum > adjusted:
+                    W[colNo] = minimum
+                    del desiredWidths[colNo]
+                    difference += minimum-adjusted
+                    disappointment = (difference-remaining)/len(desiredWidths)
+            for colNo, desired in desiredWidths.items():
+                adjusted = desired - disappointment
+                minimum = minimums[colNo]
+                assert adjusted >= minimum
+                W[colNo] = adjusted
+        else:
+            for colNo, minimum in minimums.items():
+                W[colNo] = minimum
+        if verbose: print 'new widths are:', W
+        self._argW = self._colWidths = W
+        return W
 
     def _calcSpanRanges(self):
         """Work out rects for tables which do row and column spanning.
