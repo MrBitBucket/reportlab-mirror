@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.8  2000/03/16 20:28:12  rgbecker
+#	fixed off by one error in obj ref accounting, made font dict external object
+#
 #	Revision 1.7  2000/02/23 15:09:23  rgbecker
 #	Memory leak fixes
-#
+#	
 #	Revision 1.6  2000/02/17 12:36:25  rgbecker
 #	added _HAVE_ZLIB to stop compression being set without zlib
 #	
@@ -49,7 +52,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.7 2000/02/23 15:09:23 rgbecker Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.8 2000/03/16 20:28:12 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -151,7 +154,12 @@ class PDFDocument:
         fontstartpos = len(self.objects) + 1
         for font in self.fonts:
             self.add('Font.'+font.keyname, font)
-        self.fontdict = MakeFontDictionary(fontstartpos, len(self.fonts))
+        # make font dict as a shared indirect object reference
+        #self.fontdict = MakeFontDictionary(fontstartpos, len(self.fonts))
+        fontdicttext = MakeFontDictionary(fontstartpos, len(self.fonts))
+        fontdictob = PDFLiteral(fontdicttext)
+        self.add("FontDictionary", fontdictob)
+        self.fontdict = self.objectReference("FontDictionary")
         
         # position 17 - Info
         self.info = PDFInfo()  #hang onto it!
@@ -160,16 +168,21 @@ class PDFDocument:
     
     
     def add(self, key, obj):
-        self.objectPositions[key] = len(self.objects)  # its position
+        #self.objectPositions[key] = len(self.objects)  # its position
+        self.objectPositions[key] = len(self.objects)+1 # its position
         self.objects.append(obj)
         #obj.doc = self
-        return len(self.objects) - 1  # give its position
+        #return len(self.objects) - 1  # give its position
+        return self.getPosition(key)
 
     def getPosition(self, key):
         """Tell you where the given object is in the file - used for
         cross-linking; an object can call self.doc.getPosition("Page001")
         to find out where the object keyed under "Page001" is stored."""
         return self.objectPositions[key]
+        
+    def objectReference(self, key):
+        return "%s 0 R" % self.getPosition(key)
     
     def setTitle(self, title):
         "embeds in PDF file"
@@ -266,7 +279,7 @@ class PDFDocument:
         #page.buildstream()
         pos = len(self.objects) # work out where added
         
-        page.ParentPos = 3   #pages collection
+        page.ParentPos = self.getPosition("PagesTreeRoot")   #pages collection
         page.info = {
             'parentpos':3,
             'fontdict':self.fontdict,
