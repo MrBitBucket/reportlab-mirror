@@ -32,6 +32,9 @@
 #
 ###############################################################################
 #   $Log: genuserguide.py,v $
+#   Revision 1.31  2000/07/14 10:49:22  rgbecker
+#   Added space, optional bullet and eg after spacing
+#
 #   Revision 1.30  2000/07/13 20:36:02  aaron_watters
 #   various mods
 #
@@ -126,7 +129,7 @@
 #   Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #   initial checkin. user guide generation framework.
 #   
-__version__=''' $Id: genuserguide.py,v 1.30 2000/07/13 20:36:02 aaron_watters Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.31 2000/07/14 10:49:22 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -247,8 +250,10 @@ def disc(text, klass=Paragraph, style=discussiontextstyle):
 def restartList():
     getSequencer().reset('list1')
 
-def list(text):
-    text='<bullet><seq id="list1"/>.</bullet>' + quickfix(text)
+def list(text, doBullet=1):
+    text=quickfix(text)
+    if doBullet:
+        text='<bullet><seq id="list1"/>.</bullet>'+text
     P = Paragraph(text, BU)
     getStory().append(P)
     
@@ -257,9 +262,13 @@ def bullet(text):
     P = Paragraph(text, BU)
     getStory().append(P)
     
-def eg(text):
-    getStory().append(Spacer(0.1*inch, 0.1*inch))
+def eg(text,before=0.1,after=0):
+    space(before)
     disc(text, klass=Preformatted, style=exampletextstyle)
+    space(after)
+
+def space(inches=1./6):
+	if inches: getStory().append(Spacer(0,inches*inch))
 
 def EmbeddedCode(code,name='t', fn='embedded.tmp'):
     eg(code)
