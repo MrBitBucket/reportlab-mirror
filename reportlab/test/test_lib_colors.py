@@ -1,3 +1,6 @@
+"""Tests for the reportlab.lib.colors module.
+"""
+
 
 import os, math
 

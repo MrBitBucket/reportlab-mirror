@@ -1,3 +1,6 @@
+"""Tests for the reportlab.platypus.paragraphs module.
+"""
+
 import sys
 
 from string import split, strip, join, whitespace

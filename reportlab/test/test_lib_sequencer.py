@@ -1,3 +1,7 @@
+"""Tests for the reportlab.lib.sequencer module.
+"""
+
+
 import sys, random
 
 from reportlab.test import unittest
