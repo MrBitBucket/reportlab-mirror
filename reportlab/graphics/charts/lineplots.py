@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.29 2002/04/11 13:35:47 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.30 2002/05/21 16:41:16 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.29 2002/04/11 13:35:47 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.30 2002/05/21 16:41:16 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -15,13 +15,12 @@ from reportlab.lib.attrmap import *
 from reportlab.graphics.shapes import Drawing, Group, Rect, Line, PolyLine
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.textlabels import Label
-from reportlab.graphics.charts.axes import XValueAxis, YValueAxis
+from reportlab.graphics.charts.axes import XValueAxis, YValueAxis, AdjYValueAxis, NormalDateXValueAxis
 from reportlab.graphics.charts.utils import *
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol, makeMarker
-
+from reportlab.graphics.widgets.grids import Grid, DoubleGrid, ShadedRect
 
 # This might be moved again from here...
-
 class LinePlotProperties(PropHolder):
 	_attrMap = AttrMap(
 		strokeWidth = AttrMapValue(isNumber,
@@ -308,6 +307,239 @@ class LinePlot(Widget):
 		self.calcPositions()		
 		
 		g = Group()
+
+		g.add(self.makeBackground())
+		g.add(self.xValueAxis)
+		g.add(self.yValueAxis)
+		g.add(self.makeLines())
+
+		return g
+
+_monthlyIndexData = [[(19971202, 100.0),
+  (19971231, 100.1704367),
+  (19980131, 101.5639577),
+  (19980228, 102.1879927),
+  (19980331, 101.6337257),
+  (19980430, 102.7640446),
+  (19980531, 102.9198038),
+  (19980630, 103.25938789999999),
+  (19980731, 103.2516421),
+  (19980831, 105.4744329),
+  (19980930, 109.3242705),
+  (19981031, 111.9859291),
+  (19981130, 110.9184642),
+  (19981231, 110.9184642),
+  (19990131, 111.9882532),
+  (19990228, 109.7912614),
+  (19990331, 110.24189629999999),
+  (19990430, 110.4279321),
+  (19990531, 109.33955469999999),
+  (19990630, 108.2341748),
+  (19990731, 110.21294469999999),
+  (19990831, 110.9683062),
+  (19990930, 112.4425371),
+  (19991031, 112.7314032),
+  (19991130, 112.3509645),
+  (19991231, 112.3660659),
+  (20000131, 110.9255248),
+  (20000229, 110.5266306),
+  (20000331, 113.3116101),
+  (20000430, 111.0449133),
+  (20000531, 111.702717),
+  (20000630, 113.5832178)],
+ [(19971202, 100.0),
+  (19971231, 100.0),
+  (19980131, 100.8),
+  (19980228, 102.0),
+  (19980331, 101.9),
+  (19980430, 103.0),
+  (19980531, 103.0),
+  (19980630, 103.1),
+  (19980731, 103.1),
+  (19980831, 102.8),
+  (19980930, 105.6),
+  (19981031, 108.3),
+  (19981130, 108.1),
+  (19981231, 111.9),
+  (19990131, 113.1),
+  (19990228, 110.2),
+  (19990331, 111.8),
+  (19990430, 112.3),
+  (19990531, 110.1),
+  (19990630, 109.3),
+  (19990731, 111.2),
+  (19990831, 111.7),
+  (19990930, 112.6),
+  (19991031, 113.2),
+  (19991130, 113.9),
+  (19991231, 115.4),
+  (20000131, 112.7),
+  (20000229, 113.9),
+  (20000331, 115.8),
+  (20000430, 112.2),
+  (20000531, 112.6),
+  (20000630, 114.6)]]
+
+class GridLinePlot(LinePlot):
+	"""A customized version of LinePlot.
+	It uses NormalDateXValueAxis() and AdjYValueAxis() for the X and Y axes.
+	The chart has a default grid background with thin horizontal lines
+	aligned with the tickmarks (and labels). You can change the back-
+	ground to be any Grid or ShadedRect, or scale the whole chart.
+	If you do provide a background, you can specify the colours of the
+	stripes with 'background.stripeColors'.
+	"""
+
+	_attrMap = AttrMap(BASE=LinePlot,
+		background = AttrMapValue(None, desc='Background for chart area (now Grid or ShadedRect).'),
+		scaleFactor = AttrMapValue(isNumberOrNone, desc='Scalefactor to apply to whole drawing.'),
+		)
+
+	def __init__(self):
+		from reportlab.lib import colors
+		LinePlot.__init__(self)
+		self.xValueAxis = NormalDateXValueAxis()
+		self.yValueAxis = AdjYValueAxis()
+		self.scaleFactor = None
+		self.background = Grid()
+		self.background.orientation = 'horizontal'
+		self.background.useRects = 0
+		self.background.useLines = 1
+		self.background.strokeWidth = 0.5
+		self.background.strokeColor = colors.black
+		self.data = _monthlyIndexData
+
+	def demo(self,drawing=None):
+		from reportlab.lib import colors
+		if not drawing:
+			drawing = Drawing(400, 200)
+		lp = AdjLinePlot()
+		lp.x = 50
+		lp.y = 50
+		lp.height = 125
+		lp.width = 300
+		lp.data = _monthlyIndexData
+		lp.joinedLines = 1
+		lp.strokeColor = colors.black
+		c0 = colors.PCMYKColor(100,65,0,30, spotName='PANTONE 288 CV', density=100)
+		lp.lines[0].strokeColor = c0
+		lp.lines[0].strokeWidth = 2
+		lp.lines[0].strokeDashArray = None
+		c1 = colors.PCMYKColor(0,79,91,0, spotName='PANTONE Wm Red CV', density=100)
+		lp.lines[1].strokeColor = c1
+		lp.lines[1].strokeWidth = 1
+		lp.lines[1].strokeDashArray = [3,1]
+		lp.xValueAxis.labels.fontSize = 10
+		lp.xValueAxis.labels.textAnchor = 'start'
+		lp.xValueAxis.labels.boxAnchor = 'w'
+		lp.xValueAxis.labels.angle = -45
+		lp.xValueAxis.labels.dx = 0
+		lp.xValueAxis.labels.dy = -8
+		lp.xValueAxis.xLabelFormat = '{mm}/{yy}'
+		lp.yValueAxis.labelTextFormat = '%5d%% '
+		lp.yValueAxis.tickLeft = 5
+		lp.yValueAxis.labels.fontSize = 10
+		lp.background = Grid()
+		lp.background.stripeColors = [colors.pink, colors.lightblue]
+		lp.background.orientation = 'vertical'
+		drawing.add(lp,'plot')
+		return drawing
+
+	def makeBackground(self):
+		"Make a background grid or fall back on chart's default."
+
+		# If no background set, fall back to default behaviour.
+		if not self.background:
+			return LinePlot.makeBackground(self)
+
+		g = Group()
+
+		back = self.background
+		back.x = self.x
+		back.y = self.y
+		back.width = self.width
+		back.height = self.height
+
+		g.add(self.background)
+
+		return g
+
+	def draw(self):
+		xva, yva = self.xValueAxis, self.yValueAxis
+
+		yva.setPosition(self.x, self.y, self.height)
+		yva.configure(self.data)
+
+		# if zero is in chart, put x axis there, otherwise
+		# use bottom.
+		xAxisCrossesAt = yva.scale(0)
+		if ((xAxisCrossesAt > self.y + self.height) or (xAxisCrossesAt < self.y)):
+			y = self.y
+		else:
+			y = xAxisCrossesAt
+
+		xva.setPosition(self.x, y, self.width)
+		xva.configure(self.data)
+
+		back = self.background
+		if isinstance(back, Grid):
+			if back.orientation == 'vertical' and xva.valueSteps:
+				xpos = map(xva.scale, [xva._valueMin] + xva.valueSteps)
+				steps = []
+				for i in range(len(xpos)-1):
+					steps.append(xpos[i+1] - xpos[i])
+				back.deltaSteps = steps
+			elif back.orientation == 'horizontal' and yva.valueSteps:
+				ypos = map(yva.scale, [yva._valueMin] + yva.valueSteps)
+				steps = []
+				for i in range(len(ypos)-1):
+					steps.append(ypos[i+1] - ypos[i])
+				back.deltaSteps = steps
+		elif isinstance(back, DoubleGrid):
+			# Ideally, these lines would not be needed...
+			back.grid0.x = self.x
+			back.grid0.y = self.y
+			back.grid0.width = self.width
+			back.grid0.height = self.height
+			back.grid1.x = self.x
+			back.grid1.y = self.y
+			back.grid1.width = self.width
+			back.grid1.height = self.height
+
+			# some room left for optimization...
+			if back.grid0.orientation == 'vertical' and xva.valueSteps:
+				xpos = map(xva.scale, [xva._valueMin] + xva.valueSteps)
+				steps = []
+				for i in range(len(xpos)-1):
+					steps.append(xpos[i+1] - xpos[i])
+				back.grid0.deltaSteps = steps
+			elif back.grid0.orientation == 'horizontal' and yva.valueSteps:
+				ypos = map(yva.scale, [yva._valueMin] + yva.valueSteps)
+				steps = []
+				for i in range(len(ypos)-1):
+					steps.append(ypos[i+1] - ypos[i])
+				back.grid0.deltaSteps = steps
+			if back.grid1.orientation == 'vertical' and xva.valueSteps:
+				xpos = map(xva.scale, [xva._valueMin] + xva.valueSteps)
+				steps = []
+				for i in range(len(xpos)-1):
+					steps.append(xpos[i+1] - xpos[i])
+				back.grid1.deltaSteps = steps
+			elif back.grid1.orientation == 'horizontal' and yva.valueSteps:
+				ypos = map(yva.scale, [yva._valueMin] + yva.valueSteps)
+				steps = []
+				for i in range(len(ypos)-1):
+					steps.append(ypos[i+1] - ypos[i])
+				back.grid1.deltaSteps = steps
+
+		self.calcPositions()
+
+		width, height, scaleFactor = self.width, self.height, self.scaleFactor
+		if scaleFactor and scaleFactor!=1:
+			#g = Drawing(scaleFactor*width, scaleFactor*height)
+			g.transform = (scaleFactor, 0, 0, scaleFactor,0,0)
+		else:
+			g = Group()
 
 		g.add(self.makeBackground())
 		g.add(self.xValueAxis)
