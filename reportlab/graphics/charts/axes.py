@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.80 2003/07/02 16:10:10 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.81 2003/07/29 20:10:15 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.80 2003/07/02 16:10:10 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.81 2003/07/29 20:10:15 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -483,6 +483,8 @@ class ValueAxis(Widget):
         maximumTicks = AttrMapValue(isNumber, desc='Maximum number of ticks.'),
         labels = AttrMapValue(None, desc='Handle of the axis labels.'),
         labelTextFormat = AttrMapValue(None, desc='Formatting string or function used for axis labels.'),
+        labelTextPostFormat = AttrMapValue(None, desc='Extra Formatting string.'),
+        labelTextScale = AttrMapValue(isNumberOrNone, desc='Scaling for label tick values.'),
         valueMin = AttrMapValue(isNumberOrNone, desc='Minimum value on axis.'),
         valueMax = AttrMapValue(isNumberOrNone, desc='Maximum value on axis.'),
         valueStep = AttrMapValue(isNumberOrNone, desc='Step size used between ticks.'),
@@ -526,7 +528,7 @@ class ValueAxis(Widget):
 
         # a format string like '%0.2f'
         # or a function which takes the value as an argument and returns a string
-        self._labelTextFormat = self.labelTextFormat = None
+        self._labelTextFormat = self.labelTextFormat = self.labelTextPostFormat = self.labelTextScale = None
 
         # if set to None, these will be worked out for you.
         # if you override any or all of them, your values
@@ -728,6 +730,8 @@ class ValueAxis(Widget):
         if f is None:
             f = self.labelTextFormat or (self._allIntTicks() and '%d' or str)
         elif f is str and self._allIntTicks(): f = '%d'
+        post = self.labelTextPostFormat
+        scl = self.labelTextScale
         pos = [self._x, self._y]
         d = self._dataIndex
         labels = self.labels
@@ -736,7 +740,11 @@ class ValueAxis(Widget):
         for tick in self._tickValues:
             if f and labels[i].visible:
                 v = self.scale(tick)
-                if type(f) is StringType: txt = f % tick
+                if scl is not None:
+                    t = tick*scl
+                else:
+                    t = tick
+                if type(f) is StringType: txt = f % t
                 elif type(f) in (TupleType,ListType):
                     #it's a list, use as many items as we get
                     if i < len(f):
@@ -744,9 +752,10 @@ class ValueAxis(Widget):
                     else:
                         txt = ''
                 elif callable(f):
-                    txt = f(tick)
+                    txt = f(t)
                 else:
                     raise ValueError, 'Invalid labelTextFormat %s' % f
+                if post: txt = post % txt
                 label = labels[i]
                 pos[d] = v
                 apply(label.setOrigin,pos)

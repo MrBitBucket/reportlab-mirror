@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.28 2003/07/29 15:13:18 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.29 2003/07/29 20:10:15 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
-__version__=''' $Id: linecharts.py,v 1.28 2003/07/29 15:13:18 rgbecker Exp $ '''
+__version__=''' $Id: linecharts.py,v 1.29 2003/07/29 20:10:15 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType
@@ -76,6 +76,7 @@ class HorizontalLineChart(LineChart):
         lineLabelNudge = AttrMapValue(isNumber, desc='Distance between a data point and its label.'),
         lineLabels = AttrMapValue(None, desc='Handle to the list of data point labels.'),
         lineLabelFormat = AttrMapValue(None, desc='Formatting string or function used for data point labels.'),
+        lineLabelArray = AttrMapValue(None, desc='explicit array of line label values, must match size of data if present.'),
         groupSpacing = AttrMapValue(isNumber, desc='? - Likely to disappear.'),
         joinedLines = AttrMapValue(isNumber, desc='Display data points joined with lines if true.'),
         lines = AttrMapValue(None, desc='Handle of the lines.'),
@@ -118,6 +119,7 @@ class HorizontalLineChart(LineChart):
 
         self.lineLabels = TypedPropertyCollection(Label)
         self.lineLabelFormat = None
+        self.lineLabelArray = None
 
         # This says whether the origin is above or below
         # the data point. +10 means put the origin ten points
@@ -200,6 +202,8 @@ class HorizontalLineChart(LineChart):
 
         if labelFmt is None:
             labelText = None
+        elif labelFmt == 'values':
+            labelText = self.lineLabelArray[rowNo][colNo]
         elif type(labelFmt) is StringType:
             labelText = labelFmt % labelValue
         elif type(labelFmt) is FunctionType:
