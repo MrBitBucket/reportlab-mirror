@@ -176,7 +176,7 @@ class ParaParser(xmllib.XMLParser):
 					A[j[0]] = (func is None) and val or apply(func,(val,))
 				except:
 					self.syntax_error('%s: invalid value %s'%(i,val))
-			apply(self._push,(),A)
+		apply(self._push,(),A)
 
 	def end_font(self):
 		self._pop()
@@ -305,14 +305,14 @@ if __name__=='__main__':
 	<b><i><greek>a</greek>D</i></b>&beta;
 	<font name="helvetica" size="15" color=green>
 	Tell me, O muse, of that ingenious hero who travelled far and wide
-	after he had sacked the famous town of Troy. Many cities did he visit,
+	after</font> he had sacked the famous town of Troy. Many cities did he visit,
 	and many were the nations with whose manners and customs he was acquainted;
 	moreover he suffered much by sea while trying to save his own life
 	and bring his men safely home; but do what he might he could not save
 	his men, for they perished through their own sheer folly in eating
 	the cattle of the Sun-god Hyperion; so the god prevented them from
 	ever reaching home. Tell me, too, about all these things, O daughter
-	of Jove, from whatsoever source you may know them.</font>
+	of Jove, from whatsoever source you may know them.
 	'''
 	text = cleanBlockQuotedText(text)
 	rv = _parser.parse(text,style)
