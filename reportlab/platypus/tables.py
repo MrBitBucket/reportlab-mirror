@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.45 2001/09/26 21:32:42 andy_robinson Exp $
-__version__=''' $Id: tables.py,v 1.45 2001/09/26 21:32:42 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.46 2001/11/23 17:53:30 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.46 2001/11/23 17:53:30 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -72,15 +72,19 @@ class CellStyle1(PropertySet):
 CellStyle = CellStyle1
 
 class TableStyle:
-	def __init__(self, cmds=None, parent=None):
+	def __init__(self, cmds=None, parent=None, **kw):
 		#handle inheritance from parent first.
 		commands = []
 		if parent:
 			# copy the parents list at construction time
 			commands = commands + parent.getCommands()
+			self._opts = parent._opts
 		if cmds:
 			commands = commands + cmds
 		self._cmds = commands
+		self._opts={}
+		self._opts.update(kw)
+
 	def add(self, *cmd):
 		self._cmds.append(cmd)
 	def __repr__(self):
@@ -288,6 +292,8 @@ class Table(Flowable):
 			tblstyle = TableStyle(tblstyle)
 		for cmd in tblstyle.getCommands():
 			self._addCommand(cmd)
+		for k,v in tblstyle._opts.items():
+			setattr(self,k,v)
 
 	def _addCommand(self,cmd):
 		if cmd[0] == 'BACKGROUND':
