@@ -8,7 +8,8 @@ __version__=''' $Id$ '''
 import string, copy
 
 from reportlab.lib import colors
-from reportlab.lib.validators import isNumber, OneOf, isString, isColorOrNone, isNumberOrNone, isListOfNumbersOrNone, isStringOrNone, isBoolean
+from reportlab.lib.validators import isNumber, OneOf, isString, isColorOrNone,\
+        isNumberOrNone, isListOfNumbersOrNone, isStringOrNone, isBoolean, AutoOr
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth, getFont
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
