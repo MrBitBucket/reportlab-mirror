@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/test_invariant.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_invariant.py,v 1.5 2004/01/20 22:50:32 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_invariant.py,v 1.6 2004/03/23 15:43:13 rgbecker Exp $
 __version__=''' $Id'''
 __doc__="""Verfy that if in invariant mode, repeated runs
 make identical file.  This does NOT test across platforms
@@ -17,10 +17,12 @@ class InvarTestCase(unittest.TestCase):
     "Simplest test that makes PDF"
     def test(self):
 
+        import os
         c = Canvas(filename, invariant=1, pageCompression=0)
         c.setFont('Helvetica-Bold', 36)
         c.drawString(100,700, 'Hello World')
-        c.drawImage('pythonpowered.gif',100,600)
+        gif = os.path.join(os.path.dirname(unittest.__file__),'pythonpowered.gif')
+        c.drawImage(gif,100,600)
         c.save()
 
         raw1 = open(filename, 'rb').read()
@@ -28,14 +30,11 @@ class InvarTestCase(unittest.TestCase):
         c = Canvas(filename, invariant=1, pageCompression=0)
         c.setFont('Helvetica-Bold', 36)
         c.drawString(100,700, 'Hello World')
-        c.drawImage('pythonpowered.gif',100,600)
+        c.drawImage(gif,100,600)
         c.save()
 
         raw2 = open(filename, 'rb').read()
-
         assert raw1 == raw2, 'repeated runs differ!'
-
-
 
 def makeSuite():
     return makeSuiteForClasses(InvarTestCase)
