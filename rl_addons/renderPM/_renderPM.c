@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "0.0"
+#define VERSION "0.1"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -262,6 +262,7 @@ static	PyObject* gstate_clipPathClear(gstateObject* self, PyObject* args)
 	if(!PyArg_ParseTuple(args,":clipPathClear")) return NULL;
 	if(self->clipSVP){
 		art_svp_free(self->clipSVP);
+		self->clipSVP = NULL;
 		}
 	Py_INCREF(Py_None);
 	return Py_None;
@@ -644,8 +645,8 @@ static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
 }
 
 static struct PyMethodDef gstate_methods[] = {
-	{"clipPathClear", (PyCFunction)gstate_pathStroke, METH_VARARGS, "clipPathClear()"},
-	{"clipPathSet", (PyCFunction)gstate_pathStroke, METH_VARARGS, "clipPathSet()"},
+	{"clipPathClear", (PyCFunction)gstate_clipPAthClear, METH_VARARGS, "clipPathClear()"},
+	{"clipPathSet", (PyCFunction)gstate_clipPAthSet, METH_VARARGS, "clipPathSet()"},
 	{"curveTo", (PyCFunction)gstate_curveTo, METH_VARARGS, "curveTo(x1,y1,x2,y2,x3,y3)"},
 	{"drawString", (PyCFunction)gstate_drawString, METH_VARARGS, "drawString(x,y,text)"},
 	{"lineTo", (PyCFunction)gstate_lineTo, METH_VARARGS, "lineTo(x,y)"},
