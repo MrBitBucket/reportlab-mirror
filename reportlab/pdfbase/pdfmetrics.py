@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.50 2002/01/17 10:52:03 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.51 2002/02/21 14:44:11 rgbecker Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -66,6 +66,11 @@ def parseAFMFile(afmFileName):
     order."""
 
     lines = open(afmFileName, 'r').readlines()
+    if len(lines)<=1:
+        #likely to be a MAC file
+        lines = string.split(lines,'\r')
+        if len(lines)<=1:
+			raise ValueError, 'AFM file %s hasn\'t enough data' % afmFileName
     topLevel = {}
     glyphLevel = []
 
@@ -263,14 +268,14 @@ class Encoding:
         curRange = None
         for i in xrange(len(self.vector)):
             glyph = self[i]
-            if glyph == otherEnc[i]:
+            if glyph==otherEnc[i]:
                 if curRange:
                     ranges.append(curRange)
                     curRange = []
             else:
                 if curRange:
                     curRange.append(glyph)
-                else:
+                elif glyph:
                     curRange = [i, glyph]
         if curRange:
             ranges.append(curRange)
@@ -704,7 +709,7 @@ def test3widths(texts):
         print
 
 def testStringWidthAlgorithms():
-    rawdata = open('../../rlextra/rml2pdf/doc/rml_user_guide.rml').read()
+    rawdata = open('../../rlextra/rml2pdf/doc/rml_user_guide.prep').read()
     print 'rawdata length %d' % len(rawdata)
     print 'test one huge string...'
     test3widths([rawdata])
