@@ -2,14 +2,14 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/randomtext.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/randomtext.py,v 1.7 2001/04/26 11:46:17 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/lib/randomtext.py,v 1.8 2002/07/17 22:46:23 andy_robinson Exp $
 
-__version__=''' $Id: randomtext.py,v 1.7 2001/04/26 11:46:17 johnprecedo Exp $ '''
+__version__=''' $Id: randomtext.py,v 1.8 2002/07/17 22:46:23 andy_robinson Exp $ '''
 
 import string
 
 ###############################################################################
-#	generates so-called 'Greek Text' for use in filling documents.
+#   generates so-called 'Greek Text' for use in filling documents.
 ###############################################################################
 """
 This module exposes a function randomText() which generates paragraphs.
@@ -18,21 +18,21 @@ A number of 'themes' are provided - please contribute more!
 We need some real Greek text too.
 
 There are currently six themes provided:
-	STARTUP (words suitable for a business plan - or not as the case may be),
-	COMPUTERS (names of programming languages and operating systems etc),
-	BLAH (variations on the word 'blah'),
-	BUZZWORD (buzzword bingo),
-	STARTREK (Star Trek),
-	PRINTING (print-related terms)
-	PYTHON (snippets and quotes from Monty Python)
+    STARTUP (words suitable for a business plan - or not as the case may be),
+    COMPUTERS (names of programming languages and operating systems etc),
+    BLAH (variations on the word 'blah'),
+    BUZZWORD (buzzword bingo),
+    STARTREK (Star Trek),
+    PRINTING (print-related terms)
+    PYTHON (snippets and quotes from Monty Python)
 
 EXAMPLE USAGE:
-	from reportlab.lib import randomtext
-	print randomtext.randomText(randomtext.PYTHON, 10)
+    from reportlab.lib import randomtext
+    print randomtext.randomText(randomtext.PYTHON, 10)
 
-	This prints a random number of random sentences (up to a limit
-	of ten) using the theme 'PYTHON'.
-	
+    This prints a random number of random sentences (up to a limit
+    of ten) using the theme 'PYTHON'.
+    
 """
 
 #theme one :-)
@@ -76,32 +76,32 @@ BLAH = ['Blah', 'BLAH', 'blahblah', 'blahblahblah', 'blah-blah',
 
 #theme four - 'buzzword bingo' time!
 BUZZWORD = ['intellectual capital', 'market segment', 'flattening',
-		'regroup', 'platform', 'client-based', 'long-term', 'proactive',
-		'quality vector', 'out of the loop', 'implement',
-		'streamline', 'cost-centered', 'phase', 'synergy',
-		'synergize', 'interactive', 'facilitate',
-		'appropriate', 'goal-setting', 'empowering', 'low-risk high-yield',
-		'peel the onion', 'goal', 'downsize', 'result-driven',
-		'conceptualize', 'multidisciplinary', 'gap analysis', 'dysfunctional',
-		'networking', 'knowledge management', 'goal-setting',
-		'mastery learning', 'communication', 'real-estate', 'quarterly',
-		'scalable', 'Total Quality Management', 'best of breed',
-		'nimble', 'monetize', 'benchmark', 'hardball',
-		'client-centered', 'vision statement', 'empowerment',
-		'lean & mean', 'credibility', 'synergistic',
-		'backward-compatible', 'hardball', 'stretch the envelope',
-		'bleeding edge', 'networking', 'motivation', 'best practice',
-		'best of breed', 'implementation', 'Total Quality Management',
-		'undefined', 'disintermediate', 'mindset', 'architect',
-		'gap analysis', 'morale', 'objective', 'projection',
-		'contribution', 'proactive', 'go the extra mile', 'dynamic',
-		'world class', 'real estate', 'quality vector', 'credibility',
-		'appropriate', 'platform', 'projection', 'mastery learning',
-		'recognition', 'quality', 'scenario', 'performance based',
-		'solutioning', 'go the extra mile', 'downsize', 'phase',
-		'networking', 'experiencing slippage', 'knowledge management',
-		'high priority', 'process', 'ethical', 'value-added', 'implement',
-		're-factoring', 're-branding', 'embracing change']
+        'regroup', 'platform', 'client-based', 'long-term', 'proactive',
+        'quality vector', 'out of the loop', 'implement',
+        'streamline', 'cost-centered', 'phase', 'synergy',
+        'synergize', 'interactive', 'facilitate',
+        'appropriate', 'goal-setting', 'empowering', 'low-risk high-yield',
+        'peel the onion', 'goal', 'downsize', 'result-driven',
+        'conceptualize', 'multidisciplinary', 'gap analysis', 'dysfunctional',
+        'networking', 'knowledge management', 'goal-setting',
+        'mastery learning', 'communication', 'real-estate', 'quarterly',
+        'scalable', 'Total Quality Management', 'best of breed',
+        'nimble', 'monetize', 'benchmark', 'hardball',
+        'client-centered', 'vision statement', 'empowerment',
+        'lean & mean', 'credibility', 'synergistic',
+        'backward-compatible', 'hardball', 'stretch the envelope',
+        'bleeding edge', 'networking', 'motivation', 'best practice',
+        'best of breed', 'implementation', 'Total Quality Management',
+        'undefined', 'disintermediate', 'mindset', 'architect',
+        'gap analysis', 'morale', 'objective', 'projection',
+        'contribution', 'proactive', 'go the extra mile', 'dynamic',
+        'world class', 'real estate', 'quality vector', 'credibility',
+        'appropriate', 'platform', 'projection', 'mastery learning',
+        'recognition', 'quality', 'scenario', 'performance based',
+        'solutioning', 'go the extra mile', 'downsize', 'phase',
+        'networking', 'experiencing slippage', 'knowledge management',
+        'high priority', 'process', 'ethical', 'value-added', 'implement',
+        're-factoring', 're-branding', 'embracing change']
 
 #theme five - Star Trek
 STARTREK = ['Starfleet', 'Klingon', 'Romulan', 'Cardassian', 'Vulcan',
@@ -139,71 +139,71 @@ PRINTING = ['points', 'picas', 'leading', 'kerning', 'CMYK', 'offset litho',
 #it had to be done!...
 #theme seven - the "full Monty"!
 PYTHON = ['Good evening ladies and Bruces','I want to buy some cheese', 'You do have some cheese, do you?',
-		  "Of course sir, it's a cheese shop sir, we've got...",'discipline?... naked? ... With a melon!?',
-		  'The Church Police!!' , "There's a dead bishop on the landing", 'Would you like a twist of lemming sir?',
-		  '"Conquistador Coffee brings a new meaning to the word vomit"','Your lupins please',
-		  'Crelm Toothpaste, with the miracle ingredient Fraudulin',
-		  "Well there's the first result and the Silly Party has held Leicester.",
-		  'Hello, I would like to buy a fish license please', "Look, it's people like you what cause unrest!",
-		  "When we got home, our Dad would thrash us to sleep with his belt!", 'Luxury', "Gumby Brain Specialist",
-		  "My brain hurts!!!", "My brain hurts too.", "How not to be seen",
-		  "In this picture there are 47 people. None of them can be seen",
-		  "Mrs Smegma, will you stand up please?",
-		  "Mr. Nesbitt has learned the first lesson of 'Not Being Seen', not to stand up.",
-		  "My hovercraft is full of eels", "Ah. You have beautiful thighs.", "My nipples explode with delight",
-		  "Drop your panties Sir William, I cannot wait 'til lunchtime",
-		  "I'm a completely self-taught idiot.", "I always wanted to be a lumberjack!!!",
-		  "Told you so!! Oh, coitus!!", "",
-		  "Nudge nudge?", "Know what I mean!", "Nudge nudge, nudge nudge?", "Say no more!!",
-		  "Hello, well it's just after 8 o'clock, and time for the penguin on top of your television set to explode",
-		  "Oh, intercourse the penguin!!", "Funny that penguin being there, isn't it?",
-		  "I wish to register a complaint.", "Now that's what I call a dead parrot", "Pining for the fjords???",
-		  "No, that's not dead, it's ,uhhhh, resting", "This is an ex-parrot!!",
-		  "That parrot is definitely deceased.", "No, no, no - it's spelt Raymond Luxury Yach-t, but it's pronounced 'Throatwobbler Mangrove'.",
-		  "You're a very silly man and I'm not going to interview you.", "No Mungo... never kill a customer."
-		  "And I'd like to conclude by putting my finger up my nose",
-		  "egg and Spam", "egg bacon and Spam", "egg bacon sausage and Spam", "Spam bacon sausage and Spam",
-		  "Spam egg Spam Spam bacon and Spam", "Spam sausage Spam Spam Spam bacon Spam tomato and Spam", 
-		  "Spam Spam Spam egg and Spam", "Spam Spam Spam Spam Spam Spam baked beans Spam Spam Spam",
-		  "Spam!!", "I don't like Spam!!!", "You can't have egg, bacon, Spam and sausage without the Spam!",
-		  "I'll have your Spam. I Love it!",
-		  "I'm having Spam Spam Spam Spam Spam Spam Spam baked beans Spam Spam Spam and Spam",
-		  "Have you got anything without Spam?", "There's Spam egg sausage and Spam, that's not got much Spam in it.",
-		  "No one expects the Spanish Inquisition!!", "Our weapon is surprise, surprise and fear!",
-		  "Get the comfy chair!", "Amongst our weaponry are such diverse elements as: fear, surprise, ruthless efficiency, an almost fanatical devotion to the Pope, and nice red uniforms - Oh damn!",
-		  "Nobody expects the... Oh bugger!", "What swims in the sea and gets caught in nets? Henri Bergson?",
-		  "Goats. Underwater goats with snorkels and flippers?", "A buffalo with an aqualung?",
-		  "Dinsdale was a looney, but he was a happy looney.", "Dinsdale!!",
-		  "The 127th Upper-Class Twit of the Year Show", "What a great Twit!",
-		  "thought by many to be this year's outstanding twit",
-		  "...and there's a big crowd here today to see these prize idiots in action.",
-		  "And now for something completely different.", "Stop that, it's silly",
-		  "We interrupt this program to annoy you and make things generally irritating",
-		  "This depraved and degrading spectacle is going to stop right now, do you hear me?",
-		  "Stop right there!", "This is absolutely disgusting and I'm not going to stand for it",
-		  "I object to all this sex on the television. I mean, I keep falling off",
-		  "Right! Stop that, it's silly. Very silly indeed", "Very silly indeed", "Lemon curry?",
-		  "And now for something completely different, a man with 3 buttocks",
-		  "I've heard of unisex, but I've never had it", "That's the end, stop the program! Stop it!"]
+          "Of course sir, it's a cheese shop sir, we've got...",'discipline?... naked? ... With a melon!?',
+          'The Church Police!!' , "There's a dead bishop on the landing", 'Would you like a twist of lemming sir?',
+          '"Conquistador Coffee brings a new meaning to the word vomit"','Your lupins please',
+          'Crelm Toothpaste, with the miracle ingredient Fraudulin',
+          "Well there's the first result and the Silly Party has held Leicester.",
+          'Hello, I would like to buy a fish license please', "Look, it's people like you what cause unrest!",
+          "When we got home, our Dad would thrash us to sleep with his belt!", 'Luxury', "Gumby Brain Specialist",
+          "My brain hurts!!!", "My brain hurts too.", "How not to be seen",
+          "In this picture there are 47 people. None of them can be seen",
+          "Mrs Smegma, will you stand up please?",
+          "Mr. Nesbitt has learned the first lesson of 'Not Being Seen', not to stand up.",
+          "My hovercraft is full of eels", "Ah. You have beautiful thighs.", "My nipples explode with delight",
+          "Drop your panties Sir William, I cannot wait 'til lunchtime",
+          "I'm a completely self-taught idiot.", "I always wanted to be a lumberjack!!!",
+          "Told you so!! Oh, coitus!!", "",
+          "Nudge nudge?", "Know what I mean!", "Nudge nudge, nudge nudge?", "Say no more!!",
+          "Hello, well it's just after 8 o'clock, and time for the penguin on top of your television set to explode",
+          "Oh, intercourse the penguin!!", "Funny that penguin being there, isn't it?",
+          "I wish to register a complaint.", "Now that's what I call a dead parrot", "Pining for the fjords???",
+          "No, that's not dead, it's ,uhhhh, resting", "This is an ex-parrot!!",
+          "That parrot is definitely deceased.", "No, no, no - it's spelt Raymond Luxury Yach-t, but it's pronounced 'Throatwobbler Mangrove'.",
+          "You're a very silly man and I'm not going to interview you.", "No Mungo... never kill a customer."
+          "And I'd like to conclude by putting my finger up my nose",
+          "egg and Spam", "egg bacon and Spam", "egg bacon sausage and Spam", "Spam bacon sausage and Spam",
+          "Spam egg Spam Spam bacon and Spam", "Spam sausage Spam Spam Spam bacon Spam tomato and Spam", 
+          "Spam Spam Spam egg and Spam", "Spam Spam Spam Spam Spam Spam baked beans Spam Spam Spam",
+          "Spam!!", "I don't like Spam!!!", "You can't have egg, bacon, Spam and sausage without the Spam!",
+          "I'll have your Spam. I Love it!",
+          "I'm having Spam Spam Spam Spam Spam Spam Spam baked beans Spam Spam Spam and Spam",
+          "Have you got anything without Spam?", "There's Spam egg sausage and Spam, that's not got much Spam in it.",
+          "No one expects the Spanish Inquisition!!", "Our weapon is surprise, surprise and fear!",
+          "Get the comfy chair!", "Amongst our weaponry are such diverse elements as: fear, surprise, ruthless efficiency, an almost fanatical devotion to the Pope, and nice red uniforms - Oh damn!",
+          "Nobody expects the... Oh bugger!", "What swims in the sea and gets caught in nets? Henri Bergson?",
+          "Goats. Underwater goats with snorkels and flippers?", "A buffalo with an aqualung?",
+          "Dinsdale was a looney, but he was a happy looney.", "Dinsdale!!",
+          "The 127th Upper-Class Twit of the Year Show", "What a great Twit!",
+          "thought by many to be this year's outstanding twit",
+          "...and there's a big crowd here today to see these prize idiots in action.",
+          "And now for something completely different.", "Stop that, it's silly",
+          "We interrupt this program to annoy you and make things generally irritating",
+          "This depraved and degrading spectacle is going to stop right now, do you hear me?",
+          "Stop right there!", "This is absolutely disgusting and I'm not going to stand for it",
+          "I object to all this sex on the television. I mean, I keep falling off",
+          "Right! Stop that, it's silly. Very silly indeed", "Very silly indeed", "Lemon curry?",
+          "And now for something completely different, a man with 3 buttocks",
+          "I've heard of unisex, but I've never had it", "That's the end, stop the program! Stop it!"]
 
 
 
 def randomText(theme=STARTUP, sentences=5):
-	#this may or may not be appropriate in your company
-	from random import randint, choice
+    #this may or may not be appropriate in your company
+    from random import randint, choice
 
-	RANDOMWORDS = theme
+    RANDOMWORDS = theme
 
-#	sentences = 5
-	output = ""
-	for sentenceno in range(randint(1,sentences)):
-		output = output + 'Blah'
-		for wordno in range(randint(10,25)):
-			if randint(0,4)==0:
-				word = choice(RANDOMWORDS)
-			else:
-				word = 'blah'
-			output = output + ' ' +word
-		output = output+'. '
-	return output
+#   sentences = 5
+    output = ""
+    for sentenceno in range(randint(1,sentences)):
+        output = output + 'Blah'
+        for wordno in range(randint(10,25)):
+            if randint(0,4)==0:
+                word = choice(RANDOMWORDS)
+            else:
+                word = 'blah'
+            output = output + ' ' +word
+        output = output+'. '
+    return output
 

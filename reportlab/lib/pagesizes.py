@@ -2,12 +2,12 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/pagesizes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/pagesizes.py,v 1.8 2001/12/08 22:05:19 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/lib/pagesizes.py,v 1.9 2002/07/17 22:46:23 andy_robinson Exp $
 
 """This module defines a few common page sizes in points (1/72 inch).
 To be expanded to include things like label sizes, envelope windows
 etc."""
-__version__=''' $Id: pagesizes.py,v 1.8 2001/12/08 22:05:19 andy_robinson Exp $ '''
+__version__=''' $Id: pagesizes.py,v 1.9 2002/07/17 22:46:23 andy_robinson Exp $ '''
 
 from reportlab.lib.units import cm, inch
 
@@ -40,17 +40,17 @@ B1 = (_BH*4, _BW*2)
 B0 = (_BW*4, _BH*4)
 
 def landscape(pagesize):
-	"""Use this to get page orientation right"""
-	a, b = pagesize
-	if a < b:
-		return (b, a)
-	else:
-		return (a, b)
+    """Use this to get page orientation right"""
+    a, b = pagesize
+    if a < b:
+        return (b, a)
+    else:
+        return (a, b)
 
 def portrait(pagesize):
-	"""Use this to get page orientation right"""
-	a, b = pagesize
-	if a >= b:
-		return (b, a)
-	else:
-		return (a, b)
+    """Use this to get page orientation right"""
+    a, b = pagesize
+    if a >= b:
+        return (b, a)
+    else:
+        return (a, b)

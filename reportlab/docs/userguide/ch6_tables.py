@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch6_tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch6_tables.py,v 1.2 2001/10/27 22:37:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch6_tables.py,v 1.3 2002/07/17 22:46:22 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.platypus import Image
 
@@ -175,38 +175,38 @@ data=  [['00', '01', '02', '03', '04'],
         ['30', '31', '32', '33', '34']]
 t=Table(data,style=[('GRID',(1,1),(-2,-2),1,colors.green),
                     ('BOX',(0,0),(1,-1),2,colors.red),
-					('LINEABOVE',(1,2),(-2,2),1,colors.blue),
-					('LINEBEFORE',(2,1),(2,-2),1,colors.pink),
-					])
+                    ('LINEABOVE',(1,2),(-2,2),1,colors.blue),
+                    ('LINEBEFORE',(2,1),(2,-2),1,colors.pink),
+                    ])
 """)
 disc("""Line commands cause problems for tables when they split; the following example
 shows a table being split in various positions""")
 EmbeddedCode("""
 data=  [['00', '01', '02', '03', '04'],
-		['10', '11', '12', '13', '14'],
-		['20', '21', '22', '23', '24'],
-		['30', '31', '32', '33', '34']]
+        ['10', '11', '12', '13', '14'],
+        ['20', '21', '22', '23', '24'],
+        ['30', '31', '32', '33', '34']]
 t=Table(data,style=[
-				('GRID',(0,0),(-1,-1),0.5,colors.grey),
-				('GRID',(1,1),(-2,-2),1,colors.green),
-				('BOX',(0,0),(1,-1),2,colors.red),
-				('BOX',(0,0),(-1,-1),2,colors.black),
-				('LINEABOVE',(1,2),(-2,2),1,colors.blue),
-				('LINEBEFORE',(2,1),(2,-2),1,colors.pink),
-				('BACKGROUND', (0, 0), (0, 1), colors.pink),
-				('BACKGROUND', (1, 1), (1, 2), colors.lavender),
-				('BACKGROUND', (2, 2), (2, 3), colors.orange),
-				])
+                ('GRID',(0,0),(-1,-1),0.5,colors.grey),
+                ('GRID',(1,1),(-2,-2),1,colors.green),
+                ('BOX',(0,0),(1,-1),2,colors.red),
+                ('BOX',(0,0),(-1,-1),2,colors.black),
+                ('LINEABOVE',(1,2),(-2,2),1,colors.blue),
+                ('LINEBEFORE',(2,1),(2,-2),1,colors.pink),
+                ('BACKGROUND', (0, 0), (0, 1), colors.pink),
+                ('BACKGROUND', (1, 1), (1, 2), colors.lavender),
+                ('BACKGROUND', (2, 2), (2, 3), colors.orange),
+                ])
 """)
 t=getStory()[-1]
 getStory().append(Spacer(0,6))
 for s in t.split(4*inch,30):
-	getStory().append(s)
-	getStory().append(Spacer(0,6))
+    getStory().append(s)
+    getStory().append(Spacer(0,6))
 getStory().append(Spacer(0,6))
 for s in t.split(4*inch,36):
-	getStory().append(s)
-	getStory().append(Spacer(0,6))
+    getStory().append(s)
+    getStory().append(Spacer(0,6))
 
 disc("""When unsplit and split at the first or second row.""")
 
@@ -234,27 +234,27 @@ P = Paragraph('''
        Image</para>''',
        styleSheet["BodyText"])
 data=  [['A',   'B', 'C',     P0, 'D'],
-		['00', '01', '02', [I,P], '04'],
-		['10', '11', '12', [P,I], '14'],
-		['20', '21', '22',  '23', '24'],
-		['30', '31', '32',  '33', '34']]
+        ['00', '01', '02', [I,P], '04'],
+        ['10', '11', '12', [P,I], '14'],
+        ['20', '21', '22',  '23', '24'],
+        ['30', '31', '32',  '33', '34']]
 
 t=Table(data,style=[('GRID',(1,1),(-2,-2),1,colors.green),
-					('BOX',(0,0),(1,-1),2,colors.red),
-					('LINEABOVE',(1,2),(-2,2),1,colors.blue),
-					('LINEBEFORE',(2,1),(2,-2),1,colors.pink),
-					('BACKGROUND', (0, 0), (0, 1), colors.pink),
-					('BACKGROUND', (1, 1), (1, 2), colors.lavender),
-					('BACKGROUND', (2, 2), (2, 3), colors.orange),
-					('BOX',(0,0),(-1,-1),2,colors.black),
-					('GRID',(0,0),(-1,-1),0.5,colors.black),
-					('VALIGN',(3,0),(3,0),'BOTTOM'),
-					('BACKGROUND',(3,0),(3,0),colors.limegreen),
-					('BACKGROUND',(3,1),(3,1),colors.khaki),
-					('ALIGN',(3,1),(3,1),'CENTER'),
-					('BACKGROUND',(3,2),(3,2),colors.beige),
-					('ALIGN',(3,2),(3,2),'LEFT'),
-					])
+                    ('BOX',(0,0),(1,-1),2,colors.red),
+                    ('LINEABOVE',(1,2),(-2,2),1,colors.blue),
+                    ('LINEBEFORE',(2,1),(2,-2),1,colors.pink),
+                    ('BACKGROUND', (0, 0), (0, 1), colors.pink),
+                    ('BACKGROUND', (1, 1), (1, 2), colors.lavender),
+                    ('BACKGROUND', (2, 2), (2, 3), colors.orange),
+                    ('BOX',(0,0),(-1,-1),2,colors.black),
+                    ('GRID',(0,0),(-1,-1),0.5,colors.black),
+                    ('VALIGN',(3,0),(3,0),'BOTTOM'),
+                    ('BACKGROUND',(3,0),(3,0),colors.limegreen),
+                    ('BACKGROUND',(3,1),(3,1),colors.khaki),
+                    ('ALIGN',(3,1),(3,1),'CENTER'),
+                    ('BACKGROUND',(3,2),(3,2),colors.beige),
+                    ('ALIGN',(3,2),(3,2),'LEFT'),
+                    ])
 
 t._argW[3]=1.5*inch
 """%I)
@@ -306,9 +306,9 @@ Image("lj8100.jpg")
 """,after=0.1)
 disc("""will display as""")
 try:
-	getStory().append(Image(I))
+    getStory().append(Image(I))
 except:
-	disc("""An image should have appeared here.""")
+    disc("""An image should have appeared here.""")
 disc("""whereas""")
 eg("""
 im = Image("lj8100.jpg", width=2*inch, height=2*inch)
@@ -316,11 +316,11 @@ im.hAlign = 'CENTER'
 """, after=0.1)
 disc('produces')
 try:
-	im = Image(I, width=2*inch, height=2*inch)
-	im.hAlign = 'CENTER'
-	getStory().append(Image(I, width=2*inch, height=2*inch))
+    im = Image(I, width=2*inch, height=2*inch)
+    im.hAlign = 'CENTER'
+    getStory().append(Image(I, width=2*inch, height=2*inch))
 except:
-	disc("""An image should have appeared here.""")
+    disc("""An image should have appeared here.""")
 heading2("""$Spacer(width, height)$""")
 disc("""This does exactly as would be expected; it adds a certain amount of space into the story.
 At present this only works for vertical space.

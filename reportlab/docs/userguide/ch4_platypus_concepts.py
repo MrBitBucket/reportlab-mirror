@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch4_platypus_concepts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch4_platypus_concepts.py,v 1.2 2001/10/27 22:37:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch4_platypus_concepts.py,v 1.3 2002/07/17 22:46:22 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 
 #####################################################################################################3
@@ -168,7 +168,7 @@ eg("""
 endKeep(k)
 heading3("$Flowable$ User Methods")
 eg("""
-	Flowable.draw()
+    Flowable.draw()
 """)
 disc("""This will be called to ask the flowable to actually render itself.
 The $Flowable$ class does not implement $draw$.
@@ -179,7 +179,7 @@ this method will only be called internally by the $drawOn$ method. Derived class
 must implement this method.
 """)
 eg("""
-	Flowable.drawOn(canvas,x,y)
+    Flowable.drawOn(canvas,x,y)
 """)
 disc("""
 This is the method which controlling programs use to render the flowable to a particular
@@ -189,16 +189,16 @@ $draw$ method (which is not implemented in the base class) can render in an
 absolute coordinate frame.
 """)
 eg("""
-	Flowable.wrap(availWidth, availHeight)
+    Flowable.wrap(availWidth, availHeight)
 """)
 disc("""This will be called by the enclosing frame before objects
 are asked their size, drawn or whatever.  It returns the
 size actually used.""")
 eg("""
-	Flowable.split(self, availWidth, availheight):
+    Flowable.split(self, availWidth, availheight):
 """)
 disc("""This will be called by more sophisticated frames when
-		wrap fails. Stupid flowables should return [] meaning that they are unable to split.
+        wrap fails. Stupid flowables should return [] meaning that they are unable to split.
 Clever flowables should split themselves and return a list of flowables. It is up to
 the client code to ensure that repeated attempts to split are avoided.
 If the space is sufficient the split method should return [self].
@@ -209,8 +209,8 @@ changing $self$ as this will allow sophisticated layout mechanisms to do multipl
 passes over a list of flowables.
 """)
 eg("""
-	Flowable.getSpaceAfter(self):
-	Flowable.getSpaceBefore(self):
+    Flowable.getSpaceAfter(self):
+    Flowable.getSpaceBefore(self):
 """)
 disc("""These methods return how much space should follow or precede
 the flowable. The space doesn't belong to the flowable itself i.e. the flowable's
@@ -231,8 +231,8 @@ space. The command
 """)
 
 eg("""
-	Frame(x1, y1, width,height, leftPadding=6, bottomPadding=6,
-			rightPadding=6, topPadding=6, id=None, showBoundary=0)
+    Frame(x1, y1, width,height, leftPadding=6, bottomPadding=6,
+            rightPadding=6, topPadding=6, id=None, showBoundary=0)
 """)
 disc("""creates a $Frame$ instance with lower left hand corner at coordinate $(x1,y1)$
 (relative to the canvas at use time) and with dimensions $width$ x $height$. The $Padding$
@@ -243,21 +243,21 @@ at run time (this is useful sometimes).
 """)
 heading3("$Frame$ User Methods")
 eg("""
-	Frame.addFromList(drawlist, canvas)
+    Frame.addFromList(drawlist, canvas)
 """)
 disc("""consumes $Flowables$ from the front of $drawlist$ until the
-	frame is full.	If it cannot fit one object, raises
-	an exception.""")
+    frame is full.  If it cannot fit one object, raises
+    an exception.""")
 
 eg("""
-	Frame.split(flowable,canv)
+    Frame.split(flowable,canv)
 """)
 disc('''Asks the flowable to split using up the available space and return
 the list of flowables.
 ''')
 
 eg("""
-	Frame.drawBoundary(canvas)
+    Frame.drawBoundary(canvas)
 """)
 disc("draws the frame boundary as a rectangle (primarily for debugging).")
 heading3("Using $Frames$")
@@ -280,7 +280,7 @@ story = []
 #add some flowables
 story.append(Paragraph("This is a Heading",styleH))
 story.append(Paragraph("This is a paragraph in <i>Normal</i> style.",
-	styleN))
+    styleN))
 c  = Canvas('mydoc.pdf')
 f = Frame(inch, inch, 6*inch, 9*inch, showBoundary=1)
 f.addFromList(story,c)
@@ -302,17 +302,17 @@ heading3("The $BaseDocTemplate$ class")
 
 eg("""
     BaseDocTemplate(self, filename,
-					pagesize=defaultPageSize,
-					pageTemplates=[],
-					showBoundary=0,
-					leftMargin=inch,
-					rightMargin=inch,
-					topMargin=inch,
-					bottomMargin=inch,
-					allowSplitting=1,
-					title=None,
-					author=None,
-					_pageBreakQuick=1)
+                    pagesize=defaultPageSize,
+                    pageTemplates=[],
+                    showBoundary=0,
+                    leftMargin=inch,
+                    rightMargin=inch,
+                    topMargin=inch,
+                    bottomMargin=inch,
+                    allowSplitting=1,
+                    title=None,
+                    author=None,
+                    _pageBreakQuick=1)
 """)
 
 disc("""
@@ -372,8 +372,8 @@ eg("""
     BaseDocTemplate.afterPage(self)
 """)
 disc("""This is called after page processing, and
-		immediately after the afterDrawPage method
-		of the current page template. A derived class could
+        immediately after the afterDrawPage method
+        of the current page template. A derived class could
 use this to do things which are dependent on information in the page
 such as the first and last word on the page of a dictionary.
 """)
@@ -393,19 +393,19 @@ eg("""
 """)
 
 disc("""This is called at the beginning of page
-		processing, and immediately before the
-		beforeDrawPage method of the current page
-		template. It could be used to reset page specific
-		information holders.""")
+        processing, and immediately before the
+        beforeDrawPage method of the current page
+        template. It could be used to reset page specific
+        information holders.""")
 
 eg("""
     BaseDocTemplate.filterFlowables(self,flowables)
 """)
 
 disc("""This is called to filter flowables at the start of the main handle_flowable method.
-		Upon return if flowables[0] has been set to None it is discarded and the main
-		method returns immediately.
-		""")
+        Upon return if flowables[0] has been set to None it is discarded and the main
+        method returns immediately.
+        """)
 
 eg("""
     BaseDocTemplate.afterFlowable(self, flowable)
@@ -471,7 +471,7 @@ story = []
 #add some flowables
 story.append(Paragraph("This is a Heading",styleH))
 story.append(Paragraph("This is a paragraph in <i>Normal</i> style.",
-	styleN))
+    styleN))
 doc = SimpleDocTemplate('mydoc.pdf',pagesize = letter)
 doc.build(story)
 """)

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/odyssey/odyssey.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/odyssey/odyssey.py,v 1.9 2000/10/25 08:57:44 rgbecker Exp $
-__version__=''' $Id: odyssey.py,v 1.9 2000/10/25 08:57:44 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/odyssey/odyssey.py,v 1.10 2002/07/17 22:46:22 andy_robinson Exp $
+__version__=''' $Id: odyssey.py,v 1.10 2002/07/17 22:46:22 andy_robinson Exp $ '''
 ___doc__=''
 #odyssey.py
 #
@@ -110,7 +110,7 @@ def run():
         canv.drawText(tx)
         canv.showPage()
         drawPageFrame(canv)
-		
+        
     print 'about to write to disk...'
     
     canv.save()

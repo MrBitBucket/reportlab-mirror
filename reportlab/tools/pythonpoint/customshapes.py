@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/customshapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/pythonpoint/customshapes.py,v 1.3 2001/11/22 09:51:06 dinu_gherman Exp $
-__version__=''' $Id: customshapes.py,v 1.3 2001/11/22 09:51:06 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/tools/pythonpoint/customshapes.py,v 1.4 2002/07/17 22:46:24 andy_robinson Exp $
+__version__=''' $Id: customshapes.py,v 1.4 2002/07/17 22:46:24 andy_robinson Exp $ '''
 
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
@@ -282,7 +282,7 @@ class Logo:
         logo = self.logo
         x, y = logo.x, logo.y
         w, h = logo.width, logo.height
-    	D = Drawing(w, h)
+        D = Drawing(w, h)
         D.add(logo)
         D.drawOn(canvas, 0, 0)
 

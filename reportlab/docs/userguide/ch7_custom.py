@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch7_custom.py,v 1.2 2001/10/27 22:37:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch7_custom.py,v 1.3 2002/07/17 22:46:22 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 
 heading1("Writing your own $Flowable$ Objects")
@@ -71,12 +71,12 @@ I = '../images/replogo.gif'
 
 EmbeddedCode("""
 class RotatedImage(Image):
-	def wrap(self,availWidth,availHeight):
-		h, w = Image.wrap(self,availHeight,availWidth)
-		return w, h
-	def draw(self):
-		self.canv.rotate(90)
-		Image.draw(self)
+    def wrap(self,availWidth,availHeight):
+        h, w = Image.wrap(self,availHeight,availWidth)
+        return w, h
+    def draw(self):
+        self.canv.rotate(90)
+        Image.draw(self)
 I = RotatedImage('%s')
 I.hAlign = 'CENTER'
 """ % I,'I')

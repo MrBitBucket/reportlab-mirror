@@ -7,7 +7,7 @@ import re
 import string
 
 try:
-    import sgmlop	# this works for both builtin on the path or relative
+    import sgmlop   # this works for both builtin on the path or relative
 except ImportError, errMsg:
     from reportlab.lib.utils import _checkImportError
     _checkImportError(errMsg)

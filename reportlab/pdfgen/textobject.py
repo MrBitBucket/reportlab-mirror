@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/textobject.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/textobject.py,v 1.23 2002/05/28 15:06:55 rgbecker Exp $
-__version__=''' $Id: textobject.py,v 1.23 2002/05/28 15:06:55 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/textobject.py,v 1.24 2002/07/17 22:46:23 andy_robinson Exp $
+__version__=''' $Id: textobject.py,v 1.24 2002/07/17 22:46:23 andy_robinson Exp $ '''
 __doc__=""" 
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -266,7 +266,7 @@ class PDFTextObject:
     def textOut(self, text):
         """prints string at current point, text cursor moves across."""
         self._x = self._x + self._canvas.stringWidth(text, self._fontname, self._fontsize)
-       	self._code.append(self._formatText(text))
+        self._code.append(self._formatText(text))
 
     def textLine(self, text=''):
         """prints string at current point, text cursor moves down.

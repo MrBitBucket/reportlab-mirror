@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.66 2002/06/14 20:26:09 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.66 2002/06/14 20:26:09 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.67 2002/07/17 22:46:23 andy_robinson Exp $
+__version__=''' $Id: pdfdoc.py,v 1.67 2002/07/17 22:46:23 andy_robinson Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -33,7 +33,7 @@ except: # pre-2.0
 
     
 if platform[:4] == 'java' and version_info[:2] == (2, 1):
-	# workaround for list()-bug in Jython 2.1 (should be fixed in 2.2)
+    # workaround for list()-bug in Jython 2.1 (should be fixed in 2.2)
     def list(sequence):
         def f(x):
             return x

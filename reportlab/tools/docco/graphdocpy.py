@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.16 2002/04/13 18:31:19 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.17 2002/07/17 22:46:24 andy_robinson Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -49,9 +49,9 @@ from reportlab.platypus.doctemplate \
 from reportlab.platypus.tables import TableStyle, Table
 from reportlab.graphics.shapes import NotImplementedError
 try:
-	import inspect
+    import inspect
 except ImportError:
-	from reportlab.tools.docco import inspect
+    from reportlab.tools.docco import inspect
 
 # Needed to draw Widget/Drawing demos.
 
@@ -520,7 +520,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
 
         widgetClass = widget.__class__
         demoMethod = widgetClass.demo
-        srcFileName = demoMethod.im_func.func_code.co_filename
+        srcFileName = os.path.abspath(demoMethod.im_func.func_code.co_filename)
         (dirname, fileNameOnly) = os.path.split(srcFileName)
 
         # Heading
@@ -528,7 +528,12 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         self.story.append(Paragraph("<i>Example</i>", self.bt))
 
         # Sample code
-        lines = open(srcFileName, 'r').readlines()
+        try:
+            lines = open(srcFileName, 'r').readlines()
+        except IOError:
+            print 'documenting %s running in %s' % (widgetClass, os.getcwd())
+            raise
+            
         lines = map(string.rstrip, lines)
         codeSample = getFunctionBody(demoMethod, lines)
         self.story.append(Preformatted(codeSample, self.code))
@@ -933,6 +938,11 @@ def documentModule0(pathOrName, builder, opts={}):
 def _packageWalkCallback((builder, opts), dirPath, files):
     "A callback function used when waking over a package tree."
 
+    #must CD into a directory to document the module correctly
+    cwd = os.getcwd()
+    os.chdir(dirPath)
+    
+    
     # Skip __init__ files.    
     files = filter(lambda f:f != '__init__.py', files)
 
@@ -944,7 +954,8 @@ def _packageWalkCallback((builder, opts), dirPath, files):
         builder.indentLevel = builder.indentLevel + 1
         documentModule0(path, builder)
         builder.indentLevel = builder.indentLevel - 1
-
+    #CD back out
+    os.chdir(cwd)
     
 def documentPackage0(pathOrName, builder, opts={}):
     """Generate documentation for one Python package in some format.
@@ -972,6 +983,7 @@ def documentPackage0(pathOrName, builder, opts={}):
         path = os.path.dirname(package.__file__)
 
     cwd = os.getcwd()
+    os.chdir(path)
     builder.beginPackage(name)
     os.path.walk(path, _packageWalkCallback, (builder, opts))
     builder.endPackage(name)
@@ -999,8 +1011,8 @@ def main():
     
     # On -f set the appropriate DocBuilder to use or a default one.
     builder = { 'Pdf': GraphPdfDocBuilder0,
-				'Html': GraphHtmlDocBuilder0,
-				}[optsDict.get('-f', 'Pdf')]()
+                'Html': GraphHtmlDocBuilder0,
+                }[optsDict.get('-f', 'Pdf')]()
 
     # Set default module or package to document.
     if not hasOpt('-p') and not hasOpt('-m'):

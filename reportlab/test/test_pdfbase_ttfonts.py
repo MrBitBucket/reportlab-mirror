@@ -71,12 +71,12 @@ class TTFontsTestCase(unittest.TestCase):
         pdfmetrics.registerFont(TTFont("RinaFont", "rina.ttf"))
         # Draw a table of Unicode characters
         for fontName in ('TestFont','RinaFont'):
-			c.setFont(fontName, 10)
-			for i in range(0, 32):
-				for j in range(0, 32):
-					ch = utf8(i * 32 + j)
-					c.drawString(80 + j * 13 + int(j / 16) * 4, 600 - i * 13 - int(i / 8) * 8, ch)
-			c.showPage()
+            c.setFont(fontName, 10)
+            for i in range(0, 32):
+                for j in range(0, 32):
+                    ch = utf8(i * 32 + j)
+                    c.drawString(80 + j * 13 + int(j / 16) * 4, 600 - i * 13 - int(i / 8) * 8, ch)
+            c.showPage()
         c.save()
 
         # Do it twice with the same font object

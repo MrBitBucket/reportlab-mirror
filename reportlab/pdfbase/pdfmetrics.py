@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.54 2002/06/20 15:05:58 aaron_watters Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.55 2002/07/17 22:46:23 andy_robinson Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -70,7 +70,7 @@ def parseAFMFile(afmFileName):
         #likely to be a MAC file
         lines = string.split(lines,'\r')
         if len(lines)<=1:
-			raise ValueError, 'AFM file %s hasn\'t enough data' % afmFileName
+            raise ValueError, 'AFM file %s hasn\'t enough data' % afmFileName
     topLevel = {}
     glyphLevel = []
 

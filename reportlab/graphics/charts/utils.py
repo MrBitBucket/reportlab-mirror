@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/utils.py,v 1.7 2002/03/26 11:17:18 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/utils.py,v 1.8 2002/07/17 22:46:22 andy_robinson Exp $
 "Utilities used here and there."
-__version__=''' $Id: utils.py,v 1.7 2002/03/26 11:17:18 rgbecker Exp $ '''
+__version__=''' $Id: utils.py,v 1.8 2002/07/17 22:46:22 andy_robinson Exp $ '''
 
 from time import mktime, gmtime, strftime
 import string
@@ -85,108 +85,108 @@ _j_max=len(_intervals)-1
 
 
 def find_interval(lo,hi,I=5):
-	'determine tick parameters for range [lo, hi] using I intervals'
+    'determine tick parameters for range [lo, hi] using I intervals'
 
-	if lo >= hi:
-		if lo==hi:
-			if lo==0:
-				lo = -.1
-				hi =  .1
-			else:
-				lo = 0.9*lo
-				hi = 1.1*hi
-		else:
-			raise ValueError, "lo>hi"
-	x=(hi - lo)/float(I)
-	b= (x>0 and (x<1 or x>10)) and 10**floor(log10(x)) or 1
-	b = b
-	while 1:
-		a = x/b
-		if a<=_intervals[-1]: break
-		b = b*10
+    if lo >= hi:
+        if lo==hi:
+            if lo==0:
+                lo = -.1
+                hi =  .1
+            else:
+                lo = 0.9*lo
+                hi = 1.1*hi
+        else:
+            raise ValueError, "lo>hi"
+    x=(hi - lo)/float(I)
+    b= (x>0 and (x<1 or x>10)) and 10**floor(log10(x)) or 1
+    b = b
+    while 1:
+        a = x/b
+        if a<=_intervals[-1]: break
+        b = b*10
 
-	j = 0
-	while a>_intervals[j]: j = j + 1
+    j = 0
+    while a>_intervals[j]: j = j + 1
 
-	while 1:
-		ss = _intervals[j]*b
-		n = lo/ss
-		l = int(n)-(n<0)
-		n = ss*l
-		x = ss*(l+I)
-		a = I*ss
-		if n>0:
-			if a>=hi:
-				n = 0.0
-				x = a
-		elif hi<0:
-			a = -a
-			if lo>a:
-				n = a
-				x = 0
-		if hi<=x and n<=lo: break
-		j = j + 1
-		if j>_j_max:
-			j = 0
-			b = b*10
-	return n, x, ss, lo - n + x - hi
+    while 1:
+        ss = _intervals[j]*b
+        n = lo/ss
+        l = int(n)-(n<0)
+        n = ss*l
+        x = ss*(l+I)
+        a = I*ss
+        if n>0:
+            if a>=hi:
+                n = 0.0
+                x = a
+        elif hi<0:
+            a = -a
+            if lo>a:
+                n = a
+                x = 0
+        if hi<=x and n<=lo: break
+        j = j + 1
+        if j>_j_max:
+            j = 0
+            b = b*10
+    return n, x, ss, lo - n + x - hi
 
 
 def find_good_grid(lower,upper,n=(4,5,6,7,8,9), grid=None):
-	if grid:
-		t = divmod(lower,grid)[0] * grid
-		hi, z = divmod(upper,grid)
-		if z>1e-8: hi = hi+1
-		hi = hi*grid
-	else:
-		try:
-			n[0]
-		except TypeError:
-			n = xrange(max(1,n-2),max(n+3,2))
+    if grid:
+        t = divmod(lower,grid)[0] * grid
+        hi, z = divmod(upper,grid)
+        if z>1e-8: hi = hi+1
+        hi = hi*grid
+    else:
+        try:
+            n[0]
+        except TypeError:
+            n = xrange(max(1,n-2),max(n+3,2))
 
-		w = 1e308
-		for i in n:
-			z=find_interval(lower,upper,i)
-			if z[3]<w:
-				t, hi, grid = z[:3]
-				w=z[3]
-	return t, hi, grid
+        w = 1e308
+        for i in n:
+            z=find_interval(lower,upper,i)
+            if z[3]<w:
+                t, hi, grid = z[:3]
+                w=z[3]
+    return t, hi, grid
 
 
 def ticks(lower, upper, n=(4,5,6,7,8,9), split=1, percent=0, grid=None):
-	'''
-	return tick positions and labels for range lower<=x<=upper
-	n=number of intervals to try (can be a list or sequence)
-	split=1 return ticks then labels else (tick,label) pairs
-	'''
-	t, hi, grid = find_good_grid(lower, upper, n, grid)
-	power = floor(log10(grid))
-	if power==0: power = 1
-	w = grid/10.**power
-	w = int(w)!=w
-	
-	if power > 3 or power < -3:
-		format = '%+'+`w+7`+'.0e'
-	else:
-		if power >= 0:
-			digits = int(power)+w
-			format = '%' + `digits`+'.0f'
-		else:
-			digits = w-int(power)
-			format = '%'+`digits+2`+'.'+`digits`+'f'
-	
-	if percent: format=format+'%%'
-	T = []
-	n = int(float(hi-t)/grid+0.1)+1
-	if split:
-		labels = []
-		for i in xrange(n):
-			v = t+grid*i
-			T.append(v)
-			labels.append(format % v)
-		return T, labels
-	else:
-		for i in xrange(n):
-			v = t+grid*i
-			T.append((v, format % v))
-		return T
+    '''
+    return tick positions and labels for range lower<=x<=upper
+    n=number of intervals to try (can be a list or sequence)
+    split=1 return ticks then labels else (tick,label) pairs
+    '''
+    t, hi, grid = find_good_grid(lower, upper, n, grid)
+    power = floor(log10(grid))
+    if power==0: power = 1
+    w = grid/10.**power
+    w = int(w)!=w
+    
+    if power > 3 or power < -3:
+        format = '%+'+`w+7`+'.0e'
+    else:
+        if power >= 0:
+            digits = int(power)+w
+            format = '%' + `digits`+'.0f'
+        else:
+            digits = w-int(power)
+            format = '%'+`digits+2`+'.'+`digits`+'f'
+    
+    if percent: format=format+'%%'
+    T = []
+    n = int(float(hi-t)/grid+0.1)+1
+    if split:
+        labels = []
+        for i in xrange(n):
+            v = t+grid*i
+            T.append(v)
+            labels.append(format % v)
+        return T, labels
+    else:
+        for i in xrange(n):
+            v = t+grid*i
+            T.append((v, format % v))
+        return T

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.4 2002/05/28 15:06:55 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.5 2002/07/17 22:46:22 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.lib.codecharts import SingleByteEncodingChart
 from reportlab.platypus import Image
@@ -248,9 +248,9 @@ generate them.""")
 # include a bitmap of some Asian text
 I=os.path.join(os.path.dirname(__file__),'..','images','jpnchars.jpg')
 try:
-	getStory().append(Image(I))
+    getStory().append(Image(I))
 except:
-	disc("""An image should have appeared here.""")
+    disc("""An image should have appeared here.""")
 
 disc("""Asian multi-byte fonts are called 'CIDFonts'.  CID stands for 'Character ID'.  The
 central idea is that a font contains many thousands of glyphs each identified by a numeric
@@ -581,7 +581,7 @@ canvas.drawString(10, 100, "In the Rina TT Font!")
 illust(examples.ttffont1, "Using a the Rina TrueType Font")
 disc("""In the above example the true type font object is created using""")
 eg("""
-	TTFont(name,filename)
+    TTFont(name,filename)
 """)
 disc("""so that the ReportLab internal name is given by the first argument and the second argument
 is a string(or file like object) denoting the font's TTF file. In Marius' original patch the filename
@@ -602,10 +602,10 @@ individual font names that describe the behaviour under the $<b>$ and $<i>$ attr
 
 eg("""
 from reportlab.lib.fonts import addMapping
-addMapping('Rina', 0, 0, 'Rina')	#normal
-addMapping('Rina', 0, 1, 'Rina')	#italic
-addMapping('Rina', 1, 0, 'Rina')	#bold
-addMapping('Rina', 1, 1, 'Rina')	#italic and bold
+addMapping('Rina', 0, 0, 'Rina')    #normal
+addMapping('Rina', 0, 1, 'Rina')    #italic
+addMapping('Rina', 1, 0, 'Rina')    #bold
+addMapping('Rina', 1, 1, 'Rina')    #italic and bold
 """)
 
 disc("""we only have Rina regular so we map all to the same internal fontname. After registering and mapping
