@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.50 2001/10/05 17:05:35 aaron_watters Exp $
-__version__=''' $Id: pdfdoc.py,v 1.50 2001/10/05 17:05:35 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.51 2001/10/08 02:08:38 aaron_watters Exp $
+__version__=''' $Id: pdfdoc.py,v 1.51 2001/10/08 02:08:38 aaron_watters Exp $ '''
 __doc__=""" 
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The 
@@ -368,12 +368,14 @@ class PDFDocument:
     def hasForm(self, name):
         """test for existence of named form"""
         internalname = formName(name)
-        try:
-            test = self.idToObject[internalname]          
-        except:
-            return 0
-        else:
-            return internalname
+        # always assume the form will be defined eventually, even if undefined now
+        return internalname
+##        try:
+##            test = self.idToObject[internalname]          
+##        except:
+##            return 0
+##        else:
+##            return internalname
 
     def xobjDict(self, formnames):
         """construct an xobject dict (for inclusion in a resource dict, usually)
@@ -673,7 +675,10 @@ class PDFObjectReference:
         self.name = name
     def format(self, document):
         name = self.name
-        (n, v) = document.idToObjectNumberAndVersion[name]
+        try:
+            (n, v) = document.idToObjectNumberAndVersion[name]
+        except:
+            raise KeyError, "forward reference to %s not resolved upon final formatting" % repr(name)
         return "%s %s R" % (n,v)
 
 ### chapter 5
@@ -1641,18 +1646,8 @@ class PDFFormXObject:
         sdict["Resources"] = resources
         return self.Contents.format(document)
 
-if __name__=="__main__":
-    # first test
-    print "line end is", repr(LINEEND)
-    print "PDFName", PDFName("test")
-    D = PDFDocument(dummyoutline=1)
-    print "PDFDict", PDFDictionary({"this":1}).format(D)
-    testpage(D)
-    txt = D.format()
-    fn = "test.pdf"
-    f = open(fn, "wb")
-    f.write(txt)
-    print "wrote", fn
 
+if __name__=="__main__":
+    print "There is no script interpretation for pdfdoc."
     
             
