@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.51 2003/09/17 18:29:01 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.52 2003/10/24 10:46:00 johnprecedo Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.51 2003/09/17 18:29:01 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.52 2003/10/24 10:46:00 johnprecedo Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -315,6 +315,8 @@ class LinePlot(PlotArea):
         if getattr(self,'_bubblePlot',None):
             yA._bubblePlot = xA._bubblePlot = 1
         yA.setPosition(self.x, self.y, self.height)
+        if yA: yA.joinAxis = xA
+        if xA: xA.joinAxis = yA
         yA.configure(self.data)
 
         # if zero is in chart, put x axis there, otherwise use bottom.
