@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.52 2002/01/24 13:18:06 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.52 2002/01/24 13:18:06 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.53 2002/01/28 12:33:53 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.53 2002/01/28 12:33:53 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -217,10 +217,10 @@ class Table(Flowable):
 		W = self._argW
 		#print "W is", W
 
-		canv = self.canv
+		canv = getattr(self,'canv',None)
 		saved = None
 		if None in H:
-			saved = canv._fontname, canv._fontsize, canv._leading
+			if canv: saved = canv._fontname, canv._fontsize, canv._leading
 			H = H[:]	#make a copy as we'll change it
 			self._rowHeights = H
 			while None in H:
@@ -236,9 +236,9 @@ class Table(Flowable):
 						if not t in _SeqTypes: v = (v,)
 						if w is None:
 							raise ValueError, "Flowable %s in cell(%d,%d) can't have auto width in\n%s" % (v[0].identity(30),i,j,self.identity(30))
-						canv._fontname, canv._fontsize, canv._leading = s.fontname, s.fontsize, s.leading or 1.2*s.fontsize
+						if canv: canv._fontname, canv._fontsize, canv._leading = s.fontname, s.fontsize, s.leading or 1.2*s.fontsize
 						dW,t = self._listCellGeom(v,w,s)
-						canv._fontname, canv._fontsize, canv._leading = saved
+						if canv: canv._fontname, canv._fontsize, canv._leading = saved
 						#print "leftpadding, rightpadding", s.leftPadding, s.rightPadding
 						dW = dW + s.leftPadding + s.rightPadding
 						if not rl_config.allowTableBoundsErrors and dW>w:
