@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2_graphics.py,v 1.2 2001/10/21 17:05:01 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2_graphics.py,v 1.3 2001/10/22 05:43:18 andy_robinson Exp $
 from rl_doc_utils import *
 from reportlab.lib.codecharts import SingleByteEncodingChart
     
@@ -769,13 +769,20 @@ value of the $T1SearchPath$ identifier to contain additional
 directories.
 """)
 
-heading2("Single-byte Font Encodings")
+heading2("Single-Byte Font Encodings")
 disc("""
 Every time you draw some text, you presume an encoding.
 The Reportlab PDF library offers very fine-grained control
 of character encodings, which can be critical.  You can specify
 the encoding to use at a per-installation, per-document or per-font
-level, and also synthesize your own encodings.
+level, and also synthesize your own encodings.  
+""")
+
+disc("""The module reportlab/rl_config.py contains a variable
+'defaultEncoding' which will usually be set to one of "WinAnsiEncoding"
+or "MacRomanEncoding".  In the distribution, it is the first, but Mac users will
+commonly edit it.  Unless otherwise specified, this is used for text fonts.
+Let's start by reviewing the characters in these fonts.
 """)
 
 disc("""The code chart below shows the characters in the $WinAnsiEncoding$.
@@ -810,12 +817,94 @@ illust(lambda canv: cht3.drawOn(canv, 0, 0), "ZapfDingbats and its one and only 
 cht4 = SingleByteEncodingChart(faceName='Symbol',encodingName='SymbolEncoding',charsPerRow=32, boxSize=12)
 illust(lambda canv: cht4.drawOn(canv, 0, 0), "Symbol and its one and only encoding", cht4.width, cht4.height)
 
+todo(""""Complete this section with examples of synthesizing new encodings
+and fonts, based on test_pdfbase_encodings.py""")
+
+heading2("Asian Font Support")
+disc("""The Reportlab PDF Library aims to expose full support for Asian fonts.
+PDF is the first really portable solution for Asian text handling.
+Japanese, Traditional Chinese (Taiwan/Hong Kong), Simplified Chinese (mainland China)
+and Korean are all supported; however, you have to download the relevant font pack
+from Adobe's web site to view such PDF files, or you'll get cryptic error messages
+about "bad CMaps".
+""")
+
+disc("""Since many users will not have the font packs installed, we have included
+a rather grainy ^bitmap^ of some Japanese characters.  We will discuss below what is needed to
+generate them.""")
 # include a bitmap of some Asian text
 I=os.path.join(os.path.dirname(__file__),'..','images','jpnchars.jpg')
 try:
 	getStory().append(Image(I))
 except:
 	disc("""An image should have appeared here.""")
+
+disc("""Asian multi-byte fonts are called 'CIDFonts'.  CID stands for 'Character ID'.  The
+central idea is that a font contains many thousands of glyphs each identified by a numeric
+character ID, and that encodings determine which strings (typically one or two bytes long)
+map to which character IDs.  This is exactly the same concept as for single byte fonts.
+However, the implementation differs slightly, as does the amount of work we have to do
+to load and measure these fonts accurately.""")
+
+disc("""You create CID fonts with a combination of a face name and an encoding name.
+By convention, the font name is a combination of the two separated by a dash.
+It is actually possible to create separate CIDTypeFace and CIDEncoding objects, and
+to assign your own names, but there is no point; Adobe has followed the naming
+convention since CID fonts were introduced.  We wish they (and we) had done so with
+single byte fonts too!  Once a font is registered, you can use it by its combined
+name with $setFont$.""")
+
+
+eg("""
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.cidfonts import CIDFont
+pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90ms-RKSJ-H'))
+canvas.setFont('HeiseiMin-W3-90ms-RKSJ-H', 16)
+
+# this says "This is HeiseiMincho" in shift-JIS.  Not all our readers
+# have a Japanese PC, so I escaped it. On a Japanese-capable
+# system, print the string to see Kanji
+message1 = '\202\261\202\352\202\315\225\275\220\254\226\276\222\251\202\305\202\267\201B'
+canvas.drawString(100, 675, message1)
+""")
+
+disc("""A full list of the available fonts and encodings is available near the
+top of $reportlab/pdfbase/_cidfontdata.py$.  Also, the following four test scripts
+generate samples in the corresponding languages:""")
+eg("""reportlab/test/test_multibyte_jpn.py
+reportlab/test/test_multibyte_kor.py
+reportlab/test/test_multibyte_chs.py
+reportlab/test/test_multibyte_cht.py""")
+
+pencilnote()
+heading3("Character Mappings and Configuration")
+disc("""In order to accurately measure the width of Asian characters, and
+thus to correctly right-align and centre them, we need access to the mapping
+tables which relate each encoding to the glyphs in the font file.  We currently
+get this by processing the Acrobat Reader CMap files; these wil be on your
+system if the relevant font packs are installed.  If you try to generate an
+Asian document and get an error, check that the relevant Acrobat Language Pack
+is installed.  Then, check in rl_config.py which has a list of standard locations;
+you may need to edit this list.
+""")
+
+disc("""
+Most of these files are small and fast to parse, but the Unicode ones are
+big.  Any encoding with 'UCS2' in the name is Unicode.  The files work with
+consecutive runs of characters, but there may be 10,000 runs of 1 character
+in a Unicode maping table; it may take minutes to parse these.  Therefore,
+after the first parse, we write a marshalled dictionary in the
+$reportlab/fonts$ directory with the extension $.fastmap$.  This is used on
+subsequent calls and loads up to 100x faster.  If you are running in a
+secure environment such as a web server, be aware that you either need
+to pre-generate and copy up this file, or ensure that the web user can
+write this directory.
+""")
+
+disc("""
+We are working on a compressed mapping database which will remove any
+need to refer to Adobe's CMap files, and further speed up access.
+""")
 
 heading2("Text object methods")
 
@@ -827,21 +916,13 @@ PDF that will render faster than many separate calls to the $drawString$ methods
 """)
 
 eg("""textobject.setTextOrigin(x,y)""")
-
 eg("""textobject.setTextTransform(a,b,c,d,e,f)""")
-
 eg("""textobject.moveCursor(dx, dy) # from start of current LINE""")
-
 eg("""(x,y) = textobject.getCursor()""")
-
 eg("""x = textobject.getX(); y = textobject.getY()""")
-
 eg("""textobject.setFont(psfontname, size, leading = None)""")
-
 eg("""textobject.textOut(text)""")
-
 eg("""textobject.textLine(text='')""")
-
 eg("""textobject.textLines(stuff, trim=1)""")
 
 disc("""

@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/_cidfontdata.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: _cidfontdata.py,v 1.4 2001/09/29 08:04:32 andy_robinson Exp $ '''
+__version__=''' $Id: _cidfontdata.py,v 1.5 2001/10/22 05:43:18 andy_robinson Exp $ '''
 __doc__="""
 This defines additional static data to support CID fonts.
 
@@ -149,7 +149,7 @@ CIDFontInfo['HeiseiMin-W3'] = {
                     'ItalicAngle': 0,
                     'StemV': 114,
                     'XHeight': 553,
-                    'Style': {'Panose': '<0801020b0600000000000000>'}
+                    'Style': {'Panose': '<010502020400000000000000>'}
                     },
                 'CIDSystemInfo': {
                     'Registry': '(Adobe)',
