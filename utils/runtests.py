@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: runtests.py,v $
+#	Revision 1.7  2000/04/07 09:21:29  rgbecker
+#	Fixed import bug
+#
 #	Revision 1.6  2000/04/06 15:08:53  rgbecker
 #	Changes to way dir is handled
-#
+#	
 #	Revision 1.5  2000/04/03 09:29:36  rgbecker
 #	Eliminated -dir option
 #	
@@ -51,15 +54,15 @@
 #	New infrastructure
 #	
 #	
-__version__=''' $Id: runtests.py,v 1.6 2000/04/06 15:08:53 rgbecker Exp $ '''
+__version__=''' $Id: runtests.py,v 1.7 2000/04/07 09:21:29 rgbecker Exp $ '''
 '''
 script for testing ReportLab
 '''
 
-_globals=globals().copy()			#make a copy of out globals
+_globals=globals().copy()				#make a copy of out globals
 _globals['__name__'] = "__main__"	#for passing to execfile
 
-import os, sys, string, traceback, re
+import os, sys, string, traceback, re, copy
 
 _ecount = 0	# count of errors
 
@@ -93,7 +96,6 @@ def do_tests(d,cyc):
 			if os.path.isfile(fn): L.append(fn)
 
 	if cyc is not None: import Cyclops
-	if d not in sys.path: sys.path.insert(0,d)
 	os.chdir(d)
 	test_files = []
 	os.path.walk('.',find_test_files,test_files)
@@ -105,11 +107,14 @@ def do_tests(d,cyc):
 		fn =os.path.normcase(os.path.normpath(os.path.join(d,t)))
 		bn = os.path.basename(fn)
 		print '##### Test %s starting' % bn
+		dn = os.path.dirname(fn)
+		sys.path.insert(0,dn)
+		os.chdir(os.path.dirname(fn))
+		g = copy.copy(_globals)
 		try:
-			os.chdir(os.path.dirname(fn))
 			if cyc is not None:
 				z = Cyclops.CycleFinder()
-				z.run(execfile,(fn,_globals.copy()))
+				z.run(execfile,(fn,g))
 				if z.find_cycles():
 					print '!!!!!! CYCLES WERE FOUND !!!!!!'
 					if 's' in cyc: z.show_stats()
@@ -121,11 +126,12 @@ def do_tests(d,cyc):
 					print '!!!!!! NO CYCLES WERE FOUND !!!!!!'
 					if 's' in cyc: z.show_stats()
 			else:
-				execfile(fn,_globals.copy())
+				execfile(fn,g)
 			print '##### Test %s finished ok' % bn
 		except:
 			traceback.print_exc(None,sys.stdout)
 			_ecount = _ecount + 1
+		del sys.path[0]
 
 def clean_files(d):
 	def find_cleanable_files(L,d,N):
