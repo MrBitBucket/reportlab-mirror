@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.2 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.3 2001/05/07 12:40:15 dinu_gherman Exp $
 """This will be a collection of legends to be used with charts.
 """
 
@@ -10,8 +10,9 @@ import string
 
 from reportlab.lib import colors
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from reportlab.graphics.shapes import *
 from reportlab.graphics.widgetbase import Widget
+# Move this into dedicated module.
+from reportlab.graphics.shapes import *
 
 
 class Legend0(Widget):
@@ -29,7 +30,7 @@ class Legend0(Widget):
         "dx": isNumber,
         "dy": isNumber,
         "columnMaximum": isNumber,
-        "alignment": OneOf(("left", "right")), # align text on the left or right
+        "alignment": OneOf(("left", "right")),
         "colorNamePairs": None, # fix this
         }
 
@@ -37,18 +38,24 @@ class Legend0(Widget):
         # Upper-left reference point.
         self.x = 0
         self.y = 0
+
         # Alginment of text with respect to swatches.
         self.alignment = "left"
+
         # x- and y-distances between neighbouring swatches.
         self.deltax = 75
         self.deltay = 20
+
         # Size of swatch rectangle.
         self.dx = 10
         self.dy = 10
+
         # Distance between swatch rectangle and text.
         self.dxTextSpace = 10
+
         # Max. number of items per column.
         self.columnMaximum = 3
+
         # Color/name pairs.
         self.colorNamePairs = [ (colors.red, "red"),
                                 (colors.blue, "blue"),

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.5 2001/04/25 14:19:28 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.6 2001/05/07 12:40:15 dinu_gherman Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -12,13 +12,14 @@
 This permits you to customize and pop out individual wedges;
 supports elliptical and circular pies."""
 
-import math
+from math import sin, cos, pi
 
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
-from reportlab.graphics.shapes import *
 from reportlab.graphics import renderPDF
 from reportlab.lib import colors
 from reportlab.pdfgen.canvas import Canvas
+# Move this into a dedicated module.
+from reportlab.graphics.shapes import *
 
 
 class WedgeFormatter(Widget):
@@ -65,7 +66,7 @@ class Pie(Widget):
         'data':isListOfNumbers,
         'labels':isListOfStringsOrNone,
         'startAngle':isNumber,
-        'direction': lambda x: x in ['clockwise', 'anticlockwise'],
+        'direction': OneOf(('clockwise', 'anticlockwise')),
         'wedges':None,   # could be improved,
         'defaultColors':SequenceOf(isColor)
         }
@@ -82,12 +83,13 @@ class Pie(Widget):
         
         self.wedges = TypedPropertyCollection(WedgeFormatter)
         # no need to change the defaults for a WedgeFormatter; if we did,
-        ## we would do e.g.
+        # we would do e.g.
         #self.wedges.strokeColor = colors.blueviolet
         
 
     def demo(self):
         d = Drawing(200, 100)
+
         pc = Pie()
         pc.x = 50
         pc.y = 10
@@ -95,12 +97,14 @@ class Pie(Widget):
         pc.height = 80
         pc.data = [10,20,30,40,50,60]
         pc.labels = ['a','b','c','d','e','f']
+
         pc.wedges.strokeWidth=0.5
         pc.wedges[3].popout = 10
         pc.wedges[3].strokeWidth = 2
         pc.wedges[3].strokeDashArray = [2,2]
         pc.wedges[3].labelRadius = 1.75
         pc.wedges[3].fontColor = colors.red
+
         d.add(pc)
         return d
 
@@ -152,10 +156,10 @@ class Pie(Widget):
             if self.wedges[i].popout <> 0:
                 # pop out the wedge
                 averageAngle = (a1+a2)/2.0
-                aveAngleRadians = averageAngle*math.pi/180.0
+                aveAngleRadians = averageAngle*pi/180.0
                 popdistance = self.wedges[i].popout
-                cx = centerx + popdistance * math.cos(aveAngleRadians)
-                cy = centery + popdistance * math.sin(aveAngleRadians)
+                cx = centerx + popdistance * cos(aveAngleRadians)
+                cy = centery + popdistance * sin(aveAngleRadians)
 
             if len(normData) > 1:
                 theWedge = Wedge(cx, cy, xradius, a1, a2, yradius=yradius)
@@ -172,9 +176,10 @@ class Pie(Widget):
             # now draw a label
             if labels[i] <> "":
                 averageAngle = (a1+a2)/2.0
-                aveAngleRadians = averageAngle*math.pi/180.0
-                labelX = centerx + (0.5 * self.width * math.cos(aveAngleRadians) * self.wedges[i].labelRadius)
-                labelY = centery + (0.5 * self.height * math.sin(aveAngleRadians) * self.wedges[i].labelRadius)
+                aveAngleRadians = averageAngle*pi/180.0
+                labelRadius = self.wedges[i].labelRadius
+                labelX = centerx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
+                labelY = centery + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
                 
                 theLabel = String(labelX, labelY, labels[i])
                 theLabel.textAnchor = "middle"

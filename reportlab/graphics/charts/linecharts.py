@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.4 2001/04/09 22:06:28 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.5 2001/05/07 12:40:15 dinu_gherman Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
@@ -13,10 +13,11 @@ from reportlab.lib import colors
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.charts.markers import *
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing
-from reportlab.graphics.shapes import Auto, isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf
 from reportlab.graphics.widgets.signsandsymbols import NoEntry0
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
+# Move this into dedicated module.
+from reportlab.graphics.shapes import Auto, isNumber, isColor, isColorOrNone, isListOfStrings, isListOfStringsOrNone, SequenceOf
       
 
 class LineChart(Widget):
@@ -83,7 +84,7 @@ class HorizontalLineChart(LineChart):
 
         'valueAxis':None,
         'categoryAxis':None,
-        'categoryNames':isListOfStrings,
+        'categoryNames':isListOfStringsOrNone,
 
         'data':None
         }
@@ -163,7 +164,8 @@ class HorizontalLineChart(LineChart):
         """Works out where they go.
 
         Sets an attribute _positions which is a list of
-        lists of (x, y) matching the data."""
+        lists of (x, y) matching the data.
+        """
 
         self._seriesCount = len(self.data)
         self._rowLength = len(self.data[0])

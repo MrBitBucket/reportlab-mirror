@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.7 2001/04/12 16:04:19 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.8 2001/05/07 12:40:15 dinu_gherman Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -18,10 +18,11 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib import colors
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing
-from reportlab.graphics.shapes import Auto, isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.axes import YCategoryAxis, XValueAxis
+# Move into dedicated module.
+from reportlab.graphics.shapes import Auto, isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf
 
 
 ### Helpers (maybe put this into Drawing... or shapes)
@@ -46,7 +47,8 @@ from reportlab.graphics.charts.axes import YCategoryAxis, XValueAxis
 ##        g.add(Line(0, y0, x+width, y0, strokeWidth=lineWidth))
 
 
-# Bar chart classes
+# Bar chart classes.
+
 class BarChart(Widget):
     "Abstract base class, unusable by itself."
 
@@ -121,8 +123,9 @@ class BarChart(Widget):
         # if you have multiple series, by default they butt
         # together.
 
+
     def _findMinMaxValues(self):
-        """Find the minimum and maximum value of the data we have."""
+        "Find the minimum and maximum value of the data we have."
 
         data = self.data
         m, M = Auto, Auto
@@ -134,6 +137,7 @@ class BarChart(Widget):
                     M = val
 
         return m, M
+
 
     def makeBackground(self):
         g = Group()
@@ -167,8 +171,10 @@ class BarChart(Widget):
 
         return drawing
 
+
     def _drawBegin(self,org,length):
         '''Position and configure value axis, return crossing value'''
+
         self.valueAxis.setPosition(self.x, self.y, length)
         self.valueAxis.configure(self.data)
 
@@ -177,10 +183,13 @@ class BarChart(Widget):
         crossesAt = self.valueAxis.scale(0)
         if crossesAt > org+length or crossesAt<org:
             crossesAt = org
+
         return crossesAt
+
 
     def _drawFinish(self):
         '''finalize the drawing of a barchart'''
+
         self.categoryAxis.configure(self.data)
         self.calcBarPositions()
 
@@ -193,11 +202,13 @@ class BarChart(Widget):
 
         return g
 
+
     def calcBarPositions(self):
         """Works out where they go. default vertical.
 
         Sets an attribute _barPositions which is a list of
-        lists of (x, y, width, height) matching the data."""
+        lists of (x, y, width, height) matching the data.
+        """
 
         flipXY = self._flipXY
         org = flipXY and self.y or self.x
@@ -258,6 +269,7 @@ class BarChart(Widget):
 
             self._barPositions.append(barRow)
 
+
     def makeBars(self):
         g = Group()
 
@@ -299,10 +311,12 @@ class BarChart(Widget):
 
         return g
 
+
 class VerticalBarChart(BarChart):
-    """Vertical bar chart with multiple side-by-side bars.
-    """
+    "Vertical bar chart with multiple side-by-side bars."
+
     _flipXY = 0
+
     def __init__(self):
         BarChart.__init__(self)
         self.categoryAxis = XCategoryAxis()
@@ -316,10 +330,12 @@ class VerticalBarChart(BarChart):
         self.categoryAxis.setPosition(self.x, self._drawBegin(self.y,self.height), self.width)
         return self._drawFinish()
 
+
 class HorizontalBarChart(BarChart):
-    """Horizontal bar chart with multiple side-by-side bars.
-    """
+    "Horizontal bar chart with multiple side-by-side bars."
+
     _flipXY = 1
+
     def __init__(self):
         BarChart.__init__(self)
         self.categoryAxis = YCategoryAxis()
@@ -333,7 +349,9 @@ class HorizontalBarChart(BarChart):
         self.categoryAxis.setPosition(self._drawBegin(self.x,self.width), self.y, self.height)
         return self._drawFinish()
 
+
 # Vertical samples.
+
 def sampleV0a():
     "A slightly pathologic bar chart with only TWO data items."
 
@@ -363,6 +381,7 @@ def sampleV0a():
     drawing.add(bc)
 
     return drawing
+
 
 def sampleV0b():
     "A pathologic bar chart with only ONE data item."

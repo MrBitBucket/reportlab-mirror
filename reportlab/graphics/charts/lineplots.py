@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.7 2001/04/26 14:46:49 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.8 2001/05/07 12:40:15 dinu_gherman Exp $
 """
 This modules defines a very preliminary Line Plot example.
 """
@@ -165,7 +165,8 @@ class LinePlot(Widget):
         """Works out where they go.
 
         Sets an attribute _positions which is a list of
-        lists of (x, y) matching the data."""
+        lists of (x, y) matching the data.
+        """
 
         self._seriesCount = len(self.data)
         self._rowLength = len(self.data[0])
@@ -307,8 +308,8 @@ class LinePlot(Widget):
                     line.strokeWidth = width
                 if dash:
                     line.strokeDashArray = dash
-		g.add(line)
-	    else:
+                g.add(line)
+            else:
                 for colNo in range(len(row)):
                     x1, y1 = row[colNo]
                     if self.joinedLines == 1:

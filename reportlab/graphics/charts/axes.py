@@ -1,12 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.18 2001/05/01 12:30:20 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.19 2001/05/07 12:40:15 dinu_gherman Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
 coordinate systems. All axes might have tick marks and labels.
-
 There are two dichotomies for axes: one of X and Y flavours and
 another of category and value flavours.
 
@@ -38,11 +37,52 @@ from types import FunctionType, StringType, TupleType, ListType
 
 from reportlab.graphics.shapes import Drawing, Line, Group, Auto
 from reportlab.graphics.shapes import STATE_DEFAULTS
-from reportlab.graphics.shapes import isNumber, isNumberOrNone, isNumberOrAuto, isListOfNumbers, isListOfNumbersOrNone, isColorOrNone, OneOf
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.utils import nextRoundNumber
+# Move into dedicated module.
+from reportlab.graphics.shapes import isNumber, isNumberOrNone, isNumberOrAuto, isListOfStringsOrNone, isListOfNumbers, isListOfNumbersOrNone, isColorOrNone, OneOf
 
+
+# Helpers.
+
+def _findMin(V, x, default):
+    '''find minimum over V[i][x]'''
+
+    try:
+        if type(V[0][0]) in (TupleType,ListType):
+            selector = lambda T, x=x: T[x]
+            m = min(map(selector, V[0]))
+            for v in V[1:]:
+                m = min(m,min(map(selector, v)))
+        else:
+            m = min(V[0])
+            for v in V[1:]:
+                m = min(m,min(v))
+    except IndexError:
+            m = default
+
+    return m
+
+
+def _findMax(V, x, default):
+    '''find maximum over V[i][x]'''
+
+    try:
+        if type(V[0][0]) in (TupleType,ListType):
+            selector = lambda T, x=x: T[x]
+            m = max(map(selector, V[0]))
+            for v in V[1:]:
+                m = max(m,max(map(selector, v)))
+        else:
+            m = max(V[0])
+            for v in V[1:]:
+                m = max(m,max(v))
+    except IndexError:
+        m = default
+
+    return m
+    
 
 # Category axes.
 
@@ -90,7 +130,7 @@ class XCategoryAxis(CategoryAxis):
         'tickUp':isNumber,
         'tickDown':isNumber,
         'labels':None,
-        'categoryNames':None,
+        'categoryNames':isListOfStringsOrNone,
         'joinAxis':None,
         'joinAxisMode':OneOf(('bottom', 'top', 'value', 'points', None)),
         'joinAxisPos':isNumberOrNone,
@@ -252,7 +292,7 @@ class YCategoryAxis(CategoryAxis):
         'tickLeft':isNumber,
         'tickRight':isNumber,
         'labels':None,
-        'categoryNames':None,
+        'categoryNames':isListOfStringsOrNone,
         'joinAxis':None,
         'joinAxisMode':OneOf(('left', 'right', 'value', 'points', None)),
         'joinAxisPos':isNumberOrNone,
@@ -339,7 +379,8 @@ class YCategoryAxis(CategoryAxis):
 
 
     def scale(self, idx):
-        """returns the y position and width in drawing units of the slice"""
+        "Returns the y position and width in drawing units of the slice."
+
         return (self._y + (idx * self._barWidth), self._barWidth)
 
     
@@ -374,7 +415,8 @@ class YCategoryAxis(CategoryAxis):
             for i in range(self._catCount + 1):
                 if self.tickLeft or self.tickRight:
                     y = self._y + (1.0 * i * self._barWidth)
-                    tick = Line(self._x - self.tickLeft, y, self._x + self.tickRight, y)
+                    tick = Line(self._x - self.tickLeft, y,
+                                self._x + self.tickRight, y)
                     tick.strokeColor = self.strokeColor
                     tick.strokeWidth = self.strokeWidth
                     tick.strokeDashArray = self.strokeDashArray
@@ -402,41 +444,6 @@ class YCategoryAxis(CategoryAxis):
         return g
 
 
-def _findMin(V, x, default):
-    '''find minimum over V[i][x]'''
-    try:
-        if type(V[0][0]) in (TupleType,ListType):
-            selector = lambda T, x=x: T[x]
-            m = min(map(selector, V[0]))
-            for v in V[1:]:
-                m = min(m,min(map(selector, v)))
-        else:
-            m = min(V[0])
-            for v in V[1:]:
-                m = min(m,min(v))
-    except IndexError:
-            m = default
-    return m
-
-
-def _findMax(V, x, default):
-    '''find maximum over V[i][x]'''
-    try:
-        if type(V[0][0]) in (TupleType,ListType):
-            selector = lambda T, x=x: T[x]
-            m = max(map(selector, V[0]))
-            for v in V[1:]:
-                m = max(m,max(map(selector, v)))
-        else:
-            m = max(V[0])
-            for v in V[1:]:
-                m = max(m,max(v))
-    except IndexError:
-        m = default
-
-    return m
-    
-
 # Value axes.
 
 class ValueAxis(Widget):
@@ -448,7 +455,7 @@ class ValueAxis(Widget):
         'strokeColor':isColorOrNone,
         'strokeDashArray':isListOfNumbersOrNone,
         'minimumTickSpacing':isNumber,
-        'maximumTicks' : isNumber,
+        'maximumTicks':isNumber,
         'labels':None,
         'labelTextFormat':None,
         'valueMin':isNumberOrAuto,
@@ -486,6 +493,7 @@ class ValueAxis(Widget):
         # 'formatMonthEndDate' function and use that on irregular
         # data points.
         self.labelTextFormat = '%d'
+
         # if set to auto, these will be worked out for you.
         # if you override any or all of them, your values
         # will be used.
@@ -493,15 +501,6 @@ class ValueAxis(Widget):
         self.valueMax = Auto
         self.valueStep = Auto
         
-        # alternative which is more flexible - provide a list
-        # of values to use, allowing equal spacing.  So you
-        # can give month end timestamps, which are not equally
-        # spaced mathematically.
-        #
-        # This overrides the above three if present.
-        # self.valueList = None
-        # or should it be in a subclass for TimeAxis?
-
 
     def setPosition(self, x, y, length):
         # ensure floating point
@@ -544,6 +543,7 @@ class ValueAxis(Widget):
 
         Returns a min, max tuple.
         """
+
         valueMin = self.valueMin
         if self.valueMin == Auto:
             valueMin = _findMin(dataSeries,self._dataIndex,valueMin)
@@ -556,10 +556,12 @@ class ValueAxis(Widget):
 
 
     def _rangeAdjust(self):
-        ''' override this if you want to alter the calculated range
-            eg want a minumamum range of 30%
-            or don't want 100% as the first point
-        '''
+        """Override this if you want to alter the calculated range.
+        
+        E.g. if want a minumamum range of 30% or don't want 100%
+        as the first point.
+        """
+
         pass
 
 
@@ -599,7 +601,8 @@ class ValueAxis(Widget):
 
 
     def _calcValueStep(self):
-        '''Calculate _valueStep for the axis or get from valueStep''' 
+        '''Calculate _valueStep for the axis or get from valueStep.''' 
+
         if self.valueStep == Auto:
             rawRange = self._valueMax - self._valueMin
             rawInterval = rawRange / min(self.maximumTicks-1,(float(self._length)/self.minimumTickSpacing ))
@@ -616,7 +619,6 @@ class ValueAxis(Widget):
         pos = [self._x, self._y]
         d = self._dataIndex
         labels = self.labels
-
 
         i = 0
         for tick in self._tickValues:
@@ -659,16 +661,19 @@ class XValueAxis(ValueAxis):
         'joinAxisMode':OneOf(('bottom', 'top', 'value', 'points', None)),
         'joinAxisPos':isNumberOrNone,
         })
- 
+
+    # Indicate the dimension of the data we're interested in. 
     _dataIndex = 0
 
     def __init__(self):
         ValueAxis.__init__(self)
+
         self.labels.boxAnchor = 'n'
         self.labels.dx = 0
         self.labels.dy = -5
-        self.tickUp = 0     # how far up of axis does tick go?
-        self.tickDown = 5   # how far down does tick go?
+
+        self.tickUp = 0
+        self.tickDown = 5
 
         self.joinAxis = None
         self.joinAxisMode = None
@@ -678,6 +683,7 @@ class XValueAxis(ValueAxis):
     def demo(self):
         self.setPosition(20, 50, 150)
         self.configure([(10,20,30,40,50)])
+
         d = Drawing(200, 100)
         d.add(self)
         return d
@@ -716,7 +722,8 @@ class XValueAxis(ValueAxis):
         The chart first configures the axis, then asks it to
         work out the x value for each point when plotting
         lines or bars.  You could override this to do
-        logarithmic axes."""
+        logarithmic axes.
+        """
 
         msg = "Axis cannot scale numbers before it is configured"
         assert self._configured, msg
@@ -755,7 +762,8 @@ class XValueAxis(ValueAxis):
         for tickValue in self._tickValues:
             if self.tickUp or self.tickDown:
                 x = self.scale(tickValue)
-                tick = Line(x, self._y - self.tickDown, x, self._y + self.tickUp)
+                tick = Line(x, self._y - self.tickDown,
+                            x, self._y + self.tickUp)
                 tick.strokeColor = self.strokeColor
                 tick.strokeWidth = self.strokeWidth
                 tick.strokeDashArray = self.strokeDashArray
@@ -775,15 +783,19 @@ class YValueAxis(ValueAxis):
         'joinAxisMode':OneOf(('left', 'right', 'value', 'points', None)),
         'joinAxisPos':isNumberOrNone,
         })
+
+    # Indicate the dimension of the data we're interested in. 
     _dataIndex = 1
 
     def __init__(self):
         ValueAxis.__init__(self)
+
         self.labels.boxAnchor = 'e'
         self.labels.dx = -5
         self.labels.dy = 0
-        self.tickRight = 0  # how far to right of axis does tick go?
-        self.tickLeft = 5   # how far to left does tick go?
+
+        self.tickRight = 0
+        self.tickLeft = 5
 
         self.joinAxis = None
         self.joinAxisMode = None
@@ -793,6 +805,7 @@ class YValueAxis(ValueAxis):
     def demo(self):
         self.setPosition(40, 10, 80)
         self.configure([(10,20,30)])
+
         d = Drawing(200, 100)
         d.add(self)
         return d
@@ -831,7 +844,8 @@ class YValueAxis(ValueAxis):
         The chart first configures the axis, then asks it to
         work out the x value for each point when plotting
         lines or bars.  You could override this to do
-        logarithmic axes."""
+        logarithmic axes.
+        """
 
         msg = "Axis cannot scale numbers before it is configured"
         assert self._configured, msg
@@ -870,7 +884,8 @@ class YValueAxis(ValueAxis):
         for tickValue in self._tickValues:
             if self.tickLeft or self.tickRight:
                 y = self.scale(tickValue)
-                tick = Line(self._x - self.tickLeft, y, self._x + self.tickRight, y)
+                tick = Line(self._x - self.tickLeft, y,
+                            self._x + self.tickRight, y)
                 tick.strokeColor = self.strokeColor
                 tick.strokeWidth = self.strokeWidth
                 tick.strokeDashArray = self.strokeDashArray
@@ -878,124 +893,6 @@ class YValueAxis(ValueAxis):
 
         return g
  
-# Deprecated!!! Will change!!!
-
-##class XTimeValueAxis(XValueAxis):
-##    "X time value axis"
-##
-##    _attrMap = {
-##        'visible':isNumber,
-##        'strokeWidth':isNumber,
-##        'strokeColor':isColorOrNone,
-##        'strokeDashArray':isListOfNumbersOrNone,
-##        'tickUp':isNumber,
-##        'tickDown':isNumber,
-##        'minimumTickSpacing':isNumber,
-##        'labels':None,
-##        'labelTextFormat':None,
-##        'valueMin':isNumberOrAuto,
-##        'valueMax':isNumberOrAuto,
-##        'valueStep':isNumberOrAuto,
-##        'valueSteps':isListOfNumbers
-##        }
-##
-##    def demo(self):
-##        self.setPosition(20, 50, 150)
-##        self.configure([(10,20,30,40,50)])
-##        d = Drawing(200, 100)
-##        d.add(self)
-##        return d
-##
-##        
-##    def configure(self, dataSeries):
-##        try:
-##            minFound = dataSeries[0][0]
-##            maxFound = dataSeries[0][0]
-##            for ser in dataSeries:
-##                for num in ser:
-##                    if num < minFound:
-##                        minFound = num
-##                    if num > maxFound:
-##                        maxFound = num
-##        except IndexError:
-##            minFound = self.valueMin
-##            maxFound = self.valueMax
-##        
-##        if self.valueMin == Auto:
-##            self._valueMin = minFound
-##        else:
-##            self._valueMin = self.valueMin
-##
-##        if self.valueMax == Auto:
-##            self._valueMax = maxFound
-##        else:
-##            self._valueMax = self.valueMax
-##
-##        self._scaleFactor = self._length * 1.0 / (self._valueMax - self._valueMin) 
-##
-##        # now work out where to put tickmarks.
-##        if hasattr(self, 'valueSteps'): 
-##            self._tickValues = self.valueSteps
-##        else:
-##            if self.valueStep == Auto:
-##                rawRange = self._valueMax - self._valueMin
-##                rawInterval = rawRange * (1.0 * self.minimumTickSpacing / self._length)
-##                niceInterval = nextRoundNumber(rawInterval)
-##                self._valueStep = niceInterval
-##            else:
-##                self._valueStep = self.valueStep
-##
-##            self._tickValues = []
-##            tick = int(self._valueMin / self._valueStep) * self._valueStep
-##            if tick >= self._valueMin:
-##                self._tickValues.append(tick)
-##            tick = tick + self._valueStep
-##            while tick <= self._valueMax:
-##                self._tickValues.append(tick)
-##                tick = tick + self._valueStep
-##            
-##        self._configured = 1            
-##
-##
-##    def draw(self):
-##        g = Group()
-##        if not self.visible:
-##            return g
-##
-##        axis = Line(self._x, self._y, self._x + self._length, self._y)
-##        axis.strokeColor = self.strokeColor
-##        axis.strokeWidth = self.strokeWidth
-##        axis.strokeDashArray = self.strokeDashArray
-##        g.add(axis)
-##
-##        formatFunc = self.labelTextFormat
-##
-##        i = 0
-##        for tickValue in self._tickValues:
-##            x = self.scale(tickValue)
-##            if (self.tickUp != self.tickDown):
-##                # draw tick marks
-##                tick = Line(x, self._y - self.tickDown,
-##                            x, self._y + self.tickUp)
-##
-##                tick.strokeColor = self.strokeColor
-##                tick.strokeWidth = self.strokeWidth
-##                tick.strokeDashArray = self.strokeDashArray
-##                g.add(tick)
-##
-##            if formatFunc:
-##                if type(formatFunc) is StringType:
-##                    labelText = formatFunc % tickValue
-##                else:
-##                    labelText = formatFunc(tickValue)
-##                label = self.labels[i]
-##                label.setOrigin(x, self._y)
-##                label.setText(labelText)
-##                g.add(label)
-##            i = i + 1
-##                        
-##        return g
-
 
 # Sample functions.
 
