@@ -1,12 +1,15 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/abag.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/abag.py,v 1.3 2001/01/10 09:08:10 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/lib/abag.py,v 1.4 2001/01/19 11:45:16 rgbecker Exp $
 
 class ABag:
 	"""
 	A trivial BAG class for holding attributes.
-	(Perhaps AttrBag would be a better name.)
+
+	a = ABag(k0=v0,....,kx=vx,....) ==> getattr(a,'kx')==vx
+
+	c = a.clone(ak0=av0,.....) copy with optional additional attributes.
 	"""
 	def __init__(self,**attr):
 		for k,v in attr.items():
