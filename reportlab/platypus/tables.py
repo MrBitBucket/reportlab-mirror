@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.24  2000/07/12 15:25:42  rgbecker
+#	INNERGRID was dumb
+#
 #	Revision 1.23  2000/07/12 15:18:16  rgbecker
 #	Leading changes fixed
-#
+#	
 #	Revision 1.22  2000/07/12 14:23:12  rgbecker
 #	Table argument order changed
 #	
@@ -98,7 +101,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.23 2000/07/12 15:18:16 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.24 2000/07/12 15:25:42 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -276,9 +279,6 @@ class Table(Flowable):
 				self._drawInnerGrid( (sc, sr), (ec, er), weight, color)
 			elif op in ('BOX',	'OUTLINE',):
 				self._drawBox( (sc, sr), (ec, er), weight, color)
-			elif op == 'BOXGRID':
-				self._drawBox( (sc, sr), (ec, er), weight, color)
-				self._drawInnerGrid( (sc, sr), (ec, er), weight, color)
 			elif op == 'INNERGRID':
 				self._drawInnerGrid( (sc, sr), (ec, er), weight, color)
 			elif op == 'LINEBELOW':
