@@ -89,7 +89,7 @@ def _find_rl_accel():
 _FILES= [
         'README',
         'changes',
-        'license.txt'
+        'license.txt',
 
         'demos/colors/colortest.py',
         'demos/gadflypaper/00readme.txt',
