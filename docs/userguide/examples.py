@@ -101,17 +101,22 @@ def colors(canvas):
     from reportlab.lib import colors
     from reportlab.lib.units import inch
     black = colors.black
-    y = x = 0; dy=inch*3/4.0; dx=inch*5.5/5; w=h=dy/2; rdx=(dx-w)/2; rdy=h/5.0; texty=h+2*rdy
+    y = x = 0; dy=inch*3/4.0; dx=inch*5.5/5; w=h=dy/2; rdx=(dx-w)/2
+    rdy=h/5.0; texty=h+2*rdy
     canvas.setFont("Helvetica",10)
-    for name in ("lavenderblush", "lawngreen", "lemonchiffon", "lightblue", "lightcoral"):
-        color = getattr(colors,name) # colors.lavenderblush, ... (shorthand)
-        canvas.setFillColor(color)
+    for [namedcolor, name] in (
+           [colors.lavenderblush, "lavenderblush"], 
+           [colors.lawngreen, "lawngreen"],
+           [colors.lemonchiffon, "lemonchiffon"],
+           [colors.lightblue, "lightblue"],
+           [colors.lightcoral, "lightcoral"]):
+        canvas.setFillColor(namedcolor)
         canvas.rect(x+rdx, y+rdy, w, h, fill=1)
         canvas.setFillColor(black)
         canvas.drawCentredString(x+dx/2, y+texty, name)
         x = x+dx
     y = y + dy; x = 0
-    for rgb in [(1,0,0), (0,1,0), (0,0,1), (0.5,0.3,0.1), (0.1,0.5,0.3)]:
+    for rgb in [(1,0,0), (0,1,0), (0,0,1), (0.5,0.3,0.1), (0.4,0.5,0.3)]:
         r,g,b = rgb
         canvas.setFillColorRGB(r,g,b)
         canvas.rect(x+rdx, y+rdy, w, h, fill=1)
@@ -127,8 +132,7 @@ def colors(canvas):
         canvas.drawCentredString(x+dx/2, y+texty, "c%s m%s y%s k%s"%cmyk)
         x = x+dx
     y = y + dy; x = 0
-    for g in range(5):
-        gray = g/4.0
+    for gray in (0.0, 0.25, 0.50, 0.75, 1.0):
         canvas.setFillGray(gray)
         canvas.rect(x+rdx, y+rdy, w, h, fill=1)
         canvas.setFillColor(black)
@@ -344,7 +348,8 @@ def textsize(canvas):
 """
 
 teststar = """
-def star(canvas, title="Title Here", aka="Comment here.", xcenter=None, ycenter=None, nvertices=5):
+def star(canvas, title="Title Here", aka="Comment here.", 
+         xcenter=None, ycenter=None, nvertices=5):
     from math import pi
     from reportlab.lib.units import inch
     radius=inch/3.0
@@ -579,6 +584,57 @@ def fonts(canvas):
         canvas.setFont("Helvetica", 10)
         canvas.drawRightString(x-10,y, font+":")
         y = y-13
+"""
+
+testarcs = """
+def arcs(canvas):
+    from reportlab.lib.units import inch
+    canvas.setLineWidth(4)
+    canvas.setStrokeColorRGB(0.8, 1, 0.6)
+    # draw rectangles enclosing the arcs
+    canvas.rect(inch, inch, 1.5*inch, inch)
+    canvas.rect(3*inch, inch, inch, 1.5*inch)
+    canvas.setStrokeColorRGB(0, 0.2, 0.4)
+    canvas.setFillColorRGB(1, 0.6, 0.8)
+    p = canvas.beginPath()
+    p.moveTo(0.2*inch, 0.2*inch)
+    p.arcTo(inch, inch, 2.5*inch,2*inch, startAng=-30, extent=135)
+    p.arc(3*inch, inch, 4*inch, 2.5*inch, startAng=-45, extent=270)
+    canvas.drawPath(p, fill=1, stroke=1)
+"""
+testvariousshapes = """
+def variousshapes(canvas):
+    from reportlab.lib.units import inch
+    inch = int(inch)
+    canvas.setStrokeGray(0.5)
+    canvas.grid(range(0,11*inch/2,inch/2), range(0,7*inch/2,inch/2))
+    canvas.setLineWidth(4)
+    canvas.setStrokeColorRGB(0, 0.2, 0.7)
+    canvas.setFillColorRGB(1, 0.6, 0.8)
+    p = canvas.beginPath()
+    p.rect(0.5*inch, 0.5*inch, 0.5*inch, 2*inch)
+    p.circle(2.75*inch, 1.5*inch, 0.3*inch)
+    p.ellipse(3.5*inch, 0.5*inch, 1.2*inch, 2*inch)
+    canvas.drawPath(p, fill=1, stroke=1)
+"""
+
+testclosingfigures = """
+def closingfigures(canvas):
+    from reportlab.lib.units import inch
+    h = inch/3.0; k = inch/2.0
+    canvas.setStrokeColorRGB(0.2,0.3,0.5)
+    canvas.setFillColorRGB(0.8,0.6,0.2)
+    canvas.setLineWidth(4)
+    p = canvas.beginPath()
+    for i in (1,2,3,4):
+        for j in (1,2):
+            xc,yc = inch*i, inch*j
+            p.moveTo(xc,yc)
+            p.arcTo(xc-h, yc-k, xc+h, yc+k, startAng=0, extent=60*i)
+            # close only the first one, not the second one
+            if j==1:
+                p.close()
+    canvas.drawPath(p, fill=1, stroke=1)
 """
 
 testforms = """

@@ -325,7 +325,7 @@ eg("""canvas.skew(alpha, beta) """)
 
 disc("""
 All PDF drawings fit into a specified page size.  Elements drawn outside of the specified
-page size are ignored.  Furthermore all drawn elements are passed through an affine
+page size are not visible.  Furthermore all drawn elements are passed through an affine
 transformation which may adjust their location and/or distort their appearence.  The
 $setPageSize$ method adjusts the current page size.  The $transform$, $translate$, $scale$,
 $rotate$, and $skew$ methods add additional transformations to the current transformation.
@@ -343,7 +343,8 @@ Very often it is important to save the current font, graphics transform, line st
 other graphics state in order to restore them later. The $saveState$ method marks the
 current graphics state for later restoration by a matching $restoreState$.  Note that
 the save and restore method invokation must match -- a restore call restores the state to
-the most recently saved state.  You cannot save the state on one page and restore
+the most recently saved state which hasn't been restored yet.  
+You cannot save the state on one page and restore
 it on the next, however -- no state is preserved between pages.""")
 
 heading2("Other $canvas$ methods.")
@@ -816,7 +817,7 @@ or a half circle over the vertex.
 
 eg(examples.testcaps)
 
-disc("""The line cap setting, like the line join setting, is only
+disc("""The line cap setting, like the line join setting, is only clearly
 visible when the lines are thick.""")
 
 illust(examples.caps, "line cap settings")
@@ -931,30 +932,141 @@ illust(examples.bezier2, "bezier curves")
 
 heading2("Path object methods")
 
+disc("""
+Path objects build complex graphical figures by setting
+the "pen" or "brush" at a start point on the canvas and drawing
+lines or curves to additional points on the canvas.  Most operations
+apply paint on the canvas starting at the end point of the last
+operation and leave the brush at a new end point.
+""")
+
 eg("""pathobject.moveTo(x,y)""")
+
+disc("""
+The $moveTo$ method lifts the brush (ending any current sequence
+of lines or curves if there is one) and replaces the brush at the
+new ^(x,y)^ location on the canvas to start a new path sequence.
+""")
 
 eg("""pathobject.lineTo(x,y)""")
 
+disc("""
+The $lineTo$ method paints straight line segment from the current brush
+location to the new ^(x,y)^ location.
+""")
+
 eg("""pathobject.curveTo(x1, y1, x2, y2, x3, y3) """)
+
+disc("""
+The $curveTo$ method starts painting a Bezier curve beginning at
+the current brush location, using ^(x1,y1)^, ^(x2,y2)^, and ^(x3,y3)^
+as the other three control points, leaving the brush on ^(x3,y3)^.
+""")
 
 eg("""pathobject.arc(x1,y1, x2,y2, startAng=0, extent=90) """)
 
 eg("""pathobject.arcTo(x1,y1, x2,y2, startAng=0, extent=90) """)
 
+disc("""
+The $arc$ and $arcTo$ methods paint partial ellipses.  The $arc$ method first "lifts the brush"
+and starts a new shape sequence.  The $arcTo$ method joins the start of 
+the partial ellipse to the current
+shape sequence by line segment before drawing the partial ellipse.  The points
+^(x1,y1)^ and ^(x2,y2)^ define opposite corner points of a rectangle enclosing
+the ellipse.  The $startAng$ is an angle (in degrees) specifying where to begin
+the partial ellipse where the 0 angle is the midpoint of the right border of the enclosing
+rectangle (when ^(x1,y1)^ is the lower left corner and ^(x2,y2)^ is the upper
+right corner).  The $extent$ is the angle in degrees to traverse on the ellipse.
+""")
+
+eg(examples.testarcs)
+
+disc("""The $arcs$ function above exercises the two partial ellipse methods.
+It produces the following drawing.""")
+
+illust(examples.arcs, "arcs in path objects")
+
 eg("""pathobject.rect(x, y, width, height) """)
+
+disc("""The $rect$ method draws a rectangle with lower left corner
+at ^(x,y)^ of the specified ^width^ and ^height^.""")
 
 eg("""pathobject.ellipse(x, y, width, height)""")
 
+disc("""The $ellipse$ method
+draws an ellipse enclosed in the rectange with lower left corner
+at ^(x,y)^ of the specified ^width^ and ^height^.
+""")
+
 eg("""pathobject.circle(x_cen, y_cen, r) """)
+
+disc("""The $circle$ method
+draws a circle centered at ^(x_cen, y_cen)^ with radius ^r^.
+""")
+
+eg(examples.testvariousshapes)
+
+disc("""
+The $variousshapes$ function above shows a rectangle, circle and ellipse
+placed in a frame of reference grid.
+""")
+
+illust(examples.variousshapes, "rectangles, circles, ellipses in path objects")
 
 eg("""pathobject.close() """)
 
+disc("""
+The $close$ method closes the current graphical figure
+by painting a line segment from the last point of the figure
+to the starting point of the figure (the the most
+recent point where the brush was placed on the paper by $moveTo$
+or $arc$ or other placement operations).
+""")
+
+eg(examples.testclosingfigures)
+
+disc("""
+The $closingfigures$ function illustrates the
+effect of closing or not closing figures including a line
+segment and a partial ellipse.
+""")
+
+illust(examples.closingfigures, "closing and not closing pathobject figures")
+
+disc("""
+Closing or not closing graphical figures effects only the stroked outline
+of a figure, not the filling of the figure as illustrated above.
+""")
+
+
+disc("""
+For a more extensive example of drawing using a path object
+examine the $hand$ function.
+""")
+
 eg(examples.testhand)
+
+disc("""
+In debug mode (the default) the $hand$ function shows the tangent line segments
+to the bezier curves used to compose the figure.  Note that where the segments
+line up the curves join smoothly, but where they do not line up the curves show
+a "sharp edge".
+""")
 
 illust(examples.hand, "an outline of a hand using bezier curves")
 
+disc("""
+Used in non-debug mode the $hand$ function only shows the
+Bezier curves.  With the $fill$ parameter set the figure is
+filled using the current fill color.
+""")
 
 eg(examples.testhand2)
+
+disc("""
+Note that the "stroking" of the border draws over the interior fill where
+they overlap.
+""")
 
 illust(examples.hand2, "the finished hand, filled")
 
