@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/tocindex.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/tocindex.py,v 1.9 2002/07/24 19:56:37 andy_robinson Exp $
-__version__=''' $Id: tocindex.py,v 1.9 2002/07/24 19:56:37 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/tocindex.py,v 1.10 2003/12/02 15:21:17 andy_robinson Exp $
+__version__=''' $Id: tocindex.py,v 1.10 2003/12/02 15:21:17 andy_robinson Exp $ '''
 __doc__=''
 """
 This module will contain standard Table of Contents and Index objects.
@@ -196,6 +196,8 @@ def getSampleTOCData(depth=3):
                                     (chapter, section, subSection),
                                     pgNum)
                         pgNum = pgNum + randint(0,1)
+    from pprint import pprint as pp
+    pp(data)
     return data
 
 
@@ -211,7 +213,7 @@ def getSampleStory(depth=3):
     story = [Paragraph("This is a demo of the table of contents object",
                        styles['Heading1'])]
 
-    toc = TableOfContents()  # empty on first pass
+    toc = TableOfContents0()  # empty on first pass
     #toc.addEntries(TOCData)  # init with random page numbers
     story.append(toc)
 

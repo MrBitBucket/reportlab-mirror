@@ -18,264 +18,237 @@
 
     Please send bug reports, suggestions, etc. to: info@reportlab.com.
 -->
-
 <!-- Entities -->
-<!ENTITY % bool                   "true|false">
-<!ENTITY % align.values           "left|center|right">
+<!ENTITY % bool "true|false">
+<!ENTITY % align.values "left|center|right">
 <!ENTITY % effectdimension.values "H|V">
 <!ENTITY % effectdirection.values "0|90|180|270">
-<!ENTITY % effectmotion.values    "I|O">
-<!ENTITY % effectname.values      "Blinds|Box|Dissolve|Glitter|Split|Wipe">
-
-
+<!ENTITY % effectmotion.values "I|O">
+<!ENTITY % effectname.values "Blinds|Box|Dissolve|Glitter|Split|Wipe">
 <!-- Top-Level Element -->
-
-<!ELEMENT presentation 
-              (subject?, title?, author?, section?, stylesheet?, 
-              registerFont?, slide*)+>
-<!ATTLIST presentation 
-              filename CDATA #REQUIRED>
-
-
+<!ELEMENT presentation (subject?, title?, author?, section?, stylesheet?, registerFont?, slide*)+>
+<!ATTLIST presentation
+  filename CDATA #REQUIRED
+  pageDuration CDATA #IMPLIED
+>
 <!-- First-Level Elements -->
-
-<!ELEMENT author (#PCDATA)> <!-- PDF Document Info -->
-
-<!ELEMENT section 
-              (fixedimage*, rectangle*, roundrect*, 
-              ellipse*, polygon*, line*, string*, 
-              infostring*, customshape*, slide*)+>
-<!ATTLIST section 
-              name CDATA #REQUIRED>
-
-<!ELEMENT slide 
-              (fixedimage*, rectangle*, roundrect*, 
-              ellipse*, polygon*, line*, string*, 
-              infostring*, customshape*, frame*, 
-              notes*)+>
-<!ATTLIST slide 
-              id              CDATA                      #REQUIRED
-              title           CDATA                      #REQUIRED
-              outlineentry    CDATA                      #IMPLIED
-              outlinelevel    NMTOKEN                    #IMPLIED
-              showIDName      (%bool;)                   "true"
-              effectname      (%effectname.values;)      #IMPLIED
-              effectdirection (%effectdirection.values;) "0"
-              effectdimension (%effectdimension.values;) "H"
-              effectmotion    (%effectmotion.values;)    "I"
-              effectduration  NMTOKEN                    "1">
-
+<!ELEMENT author (#PCDATA)>
+<!-- PDF Document Info -->
+<!ELEMENT section (fixedimage*, rectangle*, roundrect*, ellipse*, polygon*, line*, string*, infostring*, customshape*, slide*)+>
+<!ATTLIST section
+  name CDATA #REQUIRED
+>
+<!ELEMENT slide (fixedimage*, rectangle*, roundrect*, ellipse*, polygon*, line*, string*, infostring*, customshape*, frame*, notes*)+>
+<!ATTLIST slide
+  id CDATA #REQUIRED
+  title CDATA #REQUIRED
+  outlineentry CDATA #IMPLIED
+  outlinelevel NMTOKEN #IMPLIED
+  showIDName (%bool;) "true"
+  effectname (%effectname.values;) #IMPLIED
+  effectdirection (%effectdirection.values;) "0"
+  effectdimension (%effectdimension.values;) "H"
+  effectmotion (%effectmotion.values;) "I"
+  effectduration NMTOKEN "1"
+>
 <!ELEMENT stylesheet EMPTY>
-<!ATTLIST stylesheet 
-              path     CDATA #IMPLIED
-              module   CDATA #REQUIRED
-              function CDATA #REQUIRED>
-
+<!ATTLIST stylesheet
+  path CDATA #IMPLIED
+  module CDATA #REQUIRED
+  function CDATA #REQUIRED
+>
 <!ELEMENT registerFont EMPTY>
 <!ATTLIST registerFont
-              name     CDATA #REQUIRED
-              path     CDATA #REQUIRED>
-
-<!ELEMENT subject (#PCDATA)> <!-- PDF Document Info -->
-
-<!ELEMENT title (#PCDATA)> <!-- PDF Document Info -->
-
-
+  name CDATA #REQUIRED
+  path CDATA #REQUIRED
+>
+<!ELEMENT subject (#PCDATA)>
+<!-- PDF Document Info -->
+<!ELEMENT title (#PCDATA)>
+<!-- PDF Document Info -->
 <!-- Other elements -->
-
 <!ELEMENT b (#PCDATA)>
-
 <!ELEMENT customshape EMPTY>
-<!ATTLIST customshape 
-              path     CDATA #IMPLIED
-              module   CDATA #IMPLIED
-              class    CDATA #IMPLIED
-              initargs CDATA #IMPLIED
-              align    (%align.values;) #IMPLIED>
-
+<!ATTLIST customshape
+  path CDATA #IMPLIED
+  module CDATA #IMPLIED
+  class CDATA #IMPLIED
+  initargs CDATA #IMPLIED
+  align (%align.values;) #IMPLIED
+>
 <!ELEMENT ellipse EMPTY>
-<!ATTLIST ellipse 
-              x1        NMTOKEN #REQUIRED
-              y1        NMTOKEN #REQUIRED
-              x2        NMTOKEN #REQUIRED
-              y2        NMTOKEN #REQUIRED
-              fill      CDATA   #IMPLIED
-              stroke    CDATA   "(0,0,0)"
-              linewidth NMTOKEN "0"
-              effectname      (%effectname.values;)      #IMPLIED
-              effectdirection (%effectdirection.values;) "0"
-              effectdimension (%effectdimension.values;) "H"
-              effectmotion    (%effectmotion.values;)    "I"
-              effectduration  NMTOKEN                    "1">
-
+<!ATTLIST ellipse
+  x1 NMTOKEN #REQUIRED
+  y1 NMTOKEN #REQUIRED
+  x2 NMTOKEN #REQUIRED
+  y2 NMTOKEN #REQUIRED
+  fill CDATA #IMPLIED
+  stroke CDATA "(0,0,0)"
+  linewidth NMTOKEN "0"
+  effectname (%effectname.values;) #IMPLIED
+  effectdirection (%effectdirection.values;) "0"
+  effectdimension (%effectdimension.values;) "H"
+  effectmotion (%effectmotion.values;) "I"
+  effectduration NMTOKEN "1"
+>
 <!ELEMENT fixedimage EMPTY>
-<!ATTLIST fixedimage 
-              filename CDATA   #REQUIRED
-              x        NMTOKEN #REQUIRED
-              y        NMTOKEN #REQUIRED
-              width    NMTOKEN #IMPLIED
-              height   NMTOKEN #IMPLIED>
-
+<!ATTLIST fixedimage
+  filename CDATA #REQUIRED
+  x NMTOKEN #REQUIRED
+  y NMTOKEN #REQUIRED
+  width NMTOKEN #IMPLIED
+  height NMTOKEN #IMPLIED
+>
 <!ELEMENT font (#PCDATA)>
-<!ATTLIST font  
-              name  CDATA   #IMPLIED
-              color CDATA   #IMPLIED
-              size  NMTOKEN #IMPLIED>
-
-<!ELEMENT frame 
-              (para*, prefmt*, pycode*, image*, table*, 
-              fixedimage*, rectangle*, roundrect*, 
-              ellipse*, polygon*, line*, string*, 
-              customshape*, spacer*)+>
-<!ATTLIST frame 
-              x            NMTOKEN #REQUIRED
-              y            NMTOKEN #REQUIRED
-              width        NMTOKEN #REQUIRED
-              height       NMTOKEN #REQUIRED
-              leftmargin   NMTOKEN "0"
-              rightmargin  NMTOKEN "0"
-              topmargin    NMTOKEN "0"
-              bottommargin NMTOKEN "0"
-              border       (%bool;) "false">
-
+<!ATTLIST font
+  name CDATA #IMPLIED
+  color CDATA #IMPLIED
+  size NMTOKEN #IMPLIED
+>
+<!ELEMENT frame (para*, prefmt*, pycode*, image*, table*, fixedimage*, rectangle*, roundrect*, ellipse*, polygon*, line*, string*, customshape*, spacer*)+>
+<!ATTLIST frame
+  x NMTOKEN #REQUIRED
+  y NMTOKEN #REQUIRED
+  width NMTOKEN #REQUIRED
+  height NMTOKEN #REQUIRED
+  leftmargin NMTOKEN "0"
+  rightmargin NMTOKEN "0"
+  topmargin NMTOKEN "0"
+  bottommargin NMTOKEN "0"
+  border (%bool;) "false"
+>
 <!ELEMENT greek (#PCDATA)>
-
 <!ELEMENT i (#PCDATA)>
-
 <!ELEMENT image EMPTY>
-<!ATTLIST image 
-              filename CDATA   #REQUIRED   
-              width    NMTOKEN #IMPLIED
-              height   NMTOKEN #IMPLIED
-              effectname      (%effectname.values;)      #IMPLIED
-              effectdirection (%effectdirection.values;) "0"
-              effectdimension (%effectdimension.values;) "H"
-              effectmotion    (%effectmotion.values;)    "I"
-              effectduration  NMTOKEN                    "1">
-
+<!ATTLIST image
+  filename CDATA #REQUIRED
+  width NMTOKEN #IMPLIED
+  height NMTOKEN #IMPLIED
+  effectname (%effectname.values;) #IMPLIED
+  effectdirection (%effectdirection.values;) "0"
+  effectdimension (%effectdimension.values;) "H"
+  effectmotion (%effectmotion.values;) "I"
+  effectduration NMTOKEN "1"
+>
 <!ELEMENT infostring (#PCDATA)>
-<!ATTLIST infostring 
-              x     NMTOKEN #REQUIRED
-              y     NMTOKEN #REQUIRED
-              color CDATA   "(0,0,0)"
-              font  CDATA   "Times-Roman"
-              size  NMTOKEN "12"
-              align (%align.values;) "left">
-
+<!ATTLIST infostring
+  x NMTOKEN #REQUIRED
+  y NMTOKEN #REQUIRED
+  color CDATA "(0,0,0)"
+  font CDATA "Times-Roman"
+  size NMTOKEN "12"
+  align (%align.values;) "left"
+>
 <!ELEMENT line EMPTY>
-<!ATTLIST line 
-              x1     NMTOKEN  #REQUIRED
-              y1     NMTOKEN  #REQUIRED
-              x2     NMTOKEN  #REQUIRED
-              y2     NMTOKEN  #REQUIRED
-              stroke CDATA    "(0,0,0)"
-              width  NMTOKEN  "0"
-              effectname      (%effectname.values;)      #IMPLIED
-              effectdirection (%effectdirection.values;) "0"
-              effectdimension (%effectdimension.values;) "H"
-              effectmotion    (%effectmotion.values;)    "I"
-              effectduration  NMTOKEN                    "1">
-
+<!ATTLIST line
+  x1 NMTOKEN #REQUIRED
+  y1 NMTOKEN #REQUIRED
+  x2 NMTOKEN #REQUIRED
+  y2 NMTOKEN #REQUIRED
+  stroke CDATA "(0,0,0)"
+  width NMTOKEN "0"
+  effectname (%effectname.values;) #IMPLIED
+  effectdirection (%effectdirection.values;) "0"
+  effectdimension (%effectdimension.values;) "H"
+  effectmotion (%effectmotion.values;) "I"
+  effectduration NMTOKEN "1"
+>
 <!ELEMENT notes (para+)>
-
 <!ELEMENT para (#PCDATA | i | b | u | super | sub | font | greek)*>
-<!ATTLIST para 
-              style      CDATA "Normal"
-              bullettext CDATA #IMPLIED
-              effectname      (%effectname.values;)      #IMPLIED
-              effectdirection (%effectdirection.values;) "0"
-              effectdimension (%effectdimension.values;) "H"
-              effectmotion    (%effectmotion.values;)    "I"
-              effectduration  NMTOKEN                    "1">
-
+<!ATTLIST para
+  style CDATA "Normal"
+  bullettext CDATA #IMPLIED
+  effectname (%effectname.values;) #IMPLIED
+  effectdirection (%effectdirection.values;) "0"
+  effectdimension (%effectdimension.values;) "H"
+  effectmotion (%effectmotion.values;) "I"
+  effectduration NMTOKEN "1"
+>
 <!ELEMENT polygon EMPTY>
-<!ATTLIST polygon 
-              points    CDATA   #REQUIRED
-              fill      CDATA   #REQUIRED
-              stroke    CDATA   "(0,0,0)"
-              linewidth NMTOKEN "0"
-              effectname      (%effectname.values;)      #IMPLIED
-              effectdirection (%effectdirection.values;) "0"
-              effectdimension (%effectdimension.values;) "H"
-              effectmotion    (%effectmotion.values;)    "I"
-              effectduration  NMTOKEN                    "1">
-
+<!ATTLIST polygon
+  points CDATA #REQUIRED
+  fill CDATA #REQUIRED
+  stroke CDATA "(0,0,0)"
+  linewidth NMTOKEN "0"
+  effectname (%effectname.values;) #IMPLIED
+  effectdirection (%effectdirection.values;) "0"
+  effectdimension (%effectdimension.values;) "H"
+  effectmotion (%effectmotion.values;) "I"
+  effectduration NMTOKEN "1"
+>
 <!ELEMENT prefmt (#PCDATA)>
-<!ATTLIST prefmt 
-              xml:space (default|preserve) #FIXED 'preserve'
-              style CDATA #IMPLIED>
-
+<!ATTLIST prefmt
+  xml:space (default | preserve) #FIXED "preserve"
+  style CDATA #IMPLIED
+>
 <!ELEMENT pycode (#PCDATA)>
-<!ATTLIST pycode 
-              xml:space (default|preserve) #FIXED 'preserve'
-              style CDATA #IMPLIED>
-
+<!ATTLIST pycode
+  xml:space (default | preserve) #FIXED "preserve"
+  style CDATA #IMPLIED
+>
 <!ELEMENT rectangle EMPTY>
-<!ATTLIST rectangle 
-              x         NMTOKEN #REQUIRED
-              y         NMTOKEN #REQUIRED
-              width     NMTOKEN #REQUIRED
-              height    NMTOKEN #REQUIRED
-              fill      CDATA   #IMPLIED
-              stroke    CDATA   "(0,0,0)"
-              linewidth NMTOKEN "0"
-              effectname      (%effectname.values;)      #IMPLIED
-              effectdirection (%effectdirection.values;) "0"
-              effectdimension (%effectdimension.values;) "H"
-              effectmotion    (%effectmotion.values;)    "I"
-              effectduration  NMTOKEN                    "1">
-
+<!ATTLIST rectangle
+  x NMTOKEN #REQUIRED
+  y NMTOKEN #REQUIRED
+  width NMTOKEN #REQUIRED
+  height NMTOKEN #REQUIRED
+  fill CDATA #IMPLIED
+  stroke CDATA "(0,0,0)"
+  linewidth NMTOKEN "0"
+  effectname (%effectname.values;) #IMPLIED
+  effectdirection (%effectdirection.values;) "0"
+  effectdimension (%effectdimension.values;) "H"
+  effectmotion (%effectmotion.values;) "I"
+  effectduration NMTOKEN "1"
+>
 <!ELEMENT roundrect EMPTY>
-<!ATTLIST roundrect 
-              x         NMTOKEN #REQUIRED
-              y         NMTOKEN #REQUIRED
-              width     NMTOKEN #REQUIRED
-              height    NMTOKEN #REQUIRED
-              fill      CDATA   #IMPLIED
-              stroke    CDATA   "(0,0,0)"
-              linewidth NMTOKEN "0"
-              radius    NMTOKEN "6"
-              effectname      (%effectname.values;)      #IMPLIED
-              effectdirection (%effectdirection.values;) "0"
-              effectdimension (%effectdimension.values;) "H"
-              effectmotion    (%effectmotion.values;)    "I"
-              effectduration  NMTOKEN                    "1">
-
+<!ATTLIST roundrect
+  x NMTOKEN #REQUIRED
+  y NMTOKEN #REQUIRED
+  width NMTOKEN #REQUIRED
+  height NMTOKEN #REQUIRED
+  fill CDATA #IMPLIED
+  stroke CDATA "(0,0,0)"
+  linewidth NMTOKEN "0"
+  radius NMTOKEN "6"
+  effectname (%effectname.values;) #IMPLIED
+  effectdirection (%effectdirection.values;) "0"
+  effectdimension (%effectdimension.values;) "H"
+  effectmotion (%effectmotion.values;) "I"
+  effectduration NMTOKEN "1"
+>
 <!ELEMENT spacer EMPTY>
-<!ATTLIST spacer 
-              height NMTOKEN #REQUIRED>
-
+<!ATTLIST spacer
+  height NMTOKEN #REQUIRED
+>
 <!ELEMENT string (#PCDATA)>
-<!ATTLIST string 
-              x     NMTOKEN #REQUIRED
-              y     NMTOKEN #REQUIRED
-              color CDATA   "(0,0,0)"
-              font  CDATA   "Times-Roman"
-              size  NMTOKEN "12"
-              align (%align.values;) "left"
-              effectname      (%effectname.values;)      #IMPLIED
-              effectdirection (%effectdirection.values;) "0"
-              effectdimension (%effectdimension.values;) "H"
-              effectmotion    (%effectmotion.values;)    "I"
-              effectduration  NMTOKEN                    "1">
-
+<!ATTLIST string
+  x NMTOKEN #REQUIRED
+  y NMTOKEN #REQUIRED
+  color CDATA "(0,0,0)"
+  font CDATA "Times-Roman"
+  size NMTOKEN "12"
+  align (%align.values;) "left"
+  effectname (%effectname.values;) #IMPLIED
+  effectdirection (%effectdirection.values;) "0"
+  effectdimension (%effectdimension.values;) "H"
+  effectmotion (%effectmotion.values;) "I"
+  effectduration NMTOKEN "1"
+>
 <!ELEMENT sub (#PCDATA)>
-
 <!ELEMENT super (#PCDATA)>
-
 <!ELEMENT table (#PCDATA)>
-<!ATTLIST table 
-              xml:space (default|preserve) #FIXED 'preserve'
-              widths   CDATA #IMPLIED
-              heights  CDATA #IMPLIED
-              style    CDATA #IMPLIED
-              colDelim CDATA #IMPLIED
-              rowDelim CDATA #IMPLIED
-              effectname      (%effectname.values;)      #IMPLIED
-              effectdirection (%effectdirection.values;) "0"
-              effectdimension (%effectdimension.values;) "H"
-              effectmotion    (%effectmotion.values;)    "I"
-              effectduration  NMTOKEN                    "1">
-
+<!ATTLIST table
+  xml:space (default | preserve) #FIXED "preserve"
+  widths CDATA #IMPLIED
+  heights CDATA #IMPLIED
+  style CDATA #IMPLIED
+  colDelim CDATA #IMPLIED
+  rowDelim CDATA #IMPLIED
+  effectname (%effectname.values;) #IMPLIED
+  effectdirection (%effectdirection.values;) "0"
+  effectdimension (%effectdimension.values;) "H"
+  effectmotion (%effectmotion.values;) "I"
+  effectduration NMTOKEN "1"
+>
 <!ELEMENT u (#PCDATA)>
-

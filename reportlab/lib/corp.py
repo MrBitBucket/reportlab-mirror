@@ -2,11 +2,11 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/corp.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/corp.py,v 1.10 2002/07/24 19:56:37 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/lib/corp.py,v 1.11 2003/12/02 15:21:16 andy_robinson Exp $
 """ This module includes some reusable routines for ReportLab's
  'Corporate Image' - the logo, standard page backdrops and
  so on - you are advised to do the same for your own company!"""
-__version__=''' $Id: corp.py,v 1.10 2002/07/24 19:56:37 andy_robinson Exp $ '''
+__version__=''' $Id: corp.py,v 1.11 2003/12/02 15:21:16 andy_robinson Exp $ '''
 
 from reportlab.lib.units import inch,cm
 from reportlab.lib.validators import *
@@ -106,6 +106,12 @@ class RL_CorpLogo(Widget):
             G.shift(w,h)
         G.shift(x,y)
         return G
+
+class RL_CorpLogoReversed(RL_CorpLogo):
+    def __init__(self):
+        RL_CorpLogo.__init__(self)
+        self.background = white
+        self.fillColor = ReportLabBlue
 
 class RL_CorpLogoThin(Widget):
     """The ReportLab Logo.

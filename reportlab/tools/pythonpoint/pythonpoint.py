@@ -953,6 +953,13 @@ def setStyles(newStyleSheet):
 ##    p.close()
 
 
+def validate(rawdata):
+    try:
+        import pyRXP
+    except ImportError:
+        return
+    pars = pyRXP.Parser().parse(rawdata)
+    
 def process(datafile, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=None, datafilename=None):
     "Process one PythonPoint source file."
     if not hasattr(datafile, "read"):
@@ -961,6 +968,10 @@ def process(datafile, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=
     else:
         if not datafilename: datafilename = "PseudoFile"
     rawdata = datafile.read()
+
+    #if pyRXP present, use it to check and get line numbers for errors...
+    validate(rawdata)        
+    
     return _process(rawdata, datafilename, notes, handout, printout, cols, verbose, outDir)
 
 def _process(rawdata, datafilename, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=None):
