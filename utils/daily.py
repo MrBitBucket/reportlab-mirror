@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/daily.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/daily.py,v 1.44 2001/10/05 11:22:07 rgbecker Exp $
-__version__=''' $Id: daily.py,v 1.44 2001/10/05 11:22:07 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/utils/daily.py,v 1.45 2001/10/05 13:46:07 rgbecker Exp $
+__version__=''' $Id: daily.py,v 1.45 2001/10/05 13:46:07 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -112,13 +112,9 @@ def cvs_checkout(d):
 		do_exec("chmod a+x %s/py2pdf.py %s/idle_print.py" % (dst, dst))
 		CVS_remove(dst)
 	else:
-		do_exec(cvs+' co docs')
 		dst = os.path.join(d,"reportlab","docs")
-		if not os.path.isdir(dst): do_exec("mkdir %s" % dst)
-
 		P=os.path.join(os.environ['HOME'],'python_stuff','lib')
-		PP=os.path.join(P,'PIL')
-		PP = "%s:%s:%s" % (d,P,PP)
+		PP = "%s:%s" % (d,P)
 		#add our reportlab parent to the path so we import from there
 		if os.environ.has_key('PYTHONPATH'):
 			opp = os.environ['PYTHONPATH']
@@ -129,25 +125,11 @@ def cvs_checkout(d):
 		if '-pythonpath' in sys.argv:
 			print 'PYTHONPATH=%s'%os.environ['PYTHONPATH']
 
-		os.chdir('docs/reference')
-		do_exec(python + ' ../tools/yaml2pdf.py reference.yml')
+		os.chdir(dst)
+		do_exec(python + ' tools/genAll.py')
+		do_exec('cp %s %s' % (os.path.join(dst,'*.pdf'),htmldir))
+		#do_exec('rm *.pdf')
 		os.chdir(d)
-		do_exec('cp docs/reference/*.pdf %s' % htmldir)
-		do_exec('mv docs/reference/*.pdf %s' % dst)
-
-		os.chdir('docs/userguide')
-		do_exec(python + ' genuserguide.py')
-		os.chdir(d)
-		do_exec('cp docs/userguide/*.pdf %s' % htmldir)
-		do_exec('mv docs/userguide/*.pdf %s' % dst)
-
-		os.chdir('docs/graphguide')
-		do_exec(python + ' gengraphguide.py')
-		os.chdir(d)
-		do_exec('cp docs/graphguide/*.pdf %s' % htmldir)
-		do_exec('mv docs/graphguide/*.pdf %s' % dst)
-
-		recursive_rmdir('docs')
 		pyc_remove(cvsdir)
 
 		#restore the python path
