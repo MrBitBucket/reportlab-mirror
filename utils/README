@@ -41,7 +41,7 @@ Release Procedure
 
 1) edit reportlab/__init__.py and insert the new version number d.xy
 
-2) python utils/cvslh.py -d"2001/mm/dd hh:mm:ss" -r >/tmp/logh
+2) python utils/cvslh.py -d"2001-mm-dd hh:mm:ss" -r >/tmp/logh
    to get a list of the latest changes. The date & time should correspond to
    the previous release. Add the changes into the reportlab changes file at
    the top. These changes should probably be trimmed.
