@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pdfimages.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.4 2000/12/19 09:12:04 rgbecker Exp $
-__version__=''' $Id: pdfimages.py,v 1.4 2000/12/19 09:12:04 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.5 2000/12/19 10:02:30 rgbecker Exp $
+__version__=''' $Id: pdfimages.py,v 1.5 2000/12/19 10:02:30 rgbecker Exp $ '''
 __doc__="""
 Image functionality sliced out of canvas.py for generalization
 """
@@ -82,8 +82,8 @@ class PDFImage:
 
         # this describes what is in the image itself
         # *NB* according to the spec you can only use the short form in inline images
-        #imagedata=['BI /Width %d /Height /BitsPerComponent 8 /ColorSpace /%s /Filter [/Filter [ /ASCII85Decode /FlateDecode] ID]' % (imgwidth, imgheight,'RGB'))]
-        imagedata=['BI /W %d /H %d /BPC 8 /CS /RGB /F [/A85 /Fl] ID' % (imgwidth, imgheight))]
+        #imagedata=['BI /Width %d /Height /BitsPerComponent 8 /ColorSpace /%s /Filter [/Filter [ /ASCII85Decode /FlateDecode] ID]' % (imgwidth, imgheight,'RGB')]
+        imagedata=['BI /W %d /H %d /BPC 8 /CS /RGB /F [/A85 /Fl] ID' % (imgwidth, imgheight)]
 
         #use a flate filter and Ascii Base 85 to compress
         raw = myimage.tostring()
