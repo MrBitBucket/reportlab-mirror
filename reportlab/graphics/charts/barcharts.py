@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.76 2003/09/10 14:47:17 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.77 2003/09/16 13:41:04 johnprecedo Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -9,7 +9,7 @@ vertical versions.
 
 Stacked and percentile bar charts to follow...
 """
-__version__=''' $Id: barcharts.py,v 1.76 2003/09/10 14:47:17 rgbecker Exp $ '''
+__version__=''' $Id: barcharts.py,v 1.77 2003/09/16 13:41:04 johnprecedo Exp $ '''
 
 import string, copy
 from types import FunctionType, StringType
@@ -535,7 +535,7 @@ class VerticalBarChart3D(VerticalBarChart):
                 _draw_3d_bar(g, x, x+width, y, y+height, dz*theta_x, dz*theta_y,
                             fillColor=style.fillColor, fillColorShaded=None,
                             strokeColor=style.strokeColor, strokeWidth=style.strokeWidth,
-                            shading=0.1)
+                            shading=0.45)
         return g
 
 class HorizontalBarChart(BarChart):
