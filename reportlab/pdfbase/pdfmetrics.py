@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.52 2002/04/09 11:41:17 johnprecedo Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.53 2002/05/24 17:06:57 dinu_gherman Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -154,7 +154,7 @@ class TypeFace:
         self.glyphNames = self.glyphWidths.keys()
         self.ascent,self.descent = _fontdata.ascent_descent[name]
 
-    def findT1File(self,ext='.pfb'):
+    def findT1File(self, ext='.pfb'):
         possible_exts = (string.lower(ext), string.upper(ext))
         if hasattr(self,'pfbFileName'):
             r_basename = os.path.splitext(self.pfbFileName)[0]
@@ -166,14 +166,14 @@ class TypeFace:
         except:
             afm = bruteForceSearchForAFM(self.name)
             if afm:
-                if ext == '.pfb':
+                if string.lower(ext) == '.pfb':
                     for e in possible_exts:
                         pfb = os.path.splitext(afm)[0] + e
                         if os.path.isfile(pfb):
                             r = pfb
                         else:
                             r = None
-                elif ext == '.afm':
+                elif string.lower(ext) == '.afm':
                     r = afm
             else:
                 r = None
@@ -191,7 +191,7 @@ def bruteForceSearchForAFM(faceName):
     for dirname in T1SearchPath:
         if not os.path.isdir(dirname):
             continue
-        possibles = glob.glob(dirname + os.sep + '*.afm')
+        possibles = glob.glob(dirname + os.sep + '*.[aA][fF][mM]')
         for possible in possibles:
             (topDict, glyphDict) = parseAFMFile(possible)
             if topDict['FontName'] == faceName:
