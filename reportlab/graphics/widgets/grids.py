@@ -1,5 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/grids.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.20 2002/03/26 11:11:48 rgbecker Exp $
+__version__='''$Id:'''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *
