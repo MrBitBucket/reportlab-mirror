@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.59 2002/11/27 17:48:06 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.60 2002/12/02 19:02:25 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.59 2002/11/27 17:48:06 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.60 2002/12/02 19:02:25 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -944,7 +944,7 @@ class NormalDateXValueAxis(XValueAxis):
                     if (axisLength/(ticks[-1]-ticks[0]))*(ticks[-1]-ticks[-2])<=w:
                         del ticks[-2], labels[-2]
                 try:
-                    if labels[0]==labels[1]:
+                    if labels[0] and labels[0]==labels[1]:
                         del ticks[1], labels[1]
                 except IndexError:
                     pass
@@ -983,7 +983,7 @@ class NormalDateXValueAxis(XValueAxis):
         if valueMin is None: valueMin = xVals[0]
         if valueMax is None: valueMax = xVals[-1]
         self._valueMin, self._valueMax = valueMin, valueMax
-        self.valueSteps = steps
+        self._tickValues = steps
         self.labelTextFormat = labels
 
         self._scaleFactor = self._length / float(valueMax - valueMin)
@@ -1133,10 +1133,13 @@ class AdjYValueAxis(YValueAxis):
 
         from reportlab.graphics.charts.utils import find_good_grid, ticks
         y_min, y_max = self._valueMin, self._valueMax
+        m = self.maximumTicks
+        n = filter(lambda x,m=m: x<=m,[4,5,6,7,8,9])
+        if not n: n = [m]
 
         valueStep, requiredRange = self.valueStep, self.requiredRange
         if requiredRange and y_max - y_min < requiredRange:
-            y1, y2, None = find_good_grid(y_min, y_max,grid=valueStep)
+            y1, y2, None = find_good_grid(y_min, y_max,n=n,grid=valueStep)
             if y2 - y1 < requiredRange:
                 ym = (y1+y2)*0.5
                 y1 = min(ym-requiredRange*0.5,y_min)
@@ -1149,7 +1152,7 @@ class AdjYValueAxis(YValueAxis):
                     y1 = 0
             self._valueMin, self._valueMax = y1, y2
 
-        T, L = ticks(self._valueMin, self._valueMax, split=1, percent=self.leftAxisPercent,grid=valueStep)
+        T, L = ticks(self._valueMin, self._valueMax, split=1, n=n, percent=self.leftAxisPercent,grid=valueStep)
         abf = self.avoidBoundFrac
         if abf:
             _n = getattr(self,'_cValueMin',T[0])
@@ -1157,11 +1160,11 @@ class AdjYValueAxis(YValueAxis):
             i = (T[1]-T[0])*abf
             if _n - T[0] < i: self._valueMin = self._valueMin - i
             if T[-1]-_x < i: self._valueMax = self._valueMax + i
-            T, L = ticks(self._valueMin, self._valueMax, split=1, percent=self.leftAxisPercent,grid=valueStep)
+            T, L = ticks(self._valueMin, self._valueMax, split=1, n=n, percent=self.leftAxisPercent,grid=valueStep)
 
         self._valueMin = T[0]
         self._valueMax = T[-1]
-        self.valueSteps = T
+        self._tickValues = self.valueSteps = T
         from reportlab.lib.formatters import DecimalFormatter
         if not isinstance(self.labelTextFormat,DecimalFormatter): self.labelTextFormat = L
 
