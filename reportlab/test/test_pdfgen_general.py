@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.9 2001/11/26 22:59:19 andy_robinson Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.9 2001/11/26 22:59:19 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.10 2002/02/03 21:25:57 andy_robinson Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.10 2002/02/03 21:25:57 andy_robinson Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
@@ -182,13 +182,15 @@ def drawCode(canvas, code):
     canvas.addLiteral('-36 0 Td')
     canvas.setFont('Times-Roman',10)
     
-
-def makeDocument(filename):
+    
+def makeDocument(filename, pageCallBack=None):
     #the extra arg is a hack added later, so other
     #tests can get hold of the canvas just before it is
     #saved
+
     c = canvas.Canvas(filename)
     c.setPageCompression(0)
+    c.setPageCallBack(pageCallBack)
     framePageForm(c) # define the frame form
     c.showOutline()
     
@@ -712,7 +714,8 @@ cost to performance.""")
     #stop
     #apply(c.setOutlineNames0, tuple(outlinenametree))
     return c
-    
+
+
 def run(filename):
     c = makeDocument(filename)
     c.save()

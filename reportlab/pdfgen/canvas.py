@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.95 2001/12/19 18:41:00 aaron_watters Exp $
-__version__=''' $Id: canvas.py,v 1.95 2001/12/19 18:41:00 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.96 2002/02/03 21:25:57 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.96 2002/02/03 21:25:57 andy_robinson Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -118,6 +118,8 @@ class Canvas:
         #this only controls whether it prints 'saved ...' - 0 disables
         self._verbosity = verbosity
 
+        #this is called each time a page is output if non-null
+        self._onPage = None
         
         self._pagesize = pagesize
         #self._currentPageHasImages = 0
@@ -353,12 +355,21 @@ class Canvas:
         self._setXObjects(page)
         self._setAnnotations(page)
         self._doc.addPage(page)
-        
+
+        if self._onPage:
+            self._onPage(self._pageNumber)
         #now get ready for the next one
         self._pageNumber = self._pageNumber + 1
         self._restartAccumulators()
         self.init_graphics_state()
         self.state_stack = []
+
+    def setPageCallBack(self, func):
+        """func(pageNum) will be called on each page end.
+        
+       This is mainly a hook for progress monitoring.
+        Call setPageCallback(None) to clear a callback."""
+        self._onPage = func
         
     def _setAnnotations(self,page):
         page.Annots = self._annotationrefs
