@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.13 2001/04/06 12:17:47 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.13 2001/04/06 12:17:47 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.14 2001/05/20 09:08:23 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.14 2001/05/20 09:08:23 rgbecker Exp $ '''
 
 import string, os
 from types import *
@@ -33,7 +33,7 @@ def import_zlib():
 	except ImportError, errMsg:
 		if str(errMsg)!='No module named zlib': raise
 		zlib = None
-		warnOnce('zlib not available')
+		if ZLIB_WARNINGS: warnOnce('zlib not available')
 	return zlib
 
 try:
@@ -42,11 +42,11 @@ except ImportError, errMsg:
 	if str(errMsg)!='No module named PIL': raise
 	try:
 		import Image
-		warnOnce('Python Imaging Library not available as package; upgrade your installation!')
+		if PIL_WARNINGS: warnOnce('Python Imaging Library not available as package; upgrade your installation!')
 	except ImportError, errMsg:
 		if str(errMsg)!='No module named Image': raise
 		Image = None
-		warnOnce('Python Imaging Library not available')
+		if PIL_WARNINGS: warnOnce('Python Imaging Library not available')
 PIL_Image = Image
 del Image
 
