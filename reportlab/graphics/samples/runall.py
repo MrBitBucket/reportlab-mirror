@@ -29,11 +29,11 @@ def run(format, VERBOSE=0):
         if c != None:
             print c.__name__
             try:
-                for f in formats:
-                    if f:
-                        c().save(formats=[f],outDir='.',fnRoot=c.__name__)
+                for fmt in formats:
+                    if fmt:
+                        c().save(formats=[fmt],outDir='.',fnRoot=c.__name__)
                         if VERBOSE:
-                            print "  %s.%s" % (c.__name__, f)
+                            print "  %s.%s" % (c.__name__, fmt)
             except:
                 print "  COULDN'T CREATE '%s.%s'!" % (c.__name__, format)
 
