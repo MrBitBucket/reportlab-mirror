@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.7 2001/04/09 13:50:09 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.8 2001/04/09 14:51:29 dinu_gherman Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -49,6 +49,11 @@ from reportlab.graphics.charts.utils import nextRoundNumber
 class CategoryAxis(Widget):
     "Abstract category axis, unusable in itself."
 
+##    def __init__(self):
+##        msg = "This is an abstract class and must be subclassed to be used!"
+##        raise "NotImplementedError", msg
+
+
     def setPosition(self, x, y, length):
         # ensure floating point
         self._x = x * 1.0
@@ -62,8 +67,16 @@ class CategoryAxis(Widget):
 
 
     def draw(self):
-        msg = "This is an abstract class and must be subclassed to be used!"
-        raise "NotImplementedError", msg
+        g = Group()
+
+        if not self.visible:
+            return g
+        
+        g.add(self.makeAxis())
+        g.add(self.makeTicks())
+        g.add(self.makeTickLabels())
+        
+        return g
 
     
 class XCategoryAxis(CategoryAxis):
@@ -209,19 +222,6 @@ class XCategoryAxis(CategoryAxis):
         return g
 
 
-    def draw(self):
-        g = Group()
-
-        if not self.visible:
-            return g
-        
-        g.add(self.makeAxis())
-        g.add(self.makeTicks())
-        g.add(self.makeTickLabels())
-        
-        return g
-
-
 class YCategoryAxis(CategoryAxis):
     "Y/category axis"
 
@@ -364,23 +364,15 @@ class YCategoryAxis(CategoryAxis):
         return g
 
     
-    def draw(self):
-        g = Group()
-
-        if not self.visible:
-            return g
-        
-        g.add(self.makeAxis())
-        g.add(self.makeTicks())
-        g.add(self.makeTickLabels())
-
-        return g
-
-
 # Value axes.
 
 class ValueAxis(Widget):
     "Abstract value axis, unusable in itself."
+
+##    def __init__(self):
+##        msg = "This is an abstract class and must be subclassed to be used!"
+##        raise "NotImplementedError", msg
+
 
     def setPosition(self, x, y, length):
         # ensure floating point
@@ -415,9 +407,52 @@ class ValueAxis(Widget):
         self._configured = 1            
 
 
+    def _setRange(self, dataSeries):
+        """Set minimum and maximum axis values.
+
+        The dataSeries argument is assumed to be a list of data
+        vectors. Each vector is itself a list or tuple of numbers.
+
+        Returns a min, max tuple.
+        """
+
+        try:
+            minFound = dataSeries[0][0]
+            maxFound = dataSeries[0][0]
+            for ser in dataSeries:
+                for num in ser:
+                    if num < minFound:
+                        minFound = num
+                    if num > maxFound:
+                        maxFound = num
+        except IndexError:
+            minFound = self.valueMin
+            maxFound = self.valueMax
+        
+        if self.valueMin == Auto:
+            valueMin = minFound
+        else:
+            valueMin = self.valueMin
+
+        if self.valueMax == Auto:
+            valueMax = maxFound
+        else:
+            valueMax = self.valueMax
+
+        return valueMin, valueMax
+
+
     def draw(self):
-        msg = "This is an abstract class and must be subclassed to be used!"
-        raise "NotImplementedError", msg
+        g = Group()
+
+        if not self.visible:
+            return g
+
+        g.add(self.makeAxis())
+        g.add(self.makeTicks())
+        g.add(self.makeTickLabels())
+                        
+        return g
 
 
 class XValueAxis(ValueAxis):
@@ -523,41 +558,6 @@ class XValueAxis(ValueAxis):
         elif mode == 'fixedPoints':
             self._x = yAxis._x * 1.0
             self._y = points * 1.0
-
-
-    def _setRange(self, dataSeries):
-        """Set minimum and maximum axis values.
-
-        The dataSeries argument is assumed to be a list of data
-        vectors. Each vector is itself a list or tuple of numbers.
-
-        Returns a min, max tuple.
-        """
-
-        try:
-            minFound = dataSeries[0][0]
-            maxFound = dataSeries[0][0]
-            for ser in dataSeries:
-                for num in ser:
-                    if num < minFound:
-                        minFound = num
-                    if num > maxFound:
-                        maxFound = num
-        except IndexError:
-            minFound = self.valueMin
-            maxFound = self.valueMax
-        
-        if self.valueMin == Auto:
-            valueMin = minFound
-        else:
-            valueMin = self.valueMin
-
-        if self.valueMax == Auto:
-            valueMax = maxFound
-        else:
-            valueMax = self.valueMax
-
-        return valueMin, valueMax
 
 
     def _calcScaleFactor(self):
@@ -666,19 +666,6 @@ class XValueAxis(ValueAxis):
         return g
 
         
-    def draw(self):
-        g = Group()
-
-        if not self.visible:
-            return g
-
-        g.add(self.makeAxis())
-        g.add(self.makeTicks())
-        g.add(self.makeTickLabels())
-                        
-        return g
-
-
 class YValueAxis(ValueAxis):
     "Y/value axis"
 
@@ -782,41 +769,6 @@ class YValueAxis(ValueAxis):
         elif mode == 'fixedPoints':
             self._x = points * 1.0
             self._y = xAxis._y * 1.0
-
-
-    def _setRange(self, dataSeries):
-        """Set minimum and maximum axis values.
-
-        The dataSeries argument is assumed to be a list of data
-        vectors. Each vector is itself a list or tuple of numbers.
-
-        Returns a min, max tuple.
-        """
-
-        try:
-            minFound = dataSeries[0][0]
-            maxFound = dataSeries[0][0]
-            for ser in dataSeries:
-                for num in ser:
-                    if num < minFound:
-                        minFound = num
-                    if num > maxFound:
-                        maxFound = num
-        except IndexError:
-            minFound = self.valueMin
-            maxFound = self.valueMax
-        
-        if self.valueMin == Auto:
-            valueMin = minFound
-        else:
-            valueMin = self.valueMin
-
-        if self.valueMax == Auto:
-            valueMax = maxFound
-        else:
-            valueMax = self.valueMax
-
-        return valueMin, valueMax
 
 
     def _calcScaleFactor(self):
@@ -925,19 +877,6 @@ class YValueAxis(ValueAxis):
         return g
 
         
-    def draw(self):
-        g = Group()
-
-        if not self.visible:
-            return g
-        
-        g.add(self.makeAxis())
-        g.add(self.makeTicks())
-        g.add(self.makeTickLabels())
-                        
-        return g
-
-
 # Deprecated!!! Will change!!!
 
 class XTimeValueAxis(XValueAxis):
