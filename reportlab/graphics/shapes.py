@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.30 2001/05/23 16:46:03 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.31 2001/06/16 00:40:07 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -420,6 +420,10 @@ class Drawing(Group, Flowable):
 				setattr(obj, oldKey, obj.contents[pos])
 
 		return obj
+
+class _DrawingEditorMixin:
+	'''This is a mixin to provide functionality for edited drawings'''
+	pass
 
 class LineShape(Shape):
 	# base for types of lines
