@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: frames.py,v $
+#	Revision 1.6  2000/08/03 14:12:53  rgbecker
+#	Changing to packer led positioning
+#
 #	Revision 1.5  2000/07/30 22:32:29  rgbecker
 #	geometry changing attributes now work
-#
+#	
 #	Revision 1.4  2000/07/07 16:21:12  rgbecker
 #	Cosmetics
 #	
@@ -46,7 +49,7 @@
 #	Revision 1.1  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #	
-__version__=''' $Id: frames.py,v 1.5 2000/07/30 22:32:29 rgbecker Exp $ '''
+__version__=''' $Id: frames.py,v 1.6 2000/08/03 14:12:53 rgbecker Exp $ '''
 __doc__="""
 """
 _geomAttr=('x1','y1','width','height', 'leftPadding', 'bottomPadding', 'rightPadding', 'topPadding')
@@ -157,7 +160,7 @@ class Frame:
 			return 0
 		else:
 			#now we can draw it, and update the current point.
-			flowable.drawOn(canv, self._x, y)
+			flowable.drawOn(canv, self._x, y, _sW=self._aW-w)
 			y = y - flowable.getSpaceAfter()
 			self._atTop = 0
 			self._y = y

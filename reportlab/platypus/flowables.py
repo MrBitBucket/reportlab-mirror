@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: flowables.py,v $
+#	Revision 1.7  2000/08/03 14:12:53  rgbecker
+#	Changing to packer led positioning
+#
 #	Revision 1.6  2000/07/13 11:42:10  rgbecker
 #	removed debug prints
-#
+#	
 #	Revision 1.5  2000/07/13 11:41:00  rgbecker
 #	Added KeepTogether
 #	
@@ -50,7 +53,7 @@
 #	Platypus re-organisation
 #	
 #	
-__version__=''' $Id: flowables.py,v 1.6 2000/07/13 11:42:10 rgbecker Exp $ '''
+__version__=''' $Id: flowables.py,v 1.7 2000/08/03 14:12:53 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -59,7 +62,11 @@ headers, footers, fixed diagrams or logos, among others.
 
 Flowables are defined here as objects which know how to determine their size and which
 can draw themselves onto a page with respect to a relative "origin" position determined
-at a higher level.  Some Flowables also know how to "split themselves".  For example a
+at a higher level. The object's draw() method should assume that (0,0) corresponds to the
+bottom left corner of the enclosing rectangle that will contain the object. The attributes
+vAlign and hAlign may be used by 'packers' as hints as to how the object should be placed.
+
+Some Flowables also know how to "split themselves".  For example a
 long paragraph might split itself between one page and the next.
 
 The "text" of a document usually consists mainly of a sequence of flowables which
@@ -100,8 +107,20 @@ class Flowable:
 		self.height = 0
 		self.wrapped = 0
 
-	def drawOn(self, canvas, x, y):
+		#these are hints to packers/frames as to how the floable should be positioned
+		self.hAlign = 'LEFT'	#CENTER/CENTRE or RIGHT
+		self.vAlign = 'BOTTOM'	#MIDDLE or TOP
+
+	def drawOn(self, canvas, x, y, _sW=0):
 		"Tell it to draw itself on the canvas.	Do not override"
+		if _sW and hasattr(self,'hAlign'):
+			a = self.hAlign
+			if a in ['CENTER','CENTRE']:
+				x = x + 0.5*_sW
+			elif a == 'RIGHT':
+				x = x + _sW
+			elif a != 'LEFT':
+				raise ValueError, "Bad hAlign value "+str(a)
 		self.canv = canvas
 		self.canv.saveState()
 		self.canv.translate(x, y)
@@ -235,6 +254,7 @@ class Image(Flowable):
 		"""If size to draw at not specified, get it from the image."""
 		import Image  #this will raise an error if they do not have PIL.
 		self.filename = filename
+		self.hAlign = 'CENTER'
 		# if it is a JPEG, will be inlined within the file -
 		# but we still need to know its size now
 		if os.path.splitext(filename)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
@@ -255,14 +275,12 @@ class Image(Flowable):
 
 	def wrap(self, availWidth, availHeight):
 		#the caller may decide it does not fit.
-		self.availWidth = availWidth
 		return (self.drawWidth, self.drawHeight)
 
 	def draw(self):
 		#center it
-		startx = 0.5 * (self.availWidth - self.drawWidth)
 		self.canv.drawInlineImage(self.filename,
-								startx,
+								0,
 								0,
 								self.drawWidth,
 								self.drawHeight
@@ -337,5 +355,3 @@ class Macro(Flowable):
 		return (0,0)
 	def draw(self):
 		exec self.command in globals(), {'canvas':self.canv}
-
-#from paragraph import Paragraph
