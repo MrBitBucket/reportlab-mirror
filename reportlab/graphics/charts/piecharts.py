@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.29 2003/08/13 14:37:29 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.30 2003/08/15 14:36:20 rgbecker Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -12,7 +12,7 @@
 This permits you to customize and pop out individual wedges;
 supports elliptical and circular pies.
 """
-__version__=''' $Id: piecharts.py,v 1.29 2003/08/13 14:37:29 rgbecker Exp $ '''
+__version__=''' $Id: piecharts.py,v 1.30 2003/08/15 14:36:20 rgbecker Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -162,7 +162,9 @@ class Pie(Widget):
         direction = AttrMapValue( OneOf('clockwise', 'anticlockwise'), desc="'clockwise' or 'anticlockwise'"),
         slices = AttrMapValue(None, desc="collection of wedge descriptor objects"),
         simpleLabels = AttrMapValue(isBoolean, desc="If true(default) use String not super duper WedgeLabel"),
+        other_threshold = AttrMapValue(isNumber, desc='A value for doing thresh holding, not used yet.'),
         )
+    other_threshold=None
 
     def __init__(self):
         self.x = 0
@@ -212,7 +214,7 @@ class Pie(Widget):
     def normalizeData(self):
         from operator import add
         data = self.data
-        sum = float(reduce(add,data,0))
+        self._sum = sum = float(reduce(add,data,0))
         return abs(sum)>=1e-8 and map(lambda x,f=360./sum: f*x, data) or len(data)*[0]
 
     def makeWedges(self):
@@ -525,15 +527,18 @@ class _SL3D:
     def __str__(self):
         return '_SL3D(%.2f,%.2f)' % (self.lo,self.hi)
 
-class Pie3d(Widget):
+class Pie3d(Pie):
+    _attrMap = AttrMap(BASE=Pie,
+        perspective = AttrMapValue(isNumber, desc='A flattening parameter.'),
+        depth_3d = AttrMapValue(isNumber, desc='depth of the pie.'),
+        angle_3d = AttrMapValue(isNumber, desc='The view angle.'),
+        )
     perspective = 70
-    other_threshold = -1
-    threeD = 1
-    _3d_depth = 25
-    _3d_angle = 180
+    depth_3d = 25
+    angle_3d = 180
 
     def _popout(self,i):
-        return self.styles[i].popout or 0
+        return self.slices[i].popout or 0
 
     def CX(self, i,d ):
         return self._cx+(d and self._xdepth_3d or 0)+self._popout(i)*cos(_2rad(self._sl3d[i].mid))
@@ -553,26 +558,19 @@ class Pie3d(Widget):
         self.y = 0
         self.width = 300
         self.height = 200
-        self.radius = 149
         self.data = [12.50,20.10,2.00,22.00,5.00,18.00,13.00]
         self.labels = None  # or list of strings
         self.startAngle = 90
         self.direction = "clockwise"
         self.simpleLabels = 1
-
-        self.styles = TypedPropertyCollection(Wedge3dProperties)
-        self.styles[0].fillColor = colors.darkcyan
-        self.styles[1].fillColor = colors.blueviolet
-        self.styles[2].fillColor = colors.blue
-        self.styles[3].fillColor = colors.cyan
-        self.styles[4].fillColor = colors.azure
-        self.styles[5].fillColor = colors.crimson
-        self.styles[6].fillColor = colors.darkviolet
-        self.styles[1].visible = 0
-        self.styles[3].visible = 0
-        self.styles[4].visible = 0
-        self.styles[5].visible = 1
-        self.styles[6].visible = 0
+        self.slices = TypedPropertyCollection(Wedge3dProperties)
+        self.slices[0].fillColor = colors.darkcyan
+        self.slices[1].fillColor = colors.blueviolet
+        self.slices[2].fillColor = colors.blue
+        self.slices[3].fillColor = colors.cyan
+        self.slices[4].fillColor = colors.azure
+        self.slices[5].fillColor = colors.crimson
+        self.slices[6].fillColor = colors.darkviolet
 
     def _fillSide(self,L,i,angle,strokeColor,strokeWidth,fillColor):
         rd = self.rad_dist(angle)
@@ -584,20 +582,19 @@ class Pie3d(Widget):
             L.append((rd,Polygon(p, strokeColor=strokeColor, fillColor=fillColor,strokeWidth=strokeWidth)))
 
     def draw(self):
-        styles = self.styles
-        _3d_angle = self._3d_angle
-        self._cx = self.x+self.width/2.0
-        self._cy = self.y+self.height/2.0
+        slices = self.slices
+        _3d_angle = self.angle_3d
         _3dva = self._3dva = _360(_3d_angle+90)
         a0 = _2rad(_3dva)
-        self._xdepth_3d = cos(a0)*self._3d_depth
-        self._ydepth_3d = sin(a0)*self._3d_depth
-        radius = self._radius = self.radius
+        self._xdepth_3d = cos(a0)*self.depth_3d
+        self._ydepth_3d = sin(a0)*self.depth_3d
+        self._cx = self.x+self.width/2.0
+        self._cy = self.y+(self.height - self._ydepth_3d)/2.0
+        radius = self._radius = self._cx - 5
         self._radiusx = radiusx = radius
         self._radiusy = radiusy = (1.0 - self.perspective/100.0)*radius
-        data = self.data
-        import operator
-        tot_val = float(reduce(operator.add,self.data))
+        data = self.normalizeData()
+        sum = self._sum
 
         CX = self.CX
         CY = self.CY
@@ -609,15 +606,14 @@ class Pie3d(Widget):
         _sl3d = self._sl3d = []
         g = Group()
         last = _360(self.startAngle) 
-        if self.direction=='clockwise': tot_val *= -1
-        for v in self.data:
-            pct = v/tot_val     #should never be > 100%
-            this = pct*360      #pie-portion
-            angle1, angle0 = last, this+last
-            if tot_val>0: angle0, angle1 = angle1, angle0
+        a0 = self.direction=='clockwise' and -1 or 1
+        for v in data:
+            v *= a0
+            angle1, angle0 = last, v+last
+            last = angle0
+            if a0>0: angle0, angle1 = angle1, angle0
             _sl3d.append(_SL3D(angle0,angle1))
             #print '%d: %.2f %.2f --> %s' %(len(_sl3d)-1,angle0,angle1,_sl3d[-1])
-            last += this
 
         labels = _fixLabels(self.labels,n)
         a0 = _3d_angle
@@ -626,7 +622,7 @@ class Pie3d(Widget):
         S = []
         L = []
         for i in xrange(n):
-            style = styles[i]
+            style = slices[i]
             if not style.visible: continue
             fillColor = _getShaded(style.fillColor,style.fillColorShaded,style.shading)
             strokeColor = _getShaded(style.strokeColor,style.strokeColorShaded,style.shading) or fillColor
@@ -677,6 +673,39 @@ class Pie3d(Widget):
         S.sort(lambda a,b: -cmp(a[0],b[0]))
         map(g.add,map(lambda x:x[1],S)+T+L)
         return g
+
+    def demo(self):
+        d = Drawing(200, 100)
+
+        pc = Pie()
+        pc.x = 50
+        pc.y = 10
+        pc.width = 100
+        pc.height = 80
+        pc.data = [10,20,30,40,50,60]
+        pc.labels = ['a','b','c','d','e','f']
+
+        pc.slices.strokeWidth=0.5
+        pc.slices[3].popout = 10
+        pc.slices[3].strokeWidth = 2
+        pc.slices[3].strokeDashArray = [2,2]
+        pc.slices[3].labelRadius = 1.75
+        pc.slices[3].fontColor = colors.red
+        pc.slices[0].fillColor = colors.darkcyan
+        pc.slices[1].fillColor = colors.blueviolet
+        pc.slices[2].fillColor = colors.blue
+        pc.slices[3].fillColor = colors.cyan
+        pc.slices[4].fillColor = colors.aquamarine
+        pc.slices[5].fillColor = colors.cadetblue
+        pc.slices[6].fillColor = colors.lightcoral
+        self.slices[1].visible = 0
+        self.slices[3].visible = 1
+        self.slices[4].visible = 1
+        self.slices[5].visible = 1
+        self.slices[6].visible = 0
+
+        d.add(pc)
+        return d
 
 
 def sample0a():
