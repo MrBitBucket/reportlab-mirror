@@ -19,12 +19,14 @@
 
 /* Various utility functions RLL finds useful. */
 
-#if !defined(_WIN32) && !defined(macintosh)
+#include "config.h"
+#include "art_misc.h"
+
+#ifdef HAVE_UINSTD_H
 #	include <unistd.h>
 #endif
 #include <stdio.h>
 #include <stdarg.h>
-#include "art_misc.h"
 
 /**
  * art_die: Print the error message to stderr and exit with a return code of 1.
@@ -44,8 +46,8 @@ art_die (const char *fmt, ...)
 }
 
 /**
- * art_die: Print the error message to stderr.
- * @fmt: The printf-style format for the error message.
+ * art_warn: Print the warning message to stderr.
+ * @fmt: The printf-style format for the warning message.
  *
  * Used for generating warnings.
  **/
@@ -58,3 +60,19 @@ art_warn (const char *fmt, ...)
   vfprintf (stderr, fmt, ap);
   va_end (ap);
 }
+/**
+ * art_dprint: Print the debug message to stderr.
+ * @fmt: The printf-style format for the debug message.
+ *
+ * Used for generating debug output.
+ **/
+void
+art_dprint (const char *fmt, ...)
+{
+  va_list ap;
+
+  va_start (ap, fmt);
+  vfprintf (stderr, fmt, ap);
+  va_end (ap);
+}
+

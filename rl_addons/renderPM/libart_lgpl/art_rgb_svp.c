@@ -19,12 +19,12 @@
 
 /* Render a sorted vector path into an RGB buffer. */
 
-#include "art_misc.h"
+#include "config.h"
+#include "art_rgb_svp.h"
 
 #include "art_svp.h"
 #include "art_svp_render_aa.h"
 #include "art_rgb.h"
-#include "art_rgb_svp.h"
 
 typedef struct _ArtRgbSVPData ArtRgbSVPData;
 typedef struct _ArtRgbSVPAlphaData ArtRgbSVPAlphaData;
@@ -286,13 +286,6 @@ art_rgb_svp_alpha_callback (void *callback_data, int y,
   data->buf += data->rowstride;
 }
 
-#ifdef	ROBIN_DEBUG
-#	define ROBIN_DBG1 printf("art_rgb_svp_alpha_opaque_callback: r=0x%2.2x g=0x%2.2x b=0x%2.2x y=%d\n",r,g,b,y); 
-#	define ROBIN_DBG2(M,n0,n1,x0,x1) printf("%s alpha=%d %s=%d %s=%d, %s-%s=%d\n",M,alpha,n0,x0,n1,x1,n1,n0,x1-x0); 
-#else
-#	define ROBIN_DBG1
-#	define ROBIN_DBG2(M,n0,n1,x0,x1)
-#endif
 static void
 art_rgb_svp_alpha_opaque_callback (void *callback_data, int y,
 				   int start,
@@ -317,7 +310,6 @@ art_rgb_svp_alpha_opaque_callback (void *callback_data, int y,
   b = data->b;
   alphatab = data->alphatab;
 
-  ROBIN_DBG1
   if (n_steps > 0)
     {
       run_x1 = steps[0].x;
@@ -326,7 +318,6 @@ art_rgb_svp_alpha_opaque_callback (void *callback_data, int y,
 	  alpha = running_sum >> 16;
 	  if (alpha)
 	    {
-			ROBIN_DBG2("0","x0","run_x1",x0,run_x1)
 	      if (alpha >= 255)
 		art_rgb_fill_run (linebuf,
 				  r, g, b,
@@ -348,7 +339,6 @@ art_rgb_svp_alpha_opaque_callback (void *callback_data, int y,
 	      alpha = running_sum >> 16;
 	      if (alpha)
 		{
-			ROBIN_DBG2("1","run_x0","run_x1",run_x0,run_x1)
 		  if (alpha >= 255)
 		    art_rgb_fill_run (linebuf + (run_x0 - x0) * 3,
 				      r, g, b,
@@ -366,7 +356,6 @@ art_rgb_svp_alpha_opaque_callback (void *callback_data, int y,
 	  alpha = running_sum >> 16;
 	  if (alpha)
 	    {
-			ROBIN_DBG2("2","run_x1","x1",run_x1,x1)
 	      if (alpha >= 255)
 		art_rgb_fill_run (linebuf + (run_x1 - x0) * 3,
 				  r, g, b,
@@ -383,7 +372,6 @@ art_rgb_svp_alpha_opaque_callback (void *callback_data, int y,
       alpha = running_sum >> 16;
       if (alpha)
 	{
-		ROBIN_DBG2("3","x0","x1",x0,x1)
 	  if (alpha >= 255)
 	    art_rgb_fill_run (linebuf,
 			      r, g, b,
@@ -441,9 +429,6 @@ art_rgb_svp_alpha (const ArtSVP *svp,
   g = (rgba >> 16) & 0xff;
   b = (rgba >> 8) & 0xff;
   alpha = rgba & 0xff;
-#ifdef	ROBIN_DEBUG
-  printf("art_rgb_svp_alpha: r=0x%2.2x g=0x%2.2x b=0x%2.2x alpha=0x%2.2x\n", r,g,b,alpha);
-#endif
 
   data.r = r;
   data.g = g;
@@ -469,3 +454,4 @@ art_rgb_svp_alpha (const ArtSVP *svp,
   else
     art_svp_render_aa (svp, x0, y0, x1, y1, art_rgb_svp_alpha_callback, &data);
 }
+

@@ -23,16 +23,25 @@
 /* Primitive intersection and winding number operations on sorted
    vector paths. */
 
+#ifdef LIBART_COMPILATION
+#include "art_svp.h"
+#else
+#include <libart_lgpl/art_svp.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
+#ifndef ART_WIND_RULE_DEFINED
+#define ART_WIND_RULE_DEFINED
 typedef enum {
   ART_WIND_RULE_NONZERO,
   ART_WIND_RULE_INTERSECT,
   ART_WIND_RULE_ODDEVEN,
   ART_WIND_RULE_POSITIVE
 } ArtWindRule;
+#endif
 
 ArtSVP *
 art_svp_uncross (ArtSVP *vp);

@@ -13,10 +13,14 @@
 #endif
 
 
-#define VERSION "$Revision: 1.10 $"
+#define VERSION "$Revision: 1.11 $"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
+#ifndef LIBART_VERSION
+#	define LIBART_VERSION "?.?.?"
+#endif
+static PyObject *_libart_version;
 static char *moduleDoc =
 "Helper extension module for renderPM.\n\
 \n\
@@ -29,6 +33,7 @@ Interface summary:\n\
 \n\
 	Error			# module level error\n\
 	error			# alias for Error\n\
+	_libart_version	# base library version string\n\
 	_version		# module version string\n\
 ";
 
@@ -1232,6 +1237,8 @@ void init_renderPM()
 	_version = (PyObject*)(strchr(VERSION,' ')+1);
 	_version = PyString_FromStringAndSize((char*)_version, strchr((char*)_version,' ')-(char*)_version);
 	PyDict_SetItemString(d, "_version", _version );
+	_libart_version = PyString_FromString(LIBART_VERSION);
+	PyDict_SetItemString(d, "_libart_version", _libart_version );
 	moduleError = PyErr_NewException(MODULE ".Error",NULL,NULL);
 	PyDict_SetItemString(d, "Error", moduleError);
 

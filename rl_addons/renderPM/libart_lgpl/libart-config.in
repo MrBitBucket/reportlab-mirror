@@ -39,14 +39,12 @@ while test $# -gt 0; do
       echo @LIBART_VERSION@
       ;;
     --cflags)
-      if test @includedir@ != /usr/include ; then
-        includes=-I@includedir@
-      fi
+      includes=-I@includedir@/libart-2.0
       echo $includes
       ;;
     --libs)
       libdirs=-L@libdir@
-      echo $libdirs -lart_lgpl -lm
+      echo $libdirs -lart_lgpl_2 -lm
       ;;
     *)
       echo "${usage}" 1>&2

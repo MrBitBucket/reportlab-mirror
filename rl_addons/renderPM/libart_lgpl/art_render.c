@@ -20,11 +20,10 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include "art_misc.h"
-#include "art_alphagamma.h"
-#include "art_rgb.h"
-
+#include "config.h"
 #include "art_render.h"
+
+#include "art_rgb.h"
 
 typedef struct _ArtRenderPriv ArtRenderPriv;
 
@@ -643,12 +642,263 @@ const ArtRenderCallback art_render_composite_8_obj =
   art_render_nop_done
 };
 
+
+/* Assumes:
+ * alpha_buf is NULL
+ * buf_alpha = ART_ALPHA_NONE  (source)
+ * alpha_type = ART_ALPHA_SEPARATE (dest)
+ * n_chan = 3;
+ */
+static void
+art_render_composite_8_opt1 (ArtRenderCallback *self, ArtRender *render,
+			     art_u8 *dest, int y)
+{
+  ArtRenderMaskRun *run = render->run;
+  int n_run = render->n_run;
+  int x0 = render->x0;
+  int x;
+  int run_x0, run_x1;
+  art_u8 *image_buf = render->image_buf;
+  int i, j;
+  art_u32 tmp;
+  art_u32 run_alpha;
+  int image_ix;
+  art_u8 *bufptr;
+  art_u32 src_mul;
+  art_u8 *dstptr;
+  art_u32 dst_alpha;
+  art_u32 dst_mul, dst_save_mul;
+
+  image_ix = 0;
+  for (i = 0; i < n_run - 1; i++)
+    {
+      run_x0 = run[i].x;
+      run_x1 = run[i + 1].x;
+      tmp = run[i].alpha;
+      if (tmp < 0x10000)
+	continue;
+
+      run_alpha = (tmp + (tmp >> 8) + (tmp >> 16) - 0x8000) >> 8; /* range [0 .. 0x10000] */
+      bufptr = image_buf + (run_x0 - x0) * 3;
+      dstptr = dest + (run_x0 - x0) * 4;
+      if (run_alpha == 0x10000)
+	{
+	  for (x = run_x0; x < run_x1; x++)
+	    {
+	      *dstptr++ = *bufptr++;
+	      *dstptr++ = *bufptr++;
+	      *dstptr++ = *bufptr++;
+	      *dstptr++ = 0xff;
+	    }
+	}
+      else
+	{
+	  for (x = run_x0; x < run_x1; x++)
+	    {
+	      src_mul = run_alpha * 0x101;
+	      
+	      tmp = dstptr[3];
+	      /* range 0..0xff */
+	      dst_alpha = (tmp << 8) + tmp + (tmp >> 7);
+	      dst_mul = dst_alpha;
+	      /* dst_alpha is the alpha of the dest pixel,
+		 range 0..0x10000 */
+	      
+	      dst_mul *= 0x101;
+	      
+	      dst_alpha += ((((0x10000 - dst_alpha) * run_alpha) >> 8) + 0x80) >> 8;
+	      if (dst_alpha == 0)
+		  dst_save_mul = 0xff;
+	      else /* (dst_alpha != 0) */
+		  dst_save_mul = 0xff0000 / dst_alpha;
+	      
+	      for (j = 0; j < 3; j++)
+		{
+		  art_u32 src, dst;
+		  art_u32 tmp;
+		  
+		  src = (bufptr[j] * src_mul + 0x8000) >> 16;
+		  dst = (dstptr[j] * dst_mul + 0x8000) >> 16;
+		  tmp = ((dst * (0x10000 - run_alpha) + 0x8000) >> 16) + src;
+		  tmp -= tmp >> 16;
+		  dstptr[j] = (tmp * dst_save_mul + 0x8000) >> 16;
+		}
+	      dstptr[3] = (dst_alpha * 0xff + 0x8000) >> 16;
+	      
+	      bufptr += 3;
+	      dstptr += 4;
+	    }
+	}
+    }
+}
+
+
+const ArtRenderCallback art_render_composite_8_opt1_obj =
+{
+  art_render_composite_8_opt1,
+  art_render_nop_done
+};
+
+/* Assumes:
+ * alpha_buf is NULL
+ * buf_alpha = ART_ALPHA_PREMUL  (source)
+ * alpha_type = ART_ALPHA_SEPARATE (dest)
+ * n_chan = 3;
+ */
+static void
+art_render_composite_8_opt2 (ArtRenderCallback *self, ArtRender *render,
+			     art_u8 *dest, int y)
+{
+  ArtRenderMaskRun *run = render->run;
+  int n_run = render->n_run;
+  int x0 = render->x0;
+  int x;
+  int run_x0, run_x1;
+  art_u8 *image_buf = render->image_buf;
+  int i, j;
+  art_u32 tmp;
+  art_u32 run_alpha;
+  int image_ix;
+  art_u8 *bufptr;
+  art_u32 src_alpha;
+  art_u32 src_mul;
+  art_u8 *dstptr;
+  art_u32 dst_alpha;
+  art_u32 dst_mul, dst_save_mul;
+
+  image_ix = 0;
+  for (i = 0; i < n_run - 1; i++)
+    {
+      run_x0 = run[i].x;
+      run_x1 = run[i + 1].x;
+      tmp = run[i].alpha;
+      if (tmp < 0x10000)
+	continue;
+
+      run_alpha = (tmp + (tmp >> 8) + (tmp >> 16) - 0x8000) >> 8; /* range [0 .. 0x10000] */
+      bufptr = image_buf + (run_x0 - x0) * 4;
+      dstptr = dest + (run_x0 - x0) * 4;
+      if (run_alpha == 0x10000)
+	{
+	  for (x = run_x0; x < run_x1; x++)
+	    {
+	      src_alpha = (bufptr[3] << 8) + bufptr[3] + (bufptr[3] >> 7);
+	      /* src_alpha is the (alpha of the source pixel),
+		 range 0..0x10000 */
+	      
+	      dst_alpha = (dstptr[3] << 8) + dstptr[3] + (dstptr[3] >> 7);
+	      /* dst_alpha is the alpha of the dest pixel,
+		 range 0..0x10000 */
+	      
+	      dst_mul = dst_alpha*0x101;
+	      
+	      if (src_alpha >= 0x10000)
+		dst_alpha = 0x10000;
+	      else
+		dst_alpha += ((((0x10000 - dst_alpha) * src_alpha) >> 8) + 0x80) >> 8;
+	      
+	      if (dst_alpha == 0)
+		  dst_save_mul = 0xff;
+	      else /* dst_alpha != 0) */
+		  dst_save_mul = 0xff0000 / dst_alpha;
+	      
+	      for (j = 0; j < 3; j++)
+		{
+		  art_u32 src, dst;
+		  art_u32 tmp;
+		  
+		  src = (bufptr[j] << 8) |  bufptr[j];
+		  dst = (dstptr[j] * dst_mul + 0x8000) >> 16;
+		  tmp = ((dst * (0x10000 - src_alpha) + 0x8000) >> 16) + src;
+		  tmp -= tmp >> 16;
+		  dstptr[j] = (tmp * dst_save_mul + 0x8000) >> 16;
+		}
+	      dstptr[3] = (dst_alpha * 0xff + 0x8000) >> 16;
+	      
+	      bufptr += 4;
+	      dstptr += 4;
+	    }
+	}
+      else
+	{
+	  for (x = run_x0; x < run_x1; x++)
+	    {
+	      tmp = run_alpha * bufptr[3] + 0x80;
+	      /* range 0x80 .. 0xff0080 */
+	      src_alpha = (tmp + (tmp >> 8) + (tmp >> 16)) >> 8;
+	      /* src_alpha is the (alpha of the source pixel * alpha),
+		 range 0..0x10000 */
+	      
+	      src_mul = run_alpha * 0x101;
+	      
+	      tmp = dstptr[3];
+	      /* range 0..0xff */
+	      dst_alpha = (tmp << 8) + tmp + (tmp >> 7);
+	      dst_mul = dst_alpha;
+	      /* dst_alpha is the alpha of the dest pixel,
+		 range 0..0x10000 */
+	      
+	      dst_mul *= 0x101;
+	      
+	      if (src_alpha >= 0x10000)
+		dst_alpha = 0x10000;
+	      else
+		dst_alpha += ((((0x10000 - dst_alpha) * src_alpha) >> 8) + 0x80) >> 8;
+	      
+	      if (dst_alpha == 0)
+		{
+		  dst_save_mul = 0xff;
+		}
+	      else /* dst_alpha != 0) */
+		{
+		  dst_save_mul = 0xff0000 / dst_alpha;
+		}
+	      
+	      for (j = 0; j < 3; j++)
+		{
+		  art_u32 src, dst;
+		  art_u32 tmp;
+		  
+		  src = (bufptr[j] * src_mul + 0x8000) >> 16;
+		  dst = (dstptr[j] * dst_mul + 0x8000) >> 16;
+		  tmp = ((dst * (0x10000 - src_alpha) + 0x8000) >> 16) + src;
+		  tmp -= tmp >> 16;
+		  dstptr[j] = (tmp * dst_save_mul + 0x8000) >> 16;
+		}
+	      dstptr[3] = (dst_alpha * 0xff + 0x8000) >> 16;
+	      
+	      bufptr += 4;
+	      dstptr += 4;
+	    }
+	}
+    }
+}
+
+const ArtRenderCallback art_render_composite_8_opt2_obj =
+{
+  art_render_composite_8_opt2,
+  art_render_nop_done
+};
+
+
 /* todo: inline */
 static ArtRenderCallback *
 art_render_choose_compositing_callback (ArtRender *render)
 {
   if (render->depth == 8 && render->buf_depth == 8)
-    return (ArtRenderCallback *)&art_render_composite_8_obj;
+    {
+      if (render->n_chan == 3 &&
+	  render->alpha_buf == NULL &&
+	  render->alpha_type == ART_ALPHA_SEPARATE)
+	{
+	  if (render->buf_alpha == ART_ALPHA_NONE)
+	    return (ArtRenderCallback *)&art_render_composite_8_opt1_obj;
+	  else if (render->buf_alpha == ART_ALPHA_PREMUL)
+	    return (ArtRenderCallback *)&art_render_composite_8_opt2_obj;
+	}
+	  
+      return (ArtRenderCallback *)&art_render_composite_8_obj;
+    }
   return (ArtRenderCallback *)&art_render_composite_obj;
 }
 
@@ -1025,7 +1275,7 @@ art_render_image_solid_rgb8_opaq (ArtRenderCallback *self, ArtRender *render,
 	    }
 #else
 	  art_rgb_fill_run (dest + ix,
-			    rgb >> 16, (rgb >> 8) & 0xff, rgb & 0xff,
+			    (art_u8)(rgb >> 16), (art_u8)((rgb >> 8) & 0xff), (art_u8)(rgb & 0xff),
 			    run_x1 - run_x0);
 #endif
 	}

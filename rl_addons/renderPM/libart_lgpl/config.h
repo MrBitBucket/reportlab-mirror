@@ -9,5 +9,5 @@
 #define PACKAGE "libart_lgpl"
 
 /* Version number of package */
-#define VERSION "2.3.4"
+#define VERSION "2.3.10"
 

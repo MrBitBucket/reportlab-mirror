@@ -6,5 +6,5 @@ includedir=@includedir@
 Name: libart
 Description: LGPL version of the libart library
 Version: @VERSION@
-Libs: -L${libdir} -lart_lgpl
-Cflags: -I${includedir}
+Libs: -L${libdir} -lart_lgpl_2
+Cflags: -I${includedir}/libart-2.0

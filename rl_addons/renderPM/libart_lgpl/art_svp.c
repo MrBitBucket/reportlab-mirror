@@ -19,10 +19,10 @@
 
 /* Basic constructors and operations for sorted vector paths */
 
-#include "art_misc.h"
-
-#include "art_rect.h"
+#include "config.h"
 #include "art_svp.h"
+
+#include "art_misc.h"
 
 /* Add a new segment. The arguments can be zero and NULL if the caller
    would rather fill them in later.
@@ -119,7 +119,11 @@ art_svp_free (ArtSVP *svp)
   art_free (svp);
 }
 
+#ifdef ART_USE_NEW_INTERSECTOR
+#define EPSILON 0
+#else
 #define EPSILON 1e-6
+#endif
 
 /**
  * art_svp_seg_compare: Compare two segments of an svp.
@@ -127,8 +131,7 @@ art_svp_free (ArtSVP *svp)
  * @seg2: Second segment to compare.
  * 
  * Compares two segments of an svp. Return 1 if @seg2 is below or to the
- * right of @seg1, -1 otherwise. The comparison rules are "interesting"
- * with respect to numerical robustness, rtfs if in doubt.
+ * right of @seg1, -1 otherwise.
  **/
 int
 art_svp_seg_compare (const void *s1, const void *s2)

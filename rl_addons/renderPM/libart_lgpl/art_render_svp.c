@@ -22,13 +22,8 @@
  * Authors: Raph Levien <raph@acm.org>
  */
 
-#include "art_misc.h"
-#include "art_alphagamma.h"
-#include "art_svp.h"
-#include "art_svp_render_aa.h"
-
-#include "art_render.h"
 #include "art_render_svp.h"
+#include "art_svp_render_aa.h"
 
 typedef struct _ArtMaskSourceSVP ArtMaskSourceSVP;
 

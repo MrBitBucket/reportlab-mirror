@@ -17,30 +17,36 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/* Render a sorted vector path into a graymap. */
+#ifndef __ART_RGB_A_AFFINE_H__
+#define __ART_RGB_A_AFFINE_H__
 
-#ifndef __ART_GRAY_SVP_H__
-#define __ART_GRAY_SVP_H__
+/* This module handles compositing of affine-transformed alpha only images
+   over rgb pixel buffers. */
 
 #ifdef LIBART_COMPILATION
-#include "art_misc.h"
-#include "art_svp.h"
+#include "art_filterlevel.h"
+#include "art_alphagamma.h"
 #else
-#include <libart_lgpl/art_misc.h>
-#include <libart_lgpl/art_svp.h>
+#include <libart_lgpl/art_filterlevel.h>
+#include <libart_lgpl/art_alphagamma.h>
 #endif
 
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif
 
 void
-art_gray_svp_aa (const ArtSVP *svp,
-		 int x0, int y0, int x1, int y1,
-		 art_u8 *buf, int rowstride);
+art_rgb_a_affine (art_u8 *dst,
+		  int x0, int y0, int x1, int y1, int dst_rowstride,
+		  const art_u8 *src,
+		  int src_width, int src_height, int src_rowstride,
+		  art_u32 rgb,
+		  const double affine[6],
+		  ArtFilterLevel level,
+		  ArtAlphaGamma *alphagamma);
 
 #ifdef __cplusplus
 }
-#endif /* __cplusplus */
+#endif
 
-#endif /* __ART_GRAY_SVP_H__ */
+#endif

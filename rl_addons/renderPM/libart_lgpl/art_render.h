@@ -23,6 +23,12 @@
 #ifndef __ART_RENDER_H__
 #define __ART_RENDER_H__
 
+#ifdef LIBART_COMPILATION
+#include "art_alphagamma.h"
+#else
+#include <libart_lgpl/art_alphagamma.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

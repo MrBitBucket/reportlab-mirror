@@ -1,6 +1,18 @@
 #!/usr/bin/env python
+import os, sys, string
+def libart_version():
+	K = ('LIBART_MAJOR_VERSION','LIBART_MINOR_VERSION','LIBART_MICRO_VERSION')
+	D = {}
+	for l in open('libart_lgpl/configure.in','r').readlines():
+		l = string.split(string.strip(l),'=')
+		if len(l)>1 and string.strip(l[0]) in K:
+			D[string.strip(l[0])] = string.strip(l[1])
+			if len(D)==3: break
+	return '\\"%s\\"' % string.join(map(lambda k,D=D: D.get(k,'?'),K),'.')
 if __name__=='__main__': #NO RUNTESTS
-	import os, sys
+	import os, sys, string
+	cwd = os.getcwd()
+	os.chdir(os.path.dirname(os.path.abspath(sys.argv[0])))
 	ROBIN_DEBUG=[('ROBIN_DEBUG',None)]
 	ROBIN_DEBUG=[]
 	from glob import glob
@@ -12,6 +24,7 @@ if __name__=='__main__': #NO RUNTESTS
 			R.append(pJoin(pfx,n))
 		return R
 
+	LIBART_VERSION = libart_version()
 	SOURCES=['_renderPM.c']
 	DEVEL_DIR=os.curdir
 	LIBART_DIR=pJoin(DEVEL_DIR,'libart_lgpl')
@@ -24,7 +37,7 @@ if __name__=='__main__': #NO RUNTESTS
 		raise ValueError, "Don't know about other systems"
 
 	setup(	name = "_renderPM",
-			version = "0.0",
+			version = "1.11",
 			description = "Python low level render interface",
 			author = "Robin Becker",
 			author_email = "robin@reportlab.com",
@@ -48,7 +61,7 @@ if __name__=='__main__': #NO RUNTESTS
 			ext_modules = 	[Extension(	'_renderPM',
 										SOURCES,
 										include_dirs=[DEVEL_DIR,LIBART_DIR,GT1_DIR],
-										define_macros=[('LIBART_COMPILATION',None)]+ROBIN_DEBUG,
+										define_macros=[('LIBART_COMPILATION',None)]+ROBIN_DEBUG+[('LIBART_VERSION',LIBART_VERSION)],
 										library_dirs=[],
 
 										# libraries to link against

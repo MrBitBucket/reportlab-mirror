@@ -38,6 +38,7 @@
 #include "art_render.h"
 #include "art_render_gradient.h"
 #include "art_render_svp.h"
+#include "art_svp_intersect.h"
 
 #ifdef DEAD_CODE
 static void
@@ -143,7 +144,7 @@ randstar (int n)
 #define BYTES_PP 1
 #endif
 
-#ifdef DEAD_CODE
+#ifndef nDEAD_CODE
 static void
 print_svp (ArtSVP *vp)
 {
@@ -212,8 +213,10 @@ make_testpat (void)
 
   vpath = randstar (50);
   svp = art_svp_from_vpath (vpath);
+  art_free (vpath);
 
   vpath2 = randstar (50);
+#if 1
   vpath3 = art_vpath_dash (vpath2, &dash);
   art_free (vpath2);
   svp2 = art_svp_vpath_stroke (vpath3,
@@ -222,11 +225,20 @@ make_testpat (void)
 			       15,
 			       4,
 			       0.5);
+  art_free (vpath3);
+#else
+  svp2 = art_svp_from_vpath (vpath2);
+#endif
 
+#if 1
   svp3 = art_svp_intersect (svp, svp2);
-  /*
-  print_svp (svp2);
-  */
+#else
+  svp3 = svp2;
+#endif
+
+#if 0
+  print_svp (svp);
+#endif
 
   for (y = 0; y < 256; y++)
     for (x = 0; x < 256; x++)
@@ -266,8 +278,11 @@ make_testpat (void)
   affine3[4] = 384;
   affine3[5] = 32;
 
+#if 0
   alphagamma = art_alphagamma_new (1.8);
+#else
   alphagamma = NULL;
+#endif
 
 #ifdef COLOR
   printf ("P6\n512 512\n255\n");
@@ -277,8 +292,8 @@ make_testpat (void)
   for (iter = 0; iter < NUM_ITERS; iter++)
     for (j = 0; j < 512; j += TILE_SIZE)
       for (i = 0; i < 512; i += TILE_SIZE)
-#ifdef COLOR
 	{
+#ifdef COLOR
 	  art_rgb_svp_aa (svp, i, j, i + TILE_SIZE, j + TILE_SIZE,
 			  0xffe0a0, 0x100040,
 			  buf + (j * 512 + i) * BYTES_PP, 512 * BYTES_PP,
@@ -309,13 +324,19 @@ make_testpat (void)
 				 0xffff00ff,
 				 affine3,
 				 ART_FILTER_NEAREST, alphagamma);
-	}
 #else
-	art_gray_svp_aa (svp, i, j, i + TILE_SIZE, j + TILE_SIZE,
-		   buf + (j * 512 + i) * BYTES_PP, 512 * BYTES_PP);
+	  art_gray_svp_aa (svp, i, j, i + TILE_SIZE, j + TILE_SIZE,
+			   buf + (j * 512 + i) * BYTES_PP, 512 * BYTES_PP);
 #endif
+	}
 
+  art_svp_free (svp2);
+  art_svp_free (svp3);
+  art_svp_free (svp);
+
+#if 1
   fwrite (buf, 1, 512 * 512 * BYTES_PP, stdout);
+#endif
 }
 
 static void
@@ -495,6 +516,90 @@ test_gradient (void)
 }
 
 static void
+output_svp_ppm (const ArtSVP *svp)
+{
+  art_u8 buf[512 * 512 * 3];
+  art_rgb_svp_aa (svp, 0, 0, 512, 512, 0xfff0c0, 0x000080,
+		  buf, 512 * 3, NULL);
+  printf ("P6\n512 512\n255\n");
+  fwrite (buf, 1, 512 * 512 * 3, stdout);
+}
+
+static void
+test_intersect (void)
+{
+  ArtVpath vpath[] = {
+
+#if 0
+    /* two triangles */
+    { ART_MOVETO, 100, 100 },
+    { ART_LINETO, 300, 400 },
+    { ART_LINETO, 400, 200 },
+    { ART_LINETO, 100, 100 },
+    { ART_MOVETO, 110, 110 },
+    { ART_LINETO, 310, 410 },
+    { ART_LINETO, 410, 210 },
+    { ART_LINETO, 110, 110 },
+#endif
+
+#if 0
+    /* a bowtie */
+    { ART_MOVETO, 100, 100 },
+    { ART_LINETO, 400, 400 },
+    { ART_LINETO, 400, 100 },
+    { ART_LINETO, 100, 400 },
+    { ART_LINETO, 100, 100 },
+#endif
+
+#if 1
+    /* a square */
+    { ART_MOVETO, 100, 100 },
+    { ART_LINETO, 100, 400 },
+    { ART_LINETO, 400, 400 },
+    { ART_LINETO, 400, 100 },
+    { ART_LINETO, 100, 100 },
+#endif
+
+#if 1
+    /* another square */
+#define XOFF 10
+#define YOFF 10
+    { ART_MOVETO, 100 + XOFF, 100 + YOFF },
+    { ART_LINETO, 100 + XOFF, 400 + YOFF },
+    { ART_LINETO, 400 + XOFF, 400 + YOFF },
+    { ART_LINETO, 400 + XOFF, 100 + YOFF },
+    { ART_LINETO, 100 + XOFF, 100 + YOFF },
+#endif
+
+    { ART_END, 0, 0}
+  };
+  ArtSVP *svp, *svp2;
+  ArtSvpWriter *swr;
+
+  svp = art_svp_from_vpath (vpath);
+
+#define RUN_INTERSECT
+#ifdef RUN_INTERSECT
+  swr = art_svp_writer_rewind_new (ART_WIND_RULE_ODDEVEN);
+  art_svp_intersector (svp, swr);
+
+  svp2 = art_svp_writer_rewind_reap (swr);
+#endif
+
+#if 0
+  output_svp_ppm (svp2);
+#else
+  print_svp (svp2);
+#endif
+
+  art_svp_free (svp);
+
+#ifdef RUN_INTERSECT
+  art_svp_free (svp2);
+#endif
+}
+
+static void
 usage (void)
 {
   fprintf (stderr, "usage: testart <test>\n"
@@ -502,7 +607,8 @@ usage (void)
 "  testpat    -- make random star + gradients test pattern\n"
 "  gradient   -- test pattern for rendered gradients\n"
 "  dash       -- dash test (output is valid PostScript)\n"
-"  dist       -- distance test\n");
+"  dist       -- distance test\n"
+"  intersect  -- softball test for intersector\n");
   exit (1);
 }
 
@@ -520,6 +626,8 @@ main (int argc, char **argv)
     test_dist ();
   else if (!strcmp (argv[1], "dash"))
     test_dash ();
+  else if (!strcmp (argv[1], "intersect"))
+    test_intersect ();
   else
     usage ();
   return 0;

@@ -17,10 +17,11 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include "art_misc.h"
+#include "config.h"
 #include "art_pixbuf.h"
-#include <string.h>
 
+#include "art_misc.h"
+#include <string.h>
 
 /**
  * art_pixbuf_new_rgb_dnotify: Create a new RGB #ArtPixBuf with explicit destroy notification.

@@ -1,3 +1,355 @@
+2002-07-01  Alexander Larsson  <alexl@redhat.com>
+
+	* Release 2.3.10
+
+2002-07-01  Alexander Larsson  <alexl@redhat.com>
+
+	* configure.in (LIBART_VERSION_INFO):
+	Bump to 2.3.10
+
+	* art_svp_intersect.c (art_svp_intersect_add_seg):
+	Initialize seg->wind_left to zero, this avoids
+	uninitialized memory read later in art_svp_intersect_horiz_commit.
+
+2002-06-24  Alexander Larsson  <alexl@redhat.com>
+
+	Release 2.3.9.
+	
+2002-06-24  Alexander Larsson  <alexl@redhat.com>
+
+	* configure.in: Bump to 2.3.9
+
+2002-06-04  Balamurali Viswanathan <balamurali.viswanathan@wipro.com>
+
+	* Makefile.am: Added -lm to libart_lgpl_2_la_LIBADD
+	fixes bug 75711 (Jacob's suggestion)
+
+2002-05-08  Raph Levien  <raph@pixel.artofcode.com>
+
+	* art_uta_vpath.c (art_uta_add_line): Fixes very subtle
+	edge case found by Federico Mena Quintero: (96, 96) -
+	(96.220200017562348, 93.034868598919431). Previously, through
+	numerical error, xn was a hair to the left, throwing off
+	the Bresenham iteration.
+
+2002-03-08  Tor Lillqvist  <tml@iki.fi>
+
+	* configure.in: Minor changes for build on Win32. Call
+	AC_LIBTOOL_WIN32_DLL. Set automake conditionals OS_WIN32 and
+	MS_LIB_AVAILABLE.
+
+	* art_affine.c: Include art_misc.h for M_PI, which not necessarily
+	is in math.h.
+
+	* Makefile.am: On Win32, build and install import libraries, both
+	for gcc and for MSVC (if available).
+
+	* libart-zip.in: New file. Used to build runtime and developer
+	package for Win32.
+
+2002-02-06  Laszlo Peter  <laca@ireland.sun.com>
+
+	* configure.in: add AC_FUNC_ALLOCA
+
+	* art_render_gradient.c: copy alloca hacks from glib/galloca.h
+
+2002-02-02  Alexander Larsson  <alla@lysator.liu.se>
+
+	* art_render.c:
+	Add special case for art_render_composite_8 for two cases
+	that are very common when rendering SVGs with librsvg.
+	I'm sure these can be optimized further, but i'm feeling
+	very slow today.
+
+2002-02-01  Alex Larsson  <alexl@redhat.com>
+
+	* art_render_gradient.c:
+	Add optimized case for depth==8,  n_channels == 3
+
+	* test_gradient.c:
+	Test case for gradients. Uses gtk+, so not built by
+	default.
+
+2002-01-10  Anders Carlsson  <andersca@gnu.org>
+
+	* Release 2.3.8
+
+2002-01-04  Anders Carlsson  <andersca@gnu.org>
+
+	* configure.in: Bump version to 2.3.8.
+
+2002-01-03  Darin Adler  <darin@bentspoon.com>
+
+	* Makefile.am: Add art_render_mask.[ch].
+
+	* art_bpath.h:
+	* art_rect_svp.h:
+	* art_rect_uta.h:
+	* art_render.h:
+	* art_render_gradient.h:
+	* art_render_mask.h:
+	* art_render_svp.h:
+	* art_rgb_svp.h:
+	* art_svp_intersect.h:
+	* art_svp_ops.h:
+	* art_svp_point.h:
+	* art_svp_render_aa.h:
+	* art_svp_vpath.h:
+	* art_svp_vpath_stroke.h:
+	* art_svp_wind.h:
+	* art_uta.h:
+	* art_uta_rect.h:
+	* art_uta_ops.h:
+	* art_uta_svp.h:
+	* art_uta_vpath.h:
+	* art_vpath_bpath.h:
+	* art_vpath_dash.h:
+	* art_vpath_svp.h:
+	Fix includes so that each header includes what it needs.
+
+	* art_affine.c:
+	* art_alphagamma.c:
+	* art_bpath.c:
+	* art_gray_svp.c:
+	* art_misc.c:
+	* art_pixbuf.c:
+	* art_rect.c:
+	* art_rect_svp.c:
+	* art_rect_uta.c:
+	* art_render.c:
+	* art_render_gradient.c:
+	* art_render_mask.c:
+	* art_render_svp.c:
+	* art_rgb.c:
+	* art_rgb_a_affine.c:
+	* art_rgb_affine.c:
+	* art_rgb_affine_private.c:
+	* art_rgb_bitmap_affine.c:
+	* art_rgb_pixbuf_affine.c:
+	* art_rgb_rgba_affine.c:
+	* art_rgb_svp.c:
+	* art_rgba.c:
+	* art_svp.c:
+	* art_svp_intersect.c:
+	* art_svp_ops.c:
+	* art_svp_point.c:
+	* art_svp_render_aa.c:
+	* art_svp_vpath.c:
+	* art_svp_vpath_stroke.c:
+	* art_svp_wind.c:
+	* art_uta.c:
+	* art_uta_ops.c:
+	* art_uta_rect.c:
+	* art_uta_svp.c:
+	* art_uta_vpath.c:
+	* art_vpath.c:
+	* art_vpath_bpath.c:
+	* art_vpath_dash.c:
+	* art_vpath_svp.c:
+	Fix order of includes so that the corresponding header is
+	included first, to test that each header includes what it
+	needs.
+
+2002-01-02  Darin Adler  <darin@bentspoon.com>
+
+	* art_alphagamma.h:
+	* art_gray_svp.h:
+	* art_pixbuf.h:
+	* art_render.h:
+	* art_rgb.h:
+	* art_rgba.h:
+	Add some missing includes.
+
+2001-12-26  Raph Levien  <raph@pixel.artofcode.com>
+
+	* art_svp_intersect.c: More fixes to intersector. When tops
+	coincide, full ordering test is performed (with breaking),
+	rather than just comparing b from line eq. Also, had a test
+	for x >= backwards in art_svp_intersect_add_point. Thanks
+	to Bruce Q. Hammond for test cases.
+
+2001-11-21  Raph Levien  <raph@pixel.artofcode.com>
+
+	* art_svp_intersect.c (art_svp_intersect_break): Changed break
+	logic systematically so that new breaks are always in order,
+	rather than allowing them to become out of order, then try to fix
+	them up later. It's no doubt possible to come up with cases in
+	which this reduces precision, but it simplifies life nicely, so I
+	did it.
+	
+	* (art_svp_intersect_horiz): Initialize (a, b, c) values of hs to
+	avoid UMR's when they are tested later.
+
+	* art_svp_ops.c (print_ps_vpath): Changed the coordinate
+	transform so that it's done in the PostScript rather than
+	the C code that outputs the coordinates. This makes it easier
+	to reconstruct the vector path from the debug output.
+
+2001-11-16  Alex Larsson  <alexl@redhat.com>
+
+	* art_rect.c (art_drect_svp_union, art_drect_svp):
+	Don't call art_drect_union() in these functions, since
+	it considers zero-width or zero-height svg segments to
+	be empty. This causes it to think i.e. rectangular svps
+	are empty.
+
+2001-11-07  Raph Levien  <raph@pixel.artofcode.com>
+
+	* art_svp_intersect.c (art_svp_intersect_horiz): Fixed important
+	logic bug, failing to test crossings of neighbors when inserting
+	horizontal lines. Also changed printf to art_dprint.
+
+	* art_misc.c (art_dprint): Added function for debug printing,
+	so verbose intersector output doesn't have to go through printf.
+
+	* art_misc.h (ART_USE_NEW_INTERSECTOR): I've turned this on
+	now, as the new intersector certainly seems to be performing
+	better than the old one now.
+
+2001-10-31  Anders Carlsson  <andersca@gnu.org>
+
+	* Release 2.3.7
+
+2001-10-15  Raph Levien  <raph@pixel.artofcode.com>
+
+	* art_svp_intersect.c (art_svp_intersect_horiz): Minor
+	logic fix so that horiz segments successfully cross
+	zero length segments in the active list.
+
+	(art_svp_intersect_test_cross): Flags indicating whether to
+	do add_point (potentially breaking neighbors) to left and
+	to right.
+
+	(art_svp_intersect_insert_cross): Provide ART_BREAK_LEFT and
+	ART_BREAK_RIGHT flags to art_svp_intersect_test_cross,
+	depending on direction of search.
+
+	(art_svp_intersect_advance_cursor): Provide flags (allow
+	both left and right breaking) to test_cross.
+	
+2001-10-15  Raph Levien  <raph@pixel.artofcode.com>
+
+	* art_svp_intersect.c (CHEAP_SANITYCHECK): Added an inexpensive
+	sanitycheck to detect multiple insertions of a segment into the
+	horiz list.
+
+	(art_svp_writer_rewind_add_point): Avoid breaking lines below
+	their bottom point.
+
+	(art_svp_intersect_test_cross): Handle cases correctly where
+	intersection point matches y0 of left or right segment. These _do_
+	happen in real world examples. Also, do add_point on newly
+	inserted intersection point.
+
+2001-10-14  Raph Levien  <raph@pixel.artofcode.com>
+
+	* art_svp_intersect.c (art_svp_intersect_add_point): Fixed
+	rather subtle logic bug that misplaced insertion point
+	when seg argument was NULL.
+
+2001-10-11  Raph Levien  <raph@pixel.artofcode.com>
+
+	* art_svp_render_aa.c (art_svp_render_aa_iter_step): Got rid
+	of qsort of steps, and now keep the step list in sorted order.
+	Further, we combine duplicate steps with the same x value,
+	which bounds the size of the step list to x1 - x0, so we
+	don't need to dynamically resize it. Thanks greatly to
+	Bruce Q. Hammond for the original version of this patch.
+
+2001-10-09  Raph Levien  <raph@pixel.artofcode.com>
+
+	* art_svp_intersect.c (art_svp_intersect_test_cross): Breaks
+	bottom part of line segments in "too close" cases.
+
+2001-10-09  Raph Levien  <raph@pixel.artofcode.com>
+
+	* art_svp_intersect.c (art_svp_writer_rewind_add_point): Fixed
+	bbox computation.
+	(art_svp_intersector): Handle degenerate case where input
+	SVP has 0 segments.
+
+	* art_svp_intersect.h: Moved definition of art_svp_intersector
+	inside #ifdef __cplusplus, so it links properly against C++
+
+2001-10-09  Raph Levien  <raph@pixel.artofcode.com>
+
+	* art_svp_intersect.c (art_svp_intersect_break): Handle
+	case when break y equals sweep line correctly. Also adds
+	first try at winding number sanitychecker, but that makes
+	too many false positives.
+
+2001-10-07  Raph Levien  <raph@pixel.artofcode.com>
+
+	* art_svp.c (EPSILON): Set to zero if new intersector is
+	in use - we want svp's to be in strict sorted order.
+
+	* art_svp_intersect.c (art_svp_intersect_test_cross): Explicitly
+	check that top points are equal, and swap immediately if b is out
+	of order.
+	(art_svp_intersect_horiz): Break segments that intersect
+	horizontal lines. Now passes "two squares with offset" test.
+
+2001-10-05  Raph Levien  <raph@pixel.artofcode.com>
+
+	* art_svp_intersect.c: Major changes to accommodate
+	horizontal lines. Intersections of horizontal lines
+	aren't fully processed, but should work a lot better
+	than before.
+
+	* testart.c: Minor tweaks. testpat now frees memory
+	so it can be run under memprof to detect leaks.
+
+2001-10-03  Raph Levien  <raph@pixel.artofcode.com>
+
+	* art_svp_intersect.c (art_svp_intersect_advance_cursor):
+	Made test_cross for inserted segments common between
+	intersection processing and cursor advance, and also took
+	care of a case that hadn't been handled before. Also added
+	invariant sanitychecker for debugging purposes.
+
+2001-10-02  Raph Levien  <raph@pixel.artofcode.com>
+
+	* art_svp_ops.c: ART_USE_NEW_INTERSECTOR variants of svp
+	ops changed to do shallow free of merged svp.
+
+2001-10-01  Raph Levien  <raph@acm.org>
+
+	* art_svp_intersect.c:
+	* art_svp_intersect.h:
+	* Makefile.am:
+	* art_misc.h:
+	* art_svp_wind.h: First commit of new intersector code. It is
+	  turned off by default, but can be enabled by #defining
+	  ART_USE_NEW_INTERSECTOR in art_misc.h.
+
+	* art_svp_ops.c: Make svp ops use new intersector if enabled.
+
+	* art_svp_vpath_stroke.c: Make vpath stroking use new intersector
+	if enabled.
+	
+	* testart.c: New test case for intersector.
+
+Wed Sep 26 03:48:13 2001  George Lebl <jirka@5z.com>
+
+	* Release 2.3.6
+
+Wed Sep 26 03:11:40 2001  George Lebl <jirka@5z.com>
+
+	* gen_art_config.c: Fix 64bit issues, cast sizeof return when
+	  using %d to print it.
+
+2001-09-13  Havoc Pennington  <hp@redhat.com>
+
+	* Makefile.am: rename library to libart_lgpl_2
+
+	* libart-2.0.pc.in (Cflags): move includes
+
+	* libart-config.in: move includes
+
+	* Makefile.am: delete libartConf.sh, rename libart-config
+	(EXTRA_DIST): don't install m4 files
+	(libart_lgplincdir): move headers
+
 2001-08-03  Michael Meeks  <michael@ximian.com>
 
 	* Version 2.3.5 for the API freeze.

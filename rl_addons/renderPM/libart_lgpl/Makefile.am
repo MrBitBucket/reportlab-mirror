@@ -1,7 +1,7 @@
 noinst_PROGRAMS = testart testuta gen_art_config
 
 bin_SCRIPTS = \
-	libart-config
+	libart2-config
 
 BUILT_SOURCES = art_config.h
 
@@ -9,14 +9,41 @@ art_config.h:	gen_art_config
 	./gen_art_config > art_config.h
 
 EXTRA_DIST = 			\
-	libart.m4		\
-	libartConf.sh.in	\
 	libart-config.in	\
 	libart-2.0.pc.in
 
-lib_LTLIBRARIES = libart_lgpl.la
+lib_LTLIBRARIES = libart_lgpl_2.la
 
-libart_lgpl_la_SOURCES = \
+if OS_WIN32
+no_undefined = -no-undefined
+
+install-libtool-import-lib:
+	$(INSTALL) .libs/libart_lgpl_2.dll.a $(DESTDIR)$(libdir)
+uninstall-libtool-import-lib:
+	-rm $(DESTDIR)$(libdir)/libart_lgpl_2.dll.a
+else
+install-libtool-import-lib:
+uninstall-libtool-import-lib:
+endif
+
+if MS_LIB_AVAILABLE
+noinst_DATA = art_lgpl_2.lib
+
+install-ms-lib:
+	$(INSTALL) art_lgpl_2.lib $(DESTDIR)$(libdir)
+
+uninstall-ms-lib:
+	-rm $(DESTDIR)$(libdir)/art_lgpl_2.lib
+
+art_lgpl_2.lib : libart_lgpl_2.la
+	lib -name:libart_lgpl_2-@LIBART_MAJOR_VERSION@.dll -def:.libs/libart_lgpl_2-@LIBART_MAJOR_VERSION@.dll-def -out:$@
+
+else
+install-ms-lib:
+uninstall-ms-lib:
+endif
+
+libart_lgpl_2_la_SOURCES = \
 	art_affine.c \
 	art_alphagamma.c \
 	art_bpath.c \
@@ -28,6 +55,7 @@ libart_lgpl_la_SOURCES = \
 	art_rect_uta.c \
 	art_render.c \
 	art_render_gradient.c \
+	art_render_mask.c \
 	art_render_svp.c \
 	art_rgb.c \
 	art_rgb_affine.c \
@@ -40,6 +68,7 @@ libart_lgpl_la_SOURCES = \
 	art_rgba.c \
 	art_rgb_svp.c \
 	art_svp.c \
+	art_svp_intersect.c \
 	art_svp_ops.c \
 	art_svp_point.c \
 	art_svp_render_aa.c \
@@ -57,9 +86,10 @@ libart_lgpl_la_SOURCES = \
 	art_vpath_svp.c	\
 	libart-features.c
 
-libart_lgpl_la_LDFLAGS = -version-info @LIBART_VERSION_INFO@
+libart_lgpl_2_la_LDFLAGS = -version-info @LIBART_VERSION_INFO@ $(no_undefined)
+libart_lgpl_2_la_LIBADD = -lm
 
-libart_lgplincdir = $(includedir)/libart_lgpl
+libart_lgplincdir = $(includedir)/libart-2.0/libart_lgpl
 libart_lgplinc_HEADERS = \
 	art_affine.h \
 	art_alphagamma.h \
@@ -76,6 +106,7 @@ libart_lgplinc_HEADERS = \
 	art_rect_uta.h \
 	art_render.h \
 	art_render_gradient.h \
+	art_render_mask.h \
 	art_render_svp.h \
 	art_rgb.h \
 	art_rgb_affine.h \
@@ -86,6 +117,7 @@ libart_lgplinc_HEADERS = \
 	art_rgb_svp.h \
 	art_rgba.h \
 	art_svp.h \
+	art_svp_intersect.h \
 	art_svp_ops.h \
 	art_svp_point.h \
 	art_svp_render_aa.h \
@@ -106,8 +138,8 @@ libart_lgplinc_HEADERS = \
 
 INCLUDES = -I$(top_srcdir) -I$(top_builddir) -DLIBART_COMPILATION
 
-DEPS = $(top_builddir)/libart_lgpl.la
-LDADDS = $(top_builddir)/libart_lgpl.la
+DEPS = $(top_builddir)/libart_lgpl_2.la
+LDADDS = $(top_builddir)/libart_lgpl_2.la
 
 testart_SOURCES=testart.c
 testart_LDFLAGS =
@@ -121,27 +153,12 @@ testuta_LDADD = $(LDADDS) -lm
 
 tests:	testart testuta
 
-m4datadir = $(datadir)/aclocal
-m4data_DATA = libart.m4
-
-## Put `exec' in the name because this should be installed by
-## `install-exec', not `install-data'.
-
-confexecdir=$(libdir)
-confexec_DATA = libartConf.sh
-
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libart-2.0.pc
 
-## We create libartConf.sh here and not from configure because we want
-## to get the paths expanded correctly.  Macros like srcdir are given
-## the value NONE in configure if the user doesn't specify them (this
-## is an autoconf feature, not a bug).
+libart2-config: libart-config
+	cp -f libart-config libart2-config
 
-libartConf.sh: libartConf.sh.in Makefile
-## Use sed and then mv to avoid problems if the user interrupts.
-	sed -e 's?\@LIBART_LIBDIR\@?$(LIBART_LIBDIR)?g' \
-	    -e 's?\@LIBART_INCLUDEDIR\@?$(LIBART_INCLUDEDIR)?g' \
-	    -e 's?\@LIBART_LIBS\@?$(LIBART_LIBS)?g' \
-	      < $(srcdir)/libartConf.sh.in > libartConf.tmp \
-	  && mv libartConf.tmp libartConf.sh
+install-data-local: install-ms-lib install-libtool-import-lib
+
+uninstall-local: uninstall-ms-lib uninstall-libtool-import-lib

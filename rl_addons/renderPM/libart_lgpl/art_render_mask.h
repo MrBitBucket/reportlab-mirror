@@ -1,5 +1,8 @@
-/* Libart_LGPL - library of basic graphic primitives
- * Copyright (C) 1998 Raph Levien
+/*
+ * art_render_mask.h: Alpha mask source for modular rendering.
+ *
+ * Libart_LGPL - library of basic graphic primitives
+ * Copyright (C) 2000 Raph Levien
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -15,19 +18,17 @@
  * License along with this library; if not, write to the
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
+ *
+ * Authors: Raph Levien <raph@acm.org>
  */
 
-/* Render a sorted vector path into a graymap. */
-
-#ifndef __ART_GRAY_SVP_H__
-#define __ART_GRAY_SVP_H__
+#ifndef __ART_RENDER_MASK_H__
+#define __ART_RENDER_MASK_H__
 
 #ifdef LIBART_COMPILATION
-#include "art_misc.h"
-#include "art_svp.h"
+#include "art_render.h"
 #else
-#include <libart_lgpl/art_misc.h>
-#include <libart_lgpl/art_svp.h>
+#include <libart_lgpl/art_render.h>
 #endif
 
 #ifdef __cplusplus
@@ -35,12 +36,12 @@ extern "C" {
 #endif /* __cplusplus */
 
 void
-art_gray_svp_aa (const ArtSVP *svp,
+art_render_mask (ArtRender *render,
 		 int x0, int y0, int x1, int y1,
-		 art_u8 *buf, int rowstride);
+		 const art_u8 *mask_buf, int rowstride);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* __ART_GRAY_SVP_H__ */
+#endif /* __ART_RENDER_MASK_H__ */
