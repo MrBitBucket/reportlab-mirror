@@ -252,7 +252,7 @@ are not supported directly by the $canvas$ interface.
 A program creates a text object from the $canvas$ using $beginText$
 and then formats text by invoking $textobject$ methods.
 Finally the $textobject$ is drawn onto the canvas using
-drawText.
+$drawText$.
 """)
 
 heading3("The path object methods")
@@ -261,15 +261,38 @@ eg("""path = canvas.beginPath() """)
 eg("""canvas.drawPath(path, stroke=1, fill=0) """)
 eg("""canvas.clipPath(path, stroke=1, fill=0) """)
 
+disc("""
+Path objects are similar to text objects: they provide dedicated control
+for performing complex graphical drawing not directly provided by the
+canvas interface.  A program creates a path object using $beginPath$
+populates the path with graphics using the methods of the path object
+and then draws the path on the canvas using $drawPath$.""")
+
+disc("""It is also possible
+to use a path as a "clipping region" using the $clipPath$ method -- for example a circular path
+can be used to clip away the outer parts of a rectangular image leaving
+only a circular part of the image visible on the page. 
+""")
+
 heading3("Image methods")
 
 eg("""canvas.drawInlineImage(self, image, x,y, width=None,height=None) """)
+
+disc("""
+The $drawInlineImage$ method places an image on the canvas.
+""")
+
+pencilnote()
+
+disc("""
+You need the Python Imaging Library (PIL) to use images with the ReportLab package.
+""")
 
 heading3("Ending a page")
 
 eg("""canvas.showPage()""")
 
-disc("""The showPage method finishes the current page.  All additional drawing will
+disc("""The $showPage$ method finishes the current page.  All additional drawing will
 be done on another page.""")
 
 pencilnote()
@@ -297,8 +320,23 @@ eg("""canvas.setStrokeColor(acolor) """)
 eg("""canvas.setFillGray(gray) """)
 eg("""canvas.setStrokeGray(gray) """)
 
+disc("""
+PDF supports three different color models: gray level, additive (red/green/blue or RGB), and
+subtractive with darkness parameter (cyan/magenta/yellow/darkness or CMYK).
+The ReportLab packages also provide named colors such as $lawngreen$.  There are two
+basic color parameters in the graphics state: the $Fill$ color for the interior of graphic
+figures and the $Stroke$ color for the boundary of graphic figures.  The above methods
+support setting the fill or stroke color using any of the four color specifications.
+""")
+
 heading3("Changing Fonts")
 eg("""canvas.setFont(psfontname, size, leading = None) """)
+
+disc("""
+The $setFont$ method changes the current text font to a given type and size.
+The $leading$ parameter specifies the distance down to move when advancing from
+one text line to the next.
+""")
 
 heading3("Changing Graphical Line Styles")
 

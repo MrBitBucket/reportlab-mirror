@@ -1,5 +1,16 @@
 import string
 
+testannotations="""
+def annotations(canvas):
+    from reportlab.lib.units import inch
+    canvas.drawString(inch, 2.5*inch, "setAuthor, setTitle, setSubject have no visible effect")
+    canvas.drawString(inch, inch, "But if you are viewing this document dynamically")
+    canvas.drawString(inch, 0.5*inch, "please look at File/Document Info")
+    canvas.setAuthor("the ReportLab Team")
+    canvas.setTitle("ReportLab PDF Generation User Guide")
+    canvas.setSubject("How to Generate PDF files using the ReportLab modules")
+"""
+
 # magic function making module
 
 test1 = """

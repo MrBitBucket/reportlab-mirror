@@ -172,3 +172,27 @@ page during interactive viewing.  These effects are useful in spicing up
 slide presentations, mong other places.
 Please see the reference manual for more detail on how to use this method.
 """)
+
+heading2("Internal File Annotations")
+
+eg("""
+ canvas.setAuthor(name)
+ canvas.setTitle(title)
+ canvas.setSubject(subj)
+ """)
+ 
+disc("""
+These methods have no automatically seen visible effect on the document.
+They add internal annotations to the document.
+""")
+
+eg(examples.testannotations)
+
+disc("""
+If you want the subject, title, and author to automatically display
+in the document when viewed and printed you must paint them onto the
+document like any other text.
+""")
+
+illust(examples.annotations, "Setting document internal annotations")
+ 
