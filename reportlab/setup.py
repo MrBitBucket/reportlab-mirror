@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2003
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/setup.py,v 1.6 2002/12/22 22:15:34 andy_robinson Exp $
-__version__=''' $Id: setup.py,v 1.6 2002/12/22 22:15:34 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/setup.py,v 1.7 2002/12/22 23:03:38 andy_robinson Exp $
+__version__=''' $Id: setup.py,v 1.7 2002/12/22 23:03:38 andy_robinson Exp $ '''
 
 import os, sys, distutils
 from distutils.core import setup, Extension
@@ -18,7 +18,8 @@ def package_home(globals_dict):
 
 pjoin = os.path.join
 
-package_path = pjoin(package_home(distutils.__dict__), 'site-packages', 'reportlab')
+package_path = pjoin(package_home(distutils.__dict__), 'reportlab')
+print package_path
 
 
 # why oh why don't most setup scripts have a script handler?
@@ -68,51 +69,111 @@ An Open Source Python library for generating PDFs and graphics.
                     'reportlab.tools.pythonpoint.demos',
                     'reportlab.tools.pythonpoint.styles',
                      ],
-              data_files = [(pjoin(package_path, 'docs', 'images'),
-                                ['reportlab/docs/images/Edit_Prefs.gif',
-                                 'reportlab/docs/images/Python_21.gif',
-                                 'reportlab/docs/images/Python_21_HINT.gif',
-                                 'reportlab/docs/images/fileExchange.gif',
-                                 'reportlab/docs/images/jpn.gif',
-                                 'reportlab/docs/images/jpnchars.jpg',
-                                 'reportlab/docs/images/lj8100.jpg',
-                                 'reportlab/docs/images/replogo.a85',
-                                 'reportlab/docs/images/replogo.gif']),
-                            (pjoin(package_path, 'fonts'), 
-                                ['reportlab/fonts/LeERC___.AFM',
-                                 'reportlab/fonts/LeERC___.PFB',
-                                 'reportlab/fonts/luxiserif.ttf',
-                                 'reportlab/fonts/luxiserif_license.txt',
-                                 'reportlab/fonts/rina.ttf',
-                                 'reportlab/fonts/rina_license.txt']),
+              data_files = [
                             (package_path,
                                 ['README',
                                  'changes',
                                  'license.txt']),
-                            (pjoin(package_path, 'test'),
-                                ['test/pythonpowered.gif',]),
+
+                            (pjoin(package_path,'demos', 'gadflypaper'),
+                                ['demos/gadflypaper/00readme.txt']),
+
+                            (pjoin(package_path,'demos', 'odyssey'),
+                                ['demos/odyssey/00readme.txt',
+                                 'demos/odyssey/odyssey.txt']),
+
+                            (pjoin(package_path,'demos', 'rlzope'),
+                                ['demos/rlzope/readme.txt']),
+
+                            (pjoin(package_path,'demos', 'stdfonts'),
+                                ['demos/stdfonts/00readme.txt']),
+
+                            (pjoin(package_path,'docs', 'images'),
+                                ['docs/images/Edit_Prefs.gif',
+                                 'docs/images/Python_21.gif',
+                                 'docs/images/Python_21_HINT.gif',
+                                 'docs/images/fileExchange.gif',
+                                 'docs/images/jpn.gif',
+                                 'docs/images/jpnchars.jpg',
+                                 'docs/images/lj8100.jpg',
+                                 'docs/images/replogo.a85',
+                                 'docs/images/replogo.gif']),
+
+                            (pjoin(package_path,'docs', 'reference'),
+                                ['docs/reference/reference.yml']),
+
+                            (pjoin(package_path,'docs', 'userguide'),
+                                ['docs/userguide/testfile.txt']),
+
+                            (pjoin(package_path,'extensions'),
+                                ['extensions/README']),
+
+                            (pjoin(package_path, 'fonts'), 
+                                ['fonts/00readme.txt',
+                                 'fonts/LeERC___.AFM',
+                                 'fonts/LeERC___.PFB',
+                                 'fonts/luxiserif.ttf',
+                                 'fonts/luxiserif_license.txt',
+                                 'fonts/rina.ttf',
+                                 'fonts/rina_license.txt']),
+
                             (pjoin(package_path, 'lib'),
                                 ['lib/hyphen.mashed',]),
+
+                            (pjoin(package_path, 'test'),
+                                ['test/pythonpowered.gif',]),
+
+                            (pjoin(package_path, 'tools'),
+                                ['tools/README',]),
+
+                            (pjoin(package_path, 'tools', 'docco'),
+                                ['tools/docco/README',]),
+
+                            (pjoin(package_path, 'tools', 'py2pdf'),
+                                ['tools/py2pdf/README',
+                                 'tools/py2pdf/demo-config.txt',
+                                 'tools/py2pdf/vertpython.jpg'
+                                 ]),
+
+                            (pjoin(package_path, 'tools', 'pythonpoint'),
+                                ['tools/pythonpoint/README',
+                                 'tools/pythonpoint/pythonpoint.dtd',]),
+
+                            (pjoin(package_path, 'tools', 'pythonpoint', 'demos'),
+                                ['tools/pythonpoint/demos/htu.xml',
+                                 'tools/pythonpoint/demos/LeERC___.AFM',
+                                 'tools/pythonpoint/demos/LeERC___.PFB',
+                                 'tools/pythonpoint/demos/leftlogo.a85',
+                                 'tools/pythonpoint/demos/leftlogo.gif',
+                                 'tools/pythonpoint/demos/lj8100.jpg',
+                                 'tools/pythonpoint/demos/monterey.xml',
+                                 'tools/pythonpoint/demos/outline.gif',
+                                 'tools/pythonpoint/demos/pplogo.gif',
+                                 'tools/pythonpoint/demos/python.gif',
+                                 'tools/pythonpoint/demos/pythonpoint.xml',
+                                 'tools/pythonpoint/demos/spectrum.png',
+                                 'tools/pythonpoint/demos/vertpython.gif']),
+
                             ],
 
             ext_modules =   [Extension( '_rl_accel',
-                                        ['reportlab/lib/_rl_accel.c'],
+                                        ['lib/_rl_accel.c'],
                                         include_dirs=[],
                                         define_macros=[],
                                         library_dirs=[],
                                         libraries=LIBS, # libraries to link against
                                         ),
                              Extension( 'sgmlop',
-                                        ['reportlab/lib/sgmlop.c'],
+                                        ['lib/sgmlop.c'],
                                         include_dirs=[],
                                         define_macros=[],
                                         library_dirs=[],
                                         libraries=LIBS, # libraries to link against
                                         ),
                              Extension( 'pyHnj',
-                                        ['reportlab/lib/pyHnjmodule.c',
-                                         'reportlab/lib/hyphen.c',
-                                         'reportlab/lib/hnjalloc.c'],
+                                        ['lib/pyHnjmodule.c',
+                                         'lib/hyphen.c',
+                                         'lib/hnjalloc.c'],
                                         include_dirs=[],
                                         define_macros=[],
                                         library_dirs=[],
