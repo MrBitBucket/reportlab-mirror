@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.33 2002/11/04 16:17:08 rgbecker Exp $
-__version__=''' $Id: pdfutils.py,v 1.33 2002/11/04 16:17:08 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.34 2002/11/20 17:37:25 rgbecker Exp $
+__version__=''' $Id: pdfutils.py,v 1.34 2002/11/20 17:37:25 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -267,6 +267,81 @@ if 1: # for testing always define this
         outstream.write('~>')
         return outstream.getvalue()
 
+    def _AsciiBase85DecodePYTHON(input):
+        """Decodes input using ASCII-Base85 coding.
+
+        This is not used - Acrobat Reader decodes for you
+        - but a round trip is essential for testing."""
+        outstream = getStringIO()
+        #strip all whitespace
+        stripped = join(split(input),'')
+        #check end
+        assert stripped[-2:] == '~>', 'Invalid terminator for Ascii Base 85 Stream'
+        stripped = stripped[:-2]  #chop off terminator
+
+        #may have 'z' in it which complicates matters - expand them
+        stripped = replace(stripped,'z','!!!!!')
+        # special rules apply if not a multiple of five bytes.
+        whole_word_count, remainder_size = divmod(len(stripped), 5)
+        #print '%d words, %d leftover' % (whole_word_count, remainder_size)
+        #assert remainder_size <> 1, 'invalid Ascii 85 stream!'
+        cut = 5 * whole_word_count
+        body, lastbit = stripped[0:cut], stripped[cut:]
+
+        for i in range(whole_word_count):
+            offset = i*5
+            c1 = ord(body[offset]) - 33
+            c2 = ord(body[offset+1]) - 33
+            c3 = ord(body[offset+2]) - 33
+            c4 = ord(body[offset+3]) - 33
+            c5 = ord(body[offset+4]) - 33
+
+            num = ((85L**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5
+
+            temp, b4 = divmod(num,256)
+            temp, b3 = divmod(temp,256)
+            b1, b2 = divmod(temp, 256)
+
+            assert  num == 16777216 * b1 + 65536 * b2 + 256 * b3 + b4, 'dodgy code!'
+            outstream.write(chr(b1))
+            outstream.write(chr(b2))
+            outstream.write(chr(b3))
+            outstream.write(chr(b4))
+
+        #decode however many bytes we have as usual
+        if remainder_size > 0:
+            while len(lastbit) < 5:
+                lastbit = lastbit + '!'
+            c1 = ord(lastbit[0]) - 33
+            c2 = ord(lastbit[1]) - 33
+            c3 = ord(lastbit[2]) - 33
+            c4 = ord(lastbit[3]) - 33
+            c5 = ord(lastbit[4]) - 33
+            num = (((85*c1+c2)*85+c3)*85+c4)*85L + (c5
+                     +(0,0,0xFFFFFF,0xFFFF,0xFF)[remainder_size])
+            temp, b4 = divmod(num,256)
+            temp, b3 = divmod(temp,256)
+            b1, b2 = divmod(temp, 256)
+            assert  num == 16777216 * b1 + 65536 * b2 + 256 * b3 + b4, 'dodgy code!'
+            #print 'decoding: %d %d %d %d %d -> %d -> %d %d %d %d' % (
+            #    c1,c2,c3,c4,c5,num,b1,b2,b3,b4)
+
+            #the last character needs 1 adding; the encoding loses
+            #data by rounding the number to x bytes, and when
+            #divided repeatedly we get one less
+            if remainder_size == 2:
+                lastword = chr(b1)
+            elif remainder_size == 3:
+                lastword = chr(b1) + chr(b2)
+            elif remainder_size == 4:
+                lastword = chr(b1) + chr(b2) + chr(b3)
+            else:
+                lastword = ''
+            outstream.write(lastword)
+
+        #terminator code for ascii 85
+        return outstream.getvalue()
+
 try:
     try:
         from _rl_accel import _AsciiBase85Encode                # builtin or on the path
@@ -277,81 +352,18 @@ except ImportError, errMsg:
     _checkImportError(errMsg)
     _AsciiBase85Encode = _AsciiBase85EncodePYTHON
 
-def _AsciiBase85Decode(input):
-    """Decodes input using ASCII-Base85 coding.
-
-    This is not used - Acrobat Reader decodes for you
-    - but a round trip is essential for testing."""
-    outstream = getStringIO()
-    #strip all whitespace
-    stripped = join(split(input),'')
-    #check end
-    assert stripped[-2:] == '~>', 'Invalid terminator for Ascii Base 85 Stream'
-    stripped = stripped[:-2]  #chop off terminator
-
-    #may have 'z' in it which complicates matters - expand them
-    stripped = replace(stripped,'z','!!!!!')
-    # special rules apply if not a multiple of five bytes.
-    whole_word_count, remainder_size = divmod(len(stripped), 5)
-    #print '%d words, %d leftover' % (whole_word_count, remainder_size)
-    #assert remainder_size <> 1, 'invalid Ascii 85 stream!'
-    cut = 5 * whole_word_count
-    body, lastbit = stripped[0:cut], stripped[cut:]
-
-    for i in range(whole_word_count):
-        offset = i*5
-        c1 = ord(body[offset]) - 33
-        c2 = ord(body[offset+1]) - 33
-        c3 = ord(body[offset+2]) - 33
-        c4 = ord(body[offset+3]) - 33
-        c5 = ord(body[offset+4]) - 33
-
-        num = ((85L**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5
-
-        temp, b4 = divmod(num,256)
-        temp, b3 = divmod(temp,256)
-        b1, b2 = divmod(temp, 256)
-
-        assert  num == 16777216 * b1 + 65536 * b2 + 256 * b3 + b4, 'dodgy code!'
-        outstream.write(chr(b1))
-        outstream.write(chr(b2))
-        outstream.write(chr(b3))
-        outstream.write(chr(b4))
-
-    #decode however many bytes we have as usual
-    if remainder_size > 0:
-        while len(lastbit) < 5:
-            lastbit = lastbit + '!'
-        c1 = ord(lastbit[0]) - 33
-        c2 = ord(lastbit[1]) - 33
-        c3 = ord(lastbit[2]) - 33
-        c4 = ord(lastbit[3]) - 33
-        c5 = ord(lastbit[4]) - 33
-        num = (((85*c1+c2)*85+c3)*85+c4)*85L + (c5
-                 +(0,0,0xFFFFFF,0xFFFF,0xFF)[remainder_size])
-        temp, b4 = divmod(num,256)
-        temp, b3 = divmod(temp,256)
-        b1, b2 = divmod(temp, 256)
-        assert  num == 16777216 * b1 + 65536 * b2 + 256 * b3 + b4, 'dodgy code!'
-        #print 'decoding: %d %d %d %d %d -> %d -> %d %d %d %d' % (
-        #    c1,c2,c3,c4,c5,num,b1,b2,b3,b4)
-
-        #the last character needs 1 adding; the encoding loses
-        #data by rounding the number to x bytes, and when
-        #divided repeatedly we get one less
-        if remainder_size == 2:
-            lastword = chr(b1)
-        elif remainder_size == 3:
-            lastword = chr(b1) + chr(b2)
-        elif remainder_size == 4:
-            lastword = chr(b1) + chr(b2) + chr(b3)
-        else:
-            lastword = ''
-        outstream.write(lastword)
-
-    #terminator code for ascii 85
-    return outstream.getvalue()
-
+try:
+    try:
+        from _rl_accel import _AsciiBase85Decode                # builtin or on the path
+        #_AsciiBase85DecodeC = _AsciiBase85Decode
+        #def _AsciiBase85Decode(inp):
+            #return _AsciiBase85DecodeC(join(split(inp),''))
+    except ImportError, errMsg:
+        _checkImportError(errMsg)
+        from reportlab.lib._rl_accel import _AsciiBase85Decode  # where we think it should be
+except ImportError, errMsg:
+    _checkImportError(errMsg)
+    _AsciiBase85Decode = _AsciiBase85DecodePYTHON
 
 def _wrap(input, columns=60):
     "Wraps input at a given column size by inserting LINEEND characters."
