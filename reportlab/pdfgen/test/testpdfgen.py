@@ -32,10 +32,13 @@
 #
 ###############################################################################
 #	$Log: testpdfgen.py,v $
+#	Revision 1.8  2000/03/26 23:06:49  aaron_watters
+#	added demos for forms and links
+#
 #	Revision 1.7  2000/03/08 13:40:03  andy_robinson
 #	Canvas has two methods setFillColor(aColor) and setStrokeColor(aColor)
 #	which accepts color objects directly.
-#
+#	
 #	Revision 1.6  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
 #	
@@ -51,7 +54,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testpdfgen.py,v 1.7 2000/03/08 13:40:03 andy_robinson Exp $ '''
+__version__=''' $Id: testpdfgen.py,v 1.8 2000/03/26 23:06:49 aaron_watters Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
@@ -67,21 +70,51 @@ from reportlab.lib import colors
 ################################################################
 
 BASEFONT = ('Times-Roman', 10)
-def framePage(canvas, title):
-    canvas.setFont('Times-BoldItalic',20)
-    canvas.drawString(inch, 10.5 * inch, title)
+def framePageForm(c):
+    c.beginForm("frame")
+    c.saveState()
+    # forms can't do non-constant operations
+    #canvas.setFont('Times-BoldItalic',20)
+    #canvas.drawString(inch, 10.5 * inch, title)
                             
+    #c.setFont('Times-Roman',10)
+    #c.drawCentredString(4.135 * inch, 0.75 * inch,
+    #                        'Page %d' % c.getPageNumber())
+    
+    #draw a border
+    c.setFillColorRGB(0,0,0.95)
+    c.rect(0.3*inch, inch, 0.5*inch, 10*inch, fill=1)
+    from reportlab.lib import corp
+    c.translate(0.8*inch, 9.6*inch)
+    c.rotate(90)
+    logo = corp.ReportLabLogo(width=1.3*inch, height=0.5*inch, powered_by=1)
+    c.setFillColorRGB(1,1,1)
+    c.setStrokeColorRGB(1,1,1)
+    logo.draw(c)
+    #c.setStrokeColorRGB(1,0,0)
+    #c.setLineWidth(5)
+    #c.line(0.8 * inch, inch, 0.8 * inch, 10.75 * inch)
+    #reset carefully afterwards
+    #canvas.setLineWidth(1)
+    #canvas.setStrokeColorRGB(0,0,0)\
+    c.restoreState()
+    c.endForm()
+    
+titlelist = []
+    
+def framePage(canvas, title):
+    titlelist.append(title)
+    canvas.inPage()
+    canvas.saveState()
+    canvas.setFont('Times-BoldItalic',20)
+    
+    canvas.drawString(inch, 10.5 * inch, title)
+    canvas.bookmarkHorizontalAbsolute(title, 10.8*inch)
     canvas.setFont('Times-Roman',10)
     canvas.drawCentredString(4.135 * inch, 0.75 * inch,
                             'Page %d' % canvas.getPageNumber())
-    
-    #draw a border
-    canvas.setStrokeColorRGB(1,0,0)
-    canvas.setLineWidth(5)
-    canvas.line(0.8 * inch, inch, 0.8 * inch, 10.75 * inch)
-    #reset carefully afterwards
-    canvas.setLineWidth(1)
-    canvas.setStrokeColorRGB(0,0,0)
+    canvas.restoreState()
+    canvas.doForm("frame")
 
 class DocBlock:
     """A DocBlock has a chunk of commentary and a chunk of code.
@@ -117,7 +150,7 @@ class DocBlock:
         drawCode(canvas, self.code)
         canvas.textLines(self.comment2)
 
-        #now a box for the drawing, slightly witin rect        
+        #now a box for the drawing, slightly within rect        
         canvas.rect(x + 9, y - height + 9, 198, height - 18)
         #boundary:
         self.namespace = {'canvas':canvas,'cm': cm,'inch':inch}
@@ -179,6 +212,7 @@ def run():
 ##    c = pdfgen.Canvas('d:\\distiller\\testing\\testpdfgen.pdf')
 ##    c.setPageCompression(0)
     c = canvas.Canvas('testpdfgen.pdf')
+    framePageForm(c) # define the frame form
     
     
     framePage(c, 'PDFgen graphics API test script')
@@ -603,7 +637,44 @@ cost to performance.""")
     c.line(1.5*inch, 4*inch, 4*inch, 4*inch)
     c.line(2*inch, 3.5*inch, 2*inch, 5*inch)
     c.drawString(4.5 * inch, 4.25*inch, 'image distorted to fit box')
-        
+    
+
+
+#########################################################################
+#
+#  Page 8 - Forms and simple links
+#
+#########################################################################
+    c.showPage()
+    framePage(c, "Forms and Links")
+    c.setFont('Times-Roman', 12)
+    t = c.beginText(inch, 10 * inch)
+    t.textLines("""Forms are sequences of text or graphics operations
+      which are stored only once in a PDF file and used as many times
+      as desired.  The blue logo bar to the left is an example of a form
+      in this document.  See the function framePageForm in this demo script
+      for an example of how to use canvas.beginForm(name, ...) ... canvas.endForm().
+      
+      Documents can also contain cross references where (for example) a rectangle
+      on a page may be bound to a position on another page.  If the user clicks
+      on the rectangle the PDF viewer moves to the bound position on the other
+      page.  There are many other types of annotations and links supported by PDF.
+      
+      For example there is a bookmark to each page in this document and below
+      is a browsable index that jumps to those pages.
+      """)
+    c.drawText(t)
+    
+    nentries = len(titlelist)
+    xmargin = 3*inch
+    xmax = 7*inch
+    ystart = 6.54*inch
+    ydelta = 0.4*inch
+    for i in range(nentries):
+        yposition = ystart - i*ydelta
+        title = titlelist[i]
+        c.drawString(xmargin, yposition, title)
+        c.linkAbsolute(title, title, (xmargin-ydelta/4, yposition-ydelta/4, xmax, yposition+ydelta/2))
     c.save()
 
 
