@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.6 2001/03/29 16:50:57 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.7 2001/03/30 17:05:23 dinu_gherman Exp $
 
 from gengraphguide import *
 
@@ -118,17 +118,30 @@ may be imported into publishing tools such as Quark Express.
 
 heading2("Verification")
 
-disc("""The framework so far would be ideally suited to a type-safe language 
-       like Java or Delphi. Python is very dynamic and lets us type things 
-       which just don't make sense:""")
+disc("""
+Python is very dynamic and lets us exectue statements at run time that
+can easily be the source for unexpected behaviour.
+One subtle 'error' is when assigning to an attribute that the framework
+doesn't know about because the used attribute's name contains a typo.
+Python lets you get away with it (adding a new attribute to an object,
+say), but the graphics framework will not detect this 'typo' without
+taking special counter-measures.
+""")
+
+disc("""
+There are two verification techniques to avoid this situation.
+The default is for every object to check every assignment at run
+time, such that you can only assign to 'legal' attributes.
+This is what happens by default.
+As this imposes a small performance penalty, this behaviour can
+be turned off when you need it to be.
+""")
 
 eg("""
 >>> R = Rect(10,10,200,100, fillColor=red) 
 >>> 
 >>> R.fullColor = green    # note the typo 
->>> 
 >>> R.x = 'not a number'   # illegal argument type 
->>> 
 >>> del R.width            # that should confuse it
 """)
 
@@ -142,14 +155,6 @@ some back-end tries to draw the rectangle.
 The third, though less likely, results in an invalid object that
 would not know how to draw itself.
 """)
-
-disc("""
-We have provided two verification techniques.
-The default is for every object to check every assignment at run
-time.
-This is what happens by default.
-So if you make a mistake in an assignment, you get something 
-like this:""")
 
 eg("""
 >>> r = shapes.Rect(10,10,200,80) 

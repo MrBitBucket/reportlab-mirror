@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch1_intro.py,v 1.4 2001/03/30 11:36:46 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/ch1_intro.py,v 1.5 2001/03/30 17:05:23 dinu_gherman Exp $
 
 from gengraphguide import *
 import reportlab
@@ -61,8 +61,6 @@ well.
 ReportLab is in the process of adding such a graphics package to
 its standard distribution.
 This document is both the "design document" and the "tutorial".
-It is also an expanded version of chapter 8 of the ReportLab User
-Guide, "Platform Independent Graphics...".
 """)
 
 
