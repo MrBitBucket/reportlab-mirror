@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.43 2001/08/22 19:30:03 aaron_watters Exp $
-__version__=''' $Id: paraparser.py,v 1.43 2001/08/22 19:30:03 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.44 2001/08/22 20:35:25 aaron_watters Exp $
+__version__=''' $Id: paraparser.py,v 1.44 2001/08/22 20:35:25 aaron_watters Exp $ '''
 import string
 import re
 from types import TupleType
@@ -474,7 +474,10 @@ class ParaParser(xmllib.XMLParser):
 			if frag.greek: frag.fontName = 'symbol'
 
 		# bold, italic, and underline
-		frag.fontName = tt2ps(frag.fontName,frag.bold,frag.italic)
+		#print "content-type: text/html"; print; print "0ld frag.fontName, frag.bold, frag.italic", (frag.fontName, frag.bold, frag.italic)
+		x = frag.fontName = tt2ps(frag.fontName,frag.bold,frag.italic)
+		#from reportlab.lib import fonts; from pprint import pprint; print "<pre>"; pprint(fonts._tt2ps_map); print "</pre>"
+		#print "new frag.fontName", frag.fontName, x, "<br>"
 
 		#save our data
 		frag.text = data

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.55 2001/06/07 18:16:46 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.55 2001/06/07 18:16:46 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.56 2001/08/22 20:35:25 aaron_watters Exp $
+__version__=''' $Id: paragraph.py,v 1.56 2001/08/22 20:35:25 aaron_watters Exp $ '''
 from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
@@ -476,6 +476,7 @@ class Paragraph(Flowable):
 			f = frags[0]
 			fontSize = f.fontSize
 			fontName = f.fontName
+			print "content-type: text/html"; print; print fontName, "burp <br>"
 			words = hasattr(f,'text') and split(f.text, ' ') or f.words
 			spaceWidth = stringWidth(' ', fontName, fontSize)
 			cLine = []
