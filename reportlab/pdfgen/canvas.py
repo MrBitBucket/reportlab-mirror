@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.19  2000/04/02 02:53:49  aaron_watters
+#	added support for outline trees
+#
 #	Revision 1.18  2000/03/26 20:45:01  aaron_watters
 #	added beginForm..endForm and fixed some naming convention issues.
-#
+#	
 #	Revision 1.17  2000/03/24 21:02:21  aaron_watters
 #	added support for destinations, forms, linkages
 #	
@@ -81,7 +84,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.18 2000/03/26 20:45:01 aaron_watters Exp $ '''
+__version__=''' $Id: canvas.py,v 1.19 2000/04/02 02:53:49 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -233,6 +236,23 @@ class Canvas:
     def setAuthor(self, author):
         self._doc.setAuthor(author)
         
+    def setOutlineNames(self, *nametree):
+        """nametree should can be a recursive tree like so
+           c.setOutlineNames(
+             "chapter1dest",
+             ("chapter2dest",
+              ["chapter2section1dest",
+               "chapter2section2dest",
+               "chapter2conclusiondest"]
+             ), # end of chapter2 description
+             "chapter3dest",
+             ("chapter4dest", ["c4s1", "c4s2"])
+             )
+          each of the string names inside must be bound to a bookmark
+          before the document is generated.
+        """
+        apply(self._doc.outline.setNames, (self,)+nametree)
+        
     def setTitle(self, title):
         self._doc.setTitle(title)
         
@@ -242,6 +262,9 @@ class Canvas:
     def pageHasData(self):
         "Info function - app can call it after showPage to see if it needs a save"
         return len(self._code) == 0
+        
+    def showOutline(self):
+        self._doc._catalog.showOutline()
     
     def showPage(self):
         """This is where the fun happens"""

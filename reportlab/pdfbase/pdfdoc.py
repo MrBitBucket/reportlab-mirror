@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.11  2000/04/02 02:52:39  aaron_watters
+#	added support for outline trees
+#
 #	Revision 1.10  2000/03/24 21:03:51  aaron_watters
 #	Added forms, destinations, linkages and other features
-#
+#	
 #	Revision 1.7  2000/02/23 15:09:23  rgbecker
 #	Memory leak fixes
 #	
@@ -53,7 +56,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.10 2000/03/24 21:03:51 aaron_watters Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.11 2000/04/02 02:52:39 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -121,6 +124,8 @@ class PDFDocument:
     def __init__(self):
         self.objects = []
         self.objectPositions = {}
+        # named object references (may be unbound)
+        self.objectReferences = {}
         self.inObject = None # mark for whether in page or form or possibly others...
         self.thispageposition = None # record if in page
         self.thisformposition = None # record if in form
@@ -142,12 +147,14 @@ class PDFDocument:
         
         # position 1
         cat = PDFCatalog()
+        self._catalog = cat
         cat.RefPages = 3
         cat.RefOutlines = 2
         self.add('Catalog', cat)
     
         # position 2 - outlines
         outl = PDFOutline()
+        self.outline = outl
         self.add('Outline', outl)
     
         # position 3 - pages collection
@@ -173,7 +180,8 @@ class PDFDocument:
     
     def add(self, key, obj):
         #self.objectPositions[key] = len(self.objects)  # its position
-        self.objectPositions[key] = len(self.objects)+1 # its position
+        self.objectPositions[key] = p = len(self.objects)+1 # its position
+        self.setObjectReference(key, p)
         self.objects.append(obj)
         #obj.doc = self
         #return len(self.objects) - 1  # give its position
@@ -182,6 +190,7 @@ class PDFDocument:
     def replace(self, key, obj):
         """replace an object (but you better know what you are doing)"""
         position = self.getPosition(key)
+        #self.setObjectReference(key, position)
         self.objects[position-1] = obj
         return position
         
@@ -195,8 +204,20 @@ class PDFDocument:
         to find out where the object keyed under "Page001" is stored."""
         return self.objectPositions[key]
         
+    def setObjectReference(self, key, position):
+        ref = self.objectReference(key)
+        ref.bind("%s 0 R" % position)
+        
     def objectReference(self, key):
-        return "%s 0 R" % self.getPosition(key)
+        "get a (lazy) object ref"
+        #return "%s 0 R" % self.getPosition(key)
+        refs = self.objectReferences
+        try:
+            test = refs[key]
+        except:
+            refs[key] = test = BindableStr(key)
+        return test
+        
     
     def setTitle(self, title):
         "embeds in PDF file"
@@ -249,6 +270,10 @@ class PDFDocument:
         self.xref = []
         f.write("%PDF-1.2" + LINEEND)  # for CID support
         f.write("%\355\354\266\276" + LINEEND)
+        # do preprocessing as needed
+        # prepare outline
+        outline = self.outline
+        outline.prepare(self)
         for obj in self.objects:
             pos = f.tell()
             self.xref.append(pos)
@@ -469,17 +494,21 @@ class PDFLiteral(PDFObject):
 
 class PDFCatalog(PDFObject):
     "requires RefPages and RefOutlines set"
+    PageMode = "/UseNone"
     def __init__(self):
         self.template = string.join([
                         '<<',
                         '/Type /Catalog',
                         '/Pages %d 0 R',
                         '/Outlines %d 0 R',
+                        '/PageMode %s',
                         '>>'
                         ],LINEEND
                         )
+    def showOutline(self):
+        self.PageMode = "/UseOutlines"
     def save(self, file):
-        file.write(self.template % (self.RefPages, self.RefOutlines) + LINEEND)
+        file.write(self.template % (self.RefPages, self.RefOutlines, self.PageMode) + LINEEND)
 
 
 class PDFInfo(PDFObject):
@@ -512,7 +541,7 @@ class PDFInfo(PDFObject):
     
 
 
-class PDFOutline(PDFObject):
+class PDFOutline0(PDFObject):
     "null outline, does nothing yet"
     def __init__(self):
         self.template = string.join([
@@ -523,7 +552,140 @@ class PDFOutline(PDFObject):
                 LINEEND)
     def save(self, file):
         file.write(self.template + LINEEND)
-
+        
+class PDFOutline(PDFObject):
+    """takes a recursive list of outline destinations
+       like
+           out = PDFOutline1()
+           out.setNames(canvas, # requires canvas for name resolution
+             "chapter1dest",
+             ("chapter2dest",
+              ["chapter2section1dest",
+               "chapter2section2dest",
+               "chapter2conclusiondest"]
+             ), # end of chapter2 description
+             "chapter3dest",
+             ("chapter4dest", ["c4s1", "c4s2"])
+             )
+       Higher layers may build this structure incrementally. KISS at base level.
+    """
+    # first attempt, many possible features missing.
+    #no init for now
+    mydestinations = ready = None
+    counter = 0
+    def setDestinations(self, destinationtree):
+        self.mydestinations = destinationtree
+    def save(self, file):
+        c = self.count
+        if c==0:
+           file.write(BasicPDFDictString(Type="/Outlines", Count=c))
+           return
+        first = self.first
+        last = self.last
+        file.write(BasicPDFDictString(Type="/Outlines", Count=c, First=first, Last=last))
+    def setNames(self, canvas, *nametree):
+        desttree = self.translateNames(canvas, nametree)
+        self.setDestinations(desttree)
+    def translateNames(self, canvas, object):
+        "recursively translate tree of names into tree of destinations"
+        from types import ListType, TupleType, StringType
+        Ot = type(object)
+        if Ot is StringType:
+            return {object: canvas._bookmarkReference(object)} # name-->ref
+        if Ot is ListType or Ot is TupleType:
+            L = []
+            for o in object:
+                L.append(self.translateNames(canvas, o))
+            if Ot is TupleType:
+                return tuple(L)
+            return L
+        raise "in outline, destination name must be string: got a %s" % Ot
+    def prepare(self, document):
+        """prepare all data structures required for save operation (create related objects)"""
+        if self.mydestinations is None:
+            self.first = self.last = None
+            self.count = 0
+            self.ready = 1
+            return
+        #self.first = document.objectReference("Outline.First")
+        #self.last = document.objectReference("Outline.Last")
+        self.count = count(self.mydestinations)
+        (self.first, self.last) = self.maketree(document, self.mydestinations, toplevel=1)
+        self.ready = 1
+    def maketree(self, document, destinationtree, Parent=None, toplevel=0):
+        from types import ListType, TupleType, DictType
+        if toplevel:
+            levelname = "Outline"
+            Parent = document.objectReference("Outline")
+        else:
+            self.count = self.count+1
+            levelname = "Outline.%s" % self.count
+            if Parent is None:
+                raise ValueError, "non-top level outline elt parent must be specified"
+        if type(destinationtree) is not ListType and type(destinationtree) is not TupleType:
+            raise ValueError, "destinationtree must be list or tuple, got %s"
+        nelts = len(destinationtree)
+        lastindex = nelts-1
+        lastelt = firstref = lastref = None
+        for index in range(nelts):
+            eltobj = OutlineEntryObject()
+            eltobj.Parent = Parent
+            eltname = "%s.%s" % (levelname, index)
+            eltref = document.objectReference(eltname)
+            document.add(eltname, eltobj)
+            if lastelt is not None:
+                lastelt.Next = eltref
+                eltobj.Prev = lastref
+            if firstref is None:
+                firstref = eltref
+            lastref = eltref
+            lastelt = eltobj # advance eltobj
+            lastref = eltref
+            elt = destinationtree[index]
+            te = type(elt)
+            if te is DictType:
+                # simple leaf {name: dest}
+                leafdict = elt
+            elif te is TupleType:
+                # leaf with subsections: ({name: ref}, subsections)
+                try:
+                    (leafdict, subsections) = elt
+                except:
+                    raise ValueError, "destination tree elt tuple should have two elts, got %s" % len(elt)
+                eltobj.Count = count(subsections)
+                (eltobj.First, eltobj.Last) = self.maketree(document, subsections, eltref)
+            else:
+                raise ValueError, "destination tree elt should be dict or tuple, got %s" % te
+            try:
+                [(Title, Dest)] = leafdict.items()
+            except:
+                raise ValueError, "bad outline leaf dictionary, should have one entry "+str(elt)
+            eltobj.Title = Title
+            eltobj.Dest = Dest
+        return (firstref, lastref)
+def count(tree): 
+    """utility for outline: recursively count leaves in a tuple/list tree"""
+    from types import TupleType, ListType
+    from operator import add
+    tt = type(tree)
+    if tt is TupleType or tt is ListType:
+        return reduce(add, map(count, tree))
+    return 1
+    
+class OutlineEntryObject(PDFObject):
+    "an entry in an outline"
+    Title = Dest = Parent = Prev = Next = First = Last = Count = None
+    def save(self, file):
+        D = {}
+        D["Title"] = PDFString(self.Title)
+        D["Parent"] = self.Parent
+        D["Dest"] = self.Dest
+        for n in ("Prev", "Next", "First", "Last", "Count"):
+            v = getattr(self, n)
+            if v is not None:
+                D[n] = v
+        file.write(apply(BasicPDFDictString, (), D))
+    
 
 class PDFPageCollection(PDFObject):
     "presumes PageList attribute set (list of integers)"
@@ -812,13 +974,15 @@ class Destination:
           d.setPageRef("20 0 R")
        (at present setPageRef is called on generation of the page).
     """
-    representation = format = None
+    representation = format = pageref = None
     def __init__(self,name):
         self.name = name
     def __str__(self):
-        r = self.representation
-        if r is None: raise ValueError, "Destination not resolved %s" % self.name
-        return r
+        f = self.format
+        if f is None: raise ValueError, "format not resolved %s" % self.name
+        p = self.pageref
+        if p is None: raise ValueError, "Page reference unbound %s" % self.name
+        return f % p
     def xyz(self, left, top, zoom):  # see pdfspec mar 11 99 pp184+
         self.format = "[ %%s /XYZ %s %s %s ]" % (left, top, zoom)
     def fit(self):
@@ -834,10 +998,19 @@ class Destination:
     def fitbv(self, left):
         self.format = "[ %%s /FitBV %s ]" % left
     def setPageRef(self, pageref):
-        f = self.format
-        if f is None:
-            raise ValueError, "format not defined"
-        self.representation = f % pageref
+        self.pageref = pageref
+        
+class BindableStr:
+    """trick to make an object whose str() operation may be defined later."""
+    strValue = None
+    def __init__(self, name):
+        self.name = name
+    def __str__(self):
+        v = self.value
+        if v is None: raise ValueError, "str value unbound for name %s" % self.name
+        return v
+    def bind(self, v):
+        self.value = v
 
 # this one doesn't seem to work (but I'm not sure :( ).
 class InkAnnotation(Annotation):
