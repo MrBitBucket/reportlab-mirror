@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/styles_modern.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/pythonpoint/styles/modern.py,v 1.3 2002/07/24 19:56:39 andy_robinson Exp $
-__version__=''' $Id: modern.py,v 1.3 2002/07/24 19:56:39 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/tools/pythonpoint/styles/modern.py,v 1.4 2003/12/14 17:52:26 andy_robinson Exp $
+__version__=''' $Id: modern.py,v 1.4 2003/12/14 17:52:26 andy_robinson Exp $ '''
 # style_modern.py
 __doc__="""This is an example style sheet.  You can create your own, and
 have them loaded by the presentation.  A style sheet is just a
@@ -37,6 +37,15 @@ def getParagraphStyles():
     para = ParagraphStyle('BodyText', stylesheet['Normal'])
     para.spaceBefore = 12
     stylesheet['BodyText'] = para
+
+    para = ParagraphStyle('Indent', stylesheet['Normal'])
+    para.leftIndent = 36
+    para.firstLineIndent = 0
+    stylesheet['Indent'] = para
+
+    para = ParagraphStyle('Centered', stylesheet['Normal'])
+    para.alignment = TA_CENTER
+    stylesheet['Centered'] = para
 
     para = ParagraphStyle('BigCentered', stylesheet['Normal'])
     para.spaceBefore = 12
@@ -85,6 +94,13 @@ def getParagraphStyles():
     para.bulletFontSize = 24
     para.bulletIndent = 36
     stylesheet['Bullet'] = para
+
+    para = ParagraphStyle('Bullet2', stylesheet['Bullet'])
+    para.firstLineIndent = 0
+    para.bulletIndent = 72
+    para.leftIndent = 108
+    stylesheet['Bullet2'] = para
+
 
     para = ParagraphStyle('Definition', stylesheet['Normal'])
     #use this for definition lists

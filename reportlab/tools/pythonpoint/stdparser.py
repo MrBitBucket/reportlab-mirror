@@ -340,6 +340,7 @@ class PPMLParser(xmllib.XMLParser):
         if path=='None':
             path = []
         path.append('styles')
+        path.append(os.getcwd())
         modulename = self._arg('stylesheet', args, 'module')
         funcname = self._arg('stylesheet', args, 'function')
         try:
