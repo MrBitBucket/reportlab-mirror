@@ -22,7 +22,11 @@ Installation instructions :
 
   0 - If not installed then install Zope.
 
-  1 - Install reportlab in the Zope/lib/python/Shared directory.
+  1 - Install reportlab in the Zope/lib/python/Shared directory by unpacking 
+      the tarball and putting a reportlabs.pth file in site-packages for the Zope
+      used with Python.  The path value in the reportlabs.pth file must be 
+      relative.  For a typical Zope installation,  the path is "../../python/Shared".
+      Remember to restart Zope so the new path is instantiated.
 
   2 - Install PIL in the Zope/lib/python/Shared directory. You need to
       ensure that the _imaging.so or .pyd is also installed appropriately.
