@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.57 2000/12/01 01:53:50 aaron_watters Exp $
-__version__=''' $Id: canvas.py,v 1.57 2000/12/01 01:53:50 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.58 2000/12/10 14:04:31 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.58 2000/12/10 14:04:31 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -912,7 +912,7 @@ class Canvas:
             else:
                 raise 'Unknown color', str(aColor)
         elif type(aColor) is StringType:
-            self.setFillColor(colors.toColor(aColor))
+            self.setFillColor(toColor(aColor))
         else:
             raise 'Unknown color', str(aColor)
 

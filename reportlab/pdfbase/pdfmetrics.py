@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfmetrics.py,v 1.16 2000/11/13 15:26:46 rgbecker Exp $
-__version__=''' $Id: pdfmetrics.py,v 1.16 2000/11/13 15:26:46 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfmetrics.py,v 1.17 2000/12/10 14:04:31 andy_robinson Exp $
+__version__=''' $Id: pdfmetrics.py,v 1.17 2000/12/10 14:04:31 andy_robinson Exp $ '''
 __doc__="""This contains pre-canned text metrics for the PDFgen package, and may also
 be used for any other PIDDLE back ends or packages which use the standard
 Type 1 postscript fonts.
@@ -80,6 +80,9 @@ winansiencodingwidths={
 widths={
 	'MacRomanEncoding': macromanencodingwidths , 'WinAnsiEncoding': winansiencodingwidths
 	}
+
+#HACK to get proper bullet metrics - don't know why they are zero!
+winansiencodingwidths['courier'][129] = 6
 
 ascent_descent = {'courier': (629, -157), 'courier-bold': (626, -142), 'courier-boldoblique': (626, -142), 'courier-oblique': (629, -157), 'helvetica': (718, -207), 'helvetica-bold': (718, -207), 'helvetica-boldoblique': (718, -207), 'helvetica-oblique': (718, -207), 'symbol': (0, 0), 'times-bold': (676, -205), 'times-bolditalic': (699, -205), 'times-italic': (683, -205), 'times-roman': (683, -217), 'zapfdingbats': (0, 0)}
 try:

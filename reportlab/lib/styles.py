@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/styles.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/styles.py,v 1.11 2000/12/10 11:57:42 andy_robinson Exp $
-__version__=''' $Id: styles.py,v 1.11 2000/12/10 11:57:42 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/styles.py,v 1.12 2000/12/10 14:04:31 andy_robinson Exp $
+__version__=''' $Id: styles.py,v 1.12 2000/12/10 14:04:31 andy_robinson Exp $ '''
 
 from reportlab.lib.colors import white, black
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
@@ -190,84 +190,6 @@ def testStyles():
     return pNormal, pPre
 
 def getSampleStyleSheet():
-    """Returns a dictionary of styles to get you started.  Should be
-    usable for fairly basic word processing tasks.  We should really have
-    a class for StyleSheets, which can list itself and avoid the
-    duplication of item names seen below."""
-    stylesheet = {}
-
-    para = ParagraphStyle('Normal', None)   #the ancestor of all
-    para.fontName = 'Times-Roman'
-    para.fontSize = 10
-    para.leading = 12
-    stylesheet['Normal'] = para
-
-    para = ParagraphStyle('BodyText', stylesheet['Normal'])
-    para.spaceBefore = 6
-    stylesheet['BodyText'] = para
-
-    para = ParagraphStyle('Italic', stylesheet['BodyText'])
-    para.fontName = 'Times-Italic'
-    stylesheet['Italic'] = para
-
-    para = ParagraphStyle('Title', stylesheet['Normal'])
-    para.fontName = 'Times-Bold'
-    para.fontSize = 18
-    para.leading = 22
-    para.spaceAfter = 6
-    para.alignment = TA_CENTER
-    stylesheet['Title'] = para
-
-    para = ParagraphStyle('Heading1', stylesheet['Normal'])
-    para.fontName = 'Times-Bold'
-    para.fontSize = 18
-    para.leading = 22
-    para.spaceAfter = 6
-    stylesheet['Heading1'] = para
-
-    para = ParagraphStyle('Heading2', stylesheet['Normal'])
-    para.fontName = 'Times-Bold'
-    para.fontSize = 14
-    para.leading = 18
-    para.spaceBefore = 12
-    para.spaceAfter = 6
-    stylesheet['Heading2'] = para
-
-    para = ParagraphStyle('Heading3', stylesheet['Normal'])
-    para.fontName = 'Times-BoldItalic'
-    para.fontSize = 12
-    para.leading = 14
-    para.spaceBefore = 12
-    para.spaceAfter = 6
-    stylesheet['Heading3'] = para
-
-    para = ParagraphStyle('Bullet', stylesheet['Normal'])
-    para.firstLineIndent = 36
-    para.leftIndent = 36
-    para.spaceBefore = 3
-    stylesheet['Bullet'] = para
-
-    para = ParagraphStyle('Definition', stylesheet['Normal'])
-    #use this for definition lists
-    para.firstLineIndent = 36
-    para.leftIndent = 36
-    para.bulletIndent = 0
-    para.spaceBefore = 6
-    para.bulletFontName = 'Times-BoldItalic'
-    stylesheet['Definition'] = para
-
-    para = ParagraphStyle('Code', stylesheet['Normal'])
-    para.fontName = 'Courier'
-    para.fontSize = 8
-    para.leading = 8.8
-    para.firstLineIndent = 36
-    para.leftIndent = 36
-    stylesheet['Code'] = para
-
-    return stylesheet
-
-
-def getSampleStyleSheet1():
     """Returns a stylesheet object"""
     stylesheet = StyleSheet1()
 
@@ -333,7 +255,7 @@ def getSampleStyleSheet1():
                                   leftIndent=36,
                                   bulletIndent=0,
                                   spaceBefore=6,
-                                  bulletFontIndent='Times-BoldItalic'),
+                                  bulletFontName='Times-BoldItalic'),
                    alias='df')
 
     stylesheet.add(ParagraphStyle(name='Code',
@@ -347,5 +269,3 @@ def getSampleStyleSheet1():
     
     return stylesheet
 
-# substitute new one for testing
-getSampleStyleSheet = getSampleStyleSheet1
