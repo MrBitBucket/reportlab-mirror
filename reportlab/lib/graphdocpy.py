@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.11 2001/07/02 09:41:34 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.12 2001/07/03 08:24:20 andy_robinson Exp $
 
 """Generate documentation of graphical Python objects.
 
@@ -138,13 +138,10 @@ class MyTemplate(BaseDocTemplate):
                 key = str(hash(f))
                 lev = int(f.style.name[7:])
                 try:
-                    if lev == 0 or title != 'Functions':
+                    if lev == 0: 
                         isClosed = 0
                     else:
                         isClosed = 1
-
-                    #print title, isClosed
-
                     c.bookmarkPage(key)
                     c.addOutlineEntry(title, key, level=lev, closed=isClosed)
                     c.showOutline()
@@ -197,9 +194,11 @@ def getFunctionBody(f, linesInFile):
     Works with a list of lines since we will typically grab
     several things out of the same file.  It extracts a
     multiline text block.  It can be fooled by devious
-    use of dedentation inside brackets, which could be
+    use of dedentation inside quotes, which could be
     fixed in a future version that watched the nesting
-    level."""
+    level.  It simply looks at the left indent level
+    of each line, except for lines with whitespace or
+    leading comments."""
 
     if hasattr(f, 'im_func'):
         #it's a method, drill down and get its function
@@ -381,7 +380,6 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
 
     def beginFunctions(self, names):
         srch = string.join(names, ' ')
-        print 'name searching "%s"' % srch
         if string.find(string.join(names, ' '), ' sample') > -1:
             PdfDocBuilder0.beginFunctions(self, names)
 

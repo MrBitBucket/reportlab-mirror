@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/docpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/Attic/docpy.py,v 1.4 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/Attic/docpy.py,v 1.5 2001/07/03 08:24:20 andy_robinson Exp $
 
 """Generate documentation from live Python objects.
 
@@ -283,7 +283,6 @@ class ModuleSkeleton0:
 
     def _inspectModule(self, object):
         """Collect information about a given module object."""
-
         name = object.__name__
 
         self.module['name'] = name
@@ -301,10 +300,10 @@ class ModuleSkeleton0:
 
         functions, fdict = [], {}
         for key, value in inspect.getmembers(object, inspect.isroutine):
-            if inspect.isbuiltin(value) or inspect.getmodule(value) is object:
-                functions.append(value)
-                fdict[key] = '#-' + key
-                if inspect.isfunction(value): fdict[value] = fdict[key]
+            #if inspect.isbuiltin(value) or inspect.getmodule(value) is object:
+            functions.append(value)
+            fdict[key] = '#-' + key
+            if inspect.isfunction(value): fdict[value] = fdict[key]
 
         for c in classes:
             for base in c.__bases__:
@@ -371,7 +370,6 @@ class ModuleSkeleton0:
 
     def _inspectFunction(self, object, functions={}, classes={}, methods={}, clname=''):
         """Collect information about a given function object."""
-
         try:
             args, varargs, varkw, defaults = inspect.getargspec(object)
             argspec = inspect.formatargspec(
