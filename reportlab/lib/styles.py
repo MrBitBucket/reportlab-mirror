@@ -1,4 +1,4 @@
-###############################################################################
+##############################################################################
 #
 #   ReportLab Public License Version 1.0
 #
@@ -31,6 +31,9 @@
 #
 ###############################################################################
 #   $Log: styles.py,v $
+#   Revision 1.7  2000/10/03 09:21:07  rgbecker
+#   Code needs a firstLineIndent same as normal lineIndent
+#
 #   Revision 1.6  2000/09/25 20:07:29  andy_robinson
 #   added has_key method to stylesheet1
 #
@@ -53,7 +56,7 @@
 #   Revision 1.1  2000/04/14 10:51:56  rgbecker
 #   Moved out of layout.py
 #   
-__version__=''' $Id: styles.py,v 1.6 2000/09/25 20:07:29 andy_robinson Exp $ '''
+__version__=''' $Id: styles.py,v 1.7 2000/10/03 09:21:07 rgbecker Exp $ '''
 
 from reportlab.lib.colors import white, black
 from reportlab.lib.enums import TA_LEFT
@@ -299,6 +302,7 @@ def getSampleStyleSheet():
     para.fontName = 'Courier'
     para.fontSize = 8
     para.leading = 8.8
+    para.firstLineIndent = 36
     para.leftIndent = 36
     stylesheet['Code'] = para
 
@@ -367,6 +371,7 @@ def getSampleStyleSheet1():
                                   fontName='Courier',
                                   fontSize=8,
                                   leading=8.8,
+                                  firstLineIndent=36,
                                   leftIndent=36))
     
     
