@@ -2,19 +2,17 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/genuserguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/genuserguide.py,v 1.4 2001/10/27 22:37:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/genuserguide.py,v 1.5 2001/10/28 21:18:03 andy_robinson Exp $
 
-__version__=''' $Id: genuserguide.py,v 1.4 2001/10/27 22:37:02 andy_robinson Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.5 2001/10/28 21:18:03 andy_robinson Exp $ '''
 
 __doc__ = """
 This module contains the script for building the user guide.
 """
 
-import os, sys
-sys.path.insert(0,os.path.join('..','tools'))
 from reportlab.tools.docco.rl_doc_utils import *
 
-def run(pagesize):
+def run(pagesize, verbose=0):
 
 	doc = RLDocTemplate('userguide.pdf',pagesize = pagesize)
 
@@ -33,9 +31,11 @@ def run(pagesize):
 	import app_demos
 
 	story = getStory()
-	print 'Built story contains %d flowables...' % len(story)
+	if verbose:
+		print 'Built story contains %d flowables...' % len(story)
 	doc.build(story)
-	print 'Saved userguide.pdf'
+	if verbose:
+		print 'Saved userguide.pdf'
 
 	# copy to target
 	import reportlab
@@ -44,7 +44,8 @@ def run(pagesize):
 	import shutil
 	shutil.copyfile('userguide.pdf',
 					destfn)
-	print 'copied to %s' % destfn
+	if verbose:
+		print 'copied to %s' % destfn
 	
 	# remove *.pyc files
 	pat = os.path.join(os.path.dirname(sys.argv[0]), '*.pyc')
@@ -60,6 +61,8 @@ def makeSuite():
 								   'userguide.pdf')
 
 if __name__=="__main__":
+	verbose = '-s' not in sys.argv
+	if not verbose: sys.argv.remove('-s')
 	timing = '-timing' in sys.argv
 	if timing: sys.argv.remove('-timing')
 	prof = '-prof' in sys.argv
@@ -70,14 +73,16 @@ if __name__=="__main__":
 		except:
 			print 'Expected page size in argument 1', sys.argv[1]
 			raise
-		print 'set page size to',sys.argv[1]
+		if verbose:
+			print 'set page size to',sys.argv[1]
 	else:
 		(w, h) = defaultPageSize
 	if timing:
 		from time import time
 		t0 = time()
-		run((w, h))
-		print 'Generation of userguide took %.2f seconds' % (time()-t0)
+		run((w, h, verbose))
+		if verbose:
+			print 'Generation of userguide took %.2f seconds' % (time()-t0)
 	elif prof:
 		import profile
 		profile.run('run((w, h))','genuserguide.stats')
