@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.67 2003/11/09 00:54:22 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.68 2003/11/13 17:15:19 william_ng Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.67 2003/11/09 00:54:22 andy_robinson Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.68 2003/11/13 17:15:19 william_ng Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -610,7 +610,7 @@ class BaseDocTemplate:
                 self.handle_flowable(flowables)
             except:
                 #if it has trace info, add it to the traceback message.
-                if first._traceInfo:
+                if hasattr(first, '_traceInfo') and first._traceInfo:
                     exc = sys.exc_info()[1]
                     args = list(exc.args)
                     tr = first._traceInfo
