@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/pythonpoint.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.27 2000/11/05 17:46:15 andy_robinson Exp $
-__version__=''' $Id: pythonpoint.py,v 1.27 2000/11/05 17:46:15 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.28 2000/11/06 08:05:41 andy_robinson Exp $
+__version__=''' $Id: pythonpoint.py,v 1.28 2000/11/06 08:05:41 andy_robinson Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -73,7 +73,7 @@ class PPPresentation:
         self.slides = []
         self.effectName = None
         self.showOutline = 1   #should it be displayed when opening?
-        
+        self.compression = 1        
         #assume landscape        
         self.pageWidth = DEFAULT_PAGE_SIZE[1]  
         self.pageHeight = DEFAULT_PAGE_SIZE[0]  
@@ -89,7 +89,7 @@ class PPPresentation:
             canv.setAuthor(self.author)
         if self.subject:
             canv.setSubject(self.subject)
-        canv.setPageCompression(0)
+        canv.setPageCompression(self.compression)
         for slide in self.slides:
             if self.speakerNotes:
                 #frame and shift the slide

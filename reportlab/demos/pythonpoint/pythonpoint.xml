@@ -14,7 +14,7 @@ the two lines below
     <rectangle x="20" y="20" width="96" height="555" fill="(0,0,0.8)"/>
     <fixedimage  x="20" y="510" width="96" height="64" filename="leftlogo.gif"/>
     <infostring align="right" x="800" y= "36" size="14" >
-            %(title)s, page %(page)s
+            &#187;%(title)s, page %(page)s&#171;
     </infostring>
         
 	<!--Now for the slides-->
