@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paraparser.py,v $
+#	Revision 1.22  2000/06/12 11:27:17  andy_robinson
+#	Added Sequencer and associated XML tags
+#
 #	Revision 1.21  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
-#
+#	
 #	Revision 1.20  2000/05/31 10:12:20  rgbecker
 #	<bullet> xml tag added
 #	
@@ -58,7 +61,7 @@
 #	Revision 1.13  2000/04/25 13:07:57  rgbecker
 #	Added license
 #	
-__version__=''' $Id: paraparser.py,v 1.21 2000/06/01 15:23:06 rgbecker Exp $ '''
+__version__=''' $Id: paraparser.py,v 1.22 2000/06/12 11:27:17 andy_robinson Exp $ '''
 import string
 import re
 from types import TupleType
@@ -80,7 +83,7 @@ except ImportError:
 from reportlab.lib.colors import toColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
-
+from reportlab.lib.sequencer import Sequencer
 _re_para = re.compile('^\\s*<\\s*para(\\s+|>)')
 
 sizeDelta = 2		# amount to reduce font size by for super and sub script
@@ -140,6 +143,7 @@ _fontAttrMap = {'size': ('fontSize', _num),
 				'name': ('fontName', None),
 				'fg': 	('textColor', toColor),
 				'color':('textColor', toColor)}
+
 
 def _addAttributeNames(m):
 	K = m.keys()
@@ -227,7 +231,7 @@ class ParaFrag:
 #	   < super > < /super > - superscript
 #	   < sub > < /sub > - subscript
 #	   <font name=fontfamily/fontname color=colorname size=float>
-#
+#      < bullet > </bullet> - bullet text (at head of para only)
 #		The whole may be surrounded by <para> </para> tags
 #
 # It will also be able to handle any MathML specified Greek characters.
@@ -363,6 +367,59 @@ class ParaParser(xmllib.XMLParser):
 	def end_bullet(self):
 		self._pop()
 
+
+
+	#---------------------------------------------------------------
+	def setSequencer(self, seq):
+		self._seq = seq
+
+	def getSequencer(self):
+		if self._seq is None:
+			self._seq = Sequencer()
+		return self._seq
+		
+	def start_seqdefault(self, attr):
+		try:
+			default = attr['id']
+		except KeyError:
+			default = None
+		self.getSequencer().setDefaultCounter(default)
+
+	def end_seqdefault(self):
+		pass
+	
+	def start_seqreset(self, attr):
+		try:
+			id = attr['id']
+		except KeyError:
+			id = None
+		try:
+			base = math.atoi(attr['base'])
+		except:
+			base=1
+		self.getSequencer().reset(id, base)
+
+	def end_seqreset(self):
+		pass
+	
+	def start_seq(self, attr):
+		#if it has a template, use that; otherwise try for id;
+		#otherwise take default sequence
+		if attr.has_key('template'):
+			templ = attr['template']
+			self.handle_data(templ % self.getSequencer())
+			return
+		elif attr.has_key('id'):
+			id = attr['id']
+		else: 
+			id = None
+		output = self.getSequencer().nextf(id)
+		self.handle_data(output)
+		
+	def end_seq(self):
+		pass
+
+	#---------------------------------------------------------------
 	def _push(self,**attr):
 		frag = copy.copy(self._stack[-1])
 		_applyAttributes(frag,attr)
@@ -393,6 +450,12 @@ class ParaParser(xmllib.XMLParser):
 	#----------------------------------------------------------------
 
 	def __init__(self,verbose=0):
+		# the sequencing stuff presumes access to a sequencer.
+		# this may be set with setSequencer(); if a <seq> tag
+		# is encountered and it has not been set, a default
+		# sequencer will be provided.  
+		self._seq = None
+		
 		if _xmllib_newStyle:
 			xmllib.XMLParser.__init__(self,verbose=verbose)
 		else:
@@ -418,6 +481,8 @@ class ParaParser(xmllib.XMLParser):
 			self.entitydefs = self.entitydefs.copy()
 			for item in greeks.keys():
 				self.entitydefs[item] = '<%s/>' % item
+
+		
 
 	def _iReset(self):
 		self.fragList = []

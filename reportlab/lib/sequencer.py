@@ -31,16 +31,19 @@
 #
 ###############################################################################
 #	$Log: sequencer.py,v $
+#	Revision 1.4  2000/06/12 11:27:17  andy_robinson
+#	Added Sequencer and associated XML tags
+#
 #	Revision 1.3  2000/06/11 21:34:01  andy_robinson
 #	Largely complete class for numbering lists, figures and chapters
-#
+#	
 #	Revision 1.2  2000/06/09 16:18:19  andy_robinson
 #	Doc strings, sequencer
 #	
 #	Revision 1.1  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #	
-__version__=''' $Id: sequencer.py,v 1.3 2000/06/11 21:34:01 andy_robinson Exp $ '''
+__version__=''' $Id: sequencer.py,v 1.4 2000/06/12 11:27:17 andy_robinson Exp $ '''
 """This module defines a single public class, Sequencer, which aids in
 numbering and formatting lists."""
 
@@ -66,7 +69,7 @@ class _Counter:
 	def __init__(self):
 		self._base = 1
 		self._value = self._base
-		self._formatter = format_123
+		self._formatter = _format_123
 		self._resets = []
 
 	def setFormatter(self, formatFunc):
@@ -191,7 +194,7 @@ class Sequencer:
 	def reset(self, counter=None, base=1):
 		if not counter:
 			counter = self._defaultCounter
-		self._getCounter(counter).value = base
+		self._getCounter(counter)._value = base
 
 	def chain(self, parent, child):
 		p = self._getCounter(parent)
@@ -211,7 +214,15 @@ class Sequencer:
 	def format(self, template):
 		"""The crowning jewels - formats multi-level lists."""
 		return template % self
-	
+
+	def dump(self):
+		"""Write current state to stdout for diagnostics"""
+		counters = self._counters.items()
+		counters.sort()
+		print 'Sequencer dump:'
+		for (key, counter) in counters:
+			print '    %s: value = %d, base = %d, format example = %s' % (
+				key, counter.this(), counter._base, counter.thisf())
 def test():
 	s = Sequencer()
 	print 'Counting using default sequence: %d %d %d' % (s.next(),s.next(), s.next())
