@@ -33,7 +33,6 @@ the former axes in its own coordinate system.
 from types import FunctionType
 
 from reportlab.graphics.shapes import *
-##from reportlab.graphics.shapes import Group, Line, Drawing # ...
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics.charts.piechart0 import TypedPropertyCollection
 from reportlab.graphics.charts.textlabel0 import Label
@@ -545,7 +544,7 @@ class XValueAxis(Widget):
 ##        print 'step = %0.2f' % self._valueStep
 ##        print 'ticks = %s' % self._tickValues
 
-            
+
     def scale(self, value):
         """Converts a numeric value to a Y position.
 

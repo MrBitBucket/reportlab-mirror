@@ -3,16 +3,15 @@
 
 
 import string
-from reportlab.graphics.shapes import *
-from reportlab.graphics.widgetbase import Widget
+
 from reportlab.lib import colors
 from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.graphics.shapes import *
+from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics.charts.barchart1 import sample2a
 
 
-# This one was originally written by Aaron (for Pingo, I think).
-
-class Swatches0(Widget):
+class Legend0(Widget):
     """A very simple legend containing rectangular swatches and strings.
 
     Strings can be nicely aligned left or right to the swatches.
@@ -110,79 +109,59 @@ class Swatches0(Widget):
 
 
     def demo(self):
-        "Make sample swatches."
+        "Make sample legend."
 
         d = Drawing(200, 100)
         
-        swatches = Swatches0()
-        swatches.alignment = 'left'
-        swatches.x = 0
-        swatches.y = 100
-        swatches.dxTextSpace = 5
+        legend = Legend0()
+        legend.alignment = 'left'
+        legend.x = 0
+        legend.y = 100
+        legend.dxTextSpace = 5
         items = string.split('red green blue yellow pink black white', ' ')
         items = map(lambda i:(getattr(colors, i), i), items)
-        swatches.colorNamePairs = items
+        legend.colorNamePairs = items
 
-        d.add(swatches, 'legend')
+        d.add(legend, 'legend')
 
         return d
 
 
 def sample1c():
-    "Make sample swatches."
+    "Make sample legend."
     
     d = Drawing(200, 100)
     
-    swatches = Swatches0()
-    swatches.alignment = 'right'
-    swatches.x = 0
-    swatches.y = 100
-    swatches.dxTextSpace = 5
+    legend = Legend0()
+    legend.alignment = 'right'
+    legend.x = 0
+    legend.y = 100
+    legend.dxTextSpace = 5
     items = string.split('red green blue yellow pink black white', ' ')
     items = map(lambda i:(getattr(colors, i), i), items)
-    swatches.colorNamePairs = items
+    legend.colorNamePairs = items
 
-    d.add(swatches, 'legend')
+    d.add(legend, 'legend')
 
     return d
 
 
 def sample2c():
-    "Make sample swatches."
+    "Make sample legend."
 
     d = Drawing(200, 100)
     
-    swatches = Swatches0()
-    swatches.alignment = 'right'
-    swatches.x = 20
-    swatches.y = 90
-    swatches.deltax = 60
-    swatches.dxTextSpace = 10
-    swatches.columnMaximum = 4
+    legend = Legend0()
+    legend.alignment = 'right'
+    legend.x = 20
+    legend.y = 90
+    legend.deltax = 60
+    legend.dxTextSpace = 10
+    legend.columnMaximum = 4
     items = string.split('red green blue yellow pink black white', ' ')
     items = map(lambda i:(getattr(colors, i), i), items)
-    swatches.colorNamePairs = items
+    legend.colorNamePairs = items
 
-    d.add(swatches, 'legend')
-
-    return d
-
-
-def sample3c():
-    "Make sample swatches."
-
-    d = sample2c()
-    
-    swatches = Swatches0()
-    swatches.alignment = 'right'
-    swatches.x = 80
-    swatches.y = 190
-    swatches.deltax = 60
-    swatches.dxTextSpace = 10
-    swatches.columnMaximum = 4
-    items = [(colors.red, 'before'), (colors.green, 'after')]
-    swatches.colorNamePairs = items
-
-    d.add(swatches, 'legend')
+    d.add(legend, 'legend')
 
     return d

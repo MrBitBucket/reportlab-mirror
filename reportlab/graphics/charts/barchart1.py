@@ -244,206 +244,6 @@ class VerticalBarChart(Widget):
         return g
         
 
-class HorizontalBarChart(VerticalBarChart):
-    """Bar chart with multiple side-by-side bars.
-
-    Variants will be provided for stacked and 100% charts,
-    probably by running all three off a common base class."""
-
-    def __init__(self):
-        self.debug = 0
-
-        self.x = 0
-        self.y = 0
-        self.width = 200
-        self.height = 100
-
-        # allow for a bounding rectangle
-        self.strokeColor = None
-        self.fillColor = None
-
-        # named so we have less recoding for the horizontal one :-)
-        self.categoryAxis = YCategoryAxis()
-        self.valueAxis = XValueAxis()
-
-        # this defines two series of 3 points.  Just an example.
-        self.data = [(100,110,120,130),
-                     (70, 80, 80, 90)]        
-        self.categoryNames = ('North','South','East','West')
-        # we really need some well-designed default lists of
-        # colors e.g. from Tufte.  These will be used in a
-        # cycle to set the fill color of each series.
-        self.defaultColors = [colors.red, colors.green, colors.blue]
-
-        # control bar spacing. is useAbsolute = 1 then
-        # the next parameters are in points; otherwise
-        # they are 'proportions' and are normalized to
-        # fit the available space.  Half a barSpacing
-        # is allocated at the beginning and end of the
-        # chart.
-        self.useAbsolute = 0   #- not done yet
-        self.barWidth = 10
-        self.groupSpacing = 5
-        self.barSpacing = 0
-
-        self.barLabels = TypedPropertyCollection(Label)
-        self.barLabelFormat = None
-
-        # this says whether the origin is inside or outside
-        # the bar - +10 means put the origin ten points
-        # above the tip of the bar if value > 0, or ten
-        # points inside if bar value < 0.  This is different
-        # to label dx/dy which are not dependent on the
-        # sign of the data.
-        self.barLabelNudge = 0
-        # if you have multiple series, by default they butt
-        # together.
-
-
-    def demo(self):
-        """Shows basic use of a bar chart"""
-        drawing = Drawing(200, 100)
-
-        data = [
-                (13, 5, 20, 22, 37, 45, 19, 4),
-                #(14, 6, 21, 23, 38, 46, 20, 5)
-                ]
-        
-        bc = HorizontalBarChart()
-        bc.x = 10
-        bc.y = 10
-        bc.height = 85
-        bc.width = 90
-        bc.data = data
-        drawing.add(bc)
-        return drawing
-
-
-    def calcBarPositions(self):
-        """Works out where they go.
-
-        Sets an attribute _barPositions which is a list of
-        lists of (x, y, width, height) matching the data."""
-
-        self._seriesCount = len(self.data)
-        self._rowLength = len(self.data[0])
-        
-        if self.useAbsolute:
-            # bar dimensions are absolute
-            normFactor = 1.0
-        else:
-            # bar dimensions are normalized to fit.  How wide
-            # notionally is one group of bars?
-            normWidth = (self.groupSpacing 
-                        + (self._seriesCount * self.barWidth) 
-                        + ((self._seriesCount - 1) * self.barSpacing)
-                        )
-            availWidth = self.categoryAxis.scale(0)[1]
-            normFactor = availWidth / normWidth
-            if self.debug:
-                print '%d series, %d points per series' % (self._seriesCount, self._rowLength)
-                print 'width = %d group + (%d bars * %d barWidth) + (%d gaps * %d interBar) = %d total' % (
-                    self.groupSpacing, self._seriesCount, self.barWidth,
-                    self._seriesCount - 1, self.barSpacing, normWidth)
-        
-        self._barPositions = []
-        for rowNo in range(len(self.data)):
-            barRow = []
-            for colNo in range(len(self.data[0])):
-                datum = self.data[rowNo][colNo]
-
-                (groupY, groupWidth) = self.categoryAxis.scale(colNo)
-                y = (groupY +
-                     (0.5 * self.groupSpacing * normFactor) +
-                     (rowNo * self.barWidth * normFactor) +
-                     (rowNo * self.barSpacing * normFactor)
-                     )
-                width = self.barWidth * normFactor
-                     
-                x = self.valueAxis.scale(0)
-                height = self.valueAxis.scale(datum) - x
-                barRow.append((x, y, height, width))
-            self._barPositions.append(barRow)
-        
-
-    def draw(self):
-        self.valueAxis.configure(self.data)
-        self.valueAxis.setPosition(self.x, self.y, self.height)
-
-        # if zero is in chart, put x axis there, otherwise
-        # use bottom.
-        yAxisCrossesAt = self.valueAxis.scale(0)
-        if ((yAxisCrossesAt > self.x + self.height) or (yAxisCrossesAt < self.x)):
-            self.categoryAxis.setPosition(self.x, self.y, self.width)
-        else:
-            self.categoryAxis.setPosition(self.x, xAxisCrossesAt, self.width)
-
-        self.categoryAxis.configure(self.data)
-        
-        self.calcBarPositions()        
-        
-        g = Group()
-
-        # debug mode - show border
-        g.add(Rect(self.x, self.y,
-                   self.width, self.height,
-                   strokeColor = self.strokeColor,
-                   fillColor= self.fillColor))
-        
-        g.add(self.categoryAxis)
-        g.add(self.valueAxis)
-
-        labelFmt = self.barLabelFormat
-        
-        for rowNo in range(len(self._barPositions)):
-            row = self._barPositions[rowNo]
-            colorCount = len(self.defaultColors)
-            colorIdx = rowNo % colorCount
-            rowColor = self.defaultColors[colorIdx]
-            for colNo in range(len(row)):
-                barPos = row[colNo]
-                (x, y, width, height) = barPos
-                r = Rect(x, y, width, height)
-                r.fillColor = rowColor
-                r.strokeColor = colors.black
-                g.add(r)
-
-                if labelFmt is None:
-                    labelText = None
-                elif type(labelFmt) is StringType:
-                    labelText = labelFmt % self.data[rowNo][colNo]
-                elif type(labelFmt) is FunctionType:
-                    labelText = labelFmt(self.data[rowNo][colNo])
-                else:
-                    raise Exception, "Unknown formatter type %s, expected string or function" % labelFmt
-
-                # Unchanged from vertical bar chart !!!
-
-                # We currently overwrite the boxAnchor with 'c' and display
-                # it at a constant offset to the bar's top/bottom determined
-                # by the barLabelNudge attribute.
-                if labelText:
-                    label = self.barLabels[(rowNo, colNo)]
-                    labelWidth = stringWidth(labelText, label.fontName, label.fontSize)                    
-
-                    sign = lambda v:[-1, 1][v>=0] # Where the heck is this function??
-                    y0 = y + height + sign(height) * self.barLabelNudge
-                    x0 = x + 0.5*width
-                    label.boxAnchor = 'c' # saves a lot of correcting code like this:...
-##                    if label.boxAnchor in ('w', 'sw', 'nw'):
-##                        x0 = x0 - 0.5*labelWidth
-##                    elif label.boxAnchor in ('e', 'se', 'ne'):
-##                        x0 = x0 + 0.5*labelWidth
-##                    elif label.boxAnchor == 'c':
-##                        pass
-                    label.setOrigin(x0, y0)
-                    label.setText(labelText)
-
-                    g.add(label)
-
-        return g
-
-
 # Samples
 
 def sample0a():
@@ -596,12 +396,12 @@ def sample2a():
     bc.valueAxis.valueStep = 5
     bc.valueAxis.labels.fontName = 'Helvetica'
     bc.valueAxis.labels.fontSize = 8    
+    bc.valueAxis.labels.boxAnchor = 'n'   # irrelevant (becomes 'c')
+    bc.valueAxis.labels.textAnchor = 'middle'
 
     bc.categoryAxis.categoryNames = labels
     bc.categoryAxis.labels.fontName = 'Helvetica'
     bc.categoryAxis.labels.fontSize = 8
-    bc.valueAxis.labels.boxAnchor = 'n'   # irrelevant (becomes 'c')
-    bc.valueAxis.labels.textAnchor = 'middle'
     bc.categoryAxis.labels.dy = -60
     
     drawing.add(bc)    
@@ -636,12 +436,12 @@ def sample2b():
     bc.valueAxis.valueStep = 5
     bc.valueAxis.labels.fontName = 'Helvetica'
     bc.valueAxis.labels.fontSize = 8    
+    bc.valueAxis.labels.boxAnchor = 'n'   # irrelevant (becomes 'c')
+    bc.valueAxis.labels.textAnchor = 'middle'
 
     bc.categoryAxis.categoryNames = labels
     bc.categoryAxis.labels.fontName = 'Helvetica'
     bc.categoryAxis.labels.fontSize = 8
-    bc.valueAxis.labels.boxAnchor = 'n'   # irrelevant (becomes 'c')
-    bc.valueAxis.labels.textAnchor = 'middle'
     bc.categoryAxis.labels.dy = -60
     
     drawing.add(bc)    
