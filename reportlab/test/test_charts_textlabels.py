@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_charts_textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_charts_textlabels.py,v 1.1 2001/06/07 15:27:03 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_charts_textlabels.py,v 1.2 2001/11/26 21:49:01 andy_robinson Exp $
 """
 Tests for the text Label class.
 """
@@ -270,7 +270,7 @@ textAnchor attribute.""", bt))
         tempfile.tempdir = os.curdir
         path = join(tempfile.tempdir, pdfPath)
         doc = MyDocTemplate(path)
-        doc.multiBuild0(story)
+        doc.multiBuild(story)
 
 
 def makeSuite():

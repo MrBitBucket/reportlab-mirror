@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/tocindex.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/tocindex.py,v 1.7 2001/03/16 14:51:50 rgbecker Exp $
-__version__=''' $Id: tocindex.py,v 1.7 2001/03/16 14:51:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/tocindex.py,v 1.8 2001/11/26 21:49:01 andy_robinson Exp $
+__version__=''' $Id: tocindex.py,v 1.8 2001/11/26 21:49:01 andy_robinson Exp $ '''
 __doc__=''
 """
 This module will contain standard Table of Contents and Index objects.
@@ -15,7 +15,7 @@ import string
 
 from reportlab.platypus import Flowable, BaseDocTemplate, Paragraph, \
      PageBreak, Frame, PageTemplate, NextPageTemplate
-from reportlab.platypus.doctemplate import IndexingFlowable0
+from reportlab.platypus.doctemplate import IndexingFlowable
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.platypus import tables
 from reportlab.lib import enums
@@ -60,7 +60,7 @@ defaultTableStyle = tables.TableStyle([
 
 
 
-class TableOfContents0(IndexingFlowable0):
+class TableOfContents0(IndexingFlowable):
     """This creates a formatted table of contents.  It presumes
     a correct block of data is passed in.  The data block contains
     a list of (level, text, pageNumber) triplets.  You can supply
@@ -211,7 +211,7 @@ def getSampleStory(depth=3):
     story = [Paragraph("This is a demo of the table of contents object",
                        styles['Heading1'])]
 
-    toc = TableOfContents0()  # empty on first pass
+    toc = TableOfContents()  # empty on first pass
     #toc.addEntries(TOCData)  # init with random page numbers
     story.append(toc)
 
@@ -259,17 +259,17 @@ class MyDocTemplate(BaseDocTemplate):
 
         if hasattr(flowable, 'style'):
             if flowable.style.name == 'Heading1':
-                self.notify0('TOCEntry', (0, flowable.getPlainText(), self.page))
+                self.notify('TOCEntry', (0, flowable.getPlainText(), self.page))
                 self.canv.bookmarkPage(str(self._uniqueKey))
                 self.canv.addOutlineEntry(flowable.getPlainText()[0:10], str(self._uniqueKey), 0)
 
             elif flowable.style.name == 'Heading2':
-                self.notify0('TOCEntry', (1, flowable.getPlainText(), self.page))
+                self.notify('TOCEntry', (1, flowable.getPlainText(), self.page))
                 self.canv.bookmarkPage(str(self._uniqueKey))
                 self.canv.addOutlineEntry(flowable.getPlainText(), str(self._uniqueKey), 1)
 
             elif flowable.style.name == 'Heading3':
-                self.notify0('TOCEntry', (2, flowable.getPlainText(), self.page))
+                self.notify('TOCEntry', (2, flowable.getPlainText(), self.page))
                 self.canv.bookmarkPage(str(self._uniqueKey))
                 self.canv.addOutlineEntry(flowable.getPlainText(), str(self._uniqueKey), 2)
 
@@ -290,4 +290,4 @@ if __name__=='__main__':
     #change this to depth=3 for a BIG document
     story = getSampleStory(depth=2)
 
-    doc.multiBuild0(story, 'tocindex.pdf')
+    doc.multiBuild(story, 'tocindex.pdf')

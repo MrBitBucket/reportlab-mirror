@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_breaking.py,v 1.2 2001/11/19 11:31:43 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_breaking.py,v 1.3 2001/11/26 21:49:01 andy_robinson Exp $
 """Tests pageBreakBefore, frameBreakBefore, keepWithNext...
 """
 
@@ -71,28 +71,30 @@ def _test1(self):
 
 	story.append(Paragraph("""
 		Subsequent pages test pageBreakBefore, frameBreakBefore and
-		keepTogether attributes.  Generated at %s """ % time.ctime(time.time()),
+		keepTogether attributes.  Generated at %s.  The number in brackets
+		at the end of each paragraph is its position in the story. (%d)""" % (
+			time.ctime(time.time()), len(story)),
 						   bt))
 
 
 	for i in range(10):
-		story.append(Paragraph('Heading 1 always starts a new page', h1))
+		story.append(Paragraph('Heading 1 always starts a new page (%d)' % len(story), h1))
 		for j in range(3):
 			story.append(Paragraph('Heading1 paragraphs should always'
 							'have a page break before.	Heading 2 on the other hand'
-							'should always have a FRAME break before', bt))
-			story.append(Paragraph('Heading 2 always starts a new frame', h2))
+							'should always have a FRAME break before (%d)' % len(story), bt))
+			story.append(Paragraph('Heading 2 always starts a new frame (%d)' % len(story), h2))
 			story.append(Paragraph('Heading1 paragraphs should always'
 							'have a page break before.	Heading 2 on the other hand'
-							'should always have a FRAME break before', bt))
+							'should always have a FRAME break before (%d)' % len(story), bt))
 			for j in range(3):
-				story.append(Paragraph(randomText(theme=PYTHON, sentences=2), bt))
-				story.append(Paragraph('I should never be at the bottom of a frame', h3))
-				story.append(Paragraph(randomText(theme=PYTHON, sentences=1), bt))
+				story.append(Paragraph(randomText(theme=PYTHON, sentences=2)+' (%d)' % len(story), bt))
+				story.append(Paragraph('I should never be at the bottom of a frame (%d)' % len(story), h3))
+				story.append(Paragraph(randomText(theme=PYTHON, sentences=1)+' (%d)' % len(story), bt))
 
 
 	doc = MyDocTemplate('test_platypus_breaking.pdf')
-	doc.multiBuild0(story)
+	doc.multiBuild(story)
 
 class BreakingTestCase(unittest.TestCase):
 	"Test multi-page splitting of paragraphs (eyeball-test)."

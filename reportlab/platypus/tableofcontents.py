@@ -1,27 +1,27 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tableofcontents.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tableofcontents.py,v 1.2 2001/04/05 09:30:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/tableofcontents.py,v 1.3 2001/11/26 21:49:01 andy_robinson Exp $
 """
-This module defines a single TableOfContents0() class that can be used to
+This module defines a single TableOfContents() class that can be used to
 create automatically a table of tontents for Platypus documents like
 this:
 
     story = []
-    toc = TableOfContents0()
+    toc = TableOfContents()
     story.append(toc)
     # some heading paragraphs here...
     doc = MyTemplate(path)
-    doc.multiBuild0(story)
+    doc.multiBuild(story)
 
 The data needed to create the table is a list of (level, text, pageNum)
 triplets, plus some paragraph styles for each level of the table itself.
 The triplets will usually be created in a document template's method
-like afterFlowable(), making notification calls using the notify0()
+like afterFlowable(), making notification calls using the notify()
 method with appropriate data like this:
 
     (level, text, pageNum) = ...
-    self.notify0('TOCEntry', (level, text, pageNum))
+    self.notify('TOCEntry', (level, text, pageNum))
 
 As the table of contents need at least two passes over the Platypus
 story which is why the moultiBuild0() method must be called.
@@ -39,7 +39,7 @@ from reportlab.lib import enums
 from reportlab.lib.units import cm
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus.paragraph import Paragraph
-from reportlab.platypus.doctemplate import IndexingFlowable0
+from reportlab.platypus.doctemplate import IndexingFlowable
 from reportlab.platypus.tables import TableStyle, Table
 
 
@@ -91,7 +91,7 @@ defaultTableStyle = \
     TableStyle([('VALIGN', (0,0), (-1,-1), 'TOP')])
 
 
-class TableOfContents0(IndexingFlowable0):
+class TableOfContents(IndexingFlowable):
     """This creates a formatted table of contents.
 
     It presumes a correct block of data is passed in.
@@ -128,7 +128,7 @@ class TableOfContents0(IndexingFlowable0):
         return (self._entries == self._lastEntries)
 
 
-    # Shouldn't that be notify0??
+    # Shouldn't that be notify??
     def notify(self, kind, stuff):
         """The notification hook called to register all kinds of events.
 

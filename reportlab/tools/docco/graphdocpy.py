@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.10 2001/10/12 14:59:29 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.11 2001/11/26 21:49:01 andy_robinson Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -35,7 +35,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfgen import canvas
 from reportlab.platypus.flowables import Flowable, Spacer
 from reportlab.platypus.paragraph import Paragraph
-from reportlab.platypus.tableofcontents import TableOfContents0
+from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.platypus.flowables \
      import Flowable, Preformatted,Spacer, Image, KeepTogether, PageBreak
 from reportlab.platypus.xpreformatted import XPreformatted
@@ -124,7 +124,7 @@ class MyTemplate(BaseDocTemplate):
             if f.style.name[:7] == 'Heading':
                 # Register TOC entries.
                 headLevel = int(f.style.name[7:])
-                self.notify0('TOCEntry', (headLevel, flowable.getPlainText(), self.page))
+                self.notify('TOCEntry', (headLevel, flowable.getPlainText(), self.page))
 
                 # Add PDF outline entries.
                 c = self.canv
@@ -261,7 +261,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         self.story.append(PageBreak())
 
         # Table of contents
-        toc = TableOfContents0()
+        toc = TableOfContents()
         self.story.append(toc)
         self.story.append(PageBreak())
 
@@ -278,7 +278,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         
         if self.outPath:
             doc = MyTemplate(self.outPath)
-            doc.multiBuild0(self.story)
+            doc.multiBuild(self.story)
 
         
     def beginModule(self, name, doc, imported):
@@ -991,7 +991,7 @@ def main():
 
     # On -s set silent mode.
     isSilent = hasOpt('-s')
-
+    
     # On -f set the appropriate DocBuilder to use or a default one.
     builderClassName = optsDict.get('-f', 'GraphPdf') + 'DocBuilder0'
     if builderClassName in ('PdfDocBuilder0', 'HtmlDocBuilder0'):
@@ -1028,7 +1028,8 @@ def main():
         import shutil, reportlab
         dst = os.path.join(os.path.dirname(reportlab.__file__),'docs','graphics_reference.pdf')
         shutil.copyfile('reportlab.graphics.pdf', dst)
-        print 'copied to '+dst
+        if not isSilent:
+            print 'copied to '+dst
 
 def makeSuite():
     "standard test harness support - run self as separate process"

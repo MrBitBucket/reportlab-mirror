@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/docpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/docpy.py,v 1.2 2001/09/06 09:36:06 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/docpy.py,v 1.3 2001/11/26 21:49:01 andy_robinson Exp $
 
 """Generate documentation from live Python objects.
 
@@ -48,7 +48,7 @@ from reportlab.platypus.flowables import Flowable, Spacer
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.flowables \
      import Flowable, Preformatted,Spacer, Image, KeepTogether, PageBreak
-from reportlab.platypus.tableofcontents import TableOfContents0
+from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate \
@@ -128,7 +128,7 @@ class MyTemplate(BaseDocTemplate):
             if name7 == 'Heading':
                 # Register TOC entries.
                 headLevel = int(f.style.name[7:])
-                self.notify0('TOCEntry', (headLevel, flowable.getPlainText(), self.page))
+                self.notify('TOCEntry', (headLevel, flowable.getPlainText(), self.page))
 
                 # Add PDF outline entries.
                 c = self.canv
@@ -821,7 +821,7 @@ class PdfDocBuilder0(DocBuilder0):
         self.story.append(PageBreak())
 
         # Table of contents
-        toc = TableOfContents0()
+        toc = TableOfContents()
         self.story.append(toc)
         self.story.append(PageBreak())
 
@@ -836,7 +836,7 @@ class PdfDocBuilder0(DocBuilder0):
         
         if self.outPath:
             doc = MyTemplate(self.outPath)
-            doc.multiBuild0(self.story)
+            doc.multiBuild(self.story)
 
 
     def beginPackage(self, name):

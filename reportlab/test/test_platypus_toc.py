@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_toc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_toc.py,v 1.6 2001/04/05 09:30:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_toc.py,v 1.7 2001/11/26 21:49:01 andy_robinson Exp $
 """Tests for the Platypus TableOfContents class.
 
 Currently there is only one such test. Most such tests, like this
@@ -24,9 +24,9 @@ from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate \
      import PageTemplate, BaseDocTemplate
 from reportlab.platypus import tableofcontents
-from reportlab.platypus.tableofcontents import TableOfContents0
+from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.platypus.tables import TableStyle, Table
-
+from reportlab.lib import randomtext
 
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
@@ -64,7 +64,7 @@ class MyDocTemplate(BaseDocTemplate):
                 level = int(styleName[7:])
                 text = flowable.getPlainText()
                 pageNum = self.page 
-                self.notify0('TOCEntry', (level, text, pageNum))
+                self.notify('TOCEntry', (level, text, pageNum))
 
                 # Add PDF outline entries (not really needed/tested here).
                 key = str(hash(flowable))
@@ -89,6 +89,9 @@ def makeHeaderStyle(level, fontName='Times-Roman'):
 
     return style
 
+def makeBodyStyle():
+    "Body text style - the default will do"
+    return ParagraphStyle('body')
 
 def makeTocHeaderStyle(level, delta, epsilon, fontName='Times-Roman'):
     "Make a header style for different levels."
@@ -110,7 +113,7 @@ def makeTocHeaderStyle(level, delta, epsilon, fontName='Times-Roman'):
 
 
 class TocTestCase(unittest.TestCase):
-    "Test TableOfContents0 class (eyeball-test)."
+    "Test TableOfContents class (eyeball-test)."
     
     def test1(self):
         """Test story with TOC and a cascaded header hierarchy.
@@ -149,18 +152,22 @@ class TocTestCase(unittest.TestCase):
         description = '<font color=red>%s</font>' % self.test1.__doc__
         story.append(XPreformatted(description, bt))
 
-        toc = TableOfContents0()
+        toc = TableOfContents()
         toc.levelStyles = tocLevelStyles
         story.append(toc)
 
         for i in range(maxLevels):
             story.append(Paragraph('HEADER, LEVEL %d' % i,
                                    headerLevelStyles[i]))
+            #now put some body stuff in.
+            txt = randomtext.randomText(randomtext.PYTHON, 5)
+            para = Paragraph(txt, makeBodyStyle())
+            story.append(para)
 
         tempfile.tempdir = os.curdir
         path = join(tempfile.tempdir, 'test_platypus_toc.pdf')
         doc = MyDocTemplate(path)
-        doc.multiBuild0(story)
+        doc.multiBuild(story)
         
 
 def makeSuite():

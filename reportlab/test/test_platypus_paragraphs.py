@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_paragraphs.py,v 1.6 2001/04/05 09:30:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_paragraphs.py,v 1.7 2001/11/26 21:49:01 andy_robinson Exp $
 """Tests for the reportlab.platypus.paragraphs module.
 """
 
@@ -25,7 +25,7 @@ from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate \
      import PageTemplate, BaseDocTemplate
 from reportlab.platypus import tableofcontents
-from reportlab.platypus.tableofcontents import TableOfContents0
+from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.platypus.tables import TableStyle, Table
 from reportlab.platypus.paragraph import *
 from reportlab.platypus.paragraph import _getFragWords
@@ -71,7 +71,7 @@ class ParagraphSplitTestCase(unittest.TestCase):
         story.append(Paragraph(description, bt))
 
         doc = MyDocTemplate('test_paragraphs_splitting.pdf')
-        doc.multiBuild0(story)
+        doc.multiBuild(story)
 
 
 class FragmentTestCase(unittest.TestCase):

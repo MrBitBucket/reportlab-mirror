@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.48 2001/11/19 11:33:19 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.49 2001/11/26 21:49:01 andy_robinson Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.48 2001/11/19 11:33:19 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.49 2001/11/26 21:49:01 andy_robinson Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -44,7 +44,7 @@ def _doNothing(canvas, doc):
 	pass
 
 
-class IndexingFlowable0(Flowable):
+class IndexingFlowable(Flowable):
 	"""Abstract interface definition for flowables which might
 	hold references to other pages or themselves be targets
 	of cross-references.  XRefStart, XRefDest, Table of Contents,
@@ -562,7 +562,7 @@ class BaseDocTemplate:
 
 		self._endBuild()
 
-	def _allSatisfied0(self):
+	def _allSatisfied(self):
 		"""Called by multi-build - are all cross-references resolved?"""
 		allHappy = 1
 		for f in self._indexingFlowables:
@@ -571,18 +571,18 @@ class BaseDocTemplate:
 				break
 		return allHappy
 
-	def notify0(self, kind, stuff):
+	def notify(self, kind, stuff):
 		""""Forward to any listeners"""
 		for l in self._indexingFlowables:
 			l.notify(kind, stuff)
 
-	def pageRef0(self, label):
+	def pageRef(self, label):
 		"""hook to register a page number"""
 		if _verbose: print "pageRef called with label '%s' on page %d" % (
 			label, self.page)
 		self._pageRefs[label] = self.page
 
-	def multiBuild0(self, story,
+	def multiBuild(self, story,
 				   filename=None,
 				   canvasmaker=canvas.Canvas,
 				   maxPasses = 10):
@@ -595,7 +595,7 @@ class BaseDocTemplate:
 				self._indexingFlowables.append(thing)
 		#print 'scanned story, found these indexing flowables:\n'
 		#print self._indexingFlowables
-
+		
 		passes = 0
 		while 1:
 			passes = passes + 1
@@ -607,7 +607,7 @@ class BaseDocTemplate:
 			# work with a copy of the story, since it is consumed
 			tempStory = story[:]
 			self.build(tempStory, filename, canvasmaker)
-			#self.notify0('debug',None)
+			#self.notify('debug',None)
 
 			#clean up so multi-build does not go wrong - the frame
 			#packer might have tacked an attribute onto some
@@ -621,7 +621,7 @@ class BaseDocTemplate:
 			for fl in self._indexingFlowables:
 				fl.afterBuild()
 
-			happy = self._allSatisfied0()
+			happy = self._allSatisfied()
 
 			if happy:
 				## print 'OK'
