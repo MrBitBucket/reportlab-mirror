@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch5_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch5_paragraphs.py,v 1.7 2000/12/14 17:11:03 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch5_paragraphs.py,v 1.8 2001/02/09 11:52:27 rgbecker Exp $
 from genuserguide import *
 
 #begin chapter oon paragraphs
@@ -103,8 +103,9 @@ parabox(sample,
         'Space before and after and increased leading'
         )
 
-disc("""The $firstLineIndent$, $leftIndent$ and $rightIndent$ attributes do exactly
-what you would expect.  If you want a straight left edge, remember
+disc("""The $leftIndent$ and $rightIndent$ attributes do exactly
+what you would expect; $firstLineIndent$ is added to the $leftIndent$ of the
+first line. If you want a straight left edge, remember
 to set $firstLineIndent$ equal to 0.""")
 
 parabox(sample,
