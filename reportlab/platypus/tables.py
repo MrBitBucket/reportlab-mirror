@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.15  2000/07/06 14:05:55  rgbecker
+#	Adjusted doc string
+#
 #	Revision 1.14  2000/07/06 12:41:47  rgbecker
 #	First try at auto sizing
-#
+#	
 #	Revision 1.13  2000/06/29 17:55:19	aaron_watters
 #	support explicit \n line splitting in cells
 #	
@@ -71,11 +74,17 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.14 2000/07/06 12:41:47 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.15 2000/07/06 14:05:55 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
 color and weight of the lines (if any), and the font, alignment and padding of the text.
+
+None values in the sequence of row heights or column widths, mean that the corresponding rows
+or columns should be automatically sized.
+
+All the cell values should be convertible to strings; embedded newline '\\n' characters
+cause the value to wrap (ie are like a traditional linefeed).
 
 See the test output from running this module as a script for a discussion of the method for constructing
 tables and table styles.
