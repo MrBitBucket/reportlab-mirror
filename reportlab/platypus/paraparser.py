@@ -373,6 +373,17 @@ class ParaParser(xmllib.XMLParser):
 if __name__=='__main__':
 	from reportlab.platypus.paragraph import cleanBlockQuotedText
 	_parser=ParaParser()
+	def check_text(text,p=_parser):
+		print '##########'
+		text = cleanBlockQuotedText(text)
+		l,rv = p.parse(text,style)
+		if rv is None:
+			for l in _parser.errors:
+				print l
+		else:
+			print 'ParaStyle', l.fontName,l.fontSize,l.textColor
+			for l in rv:
+				print l.fontName,l.fontSize,l.textColor,l.bold, l.rise, l.text[:25]
 
 	style=ParaFrag()
 	style.fontName='Times-Roman'
@@ -392,12 +403,80 @@ if __name__=='__main__':
 	ever reaching home. Tell me, too, about all these things, O daughter
 	of Jove, from whatsoever source you<super>1</super> may know them.
 	'''
-	text = cleanBlockQuotedText(text)
-	l,rv = _parser.parse(text,style)
-	if rv is None:
-		for l in _parser.errors:
-			print l
-	else:
-		print 'ParaStyle', l.fontName,l.fontSize,l.textColor
-		for l in rv:
-			print l.fontName,l.fontSize,l.textColor,l.bold, l.rise, l.text[:25]
+	check_text(text)
+	check_text('<para> </para>')
+
+	check_text('''
+	<font color=red>&tau;</font>Tell me, O muse, of that ingenious hero who travelled far and wide
+	after he had sacked the famous town of Troy. Many cities did he visit,
+	and many were the nations with whose manners and customs he was acquainted;
+	moreover he suffered much by sea while trying to save his own life
+	and bring his men safely home; but do what he might he could not save
+	his men, for they perished through their own sheer folly in eating
+	the cattle of the Sun-god Hyperion; so the god prevented them from
+	ever reaching home. Tell me, too, about all these things, O daughter
+	of Jove, from whatsoever source you may know them.''')
+	check_text('''
+	Telemachus took this speech as of good omen and rose at once, for
+	he was bursting with what he had to say. He stood in the middle of
+	the assembly and the good herald Pisenor brought him his staff. Then,
+	turning to Aegyptius, "Sir," said he, "it is I, as you will shortly
+	learn, who have convened you, for it is I who am the most aggrieved.
+	I have not got wind of any host approaching about which I would warn
+	you, nor is there any matter of public moment on which I would speak.
+	My grieveance is purely personal, and turns on two great misfortunes
+	which have fallen upon my house. The first of these is the loss of
+	my excellent father, who was chief among all you here present, and
+	was like a father to every one of you; the second is much more serious,
+	and ere long will be the utter ruin of my estate. The sons of all
+	the chief men among you are pestering my mother to marry them against
+	her will. They are afraid to go to her father Icarius, asking him
+	to choose the one he likes best, and to provide marriage gifts for
+	his daughter, but day by day they keep hanging about my father's house,
+	sacrificing our oxen, sheep, and fat goats for their banquets, and
+	never giving so much as a thought to the quantity of wine they drink.
+	No estate can stand such recklessness; we have now no Ulysses to ward
+	off harm from our doors, and I cannot hold my own against them. I
+	shall never all my days be as good a man as he was, still I would
+	indeed defend myself if I had power to do so, for I cannot stand such
+	treatment any longer; my house is being disgraced and ruined. Have
+	respect, therefore, to your own consciences and to public opinion.
+	Fear, too, the wrath of heaven, lest the gods should be displeased
+	and turn upon you. I pray you by Jove and Themis, who is the beginning
+	and the end of councils, [do not] hold back, my friends, and leave
+	me singlehanded- unless it be that my brave father Ulysses did some
+	wrong to the Achaeans which you would now avenge on me, by aiding
+	and abetting these suitors. Moreover, if I am to be eaten out of house
+	and home at all, I had rather you did the eating yourselves, for I
+	could then take action against you to some purpose, and serve you
+	with notices from house to house till I got paid in full, whereas
+	now I have no remedy."''')
+
+	check_text('''
+But as the sun was rising from the fair sea into the firmament of
+heaven to shed light on mortals and immortals, they reached Pylos
+the city of Neleus. Now the people of Pylos were gathered on the sea
+shore to offer sacrifice of black bulls to Neptune lord of the Earthquake.
+There were nine guilds with five hundred men in each, and there were
+nine bulls to each guild. As they were eating the inward meats and
+burning the thigh bones [on the embers] in the name of Neptune, Telemachus
+and his crew arrived, furled their sails, brought their ship to anchor,
+and went ashore. ''')
+	check_text('''
+So the neighbours and kinsmen of Menelaus were feasting and making
+merry in his house. There was a bard also to sing to them and play
+his lyre, while two tumblers went about performing in the midst of
+them when the man struck up with his tune.]''')
+	check_text('''
+"When we had passed the [Wandering] rocks, with Scylla and terrible
+Charybdis, we reached the noble island of the sun-god, where were
+the goodly cattle and sheep belonging to the sun Hyperion. While still
+at sea in my ship I could bear the cattle lowing as they came home
+to the yards, and the sheep bleating. Then I remembered what the blind
+Theban prophet Teiresias had told me, and how carefully Aeaean Circe
+had warned me to shun the island of the blessed sun-god. So being
+much troubled I said to the men, 'My men, I know you are hard pressed,
+but listen while I tell you the prophecy that Teiresias made me, and
+how carefully Aeaean Circe warned me to shun the island of the blessed
+sun-god, for it was here, she said, that our worst danger would lie.
+Head the ship, therefore, away from the island.''')

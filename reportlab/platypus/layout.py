@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.17  2000/04/14 16:12:11  rgbecker
+#	Debugging xml changes
+#
 #	Revision 1.16  2000/04/14 11:54:57  rgbecker
 #	Splitting layout.py
-#
+#	
 #	Revision 1.15  2000/04/14 08:56:20  rgbecker
 #	Drawable ==> Flowable
 #	
@@ -76,7 +79,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.16 2000/04/14 11:54:57 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.17 2000/04/14 16:12:11 rgbecker Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -264,9 +267,6 @@ class Macro(Flowable):
 	def draw(self):
 		exec self.command in globals(), {'canvas':self.canv}
 
-
-
-
 #############################################################
 #
 #		Basic paragraph-drawing routine.  Not sure where
@@ -316,7 +316,6 @@ class SimpleFrame:
 		#drawing starts at top left
 		self.x = x1 + self.leftPadding
 		self.y = y2 - self.topPadding
-
 
 	def add(self, flowable):
 		""" Draws the object at the current position.
@@ -488,7 +487,6 @@ def randomText():
 			output = output + ' ' +word
 		output = output+'.'
 	return output
-
 
 def myFirstPage(canvas, doc):
 	canvas.saveState()
