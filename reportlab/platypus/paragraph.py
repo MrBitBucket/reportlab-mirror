@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.29 2000/11/13 17:54:34 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.29 2000/11/13 17:54:34 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.30 2000/11/21 16:31:17 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.30 2000/11/21 16:31:17 rgbecker Exp $ '''
 import string
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -139,6 +139,11 @@ def _getFragWords(frags):
 				W = []
 				n = 0
 		elif hasattr(f,'cbDefn'):
+			if W!=[]:
+				W.insert(0,n)
+				R.append(W)
+				W = []
+				n = 0
 			R.append([0,(f,'')])
 
 	if W!=[]:
