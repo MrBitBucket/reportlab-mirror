@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.21 2001/09/20 17:44:22 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.22 2001/09/24 17:57:11 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
 
@@ -46,7 +46,7 @@ class LinePlot(Widget):
             desc='Used only for debugging.'),
         x = AttrMapValue(isNumber, desc='X position of the lower-left corner of the chart.'),
         y = AttrMapValue(isNumber, desc='Y position of the lower-left corner of the chart.'),
-        firstOnTop= AttrMapValue(isBoolean, desc='First plotted are on top'),
+        reversePlotOrder = AttrMapValue(isBoolean, desc='If true reverse plot order.'),
         width = AttrMapValue(isNumber, desc='Width of the chart.'),
         height = AttrMapValue(isNumber, desc='Height of the chart.'),
         lineLabelNudge = AttrMapValue(isNumber,
@@ -76,7 +76,7 @@ class LinePlot(Widget):
 
         self.x = 0
         self.y = 0
-        self.firstOnTop = 0
+        self.reversePlotOrder = 0
         self.width = 200
         self.height = 100
 
@@ -221,7 +221,7 @@ class LinePlot(Widget):
         labelFmt = self.lineLabelFormat
 
         P = range(len(self._positions))
-        if self.firstOnTop: P.reverse()
+        if self.reversePlotOrder: P.reverse()
         # Iterate over data rows.
         for rowNo in P:
             row = self._positions[rowNo]

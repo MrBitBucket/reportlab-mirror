@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.35 2001/09/18 10:08:15 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.36 2001/09/24 17:57:11 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -88,32 +88,52 @@ def _findMax(V, x, default):
 
 
 # Category axes.
-
 class CategoryAxis(Widget):
 	"Abstract category axis, unusable in itself."
 
 	_attrMap = AttrMap(
-		visible = AttrMapValue(isNumber,
-			desc='Display entire object, if true.'),
-		visibleAxis = AttrMapValue(isNumber,
-			desc='Display axis line, if true.'),
-		visibleTicks = AttrMapValue(isNumber,
-			desc='Display axis ticks, if true.'),
-		strokeWidth = AttrMapValue(isNumber,
-			desc='Width of axis line and ticks.'),
-		strokeColor = AttrMapValue(isColorOrNone,
-			desc='Color of axis line and ticks.'),
-		strokeDashArray = AttrMapValue(isListOfNumbersOrNone,
-			desc='Dash array used for axis line.'),
-		labels = AttrMapValue(None,
-			desc='Handle of the axis labels.'),
-		categoryNames = AttrMapValue(isListOfStringsOrNone,
-			desc='List of category names.'),
-		joinAxis = AttrMapValue(None,
-			desc='Join both axes if true.'),
-		joinAxisPos = AttrMapValue(isNumberOrNone,
-			desc='Position at which to join with other axis.'),
+		visible = AttrMapValue(isNumber, desc='Display entire object, if true.'),
+		visibleAxis = AttrMapValue(isNumber, desc='Display axis line, if true.'),
+		visibleTicks = AttrMapValue(isNumber, desc='Display axis ticks, if true.'),
+		strokeWidth = AttrMapValue(isNumber, desc='Width of axis line and ticks.'),
+		strokeColor = AttrMapValue(isColorOrNone, desc='Color of axis line and ticks.'),
+		strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array used for axis line.'),
+		labels = AttrMapValue(None, desc='Handle of the axis labels.'),
+		categoryNames = AttrMapValue(isListOfStringsOrNone, desc='List of category names.'),
+		joinAxis = AttrMapValue(None, desc='Join both axes if true.'),
+		joinAxisPos = AttrMapValue(isNumberOrNone, desc='Position at which to join with other axis.'),
+		reverseDirection = AttrMapValue(isBoolean, desc='If true reverse category direction.'),
+		style = AttrMapValue(OneOf('parallel','stacked'),"How common category bars are plotted"),
 		)
+
+	def __init__(self):
+		assert self.__class__.__name__!='CategoryAxis', "Abstract Class CategoryAxis Instantiated"
+		# private properties set by methods.  The initial values
+		# here are to make demos easy; they would always be
+		# overridden in real life.
+		self._x = 50
+		self._y = 50
+		self._length = 100
+		self._catCount = 0
+
+		# public properties
+		self.visible = 1
+		self.visibleAxis = 1
+		self.visibleTicks = 1
+
+		self.strokeWidth = 1
+		self.strokeColor = STATE_DEFAULTS['strokeColor']
+		self.strokeDashArray = STATE_DEFAULTS['strokeDashArray']
+		self.labels = TypedPropertyCollection(Label)
+		# if None, they don't get labels. If provided,
+		# you need one name per data point and they are
+		# used for label text.
+		self.categoryNames = None
+		self.joinAxis = None
+		self.joinAxisPos = None
+		self.joinAxisMode = None
+		self.reverseDirection = 0
+		self.style = 'parallel'
 
 	def setPosition(self, x, y, length):
 		# ensure floating point
@@ -126,7 +146,6 @@ class CategoryAxis(Widget):
 		self._catCount = len(multiSeries[0])
 		self._barWidth = self._length / (self._catCount or 1)
 
-
 	def draw(self):
 		g = Group()
 
@@ -138,6 +157,10 @@ class CategoryAxis(Widget):
 		g.add(self.makeTickLabels())
 
 		return g
+
+	def _scale(self,idx):
+		if self.reverseDirection: idx = self._catCount-idx-1
+		return idx
 
 
 class XCategoryAxis(CategoryAxis):
@@ -153,44 +176,14 @@ class XCategoryAxis(CategoryAxis):
 		)
 
 	def __init__(self):
-		# private properties set by methods.  The initial values
-		# here are to make demos easy; they would always be
-		# overridden in real life.
-		self._x = 50
-		self._y = 50
-		self._length = 100
-		self._catCount = 0
-		# public properties
-
-		self.visible = 1
-		self.visibleAxis = 1
-		self.visibleTicks = 1
-
-		self.strokeWidth = 1
-		self.strokeColor = STATE_DEFAULTS['strokeColor']
-		self.strokeDashArray = STATE_DEFAULTS['strokeDashArray']
-		self.labels = TypedPropertyCollection(Label)
+		CategoryAxis.__init__(self)
 		self.labels.boxAnchor = 'n' #north - top edge
 		self.labels.dy = -5
-
 		# ultra-simple tick marks for now go between categories
 		# and have same line style as axis - need more
 		self.tickUp = 0  # how far into chart does tick go?
 		self.tickDown = 5  # how far below axis does tick go?
-
-		# idea - can we represent a gridline as just a great
-		# big tickmark which sticks in rather than out?  Would
-		# one ever want both of them?
-		#self.tickMarks = TypedPropertyCollection(TickMark)
-
-		# if None, they don't get labels.  If provided,
-		# you need one name per data point and they are
-		# used for label text.
-		self.categoryNames = None
-
-		self.joinAxis = None
 		self.joinAxisMode = None
-		self.joinAxisPos = None
 
 
 	def demo(self):
@@ -232,7 +225,7 @@ class XCategoryAxis(CategoryAxis):
 
 	def scale(self, idx):
 		"""returns the x position and width in drawing units of the slice"""
-		return (self._x + (idx * self._barWidth), self._barWidth)
+		return (self._x + self._scale(idx)*self._barWidth, self._barWidth)
 
 
 	def makeAxis(self):
@@ -286,15 +279,21 @@ class XCategoryAxis(CategoryAxis):
 			return g
 
 		if not (self.categoryNames is None):
-			assert len(self.categoryNames) == self._catCount, \
+			catCount = self._catCount
+			assert len(self.categoryNames) == catCount, \
 				"expected %d category names but found %d in axis" % (
-				len(self.categoryNames), self._catCount
+				len(self.categoryNames), catCount
 				)
-			for i in range(self._catCount):
-				x = self._x + (i+0.5) * self._barWidth
-				y = self._y
+			reverseDirection = self.reverseDirection
+			barWidth = self._barWidth
+			_x = self._x
+			_y = self._y
+
+			for i in range(catCount):
+				x = _x + (i+0.5) * barWidth
 				label = self.labels[i]
-				label.setOrigin(x, y)
+				label.setOrigin(x, _y)
+				if reverseDirection: i = catCount-i-1
 				label.setText(self.categoryNames[i])
 				g.add(label)
 
@@ -315,44 +314,13 @@ class YCategoryAxis(CategoryAxis):
 
 
 	def __init__(self):
-		# private properties set by methods.  The initial values
-		# here are to make demos easy; they would always be
-		# overridden in real life.
-		self._x = 50
-		self._y = 50
-		self._length = 100
-		self._catCount = 0
-		# public properties
-
-		self.visible = 1
-		self.visibleAxis = 1
-		self.visibleTicks = 1
-
-		self.strokeWidth = 1
-		self.strokeColor = STATE_DEFAULTS['strokeColor']
-		self.strokeDashArray = STATE_DEFAULTS['strokeDashArray']
-		self.labels = TypedPropertyCollection(Label)
+		CategoryAxis.__init__(self)
 		self.labels.boxAnchor = 'e' #east - right edge
 		self.labels.dx = -5
-
 		# ultra-simple tick marks for now go between categories
 		# and have same line style as axis - need more
 		self.tickLeft = 5  # how far left of axis does tick go?
 		self.tickRight = 0	# how far right of axis does tick go?
-
-		# idea - can we represent a gridline as just a great
-		# big tickmark which sticks in rather than out?  Would
-		# one ever want both of them?
-		#self.tickMarks = TypedPropertyCollection(TickMark)
-
-		# if None, they don't get labels.  If provided,
-		# you need one name per data point and they are
-		# used for label text.
-		self.categoryNames = None
-
-		self.joinAxis = None
-		self.joinAxisMode = None
-		self.joinAxisPos = None
 
 
 	def demo(self):
@@ -393,8 +361,7 @@ class YCategoryAxis(CategoryAxis):
 
 	def scale(self, idx):
 		"Returns the y position and width in drawing units of the slice."
-
-		return (self._y + (idx * self._barWidth), self._barWidth)
+		return (self._y + self._scale(idx)*self._barWidth, self._barWidth)
 
 
 	def makeAxis(self):
@@ -449,15 +416,21 @@ class YCategoryAxis(CategoryAxis):
 			return g
 
 		if not (self.categoryNames is None):
-			assert len(self.categoryNames) == self._catCount, \
+			catCount = self._catCount
+			assert len(self.categoryNames) == catCount, \
 				"expected %d category names but found %d in axis" % (
-				len(self.categoryNames), self._catCount
+				len(self.categoryNames), catCount
 				)
-			for i in range(self._catCount):
-				y = self._y + (i+0.5) * self._barWidth
-				x = self._x
-				label = self.labels[i]
-				label.setOrigin(x, y)
+			reverseDirection = self.reverseDirection
+			barWidth = self._barWidth
+			labels = self.labels
+			_x = self._x
+			_y = self._y
+			for i in range(catCount):
+				y = _y + (i+0.5) * barWidth
+				label = labels[i]
+				label.setOrigin(_x, y)
+				if reverseDirection: i = catCount-i-1
 				label.setText(self.categoryNames[i])
 				g.add(label)
 

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.40 2001/09/17 16:53:32 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.41 2001/09/24 17:57:11 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -14,7 +14,7 @@ import string, copy
 from types import FunctionType, StringType
 
 from reportlab.lib import colors
-from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf
+from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf, isBoolean
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
@@ -49,14 +49,10 @@ from reportlab.graphics.widgets.grids import ShadedRect
 
 class BarChartProperties(PropHolder):
 	_attrMap = AttrMap(
-		strokeColor = AttrMapValue(isColorOrNone,
-			desc='Color of the bar border.'),
-		fillColor = AttrMapValue(isColorOrNone,
-			desc='Color of the bar interior area.'),
-		strokeWidth = AttrMapValue(isNumber,
-			desc='Width of the bar border.'),
-		symbol = AttrMapValue(None,
-			desc='A widget to be used instead of a normal bar.'),
+		strokeColor = AttrMapValue(isColorOrNone, desc='Color of the bar border.'),
+		fillColor = AttrMapValue(isColorOrNone, desc='Color of the bar interior area.'),
+		strokeWidth = AttrMapValue(isNumber, desc='Width of the bar border.'),
+		symbol = AttrMapValue(None, desc='A widget to be used instead of a normal bar.'),
 		)
 
 	def __init__(self):
@@ -71,48 +67,25 @@ class BarChart(Widget):
 	"Abstract base class, unusable by itself."
 
 	_attrMap = AttrMap(
-		debug = AttrMapValue(isNumber,
-			desc='Used only for debugging.'),
-		x = AttrMapValue(isNumber,
-			desc='X position of the lower-left corner of the chart.'),
-		y = AttrMapValue(isNumber,
-			desc='Y position of the lower-left corner of the chart.'),
-		width = AttrMapValue(isNumber,
-			desc='Width of the chart.'),
-		height = AttrMapValue(isNumber,
-			desc='Height of the chart.'),
-
-		useAbsolute = AttrMapValue(isNumber,
-			desc='Flag to use absolute spacing values.'),
-		barWidth = AttrMapValue(isNumber,
-			desc='The width of an individual bar.'),
-		groupSpacing = AttrMapValue(isNumber,
-			desc='Width between groups of bars.'),
-		barSpacing = AttrMapValue(isNumber,
-			desc='Width between individual bars.'),
-
-		strokeColor = AttrMapValue(isColorOrNone,
-			desc='Color of the plot area border.'),
-		strokeWidth = AttrMapValue(isNumber,
-			desc='Width plot area border.'),
-		fillColor = AttrMapValue(isColorOrNone,
-			desc='Color of the plot area interior.'),
-
-		bars = AttrMapValue(None,
-			desc='Handle of the individual bars.'),
-
-		valueAxis = AttrMapValue(None,
-			desc='Handle of the value axis.'),
-		categoryAxis = AttrMapValue(None,
-			desc='Handle of the category axis.'),
-		categoryNames = AttrMapValue(isListOfStrings,
-			desc='List of category names.'),
-		data = AttrMapValue(None,
-			desc='Data to be plotted, list of (lists of) numbers.'),
-		barLabels = AttrMapValue(None,
-			desc='Handle to the list of bar labels.'),
-		barLabelFormat = AttrMapValue(None,
-			desc='Formatting string or function used for bar labels.'),
+		debug = AttrMapValue(isNumber, desc='Used only for debugging.'),
+		x = AttrMapValue(isNumber, desc='X position of the lower-left corner of the chart.'),
+		y = AttrMapValue(isNumber, desc='Y position of the lower-left corner of the chart.'),
+		width = AttrMapValue(isNumber, desc='Width of the chart.'),
+		height = AttrMapValue(isNumber, desc='Height of the chart.'),
+		useAbsolute = AttrMapValue(isNumber, desc='Flag to use absolute spacing values.'),
+		barWidth = AttrMapValue(isNumber, desc='The width of an individual bar.'),
+		groupSpacing = AttrMapValue(isNumber, desc='Width between groups of bars.'),
+		barSpacing = AttrMapValue(isNumber, desc='Width between individual bars.'),
+		strokeColor = AttrMapValue(isColorOrNone, desc='Color of the plot area border.'),
+		strokeWidth = AttrMapValue(isNumber, desc='Width plot area border.'),
+		fillColor = AttrMapValue(isColorOrNone, desc='Color of the plot area interior.'),
+		bars = AttrMapValue(None, desc='Handle of the individual bars.'),
+		valueAxis = AttrMapValue(None, desc='Handle of the value axis.'),
+		categoryAxis = AttrMapValue(None, desc='Handle of the category axis.'),
+		data = AttrMapValue(None, desc='Data to be plotted, list of (lists of) numbers.'),
+		barLabels = AttrMapValue(None, desc='Handle to the list of bar labels.'),
+		barLabelFormat = AttrMapValue(None, desc='Formatting string or function used for bar labels.'),
+		reversePlotOrder = AttrMapValue(isBoolean, desc='If true, reverse common category plot order.'),
 		)
 
 	def __init__(self):
@@ -126,6 +99,7 @@ class BarChart(Widget):
 		self.y = 10
 		self.height = 85
 		self.width = 180
+		self.reversePlotOrder = 0
 
 		# allow for a bounding rectangle
 		self.strokeColor = None
@@ -133,8 +107,7 @@ class BarChart(Widget):
 
 		# this defines two series of 3 points.	Just an example.
 		self.data = [(100,110,120,130),
-					 (70, 80, 85, 90)]
-		self.categoryNames = ('North','South','East','West')
+					(70, 80, 85, 90)]
 
 		# control bar spacing. is useAbsolute = 1 then
 		# the next parameters are in points; otherwise
@@ -174,7 +147,6 @@ class BarChart(Widget):
 		self.bars[0].fillColor = colors.red
 		self.bars[1].fillColor = colors.green
 		self.bars[2].fillColor = colors.blue
-
 
 	def _findMinMaxValues(self):
 		"Find the minimum and maximum value of the data we have."
@@ -240,6 +212,8 @@ class BarChart(Widget):
 			org = self.y
 		else:
 			org = self.x
+		cA = self.categoryAxis
+		cScale = cA.scale
 
 		self._seriesCount = len(self.data)
 		self._rowLength = len(self.data[0])
@@ -254,7 +228,7 @@ class BarChart(Widget):
 						+ (self._seriesCount * self.barWidth)
 						+ ((self._seriesCount - 1) * self.barSpacing)
 						)
-			availWidth = self.categoryAxis.scale(0)[1]
+			availWidth = cScale(0)[1]
 			normFactor = availWidth / normWidth
 			if self.debug:
 				print '%d series, %d points per series' % (self._seriesCount, self._rowLength)
@@ -263,40 +237,49 @@ class BarChart(Widget):
 					self._seriesCount - 1, self.barSpacing, normWidth)
 
 		# 'Baseline' correction...
-		scale = self.valueAxis.scale
-		vm, vM = self.valueAxis.valueMin, self.valueAxis.valueMax
+		vA = self.valueAxis
+		vScale = vA.scale
+		vm, vM = vA.valueMin, vA.valueMax
 		if None in (vm, vM):
 			y = self._findMinMaxValues()[0]
 			if vm is not None: y = min(y,vm)
-			y = scale(y)
+			y = vScale(y)
 		elif vm <= 0 <= vM:
-			y = scale(0)
+			y = vScale(0)
 		elif 0 < vm:
-			y = scale(vm)
+			y = vScale(vm)
 		elif vM < 0:
-			y = scale(vM)
-		#print vm, vM, y, scale, self.valueAxis._y, self.valueAxis._valueMin, self._findMinMaxValues()[0]
+			y = vScale(vM)
 
+		data = self.data
+		lenData = len(data)
+		COLUMNS = range(max(map(len,data)))
+		bGap = self.barWidth+self.barSpacing
+		if self.useAbsolute:
+			gVal = lenData*bGap + self.groupSpacing
+			_cScale = cA._scale
+
+		width = self.barWidth*normFactor
 		self._barPositions = []
-		for rowNo in range(len(self.data)):
+		reversePlotOrder = self.reversePlotOrder
+		for rowNo in range(lenData):
 			barRow = []
-			for colNo in range(len(self.data[0])):
-				datum = self.data[rowNo][colNo]
+			xVal = 0.5*self.groupSpacing+rowNo*bGap
+			if reversePlotOrder: rowNo = lenData-1 - rowNo
+			for colNo in COLUMNS:
+				datum = data[rowNo][colNo]
 
 				# Ufff...
 				if self.useAbsolute:
-					g = len(self.data) * self.barWidth + \
-							 len(self.data) * self.barSpacing + \
-							 self.groupSpacing
-					g = g * colNo + 0.5 * self.groupSpacing + org
-					x = g + rowNo * (self.barWidth + self.barSpacing)
+					x = gVal*_cScale(colNo) + xVal + org
 				else:
-					(g, gW) = self.categoryAxis.scale(colNo)
-					x = g + normFactor * (0.5 * self.groupSpacing \
-											   + rowNo * (self.barWidth + self.barSpacing))
-				width = self.barWidth * normFactor
+					(g, gW) = cScale(colNo)
+					x = g + normFactor*xVal
 
-				height = self.valueAxis.scale(datum) - y
+				if datum is None:
+					height = 0
+				else:
+					height = vScale(datum) - y
 				barRow.append(flipXY and (y,x,height,width) or (x, y, width, height))
 
 			self._barPositions.append(barRow)
@@ -365,7 +348,10 @@ class BarChart(Widget):
 	def makeBars(self):
 		g = Group()
 
-		for rowNo in range(len(self._barPositions)):
+		lenData = len(self.data)
+		reversePlotOrder = self.reversePlotOrder
+		for rowNo in range(lenData):
+			if reversePlotOrder: rowNo = lenData-1 - rowNo
 			row = self._barPositions[rowNo]
 			styleCount = len(self.bars)
 			styleIdx = rowNo % styleCount
@@ -406,9 +392,9 @@ class VerticalBarChart(BarChart):
 	_flipXY = 0
 
 	def __init__(self):
-		BarChart.__init__(self)
 		self.categoryAxis = XCategoryAxis()
 		self.valueAxis = YValueAxis()
+		BarChart.__init__(self)
 
 	def draw(self):
 		self.categoryAxis.setPosition(self.x, self._drawBegin(self.y,self.height), self.width)
@@ -421,9 +407,9 @@ class HorizontalBarChart(BarChart):
 	_flipXY = 1
 
 	def __init__(self):
-		BarChart.__init__(self)
 		self.categoryAxis = YCategoryAxis()
 		self.valueAxis = XValueAxis()
+		BarChart.__init__(self)
 
 	def draw(self):
 		self.categoryAxis.setPosition(self._drawBegin(self.x,self.width), self.y, self.height)
