@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.113 2003/06/24 11:55:28 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.113 2003/06/24 11:55:28 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.114 2003/07/03 14:20:04 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.114 2003/07/03 14:20:04 rgbecker Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -15,7 +15,6 @@ ENABLE_TRACKING = 1 # turn this off to do profile testing w/o tracking
 import os
 import sys
 from string import join, split, strip, atoi, replace, upper
-import time
 import tempfile
 from types import *
 from math import sin, cos, tan, pi, ceil
