@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/odyssey/odyssey.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/odyssey/odyssey.py,v 1.11 2002/07/24 19:56:35 andy_robinson Exp $
-__version__=''' $Id: odyssey.py,v 1.11 2002/07/24 19:56:35 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/odyssey/odyssey.py,v 1.12 2003/09/11 21:43:20 andy_robinson Exp $
+__version__=''' $Id: odyssey.py,v 1.12 2003/09/11 21:43:20 andy_robinson Exp $ '''
 ___doc__=''
 #odyssey.py
 #
@@ -22,8 +22,18 @@ ___doc__=''
 # 239 pages in 39.39 seconds = 6 pages per second
 
 from reportlab.pdfgen import canvas
-import time, os
+import time, os, sys
 
+#find out what platform we are on and whether accelerator is
+#present, in order to print this as part of benchmark info.
+try:
+    import _rl_accel
+    ACCEL = 1
+except ImportError:
+    ACCEL = 0
+
+    
+    
 
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
@@ -49,10 +59,21 @@ def drawPageFrame(canv):
 
 
 
-def run():
+def run(verbose=1):
+    if sys.platform[0:4] == 'java':
+        impl = 'Jython'
+    else:
+        impl = 'Python'
+    verStr = '%d.%d' % (sys.version_info[0:2])
+    if ACCEL:
+        accelStr = 'with _rl_accel'
+    else:
+        accelStr = 'without _rl_accel'
+    print 'Benchmark of %s %s %s' % (impl, verStr, accelStr)
+
     started = time.time()
     canv = canvas.Canvas('odyssey.pdf')
-    canv.setPageCompression(0)
+    canv.setPageCompression(1)
     drawPageFrame(canv)
 
     #do some title page stuff
@@ -103,7 +124,7 @@ def run():
 
             #page
             pg = canv.getPageNumber()
-            if pg % 10 == 0:
+            if verbose and pg % 10 == 0:
                 print 'formatted page %d' % canv.getPageNumber()
 
     if tx:
@@ -111,7 +132,8 @@ def run():
         canv.showPage()
         drawPageFrame(canv)
 
-    print 'about to write to disk...'
+    if verbose:
+        print 'about to write to disk...'
 
     canv.save()
 
@@ -119,8 +141,10 @@ def run():
     elapsed = finished - started
     pages = canv.getPageNumber()-1
     speed =  pages / elapsed
-    print '%d pages in %0.2f seconds = %0.2f pages per second' % (
-                pages, elapsed, speed)
+    fileSize = os.stat('odyssey.pdf')[6] / 1024
+    print '%d pages in %0.2f seconds = %0.2f pages per second, file size %d kb' % (
+                pages, elapsed, speed, fileSize)
 
 if __name__=='__main__':
-    run()
+    quiet = ('-q' in sys.argv)
+    run(verbose = not quiet)
