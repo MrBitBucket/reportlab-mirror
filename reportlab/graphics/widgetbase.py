@@ -128,6 +128,60 @@ class Widget(shapes.UserNode):
         for (name, value) in propList:
             print '%s%s = %s' % (prefix, name, value)
                     
+class TypedPropertyCollection(Widget):
+    """This makes it easy to create lists of objects.  You initialize
+    it with a class of what it is to contain, and that is all you
+    can add to it.  You can assign properties to the collection
+    as a whole, or to a numeric index within it; if so it creates
+    a new child object to hold that data.  So:
+        wedges = TypesPropertyCollection0(WedgeFormatter)
+        wedges.strokeWidth = 2                # applies to all
+        wedges.strokeColor = colors.red       # applies to all
+        wedges[3].strokeColor = colors.blue   # only to one
+    The last line should be taken as a prescription of how to
+    create wedge no. 3 if one is needed; no error is raised if
+    there are only two data points."""
+    def __init__(self, exampleClass):
+        #give it same validation rules as what it holds
+        self._prototype = exampleClass
+        example = exampleClass()
+        self._attrMap = example._attrMap.copy()
+        #give it same default values as whhat it holds
+        self.setProperties(example.getProperties())
+        self._children = {}
+        
+        
+        
+    def __getitem__(self, index):
+        try:
+            return self._children[index]
+        except KeyError:
+            child = self._prototype()
+            #should we copy down?  how to keep in synch?
+            child.setProperties(Widget.getProperties(self))
+            self._children[index] = child
+            return child
+
+    def __setitem__(self, key, value):
+        assert isinstance(value, self._prototype), "This collection can only hold objects of type %s" % self._prototype.__name__
+        
+    def getProperties(self):
+        # return any children which are defined and whatever
+        # differs from the parent
+        props = {}
+
+        for (key, value) in Widget.getProperties(self).items():
+            props['%s' % key] = value
+                  
+        for idx in self._children.keys():
+            childProps = self._children[idx].getProperties()
+            for (key, value) in childProps.items():
+                parentValue = getattr(self, key)
+                if parentValue <> value:
+                    newKey = '[%s].%s' % (idx, key)
+                    props[newKey] = value
+
+        return props
                 
                         
 

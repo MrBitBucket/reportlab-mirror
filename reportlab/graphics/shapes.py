@@ -142,7 +142,37 @@ def isValidChild(x):
     return isinstance(x, UserNode) or isinstance(x, Shape)
 
 
+class OneOf:
+    """Make validator functions for list of choices. Usage:
+    >>> f = shapes.OneOf(('happy','sad'))
+    >>> f('happy')
+    1
+    >>> f('grumpy')
+    0
+    >>> 
+    """
+    def __init__(self, choices):
+        self._choices = choices
+    def __call__(self, arg):
+        return arg in self._choices
 
+class SequenceOf:
+    """Make validator functions for sequence of things:
+    >>> isListOfColors = shapes.SequenceOf(isColor)
+    
+    """
+    def __init__(self, atomicFunc):
+        self._atomicFunc = atomicFunc
+    def __call__(self, seq):
+        if type(seq) not in (ListType, TupleType):
+            return 0
+        else:
+            for elem in seq:
+                if not self._atomicFunc(elem):
+                    return 0
+            return 1
+
+    
     ####################################################################
     # math utilities.  These could probably be moved into lib
     # somewhere.
