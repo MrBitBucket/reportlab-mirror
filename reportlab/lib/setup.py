@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/setup.py,v 1.7 2001/06/06 10:53:13 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/setup.py,v 1.8 2001/06/13 18:24:14 jvr Exp $
 if __name__=='__main__': #NO RUNTESTS
 	import os, sys
 	from distutils.core import setup, Extension
@@ -12,6 +12,8 @@ if __name__=='__main__': #NO RUNTESTS
 	elif sys.platform=="sunos5":
 		LIBS=[]
 	elif sys.platform=="aix4":
+		LIBS=[]
+	elif sys.platform=="mac":
 		LIBS=[]
 	else:
 		print "Don't know about other systems"
