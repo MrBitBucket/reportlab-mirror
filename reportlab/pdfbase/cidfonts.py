@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/cidfonts?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: cidfonts.py,v 1.2 2001/09/10 02:39:30 andy_robinson Exp $ '''
+__version__=''' $Id: cidfonts.py,v 1.3 2001/09/10 03:08:29 andy_robinson Exp $ '''
 __doc__="""CID (Asian multi-byte) font support.
 
 This defines classes to represent CID fonts.  They know how to calculate
@@ -16,24 +16,8 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase._cidfontdata import allowedTypeFaces, allowedEncodings, CIDFontInfo
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfdoc
+from reportlab.rl_config import CMapSearchPath
 
-## need to find CMAP files to work out widths accurately.
-CMAP_DIR = None
-for dirname in [
-    '/usr/local/Acrobat4/Resource/CMap',
-    'C:\\Program Files\\Adobe\\Acrobat\\Resource\\CMap',
-    'C:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\CMap'
-    ]:
-    if os.path.exists(dirname):
-        CMAP_DIR = dirname
-        break
-
-if CMAP_DIR is None:
-    raise IOError("""Unable to find CMAP directory in any of the standard locations.
-Please modify the directory list at the beginning of jpsupport.py to include
-the correct directory location for your Adobe CMap files.  If you believe
-your files are in a standard location, let us know and we will extend the
-search path in the next release.""")
 
 def structToPDF(structure):
     "Converts deeply nested structure to PDFdoc dictionary/array objects"
@@ -69,14 +53,18 @@ class CIDEncoding(pdfmetrics.Encoding):
         
         self.parseCMAPFile(name)
 
+            
     def parseCMAPFile(self, name):
         """This is a tricky one as CMAP files are Postscript
         ones.  Some refer to others with a 'usecmap'
         command"""
-        
-        #print 'parsing cmap file for ' + name,
-        cmapfile = CMAP_DIR + os.sep + name
-        assert os.path.isfile(cmapfile), 'CMAP file for encodings "%s" not found!' % name
+        found = 0
+        for dirname in CMapSearchPath:
+            cmapfile = dirname + os.sep + name
+            if os.path.isfile(cmapfile):
+                found = 1
+                break
+        assert found, 'CMAP file for encodings "%s" not found!' % name
 
         rawdata = open(cmapfile, 'r').read()
         if len(rawdata) > 50000:
@@ -244,6 +232,7 @@ class CIDTypeFace(pdfmetrics.TypeFace):
         return self._explicitWidths.get(characterId, self._defaultWidth)
 
 class CIDFont(pdfmetrics.Font):
+    "Represents a built-in multi-byte font"
     def __init__(self, face, encoding):
 ##        self._multiByte = 1
 ##        self.fontName = face + '-' + encoding

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.21 2001/08/30 08:51:01 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.22 2001/09/10 03:08:29 andy_robinson Exp $
 
 shapeChecking =				1
 defaultEncoding =			'WinAnsiEncoding'		# 'WinAnsi' or 'MacRoman'
@@ -19,6 +19,14 @@ T1SearchPath =	('c:/Program Files/Adobe/Acrobat 4.0/Resource/Font', #Win32
 				'/usr/lib/Acrobat4/Resource/Font', #Linux
 				'%(REPORTLAB_DIR)s/lib/fontDir', #special
 				)
+
+# places to look for CMap files - should ideally merge with above
+CMapSearchPath = ('/usr/local/Acrobat4/Resource/CMap',
+				'C:\\Program Files\\Adobe\\Acrobat\\Resource\\CMap',
+				'C:\\Program Files\\Adobe\\Acrobat 5.0\\Resource\\CMap',
+				'C:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\CMap'
+				  )
+
 
 #### Normally don't need to edit below here ####
 import os, sys, string
@@ -40,7 +48,7 @@ def	_startUp():
 	'''This function allows easy resetting to the global defaults
 	If the environment contains 'RL_xxx' then we use the value
 	else we use the given default'''
-	V = ('T1SearchPath','shapeChecking', 'defaultEncoding', 'pageCompression',
+	V = ('T1SearchPath','CMapSearchPath','shapeChecking', 'defaultEncoding', 'pageCompression',
 				'defaultPageSize', 'defaultImageCaching', 'PIL_WARNINGS',
 				'ZLIB_WARNINGS', 'warnOnMissingFontGlyphs', '_verbose',
 				)
@@ -61,6 +69,12 @@ def	_startUp():
 		d = string.replace(p % D,'/',os.sep)
 		if os.path.isdir(d): P.append(d)
 	_setOpt('T1SearchPath',P)
+
+	P=[]
+	for p in _SAVED['CMapSearchPath']:
+		d = string.replace(p % D,'/',os.sep)
+		if os.path.isdir(d): P.append(d)
+	_setOpt('CMapSearchPath',P)
 
 	for k in V[1:]:
 		v = _SAVED[k]
