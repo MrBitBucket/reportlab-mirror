@@ -48,8 +48,16 @@
             characters). That enables you, for example, to have native (in my
             case, Turkish) characters in your document:</para>
         <para style="Indent">
-            <font name="Verdana" size="32">DISABLED WHILE TESTING 16-11-2002</font>
-            <!--<font name="Verdana" size="32">������</font></para>-->
+            <!--  if you have any trouble with these, execute the lines below
+            to find out what we really intended 
+            >>> turkishChars =  u"\u011e \u011f \u0130 \u0131 \u015e \u015f"
+            >>> print turkishChars
+            Ğ ğ İ ı Ş ş
+            >>> print turkishChars.encode("utf-8")
+            Äž ÄŸ Ä° Ä± Åž ÅŸ
+            >>> 
+            -->
+            <font name="Verdana" size="32">Äž ÄŸ Ä° Ä± Åž ÅŸ</font></para>
       </frame>
     </slide>
 

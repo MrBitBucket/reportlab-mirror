@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.36 2002/07/24 19:56:37 andy_robinson Exp $
-__version__=''' $Id: utils.py,v 1.36 2002/07/24 19:56:37 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.37 2002/12/23 00:46:57 andy_robinson Exp $
+__version__=''' $Id: utils.py,v 1.37 2002/12/23 00:46:57 andy_robinson Exp $ '''
 
 import string, os, sys
 from types import *
@@ -36,30 +36,76 @@ if ',' in fp_str(0.25):
     def fp_str(*a):
         return string.replace(apply(_FP_STR,a),',','.')
 
-def recursiveImport(modulename, baseDir=None, noCWD=0):
+def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     """Dynamically imports possible packagized module, or raises ImportError"""
     import imp
     parts = string.split(modulename, '.')
-    part = parts[0]
-    path = list(baseDir and (type(baseDir) not in SeqTypes and [baseDir] or filter(None,baseDir)) or None)
-    if not noCWD and '.' not in path: path.insert(0,'.')
+    name = parts[0]
 
+    #this hosed my brain..redo it slowly  (AR).
+    #path = list(baseDir and (type(baseDir) not in SeqTypes and [baseDir] or filter(None,baseDir)) or None)
+    if baseDir is None:
+        path = sys.path[:]
+    else:
+        path = [baseDir]
+
+    if noCWD:
+        if '.' in path:
+            path.remove('.')
+        abspath = os.path.abspath('.')
+        if abspath in path:
+            path.remove(abspath)
+    else:
+        if '.' not in path:
+            path.insert(0,'.')
+
+    if debug:
+        import pprint
+        pp = pprint.pprint
+        print 'path=',pp(path)
+        
     #make import errors a bit more informative
+    fullName = name
     try:
-        (file, pathname, description) = imp.find_module(part, path)
-        childModule = parentModule = imp.load_module(part, file, pathname, description)
+        (file, pathname, description) = imp.find_module(name, path)
+        childModule = parentModule = imp.load_module(name, file, pathname, description)
+        if debug: print 'imported module = %s' % parentModule
         for name in parts[1:]:
-            (file, pathname, description) = imp.find_module(name, parentModule.__file__)
-            childModule = imp.load_module(name, file, pathname, description)
+            fullName = fullName + '.' + name
+            if debug: print 'trying part %s' % name
+            (file, pathname, description) = imp.find_module(name, [os.path.dirname(parentModule.__file__)])
+            childModule = imp.load_module(fullName, file, pathname, description)
+            if debug: print 'imported module = %s' % childModule
+            
             setattr(parentModule, name, childModule)
             parentModule = childModule
     except ImportError:
-        msg = "cannot import '%s' while attempting recursive import of '%s'" % (part, modulename)
+        msg = "cannot import '%s' while attempting recursive import of '%s'" % (fullName, modulename)
         if baseDir:
             msg = msg + " under paths '%s'" % `path`
         raise ImportError, msg
 
     return childModule
+
+
+def recursiveGetAttr(obj, name):
+    "Can call down into e.g. object1.object2[4].attr"
+    return eval(name, obj.__dict__)
+
+def recursiveSetAttr(obj, name, value):
+    "Can call down into e.g. object1.object2[4].attr = value"
+    #get the thing above last.
+    tokens = string.split(name, '.')
+    #print 'name=%s, tokens=%s' % (name, tokens)
+    if len(tokens) == 1:
+        setattr(obj, name, value)
+    else:        
+        most = string.join(tokens[:-1], '.')
+        last = tokens[-1]
+        #print 'most=%s, last=%s' % (most, last)
+        parent = recursiveGetAttr(obj, most)
+        #print 'parent=%s' % parent
+        setattr(parent, last, value)
 
 def import_zlib():
     try:
