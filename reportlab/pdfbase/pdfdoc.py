@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.23  2000/08/24 02:26:04  aaron_watters
+#	change to PDFLiteral to support "lazy string conversions" (to support lazy crosslinks)
+#
 #	Revision 1.22  2000/08/09 10:57:52  rgbecker
 #	Andy's Symbol/Zapf font fix
-#
+#	
 #	Revision 1.21  2000/06/26 15:58:22  rgbecker
 #	Simple fix to widths problem
 #	
@@ -89,7 +92,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.22 2000/08/09 10:57:52 rgbecker Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.23 2000/08/24 02:26:04 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -538,7 +541,7 @@ class PDFLiteral(PDFObject):
     def __init__(self, text):
         self.text = text
     def save(self, file):
-        file.write(self.text + LINEEND)
+        file.write(str(self.text) + LINEEND)
 
 
 
