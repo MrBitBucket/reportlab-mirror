@@ -53,7 +53,97 @@ heading2("More about the Canvas")
 disc("""
 Before describing the drawing operations, we will digress to cover
 some of the things which can be done to configure a canvas.  There
-are many different settings available.""")
+are many different settings available.  If you are new to Python
+or can't wait to produce some output, you can skip ahead, but
+come back later and read this!""")
+
+disc("""First of all, we will look at the constructor
+arguments for the canvas:""")
+eg("""    def __init__(self,filename,
+                 pagesize=(595.27,841.89),
+                 bottomup = 1,
+                 pageCompression=0,
+                 encoding=pdfdoc.DEFAULT_ENCODING,
+                 verbosity=0):
+                 """)
+
+disc("""The $filename$ argument is obvious and controls the
+name of the final PDF file.  Due to popular demand, you
+may also pass in any open file object (such as $sys.stdout$)
+and the PDF document will be written to that.  Since PDF
+is a binary format, you should take care when writing other
+stuff before or after it; you can't deliver PDF documents
+inline in the middle of an HTML page!""")
+
+disc("""The $pagesize$ argument is a tuple of two numbers
+in points (1/72 of an inch). The canvas defaults to A4,
+but it is better to explicitly specify it.  Most common page
+sizes are found in the library module <i>reportlab.lib.pagesizes</i>,
+so you can use expressions like""")
+eg("""from reportlab.lib.pagesizes import letter, A4
+myCanvas = Canvas('myfile.pdf', pagesize=letter)
+width, height = pagesize.letter  #keep for later
+""")
+disc("""Very often, you will want to calculate things based on
+the page size.  In the example above we extracted the width and
+height; defining a right margin as $width - inch$ rather than
+a constant means that the margin will still work if you change
+paper sizes.""")
+
+disc("""The $bottomup$ argument is an attempt to let you
+switch coordinate systems.  Some graphics systems (like PDF
+and PostScript) place (0,0) at the bottom left of the page
+others (like most GUIs) place it at the top.  This argument
+is deprecated and may well be dropped.""")
+todo("""Need to see if it really works for all tasks, and if not
+     then get rid of it""")
+
+disc("""The $pageCompression$ option determines whether the chunk
+of PDF operations for each page should be compressed.  By default
+it is off, because the compression currently involves a slow
+byte-level loop encoding the output; compressed documents will
+be smaller, but slower to generate.  We are working on a small
+C extension which will make this go hundreds of times faster,
+removing the penalty, at which point compression will be the norm.
+Note that images are <i>always</i> compressed, and this option
+will only save space if you have a lot of text and vector graphics.""")
+
+disc("""The $encoding$ argument determines which font encoding
+is used for the standard fonts; this should correspond to
+the encoding on your system.  It has two values at present:
+$pdfdoc.WINANSI_ENCODING$ or $pdfdoc.MACROMAN_ENCODING$.  The
+$pdfdoc.DEFAULT_ENCODING$ above points to the former, which
+is standard on Windows and many Unices (including Linux). If
+you are a Mac user and want to make a global change, hack the
+line at the top of <i>reportlab/pdfbase/pdfdoc.py</i> to switch it
+over.""")
+
+disc("""We plan to add support for encodings on a per-font
+basis in future, so you can explicitly add in new fonts
+and say how the data is to be encoded.  It is your responsibility
+to ensure that your string data is in an encoding matching that
+of the font.  If conversions are needed, the Unicode library
+in Python 1.6 can be of great help.""")
+
+disc("""The demo script <i>reportlab/demos/stdfonts.py</i>
+will print out two test documents showing all code points
+in all fonts, so you can look up characters.  Special
+characters can be inserted into string commands with
+the usual octal escape sequence; for example \\101 = 'A'.""")
+
+disc("""The $verbosity$ argument determines how much log
+information is printed.  By default, it is zero to assist
+applications which want to capture PDF from standard output.
+With a value of 1, you will get a confirmation message
+each time a document is generated.  Higher numbers may
+give more output in future.""")
+
+todo("to do - all the info functions and other non-drawing stuff")
+     
+
+
+
+
 todo("""Cover all constructor arguments, and setAuthor etc.""")
 
 heading2("Drawing Operations")
