@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/validators.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.25 2002/12/03 15:38:03 rgbecker Exp $
-__version__=''' $Id: validators.py,v 1.25 2002/12/03 15:38:03 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.26 2003/06/03 12:35:20 rgbecker Exp $
+__version__=''' $Id: validators.py,v 1.26 2003/06/03 12:35:20 rgbecker Exp $ '''
 """
 This module contains some standard verifying functions which can be
 used in an attribute map.
@@ -52,7 +52,7 @@ class _isBoolean(Validator):
         except:
             raise ValueError, 'Must be boolean'
         if S in ('YES','TRUE'): return 1
-        if S in ('NO','FALSE'): return 0
+        if S in ('NO','FALSE',None): return 0
         raise ValueError, 'Must be boolean'
 
 class _isString(Validator):
