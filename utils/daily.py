@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/daily.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/daily.py,v 1.51 2001/12/07 13:30:02 rgbecker Exp $
-__version__=''' $Id: daily.py,v 1.51 2001/12/07 13:30:02 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/utils/daily.py,v 1.52 2001/12/12 10:39:56 rgbecker Exp $
+__version__=''' $Id: daily.py,v 1.52 2001/12/12 10:39:56 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -115,10 +115,6 @@ def do_exec(cmd, cmdname=None):
 			print 'Error: '+ (cmdname or cmd)
 		sys.exit(1)
 
-def genAll(f='genAll.py'):
-	execfile(f,locals())
-	return eval('_genAll')
-
 def cvs_checkout(d):
 	os.chdir(d)
 	cvsdir = os.path.join(d,projdir)
@@ -148,42 +144,11 @@ def cvs_checkout(d):
 		move(projdir,dst)
 		for f in ('py2pdf.py','idle_print.py'): os.chmod(os.path.join(dst,f),0775)	#rwxrwxr-x
 		CVS_remove(dst)
-	else:
+	elif release:
 		dst = os.path.join(d,"reportlab","docs")
-		PP = "%s" % (d,)
-		#add our reportlab parent to the path so we import from there
-		if os.environ.has_key('PYTHONPATH'):
-			opp = os.environ['PYTHONPATH']
-			os.environ['PYTHONPATH']='%s:%s' % (PP,opp)
-		else:
-			opp = None
-			os.environ['PYTHONPATH']=PP
-		if '-pythonpath' in sys.argv:
-			print 'PYTHONPATH=%s'%os.environ['PYTHONPATH']
-
-		os.chdir(dst)
-		try:
-			# this creates PDFs in each manual's directory, and copies them to reportlab/docs
-			genAll()(verbose=verbose)
-			os.chdir(dst)
-			# we copy them out to our html area
-			copy('*.pdf',htmldir)
-			# and then delete them
-			for f in ('*.pdf', 'userguide/*.pdf', 'graphguide/*.pdf' 'reference/*.pdf'): kill(f)
-		except:
-			print '????????????????????????????????'
-			print 'Failed to run genAll.py, cwd=%s' % os.getcwd()
-			do_exec('ls -l')
-			traceback.print_exc()
-			print '????????????????????????????????'
-		os.chdir(d)
-		pyc_remove(cvsdir)
-
-		#restore the python path
-		if opp is None:
-			del os.environ['PYTHONPATH']
-		else:
-			os.environ['PYTHONPATH'] = opp
+		for f in ('userguide.pdf', 'graphguide.pdf' 'reference.pdf', 'graphics_reference.pdf'):
+			f = os.path.join(htmldir,f)
+			if os.path.isfile(f): copy(f,dst)
 
 def do_zip(d):
 	'create .tgz and .zip file archives of d/reportlab'
