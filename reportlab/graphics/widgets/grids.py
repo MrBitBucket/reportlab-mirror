@@ -447,6 +447,71 @@ class ShadedRect(Widget):
         return group
 
 
+def colorRange(startCol, endCol, numOfShades):
+    "Return a range of intermediate colors between startCol and endCol."
+
+    msg = 'Start/end colors must be of same class.'
+    assert startCol.__class__ == endCol.__class__, msg
+
+    colClass = startCol.__class__
+    
+    num = float(numOfShades)
+    colorList = []
+    
+    if num == 1.0:
+        colorList = [startCol]
+    elif num > 1.0:
+        col = startCol
+        colorList.append(col)
+        c0, c1 = startCol, endCol
+        for i in range(1, int(num)):
+            if colClass == colors.Color:
+                r, g, b = colorList[-1].red, colorList[-1].green, colorList[-1].blue
+                r = r + (c1.red - c0.red) / (num-1)
+                g = g + (c1.green - c0.green) / (num-1)
+                b = b + (c1.blue - c0.blue) / (num-1)
+                col = colClass(r, g, b)
+                colorList.append(col)
+            elif colClass == colors.CMYKColor:
+                c, m, y, k = colorList[-1].cyan, colorList[-1].magenta, colorList[-1].yellow, colorList[-1].black
+                c = c + (c1.cyan - c0.cyan) / (num-1)
+                m = m + (c1.magenta - c0.magenta) / (num-1)
+                y = y + (c1.yellow - c0.yellow) / (num-1)
+                k = k + (c1.black - c0.black) / (num-1)
+                col = colClass(c, m, y, k)
+                colorList.append(col)
+            elif colClass == colors.PCMYKColor:
+                c, m, y, k = colorList[-1].cyan, colorList[-1].magenta, colorList[-1].yellow, colorList[-1].black
+                c = c + (c1.cyan - c0.cyan) / (num-1)
+                m = m + (c1.magenta - c0.magenta) / (num-1)
+                y = y + (c1.yellow - c0.yellow) / (num-1)
+                k = k + (c1.black - c0.black) / (num-1)
+                [c, m, y, k] = map(lambda x:100*x, [c, m, y, k])
+                col = colClass(c, m, y, k)
+                colorList.append(col)
+            
+    return colorList
+
+
+def test0():
+    "Create color ranges."
+
+    c0, c1 = colors.Color(0, 0, 0), colors.Color(1, 1, 1)
+    for c in colorRange(c0, c1, 4):
+        print c
+    print
+
+    c0, c1 = colors.CMYKColor(0, 0, 0, 0), colors.CMYKColor(0, 0, 0, 1)
+    for c in colorRange(c0, c1, 4):
+        print c
+    print
+
+    c0, c1 = colors.PCMYKColor(0, 0, 0, 0), colors.PCMYKColor(0, 0, 0, 100)
+    for c in colorRange(c0, c1, 4):
+        print c
+    print
+    
+
 def test1():
     "Generate a PDF document full of uncommented samples."
     
@@ -682,6 +747,164 @@ def test2():
     print 'wrote file: grids2.pdf'
     
 
+def test3():
+    "Generate a PDF document full of uncommented samples."
+    
+    D = Drawing(450, 650)
+
+    d = 80
+    s = 50
+    
+    for row in range(10):
+        y = 530 - row*d
+        if row == 0:
+            for col in range(4):
+                x = 20 + col*d
+                g = Grid()
+                g.x = x
+                g.y = y
+                g.width = s
+                g.height = s
+                g.useRects = 0
+                g.useLines = 1
+                if col == 0:
+                    pass
+                elif col == 1:
+                    g.delta0 = 10
+                elif col == 2:
+                    g.orientation = 'horizontal'
+                elif col == 3:
+                    g.deltaSteps = [5, 10, 20, 30]
+                g.demo()
+                D.add(g)
+        elif row == 1:
+            for col in range(4):
+                x = 20 + col*d 
+                g = Grid()
+                g.y = y
+                g.x = x
+                g.width = s
+                g.height = s
+                if col == 0:
+                    pass
+                elif col == 1:
+                    g.delta0 = 10
+                elif col == 2:
+                    g.orientation = 'horizontal'
+                elif col == 3:
+                    g.deltaSteps = [5, 10, 20, 30]
+                    g.useRects = 1
+                    g.useLines = 0
+                g.demo()
+                D.add(g)
+        elif row == 2:
+            for col in range(3):
+                x = 20 + col*d
+                g = Grid()
+                g.x = x
+                g.y = y
+                g.width = s
+                g.height = s
+                g.useLines = 1
+                g.useRects = 1
+                if col == 0:
+                    pass
+                elif col == 1:
+                    g.delta0 = 10
+                elif col == 2:
+                    g.orientation = 'horizontal'
+                g.demo()
+                D.add(g)
+        elif row == 3:
+            for col in range(3):
+                x = 20 + col*d
+                sr = ShadedRect()
+                sr.x = x
+                sr.y = y
+                sr.width = s
+                sr.height = s
+##                sr.fillColorStart = colors.Color(0, 0, 0)
+##                sr.fillColorEnd = colors.Color(1, 1, 1)
+                sr.fillColorStart = colors.CMYKColor(0, 0, 0, 0)
+                sr.fillColorEnd = colors.CMYKColor(1, 1, 1, 1)
+                if col == 0:
+                    sr.numShades = 5
+                elif col == 1:
+                    sr.numShades = 2
+                elif col == 2:
+                    sr.numShades = 1
+                sr.demo()
+                D.add(sr)
+        elif row == 4:
+            for col in range(3):
+                x = 20 + col*d
+                sr = ShadedRect()
+                sr.x = x
+                sr.y = y
+                sr.width = s
+                sr.height = s
+##                sr.fillColorStart = colors.red
+##                sr.fillColorEnd = colors.blue
+                sr.fillColorStart = colors.CMYKColor(1, 0, 0, 0)
+                sr.fillColorEnd = colors.CMYKColor(0, 0, 1, 0)
+                sr.orientation = 'horizontal'
+                if col == 0:
+                    sr.numShades = 10
+                elif col == 1:
+                    sr.numShades = 20
+                elif col == 2:
+                    sr.numShades = 50
+                sr.demo()
+                D.add(sr)
+        elif row == 5:
+            for col in range(3):
+                x = 20 + col*d
+                sr = ShadedRect()
+                sr.x = x
+                sr.y = y
+                sr.width = s
+                sr.height = s
+##                sr.fillColorStart = colors.white
+##                sr.fillColorEnd = colors.green
+                sr.fillColorStart = colors.PCMYKColor(11.0,11.0,72.0,0.0,	spotName='PANTONE 458 CV',density=1.00)
+                sr.fillColorEnd = colors.PCMYKColor(100.0,65.0,0.0,30.0,	spotName='PANTONE 288 CV',density=1.00) 
+                sr.orientation = 'horizontal'
+                if col == 0:
+                    sr.numShades = 10
+                elif col == 1:
+                    sr.numShades = 20
+                    sr.orientation = 'vertical'
+                elif col == 2:
+                    sr.numShades = 50
+                sr.demo()
+                D.add(sr)
+        elif row == 6:
+            for col in range(3):
+                x = 20 + col*d
+                sr = ShadedRect()
+                sr.x = x
+                sr.y = y+s
+                sr.width = s
+                sr.height = -s
+                sr.fillColorStart = colors.white
+                sr.fillColorEnd = colors.green
+                sr.orientation = 'horizontal'
+                if col == 0:
+                    sr.numShades = 10
+                elif col == 1:
+                    sr.numShades = 20
+                    sr.orientation = 'vertical'
+                elif col == 2:
+                    sr.numShades = 50
+                sr.demo()
+                D.add(sr)
+
+    renderPDF.drawToFile(D, 'grids3.pdf', 'grids3.py')
+    print 'wrote file: grids3.pdf'
+
+
 if __name__=='__main__':
-    test1()
-    test2()
+    test0()
+##    test1()
+##    test2()
+##    test3()
