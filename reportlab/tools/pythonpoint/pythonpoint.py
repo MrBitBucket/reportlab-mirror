@@ -58,12 +58,13 @@ Recently added features are:
 - add pyRXP support (TODO)
 """
 
-import os, sys, imp, string, pprint, getopt, glob, cStringIO
+import os, sys, imp, string, pprint, getopt, glob
 
 from reportlab import rl_config
 from reportlab.lib import styles
 from reportlab.lib import colors
 from reportlab.lib.units import cm
+from reportlab.lib.utils import getStringIO
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
@@ -334,7 +335,7 @@ class PPPresentation:
         if self.verbose:
             print filename
         #canv = canvas.Canvas(filename, pagesize = pageSize)
-        outfile = cStringIO.StringIO()
+        outfile = getStringIO()
         canv = canvas.Canvas(outfile, pagesize = pageSize)
         canv.setPageCompression(self.compression)
 
@@ -377,7 +378,7 @@ class PPPresentation:
         if self.sourceFilename :
             filename = os.path.splitext(self.sourceFilename)[0] + '.pdf'
         
-        outfile = cStringIO.StringIO()
+        outfile = getStringIO()
         doc = SimpleDocTemplate(outfile, pagesize=rl_config.defaultPageSize, showBoundary=0)
         doc.leftMargin = 1*cm
         doc.rightMargin = 1*cm

@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.14 2002/03/12 15:18:03 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.15 2002/04/13 15:24:06 rgbecker Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -17,7 +17,7 @@ __version__ = '0.8'
 
 import sys
 sys.path.insert(0, '.')
-import os, re, types, string, getopt, pickle, copy, time, StringIO, pprint, traceback
+import os, re, types, string, getopt, pickle, copy, time, pprint, traceback
 from string import find, join, split, replace, expandtabs, rstrip
 from reportlab import rl_config
 
@@ -32,6 +32,9 @@ from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.lib.utils import getStringIO
+#from StringIO import StringIO
+#getStringIO=StringIO
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfgen import canvas
 from reportlab.platypus.flowables import Flowable, Spacer
@@ -541,10 +544,9 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         for key in keys:
             value = props[key]
 
-            f = StringIO.StringIO('')
+            f = getStringIO('')
             pprint.pprint(value, f)
-            f.read()
-            value = f.buf[:-1]
+            value = f.getvalue()[:-1]
             valueLines = string.split(value, '\n')
             for i in range(1, len(valueLines)):
                 valueLines[i] = ' '*(len(key)+3) + valueLines[i]    
@@ -740,10 +742,9 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
             value = props[key]
 
             # Method 3
-            f = StringIO.StringIO('')
+            f = getStringIO('')
             pprint.pprint(value, f)
-            f.read()
-            value = f.buf[:-1]
+            value = f.getvalue()[:-1]
             valueLines = string.split(value, '\n')
             for i in range(1, len(valueLines)):
                 valueLines[i] = ' '*(len(key)+3) + valueLines[i]    

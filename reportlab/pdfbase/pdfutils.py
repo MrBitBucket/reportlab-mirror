@@ -1,17 +1,16 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.29 2002/03/12 15:18:03 rgbecker Exp $
-__version__=''' $Id: pdfutils.py,v 1.29 2002/03/12 15:18:03 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.30 2002/04/13 15:24:06 rgbecker Exp $
+__version__=''' $Id: pdfutils.py,v 1.30 2002/04/13 15:24:06 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
 
 import os
-import cStringIO
 from reportlab import rl_config
 from string import join, replace, strip, split
-from reportlab.lib.utils import _checkImportError
+from reportlab.lib.utils import _checkImportError, getStringIO
 
 LINEEND = '\015\012'
 
@@ -50,7 +49,7 @@ def cacheImageFile(filename, returnInMemory=0):
         encoded = _AsciiBase85Encode(compressed) #...sadly this isn't
         
         #write in blocks of 60 characters per line
-        outstream = cStringIO.StringIO(encoded)
+        outstream = getStringIO(encoded)
         dataline = outstream.read(60)
         while dataline <> "":
             code.append(dataline)
@@ -168,7 +167,7 @@ def _AsciiHexEncode(input):
     This is a verbose encoding used for binary data within
     a PDF file.  One byte binary becomes two bytes of ASCII.
     Helper function used by images."""
-    output = cStringIO.StringIO()
+    output = getStringIO()
     for char in input:
         output.write('%02x' % ord(char))
     output.write('>')
@@ -188,7 +187,7 @@ def _AsciiHexDecode(input):
     assert len(stripped) % 2 == 0, 'Ascii Hex stream has odd number of bytes'
 
     i = 0
-    output = cStringIO.StringIO()
+    output = getStringIO()
     while i < len(stripped):
         twobytes = stripped[i:i+2]
         output.write(chr(eval('0x'+twobytes)))
@@ -204,7 +203,7 @@ if 1: # for testing always define this
         This is a compact encoding used for binary data within
         a PDF file.  Four bytes of binary data become five bytes of
         ASCII.  This is the default method used for encoding images."""
-        outstream = cStringIO.StringIO()
+        outstream = getStringIO()
         # special rules apply if not a multiple of four bytes.  
         whole_word_count, remainder_size = divmod(len(input), 4)
         cut = 4 * whole_word_count
@@ -285,7 +284,7 @@ def _AsciiBase85Decode(input):
 
     This is not used - Acrobat Reader decodes for you
     - but a round trip is essential for testing."""
-    outstream = cStringIO.StringIO()
+    outstream = getStringIO()
     #strip all whitespace
     stripped = join(split(input),'')
     #check end

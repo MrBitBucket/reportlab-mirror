@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPS.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.14 2001/12/06 14:37:45 rgbecker Exp $
-__version__=''' $Id: renderPS.py,v 1.14 2001/12/06 14:37:45 rgbecker Exp $ '''
-import string, cStringIO, types
+#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.15 2002/04/13 15:19:54 rgbecker Exp $
+__version__=''' $Id: renderPS.py,v 1.15 2002/04/13 15:19:54 rgbecker Exp $ '''
+import string, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
-from reportlab.lib.utils import fp_str
+from reportlab.lib.utils import fp_str, getStringIO
 from reportlab.lib.colors import black
 from reportlab.graphics.renderbase import StateTracker, getStateDelta
 from reportlab.graphics.shapes import STATE_DEFAULTS
@@ -448,7 +448,7 @@ class PSCanvas:
         hex_encoded = self._AsciiHexEncode(rawimage)
         
         # write in blocks of 78 chars per line
-        outstream = cStringIO.StringIO(hex_encoded)
+        outstream = getStringIO(hex_encoded)
 
         dataline = outstream.read(78)
         while dataline <> "":
@@ -460,7 +460,7 @@ class PSCanvas:
     # end of drawImage
     def _AsciiHexEncode(self, input):  # also based on piddlePDF
         "Helper function used by images"
-        output = cStringIO.StringIO()
+        output = getStringIO()
         for char in input:
             output.write('%02x' % ord(char))
         output.reset()
@@ -526,7 +526,7 @@ class PSCanvas:
         hex_encoded = self._AsciiHexEncode(rawimage)
         
         # write in blocks of 78 chars per line
-        outstream = cStringIO.StringIO(hex_encoded)
+        outstream = getStringIO(hex_encoded)
 
         dataline = outstream.read(78)
         while dataline <> "":

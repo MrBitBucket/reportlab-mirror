@@ -1,20 +1,19 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pdfimages.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.14 2002/03/12 15:14:15 rgbecker Exp $
-__version__=''' $Id: pdfimages.py,v 1.14 2002/03/12 15:14:15 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.15 2002/04/13 15:24:06 rgbecker Exp $
+__version__=''' $Id: pdfimages.py,v 1.15 2002/04/13 15:24:06 rgbecker Exp $ '''
 __doc__="""
 Image functionality sliced out of canvas.py for generalization
 """
 
 import os
 import string
-import cStringIO
 from types import StringType
 import reportlab
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc 
-from reportlab.lib.utils import fp_str
+from reportlab.lib.utils import fp_str, getStringIO
 from reportlab.lib.utils import import_zlib, PIL_Image
 
 class PDFImage:
@@ -56,7 +55,7 @@ class PDFImage:
         #write in blocks of (??) 60 characters per line to a list
         compressed = imageFile.read()
         encoded = pdfutils._AsciiBase85Encode(compressed)
-        outstream = cStringIO.StringIO(encoded)
+        outstream = getStringIO(encoded)
         dataline = outstream.read(60)
         while dataline <> "":
             imagedata.append(dataline)
@@ -99,7 +98,7 @@ class PDFImage:
         compressed = zlib.compress(raw)   #this bit is very fast...
         encoded = pdfutils._AsciiBase85Encode(compressed) #...sadly this isn't
         #write in blocks of (??) 60 characters per line to a list
-        outstream = cStringIO.StringIO(encoded)
+        outstream = getStringIO(encoded)
         dataline = outstream.read(60)
         while dataline <> "":
             imagedata.append(dataline)
