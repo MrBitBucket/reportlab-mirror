@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.88 2003/11/09 10:46:26 rgbecker Exp $ '''
+__version__=''' $Id$ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -694,20 +694,36 @@ class ValueAxis(_AxisG):
         if type(abf) not in (TupleType,ListType):
             abf = abf, abf
         do_rr = rangeRound is not 'none' and do_rr
+        if do_rr:
+            rrn = rangeRound in ['both','floor']
+            rrx = rangeRound in ['both','ceiling']
+        else:
+            rrn = rrx = False
+
         go = do_rr or do_abf
         cache = {}
+        cMin = valueMin
+        cMax = valueMax
         while go:
+            go = 0
             if do_abf:
                 valueStep, T, fuzz = self._getValueStepAndTicks(valueMin, valueMax, cache)
                 fuzz = 1e-8*valueStep
                 i0 = valueStep*abf[0]
                 i1 = valueStep*abf[1]
-                _n = getattr(self,'_cValueMin',T[0])
-                _x = getattr(self,'_cValueMax',T[-1])
-                if abs(T[0])>fuzz and _n - T[0] < i0-fuzz: valueMin = valueMin - i0
-                if abs(T[-1])>fuzz and T[-1]-_x < i1-fuzz: valueMax = valueMax + i1
+                if rrn: v = T[0]
+                else: v = valueMin
+                d = v - (cMin-i0)
+                if abs(v)>fuzz and fuzz < d:
+                    valueMin = valueMin - (d+fuzz)
+                    go = 1
+                if rrn: v = T[-1]
+                else: v = valueMax
+                d = i1 + cMax - v
+                if abs(v)>fuzz and fuzz < d:
+                    valueMax = valueMax + (d+fuzz)
+                    go = 1
 
-            go = 0
             if do_rr:
                 valueStep, T, fuzz = self._getValueStepAndTicks(valueMin, valueMax, cache)
                 if rangeRound in ['both','floor'] and valueMin<T[0]-fuzz:
