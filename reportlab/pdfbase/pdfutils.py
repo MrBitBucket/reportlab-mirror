@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.16 2001/02/22 09:34:46 dinu_gherman Exp $
-__version__=''' $Id: pdfutils.py,v 1.16 2001/02/22 09:34:46 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.17 2001/02/22 09:46:19 dinu_gherman Exp $
+__version__=''' $Id: pdfutils.py,v 1.17 2001/02/22 09:46:19 dinu_gherman Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -22,8 +22,10 @@ LINEEND = '\015\012'
 
 def cacheImageFile(filename, returnInMemory=0):
     "Processes image as if for encoding, saves to a file with .a85 extension."
+
     import Image
     import zlib
+
     img1 = Image.open(filename)
     img = img1.convert('RGB')
     imgwidth, imgheight = img.size
@@ -63,7 +65,9 @@ def preProcessImages(spec):
     of image filenames, crunches them all to save time.  Run this
     to save huge amounts of time when repeatedly building image
     documents."""
+
     import types, glob
+
     if type(spec) is types.StringType:
         filelist = glob.glob(spec)
     else:  #list or tuple OK
@@ -142,11 +146,13 @@ def _AsciiHexDecode(input):
     """Decodes input using ASCII-Hex coding.
 
     Not used except to provide a test of the inverse function."""
+
     #strip out all whitespace
     stripped = string.join(string.split(input),'')
     assert stripped[-1] == '>', 'Invalid terminator for Ascii Hex Stream'
     stripped = stripped[:-1]  #chop off terminator
     assert len(stripped) % 2 == 0, 'Ascii Hex stream has odd number of bytes'
+
     i = 0
     output = cStringIO.StringIO()
     while i < len(stripped):
@@ -156,21 +162,6 @@ def _AsciiHexDecode(input):
     output.reset()
     return output.read()
 
-
-## Moved to test suite.
-##
-##def _AsciiHexTest(text='What is the average velocity of a sparrow?'):
-##    "Does the obvious test for whether ASCII-Hex encoding works."
-##    print 'Plain text:', text
-##    encoded = _AsciiHexEncode(text)
-##    print 'Encoded:', encoded
-##    decoded = _AsciiHexDecode(encoded)
-##    print 'Decoded:', decoded
-##    if decoded == text:
-##        print 'Passed'
-##    else:
-##        print 'Failed!'
-    
 
 try:
     try:
@@ -328,6 +319,7 @@ def _AsciiBase85Decode(input):
 
 def _wrap(input, columns=60):
     "Wraps input at a given column size by inserting LINEEND characters."
+
     output = []
     length = len(input)
     i = 0
@@ -340,21 +332,6 @@ def _wrap(input, columns=60):
     return string.join(output, LINEEND)
 
     
-## Moved to test suite.
-##
-##def _AsciiBase85Test(text='What is the average velocity of a sparrow?'):
-##    "Does the obvious test for whether Base 85 encoding works."
-##    print 'Plain text:', text
-##    encoded = _AsciiBase85Encode(text)
-##    print 'Encoded:', encoded
-##    decoded = _AsciiBase85Decode(encoded)
-##    print 'Decoded:', decoded
-##    if decoded == text:
-##        print 'Passed'
-##    else:
-##        print 'Failed!'
-
-
 #########################################################################
 #
 #  JPEG processing code - contributed by Eric Johnson
@@ -367,6 +344,7 @@ def _wrap(input, columns=60):
 # This is based on Thomas Merz's code from GhostScript (viewjpeg.ps)
 def readJPEGInfo(image):
     "Read width, height and number of components from open JPEG file."
+
     import struct
 
     #Acceptable JPEG Markers:
