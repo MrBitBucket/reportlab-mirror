@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.78 2003/07/02 11:26:58 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.79 2003/07/02 14:13:30 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.78 2003/07/02 11:26:58 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.79 2003/07/02 14:13:30 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -624,9 +624,10 @@ class ValueAxis(Widget):
                 elif valueMin>0: valueMin = 0
 
         abf = self.avoidBoundFrac
-        if type(abf) not in (TupleType,ListType): abf = abf, abf
         do_rr = not getattr(self,'valueSteps',None)
         do_abf = abf and do_rr
+        if type(abf) not in (TupleType,ListType):
+            abf = abf, abf
         do_rr = rangeRound is not 'none' and do_rr
         go = do_rr or do_abf
         cache = {}
