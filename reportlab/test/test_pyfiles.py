@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pyfiles.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pyfiles.py,v 1.12 2004/03/23 14:28:47 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pyfiles.py,v 1.13 2004/03/26 14:27:24 rgbecker Exp $
 """Tests performed on all Python source files of the ReportLab distribution.
 """
 
@@ -10,7 +10,7 @@ import os, sys, string, fnmatch, re
 
 import reportlab
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, SecureTestCase, GlobDirectoryWalker
+from reportlab.test.utils import makeSuiteForClasses, SecureTestCase, GlobDirectoryWalker, outputfile
 from reportlab.lib.utils import open_and_read, open_and_readlines
 
 RL_HOME = os.path.dirname(reportlab.__file__)
@@ -134,7 +134,7 @@ class FirstLineTestCase(SecureTestCase):
     def test1(self):
         "Test if all Python files have a Unix-like first line."
 
-        path = "test_firstline.log"
+        path = outputfile("test_firstline.log")
         file = open(path, 'w')
         file.write('No Unix-like first line found in the files below.\n\n')
 
