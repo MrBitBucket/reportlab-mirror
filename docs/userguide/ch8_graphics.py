@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.8 2001/03/27 20:07:49 andy_robinson Exp $
+#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.9 2001/03/28 15:00:05 johnprecedo Exp $
 from genuserguide import *
 
 heading1("Platform Independent Graphics using $reportlab/graphics$")
@@ -169,11 +169,11 @@ bullet("Group ")
 bullet("Path (<i>not implemented yet, but will be added in the future</i>)")
 
 
-disc("This drawing, taken from our test suite, shows most of the basic shapes. : ")
+disc("This drawing, taken from our test suite, shows most of the basic shapes: ")
 todo("add image")
 
-#t=testshapes.getDrawing06()
-#draw(t, "'Basic shapes'")
+t=testshapes.getDrawing06()
+draw(t, "Basic shapes")
  
 heading3("Solid Shapes")
 disc("""Shapes have two kinds of properties - some to define their geometry 
@@ -189,7 +189,16 @@ eg("""
 >>> r.strokeWidth = 3
 >>> 
 """)
-todo("add image")
+
+from reportlab.graphics.shapes import Rect
+from reportlab.lib.colors import red, green
+D = Drawing(400, 200)
+r = Rect(5, 5, 200, 100)
+r.fillColor = red
+r.strokeColor = green
+r.strokeWidth = 3
+D.add(r)
+draw(D, "red rectangle with green border")
 
 disc("""<i>In future examples we will omit the import statements.</i>""")
 
@@ -258,7 +267,19 @@ eg("""
              strokeWidth=2,
              strokeColor=colors.purple)
 """)
-todo("add image")
+
+D = Drawing(400, 200)
+D.add(Line(50,50, 300,100,strokeColor=colors.blue, strokeWidth=5))
+D.add(Line(50,100, 300,50,
+           strokeColor=colors.red,
+           strokeWidth=10,
+           strokeDashArray=[10, 20]))
+D.add(PolyLine([120,110, 130,150, 140,110, 150,150, 160,110,
+          170,150, 180,110, 190,150, 200,110],
+         strokeWidth=2,
+         strokeColor=colors.purple))
+draw(D, "Line and PolyLine examples")
+
 
  
 heading3("Strings")
@@ -306,20 +327,18 @@ eg("""
                  fontSize=36))
 """)
 
-todo("add image")
+D = Drawing(400, 200)
+for size in range(12, 36, 4):
+    D.add(String(10+size*2, 10+size*2, 'Hello World',
+                 fontName='Times-Roman',
+                 fontSize=size))
 
-#D = Drawing(400, 200)
-#for size in range(12, 36, 4):
-#    D.add(String(10+size*2, 10+size*2, 'Hello World',
-#                 fontName='Times-Roman',
-#                 fontSize=size))
-#
-#D.add(String(150, 150, 'Hello World',
-#             fontName='Courier',
-#             fontSize=36))
-#draw(D, 'test!')
+D.add(String(150, 150, 'Hello World',
+             fontName='Courier',
+             fontSize=36))
+draw(D, 'fancy font example')
 
-heading3("""Paths """)
+heading3("""Paths""")
 disc("""Postscript paths are a widely understood concept in graphics.
 There are not implement in $reportlab\graphics$ as yet, but they will be
 soon.""")
@@ -421,7 +440,37 @@ eg("""
     D.add(thirdAxisGroup)
 """)
 
-todo("add image")
+D = Drawing(400, 200)
+Axis = Group(
+    Line(0,0,100,0),  # x axis
+    Line(0,0,0,50),   # y axis
+    Line(0,10,10,10), # ticks on y axis
+    Line(0,20,10,20),
+    Line(0,30,10,30),
+    Line(0,40,10,40),
+    Line(10,0,10,10), # ticks on x axis
+    Line(20,0,20,10), 
+    Line(30,0,30,10), 
+    Line(40,0,40,10), 
+    Line(50,0,50,10), 
+    Line(60,0,60,10), 
+    Line(70,0,70,10), 
+    Line(80,0,80,10), 
+    Line(90,0,90,10),
+    String(20, 35, 'Axes', fill=colors.black)
+    )
+firstAxisGroup = Group(Axis)
+firstAxisGroup.translate(10,10)
+D.add(firstAxisGroup)
+secondAxisGroup = Group(Axis)
+secondAxisGroup.translate(150,10)
+secondAxisGroup.rotate(15)
+D.add(secondAxisGroup)
+thirdAxisGroup = Group(Axis, 
+                       transform=mmult(translate(300,10), 
+                                       rotate(30)))
+D.add(thirdAxisGroup)
+draw(D, "Line and PolyLine examples")
 
  
 heading3("""2.6 Verification """)
