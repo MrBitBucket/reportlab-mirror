@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.76 2004/03/26 15:44:24 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.76 2004/03/26 15:44:24 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.77 2004/04/01 11:17:02 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.77 2004/04/01 11:17:02 rgbecker Exp $ '''
 
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
@@ -293,14 +293,9 @@ class Table(Flowable):
                 colspans = self._colSpannedCells
             else:
                 colspans = {}
-##            k = colspans.keys()
-##            k.sort()
-##            print 'the following cells are part of spanned ranges: %s' % k
-            W = W[:]
-            self._colWidths = W
+            if W is self._argW: W = W[:]
             while None in W:
                 j = W.index(None) #find first unspecified column
-                #print 'sizing column %d' % j
                 f = lambda x,j=j: operator.getitem(x,j)
                 V = map(f,self._cellvalues)  #values for this column
                 S = map(f,self._cellStyles)  #styles for this column
@@ -324,6 +319,7 @@ class Table(Flowable):
                 #print 'max width for column %d is %0.2f' % (j, w)
                 W[j] = w
 
+        self._colWidths = W
         width = 0
         self._colpositions = [0]        #index -1 is right side boundary; we skip when processing cells
         for w in W:
