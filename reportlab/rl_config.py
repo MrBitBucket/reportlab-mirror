@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.18 2001/08/28 17:59:37 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.19 2001/08/30 08:32:12 rgbecker Exp $
 
 shapeChecking =				1
 defaultEncoding =			'WinAnsiEncoding'		# 'WinAnsi' or 'MacRoman'
@@ -12,8 +12,13 @@ PIL_WARNINGS =				1						#set to zero to remove those annoying warnings
 ZLIB_WARNINGS =				1						
 warnOnMissingFontGlyphs =	1						#if 1, warns of each missing glyph
 _verbose =					0
-T1SearchPath =				('c:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\Font',
-							)
+
+# places to look for T1Font information
+T1SearchPath =	('c:/Program Files/Adobe/Acrobat 4.0/Resource/Font', #Win32
+				'%(disk)s/Applications/Python %(sys_version)s/reportlab/fonts', #Mac?
+				'/usr/lib/Acrobat4/Resource/Font', #Linux
+				'%(REPORTLAB_DIR)s/lib/fontDir', #special
+				)
 
 #### Normally don't need to edit below here ####
 import os, sys, string
@@ -36,22 +41,16 @@ def	_startUp():
 	else we use the given default'''
 
 	#places to search for Type 1 Font files
-	if sys.platform=='win32':
-		S = ['c:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\Font']
-	elif sys.platform in ('linux2','freebsd4',):
-		S = ['/usr/lib/Acrobat4/Resource/Font']
-	elif sys.platform=='mac':	# we must be able to do better than this
-		diskName = string.split(os.getcwd(), ':')[0]
-		fontDir = diskName + ':Applications:Python %s:reportlab:fonts' % sys_version
-		S = [fontDir]					# tba
-		globals()['PIL_warnings'] = 0	# PIL is not packagized in the Mac Python build
-	else:
-		S=[]
-		#raise ValueError, 'Please add a proper T1SearchPath for your system to rl_config.py'
-	S.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'lib','fontDir')))
+	import reportlab
+	D = {'REPORTLAB_DIR': os.path.dirname(reportlab.__file__),
+		'disk': string.split(os.getcwd(), ':')[0],
+		'sys_version': sys_version,
+		}
+
 	P=[]
-	for p in S:
-		if os.path.isdir(p): P.append(p)
+	for p in T1SearchPath:
+		d = apply(os.path.join,string.split(p % D,'/'))
+		if os.path.isdir(d): P.append(d)
 	_setOpt('T1SearchPath',P)
 
 	for k in ('shapeChecking', 'defaultEncoding', 'pageCompression',
