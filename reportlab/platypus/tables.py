@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.13  2000/06/29 17:55:19  aaron_watters
+#	support explicit \n line splitting in cells
+#
 #	Revision 1.12  2000/06/13 13:03:31  aaron_watters
 #	more documentation changes
-#
+#	
 #	Revision 1.11  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #	
@@ -65,7 +68,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.12 2000/06/13 13:03:31 aaron_watters Exp $ '''
+__version__=''' $Id: tables.py,v 1.13 2000/06/29 17:55:19 aaron_watters Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -78,7 +81,7 @@ from reportlab.platypus import *
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
-import operator
+import operator, string
 
 _stringtype = type('')
 
@@ -252,6 +255,7 @@ class Table(Flowable):
                 #print "setting font: %s, %s, %s" % (cellstyle.fontname, cellstyle.fontsize, cellstyle.leading)
                 self.canv.setFont(cellstyle.fontname, cellstyle.fontsize, cellstyle.leading)
             self._curcellstyle = cellstyle
+        #print "leading is ", cellstyle.leading, "size is", cellstyle.fontsize
         just = cellstyle.alignment
         #print "alignment is ", just
         if just == 'LEFT':
@@ -268,7 +272,13 @@ class Table(Flowable):
             val = cellval
         else:
             val = str(cellval)
-        draw(x, y, val)
+        vals = string.split(val, "\n")
+        n = len(vals)-1
+        leading = cellstyle.leading
+        y2 = y+leading*n
+        for v in vals:
+            draw(x, y2, v)
+            y2 = y2-leading
         
 # for text,
 #   drawCentredString(self, x, y, text) where x is center
@@ -332,6 +342,7 @@ LIST_STYLE = TableStyle(
 
 def test():
     rowheights = (24, 16, 16, 16, 16)
+    rowheights2 = (24, 16, 16, 16, 30)
     colwidths = (50, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32)
     data = (
         ('', 'Jan', 'Feb', 'Mar','Apr','May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'),
@@ -339,6 +350,13 @@ def test():
         ('T-Shirts', 0, 42, 9, -3, 16, 4, 72, 89, 3, 19, 32, 119),
         ('Key Ring', 0,0,0,0,0,0,1,0,0,0,2,13),
         ('Hats', 893, 912, '1,212', 643, 789, 159, 888, '1,298', 832, 453, '1,344','2,843')
+        )
+    data2 = (
+        ('', 'Jan', 'Feb', 'Mar','Apr','May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'),
+        ('Mugs', 0, 4, 17, 3, 21, 47, 12, 33, 2, -2, 44, 89),
+        ('T-Shirts', 0, 42, 9, -3, 16, 4, 72, 89, 3, 19, 32, 119),
+        ('Key Ring', 0,0,0,0,0,0,1,0,0,0,2,13),
+        ('Hats\nLarge', 893, 912, '1,212', 643, 789, 159, 888, '1,298', 832, 453, '1,344','2,843')
         )
     styleSheet = getSampleStyleSheet()
     lst = []
@@ -428,6 +446,10 @@ BOX_STYLE = TableStyle(
     t = Table(colwidths, rowheights,  data)
     t.setStyle(LABELED_GRID_STYLE)
     lst.append(Paragraph("This is LABELED_GRID_STYLE\n", styleSheet['BodyText']))
+    lst.append(t)
+    t = Table(colwidths, rowheights2,  data2)
+    t.setStyle(LABELED_GRID_STYLE)
+    lst.append(Paragraph("This is LABELED_GRID_STYLE ILLUSTRATES EXPLICIT LINE SPLITTING WITH NEWLINE (different heights and data)\n", styleSheet['BodyText']))
     lst.append(t)
     lst.append(Paragraph("""
     It was created as follows:
