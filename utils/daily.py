@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.23  2000/04/19 15:14:33  rgbecker
+#	os.path.split not os.split
+#
 #	Revision 1.22  2000/04/19 15:11:58  rgbecker
 #	Fixed do_exec call
-#
+#	
 #	Revision 1.21  2000/04/19 15:07:34  rgbecker
 #	Syntax error fix
 #	
@@ -98,7 +101,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.22 2000/04/19 15:11:58 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.23 2000/04/19 15:14:33 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -145,7 +148,7 @@ def recursive_rmdir(d):
 def CVS_remove(d):
 	'destroy CVS subdirs'
 	if os.path.isdir(d):
-		if os.split(d)[1]=='CVS':
+		if os.path.split(d)[1]=='CVS':
 			recursive_rmdir(d)
 		for p in os.listdir(d):
 			fn = os.path.join(d,p)
