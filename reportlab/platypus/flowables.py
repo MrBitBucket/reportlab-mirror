@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.24 2001/12/19 19:43:03 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.24 2001/12/19 19:43:03 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.25 2002/01/17 11:45:59 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.25 2002/01/17 11:45:59 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -369,7 +369,7 @@ class KeepTogether(Flowable):
 		return W, 0xffffff	# force a split
 
 	def split(self, aW, aH):
-		S = self._CPage and [CondPageBreak(aH+1)] or []
+		S = getattr(self,'_CPage',1) and [CondPageBreak(aH+1)] or []
 		for f in self._flowables: S.append(f)
 		return S
 
