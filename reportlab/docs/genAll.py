@@ -1,5 +1,5 @@
 #!/bin/env python
-import os
+import os, sys
 def _genAll(d=None,quiet=''):
 	if not d: d = '.'
 	if not os.path.isabs(d):
@@ -14,7 +14,6 @@ def _genAll(d=None,quiet=''):
 
 """Runs the manual-building scripts"""
 if __name__=='__main__':
-	import sys
 	#need a quiet mode for the test suite	
 	if '-s' in sys.argv:  # 'silent
 		quiet = '-s'
