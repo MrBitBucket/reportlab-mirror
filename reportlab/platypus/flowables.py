@@ -616,7 +616,7 @@ class PTOContainer(Flowable):
         for x in xrange(n):
             c = C[x]
             I = c._ptoinfo
-            if I not in I2W:
+            if I not in I2W.keys():
                 T = I.trailer
                 Hdr = I.header
                 tW, tH = _listWrapOn(T, availWidth, self.canv)
