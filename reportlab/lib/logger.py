@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/logger.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/logger.py,v 1.2 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: logger.py,v 1.2 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/logger.py,v 1.3 2001/04/04 17:44:10 rgbecker Exp $
+__version__=''' $Id: logger.py,v 1.3 2001/04/04 17:44:10 rgbecker Exp $ '''
 
 from sys import stderr
 class Logger:
@@ -48,10 +48,11 @@ class WarnOnce:
 	def __init__(self,kind='Warn'):
 		self.uttered = {}
 		self.pfx = '%s: '%kind
+		self.enabled = 1
 
 	def once(self,warning):
 		if not self.uttered.has_key(warning):
-			logger.write(self.pfx + warning)
+			if self.enabled: logger.write(self.pfx + warning)
 			self.uttered[warning] = 1
 
 	def __call__(self,warning):
