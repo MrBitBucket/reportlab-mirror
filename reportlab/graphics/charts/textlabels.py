@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.30 2003/06/12 16:09:36 rgbecker Exp $
-__version__=''' $Id: textlabels.py,v 1.30 2003/06/12 16:09:36 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.31 2003/12/10 14:39:42 rgbecker Exp $
+__version__=''' $Id: textlabels.py,v 1.31 2003/12/10 14:39:42 rgbecker Exp $ '''
 import string
 
 from reportlab.lib import colors
@@ -15,7 +15,10 @@ from reportlab.graphics.shapes import _PATH_OP_ARG_COUNT, _PATH_OP_NAMES, define
 from reportlab.graphics.widgetbase import Widget, PropHolder
 
 _gs = None
-
+_A2BA=  {
+        'x': {0:'n', 45:'ne', 90:'e', 135:'se', 180:'s', 225:'sw', 270:'w', 315: 'nw', -45: 'nw'},
+        'y': {0:'e', 45:'se', 90:'s', 135:'sw', 180:'w', 225:'nw', 270:'n', 315: 'ne', -45: 'ne'},
+        }
 def _simpleSplit(txt,mW,SW):
     L = []
     ws = SW(' ')
@@ -187,11 +190,18 @@ class Label(Widget):
 
         return d
 
-
     def _getBoxAnchor(self):
         '''hook for allowing special box anchor effects'''
-        return self.boxAnchor
-
+        ba = self.boxAnchor
+        if ba in ('autox', 'autoy'):
+            angle = self.angle
+            na = (int((angle%360)/45.)*45)%360
+            if not (na % 90): # we have a right angle case
+                da = (angle - na) % 360
+                if abs(da)>5:
+                    na = na + (da>0 and 45 or -45)
+            ba = _A2BA[ba[-1]][na]
+        return ba
 
     def computeSize(self):
         # the thing will draw in its own coordinate system
@@ -239,7 +249,7 @@ class Label(Widget):
     def _getTextAnchor(self):
         '''This can be overridden to allow special effects'''
         ta = self.textAnchor
-        if ta=='boxauto': ta = _BA2TA[self.boxAnchor]
+        if ta=='boxauto': ta = _BA2TA[self._getBoxAnchor()]
         return ta
 
     def draw(self):
