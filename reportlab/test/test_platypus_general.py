@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testplatypus.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.7 2002/05/24 17:37:39 dinu_gherman Exp $
-__version__=''' $Id: test_platypus_general.py,v 1.7 2002/05/24 17:37:39 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.8 2002/06/20 09:55:29 rgbecker Exp $
+__version__=''' $Id: test_platypus_general.py,v 1.8 2002/06/20 09:55:29 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -13,7 +13,7 @@ return the 'story' for each.  The run() function gets the stories, then
 builds a special "document model" in which the frames are added to each page
 and drawn into.
 """
-import string, copy
+import string, copy, sys
 from reportlab.pdfgen import canvas
 from reportlab import platypus
 from reportlab.platypus import BaseDocTemplate, PageTemplate, Flowable, FrameBreak
@@ -491,6 +491,7 @@ def makeSuite():
 
 #noruntests
 if __name__ == "__main__":
-    unittest.TextTestRunner().run(makeSuite())
-
-
+    if '-debug' in sys.argv:
+        run()
+    else:
+        unittest.TextTestRunner().run(makeSuite())
