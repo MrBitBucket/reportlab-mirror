@@ -1,105 +1,14 @@
 #!/usr/bin/env python
 
-### py2pdf.py
-
-### Dedicated to Astor Piazzolla.
-
-### FEATURES:
-### - Python syntax color highlighting in PDF
-### - monochrome and color display/printing
-### - different font names and sizes
-### - different paper formats and sizes
-### - line numbering
-### - multi-file output (one file per page)
-### - plain text output including tags for debugging
-### - 100% pure Python, fully platform independent
-
-### APPLICABILITY:
-### - Python syntax color highlighting in PDF
-### - in theory usable for any other language 
-### - pretty-printing in a printer-friendly format
-### - teaching, reviewing, documenting Python code
-### - writing course material (e.g. sample solutions)
-### - providing printing engine to Python IDE developers
-### - providing 'uncorruptable' source code to publishers 
-### - writing PDF code fragments to be used with pdflatex
-### - debugging Python code with indentation problems (later)
-
-### DEPENDENCIES:
-### - JvR's PyFontify v. 0.3
-### - optionally: Marc-Andre's mxTextTools
-### - ReportLab libraries v. 0.92 (2000-04-10)
-
-### TODO (TESTING):
-### - test stdin, stdout on Unix
-### - test parameter tag
-### - test with Marc-Andre's tagging engine in mxTextTools
-
-### TODO FOR NEXT VERSION (IMPLEMENTATION):
-### - improve smart line wrapping (maybe add meta characters)
-### - better support mxTextTools
-### - improve tab handling
-### - handle single-dash options in config files
-### - properly right-justify line numbers if other than Courier
-### - add time stamp to page decoration frame
-### - support dimensions for paperSize command-line option
-### - reduce end user risk to accidentally use tags in their code
-### - improve some comments
-### - write a tutorial/howto
-### - create JPEGs instead of PDFs, too (PDFgen...)
-### - add artificial indentation with proportional fonts (hairy)
-### - use ReportLab's units.py, pagesizes.py (postponed)
-### - re-introduce whitespace rendering (postponed)
-### - add a summary page (postponed)
-### - implement -URL with PDF hyperlinks (postponed)
-### - write tutorial or howto (postponed)
-### - generalize/re-unify with py2html, maybe (long term)
-
-### SUGGESTIONS for ReportLab's PDFgen:
-### - get rid of the 'saved <file>' message
-### - add keywords to PDFdoc
-
-### KNOWN BUGS:
-### - comments beginning immediately with a keyword after the hash
-###   (i.e. with no whitespace) are not fully ignored to the end of 
-###   the line... (PyFontify; py2html shows the same behaviour.)
-
-### CHANGES FROM PREVIOUS VERSION (0.3):
-### - fixed bug with lines in non-Courier extending over right margin 
-### - removed sys.path.append('.')
-### - now using reportlab.lib.fonts
-### - tagFunc no longer needed as init-argument for PDFPrettyPrinter
-### - demo.py with non-commandline samples
-### - added initial version of smart line wrapping
-### - fixed bug: config file options after empty lines now ok
-### - adapted to new ReportLab color classes
-### - switched to getopt with GNU long option names
-### - bgColor option changed to bgCol
-### - implemented more secure use of eval()
-
-### CHANGES FROM VERSION (0.2):
-### - monochrome PDFs
-### - variable background color
-### - all code colors variable
-### - fonts and font sizes
-### - various paper formats
-### - line numbering
-### - config file containing options
-### - multi-page output
-### - much stuff moved into PDFPrettyPrinter class
-### - all CGI stuff remove from code
-### - temporarily removed whitespace rendering
-### - tested on Macs
-
-
-""" Python Highlighter for PDF                     Version: 0.4
+""" Python Highlighter for PDF                     Version: 0.5
 
     py2pdf.py [options] <file1> [<file2> ...]
 
     options:
      -h  or  --help    print help (this message)
-     -                 read from stdin, write to stdout
-     --stdout          read from files, write to stdout
+     -                 read from stdin, write to stdout (disabled)
+     --stdout          read from files, write to stdout (disabled)
+	 --title=string    specify title
      --config=<file>   read configuration options from <file> 
      --format=<format> set output format
                          'pdf': output as PDF (default)
@@ -108,7 +17,8 @@
                          'color': output in color (default)
                          'mono':  output b/w
      --paperFormat=    set paper format (ISO A, B, C series, 
-       <format>        US legal, letter; default: A4)
+       <format>          US legal & letter; default: 'A4')
+                         e.g. 'letter', 'A3', 'A4', 'B5', 'C6', ...
      --paperSize=      set paper size in points (size being a valid
        <size>          numeric 2-tuple (x,y) w/o any whitespace)  
      --landscape       set landscape format (default: portrait)
@@ -125,14 +35,17 @@
                          'rest':  all the rest
      --fontName=<name> set base font name (default: 'Courier')
      --fontSize=<size> set font size (default: 8)
+     --tabSize=<size>  set tab size (default: 4)
      --lineNum         print line numbers
-     --multiPage       generate one file per page (labeled 1, 2...)
+     --multiPage       generate one file per page (labeled 1, 2...),
+                         without PDF outline
+     --noOutline       don't generate PDF outline (default: unset)
      -v  or  --verbose set verbose mode
 
     Takes the input, assuming it is Python code and formats it
     into PDF. 
  
-    * Uses Just van Rossum's PyFontify version 0.3 to tag Python  
+    * Uses Just van Rossum's PyFontify version 0.3.3 to tag Python  
       scripts. You can get it via his homepage on the starship:
           http://starship.skyport.net/crew/just 
 
@@ -168,9 +81,9 @@ __copyright__ = """
     OR PERFORMANCE OF THIS SOFTWARE!
 """
 
-__version__ = '0.4'
+__version__ = '0.5'
 __author__  = 'Dinu C. Gherman'
-__date__    = '2000-04-10'
+__date__    = '2000-04-23'
 __url__     = 'http://starship.python.net/crew/gherman/programs/py2pdf'
 
 
@@ -281,11 +194,8 @@ class PaperFormat:
     _C4W, _C4H = 22.9*cm, 32.4*cm
     C0 = (4*_C4W, 4*_C4H)
     
-    elevenSeventeen = (11*inch, 17*inch)
     letter = (8.5*inch, 11*inch)
-    # Shouldn't legal be 14 instead of 17 inch long??
-    # My Adobe Acrobat Reader says so...
-    legal = (8.5*inch, 17*inch)
+    legal = (8.5*inch, 14*inch)
 
 
     def __init__(self, nameOrSize='A4', landscape=0):
@@ -429,15 +339,18 @@ class Options:
 
     def setDefaults(self):
         "Set default options."
-        
+
+        ### Maybe get these from a site config file...        
         self.pool.update({'fontName' : 'Courier',
             'fontSize'   : 8,
             'bgCol'      : Color(1, 1, 1),
             'mode'       : 'color',
             'lineNum'    : 0,
+            'tabSize'    : 4,
             'paperFormat': 'A4',
             'landscape'  : 0,
-            'multiPage'  : 0})
+            'multiPage'  : 0,
+			'title'		 : None})
 
         # Default colors (for color mode), mostly taken from py2html. 
         self.pool.update({'commCol' : HexColor('#1111CC'),    
@@ -509,12 +422,16 @@ class Options:
         shortOpts = 'hv'
 
         # Specify accepted long option names (GNU style).
-        lo = 'paperFormat= paperSize= landscape fontName= fontSize='
-        lo = lo + ' bgCol= lineNum marcs help multiPage config= format= mode='
-        lo = lo + ' commCol= identCol= kwCol= strngCol= paramCol= restCol='
+        lo = 'tabSize= paperFormat= paperSize= landscape stdOut fontName= fontSize='
+        lo = lo + ' bgCol= lineNum marcs help multiPage noOutline config= format= mode='
+        lo = lo + ' commCol= identCol= kwCol= strngCol= paramCol= restCol= title='
         longOpts = string.split(lo, ' ')
     
-        optList, args = getopt.getopt(argv, shortOpts, longOpts)
+        try:
+            optList, args = getopt.getopt(argv, shortOpts, longOpts)
+        except getopt.error, msg:
+            sys.stderr.write("%s\nuse -h or --help for help\n" % str(msg))
+            sys.exit(2)
 
         self.updateOption('files', args) # Hmm, really needed?
 
@@ -551,6 +468,9 @@ class Options:
                 self.pool['realPaperFormat'] = pf
             self.pool['realPaperFormat'].setFormatName(self.paperFormat, self.landscape)
 
+        elif name == 'tabSize':
+            self.pool['tabSize'] = int(value)
+
         elif name == 'landscape':
             self.pool['landscape'] = 1
             if self.realPaperFormat:
@@ -569,6 +489,10 @@ class Options:
         elif name == 'config':
             self.updateWithContentsOfFile(value)
             
+        elif name == 'stdOut':
+            self.pool['stdOut'] = 1
+            print `name`, `self.pool['stdOut']`
+
         else:
             # Set the value found or 1 for options without values.
             self.pool[name] = value or 1        
@@ -633,7 +557,7 @@ class PDFLayouter:
         self.pageNum = 0 
         self.path = path
         self.numLines = numLines
-                
+        
 
     def beginDocument(self):
         """Things to do when a new document should be started.
@@ -641,7 +565,7 @@ class PDFLayouter:
         The initial page counter is 0, meaning that beginPage()
         will be called by beginLine()...
         """
-
+        
         # Set initial page number and store file name.        
         self.pageNum = 0 
         o = self.options
@@ -656,13 +580,23 @@ class PDFLayouter:
             c.setFont(o.fontName, o.fontSize)                
 
             # Create document meta information.
-            c.setAuthor('%s' % __version__)
-            c.setTitle(os.path.basename(self.path))
+            c.setAuthor('py2pdf %s' % __version__)
+            c.setTitle(o.title and  o.title or os.path.basename(self.path))
             c.setSubject('')
             #c.setKeywords('') # How to get it into PDFdoc.py?
 
             # Set drawing frame.
             self.setMainFrame()
+        
+            # Determine the left text margin by adding the with 
+            # of the line number to the left margin of the main frame.
+            format = "%%%dd " % len(`self.numLines`)
+            fn, fs = self.currFont
+            text = format % self.lineNum
+            #print text
+            tm, bm, lm, rm = self.frame
+            self.txm = lm + c.stringWidth(text, fn, fs)
+            #print 'self.txm', self.txm
 
 
     def beginPage(self):
@@ -688,9 +622,12 @@ class PDFLayouter:
 
             # Create document meta information.
             c.setAuthor('%s' % __version__)
-            c.setTitle(os.path.basename(newPath))
+            c.setTitle(o.title and  o.title or os.path.basename(newPath))
             c.setSubject('')
             #c.setKeywords('') # How to get it into PDFdoc.py?
+
+            # Set text label with to 0. (not needed)
+            # self.txm = 0
 
             # Set drawing frame.
             self.setMainFrame()
@@ -700,7 +637,7 @@ class PDFLayouter:
             self.setFillColorAndFont(self.currColor, self.currFont)
 
         self.drawPageDecoration()
-                
+
 
     def beginLine(self, wrapped=0):
         "Things to do when a new line has to be added."
@@ -858,10 +795,36 @@ class PDFLayouter:
         
         self.setFillColorAndFont(o.kwCol, font)
         
-        if o.mode == 'color':
-            self.putText(t)
-        elif o.mode == 'mono':
-            self.putText(string.upper(t))
+        if not o.noOutline and not o.multiPage:
+            # Used for bookmarking...
+            if t in ('class', 'def'):
+                pos = self.text.getX()
+                tm, bm, lm, rm = self.frame
+                
+                # if pos == lm: # does not work with line numbers!!!
+                if pos == lm + self.txm: # does not work with line numbers!!!
+                    self.startPositions = []
+                
+                self.startPos = pos
+                
+                if not hasattr(self, 'startPositions'):
+                    self.startPositions = []
+                
+                if not pos in self.startPositions:
+                    self.startPositions.append(pos)
+                    # print self.startPositions
+
+        self.putText(t)
+
+        if not o.noOutline and not o.multiPage:
+            # Memorize certain keywords for bookmarking.
+            if t == 'class':
+                self.itemFound = 'class'
+            elif t == 'def':
+                self.itemFound = 'def'
+            else:
+                self.itemFound = None
+                self.startPos = None
 
                 
     def addIdent(self, t):
@@ -875,9 +838,21 @@ class PDFLayouter:
         font = (ps, o.fontSize)
         
         self.setFillColorAndFont(o.identCol, font)
-        idExp = re.sub('\t', ' '*8, t)
+        idExp = re.sub('\t', ' ' * o.tabSize, t)
         self.putText(idExp)
         
+        # Bookmark certain identifiers (now only class names).
+        if not o.noOutline and not o.multiPage:
+            item = self.itemFound
+            if item:
+                pos = self.text.getY() + o.fontSize
+                nameTag = "p%sy%s" % (self.pageNum, pos)
+                c = self.canvas
+                i = self.startPositions.index(self.startPos)
+                # print i, item, t, self.startPos
+                c.bookmarkHorizontalAbsolute0(nameTag, pos)
+                c.addOutlineEntry0('%s %s' % (item, t), nameTag, i)
+
     
     def addParam(self, t):
         "Add a parameter."
@@ -885,7 +860,7 @@ class PDFLayouter:
         o = self.options
         font = (o.fontName, o.fontSize)
         self.setFillColorAndFont(o.paramCol, font)
-        beforeExp = re.sub('\t', ' '*8, t)
+        beforeExp = re.sub('\t', ' ' * o.tabSize, t)
         self.text.putText(beforeExp)
 
         
@@ -895,7 +870,7 @@ class PDFLayouter:
         o = self.options
         font = (o.fontName, o.fontSize)
         self.setFillColorAndFont(o.strngCol, font)
-        sExp = re.sub('\t', ' '*8, t)
+        sExp = re.sub('\t', ' ' * o.tabSize, t)
         self.putText(sExp)
 
 
@@ -926,7 +901,7 @@ class PDFLayouter:
         font = (ps, o.fontSize)
         
         self.setFillColorAndFont(o.commCol, font)
-        commentExp = re.sub('\t', ' '*8, t)
+        commentExp = re.sub('\t', ' ' * o.tabSize, t)
         self.putText(commentExp)
         
 
@@ -947,12 +922,10 @@ class PDFLayouter:
             if self.multiLineStringStarted:
                 self.setFillColorAndFont(o.strngCol, font)
 
-            lineExp = re.sub('\t', ' '*8, line)
+            lineExp = re.sub('\t', ' ' * o.tabSize, line)
             self.putText(lineExp)
-            #l.text.textLine('')
 
             if eol != -1:
-                #l.text.textLine('')
                 pass
                 
         # Print an empty line.
@@ -1029,6 +1002,8 @@ class PDFLayouter:
         
         # Restore default font.
         c.setFont(o.fontName, o.fontSize)
+
+        c.setLineWidth(0)
             
         # Background color.
         c.setFillColor(o.bgCol)
@@ -1039,14 +1014,14 @@ class PDFLayouter:
         c.setFillColorRGB(0, 0, 0)
         c.line(lm, tm + .5*cm, rm, tm + .5*cm)
         c.setFont('Times-Italic', 12)
-        c.drawString(lm, tm + 0.5*cm + 2, os.path.basename(self.path))
+        c.drawString(lm, tm + 0.5*cm + 2, o.title and o.title or os.path.basename(self.path))
 
         # Footer.
         c.line(lm, bm - .5*cm, rm, bm - .5*cm)
         c.drawCentredString(0.5 * pf[0], 0.5*bm, "Page %d" % self.pageNum)
 
         # Box around main frame.
-        c.rect(lm, bm, rm - lm, tm - bm)
+        # c.rect(lm, bm, rm - lm, tm - bm)
                 
 
 class PDFEmptyLayouter (PDFLayouter):
@@ -1073,6 +1048,19 @@ class PDFEmptyLayouter (PDFLayouter):
 
 
 ### Pretty-printing classes.
+
+class Printer:
+    """Plain Printer class.
+    
+    This is a dumb printer class making no asumptions about
+    the files it is going to turn into PDF. Quite likely, it
+    must make use of a similarly dumb Layouter, but one that
+    is still able to do line and page wrapping... More likely,
+    even, the dumb Layouter is the real heart of this!
+    """
+    
+    pass
+
 
 class PrettyPrinter:
     """Generic Pretty Printer class.
@@ -1381,6 +1369,7 @@ class PDFPrettyPrinter (PrettyPrinter):
         # them.
         splitCodeLines = string.split(srcCodeLines, '\n')
         
+        ### Must also handle the case of outPath being sys.stdout!!
         l.begin(outPath, len(splitCodeLines))
         l.beginDocument()
         
@@ -1443,12 +1432,13 @@ def main(cmdline):
 #        pp.process(sys.stdin, sys.stdout)
 #        sys.exit()
 
-    if options.stdout:
+    if options.stdOut:
+        print "stdOut !!!"
         filebreak = '-'*72
         
         for f in options.files:
             try:
-                if len(files) > 1:
+                if len(options.files) > 1:
                     print filebreak
                     print 'File:', f
                     print filebreak
@@ -1477,5 +1467,5 @@ def main(cmdline):
 
 ###
 
-if __name__=='__main__': #Don't autoexec in runtests
+if __name__=='__main__':
     main(sys.argv)
