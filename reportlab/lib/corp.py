@@ -2,11 +2,11 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/corp.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/corp.py,v 1.6 2001/10/15 14:10:14 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/corp.py,v 1.7 2001/10/16 10:52:25 rgbecker Exp $
 """ This module includes some reusable routines for ReportLab's
  'Corporate Image' - the logo, standard page backdrops and
  so on - you are advised to do the same for your own company!"""
-__version__=''' $Id: corp.py,v 1.6 2001/10/15 14:10:14 rgbecker Exp $ '''
+__version__=''' $Id: corp.py,v 1.7 2001/10/16 10:52:25 rgbecker Exp $ '''
 
 from reportlab.lib.units import inch,cm
 from reportlab.lib.validators import *
@@ -42,7 +42,7 @@ class RL_CorpLogo(Widget):
 		self.background = ReportLabBlue
 		self.shadow = 0.5
 		self.height = 86
-		self.width = 129
+		self.width = 130
 		self.x = self.y = self.angle = self.skewY = self._dx = 0
 		self.skewX = 10
 		self._dy = 35.5
@@ -85,11 +85,10 @@ class RL_CorpLogo(Widget):
 		g.shift(self._dx,self._dy)
 		G = Group()
 		G.add(g)
-		_w, _h = 129, 86
+		_w, _h = 130, 86
 		w, h = self.width, self.height
+		if bg is not None: G.insert(0,Rect(0,0,_w,_h,fillColor=bg,strokeColor=None))
 		if w!=_w or h!=_h: G.scale(w/float(_w),h/float(_h))
-		if bg is not None:
-			G.insert(0,Rect(0,0,w,h,fillColor=bg,strokeColor=None))
 
 		angle = self.angle
 		if self.angle:
