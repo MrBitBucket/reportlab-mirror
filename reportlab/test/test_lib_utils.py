@@ -41,6 +41,11 @@ class ImporterTestCase(unittest.TestCase):
         testDir = os.path.join(rlDir, 'test')
         cwd = os.getcwd()
         os.chdir(testDir)
+        import sys
+        try:
+            del sys.modules['test_lib_colors']
+        except KeyError:
+            pass
         self.assertRaises(ImportError,
                           recursiveImport,
                           'test_lib_colors',
