@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/attrmap.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/attrmap.py,v 1.7 2002/07/31 12:45:49 rgbecker Exp $
-__version__=''' $Id: attrmap.py,v 1.7 2002/07/31 12:45:49 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/attrmap.py,v 1.8 2003/08/21 14:03:27 rgbecker Exp $
+__version__=''' $Id: attrmap.py,v 1.8 2003/08/21 14:03:27 rgbecker Exp $ '''
 from UserDict import UserDict
 from reportlab.lib.validators import isAnything, _SequenceTypes
 
@@ -105,9 +105,13 @@ def _findObjectAndAttr(src, P):
             src = getattr(src, p)
         return src, P[-1]
 
-def addProxy__setattr__(obj):
-    if not hasattr(obj,'_proxy__setattr__'):
-        sa = getattr(obj,'__setattr__',None)
+def hook__setattr__(obj):
+    if not hasattr(obj,'__attrproxy__'):
+        C = obj.__class__
+        import new
+        obj.__class__=new.classobj(C.__name__,(C,)+C.__bases__,
+            {'__attrproxy__':[],
+            '__setattr__':lambda self,k,v,osa=getattr(obj,'__setattr__',None),hook=hook: hook(self,k,v,osa)})
 
 def addProxyAttribute(src,name,validate=None,desc=None,initial=None,dst=None):
     '''
