@@ -1,9 +1,46 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 
 """
-This is PyPoint, an experimental evolution of PythonPoint!
+This is PythonPoint!
 
-Features added to PythonPoint are:
+The idea is a simple markup languages for describing presentation
+slides, and other documents which run page by page.  I expect most
+of it will be reusable in other page layout stuff.
+
+Look at the sample near the top, which shows how the presentation
+should be coded up.
+
+The parser, which is in a separate module to allow for multiple
+parsers, turns the XML sample into an object tree.  There is a
+simple class hierarchy of items, the inner levels of which create
+flowable objects to go in the frames.  These know how to draw
+themselves.
+
+The currently available 'Presentation Objects' are:
+
+    The main hierarchy...
+        PPPresentation
+        PPSection
+        PPSlide
+        PPFrame
+
+        PPAuthor, PPTitle and PPSubject are optional
+        
+    Things to flow within frames...
+        PPPara - flowing text
+        PPPreformatted - text with line breaks and tabs, for code..
+        PPImage
+        PPTable - bulk formatted tabular data
+        PPSpacer
+
+    Things to draw directly on the page...
+        PPRect
+        PPRoundRect
+        PPDrawingElement - user base class for graphics
+        PPLine
+        PPEllipse
+
+Recently added features are:
 
 - file globbing
 - package structure
@@ -12,7 +49,7 @@ Features added to PythonPoint are:
 - stripped off pages hidden in the outline tree (hackish)
 - new <notes> tag for speaker notes (paragraphs only)
 - new <pycode> tag for syntax-colorized Python code
-- reformatted reportlab.xml demo
+- reformatted pythonpoint.xml and monterey.xml demos
 - written/extended DTD
 - arbitrary font support
 - print proper speaker notes (TODO)
@@ -40,10 +77,10 @@ import stdparser
 
 
 USAGE_MESSAGE = """\
-PyPoint - a tool for making presentations in PDF.
+PythonPoint - a tool for making presentations in PDF.
 
 Usage:
-    pypoint.py [options] file1.xml [file2.xml [...]]
+    pythonpoint.py [options] file1.xml [file2.xml [...]]
 
     where options can be any of these:
 
@@ -54,8 +91,8 @@ Usage:
         --cols          specify number of columns
                         on handout pages (default: 2)
 
-To create the PyPoint user guide, do:
-    pypoint.py pypoint.xml
+To create the PythonPoint user guide, do:
+    pythonpoint.py pythonpoint.xml
 """
 
 
@@ -808,7 +845,7 @@ def setStyles(newStyleSheet):
 
 
 def process(datafilename, notes=0, handout=0, cols=0):
-    "Process one PyPoint source file."
+    "Process one PythonPoint source file."
     
     parser = stdparser.PPMLParser()
     parser.sourceFilename = datafilename
@@ -831,7 +868,7 @@ def process(datafilename, notes=0, handout=0, cols=0):
 ##    
 ##
 ##def process2(datafilename, notes=0, handout=0, cols=0):
-##    "Process one PyPoint source file."
+##    "Process one PythonPoint source file."
 ##    
 ##    import pyRXP, pprint
 ##
@@ -855,8 +892,8 @@ def handleOptions():
     except getopt.error, msg:
         options['help'] = 1
 
-    if not args and os.path.isfile('pypoint.xml'):
-        args = ['pypoint.xml']
+    if not args and os.path.isfile('pythonpoint.xml'):
+        args = ['pythonpoint.xml']
 
     # Remove leading dashes (max. two).
     for i in range(len(optList)):
