@@ -1,0 +1,172 @@
+.t ReportLab -- Reporting for the Internet Age
+
+.h What is ReportLab?
+ReportLab is a is a new generation reporting tool for the Internet era.  The core is a software library which directly generates PDF documents, without the need for Acrobat
+Distiller, PostScript or any print drivers.  Every report consists of a script which can
+
+1.	Acquire data from almost anywhere – databases, files, XML, internet protocols, DLLs, COM and CORBA objects
+
+2.	Transform and integrate the data as needed
+
+3.	Validate the data
+
+4.	Format the report, with no restrictions at all on layout.
+
+5.	Manage the output, including controlling the naming and 
+storage of files, emailing documents out, error logging and reporting on the state of the system.
+Most existing reporting tools only focus on Part 4.  We aim to tackle the entire process.
+
+The core library works now and has been in use for over a year in a wide range of environments.  It works unchanged on Unix, Windows and Macintosh and many other major platforms, providing a completely general programmable reporting and document generation solution.
+
+.h About Portable Document Format (PDF)
+
+Portable Document Format (PDF) is an open standard published and supported by Adobe Corporation, intended as a 'final form' for electronic documents. PDF documents can be printed, displayed,
+sent as electronic mail attachments, stored in databases, or published on web sites. PDF format has been used extensively
+by publishing houses and web sites, among others, to generate attractive downloadable static documents.  The PDF format is the best and most standard available medium for creating and distributing professionally formatted digital documents.
+It includes a number of compelling features, such as the ability to handle most of the world's languages, and aids for electronic viewing such as clickable tables of contents.
+
+To date, the majority of PDF documents are produced using Adobe's Acrobat package, which functions like a print driver; some other application such as Word or Publisher must create a document and send it through a 'print driver' to create a PDF document.  Adobe also includes a package named Distiller, which converts PostScript to PDF.
+
+These tools work well  for creating documents as one-off step, but are too cumbersome for real time reporting needs.  ReportLab is designed to DIRECTLY generate PDF with no intermediate steps, enabling very rapid creation of PDFs from any application.
+
+Due to the complex, binary nature of the PDF file format, the creation of PDF files requires the use of sophisticated software tools.  To date very few libraries have been created to work directly with PDF.  The ReportLab programmer's toolkit makes the dynamic creation of beautiful PDF files easy.
+
+
+.h Where will it be used?
+The ReportLab toolkit is expected to be useful in a variety of areas including
+
+   - Dynamic PDF generation on the web
+
+   - High-volume corporate reporting and database publishing
+
+   - An embeddable print engine for other applications, including a 'report language' so that users can customize their own reports 
+
+   - A 'build system' for complex documents such as management accounts, statistical reports and scientific papers
+
+   - Going from XML to PDF in one step!
+
+.h How ReportLab Works
+
+The ReportLab package consists of several layers.  The core is a 'canvas' object which creates PDF documents.  Programmers have access to functions which place strings of text or graphical shapes directly on the page, or to PDF-specific features such as page transition effects.  
+
+Built around the core are tools for generating PDF documents from other formats such as XML, and other software layers that provide higher level abstractions and conveniences, such as frames, flowing paragraphs and graphical chart widgets.
+
+The library is written in the Python programming language, a high-level object-oriented scripting language, and top-level report scripts will also be written in Python. Most other script-based reporting tools have a proprietary language which offers a rich set of page marking operators but does little else; instead, we selected a general-purpose language suited to user-level scripting and with very good support.  Python has over half a million users, 14 books in print at the last count, and in every way exceeds the capabilities of any proprietary language we might have developed.
+
+The Python programming environment has many native interfaces
+to important data sources (such as CORBA, ODBC, COM, and
+most common TCP/IP protocols, as well as native interfaces to
+databases such as Oracle and Sybase).  It is at the forefront of XML development and supports the latest and best XML parsers.  The Python environment also provides interfaces to the C, C++, visual basic, and java language environments.  The ReportLab toolkit can make use of these interfaces to build PDF documents from virtually any source of digital information.
+
+ReportLab will provide additional native bindings of the core services in other programming languages such as C++, Java, and Visual Basic in the near future. 
+
+.h Detailed examples
+
+We foresee many applications for ReportLab technology.
+Consider the following selection of scenarios, for example.
+
+.i Personalized portal newsletter.
+Many web portals provide personalized spaces associated with personalized advertising.  In a similar manner a portal could use the ReportLab toolkit to create downloadable personalized documents, also including personalized advertising targeted to the user's profile and interests.  A PDF document would offer a far more suitable environment for framing personalized content and advertizing than HTML since PDF provides complete control of page layout, whereas the layout control in HTML is very primitive and limited.  In fact, content and advertising presented in PDF could attain magazine quality presentation when printed on the user's low priced color printer.
+
+.i Realtime online securities statement.
+A securities firm, fund manager, or bank could use the ReportLab toolkit
+to build a downloadable customer statement in real time, in response to a "submit" click
+on a web form.  The statement would be indistinguishable from a personalized
+investment analysis with charts and tables reflecting the customer's investment
+portfolio, and perhaps some automatic risk/return
+analysis together with hypothetical projections and analysis.
+The attractively laid out statement could provide several views of the customers
+portfolio data, performance histories of the securities held, and various analytical
+reports such as portfolio analysis indicating opportunities to rearrange the
+holdings according to the customer's stated goals.
+
+.i Management, scientific and engineering reporting.
+Periodic reports are an essential tool of modern corporate life.
+These reports frequently integrate text, tabular data, and charts, often in a
+standard format.  An automated script can use the ReportLab toolkit to
+construct such reports by querying multiple databases and accounting
+systems, acquiring text, and constructing charts to order.
+Other programs
+could automatically send the reports out by electronic mail or print
+them on appropriate printers, or otherwise archive and distribute the reports 
+electronically.
+
+
+
+.h Different Approaches to Reporting
+There are two broad approaches to building reporting tools, which we will call "graphical" and "script based".  
+
+.i Graphical Report Editing
+The most common approach is to use a graphical report layout editor tied to a relational database, and is seen in packages such a Crystal Reports, Access, and equivalent tools from major vendors such as Oracle and Sybase.  This can be a quick and easy way to create database reports, but has serious limitations:
+
+- If your data needs to come from a non-relational data source, or from multiple sources, the tool just won't do the job
+- most of these tools only work on Windows
+- Generally, these reporting tools go straight to a printer.  Making a PDF document involves configuring print drivers and putting Acrobat into the pipeline afterwards; then using other tools to control
+- For really high volume work, one needs to purchase or develop extra tools to control and log the progress of reporting jobs
+- Making a global style change to a family of reports is impossible.
+- Sooner or later, you will encounter 
+
+
+.i Script based systems
+This is the approach commonly used by Fortune 500 companies with serious requirements such as printing tens of thousands of
+customer statements, formatting the Yellow Pages and so on.
+These use a script in some (often proprietary) scripting language which reads in some input, offers commands to format the data, and writes out some sort of printable 'spool file' - often PostScript, or a printer control language such as IPDS or PCL.  Examples include products such as PReS (
+.u http://www.printsoft.com.au/
+) and Miramo
+.u http://www.datazone.com/
+). 
+
+It is more work up front to create a report, since the programmer must explicitly control the placement of every item.  However,
+one quickly builds up subroutine libraries to handle common tasks .  For example within a given organization families of related report generation programs could share one subroutine,
+to print names and addresses in the envelope window or one subroutine for the generation and placement of logos or graphics.  Global style changes can then be made quickly, with total consistency.
+
+The Python language strongly supports and encourages software reuse.   Unlike the proprietary scripting tools we know of, it fully supports object-oriented programming, and we are actively fostering the development of reusable 'report objects' which developers can drop into their reports.  
+
+ReportLab aims to be the best of the script-based systems, and offers the following advantages:
+
+- the language handles all steps of the reporting process, not just formatting
+
+- the PDF file format supports advanced vector graphics effects.  There are no limits to what the designers can create
+
+- we can re-use content produced in graphical tools such as Adobe Illustrator, saving a great deal of work and freeing designers from programming
+
+- It directly produces PDF, very quickly.  To date, all of the script-based systems we know of have to use some other engine (typically Adobe Acrobat or Adobe FrameMaker) to produce PDF output, slowing down the pipeline and leading to large, hard-to-maintain environments with multiple monolithic applications.
+
+- It freely available with source, and can thus be used by companies in any way they want within their existing workflow, and extended as they need.  
+
+- It is light enough to embed in other applications.
+
+- the Open Source business model encourages a community of developers contributing new 'content objects', which everybody can use in their reports.  New style of charts, tables and diagrams will be continually released, in application areas we have not even considered yet.
+
+
+.h Why is it Open Source?
+From our viewpoint as a vendor, open Source lets us develop a better quality product, faster.  The present package started as Open Source, and this approach has served us well.  We can call on a large pool of testers and co-developers working on many platforms; we have attracted world-class developers to use our tools, bugs tend to be found quickly, ugly code rooted out and improved, and in general we are achieving a rate of development which would be extremely costly or impossible within a commercial model.
+
+From a customer's viewpoint, you can try it out freely and without restrictions.  The only decision you need to take is the degree of installation help, consulting, training and support you need to implement a solution.  If you have the skills you need in house, you don't need us - and we will welcome your feedback to help improve the product further.  However, any serious reporting project involves work, and we are confident that our skills will be in demand.
+
+Finally, an Open Source reporting system has a chance to become a global standard in much the same way as products like Apache.  If we do our job right, there won't be a reason to do anything else.
+
+
+
+
+.h Who we are
+
+.i Andy Robinson.
+Chief Executive Officer, Chief Architect.
+Andy has extensive experience as a software consultant and 
+financial analyst, working in London and Tokyo. 
+
+.i Etienne Perold.
+Chairman.  Etienne runs Founding Partners, an early-stage venture capital firm working to incubate new technology businesses.  He worked for many years as a management consultant and sits on the board of a number of corporations.
+
+.i Aaron Watters.
+Chief Technical Officer.
+Aaron has been programming computers since 1975 and has worked
+at Bell Laboratories as software engineer and architect and at the New Jersey Institute of Technology as an assistant professor.  he holds a Pd.D in Computer Science
+
+.h Current Status
+
+The base layers of the ReportLab toolkit work now, and are all that is needed to commence developing serious solutions.
+
+ReportLab is in the process of developing higher-level programming interfaces for things like platform-independent graphics, frames and tex flow,  and building a software architecture that we are prepared to support into the future. Furthermore, there are many more features of the PDF specification which we are adding to the library to allow complete generality.  We are looking to develop and improve the product through real world consulting projects, selecting 2 to 3 specific opportunities in the first half of 2000.
+

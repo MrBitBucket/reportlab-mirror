@@ -1,0 +1,132 @@
+# parses "Yet Another Markup Language" into a list of tuples.
+# Each tuple says what the data is e.g.
+# ('Paragraph', 'Heading1', 'Why Reportlab Rules')
+# and the pattern depends on type.
+"""
+Parser for "Aaron's Markup Language" - a markup language
+which is easier to type in than XML, yet gives us a
+reasonable selection of formats.
+
+The general rule is that if a line begins with a '.',
+it requires special processing. Otherwise lines
+are concatenated to paragraphs, and blank lines
+separate paragraphs. 
+
+If the line ".foo bar bletch" is encountered,
+it immediately ends and writes out any current
+paragraph.
+
+It then looks for a parser method called 'foo';
+if found, it is called with arguments (bar, bletch).
+
+If this is not found, it assumes that 'foo' is a
+paragraph style, and the text for the first line
+of the paragraph is 'bar bletch'.  It would be
+up to the formatter to decide whether on not 'foo'
+was a valid paragraph.
+
+Special commands understood at present are:
+.image filename
+- adds the image to the document
+.beginPre Code
+- begins a Preformatted object in style 'Code'
+.endPre
+- ends a preformatted object.
+"""
+
+
+import sys
+import string
+
+#modes:
+PLAIN = 1
+PREFORMATTED = 2
+
+BULLETCHAR = '\267'  # assumes font Symbol, but works on all platforms
+
+class Parser:
+    def __init__(self):
+        self.reset()
+        
+    def reset(self):
+        self._lineNo = 0
+        self._style = 'Normal'  # the default
+        self._results = []
+        self._buf = []
+        self._mode = PLAIN
+        
+    def parseFile(self, filename):
+        #returns list of objects
+        data = open(filename, 'r').readlines()
+        
+        for line in data:
+            #strip trailing newlines
+            self.readLine(line[:-1])
+        self.endPara()
+        return self._results
+        
+    def endPara(self):
+        #ends the current paragraph, or preformatted block
+            
+        text = string.join(self._buf, ' ')
+        if text:
+            if self._mode == PREFORMATTED:
+                #item 3 is list of lines
+                self._results.append(('Preformatted', self._style,
+                                 string.join(self._buf,'\n')))
+            else:
+                self._results.append(('Paragraph', self._style, text))
+        self._buf = []
+        self._style = 'Normal'
+
+    def beginPre(self, stylename):
+        self._mode = PREFORMATTED
+        self._style = stylename
+        
+    def endPre(self):
+        self.endPara()
+        self._mode = PLAIN
+
+    def image(self, filename):
+        self.endPara()
+        self._results.append(('Image', filename))
+        
+    def readLine(self, line):    
+        #this is the inner loop
+        self._lineNo = self._lineNo + 1
+        stripped = string.lstrip(line)
+        if len(stripped) == 0:
+            self.endPara()
+        elif stripped[0]=='.':
+            # we have a command of some kind
+            self.endPara()
+            words = string.split(stripped[1:])
+            cmd, args = words[0], words[1:]
+    
+            #is it a parser method?
+            if hasattr(self.__class__, cmd):
+                method = eval('self.'+cmd)
+                apply(method, args)
+            else:
+                # assume it is a paragraph style -
+                # becomes the formatter's problem
+                self.endPara()  #end the last one
+                words = string.split(stripped, ' ', 1)
+                assert len(words)==2, "Style %s but no data at line %d" % (words[0], self._lineNo)
+                (styletag, data) = words
+                self._style = styletag[1:]
+                self._buf.append(data)
+        else:
+            #we have data, add to para
+            self._buf.append(line)            
+
+    
+
+if __name__=='__main__':
+    if len(sys.argv) <> 2:
+        print 'usage: aml.py source.txt'
+    else:
+        p = Parser()
+        results = p.parseFile(sys.argv[1])
+        import pprint
+        pprint.pprint(results)
