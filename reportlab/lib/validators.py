@@ -168,14 +168,17 @@ class OneOf(Validator):
 		return x in self._enum
 
 class SequenceOf(Validator):
-	def __init__(self,elemTest,name=None,emptyOK=1,lo=0,hi=0x7fffffff):
+	def __init__(self,elemTest,name=None,emptyOK=1, NoneOK=0, lo=0,hi=0x7fffffff):
 		self._elemTest = elemTest
 		self._emptyOK = emptyOK
+		self._NoneOK = NoneOK
 		self._lo, self._hi = lo, hi
 		if name: self._str = name
 
 	def test(self, x):
-		if type(x) not in _SequenceTypes: return 0
+		if type(x) not in _SequenceTypes:
+			if x is None: return self._NoneOK
+			return 0
 		if x==[] or x==():
 			return self._emptyOK
 		elif not self._lo<=len(x)<=self._hi: return 0
@@ -214,5 +217,5 @@ isNothing = _isNothing()
 isXYCoord = SequenceOf(isNumber,lo=2,hi=2,emptyOK=0)
 isBoxAnchor = OneOf('nw','n','ne','w','c','e','sw','s','se')
 isNoneOrString = NoneOr(isString,'NoneOrString')
-isNoneOrListOfNoneOrStrings=SequenceOf(isNoneOrString,'isNoneOrListOfNoneOrStrings')
-isNoneOrListOfNoneOrNumbers=SequenceOf(isNumberOrNone,'isNoneOrListOfNoneOrNumbers')
+isNoneOrListOfNoneOrStrings=SequenceOf(isNoneOrString,'isNoneOrListOfNoneOrStrings',NoneOK=1)
+isNoneOrListOfNoneOrNumbers=SequenceOf(isNumberOrNone,'isNoneOrListOfNoneOrNumbers',NoneOK=1)
