@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: genuserguide.py,v $
+#	Revision 1.5  2000/06/21 21:19:29  aaron_watters
+#	colors, line styles, more examples
+#
 #	Revision 1.4  2000/06/21 15:16:05  aaron_watters
 #	Lots of graphical examples added
-#
+#	
 #	Revision 1.3  2000/06/20 20:31:42  aaron_watters
 #	typos and more examples
 #	
@@ -44,7 +47,7 @@
 #	Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #	initial checkin. user guide generation framework.
 #	
-__version__=''' $Id: genuserguide.py,v 1.4 2000/06/21 15:16:05 aaron_watters Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.5 2000/06/21 21:19:29 aaron_watters Exp $ '''
 
 
 __doc__ = """
@@ -572,6 +575,12 @@ disc("""
 Notice that the text strings are painted backwards.
 """)
 
+lesson("Colors")
+
+eg(examples.testcolors)
+
+canvasdemo(examples.colors)
+
 lesson('Painting back to front')
 
 eg(examples.testspumoni)
@@ -585,7 +594,31 @@ canvasdemo(examples.spumoni2)
 
 lesson('Fonts and text objects')
 
-lesson('Paths and polygons')
+eg(examples.testtextsize)
+
+canvasdemo(examples.textsize)
+
+lesson("Text object methods")
+
+###### FILL THEM IN
+
+lesson('Paths and Lines')
+
+eg(examples.teststar)
+
+canvasdemo(examples.star)
+
+eg(examples.testjoins)
+
+canvasdemo(examples.joins)
+
+eg(examples.testcaps)
+
+canvasdemo(examples.caps)
+
+eg(examples.testdashes)
+
+canvasdemo(examples.dashes)
 
 eg(examples.testpenciltip)
 
@@ -606,6 +639,10 @@ canvasdemo(examples.bezier)
 eg(examples.testbezier2)
 
 canvasdemo(examples.bezier2)
+
+lesson("Path object methods")
+
+##### FILL THEM IN
 
 lesson("...more lessons...")
 

@@ -1,4 +1,4 @@
-
+import string
 
 # magic function making module
 
@@ -94,6 +94,46 @@ def mirror(canvas):
     canvas.translate(5.5*inch, 0)
     canvas.scale(-1.0, 1.0)
     coords(canvas)
+"""
+
+testcolors = """
+def colors(canvas):
+    from reportlab.lib import colors
+    from reportlab.lib.units import inch
+    black = colors.black
+    y = x = 0; dy=inch*3/4.0; dx=inch*5.5/5; w=h=dy/2; rdx=(dx-w)/2; rdy=h/5.0; texty=h+2*rdy
+    canvas.setFont("Helvetica",10)
+    for name in ("lavenderblush", "lawngreen", "lemonchiffon", "lightblue", "lightcoral"):
+        color = getattr(colors,name) # colors.lavenderblush, ... (shorthand)
+        canvas.setFillColor(color)
+        canvas.rect(x+rdx, y+rdy, w, h, fill=1)
+        canvas.setFillColor(black)
+        canvas.drawCentredString(x+dx/2, y+texty, name)
+        x = x+dx
+    y = y + dy; x = 0
+    for rgb in [(1,0,0), (0,1,0), (0,0,1), (0.5,0.3,0.1), (0.1,0.5,0.3)]:
+        r,g,b = rgb
+        canvas.setFillColorRGB(r,g,b)
+        canvas.rect(x+rdx, y+rdy, w, h, fill=1)
+        canvas.setFillColor(black)
+        canvas.drawCentredString(x+dx/2, y+texty, "r%s g%s b%s"%rgb)
+        x = x+dx
+    y = y + dy; x = 0
+    for cmyk in [(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1), (0.2,0,1,0.2)]:
+        c,m,y1,k = cmyk
+        canvas.setFillColorCMYK(c,m,y1,k)
+        canvas.rect(x+rdx, y+rdy, w, h, fill=1)
+        canvas.setFillColor(black)
+        canvas.drawCentredString(x+dx/2, y+texty, "c%s m%s y%s k%s"%cmyk)
+        x = x+dx
+    y = y + dy; x = 0
+    for g in range(5):
+        gray = g/4.0
+        canvas.setFillGray(gray)
+        canvas.rect(x+rdx, y+rdy, w, h, fill=1)
+        canvas.setFillColor(black)
+        canvas.drawCentredString(x+dx/2, y+texty, "gray: %s"%gray)
+        x = x+dx
 """
 
 testspumoni = """
@@ -259,9 +299,6 @@ def penciltip(canvas, debug=1):
         canvas.grid([0,5*u,10*u,15*u], [0,5*u,10*u])
 """
 
-glarp = "this would be a syntax error"
-
-
 testnoteannotation = """
 from reportlab.platypus.flowables import Flowable
 class NoteAnnotation(Flowable):
@@ -276,7 +313,97 @@ class NoteAnnotation(Flowable):
         pencil(canvas, text="NOTE")
 """
 
+lyrics = '''\
+well she hit Net Solutions 
+and she registered her own .com site now
+and filled it up with yahoo profile pics 
+she snarfed in one night now
+and she made 50 million when Hugh Heffner
+bought up the rights now
+and she'll have fun fun fun
+til her Daddy takes the keyboard away'''
 
+lyrics = string.split(lyrics, "\n")
+testtextsize = """
+def textsize(canvas):
+    from reportlab.lib.units import inch
+    from reportlab.lib.colors import magenta, red
+    canvas.setFont("Times-Roman", 20)
+    canvas.setFillColor(red)
+    canvas.drawCentredString(2.75*inch, 2.5*inch, "Font Size Examples")
+    canvas.setFillColor(magenta)
+    size = 7
+    y = 2.3*inch
+    x = 1.3*inch
+    for line in lyrics:
+        canvas.setFont("Helvetica", size)
+        canvas.drawRightString(x,y,"%s points: " % size)
+        canvas.drawString(x,y, line)
+        y = y-size
+        size = size+1.5
+"""
+
+teststar = """
+def star(canvas, title="Title Here", aka="Comment here.", xcenter=None, ycenter=None, nvertices=5):
+    from math import pi
+    from reportlab.lib.units import inch
+    radius=inch/3.0
+    if xcenter is None: xcenter=2.75*inch
+    if ycenter is None: ycenter=1.5*inch
+    canvas.drawCentredString(xcenter, ycenter+1.3*radius, title)
+    canvas.drawCentredString(xcenter, ycenter-1.4*radius, aka)
+    p = canvas.beginPath()
+    p.moveTo(xcenter,ycenter+radius)
+    from math import pi, cos, sin
+    angle = (2*pi)*2/5.0
+    startangle = pi/2.0
+    for vertex in range(nvertices-1):
+        nextangle = angle*(vertex+1)+startangle
+        x = xcenter + radius*cos(nextangle)
+        y = ycenter + radius*sin(nextangle)
+        p.lineTo(x,y)
+    if nvertices==5:
+       p.close()
+    canvas.drawPath(p)
+"""
+
+testjoins = """
+def joins(canvas):
+    from reportlab.lib.units import inch
+    # make lines big
+    canvas.setLineWidth(5)
+    star(canvas, "Default: mitered join", "0: pointed", xcenter = 1*inch)
+    canvas.setLineJoin(1)
+    star(canvas, "Round join", "1: rounded")
+    canvas.setLineJoin(2)
+    star(canvas, "Bevelled join", "2: square", xcenter=4.5*inch)
+"""
+
+testcaps = """
+def caps(canvas):
+    from reportlab.lib.units import inch
+    # make lines big
+    canvas.setLineWidth(5)
+    star(canvas, "Default", "no projection",xcenter = 1*inch,
+         nvertices=4)
+    canvas.setLineCap(1)
+    star(canvas, "Round cap", "1: ends in half circle", nvertices=4)
+    canvas.setLineCap(2)
+    star(canvas, "Square cap", "2: projects out half a width", xcenter=4.5*inch,
+       nvertices=4)
+"""
+
+testdashes = """
+def dashes(canvas):
+    from reportlab.lib.units import inch
+    # make lines big
+    canvas.setDash(6,3)
+    star(canvas, "Simple dashes", "6 points on, 3 off", xcenter = 1*inch)
+    canvas.setDash(1,2)
+    star(canvas, "Dots", "One on, two off")
+    canvas.setDash([1,1,3,3,1,4,4,1], 0)
+    star(canvas, "Complex Pattern", "[1,1,3,3,1,4,4,1]", xcenter=4.5*inch)
+"""
 
 # D = dir()
 g = globals()
