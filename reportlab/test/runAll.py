@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/runAll.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.7 2001/07/13 16:06:44 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.8 2001/10/10 12:20:46 rgbecker Exp $
 
 """Runs all test files in all subfolders.
 """
@@ -34,7 +34,7 @@ def makeSuite(folder):
 
 #noruntests
 if __name__ == '__main__':
-    folder = os.path.dirname(sys.argv[0])
+    folder = os.path.dirname(sys.argv[0]) or os.getcwd()
     
     # special case for reportlab/test directory - clean up
     # all PDF & log files before starting run.  You don't
