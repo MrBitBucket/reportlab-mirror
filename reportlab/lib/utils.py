@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.49 2003/09/11 12:09:28 rptlab Exp $
-__version__=''' $Id: utils.py,v 1.49 2003/09/11 12:09:28 rptlab Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.50 2003/09/11 16:09:25 dragan1 Exp $
+__version__=''' $Id: utils.py,v 1.50 2003/09/11 16:09:25 dragan1 Exp $ '''
 
 import string, os, sys
 from types import *
@@ -306,8 +306,13 @@ class ImageReader:
         #detect which library we are using and open the image
         if sys.platform[0:4] == 'java':
             from javax.imageio import ImageIO
-            from java.io import File
-            self._image = ImageIO.read(File(fileName))
+            if type(filename) is type(''):
+                from java.io import File
+                fp = File(fileName)
+                self._image = ImageIO.read(fp)
+                fp.close()
+            else:
+                self._image = ImageIO.read(fileName)
         else:
             import PIL.Image
             self._image = PIL.Image.open(fileName)
@@ -334,13 +339,12 @@ class ImageReader:
                 # there must be a way to do this with a cast not a byte-level loop,
                 # I just haven't found it yet...
                 pixels = []
+                a = pixels.append
                 for i in range(len(buffer)):
                     rgb = buffer[i]
-                    
-                    rg, b = divmod(rgb, 256)
-                    r, g = divmod(rg, 256)
-                    pix = chr(r % 256) + chr(g % 256) + chr(b % 256)
-                    pixels.append(pix)
+                    a((rgb>>16)&0xff)
+                    a((rgb>>8)&0xff)
+                    a(chr(rgb&0xff))
                 self._data = ''.join(pixels)
             else:
                 rgb = self._image.convert('RGB')
