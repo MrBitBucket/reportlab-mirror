@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/frames.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.20 2003/05/01 22:46:17 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.21 2003/08/11 11:39:39 rgbecker Exp $
 
-__version__=''' $Id: frames.py,v 1.20 2003/05/01 22:46:17 andy_robinson Exp $ '''
+__version__=''' $Id: frames.py,v 1.21 2003/08/11 11:39:39 rgbecker Exp $ '''
 
 __doc__="""
 """
@@ -126,10 +126,7 @@ class Frame:
         y = y - h
 
         if y < p-_FUZZ:
-            # width test disabled!  Just allow it to overflow and let the user
-            # fix the problem (XXXX MAYBE CHANGE THIS TO OPTIONAL WARNING/ERROR)
-            #if ((h > self._aH and not trySplit) or w > self._aW):
-            if (not rl_config.allowTableBoundsErrors) and (h > self._aH and not trySplit):
+            if not rl_config.allowTableBoundsErrors and ((h>self._aH or w>self._aW) and not trySplit):
                 raise "LayoutError", "Flowable %s (%sx%s points) too large for frame (%sx%s points)." % (
                     flowable.__class__, w,h, self._getAvailableWidth(),self._aH)
             return 0
