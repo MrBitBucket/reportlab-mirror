@@ -305,9 +305,27 @@ class ShadedRect0(Widget):
         return D
 
 
+    def _flipRectCorners(self):
+        "Flip rectangle's corners if width or height is negative."
+        
+        if self.width < 0:
+            self.x = self.x + self.width 
+            self.width = -self.width 
+            if self.orientation == 'vertical':
+                self.fillColorStart, self.fillColorEnd = self.fillColorEnd, self.fillColorStart
+
+        if self.height < 0:
+            self.y = self.y + self.height 
+            self.height = -self.height 
+            if self.orientation == 'horizontal':
+                self.fillColorStart, self.fillColorEnd = self.fillColorEnd, self.fillColorStart
+
+
     def draw(self):
         # general widget bits
         group = Group()
+
+        self._flipRectCorners()
         
         w, h = self.width, self.height
 
@@ -472,6 +490,27 @@ def test():
                     sr.numShades = 10
                 elif col == 1:
                     sr.numShades = 20
+                    sr.orientation = 'vertical'
+                elif col == 2:
+                    sr.numShades = 50
+                sr.demo()
+                D.add(sr)
+        elif row == 6:
+            for col in range(3):
+                x = 20 + col*d
+                sr = ShadedRect0()
+                sr.x = x+s
+                sr.y = y+s
+                sr.width = -s
+                sr.height = -s
+                sr.fillColorStart = colors.white
+                sr.fillColorEnd = colors.green
+                sr.orientation = 'horizontal'
+                if col == 0:
+                    sr.numShades = 10
+                elif col == 1:
+                    sr.numShades = 20
+                    sr.orientation = 'vertical'
                 elif col == 2:
                     sr.numShades = 50
                 sr.demo()
