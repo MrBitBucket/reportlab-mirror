@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.60 2003/02/02 08:37:33 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.61 2003/02/02 08:46:47 andy_robinson Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.60 2003/02/02 08:37:33 andy_robinson Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.61 2003/02/02 08:46:47 andy_robinson Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -255,6 +255,7 @@ class BaseDocTemplate:
                     'allowSplitting':1,
                     'title':None,
                     'author':None,
+                    'invariant':None,
                     '_pageBreakQuick':1}
     _invalidInitArgs = ()
 
@@ -542,7 +543,9 @@ class BaseDocTemplate:
 
     def _startBuild(self, filename=None, canvasmaker=canvas.Canvas):
         self._calc()
-        self.canv = canvasmaker(filename or self.filename,pagesize=self.pagesize)
+        self.canv = canvasmaker(filename or self.filename,
+                                pagesize=self.pagesize,
+                                invariant=self.invariant)
         if self._onPage:
             self.canv.setPageCallBack(self._onPage)
         self.handle_documentBegin()
