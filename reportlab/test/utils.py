@@ -189,4 +189,41 @@ class SecureTestCase(unittest.TestCase):
 
         sys.path = self._initialPath
         os.chdir(self._initialWorkDir)
+
+class ScriptThatMakesFileTest(unittest.TestCase):
+    """Runs a Python script at OS level, expecting it to produce a file.
+
+    It CDs to the working directory to run the script."""
+    def __init__(self, scriptDir, scriptName, outFileName):
+        self.scriptDir = scriptDir
+        self.scriptName = scriptName
+        self.outFileName = outFileName
+        # normally, each instance is told which method to run)
+        unittest.TestCase.__init__(self)
+        
+    def setUp(self):
+        
+        self.cwd = os.getcwd()
+        #change to reportlab directory first, so that
+        #relative paths may be given to scriptdir
+        import reportlab
+        self.rl_dir = os.path.dirname(reportlab.__file__)
+        self.fn = __file__
+        os.chdir(self.rl_dir)
+
+        os.chdir(self.scriptDir)
+        assert os.path.isfile(self.scriptName), "Script %s not found!" % self.scriptName
+        if os.path.isfile(self.outFileName):
+            os.remove(self.outFileName)
+
+    def tearDown(self):
+        os.chdir(self.cwd)
+
+    def runTest(self):
+        p = os.popen('%s %s' % (sys.executable,self.scriptName),'r')
+        out = p.read()
+        print out
+        status = p.close()
+        assert os.path.isfile(self.outFileName), "File %s not created!" % self.outFileName
+        
     

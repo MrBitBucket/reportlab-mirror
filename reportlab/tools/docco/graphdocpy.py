@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.7 2001/10/04 17:05:29 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.8 2001/10/04 21:22:26 andy_robinson Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -381,8 +381,8 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
             try:
                 widget = aClass()
             except AssertionError, err:
-				if _abstractclasserr_re.match(str(err)): return
-				raise
+                if _abstractclasserr_re.match(str(err)): return
+                raise
             self.story.append(Spacer(0*cm, 0.5*cm))
             self._showWidgetDemoCode(widget)
             self.story.append(Spacer(0*cm, 0.5*cm))
@@ -1023,30 +1023,19 @@ def main():
     if not isSilent:
         print "Saved %s." % builder.outPath
 
+    #if doing the usual, put a copy in docs
+    if builder.outPath == 'reportlab.graphics.pdf':
+        import shutil
+        shutil.copyfile('reportlab.graphics.pdf',
+                        '../../docs/graphics_reference.pdf')
+        print 'copied to reportlab/docs/graphics_reference.pdf'
+
 def makeSuite():
-	import unittest
-	class AppTest(unittest.TestCase):
-		def setUp(self):
-			import reportlab
-			self.cwd = os.getcwd()
-			self.rl_dir = os.path.dirname(reportlab.__file__)
-			self.fn = __file__
-			os.chdir(self.rl_dir)
-			self.outFN = 'reportlab.graphics.pdf'
-			if os.path.isfile(self.outFN): os.remove(self.outFN)
-
-		def tearDown(self):
-			os.chdir(self.cwd)
-
-		def runsTest(self):
-			p = os.popen('%s %s' % (sys.executable,self.fn),'r')
-			out = p.read()
-			status = p.close()
-			assert os.path.isfile(self.outFN), "File %s not created!" % self.outFN
-	
-	suite = unittest.TestSuite()    
-	suite.addTest(AppTest('runsTest'))
-	return suite
+    "standard test harness support - run self as separate process"
+    from reportlab.test.unittest import TestSuite
+    from reportlab.test.utils import ScriptThatMakesFileTest
+    test = ScriptThatMakesFileTest('tools/docco','graphdocpy.py','reportlab.graphics.pdf')
+    return TestSuite((test,))
 
 if __name__ == '__main__':
     main()

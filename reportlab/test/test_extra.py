@@ -12,7 +12,7 @@ from reportlab.test.utils import SecureTestCase
 
 
 RL_HOME = os.path.dirname(reportlab.__file__)
-
+EXTRA_FILE = 'extra.txt'
 
 class ExternalTestCase(SecureTestCase):
     """Test case starting cases external to the normal RL suite.
@@ -48,7 +48,7 @@ class ExternalTestCase(SecureTestCase):
 
         # look for a file named 'extra.txt' in test directory,
         # exit if not found
-        extraFilename = os.path.join(RL_HOME, 'test', 'extra.txt')
+        extraFilename = os.path.join(RL_HOME, 'test', EXTRA_FILE)
         if not os.path.exists(extraFilename):
             return
 
@@ -64,13 +64,11 @@ class ExternalTestCase(SecureTestCase):
                 continue
             f = os.path.expanduser(f)
             f = os.path.expandvars(f)
-            if not os.path.isabs(f):
-                f = os.path.join(RL_HOME, 'test', f)
-            f = string.replace(f, '\\', '/')
+            f = os.path.abspath(f)
             
             if os.path.exists(f):
                 # look for a makeSuite function and execute it if present
-                folder = os.path.dirname(f)
+                folder = os.path.abspath(os.path.dirname(f))
                 modname = os.path.splitext(os.path.basename(f))[0]
                 os.chdir(folder)
                 sys.path.insert(0, folder)
@@ -91,4 +89,9 @@ def makeSuite():
 
 #noruntests
 if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1:
+        EXTRA_FILE = sys.argv[1]
+        assert os.path.isfile(EXTRA_FILE), 'file %s not found!' % EXTRA_FILE
+    #otherwise, extra.txt will be used
     unittest.TextTestRunner().run(makeSuite())
