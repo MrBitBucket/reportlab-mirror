@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.27  2000/07/20 13:32:33  rgbecker
+#	Started debugging Table split
+#
 #	Revision 1.26  2000/07/12 15:36:56  rgbecker
 #	Allow automatic leading in FONT command
-#
+#	
 #	Revision 1.25  2000/07/12 15:26:46  rgbecker
 #	INNERGRID was dumb
 #	
@@ -107,7 +110,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.26 2000/07/12 15:36:56 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.27 2000/07/20 13:32:33 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -126,6 +129,7 @@ from reportlab.platypus import *
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
+from reportlab.pdfbase import pdfmetrics
 import operator, string
 
 from types import TupleType, ListType
@@ -203,6 +207,7 @@ class Table(Flowable):
 			self.setStyle(style)
 
 	def _calc(self):
+		if hasattr(self,'_width'): return
 
 		H = self._argH
 		W = self._argW
@@ -231,14 +236,14 @@ class Table(Flowable):
 				V = map(f,self._cellvalues)
 				S = map(f,self._cellStyles)
 				w = 0
+				d = hasattr(self,'canv') and self.canv or pdfmetrics
 				for v, s in map(None, V, S):
 					if type(v) is not _stringtype: v = str(v)
 					v = string.split(v, "\n")
 					t = s.leftPadding+s.rightPadding + max(map(lambda a, b=s.fontname,
-								c=s.fontsize,d=self.canv: d.stringWidth(a,b,c), v))
+								c=s.fontsize,d=d.stringWidth: d(a,b,c), v))
 					if t>w: w = t	#record a new maximum
 				W[i] = w
-
 
 		height = self._height = reduce(operator.add, H, 0)
 		self._rowpositions = [height]	 # index 0 is actually topline; we skip when processing cells
@@ -280,24 +285,15 @@ class Table(Flowable):
 			if ec < 0: ec = ec + self._ncols
 			if sr < 0: sr = sr + self._nrows
 			if er < 0: er = er + self._nrows
-			if op == 'GRID':
-				self._drawBox( (sc, sr), (ec, er), weight, color)
-				self._drawInnerGrid( (sc, sr), (ec, er), weight, color)
-			elif op in ('BOX',	'OUTLINE',):
-				self._drawBox( (sc, sr), (ec, er), weight, color)
-			elif op == 'INNERGRID':
-				self._drawInnerGrid( (sc, sr), (ec, er), weight, color)
-			elif op == 'LINEBELOW':
-				self._drawHLines((sc, sr+1), (ec, er+1), weight, color)
-			elif op == 'LINEABOVE':
-				self._drawHLines((sc, sr), (ec, er), weight, color)
-			elif op == 'LINEBEFORE':
-				self._drawVLines((sc, sr), (ec, er), weight, color)
-			elif op == 'LINEAFTER':
-				self._drawVLines((sc+1, sr), (ec+1, er), weight, color)
-			else:
-				raise ValueError, "Unknown line style %s" % op
+			getattr(self,_LineOpMap.get(op, '_drawUnknown' ))( (sc, sr), (ec, er), weight, color)
 		self._curcolor = None
+
+	def _drawUnknown(self,	(sc, sr), (ec, er), weight, color):
+		raise ValueError, "Unknown line command '%s'" % op
+
+	def _drawGrid(self,	(sc, sr), (ec, er), weight, color):
+		self._drawBox( (sc, sr), (ec, er), weight, color)
+		self._drawInnerGrid( (sc, sr), (ec, er), weight, color)
 
 	def _drawBox(self,	(sc, sr), (ec, er), weight, color):
 		self._drawHLines((sc, sr), (ec, sr), weight, color)
@@ -324,12 +320,18 @@ class Table(Flowable):
 		for rowpos in self._rowpositions[sr:er+1]:
 			self.canv.line(scp, rowpos, ecp, rowpos)
 
+	def _drawHLinesB(self, (sc, sr), (ec, er), weight, color):
+		self._drawHLines((sc, sr+1), (ec, er+1), weight, color)
+
 	def _drawVLines(self, (sc, sr), (ec, er), weight, color):
 		self._prepLine(weight, color)
 		srp = self._rowpositions[sr]
 		erp = self._rowpositions[er+1]
 		for colpos in self._colpositions[sc:ec+1]:
 			self.canv.line(colpos, srp, colpos, erp)
+
+	def _drawVLinesA(self, (sc, sr), (ec, er), weight, color):
+		self._drawVLines((sc+1, sr), (ec+1, er), weight, color)
 
 	def wrap(self, availWidth, availHeight):
 		self._calc()
@@ -367,7 +369,6 @@ class Table(Flowable):
 			self._addCommand((c[0],)+((sc, sr), (ec, er))+c[3:])
 
 	def _splitRows(self,availHeight):
-		self._calc()
 		h = 0
 		n = 0
 		lim = len(self._rowHeights)
@@ -416,13 +417,13 @@ class Table(Flowable):
 		return [R0,R1]
 
 	def split(self, availWidth, availHeight):
+		self._calc()
 		if self.splitByRow:
 			if self._width>availWidth: return []
 			return self._splitRows(availHeight)
 		else:
 			raise NotImplementedError
-		
-				
+
 	def draw(self):
 		nudge = 0.5 * (self.availWidth - self._width)
 		self.canv.translate(nudge, 0)
@@ -486,7 +487,7 @@ class Table(Flowable):
 		elif valign=='TOP':
 			y = rowpos + rowheight - cellstyle.topPadding - fontsize
 		elif valign=='MIDDLE':
-			y = rowpos + (cellstyle.bottomPadding + rowheight-cellstyle.topPadding+(n-1)*leading)/2.0+leading-fontsize
+			y = rowpos + (cellstyle.bottomPadding + rowheight-cellstyle.topPadding+(n-1)*leading)/2.0
 		else:
 			raise ValueError, "Bad valign: '%s'" % str(valign)
 
@@ -499,9 +500,16 @@ class Table(Flowable):
 #	drawRightString(self, x, y, text) where x is right
 #	drawString(self, x, y, text) where x is left
 
-LINECOMMANDS = (
-	'GRID', 'BOX', 'OUTLINE', 'INNERGRID', 'BOXGRID', 'LINEBELOW', 'LINEABOVE', 'LINEBEFORE', 'LINEAFTER', )
+_LineOpMap = {	'GRID':'_drawGrid',
+				'BOX':'_drawBox',
+				'OUTLINE':'_drawBox',
+				'INNERGRID':'_drawInnerGrid',
+				'LINEBELOW':'_drawHLinesB',
+				'LINEABOVE':'_drawHLines',
+				'LINEBEFORE':'_drawVLines',
+				'LINEAFTER':'_drawVLinesA', }
 
+LINECOMMANDS = _LineOpMap.keys()
 
 def _isLineCommand(cmd):
 	return cmd[0] in LINECOMMANDS
@@ -815,7 +823,21 @@ LIST_STYLE = TableStyle(
             ('BOX', (0,0), (-1,-1), 0.25, colors.black),
             ])
 	lst.append(t)
-	t=apply(Table,([('Attribute', 'Synonyms'), ('alignment', 'align, alignment'), ('bulletColor', 'bulletcolor, bcolor'), ('bulletFontName', 'bfont, bulletfontname'), ('bulletFontSize', 'bfontsize, bulletfontsize'), ('bulletIndent', 'bindent, bulletindent'), ('firstLineIndent', 'findent, firstlineindent'), ('fontName', 'face, fontname, font'), ('fontSize', 'size, fontsize'), ('leading', 'leading'), ('leftIndent', 'leftindent, lindent'), ('rightIndent', 'rightindent, rindent'), ('spaceAfter', 'spaceafter, spacea'), ('spaceBefore', 'spacebefore, spaceb'), ('textColor', 'fg, textcolor, color')],))
+	t = Table([	('Attribute', 'Synonyms'),
+				('alignment', 'align, alignment'),
+				('bulletColor', 'bulletcolor, bcolor'),
+				('bulletFontName', 'bfont, bulletfontname'),
+				('bulletFontSize', 'bfontsize, bulletfontsize'),
+				('bulletIndent', 'bindent, bulletindent'),
+				('firstLineIndent', 'findent, firstlineindent'),
+				('fontName', 'face, fontname, font'),
+				('fontSize', 'size, fontsize'),
+				('leading', 'leading'),
+				('leftIndent', 'leftindent, lindent'),
+				('rightIndent', 'rightindent, rindent'),
+				('spaceAfter', 'spaceafter, spacea'),
+				('spaceBefore', 'spacebefore, spaceb'),
+				('textColor', 'fg, textcolor, color')])
 	t.repeatRows = 1
 	t.setStyle([
 				('FONT',(0,0),(-1,1),'Times-Bold',10,12),
@@ -841,6 +863,26 @@ LIST_STYLE = TableStyle(
 	lst.append(Table(XY,
 			style=[	('FONT',(0,0),(-1,-1),'Times-Roman', 20,24),
 					('GRID', (0,0), (-1,-1), 0.25, colors.red),]))
+	lst.append(PageBreak())
+	data=  [['00', '01', '02', '03', '04'],
+			['10', '11', '12', '13', '14'],
+			['20', '21', '22', '23', '24'],
+			['30', '31', '32', '33', '34']]
+	t=Table(data,style=[('GRID',(1,1),(-2,-2),1,colors.green),
+					('BOX',(0,0),(1,-1),2,colors.red),
+					('LINEABOVE',(1,2),(-2,2),1,colors.blue),
+					('LINEBEFORE',(2,1),(2,-2),1,colors.pink),
+					])
+	lst.append(t)
+	lst.append(Spacer(0,6))
+	for s in t.split(4*inch,30):
+		lst.append(s)
+		lst.append(Spacer(0,6))
+	lst.append(Spacer(0,6))
+	for s in t.split(4*inch,36):
+		lst.append(s)
+		lst.append(Spacer(0,6))
+
 	SimpleDocTemplate('tables.pdf', showBoundary=1).build(lst)
 
 if __name__ == '__main__':
