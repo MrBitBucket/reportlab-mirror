@@ -126,8 +126,17 @@ class SVGCanvas:
         self.setLineJoin(0)
         self.setLineWidth(1)
 
+        # Add a rectangular clipping path identical to view area.
+        clipPath = transformNode(self.doc, "clipPath", id="clip") 
+        clipRect = transformNode(self.doc, "rect", x=0, y=0, 
+            width=self.width, height=self.height)
+        clipPath.appendChild(clipRect)
+        self.svg.appendChild(clipPath)
+
         self.groupTree = transformNode(self.doc, "g", 
-            id="group", transform="scale(1,-1) translate(0,-%d)" % self.height)
+            id="group", 
+            transform="scale(1,-1) translate(0,-%d)" % self.height,
+            style="clip-path: url(#clip)")
         self.svg.appendChild(self.groupTree)
         self.currGroup = self.groupTree
 
