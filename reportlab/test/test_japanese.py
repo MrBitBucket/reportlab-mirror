@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/Attic/test_japanese.py,v 1.7 2001/09/28 21:27:17 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/Attic/test_japanese.py,v 1.8 2001/09/29 08:08:10 andy_robinson Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -24,7 +24,7 @@ VERBOSE = 0
 class JapaneseFontTests(unittest.TestCase):
     def hDraw(self, c, msg, fnt, x, y):
         "Helper - draws it with a box around"
-        c.setFont(fnt, 16)
+        c.setFont(fnt, 16, 16)
         c.drawString(x, y, msg)
         c.rect(x,y,pdfmetrics.stringWidth(msg, fnt, 16),16,stroke=1,fill=0)
         
