@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.29 2002/12/03 15:45:11 rgbecker Exp $
-__version__=''' $Id: textlabels.py,v 1.29 2002/12/03 15:45:11 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.30 2003/06/12 16:09:36 rgbecker Exp $
+__version__=''' $Id: textlabels.py,v 1.30 2003/06/12 16:09:36 rgbecker Exp $ '''
 import string
 
 from reportlab.lib import colors
@@ -125,6 +125,10 @@ class Label(Widget):
         height = AttrMapValue(isNumberOrNone),
         textAnchor = AttrMapValue(isTextAnchor),
         visible = AttrMapValue(isBoolean,desc="True if the label is to be drawn"),
+        topPadding = AttrMapValue(isNumber,'padding at top of box'),
+        leftPadding = AttrMapValue(isNumber,'padding at left of box'),
+        rightPadding = AttrMapValue(isNumber,'padding at right of box'),
+        bottomPadding = AttrMapValue(isNumber,'padding at bottom of box'),
         )
 
     def __init__(self):
@@ -134,6 +138,7 @@ class Label(Widget):
 
         self.dx = 0
         self.dy = 0
+        self.topPadding = self.leftPadding = self.rightPadding = self.bottomPadding = 0
         self.angle = 0
         self.boxAnchor = 'c'
         self.boxStrokeColor = None  #boxStroke
@@ -192,6 +197,10 @@ class Label(Widget):
         # the thing will draw in its own coordinate system
         self._lines = string.split(self._text, '\n')
         self._lineWidths = []
+        topPadding = self.topPadding
+        leftPadding = self.leftPadding
+        rightPadding = self.rightPadding
+        bottomPadding = self.bottomPadding
         SW = lambda text, fN=self.fontName, fS=self.fontSize: stringWidth(text, fN, fS)
         if self.maxWidth:
             L = []
@@ -204,28 +213,28 @@ class Label(Widget):
                 thisWidth = SW(line)
                 self._lineWidths.append(thisWidth)
                 w = max(w,thisWidth)
-            self._width = w
+            self._width = w+leftPadding+rightPadding
         else:
             self._width = self.width
-        self._height = self.height or (self.leading or 1.2*self.fontSize) * len(self._lines)
-
+        self._height = self.height or ((self.leading or 1.2*self.fontSize) * len(self._lines)+topPadding+bottomPadding)
+        self._ewidth = (self._width-leftPadding-rightPadding)
+        self._eheight = (self._height-topPadding-bottomPadding)
         boxAnchor = self._getBoxAnchor()
         if boxAnchor in ['n','ne','nw']:
-            self._top = 0
+            self._top = -topPadding
         elif boxAnchor in ['s','sw','se']:
-            self._top = self._height
+            self._top = self._height-topPadding
         else:
-            self._top = 0.5 * self._height
-        self._bottom = self._top - self._height
+            self._top = 0.5*self._eheight 
+        self._bottom = self._top - self._eheight
 
         if boxAnchor in ['ne','e','se']:
-            self._left = - self._width
+            self._left = leftPadding - self._width
         elif boxAnchor in ['nw','w','sw']:
-            self._left = 0
+            self._left = leftPadding
         else:
-            self._left = - self._width * 0.5
-        self._right = self._left + self._width
-
+            self._left = -self._ewidth*0.5
+        self._right = self._left+self._ewidth
 
     def _getTextAnchor(self):
         '''This can be overridden to allow special effects'''
@@ -247,15 +256,15 @@ class Label(Widget):
         if textAnchor == 'start':
             x = self._left
         elif textAnchor == 'middle':
-            x = self._left + 0.5 * self._width
+            x = self._left + self._ewidth*0.5
         else:
-            x = self._left + self._width
+            x = self._right
 
         # paint box behind text just in case they
         # fill it
         if self.boxFillColor or (self.boxStrokeColor and self.boxStrokeWidth):
-            g.add(Rect( self._left,
-                        self._bottom,
+            g.add(Rect( self._left-self.leftPadding,
+                        self._bottom-self.bottomPadding,
                         self._width,
                         self._height,
                         strokeColor=self.boxStrokeColor,
