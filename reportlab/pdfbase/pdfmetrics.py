@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.36 2001/04/23 13:34:45 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.37 2001/04/30 10:28:53 rgbecker Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -26,6 +26,8 @@ from reportlab.pdfbase import _fontdata
 from reportlab.lib.logger import warnOnce
 from reportlab.rl_config import defaultEncoding
 
+standardFonts = _fontdata.standardFonts
+standardEncodings = _fontdata.standardEncodings
 
 _dummyEncoding=' _not an encoding_ '
 # conditional import - try both import techniques, and set a flag
@@ -132,7 +134,7 @@ class TypeFace:
         else:
             self.requiredEncoding = None
 
-        if name in _fontdata.standardFonts:
+        if name in standardFonts:
             self.builtIn = 1
             self._loadBuiltInData(name)
         else:
@@ -158,7 +160,7 @@ class TypeFace:
         return r
 
 
-#for faceName in _fontdata.standardFonts:
+#for faceName in standardFonts:
 #    registerTypeFace(TypeFace(faceName))
 
 
@@ -167,7 +169,7 @@ class Encoding:
     def __init__(self, name, base=None):
         self.name = name
         self.frozen = 0
-        if name in _fontdata.standardEncodings:
+        if name in standardEncodings:
             assert base is None, "Can't have a base encoding for a standard encoding"
             self.baseEncodingName = name
             self.vector = _fontdata.encodings[name]
@@ -269,7 +271,7 @@ class Encoding:
             PD = pdfdoc.PDFDictionary(D)
             return PD
 
-#for encName in _fontdata.standardEncodings:
+#for encName in standardEncodings:
 #    registerEncoding(Encoding(encName))
 
 class Font:
@@ -340,7 +342,7 @@ class Font:
         pdfFont.Encoding = self.encoding.makePDFObject()
 
         # is it a built-in one?  if not, need more stuff.
-        if not self.face.name in _fontdata.standardFonts:
+        if not self.face.name in standardFonts:
             pdfFont.FirstChar = 0
             pdfFont.LastChar = 255
             pdfFont.Widths = pdfdoc.PDFArray(self.widths)
@@ -492,7 +494,7 @@ def getTypeFace(faceName):
         return _typefaces[faceName]
     except KeyError:
         # not found, construct it if known
-        if faceName in _fontdata.standardFonts:
+        if faceName in standardFonts:
             face = TypeFace(faceName)
             registerTypeFace(face)
             #print 'auto-constructing type face %s' % face.name
@@ -505,7 +507,7 @@ def getEncoding(encName):
     try:
         return _encodings[encName]
     except KeyError:
-        if encName in _fontdata.standardEncodings:
+        if encName in standardEncodings:
             enc = Encoding(encName)
             registerEncoding(enc)
             #print 'auto-constructing encoding %s' % encName
@@ -596,7 +598,7 @@ def dumpFontData():
 def test3widths(texts):
     # checks all 3 algorithms give same answer, note speed
     import time
-    for fontName in _fontdata.standardFonts[0:1]:
+    for fontName in standardFonts[0:1]:
         t0 = time.time()
         for text in texts:
             l1 = _stringWidth(text, fontName, 10)
