@@ -631,16 +631,16 @@ class FastXMLParser:
         pass
 
     # Example -- handle comment, could be overridden
-    #def handle_comment(self, data):
-    #   pass
+    def handle_comment(self, data):
+        pass
 
     # Example -- handle processing instructions, could be overridden
-    #def handle_proc(self, name, data):
-    #   pass
+    def handle_proc(self, name, data):
+        pass
 
     # Example -- handle special instructions, could be overridden
-    #def handle_special(self, data):
-    #   pass
+    def handle_special(self, data):
+        pass
 
     # Example -- handle relatively harmless syntax errors, could be overridden
     def syntax_error(self, lineno, message):
