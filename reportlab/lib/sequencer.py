@@ -31,13 +31,60 @@
 #
 ###############################################################################
 #	$Log: sequencer.py,v $
+#	Revision 1.2  2000/06/09 16:18:19  andy_robinson
+#	Doc strings, sequencer
+#
 #	Revision 1.1  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
-#
-__version__=''' $Id: sequencer.py,v 1.1 2000/06/01 15:23:06 rgbecker Exp $ '''
+#	
+__version__=''' $Id: sequencer.py,v 1.2 2000/06/09 16:18:19 andy_robinson Exp $ '''
+
+
+def format_123(num):
+	"""The simplest formatter"""
+	return str(num)
+
+def format_ABC(num):
+	"""Uppercase.  Wraps around at 26."""
+	n = (num -1) % 26
+	return chr(n+65)
+
+def format_abc(num):
+	"""Lowercase.  Wraps around at 26."""
+	n = (num -1) % 26
+	return chr(n+97)
+
+
+class Counter:
+	"""Private class used by Sequencer.  Each counter
+	knows its format, and the IDs of anything it
+	resets, as well as its value. """
+	def __init__(self):
+		self._base = 1
+		self._value = self.base
+		self._formatter = format_123
+		self._resets = []
+
+	def reset(self, value=None):
+		if value:
+			self._value = value
+		else:
+			self._value = self._base
+
+	def next(self):
+		v = self._value
+		self._value = self._value + 1
+		return v
+
+	def this(self):
+		return self._value
+
+		
 class Sequencer:
 	"""Something to make it easy to number paragraphs, sections,
-	images and anything else. Usage:
+	images and anything else.  It keeps track of a number of
+	'counters'.
+	Usage:
 		>>> seq = layout.Sequencer()
 		>>> seq.next('Bullets')
 		1
@@ -51,17 +98,68 @@ class Sequencer:
 		>>> seq.next('Figures')
 		1
 		>>>
-	I plan to add multi-level linkages, so that Head2 could be reet
+	
 	"""
 	def __init__(self):
-		self.dict = {}
+		self._counters = {}  #map key to current number
+		self._defaultCounter = None
 
-	def next(self, category):
-		if self.dict.has_key(category):
-			self.dict[category] = self.dict[category] + 1
-		else:
-			self.dict[category] = 1
-		return self.dict[category]
+	def _getCounter(self, counter=None):
+		"""Creates one if not present"""
+		try:
+			cnt = self._counters[counter]
+		except KeyError:
+			cnt = _Counter()
+			self._counters[counter] = cnt
+		return cnt
+	
 
-	def reset(self, category):
-		self.dict[category] = 0
+	def this(self, counter=None):
+		"""Retrieves counter value but does not increment. For
+		new counters, sets base value to 1."""
+		if not counter:
+			counter = self._defaultCounter
+		return self._getCounter(counter).value
+		
+	def next(self, counter=None):
+		"""Retrieves the numeric value for the given counter, then
+		increments it by one.  New counters start at one."""
+		if not counter:
+			counter = self._defaultCounter
+		cnt = self._getCounter(counter)
+		n = cnt.value
+		cnt.value = cnt.value + 1
+		return n
+	
+	def setDefaultCounter(self, default=None):
+		"""Changes the key used for the default"""
+		self._defaultCounter = default
+	
+	def reset(self, counter=None, base=1):
+		if not counter:
+			counter = self._defaultCounter
+		self._getCounter(counter).value = base
+
+	def _format(self, number, formatCode):
+		pass
+
+	def chain(self, parent, child, base):
+		
+def test():
+	s = Sequencer()
+	print 'Counting using default sequence: %d %d %d' % (s.next(),s.next(), s.next())
+	print 'Counting Figures: Figure %d, Figure %d, Figure %d' % (
+		s.next('figure'), s.next('figure'), s.next('figure'))
+	print 'Back to default again: %d' % s.next()
+	s.setDefaultCounter('list1')
+	print 'Set default to list1: %d %d %d' % (s.next(),s.next(), s.next())
+	s.setDefaultCounter()
+	print 'Set default to None again: %d %d %d' % (s.next(),s.next(), s.next())
+	print
+	
+	
+if __name__=='__main__':
+	test()
+
+	
+	

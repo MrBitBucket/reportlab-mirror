@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.41  2000/06/09 16:18:19  andy_robinson
+#	Doc strings, sequencer
+#
 #	Revision 1.40  2000/06/09 01:45:22  aaron_watters
 #	Lots of documentation additions and changes.
-#
+#	
 #	Revision 1.39  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #	
@@ -150,7 +153,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.40 2000/06/09 01:45:22 aaron_watters Exp $ '''
+__version__=''' $Id: canvas.py,v 1.41 2000/06/09 16:18:19 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -227,11 +230,8 @@ PATH_OPS = {(0, 0, FILL_EVEN_ODD) : 'n',  #no op
             }
 
 class Canvas:
-    """This is a low-level interface to the PDF file format.  The plan is to
-    expose the whole pdfgen API through this.  Its drawing functions should have a
-    one-to-one correspondence with PDF functionality.  Unlike PIDDLE, it thinks
-    in terms of RGB values, Postscript font names, paths, and a 'current graphics
-    state'.  Just started development at 5/9/99, not in use yet.
+    """This class is the programmer's interface to the PDF file format.  Methods
+    are (or will be) provided here to do just about everything PDF can do.
     
     The underlying model to the canvas concept is that of a graphics state machine
     that at any given point in time has a current font, fill color (for figure
