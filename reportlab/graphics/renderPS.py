@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPS.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.18 2002/07/17 22:46:22 andy_robinson Exp $
-__version__=''' $Id: renderPS.py,v 1.18 2002/07/17 22:46:22 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.19 2002/07/21 08:18:44 andy_robinson Exp $
+__version__=''' $Id: renderPS.py,v 1.19 2002/07/21 08:18:44 andy_robinson Exp $ '''
 import string, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str, getStringIO
@@ -14,6 +14,57 @@ from types import StringType
 from operator import getitem
 from reportlab import rl_config
 
+
+# we need to create encoding vectors for each font we use, or they will
+# come out in Adobe's old StandardEncoding, which NOBODY uses.
+PS_WinAnsiEncoding="""
+/RE { %def
+  findfont begin
+  currentdict dup length dict begin
+    { %forall
+      1 index /FID ne { def } { pop pop } ifelse
+    } forall
+    /FontName exch def dup length 0 ne { %if
+      /Encoding Encoding 256 array copy def
+      0 exch { %forall
+        dup type /nametype eq { %ifelse
+          Encoding 2 index 2 index put
+          pop 1 add
+        }{ %else
+          exch pop
+        } ifelse
+      } forall
+    } if pop
+  currentdict dup end end
+  /FontName get exch definefont pop
+} bind def
+
+/WinAnsiEncoding [ 
+  39/quotesingle 96/grave 128/euro 130/quotesinglbase/florin/quotedblbase
+  /ellipsis/dagger/daggerdbl/circumflex/perthousand
+  /Scaron/guilsinglleft/OE 145/quoteleft/quoteright
+  /quotedblleft/quotedblright/bullet/endash/emdash
+  /tilde/trademark/scaron/guilsinglright/oe/dotlessi
+  159/Ydieresis 164/currency 166/brokenbar 168/dieresis/copyright
+  /ordfeminine 172/logicalnot 174/registered/macron/ring
+  177/plusminus/twosuperior/threesuperior/acute/mu
+  183/periodcentered/cedilla/onesuperior/ordmasculine
+  188/onequarter/onehalf/threequarters 192/Agrave/Aacute
+  /Acircumflex/Atilde/Adieresis/Aring/AE/Ccedilla
+  /Egrave/Eacute/Ecircumflex/Edieresis/Igrave/Iacute
+  /Icircumflex/Idieresis/Eth/Ntilde/Ograve/Oacute
+  /Ocircumflex/Otilde/Odieresis/multiply/Oslash
+  /Ugrave/Uacute/Ucircumflex/Udieresis/Yacute/Thorn
+  /germandbls/agrave/aacute/acircumflex/atilde/adieresis
+  /aring/ae/ccedilla/egrave/eacute/ecircumflex
+  /edieresis/igrave/iacute/icircumflex/idieresis
+  /eth/ntilde/ograve/oacute/ocircumflex/otilde
+  /odieresis/divide/oslash/ugrave/uacute/ucircumflex
+  /udieresis/yacute/thorn/ydieresis
+] def
+
+"""
+
 class PSCanvas:
     def __init__(self,size=(300,300), PostScriptLevel=2):
         self.width, self.height = size
@@ -23,6 +74,9 @@ class PSCanvas:
             self._font = self._fontSize = self._lineCap = \
             self._lineJoin = self._color = None
 
+
+        self._fontsUsed = {}  # track them as we go
+        
         self.setFont(STATE_DEFAULTS['fontName'],STATE_DEFAULTS['fontSize'])
         self.setStrokeColor(STATE_DEFAULTS['strokeColor'])
         self.setLineCap(2)
@@ -59,7 +113,16 @@ class PSCanvas:
 /m {moveto} bind def
 /l {lineto} bind def
 /c {curveto} bind def
-''' % (self.width,self.height))
+
+%s
+''' % (self.width,self.height, PS_WinAnsiEncoding))
+
+        # for each font used, reencode the vectors
+        fontReencode = []
+        for fontName in self._fontsUsed.keys():
+            fontReencode.append('WinAnsiEncoding /%s /%s RE' % (fontName, fontName))
+        self.code.insert(1, string.join(fontReencode, self._sep))
+        
         file.write(string.join(self.code,self._sep))
         if file is not f: file.close()
 
@@ -120,6 +183,7 @@ class PSCanvas:
             self.code.append('%s setlinewidth' % width)
 
     def setFont(self,font,fontSize):
+        self._fontsUsed[font] = 1
         if self._font!=font or self._fontSize!=fontSize:
             self._font,self._fontSize = (font,fontSize)
             self.code.append('(%s) findfont %s scalefont setfont' % (font,fp_str(fontSize)))

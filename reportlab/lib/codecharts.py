@@ -14,7 +14,7 @@ import string
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Flowable
 from reportlab.pdfbase import pdfmetrics, cidfonts
-from reportlab.graphics.shapes import Drawing, Group, String, Circle
+from reportlab.graphics.shapes import Drawing, Group, String, Circle, Rect
 from reportlab.graphics.widgetbase import Widget
 from reportlab.lib import colors
 
@@ -267,6 +267,8 @@ def hBoxText(msg, canvas, x, y, faceName, encName):
 class CodeWidget(Widget):
     """Block showing all the characters"""
     def __init__(self):
+        self.x = 0
+        self.y = 0
         self.width = 160
         self.height = 160
         
@@ -274,11 +276,14 @@ class CodeWidget(Widget):
         dx = self.width / 16.0
         dy = self.height / 16.0
         g = Group()
+        g.add(Rect(self.x, self.y, self.width, self.height,
+                   fillColor=None, strokeColor=colors.black))
         for x in range(16):
             for y in range(16):
                 charValue = y * 16 + x
                 if charValue > 32:
-                    s = String(x * dx, y*dy, chr(charValue))
+                    s = String(self.x + x * dx,
+                               self.y + (self.height - y*dy), chr(charValue))
                     g.add(s)
         return g
         
