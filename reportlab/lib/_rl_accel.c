@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.32 2003/01/12 12:25:03 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.33 2003/04/22 12:30:19 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.32 2003/01/12 12:25:03 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.33 2003/04/22 12:30:19 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -27,7 +27,7 @@ static __version__=" $Id: _rl_accel.c,v 1.32 2003/01/12 12:25:03 rgbecker Exp $ 
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.41"
+#define VERSION "0.42"
 #define MODULE "_rl_accel"
 #ifndef	ATTRDICT
 	#if PY_MAJOR_VERSION>=2
@@ -715,7 +715,7 @@ static PyObject *_instanceEscapePDF(PyObject *unused, PyObject* args)
 static PyObject *_sameFrag(PyObject *self, PyObject* args)
 {
 	PyObject *f, *g;
-	static char *names[] = {"fontName", "fontSize", "textColor", "rise", NULL};
+	static char *names[] = {"fontName", "fontSize", "textColor", "rise", "underline", NULL};
 	int	r=0, t;
 	char **p;
 	if (!PyArg_ParseTuple(args, "OO:_sameFrag", &f, &g)) return NULL;
