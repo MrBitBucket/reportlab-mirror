@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/frames.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.22 2004/01/20 22:50:31 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.23 2004/02/17 16:10:18 rgbecker Exp $
 
-__version__=''' $Id: frames.py,v 1.22 2004/01/20 22:50:31 andy_robinson Exp $ '''
+__version__=''' $Id: frames.py,v 1.23 2004/02/17 16:10:18 rgbecker Exp $ '''
 
 __doc__="""
 """
@@ -47,8 +47,8 @@ class Frame:
         two documents at the same time (especially in the presence of multithreading.
     '''
     def __init__(self, x1, y1, width,height, leftPadding=6, bottomPadding=6,
-            rightPadding=6, topPadding=6, id=None, showBoundary=0):
-
+            rightPadding=6, topPadding=6, id=None, showBoundary=0,
+            overlapAttachedSpace=None):
         self.id = id
 
         #these say where it goes on the page
@@ -72,6 +72,8 @@ class Frame:
         # if we want a boundary to be shown
         self.showBoundary = showBoundary
 
+        if overlapAttachedSpace is None: overlapAttachedSpace = rl_config.overlapAttachedSpace
+        self._oASpace = overlapAttachedSpace
         self._geom()
         self._reset()
 
@@ -100,6 +102,7 @@ class Frame:
         self._x = self._x1 + self._leftPadding
         self._y = self._y2 - self._topPadding
         self._atTop = 1
+        self._prevASpace = 0
 
     def _getAvailableWidth(self):
         return self._aW - self._leftExtraIndent - self._rightExtraIndent
@@ -113,7 +116,12 @@ class Frame:
         y = self._y
         p = self._y1p
         s = 0
-        if not self._atTop: s = flowable.getSpaceBefore()
+        if not self._atTop:
+            s =flowable.getSpaceBefore()
+            if self._oASpace:
+                h = self._prevASpace
+                if h>s: s = 0
+                else: s = s - h
         h = y - p - s
         if h>0:
             flowable.canv = canv #so they can use stringWidth etc
@@ -133,7 +141,9 @@ class Frame:
         else:
             #now we can draw it, and update the current point.
             flowable.drawOn(canv, self._x + self._leftExtraIndent, y, _sW=self._getAvailableWidth()-w)
-            y = y - flowable.getSpaceAfter()
+            s = flowable.getSpaceAfter()
+            y = y - s
+            if self._oASpace: self._prevASpace = s
             if y<>self._y: self._atTop = 0
             self._y = y
             return 1

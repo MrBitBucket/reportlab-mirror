@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.40 2004/01/20 22:50:31 andy_robinson Exp $
-__version__=''' $Id: rl_config.py,v 1.40 2004/01/20 22:50:31 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.41 2004/02/17 16:10:18 rgbecker Exp $
+__version__=''' $Id: rl_config.py,v 1.41 2004/02/17 16:10:18 rgbecker Exp $ '''
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -17,6 +17,8 @@ showBoundary =              0                       # turns on and off boundary 
 emptyTableAction=           'error'                 # one of 'error', 'indicate', 'ignore'
 invariant=                  0                       #produces repeatable,identical PDFs with same timestamp info (for regression testing)
 eps_preview_transparent=    None                    #set to white etc
+overlapAttachedSpace=       None                    #if set non false then adajacent flowable space after
+                                                    #and space before are merged (max space is used).
 
 # places to look for T1Font information
 T1SearchPath =  ('c:/Program Files/Adobe/Acrobat 6.0/Resource/Font', #Win32, Acrobat 6
