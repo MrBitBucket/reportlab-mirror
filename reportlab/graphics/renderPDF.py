@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPDF.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.20 2002/07/24 19:56:36 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.21 2002/09/17 21:36:01 andy_robinson Exp $
 # renderPDF - draws Drawings onto a canvas
 """Usage:
     import renderpdf
@@ -9,11 +9,12 @@
 Execute the script to see some test drawings.
 changed
 """
-__version__=''' $Id: renderPDF.py,v 1.20 2002/07/24 19:56:36 andy_robinson Exp $ '''
+__version__=''' $Id: renderPDF.py,v 1.21 2002/09/17 21:36:01 andy_robinson Exp $ '''
 
 from reportlab.graphics.shapes import *
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.lib.utils import getStringIO
 from reportlab import rl_config
 
 
@@ -275,6 +276,14 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config.showBoundary, autoSize=1):
         draw(d, c, 80, y, showBoundary=showBoundary)
 
     c.save()
+
+
+def drawToString(d, msg="", showBoundary=rl_config.showBoundary,autoSize=1):
+    "Returns a PDF as a string in memory, without touching the disk"
+    s = getStringIO()
+    drawToFile(d, s, msg=msg, showBoundary=showBoundary,autoSize=autoSize)
+    return s.getvalue()
+
 
 #########################################################
 #
