@@ -67,5 +67,8 @@ if __name__=='__main__': #NO RUNTESTS
 			src = sys.exec_prefix
 			dst = os.path.join(src,'DLLs')
 			for f in F:
-				os.rename(os.path.join(src,f),os.path.join(dst,f))
+				dstf = os.path.join(dst,f)
+				if os.path.isfile(dstf):
+					os.remove(dstf)
+				os.rename(os.path.join(src,f),dstf)
 		MovePYDs('_renderPM.pyd')

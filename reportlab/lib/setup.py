@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/setup.py,v 1.6 2001/05/30 14:08:01 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/setup.py,v 1.7 2001/06/06 10:53:13 rgbecker Exp $
 if __name__=='__main__': #NO RUNTESTS
 	import os, sys
 	from distutils.core import setup, Extension
@@ -54,5 +54,8 @@ if __name__=='__main__': #NO RUNTESTS
 			src = sys.exec_prefix
 			dst = os.path.join(src,'DLLs')
 			for f in F:
-				os.rename(os.path.join(src,f),os.path.join(dst,f))
+				dstf = os.path.join(dst,f)
+				if os.path.isfile(dstf):
+					os.remove(dstf)
+				os.rename(os.path.join(src,f),dstf)
 		MovePYDs('sgmlop.pyd','_rl_accel.pyd','pyHnj.pyd')
