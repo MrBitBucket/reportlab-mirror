@@ -1,7 +1,7 @@
     #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/spider.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/spider.py,v 1.4 2002/12/03 15:46:02 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/spider.py,v 1.5 2002/12/04 12:14:07 rgbecker Exp $
 # spider chart, also known as radar chart
 
 """Spider Chart
@@ -10,7 +10,7 @@ Normal use shows variation of 5-10 parameters against some 'norm' or target.
 When there is more than one series, place the series with the largest
 numbers first, as it will be overdrawn by each successive one.
 """
-__version__=''' $Id: spider.py,v 1.4 2002/12/03 15:46:02 rgbecker Exp $ '''
+__version__=''' $Id: spider.py,v 1.5 2002/12/04 12:14:07 rgbecker Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -124,10 +124,6 @@ class SpiderChart(PlotArea):
         return scaled
 
 
-    def polarToRect(self, r, theta):
-        "Convert to rectangular based on current size"
-        return (self._centerx + r * sin(theta),self._centery + r * cos(theta))
-
     def draw(self):
         # normalize slice data
         g = self.makeBackground() or Group()
@@ -135,26 +131,12 @@ class SpiderChart(PlotArea):
         xradius = self.width/2.0
         yradius = self.height/2.0
         self._radius = radius = min(xradius, yradius)
-        self._centerx = centerx = self.x + xradius
-        self._centery = centery = self.y + yradius
+        centerx = self.x + xradius
+        centery = self.y + yradius
 
         data = self.normalizeData()
 
-        n = len(self.data[0])
-        angleBetween = (2 * pi)/n
-
-        # make a list of all spoke angles
-        angles = []
-        a = (self.startAngle * pi / 180)
-        for i in range(n):
-            angles.append(a)
-            a = a + angleBetween
-
-        #print '%d slices each of %0.2f radians here: %s' % (n, angleBetween, repr(angles))
-        if self.direction == "anticlockwise":
-            whichWay = 1
-        else:
-            whichWay = -1
+        n = len(data[0])
 
         #labels
         if self.labels is None:
@@ -167,21 +149,24 @@ class SpiderChart(PlotArea):
             if i>0:
                 labels = labels + ['']*i
 
-        i = 0
-        startAngle = self.startAngle
         spokes = []
-        for angle in angles:
-            sa = sin(angle)*radius
-            ca = cos(angle)*radius
-            spoke = Line(centerx, centery, centerx + ca, centery + sa, strokeWidth = 0.5)
+        csa = []
+        angle = self.startAngle*pi/180
+        direction = self.direction == "clockwise" and -1 or 1
+        angleBetween = direction*(2 * pi)/n
+        for i in xrange(n):
+            car = cos(angle)*radius
+            sar = sin(angle)*radius
+            csa.append((car,sar,angle))
+            spoke = Line(centerx, centery, centerx + car, centery + sar, strokeWidth = 0.5)
             #print 'added spoke (%0.2f, %0.2f) -> (%0.2f, %0.2f)' % (spoke.x1, spoke.y1, spoke.x2, spoke.y2)
             spokes.append(spoke)
             text = self.labels[i]
             if text:
                 si = self.strands[i]
                 labelRadius = si.labelRadius
-                ex = centerx + labelRadius*ca
-                ey = centery + labelRadius*sa
+                ex = centerx + labelRadius*car
+                ey = centery + labelRadius*sar
                 L = Label()
                 L.setText(text)
                 L.x = ex
@@ -192,7 +177,7 @@ class SpiderChart(PlotArea):
                 L.fillColor = si.fontColor
                 L.textAnchor = 'boxauto'
                 spokes.append(L)
-            i  = i + 1
+            angle = angle + angleBetween
 
         # now plot the polygons
 
@@ -200,18 +185,15 @@ class SpiderChart(PlotArea):
         for row in data:
             # series plot
             points = []
-            theta = angles[-1]
+            car, sar = csa[-1][:2]
             r = row[-1]
-            x0, y0 = self.polarToRect(r*radius, theta)
-            points.append(x0)
-            points.append(y0)
-            for i in range(n):
-                theta = angles[i]
+            points.append(centerx+car*r)
+            points.append(centery+sar*r)
+            for i in xrange(n):
+                car, sar = csa[i][:2]
                 r = row[i]
-                x1, y1 = self.polarToRect(r*radius, theta)
-                x0, y0 = x1, y1
-                points.append(x0)
-                points.append(y0)
+                points.append(centerx+car*r)
+                points.append(centery+sar*r)
 
                 # make up the 'strand'
                 strand = Polygon(points)
