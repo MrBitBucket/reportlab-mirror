@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.9 2001/03/28 15:00:05 johnprecedo Exp $
+#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.10 2001/03/28 16:14:39 johnprecedo Exp $
 from genuserguide import *
 
 heading1("Platform Independent Graphics using $reportlab/graphics$")
@@ -192,7 +192,7 @@ eg("""
 
 from reportlab.graphics.shapes import Rect
 from reportlab.lib.colors import red, green
-D = Drawing(400, 200)
+D = Drawing(220, 120)
 r = Rect(5, 5, 200, 100)
 r.fillColor = red
 r.strokeColor = green
@@ -670,8 +670,6 @@ eg("""
 >>> d.add(f)
 >>> renderPDF.drawToFile(d, 'face.pdf', 'A Face')""")
 
-
-
 from reportlab.graphics import widgetbase
 d = Drawing(200, 120)
 f = widgetbase.Face()
@@ -711,7 +709,14 @@ disc("""In addition, a widget always provides a $demo()$ method. Simple ones
 
 disc("""Here are a handful of simple widgets available in the module 
        <i>signsandsymbols.py</i>:""")
+
 todo("add image")
+# This doesn't work - thes test method writes to a pdf file.
+##from reportlab.graphics.widgets import signsandsymbols
+##t=signsandsymbols.test()
+##draw(t, "Examples of widgets from 'signsandsymbols.py'")
+
+
 
 heading3("""Compound Widgets """)
 disc("""Let's imagine a compound widget which draws two faces side by side. 
