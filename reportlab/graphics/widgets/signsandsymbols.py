@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/signsandsymbols.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.17 2001/09/25 12:54:53 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.18 2001/09/25 13:35:37 rgbecker Exp $
 # signsandsymbols.py
 # A collection of new widgets
 # author: John Precedo (johnp@reportlab.com)
@@ -41,8 +41,10 @@ class _Symbol(Widget):
 	'x', 'y', 'size', 'fillColor', 'strokeColor'
 	"""
 	_attrMap = AttrMap(
-		x = AttrMapValue(isNumber),
-		y = AttrMapValue(isNumber),
+		x = AttrMapValue(isNumber,desc='symbol x coordinate'),
+		y = AttrMapValue(isNumber,desc='symbol y coordinate'),
+		dx = AttrMapValue(isNumber,desc='symbol x coordinate adjustment'),
+		dy = AttrMapValue(isNumber,desc='symbol x coordinate adjustment'),
 		size = AttrMapValue(isNumber),
 		fillColor = AttrMapValue(isColorOrNone),
 		strokeColor = AttrMapValue(isColorOrNone),
@@ -50,8 +52,7 @@ class _Symbol(Widget):
 		)
 	def __init__(self):
 		assert self.__class__.__name__!='_Symbol', 'Abstract class _Symbol instantiated'
-		self.x = 0
-		self.y = 0
+		self.x = self.y = self.dx = self.dy = 0
 		self.size = 100
 		self.fillColor = colors.red
 		self.strokeColor = None

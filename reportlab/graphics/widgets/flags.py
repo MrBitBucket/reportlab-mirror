@@ -1,7 +1,6 @@
-#copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/flags.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.9 2001/09/25 12:54:53 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.10 2001/09/25 13:35:37 rgbecker Exp $
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 
@@ -73,10 +72,9 @@ class Star(_Symbol):
 			)
 
 	def __init__(self):
-		self.x = 0
-		self.y = 0
+		_Symbol.__init__(self)
 		self.size = 100 
-		self.color = colors.yellow
+		self.fillColor = colors.yellow
 		self.strokeColor = None
 		self.angle = 0
 
@@ -112,11 +110,11 @@ class Star(_Symbol):
 					s-h-z,		0-z,
 					z-z,		h-z,
 					],
-					fillColor = self.color,
+					fillColor = self.fillColor,
 					strokeColor = self.strokeColor,
 					strokeWidth=s/50)
 		g.rotate(self.angle)
-		g.shift(self.x,self.y)
+		g.shift(self.x+self.dx,self.y+self.dy)
 		g.add(star)
 		
 		return g
@@ -138,12 +136,11 @@ class Flag(_Symbol):
 			)
 
 	def __init__(self):
-		self.x = 0
-		self.y = 0
+		_Symbol.__init__(self)
+		self.kind = None
 		self.size = 100
 		self.fillColor = colors.white
 		self.border=1
-		self.kind = None
 
 	def availableFlagNames(self):
 		'''return a list of the things we can display'''
@@ -173,41 +170,42 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
-		
+		x, y = self.x+self.dx, self.y+self.dy
+
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, s*2, s, fillColor = colors.navy, strokeColor = colors.black, strokeWidth=0)
+		box = shapes.Rect(x, y, s*2, s, fillColor = colors.navy, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
-		whitediag1 = shapes.Line(self.x, self.y, self.x+(s*2), self.y+s, fillColor = colors.mintcream, strokeColor = colors.mintcream, strokeWidth=20)
+		whitediag1 = shapes.Line(x, y, x+(s*2), y+s, fillColor = colors.mintcream, strokeColor = colors.mintcream, strokeWidth=20)
 		g.add(whitediag1)
 		
-		whitediag2 = shapes.Line(self.x, self.y+s, self.x+(s*2), self.y, fillColor = colors.mintcream, strokeColor = colors.mintcream, strokeWidth=20)
+		whitediag2 = shapes.Line(x, y+s, x+(s*2), y, fillColor = colors.mintcream, strokeColor = colors.mintcream, strokeWidth=20)
 		g.add(whitediag2)
 
-		reddiag1 = shapes.Polygon(points=[self.x, self.y+s-(s/15), self.x+(s-((s/10)*4)), self.y+(s*0.65), self.x+(s-(s/10)*3), self.y+(s*0.65), self.x, self.y+s], fillColor = colors.red, strokeColor = None, strokeWidth=0)
+		reddiag1 = shapes.Polygon(points=[x, y+s-(s/15), x+(s-((s/10)*4)), y+(s*0.65), x+(s-(s/10)*3), y+(s*0.65), x, y+s], fillColor = colors.red, strokeColor = None, strokeWidth=0)
 		g.add(reddiag1)
 
-		reddiag2 = shapes.Polygon(points=[self.x, self.y, self.x+(s-((s/10)*3)), self.y+(s*0.35), self.x+(s-((s/10)*2)), self.y+(s*0.35), self.x+(s/10), self.y], fillColor = colors.red, strokeColor = None, strokeWidth=0)
+		reddiag2 = shapes.Polygon(points=[x, y, x+(s-((s/10)*3)), y+(s*0.35), x+(s-((s/10)*2)), y+(s*0.35), x+(s/10), y], fillColor = colors.red, strokeColor = None, strokeWidth=0)
 		g.add(reddiag2) 
 
-		reddiag3 = shapes.Polygon(points=[self.x+s*2, self.y+s, self.x+(s+((s/10)*3)), self.y+(s*0.65), self.x+(s+((s/10)*2)), self.y+(s*0.65), self.x+(s*2)-(s/10), self.y+s], fillColor = colors.red, strokeColor = None, strokeWidth=0)
+		reddiag3 = shapes.Polygon(points=[x+s*2, y+s, x+(s+((s/10)*3)), y+(s*0.65), x+(s+((s/10)*2)), y+(s*0.65), x+(s*2)-(s/10), y+s], fillColor = colors.red, strokeColor = None, strokeWidth=0)
 		g.add(reddiag3)
 
-		reddiag4 = shapes.Polygon(points=[self.x+s*2, self.y+(s/15), self.x+(s+((s/10)*4)), self.y+(s*0.35), self.x+(s+((s/10)*3)), self.y+(s*0.35), self.x+(s*2), self.y], fillColor = colors.red, strokeColor = None, strokeWidth=0)
+		reddiag4 = shapes.Polygon(points=[x+s*2, y+(s/15), x+(s+((s/10)*4)), y+(s*0.35), x+(s+((s/10)*3)), y+(s*0.35), x+(s*2), y], fillColor = colors.red, strokeColor = None, strokeWidth=0)
 		g.add(reddiag4)   
 
 
-		whiteline1 = shapes.Rect(self.x+((s*0.42)*2), self.y, width=(0.16*s)*2, height=s, fillColor = colors.mintcream, strokeColor = None, strokeWidth=0)
+		whiteline1 = shapes.Rect(x+((s*0.42)*2), y, width=(0.16*s)*2, height=s, fillColor = colors.mintcream, strokeColor = None, strokeWidth=0)
 		g.add(whiteline1)
 		
-		whiteline2 = shapes.Rect(self.x, self.y+(s*0.35), width=s*2, height=s*0.3, fillColor = colors.mintcream, strokeColor = None, strokeWidth=0)
+		whiteline2 = shapes.Rect(x, y+(s*0.35), width=s*2, height=s*0.3, fillColor = colors.mintcream, strokeColor = None, strokeWidth=0)
 		g.add(whiteline2)
 		
 
-		redline1 = shapes.Rect(self.x+((s*0.45)*2), self.y, width=(0.1*s)*2, height=s, fillColor = colors.red, strokeColor = None, strokeWidth=0)
+		redline1 = shapes.Rect(x+((s*0.45)*2), y, width=(0.1*s)*2, height=s, fillColor = colors.red, strokeColor = None, strokeWidth=0)
 		g.add(redline1)
 		
-		redline2 = shapes.Rect(self.x, self.y+(s*0.4), width=s*2, height=s*0.2, fillColor = colors.red, strokeColor = None, strokeWidth=0)
+		redline2 = shapes.Rect(x, y+(s*0.4), width=s*2, height=s*0.2, fillColor = colors.red, strokeColor = None, strokeWidth=0)
 		g.add(redline2)
 
 		g.add(self.borderdraw())
@@ -220,7 +218,7 @@ class Flag(_Symbol):
 		g = shapes.Group() 
 		
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, s*2, s, fillColor = colors.purple, strokeColor = colors.black, strokeWidth=0)
+		box = shapes.Rect(self.x+self.dx, self.y+self.dy, s*2, s, fillColor = colors.purple, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 		g.add(self.borderdraw())
 		return g
@@ -229,11 +227,12 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
-		g.add(shapes.Rect(self.x-1, self.y-1, width=(s*2)+2, height=s+2,
+		x, y = self.x+self.dx, self.y+self.dy
+		g.add(shapes.Rect(x-1, y-1, width=(s*2)+2, height=s+2,
 				fillColor = None, strokeColor = self.fillColor, strokeWidth=0))
 
 		if self.border:
-			g.add(shapes.Rect(self.x, self.y, width=s*2, height=s,
+			g.add(shapes.Rect(x, y, width=s*2, height=s,
 				fillColor = None, strokeColor = colors.black, strokeWidth=0))
 		return g
 
@@ -245,9 +244,10 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
+		x, y = self.x+self.dx, self.y+self.dy
 		
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, s*2, s, fillColor = colors.mintcream, strokeColor = colors.black, strokeWidth=0)
+		box = shapes.Rect(x, y, s*2, s, fillColor = colors.mintcream, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
 		for stripecounter in range (13,0, -1):
@@ -256,11 +256,11 @@ class Flag(_Symbol):
 				stripecolor = colors.red
 			else:
 				stripecolor = colors.mintcream
-			redorwhiteline = shapes.Rect(self.x, self.y+(s-(stripeheight*stripecounter)), width=s*2, height=stripeheight,
+			redorwhiteline = shapes.Rect(x, y+(s-(stripeheight*stripecounter)), width=s*2, height=stripeheight,
 				fillColor = stripecolor, strokeColor = None, strokeWidth=20)
 			g.add(redorwhiteline)
 
-		bluebox = shapes.Rect(self.x, self.y+(s-(stripeheight*7)), width=0.8*s, height=stripeheight*7,
+		bluebox = shapes.Rect(x, y+(s-(stripeheight*7)), width=0.8*s, height=stripeheight*7,
 			fillColor = colors.darkblue, strokeColor = None, strokeWidth=0)
 		g.add(bluebox)
 		
@@ -268,20 +268,20 @@ class Flag(_Symbol):
 			for starycounter in range (0,5):
 				ls = Star()
 				lss = ls.size = s*0.045
-				ls.color = colors.mintcream
-				ls.x = self.x-(s/22)+lss/2
+				ls.fillColor = colors.mintcream
+				ls.x = x-(s/22)+lss/2
 				ls.x = ls.x+(s/7)+(starxcounter*(s/14))+(starxcounter*(s/14))
-				ls.y = (self.y+s-(starycounter*(s/9)))+lss/2
+				ls.y = (y+s-(starycounter*(s/9)))+lss/2
 				g.add(ls)
 
 		for starxcounter in range (0,6):
 			for starycounter in range (0,6):
 				ls = Star()
 				lss = ls.size = s*0.045
-				ls.color = colors.mintcream
-				ls.x = self.x-(s/22)+lss/2
+				ls.fillColor = colors.mintcream
+				ls.x = x-(s/22)+lss/2
 				ls.x = ls.x+(s/14)+((starxcounter*(s/14))+(starxcounter*(s/14)))
-				ls.y = (self.y+s-(starycounter*(s/9))+(s/18))+lss/2
+				ls.y = (y+s-(starycounter*(s/9))+(s/18))+lss/2
 				g.add(ls)
 
 		g.add(self.borderdraw())
@@ -292,18 +292,19 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
+		x, y = self.x+self.dx, self.y+self.dy
 		
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, s*2, s, fillColor = colors.mintcream,
+		box = shapes.Rect(x, y, s*2, s, fillColor = colors.mintcream,
 			strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
 
-		redbox1 = shapes.Rect(self.x, self.y, width=s*2.0, height=s/3.0,
+		redbox1 = shapes.Rect(x, y, width=s*2.0, height=s/3.0,
 			fillColor = colors.red, strokeColor = None, strokeWidth=0)
 		g.add(redbox1)
 		
-		redbox2 = shapes.Rect(self.x, self.y+((s/3.0)*2.0), width=s*2.0, height=s/3.0,
+		redbox2 = shapes.Rect(x, y+((s/3.0)*2.0), width=s*2.0, height=s/3.0,
 			fillColor = colors.red, strokeColor = None, strokeWidth=0)
 		g.add(redbox2)
 
@@ -315,22 +316,23 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
+		x, y = self.x+self.dx, self.y+self.dy
 		
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, s*2, s,
+		box = shapes.Rect(x, y, s*2, s,
 			fillColor = colors.black, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
 
-		box1 = shapes.Rect(self.x, self.y, width=(s/3.0)*2.0, height=s,
+		box1 = shapes.Rect(x, y, width=(s/3.0)*2.0, height=s,
 			fillColor = colors.black, strokeColor = None, strokeWidth=0)
 		g.add(box1)
 		
-		box2 = shapes.Rect(self.x+((s/3.0)*2.0), self.y, width=(s/3.0)*2.0, height=s,
+		box2 = shapes.Rect(x+((s/3.0)*2.0), y, width=(s/3.0)*2.0, height=s,
 			fillColor = colors.gold, strokeColor = None, strokeWidth=0)
 		g.add(box2)
 
-		box3 = shapes.Rect(self.x+((s/3.0)*4.0), self.y, width=(s/3.0)*2.0, height=s,
+		box3 = shapes.Rect(x+((s/3.0)*4.0), y, width=(s/3.0)*2.0, height=s,
 			fillColor = colors.red, strokeColor = None, strokeWidth=0)
 		g.add(box3)
 
@@ -342,28 +344,29 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group()
+		x, y = self.x+self.dx, self.y+self.dy
 		self.border = 0
 		
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, (s*2)*0.70, s,
+		box = shapes.Rect(x, y, (s*2)*0.70, s,
 			fillColor = colors.red, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
-		whitebox1 = shapes.Rect(self.x+((s/5)*2), self.y, width=s/6, height=s,
+		whitebox1 = shapes.Rect(x+((s/5)*2), y, width=s/6, height=s,
 			fillColor = colors.mintcream, strokeColor = None, strokeWidth=0)
 		g.add(whitebox1)
 		
-		whitebox2 = shapes.Rect(self.x, self.y+((s/2)-(s/12)), width=(s*2)*0.70, height=s/6,
+		whitebox2 = shapes.Rect(x, y+((s/2)-(s/12)), width=(s*2)*0.70, height=s/6,
 			fillColor = colors.mintcream, strokeColor = None, strokeWidth=0)
 		g.add(whitebox2)
 
 		g.add(self.borderdraw())
 
-		outerbox = shapes.Rect(self.x, self.y, (s*2)*0.70, s,
+		outerbox = shapes.Rect(x, y, (s*2)*0.70, s,
 							fillColor = None, strokeColor = colors.white,
 			strokeWidth=0)
 		g.add(outerbox)
-		outerbox = shapes.Rect(self.x, self.y, (s*2)*0.70, s,
+		outerbox = shapes.Rect(x, y, (s*2)*0.70, s,
 							fillColor = None, strokeColor = colors.black,
 			strokeWidth=0)
 		g.add(outerbox)
@@ -373,17 +376,18 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
+		x, y = self.x+self.dx, self.y+self.dy
 		
 		# crossbox specific bits
-		box = shapes.Rect(self.x, self.y, s*2, s,
+		box = shapes.Rect(x, y, s*2, s,
 			fillColor = colors.ghostwhite, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
-		blueline1 = shapes.Rect(self.x+(s*0.6), self.y, width=0.3*s, height=s,
+		blueline1 = shapes.Rect(x+(s*0.6), y, width=0.3*s, height=s,
 			fillColor = colors.darkblue, strokeColor = None, strokeWidth=0)
 		g.add(blueline1)
 		
-		blueline2 = shapes.Rect(self.x, self.y+(s*0.4), width=s*2, height=s*0.3,
+		blueline2 = shapes.Rect(x, y+(s*0.4), width=s*2, height=s*0.3,
 			fillColor = colors.darkblue, strokeColor = None, strokeWidth=0)
 		g.add(blueline2)
 
@@ -395,21 +399,22 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
+		x, y = self.x+self.dx, self.y+self.dy
 		
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, s*2, s,
+		box = shapes.Rect(x, y, s*2, s,
 			fillColor = colors.navy, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
-		bluebox = shapes.Rect(self.x, self.y, width=((s/3.0)*2.0), height=s,
+		bluebox = shapes.Rect(x, y, width=((s/3.0)*2.0), height=s,
 			fillColor = colors.blue, strokeColor = None, strokeWidth=0)
 		g.add(bluebox)
 		
-		whitebox = shapes.Rect(self.x+((s/3.0)*2.0), self.y, width=((s/3.0)*2.0), height=s,
+		whitebox = shapes.Rect(x+((s/3.0)*2.0), y, width=((s/3.0)*2.0), height=s,
 			fillColor = colors.mintcream, strokeColor = None, strokeWidth=0)
 		g.add(whitebox)
 
-		redbox = shapes.Rect(self.x+((s/3.0)*4.0), self.y, width=((s/3.0)*2.0), height=s,
+		redbox = shapes.Rect(x+((s/3.0)*4.0), y, width=((s/3.0)*2.0), height=s,
 			fillColor = colors.red,
 			strokeColor = None,
 			strokeWidth=0)
@@ -423,17 +428,18 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
+		x, y = self.x+self.dx, self.y+self.dy
 		
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, s*2, s,
+		box = shapes.Rect(x, y, s*2, s,
 				fillColor = colors.gold, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
-		blackbox1 = shapes.Rect(self.x, self.y+((s/3.0)*2.0), width=s*2.0, height=s/3.0,
+		blackbox1 = shapes.Rect(x, y+((s/3.0)*2.0), width=s*2.0, height=s/3.0,
 			fillColor = colors.black, strokeColor = None, strokeWidth=0)
 		g.add(blackbox1)
 		
-		redbox1 = shapes.Rect(self.x, self.y+(s/3.0), width=s*2.0, height=s/3.0,
+		redbox1 = shapes.Rect(x, y+(s/3.0), width=s*2.0, height=s/3.0,
 			fillColor = colors.orangered, strokeColor = None, strokeWidth=0)
 		g.add(redbox1)
 
@@ -445,9 +451,10 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
+		x, y = self.x+self.dx, self.y+self.dy
 		
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, s*2, s, fillColor = colors.gold,
+		box = shapes.Rect(x, y, s*2, s, fillColor = colors.gold,
 						strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
@@ -458,19 +465,19 @@ class Flag(_Symbol):
 			else:
 				stripecolor = colors.mintcream
 
-			blueorwhiteline = shapes.Rect(self.x, self.y+(s-(stripeheight*stripecounter)), width=s*2, height=stripeheight,
+			blueorwhiteline = shapes.Rect(x, y+(s-(stripeheight*stripecounter)), width=s*2, height=stripeheight,
 				fillColor = stripecolor, strokeColor = None, strokeWidth=20)
 			g.add(blueorwhiteline)	
 
-		bluebox1 = shapes.Rect(self.x, self.y+((s)-stripeheight*5), width=(stripeheight*5), height=stripeheight*5,
+		bluebox1 = shapes.Rect(x, y+((s)-stripeheight*5), width=(stripeheight*5), height=stripeheight*5,
 			fillColor = colors.deepskyblue, strokeColor = None, strokeWidth=0)
 		g.add(bluebox1)
 		
-		whiteline1 = shapes.Rect(self.x, self.y+((s)-stripeheight*3), width=stripeheight*5, height=stripeheight,
+		whiteline1 = shapes.Rect(x, y+((s)-stripeheight*3), width=stripeheight*5, height=stripeheight,
 			fillColor = colors.mintcream, strokeColor = None, strokeWidth=0)
 		g.add(whiteline1)
 
-		whiteline2 = shapes.Rect(self.x+(stripeheight*2), self.y+((s)-stripeheight*5), width=stripeheight, height=stripeheight*5,
+		whiteline2 = shapes.Rect(x+(stripeheight*2), y+((s)-stripeheight*5), width=stripeheight, height=stripeheight*5,
 			fillColor = colors.mintcream, strokeColor = None, strokeWidth=0)
 		g.add(whiteline2)
 
@@ -482,17 +489,18 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
+		x, y = self.x+self.dx, self.y+self.dy
 		
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, s*2, s,
+		box = shapes.Rect(x, y, s*2, s,
 			fillColor = colors.forestgreen, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
-		whitebox = shapes.Rect(self.x+((s*2.0)/3.0), self.y, width=(2.0*(s*2.0)/3.0), height=s,
+		whitebox = shapes.Rect(x+((s*2.0)/3.0), y, width=(2.0*(s*2.0)/3.0), height=s,
 				fillColor = colors.mintcream, strokeColor = None, strokeWidth=0)
 		g.add(whitebox)
 		
-		orangebox = shapes.Rect(self.x+((2.0*(s*2.0)/3.0)), self.y, width=(s*2.0)/3.0, height=s,
+		orangebox = shapes.Rect(x+((2.0*(s*2.0)/3.0)), y, width=(s*2.0)/3.0, height=s,
 			fillColor = colors.darkorange, strokeColor = None, strokeWidth=0)
 		g.add(orangebox)
 
@@ -504,17 +512,18 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
+		x, y = self.x+self.dx, self.y+self.dy
 		
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, s*2, s,
+		box = shapes.Rect(x, y, s*2, s,
 				fillColor = colors.forestgreen, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
-		whitebox = shapes.Rect(self.x+((s*2.0)/3.0), self.y, width=(2.0*(s*2.0)/3.0), height=s,
+		whitebox = shapes.Rect(x+((s*2.0)/3.0), y, width=(2.0*(s*2.0)/3.0), height=s,
 				fillColor = colors.mintcream, strokeColor = None, strokeWidth=0)
 		g.add(whitebox)
 		
-		redbox = shapes.Rect(self.x+((2.0*(s*2.0)/3.0)), self.y, width=(s*2.0)/3.0, height=s,
+		redbox = shapes.Rect(x+((2.0*(s*2.0)/3.0)), y, width=(s*2.0)/3.0, height=s,
 				fillColor = colors.red, strokeColor = None, strokeWidth=0)
 		g.add(redbox)
 
@@ -526,17 +535,18 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
+		x, y = self.x+self.dx, self.y+self.dy
 		
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, s*2, s,
+		box = shapes.Rect(x, y, s*2, s,
 			fillColor = colors.mintcream, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
-		redbox = shapes.Rect(self.x, self.y+((s/3.0)*2.0), width=s*2.0, height=s/3.0,
+		redbox = shapes.Rect(x, y+((s/3.0)*2.0), width=s*2.0, height=s/3.0,
 				fillColor = colors.red, strokeColor = None, strokeWidth=0)
 		g.add(redbox)
 		
-		bluebox = shapes.Rect(self.x, self.y, width=s*2.0, height=s/3.0,
+		bluebox = shapes.Rect(x, y, width=s*2.0, height=s/3.0,
 				fillColor = colors.dodgerblue, strokeColor = None, strokeWidth=0)
 		g.add(bluebox)
 
@@ -548,17 +558,18 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
+		x, y = self.x+self.dx, self.y+self.dy
 		
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, s*2, s,
+		box = shapes.Rect(x, y, s*2, s,
 			fillColor = colors.mintcream, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
-		redbox = shapes.Rect(self.x, self.y+((s/3.0)*2.0), width=s*2.0, height=s/3.0,
+		redbox = shapes.Rect(x, y+((s/3.0)*2.0), width=s*2.0, height=s/3.0,
 				fillColor = colors.red, strokeColor = None, strokeWidth=0)
 		g.add(redbox)
 		
-		bluebox = shapes.Rect(self.x, self.y, width=s*2.0, height=s/3.0,
+		bluebox = shapes.Rect(x, y, width=s*2.0, height=s/3.0,
 				fillColor = colors.darkblue, strokeColor = None, strokeWidth=0)
 		g.add(bluebox)
 
@@ -573,17 +584,18 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
+		x, y = self.x+self.dx, self.y+self.dy
 		
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, s*2, s,
+		box = shapes.Rect(x, y, s*2, s,
 				fillColor = colors.yellow, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
-		redbox1 = shapes.Rect(self.x, self.y+((s/4)*3), width=s*2, height=s/4,
+		redbox1 = shapes.Rect(x, y+((s/4)*3), width=s*2, height=s/4,
 			fillColor = colors.red, strokeColor = None, strokeWidth=0)
 		g.add(redbox1)
 		
-		redbox2 = shapes.Rect(self.x, self.y, width=s*2, height=s/4,
+		redbox2 = shapes.Rect(x, y, width=s*2, height=s/4,
 			fillColor = colors.red,
 			strokeColor = None,
 			strokeWidth=0)
@@ -597,18 +609,19 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group()
+		x, y = self.x+self.dx, self.y+self.dy
 		self.border = 0
 		
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, (s*2)*0.70, s,
+		box = shapes.Rect(x, y, (s*2)*0.70, s,
 			fillColor = colors.dodgerblue, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
-		box1 = shapes.Rect(self.x+((s/5)*2), self.y, width=s/6, height=s,
+		box1 = shapes.Rect(x+((s/5)*2), y, width=s/6, height=s,
 				fillColor = colors.gold, strokeColor = None, strokeWidth=0)
 		g.add(box1)
 		
-		box2 = shapes.Rect(self.x, self.y+((s/2)-(s/12)), width=(s*2)*0.70, height=s/6,
+		box2 = shapes.Rect(x, y+((s/2)-(s/12)), width=(s*2)*0.70, height=s/6,
 			fillColor = colors.gold,
 			strokeColor = None,
 			strokeWidth=0)
@@ -616,7 +629,7 @@ class Flag(_Symbol):
 
 		g.add(self.borderdraw())
 
-		outerbox = shapes.Rect(self.x, self.y, (s*2)*0.70, s,
+		outerbox = shapes.Rect(x, y, (s*2)*0.70, s,
 							fillColor = None,
 							strokeColor = colors.black,
 			strokeWidth=0)
@@ -626,33 +639,34 @@ class Flag(_Symbol):
 	def _Flag_Norway(self):
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group()
+		x, y = self.x+self.dx, self.y+self.dy
 		self.border = 0
 		
-		box = shapes.Rect(self.x, self.y, (s*2)*0.7, s,
+		box = shapes.Rect(x, y, (s*2)*0.7, s,
 				fillColor = colors.red, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
-		box = shapes.Rect(self.x, self.y, (s*2)*0.7, s,
+		box = shapes.Rect(x, y, (s*2)*0.7, s,
 				fillColor = colors.red, strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
 
-		whiteline1 = shapes.Rect(self.x+((s*0.2)*2), self.y, width=s*0.2, height=s,
+		whiteline1 = shapes.Rect(x+((s*0.2)*2), y, width=s*0.2, height=s,
 				fillColor = colors.ghostwhite, strokeColor = None, strokeWidth=0)
 		g.add(whiteline1)
 		
-		whiteline2 = shapes.Rect(self.x, self.y+(s*0.4), width=((s*2)*0.70), height=s*0.2,
+		whiteline2 = shapes.Rect(x, y+(s*0.4), width=((s*2)*0.70), height=s*0.2,
 				fillColor = colors.ghostwhite, strokeColor = None, strokeWidth=0)
 		g.add(whiteline2)
 
-		blueline1 = shapes.Rect(self.x+((s*0.225)*2), self.y, width=0.1*s, height=s,
+		blueline1 = shapes.Rect(x+((s*0.225)*2), y, width=0.1*s, height=s,
 				fillColor = colors.darkblue, strokeColor = None, strokeWidth=0)
 		g.add(blueline1)
 		
-		blueline2 = shapes.Rect(self.x, self.y+(s*0.45), width=(s*2)*0.7, height=s*0.1,
+		blueline2 = shapes.Rect(x, y+(s*0.45), width=(s*2)*0.7, height=s*0.1,
 				fillColor = colors.darkblue, strokeColor = None, strokeWidth=0)
 		g.add(blueline2)
 
-		outerbox = shapes.Rect(self.x, self.y, (s*2)*0.70, s, fillColor = None,
+		outerbox = shapes.Rect(x, y, (s*2)*0.70, s, fillColor = None,
 				strokeColor = colors.black, strokeWidth=0)
 		g.add(outerbox)
 		return g
@@ -661,20 +675,21 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
+		x, y = self.x+self.dx, self.y+self.dy
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, s*2, s,
+		box = shapes.Rect(x, y, s*2, s,
 			fillColor = colors.mintcream,
 						strokeColor = colors.black,
 			strokeWidth=0)
 		g.add(box)
 
-		redbox = shapes.Rect(self.x, self.y, width=s*2, height=s/2,
+		redbox = shapes.Rect(x, y, width=s*2, height=s/2,
 			fillColor = colors.red,
 			strokeColor = None,
 			strokeWidth=0)
 		g.add(redbox)
 		
-		bluewedge = shapes.Polygon(points = [ self.x, self.y, self.x+s, self.y+(s/2), self.x, self.y+s],
+		bluewedge = shapes.Polygon(points = [ x, y, x+s, y+(s/2), x, y+s],
 					fillColor = colors.darkblue, strokeColor = None, strokeWidth=0)
 		g.add(bluewedge)
 		g.add(self.borderdraw())
@@ -684,21 +699,22 @@ class Flag(_Symbol):
 		# general widget bits
 		s = float(self.size)  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
+		x, y = self.x+self.dx, self.y+self.dy
 		
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, s*2, s,
+		box = shapes.Rect(x, y, s*2, s,
 			fillColor = colors.red,
 						strokeColor = colors.black,
 			strokeWidth=0)
 		g.add(box)
 
-		whitecircle = shapes.Circle(cx=self.x+((s*0.35)*2), cy=self.y+s/2, r=s*0.3,
+		whitecircle = shapes.Circle(cx=x+((s*0.35)*2), cy=y+s/2, r=s*0.3,
 			fillColor = colors.mintcream,
 			strokeColor = None,
 			strokeWidth=0)
 		g.add(whitecircle)
 
-		redcircle = shapes.Circle(cx=self.x+((s*0.39)*2), cy=self.y+s/2, r=s*0.24,
+		redcircle = shapes.Circle(cx=x+((s*0.39)*2), cy=y+s/2, r=s*0.24,
 			fillColor = colors.red,
 			strokeColor = None,
 			strokeWidth=0)
@@ -707,9 +723,9 @@ class Flag(_Symbol):
 		ws = Star()
 		ws.angle = 15
 		ws.size = s/5
-		ws.x = self.x+(s*0.5)*2+ws.size/2
-		ws.y = self.y+(s*0.5)
-		ws.color = colors.mintcream
+		ws.x = x+(s*0.5)*2+ws.size/2
+		ws.y = y+(s*0.5)
+		ws.fillColor = colors.mintcream
 		ws.strokeColor = None
 		g.add(ws)
 
@@ -721,19 +737,20 @@ class Flag(_Symbol):
 		# general widget bits
 		s = self.size  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
+		x, y = self.x+self.dx, self.y+self.dy
 		
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, s, s, fillColor = colors.red,
+		box = shapes.Rect(x, y, s, s, fillColor = colors.red,
 						strokeColor = colors.black, strokeWidth=0)
 		g.add(box)
-		whitebar1 = shapes.Line(self.x+(s/2), self.y+(s/5.5), self.x+(s/2), self.y+(s-(s/5.5)),
+		whitebar1 = shapes.Line(x+(s/2), y+(s/5.5), x+(s/2), y+(s-(s/5.5)),
 				fillColor = colors.mintcream, strokeColor = colors.mintcream, strokeWidth=(s/5))
 		g.add(whitebar1)
-		whitebar2 = shapes.Line(self.x+(s/5.5), self.y+(s/2), self.x+(s-(s/5.5)), self.y+(s/2),
+		whitebar2 = shapes.Line(x+(s/5.5), y+(s/2), x+(s-(s/5.5)), y+(s/2),
 			fillColor = colors.mintcream, strokeColor = colors.mintcream, strokeWidth=s/5)
 		g.add(whitebar2)
 
-		outerbox = shapes.Rect(self.x, self.y, s, s,
+		outerbox = shapes.Rect(x, y, s, s,
 							fillColor = None, strokeColor = colors.black, strokeWidth=0)
 		g.add(outerbox)		
 		return g
@@ -742,16 +759,17 @@ class Flag(_Symbol):
 		# general widget bits
 		s = float(self.size)  # abbreviate as we will use this a lot 
 		g = shapes.Group() 
+		x, y = self.x+self.dx, self.y+self.dy
 		
 		# flag specific bits
-		box = shapes.Rect(self.x, self.y, s*2, s,
+		box = shapes.Rect(x, y, s*2, s,
 			fillColor = colors.darkblue,
 						strokeColor = colors.black,
 			strokeWidth=0)
 		g.add(box)
 
-		centerx=self.x+(s*0.95)
-		centery=self.y+(s/2.1)
+		centerx=x+(s*0.95)
+		centery=y+(s/2.1)
 		radius=(s/2.75)
 		yradius = radius
 		xradius = radius
@@ -769,9 +787,8 @@ class Flag(_Symbol):
 			endangle = endangle+2*pi
 		angle = startangle
 		while angle<endangle:
-			x = centerx + cos(angle)*radius
-			y = centery + sin(angle)*yradius
-			a(x); a(y)
+			a(centerx + cos(angle)*radius)
+			a(centery + sin(angle)*yradius)
 			angle = angle+radiansdelta
 
 		innercounter = 0
@@ -780,15 +797,15 @@ class Flag(_Symbol):
 			gs.x=pointslist[innercounter]+s/20
 			gs.y=pointslist[innercounter+1]+s/20
 			gs.size=s/10
-			gs.color=colors.gold
+			gs.fillColor=colors.gold
 			g.add(gs)
 			innercounter=innercounter+2
 			
-		box = shapes.Rect(self.x, self.y, width=s/4, height=s,
+		box = shapes.Rect(x, y, width=s/4, height=s,
 				fillColor = self.fillColor, strokeColor = None, strokeWidth=0)
 		g.add(box)
 
-		box2 = shapes.Rect(self.x+((s*2)-s/4), self.y, width=s/4, height=s,
+		box2 = shapes.Rect(x+((s*2)-s/4), y, width=s/4, height=s,
 				fillColor = self.fillColor, strokeColor = None, strokeWidth=0)
 		g.add(box2)
 
