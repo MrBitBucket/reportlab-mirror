@@ -21,7 +21,7 @@ struct namespace_universe {
 };
 
 struct RXP_NAMESPACE {
-    char8 *uri;
+    Char *nsname;
     NamespaceUniverse universe;
     Vector(NSElementDefinition, elements);
     Vector(NSAttributeDefinition, attributes);
@@ -47,7 +47,7 @@ XML_API void deinit_namespaces(void);
 XML_API int reinit_namespaces(void);
 
 XML_API NamespaceUniverse NewNamespaceUniverse(void);
-XML_API Namespace NewNamespace(NamespaceUniverse universe, const char8 *uri);
+XML_API Namespace NewNamespace(NamespaceUniverse universe, const Char *nsname);
 XML_API void FreeNamespaceUniverse(NamespaceUniverse universe);
 
 XML_API NSElementDefinition DefineNSElement(Namespace ns, const Char *name);
@@ -57,7 +57,7 @@ XML_API NSAttributeDefinition
      DefineNSElementAttribute(NSElementDefinition element, const Char *name);
 
 XML_API Namespace 
-    FindNamespace(NamespaceUniverse universe, const char8 *uri, int create);
+    FindNamespace(NamespaceUniverse universe, const Char *nsname, int create);
 XML_API NSElementDefinition
     FindNSElementDefinition(Namespace ns, const Char *name, int create);
 XML_API NSAttributeDefinition

@@ -1,10 +1,10 @@
-/* 	$Id: xmlparser.c,v 1.3 2003/04/01 16:06:36 rgbecker Exp $
+/* 	$Id$
 */
 
 #define DEBUG_FSM 0
 
 #ifndef lint
-static char vcid[] = "$Id: xmlparser.c,v 1.3 2003/04/01 16:06:36 rgbecker Exp $";
+static char vcid[] = "$Id$";
 #endif /* lint */
 
 /* 
@@ -99,7 +99,8 @@ static int parse_external_id(Parser p, int required,
 			     int preq, int sreq);
 static int parse_conditional(Parser p, Entity ent);
 static int parse_notation_decl(Parser p, Entity ent);
-static int parse_entity_decl(Parser p, Entity ent, int line, int chpos);
+static int parse_entity_decl(Parser p, Entity ent, int line, int chpos,
+			     Entity ext_ent);
 static int parsing_internal(Parser p);
 static int parsing_external_subset(Parser p);
 static int parse_attlist_decl(Parser p, Entity ent);
@@ -156,8 +157,8 @@ static int validate_final(Parser p);
 static HashMapRetType check_id(const HashEntryStruct *id_entry, void *p);
 static int validate_attribute(Parser p, AttributeDefinition a, ElementDefinition e, const Char *value);
 static int validate_xml_lang_attribute(Parser p, ElementDefinition e, const Char *value);
-static int check_attribute_syntax(Parser p, AttributeDefinition a, ElementDefinition e, const Char *value, const char *message);
-static int check_attribute_token(Parser p, AttributeDefinition a, ElementDefinition e, const Char *value, int length, const char *message);
+static int check_attribute_syntax(Parser p, AttributeDefinition a, ElementDefinition e, const Char *value, const char *message, int real_use);
+static int check_attribute_token(Parser p, AttributeDefinition a, ElementDefinition e, const Char *value, int length, const char *message, int real_use);
 #if not_yet
 static int magically_transform_dtd(Parser p, Char *name, int namelen);
 #endif
@@ -189,6 +190,9 @@ static int check_deterministic_1(Parser p, ElementDefinition element,
 
 #define validity_error (p->seen_validity_error=1, ParserGetFlag(p, ErrorOnValidityErrors) ? error : warn)
 
+#define namespace_error error
+#define namespace_validity_error validity_error
+
 #define require(x) if(x >= 0) {} else return -1
 #define require0(x) if(x >= 0) {} else return 0
 
@@ -199,6 +203,10 @@ static int check_deterministic_1(Parser p, ElementDefinition element,
 #define CopyName(n) if((n = Malloc((p->namelen + 1)*sizeof(Char)))) {memcpy(n, p->name, p->namelen * sizeof(Char)); n[p->namelen] = 0;} else return error(p, "System error");
 
 #define CopyName0(n) if((n = Malloc((p->namelen + 1)*sizeof(Char)))) {memcpy(n, p->name, p->namelen * sizeof(Char)); n[p->namelen] = 0;} else {error(p, "System error"); return 0;}
+
+#define ifNF16wrong(p,b,l) if((p)->checker && NF16wrong==nf16checkL((p)->checker, (p)->source->line + (p)->source->next - (b), (l)))
+#define NF16StartCheck(p) if((p)->checker) nf16checkStart((p)->checker)
+#define NF16noStartCheck(p) if((p)->checker) nf16checkNoStart((p)->checker)
 
 #if CHAR_SIZE == 8
 #define tochar8(s) s
@@ -227,6 +235,13 @@ static Entity xml_builtin_entity;
 static Entity xml_predefined_entities;
 
 static int parser_initialised = 0;
+
+static Char xml_ns[] = {'h','t','t','p',':','/','/','w','w','w','.','w','3',
+			'.','o','r','g','/','X','M','L','/','1','9','9','8',
+			'/','n','a','m','e','s','p','a','c','e',0};
+static Char xmlns_ns[] = {'h','t','t','p',':','/','/','w','w','w','.','w', '3',
+			  '.','o','r','g','/','2','0','0','0','/','x', 'm','l',
+			  'n','s','/',0};
 
 int init_parser(void)
 {
@@ -348,7 +363,7 @@ static int skip_dtd_whitespace(Parser p, int allow_pe)
 	       otherwise we could just assume it was a PE reference. */
 
 	    c = get(s); unget(s);
-	    if(c != XEOE && is_xml_namestart(c))
+	    if(c != XEOE && is_xml_namestart(c, p->map))
 	    {
 		if(!allow_pe)
 		{
@@ -515,7 +530,7 @@ static int parse_name(Parser p, const char8 *where)
     if(c == BADCHAR)
 	return error(p, "Input error: %s", s->error_msg);
 
-    if(c == XEOE || !is_xml_namestart(c))
+    if(c == XEOE || !is_xml_namestart(c, p->map))
     {
 	unget(s);		/* For error position */
 	error(p, "Expected name, but got %s %s", 
@@ -524,12 +539,17 @@ static int parse_name(Parser p, const char8 *where)
     }
     i = 1;
 
-    while(c = get(s), (c != XEOE && is_xml_namechar(c)))
+    while(c = get(s), (c != XEOE && is_xml_namechar(c, p->map)))
 	i++;
     unget(s);
 
     p->name = s->line + s->next - i;
     p->namelen = i;
+
+    NF16StartCheck(p);
+    if(p->namechecker && NF16wrong==nf16checkL(p->namechecker,
+                        s->line + s->next - i, i))
+        return error(p, "Name not normalized after %s", where);
 
     return 0;
 }
@@ -543,7 +563,7 @@ static int parse_nmtoken(Parser p, const char8 *where)
     if(c == BADCHAR)
 	return error(p, "Input error: %s", s->error_msg);
 
-    while(c !=XEOE && is_xml_namechar(c))
+    while(c !=XEOE && is_xml_namechar(c, p->map))
     {
 	i++;
 	c = get(s);
@@ -556,6 +576,11 @@ static int parse_nmtoken(Parser p, const char8 *where)
 
     p->name = s->line + s->next - i;
     p->namelen = i;
+
+    NF16StartCheck(p);
+    if(p->namechecker && NF16wrong==nf16checkL(p->namechecker,
+                        s->line + s->next - i, i))
+        return error(p, "nmtoken not normalized after %s", where);
 
     return 0;
 }
@@ -615,16 +640,20 @@ Parser NewParser(void)
     p->dtd = NewDtd();
     p->dtd_callback = p->warning_callback = 0;
     p->entity_opener = 0;
-    p->callback_arg = 0;
+    p->dtd_callback_arg = 0;
+    p->warning_callback_arg = 0;
+    p->entity_opener_arg = 0;
     p->external_pe_depth = 0;
+
+    p->checker = 0;
+    p->namechecker = 0;
 
     VectorInit(p->element_stack);
 
     p->base_ns.parent = 0;
     p->base_ns.prefix = xml;
     p->base_ns.namespace =
-	FindNamespace(p->dtd->namespace_universe,
-		      "http://www.w3.org/XML/1998/namespace", 1);
+	FindNamespace(p->dtd->namespace_universe, xml_ns, 1);
     if(!p->base_ns.namespace)
 	return 0;
 
@@ -647,6 +676,14 @@ Parser NewParser(void)
     ParserSetFlag(p, MaintainElementStack, 1);
     ParserSetFlag(p, XMLSpace, 0);
     ParserSetFlag(p, XMLNamespaces, 0);
+    ParserSetFlag(p, XML11CheckNF, 0);
+    ParserSetFlag(p, XML11CheckExists, 0);
+
+    /* These are set here because LTXML sometimes pushes an internal
+       entity (for string reading), and the version-determining code
+       never gets run. */
+    p->xml_version = XV_1_0;
+    p->map = xml_char_map;
 
     return p;
 }
@@ -661,6 +698,10 @@ void FreeParser(Parser p)
     Free(p->transbuf);
     Free(p->element_stack);
     free_hash_table(p->id_table);
+    if(p->checker)
+        nf16checkDelete(p->checker);
+    if(p->namechecker)
+        nf16checkDelete(p->namechecker);
 
     Free(p);
 }
@@ -680,9 +721,19 @@ Entity ParserRootEntity(Parser p)
     return ParserRootSource(p)->entity;
 }
 
-void ParserSetCallbackArg(Parser p, void *arg)
+void ParserSetDtdCallbackArg(Parser p, void *arg)
 {
-    p->callback_arg = arg;
+    p->dtd_callback_arg = arg;
+}
+
+void ParserSetWarningCallbackArg(Parser p, void *arg)
+{
+    p->warning_callback_arg = arg;
+}
+
+void ParserSetEntityOpenerArg(Parser p, void *arg)
+{
+    p->entity_opener_arg = arg;
 }
 
 void ParserSetDtdCallback(Parser p, CallbackProc cb)
@@ -830,14 +881,19 @@ XBit PeekXBit(Parser p)
 
 int ParserPush(Parser p, InputSource source)
 {
+    Entity e = source->entity;
+
     if(!p->source && !p->document_entity)
-	p->document_entity = source->entity;
+	p->document_entity = e;
 
     source->parent = p->source;
     p->source = source;
 
-    if(source->entity->type == ET_internal)
+    if(e->type == ET_internal)
 	return 0;
+
+    if(e != p->document_entity)
+	source->map = p->map;
 
     /* Look at first few bytes of external entities to guess encoding,
        then look for an XMLDecl or TextDecl.  */
@@ -847,57 +903,92 @@ int ParserPush(Parser p, InputSource source)
     determine_character_encoding(source);
 
 #if CHAR_SIZE == 8
-    if(!EncodingIsAsciiSuperset(source->entity->encoding))
+    if(!EncodingIsAsciiSuperset(e->encoding))
 	return error(p, "Unsupported character encoding %s",
-		     CharacterEncodingName[source->entity->encoding]);
+		     CharacterEncodingName[e->encoding]);
 #else
-    if(source->entity->encoding == CE_unknown)
+    if(e->encoding == CE_unknown)
 	return error(p, "Unknown character encoding");
 #endif
 
     get(source); unget(source);	/* To get the first line read */
 
     if(looking_at(p, "<?NSL "))
-	return process_nsl_decl(p);
-
-    if(looking_at(p, "<?xml "))
     {
-	require(process_xml_decl(p));
-	if(source->entity == p->document_entity &&
-	   !source->entity->version_decl)
-	    return error(p, "XML declaration in document entity lacked "
-			    "version number");
-	if(source->entity != p->document_entity &&
-	   source->entity->standalone_decl != SDD_unspecified)
-	    return error(p, "Standalone attribute not allowed except in "
-			    "document entity");
-	if(source->entity != p->document_entity &&
-	   source->entity->encoding_decl == CE_unknown)
-	    return error(p, "Encoding declaration is required in text "
-			    "declaration");
+	require(process_nsl_decl(p));
 	source->read_carefully = 0;
 	return 0;
     }
 
+    if(looking_at(p, "<?xml "))
+    {
+	require(process_xml_decl(p));
+	if(e == p->document_entity && !e->version_decl)
+	    return error(p, "XML declaration in document entity lacked "
+			    "version number");
+	if(e != p->document_entity && e->standalone_decl != SDD_unspecified)
+	    return error(p, "Standalone attribute not allowed except in "
+			    "document entity");
+	if(e != p->document_entity && e->encoding_decl == CE_unknown)
+	    return error(p, "Encoding declaration is required in text "
+			    "declaration");
+    }
+
+    else if(looking_at(p, "<?xml?"))
+	return error(p, "Empty XML or text declaration");
+
+    else if(looking_at(p, "<?XML "))
+	return error(p, "Wrong case XML declaration, must be <?xml ...");
+
+    else if(p->state == PS_error) /* looking_at may have set it */
+	return -1;
+
     source->read_carefully = 0;
 
-    if(looking_at(p, "<?xml?"))
+    if(e == p->document_entity)
     {
-	return error(p, "Empty XML or text declaration");
-    }
+	p->xml_version = e->xml_version;
+	if(p->xml_version >= XV_1_1)
+	{
+	    ParserSetFlag(p, XML11Syntax, 1);
+#if CHAR_SIZE == 16
+	    p->map = xml_char_map_11;
+#endif
+#if CHAR_SIZE == 16
+	    /* XXX is this the best place to do this? */
+            if(ParserGetFlag(p, XML11CheckNF))
+	    {
+	        p->checker = nf16checkNew(ParserGetFlag(p, XML11CheckExists));
+                NF16StartCheck(p);
+	        p->namechecker = 
+		    nf16checkNew(ParserGetFlag(p, XML11CheckExists));
+	    }
+#endif
+	}
+	else
+	    p->map = xml_char_map;
 
-    if(!ParserGetFlag(p, XMLStrictWFErrors) && looking_at(p, "<?XML "))
+	source->map = p->map;
+    }
+    else if(e->xml_version > p->xml_version)
     {
-	warn(p, "Found <?XML instead of <?xml; switching to case-"
-	     "insensitive mode");
-	ParserSetFlag(p, CaseInsensitive, 1);
-	return process_xml_decl(p);
-    }
+	const char8 *doc_ver = p->document_entity->version_decl ?
+	                       p->document_entity->version_decl : "1.0";
 
-    if(p->state == PS_error)	/* looking_at may have set it */
-	return -1;
-    else
-	return 0;
+	if(ParserGetFlag(p, XMLStrictWFErrors))
+	    return error(p, "Referenced entity has later version number "
+			    "(%s) than document entity (%s)",
+			 e->version_decl, doc_ver);
+	else
+	    warn(p, "Referenced entity has later version number "
+		    "(%s) than document entity (%s)",
+		 e->version_decl, doc_ver);
+    }
+#if 0
+    Fprintf(Stderr, "\npushing %s, map = %s\n",
+	    EntityDescription(e), source->map == xml_char_map ? "1.0" : "1.1");
+#endif
+    return 0;
 }
 
 void ParserPop(Parser p)
@@ -1045,7 +1136,7 @@ static int parse(Parser p)
 
     if(p->state == PS_end || p->state == PS_error)
     {
-	/* After an error or EOF, jsut keep returning EOF */
+	/* After an error or EOF, just keep returning EOF */
 	p->xbit.type = XBIT_eof;
 	return 0;
     }
@@ -1067,8 +1158,10 @@ restart:
 	    return error(p, "Document ends too soon");
 	p->state = PS_end;
 	p->xbit.type = XBIT_eof;
+        NF16StartCheck(p);
 	return 0;
     case '<':
+        NF16StartCheck(p); /* only effective after markup */
 	return parse_markup(p);
     case '&':
 	if(ParserGetFlag(p, IgnoreEntities))
@@ -1087,6 +1180,7 @@ restart:
 	{
 	    /* an entity reference - push it and start again */
 	    require(parse_reference(p, 0, 1, 1));
+            NF16StartCheck(p);
 	    goto restart;
 	}
 	/* not expanding general entities, so treat as pcdata */
@@ -1117,6 +1211,7 @@ static int parse_markup(Parser p)
 	    else
 	    {
 		require(parse_comment(p, 1, 0));
+		/* XXX avoid recursion here */
 		return parse(p);
 	    }
 	}
@@ -1141,7 +1236,7 @@ static int parse_markup(Parser p)
     default:
 	unget(s);
 	if(!ParserGetFlag(p, XMLLessThan) && 
-	   (c == XEOE || !is_xml_namestart(c)))
+	   (c == XEOE || !is_xml_namestart(c, p->map)))
 	{
 	    /* In nSGML, recognise < as stago only if followed by namestart */
 
@@ -1191,7 +1286,7 @@ static int parse_endtag(Parser p)
 	p->xbit.ns_dict = VectorLast(p->element_stack).ns;
 	p->xbit.nsc = VectorLast(p->element_stack).nsc;
 	p->xbit.nsowned = (p->xbit.ns_dict != &p->base_ns);
-	VectorPop(p->element_stack);
+	(void)VectorPop(p->element_stack);
 
 	if(p->namelen != e->namelen ||
 	   memcmp(p->name, e->name, p->namelen * sizeof(Char)) != 0)
@@ -1225,6 +1320,7 @@ static int parse_endtag(Parser p)
     }
 
     skip_whitespace(p->source);
+    NF16StartCheck(p);
     return expect(p, '>', "after name in end tag");
 }
 
@@ -1238,13 +1334,24 @@ static int check_qualname_syntax(Parser p, const Char *name, const char *type)
 	return 0;
 
     if(t == name)
-	warn(p, "%s name %S has empty prefix", type, name);
+    {
+	require(namespace_error(p, "%s name %S has empty prefix", type, name));
+    }
     else if(t[1] == 0)
-	warn(p, "%s name %S has empty local part", type, name);
-    else if(!is_xml_namestart(t[1]))
-	warn(p, "%s name %S has illegal local part", type, name);
+    {
+	require(namespace_error(p, "%s name %S has empty local part", 
+				type, name));
+    }
+    else if(!is_xml_namestart(t[1], p->map))
+    {
+	require(namespace_error(p, "%s name %S has illegal local part", 
+				type, name));
+    }
     else if(Strchr(t+1, ':'))
-	warn(p, "%s name %S has multiple colons", type, name);
+    {
+	require(namespace_error(p, "%s name %S has multiple colons", 
+				type, name));
+    }
 
     return 0;
 }
@@ -1494,20 +1601,48 @@ static int parse_starttag(Parser p)
 	}	
     }
 
-    /* Check no externally-declared defaults in standalone document */
-
-    if(ParserGetFlag(p, Validate) && p->standalone == SDD_yes)
+    /* Do some checks on defaulted attributes if validating */
+    
+    if(ParserGetFlag(p, Validate))
     {
 	for(d=NextAttributeDefinition(e, 0);
 	    d;
 	    d=NextAttributeDefinition(e, d))
 	{
-	    if(!d->default_value || !d->is_externally_declared)
+	    int ed, sem;
+
+	    if(!d->default_value)
 		continue;
-	    for(a=p->xbit.attributes; a; a=a->next)
-		if(a->definition == d)
-		    break;
-	    if(!a)
+
+	    /* Check no externally-declared defaults in standalone document,
+	       and do "non-lexical" validation of some attribute types */
+
+	    ed = (p->standalone == SDD_yes && d->is_externally_declared);
+	    sem = 
+		(d->type == AT_entity || d->type == AT_entities ||
+		 d->type == AT_id || 
+		 d->type == AT_idref || d->type == AT_idrefs);
+
+	    if(ed || sem)
+	    {
+		/* was it actually defaulted? */
+		
+		for(a=p->xbit.attributes; a; a=a->next)
+		    if(a->definition == d)
+			break;
+		if(a)
+		    /* no */
+		    continue;
+	    }
+
+	    if(sem)
+	    {
+		require(check_attribute_syntax(p, d, e, d->default_value,
+					       "defaulted value for attribute",
+					       1));
+	    }
+
+	    if(ed)
 	    {
 		require(validity_error(p, "Externally declared attribute %S "
 		    "for element %S defaulted in document declared standalone",
@@ -1593,7 +1728,11 @@ static int parse_starttag(Parser p)
 	{
 	    ns = LookupNamespace(p->xbit.ns_dict, e->prefix);
 	    if(!ns)
-		warn(p, "Element name %S has unbound prefix", e->name);
+	    {
+		require(namespace_error(p, 
+					"Element name %S has unbound prefix",
+					e->name));
+	    }
 	}
 	else
 	    ns = LookupNamespace(p->xbit.ns_dict, 0);
@@ -1625,8 +1764,11 @@ static int parse_starttag(Parser p)
 		{
 		    ns = LookupNamespace(p->xbit.ns_dict, d->prefix);
 		    if(!ns)
-			warn(p, "Attribute name %S has unbound prefix",
-			     d->name);
+		    {
+			require(namespace_error(p,
+				     "Attribute name %S has unbound prefix",
+						d->name));
+		    }
 		    else
 			if(!(nsattr =
 			     NamespacifyGlobalAttributeDefinition(d, ns)))
@@ -1652,8 +1794,11 @@ static int parse_starttag(Parser p)
 		for(aa=all_attrs; aa != a; aa=aa->next)
 		{
 		    if(aa->ns_definition == a->ns_definition)
-			warn(p, "Repeated attribute %S in namespace %s",
-			     d->local, a->ns_definition->namespace->uri);
+		    {
+			require(namespace_error(p,
+				    "Repeated attribute %S in namespace %S",
+				 d->local, a->ns_definition->namespace->nsname));
+		    }
 		}
 	}
 
@@ -1673,6 +1818,7 @@ static int parse_starttag(Parser p)
 
     p->xbit.attributes = all_attrs;
 
+    NF16StartCheck(p);
     return 0;
 }
 
@@ -1680,23 +1826,24 @@ static int process_namespace(Parser p, AttributeDefinition d,const Char *value)
 {
     NamespaceBinding nb;
     const Char *prefix;
-    const char8 *uri;
+    const Char *nsname;
     Namespace ns;
 
     static Char xmlns[] = {'x','m','l','n','s',0};
     static Char xml[] = {'x','m','l',0};
+
     int xml_prefix = 0, xmlns_prefix = 0;
     int xml_uri = 0, xmlns_uri = 0;
 
     prefix = *d->ns_attr_prefix ? d->ns_attr_prefix : 0;
-    uri = *value == 0 ? 0 : tochar8(value);
+    nsname = *value == 0 ? 0 : value;
 
-    if(prefix && !uri)
+    if(prefix && !nsname && p->xml_version < XV_1_1)
     {
-	warn(p, "Namespace declaration for %S has empty URI; ignored", prefix);
-	return 0;
+	require(namespace_error(p,
+				"Namespace declaration for %S has empty URI",
+				prefix));
     }
-
     if(prefix)
     {
 	if(Strcmp(prefix, xml) == 0)
@@ -1705,43 +1852,42 @@ static int process_namespace(Parser p, AttributeDefinition d,const Char *value)
 	    xmlns_prefix = 1;
     }
 
-    if(uri)
+    if(nsname)
     {
-	if(strcmp8(uri, "http://www.w3.org/XML/1998/namespace") == 0)
+	if(Strcmp(nsname, xml_ns) == 0)
 	    xml_uri = 1;
-	else if(strcmp8(uri, "http://www.w3.org/2000/xmlns/") == 0)
+	else if(Strcmp(nsname, xmlns_ns) == 0)
 	    xmlns_uri = 1;
     }
 
     if(xml_prefix && !xml_uri)
     {
-	warn(p, "Declaration of xml prefix has wrong URI \"%s\"; ignored",
-	     uri);
-	return 0;
+	require(namespace_error(p,
+			    "Declaration of xml prefix has wrong URI \"%S\"",
+				nsname));
     }
 
     if(xmlns_prefix)
     {
-	warn(p, "Declaration of xmlns prefix is not allowed; ignored");
-	return 0;
+	require(namespace_error(p,
+				"Declaration of xmlns prefix is not allowed"));
     }
 
     if(xml_uri && !xml_prefix)
     {
-	warn(p, "Declaration of xml namespace with prefix \"%S\" "
-	        "(must be \"xml\"); ignored", prefix);
-	return 0;
+	require(namespace_error(p, "Declaration of xml namespace with "
+	        " prefix \"%S\" (must be \"xml\")", prefix));
     }
 
     if(xmlns_uri)
     {
-	warn(p, "Declaration of xmlns namespace is not allowed; ignored");
-	return 0;
+	require(namespace_error(p,
+			     "Declaration of xmlns namespace is not allowed"));
     }
 
-    if(uri)
+    if(nsname)
     {
-	if(!(ns = FindNamespace(p->dtd->namespace_universe, uri, 1)))
+	if(!(ns = FindNamespace(p->dtd->namespace_universe, nsname, 1)))
 	    return error(p, "System error");
     }
     else
@@ -1917,6 +2063,7 @@ static int transcribe(Parser p, int back, int count)
 static int parse_pcdata(Parser p)
 {
     int count = 0;
+    int had_charref = 0;
     InputSource s;
     Char *buf;
     int next, buflen;
@@ -1940,16 +2087,19 @@ static int parse_pcdata(Parser p)
 	    s->next = next;
 	    if(count > 0)
 	    {
+  	        ifNF16wrong(p,count,count)
+ 		    return error(p, "pcdata not normalized");
 		require(transcribe(p, count, count));
 	    }
 	    count = 0;
 	    if(at_eoe(s))
 	    {
+	        NF16StartCheck(p);
 		if(!ParserGetFlag(p, MergePCData))
 		    goto done;
 		else
 		    pop_while_at_eoe(p);
-	    }
+       	    }
 	    s = p->source;
 	    buf = s->line;
 	    next = s->next;
@@ -1969,12 +2119,14 @@ static int parse_pcdata(Parser p)
 		if(next == buflen)
 		    goto deflt;
 		if(buf[next] != '!' && buf[next] != '/' && buf[next] != '?' &&
-		   !is_xml_namestart(buf[next]))
+		   !is_xml_namestart(buf[next], p->map))
 		    goto deflt;
 	    }
 	    s->next = next;
 	    if(count > 0)
 	    {
+	        ifNF16wrong(p,count+1,count)
+		    return error(p, "pcdata not normalized");
 		require(transcribe(p, count+1, count));
 	    }
 	    count = 0;
@@ -1984,6 +2136,7 @@ static int parse_pcdata(Parser p)
 	    {
 		s->next = next + 3;
 		require(parse_comment(p, 1, 0));
+                NF16StartCheck(p);
 		buflen = s->line_length;
 		next = s->next;
 	    }
@@ -2006,6 +2159,8 @@ static int parse_pcdata(Parser p)
 		s->next = next-1;
 		if(count > 0)
 		{
+		    ifNF16wrong(p,count,count)
+		        return error(p, "pcdata not normalized");
 		    require(transcribe(p, count, count));
 		}
 		goto done;
@@ -2014,14 +2169,18 @@ static int parse_pcdata(Parser p)
 	    {
 		/* It's a character reference */
 
+		had_charref = 1;
 		s->next = next+1;
 		if(count > 0)
 		{
+		    ifNF16wrong(p,count,count+2)
+		        return error(p,"pcdata not normalized");
 		    require(transcribe(p, count+2, count));
 		}
 		count = 0;
 		require(parse_character_reference(p,
 				   ParserGetFlag(p, ExpandCharacterEntities)));
+		NF16StartCheck(p);
 		next = s->next;
 
 		if(!ParserGetFlag(p, MergePCData))
@@ -2034,12 +2193,15 @@ static int parse_pcdata(Parser p)
 		s->next = next;
 		if(count > 0)
 		{
+		    ifNF16wrong(p,count,count+1)
+		        return error(p, "pcdata not normalized");
 		    require(transcribe(p, count+1, count));
 		}
 		count = 0;
 		require(parse_reference(p, 0, 
 				       ParserGetFlag(p, ExpandGeneralEntities),
 					1));
+                NF16StartCheck(p);
 		s = p->source;
 		buf = s->line;
 		buflen = s->line_length;
@@ -2091,6 +2253,13 @@ static int parse_pcdata(Parser p)
 				 "Content model for %S does not allow PCDATA",
 				       e->name));
 	    }
+	    else if(had_charref)
+	    {
+		/* E15 to 2nd edition */
+		require(validity_error(p,
+		     "Content model for %S does not allow character reference",
+				       e->name));
+	    }
 	    else
 	    {
 		p->xbit.pcdata_ignorable_whitespace = 1;
@@ -2114,10 +2283,19 @@ static int parse_comment(Parser p, int skip, Entity ent)
     InputSource s = p->source;
     int c, c1=0, c2=0;
     int count = 0;
+    NF16noStartCheck(p);
 
-    /* XXX comment going over PE end should be only a validity error,
-       but we treat it as a WF error */
-    
+    if(ParserGetFlag(p, Validate) && VectorCount(p->element_stack) > 0)
+    {
+	ElementDefinition parent = VectorLast(p->element_stack).definition;
+
+	if(parent->type == CT_empty)
+	{
+	   require(validity_error(p, "Comment not allowed in EMPTY element %S",
+				  parent->name));
+	}
+    }
+
     if(!skip)
 	p->pbufnext = 0;
 
@@ -2137,6 +2315,8 @@ static int parse_comment(Parser p, int skip, Entity ent)
 	    
 	if(at_eol(s))
 	{
+	    ifNF16wrong(p,count,count)
+                return error(p, "comment not normalized");
 	    if(!skip)
 	    {
 		require(transcribe(p, count, count));
@@ -2146,9 +2326,15 @@ static int parse_comment(Parser p, int skip, Entity ent)
 	c2 = c1; c1 = c;
     }
 
+    /* XXX comment going over PE end should be only a validity error,
+       but we treat it as a WF error */
+
     if(c == XEOE)
 	return error(p, "EOE in comment");
 
+    ifNF16wrong(p,count,count-3)
+        return error(p, "comment not normalized");
+    NF16StartCheck(p);
     if(skip)
 	return 0;
 
@@ -2168,24 +2354,36 @@ static int parse_pi(Parser p, Entity ent)
     int count = 0;
     Char xml[] = {'x', 'm', 'l', 0};
 
-    /* XXX pi going over PE end should (perhaps?) only be a validity error,
-       but we treat it as a WF error */
+    if(ParserGetFlag(p, Validate) && VectorCount(p->element_stack) > 0)
+    {
+	ElementDefinition parent = VectorLast(p->element_stack).definition;
+
+	if(parent->type == CT_empty)
+	{
+	    require(validity_error(p, "PI not allowed in EMPTY element %S",
+				   parent->name));
+	}
+    }
 
     require(parse_name(p, "after <?"));
     CopyName(p->xbit.pi_name);
 
     p->pbufnext = 0;
+    NF16noStartCheck(p);
 
     if(Strcasecmp(p->xbit.pi_name, xml) == 0)
     {
 	if(ParserGetFlag(p, XMLStrictWFErrors))
-	    return error(p, "Misplaced or wrong-case xml declaration");
+	    return error(p, "Misplaced xml declaration");
 	else if(!ParserGetFlag(p, IgnorePlacementErrors))
-	    warn(p, "Misplaced or wrong-case xml declaration; treating as PI");
+	    warn(p, "Misplaced xml declaration; treating as PI");
     }
 
     if(ParserGetFlag(p, XMLNamespaces) && Strchr(p->xbit.pi_name, ':'))
-	warn(p, "PI name %S contains colon", p->xbit.pi_name);
+    {
+	require(namespace_error(p, "PI name %S contains colon",
+				p->xbit.pi_name));
+    }
 
     /* Empty PI? */
 
@@ -2216,15 +2414,22 @@ static int parse_pi(Parser p, Entity ent)
 	    break;
 	if(at_eol(s))
 	{
+	    ifNF16wrong(p,count,count)
+                return error(p, "PI not normalized");
 	    require(transcribe(p, count, count));
 	    count = 0;
 	}
 	c1 = c;
     }
 
+    /* XXX pi going over PE end should (perhaps?) only be a validity error,
+       but we treat it as a WF error */
+
     if(c == XEOE)
 	return error(p, "EOE in PI");
 
+    ifNF16wrong(p,count,count-(ParserGetFlag(p, XMLSyntax) ? 2 : 1))
+        return error(p, "PI not normalized");
     require(transcribe(p, count, count-(ParserGetFlag(p, XMLSyntax) ? 2 : 1)));
 done:
     p->pbuf[p->pbufnext++] = 0;
@@ -2232,6 +2437,7 @@ done:
     p->xbit.pi_chars = p->pbuf;
     Consume(p->pbuf);
 
+    NF16StartCheck(p);
     return 0;
 }
 
@@ -2241,6 +2447,14 @@ static int parse_string(Parser p, const char8 *where, enum literal_type type, in
     int count = 0;
     InputSource start_source, s;
     int changed = 0;
+
+    /* entities cannot start with combiner, other things can */
+    if (type==LT_param_entity||type==LT_entity) {
+        NF16StartCheck(p);
+    }
+    else {
+        NF16noStartCheck(p);
+    }
 
     s = start_source = p->source;
     
@@ -2275,11 +2489,14 @@ static int parse_string(Parser p, const char8 *where, enum literal_type type, in
 	    }
 	    if(count > 0)
 	    {
+ 	        ifNF16wrong(p,count+1,count)
+		    return error(p, "not normalized: %s", where);
 		require(transcribe(p, count+1, count));
 	    }
 	    count = 0;
 	    ExpandBuf(p->pbuf, p->pbufnext+1);
 	    p->pbuf[p->pbufnext++] = ' ';
+            NF16noStartCheck(p); /* space resets normalization checking */
 	    break;
 
 	case '<':
@@ -2294,6 +2511,8 @@ static int parse_string(Parser p, const char8 *where, enum literal_type type, in
 		return error(p, "Quoted string goes past entity end");
 	    if(count > 0)
 	    {
+ 	        ifNF16wrong(p,count,count)
+		    return error(p, "not normalized: %s", where);
 		require(transcribe(p, count, count));
 	    }
 	    count = 0;
@@ -2309,6 +2528,8 @@ static int parse_string(Parser p, const char8 *where, enum literal_type type, in
 	    }
 	    if(count > 0)
 	    {
+ 	        ifNF16wrong(p,count+1,count)
+		    return error(p, "not normalized: %s", where);
 		require(transcribe(p, count+1, count));
 	    }
 	    count = 0;
@@ -2332,6 +2553,8 @@ static int parse_string(Parser p, const char8 *where, enum literal_type type, in
 
 	    if(count > 0)
 	    {
+ 	        ifNF16wrong(p,count+1,count)
+		    return error(p, "not normalized: %s", where);
 		require(transcribe(p, count+1, count));
 	    }
 	    count = 0;
@@ -2340,7 +2563,7 @@ static int parse_string(Parser p, const char8 *where, enum literal_type type, in
 		   entity definitions otherwise the result when it is
 		   used may be syntactically incorrect. */
 	    {
-		require(parse_character_reference(p, 
+		require(parse_character_reference(p,
 				 type == LT_param_entity || 
 				 ParserGetFlag(p, ExpandCharacterEntities)));
 	    }
@@ -2365,6 +2588,8 @@ static int parse_string(Parser p, const char8 *where, enum literal_type type, in
 
 	if(at_eol(s) && count > 0)
 	{
+ 	    ifNF16wrong(p,count,count)
+		return error(p, "not normalized: %s", where);
 	    require(transcribe(p, count, count));
 	    count = 0;
 	}
@@ -2373,6 +2598,8 @@ static int parse_string(Parser p, const char8 *where, enum literal_type type, in
 done:
     if(count > 0)
     {
+ 	ifNF16wrong(p,count+1,count)
+	    return error(p, "not normalized: %s", where);
 	require(transcribe(p, count+1, count));
     }
     else
@@ -2825,14 +3052,19 @@ static int process_xml_decl(Parser p)
 		if(!(s->entity->version_decl = duptochar8(Value)))
 		    return error(p, "System error");
 
-		if(strcmp8(s->entity->version_decl, "1.0") != 0)
+		if(strcmp8(s->entity->version_decl, "1.0") == 0)
+		    s->entity->xml_version = XV_1_0;
+		else if(strcmp8(s->entity->version_decl, "1.1") == 0)
+		    s->entity->xml_version = XV_1_1;
+		else
 		{
 		    if(ParserGetFlag(p, XMLStrictWFErrors))
 			return error(p, "Version number \"%s\" not supported",
 				     s->entity->version_decl);
 		    warn(p, "Version number \"%s\" not supported, "
-			    "parsing as XML 1.0",
+			    "parsing as XML 1.1",
 			 s->entity->version_decl);
+		    s->entity->xml_version = XV_1_1;
 		}
 	    }
 	}
@@ -2863,6 +3095,7 @@ static int parse_cdata(Parser p)
     InputSource s = p->source;
     int c, c1=0, c2=0;
     int count = 0;
+    NF16StartCheck(p);
 
     if(p->state <= PS_prolog2)
 	return error(p, "CDATA section not allowed in prolog");
@@ -2889,6 +3122,8 @@ static int parse_cdata(Parser p)
 	    break;
 	if(at_eol(s))
 	{
+            ifNF16wrong(p,count,count)
+                return error(p, "CDATA section not normalized");
 	    require(transcribe(p, count, count));
 	    count = 0;
 	}
@@ -2898,12 +3133,15 @@ static int parse_cdata(Parser p)
     if(c == XEOE)
 	return error(p, "EOE in CDATA section");
 
+    ifNF16wrong(p,count,count)
+        return error(p, "CDATA section not normalized");
     require(transcribe(p, count, count-3));
     p->pbuf[p->pbufnext++] = 0;
     p->xbit.type = XBIT_cdsect;
     p->xbit.cdsect_chars = p->pbuf;
     Consume(p->pbuf);
 
+    NF16StartCheck(p);
     return 0;
 }
 
@@ -2912,7 +3150,7 @@ XBit ParseDtd(Parser p, Entity e)
     InputSource source, save;
 
     if(e->type == ET_external && p->entity_opener)
-	source = p->entity_opener(e, p->callback_arg);
+	source = p->entity_opener(e, p->entity_opener_arg);
     else
 	source = EntityOpen(e);
     if(!source)
@@ -2950,10 +3188,10 @@ XBit ParseDtd(Parser p, Entity e)
  */
 static int parse_markupdecl(Parser p)
 {
-    InputSource s;
+    InputSource s, t;
     int c;
     int cur_line, cur_char;
-    Entity cur_ent;
+    Entity cur_ent, cur_ext_ent = 0;
 
     if(p->state == PS_error)
 	return error(p, "Attempt to continue reading DTD after error");
@@ -2967,6 +3205,18 @@ static int parse_markupdecl(Parser p)
     cur_ent = s->entity;
     cur_line = s->line_number;
     cur_char = s->next;
+
+    /* Find the current *external* entity, to use as base URI for system
+       identifiers */
+
+    for(t = s; t; t = t->parent)
+	if(t->entity->type == ET_external)
+	{
+	    cur_ext_ent = t->entity;
+	    break;
+	}
+    if(!cur_ext_ent)
+	cur_ext_ent = p->document_entity;
 
     c = get(s);
     switch(c)
@@ -2990,7 +3240,8 @@ static int parse_markupdecl(Parser p)
 	else if(looking_at(p, "!ENTITY"))
 	{
 	    require(expect_dtd_whitespace(p, "after ENTITY"));
-	    return parse_entity_decl(p, cur_ent, cur_line, cur_char);
+	    return parse_entity_decl(p, cur_ent, cur_line, cur_char, 
+				     cur_ext_ent);
 	}
 	else if(looking_at(p, "!NOTATION"))
 	{
@@ -3003,7 +3254,7 @@ static int parse_markupdecl(Parser p)
 	{
 	    require(parse_pi(p, cur_ent));
 	    if(p->dtd_callback)
-		p->dtd_callback(&p->xbit, p->callback_arg);
+		p->dtd_callback(&p->xbit, p->dtd_callback_arg);
 	    else
 		FreeXBit(&p->xbit);
 	    return 0;
@@ -3014,7 +3265,7 @@ static int parse_markupdecl(Parser p)
 	    {
 		require(parse_comment(p, 0, cur_ent));
 		if(p->dtd_callback)
-		    p->dtd_callback(&p->xbit, p->callback_arg);
+		    p->dtd_callback(&p->xbit, p->dtd_callback_arg);
 		else
 		    FreeXBit(&p->xbit);
 		return 0;
@@ -3040,6 +3291,17 @@ static int parse_reference(Parser p, int pe, int expand, int allow_external)
 
     require(parse_name(p, pe ? "for parameter entity" : "for entity"));
     require(expect(p, ';', "after entity name"));
+
+    if(ParserGetFlag(p, Validate) && VectorCount(p->element_stack) > 0)
+    {
+	ElementDefinition parent = VectorLast(p->element_stack).definition;
+
+	if(parent->type == CT_empty)
+	{
+	   require(validity_error(p, "Entity reference not allowed in EMPTY element %S",
+				  parent->name));
+	}
+    }
 
     if(!expand)
 	return transcribe(p, 1 + p->namelen + 1, 1 + p->namelen + 1);
@@ -3078,7 +3340,10 @@ static int parse_reference(Parser p, int pe, int expand, int allow_external)
 	    return error(p, "System error");
 
 	if(ParserGetFlag(p, XMLNamespaces) && Strchr(e->name, ':'))
-	    warn(p, "Entity name %S contains colon", e->name);
+	{
+	    require(namespace_error(p, "Entity name %S contains colon",
+				    e->name));
+	}
     }
 
     if(e->type == ET_external && e->notation)
@@ -3110,7 +3375,7 @@ static int parse_reference(Parser p, int pe, int expand, int allow_external)
     }
 
     if(e->type == ET_external && p->entity_opener)
-	s = p->entity_opener(e, p->callback_arg);
+	s = p->entity_opener(e, p->entity_opener_arg);
     else
 	s = EntityOpen(e);
     if(!s)
@@ -3118,6 +3383,7 @@ static int parse_reference(Parser p, int pe, int expand, int allow_external)
 		     e->name, EntityDescription(e));
     
     require(ParserPush(p, s));
+    NF16StartCheck(p);
 
     return 0;
 }
@@ -3170,8 +3436,14 @@ static int parse_character_reference(Parser p, int expand)
 	    code = code * base + 10 + (c - 'a');
     }
 
+/* allow refs to C0 and C1 controls except NUL in XML 1.1 */
+#define is_xml11_legal_control(c) \
+    ((c >= 0x01 && c <= 0x1f) || (c >= 0x7f && c <= 0x9f))
+
 #if CHAR_SIZE == 8
-    if(code > 255 || !is_xml_legal(code))
+    if(code > 255 ||
+       !(is_xml_legal(code, p->map) ||
+	 (p->xml_version >= XV_1_1 && is_xml11_legal_control(code))))
     {
 	if(ParserGetFlag(p, ErrorOnBadCharacterEntities))
 	    return error(p, "0x%x is not a valid 8-bit XML character", code);
@@ -3180,7 +3452,8 @@ static int parse_character_reference(Parser p, int expand)
 	return 0;
     }
 #else
-    if(!is_xml_legal(code))
+    if(!(is_xml_legal(code, p->map) |
+	 (p->xml_version >= XV_1_1 && is_xml11_legal_control(code))))
     {
 	if(ParserGetFlag(p, ErrorOnBadCharacterEntities))
 	    return error(p, "0x%x is not a valid UTF-16 XML character", code);
@@ -3198,6 +3471,9 @@ static int parse_character_reference(Parser p, int expand)
 
 	p->pbuf[p->pbufnext++] = (code >> 10) + 0xd800;
 	p->pbuf[p->pbufnext++] = (code & 0x3ff) + 0xdc00;
+        if(p->checker && NF16wrong==nf16checkL(p->checker,
+			    p->pbuf + p->pbufnext - 2, 2))
+           return error(p, "numeric character reference not normalized");
 
 	return 0;
     }
@@ -3205,6 +3481,10 @@ static int parse_character_reference(Parser p, int expand)
 
     ExpandBuf(p->pbuf, p->pbufnext+1);
     p->pbuf[p->pbufnext++] = code;
+    if(p->checker && NF16wrong==nf16checkL(p->checker,
+		        p->pbuf + p->pbufnext - 1, 1))
+       return error(p, "numeric character reference not normalized");
+
 
     return 0;
 }
@@ -4013,7 +4293,8 @@ static int parse_external_id(Parser p, int required,
 
 /* Called after reading '<!ENTITY ' */
 
-static int parse_entity_decl(Parser p, Entity ent, int line, int chpos)
+static int parse_entity_decl(Parser p, Entity ent, int line, int chpos, 
+			     Entity ext_ent)
 {
     Entity e, old, tent;
     int pe, t, namelen;
@@ -4030,7 +4311,9 @@ static int parse_entity_decl(Parser p, Entity ent, int line, int chpos)
     CopyName(name);
 
     if(ParserGetFlag(p, XMLNamespaces) && Strchr(name, ':'))
-	    warn(p, "Entity name %S contains colon", name);
+    {
+	require(namespace_error(p, "Entity name %S contains colon", name));
+    }
 
     require(expect_dtd_whitespace(p, "after name in entity declaration"));
 
@@ -4048,6 +4331,12 @@ static int parse_entity_decl(Parser p, Entity ent, int line, int chpos)
 	    return error(p, "System error");
 	if(parsing_external_subset(p))
 	    e->is_externally_declared = 1;
+#if 0
+	Fprintf(Stderr, "internal %s entity %S\n",
+		pe ? "parameter" : "general", name);
+	Fprintf(Stderr, "base: %s\nreplacement text: %S\n",
+		e->base_url ? e->base_url : "<null>", e->text);
+#endif
     }
     else if(p->state == PS_error)	/* looking_at may have set it */
 	return -1;
@@ -4077,17 +4366,30 @@ static int parse_entity_decl(Parser p, Entity ent, int line, int chpos)
 		    return error(p, "System error");
 		if(ParserGetFlag(p, XMLNamespaces) && 
 		   Strchr(notation->name, ':'))
-		    warn(p, "Notation name %S contains colon", notation->name);
+		{
+		    require(namespace_error(p,
+					    "Notation name %S contains colon",
+					    notation->name));
+		}
 	    }
 	}
 	if(p->state == PS_error)	/* looking_at may have set it */
 	    return -1;
 
+	/* XXX we make the current external entity the parent so that
+	   system IDs are resoved correctly.  Should we instead record
+	   both parents? */
 	if(!(e = NewExternalEntityN(name, namelen,
-				    publicid, systemid, notation, ent)))
+				    publicid, systemid, notation, ext_ent)))
 	    return error(p, "System error");
 	if(parsing_external_subset(p) || ent->is_externally_declared)
 	    e->is_externally_declared = 1;
+#if 0
+	Fprintf(Stderr, "external %s entity %S\n",
+		pe ? "parameter" : "general", name);
+	Fprintf(Stderr, "base: %s\nsystem identifier: %s\n",
+		e->base_url ? e->base_url : "<null>", e->systemid);
+#endif
     }
 
     Free(name);
@@ -4191,7 +4493,10 @@ static int parse_notation_decl(Parser p, Entity ent)
 	if(!DefineNotation(p->dtd, name, publicid, systemid, ent))
 	    return error(p, "System error");
 	if(ParserGetFlag(p, XMLNamespaces) && Strchr(name, ':'))
-	    warn(p, "Notation name %S contains colon", name);
+	{
+	    require(namespace_error(p, "Notation name %S contains colon",
+				    name));
+	}
     }
 
     Free(name);
@@ -4221,7 +4526,7 @@ static int parse_conditional(Parser p, Entity ent)
 	}	
 
 	require(skip_dtd_whitespace(p, p->external_pe_depth > 0));
-	tent = p->source->entity;
+
 	while(!looking_at(p, "]"))
 	{
 	    switch(parse_markupdecl(p))
@@ -4233,15 +4538,16 @@ static int parse_conditional(Parser p, Entity ent)
 	    }
 	    require(skip_dtd_whitespace(p, p->external_pe_depth > 0));
 	}
+	tent = p->source->entity;
+
+	if(!looking_at(p, "]>"))
+	    return error(p, "]> required after ] in conditional section");
 
 	if(ParserGetFlag(p, Validate) && tent != ent)
 	{
 	    require(validity_error(p, "] of conditional section in "
 				      "different entity from <!["));
 	}
-
-	if(!looking_at(p, "]>"))
-	    return error(p, "]> required after ] in conditional section");
     }
     else if(looking_at(p, "IGNORE"))
     {
@@ -4258,7 +4564,6 @@ static int parse_conditional(Parser p, Entity ent)
 
 	while(depth > 0)
 	{
-	    tent = p->source->entity;
 	    switch(get(p->source))
 	    {
 	    case BADCHAR:
@@ -4274,6 +4579,7 @@ static int parse_conditional(Parser p, Entity ent)
 		    depth++;
 		break;
 	    case ']':
+		tent = p->source->entity;
 		if(looking_at(p, "]>"))
 		    depth--;
 	    }
@@ -4364,7 +4670,7 @@ static int warn(Parser p, const char8 *format, ...)
     bit.type = XBIT_warning;
 
     if(p->warning_callback)
-	p->warning_callback(&bit, p->callback_arg);
+	p->warning_callback(&bit, p->warning_callback_arg);
     else
 	ParserPerror(p, &bit);
 
@@ -4455,7 +4761,8 @@ static int validate_dtd(Parser p)
 	    if(a->default_value)
 	    {
 		require(check_attribute_syntax(p, a, e, a->default_value,
-					       "default value for attribute"));
+					       "default value for attribute",
+					       0));
 	    }
 	    if(a->type == AT_notation)
 	    {
@@ -4958,7 +5265,7 @@ next:
 
 static int validate_attribute(Parser p, AttributeDefinition a, ElementDefinition e, const Char *value)
 {
-    require(check_attribute_syntax(p, a, e, value, "attribute"));
+    require(check_attribute_syntax(p, a, e, value, "attribute", 1));
 
     if(a->default_type == DT_fixed)
 	if(Strcmp(value, a->default_value) != 0)
@@ -5030,7 +5337,7 @@ static int validate_xml_lang_attribute(Parser p, ElementDefinition e, const Char
    Assume it has already been normalised (no leading or trailing
    whitespace, other whitespace normalised to single space). */
 
-static int check_attribute_syntax(Parser p, AttributeDefinition a, ElementDefinition e, const Char *value, const char *message)
+static int check_attribute_syntax(Parser p, AttributeDefinition a, ElementDefinition e, const Char *value, const char *message, int real_use)
 {
     int nmchar = (a->type == AT_nmtoken || a->type == AT_nmtokens ||
 		  a->type == AT_enumeration);
@@ -5053,7 +5360,7 @@ static int check_attribute_syntax(Parser p, AttributeDefinition a, ElementDefini
 
     for(q=value; *q; q++)
     {
-	if(!nmchar && q == start && !is_xml_namestart(*q))
+	if(!nmchar && q == start && !is_xml_namestart(*q, p->map))
 	{
 	    require(validity_error(p, "The %s %S of element %S "
 				   "is declared as %s but contains a token "
@@ -5065,7 +5372,8 @@ static int check_attribute_syntax(Parser p, AttributeDefinition a, ElementDefini
 
 	if(*q == ' ')
 	{
-	    require(check_attribute_token(p, a, e, start, q-start, message));
+	    require(check_attribute_token(p, a, e, start, q-start, message, 
+					  real_use));
 	    start = q+1;
 	    
 	    if(!multiple)
@@ -5077,7 +5385,7 @@ static int check_attribute_syntax(Parser p, AttributeDefinition a, ElementDefini
 				       AttributeTypeName[a->type]));
 	    }
 	}
-	else if(!is_xml_namechar(*q))
+	else if(!is_xml_namechar(*q, p->map))
 	{
 	    require(validity_error(p, "The %s %S of element %S is declared "
 				      "as %s but contains a character which "
@@ -5088,10 +5396,10 @@ static int check_attribute_syntax(Parser p, AttributeDefinition a, ElementDefini
 	}
     }
 
-    return check_attribute_token(p, a, e, start, q-start, message);
+    return check_attribute_token(p, a, e, start, q-start, message, real_use);
 }
 
-static int check_attribute_token(Parser p, AttributeDefinition a, ElementDefinition e, const Char *value, int length, const char *message)
+static int check_attribute_token(Parser p, AttributeDefinition a, ElementDefinition e, const Char *value, int length, const char *message, int real_use)
 {
     Entity entity;
     NotationDefinition notation;
@@ -5102,6 +5410,10 @@ static int check_attribute_token(Parser p, AttributeDefinition a, ElementDefinit
     {
     case AT_entity:
     case AT_entities:
+	if(!real_use)
+	    return 0;		/* don't check defaults unless they're used */
+	/* XXX Should maybe check for colons, but it must be invalid anyway
+	   because otherwise the declaration would have been not-nwf */
 	entity = FindEntityN(p->dtd, value, length, 0);
 	if(!entity)
 	{
@@ -5119,6 +5431,8 @@ static int check_attribute_token(Parser p, AttributeDefinition a, ElementDefinit
     case AT_idref:
     case AT_idrefs:
     case AT_id:
+	if(!real_use)
+	    return 0;		/* don't check defaults unless they're used */
 	id_entry = hash_find_or_add(p->id_table, value, length*sizeof(Char),
 				    &found);
 	if(!id_entry)
@@ -5130,8 +5444,7 @@ static int check_attribute_token(Parser p, AttributeDefinition a, ElementDefinit
 		for(i=0; i<length; i++)
 		    if(value[i] == ':')
 		    {
-			warn(p, "ID %.*S contains colon", length, value);
-			break;
+			require(namespace_validity_error(p, "ID %.*S contains colon", length, value));
 		    }
 	}
 	else if(a->type == AT_id)
@@ -5146,6 +5459,8 @@ static int check_attribute_token(Parser p, AttributeDefinition a, ElementDefinit
 	}
 	break;
     case AT_notation:
+	/* XXX Should maybe check for colons, but it must be invalid anyway
+	   because otherwise the declaration would have been not-nwf */
 	notation = FindNotationN(p->dtd, value, length);
 	if(!notation)
 	{

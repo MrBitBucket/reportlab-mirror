@@ -8,8 +8,13 @@
 #include "ctype16.h"
 
 static void init_xml_chartypes(void);
+static void init_xml_chartypes_11(void);
 
 unsigned char xml_char_map[1 << CHAR_SIZE];
+#if CHAR_SIZE == 16
+/* we always use the 1.0 map in 8-bit mode */
+unsigned char xml_char_map_11[1 << CHAR_SIZE];
+#endif
 
 int init_ctype16(void)
 {    
@@ -18,6 +23,7 @@ int init_ctype16(void)
     if(!init_done)
     {
 	init_xml_chartypes();
+	init_xml_chartypes_11();
 	init_done = 1;
     }
 
@@ -490,5 +496,107 @@ static void init_xml_chartypes(void)
     
 #undef X
 
+#endif
+}
+
+static void init_xml_chartypes_11(void)
+{
+#if CHAR_SIZE == 16
+
+    int i;
+
+    for(i = 0; i < 1 << CHAR_SIZE; i++)
+	xml_char_map_11[i] = 0;
+
+    /* Legal ASCII characters */
+
+    xml_char_map_11['\t'] |= xml_legal;
+    xml_char_map_11['\r'] |= xml_legal;
+    xml_char_map_11['\n'] |= xml_legal;
+    for(i = ' '; i <= 126; i++)	/* not DEL in 1.1 */
+	xml_char_map_11[i] |= xml_legal;
+
+    /* ASCII Letters */
+
+    for(i = 'a'; i <= 'z'; i++)
+	xml_char_map_11[i] |= (xml_namestart | xml_namechar);
+    for(i = 'A'; i <= 'Z'; i++)
+	xml_char_map_11[i] |= (xml_namestart | xml_namechar);
+
+    /* ASCII Digits */
+
+    for(i = '0'; i <= '9'; i++)
+	xml_char_map_11[i] |= xml_namechar;
+
+    /* ASCII Whitespace */
+
+    xml_char_map_11[' '] |= xml_whitespace;
+    xml_char_map_11['\t'] |= xml_whitespace;
+    xml_char_map_11['\r'] |= xml_whitespace;
+    xml_char_map_11['\n'] |= xml_whitespace;
+
+    /* ASCII Others */
+
+    xml_char_map_11['_'] |= (xml_namestart | xml_namechar);
+    xml_char_map_11[':'] |= (xml_namestart | xml_namechar);
+
+    xml_char_map_11['.'] |= xml_namechar;
+    xml_char_map_11['-'] |= xml_namechar;
+
+    /* Legal Unicode characters */
+
+    xml_char_map_11[0x85] |= xml_legal;
+
+    for(i = 0xa0; i <= 0xd7ff; i++)
+	xml_char_map_11[i] |= xml_legal;
+    for(i = 0xe000; i <= 0xfffd; i++)
+	xml_char_map_11[i] |= xml_legal;
+
+    /* Name characters from productions 4 and 4a */
+
+    xml_char_map_11[0xb7] |= xml_namechar;
+    for(i = 0xc0; i <= 0xd6; i++)
+	xml_char_map_11[i] |= (xml_namestart | xml_namechar);
+    for(i = 0xd8; i <= 0xf6; i++)
+	xml_char_map_11[i] |= (xml_namestart | xml_namechar);
+    for(i = 0xf8; i <= 0x2ff; i++)
+	xml_char_map_11[i] |= (xml_namestart | xml_namechar);
+    for(i = 0x300; i <= 0x36f; i++)
+	xml_char_map_11[i] |= xml_namechar;
+    for(i = 0x370; i <= 0x037d; i++)
+	xml_char_map_11[i] |= (xml_namestart | xml_namechar);
+    for(i = 0x37f; i <= 0x01fff; i++)
+	xml_char_map_11[i] |= (xml_namestart | xml_namechar);
+    for(i = 0x200c; i <= 0x200d; i++)
+	xml_char_map_11[i] |= (xml_namestart | xml_namechar);
+    for(i = 0x203f; i <= 0x2040; i++)
+	xml_char_map_11[i] |= xml_namechar;
+    for(i = 0x2070; i <= 0x218f; i++)
+	xml_char_map_11[i] |= (xml_namestart | xml_namechar);
+    for(i = 0x2c00; i <= 0x2fef; i++)
+	xml_char_map_11[i] |= (xml_namestart | xml_namechar);
+    for(i = 0x3001; i <= 0xd7ff; i++)
+	xml_char_map_11[i] |= (xml_namestart | xml_namechar);
+    for(i = 0xf900; i <= 0xfdcf; i++)
+	xml_char_map_11[i] |= (xml_namestart | xml_namechar);
+    for(i = 0xfdf0; i <= 0xfffd; i++)
+	xml_char_map_11[i] |= (xml_namestart | xml_namechar);
+
+    /* Allow both 0x10000 - 0xeffff and the corresponding surrogates in
+       names, since we actually test UTF-16 codes rather than Unicode 
+       code points.   If the surrogates weren't legally paired, they
+       would already have been rejected.
+    */
+
+    for(i = 0x1; i <= 0xe; i++)
+	xml_char_map_11[i] |= xml_nameblock;
+
+    /* All low surrogates */
+    for(i = 0xdc00; i <= 0xdfff; i++)
+	xml_char_map_11[i] |= (xml_namestart | xml_namechar);
+    /* High surrogates corresponding to codes up to 0xeffff */
+    for(i = 0xd800; i <= 0xdb7f; i++)
+	xml_char_map_11[i] |= (xml_namestart | xml_namechar);
+    
 #endif
 }

@@ -105,6 +105,7 @@ InputSource NewInputSource(Entity e, FILE16 *f16)
 
     source->reader = 
 	(e->type == ET_external) ? external_reader :internal_reader;
+    source->map = xml_char_map;	/* 1.0 map unless changed by parser */
 
     source->file16 = f16;
 
@@ -190,6 +191,7 @@ int SourceTell(InputSource s)
     case CE_ISO_10646_UCS_2L:
     case CE_UTF_16L:
 	return s->bytes_before_current_line + 2 * s->next;
+    case CE_ISO_646:
     case CE_ISO_8859_1:
     case CE_ISO_8859_2:
     case CE_ISO_8859_3:
@@ -310,7 +312,7 @@ static void internal_reader(InputSource s)
  * have enough space.
  * Returns zero at end of line or error, one if more input is needed.
  * In the case of an error (encoding error or illegal XML character) we
- * set s->seen_error and put a SUB (ctrl-Z) in the output as a marker.
+ * set s->seen_error and put a BADCHAR in the output as a marker.
  */
 
 
@@ -323,6 +325,7 @@ static void internal_reader(InputSource s)
     const int insize = s->insize; \
     const int startin = s->nextin; \
     Char * const outbuf = s->line; \
+    unsigned char *map = s->map; \
 \
     /* local copies of fields of s, that are modified (and restored) */ \
 \
@@ -333,7 +336,7 @@ static void internal_reader(InputSource s)
 #define ERROR_CHECK \
     if(c == -1) \
     { \
-	/* There was an error.  Put a SUB character (ctl-Z) in \
+	/* There was an error.  Put a BADCHAR character (see input.h) in \
 	   as a marker, and end the line. */ \
 	outbuf[nextout++] = BADCHAR; \
 	s->seen_error = 1; \
@@ -341,7 +344,8 @@ static void internal_reader(InputSource s)
     }
 
 #define LINEFEED \
-    if(c == '\n' && ignore_linefeed) \
+    if((c == '\n' || (c == 0x85 && map == xml_char_map_11)) && \
+       ignore_linefeed) \
     { \
 	/* Ignore lf at start of line if last line ended with cr */ \
 	ignore_linefeed = 0; \
@@ -355,7 +359,9 @@ static void internal_reader(InputSource s)
     { \
 	s->line_end_was_cr = 1; \
 	c = '\n'; \
-    }
+    } \
+    if((c == 0x85 || c == 0x2028) && map == xml_char_map_11) \
+        c = '\n';
 
 #define OUTPUT \
     outbuf[nextout++] = c; \
@@ -400,7 +406,7 @@ static int translate_8bit(InputSource s)
     {
 	c = inbuf[nextin++];
 
-	if(!is_xml_legal(c))
+	if(!is_xml_legal(c, map))
 	{
 	    sprintf(s->error_msg,
 		    "Illegal character <0x%x> at file offset %d",
@@ -438,7 +444,7 @@ static int translate_latin(InputSource s)
 		    inbuf[nextin-1], CharacterEncodingName[enc],
 		    s->bytes_consumed + nextin - 1 - startin);
 	}
-	else if(!is_xml_legal(c))
+	else if(!is_xml_legal(c, map))
 	{
 	    sprintf(s->error_msg,
 		    "Illegal character <0x%x> "
@@ -466,7 +472,7 @@ static int translate_latin1(InputSource s)
     while(nextin < insize)
     {
 	c = inbuf[nextin++];
-	if(!is_xml_legal(c))
+	if(!is_xml_legal(c, map))
 	{
 	    sprintf(s->error_msg,
 		    "Illegal character <0x%x> "
@@ -570,8 +576,7 @@ static int translate_utf8(InputSource s)
 	}
 
     gotit:
-	if(c > 0x110000 ||
-	   (c >=0 && c < 0x10000 && !is_xml_legal(c)))
+	if(c >= 0 && !is_xml_legal(c, map))
 	{
 	    sprintf(s->error_msg,
 		    "Illegal character <0x%x> "
@@ -639,10 +644,9 @@ static int translate_utf16(InputSource s)
 	if(c >= 0xd800 && c <= 0xdbff) /* high (1st) surrogate */
 	    s->expecting_low_surrogate = 1;
 
-	if(c > 0x110000 ||
+	if(c >= 0 && !is_xml_legal(c, map) &&
 	   /* surrogates are legal in utf-16 */
-	   (c >= 0     && c < 0xd800  && !is_xml_legal(c)) ||
-	   (c > 0xdfff && c < 0x10000 && !is_xml_legal(c)))
+	   !(c >= 0xd800 && c <= 0xdfff))
 	{
 	    sprintf(s->error_msg,
 		    "Illegal character <0x%x> "

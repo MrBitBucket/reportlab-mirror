@@ -36,7 +36,7 @@ static void cdsect(FILE16 *f, int level, Dtd dtd, XBit bit);
 static void pcdata(FILE16 *f, int level, Dtd dtd, XBit bit);
 static void comment(FILE16 *f, int level, Dtd dtd, XBit bit);
 static void name(FILE16 *f, int level, 
-		 const char8 *uri, const Char *local, const Char *prefix);
+		 const Char *nsname, const Char *local, const Char *prefix);
 static void document_element(FILE16 *f, int level, XBit bit);
 static void character(FILE16 *f, int level, Dtd dtd, char *ecw, int c);
 static void attributes(FILE16 *f, int level, Dtd dtd, XBit bit, 
@@ -67,6 +67,10 @@ static void find_ids(Dtd dtd, XBit *bits, int nbits, HashTable id_table,
 		     int *counter);
 
 struct xbit bogus_bit;
+
+static Char xmlns_ns[] = {'h','t','t','p',':','/','/','w','w','w','.','w', '3',
+			  '.','o','r','g','/','2','0','0','0','/','x', 'm','l',
+			  'n','s','/',0};
 
 void infoset_print(FILE16 *f, Parser p, XBit *bits, int nbits)
 {
@@ -381,7 +385,7 @@ static void element(FILE16 *f, int level, Dtd dtd, XBit bit,
 
     name(f, level+1,
 	 bit->ns_element_definition ? 
-  	   bit->ns_element_definition->namespace->uri : 0,
+  	   bit->ns_element_definition->namespace->nsname : 0,
 	 bit->element_definition->local,
 	 bit->element_definition->prefix);
 
@@ -517,7 +521,7 @@ static void namespace_attributes(FILE16 *f, int level, Dtd dtd, XBit bit, HashTa
 static void attribute(FILE16 *f, int level, Dtd dtd, Attribute a,
 		      HashTable id_table)
 {
-    char8 *nsname;
+    Char *nsname;
     Char **token = 0;
     int ntokens = 0, i;
     Char **id = 0;
@@ -529,9 +533,9 @@ static void attribute(FILE16 *f, int level, Dtd dtd, Attribute a,
     Fprintf(f, "<attribute>\n");
 
     if(a->ns_definition)
-	nsname = a->ns_definition->namespace->uri;
+	nsname = a->ns_definition->namespace->nsname;
     else if(a->definition->ns_attr_prefix)
-	nsname = "http://www.w3.org/2000/xmlns/";
+	nsname = xmlns_ns;
     else
 	nsname = 0;
 
@@ -658,7 +662,7 @@ static void inscope_namespaces(FILE16 *f, int level, Dtd dtd, XBit bit)
 
 	Simple(f, level+2, "prefix", nsb->prefix ? nsb->prefix : empty);
 
-	simple(f, level+2, "namespaceName", nsb->namespace->uri);
+	Simple(f, level+2, "namespaceName", nsb->namespace->nsname);
 
 	indent(f, level+1);
 	Fprintf(f, "</namespace>\n");
@@ -671,9 +675,9 @@ static void inscope_namespaces(FILE16 *f, int level, Dtd dtd, XBit bit)
 }
 
 static void name(FILE16 *f, int level, 
-		 const char8 *uri, const Char *local, const Char *prefix)
+		 const Char *nsname, const Char *local, const Char *prefix)
 {
-    simple(f, level, "namespaceName", uri);
+    Simple(f, level, "namespaceName", nsname);
     Simple(f, level, "localName", local);
     Simple(f, level, "prefix", prefix);
 }

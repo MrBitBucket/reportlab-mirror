@@ -37,7 +37,7 @@ if __name__=='__main__': #NO RUNTESTS
 
 	rxpFiles = ('xmlparser.c', 'url.c', 'charset.c', 'string16.c', 'ctype16.c', 
                 'dtd.c', 'input.c', 'stdio16.c', 'system.c', 'hash.c', 
-                'version.c', 'namespaces.c', 'http.c')
+                'version.c', 'namespaces.c', 'http.c', 'nf16check.c', 'nf16data.c')
 	RXPLIBSOURCES=[]
 	RXPDIR='rxp'
 	for f in rxpFiles:

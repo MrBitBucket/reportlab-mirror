@@ -30,7 +30,7 @@ static char* __version__=" $Id$ ";
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "1.03"
+#define VERSION "1.04"
 #define MAX_DEPTH 256
 
 #if CHAR_SIZE==16
@@ -218,6 +218,12 @@ The python module exports the following\n\
             If this is on, the parser returns for each CDATA section a tuple\n\
             with name field equal to CDATATagName containing a single string\n\
             in its third field that is the CDATA section.\n\
+        XML11CheckNF = 0\n\
+            If this is set the parser will check for unicode normalization and\n\
+            is only relevant with XML 1.1 documents.\n\
+        XML11CheckExists = 0\n\
+            Controls whether unknown characters are present. It is only effective\n\
+            when XML11CheckNF is set and the document is XML 1.1.\n\
 ";
 
 /*alter the integer values to change the module defaults*/
@@ -256,13 +262,16 @@ static struct {char* k;long v;} flag_vals[]={
 	{"RelaxedAny",0},
 	{"ReturnNamespaceAttributes",0},
 	{"ProcessDTD",0},
+	{"XML11Syntax",0},
+	{"XML11CheckNF",0},
+	{"XML11CheckExists",0},
 	{"ReturnList",0},
 	{"ExpandEmpty",0},
 	{"MakeMutableTree",0},
 	{"ReturnProcessingInstructions",0},
 	{"ReturnCDATASectionsAsTuples",0},
 	{0}};
-#define LASTRXPFLAG ProcessDTD
+#define LASTRXPFLAG XML11CheckExists
 #define ReturnList (ParserFlag)(1+(int)LASTRXPFLAG)
 #define ExpandEmpty (ParserFlag)(1+(int)ReturnList)
 #define MakeMutableTree (ParserFlag)(1+(int)ExpandEmpty)
@@ -389,7 +398,7 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 {
 	int	r = 0, empty;
 	PyObject	*t, *s;
-	ParserDetails*	pd = (ParserDetails*)(p->callback_arg);
+	ParserDetails*	pd = (ParserDetails*)(p->warning_callback_arg);
 	switch(bit->type) {
 		case XBIT_eof: break;
 		case XBIT_error:
@@ -580,7 +589,7 @@ PyObject *ProcessSource(Parser p, InputSource source)
 	int			r, depth, i;
 	PyObject	*stack[MAX_DEPTH];
 	PyObject	*retVal = 0;
-	ParserDetails*	pd = (ParserDetails*)(p->callback_arg);
+	ParserDetails*	pd = (ParserDetails*)(p->warning_callback_arg);
 
 	if(ParserPush(p, source) == -1) {
 		PyErr_FromStderr(p,"Internal error, ParserPush failed!");
@@ -776,12 +785,15 @@ static PyObject* pyRXPParser_parse(pyRXPParserObject* xself, PyObject* args, PyO
 
 	p = NewParser();
 	CB.p = p;
-	ParserSetCallbackArg(p, &CB);
+	ParserSetWarningCallbackArg(p, &CB);
 	p->flags[0] = self->flags[0];
 	p->flags[1] = self->flags[1];
 	if((self->warnCB && self->warnCB!=Py_None) || (self->eoCB && self->eoCB!=Py_None)){
 		if(self->warnCB && self->warnCB!=Py_None) ParserSetWarningCallback(p, myWarnCB);
-		if(self->eoCB && self->eoCB!=Py_None) ParserSetEntityOpener(p, entity_open);
+		if(self->eoCB && self->eoCB!=Py_None){
+			ParserSetEntityOpener(p, entity_open);
+			ParserSetEntityOpenerArg(p, &CB);
+			}
 		}
 	CB.none_on_empty = !__GetFlag(self,ExpandEmpty);
 	if(__GetFlag(self,MakeMutableTree)){

@@ -16,6 +16,7 @@
 #include "version.h"
 #include "namespaces.h"
 #include "infoset-print.h"
+#include "catalog.h"
 
 int attr_compare(const void *a, const void *b);
 void print_tree(Parser p, XBit bit);
@@ -24,6 +25,8 @@ void print_ns_attrs(NamespaceBinding ns, int count);
 void print_namespaces(NamespaceBinding ns);
 void print_attrs(ElementDefinition e, Attribute a);
 void print_text(Char *text);
+int printable(int c);
+void print_special(int c);
 void print_text_bit(Char *text);
 void dtd_cb(XBit bit, void *arg);
 void dtd_cb2(XBit bit, void *arg);
@@ -34,12 +37,13 @@ static const char8 *minimal_uri(const char8 *uri, const char8 *base);
 int verbose = 0, expand = 1, nsgml = 0,
     attr_defaults = 0, merge = 0, strict_xml = 0, tree = 0, validate = 0,
     xml_space = 0, namespaces = 0, simple_error = 0, experiment = 0,
-    read_dtd = 0;
-enum {o_unspec, o_none, o_bits, o_plain, o_can1, o_can2, o_can3, o_infoset} output_format = o_unspec;
+    read_dtd = 0, unicode_check = 0;
+enum {o_unspec, o_none, o_bits, o_plain, o_can1, o_can2, o_can3, o_infoset, o_diff} output_format = o_unspec;
 char *enc_name = 0, *base_uri = 0;
 CharacterEncoding encoding = CE_unknown;
 InputSource source = 0;
 int need_canonical_dtd = 0;
+int xml_version;
 
 #define canonical_output (output_format >= o_can1)
 
@@ -115,6 +119,9 @@ int main(int argc, char **argv)
 		    attr_defaults = 1;
 		    merge = 0;
 		    break;
+		case 'd':
+		    output_format = o_diff;
+		    break;
 		default:
 		    fprintf(stderr, "bad output format %s\n", argv[i]);
 		    return 1;
@@ -161,6 +168,28 @@ int main(int argc, char **argv)
 		}
 		base_uri = argv[i];
 		break;
+	    case 'U':
+		if(++i >= argc)
+		{
+		    fprintf(stderr, "-U requires argument\n");
+		    return 1;
+		}
+		switch(argv[i][0])
+		{
+		case '0':
+		    unicode_check = 0;
+		    break;
+		case '1':
+		    unicode_check = 1;
+		    break;
+		case '2':
+		    unicode_check = 2;
+		    break;
+		default:
+		    fprintf(stderr, "bad Unicode check level %s\n", argv[i]);
+		    return 1;
+		}
+		break;
 	    case 'd':
 		read_dtd = 1;
 		break;
@@ -169,7 +198,7 @@ int main(int argc, char **argv)
 		break;
 	    default:
 		fprintf(stderr, 
-			"usage: rxp [-abemnNsStvVx] [-o b|0|1|2|3] [-c encoding] [-u base_uri] [url]\n");
+			"usage: rxp [-abemnNsStvVx] [-o b|0|1|2|3|i|d] [-U 0|1|2] [-c encoding] [-u base_uri] [url]\n");
 		return 1;
 	    }
     }
@@ -179,14 +208,25 @@ int main(int argc, char **argv)
     if(verbose)
 	fprintf(stderr, "%s\n", rxp_version_string);
 
+    p = NewParser();
+    CatalogEnable(p);
+
     if(i < argc)
     {
 	ent = NewExternalEntity(0, 0, argv[i], 0, 0);
 	if(ent)
-	    source = EntityOpen(ent);
+	{
+	    if(p->entity_opener)
+		source = p->entity_opener(ent, p->entity_opener_arg);
+	    else
+		source = EntityOpen(ent);
+	}
     }
     else
 	source = SourceFromStream("<stdin>", stdin);
+
+    if(!source)
+	return 1;
 
     if(base_uri)
     {
@@ -195,12 +235,6 @@ int main(int argc, char **argv)
 	EntitySetBaseURL(source->entity, base_uri);
 	free(base_uri);
     }
-
-    if(!source)
-	return 1;
-
-    p = NewParser();
-    ParserSetEntityOpener(p, entity_open);
 
     if(validate)
 	ParserSetFlag(p, Validate, 1);
@@ -228,14 +262,14 @@ int main(int argc, char **argv)
     if(output_format == o_bits)
     {
 	ParserSetDtdCallback(p, dtd_cb);
-	ParserSetCallbackArg(p, p);
+	ParserSetDtdCallbackArg(p, p);
     }
 
     if(output_format == o_infoset)
     {
 	ParserSetFlag(p, ReturnNamespaceAttributes, 1);
 	ParserSetDtdCallback(p, dtd_cb2);
-	ParserSetCallbackArg(p, p);
+	ParserSetDtdCallbackArg(p, p);
     }
 
     ParserSetFlag(p, SimpleErrorFormat, simple_error);
@@ -274,6 +308,13 @@ int main(int argc, char **argv)
 	
     }
 
+    if(unicode_check)
+    {
+	ParserSetFlag(p, XML11CheckNF, 1);
+	if(unicode_check == 2)
+	    ParserSetFlag(p, XML11CheckExists, 1);
+    }
+
     if(ParserPush(p, source) == -1)
     {
 	ParserPerror(p, &p->xbit);
@@ -310,12 +351,17 @@ int main(int argc, char **argv)
 		CharacterEncodingNameAndByteOrder[source->entity->encoding],
 		CharacterEncodingNameAndByteOrder[encoding]);
 
-    if(source->entity->ml_decl == ML_xml && output_format == o_plain)
+    xml_version = p->xml_version;
+
+    if((source->entity->ml_decl == ML_xml || encoding != CE_UTF_8) &&
+       output_format == o_plain)
     {
 	Printf("<?xml");
 
 	if(source->entity->version_decl)
 	    Printf(" version=\"%s\"", source->entity->version_decl);
+	else
+	    Printf(" version=\"1.0\"");
 
 	if(encoding == CE_unspecified_ascii_superset)
 	{
@@ -333,6 +379,10 @@ int main(int argc, char **argv)
 
 	Printf("?>\n");
     }
+    
+    if(source->entity->ml_decl == ML_xml && canonical_output &&
+       xml_version > XV_1_0)
+	Printf("<?xml version=\"%s\"?>", source->entity->version_decl);
 
     VectorInit(bits);
 
@@ -372,7 +422,8 @@ int main(int argc, char **argv)
 	{
 	    int status = p->seen_validity_error ? 2 : 0;
 
-	    if(output_format == o_plain)
+	    if(output_format == o_plain ||
+	       output_format == o_diff)
 		Printf("\n");
 
 	    /* Not necessary, but helps me check for leaks */
@@ -413,6 +464,7 @@ void print_tree(Parser p, XBit bit)
 	endbit.type = XBIT_end;
 	endbit.element_definition = bit->element_definition;
 	endbit.ns_element_definition = bit->ns_element_definition;
+	endbit.byte_offset = -1;
 	print_bit(p, &endbit);
     }
 }
@@ -449,8 +501,8 @@ void print_bit(Parser p, XBit bit)
 	    break;
 	case XBIT_start:
 	    if(namespaces && bit->ns_element_definition)
-		Printf("start: {%s}%S ",
-		       bit->ns_element_definition->namespace->uri,
+		Printf("start: {%S}%S ",
+		       bit->ns_element_definition->namespace->nsname,
 		       bit->element_definition->local);
 	    else
 		Printf("start: %S ", bit->element_definition->name);
@@ -462,8 +514,8 @@ void print_bit(Parser p, XBit bit)
 	    break;
 	case XBIT_empty:
 	    if(namespaces && bit->ns_element_definition)
-		Printf("empty: {%s}%S ",
-		       bit->ns_element_definition->namespace->uri,
+		Printf("empty: {%S}%S ",
+		       bit->ns_element_definition->namespace->nsname,
 		       bit->element_definition->local);
 	    else
 		Printf("empty: %S ", bit->element_definition->name);
@@ -475,8 +527,8 @@ void print_bit(Parser p, XBit bit)
 	    break;
 	case XBIT_end:
 	    if(namespaces && bit->ns_element_definition)
-		Printf("end: {%s}%S ",
-		       bit->ns_element_definition->namespace->uri,
+		Printf("end: {%S}%S ",
+		       bit->ns_element_definition->namespace->nsname,
 		       bit->element_definition->local);
 	    else
 		Printf("end: %S ", bit->element_definition->name);
@@ -615,8 +667,8 @@ void print_attrs(ElementDefinition e, Attribute a)
     {
 	if(output_format == o_bits && namespaces && 
 	   aa[i]->ns_definition && !aa[i]->ns_definition->element)
-	    Printf(" {%s}%S=\"", 
-		   aa[i]->ns_definition->namespace->uri,
+	    Printf(" {%S}%S=\"", 
+		   aa[i]->ns_definition->namespace->nsname,
 		   aa[i]->definition->local);
 	else
 	    Printf(" %S=\"", aa[i]->definition->name);
@@ -669,41 +721,86 @@ void print_text(Char *text)
 
     for(pc = last = text; *pc; pc++)
     {
-	if(*pc == '&' || *pc == '<' || *pc == '>' || *pc == '"' ||
-	   (canonical_output && (*pc == 9 || *pc == 10 || *pc == 13)))
+	int c = *pc, type = 0;
+	
+	if(c == '&' || c == '<' || c == '>' || c == '"' || 
+	   (c > 127 && !printable(c)))
+	    type = 1;
+	else if(c == 9 || c == 10 || c == 13)
+	    type = 2;
+	else if(c < 0x20 || (c >= 0x7f && c < 0xa0))
+	    type = 3;
+
+	if(type == 1 ||
+	   (canonical_output && output_format != o_diff && type == 2) ||
+	   (xml_version > XV_1_0 && type == 3))
 	{
 	    if(pc > last)
 		Printf("%.*S", pc - last, last);
-	    switch(*pc)
-	    {
-	    case '<':
-		Printf("&lt;");
-		break;
-	    case '>':
-		Printf("&gt;");
-		break;
-	    case '&':
-		Printf("&amp;");
-		break;
-	    case '"':
-		Printf("&quot;");
-		break;
-	    case 9:
-		Printf("&#9;");
-		break;
-	    case 10:
-		Printf("&#10;");
-		break;
-	    case 13:
-		Printf("&#13;");
-		break;
-	    }
+	    print_special(c);
 	    last = pc+1;
 	}
     }
 	
     if(pc > last)
 	Printf("%.*S", pc - last, last);
+}
+
+int printable(int c)
+{
+    int tablenum;
+
+    switch(encoding)
+    {
+    case CE_unspecified_ascii_superset:
+    case CE_ISO_646:
+    default:
+	return c <= 127;
+
+    case CE_ISO_8859_1:
+	return c <= 255;
+
+    case CE_ISO_8859_2:
+    case CE_ISO_8859_3:
+    case CE_ISO_8859_4:
+    case CE_ISO_8859_5:
+    case CE_ISO_8859_6:
+    case CE_ISO_8859_7:
+    case CE_ISO_8859_8:
+    case CE_ISO_8859_9:
+	tablenum = (encoding - CE_ISO_8859_2);
+	return c <= iso_max_val[tablenum] && unicode_to_iso[tablenum][c] != '?';
+
+    case CE_UTF_8:
+    case CE_UTF_16B:
+    case CE_UTF_16L:
+	return 1;
+
+    case CE_ISO_10646_UCS_2B:
+    case CE_ISO_10646_UCS_2L :
+	return c <= 0xffff;
+    }
+}
+
+void print_special(int c)
+{
+    switch(c)
+    {
+    case '<':
+	Printf("&lt;");
+	break;
+    case '>':
+	Printf("&gt;");
+	break;
+    case '&':
+	Printf("&amp;");
+	break;
+    case '"':
+	Printf("&quot;");
+	break;
+    default:
+	Printf(canonical_output ? "&#%d;" : "&#x%02x;", c);
+    }
 }
 
 InputSource entity_open(Entity ent, void *arg)
@@ -730,6 +827,7 @@ InputSource entity_open(Entity ent, void *arg)
 void print_ns_attrs(NamespaceBinding ns, int count)
 {
     NamespaceBinding n;
+    static Char empty[] = {0};
 
     if(!namespaces)
 	return;
@@ -739,15 +837,17 @@ void print_ns_attrs(NamespaceBinding ns, int count)
 	/* Don't need to worry about duplicates, because that could only
 	   happen if there were repeated attributes. */
 	if(n->prefix)
-	    Printf(" xmlns:%S=\"%s\"", n->prefix, n->namespace->uri);
+	    Printf(" xmlns:%S=\"%S\"", n->prefix,
+		   n->namespace ? n->namespace->nsname : empty);
 	else
-	    Printf(" xmlns=\"%s\"", n->namespace ? n->namespace->uri : "");
+	    Printf(" xmlns=\"%S\"", n->namespace ? n->namespace->nsname : empty);
     }
 }
 
 void print_namespaces(NamespaceBinding ns)
 {
     NamespaceBinding m, n;
+    static Char null[] = {'[','n','u','l','l',']',0};
 
     if(!namespaces)
 	return;
@@ -762,9 +862,9 @@ void print_namespaces(NamespaceBinding ns)
 		goto done;
 	}
 	if(n->prefix)
-	    Printf(" %S->%s", n->prefix, n->namespace->uri);
+	    Printf(" %S->%S", n->prefix, n->namespace ? n->namespace->nsname : null);
 	else
-	    Printf(" [default]->%s", n->namespace ? n->namespace->uri : "[null]");
+	    Printf(" [default]->%S", n->namespace ? n->namespace->nsname : null);
 
     done:
 	;

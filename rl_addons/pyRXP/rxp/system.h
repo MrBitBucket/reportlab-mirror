@@ -1,3 +1,7 @@
+#ifndef PY_LONG_LONG
+#include "pyconfig.h"
+#endif
+
 #define SOCKETS_IMPLEMENTED
 
 #define STD_API

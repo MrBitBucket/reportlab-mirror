@@ -1,0 +1,342 @@
+Only in rxp: .svn
+Only in rxp: .url.c.swp
+diff -rc -ICopyright (c) -I\$Header: -I\$Id: -xEntries rxp-1.4.0\dtd.c rxp\dtd.c
+*** rxp-1.4.0\dtd.c	Fri Feb 14 14:54:54 2003
+--- rxp\dtd.c	Sat Jul 17 16:26:58 2004
+***************
+*** 275,294 ****
+      if(!e)
+  	return;
+  
+!     Free((void *)e->name);	/* The casts are to get rid of the const */
+!     Free((void *)e->base_url);
+!     Free((void *)e->url);
+      
+      switch(e->type)
+      {
+      case ET_internal:
+! 	Free((void *)e->text);
+  	break;
+      case ET_external:
+! 	Free((void *)e->systemid);
+! 	Free((void *)e->publicid);
+! 	Free((void *)e->version_decl);
+! 	Free((void *)e->ddb_filename);
+  	break;
+      }
+  
+--- 275,294 ----
+      if(!e)
+  	return;
+  
+!     CFree((void *)e->name);	/* The casts are to get rid of the const */
+!     CFree((void *)e->base_url);
+!     CFree((void *)e->url);
+      
+      switch(e->type)
+      {
+      case ET_internal:
+! 	CFree((void *)e->text);
+  	break;
+      case ET_external:
+! 	CFree((void *)e->systemid);
+! 	CFree((void *)e->publicid);
+! 	CFree((void *)e->version_decl);
+! 	CFree((void *)e->ddb_filename);
+  	break;
+      }
+  
+diff -rc -ICopyright (c) -I\$Header: -I\$Id: -xEntries rxp-1.4.0\input.c rxp\input.c
+*** rxp-1.4.0\input.c	Mon Jun 07 14:24:30 2004
+--- rxp\input.c	Sat Jul 17 16:26:58 2004
+***************
+*** 129,135 ****
+  void SourceClose(InputSource source)
+  {
+      Fclose(source->file16);
+- 
+      if(source->entity->type == ET_external)
+  	Free(source->line);
+      Free(source);
+--- 129,134 ----
+diff -rc -ICopyright (c) -I\$Header: -I\$Id: -xEntries rxp-1.4.0\nf16check.c rxp\nf16check.c
+*** rxp-1.4.0\nf16check.c	Tue Sep 02 15:02:46 2003
+--- rxp\nf16check.c	Sat Jul 17 18:41:45 2004
+***************
+*** 73,86 ****
+      while (low < high) {
+          int middle  = (low+high) / 2;  /* binary search */
+          int middleB = recombiners[middle].base;
+!         if (b == middleB) {
+              int middleF = recombiners[middle].follow;
+!             if (f == middleF)      return 1;
+!             else if (f < middleF)  high = middle;
+!             else                   low  = middle + 1;
+          }
+!         else if (b < middleB)  high = middle;
+!         else                   low = middle+1;
+      }
+      return  (recombiners[low].base == b && recombiners[low].follow == f);
+  }
+--- 73,86 ----
+      while (low < high) {
+          int middle  = (low+high) / 2;  /* binary search */
+          int middleB = recombiners[middle].base;
+!         if (b == (unsigned int)middleB) {
+              int middleF = recombiners[middle].follow;
+!             if (f == (unsigned int)middleF)      return 1;
+!             else if (f < (unsigned int)middleF) high = middle;
+!             else                                low  = middle + 1;
+          }
+!         else if (b < (unsigned int)middleB) high = middle;
+!         else                                low = middle+1;
+      }
+      return  (recombiners[low].base == b && recombiners[low].follow == f);
+  }
+diff -rc -ICopyright (c) -I\$Header: -I\$Id: -xEntries rxp-1.4.0\stdio16.c rxp\stdio16.c
+*** rxp-1.4.0\stdio16.c	Fri Jun 25 14:30:34 2004
+--- rxp\stdio16.c	Sat Jul 17 18:25:09 2004
+***************
+*** 40,45 ****
+--- 40,46 ----
+  #if defined(WIN32) && !defined(__CYGWIN__)
+  #undef boolean
+  #include <winsock.h>
++ #include <io.h>
+  #include <fcntl.h>
+  #include <io.h>
+  #else
+***************
+*** 754,762 ****
+  		sprintf(val, fmt, va_arg(args, int)); /* promoted to int */
+  	    else if(l)
+  		sprintf(val, fmt, va_arg(args, long));
+! #ifdef HAVE_LONG_LONG
+  	    else if(ll)
+! 		sprintf(val, fmt, va_arg(args, long long));
+  #endif
+  	    else
+  		sprintf(val, fmt, va_arg(args, int));
+--- 755,763 ----
+  		sprintf(val, fmt, va_arg(args, int)); /* promoted to int */
+  	    else if(l)
+  		sprintf(val, fmt, va_arg(args, long));
+! #if	HAVE_LONG_LONG
+  	    else if(ll)
+! 		sprintf(val, fmt, va_arg(args, PY_LONG_LONG));
+  #endif
+  	    else
+  		sprintf(val, fmt, va_arg(args, int));
+diff -rc -ICopyright (c) -I\$Header: -I\$Id: -xEntries rxp-1.4.0\system.c rxp\system.c
+*** rxp-1.4.0\system.c	Wed Feb 17 13:32:56 1999
+--- rxp\system.c	Sat Jun 26 12:16:32 2004
+***************
+*** 23,25 ****
+--- 23,29 ----
+      free(mem);
+  }
+  
++ void CFree(void *mem)
++ {
++ 	if(mem) free(mem);
++ }
+diff -rc -ICopyright (c) -I\$Header: -I\$Id: -xEntries rxp-1.4.0\system.h rxp\system.h
+*** rxp-1.4.0\system.h	Tue May 20 01:17:28 2003
+--- rxp\system.h	Sat Jul 17 18:24:10 2004
+***************
+*** 1,4 ****
+! #define HAVE_LONG_LONG
+  
+  #define SOCKETS_IMPLEMENTED
+  
+--- 1,6 ----
+! #ifndef PY_LONG_LONG
+! #include "pyconfig.h"
+! #endif
+  
+  #define SOCKETS_IMPLEMENTED
+  
+***************
+*** 6,12 ****
+--- 8,20 ----
+  #define XML_API
+  #define WIN_IMP
+  #define EXPRT
++ #ifdef _WIN32
++ #	ifndef WIN32
++ #		define WIN32
++ #	endif
++ #endif
+  
+  void *Malloc(int bytes);
+  void *Realloc(void *mem, int bytes);
+  void Free(void *mem);
++ void CFree(void *mem);
+diff -rc -ICopyright (c) -I\$Header: -I\$Id: -xEntries rxp-1.4.0\url.c rxp\url.c
+*** rxp-1.4.0\url.c	Fri Jun 11 12:39:18 2004
+--- rxp\url.c	Sat Jul 17 20:27:49 2004
+***************
+*** 477,483 ****
+  
+  #if defined(WIN32) && ! defined(__CYGWIN__)
+      /* DOS: if name starts /X: skip the slash */
+!     if(path[0] == '/' && path[1] && path[2] == ':')
+  	p++;
+  #endif
+  
+--- 477,483 ----
+  
+  #if defined(WIN32) && ! defined(__CYGWIN__)
+      /* DOS: if name starts /X: skip the slash */
+!     if(path[0] == '/'&& ((path[1] && path[2] == ':')||(path[1]=='/'&&path[2]=='/')))
+  	p++;
+  #endif
+  
+diff -rc -ICopyright (c) -I\$Header: -I\$Id: -xEntries rxp-1.4.0\xmlparser.c rxp\xmlparser.c
+*** rxp-1.4.0\xmlparser.c	Wed Mar 17 15:58:30 2004
+--- rxp\xmlparser.c	Sat Jul 17 16:26:58 2004
+***************
+*** 1055,1061 ****
+      }
+  }
+  
+! void ParserPerror(Parser p, XBit bit)
+  {
+      int linenum, charnum;
+      InputSource s, root;
+--- 1055,1061 ----
+      }
+  }
+  
+! void _ParserPerror(FILE16 *f, Parser p, XBit bit)
+  {
+      int linenum, charnum;
+      InputSource s, root;
+***************
+*** 1072,1097 ****
+  	    --e;
+  
+  	if(p->state == PS_validate_dtd)
+! 	    Fprintf(Stderr, "%s:-1(end of prolog):-1: ", e);
+  	else if(p->state == PS_validate_final)
+! 	    Fprintf(Stderr, "%s:-1(end of body):-1: ", e);
+  	else
+! 	    Fprintf(Stderr, "%s:%d:%d: ", e,root->line_number+1, root->next+1);
+  
+  	if(bit->type == XBIT_warning)
+! 	    Fprintf(Stderr, "warning: ");
+! 	Fprintf(Stderr, "%s\n", bit->error_message);
+  
+  	return;
+      }
+  
+!     Fprintf(Stderr, "%s: %s\n", 
+  	    bit->type == XBIT_error ? "Error" : "Warning", 
+  	    bit->error_message);
+  
+      if(p->state == PS_validate_dtd || p->state == PS_validate_final)
+      {
+! 	Fprintf(Stderr, " (detected at end of %s of document %s)\n",
+  		p->state == PS_validate_final ? "body" : "prolog",
+  		EntityDescription(root->entity));
+  
+--- 1072,1097 ----
+  	    --e;
+  
+  	if(p->state == PS_validate_dtd)
+! 	    Fprintf(f, "%s:-1(end of prolog):-1: ", e);
+  	else if(p->state == PS_validate_final)
+! 	    Fprintf(f, "%s:-1(end of body):-1: ", e);
+  	else
+! 	    Fprintf(f, "%s:%d:%d: ", e,root->line_number+1, root->next+1);
+  
+  	if(bit->type == XBIT_warning)
+! 	    Fprintf(f, "warning: ");
+! 	Fprintf(f, "%s\n", bit->error_message);
+  
+  	return;
+      }
+  
+!     Fprintf(f, "%s: %s\n", 
+  	    bit->type == XBIT_error ? "Error" : "Warning", 
+  	    bit->error_message);
+  
+      if(p->state == PS_validate_dtd || p->state == PS_validate_final)
+      {
+! 	Fprintf(f, " (detected at end of %s of document %s)\n",
+  		p->state == PS_validate_final ? "body" : "prolog",
+  		EntityDescription(root->entity));
+  
+***************
+*** 1101,1126 ****
+      for(s=p->source; s; s=s->parent)
+      {
+  	if(s->entity->name)
+! 	    Fprintf(Stderr, " in entity \"%S\"", s->entity->name);
+  	else
+! 	    Fprintf(Stderr, " in unnamed entity");
+  
+  	switch(SourceLineAndChar(s, &linenum, &charnum))
+  	{
+  	case 1:
+! 	    Fprintf(Stderr, " at line %d char %d of", linenum+1, charnum+1);
+  	    break;
+  	case 0:
+! 	    Fprintf(Stderr, " defined at line %d char %d of",
+  		    linenum+1, charnum+1);
+  	    break;
+  	case -1:
+! 	    Fprintf(Stderr, " defined in");
+  	    break;
+  	}
+  
+! 	Fprintf(Stderr, " %s\n", EntityDescription(s->entity));
+      }
+  }
+  
+  
+--- 1101,1131 ----
+      for(s=p->source; s; s=s->parent)
+      {
+  	if(s->entity->name)
+! 	    Fprintf(f, " in entity \"%S\"", s->entity->name);
+  	else
+! 	    Fprintf(f, " in unnamed entity");
+  
+  	switch(SourceLineAndChar(s, &linenum, &charnum))
+  	{
+  	case 1:
+! 	    Fprintf(f, " at line %d char %d of", linenum+1, charnum+1);
+  	    break;
+  	case 0:
+! 	    Fprintf(f, " defined at line %d char %d of",
+  		    linenum+1, charnum+1);
+  	    break;
+  	case -1:
+! 	    Fprintf(f, " defined in");
+  	    break;
+  	}
+  
+! 	Fprintf(f, " %s\n", EntityDescription(s->entity));
+      }
++ }
++ 
++ void ParserPerror(Parser p, XBit bit)
++ {
++ 	_ParserPerror(Stderr,p,bit);
+  }
+  
+  
+diff -rc -ICopyright (c) -I\$Header: -I\$Id: -xEntries rxp-1.4.0\xmlparser.h rxp\xmlparser.h
+*** rxp-1.4.0\xmlparser.h	Wed Mar 17 15:58:22 2004
+--- rxp\xmlparser.h	Sat Jul 17 16:26:58 2004
+***************
+*** 236,241 ****
+--- 236,242 ----
+  #define ParserGetFlag(p, flag) \
+    (((flag) < 32) ? ((p)->flags[0] & (1u << (flag))) : ((p)->flags[1] & (1u << ((flag)-32))))
+  
++ XML_API void _ParserPerror(FILE16 *f, Parser p, XBit bit);
+  XML_API void ParserPerror(Parser p, XBit bit);
+  
+  #endif /* XMLPARSER_H */

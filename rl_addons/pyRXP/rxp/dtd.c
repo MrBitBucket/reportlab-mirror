@@ -213,6 +213,7 @@ Entity NewExternalEntityN(const Char *name, int namelen, const char8 *publicid,
     e->encoding_decl = CE_unknown;
     e->standalone_decl = SDD_unspecified;
     e->ddb_filename = 0;
+    e->xml_version = XV_1_0;	/* 1.0 unless otherwise specified */
 
     e->url = 0;
 

@@ -362,9 +362,14 @@ May be called to free memory when the library is no longer required.
 It is called by deinit_parser().
 
 A namespace is represented by a Namespace structure.  This contains
-the URI of the the namespace ("uri" field), and lists of the element
+the URI of the the namespace ("nsname" field), and lists of the element
 types and global attributes in the namespace.  Each element type has a
 list of per-element-type (ie unqualified) attributes.
+
+(Before version 1.4.0 the nsname field was called "uri".  In 1.4.0
+it was changed from char8 * to Char * in order to accommodate IRIs,
+and the field name was changed to so that old programs wouldn't
+compile without being updated.)
 
 It is natural that namespaces are shared between documents.  If two
 documents refer to an element type with the same name and namespace,
@@ -536,6 +541,7 @@ below).  Namespace declarations are *not* returned as part of the list
 of attributes on an element.
 
  void ParserSetWarningCallback(Parser p, CallbackProc cb);
+ void ParserSetWarningCallbackArg(Parser p, void *arg);
 
 Usually warnings are printed (on the standard error stream).  This
 function allows you to set a function to be called instead.  The function
@@ -544,11 +550,10 @@ should be declared like this:
  void my_warning_proc(XBit bit, void *arg)
 
 The bit argument will contain a warning bit.  The arg argument will
-be null unless it is set with
-
- void ParserSetCallbackArg(Parser p, void *arg);
+be null unless it is set with ParserSetWarningCallbackArg.
 
  void ParserSetDtdCallback(Parser p, CallbackProc cb);
+ void ParserSetDtdCallbackArg(Parser p, void *arg);
 
 Usually comments and processing instructions inside the DOCTYPE
 declaration are ignored.  This function allows you to set a callback
@@ -556,6 +561,7 @@ be called instead.  The function should be declared in the same way
 as the warning callback.
 
  void ParserSetEntityOpener(Parser p, EntityOpenerProc opener);
+ void ParserSetEntityOpenerArg(Parser p, void *arg);
 
 Usually entities are opened by calling EntityOpen() on them.  This
 function allows you to intercept entity opening with a callback, for

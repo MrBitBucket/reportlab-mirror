@@ -37,6 +37,12 @@ typedef enum standalone_declaration StandaloneDeclaration;
 
 extern const char8 *StandaloneDeclarationName[SDD_enum_count];
 
+enum xml_version {
+    XV_unknown = 0,		/* an unrecognised version */
+    XV_1_0     = 100000,	/* 1.0 (including no version specified) */
+    XV_1_1     = 100100		/* 1.1 */
+};
+typedef enum xml_version XMLVersion;
 
 struct entity {
     /* All entities */
@@ -68,6 +74,7 @@ struct entity {
     CharacterEncoding encoding_decl;
     StandaloneDeclaration standalone_decl;
     const char8 *ddb_filename;	/* filename in NSL declaration */
+    XMLVersion xml_version;
 };
 
 /* Elements */

@@ -28,6 +28,7 @@ struct input_source {
     Entity entity;		/* The entity from which the source reads */
 
     void (*reader)(InputSource); /* line-reading method */
+    unsigned char *map;		 /* character type map */
 
     FILE16 *file16;
 
@@ -64,8 +65,9 @@ struct input_source {
 /* EOE used to be -2, but that doesn't work if Char is signed char */
 #define XEOE (-999)
 
-/* Use SUB (ctl-Z) for an illegal character */
-#define BADCHAR 26
+/* Use NUL for an illegal character (in 1.1, it's the only illegal 8-bit
+   character) */
+#define BADCHAR 0
 
 #define at_eol(s) ((s)->next == (s)->line_length)
 #define get(s)    (at_eol(s) ? get_with_fill(s) : (s)->line[(s)->next++])

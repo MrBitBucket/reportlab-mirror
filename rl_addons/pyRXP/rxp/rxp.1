@@ -1,4 +1,4 @@
-.TH RXP 1 "RXP release 1.3.0"
+.TH RXP 1 "RXP release 1.4.0"
 .SH NAME
 rxp - XML parser program
 .SH SYNOPSIS
@@ -21,6 +21,16 @@ reads and parses XML from the
 output, optionally expanding entities, defaulting attributes, and
 translating to a different output encoding.
 
+.B rxp
+accepts XML 1.0 and 1.1, and the corresponding versions of XML
+namespaces.  It implements the Oasis XML catalog specification.
+
+Common option combinations are
+.B -Nxs
+to check a document for well-formedness and namespace well-formedness,
+and
+.B -VNxs
+to also check for DTD-validity.
 .SH OPTIONS
 .TP
 .B -a
@@ -86,6 +96,19 @@ to the output.
 \f3-u \f2base_uri\f1
 Use the specified base URI when resolving system identifiers.
 .TP
+.B -U
+This flag controls Unicode normalization checking and is only relevant
+when parsing XML 1.1 documents.
+If it is \f30\f1, no checking is done.
+If it is \f31\f1,
+.B rxp
+checks that the document is fully normalized as defined by the W3C character
+model.
+If it is \f32\f1, the document is checked and any unknown characters
+(which may be ones corresponding to a newer version of Unicode than
+.B rxp
+knows about) will also cause an error.
+.TP
 .B -x
 Strict XML mode.  This suppresses some warnings (eg entity redefinitions)
 but treats all XML well-formedness errors as fatal.
@@ -115,4 +138,17 @@ it treats certain errors which are technically validity errors
 as well-formedness errors.  If \f3-x\f1 is not specified, some
 well-formedness errors produce only warnings and do not affect the
 exit status.
+.SH ENVIRONMENT
+If the environment variable
+.B XML_CATALOG_FILES
+is set, XML catalog processing is enabled.
+The variable should be set to a space-separated list of catalog
+files.  The variable
+.B XML_CATALOG_PREFER
+may be set to \f3public\f1 or \f3system\f1 to
+set the initial mode for catalog processing; the default is \f3system\f1.
 
+The variable
+.B http_proxy
+can be used to specify a proxy for HTTP connections.  The syntax
+is \f3hostname[:port]\f1.
