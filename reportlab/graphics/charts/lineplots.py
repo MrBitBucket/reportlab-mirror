@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.39 2003/05/27 19:05:55 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.40 2003/05/27 19:17:13 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.39 2003/05/27 19:05:55 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.40 2003/05/27 19:17:13 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -223,15 +223,16 @@ class LinePlot(PlotArea):
                 points = []
                 for xy in row:
                     points = points + [xy[0], xy[1]]
-                line = PolyLine(points,strokeColor=rowColor,strokeLineCap=0,strokeLineJoin=1)
-                if width:
-                    line.strokeWidth = width
-                if dash:
-                    line.strokeDashArray = dash
-                g.add(line)
                 if inFill:
                     points = points + [inFillX1,inFillY,inFillX0,inFillY]
-                    inFillG.add(Polygon(points,fillColor=rowColor))
+                    inFillG.add(Polygon(points,fillColor=rowColor,strokeColor=rowColor,strokeWidth=0.1))
+                else:
+                    line = PolyLine(points,strokeColor=rowColor,strokeLineCap=0,strokeLineJoin=1)
+                    if width:
+                        line.strokeWidth = width
+                    if dash:
+                        line.strokeDashArray = dash
+                    g.add(line)
             else:
                 for colNo in range(len(row)):
                     x1, y1 = row[colNo]
