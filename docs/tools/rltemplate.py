@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/rltemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/tools/rltemplate.py,v 1.10 2001/03/16 14:51:50 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/tools/rltemplate.py,v 1.11 2001/03/27 20:07:49 andy_robinson Exp $
 # doc template for RL manuals.  Currently YAML is hard-coded
 #to use this, which is wrong.
 
@@ -104,6 +104,8 @@ class RLDocTemplate(BaseDocTemplate):
         self.chapterNo = 1 #unique keys
         self.sectionNo = 1 # unique keys
 
+##        # AR hack
+##        self.counter = 1
     def beforeDocument(self):
         self.canv.showOutline()
 
@@ -112,6 +114,14 @@ class RLDocTemplate(BaseDocTemplate):
         and track chapter title."""
         if isinstance(flowable, Paragraph):
             style = flowable.style.name
+
+##            #AR debug text
+##            try:
+##                print '%d: %s...' % (self.counter, flowable.getPlainText()[0:40])
+##            except AttributeError:
+##                print '%d: (something with ABag)' % self.counter
+##            self.counter = self.counter + 1
+            
             if style == 'Title':
                 self.title = flowable.getPlainText()
             elif style == 'Heading1':

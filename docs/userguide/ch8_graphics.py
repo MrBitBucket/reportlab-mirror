@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.7 2001/03/27 19:58:01 johnprecedo Exp $
+#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.8 2001/03/27 20:07:49 andy_robinson Exp $
 from genuserguide import *
 
 heading1("Platform Independent Graphics using $reportlab/graphics$")
@@ -622,15 +622,16 @@ eg("""
 >>> renderPDF.drawToFile(d, 'face.pdf', 'A Face')""")
 
 
-todo("add image")
 
-
-d = Drawing(400, 200)
+from reportlab.graphics import widgetbase
+d = Drawing(200, 120)
 f = widgetbase.Face()
+f.x = 50
+f.y = 10
 f.skinColor = colors.yellow
 f.mood = "sad"
 d.add(f)
-d.draw()
+draw(d, 'A sample widget')
 
 disc("""Let's see what properties it has available, using the setProperties 
        interface we saw earlier:""")
@@ -1111,7 +1112,8 @@ data=[["Property", "Meaning"],
 to display one or both axes, but they still need to be there as 
 they manage the scaling of points."""],
       ["strokeColor", "Color of the axis"],
-      ["strokeDashArray", """Whether to draw axis with a dash and, if so, what kind. Defaults to None"""],
+      ["strokeDashArray", """Whether to draw axis with a dash and, if so, what kind.
+Defaults to None"""],
       ["strokeWidth", "Width of axis in points"],
       ["tickUp", """How far above the axis should the tick marks protrude?
 (Note that making this equal to chart height gives you a gridline)"""],
@@ -1119,13 +1121,14 @@ they manage the scaling of points."""],
       ["categoryNames", """Either None, or a list of strings. This should have the
 same length as each data series."""],
       ["labels", """A collection of labels for the tick marks. By default the 'north'
-of each text label (i.e top centre) is positioned 5 points down from
-the centre of each category on the axis. You may redefine any property
-of the whole label group or of any one label. If categoryNames=None,
-no labels are drawn."""],
-      ["title", """Not Implemented Yet. This needs to be like a label, but also let you
-set the text directly. It would have a default location below the axis."""]]
-t=Table(data)
+of each text label (i.e top centre) is positioned 5 points down
+from the centre of each category on the axis. You may redefine
+any property of the whole label group or of any one label. If
+categoryNames=None, no labels are drawn."""],
+      ["title", """Not Implemented Yet. This needs to be like a label, but also
+lets you set the text directly. It would have a default
+location below the axis."""]]
+t=Table(data, colWidths=(100,330))
 t.setStyle(TableStyle([
             ('FONT',(0,0),(-1,1),'Times-Bold',10,12),
             ('FONT',(0,1),(-1,-1),'Courier',8,8),
