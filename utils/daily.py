@@ -2,12 +2,12 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/daily.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/daily.py,v 1.49 2001/10/29 10:32:02 rgbecker Exp $
-__version__=''' $Id: daily.py,v 1.49 2001/10/29 10:32:02 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/utils/daily.py,v 1.50 2001/12/07 11:27:58 rgbecker Exp $
+__version__=''' $Id: daily.py,v 1.50 2001/12/07 11:27:58 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
-import os, sys, string, traceback, re
+import os, sys, string, traceback, re, glob, shutil
 
 #this is where we extract files etc
 groupdir=os.path.normcase(os.path.normpath('%s/public_ftp'%os.environ['HOME']))
@@ -36,17 +36,6 @@ def find_exe(exe):
 	print "Can't find %s anywhere on the path" % exe
 	return None
 
-def recursive_rmdir(d):
-	'destroy directory d'
-	if os.path.isdir(d):
-		for p in os.listdir(d):
-			fn = os.path.join(d,p)
-			if os.path.isfile(fn):
-				os.remove(fn)
-			else:
-				recursive_rmdir(fn)
-		os.rmdir(d)
-
 def pyc_remove(d):
 	'remove .pyc & .pyo files in d and subtree'
 	if os.path.isdir(d):
@@ -61,17 +50,53 @@ def CVS_remove(d):
 	'destroy CVS subdirs'
 	if os.path.isdir(d):
 		if os.path.split(d)[1]=='CVS':
-			recursive_rmdir(d)
+			rmdir(d)
 		for p in os.listdir(d):
 			fn = os.path.join(d,p)
 			if os.path.isdir(fn):
 				if p=='CVS':
-					recursive_rmdir(fn)
+					rmdir(fn)
 				else:
 					CVS_remove(fn)
 
-def safe_remove(p):
-	if os.path.isfile(p): os.remove(p)
+def rmdir(d):
+	'destroy directory d'
+	if os.path.isdir(d):
+		for p in os.listdir(d):
+			fn = os.path.join(d,p)
+			if os.path.isdir(fn):
+				rmdir(fn)
+			else:
+				remove(fn)
+		os.rmdir(d)
+
+def remove(f):
+	'remove an existing file'
+	if os.path.isfile(f): os.remove(f)
+
+def kill(f):
+	'remove directory or file unconditionally'
+	if os.path.isfile(f): os.remove(f)
+	elif os.path.isdir(f): rmdir(f)
+	elif '*' in f: map(kill,glob.glob(f))
+
+def rename(src,dst):
+	remove(dst)
+	try:
+		os.rename(src,dst)
+	except:
+		pass
+
+def move(src,dst):
+	if os.path.isdir(dst): dst = os.path.join(dst,os.path.basename(src))
+	rename(src,dst)
+
+def copy(src,dst):
+	if os.path.isdir(dst): dst = os.path.join(dst,os.path.basename(src))
+	if os.path.isfile(dst): kill(dst)
+	if os.path.isfile(src): shutil.copy2(src,dst)
+	elif os.path.isdir(src): shutil.copyTree(src,dst)
+	elif '*' in src: map(lambda f,dst=dst: copy(f,dst),glob.glob(src))
 
 def do_exec(cmd, cmdname=None):
 	i=os.popen(cmd,'r')
@@ -82,11 +107,15 @@ def do_exec(cmd, cmdname=None):
 			print 'Error: '+ (cmdname or cmd)
 		sys.exit(1)
 
+def genAll(f='genAll.py'):
+	execfile(f,locals())
+	return eval('_genAll')
+
 def cvs_checkout(d):
 	os.chdir(d)
 	cvsdir = os.path.join(d,projdir)
-	recursive_rmdir(cvsdir)
-	recursive_rmdir('docs')
+	rmdir(cvsdir)
+	rmdir('docs')
 
 	cvs = find_exe('cvs')
 	python = find_exe('python')
@@ -102,14 +131,14 @@ def cvs_checkout(d):
 	if py2pdf:
 		# now we need to move the files & delete those we don't need
 		dst = py2pdf_dir
-		recursive_rmdir(dst)
+		rmdir(dst)
 		os.mkdir(dst)
-		do_exec("mv reportlab/demos/py2pdf/py2pdf.py %s"%dst)
-		do_exec("mv reportlab/demos/py2pdf/PyFontify.py %s" % dst)
-		do_exec("mv reportlab/demos/py2pdf/idle_print.py %s" % dst)
-		do_exec("rm -r reportlab/demos reportlab/platypus reportlab/lib/styles.py reportlab/README.pdfgen.txt reportlab/pdfgen/test", "reducing size")
-		do_exec("mv %s %s" % (projdir,dst))
-		do_exec("chmod a+x %s/py2pdf.py %s/idle_print.py" % (dst, dst))
+		for f in ("py2pdf.py", "PyFontify.py", "idle_print.py"):
+			move(os.path.join('reportlab/demos/py2pdf',f),dst)
+		for f in ('reportlab/demos', 'reportlab/platypus', 'reportlab/lib/styles.py', 'reportlab/README.pdfgen.txt', 'reportlab/pdfgen/test', 'reportlab/tools','reportlab/test', 'reportlab/docs'):
+			kill(f)
+		move(projdir,dst)
+		for f in ('py2pdf.py','idle_print.py'): os.chmod(os.path.join(dst,f),0775)	#rwxrwxr-x
 		CVS_remove(dst)
 	else:
 		dst = os.path.join(d,"reportlab","docs")
@@ -127,11 +156,11 @@ def cvs_checkout(d):
 		os.chdir(dst)
 		try:
 			# this creates PDFs in each manual's directory, and copies them to reportlab/docs
-			do_exec(python + ' genAll.py')
+			genAll()(quiet='-s')
 			# we copy them out to our html area
-			do_exec('cp %s %s' % (os.path.join(dst,'*.pdf'),htmldir))
+			copy(os.path.join(dst,'*.pdf'),htmldir)
 			# and then delete them
-			do_exec('rm *.pdf userguide/*.pdf graphguide/*.pdf reference/*.pdf')
+			for f in ('*.pdf', 'userguide/*.pdf', 'graphguide/*.pdf' 'reference/*.pdf'): kill(f)
 		except:
 			print '????????????????????????????????'
 			print 'Failed to run genAll.py, cwd=%s' % os.getcwd()
@@ -167,22 +196,22 @@ def do_zip(d):
 
 	tar = find_exe('tar')
 	if tar is not None:
-		safe_remove(tarfile)
+		remove(tarfile)
 		do_exec('%s czvf %s %s' % (tar, tarfile, pdir))
 
 	zip = find_exe('zip')
 	if zip is not None:
-		safe_remove(zipfile)
+		remove(zipfile)
 		do_exec('%s -ur %s %s' % (zip, zipfile, pdir))
-	recursive_rmdir(cvsdir)
+	rmdir(cvsdir)
 
 	if release:
 		# make links to the latest outcome
 		for b in ['reportlab','current']:
 			ltarfile = '%s/%s.tgz' % (groupdir,b)
 			lzipfile = '%s/%s.zip' % (groupdir,b)
-			safe_remove(lzipfile)
-			safe_remove(ltarfile)
+			remove(lzipfile)
+			remove(ltarfile)
 			os.symlink(zipfile,lzipfile)
 			os.symlink(tarfile,ltarfile)
 
