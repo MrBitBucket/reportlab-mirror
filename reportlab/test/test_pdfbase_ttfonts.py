@@ -58,29 +58,34 @@ def utf8(code):
                   0x80 + ((code >> 6) & 0x3F),
                   0x80 + (code & 0x3F))
 
+def _simple_subset_generation(fn,npages,alter=0):
+    c = Canvas(outputfile(fn))
+    c.setFont('Helvetica', 30)
+    c.drawString(100,700, 'Unicode TrueType Font Test %d pages' % npages)
+    # Draw a table of Unicode characters
+    for p in xrange(npages):
+        for fontName in ('TestFont','RinaFont'):
+            c.setFont(fontName, 10)
+            for i in xrange(32):
+                for j in xrange(32):
+                    ch = utf8(i * 32 + j+p*alter)
+                    c.drawString(80 + j * 13 + int(j / 16) * 4, 600 - i * 13 - int(i / 8) * 8, ch)
+        c.showPage()
+    c.save()
 
 class TTFontsTestCase(unittest.TestCase):
     "Make documents with TrueType fonts"
 
     def testTTF(self):
         "Test PDF generation with TrueType fonts"
-        c = Canvas(outputfile('test_pdfbase_ttfonts.pdf'))
-        c.setFont('Helvetica', 30)
-        c.drawString(100,700, 'Unicode TrueType Font Test')
         pdfmetrics.registerFont(TTFont("TestFont", "luxiserif.ttf"))
         pdfmetrics.registerFont(TTFont("RinaFont", "rina.ttf"))
-        # Draw a table of Unicode characters
-        for fontName in ('TestFont','RinaFont'):
-            c.setFont(fontName, 10)
-            for i in range(0, 32):
-                for j in range(0, 32):
-                    ch = utf8(i * 32 + j)
-                    c.drawString(80 + j * 13 + int(j / 16) * 4, 600 - i * 13 - int(i / 8) * 8, ch)
-            c.showPage()
-        c.save()
+        _simple_subset_generation('test_pdfbase_ttfonts1.pdf',1)
+        _simple_subset_generation('test_pdfbase_ttfonts3.pdf',3)
+        _simple_subset_generation('test_pdfbase_ttfonts35.pdf',3,5)
 
         # Do it twice with the same font object
-        c = Canvas(outputfile('test_pdfbase_ttfonts2.pdf'))
+        c = Canvas(outputfile('test_pdfbase_ttfontsadditional.pdf'))
         # Draw a table of Unicode characters
         c.setFont('TestFont', 10)
         c.drawString(100, 700, 'Hello, ' + utf8(0xffee))
