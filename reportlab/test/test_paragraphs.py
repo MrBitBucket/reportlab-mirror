@@ -93,6 +93,16 @@ class ParagraphTestCase(unittest.TestCase):
             Paragraph("""<para backcolor="pink">This got a background from the para tag</para>""", styNormal))
 
 
+        story.append(
+            Paragraph("""<para>\n\tThis has newlines and tabs on the front but inside the para tag</para>""", styNormal))
+        story.append(
+            Paragraph("""<para>  This has spaces on the front but inside the para tag</para>""", styNormal))
+
+        story.append(
+            Paragraph("""\n\tThis has newlines and tabs on the front but no para tag""", styNormal))
+        story.append(
+            Paragraph("""  This has spaces on the front but no para tag""", styNormal))
+
         template = SimpleDocTemplate('test_paragraphs.pdf',
                                      showBoundary=1)
         template.build(story,
