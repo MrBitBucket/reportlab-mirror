@@ -1,4 +1,4 @@
-########### 0.95 Released 2000/07/13
+########### 0.95 Released 2000/07/14
 demos/py2pdf/demo.py
        1.5 2000/06/27 08:58:19  Try to ensure test file removal rgbecker
 demos/py2pdf/py2pdf.py
@@ -13,29 +13,6 @@ demos/pythonpoint/pythonpoint.xml
 demos/pythonpoint/stdparser.py
       1.10 2000/07/11 15:00:39  Added end_spacer rgbecker
        1.9 2000/07/10 15:25:47  Added tables to PythonPoint andy_robinson
-docs/reference/reference.yml
-      1.11 2000/07/10 23:56:09  Paragraphs chapter pretty much complete.  Fancy cover. andy_robinson
-      1.10 2000/07/03 15:39:51  Documentation fixes rgbecker
-       1.9 2000/06/28 14:52:43  Documentation changes rgbecker
-docs/tools/codegrab.py
-       1.4 2000/06/28 14:52:43  Documentation changes rgbecker
-docs/tools/rltemplate.py
-       1.6 2000/07/12 13:34:35  changed nj address aaron_watters
-       1.5 2000/07/11 05:50:52  Script was referring to the wrong copy of the logo. andy_robinson
-       1.4 2000/07/10 23:56:09  Paragraphs chapter pretty much complete.  Fancy cover. andy_robinson
-       1.3 2000/06/21 12:28:18  remove UserDocTemplate, but add Andy's hook methods rgbecker
-docs/tools/stylesheet.py
-       1.6 2000/07/10 23:56:09  Paragraphs chapter pretty much complete.  Fancy cover. andy_robinson
-       1.5 2000/07/08 12:52:25  Separated out actual text from genuserguide, so it can be broken into chapters. andy_robinson
-       1.4 2000/07/05 16:07:00  added Heading4 style rgbecker
-       1.3 2000/07/03 15:50:31  Pushed down most existing lessons one level; added functions heading1..heading3 for building story unambiguously; spelled Hugh Hefner right! andy_robinson
-docs/tools/yaml.py
-       1.8 2000/07/10 23:56:09  Paragraphs chapter pretty much complete.  Fancy cover. andy_robinson
-       1.7 2000/07/03 15:39:51  Documentation fixes rgbecker
-       1.6 2000/07/03 10:50:32  Fix usage message rgbecker
-docs/tools/yaml2pdf.py
-       1.7 2000/07/10 23:56:09  Paragraphs chapter pretty much complete.  Fancy cover. andy_robinson
-documentaion many changes
 lib/sequencer.py
        1.8 2000/07/10 11:58:35  Pre-incrementing bug fixed andy_robinson
        1.7 2000/07/08 07:11:21  Changed to pre-increment andy_robinson
@@ -64,6 +41,8 @@ platypus/doctemplate.py
       1.26 2000/07/07 16:21:12  Cosmetics rgbecker
       1.25 2000/07/06 12:40:37  Push canvas into flowables during wrap/split rgbecker
       1.24 2000/07/05 12:22:21  Force _calc in SimpleDocTemplae.build rgbecker
+      1.23 2000/07/03 15:39:51  Documentation fixes rgbecker
+      1.22 2000/06/28 14:52:43  Documentation changes rgbecker
       1.21 2000/06/26 15:58:22  Simple fix to widths problem rgbecker
       1.20 2000/06/21 12:27:42  remove UserDocTemplate, but add Andy's hook methods rgbecker
       1.19 2000/06/20 21:56:17  re-synching after sourceforge went weird andy_robinson
@@ -75,6 +54,7 @@ platypus/frames.py
        1.4 2000/07/07 16:21:12  Cosmetics rgbecker
        1.3 2000/07/06 12:40:38  Push canvas into flowables during wrap/split rgbecker
 platypus/paragraph.py
+      1.17 2000/07/14 10:29:50  The Paragraph.split method was wrongly assuming that the firstLineIndent should reset to zero. It should always reset to leftIndent! rgbecker
       1.16 2000/07/03 15:39:51  Documentation fixes rgbecker
       1.15 2000/06/23 13:13:54  Fixes to splitting code rgbecker
 platypus/paraparser.py
@@ -83,9 +63,9 @@ platypus/paraparser.py
 platypus/tables.py
       1.26 2000/07/12 15:36:56  Allow automatic leading in FONT command rgbecker
       1.25 2000/07/12 15:26:46  INNERGRID was dumb rgbecker
+      1.24 2000/07/12 15:25:42  INNERGRID was dumb rgbecker
       1.23 2000/07/12 15:18:16  Leading changes fixed rgbecker
       1.22 2000/07/12 14:23:12  Table argument order changed rgbecker
-								**********Incompatibility************
       1.21 2000/07/12 09:05:17  Fixed tuple size bug rgbecker
       1.20 2000/07/11 14:29:45  Table splitting start rgbecker
       1.19 2000/07/10 15:25:47  Added tables to PythonPoint andy_robinson
@@ -99,6 +79,8 @@ platypus/test/testplatypus.py
       1.18 2000/07/12 14:23:12  Table argument order changed rgbecker
 platypus/test/testtables.py
       1.11 2000/07/12 14:23:12  Table argument order changed rgbecker
+utils/README
+       1.2 2000/07/13 14:55:30  Added detailed release rgbecker
 ########### 0.94 Released 2000/06/20
 demos/gadflypaper/gfe.py
       1.11 2000/06/01 16:27:56  pageSize is wrong at present rgbecker

@@ -31,16 +31,19 @@
 #
 ###############################################################################
 #	$Log: __init__.py,v $
+#	Revision 1.4  2000/07/14 13:29:49  rgbecker
+#	Releasing 0.95
+#
 #	Revision 1.3  2000/06/20 13:32:26  rgbecker
 #	Version Change
-#
+#	
 #	Revision 1.2  2000/02/17 02:03:53  rgbecker
 #	Docstring & other fixes
 #	
 #	Revision 1.1  2000/02/16 09:42:49  rgbecker
 #	Conversion to reportlab package
 #	
-__version__=''' $Id: __init__.py,v 1.3 2000/06/20 13:32:26 rgbecker Exp $ '''
+__version__=''' $Id: __init__.py,v 1.4 2000/07/14 13:29:49 rgbecker Exp $ '''
 __doc__="""
 """
-Version = "0.94"
+Version = "0.95"
