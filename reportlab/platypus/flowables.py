@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.18 2001/03/26 07:49:41 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.18 2001/03/26 07:49:41 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.19 2001/05/18 11:46:45 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.19 2001/05/18 11:46:45 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -81,6 +81,10 @@ class Flowable:
 		are asked their size, drawn or whatever.  It returns the
 		size actually used."""
 		return (self.width, self.height)
+
+	def minWidth(self):
+		"""This should return the minimum required width"""
+		return getattr(self,'_minWidth',self.width)
 
 	def split(self, availWidth, availheight):
 		"""This will be called by more sophisticated frames when

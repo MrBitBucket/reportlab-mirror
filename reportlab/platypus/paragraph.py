@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.52 2001/05/15 09:29:59 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.52 2001/05/15 09:29:59 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.53 2001/05/18 11:46:45 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.53 2001/05/18 11:46:45 rgbecker Exp $ '''
 from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
@@ -378,6 +378,21 @@ class Paragraph(Flowable):
 		self.height = len(self.blPara.lines) * self.style.leading
 		return (self.width, self.height)
 
+	def minWidth(self):
+		'Attempt to determine a minimum sensible width'
+		frags = self.frags
+		nFrags= len(frags)
+		if nFrags==1:
+			f = frags[0]
+			fS = f.fontSize
+			fN = f.fontName
+			words = hasattr(f,'text') and split(f.text, ' ') or f.words
+			func = lambda w, fS=fS, fN=fN: stringWidth(w,fN,fS)
+		else:
+			words = _getFragWords(frags)
+			func  = lambda x: x[0]
+		return max(map(func,words))
+
 	def _get_split_blParaFunc(self):
 		return self.blPara.kind==0 and _split_blParaSimple or _split_blParaHard
 
@@ -723,15 +738,18 @@ if __name__=='__main__':	#NORUNTESTS
 		n =len(lines)
 		for l in range(n):
 			line = lines[l]
-			words = line.words
+			if hasattr(line,'words'):
+				words = line.words
+			else:
+				words = line[1]
 			nwords = len(words)
-			print 'line%d: %d(%d)\n  ' % (l,nwords,line.wordCount),
+			print 'line%d: %d(%s)\n  ' % (l,nwords,str(getattr(line,'wordCount','Unknown'))),
 			for w in range(nwords):
-				print "%d:'%s'"%(w,words[w].text),
+				print "%d:'%s'"%(w,getattr(words[w],'text',words[w])),
 			print
 
 	def dumpParagraphFrags(P):
-		print 'dumpParagraphFrags(<Paragraph @ %d>)' % id(P)
+		print 'dumpParagraphFrags(<Paragraph @ %d>) minWidth() = %.2f' % (id(P), P.minWidth())
 		frags = P.frags
 		n =len(frags)
 		for l in range(n):
@@ -747,15 +765,19 @@ if __name__=='__main__':	#NORUNTESTS
 			print
 			l = l + 1
 
+
 	from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 	import sys
 	TESTS = sys.argv[1:]
 	if TESTS==[]: TESTS=['4']
+	def flagged(i,TESTS=TESTS):
+		return 'all' in TESTS or '*' in TESTS or str(i) in TESTS
+
 	styleSheet = getSampleStyleSheet()
 	B = styleSheet['BodyText']
 	style = ParagraphStyle("discussiontext", parent=B)
 	style.fontName= 'Helvetica'
-	if '1' in TESTS:
+	if flagged(1):
 		text='''The <font name=courier color=green>CMYK</font> or subtractive method follows the way a printer
 mixes three pigments (cyan, magenta, and yellow) to form colors.
 Because mixing chemicals is more difficult than combining light there
@@ -778,13 +800,13 @@ and better control when printed.
 			dumpParagraphLines(s)
 			aH = 500
 
-	if '2' in TESTS:
+	if flagged(2):
 		P=Paragraph("""Price<super><font color="red">*</font></super>""", styleSheet['Normal'])
 		dumpParagraphFrags(P)
 		w,h = P.wrap(24, 200)
 		dumpParagraphLines(P)
 
-	if '3' in TESTS:
+	if flagged(3):
 		text = """Dieses Kapitel bietet eine schnelle <b><font color=red>Programme :: starten</font></b>
 <onDraw name=myIndex label="Programme :: starten">
 <b><font color=red>Eingabeaufforderung :: (&gt;&gt;&gt;)</font></b>
@@ -803,7 +825,7 @@ umfassend zu sein."""
 		w,h = P.wrap(6*72, 9.7*72)
 		dumpParagraphLines(P)
 
-	if '4' in TESTS:
+	if flagged(4):
 		text='''Die eingebaute Funktion <font name=Courier>range(i, j [, stride])</font><onDraw name=myIndex label="eingebaute Funktionen::range()"><onDraw name=myIndex label="range() (Funktion)"><onDraw name=myIndex label="Funktionen::range()"> erzeugt eine Liste von Ganzzahlen und f\374llt sie mit Werten <font name=Courier>k</font>, f\374r die gilt: <font name=Courier>i &lt;= k &lt; j</font>. Man kann auch eine optionale Schrittweite angeben. Die eingebaute Funktion <font name=Courier>xrange()</font><onDraw name=myIndex label="eingebaute Funktionen::xrange()"><onDraw name=myIndex label="xrange() (Funktion)"><onDraw name=myIndex label="Funktionen::xrange()"> erf\374llt einen \344hnlichen Zweck, gibt aber eine unver\344nderliche Sequenz vom Typ <font name=Courier>XRangeType</font><onDraw name=myIndex label="XRangeType"> zur\374ck. Anstatt alle Werte in der Liste abzuspeichern, berechnet diese Liste ihre Werte, wann immer sie angefordert werden. Das ist sehr viel speicherschonender, wenn mit sehr langen Listen von Ganzzahlen gearbeitet wird. <font name=Courier>XRangeType</font> kennt eine einzige Methode, <font name=Courier>s.tolist()</font><onDraw name=myIndex label="XRangeType::tolist() (Methode)"><onDraw name=myIndex label="s.tolist() (Methode)"><onDraw name=myIndex label="Methoden::s.tolist()">, die seine Werte in eine Liste umwandelt.'''
 		aW = 420
 		aH = 64.4
@@ -818,7 +840,7 @@ umfassend zu sein."""
 		print 'After split wrap',w0,h0
 		dumpParagraphLines(S[0])
 
-	if '5' in TESTS:
+	if flagged(5):
 		text = """<para><![CDATA[</font></b>& < >]]></para>"""
 		P=Paragraph(text, styleSheet['Code'])
 		dumpParagraphFrags(P)
