@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.35 2003/09/09 11:06:00 johnprecedo Exp $
-__version__=''' $Id: renderPM.py,v 1.35 2003/09/09 11:06:00 johnprecedo Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.36 2003/11/10 21:22:03 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.36 2003/11/10 21:22:03 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -551,7 +551,8 @@ def test():
     #grab all drawings from the test module and write out.
     #make a page of links in HTML to assist viewing.
     import os
-    from reportlab.graphics.testshapes import getAllTestDrawings
+    from reportlab.graphics import testshapes
+    getAllTestDrawings = testshapes.getAllTestDrawings
     drawings = []
     if not os.path.isdir('pmout'):
         os.mkdir('pmout')
@@ -563,6 +564,12 @@ def test():
     </html>
     """
     html = [htmlTop]
+    if hasattr(_renderPM,'ft_get_face'):
+        from reportlab.pdfbase import pdfmetrics, ttfonts
+        pdfmetrics.registerFont(ttfonts.TTFont("LuxiSerif", "luxiserif.ttf"))
+        pdfmetrics.registerFont(ttfonts.TTFont("Rina", "rina.ttf"))
+        testshapes._FONTS[1] = 'LuxiSerif'
+        testshapes._FONTS[2] = 'Rina'
 
     i = 0
     #print in a loop, with their doc strings
