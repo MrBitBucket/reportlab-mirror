@@ -80,10 +80,9 @@ def _draw_3d_line( G, x0, x1, y0, y1,
         Y.sort(_ystrip_cmp)
         for y in Y:
             c = y.slope>depth_slope and y.fillColorShaded or y.fillColor
-            G.add(Polygon(_ystrip_poly(x[0], x[1], y.y0, y.y1, xdepth, ydepth),
+            print 'Poly([%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f])'% tuple(_ystrip_poly(x[0], x[1], y.y0, y.y1, xdepth, -ydepth))
+            G.add(Polygon(_ystrip_poly(x[0], x[1], y.y0, y.y1, xdepth, -ydepth),
                 fillColor = c, strokeColor=c, strokeWidth=xdelta*0.6))
-            if x is X[0]:
-                G.add(Line(x[0], y.y1, x[0]+xdepth, y.y1+ydepth,strokeColor=c,strokeWidth=0.6*xdelta))
 
 from math import pi, sin, cos
 _pi_2 = pi*0.5
