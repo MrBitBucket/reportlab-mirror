@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "$Revision: 1.8 $"
+#define VERSION "$Revision: 1.9 $"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -693,7 +693,7 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 			while(pp->code!=ART_END){
 				if(pp->code==ART_CURVETO){
 					pp->x1= pp->x1*s+x;
-					pp->y1= pp->x1*s;
+					pp->y1= pp->y1*s;
 					pp->x2= pp->x2*s+x;
 					pp->y2= pp->y2*s;
 					}
