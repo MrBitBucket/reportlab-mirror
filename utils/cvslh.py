@@ -6,7 +6,7 @@
 #	makes a reasonably formatted file of the log entries since the specified
 #	date.
 #
-import re, sys, getopt
+import re, sys, getopt, string
 class logFileEntry:
 	def __init__(self, version):
 		self.version = version
@@ -22,11 +22,25 @@ class logFile:
 		self.E = []
 	def addEntry(self,E):
 		self.E.append(E)
+
+	def getChanges(self,L=None):
+		if L is None: L = []
+		for e in self.E:
+			L.append(Change(self.name,e))
+
 	def __str__(self):
 		s = str(self.name)
 		for e in self.E:
 			s = s+'\n'+str(e)
 		return s
+
+class Change:
+	def __init__(self,name,lFE):
+		self.name = name
+		self.version = lFE.version
+		self.date = lFE.date
+		self.comment = lFE.comment
+		self.author = lFE.author
 
 reWorking=re.compile('^Working +file: +(.*)$')
 reVersion=re.compile('^revision +(.*)$')
@@ -71,18 +85,44 @@ def findVersion(F):
 			i = i + 1
 	return None
 
-opts, argv= getopt.getopt(sys.argv[1:],'d:')
+def sortFunc(a, b):
+	if a.date<b.date: return -1
+	elif a.date>b.date: return 1
+	elif a.name<b.name: return -1
+	elif a.name>b.name: return 1
+	else: return 0
+def sortFuncR(a,b):
+	return -sortFunc(a,b)
+
+opts, argv= getopt.getopt(sys.argv[1:],'rsd:')
 for k,v in opts: opt[k]=v
 if len(argv):
 	lines = open(argv[0],'r').readlines()
 else:
 	lines = sys.stdin.readlines()
 i = 0
+cL = []
+sortFlag = opt.has_key('-s')
+reverseSort = opt.has_key('-r')
 while 1:
 	f = findWorking()
 	if f is None: break
 	F = logFile(f)
 	while findVersion(F):
 		pass
-	if F.E != []:
+	if sortFlag:
+		F.getChanges(cL)
+	elif F.E != []:
 		print str(F)
+
+if sortFlag:
+	cL.sort(reverseSort and sortFuncR or sortFunc)
+	d = ''
+	for c in cL:
+		if c.date[:10]!=d:
+			d = c.date[:10]
+			print '##### %s #####' % d
+		print '\t%s %s %s' % (c.name, c.version, c.author)
+		C = string.split(c.comment,'\n')
+		for c in C:
+			print '\t\t' + c
