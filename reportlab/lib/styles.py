@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/styles.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/styles.py,v 1.9 2000/11/23 14:01:58 andy_robinson Exp $
-__version__=''' $Id: styles.py,v 1.9 2000/11/23 14:01:58 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/styles.py,v 1.10 2000/12/10 10:50:26 andy_robinson Exp $
+__version__=''' $Id: styles.py,v 1.10 2000/12/10 10:50:26 andy_robinson Exp $ '''
 
 from reportlab.lib.colors import white, black
-from reportlab.lib.enums import TA_LEFT
+from reportlab.lib.enums import TA_LEFT, TA_CENTER
 
 ###########################################################
 # This class provides an 'instance inheritance'
@@ -209,6 +209,14 @@ def getSampleStyleSheet():
     para.fontName = 'Times-Italic'
     stylesheet['Italic'] = para
 
+    para = ParagraphStyle('Title', stylesheet['Normal'])
+    para.fontName = 'Times-Bold'
+    para.fontSize = 18
+    para.leading = 22
+    para.spaceAfter = 6
+    para.alignment = TA_CENTER
+    stylesheet['Title'] = para
+
     para = ParagraphStyle('Heading1', stylesheet['Normal'])
     para.fontName = 'Times-Bold'
     para.fontSize = 18
@@ -284,6 +292,15 @@ def getSampleStyleSheet1():
                                   leading=22,
                                   spaceAfter=6),
                    alias='h1')
+
+    stylesheet.add(ParagraphStyle(name='Title',
+                                  parent=stylesheet['Normal'],
+                                  fontName = 'Times-Bold',
+                                  fontSize=18,
+                                  leading=22,
+                                  alignment=TA_CENTER,
+                                  spaceAfter=6),
+                   alias='title')
 
     stylesheet.add(ParagraphStyle(name='Heading2',
                                   parent=stylesheet['Normal'],
