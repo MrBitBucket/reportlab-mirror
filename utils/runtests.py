@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: runtests.py,v $
+#	Revision 1.6  2000/04/06 15:08:53  rgbecker
+#	Changes to way dir is handled
+#
 #	Revision 1.5  2000/04/03 09:29:36  rgbecker
 #	Eliminated -dir option
-#
+#	
 #	Revision 1.4  2000/03/02 12:22:28  rgbecker
 #	Added recognition comment checks
 #	
@@ -48,7 +51,7 @@
 #	New infrastructure
 #	
 #	
-__version__=''' $Id: runtests.py,v 1.5 2000/04/03 09:29:36 rgbecker Exp $ '''
+__version__=''' $Id: runtests.py,v 1.6 2000/04/06 15:08:53 rgbecker Exp $ '''
 '''
 script for testing ReportLab
 '''
@@ -58,9 +61,7 @@ _globals['__name__'] = "__main__"	#for passing to execfile
 
 import os, sys, string, traceback, re
 
-#this is what we need to write to .cvspass for anonymous access
-_testdir=os.path.normcase(os.path.normpath('/tmp/reportlab_test/reportlab'))
-_ecount = 0
+_ecount = 0	# count of errors
 
 def find_py_files(d):
 	def _py_files(L,d,N):
@@ -72,7 +73,7 @@ def find_py_files(d):
 	return L
 
 def find_executable_py_files(d):
-	prog=re.compile('^(( |\t)*if( |\t)+__name__( |\t)*==( |\t)*(\'|\")__main__(\'|\")( |\t)*:)|#REPORTLAB_TEST_SCRIPT')
+	prog=re.compile('^((( |\t)*if( |\t)+__name__( |\t)*==( |\t)*(\'|\")__main__(\'|\")( |\t)*:)|#REPORTLAB_TEST_SCRIPT)( |\t)*$')
 	L=[]
 	for n in find_py_files(d):
 		for l in open(n,'r').readlines():
@@ -129,7 +130,7 @@ def do_tests(d,cyc):
 def clean_files(d):
 	def find_cleanable_files(L,d,N):
 		n = os.path.basename(d)
-		for n in filter(lambda n: n[-3:]=='.PYC' or n[-4:]=='.PDF' or n[-4:]=='.A85',map(string.upper,N)):
+		for n in filter(lambda n: n[-4:] in ['.PYC','.PDF','.A85','.PNG','.IMG'],map(string.upper,N)):
 			fn = os.path.normcase(os.path.normpath(os.path.join(d,n)))
 			if os.path.isfile(fn): os.remove(fn)
 	os.chdir(d)
