@@ -14,7 +14,7 @@ import string, copy
 from types import FunctionType, StringType
 
 from reportlab.lib import colors
-from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf, isBoolean, isNoneOrShape
+from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isString, isListOfStrings, SequenceOf, isBoolean, isNoneOrShape
 from reportlab.lib.formatters import Formatter
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
 from reportlab.pdfbase.pdfmetrics import stringWidth
