@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testplatypus.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.11 2002/09/26 20:59:36 andy_robinson Exp $
-__version__=''' $Id: test_platypus_general.py,v 1.11 2002/09/26 20:59:36 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.12 2003/04/24 11:08:02 rgbecker Exp $
+__version__=''' $Id: test_platypus_general.py,v 1.12 2003/04/24 11:08:02 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -14,7 +14,7 @@ builds a special "document model" in which the frames are added to each page
 and drawn into.
 """
 
-import string, copy, sys
+import string, copy, sys, os
 
 from reportlab.test import unittest
 from reportlab.test.utils import makeSuiteForClasses
@@ -420,7 +420,8 @@ def getExamples():
     reportlab.rl_config.warnOnMissingFontGlyphs = 0
 
     from reportlab.pdfbase import pdfmetrics
-    face = pdfmetrics.EmbeddedType1Face('../fonts/LeERC___.AFM','../fonts/LeERC___.PFB')
+    fontDir = os.path.join(os.path.dirname(reportlab.__file__),'fonts')
+    face = pdfmetrics.EmbeddedType1Face(os.path.join(fontDir,'LeERC___.AFM'),os.path.join(fontDir,'LeERC___.PFB'))
     faceName = face.name  # should be 'LettErrorRobot-Chrome'
     pdfmetrics.registerTypeFace(face)
     font = pdfmetrics.Font(faceName, faceName, 'WinAnsiEncoding')
