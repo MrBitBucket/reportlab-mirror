@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-import os, sys, string
+import os, sys, string, re
+VERSION = re.search(r'^#\s*define\s+VERSION\s*"([^"]+)"',open('_renderPM.c','r').read(),re.MULTILINE)
+VERSION = VERSION and VERSION.group(1) or 'unknown'
 def libart_version():
 	K = ('LIBART_MAJOR_VERSION','LIBART_MINOR_VERSION','LIBART_MICRO_VERSION')
 	D = {}
@@ -18,20 +20,25 @@ def BIGENDIAN(macname,value=None):
 	'define a macro if bigendian'
 	return sys.byteorder=='big' and [(macname,value)] or []
 
-if __name__=='__main__': #NO RUNTESTS
-	import os, sys, string
+def pfxJoin(pfx,*N):
+	R=[]
+	for n in N:
+		R.append(os.path.join(pfx,n))
+	return R
+
+FT_LIB='C:/Python/devel/freetype-2.1.5/objs/freetype214.lib'
+FT_INCLUDE=None
+def check_ft_lib(ft_lib=FT_LIB):
+	return os.path.isfile(ft_lib) and ft_lib or ''
+
+def main():
 	cwd = os.getcwd()
 	os.chdir(os.path.dirname(os.path.abspath(sys.argv[0])))
-	ROBIN_DEBUG=[('ROBIN_DEBUG',None)]
-	ROBIN_DEBUG=[]
+	MACROS=[('ROBIN_DEBUG',None)]
+	MACROS=[]
 	from glob import glob
 	from distutils.core import setup, Extension
 	pJoin=os.path.join
-	def pfxJoin(pfx,*N):
-		R=[]
-		for n in N:
-			R.append(pJoin(pfx,n))
-		return R
 
 	LIBART_VERSION = libart_version()
 	SOURCES=['_renderPM.c']
@@ -45,8 +52,20 @@ if __name__=='__main__': #NO RUNTESTS
 	else:
 		raise ValueError, "Don't know about other systems"
 
+	ft_lib = check_ft_lib()
+	if ft_lib:
+		FT_LIB = [os.path.splitext(os.path.basename(ft_lib))[0]]
+		FT_LIB_DIR = [os.path.dirname(ft_lib)]
+		FT_MACROS = [('RENDERPM_FT',None)]
+		FT_INC_DIR = [FT_INCLUDE or os.path.join(os.path.dirname(os.path.dirname(ft_lib)),'include')]
+	else:
+		FT_LIB = []
+		FT_LIB_DIR = []
+		FT_MACROS = []
+		FT_INC_DIR = []
+
 	setup(	name = "_renderPM",
-			version = "1.11",
+			version = VERSION,
 			description = "Python low level render interface",
 			author = "Robin Becker",
 			author_email = "robin@reportlab.com",
@@ -56,7 +75,7 @@ if __name__=='__main__': #NO RUNTESTS
 						{
 						'sources':	LIBART_SRCS,
 						'include_dirs': [DEVEL_DIR,LIBART_DIR,],
-						'macros': [('LIBART_COMPILATION',None),]+BIGENDIAN('WORDS_BIGENDIAN')+ROBIN_DEBUG,
+						'macros': [('LIBART_COMPILATION',None),]+BIGENDIAN('WORDS_BIGENDIAN')+MACROS,
 						#'extra_compile_args':['/Z7'],
 						}
 						),
@@ -64,19 +83,19 @@ if __name__=='__main__': #NO RUNTESTS
 						{
 						'sources':	pfxJoin(GT1_DIR,'gt1-dict.c','gt1-namecontext.c','gt1-parset1.c','gt1-region.c','parseAFM.c'),
 						'include_dirs': [DEVEL_DIR,GT1_DIR,GLIB_DIR,],
-						'macros': ROBIN_DEBUG,
+						'macros': MACROS,
 						#'extra_compile_args':['/Z7'],
 						}
 						),
 						],
 			ext_modules = 	[Extension(	'_renderPM',
 										SOURCES,
-										include_dirs=[DEVEL_DIR,LIBART_DIR,GT1_DIR],
-										define_macros=[('LIBART_COMPILATION',None)]+ROBIN_DEBUG+[('LIBART_VERSION',LIBART_VERSION)],
-										library_dirs=[],
+										include_dirs=[DEVEL_DIR,LIBART_DIR,GT1_DIR]+FT_INC_DIR,
+										define_macros=FT_MACROS+[('LIBART_COMPILATION',None)]+MACROS+[('LIBART_VERSION',LIBART_VERSION)],
+										library_dirs=[]+FT_LIB_DIR,
 
 										# libraries to link against
-										libraries=LIBS,
+										libraries=LIBS+FT_LIB,
 										#extra_objects=['gt1.lib','libart.lib',],
 										#extra_compile_args=['/Z7'],
 										#extra_link_args=['/debug']
@@ -84,7 +103,7 @@ if __name__=='__main__': #NO RUNTESTS
 							],
 			)
 
-	if sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
+	if sys.hexversion<0x2030000 and sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
 		def MovePYDs(*F):
 			for x in sys.argv:
 				if x[:18]=='--install-platlib=': return
@@ -99,3 +118,6 @@ if __name__=='__main__': #NO RUNTESTS
 					os.remove(dstf)
 				os.rename(srcf,dstf)
 		MovePYDs('_renderPM.pyd','_renderPM.pdb')
+
+if __name__=='__main__': #NO RUNTESTS
+	main()
