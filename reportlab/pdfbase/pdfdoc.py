@@ -1,3 +1,4 @@
+
 ###############################################################################
 #
 #	ReportLab Public License Version 1.0
@@ -31,12 +32,9 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
-#	Revision 1.9  2000/03/21 19:36:37  rgbecker
-#	8bit character fixes
+#	Revision 1.10  2000/03/24 21:03:51  aaron_watters
+#	Added forms, destinations, linkages and other features
 #
-#	Revision 1.8  2000/03/16 20:28:12  rgbecker
-#	fixed off by one error in obj ref accounting, made font dict external object
-#	
 #	Revision 1.7  2000/02/23 15:09:23  rgbecker
 #	Memory leak fixes
 #	
@@ -55,7 +53,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.9 2000/03/21 19:36:37 rgbecker Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.10 2000/03/24 21:03:51 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -123,6 +121,9 @@ class PDFDocument:
     def __init__(self):
         self.objects = []
         self.objectPositions = {}
+        self.inObject = None # mark for whether in page or form or possibly others...
+        self.thispageposition = None # record if in page
+        self.thisformposition = None # record if in form
         
         self.fonts = MakeType1Fonts()
 
@@ -177,6 +178,16 @@ class PDFDocument:
         #obj.doc = self
         #return len(self.objects) - 1  # give its position
         return self.getPosition(key)
+        
+    def replace(self, key, obj):
+        """replace an object (but you better know what you are doing)"""
+        position = self.getPosition(key)
+        self.objects[position-1] = obj
+        return position
+        
+    def reserve(self, key):
+        """reserve an object position later to be replaced (no replace == error)"""
+        return self.add(key, key)
 
     def getPosition(self, key):
         """Tell you where the given object is in the file - used for
@@ -276,24 +287,97 @@ class PDFDocument:
         self.printXref()
         self.printTrailer()
         print "%%EOF",
+        
+    def inPage(self):
+        """specify the current object as a page (enables reference binding and other page features)"""
+        if self.inObject is not None:
+            raise ValueError, "can't go in page already in object %s" % self.inObject
+        self.inObject = "page"
+        pagenum = len(self.PageCol.PageList)+1
+        pagename = "Page%06d" % pagenum
+        streamname = "PageStream%06d" % pagenum
+        pageposition = self.reserve(pagename)
+        streamposition = self.reserve(streamname)
+        self.pageposition = (pagenum, pagename, streamname, pageposition, streamposition)
+        
+    def thisPageRef(self):
+        if self.inObject!="page":
+            raise ValueError, "can't get thisPageRef -- not declared inPage"
+        (pagenum, pagename, streamname, pageposition, streamposition) = self.pageposition
+        return self.objectReference(pagename)
+        
+    def inForm(self):
+        """specify that we are in a form xobject (disable page features, etc)"""
+        if self.inObject not in ["form", None]:
+            raise ValueError, "can't go in form already in object %s" % self.inObject
+        self.inObject = "form"
+        # don't need to do anything else, I think...
 
     def addPage(self, page):
         """adds page and stream at end.  Maintains pages list"""
         #page.buildstream()
+        if self.inObject != "page":
+            self.inPage()
+        (pagenum, pagename, streamname, pageposition, streamposition) = self.pageposition
         pos = len(self.objects) # work out where added
         
-        page.ParentPos = self.getPosition("PagesTreeRoot")   #pages collection
+        parentpos = page.ParentPos = self.getPosition("PagesTreeRoot")   #pages collection
         page.info = {
-            'parentpos':3,
+            'parentpos': parentpos,
             'fontdict':self.fontdict,
-            'contentspos':pos + 2,
+            'contentspos':streamposition,
             }
         
-        self.PageCol.PageList.append(pos+1)  
-        self.add('Page%06d'% len(self.PageCol.PageList), page)
+        self.PageCol.PageList.append(pageposition)  
+        #pagenum = len(self.PageCol.PageList)
+        #self.add('Page%06d'% pagenum, page)
+        self.replace(pagename, page)
         #self.objects.append(page)
-        self.add('PageStream%06d'% len(self.PageCol.PageList), page.stream)
+        #self.add('PageStream%06d'% pagenum, page.stream)
+        self.replace(streamname, page.stream)
         #self.objects.append(page.stream)
+        # clear inObject
+        self.inObject = None
+        
+    def addForm(self, name, form):
+        """add a Form XObject."""
+        # XXX should check that name is a legal PDF name
+        if self.inObject != "form":
+            self.inForm()
+        form.info = {"fontdict": self.fontdict}
+        self.add("FormXob.%s" % name, form)
+        self.inObject = None
+        
+    def hasForm(self, name):
+        """test for existence of named form"""
+        internalname = "FormXob.%s" % name
+        try:
+            test = self.objectReference(internalname)            
+        except:
+            return 0
+        else:
+            return internalname
+        
+    def xobjDict(self, formnames):
+        """construct an xobject dict (for inclusion in a resource dict, usually)
+           from a list of form names (images not yet supported)"""
+        L = []
+        a = L.append
+        a("        <<")
+        for name in formnames:
+            internalname = "FormXob.%s" % name
+            reference = self.objectReference(internalname)
+            a("           /%s %s" % (internalname, reference))
+        a(">>")
+        a("")
+        return string.join(L, LINEEND)
+        
+    def addAnnotation(self, name, annotation):
+        self.add("Annot.%s"%name, annotation)
+        
+    def refAnnotation(self, name):
+        internalname = "Annot.%s" % name
+        return self.objectReference(internalname)
 
     def hasFont(self, psfontname):
         return self.fontMapping.has_key(psfontname)
@@ -460,7 +544,31 @@ class PDFPageCollection(PDFObject):
         file.write(text + LINEEND)
 
 
-class PDFPage(PDFObject):
+class ResourceDictUserMixin:
+    """common functionality for PDFObjects that have resource dictionaries"""
+    #override
+    info = None
+
+    def resourceDict(self, **kw):
+        info = {}
+        if self.info:
+            info.update(self.info)
+        info.update(kw)
+        #info = self.info
+        L = []
+        a = L.append
+        a("<<")
+        a("    /Font %(fontdict)s" % info)
+        a("    /ProcSet %(procsettext)s" % info)
+        #if self.XObjects:
+        #    a("    /XObject "+self.XObjects)
+        if info.has_key("XObjects") and info["XObjects"]:
+             a("    /XObject "+info["XObjects"])
+        a(">>")
+        #a("")
+        return string.join(L, LINEEND)
+        
+class PDFPage(PDFObject, ResourceDictUserMixin):
     """The Bastard.  Needs list of Resources etc. Use a standard one for now.
     It manages a PDFStream object which must be added to the document's list
     of objects as well."""
@@ -470,6 +578,12 @@ class PDFPage(PDFObject):
         self.pageheight = 842
         self.stream = PDFStream()
         self.hasImages = 0
+        # when set this should be a python string containing a PDF XObject dictionary
+        self.XObjects = ""
+        # when full, should contain a list of pdfgen annotation names
+        #self.AnnotationNames = [] (not used)
+        # when set, should contain a list of object references equivalent to names above
+        self.Annots = []
         self.pageTransitionString = ''  # presentation effects
         # editors on different systems may put different things in the line end
         # without me noticing.  No triple-quoted strings allowed!
@@ -478,31 +592,46 @@ class PDFPage(PDFObject):
                 '/Type /Page',
                 '/Parent %(parentpos)d 0 R',
                 '/Resources',
-                '   <<',
-                '   /Font %(fontdict)s',
-                '   /ProcSet %(procsettext)s',
-                '   >>',
+                #'   <<',
+                #'   /Font %(fontdict)s',
+                #'   /ProcSet %(procsettext)s',
+                #'   >>',
+                "%(resourcedict)s",
                 '/MediaBox [0 0 %(pagewidth)d %(pageheight)d]',  #A4 by default
                 '/Contents %(contentspos)d 0 R',
                 '%(transitionString)s',
+                '%(Annots)s',
                 '>>'],
             LINEEND)
+            
+    #def addXObjectDictString(XObjectDictString): set directly (also for form)
+    #    self.XObjects = XObjectDictString
+        
     def setCompression(self, onoff=0):
         "Turns page compression on or off"
         assert onoff in [0,1], "Page compression options are 1=on, 2=off"
-        self.stream.compression = onoff & _HAVE_ZLIB
+        self.stream.compression = onoff 
         
     def save(self, file):
-        self.info['pagewidth'] = self.pagewidth
-        self.info['pageheight'] = self.pageheight
+        info = self.info
+        info['pagewidth'] = self.pagewidth
+        info['pageheight'] = self.pageheight
         # check for image support
         if self.hasImages:
-            self.info['procsettext'] = '[/PDF /Text /ImageC]'
+            info['procsettext'] = '[/PDF /Text /ImageC]'
         else:
-            self.info['procsettext'] = '[/PDF /Text]'
-        self.info['transitionString'] = self.pageTransitionString
+            info['procsettext'] = '[/PDF /Text]'
+        info['transitionString'] = self.pageTransitionString
+        info['resourcedict'] = self.resourceDict(XObjects=self.XObjects)
+        Annots = self.Annots
+        if Annots:
+            info['Annots'] = "/Annots %s" % apply(BasicPDFArrayString,Annots)
+        else:
+            info['Annots'] = ""
 
-        file.write(self.template % self.info + LINEEND)
+        #print self.template
+        #print info
+        file.write(self.template % info + LINEEND)
 
     def clear(self):
         self.drawables = []
@@ -523,6 +652,12 @@ class PDFStream(PDFObject):
 
     def setStream(self, data):
         self.data = data
+        
+    def streamDict(self, **kw):
+        if self.compression:
+            return '<< /Length %(length)d /Filter [/ASCII85Decode /FlateDecode]>>' % kw + LINEEND
+        else:
+            return '<< /Length %(length)d >>' % kw + LINEEND
 
     def save(self, file):
         #avoid crashes if they wrote nothing in the page
@@ -542,13 +677,225 @@ class PDFStream(PDFObject):
         #lines = len(string.split(self.data,'\n'))
         #length = len(self.data) + lines   # one extra LF each
         length = len(data_to_write) + len(LINEEND)    #AR 19980202
-        if self.compression:
-            file.write('<< /Length %d /Filter [/ASCII85Decode /FlateDecode]>>' % length + LINEEND)
-        else:
-            file.write('<< /Length %d >>' % length + LINEEND)
+        #arw: mar16 2000: make more general for subclassing
+        #if self.compression:
+        #    file.write('<< /Length %d /Filter [/ASCII85Decode /FlateDecode]>>' % length + LINEEND)
+        #else:
+        #    file.write('<< /Length %d >>' % length + LINEEND)
+        file.write(self.streamDict(length=length))
         file.write('stream' + LINEEND)
         file.write(data_to_write + LINEEND)
         file.write('endstream' + LINEEND)
+        
+PDFFormDictTemplate = string.join([ # from pdf spec mar 11 1999 p 257 (arw)
+  "<< /Type /XObject /Subtype /Form /FormType 1",
+  "/BBox [%(lowerx)d %(lowery)d %(upperx)d %(uppery)d]",
+  "/Matrix [1 0 0 1 0 0]", # constant matrix for now
+  "/Length %(length)d",
+  "%(filter)s",
+  "/Resources",
+  "%(resourcedict)s",
+  "%(Annots)s",
+  ">>",
+  ""], LINEEND) 
+        
+class PDFFormXObject(PDFStream, ResourceDictUserMixin):
+    # like page requires .info set by some higher level (doc)
+    # XXXX any resource used in a form must be propagated up to the page that (recursively) uses
+    #   the form!! (not implemented yet).
+    XObjects = Annots = None
+    compression = 0
+    def __init__(self, lowerx, lowery, upperx, uppery):
+        self.lowerx = lowerx; self.lowery=lowery; self.upperx=upperx; self.uppery=uppery
+    def streamDict(self, **kw):
+        D = {"lowerx":self.lowerx, "lowery": self.lowery, "upperx":self.upperx, "uppery":self.uppery, "filter":""}
+        if self.compression: D["filter"] = "/Filter [/ASCII85Decode /FlateDecode]"
+        D["resourcedict"] = self.resourceDict(procsettext="[/PDF /Text /ImageC]", XObjects=self.XObjects)
+        Annots = self.Annots
+        if Annots:
+            D['Annots'] = "/Annots %s" % apply(BasicPDFArrayString,Annots)
+        else:
+            D['Annots'] = ""
+        D.update(kw)
+        return PDFFormDictTemplate % D
+    def setStreamList(self, data):
+        if type(data) is ListType:
+            data = string.join(data, LINEEND)
+        self.setStream(data)
+        
+class Annotation(PDFObject):
+    """superclass for all annotations."""
+    defaults = (("Type", "/Annot"),)
+    required = ("Type", "Rect", "Contents", "Subtype")
+    permitted = required+(
+      "Border", "C", "T", "M", "F", "H", "BS", "AA", "AS", "Popup", "P")
+    def cvtdict(self, d):
+        """transform dict args from python form to pdf string rep as needed"""
+        Rect = d["Rect"]
+        from types import StringType
+        if type(Rect) is not StringType:
+            d["Rect"] = apply(BasicPDFArrayString, tuple(Rect))
+        d["Contents"] = PDFString(d["Contents"])
+        return d
+    def AnnotationDict(self, **kw):
+        d = {}
+        for (name,val) in self.defaults:
+            d[name] = val
+        d.update(kw)
+        for name in self.required:
+            if not d.has_key(name):
+                raise ValueError, "keyword argument %s missing" % name
+        d = self.cvtdict(d)
+        permitted = self.permitted
+        for name in d.keys():
+            if name not in permitted:
+                raise ValueError, "bad annotation dictionary name %s" % name
+        return apply(BasicPDFDictString, (), d)
+    def DictString(self):
+        raise ValueError, "DictString undefined for virtual superclass Annotation, must overload"
+        # but usually
+        #return self.AnnotationDict(self, Rect=(a,b,c,d)) or whatever
+    def save(self, file):
+        file.write(self.DictString())
+
+class TextAnnotation(Annotation):
+    permitted = Annotation.permitted + (
+        "Open", "Name", "AP")
+    def __init__(self, Rect, Contents, **kw):
+        self.Rect = Rect
+        self.Contents = Contents
+        self.otherkw = kw
+    def DictString(self):
+        d = {}
+        d.update(self.otherkw)
+        d["Rect"] = self.Rect
+        d["Contents"] = self.Contents
+        d["Subtype"] = "/Text"
+        return apply(self.AnnotationDict, (), d)
+        
+class LinkAnnotation(Annotation):
+    
+    permitted = Annotation.permitted + (
+        "Dest", "A", "PA")
+    def __init__(self, Rect, Contents, Destination, Border="[0 0 1]", **kw):
+        self.Border = Border
+        self.Rect = Rect
+        self.Contents = Contents
+        self.Destination = Destination
+        self.otherkw = kw
+        
+    def dummyDictString(self): # old, testing
+        return """
+          << /Type /Annot /Subtype /Link /Rect [71 717 190 734] /Border [16 16 1]
+             /Dest [23 0 R /Fit] >>
+             """
+             
+    def DictString(self):
+        d = {}
+        d.update(self.otherkw)
+        d["Border"] = self.Border
+        d["Rect"] = self.Rect
+        d["Contents"] = self.Contents
+        d["Subtype"] = "/Link"
+        d["Dest"] = self.Destination
+        return apply(self.AnnotationDict, (), d)
+        
+class Destination:
+    """not a pdfobject!  This is a placeholder that can convert itself
+       to a string only after it has been defined by the methods
+       below.  EG a Destination can refer to Appendix A before it has been
+       defined, but only if Appendix A is explicitly noted as a destination
+       and resolved before the document is generated...
+       For example the following sequence causes resolution before doc generation.
+          d = Destination()
+          d.fit() # or other format defining method call
+          d.setPageRef("20 0 R")
+       (at present setPageRef is called on generation of the page).
+    """
+    representation = format = None
+    def __init__(self,name):
+        self.name = name
+    def __str__(self):
+        r = self.representation
+        if r is None: raise ValueError, "Destination not resolved %s" % self.name
+        return r
+    def xyz(self, left, top, zoom):  # see pdfspec mar 11 99 pp184+
+        self.format = "[ %%s /XYZ %s %s %s ]" % (left, top, zoom)
+    def fit(self):
+        self.format = "[ %s /Fit ]"
+    def fitb(self):
+        self.format = "[ %s /FitB ]"
+    def fith(self, top):
+        self.format = "[ %%s /FitH %s ]" % top
+    def fitv(self, left):
+        self.format = "[ %%s /FitV %s ]" % left
+    def fitbh(self, top):
+        self.format = "[ %%s /FitBH %s ]" % top
+    def fitbv(self, left):
+        self.format = "[ %%s /FitBV %s ]" % left
+    def setPageRef(self, pageref):
+        f = self.format
+        if f is None:
+            raise ValueError, "format not defined"
+        self.representation = f % pageref
+
+# this one doesn't seem to work (but I'm not sure :( ).
+class InkAnnotation(Annotation):
+    permitted = Annotation.permitted + (
+        "InkList", "BS", "AP")
+    def __init__(self, Rect, Contents, InkList, **kw):
+        # inklist should be a list of tuples representing a path (in default user space)
+        self.Rect = Rect
+        self.Contents = Contents
+        self.InkList = InkList
+        self.otherkw = kw
+    def DictString(self):
+        InkList = self.InkList
+        # convert the inklist seq of seq into pdf string rep
+        #InkList = map(BasicPDFArrayString, InkList)
+        L = []
+        for e in InkList:
+            L.append(apply(BasicPDFArrayString, e))
+        InkList = apply(BasicPDFArrayString, tuple(L))
+        d = {}
+        d["InkList"] = InkList
+        d["Rect"] = self.Rect
+        d["Contents"] = self.Contents
+        d.update(self.otherkw)
+        d["Subtype"] = "Ink"
+        return apply(self.AnnotationDict, (), d)
+###### more helpers ###### (maybe these should be in utils or in a separate file?)
+def BasicPDFDictString(**kw):
+    """from a set of keyword arguments (with string values)
+       make a PDF dictionary."""
+    L = []
+    a = L.append
+    a("<<")
+    for name in kw.keys():
+        val = kw[name]
+        # XXXX should check name and val for valid data!!!
+        a("  /%s" % name)
+        a("      %s" % val)
+    a(">>")
+    a("")
+    return string.join(L, LINEEND)
+   
+def BasicPDFArrayString(*args):
+    """from a list of positional arguments (with string or int values)
+       make a PDF array"""
+    # XXXX should check elts for valid data
+    L = ["["]
+    a = L.append
+    for arg in args:
+        a(" %s" % arg)
+    a("]")
+    return string.join(L, "")
+    
+def PDFString(str):
+    return "(%s)" % pdfutils._escape(str)
+    
+##### end helpers #####
+
 
 class PDFImage(PDFObject):
     # sample one while developing.  Currently, images go in a literals
