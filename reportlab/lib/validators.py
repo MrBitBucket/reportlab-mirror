@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/validators.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.23 2002/07/24 19:56:37 andy_robinson Exp $
-__version__=''' $Id: validators.py,v 1.23 2002/07/24 19:56:37 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.24 2002/07/31 14:57:12 rgbecker Exp $
+__version__=''' $Id: validators.py,v 1.24 2002/07/31 14:57:12 rgbecker Exp $ '''
 """
 This module contains some standard verifying functions which can be
 used in an attribute map.
@@ -237,8 +237,8 @@ isTransform = _isTransform()
 isColor = _isColor()
 isListOfColors = SequenceOf(isColor,'isListOfColors')
 isColorOrNone = _isColorOrNone()
-isValidChild = _isValidChild()
-isValidChildOrNone = _isValidChildOrNone()
+isShape = isValidChild = _isValidChild()
+isNoneOrShape = isValidChildOrNone = _isValidChildOrNone()
 isAnything = _isAnything()
 isNothing = _isNothing()
 isXYCoord = SequenceOf(isNumber,lo=2,hi=2,emptyOK=0)
