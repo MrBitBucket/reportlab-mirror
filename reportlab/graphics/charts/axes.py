@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.61 2002/12/02 19:38:57 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.62 2003/05/22 19:08:30 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.61 2002/12/02 19:38:57 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.62 2003/05/22 19:08:30 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -511,7 +511,7 @@ class ValueAxis(Widget):
         # and returns a chunk of text.  So you can write a
         # 'formatMonthEndDate' function and use that on irregular
         # data points.
-        self.labelTextFormat = '%d'
+        self.labelTextFormat = None
 
         # if set to None, these will be worked out for you.
         # if you override any or all of them, your values
@@ -662,7 +662,7 @@ class ValueAxis(Widget):
     def makeTickLabels(self):
         g = Group()
 
-        f = self.labelTextFormat
+        f = self._labelTextFormat or '%d'
         pos = [self._x, self._y]
         d = self._dataIndex
         labels = self.labels
@@ -978,7 +978,7 @@ class NormalDateXValueAxis(XValueAxis):
         if valueMax is None: valueMax = xVals[-1]
         self._valueMin, self._valueMax = valueMin, valueMax
         self._tickValues = steps
-        self.labelTextFormat = labels
+        self._labelTextFormat = labels
 
         self._scaleFactor = self._length / float(valueMax - valueMin)
         self._tickValues = steps
@@ -1128,7 +1128,7 @@ class AdjYValueAxis(YValueAxis):
 
         valueStep, requiredRange = self.valueStep, self.requiredRange
         if requiredRange and y_max - y_min < requiredRange:
-            y1, y2, None = find_good_grid(y_min, y_max,n=n,grid=valueStep)
+            y1, y2 = find_good_grid(y_min, y_max,n=n,grid=valueStep)[:2]
             if y2 - y1 < requiredRange:
                 ym = (y1+y2)*0.5
                 y1 = min(ym-requiredRange*0.5,y_min)
@@ -1154,8 +1154,10 @@ class AdjYValueAxis(YValueAxis):
         self._valueMin = T[0]
         self._valueMax = T[-1]
         self._tickValues = self.valueSteps = T
-        from reportlab.lib.formatters import DecimalFormatter
-        if not isinstance(self.labelTextFormat,DecimalFormatter): self.labelTextFormat = L
+        if self.labelTextFormat is None:
+            self._labelTextFormat = L
+        else:
+            self._labelTextFormat = self.labelTextFormat
 
         if abs(self._valueMin-100)<1e-6:
             self._calcValueStep()
