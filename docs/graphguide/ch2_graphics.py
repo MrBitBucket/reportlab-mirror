@@ -1,13 +1,19 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.5 2001/03/29 16:03:12 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.6 2001/03/29 16:50:57 dinu_gherman Exp $
 
 from gengraphguide import *
 
 #heading1("Platform Independent Graphics using $reportlab/graphics$")
 
 heading1("General Concepts")
+
+disc("""
+Now, we present some more fundamental principles of the graphics
+library, that will show-up later in various places.
+""")
+
 
 heading2("Drawings and Renderers")
 
@@ -45,7 +51,8 @@ disc("""The PDF renderer has "special privileges" - a Drawing object is a
 heading2("Coordinate System")
 
 disc("""
-The Y-coordinate points from the bottom up.
+The Y-direction in our X-Y coordinate system points from the
+bottom <em>up</em>.
 This is consistent with PDF, Postscript and mathematical notation.
 It also appears to be more natural for people, especially when 
 working with charts.
@@ -109,15 +116,201 @@ may be imported into publishing tools such as Quark Express.
 """)
 
 
+heading2("Verification")
+
+disc("""The framework so far would be ideally suited to a type-safe language 
+       like Java or Delphi. Python is very dynamic and lets us type things 
+       which just don't make sense:""")
+
+eg("""
+>>> R = Rect(10,10,200,100, fillColor=red) 
+>>> 
+>>> R.fullColor = green    # note the typo 
+>>> 
+>>> R.x = 'not a number'   # illegal argument type 
+>>> 
+>>> del R.width            # that should confuse it
+""")
+
+disc("""
+These statements would be caught by the compiler in a statically
+typed language, but Python lets you get away with it.
+The first error could leave you staring at the picture trying to
+figure out why the colors were wrong.
+The second error would probably become clear only later, when
+some back-end tries to draw the rectangle.
+The third, though less likely, results in an invalid object that
+would not know how to draw itself.
+""")
+
+disc("""
+We have provided two verification techniques.
+The default is for every object to check every assignment at run
+time.
+This is what happens by default.
+So if you make a mistake in an assignment, you get something 
+like this:""")
+
+eg("""
+>>> r = shapes.Rect(10,10,200,80) 
+>>> r.fullColor = colors.green 
+Traceback (innermost last): 
+  File "<interactive input>", line 1, in ? 
+  File "C:\code\users\andy\graphics\shapes.py", line 190, in __setattr__ 
+    raise AttributeError, "Illegal attribute '%s' in class %s" %\
+    
+      (attr, self.__class__.__name__) 
+AttributeError: Illegal attribute 'fullColor' in class Rect 
+>>>  
+""")
+
+disc("""
+This imposes a performance penalty, so this behaviour can be turned
+off when you need it to be.
+To do this, you should use the following lines of code before you
+first import reportlab.graphics.shapes:
+""")
+
+eg("""
+>>> import reportlab.config 
+>>> reportlab.config.shapeChecking = 0 
+>>> import reportlab.graphics.shapes 
+>>>
+""")
+
+disc("""
+Once you turn off shapeChecking, the classes are actually built 
+without the verification hook; code should get faster, then.
+Currently the penalty seems to be about 25% on batches of charts,
+so it is hardly worth disabling.
+However, if we move the renderers to C in future (which is eminently
+possible)), the remaining 75% would shrink to almost nothing and
+the saving from verification would be significant.
+""")
+
+disc("""
+Each object, including the drawing itself, has a $verify()$ method.
+This either succeeds, or raises an exception.
+If you turn off automatic verification, then you shoudl explictly
+call $verify()$ in testing when developing the code, or perhaps
+once in a batch process.
+""")
+
+
+heading2("Property Editing")
+
+disc("""A cornerstone of the reportlab/graphics which we will cover below is 
+       that you can automatically document widgets. This means getting hold 
+       of all of their editable properties, including those of their 
+       subcomponents.""")
+
+disc("""Another goal is to be able to create GUIs and config files for 
+       drawings. A generic GUI can be built to show all editable properties 
+       of a drawing, and let you modify them and see the results. The Visual 
+       Basic or Delphi developmen environment are good examples of this kind 
+       of thing. In a batch charting application, a file could list all the 
+       properties of all the components in a chart, and be merged with a 
+       database query to make a batch of charts.""")
+
+disc("""To support these applications we have two interfaces, $getProperties$ 
+       and $setProperties$, as well as a convenience method $dumpProperties$. The 
+       first returns a dictionary of the editable properties of an object; 
+       the second sets them en masse. If an object has publicly exposed 
+       'children' then one can recursively set and get their properties too. 
+       This will make much more sense when we look at Widgets later on, but 
+       we need to put the support into the base of the framework.""")
+
+eg("""
+>>> r = shapes.Rect(0,0,200,100) 
+>>> import pprint 
+>>> pprint.pprint(r.getProperties()) 
+{'fillColor': Color(0.00,0.00,0.00), 
+ 'height': 100, 
+ 'rx': 0, 
+ 'ry': 0, 
+ 'strokeColor': Color(0.00,0.00,0.00), 
+ 'strokeDashArray': None, 
+ 'strokeLineCap': 0, 
+ 'strokeLineJoin': 0, 
+ 'strokeLineWidth': 1, 
+ 'strokeMiterLimit': 0, 
+ 'width': 200, 
+ 'x': 0, 
+ 'y': 0} 
+>>> r.setProperties({'x':20, 'y':30, 'strokeColor': colors.red}) 
+>>> r.dumpProperties() 
+fillColor = Color(0.00,0.00,0.00) 
+height = 100 
+rx = 0 
+ry = 0 
+strokeColor = Color(1.00,0.00,0.00) 
+strokeDashArray = None 
+strokeLineCap = 0 
+strokeLineJoin = 0 
+strokeLineWidth = 1 
+strokeMiterLimit = 0 
+width = 200 
+x = 20 
+y = 30 
+>>>  """)
+
+disc("""
+<i>($pprint$ is the standard Python library module that allows you to 'pretty print' output
+over multiple lines rather than having one very long line.)</i>
+""")
+
+disc("""These three methods don't seem to do much here, but as we will see 
+       they make our widgets framework much more powerful when dealing with 
+       non-primitive objects.""")
+
+
+heading2("Naming Children")
+
+disc("""You can add objects to the $Drawing$ and $Group$ objects. These normally 
+       go into a list of contents. However, you may also give objects a name 
+       when adding them. This allows you to refer to and possibly change any 
+       element of a drawing after constructing it.""")
+
+eg("""
+>>> D = shapes.Drawing(400, 200) 
+>>> S = shapes.String(10, 10, 'Hello World') 
+>>> D.add(S, 'caption') 
+>>> D.caption.text 
+'Hello World' 
+>>>  
+""")
+
+disc("""Note that you can use the same shape instance in several contexts in a 
+       drawing; if you choose to use the same Circle object in many locations 
+       (e.g. a scatter plot) and use different names to access it, it will 
+       still be a shared object and the changes will be global.""")
+
+disc("""This provides one paradigm for creating and modifying interactive 
+       drawings.""")
+
+
 heading1("Shapes")
 
-disc("""Drawings are made up of Shapes. Absolutely anything can be built up by 
-       combining the same set of primitive shapes.""")
+disc("""
+This chapter describes the concept of shapes and their importance
+as building blocks for all output generated by the graphics library.
+Some properties of existing shapes and their relationship to
+diagrams are presented and the notion of having different renderers
+for different output formats is briefly introduced.
+""")
 
-disc("""The module $shapes.py$ supplies a number of primitive shapes and 
-       constructs which can be added to a drawing. They are:""")
+heading2("Available Shapes")
 
-bullet("Rect (optionally with rounded corners)")
+disc("""
+Drawings are made up of Shapes.
+Absolutely anything can be built up by combining the same set of
+primitive shapes.
+The module $shapes.py$ supplies a number of primitive shapes and 
+constructs which can be added to a drawing.
+They are:
+""")
+
+bullet("Rect")
 bullet("Circle")
 bullet("Ellipse")
 bullet("Wedge (a pie slice)")
@@ -128,13 +321,18 @@ bullet("String")
 bullet("Group")
 bullet("Path (<i>not implemented yet, but will be added in the future</i>)")
 
-disc("This drawing, taken from our test suite, shows most of the basic shapes:")
+disc("""
+The following drawing, taken from our test suite, shows most of the
+basic shapes (except for groups).
+Those with a filled purple surface are also called <em>solid shapes</em>
+(these are $Rect$, $Circle$, $Ellipse$, $Wedge$ and $Polygon$).
+""")
 
 t = testshapes.getDrawing06()
 draw(t, "Basic shapes")
  
 
-heading2("Solid Shapes")
+heading2("Shape Properties")
 
 disc("""
 Shapes have two kinds of properties - some to define their geometry 
@@ -453,180 +651,16 @@ D.add(thirdAxisGroup)
 draw(D, "Groups examples")
 
  
-heading2("Verification")
-
-disc("""The framework so far would be ideally suited to a type-safe language 
-       like Java or Delphi. Python is very dynamic and lets us type things 
-       which just don't make sense:""")
-
-eg("""
->>> R = Rect(10,10,200,100, fillColor=red) 
->>> 
->>> R.fullColor = green    # note the typo 
->>> 
->>> R.x = 'not a number'   # illegal argument type 
->>> 
->>> del R.width            # that should confuse it
-""")
-
-disc("""
-These statements would be caught by the compiler in a statically
-typed language, but Python lets you get away with it.
-The first error could leave you staring at the picture trying to
-figure out why the colors were wrong.
-The second error would probably become clear only later, when
-some back-end tries to draw the rectangle.
-The third, though less likely, results in an invalid object that
-would not know how to draw itself.
-""")
-
-disc("""
-We have provided two verification techniques.
-The default is for every object to check every assignment at run
-time.
-This is what happens by default.
-So if you make a mistake in an assignment, you get something 
-like this:""")
-
-eg("""
->>> r = shapes.Rect(10,10,200,80) 
->>> r.fullColor = colors.green 
-Traceback (innermost last): 
-  File "<interactive input>", line 1, in ? 
-  File "C:\code\users\andy\graphics\shapes.py", line 190, in __setattr__ 
-    raise AttributeError, "Illegal attribute '%s' in class %s" %\
-    
-      (attr, self.__class__.__name__) 
-AttributeError: Illegal attribute 'fullColor' in class Rect 
->>>  
-""")
-
-disc("""
-This imposes a performance penalty, so this behaviour can be turned
-off when you need it to be.
-To do this, you should use the following lines of code before you
-first import reportlab.graphics.shapes:
-""")
-
-eg("""
->>> import reportlab.config 
->>> reportlab.config.shapeChecking = 0 
->>> import reportlab.graphics.shapes 
->>>
-""")
-
-disc("""
-Once you turn off shapeChecking, the classes are actually built 
-without the verification hook; code should get faster, then.
-Currently the penalty seems to be about 25% on batches of charts,
-so it is hardly worth disabling.
-However, if we move the renderers to C in future (which is eminently
-possible)), the remaining 75% would shrink to almost nothing and
-the saving from verification would be significant.
-""")
-
-disc("""
-Each object, including the drawing itself, has a $verify()$ method.
-This either succeeds, or raises an exception.
-If you turn off automatic verification, then you shoudl explictly
-call $verify()$ in testing when developing the code, or perhaps
-once in a batch process.
-""")
-
-
-heading2("Property Editing")
-
-disc("""A cornerstone of the reportlab/graphics which we will cover below is 
-       that you can automatically document widgets. This means getting hold 
-       of all of their editable properties, including those of their 
-       subcomponents.""")
-
-disc("""Another goal is to be able to create GUIs and config files for 
-       drawings. A generic GUI can be built to show all editable properties 
-       of a drawing, and let you modify them and see the results. The Visual 
-       Basic or Delphi developmen environment are good examples of this kind 
-       of thing. In a batch charting application, a file could list all the 
-       properties of all the components in a chart, and be merged with a 
-       database query to make a batch of charts.""")
-
-disc("""To support these applications we have two interfaces, $getProperties$ 
-       and $setProperties$, as well as a convenience method $dumpProperties$. The 
-       first returns a dictionary of the editable properties of an object; 
-       the second sets them en masse. If an object has publicly exposed 
-       'children' then one can recursively set and get their properties too. 
-       This will make much more sense when we look at Widgets later on, but 
-       we need to put the support into the base of the framework.""")
-
-eg("""
->>> r = shapes.Rect(0,0,200,100) 
->>> import pprint 
->>> pprint.pprint(r.getProperties()) 
-{'fillColor': Color(0.00,0.00,0.00), 
- 'height': 100, 
- 'rx': 0, 
- 'ry': 0, 
- 'strokeColor': Color(0.00,0.00,0.00), 
- 'strokeDashArray': None, 
- 'strokeLineCap': 0, 
- 'strokeLineJoin': 0, 
- 'strokeLineWidth': 1, 
- 'strokeMiterLimit': 0, 
- 'width': 200, 
- 'x': 0, 
- 'y': 0} 
->>> r.setProperties({'x':20, 'y':30, 'strokeColor': colors.red}) 
->>> r.dumpProperties() 
-fillColor = Color(0.00,0.00,0.00) 
-height = 100 
-rx = 0 
-ry = 0 
-strokeColor = Color(1.00,0.00,0.00) 
-strokeDashArray = None 
-strokeLineCap = 0 
-strokeLineJoin = 0 
-strokeLineWidth = 1 
-strokeMiterLimit = 0 
-width = 200 
-x = 20 
-y = 30 
->>>  """)
-
-disc("""
-<i>($pprint$ is the standard Python library module that allows you to 'pretty print' output
-over multiple lines rather than having one very long line.)</i>
-""")
-
-disc("""These three methods don't seem to do much here, but as we will see 
-       they make our widgets framework much more powerful when dealing with 
-       non-primitive objects.""")
-
-
-heading2("Naming Children")
-
-disc("""You can add objects to the $Drawing$ and $Group$ objects. These normally 
-       go into a list of contents. However, you may also give objects a name 
-       when adding them. This allows you to refer to and possibly change any 
-       element of a drawing after constructing it.""")
-
-eg("""
->>> D = shapes.Drawing(400, 200) 
->>> S = shapes.String(10, 10, 'Hello World') 
->>> D.add(S, 'caption') 
->>> D.caption.text 
-'Hello World' 
->>>  
-""")
-
-disc("""Note that you can use the same shape instance in several contexts in a 
-       drawing; if you choose to use the same Circle object in many locations 
-       (e.g. a scatter plot) and use different names to access it, it will 
-       still be a shared object and the changes will be global.""")
-
-disc("""This provides one paradigm for creating and modifying interactive 
-       drawings.""")
-
-
 heading1("Widgets") 
+
+disc("""
+We now describe widgets and how they relate to shapes.
+Using many examples it is shown how widgets make reusable
+graphics components. 
+""")
+
+
+heading2("Shapes vs. Widgets")
 
 disc("""Up until now, Drawings have been 'pure data'. There is no code in them 
        to actually do anything, except assist the programmer in checking and 
@@ -948,15 +982,13 @@ todo("add image")
 
 heading1("Charts")
 
-disc("""The motivation for much of this is to create a flexible chart package. 
-       We've done several chart programs with PINGO, on which this package is 
-       based. So far, each one has been a specific program to make a specific 
-       kind of chart. A general framework is much harder!""")
-
-disc("""This section is not finalized and will evolve further. For now we'll 
-       try to give a flavour of the isues we are dealing with, and firm them 
-       up as examples are created. We need and expect feedback on this to get 
-       it right!""")
+disc("""
+The motivation for much of this is to create a flexible chart
+package. 
+This chapter presents a treament of the ideas behind our charting
+model, what the design goals are and what components of the chart
+package already exist.
+""")
 
 
 heading2("Design Goals")
@@ -1282,6 +1314,8 @@ disc("""By default, the highest data point is aligned with the top of the
        axis, the lowest with the bottom of the axis, and the axis choose 
        'nice round numbers' for its tickmark points. You may override these 
        settings with the properties below. """)
+
+disc("")
 
 data=[["Property", "Meaning"],
       ["visible", """Should the axis be drawn at all? Sometimes you don't want
@@ -1619,7 +1653,7 @@ todo("""Does this work? Is it an acceptable complication over specifying chart
 colors directly?""")
 
 
-heading2("Misc.")
+heading2("Outlook")
 
 disc("""
 It will take some time to deal with the full range of chart types.
@@ -1669,7 +1703,7 @@ example.
 """)
 
 
-heading3("Other chart classes")
+heading3("Misc.")
 
 disc("""
 This has not been an exhaustive look at all the chart classes.
