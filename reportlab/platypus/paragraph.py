@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.67 2003/06/04 15:51:13 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.67 2003/06/04 15:51:13 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.68 2003/07/25 08:01:34 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.68 2003/07/25 08:01:34 rgbecker Exp $ '''
 from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
@@ -339,7 +339,7 @@ def splitLines0(frags,widths):
 
 def _do_under_lines(i, t_off, tx):
     y = tx.XtraState.cur_y - i*tx.XtraState.style.leading - tx.XtraState.f.fontSize/8.0 # 8.0 factor copied from para.py
-    text = join(lines[i][1])
+    text = join(tx.lines[i][1])
     textlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
     tx._canvas.line(t_off, y, t_off+textlen, y)
 
