@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.66 2003/07/09 08:17:44 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.66 2003/07/09 08:17:44 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.67 2003/08/11 10:22:02 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.67 2003/08/11 10:22:02 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -831,7 +831,7 @@ class Table(Flowable):
     def split(self, availWidth, availHeight):
         self._calc(availWidth, availHeight)
         if self.splitByRow:
-            if self._width>availWidth: return []
+            if not rl_config.allowTableBoundsErrors and self._width>availWidth: return []
             return self._splitRows(availHeight)
         else:
             raise NotImplementedError
