@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.43 2003/07/31 11:20:44 rptlab Exp $
-__version__=''' $Id: utils.py,v 1.43 2003/07/31 11:20:44 rptlab Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.44 2003/08/05 16:58:58 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.44 2003/08/05 16:58:58 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -14,8 +14,28 @@ if os.name == 'mac':
     #with the Mac, we need to tag the file in a special
     #way so the system knows it is a PDF file.
     #This supplied by Joe Strout
-    def markfilename(filename,creatorcode='CARO',filetype='PDF '):
+    _KNOWN_MAC_EXT = {
+        'BMP' : ('ogle','BMP '),
+        'EPS' : ('ogle','EPSF'),
+        'EPSF': ('ogle','EPSF'),
+        'GIF' : ('ogle','GIFf'),
+        'JPG' : ('ogle','JPEG'),
+        'JPEG': ('ogle','JPEG'),
+        'PCT' : ('ttxt','PICT'),
+        'PICT': ('ttxt','PICT'),
+        'PNG' : ('ogle','PNGf'),
+        'PPM' : ('ogle','.PPM'),
+        'TIF' : ('ogle','TIFF'),
+        'TIFF': ('ogle','TIFF'),
+        'PDF': ('CARO','PDF '),
+        }
+    def markfilename(filename,creatorcode=None,filetype=None,ext='PDF'):
         try:
+            if creatorcode is None or filetype is None and ext is not None:
+                try:
+                    creatorcode, filetype = _KNOWN_MAC_EXT[ext]
+                except:
+                    return
             macfs.FSSpec(filename).SetCreatorType(creatorcode,filetype)
         except:
             pass
