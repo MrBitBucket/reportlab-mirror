@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.15 2001/04/03 11:45:21 johnprecedo Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.16 2001/04/03 12:01:03 johnprecedo Exp $
 
 from gengraphguide import *
 
@@ -119,7 +119,7 @@ may be imported into publishing tools such as Quark Express.
 heading2("Verification")
 
 disc("""
-Python is very dynamic and lets us exectue statements at run time that
+Python is very dynamic and lets us execute statements at run time that
 can easily be the source for unexpected behaviour.
 One subtle 'error' is when assigning to an attribute that the framework
 doesn't know about because the used attribute's name contains a typo.
@@ -196,7 +196,7 @@ the saving from verification would be significant.
 disc("""
 Each object, including the drawing itself, has a $verify()$ method.
 This either succeeds, or raises an exception.
-If you turn off automatic verification, then you should explictly
+If you turn off automatic verification, then you should explicitly
 call $verify()$ in testing when developing the code, or perhaps
 once in a batch process.
 """)
@@ -456,7 +456,7 @@ draw(D, "Line and PolyLine examples")
 heading2("Strings")
 
 disc("""ReportLab Graphics is not designed for fancy text layout, but it can 
-       place strings at desired locations and with left/rigth/center 
+       place strings at desired locations and with left/right/center 
        alignment. Let's specify a String and look at its properties:""")
 
 eg("""
@@ -485,7 +485,7 @@ disc("""Strings use a common font standard: the Type 1 Postscript fonts
        ReportLab and get accurate metrics for them. We expect to add support 
        for extra Type 1 fonts in the near future. Until now we have worked 
        with bitmap renderers which have to use TrueType fonts and which make 
-       some subsitutions; this could lead to differences in text wrapping or 
+       some substitutions; this could lead to differences in text wrapping or 
        even the number of labels on a chart between renderers. The 
        (forthcoming) back ends will all know how to render Type 1 fonts.""")
 
@@ -949,7 +949,7 @@ heading2("Widget Design Strategies")
 
 disc("""We could not come up with a consistent architecture for designing 
        widgets, so we are leaving that problem to the authors! If you do not 
-       like the default verifiction strategy, or the way 
+       like the default verification strategy, or the way 
        $setProperties/getProperties$ works, you can override them yourself.""")
 
 disc("""For simple widgets it is recommended that you do what we did above: 
@@ -979,14 +979,14 @@ disc("""The last line is problematic as we have only created four wedges - in
        is defined, used to override the default settings? We dump this 
        problem squarely on the widget author for now, and recommend that you 
        get a simple one working before exposing 'child objects' whose 
-       existence depends on other propereties' values :-)""")
+       existence depends on other properties' values :-)""")
 
 disc("""We also discussed rules by which parent widgets could pass properties 
        to their children. There seems to be a general desire for a global way 
        to say that 'all wedges get their lineWidth from the lineWidth of 
        their parent' without a lot of repetitive coding. We do not have a 
        universal solution, so again leave that to widget authors. We hope 
-       people will experimate with push-down, pull-down and pattern-matching 
+       people will experiment with push-down, pull-down and pattern-matching 
        approaches and come up with something nice. In the meantime, we 
        certainly can write monolithic chart widgets which work like the ones 
        in, say, Visual Basic and Delphi.""")
@@ -1069,7 +1069,7 @@ heading1("Charts")
 disc("""
 The motivation for much of this is to create a flexible chart
 package. 
-This chapter presents a treament of the ideas behind our charting
+This chapter presents a treatment of the ideas behind our charting
 model, what the design goals are and what components of the chart
 package already exist.
 """)
@@ -1183,8 +1183,8 @@ disc("""Charts have two axes; axes may be Value or Category axes. Axes in turn
        from chart to chart relate to axis properties, or axis labels.""")
 
 disc("""Objects expose properties through the interfaces discussed in the 
-       revious section; these are all optional and are there to let the end 
-       user configire the appearance. Things which must be set for a chart to 
+       previous section; these are all optional and are there to let the end 
+       user configure the appearance. Things which must be set for a chart to 
        work, and essential communication between a chart and its components, 
        are handled through methods.""")
 
@@ -1207,7 +1207,7 @@ disc("""The text and 'origin' of a label are typically set by its parent
        X axis decides the 'reference point' for each tickmark label and the 
        numeric or date text for each label. However, the end user can set 
        properties of the label (or collection of labels) directly to affect 
-       its positon relative to this origin and all of its formatting.""")
+       its position relative to this origin and all of its formatting.""")
 
 eg("""
 from reportlab.graphics import shapes
@@ -1481,7 +1481,7 @@ caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - XCategoryAxis proper
 ##strokeDashArray Whether to draw axis with a dash and, if so, what kind. Defaults to None 
 ##strokeWidth Width of axis in points 
 ##tickLeft How far to the left of the axis should the tick marks protrude?  
-##tickRight How far to the right of the exis should the tick mark protrude? (Note that making this equal to chart width gives you a gridline) 
+##tickRight How far to the right of the axis should the tick mark protrude? (Note that making this equal to chart width gives you a gridline) 
 
 ##valueMin The y value to which the bottom of the axis should correspond. Default value is 'Auto' in which case the axis sets it to the lowest actual data point (e.g. 10 in the example above). It is common to set this to zero to avoid misleading the eye. 
 ##valueMax The y value to which the top of the axis should correspond. Default value is 'Auto' in which case the axis sets it to the highest actual data point (e.g. 42 in the example above). It is common to set this to a 'round number' so data bars do not quite reach the top. 
@@ -1602,7 +1602,7 @@ data = [(10,20,30,42),]"""],
 highlighted this with a yellow border above. Note that it is
 your job to place the chart on the drawing in a way which leaves
 room for all the axis labels and tickmarks. We specify this 'inner
-rectangle' because it makes it vey easy to lay out multiple charts
+rectangle' because it makes it very easy to lay out multiple charts
 in a consistent manner."""],
       ["strokeColor", """Defaults to None. This will draw a border around the
 plot rectangle, which may be useful in debugging. Axes will
@@ -1616,7 +1616,7 @@ labels so that they work for positive and negative bars."""],
       ["useAbsolute", """Defaults to 0. If 1, the three properties below are
 absolute values in points (which means you can make a chart
 where the bars stick out from the plot rectangle); if 0,
-they are relative quantities and indicate the proprotional
+they are relative quantities and indicate the proportional
 widths of the elements involved."""],
       ["barWidth", """As it says. Defaults to 10."""],
       ["groupSpacing", """Defaults to 5. This is the space between each group of
@@ -1715,11 +1715,11 @@ draw(drawing, 'Like before, but with modified spacing')
 ##data This should be a "list of lists of numbers" or "list of tuples of numbers". If you have just one series, write it as
 ##data = [(10,20,30,42),]
 ## 
-##x, y, width, height These define the inner 'plot rectangle'. We highlighted this with a yellow border above. Note that it is your job to place the chart on the drawing in a way which leaves room for all the axis labels and tickmarks. We specify this 'inner rectangle' because it makes it vey easy to lay out multiple charts in a consistent manner. 
+##x, y, width, height These define the inner 'plot rectangle'. We highlighted this with a yellow border above. Note that it is your job to place the chart on the drawing in a way which leaves room for all the axis labels and tickmarks. We specify this 'inner rectangle' because it makes it very easy to lay out multiple charts in a consistent manner. 
 ##strokeColor Defaults to None. This will draw a border around the plot rectangle, which may be useful in debugging. Axes will overwrite this. 
 ##fillColor Defaults to None. This will fill the plot rectangle with a solid color. (Note that we could implement dashArray etc. as for any other solid shape) 
 ##barLabelFormat This is a format string or function used for displaying labels above each bar. We're working on ways to position these labels so that they work for positive and negative bars. 
-##useAbsolute Defaults to 0. If 1, the three properties below are absolute values in points (which means you can make a chart where the bars stick out from the plot rectangle); if 0, they are relative quantities and indicate the proprotional widths of the elements involved. 
+##useAbsolute Defaults to 0. If 1, the three properties below are absolute values in points (which means you can make a chart where the bars stick out from the plot rectangle); if 0, they are relative quantities and indicate the proportional widths of the elements involved. 
 ##barWidth As it says. Defaults to 10. 
 ##groupSpacing Defaults to 5. This is the space between each group of bars. If you have only one series, use groupSpacing and not barSpacing to split them up. Half of the groupSpacing is used before the first bar in the chart, and another half at the end. 
 ##barSpacing Defaults to 0. This is the spacing between bars in each group. If you wanted a little gap between green and red bars in the example above, you would make this non-zero. 
