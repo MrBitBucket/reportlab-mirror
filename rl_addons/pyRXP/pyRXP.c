@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.25 2004/03/16 15:28:26 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.26 2004/03/24 17:14:53 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.25 2004/03/16 15:28:26 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.26 2004/03/24 17:14:53 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,7 +31,7 @@ static char* __version__=" $Id: pyRXP.c,v 1.25 2004/03/16 15:28:26 rgbecker Exp 
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "1.01"
+#define VERSION "1.02"
 #define MAX_DEPTH 256
 
 #if CHAR_SIZE==16
@@ -115,7 +115,9 @@ The python module exports the following\n\
         eoCB    argument should be None or a callable method with\n\
             a single argument. This method will be called when external\n\
             entities are opened. The method should return a possibly\n\
-            modified URI.\n\
+            modified URI or a tuple containing a tuple (URI,'text...') to allow\
+			the content itself to be returned. The possibly changed URI\
+			is required.\
 \n""\
         fourth  argument should be None (default) or a callable method with\n\
             no arguments. If callable, will be called to get or generate the\n\
@@ -496,7 +498,7 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 static InputSource entity_open(Entity e, void *info)
 {
 	ParserDetails*	pd = (ParserDetails*)info;
-	PyObject	*eoCB = pd->eoCB;
+	PyObject	*eoCB = pd->eoCB, *text=NULL;
 
 	if(e->type==ET_external){
 		PyObject		*arglist;
@@ -504,13 +506,21 @@ static InputSource entity_open(Entity e, void *info)
 		arglist = Py_BuildValue("(s)",e->systemid);	/*NB 8 bit*/
 		result = PyEval_CallObject(eoCB, arglist);
 		if(result){
-			if(PyString_Check(result)){
+			int isTuple;
+			if(PyString_Check(result)||(isTuple=PyTuple_Check(result))){
 				int	i;
 				PyObject_Cmp(PyTuple_GET_ITEM(arglist,0),result,&i);
 				if(i){
 					/*not the same*/
-					Free((void*)(e->systemid));
-					e->systemid = strdup8(PyString_AS_STRING(result));
+					CFree((void *)e->systemid);
+					if(isTuple){
+						e->systemid = strdup8(PyString_AS_STRING(PyTuple_GET_ITEM(result,0)));
+						text = PyTuple_GET_ITEM(result,1);
+						Py_INCREF(text);
+						}
+					else{
+						e->systemid = strdup8(PyString_AS_STRING(result));
+						}
 					}
 				}
 			Py_DECREF(result);
@@ -520,7 +530,17 @@ static InputSource entity_open(Entity e, void *info)
 			}
 		Py_DECREF(arglist);
 		}
-	return EntityOpen(e);
+	if(text){
+		int textlen = PyString_Size(text);
+		char *buf = Malloc(textlen);
+		FILE16 *f16;
+		memcpy(buf,PyString_AS_STRING(text),textlen);
+		f16 = MakeFILE16FromString(buf, textlen, "r");
+		Py_DECREF(text);
+		if(!e->base_url) EntitySetBaseURL(e,e->systemid);
+    	return NewInputSource(e, f16);
+		}
+	else return EntityOpen(e);
 }
 
 void PyErr_FromStderr(Parser p, char *msg){
