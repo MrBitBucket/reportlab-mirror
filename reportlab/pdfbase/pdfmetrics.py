@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfmetrics.py,v 1.19 2001/02/28 11:53:55 rgbecker Exp $
-__version__=''' $Id: pdfmetrics.py,v 1.19 2001/02/28 11:53:55 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfmetrics.py,v 1.20 2001/02/28 19:30:33 rgbecker Exp $
+__version__=''' $Id: pdfmetrics.py,v 1.20 2001/02/28 19:30:33 rgbecker Exp $ '''
 __doc__="""This contains pre-canned text metrics for the PDFgen package, and may also
 be used for any other PIDDLE back ends or packages which use the standard
 Type 1 postscript fonts.
@@ -87,13 +87,12 @@ winansiencodingwidths['courier'][129] = 6
 ascent_descent = {'courier': (629, -157), 'courier-bold': (626, -142), 'courier-boldoblique': (626, -142), 'courier-oblique': (629, -157), 'helvetica': (718, -207), 'helvetica-bold': (718, -207), 'helvetica-boldoblique': (718, -207), 'helvetica-oblique': (718, -207), 'symbol': (0, 0), 'times-bold': (676, -205), 'times-bolditalic': (699, -205), 'times-italic': (683, -205), 'times-roman': (683, -217), 'zapfdingbats': (0, 0)}
 try:
 	try:
-		from reportlab.lib import _rl_accel		# works if we built it
+		from reportlab.lib._rl_accel import _stringWidth
 	except ImportError, errMsg:
-		if errMsg!='No module named _rl_accel': raise
-		import _rl_accel						# works if builtin or on the path?
-	_stringWidth = _rl_accel.stringWidth
+		if str(errMsg)!='No module named _rl_accel': raise
+		from _rl_accel import _stringWidth
 except ImportError, errMsg:
-	if errMsg!='No module named _rl_accel': raise
+	if str(errMsg)!='No module named _rl_accel': raise
 	_stringWidth = None
 
 	####################################################################################

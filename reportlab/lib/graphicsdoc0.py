@@ -49,7 +49,7 @@ from reportlab.graphics import renderPDF
 try:
     from rlextra.graphics import renderGD
 except ImportError, errMsg:
-    if errMsg!='No module named renderGD':
+    if str(errMsg)!='No module named renderGD':
     pass
 
 

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.19 2001/02/28 14:36:52 rgbecker Exp $
-__version__=''' $Id: pdfutils.py,v 1.19 2001/02/28 14:36:52 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.20 2001/02/28 19:30:34 rgbecker Exp $
+__version__=''' $Id: pdfutils.py,v 1.20 2001/02/28 19:30:34 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -167,10 +167,10 @@ try:
     try:
         from reportlab.lib._rl_accel import _AsciiBase85Encode	# where we think it should be
     except ImportError, errMsg:
-        if errMsg!='No module named _rl_accel': raise
+        if str(errMsg)!='No module named _rl_accel': raise
         from _rl_accel import _AsciiBase85Encode				# builtin or on the path
 except ImportError, errMsg:
-    if errMsg!='No module named _rl_accel': raise
+    if str(errMsg)!='No module named _rl_accel': raise
     def _AsciiBase85Encode(input):
         """Encodes input using ASCII-Base85 coding.
 

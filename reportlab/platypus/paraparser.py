@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.39 2001/02/28 11:52:56 rgbecker Exp $
-__version__=''' $Id: paraparser.py,v 1.39 2001/02/28 11:52:56 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.40 2001/02/28 19:30:34 rgbecker Exp $
+__version__=''' $Id: paraparser.py,v 1.40 2001/02/28 19:30:34 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -19,7 +19,7 @@ try:
 	from reportlab.lib import xmllib
 	_xmllib_newStyle = 1
 except ImportError, errMsg:
-	if errMsg!='No module named xmllib': raise
+	if str(errMsg)!='cannot import name xmllib': raise
 	import xmllib
 	_xmllib_newStyle = 0
 
