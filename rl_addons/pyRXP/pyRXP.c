@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.7 2002/04/18 18:23:41 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.8 2002/10/18 12:41:54 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.7 2002/04/18 18:23:41 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.8 2002/10/18 12:41:54 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -86,7 +86,11 @@ The python module exports the following\n\
 				entities are opened. The method should return a possibly\n\
 				modified URI.\n\
 \n"
-"		Flag attributes corresponding to the rxp flags;\n\
+"		fourth	argument should be None (default) or a callable method with\n\
+				no arguments. If callable, will be called to get or generate the\n\
+				4th item of every 4-item tuple or list in the returned tree\n\
+\n\
+		Flag attributes corresponding to the rxp flags;\n\
 			the values are the module standard defaults.\n\
 		ExpandCharacterEntities = 1\n\
 		ExpandGeneralEntities = 1\n\
@@ -123,7 +127,7 @@ The python module exports the following\n\
 		ProcessDTD = 0\n\
 			If TrustSDD is set and a DOCTYPE declaration is present, the internal\n\
 			part is processed and if the document was not declared standalone or\n\
-			if Validate is set the external part is processed.  Otherwise, whether\n\
+			if Validate is set the external part is processed.	Otherwise, whether\n\
 			the DOCTYPE is automatically processed depends on ProcessDTD; if\n\
 			ProcessDTD is not set the user must call ParseDtd() if desired.\n\
 		XMLExternalIDs = 1\n\
@@ -167,6 +171,11 @@ The python module exports the following\n\
 			Usually we discard comments and want only one tag; set this to 1 to get\n\
 			a list at the top level instead of a supposed singleton tag.\n\
 			If 0 the first tuple in the list will be returned (ie the first tag tuple).\n\
+		ExpandEmpty	false (default) or true.  If false, empty attribute dicts and\n\
+				empty lists of children are changed into the value None\n\
+				in every 4-item tuple or list in the returned tree\n\
+		MakeMutableTree	false (default) or true.  If false, nodes in the returned tree\n\
+				are 4-item tuples; if true, 4-item lists.\n\
 ";
 
 /*alter the integer values to change the module defaults*/
@@ -206,25 +215,45 @@ static struct {char* k;long v;} flag_vals[]={
 	{"ReturnNamespaceAttributes",0},
 	{"ProcessDTD",0},
 	{"ReturnList",0},
+	{"ExpandEmpty",0},
+	{"MakeMutableTree",0},
 	{0}};
 #define LASTRXPFLAG ProcessDTD
 #define ReturnList (ParserFlag)(1+(int)LASTRXPFLAG)
+#define ExpandEmpty (ParserFlag)(1+(int)ReturnList)
+#define MakeMutableTree (ParserFlag)(1+(int)ExpandEmpty)
 #define __GetFlag(p, flag) \
   ((((flag) < 32) ? ((p)->flags[0] & (1u << (flag))) : ((p)->flags[1] & (1u << ((flag)-32))))!=0)
 #ifdef	_DEBUG
 #	define Py_REFCOUNT(op) ((op)->ob_refcnt)
 #endif
 
-static	PyObject* get_attrs(ElementDefinition e, Attribute a)
-{
-	Attribute	b;
-	int			n;
-	for(n=0,b=a; b; b=b->next) n++;
 
-	if(n){
+typedef	struct {
+		Parser		p;
+		int			warnCBF;
+		int			warnErr;
+		PyObject*	warnCB;
+		PyObject*	eoCB;
+		PyObject*	fourth;
+		PyObject*	(*Node_New)(int);
+		int			(*SetItem)(PyObject*, int, PyObject*);
+		PyObject*	(*GetItem)(PyObject*, int);
+		int			none_on_empty;
+		} ParserDetails;
+
+#define PDGetItem pd->GetItem
+#define PDSetItem pd->SetItem
+#define PDNode_New pd->Node_New
+static	PyObject* get_attrs(ParserDetails* pd, ElementDefinition e, Attribute a)
+{
+	int		useNone = pd->none_on_empty && !a;
+
+	if(!useNone){
 		PyObject	*attrs=PyDict_New(), *t;
 		for(; a; a=a->next){
-			PyDict_SetItemString(attrs, (char*)a->definition->name, t=PyString_FromString(a->value));
+			PyDict_SetItemString(attrs, (char*)a->definition->name,
+							t=PyString_FromString(a->value));
 			Py_DECREF(t);
 			}
 		return attrs;
@@ -235,27 +264,33 @@ static	PyObject* get_attrs(ElementDefinition e, Attribute a)
 		}
 }
 
-static	PyObject* make4tuple(char *name, PyObject* attr, int empty)
+static	PyObject* makeNode(ParserDetails* pd, char *name, PyObject* attr, int empty)
 {
-	PyObject	*t = PyTuple_New(4);
-	PyTuple_SetItem(t,0,PyString_FromString(name));
-	PyTuple_SetItem(t,1,attr);
-	if(empty){
+	PyObject	*t = PDNode_New(4);
+	PDSetItem(t, 0, PyString_FromString(name));
+	PDSetItem(t, 1, attr);
+	if(empty && pd->none_on_empty){
 		attr = Py_None;
 		Py_INCREF(Py_None);
 		}
 	else
 		attr = PyList_New(0);
-	PyTuple_SetItem(t,2,attr);
-	PyTuple_SetItem(t,3,Py_None);
-    Py_INCREF(Py_None);
+	PDSetItem(t,2,attr);
+	if(pd->fourth && pd->fourth!=Py_None) attr = PyObject_CallObject(pd->fourth, 0);
+	else {
+		attr = Py_None;
+		Py_INCREF(Py_None);
+		}
+	PDSetItem(t, 3, attr);
 	return t;
 }
+
 
 static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 {
 	int	r = 0, empty;
 	PyObject	*t;
+	ParserDetails*	pd = (ParserDetails*)(p->callback_arg);
 	switch(bit->type) {
 		case XBIT_eof: break;
 		case XBIT_error:
@@ -271,10 +306,10 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 				}
 
 			empty = bit->type == XBIT_empty;
-			t = make4tuple((char*)bit->element_definition->name,
-					get_attrs(bit->element_definition, bit->attributes), empty);
+			t = makeNode( pd, (char*)bit->element_definition->name,
+					get_attrs(pd, bit->element_definition, bit->attributes), empty);
 			if(empty){
-				PyList_Append(PyTuple_GET_ITEM(stack[*depth],2),t);
+				PyList_Append(PDGetItem(stack[*depth],2),t);
 				Py_DECREF(t);
 				}
 			else {
@@ -290,7 +325,7 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 				}
 			t = stack[*depth];
 			*depth = *depth-1;
-			PyList_Append(PyTuple_GET_ITEM(stack[*depth],2),t);
+			PyList_Append(PDGetItem(stack[*depth],2),t);
 			Py_DECREF(t);
 			break;
 		case XBIT_pi:
@@ -301,12 +336,12 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 			break;
 		case XBIT_pcdata:
 			t = PyString_FromString(bit->pcdata_chars);
-			PyList_Append(PyTuple_GET_ITEM(stack[*depth],2),t);
+			PyList_Append(PDGetItem(stack[*depth],2),t);
 			Py_DECREF(t);
 			break;
 		case XBIT_cdsect:
 			t = PyString_FromString(bit->cdsect_chars);
-			PyList_Append(PyTuple_GET_ITEM(stack[*depth],2),t);
+			PyList_Append(PDGetItem(stack[*depth],2),t);
 			Py_DECREF(t);
 			break;
 		case XBIT_dtd:
@@ -318,7 +353,7 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 				strcat(c,bit->comment_chars);
 				strcat(c,"-->");
 				t = PyString_FromString(c);
-				PyList_Append(PyTuple_GET_ITEM(stack[*depth],2),t);
+				PyList_Append(PDGetItem(stack[*depth],2),t);
 				Py_DECREF(t);
 				PyMem_Free(c);
 				}
@@ -332,18 +367,11 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 	return r;
 }
 
-typedef	struct {
-		Parser		p;
-		int			warnCBF;
-		int			warnErr;
-		PyObject*	warnCB;
-		PyObject*	eoCB;
-		} CB_info_t, *pCB_info_t;
 
 static InputSource entity_open(Entity e, void *info)
 {
-	pCB_info_t	pInfo = (pCB_info_t)info;
-	PyObject	*eoCB = pInfo->eoCB;
+	ParserDetails*	pd = (ParserDetails*)info;
+	PyObject	*eoCB = pd->eoCB;
 
 	if(e->type==ET_external){
 		PyObject		*arglist;
@@ -376,7 +404,8 @@ PyObject *ProcessSource(Parser p, InputSource source)
 	XBit		bit=0;
 	int			r, depth, i;
 	PyObject	*stack[MAX_DEPTH];
-	PyObject	*retVal;
+	PyObject	*retVal = 0;
+	ParserDetails*	pd = (ParserDetails*)(p->callback_arg);
 
 	if(ParserPush(p, source) == -1) {
 		PyErr_SetString(moduleError,"Internal error, ParserPush failed!");
@@ -384,8 +413,8 @@ PyObject *ProcessSource(Parser p, InputSource source)
 		}
 
 	depth = 0;
-	stack[0] = make4tuple("",Py_None,0);	/*stealing a reference to Py_None*/
-	Py_INCREF(Py_None);						/*so we must correct for it*/
+	stack[0] = makeNode( pd, "", Py_None, 0);	/*stealing a reference to Py_None*/
+	Py_INCREF(Py_None);					/*so we must correct for it*/
 	while(1){
 		XBitType bt;
 		bit = ReadXBit(p);
@@ -399,7 +428,7 @@ PyObject *ProcessSource(Parser p, InputSource source)
 			}
 		}
 	if(!r && depth==0){
-		PyObject*	l0 = PyTuple_GetItem(stack[0],2);
+		PyObject*	l0 = PDGetItem(stack[0],2);
 		Py_INCREF(l0);
 		Py_DECREF(stack[0]);
 		if(!__GetFlag(p,ReturnList)){
@@ -407,6 +436,7 @@ PyObject *ProcessSource(Parser p, InputSource source)
 			for(i=0;i<n;i++){
 				retVal = PyList_GetItem(l0,i);
 				if(PyTuple_Check(retVal)) break;
+				if(PyList_Check(retVal)) break;
 				}
 			if(i==n) retVal = Py_None;
 			Py_INCREF(retVal);
@@ -423,8 +453,8 @@ PyObject *ProcessSource(Parser p, InputSource source)
 			}
 		else if(r==1){
 			struct _FILE16 {
-    			void *handle;
-    			int handle2, handle3;
+				void *handle;
+				int handle2, handle3;
 				};
 
 			char *buf=((struct _FILE16*)Stderr)->handle;
@@ -441,34 +471,34 @@ PyObject *ProcessSource(Parser p, InputSource source)
 
 static void myWarnCB(XBit bit, void *info)
 {
-	pCB_info_t	pInfo = (pCB_info_t)info;
+	ParserDetails*	pd=(ParserDetails*)info;
 	PyObject	*arglist;
 	PyObject	*result;
 	FILE16		*str;
 	char		buf[512];
 
-	pInfo->warnErr++;
-	if(pInfo->warnCB==Py_None) return;
+	pd->warnErr++;
+	if(pd->warnCB==Py_None) return;
 
 	str = MakeFILE16FromString(buf,sizeof(buf)-1,"w");
-	_ParserPerror(str, pInfo->p, bit);
+	_ParserPerror(str, pd->p, bit);
 	Fclose(str);
 	arglist = Py_BuildValue("(s)",buf);
-	result = PyEval_CallObject(pInfo->warnCB, arglist);
+	result = PyEval_CallObject(pd->warnCB, arglist);
 	Py_DECREF(arglist);
 	if(result){
 		Py_DECREF(result);
 		}
 	else {
-		pInfo->warnCBF++;
+		pd->warnCBF++;
 		PyErr_Clear();
 		}
 }
 
 typedef struct {
 	PyObject_HEAD
-	PyObject	*warnCB, *eoCB, *srcName;
-	int			flags[2];
+	PyObject		*warnCB, *eoCB, *srcName, *fourth;
+	int				flags[2];
 	} pyRXPParserObject;
 
 static void __SetFlag(pyRXPParserObject* p, ParserFlag flag, int value)
@@ -492,7 +522,7 @@ static int _set_CB(char* name, PyObject** pCB, PyObject* value)
 		return -1;
 		}
 	else {
-		if(*pCB) Py_DECREF(*pCB);
+		Py_XDECREF(*pCB);
 		*pCB = value;
 		Py_INCREF(value);
 		return 0;
@@ -507,13 +537,14 @@ static int pyRXPParser_setattr(pyRXPParserObject *self, char *name, PyObject* va
 
 	if(!strcmp(name,"warnCB")) return _set_CB(name,&self->warnCB,value);
 	else if(!strcmp(name,"eoCB")) return _set_CB(name,&self->eoCB,value);
+	else if(!strcmp(name,"fourth")) return _set_CB(name,&self->fourth,value);
 	else if(!strcmp(name,"srcName")){
 		if(!PyString_Check(value)){
 			PyErr_SetString(PyExc_ValueError, "srcName value must be a string");
 			return -1;
 			}
 		else {
-			if(self->srcName) Py_DECREF(self->srcName);
+			Py_XDECREF(self->srcName);
 			self->srcName = value;
 			Py_INCREF(value);
 			return 0;
@@ -549,12 +580,13 @@ static PyObject* pyRXPParser_parse(pyRXPParserObject* xself, PyObject* args, PyO
 	InputSource source;
 	PyObject	*retVal=NULL;
 	char		errBuf[512];
-	CB_info_t	CB_info;
+	ParserDetails	CB;
 	Parser		p;
 	pyRXPParserObject	dummy = *xself;
 	pyRXPParserObject*	self = &dummy;
 	if(self->warnCB) Py_INCREF(self->warnCB);
 	if(self->eoCB) Py_INCREF(self->eoCB);
+	if(self->fourth) Py_INCREF(self->fourth);
 	if(self->srcName) Py_INCREF(self->srcName);
 
 	if(!PyArg_ParseTuple(args, "s#", &src, &srcLen)) goto L_1;
@@ -566,21 +598,34 @@ static PyObject* pyRXPParser_parse(pyRXPParserObject* xself, PyObject* args, PyO
 		}
 
 	if(self->warnCB){
-		CB_info.warnCB = self->warnCB;
-		CB_info.warnErr = 0;
-		CB_info.warnCBF = 0;
+		CB.warnCB = self->warnCB;
+		CB.warnErr = 0;
+		CB.warnCBF = 0;
 		}
 	if(self->eoCB){
-		CB_info.eoCB = self->eoCB;
+		CB.eoCB = self->eoCB;
 		}
+	CB.fourth = self->fourth;
+
 	p = NewParser();
+	CB.p = p;
+	ParserSetCallbackArg(p, &CB);
 	p->flags[0] = self->flags[0];
 	p->flags[1] = self->flags[1];
- 	if((self->warnCB && self->warnCB!=Py_None) || (self->eoCB && self->eoCB!=Py_None)){
-		CB_info.p = p;
- 		ParserSetCallbackArg(p, &CB_info);
+	if((self->warnCB && self->warnCB!=Py_None) || (self->eoCB && self->eoCB!=Py_None)){
 		if(self->warnCB && self->warnCB!=Py_None) ParserSetWarningCallback(p, myWarnCB);
 		if(self->eoCB && self->eoCB!=Py_None) ParserSetEntityOpener(p, entity_open);
+		}
+	CB.none_on_empty = !__GetFlag(self,ExpandEmpty);
+	if(__GetFlag(self,MakeMutableTree)){
+		CB.Node_New = PyList_New;
+		CB.SetItem = PyList_SetItem;
+		CB.GetItem = PyList_GetItem;
+		}
+	else {
+		CB.Node_New = PyTuple_New;
+		CB.SetItem = PyTuple_SetItem;
+		CB.GetItem = PyTuple_GetItem;
 		}
 
 	ParserSetFlag(p,XMLPredefinedEntities,__GetFlag(self,XMLPredefinedEntities));
@@ -597,9 +642,10 @@ static PyObject* pyRXPParser_parse(pyRXPParserObject* xself, PyObject* args, PyO
 	FreeParser(p);
 	deinit_parser();
 L_1:
-	if(self->warnCB) Py_DECREF(self->warnCB);
-	if(self->eoCB) Py_DECREF(self->eoCB);
-	if(self->srcName) Py_DECREF(self->srcName);
+	Py_XDECREF(self->warnCB);
+	Py_XDECREF(self->eoCB);
+	Py_XDECREF(self->fourth);
+	Py_XDECREF(self->srcName);
 	return retVal;
 }
 
@@ -625,6 +671,7 @@ static PyObject* pyRXPParser_getattr(pyRXPParserObject *self, char *name)
 	int	i;
 	if(!strcmp(name,"warnCB")) return _get_OB(name,self->warnCB);
 	else if(!strcmp(name,"eoCB")) return _get_OB(name,self->eoCB);
+	else if(!strcmp(name,"fourth")) return _get_OB(name,self->eoCB);
 	else if(!strcmp(name,"srcName")){
 		Py_INCREF(self->srcName);
 		return self->srcName;
@@ -640,9 +687,10 @@ static PyObject* pyRXPParser_getattr(pyRXPParserObject *self, char *name)
 
 static void pyRXPParserFree(pyRXPParserObject* self)
 {
-	if(self->srcName) Py_DECREF(self->srcName);
-	if(self->warnCB) Py_DECREF(self->warnCB);
-	if(self->eoCB) Py_DECREF(self->eoCB);
+	Py_XDECREF(self->srcName);
+	Py_XDECREF(self->warnCB);
+	Py_XDECREF(self->eoCB);
+	Py_XDECREF(self->fourth);
 #if	0
 	/*this could be called if we're never going to use the parser again*/
 	deinit_parser();
@@ -683,7 +731,7 @@ static pyRXPParserObject* pyRXPParser(PyObject* module, PyObject* args, PyObject
 
 	if(!PyArg_ParseTuple(args, ":Parser")) return NULL;
 	if(!(self = PyObject_NEW(pyRXPParserObject, &pyRXPParserType))) return NULL;
-	self->warnCB = self->eoCB = (void*)self->srcName = NULL;
+	self->warnCB = self->eoCB = self->fourth = (void*)self->srcName = NULL;
 	if(!(self->srcName=PyString_FromString("[unknown]"))){
 		PyErr_SetString(moduleError,"Internal error, memory limit reached!");
 Lfree:	pyRXPParserFree(self);
@@ -732,7 +780,7 @@ DL_EXPORT(void) initpyRXP(void)
 		Py_DECREF(t);
 		}
 	PyDict_SetItemString(d,"parser_flags",parser_flags);
-	
+
 	/*add in the docstring*/
 	v = PyString_FromString(moduleDoc);
 	PyDict_SetItemString(d, "__doc__", v);
