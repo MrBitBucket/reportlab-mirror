@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.54 2002/03/15 13:56:33 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.54 2002/03/15 13:56:33 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.55 2002/03/15 19:42:55 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.55 2002/03/15 19:42:55 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -218,7 +218,7 @@ class Table(Flowable):
 		aW = w-s.leftPadding-s.rightPadding
 		t = 0
 		w = 0
-		canv = self.canv
+		canv = getattr(self,'canv',None)
 		for v in V:
 			vw, vh = v.wrapOn(canv,aW, 72000)
 			if W is not None: W.append(vw)
