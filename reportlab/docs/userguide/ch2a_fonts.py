@@ -1,17 +1,21 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.1 2001/11/06 11:13:53 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.2 2001/11/06 11:50:24 johnprecedo Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.lib.codecharts import SingleByteEncodingChart
 from reportlab.platypus import Image
     
-heading1("Arbitrary fonts and encodings")
+heading1("Fonts and encodings")
 
 disc("""
-This chapter explains how you can use arbitrary fonts,
-which will increase slightly the document size because these
-fonts need to be embedded within the document.
+This chapter covers fonts, encodings and Asian language capabilities.
+If you are purely concerned with generating PDFs for Western
+European languages, you can skip this on a first reading.
+We expect this section to grow considerably over time. We
+hope that Open Source will enable us to give better support for
+more of the world's languages than other tools, and we welcome
+feedback and help in this area.
 """)
 
 disc("""
@@ -20,14 +24,21 @@ reportlab (Release 1.10, 6 Nov. 2001), and as such some things may
 change in the future. The canvas methods  $setFont$, $getFont$, 
 $registerEncoding$ and $registerTypeFace$ can all be considered 
 stable. Other things such as how reportlab searches for fonts are more 
-liable to change.
+liable to change.  
 """)
 
-heading2("Arbitrary fonts")
+
+heading2("Using non-standard fonts")
 
 disc("""
-You can use the following mechanism described below to include
-arbitrary fonts in your documents. Just van Rossum has kindly
+As discussed in the previous chapter, every copy of Acrobat Reader
+comes with 14 standard fonts built in.  Therefore, the ReportLab
+PDF Library only needs to refer to these by name.  If you want
+to use other fonts, they must be embedded in the PDF document.""")
+
+disc("""
+You can use the mechanism described below to include arbitrary
+fonts in your documents. Just van Rossum has kindly
 donated a font named <i>LettErrorRobot-Chrome</i> which we may
 use for testing and/or documenting purposes (and which you may
 use as well). It comes bundled with the ReportLab distribution in the
@@ -46,20 +57,13 @@ font.
 """)
 
 disc("""
-In the following example we first set to suppress any
-warnings during the font-emdedding as a result of missing
-glyphs (sometime the case for the Euro character, say).
-Then we locate the folder containing the test font and
+In the following example locate the folder containing the test font and
 register it for future use with the $pdfmetrics$ module,
 after which we can use it like any other standard font.
 """)
 
 
 eg("""
-# we know some glyphs are missing, suppress warnings
-import reportlab.rl_config
-reportlab.rl_config.warnOnMissingFontGlyphs = 0
-
 import os
 import reportlab
 folder = os.path.dirname(reportlab.__file__) + os.sep + 'fonts'
@@ -132,6 +136,25 @@ value of the $T1SearchPath$ identifier to contain additional
 directories.
 """)
 
+heading3("Missing Glyphs")
+disc("""If you specify an encoding, it is generally assumed that
+the font designer has provided all the needed glyphs.  However,
+this is not always true.  In the case of our example font,
+the letters of the alphabet are present, but many symbols and
+accents are missing.  The default behaviour is for the font to
+print a 'notdef' character - typically a blob, dot or space -
+when passed a character it cannot draw.  However, you can ask
+the library to warn you instead; the code below (executed
+before loading a font) will cause warnings to be generated
+for any glyphs not in the font when you register it.""")
+
+eg("""
+import reportlab.rl_config
+reportlab.rl_config.warnOnMissingFontGlyphs = 0
+""")
+
+
+
 heading2("Single-Byte Font Encodings")
 disc("""
 Every time you draw some text, you presume an encoding.
@@ -189,7 +212,8 @@ PDF is the first really portable solution for Asian text handling.
 Japanese, Traditional Chinese (Taiwan/Hong Kong), Simplified Chinese (mainland China)
 and Korean are all supported; however, you have to download the relevant font pack
 from Adobe's web site to view such PDF files, or you'll get cryptic error messages
-about "bad CMaps".
+about "bad CMaps".  We do not yet support TrueType Unicode fonts with subsetting, which
+is the other technique used by Distiller in creating Asian PDF documents.
 """)
 
 disc("""Since many users will not have the font packs installed, we have included
@@ -226,9 +250,10 @@ canvas.setFont('HeiseiMin-W3-90ms-RKSJ-H', 16)
 # this says "This is HeiseiMincho" in shift-JIS.  Not all our readers
 # have a Japanese PC, so I escaped it. On a Japanese-capable
 # system, print the string to see Kanji
-message1 = '\202\261\202\352\202\315\225\275\220\254\226\276\222\251\202\305\202\267\201B'
+message1 = '\\202\\261\\202\\352\\202\\315\\225\\275\\220\\254\\226\\276\\222\\251\\202\\305\\202\\267\\201B'
 canvas.drawString(100, 675, message1)
 """)
+#had to double-escape the slashes above to get escapes into the PDF
 
 disc("""A full list of the available fonts and encodings is available near the
 top of $reportlab/pdfbase/_cidfontdata.py$.  Also, the following four test scripts
@@ -238,13 +263,22 @@ reportlab/test/test_multibyte_kor.py
 reportlab/test/test_multibyte_chs.py
 reportlab/test/test_multibyte_cht.py""")
 
+disc("""The illustration below shows part of the first page
+of the Japanese output sample.  It shows both horizontal and vertical
+writing, and illustrates the ability to mix variable-width Latin
+characters in Asian sentences.  The choice of horizontal and vertical
+writing is determined by the encoding, which ends in 'H' or 'V'.
+Whether an encoding uses fixed-width or variable-width versions
+of Latin characters also depends on the encoding used; see the definitions
+below.""")
+
 Illustration(image("../images/jpn.gif", width=531*0.50,
 height=435*0.50), 'Output from test_multibyte_jpn.py')
 
 caption("""
 Output from test_multibyte_jpn.py
 """)
-
+heading2("Available typefaces and encodings")
 disc("""
 The encoding and font data are grouped by some standard 'language
 prefixes':
@@ -455,10 +489,41 @@ to pre-generate and copy up this file, or ensure that the web user can
 write this directory.
 """)
 
-disc("""
-We are working on a compressed mapping database which will remove any
+heading3("To Do")
+disc("""We expect to be developing this area of the package for some time.accept2dyear
+Here is an outline of the main priorities.  We welcome help!""")
+
+bullet("""
+Ensure that we have accurate character metrics for all encodings in horizontal and
+vertical writing.""")
+
+bullet("""
+document everything thoroughly.""")
+
+bullet("""
+build a compressed mapping database which will remove any
 need to refer to Adobe's CMap files, and further speed up access.
 """)
 
+bullet("""
+write accelerators in C for loading CMaps and calculating the widths of
+strings""")
+
+bullet("""
+draw Asian text in the bitmap output of reportlab/graphics, so that we can provide
+identical charts in all media
+""")
+
+bullet("""
+allow support for Gaiji (user-defined characters) easily by implementing composite
+fonts made out of a standard Asian font and a small custom-built Type 1 font.
+""")
+
+bullet("""
+implement and then accelerate the correct paragraph wrapping rules for paragraphs""")
+
+bullet("""
+support Unicode documents with automatic selection of the underlying encoding
+for printing""")
 
 ##### FILL THEM IN
