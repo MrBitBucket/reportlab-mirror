@@ -20,7 +20,7 @@ class FrontCoverTemplate(PageTemplate):
 
     def afterDrawPage(self, canvas, doc):
         canvas.saveState()
-        canvas.drawInlineImage('replogo.gif',2*inch, 8*inch)
+        canvas.drawInlineImage('../images/replogo.gif',2*inch, 8*inch)
 
 
         canvas.setFont('Times-Roman', 10)
