@@ -1,15 +1,17 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.10 2001/05/08 11:36:40 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.11 2001/05/09 15:20:58 dinu_gherman Exp $
 import string
 
 from reportlab.graphics import shapes
 from reportlab import rl_config
 from reportlab.lib import colors
 
+
 class PropHolder:
     '''Base for property holders'''
+
     _attrMap = None
 
     def verify(self):
@@ -18,43 +20,60 @@ class PropHolder:
         unwanted attributes are present; and (if a
         checking function is found) checks each
         attribute has a valid value.  Either succeeds
-        or raises an informative exception."""
+        or raises an informative exception.
+        """
+
         if self._attrMap is not None:
             for key in self.__dict__.keys():
                 if key[0] <> '_':
-                    assert self._attrMap.has_key(key), "Unexpected attribute %s found in %s" % (key, self)
+                    msg = "Unexpected attribute %s found in %s" % (key, self)
+                    assert self._attrMap.has_key(key), msg
             for (attr, checkerFunc) in self._attrMap.items():
-                assert hasattr(self, attr), "Missing attribute %s from %s" % (key, self)
+                msg = "Missing attribute %s from %s" % (key, self)
+                assert hasattr(self, attr), msg
                 if checkerFunc:
                     value = getattr(self, attr)
-                    assert checkerFunc(value), "Invalid value %s for attribute %s in class %s" % (value, attr, self.__class__.__name__)
+                    args = (value, attr, self.__class__.__name__)
+                    msg = "Invalid value %s for attribute %s in class %s" % args
+                    assert checkerFunc(value), msg
+
 
     if rl_config.shapeChecking:
-        """This adds the ability to check every attribite assignment as it is made.
-        It slows down shapes but is a big help when developing. It does not
-        get defined if rl_config.shapeChecking = 0"""
+        """This adds the ability to check every attribute assignment
+        as it is made. It slows down shapes but is a big help when
+        developing. It does not get defined if rl_config.shapeChecking = 0.
+        """
+
         def __setattr__(self, attr, value):
             """By default we verify.  This could be off
             in some parallel base classes."""
+
             if self._attrMap is not None:
                 if attr[0:1] <> '_':
                     try:
                         checker = self._attrMap[attr]
-                        if checker:
-                            if not checker(value):
-                                raise AttributeError, "Illegal assignment of '%s' to '%s' in class %s" % (value, attr, self.__class__.__name__)
+                        if checker and not checker(value):
+                            args = (value, attr, self.__class__.__name__)
+                            msg = "Illegal assignment of '%s' to '%s' in class %s" % args
+                            raise AttributeError, msg
                     except KeyError:
-                        raise AttributeError, "Illegal attribute '%s' in class %s" % (attr, self.__class__.__name__)
+                        args = (attr, self.__class__.__name__)
+                        msg = "Illegal attribute '%s' in class %s" % args
+                        raise AttributeError, msg
+
             #if we are still here, set it.
             self.__dict__[attr] = value
             #print 'set %s.%s = %s' % (self.__class__.__name__, attr, value)
+
 
     def getProperties(self):
         """Returns a list of all properties which can be edited and
         which are not marked as private. This may include 'child
         widgets' or 'primitive shapes'.  You are free to override
         this and provide alternative implementations; the default
-        one simply returns everything without a leading underscore."""
+        one simply returns everything without a leading underscore.
+        """
+
         # TODO when we need it, but not before -
         # expose sequence contents?
         props = {}
@@ -78,6 +97,7 @@ class PropHolder:
 
         return props
 
+
     def setProperties(self, propDict):
         """Permits bulk setting of properties.  These may include
         child objects e.g. "chart.legend.width = 200".
@@ -87,7 +107,8 @@ class PropHolder:
 
         All properties of a top-level object are guaranteed to be
         set before any of the children, which may be helpful to
-        widget designers."""
+        widget designers.
+        """
 
         childPropDicts = {}
         for (name, value) in propDict.items():
@@ -101,21 +122,26 @@ class PropHolder:
                     childPropDicts[childName][remains] = value
                 except KeyError:
                     childPropDicts[childName] = {remains: value}
+
         # now assign to children
         for (childName, childPropDict) in childPropDicts.items():
             child = getattr(self, childName)
             child.setProperties(childPropDict)
 
+
     def dumpProperties(self, prefix=""):
         """Convenience. Lists them on standard output.  You
         may provide a prefix - mostly helps to generate code
-        samples for documentation."""
+        samples for documentation.
+        """
+
         propList = self.getProperties().items()
         propList.sort()
         if prefix:
             prefix = prefix + '.'
         for (name, value) in propList:
             print '%s%s = %s' % (prefix, name, value)
+
 
 class Widget(PropHolder,shapes.UserNode):
     """Base for all user-defined widgets.  Keep as simple as possible. Does
@@ -135,15 +161,20 @@ class Widget(PropHolder,shapes.UserNode):
 
 
 class TypedPropertyCollection(PropHolder):
-    """This makes it easy to create lists of objects.  You initialize
+    """A container with properties for objects of the same kind.
+
+    This makes it easy to create lists of objects. You initialize
     it with a class of what it is to contain, and that is all you
     can add to it.  You can assign properties to the collection
     as a whole, or to a numeric index within it; if so it creates
-    a new child object to hold that data.  So:
-        wedges = TypesPropertyCollection0(WedgeFormatter)
+    a new child object to hold that data.
+
+    So:
+        wedges = TypesPropertyCollection0(WedgeProperties)
         wedges.strokeWidth = 2                # applies to all
         wedges.strokeColor = colors.red       # applies to all
         wedges[3].strokeColor = colors.blue   # only to one
+
     The last line should be taken as a prescription of how to
     create wedge no. 3 if one is needed; no error is raised if
     there are only two data points.
@@ -194,6 +225,8 @@ class TypedPropertyCollection(PropHolder):
         return props
 
 
+## No longer needed!
+    
 class StyleProperties(PropHolder):
 	"""A container class for attributes used in charts and legends.
 
@@ -223,15 +256,9 @@ class StyleProperties(PropHolder):
 		'strokeMiterLimit': None,
 		'strokeDashArray': shapes.isListOfNumbersOrNone,
 		'strokeOpacity': shapes.isNumber,
-
 		'strokeColor': shapes.isColorOrNone,
 		'fillColor': shapes.isColorOrNone,
-
-# Not sure if needed...
-##		  'fontSize': isNumber,
-##		  'fontName': isString,
-
-		'desc':shapes.isString	   # 
+		'desc':shapes.isString
 		}
 
 	def __init__(self, **kwargs):
@@ -261,6 +288,7 @@ class StyleProperties(PropHolder):
 		# Now set it.
 		self.__dict__[name] = value
 
+
 class TwoCircles(Widget):
     def __init__(self):
         self.leftCircle = shapes.Circle(100,100,20, fillColor=colors.red)
@@ -269,11 +297,17 @@ class TwoCircles(Widget):
     def draw(self):
         return shapes.Group(self.leftCircle, self.rightCircle)
 
+
 class Face(Widget):
-    """This draws a face with two eyes.  It exposes a couple of properties
-    to configure itself and hides all other details"""
+    """This draws a face with two eyes.
+
+    It exposes a couple of properties
+    to configure itself and hides all other details.
+    """
+
     def checkMood(moodName):
         return (moodName in ('happy','sad','ok'))
+
     _attrMap = {
         'x': shapes.isNumber,
         'y': shapes.isNumber,
@@ -282,7 +316,6 @@ class Face(Widget):
         'eyeColor': shapes.isColorOrNone,
         'mood': checkMood 
         }
-
 
     def __init__(self):
         self.x = 10
@@ -299,9 +332,9 @@ class Face(Widget):
         s = self.size  # abbreviate as we will use this a lot
         g = shapes.Group()
         g.transform = [1,0,0,1,self.x, self.y]
+
         # background
         g.add(shapes.Circle(s * 0.5, s * 0.5, s * 0.5, fillColor=self.skinColor))
-
 
         # left eye
         g.add(shapes.Circle(s * 0.35, s * 0.65, s * 0.1, fillColor=colors.white))
@@ -312,8 +345,9 @@ class Face(Widget):
         g.add(shapes.Circle(s * 0.65, s * 0.65, s * 0.05, fillColor=self.eyeColor))
 
         # nose
-        g.add(shapes.Polygon(points=[s * 0.5, s * 0.6, s * 0.4, s * 0.3, s * 0.6, s * 0.3],
-                             fillColor=None))
+        g.add(shapes.Polygon(
+            points=[s * 0.5, s * 0.6, s * 0.4, s * 0.3, s * 0.6, s * 0.3],
+            fillColor=None))
 
         # mouth
         if self.mood == 'happy':
@@ -323,19 +357,20 @@ class Face(Widget):
         else:
             offset = 0
 
-        g.add(shapes.Polygon(points = [
-                                s * 0.3, s * 0.2, #left of mouth
-                                s * 0.7, s * 0.2, #right of mouth
-                                s * 0.6, s * (0.2 + offset), # the bit going up or down
-                                s * 0.4, s * (0.2 + offset) # the bit going up or down
-
-                                ],
-                             fillColor = colors.pink,
-                             strokeColor = colors.red,
-                             strokeWidth = s * 0.03
-                             ))
+        g.add(shapes.Polygon(
+            points = [
+                s * 0.3, s * 0.2, #left of mouth
+                s * 0.7, s * 0.2, #right of mouth
+                s * 0.6, s * (0.2 + offset), # the bit going up or down
+                s * 0.4, s * (0.2 + offset) # the bit going up or down
+                ],
+            fillColor = colors.pink,
+            strokeColor = colors.red,
+            strokeWidth = s * 0.03
+            ))
 
         return g
+
 
 class TwoFaces(Widget):
     def __init__(self):
@@ -353,6 +388,7 @@ class TwoFaces(Widget):
         """The default case already looks good enough,
         no implementation needed here"""
         pass
+
 
 def test():
     d = shapes.Drawing(400, 200)
@@ -377,6 +413,7 @@ def test():
     print 'saved face_copy.pdf'
     print 'drawing 2 properties:'
     d2.dumpProperties()
+
 
 if __name__=='__main__':
     test()
