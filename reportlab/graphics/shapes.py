@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.82 2002/11/27 17:26:46 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.83 2002/11/27 20:19:24 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.82 2002/11/27 17:26:46 rgbecker Exp $ '''
+__version__=''' $Id: shapes.py,v 1.83 2002/11/27 20:19:24 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -174,28 +174,25 @@ class _DrawTimeResizeable:
             if hasattr(canvas,'_drawTimeResize'):
                 canvas._drawTimeResize(w,h)
 
+class _SetKeyWordArgs:
+    def __init__(self, keywords={}):
+        """In general properties may be supplied to the constructor."""
+        for key, value in keywords.items():
+            setattr(self, key, value)
+
 #################################################################
 #
 #    And now the shapes themselves....
 #
 #################################################################
-class Shape(_DrawTimeResizeable):
+class Shape(_SetKeyWordArgs,_DrawTimeResizeable):
     """Base class for all nodes in the tree. Nodes are simply
     packets of data to be created, stored, and ultimately
     rendered - they don't do anything active.  They provide
     convenience methods for verification but do not
     check attribiute assignments or use any clever setattr
     tricks this time."""
-
     _attrMap = AttrMap()
-
-    def __init__(self, keywords={}):
-        """In general properties may be supplied to the
-        constructor."""
-
-        for key, value in keywords.items():
-            #print 'setting keyword %s.%s = %s' % (self, key, value)
-            setattr(self, key, value)
 
     def copy(self):
         """Return a clone of this shape."""
