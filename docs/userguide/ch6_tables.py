@@ -159,6 +159,7 @@ disc("""
     and LINEAFTER. BOX and OUTLINE are equivalent, and GRID is the equivalent of applying both BOX and
     INNERGRID.
 """)
+CPage(4.0)
 disc("""We can see some line commands in action with the following example.
 """)
 EmbeddedCode("""
