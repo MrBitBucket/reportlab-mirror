@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.40 2001/08/08 18:17:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.41 2001/08/31 14:56:05 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -281,7 +281,8 @@ class Group(Shape):
 	def _addNamedNode(self,name,node):
 		'if name is not None add an attribute pointing to node and add to the attrMap'
 		if name:
-			self._attrMap[name] = AttrMapValue(isValidChild)
+			if name not in self._attrMap.keys():
+				self._attrMap[name] = AttrMapValue(isValidChild)
 			setattr(self, name, node)
 
 	def add(self, node, name=None):
@@ -431,7 +432,25 @@ class Drawing(Group, Flowable):
 
 class _DrawingEditorMixin:
 	'''This is a mixin to provide functionality for edited drawings'''
-	pass
+	def _add(self,obj,value,name=None,validate=None,desc=None,pos=None):
+		'''
+		effectively setattr(obj,name,value), but takes care of things with _attrMaps etc
+		'''
+		ivc = isValidChild(value)
+		if name and hasattr(obj,'_attrMap'):
+			if not obj.__dict__.has_key('_attrMap'):
+				obj._attrMap = obj._attrMap.clone()
+			if ivc and validate is None: validate = isValidChild
+			obj._attrMap[name] = AttrMapValue(validate,desc)
+		if hasattr(obj,'add') and ivc:
+			if pos:
+				obj.insert(pos,value,name)
+			else:
+				obj.add(value,name)
+		elif name:
+			setattr(obj,name,value)
+		else:
+			raise ValueError, "Can't add, need name"
 
 class LineShape(Shape):
 	# base for types of lines
