@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.22  2000/05/10 13:04:35  rgbecker
+#	Added softspace handling
+#
 #	Revision 1.21  2000/05/10 09:54:40  rgbecker
 #	Flowable.split should return list
-#
+#	
 #	Revision 1.20  2000/04/28 13:39:12  rgbecker
 #	Fix _doNothing argument name
 #	
@@ -92,7 +95,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.21 2000/05/10 09:54:40 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.22 2000/05/10 13:04:35 rgbecker Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -104,7 +107,6 @@ currently working on paragraph wrapping stuff.
 #	rewrote grid stuff - now in tables.py
 
 import string
-import types
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
@@ -153,6 +155,26 @@ class Flowable:
 		wrap fails. Stupid flowables should return (). Clever flowables
 		should split themselves and return a list of flowables"""
 		return []
+
+	def restoreSpace(self):
+		if hasattr(self,'_spaceBefore'):
+			self.style.spaceBefore = self._spaceBefore
+			del self._spaceBefore
+		if hasattr(self,'_spaceAfter'):
+			self.style.spaceAfter = self._spaceAfter
+			del self._spaceAfter
+		
+	def saveSpace(self,atTop=0):
+		'''eliminate unwanted space'''
+		R = [0,0]
+		if hasattr(self,'style'):
+			if atTop and hasattr(self.style,'spaceBefore'):
+				R[0] = self._spaceBefore = self.style.spaceBefore
+				self.style.spaceBefore = 0
+			if hasattr(self.style,'spaceAfter'):
+				R[1] = self._spaceAfter = self.style.spaceAfter
+				self.style.spaceAfter = 0
+		return R
 
 class XBox(Flowable):
 	"""Example flowable - a box with an x through it and a caption.
@@ -335,6 +357,7 @@ class BasicFrame:
 		#drawing starts at top left
 		self.x = self.x1 + self.leftPadding
 		self.y = self.y2 - self.topPadding
+		self.atTop = 1
 
 	def _add(self, flowable, canv, trySplit=0):
 		""" Draws the flowable at the current position.
@@ -344,16 +367,23 @@ class BasicFrame:
 		to avoid infinite loops"""
 		y = self.y
 		p = self.y1 + self.bottomPadding
-		w, h = flowable.wrap(self.width, y - p )
+		S = flowable.saveSpace(self.atTop)
+		y_p = y-p
+		w, h = flowable.wrap(self.width, y_p )
 
 		y = y - h
 		if y < p:
+			flowable.restoreSpace()
 			if ((h > self.height and not trySplit) or w > self.width):
 				raise "LayoutError", "Flowable (%dx%d points) too large for frame (%dx%d points)." % (w,h, self.width,self.height)
+			self._availHeight = y_p
 			return 0
 		else:
 			#now we can draw it, and update the current point.
 			flowable.drawOn(canv, self.x, y)
+			flowable.restoreSpace()
+			y = y - S[1]	#space after
+			self.atTop = 0
 			self.y = y
 			return 1
 
