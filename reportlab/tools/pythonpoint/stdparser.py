@@ -391,9 +391,11 @@ class PPMLParser(xmllib.XMLParser):
         # hack - bullet character if bullet style
         bt = self._arg('para',args,'bullettext')
         if bt == '':
-            bt = None
-        if self._curPara.style == 'Bullet' and bt == '':
-            bt = '\267'  # Symbol Font bullet character, reasonable default
+            if self._curPara.style == 'Bullet':
+                bt = '\267'  # Symbol Font bullet character, reasonable default
+            else:
+                bt = None
+
         self._curPara.bulletText = bt
 
 
