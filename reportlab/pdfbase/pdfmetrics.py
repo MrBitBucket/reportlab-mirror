@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.53 2002/05/24 17:06:57 dinu_gherman Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.54 2002/06/20 15:05:58 aaron_watters Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -231,6 +231,7 @@ class Encoding:
 
     def __getitem__(self, index):
         "Return glyph name for that code point, or None"
+        # THIS SHOULD BE INLINED FOR SPEED
         return self.vector[index]
 
     def __setitem__(self, index, value):
@@ -268,8 +269,8 @@ class Encoding:
         ranges = []
         curRange = None
         for i in xrange(len(self.vector)):
-            glyph = self[i]
-            if glyph==otherEnc[i]:
+            glyph = self.vector[i]
+            if glyph==otherEnc.vector[i]:
                 if curRange:
                     ranges.append(curRange)
                     curRange = []
