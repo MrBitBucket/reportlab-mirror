@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.27 2001/07/21 11:16:57 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.28 2001/08/19 13:01:27 dinu_gherman Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -131,7 +131,7 @@ class BarChart(Widget):
 
         # this defines two series of 3 points.  Just an example.
         self.data = [(100,110,120,130),
-                     (70, 80, None, 90)]
+                     (70, 80, 85, 90)]
         self.categoryNames = ('North','South','East','West')
 
         # control bar spacing. is useAbsolute = 1 then
