@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.18 2001/05/17 11:17:16 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.19 2001/05/17 18:30:01 rgbecker Exp $
 
 from gengraphguide import *
 
@@ -964,7 +964,7 @@ from reportlab.graphics.charts import piecharts
 pc = piecharts.Pie()
 pc.defaultColors = [navy, blue, skyblue] #used in rotation 
 pc.data = [10,30,50,25] 
-pc.wedges[7].strokeWidth = 5 
+pc.defaultStyles[7].strokeWidth = 5 
 """)
 #removed 'pc.backColor = yellow' from above code example
 
@@ -1006,7 +1006,7 @@ pc = Pie()
 pc.x = 25
 pc.y = 50
 pc.data = [10,20,30,40,50,60]
-pc.wedges[0].popout = 5
+pc.defaultStyles[0].popout = 5
 d.add(pc, 'pie1')
 pc2 = Pie()
 pc2.x = 150
@@ -1042,7 +1042,7 @@ pc = Pie()
 pc.x = 25
 pc.y = 50
 pc.data = [10,20,30,40,50,60]
-pc.wedges[0].popout = 5
+pc.defaultStyles[0].popout = 5
 d.add(pc, 'pie1')
 pc2 = Pie()
 pc2.x = 150
@@ -1055,10 +1055,10 @@ pc3.x = 275
 pc3.y = 50
 pc3.data = [10,20,30,40,50,60]
 pc3.labels = ['a','b','c','d','e','f']
-pc3.wedges.labelRadius = 0.65
-pc3.wedges.fontName = "Helvetica-Bold"
-pc3.wedges.fontSize = 16
-pc3.wedges.fontColor = colors.yellow
+pc3.defaultStyles.labelRadius = 0.65
+pc3.defaultStyles.fontName = "Helvetica-Bold"
+pc3.defaultStyles.fontSize = 16
+pc3.defaultStyles.fontColor = colors.yellow
 d.add(pc3, 'pie3')
 
 draw(d, 'A sample Pie')
@@ -1114,16 +1114,16 @@ pc.x = 150
 pc.y = 50
 pc.data = [10,20,30,40,50,60]
 pc.labels = ['a','b','c','d','e','f']
-pc.wedges.strokeWidth=0.5
-pc.wedges[3].popout = 20
-pc.wedges[3].strokeWidth = 2
-pc.wedges[3].strokeDashArray = [2,2]
-pc.wedges[3].labelRadius = 1.75
-pc.wedges[3].fontColor = colors.red
+pc.defaultStyles.strokeWidth=0.5
+pc.defaultStyles[3].popout = 20
+pc.defaultStyles[3].strokeWidth = 2
+pc.defaultStyles[3].strokeDashArray = [2,2]
+pc.defaultStyles[3].labelRadius = 1.75
+pc.defaultStyles[3].fontColor = colors.red
 d.add(pc, '')
 """)
  
-disc("""<para lindent=+36>pc.wedges[3] actually lazily creates a little object which holds 
+disc("""<para lindent=+36>pc.defaultStyles[3] actually lazily creates a little object which holds 
        information about the slice in question; this will be used to format a 
        fourth slice at draw-time if there is one.""")
 
@@ -1794,12 +1794,12 @@ pc.height = 70
 pc.data = [10,20,30,40,50,60]
 pc.labels = ['a','b','c','d','e','f']
 
-pc.wedges.strokeWidth=0.5
-pc.wedges[3].popout = 10
-pc.wedges[3].strokeWidth = 2
-pc.wedges[3].strokeDashArray = [2,2]
-pc.wedges[3].labelRadius = 1.75
-pc.wedges[3].fontColor = colors.red
+pc.defaultStyles.strokeWidth=0.5
+pc.defaultStyles[3].popout = 10
+pc.defaultStyles[3].strokeWidth = 2
+pc.defaultStyles[3].strokeDashArray = [2,2]
+pc.defaultStyles[3].labelRadius = 1.75
+pc.defaultStyles[3].fontColor = colors.red
 
 d.add(pc)
 """)
@@ -1816,12 +1816,12 @@ pc.height = 70
 pc.data = [10,20,30,40,50,60]
 pc.labels = ['a','b','c','d','e','f']
 
-pc.wedges.strokeWidth=0.5
-pc.wedges[3].popout = 10
-pc.wedges[3].strokeWidth = 2
-pc.wedges[3].strokeDashArray = [2,2]
-pc.wedges[3].labelRadius = 1.75
-pc.wedges[3].fontColor = colors.red
+pc.defaultStyles.strokeWidth=0.5
+pc.defaultStyles[3].popout = 10
+pc.defaultStyles[3].strokeWidth = 2
+pc.defaultStyles[3].strokeDashArray = [2,2]
+pc.defaultStyles[3].labelRadius = 1.75
+pc.defaultStyles[3].fontColor = colors.red
 
 d.add(pc)
 
