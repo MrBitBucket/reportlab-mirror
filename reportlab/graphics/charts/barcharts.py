@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.33 2001/09/12 14:58:14 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.34 2001/09/12 18:35:14 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -122,8 +122,10 @@ class BarChart(Widget):
 
 		self.x = 0
 		self.y = 0
-		self.width = 200
-		self.height = 100
+		self.x = 20
+		self.y = 10
+		self.height = 85
+		self.width = 180
 
 		# allow for a bounding rectangle
 		self.strokeColor = None
@@ -176,40 +178,28 @@ class BarChart(Widget):
 
 	def _findMinMaxValues(self):
 		"Find the minimum and maximum value of the data we have."
-		data = map(lambda x: map(lambda x: x is not None and x or 0,x), self.data)
-		return min(min(data)), max(max(data))
+		D = []
+		for d in self.data:
+			for e in d:
+				if e is None:
+					e = 0
+				D.append(e)
+		return min(D), max(D)
 
 
 	def makeBackground(self):
 		g = Group()
 		#print 'BarChart.makeBackground(%s, %s, %s, %s)' % (self.x, self.y, self.width, self.height)
-		g.add(Rect(self.x, self.y,
-				   self.width, self.height,
-				   strokeColor = self.strokeColor,
-				   fillColor= self.fillColor))
-
+		g.add(Rect(self.x, self.y, self.width, self.height,
+			strokeColor = self.strokeColor, fillColor= self.fillColor))
 		return g
 
 
 	def demo(self):
 		"""Shows basic use of a bar chart"""
-
 		drawing = Drawing(200, 100)
-
-		data = [
-				(13, 5, 20, 22, 37, 45, 19, 4),
-				(14, 6, 21, 23, 38, 46, 20, 5)
-				]
-
 		bc = self.__class__()
-		bc.x = 20
-		bc.y = 10
-		bc.height = 85
-		bc.width = 180
-		bc.data = data
-
 		drawing.add(bc)
-
 		return drawing
 
 
@@ -289,6 +279,7 @@ class BarChart(Widget):
 			y = scale(vm)
 		elif vM < 0:
 			y = scale(vM)
+		print vm, vM, y, scale, self.valueAxis._y, self.valueAxis._valueMin, self._findMinMaxValues()[0]
 
 		self._barPositions = []
 		for rowNo in range(len(self.data)):
