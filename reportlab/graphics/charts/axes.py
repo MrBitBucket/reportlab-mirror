@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.64 2003/05/27 09:18:01 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.65 2003/05/27 19:05:54 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.64 2003/05/27 09:18:01 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.65 2003/05/27 19:05:54 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -80,8 +80,8 @@ class CategoryAxis(Widget):
         gridStrokeWidth = AttrMapValue(isNumber, desc='Width of grid lines.'),
         gridStrokeColor = AttrMapValue(isColorOrNone, desc='Color of grid lines.'),
         gridStrokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array used for grid lines.'),
-        gridStart = AttrMapValue(isNumber, desc='Start of grid lines wrt axis origin'),
-        gridEnd = AttrMapValue(isNumber, desc='End of grid lines wrt axis origin'),
+        gridStart = AttrMapValue(isNumberOrNone, desc='Start of grid lines wrt axis origin'),
+        gridEnd = AttrMapValue(isNumberOrNone, desc='End of grid lines wrt axis origin'),
         labels = AttrMapValue(None, desc='Handle of the axis labels.'),
         categoryNames = AttrMapValue(isListOfStringsOrNone, desc='List of category names.'),
         joinAxis = AttrMapValue(None, desc='Join both axes if true.'),
@@ -156,10 +156,16 @@ class CategoryAxis(Widget):
         if self.reverseDirection: idx = self._catCount-idx-1
         return idx
 
-    def makeGrid(self,g):
+    def makeGrid(self,g,dim=None):
         '''this is only called by a container object'''
-        if self.visibleGrid and (self.gridStart or self.gridEnd):
-            self._makeLines(g,self.gridStart,self.gridEnd,self.gridStrokeColor,self.gridStrokeWidth,self.gridStrokeDashArray)
+        s = self.gridStart
+        e = self.gridEnd
+        if dim:
+            s = s is None and dim[0]
+            e = e is None and dim[0]+dim[1]
+        c = self.gridStrokeColor
+        if self.visibleGrid and (s or e) and c is not None:
+            self._makeLines(g,s,e,c,self.gridStrokeWidth,self.gridStrokeDashArray)
 
 def _assertYAxis(axis):
     acn = axis.__class__.__name__
@@ -463,8 +469,8 @@ class ValueAxis(Widget):
         gridStrokeWidth = AttrMapValue(isNumber, desc='Width of grid lines.'),
         gridStrokeColor = AttrMapValue(isColorOrNone, desc='Color of grid lines.'),
         gridStrokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array used for grid lines.'),
-        gridStart = AttrMapValue(isNumber, desc='Start of grid lines wrt axis origin'),
-        gridEnd = AttrMapValue(isNumber, desc='End of grid lines wrt axis origin'),
+        gridStart = AttrMapValue(isNumberOrNone, desc='Start of grid lines wrt axis origin'),
+        gridEnd = AttrMapValue(isNumberOrNone, desc='End of grid lines wrt axis origin'),
         minimumTickSpacing = AttrMapValue(isNumber, desc='Minimum value for distance between ticks.'),
         maximumTicks = AttrMapValue(isNumber, desc='Maximum number of ticks.'),
         labels = AttrMapValue(None, desc='Handle of the axis labels.'),
@@ -704,11 +710,16 @@ class ValueAxis(Widget):
                 L.strokeDashArray = strokeDashArray
                 g.add(L)
 
-    def makeGrid(self,g):
+    def makeGrid(self,g,dim=None):
         '''this is only called by a container object'''
-        if self.visibleGrid and (self.gridStart or self.gridEnd):
-            self._makeLines(g,self.gridStart,self.gridEnd,self.gridStrokeColor,self.gridStrokeWidth,self.gridStrokeDashArray)
-
+        s = self.gridStart
+        e = self.gridEnd
+        if dim:
+            s = s is None and dim[0]
+            e = e is None and dim[0]+dim[1]
+        c = self.gridStrokeColor
+        if self.visibleGrid and (s or e) and c is not None:
+            self._makeLines(g,s,e,c,self.gridStrokeWidth,self.gridStrokeDashArray)
 
     def draw(self):
         g = Group()

@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.38 2002/12/02 19:38:59 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.39 2003/05/27 19:05:55 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.38 2002/12/02 19:38:59 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.39 2003/05/27 19:05:55 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -12,7 +12,7 @@ from types import FunctionType
 from reportlab.lib import colors
 from reportlab.lib.validators import *
 from reportlab.lib.attrmap import *
-from reportlab.graphics.shapes import Drawing, Group, Rect, Line, PolyLine, _SetKeyWordArgs
+from reportlab.graphics.shapes import Drawing, Group, Rect, Line, PolyLine, Polygon, _SetKeyWordArgs
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.axes import XValueAxis, YValueAxis, AdjYValueAxis, NormalDateXValueAxis
@@ -195,6 +195,12 @@ class LinePlot(PlotArea):
 
         P = range(len(self._positions))
         if self.reversePlotOrder: P.reverse()
+        inFill = getattr(self,'_inFill',None)
+        if inFill:
+            inFillY = self.xValueAxis._y
+            inFillX0 = self.yValueAxis._x
+            inFillX1 = inFillX0 + self.xValueAxis._length
+            inFillG = getattr(self,'_inFillG',g)
         # Iterate over data rows.
         for rowNo in P:
             row = self._positions[rowNo]
@@ -223,6 +229,9 @@ class LinePlot(PlotArea):
                 if dash:
                     line.strokeDashArray = dash
                 g.add(line)
+                if inFill:
+                    points = points + [inFillX1,inFillY,inFillX0,inFillY]
+                    inFillG.add(Polygon(points,fillColor=rowColor))
             else:
                 for colNo in range(len(row)):
                     x1, y1 = row[colNo]
@@ -291,28 +300,32 @@ class LinePlot(PlotArea):
             return g
         return S or L
 
-
     def draw(self):
-        self.yValueAxis.setPosition(self.x, self.y, self.height)
-        self.yValueAxis.configure(self.data)
+        yA = self.yValueAxis
+        xA = self.xValueAxis
+        yA.setPosition(self.x, self.y, self.height)
+        yA.configure(self.data)
 
-        # if zero is in chart, put x axis there, otherwise
-        # use bottom.
-        xAxisCrossesAt = self.yValueAxis.scale(0)
+        # if zero is in chart, put x axis there, otherwise use bottom.
+        xAxisCrossesAt = yA.scale(0)
         if ((xAxisCrossesAt > self.y + self.height) or (xAxisCrossesAt < self.y)):
             y = self.y
         else:
             y = xAxisCrossesAt
 
-        self.xValueAxis.setPosition(self.x, y, self.width)
-        self.xValueAxis.configure(self.data)
+        xA.setPosition(self.x, y, self.width)
+        xA.configure(self.data)
         self.calcPositions()
         g = Group()
         g.add(self.makeBackground())
-        g.add(self.xValueAxis)
-        g.add(self.yValueAxis)
+        if self._inFill:
+            self._inFillG = Group()
+            g.add(self._inFillG)
+        g.add(xA)
+        g.add(yA)
+        xA.makeGrid(g,dim=(0,self.height))
+        yA.makeGrid(g,dim=(0,self.width))
         g.add(self.makeLines())
-
         return g
 
 _monthlyIndexData = [[(19971202, 100.0),
@@ -530,6 +543,40 @@ class GridLinePlot(LinePlot):
         g.add(self.makeLines())
 
         return g
+
+class SplitLinePlot(LinePlot):
+    '''we're given data in the form [(X1,Y11,..Y1M)....(Xn,Yn1,...YnM)]'''
+    def __init__(self):
+        LinePlot.__init__(self)
+        self.xValueAxis = NormalDateXValueAxis()
+        self.yValueAxis = AdjYValueAxis()
+        self.data=[(20030601,0.95,0.05,0.0),(20030701,0.95,0.05,0.0),(20030801,0.95,0.05,0.0),(20030901,0.95,0.05,0.0),(20031001,0.95,0.05,0.0),(20031101,0.95,0.05,0.0),(20031201,0.95,0.05,0.0),(20040101,0.95,0.05,0.0),(20040201,0.95,0.05,0.0),(20040301,0.95,0.05,0.0),(20040401,0.95,0.05,0.0),(20040501,0.95,0.05,0.0),(20040601,0.95,0.05,0.0),(20040701,0.95,0.05,0.0),(20040801,0.95,0.05,0.0),(20040901,0.95,0.05,0.0),(20041001,0.95,0.05,0.0),(20041101,0.95,0.05,0.0),(20041201,0.95,0.05,0.0),(20050101,0.95,0.05,0.0),(20050201,0.95,0.05,0.0),(20050301,0.95,0.05,0.0),(20050401,0.95,0.05,0.0),(20050501,0.95,0.05,0.0),(20050601,0.95,0.05,0.0),(20050701,0.95,0.05,0.0),(20050801,0.95,0.05,0.0),(20050901,0.95,0.05,0.0),(20051001,0.95,0.05,0.0),(20051101,0.95,0.05,0.0),(20051201,0.95,0.05,0.0),(20060101,0.95,0.05,0.0),(20060201,0.95,0.05,0.0),(20060301,0.95,0.05,0.0),(20060401,0.95,0.05,0.0),(20060501,0.95,0.05,0.0),(20060601,0.95,0.05,0.0),(20060701,0.95,0.05,0.0),(20060801,0.95,0.05,0.0),(20060901,0.95,0.05,0.0),(20061001,0.95,0.05,0.0),(20061101,0.95,0.05,0.0),(20061201,0.95,0.05,0.0),(20070101,0.95,0.05,0.0),(20070201,0.95,0.05,0.0),(20070301,0.95,0.05,0.0),(20070401,0.95,0.05,0.0),(20070501,0.95,0.05,0.0),(20070601,0.95,0.05,0.0),(20070701,0.95,0.05,0.0),(20070801,0.95,0.05,0.0),(20070901,0.95,0.05,0.0),(20071001,0.95,0.05,0.0),(20071101,0.95,0.05,0.0),(20071201,0.95,0.05,0.0),(20080101,0.95,0.05,0.0),(20080201,0.95,0.05,0.0),(20080301,0.95,0.05,0.0),(20080401,0.95,0.05,0.0),(20080501,0.95,0.05,0.0),(20080601,0.95,0.05,0.0),(20080701,0.95,0.05,0.0),(20080801,0.95,0.05,0.0),(20080901,0.95,0.05,0.0),(20081001,0.95,0.05,0.0),(20081101,0.95,0.05,0.0),(20081201,0.95,0.05,0.0),(20090101,0.95,0.05,0.0),(20090201,0.91,0.09,0.0),(20090301,0.91,0.09,0.0),(20090401,0.91,0.09,0.0),(20090501,0.91,0.09,0.0),(20090601,0.91,0.09,0.0),(20090701,0.91,0.09,0.0),(20090801,0.91,0.09,0.0),(20090901,0.91,0.09,0.0),(20091001,0.91,0.09,0.0),(20091101,0.91,0.09,0.0),(20091201,0.91,0.09,0.0),(20100101,0.91,0.09,0.0),(20100201,0.81,0.19,0.0),(20100301,0.81,0.19,0.0),(20100401,0.81,0.19,0.0),(20100501,0.81,0.19,0.0),(20100601,0.81,0.19,0.0),(20100701,0.81,0.19,0.0),(20100801,0.81,0.19,0.0),(20100901,0.81,0.19,0.0),(20101001,0.81,0.19,0.0),(20101101,0.81,0.19,0.0),(20101201,0.81,0.19,0.0),(20110101,0.81,0.19,0.0),(20110201,0.72,0.28,0.0),(20110301,0.72,0.28,0.0),(20110401,0.72,0.28,0.0),(20110501,0.72,0.28,0.0),(20110601,0.72,0.28,0.0),(20110701,0.72,0.28,0.0),(20110801,0.72,0.28,0.0),(20110901,0.72,0.28,0.0),(20111001,0.72,0.28,0.0),(20111101,0.72,0.28,0.0),(20111201,0.72,0.28,0.0),(20120101,0.72,0.28,0.0),(20120201,0.53,0.47,0.0),(20120301,0.53,0.47,0.0),(20120401,0.53,0.47,0.0),(20120501,0.53,0.47,0.0),(20120601,0.53,0.47,0.0),(20120701,0.53,0.47,0.0),(20120801,0.53,0.47,0.0),(20120901,0.53,0.47,0.0),(20121001,0.53,0.47,0.0),(20121101,0.53,0.47,0.0),(20121201,0.53,0.47,0.0),(20130101,0.53,0.47,0.0),(20130201,0.44,0.56,0.0),(20130301,0.44,0.56,0.0),(20130401,0.44,0.56,0.0),(20130501,0.44,0.56,0.0),(20130601,0.44,0.56,0.0),(20130701,0.44,0.56,0.0),(20130801,0.44,0.56,0.0),(20130901,0.44,0.56,0.0),(20131001,0.44,0.56,0.0),(20131101,0.44,0.56,0.0),(20131201,0.44,0.56,0.0),(20140101,0.44,0.56,0.0),(20140201,0.36,0.5,0.14),(20140301,0.36,0.5,0.14),(20140401,0.36,0.5,0.14),(20140501,0.36,0.5,0.14),(20140601,0.36,0.5,0.14),(20140701,0.36,0.5,0.14),(20140801,0.36,0.5,0.14),(20140901,0.36,0.5,0.14),(20141001,0.36,0.5,0.14),(20141101,0.36,0.5,0.14),(20141201,0.36,0.5,0.14),(20150101,0.36,0.5,0.14),(20150201,0.3,0.41,0.29),(20150301,0.3,0.41,0.29),(20150401,0.3,0.41,0.29),(20150501,0.3,0.41,0.29),(20150601,0.3,0.41,0.29),(20150701,0.3,0.41,0.29),(20150801,0.3,0.41,0.29),(20150901,0.3,0.41,0.29),(20151001,0.3,0.41,0.29),(20151101,0.3,0.41,0.29),(20151201,0.3,0.41,0.29),(20160101,0.3,0.41,0.29),(20160201,0.26,0.36,0.38),(20160301,0.26,0.36,0.38),(20160401,0.26,0.36,0.38),(20160501,0.26,0.36,0.38),(20160601,0.26,0.36,0.38),(20160701,0.26,0.36,0.38),(20160801,0.26,0.36,0.38),(20160901,0.26,0.36,0.38),(20161001,0.26,0.36,0.38),(20161101,0.26,0.36,0.38),(20161201,0.26,0.36,0.38),(20170101,0.26,0.36,0.38),(20170201,0.2,0.3,0.5),(20170301,0.2,0.3,0.5),(20170401,0.2,0.3,0.5),(20170501,0.2,0.3,0.5),(20170601,0.2,0.3,0.5),(20170701,0.2,0.3,0.5),(20170801,0.2,0.3,0.5),(20170901,0.2,0.3,0.5),(20171001,0.2,0.3,0.5),(20171101,0.2,0.3,0.5),(20171201,0.2,0.3,0.5),(20180101,0.2,0.3,0.5),(20180201,0.13,0.37,0.5),(20180301,0.13,0.37,0.5),(20180401,0.13,0.37,0.5),(20180501,0.13,0.37,0.5),(20180601,0.13,0.37,0.5),(20180701,0.13,0.37,0.5),(20180801,0.13,0.37,0.5),(20180901,0.13,0.37,0.5),(20181001,0.13,0.37,0.5),(20181101,0.13,0.37,0.5),(20181201,0.13,0.37,0.5),(20190101,0.13,0.37,0.5),(20190201,0.1,0.4,0.5),(20190301,0.1,0.4,0.5),(20190401,0.1,0.4,0.5),(20190501,0.1,0.4,0.5),(20190601,0.1,0.4,0.5),(20190701,0.1,0.4,0.5),(20190801,0.1,0.4,0.5),(20190901,0.1,0.4,0.5),(20191001,0.1,0.4,0.5),(20191101,0.1,0.4,0.5),(20191201,0.1,0.4,0.5),(20200101,0.1,0.4,0.5)]
+        self._inFill = 1
+        self.reversePlotOrder = 1
+        self.yValueAxis.requiredRange = None
+        self.yValueAxis.leftAxisPercent = 0
+        self.yValueAxis.leftAxisOrigShiftMin = 0
+        self.yValueAxis.leftAxisOrigShiftIPC = 0
+        self.lines[0].strokeColor = colors.toColor(0x0033cc)
+        self.lines[1].strokeColor = colors.toColor(0x99c3ff)
+        self.lines[2].strokeColor = colors.toColor(0xCC0033)
+
+    def draw(self):
+        try:
+            odata = self.data
+            n = len(odata)
+            m = len(odata[0])
+            S = n*[0]
+            self.data = []
+            for i in xrange(1,m):
+                D = []
+                for j in xrange(n):
+                    S[j] = S[j] + odata[j][i]
+                    D.append((odata[j][0],S[j]))
+                self.data.append(D)
+            return LinePlot.draw(self)
+        finally:
+            self.data = odata
 
 def _maxWidth(T, fontName, fontSize):
     '''return max stringWidth for the list of strings T'''
