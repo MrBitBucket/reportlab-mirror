@@ -1,6 +1,6 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/flags.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.16 2001/10/18 22:28:55 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.17 2001/11/16 14:22:53 rgbecker Exp $
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 
@@ -615,7 +615,7 @@ class Flag(_Symbol):
 		g = Group()
 		box = Rect(0, s/3, s*2, s/3,
 			fillColor = colors.mintcream,
-						strokeColor = colors.black,
+						strokeColor = None,
 			strokeWidth=0)
 		g.add(box)
 
