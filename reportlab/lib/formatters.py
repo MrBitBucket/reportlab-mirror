@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/formatters.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/formatters.py,v 1.1 2001/10/10 23:14:51 andy_robinson Exp $
-__version__=''' $Id: formatters.py,v 1.1 2001/10/10 23:14:51 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/formatters.py,v 1.2 2001/10/22 16:56:01 johnprecedo Exp $
+__version__=''' $Id: formatters.py,v 1.2 2001/10/22 16:56:01 johnprecedo Exp $ '''
 __doc__="""
 These help format numbers and dates in a user friendly way.
 
@@ -36,7 +36,14 @@ class DecimalFormatter(Formatter):
         self.suffix = suffix
 
     def format(self, num):
-        intPart, fracPart = divmod(num, 1.0)
+        # positivize the numbers
+        absNum = abs(num)
+        if absNum == num:
+            sign = 1
+        else:
+            sign = -1
+            
+        intPart, fracPart = divmod(absNum, 1.0)
         strInt = str(long(intPart))
         if self.thousandSeparator is not None:
             strNew = ''
@@ -52,6 +59,8 @@ class DecimalFormatter(Formatter):
         pattern = '%0.' + str(self.decimalPlaces) + 'f'
         strFrac = (pattern % fracPart)[2:]
         strBody = strInt + self.decimalSeparator + strFrac
+        if sign == -1:
+            strBody = '-' + strBody
         if self.prefix:
             strBody = self.prefix + strBody
         if self.suffix:
