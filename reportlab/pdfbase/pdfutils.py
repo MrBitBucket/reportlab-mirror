@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.13 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: pdfutils.py,v 1.13 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.14 2001/01/22 10:38:30 dinu_gherman Exp $
+__version__=''' $Id: pdfutils.py,v 1.14 2001/01/22 10:38:30 dinu_gherman Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -15,12 +15,13 @@ LINEEND = '\015\012'
 
 ##########################################################
 #
-#  image compression helpers.  Preprocessing a directory
+#  Image compression helpers.  Preprocessing a directory
 #  of images will offer a vast speedup.
 #
 ##########################################################
+
 def cacheImageFile(filename, returnInMemory=0):
-    "Processes the image as if for encoding, saves to a file ending in AHX"
+    "Processes image as if for encoding, saves to a file with .a85 extension."
     import Image
     import zlib
     img1 = Image.open(filename)
@@ -56,7 +57,9 @@ def cacheImageFile(filename, returnInMemory=0):
 
 
 def preProcessImages(spec):
-    """accepts either a filespec ('C:\mydir\*.jpg') or a list
+    """Preprocesses one or more image files.
+
+    Accepts either a filespec ('C:\mydir\*.jpg') or a list
     of image filenames, crunches them all to save time.  Run this
     to save huge amounts of time when repeatedly building image
     documents."""
@@ -74,9 +77,10 @@ def preProcessImages(spec):
         
 
 def cachedImageExists(filename):
-    """Determines if a cached image exists which has
-    the same name and equal or newer date to the given
-    file."""
+    """Determines if a cached image already exists for a given file.
+
+    Determines if a cached image exists which has the same name
+    and equal or newer date to the given file."""
     cachedname = os.path.splitext(filename)[0] + '.a85'
     if os.path.isfile(cachedname):
         #see if it is newer
@@ -96,9 +100,11 @@ def cachedImageExists(filename):
 #
 ##############################################################
 def _escape(s):
-    """PDF escapes are almost like Python ones, but brackets
-    need slashes before them too. Use Python's repr function
-    and chop off the quotes first"""
+    """Escapes some PDF symbols (in fact, paranthesis).
+
+    PDF escapes are almost like Python ones, but brackets
+    need slashes before them too. Uses Python's repr function
+    and chops off the quotes first."""
     s = repr(s)[1:-1]
     s = string.replace(s, '(','\(')
     s = string.replace(s, ')','\)')
@@ -106,7 +112,10 @@ def _escape(s):
 
 
 def _normalizeLineEnds(text,desired=LINEEND):
-    """ensures all instances of CR, LF and CRLF end up as the specified one"""
+    """Normalizes different line end character(s).
+
+    Ensures all instances of CR, LF and CRLF end up as
+    the specified one."""
     unlikely = '\000\001\002\003'
     text = string.replace(text, '\015\012', unlikely)
     text = string.replace(text, '\015', unlikely)
@@ -114,10 +123,13 @@ def _normalizeLineEnds(text,desired=LINEEND):
     text = string.replace(text, unlikely, desired)
     return text
 
+
 def _AsciiHexEncode(input):
-    """This is a verbose encoding used for binary data within
-    a PDF file.  One byte binary becomes two bytes of ASCII."""
-    "Helper function used by images"
+    """Encodes input using ASCII-Hex coding.
+
+    This is a verbose encoding used for binary data within
+    a PDF file.  One byte binary becomes two bytes of ASCII.
+    Helper function used by images."""
     output = cStringIO.StringIO()
     for char in input:
         output.write('%02x' % ord(char))
@@ -125,8 +137,11 @@ def _AsciiHexEncode(input):
     output.reset()
     return output.read()
 
+
 def _AsciiHexDecode(input):
-    "Not used except to provide a test of the preceding"
+    """Decodes input using ASCII-Hex coding.
+
+    Not used except to provide a test of the inverse function."""
     #strip out all whitespace
     stripped = string.join(string.split(input),'')
     assert stripped[-1] == '>', 'Invalid terminator for Ascii Hex Stream'
@@ -141,8 +156,9 @@ def _AsciiHexDecode(input):
     output.reset()
     return output.read()
 
+
 def _AsciiHexTest(text='What is the average velocity of a sparrow?'):
-    "Do the obvious test for whether Ascii Hex encoding works"
+    "Does the obvious test for whether ASCII-Hex encoding works."
     print 'Plain text:', text
     encoded = _AsciiHexEncode(text)
     print 'Encoded:', encoded
@@ -160,7 +176,9 @@ try:
         from _rl_accel import _AsciiBase85Encode				# builtin or on the path
 except ImportError:
     def _AsciiBase85Encode(input):
-        """This is a compact encoding used for binary data within
+        """Encodes input using ASCII-Base85 coding.
+
+        This is a compact encoding used for binary data within
         a PDF file.  Four bytes of binary data become five bytes of
         ASCII.  This is the default method used for encoding images."""
         outstream = cStringIO.StringIO()
@@ -231,8 +249,10 @@ except ImportError:
         
 
 def _AsciiBase85Decode(input):
-    """This is not used - Acrobat Reader decodes for you - but a round
-    trip is essential for testing."""
+    """Decodes input using ASCII-Base85 coding.
+
+    This is not used - Acrobat Reader decodes for you
+    - but a round trip is essential for testing."""
     outstream = cStringIO.StringIO()
     #strip all whitespace
     stripped = string.join(string.split(input),'')
@@ -302,7 +322,9 @@ def _AsciiBase85Decode(input):
     outstream.reset()
     return outstream.read()
 
+
 def _wrap(input, columns=60):
+    "Wraps input at a given column size by inserting LINEEND characters."
     output = []
     length = len(input)
     i = 0
@@ -313,11 +335,10 @@ def _wrap(input, columns=60):
         pos = columns * i
 
     return string.join(output, LINEEND)
-
     
 
 def _AsciiBase85Test(text='What is the average velocity of a sparrow?'):
-    "Do the obvious test for whether Base 85 encoding works"
+    "Does the obvious test for whether Base 85 encoding works."
     print 'Plain text:', text
     encoded = _AsciiBase85Encode(text)
     print 'Encoded:', encoded
@@ -340,7 +361,7 @@ def _AsciiBase85Test(text='What is the average velocity of a sparrow?'):
 # Returns (width, height, color components) as a triple
 # This is based on Thomas Merz's code from GhostScript (viewjpeg.ps)
 def readJPEGInfo(image):
-    "Read width, height and number of components from open JPEG file"
+    "Read width, height and number of components from open JPEG file."
     import struct
 
     #Acceptable JPEG Markers:
