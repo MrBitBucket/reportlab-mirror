@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.7  2000/02/23 15:09:23  rgbecker
+#	Memory leak fixes
+#
 #	Revision 1.6  2000/02/17 12:36:25  rgbecker
 #	added _HAVE_ZLIB to stop compression being set without zlib
-#
+#	
 #	Revision 1.5  2000/02/17 02:07:23  rgbecker
 #	Docstring & other fixes
 #	
@@ -46,7 +49,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.6 2000/02/17 12:36:25 rgbecker Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.7 2000/02/23 15:09:23 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -159,7 +162,7 @@ class PDFDocument:
     def add(self, key, obj):
         self.objectPositions[key] = len(self.objects)  # its position
         self.objects.append(obj)
-        obj.doc = self
+        #obj.doc = self
         return len(self.objects) - 1  # give its position
 
     def getPosition(self, key):
@@ -604,4 +607,5 @@ def MakeFontDictionary(startpos, count):
     return dict
         
 if __name__ == '__main__':
-    print 'For test scripts, run test1.py to test6.py'
+	#these tests are for memory leaks only
+	doc = PDFDocument()

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.5  2000/02/23 15:09:23  rgbecker
+#	Memory leak fixes
+#
 #	Revision 1.4  2000/02/17 02:06:28  rgbecker
 #	Docstring & other fixes
-#
+#	
 #	Revision 1.3  2000/02/16 09:42:50  rgbecker
 #	Conversion to reportlab package
 #	
@@ -43,7 +46,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.4 2000/02/17 02:06:28 rgbecker Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.5 2000/02/23 15:09:23 rgbecker Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -726,6 +729,7 @@ def test():
     p = PPMLParser()
     p.feed(sample)
     p.getPresentation().save()
+    p.close()
 
 def process(datafilename):
     parser = PPMLParser()
@@ -733,7 +737,7 @@ def process(datafilename):
     parser.feed(rawdata)
     pres = parser.getPresentation()
     pres.save()
-
+    parser.close()
 
 if __name__ == '__main__':
     import sys
@@ -746,4 +750,3 @@ if __name__ == '__main__':
     else:
         print "Creating demo file pythonpoint.pdf"
         test()
-    
