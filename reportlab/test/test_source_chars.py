@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_source_chars.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_source_chars.py,v 1.3 2002/11/04 00:11:49 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_source_chars.py,v 1.4 2002/11/04 16:37:34 rgbecker Exp $
 
 """This tests for things in source files.  Initially, absence of tabs :-)
 """
@@ -17,13 +17,17 @@ from reportlab.test.utils import SecureTestCase, GlobDirectoryWalker
 
 
 class SourceTester(SecureTestCase):
+    def setUp(self):
+        SecureTestCase.setUp(self)
+        self.output = open(os.path.splitext(sys.argv[0])[0]+'.txt','w')
+
     def checkFileForTabs(self, filename):
         txt = open(filename, 'r').read()
         chunks = string.split(txt, '\t')
         tabCount = len(chunks) - 1
         if tabCount:
             #raise Exception, "File %s contains %d tab characters!" % (filename, tabCount)
-            print "file %s contains %d tab characters!" % (filename, tabCount)
+            self.output.write("file %s contains %d tab characters!\n" % (filename, tabCount))
 
     def checkFileForTrailingSpaces(self, filename):
         txt = open(filename, 'r').read()
@@ -38,7 +42,7 @@ class SourceTester(SecureTestCase):
                 badChars = badChars + spaces
 
         if badChars <> 0:
-            print "file %s contains %d trailing spaces, or %0.2f%% wastage" % (filename, badChars, 100.0*badChars/initSize)
+            self.output.write("file %s contains %d trailing spaces, or %0.2f%% wastage" % (filename, badChars, 100.0*badChars/initSize))
 
     def testFiles(self):
         topDir = os.path.dirname(reportlab.__file__)
