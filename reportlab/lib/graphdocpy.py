@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.7 2001/05/11 11:01:12 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.8 2001/05/25 13:53:30 rgbecker Exp $
 
 """Generate documentation of graphical Python objects.
 
@@ -56,9 +56,9 @@ from reportlab.graphics import renderPDF
 # Ignore if no GD rendering available.
 
 try:
-    from rlextra.graphics import renderGD
+    from rlextra.graphics import renderPM
 except ImportError, errMsg:
-    if str(errMsg)!='No module named renderGD':
+    if str(errMsg)!='No module named renderPM':
         pass
 
 
@@ -611,7 +611,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
         try:
             modName = self.skeleton.getModuleName()
             path = '%s-%s.jpg' % (modName, name)
-            renderGD.drawToFile(drawing, path, kind='JPG')
+            renderPM.drawToFile(drawing, path, fmt='JPG')
             self.outLines.append('<H3>Demo</H3>')
             self.outLines.append(makeHtmlInlineImage(path))
         except:
@@ -629,7 +629,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
             widget.verify()
             modName = self.skeleton.getModuleName()
             path = '%s-%s.jpg' % (modName, widget.__class__.__name__)
-            renderGD.drawToFile(drawing, path, kind='JPG')
+            renderPM.drawToFile(drawing, path, fmt='JPG')
             self.outLines.append('<H3>Demo</H3>')
             self.outLines.append(makeHtmlInlineImage(path))
         except:
