@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/_cidfontdata.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: _cidfontdata.py,v 1.3 2001/09/25 21:18:53 andy_robinson Exp $ '''
+__version__=''' $Id: _cidfontdata.py,v 1.4 2001/09/29 08:04:32 andy_robinson Exp $ '''
 __doc__="""
 This defines additional static data to support CID fonts.
 
@@ -21,12 +21,12 @@ prefixes':
    kor = Korean
    jpn = Japanese
 """
-languages = ['japanese', 'korean']
+languages = ['jpn', 'kor', 'cht', 'chs']
 
 #breaking down the lists let us check if something is present
 #for a specific language
-typeFaces_chs = [] # to do
-typeFaces_cht = [] # to do
+typeFaces_chs = ['STSongStd-Light-Acro'] # to do
+typeFaces_cht = ['MSungStd-Light-Acro'] # to do
 typeFaces_jpn = ['HeiseiMin-W3', 'HeiseiKakuGo-W5']
 typeFaces_kor = ['HYSMyeongJoStd-Medium-Acro']
 
@@ -235,6 +235,81 @@ CIDFontInfo['HYSMyeongJoStd-Medium-Acro'] =  {'Type':'/Font',
                     'Flags': 7,
                     'FontBBox': [-100, -142, 1100, 1000],
                     'FontName': '/'+'HYSMyeongJoStd-Medium-Acro',
+                    'ItalicAngle': 0,
+                    'Leading': 148,
+                    'MaxWidth': 1000,
+                    'MissingWidth': 500,
+                    'StemH': 91,
+                    'StemV': 91,
+                    'XHeight': 429,
+                    'Style': {'Panose': '<000000000000000000000000>'}
+                    },
+                'CIDSystemInfo': {
+                    'Registry': '(Adobe)',
+                    'Ordering': '(Korea1)',
+                    'Supplement': 1
+                    },
+                'DW': 1000,
+                'W': (1, 94, 500),
+                'WinCharSet': 129
+                }] # end descendant fonts
+            }
+
+#WARNING - not checked, just copied Korean to get some output
+CIDFontInfo['STSongStd-Light-Acro'] =  {'Type':'/Font',
+            'Subtype':'/Type0',
+            'Name': '/%(internalName)s', #<-- the internal name
+            'BaseFont': '/' + 'STSongStd-Light-Acro',
+            'Encoding': '/%(encodings)s',
+            'DescendantFonts': [{'Type':'/Font',
+                'Subtype':'/CIDFontType2',
+                'BaseFont':'/'+'STSongStd-Light-Acro',
+                'FontDescriptor': {
+                    'Type': '/FontDescriptor',
+                    'Ascent': 858,
+                    'AvgWidth': 500,
+                    'CapHeight': 858,
+                    'Descent': -142,
+                    'Flags': 7,
+                    'FontBBox': [-100, -142, 1100, 1000],
+                    'FontName': '/'+'STSongStd-Light-Acro',
+                    'ItalicAngle': 0,
+                    'Leading': 148,
+                    'MaxWidth': 1000,
+                    'MissingWidth': 500,
+                    'StemH': 91,
+                    'StemV': 91,
+                    'XHeight': 429,
+                    'Style': {'Panose': '<000000000000000000000000>'}
+                    },
+                'CIDSystemInfo': {
+                    'Registry': '(Adobe)',
+                    'Ordering': '(Korea1)',
+                    'Supplement': 1
+                    },
+                'DW': 1000,
+                'W': (1, 107, 500),
+                'WinCharSet': 129
+                }] # end descendant fonts
+            }
+#WARNING - not checked, just copied Korean to get some output
+CIDFontInfo['MSungStd-Light-Acro'] =  {'Type':'/Font',
+            'Subtype':'/Type0',
+            'Name': '/%(internalName)s', #<-- the internal name
+            'BaseFont': '/' + 'MSungStd-Light-Acro',
+            'Encoding': '/%(encodings)s',
+            'DescendantFonts': [{'Type':'/Font',
+                'Subtype':'/CIDFontType2',
+                'BaseFont':'/'+'MSungStd-Light-Acro',
+                'FontDescriptor': {
+                    'Type': '/FontDescriptor',
+                    'Ascent': 858,
+                    'AvgWidth': 500,
+                    'CapHeight': 858,
+                    'Descent': -142,
+                    'Flags': 7,
+                    'FontBBox': [-100, -142, 1100, 1000],
+                    'FontName': '/'+'MSungStd-Light-Acro',
                     'ItalicAngle': 0,
                     'Leading': 148,
                     'MaxWidth': 1000,

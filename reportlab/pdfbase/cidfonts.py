@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/cidfonts?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: cidfonts.py,v 1.5 2001/09/28 21:27:17 andy_robinson Exp $ '''
+__version__=''' $Id: cidfonts.py,v 1.6 2001/09/29 08:04:32 andy_robinson Exp $ '''
 __doc__="""CID (Asian multi-byte) font support.
 
 This defines classes to represent CID fonts.  They know how to calculate
@@ -11,6 +11,9 @@ their own width and how to write themselves into PDF files."""
 import os
 from types import ListType, TupleType, DictType
 from string import find, split, strip
+import marshal
+import md5
+import time
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase._cidfontdata import allowedTypeFaces, allowedEncodings, CIDFontInfo
@@ -55,20 +58,29 @@ class CIDEncoding(pdfmetrics.Encoding):
     # should not apply here.
 
     def __init__(self, name):
+        self.name = name
+        self._mapFileHash = None
         self._codeSpaceRanges = []
         self._notDefRanges = []
         self._cmap = {}
-        
+
         self.parseCMAPFile(name)
 
+    def _hash(self, text):
+        hasher = md5.new()
+        hasher.update(text)
+        return hasher.digest()
             
     def parseCMAPFile(self, name):
         """This is a tricky one as CMAP files are Postscript
         ones.  Some refer to others with a 'usecmap'
         command"""
+        started = time.clock()
         cmapfile = findCMapFile(name)
         # this will CRAWL with the unicode encodings...
         rawdata = open(cmapfile, 'r').read()
+        
+        self._mapFileHash = self._hash(rawdata)
         #if it contains the token 'usecmap', parse the other
         #cmap file first....
         usecmap_pos = find(rawdata, 'usecmap')
@@ -121,7 +133,8 @@ class CIDEncoding(pdfmetrics.Encoding):
                 
             else:
                 words = words[1:]
-                
+        finished = time.clock()
+        print 'loaded %s in %0.4f seconds' % (self.name, finished - started)
     def translate(self, text):
         "Convert a string into a list of CIDs"
         output = []
@@ -159,7 +172,26 @@ class CIDEncoding(pdfmetrics.Encoding):
                 lastChar = char
         return output
     
-                    
+    def fastSave(self, directory):
+        f = open(os.path.join(directory, self.name + '.fastmap'), 'wb')
+        marshal.dump(self._mapFileHash, f)
+        marshal.dump(self._codeSpaceRanges, f)
+        marshal.dump(self._notDefRanges, f)
+        marshal.dump(self._cmap, f)
+        f.close()
+        
+    def fastLoad(self, directory):
+        started = time.clock()
+        f = open(os.path.join(directory, self.name + '.fastmap'), 'rb')
+        self._mapFileHash = marshal.load(f)
+        self._codeSpaceRanges = marshal.load(f)
+        self._notDefRanges = marshal.load(f)
+        self._cmap = marshal.load(f)
+        f.close()
+        finished = time.clock()
+        print 'loaded %s in %0.4f seconds' % (self.name, finished - started)
+        
+        
                         
 
         
@@ -273,6 +305,21 @@ class CIDFont(pdfmetrics.Font):
         doc.fontMapping[self.name] = '/' + internalName
         
 
+
+def precalculate(cmapdir):
+    # crunches through all, making 'fastmap' files
+    import os
+    files = os.listdir(cmapdir)
+    for file in files:
+        if os.path.isfile(cmapdir + os.sep + self.name + '.fastmap'):
+            continue
+        try:
+            enc = CIDEncoding(file)
+        except:
+            print 'cannot parse %s, skipping' % enc
+            continue
+        enc.fastSave(cmapdir)
+        print 'saved %s.fastmap' % file
     
 def test():
     # only works if you have cirrect encodings on your box!
