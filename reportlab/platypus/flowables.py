@@ -445,14 +445,16 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1):
             H += pS
     return W, H
 
-def _makeIndexable(V):
+def _flowableSublist(V):
     "if it isn't a list or tuple, wrap it in a list"
     if type(V) not in (ListType, TupleType): V = V is not None and [V] or []
+    from doctemplate import  ActionFlowable
+    assert not filter(lambda x: isinstance(x,ActionFlowable),V),'Action flowables not allowed in sublists'
     return V
 
 class KeepTogether(Flowable):
     def __init__(self,flowables,maxHeight=None):
-        self._flowables = _makeIndexable(flowables)
+        self._flowables = _flowableSublist(flowables)
         self._maxHeight = maxHeight
 
     def __repr__(self):
@@ -600,8 +602,8 @@ class HRFlowable(Flowable):
 
 class _PTOInfo:
     def __init__(self,trailer,header):
-        self.trailer = _makeIndexable(trailer)
-        self.header = _makeIndexable(header)
+        self.trailer = _flowableSublist(trailer)
+        self.header = _flowableSublist(header)
 
 class PTOContainer(Flowable):
     '''PTOContainer(contentList,trailerList,headerList)
@@ -613,7 +615,7 @@ class PTOContainer(Flowable):
     def __init__(self,content,trailer=None,header=None):
         I = _PTOInfo(trailer,header)
         self._content = C = []
-        for _ in _makeIndexable(content):
+        for _ in _flowableSublist(content):
             if isinstance(_,PTOContainer):
                 C.extend(_._content)
             else:

@@ -71,7 +71,6 @@ class IndexingFlowable(Flowable):
         """Called after build ends but before isSatisfied"""
         pass
 
-
 class ActionFlowable(Flowable):
     '''This Flowable is never drawn, it can be used for data driven controls
        For example to change a page template (from one column to two, for example)
@@ -115,15 +114,18 @@ class ActionFlowable(Flowable):
     def identity(self, maxLen=None):
         return "ActionFlowable: %s" % str(self.action)
 
+class LCActionFlowable(ActionFlowable):
+    locChanger = 1                  #we cause a frame or page change
+
 class NextFrameFlowable(ActionFlowable):
     def __init__(self,ix,resume=0):
         ActionFlowable.__init__(self,('nextFrame',ix,resume))
 
-class CurrentFrameFlowable(ActionFlowable):
+class CurrentFrameFlowable(LCActionFlowable):
     def __init__(self,ix,resume=0):
         ActionFlowable.__init__(self,('currentFrame',ix,resume))
 
-class _FrameBreak(ActionFlowable):
+class _FrameBreak(LCActionFlowable):
     '''
     A special ActionFlowable that allows setting doc._nextFrameIndex
 
@@ -139,7 +141,7 @@ class _FrameBreak(ActionFlowable):
         ActionFlowable.apply(self,doc)
 
 FrameBreak = _FrameBreak('frameEnd')
-PageBegin = ActionFlowable('pageBegin')
+PageBegin = LCActionFlowable('pageBegin')
 
 def _evalMeasurement(n):
     if type(n) is type(''):
@@ -461,7 +463,7 @@ class BaseDocTemplate:
             self.handle_frameBegin()
 
     def handle_nextPageTemplate(self,pt):
-        '''On endPage chenge to the page template with name or index pt'''
+        '''On endPage change to the page template with name or index pt'''
         if type(pt) is StringType:
             if hasattr(self, '_nextPageTemplateCycle'): del self._nextPageTemplateCycle
             for t in self.pageTemplates:
@@ -494,7 +496,7 @@ class BaseDocTemplate:
             raise TypeError, "argument pt should be string or integer or list"
 
     def handle_nextFrame(self,fx):
-        '''On endFrame chenge to the frame with name or index fx'''
+        '''On endFrame change to the frame with name or index fx'''
         if type(fx) is StringType:
             for f in self.pageTemplate.frames:
                 if f.id == fx:
@@ -507,7 +509,7 @@ class BaseDocTemplate:
             raise TypeError, "argument fx should be string or integer"
 
     def handle_currentFrame(self,fx):
-        '''chenge to the frame with name or index fx'''
+        '''change to the frame with name or index fx'''
         if type(fx) is StringType:
             for f in self.pageTemplate.frames:
                 if f.id == fx:
@@ -547,14 +549,13 @@ class BaseDocTemplate:
             flowables.insert(0, FrameBreak())
             return
 
-
     def handle_keepWithNext(self, flowables):
         "implements keepWithNext"
         i = 0
         n = len(flowables)
-        while i<n and flowables[i].getKeepWithNext(): i = i + 1
+        while i<n and flowables[i].getKeepWithNext(): i += 1
         if i:
-            i = i + 1
+            if not getattr(flowables[i],'locChanger',None): i += 1
             K = KeepTogether(flowables[:i])
             for f in K._flowables:
                 f.keepWithNext = 0
