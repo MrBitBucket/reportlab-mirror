@@ -29,9 +29,8 @@ Type the following for usage info:
 import sys, os, re, types, string, getopt
 from string import find, join, split, replace, expandtabs, rstrip
 
-import inspect
-
 from reportlab.pdfgen import canvas
+from reportlab.lib import inspect
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
