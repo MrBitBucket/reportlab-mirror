@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.93 2001/11/26 22:59:18 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.93 2001/11/26 22:59:18 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.94 2001/11/26 23:11:54 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.94 2001/11/26 23:11:54 andy_robinson Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -549,7 +549,10 @@ class Canvas:
         if relative=1, this is in the current coord system, otherwise
         in absolute page space.
         The remaining options affect the border appearance; the border is
-        drawn by Acrobat, not us.  Set thickness to zero to hide it."""
+        drawn by Acrobat, not us.  Set thickness to zero to hide it.
+        Any border drawn this way is NOT part of the page stream and
+        will not show when printed to a Postscript printer or distilled;
+        it is safest to draw your own."""
         from reportlab.pdfbase.pdfdoc import PDFDictionary, PDFName, PDFArray, PDFString
         #tried the documented BS element in the pdf spec but it
         #does not work, and Acrobat itself does not appear to use it!
