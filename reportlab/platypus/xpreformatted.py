@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/xpreformatted.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/xpreformatted.py,v 1.12 2000/11/29 17:28:50 rgbecker Exp $
-__version__=''' $Id: xpreformatted.py,v 1.12 2000/11/29 17:28:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/xpreformatted.py,v 1.13 2001/02/12 07:48:24 dinu_gherman Exp $
+__version__=''' $Id: xpreformatted.py,v 1.13 2001/02/12 07:48:24 dinu_gherman Exp $ '''
 import string
 from types import StringType, ListType
 from paragraph import Paragraph, cleanBlockQuotedText, _handleBulletWidth, ParaLines, _getFragWords, \
@@ -38,14 +38,16 @@ def	_split_blPara(blPara,start,stop):
 	f.lines = blPara.lines[start:stop]
 	return [f]
 
+# Will be removed shortly.
 def _countSpaces(text):
-	i = 0
-	s = 0
-	while 1:
-		j = string.find(text,' ',i)
-		if j<0: return s
-		s = s + 1
-		i = j + 1
+	return string.count(text, ' ')
+##	i = 0
+##	s = 0
+##	while 1:
+##		j = string.find(text,' ',i)
+##		if j<0: return s
+##		s = s + 1
+##		i = j + 1
 
 def _getFragWord(frags):
 	'''	given a fragment list return a list of lists
@@ -59,7 +61,10 @@ def _getFragWord(frags):
 		text = f.text[:]
 		W.append((f,text))
 		n = n + stringWidth(text, f.fontName, f.fontSize)
-		s = s + _countSpaces(text)
+
+		#s = s + _countSpaces(text)
+		s = s + string.count(text, ' ') # much faster for many blanks
+		
 		#del f.text	# we can't do this until we sort out splitting
 					# of paragraphs
 	return n, s, W
