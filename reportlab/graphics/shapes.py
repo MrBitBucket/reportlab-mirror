@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.33 2001/06/21 13:34:19 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.34 2001/06/21 17:23:59 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -404,9 +404,8 @@ class Drawing(Group, Flowable):
 		obj.height = self.height
 		return obj
 
-	def copy(self):
-		"""Returns a deep copy"""
-		obj = self.Drawing(self.width, self.height)
+	def _copy(self,obj):
+		"""copies to obj"""
 		obj._attrMap = self._attrMap.clone()
 
 		self_contents = self.contents
@@ -420,6 +419,13 @@ class Drawing(Group, Flowable):
 				setattr(obj, oldKey, obj.contents[pos])
 
 		return obj
+
+	def copy(self,obj):
+		"""Returns a copy"""
+		return self._copy(Drawing(self.width, self.height))
+
+	def asGroup(self):
+		return self._copy(Group())
 
 class _DrawingEditorMixin:
 	'''This is a mixin to provide functionality for edited drawings'''
