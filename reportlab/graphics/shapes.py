@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.16 2001/04/05 09:28:51 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.17 2001/04/05 12:32:56 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -14,6 +14,7 @@ from pprint import pprint
 from reportlab.platypus import Flowable
 from reportlab.rl_config import shapeChecking
 from reportlab.lib import colors
+from reportlab.pdfbase.pdfmetrics import stringWidth
 
 
 class NotImplementedError(Exception):
