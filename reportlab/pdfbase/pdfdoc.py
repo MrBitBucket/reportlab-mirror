@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.69 2002/07/24 19:56:37 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.69 2002/07/24 19:56:37 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.70 2002/10/22 17:55:37 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.70 2002/10/22 17:55:37 rgbecker Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -30,7 +30,6 @@ except: # pre-2.0
     #work in anything which seeks to format
     # version_info into a string
     version_info = (1,5,2,'unknown',0)
-
 
 if platform[:4] == 'java' and version_info[:2] == (2, 1):
     # workaround for list()-bug in Jython 2.1 (should be fixed in 2.2)
@@ -1725,10 +1724,29 @@ class PDFImageXObject:
             pass # use the canned one.
         elif type(source) == type(''):
             # it is a filename
-            img = PIL_Image.open(open_for_read(source))
-            self.loadImageFromPIL(img)
+            img = open_for_read(source)
+            import os
+            if string.lower(os.path.splitext(source)[1]) in ('.jpg', '.jpeg'):
+                self.loadImageFromJPEG(img)
+            else:
+                self.loadImageFromPIL(PIL_Image.open(img))
         else: # it is already a PIL Image
             self.loadImageFromPIL(source)
+
+    def loadImageFromJPEG(self,imageFile):
+        info = pdfutils.readJPEGInfo(imageFile)
+        self.width, self.height = info[0], info[1]
+        self.bitsPerComponent = 8
+        if info[2] == 1:
+            self.colorSpace = 'DeviceGray'
+        elif info[2] == 3:
+            self.colorSpace = 'DeviceRGB'
+        else: #maybe should generate an error, is this right for CMYK?
+            self.colorSpace = 'DeviceCMYK'
+        imageFile.seek(0) #reset file pointer
+        self.streamContent = pdfutils._AsciiBase85Encode(imageFile.read())
+        self._filters = 'A85','DCT'
+        self.mask = None
 
     def loadImageFromPIL(self, PILImage):
         "Extracts the stream, width and height"
@@ -1737,16 +1755,14 @@ class PDFImageXObject:
         #standardize it to RGB.  We could be more optimal later.
         if PILImage.mode <> 'RGB':
             PILImage = PILImage.convert('RGB')
-        imgwidth, imgheight = PILImage.size
+        
+        self.width, self.height = PILImage.size
         raw = PILImage.tostring()
-        assert(len(raw) == imgwidth * imgheight, "Wrong amount of data for image")
-        compressed = zlib.compress(raw)
-        encoded = pdfutils._AsciiBase85Encode(compressed)
+        assert(len(raw) == self.width*self.height, "Wrong amount of data for image")
+        self.streamContent = pdfutils._AsciiBase85Encode(zlib.compress(raw))
         self.colorSpace = 'DeviceRGB'
         self.bitsPerComponent = 8
-        self.streamContent = encoded
-        self.width = imgwidth
-        self.height = imgheight
+        self._filters = 'A85','Fl'  # Ascii85decode, FlateDecode
         if self.mask=='auto':
             if PILImage.info.has_key("transparency") :
                 transparency = PILImage.info["transparency"] * 3
@@ -1758,7 +1774,6 @@ class PDFImageXObject:
     def format(self, document):
         S = PDFStream()
         S.content = self.streamContent
-
         dict = S.dictionary
         dict["Type"] = PDFName("XObject")
         dict["Subtype"] = PDFName("Image")
@@ -1766,7 +1781,7 @@ class PDFImageXObject:
         dict["Height"] = self.height
         dict["BitsPerComponent"] = self.bitsPerComponent
         dict["ColorSpace"] = PDFName(self.colorSpace)
-        dict["Filter"] = PDFArray( [PDFName('ASCII85Decode'), PDFName('FlateDecode')])
+        dict["Filter"] = PDFArray(map(PDFName,self._filters))
         dict["Length"] = len(self.streamContent)
 
         if self.mask:
