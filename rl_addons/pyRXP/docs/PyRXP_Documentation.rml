@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="iso-8859-1" standalone="no" ?> 
-<!DOCTYPE document SYSTEM "rml_1_0.dtd"> 
-<document filename="PyRXP_Documentation.pdf"> 
-<!-- Last Modified:             $Date: 2003/04/10 18:32:09 $ -->
-<!-- Document Version Number:   $Revision: 1.3 $            -->
+<?xml version="1.0" encoding="iso-8859-1" standalone="no" ?>
+<!DOCTYPE document SYSTEM "rml_1_0.dtd">
+<document filename="PyRXP_Documentation.pdf">
+<!-- Last Modified:             $Date: 2003/04/11 17:22:07 $ -->
+<!-- Document Version Number:   $Revision: 1.4 $            -->
 
 <template pageSize="(595, 842)" 
         leftMargin="72" 
@@ -51,7 +51,7 @@
         </lines>
         <setFont name="Times-Roman" size="10"/>
         <drawString x="72" y="808">PyRXP User Documentation</drawString>
-        <drawRightString x="523" y="808">$Revision: 1.3 $</drawRightString>
+        <drawRightString x="523" y="808">$Revision: 1.4 $</drawRightString>
         <drawCentredString x="297.5" y="60">Page <pageNumber/></drawCentredString>
     </pageGraphics>
     <frame id="first" x1="72" y1="72" width="451" height="698"/>
@@ -221,35 +221,33 @@
 Contents
 </h2>
 
-<para><b><i>NB THE PAGE NUMBERS ARE INCORRECT - CHANGE IN THE MORNING!</i></b></para>
-
 <blockTable style="contents" colWidths="300,50">
-    <tr><td>1. Introduction</td><td>3</td></tr>
-    <tr><td>1.1    Who is this document aimed at?</td><td>3</td></tr>
-    <tr><td>1.2    What is PyRXP?</td><td>3</td></tr>
-    <tr><td>1.3    License terms</td><td>3</td></tr>
-    <tr><td>1.4    Why another XML toolkit?</td><td>3</td></tr>
-    <tr><td>1.5    Design Goals</td><td>4</td></tr>
-    <tr><td>1.6    Design non-goals</td><td>4</td></tr>
-    <tr><td>1.7    How fast is it?</td><td>5</td></tr>
-    <tr><td>1.8    The Tuple Tree structure</td><td>5</td></tr>
-    <tr><td>1.9    Can I get involved?</td><td>6</td></tr>
-    <tr><td>2.  Installation and Setup</td><td>7</td></tr>
-    <tr><td>2.1    Windows binary - pyRXP.pyd</td><td>7</td></tr>
-    <tr><td>2.2    Source Code installation</td><td>7</td></tr>
-    <tr><td>2.2.1    Post installation tests</td><td>7</td></tr>
-    <tr><td>2.3    Examples</td><td>8</td></tr>
-    <tr><td>3.  Using pyRXP</td><td>9</td></tr>
-    <tr><td>3.1    Simple use without validation</td><td>9</td></tr>
-    <tr><td>3.1.1    The Parse method and callable instances of the parser</td><td>9</td></tr>
-    <tr><td>3.1.2    Empty tags and the ExpandEmpty flag</td><td>9</td></tr>
-    <tr><td>3.1.3    Processing instructions</td><td>9</td></tr>
-    <tr><td>3.1.4    Handling comments and the srcName attribute</td><td>9</td></tr>
-    <tr><td>3.1.5    A brief note on pyRXPU</td><td>9</td></tr>
-    <tr><td>3.2    Validating against a DTD</td><td>11</td></tr>
-    <tr><td>3.3    Interface Summary</td><td>13</td></tr>
-    <tr><td>3.4    Parser Object Attributes and Methods</td><td>13</td></tr>
-    <tr><td>3.5    List of Flags</td><td>15</td></tr>
+    <tr><td>1. Introduction</td><td>4</td></tr>
+    <tr><td>1.1    Who is this document aimed at?</td><td>4</td></tr>
+    <tr><td>1.2    What is PyRXP?</td><td>4</td></tr>
+    <tr><td>1.3    License terms</td><td>4</td></tr>
+    <tr><td>1.4    Why another XML toolkit?</td><td>4</td></tr>
+    <tr><td>1.5    Design Goals</td><td>5</td></tr>
+    <tr><td>1.6    Design non-goals</td><td>5</td></tr>
+    <tr><td>1.7    How fast is it?</td><td>6</td></tr>
+    <tr><td>1.8    The Tuple Tree structure</td><td>6</td></tr>
+    <tr><td>1.9    Can I get involved?</td><td>7</td></tr>
+    <tr><td>2.  Installation and Setup</td><td>8</td></tr>
+    <tr><td>2.1    Windows binary - pyRXP.pyd</td><td>8</td></tr>
+    <tr><td>2.2    Source Code installation</td><td>8</td></tr>
+    <tr><td>2.2.1    Post installation tests</td><td>8</td></tr>
+    <tr><td>2.3    Examples</td><td>9</td></tr>
+    <tr><td>3.  Using pyRXP</td><td>10</td></tr>
+    <tr><td>3.1    Simple use without validation</td><td>10</td></tr>
+    <tr><td>3.1.1    The Parse method and callable instances of the parser</td><td>10</td></tr>
+    <tr><td>3.1.2    Empty tags and the ExpandEmpty flag</td><td>11</td></tr>
+    <tr><td>3.1.3    Processing instructions</td><td>13</td></tr>
+    <tr><td>3.1.4    Handling comments and the srcName attribute</td><td>13</td></tr>
+    <tr><td>3.1.5    A brief note on pyRXPU</td><td>15</td></tr>
+    <tr><td>3.2    Validating against a DTD</td><td>16</td></tr>
+    <tr><td>3.3    Interface Summary</td><td>18</td></tr>
+    <tr><td>3.4    Parser Object Attributes and Methods</td><td>18</td></tr>
+    <tr><td>3.5    List of Flags</td><td>19</td></tr>
     <tr><td>3.6    Flag explanations and examples</td><td>16</td></tr>
     <tr><td>4. The examples and utilities</td><td>22</td></tr>
     <tr><td>4.1    Benchmarking</td><td>22</td></tr>
@@ -316,13 +314,13 @@ means you CAN use it in commercial products.
 </para>
 
 <para>
-We have therefore no choice but to do the same.  We licensed RXP for
-our commercial products, but are releasing pyRXP under the GPL.  If
-you want to use pyRXP for a commercial product, you need to negotiate
-with ReportLab and with Edinburgh University.  We fully encourage
-commercial enquiries and will act as a single point of contact. 
-Any commercial licensing deals will help to support both development
-teams involved.
+
+We licensed RXP for our commercial products, but are releasing pyRXP
+under the GPL.  If you want to use pyRXP for a commercial product, you
+need to purchase a license.  We are authorised resellers for RXP and
+can sell you a commercial license to use it in your own products.
+PyRXP is ideal for embedded use being lightweight, fast and pythonic.
+
 </para>
 
 <para>
@@ -365,17 +363,17 @@ error during the formatting stage.
 </para>
 
 <para>
-We tried to use all the parsers we could find.  We found that almost all
-of them were constructing large object models in Python code, which took
-a long time and a lot of memory.  Even the fastest C-based parser, expat
-(which was not yet a standard part of Python at the time), calls back
-into Python code on every start and end tag, which defeats most of
-the benefit.   Aaron Watters of ReportLab sat down for a couple of days and produced
-his own parser, rparsexml, which uses string.find and got pretty much
-the same speed as pyexpat.  We also evolved our own representation of
-a tree in memory, which became the cornerstone of our approach; and
-when we found RXP we found it easy to make a wrapper around it to
-produce the "tuple tree".
+We tried to use all the parsers we could find.  We found that almost
+all of them were constructing large object models in Python code,
+which took a long time and a lot of memory.  Even the fastest C-based
+parser, expat (which was not yet a standard part of Python at the
+time) calls back into Python code on every start and end tag, which
+defeats most of the benefit.  Aaron Watters of ReportLab sat down for
+a couple of days in 2000 and produced his own parser, rparsexml, which
+uses string.find and got pretty much the same speed as pyexpat.  We
+evolved our own representation of a tree in memory; which became
+the cornerstone of our approach; and when we found RXP we found it
+easy to make a wrapper around it to produce the "tuple tree".
 </para>
 
 <para>
@@ -393,9 +391,12 @@ be doing something right and it's time to share it :-)
 
 <para>
 This is part of an XML framework which we will polish up and release
-as soon as it can all be documented.  The general components are:</para>
+over time as we find the time to document it.  The general components
+are:
+</para>
+
 <para style="bulletList" bulletText="l" spaceAfter="0">A standard in-memory representation of an XML document (the <i>tuple tree</i> below)</para>
-<para style="bulletList" bulletText="l" spaceAfter="0">Various parsers which can produce this – principally pyRXP</para>
+<para style="bulletList" bulletText="l" spaceAfter="0">Various parsers which can produce this – principally pyRXP, but expat wrapping is possible</para>
 <para style="bulletList" bulletText="l" spaceAfter="0">A ‘lazy wrapper’ around this which gives a very friendly Pythonic interface for navigating the tree</para>
 <para style="bulletList" bulletText="l" spaceAfter="6">A lightweight transformation tool which does a lot of what XSLT can do, but again with Pythonic syntax</para>
 
@@ -408,6 +409,7 @@ whether they are DOM-compliant. Our goals for the whole framework are:</para>
 <para style="bulletList" bulletText="l" spaceAfter="0">Fast - XML parsing should not be an overhead for a program</para>
 <para style="bulletList" bulletText="l" spaceAfter="0">Validate when needed, with little or no performance penalty</para>
 <para style="bulletList" bulletText="l" spaceAfter="6">Construct a complete tree in memory which is easy and natural to access</para>
+<para style="bulletList" bulletText="l" spaceAfter="6">An easy lightweight wrapping system with some of the abilities of XSLT without the complexity</para>
 
 <para>Note that pyRXP is just the main parsing component and not the framework itself.</para>
 
@@ -515,9 +517,9 @@ This does not capture the full structure of XML.  We make decisions
 before parsing about whether to expand entities and CDATA nodes, and
 the parser deals with it; after parsing we have most of the XML
 file’s content, but we can’t get back to the original in 100% of
-cases.  For example both of the following will (with default settings)
-return the string "Smith &amp; Jones", and you can't tell from the
-tuple tree which one was in the file:
+cases.  For example following two representations will both (with
+default settings) return the string "Smith &amp; Jones", and you can't
+tell from the tuple tree which one was in the file:
 </para>
 
 <pre style="programListing">
@@ -630,7 +632,7 @@ Whichever method you used to get pyRXP installed, you should run the
 short test suite to make sure there haven't been any problems.
 </para>
 <para>Cd to the <font face="Courier">rl_addons/pyRXP/test</font> directory and run the file
-<font face="Courier">t.py</font>.
+<font face="Courier">testRXPbasic.py</font>.
 </para>
 
 <para>
@@ -639,7 +641,7 @@ or <font face="Courier">pyRXPU.so</font>, only available in the source distribut
 running the test program should show you this:
 </para>
 <pre style="programListing">
-C:\tmp\rl_addons\pyRXP\test>python t.py
+C:\tmp\rl_addons\pyRXP\test>python testRXPbasic.py
 ..........................................
 42 tests, no failures!</pre>
 
@@ -647,10 +649,39 @@ C:\tmp\rl_addons\pyRXP\test>python t.py
 If you have only installed the standard (8-bit) pyRXP, you should see something like this:
 </para>
 <pre style="programListing">
-C:\tmp\rl_addons\pyRXP\test>python t.py
+C:\tmp\rl_addons\pyRXP\test>testRXPbasic.py
 .....................
 21 tests, no failures!
 </pre>
+
+<para>
+These are basic health checks, which are the minimum required to make
+sure that nothing drastic is wrong. This is the very least that you
+should do - you should not skip this step!
+</para>
+
+<para>
+If you want to be more thorough, there is a much more comprehensive
+test suite which tests XML compliance. This is run by a file called
+<font face="Courier">test_xmltestsuite.py</font>, also in the test
+directory. This depends on a set of more than 300 tests written by
+James Clark which you can download in the form of a zip file from
+</para>
+
+<pre style="programListing">
+http://www.reportlab.com/ftp/xmltest.zip
+</pre>
+<para>
+or
+</para>
+<pre style="programListing">
+ftp://ftp.jclark.com/pub/xml/xmltest.zip
+</pre>
+
+<para>
+You can simply drop this in the test directory and run the
+test_xmltestsuite file which will automatically unpack and use it.
+</para>
 
 <h2>2.3 Examples</h2><outlineAdd level="2">2.3 Examples</outlineAdd>
 <para>
@@ -777,9 +808,8 @@ This could also be expressed more long-windedly as
 </para>
 
 <para>
-The parser has taken this single line of XML and returned a
-tuple-tree. This tuple is made up of the following elements:
-</para>
+Each element ("tag") in the XML is represented as a tuple of 4
+elements:</para>
 <para style="bulletList" bulletText="l" spaceAfter="0">'tag':  the tag
 name (aka element name).</para>
 <para style="bulletList" bulletText="l" spaceAfter="0">None:  a
@@ -789,8 +819,7 @@ have any).</para>
 list of included textual results. This is the contents of the
 tag.</para>
 <para style="bulletList" bulletText="l" spaceAfter="0">None:  the
-fourth element is unused. It’s provided for debugging info, line
-numbers or other possible future uses.</para>
+fourth element is unused by default.</para>
 
 <para>
 This tree structure is equivalent to the input XML, at least in
@@ -994,8 +1023,6 @@ which uses nested tags:
 <condPageBreak height="140"/>
 <h2>3.1.3    Processing instructions</h2>
 <outlineAdd level="3">3.1.3 Processing instructions</outlineAdd>
-<para>
-</para>
 
 <para>
 Both the comment and processing instruction tag names are special -
@@ -1011,34 +1038,36 @@ ReturnProcessingInstruction attribute.
 
 <para>
 There is a module global called piTagName (ie you need to do
-'pyRXP.piTagName' rather than refering to an instance like
+'<font face="Courier">pyRXP.piTagName</font>' rather than refering to an instance like
 'p.piTagName' which won't work).
 </para>
-
 <pre style="programListing"><![CDATA[
 >>> pyRXP.piTagName
-'&lt;?'
-]]</pre>
+'<?'
+]]></pre>
 
 <pre style="programListing"><![CDATA[
->>> p.parse('<a><?works document="hello.doc"?></a>')
+>>> p.parse(<a><?works document="hello.doc"?></a>')
 ('a', None, [], None)
 >>> #vanishes - like a comment
 >>> p.parse('<a><?works document="hello.doc"?></a>', ReturnProcessingInstructions=1)
 ('a', None, [('<?', {'name': 'works'}, ['document="hello.doc"'], None)], None)
 >>>
-]]</pre>
+]]></pre>
 
 <para>
-You can test against piTagName - but don't try and change it. See the section on
-trying to change commentTagName for an example of what would happen. 
+You can test against <font face="Courier">piTagName</font> - but don't
+try and change it. See the section on trying to change <font
+face="Courier">commentTagName</font> for an example of what would
+happen.
 </para>
 
 <pre style="programListing"><![CDATA[
->>> p.parse('<a><?works document="hello.doc"?></a>', ReturnProcessingInstructions=1)[2][0][0] is pyRXP.piTagName
+>>> p.parse('<a><?works document="hello.doc"?></a>',
+... ReturnProcessingInstructions=1)[2][0][0] is pyRXP.piTagName
 1
 >>> #identical! (ie same object each time)
-</pre>
+]]></pre>
 
 <para>
 This is a simple test and doesn't even have to process the characters.
@@ -1103,7 +1132,7 @@ AttributeError: commentTagName
 
 >>> pyRXP.commentTagName
 '<!--'
-</pre>
+]]></pre>
 
 <para>
 Don't try to change the commentTagName. Not only would it be of
@@ -1116,10 +1145,14 @@ the following example shows:
 >>> import pyRXP
 >>> p=pyRXP.Parser()
 >>> pyRXP.commentTagName = "##" # THIS WON'T WORK!
->>> p.parse('<a><!-- this is another comment comment --></a>', ReturnComments = 1)   # DOESN'T WORK!
+>>> pyRXP.commentTagName
+'##'
+>>> #LOOKS LIKE IT WORKS - BUT SEE BELOW FOR WHY IT DOESN'T
+>>> p.parse('<a><!-- this is another comment comment --></a>', ReturnComments = 1)
+>>> # DOESN'T WORK!
 >>> ('a', None, [('<!--', None, [' this is another comment comment '], None)], None)
 >>> #SEE?
-</pre>
+]]></pre>
 
 <para>
 What it is useful for is to check against to see if you have been returned a comment:
@@ -1135,7 +1168,7 @@ What it is useful for is to check against to see if you have been returned a com
 1
 >>> #they're identical
 >>> #it's easy to check if it's a special name
-</pre>
+]]></pre>
 
 <para>
 Using ReturnComments is useful, but there are circumstances where it
@@ -1147,7 +1180,7 @@ element in the line) will still be lost:
 <pre style="programListing"><![CDATA[                                                                        
 >>> p.parse('<tag/><!-- this is a comment about the tag -->', ReturnComments=1)
 ('tag', None, None, None)
-</pre>
+]]></pre>
 
 <para>
 To get around this, you need to use the ReturnList attribute:
@@ -1157,7 +1190,7 @@ To get around this, you need to use the ReturnList attribute:
 >>> p.parse('<tag/><!-- this is a comment about the tag -->', ReturnComments=1, ReturnList=1)
 [('tag', None, None, None), ('<!--', None, [' this is a comment about the tag '], None)]
 >>>
-</pre>
+]]></pre>
 
 <para>
 Since we've seen a number of errors in the preceding paragraphs, it
@@ -1225,9 +1258,9 @@ non-unicode strings.
 >>> import pyRXPU
 >>> pyRXPU.Parser()('<a><?works document="hello.doc"?></a>', ReturnProcessingInstructions=1)
 (u'a', None, [(u'<?', {'name': u'works'}, [u'document="hello.doc"'], None)], None)
-</pre>
+]]></pre>
 
-</para>
+<para>
 In most cases, the only way to tell the difference (<i>other</i> than
 sending in Unicode) is by the module name.
 </para>
@@ -1238,7 +1271,7 @@ sending in Unicode) is by the module name.
 >>> import pyRXP
 >>> pyRXP.__name__
 'pyRXP'
-</pre>
+]]></pre>
 
 <nextFrame/>
 
@@ -1412,7 +1445,7 @@ declaration, it notices the DTD is missing but continues in non-validating mode.
 There are numerous flags set out below which affect the behaviour.
 </para>
 
-
+<nextFrame/>
 <h2>3.3    Interface Summary</h2>
 <outlineAdd level="2">3.3 Interface Summary</outlineAdd>
 
