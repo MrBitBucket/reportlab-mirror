@@ -1,6 +1,6 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/flags.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.22 2002/07/24 19:56:36 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.23 2002/08/13 13:25:19 johnprecedo Exp $
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 """This file is a collection of flag graphics as widgets.
@@ -24,14 +24,16 @@ United Kingdom, Austria, Belgium, Denmark, Finland, France, Germany, Greece, Ire
 Holland (The Netherlands), Spain, Sweden
 
 Others:
-USA, Czech Republic, European Union, Switzerland, Turkey
+USA, Czech Republic, European Union, Switzerland, Turkey, Brazil
+
+(Brazilian flag contributed by Publio da Costa Melo [publio@planetarium.com.br]).
 """
-__version__=''' $Id: flags.py,v 1.22 2002/07/24 19:56:36 andy_robinson Exp $ '''
+__version__=''' $Id: flags.py,v 1.23 2002/08/13 13:25:19 johnprecedo Exp $ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *
 from reportlab.lib.attrmap import *
-from reportlab.graphics.shapes import Line, Rect, Polygon, Drawing, Group, String, Circle
+from reportlab.graphics.shapes import Line, Rect, Polygon, Drawing, Group, String, Circle, Wedge
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics import renderPDF
 from signsandsymbols import _Symbol
@@ -66,6 +68,7 @@ validFlag=OneOf(None,
                 'Turkey',
                 'Switzerland',
                 'EU',
+                'Brazil'
                 )
 
 _size = 100.
@@ -105,21 +108,19 @@ class Star(_Symbol):
         s = float(self.size)  #abbreviate as we will use this a lot
         g = Group()
 
+        # new algorithm from markers.StarFive
+        R = float(self.size)/2
+        r = R*sin(18*(pi/180.0))/cos(36*(pi/180.0))
+        P = []
+        angle = 90
+        for i in xrange(5):
+            for radius in R, r:
+                theta = angle*(pi/180.0)
+                P.append(radius*cos(theta))
+                P.append(radius*sin(theta))
+                angle = angle + 36
         # star specific bits
-        h = s/5
-        z = s/2
-        star = Polygon(points = [
-                    h-z,        0-z,
-                    h*1.5-z,    h*2.05-z,
-                    0-z,        h*3-z,
-                    h*1.95-z,   h*3-z,
-                    z-z,        s-z,
-                    h*3.25-z,   h*3-z,
-                    s-z,        h*3-z,
-                    s-h*1.5-z,  h*2.05-z,
-                    s-h-z,      0-z,
-                    z-z,        h-z,
-                    ],
+        star = Polygon(P,
                     fillColor = self.fillColor,
                     strokeColor = self.strokeColor,
                     strokeWidth=s/50)
@@ -735,13 +736,93 @@ class Flag(_Symbol):
             g.add(gs)
         return g
 
+    def _Flag_Brazil(self):
+        s = _size  # abbreviate as we will use this a lot
+        g = Group()
+
+        m = s/14
+        self._width = w = (m * 20)
+
+        def addStar(x,y,size, g=g, w=w, s=s, m=m):
+            st = Star()
+            st.fillColor=colors.mintcream
+            st.size = size*m
+            st.x = (w/2) + (x * (0.35 * m))
+            st.y = (s/2) + (y * (0.35 * m))
+            g.add(st)
+
+        g.add(Rect(0, 0, w, s, fillColor = colors.green, strokeColor = None, strokeWidth=0))
+        g.add(Polygon(points = [ 1.7*m, (s/2), (w/2), s-(1.7*m), w-(1.7*m),(s/2),(w/2), 1.7*m],
+                      fillColor = colors.yellow, strokeColor = None, strokeWidth=0))
+        g.add(Circle(cx=w/2, cy=s/2, r=3.5*m,
+                     fillColor=colors.blue,strokeColor=None, strokeWidth=0))
+        g.add(Wedge((w/2)-(2*m), 0, 8.5*m, 50, 98.1, 8.5*m,
+                    fillColor=colors.mintcream,strokeColor=None, strokeWidth=0))
+        g.add(Wedge((w/2), (s/2), 3.501*m, 156, 352, 3.501*m,
+                    fillColor=colors.mintcream,strokeColor=None, strokeWidth=0))
+        g.add(Wedge((w/2)-(2*m), 0, 8*m, 48.1, 100, 8*m,
+                    fillColor=colors.blue,strokeColor=None, strokeWidth=0))
+        g.add(Rect(0, 0, w, (s/4) + 1.7*m,
+                   fillColor = colors.green, strokeColor = None, strokeWidth=0))
+        g.add(Polygon(points = [ 1.7*m,(s/2), (w/2),s/2 - 2*m,  w-(1.7*m),(s/2) , (w/2),1.7*m],
+                      fillColor = colors.yellow, strokeColor = None, strokeWidth=0))
+        g.add(Wedge(w/2, s/2, 3.502*m, 166, 342.1, 3.502*m,
+                    fillColor=colors.blue,strokeColor=None, strokeWidth=0))
+
+        addStar(3.2,3.5,0.3)
+        addStar(-8.5,1.5,0.3)
+        addStar(-7.5,-3,0.3)
+        addStar(-4,-5.5,0.3)
+        addStar(0,-4.5,0.3)
+        addStar(7,-3.5,0.3)
+        addStar(-3.5,-0.5,0.25)
+        addStar(0,-1.5,0.25)
+        addStar(1,-2.5,0.25)
+        addStar(3,-7,0.25)
+        addStar(5,-6.5,0.25)
+        addStar(6.5,-5,0.25)
+        addStar(7,-4.5,0.25)
+        addStar(-5.5,-3.2,0.25)
+        addStar(-6,-4.2,0.25)
+        addStar(-1,-2.75,0.2)
+        addStar(2,-5.5,0.2)
+        addStar(4,-5.5,0.2)
+        addStar(5,-7.5,0.2)
+        addStar(5,-5.5,0.2)
+        addStar(6,-5.5,0.2)
+        addStar(-8.8,-3.2,0.2)
+        addStar(2.5,0.5,0.2)
+        addStar(-0.2,-3.2,0.14)
+        addStar(-7.2,-2,0.14)
+        addStar(0,-8,0.1)
+
+        sTmp = "ORDEM E PROGRESSO"
+        nTmp = len(sTmp)
+        delta = 0.850848010347/nTmp
+        radius = 7.9 *m
+        centerx = (w/2)-(2*m)
+        centery = 0
+        for i in range(nTmp):
+            rad = 2*pi - i*delta -4.60766922527
+            x=cos(rad)*radius+centerx
+            y=sin(rad)*radius+centery
+            if i == 6:
+                z = 0.35*m
+            else:
+                z= 0.45*m
+            g2 = Group(String(x, y, sTmp[i], fontName='Helvetica-Bold',
+                fontSize = z,strokeColor=None,fillColor=colors.green))
+            g2.rotate(rad)
+            g.add(g2)
+        return g
+
 def makeFlag(name):
     flag = Flag()
     flag.kind = name
     return flag
 
 def test():
-    """This function produces two pdf files with examples of all the signs and symbols from this file.
+    """This function produces three pdf files with examples of all the signs and symbols from this file.
     """
 # page 1
 
@@ -774,6 +855,7 @@ def test():
             'Turkey',
             'Switzerland',
             'EU',
+            'Brazil',
             ]
     y = Y0 = 530
     f = 0
