@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.80 2004/04/22 17:36:41 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.80 2004/04/22 17:36:41 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.81 2004/05/18 17:16:55 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.81 2004/05/18 17:16:55 rgbecker Exp $ '''
 
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
@@ -181,6 +181,7 @@ class Table(Flowable):
                 raise ValueError, '%s bad emptyTableAction: "%s"' % (self.identity(),emptyTableAction)
             return
 
+        self._cellvalues = data
         if colWidths is None: colWidths = ncols*[None]
         elif len(colWidths) != ncols:
             raise ValueError, "%s data error - %d columns in data but %d in grid" % (self.identity(),ncols, len(colWidths))
@@ -190,7 +191,6 @@ class Table(Flowable):
         for i in range(nrows):
             if len(data[i]) != ncols:
                 raise ValueError, "%s not enough data points in row %d!" % (self.identity(),i)
-        self._cellvalues = data
         self._rowHeights = self._argH = rowHeights
         self._colWidths = self._argW = colWidths
         cellrows = []
@@ -225,7 +225,7 @@ class Table(Flowable):
         vx = None
         nr = getattr(self,'_nrows','unknown')
         nc = getattr(self,'_ncols','unknown')
-        cv = self._cellvalues
+        cv = getattr(self,'_cellvalues',None)
         if cv and 'unknown' not in (nr,nc):
             b = 0
             for i in xrange(nr):
