@@ -54,32 +54,6 @@ in python and can use $ActionFlowables$ to tell the layout engine to skip to the
 column or change to another $PageTemplate$.
 """)
 
-disc("""
-An example is provided by the software that generated this document
-itself which is coded thusly:
-""")
-
-eg("""
-    BODY = []
-    def story():
-        return BODY
-    
-    def disc(text, klass=Paragraph, style=discussiontextstyle):
-        text = quickfix(text)
-        P = klass(text, style)
-        BODY.append(P)
-        
-    def eg(text):
-        BODY.append(Spacer(0.1*inch, 0.1*inch))
-
-    disc('An extreme.....')
-    disc('.....')
-    
-    story = []
-    doc = RLDocTemplate(filename,pagesize = letter)
-    doc.build(story)
-""")
-
 heading2("$Flowables$")
 disc("""
 $Flowables$ are things which can be drawn and which have $wrap$, $draw$ and perhaps $split$ methods.
@@ -376,6 +350,28 @@ eg("""
     handle_pageBegin(self)
     handle_pageBreak(self)
     handle_pageEnd(self)
+""")
+
+disc("""
+Using document templates can be very easy; $SimpleDoctemplate$ is a class derived from
+$BaseDocTemplate$ which provides its own $PageTemplate$ and $Frame$ setup.
+""")
+
+eg("""
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import Paragraph, SimpleDocTemplate
+styles = getSampleStyleSheet()
+styleN = styles['Normal']
+styleH = styles['Heading1']
+story = []
+
+#add some flowables
+story.append(Paragraph("This is a Heading",styleH))
+story.append(Paragraph("This is a paragraph in &lt;i&gt;Normal&lt;/i&gt; style.",
+	styleN))
+doc = SimpleDocTemplate('mydoc.pdf',pagesize = letter)
+doc.build(story)
 """)
 heading3("$PageTemplates$")
 disc("""
