@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.18  2000/04/19 14:56:07  rgbecker
+#	Added CVS_remove
+#
 #	Revision 1.17  2000/04/19 14:35:04  rgbecker
 #	Used -D for py2pdf export
-#
+#	
 #	Revision 1.16  2000/04/19 14:26:13  rgbecker
 #	Added tagname
 #	
@@ -83,7 +86,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.17 2000/04/19 14:35:04 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.18 2000/04/19 14:56:07 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -126,6 +129,19 @@ def recursive_rmdir(d):
 				recursive_rmdir(fn)
 		os.rmdir(d)
 
+def CVS_remove(d):
+	'destroy CVS subdirs'
+	if os.path.isdir(d):
+		if os.split(d)[1]=='CVS':
+			recursive_rmdir(d)
+		for p in os.listdir(d):
+			fn = os.path.join(d,p)
+			if os.isdir(fn):
+				if p=='CVS':
+					recursive_rmdir(fn)
+				else:
+					CVS_remove(fn)
+
 def safe_remove(p):
 	if os.path.isfile(p): os.remove(p)
 
@@ -150,13 +166,14 @@ def cvs_checkout(d):
 		do_exec(cvs+(' export -r %s reportlab' % tagname), 'the export phase')
 	else:
 		if py2pdf:
-			do_exec(cvs+' export -D "0 days ago" reportlab', 'the export phase')
+			do_exec(cvs+' co reportlab', 'the checkout phase')
 			# now we need to move the files & delete those we don't need
 			os.mkdir("py2pdf")
 			do_exec("mv reportlab/demos/py2pdf/py2pdf.py py2pdf", "mv py2pdf.py")
 			do_exec("mv reportlab/demos/py2pdf/pyfontify.py reportlab", "mv pyfontify.py")
 			do_exec("rm -r reportlab/demos reportlab/platypus reportlab/lib/styles.py reportlab/README.pdfgen.txt", "rm")
 			do_exec("mv reportlab py2pdf")
+			CVS_remove('py2pdf')
 		else:
 			do_exec(cvs+' co reportlab', 'the checkout phase')
 
