@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "0.92"
+#define VERSION "0.93"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -1342,14 +1342,14 @@ static int pict_putRow(BYTE_STREAM* fd, int row, int cols, pixel* rowpixels, cha
 static PyObject* pil2pict(PyObject* self, PyObject* args)
 {
 	PyObject *result;
-	int		rows, cols, colors, i, row, oc, len, npixels, tc;
+	int		rows, cols, colors, i, row, oc, len, npixels, tc=-1;
 	char	*packed;
 	long	lpos;
 	pixel	*palette, *pixels;
 	BYTE_STREAM	OBS;
 	BYTE_STREAM	*obs = &OBS;
 
-	if(!PyArg_ParseTuple(args,"iis#s#i:pil2pict",&cols,&rows,&pixels,&npixels,&palette,&colors,&tc)) return NULL;
+	if(!PyArg_ParseTuple(args,"iis#s#|i:pil2pict",&cols,&rows,&pixels,&npixels,&palette,&colors,&tc)) return NULL;
 
 	colors /= 3;
 	len = HEADER_SIZE*4+colors*4*sizeof(short)+cols*rows*sizeof(pixel);	/*generous estimate of maximum size*/
