@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_graphics_charts_textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/Attic/test_graphics_charts_textlabels.py,v 1.3 2001/04/05 09:30:12 rgbecker Exp $
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_charts_textlabels.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/test/test_charts_textlabels.py,v 1.1 2001/06/07 15:27:03 rgbecker Exp $
 """
 Tests for the text Label class.
 """
@@ -57,7 +57,7 @@ class LabelTestCase(unittest.TestCase):
     def _test0(self):
         "Perform original test function."
 
-        pdfPath = 'test_graphics_charts_textlabels.pdf'
+        pdfPath = 'test_charts_textlabels.pdf'
         c = Canvas(pdfPath)
 
         label = Label()
@@ -266,7 +266,7 @@ textAnchor attribute.""", bt))
         story.append(PageBreak())
         
 
-        pdfPath = 'test_graphics_charts_textlabels.pdf'
+        pdfPath = 'test_charts_textlabels.pdf'
         tempfile.tempdir = os.curdir
         path = join(tempfile.tempdir, pdfPath)
         doc = MyDocTemplate(path)
