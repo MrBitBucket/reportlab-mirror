@@ -32,16 +32,19 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.4  2000/03/28 13:58:26  rgbecker
+#	Add -r tag for release
+#
 #	Revision 1.3  2000/03/28 13:40:32  rgbecker
 #	Fix server for release
-#
+#	
 #	Revision 1.2  2000/03/28 13:34:26  rgbecker
 #	Fixed to release mechanism len()?
 #	
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.3 2000/03/28 13:40:32 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.4 2000/03/28 13:58:26 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -102,12 +105,13 @@ def cvs_checkout(d):
 		os.exit(1)
 
 	if release:
+		print release
 		os.environ['CVSROOT']=':ext:%s@cvs1:/cvsroot/reportlab' % USER
-		do_exec(cvs+' tag %s' % release, 'the tag phase')
+		do_exec(cvs+(' tag %s' % release), 'the tag phase')
+		do_exec(cvs+(' co -r %s reportlab'%release), 'the download phase')
 	else:
 		os.environ['CVSROOT']=':pserver:%s@cvs1:/cvsroot/reportlab' % USER
-
-	do_exec(cvs+' co reportlab', 'the download phase')
+		do_exec(cvs+' co reportlab', 'the download phase')
 
 def do_zip(d):
 	'create .tgz and .zip file archives of d/reportlab'
