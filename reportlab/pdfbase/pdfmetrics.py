@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/fonts0.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.28 2001/03/16 16:29:11 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.29 2001/03/17 15:21:22 rgbecker Exp $ '''
 __doc__=""" 
 This provides the character widths database for calculating
 text metrics.  Everything for the base 14 fonts is pre-computed
@@ -76,7 +76,7 @@ class Encoding:
 		return self.vector[index]
 
 	def __setitem__(self, index, value):
-		if self.vecttor[index]!=value:
+		if self.vector[index]!=value:
 			L = list(self.vector)
 			L[index] = value
 			self.vector = tuple(L)
@@ -287,16 +287,24 @@ for fontName in standardFonts:
 del fontName
 
 def testMetrics():
+	def fontDataDump():
+		print 'fontsByName'
+		for k,i in fontsByName.items():
+			print k, i
+		print 'fontsByBaseEnc'
+		for k,i in fontsByBaseEnc.items():
+			print k, i
+	fontDataDump()
 	# load the standard ones:
 	for baseFontName in standardFonts:
 		encoding = WinAnsiEncoding
 		fontName = baseFontName + '-WinAnsi'
 		font = Type1Font(fontName, baseFontName, encoding)
-		addWidths(fontName, font.getWidths())
 		#test it
 		msg = 'Hello World'
 		w = stringWidth(msg, fontName, 10)#
 		print 'width of "%s" in 10-point %s = %0.2f' % (msg, fontName, w)
+	fontDataDump()
 
 def testFonts():
 	# make a custom encoded font.
@@ -307,13 +315,13 @@ def testFonts():
 	c.drawString(100, 700, 'The text below should be in a custom encoding in which all vowels become "z"')
 
 	# invent a new language where vowels are replaced with letter 'z'
-	zenc = SingleByteEncoding('WinAnsiEncoding')
+	zenc = Encoding('WinAnsiEncoding')
 	for ch in 'aeiou':
 		zenc[ord(ch)] = 'z'
 	for ch in 'AEIOU':
 		zenc[ord(ch)] = 'Z'
 	f = Type1Font('FontWithoutVowels', 'Helvetica-Oblique', zenc)
-	c.registerFont0(f)
+	c.addFont(f)
 
 	c.setFont('FontWithoutVowels', 12)
 	c.drawString(125, 675, "The magic word is squamish ossifrage")
@@ -323,18 +331,18 @@ def testFonts():
 	c.drawString(100, 650, "MacRoman encoding lacks a Euro.  We'll make a Mac font with the Euro at #219:")
 
 	# WinAnsi Helvetica
-	c.registerFont0(Type1Font('Helvetica-WinAnsi', 'Helvetica-Oblique', WinAnsiEncoding))
+	c.addFont(Type1Font('Helvetica-WinAnsi', 'Helvetica-Oblique', WinAnsiEncoding))
 	c.setFont('Helvetica-WinAnsi', 12)
 	c.drawString(125, 625, 'WinAnsi with Euro: character 128 = "\200"')
 
-	c.registerFont0(Type1Font('MacHelvNoEuro', 'Helvetica-Oblique', MacRomanEncoding))
+	c.addFont(Type1Font('MacHelvNoEuro', 'Helvetica-Oblique', MacRomanEncoding))
 	c.setFont('MacHelvNoEuro', 12)
 	c.drawString(125, 600, 'Standard MacRoman, no Euro: Character 219 = "\333"') # oct(219)=0333
 
 	# now make our hacked encoding
-	euroMac = SingleByteEncoding('MacRomanEncoding')
+	euroMac = Encoding('MacRomanEncoding')
 	euroMac[219] = 'Euro'
-	c.registerFont0(Type1Font('MacHelvWithEuro', 'Helvetica-Oblique', euroMac))
+	c.addFont(Type1Font('MacHelvWithEuro', 'Helvetica-Oblique', euroMac))
 	c.setFont('MacHelvWithEuro', 12)
 	c.drawString(125, 575, 'Hacked MacRoman with Euro: Character 219 = "\333"') # oct(219)=0333
 
@@ -349,10 +357,10 @@ def testFonts():
 	w = c.stringWidth(sample, 'Helvetica-Oblique', 12)
 	c.rect(125, 475, w, 12)
 
-	narrowEnc = SingleByteEncoding('WinAnsiEncoding')
+	narrowEnc = Encoding('WinAnsiEncoding')
 	narrowEnc[ord('m')] = 'i'
 	narrowEnc[ord('M')] = 'I'
-	c.registerFont0(Type1Font('narrow', 'Helvetica-Oblique', narrowEnc))
+	c.addFont(Type1Font('narrow', 'Helvetica-Oblique', narrowEnc))
 	c.setFont('narrow', 12)
 	c.drawString(125, 450, sample)
 	w = c.stringWidth(sample, 'narrow', 12)
