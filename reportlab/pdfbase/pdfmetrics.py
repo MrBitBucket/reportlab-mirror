@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.32 2001/04/18 10:48:50 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.33 2001/04/20 05:52:05 rgbecker Exp $ '''
 __doc__=""" 
 This provides a database of font metric information.
 
@@ -146,8 +146,8 @@ if _stringWidth:
         try:
             font = getFont(fontName)
             registerFont(font)
-            print 'registered font %s' % fontName
-            dumpFontData()
+            #print 'registered font %s' % fontName
+            #dumpFontData()
             return _stringWidth(text,fontName,fontSize,encoding)
         except:
             warnOnce('Font %s:%s not found - using Courier:%s for widths'%(fontName,encoding,encoding))

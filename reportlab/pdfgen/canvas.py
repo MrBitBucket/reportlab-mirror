@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.73 2001/04/18 10:48:50 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.73 2001/04/18 10:48:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.74 2001/04/20 05:52:05 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.74 2001/04/20 05:52:05 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -1126,8 +1126,9 @@ class Canvas:
         is next called."""
         if onoff and not zlib:
             print 'zlib not available'
-            return
-        self._pageCompression = onoff
+            self._pageCompression = 0
+        else:
+            self._pageCompression = onoff
         
     def setPageTransition(self, effectname=None, duration=1, 
                         direction=0,dimension='H',motion='I'):
