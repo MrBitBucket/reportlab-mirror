@@ -64,7 +64,7 @@ from reportlab.platypus.flowables import Flowable
 from reportlab.lib import colors
 
 from types import StringType, UnicodeType, InstanceType, TupleType, ListType, FloatType
-from string import letters as LETTERS, whitespace as WHITESPACE
+from string import letters as LETTERS, whitespace as WHITESPACE, atoi
 
 # SET THIS TO CAUSE A VIEWING BUG WITH ACROREAD 3 (for at least one input)
 # CAUSEERROR = 0
@@ -141,7 +141,8 @@ class paragraphEngine:
         lineprogram = []
         #if maxheight<TOOSMALLSPACE:
         #    raise ValueError, "attempt to format inside too small a height! "+repr(maxheight)
-        heightremaining = maxheight-leading
+        heightremaining = maxheight
+        if leading: self.leading = leading
         room = 1
         cursorcount = 0 # debug
         while remainder and room: #heightremaining>=self.leading and remainder:
@@ -764,7 +765,7 @@ class paragraphEngine:
                         fontSize = self.fontSize = size
                     #(i, fontsize) = opcode
                     self.fontSize = fontSize
-                    #textobject.setFont(self.fontName, self.fontSize)
+                    textobject.setFont(self.fontName, self.fontSize)
                 elif indicator=="leading":
                     # change font leading
                     (i, leading) = opcode
@@ -2075,9 +2076,9 @@ more text and even more text and on and on and so forth</u>
     <li>second element of the alpha list</li>
 
     <li>third element of the alpha list
-    third element of the unnumberred list
-    third element of the unnumberred list
-    third element of the unnumberred list
+    third element of the unnumberred list &amp;#33; --> &#33;
+    third element of the unnumberred list &amp;#8704; --> &#8704;
+    third element of the unnumberred list &amp;exist; --> &exist;
     third element of the unnumberred list
     third element of the unnumberred list
     third element of the unnumberred list
@@ -2108,7 +2109,7 @@ def test2(canv):
     from reportlab.lib.units import inch
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.lib import rparsexml
-    parsedpara = rparsexml.parsexmlSimple(testparagraph)
+    parsedpara = rparsexml.parsexmlSimple(testparagraph,entityReplacer=None)
     S = ParagraphStyle("Normal", None)
     P = Para(S, parsedpara)
     (w, h) = P.wrap(5*inch, 10*inch)
@@ -2120,53 +2121,11 @@ def test2(canv):
     canv.setStrokeColorRGB(1, 0, 0)
     #canv.translate(0, 3*inch)
     canv.rect(0,0,w,-h, fill=0, stroke=1)
-#characters not supported: epsi, Gammad, gammad, kappav, rhov, Upsi, upsi
-greeks = {
-    'alpha':'a',
-    'beta':'b',
-    'chi':'c',
-    'Delta':'D',
-    'delta':'d',
-    'epsiv':'e',
-    'eta':'h',
-    'Gamma':'G',
-    'gamma':'g',
-    'iota':'i',
-    'kappa':'k',
-    'Lambda':'L',
-    'lambda':'l',
-    'mu':'m',
-    'nu':'n',
-    'Omega':'W',
-    'omega':'w',
-    'omicron':'x',
-    'Phi':'F',
-    'phi':'f',
-    'phiv':'j',
-    'Pi':'P',
-    'pi':'p',
-    'piv':'v',
-    'Psi':'Y',
-    'psi':'y',
-    'rho':'r',
-    'Sigma':'S',
-    'sigma':'s',
-    'sigmav':'V',
-    'tau':'t',
-    'Theta':'Q',
-    'theta':'q',
-    'thetav':'j',
-    'Xi':'X',
-    'xi':'x',
-    'zeta':'z',
-    'amp': '&',
-    'lt': '<',
-    'gt': '>',
-    # ... more?
-}
 
-def handleSpecialCharacters(engine, text, program=None, greeks=greeks):
+def handleSpecialCharacters(engine, text, program=None):
+    from paraparser import greeks, symenc
     from string import whitespace
+    standard={'lt':'<', 'gt':'>', 'amp':'&'}
     # add space prefix if space here
     if text[0:1] in whitespace:
         program.append(" ")
@@ -2193,14 +2152,34 @@ def handleSpecialCharacters(engine, text, program=None, greeks=greeks):
             semi = fragment.find(";")
             if semi>0:
                 name = fragment[:semi]
-                if greeks.has_key(name):
+                if name[0]=='#':
+                    try:
+                        if name[1] == 'x':
+                            n = atoi(name[2:], 16)
+                        else:
+                            n = atoi(name[1:])
+                    except atoi_error:
+                        n = -1
+                    if 0<=n<=255: fragment = chr(n)+fragment[semi+1:] 
+                    elif symenc.has_key(n):
+                        fragment = fragment[semi+1:]
+                        (f,b,i) = engine.shiftfont(program, face="symbol")
+                        program.append(symenc[n])
+                        engine.shiftfont(program, face=f)
+                        if fragment and fragment[0] in WHITESPACE:
+                            program.append(" ") # follow with a space
+                    else:
+                        fragment = "&"+fragment
+                elif standard.has_key(name):
+                    fragment = standard[name]+fragment[semi+1:]
+                elif greeks.has_key(name):
                     fragment = fragment[semi+1:]
                     greeksub = greeks[name]
                     (f,b,i) = engine.shiftfont(program, face="symbol")
                     program.append(greeksub)
                     engine.shiftfont(program, face=f)
                     if fragment and fragment[0] in WHITESPACE:
-                        program.append(" ") # follow the greek with a space
+                        program.append(" ") # follow with a space
                 else:
                     # add back the &
                     fragment = "&"+fragment
@@ -2235,28 +2214,8 @@ def Paragraph(text, style, bulletText=None, frags=None, context=None):
     else:
         # use the fully featured one.
         from reportlab.lib import rparsexml
-        parsedpara = rparsexml.parsexmlSimple(text)
+        parsedpara = rparsexml.parsexmlSimple(text,entityReplacer=None)
         return Para(style, parsedText=parsedpara, bulletText=bulletText, state=None, context=context)
-
-##class Paragraph(Para):
-##    """ Paragraph(text, style, bulletText=None)
-##    intended to be like a platypus Paragraph but better.
-##    """
-##    def __init__(self, text, style, bulletText = None, frags=None):
-##        # frags is dummy for compatibility
-##        # add a space at end for reasons I cannot fathom
-##        text = text+" "
-##        if debug:
-##            print "::: COMPILING TEXT :::"
-##            print text
-##            print ":::"
-##        from rlextra.radxml import rparsexml
-##        parsedpara = rparsexml.parsexmlSimple(text)
-##        if debug:
-##            print "=== compiles to"
-##            print parsedpara
-##            print "==="
-##        Para.__init__(self, style, parsedText=parsedpara, bulletText=bulletText, state=None)
 
 class UnderLineHandler:
     def __init__(self, color=None):
