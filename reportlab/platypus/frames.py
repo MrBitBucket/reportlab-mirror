@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: frames.py,v $
+#	Revision 1.5  2000/07/30 22:32:29  rgbecker
+#	geometry changing attributes now work
+#
 #	Revision 1.4  2000/07/07 16:21:12  rgbecker
 #	Cosmetics
-#
+#	
 #	Revision 1.3  2000/07/06 12:40:38  rgbecker
 #	Push canvas into flowables during wrap/split
 #	
@@ -43,9 +46,10 @@
 #	Revision 1.1  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #	
-__version__=''' $Id: frames.py,v 1.4 2000/07/07 16:21:12 rgbecker Exp $ '''
+__version__=''' $Id: frames.py,v 1.5 2000/07/30 22:32:29 rgbecker Exp $ '''
 __doc__="""
 """
+_geomAttr=('x1','y1','width','height', 'leftPadding', 'bottomPadding', 'rightPadding', 'topPadding')
 class Frame:
 	'''
 	A Frame is a piece of space in a document that is filled by the
@@ -84,33 +88,48 @@ class Frame:
 		self.id = id
 
 		#these say where it goes on the page
-		self.x1 = x1
-		self.y1 = y1
-		self.x2 = x1 + width
-		self.y2 = y1 + height
+		self.__dict__['_x1'] = x1
+		self.__dict__['_y1'] = y1
+		self.__dict__['_width'] = width
+		self.__dict__['_height'] = height
 
 		#these create some padding.
-		self.leftPadding = leftPadding
-		self.bottomPadding = bottomPadding
-		self.rightPadding = rightPadding
-		self.topPadding = topPadding
-
-		#efficiency
-		self.y1p = self.y1 + bottomPadding
+		self.__dict__['_leftPadding'] = leftPadding
+		self.__dict__['_bottomPadding'] = bottomPadding
+		self.__dict__['_rightPadding'] = rightPadding
+		self.__dict__['_topPadding'] = topPadding
 
 		# if we want a boundary to be shown
 		self.showBoundary = showBoundary
 
+		self._geom()
 		self._reset()
 
-	def	_reset(self):
+	def __getattr__(self,a):
+		if a in _geomAttr: return self.__dict__['_'+a]
+		raise AttributeError, a
+
+	def __setattr__(self,a,v):
+		if a in _geomAttr:
+			self.__dict__['_'+a] = v
+			self._geom()
+		else:
+			self.__dict__[a] = v
+
+	def	_geom(self):
+		self._x2 = self._x1 + self._width
+		self._y2 = self._y1 + self._height
+		#efficiency
+		self._y1p = self._y1 + self._bottomPadding
 		#work out the available space
-		self.width = self.x2 - self.x1 - self.leftPadding - self.rightPadding
-		self.height = self.y2 - self.y1 - self.topPadding - self.bottomPadding
+		self._aW = self._x2 - self._x1 - self._leftPadding - self._rightPadding
+		self._aH = self._y2 - self._y1p - self._topPadding
+
+	def	_reset(self):
 		#drawing starts at top left
-		self.x = self.x1 + self.leftPadding
-		self.y = self.y2 - self.topPadding
-		self.atTop = 1
+		self._x = self._x1 + self._leftPadding
+		self._y = self._y2 - self._topPadding
+		self._atTop = 1
 
 	def _add(self, flowable, canv, trySplit=0):
 		""" Draws the flowable at the current position.
@@ -118,13 +137,13 @@ class Frame:
 		Raises a LayoutError if the object is too wide,
 		or if it is too high for a totally empty frame,
 		to avoid infinite loops"""
-		y = self.y
-		p = self.y1p
-		s = self.atTop and 0 or flowable.getSpaceBefore()
+		y = self._y
+		p = self._y1p
+		s = self._atTop and 0 or flowable.getSpaceBefore()
 		h = y - p - s
 		if h>0:
 			flowable.canv = canv #so they can use stringWidth etc
-			w, h = flowable.wrap(self.width, h)
+			w, h = flowable.wrap(self._aW, h)
 			del flowable.canv
 		else:
 			return 0
@@ -133,26 +152,26 @@ class Frame:
 		y = y - h
 
 		if y < p:
-			if ((h > self.height and not trySplit) or w > self.width):
-				raise "LayoutError", "Flowable (%dx%d points) too large for frame (%dx%d points)." % (w,h, self.width,self.height)
+			if ((h > self._aH and not trySplit) or w > self._aW):
+				raise "LayoutError", "Flowable (%sx%s points) too large for frame (%sx%s points)." % (w,h, self.aW,self.aH)
 			return 0
 		else:
 			#now we can draw it, and update the current point.
-			flowable.drawOn(canv, self.x, y)
+			flowable.drawOn(canv, self._x, y)
 			y = y - flowable.getSpaceAfter()
-			self.atTop = 0
-			self.y = y
+			self._atTop = 0
+			self._y = y
 			return 1
 
 	add = _add
 
 	def split(self,flowable,canv):
 		'''Ask the flowable to split using up the available space.'''
-		y = self.y
-		p = self.y1p
-		s = self.atTop and 0 or flowable.getSpaceBefore()
+		y = self._y
+		p = self._y1p
+		s = self._atTop and 0 or flowable.getSpaceBefore()
 		flowable.canv = canv	#some flowables might need this
-		r = flowable.split(self.width, y-p-s)
+		r = flowable.split(self._aW, y-p-s)
 		del flowable.canv
 		return r
 
@@ -160,10 +179,10 @@ class Frame:
 	def drawBoundary(self,canv):
 		"draw the frame boundary as a rectangle (primarily for debugging)."
 		canv.rect(
-				self.x1,
-				self.y1,
-				self.x2 - self.x1,
-				self.y2 - self.y1
+				self._x1,
+				self._y1,
+				self._x2 - self._x1,
+				self._y2 - self._y1
 				)
 		
 	def addFromList(self, drawlist, canv):
