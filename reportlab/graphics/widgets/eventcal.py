@@ -1,11 +1,11 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/eventcal.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/eventcal.py,v 1.3 2003/04/01 09:13:42 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/eventcal.py,v 1.4 2003/04/01 10:30:16 fuzzypuffin Exp $
 # Event Calendar widget
 # author: Andy Robinson
 """This file is a 
 """
-__version__=''' $Id: eventcal.py,v 1.3 2003/04/01 09:13:42 andy_robinson Exp $ '''
+__version__=''' $Id: eventcal.py,v 1.4 2003/04/01 10:30:16 fuzzypuffin Exp $ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *
@@ -208,6 +208,85 @@ def test():
 
         ('lunch, short presentations, vendor presentations', '', None, 1, 12.0, 2.0),
 
+        ("CORBA? Isn't that obsolete", 'Duncan Grisby', 1, 1, 14.0, 1.5),
+        ("Python Design Patterns", 'Duncan Booth', 2, 1, 14.0, 1.5),
+        ("Inside Security Checks and Safe Exceptions", 'Brandon Bray', 3, 1, 14.0, 1.5),
+        ("Studying at a Distance", 'Panel Discussion, Panel to include Alan Lenton & Francis Glassborow', 4, 1, 14.0, 1.5),
+        ("Coding Standards - Given the ANSI C Standard why do I still need a coding Standard", 'Randy Marques', 5, 1, 14.0, 1.5),
+
+        ("RESTful Python", 'Hamish Lawson', 1, 1, 16.0, 1.5),
+        ("Parsing made easier - a radical old idea", 'Andrew Koenig', 2, 1, 16.0, 1.5),
+        ("C++ & Multimethods", 'Julian Smith', 3, 1, 16.0, 1.5),
+        ("C++ Threading", 'Kevlin Henney', 4, 1, 16.0, 1.5),
+        ("The Organisation Strikes Back", 'Alan Griffiths & Sarah Lees', 5, 1, 16.0, 1.5),
+
+        ('Birds of a Feather meeting', '', None, 1, 17.5, 2.0),
+
+        ('Keynote: In the Spirit of C',  'Greg Colvin', None, 2, 9.0, 1.0),
+
+        ('The Infinite Filing Cabinet - object storage in Python', 'Jacob Hallen', 1, 2, 10.5, 1.5),
+        ('Introduction to Python and Jython for C++ and Java Programmers', 'Alex Martelli', 2, 2, 10.5, 1.5),
+        ('Template metaprogramming in Haskell', 'Simon Peyton Jones', 3, 2, 10.5, 1.5),
+        ('Plenty People Programming: C++ Programming in a Group, Workshop with a difference', 'Nico Josuttis', 4, 2, 10.5, 1.5),
+        ('Design and Implementation of the Boost Graph Library', 'Jeremy Siek', 5, 2, 10.5, 1.5),
+
+        ('lunch, short presentations, vendor presentations', '', None, 2, 12.0, 2.0),
+
+        ("Building GUI Applications with PythonCard and PyCrust", 'Andy Todd', 1, 2, 14.0, 1.5),
+        ("Integrating Python, C and C++", 'Duncan Booth', 2, 2, 14.0, 1.5),
+        ("Secrets and Pitfalls of Templates", 'Nicolai Josuttis & David Vandevoorde', 3, 2, 14.0, 1.5),
+        ("Being a Mentor", 'Panel Discussion, Panel to include Alan Lenton & Francis Glassborow', 4, 2, 14.0, 1.5),
+        ("The Embedded C Extensions to C", 'Willem Wakker', 5, 2, 14.0, 1.5),
+
+        ("Lightning Talks", 'Paul Brian', 1, 2, 16.0, 1.5),
+        ("Scripting Java Applications with Jython", 'Anthony Eden', 2, 2, 16.0, 1.5),
+        ("Metaprogramming and the Boost Metaprogramming Library", 'David Abrahams', 3, 2, 16.0, 1.5),
+        ("A Common Vendor ABI for C++ -- GCC's why, what and not", 'Nathan Sidwell & Gabriel Dos Reis', 4, 2, 16.0, 1.5),
+        ("The Timing and Cost of Choices", 'Hubert Matthews', 5, 2, 16.0, 1.5),
+
+        ('Birds of a Feather meeting', '', None, 2, 17.5, 2.0),        
+
+        ('Keynote: The Cost of C &amp; C++ Compatibility', 'Andy Koenig', None, 3, 9.0, 1.0),
+
+        ('Prying Eyes: Generic Observer Implementations in C++', 'Andrei Alexandrescu', 1, 2, 10.5, 1.5),
+        ('The Roadmap to Generative Programming With C++', 'Ulrich Eisenecker', 2, 2, 10.5, 1.5),
+        ('Design Patterns in C++ and C# for the Common Language Runtime', 'Brandon Bray', 3, 2, 10.5, 1.5),
+        ('Extreme Hour (XH): (workshop) - Jutta Eckstein and Nico Josuttis', 'Jutta Ecstein', 4, 2, 10.5, 1.5),
+        ('The Lambda Library : Unnamed Functions for C++', 'Jaako Jarvi', 5, 2, 10.5, 1.5),
+
+        ('lunch, short presentations, vendor presentations', '', None, 3, 12.0, 2.0),        
+        
+        ('Reflective Metaprogramming', 'Daveed Vandevoorde', 1, 3, 14.0, 1.5),
+        ('Advanced Template Issues and Solutions (double session)', 'Herb Sutter',2, 3, 14.0, 3),
+        ('Concurrent Programming in Java (double session)', 'Angelika Langer', 3, 3, 14.0, 3),
+        ('What can MISRA-C (2nd Edition) do for us?', 'Chris Hills', 4, 3, 14.0, 1.5),
+        ('C++ Metaprogramming Concepts and Results', 'Walter E Brown', 5, 3, 14.0, 1.5),
+
+        ('Binding C++ to Python with the Boost Python Library', 'David Abrahams', 1, 3, 16.0, 1.5),
+        ('Using Aspect Oriented Programming for Enterprise Application Integration', 'Arno Schmidmeier', 4, 3, 16.0, 1.5),
+        ('Defective C++', 'Marc Paterno', 5, 3, 16.0, 1.5),
+
+        ("Speakers' Banquet & Birds of a Feather meeting", '', None, 3, 17.5, 2.0),
+
+        ('Keynote: The Internet, Software and Computers - A Report Card', 'Alan Lenton',  None, 4, 9.0, 1.0),
+
+        ('Multi-Platform Software Development; Lessons from the Boost libraries', 'Beman Dawes', 1, 5, 10.5, 1.5),
+        ('The Stability of the C++ ABI', 'Steve Clamage', 2, 5, 10.5, 1.5),
+        ('Generic Build Support - A Pragmatic Approach to the Software Build Process', 'Randy Marques', 3, 5, 10.5, 1.5),
+        ('How to Handle Project Managers: a survival guide', 'Barb Byro',  4, 5, 10.5, 1.5),
+
+        ('lunch, ACCU AGM', '', None, 5, 12.0, 2.0), 
+        
+        ('Sauce: An OO recursive descent parser; its design and implementation.', 'Jon Jagger', 1, 5, 14.0, 1.5),
+        ('GNIRTS ESAC REWOL -  Bringing the UNIX filters to the C++ iostream library.', 'JC van Winkel', 2, 5, 14.0, 1.5),
+        ('Pattern Writing: Live and Direct', 'Frank Buschmann & Kevlin Henney',  3, 5, 14.0, 3.0),
+        ('The Future of Programming Languages - A Goldfish Bowl', 'Francis Glassborow and friends',  3, 5, 14.0, 1.5),
+
+        ('Honey, I Shrunk the Threads: Compile-time checked multithreaded transactions in C++', 'Andrei Alexandrescu', 1, 5, 16.0, 1.5),
+        ('Fun and Functionality with Functors', 'Lois Goldthwaite', 2, 5, 16.0, 1.5),
+        ('Agile Enough?', 'Alan Griffiths', 4, 5, 16.0, 1.5),
+        ("Conference Closure: A brief plenary session", '', None, 5, 17.5, 0.5),        
+        
         ]
 
     #return cal
