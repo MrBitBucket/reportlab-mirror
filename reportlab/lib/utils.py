@@ -756,3 +756,14 @@ class DebugMemo:
 
     def _writeln(self,msg):
         self.stdout.write(msg+'\n')
+
+def _flatten(L,a):
+    for x in L:
+        if type(x) in SeqTypes: _flatten(x,a)
+        else: a(x)
+
+def flatten(L):
+    '''recursively flatten the list or tuple L'''
+    R = []
+    _flatten(L,R.append)
+    return R
