@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.16 2001/08/07 15:40:44 rgbecker Exp $
-import sys, string
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.17 2001/08/22 12:14:55 rgbecker Exp $
+import os, sys, string
 from reportlab.lib import pagesizes
 
 def _setOpt(name, value, conv=None):
@@ -33,18 +33,21 @@ def	_startUp():
 
 	#places to search for Type 1 Font files
 	if sys.platform=='win32':
-		T1SearchPath=['c:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\Font']
+		S = ['c:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\Font']
 	elif sys.platform in ('linux2','freebsd4',):
-		T1SearchPath=['/usr/lib/Acrobat4/Resource/Font']
+		S = ['/usr/lib/Acrobat4/Resource/Font']
 	elif sys.platform=='mac':	# we must be able to do better than this
-		import os
 		diskName = string.split(os.getcwd(), ':')[0]
 		fontDir = diskName + ':Applications:Python %s:reportlab:fonts' % sys_version
-		T1SearchPath = [fontDir]   # tba
+		S = [fontDir]   # tba
 		PIL_WARNINGS = 0 # PIL is not packagized in the Mac Python build
 	else:
-		T1SearchPath=[]
+		S=[]
 		#raise ValueError, 'Please add a proper T1SearchPath for your system to rl_config.py'
-	_setOpt('T1SearchPath',T1SearchPath)
+	S.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'lib','fontDir')))
+	P=[]
+	for p in S:
+		if os.path.isdir(p): P.append(p)
+	_setOpt('T1SearchPath',P)
 
 _startUp()
