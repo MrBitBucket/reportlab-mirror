@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.110 2003/03/14 00:05:16 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.110 2003/03/14 00:05:16 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.111 2003/04/10 00:01:17 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.111 2003/04/10 00:01:17 andy_robinson Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -136,6 +136,7 @@ class Canvas:
         self._onPage = None
 
         self._pagesize = pagesize
+        self._pageRotation = 0
         #self._currentPageHasImages = 0
         self._pageTransition = None
         self._pageDuration = None
@@ -363,6 +364,7 @@ class Canvas:
         page = pdfdoc.PDFPage()
         page.pagewidth = self._pagesize[0]
         page.pageheight = self._pagesize[1]
+        page.Rotate = self._pageRotation
         page.hasImages = self._currentPageHasImages
         page.setPageTransition(self._pageTransition)
         page.setCompression(self._pageCompression)
@@ -822,6 +824,12 @@ class Canvas:
         self._pagesize = size
         self._make_preamble()
 
+    def setPageRotation(self, rot):
+        """Instruct display device that this page is to be rotated"""
+        assert rot % 90.0 == 0.0, "Rotation must be a multiple of 90 degrees"
+        self._pageRotation = rot
+
+        
     def addLiteral(self, s, escaped=1):
         """introduce the literal text of PDF operations s into the current stream.
            Only use this if you are an expert in the PDF file format."""
