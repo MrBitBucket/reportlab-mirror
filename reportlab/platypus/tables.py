@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.21  2000/07/12 09:05:17  rgbecker
+#	Fixed tuple size bug
+#
 #	Revision 1.20  2000/07/11 14:29:45  rgbecker
 #	Table splitting start
-#
+#	
 #	Revision 1.19  2000/07/10 15:25:47  andy_robinson
 #	Added tables to PythonPoint
 #	
@@ -89,7 +92,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.20 2000/07/11 14:29:45 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.21 2000/07/12 09:05:17 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -309,27 +312,33 @@ class Table(Flowable):
 		return (self._width, self._height)
 
 	def _cr_0(self,n,cmds):
-		for op, (sc, sr), (ec, er), weight, color in cmds:
+		for c in cmds:
+			c = tuple(c)
+			(sc,sr), (ec,er) = c[1:3]
 			if sr>=n: continue
 			if er>=n: er = n-1
-			self._addCommand((op, (sc, sr), (ec, er), weight, color))
+			self._addCommand((c[0],)+((sc, sr), (ec, er))+c[3:])
 
 	def _cr_1_1(self,n,repeatRows, cmds):
-		for op, (sc, sr), (ec, er), weight, color in cmds:
+		for c in cmds:
+			c = tuple(c)
+			(sc,sr), (ec,er) = c[1:3]
 			if sr>=0 and sr>=repeatRows and sr<n and er>=0 and er<n: continue
 			if sr>=repeatRows and sr<n: sr=repeatRows
 			elif sr>=repeatRows and sr>=n: sr=sr+repeatRows-n
 			if er>=repeatRows and er<n: er=repeatRows
 			elif er>=repeatRows and er>=n: er=er+repeatRows-n
-			self._addCommand((op, (sc, sr), (ec, er), weight, color))
+			self._addCommand((c[0],)+((sc, sr), (ec, er))+c[3:])
 
 	def _cr_1_0(self,n,cmds):
-		for op, (sc, sr), (ec, er), weight, color in cmds:
+		for c in cmds:
+			c = tuple(c)
+			(sc,sr), (ec,er) = c[1:3]
 			if er>=0 and er<n: continue
 			if sr>=0 and sr<n: sr=0
 			if sr>=n: sr = sr-n
 			if er>=n: er = er-n
-			self._addCommand((op, (sc, sr), (ec, er), weight, color))
+			self._addCommand((c[0],)+((sc, sr), (ec, er))+c[3:])
 
 	def _splitRows(self,availHeight):
 		self._calc()
@@ -775,6 +784,13 @@ LIST_STYLE = TableStyle(
 				('VALIGN',(0,0),(-1,-1),'MIDDLE'),
 				('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
 				('BOX', (0,0), (-1,-1), 0.25, colors.black),
+				('BACKGROUND', (0, 0), (-1, 0), colors.green),
+				('BACKGROUND', (0, 1), (-1, -1), colors.pink),
+				('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+				('ALIGN', (0, 1), (0, -1), 'LEFT'),
+				('ALIGN', (-1, 1), (-1, -1), 'RIGHT'),
+				('FONT', (0, 0), (-1, 0), 'Times-Bold', 12),
+				('ALIGN', (1, 1), (1, -1), 'CENTER'),
 				])
 	lst.append(t)
 	SimpleDocTemplate('testtables.pdf', showBoundary=1).build(lst)
