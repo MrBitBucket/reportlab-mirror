@@ -665,7 +665,7 @@ class Paragraph(Flowable):
             canvas.setFillColor(style.backColor)
             canvas.rect(leftIndent,
                         0,
-                        self.width - style.rightIndent,
+                        self.width - (leftIndent+style.rightIndent),
                         self.height,
                         fill=1,
                         stroke=0)

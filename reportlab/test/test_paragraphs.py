@@ -6,7 +6,7 @@
 from reportlab.test import unittest
 from reportlab.test.utils import makeSuiteForClasses, outputfile
 
-from reportlab.platypus import Paragraph, SimpleDocTemplate, XBox, Indenter
+from reportlab.platypus import Paragraph, SimpleDocTemplate, XBox, Indenter, XPreformatted
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib.colors import red, black, navy, white
@@ -125,10 +125,14 @@ class ParagraphTestCase(unittest.TestCase):
         story.append(Paragraph('''This uses a font size of 3cm: Here comes <font face="Courier" size="3cm">Courier 3cm</font> and normal again.''', styNormal, caseSensitive=0))
         story.append(Paragraph('''This is just a very long silly text to see if the <FONT face="Courier">caseSensitive</FONT> flag also works if the paragraph is <EM>very</EM> long. '''*20, styNormal, caseSensitive=0))
         story.append(Indenter("1cm"))
-        story.append(Paragraph("<para leftIndent='0'><bullet bulletIndent='-0.9cm'><seq id='s3'/>)</bullet>Indented list. %s</para>" % randomText(), styNormal))
-        story.append(Paragraph("<para leftIndent='0'><bullet bulletIndent='-0.9cm'><seq id='s3'/>)</bullet>Indented list. %s</para>" % randomText(), styNormal))
-        story.append(Paragraph("<para leftIndent='0'><bullet bulletIndent='-0.9cm'><seq id='s3'/>)</bullet>Indented list. %s</para>" % randomText(), styNormal))
-        story.append(Paragraph("<para leftIndent='0'><bullet bulletIndent='-0.9cm'><seq id='s3'/>)</bullet>Indented list. %s</para>" % randomText(), styNormal))
+        story.append(Paragraph("<para leftIndent='0'><bullet bulletIndent='-1cm'><seq id='s0'/>)</bullet>Indented list. %s</para>" % randomText(), styNormal))
+        story.append(Paragraph("<para leftIndent='0'><bullet bulletIndent='-1cm'><seq id='s0'/>)</bullet>Indented list. %s</para>" % randomText(), styNormal))
+        story.append(Paragraph("<para leftIndent='0'><bullet bulletIndent='-1cm'><seq id='s0'/>)</bullet>Indented list. %s</para>" % randomText(), styNormal))
+        story.append(Indenter("1cm"))
+        story.append(XPreformatted("<para leftIndent='0.5cm' backcolor=pink><bullet bulletIndent='-1cm'><seq id='s1'/>)</bullet>Indented list.</para>", styNormal))
+        story.append(XPreformatted("<para leftIndent='0.5cm' backcolor=palegreen><bullet bulletIndent='-1cm'><seq id='s1'/>)</bullet>Indented list.</para>", styNormal))
+        story.append(Indenter("-1cm"))
+        story.append(Paragraph("<para leftIndent='0'><bullet bulletIndent='-9cm'><seq id='s0'/>)</bullet>Indented list. %s</para>" % randomText(), styNormal))
         story.append(Indenter("-1cm"))
 
         template = SimpleDocTemplate(outputfile('test_paragraphs.pdf'),
