@@ -16,9 +16,8 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.utils import getStringIO
 from reportlab import rl_config
 
-
 # the main entry point for users...
-def draw(drawing, canvas, x, y, showBoundary=rl_config.showBoundary):
+def draw(drawing, canvas, x, y, showBoundary=rl_config._unset_):
     """As it says"""
     R = _PDFRenderer()
     R.draw(drawing, canvas, x, y, showBoundary=showBoundary)
@@ -34,28 +33,6 @@ class _PDFRenderer(Renderer):
         self._stroke = 0
         self._fill = 0
         self._tracker = StateTracker()
-
-    def draw(self, drawing, canvas, x=0, y=0, showBoundary=rl_config.showBoundary):
-        """This is the top level function, which
-        draws the drawing at the given location.
-        The recursive part is handled by drawNode."""
-        #stash references for the other objects to draw on
-        self._canvas = canvas
-        canvas._drawing = self._drawing = drawing
-        try:
-            #bounding box
-            if showBoundary: canvas.rect(x, y, drawing.width, drawing.height)
-            canvas.saveState()
-            deltas = STATE_DEFAULTS.copy()
-            deltas['transform'] = [1,0,0,1,x,y]
-            self._tracker.push(deltas)
-            self.applyStateChanges(deltas, {})
-            self.drawNode(drawing)
-            self._tracker.pop()
-            canvas.restoreState()
-        finally:
-            #remove any circular references
-            del self._canvas, self._drawing, canvas._drawing
 
     def drawNode(self, node):
         """This is the recursive method called for each node
@@ -260,7 +237,7 @@ class GraphicsFlowable(Flowable):
     def draw(self):
         draw(self.drawing, self.canv, 0, 0)
 
-def drawToFile(d, fn, msg="", showBoundary=rl_config.showBoundary, autoSize=1):
+def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1):
     """Makes a one-page PDF with just the drawing.
 
     If autoSize=1, the PDF will be the same size as
@@ -294,7 +271,7 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config.showBoundary, autoSize=1):
             pass
 
 
-def drawToString(d, msg="", showBoundary=rl_config.showBoundary,autoSize=1):
+def drawToString(d, msg="", showBoundary=rl_config._unset_,autoSize=1):
     "Returns a PDF as a string in memory, without touching the disk"
     s = getStringIO()
     drawToFile(d, s, msg=msg, showBoundary=showBoundary,autoSize=autoSize)

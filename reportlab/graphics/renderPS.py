@@ -644,27 +644,6 @@ class _PSRenderer(Renderer):
     def __init__(self):
         self._tracker = StateTracker()
 
-    def draw(self, drawing, canvas, x, y, showBoundary=rl_config.showBoundary):
-        """This is the top level function, which
-        draws the drawing at the given location.
-        The recursive part is handled by drawNode."""
-        #stash references for ease of  communication
-        self._canvas = canvas
-        canvas._drawing = self._drawing = drawing
-        try:
-            #bounding box
-            if showBoundary: canvas.rect(x, y, drawing.width, drawing.height)
-            canvas.saveState()
-            deltas = STATE_DEFAULTS.copy()
-            deltas['transform'] = [1,0,0,1,x,y]
-            self._tracker.push(deltas)
-            self.applyStateChanges(deltas, {})
-            self.drawNode(drawing)
-            self._tracker.pop()
-            canvas.restoreState()
-        finally:
-            del self._canvas, self._drawing, canvas._drawing
-
     def drawNode(self, node):
         """This is the recursive method called for each node
         in the tree"""

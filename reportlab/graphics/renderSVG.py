@@ -585,8 +585,11 @@ class SVGCanvas:
     def closePath(self):
         self.path = self.path + 'Z '
 
+    def saveState(self):
+        pass
 
-
+    def restoreState(self):
+        pass
 
 class _SVGRenderer(Renderer):
     """This draws onto an SVG document.
@@ -595,33 +598,6 @@ class _SVGRenderer(Renderer):
     def __init__(self):
         self._tracker = StateTracker()
         self.verbose = 0
-
-
-    def draw(self, drawing, canvas, x, y, showBoundary=rl_config.showBoundary):
-        """This is the top level function, which draws the drawing at the given
-        location. The recursive part is handled by drawNode.
-        """
-
-        if self.verbose: print "### begin _SVGRenderer.draw"
-
-        self._canvas = canvas
-        canvas._drawing = self._drawing = drawing
-        try:
-            #bounding box
-            if showBoundary:
-                canvas.rect(x, y, drawing.width, drawing.height)
-
-            deltas = STATE_DEFAULTS.copy()
-            deltas['transform'] = [1,0,0,1,x,y]
-            self._tracker.push(deltas)
-            self.applyStateChanges(deltas, {})
-            self.drawNode(drawing)
-            self._tracker.pop()
-        finally:
-            del self._canvas, self._drawing, canvas._drawing
-
-        if self.verbose: print "### end _SVGRenderer.draw"
-
 
     def drawNode(self, node):
         """This is the recursive method called for each node in the tree.
@@ -721,7 +697,7 @@ class _SVGRenderer(Renderer):
     def drawWedge(self, wedge):
         centerx, centery, radius, startangledegrees, endangledegrees = \
          wedge.centerx, wedge.centery, wedge.radius, wedge.startangledegrees, wedge.endangledegrees
-        yradius = wedge.yradius
+        yradius = wedge.yradius or wedge.radius
         (x1, y1) = (centerx-radius, centery-yradius)
         (x2, y2) = (centerx+radius, centery+yradius)
         extent = endangledegrees - startangledegrees

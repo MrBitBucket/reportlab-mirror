@@ -43,10 +43,10 @@ def Color2Hex(c):
     return c
 
 # the main entry point for users...
-def draw(drawing, canvas, x, y, showBoundary=rl_config.showBoundary):
+def draw(drawing, canvas, x, y, showBoundary=rl_config._unset_):
     """As it says"""
     R = _PMRenderer()
-    R.draw(drawing, canvas, x, y)
+    R.draw(drawing, canvas, x, y, showBoundary=showBoundary)
 
 from reportlab.graphics.renderbase import Renderer
 class _PMRenderer(Renderer):
@@ -79,26 +79,11 @@ class _PMRenderer(Renderer):
         self._canvas.fillColor = Color2Hex(s['fillColor'])
         self._canvas.setFont(s['fontName'], s['fontSize'])
 
-    def draw(self, drawing, canvas, x=0, y=0, showBoundary=rl_config.showBoundary):
-        """This is the top level function, which
-        draws the drawing at the given location.
-        The recursive part is handled by drawNode."""
-        #stash references for ease of  communication
-        self._canvas = canvas
-        canvas.__dict__['_drawing'] = self._drawing = drawing
-        try:
-            if showBoundary: canvas.rect(x, y, drawing.width, drawing.height)
-            canvas.saveState()
-            deltas = STATE_DEFAULTS.copy()
-            deltas['transform'] = canvas._baseCTM[0:4]+(x,y)
-            self._tracker.push(deltas)
-            self.applyState()
-            self.drawNode(drawing)
-            self.pop()
-            canvas.restoreState()
-        finally:
-            #remove any circular references
-            del self._canvas, self._drawing, canvas._drawing
+    def initState(self,x,y):
+        deltas = STATE_DEFAULTS.copy()
+        deltas['transform'] = self._canvas._baseCTM[0:4]+(x,y)
+        self._tracker.push(deltas)
+        self.applyState()
 
     def drawNode(self, node):
         """This is the recursive method called for each node
@@ -519,28 +504,28 @@ class PMCanvas:
 
     restoreState = saveState
 
-def drawToPMCanvas(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config.showBoundary):
+def drawToPMCanvas(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_):
     w = int(d.width*dpi/72.0+0.5)
     h = int(d.height*dpi/72.0+0.5)
     c = PMCanvas(w, h, dpi=dpi, bg=bg, configPIL=configPIL)
-    draw(d, c, 0, 0)
+    draw(d, c, 0, 0, showBoundary=showBoundary)
     return c
 
-def drawToPIL(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config.showBoundary):
+def drawToPIL(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_):
     return drawToPMCanvas(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary).toPIL()
 
-def drawToPILP(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config.showBoundary):
+def drawToPILP(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_):
     Image = _getImage()
     im = drawToPIL(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary)
     return im.convert("P", dither=Image.NONE, palette=Image.ADAPTIVE)
 
-def drawToFile(d,fn,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config.showBoundary):
+def drawToFile(d,fn,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_):
     '''create a pixmap and draw drawing, d to it then save as a file
     configPIL dict is passed to image save method'''
     c = drawToPMCanvas(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary)
     c.saveToFile(fn,fmt)
 
-def drawToString(d,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config.showBoundary):
+def drawToString(d,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_):
     s = getStringIO()
     drawToFile(d,s,fmt=fmt, dpi=dpi, bg=bg, configPIL=configPIL)
     return s.getvalue()

@@ -93,12 +93,16 @@ def _startUp():
                 'invariant','eps_preview_transparent',
                 )
     import os, sys, string
-    global sys_version
+    global sys_version, _unset_
     sys_version = string.split(sys.version)[0]      #strip off the other garbage
     from reportlab.lib import pagesizes
     from reportlab.lib.utils import rl_isdir
 
     if _SAVED=={}:
+        _unset_ = getattr(sys,'_rl_config__unset_',None)
+        if _unset_ is None:
+            class _unset_: pass
+            sys._rl_config__unset_ = _unset_ = _unset_()
         for k in V:
             _SAVED[k] = globals()[k]
 

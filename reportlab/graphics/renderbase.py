@@ -9,6 +9,7 @@ Superclass for renderers to factor out common functionality and default implemen
 __version__=''' $Id $ '''
 
 from reportlab.graphics.shapes import *
+from reportlab import rl_config
 
 def inverse(A):
     "For A affine 2D represented as 6vec return 6vec version of A**(-1)"
@@ -165,13 +166,34 @@ class Renderer:
     def undefined(self, operation):
         raise ValueError, "%s operation not defined at superclass class=%s" %(operation, self.__class__)
 
-    def draw(self, drawing, canvas, x, y):
-        """This is the top level function, which
-        draws the drawing at the given location.
-        The recursive part is handled by drawNode."""
-        print 'enter Renderer.draw()'
-        self.undefined("draw")
-        print 'enter Renderer.draw()'
+    def draw(self, drawing, canvas, x=0, y=0, showBoundary=rl_config._unset_):
+        """This is the top level function, which draws the drawing at the given
+        location. The recursive part is handled by drawNode."""
+        #stash references for ease of  communication
+        if showBoundary is rl_config._unset_: showBoundary=rl_config.showBoundary
+        self._canvas = canvas
+        canvas.__dict__['_drawing'] = self._drawing = drawing
+        drawing._parent = None
+        try:
+            #bounding box
+            if showBoundary: canvas.rect(x, y, drawing.width, drawing.height)
+            canvas.saveState()
+            self.initState(x,y)
+            self.drawNode(drawing)
+            self.pop()
+            canvas.restoreState()
+        finally:
+            #remove any circular references
+            del self._canvas, self._drawing, canvas._drawing, drawing._parent
+
+    def initState(self,x,y):
+        deltas = STATE_DEFAULTS.copy()
+        deltas['transform'] = [1,0,0,1,x,y]
+        self._tracker.push(deltas)
+        self.applyStateChanges(deltas, {})
+
+    def pop(self):
+        self._tracker.pop()
 
     def drawNode(self, node):
         """This is the recursive method called for each node
@@ -237,8 +259,10 @@ class Renderer:
                 else:
                     node._canvas = canvas
                     ocanvas = None
+                node._parent = group
                 self.drawNode(node)
             finally:
+                del node._parent
                 if not ocanvas: del node._canvas
 
     def drawWedge(self, wedge):
