@@ -1,0 +1,1 @@
+This directory should contain all test scripts.
