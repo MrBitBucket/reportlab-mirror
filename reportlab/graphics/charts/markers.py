@@ -70,7 +70,7 @@ def makeSmiley(x, y, size, color):
 
     d = size
     s = SmileyFace()
-    s.color = color
+    s.fillColor = color
     s.x = x-d
     s.y = y-d
     s.size = d*2
