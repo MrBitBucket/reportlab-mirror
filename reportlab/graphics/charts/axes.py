@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.26 2001/05/17 16:21:33 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.27 2001/06/13 06:19:14 andy_robinson Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -718,7 +718,8 @@ class XValueAxis(ValueAxis):
 
         msg = "Axis cannot scale numbers before it is configured"
         assert self._configured, msg
-
+        if value is None:
+            value = 0
         return self._x + self._scaleFactor * (value - self._valueMin)
     
 
@@ -841,6 +842,8 @@ class YValueAxis(ValueAxis):
         msg = "Axis cannot scale numbers before it is configured"
         assert self._configured, msg
 
+        if value is None:
+            value = 0
         return self._y + self._scaleFactor * (value - self._valueMin)
     
 

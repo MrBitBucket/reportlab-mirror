@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.14 2001/05/22 10:02:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.15 2001/06/13 06:19:14 andy_robinson Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -59,15 +59,15 @@ class WedgeProperties(PropHolder):
 
 class Pie(Widget):
 	_attrMap = AttrMap(
-		x = AttrMapValue(isNumber, desc='X position of the chart.'),
-		y = AttrMapValue(isNumber, desc='Y position of the chart.'),
-		width = AttrMapValue(isNumber),
-		height = AttrMapValue(isNumber),
-		data = AttrMapValue(isListOfNumbers),
-		labels = AttrMapValue(isListOfStringsOrNone),
-		startAngle = AttrMapValue(isNumber),
-		direction = AttrMapValue( OneOf(('clockwise', 'anticlockwise'))),
-		defaultStyles = AttrMapValue(None),
+		x = AttrMapValue(isNumber, desc='X position of the chart within its container.'),
+		y = AttrMapValue(isNumber, desc='Y position of the chart within its container.'),
+		width = AttrMapValue(isNumber, desc='width of pie bounding box. Need not be same as width.'),
+		height = AttrMapValue(isNumber, desc='height of pie bounding box.  Need not be same as height.'),
+		data = AttrMapValue(isListOfNumbers, desc='list of numbers defining wedge sizes; need not sum to 1'),
+		labels = AttrMapValue(isListOfStringsOrNone, desc="optional list of labels to use for each data point"),
+		startAngle = AttrMapValue(isNumber, desc="angle of first slice; like the compass, 0 is due North"),
+		direction = AttrMapValue( OneOf(('clockwise', 'anticlockwise')), desc="'clockwise' or 'anticlockwise'"),
+		defaultStyles = AttrMapValue(None, desc="collection of wedge descriptor objects"),
 		)
 	
 	def __init__(self):

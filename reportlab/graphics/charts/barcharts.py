@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.15 2001/06/11 07:52:09 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.16 2001/06/13 06:19:14 andy_robinson Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -100,7 +100,7 @@ class BarChart(Widget):
 
         # this defines two series of 3 points.  Just an example.
         self.data = [(100,110,120,130),
-                     (70, 80, 80, 90)]
+                     (70, 80, None, 90)]
         self.categoryNames = ('North','South','East','West')
         # we really need some well-designed default lists of
         # colors e.g. from Tufte.  These will be used in a
@@ -144,6 +144,10 @@ class BarChart(Widget):
         m, M = None, None
         for row in data:
             for val in row:
+                if val is None:  # support missing values
+                    val = 0
+                if val is None:
+                    val = 0
                 if val < m:
                     m = val
                 if val > M:

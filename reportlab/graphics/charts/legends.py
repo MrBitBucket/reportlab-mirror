@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.8 2001/05/25 15:43:11 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.9 2001/06/13 06:19:14 andy_robinson Exp $
 """This will be a collection of legends to be used with charts.
 """
 
@@ -36,7 +36,8 @@ class Legend(Widget):
 
         fontName = AttrMapValue(isString),
         fontSize = AttrMapValue(isNumber),
-        fillColor = AttrMapValue(isColorOrNone)
+        fillColor = AttrMapValue(isColorOrNone),
+        strokeColor = AttrMapValue(isColorOrNone)
        )
 
     def __init__(self):
@@ -72,6 +73,7 @@ class Legend(Widget):
         self.fontName = STATE_DEFAULTS['fontName']
         self.fontSize = STATE_DEFAULTS['fontSize']
         self.fillColor = STATE_DEFAULTS['fillColor']
+        self.strokeColor = STATE_DEFAULTS['strokeColor']
 
 
     def _calculateMaxWidth(self, colorNamePairs):
@@ -117,9 +119,10 @@ class Legend(Widget):
             t.fontName = self.fontName
             t.fontSize = self.fontSize
             t.fillColor = self.fillColor
-
+            
             r.fillColor = col
-
+            r.strokeColor = self.strokeColor
+            
             g.add(t)
             g.add(r)
 

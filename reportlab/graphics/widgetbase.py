@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.23 2001/06/07 14:44:47 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.24 2001/06/13 06:19:14 andy_robinson Exp $
 import string
 
 from reportlab.graphics import shapes
@@ -210,7 +210,7 @@ class TypedPropertyCollection(PropHolder):
 		# differs from the parent
 		props = {}
 
-		for (key, value) in self._value.getProperties(self).items():
+		for (key, value) in self._value.getProperties().items():
 			props['%s' % key] = value
 
 		for idx in self._children.keys():
