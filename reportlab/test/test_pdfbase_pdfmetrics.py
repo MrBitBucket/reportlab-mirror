@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pdfbase_pdfmetrics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_pdfmetrics.py,v 1.6 2001/04/18 10:48:50 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_pdfmetrics.py,v 1.7 2001/05/30 15:10:56 rgbecker Exp $
 #test_pdfbase_pdfmetrics_widths
 """
 Various tests for PDF metrics.
@@ -102,7 +102,6 @@ if __name__=='__main__':
     (2) test_pdfbase_pdfmetrics.py fontname - " " for just one font."""
     import sys
     verbose = 1
-    global fontNamesToTest
     # accept font names as arguments; otherwise it does the lot
     if len(sys.argv) > 1:
         for arg in sys.argv[1:]:

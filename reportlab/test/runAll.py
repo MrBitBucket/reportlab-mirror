@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/runAll.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.5 2001/05/18 13:04:27 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.6 2001/05/30 15:10:56 rgbecker Exp $
 
 
 """Runs all test files in all subfolders.
@@ -17,7 +17,7 @@ def subFoldersOfFolder(folder):
     "Return a list of full paths of all subfolders."
 
     files = os.listdir(folder)
-    files = map(lambda f:os.path.join(folder, f), files)
+    files = map(lambda f,folder=folder:os.path.join(folder, f), files)
     subFolders = filter(lambda f: os.path.isdir(f), files)
 
     return subFolders
