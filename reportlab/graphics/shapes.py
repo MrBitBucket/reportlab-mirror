@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.60 2001/10/11 16:04:41 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.61 2001/10/15 13:45:14 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -694,7 +694,7 @@ class Path(SolidShape):
 	def closePath(self):
 		self.operators.append(_CLOSEPATH)
 
-def definePath(pathSegs=[],isClipPath=0,**kw):
+def definePath(pathSegs=[],isClipPath=0, dx=0, dy=0, **kw):
 	O = []
 	P = []
 	for seg in pathSegs:
@@ -711,6 +711,9 @@ def definePath(pathSegs=[],isClipPath=0,**kw):
 			raise ValueError, '%s bad arguments %s' % (opName,str(args))
 		O.append(op)
 		P.extend(args)
+	for d,o in (dx,0), (dy,1):
+		for i in xrange(o,len(P),2):
+			P[i] = P[i]+d
 	return apply(Path,(P,O,isClipPath),kw)
 
 class Rect(SolidShape):
