@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.23 2001/10/26 14:03:13 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.24 2001/10/26 14:21:01 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.23 2001/10/26 14:03:13 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.24 2001/10/26 14:21:01 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -635,19 +635,17 @@ static PyObject *_sameFrag(PyObject *self, PyObject* args)
 		PyObject *fa, *ga;
 		fa = PyObject_GetAttrString(f,*p);
 		if(!fa){
-L1:			Py_DECREF(fa);
-L2:			Py_INCREF(Py_None);
-			return Py_None;
+L1:			return NULL;
 			}
 		ga = PyObject_GetAttrString(g,*p);
-		if(!fa){
-			Py_DECREF(ga);
+		if(!ga){
+			Py_DECREF(fa);
 			goto L1;
 			}
 		t = PyObject_Compare(fa,ga);
 		Py_DECREF(fa);
 		Py_DECREF(ga);
-		if(PyErr_Occurred()) goto L2;
+		if(PyErr_Occurred()) goto L1;
 		if(t) goto L0;
 		}
 	r = 1;
