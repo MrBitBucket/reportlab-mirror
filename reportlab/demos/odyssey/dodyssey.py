@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/odyssey/dodyssey.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/odyssey/dodyssey.py,v 1.9 2000/11/13 15:26:46 rgbecker Exp $
-__version__=''' $Id: dodyssey.py,v 1.9 2000/11/13 15:26:46 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/odyssey/dodyssey.py,v 1.10 2001/02/28 19:28:04 rgbecker Exp $
+__version__=''' $Id: dodyssey.py,v 1.10 2001/02/28 19:28:04 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -72,7 +72,7 @@ def chapter(txt, style=ChapterStyle):
 	Elements.append(NextPageTemplate('OneCol'))
 	newPage()
 	chNum = chNum + 1
-	Elements.append(Paragraph(('<onDraw name=myOnDrawCB label="chap %d">'%chNum)+txt, style))
+	Elements.append(Paragraph(('foo<onDraw name=myOnDrawCB label="chap %d"> '%chNum)+txt, style))
 	Elements.append(Spacer(0.2*inch, 0.3*inch))
 	if useTwoCol:
 		Elements.append(NextPageTemplate('TwoCol'))
