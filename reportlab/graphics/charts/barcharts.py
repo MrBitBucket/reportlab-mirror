@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.5 2001/04/09 17:07:20 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.6 2001/04/09 22:04:16 dinu_gherman Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -78,10 +78,8 @@ class BarChart(Widget):
 
 
 class VerticalBarChart(BarChart):
-    """Bar chart with multiple side-by-side bars.
-
-    Variants will be provided for stacked and 100% charts,
-    probably by running all three off a common base class."""
+    """Vertical bar chart with multiple side-by-side bars.
+    """
 
     _attrMap = {
         'debug':isNumber,
@@ -319,10 +317,8 @@ class VerticalBarChart(BarChart):
         
 
 class HorizontalBarChart(BarChart):
-    """Bar chart with multiple side-by-side bars.
-
-    Variants will be provided for stacked and 100% charts,
-    probably by running all three off a common base class."""
+    """Horizontal bar chart with multiple side-by-side bars.
+    """
 
     _attrMap = {
         'debug':isNumber,
