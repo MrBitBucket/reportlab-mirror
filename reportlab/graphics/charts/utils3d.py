@@ -17,7 +17,7 @@ def _draw_3d_bar(G, x1, x2, y0, yhigh, xdepth, ydepth,
     def _add_3d_bar(x1, x2, y1, y2, xoff, yoff,
                     G=G,strokeColor=strokeColor, strokeWidth=strokeWidth, fillColor=fillColor):
         G.add(Polygon((x1,y1,x1+xoff, y1+yoff,x2+xoff, y2+yoff,x2,y2),
-            strokeWidth=strokeWidth, strokeColor=strokeColor, fillColor=fillColor))
+            strokeWidth=strokeWidth, strokeColor=strokeColor, fillColor=fillColor,strokeLineJoin=1))
 
     usd = max(y0, yhigh)
     if xdepth or ydepth:
@@ -27,7 +27,7 @@ def _draw_3d_bar(G, x1, x2, y0, yhigh, xdepth, ydepth,
         _add_3d_bar(x1, x2, usd, usd, xdepth, ydepth)   #top
 
     G.add(Polygon((x1,y0,x2,y0,x2,yhigh,x1,yhigh),
-        strokeColor=strokeColor, strokeWidth=strokeWidth, fillColor=fillColor)) #front
+        strokeColor=strokeColor, strokeWidth=strokeWidth, fillColor=fillColor,strokeLineJoin=1)) #front
 
     if xdepth or ydepth:
         G.add(Line( x1, usd, x2, usd, strokeWidth=strokeWidth, strokeColor=strokeColor or fillColorShaded))
@@ -80,7 +80,6 @@ def _draw_3d_line( G, x0, x1, y0, y1,
         Y.sort(_ystrip_cmp)
         for y in Y:
             c = y.slope>depth_slope and y.fillColorShaded or y.fillColor
-            print 'Poly([%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f])'% tuple(_ystrip_poly(x[0], x[1], y.y0, y.y1, xdepth, -ydepth))
             G.add(Polygon(_ystrip_poly(x[0], x[1], y.y0, y.y1, xdepth, ydepth),
                 fillColor = c, strokeColor=c, strokeWidth=xdelta*0.6))
 
