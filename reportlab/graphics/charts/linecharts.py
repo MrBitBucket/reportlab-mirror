@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.16 2001/10/03 08:21:16 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.17 2001/10/10 23:14:51 andy_robinson Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
@@ -13,6 +13,7 @@ from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, \
 									isListOfStringsOrNone, SequenceOf
 from reportlab.lib.attrmap import *
+from reportlab.lib.formatters import Formatter
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing
 from reportlab.graphics.widgets.signsandsymbols import NoEntry
@@ -228,6 +229,8 @@ class HorizontalLineChart(LineChart):
 		elif type(labelFmt) is StringType:
 			labelText = labelFmt % labelValue
 		elif type(labelFmt) is FunctionType:
+			labelText = labelFmt(labelValue)
+		elif isinstance(labelFmt, Formatter):
 			labelText = labelFmt(labelValue)
 		else:
 			msg = "Unknown formatter type %s, expected string or function"

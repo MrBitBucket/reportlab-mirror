@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.23 2001/10/03 12:35:14 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.24 2001/10/10 23:14:51 andy_robinson Exp $
 """This module defines a very preliminary Line Plot example.
 """
 
@@ -199,6 +199,8 @@ class LinePlot(Widget):
 		elif type(labelFmt) is StringType:
 			labelText = labelFmt % labelValue
 		elif type(labelFmt) is FunctionType:
+			labelText = labelFmt(labelValue)
+		elif isinstance(labelFmt, Formatter):
 			labelText = labelFmt(labelValue)
 		else:
 			msg = "Unknown formatter type %s, expected string or function"	

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.52 2001/10/05 12:24:25 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.53 2001/10/10 23:14:51 andy_robinson Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -15,6 +15,7 @@ from types import FunctionType, StringType
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf, isBoolean
+from reportlab.lib.formatters import Formatter, DecimalFormatter
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
@@ -292,6 +293,9 @@ class BarChart(Widget):
 		elif type(labelFmt) is StringType:
 			labelText = labelFmt % self.data[rowNo][colNo]
 		elif type(labelFmt) is FunctionType:
+			labelText = labelFmt(self.data[rowNo][colNo])
+		elif isinstance(labelFmt, Formatter):
+			#these are callable objects
 			labelText = labelFmt(self.data[rowNo][colNo])
 		else:
 			msg = "Unknown formatter type %s, expected string or function" % labelFmt
