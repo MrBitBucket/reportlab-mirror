@@ -204,7 +204,11 @@ class Renderer:
         # just do the contents.  Some renderers might need to override this
         # if they need a flipped transform
         for childNode in group.contents:
-            self.drawNode(childNode)
+            if isinstance(childNode, UserNode):
+                node2 = childNode.provideNode()
+            else:
+                node2 = childNode
+            self.drawNode(node2)
 
     def drawWedge(self, wedge):
         # by default ask the wedge to make a polygon of itself and draw that!

@@ -183,8 +183,6 @@ class TypedPropertyCollection(Widget):
 
         return props
                 
-                        
-
 class TwoCircles(Widget):
     def __init__(self):
         self.leftCircle = shapes.Circle(100,100,20, fillColor=colors.red)
@@ -290,11 +288,18 @@ def test():
     f = Face()
     f.skinColor = colors.yellow
     f.mood = "sad"
-    d.add(f)
+    d.add(f, name='theFace')
+    print 'drawing 1 properties:'
+    d.dumpProperties()
     renderPDF.drawToFile(d, 'face.pdf', 'A Sample Widget')
     print 'saved face.pdf'
 
-    tf = TwoFaces()
+    d2 = d.expandUserNodes0()
+    renderPDF.drawToFile(d2, 'face_copy.pdf', 'An expanded drawing')
+    print 'saved face_copy.pdf'
+    print 'drawing 2 properties:'
+    d2.dumpProperties()
+    
     
 
 if __name__=='__main__':

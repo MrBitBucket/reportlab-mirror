@@ -271,6 +271,10 @@ class Shape:
             #print 'setting keyword %s.%s = %s' % (self, key, value)
             setattr(self, key, value)
 
+    def copy0(self):
+        """Return a clone of this shape."""
+        # implement this in the descendants as they need the right init methods.
+        raise NotImplementedError, "No copy method implemented for %s" % self.__class__.__name__
        
     def getProperties(self):
         """Interface to make it easy to extract automatic
@@ -376,7 +380,70 @@ class Drawing(Shape, Flowable):
         import renderPDF
         R = renderPDF._PDFRenderer()
         R.draw(self, self.canv, 0, 0)
-    
+
+    def expandUserNodes0(self):
+        """Return a new drawing which only contains primitive shapes."""
+
+        # many limitations - shared nodes become multiple ones,
+        newDrawing = Drawing(self.width, self.height)
+        newDrawing._attrMap = self._attrMap.copy()
+
+        for child in self.contents:
+            if isinstance(child, UserNode):
+                newChild = child.provideNode()
+            elif isinstance(child, Group):
+                newChild = child.expandUserNodes0()
+            else:
+                newChild = child.copy0()
+            newDrawing.contents.append(newChild)
+        # they may have names.  reproduce them
+
+        for (oldKey, oldValue) in self.__dict__.items():
+            if oldValue in self.contents:
+                pos = mylist.index(oldValue)
+                setattr(newDrawing, oldKey, newDrawing.contents[pos])
+
+        return newDrawing
+
+    def copy0(self):
+        """Returns a deep copy of the drawing."""
+        
+        newDrawing = Drawing(self.width, self.height)
+        newDrawing._attrMap = self._attrMap.copy0()
+        for child in self.contents:
+            newDrawing.contents.append(child)
+
+        for (oldKey, oldValue) in self.__dict__.items():
+            if oldValue in self.contents:
+                pos = self.contents.index(oldValue)
+                setattr(newDrawing, oldKey, newDrawing.contents[pos])
+
+        return newDrawing
+            
+    def expandUserNodes0(self):
+        """Return a new group which only contains primitive shapes."""
+
+        # many limitations - shared nodes become multiple ones,
+        newDrawing = Drawing(self.width, self.height)
+        newDrawing._attrMap = self._attrMap.copy0()
+
+        for child in self.contents:
+            if isinstance(child, UserNode):
+                newChild = child.provideNode()
+            elif isinstance(child, Group):
+                newChild = child.expandUserNodes0()
+            else:
+                newChild = child.copy0()
+            newDrawing.contents.append(newChild)
+        # they may have names.  reproduce them
+
+        for (oldKey, oldValue) in self.__dict__.items():
+            if oldValue in self.contents:
+                pos = self.contents.index(oldValue)
+                setattr(newDrawing, oldKey, newDrawing.contents[pos])
+
+        return newDrawing
+        
 
 class Group(Shape):
     """Groups elements together.  May apply a transform
@@ -416,7 +483,46 @@ class Group(Shape):
             #at this point too
             self._attrMap[name] = isValidChild
             setattr(self, name, node)
+
+    def copy0(self):
+        """Returns a new group with recursively copied contents.
+
+        Expands all user nodes if they do not define a copy method."""
+        newGroup = Group()
+        newGroup.transform = self.transform[:]
+        for child in self.contents:
+            newGroup.append(child.copy())
+        # they may have names.  reproduce them
+        for (oldKey, oldValue) in self.__dict__.items():
+            if oldValue in self.contents:
+                pos = mylist.index(oldValue)
+                setattr(newGroup, oldKey, newGroup.contents[pos])
+        return newGroup
+
+    def expandUserNodes0(self):
+        """Return a new group which only contains primitive shapes."""
+
+        # many limitations - shared nodes become multiple ones,
+        newGroup = Group()
+        newGroup.transform = self.transform[:]
         
+        for child in self.contents:
+            if isinstance(child, UserNode):
+                newChild = child.provideNode()
+            elif isinstance(child, Group):
+                newChild = child.expandUserNodes0()
+            else:
+                newChild = child.copy()
+            newGroup.contents.append(newChild)
+        # they may have names.  reproduce them
+
+        for (oldKey, oldValue) in self.__dict__.items():
+            if oldValue in self.contents:
+                pos = mylist.index(oldValue)
+                setattr(newGroup, oldKey, newGroup.contents[pos])
+
+        return newGroup
+            
 
     def rotate(self, theta):
         """Convenience to help you set transforms"""
@@ -532,6 +638,11 @@ class Rect(SolidShape):
         self.rx = rx
         self.ry = ry    
 
+    def copy0(self):
+        new = Rect(self.x, self.y, self.width, self.height)
+        new.setProperties(self.getProperties())
+        return new
+    
 class Circle(SolidShape):
     _attrMap = {
         'strokeColor': None,
@@ -551,6 +662,11 @@ class Circle(SolidShape):
         self.cx = cx
         self.cy = cy
         self.r = r
+
+    def copy0(self):
+        new = Circle(self.cx, self.cy, self.r)
+        new.setProperties(self.getProperties())
+        return new
 
 class Ellipse(SolidShape):
     _attrMap = {
@@ -572,6 +688,11 @@ class Ellipse(SolidShape):
         self.cy = cy
         self.rx = rx
         self.ry = ry
+
+    def copy0(self):
+        new = Ellipse(self.cx, self.cy, self.rx, self.ry)
+        new.setProperties(self.getProperties())
+        return new
 
 class Wedge(SolidShape):
     """A "slice of a pie" by default translates to a polygon moves anticlockwise
@@ -635,6 +756,16 @@ class Wedge(SolidShape):
         a(x); a(y)
         return Polygon(points)
 
+    def copy0(self):
+        new = Wedge(self.centerx,
+                    self.centery,
+                    self.radius,
+                    self.startangledegrees,
+                    self.endangledegrees)
+        new.setProperties(self.getProperties())
+        return new
+
+
 class Polygon(SolidShape):
     """Defines a closed shape; Is implicitly
     joined back to the start for you."""
@@ -652,6 +783,11 @@ class Polygon(SolidShape):
         SolidShape.__init__(self, kw)
         assert len(points) % 2 == 0, 'Point list must have even number of elements!'
         self.points = points
+
+    def copy0(self):
+        new = Polygon(self.points)
+        new.setProperties(self.getProperties())
+        return new
 
 class PolyLine(LineShape):
     """Series of line segments.  Does not define a
@@ -680,6 +816,11 @@ class PolyLine(LineShape):
                 assert len(points) % 2 == 0, 'Point list must have even number of elements!'
         self.points = points
 
+    def copy0(self):
+        new = PolyLine(self.points)
+        new.setProperties(self.getProperties())
+        return new
+
 class String(Shape):
     """Not checked against the spec, just a way to make something work.
     Can be anchored left, middle or end."""
@@ -703,21 +844,25 @@ class String(Shape):
         self.fillColor = STATE_DEFAULTS['fillColor']
         self.setProperties(kw)
 
+    def copy0(self):
+        new = String(self.x, self.y, self.text)
+        new.setProperties(self.getProperties())
+        return new
+
 class UserNode:
-        """A simple template for creating a new node.  The user (Python
-        programmer) may subclasses this.  provideNode() must be defined to
-        provide a Shape primitive when called by a renderer.  It does
-        NOT inherit from Shape, as the renderer always replaces it, and
-        your own classes can safely inherit from it without getting
-        lots of unintended behaviour."""
+    """A simple template for creating a new node.  The user (Python
+    programmer) may subclasses this.  provideNode() must be defined to
+    provide a Shape primitive when called by a renderer.  It does
+    NOT inherit from Shape, as the renderer always replaces it, and
+    your own classes can safely inherit from it without getting
+    lots of unintended behaviour."""
 
-        def provideNode(self):
-                """Override this to create your own node. This lets widgets be
-                added to drawings; they must create a shape (typically a group)
-                so that the renderer can draw the custom node."""
-                raise NotImplementedError, "this method must be redefined by the user/programmer"
-
-
+    def provideNode(self):
+        """Override this to create your own node. This lets widgets be
+        added to drawings; they must create a shape (typically a group)
+        so that the renderer can draw the custom node."""
+        raise NotImplementedError, "this method must be redefined by the user/programmer"
+    
 
 
 def test():

@@ -141,7 +141,11 @@ class Label(Widget):
 
             
         for line in self._lines:
-            g.add(String(x, y, line, textAnchor = self.textAnchor))
+            s = String(x, y, line)
+            s.textAnchor = self.textAnchor
+            s.fontName = self.fontName
+            s.fontSize = self.fontSize
+            g.add(s)
             y = y - self.leading
 
         return g
