@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_graphics_charts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_graphics_charts.py,v 1.15 2004/03/26 11:34:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_graphics_charts.py,v 1.16 2004/03/26 14:20:44 rgbecker Exp $
 """
 Tests for chart class.
 """
@@ -10,7 +10,7 @@ import os, sys, copy
 from os.path import join, basename, splitext
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.lib.pagesizes import A4
@@ -187,8 +187,7 @@ class ChartTestCase(unittest.TestCase):
         "Hook method for deconstructing the test fixture after testing it."
 
         if FINISHED:
-            from reportlab.lib.utils import get_rl_tempdir
-            path = join(get_rl_tempdir('reportlab_test'),'test_graphics_charts.pdf')
+            path=outputfile('test_graphics_charts.pdf')
             doc = MyDocTemplate(path)
             doc.build(self.story)
 

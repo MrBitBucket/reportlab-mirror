@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_xref.py,v 1.3 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_xref.py,v 1.4 2004/03/26 14:20:44 rgbecker Exp $
 """Test long documents with indexes, tables and cross-references
 """
 
@@ -11,7 +11,7 @@ from operator import truth
 from types import StringType, ListType
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.lib import colors
 from reportlab.lib.units import cm
@@ -118,7 +118,7 @@ def _test0(self):
     story.append(Paragraph('The Index which goes at the back', h1))
     story.append(SimpleIndex())
 
-    doc = MyDocTemplate('test_platypus_xref.pdf')
+    doc = MyDocTemplate(outputfile('test_platypus_xref.pdf'))
     doc.multiBuild(story)
 
 

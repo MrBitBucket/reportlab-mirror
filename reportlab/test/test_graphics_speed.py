@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_graphics_speed.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_graphics_speed.py,v 1.12 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_graphics_speed.py,v 1.13 2004/03/26 14:20:44 rgbecker Exp $
 """
 This does a test drawing with lots of things in it, running
 with and without attribute checking.
@@ -14,7 +14,7 @@ import os, sys, time, profile
 
 import reportlab.rl_config
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.pdfgen.canvas import Canvas
@@ -35,7 +35,7 @@ class GraphicsSpeedTestCase(unittest.TestCase):
         """
         reportlab.rl_config.shapeChecking = not isFast
 
-        pdfPath = 'test_graphics_speed_fast.pdf'
+        pdfPath = outputfile('test_graphics_speed_fast.pdf')
         c = Canvas(pdfPath)
         t0 = time.time()
 
@@ -59,7 +59,7 @@ class GraphicsSpeedTestCase(unittest.TestCase):
         t1 = time.time()
 
         result = 'drew %d pie charts in %0.4f' % (num, t1 - t0)
-        open('test_graphics_speed_test%s.log' % (isFast+1), 'w').write(result)
+        open(outputfile('test_graphics_speed_test%s.log' % (isFast+1)), 'w').write(result)
 
 
     def test1(self, isFast=1):
@@ -71,7 +71,7 @@ class GraphicsSpeedTestCase(unittest.TestCase):
     def test2(self):
         "This is a profiled version of test1()."
 
-        fileName = 'test_graphics_speed_profile.log'
+        fileName = outputfile('test_graphics_speed_profile.log')
         # This runs ok, when only this test script is executed,
         # but fails, when imported from runAll.py...
 ##        profile.run("t = GraphicsSpeedTestCase('test2')", fileName)

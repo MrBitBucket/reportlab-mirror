@@ -7,7 +7,7 @@ Tests for RLG Image shapes.
 import os
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.graphics.shapes import Image, Drawing
 from reportlab.graphics import renderPDF
@@ -31,7 +31,7 @@ class ImageTestCase(unittest.TestCase):
         d = Drawing(A4[0], A4[1])
         for img in IMAGES:
             d.add(img)
-        outPath = "test_graphics_images.pdf"
+        outPath = outputfile("test_graphics_images.pdf")
         renderPDF.drawToFile(d, outPath) #, '')
         assert os.path.exists(outPath) == 1
 

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_lib_colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_lib_colors.py,v 1.8 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_lib_colors.py,v 1.9 2004/03/26 14:20:44 rgbecker Exp $
 """Tests for the reportlab.lib.colors module.
 """
 
@@ -9,7 +9,7 @@
 import os, math
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.pdfgen.canvas import Canvas
 import reportlab.pdfgen.canvas
@@ -110,7 +110,7 @@ class ColorTestCase(unittest.TestCase):
     def test5(self):
         "List and display all named colors and their gray equivalents."
 
-        canvas = reportlab.pdfgen.canvas.Canvas('test_lib_colors.pdf')
+        canvas = reportlab.pdfgen.canvas.Canvas(outputfile('test_lib_colors.pdf'))
 
         #do all named colors
         framePage(canvas, 'Color Demo - page %d' % canvas.getPageNumber())

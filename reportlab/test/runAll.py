@@ -2,12 +2,12 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/runAll.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.15 2004/03/23 14:46:35 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.16 2004/03/26 14:20:44 rgbecker Exp $
 """Runs all test files in all subfolders.
 """
 import os, glob, sys, string, traceback
 from reportlab.test import unittest
-from reportlab.test.utils import GlobDirectoryWalker
+from reportlab.test.utils import GlobDirectoryWalker, outputfile
 
 def makeSuite(folder, exclude=[],nonImportable=[],pattern='test_*.py'):
     "Build a test suite of all available test files."
@@ -37,25 +37,27 @@ def main(pattern='test_*.py'):
         folder = os.path.dirname(sys.argv[0]) or os.getcwd()
     from reportlab.lib.utils import isSourceDistro
     haveSRC = isSourceDistro()
+    _dbg = open('/tmp/_runAll.dbg','w')
+    print >>_dbg, "outputfile('')",outputfile('')
+
+    def cleanup(folder,patterns=('*.pdf', '*.log','*.svg','runAll.txt')):
+        for pat in patterns:
+            for filename in GlobDirectoryWalker(folder, pattern=pat):
+                try:
+                    os.remove(filename)
+                except:
+                    pass
 
     # special case for reportlab/test directory - clean up
     # all PDF & log files before starting run.  You don't
     # want this if reusing runAll anywhere else.
-    if string.find(folder, 'reportlab' + os.sep + 'test') > -1:
-        #print 'cleaning up previous output'
-        for pat in ('*.pdf', '*.log'):
-            for filename in GlobDirectoryWalker(folder, pattern=pat):
-                os.remove(filename)
+    if string.find(folder, 'reportlab' + os.sep + 'test') > -1: cleanup(folder)
+    cleanup(outputfile(''))
 
     NI = []
     testSuite = makeSuite(folder,nonImportable=NI,pattern=pattern+(not haveSRC and 'c' or ''))
     unittest.TextTestRunner().run(testSuite)
-    if haveSRC:
-        for filename in GlobDirectoryWalker(folder, '*.pyc'):
-            try:
-                os.remove(filename)
-            except:
-                pass
+    if haveSRC: cleanup(folder,patterns=('*.pyc','*.pyo'))
     if NI:
         sys.stderr.write('\n###################### the following tests could not be imported\n')
         for f,tb in NI:

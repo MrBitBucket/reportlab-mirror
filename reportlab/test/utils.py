@@ -10,6 +10,12 @@ from reportlab.test import unittest
 
 # Helper functions.
 
+def outputfile(fn):
+    from reportlab.lib.utils import get_rl_tempdir
+    D = get_rl_tempdir('reportlab_test')
+    if fn: D = os.path.join(D,fn)
+    return D
+
 def makeSuiteForClasses(*classes):
     "Return a test suite with tests loaded from provided classes."
 

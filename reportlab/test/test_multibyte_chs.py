@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/test_multibyte_chs.py,v 1.4 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_multibyte_chs.py,v 1.5 2004/03/26 14:20:44 rgbecker Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -12,7 +12,7 @@ by classes in reportlab.pdfbase.cidfonts
 import string, os
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen.canvas import Canvas
@@ -40,7 +40,7 @@ class CHSFontTests(unittest.TestCase):
             return
         pdfmetrics.registerFont(CIDFont('STSong-Light',enc))
 
-        c = Canvas('test_multibyte_chs.pdf')
+        c = Canvas(outputfile('test_multibyte_chs.pdf'))
         c.setFont('Helvetica', 30)
         c.drawString(100,700, 'Simplified Chinese Font Support')
 
@@ -103,7 +103,7 @@ class CHSFontTests(unittest.TestCase):
 
         c.save()
         if VERBOSE:
-            print 'saved test_multibyte_chs.pdf'
+            print 'saved '+outputfile('test_multibyte_chs.pdf')
 
 
 def makeSuite():

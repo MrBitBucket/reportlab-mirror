@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_toc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_toc.py,v 1.10 2004/03/26 11:34:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_toc.py,v 1.11 2004/03/26 14:20:44 rgbecker Exp $
 """Tests for the Platypus TableOfContents class.
 
 Currently there is only one such test. Most such tests, like this
@@ -15,7 +15,7 @@ from os.path import join, basename, splitext
 from math import sqrt
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
@@ -169,8 +169,7 @@ class TocTestCase(unittest.TestCase):
             para = Paragraph(txt, makeBodyStyle())
             story.append(para)
 
-        from reportlab.lib.utils import get_rl_tempdir
-        path = join(get_rl_tempdir('reportlab_test'), 'test_platypus_toc.pdf')
+        path = outputfile('test_platypus_toc.pdf')
         doc = MyDocTemplate(path)
         doc.multiBuild(story)
 

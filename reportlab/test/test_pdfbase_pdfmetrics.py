@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pdfbase_pdfmetrics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_pdfmetrics.py,v 1.10 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_pdfmetrics.py,v 1.11 2004/03/26 14:20:44 rgbecker Exp $
 #test_pdfbase_pdfmetrics_widths
 """
 Various tests for PDF metrics.
@@ -11,7 +11,7 @@ glyph in every standard font.  Long!
 """
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase import _fontdata
@@ -71,7 +71,7 @@ def makeWidthTestForAllGlyphs(canv, fontName, outlining=1):
 
 
 def makeTestDoc(fontNames):
-    filename = 'test_pdfbase_pdfmetrics.pdf'
+    filename = outputfile('test_pdfbase_pdfmetrics.pdf')
     c = Canvas(filename)
     c.bookmarkPage('Glyph Width Tests')
     c.showOutline()

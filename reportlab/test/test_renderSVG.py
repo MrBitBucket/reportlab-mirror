@@ -5,7 +5,7 @@ from xml.dom import minidom
 from xml.sax._exceptions import SAXReaderNotAvailable
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.graphics.shapes import *
 from reportlab.graphics import renderSVG
@@ -57,7 +57,7 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
     def test0(self):
         "Test two strings in drawing."
 
-        path = "test_renderSVG_simple_test0.svg"
+        path = outputfile("test_renderSVG_simple_test0.svg")
 
         d = Drawing(200, 100)
         d.add(String(0, 0, "foo"))
@@ -81,7 +81,7 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
     def test1(self):
         "Test two strings in group in drawing."
 
-        path = "test_renderSVG_simple_test1.svg"
+        path = outputfile("test_renderSVG_simple_test1.svg")
 
         d = Drawing(200, 100)
         g = Group()
@@ -109,7 +109,7 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
     def test2(self):
         "Test two strings in transformed group in drawing."
 
-        path = "test_renderSVG_simple_test2.svg"
+        path = outputfile("test_renderSVG_simple_test2.svg")
 
         d = Drawing(200, 100)
         g = Group()
@@ -144,7 +144,7 @@ class RenderSvgAxesTestCase(unittest.TestCase):
     def test0(self):
         "Test two strings in drawing."
 
-        path = "axestest0.svg"
+        path = outputfile("axestest0.svg")
         from reportlab.graphics.charts.axes import XCategoryAxis
 
         d = XCategoryAxis().demo()

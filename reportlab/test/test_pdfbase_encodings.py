@@ -1,5 +1,5 @@
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
@@ -12,7 +12,7 @@ class EncodingTestCase(unittest.TestCase):
         "Make custom encodings of standard fonts"
 
         # make a custom encoded font.
-        c = Canvas('test_pdfbase_encodings.pdf')
+        c = Canvas(outputfile('test_pdfbase_encodings.pdf'))
         c.setPageCompression(0)
         c.setFont('Helvetica', 12)
         c.drawString(100, 700, 'The text below should be in a custom encoding in which all vowels become "z"')

@@ -1,15 +1,15 @@
 #!/bin/env python
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_pycanvas.py,v 1.5 2004/03/22 18:08:50 rgbecker Exp $
-__version__=''' $Id: test_pdfgen_pycanvas.py,v 1.5 2004/03/22 18:08:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_pycanvas.py,v 1.6 2004/03/26 14:20:44 rgbecker Exp $
+__version__=''' $Id: test_pdfgen_pycanvas.py,v 1.6 2004/03/26 14:20:44 rgbecker Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas and the pycanvas module to output Python source code.
 
 import string, os
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.pdfgen import pycanvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
@@ -747,7 +747,7 @@ def run(filename):
     c = makeDocument(filename)
     c.save()
     source = str(c)
-    open("test_pdfgen_pycanvas_out.txt","w").write(source)
+    open(outputfile("test_pdfgen_pycanvas_out.txt"),"w").write(source)
     import reportlab.rl_config
     if reportlab.rl_config.verbose:
         print source
@@ -779,8 +779,7 @@ class PdfgenTestCase(unittest.TestCase):
 
     def test0(self):
         "Make a PDFgen document with most graphics features"
-        run('test_pdfgen_pycanvas.pdf')
-
+        run(outputfile('test_pdfgen_pycanvas.pdf'))
 
 def makeSuite():
     return makeSuiteForClasses(PdfgenTestCase)

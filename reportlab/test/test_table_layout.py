@@ -13,7 +13,7 @@ from reportlab.platypus.flowables import PageBreak
 import os
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 
 from types import TupleType, ListType, StringType
@@ -339,7 +339,7 @@ class TableTestCase(unittest.TestCase):
         a paragraph when a string will do.
         """, styNormal))
 
-        SimpleDocTemplate('test_table_layout.pdf', showBoundary=1).build(lst)
+        SimpleDocTemplate(outputfile('test_table_layout.pdf'), showBoundary=1).build(lst)
 
 def makeSuite():
     return makeSuiteForClasses(TableTestCase)
@@ -348,5 +348,5 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
-    print 'saved test_table_layout.pdf'
+    print 'saved '+outputfile('test_table_layout.pdf')
 

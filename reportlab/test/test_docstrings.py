@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_docstrings.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_docstrings.py,v 1.11 2003/09/08 16:09:51 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_docstrings.py,v 1.12 2004/03/26 14:20:44 rgbecker Exp $
 
 """This is a test on a package level that find all modules,
 classes, methods and functions that do not have a doc string
@@ -17,7 +17,7 @@ from types import ModuleType, ClassType, MethodType, FunctionType
 
 import reportlab
 from reportlab.test import unittest
-from reportlab.test.utils import SecureTestCase, GlobDirectoryWalker
+from reportlab.test.utils import SecureTestCase, GlobDirectoryWalker, outputfile
 
 
 RL_HOME = os.path.dirname(reportlab.__file__)
@@ -119,7 +119,7 @@ class DocstringTestCase(SecureTestCase):
                 MethodType:'methods',
                 ModuleType:'modules'}[objType]
 
-        path = "test_docstrings-%s.log" % expl
+        path = outputfile("test_docstrings-%s.log" % expl)
         file = open(path, 'w')
         file.write('No doc strings found for the following %s below.\n\n' % expl)
         p = re.compile('__.+__')

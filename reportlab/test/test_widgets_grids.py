@@ -1,6 +1,6 @@
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.lib import colors
 from reportlab.graphics.shapes import Drawing, Group, Line, Rect
@@ -424,24 +424,24 @@ class GridTestCase(unittest.TestCase):
         "Generate PDF and SVG documents of first sample drawing."
 
         d = self.makeDrawing0()
-        renderPDF.drawToFile(d, 'test_widgets_grids0.pdf')
-        renderSVG.drawToFile(d, 'test_widgets_grids0.svg')
+        renderPDF.drawToFile(d, outputfile('test_widgets_grids0.pdf'))
+        renderSVG.drawToFile(d, outputfile('test_widgets_grids0.svg'))
 
 
     def test1(self):
         "Generate PDF and SVG documents of second sample drawing."
 
         d = self.makeDrawing1()
-        renderPDF.drawToFile(d, 'test_widgets_grids1.pdf')
-        renderSVG.drawToFile(d, 'test_widgets_grids1.svg')
+        renderPDF.drawToFile(d, outputfile('test_widgets_grids1.pdf'))
+        renderSVG.drawToFile(d, outputfile('test_widgets_grids1.svg'))
 
 
     def test2(self):
         "Generate PDF and SVG documents of third sample drawing."
 
         d = self.makeDrawing2()
-        renderPDF.drawToFile(d, 'test_widgets_grids2.pdf')
-        renderSVG.drawToFile(d, 'test_widgets_grids2.svg')
+        renderPDF.drawToFile(d, outputfile('test_widgets_grids2.pdf'))
+        renderSVG.drawToFile(d, outputfile('test_widgets_grids2.svg'))
 
 
 def makeSuite():

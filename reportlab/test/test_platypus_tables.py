@@ -2,12 +2,12 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testtables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_tables.py,v 1.3 2002/07/24 19:56:38 andy_robinson Exp $
-__version__=''' $Id: test_platypus_tables.py,v 1.3 2002/07/24 19:56:38 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_tables.py,v 1.4 2004/03/26 14:20:44 rgbecker Exp $
+__version__=''' $Id: test_platypus_tables.py,v 1.4 2004/03/26 14:20:44 rgbecker Exp $ '''
 __doc__='Test script for reportlab.tables'
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle
 from reportlab.lib.units import inch
@@ -41,7 +41,7 @@ def makeStyles():
 
 
 def run():
-    doc = SimpleDocTemplate('test_platypus_tables.pdf', pagesize=(8.5*inch, 11*inch), showBoundary=1)
+    doc = SimpleDocTemplate(outputfile('test_platypus_tables.pdf'), pagesize=(8.5*inch, 11*inch), showBoundary=1)
     styles = makeStyles()
     lst = []
     for style in styles:

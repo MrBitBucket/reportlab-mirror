@@ -2,16 +2,16 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/test_invariant.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_invariant.py,v 1.6 2004/03/23 15:43:13 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_invariant.py,v 1.7 2004/03/26 14:20:44 rgbecker Exp $
 __version__=''' $Id'''
 __doc__="""Verfy that if in invariant mode, repeated runs
 make identical file.  This does NOT test across platforms
 or python versions, only a user can do that :-)"""
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 from reportlab.pdfgen.canvas import Canvas
-filename = 'test_invariant.pdf'
+filename = outputfile('test_invariant.pdf')
 
 class InvarTestCase(unittest.TestCase):
     "Simplest test that makes PDF"
@@ -52,5 +52,5 @@ if __name__ == "__main__":
         raw = open(filename,'rb').read()
         digest = md5.md5(raw).hexdigest()
         major, minor = sys.version_info[0:2]
-        print 'test_invariant.pdf on %s (Python %d.%d):\n    %d bytes, digest %s' % (
-            sys.platform, major, minor, fileSize, digest)
+        print '%s on %s (Python %d.%d):\n    %d bytes, digest %s' % (
+            filename,sys.platform, major, minor, fileSize, digest)

@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/test_hello.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_postscript.py,v 1.3 2004/02/10 00:12:21 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_postscript.py,v 1.4 2004/03/26 14:20:44 rgbecker Exp $
 __version__=''' $Id'''
 __doc__="""Tests Postscript XObjects.
 
@@ -11,7 +11,7 @@ contain graphics and tray commands if exported to
 a Postscript device in Acrobat 4.0"""
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 from reportlab.pdfgen.canvas import Canvas
 
 
@@ -20,7 +20,7 @@ class PostScriptTestCase(unittest.TestCase):
 
     def testVisible(self):
         "Makes a document with extra text - should export and distill"
-        c = Canvas('test_pdfbase_postscript_visible.pdf')
+        c = Canvas(outputfile('test_pdfbase_postscript_visible.pdf'))
         c.setPageCompression(0)
 
         c.setFont('Helvetica-Bold', 18)
@@ -46,7 +46,7 @@ class PostScriptTestCase(unittest.TestCase):
 
     def testTray(self):
         "Makes a document with tray command - only works on printers supporting it"
-        c = Canvas('test_pdfbase_postscript_tray.pdf')
+        c = Canvas(outputfile('test_pdfbase_postscript_tray.pdf'))
         c.setPageCompression(0)
 
         c.setFont('Helvetica-Bold', 18)
@@ -73,6 +73,6 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
-    print 'saved test_pdfgen_postscript_visible.pdf'
-    print 'saved test_pdfgen_postscript_tray.pdf'
+    print 'saved '+outputfile('test_pdfgen_postscript_visible.pdf')
+    print 'saved '+outputfile('test_pdfgen_postscript_tray.pdf')
 

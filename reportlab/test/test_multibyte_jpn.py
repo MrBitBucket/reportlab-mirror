@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/test_multibyte_jpn.py,v 1.5 2003/11/25 00:42:33 rptlab Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_multibyte_jpn.py,v 1.6 2004/03/26 14:20:44 rgbecker Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -12,7 +12,7 @@ by classes in reportlab.pdfbase.cidfonts
 import string, os
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen.canvas import Canvas
@@ -47,7 +47,7 @@ class JapaneseFontTests(unittest.TestCase):
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90ms-RKSJ-H'))
         pdfmetrics.registerFont(CIDFont('HeiseiKakuGo-W5','90ms-RKSJ-H'))
 
-        c = Canvas('test_multibyte_jpn.pdf')
+        c = Canvas(outputfile('test_multibyte_jpn.pdf'))
         c.setFont('Helvetica', 30)
         c.drawString(100,700, 'Japanese Font Support')
 
@@ -270,7 +270,7 @@ Adobe Acrobat 5.0\x82\xc5\x8d\xec\x90\xac\x82\xb5\x82\xbdAdobe PDF\x82\xcd\x81A(
 
         c.save()
         if VERBOSE:
-            print 'saved test_multibyte_jpn.pdf'
+            print 'saved '+outputfile('test_multibyte_jpn.pdf')
 
 
 def makeSuite():

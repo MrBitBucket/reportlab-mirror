@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2003
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_indents.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_indents.py,v 1.2 2004/03/26 11:36:39 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_indents.py,v 1.3 2004/03/26 14:20:44 rgbecker Exp $
 """Tests for context-dependent indentation
 """
 
@@ -11,7 +11,7 @@ from operator import truth
 from types import StringType, ListType
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus.paraparser import ParaParser
@@ -119,19 +119,14 @@ class IndentTestCase(unittest.TestCase):
         story.append(Indenter(0,0))
         story.append(Paragraph("This should be indented 0 points at each edge. " + ("spam " * 25),bt))
         story.append(Indenter(0,0))
-
         story.append(Indenter(36,72))
         story.append(Paragraph(("""This should be indented 36 points at the left
         and 72 at the right.  It should run over more than one frame and one page, and the indent should
         continue on the next page. """ + (random.randint(0,10) * 'x') + ' ') * 35 ,bt))
+
         story.append(Indenter(-36,-72))
-
         story.append(Paragraph("This should be back to normal at each edge. " + ("spam " * 25),bt))
-
-
-
-
-        doc = MyDocTemplate('test_platypus_indents.pdf')
+        doc = MyDocTemplate(outputfile('test_platypus_indents.pdf'))
         doc.multiBuild(story)
 
 

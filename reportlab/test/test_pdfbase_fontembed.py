@@ -1,7 +1,7 @@
 import os
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
@@ -22,7 +22,7 @@ class EmbeddingTestCase(unittest.TestCase):
 
         ok = 1
 
-        c = Canvas('test_pdfbase_fontembed.pdf')
+        c = Canvas(outputfile('test_pdfbase_fontembed.pdf'))
         c.setPageCompression(0)
         c.setFont('Helvetica', 12)
         c.drawString(100, 700, 'This is Helvetica.  The text below should be different fonts...')

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testplatypus.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.16 2004/03/23 13:50:40 rgbecker Exp $
-__version__=''' $Id: test_platypus_general.py,v 1.16 2004/03/23 13:50:40 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.17 2004/03/26 14:20:44 rgbecker Exp $
+__version__=''' $Id: test_platypus_general.py,v 1.17 2004/03/26 14:20:44 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -17,7 +17,7 @@ and drawn into.
 import string, copy, sys, os
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.pdfgen import canvas
 from reportlab import platypus
@@ -492,7 +492,7 @@ def showProgress(pageNo):
 
 
 def run():
-    doc = AndyTemplate('test_platypus_general.pdf')
+    doc = AndyTemplate(outputfile('test_platypus_general.pdf'))
     #doc.setPageCallBack(showProgress)
     commentary = getCommentary()
     examples = getExamples()

@@ -2,7 +2,7 @@
 #this test and associates functionality kinds donated by Ian Sparks.
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pdfgen_links.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_links.py,v 1.2 2004/01/20 22:50:32 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_links.py,v 1.3 2004/03/26 14:20:44 rgbecker Exp $
 """
 Tests for internal links and destinations
 """
@@ -21,7 +21,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 def markPage(c,height=letter[1],width=letter[0]):
     height = height / inch
@@ -32,7 +32,7 @@ def markPage(c,height=letter[1],width=letter[0]):
             c.line(x*inch,0,x*inch,height*inch)
             c.line(0,y*inch,width*inch,y*inch)
 
-fn = "test_pdfgen_links.pdf"
+fn = outputfile("test_pdfgen_links.pdf")
 
 
 class LinkTestCase(unittest.TestCase):

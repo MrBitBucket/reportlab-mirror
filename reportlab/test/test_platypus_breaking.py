@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_breaking.py,v 1.6 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_breaking.py,v 1.7 2004/03/26 14:20:44 rgbecker Exp $
 """Tests pageBreakBefore, frameBreakBefore, keepWithNext...
 """
 
@@ -11,7 +11,7 @@ from operator import truth
 from types import StringType, ListType
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib import colors
@@ -92,7 +92,7 @@ def _test0(self):
                 story.append(Paragraph('I should never be at the bottom of a frame (%d)' % len(story), h3))
                 story.append(Paragraph(randomText(theme=PYTHON, sentences=1)+' (%d)' % len(story), bt))
 
-    doc = MyDocTemplate('test_platypus_breaking.pdf')
+    doc = MyDocTemplate(outputfile('test_platypus_breaking.pdf'))
     doc.multiBuild(story)
 
 

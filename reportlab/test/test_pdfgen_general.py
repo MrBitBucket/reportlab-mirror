@@ -2,15 +2,15 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.21 2004/03/23 15:37:53 rgbecker Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.21 2004/03/23 15:37:53 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.22 2004/03/26 14:20:44 rgbecker Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.22 2004/03/26 14:20:44 rgbecker Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 
 import os, string
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.pdfgen import canvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
@@ -798,12 +798,10 @@ class PdfgenTestCase(unittest.TestCase):
 
     def test0(self):
         "Make a PDFgen document with most graphics features"
-        run('test_pdfgen_general.pdf')
-
+        run(outputfile('test_pdfgen_general.pdf'))
 
 def makeSuite():
     return makeSuiteForClasses(PdfgenTestCase)
-
 
 #noruntests
 if __name__ == "__main__":

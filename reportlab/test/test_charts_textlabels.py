@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_charts_textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_charts_textlabels.py,v 1.6 2004/03/26 11:34:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_charts_textlabels.py,v 1.7 2004/03/26 14:20:44 rgbecker Exp $
 """
 Tests for the text Label class.
 """
@@ -10,7 +10,7 @@ import os, sys, copy
 from os.path import join, basename, splitext
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.lib.pagesizes import A4
@@ -57,7 +57,7 @@ class LabelTestCase(unittest.TestCase):
     def _test0(self):
         "Perform original test function."
 
-        pdfPath = 'test_charts_textlabels.pdf'
+        pdfPath = outputfile('test_charts_textlabels.pdf')
         c = Canvas(pdfPath)
 
         label = Label()
@@ -265,8 +265,7 @@ textAnchor attribute.""", bt))
 
         story.append(PageBreak())
 
-        from reportlab.lib.utils import get_rl_tempdir
-        path = join(get_rl_tempdir('reportlab_test'),'test_charts_textlabels.pdf')
+        path = outputfile('test_charts_textlabels.pdf')
         doc = MyDocTemplate(path)
         doc.multiBuild(story)
 

@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_source_chars.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_source_chars.py,v 1.6 2004/03/23 14:15:47 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_source_chars.py,v 1.7 2004/03/26 14:20:44 rgbecker Exp $
 
 """This tests for things in source files.  Initially, absence of tabs :-)
 """
@@ -12,15 +12,19 @@ from types import ModuleType, ClassType, MethodType, FunctionType
 
 import reportlab
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
-from reportlab.test.utils import SecureTestCase, GlobDirectoryWalker
+from reportlab.test.utils import makeSuiteForClasses, outputfile, SecureTestCase, GlobDirectoryWalker
 from reportlab.lib.utils import open_and_read
 
 
 class SourceTester(SecureTestCase):
     def setUp(self):
         SecureTestCase.setUp(self)
-        self.output = open(os.path.splitext(sys.argv[0])[0]+'.txt','w')
+        try:
+            fn = __file__
+        except:
+            fn = sys.argv[0]
+
+        self.output = open(outputfile(os.path.splitext(os.path.basename(fn))[0]+'.txt'),'w')
 
     def checkFileForTabs(self, filename):
         txt = open_and_read(filename, 'r')

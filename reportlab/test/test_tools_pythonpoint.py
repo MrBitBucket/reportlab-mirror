@@ -3,7 +3,7 @@
 
 import os, sys, string
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 import reportlab
 
@@ -20,10 +20,10 @@ class PythonPointTestCase(unittest.TestCase):
         from reportlab.lib.utils import isCompactDistro, open_for_read
         ppDir = dirname(pythonpoint.__file__)
         xml = join(ppDir, 'demos', 'pythonpoint.xml')
-        datafilename = 'pythonpoiint.pdf'
+        datafilename = 'pythonpoint.pdf'
+        outdir = outputfile('')
         if isCompactDistro():
             cwd = None
-            outDir = '.'
             xml = open_for_read(xml)
         else:
             outDir = join(rlDir, 'test')

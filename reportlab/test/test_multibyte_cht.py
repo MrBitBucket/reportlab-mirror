@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/test_multibyte_cht.py,v 1.6 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_multibyte_cht.py,v 1.7 2004/03/26 14:20:44 rgbecker Exp $
 # Temporary japanese support for ReportLab.
 """
 Test of traditional Chinese (as written in Taiwan)
@@ -11,7 +11,7 @@ Test of traditional Chinese (as written in Taiwan)
 import string, os
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen.canvas import Canvas
@@ -46,7 +46,7 @@ class CHTFontTests(unittest.TestCase):
             return
         pdfmetrics.registerFont(CIDFont('MSung-Light',enc))
 
-        c = Canvas('test_multibyte_cht.pdf')
+        c = Canvas(outputfile('test_multibyte_cht.pdf'))
         c.setFont('Helvetica', 24)
         c.drawString(100,700, 'Traditional Chinese Font Support')
         c.setFont('Helvetica', 10)
@@ -125,7 +125,7 @@ class CHTFontTests(unittest.TestCase):
 
         c.save()
         if VERBOSE:
-            print 'saved test_multibyte_cht.pdf'
+            print 'saved '+outputfile('test_multibyte_cht.pdf')
 
 
 def makeSuite():

@@ -2,7 +2,7 @@
 import string, os
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen.canvas import Canvas
@@ -27,7 +27,7 @@ class KoreanFontTests(unittest.TestCase):
             return
 
         localFontName = 'HYSMyeongJo-Medium'
-        c = Canvas('test_multibyte_kor.pdf')
+        c = Canvas(outputfile('test_multibyte_kor.pdf'))
         c.setFont('Helvetica', 30)
         c.drawString(100,700, 'Korean Font Support')
         c.setFont('Helvetica', 10)
@@ -109,7 +109,7 @@ Adobe\xc0\xc7 \xc0\xe5\xbe\xd6\xc0\xda \xc1\xf6\xbf\xf8
         c.save()
 
         if VERBOSE:
-            print 'saved test_multibyte_kor.pdf'
+            print 'saved '+outputfile('test_multibyte_kor.pdf')
 
 
 def makeSuite():
