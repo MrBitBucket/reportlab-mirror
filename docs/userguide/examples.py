@@ -88,6 +88,14 @@ def scaletranslate(canvas):
     coords(canvas)
 """
 
+testmirror = """
+def mirror(canvas):
+    from reportlab.lib.units import inch
+    canvas.translate(5.5*inch, 0)
+    canvas.scale(-1.0, 1.0)
+    coords(canvas)
+"""
+
 testspumoni = """
 def spumoni(canvas):
     from reportlab.lib.units import inch
@@ -127,6 +135,68 @@ def spumoni2(canvas):
         canvas.setFillColor(color)
         canvas.circle(xcenter, y, radius, fill=1)
         y = y+radius
+"""
+
+testbezier = """
+def bezier(canvas):
+    from reportlab.lib.colors import yellow, green, red, black
+    from reportlab.lib.units import inch
+    i = inch
+    d = i/4
+    # define the bezier curve control points
+    x1,y1, x2,y2, x3,y3, x4,y4 = d,1.5*i, 1.5*i,d, 3*i,d, 5.5*i-d,3*i-d
+    # draw a figure enclosing the control points
+    canvas.setFillColor(yellow)
+    p = canvas.beginPath()
+    p.moveTo(x1,y1)
+    for (x,y) in [(x2,y2), (x3,y3), (x4,y4)]:
+        p.lineTo(x,y)
+    canvas.drawPath(p, fill=1, stroke=0)
+    # draw the tangent lines
+    canvas.setLineWidth(inch*0.1)
+    canvas.setStrokeColor(green)
+    canvas.line(x1,y1,x2,y2)
+    canvas.setStrokeColor(red)
+    canvas.line(x3,y3,x4,y4)
+    # finally draw the curve
+    canvas.setStrokeColor(black)
+    canvas.bezier(x1,y1, x2,y2, x3,y3, x4,y4)
+"""
+
+testbezier2 = """
+def bezier2(canvas):
+    from reportlab.lib.colors import yellow, green, red, black
+    from reportlab.lib.units import inch
+    # make a sequence of control points
+    xd,yd = 5.5*inch/2, 3*inch/2
+    xc,yc = xd,yd
+    dxdy = [(0,0.33), (0.33,0.33), (0.75,1), (0.875,0.875), 
+            (0.875,0.875), (1,0.75), (0.33,0.33), (0.33,0)]
+    pointlist = []
+    for xoffset in (1,-1):
+        yoffset = xoffset
+        for (dx,dy) in dxdy:
+            px = xc + xd*xoffset*dx
+            py = yc + yd*yoffset*dy
+            pointlist.append((px,py))
+        yoffset = -xoffset
+        for (dy,dx) in dxdy:
+            px = xc + xd*xoffset*dx
+            py = yc + yd*yoffset*dy
+            pointlist.append((px,py))
+    # draw tangent lines and curves
+    canvas.setLineWidth(inch*0.1)
+    while pointlist:
+        [(x1,y1),(x2,y2),(x3,y3),(x4,y4)] = pointlist[:4]
+        del pointlist[:4]
+        canvas.setLineWidth(inch*0.1)
+        canvas.setStrokeColor(green)
+        canvas.line(x1,y1,x2,y2)
+        canvas.setStrokeColor(red)
+        canvas.line(x3,y3,x4,y4)
+        # finally draw the curve
+        canvas.setStrokeColor(black)
+        canvas.bezier(x1,y1, x2,y2, x3,y3, x4,y4)
 """
 
 glarp = "this would be a syntax error"

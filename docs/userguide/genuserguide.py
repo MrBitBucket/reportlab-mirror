@@ -32,13 +32,16 @@
 #
 ###############################################################################
 #	$Log: genuserguide.py,v $
+#	Revision 1.3  2000/06/20 20:31:42  aaron_watters
+#	typos and more examples
+#
 #	Revision 1.2  2000/06/19 21:13:02  aaron_watters
 #	2nd try. more text
-#
+#	
 #	Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #	initial checkin. user guide generation framework.
 #	
-__version__=''' $Id: genuserguide.py,v 1.2 2000/06/19 21:13:02 aaron_watters Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.3 2000/06/20 20:31:42 aaron_watters Exp $ '''
 
 
 __doc__ = """
@@ -229,7 +232,7 @@ and the save method stores the file and closes the canvas.""")
 disc("""
 The showPage method causes the canvas to stop drawing on the
 current page and any further operations will draw on a subsequent
-page (if there are any further operations -- if not there no
+page (if there are any further operations -- if not no
 new page is created).  The save method must be called after the
 construction of the document is complete -- it generates the PDF
 document, which is the whole purpose of the canvas object.
@@ -274,7 +277,7 @@ disc("""
 This document contains demonstrations of the code discussed like the one shown
 in the rectangle above.  These demos are drawn on a "tiny page" embedded
 within the real pages of the guide.  The tiny pages are %s inches wide
-and %s inches tall.  The demos displays show the actual output of the demo
+and %s inches tall.  The demo displays show the actual output of the demo
 code.
 """ % (examplefunctionxinches, examplefunctionyinches))
 
@@ -337,8 +340,8 @@ drawText.
 head("The path object methods")
 
 eg("""path = canvas.beginPath() """)
-eg("""canvas.drawPath(path, stroke=1, fill=0 """)
-eg("""canvas.clipPath(path, stroke=1, fill=0 """)
+eg("""canvas.drawPath(path, stroke=1, fill=0) """)
+eg("""canvas.clipPath(path, stroke=1, fill=0) """)
 
 head("Image methods")
 
@@ -519,6 +522,25 @@ calls must match: a stray save or restore operation may cause unexpected
 and undesirable behavior.
 """)
 
+head("Mirror image")
+
+disc("""
+It is interesting although perhaps not terribly useful to note that
+scale factors can be negative.  For example the following function
+""")
+
+eg(examples.testmirror)
+
+disc("""
+creates a mirror image of the elements drawn by the coord function.
+""")
+
+canvasdemo(examples.mirror)
+
+disc("""
+Notice that the text strings are painted backwards.
+""")
+
 lesson('Painting back to front')
 
 eg(examples.testspumoni)
@@ -537,6 +559,14 @@ lesson('Paths and polygons')
 lesson('Rectangles, circles, ellipses')
 
 lesson('Bezier curves')
+
+eg(examples.testbezier)
+
+canvasdemo(examples.bezier)
+
+eg(examples.testbezier2)
+
+canvasdemo(examples.bezier2)
 
 lesson("...more lessons...")
     
