@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.38 2003/09/08 16:08:15 rgbecker Exp $
-__version__=''' $Id: pdfutils.py,v 1.38 2003/09/08 16:08:15 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.39 2003/09/09 18:13:33 rgbecker Exp $
+__version__=''' $Id: pdfutils.py,v 1.39 2003/09/09 18:13:33 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -10,7 +10,7 @@ __doc__=''
 import os
 from reportlab import rl_config
 from string import join, replace, strip, split
-from reportlab.lib.utils import _checkImportError, getStringIO, ImageReader
+from reportlab.lib.utils import getStringIO, ImageReader
 
 LINEEND = '\015\012'
 
@@ -117,13 +117,11 @@ def cachedImageExists(filename):
 try:
     from _rl_accel import escapePDF, _instanceEscapePDF
     _escape = escapePDF
-except ImportError, errMsg:
-    _checkImportError(errMsg)
+except ImportError:
     try:
         from reportlab.lib._rl_accel import escapePDF, _instanceEscapePDF
         _escape = escapePDF
-    except ImportError, errMsg:
-        _checkImportError(errMsg)
+    except ImportError:
         _instanceEscapePDF=None
         if rl_config.sys_version>='2.1':
             _ESCAPEDICT={}
@@ -343,24 +341,20 @@ if 1: # for testing always define this
         return outstream.getvalue()
 
 try:
+    from _rl_accel import _AsciiBase85Encode                    # builtin or on the path
+except ImportError:
     try:
-        from _rl_accel import _AsciiBase85Encode                # builtin or on the path
-    except ImportError, errMsg:
-        _checkImportError(errMsg)
         from reportlab.lib._rl_accel import _AsciiBase85Encode  # where we think it should be
-except ImportError, errMsg:
-    _checkImportError(errMsg)
-    _AsciiBase85Encode = _AsciiBase85EncodePYTHON
+    except ImportError:
+        _AsciiBase85Encode = _AsciiBase85EncodePYTHON
 
 try:
+    from _rl_accel import _AsciiBase85Decode                    # builtin or on the path
+except ImportError:
     try:
-        from _rl_accel import _AsciiBase85Decode                # builtin or on the path
-    except ImportError, errMsg:
-        #_checkImportError(errMsg)
         from reportlab.lib._rl_accel import _AsciiBase85Decode  # where we think it should be
-except ImportError, errMsg:
-    #_checkImportError(errMsg)
-    _AsciiBase85Decode = _AsciiBase85DecodePYTHON
+    except ImportError:
+        _AsciiBase85Decode = _AsciiBase85DecodePYTHON
 
 def _wrap(input, columns=60):
     "Wraps input at a given column size by inserting LINEEND characters."

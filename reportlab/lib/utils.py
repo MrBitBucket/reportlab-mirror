@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.47 2003/09/09 11:02:16 johnprecedo Exp $
-__version__=''' $Id: utils.py,v 1.47 2003/09/09 11:02:16 johnprecedo Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.48 2003/09/09 18:13:33 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.48 2003/09/09 18:13:33 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -62,9 +62,6 @@ def isCompactDistro():
 def isSourceDistro():
     import reportlab.pdfgen.canvas
     hypothetical_location = reportlab.pdfgen.canvas
-    
-def _checkImportError(errMsg):
-    if string.lower(string.strip(str(errMsg)[0:16]))!='no module named': raise
 
 try:
     #raise ImportError
@@ -72,11 +69,9 @@ try:
     ### IN CASE THEY ARE "LAZY OBJECTS".  ACCELLERATOR DOESN'T DO THIS (YET)
     try:
         from _rl_accel import fp_str                # in case of builtin version
-    except ImportError, errMsg:
-        _checkImportError(errMsg)
+    except ImportError:
         from reportlab.lib._rl_accel import fp_str  # specific
-except ImportError, errMsg:
-    #_checkImportError(errMsg) # this effectively requires _rl_accel... should not be required
+except ImportError:
     def fp_str(*a):
         if len(a)==1 and type(a[0]) in SeqTypes: a = a[0]
         s = []
@@ -168,8 +163,7 @@ def recursiveSetAttr(obj, name, value):
 def import_zlib():
     try:
         import zlib
-    except ImportError, errMsg:
-        _checkImportError(errMsg)
+    except ImportError:
         zlib = None
         from reportlab.rl_config import ZLIB_WARNINGS
         if ZLIB_WARNINGS: warnOnce('zlib not available')
@@ -191,12 +185,10 @@ if sys.platform[0:4] == 'java':
 else:
     try:
         from PIL import Image
-    except ImportError, errMsg:
-        _checkImportError(errMsg)
+    except ImportError:
         try:
             import Image
-        except ImportError, errMsg:
-            _checkImportError(errMsg)
+        except ImportError:
             Image = None
     haveImages = Image is not None
     if haveImages: del Image
