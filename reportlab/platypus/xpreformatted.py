@@ -1,4 +1,4 @@
-__version__=''' $Id: xpreformatted.py,v 1.9 2000/10/02 14:17:27 rgbecker Exp $ '''
+__version__=''' $Id: xpreformatted.py,v 1.10 2000/10/04 15:42:44 rgbecker Exp $ '''
 import string
 from types import StringType, ListType
 from paragraph import Paragraph, cleanBlockQuotedText, _handleBulletWidth, ParaFrag, _getFragWords, \
@@ -16,8 +16,7 @@ def _getFragLines(frags):
 		i = string.find(t,'\n')
 		if i>=0:
 			tleft = t[i+1:]
-			w.text = t[:i]
-			cline.append(w)
+			cline.append(w.clone(text=t[:i]))
 			lines.append(cline)
 			cline = []
 			if tleft!='':
@@ -170,7 +169,7 @@ class XPreformatted(Paragraph):
 
 if __name__=='__main__':	#NORUNTESTS
 	def dumpXPreformattedLines(P):
-		print 'dumpXPreforemattedLines(%s)' % str(P)
+		print '\n############dumpXPreforemattedLines(%s)' % str(P)
 		lines = P.bfrags.lines
 		n =len(lines)
 		for l in range(n):
@@ -183,7 +182,7 @@ if __name__=='__main__':	#NORUNTESTS
 			print
 
 	def dumpXPreformattedFrags(P):
-		print 'dumpXPreforemattedFrags(%s)' % str(P)
+		print '\n############dumpXPreforemattedFrags(%s)' % str(P)
 		frags = P.frags
 		n =len(frags)
 		for l in range(n):
@@ -200,13 +199,13 @@ if __name__=='__main__':	#NORUNTESTS
 				print
 			l = l + 1
 
-	def try_it(text,style,dedent):
+	def try_it(text,style,dedent,aW,aH):
 		P=XPreformatted(text,style,dedent=dedent)
 		dumpXPreformattedFrags(P)
-		aW, aH = 456.0, 42.8
 		w,h = P.wrap(aW, aH)
 		dumpXPreformattedLines(P)
 		S = P.split(aW,aH)
+		dumpXPreformattedLines(P)
 		for s in S:
 			s.wrap(aW,aH)
 			dumpXPreformattedLines(s)
@@ -217,7 +216,7 @@ if __name__=='__main__':	#NORUNTESTS
 	B = styleSheet['BodyText']
 	DTstyle = ParagraphStyle("discussiontext", parent=B)
 	DTstyle.fontName= 'Helvetica'
-	for (text,dedent,style) in [('''
+	for (text,dedent,style, aW, aH, active) in [('''
 
 
 The <font name=courier color=green>CMYK</font> or subtractive
@@ -235,7 +234,7 @@ be the case that &amp;| &amp; | colors specified in <font name=courier color=gre
 and better control when printed.
 
 
-''',0,DTstyle),
+''',0,DTstyle, 456.0, 42.8, 0),
 ('''
 
    This is a non rearranging form of the <b>Paragraph</b> class;
@@ -246,9 +245,15 @@ and better control when printed.
        common leading spaces will be removed from the
    front of each line.
 
-''',3,DTstyle),
+''',3, DTstyle, 456.0, 42.8, 0),
+("""\
+    <font color=blue>class </font><font color=red>FastXMLParser</font>:
+        # Nonsense method
+        def nonsense(self):
+            self.foo = 'bar'
+""",0, styleSheet['Code'], 456.0, 4.8, 1),
 ]:
-		try_it(text,style,dedent)
+		if active: try_it(text,style,dedent,aW,aH)
 
 ###############################################################################
 #
@@ -283,6 +288,9 @@ and better control when printed.
 #
 ###############################################################################
 #	$Log: xpreformatted.py,v $
+#	Revision 1.10  2000/10/04 15:42:44  rgbecker
+#	Fixed copying bug
+#
 #	Revision 1.9  2000/10/02 14:17:27  rgbecker
 #	Added license
-#
+#	
