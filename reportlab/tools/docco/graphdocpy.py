@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.22 2004/01/20 22:50:32 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.23 2004/04/28 15:27:31 rgbecker Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -154,13 +154,11 @@ class MyTemplate(BaseDocTemplate):
                         pass
 
 
-
 ####################################################################
 #
 # Utility functions
 #
 ####################################################################
-
 def indentLevel(line, spacesPerTab=4):
     """Counts the indent levels on the front.
 
@@ -186,80 +184,6 @@ assert indentLevel('   hello') == 3, 'error in indentLevel'
 assert indentLevel('\thello') == 4, 'error in indentLevel'
 assert indentLevel(' \thello') == 4, 'error in indentLevel'
 assert indentLevel('\t hello') == 5, 'error in indentLevel'
-
-
-def getSource(name):
-    """Attempts to load the source of the given module
-
-    This is a hack piled on a hack; given something like
-    './graphics/axes.py' it will return the content, or try looking
-    for it under 'reportlab', or under 'reportlab.graphics' or
-    just as 'axes.py'.  This is atrocious but I just cannot
-    figure out a rationale for package traversal; I am effectively
-    coding in the places that graphics modules might be found.
-    Must rework the entire docco mechanism!"""
-    found = 0
-    if os.path.isfile(name):
-        found = name
-    else:
-        lastPart = os.path.split(name)[1]
-        if os.path.isfile(lastPart):
-            found = lastPart
-        else:
-            rldir = os.path.dirname(reportlab.__file__)
-            fullPath = os.path.join(rldir, name)
-            if os.path.isfile(fullPath):
-                found = fullPath
-            else:
-                rlgdir = os.path.dirname(reportlab.graphics.__file__)
-                fullPath = os.path.join(rlgdir, name)
-                if os.path.isfile(fullPath):
-                    found = fullPath
-
-    if found:
-        return open(found).readlines()
-    else:
-        raise IOError, 'file %s not found while working in %s' % (name, os.getcwd())
-
-# This may well be replaceable by something in the inspect module.
-def getFunctionBody(f, linesInFile):
-    """Get the full source code for a function or method.
-
-    Works with a list of lines since we will typically grab
-    several things out of the same file.  It extracts a
-    multiline text block.  It can be fooled by devious
-    use of dedentation inside quotes, which could be
-    fixed in a future version that watched the nesting
-    level.  It simply looks at the left indent level
-    of each line, except for lines with whitespace or
-    leading comments.
-    """
-
-    if hasattr(f, 'im_func'):
-        #it's a method, drill down and get its function
-        f = f.im_func
-
-    extracted = []
-    firstLineNo = f.func_code.co_firstlineno - 1
-    startingIndent = indentLevel(linesInFile[firstLineNo])
-    extracted.append(linesInFile[firstLineNo])
-    #brackets = 0
-    for line in linesInFile[firstLineNo+1:]:
-        # ignore comments and whitespace lines
-        # for the purpose of getting indentation.
-        stripped = string.strip(line)
-        if len(stripped) == 0:
-            continue
-        elif stripped[0] == '#':
-            continue
-        else:
-            ind = indentLevel(line)
-            if ind <= startingIndent:
-                break
-            else:
-                extracted.append(line)
-         # we are not indented
-    return string.join(extracted, '\n')
 
 ####################################################################
 #
@@ -474,38 +398,23 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
 
     def _showFunctionDemoCode(self, function):
         """Show a demo code of the function generating the drawing."""
-
-
-        srcFileName = function.func_code.co_filename
-        (dirname, fileNameOnly) = os.path.split(srcFileName)
-
         # Heading
         self.story.append(Paragraph("<i>Example</i>", self.bt))
         self.story.append(Paragraph("", self.bt))
 
         # Sample code
-        lines = getSource(fileNameOnly)
-        lines = map(string.rstrip, lines)
-        codeSample = getFunctionBody(function, lines)
+        codeSample = inspect.getsource(function)
         self.story.append(Preformatted(codeSample, self.code))
 
 
     def _showDrawingCode(self, drawing):
         """Show code of the drawing class."""
-
-        drawingClass = drawing.__class__
-        initMethod = drawingClass.__init__
-        srcFileName = initMethod.im_func.func_code.co_filename
-        (dirname, fileNameOnly) = os.path.split(srcFileName)
-
         # Heading
-        className = drawingClass.__name__
+        #className = drawing.__class__.__name__
         self.story.append(Paragraph("<i>Example</i>", self.bt))
 
         # Sample code
-        lines = getSource(fileNameOnly)
-        lines = map(string.rstrip, lines)
-        codeSample = getFunctionBody(initMethod, lines)
+        codeSample = inspect.getsource(drawing.__class__.__init__)
         self.story.append(Preformatted(codeSample, self.code))
 
 
@@ -552,28 +461,12 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
 
     def _showWidgetDemoCode(self, widget):
         """Show a demo code of the widget."""
-
-        widgetClass = widget.__class__
-        demoMethod = widgetClass.demo
-        #AR hackery
-        #srcFileName = os.path.abspath(demoMethod.im_func.func_code.co_filename)
-        lastPart = os.path.split(demoMethod.im_func.func_code.co_filename)[1]
-        srcFileName = lastPart #demoMethod.im_func.func_code.co_filename
-        (dirname, fileNameOnly) = os.path.split(srcFileName)
-
         # Heading
-        className = widgetClass.__name__
+        #className = widget.__class__.__name__
         self.story.append(Paragraph("<i>Example</i>", self.bt))
 
         # Sample code
-        try:
-            lines = getSource(fileNameOnly)
-        except IOError:
-            print 'documenting method %s of class %s running in %s' % (demoMethod.im_func.func_code.co_filename, widgetClass, os.getcwd())
-            raise
-
-        lines = map(string.rstrip, lines)
-        codeSample = getFunctionBody(demoMethod, lines)
+        codeSample = inspect.getsource(widget.__class__.demo)
         self.story.append(Preformatted(codeSample, self.code))
 
 
@@ -694,17 +587,11 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
 
     def _showFunctionDemoCode(self, function):
         """Show a demo code of the function generating the drawing."""
-
-        srcFileName = function.func_code.co_filename
-        (dirname, fileNameOnly) = os.path.split(srcFileName)
-
         # Heading
         self.outLines.append('<H3>Example</H3>')
 
         # Sample code
-        lines = getSource(fileNameOnly)
-        lines = map(string.rstrip, lines)
-        codeSample = getFunctionBody(function, lines)
+        codeSample = inspect.getsource(function)
         self.outLines.append('<PRE>%s</PRE>' % codeSample)
 
 
@@ -756,20 +643,12 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
 
     def _showWidgetDemoCode(self, widget):
         """Show a demo code of the widget."""
-
-        widgetClass = widget.__class__
-        demoMethod = widgetClass.demo
-        srcFileName = demoMethod.im_func.func_code.co_filename
-        (dirname, fileNameOnly) = os.path.split(srcFileName)
-
         # Heading
-        className = widgetClass.__name__
+        #className = widget.__class__.__name__
         self.outLines.append('<H3>Example Code</H3>')
 
         # Sample code
-        lines = getSource(fileNameOnly)
-        lines = map(string.rstrip, lines)
-        codeSample = getFunctionBody(demoMethod, lines)
+        codeSample = inspect.getsource(widget.__class__.demo)
         self.outLines.append('<PRE>%s</PRE>' % codeSample)
         self.outLines.append('')
 
