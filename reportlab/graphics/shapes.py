@@ -18,8 +18,7 @@ NON_ZERO_WINDING = 'Non-Zero Winding'
 EVEN_ODD = 'Even-Odd'
 
 ## these can be overridden at module level before you start
-#creating shaapes.  So, if using a special color model,
-
+#creating shapes.  So, if using a special color model,
 #this provides support for the rendering mechanism.
 #you can change defaults globally before you start
 #making shapes; one use is to substitute another
