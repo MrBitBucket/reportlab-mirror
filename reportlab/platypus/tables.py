@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.73 2004/03/12 23:54:11 andy_robinson Exp $
-__version__=''' $Id: tables.py,v 1.73 2004/03/12 23:54:11 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.74 2004/03/14 09:47:14 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.74 2004/03/14 09:47:14 rgbecker Exp $ '''
 
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
@@ -711,16 +711,18 @@ class Table(Flowable):
         self._prepLine(weight, color)
         scp = ecp[0]
         ecp = ecp[-1]
-        for rowpos in rp:
-            if count == 1:
+        if count == 1:
+            for rowpos in rp:
                 self.canv.line(scp, rowpos, ecp, rowpos)
-            else: #double/triple lines
-                #position so count=1 and no space gives origin
-                offset = (count-1) * (weight + space)
-                for idx in range(count):
-                    y = rowpos + 0.5*offset - (idx * (weight+space))
+        else:
+            #multi-lines; position so count==1 and no space gives origin
+            ws = weight+space
+            offset = 0.5*(count-1)*ws
+            for rowpos in rp:
+                y = rowpos+offset
+                for idx in xrange(count):
                     self.canv.line(scp, y, ecp, y)
-
+                    y -= ws
 
     def _drawHLinesB(self, (sc, sr), (ec, er), weight, color, count, space):
         self._drawHLines((sc, sr+1), (ec, er+1), weight, color, count, space)
@@ -1542,4 +1544,3 @@ LIST_STYLE = TableStyle(
 
 if __name__ == '__main__':
     test()
-    print 'saved tables.pdf'
