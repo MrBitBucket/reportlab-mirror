@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.22  2000/04/05 16:21:02  rgbecker
+#	Added _SeqTypes for efficiency
+#
 #	Revision 1.21  2000/04/05 16:15:11  rgbecker
 #	Made setFill/StrokeColor polymorphic
-#
+#	
 #	Revision 1.20  2000/04/03 09:36:15  andy_robinson
 #	Using trailing zero convention for new form and link API
 #	
@@ -90,7 +93,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.21 2000/04/05 16:15:11 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.22 2000/04/05 16:21:02 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -137,6 +140,8 @@ from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
 from reportlab.lib.colors import ColorType
+
+_SeqTypes=(TupleType,ListType)
 
 # Robert Kern
 # Constants for closing paths.
@@ -763,7 +768,7 @@ class Canvas:
             rgb = (aColor.red, aColor.green, aColor.blue)
             self._strokeColorRGB = rgb
             self._code.append('%0.2f %0.2f %0.2f rg' % rgb )
-        elif type(aColor) in SeqTypes:
+        elif type(aColor) in _SeqTypes:
             l = len(aColor)
             if l==3:
                 self._strokeColorRGB = aColor
@@ -782,7 +787,7 @@ class Canvas:
             rgb = (aColor.red, aColor.green, aColor.blue)
             self._strokeColorRGB = rgb
             self._code.append('%0.2f %0.2f %0.2f RG' % rgb )
-        elif type(aColor) in SeqTypes:
+        elif type(aColor) in _SeqTypes:
             l = len(aColor)
             if l==3:
                 self._strokeColorRGB = aColor
