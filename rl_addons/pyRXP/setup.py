@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2002
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/setup.py,v 1.4 2002/04/12 11:22:47 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/setup.py,v 1.5 2002/04/17 17:27:59 rgbecker Exp $
 if __name__=='__main__': #NO RUNTESTS
 	import os, sys
 	from distutils.core import setup, Extension
@@ -55,15 +55,19 @@ if __name__=='__main__': #NO RUNTESTS
 							]
 			)
 
-	if sys.hexversion<0x20200a0 and sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
+	if sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
 		def MovePYDs(*F):
 			for x in sys.argv:
 				if x[:18]=='--install-platlib=': return
 			src = sys.exec_prefix
 			dst = os.path.join(src,'DLLs')
+			if sys.hexversion>=0x20200a0:
+				src = os.path.join(src,'Lib','site-packages')
 			for f in F:
 				dstf = os.path.join(dst,f)
 				if os.path.isfile(dstf):
 					os.remove(dstf)
-				os.rename(os.path.join(src,f),dstf)
+				srcf = os.path.join(src,f)
+				os.rename(srcf,dstf)
+				print 'Renaming %s to %s' % (srcf, dstf)
 		MovePYDs('pyRXP.pyd',)
