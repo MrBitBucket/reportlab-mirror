@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.26 2003/05/08 08:06:55 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.27 2003/07/02 16:10:10 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
-__version__=''' $Id: linecharts.py,v 1.26 2003/05/08 08:06:55 rgbecker Exp $ '''
+__version__=''' $Id: linecharts.py,v 1.27 2003/07/02 16:10:10 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType
@@ -294,6 +294,10 @@ class HorizontalLineChart(LineChart):
         g.add(self.makeBackground())
         g.add(cA)
         g.add(vA)
+        vA.gridStart = cA._x
+        vA.gridEnd = cA._x+cA._length
+        cA.gridStart = vA._y
+        cA.gridEnd = vA._y+vA._length
         cA.makeGrid(g)
         vA.makeGrid(g)
         g.add(self.makeLines())

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.79 2003/07/02 14:13:30 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.80 2003/07/02 16:10:10 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.79 2003/07/02 14:13:30 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.80 2003/07/02 16:10:10 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -167,7 +167,9 @@ class CategoryAxis(Widget):
             e = e is None and dim[0]+dim[1]
         c = self.gridStrokeColor
         if self.visibleGrid and (s or e) and c is not None:
-            self._makeLines(g,s,e,c,self.gridStrokeWidth,self.gridStrokeDashArray)
+            if self._dataIndex: offs = self._x
+            else: offs = self._y
+            self._makeLines(g,s-offs,e-offs,c,self.gridStrokeWidth,self.gridStrokeDashArray)
 
 def _assertYAxis(axis):
     acn = axis.__class__.__name__
@@ -187,6 +189,8 @@ class XCategoryAxis(CategoryAxis):
         joinAxisMode = AttrMapValue(OneOf('bottom', 'top', 'value', 'points', None),
             desc="Mode used for connecting axis ('bottom', 'top', 'value', 'points', None)."),
         )
+
+    _dataIndex = 0
 
     def __init__(self):
         CategoryAxis.__init__(self)
@@ -326,6 +330,8 @@ class YCategoryAxis(CategoryAxis):
         joinAxisMode = AttrMapValue(OneOf(('left', 'right', 'value', 'points', None)),
             desc="Mode used for connecting axis ('left', 'right', 'value', 'points', None)."),
         )
+
+    _dataIndex = 1
 
 
     def __init__(self):
@@ -772,7 +778,9 @@ class ValueAxis(Widget):
             e = e is None and dim[0]+dim[1]
         c = self.gridStrokeColor
         if self.visibleGrid and (s or e) and c is not None:
-            self._makeLines(g,s,e,c,self.gridStrokeWidth,self.gridStrokeDashArray)
+            if self._dataIndex: offs = self._x
+            else: offs = self._y
+            self._makeLines(g,s-offs,e-offs,c,self.gridStrokeWidth,self.gridStrokeDashArray)
 
     def draw(self):
         g = Group()

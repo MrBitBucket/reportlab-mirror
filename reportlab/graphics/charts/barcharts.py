@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.71 2003/05/29 00:02:01 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.72 2003/07/02 16:10:10 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -9,7 +9,7 @@ vertical versions.
 
 Stacked and percentile bar charts to follow...
 """
-__version__=''' $Id: barcharts.py,v 1.71 2003/05/29 00:02:01 andy_robinson Exp $ '''
+__version__=''' $Id: barcharts.py,v 1.72 2003/07/02 16:10:10 rgbecker Exp $ '''
 
 import string, copy
 from types import FunctionType, StringType
@@ -166,11 +166,15 @@ class BarChart(PlotArea):
         # for grids. It sucks that we have to do
         # this here.
         if self._flipXY == 0:
-            vA.gridEnd = self.width
-            cA.gridEnd = self.height
+            vA.gridStart = cA._x
+            vA.gridEnd = cA._x+cA._length
+            cA.gridStart = vA._y
+            cA.gridEnd = vA._y+vA._length
         else:
-            vA.gridEnd = self.height
-            cA.gridEnd = self.width
+            cA.gridStart = vA._x
+            cA.gridEnd = vA._x+vA._length
+            vA.gridStart = cA._y
+            vA.gridEnd = cA._y+cA._length
         
         cA.makeGrid(g)
         vA.makeGrid(g)

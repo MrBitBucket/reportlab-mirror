@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.41 2003/05/29 00:02:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.42 2003/07/02 16:10:10 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.41 2003/05/29 00:02:02 andy_robinson Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.42 2003/07/02 16:10:10 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -327,8 +327,12 @@ class LinePlot(PlotArea):
             g.add(self._inFillG)
         g.add(xA)
         g.add(yA)
-        xA.makeGrid(g,dim=(0,self.height))
-        yA.makeGrid(g,dim=(0,self.width))
+        yA.gridStart = xA._x
+        yA.gridEnd = xA._x+xA._length
+        xA.gridStart = yA._y
+        xA.gridEnd = yA._y+yA._length
+        xA.makeGrid(g)
+        yA.makeGrid(g)
         g.add(self.makeLines())
         return g
 
