@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.9 2001/03/21 17:01:24 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.10 2001/03/21 18:58:37 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.9 2001/03/21 17:01:24 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.10 2001/03/21 18:58:37 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -449,14 +449,21 @@ static char* AttrDict_tp_doc=
 static getattrfunc dict_getattr;
 static	PyObject *AttrDict_getattr(PyObject* self, char* name)
 {
-	PyObject* r = PyDict_GetItemString(self,name);
+	PyObject* r;
+	self->ob_type=&PyDict_Type;
+	r = PyDict_GetItemString(self,name);
 	if(!r) r = dict_getattr(self,name);
+	self->ob_type=&AttrDictType;
 	return r;
 }
 
 static int AttrDict_setattr(PyObject* self, char *name, PyObject* value)
 {
-	PyDict_SetItemString(self,name,value);
+	int	r;
+	self->ob_type=&PyDict_Type;
+	r = PyDict_SetItemString(self,name,value);
+	self->ob_type=&AttrDictType;
+	return r;
 }
 
 static PyObject *AttrDict(PyObject *self, PyObject *args)
@@ -468,6 +475,32 @@ static PyObject *AttrDict(PyObject *self, PyObject *args)
 	r->ob_type = &AttrDictType;
 	return r;
 }
+
+static binaryfunc dict_subscript;
+static objobjargproc dict_ass_sub;
+static PyObject * AttrDict_subscript(PyObject *self, register PyObject *key)
+{
+	PyObject* r;
+	self->ob_type=&PyDict_Type;
+	r = dict_subscript(self,key);
+	self->ob_type=&AttrDictType;
+	return r;
+}
+
+static int AttrDict_ass_sub(PyObject *self, PyObject *v, PyObject *w)
+{
+	int r;
+	self->ob_type=&PyDict_Type;
+	r = dict_ass_sub(self,v,w);
+	self->ob_type=&AttrDictType;
+	return r;
+}
+
+static PyMappingMethods AttrDict_as_mapping = {
+	(inquiry)0, /*mp_length*/
+	(binaryfunc)AttrDict_subscript, /*mp_subscript*/
+	(objobjargproc)AttrDict_ass_sub, /*mp_ass_subscript*/
+};
 
 static char *__doc__=
 "_rl_accel contains various accelerated utilities\n\
@@ -513,6 +546,10 @@ void init_rl_accel()
 	dict_getattr = AttrDictType.tp_getattr;
 	AttrDictType.tp_getattr = AttrDict_getattr;
 	AttrDictType.tp_setattr = AttrDict_setattr;
+	AttrDict_as_mapping.mp_length = AttrDictType.tp_as_mapping->mp_length;
+	dict_subscript = AttrDictType.tp_as_mapping->mp_subscript;
+	dict_ass_sub = AttrDictType.tp_as_mapping->mp_ass_subscript;
+	AttrDictType.tp_as_mapping = &AttrDict_as_mapping;
 
 	/*Create the module and add the functions */
 	m = Py_InitModule("_rl_accel", _methods);
