@@ -183,18 +183,24 @@ not specified (or specified as $None$) then the corresponding pixel dimension of
 to be in <i>points</i> and used.
 """)
 from reportlab.platypus import Image
-I=os.path.join(os.path.dirname(__file__),'lj8100.jpg')
+I=os.path.join(os.path.dirname(__file__),'..','images','lj8100.jpg')
 eg("""
 Image("lj8100.jpg")
 """,after=0.1)
 disc("""will display as""")
-getStory().append(Image(I))
+try:
+	getStory().append(Image(I))
+except:
+	disc("""An image should have appeared here.""")
 disc("""whereas""")
 eg("""
 Image("lj8100.jpg", width=2*inch, height=2*inch)
 """, after=0.1)
 disc('produces')
-getStory().append(Image(I, width=2*inch, height=2*inch))
+try:
+	getStory().append(Image(I, width=2*inch, height=2*inch))
+except:
+	disc("""An image should have appeared here.""")
 heading2("""$Spacer(width, height)$""")
 disc("""This does exactly as would be expected; it adds a certain amount of space into the story.
 At present this only works for vertical space.
