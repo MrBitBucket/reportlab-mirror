@@ -223,12 +223,15 @@ class NoneOr(Validator):
         return self._elemTest(x)
 
 class Auto(Validator):
+    def __init__(self,**kw):
+        self.__dict__.update(kw)
+
     def test(self,x):
-        return x is self.__class__
+        return x is self.__class__ or isinstance(x,self.__class__)
 
 class AutoOr(NoneOr):
     def test(self,x):
-        return (x is Auto) or self._elemTest()
+        return isAuto(x) or self._elemTest(x)
 
 class isInstanceOf(Validator):
     def __init__(self,klass=None):

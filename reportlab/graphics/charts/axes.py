@@ -342,23 +342,23 @@ class XCategoryAxis(CategoryAxis):
 
         if not self.visibleLabels: return g
 
-        if not (self.categoryNames is None):
+        categoryNames = self.categoryNames
+        if categoryNames is not None:
             catCount = self._catCount
-            assert len(self.categoryNames) == catCount, \
-                "expected %d category names but found %d in axis. \n categories = %s" % (
-                len(self.categoryNames), catCount, repr(self.categoryNames)
-                )
+            n = len(categoryNames)
             reverseDirection = self.reverseDirection
             barWidth = self._barWidth
             _y = self._labelAxisPos()
             _x = self._x
 
-            for i in range(catCount):
+            for i in xrange(catCount):
+                if reverseDirection: ic = catCount-i-1
+                else: ic = i
+                if ic>=n: continue
                 x = _x + (i+0.5) * barWidth
                 label = self.labels[i]
                 label.setOrigin(x, _y)
-                if reverseDirection: i = catCount-i-1
-                label.setText(self.categoryNames[i])
+                label.setText(categoryNames[ic] or '')
                 g.add(label)
 
         return g

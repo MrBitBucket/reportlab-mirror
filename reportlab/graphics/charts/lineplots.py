@@ -30,6 +30,7 @@ class LinePlotProperties(PropHolder):
         symbol = AttrMapValue(None, desc='Widget placed at data points.'),
         shader = AttrMapValue(None, desc='Shader Class.'),
         filler = AttrMapValue(None, desc='Filler Class.'),
+        name = AttrMapValue(isStringOrNone, desc='Name of the line.'),
         )
 
 class Shader(_SetKeyWordArgs):
@@ -276,7 +277,7 @@ class LinePlot(PlotArea):
                         filler.fill(self,inFillG,rowNo,rowColor,fpoints)
                     else:
                         inFillG.add(Polygon(fpoints,fillColor=rowColor,strokeColor=rowColor,strokeWidth=0.1))
-                if inFill in (0,2):
+                if inFill in (None,0,2):
                     line = PolyLine(points,strokeColor=rowColor,strokeLineCap=0,strokeLineJoin=1)
                     if width:
                         line.strokeWidth = width
@@ -310,37 +311,15 @@ class LinePlot(PlotArea):
             shader = getattr(rowStyle, 'shader', None)
             if shader: shader.shade(self,g,rowNo,rowColor,row)
 
-
         return g
 
     def makeSwatchSample(self,rowNo, x, y, width, height):
-        styleCount = len(self.lines)
-        styleIdx = rowNo % styleCount
-        rowColor = self.lines[styleIdx].strokeColor
-
-        if self.joinedLines:
-            dash = getattr(self.lines[styleIdx], 'strokeDashArray', getattr(self.lines,'strokeDashArray',None))
-            strokeWidth= getattr(self.lines[styleIdx], 'strokeWidth', getattr(self.lines[styleIdx], 'strokeWidth',None))
-            L = Line(x,y,x+width,y+height,strokeColor=rowColor,strokeLineCap=0)
-            if strokeWidth: L.strokeWidth = strokeWidth
-            if dash: L.strokeDashArray = dash
-        else:
-            L = None
-
-        if hasattr(self.lines[styleIdx], 'symbol'):
-            S = self.lines[styleIdx].symbol
-        elif hasattr(self.lines, 'symbol'):
-            S = self.lines.symbol
-        else:
-            S = None
-
-        if S: S = uSymbol2Symbol(S,x+width/2.,y+height/2.,rowColor)
-        if S and L:
-            g = Group()
-            g.add(S)
-            g.add(L)
-            return g
-        return S or L
+        styleIdx = rowNo % len(self.lines)
+        baseStyle = self.lines
+        style = baseStyle[styleIdx]
+        color = style.strokeColor
+        from legends import makeLineSwatch
+        return makeLineSwatch(self.joinedLines, style, baseStyle, color, x, y, width, height)
 
     def draw(self):
         yA = self.yValueAxis

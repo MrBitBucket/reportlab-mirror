@@ -9,12 +9,40 @@ import string, copy
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, OneOf, isString, isColorOrNone,\
-        isNumberOrNone, isListOfNumbersOrNone, isStringOrNone, isBoolean, AutoOr
+        isNumberOrNone, isListOfNumbersOrNone, isStringOrNone, isBoolean,\
+        NoneOr, AutoOr, isAuto, Auto
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth, getFont
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.shapes import Drawing, Group, String, Rect, Line, STATE_DEFAULTS
 from reportlab.graphics.charts.areas import PlotArea
+from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
+
+def makeLineSwatch(joinedLines, style, baseStyle, color, x, y, width, height):
+    y = y+height/2.
+    if joinedLines:
+        dash = getattr(style, 'strokeDashArray', getattr(baseStyle,'strokeDashArray',None))
+        strokeWidth= getattr(style, 'strokeWidth', getattr(style, 'strokeWidth',None))
+        L = Line(x,y,x+width,y,strokeColor=color,strokeLineCap=0)
+        if strokeWidth: L.strokeWidth = strokeWidth
+        if dash: L.strokeDashArray = dash
+    else:
+        L = None
+
+    if hasattr(style, 'symbol'):
+        S = style.symbol
+    elif hasattr(baseStyle, 'symbol'):
+        S = baseStyle.symbol
+    else:
+        S = None
+
+    if S: S = uSymbol2Symbol(S,x+width/2.,y,color)
+    if S and L:
+        g = Group()
+        g.add(S)
+        g.add(L)
+        return g
+    return S or L
 
 class Legend(Widget):
     """A simple legend containing rectangular swatches and strings.
@@ -48,6 +76,7 @@ class Legend(Widget):
         fillColor = AttrMapValue(isColorOrNone, desc=""),
         strokeColor = AttrMapValue(isColorOrNone, desc="Border color of the swatches"),
         strokeWidth = AttrMapValue(isNumber, desc="Width of the border color of the swatches"),
+        swatchMarker = AttrMapValue(NoneOr(AutoOr(isSymbol)), desc="None, Auto() or makeMarker('Diamond') ..."),
         callout = AttrMapValue(None, desc="a user callout(self,g,x,y,(color,text))"),
        )
 
@@ -88,28 +117,39 @@ class Legend(Widget):
         self.fillColor = STATE_DEFAULTS['fillColor']
         self.strokeColor = STATE_DEFAULTS['strokeColor']
         self.strokeWidth = STATE_DEFAULTS['strokeWidth']
+        self.swatchMarker = None
+
+    def _getTexts(self,colorNamePairs):
+        if not isAuto(colorNamePairs):
+            texts = [str(p[1]) for p in colorNamePairs]
+        else:
+            chart = colorNamePairs.chart
+            style = colorNamePairs.style
+            texts = [str(getattr(style[i],'name','series %d' % i)) for i in xrange(chart._seriesCount)]
+        return texts
 
     def _calculateMaxWidth(self, colorNamePairs):
         "Calculate the maximum width of some given strings."
         m = 0
-        for t in map(lambda p:str(p[1]),colorNamePairs):
+        for t in self._getTexts(colorNamePairs):
             if t:
                 for s in string.split(t,'\n'):
                     m = max(m,stringWidth(s, self.fontName, self.fontSize))
         return m
 
-
     def _calcHeight(self):
         deltay = self.deltay
         dy = self.dy
         thisy = upperlefty = self.y - dy
+        fontSize = self.fontSize
         ascent=getFont(self.fontName).face.ascent/1000.
         if ascent==0: ascent=0.718 # default (from helvetica)
-        leading = self.fontSize*1.2
+        ascent *= fontSize
+        leading = fontSize*1.2
         columnCount = 0
         count = 0
         lowy = upperlefty
-        for unused, name in colorNamePairs:
+        for name in self._getTexts(colorNamePairs):
             T = string.split(name and str(name) or '','\n')
             S = []
             # thisy+dy/2 = y+leading/2
@@ -125,9 +165,28 @@ class Legend(Widget):
                 count = count+1
         return upperlefty - lowy
 
+    def _defaultSwatch(self,x,thisy,dx,dy,fillColor,strokeWidth,strokeColor):
+        return Rect(x, thisy, dx, dy,
+                    fillColor = fillColor,
+                    strokeColor = strokeColor,
+                    strokeWidth = strokeWidth,
+                    )
+
     def draw(self):
-        g = Group()
         colorNamePairs = self.colorNamePairs
+        autoCP = isAuto(colorNamePairs)
+        if autoCP:
+            chart = getattr(colorNamePairs,'chart',getattr(colorNamePairs,'obj',None))
+            swatchMarker = None
+            autoCP = Auto(obj=chart)
+            n = chart._seriesCount
+            chartTexts = self._getTexts(colorNamePairs)
+        else:
+            swatchMarker = getattr(self,'swatchMarker',None)
+            if isAuto(swatchMarker):
+                chart = getattr(swatchMarker,'chart',getattr(swatchMarker,'obj',None))
+                swatchMarker = Auto(obj=chart)
+            n = len(colorNamePairs)
         thisx = upperleftx = self.x
         thisy = upperlefty = self.y - self.dy
         dx, dy, alignment, columnMaximum = self.dx, self.dy, self.alignment, self.columnMaximum
@@ -143,6 +202,7 @@ class Legend(Widget):
         else:
             if alignment=='left': maxWidth = self._calculateMaxWidth(colorNamePairs)
 
+        g = Group()
         def gAdd(t,g=g,fontName=fontName,fontSize=fontSize,fillColor=fillColor):
             t.fontName = fontName
             t.fontSize = fontSize
@@ -151,12 +211,21 @@ class Legend(Widget):
 
         ascent=getFont(fontName).face.ascent/1000.
         if ascent==0: ascent=0.718 # default (from helvetica)
-        ascent=ascent*fontSize # normalize
+        ascent *= fontSize # normalize
 
         columnCount = 0
         count = 0
         callout = getattr(self,'callout',None)
-        for col, name in colorNamePairs:
+        for i in xrange(n):
+            if autoCP:
+                col = autoCP
+                col.index = i
+                name = chartTexts[i]
+            else:
+                col, name = colorNamePairs[i]
+                if isAuto(swatchMarker):
+                    col = swatchMarker
+                    col.index = i
             T = string.split(name and str(name) or '','\n')
             S = []
             # thisy+dy/2 = y+leading/2
@@ -165,31 +234,28 @@ class Legend(Widget):
             if alignment == "left":
                 for t in T:
                     # align text to left
-                    s = String(thisx+maxWidth,y,t)
-                    s.textAnchor = "end"
-                    S.append(s)
-                    y = y-leading
+                    S.append(String(thisx+maxWidth,y,t,fontName=fontName,fontSize=fontSize,fillColor=fillColor,
+                            textAnchor = "end"))
+                    y -= leading
                 x = thisx+maxWidth+dxTextSpace
             elif alignment == "right":
                 for t in T:
                     # align text to right
-                    s = String(thisx+dx+dxTextSpace, y, t)
-                    s.textAnchor = "start"
-                    S.append(s)
-                    y = y-leading
+                    S.append(String(thisx+dx+dxTextSpace,y,t,fontName=fontName,fontSize=fontSize,fillColor=fillColor,
+                            textAnchor = "start"))
+                    y -= leading
                 x = thisx
             else:
                 raise ValueError, "bad alignment"
 
             # Make a 'normal' color swatch...
-            if isinstance(col, colors.Color):
-                r = Rect(x, thisy, dx, dy)
-                r.fillColor = col
-                r.strokeColor = strokeColor
-                r.strokeWidth = strokeWidth
-                g.add(r)
+            if isAuto(col): g.add(col.obj.makeSwatchSample(col.index,x,thisy,dx,dy))
+            elif isinstance(col, colors.Color):
+                if isSymbol(swatchMarker):
+                    g.add(uSymbol2Symbol(swatchMarker,x+dx/2.,thisy+dy/2.,col))
+                else:
+                    g.add(self._defaultSwatch(x,thisy,dx,dy,fillColor=col,strokeWidth=strokeWidth,strokeColor=strokeColor))
             else:
-                #try and see if we should do better.
                 try:
                     c = copy.deepcopy(col)
                     c.x = x
@@ -230,7 +296,6 @@ class Legend(Widget):
 
         return d
 
-
 class LineSwatch(Widget):
     """basically a Line with properties added so it can be used in a LineLegend"""
     _attrMap = AttrMap(
@@ -270,354 +335,17 @@ class LineLegend(Legend):
         Legend.__init__(self)
 
         # Size of swatch rectangle.
-        self.dx = 10 #width of line
-        self.dy = 2  #strokeWidth for line
+        self.dx = 10
+        self.dy = 2
 
-        # Color/name pairs.
-        self.colorNamePairs = []
-        for col, colName in [ (colors.red, "red"),
-                                (colors.blue, "blue"),
-                                (colors.green, "green"),
-                                (colors.pink, "pink"),
-                                (colors.yellow, "yellow") ]:
-            l =  LineSwatch()
-            l.strokeColor = col
-            self.colorNamePairs.append((l, colName))
-
-        # Font name and size of the labels.
-        self.fillColor = STATE_DEFAULTS['fillColor']
-        self.strokeColor = STATE_DEFAULTS['strokeColor']
-        self.strokeWidth = STATE_DEFAULTS['strokeWidth']
-
-    def draw(self):
-        g = Group()
-        colorNamePairs = self.colorNamePairs
-        thisx = upperleftx = self.x
-        thisy = upperlefty = self.y - self.dy
-        dx, dy, alignment, columnMaximum = self.dx, self.dy, self.alignment, self.columnMaximum
-        deltax, deltay, dxTextSpace = self.deltax, self.deltay, self.dxTextSpace
-        fontName, fontSize, fillColor = self.fontName, self.fontSize, self.fillColor
-        strokeWidth, strokeColor = self.strokeWidth, self.strokeColor
-        leading = fontSize*1.2
-        if not deltay:
-            deltay = max(dy,leading)+self.autoYPadding
-        if not deltax:
-            maxWidth = self._calculateMaxWidth(colorNamePairs)
-            deltax = maxWidth+dx+dxTextSpace+self.autoXPadding
-        else:
-            if alignment=='left': maxWidth = self._calculateMaxWidth(colorNamePairs)
-
-        def gAdd(t,g=g,fontName=fontName,fontSize=fontSize,fillColor=fillColor):
-            t.fontName = fontName
-            t.fontSize = fontSize
-            t.fillColor = fillColor
-            return g.add(t)
-
-        ascent=getFont(fontName).face.ascent/1000.
-        if ascent==0: ascent=0.718 # default (from helvetica)
-        ascent=ascent*fontSize # normalize
-
-        columnCount = 0
-        count = 0
-        callout = getattr(self,'callout',None)
-        for col, name in colorNamePairs:
-            T = string.split(name and str(name) or '','\n')
-            S = []
-            # thisy+dy/2 = y+leading/2
-            y = thisy+(dy-ascent)*0.5
-            if callout: callout(self,g,thisx,y,colorNamePairs[count])
-            if alignment == "left":
-                for t in T:
-                    # align text to left
-                    s = String(thisx+maxWidth,y,t)
-                    s.textAnchor = "end"
-                    S.append(s)
-                    y = y-leading
-                x = thisx+maxWidth+dxTextSpace
-            elif alignment == "right":
-                for t in T:
-                    # align text to right
-                    s = String(thisx+dx+dxTextSpace, y, t)
-                    s.textAnchor = "start"
-                    S.append(s)
-                    y = y-leading
-                x = thisx
-            else:
-                raise ValueError, "bad alignment"
-
-            # Make a 'normal' color line-swatch...
-            if isinstance(col, colors.Color):
-                l =  LineSwatch()
-                l.x = x
-                l.y = thisy
-                l.width = dx
-                l.height = dy
-                l.strokeColor = col
-                g.add(l)
-            else:
-                #try and see if we should do better.
-                try:
-                    c = copy.deepcopy(col)
-                    c.x = x
-                    c.y = thisy
-                    c.width = dx
-                    c.height = dy
-                    g.add(c)
-                except:
-                    pass
-
-            map(gAdd,S)
-
-            if count%columnMaximum == columnMaximum-1:
-                thisx = thisx+deltax
-                thisy = upperlefty
-                columnCount = columnCount + 1
-            else:
-                thisy = thisy-max(deltay,len(S)*leading)
-            count = count+1
-
-        return g
-
-class SmartSwatch(PropHolder):
-    _attrMap = AttrMap(
-        dxTextSpace = AttrMapValue(isNumber, desc="Distance between swatch rectangle and text"),
-        dx = AttrMapValue(isNumber, desc="Width of swatch rectangle"),
-        dy = AttrMapValue(isNumber, desc="Height of swatch rectangle"),
-        alignment = AttrMapValue(OneOf("left", "right"), desc="Alignment of text with respect to swatches"),
-        fontName = AttrMapValue(isString, desc="Font name of the strings"),
-        fontSize = AttrMapValue(isNumber, desc="Font size of the strings"),
-        fontColor = AttrMapValue(isColorOrNone, desc="color for text"),
-        fillColor = AttrMapValue(isColorOrNone, desc="color for swatch"),
-        strokeColor = AttrMapValue(isColorOrNone, desc="Border color of the swatches"),
-        strokeWidth = AttrMapValue(isNumber, desc="Width of the border color of the swatches"),
-        text = AttrMapValue(AutoOr(isString),"The associated text"),
-        visible = AttrMapValue(isBoolean,"draw if not false (default True)"),
-        ignore = AttrMapValue(isBoolean,"skip if not false (default false)"),
-        style = AttrMapValue(None,desc="Where we get source information for 'auto' properties"),
-        obj = AttrMapValue(None,desc="Where we get source information for 'auto' properties"),
-        )
-
-    def __init__(self):
-        self.dx = 10            # Size of swatch rectangle.
-        self.dy = 10
-        self.dxTextSpace = 10   # Distance between swatch rectangle and text.
-        self.alignment = "left" # Alignment of text with respect to swatches.
-
-        # Font name and size of the labels.
-        self.fontName = STATE_DEFAULTS['fontName']
-        self.fontSize = STATE_DEFAULTS['fontSize']
-        self.fontFillColor = self.fillColor = STATE_DEFAULTS['fillColor']
-        self.strokeColor = STATE_DEFAULTS['strokeColor']
-        self.strokeWidth = STATE_DEFAULTS['strokeWidth']
-
-        self.text = ''
-        self.visible = 1
-        self.ignore = 0
-        self.obj = self.style = None
-
-class SwatchCollection(TypedPropertyCollection):
-
-    def __init__(self):
-        TypedPropertyCollection.__init__(self,SmartSwatch)
-
-    def count(self):
-        obj = self.obj
-        if obj is None: return 5
-        count = obj._seriesCount
-
-    def wKlassFactory(self,Klass):
-        class WKlass(Klass):
-            def __getattr__(self,name):
-                try:
-                    return self.__class__.__bases__[0].__getattr__(self,name)
-                except:
-                    if self._index and self._parent._children.has_key(self._index) \
-                        and self._parent._children[self._index].__dict__.has_key(name):
-                        return getattr(self._parent._children[self._index],name)
-                    v = getattr(self._parent,name)
-                    if isAuto(v):
-                        return self._parent.getAutoValue(self,name)
-                    return v
-        return WKlass
-
-    def __iter__(self):
-        self.__iter = -1
-
-    def next(self):
-        self.__iter += 1
-        if self.__iter>self.count(): raise StopIteration
-        return self[self.__iter]
-
-class SmartLegend(PlotArea):
-    """A simple legend containing swatches and strings.
-
-    Strings can be nicely aligned left or right to the swatches.
-    """
-
-    _attrMap = AttrMap(BASE=PlotArea,
-        x = AttrMapValue(isNumber, desc="x-coordinate of upper-left reference point"),
-        y = AttrMapValue(isNumber, desc="y-coordinate of upper-left reference point"),
-        swatches = AttrMapValue(None, desc="Swatch definitions"),
-        columnMaximum = AttrMapValue(isNumber, desc="Max. number of items per column"),
-        callout = AttrMapValue(None, desc="a user callout(self,g,x,y,(color,text))"),
-        deltax = AttrMapValue(isNumberOrNone, desc="x-distance between neighbouring swatches"),
-        deltay = AttrMapValue(isNumberOrNone, desc="y-distance between neighbouring swatches"),
-        autoXPadding = AttrMapValue(isNumber, desc="x Padding between columns if deltax=None"),
-        autoYPadding = AttrMapValue(isNumber, desc="y Padding between rows if deltay=None"),
-        )
-
-    def __init__(self):
-        # Upper-left reference point.
-        self.x = 0
-        self.y = 0
-
-        # x- and y-distances between neighbouring swatches.
-        self.deltax = 75
-        self.deltay = 20
-        self.autoXPadding = 5
-        self.autoYPadding = 2
-
-        # Max. number of items per column.
-        self.columnMaximum = 3
-
-        swatches = self.swatches = SwatchCollection()
-
-        # Color/name pairs.
-        for color, text in [(colors.red, "red"),
-                                (colors.blue, "blue"),
-                                (colors.green, "green"),
-                                (colors.pink, "pink"),
-                                (colors.yellow, "yellow") ]:
-            swatches[i].fontColor = swatches[i].fillColor = swatches[i].strokeColor = color
-            swatches[i].text = text
-
-    def _calculateMaxWidth(self, colorNamePairs):
-        "Calculate the maximum width of some given strings."
-        m = 0
-        for s in self.swatches:
-            if not s.visible: continue
-            t = s.text
-            if t:
-                for s in t.split('\n'):
-                    m = max(m,stringWidth(s, s.fontName, s.fontSize))
-        return m
-
-    def _calcHeight(self):
-        columnCount = 0
-        count = 0
-        lowy = upperlefty = 0
-        deltay = self.deltay
-        for s in self.swatches:
-            if not count:
-                thisy = self.y - s.dy
-                if not columnCount: upperlefty = thisy
-                else: upperlefty = max(upperlefty,thisy)
-            dy = s.dy
-            T = (text and str(text) or '').split('\n')
-            S = []
-            # thisy+dy/2 = y+leading/2
-            ascent = getFont(s.fontName).face.ascent/1000.
-            if ascent==0: ascent=0.718 # default (from helvetica)
-            ascent *= fontSize
-            leading = s.fontSize*1.2
-            y = thisy+(dy-ascent)*0.5-leading
-            newy = thisy-max(deltay,len(S)*leading)
-            lowy = min(lowy,y,newy)
-            if count == columnMaximum-1:
-                count = 0
-                columnCount = columnCount + 1
-            else:
-                thisy = newy
-                count = count+1
-        return upperlefty - lowy
-
-    def draw(self):
-        g = Group()
-        columnCount = 0
-        count = 0
-        columnMaximum = self.columnMaximum
-        deltax = self.deltax
-        deltay = self.deltay
-        callout = getattr(self,'callout',None)
-        for s in self.swatches:
-            dx = s.dx
-            dy = s.dy
-            alignment = s.alignment
-            col = s.fillColor
-            thisx = self.x
-            thisy = self.y - dy
-            if not count: upperlefty = thisy
-            dxTextSpace = s.dxTextSpace
-            fontName = s.fontName
-            fontSize = s.fontSize
-            fillColor = s.fillColor
-            fontColor = s.fontColor
-            strokeWidth = s.strokeWidth
-            strokeColor = s.strokeColor
-            leading = fontSize*1.2
-            if not deltay:
-                deltay = max(dy,leading)+self.autoYPadding
-            if not deltax:
-                maxWidth = self._calculateMaxWidth(colorNamePairs)
-                deltax = maxWidth+dx+dxTextSpace+self.autoXPadding
-            else:
-                if alignment=='left': maxWidth = self._calculateMaxWidth(colorNamePairs)
-            ascent=getFont(fontName).face.ascent/1000.
-            if ascent==0: ascent=0.718          # default (from helvetica)
-            ascent=ascent*fontSize              # normalize
-
-            text = s.text
-            T = (text and str(text) or '').split('\n')
-            S = []
-            # thisy+dy/2 = y+leading/2
-            y = thisy+(dy-ascent)*0.5
-            if callout: callout(self,g,thisx,y,(text,fillColor))
-            if alignment == "left":
-                for t in T:
-                    # align text to left
-                    S.append(String(thisx+maxWidth,y,t,fontName=fontName,fontSize=fontSize,fillColor=fontColor,
-                            textAnchor = "end"))
-                    y = y-leading
-                x = thisx+maxWidth+dxTextSpace
-            elif alignment == "right":
-                for t in T:
-                    # align text to right
-                    S.append(String(thisx+dx+dxTextSpace,y,t,fontName=fontName,fontSize=fontSize,fillColor=fontColor,
-                            textAnchor = "start"))
-                    y = y-leading
-                x = thisx
-            else:
-                raise ValueError, "bad alignment"
-
-            # Make a 'normal' color swatch...
-            if isinstance(col, colors.Color):
-                r = Rect(x, thisy, dx, dy)
-                r.fillColor = col
-                r.strokeColor = strokeColor
-                r.strokeWidth = strokeWidth
-                g.add(r)
-            else:
-                #try and see if we should do better.
-                try:
-                    c = copy.deepcopy(col)
-                    c.x = x
-                    c.y = thisy
-                    c.width = dx
-                    c.height = dy
-                    g.add(c)
-                except:
-                    pass
-
-            map(g.add,S)
-
-            if count%columnMaximum == columnMaximum-1:
-                thisx = thisx+deltax
-                columnCount = columnCount + 1
-            else:
-                thisy = thisy-max(deltay,len(S)*leading)
-            count = count+1
-
-        return g
+    def _defaultSwatch(self,x,thisy,dx,dy,fillColor,strokeWidth,strokeColor):
+        l =  LineSwatch()
+        l.x = x
+        l.y = thisy
+        l.width = dx
+        l.height = dy
+        l.strokeColor = fillColor
+        return l
 
 def sample1c():
     "Make sample legend."

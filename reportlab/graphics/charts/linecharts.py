@@ -12,7 +12,7 @@ from types import FunctionType, StringType
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, \
                                     isListOfStringsOrNone, SequenceOf, isBoolean, NoneOr, \
-                                    isListOfNumbersOrNone
+                                    isListOfNumbersOrNone, isStringOrNone
 from reportlab.lib.attrmap import *
 from reportlab.lib.formatters import Formatter
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
@@ -29,10 +29,20 @@ class LineChartProperties(PropHolder):
         strokeColor = AttrMapValue(isColorOrNone, desc='Color of a line.'),
         strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array of a line.'),
         symbol = AttrMapValue(NoneOr(isSymbol), desc='Widget placed at data points.'),
+        shader = AttrMapValue(None, desc='Shader Class.'),
+        filler = AttrMapValue(None, desc='Filler Class.'),
+        name = AttrMapValue(isStringOrNone, desc='Name of the line.'),
         )
 
 class LineChart(PlotArea):
-    pass
+
+    def makeSwatchSample(self,rowNo, x, y, width, height):
+        styleIdx = rowNo % len(self.lines)
+        baseStyle = self.lines
+        style = baseStyle[styleIdx]
+        color = style.strokeColor
+        from legends import makeLineSwatch
+        return makeLineSwatch(self.joinedLines, style, baseStyle, color, x, y, width, height)
 
 # This is conceptually similar to the VerticalBarChart.
 # Still it is better named HorizontalLineChart... :-/
