@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/rl_doc_utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/tools/Attic/rl_doc_utils.py,v 1.2 2001/10/21 17:05:01 andy_robinson Exp $
-__version__=''' $Id: rl_doc_utils.py,v 1.2 2001/10/21 17:05:01 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/tools/docco/rl_doc_utils.py,v 1.1 2001/10/27 22:37:02 andy_robinson Exp $
+__version__=''' $Id: rl_doc_utils.py,v 1.1 2001/10/27 22:37:02 andy_robinson Exp $ '''
 
 
 __doc__ = """

@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/_cidfontdata.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: _cidfontdata.py,v 1.5 2001/10/22 05:43:18 andy_robinson Exp $ '''
+__version__=''' $Id: _cidfontdata.py,v 1.6 2001/10/27 22:37:02 andy_robinson Exp $ '''
 __doc__="""
 This defines additional static data to support CID fonts.
 
@@ -140,16 +140,16 @@ CIDFontInfo['HeiseiMin-W3'] = {
                 'BaseFont':'/HeiseiMin-W3',
                 'FontDescriptor': {
                     'Type': '/FontDescriptor',
-                    'Ascent': 752,
-                    'CapHeight': 737,
-                    'Descent': -221,
-                    'Flags': 4,
-                    'FontBBox': (-92, -250, 1010, 922),
+                    'Ascent': 723,
+                    'CapHeight': 709,
+                    'Descent': -241,
+                    'Flags': 6,
+                    'FontBBox': (-123, -257, 1001, 910),
                     'FontName': '/HeiseiMin-W3',
                     'ItalicAngle': 0,
-                    'StemV': 114,
-                    'XHeight': 553,
-                    'Style': {'Panose': '<010502020400000000000000>'}
+                    'StemV': 69,
+                    'XHeight': 450#,
+#                    'Style': {'Panose': '<010502020400000000000000>'}
                     },
                 'CIDSystemInfo': {
                     'Registry': '(Adobe)',
@@ -193,9 +193,10 @@ CIDFontInfo['HeiseiKakuGo-W5'] =  {'Type':'/Font',
                     'FontBBox': [-92, -250, 1010, 922],
                     'FontName': '/HeiseKakuGo-W5',
                     'ItalicAngle': 0,
+                    'StemH': 0,
                     'StemV': 114,
                     'XHeight': 553,
-                    'Style': {'Panose': '<0801020b0600000000000000>'}
+##                    'Style': {'Panose': '<0801020b0600000000000000>'}
                     },
                 'CIDSystemInfo': {
                     'Registry': '(Adobe)',
@@ -303,30 +304,28 @@ CIDFontInfo['MSungStd-Light-Acro'] =  {'Type':'/Font',
                 'BaseFont':'/'+'MSungStd-Light-Acro',
                 'FontDescriptor': {
                     'Type': '/FontDescriptor',
-                    'Ascent': 858,
-                    'AvgWidth': 500,
-                    'CapHeight': 858,
-                    'Descent': -142,
-                    'Flags': 7,
-                    'FontBBox': [-100, -142, 1100, 1000],
+                    'Ascent': 752,
+                    'CapHeight': 737,
+                    'Descent': -271,
+                    'Flags': 6,
+                    'FontBBox': [-160, -259, 1015, 888],
                     'FontName': '/'+'MSungStd-Light-Acro',
                     'ItalicAngle': 0,
                     'Leading': 148,
                     'MaxWidth': 1000,
                     'MissingWidth': 500,
-                    'StemH': 91,
-                    'StemV': 91,
-                    'XHeight': 429,
+                    'StemH': 58,
+                    'StemV': 58,
+                    'XHeight': 553,
                     'Style': {'Panose': '<000000000000000000000000>'}
                     },
                 'CIDSystemInfo': {
                     'Registry': '(Adobe)',
-                    'Ordering': '(Korea1)',
+                    'Ordering': '(CNS1)',
                     'Supplement': 1
                     },
                 'DW': 1000,
-                'W': (1, 94, 500),
-                'WinCharSet': 129
+                'W': (1, 94, 500)
                 }] # end descendant fonts
             }
 

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/yaml.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/tools/Attic/yaml.py,v 1.1 2001/10/05 12:33:33 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/yaml.py,v 1.1 2001/10/27 22:37:02 andy_robinson Exp $
 # parses "Yet Another Markup Language" into a list of tuples.
 # Each tuple says what the data is e.g.
 # ('Paragraph', 'Heading1', 'Why Reportlab Rules')

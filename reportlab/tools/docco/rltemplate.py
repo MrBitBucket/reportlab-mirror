@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/rltemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/tools/Attic/rltemplate.py,v 1.1 2001/10/05 12:33:33 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/rltemplate.py,v 1.1 2001/10/27 22:37:02 andy_robinson Exp $
 # doc template for RL manuals.  Currently YAML is hard-coded
 #to use this, which is wrong.
 

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2_graphics.py,v 1.3 2001/10/22 05:43:18 andy_robinson Exp $
-from rl_doc_utils import *
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2_graphics.py,v 1.4 2001/10/27 22:37:02 andy_robinson Exp $
+from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.lib.codecharts import SingleByteEncodingChart
     
 heading1("Graphics and Text with $pdfgen$")

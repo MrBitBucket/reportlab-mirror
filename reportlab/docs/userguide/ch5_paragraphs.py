@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch5_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch5_paragraphs.py,v 1.1 2001/10/05 12:33:33 rgbecker Exp $
-from rl_doc_utils import *
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch5_paragraphs.py,v 1.2 2001/10/27 22:37:02 andy_robinson Exp $
+from reportlab.tools.docco.rl_doc_utils import *
 
 #begin chapter oon paragraphs
 heading1("Paragraphs")
