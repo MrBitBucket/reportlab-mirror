@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.63 2001/10/25 16:02:54 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.64 2001/10/25 17:17:00 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -532,7 +532,7 @@ class Drawing(Group, Flowable):
 			ext = ext +  '/.eps'
 
 		logger.warnOnce.enabled, logger.infoOnce.enabled = _saved
-		if hasattr(self,saveLogger):
+		if hasattr(self,'saveLogger'):
 			self.saveLogger(fnroot,ext)
 		return ext and fnroot+ext[1:] or ''
 
