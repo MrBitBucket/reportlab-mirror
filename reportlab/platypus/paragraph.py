@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.30 2000/11/21 16:31:17 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.30 2000/11/21 16:31:17 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.31 2000/11/23 16:53:59 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.31 2000/11/23 16:53:59 rgbecker Exp $ '''
 import string
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -96,6 +96,7 @@ def	_justifyDrawParaLineX( tx, offset, line, last=0):
 
 def	_sameFrag(f,g):
 	'returns 1 if two frags map out the same'
+	if hasattr(f,'cbDefn') or hasattr(g,'cbDefn'): return 0
 	for a in ('fontName', 'fontSize', 'textColor', 'rise'):
 		if getattr(f,a)!=getattr(g,a): return 0
 	return 1
