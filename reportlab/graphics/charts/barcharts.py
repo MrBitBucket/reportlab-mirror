@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.43 2001/09/26 12:51:31 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.44 2001/09/27 18:09:33 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -18,7 +18,7 @@ from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfS
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
-from reportlab.graphics.shapes import Line, Rect, Group, Drawing
+from reportlab.graphics.shapes import Line, Rect, Group, Drawing, NotImplementedError
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.axes import YCategoryAxis, XValueAxis
 from reportlab.graphics.charts.textlabels import BarChartLabel
@@ -89,8 +89,8 @@ class BarChart(Widget):
 		)
 
 	def __init__(self):
+		assert self.__class__.__name__!='BarChart', 'Abstract Class BarChart Instantiated'
 		self.debug = 0
-
 		self.barSpacing = 0
 
 		self.x = 0
@@ -163,6 +163,8 @@ class BarChart(Widget):
 
 	def demo(self):
 		"""Shows basic use of a bar chart"""
+		if self.__class__.__name__=='BarChart':
+			raise NotImplementedError, 'Abstract Class BarChart has no demo'
 		drawing = Drawing(200, 100)
 		bc = self.__class__()
 		drawing.add(bc)
@@ -215,8 +217,12 @@ class BarChart(Widget):
 		cA = self.categoryAxis
 		cScale = cA.scale
 
-		self._seriesCount = len(self.data)
-		self._rowLength = len(self.data[0])
+		data = self.data
+		seriesCount = self._seriesCount = len(data)
+		self._rowLength = max(map(len,data))
+		groupSpacing, barSpacing, barWidth = self.groupSpacing, self.barSpacing, self.barWidth
+		self._groupWidth = groupWidth = groupSpacing+(seriesCount*barWidth)+(seriesCount-1)*barSpacing
+		useAbsolute = self.useAbsolute
 
 		if self.useAbsolute:
 			# bar dimensions are absolute
@@ -224,17 +230,13 @@ class BarChart(Widget):
 		else:
 			# bar dimensions are normalized to fit.  How wide
 			# notionally is one group of bars?
-			normWidth = (self.groupSpacing
-						+ (self._seriesCount * self.barWidth)
-						+ ((self._seriesCount - 1) * self.barSpacing)
-						)
 			availWidth = cScale(0)[1]
-			normFactor = availWidth / normWidth
+			normFactor = availWidth/groupWidth
 			if self.debug:
-				print '%d series, %d points per series' % (self._seriesCount, self._rowLength)
+				print '%d series, %d points per series' % (seriesCount, self._rowLength)
 				print 'width = %d group + (%d bars * %d barWidth) + (%d gaps * %d interBar) = %d total' % (
-					self.groupSpacing, self._seriesCount, self.barWidth,
-					self._seriesCount - 1, self.barSpacing, normWidth)
+					groupSpacing, seriesCount, barWidth,
+					seriesCount-1, barSpacing, groupWidth)
 
 		# 'Baseline' correction...
 		vA = self.valueAxis
@@ -252,27 +254,24 @@ class BarChart(Widget):
 			y = vScale(vM)
 		self._baseLine = y
 
-		data = self.data
-		lenData = len(data)
 		COLUMNS = range(max(map(len,data)))
-		bGap = self.barWidth+self.barSpacing
-		if self.useAbsolute:
-			gVal = lenData*bGap + self.groupSpacing
+		bGap = barWidth+barSpacing
+		if useAbsolute:
 			_cScale = cA._scale
 
 		width = self.barWidth*normFactor
 		self._barPositions = []
 		reversePlotOrder = self.reversePlotOrder
-		for rowNo in range(lenData):
+		for rowNo in range(seriesCount):
 			barRow = []
-			xVal = 0.5*self.groupSpacing+rowNo*bGap
-			if reversePlotOrder: rowNo = lenData-1 - rowNo
+			xVal = 0.5*groupSpacing+rowNo*bGap
+			if reversePlotOrder: rowNo = seriesCount-1 - rowNo
 			for colNo in COLUMNS:
 				datum = data[rowNo][colNo]
 
 				# Ufff...
-				if self.useAbsolute:
-					x = gVal*_cScale(colNo) + xVal + org
+				if useAbsolute:
+					x = groupWidth*_cScale(colNo) + xVal + org
 				else:
 					(g, gW) = cScale(colNo)
 					x = g + normFactor*xVal
@@ -401,6 +400,18 @@ class BarChart(Widget):
 
 				self._addLabel(g,rowNo,colNo,x,y,width,height)
 		return g
+
+	def _desiredCategoryAxisLength(self):
+		'''for dynamically computing the desired category axis length'''
+		style = self.categoryAxis.style
+		data = self.data
+		n = len(data)
+		m = max(map(len,data))
+		if style=='parallel':
+			groupWidth = (n-1)*self.barSpacing+n*self.barWidth
+		else:
+			groupWidth = self.barWidth
+		return m*(self.groupSpacing+groupWidth)
 
 	def draw(self):
 		cA, vA = self.categoryAxis, self.valueAxis
