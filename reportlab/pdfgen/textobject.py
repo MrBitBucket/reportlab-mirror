@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/textobject.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/textobject.py,v 1.20 2000/12/10 14:04:31 andy_robinson Exp $
-__version__=''' $Id: textobject.py,v 1.20 2000/12/10 14:04:31 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/textobject.py,v 1.21 2000/12/13 16:17:37 rgbecker Exp $
+__version__=''' $Id: textobject.py,v 1.21 2000/12/13 16:17:37 rgbecker Exp $ '''
 __doc__=""" 
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -72,19 +72,15 @@ class PDFTextObject:
                 del self._code[-1]
             else:
                 self._code[-1] = string.join(L[:-4])
-        if dx<>0 or dy<>0: self._code.append('%s Td' % fp_str(dx, -dy))
+            dx = dx + float(L[-3])
+            dy = dy - float(L[-2])
+        self._code.append('%s Td' % fp_str(dx, -dy))
  
     def setXPos(self, dx):
         """Moves to a point dx away from the start of the
         current line - NOT from the current point! So if
         you call it in mid-sentence, watch out."""
-        if self._code[-1][-3:]==' Td':
-            L = string.split(self._code[-1])
-            if len(L)==3:
-                del self._code[-1]
-            else:
-                self._code[-1] = string.join(L[:-4])
-        if dx<>0: self._code.append('%s 0 Td' % fp_str(dx))
+        self.moveCursor(dx,0)
 
     def getCursor(self):
         """Returns current text position relative to the last origin."""
