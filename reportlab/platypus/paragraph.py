@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.68 2003/07/25 08:01:34 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.68 2003/07/25 08:01:34 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.69 2003/12/10 11:35:20 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.69 2003/12/10 11:35:20 rgbecker Exp $ '''
 from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
@@ -781,13 +781,21 @@ class Paragraph(Flowable):
             canvas.drawText(tx)
             canvas.restoreState()
 
-    def getPlainText(self):
+    def getPlainText(self,identify=None):
         """Convenience function for templates which want access
         to the raw text, without XML tags. """
-        plains = []
-        for frag in self.frags:
-            plains.append(frag.text)
-        return join(plains, '')
+        frags = getattr(self,'frags',None)
+        if frags:
+            plains = []
+            for frag in frags:
+                plains.append(frag.text)
+            return join(plains, '')
+        elif identify:
+            text = getattr(self,'text',None)
+            if text is None: text = repr(self)
+            return text
+        else:
+            return ''
 
     def getActualLineWidths0(self):
         """Convenience function; tells you how wide each line
