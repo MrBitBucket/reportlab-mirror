@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.44 2001/04/18 10:48:50 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.44 2001/04/18 10:48:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.45 2001/06/15 14:04:02 aaron_watters Exp $
+__version__=''' $Id: pdfdoc.py,v 1.45 2001/06/15 14:04:02 aaron_watters Exp $ '''
 __doc__=""" 
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The 
@@ -391,6 +391,19 @@ class PDFDocument:
 PDFtrue = "true"
 PDFfalse = "false"
 PDFnull = "null"
+
+def PDFText(t):
+    L = list(t)
+    for i in range(len(L)):
+        ch = L[i]
+        n = ord(ch)
+        h = hex(n)
+        h2 = h[2:] # nuke the 0x
+        if len(h2)<2:
+            h2 = "0"+h2
+        L[i] = h2
+    result = string.join(L, "")
+    return "<%s>" % result
 
 def PDFnumber(n):
     return n
