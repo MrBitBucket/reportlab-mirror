@@ -31,8 +31,8 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
-#	Revision 1.16  2000/03/22 16:27:45  andy_robinson
-#	Added CMYK color methods
+#	Revision 1.17  2000/03/24 21:02:21  aaron_watters
+#	added support for destinations, forms, linkages
 #
 #	Revision 1.15  2000/03/10 21:46:04  andy_robinson
 #	fixed typo in setDash
@@ -78,7 +78,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.16 2000/03/22 16:27:45 andy_robinson Exp $ '''
+__version__=''' $Id: canvas.py,v 1.17 2000/03/24 21:02:21 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -161,12 +161,15 @@ class Canvas:
         self._filename = filename
         self._doc = pdfdoc.PDFDocument()
         self._pagesize = pagesize
-        self._currentPageHasImages = 0
+        #self._currentPageHasImages = 0
         self._pageTransitionString = ''
+        self._destinations = {} # dictionary of destinations for cross indexing.
 
         self._pageCompression = pageCompression  #off by default - turn on when we're happy!
         self._pageNumber = 1   # keep a count
-        self._code = []    #where the current page's marking operators accumulate
+        #self._code = []    #where the current page's marking operators accumulate
+        self.restartAccumulators()  # restart all accumulation state (generalized, arw)
+        self.annotationCount = 0
         
         #PostScript has the origin at bottom left. It is easy to achieve a top-
         #down coord system by translating to the top of the page and setting y
@@ -247,12 +250,125 @@ class Canvas:
         page.setCompression(self._pageCompression)
         #print stream
         page.setStream([self._preamble] + self._code)
+        self.setXObjects(page)
+        self.setAnnotations(page)
         self._doc.addPage(page)
         
         #now get ready for the next one
         self._pageNumber = self._pageNumber + 1
+        self.restartAccumulators()
+        
+    def setAnnotations(self,page):
+        page.Annots = self._annotationrefs
+        
+    def setXObjects(self, thing):
+        """for pages and forms, define the XObject dictionary for resources, if needed"""
+        forms = self._formsinuse
+        if forms:
+            xobjectsdict = self._doc.xobjDict(forms)
+            thing.XObjects = xobjectsdict
+        else:
+            thing.XObjects = None
+            
+    def bookmarkReference(self, name):
+        """get a reference to a (possibly undefined, possibly unbound) bookmark"""
+        d = self._destinations
+        try:
+            return d[name]
+        except:
+            result = d[name] = pdfdoc.Destination(name) # newly defined, unbound
+        return result
+        
+    def bookmarkPage(self, name):
+        """bind a bookmark (destination) to the current page"""
+        # XXXX there are a lot of other ways a bookmark destination can be bound: should be implemented.
+        # XXXX the other ways require tracking of the graphics state....
+        dest = self.bookmarkReference(name)
+        pageref = self._doc.thisPageRef()
+        dest.fit()
+        dest.setPageRef(pageref)
+        return dest
+        
+    def bookmarkHorizontalInPageAbsolute(self, name, yhorizontal):
+        """bind a bookmark (destination to the current page at a horizontal position"""
+        dest = self.bookmarkReference(name)
+        pageref = self._doc.thisPageRef()
+        dest.fith(yhorizontal)
+        dest.setPageRef(pageref)
+        return dest
+        
+    def inPage(self):
+        """declare a page, enable page features"""
+        self._doc.inPage()
+        
+    def inForm(self):
+        self._doc.inForm()
+            
+    def doForm(self, name):
+        """use a form XObj in current operation stream"""
+        internalname = self._doc.hasForm(name)
+        if not internalname:
+            raise ValueError, "form is not defined %s" % name
+        self._code.append("/%s Do" % internalname)
+        self._formsinuse.append(name)
+        
+    def restartAccumulators(self):
         self._code = []    # ready for more...
-        self._currentPageHasImages = 0
+        self._currentPageHasImages = 1 # for safety...
+        self._formsinuse = []
+        self._annotationrefs = []
+        
+    def makeForm(self, name, lowerx=0, lowery=0, upperx=None, uppery=None):
+        """Like showpage, but make a form using accumulated operations instead"""
+        (w,h) = self._pagesize
+        if upperx is None: upperx=w
+        if uppery is None: uppery=h
+        form = pdfdoc.PDFFormXObject(lowerx=lowerx, lowery=lowery, upperx=upperx, uppery=uppery)
+        form.compression = self._pageCompression
+        form.setStreamList([self._preamble] + self._code) # ??? minus preamble (seems to be needed!)
+        self.setXObjects(form)
+        self.setAnnotations(form)
+        self._doc.addForm(name, form)
+        self.restartAccumulators()
+        
+    def textAnnotation(self, contents, Rect=None, addtopage=1, name=None, **kw):
+        if not Rect:
+            (w,h) = self._pagesize# default to whole page (?)
+            Rect = (0,0,w,h)
+        annotation = apply(pdfdoc.TextAnnotation, (Rect, contents), kw)
+        self.addAnnotation(annotation, name, addtopage)
+        
+    def inkAnnotation(self, contents, InkList=None, Rect=None, addtopage=1, name=None, **kw):
+        (w,h) = self._pagesize
+        if not Rect:
+            Rect = (0,0,w,h)
+        if not InkList:
+            InkList = ( (100,100,100,h-100,w-100,h-100,w-100,100), )
+        annotation = apply(pdfdoc.InkAnnotation, (Rect, contents, InkList), kw)
+        self.addAnnotation(annotation, name, addtopage)
+    
+    def linkAnnotationAbsolute(self, contents, destinationname, Rect=None, addtopage=1, name=None, **kw):
+        """link annotation positioned wrt the default user space"""
+        destination = self.bookmarkReference(destinationname) # permitted to be undefined... must bind later...
+        (w,h) = self._pagesize
+        if not Rect:
+            Rect = (0,0,w,h)
+        kw["Rect"] = Rect
+        kw["Contents"] = contents
+        kw["Destination"] = destination
+        annotation = apply(pdfdoc.LinkAnnotation, (), kw)
+        self.addAnnotation(annotation, name, addtopage)
+    
+    def addAnnotation(self, annotation, name=None, addtopage=1):
+        count = self.annotationCount = self.annotationCount+1
+        if not name: name="NUMBER"+repr(count)
+        self._doc.addAnnotation(name, annotation)
+        if addtopage:
+            self.annotatePage(name)
+            
+    def annotatePage(self, name):
+        ref = self._doc.refAnnotation(name)
+        self._annotationrefs.append(ref)
 
     def getPageNumber(self):
         return self._pageNumber
@@ -498,6 +614,17 @@ class Canvas:
         # use PDFTextObject for multi-line text.
         ##################################################
 
+ 
+    def setFillColorCMYK(self, c, m, y, k):
+         """Takes 4 arguments between 0.0 and 1.0"""
+         self._fillColorCMYK = (c, m, y, k)
+         self._code.append('%0.2f %0.2f %0.2f %0.2f k' % (c, m, y, k))
+         
+    def setStrokeColorCMYK(self, c, m, y, k):
+         """Takes 4 arguments between 0.0 and 1.0"""
+         self._strokeColorCMYK = (c, m, y, k)
+         self._code.append('%0.2f %0.2f %0.2f %0.2f K' % (c, m, y, k))
+
     def drawString(self, x, y, text):
         """Draws a string in the current text styles."""
         #we could inline this for speed if needed
@@ -583,16 +710,6 @@ class Canvas:
         """Takes 3 arguments between 0.0 and 1.0"""
         self._strokeColorRGB = (r, g, b)
         self._code.append('%0.2f %0.2f %0.2f RG' % (r,g,b))
-
-    def setFillColorCMYK(self, c, m, y, k):
-        """Takes 4 arguments between 0.0 and 1.0"""
-        self._fillColorCMYK = (c, m, y, k)
-        self._code.append('%0.2f %0.2f %0.2f %0.2f k' % (c, m, y, k))
-        
-    def setStrokeColorCMYK(self, c, m, y, k):
-        """Takes 4 arguments between 0.0 and 1.0"""
-        self._strokeColorCMYK = (c, m, y, k)
-        self._code.append('%0.2f %0.2f %0.2f %0.2f K' % (c, m, y, k))
 
     def setFillColor(self, aColor):
         """Takes a color object, allowing colors to be referred to by name"""
