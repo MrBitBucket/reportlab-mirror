@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.86 2003/09/08 16:08:15 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.86 2003/09/08 16:08:15 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.87 2003/09/11 23:14:31 andy_robinson Exp $
+__version__=''' $Id: pdfdoc.py,v 1.87 2003/09/11 23:14:31 andy_robinson Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -18,9 +18,9 @@ classes are made available elsewhere for users to manipulate.
 
 import string, types
 from reportlab.pdfbase import pdfutils
-from reportlab.pdfbase.pdfutils import LINEEND   # this constant needed in both
+from reportlab.pdfbase.pdfutils import LINEEND # this constant needed in both
 from reportlab import rl_config
-from reportlab.lib.utils import import_zlib, open_for_read
+from reportlab.lib.utils import import_zlib, open_for_read, fp_str
 
 from sys import platform
 try:
@@ -81,7 +81,7 @@ def format(element, document, toplevel=0):
        Ensures that document parameters alter behaviour
        of formatting for all elements.
     """
-    from types import InstanceType
+    from types import InstanceType, FloatType, IntType
     if type(element) is InstanceType:
         if not toplevel and hasattr(element, __RefOnly__):
             # the object cannot be a component at non top level.
@@ -97,6 +97,10 @@ def format(element, document, toplevel=0):
             if DoComments and hasattr(element, __Comment__):
                 f = "%s%s%s%s" % ("% ", element.__Comment__, LINEEND, f)
             return f
+    elif type(element) in (FloatType, IntType):
+        #use a controlled number formatting routine
+        #instead of str, so Jython/Python etc do not differ
+        return fp_str(element)
     else:
         return str(element)
 
