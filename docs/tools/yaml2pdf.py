@@ -190,7 +190,7 @@ def getStyleSheet():
                                   leftIndent=36,
                                   bulletIndent=0,
                                   spaceBefore=6,
-                                  bulletFontIndent='Times-BoldItalic'),
+                                  bulletFontName='Times-BoldItalic'),
                    alias='df')
 
     stylesheet.add(ParagraphStyle(name='Code',
