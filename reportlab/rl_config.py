@@ -33,6 +33,7 @@ T1SearchPath =  (
                 '%(REPORTLAB_DIR)s/fonts',              #special
                 '%(REPORTLAB_DIR)s/../fonts',           #special
                 '%(REPORTLAB_DIR)s/../../fonts',        #special
+                '%(HOME)s/fonts',                       #special
                  )
 
 # places to look for TT Font information
@@ -43,6 +44,7 @@ TTFSearchPath = (
                 '%(REPORTLAB_DIR)s/fonts',      #special
                 '%(REPORTLAB_DIR)s/../fonts',   #special
                 '%(REPORTLAB_DIR)s/../../fonts',#special
+                '%(HOME)s/fonts',               #special
                 )
 
 # places to look for CMap files - should ideally merge with above
@@ -59,6 +61,7 @@ CMapSearchPath = ('/usr/lib/Acrobat6/Resource/CMap',
                   '%(REPORTLAB_DIR)s/fonts/CMap',       #special
                   '%(REPORTLAB_DIR)s/../fonts/CMap',    #special
                   '%(REPORTLAB_DIR)s/../../fonts/CMap', #special
+                  '%(HOME)s/fonts/CMap',                #special
                   )
 
 #### Normally don't need to edit below here ####
@@ -102,6 +105,7 @@ def _startUp():
     #places to search for Type 1 Font files
     import reportlab
     D = {'REPORTLAB_DIR': os.path.abspath(os.path.dirname(reportlab.__file__)),
+        'HOME': os.environ.get('HOME',os.getcwd()),
         'disk': string.split(os.getcwd(), ':')[0],
         'sys_version': sys_version,
         }
