@@ -2,6 +2,7 @@ import os
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.test import unittest
+from reportlab.test.test_pdfbase_pdfmetrics import makeWidthTestForAllGlyphs
 
 class EmbeddingTestCase(unittest.TestCase):
     "Make documents with embedded fonts"
@@ -53,7 +54,7 @@ class EmbeddingTestCase(unittest.TestCase):
             
             c.setFont('Carta', 12)
             c.drawString(100+w, 600, ' Hello World')
-                    
+                   
 
         # LettError sample - creates on demand, we hope
         y = 550
@@ -62,13 +63,17 @@ class EmbeddingTestCase(unittest.TestCase):
 ##        faceName = 'LettErrorRobot-Chrome'  # pulled from AFM file
 ##        pdfmetrics.registerTypeFace(justFace)
 ##
-##        
 ##        justFont = pdfmetrics.Font('LettErrorRobot-Chrome', faceName, 'WinAnsiEncoding')
 ##        pdfmetrics.registerFont(justFont)
 
         c.setFont('LettErrorRobot-Chrome', 12)
         c.drawString(100, y, 'This should be in LettErrorRobot-Chrome')
 
+        def testNamedFont(canv, fontName):
+            canv.showPage()
+            makeWidthTestForAllGlyphs(canv, fontName, outlining=0)
+
+        testNamedFont(c, 'LettErrorRobot-Chrome')
 
         c.save()
 
