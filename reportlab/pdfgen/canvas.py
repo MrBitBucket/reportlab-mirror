@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.92 2001/11/26 20:48:09 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.92 2001/11/26 20:48:09 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.93 2001/11/26 22:59:18 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.93 2001/11/26 22:59:18 andy_robinson Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -543,18 +543,16 @@ class Canvas:
         return apply(self.linkAbsolute, (contents, destinationname, Rect, addtopage, name), kw)
 
 
-    def linkURL(self, url, rect, relative=0,border=0):
+    def linkURL(self, url, rect, relative=0, thickness=0, color=None, dashArray=None):
         """Create a rectangular URL 'hotspot' in the given rectangle.
 
         if relative=1, this is in the current coord system, otherwise
         in absolute page space.
-        If border=0, no visible border appears.  If border=1, a one-point
-        black line is drawn (by Acrobat, not us).  More complex options
-        for Border are on the way!"""
+        The remaining options affect the border appearance; the border is
+        drawn by Acrobat, not us.  Set thickness to zero to hide it."""
         from reportlab.pdfbase.pdfdoc import PDFDictionary, PDFName, PDFArray, PDFString
         #tried the documented BS element in the pdf spec but it
         #does not work, and Acrobat itself does not appear to use it!
-        assert border in (0,1), 'border must currently be 0 (to hide) or 1 (to show)'
         if relative:
             #adjust coordinates
             (lx, ly, ux, uy) = rect
@@ -573,16 +571,24 @@ class Canvas:
         ann["Type"] = PDFName("Annot")
         ann["Subtype"] = PDFName("Link")
         ann["Rect"] = PDFArray(rect) # the whole page for testing
-        if border == 0:
-            ann["Border"] = (0,)
-        else:
-            pass #default is a visible back 1-point border
+
+        # the action is a separate dictionary            
         A = PDFDictionary()
-        #A["Type"] = PDFName("Action") # not needed?
-        ann["H"] = PDFName("I") # invert
+        A["Type"] = PDFName("Action") # not needed?
         A["S"] = PDFName("URI")
         A["URI"] = PDFString(url)
         ann["A"] = A
+
+        # now for formatting stuff.
+        if color:
+            ann["C"] = PDFArray([color.red, color.green, color.blue])
+        border = [0,0,0]
+        if thickness:
+            border[2] = thickness
+        if dashArray:
+            border.append(PDFArray(dashArray))
+        ann["Border"] = PDFArray(border)
+
         self._addAnnotation(ann)
 
     def _addAnnotation(self, annotation, name=None, addtopage=1):

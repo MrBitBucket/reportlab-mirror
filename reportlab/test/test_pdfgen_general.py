@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.8 2001/11/26 20:48:09 andy_robinson Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.8 2001/11/26 20:48:09 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.9 2001/11/26 22:59:19 andy_robinson Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.9 2001/11/26 22:59:19 andy_robinson Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
@@ -693,12 +693,19 @@ cost to performance.""")
 
     # test URLs
     r1 = (inch, 3*inch, 5*inch, 3.25*inch) # this is x1,y1,x2,y2
-    c.linkURL('http://www.reportlab.com/', r1, border=1)
-    c.drawString(inch+3, 3*inch+6, 'Hyperlink to www.reportlab.com, with border')
+    c.linkURL('http://www.reportlab.com/', r1, thickness=1, color=colors.green)
+    c.drawString(inch+3, 3*inch+6, 'Hyperlink to www.reportlab.com, with green border')
 
     r1 = (inch, 2.5*inch, 5*inch, 2.75*inch) # this is x1,y1,x2,y2
-    c.linkURL('mailto:reportlab-users@egroups.com', r1, border=0)
+    c.linkURL('mailto:reportlab-users@egroups.com', r1) #, border=0)
     c.drawString(inch+3, 2.5*inch+6, 'mailto: hyperlink, without border')
+
+    r1 = (inch, 2*inch, 5*inch, 2.25*inch) # this is x1,y1,x2,y2
+    c.linkURL('http://www.reportlab.com/', r1,
+                      thickness=2,
+                      dashArray=[2,4],
+                      color=colors.magenta)
+    c.drawString(inch+3, 2*inch+6, 'Hyperlink with custom border style')
 
     ### now do stuff for the outline
     #for x in outlinenametree: print x
