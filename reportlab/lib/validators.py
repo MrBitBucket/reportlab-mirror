@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/validators.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.26 2003/06/03 12:35:20 rgbecker Exp $
-__version__=''' $Id: validators.py,v 1.26 2003/06/03 12:35:20 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.27 2003/06/19 17:53:59 rgbecker Exp $
+__version__=''' $Id: validators.py,v 1.27 2003/06/19 17:53:59 rgbecker Exp $ '''
 """
 This module contains some standard verifying functions which can be
 used in an attribute map.
@@ -250,3 +250,4 @@ isNoneOrListOfNoneOrNumbers=SequenceOf(isNumberOrNone,'isNoneOrListOfNoneOrNumbe
 isCallable = _isCallable()
 isStringOrCallable=EitherOr((isString,isCallable),'isStringOrCallable')
 isStringOrCallableOrNone=NoneOr(isStringOrCallable,'isStringOrCallableNone')
+isStringOrNone=NoneOr(isString,'isStringOrNone')
