@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.67 2001/11/07 18:19:03 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.68 2001/11/08 13:36:27 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -595,10 +595,7 @@ class Drawing(Group, Flowable):
 			ext = ext +  '/.jpg'
 
 		if 'eps' in plotMode:
-			try:
-				from fidelity.epscharts import renderPS_SEP
-			except:
-				import renderPS_SEP
+			from rlextra.graphics import renderPS_SEP
 			filename = fnroot+'.eps'
 			if verbose: print "generating EPS file %s" % filename
 			renderPS_SEP.drawToFile(self,
