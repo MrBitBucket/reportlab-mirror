@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.19 2001/05/07 12:40:15 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.20 2001/05/07 14:10:41 dinu_gherman Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -35,13 +35,11 @@ the former axes in its own coordinate system.
 
 from types import FunctionType, StringType, TupleType, ListType
 
-from reportlab.graphics.shapes import Drawing, Line, Group, Auto
-from reportlab.graphics.shapes import STATE_DEFAULTS
+from reportlab.lib.validators import isNumber, isNumberOrNone, isNumberOrAuto, isListOfStringsOrNone, isListOfNumbers, isListOfNumbersOrNone, isColorOrNone, OneOf
+from reportlab.graphics.shapes import Drawing, Line, Group, Auto, STATE_DEFAULTS
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.utils import nextRoundNumber
-# Move into dedicated module.
-from reportlab.graphics.shapes import isNumber, isNumberOrNone, isNumberOrAuto, isListOfStringsOrNone, isListOfNumbers, isListOfNumbersOrNone, isColorOrNone, OneOf
 
 
 # Helpers.

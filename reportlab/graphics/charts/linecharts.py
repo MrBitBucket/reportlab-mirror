@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.5 2001/05/07 12:40:15 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.6 2001/05/07 14:10:41 dinu_gherman Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
@@ -10,15 +10,14 @@ import string
 from types import FunctionType, ClassType, StringType
 
 from reportlab.lib import colors 
+from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, isListOfStringsOrNone, SequenceOf
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
-from reportlab.graphics.charts.markers import *
-from reportlab.graphics.shapes import Line, Rect, Group, Drawing
+from reportlab.graphics.shapes import Auto, Line, Rect, Group, Drawing
 from reportlab.graphics.widgets.signsandsymbols import NoEntry0
-from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
-# Move this into dedicated module.
-from reportlab.graphics.shapes import Auto, isNumber, isColor, isColorOrNone, isListOfStrings, isListOfStringsOrNone, SequenceOf
-      
+from reportlab.graphics.charts.textlabels import Label
+from reportlab.graphics.charts.markers import *
+
 
 class LineChart(Widget):
     pass

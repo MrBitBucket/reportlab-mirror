@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.23 2001/05/01 09:18:53 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.24 2001/05/07 14:10:41 dinu_gherman Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -14,6 +14,7 @@ from pprint import pprint
 from reportlab.platypus import Flowable
 from reportlab.rl_config import shapeChecking
 from reportlab.lib import colors
+from reportlab.lib.validators import *
 from reportlab.pdfbase.pdfmetrics import stringWidth
 
 
@@ -68,144 +69,6 @@ class _Auto:
 Auto = _Auto()
 
 
-    ################################################################
-    #
-    #   Here are some standard verifying functions which can be
-    #   used in an attrMap
-    #
-    ################################################################
-    
-def isBoolean(x):
-    return (x in (0, 1))
-
-def isString(x):
-    return (type(x) == StringType)
-            
-def isNumber(x):
-    """Don't think we really want complex numbers for widths!"""
-    return (type(x) in (FloatType, IntType))
-
-def isNumberOrNone(x):
-    """Don't think we really want complex numbers for widths!"""
-    if x is None:
-        return 1
-    else:
-        return (type(x) in (FloatType, IntType))
-
-def isNumberOrAuto(x):
-    """Don't think we really want complex numbers for widths!"""
-    if x == Auto:
-        return 1
-    else:
-        return (type(x) in (FloatType, IntType))
-
-def isTextAnchor(x):
-    return (x in ('start','middle','end'))
-
-def isListOfNumbers(x):
-    """Don't think we really want complex numbers for widths!"""
-    if type(x) in (ListType, TupleType):
-        for element in x:
-            if not isNumber(element):
-                return 0
-        return 1
-    else:
-        return 0
-
-def isListOfNumbersOrNone(x):
-    if x is None:
-        return 1
-    else:
-        return isListOfNumbers(x)
-    
-def isListOfShapes(x):
-    if type(x) in (ListType, TupleType):
-        answer = 1
-        for element in x:
-            if not isinstance(x, Shape):
-                answer = 0
-        return answer
-    else:
-        return 0
-
-def isListOfStrings(x):
-    if type(x) in (ListType, TupleType):
-        answer = 1
-        for element in x:
-            if type(element) <> type(""):
-                answer = 0
-        return answer
-    else:
-        return 0
-
-def isListOfStringsOrNone(x):
-    if x is None:
-        return 1
-    else:
-        return isListOfStrings(x)
-
-def isTransform(x):
-    if type(x) in (ListType, TupleType):
-        if len(x) == 6:
-            for element in x:
-                if not isNumber(element):
-                    return 0
-            return 1
-        else:
-            return 0
-    else:
-        return 0
-    
-
-def isColor(x):
-    return isinstance(x, colors.Color)
-
-
-def isColorOrNone(x):
-    if x is None:
-        return 1
-    else:
-        return isinstance(x, colors.Color)
-
-
-def isValidChild(x):
-    """Is it allowed in a drawing or group?  i.e.
-    descends from Shape or UserNode"""
-    return isinstance(x, UserNode) or isinstance(x, Shape)
-
-
-class OneOf:
-    """Make validator functions for list of choices. Usage:
-    >>> f = shapes.OneOf(('happy','sad'))
-    >>> f('happy')
-    1
-    >>> f('grumpy')
-    0
-    >>> 
-    """
-    def __init__(self, choices):
-        self._choices = choices
-    def __call__(self, arg):
-        return arg in self._choices
-
-
-class SequenceOf:
-    """Make validator functions for sequence of things:
-    >>> isListOfColors = shapes.SequenceOf(isColor)
-    
-    """
-    def __init__(self, atomicFunc):
-        self._atomicFunc = atomicFunc
-    def __call__(self, seq):
-        if type(seq) not in (ListType, TupleType):
-            return 0
-        else:
-            for elem in seq:
-                if not self._atomicFunc(elem):
-                    return 0
-            return 1
-
-    
     ####################################################################
     # math utilities.  These could probably be moved into lib
     # somewhere.

@@ -7,7 +7,6 @@ import string
 from types import FloatType, IntType, ListType, TupleType, StringType
 
 from reportlab.lib import colors
-from reportlab.graphics.shapes import Auto
 
     
 def isBoolean(x):
@@ -32,6 +31,8 @@ def isNumberOrNone(x):
 
 
 def isNumberOrAuto(x):
+    from reportlab.graphics.shapes import Auto
+
     if x == Auto:
         return 1
     else:
@@ -62,6 +63,7 @@ def isListOfNumbersOrNone(x):
 
     
 def isListOfShapes(x):
+    from reportlab.graphics.shapes import Shape
     if type(x) in (ListType, TupleType):
         answer = 1
         for element in x:
@@ -120,6 +122,7 @@ def isValidChild(x):
     I.e. does it descend from Shape or UserNode?
     """
 
+    from reportlab.graphics.shapes import UserNode, Shape
     return isinstance(x, UserNode) or isinstance(x, Shape)
 
 

@@ -1,13 +1,15 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.2 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.3 2001/05/07 14:10:41 dinu_gherman Exp $
 import string
 
-from reportlab.graphics.shapes import *
-from reportlab.graphics.widgetbase import Widget
 from reportlab.lib import colors
+from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, isTextAnchor
 from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.graphics.shapes import Drawing, Group, Circle, Rect, String, STATE_DEFAULTS
+from reportlab.graphics.widgetbase import Widget
+
 
 class Label(Widget):
 	"""A text label to attach to something else, such as a chart axis.
@@ -33,7 +35,6 @@ class Label(Widget):
 		'leading':isNumberOrNone,
 		'width':isNumberOrNone,
 		'height':isNumberOrNone,
-##		'textAnchor':OneOf(('start', 'middle', 'end'))
 		'textAnchor':isTextAnchor,
 		}
 

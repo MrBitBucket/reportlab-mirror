@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.8 2001/05/07 12:40:15 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.9 2001/05/07 14:10:41 dinu_gherman Exp $
 """
 This modules defines a very preliminary Line Plot example.
 """
@@ -10,7 +10,8 @@ import string, time
 from types import FunctionType
 
 from reportlab.lib import colors 
-from reportlab.graphics.shapes import *
+from reportlab.lib.validators import * 
+from reportlab.graphics.shapes import Drawing, Group, Rect, Line, PolyLine
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.widgetbase import StyleProperties
 from reportlab.graphics.widgets.signsandsymbols import SmileyFace0

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.6 2001/05/07 12:40:15 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.7 2001/05/07 14:10:41 dinu_gherman Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -10,16 +10,16 @@
 """Basic Pie Chart class.
 
 This permits you to customize and pop out individual wedges;
-supports elliptical and circular pies."""
+supports elliptical and circular pies.
+"""
 
 from math import sin, cos, pi
 
-from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
-from reportlab.graphics import renderPDF
 from reportlab.lib import colors
+from reportlab.lib.validators import isColor, isNumber, isListOfNumbersOrNone, isListOfNumbers, isColorOrNone, isString, isListOfStringsOrNone, OneOf, SequenceOf
 from reportlab.pdfgen.canvas import Canvas
-# Move this into a dedicated module.
-from reportlab.graphics.shapes import *
+from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS
+from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 
 
 class WedgeFormatter(Widget):
@@ -28,7 +28,8 @@ class WedgeFormatter(Widget):
     It is not to be confused with the 'wedge itself'; this just holds
     a recipe for how to format one, and does not allow you to hack the
     angles.  It can format a genuine Wedge object for you with its
-    format method."""
+    format method.
+    """
 
     _attrMap = {
         'strokeWidth':isNumber,

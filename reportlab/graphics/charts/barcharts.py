@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.8 2001/05/07 12:40:15 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.9 2001/05/07 14:10:41 dinu_gherman Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -14,15 +14,14 @@ Stacked and percentile bar charts to follow...
 import string
 from types import FunctionType, StringType
 
-from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib import colors
+from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf
+from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
-from reportlab.graphics.shapes import Line, Rect, Group, Drawing
-from reportlab.graphics.charts.textlabels import Label
+from reportlab.graphics.shapes import Auto, Line, Rect, Group, Drawing
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.axes import YCategoryAxis, XValueAxis
-# Move into dedicated module.
-from reportlab.graphics.shapes import Auto, isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf
+from reportlab.graphics.charts.textlabels import Label
 
 
 ### Helpers (maybe put this into Drawing... or shapes)
