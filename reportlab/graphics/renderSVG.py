@@ -1,6 +1,10 @@
 """An experimental SVG renderer for the ReportLab graphics framework.
 
 This will create SVG code from the ReportLab Graphics API (RLG).
+To read existing SVG code and convert it into ReportLab graphics
+objects download the svglib module here:
+
+  http://python.net/~gherman/#svglib
 """
 
 import math, string, cStringIO, types, sys, os
