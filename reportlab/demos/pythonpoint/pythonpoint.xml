@@ -69,10 +69,10 @@
                 The Page Layout model comes from PLATYPUS (Page Layout and Typography Using Scripts),
                 a key component of the toolkit.  This covers concepts such as:
             </para>
-            <para style='Bullet' bullettext = 'o'>Reusable 'Drawable Objects'</para>
-            <para style='Bullet' bullettext = 'o'>Frames into which objects flow (like this one, around which we have drawn a border)</para>
-            <para style='Bullet' bullettext = 'o'>Style Sheets for text, table cells, line styles etc.</para>
-            <para style='Bullet' bullettext = 'o'>Wrapping, page breaking an document management logic</para>
+            <para style='Bullet' bullettext = '¥'>Reusable 'Drawable Objects'</para>
+            <para style='Bullet' bullettext = '¥'>Frames into which objects flow (like this one, around which we have drawn a border)</para>
+            <para style='Bullet' bullettext = '¥'>Style Sheets for text, table cells, line styles etc.</para>
+            <para style='Bullet' bullettext = '¥'>Wrapping, page breaking an document management logic</para>
             <para style='BodyText'>Everything is open and extensible.  I hope a library of reusable objects
             such as charts and diagrams will grow up.</para>
         </frame>
@@ -601,6 +601,27 @@
 			<para style='Indent'>Nothing</para>
         </frame>
     </slide>
+
+
+    <slide id="Part3" title="To Do" effectname='Blinds' effectdirection='0'>
+        <frame x="120" y="72" width="700" height="468" 
+			leftmargin="36" rightmargin="36">
+            <para style='Heading1'>Part 3 - To Do</para>
+            <para style='Bullet' bullettext = '¥'>Lots of testing</para>
+            <para style='Bullet' bullettext = '¥'>Text preprocessor to let you input text, styles and images
+			 in something easier to type</para>
+            <para style='Bullet' bullettext = '¥'>Support for Pingo (http://pingo.sourceforge.net/) drawings using
+			the Scalable Vector Graphics imaging model</para>
+            <para style='Bullet' bullettext = '¥'>Proper caching of flowing images</para>
+            <para style='Bullet' bullettext = '¥'>Basic Tables and Charts</para>
+            <para style='Bullet' bullettext = '¥'>Use new XML parsers as wel as xmllib</para>
+            <para style='Bullet' bullettext = '¥'>Slide indexing and database search tools</para>
+            <para style='Bullet' bullettext = '¥'>Speaker Notes mode</para>
+	    <para>Naturally, help is extremely welcome :-)</para>
+        </frame>
+    </slide>
+
+
 
   </section>
 </presentation>

@@ -31,9 +31,14 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.11  2000/04/10 09:05:49  andy_robinson
+#	- Fixed multi-line strings
+#	- added cached image so demo works without PIL
+#	- added to-do list
+#
 #	Revision 1.10  2000/04/07 12:29:47  rgbecker
 #	Fixe apendi() typo
-#
+#	
 #	Revision 1.9  2000/04/07 09:20:43  rgbecker
 #	Allow multiple files, default to pythonpoint.xml if present
 #	
@@ -64,7 +69,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.10 2000/04/07 12:29:47 rgbecker Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.11 2000/04/10 09:05:49 andy_robinson Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -446,13 +451,14 @@ class PPString:
         newtext = []
         for line in lines:
             newtext.append(string.strip(line))
-        #eval turns all the escape sequences into real data
-        self.text = eval(string.join(newtext, ' '))
+        #accept all the '\n' as newlines
+            
+        self.text = newtext
         
     def drawOn(self, canv):
         if self.color is None:
             return
-        lines = string.split(string.strip(self.text), '\n')
+        lines = string.split(string.strip(self.text), '\\n')
         canv.saveState()
         canv.setFont(self.font, self.size)
         r,g,b = self.color

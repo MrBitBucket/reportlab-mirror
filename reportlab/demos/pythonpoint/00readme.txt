@@ -8,7 +8,9 @@ releasing now.
 
 It is part of the ReportLab distribution; if you have managed
 to run the ReportLab tests, and have installed the Python
-Imaging Library, usage should be straightforward.
+Imaging Library, usage should be straightforward.  PIL is not 
+required to make slides, but the demo will have a few blanks if 
+you omit it.
 
 To use, cd to the pythonpoint directory and execute:
 	pythonpoint.py pythonpoint.xml
