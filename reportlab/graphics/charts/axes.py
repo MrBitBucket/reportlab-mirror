@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.33 2001/09/10 14:19:55 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.34 2001/09/17 15:45:43 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -824,20 +824,14 @@ class NormalDateXValueAxis(XValueAxis):
 	"""
 
 	_attrMap = AttrMap(BASE = XValueAxis,
-		bottomAxisLabelSlack = AttrMapValue(isNumber,
-			desc="Fractional amount used to adjust label spacing"),
-		niceMonth = AttrMapValue(isBoolean,
-			desc="Flag for displaying months 'nicely'."),
-		forceEndDate = AttrMapValue(isBoolean,
-			desc='Flag for enforced displaying of last date value.'),
-		forceFirstDate = AttrMapValue(isBoolean,
-			desc='Flag for enforced displaying of first date value.'),
-		xLabelFormat = AttrMapValue(None,
-			desc="Label format string (e.g. '{mm}/{yy}') or function."),
-		dayOfWeekName = AttrMapValue(SequenceOf(isString,emptyOK=0,lo=7,hi=7),
-			desc='Weekday names.'),
-		monthName = AttrMapValue(SequenceOf(isString,emptyOK=0,lo=12,hi=12),
-			desc='Month names.'),
+		bottomAxisLabelSlack = AttrMapValue(isNumber, desc="Fractional amount used to adjust label spacing"),
+		niceMonth = AttrMapValue(isBoolean, desc="Flag for displaying months 'nicely'."),
+		forceEndDate = AttrMapValue(isBoolean, desc='Flag for enforced displaying of last date value.'),
+		forceFirstDate = AttrMapValue(isBoolean, desc='Flag for enforced displaying of first date value.'),
+		xLabelFormat = AttrMapValue(None, desc="Label format string (e.g. '{mm}/{yy}') or function."),
+		dayOfWeekName = AttrMapValue(SequenceOf(isString,emptyOK=0,lo=7,hi=7), desc='Weekday names.'),
+		monthName = AttrMapValue(SequenceOf(isString,emptyOK=0,lo=12,hi=12), desc='Month names.'),
+		dailyFreq = AttrMapValue(isBoolean, desc='True if we are to assume daily data to be ticked at end of month.'),
 		)
 
 	_valueClass = normalDate.ND
@@ -850,6 +844,7 @@ class NormalDateXValueAxis(XValueAxis):
 		self.niceMonth = 1
 		self.forceEndDate = 0
 		self.forceFirstDate = 0
+		self.dailyFreq = 0
 		self.xLabelFormat = "{mm}/{yy}"
 		self.dayOfWeekName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 		self.monthName = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
@@ -922,10 +917,10 @@ class NormalDateXValueAxis(XValueAxis):
 
 				if self.forceFirstDate and ticks[0] != xVals[0]:
 					addTick(0)
-					if (xPoints/(ticks[-1]-ticks[0]))*(ticks[1]-ticks[0])<=w:
+					if (axisLength/(ticks[-1]-ticks[0]))*(ticks[1]-ticks[0])<=w:
 						del ticks[1], labels[1]
 				if self.forceEndDate and self.niceMonth and j:
-					if (xPoints/(ticks[-1]-ticks[0]))*(ticks[-1]-ticks[-2])<=w:
+					if (axisLength/(ticks[-1]-ticks[0]))*(ticks[-1]-ticks[-2])<=w:
 						del ticks[-2], labels[-2]
 				if labels[0]==labels[1]:
 					del ticks[1], labels[1]
@@ -945,7 +940,21 @@ class NormalDateXValueAxis(XValueAxis):
 	def configure(self, data):
 		self._convertXV(data)
 		xVals = map(lambda dv: dv[0], data[0])
-		steps, labels = self._xAxisTicker(xVals)
+		if self.dailyFreq:
+			xEOM = []
+			pm = 0
+			px = xVals[0]
+			for x in xVals:
+				m = x.month()
+				if pm!=m:
+					if pm: xEOM.append(px)
+					pm = m
+				px = x
+			px = xVals[-1]
+			if xEOM[-1]!=x: xEOM.append(px)
+			steps, labels = self._xAxisTicker(xEOM)
+		else:
+			steps, labels = self._xAxisTicker(xVals)
 		valueMin, valueMax = self.valueMin, self.valueMax
 		if valueMin is None: valueMin = xVals[0]
 		if valueMax is None: valueMax = xVals[-1]
