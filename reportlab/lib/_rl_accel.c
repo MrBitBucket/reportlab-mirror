@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.21 2001/09/05 11:14:45 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.22 2001/09/05 11:16:20 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.21 2001/09/05 11:14:45 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.22 2001/09/05 11:16:20 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -27,7 +27,7 @@ static __version__=" $Id: _rl_accel.c,v 1.21 2001/09/05 11:14:45 rgbecker Exp $ 
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.35"
+#define VERSION "0.36"
 #define MODULE "_rl_accel"
 #ifndef	ATTRDICT
 	#if PY_MAJOR_VERSION>=2
@@ -308,12 +308,16 @@ L2:	Py_DECREF(pfontName);
 	return Py_BuildValue("f",0.001*fontSize*w);
 }
 
-static const unsigned long _a85_nums[5] = {1L, 85L, 7225L, 614125L, 52200625L};
+#define a85_0          1L
+#define a85_1          85L
+#define a85_2        7225L
+#define a85_3      614125L
+#define a85_4    52200625L
 
 PyObject *_a85_encode(PyObject *self, PyObject *args)
 {
 	unsigned char	*inData;
-	int				length, blocks, extra, i, j, k, lim;
+	int				length, blocks, extra, i, k, lim;
 	unsigned long	block, res;
 	char			*buf;
 	PyObject		*retVal;
@@ -334,24 +338,46 @@ PyObject *_a85_encode(PyObject *self, PyObject *args)
 		block = ((unsigned long)inData[i]<<24)|((unsigned long)inData[i+1]<<16)
 				|((unsigned long)inData[i+2]<<8)|((unsigned long)inData[i+3]);
 		if (block == 0) buf[k++] = 'z';
-		else
-			for (j=4; j>=0; j--) {
-				res = block / _a85_nums[j];
-				buf[k++] = (char)(res+33);
-				block -= res * _a85_nums[j];
-				}
-		}
+		else {
+			res = block/a85_4;
+			buf[k++] = (char)(res+33);
+			block -= res*a85_4;
 
+			res = block/a85_3;
+			buf[k++] = (char)(res+33);
+			block -= res*a85_3;
+
+			res = block/a85_2;
+			buf[k++] = (char)(res+33);
+			block -= res*a85_2;
+
+			res = block / a85_1;
+			buf[k++] = (char)(res+33);
+			
+			buf[k++] = (char)(block-res*a85_1+33);
+			}
+		}
+	
 	if(extra>0){
 		block = 0L;
 
 		for (i=0; i<extra; i++)
 			block += (unsigned long)inData[length-extra+i] << (24-8*i);
 
-		for (j=4; j>=4-extra; j--){
-			res = block / _a85_nums[j];
+		res = block/a85_4;
+		buf[k++] = (char)(res+33);
+		if(extra>=1){
+			block -= res*a85_4;
+
+			res = block/a85_3;
 			buf[k++] = (char)(res+33);
-			block -= res * _a85_nums[j];
+			if(extra>=2){
+				block -= res*a85_3;
+
+				res = block/a85_2;
+				buf[k++] = (char)(res+33);
+				if(extra>=3) buf[k++] = (char)((block-res*a85_2)/a85_1+33);
+				}
 			}
 		}
 
