@@ -1,4 +1,4 @@
-# a Pythonesque Canvas v0.3
+# a Pythonesque Canvas v0.4
 # Author : Jerome Alet - <alet@librelogiciel.com>
 # License : ReportLab's license
 #
@@ -95,113 +95,83 @@ def buildargs(*args, **kwargs) :
         arguments = arguments[:-2]
     return arguments    
 
+# global nesting level
 _in = 0
 
+class PDFAction :
+    def __init__(self, parent, action) :
+        self._parent = parent
+        self._action = action
+    
+    def __getattr__(self, name) :
+        return getattr(getattr(self._parent._object, self._action), name)
+        
+    def __call__(self, *args, **kwargs) :
+        global _in
+        if not _in :
+            self._parent._parent._PyWrite("    %s.%s(%s)" % (self._parent._name, self._action, apply(buildargs, args, kwargs)))
+        _in += 1
+        retcode = apply(getattr(self._parent._object, self._action), args, kwargs)
+        _in -= 1
+        return retcode
+        
+class PDFObject :
+    def __init__(self, parent) :
+        self._parent = parent
+        self._initdone = 0
+    
+    def __getattr__(self, name) :
+        return PDFAction(self, name)
+        
+    def __repr__(self) :
+        return self._name
+        
+    def __call__(self, *args, **kwargs) :
+        if not self._initdone :
+            methodname = apply(self._postinit, args, kwargs)
+            self._parent._PyWrite("    %s = %s.%s(%s)" % (self._name, self._parent._name, methodname, apply(buildargs, args, kwargs)))
+            self._initdone = 1
+        return self
+    
 class Canvas :
-    class TextObject :
-        class Action :
-            def __init__(self, parent, action) :
-                self._parent = parent
-                self._action = action
+    class TextObject(PDFObject) :
+        _name = "t"
+        def _postinit(self, *args, **kwargs) :
+            self._object = apply(textobject.PDFTextObject, (self._parent, ) + args, kwargs)
+            return "beginText"
         
-            def __getattr__(self, name) :
-                return getattr(getattr(self._parent._text, self._action), name)
-                
-            def __call__(self, *args, **kwargs) :
-                global _in
-                # print "text [%s] : %i" % (self._action, _in)
-                if not _in :
-                    self._parent._parent._PyWrite("    t.%s(%s)" % (self._action, apply(buildargs, args, kwargs)))
-                _in += 1
-                retcode = apply(getattr(self._parent._text, self._action), args, kwargs)
-                _in -= 1
-                return retcode
+    class PathObject(PDFObject) :
+        _name = "p"
+        def _postinit(self, *args, **kwargs) :
+            self._object = apply(pathobject.PDFPathObject, args, kwargs)
+            return "beginPath"
         
-        def __init__(self, parent) :
-            self._parent = parent
-            self._initdone = 0
-        
-        def __repr__(self) :
-            return "t"
-            
-        def __getattr__(self, name) :
-            return self.Action(self, name)
-            
-        def __call__(self, *args, **kwargs) :
-            if not self._initdone :
-                self._text = apply(textobject.PDFTextObject, (self._parent, ) + args, kwargs)
-                self._parent._PyWrite("    t = c.beginText(%s)" % apply(buildargs, args, kwargs))
-                self._initdone = 1
-            return self
-        
-    class PathObject :
-        class Action :
-            def __init__(self, parent, action) :
-                self._parent = parent
-                self._action = action
-                
-            def __getattr__(self, name) :
-                return getattr(getattr(self._parent._path, self._action), name)
-        
-            def __call__(self, *args, **kwargs) :
-                global _in
-                # print "path [%s] : %i" % (self._action, _in)
-                if not _in :
-                    self._parent._parent._PyWrite("    p.%s(%s)" % (self._action, apply(buildargs, args, kwargs)))
-                _in += 1    
-                retcode = apply(getattr(self._parent._path, self._action), args, kwargs)
-                _in -= 1
-                return retcode
-        
-        def __init__(self, parent) :
-            self._parent = parent
-            self._initdone = 0
-        
-        def __repr__(self) :
-            return "p"
-            
-        def __getattr__(self, name) :
-            return self.Action(self, name)
-            
-        def __call__(self, *args, **kwargs) :
-            if not self._initdone :
-                self._path = apply(pathobject.PDFPathObject, args, kwargs)
-                self._parent._PyWrite("    p = c.beginPath(%s)" % apply(buildargs, args, kwargs))
-                self._initdone = 1
-            return self
-        
-    class Action :
-        def __init__(self, parent, action) :
-            self._parent = parent
-            self._action = action
-
-        def __getattr__(self, name) :
-            return getattr(getattr(self._parent._canvas, self._action), name)
-        
+    class Action(PDFAction) :
         def __call__(self, *args, **kwargs) :
             global _in
             try :
                 # print "canvas [%s] : %i" % (self._action, _in)
                 if (not _in) and (self._action != "__nonzero__") :
-                    self._parent._PyWrite("    c.%s(%s)" % (self._action, apply(buildargs, args, kwargs)))
+                    self._parent._PyWrite("    %s.%s(%s)" % (self._parent._name, self._action, apply(buildargs, args, kwargs)))
                 _in += 1    
-                retcode = apply(getattr(self._parent._canvas, self._action), args, kwargs)
+                retcode = apply(getattr(self._parent._object, self._action), args, kwargs)
                 _in -= 1    
                 return retcode
             except AttributeError :    # __nonzero__, but I don't know why
                 _in -= 1
                 return 1
 
+    _name = "c"
     def __init__(self, *args, **kwargs) :
         self._footerpresent = 0
-        self._canvas = apply(canvas.Canvas, args, kwargs)
+        self._object = apply(canvas.Canvas, args, kwargs)
         self._pyfile = cStringIO.StringIO()
         self._PyWrite(PyHeader)
         try :
             del kwargs["filename"]
         except KeyError :    
             pass
-        self._PyWrite("    c = pycanvas.Canvas(file, %s)" % apply(buildargs, args[1:], kwargs))
+        self._PyWrite("    %s = pycanvas.Canvas(file, %s)" % (self._name, apply(buildargs, args[1:], kwargs)))
 
     def __str__(self) :
         if not self._footerpresent :
