@@ -734,7 +734,7 @@ class BaseDocTemplate:
         while 1:
             passes = passes + 1
             if self._onProgress:
-                self.onProgress('PASS', passes)
+                self._onProgress('PASS', passes)
             if verbose: print 'building pass '+str(passes) + '...',
 
             for fl in self._indexingFlowables:
