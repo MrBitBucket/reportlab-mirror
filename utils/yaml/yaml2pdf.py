@@ -19,9 +19,7 @@ import yaml
 from reportlab.lib.styles import ParagraphStyle, StyleSheet1
 from reportlab.lib.enums import *
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus.layout import *
-from reportlab.platypus.paragraph import Paragraph
-from reportlab.platypus.doctemplate import *
+from reportlab.platypus import *
 from reportlab.lib import colors
 
 
@@ -46,18 +44,12 @@ class MyPageTemplate(PageTemplate):
 
 
 class MyDocTemplate(BaseDocTemplate):
-    def __init__(self, filename, pagesize=DEFAULT_PAGE_SIZE, pageTemplates=[],
-                     showBoundary=0, leftMargin=inch, rightMargin=inch,
-                     topMargin=inch, bottomMargin=inch):
-        BaseDocTemplate.__init__(self, 	filename, pagesize,
-                     pageTemplates, showBoundary,
-                     leftMargin, rightMargin,
-                     topMargin, bottomMargin)
-        #give it a single PageTemplate
-        
-        self.addPageTemplates(MyPageTemplate('Normal'))
+	_invalidInitArgs = ('pageTemplates',)
+    def __init__(self, filename, **kw):
+        apply(BaseDocTemplate.__init__,(self,filename),kw)
 
-    
+        #give it a single PageTemplate
+        self.addPageTemplates(MyPageTemplate('Normal'))
 
 def run(infilename, outfilename):
     p = yaml.Parser()

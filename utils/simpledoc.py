@@ -1,4 +1,3 @@
-#!/bin/env python
 ###############################################################################
 #
 #	ReportLab Public License Version 1.0
@@ -32,13 +31,16 @@
 #
 ###############################################################################
 #	$Log: simpledoc.py,v $
+#	Revision 1.3  2000/06/01 15:30:45  rgbecker
+#	Platypus re-organisation
+#
 #	Revision 1.2  2000/05/17 15:39:10  rgbecker
 #	Changes related to removal of SimpleFlowDocument
-#
+#	
 #	Revision 1.1  2000/02/17 02:01:46  rgbecker
 #	Initial Version from Aaron
 #	
-__version__=''' $Id: simpledoc.py,v 1.2 2000/05/17 15:39:10 rgbecker Exp $ '''
+__version__=''' $Id: simpledoc.py,v 1.3 2000/06/01 15:30:45 rgbecker Exp $ '''
 __doc__="""
 simple document formatting (quickhack) for pdf:
 
@@ -59,7 +61,7 @@ more detail.
 and so forth.
 """
 import string
-from reportlab.platypus.doctemplate import *
+from reportlab.platypus import *
 from reportlab.lib.styles import getSampleStyleSheeet
 
 do_images = 1

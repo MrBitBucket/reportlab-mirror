@@ -3,8 +3,9 @@
 from reportlab.lib import colors
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.platypus.layout import Frame, Flowable
-from reportlab.platypus.paragraph import Paragraph
+from reportlab.platypus import Frame
+from reportlab.platypus import Flowable
+from reportlab.platypus import Paragraph
 from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER
 

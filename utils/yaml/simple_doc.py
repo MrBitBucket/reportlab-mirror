@@ -139,8 +139,7 @@ and so forth.
 
 .H stuff for HTML ONLY you've been warned RGB :)
 """
-from reportlab.platypus.doctemplate import *
-from reportlab.platypus.paragraph import Paragraph
+from reportlab.platypus import *
 from reportlab.lib.styles import getSampleStyleSheet
 import string
 
