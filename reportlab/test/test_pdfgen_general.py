@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.22 2004/03/26 14:20:44 rgbecker Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.22 2004/03/26 14:20:44 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.23 2004/06/10 00:43:21 andy_robinson Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.23 2004/06/10 00:43:21 andy_robinson Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 
@@ -205,6 +205,13 @@ def makeDocument(filename, pageCallBack=None):
 
     framePage(c, 'PDFgen graphics API test script')
     makesubsection(c, "PDFgen", 10*inch)
+
+    #quickie encoding test: when canvas encoding not set,
+    #the following should do (tm), (r) and (c)
+    c.drawString(100, 100, 'copyright %s trademark %s registered %s ReportLab!' % (chr(169), chr(153),chr(174)))
+
+    
+
 
     t = c.beginText(inch, 10*inch)
     t.setFont('Times-Roman', 10)

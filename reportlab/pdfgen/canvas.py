@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.124 2004/05/28 23:41:18 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.124 2004/05/28 23:41:18 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.125 2004/06/10 00:43:21 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.125 2004/06/10 00:43:21 andy_robinson Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -122,7 +122,7 @@ class Canvas:
         Most of the attributes are private - we will use set/get methods
         as the preferred interface.  Default page size is A4."""
         if pagesize is None: pagesize = rl_config.defaultPageSize
-        if encoding is None: encoding = rl_config.defaultEncoding
+        #if encoding is None: encoding = rl_config.defaultEncoding
         if invariant is None: invariant = rl_config.invariant
         self._filename = filename
 
@@ -138,7 +138,7 @@ class Canvas:
 
         
         
-        self._doc = pdfdoc.PDFDocument(encoding,
+        self._doc = pdfdoc.PDFDocument(rl_config.defaultEncoding,
                                        compression=pageCompression,
                                        invariant=invariant)
 
@@ -1275,7 +1275,7 @@ class Canvas:
 
     def _convertText(self, text):
         "Convert to correct encoding for current font"
-        #print 'convert %s' % repr(text)
+        #print 'convert %s from %s to %s' % (repr(text), self.encoding, self._fontencoding)
         if self.encoding is None:
             return text
         elif self.encoding == 'MacRomanEncoding':
@@ -1289,7 +1289,7 @@ class Canvas:
                 docEnc = 'cp1252'
             else:
                 docEnc = self.encoding
-            uni = text.decode('utf-8')  #hack
+            uni = text.decode(docEnc)  #hack
             return uni.encode(self._fontencoding, self.encodingErrorMode)
     
 
@@ -1560,6 +1560,15 @@ class Canvas:
         for (key, value) in args:
             transDict[key] = value
         self._pageTransition = transDict
+
+    def getCurrentPageContent(self):
+        """Return uncompressed contents of current page buffer.
+
+        This is useful in creating test cases and assertions of what
+        got drawn, without necessarily saving pages to disk"""
+        return '\n'.join(self._code)
+
+
 
 if _instanceEscapePDF:
     import new

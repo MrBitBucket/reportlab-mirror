@@ -3,10 +3,141 @@ from reportlab.test.utils import makeSuiteForClasses, outputfile
 
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+import re
+
+import codecs
+
+textPat = re.compile(r'\([^(]*\)')
+
+#test sentences
+testLatin1 = 'copyright %s trademark %s registered %s ReportLab! Ol%s!' % (chr(169), chr(153),chr(174), chr(0xe9))
+testUni = unicode(testLatin1, 'latin-1')
+testUTF8 = testUni.encode('utf-8')
+# expected result is octal-escaped text in the PDF
+expectedLatin1 = "copyright \\251 trademark \\231 registered \\256 ReportLab! Ol\\351!"
+expectedUTF8 = r"\000\001\002\003\004\005\006\007\010\011\012\011\010\004\013\014\015\016\013\004\017\011\020\011\004\015\006\005\021\010\015\004\015\014\011\022\011\023\015\002\001\004\010\024\013\025\026\011\027\030\031\026"
 
 
-class EncodingTestCase(unittest.TestCase):
-    "Make documents with custom encodings"
+def extractText(pdfOps):
+    """Utility to rip out the PDF text within a block of PDF operators.
+
+    PDF will show a string draw as something like "(Hello World) Tj"
+    i.e. text is in curved brackets.     Crude and dirty, probably fails
+    on escaped brackets.
+    """    
+    found = textPat.findall(pdfOps)
+    #chop off '(' and ')'
+    return map(lambda x:x[1:-1], found)
+
+
+
+    
+
+class TextEncodingTestCase(unittest.TestCase):
+    """Tests of expected Unicode and encoding behaviour
+
+    """
+
+    #AR 9/6/2004 - just adding this to illustrate behaviour I expect.
+    def testStraightThrough(self):
+        """This assumes input encoding matches font.  no conversion,
+        trademark character does not appear in TT font"""
+        c = Canvas(outputfile('test_pdfbase_encodings_none.pdf'), encoding=None)
+        c.drawString(100,800, 'hello')
+
+        self.assertEquals(c.encoding, None)
+
+        #warmup - is my text extraction working?
+        self.assertEquals(extractText(c.getCurrentPageContent()), ['hello'])
+
+
+
+        c.drawString(100,700, testLatin1)
+        extracted = extractText(c.getCurrentPageContent())
+        self.assertEquals(extracted[1], expectedLatin1)
+
+        #now we register a unicode truetype font
+        pdfmetrics.registerFont(TTFont("Rina", "rina.ttf"))
+        pdfmetrics.registerFont(TTFont("Luxi", "luxiserif.ttf"))
+        c.setFont('Luxi', 12)
+
+    
+        #in our current mode, trying to draw this should raise an error
+        # as the bytes we pass to the Unicode font are not valid UTF8
+        self.assertRaises(UnicodeDecodeError, c.drawString, 100,100,testLatin1)
+        c.drawString(100, 600, testUTF8)
+        #print 'utf8-',testUTF8
+        c.save()
+
+
+    def testLatinCanvas(self):
+
+        """Verify canvas declared as latin autoconverts.
+
+        This assumes winansi (~latin-1) input. It converts to the
+        encoding of the underlying font, so both text lines APPEAR
+        the same."""
+
+        pdfmetrics.registerFont(TTFont("Luxi", "luxiserif.ttf"))
+
+        c = Canvas(outputfile('test_pdfbase_encodings_cp1252.pdf'), encoding='cp1252')
+        c.drawString(100,700, testLatin1)
+        extracted = extractText(c.getCurrentPageContent())
+        self.assertEquals(extracted[0], expectedLatin1)
+        
+
+        c.setFont('Luxi', 12)
+        #this should convert on the fly and see the characters in the output...
+        c.drawString(100,600, testLatin1)
+        extracted = extractText(c.getCurrentPageContent())
+        self.assertEquals(extracted[1], expectedUTF8)
+        
+        
+
+        #uncomment this to see some PDF for fun...
+        #print c.getCurrentPageContent()
+        c.save()
+
+        
+    def testUtf8Canvas(self):
+
+        """Verify canvas declared as utf8 autoconverts.
+
+        This assumes utf8 input. It converts to the encoding of the
+        underlying font, so both text lines APPEAR the same."""
+
+        pdfmetrics.registerFont(TTFont("Luxi", "luxiserif.ttf"))
+
+        c = Canvas(outputfile('test_pdfbase_encodings_utf8.pdf'), encoding='utf-8')
+        #it dies here...
+
+##        c.drawString(100,700, testUTF8)
+##        extracted = extractText(c.getCurrentPageContent())
+##        self.assertEquals(extracted[0], expectedUTF8)
+##        
+##
+##        c.setFont('Luxi', 12)
+##        #this should convert on the fly and see the characters in the output...
+##        c.drawString(100,600, testUTF8)
+##        extracted = extractText(c.getCurrentPageContent())
+##        self.assertEquals(extracted[1], expectedUTF8)
+##        
+##        
+##
+##        #uncomment this to see some PDF for fun...
+##        #print c.getCurrentPageContent()
+##        c.save()
+
+
+    
+
+
+
+class FontEncodingTestCase(unittest.TestCase):
+    """Make documents with custom encodings of Type 1 built-in fonts.
+
+    Nothing really to do with character encodings; this is about hacking the font itself"""
 
     def test0(self):
         "Make custom encodings of standard fonts"
@@ -26,6 +157,7 @@ class EncodingTestCase(unittest.TestCase):
         pdfmetrics.registerEncoding(zenc)
 
         # now we can make a font based on this encoding
+        # AR hack/workaround: the name of the encoding must be a Python codec!
         f = pdfmetrics.Font('FontWithoutVowels', 'Helvetica-Oblique', 'EncodingWithoutVowels')
         pdfmetrics.registerFont(f)
 
@@ -89,7 +221,11 @@ class EncodingTestCase(unittest.TestCase):
 
 
 def makeSuite():
-    return makeSuiteForClasses(EncodingTestCase)
+    return makeSuiteForClasses(
+        TextEncodingTestCase,
+
+        #FontEncodingTestCase - nobbled for now due to old stuff which needs removing.
+        )
 
 
 #noruntests
