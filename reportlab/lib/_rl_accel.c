@@ -27,7 +27,7 @@ static __version__=" $Id$ "
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.51"
+#define VERSION "0.52"
 #define MODULE "_rl_accel"
 
 
@@ -297,7 +297,7 @@ static PyObject *_pdfmetrics_instanceStringWidth(PyObject *unused, PyObject* arg
 
 	if(!(fI=find_font(fontName,e->fonts))){
 		if(_SWRecover && recover){
-			PyObject *arglist = Py_BuildValue("(s#sd)",text,textLen,fontName,fontSize);
+			PyObject *arglist = Py_BuildValue("(s#sds)",text,textLen,fontName,fontSize,e->name);
 			PyObject *result;
 			if(!arglist){
 				PyErr_SetString(ErrorObject,"recovery failed!");
