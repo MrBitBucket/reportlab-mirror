@@ -81,11 +81,6 @@ class _isNumberOrNone(_isNumber):
 		if x is None: return x
 		return _isNumber.normalize(x)
 
-class _isTextAnchor(Validator):
-	"TextAnchor validator class."
-	def test(self, x):
-		return x in ('start', 'middle', 'end')
-
 class _isListOfNumbersOrNone(Validator):
 	"ListOfNumbersOrNone validator class."
 	def test(self, x):
@@ -189,7 +184,7 @@ isString = _isString()
 isNumber = _isNumber()
 isInt = _isInt()
 isNumberOrNone = _isNumberOrNone()
-isTextAnchor = _isTextAnchor()
+isTextAnchor = OneOf('start','middle','end')
 isListOfNumbers = SequenceOf(isNumber,'isListOfNumbers')
 isListOfNumbersOrNone = _isListOfNumbersOrNone()
 isListOfShapes = _isListOfShapes()
@@ -202,3 +197,5 @@ isColorOrNone = _isColorOrNone()
 isValidChild = _isValidChild()
 isAnything = _isAnything()
 isNothing = _isNothing()
+isXYCoord = SequenceOf(isNumber,lo=2,hi=2,emptyOK=0)
+isBoxAnchor = OneOf('nw','n','ne','w','c','e','sw','s','se')

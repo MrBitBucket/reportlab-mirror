@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.8 2001/07/02 16:50:53 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.9 2001/07/04 14:59:24 uid22986 Exp $
 import string
 
 from reportlab.lib import colors
@@ -28,7 +28,7 @@ class Label(Widget):
 		dx = AttrMapValue(isNumber),
 		dy = AttrMapValue(isNumber),
 		angle = AttrMapValue(isNumber),
-		boxAnchor = AttrMapValue(OneOf('nw','n','ne','w','c','e','sw','s','se')),
+		boxAnchor = AttrMapValue(isBoxAnchor),
 		boxStrokeColor = AttrMapValue(isColorOrNone),
 		boxStrokeWidth = AttrMapValue(isNumber),
 		boxFillColor = AttrMapValue(isColorOrNone),
