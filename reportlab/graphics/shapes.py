@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.20 2001/04/06 12:21:32 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.21 2001/04/06 12:29:05 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -540,7 +540,7 @@ class Drawing(Group, Flowable):
         'canv':None}
 
     _attrMap = Group._attrMap.copy()
-	_attrMap.update(_xtraAttrMap)
+    _attrMap.update(_xtraAttrMap)
     
     def __init__(self, width, height, *nodes, **keywords):
         apply(Group.__init__,(self,)+nodes,keywords)
