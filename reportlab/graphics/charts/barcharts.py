@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.67 2002/07/30 16:25:39 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.68 2002/07/31 12:45:08 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -9,7 +9,7 @@ vertical versions.
 
 Stacked and percentile bar charts to follow...
 """
-__version__=''' $Id: barcharts.py,v 1.67 2002/07/30 16:25:39 rgbecker Exp $ '''
+__version__=''' $Id: barcharts.py,v 1.68 2002/07/31 12:45:08 rgbecker Exp $ '''
 
 import string, copy
 from types import FunctionType, StringType
@@ -17,14 +17,14 @@ from types import FunctionType, StringType
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf, isBoolean, isNoneOrShape
 from reportlab.lib.formatters import Formatter
-from reportlab.lib.attrmap import *
+from reportlab.lib.attrmap import AttrMap, AttrMapValue
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing, NotImplementedError
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.axes import YCategoryAxis, XValueAxis
 from reportlab.graphics.charts.textlabels import BarChartLabel, NA_Label, NoneOrInstanceOfNA_Label
-from reportlab.graphics.widgets.grids import ShadedRect
+from reportlab.graphics.charts.areas import PlotArea
 
 class BarChartProperties(PropHolder):
     _attrMap = AttrMap(
@@ -41,22 +41,14 @@ class BarChartProperties(PropHolder):
         self.symbol = None
 
 # Bar chart classes.
-class BarChart(Widget):
+class BarChart(PlotArea):
     "Abstract base class, unusable by itself."
 
-    _attrMap = AttrMap(
-        debug = AttrMapValue(isNumber, desc='Used only for debugging.'),
-        x = AttrMapValue(isNumber, desc='X position of the lower-left corner of the chart.'),
-        y = AttrMapValue(isNumber, desc='Y position of the lower-left corner of the chart.'),
-        width = AttrMapValue(isNumber, desc='Width of the chart.'),
-        height = AttrMapValue(isNumber, desc='Height of the chart.'),
+    _attrMap = AttrMap(BASE=PlotArea,
         useAbsolute = AttrMapValue(isNumber, desc='Flag to use absolute spacing values.'),
         barWidth = AttrMapValue(isNumber, desc='The width of an individual bar.'),
         groupSpacing = AttrMapValue(isNumber, desc='Width between groups of bars.'),
         barSpacing = AttrMapValue(isNumber, desc='Width between individual bars.'),
-        strokeColor = AttrMapValue(isColorOrNone, desc='Color of the plot area border.'),
-        strokeWidth = AttrMapValue(isNumber, desc='Width plot area border.'),
-        fillColor = AttrMapValue(isColorOrNone, desc='Color of the plot area interior.'),
         bars = AttrMapValue(None, desc='Handle of the individual bars.'),
         valueAxis = AttrMapValue(None, desc='Handle of the value axis.'),
         categoryAxis = AttrMapValue(None, desc='Handle of the category axis.'),
@@ -65,26 +57,14 @@ class BarChart(Widget):
         barLabelFormat = AttrMapValue(None, desc='Formatting string or function used for bar labels.'),
         reversePlotOrder = AttrMapValue(isBoolean, desc='If true, reverse common category plot order.'),
         naLabel = AttrMapValue(NoneOrInstanceOfNA_Label, desc='Label to use for N/A values.'),
-        background = AttrMapValue(isNoneOrShape, desc='Handle to background object.'),
         )
 
     def __init__(self):
         assert self.__class__.__name__!='BarChart', 'Abstract Class BarChart Instantiated'
-        self.debug = 0
+        PlotArea.__init__(self)
         self.barSpacing = 0
-
-        self.x = 0
-        self.y = 0
-        self.x = 20
-        self.y = 10
-        self.height = 85
-        self.width = 180
         self.reversePlotOrder = 0
 
-        # allow for a bounding rectangle
-        self.strokeColor = None
-        self.strokeWidth = 1
-        self.fillColor = None
 
         # this defines two series of 3 points.  Just an example.
         self.data = [(100,110,120,130),
@@ -129,26 +109,6 @@ class BarChart(Widget):
         self.bars[1].fillColor = colors.green
         self.bars[2].fillColor = colors.blue
         self.naLabel = None#NA_Label()
-        self.background = None
-
-    def makeBackground(self):
-        strokeColor,strokeWidth,fillColor=self.strokeColor, self.strokeWidth, self.fillColor
-        if self.background is not None:
-            g = Group()
-            bg = self.background
-            bg.x = self.x
-            bg.y = self.y
-            bg.width = self.width
-            bg.height = self.height
-            g.add(bg)
-            return g
-        elif (strokeWidth and strokeColor) or fillColor:
-            g = Group()
-            g.add(Rect(self.x, self.y, self.width, self.height,
-                strokeColor=strokeColor, strokeWidth=strokeWidth, fillColor=fillColor))
-            return g
-        else:
-            return None
 
 
     def demo(self):
@@ -1736,6 +1696,7 @@ def sampleSymbol1():
     bc.categoryAxis.labels.boxAnchor = 'e'
     bc.categoryAxis.categoryNames = ['Ying', 'Yang']
 
+    from reportlab.graphics.widgets.grids import ShadedRect
     sym1 = ShadedRect()
     sym1.fillColorStart = colors.black
     sym1.fillColorEnd = colors.blue
@@ -1786,6 +1747,7 @@ def sampleStacked1():
     bc.categoryAxis.labels.boxAnchor = 'e'
     bc.categoryAxis.categoryNames = ['Ying', 'Yang']
 
+    from reportlab.graphics.widgets.grids import ShadedRect
     bc.bars.symbol = ShadedRect()
     bc.bars.symbol.fillColorStart = colors.red
     bc.bars.symbol.fillColorEnd = colors.white

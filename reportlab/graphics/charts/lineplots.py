@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.33 2002/07/24 19:56:36 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.34 2002/07/31 12:45:08 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.33 2002/07/24 19:56:36 andy_robinson Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.34 2002/07/31 12:45:08 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -20,6 +20,7 @@ from reportlab.graphics.charts.utils import *
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol, makeMarker
 from reportlab.graphics.widgets.grids import Grid, DoubleGrid, ShadedRect
 from reportlab.pdfbase.pdfmetrics import stringWidth, getFont
+from reportlab.graphics.charts.areas import PlotArea
 
 # This might be moved again from here...
 class LinePlotProperties(PropHolder):
@@ -35,55 +36,29 @@ class LinePlotProperties(PropHolder):
         )
 
 
-class LinePlot(Widget):
+class LinePlot(PlotArea):
     """Line plot with multiple lines.
 
     Both x- and y-axis are value axis (so there are no seperate
     X and Y versions of this class).
     """
-
-    _attrMap = AttrMap(
-        debug = AttrMapValue(isNumber,
-            desc='Used only for debugging.'),
-        x = AttrMapValue(isNumber, desc='X position of the lower-left corner of the chart.'),
-        y = AttrMapValue(isNumber, desc='Y position of the lower-left corner of the chart.'),
+    _attrMap = AttrMap(BASE=PlotArea,
         reversePlotOrder = AttrMapValue(isBoolean, desc='If true reverse plot order.'),
-        width = AttrMapValue(isNumber, desc='Width of the chart.'),
-        height = AttrMapValue(isNumber, desc='Height of the chart.'),
-        lineLabelNudge = AttrMapValue(isNumber,
-            desc='Distance between a data point and its label.'),
-        lineLabels = AttrMapValue(None,
-            desc='Handle to the list of data point labels.'),
-        lineLabelFormat = AttrMapValue(None,
-            desc='Formatting string or function used for data point labels.'),
-        joinedLines = AttrMapValue(isNumber,
-            desc='Display data points joined with lines if true.'),
-        strokeColor = AttrMapValue(isColorOrNone,
-            desc='Color used for background border of plot area.'),
-        fillColor = AttrMapValue(isColorOrNone,
-            desc='Color used for background interior of plot area.'),
-        lines = AttrMapValue(None,
-            desc='Handle of the lines.'),
-        xValueAxis = AttrMapValue(None,
-            desc='Handle of the x axis.'),
-        yValueAxis = AttrMapValue(None,
-            desc='Handle of the y axis.'),
-        data = AttrMapValue(None,
-            desc='Data to be plotted, list of (lists of) x/y tuples.'),
+        lineLabelNudge = AttrMapValue(isNumber, desc='Distance between a data point and its label.'),
+        lineLabels = AttrMapValue(None, desc='Handle to the list of data point labels.'),
+        lineLabelFormat = AttrMapValue(None, desc='Formatting string or function used for data point labels.'),
+        joinedLines = AttrMapValue(isNumber, desc='Display data points joined with lines if true.'),
+        strokeColor = AttrMapValue(isColorOrNone, desc='Color used for background border of plot area.'),
+        fillColor = AttrMapValue(isColorOrNone, desc='Color used for background interior of plot area.'),
+        lines = AttrMapValue(None, desc='Handle of the lines.'),
+        xValueAxis = AttrMapValue(None, desc='Handle of the x axis.'),
+        yValueAxis = AttrMapValue(None, desc='Handle of the y axis.'),
+        data = AttrMapValue(None, desc='Data to be plotted, list of (lists of) x/y tuples.'),
         )
 
     def __init__(self):
-        self.debug = 0
-
-        self.x = 0
-        self.y = 0
+        PlotArea.__init__(self)
         self.reversePlotOrder = 0
-        self.width = 200
-        self.height = 100
-
-        # allow for a bounding rectangle
-        self.strokeColor = None
-        self.fillColor = None
 
         self.xValueAxis = XValueAxis()
         self.yValueAxis = YValueAxis()
@@ -176,18 +151,6 @@ class LinePlot(Widget):
                 y = self.yValueAxis.scale(datum[1])
                 line.append((x, y))
             self._positions.append(line)
-
-
-    def makeBackground(self):
-        g = Group()
-
-        g.add(Rect(self.x, self.y,
-                   self.width, self.height,
-                   strokeColor = self.strokeColor,
-                   fillColor= self.fillColor))
-
-        return g
-
 
     def drawLabel(self, group, rowNo, colNo, x, y):
         "Draw a label for a given item in the list."
@@ -304,11 +267,8 @@ class LinePlot(Widget):
 
         self.xValueAxis.setPosition(self.x, y, self.width)
         self.xValueAxis.configure(self.data)
-
         self.calcPositions()
-
         g = Group()
-
         g.add(self.makeBackground())
         g.add(self.xValueAxis)
         g.add(self.yValueAxis)
@@ -445,25 +405,6 @@ class GridLinePlot(LinePlot):
         lp.background.orientation = 'vertical'
         drawing.add(lp,'plot')
         return drawing
-
-    def makeBackground(self):
-        "Make a background grid or fall back on chart's default."
-
-        # If no background set, fall back to default behaviour.
-        if not self.background:
-            return LinePlot.makeBackground(self)
-
-        g = Group()
-
-        back = self.background
-        back.x = self.x
-        back.y = self.y
-        back.width = self.width
-        back.height = self.height
-
-        g.add(self.background)
-
-        return g
 
     def draw(self):
         xva, yva = self.xValueAxis, self.yValueAxis

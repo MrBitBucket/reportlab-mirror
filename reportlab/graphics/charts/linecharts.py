@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.24 2002/07/24 19:56:36 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.25 2002/07/31 12:45:08 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
-__version__=''' $Id: linecharts.py,v 1.24 2002/07/24 19:56:36 andy_robinson Exp $ '''
+__version__=''' $Id: linecharts.py,v 1.25 2002/07/31 12:45:08 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType
@@ -21,7 +21,7 @@ from reportlab.graphics.widgets.signsandsymbols import NoEntry
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol, makeMarker
-
+from reportlab.graphics.charts.areas import PlotArea
 
 class LineChartProperties(PropHolder):
     _attrMap = AttrMap(
@@ -30,9 +30,8 @@ class LineChartProperties(PropHolder):
         symbol = AttrMapValue(isSymbol, desc='Widget placed at data points.'),
         )
 
-class LineChart(Widget):
+class LineChart(PlotArea):
     pass
-
 
 # This is conceptually similar to the VerticalBarChart.
 # Still it is better named HorizontalLineChart... :-/
@@ -72,53 +71,22 @@ class HorizontalLineChart(LineChart):
         data: chart data, a list of data series of equal length
     """
 
-    _attrMap = AttrMap(
-        x = AttrMapValue(isNumber,
-            desc='X position of the lower-left corner of the chart.'),
-        y = AttrMapValue(isNumber,
-            desc='Y position of the lower-left corner of the chart.'),
-        width = AttrMapValue(isNumber,
-            desc='Width of the chart.'),
-        height = AttrMapValue(isNumber,
-            desc='Height of the chart.'),
-
-        useAbsolute = AttrMapValue(isNumber,
-            desc='Flag to use absolute spacing values.'),
-        lineLabelNudge = AttrMapValue(isNumber,
-            desc='Distance between a data point and its label.'),
-        lineLabels = AttrMapValue(None,
-            desc='Handle to the list of data point labels.'),
-        lineLabelFormat = AttrMapValue(None,
-            desc='Formatting string or function used for data point labels.'),
-        groupSpacing = AttrMapValue(isNumber,
-            desc='? - Likely to disappear.'),
-
-        joinedLines = AttrMapValue(isNumber,
-            desc='Display data points joined with lines if true.'),
-
-        strokeColor = AttrMapValue(isColorOrNone,
-            desc='Color used for background border of plot area.'),
-        fillColor = AttrMapValue(isColorOrNone,
-            desc='Color used for background interior of plot area.'),
-
-        lines = AttrMapValue(None,
-            desc='Handle of the lines.'),
-
-        valueAxis = AttrMapValue(None,
-            desc='Handle of the value axis.'),
-        categoryAxis = AttrMapValue(None,
-            desc='Handle of the category axis.'),
-        categoryNames = AttrMapValue(isListOfStringsOrNone,
-            desc='List of category names.'),
-        data = AttrMapValue(None,
-            desc='Data to be plotted, list of (lists of) numbers.'),
+    _attrMap = AttrMap(BASE=LineChart,
+        useAbsolute = AttrMapValue(isNumber, desc='Flag to use absolute spacing values.'),
+        lineLabelNudge = AttrMapValue(isNumber, desc='Distance between a data point and its label.'),
+        lineLabels = AttrMapValue(None, desc='Handle to the list of data point labels.'),
+        lineLabelFormat = AttrMapValue(None, desc='Formatting string or function used for data point labels.'),
+        groupSpacing = AttrMapValue(isNumber, desc='? - Likely to disappear.'),
+        joinedLines = AttrMapValue(isNumber, desc='Display data points joined with lines if true.'),
+        lines = AttrMapValue(None, desc='Handle of the lines.'),
+        valueAxis = AttrMapValue(None, desc='Handle of the value axis.'),
+        categoryAxis = AttrMapValue(None, desc='Handle of the category axis.'),
+        categoryNames = AttrMapValue(isListOfStringsOrNone, desc='List of category names.'),
+        data = AttrMapValue(None, desc='Data to be plotted, list of (lists of) numbers.'),
         )
 
     def __init__(self):
-        self.x = 0
-        self.y = 0
-        self.width = 200
-        self.height = 100
+        LineChart.__init__(self)
 
         # Allow for a bounding rectangle.
         self.strokeColor = None
@@ -248,18 +216,6 @@ class HorizontalLineChart(LineChart):
 
             group.add(label)
 
-
-    def makeBackground(self):
-        g = Group()
-
-        g.add(Rect(self.x, self.y,
-                   self.width, self.height,
-                   strokeColor = self.strokeColor,
-                   fillColor= self.fillColor))
-
-        return g
-
-
     def makeLines(self):
         g = Group()
 
@@ -334,9 +290,9 @@ class HorizontalLineChart(LineChart):
 
         g = Group()
 
+        g.add(self.makeBackground())
         g.add(cA)
         g.add(vA)
-        g.add(self.makeBackground())
         cA.makeGrid(g)
         vA.makeGrid(g)
         g.add(self.makeLines())
