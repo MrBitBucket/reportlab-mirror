@@ -489,7 +489,7 @@ class XValueAxis(Widget):
         msg = "Need at least one real data series to configure the axis"
         assert len(dataSeries) > 0, msg
         mag = "Need at least two elements in a data series to configure the axis"
-        assert len(dataSeries[0]) > 2, msg
+        assert len(dataSeries[0]) >= 2, msg
         
         minFound = dataSeries[0][0]
         maxFound = dataSeries[0][0]
@@ -708,7 +708,7 @@ class YValueAxis(Widget):
         msg = "Need at least one real data series to configure the axis"
         assert len(dataSeries) > 0, msg
         msg = "Need at least two elements in a data series to configure the axis"
-        assert len(dataSeries[0]) > 2, msg
+        assert len(dataSeries[0]) >= 2, msg
         
         minFound = dataSeries[0][0]
         maxFound = dataSeries[0][0]
