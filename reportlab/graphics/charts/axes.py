@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.63 2003/05/26 07:54:15 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.64 2003/05/27 09:18:01 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.63 2003/05/26 07:54:15 andy_robinson Exp $ '''
+__version__=''' $Id: axes.py,v 1.64 2003/05/27 09:18:01 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -509,14 +509,9 @@ class ValueAxis(Widget):
         self.minimumTickSpacing = 10
         self.maximumTicks = 7
 
-        # this may be either of (a) a format string like '%0.2f'
-        # or (b) a function which takes the value as an argument
-        # and returns a chunk of text.  So you can write a
-        # 'formatMonthEndDate' function and use that on irregular
-        # data points.
-        self.labelTextFormat = None
-        #private copy
-        self._labelTextFormat = None
+        # a format string like '%0.2f'
+        # or a function which takes the value as an argument and returns a string
+        self._labelTextFormat = self.labelTextFormat = None
 
         # if set to None, these will be worked out for you.
         # if you override any or all of them, your values
