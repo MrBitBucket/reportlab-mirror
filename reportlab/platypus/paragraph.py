@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.48 2000/12/17 10:51:55 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.48 2000/12/17 10:51:55 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.49 2000/12/18 09:24:15 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.49 2000/12/18 09:24:15 rgbecker Exp $ '''
 from string import split, strip, join, whitespace
 from operator import truth
 from types import StringType, ListType
@@ -499,6 +499,7 @@ class Paragraph(Flowable):
 				#preserving splitting algorithm
 				return self.blPara
 			n = 0
+			nSp = 0
 			for w in _getFragWords(frags):
 				spaceWidth = stringWidth(' ',w[-1][0].fontName, w[-1][0].fontSize)
 
@@ -523,13 +524,14 @@ class Paragraph(Flowable):
 						words = [g]
 						g.text = nText
 					elif not _sameFrag(g,f):
-						if (nText!='' and nText[0]!=' ') or hasattr(f,'cbDefn'):
+						if currentWidth>0 and ((nText!='' and nText[0]!=' ') or hasattr(f,'cbDefn')):
 							if hasattr(g,'cbDefn'):
 								i = len(words)-1
 								while hasattr(words[i],'cbDefn'): i = i-1
 								words[i].text = words[i].text + ' '
 							else:
 								g.text = g.text + ' '
+							nSp = nSp + 1
 						g = f.clone()
 						words.append(g)
 						g.text = nText
