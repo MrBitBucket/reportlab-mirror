@@ -8,7 +8,7 @@ from reportlab.lib import colors
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.shapes import *
 from reportlab.graphics.widgetbase import Widget
-from reportlab.graphics.charts.barchart1 import sample2a
+#from reportlab.graphics.charts.barchart1 import sample2a
 
 
 class Legend0(Widget):
