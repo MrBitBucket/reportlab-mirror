@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.19 2001/05/17 18:30:01 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.20 2001/05/29 19:19:58 johnprecedo Exp $
 
 from gengraphguide import *
 
@@ -138,11 +138,11 @@ be turned off when you need it to be.
 """)
 
 eg("""
->>> R = Rect(10,10,200,100, fillColor=red) 
+>>> R = Rect(10,10,200,100, fillColor=colors.red)
 >>> 
->>> R.fullColor = green    # note the typo 
->>> R.x = 'not a number'   # illegal argument type 
->>> del R.width            # that should confuse it
+>>> R.fullColor = colors.green # note the typo 
+>>> R.x = 'not a number'       # illegal argument type 
+>>> del R.width                # that should confuse it
 """)
 
 disc("""
@@ -159,13 +159,13 @@ would not know how to draw itself.
 eg("""
 >>> r = shapes.Rect(10,10,200,80) 
 >>> r.fullColor = colors.green 
-Traceback (innermost last): 
+Traceback (most recent call last):
   File "<interactive input>", line 1, in ? 
-  File "C:\code\users\andy\graphics\shapes.py", line 190, in __setattr__ 
-    raise AttributeError, "Illegal attribute '%s' in class %s" %\
-    
-      (attr, self.__class__.__name__) 
-AttributeError: Illegal attribute 'fullColor' in class Rect 
+  File "C:\code\users\andy\graphics\shapes.py", line 254, in __setattr__
+    validateSetattr(self,attr,value)    #from reportlab.lib.attrmap
+  File "C:\code\users\andy\lib\attrmap.py", line 74, in validateSetattr
+    raise AttributeError, "Illegal attribute '%s' in class %s" % (name, obj.__class__.__name__)
+AttributeError: Illegal attribute 'fullColor' in class Rect
 >>>  
 """)
 
@@ -177,9 +177,9 @@ first import reportlab.graphics.shapes:
 """)
 
 eg("""
->>> import reportlab.config 
->>> reportlab.config.shapeChecking = 0 
->>> import reportlab.graphics.shapes 
+>>> import reportlab.rl_config 
+>>> reportlab.rl_config.shapeChecking = 0 
+>>> from reportlab.graphics import shapes 
 >>>
 """)
 
@@ -226,7 +226,7 @@ disc("""To support these applications we have two interfaces, $getProperties$
        we need to put the support into the base of the framework.""")
 
 eg("""
->>> r = shapes.Rect(0,0,200,100) 
+>>> r = shapes.Rect(0,0,200,100)
 >>> import pprint 
 >>> pprint.pprint(r.getProperties()) 
 {'fillColor': Color(0.00,0.00,0.00), 
@@ -237,26 +237,26 @@ eg("""
  'strokeDashArray': None, 
  'strokeLineCap': 0, 
  'strokeLineJoin': 0, 
- 'strokeLineWidth': 1, 
  'strokeMiterLimit': 0, 
+ 'strokeWidth': 1, 
  'width': 200, 
  'x': 0, 
  'y': 0} 
 >>> r.setProperties({'x':20, 'y':30, 'strokeColor': colors.red}) 
 >>> r.dumpProperties() 
-fillColor = Color(0.00,0.00,0.00) 
-height = 100 
-rx = 0 
-ry = 0 
-strokeColor = Color(1.00,0.00,0.00) 
-strokeDashArray = None 
-strokeLineCap = 0 
-strokeLineJoin = 0 
-strokeLineWidth = 1 
-strokeMiterLimit = 0 
-width = 200 
-x = 20 
-y = 30 
+fillColor = Color(0.00,0.00,0.00)
+height = 100
+rx = 0
+ry = 0
+strokeColor = Color(1.00,0.00,0.00)
+strokeDashArray = None
+strokeLineCap = 0
+strokeLineJoin = 0
+strokeMiterLimit = 0
+strokeWidth = 1
+width = 200
+x = 20
+y = 30
 >>>  """)
 
 disc("""
@@ -329,7 +329,7 @@ bullet("Path (<i>not implemented yet, but will be added in the future</i>)")
 disc("""
 The following drawing, taken from our test suite, shows most of the
 basic shapes (except for groups).
-Those with a filled purple surface are also called <i>solid shapes</i>
+Those with a filled green surface are also called <i>solid shapes</i>
 (these are $Rect$, $Circle$, $Ellipse$, $Wedge$ and $Polygon$).
 """)
 
@@ -691,7 +691,7 @@ bullet("""it can be initialized with no arguments
 bullet("""It can have any parameters you want, and they can drive the way it is 
        drawn""")
 bullet("""it has a $demo()$ method which should return an attractively drawn 
-       example if itself in a 200x100 rectangle. This is the cornerstone of 
+       example of itself in a 200x100 rectangle. This is the cornerstone of 
        the automatic documentation tools. The $demo()$ method should also have 
        a well written docstring, since that is printed too!""")
 
@@ -712,9 +712,10 @@ Let's imagine a simple new widget.
 We will use a widget to draw a face, then show how it was implemented.""")
 
 eg("""
->>> import reportlab.lib.colors 
->>> import reportlab.graphics.shapes 
->>> import reportlab.graphics.renderPDF
+>>> from reportlab.lib import colors 
+>>> from reportlab.graphics import shapes
+>>> from reportlab.graphics import widgetbase
+>>> from reportlab.graphics import renderPDF
 >>> d = shapes.Drawing(200, 100)
 >>> f = widgetbase.Face()
 >>> f.skinColor = colors.yellow
