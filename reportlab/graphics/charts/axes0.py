@@ -488,8 +488,8 @@ class XValueAxis(Widget):
 
         msg = "Need at least one real data series to configure the axis"
         assert len(dataSeries) > 0, msg
-        mag = "Need at least two elements in a data series to configure the axis"
-        assert len(dataSeries[0]) >= 2, msg
+        msg = "Need at least one element in a data series to configure the axis"
+        assert len(dataSeries[0]) >= 1, msg
         
         minFound = dataSeries[0][0]
         maxFound = dataSeries[0][0]
@@ -707,8 +707,8 @@ class YValueAxis(Widget):
 
         msg = "Need at least one real data series to configure the axis"
         assert len(dataSeries) > 0, msg
-        msg = "Need at least two elements in a data series to configure the axis"
-        assert len(dataSeries[0]) >= 2, msg
+        msg = "Need at least one element in a data series to configure the axis"
+        assert len(dataSeries[0]) >= 1, msg
         
         minFound = dataSeries[0][0]
         maxFound = dataSeries[0][0]
@@ -817,13 +817,47 @@ class YValueAxis(Widget):
 
 # Sample functions.
 
+def sample0a():
+    "Make sample drawing with one axis and two buckets."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20)]
+
+    xAxis = XCategoryAxis()
+    xAxis.setPosition(75, 75, 300)
+    xAxis.configure(data)
+    xAxis.categoryNames = ['Ying', 'Yang']
+    xAxis.labels.boxAnchor = 'n'
+
+    drawing.add(xAxis)
+
+    return drawing
+
+
+def sample0b():
+    "Make sample drawing with one axis and one bucket only."
+
+    drawing = Drawing(400, 200)
+
+    data = [(10,)]
+
+    xAxis = XCategoryAxis()
+    xAxis.setPosition(75, 75, 300)
+    xAxis.configure(data)
+    xAxis.categoryNames = ['Ying']
+    xAxis.labels.boxAnchor = 'n'
+
+    drawing.add(xAxis)
+
+    return drawing
+
+
 def sample1():
     "Make sample drawing containing two unconnected axes."
 
     drawing = Drawing(400, 200)
 
-##    data = [(10, 20, 30, 40),
-##            (15, 22, 37, 42)]        
     data = [(10, 20, 30, 42)]        
 
     xAxis = XCategoryAxis()
@@ -1008,27 +1042,3 @@ def sample3c():
     drawing.add(yAxis)
 
     return drawing
-
-
-##def sample3d():
-##    "Make two axes, x connected at fixed value (of y-axes) of y."
-##
-##    drawing = Drawing(400, 200)
-##
-##    data = [(10, 20, 30, 42)]        
-##
-##    yAxis = YValueAxis()
-##    yAxis.setPosition(50, 50, 125)
-##    yAxis.configure(data)
-##
-##    xAxis = XCategoryAxis()
-##    xAxis._length = 300
-##    xAxis.configure(data)
-##    xAxis.joinToAxis(yAxis, mode='fixedValue', value=20)
-##    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
-##    xAxis.labels.boxAnchor = 'n'
-##
-##    drawing.add(xAxis)
-##    drawing.add(yAxis)
-##
-##    return drawing
