@@ -112,12 +112,16 @@ PLATYPUS is NOT designed for
         to a printer - Access, Crystal et al. handle this well already.
 
 
- 
+.pageBreak 
 .h1 Frames and Flowables
 
-There are several concepts in PLATYPUS and we will go a stage at a time.  We presume familiarity with the use of PDFgen package to create basic documents.  The stage we will save until last is how to create a flowing multi-page document from some data source.  The simplest thing you can do with PLATYPUS is to
-place a frame on a page, add some content to it, and tell it to draw.  Let's
-do this.  Here's some code which would create a frame and add two paragraphs to it:
+There are several concepts in PLATYPUS and we will go a stage at a
+time.  We presume familiarity with the use of PDFgen package to create
+basic documents.  The stage we will save until last is how to create a
+flowing multi-page document from some data source.  The simplest thing
+you can do with PLATYPUS is to place a frame on a page, add some
+content to it, and tell it to draw.  Let's do this.  Here's some code
+which would create a frame and add two paragraphs to it:
 
 .beginPre Code 
     canvas = Canvas('figure1.pdf')
@@ -149,9 +153,14 @@ This will result in a page like the one below:
 
 .custom platdemos PlatPropFigure1
 
-Frame has an <i>addFromList</i> method to display content.  It consumes objects from the front of the list until no more can fit in its client area or until the list is empty.
+Frame has an <i>addFromList</i> method to display content.  It
+consumes objects from the front of the list until no more can fit in
+its client area or until the list is empty.
 
-Note that there is a certain amount of space between the frame and the paragraphs within it.  Frames have four 'padding' attributes which can control this. The attributes can be seen below in the method signature for initializing a frame.
+Note that there is a certain amount of space between the frame and the
+paragraphs within it.  Frames have four 'padding' attributes which can
+control this. The attributes can be seen below in the method signature
+for initializing a frame.
 
 
 .beginPre Code
@@ -179,16 +188,40 @@ class Frame:
 
 .endPre
 
-The Padding attributes are formally unnecessary - you could just make the frame smaller - but are expected to make life easy when working with frames inside tables.  showBoundary is a debugging tool to draw a rectangle to show where the frame is.  <i>(Should the padding be zero by default to reduce surprises?)</i>
+The Padding attributes are formally unnecessary - you could just make
+the frame smaller - but are expected to make life easy when working
+with frames inside tables.  showBoundary is a debugging tool to draw a
+rectangle to show where the frame is.  <i>(Should the padding be zero
+by default to reduce surprises?)</i>
 
 
 .h2 Flowable objects and frame packing
 
-The things which go into frames must conform to the "Flowable" interface.  A conversation takes place between a Flowable object and a frame involving a number of steps.  First the packer calls flowable.wrap(availWidth, availheight) to say how much space is available.  The Flowable should reply with the width and height it wants.  If this fits, fine; it is told to draw itself in the right place.  If not, the packer will ask it to split (again with the same arguments). A dumb flowable will return an empty list indicating that it cannot split.  A smarter one such as a paragraph or a table might split itself into a number of separate flowables, the first of which should fit into the remaining space.
+The things which go into frames must conform to the "Flowable"
+interface.  This is defined as follows:
+.getClassDoc reportlab.platypus.layout Flowable
 
-Users may want to implement new Flowable Objects.  For this reason we will provide some high level base classes - for example, a BaseFigure class which draws a blank rectangle and a numbered caption underneath; this could be subclassed and one Draw method added to produce a new kind of graphic.
+A conversation takes place between a Flowable object and a
+frame involving a number of steps.  First the packer calls
+flowable.wrap(availWidth, availheight) to say how much space is
+available.  The Flowable should reply with the width and height it
+wants.  If this fits, fine; it is told to draw itself in the right
+place.  If not, the packer will ask it to split (again with the same
+arguments). A dumb flowable will return an empty list indicating that
+it cannot split.  A smarter one such as a paragraph or a table might
+split itself into a number of separate flowables, the first of which
+should fit into the remaining space.
 
-A new flowable should implement the methods wrap(), split() and draw().  Here's a class called XBox which just draws a box of a given height and width with diagonal lines through it, centred within the frame, and some text in the centre:
+Users may want to implement new Flowable Objects.  For this reason we
+will provide some high level base classes - for example, a BaseFigure
+class which draws a blank rectangle and a numbered caption underneath;
+this could be subclassed and one Draw method added to produce a new
+kind of graphic.
+
+A new flowable should implement the methods wrap(), split() and
+draw().  Here's a class called XBox which just draws a box of a given
+height and width with diagonal lines through it, centred within the
+frame, and some text in the centre:
 
 .beginPre Code
 
@@ -418,7 +451,7 @@ There can also be an outermost tag around each paragraph which can override the 
 .df bindent -> bulletIndent
 .df color, fg -> textColor
 
-
+.pageBreak
 .h1 Document Templates
 
 Now for the hard part - how to handle flowing documents.  
@@ -465,7 +498,7 @@ class MyPageTemplate(PageTemplate):
         canvas.restoreState()
 
 .endPre
-
+.pageBreak
 .h1 API Reference
 .getModuleDoc reportlab.pdfgen.canvas
 
@@ -473,6 +506,9 @@ class MyPageTemplate(PageTemplate):
 .h1 Appendix A - CVS Revision History
 .beginPre Code
 $Log: platprop.yml,v $
+Revision 1.11  2000/05/24 14:06:34  andy_robinson
+Documentation tools working nicely
+
 Revision 1.10  2000/05/24 13:06:00  andy_robinson
 CodeGrab utility now working, used to getcanvas reference
 for documentation.

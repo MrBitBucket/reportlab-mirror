@@ -132,11 +132,16 @@ class Parser:
         """Inserts a vertical spacer"""
         self._results.append(('VSpace', points))
         
+    def pageBreak(self):
+        """Inserts a frame break"""
+        self._results.append(('PageBreak','blah'))  # must be a tuple
 
     def custom(self, moduleName, funcName):
         """Goes and gets the Python object and adds it to the story"""
         self.endPara()
         self._results.append(('Custom',moduleName, funcName))
+
+    
         
     def getModuleDoc(self, modulename, pathname=None):
         """Documents the entire module at this point by making
@@ -154,7 +159,7 @@ class Parser:
         if len(docco.classes) > 0:
             self._results.append(('Paragraph','Heading2', 'Classes in ' + modulename))
             for cls in docco.classes:
-                self._results.append(('Paragraph','Heading3', 'Class %s:' % cls.name))
+                self._results.append(('Preformatted','FunctionHeader', 'Class %s:' % cls.name))
                 self._results.append(('Preformatted','DocString', cls.doc))
                 for mth in cls.methods:
                     if mth.status == 'official':
@@ -163,6 +168,23 @@ class Parser:
                     
         else:
             self._results.append(('Paragraph','Heading2', 'No Classes Defined in ' + modulename))
+
+    def getClassDoc(self, modulename, classname, pathname=None):
+        """Documents the class and its public methods"""
+        docco = codegrab.getObjectsDefinedIn(modulename, pathname)
+        found = 0
+        for cls in docco.classes:
+            if cls.name == classname:
+                found = 1
+                self._results.append(('Preformatted','FunctionHeader', 'Class %s:' % cls.name))
+                self._results.append(('Preformatted','DocString', cls.doc))
+                for mth in cls.methods:
+                    if mth.status == 'official':
+                        self._results.append(('Preformatted','FunctionHeader', mth.proto))
+                        self._results.append(('Preformatted','DocStringIndent', mth.doc))
+                break
+        assert found, 'No Classes Defined in ' + modulename
+
         
 if __name__=='__main__': #NORUNTESTS
     if len(sys.argv) <> 2:

@@ -93,6 +93,8 @@ def run(infilename, outfilename):
             filename = thingy[1]
             img = Image(filename)
             story.append(img)
+        elif typ == 'PageBreak':
+            story.append(PageBreak())
         elif typ == 'VSpace':
             height = thingy[1]
             story.append(Spacer(0, height))
@@ -108,7 +110,6 @@ def run(infilename, outfilename):
             #now get the function
             func = getattr(mod, funcName)
             story.append(func())
-        
         else:
             print 'skipping',typ, 'for now'
             
@@ -212,21 +213,25 @@ def getStyleSheet():
     stylesheet.add(ParagraphStyle(name='FunctionHeader',
                                   parent=stylesheet['Normal'],
                                   fontName='Courier-Bold',
-                                  textColor=colors.navy,
+                                  textColor=colors.maroon,
+                                  leftIndent=36,
                                   fontSize=8,
                                   leading=8.8))
 
     stylesheet.add(ParagraphStyle(name='DocString',
                                   parent=stylesheet['Normal'],
                                   fontName='Courier',
+                                  textColor=colors.maroon,
+                                  leftIndent=36,
                                   fontSize=8,
                                   leading=8.8))
 
     stylesheet.add(ParagraphStyle(name='DocStringIndent',
                                   parent=stylesheet['Normal'],
                                   fontName='Courier',
+                                  textColor=colors.maroon,
                                   fontSize=8,
-                                  leftIndent=36,
+                                  leftIndent=72,
                                   leading=8.8))
 
     stylesheet.add(ParagraphStyle(name='URL',
