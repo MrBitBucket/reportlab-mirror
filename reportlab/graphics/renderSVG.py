@@ -34,6 +34,13 @@ TEXT_STYLES = 'font-family font-size'
 
 ### top-level user function ###
 
+def drawToString(d, showBoundary=rl_config.showBoundary):
+    "Returns a SVG as a string in memory, without touching the disk"
+    s = getStringIO()
+    drawToFile(d, s, showBoundary=showBoundary)
+    return s.getvalue()
+
+
 def drawToFile(d, fn, showBoundary=rl_config.showBoundary):
     c = SVGCanvas((d.width, d.height))
     draw(d, c, 0, 0, showBoundary=showBoundary)
