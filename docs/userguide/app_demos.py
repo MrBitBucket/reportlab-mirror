@@ -8,7 +8,7 @@ almost all aspects of reportLab in use.""")
 heading2("""Odyssey""")
 disc("""
 The three scripts odyssey.py, dodyssey.py and fodyssey.py all take the file odyssey.txt
-and produce pdf documents. The included odyssey.txt is short a longer and more testing version
+and produce PDF documents. The included odyssey.txt is short; a longer and more testing version
 can be found at ftp://ftp.reportlab.com/odyssey.full.zip.
 """)
 eg("""
@@ -24,7 +24,7 @@ acrord odyssey.pdf
 """)
 disc("""Simple formatting is shown by the odyssey.py script. It runs quite fast,
 but all it does is gather the text and force it onto the canvas pages. It does no paragraph
-manipulation at all so you get to see the XML &lt;  &amp; &gt; tags.
+manipulation at all so you get to see the XML &lt; &amp; &gt; tags.
 """)
 disc("""The scripts fodyssey.py and dodyssey.py handle paragraph formatting so you get
 to see colour changes etc. Both scripts
@@ -52,20 +52,21 @@ different color spaces and a large selection of the colors which are named
 in the reportlab.lib.colors module.
 """)
 heading2("""Py2pdf""")
-disc("""Dinu Gherman (&lt;gherman@darwin.in-berlin.de&gt;) contributed this useful script
-which uses reportlab to produces nicely colorized pdf documents from python
-scripts. To get a nice version of the main script try""")
+disc("""Dinu Gherman (&lt;gherman@europemail.com&gt;) contributed this useful script
+which uses reportlab to produce nicely colorized PDF documents from Python
+scripts including bookmarks for classes, methods and functions.
+To get a nice version of the main script try""")
 eg("""
 cd reportlab/demos/py2pdf
 python py2pdf.py py2pdf.py
 acrord py2pdf.pdf
 """)
-disc("""ie we used py2pdf to produce a nice version of py2pdf.py in
+disc("""i.e. we used py2pdf to produce a nice version of py2pdf.py in
 the document with the same rootname and a .pdf extension.
 """)
 disc("""
-The py2pdf.py script has many options which are beyond the scope of this simple introduction
-consult the comments at the start of the script.
+The py2pdf.py script has many options which are beyond the scope of this
+simple introduction; consult the comments at the start of the script.
 """)
 heading2("Gadflypaper")
 disc("""
@@ -80,7 +81,7 @@ start gfe.pdf
 """)
 disc("""
 everything in the PDF document was produced by the script which is why this is an inline style
-of document production. So to produce a header followed by some text the script uses functions
+of document production. So, to produce a header followed by some text the script uses functions
 $header$ and $p$ which take some text and append to a global story list.
 """)
 eg('''
