@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.5  2000/05/13 08:33:53  rgbecker
+#	fix typo in import
+#
 #	Revision 1.4  2000/05/12 16:21:02  rgbecker
 #	_donothing explicit import
-#
+#	
 #	Revision 1.3  2000/05/12 14:53:38  rgbecker
 #	Handle splitting error in build
 #	
@@ -43,12 +46,12 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.4 2000/05/12 16:21:02 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.5 2000/05/13 08:33:53 rgbecker Exp $ '''
 __doc__="""
 More complicated Document model
 """
 from layout import *
-from layout import _donothing
+from layout import _doNothing
 from types import *
 import sys
 
