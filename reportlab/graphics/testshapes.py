@@ -34,7 +34,7 @@ from reportlab.graphics.renderPDF import _PDFRenderer
 #
 #########################################################
 
-def getDrawing1():
+def getDrawing0():
     """Hello World, on a rectangular background.
 
     The rectangle's fillColor is yellow.
@@ -48,11 +48,11 @@ def getDrawing1():
     return D
 
 
-def getDrawing1a():
+def getDrawing1():
     """Various Line shapes.
 
-    The rectangle's fillColor is yellow.
-    The string's fillColor is red.
+    The lines are blue and their strokeWidth is 5 mm.
+    One line has a strokeDashArray set to [5, 10, 15].
     """
     
     D = Drawing(400, 200)
@@ -69,21 +69,59 @@ def getDrawing1a():
     return D
 
 
-##class Line(LineShape):
-##    _attrMap = {
-##        'strokeColor':isColorOrNone,
-##        'strokeWidth':isNumber,
-##        'strokeLineCap':None,
-##        'strokeLineJoin':None,
-##        'strokeMiterLimit':isNumber,
-##        'strokeDashArray':None,
-##        'x1':isNumber,
-##        'y1':isNumber,
-##        'x2':isNumber,
-##        'y2':isNumber
-##        }
-
 def getDrawing2():
+    """Text strings in various sizes.
+
+    Font size increases from 12 to 36 and from bottom left
+    to upper right corner.
+    """
+    
+    D = Drawing(400, 200)
+    for size in range(12, 36, 4):
+        D.add(String(10+size*2, 10+size*2,
+                     'Hello World', fontSize=size))
+
+    return D
+
+
+def getDrawing3():
+    """Text strings in various colours.
+
+    Colours are blue, yellow and red from bottom left
+    to upper right.
+    """
+    
+    D = Drawing(400, 200)
+    i = 0
+    for color in (colors.blue, colors.yellow, colors.red):
+        D.add(String(50+i*30, 50+i*30,
+                     'Hello World', fillColor=color))
+        i = i + 1
+
+    return D
+
+
+def getDrawing4():
+    """Text strings with various anchors (alignments).
+
+    Text alignment conforms to the anchors in the left column.
+    """
+    
+    D = Drawing(400, 200)
+
+    lineX = 250
+    D.add(Line(lineX,10, lineX,190, strokeColor=colors.gray))
+
+    y = 130
+    for anchor in ('start', 'middle', 'end'):
+        D.add(String(lineX, y, 'Hello World', textAnchor=anchor))
+        D.add(String(50, y, anchor + ':'))
+        y = y - 30
+
+    return D
+
+
+def getDrawing5():
     """This demonstrates all the basic shapes at once.
 
     There are no groups or references.
@@ -120,31 +158,31 @@ def getDrawing2():
     return D
 
 
-def getDrawing3():
-    """This drawing uses groups. Each group has two circles and a comment.
-    The line style is set at group level and should be red for the left,
-    bvlue for the right."""
-
-    D = Drawing(400, 200)
-
-    Group1 = Group()
-
-    Group1.add(String(50, 50, 'Group 1', fillColor=colors.black))
-    Group1.add(Circle(75,100,25))
-    Group1.add(Circle(125,100,25))
-    D.add(Group1)
-
-    Group2 = Group(
-        String(250, 50, 'Group 2', fillColor=colors.black),
-        Circle(275,100,25),
-        Circle(325,100,25)#,
-
-        #group attributes
-        #strokeColor=colors.blue
-        )        
-    D.add(Group2)
-
-    return D
+##def getDrawing6():
+##    """This drawing uses groups. Each group has two circles and a comment.
+##    The line style is set at group level and should be red for the left,
+##    bvlue for the right."""
+##
+##    D = Drawing(400, 200)
+##
+##    Group1 = Group()
+##
+##    Group1.add(String(50, 50, 'Group 1', fillColor=colors.black))
+##    Group1.add(Circle(75,100,25))
+##    Group1.add(Circle(125,100,25))
+##    D.add(Group1)
+##
+##    Group2 = Group(
+##        String(250, 50, 'Group 2', fillColor=colors.black),
+##        Circle(275,100,25),
+##        Circle(325,100,25)#,
+##
+##        #group attributes
+##        #strokeColor=colors.blue
+##        )        
+##    D.add(Group2)
+##
+##    return D
 
 
 ##def getDrawing3():
