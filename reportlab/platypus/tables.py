@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.46 2001/11/23 17:53:30 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.46 2001/11/23 17:53:30 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.47 2001/11/28 10:41:22 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.47 2001/11/28 10:41:22 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -80,7 +80,7 @@ class TableStyle:
 			commands = commands + parent.getCommands()
 			self._opts = parent._opts
 		if cmds:
-			commands = commands + cmds
+			commands = commands + list(cmds)
 		self._cmds = commands
 		self._opts={}
 		self._opts.update(kw)
