@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.25 2002/07/31 12:45:08 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.26 2003/05/08 08:06:55 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
-__version__=''' $Id: linecharts.py,v 1.25 2002/07/31 12:45:08 rgbecker Exp $ '''
+__version__=''' $Id: linecharts.py,v 1.26 2003/05/08 08:06:55 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType
@@ -179,11 +179,12 @@ class HorizontalLineChart(LineChart):
             lineRow = []
             for colNo in range(len(self.data[rowNo])):
                 datum = self.data[rowNo][colNo]
-                (groupX, groupWidth) = self.categoryAxis.scale(colNo)
-                x = groupX + (0.5 * self.groupSpacing * normFactor)
-                y = self.valueAxis.scale(0)
-                height = self.valueAxis.scale(datum) - y
-                lineRow.append((x, y+height))
+                if datum is not None:
+                    (groupX, groupWidth) = self.categoryAxis.scale(colNo)
+                    x = groupX + (0.5 * self.groupSpacing * normFactor)
+                    y = self.valueAxis.scale(0)
+                    height = self.valueAxis.scale(datum) - y
+                    lineRow.append((x, y+height))
             self._positions.append(lineRow)
 
 
