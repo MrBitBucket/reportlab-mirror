@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/rl_doc_utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/rl_doc_utils.py,v 1.2 2001/11/13 18:59:50 dinu_gherman Exp $
-__version__=''' $Id: rl_doc_utils.py,v 1.2 2001/11/13 18:59:50 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/tools/docco/rl_doc_utils.py,v 1.3 2002/04/13 15:48:48 rgbecker Exp $
+__version__=''' $Id: rl_doc_utils.py,v 1.3 2002/04/13 15:48:48 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -12,7 +12,6 @@ This module contains utilities for generating guides
 
 import os, sys, glob
 import string
-import StringIO
 
 from rltemplate import RLDocTemplate
 from stylesheet import getStyleSheet

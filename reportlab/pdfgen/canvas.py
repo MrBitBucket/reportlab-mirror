@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.101 2002/03/29 20:37:00 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.101 2002/03/29 20:37:00 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.102 2002/04/13 15:48:48 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.102 2002/04/13 15:48:48 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -15,7 +15,6 @@ import sys
 from string import join, split, strip, atoi, replace, upper
 import time
 import tempfile
-import cStringIO
 from types import *
 from math import sin, cos, tan, pi, ceil
 import md5
