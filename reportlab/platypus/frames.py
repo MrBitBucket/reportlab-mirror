@@ -1,15 +1,16 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/frames.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.12 2001/01/19 08:41:22 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.13 2001/06/09 12:04:30 rgbecker Exp $
 
-__version__=''' $Id: frames.py,v 1.12 2001/01/19 08:41:22 dinu_gherman Exp $ '''
+__version__=''' $Id: frames.py,v 1.13 2001/06/09 12:04:30 rgbecker Exp $ '''
 
 __doc__="""
 """
 
 _geomAttr=('x1', 'y1', 'width', 'height', 'leftPadding', 'bottomPadding', 'rightPadding', 'topPadding')
 
+_FUZZ=1e-6 # to avoid numerical difficulties we use this as an error band
 
 class Frame:
 	'''
@@ -113,7 +114,7 @@ class Frame:
 		h = h + s
 		y = y - h
 
-		if y < p:
+		if y < p-_FUZZ:
 			if ((h > self._aH and not trySplit) or w > self._aW):
 				raise "LayoutError", "Flowable %s (%sx%s points) too large for frame (%sx%s points)." % (
 					flowable.__class__, w,h, self._aW,self._aH)
