@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.49 2003/09/15 14:30:33 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.50 2003/09/15 14:42:35 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.49 2003/09/15 14:30:33 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.50 2003/09/15 14:42:35 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -443,20 +443,19 @@ class LinePlot3D(LinePlot):
             else:
                 uSymbol = None
 
-            zL = (z0+z1)*0.5
             if uSymbol:
                 for xy in row:
                     x1, y1 = row[colNo]
-                    x1, y1 = _zadjust(x1,y1,zL)
+                    x1, y1 = _zadjust(x1,y1,z0)
                     symbol = uSymbol2Symbol(uSymbol,xy[0],xy[1],rowColor)
-                    if symbol: F.add((2,zL,zL,x1,y1,symbol))
+                    if symbol: F.add((1,z0,z0,x1,y1,symbol))
 
             # Draw data labels.
             for colNo in xrange(n):
                 x1, y1 = row[colNo]
-                x1, y1 = _zadjust(x1,y1,zL)
+                x1, y1 = _zadjust(x1,y1,z0)
                 L = self._innerDrawLabel(rowNo, colNo, x1, y1)
-                if L: F.add((2,zL,zL,x1,y1,L))
+                if L: F.add((2,z0,z0,x1,y1,L))
 
         F.sort()
         g = Group()

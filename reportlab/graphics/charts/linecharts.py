@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.36 2003/09/15 14:30:33 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.37 2003/09/15 14:42:35 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
-__version__=''' $Id: linecharts.py,v 1.36 2003/09/15 14:30:33 rgbecker Exp $ '''
+__version__=''' $Id: linecharts.py,v 1.37 2003/09/15 14:42:35 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType
@@ -445,20 +445,19 @@ class HorizontalLineChart3D(HorizontalLineChart):
             else:
                 uSymbol = None
 
-            zL = (z0+z1)*0.5
             if uSymbol:
                 for colNo in xrange(n):
                     x1, y1 = row[colNo]
-                    x1, y1 = _zadjust(x1,y1,zL)
+                    x1, y1 = _zadjust(x1,y1,z0)
                     symbol = uSymbol2Symbol(uSymbol,x1,y1,rowColor)
-                    if symbol: F.add((2,zL,zL,x1,y1,symbol))
+                    if symbol: F.add((2,z0,z0,x1,y1,symbol))
 
             # Draw item labels.
             for colNo in xrange(n):
                 x1, y1 = row[colNo]
-                x1, y1 = _zadjust(x1,y1,zL)
+                x1, y1 = _zadjust(x1,y1,z0)
                 L = self._innerDrawLabel(rowNo, colNo, x1, y1)
-                if L: F.add((2,zL,zL,x1,y1,L))
+                if L: F.add((2,z0,z0,x1,y1,L))
 
         F.sort()
         g = Group()
