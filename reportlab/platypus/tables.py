@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.74 2004/03/14 09:47:14 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.74 2004/03/14 09:47:14 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.75 2004/03/15 23:49:48 andy_robinson Exp $
+__version__=''' $Id: tables.py,v 1.75 2004/03/15 23:49:48 andy_robinson Exp $ '''
 
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
@@ -123,6 +123,7 @@ class Table(Flowable):
         if type(data) not in _SeqTypes:
             raise ValueError, "%s invalid data type" % self.identity()
         self._nrows = nrows = len(data)
+        self._cellvalues = []
         if nrows: self._ncols = ncols = max(map(_rowLen,data))
         elif colWidths: ncols = len(colWidths)
         else: ncols = 0
@@ -646,7 +647,7 @@ class Table(Flowable):
             else:
                 lineCount = cmd[8]
             assert lineCount >= 1
-            #linespacing at index 9. Not applicable unless 2+ lines, defaults to 2*line
+            #linespacing at index 9. Not applicable unless 2+ lines, defaults to line
             #width so you get a visible gap between centres
             if len(cmd)<10: cmd = cmd + (cmd[3],)
 
