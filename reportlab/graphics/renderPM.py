@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.7 2001/05/23 16:46:51 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.7 2001/05/23 16:46:51 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.8 2001/06/13 17:29:48 jvr Exp $
+__version__=''' $Id: renderPM.py,v 1.8 2001/06/13 17:29:48 jvr Exp $ '''
 """Usage:
 	from reportlab.graphics import renderPM
 	renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -452,7 +452,7 @@ if __name__=='__main__':
 						html.append('<p>%s format</p>\n' % string.upper(k))
 					try:
 						filename = 'renderPM%d.%s' % (i, ext(k))
-						fullpath = 'pmout%s%s'%(os.sep,filename)
+						fullpath = os.path.join('pmout', filename)
 						if os.path.isfile(fullpath):
 							os.remove(fullpath)
 						drawToFile(drawing,fullpath,fmt=k)
@@ -465,7 +465,7 @@ if __name__=='__main__':
 			i = i + 1
 			#if i==10: break
 		html.append(htmlBottom)
-		htmlFileName = 'pmout%sindex.html' % os.sep
+		htmlFileName = os.path.join('pmout', 'index.html')
 		open(htmlFileName, 'w').writelines(html)
 		print 'wrote %s' % htmlFileName
 	test()
