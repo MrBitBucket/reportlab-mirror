@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.33 2003/09/12 15:45:30 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.34 2003/09/15 09:34:21 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
-__version__=''' $Id: linecharts.py,v 1.33 2003/09/12 15:45:30 rgbecker Exp $ '''
+__version__=''' $Id: linecharts.py,v 1.34 2003/09/15 09:34:21 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType
@@ -371,7 +371,7 @@ class HorizontalLineChart3D(HorizontalLineChart):
         zSpace = self.zSpace
         zDepth = self.zDepth
         if self.categoryAxis.style=='parallel_3d':
-            _3d_depth = nSeries*zDepth+(n+1)*self.zSpace
+            _3d_depth = nSeries*zDepth+(nSeries+1)*self.zSpace
         else:
             _3d_depth = zDepth + 2*zSpace
         self._3d_dx = self.theta_x*_3d_depth
