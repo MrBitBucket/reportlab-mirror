@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.3 2001/04/25 08:26:53 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.4 2001/04/25 13:44:02 johnprecedo Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -244,6 +244,39 @@ def sample1():
     pc.wedges[3].labelRadius = 1.75
     pc.wedges[3].fontColor = colors.red
     
+    d.add(pc)
+
+    return d
+
+def sample2():
+    "Make a pie chart with nine slices."
+
+    d = Drawing(400, 200)
+
+    pc = Pie()
+    pc.x = 150
+    pc.y = 50
+    pc.data = [0.31, 0.14800000000000002, 0.10800000000000001,
+    0.075999999999999998, 0.033000000000000002, 0.029999999999999999,
+    0.019, 0.126, 0.14999999999999999]
+#    pc.labels = ['1', '2', '3', '4', '5', '6', '7', '8', 'X']
+
+    pc.width = 150
+    pc.height = 150
+    pc.labels = ['a']
+    pc.wedges.strokeWidth=0.5
+
+    pc.defaultColors = [colors.steelblue,
+                  colors.thistle,
+                  colors.cornflower,
+                  colors.lightsteelblue,
+                  colors.aquamarine,
+                  colors.cadetblue,
+                  colors.lightcoral,
+                  colors.tan,
+                  colors.darkseagreen,
+                  colors.lightgoldenrodyellow
+                  ]
     d.add(pc)
 
     return d
