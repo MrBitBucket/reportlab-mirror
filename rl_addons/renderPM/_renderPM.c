@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "$Revision: 1.12 $"
+#define VERSION "$Revision: 1.13 $"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -380,17 +380,15 @@ static	void _vpath_reverse(ArtVpath *p)
 
 static void _gstate_pathFill(gstateObject* self,int endIt, int vpReverse)
 {
-	ArtVpath*	vpath;
-	ArtSVP*		svp;
-	ArtSVP*		tmp_svp;
-	ArtVpath*	trVpath;
-	pixBufT*	p;
 
 	if(self->fillColor.valid){
+		ArtVpath	*vpath, *trVpath;
+		ArtSVP		*svp, *tmp_svp;
+		pixBufT*	p;
 		if(endIt) gstate_pathEnd(self);
 		dump_path(self);
 		vpath = art_bez_path_to_vec(self->path, 0.25);
-		trVpath =  art_vpath_affine_transform (vpath, self->ctm);
+		trVpath =  art_vpath_affine_transform(vpath, self->ctm);
 		if(vpReverse) _vpath_reverse(trVpath);
 
 		if(!self->clipSVP) {
@@ -457,10 +455,11 @@ static ArtSVP* art_svp_stroke_vpath_transform(ArtVpath *vpath,
 
 */
 {
-	ArtSVP *preTransSvp;
-	ArtVpath* backVpath;
 	ArtVpath* transVpath;
 	ArtSVP* resultSvp;
+#ifdef CLEE_CODE
+	ArtSVP *preTransSvp;
+	ArtVpath* backVpath;
 	double properAffine[6]; /* P matrix (proper affine matrix) */
 	ArtVpath* invVpath;
 	static double flipAffine[] = {1.0, 0,0,-1.0,0,0}; /* R matrix */
@@ -509,6 +508,13 @@ static ArtSVP* art_svp_stroke_vpath_transform(ArtVpath *vpath,
 		art_svp_free(preTransSvp);
 		art_free(invVpath);
 		}
+#else
+		transVpath = art_vpath_affine_transform(vpath, affine);
+		resultSvp = art_svp_vpath_stroke(transVpath, join, cap, line_width, miter_limit, flatness);
+
+		/*clean up this branch */
+		art_free(transVpath);
+#endif
 
 	return(resultSvp);
 }
@@ -780,8 +786,50 @@ static int _setA2DMX(PyObject* value, double* ctm)
 	return i;
 }
 
+#if 0
+static	void _reverse_rows_inplace( char *buf, int nrows, int stride)
+{
+	char	*rbuf=buf+(nrows-1)*stride, tmp, *lim;
+	int		stride2 = stride*2;
+	while(buf<rbuf){
+		lim = buf+stride;
+		while(buf<lim){
+			tmp = *buf;
+			*buf++ = *rbuf;
+			*rbuf++ = tmp;
+			}
+		rbuf -= stride2;
+		}
+}
+#endif
+
 static PyObject* gstate__aapixbuf(gstateObject* self, PyObject* args)
 {
+	int			dstX, dstY, dstW, dstH, srclen;
+	double		ctm[6];
+	ArtPixBuf	src;
+
+	src.n_channels = 3;
+
+	/*(dstX,dstY,dstW,dstH,src,srcW,srcH[,srcD[,aff]])*/
+	if(!PyArg_ParseTuple(args,"iiiit#ii|i:_aapixbuf",
+				&dstX, &dstY, &dstW, &dstH,
+				&src.pixels,&srclen,&src.width,&src.height,&src.n_channels)) return NULL;
+	ctm[0] = ((float)dstW)/src.width;
+	ctm[1] = ctm[2] = 0;
+	ctm[3] = -((float)dstH)/src.height;
+	ctm[4] = dstX;
+	ctm[5] = dstY+dstH;
+	art_affine_multiply(ctm,ctm,self->ctm);
+	src.format = ART_PIX_RGB;
+	src.destroy_data = src.destroy = NULL;
+	src.rowstride = src.width*src.n_channels;
+	src.has_alpha = src.n_channels==4;
+	src.bits_per_sample = 8;
+	art_rgb_pixbuf_affine(self->pixBuf->buf,0,0,self->pixBuf->width,self->pixBuf->height,self->pixBuf->rowstride,
+			(const ArtPixBuf*)&src,ctm,ART_FILTER_NEAREST,NULL);
+	Py_INCREF(Py_None);
+	return Py_None;
 }
 
 static int _setStrAttr(PyObject* value, char** pStr)
@@ -966,7 +1014,7 @@ static struct PyMethodDef gstate_methods[] = {
 	{"pathStroke", (PyCFunction)gstate_pathStroke, METH_VARARGS, "pathStroke()"},
 	{"setFont", (PyCFunction)gstate_setFont, METH_VARARGS, "setFont(fontName,fontSize)"},
 	{"_stringPath", (PyCFunction)gstate__stringPath, METH_VARARGS, "_stringPath(text[,x=0,y=0])"},
-	{"_aapixbuf", (PyCFunction)gstate__aapixbuf, METH_VARARGS, "_aapixbuf(dstX,dstY,dstW,dstH,src,srcW,srcH[,srcD[,aff]])"},
+	{"_aapixbuf", (PyCFunction)gstate__aapixbuf, METH_VARARGS, "_aapixbuf(dstX,dstY,dstW,dstH,src,srcW,srcH[,srcD]])"},
 	{NULL, NULL}		/* sentinel */
 };
 
@@ -1096,8 +1144,9 @@ gstates have the following methods\n\
  pathStroke() stroke current path\n\
  setFont(fontName,fontSize) set the font from the gt1 cache\n\
  _stringPath(text) return path dump of text\n\
- _aapixbuf(dstX,dstY,dstW,dstH,src,srcW,srcH[,srcD[,aff]]) composite\n\
+ _aapixbuf(dstX,dstY,dstW,dstH,src,srcW,srcH[,srcD]) composite\n\
       srcW by srcY depth srcD(=3) image to dst Rect(dstX,dstY,dstW,dstH)\n\
+	  src is string bytes in rgb order\n\
 \n\
 gstates have the following attributes\n\
 ctm			6vec float transformation matrix\n\
