@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.54 2002/07/09 16:47:43 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.55 2002/07/12 22:21:21 andy_robinson Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.54 2002/07/09 16:47:43 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.55 2002/07/12 22:21:21 andy_robinson Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -347,6 +347,8 @@ class BaseDocTemplate:
 			check the next page template
 			hang a page begin
 		'''
+		if self._onProgress:
+			self._onProgress('PAGE', self.canv.getPageNumber())
 		self.pageTemplate.afterDrawPage(self.canv, self)
 		self.pageTemplate.onPageEnd(self.canv, self)
 		self.afterPage()
