@@ -1,4 +1,8 @@
 #include "Python.h"
+#ifndef PyMem_New
+	/*Niki Spahiev <niki@vintech.bg> suggests this is required for 1.5.2*/
+#	define PyMem_New(type, n) ( (type *) PyMem_Malloc((n) * sizeof(type)) )
+#endif
 #include <string.h>
 #include "libart_lgpl/libart.h"
 #include "gt1/gt1-parset1.h"
