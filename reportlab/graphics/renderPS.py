@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPS.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.10 2001/07/16 13:29:28 rgbecker Exp $
-__version__=''' $Id: renderPS.py,v 1.10 2001/07/16 13:29:28 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.11 2001/09/23 04:56:55 kern Exp $
+__version__=''' $Id: renderPS.py,v 1.11 2001/09/23 04:56:55 kern Exp $ '''
 import string, cStringIO, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str
@@ -231,11 +231,15 @@ class PSCanvas:
         startAngleRadians = math.pi*startAng/180.0
         extentRadians = math.pi*extent/180.0
         endAngleRadians = startAngleRadians + extentRadians
+
+        codelineAppended = 0
+        
         # fill portion
 
         if self._fillColor != None:
             self.setColor(self._fillColor)
             self.code.append(codeline)
+            codelineAppended = 1
             if self._strokeColor!=None: self.code.append('gsave')
             self.lineTo(cx,cy)
             self.code.append('eofill')
@@ -246,6 +250,8 @@ class PSCanvas:
             # this is a bit hacked up.  There is certainly a better way...
             self.setColor(self._strokeColor)
             (startx, starty) = (cx+rx*math.cos(startAngleRadians), cy+ry*math.sin(startAngleRadians)) 
+            if not codelineAppended:
+                self.code.append(codeline)
             if fromcenter:
                 # move to center
                 self.lineTo(cx,cy)
@@ -350,17 +356,23 @@ class PSCanvas:
             figureCode.append("closepath")
         self._fillAndStroke(figureCode)
 
-    def _fillAndStroke(self,code):
-        if self._fillColor or self._strokeColor:
+    def _fillAndStroke(self,code,clip=0):
+        if self._fillColor or self._strokeColor or clip:
             self.code.extend(code)
             if self._fillColor:
-                if self._strokeColor: self.code.append("gsave")
+                if self._strokeColor or clip: self.code.append("gsave")
                 self.setColor(self._fillColor)
                 self.code.append("eofill")
-                if self._strokeColor: self.code.append("grestore")
+                if self._strokeColor or clip: self.code.append("grestore")
             if self._strokeColor != None:
+                if clip: self.code.append("gsave")
                 self.setColor(self._strokeColor)
                 self.code.append("stroke")
+                if clip: self.code.append("grestore")
+            if clip:
+                self.code.append("clip")
+                self.code.append("newpath")
+
 
     def translate(self,x,y):
         self.code.append('%s translate' % fp_str(x,y))
@@ -596,9 +608,10 @@ class _PSRenderer(Renderer):
     def drawNode(self, node):
         """This is the recursive method called for each node
         in the tree"""
-        #self._canvas.comment('begin node %s'%`node`)
+        self._canvas.comment('begin node %s'%`node`)
         color = self._canvas._color
-        self._canvas.saveState()
+        if not (isinstance(node, Path) and node.isClipPath):
+            self._canvas.saveState()
 
         #apply state changes
         deltas = getStateDelta(node)
@@ -609,8 +622,9 @@ class _PSRenderer(Renderer):
         self.drawNodeDispatcher(node)
 
         rDeltas = self._tracker.pop()
-        self._canvas.restoreState()
-        #self._canvas.comment('end node %s'%`node`)
+        if not (isinstance(node, Path) and node.isClipPath):
+            self._canvas.restoreState()
+        self._canvas.comment('end node %s'%`node`)
         self._canvas._color = color
 
         #restore things we might have lost (without actually doing anything).
@@ -694,7 +708,7 @@ class _PSRenderer(Renderer):
         isClosed = _renderPath(path, drawFuncs)
         if not isClosed:
             c._fillColor = None
-        c._fillAndStroke([])
+        c._fillAndStroke([], clip=path.isClipPath)
 
     def applyStateChanges(self, delta, newState):
         """This takes a set of states, and outputs the operators

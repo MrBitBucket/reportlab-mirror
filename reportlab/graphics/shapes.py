@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.47 2001/09/18 12:37:40 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.48 2001/09/23 04:56:55 kern Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -623,9 +623,10 @@ class Path(SolidShape):
 		fillColor = AttrMapValue(None),
 		points = AttrMapValue(isListOfNumbers),
 		operators = AttrMapValue(isListOfNumbers),
+		isClipPath = AttrMapValue(isBoolean),
 		)
 
-	def __init__(self, points=None, operators=None, **kw):
+	def __init__(self, points=None, operators=None, isClipPath=0, **kw):
 		SolidShape.__init__(self, kw)
 		if points is None:
 			points = []
@@ -634,6 +635,7 @@ class Path(SolidShape):
 		assert len(points) % 2 == 0, 'Point list must have even number of elements!'
 		self.points = points
 		self.operators = operators
+		self.isClipPath = isClipPath
 
 	def copy(self):
 		new = Path(self.points[:], self.operators[:])

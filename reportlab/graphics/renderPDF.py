@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPDF.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.12 2001/07/16 13:29:28 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.13 2001/09/23 04:56:55 kern Exp $
 # renderPDF - draws Drawings onto a canvas
 """Usage:
     import renderpdf
@@ -76,7 +76,8 @@ class _PDFRenderer(Renderer):
         in the tree"""
         #print "pdf:drawNode", self
         #if node.__class__ is Wedge: stop
-        self._canvas.saveState()
+        if not (isinstance(node, Path) and node.isClipPath):
+            self._canvas.saveState()
 
         #apply state changes
         deltas = getStateDelta(node)
@@ -87,7 +88,8 @@ class _PDFRenderer(Renderer):
         self.drawNodeDispatcher(node)
 
         self._tracker.pop()
-        self._canvas.restoreState()
+        if not (isinstance(node, Path) and node.isClipPath):
+            self._canvas.restoreState()
 
     def drawRect(self, rect):
         if rect.rx == rect.ry == 0:
@@ -189,9 +191,12 @@ class _PDFRenderer(Renderer):
             fill = self._fill
         else:
             fill = 0
-        self._canvas.drawPath(pdfPath, 
-                    fill=fill,
-                    stroke=self._stroke)
+        if path.isClipPath:
+            self._canvas.clipPath(pdfPath, fill=fill, stroke=self._stroke)
+        else:
+            self._canvas.drawPath(pdfPath, 
+                        fill=fill,
+                        stroke=self._stroke)
 
     def applyStateChanges(self, delta, newState):
         """This takes a set of states, and outputs the PDF operators

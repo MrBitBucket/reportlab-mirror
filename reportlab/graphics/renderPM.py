@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.11 2001/07/16 13:29:28 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.11 2001/07/16 13:29:28 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.12 2001/09/23 04:56:55 kern Exp $
+__version__=''' $Id: renderPM.py,v 1.12 2001/09/23 04:56:55 kern Exp $ '''
 """Usage:
 	from reportlab.graphics import renderPM
 	renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -186,6 +186,8 @@ class _PMRenderer(Renderer):
 		isClosed = _renderPath(path, drawFuncs)
 		if isClosed:
 			c.pathFill()
+		if path.isClipPath:
+			c.clipPathSet()
 		c.pathStroke()
 
 
