@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.51 2001/03/07 18:55:26 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.51 2001/03/07 18:55:26 rgbecker Exp $ '''
-from string import split, strip, join, whitespace
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.52 2001/05/15 09:29:59 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.52 2001/05/15 09:29:59 rgbecker Exp $ '''
+from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
