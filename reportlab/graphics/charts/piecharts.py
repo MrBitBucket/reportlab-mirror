@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.10 2001/05/09 09:10:42 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.11 2001/05/11 10:08:55 dinu_gherman Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -33,15 +33,15 @@ class WedgeProperties(PropHolder):
     """
 
     _attrMap = {
-        'strokeWidth':isNumber,
-        'fillColor':isColorOrNone,
-        'strokeColor':isColorOrNone,
-        'strokeDashArray':isListOfNumbersOrNone,
-        'popout':isNumber,
-        'fontName':isString,
-        'fontSize':isNumber,
-        'fontColor':isColorOrNone,
-        'labelRadius':isNumber
+        'strokeWidth':isNumber(),
+        'fillColor':isColorOrNone(),
+        'strokeColor':isColorOrNone(),
+        'strokeDashArray':isListOfNumbersOrNone(),
+        'popout':isNumber(),
+        'fontName':isString(),
+        'fontSize':isNumber(),
+        'fontColor':isColorOrNone(),
+        'labelRadius':isNumber()
         }
 
     def __init__(self):
@@ -58,13 +58,15 @@ class WedgeProperties(PropHolder):
 
 class Pie(Widget):
     _attrMap = {
-        'x':isNumber,
-        'y':isNumber,
-        'width':isNumber,
-        'height':isNumber,
-        'data':isListOfNumbers,
-        'labels':isListOfStringsOrNone,
-        'startAngle':isNumber,
+        'x':isNumber(
+            desc='X position of the chart.'),
+        'y':isNumber(
+            desc='Y position of the chart.'),
+        'width':isNumber(),
+        'height':isNumber(),
+        'data':isListOfNumbers(),
+        'labels':isListOfStringsOrNone(),
+        'startAngle':isNumber(),
         'direction': OneOf(('clockwise', 'anticlockwise')),
         'defaultStyles':None
         }

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.10 2001/05/08 19:39:15 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.11 2001/05/11 10:08:55 dinu_gherman Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -48,9 +48,9 @@ from reportlab.graphics.charts.textlabels import Label
 
 class BarChartProperties(PropHolder):
     _attrMap = {
-        'strokeColor':isColor,
-        'fillColor':isColor,
-        'strokeWidth':isNumber
+        'strokeColor':isColor(),
+        'fillColor':isColor(),
+        'strokeWidth':isNumber()
         }
 
 
@@ -60,25 +60,25 @@ class BarChart(Widget):
     "Abstract base class, unusable by itself."
 
     _attrMap = {
-        'debug':isNumber,
-        'x':isNumber,
-        'y':isNumber,
-        'width':isNumber,
-        'height':isNumber,
+        'debug':isNumber(),
+        'x':isNumber(),
+        'y':isNumber(),
+        'width':isNumber(),
+        'height':isNumber(),
 
-        'useAbsolute':isNumber,
-        'barWidth':isNumber,
-        'barLabelNudge':isNumber,
-        'groupSpacing':isNumber,
-        'barSpacing':isNumber,
+        'useAbsolute':isNumber(),
+        'barWidth':isNumber(),
+        'barLabelNudge':isNumber(),
+        'groupSpacing':isNumber(),
+        'barSpacing':isNumber(),
 
-        'strokeColor':isColorOrNone,
-        'fillColor':isColorOrNone,
+        'strokeColor':isColorOrNone(),
+        'fillColor':isColorOrNone(),
 
         'defaultStyles':None,
 
         'categoryAxis':None,
-        'categoryNames':isListOfStrings,
+        'categoryNames':isListOfStrings(),
         'valueAxis':None,
         'data':None,
         'barLabels':None,

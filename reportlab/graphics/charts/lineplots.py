@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.12 2001/05/09 07:45:25 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.13 2001/05/11 10:08:55 dinu_gherman Exp $
 """
 This modules defines a very preliminary Line Plot example.
 """
@@ -24,8 +24,8 @@ from reportlab.graphics.charts.markers import *
 
 class LinePlotProperties(PropHolder):
     _attrMap = {
-        'strokeWidth':isNumber,
-        'strokeColor':isColorOrNone,
+        'strokeWidth':isNumber(),
+        'strokeColor':isColorOrNone(),
         'symbol':None
         }
 
@@ -38,22 +38,22 @@ class LinePlot(Widget):
     """
 
     _attrMap = {
-        'debug':isNumber,
-        'x':isNumber,
-        'y':isNumber,
-        'width':isNumber,
-        'height':isNumber,
+        'debug':isNumber(),
+        'x':isNumber(),
+        'y':isNumber(),
+        'width':isNumber(),
+        'height':isNumber(),
 
-        'useAbsolute':isNumber,
-        'lineLabelNudge':isNumber,
+        'useAbsolute':isNumber(),
+        'lineLabelNudge':isNumber(),
         'lineLabels':None,
         'lineLabelFormat':None,
-        'groupSpacing':isNumber,
+        'groupSpacing':isNumber(),
 
-        'joinedLines':isNumber,
+        'joinedLines':isNumber(),
 
-        'strokeColor':isColorOrNone,
-        'fillColor':isColorOrNone,
+        'strokeColor':isColorOrNone(),
+        'fillColor':isColorOrNone(),
 
         'defaultStyles':None,
 

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.3 2001/05/07 14:10:41 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.4 2001/05/11 10:08:55 dinu_gherman Exp $
 import string
 
 from reportlab.lib import colors
@@ -22,20 +22,20 @@ class Label(Widget):
 	# framework.
 
 	_attrMap = {
-		'dx':isNumber,
-		'dy':isNumber,
-		'angle':isNumber,
+		'dx':isNumber(),
+		'dy':isNumber(),
+		'angle':isNumber(),
 		'boxAnchor':OneOf(('nw','n','ne','w','c','e','sw','s','se')),
-		'boxStrokeColor':isColorOrNone,
-		'boxStrokeWidth':isNumber,
-		'boxFillColor':isColorOrNone,
-		'text':isString,
-		'fontName':isString,
-		'fontSize':isNumber,
-		'leading':isNumberOrNone,
-		'width':isNumberOrNone,
-		'height':isNumberOrNone,
-		'textAnchor':isTextAnchor,
+		'boxStrokeColor':isColorOrNone(),
+		'boxStrokeWidth':isNumber(),
+		'boxFillColor':isColorOrNone(),
+		'text':isString(),
+		'fontName':isString(),
+		'fontSize':isNumber(),
+		'leading':isNumberOrNone(),
+		'width':isNumberOrNone(),
+		'height':isNumberOrNone(),
+		'textAnchor':isTextAnchor(),
 		}
 
 	def __init__(self):

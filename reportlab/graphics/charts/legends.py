@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.4 2001/05/07 14:10:41 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.5 2001/05/11 10:08:55 dinu_gherman Exp $
 """This will be a collection of legends to be used with charts.
 """
 
@@ -22,14 +22,14 @@ class Legend0(Widget):
     """
     
     _attrmap = {
-        "x": isNumber,
-        "y": isNumber,
-        "deltax": isNumber,
-        "deltay": isNumber,
-        "dxTextSpace": isNumber,
-        "dx": isNumber,
-        "dy": isNumber,
-        "columnMaximum": isNumber,
+        "x": isNumber(),
+        "y": isNumber(),
+        "deltax": isNumber(),
+        "deltay": isNumber(),
+        "dxTextSpace": isNumber(),
+        "dx": isNumber(),
+        "dy": isNumber(),
+        "columnMaximum": isNumber(),
         "alignment": OneOf(("left", "right")),
         "colorNamePairs": None, # fix this
         }

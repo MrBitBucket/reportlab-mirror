@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.22 2001/05/09 09:36:32 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.23 2001/05/11 10:08:55 dinu_gherman Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -88,22 +88,21 @@ class CategoryAxis(Widget):
     "Abstract category axis, unusable in itself."
 
     _attrMap = {
-        'visible':isNumber,
-        'visibleAxis':isNumber,
-        'visibleTicks':isNumber,
-        'strokeWidth':isNumber,
-        'strokeColor':isColorOrNone,
-        'strokeDashArray':isListOfNumbersOrNone,
+        'visible':isNumber(),
+        'visibleAxis':isNumber(),
+        'visibleTicks':isNumber(),
+        'strokeWidth':isNumber(),
+        'strokeColor':isColorOrNone(),
+        'strokeDashArray':isListOfNumbersOrNone(),
         'labels':None,
-        'categoryNames':isListOfStringsOrNone,
+        'categoryNames':isListOfStringsOrNone(),
         'joinAxis':None,
-        'joinAxisPos':isNumberOrNone,
+        'joinAxisPos':isNumberOrNone(),
         }
 
 ##    def __init__(self):
 ##        msg = "This is an abstract class and must be subclassed to be used!"
 ##        raise "NotImplementedError", msg
-
 
     def setPosition(self, x, y, length):
         # ensure floating point
@@ -135,8 +134,8 @@ class XCategoryAxis(CategoryAxis):
 
     _attrMap = CategoryAxis._attrMap.copy()
     _attrMap.update({
-        'tickUp':isNumber,
-        'tickDown':isNumber,
+        'tickUp':isNumber(),
+        'tickDown':isNumber(),
         'joinAxisMode':OneOf(('bottom', 'top', 'value', 'points', None)),
         })
 
@@ -291,8 +290,8 @@ class YCategoryAxis(CategoryAxis):
 
     _attrMap = CategoryAxis._attrMap.copy()
     _attrMap.update({
-        'tickLeft':isNumber,
-        'tickRight':isNumber,
+        'tickLeft':isNumber(),
+        'tickRight':isNumber(),
         'joinAxisMode':OneOf(('left', 'right', 'value', 'points', None)),
         })
 
@@ -449,20 +448,20 @@ class ValueAxis(Widget):
     "Abstract value axis, unusable in itself."
 
     _attrMap = {
-        'visible':isNumber,
-        'visibleAxis':isNumber,
-        'visibleTicks':isNumber,
-        'strokeWidth':isNumber,
-        'strokeColor':isColorOrNone,
-        'strokeDashArray':isListOfNumbersOrNone,
-        'minimumTickSpacing':isNumber,
-        'maximumTicks':isNumber,
+        'visible':isNumber(),
+        'visibleAxis':isNumber(),
+        'visibleTicks':isNumber(),
+        'strokeWidth':isNumber(),
+        'strokeColor':isColorOrNone(),
+        'strokeDashArray':isListOfNumbersOrNone(),
+        'minimumTickSpacing':isNumber(),
+        'maximumTicks':isNumber(),
         'labels':None,
         'labelTextFormat':None,
-        'valueMin':isNumberOrAuto,
-        'valueMax':isNumberOrAuto,
-        'valueStep':isNumberOrAuto,
-        'valueSteps':isListOfNumbers
+        'valueMin':isNumberOrAuto(),
+        'valueMax':isNumberOrAuto(),
+        'valueStep':isNumberOrAuto(),
+        'valueSteps':isListOfNumbers()
         }
 
     def __init__(self):
@@ -658,11 +657,11 @@ class XValueAxis(ValueAxis):
 
     _attrMap = ValueAxis._attrMap.copy()
     _attrMap.update({
-        'tickUp':isNumber,
-        'tickDown':isNumber,
+        'tickUp':isNumber(),
+        'tickDown':isNumber(),
         'joinAxis':None,
         'joinAxisMode':OneOf(('bottom', 'top', 'value', 'points', None)),
-        'joinAxisPos':isNumberOrNone,
+        'joinAxisPos':isNumberOrNone(),
         })
 
     # Indicate the dimension of the data we're interested in. 
@@ -779,11 +778,11 @@ class YValueAxis(ValueAxis):
 
     _attrMap = ValueAxis._attrMap.copy()
     _attrMap.update({
-        'tickLeft':isNumber,
-        'tickRight':isNumber,
+        'tickLeft':isNumber(),
+        'tickRight':isNumber(),
         'joinAxis':None,
         'joinAxisMode':OneOf(('left', 'right', 'value', 'points', None)),
-        'joinAxisPos':isNumberOrNone,
+        'joinAxisPos':isNumberOrNone(),
         })
 
     # Indicate the dimension of the data we're interested in. 

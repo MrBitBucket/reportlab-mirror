@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.7 2001/05/08 16:48:38 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.8 2001/05/11 10:08:55 dinu_gherman Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
@@ -21,8 +21,8 @@ from reportlab.graphics.charts.markers import *
 
 class LineChartProperties(PropHolder):
     _attrMap = {
-        'strokeColor':isColor,
-        'strokeWidth':isNumber,
+        'strokeColor':isColor(),
+        'strokeWidth':isNumber(),
         'symbol':None
         }
 
@@ -70,26 +70,26 @@ class HorizontalLineChart(LineChart):
     """
 
     _attrMap = {
-        'x':isNumber,
-        'y':isNumber,
-        'width':isNumber,
-        'height':isNumber,
+        'x':isNumber(),
+        'y':isNumber(),
+        'width':isNumber(),
+        'height':isNumber(),
 
-        'useAbsolute':isNumber,
-        'lineLabelNudge':isNumber,
+        'useAbsolute':isNumber(),
+        'lineLabelNudge':isNumber(),
         'lineLabels':None,
         'lineLabelFormat':None,
-        'groupSpacing':isNumber,
+        'groupSpacing':isNumber(),
 
-        'joinedLines':isNumber,
+        'joinedLines':isNumber(),
 
-        'strokeColor':isColorOrNone,
-        'fillColor':isColorOrNone,
+        'strokeColor':isColorOrNone(),
+        'fillColor':isColorOrNone(),
         'defaultStyles':None,
 
         'valueAxis':None,
         'categoryAxis':None,
-        'categoryNames':isListOfStringsOrNone,
+        'categoryNames':isListOfStringsOrNone(),
 
         'data':None
         }
