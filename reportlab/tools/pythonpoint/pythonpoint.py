@@ -304,6 +304,7 @@ class PPPresentation:
     def __init__(self):
         self.sourceFilename = None
         self.filename = None
+        self.outDir = None
         self.description = None
         self.title = None
         self.author = None
@@ -327,6 +328,8 @@ class PPPresentation:
             print 'saving presentation...'
         pageSize = (self.pageWidth, self.pageHeight)
         filename = os.path.splitext(self.sourceFilename)[0] + '.pdf'
+        if self.outDir: filename = os.path.join(self.outDir,os.path.basename(filename))
+        print filename
         canv = canvas.Canvas(filename, pagesize = pageSize)
         canv.setPageCompression(self.compression)
 
@@ -595,7 +598,7 @@ class PPTable:
     def getFlowable(self):
         self.parseData()
         t = Table(
-				self.data,
+                self.data,
                 self.widths,
                 self.heights)
         if self.style:
@@ -879,7 +882,7 @@ def setStyles(newStyleSheet):
 ##    p.close()
 
 
-def process(datafilename, notes=0, handout=0, cols=0, verbose=0):
+def process(datafilename, notes=0, handout=0, cols=0, verbose=0, outDir=None):
     "Process one PythonPoint source file."
     from reportlab.tools.pythonpoint.stdparser import PPMLParser
     parser = PPMLParser()
@@ -888,6 +891,7 @@ def process(datafilename, notes=0, handout=0, cols=0, verbose=0):
     parser.feed(rawdata)
     pres = parser.getPresentation()
     pres.sourceFilename = datafilename
+    pres.outDir = outDir
     pres.notes = notes
     pres.handout = handout
     pres.cols = cols
@@ -924,11 +928,12 @@ def handleOptions():
                'handout':0,
                'help':0,
                'notes':0,
-               'verbose':rl_config._verbose}
+               'verbose':rl_config._verbose,
+               'outDir': None}
 
     try:
         shortOpts = 'hnv'
-        longOpts = string.split('cols= handout help notes verbose', ' ')
+        longOpts = string.split('cols= outdir= handout help notes verbose')
         optList, args = getopt.getopt(sys.argv[1:], shortOpts, longOpts)
     except getopt.error, msg:
         options['help'] = 1
@@ -943,8 +948,8 @@ def handleOptions():
             o = o[1:]
         optList[i] = (o, v)
 
-        if o == 'cols':
-            options['cols'] = int(v)
+        if o == 'cols': options['cols'] = int(v)
+        elif o=='outdir': options['outDir'] = v 
 
     if filter(lambda ov: ov[0] == 'handout', optList):
         options['handout'] = 1
@@ -980,7 +985,7 @@ def main():
             if os.path.isfile(datafile):
                 file = os.path.join(os.getcwd(), datafile)
                 notes, handout, cols, verbose = options['notes'], options['handout'], options['cols'], options['verbose']
-                process(file, notes, handout, cols, verbose)
+                process(file, notes, handout, cols, verbose, options['outDir'])
             else:
                 print 'Data file not found:', datafile
 
