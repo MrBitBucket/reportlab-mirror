@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
 <!DOCTYPE presentation SYSTEM "../pythonpoint.dtd">
-<presentation filename="pythonpoint.pdf" pageDuration="3">
+<presentation filename="pythonpoint.pdf">
   <stylesheet module="standard" function="getParagraphStyles"/>
   <title>Conferefnce Kit Demo</title>
   <author>Kirpal Sachdev</author>
