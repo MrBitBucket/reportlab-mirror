@@ -183,15 +183,15 @@ not specified (or specified as $None$) then the corresponding pixel dimension of
 to be in <i>points</i> and used.
 """)
 from reportlab.platypus import Image
-I=os.path.join(os.path.dirname(__file__),'..','..','demos','pythonpoint','lj8100.jpg')
+I=os.path.join(os.path.dirname(__file__),'lj8100.jpg')
 eg("""
-Image("../../demos/pythonpoint/lj8100.jpg")
+Image("lj8100.jpg")
 """,after=0.1)
 disc("""will display as""")
 getStory().append(Image(I))
 disc("""whereas""")
 eg("""
-Image("../../demos/pythonpoint/lj8100.jpg", width=2*inch, height=2*inch)
+Image("lj8100.jpg", width=2*inch, height=2*inch)
 """, after=0.1)
 disc('produces')
 getStory().append(Image(I, width=2*inch, height=2*inch))
