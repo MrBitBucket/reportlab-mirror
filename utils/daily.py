@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.36  2000/06/20 13:49:29  rgbecker
+#	Added pyc_remove
+#
 #	Revision 1.35  2000/06/20 13:41:25  rgbecker
 #	Fixed miss assign to opp
-#
+#	
 #	Revision 1.34  2000/06/20 11:50:36  rgbecker
 #	Fix htmldir moves (ie copy)
 #	
@@ -137,7 +140,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.35 2000/06/20 13:41:25 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.36 2000/06/20 13:49:29 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -180,6 +183,16 @@ def recursive_rmdir(d):
 			else:
 				recursive_rmdir(fn)
 		os.rmdir(d)
+
+def pyc_remove(d):
+	'remove .pyc & .pyo files in d and subtree'
+	if os.path.isdir(d):
+		for p in os.listdir(d):
+			fn = os.path.join(d,p)
+			if os.path.isfile(fn) and fn[-4:] in ['.pyc','.pyo']:
+				os.remove(fn)
+			else:
+				pyc_remove(fn)
 
 def CVS_remove(d):
 	'destroy CVS subdirs'
@@ -258,6 +271,7 @@ def cvs_checkout(d):
 			do_exec('cp docs/userguide/*.pdf %s' % htmldir)
 			do_exec('mv docs/userguide/*.pdf %s' % dst)
 			recursive_rmdir('docs')
+			pyc_remove(cvsdir)
 
 			#restore the python path
 			if opp is None:
