@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.6 2002/07/24 19:56:35 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.7 2002/07/25 11:18:08 dinu_gherman Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.lib.codecharts import SingleByteEncodingChart
 from reportlab.platypus import Image
@@ -555,7 +555,7 @@ for printing""")
 CPage(5)
 heading2("TrueType Font Support")
 disc("""
-Marius Gedminas $<mgedmin@codeworks.lt>$ with the help of Viktorija Zaksien $<viktorija@codeworks.lt>$
+Marius Gedminas $mgedmin@codeworks.lt$ with the help of Viktorija Zaksien $viktorija@codeworks.lt$
 have contributed support for embedded TrueType fonts and preliminary Unicode translation using UTF-8!""")
 
 disc("""The current support should be regarded as experimental, but it seems to work and doesn't
@@ -563,7 +563,7 @@ interfere with anything else. Marius' patch worked almost out of the box and onl
 support for finding TTF files was added.""")
 
 CPage(3)
-disc("""Simple things are done simply; we use <b>$reportlab.pdfbase.ttfonts.TTFont<$</b> to create a true type
+disc("""Simple things are done simply; we use <b>$reportlab.pdfbase.ttfonts.TTFont$</b> to create a true type
 font object and register using <b>$reportlab.pdfbase.pdfmetrics.registerFont$</b>.
 In pdfgen drawing directly to the canvas we can do""")
 eg("""
