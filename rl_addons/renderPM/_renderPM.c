@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "0.96"
+#define VERSION "0.97"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -712,7 +712,7 @@ static int _ft_move_to(FT_Vector* to, void* user)
 	x[2] = to->x;
 	y[2] = to->y;
 	bpath_add_point(&(self->path), &(self->pathLen), &(self->pathMax), ART_MOVETO, x, y);
-	return 1;
+	return 0;
 }
 
 static int _ft_line_to(FT_Vector* to, void*  user)
@@ -723,7 +723,7 @@ static int _ft_line_to(FT_Vector* to, void*  user)
 	x[2] = to->x;
 	y[2] = to->y;
 	bpath_add_point(&(self->path), &(self->pathLen), &(self->pathMax), ART_LINETO, x, y);
-	return 1;
+	return 0;
 }
 
 static int _ft_cubic_to( FT_Vector*  control1, FT_Vector*  control2, FT_Vector*  to, void*       user )
@@ -737,7 +737,7 @@ static int _ft_cubic_to( FT_Vector*  control1, FT_Vector*  control2, FT_Vector* 
 	x[2] = to->x;
 	y[2] = to->y;
 	bpath_add_point(&(self->path), &(self->pathLen), &(self->pathMax), ART_CURVETO, x, y);
-	return 1;
+	return 0;
 }
 
 static int _ft_conic_to( FT_Vector*  control, FT_Vector*  to, void*  user )
@@ -755,10 +755,10 @@ static FT_Outline_Funcs _ft_outliner = {
 	};
 
 #include <freetype/ftoutln.h>
-static ArtBpath *_ft_get_glyph_outline(FT_Face face, int c, _ft_outliner_user_t *user)
+static ArtBpath *_ft_get_glyph_outline(FT_Face face, int c, _ft_outliner_user_t *user, double *pw)
 {
-	int	err;
-	if((err=FT_Load_Glyph(face,c,FT_LOAD_NO_SCALE|FT_LOAD_NO_BITMAP))){
+	int	err, idx;
+	if(!(idx=FT_Get_Char_Index(face,c)) || (err=FT_Load_Glyph(face,idx,FT_LOAD_NO_SCALE|FT_LOAD_NO_BITMAP))){
 		return NULL;
 		}
 	if(face->glyph->format!=FT_GLYPH_FORMAT_OUTLINE){
@@ -772,6 +772,7 @@ static ArtBpath *_ft_get_glyph_outline(FT_Face face, int c, _ft_outliner_user_t 
 		x[0] = x[1] = x[2] = 0;
 		bpath_add_point(&(user->path), &(user->pathLen), &(user->pathMax), ART_END, x, x);
 		user->pathLen--;
+		*pw = face->glyph->metrics.horiAdvance;
 		}
 	return user->path;
 }
@@ -780,7 +781,7 @@ static ArtBpath *_ft_get_glyph_outline(FT_Face face, int c, _ft_outliner_user_t 
 static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 {
 	A2DMX	orig, trans = {1,0,0,1,0,0}, scaleMat = {1,0,0,1,0,0};
-	double	scaleFactor, x, y, gw;
+	double	scaleFactor, x, y, w;
 	char*	text;
 	int		c, textlen, i;
 	ArtBpath	*saved_path;
@@ -831,32 +832,34 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 		if(ft_font){
 			_ft_data.pathLen = 0;
 			c = utext[i];
-			self->path = _ft_get_glyph_outline((FT_Face)font,c,&_ft_data);
+			self->path = _ft_get_glyph_outline((FT_Face)font,c,&_ft_data,&w);
 			}
 		else{
 #endif
 		c = (text[i])&0xff;
-		self->path = gt1_get_glyph_outline((Gt1EncodedFont*)font, c, &gw);	/*ascii encoding for the moment*/
+		self->path = gt1_get_glyph_outline((Gt1EncodedFont*)font, c, &w);	/*ascii encoding for the moment*/
 #ifdef	RENDERPM_FT
 		}
 #endif
 
 		if(self->path){
 			_gstate_pathFill(self,0,1);
+#ifdef	RENDERPM_FT
+			if(!ft_font)
+#endif
 			art_free(self->path);
 			}
 		else {
 			fprintf(stderr, "No glyph outline for code %d!\n", c);
-			gw = 1000;
+			w = 1000;
 			}
 
 		/*move to right, scaling width by xscale and don't allow rotations or skew in CTM */
-		trans[4] = gw;	/*units are em units right?*/
+		trans[4] = w;	/*units are em units right?*/
 		art_affine_multiply(self->ctm, trans, self->ctm);
 		}
 #ifdef	RENDERPM_FT
-	if(ft_font && _ft_data.path)
-		free(_ft_data.path);
+	if(ft_font) art_free(_ft_data.path);
 #endif
 
 	/*restore original ctm*/
@@ -949,7 +952,7 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 		if(ft_font){
 			_ft_data.pathLen = 0;
 			c = utext[i];
-			path = _ft_get_glyph_outline((FT_Face)font,c,&_ft_data);
+			path = _ft_get_glyph_outline((FT_Face)font,c,&_ft_data,&w);
 			}
 		else{
 #endif
@@ -972,6 +975,9 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 				pp++;
 				}
 			p = _get_gstatePath(pp-path,path);
+#ifdef	RENDERPM_FT
+			if(!ft_font)
+#endif
 			art_free(path);
 			}
 		else {
@@ -984,7 +990,7 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 		x += w*s;
 		}
 #ifdef	RENDERPM_FT
-	if(ft_font && _ft_data.path) free(_ft_data.path);
+	if(ft_font) art_free(_ft_data.path);
 #endif
 	return P;
 }
@@ -1009,6 +1015,7 @@ static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
 #ifdef	RENDERPM_FT
 	else{
 		f = (Gt1EncodedFont*)_ft_get_face(fontName);
+		fontEMSize = f ? ((FT_Face)f)->units_per_EM : 0;
 		ft_font = 1;
 		}
 #endif
