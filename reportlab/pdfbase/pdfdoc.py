@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.81 2003/07/03 14:29:08 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.81 2003/07/03 14:29:08 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.82 2003/07/08 12:51:39 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.82 2003/07/08 12:51:39 rgbecker Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -208,15 +208,11 @@ class PDFDocument:
         "A unique fingerprint for the file (unless in invariant mode)"
         if self._ID:
             return self._ID
-        if self.invariant:
-            s = PDFString('constantconstant')
-            self._ID = PDFArray([s,s])
-        else:
-            digest = self.signature.digest()
-            doc = DummyDoc()
-            ID = PDFString(digest)
-            IDs = ID.format(doc)
-            self._ID = "%s %% ReportLab generated PDF document -- digest (http://www.reportlab.com) %s [%s %s] %s" % (
+        digest = self.signature.digest()
+        doc = DummyDoc()
+        ID = PDFString(digest)
+        IDs = ID.format(doc)
+        self._ID = "%s %% ReportLab generated PDF document -- digest (http://www.reportlab.com) %s [%s %s] %s" % (
                 LINEEND, LINEEND, IDs, IDs, LINEEND)
         return self._ID
 
@@ -1795,7 +1791,12 @@ class PDFImageXObject:
         if self.mask=='auto':
             if PILImage.info.has_key("transparency") :
                 transparency = PILImage.info["transparency"] * 3
-                (tred, tgreen, tblue) = map(ord, PILImage.palette.data[transparency:transparency+3])
+                palette = PILImage.palette
+                try:
+                    palette = palette.palette
+                except:
+                    palette = palette.data
+                (tred, tgreen, tblue) = map(ord, palette[transparency:transparency+3])
                 self.mask = (tred, tred, tgreen, tgreen, tblue, tblue)
             else:
                 self.mask = None
