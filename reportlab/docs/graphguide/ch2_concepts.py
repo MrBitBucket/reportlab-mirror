@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/graphguide/ch2_concepts.py,v 1.3 2001/11/08 17:24:39 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/docs/graphguide/ch2_concepts.py,v 1.4 2002/05/27 09:20:31 dinu_gherman Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 
 heading1("General Concepts")
@@ -41,6 +41,9 @@ drawing into different formats.
 These include PDF (of course), Postscript, and bitmap output.
 The bitmap renderer uses Raph Levien's <i>libart</i> rasterizer
 and Fredrik Lundh's <i>Python Imaging Library</i> (PIL).
+Very recently, an experimental SVG renderer was also added. 
+It makes use of Python's standard library XML modules, so you don't 
+need to install the XML-SIG's additional package named PyXML.
 If you have the right extensions installed, you can generate drawings
 in bitmap form for the web as well as vector form for PDF documents,
 and get "identical output".
@@ -56,8 +59,22 @@ a one-page PDF document quickly.
 """)
 
 disc("""
+The SVG renderer is special as it is still pretty experimental.
+The SVG code it generates is not really optimised in any way and 
+maps only the features available in ReportLab Graphics (RLG) to
+SVG. This means there is no support for SVG animation, interactivity,
+scripting or more sophisticated clipping, masking or graduation 
+shapes.
+So, be careful, and please report any bugs you find!
+""")
+
+disc("""
 We expect to add both input and output filters for many vector 
-graphics formats in future, SVG being a key one.
+graphics formats in future.
+SVG was the most prominent first one to start with for which there
+is now an output filter in the graphics package.
+An SVG input filter will probably become available in Summer 2002
+as an additional module. 
 GUIs will be able to obtain screen images from the bitmap output
 filter working with PIL, so a chart could appear in a Tkinter
 GUI window.
@@ -74,6 +91,9 @@ It also appears to be more natural for people, especially when
 working with charts.
 Note that in other graphics models (such as SVG) the Y-coordinate
 points <i>down</i>.
+For the SVG renderer this is actually no problem as it will take
+your drawings and flip things as needed, so your SVG output looks
+just as expected.
 """)
 
 disc("""
@@ -145,6 +165,17 @@ disc("""
 Many other bitmap formats, like GIF, JPG, TIFF, BMP and PPN are
 genuinely available, making it unlikely you'll need to add external
 postprocessing steps to convert to the final format you need.
+""")
+
+disc("""
+To produce an SVG file containing the identical drawing, which
+may be imported into graphical editing tools such as Illustrator
+all we need to do is write code like this:
+""")
+
+eg("""
+    from reportlab.graphics import renderSVG 
+    renderSVG.drawToFile(d, 'example1.svg') 
 """)
 
 
