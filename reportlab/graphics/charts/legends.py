@@ -123,7 +123,12 @@ class Legend(Widget):
         for t in self._getTexts(colorNamePairs):
             m = [stringWidth(s, self.fontName, self.fontSize) for s in t.split('\n')]
             M.append(m and max(m) or 0)
-        return self.variColumn and [max(M[r:r+3]) for r in range(0,len(M),self.columnMaximum)] or max(M)
+        if not M: return 0
+        if self.variColumn:
+            columnMaximum = self.columnMaximum
+            return [max(M[r:r+columnMaximum]) for r in range(0,len(M),self.columnMaximum)]
+        else:
+            return max(M)
 
     def _calcHeight(self):
         dy = self.dy
