@@ -31,9 +31,13 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
-#	Revision 1.9  2000/02/24 09:12:55  andy_robinson
-#	Removed some constants which are no longer used.
+#	Revision 1.10  2000/02/24 17:28:13  andy_robinson
+#	Added methods setFillGray(g), setStrokeGray(g) where 0 <= g <= 1
 #
+#	Revision 1.9  2000/02/24 09:12:55  andy_robinson
+#	
+#	Removed some constants which are no longer used.
+#	
 #	Revision 1.8  2000/02/20 14:43:27  rgbecker
 #	_currentPageHasImages = 0 in init
 #	
@@ -55,7 +59,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.9 2000/02/24 09:12:55 andy_robinson Exp $ '''
+__version__=''' $Id: canvas.py,v 1.10 2000/02/24 17:28:13 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -557,6 +561,17 @@ class Canvas:
     def setStrokeColorRGB(self, r, g, b):
         self._strokeColorRGB = (r, g, b)
         self._code.append('%0.2f %0.2f %0.2f RG' % (r,g,b))
+
+    def setFillGray(self, gray):
+        """Sets the gray level; 0.0=black, 1.0=white"""
+        self._fillColorRGB = (gray, gray, gray)
+        self._code.append('%0.2f g' % gray)
+        
+    def setStrokeGray(self, gray):
+        """Sets the gray level; 0.0=black, 1.0=white"""
+        self._strokeColorRGB = (gray, gray, gray)
+        self._code.append('%0.2f G' % gray)
+
         
     # path stuff - the separate path object builds it    
     def beginPath(self):
