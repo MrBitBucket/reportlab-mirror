@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: textobject.py,v $
+#	Revision 1.12  2000/04/11 15:41:04  rgbecker
+#	Added _setFont for use in layout
+#
 #	Revision 1.11  2000/04/11 14:43:43  rgbecker
 #	Added _textOut for use in layout
-#
+#	
 #	Revision 1.10  2000/04/10 14:24:33  rgbecker
 #	Added defn of _SeqTypes
 #	
@@ -63,7 +66,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: textobject.py,v 1.11 2000/04/11 14:43:43 rgbecker Exp $ '''
+__version__=''' $Id: textobject.py,v 1.12 2000/04/11 15:41:04 rgbecker Exp $ '''
 __doc__=""" 
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -139,6 +142,16 @@ class PDFTextObject:
         """Returns current y position relative to the last origin."""
         return self._y
 
+    def _setFont(self, psfontname, size):
+        """Sets the font and fontSize
+        Raises a readable exception if an illegal font
+        is supplied.  Font names are case-sensitive! Keeps track
+        of font anme and size for metrics."""
+        self._fontname = psfontname
+        self._fontsize = size
+        pdffontname = self._canvas._doc.getInternalFontName(psfontname)
+        self._code.append('%s %0.1f Tf' % (pdffontname, size))
+
     def setFont(self, psfontname, size, leading = None):
         """Sets the font.  If leading not specified, defaults to 1.2 x
         font size. Raises a readable exception if an illegal font
@@ -151,7 +164,6 @@ class PDFTextObject:
             leading = size * 1.2
         self._leading = leading
         self._code.append('%s %0.1f Tf %0.1f TL' % (pdffontname, size, leading))
-
 
     def setCharSpace(self, charSpace):
          """Adjusts inter-character spacing"""
