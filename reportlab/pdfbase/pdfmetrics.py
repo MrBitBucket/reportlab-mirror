@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.51 2002/02/21 14:44:11 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.52 2002/04/09 11:41:17 johnprecedo Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -152,6 +152,7 @@ class TypeFace:
         We presume they never change so this can be a shared reference."""
         self.glyphWidths = _fontdata.widthsByFontGlyph[name]
         self.glyphNames = self.glyphWidths.keys()
+        self.ascent,self.descent = _fontdata.ascent_descent[name]
 
     def findT1File(self,ext='.pfb'):
         possible_exts = (string.lower(ext), string.upper(ext))
