@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_lib_sequencer.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_lib_sequencer.py,v 1.6 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_lib_sequencer.py,v 1.7 2003/12/15 15:36:06 dragan1 Exp $
 """Tests for the reportlab.lib.sequencer module.
 """
 
@@ -21,7 +21,7 @@ class SequencerTestCase(unittest.TestCase):
 
         seq = Sequencer()
         msg = 'Initial value is not zero!'
-        assert seq.this() == 0, msg
+        assert seq._this() == 0, msg
 
 
     def test1(self):
@@ -32,14 +32,14 @@ class SequencerTestCase(unittest.TestCase):
         for i in range(1, 101):
             n = seq.next()
             msg = 'Sequence value is not correct!'
-            assert seq.this() == n, msg
+            assert seq._this() == n, msg
 
 
     def test2(self):
         "Test resetting default counter."
 
         seq = Sequencer()
-        start = seq.this()
+        start = seq._this()
 
         for i in range(1, 101):
             n = seq.next()
@@ -47,7 +47,7 @@ class SequencerTestCase(unittest.TestCase):
         seq.reset()
 
         msg = 'Sequence value not correctly reset!'
-        assert seq.this() == start, msg
+        assert seq._this() == start, msg
 
 
     def test3(self):
@@ -58,14 +58,14 @@ class SequencerTestCase(unittest.TestCase):
         for i in range(1, 101):
             n = seq.next('myCounter1')
             msg = 'Sequence value is not correct!'
-            assert seq.this('myCounter1') == n, msg
+            assert seq._this('myCounter1') == n, msg
 
 
     def test4(self):
         "Test resetting dedicated counter."
 
         seq = Sequencer()
-        start = seq.this('myCounter1')
+        start = seq._this('myCounter1')
 
         for i in range(1, 101):
             n = seq.next('myCounter1')
@@ -73,23 +73,23 @@ class SequencerTestCase(unittest.TestCase):
         seq.reset('myCounter1')
 
         msg = 'Sequence value not correctly reset!'
-        assert seq.this('myCounter1') == start, msg
+        assert seq._this('myCounter1') == start, msg
 
 
     def test5(self):
         "Test incrementing multiple dedicated counters."
 
         seq = Sequencer()
-        startMyCounter0 = seq.this('myCounter0')
-        startMyCounter1 = seq.this('myCounter1')
+        startMyCounter0 = seq._this('myCounter0')
+        startMyCounter1 = seq._this('myCounter1')
 
         for i in range(1, 101):
             n = seq.next('myCounter0')
             msg = 'Sequence value is not correct!'
-            assert seq.this('myCounter0') == n, msg
+            assert seq._this('myCounter0') == n, msg
             m = seq.next('myCounter1')
             msg = 'Sequence value is not correct!'
-            assert seq.this('myCounter1') == m, msg
+            assert seq._this('myCounter1') == m, msg
 
 
 ##    def testRandom(self):
@@ -100,18 +100,18 @@ class SequencerTestCase(unittest.TestCase):
 ##
 ##        # Init.
 ##        for cn in counterNames:
-##            setattr(self, cn, seq.this(cn))
+##            setattr(self, cn, seq._this(cn))
 ##            msg = 'Counter start value is not correct!'
-##            assert seq.this(cn) == 0, msg
+##            assert seq._this(cn) == 0, msg
 ##
 ##        # Increment/decrement.
 ##        for i in range(1, 101):
 ##            n = seq.next('myCounter0')
 ##            msg = 'Sequence value is not correct!'
-##            assert seq.this('myCounter0') == n, msg
+##            assert seq._this('myCounter0') == n, msg
 ##            m = seq.next('myCounter1')
 ##            msg = 'Sequence value is not correct!'
-##            assert seq.this('myCounter1') == m, msg
+##            assert seq._this('myCounter1') == m, msg
 
 
 def makeSuite():
