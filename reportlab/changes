@@ -1,3 +1,318 @@
+##### 2001/feb/09 release 1.03
+##### 2001/02/09 #####
+	platypus/tableofcontents0.py 1.2 dinu_gherman
+		 Fixed wrapped line indentation.
+	lib/graphicsdoc0.py 1.7 dinu_gherman
+		 Entirely reworked PDF and HTML doc builders.
+	lib/docpy0.py 1.7 dinu_gherman
+		 Entirely reworked PDF and HTML doc builders.
+	graphics/widgetbase.py 1.5 dinu_gherman
+		 Shortened two lines that might appear in doc tools.
+	platypus/tableofcontents0.py 1.1 dinu_gherman
+		 Initial checkin.
+##### 2001/02/08 #####
+	platypus/doctemplate.py 1.35 dinu_gherman
+		 Commented some disturbing print statements.
+	lib/graphicsdoc0.py 1.6 dinu_gherman
+		 UmlPdfDocBuilder moved to docpy0.py. Changed some defaults and variable names. Fixed handling of packages with dotted names. Changed output of GraphPdfDocBuilder0.
+	lib/docpy0.py 1.6 dinu_gherman
+		 UmlPdfDocBuilder moved here from graphicsdoc0.py. Changed some defaults and variable names. Fixed handling of packages with dotted names.
+	graphics/charts/barchart1.py 1.6 dinu_gherman
+		 One long line reduced in length.
+##### 2001/02/07 #####
+	lib/randomtext.py 1.6 johnprecedo
+		 fixed a typo
+	lib/randomtext.py 1.5 johnprecedo
+		 Added a PYTHON theme (it had to be done...).
+	lib/graphicsdoc0.py 1.5 dinu_gherman
+		 Added displaying drawings returned by functions.
+	graphics/widgets/signsandsymbols.py 1.5 johnprecedo
+		 Corrected mistake in the doctsring for flags0.py and signsandsymbols.py.
+	graphics/widgets/flags0.py 1.3 johnprecedo
+		 Corrected mistake in the doctsring for flags0.py and signsandsymbols.py.
+	lib/graphicsdoc0.py 1.4 dinu_gherman
+		 Fixed import error.
+	lib/graphicsdoc0.py 1.3 dinu_gherman
+		 Added an experimental PlatypusDocBuilder0. Uncommented UmlPdfDocBuilder0.
+	lib/graphicsdoc0.py 1.2 dinu_gherman
+		 Moved utility functions from docpy0.py to graphicsdoc0.py.
+	lib/docpy0.py 1.5 dinu_gherman
+		 Moved utility functions from docpy0.py to graphicsdoc0.py.
+##### 2001/02/06 #####
+	lib/graphicsdoc0.py 1.1 dinu_gherman
+		 Initial checkin.
+	lib/docpy0.py 1.4 dinu_gherman
+		 Stripped-off everything widget/graphics-specific.
+	graphics/charts/barchart1.py 1.5 andy_robinson
+		 Added barLabelBudge property to support a customer
+	graphics/renderbase.py 1.8 andy_robinson
+		 Fixes for QIR barchart presentation
+	graphics/renderPS.py 1.3 andy_robinson
+		 Fixes for QIR barchart presentation
+	graphics/charts/barchart1.py 1.4 andy_robinson
+		 Fixes for QIR barchart presentation
+##### 2001/02/05 #####
+	pdfbase/pdfdoc.py 1.36 aaron_watters
+		 forms in forms now work
+	graphics/widgets/signsandsymbols.py 1.4 johnprecedo
+		 bugfixes for the various demo() methods for widgets.
+	lib/docpy0.py 1.3 dinu_gherman
+		 Fixed string joining for base class names.
+	graphics/widgets/signsandsymbols.py 1.3 johnprecedo
+		 changes all demo() methods to centre graphics in boxes 200x100 boxes..
+	lib/docpy0.py 1.2 dinu_gherman
+		 Modified inspect import.
+	lib/docpy0.py 1.1 dinu_gherman
+		 Initial checkin.
+	graphics/widgets/flags0.py 1.2 johnprecedo
+		 tightened up code for stripes in US and Greek flags.
+	graphics/widgets/flags0.py 1.1 johnprecedo
+		 First checkin of file that used to be users/john/fwidgets.py. 20 flags as widgets - inlcuding UK, US, most EU members and a few non-EU European countries.
+	pdfbase/pdfdoc.py 1.35 aaron_watters
+		 pdfdictionary has no has_key method bugfix.  sorry.
+##### 2001/02/04 #####
+	graphics/renderbase.py 1.7 andy_robinson
+		 Continued work on bar charts and support
+	graphics/charts/textlabel0.py 1.3 andy_robinson
+		 Continued work on bar charts and support
+	graphics/charts/barchart1.py 1.3 andy_robinson
+		 Continued work on bar charts and support
+	graphics/charts/axes0.py 1.2 andy_robinson
+		 Continued work on bar charts and support
+	graphics/charts/axes0.py 1.1 andy_robinson
+		 Broke out axes to separate module
+	graphics/widgetbase.py 1.4 andy_robinson
+		 Fixed user node rendering bug, added barchart1
+	graphics/shapes.py 1.8 andy_robinson
+		 Fixed user node rendering bug, added barchart1
+	graphics/renderbase.py 1.6 andy_robinson
+		 Fixed user node rendering bug, added barchart1
+	graphics/charts/textlabel0.py 1.2 andy_robinson
+		 Fixed user node rendering bug, added barchart1
+	graphics/charts/barchart1.py 1.2 andy_robinson
+		 Fixed user node rendering bug, added barchart1
+##### 2001/02/02 #####
+	pdfbase/pdfdoc.py 1.34 aaron_watters
+		 minor changes to support pdfparse
+##### 2001/02/01 #####
+	graphics/testshapes.py 1.8 andy_robinson
+		 Working on chart framework
+	graphics/shapes.py 1.7 andy_robinson
+		 Working on chart framework
+	graphics/renderbase.py 1.5 andy_robinson
+		 Working on chart framework
+	graphics/charts/textlabel0.py 1.1 andy_robinson
+		 Working on chart framework
+	graphics/charts/barchart1.py 1.1 andy_robinson
+		 Working on chart framework
+##### 2001/01/30 #####
+	lib/inspect.py 1.1 dinu_gherman
+		 Initial checkin.
+	graphics/charts/barchart.py 1.3 aaron_watters
+		 more stuff, bug fixes etcetera....
+	graphics/testshapes.py 1.7 andy_robinson
+		 Fixed group transform bug and added tests
+	graphics/renderbase.py 1.4 andy_robinson
+		 Fixed group transform bug and added tests
+	graphics/renderPS.py 1.2 andy_robinson
+		 Fixed group transform bug and added tests
+	graphics/renderPDF.py 1.4 andy_robinson
+		 Fixed group transform bug and added tests
+##### 2001/01/29 #####
+	graphics/widgets/signsandsymbols.py 1.2 johnprecedo
+		 Changed classnames to use the '0' convention for experimental. Changed way test print out is carried out. (all calls to classes wrapped up in a new function 'test()') some tidying up.
+##### 2001/01/28 #####
+	graphics/testshapes.py 1.6 andy_robinson
+		 Fixes to CTM to support bitmap renderer; extra string rotation and group tests.
+	graphics/renderbase.py 1.3 andy_robinson
+		 Fixes to CTM to support bitmap renderer; extra string rotation and group tests.
+##### 2001/01/26 #####
+	graphics/widgetbase.py 1.3 andy_robinson
+		 Added barchart compatibility
+	graphics/shapes.py 1.6 andy_robinson
+		 Added barchart compatibility
+	graphics/charts/piechart0.py 1.3 andy_robinson
+		 Added barchart compatibility
+	graphics/charts/barchart.py 1.2 aaron_watters
+		 added scales
+##### 2001/01/25 #####
+	graphics/widgets/signsandsymbols.py 1.1 johnprecedo
+		 First checkin of file that used to be users/john/jwidgets.py. 12 new widgets.
+	graphics/charts/barchart.py 1.1 aaron_watters
+		 A initial go at Aarons last rewrite of chart widgets :)
+	graphics/testshapes.py 1.5 andy_robinson
+		 Added postscript renderer and tests, fixed renderer bugs
+	graphics/shapes.py 1.5 andy_robinson
+		 Added postscript renderer and tests, fixed renderer bugs
+	graphics/renderbase.py 1.2 andy_robinson
+		 Added postscript renderer and tests, fixed renderer bugs
+	graphics/renderPS.py 1.1 andy_robinson
+		 Added postscript renderer and tests, fixed renderer bugs
+	test/test_graphics_speed.py 1.1 andy_robinson
+		 added a crude benchmarking script
+##### 2001/01/24 #####
+	graphics/testshapes.py 1.4 andy_robinson
+		 Added group tests, fixed font bug, resynched with Dinu
+	graphics/shapes.py 1.4 andy_robinson
+		 Added group tests, fixed font bug, resynched with Dinu
+	graphics/renderPDF.py 1.3 andy_robinson
+		 Added group tests, fixed font bug, resynched with Dinu
+	graphics/testshapes.py 1.3 dinu_gherman
+		 Added unit testing plus error drawing.
+	graphics/testshapes.py 1.2 dinu_gherman
+		 Added some String shapes.
+	graphics/testshapes.py 1.1 dinu_gherman
+		 Initial checkin.
+	graphics/widgetbase.py 1.2 andy_robinson
+		 Collection based piechart amd support for it.
+	graphics/shapes.py 1.3 andy_robinson
+		 Collection based piechart amd support for it.
+	graphics/renderPDF.py 1.2 andy_robinson
+		 Collection based piechart amd support for it.
+	graphics/charts/piechart0.py 1.2 andy_robinson
+		 Collection based piechart amd support for it.
+##### 2001/01/23 #####
+	config.py 1.1 johnprecedo
+		 Whoops, forgot
+	graphics/shapes.py 1.2 johnprecedo
+		 typos fixed
+##### 2001/01/22 #####
+	graphics/charts/piechart0.py 1.1 andy_robinson
+		 Experimental pie module
+	graphics/widgets/__init__.py 1.1 andy_robinson
+		 Added widgets subpackage
+	graphics/charts/__init__.py 1.1 andy_robinson
+		 Added charts package
+	graphics/widgetbase.py 1.1 andy_robinson
+		 Added graphics module
+	graphics/testdrawings.py 1.1 andy_robinson
+		 Added graphics module
+	graphics/shapes.py 1.1 andy_robinson
+		 Added graphics module
+	graphics/renderbase.py 1.1 andy_robinson
+		 Added graphics module
+	graphics/renderPDF.py 1.1 andy_robinson
+		 Added graphics module
+	graphics/__init__.py 1.1 andy_robinson
+		 Added graphics module
+	pdfbase/pdfutils.py 1.14 dinu_gherman
+		 Modified docstrings.
+##### 2001/01/19 #####
+	lib/abag.py 1.4 rgbecker
+		 Changed comment to be slightly more meaningful
+	platypus/frames.py 1.12 dinu_gherman
+		 Minor changes.
+	platypus/doctemplate.py 1.34 dinu_gherman
+		 Minor changes.
+	lib/randomtext.py 1.4 dinu_gherman
+		 Minor changes.
+##### 2001/01/18 #####
+	lib/colors.py 1.14 rgbecker
+		 Syncing with pingo
+##### 2001/01/12 #####
+	pdfgen/textobject.py 1.22 dinu_gherman
+		 Minor neglectable changes.
+	pdfgen/pdfimages.py 1.7 dinu_gherman
+		 Minor neglectable changes.
+	pdfgen/pdfgeom.py 1.7 dinu_gherman
+		 Minor neglectable changes.
+	pdfgen/pathobject.py 1.8 dinu_gherman
+		 Minor neglectable changes.
+	pdfgen/canvas.py 1.60 dinu_gherman
+		 Minor neglectable changes.
+	lib/utils.py 1.7 dinu_gherman
+		 Minor neglectable changes.
+	lib/sequencer.py 1.10 dinu_gherman
+		 Minor neglectable changes.
+##### 2001/01/10 #####
+	lib/abag.py 1.3 dinu_gherman
+		 Docstring modified.
+##### 2001/01/02 #####
+	lib/randomtext.py 1.3 johnprecedo
+		 Minor tweaks (removing unneccesary capital letters etc).
+	lib/randomtext.py 1.2 johnprecedo
+		 Added 5 new themes.
+##### 2000/12/29 #####
+	test/test_paragraphs.py 1.2 andy_robinson
+		 Added a random text module
+	platypus/flowables.py 1.15 andy_robinson
+		 Added a random text module
+	lib/randomtext.py 1.1 andy_robinson
+		 Added a random text module
+##### 2000/12/25 #####
+	platypus/flowables.py 1.14 rgbecker
+		 Allow for non string file names in Image.__init__
+##### 2000/12/20 #####
+	pdfgen/pdfimages.py 1.6 andy_robinson
+		 death to two tabs!
+##### 2000/12/19 #####
+	pdfgen/pdfimages.py 1.5 rgbecker
+		 Fix typo
+	pdfgen/pdfimages.py 1.4 rgbecker
+		 Fix to PIL_image, changed to warnOnce
+##### 2000/12/18 #####
+	platypus/paragraph.py 1.49 rgbecker
+		 More Dinu related fixes/edits
+	pdfgen/canvas.py 1.59 andy_robinson
+		 Stripped a couple of tabs in an otherwise-space-delimited module
+##### 2000/12/17 #####
+	platypus/paragraph.py 1.48 rgbecker
+		 Hack to fix Dinu's problem
+	platypus/doctemplate.py 1.33 rgbecker
+		 Hack to fix Dinu's problem
+##### 2000/12/15 #####
+	platypus/doctemplate.py 1.32 rgbecker
+		 Better error message
+	platypus/paragraph.py 1.47 rgbecker
+		 Start on new simpler line splitter
+	lib/abag.py 1.2 aaron_watters
+		 added a __repr__ for debug purposes
+	platypus/paragraph.py 1.46 rgbecker
+		 Further Dinuistic fixes for rare cbDefn bugs
+##### 2000/12/14 #####
+	platypus/test/testplatypus.py 1.21 rgbecker
+		 relativisation of firstLineIndent related code
+	lib/tocindex.py 1.5 rgbecker
+		 relativisation of firstLineIndent related code
+	lib/styles.py 1.13 rgbecker
+		 relativisation of firstLineIndent related code
+	demos/pythonpoint/styles_modern.py 1.8 rgbecker
+		 relativisation of firstLineIndent related code
+	demos/pythonpoint/styles_horrible.py 1.7 rgbecker
+		 relativisation of firstLineIndent related code
+	demos/pythonpoint/pythonpoint.py 1.29 rgbecker
+		 relativisation of firstLineIndent related code
+	lib/__init__.py 1.3 rgbecker
+		 Added RL_DEBUG environ flag
+	lib/__BUILD.dsw 1.3 rgbecker
+		 Added RL_DEBUG environ flag
+	pdfbase/pdfmetrics.py 1.18 rgbecker
+		 Added extension debug code
+	platypus/paragraph.py 1.45 rgbecker
+		 Delete fix
+	platypus/paragraph.py 1.44 rgbecker
+		 Fixed Dinu's tagmadness4 problem
+##### 2000/12/13 #####
+	platypus/tables.py 1.34 aaron_watters
+		 added __repr__s and enhanced exception messages for debugging
+	platypus/paragraph.py 1.43 aaron_watters
+		 added __repr__s and enhanced exception messages for debugging
+	platypus/frames.py 1.11 aaron_watters
+		 added __repr__s and enhanced exception messages for debugging
+	platypus/flowables.py 1.13 aaron_watters
+		 added __repr__s and enhanced exception messages for debugging
+	platypus/test/testplatypus.py 1.20 rgbecker
+		 Try harder than ever for line cleaning and add bg alias
+	platypus/paraparser.py 1.38 rgbecker
+		 Try harder than ever for line cleaning and add bg alias
+	platypus/paragraph.py 1.42 rgbecker
+		 Try harder than ever for line cleaning and add bg alias
+	platypus/paragraph.py 1.41 rgbecker
+		 Layout fixes; the text objects needed moves before & after and the bullet width was calculated after maxWidth was set.  Try harder for space/tab removal.
+	pdfgen/textobject.py 1.21 rgbecker
+		 Layout fixes; Td was absolute not relative to the beginning of the line
+	platypus/tables.py 1.33 rgbecker
+		 Fixed confusing error message
 ########### 1.02 Released 2000/12/11
 ##### 2000/12/11 #####
 	utils/README 1.5 rgbecker
