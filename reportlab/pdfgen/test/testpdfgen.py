@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: testpdfgen.py,v $
+#	Revision 1.9  2000/04/02 02:54:42  aaron_watters
+#	added demonstration of outline trees
+#
 #	Revision 1.8  2000/03/26 23:06:49  aaron_watters
 #	added demos for forms and links
-#
+#	
 #	Revision 1.7  2000/03/08 13:40:03  andy_robinson
 #	Canvas has two methods setFillColor(aColor) and setStrokeColor(aColor)
 #	which accepts color objects directly.
@@ -54,7 +57,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testpdfgen.py,v 1.8 2000/03/26 23:06:49 aaron_watters Exp $ '''
+__version__=''' $Id: testpdfgen.py,v 1.9 2000/04/02 02:54:42 aaron_watters Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
@@ -110,11 +113,31 @@ def framePage(canvas, title):
     
     canvas.drawString(inch, 10.5 * inch, title)
     canvas.bookmarkHorizontalAbsolute(title, 10.8*inch)
+    newsection(title)
     canvas.setFont('Times-Roman',10)
     canvas.drawCentredString(4.135 * inch, 0.75 * inch,
                             'Page %d' % canvas.getPageNumber())
     canvas.restoreState()
     canvas.doForm("frame")
+    
+def makesubsection(canvas, title):
+    canvas.bookmarkHorizontalAbsolute(title, 10.8*inch)
+    newsubsection(title)
+    
+# outline helpers
+outlinenametree = []
+def newsection(name):
+    outlinenametree.append(name)
+    
+def newsubsection(name):
+    from types import TupleType
+    thissection = outlinenametree[-1]
+    if type(thissection) is not TupleType:
+        subsectionlist = []
+        thissection = outlinenametree[-1] = (thissection, subsectionlist)
+    else:
+        (sectionname, subsectionlist) = thissection
+    subsectionlist.append(name)
 
 class DocBlock:
     """A DocBlock has a chunk of commentary and a chunk of code.
@@ -213,9 +236,10 @@ def run():
 ##    c.setPageCompression(0)
     c = canvas.Canvas('testpdfgen.pdf')
     framePageForm(c) # define the frame form
-    
+    c.showOutline()
     
     framePage(c, 'PDFgen graphics API test script')
+    makesubsection(c, "PDFgen and PIDDLE")
     
     
     t = c.beginText(inch, 10*inch)
@@ -248,6 +272,7 @@ canvas.textLines(stuff) accepts a multi-line string or a list/tuple
 of strings, and moves the cursor down the page.
     
 """)
+    makesubsection(c, "TextMode operations")
     t.textLine('')
     t.textLine('The green crosshairs test whether the text cursor is tracking correctly.')
     drawCrossHairs(c, t.getX(),t.getY())
@@ -318,6 +343,7 @@ of strings, and moves the cursor down the page.
     p.lineTo(3*inch, 9*inch)
     c.drawPath(p)
     c.drawString(4*inch, 9*inch, 'the default - butt caps project half a width')
+    makesubsection(c, "caps and joins")
     
     c.setLineCap(1)
     p = c.beginPath()
@@ -366,6 +392,7 @@ of strings, and moves the cursor down the page.
     p.lineTo(3*inch, 5*inch)
     c.drawPath(p)
     c.drawString(4*inch, 5*inch, 'dash pattern 6 points on, 3 off- setDash(6,3)')
+    makesubsection(c, "dash patterns")
 
     c.setDash([1,2,3,4,5,6],0)
     p = c.beginPath()
@@ -396,11 +423,13 @@ cost to performance.""")
     t.textLine()
 
     #line demo    
+    makesubsection(c, "lines")
     c.line(inch, 8*inch, 3*inch, 8*inch)
     t.setTextOrigin(4*inch, 8*inch)
     t.textLine('canvas.line(x1, y1, x2, y2)')
     
     #bezier demo - show control points
+    makesubsection(c, "bezier curves")
     (x1, y1, x2, y2, x3, y3, x4, y4) = (
                         inch, 6.5*inch,
                         1.2*inch, 7.5 * inch,
@@ -417,11 +446,13 @@ cost to performance.""")
     
 
     #rectangle
+    makesubsection(c, "rectangles")
     c.rect(inch, 5.25 * inch, 2 * inch, 0.75 * inch)
     t.setTextOrigin(4*inch, 5.5 * inch)
     t.textLine('canvas.rect(x, y, width, height) - x,y is lower left')
 
     #wedge
+    makesubsection(c, "wedges")
     c.wedge(inch, 5*inch, 3*inch, 4*inch, 0, 315)
     t.setTextOrigin(4*inch, 4.5 * inch)
     t.textLine('canvas.wedge(x1, y1, x2, y2, startDeg, extentDeg)')
@@ -433,6 +464,7 @@ cost to performance.""")
     t.textLine('Use a negative extent to go clockwise')
     
     #circle
+    makesubsection(c, "circles")
     c.circle(1.5*inch, 2*inch, 0.5 * inch)
     c.circle(3*inch, 2*inch, 0.5 * inch)
     t.setTextOrigin(4*inch, 2 * inch)
@@ -455,6 +487,7 @@ cost to performance.""")
         c.setFont(fontname,24)
         c.drawString(inch, y, 'This should be %s' % fontname)
         y = y - 28
+    makesubsection(c, "fonts and colors")
 
     c.setFont('Times-Roman', 12)
     t = c.beginText(inch, 4*inch)
@@ -675,6 +708,10 @@ cost to performance.""")
         title = titlelist[i]
         c.drawString(xmargin, yposition, title)
         c.linkAbsolute(title, title, (xmargin-ydelta/4, yposition-ydelta/4, xmax, yposition+ydelta/2))
+    ### now do stuff for the outline
+    #for x in outlinenametree: print x
+    #stop
+    apply(c.setOutlineNames, tuple(outlinenametree))
     c.save()
 
 
