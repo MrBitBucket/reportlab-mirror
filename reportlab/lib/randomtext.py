@@ -22,6 +22,7 @@ There are currently six themes provided:
     STARTREK (Star Trek),
     PRINTING (print-related terms)
     PYTHON (snippets and quotes from Monty Python)
+    CHOMSKY (random lingusitic nonsense)
 
 EXAMPLE USAGE:
     from reportlab.lib import randomtext
@@ -182,6 +183,126 @@ PYTHON = ['Good evening ladies and Bruces','I want to buy some cheese', 'You do 
           "Right! Stop that, it's silly. Very silly indeed", "Very silly indeed", "Lemon curry?",
           "And now for something completely different, a man with 3 buttocks",
           "I've heard of unisex, but I've never had it", "That's the end, stop the program! Stop it!"]
+import textwrap, random
+leadins=[
+    "To characterize a linguistic level L,",
+    "On the other hand,",
+    "This suggests that",
+    "It appears that",
+    "Furthermore,",
+    "We will bring evidence in favor of the following thesis: ",
+    "To provide a constituent structure for T(Z,K),",
+    "From C1, it follows that",
+    "For any transformation which is sufficiently diversified in application to be of any interest,",
+    "Analogously,",
+    "Clearly,",
+    "Note that",
+    "Of course,",
+    "Suppose, for instance, that",
+    "Thus",
+    "With this clarification,",
+    "Conversely,",
+    "We have already seen that",
+    "By combining adjunctions and certain deformations,",
+    "I suggested that these results would follow from the assumption that",
+    "If the position of the trace in (99c) were only relatively inaccessible to movement,",
+    "However, this assumption is not correct, since",
+    "Comparing these examples with their parasitic gap counterparts in (96) and (97), we see that",
+    "In the discussion of resumptive pronouns following (81),",
+    "So far,",
+    "Nevertheless,",
+    "For one thing,",
+    "Summarizing, then, we assume that",
+    "A consequence of the approach just outlined is that",
+    "Presumably,",
+    "On our assumptions,",
+    "It may be, then, that",
+    "It must be emphasized, once again, that",
+    "Let us continue to suppose that",
+    "Notice, incidentally, that",
+    ]
+ 
+subjects = [
+    "the notion of level of grammaticalness",
+    "a case of semigrammaticalness of a different sort",
+    "most of the methodological work in modern linguistics",
+    "a subset of English sentences interesting on quite independent grounds",
+    "the natural general principle that will subsume this case",
+    "an important property of these three types of EC",
+    "any associated supporting element",
+    "the appearance of parasitic gaps in domains relatively inaccessible to ordinary extraction",
+    "the speaker-hearer's linguistic intuition",
+    "the descriptive power of the base component",
+    "the earlier discussion of deviance",
+    "this analysis of a formative as a pair of sets of features",
+    "this selectionally introduced contextual feature",
+    "a descriptively adequate grammar",
+    "the fundamental error of regarding functional notions as categorial",
+    "relational information",
+    "the systematic use of complex symbols",
+    "the theory of syntactic features developed earlier",
+    ]
+ 
+verbs= [
+    "can be defined in such a way as to impose",
+    "delimits",
+    "suffices to account for",
+    "cannot be arbitrary in",
+    "is not subject to",
+    "does not readily tolerate",
+    "raises serious doubts about",
+    "is not quite equivalent to",
+    "does not affect the structure of",
+    "may remedy and, at the same time, eliminate",
+    "is not to be considered in determining",
+    "is to be regarded as",
+    "is unspecified with respect to",
+    "is, apparently, determined by",
+    "is necessary to impose an interpretation on",
+    "appears to correlate rather closely with",
+    "is rather different from",
+    ]
+
+objects = [
+    "problems of phonemic and morphological analysis.",
+    "a corpus of utterance tokens upon which conformity has been defined by the paired utterance test.",
+    "the traditional practice of grammarians.",
+    "the levels of acceptability from fairly high (e.g. (99a)) to virtual gibberish (e.g. (98d)).",
+    "a stipulation to place the constructions into these various categories.",
+    "a descriptive fact.",
+    "a parasitic gap construction.",
+    "the extended c-command discussed in connection with (34).",
+    "the ultimate standard that determines the accuracy of any proposed grammar.",
+    "the system of base rules exclusive of the lexicon.",
+    "irrelevant intervening contexts in selectional rules.",
+    "nondistinctness in the sense of distinctive feature theory.",
+    "a general convention regarding the forms of the grammar.",
+    "an abstract underlying order.",
+    "an important distinction in language use.",
+    "the requirement that branching is not tolerated within the dominance scope of a complex symbol.",
+    "the strong generative capacity of the theory.",
+    ]
+
+def format_wisdom(text,line_length=72):
+    return textwrap.fill(text, line_length)
+
+def chomsky(times = 1):
+    if not isinstance(times, int):
+        return format_wisdom(__doc__)
+    prevparts = []
+    newparts = []
+    output = []
+    for i in xrange(times):
+        for partlist in (leadins, subjects, verbs, objects):
+            while 1:
+                part = random.choice(partlist)
+                if part not in prevparts:
+                    break
+            newparts.append(part)
+        output.append(' '.join(newparts))
+        prevparts = newparts
+        newparts = []
+    return format_wisdom('  '.join(output))
 
 from reportlab import rl_config
 if rl_config.invariant:
@@ -194,11 +315,12 @@ del rl_config
 
 def randomText(theme=STARTUP, sentences=5):
     #this may or may not be appropriate in your company
+    if theme.lower()=='chomsky': return chomsky(sentences)
     from random import randint, choice
 
     RANDOMWORDS = theme
 
-#   sentences = 5
+    #sentences = 5
     output = ""
     for sentenceno in range(randint(1,sentences)):
         output = output + 'Blah'
@@ -210,3 +332,6 @@ def randomText(theme=STARTUP, sentences=5):
             output = output + ' ' +word
         output = output+'. '
     return output
+
+if __name__=='__main__':
+    print chomsky(5)
