@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch3_shapes.py,v 1.1 2001/08/07 10:17:35 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/ch3_shapes.py,v 1.2 2001/08/10 16:00:08 dinu_gherman Exp $
 
 from gengraphguide import *
 
@@ -73,15 +73,17 @@ eg("""
 
 from reportlab.graphics.shapes import Rect
 from reportlab.lib.colors import red, green
-D = Drawing(220, 120)
+d = Drawing(220, 120)
 r = Rect(5, 5, 200, 100)
 r.fillColor = red
 r.strokeColor = green
 r.strokeWidth = 3
-D.add(r)
-draw(D, "red rectangle with green border")
+d.add(r)
+draw(d, "red rectangle with green border")
 
-disc("""<i>In future examples we will omit the import statements.</i>""")
+disc("""
+<i>Note: In future examples we will omit the import statements.</i>
+""")
 
 disc("""
 All shapes have a number of properties which can be set.
@@ -108,30 +110,36 @@ y = 5
 >>> 
 """)
 
-disc("""Shapes generally have <i>style properties</i> and <i>geometry properties</i>. <i>x</i>, <i>y</i>, 
-       <i>width</i> and <i>height</i> are part of the geometry and must be provided when 
-       creating the rectangle, since it does not make much sense without 
-       those properties. The others are optional and come with sensible 
-       defaults.""")
+disc("""
+Shapes generally have <i>style properties</i> and <i>geometry
+properties</i>.
+$x$, $y$, $width$ and $height$ are part of the geometry and must
+be provided when creating the rectangle, since it does not make
+much sense without those properties.
+The others are optional and come with sensible defaults.
+""")
 
-disc("""You may set other properties on subsequent lines, or by passing them 
-       as optional arguments to the constructor. We could also have created 
-       our rectangle this way:""")
+disc("""
+You may set other properties on subsequent lines, or by passing them 
+as optional arguments to the constructor.
+We could also have created our rectangle this way:
+""")
 
 eg("""
->>> R = Rect(5, 5, 200, 100, 
+>>> r = Rect(5, 5, 200, 100, 
              fillColor=red, 
              strokeColor=green, 
              strokeWidth=3) 
 """)
 
 disc("""
-Let's run through the style properties. <i>fillColor</i> is obvious. <i>stroke</i>
-is publishing terminology for the edge of a shape; the stroke has a
-color, width, possibly a dash pattern, and some (rarely used) features
-for what happens when a line turns a corner. <i>rx</i> and <i>ry</i> are optional
-geometric properties and are used to define the corner radius for a
-rounded rectangle.
+Let's run through the style properties. §fillColor§ is obvious.
+$stroke$ is publishing terminology for the edge of a shape;
+the stroke has a color, width, possibly a dash pattern, and
+some (rarely used) features for what happens when a line turns
+a corner.
+$rx$ and $ry$ are optional geometric properties and are used to
+define the corner radius for a rounded rectangle.
 """)
 
 disc("All the other solid shapes share the same style properties.")
@@ -139,9 +147,12 @@ disc("All the other solid shapes share the same style properties.")
 
 heading2("Lines")
 
-disc("""We provide single straight lines, PolyLines and curves. Lines have all 
-       the <i>stroke</i> properties, but no <i>fillColor</i>. Here are a few Line and 
-       PolyLine examples and the corresponding graphics output:""")
+disc("""
+We provide single straight lines, PolyLines and curves.
+Lines have all the $stroke*$ properties, but no $fillColor$.
+Here are a few Line and PolyLine examples and the corresponding
+graphics output:
+""")
 
 eg("""
     Line(50,50, 300,100,
@@ -156,28 +167,31 @@ eg("""
              strokeColor=colors.purple)
 """)
 
-D = Drawing(400, 200)
-D.add(Line(50,50, 300,100,strokeColor=colors.blue, strokeWidth=5))
-D.add(Line(50,100, 300,50,
+d = Drawing(400, 200)
+d.add(Line(50,50, 300,100,strokeColor=colors.blue, strokeWidth=5))
+d.add(Line(50,100, 300,50,
            strokeColor=colors.red,
            strokeWidth=10,
            strokeDashArray=[10, 20]))
-D.add(PolyLine([120,110, 130,150, 140,110, 150,150, 160,110,
+d.add(PolyLine([120,110, 130,150, 140,110, 150,150, 160,110,
           170,150, 180,110, 190,150, 200,110],
          strokeWidth=2,
          strokeColor=colors.purple))
-draw(D, "Line and PolyLine examples")
+draw(d, "Line and PolyLine examples")
 
 
 heading2("Strings")
 
-disc("""ReportLab Graphics is not designed for fancy text layout, but it can 
-       place strings at desired locations and with left/right/center 
-       alignment. Let's specify a String and look at its properties:""")
+disc("""
+The ReportLab Graphics package is not designed for fancy text
+layout, but it can place strings at desired locations and with
+left/right/center alignment.
+Let's specify a $String$ object and look at its properties:
+""")
 
 eg("""
->>> S = String(10, 50, 'Hello World')
->>> S.dumpProperties()
+>>> s = String(10, 50, 'Hello World')
+>>> s.dumpProperties()
 fillColor = Color(0.00,0.00,0.00)
 fontName = Times-Roman
 fontSize = 10
@@ -189,46 +203,73 @@ y = 50
 """)
 
 disc("""
-Strings have a textAnchor property, which may have the values 
-'start', 'middle', 'end'.
+Strings have a textAnchor property, which may have one of the
+values 'start', 'middle', 'end'.
 If this is set to 'start', x and y relate to the start of the
 string, and so on.
 This provides an easy way to align text.
 """)
 
-disc("""Strings use a common font standard: the Type 1 Postscript fonts 
-       present in Acrobat Reader. We can thus use the basic 14 fonts in 
-       ReportLab and get accurate metrics for them. We expect to add support 
-       for extra Type 1 fonts in the near future. Until now we have worked 
-       with bitmap renderers which have to use TrueType fonts and which make 
-       some substitutions; this could lead to differences in text wrapping or 
-       even the number of labels on a chart between renderers. The 
-       (forthcoming) back ends will all know how to render Type 1 fonts.""")
+disc("""
+Strings use a common font standard: the Type 1 Postscript fonts 
+present in Acrobat Reader.
+We can thus use the basic 14 fonts in ReportLab and get accurate
+metrics for them.
+We have recently also added support for extra Type 1 fonts
+and the renderers all know how to render Type 1 fonts.
+""")
 
-disc("Here is a more fancy example using the following code snippet:")
+##Until now we have worked with bitmap renderers which have to use
+##TrueType fonts and which make some substitutions; this could lead
+##to differences in text wrapping or even the number of labels on
+##a chart between renderers.
+
+disc("""
+Here is a more fancy example using the code snippet below.
+Please consult the ReportLab User Guide to see how non-standard
+like 'LettErrorRobot-Chrome' fonts are being registered!
+""")
 
 eg("""
-    D = Drawing(400, 200)
+    d = Drawing(400, 200)
     for size in range(12, 36, 4):
-        D.add(String(10+size*2, 10+size*2, 'Hello World',
+        d.add(String(10+size*2, 10+size*2, 'Hello World',
                      fontName='Times-Roman',
                      fontSize=size))
 
-    D.add(String(150, 150, 'Hello World',
+    d.add(String(130, 120, 'Hello World',
                  fontName='Courier',
+                 fontSize=36))
+
+    d.add(String(150, 160, 'Hello World',
+                 fontName='LettErrorRobot-Chrome',
                  fontSize=36))
 """)
 
-D = Drawing(400, 200)
+from reportlab.pdfbase import pdfmetrics
+from reportlab import rl_config
+rl_config.warnOnMissingFontGlyphs = 0
+T1face = pdfmetrics.EmbeddedType1Face('LeERC___.AFM', 'LeERC___.PFB')
+T1faceName = 'LettErrorRobot-Chrome'
+pdfmetrics.registerTypeFace(T1face)
+T1font = pdfmetrics.Font(T1faceName, T1faceName, 'WinAnsiEncoding')
+pdfmetrics.registerFont(T1font)
+
+d = Drawing(400, 200)
 for size in range(12, 36, 4):
-    D.add(String(10+size*2, 10+size*2, 'Hello World',
+    d.add(String(10+size*2, 10+size*2, 'Hello World',
                  fontName='Times-Roman',
                  fontSize=size))
 
-D.add(String(150, 150, 'Hello World',
+d.add(String(130, 120, 'Hello World',
              fontName='Courier',
              fontSize=36))
-draw(D, 'fancy font example')
+
+d.add(String(150, 160, 'Hello World',
+             fontName='LettErrorRobot-Chrome',
+             fontSize=36))
+
+draw(d, 'fancy font example')
 
 
 heading2("""Paths""")
@@ -279,30 +320,35 @@ will be, soon.
 
 heading2("Groups")
 
-disc("""Finally, we have Group objects. A group has a list of contents, which 
-       are other nodes. It can also apply a transformation - its contents can 
-       be rotated, scaled or shifted. If you know the math, you can set the 
-       transform directly. Otherwise it provides methods to rotate, scale and 
-       so on. Here we make a group which is rotated and translated:""")
-
-eg("""
->>> G =Group(shape1, shape2, shape3) 
->>> G.rotate(30) 
->>> G.translate(50, 200) 
+disc("""
+Finally, we have Group objects.
+A group has a list of contents, which are other nodes.
+It can also apply a transformation - its contents can be rotated,
+scaled or shifted.
+If you know the math, you can set the transform directly.
+Otherwise it provides methods to rotate, scale and so on.
+Here we make a group which is rotated and translated:
 """)
 
-disc("""Groups provide a tool for reuse. You can make a bunch of shapes to 
-       represent some component - say, a coordinate system - and put them in 
-       one group called "Axis". You can then put that group into other 
-       groups, each with a different translation and rotation, and you get a 
-       bunch of axis. It is still the same group, being drawn in different 
-       places.""")
+eg("""
+>>> g =Group(shape1, shape2, shape3) 
+>>> g.rotate(30) 
+>>> g.translate(50, 200) 
+""")
+
+disc("""
+Groups provide a tool for reuse.
+You can make a bunch of shapes to represent some component - say,
+a coordinate system - and put them in one group called "Axis".
+You can then put that group into other groups, each with a different
+translation and rotation, and you get a bunch of axis.
+It is still the same group, being drawn in different places.
+""")
 
 disc("""Let's do this with some only slightly more code:""")
 
 eg("""
-
-    D = Drawing(400, 200)
+    d = Drawing(400, 200)
 
     Axis = Group(
         Line(0,0,100,0),  # x axis
@@ -325,21 +371,21 @@ eg("""
 
     firstAxisGroup = Group(Axis)
     firstAxisGroup.translate(10,10)
-    D.add(firstAxisGroup)
+    d.add(firstAxisGroup)
     
     secondAxisGroup = Group(Axis)
     secondAxisGroup.translate(150,10)
     secondAxisGroup.rotate(15)
     
-    D.add(secondAxisGroup)
+    d.add(secondAxisGroup)
 
     thirdAxisGroup = Group(Axis, 
                            transform=mmult(translate(300,10), 
                                            rotate(30)))
-    D.add(thirdAxisGroup)
+    d.add(thirdAxisGroup)
 """)
 
-D = Drawing(400, 200)
+d = Drawing(400, 200)
 Axis = Group(
     Line(0,0,100,0),  # x axis
     Line(0,0,0,50),   # y axis
@@ -360,13 +406,13 @@ Axis = Group(
     )
 firstAxisGroup = Group(Axis)
 firstAxisGroup.translate(10,10)
-D.add(firstAxisGroup)
+d.add(firstAxisGroup)
 secondAxisGroup = Group(Axis)
 secondAxisGroup.translate(150,10)
 secondAxisGroup.rotate(15)
-D.add(secondAxisGroup)
+d.add(secondAxisGroup)
 thirdAxisGroup = Group(Axis, 
                        transform=mmult(translate(300,10), 
                                        rotate(30)))
-D.add(thirdAxisGroup)
-draw(D, "Groups examples")
+d.add(thirdAxisGroup)
+draw(d, "Groups examples")

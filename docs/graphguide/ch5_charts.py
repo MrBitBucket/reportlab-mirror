@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch5_charts.py,v 1.3 2001/08/07 11:15:45 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/ch5_charts.py,v 1.4 2001/08/10 16:00:08 dinu_gherman Exp $
 
 from gengraphguide import *
 
@@ -197,12 +197,16 @@ draw(d, 'Label example')
 
 
 
-disc("""In the drawing above, the label is defined relative to the green blob. 
-       The text box should have its north-east corner ten points down from 
-       the origin, and be rotated by 45 degrees about that corner.""")
+disc("""
+In the drawing above, the label is defined relative to the green blob. 
+The text box should have its north-east corner ten points down from 
+the origin, and be rotated by 45 degrees about that corner.
+""")
 
-disc("""At present labels have the following properties, which we believe are 
-       sufficient for all charts we have seen to date:""")
+disc("""
+At present labels have the following properties, which we believe are 
+sufficient for all charts we have seen to date:
+""")
 
 disc("")
 
@@ -216,8 +220,13 @@ data=[["Property", "Meaning"],
       ["boxStrokeColor", "The stroke color used in the label's box."],
       ["boxStrokeWidth", """The line width of the label's box."""],
       ["fontName", """The label's font name."""],
-      ["fontSize", """The label's font size"""],
-      ["leading", """The leading value of the label's text lines."""]]
+      ["fontSize", """The label's font size."""],
+      ["leading", """The leading value of the label's text lines."""],
+      ["x", """The X-coordinate of the reference point."""],
+      ["y", """The Y-coordinate of the reference point."""],
+      ["width", """The label's width."""],
+      ["height", """The label's height."""]
+      ]
 t=Table(data, colWidths=(100,330))
 t.setStyle(TableStyle([
             ('FONT',(0,0),(-1,0),'Times-Bold',10,12),
@@ -230,22 +239,38 @@ t.setStyle(TableStyle([
 getStory().append(t)
 caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - Label properties""")
 
+disc("""
+To see many more examples of $Label$ objects with different
+combinations of properties, please have a look into the
+ReportLab test suite in the folder $reportlab/test$, run the
+script $test_charts_textlabels.py$ and look at the PDF document
+it generates!
+""")
+
 
 
 heading2("Axes")
 
-disc("""We identify two basic kinds of axes - <i>Value</i> and <i>Category</i> Axes. Both 
-       come in horizontal and vertical flavors. Both can be subclassed to 
-       make very specific kinds of axis. For example, if you have complex 
-       rules for which dates to display in a time series application, or want 
-       irregular scaling, you override the axis and make a new one.""")
+disc("""
+We identify two basic kinds of axes - <i>Value</i> and <i>Category</i>
+ones.
+Both come in horizontal and vertical flavors.
+Both can be subclassed to make very specific kinds of axis.
+For example, if you have complex rules for which dates to display
+in a time series application, or want irregular scaling, you override
+the axis and make a new one.
+""")
 
-disc("""Axes are responsible for determining the mapping from data to image 
-       coordinates; transforming points on request from the chart; drawing 
-       themselves and their tickmarks, gridlines and axis labels.""")
+disc("""
+Axes are responsible for determining the mapping from data to image 
+coordinates; transforming points on request from the chart; drawing 
+themselves and their tickmarks, gridlines and axis labels.
+""")
 
-disc("""This drawing shows two axes, one of each kind, which have been created 
-       directly without reference to any chart:""")
+disc("""
+This drawing shows two axes, one of each kind, which have been created 
+directly without reference to any chart:
+""")
 
 
 from reportlab.graphics import shapes
@@ -301,24 +326,35 @@ drawing.add(xAxis)
 drawing.add(yAxis)
 """)
 
-disc("""Remember that you won't have to create axes directly; when using a 
-       standard chart, it comes with ready-made axes. The methods are what 
-       the chart uses to configure it and take care of the geometry. However, 
-       we will talk through them in detail below.""")
+disc("""
+Remember that, usually, you won't have to create axes directly;
+when using a standard chart, it comes with ready-made axes.
+The methods are what the chart uses to configure it and take care
+of the geometry.
+However, we will talk through them in detail below.
+The orthogonally dual axes to those we describe have essentially
+the same properties, except for those refering to ticks.
+""")
 
 
 heading3("XCategoryAxis class")
 
-disc("""A Category Axis doesn't really have a scale; it just divides itself 
-       into equal-sized buckets. It is simpler than a value axis. The chart 
-       (or programmer) sets its location with the method setPosition(x, y, 
-       length). The next stage is to show it the data so that it can 
-       configure itself. This is easy for a category axis - it just counts 
-       the number of data points in one of the data series. When the drawing 
-       is drawn, the axis can provide some help to the chart with its scale() 
-       method, which tells the chart where a given category begins and ends 
-       on the page. We have not yet seen any need to let people override the 
-       widths or positions of categories.""")
+disc("""
+A Category Axis doesn't really have a scale; it just divides itself 
+into equal-sized buckets.
+It is simpler than a value axis.
+The chart (or programmer) sets its location with the method
+$setPosition(x, y, length)$.
+The next stage is to show it the data so that it can configure
+itself.
+This is easy for a category axis - it just counts the number of
+data points in one of the data series.
+When the drawing is drawn, the axis can provide some help to the
+chart with its $scale()$ method, which tells the chart where
+a given category begins and ends on the page.
+We have not yet seen any need to let people override the widths
+or positions of categories.
+""")
 
 disc("An XCategoryAxis has the following editable properties:")
 
@@ -360,17 +396,25 @@ caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - XCategoryAxis proper
 
 heading3("YValueAxis")
 
-disc("""The left axis in the diagram is a YValueAxis. A Value Axis differs from a 
-       Category Axis in that each point along its length corresponds to a y 
-       value in chart space. It is the job of the axis to configure itself, 
-       and to convert Y values from chart space to points on demand to assist 
-       the parent chart in plotting.""")
+disc("""
+The left axis in the diagram is a YValueAxis.
+A Value Axis differs from a Category Axis in that each point along
+its length corresponds to a y value in chart space.
+It is the job of the axis to configure itself, and to convert Y values
+from chart space to points on demand to assist the parent chart in
+plotting.
+""")
 
-disc("""<i>setPosition(x, y, length)</i> and <i>configure(data)</i> work exactly as 
-       for a category axis. If you have not fully specified the maximum, 
-       minimum and tick interval, then configure() results in the axis 
-       choosing suitable values. One configured, the value axis can convert y 
-       data values to drawing space with the scale() method. Thus:""")
+disc("""
+$setPosition(x, y, length)$ and $configure(data)$ work exactly as 
+for a category axis.
+If you have not fully specified the maximum, minimum and tick
+interval, then $configure()$ results in the axis choosing suitable
+values.
+Once configured, the value axis can convert y data values to drawing
+space with the $scale()$ method.
+Thus:
+""")
 
 eg("""
 >>> yAxis = YValueAxis()
@@ -444,7 +488,7 @@ t.setStyle(TableStyle([
             ('BOX', (0,0), (-1,-1), 0.25, colors.black),
             ]))
 getStory().append(t)
-caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - XCategoryAxis properties""")
+caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - YValueAxis properties""")
 
 disc("""
 The $valueSteps$ property lets you explicitly specify the 
@@ -493,7 +537,45 @@ drawing.add(xAxis)
 draw(drawing, 'An axis with non-equidistant tick marks')
 
 
+disc("""
+In addition to these properties, all axes classes have three
+properties describing how to join two of them to each other.
+Again, this is interesting only if you define your own charts
+or want to modify the appearance of an existing chart using
+such axes.
+These properties are listed here only very briefly for now,
+but you can find a host of sample functions in the module
+$reportlab/graphics/axes.py$ which you can examine...
+""")
 
+disc("""
+One axis is joined to another, by calling the method
+$joinToAxis(otherAxis, mode, pos)$ on the first axis,
+with $mode$ and $pos$ being the properties described by
+$joinAxisMode$ and $joinAxisPos$, respectively.
+$'points'$ means to use an absolute value, and $'value'$
+to use a relative value (both indicated by the the
+$joinAxisPos$ property) along the axis.
+""")
+
+disc("")
+
+data=[["Property", "Meaning"],
+      ["joinAxis", """Join both axes if true."""],
+      ["joinAxisMode", """Mode used for connecting axis ('bottom', 'top', 'left', 'right', 'value', 'points', None)."""],
+      ["joinAxisPos", """Position at which to join with other axis."""],
+      ]
+t=Table(data, colWidths=(100,330))
+t.setStyle(TableStyle([
+            ('FONT',(0,0),(-1,0),'Times-Bold',10,12),
+            ('FONT',(0,1),(0,-1),'Courier',8,8),
+            ('FONT',(1,1),(1,-1),'Times-Roman',10,12),
+            ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ]))
+getStory().append(t)
+caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - Axes joining properties""")
 
 
 heading2("Bar Charts")
@@ -608,8 +690,8 @@ overwrite this."""],
 a solid color. (Note that we could implement dashArray etc.
 as for any other solid shape)"""],
       ["barLabelFormat", """This is a format string or function used for displaying
-labels above each bar. We're working on ways to position these
-labels so that they work for positive and negative bars."""],
+labels above each bar. They are positioned automatically
+above the bar for positive values and below for negative ones."""],
       ["useAbsolute", """Defaults to 0. If 1, the three properties below are
 absolute values in points (which means you can make a chart
 where the bars stick out from the plot rectangle); if 0,
@@ -707,6 +789,12 @@ drawing.add(bc)
 
 draw(drawing, 'Like before, but with modified spacing')
 
+disc("""
+Bars labels are automatically displayed for negative values
+<i>below</i> the lower end of the bar for positive values
+<i>above</i> the upper end of the other ones.
+""")
+
 
 ##Property Value 
 ##data This should be a "list of lists of numbers" or "list of tuples of numbers". If you have just one series, write it as
@@ -729,44 +817,167 @@ draw(drawing, 'Like before, but with modified spacing')
 ##title, subTitle Not implemented yet. These would be label-like objects whose text could be set directly and which would appear in sensible locations. For now, you can just place extra strings on the drawing. 
 
 
-heading3("Remaining Issues")
+heading2("Line Charts")
 
 disc("""
-There are several issues that are <i>almost</i> solved, but for which
-is is a bit too early to start making them really public.
-Nevertheless, here is a list of things that are under way:
+We consider "Line Charts" to be essentially the same as
+"Bar Charts", but with lines instead of bars.
+Both share the same pair of Category/Value axes pairs.
+This is in contrast to "Line Plots", where both axes are
+<i>Value</i> axes.
 """)
 
-list("""Vertical position of X axis - by default the X axis sits at the bottom.
-One will be able to specify if it sits at the top, the bottom or at
-a specific Y value (either in absolute coordinates or in those of the
-axis itself).
+disc("""
+The following code and its output shall serve as a simple
+example.
+More explanation will follow.
+For the time being you can also study the output of running
+the tool $reportlab/lib/graphdocpy.py$ withough any arguments
+and search the generated PDF document for examples of
+Line Charts.
 """)
 
-list("""
-Bar labelling - in cases where bar values are negative, the label
-should appear <i>below</i> the lower end of the bar and <i>above</i>
-the upper end of the other ones.
-This is actually already working automatically.
+eg("""
+from reportlab.graphics.charts.linecharts import HorizontalLineChart
+
+drawing = Drawing(400, 200)
+
+data = [
+    (13, 5, 20, 22, 37, 45, 19, 4),
+    (5, 20, 46, 38, 23, 21, 6, 14)
+]
+
+lc = HorizontalLineChart()
+lc.x = 50
+lc.y = 50
+lc.height = 125
+lc.width = 300
+lc.data = data
+lc.joinedLines = 1
+catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
+lc.categoryAxis.categoryNames = catNames
+lc.categoryAxis.labels.boxAnchor = 'n'
+lc.valueAxis.valueMin = 0
+lc.valueAxis.valueMax = 60
+lc.valueAxis.valueStep = 15
+lc.lines[0].strokeWidth = 2
+lc.lines[1].strokeWidth = 1.5
+drawing.add(lc)
 """)
 
-list("""
-Color specification - right now the chart has an undocumented property 
-$defaultColors$, which provides a list of colors to cycle through,
-such that each data series gets its own color.
-Right now, if you introduce a legend, you need to make sure it shares
-the same list of colors.
-Most likely, this will be replaced with a scheme to specify a kind
-of legend containing attributes with different values for each data
-series.
-This legend can then also be shared by several charts, but need not
-be visible itself.
+from reportlab.graphics.charts.linecharts import HorizontalLineChart
+
+drawing = Drawing(400, 200)
+
+data = [
+    (13, 5, 20, 22, 37, 45, 19, 4),
+    (5, 20, 46, 38, 23, 21, 6, 14)
+]
+
+lc = HorizontalLineChart()
+lc.x = 50
+lc.y = 50
+lc.height = 125
+lc.width = 300
+lc.data = data
+lc.joinedLines = 1
+catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
+lc.categoryAxis.categoryNames = catNames
+lc.categoryAxis.labels.boxAnchor = 'n'
+lc.valueAxis.valueMin = 0
+lc.valueAxis.valueMax = 60
+lc.valueAxis.valueStep = 15
+lc.lines[0].strokeWidth = 2
+lc.lines[1].strokeWidth = 1.5
+drawing.add(lc)
+
+draw(drawing, 'HorizontalLineChart sample')
+
+
+disc("")
+todo("Add properties table.")
+
+
+heading2("Line Plots")
+
+disc("""
+Below we show a more complex example of a Line Plot that
+also uses some experimental features like line markers
+placed at each data point.
 """)
 
-list("""Additional chart types - when the current design will have become
-more stable, we expect to add variants of bar charts to deal with stacked
-and percentile bars as well as the side-by-side variant seen here.
+eg("""
+from reportlab.graphics.charts.lineplots import LinePlot
+from reportlab.graphics.charts.markers import makeFilledCircle, makeEmptyCircle
+
+drawing = Drawing(400, 200)
+
+data = [
+    ((1,1), (2,2), (2.5,1), (3,3), (4,5)),
+    ((1,2), (2,3), (2.5,2), (3.5,5), (4,6))
+]
+
+lp = LinePlot()
+lp.x = 50
+lp.y = 50
+lp.height = 125
+lp.width = 300
+lp.data = data
+lp.joinedLines = 1
+lp.lines[0].symbol = makeFilledCircle
+lp.lines[1].symbol = makeEmptyCircle
+lp.lineLabelFormat = '%2.0f'
+lp.strokeColor = colors.black
+lp.xValueAxis.valueMin = 0
+lp.xValueAxis.valueMax = 5
+lp.xValueAxis.valueSteps = [1, 2, 2.5, 3, 4, 5]
+lp.xValueAxis.labelTextFormat = '%2.1f'
+lp.yValueAxis.valueMin = 0
+lp.yValueAxis.valueMax = 7
+lp.yValueAxis.valueSteps = [1, 2, 3, 5, 6]
+
+drawing.add(lp)
 """)
+
+
+from reportlab.graphics.charts.lineplots import LinePlot
+from reportlab.graphics.charts.markers import makeFilledCircle, makeEmptyCircle
+
+drawing = Drawing(400, 200)
+
+data = [
+    ((1,1), (2,2), (2.5,1), (3,3), (4,5)),
+    ((1,2), (2,3), (2.5,2), (3.5,5), (4,6))
+]
+
+lp = LinePlot()
+lp.x = 50
+lp.y = 50
+lp.height = 125
+lp.width = 300
+lp.data = data
+lp.joinedLines = 1
+lp.lines[0].symbol = makeFilledCircle
+lp.lines[1].symbol = makeEmptyCircle
+lp.lineLabelFormat = '%2.0f'
+lp.strokeColor = colors.black
+lp.xValueAxis.valueMin = 0
+lp.xValueAxis.valueMax = 5
+lp.xValueAxis.valueSteps = [1, 2, 2.5, 3, 4, 5]
+lp.xValueAxis.labelTextFormat = '%2.1f'
+lp.yValueAxis.valueMin = 0
+lp.yValueAxis.valueMax = 7
+lp.yValueAxis.valueSteps = [1, 2, 3, 5, 6]
+
+drawing.add(lp)
+
+draw(drawing, 'LinePlot sample')
+
+
+
+disc("")
+todo("Add properties table.")
+
 
 
 heading2("Pie Charts")
@@ -832,6 +1043,9 @@ This was invented before we finished the $Label$ class and will
 probably be reworked to use such labels shortly.
 """)
 
+disc("")
+todo("Add properties table.")
+
 ##Property Value 
 ##data a list or tuple of numbers 
 ##x, y, width, height Bounding box of the pie. Note that x and y do NOT specify the centre but the bottom left corner, and that width and height do not have to be equal; pies may be elliptical and wedges will be drawn correctly. 
@@ -891,6 +1105,35 @@ todo("""Does this work? Is it an acceptable complication over specifying chart
 colors directly?""")
 
 
+
+heading2("Remaining Issues")
+
+disc("""
+There are several issues that are <i>almost</i> solved, but for which
+is is a bit too early to start making them really public.
+Nevertheless, here is a list of things that are under way:
+""")
+
+list("""
+Color specification - right now the chart has an undocumented property 
+$defaultColors$, which provides a list of colors to cycle through,
+such that each data series gets its own color.
+Right now, if you introduce a legend, you need to make sure it shares
+the same list of colors.
+Most likely, this will be replaced with a scheme to specify a kind
+of legend containing attributes with different values for each data
+series.
+This legend can then also be shared by several charts, but need not
+be visible itself.
+""")
+
+list("""
+Additional chart types - when the current design will have become
+more stable, we expect to add variants of bar charts to deal with stacked
+and percentile bars as well as the side-by-side variant seen here.
+""")
+
+
 heading2("Outlook")
 
 disc("""
@@ -938,6 +1181,32 @@ inflation rates on the right axis.
 If anyone can remind us where this example came from we'll
 attribute it, and happily show the well-known graph as an
 example.
+""")
+
+
+heading3("Interactive editors")
+
+disc("""
+One principle of the Graphics package is to make all 'interesting'
+properties of its graphic components accessible and changeable by
+setting apropriate values of corresponding public attributes.
+This makes it very tempting to build a tool like a GUI editor that
+that helps you with doing that interactively.
+""")
+
+disc("""
+ReportLab has built such a tool using the Tkinter toolkit that
+loads pure Python code describing a drawing and records your
+property editing operations.
+This "change history" is then used to create code for a subclass
+of that chart, say, that can be saved and used instantly just
+like any other chart or as a new starting point for another
+interactive editing session.
+""")
+
+disc("""
+This is still work in progress, though, and the conditions for
+releasing this need to be further elaborated.
 """)
 
 

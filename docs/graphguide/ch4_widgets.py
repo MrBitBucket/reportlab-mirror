@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch4_widgets.py,v 1.1 2001/08/07 10:17:35 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/ch4_widgets.py,v 1.2 2001/08/10 16:00:08 dinu_gherman Exp $
 
 from gengraphguide import *
 
@@ -31,10 +31,13 @@ disc("""We want to build reusable graphic objects, including a powerful chart
        to reuse - arrows, gears, text boxes, UML diagram nodes, even fully 
        fledged charts.""")
 
-disc("""The Widget standard is a standard built on top of the shapes module. 
-       Anyone can write new widgets, and we can build up libraries of them. 
-       Widgets support getProperties and setProperties, so you can inspect 
-       and modify as well as document them in a uniform way.""")
+disc("""
+The Widget standard is a standard built on top of the shapes module. 
+Anyone can write new widgets, and we can build up libraries of them. 
+Widgets support the $getProperties()$ and $setProperties()$ methods,
+so you can inspect and modify as well as document them in a uniform
+way.
+""")
 
 bullet("A widget is a reusable shape ")
 bullet("""it can be initialized with no arguments 
@@ -283,19 +286,24 @@ disc("""This checking will be performed on every attribute assignment; or, if
 
 heading2("Documenting Widgets")
 
-disc("""We are working on a generic tool to document any Python package or 
-       module; this will be checked into ReportLab an will be used to 
-       generate a reference for the ReportLab package. When it encounters 
-       widgets, it will add extra sections to the manual including""")
+disc("""
+We are working on a generic tool to document any Python package or 
+module; this is already checked into ReportLab and will be used to 
+generate a reference for the ReportLab package.
+When it encounters widgets, it adds extra sections to the
+manual including:""")
 
 bullet("the doc string for your widget class ")
 bullet("the code snippet from your <i>demo()</i> method, so people can see how to use it")
 bullet("the drawing produced by the <i>demo()</i> method ")
 bullet("the property dump for the widget in the drawing. ")
 
-disc("""This tool will mean that we can have guaranteed up-to-date 
-       documentation on our widgets and chart, both on the web site and in 
-       print; and that you can do the same for your own widgets too!""")
+disc("""
+This tool will mean that we can have guaranteed up-to-date 
+documentation on our widgets and charts, both on the web site
+and in print; and that you can do the same for your own widgets,
+too!
+""")
 
 
 heading2("Widget Design Strategies")
@@ -320,11 +328,6 @@ pc.data = [10,30,50,25]
 pc.slices[7].strokeWidth = 5 
 """)
 #removed 'pc.backColor = yellow' from above code example
-
-# Hack to force a new paragraph before the todo() :-(
-#disc("")
-
-todo("More of an explanation of what '$__setattr__$ hooks' are?")
 
 disc("""The last line is problematic as we have only created four wedges - in 
        fact we might not have created them yet. Does $pc.wedges[7]$ raise an 
@@ -355,18 +358,21 @@ from reportlab.graphics.charts.piecharts import Pie
 d = Drawing(400,200)
 d.add(String(100,175,"Without labels", textAnchor="middle"))
 d.add(String(300,175,"With labels", textAnchor="middle"))
+
 pc = Pie()
 pc.x = 25
 pc.y = 50
 pc.data = [10,20,30,40,50,60]
 pc.slices[0].popout = 5
 d.add(pc, 'pie1')
+
 pc2 = Pie()
 pc2.x = 150
 pc2.y = 50
 pc2.data = [10,20,30,40,50,60]
 pc2.labels = ['a','b','c','d','e','f']
 d.add(pc2, 'pie2')
+
 pc3 = Pie()
 pc3.x = 275
 pc3.y = 50
@@ -382,8 +388,6 @@ d.add(pc3, 'pie3')
 # Hack to force a new paragraph before the todo() :-(
 disc("")
 
-#todo("add image")
-
 from reportlab.lib.colors import *
 from reportlab.graphics import shapes,renderPDF 
 from reportlab.graphics.charts.piecharts import Pie
@@ -391,18 +395,21 @@ from reportlab.graphics.charts.piecharts import Pie
 d = Drawing(400,200)
 d.add(String(100,175,"Without labels", textAnchor="middle"))
 d.add(String(300,175,"With labels", textAnchor="middle"))
+
 pc = Pie()
 pc.x = 25
 pc.y = 50
 pc.data = [10,20,30,40,50,60]
 pc.slices[0].popout = 5
 d.add(pc, 'pie1')
+
 pc2 = Pie()
 pc2.x = 150
 pc2.y = 50
 pc2.data = [10,20,30,40,50,60]
 pc2.labels = ['a','b','c','d','e','f']
 d.add(pc2, 'pie2')
+
 pc3 = Pie()
 pc3.x = 275
 pc3.y = 50
@@ -414,4 +421,4 @@ pc3.slices.fontSize = 16
 pc3.slices.fontColor = colors.yellow
 d.add(pc3, 'pie3')
 
-draw(d, 'A sample Pie')
+draw(d, 'Some sample Pies')

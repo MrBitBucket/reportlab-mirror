@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch2_concepts.py,v 1.1 2001/08/07 10:17:35 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/ch2_concepts.py,v 1.2 2001/08/10 16:00:08 dinu_gherman Exp $
 
 from gengraphguide import *
 
@@ -15,35 +15,54 @@ library, that will show-up later in various places.
 
 heading2("Drawings and Renderers")
 
-disc("""A Drawing is a platform-independent description of a collection of 
-       shapes. It is not directly associated with PDF, Postscript or any 
-       other output format. Fortunately most vector graphics systems have 
-       followed the Postscript model and it is possible to describe shapes 
-       unambiguously.""")
+disc("""
+A <i>Drawing</i> is a platform-independent description of a collection of 
+shapes.
+It is not directly associated with PDF, Postscript or any other output
+format.
+Fortunately, most vector graphics systems have followed the Postscript
+model and it is possible to describe shapes unambiguously.
+""")
 
-disc("""A Drawing contains a number of primitive Shapes. One important shape 
-       is a "Group", which can hold other shapes and apply a transformation 
-       to them. Just about anything can be built up from a small number of 
-       basic shapes.""")
+disc("""
+A drawing contains a number of primitive <i>Shapes</i>.
+Normal shapes are those widely known as rectangles, circles, lines,
+etc.
+One special (logic) shape is a <i>Group</i>, which can hold other
+shapes and apply a transformation to them.
+Groups represent composites of shapes and allow to treat the
+composite as if it were a single shape.
+Just about anything can be built up from a small number of basic
+shapes.
+""")
 
-disc("""The package provides several "renderers" which know how to draw a 
-       drawing into different formats. These include PDF (of course), 
-       Postscript, and bitmap output. The bitmap renderer will use Raph 
-       Levien's <i>libart</i> rasterizer and the Python Imaging Library. If you have 
-       the right extensions installed, you can generate drawings in bitmap 
-       form for the web as well as vector form for PDF documents, and get 
-       "identical output".""")
+disc("""
+The package provides several <i>Renderers</i> which know how to draw a 
+drawing into different formats.
+These include PDF (of course), Postscript, and bitmap output.
+The bitmap renderer uses Raph Levien's <i>libart</i> rasterizer
+and Fredrik Lundh's <i>Python Imaging Library</i> (PIL).
+If you have the right extensions installed, you can generate drawings
+in bitmap form for the web as well as vector form for PDF documents,
+and get "identical output".
+""")
 
-disc("""We expect to add both input and output filters for many vector 
-       graphics formats in future. SVG is a key one. GUIs will be able to 
-       obtain screen images from the bitmap output filter working with PIL, 
-       so a chart could appear in a Tkinter GUI window.""")
+disc("""
+The PDF renderer has special "privileges" - a Drawing object is also
+a <i>Flowable</i> and, hence, can be placed directly in the story
+of any Platypus document, or drawn directly on a <i>Canvas</i> with
+one line of code.
+In addition, the PDF renderer has a utility function to make
+a one-page PDF document quickly.
+""")
 
-disc("""The PDF renderer has "special privileges" - a Drawing object is a 
-       Flowable, and can be placed directly in the story in any flowing 
-       document, or drawn directly on a canvas with one line. In addition, 
-       the PDF renderer has a utility function to make a one-page PDF 
-       quickly.""")
+disc("""
+We expect to add both input and output filters for many vector 
+graphics formats in future, SVG being a key one.
+GUIs will be able to obtain screen images from the bitmap output
+filter working with PIL, so a chart could appear in a Tkinter
+GUI window.
+""")
 
 
 heading2("Coordinate System")
@@ -56,10 +75,13 @@ It also appears to be more natural for people, especially when
 working with charts.
 Note that in other graphics models (such as SVG) the Y-coordinate
 points <i>down</i>.
+""")
 
+disc("""
 The X-coordinate points, as usual, from left to right.
 So far there doesn't seem to be any model advocating the opposite
-direction - at least not yet.
+direction - at least not yet (with interesting exceptions, as it
+seems, for Arabs looking at time series charts...).
 """)
 
 
@@ -68,27 +90,27 @@ heading2("Getting Started")
 disc("""
 Let's create a simple drawing containing the string "Hello World", 
 displayed on top of a coloured rectangle.
-We will then save it to a standalone file.
+After creating it we will save the drawing to a standalone PDF file.
 """)
 
 eg("""
     from reportlab.lib import colors
     from reportlab.graphics.shapes import * 
  
-    D = Drawing(400, 200)
-    D.add(Rect(50, 50, 300, 100, fillColor=colors.yellow))
-    D.add(String(150,100, 'Hello World',
+    d = Drawing(400, 200)
+    d.add(Rect(50, 50, 300, 100, fillColor=colors.yellow))
+    d.add(String(150,100, 'Hello World',
                  fontSize=18, fillColor=colors.red))
  
     from reportlab.graphics import renderPDF 
-    renderPDF.drawToFile(D, 'example1.pdf', 'My First Drawing') 
+    renderPDF.drawToFile(d, 'example1.pdf', 'My First Drawing') 
 """)
 
 disc("This will produce a PDF file containing the following graphic:")
 
 from reportlab.graphics.shapes import * 
 from reportlab.graphics import testshapes
-t=testshapes.getDrawing01()
+t = testshapes.getDrawing01()
 draw(t, "'Hello World'")
  
 disc("""
@@ -96,7 +118,7 @@ Each renderer is allowed to do whatever is appropriate for its format,
 and may have whatever API is needed.
 If it refers to a file format, it usually has a $drawToFile$ function,
 and that's all you need to know about the renderer.
-Let's save this file as Encapsulated Postscript:
+Let's save the same drawing in Encapsulated Postscript format:
 """)
 
 ##eg("""
@@ -105,16 +127,29 @@ Let's save this file as Encapsulated Postscript:
 ##""")
 eg("""
     from reportlab.graphics import renderPS 
-    renderPS.drawToFile(D, 'example1.eps') 
+    renderPS.drawToFile(d, 'example1.eps') 
 """)
 
 disc("""
 This will produce an EPS file with the identical drawing, which
 may be imported into publishing tools such as Quark Express.
+If we wanted to generate the same drawing as a bitmap file for
+a website, say, all we need to do is write code like this:
+""")
+
+eg("""
+    from reportlab.graphics import renderPM 
+    renderPM.saveToFile(d, 'example1.png', 'PNG') 
+""")
+
+disc("""
+Many other bitmap formats, like GIF, JPG, TIFF, BMP and PPN are
+genuinely available, making it unlikely you'll need to add external
+postprocessing steps to convert to the final format you need.
 """)
 
 
-heading2("Verification")
+heading2("Attribute Verification")
 
 disc("""
 Python is very dynamic and lets us execute statements at run time that
@@ -136,11 +171,11 @@ be turned off when you need it to be.
 """)
 
 eg("""
->>> R = Rect(10,10,200,100, fillColor=colors.red)
+>>> r = Rect(10,10,200,100, fillColor=colors.red)
 >>> 
->>> R.fullColor = colors.green # note the typo 
->>> R.x = 'not a number'       # illegal argument type 
->>> del R.width                # that should confuse it
+>>> r.fullColor = colors.green # note the typo 
+>>> r.x = 'not a number'       # illegal argument type 
+>>> del r.width                # that should confuse it
 """)
 
 disc("""
@@ -202,26 +237,35 @@ once in a batch process.
 
 heading2("Property Editing")
 
-disc("""A cornerstone of the reportlab/graphics which we will cover below is 
-       that you can automatically document widgets. This means getting hold 
-       of all of their editable properties, including those of their 
-       subcomponents.""")
+disc("""
+A cornerstone of the reportlab/graphics which we will cover below is 
+that you can automatically document widgets.
+This means getting hold of all of their editable properties,
+including those of their subcomponents.
+""")
 
-disc("""Another goal is to be able to create GUIs and config files for 
-       drawings. A generic GUI can be built to show all editable properties 
-       of a drawing, and let you modify them and see the results. The Visual 
-       Basic or Delphi development environment are good examples of this kind 
-       of thing. In a batch charting application, a file could list all the 
-       properties of all the components in a chart, and be merged with a 
-       database query to make a batch of charts.""")
+disc("""
+Another goal is to be able to create GUIs and config files for 
+drawings.
+A generic GUI can be built to show all editable properties 
+of a drawing, and let you modify them and see the results.
+The Visual Basic or Delphi development environment are good
+examples of this kind of thing.
+In a batch charting application, a file could list all the 
+properties of all the components in a chart, and be merged
+with a database query to make a batch of charts.
+""")
 
-disc("""To support these applications we have two interfaces, $getProperties$ 
-       and $setProperties$, as well as a convenience method $dumpProperties$. The 
-       first returns a dictionary of the editable properties of an object; 
-       the second sets them en masse. If an object has publicly exposed 
-       'children' then one can recursively set and get their properties too. 
-       This will make much more sense when we look at Widgets later on, but 
-       we need to put the support into the base of the framework.""")
+disc("""
+To support these applications we have two interfaces, $getProperties$ 
+and $setProperties$, as well as a convenience method $dumpProperties$.
+The first returns a dictionary of the editable properties of an
+object; the second sets them en masse.
+If an object has publicly exposed 'children' then one can recursively
+set and get their properties too. 
+This will make much more sense when we look at <i>Widgets</i> later on,
+but we need to put the support into the base of the framework.
+""")
 
 eg("""
 >>> r = shapes.Rect(0,0,200,100)
@@ -258,35 +302,46 @@ y = 30
 >>>  """)
 
 disc("""
-<i>($pprint$ is the standard Python library module that allows you to 'pretty print' output
-over multiple lines rather than having one very long line.)</i>
+<i>Note: $pprint$ is the standard Python library module that allows
+you to 'pretty print' output over multiple lines rather than having
+one very long line.</i>
 """)
 
-disc("""These three methods don't seem to do much here, but as we will see 
-       they make our widgets framework much more powerful when dealing with 
-       non-primitive objects.""")
+disc("""
+These three methods don't seem to do much here, but as we will see 
+they make our widgets framework much more powerful when dealing with 
+non-primitive objects.
+""")
 
 
 heading2("Naming Children")
 
-disc("""You can add objects to the $Drawing$ and $Group$ objects. These normally 
-       go into a list of contents. However, you may also give objects a name 
-       when adding them. This allows you to refer to and possibly change any 
-       element of a drawing after constructing it.""")
+disc("""
+You can add objects to the $Drawing$ and $Group$ objects.
+These normally go into a list of contents.
+However, you may also give objects a name when adding them.
+This allows you to refer to and possibly change any element
+of a drawing after constructing it.
+""")
 
 eg("""
->>> D = shapes.Drawing(400, 200) 
->>> S = shapes.String(10, 10, 'Hello World') 
->>> D.add(S, 'caption') 
->>> D.caption.text 
+>>> d = shapes.Drawing(400, 200) 
+>>> s = shapes.String(10, 10, 'Hello World') 
+>>> d.add(s, 'caption') 
+>>> s.caption.text 
 'Hello World' 
 >>>  
 """)
 
-disc("""Note that you can use the same shape instance in several contexts in a 
-       drawing; if you choose to use the same Circle object in many locations 
-       (e.g. a scatter plot) and use different names to access it, it will 
-       still be a shared object and the changes will be global.""")
+disc("""
+Note that you can use the same shape instance in several contexts
+in a drawing; if you choose to use the same $Circle$ object in many
+locations (e.g. a scatter plot) and use different names to access
+it, it will still be a shared object and the changes will be
+global.
+""")
 
-disc("""This provides one paradigm for creating and modifying interactive 
-       drawings.""")
+disc("""
+This provides one paradigm for creating and modifying interactive 
+drawings.
+""")

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch1_intro.py,v 1.7 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/graphguide/ch1_intro.py,v 1.8 2001/08/10 16:00:08 dinu_gherman Exp $
 
 from gengraphguide import *
 import reportlab
@@ -44,7 +44,7 @@ todo("""
 Be warned! This document is in a preliminary form.
 We need your help to make sure it is complete and helpful.
 Please send any feedback to our user mailing list,
-reportlab-users@egroups.com.
+reportlab-users@yahoogroups.com.
 """)
 
 
@@ -58,7 +58,7 @@ graphics like diagrams or charts.
 Ideally, these graphics could be used not only to generate PDF
 documents, but other output formats, bitmap or vector ones, as
 well.
-ReportLab is in the process of adding such a graphics package to
+ReportLab is in the middle of adding such a Graphics package to
 its standard distribution.
 This document is both the "design document" and the "tutorial".
 """)
@@ -67,7 +67,7 @@ This document is both the "design document" and the "tutorial".
 heading2("Requirements")
 
 disc("""
-The graphics library should support the creation of custom
+The Graphics library should support the creation of custom
 graphical applications containing charts, diagrams, drawings, plans,
 etc. in various domains like business, finance, publishing, engineering
 and research.
@@ -95,9 +95,9 @@ bullet("""Compounding - one can define 'multiples' placing several charts on one
        drawing, or arbitrary decorations around the chart. This technique 
        also allows easy overlaying of lines on bars, or of different axes on 
        the right and left side of a plot.""")
-bullet("""'Plug-In Architecture' - with training, you can write a new chart type
-       based on an existing one but only changing/adding the features you
-       need to.""")
+bullet("""'Plug-In Architecture' - with training (and possibly supported by
+       additional tools), you can write a new chart type based on an existing
+       one but only changing/adding the features you need to.""")
 bullet("Control over drawing size, plot rectangle size and position within drawing.")
 bullet("""Control over width, dash style, line cap/join style and
        color for all lines.""")
@@ -112,6 +112,6 @@ bullet("""Control over font name (any Type 1 font on the system) and size, plus
 
 disc("""
 The charting requirements are based on a commercial sponsor who
-needs to create batches of charts rapidly with precise control over
-layout.
+needs to effeciently create batches of charts with precise control
+over layout.
 """)
