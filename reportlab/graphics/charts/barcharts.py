@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.55 2001/11/24 21:27:57 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.56 2001/12/05 19:46:18 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -15,7 +15,7 @@ from types import FunctionType, StringType
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf, isBoolean
-from reportlab.lib.formatters import Formatter, DecimalFormatter
+from reportlab.lib.formatters import Formatter
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
@@ -371,7 +371,10 @@ class BarChart(Widget):
 			if sC and sW: g.insert(0,Line(x00,y00,x0,y0, strokeColor=sC, strokeWidth=sW))
 			g.add(label)
 			alx = getattr(self,'barLabelCallOut',None)
-			if alx: alx(g,rowNo,colNo,x,y,width,height,x00,y00,x0,y0)
+			if alx:
+				label._callOutInfo = (self,g,rowNo,colNo,x,y,width,height,x00,y00,x0,y0)
+				alx(label)
+				del label._callOutInfo
 
 	def makeBars(self):
 		g = Group()

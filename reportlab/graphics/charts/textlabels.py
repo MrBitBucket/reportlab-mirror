@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.22 2001/10/12 11:08:51 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.23 2001/12/05 19:46:18 rgbecker Exp $
 import string
 
 from reportlab.lib import colors
@@ -280,6 +280,49 @@ class Label(Widget):
 				y = y - leading
 
 		return g
+
+class LabelDecorator:
+	_attrMap = AttrMap(
+        x = AttrMapValue(isNumberOrNone),
+        y = AttrMapValue(isNumberOrNone),
+		dx = AttrMapValue(isNumberOrNone),
+		dy = AttrMapValue(isNumberOrNone),
+		angle = AttrMapValue(isNumberOrNone),
+		boxAnchor = AttrMapValue(isBoxAnchor),
+		boxStrokeColor = AttrMapValue(isColorOrNone),
+		boxStrokeWidth = AttrMapValue(isNumberOrNone),
+		boxFillColor = AttrMapValue(isColorOrNone),
+		fillColor = AttrMapValue(isColorOrNone),
+		strokeColor = AttrMapValue(isColorOrNone),
+		strokeWidth = AttrMapValue(isNumberOrNone),
+		fontName = AttrMapValue(isNoneOrString),
+		fontSize = AttrMapValue(isNumberOrNone),
+		leading = AttrMapValue(isNumberOrNone),
+		width = AttrMapValue(isNumberOrNone),
+		maxWidth = AttrMapValue(isNumberOrNone),
+		height = AttrMapValue(isNumberOrNone),
+		textAnchor = AttrMapValue(isTextAnchor),
+		visible = AttrMapValue(isBoolean,desc="True if the label is to be drawn"),
+		)
+
+	def __init__(self):
+		self.textAnchor = 'start'
+		self.boxAnchor = 'w'
+		for a in self._attrMap.keys():
+			if not hasattr(self,a): setattr(self,a,None)
+
+	def decorate(self,l,L):
+		chart,g,rowNo,colNo,x,y,width,height,x00,y00,x0,y0 = l._callOutInfo
+		L.setText(chart.categoryAxis.categoryNames[colNo])
+		g.add(L)
+
+	def __call__(self,l):
+		from copy import deepcopy
+		L = Label()
+		for a,v in self.__dict__.items():
+			if v is None: v = getattr(l,a,None)
+			setattr(L,a,v)
+		self.decorate(l,L)
 
 isOffsetMode=OneOf('high','low','bar','axis')
 class LabelOffset(PropHolder):
