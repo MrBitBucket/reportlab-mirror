@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfutils.py,v $
+#	Revision 1.8  2000/07/05 12:20:27  rgbecker
+#	Ascii85 fixes/additions
+#
 #	Revision 1.7  2000/06/30 15:29:59  rgbecker
 #	Allow for non-caching of images
-#
+#	
 #	Revision 1.6  2000/05/17 08:03:53  andy_robinson
 #	readJPEGinfo moved from canvas to pdfutils;
 #	Pythonpoint now handles JPEG images; more
@@ -51,7 +54,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfutils.py,v 1.7 2000/06/30 15:29:59 rgbecker Exp $ '''
+__version__=''' $Id: pdfutils.py,v 1.8 2000/07/05 12:20:27 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -202,72 +205,79 @@ def _AsciiHexTest(text='What is the average velocity of a sparrow?'):
     else:
         print 'Failed!'
     
-def _AsciiBase85Encode(input):
-    """This is a compact encoding used for binary data within
-    a PDF file.  Four bytes of binary data become five bytes of
-    ASCII.  This is the default method used for encoding images."""
-    outstream = cStringIO.StringIO()
-    # special rules apply if not a multiple of four bytes.  
-    whole_word_count, remainder_size = divmod(len(input), 4)
-    cut = 4 * whole_word_count
-    body, lastbit = input[0:cut], input[cut:]
+try:
+    import _streams
+    _AsciiBase85Encode = _streams.ASCII85Encode
+except ImportError:
+    def _AsciiBase85Encode(input):
+        """This is a compact encoding used for binary data within
+        a PDF file.  Four bytes of binary data become five bytes of
+        ASCII.  This is the default method used for encoding images."""
+        outstream = cStringIO.StringIO()
+        # special rules apply if not a multiple of four bytes.  
+        whole_word_count, remainder_size = divmod(len(input), 4)
+        cut = 4 * whole_word_count
+        body, lastbit = input[0:cut], input[cut:]
+        
+        for i in range(whole_word_count):
+            offset = i*4
+            b1 = ord(body[offset])
+            b2 = ord(body[offset+1])
+            b3 = ord(body[offset+2])
+            b4 = ord(body[offset+3])
+        
+            if b1<128:
+                num = (((((b1<<8)|b2)<<8)|b3)<<8)|b4
+            else:
+                num = 16777216L * b1 + 65536 * b2 + 256 * b3 + b4
     
-    for i in range(whole_word_count):
-        offset = i*4
-        b1 = ord(body[offset])
-        b2 = ord(body[offset+1])
-        b3 = ord(body[offset+2])
-        b4 = ord(body[offset+3])
+            if num == 0:
+                #special case
+                outstream.write('z')
+            else:
+                #solve for five base-85 numbers                            
+                temp, c5 = divmod(num, 85)
+                temp, c4 = divmod(temp, 85)
+                temp, c3 = divmod(temp, 85)
+                c1, c2 = divmod(temp, 85)
+                assert ((85**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5 == num, 'dodgy code!'
+                outstream.write(chr(c1+33))
+                outstream.write(chr(c2+33))
+                outstream.write(chr(c3+33))
+                outstream.write(chr(c4+33))
+                outstream.write(chr(c5+33))
     
-        num = 16777216L * b1 + 65536 * b2 + 256 * b3 + b4
-
-        if num == 0:
-            #special case
-            outstream.write('z')
-        else:
-            #solve for five base-85 numbers                            
+        # now we do the final bit at the end.  I repeated this separately as
+        # the loop above is the time-critical part of a script, whereas this
+        # happens only once at the end.
+    
+        #encode however many bytes we have as usual
+        if remainder_size > 0:
+            while len(lastbit) < 4:
+                lastbit = lastbit + '\000'
+            b1 = ord(lastbit[0])
+            b2 = ord(lastbit[1])
+            b3 = ord(lastbit[2])
+            b4 = ord(lastbit[3])
+    
+            num = 16777216L * b1 + 65536 * b2 + 256 * b3 + b4
+    
+            #solve for c1..c5
             temp, c5 = divmod(num, 85)
             temp, c4 = divmod(temp, 85)
             temp, c3 = divmod(temp, 85)
             c1, c2 = divmod(temp, 85)
-            assert ((85**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5 == num, 'dodgy code!'
-            outstream.write(chr(c1+33))
-            outstream.write(chr(c2+33))
-            outstream.write(chr(c3+33))
-            outstream.write(chr(c4+33))
-            outstream.write(chr(c5+33))
-
-    # now we do the final bit at the end.  I repeated this separately as
-    # the loop above is the time-critical part of a script, whereas this
-    # happens only once at the end.
-
-    #encode however many bytes we have as usual
-    if remainder_size > 0:
-        while len(lastbit) < 4:
-            lastbit = lastbit + '\000'
-        b1 = ord(lastbit[0])
-        b2 = ord(lastbit[1])
-        b3 = ord(lastbit[2])
-        b4 = ord(lastbit[3])
-
-        num = 16777216L * b1 + 65536 * b2 + 256 * b3 + b4
-
-        #solve for c1..c5
-        temp, c5 = divmod(num, 85)
-        temp, c4 = divmod(temp, 85)
-        temp, c3 = divmod(temp, 85)
-        c1, c2 = divmod(temp, 85)
-
-        #print 'encoding: %d %d %d %d -> %d -> %d %d %d %d %d' % (
-        #    b1,b2,b3,b4,num,c1,c2,c3,c4,c5)
-        lastword = chr(c1+33) + chr(c2+33) + chr(c3+33) + chr(c4+33) + chr(c5+33)
-        #write out most of the bytes.
-        outstream.write(lastword[0:remainder_size + 1])
-
-    #terminator code for ascii 85    
-    outstream.write('~>')
-    outstream.reset()
-    return outstream.read()
+    
+            #print 'encoding: %d %d %d %d -> %d -> %d %d %d %d %d' % (
+            #    b1,b2,b3,b4,num,c1,c2,c3,c4,c5)
+            lastword = chr(c1+33) + chr(c2+33) + chr(c3+33) + chr(c4+33) + chr(c5+33)
+            #write out most of the bytes.
+            outstream.write(lastword[0:remainder_size + 1])
+    
+        #terminator code for ascii 85    
+        outstream.write('~>')
+        outstream.reset()
+        return outstream.read()
         
 
 def _AsciiBase85Decode(input):
@@ -297,7 +307,7 @@ def _AsciiBase85Decode(input):
         c4 = ord(body[offset+3]) - 33
         c5 = ord(body[offset+4]) - 33
 
-        num = ((85**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5    
+        num = ((85L**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5    
 
         temp, b4 = divmod(num,256)
         temp, b3 = divmod(temp,256)
@@ -318,7 +328,7 @@ def _AsciiBase85Decode(input):
         c3 = ord(lastbit[2]) - 33
         c4 = ord(lastbit[3]) - 33
         c5 = ord(lastbit[4]) - 33
-        num = ((85**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5    
+        num = ((85L**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5    
         temp, b4 = divmod(num,256)
         temp, b3 = divmod(temp,256)
         b1, b2 = divmod(temp, 256)
