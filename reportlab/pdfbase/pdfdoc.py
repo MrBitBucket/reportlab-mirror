@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.24  2000/09/08 10:04:08  rgbecker
+#	Paul Eddington's unix tell() returns a LongIntType bugfix
+#
 #	Revision 1.23  2000/08/24 02:26:04  aaron_watters
 #	change to PDFLiteral to support "lazy string conversions" (to support lazy crosslinks)
-#
+#	
 #	Revision 1.22  2000/08/09 10:57:52  rgbecker
 #	Andy's Symbol/Zapf font fix
 #	
@@ -92,7 +95,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.23 2000/08/24 02:26:04 aaron_watters Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.24 2000/09/08 10:04:08 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -293,7 +296,6 @@ class PDFDocument:
         f.write('0000000000 65535 f' + LINEEND)
         for pos in self.xref:
             f.write('%0.10d 00000 n' % pos + LINEEND)
-
     
     def printTrailer(self):
         print 'trailer'
@@ -305,7 +307,7 @@ class PDFDocument:
         f.write('trailer' + LINEEND)
         f.write('<< /Size %d /Root %d 0 R /Info %d 0 R>>' % (len(self.objects) + 1, 1, self.infopos)  + LINEEND)
         f.write('startxref' + LINEEND)
-        f.write(str(self.startxref)  + LINEEND)
+        f.write(('%d' % self.startxref) + LINEEND)
 
     def SaveToFile(self, filename,canvas):
         """Open a file, and ask each object in turn to write itself to
