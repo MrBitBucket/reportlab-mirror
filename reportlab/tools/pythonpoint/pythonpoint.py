@@ -857,7 +857,8 @@ def process(datafilename, notes=0, handout=0, cols=0):
     pres.handout = handout
     pres.cols = cols
     pres.save()
-    print 'saved presentation %s.pdf' % os.path.splitext(datafilename)[0]
+    if rl_config._verbose:
+        print 'saved presentation %s.pdf' % os.path.splitext(datafilename)[0]
     parser.close()
 
 
