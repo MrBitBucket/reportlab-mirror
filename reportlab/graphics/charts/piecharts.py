@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.28 2003/07/07 16:40:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.29 2003/08/13 14:37:29 rgbecker Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -12,7 +12,7 @@
 This permits you to customize and pop out individual wedges;
 supports elliptical and circular pies.
 """
-__version__=''' $Id: piecharts.py,v 1.28 2003/07/07 16:40:12 rgbecker Exp $ '''
+__version__=''' $Id: piecharts.py,v 1.29 2003/08/13 14:37:29 rgbecker Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -27,7 +27,7 @@ from reportlab.lib.validators import isColor, isNumber, isListOfNumbersOrNone,\
                                     isStringOrNone
 from reportlab.lib.attrmap import *
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS
+from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS, ArcPath, Polygon
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from textlabels import Label 
 
@@ -105,6 +105,51 @@ class WedgeProperties(PropHolder):
         self.label_textAnchor = 'start'
         self.label_visible = 1
 
+def _addWedgeLabel(self,text,add,angle,labelX,labelY,wedgeStyle):
+    # now draw a label
+    if self.simpleLabels:
+        theLabel = String(labelX, labelY, text)
+        theLabel.textAnchor = "middle"
+    else:
+        theLabel = WedgeLabel()
+        theLabel._pmv = angle
+        theLabel.x = labelX
+        theLabel.y = labelY
+        theLabel.dx = wedgeStyle.label_dx
+        theLabel.dy = wedgeStyle.label_dy
+        theLabel.angle = wedgeStyle.label_angle
+        theLabel.boxAnchor = wedgeStyle.label_boxAnchor
+        theLabel.boxStrokeColor = wedgeStyle.label_boxStrokeColor
+        theLabel.boxStrokeWidth = wedgeStyle.label_boxStrokeWidth
+        theLabel.boxFillColor = wedgeStyle.label_boxFillColor
+        theLabel.strokeColor = wedgeStyle.label_strokeColor
+        theLabel.strokeWidth = wedgeStyle.label_strokeWidth
+        _text = wedgeStyle.label_text
+        if _text is None: _text = text
+        theLabel._text = _text
+        theLabel.leading = wedgeStyle.label_leading
+        theLabel.width = wedgeStyle.label_width
+        theLabel.maxWidth = wedgeStyle.label_maxWidth
+        theLabel.height = wedgeStyle.label_height
+        theLabel.textAnchor = wedgeStyle.label_textAnchor
+        theLabel.visible = wedgeStyle.label_visible
+        theLabel.topPadding = wedgeStyle.label_topPadding
+        theLabel.leftPadding = wedgeStyle.label_leftPadding
+        theLabel.rightPadding = wedgeStyle.label_rightPadding
+        theLabel.bottomPadding = wedgeStyle.label_bottomPadding
+    theLabel.fontSize = wedgeStyle.fontSize
+    theLabel.fontName = wedgeStyle.fontName
+    theLabel.fillColor = wedgeStyle.fontColor
+    add(theLabel)
+
+def _fixLabels(labels,n):
+    if labels is None:
+        labels = [''] * n
+    else:
+        i = n-len(labels)
+        if i>0: labels = labels + ['']*i
+    return labels
+
 class Pie(Widget):
     _attrMap = AttrMap(
         x = AttrMapValue(isNumber, desc='X position of the chart within its container.'),
@@ -174,17 +219,7 @@ class Pie(Widget):
         # normalize slice data
         normData = self.normalizeData()
         n = len(normData)
-
-        #labels
-        if self.labels is None:
-            labels = [''] * n
-        else:
-            labels = self.labels
-            #there's no point in raising errors for less than enough errors if
-            #we silently create all for the extreme case of no labels.
-            i = n-len(labels)
-            if i>0:
-                labels = labels + ['']*i
+        labels = _fixLabels(self.labels,n)
 
         xradius = self.width/2.0
         yradius = self.height/2.0
@@ -236,49 +271,14 @@ class Pie(Widget):
                 theWedge.strokeDashArray = wedgeStyle.strokeDashArray
 
                 g.add(theWedge)
-
-                # now draw a label
-                if labels[i] <> "":
+                text = labels[i]
+                if text:
                     averageAngle = (a1+a2)/2.0
                     aveAngleRadians = averageAngle*pi/180.0
                     labelRadius = wedgeStyle.labelRadius
                     labelX = cx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
                     labelY = cy + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
-
-                    if self.simpleLabels:
-                        theLabel = String(labelX, labelY, labels[i])
-                        theLabel.textAnchor = "middle"
-                    else:
-                        theLabel = WedgeLabel()
-                        theLabel._pmv = averageAngle
-                        theLabel.x = labelX
-                        theLabel.y = labelY
-                        theLabel.dx = wedgeStyle.label_dx
-                        theLabel.dy = wedgeStyle.label_dy
-                        theLabel.angle = wedgeStyle.label_angle
-                        theLabel.boxAnchor = wedgeStyle.label_boxAnchor
-                        theLabel.boxStrokeColor = wedgeStyle.label_boxStrokeColor
-                        theLabel.boxStrokeWidth = wedgeStyle.label_boxStrokeWidth
-                        theLabel.boxFillColor = wedgeStyle.label_boxFillColor
-                        theLabel.strokeColor = wedgeStyle.label_strokeColor
-                        theLabel.strokeWidth = wedgeStyle.label_strokeWidth
-                        _text = wedgeStyle.label_text
-                        if _text is None: _text = labels[i]
-                        theLabel._text = _text
-                        theLabel.leading = wedgeStyle.label_leading
-                        theLabel.width = wedgeStyle.label_width
-                        theLabel.maxWidth = wedgeStyle.label_maxWidth
-                        theLabel.height = wedgeStyle.label_height
-                        theLabel.textAnchor = wedgeStyle.label_textAnchor
-                        theLabel.visible = wedgeStyle.label_visible
-                        theLabel.topPadding = wedgeStyle.label_topPadding
-                        theLabel.leftPadding = wedgeStyle.label_leftPadding
-                        theLabel.rightPadding = wedgeStyle.label_rightPadding
-                        theLabel.bottomPadding = wedgeStyle.label_bottomPadding
-                    theLabel.fontSize = wedgeStyle.fontSize
-                    theLabel.fontName = wedgeStyle.fontName
-                    theLabel.fillColor = wedgeStyle.fontColor
-                    g.add(theLabel)
+                    _addWedgeLabel(self,text,g.add,averageAngle,labelX,labelY,wedgeStyle)
 
             startAngle = endAngle
             i = i + 1
@@ -442,6 +442,241 @@ class LegendedPie(Pie):
             drawing = Drawing(tx, ty)
         drawing.add(self.draw())
         return drawing
+
+from utils3d import _getShaded, _2rad, _360, _pi_2, _2pi
+class Wedge3dProperties(PropHolder):
+    """This holds descriptive information about the wedges in a pie chart.
+
+    It is not to be confused with the 'wedge itself'; this just holds
+    a recipe for how to format one, and does not allow you to hack the
+    angles.  It can format a genuine Wedge object for you with its
+    format method.
+    """
+    _attrMap = AttrMap(
+        fillColor = AttrMapValue(isColorOrNone),
+        fillColorShaded = AttrMapValue(isColorOrNone),
+        fontColor = AttrMapValue(isColorOrNone),
+        fontName = AttrMapValue(isString),
+        fontSize = AttrMapValue(isNumber),
+        label_angle = AttrMapValue(isNumber),
+        label_bottomPadding = AttrMapValue(isNumber,'padding at bottom of box'),
+        label_boxAnchor = AttrMapValue(isBoxAnchor),
+        label_boxFillColor = AttrMapValue(isColorOrNone),
+        label_boxStrokeColor = AttrMapValue(isColorOrNone),
+        label_boxStrokeWidth = AttrMapValue(isNumber),
+        label_dx = AttrMapValue(isNumber),
+        label_dy = AttrMapValue(isNumber),
+        label_height = AttrMapValue(isNumberOrNone),
+        label_leading = AttrMapValue(isNumberOrNone),
+        label_leftPadding = AttrMapValue(isNumber,'padding at left of box'),
+        label_maxWidth = AttrMapValue(isNumberOrNone),
+        label_rightPadding = AttrMapValue(isNumber,'padding at right of box'),
+        label_strokeColor = AttrMapValue(isColorOrNone),
+        label_strokeWidth = AttrMapValue(isNumber),
+        label_text = AttrMapValue(isStringOrNone),
+        label_textAnchor = AttrMapValue(isTextAnchor),
+        label_topPadding = AttrMapValue(isNumber,'padding at top of box'),
+        label_visible = AttrMapValue(isBoolean,desc="True if the label is to be drawn"),
+        label_width = AttrMapValue(isNumberOrNone),
+        labelRadius = AttrMapValue(isNumber),
+        popout = AttrMapValue(isNumber),
+        shading = AttrMapValue(isNumber),
+        strokeColor = AttrMapValue(isColorOrNone),
+        strokeColorShaded = AttrMapValue(isColorOrNone),
+        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
+        strokeWidth = AttrMapValue(isNumber),
+        visible = AttrMapValue(isBoolean,'set to false to skip displaying'),
+        )
+
+    def __init__(self):
+        self.strokeWidth = 0
+        self.shading = 0.3
+        self.visible = 1
+        self.strokeColorShaded = self.fillColorShaded = self.fillColor = None
+        self.strokeColor = STATE_DEFAULTS["strokeColor"]
+        self.strokeDashArray = STATE_DEFAULTS["strokeDashArray"]
+        self.popout = 0
+        self.fontName = STATE_DEFAULTS["fontName"]
+        self.fontSize = STATE_DEFAULTS["fontSize"]
+        self.fontColor = STATE_DEFAULTS["fillColor"]
+        self.labelRadius = 1.2
+        self.label_dx = self.label_dy = self.label_angle = 0
+        self.label_text = None
+        self.label_topPadding = self.label_leftPadding = self.label_rightPadding = self.label_bottomPadding = 0
+        self.label_boxAnchor = 'c'
+        self.label_boxStrokeColor = None    #boxStroke
+        self.label_boxStrokeWidth = 0.5 #boxStrokeWidth
+        self.label_boxFillColor = None
+        self.label_strokeColor = None
+        self.label_strokeWidth = 0.1
+        self.label_leading =    self.label_width = self.label_maxWidth = self.label_height = None
+        self.label_textAnchor = 'start'
+        self.label_visible = 1
+
+class _SL3D:
+    def __init__(self,lo,hi):
+        if lo<0:
+            lo += 360
+            hi += 360
+        self.lo = lo
+        self.hi = hi
+        self.mid = (lo+hi)*0.5
+
+    def __str__(self):
+        return '_SL3D(%.2f,%.2f)' % (self.lo,self.hi)
+
+class Pie3d(Widget):
+    perspective = 70
+    other_threshold = -1
+    threeD = 1
+    _3d_depth = 25
+    _3d_angle = 180
+
+    def _popout(self,i):
+        return self.styles[i].popout or 0
+
+    def CX(self, i,d ):
+        return self._cx+(d and self._xdepth_3d or 0)+self._popout(i)*cos(_2rad(self._sl3d[i].mid))
+    def CY(self,i,d):
+        return self._cy+(d and self._ydepth_3d or 0)+self._popout(i)*sin(_2rad(self._sl3d[i].mid))
+    def OX(self,i,o,d):
+        return self.CX(i,d)+self._radiusx*cos(_2rad(o))
+    def OY(self,i,o,d):
+        return self.CY(i,d)+self._radiusy*sin(_2rad(o))
+
+    def rad_dist(self,a):
+        _3dva = self._3dva
+        return min(abs(a-_3dva),abs(a-_3dva+360))
+
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+        self.width = 300
+        self.height = 200
+        self.radius = 149
+        self.data = [12.50,20.10,2.00,22.00,5.00,18.00,13.00]
+        self.labels = None  # or list of strings
+        self.startAngle = 90
+        self.direction = "clockwise"
+        self.simpleLabels = 1
+
+        self.styles = TypedPropertyCollection(Wedge3dProperties)
+        self.styles[0].fillColor = colors.darkcyan
+        self.styles[1].fillColor = colors.blueviolet
+        self.styles[2].fillColor = colors.blue
+        self.styles[3].fillColor = colors.cyan
+        self.styles[4].fillColor = colors.azure
+        self.styles[5].fillColor = colors.crimson
+        self.styles[6].fillColor = colors.darkviolet
+        self.styles[1].visible = 0
+        self.styles[3].visible = 0
+        self.styles[4].visible = 0
+        self.styles[5].visible = 1
+        self.styles[6].visible = 0
+
+    def _fillSide(self,L,i,angle,strokeColor,strokeWidth,fillColor):
+        rd = self.rad_dist(angle)
+        if rd<self.rad_dist(self._sl3d[i].mid):
+            p = [self.CX(i,0),self.CY(i,0),
+                self.CX(i,1),self.CY(i,1),
+                self.OX(i,angle,1),self.OY(i,angle,1),
+                self.OX(i,angle,0),self.OY(i,angle,0)]
+            L.append((rd,Polygon(p, strokeColor=strokeColor, fillColor=fillColor,strokeWidth=strokeWidth)))
+
+    def draw(self):
+        styles = self.styles
+        _3d_angle = self._3d_angle
+        self._cx = self.x+self.width/2.0
+        self._cy = self.y+self.height/2.0
+        _3dva = self._3dva = _360(_3d_angle+90)
+        a0 = _2rad(_3dva)
+        self._xdepth_3d = cos(a0)*self._3d_depth
+        self._ydepth_3d = sin(a0)*self._3d_depth
+        radius = self._radius = self.radius
+        self._radiusx = radiusx = radius
+        self._radiusy = radiusy = (1.0 - self.perspective/100.0)*radius
+        data = self.data
+        import operator
+        tot_val = float(reduce(operator.add,self.data))
+
+        CX = self.CX
+        CY = self.CY
+        OX = self.OX
+        OY = self.OY
+        rad_dist = self.rad_dist
+        _fillSide = self._fillSide
+        n = len(data)
+        _sl3d = self._sl3d = []
+        g = Group()
+        last = _360(self.startAngle) 
+        if self.direction=='clockwise': tot_val *= -1
+        for v in self.data:
+            pct = v/tot_val     #should never be > 100%
+            this = pct*360      #pie-portion
+            angle1, angle0 = last, this+last
+            if tot_val>0: angle0, angle1 = angle1, angle0
+            _sl3d.append(_SL3D(angle0,angle1))
+            #print '%d: %.2f %.2f --> %s' %(len(_sl3d)-1,angle0,angle1,_sl3d[-1])
+            last += this
+
+        labels = _fixLabels(self.labels,n)
+        a0 = _3d_angle
+        a1 = _3d_angle+180
+        T = []
+        S = []
+        L = []
+        for i in xrange(n):
+            style = styles[i]
+            if not style.visible: continue
+            fillColor = _getShaded(style.fillColor,style.fillColorShaded,style.shading)
+            strokeColor = _getShaded(style.strokeColor,style.strokeColorShaded,style.shading) or fillColor
+            strokeWidth = style.strokeWidth
+            sl = _sl3d[i]
+            lo = angle0 = sl.lo
+            hi = angle1 = sl.hi
+            cx0 = CX(i,0)
+            cy0 = CY(i,0)
+            cx1 = CX(i,1)
+            cy1 = CY(i,1)
+            #background shaded pie bottom
+            g.add(Wedge(cx1,cy1,radiusx, lo, hi,yradius=radiusy,
+                            strokeColor=strokeColor,strokeWidth=strokeWidth,fillColor=fillColor))
+            #connect to top
+            if lo < a0 < hi: angle0 = a0
+            if lo < a1 < hi: angle1 = a1
+            if 1:
+                p = ArcPath(strokeColor=strokeColor, fillColor=fillColor,strokeWidth=strokeWidth)
+                p.addArc(cx1,cy1,radiusx,angle0,angle1,yradius=radiusy,moveTo=1)
+                p.lineTo(OX(i,angle1,0),OY(i,angle1,0))
+                p.addArc(cx0,cy0,radiusx,angle0,angle1,yradius=radiusy,reverse=1)
+                p.closePath()
+                if angle0<=_3dva and angle1>=_3dva:
+                    rd = 0
+                else:
+                    rd = min(rad_dist(angle0),rad_dist(angle1))
+                S.append((rd,p))
+            _fillSide(S,i,lo,strokeColor,strokeWidth,fillColor)
+            _fillSide(S,i,hi,strokeColor,strokeWidth,fillColor)
+
+            #bright shaded top
+            fillColor = style.fillColor
+            strokeColor = style.strokeColor or fillColor
+            T.append(Wedge(cx0,cy0,radiusx,lo,hi,yradius=radiusy,
+                            strokeColor=strokeColor,strokeWidth=strokeWidth,fillColor=fillColor))
+
+            text = labels[i]
+            if text:
+                rat = style.labelRadius
+                self._radiusx *= rat
+                self._radiusy *= rat
+                mid = sl.mid
+                _addWedgeLabel(self,text,L.append,mid,OX(i,mid,0),OY(i,mid,0),style)
+                self._radiusx = radiusx
+                self._radiusy = radiusy
+
+        S.sort(lambda a,b: -cmp(a[0],b[0]))
+        map(g.add,map(lambda x:x[1],S)+T+L)
+        return g
 
 
 def sample0a():
