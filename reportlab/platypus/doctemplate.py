@@ -400,7 +400,9 @@ class BaseDocTemplate:
             self._emptyPages = 0
         if self._emptyPages >= self._emptyPagesAllowed:
             if 1:
-                raise LayoutError("More than %d pages generated without content - halting layout.  Likely that a flowable is too large for any frame." % self._emptyPagesAllowed)
+                ident = "More than %d pages generated without content - halting layout.  Likely that a flowable is too large for any frame." % self._emptyPagesAllowed
+                #leave to keep apart from the raise
+                raise LayoutError(ident)
             else:
                 pass    #attempt to restore to good state
         else:
@@ -607,13 +609,17 @@ class BaseDocTemplate:
                         self._curPageFlowableCount = self._curPageFlowableCount + 1
                         self.afterFlowable(S[0])
                     else:
-                        raise LayoutError("Splitting error(n==%d) on page %d in\n%s" % (n,self.page,f.identity(30)))
+                        ident = "Splitting error(n==%d) on page %d in\n%s" % (n,self.page,f.identity(30))
+                        #leave to keep apart from the raise
+                        raise LayoutError(ident)
                     del S[0]
                     for f in xrange(n-1):
                         flowables.insert(f,S[f])    # put split flowables back on the list
                 else:
                     if hasattr(f,'_postponed'):
-                        raise LayoutError("Flowable %s too large on page %d" % (f.identity(30), self.page))
+                        ident = "Flowable %s too large on page %d" % (f.identity(30), self.page)
+                        #leave to keep apart from the raise
+                        raise LayoutError(ident)
                     # this ought to be cleared when they are finally drawn!
                     f._postponed = 1
                     flowables.insert(0,f)           # put the flowable back
