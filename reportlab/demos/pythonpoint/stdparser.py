@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: stdparser.py,v $
+#	Revision 1.7  2000/05/16 23:52:38  andy_robinson
+#	Bug in Image tag
+#
 #	Revision 1.6  2000/05/16 23:48:00  andy_robinson
 #	Allowed intra-paragraph text; fixed various bugs
-#
+#	
 #	Revision 1.5  2000/05/11 13:53:51  rgbecker
 #	Change to allow different xmllib
 #	
@@ -334,10 +337,8 @@ class PPMLParser(xmllib.XMLParser):
     def start_image(self, args):
         self._curImage = pythonpoint.PPImage()
         self._curImage.filename = self._arg('image',args,'filename')
-        if args['width'] <> 'None':
-            self._curImage.width = self.ceval('image',args,'width')
-        if args['height'] <> 'None':
-            self._curImage.height = self.ceval('image',args,'height')
+        self._curImage.width = self.ceval('image',args,'width')
+        self._curImage.height = self.ceval('image',args,'height')
         
     def end_image(self):
         self._curFrame.content.append(self._curImage)
