@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.9 2001/04/11 11:38:13 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.10 2001/05/08 11:36:40 dinu_gherman Exp $
 import string
 
 from reportlab.graphics import shapes
@@ -133,6 +133,7 @@ class Widget(PropHolder,shapes.UserNode):
     def provideNode(self):
         return self.draw()
 
+
 class TypedPropertyCollection(PropHolder):
     """This makes it easy to create lists of objects.  You initialize
     it with a class of what it is to contain, and that is all you
@@ -145,7 +146,9 @@ class TypedPropertyCollection(PropHolder):
         wedges[3].strokeColor = colors.blue   # only to one
     The last line should be taken as a prescription of how to
     create wedge no. 3 if one is needed; no error is raised if
-    there are only two data points."""
+    there are only two data points.
+    """
+
     def __init__(self, exampleClass):
         #give it same validation rules as what it holds
         self._prototype = exampleClass
@@ -166,8 +169,12 @@ class TypedPropertyCollection(PropHolder):
             return child
 
     def __setitem__(self, key, value):
-        assert isinstance(value, self._prototype), "This collection can only hold objects of type %s" % self._prototype.__name__
+        msg = "This collection can only hold objects of type %s" % self._prototype.__name__
+        assert isinstance(value, self._prototype), msg
 
+    def __len__(self):
+        return len(self._children.keys())
+        
     def getProperties(self):
         # return any children which are defined and whatever
         # differs from the parent
@@ -185,6 +192,7 @@ class TypedPropertyCollection(PropHolder):
                     props[newKey] = value
 
         return props
+
 
 class StyleProperties(PropHolder):
 	"""A container class for attributes used in charts and legends.
