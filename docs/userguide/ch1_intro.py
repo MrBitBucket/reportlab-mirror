@@ -41,42 +41,51 @@ your help to make sure it is complete and helpful.  Please send any
 feedback to our mailing list, reportlab-users@egroups.com.
 """)
 
-heading2("What is ReportLab all about")
-disc("""The ReportLab library is the foundation for a new generation of reporting
-tools.  It was written out of frustration with the limitations of conventional
-approaches to reporting and database publishing, and in the realisation that
-tools such as PDF and Python made a better approach possible.
+heading2("What is ReportLab?")
+disc("""ReportLab is a software library lets you directly create documents
+in Adobe's Portabe Document Format (PDF) using the Python programming
+language. """)
+
+disc("""PDF is the global standard for electronic documents. It
+supports high-quality printing yet is totally portable across
+platforms, thanks the freely available Acrobat Reader.  Any
+application which previously generated hard copy reports can
+benefit from making PDF documents instead; these can be archived,
+emailed, placed on the web, or printed out the old-fashioned way.
+However, the PDF file format (600 pages long) is a complex
+indexed binary format which is impossible to write directly.
+Until now, most of the world's PDF documents have been produced
+by Adobe's Acrobat tools, which act as a 'print driver.
 """)
 
-disc("""Most existing reporting tools suffer from a number of constraints:""")
-bullet("They assume the data is coming from a relational database")
-bullet("They impose constraints on the output - you have to work the way they want")
-bullet("""They go to the printer; getting electronic documents out requires
-extra products such as Acrobat Distiller and a more complex workflow""")
-bullet("They usually run on Windows")
-bullet("""They don't give you any way to re-use visual elements across a family
-of reports""")
-bullet("They are slow!")
+disc("""The ReportLab library directly creates PDF based on
+your graphics commands.  There are no intervening steps
+and thus no time-consuming pipelines.  Your applications
+can generate reports extremely fast - sometimes orders
+of magnitude faster than traditional report-writing
+tools.""")
 
-disc("""For these reasons, companies doing high-end database publishing or
-high-volume customer documents have generally selected expensive proprietary
-tools which use scripting languages to assemble data from various input
-files and to provide input to some formatter.  Controlling the whole
-system tends to involve export scripts, shell scripts and administrative
-tools.  These systems are basically trying to do what Python was born
-to do - gluing systems together and organising data.  And the languages
-the vendors create generally suck.  """)
+disc("""In addition, because you are writing a program
+in a powerful general purpose language, there are no
+restrictions at all on where you get your data from,
+how you transform it, and the the kind of output
+you can create.  And you can reuse code across
+whole families of reports.""")
 
-disc("""It became clear to us that putting the formatting functionality
-into a general-purpose language such as Python was a much better
-approach.  This would permit programmers to acquire data from anywhere
-and work in a pleasant language.""")
+disc("""The ReportLab library is expected to be useful
+in at least the following contexts:""")
+bullet("Dynamic PDF generation on the web")
+bullet("High-volume corporate reporting and database publishing")
+bullet("""An embeddable print engine for other applications, including
+a 'report language' so that users can customize their own reports. <i>
+This is particularly relevant to cross-platform apps which cannot
+rely on a consistent printing or previewing API on each operating
+system</i>.""")
+bullet("""A 'build system' for complex documents with charts, tables
+and text such as management accounts, statistical reports and
+scientific papers """)
+bullet("""Going from XML to PDF in one step!""")
 
-disc("""The second realisation was that PDF itself was the natural
-target, rather than any operating system's print driver.  It is
-the only truly global format for electronic document storage.""")
-
-heading2("Oh dear, I'm writing a load of crap.  I can't check this in!")
 
 
 
@@ -113,14 +122,16 @@ heading2("Installation and Setup")
 heading3("Installation for experts")
 disc("""First of all, we'll give you the high-speed version for experienced
 Python developers:""")
-disc("1.  Install Python 1.5.1 or later")
-disc("""2.  If you want to produce compressed PDF files (recommended),
+list("Install Python 1.5.1 or later")
+list("""If you want to produce compressed PDF files (recommended),
 check zlib is installed.""")
-disc("""3.  If you want to work with bitmap images, install and
+list("""If you want to work with bitmap images, install and
 test the Python Imaging Library""")
-disc("""4.  Unzip the reportlab package (reportlab.zip
+list("""Unzip the reportlab package (reportlab.zip
 or reportlab.tgz) into a directory on your path""")
-disc("")
+list("""$cd$ to ^reportlab/pdfgen/test^ and execute $testpdfen.py$,
+which will create a file 'testpdfgen.pdf'.""")
+disc(" ")
 disc("""If you have any problems, check the 'Detailed Instructions' section below""")
 
 heading3("A note on available versions")
@@ -140,14 +151,13 @@ of flux, but stable features can be assumed to be stable.  If a bug is
 reported and fix, we assume people who need the fix in a hurry will
 get $current.zip$""")
 
-heading2("Detailed Instructions")
-disc("""This section assumes you
+disc("""The next section assumes you
 don't know much about Python.  We cover all of the steps for three
 common platforms, including how to verify that each one is complete.
 While this may seem like a long list, everything takes 5 minutes if
 you have the binaries at hand.""")
 
-heading3("Windows users:")
+heading3("Instructions for novices: Windows")
 
 restartList()
 
@@ -176,19 +186,62 @@ include images in your reports; it can also be carried out later.""")
 
 list("Install the Python Imaging Library.  (todo:  make up a bundle that works)")
 
-list("Add the DLLs to your Python\DLLs directory")
+list("Add the DLLs in PIL to your Python\DLLs directory")
 
-list("""Add this directory to your path by creating …To verify,
+list("""To verify,
 start the command line Python and type "import Image", followed by
 "import _imaging".  If you see no error messages, all is well.""")
 
-list("""Now for reportlab itself.  Unzip the archive straight into
+disc("""Now for reportlab itself:""")
+list("""Unzip the archive straight into
 your Python directory; it creates a subdirectory named
-"reportlab".""")
+"reportlab".  You should now be able to go to a Python
+prompt and type $import reportlab$ without getting
+an error message.""")
 
 list("""Open up a DOS prompt and CD to
 "..\reportlab\pdfgen\test".  On NT, enter "testpdfgen.py"; on
 Win9x, enter "python testpdfgen.py".  After a couple of seconds,
 the script completes and the file testpdfgen.pdf should be ready for
 viewing.  If PIL is installed, there should be a "Python Powered"
-image on the last page.  You’re done!""")
+image on the last page.  You're done!""")
+
+heading3("Instructions for Python novices: Unix")
+todo("""Aaron? Robin?""")
+
+heading3("Instructions for Python novices: Mac")
+todo("Just?")
+
+heading2("Getting Involved")
+disc("""ReportLab is an Open Source project.  Although we are
+a commercial company, we do not have gazillions of dollars
+of dot-com venture capital, and we make no income directly
+from the product.  We therefore need help from the community
+as much as any other Open Source project.  There are many
+ways in which you can help:""")
+
+bullet("""General feedback on the core A.P.I. Does it work for you?
+are there any rough edges?  Does anything feel clunky and awkward?""")
+
+bullet("""New objects to put in reports, or useful utilities for the library.
+We have an open standard for report objects, so if you have written a nice
+chart or table class, why not contribute it?""")
+
+bullet("""Demonstrations and Case Studies: If you have produced some nice
+output, send it to us (with or without scripts).  If ReportLab solved a
+problem for you at work, write a little 'case study' and send it in!
+And if your web site uses our tools to make reports, let us link to it!""")
+
+bullet("""Working on the core code:  we have a long list of things
+to refine or to implement.  If you are missing some features or
+just want to help out, let us know!""")
+
+
+disc("""The first step for anyone wanting to learn more or
+get involved is to join the mailing list.  Just send an email
+with the subject "Subscribe" to
+$reportlab-users-subscribe@egroups.com$.  You can also browse
+through the group's archives and contributions at
+$http://www.egroups.com/group/reportlab-users$.  This list is
+the place to report bugs and get support. """)
+
