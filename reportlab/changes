@@ -1,4 +1,1023 @@
 #################################################################################
+#################### RELEASE 1.10 at 14:00 GMT 06/November/2001 #################
+#################################################################################
+##### 2001/11/06 #####
+	docs/userguide/ch2a_fonts.py 1.3 johnprecedo
+		 Added more on creating custom encodings.
+	docs/userguide/ch2a_fonts.py 1.2 johnprecedo
+		 Andy's latest changes.
+	docs/userguide/genuserguide.py 1.6 johnprecedo
+		 Split section on fonts out into its own chapter. Added in some more stuff about Asian fonts. Some other small changes.
+	docs/userguide/ch2a_fonts.py 1.1 johnprecedo
+		 Split section on fonts out into its own chapter. Added in some more stuff about Asian fonts. Some other small changes.
+	docs/userguide/ch2_graphics.py 1.5 johnprecedo
+		 Split section on fonts out into its own chapter. Added in some more stuff about Asian fonts. Some other small changes.
+	docs/images/jpn.gif 1.1 johnprecedo
+		 Split section on fonts out into its own chapter. Added in some more stuff about Asian fonts. Some other small changes.
+	test/test_multibyte_kor.py 1.3 andy_robinson
+		 Full (?) set of widths added for Asian fonts by using Asian distiller on some huge Unicode test files
+	test/test_multibyte_jpn.py 1.2 andy_robinson
+		 Full (?) set of widths added for Asian fonts by using Asian distiller on some huge Unicode test files
+	test/test_multibyte_cht.py 1.4 andy_robinson
+		 Full (?) set of widths added for Asian fonts by using Asian distiller on some huge Unicode test files
+	pdfbase/_cidfontdata.py 1.8 andy_robinson
+		 Full (?) set of widths added for Asian fonts by using Asian distiller on some huge Unicode test files
+##### 2001/11/05 #####
+	platypus/paragraph.py 1.60 andy_robinson
+		 Tidied up bullets further
+##### 2001/11/04 #####
+	tools/docco/platdemos.py 1.2 andy_robinson
+		 Bullet text spacing and figure caption size made more flexible
+	platypus/paragraph.py 1.59 andy_robinson
+		 Bullet text spacing and figure caption size made more flexible
+##### 2001/11/03 #####
+	lib/utils.py 1.22 andy_robinson
+		 Enhanced the error message from recursiveImport
+	pdfgen/canvas.py 1.90 andy_robinson
+		 canvas.hasForm now gives honest answers.
+	pdfbase/pdfdoc.py 1.53 andy_robinson
+		 canvas.hasForm now gives honest answers.
+	test/utils.py 1.5 andy_robinson
+		 Now lets you show or hide standard output from ScriptThatMakesFileTest
+##### 2001/11/02 #####
+	pdfbase/pdfmetrics.py 1.47 rgbecker
+		 Fixed up font embedding
+##### 2001/11/01 #####
+	rl_config.py 1.28 johnprecedo
+		 Now looks for acrobat 5 _before_ acrobat 4.
+	lib/validators.py 1.20 rgbecker
+		 Added a _isCallable + a couple of new vaildators
+##### 2001/10/31 #####
+	pdfgen/canvas.py 1.89 andy_robinson
+		 Added hasForm method
+	lib/utils.py 1.21 andy_robinson
+		 added function recursiveImport('package1.package2.module') in r/lib/utils
+##### 2001/10/30 #####
+	graphics/shapes.py 1.65 rgbecker
+		 Last gasp attempt to import renderPS_SEP
+	lib/utils.py 1.20 rgbecker
+		 Improved argv stuff
+##### 2001/10/29 #####
+	lib/PropertyList.dtd 1.2 rgbecker
+		 Dinu says this was rubbish
+	lib/validators.py 1.19 rgbecker
+		 Fixed EitherOr
+	lib/normalDate.py 1.2 rgbecker
+		 Added getStdday/MonthNames methods and iso string date setting
+	utils/daily.py 1.49 rgbecker
+		 Fixed comments
+	lib/corp2.py 1.5 dinu_gherman
+		 Removed file.
+##### 2001/10/28 #####
+	test/test_docs_build.py 1.1 andy_robinson
+		 New test generates all 4 manuals silently
+	docs/userguide/genuserguide.py 1.5 andy_robinson
+		 New test generates all 4 manuals silently
+	docs/reference/genreference.py 1.3 andy_robinson
+		 New test generates all 4 manuals silently
+	docs/graphguide/gengraphguide.py 1.3 andy_robinson
+		 New test generates all 4 manuals silently
+	docs/genAll.py 1.2 andy_robinson
+		 New test generates all 4 manuals silently
+	docs/genAll.py 1.1 andy_robinson
+		 Whoops, forgot it yesterday.
+	utils/daily.py 1.48 rgbecker
+		 Guard against genAll.py failure
+	test/test_multibyte_kor.py 1.2 andy_robinson
+		 Fixed font registry entries, tidied up stringWidth tests
+	test/test_multibyte_cht.py 1.3 andy_robinson
+		 Fixed font registry entries, tidied up stringWidth tests
+	test/test_multibyte_chs.py 1.2 andy_robinson
+		 Fixed font registry entries, tidied up stringWidth tests
+	pdfbase/_cidfontdata.py 1.7 andy_robinson
+		 Fixed font registry entries, tidied up stringWidth tests
+	lib/codecharts.py 1.4 andy_robinson
+		 Fixed font registry entries, tidied up stringWidth tests
+##### 2001/10/27 #####
+	README 1.6 andy_robinson
+		 It was VERY out of date...
+	tools/docco/yaml2pdf.py 1.1 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	tools/docco/yaml.py 1.1 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	tools/docco/t_parse.py 1.1 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	tools/docco/stylesheet.py 1.1 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	tools/docco/rltemplate.py 1.1 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	tools/docco/rl_doc_utils.py 1.1 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	tools/docco/platdemos.py 1.1 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	tools/docco/examples.py 1.1 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	tools/docco/codegrab.py 1.1 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	test/test_multibyte_cht.py 1.2 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	pdfbase/_cidfontdata.py 1.6 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	docs/userguide/genuserguide.py 1.4 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	docs/userguide/ch9_future.py 1.2 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	docs/userguide/ch7_custom.py 1.2 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	docs/userguide/ch6_tables.py 1.2 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	docs/userguide/ch5_paragraphs.py 1.2 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	docs/userguide/ch4_platypus_concepts.py 1.2 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	docs/userguide/ch3_pdffeatures.py 1.2 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	docs/userguide/ch2_graphics.py 1.4 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	docs/userguide/ch1_intro.py 1.2 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	docs/userguide/app_demos.py 1.2 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	docs/reference/genreference.py 1.2 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	docs/graphguide/gengraphguide.py 1.2 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	docs/graphguide/ch5_charts.py 1.2 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	docs/graphguide/ch4_widgets.py 1.2 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	docs/graphguide/ch3_shapes.py 1.2 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	docs/graphguide/ch2_concepts.py 1.2 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+	docs/graphguide/ch1_intro.py 1.2 andy_robinson
+		 Moved manual building tools to tools/docco in order to (a) remove a clearly surplus directory, and (b) allow me to refer to the nice illustration widget from a packagized location.
+##### 2001/10/26 #####
+	lib/utils.py 1.19 rgbecker
+		 Added ArgvDictValue and getArgvDict
+	lib/_rl_accel.c 1.24 rgbecker
+		 Clean up _sameFrag
+	platypus/paragraph.py 1.58 rgbecker
+		 Added accelerated _sameFrag
+	lib/_rl_accel.c 1.23 rgbecker
+		 Added accelerated _sameFrag
+	docs/userguide/genuserguide.py 1.3 rgbecker
+		 Added -timing option
+	docs/userguide/genuserguide.py 1.2 rgbecker
+		 Added simple profiling option
+##### 2001/10/25 #####
+	graphics/shapes.py 1.64 rgbecker
+		 Fix unquoted attr name
+	graphics/shapes.py 1.63 rgbecker
+		 Added optional saveLogger callout
+##### 2001/10/24 #####
+	pdfbase/pdfutils.py 1.27 rgbecker
+		 Fixed silly case of caching .a85 when it exists
+##### 2001/10/23 #####
+	graphics/charts/utils.py 1.4 rgbecker
+		 Move to gridded labels in ticks
+	graphics/charts/axes.py 1.47 rgbecker
+		 Added better null range choice and fake avoidBoundFrac
+	lib/validators.py 1.18 rgbecker
+		 Added isNoneOrInt
+##### 2001/10/22 #####
+	lib/formatters.py 1.2 johnprecedo
+		 Fixed formatting of negative numbers.
+	test/test_multibyte_kor.py 1.1 andy_robinson
+		 Asian fonts now all working in major encodings, and partly documented
+	test/test_multibyte_jpn.py 1.1 andy_robinson
+		 Asian fonts now all working in major encodings, and partly documented
+	test/test_multibyte_cht.py 1.1 andy_robinson
+		 Asian fonts now all working in major encodings, and partly documented
+	test/test_multibyte_chs.py 1.1 andy_robinson
+		 Asian fonts now all working in major encodings, and partly documented
+	test/test_korean.py 1.5 andy_robinson
+		 Asian fonts now all working in major encodings, and partly documented
+	test/test_japanese.py 1.12 andy_robinson
+		 Asian fonts now all working in major encodings, and partly documented
+	test/test_chinese_t.py 1.2 andy_robinson
+		 Asian fonts now all working in major encodings, and partly documented
+	test/test_chinese_s.py 1.4 andy_robinson
+		 Asian fonts now all working in major encodings, and partly documented
+	pdfbase/pdfdoc.py 1.52 andy_robinson
+		 Asian fonts now all working in major encodings, and partly documented
+	pdfbase/_cidfontdata.py 1.5 andy_robinson
+		 Asian fonts now all working in major encodings, and partly documented
+	lib/codecharts.py 1.3 andy_robinson
+		 Asian fonts now all working in major encodings, and partly documented
+	docs/userguide/ch2_graphics.py 1.3 andy_robinson
+		 Asian fonts now all working in major encodings, and partly documented
+##### 2001/10/21 #####
+	test/test_japanese.py 1.11 andy_robinson
+		 Japanese test now does full EUC kuten table
+	pdfbase/cidfonts.py 1.9 andy_robinson
+		 Japanese test now does full EUC kuten table
+	lib/codecharts.py 1.2 andy_robinson
+		 Japanese test now does full EUC kuten table
+	test/test_chinese_s.py 1.3 andy_robinson
+		 Enhancements/fixes to Asian fonts; codecharts utility to facilitate displaying characters in fonts; enhancements to user guide to describe fonts; work-in-progress on pdfimages towards an XObject.
+	pdfgen/pdfimages.py 1.13 andy_robinson
+		 Enhancements/fixes to Asian fonts; codecharts utility to facilitate displaying characters in fonts; enhancements to user guide to describe fonts; work-in-progress on pdfimages towards an XObject.
+	pdfbase/cidfonts.py 1.8 andy_robinson
+		 Enhancements/fixes to Asian fonts; codecharts utility to facilitate displaying characters in fonts; enhancements to user guide to describe fonts; work-in-progress on pdfimages towards an XObject.
+	lib/codecharts.py 1.1 andy_robinson
+		 Enhancements/fixes to Asian fonts; codecharts utility to facilitate displaying characters in fonts; enhancements to user guide to describe fonts; work-in-progress on pdfimages towards an XObject.
+	docs/userguide/ch2_graphics.py 1.2 andy_robinson
+		 Enhancements/fixes to Asian fonts; codecharts utility to facilitate displaying characters in fonts; enhancements to user guide to describe fonts; work-in-progress on pdfimages towards an XObject.
+	docs/images/jpnchars.jpg 1.1 andy_robinson
+		 Enhancements/fixes to Asian fonts; codecharts utility to facilitate displaying characters in fonts; enhancements to user guide to describe fonts; work-in-progress on pdfimages towards an XObject.
+##### 2001/10/20 #####
+	platypus/flowables.py 1.22 andy_robinson
+		 stripped out tab characters
+	test/test_chinese_t.py 1.1 andy_robinson
+		 Added traditional chinese, expanded simplified chinese tests
+	test/test_chinese_s.py 1.2 andy_robinson
+		 Added traditional chinese, expanded simplified chinese tests
+##### 2001/10/18 #####
+	graphics/widgets/flags.py 1.16 dinu_gherman
+		 Added flags.
+	graphics/shapes.py 1.62 rgbecker
+		 Changed Drawing.save to allow fileNamePattern to be a callable
+	lib/corp2.py 1.4 dinu_gherman
+		 Added shadows and a noRescale attribute/feature.
+	tools/pythonpoint/pythonpoint.py 1.6 andy_robinson
+		 Added optional tracing of whch slide is being processed
+##### 2001/10/17 #####
+	lib/rllogodata.py 1.2 dinu_gherman
+		 Fixed path issues and merged rllogodata.py into corp2.py.
+	lib/corp2.py 1.3 dinu_gherman
+		 Fixed path issues and merged rllogodata.py into corp2.py.
+	lib/validators.py 1.17 rgbecker
+		 Added isListOfNoneOrString
+	lib/corp.py 1.8 rgbecker
+		 Added some features requested by Dinu
+##### 2001/10/16 #####
+	lib/corp.py 1.7 rgbecker
+		 Fixed bg scaling bug
+##### 2001/10/15 #####
+	lib/corp.py 1.6 rgbecker
+		 Fixed stroke, added skewX, skewY, showPage etc
+	graphics/shapes.py 1.61 rgbecker
+		 Added dx, dy to definePath
+	lib/corp.py 1.5 rgbecker
+		 New logo stuff
+##### 2001/10/12 #####
+	tools/docco/graphdocpy.py 1.10 rgbecker
+		 Use dirname(reportlab.__file__) not relative path
+	graphics/charts/lineplots.py 1.26 rgbecker
+		 Improvements in symbol handling (fixed slowdown)
+	graphics/charts/linecharts.py 1.18 rgbecker
+		 Improvements in symbol handling (fixed slowdown)
+	graphics/widgets/markers.py 1.6 rgbecker
+		 Slight optimisations
+	graphics/charts/barcharts.py 1.54 johnprecedo
+		 Bars now appear underneath axes.
+	lib/rllogodata.py 1.1 dinu_gherman
+		 Replaced Create files with canned data in rllogodata.py & added readmes.
+	lib/corp2.py 1.2 dinu_gherman
+		 Replaced Create files with canned data in rllogodata.py & added readmes.
+	graphics/charts/textlabels.py 1.22 rgbecker
+		 Improved _text2Path, added _text2PathDescription
+	demos/pythonpoint/vertpython.gif 1.2 rgbecker
+		 Removed to tools
+	demos/pythonpoint/styles_modern.py 1.9 rgbecker
+		 Removed to tools
+	demos/pythonpoint/styles_horrible.py 1.8 rgbecker
+		 Removed to tools
+	demos/pythonpoint/stdparser.py 1.15 rgbecker
+		 Removed to tools
+	demos/pythonpoint/spectrum.png 1.2 rgbecker
+		 Removed to tools
+	demos/pythonpoint/pythonpoint.xml 1.13 rgbecker
+		 Removed to tools
+	demos/pythonpoint/pythonpoint.py 1.36 rgbecker
+		 Removed to tools
+	demos/pythonpoint/python.gif 1.2 rgbecker
+		 Removed to tools
+	demos/pythonpoint/outline.gif 1.2 rgbecker
+		 Removed to tools
+	demos/pythonpoint/monterey.xml 1.3 rgbecker
+		 Removed to tools
+	demos/pythonpoint/lj8100.jpg 1.2 rgbecker
+		 Removed to tools
+	demos/pythonpoint/leftlogo.gif 1.2 rgbecker
+		 Removed to tools
+	demos/pythonpoint/leftlogo.a85 1.4 rgbecker
+		 Removed to tools
+	demos/pythonpoint/customshapes.py 1.4 rgbecker
+		 Removed to tools
+	demos/pythonpoint/00readme.txt 1.3 rgbecker
+		 Removed to tools
+##### 2001/10/11 #####
+	test/test_tools_pythonpoint.py 1.2 andy_robinson
+		 Now points at correct instance of pythonpoint
+	tools/pythonpoint/pythonpoint.py 1.5 aaron_watters
+		 fixed bug in using private method canvas._doc.hasForm(...)
+	graphics/widgets/flags.py 1.15 rgbecker
+		 Cache _exploded widget
+	graphics/charts/lineplots.py 1.25 rgbecker
+		 Use UK flag in example
+	graphics/charts/axes.py 1.46 rgbecker
+		 Tested for callable textLabelFormat
+	graphics/shapes.py 1.60 rgbecker
+		 Finished shapes._explode
+	graphics/charts/axes.py 1.45 rgbecker
+		 Allow for the special case of only one date
+	lib/corp2.py 1.1 dinu_gherman
+		 Added new vector logo module corp2.py plus rllogo.cre8 folder it needs.
+	lib/PropertyList.dtd 1.1 dinu_gherman
+		 Added new vector logo module corp2.py plus rllogo.cre8 folder it needs.
+	graphics/charts/utils.py 1.3 rgbecker
+		 Allow for forceable grid override
+##### 2001/10/10 #####
+	lib/formatters.py 1.1 andy_robinson
+		 Formatter objects added, and used for chart label formatting
+	graphics/charts/lineplots.py 1.24 andy_robinson
+		 Formatter objects added, and used for chart label formatting
+	graphics/charts/linecharts.py 1.17 andy_robinson
+		 Formatter objects added, and used for chart label formatting
+	graphics/charts/barcharts.py 1.53 andy_robinson
+		 Formatter objects added, and used for chart label formatting
+	test/test_pdfgen_general.py 1.6 andy_robinson
+		 Now allows external programs to hook in before saves
+	graphics/charts/textlabels.py 1.21 rgbecker
+		 added _text2Path & stroked Labels
+	graphics/renderPM.py 1.15 rgbecker
+		 split functionality into _setFont
+	test/runAll.py 1.8 rgbecker
+		 Fix empty string folder buglet
+	platypus/doctemplate.py 1.46 rgbecker
+		 Possible improvements to FrameBreak et al
+##### 2001/10/09 #####
+	graphics/renderPS.py 1.13 rgbecker
+		 Removed spurious attribute setting
+	graphics/shapes.py 1.59 rgbecker
+		 Allow closePath singleton in definePath
+	graphics/shapes.py 1.58 rgbecker
+		 renamed to definePath
+	graphics/shapes.py 1.57 rgbecker
+		 Added symbolic definePath function
+##### 2001/10/08 #####
+	pdfbase/pdfdoc.py 1.51 aaron_watters
+		 allow forms to be forward references (to allow table of contents, eg).
+##### 2001/10/06 #####
+	test/test_japanese.py 1.10 andy_robinson
+		 Now run cleanly in absence of CMAP files; chinese simpified added
+	test/test_chinese_s.py 1.1 andy_robinson
+		 Now run cleanly in absence of CMAP files; chinese simpified added
+	graphics/renderPM.py 1.14 rgbecker
+		 Ensure fontName in traceback for bad fonts etc
+##### 2001/10/05 #####
+	pdfgen/canvas.py 1.88 rgbecker
+		 Take account of density for CMYKColors
+	lib/colors.py 1.28 rgbecker
+		 Remove rgb spotName+density silliness and fix special case denist interpolation
+	pdfbase/pdfdoc.py 1.50 aaron_watters
+		 /Size in Trailer off by one.
+	lib/colors.py 1.27 rgbecker
+		 Forgot _CMYK_white again
+	lib/colors.py 1.26 rgbecker
+		 Forgot _CMYK_white
+	lib/colors.py 1.25 rgbecker
+		 Improved interpolation added cmykDistance
+	graphics/widgets/flags.py 1.14 rgbecker
+		 Converted to standard form preparatory to doing more
+	utils/daily.py 1.47 rgbecker
+		 rm *.pdf
+	utils/daily.py 1.46 rgbecker
+		 python_stuff lib path no longer required
+	utils/daily.py 1.45 rgbecker
+		 Moved to new style after creation of reportlab/docs
+	docs/00readme.txt 1.2 rgbecker
+		 Added stuff on how to generate all manuals
+	docs/userguide/testfile.txt 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/userguide/genuserguide.py 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/userguide/ch9_future.py 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/userguide/ch7_custom.py 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/userguide/ch6_tables.py 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/userguide/ch5_paragraphs.py 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/userguide/ch4_platypus_concepts.py 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/userguide/ch3_pdffeatures.py 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/userguide/ch2_graphics.py 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/userguide/ch1_intro.py 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/userguide/app_demos.py 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/reference/reference.yml 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/reference/genreference.py 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/reference/build.bat 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/images/replogo.gif 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/images/replogo.a85 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/images/lj8100.jpg 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/images/Python_1.6a2_HINT.gif 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/images/Python_1.6a2.gif 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/images/Edit_Prefs.gif 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/graphguide/gengraphguide.py 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/graphguide/ch5_charts.py 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/graphguide/ch4_widgets.py 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/graphguide/ch3_shapes.py 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/graphguide/ch2_concepts.py 1.1 rgbecker
+		 Moved from original project docs, history lost
+	docs/graphguide/ch1_intro.py 1.1 rgbecker
+		 Moved from original project docs, history lost
+	graphics/charts/barcharts.py 1.52 rgbecker
+		 Fixed problem with stacked tuple data
+	utils/daily.py 1.44 rgbecker
+		 Added isdir check on reportlab.docs makedir
+	test/LeERC___.AFM 1.2 andy_robinson
+		 removed old file
+	test/test_platypus_general.py 1.5 andy_robinson
+		 Automatic loading fonts; font rearrangement
+	test/test_pdfbase_fontembed.py 1.6 andy_robinson
+		 Automatic loading fonts; font rearrangement
+	test/LeERC___.PFB 1.2 andy_robinson
+		 Automatic loading fonts; font rearrangement
+	rl_config.py 1.27 andy_robinson
+		 Automatic loading fonts; font rearrangement
+	fonts/LeERC___.PFB 1.1 andy_robinson
+		 Automatic loading fonts; font rearrangement
+	fonts/LeERC___.AFM 1.1 andy_robinson
+		 Automatic loading fonts; font rearrangement
+	fonts/00readme.txt 1.1 andy_robinson
+		 Automatic loading fonts; font rearrangement
+	tools/docco/graphdocpy.py 1.9 andy_robinson
+		 Auto-load fonts from AFM files where possible
+	rl_config.py 1.26 andy_robinson
+		 Auto-load fonts from AFM files where possible
+	pdfbase/pdfmetrics.py 1.46 andy_robinson
+		 Auto-load fonts from AFM files where possible
+##### 2001/10/04 #####
+	tools/docco/graphdocpy.py 1.8 andy_robinson
+		 Test suite extensions
+	test/utils.py 1.4 andy_robinson
+		 Test suite extensions
+	test/test_extra.py 1.3 andy_robinson
+		 Test suite extensions
+	docs/00readme.txt 1.1 andy_robinson
+		 Test suite extensions
+	tools/docco/graphdocpy.py 1.7 rgbecker
+		 Added unittest simple AppTest
+	graphics/charts/barcharts.py 1.51 rgbecker
+		 Forgot to copy NA_Label instance
+	test/test_japanese.py 1.9 andy_robinson
+		 Enhanced the asin font support
+	pdfbase/cidfonts.py 1.7 andy_robinson
+		 Enhanced the asin font support
+	graphics/charts/barcharts.py 1.50 rgbecker
+		 Shouldn't have this in the base class I think
+	graphics/charts/textlabels.py 1.20 rgbecker
+		 Syncing with on-site changes and adding NA_Label
+	graphics/charts/barcharts.py 1.49 rgbecker
+		 Syncing with on-site changes and adding NA_Label
+	graphics/charts/axes.py 1.44 rgbecker
+		 Syncing with on-site changes and adding NA_Label
+##### 2001/10/03 #####
+	graphics/widgets/flags.py 1.13 rgbecker
+		 Fixed china again
+	graphics/charts/barcharts.py 1.48 johnprecedo
+		 Andy's latest changes while on site at Fidelity.
+	rl_config.py 1.25 johnprecedo
+		 Added T1 search path for Acrobat 5.0
+	graphics/widgets/flags.py 1.12 rgbecker
+		 Added Japan, China, Russia
+	graphics/charts/axes.py 1.43 rgbecker
+		 Fix forceZero failure
+	graphics/widgets/markers.py 1.5 rgbecker
+		 Fix _Flag psotfix for makeMarker
+	graphics/charts/lineplots.py 1.23 rgbecker
+		 Move to new markers
+	tools/docco/graphdocpy.py 1.6 rgbecker
+		 Allow for Abstract Class errors
+	graphics/charts/barcharts.py 1.47 rgbecker
+		 Added _getMinMAx, fixed sign of small values
+	graphics/charts/axes.py 1.42 rgbecker
+		 Added forceZero option to ValueAxis
+	graphics/charts/linecharts.py 1.16 rgbecker
+		 Fix refs to old symbols
+##### 2001/10/02 #####
+	graphics/widgets/markers.py 1.4 rgbecker
+		 Made linecharts use the new markers/flags some of which were improved
+	graphics/widgets/flags.py 1.11 rgbecker
+		 Made linecharts use the new markers/flags some of which were improved
+	graphics/charts/linecharts.py 1.15 rgbecker
+		 Made linecharts use the new markers/flags some of which were improved
+	graphics/charts/barcharts.py 1.46 rgbecker
+		 Added a stacked sample
+	graphics/charts/barcharts.py 1.45 rgbecker
+		 Added support for 'stacked' bars
+	graphics/charts/axes.py 1.41 rgbecker
+		 Added None handling & ValueAxis._adjustAxisTicks
+##### 2001/10/01 #####
+	platypus/doctemplate.py 1.45 rgbecker
+		 Fixed slight buglet in checkpagesize
+	platypus/doctemplate.py 1.44 rgbecker
+		 Added template pagesize args in SimpleDoc.__init__ as suggested by D Horkoff
+##### 2001/09/29 #####
+	test/test_japanese.py 1.8 andy_robinson
+		 Oops, left in a print statement last time
+	pdfbase/cidfonts.py 1.6 andy_robinson
+		 Initial (inaccurate metrics?) support for chinese simplified and traditional
+	pdfbase/_cidfontdata.py 1.4 andy_robinson
+		 Initial (inaccurate metrics?) support for chinese simplified and traditional
+##### 2001/09/28 #####
+	test/test_japanese.py 1.7 andy_robinson
+		 Mostly correct string widths implemented for Asian fonts.
+	pdfbase/cidfonts.py 1.5 andy_robinson
+		 Mostly correct string widths implemented for Asian fonts.
+	graphics/charts/textlabels.py 1.19 rgbecker
+		 Added maxWidth and auto splitting
+	graphics/shapes.py 1.56 rgbecker
+		 Fixed non-string err test
+	graphics/shapes.py 1.55 rgbecker
+		 Remove unwanted known extensions
+	rl_config.py 1.24 rgbecker
+		 Added showBoundary
+	graphics/renderPS.py 1.12 rgbecker
+		 Used showBoundary every wherei, moved to Drawings as Groups
+	graphics/renderPM.py 1.13 rgbecker
+		 Used showBoundary every wherei, moved to Drawings as Groups
+	graphics/renderPDF.py 1.14 rgbecker
+		 Used showBoundary every wherei, moved to Drawings as Groups
+	graphics/shapes.py 1.54 rgbecker
+		 Used showBoundary every where
+##### 2001/09/27 #####
+	test/test_extra.py 1.2 andy_robinson
+		 Robustified path and line handling
+	graphics/charts/axes.py 1.40 rgbecker
+		 Fixed nasty bug relating to configure errors
+	graphics/charts/barcharts.py 1.44 rgbecker
+		 Added various minor tweaks to make useAbsolute easier
+##### 2001/09/26 #####
+	tools/docco/graphdocpy.py 1.5 andy_robinson
+		 Graphdocpy runs again; _nodoc class attribute allows skipping of abstract classes. Shapes have hAlign and vAlign to work within Platypus
+	graphics/widgets/signsandsymbols.py 1.19 andy_robinson
+		 Graphdocpy runs again; _nodoc class attribute allows skipping of abstract classes. Shapes have hAlign and vAlign to work within Platypus
+	graphics/shapes.py 1.53 andy_robinson
+		 Graphdocpy runs again; _nodoc class attribute allows skipping of abstract classes. Shapes have hAlign and vAlign to work within Platypus
+	graphics/charts/axes.py 1.39 andy_robinson
+		 Graphdocpy runs again; _nodoc class attribute allows skipping of abstract classes. Shapes have hAlign and vAlign to work within Platypus
+	platypus/tables.py 1.45 andy_robinson
+		 Tables can now inherit styles
+	graphics/widgets/markers.py 1.3 rgbecker
+		 Added all sorts of new markers
+	graphics/charts/textlabels.py 1.18 rgbecker
+		 Flip mode bar labels
+	graphics/charts/barcharts.py 1.43 rgbecker
+		 Flip mode bar labels
+##### 2001/09/25 #####
+	test/test_korean.py 1.4 andy_robinson
+		 Further enhanced Japanese and Korean tests
+	test/test_japanese.py 1.6 andy_robinson
+		 Further enhanced Japanese and Korean tests
+	test/test_korean.py 1.3 andy_robinson
+		 Expanded allowed encodings, added more comprehensive tests for kuten tables in Korean and Japanese.
+	test/test_japanese.py 1.5 andy_robinson
+		 Expanded allowed encodings, added more comprehensive tests for kuten tables in Korean and Japanese.
+	pdfbase/_cidfontdata.py 1.3 andy_robinson
+		 Expanded allowed encodings, added more comprehensive tests for kuten tables in Korean and Japanese.
+	lib/validators.py 1.16 rgbecker
+		 Added isInstanceOf
+	graphics/charts/textlabels.py 1.17 rgbecker
+		 Working LabelOffset usage, still need variable styles
+	graphics/charts/barcharts.py 1.42 rgbecker
+		 Working LabelOffset usage, still need variable styles
+	graphics/charts/axes.py 1.38 rgbecker
+		 Working LabelOffset usage, still need variable styles
+	lib/validators.py 1.15 rgbecker
+		 isNoneOrNumberPair was stupid
+	graphics/charts/textlabels.py 1.16 rgbecker
+		 Changed to isNoneOrNumberPair
+	lib/validators.py 1.14 rgbecker
+		 Changed to isNoneOrNumberPair
+	lib/validators.py 1.13 rgbecker
+		 Added isNumberPair
+	graphics/charts/textlabels.py 1.15 rgbecker
+		 Changed BarChartLabel fixedEnd, Start
+	graphics/charts/axes.py 1.37 rgbecker
+		 Allow categoryAxis to be positioned even if not visible
+	graphics/charts/markers.py 1.4 rgbecker
+		 Fixed fillColor
+	graphics/testshapes.py 1.14 rgbecker
+		 Changes to the signsandsymbols stuff
+	graphics/shapes.py 1.52 rgbecker
+		 Fix typo
+	graphics/widgets/signsandsymbols.py 1.18 rgbecker
+		 Added dx, dy to flags, _Symbol
+	graphics/widgets/flags.py 1.10 rgbecker
+		 Added dx, dy to flags, _Symbol
+	graphics/widgets/signsandsymbols.py 1.17 rgbecker
+		 Changes related to symbols coming of age
+	graphics/widgets/markers.py 1.2 rgbecker
+		 Changes related to symbols coming of age
+	graphics/widgets/flags.py 1.9 rgbecker
+		 Changes related to symbols coming of age
+	graphics/charts/linecharts.py 1.14 rgbecker
+		 Changes related to symbols coming of age
+	graphics/shapes.py 1.51 rgbecker
+		 Allow for negative insert indeces
+##### 2001/09/24 #####
+	graphics/charts/lineplots.py 1.22 rgbecker
+		 Added reverseDirection, reversePlotOrder and style attributes
+	graphics/charts/barcharts.py 1.41 rgbecker
+		 Added reverseDirection, reversePlotOrder and style attributes
+	graphics/charts/axes.py 1.36 rgbecker
+		 Added reverseDirection, reversePlotOrder and style attributes
+	graphics/shapes.py 1.50 rgbecker
+		 Fixed typos and normalisation
+	graphics/shapes.py 1.49 rgbecker
+		 Modified save filename calcs
+	platypus/frames.py 1.15 aaron_watters
+		 disable LayoutError error for production use (option to enable for debug)
+##### 2001/09/23 #####
+	graphics/shapes.py 1.48 kern
+		 *** empty log message ***
+	graphics/renderPS.py 1.11 kern
+		 *** empty log message ***
+	graphics/renderPM.py 1.12 kern
+		 *** empty log message ***
+	graphics/renderPDF.py 1.13 kern
+		 *** empty log message ***
+##### 2001/09/21 #####
+	graphics/widgets/flags.py 1.8 rgbecker
+		 Fixed demo
+	graphics/widgets/flags.py 1.7 rgbecker
+		 Changed the way flags worked
+##### 2001/09/20 #####
+	graphics/widgets/signsandsymbols.py 1.16 andy_robinson
+		 SmileyFace did not run due to code referencing nonexitent properties
+	graphics/widgets/signsandsymbols.py 1.15 rgbecker
+		 Changes for new Marker Class
+	graphics/widgets/markers.py 1.1 rgbecker
+		 Changes for new Marker Class
+	graphics/testshapes.py 1.13 rgbecker
+		 Changes for new Marker Class
+	graphics/charts/markers.py 1.3 rgbecker
+		 Changes for new Marker Class
+	graphics/charts/lineplots.py 1.21 rgbecker
+		 Changes for new Marker Class
+	platypus/doctemplate.py 1.43 aaron_watters
+		 platypus bug where platypus would mess up the pagesize of the canvas fixed.
+	lib/colors.py 1.24 rgbecker
+		 Improved hash, cmp funcs
+##### 2001/09/19 #####
+	lib/colors.py 1.23 andy_robinson
+		 Lists spotName before desnity in __repr__ as requested by customer
+	test/test_korean.py 1.2 andy_robinson
+		 Test suite fixups
+	test/test_japanese.py 1.4 andy_robinson
+		 Test suite fixups
+	pdfbase/pdfutils.py 1.26 andy_robinson
+		 Test suite fixups
+	pdfbase/cidfonts.py 1.4 andy_robinson
+		 Test suite fixups
+	test/test_platypus_general.py 1.4 andy_robinson
+		 Fixed alignment of tables
+	platypus/tables.py 1.44 andy_robinson
+		 Fixed alignment of tables
+##### 2001/09/18 #####
+	graphics/shapes.py 1.47 rgbecker
+		 Fixed up defaults
+	graphics/charts/axes.py 1.35 dinu_gherman
+		 Added missing checks for 'visibleTicks' in category axes.
+##### 2001/09/17 #####
+	graphics/widgets/grids.py 1.18 rgbecker
+		 Added cylinderMode to shaded rectangle
+	graphics/charts/barcharts.py 1.40 rgbecker
+		 Added cylinderMode to shaded rectangle
+	graphics/charts/axes.py 1.34 rgbecker
+		 Working dailyFreq NormalDateXVAlueAxis
+##### 2001/09/14 #####
+	graphics/charts/lineplots.py 1.20 rgbecker
+		 Added firstOnTop option for reversing Plot Order
+	graphics/charts/barcharts.py 1.39 rgbecker
+		 Fixed that bug
+	test/test_extra.py 1.1 dinu_gherman
+		 Initial checkin.
+	graphics/charts/barcharts.py 1.38 rgbecker
+		 Forgot the map
+	graphics/charts/barcharts.py 1.37 rgbecker
+		 More efficient again
+##### 2001/09/13 #####
+	rl_config.py 1.23 aaron_watters
+		 make tables one point off not bomb mysteriously in paid production installations.
+	platypus/tables.py 1.43 aaron_watters
+		 make tables one point off not bomb mysteriously in paid production installations.
+	graphics/charts/barcharts.py 1.36 andy_robinson
+		 Removed a stray debugging print statement
+##### 2001/09/12 #####
+	graphics/charts/barcharts.py 1.35 rgbecker
+		 removed a print I forgot
+	graphics/charts/barcharts.py 1.34 rgbecker
+		 Fixed stupid axis bug again, my fault
+	graphics/charts/textlabels.py 1.14 rgbecker
+		 Improved barchart labelling, added BarChartLabel
+	graphics/charts/barcharts.py 1.33 rgbecker
+		 Improved barchart labelling, added BarChartLabel
+##### 2001/09/11 #####
+	graphics/charts/textlabels.py 1.13 rgbecker
+		 Slight change to John's fix to preserve original value
+	graphics/charts/textlabels.py 1.12 rgbecker
+		 Improved labels and barchart somewhat
+	graphics/charts/barcharts.py 1.32 rgbecker
+		 Improved labels and barchart somewhat
+	graphics/charts/textlabels.py 1.11 johnprecedo
+		 Draw method no longer barfs on 'None'
+	lib/validators.py 1.12 rgbecker
+		 Allowd SequenceOf to have NoneOK arg
+	graphics/charts/legends.py 1.15 rgbecker
+		 Allowed for None as legend text
+	lib/validators.py 1.11 rgbecker
+		 Added NoneOr and various specialized validators
+##### 2001/09/10 #####
+	graphics/shapes.py 1.46 rgbecker
+		 added outDir kw arg to Drawing.save
+	graphics/charts/axes.py 1.33 rgbecker
+		 Moved from fidlineplot
+	graphics/shapes.py 1.45 rgbecker
+		 Fixed up save to use poutDir wrt sys.argv[0]
+	rl_config.py 1.22 andy_robinson
+		 CMap Search Path now in config
+	pdfbase/cidfonts.py 1.3 andy_robinson
+		 CMap Search Path now in config
+	test/test_korean.py 1.1 andy_robinson
+		 Added a trivial korean test, prior to testing on another machine
+	pdfbase/cidfonts.py 1.2 andy_robinson
+		 Added a trivial korean test, prior to testing on another machine
+	pdfbase/_cidfontdata.py 1.2 andy_robinson
+		 Added a trivial korean test, prior to testing on another machine
+	test/test_japanese.py 1.3 andy_robinson
+		 Added some rudimentary width tests to test_japanese.py
+##### 2001/09/07 #####
+	tools/pythonpoint/pythonpoint.py 1.4 rgbecker
+		 Force use of rl_config.pageCompression & remove spurious blanks
+##### 2001/09/06 #####
+	graphics/charts/lineplots.py 1.19 rgbecker
+		 removed some unused stuff (bar related?)
+	tools/docco/inspect.py 1.1 dinu_gherman
+		 Completely moved documentation tools from lib/ into tools/docco/.
+	tools/docco/graphdocpy.py 1.4 dinu_gherman
+		 Completely moved documentation tools from lib/ into tools/docco/.
+	tools/docco/docpy.py 1.2 dinu_gherman
+		 Completely moved documentation tools from lib/ into tools/docco/.
+	lib/inspect.py 1.2 dinu_gherman
+		 Completely moved documentation tools from lib/ into tools/docco/.
+	lib/graphdocpy.py 1.18 dinu_gherman
+		 Completely moved documentation tools from lib/ into tools/docco/.
+	lib/docpy.py 1.7 dinu_gherman
+		 Completely moved documentation tools from lib/ into tools/docco/.
+##### 2001/09/05 #####
+	test/test_pdfbase_pdfutils.py 1.4 rgbecker
+		 Added some extra length type tests
+	lib/_rl_accel.c 1.22 rgbecker
+		 Loop unrolling, as suggested by Paul Winkler <slinkp@bestweb.net>
+	lib/_rl_accel.c 1.21 rgbecker
+		 Fixed last block bug
+##### 2001/09/04 #####
+	graphics/shapes.py 1.44 johnprecedo
+		 Changed default machanism for plotmode in Drawing.save.
+	graphics/shapes.py 1.43 johnprecedo
+		 Fixed getattr bug (name formatting) in save method of Drawing
+	graphics/charts/barcharts.py 1.31 rgbecker
+		 Bad programming by Robin Fixed :(
+	test/test_japanese.py 1.2 andy_robinson
+		 test_japanese now works if you don't have Japanese Font Pack
+	test/test_japanese.py 1.1 andy_robinson
+		 Japanese Fonts checked in
+	pdfbase/cidfonts.py 1.1 andy_robinson
+		 Japanese Fonts checked in
+	pdfbase/_cidfontdata.py 1.1 andy_robinson
+		 Japanese Fonts checked in
+##### 2001/09/03 #####
+	pdfbase/pdfmetrics.py 1.45 andy_robinson
+		 Changes to facilitate CID (Asian) fonts.
+	pdfbase/pdfdoc.py 1.49 andy_robinson
+		 Changes to facilitate CID (Asian) fonts.
+##### 2001/09/01 #####
+	graphics/charts/axes.py 1.32 rgbecker
+		 Fixed truncating divide bug
+	graphics/charts/barcharts.py 1.30 rgbecker
+		 Fixed _findMinMaxValues and usage
+	graphics/shapes.py 1.42 rgbecker
+		 Moved saved method from Andy's datacharts.py
+##### 2001/08/31 #####
+	graphics/shapes.py 1.41 rgbecker
+		 Changes related to guiedit's add widget stuff
+##### 2001/08/30 #####
+	graphics/charts/legends.py 1.14 johnprecedo
+		 Fixed typo in line 122 - changed from dx->dy. Changing dx for a legend now no longer causes a y movement in the legend.
+	rl_config.py 1.21 rgbecker
+		 Allowed for resets
+	rl_config.py 1.20 rgbecker
+		 Fixed T1SearchPath Again
+	rl_config.py 1.19 rgbecker
+		 Fixed up a better T1SearchPath
+##### 2001/08/29 #####
+	platypus/tables.py 1.42 rgbecker
+		 Added default maxLen value for identify
+	tools/pythonpoint/customshapes.py 1.2 dinu_gherman
+		 Fixed typo and position of string below custom shape.
+	tools/pythonpoint/styles/modern.py 1.2 dinu_gherman
+		 Fixed Bullet in modern style, fixed off page frame, tidied-up a bit.
+	tools/pythonpoint/demos/pythonpoint.xml 1.4 dinu_gherman
+		 Fixed Bullet in modern style, fixed off page frame, tidied-up a bit.
+	tools/pythonpoint/demos/examples.py 1.2 dinu_gherman
+		 Fixed Bullet in modern style, fixed off page frame, tidied-up a bit.
+##### 2001/08/28 #####
+	rl_config.py 1.18 rgbecker
+		 naive users rl_config.
+##### 2001/08/26 #####
+	tools/docco/graphdocpy.py 1.3 andy_robinson
+		 Fixed test suite so it works with barcode extensions present; fixed outdated import in graphdocpy.
+	test/test_pyfiles.py 1.7 andy_robinson
+		 Fixed test suite so it works with barcode extensions present; fixed outdated import in graphdocpy.
+##### 2001/08/24 #####
+	graphics/widgets/signsandsymbols.py 1.14 rgbecker
+		 Fixed some truncating division problems, removed excess demo methods
+##### 2001/08/23 #####
+	graphics/charts/barcharts.py 1.29 johnprecedo
+		 Added strokeWidth attribute for bars.
+	platypus/paragraph.py 1.57 rgbecker
+		 Removed Aaron's rather thoughtless hacks
+	platypus/paraparser.py 1.45 rgbecker
+		 Removed Aaron's rather thoughtless hacks
+	lib/fonts.py 1.12 rgbecker
+		 Allow PS names in tt2ps call
+	pdfbase/pdfmetrics.py 1.44 rgbecker
+		 Fix whitespace bug
+##### 2001/08/22 #####
+	graphics/charts/legends.py 1.13 johnprecedo
+		 Swatches now have optional strokeWidth attribute.
+	platypus/paraparser.py 1.44 aaron_watters
+		 fix to helvetica oblique anomaly
+	platypus/paragraph.py 1.56 aaron_watters
+		 fix to helvetica oblique anomaly
+	lib/fonts.py 1.11 aaron_watters
+		 fix to helvetica oblique anomaly
+	test/test_paragraphs.py 1.11 johnprecedo
+		 Added a couple of font changes (after Dinu's problem with Helvetica/Helvetica-Oblique)
+	lib/colors.py 1.22 johnprecedo
+		 Added method to color for interpolating colors - changed shadedRect in grids to use this. Now can handle CMYK and PCMYK interpolation as well as just RGB.
+	graphics/widgets/grids.py 1.17 johnprecedo
+		 Added method to color for interpolating colors - changed shadedRect in grids to use this. Now can handle CMYK and PCMYK interpolation as well as just RGB.
+	platypus/paraparser.py 1.43 aaron_watters
+		 eliminated requirement for _rl_accel
+	pdfbase/pdfmetrics.py 1.43 aaron_watters
+		 eliminated requirement for _rl_accel
+	lib/utils.py 1.18 aaron_watters
+		 eliminated requirement for _rl_accel
+	lib/graphdocpy.py 1.17 rgbecker
+		 fixed import
+	pdfbase/pdfdoc.py 1.48 aaron_watters
+		 "the 14 std fonts" should always be "available"
+	rl_config.py 1.17 rgbecker
+		 Allow RL private T1 fontDir
+##### 2001/08/20 #####
+	graphics/widgets/grids.py 1.16 dinu_gherman
+		 Added test code.
+##### 2001/08/19 #####
+	tools/pythonpoint/demos/pythonpoint.xml 1.3 dinu_gherman
+		 Removed most tabs.
+	tools/pythonpoint/demos/monterey.xml 1.3 dinu_gherman
+		 Removed most tabs.
+	tools/pythonpoint/pythonpoint.py 1.3 dinu_gherman
+		 Used rl_config._verbose.
+	tools/pythonpoint/pythonpoint.py 1.2 dinu_gherman
+		 Removed referneces to PyPoint. Reintroduced module doc string contents.
+	tools/pythonpoint/demos/pythonpoint.xml 1.2 dinu_gherman
+		 Normalized XML files.
+	tools/pythonpoint/demos/monterey.xml 1.2 dinu_gherman
+		 Normalized XML files.
+	graphics/charts/barcharts.py 1.28 dinu_gherman
+		 Removed None from init data for BarChart.
+##### 2001/08/18 #####
+	tools/docco/graphdocpy.py 1.2 rgbecker
+		 Better import error checking
+	platypus/paraparser.py 1.42 rgbecker
+		 Better import error checking
+	pdfbase/pdfutils.py 1.25 rgbecker
+		 Better import error checking
+	pdfbase/pdfmetrics.py 1.42 rgbecker
+		 Better import error checking
+	lib/xmllib.py 1.7 rgbecker
+		 Better import error checking
+	lib/utils.py 1.17 rgbecker
+		 Better import error checking
+	lib/graphdocpy.py 1.16 rgbecker
+		 Better import error checking
+##### 2001/08/17 #####
+	tools/py2pdf/vertpython.jpg 1.1 dinu_gherman
+		 Added py2pdf tool.
+	tools/py2pdf/py2pdf.py 1.1 dinu_gherman
+		 Added py2pdf tool.
+	tools/py2pdf/idle_print.py 1.1 dinu_gherman
+		 Added py2pdf tool.
+	tools/py2pdf/demo.py 1.1 dinu_gherman
+		 Added py2pdf tool.
+	tools/py2pdf/demo-config.txt 1.1 dinu_gherman
+		 Added py2pdf tool.
+	tools/py2pdf/__init__.py 1.1 dinu_gherman
+		 Added py2pdf tool.
+	tools/py2pdf/README 1.1 dinu_gherman
+		 Added py2pdf tool.
+	tools/pythonpoint/styles/standard.py 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/styles/projection.py 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/styles/modern.py 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/styles/horrible.py 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/styles/__init__.py 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/stdparser.py 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/pythonpoint.py 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/pythonpoint.dtd 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/demos/vertpython.gif 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/demos/spectrum.png 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/demos/pythonpoint.xml 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/demos/python.gif 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/demos/pplogo.gif 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/demos/outline.gif 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/demos/monterey.xml 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/demos/leftlogo.gif 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/demos/leftlogo.a85 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/demos/examples.py 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/demos/LeERC___.PFB 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/demos/LeERC___.AFM 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/customshapes.py 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/__init__.py 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/pythonpoint/README 1.1 dinu_gherman
+		 Added improved PythonPoint tool.
+	tools/docco/graphdocpy.py 1.1 dinu_gherman
+		 Added docco tools.
+	tools/docco/docpy.py 1.1 dinu_gherman
+		 Added docco tools.
+	tools/docco/__init__.py 1.1 dinu_gherman
+		 Added docco tools.
+	graphics/widgets/grids.py 1.15 dinu_gherman
+		 Added another output PDF test document.
+	platypus/xpreformatted.py 1.14 dinu_gherman
+		 Added PythonPreformatted class.
+##### 2001/08/16 #####
+	test/test_tools_pythonpoint.py 1.1 dinu_gherman
+		 Initial checkin
+	tools/__init__.py 1.1 dinu_gherman
+		 Initial checkin
+	tools/README 1.1 dinu_gherman
+		 Initial checkin
+##### 2001/08/15 #####
+	demos/pythonpoint/stdparser.py 1.14 dinu_gherman
+		 Made use of rl_config._verbose.
+	demos/pythonpoint/pythonpoint.py 1.35 dinu_gherman
+		 Made use of rl_config._verbose.
+##### 2001/08/14 #####
+	lib/corp.py 1.4 johnprecedo
+		 Added business card prototype. (Crop-marks still need to be added).
+##### 2001/08/13 #####
+	changes 1.11 rgbecker
+		 Release 1.09 changes
+	__init__.py 1.16 rgbecker
+		 Release 1.09 changes
+#################################################################################
 #################### RELEASE 1.09 at 14:00 BST 13/August/2001 ###################
 #################################################################################
 ##### 2001/08/13 #####
