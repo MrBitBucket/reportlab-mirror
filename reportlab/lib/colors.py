@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.40 2003/07/31 17:30:31 rgbecker Exp $
-__version__=''' $Id: colors.py,v 1.40 2003/07/31 17:30:31 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.41 2003/08/01 11:04:27 rgbecker Exp $
+__version__=''' $Id: colors.py,v 1.41 2003/08/01 11:04:27 rgbecker Exp $ '''
 
 import string, math
 from types import StringType, ListType, TupleType
@@ -37,7 +37,7 @@ class Color:
         return (self.red, self.green, self.blue)
 
     def bitmap_rgb(self):
-        return tuple(map(lambda x: int((x*255)&255), self.rgb()))
+        return tuple(map(lambda x: int(x*255)&255, self.rgb()))
 
     def hexval(self):
         return '0x%02x%02x%02x' % self.bitmap_rgb()
