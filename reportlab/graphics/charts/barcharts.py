@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.61 2002/03/26 11:49:10 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.62 2002/07/15 18:45:01 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -9,7 +9,7 @@ vertical versions.
 
 Stacked and percentile bar charts to follow...
 """
-__version__=''' $Id: barcharts.py,v 1.61 2002/03/26 11:49:10 rgbecker Exp $ '''
+__version__=''' $Id: barcharts.py,v 1.62 2002/07/15 18:45:01 rgbecker Exp $ '''
 
 import string, copy
 from types import FunctionType, StringType
@@ -417,9 +417,9 @@ class BarChart(Widget):
 					symbol.width = width
 					symbol.height = height
 					g.add(symbol)
-				else:
+				elif abs(width)>1e-7 and abs(height)>=1e-7 and (rowStyle.fillColor is not None or rowStyle.strokeColor is not None):
 					r = Rect(x, y, width, height)
-					r.strokeWidth = rowStyle.strokeWidth ## added line - now actually uses strokeWidth
+					r.strokeWidth = rowStyle.strokeWidth
 					r.fillColor = rowStyle.fillColor
 					r.strokeColor = rowStyle.strokeColor
 					g.add(r)
