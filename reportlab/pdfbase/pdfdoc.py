@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.57 2002/03/25 00:51:49 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.57 2002/03/25 00:51:49 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.58 2002/03/27 12:53:12 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.58 2002/03/27 12:53:12 rgbecker Exp $ '''
 __doc__=""" 
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The 
@@ -101,7 +101,7 @@ def indent(s, IND=LINEEND+" "):
     return string.replace(s, LINEEND, IND)
 
 def xObjectName(externalname):
-    return "Xobject.%s" % externalname
+    return "FormXob.%s" % externalname
 
 
 # no encryption
