@@ -688,7 +688,7 @@ class PPFixedImage:
         if self.filename:
             x, y = self.x, self.y
             w, h = self.width, self.height
-            canv.drawInlineImage(self.filename, x, y, w, h)
+            canv.drawImage(self.filename, x, y, w, h)
 
 
 class PPRectangle:

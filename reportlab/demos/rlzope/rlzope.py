@@ -1,4 +1,4 @@
-# $Header: /tmp/reportlab/reportlab/demos/rlzope/rlzope.py,v 1.2 2002/02/19 21:18:09 andy_robinson Exp $
+# $Header: /tmp/reportlab/reportlab/demos/rlzope/rlzope.py,v 1.3 2002/03/25 00:51:49 andy_robinson Exp $
 #
 # Using the ReportLab toolkit from within Zope
 #
@@ -72,7 +72,7 @@ class MyPDFDoc :
             if self.logo is not None :
                 # draws the logo if it exists
                 ((width, height), image) = self.logo
-                canvas.drawInlineImage(image, inch, doc.pagesize[1] - inch, width, height)
+                canvas.drawImage(image, inch, doc.pagesize[1] - inch, width, height)
             canvas.setFont('Times-Roman', 10)
             canvas.drawCentredString(inch + (doc.pagesize[0] - (1.5 * inch)) / 2, 0.25 * inch, "Contributed by Jerome Alet - alet@unice.fr")
             canvas.restoreState()

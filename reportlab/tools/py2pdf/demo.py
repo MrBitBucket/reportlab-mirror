@@ -42,7 +42,7 @@ class ImgPDFLayouter (PythonPDFLayouter):
         x, y = 219.0, 655.0 # Known size of the picture.
         c.scale((lm - 1*cm)/x, height/y)
         path = 'vertpython.jpg'
-        c.drawInlineImage(path, 0, 0)
+        c.drawImage(path, 0, 0)
         c.restoreState()        
         c.endForm()
 

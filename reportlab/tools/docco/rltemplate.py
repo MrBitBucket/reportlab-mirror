@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/rltemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/rltemplate.py,v 1.1 2001/10/27 22:37:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/rltemplate.py,v 1.2 2002/03/25 00:51:49 andy_robinson Exp $
 # doc template for RL manuals.  Currently YAML is hard-coded
 #to use this, which is wrong.
 
@@ -24,7 +24,7 @@ class FrontCoverTemplate(PageTemplate):
 
     def afterDrawPage(self, canvas, doc):
         canvas.saveState()
-        canvas.drawInlineImage('../images/replogo.gif',2*inch, 8*inch)
+        canvas.drawImage('../images/replogo.gif',2*inch, 8*inch)
 
 
         canvas.setFont('Times-Roman', 10)

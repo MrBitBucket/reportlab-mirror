@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.56 2002/03/23 23:36:49 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.56 2002/03/23 23:36:49 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.57 2002/03/25 00:51:49 andy_robinson Exp $
+__version__=''' $Id: pdfdoc.py,v 1.57 2002/03/25 00:51:49 andy_robinson Exp $ '''
 __doc__=""" 
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The 
@@ -1702,9 +1702,9 @@ class PDFImageXObject:
         if not zlib: return
         #standardize it to RGB.  We could be more optimal later.
         if PILImage.mode <> 'RGB':
-            PILimage = PILImage.convert('RGB')
-        imgwidth, imgheight = PILimage.size
-        raw = PILimage.tostring()
+            PILImage = PILImage.convert('RGB')
+        imgwidth, imgheight = PILImage.size
+        raw = PILImage.tostring()
         assert(len(raw) == imgwidth * imgheight, "Wrong amount of data for image")
         compressed = zlib.compress(raw)   
         encoded = pdfutils._AsciiBase85Encode(compressed)
