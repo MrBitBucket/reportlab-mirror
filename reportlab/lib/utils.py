@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.46 2003/09/08 16:08:15 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.46 2003/09/08 16:08:15 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.47 2003/09/09 11:02:16 johnprecedo Exp $
+__version__=''' $Id: utils.py,v 1.47 2003/09/09 11:02:16 johnprecedo Exp $ '''
 
 import string, os, sys
 from types import *
@@ -27,7 +27,8 @@ if os.name == 'mac':
         'PPM' : ('ogle','.PPM'),
         'TIF' : ('ogle','TIFF'),
         'TIFF': ('ogle','TIFF'),
-        'PDF': ('CARO','PDF '),
+        'PDF' : ('CARO','PDF '),
+        'HTML': ("MSIE", "TEXT"),
         }
     def markfilename(filename,creatorcode=None,filetype=None,ext='PDF'):
         try:
@@ -37,6 +38,7 @@ if os.name == 'mac':
                 except:
                     return
             macfs.FSSpec(filename).SetCreatorType(creatorcode,filetype)
+            macostools.touched(filename)
         except:
             pass
 else:
