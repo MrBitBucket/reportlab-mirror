@@ -31,9 +31,13 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.14  2000/03/08 13:40:03  andy_robinson
+#	Canvas has two methods setFillColor(aColor) and setStrokeColor(aColor)
+#	which accepts color objects directly.
+#
 #	Revision 1.13  2000/03/06 20:06:36  rgbecker
 #	Typo self._currentPageHasImages = 1
-#
+#	
 #	Revision 1.12  2000/03/02 12:58:58  rgbecker
 #	Remove over officious import checks Imag/zlib
 #	
@@ -68,7 +72,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.13 2000/03/06 20:06:36 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.14 2000/03/08 13:40:03 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -114,6 +118,7 @@ from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
+from reportlab.lib import colors
 
 # Robert Kern
 # Constants for closing paths.
@@ -564,10 +569,24 @@ class Canvas:
             self._code.append('[%s] %s d' % (textarray, phase))
         
     def setFillColorRGB(self, r, g, b):
+        """Takes 3 arguments between 0.0 and 1.0"""
         self._fillColorRGB = (r, g, b)
         self._code.append('%0.2f %0.2f %0.2f rg' % (r,g,b))
         
     def setStrokeColorRGB(self, r, g, b):
+        """Takes 3 arguments between 0.0 and 1.0"""
+        self._strokeColorRGB = (r, g, b)
+        self._code.append('%0.2f %0.2f %0.2f RG' % (r,g,b))
+
+    def setFillColor(self, aColor):
+        """Takes a color object, allowing colors to be referred to by name"""
+        r, g, b = aColor.red, aColor.green, aColor.blue
+        self._strokeColorRGB = (r, g, b)
+        self._code.append('%0.2f %0.2f %0.2f rg' % (r,g,b))
+        
+    def setStrokeColor(self, aColor):
+        """Takes a color object, allowing colors to be referred to by name"""
+        r, g, b = aColor.red, aColor.green, aColor.blue
         self._strokeColorRGB = (r, g, b)
         self._code.append('%0.2f %0.2f %0.2f RG' % (r,g,b))
 

@@ -32,9 +32,13 @@
 #
 ###############################################################################
 #	$Log: testpdfgen.py,v $
+#	Revision 1.7  2000/03/08 13:40:03  andy_robinson
+#	Canvas has two methods setFillColor(aColor) and setStrokeColor(aColor)
+#	which accepts color objects directly.
+#
 #	Revision 1.6  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
-#
+#	
 #	Revision 1.5  2000/02/17 02:08:34  rgbecker
 #	Docstring & other fixes
 #	
@@ -47,12 +51,13 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testpdfgen.py,v 1.6 2000/03/08 13:06:39 andy_robinson Exp $ '''
+__version__=''' $Id: testpdfgen.py,v 1.7 2000/03/08 13:40:03 andy_robinson Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
 from reportlab.pdfgen import canvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
+from reportlab.lib import colors
 
 #################################################################
 #
@@ -157,14 +162,14 @@ def drawCrossHairs(canvas, x, y):
 def drawCode(canvas, code):
     """Draws a block of text at current point, indented and in Courier"""
     canvas.addLiteral('36 0 Td')
-    canvas.setFillColorRGB(0,0,1)
+    canvas.setFillColor(colors.blue)
     canvas.setFont('Courier',10)
 
     t = canvas.beginText()
     t.textLines(code)
     c.drawText(t)
     
-    canvas.setFillColorRGB(0,0,0)
+    canvas.setFillColor(colors.black)
     canvas.addLiteral('-36 0 Td')
     canvas.setFont('Times-Roman',10)
     
@@ -428,10 +433,11 @@ cost to performance.""")
     
     t = c.beginText(inch, 2.75 * inch)
     t.setFont('Times-Bold',36)
-    t.setFillColorRGB(0,1,0)  #green
+    t.setFillColor(colors.green)  #green
     t.textLine('Green fill, no stroke')
     
-    t.setStrokeColorRGB(1,0,0)  #ou can do this in a text object, or the canvas.
+    #t.setStrokeColorRGB(1,0,0)  #ou can do this in a text object, or the canvas.
+    t.setStrokeColor(colors.red)  #ou can do this in a text object, or the canvas.
     t.setTextRenderMode(2)   # fill and stroke
     t.textLine('Green fill, red stroke - yuk!')
 

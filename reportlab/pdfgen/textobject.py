@@ -31,9 +31,13 @@
 #
 ###############################################################################
 #	$Log: textobject.py,v $
+#	Revision 1.6  2000/03/08 13:40:03  andy_robinson
+#	Canvas has two methods setFillColor(aColor) and setStrokeColor(aColor)
+#	which accepts color objects directly.
+#
 #	Revision 1.5  2000/02/18 11:00:58  rgbecker
 #	trailing text/Odyssey fix
-#
+#	
 #	Revision 1.4  2000/02/17 02:08:04  rgbecker
 #	Docstring & other fixes
 #	
@@ -43,7 +47,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: textobject.py,v 1.5 2000/02/18 11:00:58 rgbecker Exp $ '''
+__version__=''' $Id: textobject.py,v 1.6 2000/03/08 13:40:03 andy_robinson Exp $ '''
 __doc__=""" 
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -54,6 +58,7 @@ Progress Reports:
 """
 import string
 from types import *
+from reportlab.lib import colors
 
 class PDFTextObject:
     """PDF logically separates text and graphics drawing; you can
@@ -181,6 +186,17 @@ class PDFTextObject:
         self._fillColorRGB = (r, g, b)
         self._code.append('%0.2f %0.2f %0.2f rg' % (r,g,b))
  
+    def setFillColor(self, aColor):
+        """Takes a color object, allowing colors to be referred to by name"""
+        r, g, b = aColor.red, aColor.green, aColor.blue
+        self._strokeColorRGB = (r, g, b)
+        self._code.append('%0.2f %0.2f %0.2f rg' % (r,g,b))
+        
+    def setStrokeColor(self, aColor):
+        """Takes a color object, allowing colors to be referred to by name"""
+        r, g, b = aColor.red, aColor.green, aColor.blue
+        self._strokeColorRGB = (r, g, b)
+        self._code.append('%0.2f %0.2f %0.2f RG' % (r,g,b))
 
     def textOut(self, text):
         "prints string at current point, text cursor moves across"
