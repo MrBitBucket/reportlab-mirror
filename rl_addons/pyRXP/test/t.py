@@ -49,7 +49,7 @@ if __name__=='__main__': #noruntests
 		goodTest('<a/>',('a', {}, [], None),ExpandEmpty=1)
 		goodTest('<a/>',['a', None, None, None],MakeMutableTree=1)
 		goodTest('<a/>',['a', {}, [], None],ExpandEmpty=1,MakeMutableTree=1)
-		failTest('</a>',"Error Error: End tag </a> outside of any element\n in unnamed entity at line 1 char 4 of [unknown]\n")
+		failTest('</a>',"Error Error: End tag </a> outside of any element\n in unnamed entity at line 1 char 4 of [unknown]\nerror return=1\nEnd tag\n")
 		goodTest('<a>A<!--comment--></a>',('a', None, ['A'], None))
 		goodTest('<a>A<!--comment--></a>',('a', {}, ['A'], None),ExpandEmpty=1)
 		goodTest('<a>A<!--comment--></a>', ('a', None, ['A', ('<!--', None, ['comment'], None)], None), ReturnComments=1)
