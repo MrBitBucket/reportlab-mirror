@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfmetrics.py,v $
+#	Revision 1.11  2000/09/27 19:57:48  andy_robinson
+#	Begun work on loading new AFM files
+#
 #	Revision 1.10  2000/08/16 07:44:53  rgbecker
 #	Start using _rl_accel
-#
+#	
 #	Revision 1.9  2000/08/01 10:56:24  rgbecker
 #	moved accelerators to lib
 #	
@@ -58,7 +61,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfmetrics.py,v 1.10 2000/08/16 07:44:53 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.11 2000/09/27 19:57:48 andy_robinson Exp $ '''
 __doc__="""This contains pre-canned text metrics for the PDFgen package, and may also
 be used for any other PIDDLE back ends or packages which use the standard
 Type 1 postscript fonts.
@@ -79,8 +82,10 @@ to sort out the fontname case issue and the resolution of PIDDLE fonts to
 Postscript font names within this module, but have not yet done so.
 """
 import string
+import os
 from reportlab.lib.logger import warnOnce, infoOnce
 DEFAULT_ENCODING='WinAnsiEncoding'
+AFMDIR = 'C:\\code\\users\\andy\\fontembed'
 
 StandardEnglishFonts = [
 	'Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique',  
@@ -185,13 +190,12 @@ if _stringWidth:
 			ad = ascent_descent[f]
 			_rl_accel.setFontInfo(f,e,ad[0],ad[1],W)
 
-	def _loadfont(font,encoding):
-		filename = AFMDIR + os.sep + font + '.afm'
-		infoOnce('cache loading %s'%filename)
+	def _loadfont(fontName, filename, encoding):
+		infoOnce('cache loading %s' % filename)
 		assert os.path.exists(filename)
 		W = parseAFMfile(filename)
 		ad = (0,0)	# TODO don't have this yet?
-		_rl_accel.setFontInfo(font,encoding,ad[0],ad[1],W)
+		_rl_accel.setFontInfo(fontName,encoding,ad[0],ad[1],W)
 
 	def _SWRecover(text, font, fontSize, encoding):
 		#infoOnce('_SWRecover('...',%s,%s,%s')%(font,str(fontSize),encoding))
@@ -205,6 +209,7 @@ if _stringWidth:
 	_rl_accel.defaultEncoding(DEFAULT_ENCODING)
 	_rl_accel._SWRecover(_SWRecover)
 	stringWidth = _stringWidth
+	loadFont = _loadfont
 
 else:
 	class FontCache:
@@ -214,9 +219,8 @@ else:
 			global widths
 			self.__widtharrays = widths
 			
-		def loadfont(self, fontName,encoding):
-			filename = AFMDIR + os.sep + fontName + '.afm'
-			infoOnce('Info: cache loading%s'%filename)
+		def loadFont(self, fontName, filename, encoding):
+			infoOnce('Info: cache loading%s' % filename)
 			assert os.path.exists(filename)
 			widths = parseAFMfile(filename)
 			self.__widtharrays[encoding][fontName] = widths
@@ -248,3 +252,4 @@ else:
 
 	#expose the singleton as a single function
 	stringWidth = TheFontCache.stringWidth
+	loadFont = TheFontCache.loadFont
