@@ -12,7 +12,6 @@ from types import FunctionType
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib import colors 
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
-from reportlab.graphics.charts.textlabel0 import Label
 from reportlab.graphics.shapes import *
 from reportlab.graphics.charts.textlabel0 import Label
 from reportlab.graphics.charts.axes0 import XCategoryAxis, YValueAxis
@@ -127,7 +126,6 @@ class VerticalBarChart(Widget):
 
         Sets an attribute _barPositions which is a list of
         lists of (x, y, width, height) matching the data."""
-
 
         self._seriesCount = len(self.data)
         self._rowLength = len(self.data[0])
@@ -448,6 +446,74 @@ class HorizontalBarChart(VerticalBarChart):
 
 # Samples
 
+def sample0a():
+    "Make a pathologic bar chart with only one data item."
+    
+    drawing = Drawing(400, 200)
+
+    data = [
+            (42,)
+            ]
+    
+    bc = VerticalBarChart()
+    bc.x = 50
+    bc.y = 50
+    bc.height = 125
+    bc.width = 300
+    bc.data = data
+    bc.strokeColor = colors.yellow  # visible border
+
+    bc.valueAxis.valueMin = 0
+    bc.valueAxis.valueMax = 50
+    bc.valueAxis.valueStep = 15
+    
+    bc.categoryAxis.labels.boxAnchor = 'ne'
+    bc.categoryAxis.labels.dx = 8
+    bc.categoryAxis.labels.dy = -2
+    bc.categoryAxis.labels.angle = 30
+    bc.categoryAxis.categoryNames = ['Jan-99']
+
+    drawing.add(bc)
+
+    return drawing    
+
+    
+def sample0b():
+    "Make a slightly pathologic bar chart with only two data items."
+    
+    drawing = Drawing(400, 200)
+
+    data = [
+            (13, 20),
+            #(14, 6, 21)
+            ]
+    
+    bc = VerticalBarChart()
+    bc.x = 50
+    bc.y = 50
+    bc.height = 125
+    bc.width = 300
+    bc.data = data
+
+    bc.strokeColor = colors.yellow  # visible border
+
+    bc.valueAxis.valueMin = 0
+    bc.valueAxis.valueMax = 60
+    bc.valueAxis.valueStep = 15
+    
+    bc.categoryAxis.labels.boxAnchor = 'ne'
+    bc.categoryAxis.labels.dx = 8
+    bc.categoryAxis.labels.dy = -2
+    bc.categoryAxis.labels.angle = 30
+
+    catNames = string.split('Jan Feb', ' ')
+    catNames = map(lambda n:n+'-99', catNames)
+    bc.categoryAxis.categoryNames = catNames
+    drawing.add(bc)
+
+    return drawing    
+
+    
 def sample1():
     drawing = Drawing(400, 200)
 
