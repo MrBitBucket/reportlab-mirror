@@ -50,10 +50,12 @@ class Widget(shapes.UserNode):
             #print 'set %s.%s = %s' % (self.__class__.__name__, attr, value)
 
     def draw(self):
-        raise shapes.NotImplementedError, "draw() must be implemented for each Widget!"
+        msg = "draw() must be implemented for each Widget!"
+        raise shapes.NotImplementedError, msg
     
     def demo(self):
-        raise shapes.NotImplementedError, "demo() must be implemented for each Widget!"
+        msg = "demo() must be implemented for each Widget!"
+        raise shapes.NotImplementedError, msg
 
     def provideNode(self):
         return self.draw()
