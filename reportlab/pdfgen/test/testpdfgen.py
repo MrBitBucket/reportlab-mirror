@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: testpdfgen.py,v $
+#	Revision 1.10  2000/04/03 09:35:37  andy_robinson
+#	Using traling zero convention for new form and link APIs.
+#
 #	Revision 1.9  2000/04/02 02:54:42  aaron_watters
 #	added demonstration of outline trees
-#
+#	
 #	Revision 1.8  2000/03/26 23:06:49  aaron_watters
 #	added demos for forms and links
 #	
@@ -57,7 +60,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testpdfgen.py,v 1.9 2000/04/02 02:54:42 aaron_watters Exp $ '''
+__version__=''' $Id: testpdfgen.py,v 1.10 2000/04/03 09:35:37 andy_robinson Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
@@ -74,7 +77,7 @@ from reportlab.lib import colors
 
 BASEFONT = ('Times-Roman', 10)
 def framePageForm(c):
-    c.beginForm("frame")
+    c.beginForm0("frame")
     c.saveState()
     # forms can't do non-constant operations
     #canvas.setFont('Times-BoldItalic',20)
@@ -101,27 +104,27 @@ def framePageForm(c):
     #canvas.setLineWidth(1)
     #canvas.setStrokeColorRGB(0,0,0)\
     c.restoreState()
-    c.endForm()
+    c.endForm0()
     
 titlelist = []
     
 def framePage(canvas, title):
     titlelist.append(title)
-    canvas.inPage()
+    canvas._inPage0()  # do we need this at all?  would be good to eliminate it
     canvas.saveState()
     canvas.setFont('Times-BoldItalic',20)
     
     canvas.drawString(inch, 10.5 * inch, title)
-    canvas.bookmarkHorizontalAbsolute(title, 10.8*inch)
+    canvas.bookmarkHorizontalAbsolute0(title, 10.8*inch)
     newsection(title)
     canvas.setFont('Times-Roman',10)
     canvas.drawCentredString(4.135 * inch, 0.75 * inch,
                             'Page %d' % canvas.getPageNumber())
     canvas.restoreState()
-    canvas.doForm("frame")
+    canvas.doForm0("frame")
     
 def makesubsection(canvas, title):
-    canvas.bookmarkHorizontalAbsolute(title, 10.8*inch)
+    canvas.bookmarkHorizontalAbsolute0(title, 10.8*inch)
     newsubsection(title)
     
 # outline helpers
@@ -236,7 +239,7 @@ def run():
 ##    c.setPageCompression(0)
     c = canvas.Canvas('testpdfgen.pdf')
     framePageForm(c) # define the frame form
-    c.showOutline()
+    c.showOutline0()
     
     framePage(c, 'PDFgen graphics API test script')
     makesubsection(c, "PDFgen and PIDDLE")
@@ -707,11 +710,11 @@ cost to performance.""")
         yposition = ystart - i*ydelta
         title = titlelist[i]
         c.drawString(xmargin, yposition, title)
-        c.linkAbsolute(title, title, (xmargin-ydelta/4, yposition-ydelta/4, xmax, yposition+ydelta/2))
+        c.linkAbsolute0(title, title, (xmargin-ydelta/4, yposition-ydelta/4, xmax, yposition+ydelta/2))
     ### now do stuff for the outline
     #for x in outlinenametree: print x
     #stop
-    apply(c.setOutlineNames, tuple(outlinenametree))
+    apply(c.setOutlineNames0, tuple(outlinenametree))
     c.save()
 
 
