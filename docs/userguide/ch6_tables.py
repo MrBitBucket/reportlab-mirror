@@ -259,6 +259,34 @@ t._argW[3]=1.5*inch
 """%I)
 
 heading1("""Other Useful $Flowables$""")
+heading2("""$Preformatted(text, style, bulletText = None, dedent=0)$""")
+disc("""
+Creates a preformatted paragraph which does no wrapping, line splitting or other manipulations.
+No $XML$ style tags are taken account of in the text.
+If dedent is non zero $dedent$ common leading
+spaces will be removed from the front of each line.
+""")
+heading2("""$XPreformatted(text, style, bulletText = None, dedent=0, frags=None)$""")
+disc("""
+This is a non rearranging form of the $Paragraph$ class; $XML$ tags are allowed in
+$text$ and have the same meanings as for the $Paragraph$ class.
+As for $Preformatted$, if dedent is non zero $dedent$ common leading
+spaces will be removed from the front of each line.
+""")
+EmbeddedCode("""
+from reportlab.lib.styles import getSampleStyleSheet
+stylesheet=getSampleStyleSheet()
+normalStyle = stylesheet['Normal']
+text='''
+   This is a non rearranging form of the <b>Paragraph</b> class;
+   <b><font color=red>XML</font></b> tags are allowed in <i>text</i> and have the same
+   meanings as for the <b>Paragraph</b> class.
+   As for <b>Preformatted</b>, if dedent is non zero <font color=red size=+1>dedent</font>
+   common leading spaces will be removed from the
+   front of each line.
+'''
+t=XPreformatted(text,normalStyle,dedent=3)
+""")
 heading2("""$Image(filename, width=None, height=None)$""")
 disc("""Create a flowable which will contain the image defined by the data in file $filename$.
 The default <b>PDF</b> image type <i>jpeg</i> is supported and if the <b>PIL</b> extension to <b>Python</b>

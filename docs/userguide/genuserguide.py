@@ -32,6 +32,9 @@
 #
 ###############################################################################
 #   $Log: genuserguide.py,v $
+#   Revision 1.34  2000/08/24 11:30:29  rgbecker
+#   Preformatted docco added
+#
 #   Revision 1.33  2000/08/02 13:11:31  rgbecker
 #   Table cell updates
 #
@@ -135,7 +138,7 @@
 #   Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #   initial checkin. user guide generation framework.
 #   
-__version__=''' $Id: genuserguide.py,v 1.33 2000/08/02 13:11:31 rgbecker Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.34 2000/08/24 11:30:29 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -155,7 +158,7 @@ from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import Paragraph, Spacer, Preformatted,\
             PageBreak, CondPageBreak, Flowable, Table, TableStyle, \
-            NextPageTemplate, KeepTogether, Image
+            NextPageTemplate, KeepTogether, Image, XPreformatted
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.sequencer import getSequencer
