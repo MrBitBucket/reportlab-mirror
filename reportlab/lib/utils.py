@@ -31,16 +31,19 @@
 #
 ###############################################################################
 #	$Log: utils.py,v $
+#	Revision 1.3  2000/08/29 09:19:31  rgbecker
+#	Initial version of D Yoo's pyHnj
+#
 #	Revision 1.2  2000/08/24 18:19:47  rgbecker
 #	Added _className func
-#
+#	
 #	Revision 1.1  2000/08/01 10:50:20  rgbecker
 #	Initial version
 #	
-__version__=''' $Id: utils.py,v 1.2 2000/08/24 18:19:47 rgbecker Exp $ '''
+__version__=''' $Id: utils.py,v 1.3 2000/08/29 09:19:31 rgbecker Exp $ '''
 from types import *
 SeqTypes = (ListType,TupleType)
-import string
+import string, os
 try:
 	#raise ImportError
 	from reportlab.lib._rl_accel import fp_str
@@ -51,6 +54,14 @@ except ImportError:
 		for i in a:
 			s.append('%0.2f' % i)
 		return string.join(s)
+
+def getHyphenater(hDict=None):
+	try:
+		from reportlab.lib.pyHnj import Hyphen
+		if hDict is None: hDict=os.path.join(os.path.dirname(__file__),'hyphen.mashed')
+		return Hyphen(hDict)
+	except ImportError:
+		return None
 
 def _className(self):
 	'''Return a shortened class name'''

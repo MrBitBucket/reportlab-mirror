@@ -167,7 +167,6 @@ INCLUDEPY=	$(INCLUDEDIR)/python$(VERSION)
 EXECINCLUDEPY=	$(exec_installdir)/include/python$(VERSION)
 LIBP=		$(exec_installdir)/lib/python$(VERSION)
 DESTSHARED=	$(BINLIBDEST)/site-packages
-LIBXML=         $(DESTSHARED)/xml
 
 LIBPL=		$(LIBP)/config
 
@@ -197,7 +196,7 @@ default:	sharedmods
 
 
 # Build everything
-all:		static sharedmods
+all:		sharedmods
 
 # Build shared libraries from our extension modules
 sharedmods:	$(SHAREDMODS)
@@ -307,36 +306,7 @@ clobber:	clean
 distclean:	clobber
 		-rm -f Setup
 
-LIBSUBDIRS = arch dom marshal parsers parsers/xmlproc \
-	     sax sax/drivers unicode utils
-
 libinstall:	
 # Create directories, if required
 	if test ! -d $(DESTSHARED) ; then \
 		mkdir $(DESTSHARED) ; else true ; fi
-	if test ! -d $(LIBXML) ; then \
-		mkdir $(LIBXML) ; else true ; fi
-
-	@for d in "" $(LIBSUBDIRS); \
-	do \
-		b=$(LIBXML)/$$d; \
-		if test ! -d $$b; then \
-			echo "Creating directory $$b"; \
-			mkdir $$b; \
-			chmod $(DIRMODE) $$b; \
-		else	true; \
-		fi; done
-	for i in `find *.py $(LIBSUBDIRS) -name '*.py' -print` ; do \
-	        dir=`dirname $$i` ; file=`basename $$i`; \
-		if test -x $$i; then \
-			$(INSTALL_PROGRAM) $$i $(LIBXML)/$$dir; \
-			echo $(INSTALL_PROGRAM) $$i $(LIBXML)/$$dir; \
-		else \
-			$(INSTALL_DATA) $$i $(LIBXML)/$$dir; \
-			echo $(INSTALL_DATA) $$i $(LIBXML)/$$dir; \
-		fi; \
-        done
-	PYTHONPATH=$(LIBXML) \
-		$(BINDIR)/$(PYTHON) -c 'import compileall;compileall.compile_dir("$(LIBXML)")'
-	PYTHONPATH=$(LIBDEST) \
-		$(BINDIR)/$(PYTHON) -O $(LIBDEST)/compileall.py $(LIBXML)
