@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.53 2001/09/26 22:02:19 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.54 2001/09/28 10:29:18 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -21,7 +21,6 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 
 class NotImplementedError(Exception):
 	pass
-
 
 # two constants for filling rules
 NON_ZERO_WINDING = 'Non-Zero Winding'
@@ -435,10 +434,11 @@ class Drawing(Group, Flowable):
 		"""Returns a copy"""
 		return self._copy(Drawing(self.width, self.height))
 
-	def asGroup(self):
-		return self._copy(Group())
+	def asGroup(self,*args,**kw):
+		return self._copy(apply(Group,args,kw))
 
 	def save(self, formats=None, verbose=None, fnRoot=None, outDir=None):
+		from reportlab import rl_config
 		"Saves copies of self in desired location and formats"
 		ext = ''
 		if not fnRoot:
@@ -463,35 +463,35 @@ class Drawing(Group, Flowable):
 			from reportlab.graphics import renderPDF
 			filename = fnroot+'.pdf'
 			if verbose: print "generating PDF file %s" % filename
-			renderPDF.drawToFile(self, filename, fnroot)
+			renderPDF.drawToFile(self, filename, fnroot,showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
 			ext = ext +  '/.pdf'
 
 		if 'gif' in plotMode:
 			from reportlab.graphics import renderPM
 			filename = fnroot+'.gif'
 			if verbose: print "generating GIF file %s" % filename
-			renderPM.drawToFile(self, filename,fmt='GIF')
+			renderPM.drawToFile(self, filename,fmt='GIF',showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
 			ext = ext +  '/.gif'
 
 		if 'png' in plotMode:
 			from reportlab.graphics import renderPM
 			filename = fnroot+'.png'
 			if verbose: print "generating PNG file %s" % filename
-			renderPM.drawToFile(self, filename,fmt='PNG')
+			renderPM.drawToFile(self, filename,fmt='PNG',showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
 			ext = ext +  '/.png'
 
 		if 'tif' in plotMode:
 			from reportlab.graphics import renderPM
 			filename = fnroot+'.tif'
 			if verbose: print "generating TIFF file %s" % filename
-			renderPM.drawToFile(self, filename,fmt='TIFF')
+			renderPM.drawToFile(self, filename,fmt='TIFF',showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
 			ext = ext +  '/.tif'
 
 		if 'jpg' in plotMode:
 			from reportlab.graphics import renderPM
 			filename = fnroot+'.jpg'
 			if verbose: print "generating JPG file %s" % filename
-			renderPM.drawToFile(self, filename,fmt='JPEG')
+			renderPM.drawToFile(self, filename,fmt='JPEG',showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
 			ext = ext +  '/.jpg'
 
 		if 'eps' in plotMode:
@@ -504,7 +504,7 @@ class Drawing(Group, Flowable):
 								dept = getattr(self,'EPS_info',['Testing'])[0],
 								company = getattr(self,'EPS_info',['','ReportLab'])[1],
 								preview = getattr(self,'preview',1),
-								showBorder=getattr(self,'showBorder',0))
+								showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
 
 			ext = ext +  '/.eps'
 
