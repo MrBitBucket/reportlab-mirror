@@ -1542,5 +1542,5 @@ def main(cmdline):
 
 ###
 
-if __name__=='__main__':
+if __name__=='__main__': #NORUNTESTS
     main(sys.argv)
