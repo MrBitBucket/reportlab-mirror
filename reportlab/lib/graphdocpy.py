@@ -4,7 +4,7 @@
 
 Type the following for usage info:
 
-  python graphicsdoc0.py -h
+  python graphdocpy.py -h
 """
 
 
@@ -15,11 +15,11 @@ import sys, os, re, types, string, getopt, pickle, copy, time
 import StringIO, pprint
 from string import find, join, split, replace, expandtabs, rstrip
 
-from reportlab.lib.docpy0 import PackageSkeleton0, ModuleSkeleton0
-from reportlab.lib.docpy0 import DocBuilder0, PdfDocBuilder0, HtmlDocBuilder0
-from reportlab.lib.docpy0 import htmlescape, htmlrepr, defaultformat, \
+from reportlab.lib.docpy import PackageSkeleton0, ModuleSkeleton0
+from reportlab.lib.docpy import DocBuilder0, PdfDocBuilder0, HtmlDocBuilder0
+from reportlab.lib.docpy import htmlescape, htmlrepr, defaultformat, \
      getdoc, reduceDocStringLength
-from reportlab.lib.docpy0 import makeHtmlSection, makeHtmlSubSection, \
+from reportlab.lib.docpy import makeHtmlSection, makeHtmlSubSection, \
      makeHtmlInlineImage
 
 from reportlab.pdfgen import canvas
@@ -75,7 +75,7 @@ def mainPageFrame(canvas, doc):
             canvas.drawString(2*cm, A4[1]-1.75*cm, headerline)
 
     canvas.setFont('Times-Roman', 8)
-    msg = "Generated with reportlab.lib.docpy0. See http://www.reportlab.com!"
+    msg = "Generated with reportlab.lib.docpy. See http://www.reportlab.com!"
     canvas.drawString(2*cm, 1.65*cm, msg)
 
     canvas.restoreState()
@@ -690,9 +690,9 @@ class PlatypusDocBuilder0(DocBuilder0):
 ####################################################################
 
 def printUsage():
-    """graphicsdoc0.py - Automated documentation for the RL Graphics library.
+    """graphdocpy.py - Automated documentation for the RL Graphics library.
     
-Usage: python graphicsdoc0.py [options]
+Usage: python graphdocpy.py [options]
 
     [options]
         -h          Print this help message.
@@ -702,9 +702,9 @@ Usage: python graphicsdoc0.py [options]
 
         -m module   Generate document for module named 'module'.
                     'module' may follow any of these forms:
-                        - docpy0.py
-                        - docpy0
-                        - c:\\test\\docpy0
+                        - docpy.py
+                        - docpy
+                        - c:\\test\\docpy
                     and can be any of these:
                         - standard Python modules
                         - modules in the Python search path
@@ -725,25 +725,25 @@ Usage: python graphicsdoc0.py [options]
 
 Examples:
 
-    python graphicsdoc0.py reportlab.graphics
-    python graphicsdoc0.py -m signsandsymbols.py -f Pdf
-    python graphicsdoc0.py -m flags0.py -f Html
-    python graphicsdoc0.py -m barchart1.py
+    python graphdocpy.py reportlab.graphics
+    python graphdocpy.py -m signsandsymbols.py -f Pdf
+    python graphdocpy.py -m flags0.py -f Html
+    python graphdocpy.py -m barchart1.py
 """
 
 
 # The following functions, including main(), are actually
-# the same as in docpy0.py (except for some defaults).
+# the same as in docpy.py (except for some defaults).
 
 def documentModule0(pathOrName, builder, opts={}):
     """Generate documentation for one Python file in some format.
 
     This handles Python standard modules like string, custom modules
-    on the Python search path like e.g. docpy0 as well as modules
+    on the Python search path like e.g. docpy as well as modules
     specified with their full path like C:/tmp/junk.py.
 
     The doc file will always be saved in the current directory with
-    a basename equal to that of the module, e.g. docpy0.
+    a basename equal to that of the module, e.g. docpy.
     """
 
     cwd = os.getcwd()
