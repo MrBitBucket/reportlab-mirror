@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.26 2002/03/15 16:42:38 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.27 2002/03/18 14:23:31 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.26 2002/03/15 16:42:38 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.27 2002/03/18 14:23:31 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -388,7 +388,7 @@ PyObject *_a85_encode(PyObject *self, PyObject *args)
 	return retVal;
 }
 
-static	char* _fp_fmts[]={"%.0f", "%.1f", "%.2f", "%.3f", "%.4f", "%.5f", "%.6f", "%.8f", "%.9f"};
+static	char* _fp_fmts[]={"%.0f", "%.1f", "%.2f", "%.3f", "%.4f", "%.5f", "%.6f"};
 static	char *_fp_one(PyObject *pD)
 {
 	double	d;

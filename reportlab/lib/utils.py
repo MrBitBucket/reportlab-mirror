@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.24 2002/01/17 19:00:09 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.24 2002/01/17 19:00:09 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.25 2002/03/18 14:23:31 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.25 2002/03/18 14:23:31 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -27,7 +27,7 @@ except ImportError, errMsg:
 		if len(a)==1 and type(a[0]) in SeqTypes: a = a[0]
 		s = []
 		for i in a:
-			s.append('%0.2f' % i)
+			s.append('%0.6f' % i)
 		return string.join(s)
 
 #hack test for comma users
