@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.38 2003/11/19 18:33:49 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.38 2003/11/19 18:33:49 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.39 2003/11/19 18:53:07 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.39 2003/11/19 18:53:07 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -610,7 +610,7 @@ def test():
                 y -= 5
             return maxx, h-y+gap, D
         maxx, maxy, D = drawit(F)
-        if maxx>400 or maxyy>200: _,_,D = drawit(F,maxx,maxy)
+        if maxx>400 or maxy>200: _,_,D = drawit(F,maxx,maxy)
         TD.append((D,'Test Various Fonts','FontTest'))
     i = 0
     #print in a loop, with their doc strings
