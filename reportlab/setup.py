@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2003
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/setup.py,v 1.8 2003/01/06 11:33:34 rgbecker Exp $
-__version__=''' $Id: setup.py,v 1.8 2003/01/06 11:33:34 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/setup.py,v 1.9 2003/04/15 07:52:36 jvr Exp $
+__version__=''' $Id: setup.py,v 1.9 2003/04/15 07:52:36 jvr Exp $ '''
 
 import os, sys, distutils
 from distutils.core import setup, Extension
@@ -107,7 +107,7 @@ An Open Source Python library for generating PDFs and graphics.
                             (pjoin(package_path,'extensions'),
                                 ['extensions/README']),
 
-                            (pjoin(package_path, 'fonts'), 
+                            (pjoin(package_path, 'fonts'),
                                 ['fonts/00readme.txt',
                                  'fonts/LeERC___.AFM',
                                  'fonts/LeERC___.PFB',
