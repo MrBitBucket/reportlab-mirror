@@ -1,77 +1,15 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.1 2001/03/29 07:15:25 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.2 2001/03/29 08:40:19 dinu_gherman Exp $
 
 from gengraphguide import *
 
-heading1("Platform Independent Graphics using $reportlab/graphics$")
+#heading1("Platform Independent Graphics using $reportlab/graphics$")
 
-heading2("Introduction")
+heading1("General Concepts")
 
-heading3("Background")
-disc("""
-ReportLab is in the process of adding a graphics package to its
-standard distribution. This chapter is both the "design document" and
-the "tutorial".""")
-
-#seamless or what?
-#from reportlab.graphics.charts import barcharts
-#draw(barcharts.sampleH0a(), 'A Sample Drawing')
-# draw (drawing object, 'caption')
-
-disc("""The ReportLab library is a general document toolkit aiming to help
-generate documents for reporting solutions. One important aspect of
-such applications is to present data in graphic diagrams or charts.
-Ideally, these charts could be used not only to generate PDF
-documents, but other output formats, bitmap or vector ones, as well.""")
-
-heading3("Requirements")
-
-disc("The package should allow: ")
-bullet("creation of reusable shapes collections")
-bullet("support for paths, clipping, coordinate transformations")
-bullet("writing output to PDF, Postscript, bitmap and vector formats")
-bullet("consistent font model (Type 1) with identical metrics on all platforms")
-bullet("""a framework for creating, documenting and reusing graphical "widgets" """)
-
-disc("""This is intended as a foundation for a chart library. However, it
-should also support the creation of other kinds of custom graphical
-applications, such as UML diagrams, CAD, project plans or whatever
-people wish to use it for. Within the charting domain our aims are:""")
-
-bullet("horizontal and vertical bar charts")
-bullet("pie charts")
-bullet("horizontal and vertical line charts based on 'category' and 'value' axis")
-bullet("""time series charts based on genuine 'x' and 'y' values;
-       special knowledge of time series""")
-bullet("""Compounding - one can define 'multiples' placing several charts on one 
-       drawing, or arbitrary decorations around the chart. This technique 
-       also allows easy overlaying of lines on bars, or of different axes on 
-       the right and left side of a plot.""")
-bullet("""'Plug-In Architecture' - with training, you can write a new chart type
-       based on an existing one but only changing/adding the features you
-       need to.""")
-bullet("Control over drawing size")
-bullet("Control over plot rectangle size and position within drawing")
-bullet("""Control over width, dash style, line cap style, line join style and
-       color for all lines""")
-bullet("""Choice of any solid color (or gray level, or transparent) for any
-       enclosed area. Fill patterns may be added later. The public library
-       will be limited to RGB and possibly plain CMYK colors but we can
-       cleanly layer custom Postscript requirements on top.""")
-bullet("""Control over font name (any Type 1 font on the system) and size, plus
-       the ability to scale, stretch and rotate the text
-       right, left and centre alignment of label text strings with correct
-       metrics""")
-
-disc("""The charting requirements are based on a commercial sponsor in the
-       financial industry who needs to create batches of charts rapidly with
-       precise control over layout.""")
-
-heading3("Using reportlab/graphics")
-
-heading4("Drawings and Renderers")
+heading2("Drawings and Renderers")
 
 disc("""A Drawing is a platform-independent description of a collection of 
        shapes. It is not directly associated with PDF, Postscript or any 
@@ -103,7 +41,8 @@ disc("""The PDF renderer has "special privileges" - a Drawing object is a
        the PDF renderer has a utility function to make a one-page PDF 
        quickly.""")
 
-heading4("Getting Started")
+
+heading2("Getting Started")
 
 disc("""Let's create a simple drawing containing the string "Hello World", 
        displayed on top of a coloured rectangle. We will then save it to a 
@@ -150,7 +89,8 @@ eg("""
 disc("""This will produce an EPS file with the identical drawing, which may be 
        imported into publishing tools such as Quark Express.""")
 
-heading2("""Shapes """)
+
+heading1("""Shapes """)
 
 disc("""Drawings are made up of Shapes. Absolutely anything can be built up by 
        combining the same set of primitive shapes.""")
@@ -158,25 +98,27 @@ disc("""Drawings are made up of Shapes. Absolutely anything can be built up by
 disc("""The module $shapes.py$ supplies a number of primitive shapes and 
        constructs which can be added to a drawing. They are:""")
 
-bullet("Rect (optionally with rounded corners) ")
-bullet("Circle ")
-bullet("Ellipse ")
-bullet("Wedge (a pie slice) ")
-bullet("Polygon ")
-bullet("Line ")
-bullet("PolyLine ")
-bullet("String ")
-bullet("Group ")
+bullet("Rect (optionally with rounded corners)")
+bullet("Circle")
+bullet("Ellipse")
+bullet("Wedge (a pie slice)")
+bullet("Polygon")
+bullet("Line")
+bullet("PolyLine")
+bullet("String")
+bullet("Group")
 bullet("Path (<i>not implemented yet, but will be added in the future</i>)")
 
+disc("This drawing, taken from our test suite, shows most of the basic shapes:")
 
-disc("This drawing, taken from our test suite, shows most of the basic shapes: ")
 todo("add image")
 
 t=testshapes.getDrawing06()
 draw(t, "Basic shapes")
  
-heading3("Solid Shapes")
+
+heading2("Solid Shapes")
+
 disc("""Shapes have two kinds of properties - some to define their geometry 
        and some to define their style. Let's create a red rectangle with 
        3-point thick green borders:""")
@@ -242,16 +184,20 @@ eg("""
              strokeWidth=3) 
 """)
 
-disc("""Let's run through the style properties. <i>fillColor</i> is obvious. <i>stroke</i>
+disc("""
+Let's run through the style properties. <i>fillColor</i> is obvious. <i>stroke</i>
 is publishing terminology for the edge of a shape; the stroke has a
 color, width, possibly a dash pattern, and some (rarely used) features
 for what happens when a line turns a corner. <i>rx</i> and <i>ry</i> are optional
 geometric properties and are used to define the corner radius for a
-rounded rectangle.""")
+rounded rectangle.
+""")
 
 disc("All the other solid shapes share the same style properties.")
 
-heading3("Lines")
+
+heading2("Lines")
+
 disc("""We provide single straight lines, PolyLines and curves. Lines have all 
        the <i>stroke</i> properties, but no <i>fillColor</i>. Here are a few Line and 
        PolyLine examples and the corresponding graphics output:""")
@@ -282,11 +228,12 @@ D.add(PolyLine([120,110, 130,150, 140,110, 150,150, 160,110,
 draw(D, "Line and PolyLine examples")
 
 
- 
-heading3("Strings")
+heading2("Strings")
+
 disc("""ReportLab Graphics is not designed for fancy text layout, but it can 
        place strings at desired locations and with left/rigth/center 
        alignment. Let's specify a String and look at its properties:""")
+
 eg("""
 >>> S = String(10, 50, 'Hello World')
 >>> S.dumpProperties()
@@ -339,7 +286,9 @@ D.add(String(150, 150, 'Hello World',
              fontSize=36))
 draw(D, 'fancy font example')
 
-heading3("""Paths""")
+
+heading2("""Paths""")
+
 disc("""Postscript paths are a widely understood concept in graphics.
 There are not implement in $reportlab/graphics$ as yet, but they will be
 soon.""")
@@ -381,7 +330,9 @@ soon.""")
     ##disc("""<b>Note that our current path implementation is an approximation; it 
     ##         should be finished off accurately for PDF and PS.</b>""")
 
-heading3("2.5 Groups")
+
+heading2("Groups")
+
 disc("""Finally, we have Group objects. A group has a list of contents, which 
        are other nodes. It can also apply a transformation - its contents can 
        be rotated, scaled or shifted. If you know the math, you can set the 
@@ -402,6 +353,7 @@ disc("""Groups provide a tool for reuse. You can make a bunch of shapes to
        places.""")
 
 disc("""Let's do this with some only slightly more code:""")
+
 eg("""
 
     D = Drawing(400, 200)
@@ -474,7 +426,8 @@ D.add(thirdAxisGroup)
 draw(D, "Line and PolyLine examples")
 
  
-heading3("""2.6 Verification """)
+heading2("Verification")
+
 disc("""The framework so far would be ideally suited to a type-safe language 
        like Java or Delphi. Python is very dynamic and lets us type things 
        which just don't make sense:""")
@@ -483,7 +436,8 @@ eg("""
 >>> R = Rect(10,10,200,100, fillColor=red) 
 >>> R.fullColor = green    # note the typo 
 >>> R.x = 'not a number'   # illegal argument type 
->>> del R.width            # that should confuse it """)
+>>> del R.width            # that should confuse it
+""")
 
 disc("""These statements would be caught by the compiler in a statically typed 
        language, but Python lets you get away with it. The first error could 
@@ -497,6 +451,7 @@ disc("""We have provided two verification techniques. The default is for every
        object to check every assignment at run time. This is what happend by 
        default. So if you make a mistake in an assignment, you get something 
        like this:""")
+
 eg("""
 >>> r = shapes.Rect(10,10,200,80) 
 >>> r.fullColor = colors.green 
@@ -514,10 +469,12 @@ disc("""This imposes a performance penalty, so this behaviour can be turned
        off when you need it to be. To do this, you should use the following 
        lines of code before you first import reportlab.graphics.shapes:""")
 
-eg(""">>> import reportlab.config 
+eg("""
+>>> import reportlab.config 
 >>> reportlab.config.shapeChecking = 0 
 >>> import reportlab.graphics.shapes 
->>>  """)
+>>>
+""")
 
 disc("""Once you turn off shapeChecking, the classes are actually built 
        without the verification hook; code should get faster.""")
@@ -533,7 +490,9 @@ disc("""Each object, including the drawing itself, has a $verify()$ method. This
        verification, then you shoudl explictly call $verify()$ in testing when 
        developing the code, or perhaps once in a batch process.""")
 
-heading3("""Property Editing """)
+
+heading2("Property Editing")
+
 disc("""A cornerstone of the reportlab/graphics which we will cover below is 
        that you can automatically document widgets. This means getting hold 
        of all of their editable properties, including those of their 
@@ -588,14 +547,19 @@ width = 200
 x = 20 
 y = 30 
 >>>  """)
-disc("""<i>($pprint$ is the standard Python library module that allows you to 'pretty print' output
-over multiple lines rather than having one very long line.)</i>""")
+
+disc("""
+<i>($pprint$ is the standard Python library module that allows you to 'pretty print' output
+over multiple lines rather than having one very long line.)</i>
+""")
 
 disc("""These three methods don't seem to do much here, but as we will see 
        they make our widgets framework much more powerful when dealing with 
        non-primitive objects.""")
 
-heading3("Naming Children")
+
+heading2("Naming Children")
+
 disc("""You can add objects to the $Drawing$ and $Group$ objects. These normally 
        go into a list of contents. However, you may also give objects a name 
        when adding them. This allows you to refer to and possibly change any 
@@ -618,7 +582,9 @@ disc("""Note that you can use the same shape instance in several contexts in a
 disc("""This provides one paradigm for creating and modifying interactive 
        drawings.""")
 
-heading2("""Widgets""") 
+
+heading1("Widgets") 
+
 disc("""Up until now, Drawings have been 'pure data'. There is no code in them 
        to actually do anything, except assist the programmer in checking and 
        inspecting the drawing. In fact, that's the cornerstone of the whole 
@@ -656,9 +622,12 @@ disc("""Widgets run contrary to the idea that a drawing is just a bundle of
        strings. You can also explicitly 'flatten out' a drawing, causing all 
        widgets to be converted to primitives.""")
 
-heading3("""Using a Widget """)
-disc("""Let's imagine a simple new widget. We will use a widget to draw a 
-       face, then show how it was implemented.""")
+
+heading2("Using a Widget")
+
+disc("""
+Let's imagine a simple new widget.
+We will use a widget to draw a face, then show how it was implemented.""")
 
 eg("""
 >>> import reportlab.lib.colors 
@@ -669,7 +638,8 @@ eg("""
 >>> f.skinColor = colors.yellow
 >>> f.mood = "sad"
 >>> d.add(f)
->>> renderPDF.drawToFile(d, 'face.pdf', 'A Face')""")
+>>> renderPDF.drawToFile(d, 'face.pdf', 'A Face')
+""")
 
 from reportlab.graphics import widgetbase
 d = Drawing(200, 120)
@@ -681,8 +651,10 @@ f.mood = "sad"
 d.add(f)
 draw(d, 'A sample widget')
 
-disc("""Let's see what properties it has available, using the setProperties 
-       interface we saw earlier:""")
+disc("""
+Let's see what properties it has available, using the setProperties 
+interface we saw earlier:
+""")
 
 eg("""
 >>> f.dumpProperties() 
@@ -692,7 +664,8 @@ size = 80
 skinColor = Color(1.00,1.00,0.00) 
 x = 10 
 y = 10 
->>>  """)
+>>>
+""")
 
 disc("""One thing which seems strange about the above code is that we did not 
        set the size or position when we made the face. This is a necessary 
@@ -718,8 +691,8 @@ todo("add image")
 ##draw(t, "Examples of widgets from 'signsandsymbols.py'")
 
 
+heading2("Compound Widgets")
 
-heading3("""Compound Widgets """)
 disc("""Let's imagine a compound widget which draws two faces side by side. 
        This is easy to build when you have the Face widget.""")
 
@@ -742,21 +715,23 @@ faceTwo.size = 80
 faceTwo.skinColor = None 
 faceTwo.x = 100 
 faceTwo.y = 10 
->>>  """)
-
+>>>
+""")
 
 disc("""The attributes 'faceOne' and 'faceTwo' are deliberately exposed so you 
        can get at them directly. There could also be top-level attributes, 
        but there aren't in this case.""")
 
 
-heading3("""Verifying Widgets """)
+heading2("Verifying Widgets")
+
 disc("""The widget designer decides the policy on verification, but by default 
        they work like shapes - checking every assignment - if the designer 
        has provided the checking information.""")
 
 
-heading3("""Implementing a Widget """)
+heading2("Implementing Widgets")
+
 disc("""We tried to make it as easy to implement widgets as possible. Here's 
        the code for a Face widget which does not do any type checking:""")
 
@@ -821,7 +796,8 @@ disc("""This checking will be performed on every attribute assignment; or, if
        $config.shapeChecking$ is off, whenever you call $myFace.verify()$.""")
 
 
-heading3("""Documenting Widgets """)
+heading2("Documenting Widgets")
+
 disc("""We are working on a generic tool to document any Python package or 
        module; this will be checked into ReportLab an will be used to 
        generate a reference for the ReportLab package. When it encounters 
@@ -836,7 +812,9 @@ disc("""This tool will mean that we can have guaranteed up-to-date
        documentation on our widgets and chart, both on the web site and in 
        print; and that you can do the same for your own widgets too!""")
 
-heading3("""Widget Design Strategies """)
+
+heading2("Widget Design Strategies")
+
 disc("""We could not come up with a consistent architecture for designing 
        widgets, so we are leaving that problem to the authors! If you do not 
        like the default verifiction strategy, or the way 
@@ -857,7 +835,9 @@ pc.data = [10,30,50,25]
 pc.wedges[7].strokeWidth = 5 
 """)
 #removed 'pc.backColor = yellow' from above code example
+
 disc("")
+
 todo("We need more of an explaination of what '$__setattr__$ hooks' are")
 
 disc("""The last line is problematic as we have only created four wedges - in 
@@ -880,7 +860,6 @@ disc("""We also discussed rules by which parent widgets could pass properties
 
 disc("""For now have a look at the following sample code using an early 
        version of a pie chart widget and the output it generates:""")
-
 
 eg("""
 from reportlab.lib.colors import *
@@ -911,12 +890,14 @@ pc3.wedges.labelRadius = 0.65
 pc3.wedges.fontName = "Helvetica-Bold"
 pc3.wedges.fontSize = 16
 pc3.wedges.fontColor = colors.yellow
-d.add(pc3, 'pie3')""")
+d.add(pc3, 'pie3')
+""")
 
 todo("add image")
 
 
-heading2("Charts ")
+heading1("Charts")
+
 disc("""The motivation for much of this is to create a flexible chart package. 
        We've done several chart programs with PINGO, on which this package is 
        based. So far, each one has been a specific program to make a specific 
@@ -927,7 +908,9 @@ disc("""This section is not finalized and will evolve further. For now we'll
        up as examples are created. We need and expect feedback on this to get 
        it right!""")
 
-heading3("Design Goals")
+
+heading2("Design Goals")
+
 disc("Here are some of the design goals: ")
 
 disc("<i>Make simple top-level use really simple </i>")
@@ -991,11 +974,13 @@ disc("""<para lindent=+36>Charts are built out of reusable child widgets. A Lege
        easy-to-grasp example. If you need a specialized type of legend (e.g. 
        circular colour swatches), you should subclass the standard Legend 
        widget. Then you could either do something like...""")
+
 eg("""
 c = MyChartWithLegend()
 c.legend = MyNewLegendClass()    # just change it
 c.legend.swatchRadius = 5    # set a property only relevant to the new one
-c.data = [10,20,30]   #   and then configure as usual....""")
+c.data = [10,20,30]   #   and then configure as usual...
+""")
 
 disc("""<para lindent=+36>...or create/modify your own chart or drawing class which creates one 
        of these by default. This is also very relevant for time series 
@@ -1019,7 +1004,8 @@ disc("""<para lindent=+36>(If you want to see the image, it is available on our 
 <font color=blue>http://www.reportlab.com/demos/provencio.pdf</font>)""")
 
 
-heading3("Key Concepts and Components")
+heading2("Key Concepts and Components")
+
 disc("""A chart or plot is an object which is placed on a drawing; it is not 
        itself a drawing. You can thus control where it goes, put several on 
        the same drawing, or add annotations.""")
@@ -1039,7 +1025,9 @@ disc("""You can subclass any chart component and use your replacement instead
        of the original provided you implement the essential methods and 
        properties.""")
 
-heading3("Labels")
+
+heading2("Labels")
+
 disc("""One of the most important building blocks is the <i>Label</i>, defined in 
        $reportlab/graphics/charts/textlabels.py$. A label is a string of text 
        attached to some chart element. They are used on axes, for titles or 
@@ -1072,10 +1060,10 @@ lab.dy = -20
 lab.boxStrokeColor = colors.green
 lab.setText('Another\nMulti-Line\nString')
 
-d.add(lab)""")
+d.add(lab)
+""")
 
 todo("add image")
-
 
 disc("""In the drawing above, the label is defined relative to the green blob. 
        The text box should have its north-east corner ten points down from 
@@ -1085,6 +1073,7 @@ disc("""At present labels have the following properties, which we believe are
        sufficient for all charts we have seen to date:""")
 
 todo("""Note: need to turn these into pretty tables with explanations """)
+
 eg("""
 >>>lab.dumpProperties()
 angle = 45
@@ -1099,7 +1088,9 @@ fontSize = 10
 leading = 12.0
 textAnchor = start""")
 
-heading3("Axes")
+
+heading2("Axes")
+
 disc("""We identify two basic kinds of axes - <i>Value</i> and <i>Category</i> Axes. Both 
        come in horizontal and vertical flavors. Both can be subclassed to 
        make very specific kinds of axis. For example, if you have complex 
@@ -1140,14 +1131,17 @@ yAxis.setPosition(50, 50, 125)
 yAxis.configure(data)
 
 drawing.add(xAxis)
-drawing.add(yAxis)""")
+drawing.add(yAxis)
+""")
 
 disc("""Remember that you won't have to create axes directly; when using a 
        standard chart, it comes with ready-made axes. The methods are what 
        the chart uses to configure it and take care of the geometry. However, 
        we will talk through them in detail below.""")
 
+
 heading3("XCategoryAxis class")
+
 disc("""A Category Axis doesn't really have a scale; it just divides itself 
        into equal-sized buckets. It is simpler than a value axis. The chart 
        (or programmer) sets its location with the method setPosition(x, y, 
@@ -1160,6 +1154,7 @@ disc("""A Category Axis doesn't really have a scale; it just divides itself
        widths or positions of categories.""")
 
 disc("An XCategoryAxis has the following editable properties:")
+
 disc("")
 
 data=[["Property", "Meaning"],
@@ -1195,7 +1190,8 @@ getStory().append(t)
 caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - XCategoryAxis properties""")
 
 
-heading3("""YValueAxis""")
+heading3("YValueAxis")
+
 disc("""The left axis in the diagram is a YValueAxis. The XValueAxis 
        flavour will shortly be available as well! A Value Axis differs from a 
        Category Axis in that each point along its length corresponds to a y 
@@ -1218,7 +1214,8 @@ eg("""
 50.0
 >>> yAxis.scale(40)  # should be near the top
 167.1875
->>>""")
+>>>
+""")
 
 disc("""By default, the highest data point is aligned with the top of the 
        axis, the lowest with the bottom of the axis, and the axis choose 
@@ -1245,7 +1242,9 @@ disc("""We hope to add an advanced property to let you explicitly specify the
        helper functions, and without needing special time series chart 
        classes.""")
 
-heading3("""Bar Charts""")
+
+heading2("Bar Charts")
+
 disc("""This describes our current VerticalBarChart class, which uses the axes 
        and labels above. We think it is step in the right direction but is is 
        far from final. As usual, we will start with an example:""")
@@ -1288,7 +1287,8 @@ eg("""
            'Apr-99','May-99','Jun-99','Jul-99','Aug-99']
     drawing.add(bc)
     
-    return drawing    """)
+    return drawing
+    """)
 
 
 disc("""Most of the code above is concerned with setting up the axes and 
@@ -1340,7 +1340,8 @@ disc("""When we are a bit more confident of the design, we expect to add
        degrees, and hid one of the axes:""")
 
 
-heading3("""4.6 Pie Charts""")
+heading2("Pie Charts")
+
 disc("""We've already seen a pie chart example above. This is provisional but 
        seems to do most things. At the very least we need to change the name. 
        For completeness we will cover it here.""")
@@ -1356,8 +1357,8 @@ eg("""
     pc.wedges[3].strokeWidth = 2
     pc.wedges[3].strokeDashArray = [2,2]
     pc.wedges[3].labelRadius = 1.75
-    pc.wedges[3].fontColor = colors.red""")
-
+    pc.wedges[3].fontColor = colors.red
+""")
 
 disc("""Properties are covered below. The pie has a 'wedges' collection and we 
        document wedge properties in the same table. This was invented before 
@@ -1384,7 +1385,10 @@ disc("""Properties are covered below. The pie has a 'wedges' collection and we
 ##1.2 will place it slightly outside. (note that if we add labels, we
 ##will keep this to specify their anchor point)
 ##
-heading3("""Legends""")
+
+
+heading2("Legends")
+
 disc("""Various preliminary legend classes can be found but need a cleanup to 
        be consistent with this model. Legends are the natural place to 
        specify the colors and line styles of charts; we propose that each 
@@ -1392,7 +1396,8 @@ disc("""Various preliminary legend classes can be found but need a cleanup to
        then do the following to specify colors:""")
 
 eg("""
-myChart.legend.defaultColors = [red, green, blue]""")
+myChart.legend.defaultColors = [red, green, blue]
+""")
 
 disc("""One could also define a group of charts sharing the same legend:""")
 
@@ -1403,17 +1408,22 @@ myLegend.columns = 2
 # etc.
 chart1.legend = myLegend
 chart2.legend = myLegend
-chart3.legend = myLegend""")
+chart3.legend = myLegend
+""")
 
 todo("""Does this work? Is it an acceptable complication over specifying chart
 colors directly?""")
 
-heading3("Other Charts")
+
+heading2("Other Charts")
+
 disc("""It will take some time to deal with the full range of chart types. We 
        expect to finalize bars and pies and to produce trial implementations 
        of more general plots in February.""")
 
-heading4("x-y plots")
+
+heading3("X-Y Plots")
+
 disc("""Most other plots involve two value axes and directly plotting x-y data 
        in some form. The series can be plotted as lines, marker symbols, 
        both, or custom graphics such as open-high-low-close graphics. All 
@@ -1423,13 +1433,17 @@ disc("""Most other plots involve two value axes and directly plotting x-y data
        it should be very easy to derive a custom chart type just by 
        overriding a single method - say, drawSeries().""")
 
-heading4("""Marker customisation and custom shapes""")
+
+heading3("Marker customisation and custom shapes")
+
 disc("""Well known plotting packages such as excel, Mathematica and Excel 
        offer ranges of marker types to add to charts. We can do better - you 
        can write any kind of chart widget you want and just tell the chart 
        to use it as an example.""")
 
+
 heading4("""Combination plots""")
+
 disc("""Combining multiple plot types is really easy. You can just draw 
        several charts (bar, line or whatever) in the same rectangle, 
        suppressing axes as needed. So a chart could correlate a line with 
@@ -1437,6 +1451,7 @@ disc("""Combining multiple plot types is really easy. You can just draw
        set of bars showing inflation rates on the right axis. If anyone can 
        remind us where this example came from we'll attribute it, and happily 
        show the well-known graph as an example.""")
+
 
 heading3("""Other chart classes""")
 
@@ -1446,4 +1461,5 @@ disc("""This has not been an exhaustive look at all the chart classes. Those cla
        on reportlab/graphics, and produce a full report. (If you want to run
        it on other modules or packages, $graphdocpy.py -h$ print a help
        message that will tell you how.)""")
+
 disc("This is the tool that was mentioned in the section on 'Documenting Widgets'")
