@@ -392,7 +392,7 @@ class Swatches(Widget):
                 C = Rect(thisx,thisy,dx,dy)
             elif self.alignment=="right":
                 # align text to right
-                T = String(x+self.dx, y, str(n))
+                T = String(thisx+self.dx, thisy, str(n))
                 T.textAnchor = "start"
                 C = Rect(thisx-dx,thisy,dx,dy)
             else: raise ValueError, "bad alignment"
@@ -405,6 +405,113 @@ class Swatches(Widget):
             else:
                 thisy = thisy-self.deltay
         return G
+
+class VScale(Widget):
+    orientation = "vertical"
+    _attrmap = {
+        "x": isNumber, "y": isNumber,
+        "minimum": isNumber, "maximum": isNumber,
+        "length": isNumber, # the amount of space for the scale
+        "width": isNumber, # the size of the lines to draw across the chart
+        "nLabels": isNumber, # the maximum number of labels to use
+        "labelFormat": isString,
+        "extraOffset": isNumber,
+        # XXX add color, line style, font stuff... etc....
+        }
+    def __init__(self):
+        self.x = self.y = 50
+        self.minimum = 1.23987432; self.maximum = 1.33338962
+        self.length = 150; self.width = 120
+        self.nLabels = 4
+        self.labelFormat = "%5.2f"
+        self.extraOffset = 15
+    def factor(self):
+        "return the scaling factor for points from domain space to canvas space"
+        return self.length*1.0/(self.maximum - self.minimum)
+    def domainToCanvas(self, domainvalue):
+        "convert from domain coordinate to canvas coordinate"
+        orientation = self.orientation
+        f = self.factor()
+        if orientation=="vertical": base = self.y
+        elif orientation=="horizontal": base = self.x
+        else: raise ValueError, "bad orientation "+repr(orientation)
+        return base + f*(domainvalue-self.minimum)
+    def draw(self):
+        orientation = self.orientation
+        # this could be done cleverly using the other widgets, but what the ....
+        x,y = self.x, self.y
+        fmt = self.labelFormat
+        (delta, startpoint) = scaleParameters(self.minimum, self.maximum, self.nLabels)
+        G = Group()
+        # orientation independent data (direct values for vertical case, convert for horizontal case
+        linedata = []
+        textdata = []
+        # the main axis
+        linedata.append( (0, 0, 0, self.length) )
+        # the cross lines and labels
+        lineposition = startpoint - self.minimum
+        factor = self.factor()
+        print "factor is", factor
+        while lineposition+self.minimum<self.maximum:
+            text = string.strip(fmt % (lineposition+self.minimum))
+            clineposition = factor * lineposition
+            print "lineposition, clineposition", lineposition, clineposition
+            linedata.append( (0, clineposition, self.width, clineposition) )
+            textdata.append( (0, clineposition, text) )
+            lineposition = lineposition + delta
+        print "done with lines"
+        if orientation=="vertical":
+            for (x1, y1, x2, y2) in linedata:
+                G.add(Line(x+x1, y+y1, x+x2, y+y2))
+            for (x1, y1, t) in textdata:
+                S = String(x+x1-self.extraOffset, y+y1, t)
+                S.textAnchor = "end"
+                G.add(S)
+        elif orientation=="horizontal":
+            for (y1, x1, y2, x2) in linedata:
+                G.add(Line(x+x1, y+y1, x+x2, y+y2))
+            for (y1, x1, t) in textdata:
+                S = String(x+x1, y+y1-self.extraOffset, t)
+                S.textAnchor = "middle"
+                G.add(S)
+        else:
+            raise ValueError, "bad orientation " + repr(orientation)
+        return G
+
+class HScale(VScale):
+    orientation = "horizontal"    
+        
+def scaleParameters(x,y,maxlabels):
+    """on number line between x and y choose delta for label marks and first mark
+       (should be reasonable like 1.2,1.4,... not 1.23423, 1.342334,... regardless of messy end points.
+    """
+    if maxlabels<2:
+        raise ValueError, "two or more labels required" # 4 or more recommended
+    difference = y-x
+    if difference<=0: raise ValueError, "%s not less than %s" % (x,y)
+    orderofmagnitude = 1.0
+    # find order of magnitude
+    while orderofmagnitude>difference:
+        orderofmagnitude = orderofmagnitude/10.0
+    while orderofmagnitude*10<difference:
+        orderofmagnitude = orderofmagnitude*10.0
+    #print "order of magnitude", orderofmagnitude
+    portion = difference/orderofmagnitude
+    #print "portion", portion
+    # find appropriate delta
+    for deltacandidate in (0.1, 0.2, 0.25, 0.5, 1.0, 2.0, 2.5, 5.0, 10.0):
+        delta = deltacandidate
+        if portion/delta < maxlabels:
+            #print delta, "ok", portion/delta
+            break
+        #print delta, "too small:", portion/delta
+    delta = delta*orderofmagnitude
+    # find starting point (rounded appropriately)
+    (below, remainder) = divmod(x, orderofmagnitude)
+    (below2, remainder2) = divmod(remainder, delta)
+    startpoint = below*orderofmagnitude + (below2+1)*delta
+    return (delta, startpoint)
+    
     
 def test():
     fn = "barchart.pdf"
@@ -418,6 +525,21 @@ def test():
         pc.format.y = 50
         pc.data = [10,20,x*0.2,40,50,60]
         x = x+200
+        d.add(pc, 'chart1')
+    c.setFont('Times-Roman', 20)
+    c.drawString(100, 720, "bar chart")
+    c.setFont('Times-Roman', 12)
+    #BUG - currently the drawing gets the most recently used font as its default.
+    d.drawOn(c, 100, 500)
+    c.showPage()
+    d = Drawing(400,200)
+    x = 50
+    for B in (VScale, HScale):
+        print B
+        pc = B()
+        pc.x = x
+        pc.y = 30
+        x = x+150
         d.add(pc, 'chart1')
     c.setFont('Times-Roman', 20)
     c.drawString(100, 720, "bar chart")
