@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.76 2003/02/02 08:37:33 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.76 2003/02/02 08:37:33 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.77 2003/02/03 20:42:38 andy_robinson Exp $
+__version__=''' $Id: pdfdoc.py,v 1.77 2003/02/03 20:42:38 andy_robinson Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -382,7 +382,11 @@ class PDFDocument:
                 IOf = IO.format(self)
                 # add a comment to the PDF output
                 if DoComments:
-                    File.add("%% %s: class %s %s" % (repr(id), obj.__class__.__name__[:50], LINEEND))
+                    try:
+                        classname = obj.__class__.__name__
+                    except:
+                        classname = repr(obj)
+                    File.add("%% %s: class %s %s" % (repr(id), classname[:50], LINEEND))
                 offset = File.add(IOf)
                 idToOf[id] = offset
                 ids.append(id)
