@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.36 2001/02/05 21:41:14 aaron_watters Exp $
-__version__=''' $Id: pdfdoc.py,v 1.36 2001/02/05 21:41:14 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.37 2001/02/09 19:33:49 aaron_watters Exp $
+__version__=''' $Id: pdfdoc.py,v 1.37 2001/02/09 19:33:49 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -315,13 +315,14 @@ class PDFDocument:
         
     def Reference(self, object, name=None):
         ### note references may "grow" during the final formatting pass: don't use d.keys()!
-        # don't make references to other references, or non instances
+        # don't make references to other references, or non instances, unless they are named!
         from types import InstanceType
         #print"object type is ", type(object)
         tob = type(object)
-        if (tob is not InstanceType) or (tob is InstanceType and object.__class__ is PDFObjectReference):
-            return object
         idToObject = self.idToObject
+        if name is None and (
+            (tob is not InstanceType) or (tob is InstanceType and object.__class__ is PDFObjectReference)):
+            return object
         if hasattr(object, __InternalName__):
             # already registered
             intname = object.__InternalName__
@@ -336,8 +337,12 @@ class PDFDocument:
         if name is None:
             name = "R"+repr(objectcounter)
         if idToObject.has_key(name):
-            raise ValueError, "redefining named object: "+repr(name)
-        object.__InternalName__ = name
+            other = idToObject[name]
+            if other!=object:
+                raise ValueError, "redefining named object: "+repr(name)
+            return PDFObjectReference(name)
+        if tob is InstanceType:
+            object.__InternalName__ = name
         #print "name", name, "counter", objectcounter
         self.idToObjectNumberAndVersion[name] = (objectcounter, 0)
         self.numberToId[objectcounter] = name
