@@ -1,4 +1,326 @@
 #################################################################################
+#################### RELEASE 1.18 at 12:00 GMT  9/Jul/2003      #################
+#################################################################################
+##### 2003/07/09 #####
+	platypus/tables.py 1.66 rgbecker  Attempt to fix up identity for early errors
+##### 2003/07/08 #####
+	lib/rparsexml.py 1.4 rgbecker  Attempt at fixing the silly return wrong tuple size problem
+	pdfbase/pdfdoc.py 1.83 rgbecker  Finally commit changes to allow invariant pdfencryption to work properly
+	platypus/para.py 1.9 rgbecker  Fixes to remove 'import as'
+	pdfbase/pdfdoc.py 1.82 rgbecker  Fix up for 1.1.4 PIL palette access
+	lib/rparsexml.py 1.3 rgbecker  Allow for no entuty replacement
+	platypus/para.py 1.8 rgbecker  Added Dirk Holtwick's patch and better entities/charrefs
+	tools/pythonpoint/pythonpoint.py 1.23 rgbecker  Karl Putland's speaker notes patch
+##### 2003/07/07 #####
+	pdfbase/_fontdata.py 1.13 rgbecker  Fixed up fake font searching again
+	graphics/charts/piecharts.py 1.28 rgbecker  Remove 2.1 ism
+	rl_config.py 1.37 rgbecker  Attempt to fix up for linux 2
+	test/runAll.py 1.12 rgbecker  Fix 2.1 ism
+##### 2003/07/03 #####
+	pdfbase/pdfdoc.py 1.81 rgbecker  Fix up invariance
+	pdfgen/canvas.py 1.114 rgbecker  Remove excess import of time
+##### 2003/07/02 #####
+	rl_config.py 1.36 rgbecker  Fix up setting of invariant
+	graphics/charts/lineplots.py 1.42 rgbecker  Fixes to makeGrids etc
+	graphics/charts/linecharts.py 1.27 rgbecker  Fixes to makeGrids etc
+	graphics/charts/barcharts.py 1.72 rgbecker  Fixes to makeGrids etc
+	graphics/charts/axes.py 1.80 rgbecker  Fixes to makeGrids etc
+	graphics/shapes.py 1.93 johnprecedo  If a PDF is made on a mac (ie OS 9 rather than OX X), now adds the correct creater type.
+	graphics/charts/axes.py 1.79 rgbecker  Fix up no avoidBoundFrac case
+	graphics/charts/axes.py 1.78 rgbecker  Fix up excel type avoidBoundFrac
+##### 2003/07/01 #####
+	lib/setup.py 1.15 rgbecker  Added linux2 flag
+	graphics/renderPDF.py 1.23 johnprecedo  Now sets the file association correctly when producing PDFs on Apple Macs running MacOS < X.
+##### 2003/06/25 #####
+	graphics/charts/axes.py 1.77 rgbecker  Fixed grid thickness error
+	graphics/charts/axes.py 1.76 rgbecker  Added zrangePref
+##### 2003/06/24 #####
+	test/test_pdfgen_general.py 1.17 rgbecker  Use new getpdfdata method
+	pdfgen/canvas.py 1.113 rgbecker  David Fraser's GetPDFData patch (to avoid unwanted StringIOs
+	pdfbase/pdfdoc.py 1.80 rgbecker  David Fraser's GetPDFData patch (to avoid unwanted StringIOs
+##### 2003/06/20 #####
+	graphics/charts/axes.py 1.75 rgbecker  Fix my stupid logic error using labelTextFormat
+##### 2003/06/19 #####
+	lib/validators.py 1.27 rgbecker  Added isStringOrNone
+	graphics/charts/spider.py 1.9 rgbecker  Attempt to be more generic with markers
+	graphics/charts/spider.py 1.8 rgbecker  Allow for proper labels in piechart and some clean ups
+	graphics/charts/piecharts.py 1.27 rgbecker  Allow for proper labels in piechart and some clean ups
+	graphics/charts/doughnut.py 1.4 rgbecker  Allow for proper labels in piechart and some clean ups
+	graphics/charts/axes.py 1.74 andy_robinson  Added visibleLabels
+##### 2003/06/17 #####
+	graphics/charts/axes.py 1.73 rgbecker  Fix up to use excel rule for equal valueMin/Max
+	graphics/charts/axes.py 1.72 rgbecker  Added atempt at auto ticking ints
+##### 2003/06/13 #####
+	graphics/charts/axes.py 1.71 rgbecker  Move avoidBoundFrac etc into base class
+	graphics/charts/axes.py 1.70 rgbecker  Change unset labelTextFormat handling
+	graphics/charts/doughnut.py 1.3 johnprecedo  Fixed a type which was causing problems with single series doughnut charts.
+	graphics/charts/doughnut.py 1.2 johnprecedo  Fixed a typo, expanded docstring. No other changes.
+	graphics/charts/doughnut.py 1.1 johnprecedo  Initial commit of a new 'doughnut' chart type - does doughnut charts like those which Excel produces. Can handle multiple series, but not popouts or inter-series gaps (yet).
+##### 2003/06/12 #####
+	graphics/renderPS.py 1.23 rgbecker  Attempt at adding in a generalised wedge
+	graphics/renderPDF.py 1.22 rgbecker  Attempt at adding in a generalised wedge
+	graphics/shapes.py 1.92 rgbecker  Attempt at adding in a generalised wedge
+	graphics/charts/textlabels.py 1.30 rgbecker  Added padding to Label
+##### 2003/06/10 #####
+	graphics/charts/axes.py 1.69 rgbecker  Use union of date sequences
+	lib/set_ops.py 1.1 rgbecker  Initial check in
+##### 2003/06/09 #####
+	graphics/charts/spider.py 1.7 johnprecedo  Added capacity for markers.
+	graphics/charts/axes.py 1.68 rgbecker  Fix typo
+##### 2003/06/05 #####
+	graphics/charts/axes.py 1.67 rgbecker  Allow avoidBoundFrac to be a tuple
+##### 2003/06/04 #####
+	platypus/paragraph.py 1.67 rgbecker  added testcase
+	platypus/paraparser.py 1.52 rgbecker  laissez faire case
+##### 2003/06/03 #####
+	rl_addons/renderPM/libart_lgpl/configure.in 1.4 rgbecker  Sync to 2.3.12
+	rl_addons/renderPM/libart_lgpl/art_uta_vpath.c 1.3 rgbecker  Sync to 2.3.12
+	rl_addons/renderPM/libart_lgpl/art_svp_wind.c 1.5 rgbecker  Sync to 2.3.12
+	rl_addons/renderPM/libart_lgpl/art_svp_vpath_stroke.c 1.3 rgbecker  Sync to 2.3.12
+	rl_addons/renderPM/libart_lgpl/art_svp_ops.c 1.3 rgbecker  Sync to 2.3.12
+	rl_addons/renderPM/libart_lgpl/art_render_svp.c 1.3 rgbecker  Sync to 2.3.12
+	rl_addons/renderPM/libart_lgpl/ChangeLog 1.4 rgbecker  Sync to 2.3.12
+	graphics/charts/axes.py 1.66 rgbecker  factorize labelling for NaormalDate axis
+	lib/validators.py 1.26 rgbecker  Added Non==false for isBoolean
+##### 2003/06/01 #####
+	platypus/xpreformatted.py 1.17 rgbecker  Henning von Bargen's caseSensitive flag
+	platypus/paraparser.py 1.51 rgbecker  Henning von Bargen's caseSensitive flag
+	platypus/paragraph.py 1.66 rgbecker  Henning von Bargen's caseSensitive flag
+	test/test_paragraphs.py 1.16 rgbecker  Henning von Bargen's caseSensitive flag
+##### 2003/05/30 #####
+	platypus/para.py 1.7 rgbecker  Added Sidnei da Silva's patches
+	pdfgen/canvas.py 1.112 rgbecker  White space fixes
+##### 2003/05/29 #####
+	graphics/charts/piecharts.py 1.26 fuzzypuffin  This seems the right way to do this
+	graphics/charts/lineplots.py 1.41 andy_robinson  Adaptations for quickchart
+	graphics/charts/barcharts.py 1.71 andy_robinson  Adaptations for quickchart
+##### 2003/05/27 #####
+	graphics/charts/lineplots.py 1.40 rgbecker  Cosmetics
+	graphics/charts/lineplots.py 1.39 rgbecker  Attempt at getting SplitLinePlot & allow for inFill
+	graphics/charts/axes.py 1.65 rgbecker  Attempt at getting SplitLinePlot & allow for inFill
+	graphics/charts/axes.py 1.64 rgbecker  Ensure _labelTextFormat exists
+##### 2003/05/26 #####
+	platypus/paraparser.py 1.50 rgbecker  Final fixes to special charrefs
+	platypus/paraparser.py 1.49 rgbecker  Added in more special entities as suggested by Christoph Zwerschke
+	graphics/charts/axes.py 1.63 andy_robinson  Fixed unitialized parameter in axes (broken in last checkin?)
+##### 2003/05/24 #####
+	rl_addons/pyRXP/test/testRXPbasic.py 1.2 rgbecker  Added in Max Neunhöffer's patch for ReturnCDATASectionsAsTuples flag
+	rl_addons/pyRXP/pyRXP.c 1.22 rgbecker  Added in Max Neunhöffer's patch for ReturnCDATASectionsAsTuples flag
+##### 2003/05/22 #####
+	graphics/charts/axes.py 1.62 rgbecker  Non-intrusive changes (I hope)
+##### 2003/05/16 #####
+	lib/_rl_accel.c 1.34 johnprecedo  Fix Code Warrior strict error messages (on Mac).
+##### 2003/05/11 #####
+	platypus/doctemplate.py 1.63 rgbecker  Make PageTemplate default size None
+##### 2003/05/08 #####
+	graphics/charts/linecharts.py 1.26 rgbecker  Dirk Datzert's None Patch
+##### 2003/05/07 #####
+	graphics/renderPM.py 1.30 rgbecker  Fix up for import of test
+##### 2003/05/01 #####
+	test/test_platypus_indents.py 1.1 andy_robinson  Added relative indentation
+	platypus/frames.py 1.20 andy_robinson  Added relative indentation
+	platypus/doctemplate.py 1.62 andy_robinson  Added relative indentation
+##### 2003/04/29 #####
+	graphics/shapes.py 1.91 rgbecker  Fix up asString format lists
+	graphics/renderPM.py 1.29 rgbecker  Fix example output index.html title
+##### 2003/04/24 #####
+	fonts/LeERC___.AFM 1.2 rgbecker  Attempt to fix -kb problem
+	test/test_platypus_general.py 1.12 rgbecker  Make os & cwd agnostic
+	rl_addons/renderPM/_renderPM.c 1.19 jvr  fixed compile error with CodeWarrior Pro 6 on the Mac
+##### 2003/04/22 #####
+	platypus/tables.py 1.65 rgbecker  Prepare for a more general idea of cell size
+	platypus/flowables.py 1.36 rgbecker  Prepare for a more general idea of cell size
+	test/test_charts_textlabels.py 1.5 rgbecker  Make runAll.py more robust
+	test/runAll.py 1.11 rgbecker  Make runAll.py more robust
+	platypus/paragraph.py 1.65 rgbecker  Added in Ury Marshak's underlining stuff hacked for <2.2
+	lib/_rl_accel.c 1.33 rgbecker  Added underline to same frag routine
+	test/test_paragraphs.py 1.15 rgbecker  Added an underline sample
+##### 2003/04/21 #####
+	test/test_table_layout.py 1.1 andy_robinson  Finished off sizing logic to go with row and column spanning; added a substantial set of examples.
+	platypus/tables.py 1.64 andy_robinson  Finished off sizing logic to go with row and column spanning; added a substantial set of examples.
+##### 2003/04/17 #####
+	tools/docco/graphdocpy.py 1.21 andy_robinson  Added conveniences to control where docs are created
+	tools/docco/docpy.py 1.5 andy_robinson  Added conveniences to control where docs are created
+	test/test_pdfgen_general.py 1.16 andy_robinson  Added conveniences to control where docs are created
+	docs/graphguide/gengraphguide.py 1.8 andy_robinson  Added conveniences to control where docs are created
+	docs/graphguide/gengraphguide.py 1.7 andy_robinson  Added a default page size
+	tools/docco/rl_doc_utils.py 1.6 andy_robinson  Now runs from other scripts
+	tools/docco/graphdocpy.py 1.20 andy_robinson  Now runs from other scripts
+	docs/reference/genreference.py 1.5 andy_robinson  Temoved references to sys.argv[0], allowed some flexibility in which directory they run in
+	docs/graphguide/gengraphguide.py 1.6 andy_robinson  Temoved references to sys.argv[0], allowed some flexibility in which directory they run in
+	graphics/samples/runall.py 1.4 johnprecedo  Fix a typo.
+	graphics/shapes.py 1.90 rgbecker  added pict/pct capability
+	graphics/samples/runall.py 1.3 johnprecedo  Now allows multiple formats and if you don't specify any will assume you want PDF, PICT and PNG.
+	graphics/renderPS.py 1.22 rgbecker  Added markfilename call
+	graphics/renderPM.py 1.28 rgbecker  Added markfilename call
+	pdfbase/pdfdoc.py 1.79 rgbecker  Moved markfilename to lib/utils.py
+	lib/utils.py 1.42 rgbecker  Moved markfilename from pdfdoc
+	graphics/renderPM.py 1.27 andy_robinson  Use pct instead of pict as extension in tests
+##### 2003/04/16 #####
+	rl_addons/pyRXP/setup.py 1.9 rgbecker  Fix my silliness
+	graphics/renderPM.py 1.26 rgbecker  Added support for pict
+	rl_addons/renderPM/_renderPM.c 1.18 rgbecker  Added PICT conversion utility
+##### 2003/04/15 #####
+	rl_addons/pyRXP/setup.py 1.8 dragan1  add linux-i386
+	rl_addons/renderPM/setup.py 1.15 dragan1  add linux-i386
+	setup.py 1.9 jvr  whitespace change to test my commit rights
+##### 2003/04/14 #####
+	graphics/renderPM.py 1.25 rgbecker  Added some entry points for PIL workers
+	test/runAll.py 1.10 johnprecedo  Andy's latest changes on test machine (snowdon).
+	rl_addons/renderPM/libart_lgpl/art_affine.c 1.4 rgbecker  Fix buglet reported on list
+##### 2003/04/13 #####
+	rl_addons/pyRXP/test/test_xmltestsuite.py 1.2 rgbecker  Fix & changes for memory checks
+##### 2003/04/11 #####
+	rl_addons/pyRXP/docs/PyRXP_Documentation.rml 1.4 johnprecedo  Interim checkin. More work needs to be done on this.
+	rl_addons/pyRXP/test/test_xmltestsuite.py 1.1 rgbecker  S Bishop's unittests
+	rl_addons/pyRXP/test/testRXPbasic.py 1.1 johnprecedo  Test program t.py moved to testRXPbasic.py - namechange to make it more consistent with other Reportlab test programs.
+	rl_addons/pyRXP/test/t.py 1.12 johnprecedo  Test program t.py moved to testRXPbasic.py - namechange to make it more consistent with other Reportlab test programs.
+##### 2003/04/10 #####
+	rl_addons/pyRXP/docs/PyRXP_Documentation.rml 1.3 johnprecedo  Tutorial sections updated with info on new changes from 0.97. (Pages need renumbering).
+	pdfgen/canvas.py 1.111 andy_robinson  Added setPageRotation
+##### 2003/04/09 #####
+	platypus/para.py 1.6 andy_robinson  Added tt tag as suggested by Stephen Diehl
+	rl_addons/pyRXP/test/t.py 1.11 rgbecker  Make easier to comprehend
+##### 2003/04/07 #####
+	graphics/widgets/grids.py 1.31 rgbecker  Allow for outer rect to be special
+##### 2003/04/05 #####
+	platypus/tables.py 1.63 andy_robinson  Initial try at column spanning
+	platypus/flowables.py 1.35 andy_robinson  Fixed mask bug (lexical/dynamic scoping?)
+	docs/userguide/ch3_pdffeatures.py 1.5 andy_robinson  Removed some fancy quote characters
+##### 2003/04/04 #####
+	platypus/flowables.py 1.34 rgbecker  Allow for image transparancy mask
+	platypus/flowables.py 1.33 rgbecker  Fix trivial spelling burble
+##### 2003/04/03 #####
+	rl_addons/pyRXP/test/t.py 1.10 rgbecker  Added in 16 bit mode patch inspired by Stuart Bishop
+	rl_addons/pyRXP/pyRXP.c 1.21 rgbecker  Added in 16 bit mode patch inspired by Stuart Bishop
+	rl_addons/pyRXP/setup.py 1.7 rgbecker  Attempt at the 16 bit patch
+	rl_addons/pyRXP/pyRXP.c 1.20 rgbecker  Attempt at the 16 bit patch
+##### 2003/04/01 #####
+	rl_addons/pyRXP/pyRXP.c 1.19 rgbecker  Sync with rxp 1.3.0
+	rl_addons/pyRXP/test/t.py 1.9 rgbecker  Fix test
+	rl_addons/pyRXP/rxp/xmlparser.h 1.3 rgbecker  Synchronize with 1.3.0
+	rl_addons/pyRXP/rxp/xmlparser.c 1.3 rgbecker  Synchronize with 1.3.0
+	rl_addons/pyRXP/rxp/version.c 1.2 rgbecker  Synchronize with 1.3.0
+	rl_addons/pyRXP/rxp/url.h 1.2 rgbecker  Synchronize with 1.3.0
+	rl_addons/pyRXP/rxp/stdio16.h 1.2 rgbecker  Synchronize with 1.3.0
+	rl_addons/pyRXP/rxp/stdio16.c 1.3 rgbecker  Synchronize with 1.3.0
+	rl_addons/pyRXP/rxp/rxp.c 1.2 rgbecker  Synchronize with 1.3.0
+	rl_addons/pyRXP/rxp/rxp.1 1.2 rgbecker  Synchronize with 1.3.0
+	rl_addons/pyRXP/rxp/input.h 1.2 rgbecker  Synchronize with 1.3.0
+	rl_addons/pyRXP/rxp/input.c 1.4 rgbecker  Synchronize with 1.3.0
+	rl_addons/pyRXP/rxp/RELNOTES 1.2 rgbecker  Synchronize with 1.3.0
+	rl_addons/pyRXP/rxp/Makefile 1.2 rgbecker  Synchronize with 1.3.0
+	graphics/widgets/eventcal.py 1.4 fuzzypuffin  added talk details for 4 days as a tuple
+	graphics/widgets/eventcal.py 1.3 andy_robinson  Now crudely displays talk details
+	rl_addons/pyRXP/patches/differ.bat 1.2 rgbecker  Improved discrimination
+	graphics/widgets/eventcal.py 1.2 andy_robinson  Now beginning to look like a calendar :-)
+##### 2003/03/28 #####
+	graphics/widgets/eventcal.py 1.1 andy_robinson  Initial; checkin of calendar widget
+##### 2003/03/27 #####
+	rl_addons/renderPM/libart_lgpl/config.h 1.3 rgbecker  Attempt to make this semi-automatic
+	rl_addons/renderPM/libart_lgpl/art_render_gradient.c 1.3 jvr  Fixing compile errors with CodeWarrior Pro 6 on MacOS.
+##### 2003/03/20 #####
+	graphics/samples/bubble.py 1.1 johnprecedo  Forgot to check in last night... oops.
+##### 2003/03/19 #####
+	graphics/samples/scatter_lines_markers.py 1.1 johnprecedo  Added scatter plots, line charts and bubble plots (and some varients).
+	graphics/samples/scatter_lines.py 1.1 johnprecedo  Added scatter plots, line charts and bubble plots (and some varients).
+	graphics/samples/scatter.py 1.1 johnprecedo  Added scatter plots, line charts and bubble plots (and some varients).
+	graphics/samples/linechart_with_markers.py 1.1 johnprecedo  Added scatter plots, line charts and bubble plots (and some varients).
+	graphics/samples/line_chart.py 1.1 johnprecedo  Added scatter plots, line charts and bubble plots (and some varients).
+	graphics/shapes.py 1.89 rgbecker  Fixed up TIF vs TIFF
+	graphics/renderPM.py 1.24 rgbecker  Fixed up TIF vs TIFF
+	graphics/shapes.py 1.88 rgbecker  Space saving optimisation
+##### 2003/03/18 #####
+	graphics/samples/runall.py 1.2 andy_robinson  Drawings can now do asString(format)
+	graphics/shapes.py 1.87 andy_robinson  Drawings can now do asString(format)
+##### 2003/03/17 #####
+	graphics/samples/stacked_column.py 1.3 johnprecedo  Added in preview attribute required for EPS output.
+	graphics/samples/stacked_bar.py 1.3 johnprecedo  Added in preview attribute required for EPS output.
+	graphics/samples/simple_pie.py 1.3 johnprecedo  Added in preview attribute required for EPS output.
+	graphics/samples/radar.py 1.3 johnprecedo  Added in preview attribute required for EPS output.
+	graphics/samples/filled_radar.py 1.3 johnprecedo  Added in preview attribute required for EPS output.
+	graphics/samples/exploded_pie.py 1.3 johnprecedo  Added in preview attribute required for EPS output.
+	graphics/samples/clustered_column.py 1.3 johnprecedo  Added in preview attribute required for EPS output.
+	graphics/samples/clustered_bar.py 1.3 johnprecedo  Added in preview attribute required for EPS output.
+	graphics/samples/stacked_column.py 1.2 johnprecedo  Changed outdir from '.' to None - should no longer create a folder called '.' on a Mac.
+	graphics/samples/stacked_bar.py 1.2 johnprecedo  Changed outdir from '.' to None - should no longer create a folder called '.' on a Mac.
+	graphics/samples/simple_pie.py 1.2 johnprecedo  Changed outdir from '.' to None - should no longer create a folder called '.' on a Mac.
+	graphics/samples/radar.py 1.2 johnprecedo  Changed outdir from '.' to None - should no longer create a folder called '.' on a Mac.
+	graphics/samples/filled_radar.py 1.2 johnprecedo  Changed outdir from '.' to None - should no longer create a folder called '.' on a Mac.
+	graphics/samples/exploded_pie.py 1.2 johnprecedo  Changed outdir from '.' to None - should no longer create a folder called '.' on a Mac.
+	graphics/samples/clustered_column.py 1.2 johnprecedo  Changed outdir from '.' to None - should no longer create a folder called '.' on a Mac.
+	graphics/samples/clustered_bar.py 1.2 johnprecedo  Changed outdir from '.' to None - should no longer create a folder called '.' on a Mac.
+	graphics/samples/stacked_column.py 1.1 johnprecedo  Directory of samples which mimic the standard Excel chart classes. iInitial checkin - copied across from users/john/excel_samples.
+	graphics/samples/stacked_bar.py 1.1 johnprecedo  Directory of samples which mimic the standard Excel chart classes. iInitial checkin - copied across from users/john/excel_samples.
+	graphics/samples/simple_pie.py 1.1 johnprecedo  Directory of samples which mimic the standard Excel chart classes. iInitial checkin - copied across from users/john/excel_samples.
+	graphics/samples/runall.py 1.1 johnprecedo  Directory of samples which mimic the standard Excel chart classes. iInitial checkin - copied across from users/john/excel_samples.
+	graphics/samples/radar.py 1.1 johnprecedo  Directory of samples which mimic the standard Excel chart classes. iInitial checkin - copied across from users/john/excel_samples.
+	graphics/samples/filled_radar.py 1.1 johnprecedo  Directory of samples which mimic the standard Excel chart classes. iInitial checkin - copied across from users/john/excel_samples.
+	graphics/samples/exploded_pie.py 1.1 johnprecedo  Directory of samples which mimic the standard Excel chart classes. iInitial checkin - copied across from users/john/excel_samples.
+	graphics/samples/excelcolors.py 1.1 johnprecedo  Directory of samples which mimic the standard Excel chart classes. iInitial checkin - copied across from users/john/excel_samples.
+	graphics/samples/clustered_column.py 1.1 johnprecedo  Directory of samples which mimic the standard Excel chart classes. iInitial checkin - copied across from users/john/excel_samples.
+	graphics/samples/clustered_bar.py 1.1 johnprecedo  Directory of samples which mimic the standard Excel chart classes. iInitial checkin - copied across from users/john/excel_samples.
+	graphics/samples/__init__.py 1.1 johnprecedo  Directory of samples which mimic the standard Excel chart classes. iInitial checkin - copied across from users/john/excel_samples.
+##### 2003/03/14 #####
+	tools/pythonpoint/pythonpoint.py 1.22 andy_robinson  Whoops, stray print statement removed
+	tools/pythonpoint/pythonpoint.py 1.21 andy_robinson  Ian Sparks' expanded bookmarkPage function
+	test/test_pdfgen_links.py 1.1 andy_robinson  Ian Sparks' expanded bookmarkPage function
+	pdfgen/canvas.py 1.110 andy_robinson  Ian Sparks' expanded bookmarkPage function
+	docs/userguide/ch3_pdffeatures.py 1.4 andy_robinson  Ian Sparks' expanded bookmarkPage function
+##### 2003/03/13 #####
+	rl_addons/pyRXP/pyRXP.c 1.18 rgbecker  Fix braindead MS VC++ string length overflow
+	rl_addons/pyRXP/test/t.py 1.8 rgbecker  This was stupidly wrong
+	rl_addons/pyRXP/pyRXP.c 1.17 rgbecker  Added slight commentation
+	rl_addons/pyRXP/pyRXP.c 1.16 rgbecker  0.96 added pyRXP.recordLocation
+	rl_addons/pyRXP/docs/PyRXP_Documentation.rml 1.2 rgbecker  Upgraded to 0.96
+	rl_addons/pyRXP/test/t.py 1.7 rgbecker  Added recordLocation handling
+	rl_addons/pyRXP/pyRXP.c 1.15 rgbecker  Added recordLocation handling
+##### 2003/03/08 #####
+	rl_addons/pyRXP/test/t.py 1.6 rgbecker  Changed to comply with new nodes for comment/pi
+	rl_addons/pyRXP/pyRXP.c 1.14 rgbecker  Fixed finding first proper node in ReturnList==0 case
+	rl_addons/pyRXP/pyRXP.c 1.13 rgbecker  Added new comment & pi stuff
+##### 2003/03/04 #####
+	graphics/charts/spider.py 1.6 rgbecker  Fix for labels=None case
+##### 2003/03/03 #####
+	rl_addons/pyRXP/test/t.py 1.5 rgbecker  Added processing instructions
+	rl_addons/pyRXP/pyRXP.c 1.12 rgbecker  Added processing instructions
+##### 2003/03/02 #####
+	graphics/renderPM.py 1.23 rgbecker  Added argument to get at PIL save
+##### 2003/02/27 #####
+	lib/colors.py 1.38 rgbecker  Added special reportLabFid colours
+##### 2003/02/24 #####
+	graphics/shapes.py 1.86 rgbecker  Use title instead of fnroot
+##### 2003/02/19 #####
+	rl_addons/pyRXP/pyRXP.c 1.11 rgbecker  Fix wrong call, suggested by Stuart Bishop's patch
+##### 2003/02/06 #####
+	pdfbase/pdfdoc.py 1.78 andy_robinson  Bug fix from Ian Sparks - missing keyword argument on pdf zoom
+##### 2003/02/03 #####
+	pdfbase/pdfdoc.py 1.77 andy_robinson  Fixed how object comments are formatted - could not always __class___.__name__
+##### 2003/02/02 #####
+	platypus/doctemplate.py 1.61 andy_robinson  Passing invariant argument through to canvas
+	rl_config.py 1.35 andy_robinson  Changes to allow invariant documents when needed
+	platypus/frames.py 1.19 andy_robinson  Changes to allow invariant documents when needed
+	platypus/doctemplate.py 1.60 andy_robinson  Changes to allow invariant documents when needed
+	pdfgen/canvas.py 1.109 andy_robinson  Changes to allow invariant documents when needed
+	pdfbase/pdfdoc.py 1.76 andy_robinson  Changes to allow invariant documents when needed
+##### 2003/01/20 #####
+	lib/utils.py 1.41 andy_robinson  Back in synch, diagnostic function for distro type added
+##### 2003/01/15 #####
+	graphics/shapes.py 1.85 rgbecker  Attempted fix for problems with expandUserNodes
+	lib/utils.py 1.40 rgbecker  Fix major idiocy
+	lib/utils.py 1.39 rgbecker  Fix typo
+	lib/utils.py 1.38 rgbecker  Fix recursivImport for case when baseDir is a sequence
+##### 2003/01/14 #####
+	graphics/shapes.py 1.84 rgbecker  Small change to fix _copyNamedContents
+	graphics/charts/piecharts.py 1.25 rgbecker  Allow for special case empty data
+##### 2003/01/12 #####
+	lib/_rl_accel.c 1.32 rgbecker  Another leak fix thanks to Alessandro Praduroux
+##### 2003/01/06 #####
+	platypus/doctemplate.py 1.59 rgbecker  Fix up multiBuild to be cleverer about initial saves
+	setup.py 1.8 rgbecker  Remove spurious print
+##### 2003/01/05 #####
+	lib/_rl_accel.c 1.31 rgbecker  Fixed gaping hole in _fp_str reported by Alessandro Praduroux
+#################################################################################
 #################### RELEASE 1.17 at 16:00 GMT  3/Jan/2003      #################
 #################################################################################
 ##### 2003/01/03 #####
