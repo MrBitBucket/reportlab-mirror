@@ -145,7 +145,7 @@ randstar (int n)
 #endif
 
 #ifndef nDEAD_CODE
-static void
+void
 print_svp (ArtSVP *vp)
 {
   int i, j;
@@ -600,6 +600,54 @@ test_intersect (void)
 }
 
 static void
+test_intersection(void)
+{
+  ArtVpath vp0[] = {
+    { ART_MOVETO, 10, 10},
+    { ART_LINETO, 60, 60},
+    { ART_LINETO, 110, 10},
+    { ART_LINETO, 10, 10},
+    { ART_END, 0, 0}
+	}, 
+	vp1[]= {
+			{ART_MOVETO, 110,34.999999999999993},
+			{ART_LINETO, 10,35},
+			{ART_LINETO, 10,36},
+			{ART_LINETO, 110,35.999999999999993},
+			{ART_LINETO, 110,34.999999999999993},
+			{ART_END, 0,0}
+  	},
+	vp2[]={
+		{ART_MOVETO, 110,35.999999999999993},
+		{ART_LINETO, 10,36},
+		{ART_LINETO, 10,37},
+		{ART_LINETO, 110,36.999999999999993},
+		{ART_LINETO, 110,35.999999999999993},
+		{ART_END, 0,0}
+		},
+	*vp[] = {vp0, vp1, vp2};
+  ArtSVP *svp[3], *svpi;
+  int i;
+  for(i=0;i<3;i++){
+  	svp[i]=art_svp_from_vpath(vp[i]);
+	printf("vpath[%d]\n", i);
+	print_vpath(vp[i]);
+	printf("svp[%d]\n", i);
+	print_svp(svp[i]);
+  	}
+  for(i=2;i>0;i--){
+	svpi = art_svp_intersect(svp[i],svp[0]);
+	printf("svp[%d] & svp[0]\n", i);
+	print_svp(svpi);
+  	art_svp_free(svpi);
+  	}
+
+  for(i=0;i<3;i++){
+  	art_svp_free(svp[i]);
+  	}
+}
+
+static void
 usage (void)
 {
   fprintf (stderr, "usage: testart <test>\n"
@@ -608,7 +656,8 @@ usage (void)
 "  gradient   -- test pattern for rendered gradients\n"
 "  dash       -- dash test (output is valid PostScript)\n"
 "  dist       -- distance test\n"
-"  intersect  -- softball test for intersector\n");
+"  intersect  -- softball test for intersector\n"
+"  intersect1 -- intersection test\n");
   exit (1);
 }
 
@@ -628,6 +677,8 @@ main (int argc, char **argv)
     test_dash ();
   else if (!strcmp (argv[1], "intersect"))
     test_intersect ();
+  else if (!strcmp (argv[1], "intersect1"))
+    test_intersection();
   else
     usage ();
   return 0;
