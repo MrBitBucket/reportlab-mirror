@@ -59,12 +59,12 @@ try:
                             ExpandGeneralEntities=0,
                             warnCB = warnCB,
                             srcName='string input')
-        def parsexml(xmlText, oneOutermostTag=0,eoCB=None):
+        def parsexml(xmlText, oneOutermostTag=0,eoCB=None,entityReplacer=None):
             pyRXP_parser.eoCB = eoCB
             p = pyRXP_parser.parse(xmlText)
             return oneOutermostTag and p or ('',None,[p],None)
     else:
-        def parsexml(xmlText, oneOutermostTag=0,eoCB=None):
+        def parsexml(xmlText, oneOutermostTag=0,eoCB=None,entityReplacer=None):
             '''eoCB is the entity open callback'''
             def warnCB(s):
                 print s
