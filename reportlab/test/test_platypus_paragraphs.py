@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_paragraphs.py,v 1.9 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_paragraphs.py,v 1.10 2002/11/03 14:50:43 rgbecker Exp $
 """Tests for the reportlab.platypus.paragraphs module.
 """
 
@@ -66,12 +66,27 @@ class ParagraphSplitTestCase(unittest.TestCase):
         story = []
         styleSheet = getSampleStyleSheet()
         bt = styleSheet['BodyText']
-
+        text = '''If you imagine that the box of X's tothe left is
+an image, what I want to be able to do is flow a
+series of paragraphs around the image
+so that once the bottom of the image is reached, then text will flow back to the
+left margin. I know that it would be possible to something like this
+using tables, but I can't see how to have a generic solution.
+There are two examples of this in the demonstration section of the reportlab 
+site.
+If you look at the "minimal" euro python conference brochure, at the end of the 
+timetable section (page 8), there are adverts for "AdSu" and "O'Reilly". I can 
+see how the AdSu one might be done generically, but the O'Reilly, unsure...
+I guess I'm hoping that I've missed something, and that
+it's actually easy to do using platypus.
+'''
+        from reportlab.platypus.flowables import ParagraphAndImage, Image
+        story.append(ParagraphAndImage(Paragraph(text,bt),Image('pythonpowered.gif')))
         phrase = 'This should be a paragraph spanning at least three pages. '
         description = phrase * 250
         story.append(Paragraph(description, bt))
 
-        doc = MyDocTemplate('test_paragraphs_splitting.pdf')
+        doc = MyDocTemplate('test_platypus_paragraphs.pdf')
         doc.multiBuild(story)
 
 
