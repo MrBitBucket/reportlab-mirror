@@ -31,13 +31,16 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.3  2000/05/12 14:53:38  rgbecker
+#	Handle splitting error in build
+#
 #	Revision 1.2  2000/05/12 14:45:31  rgbecker
 #	Single actions only in ActionFlowables
-#
+#	
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.2 2000/05/12 14:45:31 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.3 2000/05/12 14:53:38 rgbecker Exp $ '''
 __doc__="""
 More complicated Document model
 """
@@ -247,7 +250,10 @@ class BaseDocTemplate:
 				S = self.frame.split(f)
 				n = len(S)
 				if n:
-					for f in xrange(n):
+					if not self.frame.add(S[0], self.canv, trySplit=0):
+						raise "LayoutError", "splitting error"
+					del S[0]
+					for f in xrange(n-1):
 						flowables.insert(f,S[f])	# put split flowables back on the list
 				else:
 					flowables.insert(0,f)			# put the flowable back
