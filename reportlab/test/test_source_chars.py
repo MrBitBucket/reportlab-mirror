@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_source_chars.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_source_chars.py,v 1.5 2004/01/20 22:50:32 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_source_chars.py,v 1.6 2004/03/23 14:15:47 rgbecker Exp $
 
 """This tests for things in source files.  Initially, absence of tabs :-)
 """
@@ -14,6 +14,7 @@ import reportlab
 from reportlab.test import unittest
 from reportlab.test.utils import makeSuiteForClasses
 from reportlab.test.utils import SecureTestCase, GlobDirectoryWalker
+from reportlab.lib.utils import open_and_read
 
 
 class SourceTester(SecureTestCase):
@@ -22,7 +23,7 @@ class SourceTester(SecureTestCase):
         self.output = open(os.path.splitext(sys.argv[0])[0]+'.txt','w')
 
     def checkFileForTabs(self, filename):
-        txt = open(filename, 'r').read()
+        txt = open_and_read(filename, 'r')
         chunks = string.split(txt, '\t')
         tabCount = len(chunks) - 1
         if tabCount:
@@ -30,7 +31,7 @@ class SourceTester(SecureTestCase):
             self.output.write("file %s contains %d tab characters!\n" % (filename, tabCount))
 
     def checkFileForTrailingSpaces(self, filename):
-        txt = open(filename, 'r').read()
+        txt = open_and_read(filename, 'r')
         initSize = len(txt)
         badLines = 0
         badChars = 0
