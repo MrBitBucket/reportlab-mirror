@@ -74,9 +74,9 @@ def _getFragWord(frags):
 
 
 class XPreformatted(Paragraph):
-    def __init__(self, text, style, bulletText = None, dedent=0, frags=None, caseSensitive=1):
+    def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1, dedent=0):
         self.caseSensitive = caseSensitive
-        cleaner = lambda text, dedent=dedent: string.join(_dedenter(text,dedent),'\n')
+        cleaner = lambda text, dedent=dedent: string.join(_dedenter(text or '',dedent),'\n')
         self._setup(text, style, bulletText, frags, cleaner)
 
     def breakLines(self, width):
