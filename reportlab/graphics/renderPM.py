@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.14 2001/10/06 01:39:02 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.14 2001/10/06 01:39:02 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.15 2001/10/10 13:55:25 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.15 2001/10/10 13:55:25 rgbecker Exp $ '''
 """Usage:
 	from reportlab.graphics import renderPM
 	renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -185,6 +185,19 @@ class _PMRenderer(Renderer):
 			c.clipPathSet()
 		c.pathStroke()
 
+def _setFont(gs,fontName,fontSize):
+	try:
+		gs.setFont(fontName,fontSize)
+	except _renderPM.Error, errMsg:
+		if errMsg.args[0]!="Can't find font!": raise
+		#here's where we try to add a font to the canvas
+		try:
+			f = getFont(fontName)
+			_renderPM.makeT1Font(fontName,f.face.findT1File(),f.encoding.vector)
+		except:
+			s1, s2 = map(str,sys.exc_info()[:2])
+			raise RenderPMError, "Can't setFont(%s) missing the T1 files?\nOriginally %s: %s" % (fontName,s1,s2)
+		gs.setFont(fontName,fontSize)
 
 BEZIER_ARC_MAGIC = 0.5522847498		#constant for drawing circular arcs w/ Beziers
 class PMCanvas:
@@ -236,18 +249,7 @@ class PMCanvas:
 		return s.getvalue()
 
 	def setFont(self,fontName,fontSize):
-		try:
-			self._gs.setFont(fontName,fontSize)
-		except _renderPM.Error, errMsg:
-			if errMsg.args[0]!="Can't find font!": raise
-			#here's where we try to add a font to the canvas
-			try:
-				f = getFont(fontName)
-				_renderPM.makeT1Font(fontName,f.face.findT1File(),f.encoding.vector)
-			except:
-				s1, s2 = map(str,sys.exc_info()[:2])
-				raise RenderPMError, "Can't setFont(%s) missing the T1 files?\nOriginally %s: %s" % (fontName,s1,s2)
-			self._gs.setFont(fontName,fontSize)
+		_setFont(self._gs,fontName,fontSize)
 
 	def __setattr__(self,name,value):
 		setattr(self._gs,name,value)
