@@ -1,4 +1,55 @@
 .t ReportLab API Reference
+
+This is the API reference for the ReportLab library.  All public
+classes, functions and methods are documented here.
+
+Please note the following points:
+.bu Items with one leading underscore are considered private
+to the modules they are defined in; they are not documented
+here and we make no commitment to their maintenance.
+.bu Items ending in a digit (usually zero) are experimental;
+they are released to allow widespread testing, but are
+guaranteed to be broken in future (if only by dropping the
+zero).  By all means play with these and give feedback, but
+do not use them in production scripts.
+
+.h2 Package Architecture
+
+The reportlab package is broken into a number of subpackages.
+These are as follows:
+
+.df <bullet>reportlab.pdfgen</bullet> - this is the programming
+interface to the PDF file format.  The Canvas (and its co-workers,
+TextObject and PathObject) provide everything you need to
+create PDF output working at a low level - individual shapes
+and lines of text.  Internally, it constructs blocks of
+<i>page marking operators</i> which match your drawing commands,
+and hand them over to the <font name="Courier">pdfbase</font>
+package for drawing.
+
+.df <bullet>reportlab.pdfbase</bullet> - this is not part of the
+public interface.  It contains code to handle the 'outer
+structure' of PDF files, and utilitis to handle text metrics
+and compressed streams.
+
+.df <bullet>reportlab.platypus</bullet> - PLATYPUS stands for
+"Page Layout and Typography Using Scripts".  It provides a
+higher level of abstraction dealing with paragraphs, frames
+on the page, and document templates.  This is used for multi-
+page documents such as this reference.
+
+.df <bullet>reportlab.lib</bullet> - this contains code of
+interest to application developers which cuts across
+both of our libraries, such as standard colors, units, and
+page sizes.  It will also contain more drawable and flowable
+objects in future.
+
+There is also a demos directory containing various demonstrations,
+and a docs directory.  These can be accessed with package
+notation but should not be thought of as packages.
+
+Each package is documented in turn.
+
 .pageBreak
 .h1 pdfgen subpackage API Reference
 .getModuleDoc reportlab.pdfgen.canvas
@@ -6,11 +57,13 @@
 .h1 Appendix A - CVS Revision History
 .beginPre Code
 $Log: reference.yml,v $
-Revision 1.1  2000/06/05 16:39:04  andy_robinson
-Initial revision
+Revision 1.2  2000/06/07 13:39:22  andy_robinson
+Added some text to the first page of reference, and a build batch file
+
+Revision 1.1.1.1  2000/06/05 16:39:04  andy_robinson
+initial import
 
 .endPre
-
 
 
 
