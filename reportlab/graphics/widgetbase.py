@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.33 2002/07/27 10:04:39 rgbecker Exp $
-__version__=''' $Id: widgetbase.py,v 1.33 2002/07/27 10:04:39 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.34 2003/08/03 12:46:23 andy_robinson Exp $
+__version__=''' $Id: widgetbase.py,v 1.34 2003/08/03 12:46:23 andy_robinson Exp $ '''
 import string
 
 from reportlab.graphics import shapes
@@ -146,6 +146,9 @@ class Widget(PropHolder, shapes.UserNode):
     def provideNode(self):
         return self.draw()
 
+    def getBounds(self):
+        "Return outer boundary as x1,y1,x2,y2.  Can be overridden for efficiency"
+        return self.draw().getBounds()
 
 _ItemWrapper={}
 
@@ -391,6 +394,62 @@ class TwoFaces(Widget):
         no implementation needed here"""
         pass
 
+class Sizer(Widget):
+    "Container to show size of all enclosed objects"
+    
+    _attrMap = AttrMap(BASE=shapes.SolidShape,
+        contents = AttrMapValue(isListOfShapes,desc="Contained drawable elements"),
+        )
+    def __init__(self, *elements):
+        self.contents = []
+        self.fillColor = colors.cyan
+        self.strokeColor = colors.magenta
+        
+        for elem in elements:
+            self.add(elem)
+
+    def _addNamedNode(self,name,node):
+        'if name is not None add an attribute pointing to node and add to the attrMap'
+        if name:
+            if name not in self._attrMap.keys():
+                self._attrMap[name] = AttrMapValue(isValidChild)
+            setattr(self, name, node)
+
+    def add(self, node, name=None):
+        """Appends non-None child node to the 'contents' attribute. In addition,
+        if a name is provided, it is subsequently accessible by name
+        """
+        # propagates properties down
+        if node is not None:
+            assert isValidChild(node), "Can only add Shape or UserNode objects to a Group"
+            self.contents.append(node)
+            self._addNamedNode(name,node)
+
+    def getBounds(self):
+        # get bounds of each object
+        if self.contents:
+            b = []
+            for elem in self.contents:
+                b.append(elem.getBounds())
+            return shapes.getRectsBounds(b)
+        else:
+            return (0,0,0,0)
+        
+    def draw(self):
+        g = shapes.Group()
+        (x1, y1, x2, y2) = self.getBounds()
+        r = shapes.Rect(
+            x = x1,
+            y = y1,
+            width = x2-x1,
+            height = y2-y1,
+            fillColor = self.fillColor,
+            strokeColor = self.strokeColor
+            )
+        g.add(r)
+        for elem in self.contents:
+            g.add(elem)
+        return g
 
 def test():
     from reportlab.graphics.charts.piecharts import WedgeProperties

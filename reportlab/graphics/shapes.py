@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.93 2003/07/02 15:37:28 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.94 2003/08/03 12:46:23 andy_robinson Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.93 2003/07/02 15:37:28 johnprecedo Exp $ '''
+__version__=''' $Id: shapes.py,v 1.94 2003/08/03 12:46:23 andy_robinson Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -165,7 +165,7 @@ def _rotatedBoxLimits( x, y, w, h, angle):
 
 
 class _DrawTimeResizeable:
-    '''Addin class to provide thei horribleness of _drawTimeResize'''
+    '''Addin class to provide the horribleness of _drawTimeResize'''
     def _drawTimeResize(self,w,h):
         if hasattr(self,'_canvas'):
             canvas = self._canvas
@@ -179,6 +179,53 @@ class _SetKeyWordArgs:
         """In general properties may be supplied to the constructor."""
         for key, value in keywords.items():
             setattr(self, key, value)
+
+
+#################################################################
+#
+#    Helper functions for working out bounds
+#
+#################################################################
+
+def getRectsBounds(rectList):
+    # filter out any None objects, e.g. empty groups
+    rectList2 = []
+    for elem in rectList:
+        if elem == (0,0,0,0):
+            print 'got an empty one'
+        if elem is not None:
+            rectList2.append(elem)
+    xMin, yMin, xMax, yMax = rectList2[0]
+    
+    for (x1, y1, x2, y2) in rectList2[1:]:
+        if x1 < xMin:
+            xMin = x1
+        if x2 > xMax:
+            xMax = x2
+        if y1 < yMin:
+            yMin = y1
+        if y2 > yMax:
+            yMax = y2
+    return (xMin, yMin, xMax, yMax)
+
+def getPointsBounds(pointList):
+    "Helper function for list of points"
+    xs = []
+    ys = []
+    first = pointList[0]
+    if type(first) in (ListType, TupleType):
+        # pairs of things
+        for (x, y) in pointList:
+            xs.append(x)
+            ys.append(y)
+    else:
+        points = pointList[:]
+        while points:
+            xs.append(points[0])
+            ys.append(points[1])
+            points = points[2:]
+    return (min(xs), min(ys), max(xs), max(ys))
+
 
 #################################################################
 #
@@ -258,6 +305,12 @@ class Shape(_SetKeyWordArgs,_DrawTimeResizeable):
             in some parallel base classes."""
             validateSetattr(self,attr,value)    #from reportlab.lib.attrmap
 
+    def getBounds(self):
+        "Returns bounding rectangle of object as (x1,y1,x2,y2)"
+        raise NotImplementedError("Shapes and widgets must implement getBounds")
+        
+        
+
 class Group(Shape):
     """Groups elements together.  May apply a transform
     to its contents.  Has a publicly accessible property
@@ -284,7 +337,7 @@ class Group(Shape):
             self.add(elt)
         # this just applies keywords; do it at the end so they
         #don;t get overwritten
-        Shape.__init__(self, keywords)
+        _SetKeyWordArgs.__init__(self, keywords)
 
     def _addNamedNode(self,name,node):
         'if name is not None add an attribute pointing to node and add to the attrMap'
@@ -423,6 +476,25 @@ class Group(Shape):
         if b and b not in C: C = [b]+C
         return C
 
+    def getBounds(self):
+        if self.contents:
+            b = []
+            for elem in self.contents:
+                b.append(elem.getBounds())
+            (x1, y1, x2, y2) = getRectsBounds(b)
+            trans = self.transform
+            corners = [[x1,y1], [x1, y2], [x2, y1], [x2,y2]]
+            newCorners = []
+            for corner in corners:
+                newCorners.append(transformPoint(trans, corner))
+            return getPointsBounds(newCorners)
+        else:
+            #empty group needs a sane default; this
+            #will happen when interactively creating a group
+            #nothing has been added to yet.  The alternative is
+            #to handle None as an allowed return value everywhere.
+            return None
+        
 def _addObjImport(obj,I,n=None):
     '''add an import of obj's class to a dictionary of imports'''
     from inspect import getmodule
@@ -710,6 +782,10 @@ class Line(LineShape):
         self.x2 = x2
         self.y2 = y2
 
+    def getBounds(self):
+        "Returns bounding rectangle of object as (x1,y1,x2,y2)"
+        return (self.x1, self.y1, self.x2, self.y2)
+    
 
 class SolidShape(LineShape):
     # base for anything with outline and content
@@ -789,6 +865,16 @@ class Path(SolidShape):
     def closePath(self):
         self.operators.append(_CLOSEPATH)
 
+    def getBounds(self):
+        xs = []
+        ys = []
+        points = self.points[:]
+        while points:
+            xs.append(points[0])
+            ys.append(points[1])
+            points = points[2:]
+        return (min(xs), min(ys), max(xs), max(ys))
+    
 EmptyClipPath=Path()    #special path
 
 def definePath(pathSegs=[],isClipPath=0, dx=0, dy=0, **kw):
@@ -839,6 +925,9 @@ class Rect(SolidShape):
         new.setProperties(self.getProperties())
         return new
 
+    def getBounds(self):
+        return (self.x, self.y, self.x + self.width, self.y + self.height)
+    
 
 class Image(SolidShape):
     """Bitmap image."""
@@ -864,6 +953,8 @@ class Image(SolidShape):
         new.setProperties(self.getProperties())
         return new
 
+    def getBounds(self):
+        return (self.x, self.y, self.x + width, self.y + width)
 
 class Circle(SolidShape):
 
@@ -884,6 +975,8 @@ class Circle(SolidShape):
         new.setProperties(self.getProperties())
         return new
 
+    def getBounds(self):
+        return (self.cx - self.r, self.cy - self.r, self.cx + self.r, self.cy + self.r)
 
 class Ellipse(SolidShape):
 
@@ -906,6 +999,8 @@ class Ellipse(SolidShape):
         new.setProperties(self.getProperties())
         return new
 
+    def getBounds(self):
+            return (self.cx - self.rx, self.cy - self.ry, self.cx + self.rx, self.cy + self.ry)
 
 class Wedge(SolidShape):
     """A "slice of a pie" by default translates to a polygon moves anticlockwise
@@ -991,7 +1086,9 @@ class Wedge(SolidShape):
         new.setProperties(self.getProperties())
         return new
 
-
+    def getBounds(self):
+        return self.asPolygon().getBounds()
+        
 class Polygon(SolidShape):
     """Defines a closed shape; Is implicitly
     joined back to the start for you."""
@@ -1010,6 +1107,8 @@ class Polygon(SolidShape):
         new.setProperties(self.getProperties())
         return new
 
+    def getBounds(self):
+        return getPointsBounds(self.points)
 
 class PolyLine(LineShape):
     """Series of line segments.  Does not define a
@@ -1039,6 +1138,8 @@ class PolyLine(LineShape):
         new.setProperties(self.getProperties())
         return new
 
+    def getBounds(self):
+        return getPointsBounds(self.points)
 
 class String(Shape):
     """Not checked against the spec, just a way to make something work.
@@ -1073,7 +1174,18 @@ class String(Shape):
         new.setProperties(self.getProperties())
         return new
 
+    def getBounds(self):
+        # assumes constant drop of 0.2*size to baseline
+        w = stringWidth(self.text,self.fontName,self.fontSize)
+        if self.textAnchor == 'start':
+            x = self.x
+        elif self.textAnchor == 'middle':
+            x = self.x - 0.5*w
+        elif self.textAnchor == 'end':
+            x = self.x - w
+        return (x, self.y - 0.2 * self.fontSize, x+w, self.y + self.fontSize)
 
+    
 class UserNode(_DrawTimeResizeable):
     """A simple template for creating a new node.  The user (Python
     programmer) may subclasses this.  provideNode() must be defined to
