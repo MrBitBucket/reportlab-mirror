@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.2 2001/03/29 08:40:19 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.3 2001/03/29 08:52:47 dinu_gherman Exp $
 
 from gengraphguide import *
 
@@ -110,6 +110,9 @@ bullet("Group")
 bullet("Path (<i>not implemented yet, but will be added in the future</i>)")
 
 disc("This drawing, taken from our test suite, shows most of the basic shapes:")
+
+# Hack to force a new paragraph before the todo() :-(
+disc("")
 
 todo("add image")
 
@@ -684,6 +687,9 @@ disc("""In addition, a widget always provides a $demo()$ method. Simple ones
 disc("""Here are a handful of simple widgets available in the module 
        <i>signsandsymbols.py</i>:""")
 
+# Hack to force a new paragraph before the todo() :-(
+disc("")
+
 todo("add image")
 # This doesn't work - thes test method writes to a pdf file.
 ##from reportlab.graphics.widgets import signsandsymbols
@@ -836,6 +842,7 @@ pc.wedges[7].strokeWidth = 5
 """)
 #removed 'pc.backColor = yellow' from above code example
 
+# Hack to force a new paragraph before the todo() :-(
 disc("")
 
 todo("We need more of an explaination of what '$__setattr__$ hooks' are")
@@ -892,6 +899,9 @@ pc3.wedges.fontSize = 16
 pc3.wedges.fontColor = colors.yellow
 d.add(pc3, 'pie3')
 """)
+
+# Hack to force a new paragraph before the todo() :-(
+disc("")
 
 todo("add image")
 
@@ -1063,6 +1073,9 @@ lab.setText('Another\nMulti-Line\nString')
 d.add(lab)
 """)
 
+# Hack to force a new paragraph before the todo() :-(
+disc("")
+
 todo("add image")
 
 disc("""In the drawing above, the label is defined relative to the green blob. 
@@ -1071,6 +1084,9 @@ disc("""In the drawing above, the label is defined relative to the green blob.
 
 disc("""At present labels have the following properties, which we believe are 
        sufficient for all charts we have seen to date:""")
+
+# Hack to force a new paragraph before the todo() :-(
+disc("")
 
 todo("""Note: need to turn these into pretty tables with explanations """)
 
@@ -1103,6 +1119,9 @@ disc("""Axes are responsible for determining the mapping from data to image
 
 disc("""This drawing shows two axes, one of each kind, which have been created 
        directly without reference to any chart:""")
+
+# Hack to force a new paragraph before the todo() :-(
+disc("")
 
 todo("add image")
 
@@ -1410,6 +1429,9 @@ chart1.legend = myLegend
 chart2.legend = myLegend
 chart3.legend = myLegend
 """)
+
+# Hack to force a new paragraph before the todo() :-(
+disc("")
 
 todo("""Does this work? Is it an acceptable complication over specifying chart
 colors directly?""")

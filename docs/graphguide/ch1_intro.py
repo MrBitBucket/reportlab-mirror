@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch1_intro.py,v 1.2 2001/03/29 08:40:19 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/ch1_intro.py,v 1.3 2001/03/29 08:52:47 dinu_gherman Exp $
 
 from gengraphguide import *
 import reportlab
@@ -38,8 +38,7 @@ like simple drawings and charts.
 """)
 
 # Hack to force a new paragraph before the todo() :-(
-disc("""
-""")
+disc("")
 
 todo("""
 Be warned! This document is in a preliminary form.
@@ -52,17 +51,18 @@ reportlab-users@egroups.com.
 heading2("Background")
 
 disc("""
-ReportLab is in the process of adding a graphics package to its
-standard distribution. This chapter is both the "design document" and
-the "tutorial".
-""")
-
-disc("""
 The ReportLab library is a general document toolkit aiming to help
-generate documents for reporting solutions. One important aspect of
-such applications is to present data in graphic diagrams or charts.
-Ideally, these charts could be used not only to generate PDF
-documents, but other output formats, bitmap or vector ones, as well.
+generate documents for reporting solutions.
+One important aspect of such applications is to present data with
+graphics like diagrams or charts.
+Ideally, these graphics could be used not only to generate PDF
+documents, but other output formats, bitmap or vector ones, as
+well.
+ReportLab is in the process of adding such a graphics package to
+its standard distribution.
+This document is both the "design document" and the "tutorial".
+It is also an expanded version of chepter 8 of the ReportLab User
+Guide, "Platform Independent Graphics...".
 """)
 
 
