@@ -64,7 +64,7 @@ class TTFontsTestCase(unittest.TestCase):
 
     def testTTF(self):
         "Test PDF generation with TrueType fonts"
-        c = Canvas('test_unicode.pdf', pageCompression=1)
+        c = Canvas('test_pdfbase_ttfonts.pdf')
         c.setFont('Helvetica', 30)
         c.drawString(100,700, 'Unicode TrueType Font Test')
         pdfmetrics.registerFont(TTFont("TestFont", "luxiserif.ttf"))
@@ -80,7 +80,7 @@ class TTFontsTestCase(unittest.TestCase):
         c.save()
 
         # Do it twice with the same font object
-        c = Canvas('test_unicode2.pdf')
+        c = Canvas('test_pdfbase_ttfonts2.pdf')
         # Draw a table of Unicode characters
         c.setFont('TestFont', 10)
         c.drawString(100, 700, 'Hello, ' + utf8(0xffee))
