@@ -27,11 +27,11 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.graphics.shapes import Group, Drawing, Line, Rect, Polygon, Ellipse, \
     Wedge, String, SolidShape, UserNode, STATE_DEFAULTS
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
-from reportlab.graphics.charts.areas import PlotArea
+from reportlab.graphics.charts.piecharts import AbstractPieChart, WedgeProperties, _addWedgeLabel
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.widgets.markers import Marker
 
-class SectorProperties(PropHolder):
+class SectorProperties(WedgeProperties):
     """This holds descriptive information about the sectors in a doughnut chart.
 
     It is not to be confused with the 'sector itself'; this just holds
@@ -39,32 +39,10 @@ class SectorProperties(PropHolder):
     angles.  It can format a genuine Sector object for you with its
     format method.
     """
+    _attrMap = AttrMap(BASE=WedgeProperties,
+            )
 
-    _attrMap = AttrMap(
-        strokeWidth = AttrMapValue(isNumber),
-        fillColor = AttrMapValue(isColorOrNone),
-        strokeColor = AttrMapValue(isColorOrNone),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
-        popout = AttrMapValue(isNumber),
-        fontName = AttrMapValue(isString),
-        fontSize = AttrMapValue(isNumber),
-        fontColor = AttrMapValue(isColorOrNone),
-        labelRadius = AttrMapValue(isNumber),
-        )
-
-    def __init__(self):
-        self.strokeWidth = 0
-        self.fillColor = None
-        self.strokeColor = STATE_DEFAULTS["strokeColor"]
-        self.strokeDashArray = STATE_DEFAULTS["strokeDashArray"]
-        self.popout = 0
-        self.fontName = STATE_DEFAULTS["fontName"]
-        self.fontSize = STATE_DEFAULTS["fontSize"]
-        self.fontColor = STATE_DEFAULTS["fillColor"]
-        self.labelRadius = 1.2
-
-
-class Doughnut(Widget):
+class Doughnut(AbstractPieChart):
     _attrMap = AttrMap(
         x = AttrMapValue(isNumber, desc='X position of the chart within its container.'),
         y = AttrMapValue(isNumber, desc='Y position of the chart within its container.'),
@@ -75,6 +53,7 @@ class Doughnut(Widget):
         startAngle = AttrMapValue(isNumber, desc="angle of first slice; like the compass, 0 is due North"),
         direction = AttrMapValue(OneOf('clockwise', 'anticlockwise'), desc="'clockwise' or 'anticlockwise'"),
         slices = AttrMapValue(None, desc="collection of sector descriptor objects"),
+        simpleLabels = AttrMapValue(isBoolean, desc="If true(default) use String not super duper WedgeLabel"),
         )
 
     def __init__(self):
@@ -86,6 +65,7 @@ class Doughnut(Widget):
         self.labels = None  # or list of strings
         self.startAngle = 90
         self.direction = "clockwise"
+        self.simpleLabels = 1
 
         self.slices = TypedPropertyCollection(SectorProperties)
         self.slices[0].fillColor = colors.darkcyan
@@ -136,10 +116,11 @@ class Doughnut(Widget):
                 t = self.normalizeData(l)
                 normData.append(t)
                 n.append(len(t))
+            self._seriesCount = max(n)
         else:
             normData = self.normalizeData(self.data)
             n = len(normData)
-        self._seriesCount = n
+            self._seriesCount = n
 
         #labels
         if self.labels is None:
@@ -151,7 +132,7 @@ class Doughnut(Widget):
                     labels = list(labels) + [''] * m
         else:
             labels = self.labels
-            #there's no point in raising errors for less than enough errors if
+            #there's no point in raising errors for less than enough labels if
             #we silently create all for the extreme case of no labels.
             if type(n) not in (ListType,TupleType):
                 i = n-len(labels)
@@ -176,15 +157,15 @@ class Doughnut(Widget):
             whichWay = -1
 
         g  = Group()
-        i  = 0
         sn = 0
 
         startAngle = self.startAngle #% 360
+        styleCount = len(self.slices)
         if type(self.data[0]) in (ListType, TupleType):
             #multi-series doughnut
-            styleCount = len(self.slices)
             iradius = (self.height/5.0)/len(self.data)
             for series in normData:
+                i = 0
                 for angle in series:
                     endAngle = (startAngle + (angle * whichWay)) #% 360
                     if abs(startAngle-endAngle)>=1e-5:
@@ -222,25 +203,19 @@ class Doughnut(Widget):
                     g.add(theSector)
                     startAngle = endAngle
 
-                    if labels[i] != "":
+                    text = self.getSeriesName(i,'')
+                    if text:
                         averageAngle = (a1+a2)/2.0
                         aveAngleRadians = averageAngle*pi/180.0
                         labelRadius = sectorStyle.labelRadius
                         labelX = centerx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
                         labelY = centery + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
-
-                        theLabel = String(labelX, labelY, labels[i])
-                        theLabel.textAnchor = "middle"
-                        theLabel.fontSize = sectorStyle.fontSize
-                        theLabel.fontName = sectorStyle.fontName
-                        theLabel.fillColor = sectorStyle.fontColor
-                        g.add(theLabel)
+                        _addWedgeLabel(self,text,g.add,averageAngle,labelX,labelY,sectorStyle)
                     i = i + 1
                 sn = sn + 1
 
         else:
             #single series doughnut
-            styleCount = len(self.slices)
             iradius = self.height/5.0
             for angle in normData:
                 endAngle = (startAngle + (angle * whichWay)) #% 360

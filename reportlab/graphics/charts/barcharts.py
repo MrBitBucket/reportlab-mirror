@@ -34,7 +34,7 @@ class BarChartProperties(PropHolder):
         strokeWidth = AttrMapValue(isNumber, desc='Width of the bar border.'),
         symbol = AttrMapValue(None, desc='A widget to be used instead of a normal bar.'),
         name = AttrMapValue(isString, desc='Text to be associated with a bar (eg seriesname)'),
-        swatchMarker = AttrMapValue(Noneor(isSymbol), desc="None or makeMarker('Diamond') ..."),
+        swatchMarker = AttrMapValue(NoneOr(isSymbol), desc="None or makeMarker('Diamond') ..."),
         )
 
     def __init__(self):

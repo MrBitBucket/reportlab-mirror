@@ -303,7 +303,7 @@ class Pie(AbstractPieChart):
                 theWedge.strokeDashArray = wedgeStyle.strokeDashArray
 
                 g.add(theWedge)
-                text = labels[i]
+                text = self.getSeriesName(i,'')
                 if text:
                     averageAngle = (a1+a2)/2.0
                     aveAngleRadians = averageAngle*pi/180.0
