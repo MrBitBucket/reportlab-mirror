@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: textobject.py,v $
+#	Revision 1.10  2000/04/10 14:24:33  rgbecker
+#	Added defn of _SeqTypes
+#
 #	Revision 1.9  2000/04/10 14:13:14  rgbecker
 #	cursor move optimisation
-#
+#	
 #	Revision 1.8  2000/04/10 09:21:21  andy_robinson
 #	Color methods in textobject and canvas now synchronised.
 #	Added 'verbosity' keyword to allow hiding of 'save myfile.pdf' messages.
@@ -57,7 +60,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: textobject.py,v 1.9 2000/04/10 14:13:14 rgbecker Exp $ '''
+__version__=''' $Id: textobject.py,v 1.10 2000/04/10 14:24:33 rgbecker Exp $ '''
 __doc__=""" 
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -70,6 +73,8 @@ import string
 from types import *
 from reportlab.lib import colors
 from reportlab.lib.colors import ColorType
+
+_SeqTypes=(TupleType,ListType)
 
 class PDFTextObject:
     """PDF logically separates text and graphics drawing; you can
