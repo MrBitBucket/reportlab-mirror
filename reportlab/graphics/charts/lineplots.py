@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.4 2001/04/09 12:01:54 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.5 2001/04/09 22:08:40 dinu_gherman Exp $
 """
 This modules defines a very preliminary Line Plot example.
 """
@@ -16,47 +16,14 @@ from reportlab.graphics.widgets.signsandsymbols import SmileyFace0
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.axes import XValueAxis, YValueAxis, XTimeValueAxis
 from reportlab.graphics.charts.utils import *
+from reportlab.graphics.charts.markers import *
 
 
-def makeFilledSquare(x, y, size, color):
-    "Make a filled square data item representation."
-
-    d = size/2.0
-    rect = Rect(x-d, y-d, 2*d, 2*d)
-    rect.fillColor = color
-    rect.strokeColor = color
-
-    return rect
-
-
-def makeFilledDiamond(x, y, size, color):
-    "Make a filled diamond data item representation."
-
-    d = size/2.0
-    poly = Polygon((x-d,y, x,y+d, x+d,y, x,y-d))
-    poly.fillColor = color
-    poly.strokeColor = color
-
-    return poly
-
-
-def makeSmiley(x, y, size, color):
-    "Make a smiley data item representation."
-
-    d = size
-    s = SmileyFace0()
-    s.color = color
-    s.x = x-d
-    s.y = y-d
-    s.size = d*2
-
-    return s
-
-        
 class LinePlot(Widget):
     """Line plot with multiple lines.
 
-    Both x- and y-axis are value axis.
+    Both x- and y-axis are value axis (so there are no seperate
+    X and Y versions of this class).
     """
 
     _attrMap = {
@@ -97,13 +64,14 @@ class LinePlot(Widget):
         self.strokeColor = None
         self.fillColor = None
 
-        # named so we have less recoding for the horizontal one :-)
-        self.xValueAxis = XTimeValueAxis()
+        self.xValueAxis = XValueAxis()
         self.yValueAxis = YValueAxis()
 
         # this defines two series of 3 points.  Just an example.
-        self.data = [(100,110,120,130),
-                     (70, 80, 80, 90)]        
+        self.data = [
+            ((1,1), (2,2), (2.5,1), (3,3), (4,5)),
+            ((1,2), (2,3), (2.5,2), (3,4), (4,6))
+            ]
         # we really need some well-designed default lists of
         # colors e.g. from Tufte.  These will be used in a
         # cycle to set the fill color of each series.
@@ -139,29 +107,35 @@ class LinePlot(Widget):
     def demo(self):
         """Shows basic use of a line chart."""
 
-        drawing = Drawing(200, 100)
+        drawing = Drawing(400, 200)
+
+        data = [
+            ((1,1), (2,2), (2.5,1), (3,3), (4,5)),
+            ((1,2), (2,3), (2.5,2), (3.5,5), (4,6))
+            ]
+        
+        lp = LinePlot()
+
+        lp.x = 50
+        lp.y = 50
+        lp.height = 125
+        lp.width = 300
+        lp.data = data
+        lp.joinedLines = 1
+        lp.lineLabelFormat = '%2.0f'
+        lp.strokeColor = colors.black
+
+        lp.xValueAxis.valueMin = 0
+        lp.xValueAxis.valueMax = 5
+        lp.xValueAxis.valueStep = 1
+
+        lp.yValueAxis.valueMin = 0
+        lp.yValueAxis.valueMax = 7
+        lp.yValueAxis.valueStep = 1
+        
+        drawing.add(lp)
 
         return drawing
-
-##        data = [
-##                (13, 5, 20, 22, 37, 45, 19, 4),
-##                (5, 20, 46, 38, 23, 21, 6, 14)
-##                ]
-##        
-##        lc = LinePlot()
-##        lc.x = 10
-##        lc.y = 10
-##        lc.height = 85
-##        lc.width = 90
-##        lc.data = data
-##
-##        lc.xValueAxis.valueMin = 0
-##        lc.xValueAxis.valueMax = len(lc.data[0])
-##        lc.xValueAxis.valueStep = 1
-##
-##        drawing.add(lc)
-##
-##        return drawing
 
 
     def calcPositions(self):
@@ -189,7 +163,7 @@ class LinePlot(Widget):
             for colNo in range(len(self.data[0])):
                 datum = self.data[rowNo][colNo] # x,y value
                 if type(datum[0]) == type(''):
-                    x = self.xValueAxis.scale(time.mktime(mkTimeTuple(datum[0])))
+                    x = self.xValueAxis.scale(mktime(mkTimeTuple(datum[0])))
                 else:
                     x = self.xValueAxis.scale(datum[0])
                 y = self.yValueAxis.scale(datum[1])
@@ -197,32 +171,46 @@ class LinePlot(Widget):
             self._positions.append(line)
 
 
-    def draw(self):
-        self.yValueAxis.configure(self.data)
-        self.yValueAxis.setPosition(self.x, self.y, self.height)
-
-        # if zero is in chart, put x axis there, otherwise
-        # use bottom.
-        xAxisCrossesAt = self.yValueAxis.scale(0)
-        if ((xAxisCrossesAt > self.y + self.height) or (xAxisCrossesAt < self.y)):
-            self.xValueAxis.setPosition(self.x, self.y, self.width)
-        else:
-            self.xValueAxis.setPosition(self.x, xAxisCrossesAt, self.width)
-
-        self.xValueAxis.configure(self.data)
-        
-        self.calcPositions()        
-        
+    def makeBackground(self):
         g = Group()
 
-        # debug mode - show border
         g.add(Rect(self.x, self.y,
                    self.width, self.height,
                    strokeColor = self.strokeColor,
                    fillColor= self.fillColor))
-        
-        g.add(self.xValueAxis)
-        g.add(self.yValueAxis)
+                
+        return g
+
+
+    def drawLabel(self, group, rowNo, colNo, x, y):
+        "Draw a label for a given item in the list."
+
+        labelFmt = self.lineLabelFormat
+        labelValue = self.data[rowNo][colNo][1] ###
+
+        if labelFmt is None:
+            labelText = None
+        elif type(labelFmt) is StringType:
+            labelText = labelFmt % labelValue
+        elif type(labelFmt) is FunctionType:
+            labelText = labelFmt(labelValue)
+        else:
+            msg = "Unknown formatter type %s, expected string or function"  
+            raise Exception, msg % labelFmt
+
+        if labelText:
+            label = self.lineLabels[(rowNo, colNo)]
+            #hack to make sure labels are outside the bar
+            if y > 0:
+                label.setOrigin(x, y + self.lineLabelNudge)
+            else:
+                label.setOrigin(x, y - self.lineLabelNudge)
+            label.setText(labelText)
+            group.add(label)
+
+
+    def makeLines(self):
+        g = Group()
 
         labelFmt = self.lineLabelFormat
 
@@ -258,42 +246,41 @@ class LinePlot(Widget):
         return g
 
 
-    def drawLabel(self, group, rowNo, colNo, x, y):
-        "Draw a label for a given item in the list."
+    def draw(self):
+        self.yValueAxis.setPosition(self.x, self.y, self.height)
+        self.yValueAxis.configure(self.data)
 
-        pass
-##        labelFmt = self.lineLabelFormat
-##        labelValue = self.data[rowNo][colNo]
-##        
-##        if labelFmt is None:
-##            labelText = None
-##        elif type(labelFmt) is StringType:
-##            labelText = labelFmt % labelValue
-##        elif type(labelFmt) is FunctionType:
-##            labelText = labelFmt(labelValue)
-##        else:
-##            msg = "Unknown formatter type %s, expected string or function"  
-##            raise Exception, msg % labelFmt
-##
-##        if labelText:
-##            label = self.lineLabels[(rowNo, colNo)]
-##            #hack to make sure labels are outside the bar
-##            if y > 0:
-##                label.setOrigin(x, y + self.lineLabelNudge)
-##            else:
-##                label.setOrigin(x, y - self.lineLabelNudge)
-##            label.setText(labelText)
-##            group.add(label)
+        # if zero is in chart, put x axis there, otherwise
+        # use bottom.
+        xAxisCrossesAt = self.yValueAxis.scale(0)
+        if ((xAxisCrossesAt > self.y + self.height) or (xAxisCrossesAt < self.y)):
+            y = self.y
+        else:
+            y = xAxisCrossesAt
+
+        self.xValueAxis.setPosition(self.x, y, self.width)
+        self.xValueAxis.configure(self.data)
+        
+        self.calcPositions()        
+        
+        g = Group()
+
+        g.add(self.makeBackground())
+        g.add(self.xValueAxis)
+        g.add(self.yValueAxis)
+        g.add(self.makeLines())
+
+        return g
 
 
-def sample0():
+def sample1a():
     "A line plot with non-equidistant points in x-axis."
     
     drawing = Drawing(400, 200)
 
     data = [
-        ((1,1), (2,2), (2.5,1), (3,3), (4,5)),
-        ((1,2), (2,3), (2.5,2), (3,4), (4,6))
+            ((1,1), (2,2), (2.5,1), (3,3), (4,5)),
+            ((1,2), (2,3), (2.5,2), (3.5,5), (4,6))
         ]
     
     lp = LinePlot()
@@ -305,11 +292,10 @@ def sample0():
     lp.data = data
     lp.joinedLines = 1
     lp.usedSymbol = makeFilledDiamond
-    lp.lineLabelFormat = '%2.0f'
     lp.strokeColor = colors.black
 
     lp.xValueAxis.valueMin = 0
-    lp.xValueAxis.valueMax = 7
+    lp.xValueAxis.valueMax = 5
     lp.xValueAxis.valueStep = 1
 
     lp.yValueAxis.valueMin = 0
@@ -321,14 +307,14 @@ def sample0():
     return drawing
 
 
-def sample1():
+def sample1b():
     "A line plot with non-equidistant points in x-axis."
     
     drawing = Drawing(400, 200)
 
     data = [
-        ((1,1), (2,2), (2.5,1), (3,3), (4,5)),
-        ((1,2), (2,3), (2.5,2), (3,4), (4,6))
+            ((1,1), (2,2), (2.5,1), (3,3), (4,5)),
+            ((1,2), (2,3), (2.5,2), (3.5,5), (4,6))
         ]
     
     lp = LinePlot()
@@ -344,13 +330,49 @@ def sample1():
     lp.strokeColor = colors.black
 
     lp.xValueAxis.valueMin = 0
-    lp.xValueAxis.valueMax = 7
+    lp.xValueAxis.valueMax = 5
     lp.xValueAxis.valueSteps = [1, 2, 2.5, 3, 4, 5]
     lp.xValueAxis.labelTextFormat = '%2.1f'
 
     lp.yValueAxis.valueMin = 0
     lp.yValueAxis.valueMax = 7
     lp.yValueAxis.valueStep = 1
+    
+    drawing.add(lp)
+
+    return drawing
+
+
+def sample1c():
+    "A line plot with non-equidistant points in x-axis."
+    
+    drawing = Drawing(400, 200)
+
+    data = [
+            ((1,1), (2,2), (2.5,1), (3,3), (4,5)),
+            ((1,2), (2,3), (2.5,2), (3.5,5), (4,6))
+        ]
+    
+    lp = LinePlot()
+
+    lp.x = 50
+    lp.y = 50
+    lp.height = 125
+    lp.width = 300
+    lp.data = data
+    lp.joinedLines = 1
+    lp.usedSymbol = makeFilledDiamond
+    lp.lineLabelFormat = '%2.0f'
+    lp.strokeColor = colors.black
+
+    lp.xValueAxis.valueMin = 0
+    lp.xValueAxis.valueMax = 5
+    lp.xValueAxis.valueSteps = [1, 2, 2.5, 3, 4, 5]
+    lp.xValueAxis.labelTextFormat = '%2.1f'
+
+    lp.yValueAxis.valueMin = 0
+    lp.yValueAxis.valueMax = 7
+    lp.yValueAxis.valueSteps = [1, 2, 3, 5, 6]
     
     drawing.add(lp)
 
@@ -398,16 +420,15 @@ def sample2():
     lp.data = data
     lp.joinedLines = 1
     lp.usedSymbol = makeFilledDiamond
-    lp.lineLabelFormat = '%4.2f'
     lp.strokeColor = colors.black
 
-    start = time.mktime(mkTimeTuple('25/11/1991'))
-    t0 = time.mktime(mkTimeTuple('30/11/1991'))
-    t1 = time.mktime(mkTimeTuple('31/12/1991'))
-    t2 = time.mktime(mkTimeTuple('31/03/1992'))
-    t3 = time.mktime(mkTimeTuple('30/06/1992'))
-    t4 = time.mktime(mkTimeTuple('30/09/1992'))
-    end = time.mktime(mkTimeTuple('31/12/1992'))
+    start = mktime(mkTimeTuple('25/11/1991'))
+    t0 = mktime(mkTimeTuple('30/11/1991'))
+    t1 = mktime(mkTimeTuple('31/12/1991'))
+    t2 = mktime(mkTimeTuple('31/03/1992'))
+    t3 = mktime(mkTimeTuple('30/06/1992'))
+    t4 = mktime(mkTimeTuple('30/09/1992'))
+    end = mktime(mkTimeTuple('31/12/1992'))
     lp.xValueAxis.valueMin = start
     lp.xValueAxis.valueMax = end
     lp.xValueAxis.valueSteps = [start, t0, t1, t2, t3, t4, end]
@@ -423,20 +444,3 @@ def sample2():
     drawing.add(lp)
 
     return drawing
-
-##ID_ICRS,PriceTypeID,Date,Fund ROR,IndexROR
-##41,4,25/11/1991 00:00,1,1
-##41,4,30/11/1991 00:00,1.000933333,1.000895188
-##41,4,31/12/1991 00:00,1.0062,1.006259951
-##41,4,31/01/1992 00:00,1.0112,1.01165347
-##41,4,29/02/1992 00:00,1.0158,1.017224821
-##41,4,31/03/1992 00:00,1.020733333,1.022776967
-##41,4,30/04/1992 00:00,1.026133333,1.028108211
-##41,4,31/05/1992 00:00,1.030266667,1.033061804
-##41,4,30/06/1992 00:00,1.034466667,1.037424855
-##41,4,31/07/1992 00:00,1.038733333,1.041857904
-##41,4,31/08/1992 00:00,1.0422,1.045738637
-##41,4,30/09/1992 00:00,1.045533333,1.052416182
-##41,4,31/10/1992 00:00,1.049866667,1.058263606
-##41,4,30/11/1992 00:00,1.054733333,1.065175179
-##41,4,31/12/1992 00:00,1.061,1.07088448
