@@ -32,10 +32,10 @@
 #
 ###############################################################################
 #	$Log: cvs_check.py,v $
-#	Revision 1.3  2000/02/15 19:36:51  rgbecker
-#	Fix call of cvs_checkout
+#	Revision 1.4  2000/02/16 14:07:14  rgbecker
+#	Fixes for package reportlab
 #
-__version__=''' $Id: cvs_check.py,v 1.3 2000/02/15 19:36:51 rgbecker Exp $ '''
+__version__=''' $Id: cvs_check.py,v 1.4 2000/02/16 14:07:14 rgbecker Exp $ '''
 '''
 script for testing ReportLab anonymous cvs download and test
 '''
@@ -78,6 +78,17 @@ def recursive_rmdir(d):
 				recursive_rmdir(fn)
 		os.rmdir(d)
 
+def safe_remove(p):
+	if os.path.isfile(p): os.remove(p)
+
+def do_exec(cmd, cmdname):
+	i=os.popen(cmd,'r')
+	print i.read()
+	i = i.close()
+	if i is not None:
+		print 'there was an error executing '+cmdname
+		sys.exit(1)
+
 def cvs_checkout(d):
 	recursive_rmdir(d)
 
@@ -94,12 +105,35 @@ def cvs_checkout(d):
 	f = open(os.path.join(d,'.cvspass'),'w')
 	f.write(_cvspass+'\n')
 	f.close()
-	i=os.popen(cvs+' -z7 -d:pserver:anonymous@cvs.reportlab.sourceforge.net:/cvsroot/reportlab co reportlab','r')
-	print i.read()
-	i = i.close()
-	if i is not None:
-		print 'there was an error during the download phase'
-		sys.exit(1)
+	do_exec(cvs+' -z7 -d:pserver:anonymous@cvs.reportlab.sourceforge.net:/cvsroot/reportlab co reportlab',
+		'the download phase')
+
+def do_zip(d):
+	'create .tgz and .zip file archives of d/reportlab'
+	def find_src_files(L,d,N):
+		if os.path.basename(d)=='CVS': return	#ignore all CVS
+		for n in N:
+			fn = os.path.normcase(os.path.normpath(os.path.join(d,n)))
+			if os.path.isfile(fn): L.append(fn)
+
+	os.chdir(d)
+	src_files = []
+	fn = os.path.normcase(os.path.normpath('reportlab'))
+	os.path.walk(fn,find_src_files,src_files)
+	tarfile = 'replab'
+	safe_remove(tarfile)
+	safe_remove('replab.tgz')
+	zipfile = 'replab.zip'
+	safe_remove(zipfile)
+	if src_files==[]: return
+	src_files = string.replace(string.join(src_files),'\\','/')
+
+	tar = find_exe('tar')
+	do_exec('%s cvf %s %s' % (tar, tarfile, src_files), 'tar creation')
+	do_exec('%s -S .tgz %s' % (find_exe('gzip'), tarfile), 'gzip')
+
+	zip = find_exe('zip')
+	do_exec('%s -u %s %s' % (zip, zipfile, src_files), 'zip creation' )
 
 def do_tests(d):
 	global _ecount
@@ -108,9 +142,11 @@ def do_tests(d):
 		n = os.path.basename(d)
 		if n!='test' and n!='tests': return
 		for n in filter(lambda n: n[-3:]=='.py',N):
-			L.append(os.path.normcase(os.path.normpath(os.path.join(d,n))))
+			fn = os.path.normcase(os.path.normpath(os.path.join(d,n)))
+			if os.path.isfile(fn): L.append(fn)
 
-	fn = os.path.normcase(os.path.normpath(os.path.join(d,'reportlab')))
+	#fn = os.path.normcase(os.path.normpath(os.path.join(d,'reportlab')))
+	fn = os.path.normcase(os.path.normpath(d))
 	if fn not in sys.path: sys.path.insert(0,fn)
 	test_files = []
 	os.path.walk(fn,find_test_files,test_files)
@@ -127,7 +163,7 @@ def do_tests(d):
 			_ecount = _ecount + 1
 
 if __name__=='__main__':
-	legal_options = ['-dir', '-help','-nocvs','-notest','-clean', '-fclean']
+	legal_options = ['-dir', '-help','-nocvs','-notest','-clean', '-fclean', '-zip' ]
 	def usage(code=0, msg=''):
 		f = code and sys.stderr or sys.stdout
 		if msg is not None: f.write(msg+'\n')
@@ -143,6 +179,7 @@ Usage
 	-notest 	don't carry out tests
 	-clean		cleanup if no errors
 	-fclean		cleanup even if some errors occur
+	-zip		create tgz and zip files after cvs stage
 ''')
 		sys.exit(code)
 
@@ -164,6 +201,9 @@ Usage
 
 	if '-nocvs' not in options and dir is _testdir:
 		cvs_checkout(dir)
+
+	if '-zip' in options:
+		do_zip(dir)
 
 	if '-notest' not in options:
 		do_tests(dir)
