@@ -15,6 +15,7 @@ from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus.paragraph import Paragraph
+from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate \
      import PageTemplate, BaseDocTemplate
@@ -23,7 +24,7 @@ from reportlab.platypus.tableofcontents0 import TableOfContents0
 from reportlab.platypus.tables import TableStyle, Table
 
 
-def mainPageFrame(canvas, doc):
+def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
     
     canvas.saveState()
@@ -36,7 +37,7 @@ def mainPageFrame(canvas, doc):
     canvas.restoreState()
     
 
-class MyTemplate(BaseDocTemplate):
+class MyDocTemplate(BaseDocTemplate):
     "The document template used for all PDF documents."
     
     _invalidInitArgs = ('pageTemplates',)
@@ -45,24 +46,31 @@ class MyTemplate(BaseDocTemplate):
         frame1 = Frame(2.5*cm, 2.5*cm, 15*cm, 25*cm, id='F1')
         self.allowSplitting = 0
         apply(BaseDocTemplate.__init__, (self, filename), kw)
-        template = PageTemplate('normal', [frame1], mainPageFrame)
+        template = PageTemplate('normal', [frame1], myMainPageFrame)
         self.addPageTemplates(template)
 
 
     def afterFlowable(self, flowable):
-        "Takes care of registering TOC entries."
+        "Registers TOC entries and makes outline entries."
         
         if flowable.__class__.__name__ == 'Paragraph':
             styleName = flowable.style.name
             if styleName[:7] == 'Heading':
+                # Register TOC entries.
                 level = int(styleName[7:])
                 text = flowable.getPlainText()
                 pageNum = self.page 
                 self.notify0('TOCEntry', (level, text, pageNum))
 
+                # Add PDF outline entries (not really needed/tested here).
+                key = str(hash(flowable))
+                c = self.canv
+                c.bookmarkPage(key)
+                c.addOutlineEntry(text, key, level=level, closed=0)
 
-def makeHeadingStyle(level, fontName='Times-Roman'):
-    "Make a heading style for different levels."
+
+def makeHeaderStyle(level, fontName='Times-Roman'):
+    "Make a header style for different levels."
 
     assert level >= 0, "Level must be >= 0."
     
@@ -78,8 +86,8 @@ def makeHeadingStyle(level, fontName='Times-Roman'):
     return style
 
 
-def makeTocHeadingStyle(level, delta, epsilon, fontName='Times-Roman'):
-    "Make a heading style for different levels."
+def makeTocHeaderStyle(level, delta, epsilon, fontName='Times-Roman'):
+    "Make a header style for different levels."
 
     assert level >= 0, "Level must be >= 0."
     
@@ -103,41 +111,51 @@ class TocTestCase(unittest.TestCase):
     def test1(self):
         """Test story with TOC and a cascaded header hierarchy.
 
-        The story contains exactly one table of contents that is
-        immediatly followed by a list of of cascaded levels of
-        header lines, each nested one level deeper than the
-        previous one."""
+        The story should contain exactly one table of contents that is
+        immediatly followed by a list of of cascaded levels of header
+        lines, each nested one level deeper than the previous one.
+
+        Features to be visually confirmed by a human being are:
+
+            1. TOC lines are indented in multiples of 1 cm. 
+            2. Wrapped TOC lines continue with additional 0.5 cm indentation.
+            3. ...
+        """
 
         maxLevels = 12
 
         # Create styles to be used for document headers
         # on differnet levels.
-        headlineLevelStyles = []
+        headerLevelStyles = []
         for i in range(maxLevels):
-            headlineLevelStyles.append(makeHeadingStyle(i))
+            headerLevelStyles.append(makeHeaderStyle(i))
 
         # Create styles to be used for TOC entry lines
         # for headers on differnet levels.
         tocLevelStyles = []
         d, e = tableofcontents0.delta, tableofcontents0.epsilon
         for i in range(maxLevels):
-            tocLevelStyles.append(makeTocHeadingStyle(i, d, e))
+            tocLevelStyles.append(makeTocHeaderStyle(i, d, e))
 
-        # Build story containinf one TOC followed by some
-        # cascaded levels of header lines, each nested one
-        # level deeper than the previous one.
+        # Build story.
         story = []
+        styleSheet = getSampleStyleSheet()
+        bt = styleSheet['BodyText']
+
+        description = '<font color=red>%s</font>' % self.test1.__doc__
+        story.append(XPreformatted(description, bt))
+
         toc = TableOfContents0()
         toc.levelStyles = tocLevelStyles
         story.append(toc)
 
         for i in range(maxLevels):
             story.append(Paragraph('HEADER, LEVEL %d' % i,
-                                   headlineLevelStyles[i]))
+                                   headerLevelStyles[i]))
 
         tempfile.tempdir = os.curdir
         path = join(tempfile.tempdir, 'test_platypus_toc.pdf')
-        doc = MyTemplate(path)
+        doc = MyDocTemplate(path)
         doc.multiBuild0(story)
         
 
