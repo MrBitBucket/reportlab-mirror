@@ -14,7 +14,7 @@ import sys
 import os
 import imp
 
-import yaml
+import docs.tools.yaml
 
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import *
@@ -53,7 +53,7 @@ class MyDocTemplate(BaseDocTemplate):
         self.addPageTemplates(MyPageTemplate('Normal'))
 
 def run(infilename, outfilename):
-    p = yaml.Parser()
+    p = docs.tools.yaml.Parser()
     results = p.parseFile(infilename)
 
     ss = getStyleSheet()
