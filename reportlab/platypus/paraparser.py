@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.50 2003/05/26 12:22:54 rgbecker Exp $
-__version__=''' $Id: paraparser.py,v 1.50 2003/05/26 12:22:54 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.51 2003/06/01 09:38:16 rgbecker Exp $
+__version__=''' $Id: paraparser.py,v 1.51 2003/06/01 09:38:16 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -26,23 +26,46 @@ except ImportError, errMsg:
 from reportlab.lib.colors import toColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
+from reportlab.lib.units import inch,mm,cm,pica
 _re_para = re.compile('^\\s*<\\s*para(\\s+|>)')
 
 sizeDelta = 2       # amount to reduce font size by for super and sub script
 subFraction = 0.5   # fraction of font size that a sub script should be lowered
 superFraction = 0.5 # fraction of font size that a super script should be raised
 
-def _num(s):
+def _num(s, unit=1):
+    """Convert a string like '10cm' to an int or float (in points).
+       The default unit is point, but optionally you can use other
+       default units like mm.
+    """
+    if s[-2:]=='cm':
+        unit=cm
+        s = s[:-2]
+    if s[-2:]=='in':
+        unit=inch
+        s = s[:-2]
+    if s[-2:]=='pt':
+        unit=1
+        s = s[:-2]
+    if s[-1:]=='i':
+        unit=inch
+        s = s[:-1]
+    if s[-2:]=='mm':
+        unit=mm
+        s = s[:-2]
+    if s[-4:]=='pica':
+        unit=pica
+        s = s[:-4]
     if s[0] in ['+','-']:
         try:
-            return ('relative',int(s))
+            return ('relative',int(s)*unit)
         except ValueError:
-            return ('relative',float(s))
+            return ('relative',float(s)*unit)
     else:
         try:
-            return int(s)
+            return int(s)*unit
         except ValueError:
-            return float(s)
+            return float(s)*unit
 
 def _align(s):
     s = string.lower(s)
@@ -71,7 +94,8 @@ _paraAttrMap = {'font': ('fontName', None),
                 'backcolor':('backColor',toColor),
                 'bgcolor':('backColor',toColor),
                 'bg':('backColor',toColor),
-                'fg': ('textColor',toColor)}
+                'fg': ('textColor',toColor),
+                }
 
 _bulletAttrMap = {
                 'font': ('bulletFontName', None),
@@ -80,14 +104,16 @@ _bulletAttrMap = {
                 'fontsize': ('bulletFontSize',_num),
                 'indent': ('bulletIndent',_num),
                 'color': ('bulletColor',toColor),
-                'fg': ('bulletColor',toColor)}
+                'fg': ('bulletColor',toColor),
+                }
 
 #things which are valid font attributes
 _fontAttrMap = {'size': ('fontSize', _num),
                 'face': ('fontName', None),
                 'name': ('fontName', None),
                 'fg':   ('textColor', toColor),
-                'color':('textColor', toColor)}
+                'color':('textColor', toColor),
+                }
 
 def _addAttributeNames(m):
     K = m.keys()
@@ -112,7 +138,7 @@ def _applyAttributes(obj, attr):
         setattr(obj,k,v)
 
 #Named character entities intended to be supported from the special font
-#with additions suggested by Christoph Zwerschke who alos suggested the 
+#with additions suggested by Christoph Zwerschke who also suggested the 
 #numeric entity names that follow.
 greeks = {
     'Alpha': 'A',
@@ -416,6 +442,15 @@ class ParaParser(xmllib.XMLParser):
     # for that data will be aparent by the current settings.
     #----------------------------------------------------------
 
+    def __getattr__( self, attrName ):
+        """This way we can handle <TAG> the same way as <tag> (ignoring case)."""
+        if attrName != attrName.lower() and attrName!="caseSensitive" and not self.caseSensitive:
+            if attrName[:6]=="start_":
+                return eval ("self."+attrName.lower())
+            if attrName[:4]=="end_":
+                return eval ("self."+attrName.lower())
+        raise AttributeError, attrName
+
     #### bold
     def start_b( self, attributes ):
         self._push(bold=1)
@@ -423,11 +458,23 @@ class ParaParser(xmllib.XMLParser):
     def end_b( self ):
         self._pop(bold=1)
 
+    def start_strong( self, attributes ):
+        self._push(bold=1)
+
+    def end_strong( self ):
+        self._pop(bold=1)
+
     #### italics
     def start_i( self, attributes ):
         self._push(italic=1)
 
     def end_i( self ):
+        self._pop(italic=1)
+
+    def start_em( self, attributes ):
+        self._push(italic=1)
+
+    def end_em( self ):
         self._pop(italic=1)
 
     #### underline
@@ -636,7 +683,8 @@ class ParaParser(xmllib.XMLParser):
     def getAttributes(self,attr,attrMap):
         A = {}
         for k, v in attr.items():
-            k = string.lower(k)
+            if not self.caseSensitive:
+                k = string.lower(k)
             if k in attrMap.keys():
                 j = attrMap[k]
                 func = j[1]
@@ -651,20 +699,23 @@ class ParaParser(xmllib.XMLParser):
     #----------------------------------------------------------------
 
     def __init__(self,verbose=0):
+        self.caseSensitive = 1
         if _xmllib_newStyle:
             xmllib.XMLParser.__init__(self,verbose=verbose)
         else:
             xmllib.XMLParser.__init__(self)
             # set up handlers for various tags
-            self.elements = {   'b': (self.start_b, self.end_b),
-                            'u': (self.start_u, self.end_u),
-                            'i': (self.start_i, self.end_i),
-                            'super': (self.start_super, self.end_super),
-                            'sup': (self.start_super, self.end_super),
-                            'sub': (self.start_sub, self.end_sub),
-                            'font': (self.start_font, self.end_font),
-                            'greek': (self.start_greek, self.end_greek),
-                            'para': (self.start_para, self.end_para)
+            self.elements = {'b': (self.start_b, self.end_b),
+                             'strong':  (self.start_b, self.end_b),
+                             'u': (self.start_u, self.end_u),
+                             'i': (self.start_i, self.end_i),
+                             'em': (self.start_i, self.end_i),
+                             'super': (self.start_super, self.end_super),
+                             'sup': (self.start_super, self.end_super),
+                             'sub': (self.start_sub, self.end_sub),
+                             'font': (self.start_font, self.end_font),
+                             'greek': (self.start_greek, self.end_greek),
+                             'para': (self.start_para, self.end_para),
                             }
 
 
@@ -883,3 +934,8 @@ his lyre, while two tumblers went about performing in the midst of
 them when the man struck up with his tune.]''')
     check_text('''<onDraw name="myFunc" label="aaa   bbb">A paragraph''')
     check_text('''<para><onDraw name="myFunc" label="aaa   bbb">B paragraph</para>''')
+    # HVB, 30.05.2003: Test for new features
+    _parser.caseSensitive=0
+    check_text('''Here comes <FONT FACE="Helvetica" SIZE="14pt">Helvetica 14</FONT> with <STRONG>strong</STRONG> <EM>emphasis</EM>.''')
+    check_text('''Here comes <font face="Helvetica" size="14pt">Helvetica 14</font> with <Strong>strong</Strong> <em>emphasis</em>.''')
+    check_text('''Here comes <font face="Courier" size="3cm">Courier 3cm</font> and normal again.''')

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.65 2003/04/22 12:32:23 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.65 2003/04/22 12:32:23 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.66 2003/06/01 09:38:16 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.66 2003/06/01 09:38:16 rgbecker Exp $ '''
 from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
@@ -351,10 +351,11 @@ def _do_under(i, t_off, tx):
     tx.XtraState.underline=0
 
 class Paragraph(Flowable):
-    """ Paragraph(text, style, bulletText=None)
+    """ Paragraph(text, style, bulletText=None, caseSensitive=1)
         text a string of stuff to go into the paragraph.
         style is a style definition as in reportlab.lib.styles.
         bulletText is an optional bullet defintion.
+        caseSensitive set this to 0 if you want the markup tags and their attributes to be case-insensitive.
 
         This class is a flowable that can format a block of text
         into a paragraph with a given style.
@@ -372,7 +373,8 @@ class Paragraph(Flowable):
 
         It will also be able to handle any MathML specified Greek characters.
     """
-    def __init__(self, text, style, bulletText = None, frags=None):
+    def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1):
+        self.caseSensitive = caseSensitive 
         self._setup(text, style, bulletText, frags, cleanBlockQuotedText)
 
 
@@ -395,6 +397,7 @@ class Paragraph(Flowable):
     def _setup(self, text, style, bulletText, frags, cleaner):
         if frags is None:
             text = cleaner(text)
+            _parser.caseSensitive = self.caseSensitive
             style, frags, bulletTextFrags = _parser.parse(text,style)
             if frags is None:
                 raise "xml parser error (%s) in paragraph beginning\n'%s'"\
@@ -913,3 +916,14 @@ umfassend zu sein."""
         dumpParagraphFrags(P)
         w,h = P.wrap(6*72, 9.7*72)
         dumpParagraphLines(P)
+
+    if flagged(6):
+        for text in ['''Here comes <FONT FACE="Helvetica" SIZE="14pt">Helvetica 14</FONT> with <STRONG>strong</STRONG> <EM>emphasis</EM>.''',
+                     '''Here comes <font face="Helvetica" size="14pt">Helvetica 14</font> with <Strong>strong</Strong> <em>emphasis</em>.''',
+                     '''Here comes <font face="Courier" size="3cm">Courier 3cm</font> and normal again.''',
+                     ]:
+            P=Paragraph(text, styleSheet['Normal'], caseSensitive=0)
+            dumpParagraphFrags(P)
+            w,h = P.wrap(6*72, 9.7*72)
+            dumpParagraphLines(P)
+        

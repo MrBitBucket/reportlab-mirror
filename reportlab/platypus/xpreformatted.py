@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/xpreformatted.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/xpreformatted.py,v 1.16 2002/07/24 19:56:38 andy_robinson Exp $
-__version__=''' $Id: xpreformatted.py,v 1.16 2002/07/24 19:56:38 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/xpreformatted.py,v 1.17 2003/06/01 09:38:16 rgbecker Exp $
+__version__=''' $Id: xpreformatted.py,v 1.17 2003/06/01 09:38:16 rgbecker Exp $ '''
 
 import string
 from types import StringType, ListType
@@ -75,7 +75,8 @@ def _getFragWord(frags):
 
 
 class XPreformatted(Paragraph):
-    def __init__(self, text, style, bulletText = None, dedent=0, frags=None):
+    def __init__(self, text, style, bulletText = None, dedent=0, frags=None, caseSensitive=1):
+        self.caseSensitive = caseSensitive
         cleaner = lambda text, dedent=dedent: string.join(_dedenter(text,dedent),'\n')
         self._setup(text, style, bulletText, frags, cleaner)
 
