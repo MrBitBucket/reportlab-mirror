@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.14  2000/04/13 17:06:40  rgbecker
+#	Fixed SimpleFrame.add
+#
 #	Revision 1.13  2000/04/13 14:48:41  rgbecker
 #	<para> tag added in layout.py paraparser.py
-#
+#	
 #	Revision 1.12  2000/04/12 16:26:51  rgbecker
 #	XML Tagged Paragraph parser changes
 #	
@@ -67,7 +70,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.13 2000/04/13 14:48:41 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.14 2000/04/13 17:06:40 rgbecker Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -923,18 +926,21 @@ class SimpleFrame:
 		Raises a LayoutError if the object is too wide,
 		or if it is too high for a totally empty frame,
 		to avoid infinite loops"""
-		w, h = drawable.wrap(self.width, self.y - self.bottomMargin - self.bottomPadding)
+		y = self.y
+		p = self.bottomMargin + self.bottomPadding
+		w, h = drawable.wrap(self.width, y - p )
 
 		if h > self.height:
 			raise "LayoutError", "Object (%d points) too high for frame (%d points)." % (h, self.height)
 		if w > self.width:
 			raise "LayoutError", "Object (%d points) too wide for frame (%d points)." % (w, self.width)
-		if self.y - h < (self.bottomMargin - self.bottomPadding):
+		y = y - h
+		if y < p:
 			return 0
 		else:
 			#now we can draw it, and update the current point.
-			drawable.drawOn(self.canvas, self.x, self.y - h)
-			self.y = self.y - h
+			drawable.drawOn(self.canvas, self.x, y)
+			self.y = y
 			self.objects.append(drawable)
 			return 1
 
