@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.20 2001/06/22 11:23:48 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.20 2001/06/22 11:23:48 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.21 2001/08/01 13:01:44 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.21 2001/08/01 13:01:44 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -107,6 +107,22 @@ class Flowable:
 	def isIndexing(self):
 		"""Hook for IndexingFlowables - things which have cross references"""
 		return 0
+
+	def identity(self, maxLen=None):
+		'''
+		This method should attempt to return a string that can be used to identify
+		a particular flowable uniquely. The result can then be used for debugging
+		and or error printouts
+		'''
+		if hasattr(self, 'getPlainText'):
+			r = self.getPlainText()
+		elif hasattr(self, 'text'):
+			r = self.text
+		else:
+			r = '...'
+		if r and maxLen:
+			r = r[:maxLen]
+		return "<%s at %d>%s" % (self.__class__.__name__, id(self), r)
 
 class XBox(Flowable):
 	"""Example flowable - a box with an x through it and a caption.
@@ -230,7 +246,7 @@ class Image(Flowable):
 	def __init__(self, filename, width=None, height=None):
 		"""If size to draw at not specified, get it from the image."""
 		from reportlab.lib.utils import PIL_Image  #this will raise an error if they do not have PIL.
-		self.filename = filename
+		self._filename = self.filename = filename
 		self.hAlign = 'CENTER'
 		# if it is a JPEG, will be inlined within the file -
 		# but we still need to know its size now
@@ -240,7 +256,7 @@ class Image(Flowable):
 			self.imageHeight = info[1]
 		else:
 			# we have to assume this is a file like object
-			self. filename = img = PIL_Image.open(filename)
+			self.filename = img = PIL_Image.open(filename)
 			(self.imageWidth, self.imageHeight) = img.size
 		if width:
 			self.drawWidth = width
@@ -263,6 +279,13 @@ class Image(Flowable):
 								self.drawWidth,
 								self.drawHeight
 								)
+
+	def identity(self,maxLen):
+		r = Flowable.identity(self,maxLen)
+		if r[-4:]=='>...' and type(self._filename) is StringType:
+			r = "%s filename=%s>" % (r[:-4],self._filename)
+		return r
+
 class Spacer(Flowable):
 	"""A spacer just takes up space and doesn't draw anything - it guarantees
 	   a gap between objects."""
@@ -353,5 +376,3 @@ class Macro(Flowable):
 		return (0,0)
 	def draw(self):
 		exec self.command in globals(), {'canvas':self.canv}
-
-	

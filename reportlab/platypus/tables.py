@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.39 2001/05/05 13:37:10 aaron_watters Exp $
-__version__=''' $Id: tables.py,v 1.39 2001/05/05 13:37:10 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.40 2001/08/01 13:01:44 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.40 2001/08/01 13:01:44 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -25,6 +25,7 @@ DO_NUDGE = 1
 from reportlab.platypus import *
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet
 from reportlab.lib import colors
+from reportlab.lib.utils import fp_str
 from reportlab.pdfbase import pdfmetrics
 import operator, string
 
@@ -110,23 +111,23 @@ class Table(Flowable):
 	def __init__(self, data, colWidths=None, rowHeights=None, style=None,
 				repeatRows=0, repeatCols=0, splitByRow=1):
 		#print "colWidths", colWidths
-		nrows = len(data)
+		self._nrows = nrows = len(data)
 		if len(data)==0 or type(data) not in _SeqTypes:
-			raise ValueError, "Table must have at least 1 row"
+			raise ValueError, "%s must have at least 1 row" % self.identity()
 		ncols = max(map(_rowLen,data))
 		if not ncols:
-			raise ValueError, "Table must have at least 1 column"
+			raise ValueError, "%s must have at least 1 column" % self.identity()
 		if colWidths is None: colWidths = ncols*[None]
 		elif len(colWidths) != ncols:
-			raise ValueError, "Data error - %d columns in data but %d in grid" % (ncols, len(colWidths))
+			raise ValueError, "%s data error - %d columns in data but %d in grid" % (self.identity(),ncols, len(colWidths))
 		if rowHeights is None: rowHeights = nrows*[None]
 		elif len(rowHeights) != nrows:
-			raise ValueError, "Data error - %d rows in data but %d in grid" % (nrows, len(rowHeights))
-		self._nrows = nrows
-		ncols = self._ncols = len(colWidths)
+			raise ValueError, "%s data error - %d rows in data but %d in grid" % (self.identity(),nrows, len(rowHeights))
+		ncols = len(colWidths)
 		for i in range(nrows):
 			if len(data[i]) != ncols:
-				raise ValueError, "Not enough data points in row %d!" % i
+				raise ValueError, "%s not enough data points in row %d!" % (self.identity(),i)
+		self._ncols = ncols
 		self._rowHeights = self._argH = rowHeights
 		self._colWidths = self._argW = colWidths
 		self._cellvalues = data
@@ -163,6 +164,43 @@ class Table(Flowable):
 		cv = string.replace(cv, "\n", "\n  ")
 		return "Table(\n rowHeights=%s,\n colWidths=%s,\n%s\n) # end table" % (r,c,cv)
 
+	def identity(self, maxLen):
+		'''Identify our selves as well as possible'''
+		vx = None
+		nr = self._nrows
+		if not hasattr(self,'_ncols'):
+			nc = 'unknown'
+		else:
+			nc = self._ncols
+			cv = self._cellvalues
+			b = 0
+			for i in xrange(nr):
+				for j in xrange(nc):
+					v = cv[i][j]
+					t = type(v)
+					if t in _SeqTypes or isinstance(v,Flowable):
+						if not t in _SeqTypes: v = (v,)
+						r = ''
+						for vij in v:
+							r = vij.identity(maxLen)
+							if r and r[-4:]!='>...':
+								break
+						if r and r[-4:]!='>...':
+							ix, jx, vx, b = i, j, r, 1
+					else:
+						v = v is None and '' or str(v)
+						ix, jx, vx = i, j, v
+						b = (vx and t is StringType) and 1 or 0
+						if maxLen: vx = vx[:maxLen]
+					if b: break
+				if b: break
+		if vx:
+			vx = ' with cell(%d,%d) containing\n%s' % (ix,jx,repr(vx))
+		else:
+			vx = '...'
+
+		return "<%s at %d %d rows x %s cols>%s" % (self.__class__.__name__, id(self), nr, nc, vx)
+
 	def _calc(self):
 		if hasattr(self,'_width'): return
 
@@ -179,18 +217,19 @@ class Table(Flowable):
 				V = self._cellvalues[i] # values for row i
 				S = self._cellStyles[i] # styles for row i
 				h = 0
+				j = 0
 				for v, s, w in map(None, V, S, W): # value, style, width (lengths must match)
-					#print "v,s,w", v,s,w
+					j = j + 1
 					t = type(v)
 					if t in _SeqTypes or isinstance(v,Flowable):
 						if not t in _SeqTypes: v = (v,)
 						if w is None:
-							raise ValueError, "Flowables cell can't have auto width"
+							raise ValueError, "Flowable %s in cell(%d,%d) can't have auto width in\n%s" % (v[0].identity(30),i,j,self.identity(30))
 						dW,t = _listCellGeom(v,w,s)
 						#print "leftpadding, rightpadding", s.leftPadding, s.rightPadding
 						dW = dW + s.leftPadding + s.rightPadding
 						if dW>w:
-							raise "LayoutError", "Flowable %s (%sx%s points) too wide for cell (%sx* points)." % (v,dW,t,w)
+							raise "LayoutError", "Flowable %s (%sx%s points) too wide for cell(%d,%d) (%sx* points) in\n%s" % (v[0].identity(30),fp_str(dW),fp_str(t),i,j, fp_str(w), self.identity(30))
 					else:
 						if t is not StringType:
 							v = v is None and '' or str(v)
@@ -205,22 +244,24 @@ class Table(Flowable):
 			W = W[:]
 			self._colWidths = W
 			while None in W:
-				i = W.index(None)
-				f = lambda x,i=i: operator.getitem(x,i)
+				j = W.index(None)
+				f = lambda x,j=j: operator.getitem(x,j)
 				V = map(f,self._cellvalues)
 				S = map(f,self._cellStyles)
 				w = 0
+				i = 0
 				d = hasattr(self,'canv') and self.canv or pdfmetrics
 				for v, s in map(None, V, S):
+					i = i + 1
 					t = type(v)
 					if t in _SeqTypes or isinstance(v,Flowable):
-						raise ValueError, "Flowables cell can't have auto width"
+						raise ValueError, "Flowable %s in cell(%d,%d) can't have auto width\n%s" % (v.identity(30),i,j,self.identity(30))
 					elif t is not StringType: v = v is None and '' or str(v)
 					v = string.split(v, "\n")
 					t = s.leftPadding+s.rightPadding + max(map(lambda a, b=s.fontname,
 								c=s.fontsize,d=d.stringWidth: d(a,b,c), v))
 					if t>w: w = t	#record a new maximum
-				W[i] = w
+				W[j] = w
 
 		height = self._height = reduce(operator.add, H, 0)
 		#print "height, H", height, H
@@ -954,6 +995,7 @@ LIST_STYLE = TableStyle(
 	I = Image(os.path.join(os.path.dirname(reportlab.platypus.__file__),'..','demos','pythonpoint','leftlogo.gif'))
 	I.drawHeight = 1.25*inch*I.drawHeight / I.drawWidth
 	I.drawWidth = 1.25*inch
+	I.drawWidth = 9.25*inch #uncomment to see better messaging
 	P = Paragraph("<para align=center spaceb=3>The <b>ReportLab Left <font color=red>Logo</font></b> Image</para>", styleSheet["BodyText"])
 	data=  [['A', 'B', 'C', Paragraph("<b>A pa<font color=red>r</font>a<i>graph</i></b><super><font color=yellow>1</font></super>",styleSheet["BodyText"]), 'D'],
 			['00', '01', '02', [I,P], '04'],

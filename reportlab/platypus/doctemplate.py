@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.40 2001/05/11 15:00:52 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.41 2001/08/01 13:01:44 rgbecker Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.40 2001/05/11 15:00:52 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.41 2001/08/01 13:01:44 rgbecker Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -408,15 +408,7 @@ class BaseDocTemplate:
 					if self.frame.add(S[0], self.canv, trySplit=0):
 						self.afterFlowable(S[0])
 					else:
-						if hasattr(f,'text'):
-							print 'Offending text:'
-							print "'''"+f.text+"'''"
-							print f.style.fontName, f.style.fontSize, f.style.leading, f.style.firstLineIndent, f.style.leftIndent, f.style.rightIndent
-							print S[0].style.fontName, S[0].style.fontSize, S[0].style.leading, S[0].style.firstLineIndent, S[0].style.leftIndent, S[0].style.rightIndent
-						elif hasattr(f, 'getPlainText'):
-							print 'Offending Paragraph:'
-							print f.getPlainText()
-						raise "LayoutError", "splitting error type=%s" % type(f)
+						raise "LayoutError", "splitting error on page %d in\n%s" % (self.page,f.identity(30))
 					del S[0]
 					for f in xrange(n-1):
 						flowables.insert(f,S[f])	# put split flowables back on the list
@@ -424,14 +416,11 @@ class BaseDocTemplate:
 					# this must be cleared when they are finally drawn!
 ##					if hasattr(f,'postponed'):
 					if hasattr(f,'_postponed'):
-						message = "Flowable %s too large on page %d" % (f, self.page)
+						message = "Flowable %s too large on page %d" % (f.identity(30), self.page)
 						#show us, it might be handy
 						#HACK = it seems within tables we sometimes
 						#get an empty paragraph that won't fit and this
 						#causes it to fall over.  FIXME FIXME FIXME
-						if hasattr(f, 'getPlainText'):
-							print 'Offending Paragraph:'
-							print f.getPlainText()
 						raise "LayoutError", message
 ##					f.postponed = 1
 					f._postponed = 1
