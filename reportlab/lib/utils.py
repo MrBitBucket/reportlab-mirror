@@ -1,14 +1,27 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.41 2003/01/20 21:11:22 andy_robinson Exp $
-__version__=''' $Id: utils.py,v 1.41 2003/01/20 21:11:22 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.42 2003/04/17 11:24:27 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.42 2003/04/17 11:24:27 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
 from reportlab.lib.logger import warnOnce
 SeqTypes = (ListType,TupleType)
 
+
+if os.name == 'mac':
+    #with the Mac, we need to tag the file in a special
+    #way so the system knows it is a PDF file.
+    #This supplied by Joe Strout
+    def markfilename(filename,creatorcode='CARO',filetype='PDF '):
+        try:
+            macfs.FSSpec(filename).SetCreatorType(creatorcode,filetype)
+        except:
+            pass
+else:
+    def markfilename(filename,creatorcode=None,filetype=None):
+        pass
 
 def isFileSystemDistro():
     """Attempt to detect if this copy of reportlab is running in a
