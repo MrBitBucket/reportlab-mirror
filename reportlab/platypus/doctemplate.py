@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.69 2004/01/07 22:58:54 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.70 2004/01/08 23:45:14 andy_robinson Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.69 2004/01/07 22:58:54 andy_robinson Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.70 2004/01/08 23:45:14 andy_robinson Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -315,7 +315,7 @@ class BaseDocTemplate:
         #infinite loop detection if we start doing lots of empty pages
         self._curPageFlowableCount = 0
         self._emptyPages = 0
-        self._emptyPagesAllowed = 3
+        self._emptyPagesAllowed = 10
 
         #context sensitive margins - set by story, not from outside
         self._leftExtraIndent = 0.0
