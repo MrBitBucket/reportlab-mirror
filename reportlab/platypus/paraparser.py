@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.30 2000/11/13 17:25:52 rgbecker Exp $
-__version__=''' $Id: paraparser.py,v 1.30 2000/11/13 17:25:52 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.31 2000/11/13 17:54:34 rgbecker Exp $
+__version__=''' $Id: paraparser.py,v 1.31 2000/11/13 17:54:34 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -440,7 +440,7 @@ class ParaParser(xmllib.XMLParser):
 
 		frag = copy.copy(self._stack[-1])
 		#save our data
-		if hasattr(self,'cbDefn') and data!='': syntax_error('Only <onDraw/> tag allowed')
+		if hasattr(self,'cbDefn') and data!='': syntax_error('Only <onDraw> tag allowed')
 		frag.text = data
 
 		# if sub and super are both one they will cancel each other out
