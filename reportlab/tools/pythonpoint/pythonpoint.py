@@ -356,6 +356,9 @@ class PPPresentation:
             print filename
         #canv = canvas.Canvas(filename, pagesize = pageSize)
         outfile = getStringIO()
+        if self.notes:
+            #translate the page from landscape to portrait
+            pageSize= pageSize[1], pageSize[0]
         canv = canvas.Canvas(outfile, pagesize = pageSize)
         canv.setPageCompression(self.compression)
         canv.setPageDuration(self.pageDuration)
@@ -374,8 +377,13 @@ class PPPresentation:
                 print 'doing slide %d, id = %s' % (slideNo, slide.id)
             if self.notes:
                 #frame and shift the slide
-                canv.scale(0.67, 0.67)
-                canv.translate(self.pageWidth / 6.0, self.pageHeight / 3.0)
+                #canv.scale(0.67, 0.67)
+                scale_amt = (min(pageSize)/float(max(pageSize)))*.95
+                #canv.translate(self.pageWidth / 6.0, self.pageHeight / 3.0)
+                #canv.translate(self.pageWidth / 2.0, .025*self.pageHeight)
+                canv.translate(.025*self.pageHeight, (self.pageWidth/2.0) + 5)
+                #canv.rotate(90)
+                canv.scale(scale_amt, scale_amt)
                 canv.rect(0,0,self.pageWidth, self.pageHeight)
             slide.drawOn(canv)
             canv.showPage()
