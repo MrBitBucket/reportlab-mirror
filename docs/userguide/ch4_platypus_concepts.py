@@ -14,6 +14,19 @@ level page layout library which lets you programmatically create complex
 documents with a minimum of effort.
 """)
 
+
+
+disc("""
+The design of Platypus seeks to separate "high level" layout decisions
+from the document content as much as possible.  Thus, for example paragraphs
+are constructed using paragraph styles and pages are constructed
+using page templates with the intention that hundreds of
+documents with thousands of pages can be reformatted to different
+style specifications with the modifications of a few lines in a single
+shared file which contains the paragraph styles and page layout specifications.
+""")
+
+
 disc("""
 The overall design of PLATYPUS can be thought of has having
 several layers, top down, these are""")
@@ -47,8 +60,7 @@ a $Paragraph$ or a $Table$.
 """)
 
 disc("""
-To use platypus you do approximately the following:
-create a document from a $DocTemplate$ class and pass
+To use platypus you create a document from a $DocTemplate$ class and pass
 a list of $Flowable$s to its $build$ method. The document
 $build$ method knows how to process the list of flowables
 into something reasonable.
@@ -63,12 +75,57 @@ first time.
 """)
 
 disc("""
-The logic behind this is that the story consists of basic elements called $Flowables$
-and these can be used to drive the machinery which leads to a data driven approach, but
-instead of producing another macro driven troff like language we are programming
-in python and can use $ActionFlowables$ to tell the layout engine to skip to the next
+A Platypus story consists of a sequence of basic elements called $Flowables$
+and these elements drive the data driven platypus formatting engine.
+To modify the behavior of the engine
+a special kind of flowable, $ActionFlowables$, tell the layout engine to,
+for example, skip to the next
 column or change to another $PageTemplate$.
 """)
+
+
+heading2("""Getting started""")
+
+disc("""Consider the following code sequence which provides
+a very simple "hello world" example for Platypus.""")
+
+eg(examples.platypussetup)
+
+disc("""First we import some constructors, some paragraph styles
+and other conveniences from other modules.""")
+
+eg(examples.platypusfirstpage)
+
+disc("""We define the fixed features of the first page of the document
+with the function above.""")
+
+eg(examples.platypusnextpage)
+
+disc("""Since we want pages after the first to look different from the
+first we define an alternate layout for the fixed features
+of the other pages.  Note that the two functions above use
+the $pdfgen$ level canvas operations to paint the annotations for
+the pages.  
+""")
+
+eg(examples.platypusgo)
+
+disc("""
+Finally we create a story and build the document.
+Note that we are using a "canned" document template here which
+comes pre-built with page templates.  We are also using a pre-built
+paragraph style.  We are only using two types of flowables here
+-- $Spacers$ and $Paragraphs$.  The first $Spacer$ ensures that the
+Paragraphs skip past the title string. 
+""")
+
+disc("""
+To see the output of this example program run the module
+$docs/userguide/examples.py$ (from the ReportLab $docs$ distribution)
+as a "top level script".  The script interpretation $python examples.py$ will
+generate the Platypus output $phello.pdf$.
+""")
+
 
 heading2("$Flowables$")
 disc("""
