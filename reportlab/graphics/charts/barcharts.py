@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.66 2002/07/27 10:04:39 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.67 2002/07/30 16:25:39 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -9,13 +9,13 @@ vertical versions.
 
 Stacked and percentile bar charts to follow...
 """
-__version__=''' $Id: barcharts.py,v 1.66 2002/07/27 10:04:39 rgbecker Exp $ '''
+__version__=''' $Id: barcharts.py,v 1.67 2002/07/30 16:25:39 rgbecker Exp $ '''
 
 import string, copy
 from types import FunctionType, StringType
 
 from reportlab.lib import colors
-from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf, isBoolean
+from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf, isBoolean, isNoneOrShape
 from reportlab.lib.formatters import Formatter
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -65,6 +65,7 @@ class BarChart(Widget):
         barLabelFormat = AttrMapValue(None, desc='Formatting string or function used for bar labels.'),
         reversePlotOrder = AttrMapValue(isBoolean, desc='If true, reverse common category plot order.'),
         naLabel = AttrMapValue(NoneOrInstanceOfNA_Label, desc='Label to use for N/A values.'),
+        background = AttrMapValue(isNoneOrShape, desc='Handle to background object.'),
         )
 
     def __init__(self):
@@ -128,10 +129,20 @@ class BarChart(Widget):
         self.bars[1].fillColor = colors.green
         self.bars[2].fillColor = colors.blue
         self.naLabel = None#NA_Label()
+        self.background = None
 
     def makeBackground(self):
         strokeColor,strokeWidth,fillColor=self.strokeColor, self.strokeWidth, self.fillColor
-        if (strokeWidth and strokeColor) or fillColor:
+        if self.background is not None:
+            g = Group()
+            bg = self.background
+            bg.x = self.x
+            bg.y = self.y
+            bg.width = self.width
+            bg.height = self.height
+            g.add(bg)
+            return g
+        elif (strokeWidth and strokeColor) or fillColor:
             g = Group()
             g.add(Rect(self.x, self.y, self.width, self.height,
                 strokeColor=strokeColor, strokeWidth=strokeWidth, fillColor=fillColor))
