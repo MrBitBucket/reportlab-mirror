@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.15 2001/08/03 10:21:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.16 2001/08/07 15:40:44 rgbecker Exp $
 import sys, string
 from reportlab.lib import pagesizes
 
@@ -14,6 +14,7 @@ def _setOpt(name, value, conv=None):
 	if conv: value = conv(value)
 	globals()[name] = value
 
+sys_version = string.split(sys.version)[0]		#strip off the other garbage
 
 def	_startUp():
 	'''this function allows easy resetting to the global defaults'''
@@ -33,16 +34,17 @@ def	_startUp():
 	#places to search for Type 1 Font files
 	if sys.platform=='win32':
 		T1SearchPath=['c:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\Font']
-	elif sys.platform in ('linux2',):
+	elif sys.platform in ('linux2','freebsd4',):
 		T1SearchPath=['/usr/lib/Acrobat4/Resource/Font']
 	elif sys.platform=='mac':	# we must be able to do better than this
 		import os
 		diskName = string.split(os.getcwd(), ':')[0]
-		fontDir = diskName + ':Applications:Python 2.1:reportlab:fonts'
+		fontDir = diskName + ':Applications:Python %s:reportlab:fonts' % sys_version
 		T1SearchPath = [fontDir]   # tba
-		PIL_WARNINGS = 0 # PIL is not packagized in the Mac Python buildelse:
+		PIL_WARNINGS = 0 # PIL is not packagized in the Mac Python build
+	else:
 		T1SearchPath=[]
+		#raise ValueError, 'Please add a proper T1SearchPath for your system to rl_config.py'
 	_setOpt('T1SearchPath',T1SearchPath)
 
-sys_version = string.split(sys.version)[0]		#strip off the other garbage
 _startUp()
