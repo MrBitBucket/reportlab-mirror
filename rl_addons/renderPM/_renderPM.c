@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "0.97"
+#define VERSION "0.98"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -1725,11 +1725,9 @@ static PyObject* pil2pict(PyObject* self, PyObject* args)
 	pict_putShort(obs, PICT_picVersion);
 	pict_putShort(obs, 0x02FF);
 	pict_putShort(obs, PICT_headerOp);
-	pict_putShort(obs, 0xFFFE);
-	pict_putShort(obs, 0);
-
+	pict_putLong(obs, -1L);
 	pict_putRect(obs, 72, 0, 72, 0);	/*h/v resolutions*/
-	pict_putRect(obs, 0,0, cols,rows);
+	pict_putRect(obs, cols, 0, rows, 0);
 	pict_putFill(obs, 4);
 
 
