@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.29  2000/05/18 09:05:08  andy_robinson
+#	Resynchronization
+#
 #	Revision 1.28  2000/05/17 22:17:38  rgbecker
 #	Renamed BasicFrame to Frame
-#
+#	
 #	Revision 1.27  2000/05/17 16:29:40  rgbecker
 #	Removal of SimpleFrame
 #	
@@ -113,7 +116,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.28 2000/05/17 22:17:38 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.29 2000/05/18 09:05:08 andy_robinson Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -123,12 +126,14 @@ currently working on paragraph wrapping stuff.
 # 200-10-13 gmcm
 #	packagizing
 #	rewrote grid stuff - now in tables.py
-
+import os
 import string
+
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from reportlab.lib.colors import red
+from reportlab.pdfbase import pdfutils
 
 from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
 PAGE_HEIGHT = DEFAULT_PAGE_SIZE[1]
@@ -238,7 +243,8 @@ class Preformatted(Flowable):
 		cur_x = self.style.leftIndent
 		cur_y = self.height - self.style.fontSize
 		self.canv.addLiteral('%PreformattedPara')
-
+		if self.style.textColor:
+			self.canv.setFillColor(self.style.textColor)
 		tx = self.canv.beginText(cur_x, cur_y)
 		#set up the font etc.
 		tx.setFont(self.style.fontName,
@@ -254,9 +260,15 @@ class Image(Flowable):
 		"""If size to draw at not specified, get it from the image."""
 		import Image  #this will raise an error if they do not have PIL.
 		self.filename = filename
-		print 'Creating Image for', filename
-		img = Image.open(filename)
-		(self.imageWidth, self.imageHeight) = img.size
+		# if it is a JPEG, will be inlined within the file -
+		# but we still need to know its size now
+		if os.path.splitext(filename)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
+			info = pdfutils.readJPEGInfo(open(filename, 'rb'))
+			self.imageWidth = info[0]
+			self.imageHeight = info[1]
+		else:
+			img = Image.open(filename)
+			(self.imageWidth, self.imageHeight) = img.size
 		if width:
 			self.drawWidth = width
 		else:
@@ -407,6 +419,7 @@ class Frame:
 		s = self.atTop and 0 or flowable.getSpaceBefore()
 		return flowable.split(self.width, y-p-s)
 
+
 	def drawBoundary(self,canv):
 		canv.rect(
 				self.x1,
@@ -414,7 +427,7 @@ class Frame:
 				self.x2 - self.x1,
 				self.y2 - self.y1
 				)
-
+		
 	def addFromList(self, drawlist, canv):
 		"""Consumes objects from the front of the list until the
 		frame is full.	If it cannot fit one object, raises

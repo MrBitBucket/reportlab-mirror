@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.35  2000/05/18 09:05:08  andy_robinson
+#	Resynchronization
+#
 #	Revision 1.34  2000/04/28 17:33:44  andy_robinson
 #	Added font encoding support and changed default encoding to WinAnsi
-#
+#	
 #	Revision 1.33  2000/04/28 14:18:16  rgbecker
 #	Use str(filename) not '<Unknown>'
 #	
@@ -132,7 +135,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.34 2000/04/28 17:33:44 andy_robinson Exp $ '''
+__version__=''' $Id: canvas.py,v 1.35 2000/05/18 09:05:08 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -955,11 +958,11 @@ class Canvas:
         self._currentPageHasImages = 1
 
         if type(image) == StringType:
-            if os.path.splitext(image)[1] in ['.jpg', '.JPG']:
+            if os.path.splitext(image)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
                 #directly process JPEG files
                 #open file, needs some error handling!!
                 imageFile = open(image, 'rb')
-                info = self.readJPEGInfo(imageFile)
+                info = pdfutils.readJPEGInfo(imageFile)
                 imgwidth, imgheight = info[0], info[1]
                 if info[2] == 1:
                     colorSpace = 'DeviceGray'
@@ -1058,60 +1061,6 @@ class Canvas:
         self._code.append('Q')
         #self._code.append('BT')
 
-#########################################################################
-#
-#  JPEG processing code - contributed by Eric Johnson
-#
-#########################################################################
-
-    # Read data from the JPEG file. We should probably be using PIL to
-    # get this information for us -- but this way is more fun!
-    # Returns (width, height, color components) as a triple
-    # This is based on Thomas Merz's code from GhostScript (viewjpeg.ps)
-    def readJPEGInfo(self, image):
-        "Read width, height and number of components from JPEG file"
-        import struct
-
-        #Acceptable JPEG Markers:
-        #  SROF0=baseline, SOF1=extended sequential or SOF2=progressive
-        validMarkers = [0xC0, 0xC1, 0xC2]
-
-        #JPEG markers without additional parameters
-        noParamMarkers = \
-            [ 0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0x01 ]
-
-        #Unsupported JPEG Markers
-        unsupportedMarkers = \
-            [ 0xC3, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF ]
-
-        #read JPEG marker segments until we find SOFn marker or EOF
-        done = 0
-        while not done:
-            x = struct.unpack('B', image.read(1))
-            if x[0] == 0xFF:                    #found marker
-                x = struct.unpack('B', image.read(1))
-                #print "Marker: ", '%0.2x' % x[0]
-                #check marker type is acceptable and process it
-                if x[0] in validMarkers:
-                    image.seek(2, 1)            #skip segment length
-                    x = struct.unpack('B', image.read(1)) #data precision
-                    if x[0] != 8:
-                        raise 'PDFError', ' JPEG must have 8 bits per component'
-                    y = struct.unpack('BB', image.read(2))
-                    height = (y[0] << 8) + y[1] 
-                    y = struct.unpack('BB', image.read(2))
-                    width =  (y[0] << 8) + y[1]
-                    y = struct.unpack('B', image.read(1))
-                    color =  y[0]
-                    return width, height, color
-                    done = 1
-                elif x[0] in unsupportedMarkers:
-                    raise 'PDFError', ' Unsupported JPEG marker: %0.2x' % x[0]
-                elif x[0] not in noParamMarkers:
-                    #skip segments with parameters
-                    #read length and skip the data
-                    x = struct.unpack('BB', image.read(2))
-                    image.seek( (x[0] << 8) + x[1] - 2, 1)
 
     def setPageCompression(self, onoff=1):
         """Possible values 1 or 0 (1 for 'on' is the default).
