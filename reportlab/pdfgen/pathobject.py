@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pathobject.py,v $
+#	Revision 1.6  2000/07/12 16:07:09  aaron_watters
+#	fixed nameerror and path.circle bug
+#
 #	Revision 1.5  2000/06/09 08:17:43  andy_robinson
 #	Full qualified a local import in pdfgen package
-#
+#	
 #	Revision 1.4  2000/02/17 02:08:04  rgbecker
 #	Docstring & other fixes
 #	
@@ -43,7 +46,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pathobject.py,v 1.5 2000/06/09 08:17:43 andy_robinson Exp $ '''
+__version__=''' $Id: pathobject.py,v 1.6 2000/07/12 16:07:09 aaron_watters Exp $ '''
 __doc__=""" 
 PDFPathObject is an efficient way to draw paths on a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -54,6 +57,7 @@ Progress Reports:
 """
 import string
 import reportlab.pdfgen.pdfgeom
+from reportlab.pdfgen import pdfgeom
 
 class PDFPathObject:
     """Represents a graphic path.  There are certain 'modes' to PDF
@@ -117,10 +121,13 @@ class PDFPathObject:
     def circle(self, x_cen, y_cen, r):
         """adds a circle to the path"""
         x1 = x_cen - r
-        x2 = x_cen + r
+        #x2 = x_cen + r
         y1 = y_cen - r
-        y2 = y_cen + r
-        self.ellipse(x_cen - r, y_cen - r, x_cen + r, y_cen + r)
+        #y2 = y_cen + r
+        width = height = 2*r
+        #self.ellipse(x_cen - r, y_cen - r, x_cen + r, y_cen + r)
+        self.ellipse(x1, y1, width, height)
+        
         
     def close(self):
         "draws a line back to where it started"
