@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.8 2002/07/25 11:09:35 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.9 2002/08/10 10:18:23 dragan1 Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 import reportlab
 
@@ -232,7 +232,7 @@ disc("""The next step is optional and only necessary if you want to
 include images in your reports; it can also be carried out later.""")
 
 list("""Install the Python Imaging Library ($PIL$).  Follow the
-directions from $http://www.python.org/sigs/image-sig/Imaging.html$ or
+directions from $http://www.python.org/sigs/image-sig/index.html$ or
 get it directly from $http://www.pythonware.com/products/pil/$.
 """)
 
@@ -323,7 +323,7 @@ eg("""import reportlab""",after=0.1)
 list("""If you want to use images you should certainly consider
 getting &amp; installing the Python Imaging Library - follow the
 directions from
-$http://www.python.org/sigs/image-sig/Imaging.html$ or get it directly from
+$http://www.python.org/sigs/image-sig/index.html$ or get it directly from
 $http://www.pythonware.com/products/pil/$.""")
 
 
@@ -450,11 +450,10 @@ to refine or to implement.  If you are missing some features or
 just want to help out, let us know!""")
 
 disc("""The first step for anyone wanting to learn more or
-get involved is to join the mailing list.  Just send an email
-with the subject "Subscribe" to
-$reportlab-users-subscribe@egroups.com$.  You can also browse
-through the group's archives and contributions at
-$http://www.egroups.com/group/reportlab-users$.  This list is
+get involved is to join the mailing list.  To Subscribe visit
+$http://two.pairlist.net/mailman/listinfo/reportlab-users$.
+From there you can also browse through the group's archives
+and contributions.  The mailing list is
 the place to report bugs and get support. """)
 
 
