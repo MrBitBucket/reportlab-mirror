@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.62 2003/05/22 19:08:30 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.63 2003/05/26 07:54:15 andy_robinson Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.62 2003/05/22 19:08:30 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.63 2003/05/26 07:54:15 andy_robinson Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -125,6 +125,9 @@ class CategoryAxis(Widget):
         self.labelAxisMode = 'axis'
         self.reverseDirection = 0
         self.style = 'parallel'
+
+        #various private things which need to be initialized
+        self._labelTextFormat = None
 
     def setPosition(self, x, y, length):
         # ensure floating point
@@ -512,6 +515,8 @@ class ValueAxis(Widget):
         # 'formatMonthEndDate' function and use that on irregular
         # data points.
         self.labelTextFormat = None
+        #private copy
+        self._labelTextFormat = None
 
         # if set to None, these will be worked out for you.
         # if you override any or all of them, your values
@@ -521,7 +526,7 @@ class ValueAxis(Widget):
         self.valueStep = None
         self.avoidBoundFrac = None
         self.rangeRound = 'none'
-
+        
 
     def setPosition(self, x, y, length):
         # ensure floating point
