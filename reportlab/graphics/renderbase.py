@@ -79,8 +79,8 @@ class StateTracker:
                 newstate['transform'] = delta['transform']
                 #newstate['ctm'] = mmult(self.__combined[-1]['transform'], delta['transform'])
                 newstate['ctm'] = mmult(self.__combined[-1]['ctm'], delta['transform'])
-                print 'statetracker transform = (%0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f)' % tuple(newstate['transform'])
-                print 'statetracker ctm = (%0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f)' % tuple(newstate['ctm'])
+                #print 'statetracker transform = (%0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f)' % tuple(newstate['transform'])
+                #print 'statetracker ctm = (%0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f)' % tuple(newstate['ctm'])
                 
             else:  #just overwrite it
                 newstate[key] = value

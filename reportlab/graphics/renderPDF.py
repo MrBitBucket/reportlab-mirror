@@ -258,7 +258,7 @@ def drawToFile(d,fn,msg):
 
 
 def test():
-    c = Canvas('testdrawings.pdf')
+    c = Canvas('renderPDF.pdf')
     c.setFont('Times-Roman', 36)
     c.drawString(80, 750, 'Graphics Test')
 
@@ -266,13 +266,12 @@ def test():
     # file
 
     #grab all drawings from the test module
-    import testdrawings
+    from reportlab.graphics import testshapes
     drawings = []
-
-    for funcname in dir(testdrawings):
+    for funcname in dir(testshapes):
         if funcname[0:10] == 'getDrawing':
-            drawing = eval('testdrawings.' + funcname + '()')  #execute it
-            docstring = eval('testdrawings.' + funcname + '.__doc__')
+            drawing = eval('testshapes.' + funcname + '()')  #execute it
+            docstring = eval('testshapes.' + funcname + '.__doc__')
             drawings.append((drawing, docstring))
 
     #print in a loop, with their doc strings
@@ -299,34 +298,34 @@ def test():
         i = i + 1
 
     c.save()
-    print 'saved testdrawings.pdf'
+    print 'saved renderPDF.pdf'
 
-def testFlowable():
-    """Makes a platypus document"""
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-    from reportlab.lib.styles import getSampleStyleSheet
-    styles = getSampleStyleSheet()
-    styNormal = styles['Normal']
-
-    doc = SimpleDocTemplate('test_flowable.pdf')
-    story = []
-    story.append(Paragraph("This sees is a drawing can work as a flowable", styNormal))
-    
-    import testdrawings
-    drawings = []
-
-    for funcname in dir(testdrawings):
-        if funcname[0:10] == 'getDrawing':
-            drawing = eval('testdrawings.' + funcname + '()')  #execute it
-            docstring = eval('testdrawings.' + funcname + '.__doc__')
-            story.append(Paragraph(docstring, styNormal))
-            story.append(Spacer(18,18))
-            story.append(drawing)
-            story.append(Spacer(36,36))
-
-    doc.build(story)
-    print 'saves test_flowable.pdf'
+##def testFlowable():
+##    """Makes a platypus document"""
+##    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+##    from reportlab.lib.styles import getSampleStyleSheet
+##    styles = getSampleStyleSheet()
+##    styNormal = styles['Normal']
+##
+##    doc = SimpleDocTemplate('test_flowable.pdf')
+##    story = []
+##    story.append(Paragraph("This sees is a drawing can work as a flowable", styNormal))
+##    
+##    import testdrawings
+##    drawings = []
+##
+##    for funcname in dir(testdrawings):
+##        if funcname[0:10] == 'getDrawing':
+##            drawing = eval('testdrawings.' + funcname + '()')  #execute it
+##            docstring = eval('testdrawings.' + funcname + '.__doc__')
+##            story.append(Paragraph(docstring, styNormal))
+##            story.append(Spacer(18,18))
+##            story.append(drawing)
+##            story.append(Spacer(36,36))
+##
+##    doc.build(story)
+##    print 'saves test_flowable.pdf'
 
 if __name__=='__main__':
-    #test()
-    testFlowable()
+    test()
+    #testFlowable()

@@ -1,4 +1,4 @@
-__version__=''' $Id: renderPS.py,v 1.1 2001/01/25 22:06:44 andy_robinson Exp $ '''
+__version__=''' $Id: renderPS.py,v 1.2 2001/01/30 00:29:45 andy_robinson Exp $ '''
 import string, cStringIO, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str
@@ -740,11 +740,12 @@ def drawToFile(d,fn):
 #   Routine to draw them comes at the end.
 #
 #########################################################
-def test(outdir=None):
+def test(outdir='epsout'):
     import os
     # print all drawings and their doc strings from the test
     # file
-
+    if not os.path.isdir(outdir):
+        os.mkdir(outdir)
     #grab all drawings from the test module
     import testshapes
     drawings = []
@@ -759,10 +760,9 @@ def test(outdir=None):
 
     i = 0
     for (d, docstring) in drawings:
-        if outdir:
-            drawToFile(d,outdir + os.sep + 'pingoPS_%d.eps'%i)
-        else:
-            drawToFile(d,'pingoPS_%d.eps'%i)
+        filename = outdir + os.sep + 'renderPS_%d.eps'%i
+        drawToFile(d,filename)
+        print 'saved', filename
         i = i + 1
 
 if __name__=='__main__':
@@ -770,5 +770,5 @@ if __name__=='__main__':
     if len(sys.argv)>1:
         outdir = sys.argv[1]
     else:
-        outdir = None
+        outdir = 'epsout'
     test(outdir)

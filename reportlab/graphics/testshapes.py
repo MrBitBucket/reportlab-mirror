@@ -60,7 +60,7 @@ def getFailedDrawing(funcName):
 
 # These are the real drawings to be eye-balled.
 
-def getDrawing1():
+def getDrawing01():
     """Hello World, on a rectangular background.
 
     The rectangle's fillColor is yellow.
@@ -74,7 +74,7 @@ def getDrawing1():
     return D
 
 
-def getDrawing2():
+def getDrawing02():
     """Various Line shapes.
 
     The lines are blue and their strokeWidth is 5 mm.
@@ -97,7 +97,7 @@ def getDrawing2():
     return D
 
 
-def getDrawing3():
+def getDrawing03():
     """Text strings in various sizes and different fonts.
 
     Font size increases from 12 to 36 and from bottom left
@@ -121,7 +121,7 @@ def getDrawing3():
     return D
 
 
-def getDrawing4():
+def getDrawing04():
     """Text strings in various colours.
 
     Colours are blue, yellow and red from bottom left
@@ -138,7 +138,7 @@ def getDrawing4():
     return D
 
 
-def getDrawing5():
+def getDrawing05():
     """Text strings with various anchors (alignments).
 
     Text alignment conforms to the anchors in the left column.
@@ -158,7 +158,7 @@ def getDrawing5():
     return D
 
 
-def getDrawing6():
+def getDrawing06():
     """This demonstrates all the basic shapes at once.
 
     There are no groups or references.
@@ -195,7 +195,7 @@ def getDrawing6():
 
     return D
 
-def getDrawing7():
+def getDrawing07():
     """This tests the ability to translate and rotate groups.  The first set of axes should be
     near the bottom left of the drawing.  The second should be rotated counterclockwise
     by 15 degrees.  The third should be rotated by 30 degrees."""
@@ -237,7 +237,7 @@ def getDrawing7():
     return D
 
 
-def getDrawing8():
+def getDrawing08():
     """This tests the ability to scale coordinates. The bottom left set of axes should be
     near the bottom left of the drawing.  The bottom right should be stretched vertically
     by a factor of 2.  The top left one should be stretched horizontally by a factor of 2.
@@ -285,7 +285,7 @@ def getDrawing8():
     
     return D
 
-def getDrawing9():
+def getDrawing09():
     """This tests rotated strings
 
     Some renderers will have a separate mechanism for font drawing.  This test
@@ -316,6 +316,30 @@ def getDrawing9():
 
     return D
 
+def getDrawing10():
+    """This tests nested groups with multiple levels of coordinate transformation.
+    Each box should be staggered up and to the right, moving by 25 points each time."""
+    D = Drawing(400, 200)
+
+    fontName = "Times-Roman"
+    fontSize = 12
+
+    g1 = Group(
+            Rect(0, 0, 100, 20, fillColor=colors.yellow),
+            String(5, 5, 'Text in the box', fontName=fontName, fontSize = fontSize)
+            )
+    D.add(g1)
+
+    g2 = Group(g1, transform = translate(25,25))
+    D.add(g2)
+    
+    g3 = Group(g2, transform = translate(25,25))
+    D.add(g3)
+    
+    g4 = Group(g3, transform = translate(25,25))
+    D.add(g3)
+    
+    return D
 
 def getAllFunctionDrawingNames():
     "Get a list of drawing function names from somewhere."
