@@ -183,7 +183,6 @@ PYTHON = ['Good evening ladies and Bruces','I want to buy some cheese', 'You do 
           "Right! Stop that, it's silly. Very silly indeed", "Very silly indeed", "Lemon curry?",
           "And now for something completely different, a man with 3 buttocks",
           "I've heard of unisex, but I've never had it", "That's the end, stop the program! Stop it!"]
-import textwrap, random
 leadins=[
     "To characterize a linguistic level L,",
     "On the other hand,",
@@ -220,6 +219,7 @@ leadins=[
     "It must be emphasized, once again, that",
     "Let us continue to suppose that",
     "Notice, incidentally, that",
+    "A majority  of informed linguistic specialists agree that",
     ]
  
 subjects = [
@@ -284,11 +284,16 @@ objects = [
     ]
 
 def format_wisdom(text,line_length=72):
-    return textwrap.fill(text, line_length)
+    try:
+        import textwrap
+        return textwrap.fill(text, line_length)
+    except:
+        return text
 
 def chomsky(times = 1):
     if not isinstance(times, int):
         return format_wisdom(__doc__)
+    import random
     prevparts = []
     newparts = []
     output = []
