@@ -1,6 +1,6 @@
 global-include *.dtd *.txt *.xml *.yml
 global-include *.c *.h *.in *.mashed
-global-include *.gif *.png *.jpg
-global-include *.AFM *.PFB
-include changes README
-
+global-include *.gif *.png *.jpg .a85
+global-include *.AFM *.PFB *.ttf
+global-include README
+include changes

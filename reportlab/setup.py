@@ -26,12 +26,10 @@ def run():
     setup(
             name="Reportlab",
             version="1.17",
-            licence="BSD license, Copyright (c) 2000-2003, ReportLab Inc.",
-            description="Reportlab PDF generation tools",
-            long_description="""The ReportLab PDF Generation tools.
-An Open Source Python library for generating PDFs.
-
-This installer created using distutils by John Precedo.
+            licence="BSD license (see license.txt for details), Copyright (c) 2000-2003, ReportLab Inc.",
+            description="The Reportlab Toolkit",
+            long_description="""The ReportLab Toolkit.
+An Open Source Python library for generating PDFs and graphics.
 """,
 
             author="The boys from SW19",
@@ -69,7 +67,7 @@ This installer created using distutils by John Precedo.
                     'reportlab.tools.pythonpoint.styles',
                      ],
               data_files = [(pjoin(package_path, 'docs', 'images'),
-				['docs/images/Edit_Prefs.gif',
+                                ['docs/images/Edit_Prefs.gif',
                                  'docs/images/Python_21.gif',
                                  'docs/images/Python_21_HINT.gif',
                                  'docs/images/fileExchange.gif',
@@ -78,11 +76,13 @@ This installer created using distutils by John Precedo.
                                  'docs/images/lj8100.jpg',
                                  'docs/images/replogo.a85',
                                  'docs/images/replogo.gif']),
-			    (pjoin(package_path, 'fonts'), 
-				['fonts/LeERC___.AFM',
+                            (pjoin(package_path, 'fonts'), 
+                                ['fonts/LeERC___.AFM',
                                  'fonts/LeERC___.PFB',
                                  'fonts/luxiserif.ttf',
-                                 'fonts/rina.ttf']),
+                                 'fonts/luxiserif_license.txt',
+                                 'fonts/rina.ttf',
+                                 'fonts/rina_license.txt']),
 			    (package_path,
 				['README',
 				 'changes',
