@@ -396,4 +396,6 @@ if __name__=='__main__':
 		for l in _parser.errors:
 			print l
 	else:
-		print l.fontName,l.fontSize,l.textColor,l.bold, l.rise, l.text[:25]
+		print 'ParaStyle', l.fontName,l.fontSize,l.textColor
+		for l in rv:
+			print l.fontName,l.fontSize,l.textColor,l.bold, l.rise, l.text[:25]

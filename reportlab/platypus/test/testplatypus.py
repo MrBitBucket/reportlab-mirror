@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: testplatypus.py,v $
+#	Revision 1.12  2000/04/14 11:54:57  rgbecker
+#	Splitting layout.py
+#
 #	Revision 1.11  2000/04/14 08:56:20  rgbecker
 #	Drawable ==> Flowable
-#
+#	
 #	Revision 1.10  2000/04/13 17:10:38  rgbecker
 #	minor adjustments
 #	
@@ -62,7 +65,7 @@
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testplatypus.py,v 1.11 2000/04/14 08:56:20 rgbecker Exp $ '''
+__version__=''' $Id: testplatypus.py,v 1.12 2000/04/14 11:54:57 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -76,7 +79,9 @@ and drawn into.
 import string, copy
 from reportlab.pdfgen import canvas
 from reportlab.platypus import layout, tables
+from reportlab.platypus.paragraph import Paragraph
 from reportlab.lib.units import inch, cm
+from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyle
 
 #################################################################
 #
@@ -127,10 +132,10 @@ def getParagraphs(textBlock):
 def getCommentary():
     """Returns the story for the commentary - all the paragraphs."""
 
-    styleSheet = layout.getSampleStyleSheet()
+    styleSheet = getSampleStyleSheet()
     
     story = []
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         PLATYPUS User Guide and Test Script
         """, styleSheet['Heading1']))
 
@@ -153,12 +158,12 @@ def getCommentary():
     """    
 
     for text in getParagraphs(spam):
-        story.append(layout.Paragraph(text, styleSheet['BodyText']))
+        story.append(Paragraph(text, styleSheet['BodyText']))
 
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         What concepts does PLATYPUS deal with?
         """, styleSheet['Heading2']))
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         The central concepts in PLATYPUS are Flowable Objects, Frames, Flow
         Management, Styles and Style Sheets, Paragraphs and Tables.  This is
         best explained in contrast to PDFgen, the layer underneath PLATYPUS.
@@ -169,11 +174,11 @@ def getCommentary():
         objects and fit them onto the page.
         """, styleSheet['BodyText']))
 
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         How is this document organized?
         """, styleSheet['Heading2']))
 
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         Since this is a test script, we'll just note how it is organized.
         the top of each page contains commentary.  The bottom half contains
         example drawings and graphic elements to whicht he commentary will
@@ -187,7 +192,7 @@ def getCommentary():
     #     Commentary Page 2
     #######################################################################
     
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         Flowable Objects
         """, styleSheet['Heading2']))
     spam = """
@@ -232,14 +237,14 @@ def getCommentary():
         can be drawn anywhere on the page (possibly even scaled or rotated).
         """    
     for text in getParagraphs(spam):
-        story.append(layout.Paragraph(text, styleSheet['BodyText']))
+        story.append(Paragraph(text, styleSheet['BodyText']))
 
     story.append(layout.PageBreak())
     #######################################################################
     #     Commentary Page 3
     #######################################################################
 
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         Available Flowable Objects
         """, styleSheet['Heading2']))
 
@@ -247,21 +252,21 @@ def getCommentary():
 ##
 ##        """    
 ##    for text in getParagraphs(spam):
-##        story.append(layout.Paragraph(text, styleSheet['BodyText']))
+##        story.append(Paragraph(text, styleSheet['BodyText']))
 
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         Platypus comes with a basic set of flowable objects.  Here we list their
         class names and tell you what they do:
         """, styleSheet['BodyText']))
     #we can use the bullet feature to do a definition list
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         This is a contrived object to give an example of a Flowable -
         just a fixed-size box with an X through it and a centred string.""",
             styleSheet['Definition'],
             bulletText='XBox  '  #hack - spot the extra space after
             ))
         
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         This is the basic unit of a document.  Paragraphs can be finely
         tuned and offer a host of properties through their associated
         ParagraphStyle.""",
@@ -269,7 +274,7 @@ def getCommentary():
             bulletText='Paragraph  '  #hack - spot the extra space after
             ))
     
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         This is used for printing code and other preformatted text.
         There is no wrapping, and line breaks are taken where they occur.
         Many paragraph style properties do not apply.  You may supply
@@ -278,7 +283,7 @@ def getCommentary():
             styleSheet['Definition'],
             bulletText='Preformatted  '  #hack - spot the extra space after
             ))
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         This is a straight wrapper around an external image file.  By default
         the image will be drawn at a scale of one pixel equals one point, and
         centred in the frame.  You may supply an optional width and height.""",
@@ -286,14 +291,14 @@ def getCommentary():
             bulletText='Image  '  #hack - spot the extra space after
             ))
         
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         This is a base class for making grids.  It is really just a base for
         TextGrid below.""",
             styleSheet['Definition'],
             bulletText='BaseGrid  '  #hack - spot the extra space after
             ))
 
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         This is a table drawing class descended from BaseGrid.  It is intended to be simpler
         than a full HTML table model yet be able to draw attractive output,
         and behave intelligently when the numbers of rows and columns vary.
@@ -302,20 +307,20 @@ def getCommentary():
             bulletText='TextGrid  '  #hack - spot the extra space after
             ))
 
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         This is a 'null object' which merely takes up space on the page.
         Use it when you want some extra padding betweene elements.""",
             styleSheet['Definition'],
             bulletText='Spacer  '  #hack - spot the extra space after
             ))
 
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         A PageBreak consumes all the remaining space in a frame.""",
             styleSheet['Definition'],
             bulletText='PageBreak  '  #hack - spot the extra space after
             ))
 
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         This is in progress, but a macro is basically a chunk of Python code to
         be evaluated when it is drawn.  It could do lots of neat things.""",
             styleSheet['Definition'],
@@ -327,20 +332,20 @@ def getCommentary():
 
 def getExamples():
     """Returns all the example flowable objects"""
-    styleSheet = layout.getSampleStyleSheet()
+    styleSheet = getSampleStyleSheet()
     
     story = []
 
     #make a style with indents and spacing
-    sty = layout.ParagraphStyle('obvious', None)
+    sty = ParagraphStyle('obvious', None)
     sty.leftIndent = 18
     sty.rightIndent = 18
     sty.firstLineIndent = 36
     sty.spaceBefore = 6
     sty.spaceAfter = 6
-    story.append(layout.Paragraph("""Now for some demo stuff - we need some on this page,
+    story.append(Paragraph("""Now for some demo stuff - we need some on this page,
         even before we explain the concepts fully""", styleSheet['BodyText']))
-    p = layout.Paragraph("""
+    p = Paragraph("""
         Platypus is all about fitting objects into frames on the page.  You
         are looking at a fairly simple Platypus paragraph in Debug mode.
         It has some gridlines drawn around it to show the left and right indents,
@@ -353,8 +358,8 @@ def getExamples():
     p.debug = 1   #show me the borders
     story.append(p)
 
-    story.append(layout.Paragraph("""Same but with justification .5 extra leading""", styleSheet['BodyText']))
-    p = layout.Paragraph("""
+    story.append(Paragraph("""Same but with justification .5 extra leading""", styleSheet['BodyText']))
+    p = Paragraph("""
         <para align=justify leading=+1><font color=red>Platypus</font> is all about fitting objects into frames on the page.  You
         are looking at a fairly simple Platypus paragraph in Debug mode.
         It has some gridlines drawn around it to show the left and right indents,
@@ -370,7 +375,7 @@ def getExamples():
     story.append(layout.XBox(4*inch, 0.75*inch,
             'This is a box with a fixed size'))
 
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         All of this is being drawn within a text frame which was defined
         on the page.  This frame is in 'debug' mode so you can see the border,
         and also see the margins which it reserves.  A frame does not have
@@ -384,7 +389,7 @@ def getExamples():
     #     Examples Page 2
     #######################################################################
     
-    story.append(layout.Paragraph("""
+    story.append(Paragraph("""
         Here's the base class for Flowable...
         """, styleSheet['Italic']))
     
@@ -423,27 +428,27 @@ def getExamples():
     #     Examples Page 3
     #######################################################################
 
-    story.append(layout.Paragraph(
+    story.append(Paragraph(
                 "Here are some examples of the remaining objects above.",
                 styleSheet['Italic']))
     
-    story.append(layout.Paragraph("This is a bullet point", styleSheet['Bullet'], bulletText='O'))
-    story.append(layout.Paragraph("Another bullet point", styleSheet['Bullet'], bulletText='O'))
+    story.append(Paragraph("This is a bullet point", styleSheet['Bullet'], bulletText='O'))
+    story.append(Paragraph("Another bullet point", styleSheet['Bullet'], bulletText='O'))
     
-    story.append(layout.Paragraph(
+    story.append(Paragraph(
                 "Here is an Image.  For now, these are always centred in the frame.",
                 styleSheet['Italic']))
 
     story.append(layout.Image('pythonpowered.gif'))
 
-##    story.append(layout.Paragraph("""
+##    story.append(Paragraph("""
 ##                Next comes a grid.  class BaseGrid is the ancestor of Grid classes,
 ##                and doesn't do much more than this.  It, too, is centred.""",
 ##                styleSheet['Italic']))
 ##
 ##    story.append(layout.BaseGrid((36,36,36,36),(8,8,8)))
 
-    story.append(layout.Paragraph("""Here is a Table, which takes all kinds of formatting options...""",
+    story.append(Paragraph("""Here is a Table, which takes all kinds of formatting options...""",
                 styleSheet['Italic']))
     story.append(layout.Spacer(0, 12))
     

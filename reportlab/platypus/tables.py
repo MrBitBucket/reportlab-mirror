@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.6  2000/04/14 11:54:57  rgbecker
+#	Splitting layout.py
+#
 #	Revision 1.5  2000/04/14 08:56:20  rgbecker
 #	Drawable ==> Flowable
-#
+#	
 #	Revision 1.4  2000/02/17 02:09:05  rgbecker
 #	Docstring & other fixes
 #	
@@ -43,18 +46,19 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.5 2000/04/14 08:56:20 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.6 2000/04/14 11:54:57 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
 color and weight of the lines (if any), and the font, alignment and padding of the text.
 """
 from reportlab.platypus import layout
+from reportlab.lib.styles import PropertySet
 import operator
 
 _stringtype = type('')
 
-class CellStyle(layout.PropertySet):
+class CellStyle(PropertySet):
     defaults = {
         'fontname':'Times-Roman',
         'fontsize':10,
