@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.25 2001/10/11 16:11:48 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.26 2001/10/12 14:38:23 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
 
@@ -268,29 +268,18 @@ class LinePlot(Widget):
 								line.strokeDashArray = dash
 							g.add(line)
 
-			# Iterate once more over data columns
-			# (to make sure symbols and labels are on top).
-			for colNo in range(len(row)):
-				x1, y1 = row[colNo]
+			if hasattr(self.lines[styleIdx], 'symbol'):
+				uSymbol = self.lines[styleIdx].symbol
+			elif hasattr(self.lines, 'symbol'):
+				uSymbol = self.lines.symbol
+			else:
+				uSymbol = None
 
-				# Draw a symbol for each data item.
-				# This if should be done implicitely by the collection,
-				# but it didn't want to...
-				if hasattr(self.lines[styleIdx], 'symbol'):
-					uSymbol = self.lines[styleIdx].symbol
-				elif hasattr(self.lines, 'symbol'):
-					uSymbol = self.lines.symbol
-				else:
-					uSymbol = None
-
-				if uSymbol:
-					for colNo in range(len(row)):
-						x1, y1 = row[colNo]
-						# Draw a symbol for each data item. The usedSymbol
-						# attribute can be either a Widget class or a function
-						# returning a widget object.
-						symbol = uSymbol2Symbol(uSymbol,x1,y1,rowColor)
-						if symbol: g.add(symbol)
+			if uSymbol:
+				for colNo in range(len(row)):
+					x1, y1 = row[colNo]
+					symbol = uSymbol2Symbol(uSymbol,x1,y1,rowColor)
+					if symbol: g.add(symbol)
 				
 				# Draw item (bar) labels.
 				self.drawLabel(g, rowNo, colNo, x1, y1)

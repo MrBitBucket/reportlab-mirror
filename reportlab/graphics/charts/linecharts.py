@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.17 2001/10/10 23:14:51 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.18 2001/10/12 14:38:23 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
@@ -290,8 +290,6 @@ class HorizontalLineChart(LineChart):
 						line.strokeWidth = rowStyle.strokeWidth
 						g.add(line)
 
-			# Iterate once more over data columns
-			# (to make sure symbols and labels are on top).
 			if hasattr(self.lines[styleIdx], 'symbol'):
 				uSymbol = self.lines[styleIdx].symbol
 			elif hasattr(self.lines, 'symbol'):
@@ -302,9 +300,6 @@ class HorizontalLineChart(LineChart):
 			if uSymbol:
 				for colNo in range(len(row)):
 					x1, y1 = row[colNo]
-					# Draw a symbol for each data item. The usedSymbol
-					# attribute can be either a Widget class or a function
-					# returning a widget object.
 					symbol = uSymbol2Symbol(uSymbol,x1,y1,rowStyle.strokeColor)
 					if symbol: g.add(symbol)
 
