@@ -31,11 +31,14 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.30  2000/04/25 20:20:13  aaron_watters
+#	Added support for closed outline entries
+#
 #	Revision 1.29  2000/04/18 19:52:35  aaron_watters
 #	eliminated inForm/inPage apis in favor of only beginForm..endForm
 #	(page mode is automatically inferred when page-only operations are
 #	attempted...)
-#
+#	
 #	Revision 1.28  2000/04/15 14:58:32  aaron_watters
 #	Completed addOutlineEntry0 api
 #	
@@ -117,7 +120,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.29 2000/04/18 19:52:35 aaron_watters Exp $ '''
+__version__=''' $Id: canvas.py,v 1.30 2000/04/25 20:20:13 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -281,10 +284,12 @@ class Canvas:
     def setAuthor(self, author):
         self._doc.setAuthor(author)
 
-    def addOutlineEntry0(self, title, key, level=0):
+    def addOutlineEntry0(self, title, key, level=0, closed=None):
         """Adds a new entry to the outline.  If not specified,
         this gos at the top level.  If specified, it must be
         no more than 1 greater than the current outline level.
+        
+        If closed is set then the entry should show no subsections by default
         
         Example
            c.addOutlineEntry0("first section", "section1")
@@ -310,7 +315,7 @@ class Canvas:
         """
         #to be completed
         #self._outlines.append(title)
-        self._doc.outline.addOutlineEntry(key, level, title)
+        self._doc.outline.addOutlineEntry(key, level, title, closed=closed)
         
         
     def setOutlineNames0(self, *nametree):
