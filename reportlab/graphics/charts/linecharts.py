@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.38 2003/09/17 18:29:01 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.39 2003/10/13 10:39:20 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
-__version__=''' $Id: linecharts.py,v 1.38 2003/09/17 18:29:01 rgbecker Exp $ '''
+__version__=''' $Id: linecharts.py,v 1.39 2003/10/13 10:39:20 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType
@@ -302,6 +302,8 @@ class HorizontalLineChart(LineChart):
 
         vA, cA = self.valueAxis, self.categoryAxis
         vA.setPosition(self.x, self.y, self.height)
+        if vA: vA.joinAxis = cA
+        if cA: cA.joinAxis = vA
         vA.configure(self.data)
 
         # If zero is in chart, put x axis there, otherwise
