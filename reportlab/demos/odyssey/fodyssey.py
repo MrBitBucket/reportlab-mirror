@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: fodyssey.py,v $
+#	Revision 1.5  2000/05/12 12:49:38  rgbecker
+#	Minor fixes and changes for comparison with dodyssey.py
+#
 #	Revision 1.4  2000/04/14 12:17:05  rgbecker
 #	Splitting layout.py
-#
+#	
 #	Revision 1.3  2000/04/13 14:48:41  rgbecker
 #	<para> tag added in layout.py paraparser.py
 #	
@@ -43,7 +46,7 @@
 #	Revision 1.1  2000/04/06 08:58:09  rgbecker
 #	Paragraph formatting version of odyssey.py
 #	
-__version__=''' $Id: fodyssey.py,v 1.4 2000/04/14 12:17:05 rgbecker Exp $ '''
+__version__=''' $Id: fodyssey.py,v 1.5 2000/05/12 12:49:38 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -56,15 +59,11 @@ from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 
 styles = getSampleStyleSheet()
 
-Title = "Odyssey"
-
+Title = "The Odyssey"
 Author = "Homer"
 
 def myFirstPage(canvas, doc):
 	canvas.saveState()
-	canvas.setFont('Times-Bold',16)
-	canvas.drawString(108, layout.PAGE_HEIGHT-108, Title)
-	canvas.setFont('Times-Roman',9)
 	canvas.restoreState()
 	
 def myLaterPages(canvas, doc):
@@ -83,7 +82,10 @@ Elements = []
 
 ChapterStyle = copy.copy(styles["Heading1"])
 ChapterStyle.alignment = TA_CENTER
-ChapterStyle.fontsize = 14
+ChapterStyle.fontsize = 16
+InitialStyle = copy.deepcopy(ChapterStyle)
+InitialStyle.fontsize = 16
+PreStyle = styles["Code"] 
 
 def newPage():
 	Elements.append(layout.PageBreak())
@@ -92,6 +94,9 @@ def chapter(txt, style=ChapterStyle):
 	newPage()
 	Elements.append(Paragraph(txt, style))
 	Elements.append(layout.Spacer(0.2*inch, 0.3*inch))
+
+def fTitle(txt,style=InitialStyle):
+	Elements.append(Paragraph(txt, style))
 
 ParaStyle = copy.deepcopy(styles["Normal"])
 if 'right' in sys.argv:
@@ -105,19 +110,16 @@ elif 'center' in sys.argv or 'centre' in sys.argv:
 else:
 	ParaStyle.alignment = TA_JUSTIFY
 
+def spacer(inches):
+	Elements.append(layout.Spacer(0.1*inch, inches*inch))
+
 def p(txt, style=ParaStyle):
-	Elements.append(layout.Spacer(0.2*inch, 0.1*inch))
+	spacer(0.1)
 	Elements.append(Paragraph(txt, style))
 
-PreStyle = styles["Code"] 
-InitialStyle = copy.copy(PreStyle)
-InitialStyle.alignment = TA_CENTER
-InitialStyle.fontsize = 14
-
 def pre(txt, style=PreStyle):
-	s = layout.Spacer(0.1*inch, 0.1*inch)
-	Elements.append(s)
-	p = layout.Preformatted(txt, PreStyle)
+	spacer(0.1)
+	p = layout.Preformatted(txt, style)
 	Elements.append(p)
 
 def parseOdyssey(fn):
@@ -162,7 +164,9 @@ def parseOdyssey(fn):
 		f, k = findNext(L,0)
 		if k: break
 
-	E.append([layout.Preformatted,'The Odyssey\n\nHomer\n', InitialStyle])
+	E.append([spacer,2])
+	E.append([fTitle,'<font color=red>%s</font>' % Title, InitialStyle])
+	E.append([fTitle,'<font size=-4>by</font> <font color=green>%s</font>' % Author, InitialStyle])
 
 	while 1:
 		if f>=len(L): break
