@@ -12,14 +12,6 @@ from reportlab.graphics.charts.textlabel0 import Label
 from reportlab.graphics.charts.axes0 import XCategoryAxis, YValueAxis
       
 
-class BarFormatter(Widget):
-    """Represents the attributes of a bar which you can customize.
-
-    """
-    def __init__(self):
-        pass
-
-        
     
 class VerticalBarChart(Widget):
     """Bar chart with multiple side-by-side bars.
@@ -65,6 +57,14 @@ class VerticalBarChart(Widget):
 
         self.barLabels = TypedPropertyCollection(Label)
         self.barLabelFormat = None
+
+        # this says whether the origin is inside or outside
+        # the bar - +10 means put the origin ten points
+        # above the tip of the bar if value > 0, or ten
+        # points inside if bar value < 0.  This is different
+        # to label dx/dy which are not dependent on the
+        # sign of the data.
+        self.barLabelNudge = 0
         # if you have multiple series, by default they butt
         # together.
         
@@ -126,6 +126,7 @@ class VerticalBarChart(Widget):
         self.valueAxis.configure(self.data)
         self.valueAxis.setPosition(self.x, self.y, self.height)
 
+
         # if zero is in chart, put x axis there, otherwise
         # use bottom.
         xAxisCrossesAt = self.valueAxis.scale(0)
@@ -177,9 +178,9 @@ class VerticalBarChart(Widget):
                     label = self.barLabels[(rowNo, colNo)]
                     #hack to make sure labels are outside the bar
                     if height > 0:
-                        label.setOrigin(x + 0.5*width, y + height + 3)
+                        label.setOrigin(x + 0.5*width, y + height + self.barLabelNudge)
                     else:
-                        label.setOrigin(x + 0.5*width, y + height - 3 - self.barLabels.fontSize)
+                        label.setOrigin(x + 0.5*width, y + height - self.barLabelNudge)
                     label.setText(labelText)
                     g.add(label)
         return g
