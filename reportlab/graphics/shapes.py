@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.22 2001/04/11 14:33:40 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.23 2001/05/01 09:18:53 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -631,7 +631,7 @@ class LineShape(Shape):
         'strokeLineCap':None,
         'strokeLineJoin':None,
         'strokeMiterLimit':isNumber,
-        'strokeDashArray':None,
+        'strokeDashArray':isListOfNumbersOrNone,
         }
 
     def __init__(self, kw):
@@ -651,7 +651,7 @@ class Line(LineShape):
         'strokeLineCap':None,
         'strokeLineJoin':None,
         'strokeMiterLimit':isNumber,
-        'strokeDashArray':None,
+        'strokeDashArray':isListOfNumbersOrNone,
         'x1':isNumber,
         'y1':isNumber,
         'x2':isNumber,
@@ -706,7 +706,7 @@ class Rect(SolidShape):
         'strokeLineCap': None,   #TODO - define the types expected and add a checker function
         'strokeLineJoin': None,  #TODO - define the types expected and add a checker function
         'strokeMiterLimit': None, #TODO - define the types expected and add a checker function
-        'strokeDashArray': None, #TODO - define the types expected and add a checker function
+        'strokeDashArray': isListOfNumbersOrNone, #TODO - define the types expected and add a checker function
         'fillColor': isColorOrNone,
         'x': isNumber,
         'y': isNumber,
@@ -739,7 +739,7 @@ class Circle(SolidShape):
         'strokeLineCap': None,
         'strokeLineJoin': None,
         'strokeMiterLimit': None,
-        'strokeDashArray': None,
+        'strokeDashArray': isListOfNumbersOrNone,
         'fillColor': None,
         'cx': isNumber,
         'cy': isNumber,
@@ -766,7 +766,7 @@ class Ellipse(SolidShape):
         'strokeLineCap': None,
         'strokeLineJoin': None,
         'strokeMiterLimit': None,
-        'strokeDashArray': None,
+        'strokeDashArray': isListOfNumbersOrNone,
         'fillColor': None,
         'cx': isNumber,
         'cy': isNumber,
@@ -797,7 +797,7 @@ class Wedge(SolidShape):
         'strokeLineCap': None,
         'strokeLineJoin': None,
         'strokeMiterLimit': None,
-        'strokeDashArray': None,
+        'strokeDashArray': isListOfNumbersOrNone,
         'fillColor': None,
         'centerx': isNumber,
         'centery': isNumber,
@@ -874,7 +874,7 @@ class Polygon(SolidShape):
         'strokeLineCap': None,
         'strokeLineJoin': None,
         'strokeMiterLimit': None,
-        'strokeDashArray': None,
+        'strokeDashArray': isListOfNumbersOrNone,
         'fillColor': None,
         'points': isListOfNumbers,
         }
@@ -901,7 +901,7 @@ class PolyLine(LineShape):
         'strokeLineCap':None,
         'strokeLineJoin':None,
         'strokeMiterLimit':isNumber,
-        'strokeDashArray':None,
+        'strokeDashArray':isListOfNumbersOrNone,
         'points':isListOfNumbers
         }
 

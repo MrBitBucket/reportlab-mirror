@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.16 2001/04/24 16:07:18 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.17 2001/05/01 09:18:53 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -38,7 +38,7 @@ from types import FunctionType, StringType, TupleType, ListType
 
 from reportlab.graphics.shapes import Drawing, Line, Group, Auto
 from reportlab.graphics.shapes import STATE_DEFAULTS
-from reportlab.graphics.shapes import isNumber, isNumberOrNone, isNumberOrAuto, isListOfNumbers, isColorOrNone, OneOf
+from reportlab.graphics.shapes import isNumber, isNumberOrNone, isNumberOrAuto, isListOfNumbers, isListOfNumbersOrNone, isColorOrNone, OneOf
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.utils import nextRoundNumber
@@ -86,7 +86,7 @@ class XCategoryAxis(CategoryAxis):
         'visible':isNumber,
         'strokeWidth':isNumber,
         'strokeColor':isColorOrNone,
-        'strokeDashArray':None,
+        'strokeDashArray':isListOfNumbersOrNone,
         'tickUp':isNumber,
         'tickDown':isNumber,
         'labels':None,
@@ -110,7 +110,7 @@ class XCategoryAxis(CategoryAxis):
 
         self.strokeWidth = 1
         self.strokeColor = STATE_DEFAULTS['strokeColor']
-        self.strokeDashArray = STATE_DEFAULTS['strokeColor']
+        self.strokeDashArray = STATE_DEFAULTS['strokeDashArray']
         self.labels = TypedPropertyCollection(Label)
         self.labels.boxAnchor = 'n' #north - top edge
         self.labels.dy = -5 
@@ -248,7 +248,7 @@ class YCategoryAxis(CategoryAxis):
         'visible':isNumber,
         'strokeWidth':isNumber,
         'strokeColor':isColorOrNone,
-        'strokeDashArray':None,
+        'strokeDashArray':isListOfNumbersOrNone,
         'tickLeft':isNumber,
         'tickRight':isNumber,
         'labels':None,
@@ -272,7 +272,7 @@ class YCategoryAxis(CategoryAxis):
 
         self.strokeWidth = 1
         self.strokeColor = STATE_DEFAULTS['strokeColor']
-        self.strokeDashArray = STATE_DEFAULTS['strokeColor']
+        self.strokeDashArray = STATE_DEFAULTS['strokeDashArray']
         self.labels = TypedPropertyCollection(Label)
         self.labels.boxAnchor = 'e' #east - right edge
         self.labels.dx = -5 
@@ -446,7 +446,7 @@ class ValueAxis(Widget):
         'visible':isNumber,
         'strokeWidth':isNumber,
         'strokeColor':isColorOrNone,
-        'strokeDashArray':None,
+        'strokeDashArray':isListOfNumbersOrNone,
         'minimumTickSpacing':isNumber,
         'maximumTicks' : isNumber,
         'labels':None,
@@ -471,7 +471,7 @@ class ValueAxis(Widget):
         
         self.strokeWidth = 1
         self.strokeColor = STATE_DEFAULTS['strokeColor']
-        self.strokeDashArray = STATE_DEFAULTS['strokeColor']
+        self.strokeDashArray = STATE_DEFAULTS['strokeDashArray']
 
         self.labels = TypedPropertyCollection(Label)
         self.labels.angle = 0        
@@ -907,7 +907,7 @@ class YValueAxis(ValueAxis):
 ##        'visible':isNumber,
 ##        'strokeWidth':isNumber,
 ##        'strokeColor':isColorOrNone,
-##        'strokeDashArray':None,
+##        'strokeDashArray':isListOfNumbersOrNone,
 ##        'tickUp':isNumber,
 ##        'tickDown':isNumber,
 ##        'minimumTickSpacing':isNumber,

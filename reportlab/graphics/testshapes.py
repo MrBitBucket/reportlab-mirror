@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/testshapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.9 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.10 2001/05/01 09:18:53 rgbecker Exp $
 
 # testshapes.py - draws shapes onto a PDF canvas.
 
@@ -170,6 +170,7 @@ def getDrawing06():
     """
 
     purple = colors.purple
+    purple = colors.green
     
     D = Drawing(400, 200) #, fillColor=purple)
     
