@@ -259,11 +259,13 @@ eg $tar xzvf py152.tgz$; this will create a subdirectory called Python-1.5.2
 (or whatever) cd into this directory. Then read the file $README$! It contains the 
 latest information on how to install Python.""")
 
-list("""Check that the zlib extension will be installed by default by editing
+list("""If your system has the gzip libz library installed
+check that the zlib extension will be installed by default by editing
 the file Modules/Setup.in and ensuring that (near line 405) the line
 containing zlib zlibmodule.c is uncommented ie has no hash '#' character at the
 beginning. You also need to decide if you will be installing in the default location
-(/usr/local/) or in some other place.""")
+(/usr/local/) or in some other place.
+The zlib module is needed if you want compressed PDF and for some images.""")
 
 list("""Invoke the command $./configure --prefix=/usr/local$ this should configure
 the source directory for building. Then you can build the binaries with
@@ -285,11 +287,16 @@ eg("""
 #shell rcfile
 PYTHONPATH=$HOME/mypythonpackages
 export PYTHONPATH
+""",after=0.1)
+
+list("""You should now be able to run python and execute the python statement
+""",doBullet=0)
+eg("""import reportlab""",after=0.1)
+list("""
+If you want to use images you should certainly consider getting &amp; installing the Python Imaging Library
+from <font color=blue>http://www.pythonware.com/products/pil</font>.
 """)
 
-disc("""You should now be able to run python and execute the python statement
-""")
-eg("""import reportlab""")
 heading3("Instructions for Python novices: Mac")
 
 todo("[Earth to Just van Rossum, come in Just!?]")
