@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.14 2001/07/21 11:35:28 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.15 2001/07/23 07:57:45 dinu_gherman Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -393,6 +393,8 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         elif issubclass(aClass, Drawing):
             drawing = aClass()
             self.story.append(Spacer(0*cm, 0.5*cm))
+            self._showDrawingCode(drawing)
+            self.story.append(Spacer(0*cm, 0.5*cm))
             self._showDrawingDemo(drawing)            
             self.story.append(Spacer(0*cm, 0.5*cm))
 
@@ -445,6 +447,25 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         lines = open(srcFileName, 'r').readlines()
         lines = map(string.rstrip, lines)
         codeSample = getFunctionBody(function, lines)
+        self.story.append(Preformatted(codeSample, self.code))
+
+
+    def _showDrawingCode(self, drawing):
+        """Show code of the drawing class."""
+
+        drawingClass = drawing.__class__
+        initMethod = drawingClass.__init__
+        srcFileName = initMethod.im_func.func_code.co_filename
+        (dirname, fileNameOnly) = os.path.split(srcFileName)
+
+        # Heading
+        className = drawingClass.__name__
+        self.story.append(Paragraph("<i>Example</i>", self.bt))
+
+        # Sample code
+        lines = open(srcFileName, 'r').readlines()
+        lines = map(string.rstrip, lines)
+        codeSample = getFunctionBody(initMethod, lines)
         self.story.append(Preformatted(codeSample, self.code))
 
 
