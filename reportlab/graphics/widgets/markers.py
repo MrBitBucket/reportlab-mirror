@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/markers.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/markers.py,v 1.12 2002/07/24 19:56:36 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/markers.py,v 1.13 2002/08/13 12:32:51 rgbecker Exp $
 """
 This modules defines a collection of markers used in charts.
 """
-__version__=''' $Id: markers.py,v 1.12 2002/07/24 19:56:36 andy_robinson Exp $ '''
+__version__=''' $Id: markers.py,v 1.13 2002/08/13 12:32:51 rgbecker Exp $ '''
 from types import FunctionType, ClassType
 from reportlab.graphics.shapes import Rect, Line, Circle, Polygon, Drawing, Group
 from reportlab.graphics.widgets.signsandsymbols import SmileyFace
@@ -23,10 +23,10 @@ class Marker(Widget):
     _attrMap = AttrMap(BASE=Widget,
                     kind = AttrMapValue(
                             OneOf(None, 'Square', 'Diamond', 'Circle', 'Cross', 'Triangle', 'StarSix',
-                                'Pentagon', 'Hexagon', 'Heptagon', 'Octagon',
+                                'Pentagon', 'Hexagon', 'Heptagon', 'Octagon', 'StarFive',
                                 'FilledSquare', 'FilledCircle', 'FilledDiamond', 'FilledCross',
                                 'FilledTriangle','FilledStarSix', 'FilledPentagon', 'FilledHexagon',
-                                'FilledHeptagon', 'FilledOctagon',
+                                'FilledHeptagon', 'FilledOctagon', 'FilledStarFive',
                                 'Smiley'),
                             desc='marker type name'),
                     size = AttrMapValue(isNumber,desc='marker size'),
@@ -96,11 +96,24 @@ class Marker(Widget):
     def _StarSix(self):
         r = float(self.size)/2
         c = 30*_toradians
-        s = sin(30*_toradians)*r
+        s = sin(c)*r
         c = cos(c)*r
         z = s/2
         g = c/2
         return self._doPolygon((0,r,-z,s,-c,s,-s,0,-c,-s,-z,-s,0,-r,z,-s,c,-s,s,0,c,s,z,s))
+
+    def _StarFive(self):
+        R = float(self.size)/2
+        r = R*sin(18*_toradians)/cos(36*_toradians)
+        P = []
+        angle = 90
+        for i in xrange(5):
+            for radius in R, r:
+                theta = angle*_toradians
+                P.append(radius*cos(theta))
+                P.append(radius*sin(theta))
+                angle = angle + 36
+        return self._doPolygon(P)
 
     def _Pentagon(self):
         return self._doNgon(5)
@@ -146,6 +159,7 @@ class Marker(Widget):
     _FilledHexagon = _doFill
     _FilledHeptagon = _doFill
     _FilledOctagon = _doFill
+    _FilledStarFive = _doFill
 
     def draw(self):
         if self.kind:
@@ -160,7 +174,7 @@ class Marker(Widget):
                 if not isinstance(m,Group):
                     _m, m = m, Group()
                     m.add(_m)
-                if self.angle: m.rotate(angle)
+                if self.angle: m.rotate(self.angle)
                 x, y = _x+_dx, _y+_dy
                 if x or y: m.shift(x,y)
             else:
