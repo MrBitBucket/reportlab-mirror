@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pdfimages.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.13 2001/10/21 17:05:01 andy_robinson Exp $
-__version__=''' $Id: pdfimages.py,v 1.13 2001/10/21 17:05:01 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.14 2002/03/12 15:14:15 rgbecker Exp $
+__version__=''' $Id: pdfimages.py,v 1.14 2002/03/12 15:14:15 rgbecker Exp $ '''
 __doc__="""
 Image functionality sliced out of canvas.py for generalization
 """
@@ -185,5 +185,3 @@ if __name__=='__main__':
     print img.format(doc)
     for row in img.binaryData:
         print row
-    
-        
