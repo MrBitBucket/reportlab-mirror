@@ -1,3 +1,154 @@
+##### 2001/03/13 #####
+	test/test_graphics_charts.py 1.3 dinu_gherman
+		 Changed to use Legend0 instead of Swatches0.
+	graphics/charts/legends0.py 1.7 dinu_gherman
+		 Renamed Swatches0 to Legend0. Stripped away horizontal bar charts temporyrily.
+	graphics/charts/barchart1.py 1.14 dinu_gherman
+		 Renamed Swatches0 to Legend0. Stripped away horizontal bar charts temporyrily.
+	graphics/charts/axes0.py 1.15 dinu_gherman
+		 Renamed Swatches0 to Legend0. Stripped away horizontal bar charts temporyrily.
+	lib/setup.py 1.2 rgbecker
+		 Added sgmlop pyHnj extensions
+	lib/_rl_accel.c 1.7 rgbecker
+		 Fixed up the  defaultEncoding thing and added a version number
+	lib/setup.py 1.1 rgbecker
+		 Initial version of distutils script
+	lib/_rl_accel.c 1.6 rgbecker
+		 Initial version of distutils script
+	graphics/charts/barchart1.py 1.13 dinu_gherman
+		 Enabled mono-bar charts and no-bar charts(!) plus more samples.
+	graphics/charts/axes0.py 1.14 dinu_gherman
+		 Enabled mono-bar charts and no-bar charts(!) plus more samples.
+	graphics/charts/barchart1.py 1.12 dinu_gherman
+		 Added new samples.
+	graphics/charts/axes0.py 1.13 dinu_gherman
+		 Set minimum number of items for X/Y axes to 1 instead of 2.
+	graphics/charts/axes0.py 1.12 dinu_gherman
+		 Fixed bug refusing exactly two data items.
+	graphics/charts/axes0.py 1.11 dinu_gherman
+		 Improved axes.
+	graphics/charts/axes0.py 1.10 dinu_gherman
+		 Improved X/Y axes.
+	graphics/charts/axes0.py 1.9 dinu_gherman
+		 Improved YCategoryAxis slightly.
+	test/test_graphics_charts.py 1.2 dinu_gherman
+		 Changed attribute postponed to _postponed in doctemplate.py. Added minor changes in shapes.py. Changed test_graphics_charts.py to no longer use page breaks.
+	platypus/doctemplate.py 1.38 dinu_gherman
+		 Changed attribute postponed to _postponed in doctemplate.py. Added minor changes in shapes.py. Changed test_graphics_charts.py to no longer use page breaks.
+	graphics/shapes.py 1.9 dinu_gherman
+		 Changed attribute postponed to _postponed in doctemplate.py. Added minor changes in shapes.py. Changed test_graphics_charts.py to no longer use page breaks.
+	graphics/charts/legends0.py 1.6 andy_robinson
+		 Fixed broken cross reference to another example
+	test/test_lib_colors.py 1.4 andy_robinson
+		 Added CMYK support to core
+	pdfgen/canvas.py 1.67 andy_robinson
+		 Added CMYK support to core
+	lib/colors.py 1.17 andy_robinson
+		 Added CMYK support to core
+##### 2001/03/12 #####
+	test/test_lib_colors.py 1.3 andy_robinson
+		 Initial checkin of CMYKColor class
+	lib/colors.py 1.16 andy_robinson
+		 Initial checkin of CMYKColor class
+	graphics/charts/barchart1.py 1.11 dinu_gherman
+		 Added initial crude version of HorizontalBarChart class.
+	graphics/charts/axes0.py 1.8 dinu_gherman
+		 Added dual versions for category and value axes. (not all tested)
+	graphics/charts/piechart0.py 1.5 andy_robinson
+		 Fixed bug with defaultColors changes being erroneouslty banned
+	graphics/charts/legends0.py 1.5 andy_robinson
+		 Fixed bug with defaultColors changes being erroneouslty banned
+	test/test_graphics_charts.py 1.1 dinu_gherman
+		 Initial checkin.
+	graphics/charts/legends0.py 1.4 dinu_gherman
+		 Fixed import error.
+	test/test_pdfbase_pdfmetrics.py 1.3 rgbecker
+		 Changes to basic Font stuff, moved it to pdfmetrics
+	test/test_paragraphs.py 1.5 rgbecker
+		 Changes to basic Font stuff, moved it to pdfmetrics
+	pdfgen/canvas.py 1.66 rgbecker
+		 Changes to basic Font stuff, moved it to pdfmetrics
+	pdfbase/pdfmetrics.py 1.24 rgbecker
+		 Changes to basic Font stuff, moved it to pdfmetrics
+	pdfbase/pdfdoc.py 1.41 rgbecker
+		 Changes to basic Font stuff, moved it to pdfmetrics
+	pdfbase/_fontdata.py 1.2 rgbecker
+		 Changes to basic Font stuff, moved it to pdfmetrics
+	pdfgen/fonts0.py 1.4 rgbecker
+		 Removed fonts0 stuff to pdfbase.pdfmetrics
+##### 2001/03/08 #####
+	test/test_pdfbase_pdfmetrics.py 1.2 rgbecker
+		 Initial split of pdfmetrics into code + database; some minor name adjustments
+	pdfgen/fonts0.py 1.3 rgbecker
+		 Initial split of pdfmetrics into code + database; some minor name adjustments
+	pdfgen/canvas.py 1.65 rgbecker
+		 Initial split of pdfmetrics into code + database; some minor name adjustments
+	pdfbase/pdfmetrics.py 1.23 rgbecker
+		 Initial split of pdfmetrics into code + database; some minor name adjustments
+	pdfbase/_fontdata.py 1.1 rgbecker
+		 Initial split of pdfmetrics into code + database; some minor name adjustments
+	demos/stdfonts/stdfonts.py 1.10 rgbecker
+		 Initial split of pdfmetrics into code + database; some minor name adjustments
+	test/test_platypus_paragraphs.py 1.3 dinu_gherman
+		 Added a multi-page paragraph test.
+##### 2001/03/07 #####
+	test/test_paragraphs.py 1.4 rgbecker
+		 Changed things to use config.py for defaults
+	platypus/test/testplatypus.py 1.22 rgbecker
+		 Changed things to use config.py for defaults
+	platypus/tables.py 1.35 rgbecker
+		 Changed things to use config.py for defaults
+	platypus/flowables.py 1.16 rgbecker
+		 Changed things to use config.py for defaults
+	platypus/doctemplate.py 1.37 rgbecker
+		 Changed things to use config.py for defaults
+	pdfgen/fonts0.py 1.2 rgbecker
+		 Changed things to use config.py for defaults
+	pdfgen/canvas.py 1.64 rgbecker
+		 Changed things to use config.py for defaults
+	pdfbase/pdfdoc.py 1.40 rgbecker
+		 Changed things to use config.py for defaults
+	lib/tocindex.py 1.6 rgbecker
+		 Changed things to use config.py for defaults
+	lib/pagesizes.py 1.6 rgbecker
+		 Changed things to use config.py for defaults
+	lib/fonts.py 1.5 rgbecker
+		 Changed things to use config.py for defaults
+	demos/pythonpoint/pythonpoint.py 1.30 rgbecker
+		 Changed things to use config.py for defaults
+	demos/odyssey/fodyssey.py 1.15 rgbecker
+		 Changed things to use config.py for defaults
+	demos/gadflypaper/gfe.py 1.13 rgbecker
+		 Changed things to use config.py for defaults
+	config.py 1.3 rgbecker
+		 Changed things to use config.py for defaults
+	platypus/paragraph.py 1.51 rgbecker
+		 Added test 5
+##### 2001/03/06 #####
+	lib/yaml.py 1.1 andy_robinson
+		 Added
+	test/test_pdfbase_pdfmetrics.py 1.1 andy_robinson
+		 Added explicit font and encoding support
+	platypus/paragraph.py 1.50 andy_robinson
+		 Added explicit font and encoding support
+	platypus/doctemplate.py 1.36 andy_robinson
+		 Added explicit font and encoding support
+	pdfgen/fonts0.py 1.1 andy_robinson
+		 Added explicit font and encoding support
+	pdfgen/canvas.py 1.63 andy_robinson
+		 Added explicit font and encoding support
+	pdfbase/pdfmetrics.py 1.22 andy_robinson
+		 Added explicit font and encoding support
+	pdfbase/pdfdoc.py 1.39 andy_robinson
+		 Added explicit font and encoding support
+	lib/graphicsdoc0.py 1.11 andy_robinson
+		 Added explicit font and encoding support
+	demos/stdfonts/stdfonts.py 1.9 andy_robinson
+		 Added explicit font and encoding support
+	config.py 1.2 andy_robinson
+		 Added explicit font and encoding support
+	__init__.py 1.10 andy_robinson
+		 Added explicit font and encoding support
 ##### 2001/feb/09 release 1.03
 ##### 2001/02/09 #####
 	platypus/tableofcontents0.py 1.2 dinu_gherman
