@@ -1,58 +1,32 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.3 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.4 2001/04/09 22:06:28 dinu_gherman Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
 
 import string
-from types import FunctionType
+from types import FunctionType, ClassType, StringType
 
 from reportlab.lib import colors 
-from reportlab.graphics.shapes import *
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
-from reportlab.graphics.widgets.signsandsymbols import SmileyFace0
+from reportlab.graphics.charts.markers import *
+from reportlab.graphics.shapes import Line, Rect, Group, Drawing
+from reportlab.graphics.shapes import Auto, isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf
+from reportlab.graphics.widgets.signsandsymbols import NoEntry0
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
       
 
-def makeFilledSquare(x, y, size, color):
-    "Make a filled square data item representation."
-
-    d = size/2.0
-    rect = Rect(x-d, y-d, 2*d, 2*d)
-    rect.fillColor = color
-    rect.strokeColor = color
-
-    return rect
-
-
-def makeFilledDiamond(x, y, size, color):
-    "Make a filled diamond data item representation."
-
-    d = size/2.0
-    poly = Polygon((x-d,y, x,y+d, x+d,y, x,y-d))
-    poly.fillColor = color
-    poly.strokeColor = color
-
-    return poly
-
-
-def makeSmiley(x, y, size, color):
-    "Make a smiley data item representation."
-
-    d = size
-    s = SmileyFace0()
-    s.color = color
-    s.x = x-d
-    s.y = y-d
-    s.size = d*2
-
-    return s
-
-        
 class LineChart(Widget):
+    pass
+
+
+# This is conceptually similar to the VerticalBarChart.
+# Still it is better named HorizontalLineChart... :-/
+
+class HorizontalLineChart(LineChart):
     """Line chart with multiple lines.
 
     A line chart is assumed to have one category and one value axis. 
@@ -172,7 +146,7 @@ class LineChart(Widget):
                 (14, 10, 21, 28, 38, 46, 25, 5)
                 ]
         
-        lc = LineChart()
+        lc = HorizontalLineChart()
 
         lc.x = 20
         lc.y = 10
@@ -216,34 +190,47 @@ class LineChart(Widget):
             self._positions.append(lineRow)
         
 
-    def draw(self):
-        "Draws itself."
-        
-        self.valueAxis.configure(self.data)
-        self.valueAxis.setPosition(self.x, self.y, self.height)
+    def drawLabel(self, group, rowNo, colNo, x, y):
+        "Draw a label for a given item in the list."
 
-        # If zero is in chart, put x axis there, otherwise
-        # use bottom.
-        xAxisCrossesAt = self.valueAxis.scale(0)
-        if ((xAxisCrossesAt > self.y + self.height) or (xAxisCrossesAt < self.y)):
-            self.categoryAxis.setPosition(self.x, self.y, self.width)
+        labelFmt = self.lineLabelFormat
+        labelValue = self.data[rowNo][colNo]
+        
+        if labelFmt is None:
+            labelText = None
+        elif type(labelFmt) is StringType:
+            labelText = labelFmt % labelValue
+        elif type(labelFmt) is FunctionType:
+            labelText = labelFmt(labelValue)
         else:
-            self.categoryAxis.setPosition(self.x, xAxisCrossesAt, self.width)
+            msg = "Unknown formatter type %s, expected string or function"  
+            raise Exception, msg % labelFmt
 
-        self.categoryAxis.configure(self.data)
-        
-        self.calcPositions()        
-        
+        if labelText:
+            label = self.lineLabels[(rowNo, colNo)]
+            # Make sure labels are some distance off the data point.
+            if y > 0:
+                label.setOrigin(x, y + self.lineLabelNudge)
+            else:
+                label.setOrigin(x, y - self.lineLabelNudge)
+            label.setText(labelText)
+
+            group.add(label)
+
+
+    def makeBackground(self):
         g = Group()
 
-        # debug mode - show border
         g.add(Rect(self.x, self.y,
                    self.width, self.height,
                    strokeColor = self.strokeColor,
                    fillColor= self.fillColor))
         
-        g.add(self.categoryAxis)
-        g.add(self.valueAxis)
+        return g
+
+
+    def makeLines(self):
+        g = Group()
 
         labelFmt = self.lineLabelFormat
 
@@ -269,41 +256,64 @@ class LineChart(Widget):
             # (to make sure symbols and labels are on top).
             for colNo in range(len(row)):
                 x1, y1 = row[colNo]
-                # Draw a symbol for each data item.
-                symbol = self.usedSymbol(x1, y1, 5, rowColor)
+
+                # Draw a symbol for each data item. The usedSymbol
+                # attribute can be either a Widget class or a function
+                # returning a widget object.
+                uSymbol = self.usedSymbol
+                if type(uSymbol) == FunctionType:
+                    symbol = uSymbol(x1, y1, 5, rowColor)
+                elif type(uSymbol) == ClassType:
+                    size = 10.0
+                    symbol = uSymbol()
+                    if not isinstance(symbol, Widget):
+                        break
+                    symbol.x = x1 - (size/2)
+                    symbol.y = y1 - (size/2)
+                    try:
+                        symbol.size = size
+                        symbol.color = rowColor
+                    except:
+                        pass
                 g.add(symbol)
 
                 # Draw item labels.
                 self.drawLabel(g, rowNo, colNo, x1, y1)
+        
+        return g
+
+
+    def draw(self):
+        "Draws itself."
+        
+        self.valueAxis.setPosition(self.x, self.y, self.height)
+        self.valueAxis.configure(self.data)
+
+        # If zero is in chart, put x axis there, otherwise
+        # use bottom.
+        xAxisCrossesAt = self.valueAxis.scale(0)
+        if ((xAxisCrossesAt > self.y + self.height) or (xAxisCrossesAt < self.y)):
+            y = self.y
+        else:
+            y = xAxisCrossesAt
+
+        self.categoryAxis.setPosition(self.x, y, self.width)
+        self.categoryAxis.configure(self.data)
+        
+        self.calcPositions()        
+        
+        g = Group()
+
+        g.add(self.categoryAxis)
+        g.add(self.valueAxis)
+        g.add(self.makeBackground())
+        g.add(self.makeLines())
 
         return g
 
 
-    def drawLabel(self, group, rowNo, colNo, x, y):
-        "Draw a label for a given item in the list."
-
-        labelFmt = self.lineLabelFormat
-        labelValue = self.data[rowNo][colNo]
-        
-        if labelFmt is None:
-            labelText = None
-        elif type(labelFmt) is StringType:
-            labelText = labelFmt % labelValue
-        elif type(labelFmt) is FunctionType:
-            labelText = labelFmt(labelValue)
-        else:
-            msg = "Unknown formatter type %s, expected string or function"  
-            raise Exception, msg % labelFmt
-
-        if labelText:
-            label = self.lineLabels[(rowNo, colNo)]
-            # Make sure labels are some distance off the data point.
-            if y > 0:
-                label.setOrigin(x, y + self.lineLabelNudge)
-            else:
-                label.setOrigin(x, y - self.lineLabelNudge)
-            label.setText(labelText)
-            group.add(label)
+class VerticalLineChart(LineChart):
+    pass
 
 
 def sample1():
@@ -314,7 +324,7 @@ def sample1():
             (5, 20, 46, 38, 23, 21, 6, 14)
             ]
     
-    lc = LineChart()
+    lc = HorizontalLineChart()
 
     lc.x = 50
     lc.y = 50
@@ -324,15 +334,89 @@ def sample1():
     lc.joinedLines = 1
     lc.usedSymbol = makeFilledDiamond
     lc.lineLabelFormat = '%2.0f'
-##    lc.strokeColor = colors.yellow
 
     catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
-    catNames = map(lambda n:n+'-99', catNames)
     lc.categoryAxis.categoryNames = catNames
-    lc.categoryAxis.labels.boxAnchor = 'ne'
-    lc.categoryAxis.labels.dx = 8
-    lc.categoryAxis.labels.dy = -2
-    lc.categoryAxis.labels.angle = 30
+    lc.categoryAxis.labels.boxAnchor = 'n'
+
+    lc.valueAxis.valueMin = 0
+    lc.valueAxis.valueMax = 60
+    lc.valueAxis.valueStep = 15
+    
+    drawing.add(lc)
+
+    return drawing
+
+
+class SampleHorizontalLineChart(HorizontalLineChart):
+    "Sample class overwriting one method to draw additional horizontal lines."
+    
+    def demo(self):
+        """Shows basic use of a line chart."""
+
+        drawing = Drawing(200, 100)
+
+        data = [
+                (13, 5, 20, 22, 37, 45, 19, 4),
+                (14, 10, 21, 28, 38, 46, 25, 5)
+                ]
+        
+        lc = SampleHorizontalLineChart()
+
+        lc.x = 20
+        lc.y = 10
+        lc.height = 85
+        lc.width = 170
+        lc.data = data
+        lc.strokeColor = colors.white
+        lc.fillColor = colors.HexColor(0xCCCCCC)
+
+        drawing.add(lc)
+
+        return drawing
+
+
+    def makeBackground(self):
+        g = Group()
+
+        g.add(HorizontalLineChart.makeBackground(self))        
+
+        valAxis = self.valueAxis
+        valTickPositions = valAxis._tickValues
+
+        for y in valTickPositions:
+            y = valAxis.scale(y)
+            g.add(Line(self.x, y, self.x+self.width, y,
+                       strokeColor = self.strokeColor))
+        
+        return g
+
+
+
+def sample1a():
+    drawing = Drawing(400, 200)
+
+    data = [
+            (13, 5, 20, 22, 37, 45, 19, 4),
+            (5, 20, 46, 38, 23, 21, 6, 14)
+            ]
+
+    lc = SampleHorizontalLineChart()
+
+    lc.x = 50
+    lc.y = 50
+    lc.height = 125
+    lc.width = 300
+    lc.data = data
+    lc.joinedLines = 1
+    lc.strokeColor = colors.white
+    lc.fillColor = colors.HexColor(0xCCCCCC)
+    lc.usedSymbol = makeFilledDiamond
+    lc.lineLabelFormat = '%2.0f'
+
+    catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
+    lc.categoryAxis.categoryNames = catNames
+    lc.categoryAxis.labels.boxAnchor = 'n'
 
     lc.valueAxis.valueMin = 0
     lc.valueAxis.valueMax = 60
@@ -351,7 +435,7 @@ def sample2():
             (5, 20, 46, 38, 23, 21, 6, 14)
             ]
     
-    lc = LineChart()
+    lc = HorizontalLineChart()
 
     lc.x = 50
     lc.y = 50
@@ -365,12 +449,41 @@ def sample2():
     lc.fillColor = colors.lightblue
 
     catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
-    catNames = map(lambda n:n+'-99', catNames)
     lc.categoryAxis.categoryNames = catNames
-    lc.categoryAxis.labels.boxAnchor = 'ne'
-    lc.categoryAxis.labels.dx = 8
-    lc.categoryAxis.labels.dy = -2
-    lc.categoryAxis.labels.angle = 30
+    lc.categoryAxis.labels.boxAnchor = 'n'
+
+    lc.valueAxis.valueMin = 0
+    lc.valueAxis.valueMax = 60
+    lc.valueAxis.valueStep = 15
+    
+    drawing.add(lc)
+
+    return drawing
+
+
+def sample3():
+    drawing = Drawing(400, 200)
+
+    data = [
+            (13, 5, 20, 22, 37, 45, 19, 4),
+            (5, 20, 46, 38, 23, 21, 6, 14)
+            ]
+    
+    lc = HorizontalLineChart()
+
+    lc.x = 50
+    lc.y = 50
+    lc.height = 125
+    lc.width = 300
+    lc.data = data
+    lc.joinedLines = 1
+    lc.usedSymbol = NoEntry0
+    lc.lineLabelFormat = '%2.0f'
+    lc.strokeColor = colors.black
+
+    catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
+    lc.categoryAxis.categoryNames = catNames
+    lc.categoryAxis.labels.boxAnchor = 'n'
 
     lc.valueAxis.valueMin = 0
     lc.valueAxis.valueMax = 60
