@@ -1,6 +1,4 @@
-This directory contains all of reportlabs extensions.
-At present we don't yet support the new distutils distribution
-mechanism although contributions are welcome :).
+This directory contains all of ReportLab's extensions.
 
 The file __BUILD.dsw is suitable for VC++ 6.0; th dsp files are 
 for individual projects. At present these are
@@ -16,5 +14,9 @@ You need to do
 	make
 
 then you should have some shared libraries.
+
+Alternatively you can use the distutils setup.py file
+eg
+	setup.py build or setup.py install
 
 Robin Becker
