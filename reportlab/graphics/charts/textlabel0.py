@@ -1,4 +1,5 @@
 import string
+
 from reportlab.graphics.shapes import *
 from reportlab.graphics.widgetbase import Widget
 from reportlab.lib import colors
@@ -153,11 +154,4 @@ class Label(Widget):
             y = y - self.leading
 
         return g
-    
-        
-##if __name__=='__main__':
-##    from reportlab.graphics.renderPDF import drawToFile
-##    tx = Label()
-##    d = tx.demo()
-##    drawToFile(d, 'textlabel.pdf', 'example text label')
     
