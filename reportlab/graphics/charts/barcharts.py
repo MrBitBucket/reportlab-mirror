@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.24 2001/07/16 12:25:04 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.25 2001/07/16 12:30:09 dinu_gherman Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -49,12 +49,16 @@ from reportlab.graphics.widgets.grids import ShadedRect0
 
 class BarChartProperties(PropHolder):
     _attrMap = AttrMap(
-        strokeColor = AttrMapValue(isColorOrNone),
-        fillColor = AttrMapValue(isColorOrNone),
-        strokeWidth = AttrMapValue(isNumber),
+        strokeColor = AttrMapValue(isColorOrNone,
+            desc='Color of the bar border.'),
+        fillColor = AttrMapValue(isColorOrNone,
+            desc='Color of the bar interior area.'),
+        strokeWidth = AttrMapValue(isNumber,
+            desc='Width of the bar border.'),
         symbol = AttrMapValue(None,
-            desc='A widget to be used insteaad of a normal bar.'),
+            desc='A widget to be used instead of a normal bar.'),
         )
+
     def __init__(self):
         self.strokeColor = None
         self.fillColor = colors.blue
@@ -90,9 +94,9 @@ class BarChart(Widget):
             desc='Width between individual bars.'),
 
         strokeColor = AttrMapValue(isColorOrNone,
-            desc='Color of the bar border.'),
+            desc='Color of the plot area border.'),
         fillColor = AttrMapValue(isColorOrNone,
-            desc='Color of the bar interior area.'),
+            desc='Color of the plot area interior.'),
 
         bars = AttrMapValue(None,
             desc='Handle of the individual bars.'),
