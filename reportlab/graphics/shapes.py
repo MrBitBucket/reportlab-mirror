@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.45 2001/09/10 14:18:59 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.46 2001/09/10 14:44:12 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -431,10 +431,10 @@ class Drawing(Group, Flowable):
 	def asGroup(self):
 		return self._copy(Group())
 
-	def save(self, formats=None, verbose=None, fnRoot=None):
+	def save(self, formats=None, verbose=None, fnRoot=None, outDir=None):
 		"Saves copies of self in desired location and formats"
 		ext = ''
-		outDir = getattr(self,'outDir','.')
+		outDir = outDir or getattr(self,'outDir','.')
 		if not os.path.isabs(outDir): outDir = os.path.join(os.path.dirname(sys.argv[0]),outDir)
 		if not os.path.isdir(outDir): os.makedirs(outDir)
 		fnroot = os.path.normpath(os.path.join(outDir, fnRoot or (getattr(self,'fileNamePattern',(self.__class__.__name__+'%03d')) % getattr(self,'chartId',0))))
