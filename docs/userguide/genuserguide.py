@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/genuserguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/genuserguide.py,v 1.41 2001/03/27 15:55:57 johnprecedo Exp $
-__version__=''' $Id: genuserguide.py,v 1.41 2001/03/27 15:55:57 johnprecedo Exp $ '''
+#$Header: /tmp/reportlab/docs/userguide/genuserguide.py,v 1.42 2001/03/27 16:48:46 johnprecedo Exp $
+__version__=''' $Id: genuserguide.py,v 1.42 2001/03/27 16:48:46 johnprecedo Exp $ '''
 
 
 __doc__ = """
@@ -239,6 +239,27 @@ def illust(operation, caption):
     i = Illustration(operation, caption)
     getStory().append(i)
 
+
+class GraphicsDrawing(Illustration):
+    """Lets you include reportlab/graphics drawings seamlessly,
+    with the right numbering."""
+    def __init__(self, drawing, caption):
+        platdemos.Figure.__init__(self,
+                                  drawing.width,
+                                  drawing.height,
+                    'Figure <seq template="%(Chapter)s-%(Figure+)s"/>: ' + quickfix(caption)
+                                  )
+        self.drawing = drawing
+        
+    def drawFigure(self):
+        d = self.drawing
+        d.wrap(d.width, d.height)
+        d.drawOn(self.canv, 0, 0)
+        
+def draw(drawing, caption):
+    d = GraphicsDrawing(drawing, caption)
+    getStory().append(d)
+        
 class ParaBox(platdemos.Figure):
     """Illustrates paragraph examples, with style attributes on the left"""
     descrStyle = ParagraphStyle('description',

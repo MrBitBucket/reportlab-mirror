@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.5 2001/03/27 16:40:08 johnprecedo Exp $
+#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.6 2001/03/27 16:48:46 johnprecedo Exp $
 from genuserguide import *
 
 heading1("Platform Independent Graphics using $reportlab/graphics$")
@@ -13,6 +13,10 @@ disc("""
 ReportLab is in the process of adding a graphics package to its
 standard distribution. This chapter is both the "design document" and
 the "tutorial".""")
+
+#seamless or what?
+from reportlab.graphics.charts import barcharts
+draw(barcharts.sampleH0a(), 'A Sample Drawing')
 
 disc("""The ReportLab library is a general document toolkit aiming to help
 generate documents for reporting solutions. One important aspect of
