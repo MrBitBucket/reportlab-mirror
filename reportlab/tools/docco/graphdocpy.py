@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.3 2001/08/26 17:34:18 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.4 2001/09/06 09:36:06 dinu_gherman Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -27,7 +27,6 @@ from docpy import htmlescape, htmlrepr, defaultformat, \
 from docpy import makeHtmlSection, makeHtmlSubSection, \
      makeHtmlInlineImage
 
-from reportlab.lib import inspect
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
@@ -45,6 +44,7 @@ from reportlab.platypus.doctemplate \
      import PageTemplate, BaseDocTemplate
 from reportlab.platypus.tables import TableStyle, Table
 from reportlab.graphics.shapes import NotImplementedError
+from reportlab.tools.docco import inspect
 
 
 # Needed to draw Widget/Drawing demos.
