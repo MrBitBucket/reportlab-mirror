@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: flowables.py,v $
+#	Revision 1.6  2000/07/13 11:42:10  rgbecker
+#	removed debug prints
+#
 #	Revision 1.5  2000/07/13 11:41:00  rgbecker
 #	Added KeepTogether
-#
+#	
 #	Revision 1.4  2000/06/27 10:07:55  rgbecker
 #	Added CondPageBreak
 #	
@@ -47,7 +50,7 @@
 #	Platypus re-organisation
 #	
 #	
-__version__=''' $Id: flowables.py,v 1.5 2000/07/13 11:41:00 rgbecker Exp $ '''
+__version__=''' $Id: flowables.py,v 1.6 2000/07/13 11:42:10 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -316,12 +319,10 @@ class KeepTogether(Flowable):
 			if f is not F[-1]: h = h + f.getSpaceAfter()
 			W = max(W,w)
 			H = H+h
-		print 'wrap', aW, aH, W, H
 		self._CPage = H>aH
 		return W, 0xffffff	# force a split
 
 	def split(self, aW, aH):
-		print 'wrap', aW, aH, self._CPage
 		S = self._CPage and [CondPageBreak(aH+1)] or []
 		for f in self._flowables: S.append(f)
 		return S
