@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.20 2001/08/30 08:37:38 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.21 2001/08/30 08:51:01 rgbecker Exp $
 
 shapeChecking =				1
 defaultEncoding =			'WinAnsiEncoding'		# 'WinAnsi' or 'MacRoman'
@@ -34,11 +34,20 @@ def _setOpt(name, value, conv=None):
 	globals()[name] = value
 
 sys_version = string.split(sys.version)[0]		#strip off the other garbage
+_SAVED = {}
 
 def	_startUp():
 	'''This function allows easy resetting to the global defaults
 	If the environment contains 'RL_xxx' then we use the value
 	else we use the given default'''
+	V = ('T1SearchPath','shapeChecking', 'defaultEncoding', 'pageCompression',
+				'defaultPageSize', 'defaultImageCaching', 'PIL_WARNINGS',
+				'ZLIB_WARNINGS', 'warnOnMissingFontGlyphs', '_verbose',
+				)
+
+	if _SAVED=={}:
+		for k in V:
+			_SAVED[k] = globals()[k]
 
 	#places to search for Type 1 Font files
 	import reportlab
@@ -48,17 +57,13 @@ def	_startUp():
 		}
 
 	P=[]
-	for p in T1SearchPath:
+	for p in _SAVED['T1SearchPath']:
 		d = string.replace(p % D,'/',os.sep)
-		print d
 		if os.path.isdir(d): P.append(d)
 	_setOpt('T1SearchPath',P)
 
-	for k in ('shapeChecking', 'defaultEncoding', 'pageCompression',
-				'defaultPageSize', 'defaultImageCaching', 'PIL_WARNINGS',
-				'ZLIB_WARNINGS', 'warnOnMissingFontGlyphs', '_verbose',
-				):
-		v = globals()[k]
+	for k in V[1:]:
+		v = _SAVED[k]
 		if type(v)==type(1): conv = int
 		elif k=='defaultPageSize': conv = lambda v,M=pagesizes: getattr(M,v)
 		else: conv = None
