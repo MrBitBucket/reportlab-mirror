@@ -1,20 +1,17 @@
 #!/bin/env python
 
-# testshapes.py - draws them onto a canvas
+# testshapes.py - draws shapes onto a PDF canvas.
 
 """
-Usage:
-    import pingopdf
-    pingopdf.draw(drawing, canvas, x, y)
-
 Execute the script to see some test drawings.
 
 This contains a number of routines to generate test drawings
-for reportlab/graphics.  For now they are contrived, but we will expand them
-to try and trip up any parser. Feel free to add more.
+for reportlab/graphics.  For now many of them are contrived,
+but we will expand them to try and trip up any parser.
+Feel free to add more.
 """
 
-__version__=''' $Id $ '''
+__version__ = ''' $Id $ '''
 
 
 import os, sys
@@ -26,6 +23,7 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus import Flowable
 from reportlab.graphics.shapes import *
 from reportlab.graphics.renderPDF import _PDFRenderer
+from reportlab.test import unittest
 
 
 #########################################################
@@ -33,6 +31,36 @@ from reportlab.graphics.renderPDF import _PDFRenderer
 #   Collections of shape drawings.
 #
 #########################################################
+
+# This is a special drawing printed whenever another
+# function fails to create a drawing.
+
+def getFailedDrawing(funcName):
+    """Generate a drawing in case something goes really wrong.
+
+    This will create a drawing to be displayed whenever some
+    other drawing could not be executed, because the generating
+    function does something terribly wrong! The box contains
+    an attention triangle, plus some error message.
+    """
+    
+    D = Drawing(400, 200)
+
+    points = [200,170, 140,80, 260,80]
+    D.add(Polygon(points,
+                  strokeWidth=0.5*cm,
+                  strokeColor=colors.red,
+                  fillColor=colors.yellow))
+
+    s = String(200, 40,
+               "Error in generating function '%s'!" % funcName,
+               textAnchor='middle')
+    D.add(s)
+
+    return D
+
+
+# These are the real drawings to be eye-balled.
 
 def getDrawing0():
     """Hello World, on a rectangular background.
@@ -65,6 +93,8 @@ def getDrawing1():
                strokeWidth=0.5*cm,
                strokeDashArray=[1, 10, 20],
                ))
+
+    x = 1/0 # Comment this to see the actual drawing!
 
     return D
 
@@ -376,49 +406,45 @@ def getDrawing5():
 #
 #########################################################
 
-# hack so we only get warnings once each
-#warnOnce = WarnOnce()
-def warnOnce(text):
-    pass
-
-
-# the main entry point for users...
 def draw(drawing, canvas, x, y):
-    """As it says"""
+    "Draws a drawing on a canvas."
+
     R = _PDFRenderer()
     R.draw(drawing, canvas, x, y)
 
 
-def test():
+def getAllFunctionDrawingNames():
+    "Get a list of drawing function names from somewhere."
+
+    funcNames = []
+
+    # Here we get the names from the global name space.
+    symbols = globals().keys()
+    symbols.sort()
+    for funcName in symbols:
+        if funcName[0:10] == 'getDrawing':
+            funcNames.append(funcName)
+
+    return funcNames
+
+
+def writePDF(drawings):
+    "Create and save a PDF file containing some drawings."
+    
     pdfPath = os.path.splitext(sys.argv[0])[0] + '.pdf'
     c = Canvas(pdfPath)
     c.setFont('Times-Roman', 32)
     c.drawString(80, 750, 'ReportLab Graphics-Shapes Test')
 
-    # print all drawings and their doc strings from the test
-    # file
-
-    #grab all drawings from the test module
-    drawings = []
-
-    symbols = globals().keys()
-    symbols.sort()
-    for funcname in symbols:
-        if funcname[0:10] == 'getDrawing':
-            # Make an instance and get its docstring.
-            drawing = eval(funcname + '()')
-            docstring = eval(funcname + '.__doc__')
-            drawings.append((drawing, docstring, funcname[3:]))
-
-    #print in a loop, with their doc strings
+    # Print drawings in a loop, with their doc strings.
     c.setFont('Times-Roman', 12)
     y = 740
     i = 1
     for (drawing, docstring, funcname) in drawings:
-        if y < 300:  #allows 5-6 lines of text
+        if y < 300:  # Allows 5-6 lines of text.
             c.showPage()
             y = 740
-        # draw a title
+        # Draw a title.
         y = y - 30
         c.setFont('Times-BoldItalic',12)
         c.drawString(80, y, '%s (#%d)' % (funcname, i))
@@ -429,11 +455,57 @@ def test():
         c.drawText(textObj)
         y = textObj.getY()
         y = y - drawing.height
+        # Draw the shape or whatever.
         draw(drawing, c, 80, y)
         i = i + 1
 
     c.save()
+        
+
+class ShapesTestCase(unittest.TestCase):
+    "Test generating all kinds of shapes."
+
+    def setUp(self):
+        "Prepare some things before the tests start."
+
+        self.funcNames = getAllFunctionDrawingNames()
+        self.drawings = []
 
 
-if __name__=='__main__':
-    test()
+    def tearDown(self):
+        "Do what has to be done after the tests are over."
+
+        writePDF(self.drawings)
+    
+
+    # This should always succeed. If each drawing would be
+    # wrapped in a dedicated test method like this one, it
+    # would be possible to have a count for wrong tests
+    # as well... Something like this is left for later...
+    def testAllDrawings(self):
+        "Make a list of drawings."
+
+        for funcName in self.funcNames:
+            if funcName[0:10] == 'getDrawing':
+                # Make an instance and get its doc string.
+                # If that fails, use a default error drawing.
+                try:
+                    drawing = eval(funcName + '()')
+                except:
+                    drawing = getFailedDrawing(funcName)
+                docstring = eval(funcName + '.__doc__')
+                self.drawings.append((drawing, docstring, funcName[3:]))
+
+        # assert 1 == 1
+
+
+def makeSuite():
+    "Make a test suite for unit testing."
+    
+    suite = unittest.TestSuite()
+    suite.addTest(ShapesTestCase('testAllDrawings'))
+    return suite
+
+
+if __name__ == "__main__":
+    unittest.TextTestRunner().run(makeSuite())
