@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.16 2001/03/12 22:44:13 andy_robinson Exp $
-__version__=''' $Id: colors.py,v 1.16 2001/03/12 22:44:13 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.17 2001/03/13 01:07:49 andy_robinson Exp $
+__version__=''' $Id: colors.py,v 1.17 2001/03/13 01:07:49 andy_robinson Exp $ '''
 
 import string
 import math
@@ -32,6 +32,10 @@ class Color:
 		if dsum < 0: return -1
 		return 0
 
+	def rgb(self):
+		"Returns a three-tuple of components"
+		return (self.red, self.green, self.blue)
+	
 class CMYKColor(Color):
 	"""This represents colors using the CMYK (cyan, magenta, yellow, black)
 	model commonly used in professional printing.  This is implemented
@@ -82,7 +86,10 @@ class CMYKColor(Color):
 		if dsum > 0: return 1
 		if dsum < 0: return -1
 		return 0
-	
+
+	def cmyk(self):
+		"Returns a tuple of four color components - syntactic sugar"
+		return (self.cyan, self.magenta, self.yellow, self.black)
 
 def cmyk2rgb(cmyktuple):
 	"Convert from a CMYK color tuple to an RGB color tuple"
@@ -138,7 +145,8 @@ def HexColor(val):
 	return Color(((val>>16)&0xFF)/255.0,((val>>8)&0xFF)/255.0,(val&0xFF)/255.0)
 
 # special case -- indicates no drawing should be done
-transparent = Color(-1, -1, -1)
+# this is a hangover from PIDDLE - suggest we ditch it since it is not used anywhere
+#transparent = Color(-1, -1, -1)
 
 # color constants -- mostly from HTML standard
 aliceblue =		HexColor(0xF0F8FF)

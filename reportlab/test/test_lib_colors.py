@@ -64,8 +64,8 @@ class ColorTestCase(unittest.TestCase):
         "Test roundtrip RGB to CMYK conversion."
 
         # Take all colors as test subjects, except 'transparent'.
-        rgbCols = colors.getAllNamedColors()
-        del rgbCols['transparent']
+##        rgbCols = colors.getAllNamedColors()
+##        del rgbCols['transparent']
         rgbCols = colors.getAllNamedColors().items()
 
         # Make a roundtrip test (RGB > CMYK > RGB).
@@ -84,8 +84,6 @@ class ColorTestCase(unittest.TestCase):
     def test5(self):
         "Construct CMYK instances and test round trip conversion"
 
-        #rgbCols = colors.getAllNamedColors()
-        # del rgbCols['transparent'] - not needed, already deleted
         rgbCols = colors.getAllNamedColors().items()
         
         # Make a roundtrip test (RGB > CMYK > RGB).
@@ -109,26 +107,41 @@ class ColorTestCase(unittest.TestCase):
         canvas = reportlab.pdfgen.canvas.Canvas('test_lib_colors.pdf')
         
         #do all named colors
-        framePage(canvas, 'Color Demo - RGB Space - page %d' % canvas.getPageNumber())
+        framePage(canvas, 'Color Demo - page %d' % canvas.getPageNumber())
 
         all_colors = reportlab.lib.colors.getAllNamedColors().items()
         all_colors.sort() # alpha order by name
-        canvas.setFont('Times-Roman', 12)
-        text = 'This shows all the named colors in the HTML standard (plus their gray equivalents).'
-        canvas.drawString(72,730, text)
+        canvas.setFont('Times-Roman', 10)
+        text = 'This shows all the named colors in the HTML standard (plus their gray and CMYK equivalents).'
+        canvas.drawString(72,740, text)
+
+        canvas.drawString(200,725,'Pure RGB')
+        canvas.drawString(300,725,'B&W Approx')
+        canvas.drawString(400,725,'CMYK Approx')
+        
         y = 700
         for (name, color) in all_colors:
             canvas.setFillColor(colors.black)
             canvas.drawString(100, y, name)
             canvas.setFillColor(color)
-            canvas.rect(200, y-10, 140, 30, fill=1)
+            canvas.rect(200, y-10, 80, 30, fill=1)
             canvas.setFillColor(colors.color2bw(color))
-            canvas.rect(360, y-10, 140, 30, fill=1)
+            canvas.rect(300, y-10, 80, 30, fill=1)
+
+            c, m, yel, k = colors.rgb2cmyk(color.red, color.green, color.blue)
+            CMYK = colors.CMYKColor(c,m,yel,k)
+            canvas.setFillColor(CMYK)
+            canvas.rect(400, y-10, 80, 30, fill=1)
+            
             y = y - 40
             if y < 100:
                 canvas.showPage()
-                framePage(canvas, 'Color Demo - RGB Space - page %d' % canvas.getPageNumber())
+                framePage(canvas, 'Color Demo - page %d' % canvas.getPageNumber())
+                canvas.setFont('Times-Roman', 10)
                 y = 700
+                canvas.drawString(200,725,'Pure RGB')
+                canvas.drawString(300,725,'B&W Approx')
+                canvas.drawString(400,725,'CMYK Approx')
 
         canvas.save()
         

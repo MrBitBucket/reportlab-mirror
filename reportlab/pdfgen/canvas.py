@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.66 2001/03/12 16:52:45 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.66 2001/03/12 16:52:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.67 2001/03/13 01:07:49 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.67 2001/03/13 01:07:49 andy_robinson Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -23,7 +23,7 @@ from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
-from reportlab.lib.colors import ColorType, toColor
+from reportlab.lib.colors import Color, CMYKColor, toColor
 from reportlab.lib.utils import import_zlib, import_Image
 from reportlab.lib.utils import fp_str
 
@@ -909,7 +909,12 @@ class Canvas:
 
     def setFillColor(self, aColor):
         """Takes a color object, allowing colors to be referred to by name"""
-        if type(aColor) == ColorType:
+        if isinstance(aColor, CMYKColor):
+            c,m,y,k = (aColor.cyan, aColor.magenta, aColor.yellow, aColor.black)
+            self._fillColorCMYK = (c, m, y, k)
+            self._code.append('%s k' % fp_str(c, m, y, k))
+        elif isinstance(aColor, Color): 
+        #if type(aColor) == ColorType:
             rgb = (aColor.red, aColor.green, aColor.blue)
             self._fillColorRGB = rgb
             self._code.append('%s rg' % fp_str(rgb) )
@@ -929,7 +934,12 @@ class Canvas:
 
     def setStrokeColor(self, aColor):
         """Takes a color object, allowing colors to be referred to by name"""
-        if type(aColor) == ColorType:
+        if isinstance(aColor, CMYKColor):
+            c,m,y,k = (aColor.cyan, aColor.magenta, aColor.yellow, aColor.black)
+            self._strokeColorCMYK = (c, m, y, k)
+            self._code.append('%s K' % fp_str(c, m, y, k))
+        elif isinstance(aColor, Color): 
+        #if type(aColor) == ColorType:
             rgb = (aColor.red, aColor.green, aColor.blue)
             self._strokeColorRGB = rgb
             self._code.append('%s RG' % fp_str(rgb) )
