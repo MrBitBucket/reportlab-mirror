@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.19 2002/03/26 11:49:10 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.20 2002/06/12 20:25:21 rgbecker Exp $
 """This will be a collection of legends to be used with charts.
 """
-__version__=''' $Id: legends.py,v 1.19 2002/03/26 11:49:10 rgbecker Exp $ '''
+__version__=''' $Id: legends.py,v 1.20 2002/06/12 20:25:21 rgbecker Exp $ '''
 
 import string, copy
 
@@ -47,7 +47,8 @@ class Legend(Widget):
 		fontSize = AttrMapValue(isNumber, desc="Font size of the strings"),
 		fillColor = AttrMapValue(isColorOrNone, desc=""),
 		strokeColor = AttrMapValue(isColorOrNone, desc="Border color of the swatches"),
-		strokeWidth = AttrMapValue(isNumber, desc="Width of the border color of the swatches")
+		strokeWidth = AttrMapValue(isNumber, desc="Width of the border color of the swatches"),
+		callout = AttrMapValue(None, desc="a user callout(self,g,x,y,(color,text))"),
 	   )
 
 	def __init__(self):
@@ -88,7 +89,6 @@ class Legend(Widget):
 		self.strokeColor = STATE_DEFAULTS['strokeColor']
 		self.strokeWidth = STATE_DEFAULTS['strokeWidth']
 
-
 	def _calculateMaxWidth(self, colorNamePairs):
 		"Calculate the maximum width of some given strings."
 		m = 0
@@ -98,6 +98,32 @@ class Legend(Widget):
 					m = max(m,stringWidth(s, self.fontName, self.fontSize))
 		return m
 
+
+	def _calcHeight(self):
+		thisy = upperlefty = self.y - self.dy
+		ascent=getFont(self.fontName).face.ascent/1000.
+		if ascent==0: ascent=0.718 # default (from helvetica)
+		leading = self.fontSize*1.2
+		deltay = self.deltay
+		dy = self.dy
+		columnCount = 0
+		count = 0
+		lowy = upperlefty
+		for None, name in colorNamePairs:
+			T = string.split(name and str(name) or '','\n')
+			S = []
+			# thisy+dy/2 = y+leading/2
+			y = thisy+(dy-ascent)*0.5-leading
+			newy = thisy-max(deltay,len(S)*leading)
+			lowy = min(y,newy)
+			if count == columnMaximum-1:
+				count = 0
+				thisy = upperlefty
+				columnCount = columnCount + 1
+			else:
+				thisy = newy
+				count = count+1
+		return upperlefty - lowy
 
 	def draw(self):
 		g = Group()
@@ -129,11 +155,13 @@ class Legend(Widget):
 
 		columnCount = 0
 		count = 0
+		callout = getattr(self,'callout',None)
 		for col, name in colorNamePairs:
 			T = string.split(name and str(name) or '','\n')
 			S = []
 			# thisy+dy/2 = y+leading/2
 			y = thisy+(dy-ascent)*0.5
+			if callout: callout(self,g,thisx,y,colorNamePairs[count])
 			if alignment == "left":
 				for t in T:
 					# align text to left
@@ -174,14 +202,13 @@ class Legend(Widget):
 
 			map(gAdd,S)
 
-			if count == columnMaximum-1:
-				count = 0
+			if count%columnMaximum == columnMaximum-1:
 				thisx = thisx+deltax
 				thisy = upperlefty
 				columnCount = columnCount + 1
 			else:
 				thisy = thisy-max(deltay,len(S)*leading)
-				count = count+1
+			count = count+1
 
 		return g
 
