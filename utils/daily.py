@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.33  2000/06/20 11:43:51  rgbecker
+#	Chanded do_exec, added htmldir moves etc
+#
 #	Revision 1.32  2000/06/20 09:15:50  rgbecker
 #	Use python path in docs creation
-#
+#	
 #	Revision 1.31  2000/06/19 15:55:41  rgbecker
 #	Fixing up docs generation
 #	
@@ -128,7 +131,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.32 2000/06/20 09:15:50 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.33 2000/06/20 11:43:51 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -136,6 +139,7 @@ import os, sys, string, traceback, re
 
 #this is where we extract files etc
 groupdir=os.path.normcase(os.path.normpath('%s/public_ftp'%os.environ['HOME']))
+htmldir=os.path.normcase(os.path.normpath('%s/public_html'%os.environ['HOME']))
 projdir = 'reportlab'
 py2pdf_dir = 'py2pdf'
 release=0		#1 if making a release
@@ -187,12 +191,13 @@ def CVS_remove(d):
 def safe_remove(p):
 	if os.path.isfile(p): os.remove(p)
 
-def do_exec(cmd, cmdname):
+def do_exec(cmd, cmdname=None):
 	i=os.popen(cmd,'r')
 	print i.read()
 	i = i.close()
 	if i is not None:
-		print 'there was an error executing '+cmdname
+		if cmdname is not None:
+			print 'Error: %s '+ cmdname or cmd
 		sys.exit(1)
 
 def cvs_checkout(d):
@@ -216,17 +221,17 @@ def cvs_checkout(d):
 			dst = py2pdf_dir
 			recursive_rmdir(dst)
 			os.mkdir(dst)
-			do_exec("mv reportlab/demos/py2pdf/py2pdf.py %s"%dst, "mv py2pdf.py")
-			do_exec("mv reportlab/demos/py2pdf/PyFontify.py %s" % dst, "mv pyfontify.py")
-			do_exec("mv reportlab/demos/py2pdf/idle_print.py %s" % dst, "mv idle_print.py")
-			do_exec("rm -r reportlab/demos reportlab/platypus reportlab/lib/styles.py reportlab/README.pdfgen.txt reportlab/pdfgen/test", "rm")
-			do_exec("mv %s %s" % (projdir,dst), "moving %s to %s" %(projdir,py2pdf_dir))
-			do_exec("chmod a+x %s/py2pdf.py %s/idle_print.py" % (dst, dst), "chmod")
+			do_exec("mv reportlab/demos/py2pdf/py2pdf.py %s"%dst)
+			do_exec("mv reportlab/demos/py2pdf/PyFontify.py %s" % dst)
+			do_exec("mv reportlab/demos/py2pdf/idle_print.py %s" % dst)
+			do_exec("rm -r reportlab/demos reportlab/platypus reportlab/lib/styles.py reportlab/README.pdfgen.txt reportlab/pdfgen/test", "reducing size")
+			do_exec("mv %s %s" % (projdir,dst))
+			do_exec("chmod a+x %s/py2pdf.py %s/idle_print.py" % (dst, dst))
 			CVS_remove(dst)
 		else:
-			do_exec(cvs+' co docs', 'the docs checkout phase')
+			do_exec(cvs+' co docs')
 			dst = os.path.join(d,"reportlab","docs")
-			do_exec("mkdir %s" % dst, "mkdir reportlab/docs")
+			do_exec("mkdir %s" % dst)
 
 			#add our reportlab parent to the path so we import from there
 			if os.environ.has_key('PYTHONPATH'):
@@ -236,13 +241,15 @@ def cvs_checkout(d):
 				os.environ['PYTHONPATH']=d
 
 			os.chdir('docs/reference')
-			do_exec(python + ' ../tools/yaml2pdf.py reference.yml','building reference')
+			do_exec(python + ' ../tools/yaml2pdf.py reference.yml')
 			os.chdir(d)
-			do_exec('mv docs/reference/*.pdf %s'%dst,'moving reference')
+			do_exec('mv docs/reference/*.pdf %s'%dst)
+			do_exec('mv docs/reference/*.pdf %s'%htmldir)
 			os.chdir('docs/userguide')
-			do_exec(python + ' genuserguide.py', 'building userguide')
+			do_exec(python + ' genuserguide.py')
 			os.chdir(d)
-			do_exec('mv docs/userguide/*.pdf %s'%dst,'moving userguide')
+			do_exec('mv docs/userguide/*.pdf %s'%dst)
+			do_exec('mv docs/userguide/*.pdf %s'%htmldir)
 			recursive_rmdir('docs')
 
 			#restore the python path
@@ -273,12 +280,12 @@ def do_zip(d):
 	tar = find_exe('tar')
 	if tar is not None:
 		safe_remove(tarfile)
-		do_exec('%s czvf %s %s' % (tar, tarfile, pdir), 'tar creation')
+		do_exec('%s czvf %s %s' % (tar, tarfile, pdir))
 
 	zip = find_exe('zip')
 	if zip is not None:
 		safe_remove(zipfile)
-		do_exec('%s -ur %s %s' % (zip, zipfile, pdir), 'zip creation')
+		do_exec('%s -ur %s %s' % (zip, zipfile, pdir))
 	recursive_rmdir(cvsdir)
 
 	if release:
