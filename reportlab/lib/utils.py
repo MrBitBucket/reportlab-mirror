@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.63 2004/03/19 18:00:56 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.63 2004/03/19 18:00:56 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.64 2004/03/22 18:09:51 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.64 2004/03/22 18:09:51 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -365,6 +365,10 @@ def _className(self):
         return str(self)
 
 _RL_DIR=None
+import reportlab
+_RL_DIR=os.path.dirname(reportlab.__file__)
+del reportlab
+
 def open_for_read(name,mode='b'):
     '''attempt to open a file or URL for reading'''
     if hasattr(name,'read'): return name
@@ -383,10 +387,6 @@ def open_for_read(name,mode='b'):
             try:
                 #we have a __loader__, perhaps the filename starts with
                 #the dirname(reportlab.__file__) or is relative
-                global _RL_DIR
-                if _RL_DIR is None:
-                    import reportlab
-                    _RL_DIR=os.path.dirname(reportlab.__file__)
                 name = name.replace('/',os.sep)
                 if name.startswith(_RL_DIR):
                     name = name[len(__loader__.archive)+len(os.sep):]
@@ -399,6 +399,17 @@ def open_for_read(name,mode='b'):
 
 def open_and_read(name,mode='b'):
     return open_for_read(name,mode).read()
+
+def rl_isfile(fn,os_path_isfile=os.path.isfile):
+    if hasattr(fn,'read'): return True
+    if os_path_isfile(fn): return True
+    if _isFSD or __loader__ is None: return False
+    if fn.startswith(_RL_DIR):
+        fn = fn.replace('/',os.sep)
+        fn = fn[len(__loader__.archive)+len(os.sep):]
+        return fn in __loader__._files.keys()
+    return False
+
 
 class ImageReader:
     "Wraps up either PIL or Java to get data from bitmaps"
