@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.78 2001/05/29 17:05:42 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.78 2001/05/29 17:05:42 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.79 2001/05/29 19:02:33 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.79 2001/05/29 19:02:33 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -63,12 +63,10 @@ if not _instanceEscapePDF:
         _ESCAPEDICT={}
         for c in range(0,256):
             if c<32 or c>=127:
-                _ESCAPETABLE[c] = _ESCAPEDICT[chr(c)]= '\\%03o' % c
+                _ESCAPEDICT[chr(c)]= '\\%03o' % c
             elif c in (ord('\\'),ord('('),ord(')')):
-                _ESCAPETABLE[c] = '\\'+chr(c)
                 _ESCAPEDICT[chr(c)] = '\\'+chr(c)
             else:
-                _ESCAPETABLE[c] = chr(c)
                 _ESCAPEDICT[chr(c)] = chr(c)
         del c
 
