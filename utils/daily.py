@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.10  2000/04/06 13:01:58  rgbecker
+#	Added import of time
+#
 #	Revision 1.9  2000/04/06 12:59:48  rgbecker
 #	ext-->pserver for release
-#
+#	
 #	Revision 1.8  2000/04/06 12:57:38  rgbecker
 #	Print user
 #	
@@ -59,11 +62,11 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.9 2000/04/06 12:59:48 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.10 2000/04/06 13:01:58 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
-import os, sys, string, traceback, re
+import os, sys, string, traceback, re, time
 
 #this is where we extract files etc
 groupdir=os.path.normcase(os.path.normpath('/home/groups/ftp/pub/reportlab'))
