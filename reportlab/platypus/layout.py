@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.30  2000/05/23 14:08:02  andy_robinson
+#	Preformatted objects now splitting
+#
 #	Revision 1.29  2000/05/18 09:05:08  andy_robinson
 #	Resynchronization
-#
+#	
 #	Revision 1.28  2000/05/17 22:17:38  rgbecker
 #	Renamed BasicFrame to Frame
 #	
@@ -116,7 +119,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.29 2000/05/18 09:05:08 andy_robinson Exp $ '''
+__version__=''' $Id: layout.py,v 1.30 2000/05/23 14:08:02 andy_robinson Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -128,6 +131,7 @@ currently working on paragraph wrapping stuff.
 #	rewrote grid stuff - now in tables.py
 import os
 import string
+from copy import deepcopy
 
 
 from reportlab.pdfgen import canvas
@@ -234,6 +238,24 @@ class Preformatted(Flowable):
 		self.width = availWidth
 		self.height = self.style.leading*len(self.lines)
 		return (self.width, self.height)
+
+	def split(self, availWidth, availHeight):
+		#returns two Preformatted objects
+
+		#not sure why they can be called with a negative height		
+		if availHeight < self.style.leading:
+			return []
+		
+		linesThatFit = int(availHeight * 1.0 / self.style.leading)
+		
+		text1 = string.join(self.lines[0:linesThatFit], '\n')
+		text2 = string.join(self.lines[linesThatFit:], '\n')
+		style = self.style
+		if style.firstLineIndent != 0:
+			style = deepcopy(style)
+			style.firstLineIndent = 0
+		return [Preformatted(text1, style), Preformatted(text2, style)]
+		
 
 	def draw(self):
 		#call another method for historical reasons.  Besides, I
