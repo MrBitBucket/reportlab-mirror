@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
 #$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.81 2004/06/03 11:26:44 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.81 2004/06/03 11:26:44 rgbecker Exp $ '''
+__version__=''' $Id$ '''
 
 import string, os, sys, imp
 from types import *
@@ -138,23 +138,28 @@ except:
 import glob, fnmatch
 try:
     _isFSD = not __loader__
-    _archivepfx = __loader__.archive + os.sep
-    _archivedirpfx = os.path.dirname(__loader__.archive) + os.sep
+    _archive = __loader__.archive
+    _archivepfx = _archive + os.sep
+    _archivedir = os.path.dirname(__loader__.archive)
+    _archivedirpfx = _archivedir + os.sep
     _archivepfxlen = len(_archivepfx)
     _archivedirpfxlen = len(_archivedirpfx)
     if sys.platform=='win32':
-        def __startswith_rl(fn,_archivepfx=_archivepfx.upper(),_archivedirpfx=_archivedirpfx.upper()):
+        def __startswith_rl(fn,_archivepfx=_archivepfx.upper(),_archivedirpfx=_archivedirpfx.upper(),_archive=_archive.upper(),_archivedir=_archivedir.upper()):
             '''if the name starts with a known prefix strip it off'''
             fn = fn.replace('/',os.sep)
             if fn.startswith('.'+os.sep): fn = fn[1+len(os.sep):]
-            if fn.upper().startswith(_archivepfx): return 1,fn[_archivepfxlen:]
-            if fn.upper().startswith(_archivedirpfx): return 1,fn[_archivedirpfxlen:]
+            fnu = fn.upper()
+            if fnu in (_archivedir,_archive): return 1,''
+            if fnu.startswith(_archivepfx): return 1,fn[_archivepfxlen:]
+            if fnu.startswith(_archivedirpfx): return 1,fn[_archivedirpfxlen:]
             return not os.path.isabs(fn),fn
     else:
         def __startswith_rl(fn):
             '''if the name starts with a known prefix strip it off'''
             fn = fn.replace('/',os.sep)
-            if fn.upper().startswith(_archivepfx): return 1,fn[_archivepfxlen:]
+            if fn in (_archivedir,_archive): return 1,''
+            if fn.startswith(_archivepfx): return 1,fn[_archivepfxlen:]
             if fn.startswith(_archivedirpfx): return 1,fn[_archivedirpfxlen:]
             return not os.path.isabs(fn),fn
 
@@ -485,7 +490,8 @@ def rl_get_module(name,dir):
                 #attempt a load from inside the zip archive
                 import zipimport
                 dir = _startswith_rl(dir)
-                zi = zipimport.zipimporter(os.path.join(__loader__.archive,dir.replace('/',os.sep)))
+                dir = dir and os.path.join(_archive,dir.replace('/',os.sep)) or _archive
+                zi = zipimport.zipimporter(dir)
                 return zi.load_module(name)
             raise ImportError('%s[%s]' % (name,dir))
     finally:
