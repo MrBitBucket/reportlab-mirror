@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.34 2003/04/04 15:35:35 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.34 2003/04/04 15:35:35 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.35 2003/04/05 22:07:51 andy_robinson Exp $
+__version__=''' $Id: flowables.py,v 1.35 2003/04/05 22:07:51 andy_robinson Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -309,7 +309,7 @@ class Image(Flowable):
                                 0,
                                 self.drawWidth,
                                 self.drawHeight,
-                                mask=mask,
+                                mask=self._mask,
                                 )
 
     def identity(self,maxLen):
