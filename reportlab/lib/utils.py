@@ -493,7 +493,7 @@ def rl_get_module(name,dir):
                 #attempt a load from inside the zip archive
                 import zipimport
                 dir = _startswith_rl(dir)
-                dir = dir and os.path.join(_archive,dir.replace('/',os.sep)) or _archive
+                dir = (dir=='.' or not dir) and _archive or os.path.join(_archive,dir.replace('/',os.sep))
                 zi = zipimport.zipimporter(dir)
                 return zi.load_module(name)
             raise ImportError('%s[%s]' % (name,dir))
