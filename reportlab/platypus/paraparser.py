@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paraparser.py,v $
+#	Revision 1.26  2000/07/10 23:53:46  andy_robinson
+#	Changed base of seqdefault tag to 0
+#
 #	Revision 1.25  2000/07/04 10:50:33  rgbecker
 #	Sequencer fixes
-#
+#	
 #	Revision 1.24  2000/06/19 11:14:03  andy_robinson
 #	Global sequencer put in the 'story builder'.
 #	
@@ -70,7 +73,7 @@
 #	Revision 1.13  2000/04/25 13:07:57  rgbecker
 #	Added license
 #	
-__version__=''' $Id: paraparser.py,v 1.25 2000/07/04 10:50:33 rgbecker Exp $ '''
+__version__=''' $Id: paraparser.py,v 1.26 2000/07/10 23:53:46 andy_robinson Exp $ '''
 import string
 import re
 from types import TupleType
@@ -399,7 +402,7 @@ class ParaParser(xmllib.XMLParser):
 		try:
 			base = math.atoi(attr['base'])
 		except:
-			base=1
+			base=0
 		self._seq.reset(id, base)
 
 	def end_seqreset(self):
