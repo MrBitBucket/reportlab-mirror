@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.46 2000/12/15 11:49:45 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.46 2000/12/15 11:49:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.47 2000/12/15 16:58:02 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.47 2000/12/15 16:58:02 rgbecker Exp $ '''
 from string import split, strip, join, whitespace
 from operator import truth
 from types import StringType, ListType
@@ -248,6 +248,44 @@ def _handleBulletWidth(bulletText,style,maxWidths):
 		if bulletRight > indent:
 			#..then it overruns, and we have less space available on line 1
 			maxWidths[0] = maxWidths[0] - (bulletRight - indent)
+
+def moreFrags(iterator):
+	'''this should only be called at the beginning of a line'''
+	frags,i,start=iterator
+	l = len(frags)
+	while i<l:
+		text = frags[i].text
+		lim = len(text)
+		while start<lim and text[start]==' ': start=start+1
+		if start==lim:
+			i = i + 1
+			start = 0
+		else:
+			iterator[0:2] = [i,start]
+			return 1
+	return 0
+	
+def	splitLines(frags,widths):
+	'''
+	given a list of ParaFrags we return a list of ParaLines
+
+	each ParaLine has
+	1)	ExtraSpace
+	2)	blankCount
+	3)	[textDefns....]
+		each text definition is a (ParaFrag, start, limit) triplet
+	'''
+	#initialise the algorithm
+	lines	= []
+	lineNum	= 0
+	maxW	= widths[lineNum]
+	iterator = [frags,0,0]
+	while moreFrags(iterator):
+		#start of a line
+		line	= []
+		cLen	= 0
+		while cLen<maxW:
+			pass
 
 class Paragraph(Flowable):
 	""" Paragraph(text, style, bulletText=None)
