@@ -1,4 +1,4 @@
-#!/usr/local/bin/env python
+#!/usr/local/bin/python
 ###############################################################################
 #
 #	ReportLab Public License Version 1.0
@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.13  2000/04/07 09:58:10  rgbecker
+#	Fixed missing programs problems
+#
 #	Revision 1.12  2000/04/06 14:10:10  rgbecker
 #	Made anonymous
-#
+#	
 #	Revision 1.11  2000/04/06 14:08:00  rgbecker
 #	Changed release naming convention
 #	
@@ -68,14 +71,14 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.12 2000/04/06 14:10:10 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.13 2000/04/07 09:58:10 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
 import os, sys, string, traceback, re
 
 #this is where we extract files etc
-groupdir=os.path.normcase(os.path.normpath('/home/groups/ftp/pub/reportlab'))
+groupdir=os.path.normcase(os.path.normpath('%s/public_ftp'%os.environ['HOME']))
 projdir = os.path.normcase(os.path.normpath('reportlab'))
 cvsdir = os.path.join(groupdir,projdir)
 release=0		#1 if making a release
@@ -96,6 +99,7 @@ def find_exe(exe):
 		f = os.path.join(p,exe)
 		if os.path.isfile(f): return f
 
+	print "Can't find %s anywhere on the path" % exe
 	return None
 
 def recursive_rmdir(d):
@@ -126,44 +130,35 @@ def cvs_checkout(d):
 
 	cvs = find_exe('cvs')
 	if cvs is None:
-		print "Can't find cvs anywhere on the path"
 		os.exit(1)
 
+	os.environ['CVSROOT']=':pserver:%s@cvs.reportlab.sourceforge.net:/cvsroot/reportlab' % USER
 	if release:
-		os.environ['CVSROOT']=':pserver:%s@cvs:/cvsroot/reportlab' % USER
-		do_exec(cvs+(' co -r %s reportlab'%release), 'the download phase')
+		do_exec(cvs+(' export -r %s reportlab'%release), 'the export phase')
 	else:
-		os.environ['CVSROOT']=':pserver:%s@cvs:/cvsroot/reportlab' % USER
-		do_exec(cvs+' co reportlab', 'the download phase')
+		do_exec(cvs+' co reportlab', 'the checkout phase')
 
 def do_zip(d):
 	'create .tgz and .zip file archives of d/reportlab'
-	def find_src_files(L,d,N):
-		if string.upper(os.path.basename(d))=='CVS': return	#ignore all CVS
-		for n in N:
-			fn = os.path.normcase(os.path.normpath(os.path.join(d,n)))
-			if os.path.isfile(fn): L.append(fn)
 
 	os.chdir(d)
-	src_files = []
-	os.path.walk(projdir,find_src_files,src_files)
 	if release:
-		b = "%s" % release
+		b = release
 	else:
 		b = "current"
 
 	tarfile = '%s/%s.tgz' % (groupdir,b)
 	zipfile = '%s/%s.zip' % (groupdir,b)
-	safe_remove(zipfile)
-	safe_remove(tarfile)
-	if src_files==[]: return
-	src_files = string.join(src_files)
 
 	tar = find_exe('tar')
-	do_exec('%s czvf %s %s' % (tar, tarfile, src_files), 'tar creation')
+	if tar is not None:
+		safe_remove(tarfile)
+		do_exec('%s czvf %s %s' % (tar, tarfile, projdir), 'tar creation')
 
 	zip = find_exe('zip')
-	do_exec('%s -u %s %s' % (zip, zipfile, src_files), 'zip creation')
+	if zip is not None:
+		safe_remove(zipfile)
+		do_exec('%s -ur %s %s' % (zip, zipfile, projdir), 'zip creation')
 	recursive_rmdir(cvsdir)
 
 	if release:
@@ -185,3 +180,7 @@ if __name__=='__main__':
 		release=sys.argv[2]
 	cvs_checkout(groupdir)
 	do_zip(groupdir)
+	if release:
+		release = None
+		cvs_checkout(groupdir)
+		do_zip(groupdir)
