@@ -927,6 +927,13 @@ class PPDrawing:
     def getFlowable(self):
         return self.drawing
 
+class PPFigure:
+    def __init__(self):
+        self.figure = None
+    def getFlowable(self):
+        print 'getFigure(%s)' % self.figure.__class__.__name__
+        return self.figure
+
 def getSampleStyleSheet():
     from reportlab.tools.pythonpoint.styles.standard import getParagraphStyles
     return getParagraphStyles()

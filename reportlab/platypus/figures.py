@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/platdemos.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.10 2003/12/03 17:15:11 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.11 2003/12/08 13:12:38 andy_robinson Exp $
 """This includes some demos of platypus for use in the API proposal"""
-__version__=''' $Id: figures.py,v 1.10 2003/12/03 17:15:11 johnprecedo Exp $ '''
+__version__=''' $Id: figures.py,v 1.11 2003/12/08 13:12:38 andy_robinson Exp $ '''
 
 import os
 
@@ -157,14 +157,18 @@ class FlexFigure(Figure):
         "Rescale to fit according to the rules, but only once"
         if self._scaledWidth <> availWidth:
             self._scaledWidth = availWidth
-            self.scaleFactor = availWidth / self.width
+            #scale factor None means 'auto'
+            if self.scaleFactor is None:
+                self._scaleFactor = availWidth / self.width
+            else: #they provided a factor
+                self._scaleFactor = self.scaleFactor
             #print 'width=%d, scale=%0.2f' % (self.width, self.scaleFactor)
-            if self.scaleFactor < 1 and self.shrinkToFit:
-                self.width = self.width * self.scaleFactor
-                self.figureHeight = self.figureHeight * self.scaleFactor
-            elif self.scaleFactor > 1 and self.growToFit:
-                self.width = self.width * self.scaleFactor
-                self.figureHeight = self.figureHeight * self.scaleFactor
+            if self._scaleFactor < 1 and self.shrinkToFit:
+                self.width = self.width * self._scaleFactor
+                self.figureHeight = self.figureHeight * self._scaleFactor
+            elif self._scaleFactor > 1 and self.growToFit:
+                self.width = self.width * self._scaleFactor
+                self.figureHeight = self.figureHeight * self._scaleFactor
         return Figure.wrap(self, availWidth, availHeight)
 
 
@@ -244,11 +248,12 @@ if _hasPageCatcher:
             return formName + '.frm'
 
         
-    class PageFigure(FlexFigure, PageCatcherCachingMixIn):
+    class PageCatcherFigure(FlexFigure, PageCatcherCachingMixIn):
         """PageCatcher page with a caption below it.  Presumes A4, Portrait.
         This needs our commercial PageCatcher product, or you'll get a blank."""
 
         def __init__(self, filename, pageNo, caption, width=595, height=842, background=None):
+            FlexFigure.__init__(self, width, height, caption, background)
             self.dirname, self.filename = os.path.split(filename)
             if self.dirname == '':
                 self.dirname = os.curdir
@@ -259,8 +264,8 @@ if _hasPageCatcher:
             
 
         def drawFigure(self):
-            #print 'drawing ',self.formName
-            #print 'self.width=%0.2f, self.figureHeight=%0.2f' % (self.width, self.figureHeight)
+            print 'drawing ',self.formName
+            print 'self.width=%0.2f, self.figureHeight=%0.2f' % (self.width, self.figureHeight)
             self.canv.saveState()
             if not self.canv.hasForm(self.formName):
                 restorePath = self.dirname + os.sep + self.filename
@@ -271,12 +276,12 @@ if _hasPageCatcher:
                     self.processPDF(restorePath, self.pageNo)
                 names = restoreForms(formFileName, self.canv)
                 #print 'restored',names
-            self.canv.scale(self.scaleFactor, self.scaleFactor)
+            self.canv.scale(self._scaleFactor, self._scaleFactor)
             #print 'doing form',self.formName
             self.canv.doForm(self.formName)
             self.canv.restoreState()
 
-    class PageFigureNonA4(FlexFigure, PageCatcherCachingMixIn):
+    class PageCatcherFigureNonA4(FlexFigure, PageCatcherCachingMixIn):
         """PageCatcher page with a caption below it.  Size to be supplied."""
         # This should merge with PageFigure into one class that reuses
         # form information to determine the page orientation...

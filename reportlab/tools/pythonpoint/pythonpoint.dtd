@@ -105,7 +105,7 @@
   color CDATA #IMPLIED
   size NMTOKEN #IMPLIED
 >
-<!ELEMENT frame (para*, prefmt*, pycode*, image*, table*, fixedimage*, rectangle*, roundrect*, ellipse*, polygon*, line*, string*, customshape*, spacer*)+>
+<!ELEMENT frame (para*, prefmt*, pycode*, image*, table*, fixedimage*, rectangle*, roundrect*, ellipse*, polygon*, line*, string*, customshape*, spacer*, drawing*, pageCatcherFigure*)+>
 <!ATTLIST frame
   x NMTOKEN #REQUIRED
   y NMTOKEN #REQUIRED
@@ -252,3 +252,23 @@
   effectduration NMTOKEN "1"
 >
 <!ELEMENT u (#PCDATA)>
+
+<!ELEMENT drawing EMPTY>
+<!ATTLIST drawing
+  module CDATA #REQUIRED
+  constructor CDATA #REQUIRED
+  baseDir CDATA #IMPLIED
+  hAlign CDATA #IMPLIED
+  showBoundary CDATA #IMPLIED
+>
+
+<!ELEMENT pageCatcherFigure (#PCDATA)>
+<!ATTLIST pageCatcherFigure
+  filename CDATA #REQUIRED
+  pageNo CDATA #REQUIRED
+  caption CDATA #IMPLIED
+  width CDATA #IMPLIED
+  height CDATA #IMPLIED
+  background CDATA #IMPLIED
+  scaleFactor CDATA #IMPLIED
+>

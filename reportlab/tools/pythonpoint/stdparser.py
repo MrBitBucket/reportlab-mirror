@@ -7,12 +7,14 @@ The parser has a getPresentation method; it is called from
 pythonpoint.py.
 """
 
-import string, imp, os, copy
+import string, imp, sys, os, copy
 
 from reportlab.lib import xmllib
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
+from reportlab.lib.utils import recursiveImport
 from reportlab.tools.pythonpoint import pythonpoint
+from reportlab.platypus import figures
 
 
 def getModule(modulename,fromPath='reportlab.tools.pythonpoint.styles'):
@@ -212,6 +214,7 @@ class PPMLParser(xmllib.XMLParser):
 
 
     def _arg(self,tag,args,name):
+        "What's this for???"
         if args.has_key(name):
             v = args[name]
         else:
@@ -736,38 +739,67 @@ class PPMLParser(xmllib.XMLParser):
 
     def start_drawing(self, args):
         #loads one
-        path = self._arg('drawing',args,'path')
-        if path=='None':
-            path = []
-        else:
-            path=[path]
 
-        # add package root folder and input file's folder to path
-        path.append(os.path.dirname(self.sourceFilename))
-        path.append(os.path.dirname(pythonpoint.__file__))
+        moduleName = args["module"]
+        funcName = args["constructor"]
 
-        modulename = self._arg('drawing',args,'module')
-        funcname = self._arg('drawing',args,'class')
+        showBoundary = int(args.get("showBoundary", "0"))
+
+        hAlign = args.get("hAlign", "CENTER")
+        
+
+        # the path for the imports should include:
+        # 1. document directory
+        # 2. python path if baseDir not given, or
+        # 3. baseDir if given
         try:
-            found = imp.find_module(modulename, path)
-            (file, pathname, description) = found
-            mod = imp.load_module(modulename, file, pathname, description)
-        except ImportError:
-            mod = getModule(modulename)
+            dirName = sdict["baseDir"]
+        except:
+            dirName = None
+        importPath = [os.getcwd()]
+        if dirName is None:
+            importPath.extend(sys.path)
+        else:
+            importPath.insert(0, dirName)
+        
+        modul = recursiveImport(moduleName, baseDir=importPath)
+        func = getattr(modul, funcName)
+        drawing = func()
 
-        #now get the function
+        drawing.hAlign = hAlign
+        if showBoundary:
+            drawing._showBoundary = 1
 
-        func = getattr(mod, funcname)
-        #initargs = self.ceval('customshape',args,'initargs')
         self._curDrawing = pythonpoint.PPDrawing()
-        self._curDrawing.drawing = func()
-        self._curDrawing.drawing.hAlign = 'CENTRE'
+        self._curDrawing.drawing = drawing
 
 
     def end_drawing(self):
         self._curFrame.content.append(self._curDrawing)
         self._curDrawing = None
 
+
+    def start_pageCatcherFigure(self, args):
+        filename = args["filename"]
+        pageNo = int(args["pageNo"])
+
+
+        fig = figures.PageCatcherFigure(filename, pageNo, args.get("caption", ""))
+        sf = args.get('scaleFactor', None)
+        if sf: sf = float(sf)
+
+        fig.scaleFactor = sf
+
+        #self.ceval('pageCatcherFigure',args,'scaleFactor'),
+        #initargs = self.ceval('customshape',args,'initargs')
+        self._curFigure = pythonpoint.PPFigure()
+        self._curFigure.figure = fig
+
+
+
+    def end_pageCatcherFigure(self):
+        self._curFrame.content.append(self._curFigure)
+        self._curFigure = None
 
     ## intra-paragraph XML should be allowed through into PLATYPUS
     def unknown_starttag(self, tag, attrs):
