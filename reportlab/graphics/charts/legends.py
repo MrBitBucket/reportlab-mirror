@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.7 2001/05/17 16:21:33 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.8 2001/05/25 15:43:11 dinu_gherman Exp $
 """This will be a collection of legends to be used with charts.
 """
 
@@ -9,11 +9,11 @@
 import string
 
 from reportlab.lib import colors
-from reportlab.lib.validators import isNumber, OneOf
+from reportlab.lib.validators import isNumber, OneOf, isString, isColorOrNone
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.widgetbase import Widget
-from reportlab.graphics.shapes import Drawing, Group, String, Rect
+from reportlab.graphics.shapes import Drawing, Group, String, Rect, STATE_DEFAULTS
 
 
 class Legend(Widget):
@@ -33,7 +33,11 @@ class Legend(Widget):
         columnMaximum = AttrMapValue(isNumber),
         alignment = AttrMapValue(OneOf(("left", "right"))),
         colorNamePairs = AttrMapValue(None),
-        )
+
+        fontName = AttrMapValue(isString),
+        fontSize = AttrMapValue(isNumber),
+        fillColor = AttrMapValue(isColorOrNone)
+       )
 
     def __init__(self):
         # Upper-left reference point.
@@ -63,6 +67,11 @@ class Legend(Widget):
                                 (colors.green, "green"),
                                 (colors.pink, "pink"),
                                 (colors.yellow, "yellow") ]
+
+        # Font name and size of the labels.
+        self.fontName = STATE_DEFAULTS['fontName']
+        self.fontSize = STATE_DEFAULTS['fontSize']
+        self.fillColor = STATE_DEFAULTS['fillColor']
 
 
     def _calculateMaxWidth(self, colorNamePairs):
@@ -104,9 +113,16 @@ class Legend(Widget):
                 r = Rect(thisx,thisy, dx, dy)
             else:
                 raise ValueError, "bad alignment"
+
+            t.fontName = self.fontName
+            t.fontSize = self.fontSize
+            t.fillColor = self.fillColor
+
             r.fillColor = col
+
             g.add(t)
             g.add(r)
+
             if count == self.columnMaximum-1:
                 count = 0
                 thisx = thisx+self.deltax
