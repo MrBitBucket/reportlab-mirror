@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.59 2001/10/09 15:00:50 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.60 2001/10/11 16:04:41 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -326,7 +326,19 @@ class Group(Shape):
 
 	def _explode(self):
 		''' return a fully expanded object'''
-		obj = self.__class__()
+		from reportlab.graphics.widgetbase import Widget
+		obj = Group()
+		if hasattr(obj,'transform'): obj.transform = self.transform[:]
+		P = self.contents[:]	# pending nodes
+		while P:
+			n = P.pop(0)
+			if isinstance(n, UserNode):
+				P.append(n.provideNode())
+			elif isinstance(n, Group):
+				obj.add(n._explode())
+			else:
+				obj.add(n)
+		return obj
 
 	def _copyContents(self,obj):
 		for child in self.contents:
