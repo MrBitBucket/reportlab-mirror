@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.46 2001/10/05 00:23:26 andy_robinson Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.47 2001/11/02 17:36:46 rgbecker Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -393,6 +393,26 @@ class Font:
         # and in the font mappings
         doc.fontMapping[self.fontName] = '/' + internalName
 
+PFB_MARKER=chr(0x80)
+PFB_ASCII=chr(1)
+PFB_BINARY=chr(2)
+PFB_EOF=chr(3)
+def _pfbSegLen(p,d):
+    '''compute a pfb style length from the first 4 bytes of string d'''
+    return ((((ord(d[p+3])<<8)|ord(d[p+2])<<8)|ord(d[p+1]))<<8)|ord(d[p])
+
+def _pfbCheck(p,d,m,fn):
+    if d[p]!=PFB_MARKER or d[p+1]!=m:
+        raise ValueError, 'Bad pfb file\'%s\' expected chr(%d)chr(%d) at char %d, got chr(%d)chr(%d)' % (fn,ord(PFB_MARKER),ord(m),p,ord(d[p]),ord(d[p+1]))
+    if m==PFB_EOF: return
+    p = p + 2
+    l = _pfbSegLen(p,d)
+    p = p + 4
+    if p+l>len(d):
+        raise ValueError, 'Bad pfb file\'%s\' needed %d+%d bytes have only %d!' % (fn,p,l,len(d))
+    return p, p+l
+
+
 class EmbeddedType1Face(TypeFace):
     """A Type 1 font other than one of the basic 14.
 
@@ -409,23 +429,17 @@ class EmbeddedType1Face(TypeFace):
         """Loads in binary glyph data, and finds the four length
         measurements needed for the font descriptor"""
         assert os.path.isfile(pfbFileName), 'file %s not found' % pfbFileName
-        rawdata = open(pfbFileName, 'rb').read()
-        self._binaryData = rawdata
-        firstPS = string.find(rawdata, '%!PS')
-        self._length = len(rawdata)
-        self._length1 = string.find(rawdata, 'eexec')
-        pos2 = string.find(rawdata, 'cleartomark')
-        if pos2 < 0:
-            # need to append the zeros
-            rawdata = rawdata + '0'*256 + 'cleartomark'
-            pos2 = string.find(rawdata, 'cleartomark')
-        zeroes = 0
-        while zeroes < 512:
-            pos2 = pos2 - 1
-            if rawdata[pos2] == '0':
-                zeroes = zeroes + 1
-        self._length2 = pos2 - self._length1
-        self._length3 = len(rawdata) - pos2
+        d = open(pfbFileName, 'rb').read()
+        s1, l1 = _pfbCheck(0,d,PFB_ASCII,pfbFileName)
+        s2, l2 = _pfbCheck(l1,d,PFB_BINARY,pfbFileName)
+        s3, l3 = _pfbCheck(l2,d,PFB_ASCII,pfbFileName)
+        _pfbCheck(l3,d,PFB_EOF,pfbFileName)
+        self._binaryData = d[s1:l1]+d[s2:l2]+d[s3:l3]
+
+        self._length = len(self._binaryData)
+        self._length1 = l1-s1
+        self._length2 = l2-s2
+        self._length3 = l3-s3
 
 
     def _loadMetrics(self, afmFileName):
@@ -477,10 +491,12 @@ class EmbeddedType1Face(TypeFace):
         fontFile.dictionary['Length1'] = self._length1
         fontFile.dictionary['Length2'] = self._length2
         fontFile.dictionary['Length3'] = self._length3
+        #fontFile.filters = [pdfdoc.PDFZCompress]
 
         fontFileRef = doc.Reference(fontFile, 'fontFile:' + self.pfbFileName)
 
         fontDescriptor = pdfdoc.PDFDictionary({
+            'Type': '/FontDescriptor',
             'Ascent':self.ascent,
             'CapHeight':self.capHeight,
             'Descent':self.descent,
@@ -490,7 +506,7 @@ class EmbeddedType1Face(TypeFace):
             'ItalicAngle':self.italicAngle,
             'StemV':self.stemV,
             'XHeight':self.xHeight,
-            'FontFile': fontFileRef
+            'FontFile': fontFileRef,
             })
         fontDescriptorRef = doc.Reference(fontDescriptor, 'fontDescriptor:' + self.name)
         return fontDescriptorRef
