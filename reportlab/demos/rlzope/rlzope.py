@@ -1,4 +1,4 @@
-# $Header: /tmp/reportlab/reportlab/demos/rlzope/rlzope.py,v 1.5 2002/08/23 13:51:19 johnprecedo Exp $
+# $Header: /tmp/reportlab/reportlab/demos/rlzope/rlzope.py,v 1.6 2004/03/17 16:29:30 rgbecker Exp $
 #
 # Using the ReportLab toolkit from within Zope
 #
@@ -19,13 +19,13 @@ try :
     from Shared.reportlab.platypus.doctemplate import *
     from Shared.reportlab.lib.units import inch
     from Shared.reportlab.lib import styles
-    from Shared.PIL import Image as PIL_Image
+    from Shared.reportlab.lib.utils import ImageReader
 except ImportError :
     from reportlab.platypus.paragraph import Paragraph
     from reportlab.platypus.doctemplate import *
     from reportlab.lib.units import inch
     from reportlab.lib import styles
-    from PIL import Image as PIL_Image
+    from reportlab.lib.utils import ImageReader
 
 class MyPDFDoc :
     class MyPageTemplate(PageTemplate) :
@@ -56,8 +56,8 @@ class MyPDFDoc :
                 return None
 
             # Convert it to PIL
-            image = PIL_Image.open(cStringIO.StringIO(str(logo.data)))
-            (width, height) = image.size
+            image = ImageReader(cStringIO.StringIO(str(logo.data)))
+            (width, height) = image.getSize()
 
             # scale it to be 0.75 inch high
             multi = ((height + 0.0) / (0.75 * inch))
