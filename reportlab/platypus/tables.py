@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.49 2002/01/17 14:21:29 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.49 2002/01/17 14:21:29 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.50 2002/01/18 12:21:13 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.50 2002/01/18 12:21:13 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -101,17 +101,6 @@ _SeqTypes = (TupleType, ListType)
 def _rowLen(x):
 	return type(x) not in _SeqTypes and 1 or len(x)
 
-def _listCellGeom(V,w,s,W=None,H=None):
-	aW = w-s.leftPadding-s.rightPadding
-	t = 0
-	w = 0
-	for v in V:
-		vw, vh = v.wrap(aW, 72000)
-		if W is not None: W.append(vw)
-		if H is not None: H.append(vh)
-		w = max(w,vw)
-		t = t + vh + v.getSpaceBefore()+v.getSpaceAfter()
-	return w, t - V[0].getSpaceBefore()-V[-1].getSpaceAfter() 
 
 class Table(Flowable):
 	def __init__(self, data, colWidths=None, rowHeights=None, style=None,
@@ -207,6 +196,19 @@ class Table(Flowable):
 
 		return "<%s at %d %d rows x %s cols>%s" % (self.__class__.__name__, id(self), nr, nc, vx)
 
+	def _listCellGeom(self, V,w,s,W=None,H=None):
+		aW = w-s.leftPadding-s.rightPadding
+		t = 0
+		w = 0
+		canv = self.canv
+		for v in V:
+			vw, vh = v.wrapOn(canv,aW, 72000)
+			if W is not None: W.append(vw)
+			if H is not None: H.append(vh)
+			w = max(w,vw)
+			t = t + vh + v.getSpaceBefore()+v.getSpaceAfter()
+		return w, t - V[0].getSpaceBefore()-V[-1].getSpaceAfter() 
+
 	def _calc(self):
 		if hasattr(self,'_width'): return
 
@@ -231,7 +233,7 @@ class Table(Flowable):
 						if not t in _SeqTypes: v = (v,)
 						if w is None:
 							raise ValueError, "Flowable %s in cell(%d,%d) can't have auto width in\n%s" % (v[0].identity(30),i,j,self.identity(30))
-						dW,t = _listCellGeom(v,w,s)
+						dW,t = self._listCellGeom(v,w,s)
 						#print "leftpadding, rightpadding", s.leftPadding, s.rightPadding
 						dW = dW + s.leftPadding + s.rightPadding
 						if not rl_config.allowTableBoundsErrors and dW>w:
@@ -543,7 +545,7 @@ class Table(Flowable):
 			# we assume it's a list of Flowables
 			W = []
 			H = []
-			w, h = _listCellGeom(cellval,colwidth,cellstyle,W=W, H=H)
+			w, h = self._listCellGeom(cellval,colwidth,cellstyle,W=W, H=H)
 			if valign=='TOP':
 				y = rowpos + rowheight - cellstyle.topPadding
 			elif valign=='BOTTOM':
