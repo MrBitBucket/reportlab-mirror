@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.12  2000/05/26 10:27:37  rgbecker
+#	Fixed infinite recursion bug
+#
 #	Revision 1.11  2000/05/17 22:17:38  rgbecker
 #	Renamed BasicFrame to Frame
-#
+#	
 #	Revision 1.10  2000/05/17 16:29:40  rgbecker
 #	Removal of SimpleFrame
 #	
@@ -64,7 +67,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.11 2000/05/17 22:17:38 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.12 2000/05/26 10:27:37 rgbecker Exp $ '''
 __doc__="""
 More complicated Document model
 """
@@ -165,10 +168,12 @@ class BaseDocTemplate:
 		self._pageBreakQuick = 1
 
 	def clean_hanging(self):
+		'handle internal postponed actions'
 		while len(self._hanging):
 			self.handle_flowable(self._hanging)
 
 	def addPageTemplates(self,pageTemplates):
+		'add one or a sequence of pageTamplates'
 		if type(pageTemplates) not in (ListType,TupleType):
 			pageTemplates = [pageTemplates]
 		assert filter(lambda x: not isinstance(x,PageTemplate), pageTemplates)==[], "pageTemplates argument error"
@@ -176,12 +181,14 @@ class BaseDocTemplate:
 			self.pageTemplates.append(t)
 			
 	def handle_documentBegin(self):
+		'''Hook actions at beginning of document'''
 		self._hanging = [PageBegin]
 		self.pageTemplate = self.pageTemplates[0]
 		self.page = 0
 
 	def handle_pageBegin(self):
-		'''shouldn't normally be called directly'''
+		'''Perform actions required at beginning of page.
+		shouldn't normally be called directly'''
 		self.page = self.page + 1
 		self.pageTemplate.drawPage(self.canv,self)
 		self.pageTemplate.onPage(self.canv,self)
@@ -211,6 +218,7 @@ class BaseDocTemplate:
 				self.handle_frameEnd()
 
 	def handle_frameBegin(self,*args):
+		'''What to do at the beginning of a page'''
 		self.frame._reset()
 		if self.showBoundary or self.frame.showBoundary:
 			self.frame.drawBoundary(self.canv)
@@ -296,6 +304,9 @@ class BaseDocTemplate:
 					for f in xrange(n-1):
 						flowables.insert(f,S[f])	# put split flowables back on the list
 				else:
+					if hasattr(f,'postponed'):
+						raise "LayoutError", "Flowable too large"
+					f.postponed = 1
 					flowables.insert(0,f)			# put the flowable back
 					self.handle_frameEnd()
 
