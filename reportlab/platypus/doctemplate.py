@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.57 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.58 2003/01/02 11:30:05 rgbecker Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.57 2002/07/24 19:56:38 andy_robinson Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.58 2003/01/02 11:30:05 rgbecker Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -618,8 +618,22 @@ class BaseDocTemplate:
         #print 'scanned story, found these indexing flowables:\n'
         #print self._indexingFlowables
 
+        # attempt to fix the filename is a 'file' problem
+        isFile = getattr(filename,'write',None)
+        if isFile:
+            hasSeek = getattr(filename,'seek',None)
+            if hasSeek:
+                fLoc = filename.tell()
+            else:
+                class _DUMMYFILE:
+                    def __init__(self,filename):
+                        self._filename = filename
+                    def write(self,bytes): pass
+                    def close(self): pass
+                filename = _DUMMYFILE(filename)
         passes = 0
         while 1:
+            if passes and isFile and hasSeek: filename.seek(fLoc)
             passes = passes + 1
             if self._onProgress:
                 self.onProgress('PASS', passes)
@@ -648,10 +662,9 @@ class BaseDocTemplate:
             happy = self._allSatisfied()
 
             if happy:
-                ## print 'OK'
+                if isFile and not hasSeek:
+                    filename = filename._filename
                 break
-            ## else:
-                ## print 'failed'
             if passes > maxPasses:
                 raise IndexError, "Index entries not resolved after %d passes" % maxPasses
 
