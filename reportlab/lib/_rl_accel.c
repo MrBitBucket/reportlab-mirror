@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.31 2003/01/05 11:15:08 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.32 2003/01/12 12:25:03 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.31 2003/01/05 11:15:08 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.32 2003/01/12 12:25:03 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -27,7 +27,7 @@ static __version__=" $Id: _rl_accel.c,v 1.31 2003/01/05 11:15:08 rgbecker Exp $ 
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.40"
+#define VERSION "0.41"
 #define MODULE "_rl_accel"
 #ifndef	ATTRDICT
 	#if PY_MAJOR_VERSION>=2
@@ -512,9 +512,9 @@ PyObject *_fp_str(PyObject *self, PyObject *args)
 			if((i=PySequence_Length(retVal))>=0){
 				aL = i;
 				args = retVal;
-				Py_DECREF(retVal);
 				}
 			else PyErr_Clear();
+			Py_DECREF(retVal);
 			}
 		buf=malloc(31*aL);
 		pB = buf;
