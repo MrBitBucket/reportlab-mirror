@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/Attic/test_chinese_s.py,v 1.1 2001/10/06 20:45:06 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/Attic/test_chinese_s.py,v 1.2 2001/10/20 20:42:14 andy_robinson Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -21,7 +21,7 @@ global VERBOSE
 VERBOSE = 0
 
 
-class ChineseFontTests(unittest.TestCase):
+class CHSFontTests(unittest.TestCase):
     def hDraw(self, c, msg, fnt, x, y):
         "Helper - draws it with a box around"
         c.setFont(fnt, 16, 16)
@@ -45,25 +45,21 @@ class ChineseFontTests(unittest.TestCase):
     
         c = Canvas('test_chinese_simplified.pdf')
         c.setFont('Helvetica', 30)
-        c.drawString(100,700, 'Chinese Font Support')
+        c.drawString(100,700, 'Simplified Chinese Font Support')
 
         c.setStrokeColor(colors.red)
 
         # the two typefaces
         c.setFont('STSongStd-Light-Acro-' + enc, 16)
         message1 = '\xce\xc4\xbd\xa1\xb5\xc3\xb5\xbd\xc1\xcb \xc4\xc7\xd5\xfd\xba\xc3\xb0\xa2  \xce\xd2 \xba\xdc\xcf\xb2\xbb\xb6.'
-        #message1 = string.strip(open('chinese_cp936.txt', 'r').read())
-        #print 'message length %d bytes' % len(message1)
         c.drawString(100, 675, message1)
-        #wid = pdfmetrics.stringWidth(message1, 'HeiseiMin-W3-90ms-RKSJ-H', 16)
-        #c.rect(100,675,wid,16,stroke=1,fill=0)
         c.setPageCompression(0)
         c.save()
         if VERBOSE:
             print 'saved test_chinese_simplified.pdf'
 
 def makeSuite():
-    return unittest.makeSuite(ChineseFontTests,'test')
+    return unittest.makeSuite(CHSFontTests,'test')
 
 #noruntests
 if __name__ == "__main__":
