@@ -1,4 +1,84 @@
 #################################################################################
+#################### RELEASE 1.17 at 16:00 GMT  3/Jan/2003      #################
+#################################################################################
+##### 2003/01/03 #####
+	test/test_lib_utils.py 1.2 rgbecker  Fix test2 for the pyz case
+##### 2003/01/02 #####
+	platypus/doctemplate.py 1.58 rgbecker  Attempted fix for non string filenamevs multibuild
+##### 2002/12/28 #####
+	pdfbase/pdfmetrics.py 1.61 andy_robinson  Permits use of CID fonts within paragraphs
+	pdfbase/pdfmetrics.py 1.60 andy_robinson  Allows Asian fonts to have correct TT mapping and thus work in paragraphs
+##### 2002/12/23 #####
+	tools/pythonpoint/demos/htu.xml 1.2 andy_robinson  Fixed recursive import, setting and gettign attributes
+	test/test_lib_utils.py 1.1 andy_robinson  Fixed recursive import, setting and gettign attributes
+	lib/utils.py 1.37 andy_robinson  Fixed recursive import, setting and gettign attributes
+	graphics/charts/barcharts.py 1.70 andy_robinson  Fixed recursive import, setting and gettign attributes
+##### 2002/12/22 #####
+	setup.py 1.7 andy_robinson  Now includes all data files, and installs with sdist/install on Windows
+	setup.py 1.6 andy_robinson  Tidied up whitespace and header
+	setup.py 1.5 andy_robinson  Dirk's latest changes
+	MANIFEST.in 1.3 andy_robinson  Dirk's latest changes
+	setup.py 1.4 andy_robinson  Changed how it refers to extenions so it works on Windows
+	MANIFEST.in 1.2 andy_robinson  Dirk's latest
+	MANIFEST.in 1.1 rgbecker  Forgot to add this
+	setup_reportlab.py 1.3 rgbecker  No longer needed
+	setup.py 1.3 rgbecker  After Dirk's patch
+##### 2002/12/21 #####
+	license.txt 1.4 rgbecker  Fixed dates
+##### 2002/12/20 #####
+	docs/userguide/ch2_graphics.py 1.9 rgbecker  Fix example 2.1
+##### 2002/12/13 #####
+	graphics/renderPS.py 1.21 rgbecker  Added Dirk Datzert's drawToString func
+##### 2002/12/04 #####
+	graphics/charts/spider.py 1.5 rgbecker  Fix calcs for values correct direction
+##### 2002/12/03 #####
+	graphics/charts/spider.py 1.4 rgbecker  remove spurious print
+	graphics/charts/textlabels.py 1.29 rgbecker  remove spurious print
+	lib/validators.py 1.25 rgbecker  Minor enhancements to SpiderChart/Label
+	graphics/charts/textlabels.py 1.28 rgbecker  Minor enhancements to SpiderChart/Label
+	graphics/charts/spider.py 1.3 rgbecker  Minor enhancements to SpiderChart/Label
+	graphics/charts/spider.py 1.2 rgbecker  Fix up for labels etc
+##### 2002/12/02 #####
+	graphics/charts/spider.py 1.1 andy_robinson  Initial checkin, several more features needed
+	graphics/widgets/grids.py 1.30 rgbecker  Fix backgrounds
+	graphics/charts/lineplots.py 1.38 rgbecker  Fix up bugs in joinAxisMode handling
+	graphics/charts/axes.py 1.61 rgbecker  Fix up bugs in joinAxisMode handling
+	graphics/charts/lineplots.py 1.37 rgbecker  Use _tickValues instead of valueSteps
+	graphics/charts/axes.py 1.60 rgbecker  Attempts at controlling number of ticks & fix for empty labels
+	graphics/charts/lineplots.py 1.36 rgbecker  added makeSwatchSample
+##### 2002/11/28 #####
+	pdfbase/pdfdoc.py 1.75 rgbecker  Fix off by 1 in loadA85Image
+##### 2002/11/27 #####
+	graphics/widgets/flags.py 1.24 rgbecker  Minor efficiency saving
+	graphics/charts/textlabels.py 1.27 rgbecker  Minor efficiency saving
+	graphics/charts/lineplots.py 1.35 rgbecker  Started adding Shader
+	graphics/charts/areas.py 1.2 rgbecker  Minor saving
+	graphics/shapes.py 1.83 rgbecker  Added class _SetKeyWordArgs
+	pdfbase/pdfutils.py 1.36 rgbecker  A85 files are binary :(
+	test/test_graphics_images.py 1.6 rgbecker  Allow for easy change of images
+	graphics/charts/axes.py 1.59 rgbecker  Allow LL0 to be a list
+	graphics/shapes.py 1.82 rgbecker  Added String.getEast method
+##### 2002/11/22 #####
+	graphics/charts/barcharts.py 1.69 rgbecker  Fixed attributes
+##### 2002/11/21 #####
+	pdfbase/pdfutils.py 1.35 rgbecker  Bad checks commented
+##### 2002/11/20 #####
+	pdfbase/pdfutils.py 1.34 rgbecker  Added _rl_accel._Ascii85Decode
+	lib/_rl_accel.c 1.30 rgbecker  Added _Ascii85Decode
+	graphics/charts/piecharts.py 1.24 rgbecker  Slight fix for all zero case
+##### 2002/11/18 #####
+	platypus/para.py 1.5 aaron_watters  eliminated divide by zero but just introduced
+	platypus/para.py 1.4 rgbecker  Slight improvement on Doug's fix
+	platypus/para.py 1.3 andy_robinson  Path for word spacing in justified text
+##### 2002/11/16 #####
+	tools/pythonpoint/styles/htu.py 1.1 andy_robinson  Pythonpoint patches from Turgut Uyar
+	tools/pythonpoint/stdparser.py 1.15 andy_robinson  Pythonpoint patches from Turgut Uyar
+	tools/pythonpoint/pythonpoint.py 1.20 andy_robinson  Pythonpoint patches from Turgut Uyar
+	tools/pythonpoint/demos/htu.xml 1.1 andy_robinson  Pythonpoint patches from Turgut Uyar
+	lib/fonts.py 1.15 andy_robinson  Pythonpoint patches from Turgut Uyar
+##### 2002/11/09 #####
+	tools/pythonpoint/stdparser.py 1.14 andy_robinson  Fix for dead bullets pointed out by Tim Roberts...
+#################################################################################
 #################### RELEASE 1.16 at 16:00 GMT  7/Nov/2002      #################
 #################################################################################
 ##### 2002/11/07 #####
