@@ -27,10 +27,13 @@ XML_API void determine_character_encoding(InputSource s);
 struct input_source {
     Entity entity;		/* The entity from which the source reads */
 
+    void (*reader)(InputSource); /* line-reading method */
+
     FILE16 *file16;
 
     Char *line;
     int line_alloc, line_length;
+    int line_is_incomplete;
     int next;
 
     int seen_eoe;
@@ -38,9 +41,12 @@ struct input_source {
     int bytes_consumed;
     int bytes_before_current_line;
     int line_end_was_cr;
+    int expecting_low_surrogate;
+    int ignore_linefeed;
 
     int line_number;
     int not_read_yet;
+    int read_carefully;		/* be sure not to read past end of XML decl */
 
     struct input_source *parent;
 

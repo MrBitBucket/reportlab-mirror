@@ -46,8 +46,12 @@ STD_API int Printf(const char *format, ...);
 STD_API int Vprintf(const char *format, va_list args);
 
 STD_API int Sprintf(void *buf, CharacterEncoding enc, const char *format, ...);
+STD_API int Snprintf(void *buf, size_t size, CharacterEncoding enc,
+		     const char *format, ...);
 STD_API int Vsprintf(void *buf, CharacterEncoding enc, const char *format, 
 	     va_list args);
+STD_API int Vsnprintf(void *buf, size_t size, CharacterEncoding enc,
+		      const char *format, va_list args);
 
 STD_API int Getu(FILE16 *file);
 

@@ -33,7 +33,8 @@
 #include "url.h"
 #include "ctype16.h"
 
-static int get_translated_line1(InputSource s);
+static void internal_reader(InputSource s);
+static void external_reader(InputSource s);
 
 InputSource SourceFromFILE16(const char8 *description, FILE16 *file16)
 {
@@ -94,10 +95,16 @@ InputSource NewInputSource(Entity e, FILE16 *f16)
     source->line = 0;
     source->line_alloc = 0;
     source->line_length = 0;
+    source->expecting_low_surrogate = 0;
+    source->complicated_utf8_line = 0;
+    source->line_is_incomplete = 0;
     source->next = 0;
     source->seen_eoe = 0;
 
     source->entity = e;
+
+    source->reader = 
+	(e->type == ET_external) ? external_reader :internal_reader;
 
     source->file16 = f16;
 
@@ -106,6 +113,7 @@ InputSource NewInputSource(Entity e, FILE16 *f16)
     source->line_end_was_cr = 0;
     source->line_number = 0;
     source->not_read_yet = 1;
+    source->read_carefully = 0;
 
     source->nextin = source->insize = 0;
 
@@ -256,9 +264,11 @@ int SourceSeek(InputSource s, int byte_offset)
     return Fseek(s->file16, byte_offset, SEEK_SET);
 }
 
-static int get_translated_line(InputSource s)
+/* reader for internal entities, doesn't need to do any encoding translation */
+
+static void internal_reader(InputSource s)
 {
-    /* This is a hack, pending some reorganisation */
+    /* XXX reconsider use of FILE16 for internal entities */
 
     struct _FILE16 {
 	void *handle;
@@ -266,18 +276,13 @@ static int get_translated_line(InputSource s)
 	/* we don't need the rest here */
     };
 
-    Entity e = s->entity;
     Char *p;
     struct _FILE16 *f16 = (struct _FILE16 *)s->file16;
-
-
-    if(e->type == ET_external)
-	return get_translated_line1(s);
 
     if(!*(Char *)((char *)f16->handle + f16->handle2))
     {
 	s->line_length = 0;
-	return 0;
+	return;
     }
 
     s->line = (Char *)((char *)f16->handle + f16->handle2);
@@ -289,308 +294,495 @@ static int get_translated_line(InputSource s)
     s->line_length = p - s->line;
 
     s->bytes_before_current_line = f16->handle2;
+    s->next = 0;
+    if(s->not_read_yet)
+	s->not_read_yet = 0;
+    else
+	s->line_number++;
 
-    return 0;
+    return;
 }
 
-static int get_translated_line1(InputSource s)
+/*
+ * Translate bytes starting at s->inbuf[s->nextin] until end of line
+ * or until s->nextin == s->insize.
+ * The output is placed starting at s->line[s->nextout], which must
+ * have enough space.
+ * Returns zero at end of line or error, one if more input is needed.
+ * In the case of an error (encoding error or illegal XML character) we
+ * set s->seen_error and put a SUB (ctrl-Z) in the output as a marker.
+ */
+
+
+#define SETUP \
+    int c;		/* can't use Char, it might be >0x10000 */ \
+\
+    /* local copies of fields of s, that are not modified */ \
+\
+    unsigned char * const inbuf = s->inbuf; \
+    const int insize = s->insize; \
+    const int startin = s->nextin; \
+    Char * const outbuf = s->line; \
+\
+    /* local copies of fields of s, that are modified (and restored) */ \
+\
+    int nextin = s->nextin; \
+    int nextout = s->line_length; \
+    int ignore_linefeed = s->ignore_linefeed; \
+
+#define ERROR_CHECK \
+    if(c == -1) \
+    { \
+	/* There was an error.  Put a SUB character (ctl-Z) in \
+	   as a marker, and end the line. */ \
+	outbuf[nextout++] = BADCHAR; \
+	s->seen_error = 1; \
+	goto end_of_line; \
+    }
+
+#define LINEFEED \
+    if(c == '\n' && ignore_linefeed) \
+    { \
+	/* Ignore lf at start of line if last line ended with cr */ \
+	ignore_linefeed = 0; \
+	s->bytes_before_current_line += (nextin - startin); \
+	continue; \
+    } \
+\
+    ignore_linefeed = 0; \
+\
+    if(c == '\r') \
+    { \
+	s->line_end_was_cr = 1; \
+	c = '\n'; \
+    }
+
+#define OUTPUT \
+    outbuf[nextout++] = c; \
+\
+    if(c == '\n') \
+        goto end_of_line
+
+#define OUTPUT_WITH_SURROGATES \
+    if(c >= 0x10000) \
+    { \
+	/* Use surrogates */ \
+	outbuf[nextout++] = ((c - 0x10000) >> 10) + 0xd800; \
+	outbuf[nextout++] = ((c - 0x10000) & 0x3ff) + 0xdc00; \
+    } \
+    else \
+	outbuf[nextout++] = c; \
+\
+    if(c == '\n') \
+        goto end_of_line
+
+#define MORE_BYTES \
+ more_bytes: \
+	s->nextin = nextin; \
+	s->line_length = nextout; \
+        s->ignore_linefeed = ignore_linefeed; \
+	return 1 \
+
+#define END_OF_LINE \
+ end_of_line: \
+	s->nextin = nextin; \
+	s->line_length = nextout; \
+        s->ignore_linefeed = ignore_linefeed; \
+	return 0
+
+#if CHAR_SIZE == 8
+
+static int translate_8bit(InputSource s)
 {
-    unsigned int c;		/* can't use Char, it might be >0x10000 */
-    unsigned char *inbuf = s->inbuf;
-    int nextin = s->nextin, insize = s->insize;
-    int startin = s->nextin;
-    Char *outbuf = s->line;
-    int outsize = s->line_alloc;
-    int nextout = 0;
-    int remaining = 0;
-    int ignore_linefeed = s->line_end_was_cr;
+    SETUP;
 
-#if CHAR_SIZE == 16
+    while(nextin < insize)
+    {
+	c = inbuf[nextin++];
 
-    int expecting_low_surrogate = 0;
-    int *to_unicode = 0;	/* initialize to shut gcc up */
+	if(!is_xml_legal(c))
+	{
+	    sprintf(s->error_msg,
+		    "Illegal character <0x%x> at file offset %d",
+		    c, s->bytes_consumed + nextin - startin - 1);
+	    c = -1;
+	}
+
+	ERROR_CHECK;
+
+	LINEFEED;
+
+	OUTPUT;
+    }
+
+    MORE_BYTES;
+
+    END_OF_LINE;
+}
+
+#else
+
+static int translate_latin(InputSource s)
+{
     CharacterEncoding enc = s->entity->encoding;
-    int more, i, mincode;
-    s->complicated_utf8_line = 0;
+    int *to_unicode = iso_to_unicode[enc - CE_ISO_8859_2];
+    SETUP;
 
-    if(enc >= CE_ISO_8859_2 && enc <= CE_ISO_8859_9)
-	to_unicode = iso_to_unicode[enc - CE_ISO_8859_2];
+    while(nextin < insize)
+    {
+	c = to_unicode[inbuf[nextin++]];
+	if(c == -1)
+	{
+	    sprintf(s->error_msg, 
+		    "Illegal byte <0x%x> for encoding %s at file offset %d",
+		    inbuf[nextin-1], CharacterEncodingName[enc],
+		    s->bytes_consumed + nextin - 1 - startin);
+	}
+	else if(!is_xml_legal(c))
+	{
+	    sprintf(s->error_msg,
+		    "Illegal character <0x%x> "
+		    "immediately before file offset %d",
+		    c, s->bytes_consumed + nextin - startin);
+	    c = -1;
+	}
+
+	ERROR_CHECK;
+
+	LINEFEED;
+
+	OUTPUT;
+    }
+
+    MORE_BYTES;
+
+    END_OF_LINE;
+}
+
+static int translate_latin1(InputSource s)
+{
+    SETUP;
+
+    while(nextin < insize)
+    {
+	c = inbuf[nextin++];
+	if(!is_xml_legal(c))
+	{
+	    sprintf(s->error_msg,
+		    "Illegal character <0x%x> "
+		    "immediately before file offset %d",
+		    c, s->bytes_consumed + nextin - startin);
+	    c = -1;
+	}
+
+	ERROR_CHECK;
+
+	LINEFEED;
+
+	OUTPUT;
+    }
+
+    MORE_BYTES;
+
+    END_OF_LINE;
+}
+
+static int translate_utf8(InputSource s)
+{
+    int more, i, mincode;
+    SETUP;
+
+    while(nextin < insize)
+    {
+	c = inbuf[nextin++];
+	if(c <= 0x7f)
+	    goto gotit;
+	else if(c <= 0xc0 || c >= 0xfe)
+	{
+	    sprintf(s->error_msg,
+		   "Illegal UTF-8 start byte <0x%x> at file offset %d",
+		    c, s->bytes_consumed + nextin - 1 - startin);
+	    c = -1;
+	    goto gotit;
+	}
+	else if(c <= 0xdf)
+	{
+	    c &= 0x1f;
+	    more = 1;
+	    mincode = 0x80;
+	}
+	else if(c <= 0xef)
+	{
+	    c &= 0x0f;
+	    more = 2;
+	    mincode = 0x800;
+	}
+	else if(c <= 0xf7)
+	{
+	    c &= 0x07;
+	    more = 3;
+	    mincode = 0x10000;
+	}
+	else if(c <= 0xfb)
+	{
+	    c &= 0x03;
+	    more = 4;
+	    mincode = 0x200000;
+	}
+	else
+	{
+	    c &= 0x01;
+	    more = 5;
+	    mincode = 0x4000000;
+	}
+	if(nextin+more > insize)
+	{
+	    nextin--;
+	    goto more_bytes;
+	}
+	s->complicated_utf8_line = 1;
+	s->cached_line_char = 0;
+	s->cached_line_byte = 0;
+
+	for(i=0; i<more; i++)
+	{
+	    int t = inbuf[nextin++];
+	    if((t & 0xc0) != 0x80)
+	    {
+		c = -1;
+		sprintf(s->error_msg,
+		      "Illegal UTF-8 byte %d <0x%x> at file offset %d",
+			i+2, t, 
+			s->bytes_consumed + nextin - 1 - startin);
+		break;
+	    }
+	    c = (c << 6) + (t & 0x3f);
+	}
+
+	if(c < mincode && c != -1)
+	{
+	    sprintf(s->error_msg,
+		    "Illegal (non-shortest) UTF-8 sequence for "
+		    "character <0x%x> "
+		    "immediately before file offset %d",
+		    c, s->bytes_consumed + nextin - startin);
+	    c = -1;
+	}
+
+    gotit:
+	if(c > 0x110000 ||
+	   (c >=0 && c < 0x10000 && !is_xml_legal(c)))
+	{
+	    sprintf(s->error_msg,
+		    "Illegal character <0x%x> "
+		    "immediately before file offset %d",
+		    c, s->bytes_consumed + nextin - startin);
+	    c = -1;
+	}
+
+	ERROR_CHECK;
+
+	LINEFEED;
+
+	OUTPUT_WITH_SURROGATES;
+
+	if(c == '>' && s->read_carefully)
+	{
+	    s->line_is_incomplete = 1;
+	    goto end_of_line;
+	}
+    }
+
+    MORE_BYTES;
+
+    END_OF_LINE;
+}
+
+static int translate_utf16(InputSource s)
+{
+    int le = (s->entity->encoding == CE_ISO_10646_UCS_2L ||
+	      s->entity->encoding == CE_UTF_16L);
+    SETUP;
+
+    while(nextin < insize)
+    {
+	if(nextin+2 > insize)
+	    goto more_bytes;
+
+	if(le)
+	    c = (inbuf[nextin+1] << 8) + inbuf[nextin];
+	else
+	    c = (inbuf[nextin] << 8) + inbuf[nextin+1];
+	nextin += 2;
+
+	if(c >= 0xdc00 && c <= 0xdfff) /* low (2nd) surrogate */
+	{
+	    if(s->expecting_low_surrogate)
+		s->expecting_low_surrogate = 0;
+	    else
+	    {
+		sprintf(s->error_msg,
+			"Unexpected low surrogate <0x%x> "
+			"at file offset %d",
+			c, s->bytes_consumed + nextin - startin - 2);
+		c = -1;
+	    }
+	}
+	else if(s->expecting_low_surrogate)
+	{
+	    sprintf(s->error_msg,
+		    "Expected low surrogate but got <0x%x> "
+		    "at file offset %d",
+		    c, s->bytes_consumed + nextin - startin - 2);
+	    c = -1;
+	}
+	if(c >= 0xd800 && c <= 0xdbff) /* high (1st) surrogate */
+	    s->expecting_low_surrogate = 1;
+
+	if(c > 0x110000 ||
+	   /* surrogates are legal in utf-16 */
+	   (c >= 0     && c < 0xd800  && !is_xml_legal(c)) ||
+	   (c > 0xdfff && c < 0x10000 && !is_xml_legal(c)))
+	{
+	    sprintf(s->error_msg,
+		    "Illegal character <0x%x> "
+		    "immediately before file offset %d",
+		    c, s->bytes_consumed + nextin - startin);
+	    c = -1;
+	}
+
+	ERROR_CHECK;
+
+	LINEFEED;
+
+	OUTPUT;
+    }
+
+    MORE_BYTES;
+
+    END_OF_LINE;
+}
 
 #endif
 
-    if(s->seen_error)
-	return -1;
+static void external_reader(InputSource s)
+{
+    int startin = s->nextin;
+    int (*trans)(InputSource);
+    int continuing_incomplete_line = s->line_is_incomplete;
 
-    s->line_end_was_cr = 0;
-    s->bytes_before_current_line = s->bytes_consumed;
+    if(s->seen_error)
+	return;
+
+    s->line_is_incomplete = 0;
+    if(!continuing_incomplete_line)
+    {
+	s->ignore_linefeed = s->line_end_was_cr;
+	s->line_end_was_cr = 0;
+	s->complicated_utf8_line = 0;
+	s->line_length = 0;
+	s->bytes_before_current_line = s->bytes_consumed;
+	s->next = 0;
+    }
+
+#if CHAR_SIZE == 8
+    trans = translate_8bit;
+#else
+    switch(s->entity->encoding)
+    {
+    case CE_ISO_646:	/* should really check for >127 in this case */
+    case CE_ISO_8859_1:
+    case CE_unspecified_ascii_superset:
+	trans = translate_latin1;
+	break;
+    case CE_ISO_8859_2:
+    case CE_ISO_8859_3:
+    case CE_ISO_8859_4:
+    case CE_ISO_8859_5:
+    case CE_ISO_8859_6:
+    case CE_ISO_8859_7:
+    case CE_ISO_8859_8:
+    case CE_ISO_8859_9:
+	trans = translate_latin;
+	break;
+    case CE_UTF_8:
+	trans = translate_utf8;
+	break;
+    case CE_ISO_10646_UCS_2B:
+    case CE_UTF_16B:
+    case CE_ISO_10646_UCS_2L:
+    case CE_UTF_16L:
+	trans=translate_utf16;
+	break;
+    default:
+	assert(1==0);
+	break;
+    }
+#endif
 
     while(1)
     {
 	/* There are never more characters than bytes in the input */
-	if(outsize < nextout + (insize - nextin))
+	if(s->line_alloc < s->line_length + (s->insize - s->nextin))
 	{
-	    outsize = nextout + (insize - nextin);
-	    outbuf = Realloc(outbuf, outsize * sizeof(Char));
+	    s->line_alloc = s->line_length + (s->insize - s->nextin);
+	    s->line = Realloc(s->line, s->line_alloc * sizeof(Char));
 	}
 
-	while(nextin < insize)
+	if(trans(s) == 0)
 	{
-#if CHAR_SIZE == 8
-	    c = inbuf[nextin++];
-
-	    if(!is_xml_legal(c))
-	    {
-		sprintf(s->error_msg,
-			"Illegal character <0x%x> at file offset %d",
-			c, s->bytes_consumed + nextin - startin - 1);
-		c = (unsigned int)-1;
-	    }
-#else
-	    switch(enc)
-	    {
-	    case CE_ISO_10646_UCS_2B:
-	    case CE_UTF_16B:
-		if(nextin+2 > insize)
-		    goto more_bytes;
-		c = (inbuf[nextin] << 8) + inbuf[nextin+1];
-		nextin += 2;
-		goto surr_check;
-	    case CE_ISO_10646_UCS_2L:
-	    case CE_UTF_16L:
-		if(nextin+2 > insize)
-		    goto more_bytes;
-		c = (inbuf[nextin+1] << 8) + inbuf[nextin];
-		nextin += 2;
-	    surr_check:
-		if(c >= 0xdc00 && c <= 0xdfff) /* low (2nd) surrogate */
-		{
-		    if(expecting_low_surrogate)
-			expecting_low_surrogate = 0;
-		    else
-		    {
-			sprintf(s->error_msg,
-				"Unexpected low surrogate <0x%x> "
-				"at file offset %d",
-				c, s->bytes_consumed + nextin - startin - 2);
-			c = (unsigned int)-1;
-		    }
-		}
-		else if(expecting_low_surrogate)
-		{
-		    sprintf(s->error_msg,
-			    "Expected low surrogate but got <0x%x> "
-			    "at file offset %d",
-			    c, s->bytes_consumed + nextin - startin - 2);
-		    c = (unsigned int)-1;
-		}
-		if(c >= 0xd800 && c <= 0xdbff) /* high (1st) surrogate */
-		    expecting_low_surrogate = 1;
-		break;
-	    case CE_ISO_646:	/* should really check for >127 in this case */
-	    case CE_ISO_8859_1:
-	    case CE_unspecified_ascii_superset:
-		c = inbuf[nextin++];
-		break;
-	    case CE_ISO_8859_2:
-	    case CE_ISO_8859_3:
-	    case CE_ISO_8859_4:
-	    case CE_ISO_8859_5:
-	    case CE_ISO_8859_6:
-	    case CE_ISO_8859_7:
-	    case CE_ISO_8859_8:
-	    case CE_ISO_8859_9:
-		c = to_unicode[inbuf[nextin++]];
-		if(c == (unsigned int)-1)
-		    sprintf(s->error_msg, 
-			    "Illegal %s character <0x%x> at file offset %d",
-			    CharacterEncodingName[enc], inbuf[nextin-1],
-			    s->bytes_consumed + nextin - 1 - startin);
-		break;
-	    case CE_UTF_8:
-		c = inbuf[nextin++];
-		if(c <= 0x7f)
-		    break;
-		if(c <= 0xc0 || c >= 0xfe)
-		{
-		    sprintf(s->error_msg,
-			   "Illegal UTF-8 start byte <0x%x> at file offset %d",
-			    c, s->bytes_consumed + nextin - 1 - startin);
-		    c = (unsigned int)-1;
-		    break;
-		}
-		if(c <= 0xdf)
-		{
-		    c &= 0x1f;
-		    more = 1;
-		    mincode = 0x80;
-		}
-		else if(c <= 0xef)
-		{
-		    c &= 0x0f;
-		    more = 2;
-		    mincode = 0x800;
-		}
-		else if(c <= 0xf7)
-		{
-		    c &= 0x07;
-		    more = 3;
-		    mincode = 0x10000;
-		}
-		else if(c <= 0xfb)
-		{
-		    c &= 0x03;
-		    more = 4;
-		    mincode = 0x200000;
-		}
-		else
-		{
-		    c &= 0x01;
-		    more = 5;
-		    mincode = 0x4000000;
-		}
-		if(nextin+more > insize)
-		{
-		    nextin--;
-		    goto more_bytes;
-		}
-		s->complicated_utf8_line = 1;
-		s->cached_line_char = 0;
-		s->cached_line_byte = 0;
-		
-		for(i=0; i<more; i++)
-		{
-		    int t = inbuf[nextin++];
-		    if((t & 0xc0) != 0x80)
-		    {
-			c = (unsigned int)-1;
-			sprintf(s->error_msg,
-			      "Illegal UTF-8 byte %d <0x%x> at file offset %d",
-				i+2, t, 
-				s->bytes_consumed + nextin - 1 - startin);
-			break;
-		    }
-		    c = (c << 6) + (t & 0x3f);
-		}
-#if 0
-		if(c < mincode)
-		{
-		    sprintf(s->error_msg,
-			    "Illegal (non-shortest) UTF-8 sequence for "
-			    "character <0x%x> "
-			    "immediately before file offset %d",
-			    c, s->bytes_consumed + nextin - startin);
-		    c = (unsigned int)-1;
-		}
-#endif
-		break;
-	    default:
-		sprintf(s->error_msg,
-			"read from entity with unsupported encoding!");
-		c = (unsigned int)-1;
-		break;
-	    }
-
-	    if((c > 0x110000 || (c < 0x10000 && !is_xml_legal(c))) &&
-	       c != (unsigned int)-1)
-		if(!(enc == CE_UTF_16L || enc == CE_UTF_16B) ||
-		   c < 0xd800 || c > 0xdfff)
-		    /* We treat the surrogates as legal because we didn't
-		       combine them when translating from UTF-16.  XXX */
-		{
-		    sprintf(s->error_msg,
-			    "Illegal character <0x%x> "
-			    "immediately before file offset %d",
-			    c, s->bytes_consumed + nextin - startin);
-		    c = (unsigned int)-1;
-		}
-#endif
-	    if(c == (unsigned int)-1)
-	    {
-		/* There was an error.  Put a SUB character (ctl-Z) in
-		   as a marker, and end the line. */
-		outbuf[nextout++] = BADCHAR;
-		s->seen_error = 1;
-
-		/* copied from linefeed case below */
-
-		s->nextin = nextin;
-		s->insize = insize;
-		s->bytes_consumed += (nextin - startin);
-		s->line = outbuf;
-		s->line_alloc = outsize;
-		s->line_length = nextout;
-		return 0;
-	    }
-
-	    if(c == '\n' && ignore_linefeed)
-	    {
-		/* Ignore lf at start of line if last line ended with cr */
-		ignore_linefeed = 0;
-		s->bytes_before_current_line += (nextin - startin);
-	    }		
-	    else
-	    {
-		ignore_linefeed = 0;
-		if(c == '\r')
-		{
-		    s->line_end_was_cr = 1;
-		    c = '\n';
-		}
-
-#if CHAR_SIZE == 16
-		if(c >= 0x10000)
-		{
-		    /* Use surrogates */
-		    outbuf[nextout++] = ((c - 0x10000) >> 10) + 0xd800;
-		    outbuf[nextout++] = ((c - 0x10000) & 0x3ff) + 0xdc00;
-		}
-		else
-		    outbuf[nextout++] = c;
-#else
-		outbuf[nextout++] = c;
-#endif
-
-		if(c == '\n')
-		{
-		    s->nextin = nextin;
-		    s->insize = insize;
-		    s->bytes_consumed += (nextin - startin);
-		    s->line = outbuf;
-		    s->line_alloc = outsize;
-		    s->line_length = nextout;
-		    return 0;
-		}
-	    }
+	    s->bytes_consumed += (s->nextin - startin);
+	    if(s->not_read_yet)
+		s->not_read_yet = 0;
+	    else if(!continuing_incomplete_line)
+		s->line_number++;
+	    return;
 	}
-
-#if CHAR_SIZE == 16
-    more_bytes:
-	/* Copy down any partial character */
-
-	remaining = insize - nextin;
-	for(i=0; i<remaining; i++)
-	    inbuf[i] = inbuf[nextin + i];
-#endif
-
-	/* Get another block */
-
-	s->bytes_consumed += (nextin - startin);
-
-	insize = Readu(s->file16,
-			inbuf+insize-nextin, sizeof(s->inbuf)-remaining);
-	nextin = startin = 0;
-
-	if(insize <= 0)
+	else
 	{
-		s->nextin = nextin;
+	    int i, bytes_read, remaining = 0;
+
+	    /* more input needed */
+
+	    /* Copy down any partial character */
+
+	    remaining = s->insize - s->nextin;
+	    for(i=0; i<remaining; i++)
+		s->inbuf[i] = s->inbuf[s->nextin + i];
+
+	    /* Get another block */
+
+	    s->bytes_consumed += (s->nextin - startin);
+
+	    bytes_read = Readu(s->file16,
+			       s->inbuf+remaining, sizeof(s->inbuf)-remaining);
+	    s->nextin = startin = 0;
+
+	    if(bytes_read <= 0)
+	    {
+		if(remaining > 0)
+		{
+		    /* EOF or error in the middle of a character */
+		    sprintf(s->error_msg, "EOF or error inside character at "
+					  "file offset %d",
+			    s->bytes_consumed + remaining);
+		    /* There must be space because there is unconsumed input */
+		    s->line[s->line_length++] = BADCHAR;
+		    s->seen_error = 1;
+		}
+
 		s->insize = 0;
-		s->line = outbuf;
-		s->line_alloc = outsize;
-		s->line_length = nextout;
-		return insize;
-	}
 
-	insize += remaining;
+		if(s->not_read_yet)
+		    s->not_read_yet = 0;
+		else if(!continuing_incomplete_line)
+		    s->line_number++;
+
+		return;
+	    }
+
+	    s->insize = bytes_read + remaining;
+	}
     }
 }
 
@@ -623,12 +815,14 @@ void determine_character_encoding(InputSource s)
     {
 	e->encoding = CE_UTF_8;
 	s->nextin = 3;
+	s->bytes_consumed = 3;
     }
     else
     if(b[0] == 0xfe && b[1] == 0xff)
     {
 	e->encoding = CE_UTF_16B;
 	s->nextin = 2;
+	s->bytes_consumed = 2;
     }
     else if(b[0] == 0 && b[1] == '<' && b[2] == 0 && b[3] == '?')
 	e->encoding = CE_UTF_16B;
@@ -636,6 +830,7 @@ void determine_character_encoding(InputSource s)
     {
 	e->encoding = CE_UTF_16L;
 	s->nextin = 2;
+	s->bytes_consumed = 2;
     }
     else if(b[0] == '<' && b[1] == 0 && b[2] == '?' && b[3] == 0)
 	e->encoding = CE_UTF_16L;
@@ -645,41 +840,56 @@ void determine_character_encoding(InputSource s)
 	e->encoding = CE_unspecified_ascii_superset;
 #else
         e->encoding = CE_UTF_8;
+	s->read_carefully = 1;
 #endif
     }
 }
 
 int get_with_fill(InputSource s)
 {
+    int old_length = s->next;
+    int old_cu8l = s->complicated_utf8_line;
+    int old_bbcl = s->bytes_before_current_line;
+    int old_ln = s->line_number;
+
     assert(!s->seen_eoe);
 
-    if(get_translated_line(s) != 0)
+    if(s->seen_error)
     {
-	/* It would be nice to pass this up to the parser, but we don't
-	   know anything about parsers here! */
-      ERR1("I/O error on stream <%s>, ignore further errors\n",
-	      EntityDescription(s->entity));
-
-	/* Restore old line and return EOE (is this the best thing to do?) */
-	s->line_length = s->next;
 	s->seen_eoe = 1;
 	return XEOE;
     }
+    
+    s->reader(s);
 
     if(s->line_length == 0)
     {
 	/* Restore old line */
-	s->line_length = s->next;
+	s->line_length = s->next = old_length;
+	s->complicated_utf8_line = old_cu8l;
+	s->bytes_before_current_line = old_bbcl;
+	s->line_number = old_ln;
+	s->seen_eoe = 1;
+#if 0
+	fprintf(stderr, "EOE on %s\n", EntityDescription(s->entity));
+#endif
+	return XEOE;
+    }
+
+    if(s->next == s->line_length)
+    {
+	/* "incomplete" line turned out to be at EOF */
+#if 0
+	fprintf(stderr, "EOE on %s\n", EntityDescription(s->entity));
+#endif
 	s->seen_eoe = 1;
 	return XEOE;
     }
 
-    s->next = 0;
-
-    if(s->not_read_yet)
-	s->not_read_yet = 0;
-    else
-	s->line_number++;
+#if 0
+    Fprintf(Stderr, "line (len %d, next %d): |%.*S|\n",
+	    s->line_length, s->next, s->line_length, s->line);
+#endif
 
     return s->line[s->next++];
 }

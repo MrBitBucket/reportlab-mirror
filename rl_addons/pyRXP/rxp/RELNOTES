@@ -1,4 +1,4 @@
-This is RXP 1.2, a validating namespace-aware XML parser in C.
+This is RXP 1.3, a validating namespace-aware XML parser in C.
 
 RXP was written by Richard Tobin at the Language Technology Group,
 Human Communication Research Centre, University of Edinburgh.
@@ -7,9 +7,10 @@ RXP is distributed under the GNU Public Licence, which is in the file
 COPYING.  RXP may be made available under other licensing terms;
 contact M.Moens@ed.ac.uk for details.
 
-RXP is based on the W3C XML 1.0 recommendation of 10th February 1998
-and the Namespaces recommendation of 14th January 1999.  Deviations
-from these recommendations should probably be considered as bugs.
+RXP is based on the W3C XML 1.0 (second edition) recommendation of 6th
+October 2000 and the Namespaces recommendation of 14th January 1999,
+along with errata to those specifications.  Deviations from these
+recommendations should probably be considered as bugs.
 
 There is currently only minimal documentation.  There is a manual page
 for the rxp program, and a hastily-written file called "Manual" which
@@ -19,7 +20,8 @@ contains some notes about use in a threaded environment.
 The system has been developed under unix (Solaris and FreeBSD), but
 has also been compiled and run under MS Windows.  It should work with
 minor changes on other systems.  To compile under unix, type "make",
-or "make CHAR_SIZE=8".
+or "make CHAR_SIZE=8" (not recommended if you care about standards
+conformance).
 
 A simple application (called rxp) is provided that parses and writes
 XML data, optionally expanding entities, defaulting attributes, and
@@ -31,15 +33,16 @@ Bug reports should be sent to richard@cogsci.ed.ac.uk.
 
 
 
-Changes since 1.1:
+Changes since 1.2:
 
   Several bugs and memory leaks fixed (thanks to several testers).
 
-  Some missing validity checks added.
+  Some changes corresponding to XML 1.0 and Namespaces 1.0 errata
+  (allow empty xml:lang, no NOTATIONs on EMPTY elements, enforce rules
+  about reserved prefixes).
 
-  File I/O under WIN32 now uses binary mode; text mode is not suitable
-  for non-ascii-superset encodings.
-
-  The -e flag to rxp has been removed; entity expansion is now the
-  default.  A new -E flag prevents entity expansion.  A new -o
-  flag specifies output format.  See the man page.
+  Restructuring of input functions: there are now separate functions
+  for different encodings instead of a switch in the inner loop, which
+  produces a 10-20% speedup on some files.  And finally the bug with
+  non-UTF characters on the same line as the XML declaration is fixed.
+  

@@ -641,6 +641,7 @@ void dtd_cb(XBit bit, void *arg)
 {
     Printf("In DTD: ");
     print_bit(arg, bit);
+    FreeXBit(bit);
 }
 	
 void dtd_cb2(XBit bit, void *arg)

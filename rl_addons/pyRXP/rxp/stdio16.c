@@ -102,6 +102,7 @@ static int FDFlush(FILE16 *file);
 
 static int StringRead(FILE16 *file, unsigned char *buf, int max_count);
 static int StringWrite(FILE16 *file, const unsigned char *buf, int count);
+static int StringWriteTrunc(FILE16 *file, const unsigned char *buf, int count);
 static int StringSeek(FILE16 *file, long offset, int ptrname);
 static int StringClose(FILE16 *file);
 static int StringFlush(FILE16 *file);
@@ -159,8 +160,22 @@ void deinit_stdio16(void) {
     if(Stderr_open) Fclose(Stderr);
 }
 
-static int ConvertASCII(const char8 *buf, int count, FILE16 *file);
-static int ConvertUTF16(const char16 *buf, int count, FILE16 *file);
+/* Return the size (in bytes) of nul in the given encoding */
+
+static int NullSize(CharacterEncoding enc)
+{
+    switch(enc)
+    {
+    default:
+	return 1;
+
+    case CE_UTF_16B:
+    case CE_ISO_10646_UCS_2B:
+    case CE_UTF_16L:
+    case CE_ISO_10646_UCS_2L:
+	return 2;
+    }
+}
 
 /* Output an ASCII buffer in the specified encoding */
 
@@ -554,6 +569,14 @@ int Sprintf(void *buf, CharacterEncoding enc, const char *format, ...)
     return Vsprintf(buf, enc, format, args);
 }
 
+int Snprintf(void *buf, size_t size, CharacterEncoding enc, 
+	     const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    return Vsnprintf(buf, size, enc, format, args);
+}
+
 int Vprintf(const char *format, va_list args)
 {
     return Vfprintf(Stdout, format, args);
@@ -563,14 +586,31 @@ int Vsprintf(void *buf, CharacterEncoding enc, const char *format,
 	     va_list args)
 {
     int nchars;
-    FILE16 file = {0, 0, -1, StringRead, StringWrite, StringSeek, StringFlush, StringClose, FILE16_write};
+    FILE16 file = {0, 0, -1, 0, StringWrite, 0, StringFlush, StringClose, FILE16_write};
 
     file.handle = buf;
     file.enc = enc;
 
     nchars = Vfprintf(&file, format, args);
-    file.close(&file);		/* Fclose would try to free it */
+    file.close(&file);		/* Fclose would try to free file */
 
+    return nchars;
+}
+
+int Vsnprintf(void *buf, size_t size, CharacterEncoding enc,
+	      const char *format, va_list args)
+{
+    int nchars;
+    FILE16 file = {0, 0, -1, 0, StringWriteTrunc, 0, StringFlush, StringClose, FILE16_write};
+
+    file.handle = buf;
+    file.enc = enc;
+    file.handle3 = size - NullSize(enc); /* make sure we can null-terminate */
+
+    nchars = Vfprintf(&file, format, args);
+    file.handle3 = size;	/* ready for null-termination */
+    file.close(&file);		/* Fclose would try to free file */
+    
     return nchars;
 }
 
@@ -952,6 +992,13 @@ static int FileRead(FILE16 *file, unsigned char *buf, int max_count)
     }
 #endif
 
+    /* Terminal EOF is sticky for fread() on Linux, even though feof() is true.
+       How can they have got this wrong and never noticed it?
+       So check feof() here.
+    */
+    if(feof(f))
+	return 0;
+
     count = fread(buf, 1, max_count, f);
 
     return ferror(f) ? -1 : count;
@@ -1041,6 +1088,25 @@ static int StringWrite(FILE16 *file, const unsigned char *buf, int count)
 
     if(file->handle3 >= 0 && file->handle2 + count > file->handle3)
 	return -1;
+
+    memcpy(p, buf, count);
+    file->handle2 += count;
+
+    return 0;
+}
+
+/* Like StringWrite, but ignores overflow rather than returning an error.
+   Used for Vsnprintf. */
+
+static int StringWriteTrunc(FILE16 *file, const unsigned char *buf, int count)
+{
+    char *p = (char *)file->handle + file->handle2;
+
+    if(file->handle3 >= 0 && file->handle2 + count > file->handle3)
+	/* XXX This doesn't really work; a character might be truncated.
+	   Safe for fixed-size encodings if buffer size is a multiple
+	   of the character size. */
+	count = file->handle3 - file->handle2;
 
     memcpy(p, buf, count);
     file->handle2 += count;

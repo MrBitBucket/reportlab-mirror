@@ -1,10 +1,10 @@
-/* 	$Id: xmlparser.c,v 1.2 2002/03/22 11:00:37 rgbecker Exp $
+/* 	$Id: xmlparser.c,v 1.3 2003/04/01 16:06:36 rgbecker Exp $
 */
 
 #define DEBUG_FSM 0
 
 #ifndef lint
-static char vcid[] = "$Id: xmlparser.c,v 1.2 2002/03/22 11:00:37 rgbecker Exp $";
+static char vcid[] = "$Id: xmlparser.c,v 1.3 2003/04/01 16:06:36 rgbecker Exp $";
 #endif /* lint */
 
 /* 
@@ -132,7 +132,7 @@ static int parse_dtd(Parser p);
 static int read_markupdecls(Parser p);
 static int error(Parser p, const char8 *format, ...);
 static int warn(Parser p, const char8 *format, ...);
-static void verror(char8 *buf, XBit bit, const char8 *format, va_list args);
+static void verror(char8 *buf, int size, XBit bit, const char8 *format, va_list args);
 enum literal_type {
     LT_cdata_attr, LT_tok_attr, LT_plain, LT_entity, LT_param_entity,
     LT_pubid
@@ -750,7 +750,7 @@ XBit ReadXTree(Parser p)
 		}
 		/* Transfer ns records to start bit so that ns gets freed
 		   when the tree is freed, rather than now. */
-		tree->nsowned = 1;
+		tree->nsowned = child->nsowned;
 		child->nsowned = 0;
 		FreeXTree(child);
 		return tree;
@@ -875,8 +875,11 @@ int ParserPush(Parser p, InputSource source)
 	   source->entity->encoding_decl == CE_unknown)
 	    return error(p, "Encoding declaration is required in text "
 			    "declaration");
+	source->read_carefully = 0;
 	return 0;
     }
+
+    source->read_carefully = 0;
 
     if(looking_at(p, "<?xml?"))
     {
@@ -1088,6 +1091,8 @@ restart:
 	}
 	/* not expanding general entities, so treat as pcdata */
 	goto pcdata;
+    case BADCHAR:
+	return error(p, "Input error: %s", s->error_msg);
     default:
     pcdata:
 	unget(s);
@@ -1185,7 +1190,7 @@ static int parse_endtag(Parser p)
 	nse = VectorLast(p->element_stack).ns_definition;
 	p->xbit.ns_dict = VectorLast(p->element_stack).ns;
 	p->xbit.nsc = VectorLast(p->element_stack).nsc;
-	p->xbit.nsowned = 1;
+	p->xbit.nsowned = (p->xbit.ns_dict != &p->base_ns);
 	VectorPop(p->element_stack);
 
 	if(p->namelen != e->namelen ||
@@ -1396,6 +1401,10 @@ static int parse_starttag(Parser p)
 	    this_info->wsm = WSM_unspecified;
 	    this_info->ns = 0;
 	    this_info->entity = p->source->entity;
+	    /* Set these here even if not doing namespace processing, to
+	       avoid rui errors from dbx. */
+	    this_info->ns_definition = 0;
+	    this_info->nsc = 0;
 	}
 	else
 	{
@@ -1575,7 +1584,8 @@ static int parse_starttag(Parser p)
 		attp = &a->next;
 	}
 
-	p->xbit.nsowned = (p->xbit.type == XBIT_empty);
+	p->xbit.nsowned = (p->xbit.type == XBIT_empty &&
+			   p->xbit.ns_dict != &p->base_ns);
 
 	/* Find namespace for element */
 
@@ -1670,26 +1680,72 @@ static int process_namespace(Parser p, AttributeDefinition d,const Char *value)
 {
     NamespaceBinding nb;
     const Char *prefix;
+    const char8 *uri;
     Namespace ns;
 
-    prefix = *d->ns_attr_prefix ? d->ns_attr_prefix : 0;
+    static Char xmlns[] = {'x','m','l','n','s',0};
+    static Char xml[] = {'x','m','l',0};
+    int xml_prefix = 0, xmlns_prefix = 0;
+    int xml_uri = 0, xmlns_uri = 0;
 
-    if(*value == 0)
+    prefix = *d->ns_attr_prefix ? d->ns_attr_prefix : 0;
+    uri = *value == 0 ? 0 : tochar8(value);
+
+    if(prefix && !uri)
     {
-	if(prefix)
-	{
-	    warn(p, "Namespace declaration for %S has empty URI", prefix);
-	    return 0;
-	}
-	ns = 0;
+	warn(p, "Namespace declaration for %S has empty URI; ignored", prefix);
+	return 0;
     }
-    else
+
+    if(prefix)
     {
-	const char8 *uri = tochar8(value);
-	
+	if(Strcmp(prefix, xml) == 0)
+	    xml_prefix = 1;
+	else if(Strcmp(prefix, xmlns) == 0)
+	    xmlns_prefix = 1;
+    }
+
+    if(uri)
+    {
+	if(strcmp8(uri, "http://www.w3.org/XML/1998/namespace") == 0)
+	    xml_uri = 1;
+	else if(strcmp8(uri, "http://www.w3.org/2000/xmlns/") == 0)
+	    xmlns_uri = 1;
+    }
+
+    if(xml_prefix && !xml_uri)
+    {
+	warn(p, "Declaration of xml prefix has wrong URI \"%s\"; ignored",
+	     uri);
+	return 0;
+    }
+
+    if(xmlns_prefix)
+    {
+	warn(p, "Declaration of xmlns prefix is not allowed; ignored");
+	return 0;
+    }
+
+    if(xml_uri && !xml_prefix)
+    {
+	warn(p, "Declaration of xml namespace with prefix \"%S\" "
+	        "(must be \"xml\"); ignored", prefix);
+	return 0;
+    }
+
+    if(xmlns_uri)
+    {
+	warn(p, "Declaration of xmlns namespace is not allowed; ignored");
+	return 0;
+    }
+
+    if(uri)
+    {
 	if(!(ns = FindNamespace(p->dtd->namespace_universe, uri, 1)))
 	    return error(p, "System error");
     }
+    else
+	ns = 0;
 
     if(!(nb = Malloc(sizeof(*nb))))
 	return error(p, "System error");
@@ -4273,10 +4329,10 @@ static int is_ascii_digit(int c)
 
 /* Error handling */
 
-static void verror(char8 *buf, XBit bit, const char8 *format, va_list args)
+static void verror(char8 *buf, int size, XBit bit, const char8 *format, va_list args)
 {
     /* Print message before freeing xbit, so we can print data from it */
-    Vsprintf(buf, CE_ISO_8859_1, format, args);
+    Vsnprintf(buf, size, CE_ISO_8859_1, format, args);
 
     FreeXBit(bit);
     bit->type = XBIT_error;
@@ -4288,7 +4344,7 @@ static int error(Parser p, const char8 *format, ...)
     va_list args;
 
     va_start(args, format);
-    verror(p->errbuf, &p->xbit, format, args);
+    verror(p->errbuf, sizeof(p->errbuf), &p->xbit, format, args);
 
     p->state = PS_error;
 
@@ -4303,7 +4359,7 @@ static int warn(Parser p, const char8 *format, ...)
     clear_xbit(&bit);
 
     va_start(args, format);
-    verror(p->errbuf, &bit, format, args);
+    verror(p->errbuf, sizeof(p->errbuf), &bit, format, args);
 
     bit.type = XBIT_warning;
 
@@ -4402,6 +4458,16 @@ static int validate_dtd(Parser p)
 					       "default value for attribute"));
 	    }
 	    if(a->type == AT_notation)
+	    {
+		if(e->type == CT_empty)
+		{
+		    require(validity_error(p,
+					   "NOTATION attribute %S not allowed "
+					   "on EMPTY element %S",
+					   a->name, e->name));
+					   
+		}
+
 		for(i=0; a->allowed_values[i]; i++)
 		    if(!FindNotation(d, a->allowed_values[i]))
 		    {
@@ -4411,9 +4477,8 @@ static int validate_dtd(Parser p)
 					       a->name, e->name,
 					       a->allowed_values[i]));
 		    }
+	    }
 	}
-
-    /* XXX check for notation attributes on declared-empty elements */
 
     return 0;
 }
@@ -4914,6 +4979,9 @@ static int validate_attribute(Parser p, AttributeDefinition a, ElementDefinition
 
 static int validate_xml_lang_attribute(Parser p, ElementDefinition e, const Char *value)
 {
+    /* 1.1 will allow empty xml:lang values (and maybe 1.0 will be amended
+       to), and it no longer seems worth checking anything here. */
+#if 0
     const Char *t;
 
     /* Look for the Langcode */
@@ -4954,6 +5022,7 @@ static int validate_xml_lang_attribute(Parser p, ElementDefinition e, const Char
  bad:
     /* Not a validity error since erratum 73 */
     warn(p, "Dubious xml:lang attribute for element %S", e->name);
+#endif
     return 0;
 }
 

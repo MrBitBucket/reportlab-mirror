@@ -1,4 +1,4 @@
-/* 	$Id: xmlparser.h,v 1.2 2002/03/22 11:00:37 rgbecker Exp $    */
+/* 	$Id: xmlparser.h,v 1.3 2003/04/01 16:06:37 rgbecker Exp $    */
 
 #ifndef XMLPARSER_H
 #define XMLPARSER_H
