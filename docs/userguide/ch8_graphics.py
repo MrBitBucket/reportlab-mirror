@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.2 2001/03/26 16:22:20 johnprecedo Exp $
+#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.3 2001/03/26 20:16:35 johnprecedo Exp $
 from genuserguide import *
 
 ##heading1("Writing your own $Flowable$ Objects")
@@ -14,7 +14,7 @@ from genuserguide import *
 ##disc("""
 ##""")
 
-heading1("Platform Independent Graphics")
+heading1("Platform Independent Graphics using $reportlab/graphics$")
 
 heading2("Introduction")
 
@@ -550,499 +550,562 @@ disc("""The Widget standard is a standard built on top of the shapes module.
        Anyone can write new widgets, and we can build up libraries of them. 
        Widgets support getProperties and setProperties, so you can inspect 
        and modify as well as document them in a uniform way.""")
-##
-##
-##A widget is a reusable shape 
-##it can be initialized with no arguments
-##when its draw() method is called it creates a primitive Shape or a
-##Group to represent itself
-##It can have any parameters you want, and they can drive the way it is
-##drawn
-##it has a demo() method which should return an attractively drawn
-##example if itself in a 200x100 rectangle. This is the cornerstone of
-##the automatic documentation tools. The demo() method should also have
-##a well written docstring, since that is printed too!
-##
-##
-##Widgets run contrary to the idea that a drawing is just a bundle of
-##shapes; surely they have their own code? The way they work is that a
-##widget can convert itself to a group of primitive shapes. If some of
-##its components are themselves widgets, they will get converted too.
-##This happens automatically during rendering; the renderer will not see
-##your chart widget, but just a collection of rectangles, lines and
-##strings. You can also explicitly 'flatten out' a drawing, causing all
-##widgets to be converted to primitives.
-##
-##3.1 Using a Widget 
-##Let's imagine a simple new widget. We will use a widget to draw a
-##face, then show how it was implemented.
-##
-##
-##>>> import renderPDF
-##>>> d = shapes.Drawing(400, 200)
-##>>> f = widgets.Face()
-##>>> f.skinColor = colors.yellow
-##>>> f.mood = "sad"
-##>>> d.add(f)
-##>>> renderPDF.drawToFile(d, 'face.pdf', 'A Face')
-##
-##
-## 
-##Let's see what properties it has available, using the setProperties
-##interface we saw earlier:
-##
-##
-##>>> f.dumpProperties() 
-##eyeColor = Color(0.00,0.00,1.00) 
-##mood = sad 
-##size = 80 
-##skinColor = Color(1.00,1.00,0.00) 
-##x = 10 
-##y = 10 
-##>>>  
-##
-##
-##One thing which seems strange about the above code is that we did not
-##set the size or position when we made the face. This is a necessary
-##trade-off to allow a uniform interface for constructing widgets and
-##documenting them - they cannot require arguments in their __init__
-##method. Instead, they are generally designed to fit in a 200 x 100
-##window, and you move or resize them by setting properties such as x,
-##y, width and so on after creation.
-##
-##In addition, a widget always provides a demo() method. Simple ones
-##like this always do something sensible before setting properties, but
-##more complex ones like a chart would not have any data to plot. The
-##documentation tool calls demo() so that your fancy new chart class can
-##create a drawing showing what it can do.
-##
-##Here are a handful of simple widgets available in the module
-##signsandsymbols.py:
-##
-## 
-##3.2 Compound Widgets 
-##Let's imagine a compound widget which draws two faces side by side.
-##This is easy to build when you have the Face widget.
-##
-##
-##>>> tf = widgets.TwoFaces() 
-##>>> tf.faceOne.mood 
-##'happy' 
-##>>> tf.faceTwo.mood 
-##'sad' 
-##>>> tf.dumpProperties() 
-##faceOne.eyeColor = Color(0.00,0.00,1.00) 
-##faceOne.mood = happy 
-##faceOne.size = 80 
-##faceOne.skinColor = None 
-##faceOne.x = 10 
-##faceOne.y = 10 
-##faceTwo.eyeColor = Color(0.00,0.00,1.00) 
-##faceTwo.mood = sad 
-##faceTwo.size = 80 
-##faceTwo.skinColor = None 
-##faceTwo.x = 100 
-##faceTwo.y = 10 
-##>>>  
-##
-##
-##The attributes 'faceOne' and 'faceTwo' are deliberately exposed so you
-##can get at them directly. There could also be top-level attributes,
-##but there aren't in this case.
-##
-##3.3 Verifying Widgets 
-##The widget designer decides the policy on verification, but by default
-##they work like shapes - checking every assignment - if the designer
-##has provided the checking information.
-##
-##3.4 Implementing a Widget 
-##We tried to make it as easy to implement widgets as possible. Here's
-##the code for a Face widget which does not do any type checking:
-##
-##
-##class Face(Widget): 
-##    """This draws a face with two eyes, mouth and nose.""" 
-##         
-##    def __init__(self): 
-##        self.x = 10 
-##        self.y = 10 
-##        self.size = 80 
-##        self.skinColor = None 
-##        self.eyeColor = colors.blue 
-##        self.mood = 'happy' 
-## 
-##    def draw(self): 
-##        s = self.size  # abbreviate as we will use this a lot 
-##        g = shapes.Group() 
-##        g.transform = [1,0,0,1,self.x, self.y] 
-##        # background 
-##        g.add(shapes.Circle(s * 0.5, s * 0.5, s * 0.5, 
-##                            fillColor=self.skinColor)) 
-##        # CODE OMITTED TO MAKE MORE SHAPES 
-##        return g 
-##
-##
-##We left out all the code to draw the shapes in this document, but you
-##can find it in the distribution in widgets.py.
-##
-##By default, any attribute without a leading underscore is returned by
-##setProperties. This is a deliberate policy to encourage consistent
-##coding conventions.
-##
-##Once your widget works, you probably want to add support for
-##verification. This involves adding a dictionary to the class called
-##_verifyMap, which map from attribute names to 'checking functions'.
-##The widgets.py module defines a bunch of checking functions with names
-##like isNumber, isLIstOfShapes and so on. You can also simply use None,
-##which means that the attribute must be present but can have any type.
-##And you can and should write your own checking functions. We want to
-##restrict the "mood" custom attribute to the values "happy", "sad" or
-##"ok". So we do this:
-##
-##
-##class Face(Widget): 
-##    """This draws a face with two eyes.  It exposes a 
-##    couple of properties to configure itself and hides 
-##    all other details""" 
-##    def checkMood(moodName): 
-##        return (moodName in ('happy','sad','ok')) 
-##    _verifyMap = { 
-##        'x': shapes.isNumber, 
-##        'y': shapes.isNumber, 
-##        'size': shapes.isNumber, 
-##        'skinColor':shapes.isColorOrNone, 
-##        'eyeColor': shapes.isColorOrNone, 
-##        'mood': checkMood  
-##        } 
-##
-##
-##This checking will be performed on every attribute assignment; or, if
-##config.shapeChecking is off, whenever you call myFace.verify().
-##
-##3.5 Documenting Widgets 
-##We are working on a generic tool to document any Python package or
-##module; this will be checked into ReportLab an will be used to
-##generate a reference for the ReportLab package. When it encounters
-##widgets, it will add extra sections to the manual including
-##
-##the doc string for your widget class 
-##the code snippet from your demo() method, so people can see how to use it 
-##the drawing produced by the demo() method 
-##the property dump for the widget in the drawing. 
-##This tool will mean that we can have guaranteed up-to-date documentation on our widgets and chart, both on the web site and in print; and that you can do the same for your own widgets too!
-##
-##In case this sounds like vapor, you can look at this PDF document
-##(135kb) from a preliminary version of the tool developed as part of
-##the PINGO project.
-##
-##3.6 Widget Design Strategies 
-##We could not come up with a consistent architecture for designing
-##widgets, so we are leaving that problem to the authors! If you do not
-##like the default verifiction strategy, or the way
-##setProperties/getProperties works, you can override them yourself.
-##
-##For simple widgets it is recommended that you do what we did above:
-##select non-overlapping properties, initialize every property on
-##__init__and construct everything when draw() is called. You can
-##instead have __setattr__ hooks and have things updated when certain
-##attributes are set. Consider a pie chart. If you want to expose the
-##individual wedges, you might write code like this:
-##
-##
-##pc = PieChart() 
-##pc.backColor = yellow 
-##pc.defaultColors = [navy, blue, sky] #used in rotation 
-##pc.data = [10,30,50,25] 
-##pc.wedges[7].lineWidth = 5 
-##
-##
-##The last line is problematic as we have only created four wedges - in
-##fact we might not have created them yet. Does pc.wedges[7] raise an
-##error? Is it a prescription for what should happen if a seventh wedge
-##is defined, used to override the default settings? We dump this
-##problem squarely on the widget author for now, and recommend that you
-##get a simple one working before exposing 'child objects' whose
-##existence depends on other propereties' values :-)
-##
-##We also discussed rules by which parent widgets could pass properties
-##to their children. There seems to be a general desire for a global way
-##to say that 'all wedges get their lineWidth from the lineWidth of
-##their parent' without a lot of repetitive coding. We do not have a
-##universal solution, so again leave that to widget authors. We hope
-##people will experimate with push-down, pull-down and pattern-matching
-##approaches and come up with something nice. In the meantime, we
-##certainly can write monolithic chart widgets which work like the ones
-##in, say, Visual Basic and Delphi.
-##
-##For now have a look at the following sample code using an early
-##version of a pie chart widget and the output it generates:
-##
-##
-##    d = Drawing(400,200)
-##
-##    d.add(String(100,175,"Without labels", textAnchor="middle"))
-##    d.add(String(300,175,"With labels", textAnchor="middle"))
-##
-##    pc = Pie()
-##    pc.x = 25
-##    pc.y = 50
-##    pc.data = [10,20,30,40,50,60]
-##    pc.popouts[0] = 5
-##    d.add(pc, 'pie1')
-##    
-##    pc2 = Pie()
-##    pc2.x = 150
-##    pc2.y = 50
-##    pc2.data = [10,20,30,40,50,60]
-##    pc2.labels = ['a','b','c','d','e','f']
-##    d.add(pc2, 'pie2')
-##
-##    pc3 = Pie()
-##    pc3.x = 275
-##    pc3.y = 50
-##    pc3.data = [10,20,30,40,50,60]
-##    pc3.labels = ['a','b','c','d','e','f']
-##    pc3.labelRadius = 0.65
-##    pc3.labelFontName = "Helvetica-Bold"
-##    pc3.labelFontSize = 16
-##    pc3.labelColor = colors.yellow
-##    d.add(pc3, 'pie3')
-##
-##
-## 
-##Contents - Back Next
-##
-##
-##4. Charts 
-##The motivation for much of this is to create a flexible chart package.
-##We've done several chart programs with PINGO, on which this package is
-##based. So far, each one has been a specific program to make a specific
-##kind of chart. A general framework is much harder!
-##
-##This section is not finalized and will evolve further. For now we'll
-##try to give a flavour of the isues we are dealing with, and firm them
-##up as examples are created. We need and expect feedback on this to get
-##it right!
-##
-##4.1 Design Goals
-##Here are some of the design goals: 
-##
-##Make simple top-level use really simple 
-##It should be possible to create a simple chart with minimum lines of
-##code, yet have it 'do the right things' with sensible automatic
-##settings. The pie chart snippets above do this. If a real chart has
-##many subcomponents, you still should not need to interact with them
-##unless you want to customize what they do.
-##
-##Allow precise positioning 
-##An absolute requirement in publishing and graphic design is to control
-##the placing and style of every element. We will try to have properties
-##that specify things in fixed sizes and proportions of the drawing,
-##rather than having automatic resizing. Thus, the 'inner plot
-##rectangle' will not magically change when you make the font size of
-##the y labels bigger, even if this means your labels can spill out of
-##the left edge of the chart rectangle. It is your job to preview the
-##chart and choose sizes and spaces which will work.
-##
-##Some things do need to be automatic. For example, if you want to fit N
-##bars into a 200 point space and don't know N in advance, we specify
-##bar separation as a percentage of the width of a bar rather than a
-##point size, and let the chart work it out. This is still deterministic
-##and controllable.
-##
-##Control child elements individually or as a group
-##
-##We use smart collection classes that let you customize a group of
-##things, or just one of them. For example you can do this in our
-##experimental pie chart:
-##    pc = PieWithWedges()
-##    pc.x = 150
-##    pc.y = 50
-##    pc.data = [10,20,30,40,50,60]
-##    pc.labels = ['a','b','c','d','e','f']
-##    pc.wedges.strokeWidth=0.5
-##    pc.wedges[3].popout = 20
-##    pc.wedges[3].strokeWidth = 2
-##    pc.wedges[3].strokeDashArray = [2,2]
-##    pc.wedges[3].labelRadius = 1.75
-##    pc.wedges[3].fontColor = colors.red
-##
-## 
-##pc.wedges[3] actually lazily creates a little object which holds information about the slice in question; this will be used to format a fourth slice at draw-time if there is one. 
-##Only expose things you should change 
-##It would be wrong from a statistical viewpoint to let you directly adjust the angle of one of the pie wedges in the above example, since that is determined by the data. So not everything will be exposed through the public properties. There may be 'back doors' to let you violate this when you really need to, or methods to provide advanced functionality, but in general properties will be orthogonal. 
-##Composition and component based 
-##Charts are built out of reusable child widgets. A Legend is an easy-to-grasp example. If you need a specialized type of legend (e.g. circular colour swatches), you should subclass the standard Legend widget. Then you could either do something like... 
-##c = MyChartWithLegend()
-##c.legend = MyNewLegendClass()    # just change it
-##c.legend.swatchRadius = 5    # set a property only relevant to the new one
-##c.data = [10,20,30]   #   and then configure as usual....
-##
-##...or create/modify your own chart or drawing class which creates one
-##of these by default. This is also very relevant for time series
-##charts, where there can be many styles of x axis.
-##
-##Top level chart classes will create a number of such components, and
-##then either call methods or set private properties to tell them their
-##height and position - all the stuff which should be done for you and
-##which you cannot customise. We are working on modelling what the
-##components should be and will publish their APIs here as a consensus
-##emerges.
-##
-##Multiples 
-##A corollary of the component approach is that you can create diagrams
-##with multiple charts, or custom data graphics. Our favourite example
-##of what we are aiming for is the weather report in our gallery
-##contributed by a user; we'd like to make it easy to create such
-##drawings, hook the building blocks up to their legends, and feed that
-##data in a consistent way. Click the image to download the full page
-##PDF.
-##
-##
-##4.2 Key Concepts and Components
-##A chart or plot is an object which is placed on a drawing; it is not
-##itself a drawing. You can thus control where it goes, put several on
-##the same drawing, or add annotations.
-##
-##Charts have two axes; axes may be Value or Category axes. Axes in turn
-##have a Labels property which lets you configure all text labels or
-##each one individually. Most of the configuration details which vary
-##from chart to chart relate to axis properties, or axis labels.
-##
-##Objects expose properties through the interfaces discussed in the
-##revious section; these are all optional and are there to let the end
-##user configire the appearance. Things which must be set for a chart to
-##work, and essential communication between a chart and its components,
-##are handled through methods.
-##
-##You can subclass any chart component and use your replacement instead
-##of the original provided you implement the essential methods and
-##properties.
-##
-##4.3 Labels
-##One of the most important building blocks is the Label, defined in
-##reportlab/graphics/charts/textlabel0.py. A label is a string of text
-##attached to some chart element. They are used on axes, for titles or
-##alongside axes, or attached to individual data points.
-##
-##Labels may contain newline characters, but only one font.
-##
-##The text and 'origin' of a label are typically set by its parent
-##object. They are accessed by methods rather than properties. Thus, the
-##X axis decides the 'reference point' for each tickmark label and the
-##numeric or date text for each label. However, the end user can set
-##properties of the label (or collection of labels) directly to affect
-##its positon relative to this origin and all of its formatting.
-##
-##d = Drawing(200, 100)
-##
-### mark the origin of the label
-##d.add(Circle(100,90, 5, fillColor=colors.green))
-##
-##lab = Label()
-##lab.setOrigin(100,90)
-##lab.boxAnchor = 'ne'
-##lab.angle = 45
-##lab.dx = 0
-##lab.dy = -20
-##lab.boxStrokeColor = colors.green
-##lab.setText('Another\nMulti-Line\nString')
-##
-##d.add(lab)
-##
-## 
-##In the drawing above, the label is defined relative to the green blob.
-##The text box should have its north-east corner ten points down from
-##the origin, and be rotated by 45 degrees about that corner.
-##
-##At present labels have the following properties, which we believe are
-##sufficient for all charts we have seen to date:
-##
-##Note: need to turn these into pretty tables with explanations 
-##>>>lab.dumpProperties()
-##angle = 45
-##boxAnchor = ne
-##boxFillColor = None
-##boxStrokeColor = Color(0.00,0.50,0.00)
-##boxStrokeWidth = 0.5
-##dx = 0
-##dy = -20
-##fontName = Times-Roman
-##fontSize = 10
-##leading = 12.0
-##textAnchor = start
-##
-##4.4 Axes
-##We identify two basic kinds of axes - Value and Category Axes. Both
-##come in horizontal and vertical flavors. Both can be subclassed to
-##make very specific kinds of axis. For example, if you have complex
-##rules for which dates to display in a time series application, or want
-##irregular scaling, you override the axis and make a new one.
-##
-##Axes are responsible for determining the mapping from data to image
-##coordinates; transforming points on request from the chart; drawing
-##themselves and their tickmarks, gridlines and axis labels.
-##
-##This drawing shows two axes, one of each kind, which have been created
-##directly without reference to any chart:
-##
-##Here is the code that created them: 
-##
-##    drawing = Drawing(400, 200)
-##
-##    data = [(10, 20, 30, 40),
-##            (15, 22, 37, 42)]        
-##
-##    xAxis = XCategoryAxis()
-##    xAxis.setPosition(75, 75, 300)
-##    xAxis.configure(data)
-##    xAxis.categoryNames = ['Beer','Wine','Meat','Cannelloni']
-##    xAxis.labels.boxAnchor = 'n'
-##    xAxis.labels[3].dy = -15
-##    xAxis.labels[3].angle = 30
-##    xAxis.labels[3].fontName = 'Times-Bold'
-##
-##
-##    yAxis = YValueAxis()
-##    yAxis.setPosition(50, 50, 125)
-##    yAxis.configure(data)
-##
-##    drawing.add(xAxis)
-##    drawing.add(yAxis)
-##
-##Remember that you won't have to create axes directly; when using a standard chart, it comes with ready-made axes. The methods are what the chart uses to configure it and take care of the geometry. However, we will talk through them in detail below. 
-##
-##XCategoryAxis class
-##A Category Axis doesn't really have a scale; it just divides itself into equal-sized buckets. It is simpler than a value axis. The chart (or programmer) sets its location with the method setPosition(x, y, length). The next stage is to show it the data so that it can configure itself. This is easy for a category axis - it just counts the number of data points in one of the data series. When the drawing is drawn, the axis can provide some help to the chart with its scale() method, which tells the chart where a given category begins and ends on the page. We have not yet seen any need to let people override the widths or positions of categories.
-##
-##An XCategoryAxis has the following editable properties:
-##
-##Property Meaning 
-##visible Should the exis be drawn at all? Sometimes you don't want to display one or both axes, but they still need to be there as they manage the scaling of points. 
-##strokeColor Color of the axis 
-##strokeDashArray Whether to draw axis with a dash and, if so, what kind. Defaults to None 
-##strokeWidth Width of axis in points 
-##tickUp How far above the axis should the tick marks protrude? (Note that making this equal to chart height gives you a gridline) 
-##tickDown How far below the exis should the tick mark protrude? 
-##categoryNames Either None, or a list of strings. This should have the same length as each data series. 
-##labels A collection of labels for the tick marks. By default the 'north' of each text label (i.e top centre) is positioned 5 points down from the centre of each category on the axis. You may redefine any property of the whole label group or of any one label. If categoryNames=None, no labels are drawn. 
-##title Not Implemented Yet. This needs to be like a label, but also let you set the text directly. It would have a default location below the axis. 
-##
-##YValueAxis
-##The left axis in the diagram is a YValueAxis. The XValueAxis flavour will shortly be available as well! A Value Axis differs from a Category Axis in that each point along its length corresponds to a y value in chart space. It is the job of the axis to configure itself, and to convert Y values from chart space to points on demand to assist the parent chart in plotting
-##
-##setPosition(x, y, length) and configure(data) work exactly as for a category axis. If you have not fully specified the maximum, minimum and tick interval, then configure() results in the axis choosing suitable values. One configured, the value axis can convert y data values to drawing space with the scale() method. Thus: 
-##
-##>>> yAxis = YValueAxis()
-##>>> yAxis.setPosition(50, 50, 125)
-##>>> data = [(10, 20, 30, 40),(15, 22, 37, 42)]   
-##>>> yAxis.configure(data)
-##>>> yAxis.scale(10)  # should be bottom of chart
-##50.0
-##>>> yAxis.scale(40)  # should be near the top
-##167.1875
-##>>> 
-##By default, the highest data point is aligned with the top of the axis, the lowest with the bottom of the axis, and the axis choose 'nice round numbers' for its tickmark points. You may override these settings with the properties below. Property Meaning 
+
+bullet("A widget is a reusable shape ")
+bullet("""it can be initialized with no arguments 
+       when its draw() method is called it creates a primitive Shape or a 
+       Group to represent itself""")
+bullet("""It can have any parameters you want, and they can drive the way it is 
+       drawn""")
+bullet("""it has a demo() method which should return an attractively drawn 
+       example if itself in a 200x100 rectangle. This is the cornerstone of 
+       the automatic documentation tools. The demo() method should also have 
+       a well written docstring, since that is printed too!""")
+
+disc("""Widgets run contrary to the idea that a drawing is just a bundle of 
+       shapes; surely they have their own code? The way they work is that a 
+       widget can convert itself to a group of primitive shapes. If some of 
+       its components are themselves widgets, they will get converted too. 
+       This happens automatically during rendering; the renderer will not see 
+       your chart widget, but just a collection of rectangles, lines and 
+       strings. You can also explicitly 'flatten out' a drawing, causing all 
+       widgets to be converted to primitives.""")
+
+heading3("""Using a Widget """)
+disc("""Let's imagine a simple new widget. We will use a widget to draw a 
+       face, then show how it was implemented.""")
+
+eg("""
+>>> import renderPDF
+>>> d = shapes.Drawing(400, 200)
+>>> f = widgets.Face()
+>>> f.skinColor = colors.yellow
+>>> f.mood = "sad"
+>>> d.add(f)
+>>> renderPDF.drawToFile(d, 'face.pdf', 'A Face')""")
+
+
+disc("""Let's see what properties it has available, using the setProperties 
+       interface we saw earlier:""")
+
+eg("""
+>>> f.dumpProperties() 
+eyeColor = Color(0.00,0.00,1.00) 
+mood = sad 
+size = 80 
+skinColor = Color(1.00,1.00,0.00) 
+x = 10 
+y = 10 
+>>>  """)
+
+disc("""One thing which seems strange about the above code is that we did not 
+       set the size or position when we made the face. This is a necessary 
+       trade-off to allow a uniform interface for constructing widgets and 
+       documenting them - they cannot require arguments in their __init__ 
+       method. Instead, they are generally designed to fit in a 200 x 100 
+       window, and you move or resize them by setting properties such as
+       x, y, width and so on after creation.""")
+
+disc("""In addition, a widget always provides a demo() method. Simple ones 
+       like this always do something sensible before setting properties, but 
+       more complex ones like a chart would not have any data to plot. The 
+       documentation tool calls demo() so that your fancy new chart class can 
+       create a drawing showing what it can do.""")
+
+disc("""Here are a handful of simple widgets available in the module 
+       signsandsymbols.py:""")
+
+
+
+heading3("""Compound Widgets """)
+disc("""Let's imagine a compound widget which draws two faces side by side. 
+       This is easy to build when you have the Face widget.""")
+
+eg("""
+>>> tf = widgets.TwoFaces() 
+>>> tf.faceOne.mood 
+'happy' 
+>>> tf.faceTwo.mood 
+'sad' 
+>>> tf.dumpProperties() 
+faceOne.eyeColor = Color(0.00,0.00,1.00) 
+faceOne.mood = happy 
+faceOne.size = 80 
+faceOne.skinColor = None 
+faceOne.x = 10 
+faceOne.y = 10 
+faceTwo.eyeColor = Color(0.00,0.00,1.00) 
+faceTwo.mood = sad 
+faceTwo.size = 80 
+faceTwo.skinColor = None 
+faceTwo.x = 100 
+faceTwo.y = 10 
+>>>  """)
+
+
+disc("""The attributes 'faceOne' and 'faceTwo' are deliberately exposed so you 
+       can get at them directly. There could also be top-level attributes, 
+       but there aren't in this case.""")
+
+
+heading3("""Verifying Widgets """)
+disc("""The widget designer decides the policy on verification, but by default 
+       they work like shapes - checking every assignment - if the designer 
+       has provided the checking information.""")
+
+
+heading3("""Implementing a Widget """)
+disc("""We tried to make it as easy to implement widgets as possible. Here's 
+       the code for a Face widget which does not do any type checking:""")
+
+eg("""
+class Face(Widget): 
+    \"\"\"This draws a face with two eyes, mouth and nose.\"\"\" 
+         
+    def __init__(self): 
+        self.x = 10 
+        self.y = 10 
+        self.size = 80 
+        self.skinColor = None 
+        self.eyeColor = colors.blue 
+        self.mood = 'happy' 
+ 
+    def draw(self): 
+        s = self.size  # abbreviate as we will use this a lot 
+        g = shapes.Group() 
+        g.transform = [1,0,0,1,self.x, self.y] 
+        # background 
+        g.add(shapes.Circle(s * 0.5, s * 0.5, s * 0.5, 
+                            fillColor=self.skinColor)) 
+        # CODE OMITTED TO MAKE MORE SHAPES 
+        return g 
+""")
+
+disc("""We left out all the code to draw the shapes in this document, but you 
+       can find it in the distribution in widgets.py.""")
+
+disc("""By default, any attribute without a leading underscore is returned by 
+       setProperties. This is a deliberate policy to encourage consistent 
+       coding conventions.""")
+
+disc("""Once your widget works, you probably want to add support for 
+       verification. This involves adding a dictionary to the class called 
+       _verifyMap, which map from attribute names to 'checking functions'. 
+       The widgets.py module defines a bunch of checking functions with names 
+       like isNumber, isLIstOfShapes and so on. You can also simply use None, 
+       which means that the attribute must be present but can have any type. 
+       And you can and should write your own checking functions. We want to 
+       restrict the "mood" custom attribute to the values "happy", "sad" or 
+       "ok". So we do this:""")
+
+eg("""
+class Face(Widget): 
+    \"\"\"This draws a face with two eyes.  It exposes a 
+    couple of properties to configure itself and hides 
+    all other details\"\"\" 
+    def checkMood(moodName): 
+        return (moodName in ('happy','sad','ok')) 
+    _verifyMap = { 
+        'x': shapes.isNumber, 
+        'y': shapes.isNumber, 
+        'size': shapes.isNumber, 
+        'skinColor':shapes.isColorOrNone, 
+        'eyeColor': shapes.isColorOrNone, 
+        'mood': checkMood  
+        } 
+""")
+
+disc("""This checking will be performed on every attribute assignment; or, if 
+       config.shapeChecking is off, whenever you call myFace.verify().""")
+
+
+heading3("""Documenting Widgets """)
+disc("""We are working on a generic tool to document any Python package or 
+       module; this will be checked into ReportLab an will be used to 
+       generate a reference for the ReportLab package. When it encounters 
+       widgets, it will add extra sections to the manual including""")
+
+bullet("the doc string for your widget class ")
+bullet("the code snippet from your <i>demo()</i> method, so people can see how to use it")
+bullet("the drawing produced by the <i>demo()</i> method ")
+bullet("the property dump for the widget in the drawing. ")
+
+disc("""This tool will mean that we can have guaranteed up-to-date 
+       documentation on our widgets and chart, both on the web site and in 
+       print; and that you can do the same for your own widgets too!""")
+
+disc("""In case this sounds like vapor, you can look at this PDF document 
+       (135kb) from a preliminary version of the tool developed as part of 
+       the PINGO project.""")
+
+
+heading3("""Widget Design Strategies """)
+disc("""We could not come up with a consistent architecture for designing 
+       widgets, so we are leaving that problem to the authors! If you do not 
+       like the default verifiction strategy, or the way 
+       setProperties/getProperties works, you can override them yourself.""")
+
+disc("""For simple widgets it is recommended that you do what we did above: 
+       select non-overlapping properties, initialize every property on 
+       __init__and construct everything when draw() is called. You can 
+       instead have __setattr__ hooks and have things updated when certain 
+       attributes are set. Consider a pie chart. If you want to expose the 
+       individual wedges, you might write code like this:""")
+
+eg("""
+pc = PieChart() 
+pc.backColor = yellow 
+pc.defaultColors = [navy, blue, sky] #used in rotation 
+pc.data = [10,30,50,25] 
+pc.wedges[7].lineWidth = 5 
+""")
+
+disc("""The last line is problematic as we have only created four wedges - in 
+       fact we might not have created them yet. Does pc.wedges[7] raise an 
+       error? Is it a prescription for what should happen if a seventh wedge 
+       is defined, used to override the default settings? We dump this 
+       problem squarely on the widget author for now, and recommend that you 
+       get a simple one working before exposing 'child objects' whose 
+       existence depends on other propereties' values :-)""")
+
+disc("""We also discussed rules by which parent widgets could pass properties 
+       to their children. There seems to be a general desire for a global way 
+       to say that 'all wedges get their lineWidth from the lineWidth of 
+       their parent' without a lot of repetitive coding. We do not have a 
+       universal solution, so again leave that to widget authors. We hope 
+       people will experimate with push-down, pull-down and pattern-matching 
+       approaches and come up with something nice. In the meantime, we 
+       certainly can write monolithic chart widgets which work like the ones 
+       in, say, Visual Basic and Delphi.""")
+
+disc("""For now have a look at the following sample code using an early 
+       version of a pie chart widget and the output it generates:""")
+
+
+eg("""
+    d = Drawing(400,200)
+
+    d.add(String(100,175,"Without labels", textAnchor="middle"))
+    d.add(String(300,175,"With labels", textAnchor="middle"))
+
+    pc = Pie()
+    pc.x = 25
+    pc.y = 50
+    pc.data = [10,20,30,40,50,60]
+    pc.popouts[0] = 5
+    d.add(pc, 'pie1')
+    
+    pc2 = Pie()
+    pc2.x = 150
+    pc2.y = 50
+    pc2.data = [10,20,30,40,50,60]
+    pc2.labels = ['a','b','c','d','e','f']
+    d.add(pc2, 'pie2')
+
+    pc3 = Pie()
+    pc3.x = 275
+    pc3.y = 50
+    pc3.data = [10,20,30,40,50,60]
+    pc3.labels = ['a','b','c','d','e','f']
+    pc3.labelRadius = 0.65
+    pc3.labelFontName = "Helvetica-Bold"
+    pc3.labelFontSize = 16
+    pc3.labelColor = colors.yellow
+    d.add(pc3, 'pie3')""")
+
+
+heading2("Charts ")
+disc("""The motivation for much of this is to create a flexible chart package. 
+       We've done several chart programs with PINGO, on which this package is 
+       based. So far, each one has been a specific program to make a specific 
+       kind of chart. A general framework is much harder!""")
+
+disc("""This section is not finalized and will evolve further. For now we'll 
+       try to give a flavour of the isues we are dealing with, and firm them 
+       up as examples are created. We need and expect feedback on this to get 
+       it right!""")
+
+heading3("Design Goals")
+disc("Here are some of the design goals: ")
+
+disc("<i>Make simple top-level use really simple </i>")
+disc("""<para lindent=+36>It should be possible to create a simple chart with minimum lines of 
+       code, yet have it 'do the right things' with sensible automatic 
+       settings. The pie chart snippets above do this. If a real chart has 
+       many subcomponents, you still should not need to interact with them 
+       unless you want to customize what they do.""")
+
+disc("<i>Allow precise positioning </i>")
+disc("""<para lindent=+36>An absolute requirement in publishing and graphic design is to control 
+       the placing and style of every element. We will try to have properties 
+       that specify things in fixed sizes and proportions of the drawing, 
+       rather than having automatic resizing. Thus, the 'inner plot 
+       rectangle' will not magically change when you make the font size of 
+       the y labels bigger, even if this means your labels can spill out of 
+       the left edge of the chart rectangle. It is your job to preview the 
+       chart and choose sizes and spaces which will work.""")
+
+disc("""<para lindent=+36>Some things do need to be automatic. For example, if you want to fit N 
+       bars into a 200 point space and don't know N in advance, we specify 
+       bar separation as a percentage of the width of a bar rather than a 
+       point size, and let the chart work it out. This is still deterministic 
+       and controllable.""")
+
+disc("<i>Control child elements individually or as a group</i>")
+disc("""<para lindent=+36>We use smart collection classes that let you customize a group of 
+       things, or just one of them. For example you can do this in our 
+       experimental pie chart:""")
+
+eg("""
+    pc = PieWithWedges()
+    pc.x = 150
+    pc.y = 50
+    pc.data = [10,20,30,40,50,60]
+    pc.labels = ['a','b','c','d','e','f']
+    pc.wedges.strokeWidth=0.5
+    pc.wedges[3].popout = 20
+    pc.wedges[3].strokeWidth = 2
+    pc.wedges[3].strokeDashArray = [2,2]
+    pc.wedges[3].labelRadius = 1.75
+    pc.wedges[3].fontColor = colors.red""")
+ 
+disc("""<para lindent=+36>pc.wedges[3] actually lazily creates a little object which holds 
+       information about the slice in question; this will be used to format a 
+       fourth slice at draw-time if there is one.""")
+
+disc("<i>Only expose things you should change </i>")
+disc("""<para lindent=+36>It would be wrong from a statistical viewpoint to let you directly 
+       adjust the angle of one of the pie wedges in the above example, since 
+       that is determined by the data. So not everything will be exposed 
+       through the public properties. There may be 'back doors' to let you 
+       violate this when you really need to, or methods to provide advanced 
+       functionality, but in general properties will be orthogonal.""")
+
+disc("<i>Composition and component based </i>")
+disc("""<para lindent=+36>Charts are built out of reusable child widgets. A Legend is an 
+       easy-to-grasp example. If you need a specialized type of legend (e.g. 
+       circular colour swatches), you should subclass the standard Legend 
+       widget. Then you could either do something like...""")
+eg("""
+c = MyChartWithLegend()
+c.legend = MyNewLegendClass()    # just change it
+c.legend.swatchRadius = 5    # set a property only relevant to the new one
+c.data = [10,20,30]   #   and then configure as usual....""")
+
+disc("""<para lindent=+36>...or create/modify your own chart or drawing class which creates one 
+       of these by default. This is also very relevant for time series 
+       charts, where there can be many styles of x axis.""")
+
+disc("""<para lindent=+36>Top level chart classes will create a number of such components, and 
+       then either call methods or set private properties to tell them their 
+       height and position - all the stuff which should be done for you and 
+       which you cannot customise. We are working on modelling what the 
+       components should be and will publish their APIs here as a consensus 
+       emerges.""")
+
+disc("<i>Multiples </i>")
+disc("""<para lindent=+36>A corollary of the component approach is that you can create diagrams 
+       with multiple charts, or custom data graphics. Our favourite example 
+       of what we are aiming for is the weather report in our gallery 
+       contributed by a user; we'd like to make it easy to create such 
+       drawings, hook the building blocks up to their legends, and feed that 
+       data in a consistent way. Click the image to download the full page 
+       PDF.""")
+
+
+heading3("Key Concepts and Components")
+disc("""A chart or plot is an object which is placed on a drawing; it is not 
+       itself a drawing. You can thus control where it goes, put several on 
+       the same drawing, or add annotations.""")
+
+disc("""Charts have two axes; axes may be Value or Category axes. Axes in turn 
+       have a Labels property which lets you configure all text labels or 
+       each one individually. Most of the configuration details which vary 
+       from chart to chart relate to axis properties, or axis labels.""")
+
+disc("""Objects expose properties through the interfaces discussed in the 
+       revious section; these are all optional and are there to let the end 
+       user configire the appearance. Things which must be set for a chart to 
+       work, and essential communication between a chart and its components, 
+       are handled through methods.""")
+
+disc("""You can subclass any chart component and use your replacement instead 
+       of the original provided you implement the essential methods and 
+       properties.""")
+
+heading3("Labels")
+disc("""One of the most important building blocks is the Label, defined in 
+       reportlab/graphics/charts/textlabel0.py. A label is a string of text 
+       attached to some chart element. They are used on axes, for titles or 
+       alongside axes, or attached to individual data points.""")
+
+disc("Labels may contain newline characters, but only one font.")
+
+disc("""The text and 'origin' of a label are typically set by its parent 
+       object. They are accessed by methods rather than properties. Thus, the 
+       X axis decides the 'reference point' for each tickmark label and the 
+       numeric or date text for each label. However, the end user can set 
+       properties of the label (or collection of labels) directly to affect 
+       its positon relative to this origin and all of its formatting.""")
+
+eg("""
+d = Drawing(200, 100)
+
+# mark the origin of the label
+d.add(Circle(100,90, 5, fillColor=colors.green))
+
+lab = Label()
+lab.setOrigin(100,90)
+lab.boxAnchor = 'ne'
+lab.angle = 45
+lab.dx = 0
+lab.dy = -20
+lab.boxStrokeColor = colors.green
+lab.setText('Another\nMulti-Line\nString')
+
+d.add(lab)""")
+
+disc("""In the drawing above, the label is defined relative to the green blob. 
+       The text box should have its north-east corner ten points down from 
+       the origin, and be rotated by 45 degrees about that corner.""")
+
+disc("""At present labels have the following properties, which we believe are 
+       sufficient for all charts we have seen to date:""")
+
+todo("""Note: need to turn these into pretty tables with explanations """)
+eg("""
+>>>lab.dumpProperties()
+angle = 45
+boxAnchor = ne
+boxFillColor = None
+boxStrokeColor = Color(0.00,0.50,0.00)
+boxStrokeWidth = 0.5
+dx = 0
+dy = -20
+fontName = Times-Roman
+fontSize = 10
+leading = 12.0
+textAnchor = start""")
+
+heading3("Axes")
+disc("""We identify two basic kinds of axes - Value and Category Axes. Both 
+       come in horizontal and vertical flavors. Both can be subclassed to 
+       make very specific kinds of axis. For example, if you have complex 
+       rules for which dates to display in a time series application, or want 
+       irregular scaling, you override the axis and make a new one.""")
+
+disc("""Axes are responsible for determining the mapping from data to image 
+       coordinates; transforming points on request from the chart; drawing 
+       themselves and their tickmarks, gridlines and axis labels.""")
+
+disc("""This drawing shows two axes, one of each kind, which have been created 
+       directly without reference to any chart:""")
+
+disc("Here is the code that created them: ")
+
+eg("""
+    drawing = Drawing(400, 200)
+
+    data = [(10, 20, 30, 40),
+            (15, 22, 37, 42)]        
+
+    xAxis = XCategoryAxis()
+    xAxis.setPosition(75, 75, 300)
+    xAxis.configure(data)
+    xAxis.categoryNames = ['Beer','Wine','Meat','Cannelloni']
+    xAxis.labels.boxAnchor = 'n'
+    xAxis.labels[3].dy = -15
+    xAxis.labels[3].angle = 30
+    xAxis.labels[3].fontName = 'Times-Bold'
+
+    yAxis = YValueAxis()
+    yAxis.setPosition(50, 50, 125)
+    yAxis.configure(data)
+
+    drawing.add(xAxis)
+    drawing.add(yAxis)""")
+
+disc("""Remember that you won't have to create axes directly; when using a 
+       standard chart, it comes with ready-made axes. The methods are what 
+       the chart uses to configure it and take care of the geometry. However, 
+       we will talk through them in detail below.""")
+
+heading3("XCategoryAxis class")
+disc("""A Category Axis doesn't really have a scale; it just divides itself 
+       into equal-sized buckets. It is simpler than a value axis. The chart 
+       (or programmer) sets its location with the method setPosition(x, y, 
+       length). The next stage is to show it the data so that it can 
+       configure itself. This is easy for a category axis - it just counts 
+       the number of data points in one of the data series. When the drawing 
+       is drawn, the axis can provide some help to the chart with its scale() 
+       method, which tells the chart where a given category begins and ends 
+       on the page. We have not yet seen any need to let people override the 
+       widths or positions of categories.""")
+
+disc("An XCategoryAxis has the following editable properties:")
+disc("")
+
+data=[["Property", "Meaning"],
+      ["visible", """Should the axis be drawn at all? Sometimes you don't want
+to display one or both axes, but they still need to be there as 
+they manage the scaling of points."""],
+      ["strokeColor", "Color of the axis"],
+      ["strokeDashArray", """Whether to draw axis with a dash and, if so, what kind. Defaults to None"""],
+      ["strokeWidth", "Width of axis in points"],
+      ["tickUp", """How far above the axis should the tick marks protrude?
+(Note that making this equal to chart height gives you a gridline)"""],
+      ["tickDown", """How far below the axis should the tick mark protrude?"""],
+      ["categoryNames", """Either None, or a list of strings. This should have the
+same length as each data series."""],
+      ["labels", """A collection of labels for the tick marks. By default the 'north'
+of each text label (i.e top centre) is positioned 5 points down from
+the centre of each category on the axis. You may redefine any property
+of the whole label group or of any one label. If categoryNames=None,
+no labels are drawn."""],
+      ["title", """Not Implemented Yet. This needs to be like a label, but also let you
+set the text directly. It would have a default location below the axis."""]]
+t=Table(data)
+t.setStyle(TableStyle([
+            ('FONT',(0,0),(-1,1),'Times-Bold',10,12),
+            ('FONT',(0,1),(-1,-1),'Courier',8,8),
+            ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ]))
+getStory().append(t)
+caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - XCategoryAxis properties""")
+
+
+heading3("""YValueAxis""")
+disc("""The left axis in the diagram is a YValueAxis. The XValueAxis 
+       flavour will shortly be available as well! A Value Axis differs from a 
+       Category Axis in that each point along its length corresponds to a y 
+       value in chart space. It is the job of the axis to configure itself, 
+       and to convert Y values from chart space to points on demand to assist 
+       the parent chart in plotting""")
+
+disc("""<i>setPosition(x, y, length)</i> and <i>configure(data)</i> work exactly as 
+       for a category axis. If you have not fully specified the maximum, 
+       minimum and tick interval, then configure() results in the axis 
+       choosing suitable values. One configured, the value axis can convert y 
+       data values to drawing space with the scale() method. Thus:""")
+
+eg("""
+>>> yAxis = YValueAxis()
+>>> yAxis.setPosition(50, 50, 125)
+>>> data = [(10, 20, 30, 40),(15, 22, 37, 42)]   
+>>> yAxis.configure(data)
+>>> yAxis.scale(10)  # should be bottom of chart
+50.0
+>>> yAxis.scale(40)  # should be near the top
+167.1875
+>>>""")
+
+disc("""By default, the highest data point is aligned with the top of the 
+       axis, the lowest with the bottom of the axis, and the axis choose 
+       'nice round numbers' for its tickmark points. You may override these 
+       settings with the properties below. """)
+##Property Meaning
 ##visible Is it drawn at all? 
 ##strokeColor Color of the axis 
 ##strokeDashArray Whether to draw axis with a dash and, if so, what kind. Defaults to None 
@@ -1057,60 +1120,61 @@ disc("""The Widget standard is a standard built on top of the shapes module.
 ##title Not Implemented Yet. This needs to be like a label, but also let you set the text directly. It would have a default location to the left of the axis and inclined by 90 degrees. 
 ##
 ##
-##We hope to add an advanced property to let you explicitly specify the
-##tick mark locations, so you don't have to follow regular intervals.
-##You could then plot month ends and month end dates with a couple of
-##helper functions, and without needing special time series chart
-##classes.
-##
-##4.5 Bar Charts
-##This describes our current VerticalBarChart class, which uses the axes
-##and labels above. We think it is step in the right direction but is is
-##far from final. As usual, we will start with an example:
-##
-## 
-##Note that people we speak to are divided about 50/50 on whether to
-##call this a 'Vertical' or 'Horizontal' bar chart. We chose this name
-##because 'Vertical' appears next to 'Bar', so we take it to mean that
-##the bars rather than the category axis are vertical.
-##
-##    # code to produce the above chart
-##    drawing = Drawing(400, 200)
-##
-##    data = [
-##            (13, 5, 20, 22, 37, 45, 19, 4),
-##            (14, 6, 21, 23, 38, 46, 20, 5)
-##            ]
-##            
-##    
-##    bc = VerticalBarChart()
-##    bc.x = 50
-##    bc.y = 50
-##    bc.height = 125
-##    bc.width = 300
-##    bc.data = data
-##
-##    bc.strokeColor = colors.yellow    
-##
-##    bc.valueAxis.valueMin = 0
-##    bc.valueAxis.valueMax = 60
-##    bc.valueAxis.valueStep = 15
-##    
-##    
-##    bc.categoryAxis.labels.boxAnchor = 'ne'
-##    bc.categoryAxis.labels.dx = 8
-##    bc.categoryAxis.labels.dy = -2
-##    bc.categoryAxis.labels.angle = 30
-##    
-##    bc.categoryAxis.categoryNames = ['Jan-99','Feb-99','Mar-99',
-##           'Apr-99','May-99','Jun-99','Jul-99','Aug-99']
-##    drawing.add(bc)
-##    
-##    return drawing    
-##
-##Most of the code above is concerned with setting up the axes and
-##labels, which we have already covered. Here are the top-level
-##properties of the VerticalBarChart class:
+disc("""We hope to add an advanced property to let you explicitly specify the 
+       tick mark locations, so you don't have to follow regular intervals. 
+       You could then plot month ends and month end dates with a couple of 
+       helper functions, and without needing special time series chart 
+       classes.""")
+
+heading3("""Bar Charts""")
+disc("""This describes our current VerticalBarChart class, which uses the axes 
+       and labels above. We think it is step in the right direction but is is 
+       far from final. As usual, we will start with an example:""")
+
+disc("""Note that people we speak to are divided about 50/50 on whether to 
+       call this a 'Vertical' or 'Horizontal' bar chart. We chose this name 
+       because 'Vertical' appears next to 'Bar', so we take it to mean that 
+       the bars rather than the category axis are vertical.""")
+
+eg("""
+    # code to produce the above chart
+    drawing = Drawing(400, 200)
+
+    data = [
+            (13, 5, 20, 22, 37, 45, 19, 4),
+            (14, 6, 21, 23, 38, 46, 20, 5)
+            ]
+            
+    
+    bc = VerticalBarChart()
+    bc.x = 50
+    bc.y = 50
+    bc.height = 125
+    bc.width = 300
+    bc.data = data
+
+    bc.strokeColor = colors.yellow    
+
+    bc.valueAxis.valueMin = 0
+    bc.valueAxis.valueMax = 60
+    bc.valueAxis.valueStep = 15
+    
+    
+    bc.categoryAxis.labels.boxAnchor = 'ne'
+    bc.categoryAxis.labels.dx = 8
+    bc.categoryAxis.labels.dy = -2
+    bc.categoryAxis.labels.angle = 30
+    
+    bc.categoryAxis.categoryNames = ['Jan-99','Feb-99','Mar-99',
+           'Apr-99','May-99','Jun-99','Jul-99','Aug-99']
+    drawing.add(bc)
+    
+    return drawing    """)
+
+
+disc("""Most of the code above is concerned with setting up the axes and 
+       labels, which we have already covered. Here are the top-level 
+       properties of the VerticalBarChart class:""")
 ##
 ##Property Value 
 ##data This should be a "list of lists of numbers" or "list of tuples of numbers". If you have just one series, write it as
@@ -1133,53 +1197,54 @@ disc("""The Widget standard is a standard built on top of the shapes module.
 ##title, subTitle Not implemented yet. These would be label-like objects whose text could be set directly and which would appear in sensible locations. For now, you can just place extra strings on the drawing. 
 ##  
 ##
-##There are several open issues:
+disc("There are several open issues:")
 ##
-##vertical position of X Axis - by default the X Axis sits at the
-##bottom. One should be able to specify if it sits at the top, the
-##bottom or at a specific y value (e.g. y=0).
-##bar labelling - in cases with some negative bars, the label should
-##appear BELOW the negative labels and ABOVE the positive ones. How can
-##we specify this?
-##color specification - right now the chart has an undocumented property
-##defaultColors, which provides a list of colors to cycle through. If
-##you introduce a legend, it should share the list of colors. What's
-##more, several charts can share a legend. Should we sppecify colors and
-##line styles on a legend object and attach charts to that, ruling that
-##the legend need not be visible? Similar issues appear to x-y charts.
-##
-##When we are a bit more confident of the design, we expect to add
-##variants of bar charts to deal with stacked and 100% bars as well as
-##the side-by-side variant seen here, and variants with vertical and
-##horizontal orientation. For now, if you want one oriented the other
-##way, just put it in a group and rotate it - here's a VerticalBarChart
-##whhere we just turned the labels and the whole chart around by 90
-##degrees, and hid one of the axes:
-##
-## 
-##4.6 Pie Charts
-##We've already seen a pie chart example above. This is provisional but
-##seems to do most things. At the very least we need to change the name.
-##For completeness we will cover it here.
-##
-##    pc = PieWithWedges()
-##    pc.x = 150
-##    pc.y = 50
-##    pc.data = [10,20,30,40,50,60]
-##    pc.labels = ['a','b','c','d','e','f']
-##    pc.wedges.strokeWidth=0.5
-##    pc.wedges[3].popout = 20
-##    pc.wedges[3].strokeWidth = 2
-##    pc.wedges[3].strokeDashArray = [2,2]
-##    pc.wedges[3].labelRadius = 1.75
-##    pc.wedges[3].fontColor = colors.red
-##
-## 
-##Properties are covered below. The pie has a 'wedges' collection and we
-##document wedge properties in the same table. This was invented before
-##we finished the Label class and will probably be reworked to use
-##Labels shortly.
-##
+list("""vertical position of X Axis - by default the X Axis sits at the 
+       bottom. One should be able to specify if it sits at the top, the 
+       bottom or at a specific y value (e.g. y=0).""")
+list("""bar labelling - in cases with some negative bars, the label should 
+       appear BELOW the negative labels and ABOVE the positive ones. How can 
+       we specify this?""")
+list("""color specification - right now the chart has an undocumented property 
+       defaultColors, which provides a list of colors to cycle through. If 
+       you introduce a legend, it should share the list of colors. What's 
+       more, several charts can share a legend. Should we sppecify colors and 
+       line styles on a legend object and attach charts to that, ruling that 
+       the legend need not be visible? Similar issues appear to x-y charts.""")
+
+disc("""When we are a bit more confident of the design, we expect to add 
+       variants of bar charts to deal with stacked and 100% bars as well as 
+       the side-by-side variant seen here, and variants with vertical and 
+       horizontal orientation. For now, if you want one oriented the other 
+       way, just put it in a group and rotate it - here's a VerticalBarChart 
+       where we just turned the labels and the whole chart around by 90 
+       degrees, and hid one of the axes:""")
+
+
+heading3("""4.6 Pie Charts""")
+disc("""We've already seen a pie chart example above. This is provisional but 
+       seems to do most things. At the very least we need to change the name. 
+       For completeness we will cover it here.""")
+
+eg("""
+    pc = PieWithWedges()
+    pc.x = 150
+    pc.y = 50
+    pc.data = [10,20,30,40,50,60]
+    pc.labels = ['a','b','c','d','e','f']
+    pc.wedges.strokeWidth=0.5
+    pc.wedges[3].popout = 20
+    pc.wedges[3].strokeWidth = 2
+    pc.wedges[3].strokeDashArray = [2,2]
+    pc.wedges[3].labelRadius = 1.75
+    pc.wedges[3].fontColor = colors.red""")
+
+
+disc("""Properties are covered below. The pie has a 'wedges' collection and we 
+       document wedge properties in the same table. This was invented before 
+       we finished the Label class and will probably be reworked to use 
+       Labels shortly.""")
+
 ##Property Value 
 ##data a list or tuple of numbers 
 ##x, y, width, height Bounding box of the pie. Note that x and y do NOT specify the centre but the bottom left corner, and that width and height do not have to be equal; pies may be elliptical and wedges will be drawn correctly. 
@@ -1200,58 +1265,59 @@ disc("""The Widget standard is a standard built on top of the shapes module.
 ##1.2 will place it slightly outside. (note that if we add labels, we
 ##will keep this to specify their anchor point)
 ##
-##4.7 Legends
-##Various preliminary legend classes can be found but need a cleanup to
-##be consistent with this model. Legends are the natural place to
-##specify the colors and line styles of charts; we propose that each
-##chart is created with a Legend attribute which is invisible. One would
-##then do the following to specify colors:
-##
-##myChart.legend.defaultColors = [red, green, blue]
-##
-##One could also define a group of charts sharing the same legend:
-##
-##myLegend = Legend()
-##myLegend.defaultColor = [red, green.....] #yuck!
-##myLegend.columns = 2
-### etc.
-##chart1.legend = myLegend
-##chart2.legend = myLegend
-##chart3.legend = myLegend
-##
-##Does this work? Is it an acceptable complication over specifying chart
-##colors directly?
-##
-##4.8 Other Charts
-##It will take some time to deal with the full range of chart types. We
-##expect to finalize bars and pies and to produce trial implementations
-##of more general plots in February.
-##
-##x-y plots
-##Most other plots involve two value axes and directly plotting x-y data
-##in some form. The series can be plotted as lines, marker symbols,
-##both, or custom graphics such as open-high-low-close graphics. All
-##share the concepts of scaling and axis/title formatting. At a certain
-##point, a routine will loop over the data series and 'do something'
-##with the data points at given x-y locations. Given a basic line plot,
-##it should be very easy to derive a custom chart type just by
-##overriding a single method - say, drawSeries().
-##
-##Marker customisation and custom shapes
-##Well known plotting packages such as excel, Mathematica and Excel
-##offer ranges of marker types to add to charts. We can do better - you
-##cann write any kind of chart widget you want and just tell the chart
-##to use it as ann example.
-##
-##Combination plots
-##Combining multiple plot types is really easy. You can just draw
-##several charts (bar, line or whatever) in the same rectangle,
-##suppressing axes as needed. So a chart could correlate a line with
-##Scottish typhoid cases over a 15 year period on the left axis with a
-##set of bars showing inflation rates on the right axis. If anyone can
-##remind us where this example came from we'll attribute it, and happily
-##show the well-known graph as an example.
-##
-##That's all for now - tell us what you think and check back soon :-}
-##
-##Contents - Back
+heading3("""Legends""")
+disc("""Various preliminary legend classes can be found but need a cleanup to 
+       be consistent with this model. Legends are the natural place to 
+       specify the colors and line styles of charts; we propose that each 
+       chart is created with a Legend attribute which is invisible. One would 
+       then do the following to specify colors:""")
+
+eg("""
+myChart.legend.defaultColors = [red, green, blue]""")
+
+disc("""One could also define a group of charts sharing the same legend:""")
+
+eg("""
+myLegend = Legend()
+myLegend.defaultColor = [red, green.....] #yuck!
+myLegend.columns = 2
+# etc.
+chart1.legend = myLegend
+chart2.legend = myLegend
+chart3.legend = myLegend""")
+
+todo("""Does this work? Is it an acceptable complication over specifying chart
+colors directly?""")
+
+heading3("Other Charts")
+disc("""It will take some time to deal with the full range of chart types. We 
+       expect to finalize bars and pies and to produce trial implementations 
+       of more general plots in February.""")
+
+heading4("x-y plots")
+disc("""Most other plots involve two value axes and directly plotting x-y data 
+       in some form. The series can be plotted as lines, marker symbols, 
+       both, or custom graphics such as open-high-low-close graphics. All 
+       share the concepts of scaling and axis/title formatting. At a certain 
+       point, a routine will loop over the data series and 'do something' 
+       with the data points at given x-y locations. Given a basic line plot, 
+       it should be very easy to derive a custom chart type just by 
+       overriding a single method - say, drawSeries().""")
+
+heading4("""Marker customisation and custom shapes""")
+disc("""Well known plotting packages such as excel, Mathematica and Excel 
+       offer ranges of marker types to add to charts. We can do better - you 
+       can write any kind of chart widget you want and just tell the chart 
+       to use it as an example.""")
+
+heading4("""Combination plots""")
+disc("""Combining multiple plot types is really easy. You can just draw 
+       several charts (bar, line or whatever) in the same rectangle, 
+       suppressing axes as needed. So a chart could correlate a line with 
+       Scottish typhoid cases over a 15 year period on the left axis with a 
+       set of bars showing inflation rates on the right axis. If anyone can 
+       remind us where this example came from we'll attribute it, and happily 
+       show the well-known graph as an example.""")
+
+todo("""That's all for now - tell us what you think and check back soon :-}""")
+
