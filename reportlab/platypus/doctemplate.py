@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.28  2000/07/20 16:41:16  rgbecker
+#	Added pagesize to canvasmaker call
+#
 #	Revision 1.27  2000/07/10 11:58:35  andy_robinson
 #	Pre-incrementing bug fixed
-#
+#	
 #	Revision 1.26  2000/07/07 16:21:12  rgbecker
 #	Cosmetics
 #	
@@ -114,7 +117,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.27 2000/07/10 11:58:35 andy_robinson Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.28 2000/07/20 16:41:16 rgbecker Exp $ '''
 __doc__="""
 This module contains the core structure of platypus.
 
@@ -485,7 +488,7 @@ class BaseDocTemplate:
 
 	def _startBuild(self, filename=None, canvasmaker=canvas.Canvas):
 		self._calc()
-		self.canv = canvasmaker(filename or self.filename)
+		self.canv = canvasmaker(filename or self.filename,pagesize=self.pagesize)
 		self.handle_documentBegin()
 
 	def _endBuild(self):
