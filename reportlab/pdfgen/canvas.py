@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.91 2001/11/21 01:39:54 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.91 2001/11/21 01:39:54 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.92 2001/11/26 20:48:09 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.92 2001/11/26 20:48:09 andy_robinson Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -12,7 +12,7 @@ ENABLE_TRACKING = 1 # turn this off to do profile testing w/o tracking
 
 import os
 import sys
-from string import join, split, strip, atoi, replace
+from string import join, split, strip, atoi, replace, upper
 import time
 import tempfile
 import cStringIO
@@ -543,14 +543,20 @@ class Canvas:
         return apply(self.linkAbsolute, (contents, destinationname, Rect, addtopage, name), kw)
 
 
-    def linkURL(self, url, rect, relative=0):
+    def linkURL(self, url, rect, relative=0,border=0):
         """Create a rectangular URL 'hotspot' in the given rectangle.
 
         if relative=1, this is in the current coord system, otherwise
-        in absolute page space. There is a 1 point border drawn for you
-        (this behaviour is built into Acrobat); we expect to add an
-        optional Border argument to let you override this soon."""
+        in absolute page space.
+        If border=0, no visible border appears.  If border=1, a one-point
+        black line is drawn (by Acrobat, not us).  More complex options
+        for Border are on the way!"""
+        from reportlab.pdfbase.pdfdoc import PDFDictionary, PDFName, PDFArray, PDFString
+        #tried the documented BS element in the pdf spec but it
+        #does not work, and Acrobat itself does not appear to use it!
+        assert border in (0,1), 'border must currently be 0 (to hide) or 1 (to show)'
         if relative:
+            #adjust coordinates
             (lx, ly, ux, uy) = rect
             (xll,yll) = self.absolutePosition(lx,ly)
             (xur,yur) = self.absolutePosition(ux, uy)
@@ -563,13 +569,14 @@ class Canvas:
             #(w2, h2) = (xmax-xmin, ymax-ymin)
             rect = (xmin, ymin, xmax, ymax)
 
-        from reportlab.pdfbase.pdfdoc import PDFDictionary, PDFName, PDFArray, PDFString
         ann = PDFDictionary()
         ann["Type"] = PDFName("Annot")
         ann["Subtype"] = PDFName("Link")
         ann["Rect"] = PDFArray(rect) # the whole page for testing
-        #ann["Border"] = PDFArray(border)
-        #ann["Contents"] = PDFString(contents)
+        if border == 0:
+            ann["Border"] = (0,)
+        else:
+            pass #default is a visible back 1-point border
         A = PDFDictionary()
         #A["Type"] = PDFName("Action") # not needed?
         ann["H"] = PDFName("I") # invert
