@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.14 2001/05/20 09:08:23 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.14 2001/05/20 09:08:23 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.15 2001/05/25 14:02:47 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.15 2001/05/25 14:02:47 rgbecker Exp $ '''
 
 import string, os
 from types import *
@@ -26,6 +26,12 @@ except ImportError, errMsg:
 		for i in a:
 			s.append('%0.2f' % i)
 		return string.join(s)
+
+#hack test for comma users
+if ',' in fp_str(0.25):
+	_FP_STR = fp_str
+	def fp_str(*a):
+		return string.replace(apply(_FP_STR,a),',','.')
 
 def import_zlib():
 	try:
