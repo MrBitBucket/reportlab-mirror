@@ -1,9 +1,9 @@
 #!/bin/env python
-#copyright ReportLab Inc. 2000
+#copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/genuserguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/genuserguide.py,v 1.40 2001/03/16 14:51:50 rgbecker Exp $
-__version__=''' $Id: genuserguide.py,v 1.40 2001/03/16 14:51:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/docs/userguide/genuserguide.py,v 1.41 2001/03/27 15:55:57 johnprecedo Exp $
+__version__=''' $Id: genuserguide.py,v 1.41 2001/03/27 15:55:57 johnprecedo Exp $ '''
 
 
 __doc__ = """
@@ -399,7 +399,8 @@ def run(pagesize):
     import ch5_paragraphs
     import ch6_tables
     import ch7_custom
-    import ch8_future
+    import ch8_graphics
+    import ch9_future
     
     import app_demos
 
@@ -411,7 +412,7 @@ def run(pagesize):
     #if I just call getStory, it has no
     #items!
     
-    story = ch8_future.getStory()
+    story = ch9_future.getStory()
     print 'Built story contains %d flowables...' % len(story)
     doc.build(story)
     print 'Saved userguide.pdf'
