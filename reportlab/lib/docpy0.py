@@ -2,7 +2,7 @@
 
 """Generate documentation from live Python objects.
 
-This is an evolving module that allows to generated documentation
+This is an evolving module that allows to generate documentation
 for python modules in an automated fashion. The idea is to take
 live Python objects and inspect them in order to use as much mean-
 ingful information as possible to write in some formatted way into
@@ -22,26 +22,30 @@ Type the following for usage info:
 """
 
 # Much inspired by Ka-Ping Yee's htmldoc.py.
-# Needs his inspect module.
+# Needs the inspect module.
 
 # Dinu Gherman
 
-__version__ = 0,1
+
+__version__ = '0.8'
 
 
-import sys, os, re, types, string, getopt
+import sys, os, re, types, string, getopt, copy, time
 from string import find, join, split, replace, expandtabs, rstrip
 
 from reportlab.pdfgen import canvas
 from reportlab.lib import inspect
-from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
+from reportlab.lib.units import inch, cm
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import enums
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus.flowables import Flowable, Spacer
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.flowables \
-     import Flowable, Preformatted,Spacer, Image, KeepTogether
+     import Flowable, Preformatted,Spacer, Image, KeepTogether, PageBreak
+from reportlab.platypus.tableofcontents0 import TableOfContents0
 from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate \
@@ -55,12 +59,26 @@ from reportlab.platypus.tables import TableStyle, Table
 # 
 ####################################################################
 
+
 def mainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
     
     canvas.saveState()
-    canvas.setFont('Times-Roman', 12)
-    canvas.drawString(4 * inch, cm, "%d" % canvas.getPageNumber())
+
+    pageNumber = canvas.getPageNumber()
+    canvas.line(2*cm, A4[1]-2*cm, A4[0]-2*cm, A4[1]-2*cm)
+    canvas.line(2*cm, 2*cm, A4[0]-2*cm, 2*cm)
+    if pageNumber > 1:
+        canvas.setFont('Times-Roman', 12)
+        canvas.drawString(4 * inch, cm, "%d" % pageNumber)
+        if hasattr(canvas, 'headerLine'): # hackish
+            headerline = string.join(canvas.headerLine, ' \215 ')
+            canvas.drawString(2*cm, A4[1]-1.75*cm, headerline)
+
+    canvas.setFont('Times-Roman', 8)
+    msg = "Generated with reportlab.lib.docpy0. See http://www.reportlab.com!"
+    canvas.drawString(2*cm, 1.65*cm, msg)
+
     canvas.restoreState()
     
 
@@ -70,20 +88,44 @@ class MyTemplate(BaseDocTemplate):
     _invalidInitArgs = ('pageTemplates',)
     
     def __init__(self, filename, **kw):
-        frame1 = Frame(inch, inch, 6*inch, 9.7*inch, id='F1')
+        frame1 = Frame(2.5*cm, 2.5*cm, 15*cm, 25*cm, id='F1')
         self.allowSplitting = 0
         apply(BaseDocTemplate.__init__, (self, filename), kw)
         self.addPageTemplates(PageTemplate('normal', [frame1], mainPageFrame))
 
+
     def afterFlowable(self, flowable):
+        "Takes care of header line, TOC and outline entries."
+        
         if flowable.__class__.__name__ == 'Paragraph':
             f = flowable
+
+            # Build a list of heading parts.
+            # So far, this is the *last* item on the *previous* page...
+            if f.style.name[:8] == 'Heading0':
+                self.canv.headerLine = [f.text] # hackish
+            elif f.style.name[:8] == 'Heading1':
+                if len(self.canv.headerLine) == 2:
+                    del self.canv.headerLine[-1]
+                elif len(self.canv.headerLine) == 3:
+                    del self.canv.headerLine[-1]
+                    del self.canv.headerLine[-1]
+                self.canv.headerLine.append(f.text)
+            elif f.style.name[:8] == 'Heading2':
+                if len(self.canv.headerLine) == 3:
+                    del self.canv.headerLine[-1]
+                self.canv.headerLine.append(f.text)
+
             if f.style.name[:7] == 'Heading':
-                # Add line height to current vert. position.
+                # Register TOC entries.
+                headLevel = int(f.style.name[7:])
+                self.notify0('TOCEntry', (headLevel, flowable.getPlainText(), self.page))
+
+                # Add PDF outline entries.
                 c = self.canv
                 title = f.text
                 key = str(hash(f))
-                lev = int(f.style.name[7:]) #- 1
+                lev = int(f.style.name[7:])
                 try:
                     if lev == 0:
                         isClosed = 0
@@ -103,21 +145,21 @@ class MyTemplate(BaseDocTemplate):
 # 
 ####################################################################
 
-def _htmlescape(text):
+def htmlescape(text):
     "Escape special HTML characters, namely &, <, >."
     return replace(replace(replace(text, '&', '&amp;'),
                                          '<', '&lt;'),
                                          '>', '&gt;')
 
-def _htmlrepr(object):
-    return _htmlescape(repr(object))
+def htmlrepr(object):
+    return htmlescape(repr(object))
 
 
-def _defaultformat(object):
-    return '=' + _htmlrepr(object)
+def defaultformat(object):
+    return '=' + htmlrepr(object)
 
 
-def _getdoc(object):
+def getdoc(object):
     result = inspect.getdoc(object)
     if not result:
         try:
@@ -144,7 +186,7 @@ def makeHtmlSection(text, bgcolor='#FFA0FF'):
 
     This is usually a header for all classes or functions.
     """
-    text = _htmlescape(expandtabs(text))
+    text = htmlescape(expandtabs(text))
     result = []
     result.append("""<TABLE WIDTH="100\%" BORDER="0">""")
     result.append("""<TR><TD BGCOLOR="%s" VALIGN="CENTER">""" % bgcolor)
@@ -160,7 +202,7 @@ def makeHtmlSubSection(text, bgcolor='#AAA0FF'):
 
     This is usually a class or function name.
     """
-    text = _htmlescape(expandtabs(text))
+    text = htmlescape(expandtabs(text))
     result = []
     result.append("""<TABLE WIDTH="100\%" BORDER="0">""")
     result.append("""<TR><TD BGCOLOR="%s" VALIGN="CENTER">""" % bgcolor)
@@ -184,12 +226,18 @@ def makeHtmlInlineImage(text):
 # 
 ####################################################################
 
+class PackageSkeleton0:
+    """A class collecting 'interesting' information about a package."""
+    pass # Not yet!
+
+
 class ModuleSkeleton0:
     """A class collecting 'interesting' information about a module."""
 
     def __init__(self):
         # This is an ad-hoc, somewhat questionable 'data structure',
-        # but for the time being it serves its purpose...
+        # but for the time being it serves its purpose and is fairly
+        # self-contained.
         self.module = {}
         self.functions = {}
         self.classes = {}
@@ -258,7 +306,8 @@ class ModuleSkeleton0:
                         if not cdict.has_key(key):
                             cdict[key] = cdict[base] = modname + '.txt#' + key
 
-        doc = _getdoc(object) or 'No doc string.'
+##        doc = getdoc(object) or 'No doc string.'
+        doc = getdoc(object)
         self.module['doc'] = doc
 
         if modules:
@@ -300,7 +349,8 @@ class ModuleSkeleton0:
             for item in methods:
                 self._inspectMethod(item, functions, classes, mdict, name)
 
-        doc = _getdoc(object) or 'No doc string.'
+##        doc = getdoc(object) or 'No doc string.'
+        doc = getdoc(object)
         self.classes[name]['doc'] = doc
 
 
@@ -317,12 +367,13 @@ class ModuleSkeleton0:
             args, varargs, varkw, defaults = inspect.getargspec(object)
             argspec = inspect.formatargspec(
                 args, varargs, varkw, defaults,
-                defaultformat=_defaultformat)
+                defaultformat=defaultformat)
         except TypeError:
             argspec = '( ... )'
         
-        doc = _getdoc(object) or 'No doc string.'
-
+##        doc = getdoc(object) or 'No doc string.'
+        doc = getdoc(object)
+        
         if object.__name__ == '<lambda>':
             decl = [' lambda  ', argspec[1:-1]]
             # print '  %s' % decl
@@ -342,7 +393,6 @@ class ModuleSkeleton0:
                 theMethod['doc'] = doc
 
 
-    # Not used/tested.
     def _inspectBuiltin(self, object):
         """Collect information about a given built-in."""
 
@@ -384,7 +434,6 @@ class ModuleSkeleton0:
             # Methods
             #f.indentLevel = f.indentLevel + 1
             f.beginMethods(s.classes[k]['methods'].keys())
-            #if s.classes[k].has_key('methods'):
             items = s.classes[k]['methods'].items()
             items.sort()
             for m, v in items:
@@ -457,11 +506,14 @@ class DocBuilder0:
 
 
     # Event-method API, called by associated skeleton instances.
+    # In fact, these should raise a NotImplementedError, but for now we
+    # just don't do anything here.
 
     # The following four methods are *not* called by skeletons!
-    def begin(self): pass
+    def begin(self, name='', typ=''): pass
     def end(self): pass
 
+    # Methods for packaging should move into a future PackageSkeleton...
     def beginPackage(self, name):
         self.packageName = name
         
@@ -498,22 +550,24 @@ class AsciiDocBuilder0(DocBuilder0):
     The output will be an ASCII file with nested lines representing
     the hiearchical module structure.
 
-    Currently, no doc strings are listed."""
+    Currently, no doc strings are listed.
+    """
 
     fileSuffix = '.txt'
     outLines = []
     indentLabel = '  '
     
     def end(self):
+        # This if should move into DocBuilder0...
         if self.packageName:
-            path = self.packageName + self.fileSuffix
+            self.outPath = self.packageName + self.fileSuffix
         elif self.skeleton:
-            path = self.skeleton.getModuleName() + self.fileSuffix
+            self.outPath = self.skeleton.getModuleName() + self.fileSuffix
         else:
-            path = ''
+            self.outPath = ''
             
-        if path:
-            file = open(path, 'w')
+        if self.outPath:
+            file = open(self.outPath, 'w')
             for line in self.outLines:
                 file.write(line + '\n')
             file.close()
@@ -600,21 +654,21 @@ class HtmlDocBuilder0(DocBuilder0):
     fileSuffix = '.html'
     outLines = []
 
-    def begin(self):
+    def begin(self, name='', typ=''):
         self.outLines.append("""<!doctype html public "-//W3C//DTD HTML 4.0 Transitional//EN">""")
         self.outLines.append("""<html>""")
     
 
     def end(self):
         if self.packageName:
-            path = self.packageName + self.fileSuffix
+            self.outPath = self.packageName + self.fileSuffix
         elif self.skeleton:
-            path = self.skeleton.getModuleName() + self.fileSuffix
+            self.outPath = self.skeleton.getModuleName() + self.fileSuffix
         else:
-            path = ''
+            self.outPath = ''
             
-        if path:
-            file = open(path, 'w')
+        if self.outPath:
+            file = open(self.outPath, 'w')
             self.outLines.append('</body></html>')
             for line in self.outLines:
                 file.write(line + '\n')
@@ -638,7 +692,7 @@ class HtmlDocBuilder0(DocBuilder0):
         self.outLines.append("""<H1>%s</H1>""" % name)
         self.outLines.append('')
         for line in split(doc, '\n'):
-            self.outLines.append("""<FONT SIZE="-1">%s</FONT>""" % _htmlescape(line))
+            self.outLines.append("""<FONT SIZE="-1">%s</FONT>""" % htmlescape(line))
             self.outLines.append('<BR>')
         self.outLines.append('')
 
@@ -657,8 +711,8 @@ class HtmlDocBuilder0(DocBuilder0):
     def beginClass(self, name, doc, bases):
         DocBuilder0.beginClass(self, name, doc, bases)
 
-        # Keep an eye on the base classes.
-        self.currentBaseClasses = bases
+##        # Keep an eye on the base classes.
+##        self.currentBaseClasses = bases
 
         if bases:
             bases = map(lambda b:b.__name__, bases) # hack
@@ -666,16 +720,17 @@ class HtmlDocBuilder0(DocBuilder0):
         else:
             self.outLines.append(makeHtmlSubSection('%s' % name))
         for line in split(doc, '\n'):
-            self.outLines.append("""<FONT SIZE="-1">%s</FONT>""" % _htmlescape(line))
+            self.outLines.append("""<FONT SIZE="-1">%s</FONT>""" % htmlescape(line))
             self.outLines.append('<BR>')
 
         self.outLines.append('')
 
 
     def beginMethods(self, names):
-        if names:
-            self.outLines.append('<H3>Method Interface</H3>')
-            self.outLines.append('')
+        pass
+##        if names:
+##            self.outLines.append('<H3>Method Interface</H3>')
+##            self.outLines.append('')
 
 
     def beginMethod(self, name, doc, sig):
@@ -691,7 +746,7 @@ class HtmlDocBuilder0(DocBuilder0):
         append("""<DL><DL><DT><TT><STRONG>%s</STRONG>%s</TT></DT>""" % (name, sig))
         append('')
         for line in split(doc, '\n'):
-            append("""<DD><FONT SIZE="-1">%s</FONT></DD>""" % _htmlescape(line))
+            append("""<DD><FONT SIZE="-1">%s</FONT></DD>""" % htmlescape(line))
             append('<BR>')
         append('</DL></DL>')
         append('')
@@ -702,7 +757,7 @@ class PdfDocBuilder0(DocBuilder0):
 
     fileSuffix = '.pdf'
 
-    def makeHeadingStyle(self, level, typ=None):
+    def makeHeadingStyle(self, level, typ=None, doc=''):
         "Make a heading style for different types of module content."
 
         if typ in ('package', 'module', 'class'):
@@ -713,13 +768,25 @@ class PdfDocBuilder0(DocBuilder0):
                                       spaceBefore=12,
                                       spaceAfter=6)
         elif typ in ('method', 'function'):
-            style = ParagraphStyle(name='Heading'+str(level),
-                                      fontName = 'Courier-Bold',
-                                      fontSize=12,
-                                      leading=18,
-                                      firstLineIndent=18,
-                                      spaceBefore=12,
-                                      spaceAfter=6)
+            if doc:
+                style = ParagraphStyle(name='Heading'+str(level),
+                                          fontName = 'Courier-Bold',
+                                          fontSize=12,
+                                          leading=18,
+                                          firstLineIndent=-18,
+                                          leftIndent=36,
+                                          spaceBefore=0,
+                                          spaceAfter=-3)
+            else:
+                style = ParagraphStyle(name='Heading'+str(level),
+                                          fontName = 'Courier-Bold',
+                                          fontSize=12,
+                                          leading=18,
+                                          firstLineIndent=-18,
+                                          leftIndent=36,
+                                          spaceBefore=0,
+                                          spaceAfter=0)
+
         else:
             style = ParagraphStyle(name='Heading'+str(level),
                                       fontName = 'Times-Bold',
@@ -731,24 +798,38 @@ class PdfDocBuilder0(DocBuilder0):
         return style
     
     
-    def begin(self):
+    def begin(self, name='', typ=''):
         styleSheet = getSampleStyleSheet()
         self.code = styleSheet['Code']
         self.bt = styleSheet['BodyText']
         self.story = []
 
+        # Cover page
+        t = time.gmtime(time.time())
+        timeString = time.strftime("%Y-%m-%d %H:%M", t)
+        self.story.append(Paragraph('<font size=18>Documentation for %s "%s"</font>' % (typ, name), self.bt))
+        self.story.append(Paragraph('<font size=18>Generated by: docpy0.py version %s</font>' %  __version__, self.bt))
+        self.story.append(Paragraph('<font size=18>Date generated: %s</font>' % timeString, self.bt))
+        self.story.append(Paragraph('<font size=18>Format: PDF</font>', self.bt))
+        self.story.append(PageBreak())
+
+        # Table of contents
+        toc = TableOfContents0()
+        self.story.append(toc)
+        self.story.append(PageBreak())
+
         
     def end(self):
         if self.packageName:
-            path = self.packageName + self.fileSuffix
+            self.outPath = self.packageName + self.fileSuffix
         elif self.skeleton:
-            path = self.skeleton.getModuleName() + self.fileSuffix
+            self.outPath = self.skeleton.getModuleName() + self.fileSuffix
         else:
-            path = ''
+            self.outPath = ''
         
-        if path:
-            doc = MyTemplate(path)
-            doc.build(self.story)
+        if self.outPath:
+            doc = MyTemplate(self.outPath)
+            doc.multiBuild0(self.story)
 
 
     def beginPackage(self, name):
@@ -761,8 +842,9 @@ class PdfDocBuilder0(DocBuilder0):
         story = self.story
         bt = self.bt
         story.append(Paragraph(name, self.makeHeadingStyle(self.indentLevel, 'module')))
-
-        story.append(XPreformatted(doc, bt))
+        if doc:
+            story.append(XPreformatted(htmlescape(doc), bt))
+            story.append(XPreformatted('', bt))
 
         if imported:
             story.append(Paragraph('Imported modules', self.makeHeadingStyle(self.indentLevel + 1)))
@@ -771,6 +853,11 @@ class PdfDocBuilder0(DocBuilder0):
                 p.style.bulletIndent = 10
                 p.style.leftIndent = 18
                 story.append(p)
+
+
+    def endModule(self, name, doc, imported):
+        DocBuilder0.endModule(self, name, doc, imported)
+        self.story.append(PageBreak())
 
 
     def beginClasses(self, names):
@@ -786,15 +873,18 @@ class PdfDocBuilder0(DocBuilder0):
         else:
             story.append(Paragraph(name, self.makeHeadingStyle(self.indentLevel, 'class')))
 
-        story.append(XPreformatted(doc, bt))
+        if doc:
+            story.append(XPreformatted(htmlescape(doc), bt))
+            story.append(XPreformatted('', bt))
 
 
     def beginMethod(self, name, doc, sig):
         bt = self.bt
         story = self.story
-##        story.append(Paragraph(name+sig, h3))
-        story.append(Paragraph(name+sig, self.makeHeadingStyle(self.indentLevel, 'method')))
-        story.append(XPreformatted(doc, bt))
+        story.append(Paragraph(name+sig, self.makeHeadingStyle(self.indentLevel, 'method', doc)))
+        if doc:
+            story.append(XPreformatted(htmlescape(doc), bt))
+            story.append(XPreformatted('', bt))
 
 
     def beginFunctions(self, names):
@@ -806,13 +896,15 @@ class PdfDocBuilder0(DocBuilder0):
         bt = self.bt
         story = self.story
         story.append(Paragraph(name+sig, self.makeHeadingStyle(self.indentLevel, 'function')))
-        story.append(XPreformatted(doc, bt))
+        if doc:
+            story.append(XPreformatted(htmlescape(doc), bt))
+            story.append(XPreformatted('', bt))
 
 
 class UmlPdfDocBuilder0(PdfDocBuilder0):
     "Document the skeleton of a Python module with UML class diagrams."
 
-    fileSuffix = '-uml.pdf'
+    fileSuffix = '.pdf'
 
     def begin(self):
         styleSheet = getSampleStyleSheet()
@@ -840,6 +932,11 @@ class UmlPdfDocBuilder0(PdfDocBuilder0):
             for m in imported:
                 story.append(Paragraph(m, bt1))
 
+
+    def endModule(self, name, doc, imported):
+        self.story.append(PageBreak())
+        PdfDocBuilder0.endModule(self, name, doc, imported)
+        
 
     def beginClasses(self, names):
         h1, h2, h3, bt = self.h1, self.h2, self.h3, self.bt
@@ -953,10 +1050,32 @@ Usage: python docpy0.py [options]
 
     [options]
         -h          Print this help message.
+
         -f name     Use the document builder indicated by 'name',
                     e.g. Ascii, Html, Pdf (default), UmlPdf.
-        -m module   Generate doc for module named 'module'.
-        -p package  Generate doc for package named 'package'.
+
+        -m module   Generate document for module named 'module'
+                    (default is 'docpy0').
+                    'module' may follow any of these forms:
+                        - docpy0.py
+                        - docpy0
+                        - c:\\test\\docpy0
+                    and can be any of these:
+                        - standard Python modules
+                        - modules in the Python search path
+                        - modules in the current directory
+
+        -p package  Generate document for package named 'package'.
+                    'package' may follow any of these forms:
+                        - reportlab
+                        - reportlab.platypus
+                        - c:\\test\\reportlab
+                    and can be any of these:
+                        - standard Python packages (?)
+                        - packages in the Python search path
+                        - packages in the current directory
+
+        -s          Silent mode (default is unset).
 
 Examples:
 
@@ -965,32 +1084,33 @@ Examples:
     python docpy0.py -m string -f Html
     python docpy0.py -m signsandsymbols.py -f Pdf
     python docpy0.py -p reportlab.platypus -f UmlPdf
+    python docpy0.py -p reportlab.lib -s -f UmlPdf
 """
 
 
-def documentModule0(path, builder=PdfDocBuilder0()):
+def documentModule0(pathOrName, builder, opts={}):
     """Generate documentation for one Python file in some format.
 
     This handles Python standard modules like string, custom modules
-    on the Python search path like e.g. docpy as well as modules
+    on the Python search path like e.g. docpy0 as well as modules
     specified with their full path like C:/tmp/junk.py.
 
-    The doc file will always be saved in the current directory
-    with a basename equal to the module's name.
+    The doc file will always be saved in the current directory with
+    a basename equal to that of the module, e.g. docpy0.
     """
 
     cwd = os.getcwd()
 
     # Append directory to Python search path if we get one.
-    dirName = os.path.dirname(path)
+    dirName = os.path.dirname(pathOrName)
     if dirName:
         sys.path.append(dirName)
 
     # Remove .py extension from module name.
-    if path[-3:] == '.py':
-        modname = path[:-3]
+    if pathOrName[-3:] == '.py':
+        modname = pathOrName[:-3]
     else:
-        modname = path
+        modname = pathOrName
 
     # Remove directory paths from module name.
     if dirName:
@@ -1016,44 +1136,50 @@ def documentModule0(path, builder=PdfDocBuilder0()):
     os.chdir(cwd)
 
 
-def _packageWalkCallback(builder, dirPath, files):
+def _packageWalkCallback((builder, opts), dirPath, files):
     "A callback function used when waking over a package tree."
-    
+
+    # Skip __init__ files.    
     files = filter(lambda f:f != '__init__.py', files)
+
     files = filter(lambda f:f[-3:] == '.py', files)
-    if files:
-        for f in files:
-            path = os.path.join(dirPath, f)
+    for f in files:
+        path = os.path.join(dirPath, f)
+        if not opts.get('isSilent', 0):
             print path
-            builder.indentLevel = builder.indentLevel + 1
-            documentModule0(path, builder)
-            builder.indentLevel = builder.indentLevel - 1
+        builder.indentLevel = builder.indentLevel + 1
+        documentModule0(path, builder)
+        builder.indentLevel = builder.indentLevel - 1
 
     
-def documentPackage0(pathOrName, builder=PdfDocBuilder0()):
+def documentPackage0(pathOrName, builder, opts={}):
     """Generate documentation for one Python package in some format.
 
-    Rigiht now, 'path' must be a filesystem path, later it will
-    also be a package name whose path will be resolved by importing
+    'pathOrName' can be either a filesystem path leading to a Python
+    package or package name whose path will be resolved by importing
     the top-level module.
     
-    The doc file will always be saved in the current directory.
+    The doc file will always be saved in the current directory with
+    a basename equal to that of the package, e.g. reportlab.lib.
     """
 
-    if string.find(pathOrName, os.sep) > -1:
-        name = os.path.splitext(os.path.basename(pathOrName))[0]
+    # Did we get a package path with OS-dependant seperators...?
+    if os.sep in pathOrName:
         path = pathOrName
+        name = os.path.splitext(os.path.basename(path))[0]
+    # ... or rather a package name?
     else:
-        package = __import__(pathOrName)
-        if '.' in pathOrName:
-            subname = 'package' + pathOrName[string.find(pathOrName, '.'):]
-            package = eval(subname)
         name = pathOrName
+        package = __import__(name)
+        # Some special care needed for dotted names.
+        if '.' in name:
+            subname = 'package' + name[find(name, '.'):]
+            package = eval(subname)
         path = os.path.dirname(package.__file__)
-    
+
     cwd = os.getcwd()
     builder.beginPackage(name)
-    os.path.walk(path, _packageWalkCallback, builder)
+    os.path.walk(path, _packageWalkCallback, (builder, opts))
     builder.endPackage(name)
     os.chdir(cwd)
 
@@ -1061,36 +1187,50 @@ def documentPackage0(pathOrName, builder=PdfDocBuilder0()):
 def main():
     "Handle command-line options and trigger corresponding action."
     
-    opts, args = getopt.getopt(sys.argv[1:], 'hf:m:p:')
+    opts, args = getopt.getopt(sys.argv[1:], 'hsf:m:p:')
 
+    # Make an options dictionary that is easier to use.
+    optsDict = {}
+    for k, v in opts:
+        optsDict[k] = v
+    hasOpt = optsDict.has_key
+        
     # On -h print usage and exit immediately.
-    for o, a in opts:
-        if o == '-h':
-            print printUsage.__doc__
-            sys.exit(0)
+    if hasOpt('-h'):
+        print printUsage.__doc__
+        sys.exit(0)
+
+    # On -s set silent mode.
+    isSilent = hasOpt('-s')
 
     # On -f set the appropriate DocBuilder to use or a default one.
-    builder = PdfDocBuilder0()
-    for o, a in opts:
-        if o == '-f':
-            builder = eval("%sDocBuilder0()" % a)
-            break
+    builderClassName = optsDict.get('-f', 'Pdf') + 'DocBuilder0'
+    builder = eval(builderClassName + '()')
+    
+    # Set default module or package to document.
+    if not hasOpt('-p') and not hasOpt('-m'):
+        optsDict['-m'] = 'docpy0'
 
+    # Save a few options for further use.
+    options = {'isSilent':isSilent}
+    
     # Now call the real documentation functions.
-    if not opts:
-        opts = [('-p', 'reportlab.graphics')] # default setting
+    if hasOpt('-m'):
+        nameOrPath = optsDict['-m']
+        if not isSilent:
+            print "Generating documentation for module %s..." % nameOrPath
+        builder.begin(name=nameOrPath, typ='module')
+        documentModule0(nameOrPath, builder, options)
+    elif hasOpt('-p'):
+        nameOrPath = optsDict['-p']
+        if not isSilent:
+            print "Generating documentation for package %s..." % nameOrPath
+        builder.begin(name=nameOrPath, typ='package')
+        documentPackage0(nameOrPath, builder, options)
+    builder.end()
 
-    for o, a in opts:
-        if o == '-m':
-            builder.begin()
-            documentModule0(a, builder)
-            builder.end()
-            sys.exit(0)
-        elif o == '-p':
-            builder.begin()
-            documentPackage0(a, builder)
-            builder.end()
-            sys.exit(0)
+    if not isSilent:
+        print "Saved %s." % builder.outPath
 
 
 if __name__ == '__main__':
