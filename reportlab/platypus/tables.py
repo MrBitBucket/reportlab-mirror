@@ -906,7 +906,6 @@ class Table(Flowable):
     def draw(self):
         self._curweight = self._curcolor = self._curcellstyle = None
         self._drawBkgrnd()
-        self._drawLines()
         if self._spanCmds == []:
             # old fashioned case, no spanning, steam on and do each cell
             for row, rowstyle, rowpos, rowheight in map(None, self._cellvalues, self._cellStyles, self._rowpositions[1:], self._rowHeights):
@@ -923,6 +922,7 @@ class Table(Flowable):
                         cellval = self._cellvalues[rowNo][colNo]
                         cellstyle = self._cellStyles[rowNo][colNo]
                         self._drawCell(cellval, cellstyle, (x, y), (width, height))
+        self._drawLines()
 
 
     def _drawBkgrnd(self):
