@@ -42,8 +42,8 @@ class CellStyle(PropertySet):
         'valign': 'BOTTOM',
         }
 
-LINECAPS={'butt':0,'round':1,'projecting':2,'squared':2}
-LINEJOINS={'miter':0, 'mitre':0, 'round':1,'bevel':2}
+LINECAPS={None: None, 'butt':0,'round':1,'projecting':2,'squared':2}
+LINEJOINS={None: None, 'miter':0, 'mitre':0, 'round':1,'bevel':2}
 
 # experimental replacement
 class CellStyle1(PropertySet):
@@ -177,6 +177,18 @@ def _multiLine(scp,ecp,y,canvLine,ws,count):
     for idx in xrange(count):
         canvLine(scp, y, ecp, y)
         y -= ws
+
+def _convert2int(value, map, low, high, name, cmd):
+    '''private converter tries map(value) low<=int(value)<=high or finally an error'''
+    try:
+        return map[value]
+    except KeyError:
+        try:
+            ivalue = int(value)
+            if low<=ivalue<=high: return ivalue
+        except:
+            pass
+    raise ValueError('Bad %s value %s in %s'%(name,value,str(cmd)))
 
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
@@ -717,15 +729,8 @@ class Table(Flowable):
             if len(cmd)<6:
                 cmd = cmd+(1,)
             else:
-                cap = cmd[5]
-                try:
-                    if type(cap) is StringType:
-                        cap = LINECAPS[cap]
-                    elif cap<0 or cap>2:
-                        raise ValueError
-                    cmd = cmd[:5]+(cap,)+cmd[6:]
-                except:
-                    raise ValueError('Bad cap value %s in %s'%(cap,str(cmd)))
+                cap = _convert2int(cmd[5], LINECAPS, 0, 2, 'cap', cmd)
+                cmd = cmd[:5]+(cap,)+cmd[6:]
 
             #dashes at index 6 - this is a dash array:
             if len(cmd)<7: cmd += (None,)
@@ -733,15 +738,8 @@ class Table(Flowable):
             #join mode at index 7 - can be string or numeric, look up as for caps
             if len(cmd)<8: cmd = cmd+(1,)
             else:
-                join = cmd[7]
-                try:
-                    if type(join) is StringType:
-                        join = LINEJOINS[join]
-                    elif join<0 or join>2:
-                        raise ValueError
-                    cmd = cmd[:7]+(join,)+cmd[8:]
-                except:
-                    ValueError('Bad join value %s in %s'%(join,str(cmd)))
+                join = _convert2int(cmd[7], LINEJOINS, 0, 2, 'join', cmd)
+                cmd = cmd[:7]+(join,)+cmd[8:]
 
             #linecount at index 8.  Default is 1, set to 2 for double line.
             if len(cmd)<9:
