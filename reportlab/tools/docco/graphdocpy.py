@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.17 2002/07/17 22:46:24 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.18 2002/07/17 23:45:36 andy_robinson Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -19,6 +19,7 @@ import sys
 sys.path.insert(0, '.')
 import os, re, types, string, getopt, pickle, copy, time, pprint, traceback
 from string import find, join, split, replace, expandtabs, rstrip
+import reportlab
 from reportlab import rl_config
 
 from docpy import PackageSkeleton0, ModuleSkeleton0
@@ -186,6 +187,39 @@ assert indentLevel('\thello') == 4, 'error in indentLevel'
 assert indentLevel(' \thello') == 4, 'error in indentLevel'
 assert indentLevel('\t hello') == 5, 'error in indentLevel'
 
+
+def getSource(name):
+    """Attempts to load the source of the given module
+
+    This is a hack piled on a hack; given something like
+    './graphics/axes.py' it will return the content, or try looking
+    for it under 'reportlab', or under 'reportlab.graphics' or
+    just as 'axes.py'.  This is atrocious but I just cannot
+    figure out a rationale for package traversal; I am effectively
+    coding in the places that graphics modules might be found.
+    Must rework the entire docco mechanism!"""
+    found = 0
+    if os.path.isfile(name):
+        found = name
+    else:
+        lastPart = os.path.split(name)[1]
+        if os.path.isfile(lastPart):
+            found = lastPart
+        else:
+            rldir = os.path.dirname(reportlab.__file__)
+            fullPath = os.path.join(rldir, name)
+            if os.path.isfile(fullPath):
+                found = fullPath
+            else:
+                rlgdir = os.path.dirname(reportlab.graphics.__file__)
+                fullPath = os.path.join(rlgdir, name)
+                if os.path.isfile(fullPath):
+                    found = fullPath
+                
+    if found:
+        return open(found).readlines()
+    else:
+        raise IOError, 'file %s not found while working in %s' % (name, os.getcwd())
 
 # This may well be replaceable by something in the inspect module.
 def getFunctionBody(f, linesInFile):
@@ -441,15 +475,16 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
     def _showFunctionDemoCode(self, function):
         """Show a demo code of the function generating the drawing."""
 
+        
         srcFileName = function.func_code.co_filename
         (dirname, fileNameOnly) = os.path.split(srcFileName)
-
+        
         # Heading
         self.story.append(Paragraph("<i>Example</i>", self.bt))
         self.story.append(Paragraph("", self.bt))
 
         # Sample code
-        lines = open(srcFileName, 'r').readlines()
+        lines = getSource(fileNameOnly)
         lines = map(string.rstrip, lines)
         codeSample = getFunctionBody(function, lines)
         self.story.append(Preformatted(codeSample, self.code))
@@ -468,7 +503,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         self.story.append(Paragraph("<i>Example</i>", self.bt))
 
         # Sample code
-        lines = open(srcFileName, 'r').readlines()
+        lines = getSource(fileNameOnly)
         lines = map(string.rstrip, lines)
         codeSample = getFunctionBody(initMethod, lines)
         self.story.append(Preformatted(codeSample, self.code))
@@ -520,7 +555,10 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
 
         widgetClass = widget.__class__
         demoMethod = widgetClass.demo
-        srcFileName = os.path.abspath(demoMethod.im_func.func_code.co_filename)
+        #AR hackery
+        #srcFileName = os.path.abspath(demoMethod.im_func.func_code.co_filename)
+        lastPart = os.path.split(demoMethod.im_func.func_code.co_filename)[1]
+        srcFileName = lastPart #demoMethod.im_func.func_code.co_filename
         (dirname, fileNameOnly) = os.path.split(srcFileName)
 
         # Heading
@@ -529,9 +567,9 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
 
         # Sample code
         try:
-            lines = open(srcFileName, 'r').readlines()
+            lines = getSource(fileNameOnly)
         except IOError:
-            print 'documenting %s running in %s' % (widgetClass, os.getcwd())
+            print 'documenting method %s of class %s running in %s' % (demoMethod.im_func.func_code.co_filename, widgetClass, os.getcwd())
             raise
             
         lines = map(string.rstrip, lines)
@@ -664,7 +702,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
         self.outLines.append('<H3>Example</H3>')
 
         # Sample code
-        lines = open(srcFileName, 'r').readlines()
+        lines = getSource(fileNameOnly)
         lines = map(string.rstrip, lines)
         codeSample = getFunctionBody(function, lines)
         self.outLines.append('<PRE>%s</PRE>' % codeSample)
@@ -729,7 +767,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
         self.outLines.append('<H3>Example Code</H3>')
 
         # Sample code
-        lines = open(srcFileName, 'r').readlines()
+        lines = getSource(fileNameOnly)
         lines = map(string.rstrip, lines)
         codeSample = getFunctionBody(demoMethod, lines)
         self.outLines.append('<PRE>%s</PRE>' % codeSample)
@@ -937,7 +975,6 @@ def documentModule0(pathOrName, builder, opts={}):
 
 def _packageWalkCallback((builder, opts), dirPath, files):
     "A callback function used when waking over a package tree."
-
     #must CD into a directory to document the module correctly
     cwd = os.getcwd()
     os.chdir(dirPath)
@@ -952,7 +989,8 @@ def _packageWalkCallback((builder, opts), dirPath, files):
         if not opts.get('isSilent', 0):
             print path
         builder.indentLevel = builder.indentLevel + 1
-        documentModule0(path, builder)
+        #documentModule0(path, builder)
+        documentModule0(f, builder)
         builder.indentLevel = builder.indentLevel - 1
     #CD back out
     os.chdir(cwd)
