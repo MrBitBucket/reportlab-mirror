@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.53 2001/11/03 19:05:01 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.53 2001/11/03 19:05:01 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.54 2001/11/19 16:22:28 aaron_watters Exp $
+__version__=''' $Id: pdfdoc.py,v 1.54 2001/11/19 16:22:28 aaron_watters Exp $ '''
 __doc__=""" 
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The 
@@ -369,6 +369,20 @@ class PDFDocument:
         """test for existence of named form"""
         internalname = formName(name)
         return self.idToObject.has_key(internalname)
+
+    def getFormBBox(self, name):
+        "get the declared bounding box of the form as a list"
+        internalname = formName(name)
+        if self.idToObject.has_key(internalname):
+            theform = self.idToObject[internalname]
+            if isinstance(theform, PDFFormXObject):
+                # internally defined form
+                return theform.BBoxList()
+            elif isinstance(theform, PDFStream):
+                # externally defined form
+                return list(theform.dictionary.dict["BBox"].sequence)
+            else:
+                raise ValueError, "I don't understand the form instance %s" % repr(name)
 
     def getFormName(self, name):
         """Lets canvas find out what form is called internally.
@@ -1604,6 +1618,13 @@ class PDFFormXObject:
         if type(data) is types.ListType:
             data = string.join(data, LINEEND)
         self.stream = data
+
+    def BBoxList(self):
+        "get the declared bounding box for the form as a list"
+        if self.BBox:
+            return list(self.BBox.sequence)
+        else:
+            return [self.lowerx, self.lowery, self.upperx, self.uppery]
         
     def format(self, document):
         self.BBox = self.BBox or PDFArray([self.lowerx, self.lowery, self.upperx, self.uppery])
