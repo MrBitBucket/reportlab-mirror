@@ -33,13 +33,16 @@
 #
 ###############################################################################
 #	$Log: colors.py,v $
+#	Revision 1.4  2000/04/05 14:22:38  rgbecker
+#	Allow 0x in HexColor, added stringToColor, fixed caching in getAllNamedColors
+#
 #	Revision 1.3  2000/03/24 10:37:02  rgbecker
 #	Sync with pingo
-#
+#	
 #	Revision 1.2  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
 #	
-__version__=''' $Id: colors.py,v 1.3 2000/03/24 10:37:02 rgbecker Exp $ '''
+__version__=''' $Id: colors.py,v 1.4 2000/04/05 14:22:38 rgbecker Exp $ '''
 
 import string
 import math
@@ -85,12 +88,20 @@ def HexColor(val):
 
     HTML uses a hex string with a preceding hash; if this is present,
     it is stripped off.  (AR, 3-3-2000)
+
+    For completeness I assume that #aabbcc or 0xaabbcc are hex numbers
+    otherwise a pure integer is converted as decimal rgb
     """
 
     if type(val) == types.StringType:
+        b = 10
         if val[:1] == '#':
             val = val[1:]
-        val = string.atoi(val,16)
+            b = 16
+        elif string.lower(val[:2]) == '0x':
+            b = 16
+            val = val[2:]
+        val = string.atoi(val,b)
     factor = 1.0 / 255
     return Color(factor * ((val >> 16) & 0xFF), 
               factor * ((val >> 8) & 0xFF),
@@ -268,12 +279,14 @@ __namedColors = None
 def getAllNamedColors():
     #returns a dictionary of all the named ones in the module
     # uses a singleton for efficiency
+    if __namedColors is not None: return __namedColors
     import colors
-    namedColors = {}
+    __namedColors = {}
     for (name, value) in colors.__dict__.items():
         if isinstance(value, Color):
-            namedColors[name] = value
-    return namedColors
+            __namedColors[name] = value
+
+    return __namedColors
 
 def describe(aColor):
     # finds nearest match to one you provide.  Useful when
@@ -286,4 +299,16 @@ def describe(aColor):
         if distance < closest[0]:
             closest = (distance, name, color)
     print 'best match is %s, distance %0.4f' % (closest[1], closest[0])
-            
+
+def stringToColor(str):
+	'''try to map an arbitrary string to a color instance'''
+	if type(str) == types.StringType:
+		c = getAllNamedColors()
+		str = string.lower(str)
+		if C.has_key(str):
+			return C[str]
+
+	try:
+		return HexColor(str)
+	except:
+		raise 'Invalid color value', str
