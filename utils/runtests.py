@@ -32,14 +32,17 @@
 #
 ###############################################################################
 #	$Log: runtests.py,v $
+#	Revision 1.3  2000/03/02 10:43:37  rgbecker
+#	Fixed problem with -dir relativepath
+#
 #	Revision 1.2  2000/02/23 15:08:23  rgbecker
 #	Fixed clean_files
-#
+#	
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
 #	
-__version__=''' $Id: runtests.py,v 1.2 2000/02/23 15:08:23 rgbecker Exp $ '''
+__version__=''' $Id: runtests.py,v 1.3 2000/03/02 10:43:37 rgbecker Exp $ '''
 '''
 script for testing ReportLab
 '''
@@ -170,6 +173,11 @@ Usage
 			dflag = k=='-dir'
 
 	dir = os.path.normcase(os.path.normpath(dir))
+	if not os.path.isdir(dir):
+		usage(code=1,msg='-dir needs a directory')
+
+	if not os.path.isabs(dir): #abspath not available under 1.5.1
+		dir = os.path.join(os.getcwd(),dir)
 	if not os.path.isdir(dir):
 		usage(code=1,msg="Invalid directory '%s'"%dir)
 
