@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.6 2001/05/22 12:16:58 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.7 2001/05/23 16:47:57 rgbecker Exp $
 import string
 
 from reportlab.lib import colors
@@ -23,6 +23,8 @@ class Label(Widget):
 	# framework.
 
 	_attrMap = AttrMap(
+        x = AttrMapValue(isNumber),
+        y = AttrMapValue(isNumber),
 		dx = AttrMapValue(isNumber),
 		dy = AttrMapValue(isNumber),
 		angle = AttrMapValue(isNumber),
@@ -41,8 +43,8 @@ class Label(Widget):
 		)
 
 	def __init__(self):
-		self._x = 100
-		self._y = 75
+		self.x = 0
+		self.y = 0
 		self._text = 'Multi-Line\nString' 
 
 		self.dx = 0
@@ -60,7 +62,6 @@ class Label(Widget):
 		self.height = None
 		self.textAnchor = 'start'
 
-
 	def setText(self, text):
 		"""Set the text property.  May contain embedded newline characters.
 		Called by the containing chart or axis."""
@@ -70,8 +71,8 @@ class Label(Widget):
 	def setOrigin(self, x, y):
 		"""Set the origin.	This would be the tick mark or bar top relative to
 		which it is defined.  Called by the containing chart or axis."""
-		self._x = x
-		self._y = y
+		self.x = x
+		self.y = y
 
 
 	def demo(self):
@@ -131,7 +132,7 @@ class Label(Widget):
 	def draw(self):
 		self.computeSize()
 		g = Group()
-		g.translate(self._x + self.dx, self._y + self.dy)
+		g.translate(self.x + self.dx, self.y + self.dy)
 		g.rotate(self.angle)
 
 		y = self._top - self.fontSize
