@@ -1,10 +1,11 @@
 .t ReportLab -- Reporting for the Internet Age
 
-.h What is ReportLab?
+.h1 What is ReportLab?
+
 ReportLab is a is a new generation reporting tool for the Internet era.  The core is a software library which directly generates PDF documents, without the need for Acrobat
 Distiller, PostScript or any print drivers.  Every report consists of a script which can
 
-1.	Acquire data from almost anywhere – databases, files, XML, internet protocols, DLLs, COM and CORBA objects
+1.	Acquire data from almost anywhere - databases, files, XML, internet protocols, DLLs, COM and CORBA objects
 
 2.	Transform and integrate the data as needed
 
@@ -18,7 +19,7 @@ Most existing reporting tools only focus on Part 4.  We aim to tackle the entire
 
 The core library works now and has been in use for over a year in a wide range of environments.  It works unchanged on Unix, Windows and Macintosh and many other major platforms, providing a completely general programmable reporting and document generation solution.
 
-.h About Portable Document Format (PDF)
+.h1 About Portable Document Format (PDF)
 
 Portable Document Format (PDF) is an open standard published and supported by Adobe Corporation, intended as a 'final form' for electronic documents. PDF documents can be printed, displayed,
 sent as electronic mail attachments, stored in databases, or published on web sites. PDF format has been used extensively
@@ -32,7 +33,8 @@ These tools work well  for creating documents as one-off step, but are too cumbe
 Due to the complex, binary nature of the PDF file format, the creation of PDF files requires the use of sophisticated software tools.  To date very few libraries have been created to work directly with PDF.  The ReportLab programmer's toolkit makes the dynamic creation of beautiful PDF files easy.
 
 
-.h Where will it be used?
+.h1 Where will it be used?
+
 The ReportLab toolkit is expected to be useful in a variety of areas including
 
    - Dynamic PDF generation on the web
@@ -45,7 +47,7 @@ The ReportLab toolkit is expected to be useful in a variety of areas including
 
    - Going from XML to PDF in one step!
 
-.h How ReportLab Works
+.h1 How ReportLab Works
 
 The ReportLab package consists of several layers.  The core is a 'canvas' object which creates PDF documents.  Programmers have access to functions which place strings of text or graphical shapes directly on the page, or to PDF-specific features such as page transition effects.  
 
@@ -60,15 +62,17 @@ databases such as Oracle and Sybase).  It is at the forefront of XML development
 
 ReportLab will provide additional native bindings of the core services in other programming languages such as C++, Java, and Visual Basic in the near future. 
 
-.h Detailed examples
+.h1 Detailed examples
 
 We foresee many applications for ReportLab technology.
 Consider the following selection of scenarios, for example.
 
-.i Personalized portal newsletter.
+.h2 Personalized portal newsletter.
+
 Many web portals provide personalized spaces associated with personalized advertising.  In a similar manner a portal could use the ReportLab toolkit to create downloadable personalized documents, also including personalized advertising targeted to the user's profile and interests.  A PDF document would offer a far more suitable environment for framing personalized content and advertizing than HTML since PDF provides complete control of page layout, whereas the layout control in HTML is very primitive and limited.  In fact, content and advertising presented in PDF could attain magazine quality presentation when printed on the user's low priced color printer.
 
-.i Realtime online securities statement.
+.h2 Realtime online securities statement.
+
 A securities firm, fund manager, or bank could use the ReportLab toolkit
 to build a downloadable customer statement in real time, in response to a "submit" click
 on a web form.  The statement would be indistinguishable from a personalized
@@ -80,7 +84,8 @@ portfolio data, performance histories of the securities held, and various analyt
 reports such as portfolio analysis indicating opportunities to rearrange the
 holdings according to the customer's stated goals.
 
-.i Management, scientific and engineering reporting.
+.h2 Management, scientific and engineering reporting.
+
 Periodic reports are an essential tool of modern corporate life.
 These reports frequently integrate text, tabular data, and charts, often in a
 standard format.  An automated script can use the ReportLab toolkit to
@@ -93,10 +98,12 @@ electronically.
 
 
 
-.h Different Approaches to Reporting
+.h1 Different Approaches to Reporting
+
 There are two broad approaches to building reporting tools, which we will call "graphical" and "script based".  
 
-.i Graphical Report Editing
+.h2 Graphical Report Editing
+
 The most common approach is to use a graphical report layout editor tied to a relational database, and is seen in packages such a Crystal Reports, Access, and equivalent tools from major vendors such as Oracle and Sybase.  This can be a quick and easy way to create database reports, but has serious limitations:
 
 - If your data needs to come from a non-relational data source, or from multiple sources, the tool just won't do the job
@@ -107,7 +114,8 @@ The most common approach is to use a graphical report layout editor tied to a re
 - Sooner or later, you will encounter 
 
 
-.i Script based systems
+.h2 Script based systems
+
 This is the approach commonly used by Fortune 500 companies with serious requirements such as printing tens of thousands of
 customer statements, formatting the Yellow Pages and so on.
 These use a script in some (often proprietary) scripting language which reads in some input, offers commands to format the data, and writes out some sort of printable 'spool file' - often PostScript, or a printer control language such as IPDS or PCL.  Examples include products such as PReS (
@@ -139,7 +147,8 @@ ReportLab aims to be the best of the script-based systems, and offers the follow
 - the Open Source business model encourages a community of developers contributing new 'content objects', which everybody can use in their reports.  New style of charts, tables and diagrams will be continually released, in application areas we have not even considered yet.
 
 
-.h Why is it Open Source?
+.h1 Why is it Open Source?
+
 From our viewpoint as a vendor, open Source lets us develop a better quality product, faster.  The present package started as Open Source, and this approach has served us well.  We can call on a large pool of testers and co-developers working on many platforms; we have attracted world-class developers to use our tools, bugs tend to be found quickly, ugly code rooted out and improved, and in general we are achieving a rate of development which would be extremely costly or impossible within a commercial model.
 
 From a customer's viewpoint, you can try it out freely and without restrictions.  The only decision you need to take is the degree of installation help, consulting, training and support you need to implement a solution.  If you have the skills you need in house, you don't need us - and we will welcome your feedback to help improve the product further.  However, any serious reporting project involves work, and we are confident that our skills will be in demand.
@@ -149,22 +158,25 @@ Finally, an Open Source reporting system has a chance to become a global standar
 
 
 
-.h Who we are
+.h1 Who we are
 
-.i Andy Robinson.
+.h2 Andy Robinson.
+
 Chief Executive Officer, Chief Architect.
 Andy has extensive experience as a software consultant and 
 financial analyst, working in London and Tokyo. 
 
-.i Etienne Perold.
+.h2 Etienne Perold.
+
 Chairman.  Etienne runs Founding Partners, an early-stage venture capital firm working to incubate new technology businesses.  He worked for many years as a management consultant and sits on the board of a number of corporations.
 
-.i Aaron Watters.
+.h2 Aaron Watters.
+
 Chief Technical Officer.
 Aaron has been programming computers since 1975 and has worked
 at Bell Laboratories as software engineer and architect and at the New Jersey Institute of Technology as an assistant professor.  he holds a Pd.D in Computer Science
 
-.h Current Status
+.h1 Current Status
 
 The base layers of the ReportLab toolkit work now, and are all that is needed to commence developing serious solutions.
 

@@ -144,7 +144,14 @@ def getStyleSheet():
                                   leading=8.8,
                                   leftIndent=36,
                                   firstLineIndent=36))
-    
+
+    stylesheet.add(ParagraphStyle(name='URL',
+                                  parent=stylesheet['Normal'],
+                                  fontName='Courier',
+                                  textColor=colors.navy,
+                                  alignment=TA_CENTER),
+                   alias='u')
+        
     stylesheet.add(ParagraphStyle(name='centred',
                                   parent=stylesheet['Normal'],
                                   alignment=TA_CENTER
