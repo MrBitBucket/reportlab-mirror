@@ -1,0 +1,178 @@
+diff -rc -ICopyright (c) 1997 -I$Header: /tmp/reportlab/rl_addons/pyRXP/patches/rl-1.2.5.patch,v 1.1 2002/03/22 11:07:52 rgbecker Exp $Id: rxp-1.2.5\stdio16.c rxp\stdio16.c
+*** rxp-1.2.5\stdio16.c	Tue Nov 20 17:14:50 2001
+--- rxp\stdio16.c	Tue Jan 22 11:15:58 2002
+***************
+*** 40,45 ****
+--- 40,46 ----
+  #if defined(WIN32) && !defined(__CYGWIN__)
+  #undef boolean
+  #include <winsock.h>
++ #include <io.h>
+  #include <fcntl.h>
+  #include <io.h>
+  #else
+diff -rc -ICopyright (c) 1997 -I$Header: /tmp/reportlab/rl_addons/pyRXP/patches/rl-1.2.5.patch,v 1.1 2002/03/22 11:07:52 rgbecker Exp $Id: rxp-1.2.5\system.h rxp\system.h
+*** rxp-1.2.5\system.h	Wed Feb 17 13:32:54 1999
+--- rxp\system.h	Tue Jan 22 11:15:58 2002
+***************
+*** 4,9 ****
+--- 4,14 ----
+  #define XML_API
+  #define WIN_IMP
+  #define EXPRT
++ #ifdef _WIN32
++ #	ifndef WIN32
++ #		define WIN32
++ #	endif
++ #endif
+  
+  void *Malloc(int bytes);
+  void *Realloc(void *mem, int bytes);
+diff -rc -ICopyright (c) 1997 -I$Header: /tmp/reportlab/rl_addons/pyRXP/patches/rl-1.2.5.patch,v 1.1 2002/03/22 11:07:52 rgbecker Exp $Id: rxp-1.2.5\xmlparser.c rxp\xmlparser.c
+*** rxp-1.2.5\xmlparser.c	Sat Oct 27 11:06:18 2001
+--- rxp\xmlparser.c	Tue Jan 22 11:18:46 2002
+***************
+*** 961,967 ****
+      }
+  }
+  
+! void ParserPerror(Parser p, XBit bit)
+  {
+      int linenum, charnum;
+      InputSource s, root;
+--- 961,967 ----
+      }
+  }
+  
+! void _ParserPerror(FILE16 *f, Parser p, XBit bit)
+  {
+      int linenum, charnum;
+      InputSource s, root;
+***************
+*** 978,1003 ****
+  	    --e;
+  
+  	if(p->state == PS_validate_dtd)
+! 	    Fprintf(Stderr, "%s:-1(end of prolog):-1: ", e);
+  	else if(p->state == PS_validate_final)
+! 	    Fprintf(Stderr, "%s:-1(end of body):-1: ", e);
+  	else
+! 	    Fprintf(Stderr, "%s:%d:%d: ", e,root->line_number+1, root->next+1);
+  
+  	if(bit->type == XBIT_warning)
+! 	    Fprintf(Stderr, "warning: ");
+! 	Fprintf(Stderr, "%s\n", bit->error_message);
+  
+  	return;
+      }
+  
+!     Fprintf(Stderr, "%s: %s\n", 
+  	    bit->type == XBIT_error ? "Error" : "Warning", 
+  	    bit->error_message);
+  
+      if(p->state == PS_validate_dtd || p->state == PS_validate_final)
+      {
+! 	Fprintf(Stderr, " (detected at end of %s of document %s)\n",
+  		p->state == PS_validate_final ? "body" : "prolog",
+  		EntityDescription(root->entity));
+  
+--- 978,1003 ----
+  	    --e;
+  
+  	if(p->state == PS_validate_dtd)
+! 	    Fprintf(f, "%s:-1(end of prolog):-1: ", e);
+  	else if(p->state == PS_validate_final)
+! 	    Fprintf(f, "%s:-1(end of body):-1: ", e);
+  	else
+! 	    Fprintf(f, "%s:%d:%d: ", e,root->line_number+1, root->next+1);
+  
+  	if(bit->type == XBIT_warning)
+! 	    Fprintf(f, "warning: ");
+! 	Fprintf(f, "%s\n", bit->error_message);
+  
+  	return;
+      }
+  
+!     Fprintf(f, "%s: %s\n", 
+  	    bit->type == XBIT_error ? "Error" : "Warning", 
+  	    bit->error_message);
+  
+      if(p->state == PS_validate_dtd || p->state == PS_validate_final)
+      {
+! 	Fprintf(f, " (detected at end of %s of document %s)\n",
+  		p->state == PS_validate_final ? "body" : "prolog",
+  		EntityDescription(root->entity));
+  
+***************
+*** 1007,1032 ****
+      for(s=p->source; s; s=s->parent)
+      {
+  	if(s->entity->name)
+! 	    Fprintf(Stderr, " in entity \"%S\"", s->entity->name);
+  	else
+! 	    Fprintf(Stderr, " in unnamed entity");
+  
+  	switch(SourceLineAndChar(s, &linenum, &charnum))
+  	{
+  	case 1:
+! 	    Fprintf(Stderr, " at line %d char %d of", linenum+1, charnum+1);
+  	    break;
+  	case 0:
+! 	    Fprintf(Stderr, " defined at line %d char %d of",
+  		    linenum+1, charnum+1);
+  	    break;
+  	case -1:
+! 	    Fprintf(Stderr, " defined in");
+  	    break;
+  	}
+  
+! 	Fprintf(Stderr, " %s\n", EntityDescription(s->entity));
+      }
+  }
+  
+  
+--- 1007,1037 ----
+      for(s=p->source; s; s=s->parent)
+      {
+  	if(s->entity->name)
+! 	    Fprintf(f, " in entity \"%S\"", s->entity->name);
+  	else
+! 	    Fprintf(f, " in unnamed entity");
+  
+  	switch(SourceLineAndChar(s, &linenum, &charnum))
+  	{
+  	case 1:
+! 	    Fprintf(f, " at line %d char %d of", linenum+1, charnum+1);
+  	    break;
+  	case 0:
+! 	    Fprintf(f, " defined at line %d char %d of",
+  		    linenum+1, charnum+1);
+  	    break;
+  	case -1:
+! 	    Fprintf(f, " defined in");
+  	    break;
+  	}
+  
+! 	Fprintf(f, " %s\n", EntityDescription(s->entity));
+      }
++ }
++ 
++ void ParserPerror(Parser p, XBit bit)
++ {
++ 	_ParserPerror(Stderr,p,bit);
+  }
+  
+  
+diff -rc -ICopyright (c) 1997 -I$Header: /tmp/reportlab/rl_addons/pyRXP/patches/rl-1.2.5.patch,v 1.1 2002/03/22 11:07:52 rgbecker Exp $Id: rxp-1.2.5\xmlparser.h rxp\xmlparser.h
+*** rxp-1.2.5\xmlparser.h	Fri May 04 14:09:56 2001
+--- rxp\xmlparser.h	Tue Jan 22 11:18:46 2002
+***************
+*** 208,213 ****
+--- 208,214 ----
+  #define ParserGetFlag(p, flag) \
+    (((flag) < 32) ? ((p)->flags[0] & (1u << (flag))) : ((p)->flags[1] & (1u << ((flag)-32))))
+  
++ XML_API void _ParserPerror(FILE16 *f, Parser p, XBit bit);
+  XML_API void ParserPerror(Parser p, XBit bit);
+  
+  #endif /* XMLPARSER_H */
