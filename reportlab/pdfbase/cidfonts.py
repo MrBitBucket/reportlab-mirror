@@ -2,14 +2,14 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/cidfonts?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: cidfonts.py,v 1.1 2001/09/04 08:52:13 andy_robinson Exp $ '''
+__version__=''' $Id: cidfonts.py,v 1.2 2001/09/10 02:39:30 andy_robinson Exp $ '''
 __doc__="""CID (Asian multi-byte) font support.
 
 This defines classes to represent CID fonts.  They know how to calculate
 their own width and how to write themselves into PDF files."""
 
 import os
-from types import ListType, TupleType
+from types import ListType, TupleType, DictType
 from string import find, split, strip
 
 from reportlab.pdfbase import pdfmetrics
@@ -34,6 +34,21 @@ Please modify the directory list at the beginning of jpsupport.py to include
 the correct directory location for your Adobe CMap files.  If you believe
 your files are in a standard location, let us know and we will extend the
 search path in the next release.""")
+
+def structToPDF(structure):
+    "Converts deeply nested structure to PDFdoc dictionary/array objects"
+    if type(structure) is DictType:
+        newDict = {}
+        for k, v in structure.items():
+            newDict[k] = structToPDF(v)
+        return pdfdoc.PDFDictionary(newDict)
+    elif type(structure) in (ListType, TupleType):
+        newList = []
+        for elem in structure:
+            newList.append(structToPDF(elem))
+        return pdfdoc.PDFArray(newList)
+    else:
+        return structure
 
 class CIDEncoding(pdfmetrics.Encoding):
     """Multi-byte encoding.  These are loaded from CMAP files.
@@ -262,144 +277,31 @@ class CIDFont(pdfmetrics.Font):
         will be replaced by something that pulls the data from
         _cidfontdata.py in the next few days."""
         internalName = 'F' + repr(len(doc.fontMapping)+1)
-        
-        if self.face.name == 'HeiseiMin-W3':
-            self.addMinchoObjects(doc, internalName)
-        elif self.face.name == 'HeiseiKakuGo-W5':
-            self.addGothicObjects(doc, internalName)
-        else:
-            raise Exception("Sack the programmer! Unexpected font face which should have been trapped earlier")
 
+        bigDict = CIDFontInfo[self.face.name]
+        bigDict['Name'] = '/' + internalName
+        bigDict['Encoding'] = '/' + self.encoding
+
+        #convert to PDF dictionary/array objects
+        cidObj = structToPDF(bigDict)
+
+        # link into document, and add to font map        
+        r = doc.Reference(cidObj, internalName)
+        fontDict = doc.idToObject['BasicFonts'].dict
+        fontDict[internalName] = r
         doc.fontMapping[self.name] = '/' + internalName
-
-    def addMinchoObjects(self, doc, internalName):
-        """Adds the PDF objects for HeiseiMin-W3"""
-        Mincho_part_3 = pdfdoc.PDFDictionary({
-            'Type': '/FontDescriptor',
-            'Ascent': 723,
-            'CapHeight': 709,
-            'Descent': -241,
-            'Flags': 6,
-            'FontBBox': pdfdoc.PDFArray([-123, -257, 1001, 910]),
-            'FontName': '/' + self.name,
-            'ItalicAngle': 0,
-            'StemV': 69,
-            'XHeight': 450,
-            'Style': pdfdoc.PDFDictionary({'Panose': '<010502020400000000000000>'})
-            })
-        Mincho_part_3.__Comment__ = 'CID Font (Mincho) FontDescriptor'
-        r1 = doc.Reference(Mincho_part_3)
-
-        Mincho_part_2 = pdfdoc.PDFDictionary({
-            'Type':'/Font',
-            'Subtype':'/CIDFontType0',
-            'BaseFont':'/' + self.name,
-            'FontDescriptor': r1, # <---- here's the cross-reference
-            'CIDSystemInfo': pdfdoc.PDFDictionary({
-                'Registry': '(Adobe)',
-                'Ordering': '(Japan1)',
-                'Supplement': 2
-                }),
-            'DW': 1000,
-            'W': pdfdoc.PDFArray([
-                1, pdfdoc.PDFArray([277,305,500,668,668,906,727,305,445,445,508,668,305,379,305,539 ]),
-                17, 26, 668,
-                27, pdfdoc.PDFArray([305, 305, 668, 668, 668, 566, 871, 727, 637, 652, 699, 574, 555,
-                                     676, 687, 242, 492, 664, 582, 789, 707, 734, 582, 734, 605, 605,
-                                     641, 668, 727, 945, 609, 609, 574, 445, 668, 445, 668, 668, 590,
-                                     555, 609, 547, 602, 574, 391, 609, 582, 234, 277, 539, 234, 895,
-                                     582, 605, 602, 602, 387, 508, 441, 582, 562, 781, 531, 570, 555,
-                                     449, 246, 449, 668]),
-                231, 632, 500
-                ])
-            })
-        Mincho_part_2.__Comment__ = 'CID Font'
-        r2 = doc.Reference(Mincho_part_2)
         
-        Mincho_part_1 = pdfdoc.PDFDictionary({
-            'Type':'/Font',
-            'Subtype':'/Type0',
-            'Name': '/'+internalName, #<-- the internal name
-            'BaseFont': '/' + self.fontName,
-            'Encoding': '/' + self.encoding,
-            'DescendantFonts': pdfdoc.PDFArray([r2])
-            })
-        Mincho_part_1.__Comment__ = 'CID Font Parent'
-        
-        r3 = doc.Reference(Mincho_part_1, internalName)
 
-                # also refer to it in the BasicFonts dictionary
-        fontDict = doc.idToObject['BasicFonts'].dict
-        fontDict[internalName] = r3
-    
-
-    def addGothicObjects(self, doc, internalName):
-        """Adds the PDF objects for HeiseiKakuGo-W5"""
-        Gothic_part_3 = pdfdoc.PDFDictionary({
-            'Type': '/FontDescriptor',
-            'Ascent': 752,
-            'CapHeight': 737,
-            'Descent': -221,
-            'Flags': 4,
-            'FontBBox': pdfdoc.PDFArray([-92, -250, 1010, 922]),
-            'FontName': '/' + self.faceName,
-            'ItalicAngle': 0,
-            'StemV': 114,
-            'XHeight': 553,
-            'Style': pdfdoc.PDFDictionary({'Panose': '<0801020b0600000000000000>'})
-            })
-        Gothic_part_3.__Comment__ = 'CID Font (Mincho) FontDescriptor'
-        r1 = doc.Reference(Gothic_part_3)
-
-        Gothic_part_2 = pdfdoc.PDFDictionary({
-            'Type':'/Font',
-            'Subtype':'/CIDFontType0',
-            'BaseFont':'/' + self.faceName,
-            'FontDescriptor': r1, # <---- here's the cross-reference
-            'CIDSystemInfo': pdfdoc.PDFDictionary({
-                'Registry': '(Adobe)',
-                'Ordering': '(Japan1)',
-                'Supplement': 2
-                }),
-            'DW': 1000,
-            'W': pdfdoc.PDFArray([
-                1, pdfdoc.PDFArray([277,305,500,668,668,906,727,305,445,445,508,668,305,379,305,539 ]),
-                17, 26, 668,
-                27, pdfdoc.PDFArray([305, 305, 668, 668, 668, 566, 871, 727, 637, 652, 699, 574, 555,
-                                     676, 687, 242, 492, 664, 582, 789, 707, 734, 582, 734, 605, 605,
-                                     641, 668, 727, 945, 609, 609, 574, 445, 668, 445, 668, 668, 590,
-                                     555, 609, 547, 602, 574, 391, 609, 582, 234, 277, 539, 234, 895,
-                                     582, 605, 602, 602, 387, 508, 441, 582, 562, 781, 531, 570, 555,
-                                     449, 246, 449, 668]),
-                231, 632, 500
-                ])
-            })
-        Gothic_part_2.__Comment__ = 'CID Font'
-        r2 = doc.Reference(Gothic_part_2)
-        
-        Gothic_part_1 = pdfdoc.PDFDictionary({
-            'Type':'/Font',
-            'Subtype':'/Type0',
-            'Name': '/'+internalName, #<-- the internal name
-            'BaseFont': '/' + self.name,
-            'Encoding': '/' + self.encoding,
-            'DescendantFonts': pdfdoc.PDFArray([r2])
-            })
-        Gothic_part_1.__Comment__ = 'CID Font Parent'
-        
-        r3 = doc.Reference(Gothic_part_1, internalName)
-
-                # also refer to it in the BasicFonts dictionary
-        fontDict = doc.idToObject['BasicFonts'].dict
-        fontDict[internalName] = r3
     
 def test():
+    # only works if you have cirrect encodings on your box!
     c = Canvas('test_japanese.pdf')
     c.setFont('Helvetica', 30)
     c.drawString(100,700, 'Japanese Font Support')
 
     pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90ms-RKSJ-H'))
     pdfmetrics.registerFont(CIDFont('HeiseiKakuGo-W5','90ms-RKSJ-H'))
+        
 
     # the two typefaces
     c.setFont('HeiseiMin-W3-90ms-RKSJ-H', 16)
@@ -410,6 +312,8 @@ def test():
     c.drawString(100, 675, message1)
     c.save()
     print 'saved test_japanese.pdf'
+
+
 ##    print 'CMAP_DIR = ', CMAP_DIR
 ##    tf1 = CIDTypeFace('HeiseiMin-W3')
 ##    print 'ascent = ',tf1.ascent

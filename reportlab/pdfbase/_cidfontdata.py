@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/_cidfontdata.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: _cidfontdata.py,v 1.1 2001/09/04 08:52:13 andy_robinson Exp $ '''
+__version__=''' $Id: _cidfontdata.py,v 1.2 2001/09/10 02:39:30 andy_robinson Exp $ '''
 __doc__="""
 This defines additional static data to support CID fonts.
 
@@ -14,9 +14,9 @@ through Distiller, then examining the resulting PDFs.
 Each font is described as a big nested dictionary.  This lets us keep
 code out of the module altogether and avoid circular dependencies.
 """
-languages = ['japanese']
+languages = ['japanese', 'korean']
 
-allowedTypeFaces = ['HeiseiMin-W3', 'HeiseiKakuGo-W5']
+allowedTypeFaces = ['HeiseiMin-W3', 'HeiseiKakuGo-W5', '\xB9\xD9\xC5\xC1\xC3\xBC']
 allowedEncodings = [
     # list of official encoding names we support, from PDF Spec
     '83pv-RKSJ-H', #Macintosh, JIS X 0208 character set with KanjiTalk6 extensions, Shift-JIS encoding, Script Manager code 1
@@ -37,6 +37,9 @@ allowedEncodings = [
     'UniJIS-UCS2-V', #Vertical version of UniJIS-UCS2-H
     'UniJIS-UCS2-HW-H', #Same as UniJIS-UCS2-H, but replaces proportional Latin characters with half-width forms
     'UniJIS-UCS2-HW-V', #Vertical version of UniJIS-UCS2-HW-H
+
+    #Korean font
+    'KSCms-UHC-H'    
     ]
 
 CIDFontInfo = {}
@@ -129,6 +132,44 @@ CIDFontInfo['HeiseiKakuGo-W5'] =  {'Type':'/Font',
                                          449, 246, 449, 668),
                     231, 632, 500
                     )
+                }] # end descendant fonts
+            }
+
+
+CIDFontInfo['\xB9\xD9\xC5\xC1\xC3\xBC'] =  {'Type':'/Font',
+            'Subtype':'/Type0',
+            'Name': '/%(internalName)s', #<-- the internal name
+            'BaseFont': '/\xB9\xD9\xC5\xC1\xC3\xBC',
+            'Encoding': '/%(encodings)s',
+            'DescendantFonts': [{'Type':'/Font',
+                'Subtype':'/CIDFontType2',
+                'BaseFont':'/\xB9\xD9\xC5\xC1\xC3\xBC',
+                'FontDescriptor': {
+                    'Type': '/FontDescriptor',
+                    'Ascent': 858,
+                    'AvgWidth': 500,
+                    'CapHeight': 858,
+                    'Descent': -142,
+                    'Flags': 7,
+                    'FontBBox': [-100, -142, 1100, 1000],
+                    'FontName': '/#b#d#c#c#c#b',
+                    'ItalicAngle': 0,
+                    'Leading': 148,
+                    'MaxWidth': 1000,
+                    'MissingWidth': 500,
+                    'StemH': 91,
+                    'StemV': 91,
+                    'XHeight': 429,
+                    'Style': {'Panose': '<000000000000000000000000>'}
+                    },
+                'CIDSystemInfo': {
+                    'Registry': '(Adobe)',
+                    'Ordering': '(Korea1)',
+                    'Supplement': 1
+                    },
+                'DW': 1000,
+                'W': (1, 94, 500),
+                'WinCharSet': 129
                 }] # end descendant fonts
             }
 
