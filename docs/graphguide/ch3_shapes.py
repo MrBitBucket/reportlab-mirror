@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch3_shapes.py,v 1.3 2001/08/11 14:33:58 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/graphguide/ch3_shapes.py,v 1.4 2001/08/11 15:18:41 rgbecker Exp $
 
 from rl_doc_utils import *
 from reportlab.graphics.shapes import *
@@ -248,7 +248,8 @@ eg("""
 from reportlab.pdfbase import pdfmetrics
 from reportlab import rl_config
 rl_config.warnOnMissingFontGlyphs = 0
-T1face = pdfmetrics.EmbeddedType1Face('LeERC___.AFM', 'LeERC___.PFB')
+afmFile, pfbFile = getJustFontPaths()
+T1face = pdfmetrics.EmbeddedType1Face(afmFile, pfbFile)
 T1faceName = 'LettErrorRobot-Chrome'
 pdfmetrics.registerTypeFace(T1face)
 T1font = pdfmetrics.Font(T1faceName, T1faceName, 'WinAnsiEncoding')

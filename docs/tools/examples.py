@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/examples.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/tools/examples.py,v 1.1 2001/08/11 14:33:13 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/tools/examples.py,v 1.2 2001/08/11 15:18:41 rgbecker Exp $
 import string
 
 testannotations="""
@@ -458,13 +458,9 @@ def customfont1(canvas):
 	import reportlab.rl_config
 	reportlab.rl_config.warnOnMissingFontGlyphs = 0
 
-	import os
-	import reportlab.test
-	folder = os.path.dirname(reportlab.test.__file__)
-	afmFile = os.path.join(folder, 'LeERC___.AFM')
-	pfbFile = os.path.join(folder, 'LeERC___.PFB')
-
+	import rl_doc_utils
 	from reportlab.pdfbase import pdfmetrics
+	afmFile, pfbFile = rl_doc_utils.getJustFontPaths()
 	justFace = pdfmetrics.EmbeddedType1Face(afmFile, pfbFile)
 	faceName = 'LettErrorRobot-Chrome' # pulled from AFM file
 	pdfmetrics.registerTypeFace(justFace)

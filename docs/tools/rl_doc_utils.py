@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/rl_doc_utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/tools/rl_doc_utils.py,v 1.1 2001/08/11 14:33:13 rgbecker Exp $
-__version__=''' $Id: rl_doc_utils.py,v 1.1 2001/08/11 14:33:13 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/docs/tools/rl_doc_utils.py,v 1.2 2001/08/11 15:18:41 rgbecker Exp $
+__version__=''' $Id: rl_doc_utils.py,v 1.2 2001/08/11 15:18:41 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -100,6 +100,11 @@ examplefunctionxinches = 5.5
 examplefunctionyinches = 3
 examplefunctiondisplaysizes = (examplefunctionxinches*inch, examplefunctionyinches*inch)
 
+def getJustFontPaths():
+	'''return afm and pfb for Just's files'''
+	import reportlab.test
+	folder = os.path.dirname(reportlab.test.__file__)
+	return os.path.join(folder, 'LeERC___.AFM'), os.path.join(folder, 'LeERC___.PFB')
 
 # for testing
 def NOP(*x,**y):
