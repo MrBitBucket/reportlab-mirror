@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/grids.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.31 2003/04/07 11:40:51 rgbecker Exp $
-__version__=''' $Id: grids.py,v 1.31 2003/04/07 11:40:51 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.32 2003/08/12 14:06:49 rgbecker Exp $
+__version__=''' $Id: grids.py,v 1.32 2003/08/12 14:06:49 rgbecker Exp $ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColorOrNone, isBoolean, isListOfNumbers, OneOf, isListOfColors
@@ -215,7 +215,7 @@ class Grid(Widget):
 
         group.add(self.makeOuterRect())
         group.add(self.makeInnerTiles())
-        group.add(self.makeInnerLines())
+        group.add(self.makeInnerLines(),name='_gridLines')
 
         return group
 
@@ -301,7 +301,7 @@ class DoubleGrid(Widget):
             group.add(g.makeOuterRect())
         for g in G:
             group.add(g.makeInnerTiles())
-            group.add(g.makeInnerLines())
+            group.add(g.makeInnerLines(),name='_gridLines')
 
         return group
 
