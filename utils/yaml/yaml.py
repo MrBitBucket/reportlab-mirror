@@ -37,6 +37,7 @@ Special commands understood at present are:
 
 import sys
 import string
+import imp
 
 #modes:
 PLAIN = 1
@@ -127,7 +128,12 @@ class Parser:
             #we have data, add to para
             self._buf.append(line)            
 
-    
+    def custom(self, moduleName, funcName):
+        """Goes and gets the Python object and adds it to the story"""
+        self.endPara()
+        self._results.append(('Custom',moduleName, funcName))
+        
+        
 
 if __name__=='__main__':
     if len(sys.argv) <> 2:

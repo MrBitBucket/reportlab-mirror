@@ -12,6 +12,7 @@ Usage:
 
 import sys
 import os
+import imp
 
 import yaml
 
@@ -95,8 +96,23 @@ def run(infilename, outfilename):
         elif typ == 'VSpace':
             height = thingy[1]
             story.append(Spacer(0, height))
+        elif typ == 'Custom':
+            # go find it
+            searchPath = [os.getcwd()+'\\']
+            print 'search path',searchPath
+            (typ2, moduleName, funcName) = thingy
+            found = imp.find_module(moduleName, searchPath)
+            assert found, "Custom object module %s not found" % moduleName
+            (file, pathname, description) = found
+            mod = imp.load_module(moduleName, file, pathname, description)
+        
+            #now get the function
+            func = getattr(mod, funcName)
+            story.append(func())
+        
         else:
             print 'skipping',typ, 'for now'
+            
 
     #print it
     doc = MyDocTemplate(outfilename, pagesize=A4)
