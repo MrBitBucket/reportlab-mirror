@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.15 2001/05/25 14:22:14 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.16 2001/05/25 14:37:29 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.15 2001/05/25 14:22:14 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.16 2001/05/25 14:37:29 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -375,7 +375,10 @@ static	char *_fp_one(PyObject *pD)
 	if(s[l]=='.' || s[l]==',') s[l]=0;
 	else {
 		s[l+1]=0;
-		if(s[0]=='0' && (s[1]=='.'||s[1]==',')) return s+1;
+		if(s[0]=='0' && (s[1]=='.'||s[1]==',')){
+			if(s[1]==',') s[1] = '.';
+			return s+1;
+			}
 		}
 	if((dot=strchr(s,','))) *dot = '.';
 	return s;
