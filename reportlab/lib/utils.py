@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.17 2001/08/18 16:52:09 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.17 2001/08/18 16:52:09 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.18 2001/08/22 19:30:03 aaron_watters Exp $
+__version__=''' $Id: utils.py,v 1.18 2001/08/22 19:30:03 aaron_watters Exp $ '''
 
 import string, os
 from types import *
@@ -22,7 +22,7 @@ try:
 		_checkImportError(errMsg)
 		from reportlab.lib._rl_accel import fp_str	# specific
 except ImportError, errMsg:
-	_checkImportError(errMsg)
+	#_checkImportError(errMsg) # this effectively requires _rl_accel... should not be required
 	def fp_str(*a):
 		if len(a)==1 and type(a[0]) in SeqTypes: a = a[0]
 		s = []

@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.42 2001/08/18 16:52:09 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.43 2001/08/22 19:30:03 aaron_watters Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -45,7 +45,7 @@ try:
         _stringWidth = None
     #del widthVectorsByFont
 except ImportError, errMsg:
-    _checkImportError(errMsg)
+    #_checkImportError(errMsg) # this effectively requires _rl_accel... should not be required!
     _stringWidth = None
 
 _typefaces = {}

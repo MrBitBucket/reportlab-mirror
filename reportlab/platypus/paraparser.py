@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.42 2001/08/18 16:52:09 rgbecker Exp $
-__version__=''' $Id: paraparser.py,v 1.42 2001/08/18 16:52:09 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.43 2001/08/22 19:30:03 aaron_watters Exp $
+__version__=''' $Id: paraparser.py,v 1.43 2001/08/22 19:30:03 aaron_watters Exp $ '''
 import string
 import re
 from types import TupleType
@@ -286,6 +286,7 @@ class ParaParser(xmllib.XMLParser):
 			frag.textColor = hasattr(style,'bulletColor') and style.bulletColor or style.textColor
 		else:
 			frag.fontName, frag.bold, frag.italic = ps2tt(style.fontName)
+			#print "content-type: text/html";print; print frag.fontName, frag.bold, frag.italic, "<br>"
 			frag.fontSize = style.fontSize
 			frag.textColor = style.textColor
 		return frag
