@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPS.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.12 2001/09/28 10:30:12 rgbecker Exp $
-__version__=''' $Id: renderPS.py,v 1.12 2001/09/28 10:30:12 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.13 2001/10/09 17:28:27 rgbecker Exp $
+__version__=''' $Id: renderPS.py,v 1.13 2001/10/09 17:28:27 rgbecker Exp $ '''
 import string, cStringIO, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str
@@ -33,7 +33,6 @@ class PSCanvas:
 
         self.setFont(STATE_DEFAULTS['fontName'],STATE_DEFAULTS['fontSize'])
         self.setStrokeColor(STATE_DEFAULTS['strokeColor'])
-        self._fillColor = None
         self.setLineCap(2)
         self.setLineJoin(0)
         self.setLineWidth(1)
