@@ -78,6 +78,7 @@ class ClusteredBar(_DrawingEditorMixin,Drawing):
 		self.YLabel.maxWidth       = 100
 		self.YLabel.height         = 20
 		self.YLabel._text          = "Y Axis"
+		self._add(self,0,name='preview',validate=None,desc=None)
 
 if __name__=="__main__": #NORUNTESTS
 	ClusteredBar().save(formats=['pdf'],outDir=None,fnRoot='clustered_bar')

@@ -48,6 +48,7 @@ class FilledRadarChart(_DrawingEditorMixin,Drawing):
 		self.Legend.dx             = 5
 		self.Legend.deltay         = 5
 		self.Legend.alignment      ='right'
+		self._add(self,0,name='preview',validate=None,desc=None)
 
 if __name__=="__main__": #NORUNTESTS
 	FilledRadarChart().save(formats=['pdf'],outDir=None,fnRoot='filled_radar')

@@ -60,6 +60,7 @@ class RadarChart(_DrawingEditorMixin,Drawing):
 		self.Legend.deltay         = 5
 		self.Legend.alignment      ='right'
 		self.chart.strands.strokeWidth     = 1
+		self._add(self,0,name='preview',validate=None,desc=None)
 
 if __name__=="__main__": #NORUNTESTS
 	RadarChart().save(formats=['pdf'],outDir=None,fnRoot='radar')

@@ -55,6 +55,7 @@ class SimplePie(_DrawingEditorMixin,Drawing):
 		self.background.x              = 25
 		self.background.y              = 25
 		self.Legend.columnMaximum  = 10
+		self._add(self,0,name='preview',validate=None,desc=None)
 
 if __name__=="__main__": #NORUNTESTS
 	SimplePie().save(formats=['pdf'],outDir=None,fnRoot=None)

@@ -79,6 +79,7 @@ class StackedBar(_DrawingEditorMixin,Drawing):
 		self.YLabel.height         = 20
 		self.YLabel._text          = "Y Axis"
 		self.chart.categoryAxis.style='stacked'
+		self._add(self,0,name='preview',validate=None,desc=None)
 
 if __name__=="__main__": #NORUNTESTS
 	StackedBar().save(formats=['pdf'],outDir=None,fnRoot='stacked_bar')

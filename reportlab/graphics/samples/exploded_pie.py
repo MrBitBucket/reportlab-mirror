@@ -59,6 +59,7 @@ class ExplodedPie(_DrawingEditorMixin,Drawing):
 		self.chart.slices.popout       = 5
 		self.background.height         = 110
 		self.background.width          = 110
+		self._add(self,0,name='preview',validate=None,desc=None)
 
 if __name__=="__main__": #NORUNTESTS
 	ExplodedPie().save(formats=['pdf'],outDir=None,fnRoot='exploded_pie')
