@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.89 2001/10/31 02:06:35 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.89 2001/10/31 02:06:35 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.90 2001/11/03 19:05:01 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.90 2001/11/03 19:05:01 andy_robinson Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -397,18 +397,18 @@ class Canvas:
     #    self._doc.inForm()
             
     def doForm(self, name):
-        """use a form XObj in current operation stream.  The form
-           should have been defined previously using beginForm ... endForm.
-           The form will be drawn within the context of the current graphics
-           state."""
-        internalname = self._doc.hasForm(name)
-        if not internalname:
-            raise ValueError, "form is not defined %s" % name
-        self._code.append("/%s Do" % internalname)
+        """use a form XObj in current operation stream.
+
+        The form should either have been defined previously using
+        beginForm ... endForm, or may be defined later.  If it is not
+        defined at save time, an exception will be raised. The form
+        will be drawn within the context of the current graphics
+        state."""
+        self._code.append("/%s Do" % self._doc.getFormName(name))
         self._formsinuse.append(name)
 
     def hasForm(self, name):
-        """Query whether form XObj exists"""
+        """Query whether form XObj really exists yet."""
         return self._doc.hasForm(name)
         
     def _restartAccumulators(self):

@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.52 2001/10/22 05:43:18 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.52 2001/10/22 05:43:18 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.53 2001/11/03 19:05:01 andy_robinson Exp $
+__version__=''' $Id: pdfdoc.py,v 1.53 2001/11/03 19:05:01 andy_robinson Exp $ '''
 __doc__=""" 
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The 
@@ -368,15 +368,13 @@ class PDFDocument:
     def hasForm(self, name):
         """test for existence of named form"""
         internalname = formName(name)
-        # always assume the form will be defined eventually, even if undefined now
-        return internalname
-##        try:
-##            test = self.idToObject[internalname]          
-##        except:
-##            return 0
-##        else:
-##            return internalname
+        return self.idToObject.has_key(internalname)
 
+    def getFormName(self, name):
+        """Lets canvas find out what form is called internally.
+        Never mind whether it is defined yet or not."""
+        return formName(name)
+    
     def xobjDict(self, formnames):
         """construct an xobject dict (for inclusion in a resource dict, usually)
            from a list of form names (images not yet supported)"""
