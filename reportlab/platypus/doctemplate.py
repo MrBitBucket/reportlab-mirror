@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.65 2003/10/22 12:13:50 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.66 2003/10/28 12:57:11 rgbecker Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.65 2003/10/22 12:13:50 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.66 2003/10/28 12:57:11 rgbecker Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -273,6 +273,7 @@ class BaseDocTemplate:
                     'invariant':None,
                     '_pageBreakQuick':1}
     _invalidInitArgs = ()
+    _firstPageTemplateIndex = 0
 
     def __init__(self, filename, **kw):
         """create a document template bound to a filename (see class documentation for keyword arguments)"""
@@ -343,7 +344,7 @@ class BaseDocTemplate:
     def handle_documentBegin(self):
         '''implement actions at beginning of document'''
         self._hanging = [PageBegin]
-        self.pageTemplate = self.pageTemplates[0]
+        self.pageTemplate = self.pageTemplates[self._firstPageTemplateIndex]
         self.page = 0
         self.beforeDocument()
 
