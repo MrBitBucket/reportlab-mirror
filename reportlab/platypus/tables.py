@@ -211,9 +211,9 @@ class Table(Flowable):
             self.setStyle(style)
     def __repr__(self):
         "incomplete, but better than nothing"
-        r = self._rowHeights
-        c = self._colWidths
-        cv = self._cellvalues
+        r = getattr(self,'_rowHeights','[unknown]')
+        c = getattr(self,'_colWidths','[unknown]')
+        cv = getattr(self,'_cellvalues','[unknown]')
         import pprint, string
         cv = pprint.pformat(cv)
         cv = string.replace(cv, "\n", "\n  ")
