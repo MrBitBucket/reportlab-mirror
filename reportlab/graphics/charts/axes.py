@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.39 2001/09/26 22:02:19 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.40 2001/09/27 18:10:49 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -139,14 +139,14 @@ class CategoryAxis(Widget):
 
 	def setPosition(self, x, y, length):
 		# ensure floating point
-		self._x = x * 1.0
-		self._y = y * 1.0
-		self._length = length * 1.0
+		self._x = x
+		self._y = y
+		self._length = length
 
 
-	def configure(self, multiSeries):
-		self._catCount = len(multiSeries[0])
-		self._barWidth = self._length / (self._catCount or 1)
+	def configure(self, multiSeries,barWidth=None):
+		self._catCount = max(map(len,multiSeries))
+		self._barWidth = barWidth or (self._length/float(self._catCount or 1))
 
 	def draw(self):
 		g = Group()
@@ -492,6 +492,7 @@ class ValueAxis(Widget):
 		)
 
 	def __init__(self):
+		assert self.__class__.__name__!='ValueAxis', 'Abstract Class ValueAxis Instantiated'
 		self._configured = 0
 		# private properties set by methods.  The initial values
 		# here are to make demos easy; they would always be
