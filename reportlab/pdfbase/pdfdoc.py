@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.58 2002/03/27 12:53:12 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.58 2002/03/27 12:53:12 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.59 2002/04/12 13:57:05 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.59 2002/04/12 13:57:05 rgbecker Exp $ '''
 __doc__=""" 
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The 
@@ -21,7 +21,7 @@ import string, types
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfutils import LINEEND   # this constant needed in both
 from reportlab import rl_config
-from reportlab.lib.utils import import_zlib, PIL_Image
+from reportlab.lib.utils import import_zlib, PIL_Image, open_for_read
 
 class PDFError(Exception):
     pass
@@ -1632,6 +1632,7 @@ class PDFFormXObject:
         if not self.Annots:
             self.Annots = None
         else:
+			#these must be transferred to the page when the form is used
             raise ValueError, "annotations not reimplemented yet"
         if not self.Contents:
             stream = self.stream
@@ -1691,7 +1692,7 @@ class PDFImageXObject:
             pass # use the canned one.
         elif type(source) == type(''):
             # it is a filename
-            img = PIL_Image.open(source)
+            img = PIL_Image.open(open_for_read(source))
             self.loadImageFromPIL(img)
         else: # it is already a PIL Image
             self.loadImageFromPIL(source)
