@@ -183,6 +183,15 @@ class SequenceOf(Validator):
 			if not self._elemTest(e): return 0
 		return 1
 
+class NoneOr(Validator):
+	def __init__(self,elemTest,name=None):
+		self._elemTest = elemTest
+		if name: self._str = name
+
+	def test(self, x):
+		if x is None: return 1
+		return self._elemTest(x)
+
 isBoolean = _isBoolean()
 isString = _isString()
 isNumber = _isNumber()
@@ -204,3 +213,6 @@ isAnything = _isAnything()
 isNothing = _isNothing()
 isXYCoord = SequenceOf(isNumber,lo=2,hi=2,emptyOK=0)
 isBoxAnchor = OneOf('nw','n','ne','w','c','e','sw','s','se')
+isNoneOrString = NoneOr(isString,'NoneOrString')
+isNoneOrListOfNoneOrStrings=SequenceOf(isNoneOrString,'isNoneOrListOfNoneOrStrings')
+isNoneOrListOfNoneOrNumbers=SequenceOf(isNumberOrNone,'isNoneOrListOfNoneOrNumbers')
