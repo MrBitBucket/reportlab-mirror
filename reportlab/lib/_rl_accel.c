@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.5 2000/11/24 00:09:52 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.6 2001/03/13 15:49:57 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.5 2000/11/24 00:09:52 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.6 2001/03/13 15:49:57 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -23,6 +23,10 @@ static __version__=" $Id: _rl_accel.c,v 1.5 2000/11/24 00:09:52 rgbecker Exp $ "
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
+#define VERSION "0.2"
+#define MODULE "_rl_accel"
+static PyObject *moduleVersion;
+
 typedef struct _fI_t {
 		char*			name;
 		int				ascent, descent;
@@ -99,10 +103,13 @@ static PyObject *_pdfmetrics_defaultEncoding(PyObject *self, PyObject* args)
 	if (!PyArg_ParseTuple(args, "|s", &encoding)) return NULL;
 	if(encoding){
 		if(!(e= find_encoding(encoding))){
-			PyErr_SetString(ErrorObject,"Unknown encoding");
-			return NULL;
+			e = (eI_t*)malloc(sizeof(eI_t));
+			e->name = strdup(encoding);
+			e->next = Encodings;
+			e->fonts = NULL;
+			Encodings = e;
 			}
-		else defaultEncoding = e;
+		defaultEncoding = e;
 		}
 	else if(defaultEncoding) return Py_BuildValue("s",defaultEncoding->name);
 	Py_INCREF(Py_None);
@@ -392,6 +399,8 @@ void init_rl_accel()
 	d = PyModule_GetDict(m);
 	ErrorObject = PyString_FromString("_rl_accel.error");
 	PyDict_SetItemString(d, "error", ErrorObject);
+	moduleVersion = PyString_FromString(VERSION);
+	PyDict_SetItemString(d, "version", moduleVersion );
 
 	/*add in the docstring */
 	PyDict_SetItemString(d, "__doc__", Py_BuildValue("s", __doc__));
