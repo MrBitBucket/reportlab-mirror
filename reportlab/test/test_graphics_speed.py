@@ -16,7 +16,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus import Flowable
 from reportlab.graphics.shapes import *
-from reportlab.graphics.charts.piechart0 import Pie
+from reportlab.graphics.charts.piecharts import Pie
 
 
 class GraphicsSpeedTestCase(unittest.TestCase):

@@ -12,7 +12,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.graphics.shapes import *
-from reportlab.graphics.charts.textlabel0 import Label
+from reportlab.graphics.charts.textlabels import Label
 from reportlab.platypus.flowables import Spacer, PageBreak
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.xpreformatted import XPreformatted
@@ -20,10 +20,10 @@ from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate \
      import PageTemplate, BaseDocTemplate
 
-from reportlab.graphics.charts.barchart1 import VerticalBarChart
-from reportlab.graphics.charts.linechart0 import LineChart
-from reportlab.graphics.charts.piechart0 import Pie
-from reportlab.graphics.charts.legends0 import Legend0
+from reportlab.graphics.charts.barcharts import VerticalBarChart
+from reportlab.graphics.charts.linecharts import LineChart
+from reportlab.graphics.charts.piecharts import Pie
+from reportlab.graphics.charts.legends import Legend0
 
 
 def myMainPageFrame(canvas, doc):
