@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/randomtext.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/randomtext.py,v 1.5 2001/02/07 15:11:23 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/lib/randomtext.py,v 1.6 2001/02/07 15:16:11 johnprecedo Exp $
 
-__version__=''' $Id: randomtext.py,v 1.5 2001/02/07 15:11:23 johnprecedo Exp $ '''
+__version__=''' $Id: randomtext.py,v 1.6 2001/02/07 15:16:11 johnprecedo Exp $ '''
 
 import string
 
@@ -150,7 +150,7 @@ PYTHON = ['Good evening ladies and Bruces','I want to buy some cheese', 'You do 
 		  "Hello, well it's just after 8 o'clock, and time for the penguin on top of your television set to explode",
 		  "Oh, intercourse the penguin!!", "Funny that penguin being there, isn't it?",
 		  "I wish to register a complaint.", "Now that's what I call a dead parrot", "Pining for the fjords???",
-		  "No, that's not dead, it's ,uhhhh, resting 6K", "This is an ex-parrot!!",
+		  "No, that's not dead, it's ,uhhhh, resting", "This is an ex-parrot!!",
 		  "That parrot is definitely deceased.", "No, no, no - it's spelt Raymond Luxury Yach-t, but it's pronounced 'Throatwobbler Mangrove'.",
 		  "You're a very silly man and I'm not going to interview you.", "No Mungo... never kill a customer."
 		  "And I'd like to conclude by putting my finger up my nose",
