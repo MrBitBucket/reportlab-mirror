@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.42 2003/08/28 12:55:05 johnprecedo Exp $
-__version__=''' $Id: colors.py,v 1.42 2003/08/28 12:55:05 johnprecedo Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.43 2003/09/08 16:42:26 dragan1 Exp $
+__version__=''' $Id: colors.py,v 1.43 2003/09/08 16:42:26 dragan1 Exp $ '''
 
 import string, math
 from types import StringType, ListType, TupleType
@@ -210,19 +210,19 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
     dx = float(x1-x0)
     x = x-x0
 
-    if cname is 'Color': # RGB
+    if cname == 'Color': # RGB
         r = c0.red+x*(c1.red - c0.red)/dx
         g = c0.green+x*(c1.green- c0.green)/dx
         b = c0.blue+x*(c1.blue - c0.blue)/dx
         return Color(r,g,b)
-    elif cname is 'CMYKColor':
+    elif cname == 'CMYKColor':
         c = c0.cyan+x*(c1.cyan - c0.cyan)/dx
         m = c0.magenta+x*(c1.magenta - c0.magenta)/dx
         y = c0.yellow+x*(c1.yellow - c0.yellow)/dx
         k = c0.black+x*(c1.black - c0.black)/dx
         d = c0.density+x*(c1.density - c0.density)/dx
         return CMYKColor(c,m,y,k, density=d)
-    elif cname is 'PCMYKColor':
+    elif cname == 'PCMYKColor':
         if cmykDistance(c0,c1)<1e-8:
             #colors same do density and preserve spotName if any
             assert c0.spotName == c1.spotName, "Identical cmyk, but different spotName"
