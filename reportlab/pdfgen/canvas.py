@@ -6,9 +6,6 @@ __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
 """
-
-
-
 ENABLE_TRACKING = 1 # turn this off to do profile testing w/o tracking
 
 import os
@@ -198,39 +195,17 @@ class Canvas:
         self._strokeColorRGB = (0,0,0)
 
     def push_state_stack(self):
-
         state = {}
         d = self.__dict__
         for name in self.STATE_ATTRIBUTES:
             state[name] = d[name] #getattr(self, name)
-        #state = d.copy() # this is no faster.
-        #del state["state_stack"]
-        self.state_stack.append(state)
-        return
-
-        stateatts = self.STATE_ATTRIBUTES # list based alternative (not used)
-        staterange = self.STATE_RANGE
-        state = list(staterange)
-        d = self.__dict__
-        for i in staterange:
-            state[i] = d[stateatts[i]] #getattr(self, stateatts[i])
         self.state_stack.append(state)
 
     def pop_state_stack(self):
-
         state = self.state_stack[-1]
         del self.state_stack[-1]
         d = self.__dict__
-        #for name in self.STATE_ATTRIBUTES:
-        #    d[name] = state[name] #setattr(self, name, state[name])
         d.update(state)
-        return
-
-        stateatts = self.STATE_ATTRIBUTES # list based alternative (not used)
-        staterange = self.STATE_RANGE
-        d = self.__dict__
-        for i in staterange:
-            d[i] = stateatts[i] #setattr(self, stateatts[i], state[i])
 
     STATE_ATTRIBUTES = split("""
      _x _y _fontname _fontsize _dynamicFont _textMode _leading _currentMatrix _fillMode
@@ -329,7 +304,6 @@ class Canvas:
           each of the string names inside must be bound to a bookmark
           before the document is generated.
         """
-        #print nametree
         apply(self._doc.outline.setNames, (self,)+nametree)
 
     def setTitle(self, title):
@@ -374,7 +348,6 @@ class Canvas:
         page.setCompression(self._pageCompression)
         if self._pageDuration is not None:
             page.Dur = self._pageDuration
-        #print stream
 
         strm =  self._psCommandsBeforePage + [self._preamble] + self._code + self._psCommandsAfterPage
         page.setStream(strm)
@@ -691,7 +664,7 @@ class Canvas:
         with position=1, at current point; and
         with position=2, at very end of page stream.  What that does
         to the resulting Postscript depends on Adobe's header :-)
-        
+
         Use with extreme caution, but sometimes needed for printer tray commands.
         Acrobat 4.0 will export Postscript to a printer or file containing
         the given commands.  Adobe Reader 6.0 no longer does as this feature is
@@ -717,11 +690,8 @@ class Canvas:
             self._code.append("/%s Do" % regName)
         else:
             self._psCommandsAfterPage.append("/%s Do" % regName)
-        
+
         self._formsinuse.append(rawName)
-
-
-        #
 
     def textAnnotation0(self, contents, Rect=None, addtopage=1, name=None, **kw):
         """Experimental.
@@ -785,9 +755,7 @@ class Canvas:
             (xmax, ymax) = (max(xs), max(ys))
             #(w2, h2) = (xmax-xmin, ymax-ymin)
             Rect = (xmin, ymin, xmax, ymax)
-            #print "rect is", Rect
         return apply(self.linkAbsolute, (contents, destinationname, Rect, addtopage, name), kw)
-
 
     def linkURL(self, url, rect, relative=0, thickness=0, color=None, dashArray=None):
         """Create a rectangular URL 'hotspot' in the given rectangle.
@@ -911,7 +879,6 @@ class Canvas:
         resultb = -selfb/det
         resultf = (selfe*selfb - selff*selfa)/det
         self.transform(resulta, resultb, resultc, resultd, resulte, resultf)
-        #print self._currentMatrix
 
     def transform(self, a,b,c,d,e,f):
         """adjoin a mathematical transform to the current graphics state matrix.
@@ -922,8 +889,6 @@ class Canvas:
             self._currentMatrix = (a0*a+c0*b,    b0*a+d0*b,
                                    a0*c+c0*d,    b0*c+d0*d,
                                    a0*e+c0*f+e0, b0*e+d0*f+f0)
-        #print "transform", (a,b,c,d,e,f)
-        #print "currentMatrix", self._currentMatrix
         if self._code and self._code[-1][-3:]==' cm':
             L = split(self._code[-1])
             a0, b0, c0, d0, e0, f0 = map(float,L[-7:-1])
@@ -991,13 +956,11 @@ class Canvas:
             canvas.restoreState()
             # if the save/restore pairs match then font is Helvetica 20 again.
         """
-        #"""These need expanding to save/restore Python's state tracking too"""
         self.push_state_stack()
         self._code.append('q')
 
     def restoreState(self):
         """restore the graphics state to the matching saved state (see saveState)."""
-        #"""These need expanding to save/restore Python's state tracking too"""
         self._code.append('Q')
         self.pop_state_stack()
 
@@ -1231,8 +1194,6 @@ class Canvas:
         if len(parts) > 1:
             rightText = pivotChar + parts[1]
             self.drawString(x-0.5*pivW, y, rightText)
-        
-        
 
     def getAvailableFonts(self):
         """Returns the list of PostScript font names available.
@@ -1263,7 +1224,6 @@ class Canvas:
         font size. Raises a readable exception if an illegal font
         is supplied.  Font names are case-sensitive! Keeps track
         of font name and size for metrics."""
-        #print "setFont", (psfontname, size, leading)
         self._fontname = psfontname
         self._fontsize = size
         if leading is None:
@@ -1522,7 +1482,6 @@ class Canvas:
 if _instanceEscapePDF:
     import new
     Canvas._escape = new.instancemethod(_instanceEscapePDF,None,Canvas)
-
 
 if __name__ == '__main__':
     print 'For test scripts, look in reportlab/test'

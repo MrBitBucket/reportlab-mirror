@@ -482,6 +482,24 @@ class Macro(Flowable):
     def draw(self):
         exec self.command in globals(), {'canvas':self.canv}
 
+class CallerMacro(Flowable):
+    '''
+    like Macro, but with callable command(s)
+    drawCallable(self)
+    wrapCallable(self,aW,aH)
+    '''
+    def __init__(self, drawCallable=None, wrapCallable=None):
+        _ = lambda *args: None
+        self._drawCallable = drawCallable or _
+        self._wrapCallable = wrapCallable or _
+    def __repr__(self):
+        return "CallerMacro(%s)" % repr(self.command)
+    def wrap(self, aW, aH):
+        self._wrapCallable(self,aW,aH)
+        return (0,0)
+    def draw(self):
+        self._drawCallable(self)
+
 class ParagraphAndImage(Flowable):
     '''combine a Paragraph and an Image'''
     def __init__(self,P,I,xpad=3,ypad=3):
