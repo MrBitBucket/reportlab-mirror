@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.36 2002/09/09 14:08:19 rgbecker Exp $
-__version__=''' $Id: colors.py,v 1.36 2002/09/09 14:08:19 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.37 2002/09/13 14:27:33 rgbecker Exp $
+__version__=''' $Id: colors.py,v 1.37 2002/09/13 14:27:33 rgbecker Exp $ '''
 
 import string, math
 from types import StringType, ListType, TupleType
@@ -287,7 +287,7 @@ cadetblue =     HexColor(0x5F9EA0)
 chartreuse =    HexColor(0x7FFF00)
 chocolate =     HexColor(0xD2691E)
 coral =     HexColor(0xFF7F50)
-cornflower =    HexColor(0x6495ED)
+cornflowerblue = cornflower =   HexColor(0x6495ED)
 cornsilk =  HexColor(0xFFF8DC)
 crimson =   HexColor(0xDC143C)
 cyan =  HexColor(0x00FFFF)
