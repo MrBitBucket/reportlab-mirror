@@ -1,3 +1,690 @@
+##### 2001/03/30 #####
+	docs/graphguide/ch2_graphics.py 1.11 dinu_gherman
+		 Minor changes.
+	docs/graphguide/ch2_graphics.py 1.10 dinu_gherman
+		 Updated text.
+	docs/graphguide/ch2_graphics.py 1.9 dinu_gherman
+		 Added two bar charts.
+	docs/graphguide/ch2_graphics.py 1.8 dinu_gherman
+		 Added samples for signsandsymbols.
+	docs/graphguide/ch2_graphics.py 1.7 dinu_gherman
+		 Added minor changes.
+	docs/graphguide/ch1_intro.py 1.5 dinu_gherman
+		 Added minor changes.
+	docs/graphguide/ch1_intro.py 1.4 dinu_gherman
+		 Retrofitted a few changes to the content.
+	docs/userguide/genuserguide.py 1.46 dinu_gherman
+		 Removed two commented imports (to see if CVS works).
+	utils/daily.py 1.39 rgbecker
+		 Changed to account for graphdocpy and dos/graphguide
+	docs/userguide/genuserguide.py 1.45 rgbecker
+		 Cross-refrenced to graphics guide, removed spurious ch8
+	docs/userguide/ch8_graphics.py 1.15 rgbecker
+		 Cross-refrenced to graphics guide, removed spurious ch8
+	docs/userguide/ch2_graphics.py 1.12 rgbecker
+		 Cross-refrenced to graphics guide, removed spurious ch8
+	docs/userguide/ch1_intro.py 1.13 rgbecker
+		 Cross-refrenced to graphics guide, removed spurious ch8
+	README 1.3 rgbecker
+		 Touch Test
+##### 2001/03/29 #####
+	docs/userguide/ch8_graphics.py 1.14 dinu_gherman
+		 Added further minor corrections.
+	docs/graphguide/ch2_graphics.py 1.6 dinu_gherman
+		 Further changes.
+	docs/graphguide/ch2_graphics.py 1.5 dinu_gherman
+		 Added a table.
+	docs/graphguide/ch2_graphics.py 1.4 dinu_gherman
+		 Further changes.
+	docs/userguide/ch8_graphics.py 1.13 dinu_gherman
+		 Shortened even further.
+	docs/graphguide/ch2_graphics.py 1.3 dinu_gherman
+		 Minor changes.
+	docs/graphguide/ch1_intro.py 1.3 dinu_gherman
+		 Minor changes.
+	docs/graphguide/ch2_graphics.py 1.2 dinu_gherman
+		 Changed granularity of chapters.
+	docs/graphguide/ch1_intro.py 1.2 dinu_gherman
+		 Changed granularity of chapters.
+	docs/userguide/genuserguide.py 1.44 dinu_gherman
+		 Removed reference to original graphics chapter.
+	docs/userguide/ch8_graphics_long.py 1.2 dinu_gherman
+		 Removed graphics chapter into graphics guide.
+	docs/graphguide/t_parse.py 1.1 dinu_gherman
+		 Initial checkin, mostly copied from user guide.
+	docs/graphguide/platdemos.py 1.1 dinu_gherman
+		 Initial checkin, mostly copied from user guide.
+	docs/graphguide/gengraphguide.py 1.1 dinu_gherman
+		 Initial checkin, mostly copied from user guide.
+	docs/graphguide/examples.py 1.1 dinu_gherman
+		 Initial checkin, mostly copied from user guide.
+	docs/graphguide/ch2_graphics.py 1.1 dinu_gherman
+		 Initial checkin, mostly copied from user guide.
+	docs/graphguide/ch1_intro.py 1.1 dinu_gherman
+		 Initial checkin, mostly copied from user guide.
+##### 2001/03/28 #####
+	docs/userguide/ch8_graphics.py 1.12 dinu_gherman
+		 Further changes.
+	docs/userguide/ch8_graphics.py 1.11 dinu_gherman
+		 Shortened from previous version.
+	docs/userguide/genuserguide.py 1.43 dinu_gherman
+		 Added import of short graphics chapter.
+	docs/userguide/ch8_graphics_long.py 1.1 dinu_gherman
+		 Copyied graphics chapter file (to be extracted into a seperate document).
+	docs/userguide/ch8_graphics.py 1.10 johnprecedo
+		 More images.
+	docs/userguide/ch8_graphics.py 1.9 johnprecedo
+		 Added more illustrations.
+	graphics/charts/linecharts.py 1.2 dinu_gherman
+		 Added to docstrings and tidied-up a bit.
+##### 2001/03/27 #####
+	docs/userguide/ch8_graphics.py 1.8 andy_robinson
+		 Drawings and tables bug fixed.
+	docs/tools/rltemplate.py 1.11 andy_robinson
+		 Drawings and tables bug fixed.
+	docs/userguide/ch8_graphics.py 1.7 johnprecedo
+		 More markup. Added todo comments for missing images
+	docs/userguide/genuserguide.py 1.42 johnprecedo
+		 Added Andy's changes to include illustrations (from code snippets).
+	docs/userguide/ch8_graphics.py 1.6 johnprecedo
+		 Added Andy's changes to include illustrations (from code snippets).
+	docs/userguide/ch8_graphics.py 1.5 johnprecedo
+		 More markup changes. Code snippets changed so that they match with current code.
+	docs/userguide/ch8_graphics.py 1.4 johnprecedo
+		 Lots of small markup changes. Removed reference to paths - they aren't implemented yet in reportlab\graphics. changed references to 'widgets.py' to 'widgetbase.py'.
+	docs/userguide/genuserguide.py 1.41 johnprecedo
+		 Moved chapter 8 to chapter 9 - new chapter 8 inserted for reportlab\graphics.
+##### 2001/03/26 #####
+	docs/userguide/ch8_graphics.py 1.3 johnprecedo
+		 Finished markup of reportlab\graphics tutorial. Only one table inserted so far. Any markup other that split into headings/paragraphs/code examples is also missing.
+	docs/userguide/ch8_graphics.py 1.2 johnprecedo
+		 First partial checkin on new chapter on "Platform Independent Graphics". Little markup done. Later part is still commented out (awaiting markup).
+	utils/runtests.py 1.16 rgbecker
+		 Improved pattern searches and added better inhibiting
+	test/unittest.py 1.3 rgbecker
+		 Added utils\runtests.py inhibitor comment
+	test/test_pyfiles.py 1.4 rgbecker
+		 Added utils\runtests.py inhibitor comment
+	test/test_platypus_toc.py 1.5 rgbecker
+		 Added utils\runtests.py inhibitor comment
+	test/test_platypus_paragraphs.py 1.5 rgbecker
+		 Added utils\runtests.py inhibitor comment
+	test/test_pdfgen_pagemodes.py 1.3 rgbecker
+		 Added utils\runtests.py inhibitor comment
+	test/test_pdfbase_pdfutils.py 1.2 rgbecker
+		 Added utils\runtests.py inhibitor comment
+	test/test_pdfbase_pdfmetrics.py 1.4 rgbecker
+		 Added utils\runtests.py inhibitor comment
+	test/test_paragraphs.py 1.8 rgbecker
+		 Added utils\runtests.py inhibitor comment
+	test/test_lib_sequencer.py 1.3 rgbecker
+		 Added utils\runtests.py inhibitor comment
+	test/test_lib_colors.py 1.5 rgbecker
+		 Added utils\runtests.py inhibitor comment
+	test/test_graphics_speed.py 1.6 rgbecker
+		 Added utils\runtests.py inhibitor comment
+	test/test_graphics_charts_textlabels.py 1.2 rgbecker
+		 Added utils\runtests.py inhibitor comment
+	test/test_graphics_charts.py 1.6 rgbecker
+		 Added utils\runtests.py inhibitor comment
+	test/test_docstrings.py 1.3 rgbecker
+		 Added utils\runtests.py inhibitor comment
+	test/runAll.py 1.3 rgbecker
+		 Added utils\runtests.py inhibitor comment
+	docs/userguide/ch9_future.py 1.1 johnprecedo
+		 Existing chapter 8 renamed to chapter 9. Stub for new chapter 8 on graphics added.
+	docs/userguide/ch8_graphics.py 1.1 johnprecedo
+		 Existing chapter 8 renamed to chapter 9. Stub for new chapter 8 on graphics added.
+	docs/userguide/ch8_future.py 1.4 johnprecedo
+		 Existing chapter 8 renamed to chapter 9. Stub for new chapter 8 on graphics added.
+	lib/utils.py 1.11 rgbecker
+		 Changed to prefer PIL as package
+	platypus/flowables.py 1.18 rgbecker
+		 Changed to PIL_Image
+	pdfgen/test/testpdfgen.py 1.17 rgbecker
+		 Changed to PIL_Image
+	pdfgen/pdfimages.py 1.11 rgbecker
+		 Changed to PIL_Image
+	pdfgen/canvas.py 1.72 rgbecker
+		 Changed to PIL_Image
+	pdfbase/pdfutils.py 1.21 rgbecker
+		 Changed to PIL_Image
+	lib/utils.py 1.10 rgbecker
+		 Changed to PIL_Image
+	graphics/renderPS.py 1.5 rgbecker
+		 Changed to PIL_Image
+##### 2001/03/25 #####
+	graphics/shapes.py 1.12 dinu_gherman
+		 Improved Auto class. Changed formatting slightly.
+	test/test_graphics_charts.py 1.5 dinu_gherman
+		 Fixed a buglet with graphdocpy.py running over this file.
+	lib/docpy.py 1.3 dinu_gherman
+		 Fixed argument bug for UmlPdfDocumentBuilder.begin(). Added bullets to 'imported modules' section. Added cosmetic changes to MyTemplate.afterFlowable().
+##### 2001/03/23 #####
+	test/test_pyfiles.py 1.3 dinu_gherman
+		 Changed trailing digit test to really fail.
+	graphics/widgets/flags0.py 1.5 dinu_gherman
+		 Replaced trailing digit filename.
+	graphics/widgets/flags.py 1.1 dinu_gherman
+		 Replaced trailing digit filename.
+	platypus/tableofcontents0.py 1.3 dinu_gherman
+		 Replaced trailing digit file.
+	platypus/tableofcontents.py 1.1 dinu_gherman
+		 Replaced trailing digit file.
+	test/test_platypus_toc.py 1.4 dinu_gherman
+		 Fixed imports for non-trailing digit modules.
+	test/test_platypus_paragraphs.py 1.4 dinu_gherman
+		 Fixed imports for non-trailing digit modules.
+	test/test_pyfiles.py 1.2 dinu_gherman
+		 Added test for trailing digits in filenames.
+	lib/graphdocpy.py 1.2 dinu_gherman
+		 Fixed doc strings and imports.
+	lib/docpy.py 1.2 dinu_gherman
+		 Fixed doc strings and imports.
+	lib/graphdocpy.py 1.1 dinu_gherman
+		 Initial checkin of non-trailing digit files replacing previous ones.
+	lib/docpy.py 1.1 dinu_gherman
+		 Initial checkin of non-trailing digit files replacing previous ones.
+	lib/graphicsdoc0.py 1.12 dinu_gherman
+		 Removed trailing digit file to be replaced with others.
+	lib/docpy1.py 1.2 dinu_gherman
+		 Removed trailing digit files to be replaced with others.
+	lib/docpy0.py 1.8 dinu_gherman
+		 Removed trailing digit files to be replaced with others.
+	graphics/shapes.py 1.11 dinu_gherman
+		 Added isNumberOrAuto() function.
+	graphics/charts/axes.py 1.2 dinu_gherman
+		 Added missing attribute maps.
+##### 2001/03/22 #####
+	lib/_rl_accel.c 1.12 rgbecker
+		 Fixed up a better lookup for _AttrDict
+	platypus/paraparser.py 1.41 andy_robinson
+		 Accepts seqdefault/seqDefault and seqreset/seqReset
+	lib/_rl_accel.c 1.11 rgbecker
+		 Renamed AttrDict to _AttrDict
+##### 2001/03/21 #####
+	pdfbase/pdfdoc.py 1.43 aaron_watters
+		 fixed minor bug in forms handling
+	lib/_rl_accel.c 1.10 rgbecker
+		 AttrDict improvements not yet primetime
+	lib/setup.py 1.3 rgbecker
+		 avoid import errors for Dinu, no runtests for Robin
+	lib/_rl_accel.c 1.9 rgbecker
+		 avoid import errors for Dinu, no runtests for Robin
+	test/test_graphics_charts_textlabel0.py 1.4 dinu_gherman
+		 Removed trailing digit filename to be replaced.
+	test/test_graphics_speed.py 1.5 dinu_gherman
+		 Replaced one file with a non-trailing digit filename. Modified files using previous trailing digit modules.
+	test/test_graphics_charts_textlabels.py 1.1 dinu_gherman
+		 Replaced one file with a non-trailing digit filename. Modified files using previous trailing digit modules.
+	test/test_graphics_charts.py 1.4 dinu_gherman
+		 Replaced one file with a non-trailing digit filename. Modified files using previous trailing digit modules.
+	graphics/charts/textlabels.py 1.1 dinu_gherman
+		 Initial checkin, replacing previous trailing digit filenames.
+	graphics/charts/piecharts.py 1.1 dinu_gherman
+		 Initial checkin, replacing previous trailing digit filenames.
+	graphics/charts/lineplots.py 1.1 dinu_gherman
+		 Initial checkin, replacing previous trailing digit filenames.
+	graphics/charts/linecharts.py 1.1 dinu_gherman
+		 Initial checkin, replacing previous trailing digit filenames.
+	graphics/charts/legends.py 1.1 dinu_gherman
+		 Initial checkin, replacing previous trailing digit filenames.
+	graphics/charts/barcharts.py 1.1 dinu_gherman
+		 Initial checkin, replacing previous trailing digit filenames.
+	graphics/charts/axes.py 1.1 dinu_gherman
+		 Initial checkin, replacing previous trailing digit filenames.
+	graphics/charts/textlabel0.py 1.7 dinu_gherman
+		 Removed file names to be replaced with non-trailing digit ones.
+	graphics/charts/piechart0.py 1.6 dinu_gherman
+		 Removed file names to be replaced with non-trailing digit ones.
+	graphics/charts/lineplot.py 1.2 dinu_gherman
+		 Removed file names to be replaced with non-trailing digit ones.
+	graphics/charts/linechart0.py 1.3 dinu_gherman
+		 Removed file names to be replaced with non-trailing digit ones.
+	graphics/charts/legends0.py 1.9 dinu_gherman
+		 Removed file names to be replaced with non-trailing digit ones.
+	graphics/charts/barchart1.py 1.19 dinu_gherman
+		 Removed file names to be replaced with non-trailing digit ones.
+	graphics/charts/axes0.py 1.18 dinu_gherman
+		 Removed file names to be replaced with non-trailing digit ones.
+	rl_config.py 1.2 rgbecker
+		 Made imageCaching a positive quantity and proeprty of the canvas
+	platypus/tables.py 1.37 rgbecker
+		 Made imageCaching a positive quantity and proeprty of the canvas
+	pdfgen/pdfimages.py 1.10 rgbecker
+		 Made imageCaching a positive quantity and proeprty of the canvas
+	pdfgen/canvas.py 1.71 rgbecker
+		 Made imageCaching a positive quantity and proeprty of the canvas
+	docs/userguide/ch7_custom.py 1.7 rgbecker
+		 Made imageCaching a positive quantity and proeprty of the canvas
+	docs/userguide/ch6_tables.py 1.17 rgbecker
+		 Made imageCaching a positive quantity and proeprty of the canvas
+##### 2001/03/20 #####
+	graphics/charts/lineplot.py 1.1 dinu_gherman
+		 Initial checkin. Added new experimental time series x value axis.
+	graphics/charts/axes0.py 1.17 dinu_gherman
+		 Initial checkin. Added new experimental time series x value axis.
+	graphics/charts/legends0.py 1.8 dinu_gherman
+		 Fixed import buglet.
+	graphics/charts/axes0.py 1.16 dinu_gherman
+		 Fixed buglet when used with bar charts.
+	graphics/charts/barchart1.py 1.18 dinu_gherman
+		 Added horizontal bar charts plus samples.
+##### 2001/03/19 #####
+	platypus/tables.py 1.36 aaron_watters
+		 changed handling of table element styles for better space/time.  old code left commented
+	test/test_paragraphs.py 1.7 andy_robinson
+		 Proving you get leading whitespace in print if you have leading whitespace inside the para tag.
+##### 2001/03/17 #####
+	lib/styles.py 1.14 rgbecker
+		 Removed spurious CellStyle
+	pdfbase/pdfmetrics.py 1.29 rgbecker
+		 Fixed up self test
+##### 2001/03/16 #####
+	graphics/charts/barchart1.py 1.17 dinu_gherman
+		 Fixed bug for bar charts using attribute 'useAbsolute'.
+	pdfbase/pdfmetrics.py 1.28 rgbecker
+		 Fix bad name error(s)
+	pdfbase/_fontdata.py 1.4 rgbecker
+		 Fix bad name error(s)
+	test/test_paragraphs.py 1.6 rgbecker
+		 Renamed config.py to rl_config.py
+	test/test_graphics_speed.py 1.4 rgbecker
+		 Renamed config.py to rl_config.py
+	platypus/test/testplatypus.py 1.23 rgbecker
+		 Renamed config.py to rl_config.py
+	platypus/flowables.py 1.17 rgbecker
+		 Renamed config.py to rl_config.py
+	platypus/doctemplate.py 1.39 rgbecker
+		 Renamed config.py to rl_config.py
+	pdfgen/canvas.py 1.70 rgbecker
+		 Renamed config.py to rl_config.py
+	pdfbase/pdfdoc.py 1.42 rgbecker
+		 Renamed config.py to rl_config.py
+	lib/tocindex.py 1.7 rgbecker
+		 Renamed config.py to rl_config.py
+	lib/fonts.py 1.6 rgbecker
+		 Renamed config.py to rl_config.py
+	graphics/widgetbase.py 1.6 rgbecker
+		 Renamed config.py to rl_config.py
+	graphics/shapes.py 1.10 rgbecker
+		 Renamed config.py to rl_config.py
+	docs/userguide/genuserguide.py 1.40 rgbecker
+		 Renamed config.py to rl_config.py
+	docs/userguide/examples.py 1.18 rgbecker
+		 Renamed config.py to rl_config.py
+	docs/userguide/ch2_graphics.py 1.11 rgbecker
+		 Renamed config.py to rl_config.py
+	docs/tools/rltemplate.py 1.10 rgbecker
+		 Renamed config.py to rl_config.py
+	demos/pythonpoint/pythonpoint.py 1.31 rgbecker
+		 Renamed config.py to rl_config.py
+	demos/gadflypaper/gfe.py 1.14 rgbecker
+		 Renamed config.py to rl_config.py
+	utils/simpledoc.py 1.6 rgbecker
+		 Fixed typo added point 8 (upload to SF)
+	utils/README 1.7 rgbecker
+		 Fixed typo added point 8 (upload to SF)
+	pdfgen/pdfimages.py 1.9 rgbecker
+		 fixed noImageCaching
+	pdfbase/_fontdata.py 1.3 rgbecker
+		 Changed in line with _rl_accel 0.3
+	rl_config.py 1.1 rgbecker
+		 Renamed config.py to rl_config.py
+	config.py 1.4 rgbecker
+		 Renamed config.py to rl_config.py
+	pdfbase/pdfmetrics.py 1.27 rgbecker
+		 Added support for _rl_accel 0.3
+	lib/_rl_accel.c 1.8 rgbecker
+		 Added _instanceStringWidth, imroved fontSize arg handling
+##### 2001/03/15 #####
+	graphics/charts/barchart1.py 1.16 dinu_gherman
+		 Fixed baseline bug and added test sample.
+	pdfbase/pdfmetrics.py 1.26 rgbecker
+		 addStandardFonts was spurious
+	pdfgen/canvas.py 1.69 rgbecker
+		 pdfmetrics.addStandardFonts was spurious
+	pdfbase/pdfmetrics.py 1.25 rgbecker
+		 Stuff for adding standardFonts
+	pdfgen/canvas.py 1.68 rgbecker
+		 Use pdfmetrics addFonts
+##### 2001/03/14 #####
+	graphics/charts/barchart1.py 1.15 dinu_gherman
+		 Added more samples.
+##### 2001/03/13 #####
+	changes 1.7 dinu_gherman
+		 New release 1.05.
+	__init__.py 1.11 dinu_gherman
+		 New release 1.05.
+	test/test_graphics_charts.py 1.3 dinu_gherman
+		 Changed to use Legend0 instead of Swatches0.
+	graphics/charts/legends0.py 1.7 dinu_gherman
+		 Renamed Swatches0 to Legend0. Stripped away horizontal bar charts temporyrily.
+	graphics/charts/barchart1.py 1.14 dinu_gherman
+		 Renamed Swatches0 to Legend0. Stripped away horizontal bar charts temporyrily.
+	graphics/charts/axes0.py 1.15 dinu_gherman
+		 Renamed Swatches0 to Legend0. Stripped away horizontal bar charts temporyrily.
+	lib/setup.py 1.2 rgbecker
+		 Added sgmlop pyHnj extensions
+	lib/_rl_accel.c 1.7 rgbecker
+		 Fixed up the  defaultEncoding thing and added a version number
+	lib/setup.py 1.1 rgbecker
+		 Initial version of distutils script
+	lib/_rl_accel.c 1.6 rgbecker
+		 Initial version of distutils script
+	graphics/charts/barchart1.py 1.13 dinu_gherman
+		 Enabled mono-bar charts and no-bar charts(!) plus more samples.
+	graphics/charts/axes0.py 1.14 dinu_gherman
+		 Enabled mono-bar charts and no-bar charts(!) plus more samples.
+	graphics/charts/barchart1.py 1.12 dinu_gherman
+		 Added new samples.
+	graphics/charts/axes0.py 1.13 dinu_gherman
+		 Set minimum number of items for X/Y axes to 1 instead of 2.
+	graphics/charts/axes0.py 1.12 dinu_gherman
+		 Fixed bug refusing exactly two data items.
+	graphics/charts/axes0.py 1.11 dinu_gherman
+		 Improved axes.
+	graphics/charts/axes0.py 1.10 dinu_gherman
+		 Improved X/Y axes.
+	graphics/charts/axes0.py 1.9 dinu_gherman
+		 Improved YCategoryAxis slightly.
+	test/test_graphics_charts.py 1.2 dinu_gherman
+		 Changed attribute postponed to _postponed in doctemplate.py. Added minor changes in shapes.py. Changed test_graphics_charts.py to no longer use page breaks.
+	platypus/doctemplate.py 1.38 dinu_gherman
+		 Changed attribute postponed to _postponed in doctemplate.py. Added minor changes in shapes.py. Changed test_graphics_charts.py to no longer use page breaks.
+	graphics/shapes.py 1.9 dinu_gherman
+		 Changed attribute postponed to _postponed in doctemplate.py. Added minor changes in shapes.py. Changed test_graphics_charts.py to no longer use page breaks.
+	graphics/charts/legends0.py 1.6 andy_robinson
+		 Fixed broken cross reference to another example
+	test/test_lib_colors.py 1.4 andy_robinson
+		 Added CMYK support to core
+	pdfgen/canvas.py 1.67 andy_robinson
+		 Added CMYK support to core
+	lib/colors.py 1.17 andy_robinson
+		 Added CMYK support to core
+##### 2001/03/12 #####
+	test/test_lib_colors.py 1.3 andy_robinson
+		 Initial checkin of CMYKColor class
+	lib/colors.py 1.16 andy_robinson
+		 Initial checkin of CMYKColor class
+	graphics/charts/barchart1.py 1.11 dinu_gherman
+		 Added initial crude version of HorizontalBarChart class.
+	graphics/charts/axes0.py 1.8 dinu_gherman
+		 Added dual versions for category and value axes. (not all tested)
+	graphics/charts/piechart0.py 1.5 andy_robinson
+		 Fixed bug with defaultColors changes being erroneouslty banned
+	graphics/charts/legends0.py 1.5 andy_robinson
+		 Fixed bug with defaultColors changes being erroneouslty banned
+	test/test_graphics_charts.py 1.1 dinu_gherman
+		 Initial checkin.
+	graphics/charts/legends0.py 1.4 dinu_gherman
+		 Fixed import error.
+	test/test_pdfbase_pdfmetrics.py 1.3 rgbecker
+		 Changes to basic Font stuff, moved it to pdfmetrics
+	test/test_paragraphs.py 1.5 rgbecker
+		 Changes to basic Font stuff, moved it to pdfmetrics
+	pdfgen/canvas.py 1.66 rgbecker
+		 Changes to basic Font stuff, moved it to pdfmetrics
+	pdfbase/pdfmetrics.py 1.24 rgbecker
+		 Changes to basic Font stuff, moved it to pdfmetrics
+	pdfbase/pdfdoc.py 1.41 rgbecker
+		 Changes to basic Font stuff, moved it to pdfmetrics
+	pdfbase/_fontdata.py 1.2 rgbecker
+		 Changes to basic Font stuff, moved it to pdfmetrics
+	pdfgen/fonts0.py 1.4 rgbecker
+		 Removed fonts0 stuff to pdfbase.pdfmetrics
+##### 2001/03/08 #####
+	test/test_pdfbase_pdfmetrics.py 1.2 rgbecker
+		 Initial split of pdfmetrics into code + database; some minor name adjustments
+	pdfgen/fonts0.py 1.3 rgbecker
+		 Initial split of pdfmetrics into code + database; some minor name adjustments
+	pdfgen/canvas.py 1.65 rgbecker
+		 Initial split of pdfmetrics into code + database; some minor name adjustments
+	pdfbase/pdfmetrics.py 1.23 rgbecker
+		 Initial split of pdfmetrics into code + database; some minor name adjustments
+	pdfbase/_fontdata.py 1.1 rgbecker
+		 Initial split of pdfmetrics into code + database; some minor name adjustments
+	demos/stdfonts/stdfonts.py 1.10 rgbecker
+		 Initial split of pdfmetrics into code + database; some minor name adjustments
+	test/test_platypus_paragraphs.py 1.3 dinu_gherman
+		 Added a multi-page paragraph test.
+	docs/userguide/ch1_intro.py 1.12 rgbecker
+		 Changed bad character
+##### 2001/03/07 #####
+	utils/simpledoc.py 1.5 rgbecker
+		 Changed things to use config.py for defaults
+	test/test_paragraphs.py 1.4 rgbecker
+		 Changed things to use config.py for defaults
+	platypus/test/testplatypus.py 1.22 rgbecker
+		 Changed things to use config.py for defaults
+	platypus/tables.py 1.35 rgbecker
+		 Changed things to use config.py for defaults
+	platypus/flowables.py 1.16 rgbecker
+		 Changed things to use config.py for defaults
+	platypus/doctemplate.py 1.37 rgbecker
+		 Changed things to use config.py for defaults
+	pdfgen/fonts0.py 1.2 rgbecker
+		 Changed things to use config.py for defaults
+	pdfgen/canvas.py 1.64 rgbecker
+		 Changed things to use config.py for defaults
+	pdfbase/pdfdoc.py 1.40 rgbecker
+		 Changed things to use config.py for defaults
+	lib/tocindex.py 1.6 rgbecker
+		 Changed things to use config.py for defaults
+	lib/pagesizes.py 1.6 rgbecker
+		 Changed things to use config.py for defaults
+	lib/fonts.py 1.5 rgbecker
+		 Changed things to use config.py for defaults
+	docs/userguide/genuserguide.py 1.39 rgbecker
+		 Changed things to use config.py for defaults
+	docs/userguide/examples.py 1.17 rgbecker
+		 Changed things to use config.py for defaults
+	docs/userguide/ch4_platypus_concepts.py 1.10 rgbecker
+		 Changed things to use config.py for defaults
+	docs/userguide/ch2_graphics.py 1.10 rgbecker
+		 Changed things to use config.py for defaults
+	docs/tools/rltemplate.py 1.9 rgbecker
+		 Changed things to use config.py for defaults
+	demos/pythonpoint/pythonpoint.py 1.30 rgbecker
+		 Changed things to use config.py for defaults
+	demos/odyssey/fodyssey.py 1.15 rgbecker
+		 Changed things to use config.py for defaults
+	demos/gadflypaper/gfe.py 1.13 rgbecker
+		 Changed things to use config.py for defaults
+	config.py 1.3 rgbecker
+		 Changed things to use config.py for defaults
+	platypus/paragraph.py 1.51 rgbecker
+		 Added test 5
+##### 2001/03/06 #####
+	lib/yaml.py 1.1 andy_robinson
+		 Added
+	test/test_pdfbase_pdfmetrics.py 1.1 andy_robinson
+		 Added explicit font and encoding support
+	platypus/paragraph.py 1.50 andy_robinson
+		 Added explicit font and encoding support
+	platypus/doctemplate.py 1.36 andy_robinson
+		 Added explicit font and encoding support
+	pdfgen/fonts0.py 1.1 andy_robinson
+		 Added explicit font and encoding support
+	pdfgen/canvas.py 1.63 andy_robinson
+		 Added explicit font and encoding support
+	pdfbase/pdfmetrics.py 1.22 andy_robinson
+		 Added explicit font and encoding support
+	pdfbase/pdfdoc.py 1.39 andy_robinson
+		 Added explicit font and encoding support
+	lib/graphicsdoc0.py 1.11 andy_robinson
+		 Added explicit font and encoding support
+	demos/stdfonts/stdfonts.py 1.9 andy_robinson
+		 Added explicit font and encoding support
+	config.py 1.2 andy_robinson
+		 Added explicit font and encoding support
+	__init__.py 1.10 andy_robinson
+		 Added explicit font and encoding support
+##### 2001/03/02 #####
+	lib/fonts.py 1.4 rgbecker
+		 Removed spurious import
+	lib/fonts.py 1.3 rgbecker
+		 Added standard filename roots and findPFB
+##### 2001/03/01 #####
+	pdfbase/pdfmetrics.py 1.21 rgbecker
+		 Fixed _rl_accel import
+##### 2001/02/28 #####
+	platypus/paraparser.py 1.40 rgbecker
+		 Exception tests need str()
+	pdfbase/pdfutils.py 1.20 rgbecker
+		 Exception tests need str()
+	pdfbase/pdfmetrics.py 1.20 rgbecker
+		 Exception tests need str()
+	lib/xmllib.py 1.6 rgbecker
+		 Exception tests need str()
+	lib/utils.py 1.9 rgbecker
+		 Exception tests need str()
+	lib/graphicsdoc0.py 1.10 rgbecker
+		 Exception tests need str()
+	demos/odyssey/dodyssey.py 1.10 rgbecker
+		 slight twitch to onDraw test
+	pdfbase/pdfutils.py 1.19 rgbecker
+		 Fixed typos
+	graphics/renderPS.py 1.4 rgbecker
+		 Improved ImportError handling
+	lib/xmllib.py 1.5 rgbecker
+		 Improved ImportError handling
+	lib/utils.py 1.8 rgbecker
+		 Improved ImportError handling
+	lib/graphicsdoc0.py 1.9 rgbecker
+		 Improved ImportError handling
+	lib/_rl_accel.dsp 1.3 rgbecker
+		 Improved ImportError handling
+	pdfbase/pdfutils.py 1.18 rgbecker
+		 Improved ImportError handling
+	pdfbase/pdfmetrics.py 1.19 rgbecker
+		 Improved ImportError handling
+	pdfbase/pdfdoc.py 1.38 rgbecker
+		 Improved ImportError handling
+	pdfgen/pdfimages.py 1.8 rgbecker
+		 Imporved ImportError handling
+	pdfgen/canvas.py 1.62 rgbecker
+		 Imporved ImportError handling
+	platypus/paraparser.py 1.39 rgbecker
+		 Imporved ImportError handling
+	graphics/charts/barchart1.py 1.10 dinu_gherman
+		 Changed bar chart labels to have always a boxAttribute of 'c'.
+	test/test_graphics_charts_textlabel0.py 1.3 dinu_gherman
+		 Added meaningful tests for textAnchor attribute.
+##### 2001/02/27 #####
+	graphics/charts/textlabel0.py 1.6 rgbecker
+		 Added auto height, width and leading
+	test/test_graphics_charts_textlabel0.py 1.2 dinu_gherman
+		 Thoroughly changed test file.
+	graphics/charts/barchart1.py 1.9 dinu_gherman
+		 Splitted function sample2 in sample2a and sample2b.
+	test/test_graphics_charts_textlabel0.py 1.1 dinu_gherman
+		 Initial checkin.
+	graphics/charts/textlabel0.py 1.5 dinu_gherman
+		 Removed commented test function.
+##### 2001/02/26 #####
+	lib/docpy1.py 1.1 andy_robinson
+		 Initial checkin of new experiments
+##### 2001/02/24 #####
+	graphics/widgets/signsandsymbols.py 1.7 dinu_gherman
+		 Added color attribute to SmileyFace0.
+	graphics/charts/linechart0.py 1.2 dinu_gherman
+		 General improvements.
+	graphics/charts/linechart0.py 1.1 dinu_gherman
+		 Initial checkin.
+##### 2001/02/23 #####
+	test/test_pyfiles.py 1.1 dinu_gherman
+		 Initial checkin.
+##### 2001/02/22 #####
+	pdfbase/pdfutils.py 1.17 dinu_gherman
+		 Removed commented encoding test functions.
+	test/test_pdfbase_pdfutils.py 1.1 dinu_gherman
+		 Initial checkin.
+	pdfbase/pdfutils.py 1.16 dinu_gherman
+		 Commented another test function.
+	pdfbase/pdfutils.py 1.15 dinu_gherman
+		 Commented one test function.
+	graphics/charts/textlabel0.py 1.4 dinu_gherman
+		 Minor corrections.
+	graphics/charts/axes0.py 1.7 dinu_gherman
+		 Minor corrections.
+##### 2001/02/21 #####
+	pdfgen/canvas.py 1.61 aaron_watters
+		 bugfix: code before of begin/end form should not appear in the form but in page
+##### 2001/02/19 #####
+	graphics/charts/axes0.py 1.6 dinu_gherman
+		 Added different modes for joined x- and y-axes.
+	graphics/charts/barchart1.py 1.8 dinu_gherman
+		 Added attribute mappings.
+	graphics/charts/axes0.py 1.5 dinu_gherman
+		 Added attribute mappings.
+	graphics/charts/axes0.py 1.4 dinu_gherman
+		 Changed test function to sample function.
+	graphics/charts/legends0.py 1.3 dinu_gherman
+		 Added combined barchart sample.
+	graphics/charts/legends0.py 1.2 dinu_gherman
+		 Minor changes.
+	graphics/charts/legends0.py 1.1 dinu_gherman
+		 Initial checkin.
+	test/test_pdfgen_pagemodes.py 1.2 dinu_gherman
+		 Added doc string.
+	test/test_platypus_paragraphs.py 1.2 dinu_gherman
+		 Added doc strings.
+	test/test_lib_sequencer.py 1.2 dinu_gherman
+		 Added doc strings.
+	test/test_lib_colors.py 1.2 dinu_gherman
+		 Added doc strings.
+	test/test_docstrings.py 1.2 dinu_gherman
+		 Fixed filename bug.
+	test/test_docstrings.py 1.1 dinu_gherman
+		 Initial checkin.
+##### 2001/02/18 #####
+	test/unittest.py 1.2 andy_robinson
+		 Resynched graphics test with Pie class; runAll now deletes previous PDF files incorporated latest unittest.py
+	test/test_graphics_speed.py 1.3 andy_robinson
+		 Resynched graphics test with Pie class; runAll now deletes previous PDF files incorporated latest unittest.py
+	test/runAll.py 1.2 andy_robinson
+		 Resynched graphics test with Pie class; runAll now deletes previous PDF files incorporated latest unittest.py
+	test/00readme.txt 1.4 andy_robinson
+		 Resynched graphics test with Pie class; runAll now deletes previous PDF files incorporated latest unittest.py
+##### 2001/02/16 #####
+	test/test_lib_colors.py 1.1 dinu_gherman
+		 Initil checkin.
+	lib/colors.py 1.15 dinu_gherman
+		 Added color2bw function.
+##### 2001/02/15 #####
+	graphics/charts/piechart0.py 1.4 andy_robinson
+		 Slimmed down and added demo methods
+	graphics/charts/barchart1.py 1.7 andy_robinson
+		 Slimmed down and added demo methods
+	graphics/charts/axes0.py 1.3 andy_robinson
+		 Slimmed down and added demo methods
+	test/test_platypus_paragraphs.py 1.1 dinu_gherman
+		 Initial checkin.
+##### 2001/02/14 #####
+	graphics/charts/barchart.py 1.4 dinu_gherman
+		 File has become obsolete. See barchart1.py.
+	lib/graphicsdoc0.py 1.8 dinu_gherman
+		 Improved displaying widget properties (using pprint).
+	pdfgen/test/testPageMode.py 1.3 dinu_gherman
+		 Moved to reportlab.test.
+	test/test_pdfgen_pagemodes.py 1.1 dinu_gherman
+		 Initial checkin, moved from reportlab.pdfgen.test.
+	test/test_lib_sequencer.py 1.1 dinu_gherman
+		 Initial checkin.
+	test/runAll.py 1.1 dinu_gherman
+		 Initial checkin.
+	test/test_platypus_toc.py 1.3 dinu_gherman
+		 Restructured entire test suite to make clean use of the unittest module.
+	test/test_paragraphs.py 1.3 dinu_gherman
+		 Restructured entire test suite to make clean use of the unittest module.
+	test/test_graphics_speed.py 1.2 dinu_gherman
+		 Restructured entire test suite to make clean use of the unittest module.
+	test/00readme.txt 1.3 dinu_gherman
+		 Restructured entire test suite to make clean use of the unittest module.
+##### 2001/02/13 #####
+	graphics/widgets/flags0.py 1.4 johnprecedo
+		 - Removed white borders from inside edges of flags. - added the word "sample" to the demo flag produced by Flag0 - dummy __init__ and demo methods added for Portugal0 - no example flag   or properties are produced.
 ##### 2001/03/13 #####
 	test/test_graphics_charts.py 1.3 dinu_gherman
 		 Changed to use Legend0 instead of Swatches0.
