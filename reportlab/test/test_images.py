@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/test_images.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_images.py,v 1.4 2004/01/20 22:50:32 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_images.py,v 1.5 2004/03/22 18:08:50 rgbecker Exp $
 __version__=''' $Id'''
 __doc__="""Tests to do with image handling.
 
@@ -36,8 +36,9 @@ class ReaderTestCase(unittest.TestCase):
 
     def test(self):
         import reportlab.test
+        from reportlab.lib.utils import rl_isfile
         imageFileName = os.path.dirname(reportlab.test.__file__) + os.sep + 'pythonpowered.gif'
-        assert os.path.isfile(imageFileName), "%s not found!" % imageFileName
+        assert rl_isfile(imageFileName), "%s not found!" % imageFileName
 
         ir = ImageReader(imageFileName)
         assert ir.getSize() == (110,44)
