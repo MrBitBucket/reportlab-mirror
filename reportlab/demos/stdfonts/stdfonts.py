@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: stdfonts.py,v $
+#	Revision 1.5  2000/04/28 17:33:44  andy_robinson
+#	Added font encoding support and changed default encoding to WinAnsi
+#
 #	Revision 1.4  2000/02/17 02:06:28  rgbecker
 #	Docstring & other fixes
-#
+#	
 #	Revision 1.3  2000/02/16 09:42:50  rgbecker
 #	Conversion to reportlab package
 #	
@@ -43,7 +46,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:15:57  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: stdfonts.py,v 1.4 2000/02/17 02:06:28 rgbecker Exp $ '''
+__version__=''' $Id: stdfonts.py,v 1.5 2000/04/28 17:33:44 andy_robinson Exp $ '''
 __doc__="""
 standardfonts.py
 shows the 14 standard fonts in our encoding
@@ -54,33 +57,41 @@ from reportlab.pdfgen import canvas
 
 def run():
 
-    canv = canvas.Canvas('standardfonts.pdf')
-    canv.setPageCompression(0)
-    
-    for fontname in pdfmetrics.StandardEnglishFonts:
-        canv.setFont('Times-Bold', 18)
-        canv.drawString(80, 744, fontname)
+    for enc in ['MacRoman', 'WinAnsi']:
+        canv = canvas.Canvas(
+                'StandardFonts_%s.pdf' % enc,
+                encoding=enc
+                )
+        canv.setPageCompression(0)
         
-        #for dingbats, we need to use another font for the numbers.
-        #do two parallel text objects.
-        if fontname == 'ZapfDingbats':
-            labelfont = 'Helvetica'
-        else:
-            labelfont = fontname
-
-        for byt in range(32, 256):
-            col, row = divmod(byt - 32, 32)
-            x = 72 + (66*col)
-            y = 720 - (18*row)
-            canv.setFont(labelfont, 14)
-            canv.drawString(x, y, '%d =' % byt)
-            canv.setFont(fontname, 14)
-            canv.drawString(x + 44, y , chr(byt))
-
-        canv.showPage()            
+        for fontname in pdfmetrics.StandardEnglishFonts:
+            if fontname in ['Symbol', 'ZapfDingbats']:
+                encLabel = 'only available as MacRoman'
+            else:
+                encLabel = enc
+            canv.setFont('Times-Bold', 18)
+            canv.drawString(80, 744, fontname + '-' + encLabel)
             
+            #for dingbats, we need to use another font for the numbers.
+            #do two parallel text objects.
+            if fontname == 'ZapfDingbats':
+                labelfont = 'Helvetica'
+            else:
+                labelfont = fontname
 
-    canv.save()
+            for byt in range(32, 256):
+                col, row = divmod(byt - 32, 32)
+                x = 72 + (66*col)
+                y = 720 - (18*row)
+                canv.setFont(labelfont, 14)
+                canv.drawString(x, y, '%d =' % byt)
+                canv.setFont(fontname, 14)
+                canv.drawString(x + 44, y , chr(byt))
+
+            canv.showPage()            
+                
+
+        canv.save()
 
 if __name__ == '__main__':
     run()

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.34  2000/04/28 17:33:44  andy_robinson
+#	Added font encoding support and changed default encoding to WinAnsi
+#
 #	Revision 1.33  2000/04/28 14:18:16  rgbecker
 #	Use str(filename) not '<Unknown>'
-#
+#	
 #	Revision 1.32  2000/04/28 13:37:40  rgbecker
 #	Fix verbose filename print when it's actually a file type object
 #	
@@ -129,7 +132,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.33 2000/04/28 14:18:16 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.34 2000/04/28 17:33:44 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -217,15 +220,18 @@ class Canvas:
                  pagesize=(595.27,841.89),
                  bottomup = 1,
                  pageCompression=0,
+				 encoding=pdfdoc.DEFAULT_ENCODING,
                  verbosity=1):
         """Most of the attributes are private - we will use set/get methods
         as the preferred interface.  Default page size is A4."""
         self._filename = filename
-        self._doc = pdfdoc.PDFDocument()
+
+        self._doc = pdfdoc.PDFDocument(encoding)
 
         #this only controls whether it prints 'saved ...' - 0 disables
         self._verbosity = verbosity
-        
+
+		
         self._pagesize = pagesize
         #self._currentPageHasImages = 0
         self._pageTransitionString = ''

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.18  2000/04/28 17:33:44  andy_robinson
+#	Added font encoding support and changed default encoding to WinAnsi
+#
 #	Revision 1.17  2000/04/28 09:08:42  rgbecker
 #	Fix typo in SaveToFile
-#
+#	
 #	Revision 1.16  2000/04/27 18:11:56  rgbecker
 #	Dinu's SaveFile patch
 #	
@@ -73,7 +76,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.17 2000/04/28 09:08:42 rgbecker Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.18 2000/04/28 17:33:44 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -116,6 +119,8 @@ from reportlab.pdfbase import pdfmetrics
 #
 ##############################################################
 
+DEFAULT_ENCODING = 'WinAnsiEncoding' #hack here for a system wide change
+ALLOWED_ENCODINGS = ('WinAnsiEncoding', 'MacRomanEncoding')
 
 
 StandardEnglishFonts = [
@@ -138,7 +143,7 @@ class PDFDocument:
     another object is, or raises a KeyError if not found.  The rule is that
     objects should only refer ones previously written to file.
     """
-    def __init__(self):
+    def __init__(self, encoding=DEFAULT_ENCODING):
         self.objects = []
         self.objectPositions = {}
         # named object references (may be unbound)
@@ -146,8 +151,15 @@ class PDFDocument:
         self.inObject = None # mark for whether in page or form or possibly others...
         self.thispageposition = None # record if in page
         self.thisformposition = None # record if in form
-        
-        self.fonts = MakeType1Fonts()
+
+        #check encoding legal - they can omit the suffix 'Encoding
+        if encoding[-8:] <> 'Encoding':
+            encoding = encoding + 'Encoding'
+        assert encoding in ALLOWED_ENCODINGS, \
+               "Unknown encoding %s. Allowed values are %s" % (
+                encoding, ALLOWED_ENCODINGS)
+                        
+        self.fonts = MakeType1Fonts(encoding)
 
         #mapping of Postscriptfont names to internal ones;
         #needs to be dynamically built once we start adding
@@ -1203,20 +1215,23 @@ class PDFImage(PDFObject):
                 ], LINEEND) + LINEEND)
 
 class PDFType1Font(PDFObject):
-    def __init__(self, key, font):
+    def __init__(self, key, font, encoding):
         self.fontname = font
         self.keyname = key
+        self.encoding = encoding
         self.template = string.join([
                     '<<',
                     '/Type /Font',
                     '/Subtype /Type1',
                     '/Name /%s',
                     '/BaseFont /%s',
-                    '/Encoding /MacRomanEncoding',
+                    '/Encoding /%s',
                     '>>'],
                     LINEEND)
     def save(self, file):
-        file.write(self.template % (self.keyname, self.fontname) + LINEEND)
+        file.write(self.template %
+                   (self.keyname, self.fontname, self.encoding)
+                   + LINEEND)
 
 
        
@@ -1231,12 +1246,17 @@ class PDFType1Font(PDFObject):
 #
 ##############################################################
 
-def MakeType1Fonts():
+def MakeType1Fonts(encoding):
     "returns a list of all the standard font objects"
     fonts = []
     pos = 1
     for fontname in StandardEnglishFonts:
-        font = PDFType1Font('F'+str(pos), fontname)
+        #Symbol is almost empty in WinAnsi, no choice!
+        if fontname in ['Symbol', 'ZapfDingbats']:
+            encUsed = 'MacRomanEncoding'
+        else:
+            encUsed = encoding
+        font = PDFType1Font('F'+str(pos), fontname, encUsed)
         fonts.append(font)
         pos = pos + 1
     return fonts
