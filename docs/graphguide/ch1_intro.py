@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch1_intro.py,v 1.5 2001/03/30 17:05:23 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/ch1_intro.py,v 1.6 2001/04/02 16:28:01 johnprecedo Exp $
 
 from gengraphguide import *
 import reportlab
@@ -26,13 +26,13 @@ This document is intended to be a conversational introduction
 to the use of the ReportLab Graphics package.
 As this package is a subcomponent of the general ReportLab document
 toolkit some previous exposure to the content of the general "ReportLab
-User Guide" is not only highly recommended, but absolutely necessary!
+User Guide" is not only highly recommended, but absolutely necessary.
 If you haven't read the general User Guide yet, this is the time to
 do so!
 """)
 
 disc("""
-After working your way throught this, you should be ready to
+After working your way through this, you should be ready to
 begin writing programs to produce reports containing graphics elements
 like simple drawings and charts.
 """)

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.12 2001/03/31 09:24:45 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.13 2001/04/02 16:27:22 johnprecedo Exp $
 
 from gengraphguide import *
 
@@ -189,14 +189,14 @@ without the verification hook; code should get faster, then.
 Currently the penalty seems to be about 25% on batches of charts,
 so it is hardly worth disabling.
 However, if we move the renderers to C in future (which is eminently
-possible)), the remaining 75% would shrink to almost nothing and
+possible), the remaining 75% would shrink to almost nothing and
 the saving from verification would be significant.
 """)
 
 disc("""
 Each object, including the drawing itself, has a $verify()$ method.
 This either succeeds, or raises an exception.
-If you turn off automatic verification, then you shoudl explictly
+If you turn off automatic verification, then you should explictly
 call $verify()$ in testing when developing the code, or perhaps
 once in a batch process.
 """)
@@ -212,7 +212,7 @@ disc("""A cornerstone of the reportlab/graphics which we will cover below is
 disc("""Another goal is to be able to create GUIs and config files for 
        drawings. A generic GUI can be built to show all editable properties 
        of a drawing, and let you modify them and see the results. The Visual 
-       Basic or Delphi developmen environment are good examples of this kind 
+       Basic or Delphi development environment are good examples of this kind 
        of thing. In a batch charting application, a file could list all the 
        properties of all the components in a chart, and be merged with a 
        database query to make a batch of charts.""")
