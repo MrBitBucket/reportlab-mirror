@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.62 2002/07/24 19:56:38 andy_robinson Exp $
-__version__=''' $Id: paragraph.py,v 1.62 2002/07/24 19:56:38 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.63 2002/09/30 13:15:27 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.63 2002/09/30 13:15:27 rgbecker Exp $ '''
 from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
@@ -413,7 +413,9 @@ class Paragraph(Flowable):
         lines = blPara.lines
         n = len(lines)
         s = int(availHeight/leading)
-        if s<=1: return []
+        if s<=1:
+            del self.blPara
+            return []
         if n<=s: return [self]
         func = self._get_split_blParaFunc()
 
