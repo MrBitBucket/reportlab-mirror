@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.42 2001/09/25 19:22:34 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.43 2001/09/26 12:51:31 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -317,20 +317,22 @@ class BarChart(Widget):
 			if label.visible:
 				labelWidth = stringWidth(labelText, label.fontName, label.fontSize)
 				x0, y0 = self._labelXY(label,x,y,width,height)
-				if self._flipXY:
+				flipXY = self._flipXY
+				if flipXY:
 					pm = width
 				else:
 					pm = height
+				label._pmv = pm	#the plus minus val
 				fixedEnd = getattr(label,'fixedEnd', None)
 				if fixedEnd is not None:
 					v = fixedEnd._getValue(self,pm)
 					x00, y00 = x0, y0
-					if self._flipXY:
+					if flipXY:
 						x0 = v
 					else:
 						y0 = v
 				else:
-					if self._flipXY:
+					if flipXY:
 						x00 = x0
 						y00 = y+height/2.0
 					else:
@@ -339,17 +341,26 @@ class BarChart(Widget):
 				fixedStart = getattr(label,'fixedStart', None)
 				if fixedStart is not None:
 					v = fixedStart._getValue(self,pm)
-					if self._flipXY:
+					if flipXY:
 						x00 = v
 					else:
 						y00 = v
 
-				label.setOrigin(x0, y0)
+				if pm<0:
+					if flipXY:
+						dx = -2*label.dx
+						dy = 0
+					else:
+						dy = -2*label.dy
+						dx = 0
+				else:
+					dy = dx = 0
+				label.setOrigin(x0+dx, y0+dy)
 				label.setText(labelText)
 				sC, sW = label.lineStrokeColor, label.lineStrokeWidth
 				if sC and sW: g.insert(0,Line(x00,y00,x0,y0, strokeColor=sC, strokeWidth=sW))
 				g.add(label)
-				alx = getattr(self,'barLabelCallout',None)
+				alx = getattr(self,'barLabelCallOut',None)
 				if alx: alx(g,rowNo,colNo,x,y,width,height,x00,y00,x0,y0)
 
 	def makeBars(self):
@@ -389,9 +400,17 @@ class BarChart(Widget):
 					g.add(r)
 
 				self._addLabel(g,rowNo,colNo,x,y,width,height)
-
 		return g
 
+	def draw(self):
+		cA, vA = self.categoryAxis, self.valueAxis
+		if vA: vA.joinAxis = cA
+		if cA: cA.joinAxis = vA
+		if self._flipXY:
+			cA.setPosition(self._drawBegin(self.x,self.width), self.y, self.height)
+		else:
+			cA.setPosition(self.x, self._drawBegin(self.y,self.height), self.width)
+		return self._drawFinish()
 
 class VerticalBarChart(BarChart):
 	"Vertical bar chart with multiple side-by-side bars."
@@ -403,11 +422,6 @@ class VerticalBarChart(BarChart):
 		self.valueAxis = YValueAxis()
 		BarChart.__init__(self)
 
-	def draw(self):
-		self.categoryAxis.setPosition(self.x, self._drawBegin(self.y,self.height), self.width)
-		return self._drawFinish()
-
-
 class HorizontalBarChart(BarChart):
 	"Horizontal bar chart with multiple side-by-side bars."
 
@@ -417,11 +431,6 @@ class HorizontalBarChart(BarChart):
 		self.categoryAxis = YCategoryAxis()
 		self.valueAxis = XValueAxis()
 		BarChart.__init__(self)
-
-	def draw(self):
-		self.categoryAxis.setPosition(self._drawBegin(self.x,self.width), self.y, self.height)
-		return self._drawFinish()
-
 
 # Vertical samples.
 

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.17 2001/09/25 19:22:34 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.18 2001/09/26 12:51:31 rgbecker Exp $
 import string
 
 from reportlab.lib import colors
@@ -42,11 +42,6 @@ class Label(Widget):
 		height = AttrMapValue(isNumberOrNone),
 		textAnchor = AttrMapValue(isTextAnchor),
 		visible = AttrMapValue(isBoolean,desc="True if the label is to be drawn"),
-		lineStrokeWidth = AttrMapValue(isNumberOrNone, desc="Non-zero for a drawn line"),
-		lineStrokeColor = AttrMapValue(isColorOrNone, desc="Color for a drawn line"),
-		fixedEnd = AttrMapValue(isNumberOrNone, desc="Non-zero for a fixed draw end"),
-		fixedStart = AttrMapValue(isNumberOrNone, desc="Non-zero for a fixed draw start"),
-		nudge = AttrMapValue(isNumber, desc="Non-zero sign dependent nudge"),
 		)
 
 	def __init__(self):
@@ -69,10 +64,6 @@ class Label(Widget):
 		self.height = None
 		self.textAnchor = 'start'
 		self.visible = 1
-		self.lineStrokeWidth = 0
-		self.lineStrokeColor = None
-		self.nudge = 0
-		self.fixedStart = self.fixedEnd = None
 
 	def setText(self, text):
 		"""Set the text property.  May contain embedded newline characters.
@@ -109,6 +100,10 @@ class Label(Widget):
 		return d
 
 
+	def _getBoxAnchor(self):
+		'''hook for allowing special box anchor effects'''
+		return self.boxAnchor
+
 	def computeSize(self):
 		# the thing will draw in its own coordinate system
 		self._lines = string.split(self._text, '\n')
@@ -124,22 +119,27 @@ class Label(Widget):
 			self._width = self.width
 		self._height = self.height or (self.leading or 1.2*self.fontSize) * len(self._lines)
 
-		if self.boxAnchor in ['n','ne','nw']:
+		boxAnchor = self._getBoxAnchor()
+		if boxAnchor in ['n','ne','nw']:
 			self._top = 0
-		elif self.boxAnchor in ['s','sw','se']:
+		elif boxAnchor in ['s','sw','se']:
 			self._top = self._height
 		else: 
 			self._top = 0.5 * self._height
 		self._bottom = self._top - self._height
 
-		if self.boxAnchor in ['ne','e','se']:
+		if boxAnchor in ['ne','e','se']:
 			self._left = - self._width
-		elif self.boxAnchor in ['nw','w','sw']:
+		elif boxAnchor in ['nw','w','sw']:
 			self._left = 0
 		else:
 			self._left = - self._width * 0.5
 		self._right = self._left + self._width
 
+
+	def _getTextAnchor(self):
+		'''This can be overridden to allow special effects'''
+		return self.textAnchor
 
 	def draw(self):
 		_text = self._text
@@ -151,9 +151,10 @@ class Label(Widget):
 		g.rotate(self.angle)
 
 		y = self._top - self.fontSize
-		if self.textAnchor == 'start':
+		textAnchor = self._getTextAnchor()
+		if textAnchor == 'start':
 			x = self._left
-		elif self.textAnchor == 'middle':
+		elif textAnchor == 'middle':
 			x = self._left + 0.5 * self._width
 		else:
 			x = self._left + self._width
@@ -172,7 +173,7 @@ class Label(Widget):
 
 		for line in self._lines:
 			s = String(x, y, line)
-			s.textAnchor = self.textAnchor
+			s.textAnchor = textAnchor
 			s.fontName = self.fontName
 			s.fontSize = self.fontSize
 			s.fillColor = self.fillColor
@@ -181,21 +182,28 @@ class Label(Widget):
 
 		return g
 
+isOffsetMode=OneOf('high','low','bar','axis')
 class LabelOffset(PropHolder):
 	_attrMap = AttrMap(
-				mode = AttrMapValue(OneOf('high','low','axis'),desc="Where to base the value"),
+				posMode = AttrMapValue(isOffsetMode,desc="Where to base +ve offset"),
 				pos = AttrMapValue(isNumber,desc='Value for positive elements'),
+				negMode = AttrMapValue(isOffsetMode,desc="Where to base -ve offset"),
 				neg = AttrMapValue(isNumber,desc='Value for negative elements'),
 				)
 	def __init__(self):
-		self.mode='axis'
+		self.posMode=self.negMode='axis'
 		self.pos = self.neg = 0
 
 	def _getValue(self, chart, val):
 		flipXY = chart._flipXY
 		A = chart.categoryAxis
 		jA = A.joinAxis
-		mode = self.mode
+		if val>=0:
+			mode = self.posMode
+			delta = self.pos
+		else:
+			mode = self.negMode
+			delta = self.neg
 		if flipXY:
 			v = A._x
 		else:
@@ -206,11 +214,12 @@ class LabelOffset(PropHolder):
 			else:
 				_v = jA._y
 			if mode=='high':
-				v = _v + jA.length
+				v = _v + jA._length
 			elif mode=='low':
 				v = _v
-		if val>=0: return v+self.pos
-		return v+self.neg
+			elif mode=='bar':
+				v = _v+val
+		return v+delta
 
 NoneOrIsInstanceOfLabelOffset=NoneOr(isInstanceOf(LabelOffset))
 
@@ -223,7 +232,6 @@ class BarChartLabel(Label):
 
 	_attrMap = AttrMap(
 		BASE=Label,
-		visible = AttrMapValue(isBoolean,desc="True if the label is to be drawn"),
 		lineStrokeWidth = AttrMapValue(isNumberOrNone, desc="Non-zero for a drawn line"),
 		lineStrokeColor = AttrMapValue(isColorOrNone, desc="Color for a drawn line"),
 		fixedEnd = AttrMapValue(NoneOrIsInstanceOfLabelOffset, desc="None or fixed draw ends +/-"),
@@ -233,8 +241,18 @@ class BarChartLabel(Label):
 
 	def __init__(self):
 		Label.__init__(self)
-		self.visible = 1
 		self.lineStrokeWidth = 0
 		self.lineStrokeColor = None
 		self.nudge = 0
 		self.fixedStart = self.fixedEnd = None
+		self._pmv = 0
+
+	def _getBoxAnchor(self):
+		a = self.boxAnchor
+		if self._pmv<0: a = {'nw':'se','n':'s','ne':'sw','w':'e','c':'c','e':'w','sw':'ne','s':'n','se':'nw'}[a]
+		return a
+
+	def _getTextAnchor(self):
+		a = self.textAnchor
+		if self._pmv<0: a = {'start':'end', 'middle':'middle', 'end':'start'}[a]
+		return a
