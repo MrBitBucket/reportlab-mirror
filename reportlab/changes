@@ -1,6 +1,14 @@
 #################################################################################
-#################### RELEASE 1.20 at 18:00 GMT   9/Nov/2004     #################
+#################### RELEASE 1.20 at 18:00 GMT  25/Nov/2004     #################
 #################################################################################
+r2478 | rgbecker | 2004-11-25 14:18:03 +0000 (Thu, 25 Nov 2004)
+   tables.py: extend span line blocking to multi lines
+r2477 | rgbecker | 2004-11-24 18:29:57 +0000 (Wed, 24 Nov 2004)
+   setup.py: add backin the missing sub-packages
+r2476 | rgbecker | 2004-11-24 16:42:12 +0000 (Wed, 24 Nov 2004)
+   reportlab: table improvments and better documentation
+r2475 | rgbecker | 2004-11-23 17:08:33 +0000 (Tue, 23 Nov 2004)
+   reportlab.setup.py: now works with and without rl_accel
 r2462 | rgbecker | 2004-11-03 20:48:51 +0000 (Wed, 03 Nov 2004)
    M /reportlab/trunk/reportlab/lib/utils.py
    reportlab lib utils.py: add find_locals
