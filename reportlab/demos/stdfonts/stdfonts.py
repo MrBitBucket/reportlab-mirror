@@ -30,6 +30,7 @@ def run(mode):
                 encoding=enc
                 )
         canv.setPageCompression(0)
+        canv.encodingErrorMode = 'replace'
 
         for faceName in pdfmetrics.standardFonts:
             if faceName in ['Symbol', 'ZapfDingbats']:
