@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/runtests.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/runtests.py,v 1.16 2001/03/26 12:22:23 rgbecker Exp $
-__version__=''' $Id: runtests.py,v 1.16 2001/03/26 12:22:23 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/utils/runtests.py,v 1.17 2001/03/31 12:41:57 rgbecker Exp $
+__version__=''' $Id: runtests.py,v 1.17 2001/03/31 12:41:57 rgbecker Exp $ '''
 '''
 script for testing ReportLab
 '''
@@ -16,6 +16,7 @@ import os, sys, string, traceback, re, copy
 #if a file matches this it won't be cleaned
 CLEAN_EXCEPTIONS=['demos/pythonpoint/leftlogo.a85', 'demos/pythonpoint/spectrum.png']
 DO_NOT_RUN = ['unittest.py']
+LISTONLY=0
 _ecount = 0	# count of errors
 
 def makeabs(dir):
@@ -38,9 +39,9 @@ def find_py_files(d):
 	os.path.walk(d,_py_files,L)
 	return L
 
+nprog = re.compile('#( |\t)*no(run|)test(s|)( |\t)*$',re.M|re.I)
+prog = re.compile('.*^((( |\t)*if( |\t)+__name__( |\t)*==( |\t)*(\'|\")__main__(\'|\")( |\t)*:)|#REPORTLAB_TEST_SCRIPT)( |\t)*$',re.M)
 def find_executable_py_files(d):
-	nprog = re.compile('#( |\t)*no(run|)test(s|)( |\t)*$',re.M|re.I)
-	prog=re.compile('.*^((( |\t)*if( |\t)+__name__( |\t)*==( |\t)*(\'|\")__main__(\'|\")( |\t)*:)|#REPORTLAB_TEST_SCRIPT)( |\t)*$',re.M)
 	L=[]
 	for n in find_py_files(d):
 		l = open(n,'r').read()
@@ -50,25 +51,15 @@ def find_executable_py_files(d):
 def do_tests(d,cyc,prof,timing):
 	global _ecount
 
-	def find_test_files(L,d,N):
-		n = os.path.basename(d)
-		if n!='test' : return
-		for n in filter(lambda n: n[-3:]=='.py',N):
-			fn = os.path.normcase(os.path.normpath(os.path.join(d,n)))
-			if os.path.isfile(fn): L.append(fn)
-
 	if cyc is not None: import Cyclops
 	elif prof is not None:
 		import profile, pstats
 	os.chdir(d)
-	test_files = []
-	os.path.walk('.',find_test_files,test_files)
-	for t in find_executable_py_files('.'):
-		if t not in test_files:
-			test_files.append(t)
-
 	oldArgv0 =sys.argv[0]
-	for t in test_files:
+	for t in find_executable_py_files('.'):
+		if LISTONLY:
+			print t
+			continue
 		fn =os.path.normcase(os.path.normpath(os.path.join(d,t)))
 		bn = os.path.basename(fn)
 		print '##### Test %s starting' % bn
@@ -129,7 +120,7 @@ def clean_files(d):
 	os.path.walk('.',find_cleanable_files,None)
 
 if __name__=='__main__': #NORUNTESTS
-	legal_options = ['-cycles', '-dir', '-help','-notest','-clean', '-fclean', '-prof', '-time']
+	legal_options = ['-cycles', '-dir', '-help','-notest','-clean', '-fclean', '-listonly', '-prof', '-time']
 	def usage(code=0, msg=''):
 		f = code and sys.stderr or sys.stdout
 		if msg is not None: f.write(msg+'\n')
@@ -148,6 +139,7 @@ Usage
     -notest         don't carry out tests
     -clean          cleanup if no errors
     -fclean         cleanup even if some errors occur
+    -listonly       just list files instead of executing them
 ''')
 		sys.exit(code)
 
@@ -202,6 +194,7 @@ Usage
 	if '-help' in options: usage()
 
 	if '-notest' not in options:
+		LISTONLY = '-listonly' in options
 		do_tests(dir, cyc, prof, timing)
 
 	if ((_ecount==0 and '-clean' in options) or '-fclean' in options):
