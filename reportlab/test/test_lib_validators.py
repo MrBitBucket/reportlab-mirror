@@ -44,17 +44,6 @@ class ValidatorTestCase(unittest.TestCase):
             assert isNumberOrNone(n) == 1, msg % str(n)
 
 
-    def test3(self):
-        "Test isNumberOrAuto validator."
-
-        msg = 'Validation failed for number %s!'
-
-        numbers = [Auto, 0, 1, 2, -1, -2, 0.0, 0.1, -0.1] #, 2L, -2L]        
-        isNumberOrAuto = validators.isNumberOrAuto()
-        for n in numbers:
-            assert isNumberOrAuto(n) == 1, msg % str(n)
-
-
     def test4(self):
         "Test isString validator."
 
@@ -109,7 +98,6 @@ def makeSuite():
     suite.addTest(ValidatorTestCase('test0'))
     suite.addTest(ValidatorTestCase('test1'))
     suite.addTest(ValidatorTestCase('test2'))
-    suite.addTest(ValidatorTestCase('test3'))
     suite.addTest(ValidatorTestCase('test4'))
     suite.addTest(ValidatorTestCase('test5'))
     suite.addTest(ValidatorTestCase('test6'))

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.23 2001/05/11 10:08:55 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.24 2001/05/15 19:10:55 dinu_gherman Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -35,7 +35,7 @@ the former axes in its own coordinate system.
 
 from types import FunctionType, StringType, TupleType, ListType
 
-from reportlab.lib.validators import isNumber, isNumberOrNone, isNumberOrAuto, isListOfStringsOrNone, isListOfNumbers, isListOfNumbersOrNone, isColorOrNone, OneOf
+from reportlab.lib.validators import isNumber, isNumberOrNone, isListOfStringsOrNone, isListOfNumbers, isListOfNumbersOrNone, isColorOrNone, OneOf
 from reportlab.graphics.shapes import Drawing, Line, Group, Auto, STATE_DEFAULTS
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.charts.textlabels import Label
@@ -458,9 +458,9 @@ class ValueAxis(Widget):
         'maximumTicks':isNumber(),
         'labels':None,
         'labelTextFormat':None,
-        'valueMin':isNumberOrAuto(),
-        'valueMax':isNumberOrAuto(),
-        'valueStep':isNumberOrAuto(),
+        'valueMin':isNumberOrNone(),
+        'valueMax':isNumberOrNone(),
+        'valueStep':isNumberOrNone(),
         'valueSteps':isListOfNumbers()
         }
 

@@ -30,16 +30,6 @@ from reportlab.lib import colors
 ##        return (type(x) in (FloatType, IntType))
 ##
 ##
-##def isNumberOrAuto(x):
-##    from reportlab.graphics.shapes import Auto
-##
-##    if x == Auto:
-##        return 1
-##    else:
-##        # Don't think we really want complex numbers for numbers!
-##        return (type(x) in (FloatType, IntType))
-##
-##
 ##def isTextAnchor(x):
 ##    return (x in ('start', 'middle', 'end'))
 ##
@@ -197,19 +187,6 @@ class isNumberOrNone(Validator):
 
     def __call__(self, x):
         if x is None:
-            return 1
-        else:
-            # Don't think we really want complex numbers for numbers!
-            return (type(x) in (FloatType, IntType))
-
-
-class isNumberOrAuto(Validator):
-    "NumberOrAuto validator class."
-
-    def __call__(self, x):
-        from reportlab.graphics.shapes import Auto
-
-        if x == Auto:
             return 1
         else:
             # Don't think we really want complex numbers for numbers!
