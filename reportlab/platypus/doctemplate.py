@@ -407,7 +407,15 @@ class BaseDocTemplate:
             self.pageTemplate.onPageEnd(self.canv, self)
             self.afterPage()
             self.canv.showPage()
-            if hasattr(self,'_nextPageTemplateIndex'):
+
+            if hasattr(self,'_nextPageTemplateCycle'):
+                #they are cycling through pages'; we keep the index
+                cyc = self._nextPageTemplateCycle
+                idx = self._nextPageTemplateIndex
+                self.pageTemplate = cyc[idx]  #which is one of the ones in the list anyway
+                #bump up by 1
+                self._nextPageTemplateIndex = (idx + 1) % len(cyc)
+            elif hasattr(self,'_nextPageTemplateIndex'):
                 self.pageTemplate = self.pageTemplates[self._nextPageTemplateIndex]
                 del self._nextPageTemplateIndex
             if self._emptyPages==0:
@@ -455,15 +463,35 @@ class BaseDocTemplate:
     def handle_nextPageTemplate(self,pt):
         '''On endPage chenge to the page template with name or index pt'''
         if type(pt) is StringType:
+            if hasattr(self, '_nextPageTemplateCycle'): del self._nextPageTemplateCycle
             for t in self.pageTemplates:
                 if t.id == pt:
                     self._nextPageTemplateIndex = self.pageTemplates.index(t)
                     return
             raise ValueError, "can't find template('%s')"%pt
         elif type(pt) is IntType:
+            if hasattr(self, '_nextPageTemplateCycle'): del self._nextPageTemplateCycle
             self._nextPageTemplateIndex = pt
+        elif type(pt) in (ListType, TupleType):
+            #used for alternating left/right pages
+            #collect the refs to the template objects, complain if any are bad
+            cycle = []
+            for templateName in pt:
+                found = 0
+                for t in self.pageTemplates:
+                    if t.id == templateName:
+                        cycle.append(t)
+                        found = 1
+                if not found:
+                    raise ValueError("Cannot find page template called %s" % templateName)
+            #double-check all of them are there...
+            
+            first = cycle[0]
+            #ensure we start on the first one
+            self._nextPageTemplateCycle = cycle
+            self._nextPageTemplateIndex = 0  #indexes into the cycle
         else:
-            raise TypeError, "argument pt should be string or integer"
+            raise TypeError, "argument pt should be string or integer or list"
 
     def handle_nextFrame(self,fx):
         '''On endFrame chenge to the frame with name or index fx'''

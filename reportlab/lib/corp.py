@@ -409,7 +409,7 @@ class RL_BusinessCard(Widget):
 def test():
     """This function produces a pdf with examples. """
 
-    #wbite on blue
+    #white on blue
     rl = RL_CorpLogo()
     rl.width = 129
     rl.height = 86
@@ -428,6 +428,15 @@ def test():
     D.__dict__['verbose'] = 1
     D.save(fnRoot='corplogo_blueonwhite',formats=['pdf','eps','jpg','gif'])
 
+    #gray on white
+    rl = RL_CorpLogoReversed()
+    rl.fillColor = Color(0.2, 0.2, 0.2)
+    rl.width = 129
+    rl.height = 86
+    D = Drawing(rl.width,rl.height)
+    D.add(rl)
+    D.__dict__['verbose'] = 1
+    D.save(fnRoot='corplogo_grayonwhite',formats=['pdf','eps','jpg','gif'])
 
 
     rl = RL_BusinessCard()
