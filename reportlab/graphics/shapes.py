@@ -1,12 +1,12 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.44 2001/09/04 18:18:09 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.45 2001/09/10 14:18:59 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
 
-import string, os
+import string, os, sys
 from math import pi, cos, sin, tan
 from types import FloatType, IntType, ListType, TupleType, StringType
 from pprint import pprint
@@ -434,7 +434,10 @@ class Drawing(Group, Flowable):
 	def save(self, formats=None, verbose=None, fnRoot=None):
 		"Saves copies of self in desired location and formats"
 		ext = ''
-		fnroot = os.path.join(getattr(self,'outDir','.'), fnRoot or (getattr(self,'fileNamePattern',(self.__class__.__name__+'%03d')) % getattr(self,'chartId',0)))
+		outDir = getattr(self,'outDir','.')
+		if not os.path.isabs(outDir): outDir = os.path.join(os.path.dirname(sys.argv[0]),outDir)
+		if not os.path.isdir(outDir): os.makedirs(outDir)
+		fnroot = os.path.normpath(os.path.join(outDir, fnRoot or (getattr(self,'fileNamePattern',(self.__class__.__name__+'%03d')) % getattr(self,'chartId',0))))
 
 		plotMode, verbose = formats or getattr(self,'formats',['pdf']), verbose or getattr(self,'verbose',_verbose)
 		_saved = logger.warnOnce.enabled, logger.infoOnce.enabled
@@ -442,42 +445,42 @@ class Drawing(Group, Flowable):
 		if 'pdf' in plotMode:
 			from reportlab.graphics import renderPDF
 			filename = fnroot+'.pdf'
-			if verbose: print "generating PDF file %s" % repr(filename)
+			if verbose: print "generating PDF file %s" % filename
 			renderPDF.drawToFile(self, filename, fnroot)
 			ext = ext +  '/.pdf'
 
 		if 'gif' in plotMode:
 			from reportlab.graphics import renderPM
 			filename = fnroot+'.gif'
-			if verbose: print "generating GIF file %s" % repr(filename)
+			if verbose: print "generating GIF file %s" % filename
 			renderPM.drawToFile(self, filename,fmt='GIF')
 			ext = ext +  '/.gif'
 
 		if 'png' in plotMode:
 			from reportlab.graphics import renderPM
 			filename = fnroot+'.png'
-			if verbose: print "generating PNG file %s" % repr(filename)
+			if verbose: print "generating PNG file %s" % filename
 			renderPM.drawToFile(self, filename,fmt='PNG')
 			ext = ext +  '/.png'
 
 		if 'tif' in plotMode:
 			from reportlab.graphics import renderPM
 			filename = fnroot+'.tif'
-			if verbose: print "generating TIFF file %s" % repr(filename)
+			if verbose: print "generating TIFF file %s" % filename
 			renderPM.drawToFile(self, filename,fmt='TIFF')
 			ext = ext +  '/.tif'
 
 		if 'jpg' in plotMode:
 			from reportlab.graphics import renderPM
 			filename = fnroot+'.jpg'
-			if verbose: print "generating JPG file %s" % repr(filename)
+			if verbose: print "generating JPG file %s" % filename
 			renderPM.drawToFile(self, filename,fmt='JPEG')
 			ext = ext +  '/.jpg'
 
 		if 'eps' in plotMode:
 			from fidelity.epscharts import renderPS_SEP
 			filename = fnroot+'.eps'
-			if verbose: print "generating EPS file %s" % repr(filename)
+			if verbose: print "generating EPS file %s" % filename
 			renderPS_SEP.drawToFile(self,
 								filename,
 								title = fnroot,
