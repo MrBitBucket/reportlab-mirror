@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.31 2000/11/23 16:53:59 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.31 2000/11/23 16:53:59 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.32 2000/11/24 12:37:13 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.32 2000/11/24 12:37:13 rgbecker Exp $ '''
 import string
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -58,6 +58,7 @@ def	_putFragLine(tx,words):
 			if not func:
 				raise AttributeError, "Missing %s callback attribute '%s'" % (f.cbDefn.kind,f.cbDefn.name)
 			func(tx._canvas,f.cbDefn.kind,f.cbDefn.label)
+			if f is words[-1]: tx._textOut('',1)
 		else:
 			if (tx._fontname,tx._fontsize)!=(f.fontName,f.fontSize):
 				tx._setFont(f.fontName, f.fontSize)
