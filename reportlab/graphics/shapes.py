@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.95 2003/08/03 14:50:14 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.96 2003/08/11 18:20:38 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.95 2003/08/03 14:50:14 rgbecker Exp $ '''
+__version__=''' $Id: shapes.py,v 1.96 2003/08/11 18:20:38 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -306,8 +306,6 @@ class Shape(_SetKeyWordArgs,_DrawTimeResizeable):
     def getBounds(self):
         "Returns bounding rectangle of object as (x1,y1,x2,y2)"
         raise NotImplementedError("Shapes and widgets must implement getBounds")
-
-
 
 class Group(Shape):
     """Groups elements together.  May apply a transform
@@ -865,6 +863,36 @@ class Path(SolidShape):
 
     def getBounds(self):
         return getPathBounds(self.points)
+
+def getArcPoints(centerx, centery, radius, startangledegrees, endangledegrees, yradius=None, degreedelta=None):
+    while endangledegrees<startangledegrees:
+        endangledegrees = endangledegrees+360
+    degreedelta = degreedelta or 1
+    if yradius is None: yradius = radius
+    points = []
+    a = points.append
+    from math import sin, cos, pi
+    degreestoradians = pi/180.0
+    radiansdelta = degreedelta*degreestoradians
+    startangle = startangledegrees*degreestoradians
+    endangle = endangledegrees*degreestoradians
+    while endangle<startangle:
+        endangle = endangle+2*pi
+    angle = startangle
+    while angle<endangle:
+        a((centerx+radius*cos(angle),centery+yradius*sin(angle)))
+        angle = angle+radiansdelta
+    a((centerx+radius*cos(endangle),centery+yradius*sin(endangle)))
+    return points
+
+class ArcPath(Path):
+    '''Path with an addArc method'''
+    def addArc(self, centerx, centery, radius, startangledegrees, endangledegrees, yradius=None, degreedelta=None, moveTo=None):
+        P = getArcPoints(centerx, centery, radius, startangledegrees, endangledegrees, yradius=yradius, degreedelta=degreedelta)
+        if moveTo or not len(self.operators):
+            self.moveTo(P[0][0],P[0][1])
+            del P[0]
+        for x, y in P: self.lineTo(x,y)
 
 EmptyClipPath=Path()    #special path
 
