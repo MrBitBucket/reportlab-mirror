@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/daily.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/daily.py,v 1.40 2001/04/20 08:39:34 rgbecker Exp $
-__version__=''' $Id: daily.py,v 1.40 2001/04/20 08:39:34 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/utils/daily.py,v 1.41 2001/04/20 08:41:59 rgbecker Exp $
+__version__=''' $Id: daily.py,v 1.41 2001/04/20 08:41:59 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -140,12 +140,6 @@ def cvs_checkout(d):
 		os.chdir(d)
 		do_exec('cp docs/userguide/*.pdf %s' % htmldir)
 		do_exec('mv docs/userguide/*.pdf %s' % dst)
-	
-		os.chdir('docs/graphguide')
-		do_exec(python + ' gengraphguide.py')
-		os.chdir(d)
-		do_exec('cp docs/graphguide/*.pdf %s' % htmldir)
-		do_exec('mv docs/graphguide/*.pdf %s' % dst)
 
 		os.chdir('docs/graphguide')
 		do_exec(python + ' gengraphguide.py')
