@@ -7,12 +7,48 @@ from types import FunctionType
 
 from reportlab.lib import colors 
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
+from reportlab.graphics.widgets.signsandsymbols import SmileyFace0
 from reportlab.graphics.charts.textlabel0 import Label
 from reportlab.graphics.shapes import *
 from reportlab.graphics.charts.textlabel0 import Label
 from reportlab.graphics.charts.axes0 import XCategoryAxis, YValueAxis
       
 
+def makeFilledSquare(x, y, size, color):
+    "Make a filled square data item representation."
+
+    d = size/2.0
+    rect = Rect(x-d, y-d, 2*d, 2*d)
+    rect.fillColor = color
+    rect.strokeColor = color
+
+    return rect
+
+
+def makeFilledDiamond(x, y, size, color):
+    "Make a filled diamond data item representation."
+
+    d = size/2.0
+    poly = Polygon((x-d,y, x,y+d, x+d,y, x,y-d))
+    poly.fillColor = color
+    poly.strokeColor = color
+
+    return poly
+
+
+def makeSmiley(x, y, size, color):
+    "Make a smiley data item representation."
+
+    d = size
+    s = SmileyFace0()
+    s.color = color
+    s.x = x-d
+    s.y = y-d
+    s.size = d*2
+
+    return s
+
+        
 class LineChart(Widget):
     """Line chart with multiple lines.
 
@@ -27,13 +63,13 @@ class LineChart(Widget):
         'height':isNumber,
 
         'useAbsolute':isNumber,
-        'barWidth':isNumber,
-        'barLabelNudge':isNumber,
+        'lineLabelNudge':isNumber,
+        'lineLabels':None,
+        'lineLabelFormat':None,
         'groupSpacing':isNumber,
-        'barSpacing':isNumber,
 
         'joinedLines':isNumber,
-        'blobLength':isNumber,
+        'usedSymbol':None,
 
         'strokeColor':isColorOrNone,
         'fillColor':isColorOrNone,
@@ -43,9 +79,7 @@ class LineChart(Widget):
         'categoryAxis':None,
         'categoryNames':isListOfStrings,
         'valueAxis':None,
-        'data':None,
-        'barLabels':None,
-        'barLabelFormat':None
+        'data':None
         }
 
     def __init__(self):
@@ -80,12 +114,10 @@ class LineChart(Widget):
         # is allocated at the beginning and end of the
         # chart.
         self.useAbsolute = 0   #- not done yet
-        self.barWidth = 0 # 10
-        self.groupSpacing = 5
-        self.barSpacing = 0
+        self.groupSpacing = 1 #5
 
-        self.barLabels = TypedPropertyCollection(Label)
-        self.barLabelFormat = None
+        self.lineLabels = TypedPropertyCollection(Label)
+        self.lineLabelFormat = None
 
         # this says whether the origin is inside or outside
         # the bar - +10 means put the origin ten points
@@ -93,13 +125,13 @@ class LineChart(Widget):
         # points inside if bar value < 0.  This is different
         # to label dx/dy which are not dependent on the
         # sign of the data.
-        self.barLabelNudge = 10
+        self.lineLabelNudge = 10
         # if you have multiple series, by default they butt
         # together.
 
         # New line chart attributes.
         self.joinedLines = 1 # Connect items with straight lines.
-        self.blobLength = 5  # Lenght of sqaure blobs (when unconnected).
+        self.usedSymbol = makeFilledSquare
 
 
     def demo(self):
@@ -123,11 +155,11 @@ class LineChart(Widget):
         return drawing
 
 
-    def calcBarPositions(self):
+    def calcPositions(self):
         """Works out where they go.
 
-        Sets an attribute _barPositions which is a list of
-        lists of (x, y, width, height) matching the data."""
+        Sets an attribute _positions which is a list of
+        lists of (x, y) matching the data."""
 
         self._seriesCount = len(self.data)
         self._rowLength = len(self.data[0])
@@ -138,36 +170,21 @@ class LineChart(Widget):
         else:
             # bar dimensions are normalized to fit.  How wide
             # notionally is one group of bars?
-            normWidth = (self.groupSpacing 
-                        + (self._seriesCount * self.barWidth) 
-                        + ((self._seriesCount - 1) * self.barSpacing)
-                        )
+            normWidth = self.groupSpacing
             availWidth = self.categoryAxis.scale(0)[1]
             normFactor = availWidth / normWidth
-            if self.debug:
-                print '%d series, %d points per series' % (self._seriesCount, self._rowLength)
-                print 'width = %d group + (%d bars * %d barWidth) + (%d gaps * %d interBar) = %d total' % (
-                    self.groupSpacing, self._seriesCount, self.barWidth,
-                    self._seriesCount - 1, self.barSpacing, normWidth)
         
-        self._barPositions = []
+        self._positions = []
         for rowNo in range(len(self.data)):
             barRow = []
             for colNo in range(len(self.data[0])):
                 datum = self.data[rowNo][colNo]
-
                 (groupX, groupWidth) = self.categoryAxis.scale(colNo)
-                x = (groupX +
-                     (0.5 * self.groupSpacing * normFactor) +
-                     (rowNo * self.barWidth * normFactor) +
-                     (rowNo * self.barSpacing * normFactor)
-                     )
-                width = self.barWidth * normFactor
-                     
+                x = groupX + (0.5 * self.groupSpacing * normFactor)
                 y = self.valueAxis.scale(0)
                 height = self.valueAxis.scale(datum) - y
-                barRow.append((x, y, width, height))
-            self._barPositions.append(barRow)
+                barRow.append((x, y+height))
+            self._positions.append(barRow)
         
 
     def draw(self):
@@ -184,7 +201,7 @@ class LineChart(Widget):
 
         self.categoryAxis.configure(self.data)
         
-        self.calcBarPositions()        
+        self.calcPositions()        
         
         g = Group()
 
@@ -197,66 +214,63 @@ class LineChart(Widget):
         g.add(self.categoryAxis)
         g.add(self.valueAxis)
 
-        labelFmt = self.barLabelFormat
+        labelFmt = self.lineLabelFormat
 
         # Iterate over data rows.        
-        for rowNo in range(len(self._barPositions)):
-            row = self._barPositions[rowNo]
+        for rowNo in range(len(self._positions)):
+            row = self._positions[rowNo]
             colorCount = len(self.defaultColors)
             colorIdx = rowNo % colorCount
             rowColor = self.defaultColors[colorIdx]
 
             # Iterate over data columns.        
-            if self.joinedLines == 1:
-                startIndex = 1
-            else:
-                startIndex = 0
-            for colNo in range(startIndex, len(row)):
-                barPos1 = row[colNo]
-                (x1, y1, width1, height1) = barPos1
+            for colNo in range(len(row)):
+                x1, y1 = row[colNo]
                 if self.joinedLines == 1:
-                    barPos0 = row[colNo-1]
-                    (x0, y0, width0, height0) = barPos0
-                    line = Line(x0, y0+height0, x1, y1+height1)
-                    line.strokeColor = rowColor
-                    g.add(line)
-                else:
-                    d = self.blobLength/2.0
-                    rect = Rect(x1-d, y1+height1-d, 2*d, 2*d)
-                    rect.fillColor = rowColor
-                    rect.strokeColor = rowColor
-                    g.add(rect)
+                    if colNo > 0:
+                        # Draw lines between adjacent items.
+                        x2, y2 = row[colNo-1]
+                        line = Line(x1, y1, x2, y2)
+                        line.strokeColor = rowColor
+                        g.add(line)
+
+            # Iterate once more over data columns
+            # (to make sure symbols and labels are on top).
+            for colNo in range(len(row)):
+                x1, y1 = row[colNo]
+                # Draw a symbol for each data item.
+                symbol = self.usedSymbol(x1, y1, 5, rowColor)
+                g.add(symbol)
 
                 # Draw item (bar) labels.
-                if self.joinedLines == 1:
-                    self.drawLabel(g, rowNo, colNo-1, x0, y0, width0, height0)
-                self.drawLabel(g, rowNo, colNo, x1, y1, width1, height1)
+                self.drawLabel(g, rowNo, colNo, x1, y1)
 
         return g
 
 
-    def drawLabel(self, group, rowNo, colNo, x1, y1, width1, height1):
+    def drawLabel(self, group, rowNo, colNo, x, y):
         "Draw a label for a given item in the list."
 
-        labelFmt = self.barLabelFormat
-
+        labelFmt = self.lineLabelFormat
+        labelValue = self.data[rowNo][colNo]
+        
         if labelFmt is None:
             labelText = None
         elif type(labelFmt) is StringType:
-            labelText = labelFmt % self.data[rowNo][colNo]
+            labelText = labelFmt % labelValue
         elif type(labelFmt) is FunctionType:
-            labelText = labelFmt(self.data[rowNo][colNo])
+            labelText = labelFmt(labelValue)
         else:
             msg = "Unknown formatter type %s, expected string or function"  
             raise Exception, msg % labelFmt
 
         if labelText:
-            label = self.barLabels[(rowNo, colNo)]
+            label = self.lineLabels[(rowNo, colNo)]
             #hack to make sure labels are outside the bar
-            if height1 > 0:
-                label.setOrigin(x1 + 0.5*width1, y1 + height1 + self.barLabelNudge)
+            if y > 0:
+                label.setOrigin(x, y + self.lineLabelNudge)
             else:
-                label.setOrigin(x1 + 0.5*width1, y1 + height1 - self.barLabelNudge)
+                label.setOrigin(x, y - self.lineLabelNudge)
             label.setText(labelText)
             group.add(label)
 
@@ -275,8 +289,10 @@ def sample1():
     lc.height = 125
     lc.width = 300
     lc.data = data
+
     lc.joinedLines = 1
-    lc.barLabelFormat = '%2.0f'
+    lc.usedSymbol = makeFilledDiamond
+    lc.lineLabelFormat = '%2.0f'
 
     lc.strokeColor = colors.yellow  # visible border
 
@@ -311,8 +327,10 @@ def sample2():
     lc.height = 125
     lc.width = 300
     lc.data = data
-    lc.joinedLines = 0
-    lc.barLabelFormat = '%2.0f'
+
+    lc.joinedLines = 1
+    lc.usedSymbol = makeSmiley
+    lc.lineLabelFormat = '%2.0f'
 
     lc.strokeColor = colors.yellow  # visible border
 
