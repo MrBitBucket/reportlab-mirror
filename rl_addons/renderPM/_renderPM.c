@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "$Revision: 1.9 $"
+#define VERSION "$Revision: 1.10 $"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -670,7 +670,7 @@ static PyObject* _get_gstatePath(int n, ArtBpath* path)
 
 static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 {
-	double	w, x, s;
+	double	w, x=0, y=0, s;
 	char*	text;
 	PyObject *P, *p;
 	ArtBpath	*path, *pp;
@@ -679,9 +679,8 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 		PyErr_SetString(moduleError, "No font set!");
 		return NULL;
 		}
-	if(!PyArg_ParseTuple(args,"s:_stringPath", &text)) return NULL;
+	if(!PyArg_ParseTuple(args,"s|dd:_stringPath", &text, &x, &y)) return NULL;
 
-	x = 0;
 	s = self->fontSize/1000;
 	n = strlen(text);
 	P = PyTuple_New(n);
@@ -693,12 +692,12 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 			while(pp->code!=ART_END){
 				if(pp->code==ART_CURVETO){
 					pp->x1= pp->x1*s+x;
-					pp->y1= pp->y1*s;
+					pp->y1= pp->y1*s+y;
 					pp->x2= pp->x2*s+x;
-					pp->y2= pp->y2*s;
+					pp->y2= pp->y2*s+y;
 					}
 				pp->x3 = pp->x3*s+x;
-				pp->y3 = pp->y3*s;
+				pp->y3 = pp->y3*s+y;
 				pp++;
 				}
 			p = _get_gstatePath(pp-path,path);
@@ -752,7 +751,7 @@ static struct PyMethodDef gstate_methods[] = {
 	{"pathFill", (PyCFunction)gstate_pathFill, METH_VARARGS, "pathFill()"},
 	{"pathStroke", (PyCFunction)gstate_pathStroke, METH_VARARGS, "pathStroke()"},
 	{"setFont", (PyCFunction)gstate_setFont, METH_VARARGS, "setFont(fontName,fontSize)"},
-	{"_stringPath", (PyCFunction)gstate__stringPath, METH_VARARGS, "_stringPath(text)"},
+	{"_stringPath", (PyCFunction)gstate__stringPath, METH_VARARGS, "_stringPath(text[,x=0,y=0])"},
 	{NULL, NULL}		/* sentinel */
 };
 
