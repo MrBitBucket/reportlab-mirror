@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.47 2001/11/02 17:36:46 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.48 2001/11/21 12:12:21 rgbecker Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -179,7 +179,7 @@ def bruteForceSearchForAFM(faceName):
     for dirname in T1SearchPath:
         if not os.path.isdir(dirname):
             continue
-        possibles = glob.glob(dirname + os.sep + '*.AFM')
+        possibles = glob.glob(dirname + os.sep + '*.afm')
         for possible in possibles:
             (topDict, glyphDict) = parseAFMFile(possible)
             if topDict['FontName'] == faceName:
