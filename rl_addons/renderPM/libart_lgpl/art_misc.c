@@ -72,7 +72,11 @@ art_dprint (const char *fmt, ...)
   va_list ap;
 
   va_start (ap, fmt);
+#ifndef	NOSTDERR
   vfprintf (stderr, fmt, ap);
+#else
+  vfprintf (stdout, fmt, ap);
+#endif
   va_end (ap);
 }
 

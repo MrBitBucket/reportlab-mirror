@@ -33,6 +33,11 @@
 
 #include "art_rect.h"
 #include "art_svp.h"
+#ifdef NOSTDERR
+#	define STDERR stdout
+#else
+#	define STDERR stderr
+#endif
 
 #define noVERBOSE
 
@@ -188,7 +193,7 @@ x_order (ArtPoint z0, ArtPoint z1, ArtPoint z2, ArtPoint z3)
 	    {
 	      if (d1 > 0) return 1;
 	      else if (d1 < 0) return -1;
-	      else fprintf (stderr,"case 1 degenerate\n");
+	      else fprintf (STDERR,"case 1 degenerate\n");
 	      return 0;
 	    }
 	  else /* d0 < 0 */
@@ -226,7 +231,7 @@ x_order (ArtPoint z0, ArtPoint z1, ArtPoint z2, ArtPoint z3)
 	{
 	  if (d3 > 0) return -1;
 	  else if (d3 < 0) return 1;
-	  else fprintf (stderr,"case 2 degenerate\n");
+	  else fprintf (STDERR,"case 2 degenerate\n");
 	  return 0;
 	}
       else /* d2 < 0 */
@@ -263,7 +268,7 @@ x_order (ArtPoint z0, ArtPoint z1, ArtPoint z2, ArtPoint z3)
       if (d3 > 0) return -1;
       else if (d3 < 0) return 1;
       else
-	fprintf (stderr, "colinear!\n");
+	fprintf (STDERR, "colinear!\n");
     }
   else /* d2 < 0 */
     {
@@ -291,7 +296,7 @@ x_order (ArtPoint z0, ArtPoint z1, ArtPoint z2, ArtPoint z3)
       if (d1 > 0) return 1;
       else if (d1 < 0) return -1;
       else
-	fprintf (stderr, "colinear!\n");
+	fprintf (STDERR, "colinear!\n");
     }
   else /* d0 < 0 */
     {
@@ -338,7 +343,7 @@ x_order_2 (ArtPoint z0, ArtPoint z1, ArtPoint z2, ArtPoint z3)
   if (z0.x >= z2.x && z1.x >= z2.x && z0.x >= z3.x && z1.x >= z3.x)
     return 1;
   
-  fprintf (stderr, "x_order_2: colinear!\n");
+  fprintf (STDERR, "x_order_2: colinear!\n");
   return 0;
 }
 
@@ -367,7 +372,7 @@ traverse (ArtSVP *vp)
   y = vp->segs[0].points[0].y;
   while (seg_idx < vp->n_segs || n_active_segs > 0)
     {
-      fprintf (stderr,"y = %g\n", y);
+      fprintf (STDERR,"y = %g\n", y);
       /* delete segments ending at y from active list */
       for (i = 0; i < n_active_segs; i++)
 	{
@@ -375,7 +380,7 @@ traverse (ArtSVP *vp)
 	  if (vp->segs[asi].n_points - 1 == cursor[asi] &&
 	      vp->segs[asi].points[cursor[asi]].y == y)
 	    {
-	      fprintf (stderr,"deleting %d\n", asi);
+	      fprintf (STDERR,"deleting %d\n", asi);
 	      n_active_segs--;
 	      for (j = i; j < n_active_segs; j++)
 		active_segs[j] = active_segs[j + 1];
@@ -387,7 +392,7 @@ traverse (ArtSVP *vp)
       while (seg_idx < vp->n_segs && y == vp->segs[seg_idx].points[0].y)
 	{
 	  cursor[seg_idx] = 0;
-	  fprintf (stderr,"inserting %d\n", seg_idx);
+	  fprintf (STDERR,"inserting %d\n", seg_idx);
 	  for (i = 0; i < n_active_segs; i++)
 	    {
 	      asi = active_segs[i];
@@ -414,7 +419,7 @@ traverse (ArtSVP *vp)
       for (i = 0; i < n_active_segs; i++)
 	{
 	  asi = active_segs[i];
-	  fprintf (stderr,"%d (%g, %g) - (%g, %g) %s\n", asi,
+	  fprintf (STDERR,"%d (%g, %g) - (%g, %g) %s\n", asi,
 		  vp->segs[asi].points[cursor[asi]].x,
 		  vp->segs[asi].points[cursor[asi]].y,
 		  vp->segs[asi].points[cursor[asi] + 1].x,
@@ -451,7 +456,7 @@ traverse (ArtSVP *vp)
 		 y >= vp->segs[asi].points[cursor[asi] + 1].y)
 	    cursor[asi]++;
 	}
-      fprintf (stderr,"\n");
+      fprintf (STDERR,"\n");
     }
   art_free (cursor);
   art_free (active_segs);
@@ -525,7 +530,7 @@ intersect_neighbors (int i, int *active_segs,
   if (intersect_lines (z0, z1, z2, z3, &ip))
     {
 #ifdef VERBOSE
-      fprintf (stderr,"new intersection point: (%g, %g)\n", ip.x, ip.y);
+      fprintf (STDERR,"new intersection point: (%g, %g)\n", ip.x, ip.y);
 #endif
       insert_ip (asi01, n_ips, n_ips_max, ips, ip);
       insert_ip (asi23, n_ips, n_ips_max, ips, ip);
@@ -568,7 +573,7 @@ svp_add_point (ArtSVP *svp, int *n_points_max,
 
 	    {
 #ifdef VERBOSE
-	      fprintf (stderr,"svp_add_point: cross on left!\n");
+	      fprintf (STDERR,"svp_add_point: cross on left!\n");
 #endif
 	    }
 	}
@@ -590,7 +595,7 @@ svp_add_point (ArtSVP *svp, int *n_points_max,
 		       p) > -1)
 	    {
 #ifdef VERBOSE
-	      fprintf (stderr,"svp_add_point: cross on right!\n");
+	      fprintf (STDERR,"svp_add_point: cross on right!\n");
 #endif
 	    }
 	}
@@ -644,14 +649,14 @@ find_crossing (int i, int *active_segs, int n_active_segs,
 	break;
 
 #ifdef VERBOSE
-      fprintf (stderr,"point matches on left (%g, %g) - (%g, %g) x (%g, %g) - (%g, %g)!\n",
+      fprintf (STDERR,"point matches on left (%g, %g) - (%g, %g) x (%g, %g) - (%g, %g)!\n",
 	      p0l.x, p0l.y, p1l.x, p1l.y, p0.x, p0.y, p1.x, p1.y);
 #endif
       if (x_order (p0l, p1l, p0, p1) == 1)
 	break;
 
 #ifdef VERBOSE
-      fprintf (stderr,"scanning to the left (i=%d, target=%d)\n", i, target);
+      fprintf (STDERR,"scanning to the left (i=%d, target=%d)\n", i, target);
 #endif
     }
 
@@ -669,14 +674,14 @@ find_crossing (int i, int *active_segs, int n_active_segs,
 	break;
 
 #ifdef VERBOSE
-      fprintf (stderr,"point matches on left (%g, %g) - (%g, %g) x (%g, %g) - (%g, %g)!\n",
+      fprintf (STDERR,"point matches on left (%g, %g) - (%g, %g) x (%g, %g) - (%g, %g)!\n",
 	      p0.x, p0.y, p1.x, p1.y, p0r.x, p0r.y, p1r.x, p1r.y);
 #endif
       if (x_order (p0r, p1r, p0, p1) == 1)
 	break;
 
 #ifdef VERBOSE
-      fprintf (stderr,"scanning to the right (i=%d, target=%d)\n", i, target);
+      fprintf (STDERR,"scanning to the right (i=%d, target=%d)\n", i, target);
 #endif
     }
 
@@ -717,10 +722,10 @@ fix_crossing (int start, int end, int *active_segs, int n_active_segs,
   ArtPoint *pts;
 
 #ifdef VERBOSE
-  fprintf (stderr,"fix_crossing: [%d..%d)", start, end);
+  fprintf (STDERR,"fix_crossing: [%d..%d)", start, end);
   for (k = 0; k < n_active_segs; k++)
-    fprintf (stderr," %d", active_segs[k]);
-  fprintf (stderr,"\n");
+    fprintf (STDERR," %d", active_segs[k]);
+  fprintf (STDERR,"\n");
 #endif
 
   if (start == -1)
@@ -762,7 +767,7 @@ fix_crossing (int start, int end, int *active_segs, int n_active_segs,
 	    swap = 1;
 
 #ifdef VERBOSE
-	    fprintf (stderr,"fix_crossing: at %i should be %i\n", i, target);
+	    fprintf (STDERR,"fix_crossing: at %i should be %i\n", i, target);
 #endif
 
 	    /* let's close off all relevant segments */
@@ -781,7 +786,7 @@ fix_crossing (int start, int end, int *active_segs, int n_active_segs,
 		    int seg_num;
 		    /* so break here */
 #ifdef VERBOSE
-		    fprintf (stderr,"closing off %d\n", j);
+		    fprintf (STDERR,"closing off %d\n", j);
 #endif
 
 		    pts = art_new (ArtPoint, 16);
@@ -812,7 +817,7 @@ fix_crossing (int start, int end, int *active_segs, int n_active_segs,
       if (cursor[as_start] < vp->segs[as_start].n_points)
 	{
 #ifdef VERBOSE
-	  fprintf (stderr,"checking intersection of %d, %d\n", start - 1, start);
+	  fprintf (STDERR,"checking intersection of %d, %d\n", start - 1, start);
 #endif
 	  intersect_neighbors (start, active_segs,
 			       n_ips, n_ips_max, ips,
@@ -828,7 +833,7 @@ fix_crossing (int start, int end, int *active_segs, int n_active_segs,
       if (cursor[as_end] < vp->segs[as_end].n_points)
 	{
 #ifdef VERBOSE
-	  fprintf (stderr,"checking intersection of %d, %d\n", end - 1, end);
+	  fprintf (STDERR,"checking intersection of %d, %d\n", end - 1, end);
 #endif
 	  intersect_neighbors (end, active_segs,
 			       n_ips, n_ips_max, ips,
@@ -838,10 +843,10 @@ fix_crossing (int start, int end, int *active_segs, int n_active_segs,
   if (swap)
     {
 #ifdef VERBOSE
-      fprintf (stderr,"fix_crossing return: [%d..%d)", start, end);
+      fprintf (STDERR,"fix_crossing return: [%d..%d)", start, end);
       for (k = 0; k < n_active_segs; k++)
-	fprintf (stderr," %d", active_segs[k]);
-      fprintf (stderr,"\n");
+	fprintf (STDERR," %d", active_segs[k]);
+      fprintf (STDERR,"\n");
 #endif
     }
 }
@@ -1021,7 +1026,7 @@ art_svp_uncross (ArtSVP *vp)
   while (seg_idx < vp->n_segs || n_active_segs > 0)
     {
 #ifdef VERBOSE
-      fprintf (stderr,"y = %g\n", y);
+      fprintf (STDERR,"y = %g\n", y);
 #endif
 
       /* maybe move deletions to end of loop (to avoid so much special
@@ -1037,7 +1042,7 @@ art_svp_uncross (ArtSVP *vp)
 	      do
 		{
 #ifdef VERBOSE
-		  fprintf (stderr,"deleting %d\n", asi);
+		  fprintf (STDERR,"deleting %d\n", asi);
 #endif
 		  art_free (ips[asi]);
 		  n_active_segs--;
@@ -1065,7 +1070,7 @@ art_svp_uncross (ArtSVP *vp)
       while (seg_idx < vp->n_segs && y == vp->segs[seg_idx].points[0].y)
 	{
 #ifdef VERBOSE
-	  fprintf (stderr,"inserting %d\n", seg_idx);
+	  fprintf (STDERR,"inserting %d\n", seg_idx);
 #endif
 	  cursor[seg_idx] = 0;
 	  for (i = 0; i < n_active_segs; i++)
@@ -1124,12 +1129,12 @@ art_svp_uncross (ArtSVP *vp)
       for (i = 0; i < n_active_segs; i++)
 	{
 	  asi = active_segs[i];
-	  fprintf (stderr,"%d ", asi);
+	  fprintf (STDERR,"%d ", asi);
 	  for (j = 0; j < n_ips[asi]; j++)
-	    fprintf (stderr,"(%g, %g) - ",
+	    fprintf (STDERR,"(%g, %g) - ",
 		    ips[asi][j].x,
 		    ips[asi][j].y);
-	  fprintf (stderr,"(%g, %g) %s\n",
+	  fprintf (STDERR,"(%g, %g) %s\n",
 		  vp->segs[asi].points[cursor[asi] + 1].x,
 		  vp->segs[asi].points[cursor[asi] + 1].y,
 		  vp->segs[asi].dir ? "v" : "^");
@@ -1242,7 +1247,7 @@ art_svp_uncross (ArtSVP *vp)
 		    &n_segs_max, &n_points_max);
 
 #ifdef VERBOSE
-      fprintf (stderr,"\n");
+      fprintf (STDERR,"\n");
 #endif
     }
 
@@ -1254,7 +1259,7 @@ art_svp_uncross (ArtSVP *vp)
     int k;
     for (k = 0; k < new_vp->n_segs - 1; k++)
       {
-	fprintf (stderr,"(%g, %g) - (%g, %g) %s (%g, %g) - (%g, %g)\n",
+	fprintf (STDERR,"(%g, %g) - (%g, %g) %s (%g, %g) - (%g, %g)\n",
 		new_vp->segs[k].points[0].x,
 		new_vp->segs[k].points[0].y,
 		new_vp->segs[k].points[1].x,
@@ -1374,7 +1379,7 @@ art_svp_rewind_uncrossed (ArtSVP *vp, ArtWindRule rule)
   while (seg_idx < vp->n_segs || n_active_segs > 0)
     {
 #ifdef VERBOSE
-      fprintf (stderr,"y = %g\n", y);
+      fprintf (STDERR,"y = %g\n", y);
 #endif
       /* delete segments ending at y from active list */
       for (i = 0; i < n_active_segs; i++)
@@ -1384,7 +1389,7 @@ art_svp_rewind_uncrossed (ArtSVP *vp, ArtWindRule rule)
 	      vp->segs[asi].points[cursor[asi]].y == y)
 	    {
 #ifdef VERBOSE
-	      fprintf (stderr,"deleting %d\n", asi);
+	      fprintf (STDERR,"deleting %d\n", asi);
 #endif
 	      n_active_segs--;
 	      for (j = i; j < n_active_segs; j++)
@@ -1397,7 +1402,7 @@ art_svp_rewind_uncrossed (ArtSVP *vp, ArtWindRule rule)
       while (seg_idx < vp->n_segs && y == vp->segs[seg_idx].points[0].y)
 	{
 #ifdef VERBOSE
-	  fprintf (stderr,"inserting %d\n", seg_idx);
+	  fprintf (STDERR,"inserting %d\n", seg_idx);
 #endif
 	  cursor[seg_idx] = 0;
 	  for (i = 0; i < n_active_segs; i++)
@@ -1456,7 +1461,7 @@ art_svp_rewind_uncrossed (ArtSVP *vp, ArtWindRule rule)
 	      int new_dir;
 
 #ifdef VERBOSE
-	      fprintf (stderr,"keeping segment %d\n", seg_idx);
+	      fprintf (STDERR,"keeping segment %d\n", seg_idx);
 #endif
 	      n_points = vp->segs[seg_idx].n_points;
 	      points = vp->segs[seg_idx].points;
@@ -1487,7 +1492,7 @@ art_svp_rewind_uncrossed (ArtSVP *vp, ArtWindRule rule)
       for (i = 0; i < n_active_segs; i++)
 	{
 	  asi = active_segs[i];
-	  fprintf (stderr,"%d:%d (%g, %g) - (%g, %g) %s %d\n", asi,
+	  fprintf (STDERR,"%d:%d (%g, %g) - (%g, %g) %s %d\n", asi,
 		  cursor[asi],
 		  vp->segs[asi].points[cursor[asi]].x,
 		  vp->segs[asi].points[cursor[asi]].y,
@@ -1528,7 +1533,7 @@ art_svp_rewind_uncrossed (ArtSVP *vp, ArtWindRule rule)
 	    cursor[asi]++;
 	}
 #ifdef VERBOSE
-      fprintf (stderr,"\n");
+      fprintf (STDERR,"\n");
 #endif
     }
   art_free (cursor);
