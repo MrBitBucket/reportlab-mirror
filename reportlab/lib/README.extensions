@@ -1,0 +1,19 @@
+This directory contains all of reportlabs extensions.
+At present we don't yet support the new distutils distribution
+mechanism although contributions are welcome :).
+
+The file __BUILD.dsw is suitable for VC++ 6.0; th dsp files are 
+for individual projects. At present these are
+
+	_rl_accel.dsp (.c)
+	sgmlop.dsp (.c)
+
+for unix the Setup.in and generic Makefile.pre.in are included.
+You need to do
+
+	make -f Makefile.pre.in boot
+	make
+
+then you should have some shared libraries.
+
+Robin Becker
