@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.24 2001/10/10 23:14:51 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.25 2001/10/11 16:11:48 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
 
@@ -345,7 +345,8 @@ def sample1a():
 	lp.joinedLines = 1
 	lp.strokeColor = colors.black
 
-	lp.lines.symbol = makeMarker('USA_Flag')
+	lp.lines.symbol = makeMarker('UK_Flag')
+
 	lp.lines[0].strokeWidth = 2
 	lp.lines[1].strokeWidth = 4
 
