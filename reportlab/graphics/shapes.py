@@ -44,9 +44,17 @@ STATE_DEFAULTS = {   # sensible defaults for all
     'fontName': 'Times-Roman',
     'textAnchor':  'start' # can be start, middle, end, inherited
     }
-#####verifying functions, can be used in a verifyMap####
+
+    ################################################################
+    #
+    #   Here are some standard verifying functions which can be
+    #   used in an attrMap
+    #
+    ################################################################
+    
 def isBoolean(x):
     return (x in (0, 1))
+
 def isString(x):
     return (type(x) == StringType)
             
@@ -61,6 +69,9 @@ def isNumberOrNone(x):
     else:
         return (type(x) in (FloatType, IntType))
 
+def isTextAnchor(x):
+    return (x in ('start','middle','end'))
+
 def isListOfNumbers(x):
     """Don't think we really want complex numbers for widths!"""
     if type(x) in (ListType, TupleType):
@@ -71,6 +82,12 @@ def isListOfNumbers(x):
     else:
         return 0
 
+def isListOfNumbersOrNone(x):
+    if x is None:
+        return 1
+    else:
+        return isListOfNumbers(x)
+    
 def isListOfShapes(x):
     if type(x) in (ListType, TupleType):
         answer = 1
@@ -80,6 +97,22 @@ def isListOfShapes(x):
         return answer
     else:
         return 0
+
+def isListOfStrings(x):
+    if type(x) in (ListType, TupleType):
+        answer = 1
+        for element in x:
+            if type(element) <> type(""):
+                answer = 0
+        return answer
+    else:
+        return 0
+
+def isListOfStringsOrNone(x):
+    if x is None:
+        return 1
+    else:
+        return isListOfStrings(x)
 
 def isTransform(x):
     if type(x) in (ListType, TupleType):
@@ -541,15 +574,17 @@ class String(Shape):
         'text': isString,
         'fontName':None,  #TODO - checker
         'fontSize':isNumber,
-        'alignment':None #TODO - add checker
+        'fillColor':isColorOrNone,
+        'textAnchor':isTextAnchor
         }
     def __init__(self, x, y, text, **kw):
         self.x = x
         self.y = y
         self.text = text
-        self.alignment = 'left'
+        self.textAnchor = 'start'
         self.fontName = STATE_DEFAULTS['fontName']
         self.fontSize = STATE_DEFAULTS['fontSize']
+        self.fillColor = STATE_DEFAULTS['fillColor']
         self.setProperties(kw)
 
 class UserNode:

@@ -75,7 +75,13 @@ class Widget(shapes.UserNode):
                     # child object, get its properties too
                     childProps = component.getProperties()
                     for (childKey, childValue) in childProps.items():
-                        props['%s.%s' % (name, childKey)] = childValue
+                        #key might be something indexed like '[2].fillColor'
+                        #or simple like 'fillColor'; in the former case we
+                        #don't need a '.' between me and my child.
+                        if childKey[0] == '[':
+                            props['%s%s' % (name, childKey)] = childValue
+                        else:
+                            props['%s.%s' % (name, childKey)] = childValue
                 else:
                     props[name] = component
                

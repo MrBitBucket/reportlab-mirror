@@ -172,7 +172,7 @@ class _PDFRenderer(Renderer):
                 elif text_anchor=='middle':
                     x = x - textLen/2
                 else:
-                    raise ValueError, 'bad value for textAnchor '+str(textAnchor)
+                    raise ValueError, 'bad value for textAnchor '+str(text_anchor)
             self._canvas.addLiteral('BT 1 0 0 1 %0.2f %0.2f Tm (%s) Tj ET' % (x, y, self._canvas._escape(text)))
 
     #def drawPath(self, path):
