@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.30 2003/05/07 10:37:44 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.30 2003/05/07 10:37:44 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.31 2003/07/26 08:54:19 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.31 2003/07/26 08:54:19 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -258,6 +258,7 @@ class PMCanvas:
         self.__dict__['_baseCTM'] = (scale,0,0,scale,0,0)
         self.__dict__['_clipPaths'] = []
         self.__dict__['configPIL'] = configPIL
+        self.__dict__['_dpi'] = dpi
         self.ctm = self._baseCTM
 
     def _drawTimeResize(self,w,h,bg=None):
@@ -301,7 +302,11 @@ class PMCanvas:
                 fmt = 'JPEG'
             else:
                 raise RenderPMError,"Unknown image kind %s" % fmt
-            apply(im.save,(fn,fmt),self.configPIL or {})
+            configPIL = self.configPIL or {}
+            if fmt=='TIFF':
+                for a,d in ('resolution',self._dpi),('resolution unit','inch'):
+                    configPIL[a] = configPIL.get(a,d)
+            apply(im.save,(fn,fmt),configPIL)
             if not hasattr(fn,'write'):
                 from reportlab.lib.utils import markfilename
                 markfilename(fn,creatorcode='ogle',filetype='PICT')
