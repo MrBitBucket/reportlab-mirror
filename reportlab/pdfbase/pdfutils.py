@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.25 2001/08/18 16:52:09 rgbecker Exp $
-__version__=''' $Id: pdfutils.py,v 1.25 2001/08/18 16:52:09 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.26 2001/09/19 22:38:13 andy_robinson Exp $
+__version__=''' $Id: pdfutils.py,v 1.26 2001/09/19 22:38:13 andy_robinson Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -290,7 +290,7 @@ def _AsciiBase85Decode(input):
     # special rules apply if not a multiple of five bytes.  
     whole_word_count, remainder_size = divmod(len(stripped), 5)
     #print '%d words, %d leftover' % (whole_word_count, remainder_size)
-    assert remainder_size <> 1, 'invalid Ascii 85 stream!'
+    #assert remainder_size <> 1, 'invalid Ascii 85 stream!'
     cut = 5 * whole_word_count
     body, lastbit = stripped[0:cut], stripped[cut:]
     
@@ -341,6 +341,8 @@ def _AsciiBase85Decode(input):
             lastword = chr(b1) + chr(b2)
         elif remainder_size == 4:
             lastword = chr(b1) + chr(b2) + chr(b3)
+        else:
+            lastword = ''
         outstream.write(lastword)
 
     #terminator code for ascii 85    

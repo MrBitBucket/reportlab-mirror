@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/cidfonts?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: cidfonts.py,v 1.3 2001/09/10 03:08:29 andy_robinson Exp $ '''
+__version__=''' $Id: cidfonts.py,v 1.4 2001/09/19 22:38:13 andy_robinson Exp $ '''
 __doc__="""CID (Asian multi-byte) font support.
 
 This defines classes to represent CID fonts.  They know how to calculate
@@ -19,6 +19,14 @@ from reportlab.pdfbase import pdfdoc
 from reportlab.rl_config import CMapSearchPath
 
 
+def findCMapFile(name):
+    "Returns full filename, or raises error"
+    for dirname in CMapSearchPath:
+        cmapfile = dirname + os.sep + name
+        if os.path.isfile(cmapfile):
+            return cmapfile
+    raise IOError, 'CMAP file for encodings "%s" not found!' % name
+    
 def structToPDF(structure):
     "Converts deeply nested structure to PDFdoc dictionary/array objects"
     if type(structure) is DictType:
@@ -58,14 +66,8 @@ class CIDEncoding(pdfmetrics.Encoding):
         """This is a tricky one as CMAP files are Postscript
         ones.  Some refer to others with a 'usecmap'
         command"""
-        found = 0
-        for dirname in CMapSearchPath:
-            cmapfile = dirname + os.sep + name
-            if os.path.isfile(cmapfile):
-                found = 1
-                break
-        assert found, 'CMAP file for encodings "%s" not found!' % name
-
+        cmapfile = findCMapFile(name)
+        
         rawdata = open(cmapfile, 'r').read()
         if len(rawdata) > 50000:
             # CMAPs for unicode have 7000+ explicit ranges, takes minutes
