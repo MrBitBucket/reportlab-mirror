@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.44 2000/12/14 12:26:58 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.44 2000/12/14 12:26:58 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.45 2000/12/14 13:18:50 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.45 2000/12/14 13:18:50 rgbecker Exp $ '''
 from string import split, strip, join, whitespace
 from operator import truth
 from types import StringType, ListType
@@ -161,7 +161,7 @@ def _getFragWords(frags):
 					# of paragraphs
 		if text!='':
 			S = split(text)
-			if S[-1]=='': del S[-1]
+			if S==[]: S = ['']
 			if W!=[] and text[0] in whitespace:
 				W.insert(0,n)
 				R.append(W)
