@@ -15,8 +15,7 @@ from reportlab.graphics.shapes import STATE_DEFAULTS, Path, UserNode
 from reportlab.graphics.shapes import * # (only for test0)
 from reportlab import rl_config
 
-from xml.dom import implementation
-from xml.dom.ext import PrettyPrint
+from xml.dom import getDOMImplementation
 
 
 ### some constants ###
@@ -105,8 +104,11 @@ class SVGCanvas:
             self._font = self._fontSize = self._lineCap = \
             self._lineJoin = self._color = None
 
-        self.doc = implementation.createDocument(None, None, None)
-        self.svg = transformNode(self.doc, "svg", width=size[0], height=self.height)
+        implementation = getDOMImplementation()
+        self.doc = implementation.createDocument(None, "svg", None)
+        self.svg = self.doc.documentElement
+        self.svg.setAttribute("width", str(size[0]))
+        self.svg.setAttribute("height", str(self.height))
 
         title = self.doc.createElement('title')
         text = self.doc.createTextNode('...')
@@ -145,7 +147,8 @@ class SVGCanvas:
         # use.setAttribute("transform", "scale(1, -1)")
         # self.svg.appendChild(use)        
 
-        PrettyPrint(self.svg, file)
+        result = self.svg.toprettyxml(indent="    ")
+        file.write(result)
 
         if file is not f: 
             file.close()
@@ -513,7 +516,7 @@ class SVGCanvas:
     def endGroup(self):
         if self.verbose: print "+++ begin SVGCanvas.endGroup"
         if not self.currGroup.getAttribute("transform"):
-            self.currGroup.removeAttribute("transform")
+            pass #self.currGroup.removeAttribute("transform")
         # self.currGroup = self.currGroup.parentNode
         if self.verbose: print "+++ end SVGCanvas.endGroup"
 
