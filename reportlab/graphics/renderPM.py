@@ -414,8 +414,7 @@ class PMCanvas:
 
     def drawCentredString(self, x, y, text, text_anchor='middle'):
         if self.fillColor is not None:
-            font, font_size = self.fontName, self.fontSize
-            textLen = stringWidth(text, font,font_size)
+            textLen = stringWidth(text, self.fontName,self.fontSize)
             if text_anchor=='end':
                 x = x-textLen
             elif text_anchor=='middle':

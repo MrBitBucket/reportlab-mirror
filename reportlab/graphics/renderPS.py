@@ -184,7 +184,7 @@ class PSCanvas:
             self._lineWidth = width
             self.code.append('%s setlinewidth' % width)
 
-    def setFont(self,font,fontSize):
+    def setFont(self,font,fontSize,leading=None):
         if self._font!=font or self._fontSize!=fontSize:
             self._fontCodeLoc = len(self.code)
             self._font = font
@@ -207,7 +207,7 @@ class PSCanvas:
         str = string.replace(str, ')', '\)')
         return str
 
-    def drawString(self, s, x, y, angle=0):
+    def drawString(self, x, y, s, angle=0):
         if self._fillColor != None:
             if not self.code[self._fontCodeLoc]:
                 psName = getFont(self._font).face.name
@@ -230,6 +230,18 @@ class PSCanvas:
                 self.code.append('0 0 m (%s) show' % s)
                 self.code.append('grestore')
 
+    def drawCentredString(self, x, y, text, text_anchor='middle'):
+        if self.fillColor is not None:
+            textLen = stringWidth(text, self._font,self._fontSize)
+            if text_anchor=='end':
+                x = x-textLen
+            elif text_anchor=='middle':
+                x = x - textLen/2
+            self.drawString(x,y,text)
+
+    def drawRightString(self, text, x, y):
+        self.drawCentredString(text,x,y,text_anchor='end')
+
     def drawCurve(self, x1, y1, x2, y2, x3, y3, x4, y4, closed=0):
         codeline = '%s m %s curveto'
         data = (fp_str(x1, y1), fp_str(x2, y2, x3, y3, x4, y4))
@@ -244,13 +256,13 @@ class PSCanvas:
 
     ########################################################################################
 
-    def rect(self, x1,y1, x2,y2, rx=8, ry=8):
+    def rect(self, x1,y1, x2,y2, stroke=1, fill=1):
         "Draw a rectangle between x1,y1, and x2,y2"
         # Path is drawn in counter-clockwise direction"
 
         x1, x2 = min(x1,x2), max(x1, x2) # from piddle.py
         y1, y2 = min(y1,y2), max(y1, y2)
-        self.polygon(((x1,y1),(x2,y1),(x2,y2),(x1,y2)), closed=1)
+        self.polygon(((x1,y1),(x2,y1),(x2,y2),(x1,y2)), closed=1, stroke=stroke, fill = fill)
 
     def roundRect(self, x1,y1, x2,y2, rx=8, ry=8):
         """Draw a rounded rectangle between x1,y1, and x2,y2,
@@ -349,7 +361,7 @@ class PSCanvas:
 
         return codeline % data
 
-    def polygon(self, p, closed=0):
+    def polygon(self, p, closed=0, stroke=1, fill=1):
         assert len(p) >= 2, 'Polygon must have 2 or more points'
 
         start = p[0]
@@ -362,7 +374,7 @@ class PSCanvas:
         if closed:
             polyCode.append("closepath")
 
-        self._fillAndStroke(polyCode)
+        self._fillAndStroke(polyCode,stroke=stroke,fill=fill)
 
     def lines(self, lineList, color=None, width=None):
         if self._strokeColor != None:
@@ -428,15 +440,17 @@ class PSCanvas:
             figureCode.append("closepath")
         self._fillAndStroke(figureCode)
 
-    def _fillAndStroke(self,code,clip=0):
-        if self._fillColor or self._strokeColor or clip:
+    def _fillAndStroke(self,code,clip=0,fill=1,stroke=1):
+        fill = self._fillColor and fill
+        stroke = self._strokeColor and stroke
+        if fill or stroke or clip:
             self.code.extend(code)
-            if self._fillColor:
-                if self._strokeColor or clip: self.code.append("gsave")
+            if fill:
+                if stroke or clip: self.code.append("gsave")
                 self.setColor(self._fillColor)
                 self.code.append("eofill")
-                if self._strokeColor or clip: self.code.append("grestore")
-            if self._strokeColor != None:
+                if stroke or clip: self.code.append("grestore")
+            if stroke:
                 if clip: self.code.append("gsave")
                 self.setColor(self._strokeColor)
                 self.code.append("stroke")
@@ -741,7 +755,7 @@ class _PSRenderer(Renderer):
                     x = x - textLen/2
                 else:
                     raise ValueError, 'bad value for text_anchor '+str(text_anchor)
-            self._canvas.drawString(text,x,y)
+            self._canvas.drawString(x,y,text)
 
     def drawPath(self, path):
         from reportlab.graphics.shapes import _renderPath
