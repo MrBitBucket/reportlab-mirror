@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch1_intro.py,v 1.11 2000/10/25 08:57:45 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch1_intro.py,v 1.12 2001/03/08 00:22:44 rgbecker Exp $
 from genuserguide import *
 import reportlab
 
@@ -312,7 +312,7 @@ image('Python_1.6a2.gif', 3*inch, 3*inch )
 disc("""
 Now you can put Extensions in the Extensions-Folder;
 which is where you should unpack the <b>reportlab.zip</b> with your favorite unpack-utility.
-You¹ll get a subfolder named <b>reportlab</b>.
+You'll get a subfolder named <b>reportlab</b>.
 """)
 
 disc("""
