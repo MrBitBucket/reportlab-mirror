@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.21 2002/03/26 11:49:10 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.22 2002/04/11 13:35:47 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
-__version__=''' $Id: linecharts.py,v 1.21 2002/03/26 11:49:10 rgbecker Exp $ '''
+__version__=''' $Id: linecharts.py,v 1.22 2002/04/11 13:35:47 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType
@@ -195,7 +195,7 @@ class HorizontalLineChart(LineChart):
 		"""
 
 		self._seriesCount = len(self.data)
-		self._rowLength = len(self.data[0])
+		self._rowLength = max(map(len,self.data))
 
 		if self.useAbsolute:
 			# Dimensions are absolute.
@@ -209,7 +209,7 @@ class HorizontalLineChart(LineChart):
 		self._positions = []
 		for rowNo in range(len(self.data)):
 			lineRow = []
-			for colNo in range(len(self.data[0])):
+			for colNo in range(len(self.data[rowNo])):
 				datum = self.data[rowNo][colNo]
 				(groupX, groupWidth) = self.categoryAxis.scale(colNo)
 				x = groupX + (0.5 * self.groupSpacing * normFactor)

@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.28 2002/03/26 11:49:10 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.29 2002/04/11 13:35:47 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.28 2002/03/26 11:49:10 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.29 2002/04/11 13:35:47 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -162,12 +162,12 @@ class LinePlot(Widget):
 		"""
 
 		self._seriesCount = len(self.data)
-		self._rowLength = len(self.data[0])
+		self._rowLength = max(map(len,self.data))
 		
 		self._positions = []
 		for rowNo in range(len(self.data)):
 			line = []
-			for colNo in range(len(self.data[0])):
+			for colNo in range(len(self.data[rowNo])):
 				datum = self.data[rowNo][colNo] # x,y value
 				if type(datum[0]) == type(''):
 					x = self.xValueAxis.scale(mktime(mkTimeTuple(datum[0])))
