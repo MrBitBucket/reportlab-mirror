@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/runtests.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/runtests.py,v 1.17 2001/03/31 12:41:57 rgbecker Exp $
-__version__=''' $Id: runtests.py,v 1.17 2001/03/31 12:41:57 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/utils/runtests.py,v 1.18 2001/03/31 14:49:23 rgbecker Exp $
+__version__=''' $Id: runtests.py,v 1.18 2001/03/31 14:49:23 rgbecker Exp $ '''
 '''
 script for testing ReportLab
 '''
@@ -14,9 +14,10 @@ _globals['__name__'] = "__main__"	#for passing to execfile
 import os, sys, string, traceback, re, copy
 
 #if a file matches this it won't be cleaned
-CLEAN_EXCEPTIONS=['demos/pythonpoint/leftlogo.a85', 'demos/pythonpoint/spectrum.png']
+CLEAN_EXCEPTIONS=['demos/pythonpoint/leftlogo.a85', 'docs/images/replogo.a85', 'demos/pythonpoint/spectrum.png']
 DO_NOT_RUN = ['unittest.py']
 LISTONLY=0
+VERBOSE=0
 _ecount = 0	# count of errors
 
 def makeabs(dir):
@@ -109,18 +110,36 @@ def is_exceptional(fn,exceptions):
 		if makeabs(fn)[-len(xfn):]==xfn: return 1
 	return 0
 
+def getEntries(d, kind=1):
+	try:
+		f = open(os.path.join(d,'CVS','Entries'),'r')
+	except:
+		return []
+	E = []
+	for l in f.readlines():
+		if l[0]=='D':
+			if kind & 2:
+				e = l[2:l.find('/',2)]
+				if e: E.append(e)
+		elif kind & 1:
+			e = l[1:l.find('/',1)]
+			if e: E.append(e)
+	return [os.path.join(d,e) for e in E]
+
 def clean_files(d):
 	def find_cleanable_files(L,d,N):
+		exceptions = CLEAN_EXCEPTIONS+getEntries(d)
 		n = os.path.basename(d)
-		for n in filter(lambda n: n[-4:] in ['.PYC','.PDF','.A85','.PNG','.IMG'],map(string.upper,N)):
+		for n in filter(lambda n: n[-4:] in ['.PYC','.PDF','.A85','.PNG','.IMG', '.PYO', '.EPS'],map(string.upper,N)):
 			fn = os.path.normcase(os.path.normpath(os.path.join(d,n)))
-			if os.path.isfile(fn) and not is_exceptional(fn,CLEAN_EXCEPTIONS):
+			if os.path.isfile(fn) and not is_exceptional(fn,exceptions):
+				if VERBOSE: print 'remove \'%s\'' % fn
 				os.remove(fn)
 	os.chdir(d)
 	os.path.walk('.',find_cleanable_files,None)
 
 if __name__=='__main__': #NORUNTESTS
-	legal_options = ['-cycles', '-dir', '-help','-notest','-clean', '-fclean', '-listonly', '-prof', '-time']
+	legal_options = ['-cycles', '-dir', '-help','-notest','-clean', '-fclean', '-listonly', '-prof', '-time', '-verbose']
 	def usage(code=0, msg=''):
 		f = code and sys.stderr or sys.stdout
 		if msg is not None: f.write(msg+'\n')
@@ -140,6 +159,7 @@ Usage
     -clean          cleanup if no errors
     -fclean         cleanup even if some errors occur
     -listonly       just list files instead of executing them
+    -verbose        be verbose about actions
 ''')
 		sys.exit(code)
 
@@ -151,6 +171,8 @@ Usage
 	if options!=[] and options[0][0]!='-':
 		dir = options[0]
 		del options[0]
+
+	VERBOSE='-verbose' in options
 
 	for k in options:
 		if '=' in k:
