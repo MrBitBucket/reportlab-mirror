@@ -14,13 +14,8 @@ class EmbeddingTestCase(unittest.TestCase):
 
         #LettError fonts should always be there.  The others are voluntary.
 
-        # we know some glyphs are missing, suppress warnings
-        import reportlab.rl_config
-        reportlab.rl_config.warnOnMissingFontGlyphs = 0
         
         ok = 1
-        for filename in ('LeERC___.AFM','LeERC___.PFB'): 
-            assert os.path.isfile(filename), "Font file not found %s" % filename
         
         c = Canvas('test_pdfbase_fontembed.pdf')
         c.setPageCompression(0)
@@ -60,16 +55,16 @@ class EmbeddingTestCase(unittest.TestCase):
             c.drawString(100+w, 600, ' Hello World')
                     
 
-        # LettError sample
+        # LettError sample - creates on demand, we hope
         y = 550
-        justFace = pdfmetrics.EmbeddedType1Face('LeERC___.AFM','LeERC___.PFB')
-
-        faceName = 'LettErrorRobot-Chrome'  # pulled from AFM file
-        pdfmetrics.registerTypeFace(justFace)
-
-        
-        justFont = pdfmetrics.Font('LettErrorRobot-Chrome', faceName, 'WinAnsiEncoding')
-        pdfmetrics.registerFont(justFont)
+##        justFace = pdfmetrics.EmbeddedType1Face('LeERC___.AFM','LeERC___.PFB')
+##
+##        faceName = 'LettErrorRobot-Chrome'  # pulled from AFM file
+##        pdfmetrics.registerTypeFace(justFace)
+##
+##        
+##        justFont = pdfmetrics.Font('LettErrorRobot-Chrome', faceName, 'WinAnsiEncoding')
+##        pdfmetrics.registerFont(justFont)
 
         c.setFont('LettErrorRobot-Chrome', 12)
         c.drawString(100, y, 'This should be in LettErrorRobot-Chrome')

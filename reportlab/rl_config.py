@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.26 2001/10/05 00:23:26 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.27 2001/10/05 01:00:34 andy_robinson Exp $
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =				1
@@ -21,9 +21,7 @@ T1SearchPath =	('c:/Program Files/Adobe/Acrobat 4.0/Resource/Font', #Win32
 				'%(disk)s/Applications/Python %(sys_version)s/reportlab/fonts', #Mac?
 				'/usr/lib/Acrobat4/Resource/Font', #Linux
 				'/usr/lib/Acrobat5/Resource/Font', #Linux, Acrobat 5?
-				'%(REPORTLAB_DIR)s/test', #special
-				'%(REPORTLAB_DIR)s/fonts', #special
-				'%(REPORTLAB_DIR)s/lib/fontDir' #special
+				'%(REPORTLAB_DIR)s/fonts' #special
 				)
 
 # places to look for CMap files - should ideally merge with above
