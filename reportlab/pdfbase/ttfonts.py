@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.16 2003/11/10 21:20:25 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.17 2003/11/14 17:15:30 rgbecker Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -58,7 +58,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.16 2003/11/10 21:20:25 rgbecker Exp $'
+__version__ = '$Id: ttfonts.py,v 1.17 2003/11/14 17:15:30 rgbecker Exp $'
 
 import string
 from types import StringType
@@ -273,7 +273,7 @@ class TTFontParser:
 
         # Check the checksums for the whole file
         checkSum = calcChecksum(self._ttf_data)
-        checkSum = add32(0xB1B0AFBAL, -checkSum)
+        checkSum = add32(_L2U32(0xB1B0AFBAL), -checkSum)
         if checkSum != 0:
             raise TTFError, 'Invalid font checksum'
 

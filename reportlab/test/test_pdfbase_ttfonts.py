@@ -134,7 +134,7 @@ class TTFontFileTestCase(unittest.TestCase):
         "Test add32"
         self.assertEquals(add32(10, -6), 4)
         self.assertEquals(add32(6, -10), -4)
-        self.assertEquals(add32(0x80000000L, -1), 0x7FFFFFFF)
+        self.assertEquals(add32(_L2U32(0x80000000L), -1), 0x7FFFFFFF)
         self.assertEquals(add32(0x7FFFFFFF, 1), _L2U32(0x80000000L))
 
     def testChecksum(self):
