@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.44 2003/12/17 18:41:23 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.44 2003/12/17 18:41:23 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.45 2004/01/28 13:03:19 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.45 2004/01/28 13:03:19 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -597,6 +597,7 @@ def test():
                 except AttributeError:
                     print 'Problem drawing %s file'%k
                     raise
+        if os.environ.get('RL_NOEPSPREVIEW','0')=='1': drawing.__dict__['preview'] = 0
         drawing.save(formats=['eps','pdf'],outDir='pmout',fnRoot=fnRoot)
         i = i + 1
         #if i==10: break
