@@ -1,0 +1,17 @@
+.t PLATYPUS Proposal
+
+.beginPre
+$Log: platprop.yml,v $
+Revision 1.1  2000/05/15 10:58:54  andy_robinson
+Platypus Proposal
+
+.endPre
+
+
+.h1 Paragraphs, Paragraph Styles and Text
+
+The most common Flowable objects in most applications will almost certainly be paragraphs, and these are also the most complex we have implemented so far.  This section explains what can be done with Paragraphs.
+
+
+.h3 Initialisation
+We have abstracted many of the formatting options out of Paragraph cclass itself into a separate class called ParagraphStyle.  This 
