@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch6_tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch6_tables.py,v 1.4 2002/07/24 19:56:36 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch6_tables.py,v 1.5 2002/09/12 10:47:20 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.platypus import Image
 
@@ -13,9 +13,42 @@ a <b>Python</b> $string$.
 """)
 
 disc("""
-$Tables$ are created by passing the constructor a sequence of column widths,
-a sequence of row heights and the data in
-row order. Drawing of the table can be controlled by using a $TableStyle$ instance. This allows control of the
+Our present tables are a trade-off between efficient drawing and specification
+and functionality.  We assume the reader has some familiarity with HTML tables.
+In brief, they have the following characteristics:
+""")
+
+bullet("""They can contain anythign convertible to a string; flowable
+objects such as other tables; or entire sub-stories""")
+
+bullet("""They can row out the row heights to fit the data if you don't supply
+the row height.  (They can also work out the widths, but generally it is better
+for a designer to set the width manually, and it draws faster).""")
+
+bullet("""They can split across pages if needed (see the canSplit attribute).
+You can specify that a number of rows at the top and bottom should be
+repeated after the split (e.g. show the headers again on page 2,3,4...)""")
+
+bullet("""For very wide tables, they can also split 'by column'.  You can choose
+whether tou want to split down-and-across or across-and-down""")
+
+bullet("""They have a simple and powerful notation for specifying shading and
+gridlines which works well with financial or database tables, where you
+don't know the number of rows up front.  You can easily say 'make the last row
+bold and put a line above it'""")
+
+bullet("""The style and data are separated, so you can declare a handful of table
+styles and use them for a family of reports.  Styes can also 'inherit', as with
+paragraphs.""")
+
+disc("""There is however one main limitation compared to an HTML table.
+They define a simple rectangular grid.  There is no row or column
+spanning; if you need to span cells, you must nest tables inside table cells instead""")
+
+disc("""
+$Tables$ are created by passing the constructor an optional sequence of column widths,
+an optional sequence of row heights, and the data in row order.
+Drawing of the table can be controlled by using a $TableStyle$ instance. This allows control of the
 color and weight of the lines (if any), and the font, alignment and padding of the text.
 A primitive automatic row height and or column width calculation mechanism is provided for.
 """)
@@ -46,7 +79,10 @@ in $rowHeights$ determines the number of rows in the table.
 A value of $None$ means that the corresponding row height should be calculated automatically.""")
 
 disc("""The $style$ argument can be an initial style for the table.""")
-disc("""The $splitByRow$ argument is a Boolean indicating that the $Table$ should split itself
+disc("""The $splitByRow$ argument is only needed for tables both too tall and too wide
+to fit in the current context.  In this case you must decide whether to 'tile'
+down and across, or across and then down.  This parameter is a Boolean indicating that the
+$Table$ should split itself
 by row before attempting to split itself by column when too little space is available in
 the current drawing area and the caller wants the $Table$ to split.""")
 
