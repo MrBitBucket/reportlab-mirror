@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.72 2003/07/02 16:10:10 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.73 2003/09/03 11:15:06 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -9,7 +9,7 @@ vertical versions.
 
 Stacked and percentile bar charts to follow...
 """
-__version__=''' $Id: barcharts.py,v 1.72 2003/07/02 16:10:10 rgbecker Exp $ '''
+__version__=''' $Id: barcharts.py,v 1.73 2003/09/03 11:15:06 rgbecker Exp $ '''
 
 import string, copy
 from types import FunctionType, StringType
@@ -374,6 +374,7 @@ class BarChart(PlotArea):
 
     def makeBars(self):
         g = Group()
+        lg = Group()
 
         lenData = len(self.data)
         reversePlotOrder = self.reversePlotOrder
@@ -389,7 +390,7 @@ class BarChart(PlotArea):
                 style = bars.has_key((styleIdx,colNo)) and bars[(styleIdx,colNo)] or rowStyle
                 (x, y, width, height) = barPos
                 if None in (width,height):
-                    self._addNABarLabel(g,rowNo,colNo,x,y,width,height)
+                    self._addNABarLabel(lg,rowNo,colNo,x,y,width,height)
                     continue
 
                 # Draw a rectangular symbol for each data item,
@@ -413,7 +414,8 @@ class BarChart(PlotArea):
                     r.strokeColor = style.strokeColor
                     g.add(r)
 
-                self._addBarLabel(g,rowNo,colNo,x,y,width,height)
+                self._addBarLabel(lg,rowNo,colNo,x,y,width,height)
+        g.add(lg)
         return g
 
     def _desiredCategoryAxisLength(self):
