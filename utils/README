@@ -59,12 +59,9 @@ Release Procedure
 
 	this should create the files ~/ReportLab_d_xy.tgz/.zip
 	the links ~/public_ftp/reportlab.tgz/.zip should be pointing to the 
-	ne archives
+	new archives.
 
-	The current.tgz/.zip will be out of phase so we should also run
-	./daily.py
-
-	and if we know that the idle py2pdf patch works
+	If we know that the idle py2pdf patch works
 	./daily.py -py2pdf to create the cutdown distribution for idle
 
 6)	Finally we need to edit ~/public_html/news.html around line 117 we should see
