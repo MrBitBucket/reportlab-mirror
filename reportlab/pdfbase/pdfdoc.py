@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.87 2003/09/11 23:14:31 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.87 2003/09/11 23:14:31 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.88 2003/11/19 10:17:56 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.88 2003/11/19 10:17:56 rgbecker Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -1750,7 +1750,7 @@ class PDFImageXObject:
         self.height = 23
         self.bitsPerComponent = 1
         self.colorSpace = 'DeviceGray'
-        self.filter = PDFName('ASCII85Decode')
+        self._filters = 'ASCII85Decode',
         self.streamContent = """
             003B00 002700 002480 0E4940 114920 14B220 3CB650
             75FE88 17FF8C 175F14 1C07E2 3803C4 703182 F8EDFC
