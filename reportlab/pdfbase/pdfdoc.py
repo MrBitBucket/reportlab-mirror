@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.35 2001/02/05 15:09:34 aaron_watters Exp $
-__version__=''' $Id: pdfdoc.py,v 1.35 2001/02/05 15:09:34 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.36 2001/02/05 21:41:14 aaron_watters Exp $
+__version__=''' $Id: pdfdoc.py,v 1.36 2001/02/05 21:41:14 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -140,7 +140,7 @@ class PDFDocument:
             outlines = PDFOutlines()
         self.Outlines = self.outline = outlines
         cat.Outlines = outlines
-        self.info = self.Info = PDFInfo()
+        self.info = PDFInfo()
         #self.Reference(self.Catalog)
         #self.Reference(self.Info)
         # make std fonts (this could be made optional
@@ -150,7 +150,7 @@ class PDFDocument:
     def SaveToFile(self, filename, canvas):
         # prepare outline
         self.Reference(self.Catalog)
-        self.Reference(self.Info)
+        self.Reference(self.info)
         outline = self.outline
         outline.prepare(self, canvas)
         from types import StringType
@@ -242,9 +242,9 @@ class PDFDocument:
         # register the Catalog/INfo and then format the objects one by one until exhausted
         # (possible infinite loop if there is a bug that continually makes new objects/refs...)
         cat = self.Catalog
-        info = self.Info
+        info = self.info
         self.Reference(self.Catalog)
-        self.Reference(self.Info)
+        self.Reference(self.info)
         # make std fonts (this could be made optional
         counter = 0 # start at first object (object 1 after preincrement)
         ids = [] # the collection of object ids in object number order
@@ -470,7 +470,7 @@ class PDFStream:
         if filters is None:
             filters = document.defaultStreamFilters
         # only apply filters if they haven't been applied elsewhere
-        if filters is not None and not dictionary.dict.has_key("Filters"):
+        if filters is not None and not dictionary.dict.has_key("Filter"):
             # apply filters in reverse order listed
             rf = list(filters)
             rf.reverse()
@@ -1517,6 +1517,9 @@ class PDFFormXObject:
                 resources.allProcs()
             else:
                 resources.basicProcs()
+            if self.XObjects:
+                #print "XObjects", self.XObjects.dict
+                resources.XObject = self.XObjects
         if self.compression:
             self.Contents.filters = [PDFBase85Encode, PDFZCompress]
         sdict = self.Contents.dictionary
