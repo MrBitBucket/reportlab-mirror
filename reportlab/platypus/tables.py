@@ -678,10 +678,10 @@ class Table(Flowable):
                 join = cmd[7]
                 try:
                     if not isinstance(join,int):
-                        join = LINEJOINS[cap]
+                        join = LINEJOINS[join]
                     elif join<0 or join>2:
                         raise ValueError
-                    cmd = cmd[:7]+(join,)
+                    cmd = cmd[:7]+(join,)+cmd[8:]
                 except:
                     ValueError('Bad join value %s in %s'%(join,str(cmd)))
 
