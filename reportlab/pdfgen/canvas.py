@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.27  2000/04/14 11:28:32  andy_robinson
+#	Removed illegal append statement usage in canvas.grid()
+#
 #	Revision 1.26  2000/04/12 16:26:51  rgbecker
 #	XML Tagged Paragraph parser changes
-#
+#	
 #	Revision 1.25  2000/04/10 09:21:21  andy_robinson
 #	Color methods in textobject and canvas now synchronised.
 #	Added 'verbosity' keyword to allow hiding of 'save myfile.pdf' messages.
@@ -106,7 +109,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.26 2000/04/12 16:26:51 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.27 2000/04/14 11:28:32 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -569,9 +572,9 @@ class Canvas:
         y0, y1 = ylist[0], ylist[-1]
         x0, x1 = xlist[0], xlist[-1]
         for x in xlist:
-            lines.append(x,y0,x,y1)
+            lines.append((x,y0,x,y1))
         for y in ylist:
-            lines.append(x0,y,x1,y)
+            lines.append((x0,y,x1,y))
         self.lines(lines)
 
     def bezier(self, x1, y1, x2, y2, x3, y3, x4, y4):
