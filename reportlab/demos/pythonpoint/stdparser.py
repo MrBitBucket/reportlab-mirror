@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: stdparser.py,v $
+#	Revision 1.5  2000/05/11 13:53:51  rgbecker
+#	Change to allow different xmllib
+#
 #	Revision 1.4  2000/04/28 17:04:28  andy_robinson
 #	Changed to display multiple outline levels
-#
+#	
 #	Revision 1.3  2000/04/14 12:17:05  rgbecker
 #	Splitting layout.py
 #	
@@ -57,7 +60,7 @@ The parser has a getPresentation method; it is called from
 pythonpoint.py.
 """
 
-import xmllib
+from reportlab.lib import xmllib
 import string
 import imp
 import pythonpoint
@@ -182,6 +185,26 @@ class PPMLParser(xmllib.XMLParser):
         self._curString = None
         xmllib.XMLParser.__init__(self)
 
+    def _arg(self,tag,args,name):
+        if args.has_key(name):
+            v = args[name]
+        else:
+            if self.attributes.has_key(tag):
+                v = self.attributes[tag][name]
+            else:
+                v = None
+        return v
+
+    def ceval(self,tag,args,name):
+        if args.has_key(name):
+            v = args[name]
+        else:
+            if self.attributes.has_key(tag):
+                v = self.attributes[tag][name]
+            else:
+                return None
+        return eval(v)
+
     def getPresentation(self):
         return self._curPres
         
@@ -207,21 +230,20 @@ class PPMLParser(xmllib.XMLParser):
     def start_presentation(self, args):
         #print 'started presentation:', args['filename']
         self._curPres = pythonpoint.PPPresentation()
-        self._curPres.filename = args['filename']
-        if args.has_key('effect'):
-            self._curPres.effectName = args['effect']
+        self._curPres.filename = self._arg('presentation',args,'filename')
+        self._curPres.effectName = self._arg('presentation',args,'effect')
 
     def end_presentation(self):
         #print 'ended presentation'
         print 'Fully parsed presentation',self._curPres.filename
 
-    def start_stylesheet(self, attributes):
+    def start_stylesheet(self, args):
         #makes it the current style sheet.
-        path = attributes['path']
+        path = self._arg('stylesheet',args,'path')
         if path=='None':
             path = None
-        modulename = attributes['module']
-        funcname = attributes['function']
+        modulename = self._arg('stylesheet',args,'module')
+        funcname = self._arg('stylesheet',args,'function')
         found = imp.find_module(modulename, path)
         assert found, "StyleSheet %s not found" % modulename
         (file, pathname, description) = found
@@ -235,8 +257,8 @@ class PPMLParser(xmllib.XMLParser):
     def end_stylesheet(self):
         pass
 
-    def start_section(self, attributes):
-        name = attributes['name']
+    def start_section(self, args):
+        name = self._arg('section',args,'name')
         self._curSection = pythonpoint.PPSection(name)
 
     def end_section(self):
@@ -244,21 +266,22 @@ class PPMLParser(xmllib.XMLParser):
 
     def start_slide(self, args):
         s = pythonpoint.PPSlide()
-        s.id = args['id']
-        s.title = args['title']
-        if args['effectname'] <> 'None':
-            s.effectName = args['effectname']
-        s.effectDirection = string.atoi(args['effectdirection'])
-        s.effectDimension = args['effectdimension']
-        s.effectMotion = args['effectmotion']
+        s.id = self._arg('slide',args,'id')
+        s.title = self._arg('slide',args,'title')
+        a = self._arg('slide',args,'effectname')
+        if a <> 'None': s.effectName = a
+        s.effectDirection = self.ceval('slide',args,'effectdirection')
+        s.effectDimension = self._arg('slide',args,'effectdimension')
+        s.effectMotion = self._arg('slide',args,'effectmotion')
 
 
         #HACK - may not belong here in the long run...
-        if args['outlineentry'] <> 'None':
-            s.outlineEntry = args['outlineentry']
+        a = self._arg('slide',args,'outlineentry')
+        if a <> 'None':
+            s.outlineEntry = a
         else:
-            s.outlineEntry = args['title']
-        s.outlineLevel = string.atoi(args['outlinelevel'])
+            s.outlineEntry = s.title
+        s.outlineLevel = self.ceval('slide',args,'outlinelevel')
         
 
         #let it know its section, which may be none
@@ -271,16 +294,16 @@ class PPMLParser(xmllib.XMLParser):
 
     def start_frame(self, args):
         self._curFrame = pythonpoint.PPFrame(
-            string.atof(args['x']),
-            string.atof(args['y']),
-            string.atof(args['width']),
-            string.atof(args['height'])
+            self.ceval('frame',args,'x'),
+            self.ceval('frame',args,'y'),
+            self.ceval('frame',args,'width'),
+            self.ceval('frame',args,'height')
             )
-        self._curFrame.leftMargin = string.atof(args['leftmargin'])
-        self._curFrame.topMargin = string.atof(args['topmargin'])
-        self._curFrame.rightMargin = string.atof(args['rightmargin'])
-        self._curFrame.bottomMargin = string.atof(args['bottommargin'])
-        if args['border']=='true':
+        self._curFrame.leftMargin = self.ceval('frame',args,'leftmargin')
+        self._curFrame.topMargin = self.ceval('frame',args,'topmargin')
+        self._curFrame.rightMargin = self.ceval('frame',args,'rightmargin')
+        self._curFrame.bottomMargin = self.ceval('frame',args,'bottommargin')
+        if self._arg('frame',args,'border')=='true':
             self._curFrame.showBoundary = 1
 
     def end_frame(self):
@@ -289,10 +312,10 @@ class PPMLParser(xmllib.XMLParser):
 
     def start_para(self, args):
         self._curPara = pythonpoint.PPPara()
-        self._curPara.style = args['style']
+        self._curPara.style = self._arg('para',args,'style')
         # hack - we want to allow octal escape sequences in the input -
         # treat as raw string and evaluate
-        self._curPara.bulletText = args['bullettext']
+        self._curPara.bulletText = self._arg('para',args,'bullettext')
         
     def end_para(self):
         self._curFrame.content.append(self._curPara)
@@ -300,7 +323,7 @@ class PPMLParser(xmllib.XMLParser):
 
     def start_prefmt(self, args):
         self._curPrefmt = pythonpoint.PPPreformattedText()
-        self._curPrefmt.style = args['style']
+        self._curPrefmt.style = self._arg('prefmt',args,'style')
 
     def end_prefmt(self):
         self._curFrame.content.append(self._curPrefmt)
@@ -308,11 +331,11 @@ class PPMLParser(xmllib.XMLParser):
 
     def start_image(self, args):
         self._curImage = pythonpoint.PPImage()
-        self._curImage.filename = args['filename']
+        self._curImage.filename = self._arg('image',args,'filename')
         if args['width'] <> 'None':
-            self._curImage.width = string.atof(args['width'])
+            self._curImage.width = self.ceval('image',args,'width')
         if args['height'] <> 'None':
-            self._curImage.height = string.atof(args['height'])
+            self._curImage.height = self.ceval('image',args,'height')
         
     def end_image(self):
         self._curFrame.content.append(self._curImage)
@@ -323,11 +346,11 @@ class PPMLParser(xmllib.XMLParser):
     ## or the current slide.
     def start_fixedimage(self, args):
         img = pythonpoint.PPFixedImage()
-        img.filename = args['filename']
-        img.x = eval(args['x'])
-        img.y = eval(args['y'])
-        img.width = eval(args['width'])
-        img.height = eval(args['height'])
+        img.filename = self._arg('fixedimage',args,'filename')
+        img.x = self.ceval('fixedimage',args,'x')
+        img.y = self.ceval('fixedimage',args,'y')
+        img.width = self.ceval('fixedimage',args,'width')
+        img.height = self.ceval('fixedimage',args,'height')
         self._curFixedImage = img
 
     def end_fixedimage(self):
@@ -339,14 +362,14 @@ class PPMLParser(xmllib.XMLParser):
 
     def start_rectangle(self, args):
         rect = pythonpoint.PPRectangle(
-                    eval(args['x']),
-                    eval(args['y']),
-                    eval(args['width']),
-                    eval(args['height'])
+                    self.ceval('rectangle',args,'x'),
+                    self.ceval('rectangle',args,'y'),
+                    self.ceval('rectangle',args,'width'),
+                    self.ceval('rectangle',args,'height')
                     )
+        rect.fillColor = self.ceval('rectangle',args,'fill')
+        rect.strokeColor = self.ceval('rectangle',args,'stroke')
         self._curRectangle = rect
-        self._curRectangle.fillColor = eval(args['fill'])
-        self._curRectangle.strokeColor = eval(args['stroke'])
 
     def end_rectangle(self):
         if self._curSlide:
@@ -357,15 +380,15 @@ class PPMLParser(xmllib.XMLParser):
 
     def start_roundrect(self, args):
         rrect = pythonpoint.PPRoundRect(
-                    eval(args['x']),
-                    eval(args['y']),
-                    eval(args['width']),
-                    eval(args['height']),
-                    eval(args['radius'])
+                    self.ceval('roundrect',args,'x'),
+                    self.ceval('roundrect',args,'y'),
+                    self.ceval('roundrect',args,'width'),
+                    self.ceval('roundrect',args,'height'),
+                    self.ceval('roundrect',args,'radius')
                     )
+        rrect.fillColor = self.ceval('roundrect',args,'fill')
+        rrect.strokeColor = self.ceval('roundrect',args,'stroke')
         self._curRoundRect = rrect
-        self._curRoundRect.fillColor = eval(args['fill'])
-        self._curRoundRect.strokeColor = eval(args['stroke'])
 
     def end_roundrect(self):
         if self._curSlide:
@@ -376,12 +399,12 @@ class PPMLParser(xmllib.XMLParser):
 
     def start_line(self, args):
         self._curLine = pythonpoint.PPLine(
-                    eval(args['x1']),
-                    eval(args['y1']),
-                    eval(args['x2']),
-                    eval(args['y2'])
+                    self.ceval('line',args,'x1'),
+                    self.ceval('line',args,'y1'),
+                    self.ceval('line',args,'x2'),
+                    self.ceval('line',args,'y2')
                     )
-        self._curLine.strokeColor = eval(args['stroke'])
+        self._curLine.strokeColor = self.ceval('line',args,'stroke')
 
     def end_line(self):
         if self._curSlide:
@@ -392,13 +415,13 @@ class PPMLParser(xmllib.XMLParser):
 
     def start_ellipse(self, args):
         self._curEllipse = pythonpoint.PPEllipse(
-                    eval(args['x1']),
-                    eval(args['y1']),
-                    eval(args['x2']),
-                    eval(args['y2'])
+                    self.ceval('ellipse',args,'x1'),
+                    self.ceval('ellipse',args,'y1'),
+                    self.ceval('ellipse',args,'x2'),
+                    self.ceval('ellipse',args,'y2')
                     )
-        self._curEllipse.strokeColor = eval(args['stroke'])
-        self._curEllipse.fillColor = eval(args['fill'])
+        self._curEllipse.strokeColor = self.ceval('ellipse',args,'stroke')
+        self._curEllipse.fillColor = self.ceval('ellipse',args,'fill')
         
     def end_ellipse(self):
         if self._curSlide:
@@ -408,8 +431,8 @@ class PPMLParser(xmllib.XMLParser):
         self._curEllipse = None
 
     def start_polygon(self, args):
-        self._curPolygon = pythonpoint.PPPolygon(eval(args['points']))
-        self._curPolygon.strokeColor = eval(args['stroke'])
+        self._curPolygon = pythonpoint.PPPolygon(self.ceval('polygon',args,'points'))
+        self._curPolygon.strokeColor = self.ceval('polygon',args,'stroke')
 
     def end_polygon(self):
         if self._curSlide:
@@ -420,12 +443,12 @@ class PPMLParser(xmllib.XMLParser):
 
     def start_string(self, args):
         self._curString = pythonpoint.PPString(
-                            eval(args['x']),
-                            eval(args['y'])
+                            self.ceval('string',args,'x'),
+                            self.ceval('string',args,'y')
                             )
-        self._curString.color = eval(args['color'])
-        self._curString.font = args['font']
-        self._curString.size = eval(args['size'])
+        self._curString.color = self.ceval('string',args,'color')
+        self._curString.font = self._arg('string',args,'font')
+        self._curString.size = self.ceval('string',args,'size')
         if args['align'] == 'left':
             self._curString.align = TA_LEFT
         elif args['align'] == 'center':
@@ -444,13 +467,13 @@ class PPMLParser(xmllib.XMLParser):
             self._curSection.graphics.append(self._curString)
         self._curString = None
 
-    def start_customshape(self, attributes):
+    def start_customshape(self, args):
         #loads one
-        path = attributes['path']
+        path = self._arg('customshape',args,'path')
         if path=='None':
             path = None
-        modulename = attributes['module']
-        funcname = attributes['class']
+        modulename = self._arg('customshape',args,'module')
+        funcname = self._arg('customshape',args,'class')
         found = imp.find_module(modulename, path)
         assert found, "CustomShape %s not found" % modulename
         (file, pathname, description) = found
@@ -459,7 +482,7 @@ class PPMLParser(xmllib.XMLParser):
         #now get the function
         
         func = getattr(mod, funcname)
-        initargs = eval(attributes['initargs'])
+        initargs = self.ceval('customshape',args,'initargs')
         self._curCustomShape = apply(func, initargs)
         
         
