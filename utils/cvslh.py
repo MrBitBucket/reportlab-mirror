@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/cvslh.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/cvslh.py,v 1.5 2002/01/19 19:06:21 rgbecker Exp $
+#$Header: /tmp/reportlab/utils/cvslh.py,v 1.6 2002/01/21 13:19:27 rgbecker Exp $
 #
 #	python cvslh.py -d"2000/04/10 14:00:00" >\tmp\hacked_log
 #
@@ -126,10 +126,7 @@ if __name__=='__main__': #noruntests
 			if c.date[:10]!=d:
 				d = c.date[:10]
 				print '##### %s #####' % d
-			print '\t%s %s %s' % (c.name, c.version, c.author)
-			C = string.split(c.comment,'\n')
-			for c in C:
-				print '\t\t' + c
+			print '\t%s %s %s %s' % (c.name, c.version, c.author, string.join(string.split(c.comment,'\n'),'\n\t\t'))
 	else:
 		L = []
 		for c in cL:
