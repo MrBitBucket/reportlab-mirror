@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.17 2002/04/13 15:18:51 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.17 2002/04/13 15:18:51 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.18 2002/07/03 10:21:07 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.18 2002/07/03 10:21:07 rgbecker Exp $ '''
 """Usage:
 	from reportlab.graphics import renderPM
 	renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -80,7 +80,7 @@ class _PMRenderer(Renderer):
 		The recursive part is handled by drawNode."""
 		#stash references for ease of  communication
 		self._canvas = canvas
-		self._drawing = drawing
+		canvas.__dict__['_drawing'] = self._drawing = drawing
 		try:
 			if showBoundary: canvas.rect(x, y, drawing.width, drawing.height)
 			canvas.saveState()
@@ -93,7 +93,7 @@ class _PMRenderer(Renderer):
 			canvas.restoreState()
 		finally:
 			#remove any circular references
-			del self._canvas, self._drawing
+			del self._canvas, self._drawing, canvas._drawing
 
 	def drawNode(self, node):
 		"""This is the recursive method called for each node
@@ -204,8 +204,23 @@ class PMCanvas:
 	def __init__(self,w,h,dpi=72,bg=0xffffff):
 		scale = dpi/72.0
 		self.__dict__['_gs'] = _renderPM.gstate(w,h,bg=bg)
+		self.__dict__['_bg'] = bg
 		self.__dict__['_baseCTM'] = (scale,0,0,scale,0,0)
 		self.ctm = self._baseCTM
+
+	def _drawTimeResize(self,w,h,bg=None):
+		if bg is None: bg = self._bg
+		self._drawing.width, self._drawing.height = w, h
+		A = {'ctm':None, 'strokeWidth':None, 'strokeColor':None, 'lineCap':None, 'lineJoin':None, 'dashArray':None, 'fillColor':None}
+		gs = self._gs
+		fN,fS = gs.fontName, gs.fontSize
+		for k in A.keys():
+			A[k] = getattr(gs,k)
+		del gs, self._gs
+		gs = self.__dict__['_gs'] = _renderPM.gstate(w,h,bg=bg)
+		for k in A.keys():
+			setattr(self,k,A[k])
+		gs.setFont(fN,fS)
 
 	def toPIL(self):
 		try:

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPDF.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.18 2002/05/17 08:01:18 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.19 2002/07/03 10:21:07 rgbecker Exp $
 # renderPDF - draws Drawings onto a canvas
 """Usage:
     import renderpdf
@@ -9,7 +9,7 @@
 Execute the script to see some test drawings.
 changed
 """
-__version__=''' $Id: renderPDF.py,v 1.18 2002/05/17 08:01:18 dinu_gherman Exp $ '''
+__version__=''' $Id: renderPDF.py,v 1.19 2002/07/03 10:21:07 rgbecker Exp $ '''
 
 from reportlab.graphics.shapes import *
 from reportlab.pdfgen.canvas import Canvas
@@ -41,7 +41,7 @@ class _PDFRenderer(Renderer):
         The recursive part is handled by drawNode."""
         #stash references for the other objects to draw on
         self._canvas = canvas
-        self._drawing = drawing
+        canvas._drawing = self._drawing = drawing
         try:
             #bounding box
             if showBoundary: canvas.rect(x, y, drawing.width, drawing.height)
@@ -55,7 +55,7 @@ class _PDFRenderer(Renderer):
             canvas.restoreState()
         finally:
             #remove any circular references
-            del self._canvas, self._drawing
+            del self._canvas, self._drawing, canvas._drawing
 
     def drawNode(self, node):
         """This is the recursive method called for each node

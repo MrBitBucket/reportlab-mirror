@@ -593,7 +593,7 @@ class _SVGRenderer(Renderer):
         if self.verbose: print "### begin _SVGRenderer.draw"
 
         self._canvas = canvas
-        self._drawing = drawing
+        canvas._drawing = self._drawing = drawing
         try:
             #bounding box
             if showBoundary:
@@ -606,7 +606,7 @@ class _SVGRenderer(Renderer):
             self.drawNode(drawing)
             self._tracker.pop()
         finally:
-            del self._canvas, self._drawing
+            del self._canvas, self._drawing, canvas._drawing
 
         if self.verbose: print "### end _SVGRenderer.draw"
 

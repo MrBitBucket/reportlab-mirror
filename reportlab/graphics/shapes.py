@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.74 2002/05/15 15:54:35 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.75 2002/07/03 10:21:07 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.74 2002/05/15 15:54:35 dinu_gherman Exp $ '''
+__version__=''' $Id: shapes.py,v 1.75 2002/07/03 10:21:07 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -164,13 +164,22 @@ def _rotatedBoxLimits( x, y, w, h, angle):
 	return min(X), max(X), min(Y), max(Y), C
 
 
-	#################################################################
-	#
-	#	 And now the shapes themselves....
-	#
-	#################################################################
+class _DrawTimeResizeable:
+	'''Addin class to provide thei horribleness of _drawTimeResize'''
+	def _drawTimeResize(self,w,h):
+		if hasattr(self,'_canvas'):
+			canvas = self._canvas
+			drawing = canvas._drawing
+			drawing.width, drawing.height = w, h
+			if hasattr(canvas,'_drawTimeResize'):
+				canvas._drawTimeResize(w,h)
 
-class Shape:
+#################################################################
+#
+#	 And now the shapes themselves....
+#
+#################################################################
+class Shape(_DrawTimeResizeable):
 	"""Base class for all nodes in the tree. Nodes are simply
 	packets of data to be created, stored, and ultimately
 	rendered - they don't do anything active.  They provide
@@ -1110,7 +1119,7 @@ class String(Shape):
 		return new
 
 
-class UserNode:
+class UserNode(_DrawTimeResizeable):
 	"""A simple template for creating a new node.  The user (Python
 	programmer) may subclasses this.  provideNode() must be defined to
 	provide a Shape primitive when called by a renderer.  It does
