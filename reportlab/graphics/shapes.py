@@ -550,6 +550,15 @@ def _renderGroupPy(G,pfx,I,i=0,indent='\t\t'):
             s = s + '%s%s.add(%s)\n' % (indent,pfx,_repr(n,I))
     return s
 
+def _extraKW(self,pfx,**kw):
+    kw.update(self.__dict__)
+    R = {}
+    n = len(pfx)
+    for k in kw.keys():
+        if k.startswith(pfx):
+            R[k[n:]] = kw[k]
+    return R
+
 class Drawing(Group, Flowable):
     """Outermost container; the thing a renderer works on.
     This has no properties except a height, width and list
@@ -612,10 +621,13 @@ class Drawing(Group, Flowable):
     def asGroup(self,*args,**kw):
         return self._copy(apply(Group,args,kw))
 
-    def save(self, formats=None, verbose=None, fnRoot=None, outDir=None, title=''):
+    def save(self, formats=None, verbose=None, fnRoot=None, outDir=None, title='', **kw):
         """Saves copies of self in desired location and formats.
+        Multiple formats can be supported in one call
 
-        Multiple formats can be supported in one call"""
+        the extra keywords can be of the form
+        _renderPM_dpi=96 (which passes dpi=96 to renderPM)
+        """
         from reportlab import rl_config
         ext = ''
         if not fnRoot:
@@ -647,7 +659,7 @@ class Drawing(Group, Flowable):
             from reportlab.graphics import renderPDF
             filename = fnroot+'.pdf'
             if verbose: print "generating PDF file %s" % filename
-            renderPDF.drawToFile(self, filename, title, showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
+            renderPDF.drawToFile(self, filename, title, showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderPDF_',**kw))
             ext = ext +  '/.pdf'
             if sys.platform=='mac':
                 import macfs, macostools
@@ -659,7 +671,7 @@ class Drawing(Group, Flowable):
                 from reportlab.graphics import renderPM
                 filename = '%s.%s' % (fnroot,bmFmt)
                 if verbose: print "generating %s file %s" % (bmFmt,filename)
-                renderPM.drawToFile(self, filename,fmt=bmFmt,showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
+                renderPM.drawToFile(self, filename,fmt=bmFmt,showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderPM_',**kw))
                 ext = ext + '/.' + bmFmt
 
         if 'eps' in plotMode:
@@ -672,14 +684,14 @@ class Drawing(Group, Flowable):
                                 dept = getattr(self,'EPS_info',['Testing'])[0],
                                 company = getattr(self,'EPS_info',['','ReportLab'])[1],
                                 preview = getattr(self,'preview',1),
-                                showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
+                                showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderPS_',**kw))
             ext = ext +  '/.eps'
 
         if 'ps' in plotMode:
             from reportlab.graphics import renderPS
             filename = fnroot+'.ps'
             if verbose: print "generating EPS file %s" % filename
-            renderPS.drawToFile(self, filename, showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
+            renderPS.drawToFile(self, filename, showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderPS_',**kw))
             ext = ext +  '/.ps'
 
         if 'py' in plotMode:
