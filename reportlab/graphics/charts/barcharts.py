@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.19 2001/06/21 13:03:17 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.20 2001/06/26 16:27:34 rgbecker Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -1663,3 +1663,31 @@ def sampleSymbol1():
     drawing.add(bc)
 
     return drawing
+
+#class version of function sampleH5c4 above
+class SampleH5c4(Drawing):
+	"Simple bar chart with absolute spacing."
+
+	def __init__(self,width=400,height=200,*args,**kw):
+		apply(Drawing.__init__,(self,width,height)+args,kw)
+		bc = HorizontalBarChart()
+		bc.x = 50
+		bc.y = 50
+		bc.height = 125
+		bc.width = 300
+		bc.data = dataSample5
+		bc.strokeColor = colors.black
+
+		bc.useAbsolute = 1
+		bc.barWidth = 10
+		bc.groupSpacing = 20
+		bc.barSpacing = 10
+
+		bc.valueAxis.valueMin = 0
+		bc.valueAxis.valueMax = 60
+		bc.valueAxis.valueStep = 15
+
+		bc.categoryAxis.labels.boxAnchor = 'e'
+		bc.categoryAxis.categoryNames = ['Ying', 'Yang']
+
+		self.add(bc,name='HBC')
