@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.15 2001/07/23 07:57:45 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.16 2001/08/18 16:52:09 rgbecker Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -59,8 +59,8 @@ from reportlab.graphics import renderPDF
 try:
     from rlextra.graphics import renderPM
 except ImportError, errMsg:
-    if str(errMsg) != 'No module named renderPM':
-        pass
+    from reportlab.lib.utils import _checkImportError
+    _checkImportError(errMsg)
 
 
 VERBOSE = 0

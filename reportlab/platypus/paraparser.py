@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.41 2001/03/22 09:46:27 andy_robinson Exp $
-__version__=''' $Id: paraparser.py,v 1.41 2001/03/22 09:46:27 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.42 2001/08/18 16:52:09 rgbecker Exp $
+__version__=''' $Id: paraparser.py,v 1.42 2001/08/18 16:52:09 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -12,6 +12,7 @@ import copy
 
 import reportlab.lib.sequencer
 from reportlab.lib.abag import ABag
+from reportlab.lib.utils import _checkImportError
 #try:
 #	from xml.parsers import xmllib
 #	_xmllib_newStyle = 1
@@ -19,7 +20,7 @@ try:
 	from reportlab.lib import xmllib
 	_xmllib_newStyle = 1
 except ImportError, errMsg:
-	if str(errMsg)!='cannot import name xmllib': raise
+	_checkImportError(errMsg)
 	import xmllib
 	_xmllib_newStyle = 0
 

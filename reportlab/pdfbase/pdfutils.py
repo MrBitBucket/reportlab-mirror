@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.24 2001/07/11 00:38:01 rgbecker Exp $
-__version__=''' $Id: pdfutils.py,v 1.24 2001/07/11 00:38:01 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.25 2001/08/18 16:52:09 rgbecker Exp $
+__version__=''' $Id: pdfutils.py,v 1.25 2001/08/18 16:52:09 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -11,6 +11,7 @@ import os
 import cStringIO
 from reportlab import rl_config
 from string import join, replace, strip, split
+from reportlab.lib.utils import _checkImportError
 
 LINEEND = '\015\012'
 
@@ -111,11 +112,13 @@ def cachedImageExists(filename):
 try:
     from _rl_accel import escapePDF, _instanceEscapePDF
     _escape = escapePDF
-except ImportError:
+except ImportError, errMsg:
+    _checkImportError(errMsg)
     try:
         from reportlab.lib._rl_accel import escapePDF, _instanceEscapePDF
         _escape = escapePDF
-    except ImportError:
+    except ImportError, errMsg:
+        _checkImportError(errMsg)
         _instanceEscapePDF=None
         if rl_config.sys_version>='2.1':
             _ESCAPEDICT={}
@@ -191,12 +194,12 @@ def _AsciiHexDecode(input):
 
 try:
     try:
-        from reportlab.lib._rl_accel import _AsciiBase85Encode  # where we think it should be
-    except ImportError, errMsg:
-        if str(errMsg)!='No module named _rl_accel': raise
         from _rl_accel import _AsciiBase85Encode                # builtin or on the path
+    except ImportError, errMsg:
+        _checkImportError(errMsg)
+        from reportlab.lib._rl_accel import _AsciiBase85Encode  # where we think it should be
 except ImportError, errMsg:
-    if str(errMsg)!='No module named _rl_accel': raise
+    _checkImportError(errMsg)
     def _AsciiBase85Encode(input):
         """Encodes input using ASCII-Base85 coding.
 

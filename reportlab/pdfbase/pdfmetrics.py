@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.41 2001/07/14 07:39:12 andy_robinson Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.42 2001/08/18 16:52:09 rgbecker Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -31,14 +31,13 @@ standardEncodings = _fontdata.standardEncodings
 
 _dummyEncoding=' _not an encoding_ '
 # conditional import - try both import techniques, and set a flag
+from reportlab.lib.utils import _checkImportError
 try:
     try:
-        from reportlab.lib import _rl_accel
-## I don't get exactly the message given so this bombs for me
-##    except ImportError, errMsg:
-##        if str(errMsg)!='cannot import name _rl_accel': raise
-    except ImportError:
         import _rl_accel
+    except ImportError, errMsg:
+        _checkImportError(errMsg)
+        from reportlab.lib import _rl_accel
     if _rl_accel.version>="0.31":
         _stringWidth = _rl_accel.stringWidth
         _rl_accel.defaultEncoding(_dummyEncoding)
@@ -46,7 +45,7 @@ try:
         _stringWidth = None
     #del widthVectorsByFont
 except ImportError, errMsg:
-    if str(errMsg)!='No module named _rl_accel': raise
+    _checkImportError(errMsg)
     _stringWidth = None
 
 _typefaces = {}

@@ -9,7 +9,8 @@ import string
 try:
     import sgmlop	# this works for both builtin on the path or relative
 except ImportError, errMsg:
-    if str(errMsg)!='No module named sgmlop': raise
+    from reportlab.lib.utils import _checkImportError
+    _checkImportError(errMsg)
     sgmlop = None
 
 # standard entity defs
