@@ -56,6 +56,20 @@ if	__name__=='__main__':
 			traceback.print_exc()
 			print g.dashArray
 
+		try:
+			g.pathBegin()
+			g.moveTo(0,0)
+			g.lineTo(1,0)
+			g.lineTo(1,1)
+			g.lineTo(0,1)
+			g.pathClose()
+			good = (('moveToClosed', 0.0, 0.0), ('lineTo', 1.0, 0.0), ('lineTo', 1.0, 1.0), ('lineTo', 0.0, 1.0), ('lineTo', 0.0, 0.0))
+			assert good==g.path, 'Wrong path should be %s' % str(good)
+		except:
+			print 'wrong handling of path'
+			traceback.print_exc()
+			print g.path
+
 	if len(sys.argv)==1:
 		test_base()
 	else:
@@ -145,6 +159,7 @@ if	__name__=='__main__':
 			do_save(c,0)
 
 		def doCPath1(c):
+			c.pathBegin()
 			c.moveTo(110-85,100-85)
 			c.curveTo(110-85,94.477152501999996-85, 105.522847498-85,90-85, 100-85,90-85)
 			c.curveTo(94.477152501999996-85,90-85, 90-85,94.477152501999996-85, 90-85,100-85)
@@ -155,6 +170,7 @@ if	__name__=='__main__':
 			c.pathStroke()
 
 		def doCPath2(c):
+			c.pathBegin()
 			c.moveTo(5,5)
 			c.lineTo(5,20)
 			c.lineTo(20,20)
@@ -174,22 +190,33 @@ if	__name__=='__main__':
 				can.drawString(off_x,0, text)
 				can.grestore()
 
-		def doCPath4(c):
+		def doCPath4(c,doStroke=1,doFill=1):
+			c.pathBegin()
 			c.moveTo(5,5)
 			c.lineTo(5,20)
 			c.lineTo(20,20)
 			c.lineTo(20,5)
 			c.pathClose()
-			c.pathFill()
-			c.pathStroke()
+			if doFill: c.pathFill()
+			if doStroke: c.pathStroke()
 
-		def doCPath5(c):
+		def doCPath5(c,doStroke=1):
+			c.pathBegin()
 			c.moveTo(5,5)
 			c.lineTo(5,20)
 			c.lineTo(20,20)
 			c.lineTo(20,5)
 			c.pathClose()
-			c.pathStroke()
+			if doStroke: c.pathStroke()
+
+		def doCPath6(c,doStroke=1):
+			c.pathBegin()
+			c.moveTo(5,10)
+			c.lineTo(5,20)
+			c.lineTo(20,20)
+			c.lineTo(20,10)
+			c.pathClose()
+			if doStroke: c.pathStroke()
 
 		if flagged(1):
 			c = renderPM.PMCanvas(25, 25, bg=0xffffff)
@@ -226,8 +253,10 @@ if	__name__=='__main__':
 
 		if flagged(6):
 			c = renderPM.PMCanvas(25, 25, bg=0xffffff)
-			doCTest(doCPath5, c, 0, 0 )
+			doCPath6(c,doStroke=1)
+			print 'Clip',c.path
 			c.clipPathSet()
 			doCTest(doCPath4, c, 0, 0, c0=0x8000, c1=0xff0000)
+			print 'Draw',c.path
 			c.clipPathClear()
 			do_save(c,6)
