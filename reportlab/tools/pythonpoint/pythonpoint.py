@@ -25,7 +25,7 @@ The currently available 'Presentation Objects' are:
         PPFrame
 
         PPAuthor, PPTitle and PPSubject are optional
-        
+
     Things to flow within frames...
         PPPara - flowing text
         PPPreformatted - text with line breaks and tabs, for code..
@@ -69,11 +69,11 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 from reportlab.platypus.doctemplate import SimpleDocTemplate
 from reportlab.platypus.flowables import Flowable
-from reportlab.platypus.xpreformatted import PythonPreformatted 
+from reportlab.platypus.xpreformatted import PythonPreformatted
 from reportlab.platypus import Preformatted, Paragraph, Frame, \
      Image, Table, TableStyle, Spacer
 
-import stdparser 
+import stdparser
 
 
 USAGE_MESSAGE = """\
@@ -130,10 +130,10 @@ class FontFilesNotFoundError(Exception):
 ##
 ##    join = os.path.join
 ##    splitext = os.path.splitext
-##    
+##
 ##    afmFile = None
 ##    pfbFile = None
-##    
+##
 ##    found = 0
 ##    while not found:
 ##        for p in rl_config.T1SearchPath:
@@ -153,7 +153,7 @@ class FontFilesNotFoundError(Exception):
 ##
 ##    return afmFile, pfbFile
 ##
-##    
+##
 ##def registerFont(name):
 ##    "Register Type-1 font for future use."
 ##
@@ -179,7 +179,7 @@ def registerFont0(sourceFile, name, path):
     p = os.path.join(os.path.dirname(sourceFile), path)
     afmFiles = glob.glob(p + '.[aA][fF][mM]')
     pfbFiles = glob.glob(p + '.[pP][fF][bB]')
-    assert len(afmFiles) == len(pfbFiles) == 1, FontFilesNotFoundError                         
+    assert len(afmFiles) == len(pfbFiles) == 1, FontFilesNotFoundError
 
     T1face = pdfmetrics.EmbeddedType1Face(afmFiles[0], pfbFiles[0])
     T1faceName = name
@@ -202,7 +202,7 @@ def checkColor(col):
 
 def handleHiddenSlides(slides):
     """Filters slides from a list of slides.
-    
+
     In a sequence of hidden slides all but the last one are
     removed. Also, the slide before the sequence of hidden
     ones is removed.
@@ -221,7 +221,7 @@ def handleHiddenSlides(slides):
                 itd[i] = 0
             if i > 0 and itd[i-1] == 0:
                 itd[i-1] = 1
-    
+
     for i in range(len(itd)):
         if itd[i] == 1:
             slides[i].delete = 1
@@ -238,7 +238,7 @@ def makeSlideTable(slides, pageSize, docWidth, numCols):
     """
 
     slides = handleHiddenSlides(slides)
-    
+
     # Set table style.
     tabStyle = TableStyle(
         [('GRID', (0,0), (-1,-1), 0.25, colors.black),
@@ -316,10 +316,10 @@ class PPPresentation:
         self.slides = []
         self.effectName = None
         self.showOutline = 1   #should it be displayed when opening?
-        self.compression = 1        
+        self.compression = rl_config.pageCompression
         #assume landscape
-        self.pageWidth = rl_config.defaultPageSize[1]  
-        self.pageHeight = rl_config.defaultPageSize[0]  
+        self.pageWidth = rl_config.defaultPageSize[1]
+        self.pageHeight = rl_config.defaultPageSize[0]
 
 
     def saveAsPresentation(self):
@@ -350,7 +350,7 @@ class PPPresentation:
         if self.showOutline:
             canv.showOutline()
 
-        canv.save()        
+        canv.save()
 
 
     def saveAsHandout(self):
@@ -368,7 +368,7 @@ class PPPresentation:
         doc.topMargin = 2*cm
         doc.bottomMargin = 2*cm
         multiPageWidth = rl_config.defaultPageSize[0] - doc.leftMargin - doc.rightMargin - 50
-        
+
         story = []
         orgFullPageSize = (self.pageWidth, self.pageHeight)
         t = makeSlideTable(self.slides, orgFullPageSize, multiPageWidth, self.cols)
@@ -380,10 +380,10 @@ class PPPresentation:
 
         doc.build(story)
 
-    
+
     def save(self):
         "Save the PDF document."
-        
+
         if self.handout:
             self.saveAsHandout()
         else:
@@ -398,7 +398,7 @@ class PPSection:
     def __init__(self, name):
         self.name = name
         self.graphics = []
-        
+
     def drawOn(self, canv):
         for graphic in self.graphics:
 ##            graphic.drawOn(canv)
@@ -415,15 +415,15 @@ class PPSection:
             else:
                 canv.doForm(name)
             canv.restoreState()
-            
+
 
 class PPNotes:
     def __init__(self):
         self.content = []
-    
+
     def drawOn(self, canv):
         print self.content
-    
+
 
 class PPSlide:
     def __init__(self):
@@ -458,13 +458,13 @@ class PPSlide:
             tag = self.title
             canv.bookmarkPage(tag)
             canv.addOutlineEntry(tag, tag, self.outlineLevel)
-            
+
         if self.section:
             self.section.drawOn(canv)
-                
+
         for graphic in self.graphics:
             graphic.drawOn(canv)
-            
+
         for frame in self.frames:
             frame.drawOn(canv)
 
@@ -480,7 +480,7 @@ class PPFrame:
         self.width = width
         self.height = height
         self.content = []
-        self.showBoundary = 0        
+        self.showBoundary = 0
 
     def drawOn(self, canv):
         #make a frame
@@ -490,7 +490,7 @@ class PPFrame:
                               self.height
                               )
         frame.showBoundary = self.showBoundary
- 
+
         #build a story for the frame
         story = []
         for thingy in self.content:
@@ -499,7 +499,7 @@ class PPFrame:
         #draw it
         frame.addFromList(story,canv)
 
- 
+
 class PPPara:
     """This is a placeholder for a paragraph."""
     def __init__(self):
@@ -567,7 +567,7 @@ class PPTable:
             t.setStyle(getStyles()[self.style])
 
         return t
-                
+
     def parseData(self):
         """Try to make sense of the table data!"""
         rawdata = string.strip(string.join(self.rawBlocks, ''))
@@ -584,7 +584,7 @@ class PPTable:
             self.widths = [None] * len(self.data[0])
         if not self.heights:
             self.heights = [None] * len(self.data)
-        
+
 ##        import pprint
 ##        print 'table data:'
 ##        print 'style=',self.style
@@ -614,7 +614,7 @@ class PPSpacer:
 ##    def drawOn(self, canv):
 ##        raise "NotImplementedError", "Abstract base class!"
 
-        
+
 class PPFixedImage:
     """You place this on the page, rather than flowing it"""
     def __init__(self):
@@ -655,7 +655,7 @@ class PPRectangle:
                     fill = (self.fillColor<>None)
                     )
         canv.restoreState()
-                                   
+
 
 class PPRoundRect:
     def __init__(self, x, y, width, height, radius):
@@ -667,7 +667,7 @@ class PPRoundRect:
         self.fillColor = None
         self.strokeColor = (1,1,1)
         self.lineWidth=0
-        
+
     def drawOn(self, canv):
         canv.saveState()
         canv.setLineWidth(self.lineWidth)
@@ -694,7 +694,7 @@ class PPLine:
         self.fillColor = None
         self.strokeColor = (1,1,1)
         self.lineWidth=0
-        
+
     def drawOn(self, canv):
         canv.saveState()
         canv.setLineWidth(self.lineWidth)
@@ -714,7 +714,7 @@ class PPEllipse:
         self.fillColor = None
         self.strokeColor = (1,1,1)
         self.lineWidth=0
-        
+
     def drawOn(self, canv):
         canv.saveState()
         canv.setLineWidth(self.lineWidth)
@@ -737,7 +737,7 @@ class PPPolygon:
         self.fillColor = None
         self.strokeColor = (1,1,1)
         self.lineWidth=0
-        
+
     def drawOn(self, canv):
         canv.saveState()
         canv.setLineWidth(self.lineWidth)
@@ -754,7 +754,7 @@ class PPPolygon:
         canv.drawPath(path, stroke=(self.strokeColor<>None))
         canv.restoreState()
 
-    
+
 class PPString:
     def __init__(self, x, y):
         self.text = ''
@@ -776,9 +776,9 @@ class PPString:
         for line in lines:
             newtext.append(string.strip(line))
         #accept all the '\n' as newlines
-            
+
         self.text = newtext
-        
+
     def drawOn(self, canv):
         # for a string in a section, this will be drawn several times;
         # so any substitution into the text should be in a temporary
@@ -814,7 +814,7 @@ class PPString:
             elif self.align == TA_RIGHT:
                 canv.drawRightString(self.x, cur_y, line)
             cur_y = cur_y - 1.2*self.size
-                
+
         canv.restoreState()
 
 
@@ -823,7 +823,7 @@ def getSampleStyleSheet():
     return getParagraphStyles()
 
 
-#make a singleton and a function to access it        
+#make a singleton and a function to access it
 _styles = None
 def getStyles():
     global _styles
@@ -836,7 +836,7 @@ def setStyles(newStyleSheet):
     global _styles
     _styles = newStyleSheet
 
-        
+
 ##def test():
 ##    p = stdparser.PPMLParser()
 ##    p.feed(sample)
@@ -846,7 +846,7 @@ def setStyles(newStyleSheet):
 
 def process(datafilename, notes=0, handout=0, cols=0):
     "Process one PythonPoint source file."
-    
+
     parser = stdparser.PPMLParser()
     parser.sourceFilename = datafilename
     rawdata = open(datafilename).read()
@@ -866,11 +866,11 @@ def process(datafilename, notes=0, handout=0, cols=0):
 ##    def feed(self, text):
 ##        parser = stdparser.PPMLParser()
 ##        d = pyRXP.parse(text)
-##    
+##
 ##
 ##def process2(datafilename, notes=0, handout=0, cols=0):
 ##    "Process one PythonPoint source file."
-##    
+##
 ##    import pyRXP, pprint
 ##
 ##    rawdata = open(datafilename).read()
@@ -912,7 +912,7 @@ def handleOptions():
     if optList == [] and args == [] or \
        filter(lambda ov: ov[0] in ('h', 'help'), optList):
         options['help'] = 1
-        
+
     if filter(lambda ov: ov[0] in ('n', 'notes'), optList):
         options['notes'] = 1
 
