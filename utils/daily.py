@@ -32,10 +32,13 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.2  2000/03/28 13:34:26  rgbecker
+#	Fixed to release mechanism len()?
+#
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
-#
-__version__=''' $Id: daily.py,v 1.1 2000/02/23 13:16:56 rgbecker Exp $ '''
+#	
+__version__=''' $Id: daily.py,v 1.2 2000/03/28 13:34:26 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -144,7 +147,7 @@ def do_zip(d):
 if __name__=='__main__':
 	release = '-release' in sys.argv[1:]
 	if release:
-		if sys.argv.len()!=3 or sys.argv[1]!='-release':
+		if len(sys.argv)!=3 or sys.argv[1]!='-release':
 			print 'Usage:\n    python daily.py [-release tag]'
 			sys.exit(1)
 		release=sys.argv[2]
