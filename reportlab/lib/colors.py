@@ -1,9 +1,8 @@
-
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.20 2001/07/05 14:03:45 rgbecker Exp $
-__version__=''' $Id: colors.py,v 1.20 2001/07/05 14:03:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.21 2001/08/08 19:16:57 rgbecker Exp $
+__version__=''' $Id: colors.py,v 1.21 2001/08/08 19:16:57 rgbecker Exp $ '''
 
 import string
 import math
@@ -180,7 +179,7 @@ def HexColor(val):
 #transparent = Color(-1, -1, -1)
 
 # Special color 
-ReportLabBlue =		HexColor(0x0000CC)
+ReportLabBlue =		HexColor(0x4e5688)
 
 # color constants -- mostly from HTML standard
 aliceblue =		HexColor(0xF0F8FF)
