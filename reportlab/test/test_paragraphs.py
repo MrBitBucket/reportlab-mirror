@@ -7,29 +7,7 @@ from reportlab.lib.colors import red, black, navy, white
 from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
 (PAGE_WIDTH, PAGE_HEIGHT) = DEFAULT_PAGE_SIZE
 
-def randomText():
-    #this may or may not be appropriate in your company
-    from random import randint, choice
-
-    RANDOMWORDS = ['strategic','direction','proactive',
-    'reengineering','forecast','resources',
-    'forward-thinking','profit','growth','doubletalk',
-    'venture capital','IPO']
-
-    sentences = 5
-    output = ""
-    for sentenceno in range(randint(1,5)):
-        output = output + 'Blah'
-        for wordno in range(randint(10,25)):
-            if randint(0,4)==0:
-                word = choice(RANDOMWORDS)
-            else:
-                word = 'blah'
-            output = output + ' ' +word
-        output = output+'.'
-    return output
-
-
+from reportlab.lib.randomtext import randomText
 
 def myFirstPage(canvas, doc):
     canvas.saveState()

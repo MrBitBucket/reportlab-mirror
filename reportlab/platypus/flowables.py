@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.14 2000/12/25 11:52:18 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.14 2000/12/25 11:52:18 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.15 2000/12/29 02:06:13 andy_robinson Exp $
+__version__=''' $Id: flowables.py,v 1.15 2000/12/29 02:06:13 andy_robinson Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -302,6 +302,7 @@ class CondPageBreak(Spacer):
 		return (0, 0)
 
 _SeqTypes = (ListType, TupleType)
+
 class KeepTogether(Flowable):
 	def __init__(self,flowables):
 		if type(flowables) not in _SeqTypes:
@@ -347,3 +348,5 @@ class Macro(Flowable):
 		return (0,0)
 	def draw(self):
 		exec self.command in globals(), {'canvas':self.canv}
+
+	
