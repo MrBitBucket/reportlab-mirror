@@ -329,6 +329,32 @@ class NoteAnnotation(Flowable):
         pencil(canvas, text="NOTE")
 """
 
+testhandannotation = """
+from reportlab.platypus.flowables import Flowable
+from reportlab.lib.colors import tan, green
+class HandAnnotation(Flowable):
+    '''A hand flowable.'''
+    def __init__(self, xoffset=0, size=None, fillcolor=tan, strokecolor=green):
+        from reportlab.lib.units import inch
+        if size is None: size=4*inch
+        self.fillcolor, self.strokecolor = fillcolor, strokecolor
+        self.xoffset = xoffset
+        self.size = size
+        # normal size is 4 inches
+        self.scale = size/(4.0*inch)
+    def wrap(self, *args):
+        return (self.xoffset, self.size)
+    def draw(self):
+        canvas = self.canv
+        canvas.setLineWidth(6)
+        canvas.setFillColor(self.fillcolor)
+        canvas.setStrokeColor(self.strokecolor)
+        canvas.translate(self.xoffset+self.size,0)
+        canvas.rotate(90)
+        canvas.scale(self.scale, self.scale)
+        hand(canvas, debug=0, fill=1)
+"""
+
 lyrics = '''\
 well she hit Net Solutions 
 and she registered her own .com site now
@@ -661,6 +687,71 @@ def forms(canvas):
     canvas.doForm("SpumoniForm")    
 """
 
+def doctemplateillustration(canvas):
+    from reportlab.lib.units import inch
+    canvas.setFont("Helvetica", 10)
+    canvas.drawString(inch/4.0, 2.75*inch, "DocTemplate")
+    W = 4/3.0*inch
+    H = 2*inch
+    Wd = x = inch/4.0
+    Hd =y = inch/2.0
+    for name in ("two column", "chapter page", "title page"):
+        canvas.setFillColorRGB(0.5,1.0,1.0)
+        canvas.rect(x,y,W,H, fill=1)
+        canvas.setFillColorRGB(0,0,0)
+        canvas.drawString(x+inch/8, y+H-Wd, "PageTemplate")
+        canvas.drawCentredString(x+W/2.0, y-Wd, name)
+        x = x+W+Wd
+    canvas.saveState()
+    d = inch/16
+    dW = (W-3*d)/2.0
+    hD = H -2*d-Wd
+    canvas.translate(Wd+d, Hd+d)
+    for name in ("left Frame", "right Frame"):
+        canvas.setFillColorRGB(1.0,0.5,1.0)
+        canvas.rect(0,0, dW,hD, fill=1)
+        canvas.setFillGray(0.7)
+        dd= d/2.0
+        ddH = (hD-6*dd)/5.0
+        ddW = dW-2*dd
+        yy = dd
+        xx = dd
+        for i in range(5):
+            canvas.rect(xx,yy,ddW,ddH, fill=1, stroke=0)
+            yy = yy+ddH+dd
+        canvas.setFillColorRGB(0,0,0)
+        canvas.saveState()
+        canvas.rotate(90)
+        canvas.drawString(d,-dW/2, name)
+        canvas.restoreState()
+        canvas.translate(dW+d,0)
+    canvas.restoreState()
+    canvas.setFillColorRGB(1.0, 0.5, 1.0)
+    mx = Wd+W+Wd+d
+    my = Hd+d
+    mW = W-2*d
+    mH = H-d-Hd
+    canvas.rect(mx, my, mW, mH, fill=1)
+    canvas.rect(Wd+2*(W+Wd)+d, Hd+3*d, W-2*d, H/2.0, fill=1)
+    canvas.setFillGray(0.7)
+    canvas.rect(Wd+2*(W+Wd)+d+dd, Hd+5*d, W-2*d-2*dd, H/2.0-2*d-dd, fill=1)
+    xx = mx+dd
+    yy = my+mH/5.0
+    ddH = (mH-6*dd-mH/5.0)/3.0
+    ddW = mW - 2*dd
+    for i in range(3):
+        canvas.setFillGray(0.7)
+        canvas.rect(xx,yy,ddW,ddH, fill=1, stroke=1)
+        canvas.setFillGray(0)
+        canvas.drawString(xx+dd/2.0,yy+dd/2.0, "flowable %s" %(157-i))
+        yy = yy+ddH+dd
+    canvas.drawCentredString(3*Wd+2*W+W/2, Hd+H/2.0, "First Flowable")
+    canvas.setFont("Times-BoldItalic", 8)
+    canvas.setFillGray(0)
+    canvas.drawCentredString(mx+mW/2.0, my+mH+3*dd, "Chapter 6: Lubricants")
+    canvas.setFont("Times-BoldItalic", 10)
+    canvas.drawCentredString(3*Wd+2*W+W/2, Hd+H-H/4, "College Life")
+
 # D = dir()
 g = globals()
 Dprime = {}
@@ -672,3 +763,50 @@ for (a,b) in g.items():
         #print b
         b = strip(b)
         exec(b+'\n')
+        
+platypussetup = """
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
+from reportlab.lib.units import inch
+PAGE_HEIGHT=DEFAULT_PAGE_SIZE[1]; PAGE_WIDTH=DEFAULT_PAGE_SIZE[0]
+styles = getSampleStyleSheet()
+"""
+platypusfirstpage = """
+Title = "Hello world"
+pageinfo = "platypus example"
+def myFirstPage(canvas, doc):
+    canvas.saveState()
+    canvas.setFont('Times-Bold',16)
+    canvas.drawCentredString(PAGE_WIDTH/2.0, PAGE_HEIGHT-108, Title)
+    canvas.setFont('Times-Roman',9)
+    canvas.drawString(inch, 0.75 * inch, "First Page / %s" % pageinfo)
+    canvas.restoreState()
+"""
+platypusnextpage = """
+def myLaterPages(canvas, doc):
+    canvas.saveState()
+    canvas.setFont('Times-Roman',9)
+    canvas.drawString(inch, 0.75 * inch, "Page %d %s" % (doc.page, pageinfo))
+    canvas.restoreState()
+"""
+platypusgo = """
+def go():
+    doc = SimpleDocTemplate("phello.pdf")
+    Story = [Spacer(1,2*inch)]
+    style = styles["Normal"]
+    for i in range(100):
+        bogustext = ("This is Paragraph number %s.  " % i) *20
+        p = Paragraph(bogustext, style)
+        Story.append(p)
+        Story.append(Spacer(1,0.2*inch))
+    doc.build(Story, onFirstPage=myFirstPage, onLaterPages=myLaterPages)
+"""
+
+if __name__=="__main__":
+    # then do the platypus hello world
+    for b in platypussetup, platypusfirstpage, platypusnextpage, platypusgo:
+        b = strip(b)
+        exec(b+'\n')
+    go()
+

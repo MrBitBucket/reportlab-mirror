@@ -32,6 +32,9 @@
 #
 ###############################################################################
 #   $Log: genuserguide.py,v $
+#   Revision 1.30  2000/07/13 20:36:02  aaron_watters
+#   various mods
+#
 #   Revision 1.29  2000/07/13 12:38:56  rgbecker
 #   More demos in appendix
 #
@@ -123,7 +126,7 @@
 #   Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #   initial checkin. user guide generation framework.
 #   
-__version__=''' $Id: genuserguide.py,v 1.29 2000/07/13 12:38:56 rgbecker Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.30 2000/07/13 20:36:02 aaron_watters Exp $ '''
 
 
 __doc__ = """
@@ -473,6 +476,12 @@ def parabox2(text, caption):
 
 def pencilnote():
     getStory().append(examples.NoteAnnotation())
+    
+
+from reportlab.lib.colors import tan, green
+def handnote(xoffset=0, size=None, fillcolor=tan, strokecolor=green):
+    getStory().append(examples.HandAnnotation(xoffset,size,fillcolor,strokecolor))
+    
         
 
 #make a singleton, created when requested rather
