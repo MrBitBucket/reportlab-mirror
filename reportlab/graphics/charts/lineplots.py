@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.36 2002/12/02 16:30:59 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.37 2002/12/02 19:04:01 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.36 2002/12/02 16:30:59 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.37 2002/12/02 19:04:01 rgbecker Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -464,14 +464,14 @@ class GridLinePlot(LinePlot):
 
         back = self.background
         if isinstance(back, Grid):
-            if back.orientation == 'vertical' and xva.valueSteps:
-                xpos = map(xva.scale, [xva._valueMin] + xva.valueSteps)
+            if back.orientation == 'vertical' and xva._tickValues:
+                xpos = map(xva.scale, [xva._valueMin] + xva._tickValues)
                 steps = []
                 for i in range(len(xpos)-1):
                     steps.append(xpos[i+1] - xpos[i])
                 back.deltaSteps = steps
-            elif back.orientation == 'horizontal' and yva.valueSteps:
-                ypos = map(yva.scale, [yva._valueMin] + yva.valueSteps)
+            elif back.orientation == 'horizontal' and yva._tickValues:
+                ypos = map(yva.scale, [yva._valueMin] + yva._tickValues)
                 steps = []
                 for i in range(len(ypos)-1):
                     steps.append(ypos[i+1] - ypos[i])
@@ -488,26 +488,26 @@ class GridLinePlot(LinePlot):
             back.grid1.height = self.height
 
             # some room left for optimization...
-            if back.grid0.orientation == 'vertical' and xva.valueSteps:
-                xpos = map(xva.scale, [xva._valueMin] + xva.valueSteps)
+            if back.grid0.orientation == 'vertical' and xva._tickValues:
+                xpos = map(xva.scale, [xva._valueMin] + xva._tickValues)
                 steps = []
                 for i in range(len(xpos)-1):
                     steps.append(xpos[i+1] - xpos[i])
                 back.grid0.deltaSteps = steps
-            elif back.grid0.orientation == 'horizontal' and yva.valueSteps:
-                ypos = map(yva.scale, [yva._valueMin] + yva.valueSteps)
+            elif back.grid0.orientation == 'horizontal' and yva._tickValues:
+                ypos = map(yva.scale, [yva._valueMin] + yva._tickValues)
                 steps = []
                 for i in range(len(ypos)-1):
                     steps.append(ypos[i+1] - ypos[i])
                 back.grid0.deltaSteps = steps
-            if back.grid1.orientation == 'vertical' and xva.valueSteps:
-                xpos = map(xva.scale, [xva._valueMin] + xva.valueSteps)
+            if back.grid1.orientation == 'vertical' and xva._tickValues:
+                xpos = map(xva.scale, [xva._valueMin] + xva._tickValues)
                 steps = []
                 for i in range(len(xpos)-1):
                     steps.append(xpos[i+1] - xpos[i])
                 back.grid1.deltaSteps = steps
-            elif back.grid1.orientation == 'horizontal' and yva.valueSteps:
-                ypos = map(yva.scale, [yva._valueMin] + yva.valueSteps)
+            elif back.grid1.orientation == 'horizontal' and yva._tickValues:
+                ypos = map(yva.scale, [yva._valueMin] + yva._tickValues)
                 steps = []
                 for i in range(len(ypos)-1):
                     steps.append(ypos[i+1] - ypos[i])
