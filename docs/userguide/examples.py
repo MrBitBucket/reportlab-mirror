@@ -330,7 +330,7 @@ def textsize(canvas):
     from reportlab.lib.colors import magenta, red
     canvas.setFont("Times-Roman", 20)
     canvas.setFillColor(red)
-    canvas.drawCentredString(2.75*inch, 2.5*inch, "Font Size Examples")
+    canvas.drawCentredString(2.75*inch, 2.5*inch, "Font size examples")
     canvas.setFillColor(magenta)
     size = 7
     y = 2.3*inch
@@ -339,7 +339,7 @@ def textsize(canvas):
         canvas.setFont("Helvetica", size)
         canvas.drawRightString(x,y,"%s points: " % size)
         canvas.drawString(x,y, line)
-        y = y-size
+        y = y-size*1.2
         size = size+1.5
 """
 
@@ -405,6 +405,112 @@ def dashes(canvas):
     star(canvas, "Complex Pattern", "[1,1,3,3,1,4,4,1]", xcenter=4.5*inch)
 """
 
+testcursormoves1 = """
+def cursormoves1(canvas):
+    from reportlab.lib.units import inch
+    textobject = canvas.beginText()
+    textobject.setTextOrigin(inch, 2.5*inch)
+    textobject.setFont("Helvetica-Oblique", 14)
+    for line in lyrics:
+        textobject.textLine(line)
+    textobject.setFillGray(0.4)
+    textobject.textLines('''
+    With many apologeze to the Beach Boys
+    and anyone else who finds this objectionable
+    ''')
+    canvas.drawText(textobject)
+"""
+
+testcursormoves2 = """
+def cursormoves2(canvas):
+    from reportlab.lib.units import inch
+    textobject = canvas.beginText()
+    textobject.setTextOrigin(2, 2.5*inch)
+    textobject.setFont("Helvetica-Oblique", 14)
+    for line in lyrics:
+        textobject.textOut(line)
+        textobject.moveCursor(14,14) # POSITIVE Y moves down!!!
+    textobject.setFillColorRGB(0.4,0,1)
+    textobject.textLines('''
+    With many apologeze to the Beach Boys
+    and anyone else who finds this objectionable
+    ''')
+    canvas.drawText(textobject)
+"""
+
+testcharspace = """
+def charspace(canvas):
+    from reportlab.lib.units import inch
+    textobject = canvas.beginText()
+    textobject.setTextOrigin(3, 2.5*inch)
+    textobject.setFont("Helvetica-Oblique", 10)
+    charspace = 0
+    for line in lyrics:
+        textobject.setCharSpace(charspace)
+        textobject.textLine("%s: %s" %(charspace,line))
+        charspace = charspace+0.5
+    textobject.setFillGray(0.4)
+    textobject.textLines('''
+    With many apologeze to the Beach Boys
+    and anyone else who finds this objectionable
+    ''')
+    canvas.drawText(textobject)
+"""
+
+testwordspace = """
+def wordspace(canvas):
+    from reportlab.lib.units import inch
+    textobject = canvas.beginText()
+    textobject.setTextOrigin(3, 2.5*inch)
+    textobject.setFont("Helvetica-Oblique", 12)
+    wordspace = 0
+    for line in lyrics:
+        textobject.setWordSpace(wordspace)
+        textobject.textLine("%s: %s" %(wordspace,line))
+        wordspace = wordspace+2.5
+    textobject.setFillColorCMYK(0.4,0,0.4,0.2)
+    textobject.textLines('''
+    With many apologeze to the Beach Boys
+    and anyone else who finds this objectionable
+    ''')
+    canvas.drawText(textobject)
+"""
+testhorizontalscale = """
+def horizontalscale(canvas):
+    from reportlab.lib.units import inch
+    textobject = canvas.beginText()
+    textobject.setTextOrigin(3, 2.5*inch)
+    textobject.setFont("Helvetica-Oblique", 12)
+    horizontalscale = 80 # 100 is default
+    for line in lyrics:
+        textobject.setHorizScale(horizontalscale)
+        textobject.textLine("%s: %s" %(horizontalscale,line))
+        horizontalscale = horizontalscale+10
+    textobject.setFillColorCMYK(0.0,0.4,0.4,0.2)
+    textobject.textLines('''
+    With many apologeze to the Beach Boys
+    and anyone else who finds this objectionable
+    ''')
+    canvas.drawText(textobject)
+"""
+testleading = """
+def leading(canvas):
+    from reportlab.lib.units import inch
+    textobject = canvas.beginText()
+    textobject.setTextOrigin(3, 2.5*inch)
+    textobject.setFont("Helvetica-Oblique", 14)
+    leading = 8
+    for line in lyrics:
+        textobject.setLeading(leading)
+        textobject.textLine("%s: %s" %(leading,line))
+        leading = leading+2.5
+    textobject.setFillColorCMYK(0.8,0,0,0.3)
+    textobject.textLines('''
+    With many apologeze to the Beach Boys
+    and anyone else who finds this objectionable
+    ''')
+    canvas.drawText(textobject)
+"""
 # D = dir()
 g = globals()
 Dprime = {}

@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: genuserguide.py,v $
+#	Revision 1.6  2000/06/22 13:35:28  aaron_watters
+#	textobject and pathobject methods, among other things
+#
 #	Revision 1.5  2000/06/21 21:19:29  aaron_watters
 #	colors, line styles, more examples
-#
+#	
 #	Revision 1.4  2000/06/21 15:16:05  aaron_watters
 #	Lots of graphical examples added
 #	
@@ -47,7 +50,7 @@
 #	Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #	initial checkin. user guide generation framework.
 #	
-__version__=''' $Id: genuserguide.py,v 1.5 2000/06/21 21:19:29 aaron_watters Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.6 2000/06/22 13:35:28 aaron_watters Exp $ '''
 
 
 __doc__ = """
@@ -600,7 +603,63 @@ canvasdemo(examples.textsize)
 
 lesson("Text object methods")
 
-###### FILL THEM IN
+eg("""textobject.setTextOrigin(x,y)""")
+
+eg("""textobject.setTextTransform(a,b,c,d,e,f)""")
+
+eg("""textobject.moveCursor(dx, dy) # from start of current LINE""")
+
+eg("""(x,y) = textobject.getCursor()""")
+
+eg("""x = textobject.getX(); y = textobject.getY()""")
+
+eg("""textobject.setFont(psfontname, size, leading = None)""")
+
+eg("""textobject.textOut(text)""")
+
+eg("""textobject.textLine(text='')""")
+
+eg("""textobject.textLines(stuff, trim=1)""")
+
+eg(examples.testcursormoves1)
+
+canvasdemo(examples.cursormoves1)
+
+eg(examples.testcursormoves2)
+
+canvasdemo(examples.cursormoves2)
+
+eg("""textobject.setCharSpace(charSpace)""")
+
+eg(examples.testcharspace)
+
+canvasdemo(examples.charspace)
+
+eg("""textobject.setWordSpace(wordSpace)""")
+
+eg(examples.testwordspace)
+
+canvasdemo(examples.wordspace)
+
+eg("""textobject.setHorizScale(horizScale)""")
+
+eg(examples.testhorizontalscale)
+
+canvasdemo(examples.horizontalscale)
+
+eg("""textobject.setLeading(leading)""")
+
+eg(examples.testleading)
+
+canvasdemo(examples.leading)
+
+eg("""textobject.setTextRenderMode(mode)""")
+
+eg("""textobject.setRise(rise)""")
+
+eg("""textobject.setFillColor(aColor); 
+textobject.setStrokeColor(self, aColor) 
+# and similar""")
 
 lesson('Paths and Lines')
 
@@ -641,6 +700,24 @@ eg(examples.testbezier2)
 canvasdemo(examples.bezier2)
 
 lesson("Path object methods")
+
+eg("""pathobject.moveTo(x,y)""")
+
+eg("""pathobject.lineTo(x,y)""")
+
+eg("""pathobject.curveTo(x1, y1, x2, y2, x3, y3) """)
+
+eg("""pathobject.arc(x1,y1, x2,y2, startAng=0, extent=90) """)
+
+eg("""pathobject.arcTo(x1,y1, x2,y2, startAng=0, extent=90) """)
+
+eg("""pathobject.rect(x, y, width, height) """)
+
+eg("""pathobject.ellipse(x, y, width, height)""")
+
+eg("""pathobject.circle(x_cen, y_cen, r) """)
+
+eg("""pathobject.close() """)
 
 ##### FILL THEM IN
 
