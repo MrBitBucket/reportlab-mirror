@@ -1,15 +1,19 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pyfiles.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pyfiles.py,v 1.5 2001/04/05 09:30:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pyfiles.py,v 1.6 2001/05/29 16:26:06 dinu_gherman Exp $
 """Tests performed on all Python source files of the ReportLab distribution.
 """
 
 
-import os, string, fnmatch
+import os, string, fnmatch, re
 
 import reportlab
 from reportlab.test import unittest
+from reportlab.test.utils import SecureTestCase, GlobDirectoryWalker
+
+
+RL_HOME = os.path.dirname(reportlab.__file__)
 
 
 # Helper function and class.
@@ -125,7 +129,6 @@ class FilenameTestCase(unittest.TestCase):
     def testTrailingDigits(self):
         "Test if Python files contain trailing digits."
 
-        RL_HOME = os.path.dirname(reportlab.__file__)
         allPyFiles = GlobDirectoryWalker(RL_HOME, '*.py')
 
         for path in allPyFiles:
@@ -138,12 +141,48 @@ class FilenameTestCase(unittest.TestCase):
 ##                print truncPath
 
 
+class FirstLineTestCase(SecureTestCase):
+    "Testing if objects in the ReportLab package have docstrings."
+
+    def findSuspiciousModules(self, folder, rootName):
+        "Get all modul paths with non-Unix-like first line."
+
+        firstLinePat = re.compile('^#!.*python.*')
+
+        paths = []
+        for file in GlobDirectoryWalker(folder, '*.py'):
+            if os.path.basename(file) == '__init__.py':
+                continue
+            firstLine = open(file).readline()
+            if not firstLinePat.match(firstLine):
+                paths.append(file)
+
+        return paths
+
+
+    def test1(self):
+        "Test if all Python files have a Unix-like first line."
+
+        path = "test_firstline.log"
+        file = open(path, 'w')
+        file.write('No Unix-like first line found in the files below.\n\n')
+
+        paths = self.findSuspiciousModules(RL_HOME, 'reportlab')
+        paths.sort()
+
+        for p in paths:        
+            file.write("%s\n" % p)
+
+        file.close()
+
+
 def makeSuite():
     suite = unittest.TestSuite()    
 
     suite.addTest(SelfTestCase('testUnique'))
     suite.addTest(AsciiFileTestCase('testAscii'))
     suite.addTest(FilenameTestCase('testTrailingDigits'))
+    suite.addTest(FirstLineTestCase('test1'))
 
     return suite
 
