@@ -55,7 +55,9 @@ class CodeChartBase(Flowable):
         """Fills boxes in order.  None means skip a box.
         Empty boxes at end get filled with gray"""
         extraNeeded = (self.rows * self.charsPerRow - len(charList))
-        charList = charList + [None] * extraNeeded
+        for i in range(extraNeeded):
+            charList.append(None)
+        #charList.extend([None] * extraNeeded)
         row = 0
         col = 0
         self.canv.setFont(self.fontName, self.boxSize * 0.75)
@@ -305,18 +307,18 @@ def test():
     cc3 = SingleByteEncodingChart(charsPerRow=25, hex=0)
     cc3.drawOn(c, 72, 100)
 
-    c.showPage()
-
-    c.setFont('Helvetica-Bold', 24)
-    c.drawString(72, 750, 'Multi-byte Kuten code chart examples')
-    KutenRowCodeChart(1, 'HeiseiMin-W3','EUC-H').drawOn(c, 72, 600)
-    KutenRowCodeChart(16, 'HeiseiMin-W3','EUC-H').drawOn(c, 72, 450)
-    KutenRowCodeChart(84, 'HeiseiMin-W3','EUC-H').drawOn(c, 72, 300)
-
-    c.showPage()
-    c.setFont('Helvetica-Bold', 24)
-    c.drawString(72, 750, 'Big5 Code Chart Examples')
-    #Big5CodeChart(0xA1, 'MSungStd-Light-Acro','ETenms-B5-H').drawOn(c, 72, 500)
+##    c.showPage()
+##
+##    c.setFont('Helvetica-Bold', 24)
+##    c.drawString(72, 750, 'Multi-byte Kuten code chart examples')
+##    KutenRowCodeChart(1, 'HeiseiMin-W3','EUC-H').drawOn(c, 72, 600)
+##    KutenRowCodeChart(16, 'HeiseiMin-W3','EUC-H').drawOn(c, 72, 450)
+##    KutenRowCodeChart(84, 'HeiseiMin-W3','EUC-H').drawOn(c, 72, 300)
+##
+##    c.showPage()
+##    c.setFont('Helvetica-Bold', 24)
+##    c.drawString(72, 750, 'Big5 Code Chart Examples')
+##    #Big5CodeChart(0xA1, 'MSungStd-Light-Acro','ETenms-B5-H').drawOn(c, 72, 500)
 
     c.save()
     print 'saved codecharts.pdf'

@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.68 2003/11/13 17:15:19 william_ng Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.69 2004/01/07 22:58:54 andy_robinson Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.68 2003/11/13 17:15:19 william_ng Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.69 2004/01/07 22:58:54 andy_robinson Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -38,6 +38,8 @@ import reportlab.lib.sequencer
 from types import *
 import sys
 
+class LayoutError(Exception):
+    pass
 
 def _doNothing(canvas, doc):
     "Dummy callback for onPage"
@@ -111,6 +113,9 @@ class ActionFlowable(Flowable):
     def __call__(self):
         return self
 
+    def identity(self, maxLen=None):
+        return "ActionFlowable: %s" % str(self.action)
+    
 class NextFrameFlowable(ActionFlowable):
     def __init__(self,ix,resume=0):
         ActionFlowable.__init__(self,('nextFrame',ix,resume))
@@ -306,6 +311,12 @@ class BaseDocTemplate:
         self._onProgress = None
         self._flowableCount = 0  # so we know how far to go
 
+
+        #infinite loop detection if we start doing lots of empty pages
+        self._curPageFlowableCount = 0
+        self._emptyPages = 0
+        self._emptyPagesAllowed = 3
+
         #context sensitive margins - set by story, not from outside
         self._leftExtraIndent = 0.0
         self._rightExtraIndent = 0.0
@@ -357,6 +368,8 @@ class BaseDocTemplate:
         self.pageTemplate.onPage(self.canv,self)
         for f in self.pageTemplate.frames: f._reset()
         self.beforePage()
+        #keep a count of flowables added to this page.  zero indicates bad stuff
+        self._curPageFlowableCount = 0
         if hasattr(self,'_nextFrameIndex'):
             del self._nextFrameIndex
         self.frame = self.pageTemplate.frames[0]
@@ -367,6 +380,15 @@ class BaseDocTemplate:
             check the next page template
             hang a page begin
         '''
+        #detect infinite loops...
+        if self._curPageFlowableCount == 0:
+            self._emptyPages = self._emptyPages + 1
+        else:
+            self._emptyPages = 0
+        if self._emptyPages >= self._emptyPagesAllowed:
+            raise LayoutError("More than %d pages generated without content - halting layout.  Likely that a flowable is too large for any frame." % self._emptyPagesAllowed)
+
+
         if self._onProgress:
             self._onProgress('PAGE', self.canv.getPageNumber())
         self.pageTemplate.afterDrawPage(self.canv, self)
@@ -507,6 +529,7 @@ class BaseDocTemplate:
         self.handle_breakBefore(flowables)
         self.handle_keepWithNext(flowables)
         f = flowables[0]
+        #print 'handling flowable %s' % f.identity()
         del flowables[0]
         if f is None:
             return
@@ -520,6 +543,7 @@ class BaseDocTemplate:
         else:
             #try to fit it then draw it
             if self.frame.add(f, self.canv, trySplit=self.allowSplitting):
+                self._curPageFlowableCount = self._curPageFlowableCount + 1
                 self.afterFlowable(f)
             else:
                 #if isinstance(f, KeepTogether): print 'could not add it to frame'
@@ -533,6 +557,7 @@ class BaseDocTemplate:
                 #if isinstance(f, KeepTogether): print 'n=%d' % n
                 if n:
                     if self.frame.add(S[0], self.canv, trySplit=0):
+                        self._curPageFlowableCount = self._curPageFlowableCount + 1
                         self.afterFlowable(S[0])
                     else:
                         print 'n = %d' % n
@@ -545,6 +570,7 @@ class BaseDocTemplate:
 ##                  if hasattr(f,'postponed'):
                     if hasattr(f,'_postponed'):
                         message = "Flowable %s too large on page %d" % (f.identity(30), self.page)
+                        #print message
                         #show us, it might be handy
                         #HACK = it seems within tables we sometimes
                         #get an empty paragraph that won't fit and this
