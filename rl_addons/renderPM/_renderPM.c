@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "$Revision: 1.14 $"
+#define VERSION "$Revision: 1.15 $"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -142,6 +142,62 @@ typedef struct {
 	ArtVpathDash	dash;			/*for doing dashes*/
 	Gt1EncodedFont*		font;		/*the currently set external font or NULL*/
 	} gstateObject;
+
+#ifdef	ROBIN_DEBUG
+#define	GFMT	"%.17g"
+#define PATHCODENAME(c) (c==ART_MOVETO_OPEN?"MOVETO":(c==ART_MOVETO?"MOVETO_C":(c==ART_LINETO?"LINETO":(c==ART_CURVETO?"CURVETO":(c==ART_END?"END":"????")))))
+static	void dump_path(gstateObject* self)
+{
+	ArtBpath	*q = self->path;
+	size_t		i;
+	printf("strokeColor=%8.8xX%s strokeWidth=%g fillColor=%8.8xX%s\n", self->strokeColor.value,
+			self->strokeColor.valid ? "valid":"invalid", self->strokeWidth,
+			self->fillColor.value,
+			self->fillColor.valid ? "valid":"invalid"
+			);
+	printf("ctm: " GFMT " " GFMT " " GFMT " " GFMT " " GFMT " " GFMT " det: " GFMT "\n", self->ctm[0], self->ctm[1], self->ctm[2], self->ctm[3], self->ctm[4], self->ctm[5],
+		self->ctm[0]*self->ctm[3] - self->ctm[1]*self->ctm[2]);
+	printf("path: pathLen=%d pathMax=%d\n",self->pathLen, self->pathMax);
+	for(i=0;i<(size_t)self->pathLen;i++){
+		char	*s;
+		printf("%3d: %-8s, (" GFMT "," GFMT "), (" GFMT "," GFMT "), (" GFMT "," GFMT ")\n",
+				i, s=PATHCODENAME(q->code),
+				q->x1,q->y1,q->x2,q->y2,q->x3,q->y3);
+		if((q++)->code==ART_END || s[0]=='?') break;
+		}
+	fflush(stdout);
+}
+
+void dump_vpath(char* msg, ArtVpath* q)
+{
+	size_t		i;
+	printf("%s vpath:\n",msg);
+	for(i=0;i<10000;i++){
+		char	*s;
+		printf("%3d: %-8s, (" GFMT "," GFMT ")\n",
+				i, s=PATHCODENAME(q->code),
+				q->x,q->y);
+		if((q++)->code==ART_END || s[0]=='?') break;
+		}
+	fflush(stdout);
+}
+
+void dump_svp(char* msg, ArtSVP* svp)
+{
+	int	i, j;
+	printf("%s svp:\n",msg);
+	for(i=0;i<svp->n_segs;i++){
+		ArtSVPSeg *s=svp->segs+i;
+		printf("seg%3d: n_points=%d dir=%s box=(" GFMT "," GFMT ") (" GFMT "," GFMT ")\n", i, s->n_points, s->dir?"dn":"up",s->bbox.x0,s->bbox.y0,s->bbox.x1,s->bbox.y1);
+		for(j=0;j<s->n_points;j++) printf("    (" GFMT "," GFMT ")\n",s->points[j].x, s->points[j].y);
+		}
+	fflush(stdout);
+}
+#else
+#define dump_path(p)
+#define dump_vpath(m,p)
+#define dump_svp(m,p)
+#endif
 
 static	void bpath_add_point(ArtBpath** pp, int* pn, int *pm, int code, double x[3], double y[3])
 {
@@ -272,23 +328,6 @@ static	PyObject* gstate_clipPathClear(gstateObject* self, PyObject* args)
 	Py_INCREF(Py_None);
 	return Py_None;
 }
-static	PyObject* gstate_clipPathSet(gstateObject* self, PyObject* args)
-{
-	ArtVpath	*vpath;
-	ArtVpath	*trVpath;
-
-	if(!PyArg_ParseTuple(args,":clipPathSet")) return NULL;
-	vpath = art_bez_path_to_vec(self->path, 0.25);
-	trVpath = art_vpath_affine_transform (vpath, self->ctm);
-	if(self->clipSVP){
-		art_svp_free(self->clipSVP);
-		}
-	self->clipSVP = art_svp_from_vpath(trVpath);
-	art_free(trVpath);
-	art_free(vpath);
-	Py_INCREF(Py_None);
-	return Py_None;
-}
 
 static art_u32 _RGBA(art_u32 rgb, double alpha)
 {
@@ -296,62 +335,6 @@ static art_u32 _RGBA(art_u32 rgb, double alpha)
 	return (rgb << 8) | tmp;
 }
 
-#ifdef	ROBIN_DEBUG
-#define	GFMT	"%.17g"
-#define PATHCODENAME(c) (c==ART_MOVETO_OPEN?"MOVETO":(c==ART_MOVETO?"MOVETO_C":(c==ART_LINETO?"LINETO":(c==ART_CURVETO?"CURVETO":(c==ART_END?"END":"????")))))
-static	void dump_path(gstateObject* self)
-{
-	ArtBpath	*q = self->path;
-	size_t		i;
-	printf("strokeColor=%8.8xX%s strokeWidth=%g fillColor=%8.8xX%s\n", self->strokeColor.value,
-			self->strokeColor.valid ? "valid":"invalid", self->strokeWidth,
-			self->fillColor.value,
-			self->fillColor.valid ? "valid":"invalid"
-			);
-	printf("ctm: " GFMT " " GFMT " " GFMT " " GFMT " " GFMT " " GFMT " det: " GFMT "\n", self->ctm[0], self->ctm[1], self->ctm[2], self->ctm[3], self->ctm[4], self->ctm[5],
-		self->ctm[0]*self->ctm[3] - self->ctm[1]*self->ctm[2]);
-	printf("path: pathLen=%d pathMax=%d\n",self->pathLen, self->pathMax);
-	for(i=0;i<10000;i++){
-		char	*s;
-		printf("%3d: %-8s, (" GFMT "," GFMT "), (" GFMT "," GFMT "), (" GFMT "," GFMT ")\n",
-				i, s=PATHCODENAME(q->code),
-				q->x1,q->y1,q->x2,q->y2,q->x3,q->y3);
-		if((q++)->code==ART_END || s[0]=='?') break;
-		}
-	fflush(stdout);
-}
-
-void dump_vpath(char* msg, ArtVpath* q)
-{
-	size_t		i;
-	printf("%s vpath:\n",msg);
-	for(i=0;i<10000;i++){
-		char	*s;
-		printf("%3d: %-8s, (" GFMT "," GFMT ")\n",
-				i, s=PATHCODENAME(q->code),
-				q->x,q->y);
-		if((q++)->code==ART_END || s[0]=='?') break;
-		}
-	fflush(stdout);
-}
-
-void dump_svp(char* msg, ArtSVP* svp)
-{
-	int	i, j;
-	printf("%s svp:\n",msg);
-	for(i=0;i<svp->n_segs;i++){
-		ArtSVPSeg *s=svp->segs+i;
-		printf("seg%3d: n_points=%d dir=%d box=" GFMT " " GFMT " " GFMT " " GFMT "\n       ", i, s->n_points, s->dir,s->bbox.x0,s->bbox.y0,s->bbox.x1,s->bbox.y1);
-		for(j=0;j<s->n_points;j++) printf(" (" GFMT " " GFMT ")",s->points[j].x, s->points[j].y);
-		printf("\n");
-		}
-	fflush(stdout);
-}
-#else
-#define dump_path(p)
-#define dump_vpath(m,p)
-#define dump_svp(m,p)
-#endif
 static void _vpath_segment_reverse(ArtVpath *p, ArtVpath *q)
 {
 	if(p<q){
@@ -378,6 +361,65 @@ static	void _vpath_reverse(ArtVpath *p)
 		}
 }
 
+static double _vpath_segment_area(ArtVpath *p, ArtVpath *q)
+{
+	double a=0.0, x0,y0, x1,y1;
+	if(p->code==ART_MOVETO){
+		ArtVpath* p0 = p;
+		while(p<q){
+			x0 = p->x;
+			y0 = (p++)->y;
+			if(p==q){
+				x1 = p0->x;
+				y1 = p0->y;
+				}
+			else{
+				x1 = p->x;
+				y1 = p->y;
+				}
+			a += x1*y0 - x0*y1;
+			}
+		}
+	return a;
+}
+
+static double _vpath_area(ArtVpath *p)
+{
+	double a=0.0, t;
+	ArtVpath	*q = p;
+	while(q->code!=ART_END){
+		while((++p)->code==ART_LINETO);
+		t = _vpath_segment_area( q, p);
+#ifdef	ROBIN_DEBUG
+		printf("	closed segment area=%g\n", t );
+#endif
+		if(t<=-1e-8) _vpath_segment_reverse( q, p-1 );
+		a += t;
+		q = p;
+		}
+	return a;
+}
+
+static	PyObject* gstate_clipPathSet(gstateObject* self, PyObject* args)
+{
+	ArtVpath	*vpath;
+	ArtVpath	*trVpath;
+
+	if(!PyArg_ParseTuple(args,":clipPathSet")) return NULL;
+	gstate_pathEnd(self);
+	dump_path(self);
+	vpath = art_bez_path_to_vec(self->path, 0.25);
+	dump_vpath("after -->vec",vpath);
+	trVpath = art_vpath_affine_transform (vpath, self->ctm);
+	_vpath_area(trVpath);
+	if(self->clipSVP) art_svp_free(self->clipSVP);
+	self->clipSVP = art_svp_from_vpath(trVpath);
+	art_free(trVpath);
+	art_free(vpath);
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
 static void _gstate_pathFill(gstateObject* self,int endIt, int vpReverse)
 {
 
@@ -388,14 +430,14 @@ static void _gstate_pathFill(gstateObject* self,int endIt, int vpReverse)
 		if(endIt) gstate_pathEnd(self);
 		dump_path(self);
 		vpath = art_bez_path_to_vec(self->path, 0.25);
+		if(vpReverse) _vpath_reverse(vpath);
 		trVpath =  art_vpath_affine_transform(vpath, self->ctm);
-		if(vpReverse) _vpath_reverse(trVpath);
-
-		if(!self->clipSVP) {
-			svp = art_svp_from_vpath(trVpath);
-			}
-		else {
-			tmp_svp = art_svp_from_vpath(trVpath);
+		if(self->clipSVP && !vpReverse) _vpath_area(trVpath);
+		svp = art_svp_from_vpath(trVpath);
+		if(self->clipSVP) {
+			tmp_svp = svp;
+			dump_svp("fill clip svp path",self->clipSVP);
+			dump_svp("fill svp orig",svp);
 			svp = art_svp_intersect(tmp_svp, self->clipSVP);
 			art_svp_free(tmp_svp);
 			}
@@ -429,99 +471,9 @@ static PyObject* gstate_pathFill(gstateObject* self, PyObject* args)
 	return Py_None;
 }
 
-static ArtSVP* art_svp_stroke_vpath_transform(ArtVpath *vpath,
-	const double affine[6],
-	ArtPathStrokeJoinType join,
-	ArtPathStrokeCapType cap,
-	double line_width /*in user coordinates*/,
-	double miter_limit,
-	double flatness)
-/*
-	Strokes a vpath and transforms it according to the transformation in affine
-
-	decomposes affine transformation into proper and improper portions so that the
-	improper portion can be done on the vpath before stroking.	I think this is
-	what you would usually want to happen.	For example, the line_width can now be
-	considered to be in "user coordinates". -chris lee
-
-	Could be sped up by doing the flip transformation in a loop w/o calling
-	general affine transform code
-
-	Ultimately, it seems to me that this should be implemented w/o needing to back
-	transform to vpaths.  Need to delve in to stroke code for this and apply
-	transform to (normal vector * line_width) when calculating stroked paths.
-
-	N.B. proper affine transformation = orientation preserving transformation
-
-*/
-{
-	ArtVpath* transVpath;
-	ArtSVP* resultSvp;
-#ifdef CLEE_CODE
-	ArtSVP *preTransSvp;
-	ArtVpath* backVpath;
-	double properAffine[6]; /* P matrix (proper affine matrix) */
-	ArtVpath* invVpath;
-	static double flipAffine[] = {1.0, 0,0,-1.0,0,0}; /* R matrix */
-	double det;
-
-	det = affine[0]*affine[3] - affine[1]*affine[2]; /* find determinant, is it proper or improper*/
-
-	if(det > 0) {
-		preTransSvp = art_svp_vpath_stroke(vpath, join, cap, line_width, miter_limit, flatness);
-		backVpath = art_vpath_from_svp(preTransSvp);
-		transVpath = art_vpath_affine_transform(backVpath, affine);
-		resultSvp = art_svp_from_vpath(transVpath);
-
-		/*clean up this branch */
-		art_free(transVpath);
-		art_free(backVpath);
-		art_svp_free(preTransSvp);
-
-		}
-	else {	/* det is not allowed to be zero, could check here */
-		/*
-		A = [ a c ]    R = [ 1	0]	and P is the proper affine transform
-			[ b d ]		   [ 0 -1]
-
-		A = R P ; P = R^-1 ; P = R A
-
-		*/
-		/* need to check if in right order */
-		properAffine[0] = affine[0];
-		properAffine[1] = -affine[1];
-		properAffine[2] = affine[2];
-		properAffine[3] = -affine[3];
-		properAffine[4] = affine[4];
-		properAffine[5] = affine[5];
-
-		/* do this the slow way, won't meddle w/ vpath structure yet */
-		invVpath = art_vpath_affine_transform(vpath, flipAffine);
-		preTransSvp = art_svp_vpath_stroke(invVpath, join, cap, line_width, miter_limit, flatness);
-		backVpath = art_vpath_from_svp(preTransSvp);
-		transVpath = art_vpath_affine_transform(backVpath, properAffine);
-		resultSvp = art_svp_from_vpath(transVpath);
-
-		/* clean up this branch*/
-		art_free(transVpath);
-		art_free(backVpath);
-		art_svp_free(preTransSvp);
-		art_free(invVpath);
-		}
-#else
-		transVpath = art_vpath_affine_transform(vpath, affine);
-		resultSvp = art_svp_vpath_stroke(transVpath, join, cap, line_width, miter_limit, flatness);
-
-		/*clean up this branch */
-		art_free(transVpath);
-#endif
-
-	return(resultSvp);
-}
-
 static PyObject* gstate_pathStroke(gstateObject* self, PyObject* args)
 {
-	ArtVpath*	vpath=NULL;
+	ArtVpath	*vpath=NULL, *trVpath;
 	ArtSVP*		svp=NULL;
 	ArtSVP*		tmp_svp=NULL;
 	pixBufT*	p;
@@ -538,26 +490,14 @@ static PyObject* gstate_pathStroke(gstateObject* self, PyObject* args)
 			PyMem_Free(tvpath);
 			}
 		dump_vpath("stroke vpath", vpath);
-
-		if(!self->clipSVP){
-			svp = art_svp_stroke_vpath_transform(vpath,
-												  self->ctm,
-												  self->lineJoin,
-												  self->lineCap,
-												  self->strokeWidth,
-												  4, /*miter_limit */
-												  0.5/*flatness */);
-
-			}
-		else {
-			tmp_svp = art_svp_stroke_vpath_transform(vpath,
-													self->ctm,
-													self->lineJoin,
-													self->lineCap,
-													self->strokeWidth,
-													4, /*miter_limit */
-													0.5/*flatness */);
-
+		trVpath = art_vpath_affine_transform(vpath, self->ctm);
+		if(self->clipSVP) _vpath_area(trVpath);
+		svp = art_svp_vpath_stroke(trVpath, self->lineJoin, self->lineCap, self->strokeWidth, 4, 0.5);
+		art_free(trVpath);
+		if(self->clipSVP){
+			tmp_svp = svp;
+			dump_svp("stroke clip svp path",self->clipSVP);
+			dump_svp("stroke svp orig",svp);
 			svp = art_svp_intersect(tmp_svp, self->clipSVP);
 			art_svp_free(tmp_svp);
 			}

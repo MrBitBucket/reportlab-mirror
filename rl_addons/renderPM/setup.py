@@ -48,6 +48,7 @@ if __name__=='__main__': #NO RUNTESTS
 						'sources':	LIBART_SRCS,
 						'include_dirs': [DEVEL_DIR,LIBART_DIR,],
 						'macros': [('LIBART_COMPILATION',None),]+ROBIN_DEBUG,
+						#'extra_compile_args':['/Z7'],
 						}
 						),
 						('_renderPM_gt1',
@@ -55,6 +56,7 @@ if __name__=='__main__': #NO RUNTESTS
 						'sources':	pfxJoin(GT1_DIR,'gt1-dict.c','gt1-namecontext.c','gt1-parset1.c','gt1-region.c','parseAFM.c'),
 						'include_dirs': [DEVEL_DIR,GT1_DIR,GLIB_DIR,],
 						'macros': ROBIN_DEBUG,
+						#'extra_compile_args':['/Z7'],
 						}
 						),
 						],
@@ -67,19 +69,24 @@ if __name__=='__main__': #NO RUNTESTS
 										# libraries to link against
 										libraries=LIBS,
 										#extra_objects=['gt1.lib','libart.lib',],
+										#extra_compile_args=['/Z7'],
+										#extra_link_args=['/debug']
 										),
 							],
 			)
 
-	if sys.hexversion<0x20200a0 and sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
+	if sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
 		def MovePYDs(*F):
 			for x in sys.argv:
 				if x[:18]=='--install-platlib=': return
 			src = sys.exec_prefix
 			dst = os.path.join(src,'DLLs')
+			if sys.hexversion>=0x20200a0: src = os.path.join(src,'lib','site-packages')
 			for f in F:
+				srcf = os.path.join(src,f)
+				if not os.path.isfile(srcf): continue
 				dstf = os.path.join(dst,f)
 				if os.path.isfile(dstf):
 					os.remove(dstf)
-				os.rename(os.path.join(src,f),dstf)
-		MovePYDs('_renderPM.pyd')
+				os.rename(srcf,dstf)
+		MovePYDs('_renderPM.pyd','_renderPM.pdb')
