@@ -20,6 +20,7 @@ def frange(start, end=None, inc=None):
 		inc = 1.0
 
 	L = []
+	end = end - inc*0.0001	#to avoid numrical problems
 	while 1:
 		next = start + len(L) * inc
 		if inc > 0 and next >= end:
