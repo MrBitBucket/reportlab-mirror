@@ -2,11 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/randomtext.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/randomtext.py,v 1.9 2002/07/24 19:56:37 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/lib/randomtext.py,v 1.10 2003/10/06 11:33:14 rgbecker Exp $
 
-__version__=''' $Id: randomtext.py,v 1.9 2002/07/24 19:56:37 andy_robinson Exp $ '''
-
-import string
+__version__=''' $Id: randomtext.py,v 1.10 2003/10/06 11:33:14 rgbecker Exp $ '''
 
 ###############################################################################
 #   generates so-called 'Greek Text' for use in filling documents.
@@ -186,7 +184,14 @@ PYTHON = ['Good evening ladies and Bruces','I want to buy some cheese', 'You do 
           "And now for something completely different, a man with 3 buttocks",
           "I've heard of unisex, but I've never had it", "That's the end, stop the program! Stop it!"]
 
-
+from reportlab import rl_config
+if rl_config.invariant:
+    if not getattr(rl_config,'_random',None):
+        rl_config._random = 1
+        import random
+        random.seed(2342471922L)
+        del random
+del rl_config
 
 def randomText(theme=STARTUP, sentences=5):
     #this may or may not be appropriate in your company
