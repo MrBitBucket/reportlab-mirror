@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.39 2003/01/15 12:13:10 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.39 2003/01/15 12:13:10 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.40 2003/01/15 12:18:47 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.40 2003/01/15 12:18:47 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -49,7 +49,7 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
             path = [baseDir]
         else:
             path = list(baseDir)
-    path = filter(None,basDir)
+    path = filter(None,path)
 
     if noCWD:
         if '.' in path:
