@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/odyssey/odyssey.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/odyssey/odyssey.py,v 1.12 2003/09/11 21:43:20 andy_robinson Exp $
-__version__=''' $Id: odyssey.py,v 1.12 2003/09/11 21:43:20 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/odyssey/odyssey.py,v 1.13 2003/09/11 22:07:34 andy_robinson Exp $
+__version__=''' $Id: odyssey.py,v 1.13 2003/09/11 22:07:34 andy_robinson Exp $ '''
 ___doc__=''
 #odyssey.py
 #
@@ -72,7 +72,7 @@ def run(verbose=1):
     print 'Benchmark of %s %s %s' % (impl, verStr, accelStr)
 
     started = time.time()
-    canv = canvas.Canvas('odyssey.pdf')
+    canv = canvas.Canvas('odyssey.pdf', invariant=1)
     canv.setPageCompression(1)
     drawPageFrame(canv)
 
@@ -144,7 +144,9 @@ def run(verbose=1):
     fileSize = os.stat('odyssey.pdf')[6] / 1024
     print '%d pages in %0.2f seconds = %0.2f pages per second, file size %d kb' % (
                 pages, elapsed, speed, fileSize)
-
+    import md5
+    print 'file digest: %s' % md5.md5(open('odyssey.pdf','rb').read()).hexdigest()
+    
 if __name__=='__main__':
     quiet = ('-q' in sys.argv)
     run(verbose = not quiet)
