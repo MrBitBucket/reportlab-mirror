@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.41 2001/10/02 11:03:35 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.42 2001/10/03 11:12:59 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -70,9 +70,9 @@ class CategoryAxis(Widget):
 	"Abstract category axis, unusable in itself."
 	_nodoc = 1
 	_attrMap = AttrMap(
-		visible = AttrMapValue(isNumber, desc='Display entire object, if true.'),
-		visibleAxis = AttrMapValue(isNumber, desc='Display axis line, if true.'),
-		visibleTicks = AttrMapValue(isNumber, desc='Display axis ticks, if true.'),
+		visible = AttrMapValue(isBoolean, desc='Display entire object, if true.'),
+		visibleAxis = AttrMapValue(isBoolean, desc='Display axis line, if true.'),
+		visibleTicks = AttrMapValue(isBoolean, desc='Display axis ticks, if true.'),
 		strokeWidth = AttrMapValue(isNumber, desc='Width of axis line and ticks.'),
 		strokeColor = AttrMapValue(isColorOrNone, desc='Color of axis line and ticks.'),
 		strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array used for axis line.'),
@@ -439,34 +439,21 @@ class ValueAxis(Widget):
 	"Abstract value axis, unusable in itself."
 
 	_attrMap = AttrMap(
-		visible = AttrMapValue(isNumber,
-			desc='Display entire object, if true.'),
-		visibleAxis = AttrMapValue(isNumber,
-			desc='Display axis line, if true.'),
-		visibleTicks = AttrMapValue(isNumber,
-			desc='Display axis ticks, if true.'),
-		strokeWidth = AttrMapValue(isNumber,
-			desc='Width of axis line and ticks.'),
-		strokeColor = AttrMapValue(isColorOrNone,
-			desc='Color of axis line and ticks.'),
-		strokeDashArray = AttrMapValue(isListOfNumbersOrNone,
-			desc='Dash array used for axis line.'),
-		minimumTickSpacing = AttrMapValue(isNumber,
-			desc='Minimum value for distance between ticks.'),
-		maximumTicks = AttrMapValue(isNumber,
-			desc='Maximum number of ticks.'),
-		labels = AttrMapValue(None,
-			desc='Handle of the axis labels.'),
-		labelTextFormat = AttrMapValue(None,
-			desc='Formatting string or function used for axis labels.'),
-		valueMin = AttrMapValue(isNumberOrNone,
-			desc='Minimum value on axis.'),
-		valueMax = AttrMapValue(isNumberOrNone,
-			desc='Maximum value on axis.'),
-		valueStep = AttrMapValue(isNumberOrNone,
-			desc='Step size used between ticks.'),
-		valueSteps = AttrMapValue(isListOfNumbersOrNone,
-			desc='List of step sizes used between ticks.'),
+		forceZero = AttrMapValue(isBoolean, desc='Ensure zero in range if true.'),
+		visible = AttrMapValue(isBoolean, desc='Display entire object, if true.'),
+		visibleAxis = AttrMapValue(isBoolean, desc='Display axis line, if true.'),
+		visibleTicks = AttrMapValue(isBoolean, desc='Display axis ticks, if true.'),
+		strokeWidth = AttrMapValue(isNumber, desc='Width of axis line and ticks.'),
+		strokeColor = AttrMapValue(isColorOrNone, desc='Color of axis line and ticks.'),
+		strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array used for axis line.'),
+		minimumTickSpacing = AttrMapValue(isNumber, desc='Minimum value for distance between ticks.'),
+		maximumTicks = AttrMapValue(isNumber, desc='Maximum number of ticks.'),
+		labels = AttrMapValue(None, desc='Handle of the axis labels.'),
+		labelTextFormat = AttrMapValue(None, desc='Formatting string or function used for axis labels.'),
+		valueMin = AttrMapValue(isNumberOrNone, desc='Minimum value on axis.'),
+		valueMax = AttrMapValue(isNumberOrNone, desc='Maximum value on axis.'),
+		valueStep = AttrMapValue(isNumberOrNone, desc='Step size used between ticks.'),
+		valueSteps = AttrMapValue(isListOfNumbersOrNone, desc='List of step sizes used between ticks.'),
 		)
 
 	def __init__(self):
@@ -483,6 +470,7 @@ class ValueAxis(Widget):
 		self.visible = 1
 		self.visibleAxis = 1
 		self.visibleTicks = 1
+		self.forceZero = 0
 
 		self.strokeWidth = 1
 		self.strokeColor = STATE_DEFAULTS['strokeColor']
@@ -547,11 +535,19 @@ class ValueAxis(Widget):
 
 		valueMin = self.valueMin
 		if self.valueMin is None:
-			valueMin = _findMin(dataSeries,self._dataIndex,valueMin)
+			valueMin = _findMin(dataSeries,self._dataIndex,0)
 
 		valueMax = self.valueMax
 		if self.valueMax is None:
-			valueMax = _findMax(dataSeries,self._dataIndex,valueMax)
+			valueMax = _findMax(dataSeries,self._dataIndex,0)
+		if valueMin == valueMax:
+			if valueMax==0:
+				valueMax = 1
+			else:
+				valueMax = valueMin+1
+		elif self.forceZero:
+			if valueMax<0: valueMax=0
+			elif valueMin>0: valueMin = 0
 		self._valueMin, self._valueMax = (valueMin, valueMax)
 		self._rangeAdjust()
 
