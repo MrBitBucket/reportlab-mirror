@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/examples.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/Attic/examples.py,v 1.18 2001/03/16 14:51:50 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/Attic/examples.py,v 1.19 2001/08/02 15:40:36 dinu_gherman Exp $
 import string
 
 testannotations="""
@@ -450,6 +450,32 @@ def dashes(canvas):
     star(canvas, "Dots", "One on, two off")
     canvas.setDash([1,1,3,3,1,4,4,1], 0)
     star(canvas, "Complex Pattern", "[1,1,3,3,1,4,4,1]", xcenter=4.5*inch)
+"""
+
+testcustomfont1 = """
+def customfont1(canvas):
+    # we know some glyphs are missing, suppress warnings
+    import reportlab.rl_config
+    reportlab.rl_config.warnOnMissingFontGlyphs = 0
+
+    import os
+    import reportlab.test
+    folder = os.path.dirname(reportlab.test.__file__)
+    afmFile = os.path.join(folder, 'LeERC___.AFM')
+    pfbFile = os.path.join(folder, 'LeERC___.PFB')
+
+    from reportlab.pdfbase import pdfmetrics
+    justFace = pdfmetrics.EmbeddedType1Face(afmFile, pfbFile)
+    faceName = 'LettErrorRobot-Chrome' # pulled from AFM file
+    pdfmetrics.registerTypeFace(justFace)
+    justFont = pdfmetrics.Font('LettErrorRobot-Chrome',
+                               faceName,
+                               'WinAnsiEncoding')
+    pdfmetrics.registerFont(justFont)
+    
+    canvas.setFont('LettErrorRobot-Chrome', 32)
+    canvas.drawString(10, 150, 'This should be in')
+    canvas.drawString(10, 100, 'LettErrorRobot-Chrome')
 """
 
 testcursormoves1 = """

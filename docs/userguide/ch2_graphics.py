@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch2_graphics.py,v 1.13 2001/07/31 11:31:42 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch2_graphics.py,v 1.14 2001/08/02 15:40:36 dinu_gherman Exp $
 from genuserguide import *
 
 heading1("Graphics and Text with $pdfgen$")
@@ -625,7 +625,7 @@ and scoops layer over eachother as well.
 illust(examples.spumoni2, "building up a drawing in layers")
 
 
-heading2('Fonts and text objects')
+heading2('Standard fonts and text objects')
 
 disc("""
 Text may be drawn in many different colors, fonts, and sizes in $pdfgen$.
@@ -656,9 +656,88 @@ are guaranteed to be present in Acrobat Reader.
 illust(examples.fonts, "the 14 standard fonts")
 
 disc("""
-In the near future we will add the ability to embed other fonts
-within a PDF file.  However, this will add a little to file size.
+The next section explains how you can use arbitrary fonts,
+which will increase slightly the document size because these
+fonts need to be embedded in the document.
 """)
+
+heading2("Arbitrary fonts")
+
+disc("""
+You can use the following mechanism described below to include
+arbitrary fonts in your documents. Just van Rossum has kindly
+donated a font named <i>LettErrorRobot-Chrome</i> which we may
+use for testing/documenting purposes (and which you may use as
+well). It comes bundled with the ReportLab distribution in the
+directory reportlab/test.
+""")
+
+disc("""
+Right now font-embedding relies on font description files in
+the Adobe AFM and PFB format. The former is an ASCII file and
+contains font metrics information while the latter is a
+binary file that describes the shapes of the font. The
+reportlab/test directory contains the files 'LeERC___.AFM'
+and 'LeERC___.PFB' that are used as an example font.
+""")
+
+eg("""
+# we know some glyphs are missing, suppress warnings
+import reportlab.rl_config
+reportlab.rl_config.warnOnMissingFontGlyphs = 0
+
+import os
+import reportlab.test
+folder = os.path.dirname(reportlab.test.__file__)
+afmFile = os.path.join(folder, 'LeERC___.AFM')
+pfbFile = os.path.join(folder, 'LeERC___.PFB')
+
+from reportlab.pdfbase import pdfmetrics
+justFace = pdfmetrics.EmbeddedType1Face(afmFile, pfbFile)
+faceName = 'LettErrorRobot-Chrome' # pulled from AFM file
+pdfmetrics.registerTypeFace(justFace)
+justFont = pdfmetrics.Font('LettErrorRobot-Chrome',
+                           faceName,
+                           'WinAnsiEncoding')
+pdfmetrics.registerFont(justFont)
+
+canvas.setFont('LettErrorRobot-Chrome', 32)
+canvas.drawString(10, 150, 'This should be in')
+canvas.drawString(10, 100, 'LettErrorRobot-Chrome')
+""")
+
+illust(examples.customfont1, "Using a very non-standard font")
+
+disc("""
+The font's facename comes from the AFM file's FontName field.
+In the example above we knew the name in advance, but quite
+often the names of font description files are pretty cryptic
+and then you might want to retrieve the name from an AFM file
+automatically using some code like the following:
+""")
+
+eg("""
+class FontNameNotFoundError(Exception):
+    pass
+
+
+def findFontName(path):
+    "Extract a font name from an AFM file."
+
+    f = open(path)
+
+    found = 0
+    while not found:
+        line = f.readline()[:-1]
+        if not found and line[:16] == 'StartCharMetrics':
+            raise FontNameNotFoundError, path
+        if line[:8] == 'FontName':
+            fontName = line[9:]
+            found = 1
+
+    return fontName
+""")
+
 
 heading2("Text object methods")
 
