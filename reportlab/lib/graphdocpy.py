@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.9 2001/06/22 08:23:11 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/lib/Attic/graphdocpy.py,v 1.10 2001/06/27 15:01:01 dinu_gherman Exp $
 
 """Generate documentation of graphical Python objects.
 
@@ -64,6 +64,7 @@ except ImportError, errMsg:
 
 
 VERBOSE = 1
+VERIFY = 1
 
 ####################################################################
 # 
@@ -448,7 +449,8 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         # Ignored if no GD rendering available
         # or the demo method does not return a drawing.        
         try:
-            widget.verify()
+            if VERIFY:
+                widget.verify()
             drawing = widget.demo()
             flo = renderPDF.GraphicsFlowable(drawing)
             self.story.append(Spacer(6,6))
@@ -649,7 +651,8 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
         # or the demo method does not return a drawing.
         try:
             drawing = widget.demo()
-            widget.verify()
+            if VERIFY:
+                widget.verify()
             modName = self.skeleton.getModuleName()
             path = '%s-%s.jpg' % (modName, widget.__class__.__name__)
             renderPM.drawToFile(drawing, path, fmt='JPG')
