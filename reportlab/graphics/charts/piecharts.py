@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.7 2001/05/07 14:10:41 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.8 2001/05/08 14:28:03 dinu_gherman Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -13,16 +13,17 @@ This permits you to customize and pop out individual wedges;
 supports elliptical and circular pies.
 """
 
+import copy
 from math import sin, cos, pi
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isColor, isNumber, isListOfNumbersOrNone, isListOfNumbers, isColorOrNone, isString, isListOfStringsOrNone, OneOf, SequenceOf
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS
-from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
+from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 
 
-class WedgeFormatter(Widget):
+class WedgeProperties(PropHolder):
     """This holds descriptive information about the wedges in a pie chart.
     
     It is not to be confused with the 'wedge itself'; this just holds
@@ -33,6 +34,7 @@ class WedgeFormatter(Widget):
 
     _attrMap = {
         'strokeWidth':isNumber,
+        'fillColor':isColorOrNone,
         'strokeColor':isColorOrNone,
         'strokeDashArray':isListOfNumbersOrNone,
         'popout':isNumber,
@@ -44,6 +46,7 @@ class WedgeFormatter(Widget):
 
     def __init__(self):
         self.strokeWidth = 0
+        self.fillColor = None
         self.strokeColor = STATE_DEFAULTS["strokeColor"]
         self.strokeDashArray = STATE_DEFAULTS["strokeDashArray"]
         self.popout = 0
@@ -54,11 +57,6 @@ class WedgeFormatter(Widget):
 
 
 class Pie(Widget):
-    defaultColors = [colors.darkcyan,
-                     colors.blueviolet,
-                     colors.blue,
-                     colors.cyan]
-
     _attrMap = {
         'x':isNumber,
         'y':isNumber,
@@ -68,8 +66,7 @@ class Pie(Widget):
         'labels':isListOfStringsOrNone,
         'startAngle':isNumber,
         'direction': OneOf(('clockwise', 'anticlockwise')),
-        'wedges':None,   # could be improved,
-        'defaultColors':SequenceOf(isColor)
+        'defaultStyles':None
         }
     
     def __init__(self):
@@ -82,15 +79,16 @@ class Pie(Widget):
         self.startAngle = 90
         self.direction = "clockwise"
         
-        self.wedges = TypedPropertyCollection(WedgeFormatter)
-        # no need to change the defaults for a WedgeFormatter; if we did,
-        # we would do e.g.
-        #self.wedges.strokeColor = colors.blueviolet
-        
+        self.defaultStyles = TypedPropertyCollection(WedgeProperties)
+        self.defaultStyles[0].fillColor = colors.darkcyan
+        self.defaultStyles[1].fillColor = colors.blueviolet
+        self.defaultStyles[2].fillColor = colors.blue
+        self.defaultStyles[3].fillColor = colors.cyan
 
+        
     def demo(self):
         d = Drawing(200, 100)
-
+    
         pc = Pie()
         pc.x = 50
         pc.y = 10
@@ -99,18 +97,29 @@ class Pie(Widget):
         pc.data = [10,20,30,40,50,60]
         pc.labels = ['a','b','c','d','e','f']
 
-        pc.wedges.strokeWidth=0.5
-        pc.wedges[3].popout = 10
-        pc.wedges[3].strokeWidth = 2
-        pc.wedges[3].strokeDashArray = [2,2]
-        pc.wedges[3].labelRadius = 1.75
-        pc.wedges[3].fontColor = colors.red
+        pc.defaultStyles.strokeWidth=0.5
+        pc.defaultStyles[3].popout = 10
+        pc.defaultStyles[3].strokeWidth = 2
+        pc.defaultStyles[3].strokeDashArray = [2,2]
+        pc.defaultStyles[3].labelRadius = 1.75
+        pc.defaultStyles[3].fontColor = colors.red
+        pc.defaultStyles[0].fillColor = colors.darkcyan
+        pc.defaultStyles[1].fillColor = colors.blueviolet
+        pc.defaultStyles[2].fillColor = colors.blue
+        pc.defaultStyles[3].fillColor = colors.cyan
+        pc.defaultStyles[4].fillColor = colors.aquamarine
+        pc.defaultStyles[5].fillColor = colors.cadetblue
+        pc.defaultStyles[6].fillColor = colors.lightcoral
 
         d.add(pc)
         return d
 
 
     def draw(self):
+        ### ATTENTION: MUST USE defaultStyles[i % wedgeCount]
+        ### INSTEAD OF defaultStyles[i], OTHERWISE THE NUMBER
+        ### OF SLICES GETS CHANGED!!!
+
         # normalize slice data
         sum = 0.0
         for number in self.data:
@@ -124,7 +133,8 @@ class Pie(Widget):
             labels = [''] * len(normData)
         else:
             labels = self.labels
-        assert len(labels) == len(self.data), "Number of labels does not match number of data points!"
+        msg = "Number of labels does not match number of data points!"
+        assert len(labels) == len(self.data), msg
         
         xradius = self.width/2.0
         yradius = self.height/2.0
@@ -135,13 +145,13 @@ class Pie(Widget):
             whichWay = 1
         else:
             whichWay = -1
-        i = 0
-        colorCount = len(self.defaultColors)
-        
+
         g = Group()
+        i = 0
+        wedgeCount = len(self.defaultStyles)
+        
         startAngle = self.startAngle #% 360
         for angle in normData:
-            thisWedgeColor = self.defaultColors[i % colorCount]
             endAngle = (startAngle + (angle * whichWay)) #% 360
             if startAngle < endAngle:
                 a1 = startAngle
@@ -154,11 +164,11 @@ class Pie(Widget):
 
             # is it a popout?
             cx, cy = centerx, centery
-            if self.wedges[i].popout <> 0:
+            if self.defaultStyles[i % wedgeCount].popout <> 0:
                 # pop out the wedge
                 averageAngle = (a1+a2)/2.0
-                aveAngleRadians = averageAngle*pi/180.0
-                popdistance = self.wedges[i].popout
+                aveAngleRadians = averageAngle * pi/180.0
+                popdistance = self.defaultStyles[i % wedgeCount].popout
                 cx = centerx + popdistance * cos(aveAngleRadians)
                 cy = centery + popdistance * sin(aveAngleRadians)
 
@@ -167,10 +177,11 @@ class Pie(Widget):
             elif len(normData) == 1:
                 theWedge = Ellipse(cx, cy, xradius, yradius)
 
-            theWedge.fillColor = thisWedgeColor
-            theWedge.strokeColor = self.wedges[i].strokeColor
-            theWedge.strokeWidth = self.wedges[i].strokeWidth
-            theWedge.strokeDashArray = self.wedges[i].strokeDashArray
+            wedgeStyle = self.defaultStyles[i % wedgeCount]
+            theWedge.fillColor = wedgeStyle.fillColor
+            theWedge.strokeColor = wedgeStyle.strokeColor
+            theWedge.strokeWidth = wedgeStyle.strokeWidth
+            theWedge.strokeDashArray = wedgeStyle.strokeDashArray
 
             g.add(theWedge)
 
@@ -178,15 +189,15 @@ class Pie(Widget):
             if labels[i] <> "":
                 averageAngle = (a1+a2)/2.0
                 aveAngleRadians = averageAngle*pi/180.0
-                labelRadius = self.wedges[i].labelRadius
+                labelRadius = self.defaultStyles[i % wedgeCount].labelRadius
                 labelX = centerx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
                 labelY = centery + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
                 
                 theLabel = String(labelX, labelY, labels[i])
                 theLabel.textAnchor = "middle"
-                theLabel.fontSize = self.wedges[i].fontSize
-                theLabel.fontName = self.wedges[i].fontName
-                theLabel.fillColor = self.wedges[i].fontColor
+                theLabel.fontSize = self.defaultStyles[i % wedgeCount].fontSize
+                theLabel.fontName = self.defaultStyles[i % wedgeCount].fontName
+                theLabel.fillColor = self.defaultStyles[i % wedgeCount].fontColor
 
                 g.add(theLabel)
                 
@@ -206,7 +217,7 @@ def sample0a():
     pc.y = 50
     pc.data = [10]
     pc.labels = ['a']
-    pc.wedges.strokeWidth=0.5
+    pc.defaultStyles.strokeWidth=0.5
     
     d.add(pc)
 
@@ -225,7 +236,7 @@ def sample0b():
     pc.height = 100
     pc.data = [10]
     pc.labels = ['a']
-    pc.wedges.strokeWidth=0.5
+    pc.defaultStyles.strokeWidth=0.5
     
     d.add(pc)
 
@@ -243,12 +254,12 @@ def sample1():
     pc.data = [10, 20, 30, 40, 50, 60]
     pc.labels = ['a', 'b', 'c', 'd', 'e', 'f']
 
-    pc.wedges.strokeWidth=0.5
-    pc.wedges[3].popout = 20
-    pc.wedges[3].strokeWidth = 2
-    pc.wedges[3].strokeDashArray = [2,2]
-    pc.wedges[3].labelRadius = 1.75
-    pc.wedges[3].fontColor = colors.red
+    pc.defaultStyles.strokeWidth=0.5
+    pc.defaultStyles[3].popout = 20
+    pc.defaultStyles[3].strokeWidth = 2
+    pc.defaultStyles[3].strokeDashArray = [2,2]
+    pc.defaultStyles[3].labelRadius = 1.75
+    pc.defaultStyles[3].fontColor = colors.red
     
     d.add(pc)
 
@@ -270,19 +281,18 @@ def sample2():
 
     pc.width = 150
     pc.height = 150
-    pc.wedges.strokeWidth=0.5
+    pc.defaultStyles.strokeWidth=0.5
 
-    pc.defaultColors = [colors.steelblue,
-                  colors.thistle,
-                  colors.cornflower,
-                  colors.lightsteelblue,
-                  colors.aquamarine,
-                  colors.cadetblue,
-                  colors.lightcoral,
-                  colors.tan,
-                  colors.darkseagreen,
-                  colors.lightgoldenrodyellow
-                  ]
+    pc.defaultStyles[0].fillColor = colors.steelblue
+    pc.defaultStyles[1].fillColor = colors.thistle
+    pc.defaultStyles[2].fillColor = colors.cornflower
+    pc.defaultStyles[3].fillColor = colors.lightsteelblue
+    pc.defaultStyles[4].fillColor = colors.aquamarine
+    pc.defaultStyles[5].fillColor = colors.cadetblue
+    pc.defaultStyles[6].fillColor = colors.lightcoral
+    pc.defaultStyles[7].fillColor = colors.tan
+    pc.defaultStyles[8].fillColor = colors.darkseagreen
+
     d.add(pc)
 
     return d
@@ -301,7 +311,10 @@ def sample3():
 
     pc.width = 150
     pc.height = 150
-    pc.wedges.strokeWidth=0.5
+    pc.defaultStyles.strokeWidth=0.5
+    pc.defaultStyles[0].fillColor = colors.steelblue
+    pc.defaultStyles[1].fillColor = colors.thistle
+    pc.defaultStyles[2].fillColor = colors.cornflower
 
     d.add(pc)
 
@@ -321,7 +334,13 @@ def sample4():
 
     pc.width = 150
     pc.height = 150
-    pc.wedges.strokeWidth=0.5
+    pc.defaultStyles.strokeWidth=0.5
+    pc.defaultStyles[0].fillColor = colors.steelblue
+    pc.defaultStyles[1].fillColor = colors.thistle
+    pc.defaultStyles[2].fillColor = colors.cornflower
+    pc.defaultStyles[3].fillColor = colors.lightsteelblue
+    pc.defaultStyles[4].fillColor = colors.aquamarine
+    pc.defaultStyles[5].fillColor = colors.cadetblue
 
     d.add(pc)
 
