@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.34 2000/12/04 16:20:49 rgbecker Exp $
-__version__=''' $Id: paraparser.py,v 1.34 2000/12/04 16:20:49 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.35 2000/12/05 09:53:18 rgbecker Exp $
+__version__=''' $Id: paraparser.py,v 1.35 2000/12/05 09:53:18 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -517,7 +517,7 @@ if __name__=='__main__':
 	style.textColor = black
 	style.bulletFontName = black
 	style.bulletFontName='Times-Roman'
-		style.bulletFontSize=12
+	style.bulletFontSize=12
 
 	text='''
 	<b><i><greek>a</greek>D</i></b>&beta;
