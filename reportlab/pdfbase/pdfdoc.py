@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.77 2003/02/03 20:42:38 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.77 2003/02/03 20:42:38 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.78 2003/02/06 21:12:21 andy_robinson Exp $
+__version__=''' $Id: pdfdoc.py,v 1.78 2003/02/06 21:12:21 andy_robinson Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -1485,7 +1485,10 @@ class Destination:
 class PDFDestinationXYZ:
     typename = "XYZ"
     def __init__(self, page, left, top, zoom):
-        self.page = page; self.top=top; self.zoom=zoom
+        self.page = page
+        self.top = top
+        self.zoom = zoom
+        self.left = left
     def format(self, document):
         pageref = document.Reference(self.page)
         A = PDFArray( [ pageref, PDFName(self.typename), self.left, self.top, self.zoom ] )
