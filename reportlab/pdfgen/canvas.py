@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.111 2003/04/10 00:01:17 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.111 2003/04/10 00:01:17 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.112 2003/05/30 09:46:23 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.112 2003/05/30 09:46:23 rgbecker Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -429,13 +429,13 @@ class Canvas:
         is to keep the user's current zoom settings. the last
         arguments may or may not be needed depending on the
         choice of 'fitType'.
-        
+
         Fit types and the other arguments they use are:
         /XYZ left top zoom - fine grained control.  null
           or zero for any of the parameters means 'leave
           as is', so "0,0,0" will keep the reader's settings.
           NB. Adobe Reader appears to prefer "null" to 0's.
-          
+
         /Fit - entire page fits in window
 
         /FitH top - top coord at top of window, width scaled
@@ -443,7 +443,7 @@ class Canvas:
 
         /FitV left - left coord at left of window, height
                      scaled to fit
-                     
+
         /FitR left bottom right top - scale window to fit
                                   the specified rectangle
 
@@ -464,7 +464,7 @@ class Canvas:
             right = "null"
         if zoom is None:
             zoom = "null"
-        
+
         if fitType == "XYZ":
             dest.xyz(left,top,zoom)
         elif fitType == "Fit":
@@ -483,7 +483,7 @@ class Canvas:
         elif fitType == "FitBV":
             dest.fitbv(left)
         else:
-            raise "Unknown Fit type %s" % (fitType,)           
+            raise "Unknown Fit type %s" % (fitType,)
 
         dest.setPage(pageref)
         return dest
@@ -498,7 +498,7 @@ class Canvas:
            the page."""
         #This method should probably be deprecated since it is just a sub-set of bookmarkPage
         return self.bookmarkPage(key,fitType="FitH",top=yhorizontal)
-                    
+
     def bookmarkHorizontal(self, key, relativeX, relativeY):
         """w.r.t. the current transformation, bookmark this horizontal."""
         (xt, yt) = self.absolutePosition(relativeX,relativeY)
@@ -829,7 +829,6 @@ class Canvas:
         assert rot % 90.0 == 0.0, "Rotation must be a multiple of 90 degrees"
         self._pageRotation = rot
 
-        
     def addLiteral(self, s, escaped=1):
         """introduce the literal text of PDF operations s into the current stream.
            Only use this if you are an expert in the PDF file format."""
