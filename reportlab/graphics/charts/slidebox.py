@@ -135,13 +135,13 @@ class SlideBox(Widget):
                    strokeWidth=self.boxOutlineWidth,
                    fillColor=None))
 
-            g.add(String(x+self.boxWidth/2.,(self.boxHeight-ascent)/2.),
+            g.add(String(x+self.boxWidth/2.,(self.boxHeight-ascent)/2.,
                    text = str(f+1),
                    fillColor = self.labelFillColor,
                    strokeColor=self.labelStrokeColor,
                    textAnchor = 'middle',
                    fontName = self.labelFontName,
-                   fontSize = self.labelFontSize)
+                   fontSize = self.labelFontSize))
             x=x+self.boxWidth+self.boxSpacing
 
         #do triangles
