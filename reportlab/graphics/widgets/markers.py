@@ -187,9 +187,9 @@ def makeMarker(name):
 	if Marker._attrMap['kind'].validate(name):
 		m = Marker()
 		m.kind = name
-	elif Flag._attrMap['kind'].validate(name):
+	elif name[-5:]=='_Flag' and Flag._attrMap['kind'].validate(name[:-5]):
 		m = Flag()
-		m.kind = name
+		m.kind = name[:-5]
 		m.size = 10
 	else:
 		raise ValueError, "Invalid marker name %s" % name
