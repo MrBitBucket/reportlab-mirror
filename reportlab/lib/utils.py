@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.60 2004/03/17 14:35:51 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.60 2004/03/17 14:35:51 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.61 2004/03/17 18:54:06 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.61 2004/03/17 18:54:06 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -391,18 +391,18 @@ class ImageReader:
         self._height = None
         self._transparent = None
         self._data = None
+        if type(fileName) is type(''):
+            fp = open_for_read(fileName,'b')
+        else:
+            fp = fileName
 
         #detect which library we are using and open the image
         if sys.platform[0:4] == 'java':
             from javax.imageio import ImageIO
-            if type(fileName) is type(''):
-                fp = open(fileName,'rb')
-            else:
-                fp = fileName
             self._image = ImageIO.read(fp)
         else:
             import PIL.Image
-            self._image = PIL.Image.open(fileName)
+            self._image = PIL.Image.open(fp)
 
     def getSize(self):
         if (self._width is None or self._height is None):
