@@ -29,6 +29,7 @@ def pfxJoin(pfx,*N):
 FT_LIB='C:/Python/devel/freetype-2.1.5/objs/freetype214.lib'
 FT_INCLUDE=None
 def check_ft_lib(ft_lib=FT_LIB):
+	if sys.hexversion<0x20000a0: return ''
 	return os.path.isfile(ft_lib) and ft_lib or ''
 
 def main():
@@ -98,7 +99,7 @@ def main():
 										libraries=LIBS+FT_LIB,
 										#extra_objects=['gt1.lib','libart.lib',],
 										#extra_compile_args=['/Z7'],
-										#extra_link_args=['/debug']
+										extra_link_args=[]
 										),
 							],
 			)
