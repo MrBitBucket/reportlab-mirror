@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.35 2001/04/23 11:48:46 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.36 2001/04/23 13:34:45 rgbecker Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -144,6 +144,19 @@ class TypeFace:
         We presume they never change so this can be a shared reference."""
         self.glyphWidths = _fontdata.widthsByFontGlyph[name]
         self.glyphNames = self.glyphWidths.keys()
+
+    def findT1File(self,ext='.pfb'):
+        if hasattr(self,'pfbFileName'):
+            r = self.splitext(self.pfbFileName)[0] + ext
+            if os.path.isfile(r): return r
+        try:
+            r = _fontdata.findT1File(self.name)
+        except:
+            r = None
+        if r is None:
+            warnOnce("Can't find %s for face '%s'" % (ext, self.name))
+        return r
+
 
 #for faceName in _fontdata.standardFonts:
 #    registerTypeFace(TypeFace(faceName))
@@ -348,8 +361,8 @@ class EmbeddedType1Face(TypeFace):
     Its glyph data will be embedded in the PDF file."""
     def __init__(self, afmFileName, pfbFileName):
         # ignore afm file for now
-        self.afmFileName = afmFileName
-        self.pfbFileName = pfbFileName
+        self.afmFileName = os.path.abspath(afmFileName)
+        self.pfbFileName = os.path.abspath(pfbFileName)
         self.requiredEncoding = None
         self._loadGlyphs(pfbFileName)
         self._loadMetrics(afmFileName)
