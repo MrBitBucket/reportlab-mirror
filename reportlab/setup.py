@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2003
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/setup.py,v 1.9 2003/04/15 07:52:36 jvr Exp $
-__version__=''' $Id: setup.py,v 1.9 2003/04/15 07:52:36 jvr Exp $ '''
+#$Header: /tmp/reportlab/reportlab/setup.py,v 1.10 2003/10/26 09:39:58 rgbecker Exp $
+__version__=''' $Id: setup.py,v 1.10 2003/10/26 09:39:58 rgbecker Exp $ '''
 
 import os, sys, distutils
 from distutils.core import setup, Extension
@@ -17,9 +17,36 @@ def package_home(globals_dict):
     return r
 
 pjoin = os.path.join
-
 package_path = pjoin(package_home(distutils.__dict__), 'reportlab')
 
+def get_version():
+    #determine Version
+    if __name__=='__main__':
+        HERE=os.path.dirname(sys.argv[0])
+    else:
+        HERE=os.path.dirname(__file__)
+
+    #first try source
+    FN = pjoin(HERE,'__init__')
+    try:
+        for l in open(pjoin(FN+'.py'),'r').readlines():
+            if l.startswith('Version'):
+                exec l
+                return Version
+    except:
+        pass
+
+    #don't have source, try import
+    import imp
+    for desc in ('.pyc', 'rb', 2), ('.pyo', 'rb', 2):
+        try:
+            fn = FN+desc[0]
+            f = open(fn,desc[1])
+            m = imp.load_module('reportlab',f,fn,desc)
+            return m.Version
+        except:
+            pass
+    raise ValueError('Cannot determine ReportLab Version')
 
 # why oh why don't most setup scripts have a script handler?
 # if you don't have one, you can't edit in Pythonwin
@@ -27,7 +54,7 @@ def run():
     LIBS = []
     setup(
             name="Reportlab",
-            version="1.17",
+            version=get_version(),
             licence="BSD license (see license.txt for details), Copyright (c) 2000-2003, ReportLab Inc.",
             description="The Reportlab Toolkit",
             long_description="""The ReportLab Toolkit.
