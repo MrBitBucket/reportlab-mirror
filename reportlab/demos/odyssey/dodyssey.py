@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/odyssey/dodyssey.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/odyssey/dodyssey.py,v 1.14 2003/09/11 22:27:09 andy_robinson Exp $
-__version__=''' $Id: dodyssey.py,v 1.14 2003/09/11 22:27:09 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/odyssey/dodyssey.py,v 1.15 2003/09/11 22:35:32 andy_robinson Exp $
+__version__=''' $Id: dodyssey.py,v 1.15 2003/09/11 22:35:32 andy_robinson Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -19,6 +19,9 @@ if _NEW_PARA:
 from reportlab.lib.units import inch
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
+
+import reportlab.rl_config
+reportlab.rl_config.invariant = 1
 
 styles = getSampleStyleSheet()
 
@@ -41,7 +44,6 @@ def go():
         canv = apply(Canvas,(fn,),kw)
         # attach our callback to the canvas
         canv.myOnDrawCB = myOnDrawCB
-        canv.invariant = 1
         return canv
 
     doc = BaseDocTemplate('dodyssey.pdf',showBoundary=0)
