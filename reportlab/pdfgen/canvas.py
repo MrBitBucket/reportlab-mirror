@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.16  2000/03/22 16:27:45  andy_robinson
+#	Added CMYK color methods
+#
 #	Revision 1.15  2000/03/10 21:46:04  andy_robinson
 #	fixed typo in setDash
-#
+#	
 #	Revision 1.14  2000/03/08 13:40:03  andy_robinson
 #	Canvas has two methods setFillColor(aColor) and setStrokeColor(aColor)
 #	which accepts color objects directly.
@@ -75,7 +78,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.15 2000/03/10 21:46:04 andy_robinson Exp $ '''
+__version__=''' $Id: canvas.py,v 1.16 2000/03/22 16:27:45 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -580,6 +583,16 @@ class Canvas:
         """Takes 3 arguments between 0.0 and 1.0"""
         self._strokeColorRGB = (r, g, b)
         self._code.append('%0.2f %0.2f %0.2f RG' % (r,g,b))
+
+    def setFillColorCMYK(self, c, m, y, k):
+        """Takes 4 arguments between 0.0 and 1.0"""
+        self._fillColorCMYK = (c, m, y, k)
+        self._code.append('%0.2f %0.2f %0.2f %0.2f k' % (c, m, y, k))
+        
+    def setStrokeColorCMYK(self, c, m, y, k):
+        """Takes 4 arguments between 0.0 and 1.0"""
+        self._strokeColorCMYK = (c, m, y, k)
+        self._code.append('%0.2f %0.2f %0.2f %0.2f K' % (c, m, y, k))
 
     def setFillColor(self, aColor):
         """Takes a color object, allowing colors to be referred to by name"""
