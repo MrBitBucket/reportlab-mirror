@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.23 2003/07/30 16:55:26 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.24 2003/11/09 13:59:54 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.23 2003/07/30 16:55:26 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.24 2003/11/09 13:59:54 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,7 +31,7 @@ static char* __version__=" $Id: pyRXP.c,v 1.23 2003/07/30 16:55:26 rgbecker Exp 
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "0.99"
+#define VERSION "1.00"
 #define MAX_DEPTH 256
 
 #if CHAR_SIZE==16
@@ -729,6 +729,7 @@ static PyObject* pyRXPParser_parse(pyRXPParserObject* xself, PyObject* args, PyO
 	char		errBuf[512];
 	ParserDetails	CB;
 	Parser		p;
+	Entity		e;
 	pyRXPParserObject	dummy = *xself;
 	pyRXPParserObject*	self = &dummy;
 	if(self->warnCB) Py_INCREF(self->warnCB);
@@ -783,10 +784,11 @@ static PyObject* pyRXPParser_parse(pyRXPParserObject* xself, PyObject* args, PyO
 	f = MakeFILE16FromString(src,srcLen,"r");
 	source = SourceFromFILE16(PyString_AsString(self->srcName),f);
 	retVal = ProcessSource(p,source);
-	FreeEntity(source->entity);
+	e = source->entity; /*used during FreeParser closing source!*/
 	Fclose(Stderr);
 	FreeDtd(p->dtd);
 	FreeParser(p);
+	FreeEntity(e);
 	deinit_parser();
 L_1:
 	Py_XDECREF(self->warnCB);
