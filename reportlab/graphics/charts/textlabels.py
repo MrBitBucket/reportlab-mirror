@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.10 2001/07/04 15:02:28 uid22986 Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.11 2001/09/11 16:06:48 johnprecedo Exp $
 import string
 
 from reportlab.lib import colors
@@ -130,6 +130,8 @@ class Label(Widget):
 
 
 	def draw(self):
+		if self._text == None:
+			self._text = '' # hack, but it works for now...
 		self.computeSize()
 		g = Group()
 		g.translate(self.x + self.dx, self.y + self.dy)
