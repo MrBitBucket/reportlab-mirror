@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: textobject.py,v $
+#	Revision 1.14  2000/08/01 05:22:23  andy_robinson
+#	Updated old doc string
+#
 #	Revision 1.13  2000/07/28 00:00:42  rgbecker
 #	Bernhard herzog inspired fixes
-#
+#	
 #	Revision 1.12  2000/04/11 15:41:04  rgbecker
 #	Added _setFont for use in layout
 #	
@@ -69,7 +72,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: textobject.py,v 1.13 2000/07/28 00:00:42 rgbecker Exp $ '''
+__version__=''' $Id: textobject.py,v 1.14 2000/08/01 05:22:23 andy_robinson Exp $ '''
 __doc__=""" 
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -86,16 +89,15 @@ from reportlab.lib.colors import ColorType
 _SeqTypes=(TupleType,ListType)
 
 class PDFTextObject:
-    """PDF logically separates text and graphics drawing; you can
-    change the coordinate systems for text and graphics independently.
-    If you do drawings while in text mode, they appear in the right places
-    on the page in Acrobat Reader, bur when you export Postscript to
-    a printer the graphics appear relative to the text coordinate
-    system.  I regard this as a bug in how Acrobat exports to PostScript,
-    but this is the workaround.  It forces the user to separate text
-    and graphics.  To output text, ask te canvas for a text object
-    with beginText(x, y).  Do not construct one directly. It keeps
-    track of x and y coordinates relative to its origin."""
+    """PDF logically separates text and graphics drawing; text
+    operations need to be bracketed between BT (Begin text) and
+    ET operators. This class ensures text operations are
+    properly encapusalted. Ask the canvas for a text object
+    with beginText(x, y).  Do not construct one directly. 
+    Do not use multiple text objects in parallel; PDF is
+    not multi-threaded!
+    
+    It keeps track of x and y coordinates relative to its origin."""
     def __init__(self, canvas, x=0,y=0):
         self._code = ['BT']    #no point in [] then append RGB
         self._canvas = canvas  #canvas sets this so it has access to size info
