@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.33 2000/11/08 10:55:37 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.33 2000/11/08 10:55:37 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.34 2001/02/02 21:42:39 aaron_watters Exp $
+__version__=''' $Id: pdfdoc.py,v 1.34 2001/02/02 21:42:39 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -101,6 +101,9 @@ def format(element, document, toplevel=0):
 def indent(s, IND=LINEEND+" "):
     return string.replace(s, LINEEND, IND)
 
+def formName(externalname):
+    return "FormXob.%s" % externalname
+
 ### the global document structure manager
 
 class PDFDocument:
@@ -109,7 +112,7 @@ class PDFDocument:
     # set this to define filters 
     defaultStreamFilters = None
     pageCounter = 1
-    def __init__(self, encoding=DEFAULT_ENCODING, dummyoutline=0):
+    def __init__(self, encoding=DEFAULT_ENCODING, dummyoutline=0, doFonts=1):
         #self.defaultStreamFilters = [PDFBase85Encode, PDFZCompress] # for testing!
         #self.defaultStreamFilters = [PDFZCompress] # for testing!
         assert encoding in ['MacRomanEncoding',
@@ -138,14 +141,16 @@ class PDFDocument:
         self.Outlines = self.outline = outlines
         cat.Outlines = outlines
         self.info = self.Info = PDFInfo()
-        self.Reference(self.Catalog)
-        self.Reference(self.Info)
+        #self.Reference(self.Catalog)
+        #self.Reference(self.Info)
         # make std fonts (this could be made optional
         self.fontMapping = {}
-        MakeStandardEnglishFontObjects(self, encoding)
+        if doFonts: MakeStandardEnglishFontObjects(self, encoding)
 
     def SaveToFile(self, filename, canvas):
         # prepare outline
+        self.Reference(self.Catalog)
+        self.Reference(self.Info)
         outline = self.outline
         outline.prepare(self, canvas)
         from types import StringType
@@ -195,15 +200,15 @@ class PDFDocument:
         self.pageCounter = self.pageCounter+1
         self.inObject = None
 
-    def formName(self, externalname):
-        return "FormXob.%s" % externalname
+    #def formName(self, externalname):  # made externally available
+    #    return "FormXob.%s" % externalname
     
     def addForm(self, name, form):
         """add a Form XObject."""
         # XXX should check that name is a legal PDF name
         if self.inObject != "form":
             self.inForm()
-        self.Reference(form, self.formName(name))
+        self.Reference(form, formName(name))
         self.inObject = None
 
     def annotationName(self, externalname):
@@ -289,7 +294,7 @@ class PDFDocument:
     
     def hasForm(self, name):
         """test for existence of named form"""
-        internalname = self.formName(name)
+        internalname = formName(name)
         try:
             test = self.idToObject[internalname]          
         except:
@@ -302,7 +307,7 @@ class PDFDocument:
            from a list of form names (images not yet supported)"""
         D = {}
         for name in formnames:
-            internalname = self.formName(name)
+            internalname = formName(name)
             reference = PDFObjectReference(internalname)
             D[internalname] = reference
         #print "xobjDict D", D
@@ -333,6 +338,7 @@ class PDFDocument:
         if idToObject.has_key(name):
             raise ValueError, "redefining named object: "+repr(name)
         object.__InternalName__ = name
+        #print "name", name, "counter", objectcounter
         self.idToObjectNumberAndVersion[name] = (objectcounter, 0)
         self.numberToId[objectcounter] = name
         idToObject[name] = object
@@ -353,6 +359,7 @@ def PDFString(str):
     
 def PDFName(data):
     # might need to change this to class for encryption
+    #  NOTE: RESULT MUST ALWAYS SUPPORT MEANINGFUL COMPARISONS (EQUALITY)
     # first convert the name
     ldata = list(data)
     index = 0
@@ -454,13 +461,16 @@ class PDFStream:
         self.filters = None
     def format(self, document):
         dictionary = self.dictionary
+        # copy it for modification
+        dictionary = PDFDictionary(dictionary.dict.copy())
         content = self.content
         filters = self.filters
         if self.content is None:
             raise ValueError, "stream content not set"
         if filters is None:
             filters = document.defaultStreamFilters
-        if filters is not None:
+        # only apply filters if they haven't been applied elsewhere
+        if filters is not None and not dictionary.has_key("Filters"):
             # apply filters in reverse order listed
             rf = list(filters)
             rf.reverse()
@@ -475,10 +485,11 @@ class PDFStream:
             #stop
             dictionary["Filter"] = PDFArray(fnames)
         fc = format(content, document)
-        #print "type(content)", type(content)
+        #print "type(content)", type(content), len(content), type(self.dictionary)
+        lc = len(content)
         #if fc!=content: burp
         # set dictionary length parameter
-        dictionary["Length"] = len(content)
+        dictionary["Length"] = lc
         fd = format(dictionary, document)
         sdict = LINEENDDICT.copy()
         sdict["dictionary"] = fd
