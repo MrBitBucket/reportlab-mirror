@@ -6,7 +6,6 @@ __version__=''' $Id$ '''
 import os, sys, distutils
 from distutils.core import setup, Extension
 
-
 # from Zope - App.Common.package_home
 
 def package_home(globals_dict):
@@ -47,9 +46,45 @@ def get_version():
             pass
     raise ValueError('Cannot determine ReportLab Version')
 
+def _find_rl_accel():
+    '''locate where the accelerator code lives'''
+    _ = []
+    for x in '../rl_addons/rl_accel','./rl_addons/rl_accel','./rl_accel','./lib':
+        if os.path.isfile(os.path.join(x,'_rl_accel.c')):
+            _.append(x)
+    if _:
+        if len(_)>1:
+            raise ValueError('Detected multiple locations for the accelerator code ie %s' % _)
+        return _[0]
+    return None
+
 # why oh why don't most setup scripts have a script handler?
 # if you don't have one, you can't edit in Pythonwin
 def run():
+    EXT_MODULES = RL_ACCEL and [Extension( '_rl_accel',
+                                [RL_ACCEL+'/_rl_accel.c'],
+                                include_dirs=[],
+                            define_macros=[],
+                            library_dirs=[],
+                            libraries=LIBS, # libraries to link against
+                            ),
+                 Extension( 'sgmlop',
+                            [RL_ACCEL+'/sgmlop.c'],
+                            include_dirs=[],
+                            define_macros=[],
+                            library_dirs=[],
+                            libraries=LIBS, # libraries to link against
+                            ),
+                 Extension( 'pyHnj',
+                            [RL_ACCEL+'lib/pyHnjmodule.c',
+                             RL_ACCEL+'hyphen.c',
+                             RL_ACCEL+'hnjalloc.c'],
+                            include_dirs=[],
+                            define_macros=[],
+                            library_dirs=[],
+                            libraries=LIBS, # libraries to link against
+                            ),
+                ] or []
     LIBS = []
     setup(
             name="Reportlab",
@@ -181,31 +216,7 @@ An Open Source Python library for generating PDFs and graphics.
 
                             ],
 
-            ext_modules =   [Extension( '_rl_accel',
-                                        ['lib/_rl_accel.c'],
-                                        include_dirs=[],
-                                        define_macros=[],
-                                        library_dirs=[],
-                                        libraries=LIBS, # libraries to link against
-                                        ),
-                             Extension( 'sgmlop',
-                                        ['lib/sgmlop.c'],
-                                        include_dirs=[],
-                                        define_macros=[],
-                                        library_dirs=[],
-                                        libraries=LIBS, # libraries to link against
-                                        ),
-                             Extension( 'pyHnj',
-                                        ['lib/pyHnjmodule.c',
-                                         'lib/hyphen.c',
-                                         'lib/hnjalloc.c'],
-                                        include_dirs=[],
-                                        define_macros=[],
-                                        library_dirs=[],
-                                        libraries=LIBS, # libraries to link against
-                                        ),
-                            ],
-
+            ext_modules =   EXT_MODULES,
         )
 
 if __name__=='__main__':

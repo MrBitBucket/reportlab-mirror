@@ -1,6 +1,6 @@
 /*
  * SGMLOP
- * $Id: sgmlop.c,v 1.1 2000/08/01 10:50:20 rgbecker Exp $
+ * $Id$
  *
  * The sgmlop accelerator module
  *
