@@ -17,7 +17,10 @@ def moduleClasses(mod):
 def getclass(f):
     return moduleClasses(__import__(f))
 
-def run(format):
+def run(format, VERBOSE=0):
+    formats = string.split(format, ',')
+    for i in range(0, len(formats)):
+        formats[i] == string.lower(string.strip(formats[i]))
     allfiles = glob.glob('*.py')
     allfiles.sort()
     for fn in allfiles:
@@ -26,13 +29,32 @@ def run(format):
         if c != None:
             print c.__name__
             try:
-                c().save(formats=[format],outDir='.',fnRoot=c.__name__)
+                for f in formats:
+                    if f:
+                        c().save(formats=[f],outDir='.',fnRoot=c.__name__)
+                        if VERBOSE:
+                            print "  %s.%s" % (c.__name__, f)
             except:
-                print " COULDN'T CREATE '%s.%s'!" % (c.__name__, format)
+                print "  COULDN'T CREATE '%s.%s'!" % (c.__name__, format)
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print 'usage: runall.py FORMAT'
-        print '  (where format one of pdf,gif,eps,png etc.)'
+    if len(sys.argv) == 1:
+        run('pdf,pict,png')
     else:
-        run(sys.argv[1])
+        try:
+            if sys.argv[1] == "-h":
+                print 'usage: runall.py [FORMAT] [-h]'
+                print '   if format is supplied is should be one or more of pdf,gif,eps,png etc'
+                print '   if format is missing the following formats are assumed: pdf,pict,png'
+                print '   -h prints this message'
+            else:
+                t = sys.argv[1:]
+                for f in t:
+                    run(f)
+        except:
+            print 'usage: runall.py [FORMAT][-h]'
+            print '   if format is supplied is should be one or more of pdf,gif,eps,png etc'
+            print '   if format is missing the following formats are assumed: pdf,pict,png'
+            print '   -h prints this message'
+            raise
+            
