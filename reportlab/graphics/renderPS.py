@@ -193,6 +193,7 @@ class PSCanvas:
 
     def line(self, x1, y1, x2, y2):
         if self._strokeColor != None:
+            self.setColor(self._strokeColor)
             self.code.append('%s m %s l stroke' % (fp_str(x1, y1), fp_str(x2, y2)))
 
     def _escape(self, s):
@@ -231,7 +232,7 @@ class PSCanvas:
                 self.code.append('grestore')
 
     def drawCentredString(self, x, y, text, text_anchor='middle'):
-        if self.fillColor is not None:
+        if self._fillColor is not None:
             textLen = stringWidth(text, self._font,self._fontSize)
             if text_anchor=='end':
                 x = x-textLen
