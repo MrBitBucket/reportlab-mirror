@@ -3,6 +3,11 @@
 #include <ctype.h>
 #include <math.h>
 
+#if defined(macintosh)
+#	include <extras.h>
+#	define strdup _strdup
+#endif
+
 #include "libart_lgpl/art_bpath.h"
 
 
