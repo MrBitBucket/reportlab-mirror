@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.27 2001/06/13 06:19:14 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.28 2001/06/27 14:31:50 dinu_gherman Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -456,7 +456,7 @@ class ValueAxis(Widget):
         valueMin = AttrMapValue(isNumberOrNone),
         valueMax = AttrMapValue(isNumberOrNone),
         valueStep = AttrMapValue(isNumberOrNone),
-        valueSteps = AttrMapValue(isListOfNumbers),
+        valueSteps = AttrMapValue(isListOfNumbersOrNone),
         )
 
     def __init__(self):
@@ -579,7 +579,7 @@ class ValueAxis(Widget):
         Returns a list of numbers.
         """
 
-        if hasattr(self, 'valueSteps'): 
+        if hasattr(self, 'valueSteps') and self.valueSteps: 
             self._tickValues = self.valueSteps
             return self._tickValues
 
