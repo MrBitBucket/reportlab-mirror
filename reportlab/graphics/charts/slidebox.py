@@ -141,7 +141,7 @@ class SlideBox(Widget):
                    strokeColor=self.labelStrokeColor,
                    textAnchor = 'middle',
                    fontName = self.labelFontName,
-                   fontSize = self.labelFontSize))
+                   fontSize = self.labelFontSize)
             x=x+self.boxWidth+self.boxSpacing
 
         #do triangles
