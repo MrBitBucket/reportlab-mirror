@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/testshapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.17 2002/07/24 19:56:36 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.18 2003/11/08 18:40:09 rgbecker Exp $
 
 # testshapes.py - draws shapes onto a PDF canvas.
 
@@ -29,6 +29,7 @@ from reportlab.graphics.shapes import *
 from reportlab.graphics.renderPDF import _PDFRenderer
 from reportlab.test import unittest
 
+_FONTS = ['Times-Roman','Courier','Times-BoldItalic',]
 
 #########################################################
 #
@@ -115,12 +116,12 @@ def getDrawing03():
         D.add(String(10+size*2,
                      10+size*2,
                      'Hello World',
-                     fontName='Times-Roman',
+                     fontName=_FONTS[0],
                      fontSize=size))
 
     D.add(String(150, 150,
                  'Hello World',
-                 fontName='Courier',
+                 fontName=_FONTS[1],
                  fontSize=36))
     return D
 
@@ -297,7 +298,7 @@ def getDrawing09():
     just makes sure strings get transformed the same way as regular graphics."""
     D = Drawing(400, 200)
 
-    fontName = "Times-Roman"
+    fontName = _FONTS[0]
     fontSize = 12
     text = "I should be totally horizontal and enclosed in a box"
     textWidth = stringWidth(text, fontName, fontSize)
@@ -326,7 +327,7 @@ def getDrawing10():
     Each box should be staggered up and to the right, moving by 25 points each time."""
     D = Drawing(400, 200)
 
-    fontName = "Times-Roman"
+    fontName = _FONTS[0]
     fontSize = 12
 
     g1 = Group(
@@ -423,11 +424,11 @@ def writePDF(drawings):
 
     pdfPath = os.path.splitext(sys.argv[0])[0] + '.pdf'
     c = Canvas(pdfPath)
-    c.setFont('Times-Roman', 32)
+    c.setFont(_FONTS[0], 32)
     c.drawString(80, 750, 'ReportLab Graphics-Shapes Test')
 
     # Print drawings in a loop, with their doc strings.
-    c.setFont('Times-Roman', 12)
+    c.setFont(_FONTS[0], 12)
     y = 740
     i = 1
     for (drawing, docstring, funcname) in drawings:
@@ -436,9 +437,9 @@ def writePDF(drawings):
             y = 740
         # Draw a title.
         y = y - 30
-        c.setFont('Times-BoldItalic',12)
+        c.setFont(_FONTS[2],12)
         c.drawString(80, y, '%s (#%d)' % (funcname, i))
-        c.setFont('Times-Roman',12)
+        c.setFont(_FONTS[0],12)
         y = y - 14
         textObj = c.beginText(80, y)
         textObj.textLines(docstring)
