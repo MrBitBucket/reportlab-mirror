@@ -73,6 +73,7 @@ class BarChart(PlotArea):
         fillColor = getattr(style, 'fillColor', getattr(baseStyle,'fillColor',None))
         strokeDashArray = getattr(style, 'strokeDashArray', getattr(baseStyle,'strokeDashArray',None))
         strokeWidth = getattr(style, 'strokeWidth', getattr(style, 'strokeWidth',None))
+        swatchMarker = getattr(style, 'swatchMarker', getattr(baseStyle, 'swatchMarker',None))
         if swatchMarker:
             return uSymbol2Symbol(swatchMarker,x+width/2.,y+height/2.,fillColor)
         return Rect(x,y,width,height,strokeWidth=strokeWidth,strokeColor=strokeColor,
