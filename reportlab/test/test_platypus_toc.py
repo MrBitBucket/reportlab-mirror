@@ -161,9 +161,7 @@ class TocTestCase(unittest.TestCase):
 
 def makeSuite():
     suite = unittest.TestSuite()
-    
     suite.addTest(TocTestCase('test1'))
-
     return suite
 
 
