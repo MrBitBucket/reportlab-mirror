@@ -1,9 +1,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.40 2000/12/11 00:40:57 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.40 2000/12/11 00:40:57 rgbecker Exp $ '''
-import string
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.41 2000/12/13 16:20:24 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.41 2000/12/13 16:20:24 rgbecker Exp $ '''
+from string import split, strip, join
+from operator import truth
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus.paraparser import ParaParser
@@ -40,32 +41,40 @@ class FragLine(ABag):
 # XXXXX if the parser has any internal state using only one is probably a BAD idea!
 _parser=ParaParser()
 
+def _lineClean(L):
+	return join(filter(truth,split(strip(L))))
+
 def cleanBlockQuotedText(text,joiner=' '):
 	"""This is an internal utility which takes triple-
 	quoted text form within the document and returns
 	(hopefully) the paragraph the user intended originally."""
-	stripped = string.strip(text)
-	lines = string.split(stripped, '\n')
-	trimmed_lines = map(string.lstrip, lines)
-	return string.join(trimmed_lines, joiner)
+	L = map(_lineClean, split(text, '\n'))
+	return join(L, joiner)
+
+def setXPos(tx,dx):
+	if dx>1e-6 or dx<-1e-6:
+		tx.setXPos(dx)
 
 def _leftDrawParaLine( tx, offset, extraspace, words, last=0):
-	tx.setXPos(offset)
-	tx._textOut(string.join(words),1)
+	setXPos(tx,offset)
+	tx._textOut(join(words),1)
+	setXPos(tx,-offset)
 
 def _centerDrawParaLine( tx, offset, extraspace, words, last=0):
 	m = offset + 0.5 * extraspace
-	tx.setXPos(m)
-	tx._textOut(string.join(words),1)
+	setXPos(tx,m)
+	tx._textOut(join(words),1)
+	setXPos(tx,-m)
 
 def _rightDrawParaLine( tx, offset, extraspace, words, last=0):
 	m = offset + extraspace
-	tx.setXPos(m)
-	tx._textOut(string.join(words),1)
+	setXPos(tx,m)
+	tx._textOut(join(words),1)
+	setXPos(tx,-m)
 
 def _justifyDrawParaLine( tx, offset, extraspace, words, last=0):
-	tx.setXPos(offset)
-	text  = string.join(words)
+	setXPos(tx,offset)
+	text  = join(words)
 	if last:
 		#last one, left align
 		tx._textOut(text,1)
@@ -77,6 +86,7 @@ def _justifyDrawParaLine( tx, offset, extraspace, words, last=0):
 			tx.setWordSpace(0)
 		else:
 			tx._textOut(text,1)
+	setXPos(tx,-offset)
 
 def _putFragLine(tx,words):
 	for f in words:
@@ -98,26 +108,28 @@ def _putFragLine(tx,words):
 			tx._textOut(f.text,f is words[-1])	# cheap textOut
 
 def _leftDrawParaLineX( tx, offset, line, last=0):
-	tx.setXPos(offset)
+	setXPos(tx,offset)
 	_putFragLine(tx, line.words)
+	setXPos(tx,-offset)
 
 def _centerDrawParaLineX( tx, offset, line, last=0):
 	m = offset+0.5*line.extraSpace
-	tx.setXPos(m)
+	setXPos(tx,m)
 	_putFragLine(tx, line.words)
+	setXPos(tx,-m)
 
 def _rightDrawParaLineX( tx, offset, line, last=0):
 	m = offset+line.extraSpace
-	tx.setXPos(m)
+	setXPos(tx,m)
 	_putFragLine(tx, line.words)
+	setXPos(tx,-m)
 
 def _justifyDrawParaLineX( tx, offset, line, last=0):
+	setXPos(tx,offset)
 	if last:
 		#last one, left align
-		tx.setXPos(offset)
 		_putFragLine(tx, line.words)
 	else:
-		tx.setXPos(offset)
 		nSpaces = line.wordCount - 1
 		if nSpaces:
 			tx.setWordSpace(line.extraSpace / float(nSpaces))
@@ -125,6 +137,7 @@ def _justifyDrawParaLineX( tx, offset, line, last=0):
 			tx.setWordSpace(0)
 		else:
 			_putFragLine(tx, line.words)
+	setXPos(tx,-offset)
 
 def _sameFrag(f,g):
 	'returns 1 if two ParaFrags map out the same'
@@ -147,7 +160,7 @@ def _getFragWords(frags):
 		#del f.text # we can't do this until we sort out splitting
 					# of paragraphs
 		if text!='':
-			S = string.split(text,' ')
+			S = split(text,' ')
 			if S[-1]=='': del S[-1]
 			if W!=[] and text[0] in [' ','\t']:
 				W.insert(0,n)
@@ -229,18 +242,17 @@ def _handleBulletWidth(bulletText,style,maxWidths):
 	'''
 	if bulletText <> None:
 		if type(bulletText) is StringType:
-			bulletWidth = stringWidth(
-				bulletText,
-				style.bulletFontName, style.bulletFontSize)
+			bulletWidth = stringWidth( bulletText, style.bulletFontName, style.bulletFontSize)
 		else:
 			#it's a list of fragments
 			bulletWidth = 0
 			for f in bulletText:
 				bulletWidth = bulletWidth + stringWidth(f.text, f.fontName, f.fontSize)
 		bulletRight = style.bulletIndent + bulletWidth
-		if bulletRight > style.firstLineIndent:
+		indent = style.leftIndent+style.firstLineIndent
+		if bulletRight > indent:
 			#..then it overruns, and we have less space available on line 1
-			maxWidths[0] = maxWidths[0] - (bulletRight - style.firstLineIndent)
+			maxWidths[0] = maxWidths[0] - (bulletRight - indent)
 
 class Paragraph(Flowable):
 	""" Paragraph(text, style, bulletText=None)
@@ -286,12 +298,11 @@ class Paragraph(Flowable):
 	def wrap(self, availWidth, availHeight):
 		# work out widths array for breaking
 		self.width = availWidth
-		first_line_width = availWidth - self.style.firstLineIndent - self.style.rightIndent
-		later_widths = availWidth - self.style.leftIndent - self.style.rightIndent
+		leftIndent = self.style.leftIndent
+		first_line_width = availWidth - (leftIndent+self.style.firstLineIndent) - self.style.rightIndent
+		later_widths = availWidth - leftIndent - self.style.rightIndent
 		self.blPara = self.breakLines([first_line_width, later_widths])
 		self.height = len(self.blPara.lines) * self.style.leading
-
-		#estimate the size
 		return (self.width, self.height)
 
 	def _get_split_blParaFunc(self):
@@ -315,9 +326,9 @@ class Paragraph(Flowable):
 
 		P1=self.__class__(None,style,bulletText=self.bulletText,frags=func(blPara,0,s))
 		P1._JustifyLast = 1
-		if style.firstLineIndent != style.leftIndent:
+		if style.firstLineIndent != 0:
 			style = deepcopy(style)
-			style.firstLineIndent = style.leftIndent
+			style.firstLineIndent = 0
 		P2=self.__class__(None,style,bulletText=None,frags=func(blPara,s,n))
 		return [P1,P2]
 
@@ -360,12 +371,13 @@ class Paragraph(Flowable):
 		else: maxWidths = width
 		lines = []
 		lineno = 0
-		maxWidth = maxWidths[lineno]
 		style = self.style
 		fFontSize = float(style.fontSize)
 
 		#for bullets, work out width and ensure we wrap the right amount onto line one
 		_handleBulletWidth(self.bulletText,style,maxWidths)
+
+		maxWidth = maxWidths[lineno]
 
 		self.height = 0
 		frags = self.frags
@@ -374,7 +386,7 @@ class Paragraph(Flowable):
 			f = frags[0]
 			fontSize = f.fontSize
 			fontName = f.fontName
-			words = hasattr(f,'text') and string.split(f.text, ' ') or f.words
+			words = hasattr(f,'text') and split(f.text, ' ') or f.words
 			spaceWidth = stringWidth(' ', fontName, fontSize)
 			cLine = []
 			currentWidth = - spaceWidth   # hack to get around extra space for word 1
@@ -527,9 +539,9 @@ class Paragraph(Flowable):
 		bulletText = self.bulletText
 		if nLines > 0:
 			canvas.saveState()
-			canvas.addLiteral('%% %s.drawPara' % _className(self))
+			#canvas.addLiteral('%% %s.drawPara' % _className(self))
 			alignment = style.alignment
-			offset = style.firstLineIndent - style.leftIndent
+			offset = style.firstLineIndent
 			lim = nLines-1
 			noJustifyLast = not (hasattr(self,'_JustifyLast') and self._JustifyLast)
 
@@ -602,7 +614,7 @@ class Paragraph(Flowable):
 		plains = []
 		for frag in self.frags:
 			plains.append(frag.text)
-		return string.join(plains, '')
+		return join(plains, '')
 
 	def getActualLineWidths0(self):
 		"""Convenience function; tells you how wide each line
