@@ -2,12 +2,12 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/setup.py,v 1.11 2002/03/23 16:47:27 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/setup.py,v 1.12 2002/05/26 09:30:32 dinu_gherman Exp $
 if __name__=='__main__': #NO RUNTESTS
 	import os, sys
 	from distutils.core import setup, Extension
 
-	if sys.platform in ['win32', 'sunos5', 'freebsd4', 'aix4', 'mac']:
+	if sys.platform in ['win32', 'sunos5', 'freebsd4', 'aix4', 'mac', 'darwin']:
 		LIBS=[]
 	else:
 		raise ValueError, "Don't know about platform:"+sys.platform
