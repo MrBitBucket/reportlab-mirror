@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: odyssey.py,v $
+#	Revision 1.6  2000/03/08 13:06:39  andy_robinson
+#	Moved inch and cm definitions to reportlab.lib.units and amended all demos
+#
 #	Revision 1.5  2000/02/18 11:00:57  rgbecker
 #	trailing text/Odyssey fix
-#
+#	
 #	Revision 1.4  2000/02/17 02:05:25  rgbecker
 #	Docstring & other fixes
 #	
@@ -46,7 +49,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:09:29  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: odyssey.py,v 1.5 2000/02/18 11:00:57 rgbecker Exp $ '''
+__version__=''' $Id: odyssey.py,v 1.6 2000/03/08 13:06:39 andy_robinson Exp $ '''
 ___doc__=''
 #odyssey.py
 #
@@ -69,10 +72,8 @@ from reportlab.pdfgen import canvas
 import time
 
 
-#from pagesizes import A4  #from PIDDLE distribution
-A4 = (595.275590551, 841.88976378)
-inch = INCH = 72
-cm = CM = inch / 2.54
+from reportlab.lib.units import inch, cm
+from reportlab.lib.pagesizes import A4
 
 #precalculate some basics
 top_margin = A4[1] - inch

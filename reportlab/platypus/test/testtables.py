@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: testtables.py,v $
+#	Revision 1.6  2000/03/08 13:06:39  andy_robinson
+#	Moved inch and cm definitions to reportlab.lib.units and amended all demos
+#
 #	Revision 1.5  2000/02/17 02:09:05  rgbecker
 #	Docstring & other fixes
-#
+#	
 #	Revision 1.4  2000/02/16 09:42:50  rgbecker
 #	Conversion to reportlab package
 #	
@@ -44,12 +47,11 @@
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #
-__version__=''' $Id: testtables.py,v 1.5 2000/02/17 02:09:05 rgbecker Exp $ '''
+__version__=''' $Id: testtables.py,v 1.6 2000/03/08 13:06:39 andy_robinson Exp $ '''
 __doc__='Test script for reportlab.tables'
 from reportlab.platypus import layout
 from reportlab.platypus import tables
-
-INCH = 72
+from reportlab.lib.units import inch
 
 def getTable():
     t = tables.Table(
@@ -77,7 +79,7 @@ def makeStyles():
     return styles
 
 def run():
-    doc = layout.SimpleFlowDocument('testtables.pdf', (8.5*INCH, 11*INCH), 1)
+    doc = layout.SimpleFlowDocument('testtables.pdf', (8.5*inch, 11*inch), 1)
     styles = makeStyles()
     lst = []
     for style in styles:

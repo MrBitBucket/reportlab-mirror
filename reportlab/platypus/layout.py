@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.7  2000/03/08 13:06:39  andy_robinson
+#	Moved inch and cm definitions to reportlab.lib.units and amended all demos
+#
 #	Revision 1.6  2000/02/23 10:53:33  rgbecker
 #	GMCM's memleak fixed
-#
+#	
 #	Revision 1.5  2000/02/17 02:09:05  rgbecker
 #	Docstring & other fixes
 #	
@@ -46,7 +49,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.6 2000/02/23 10:53:33 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.7 2000/03/08 13:06:39 andy_robinson Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -62,9 +65,9 @@ import types
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
 
-inch = 72.0
-cm = inch / 2.54
+
 DEFAULT_PAGE_SIZE = (595.27,841.89)
 PAGE_HEIGHT = DEFAULT_PAGE_SIZE[1]
 TA_LEFT = 0

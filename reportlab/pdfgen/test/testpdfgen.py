@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: testpdfgen.py,v $
+#	Revision 1.6  2000/03/08 13:06:39  andy_robinson
+#	Moved inch and cm definitions to reportlab.lib.units and amended all demos
+#
 #	Revision 1.5  2000/02/17 02:08:34  rgbecker
 #	Docstring & other fixes
-#
+#	
 #	Revision 1.4  2000/02/16 09:42:50  rgbecker
 #	Conversion to reportlab package
 #	
@@ -44,14 +47,12 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testpdfgen.py,v 1.5 2000/02/17 02:08:34 rgbecker Exp $ '''
+__version__=''' $Id: testpdfgen.py,v 1.6 2000/03/08 13:06:39 andy_robinson Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
 from reportlab.pdfgen import canvas   # gmcm 2000/10/13, pdfgen now a package
-
-inch = INCH = 72
-cm = CM = inch / 2.54
+from reportlab.lib.units import inch, cm
 
 #################################################################
 #
@@ -84,7 +85,7 @@ class DocBlock:
     """
     def __init__(self):
         self.comment1 = "A doc block"
-        self.code = "canvas.setTextOrigin(CM, CM)\ncanvas.textOut('Hello World')"
+        self.code = "canvas.setTextOrigin(cm, cm)\ncanvas.textOut('Hello World')"
         self.comment2 = "That was a doc block"
         self.drawHeight = 0
         
@@ -508,14 +509,14 @@ cost to performance.""")
     p = c.beginPath()
     #make a chesboard effect, 1 cm squares
     for i in range(14):
-        x0 = (3 + i) * CM
+        x0 = (3 + i) * cm
         for j in range(7):
-            y0 = (16 + j) * CM
-            p.rect(x0, y0, 0.85*CM, 0.85*CM)
+            y0 = (16 + j) * cm
+            p.rect(x0, y0, 0.85*cm, 0.85*cm)
     c.addLiteral('%Begin clip path')
     c.clipPath(p)
     c.addLiteral('%End clip path')
-    t = c.beginText(3 * CM, 22.5 * CM)
+    t = c.beginText(3 * cm, 22.5 * cm)
     t.textLines("""This shows clipping at work.  We draw a chequerboard of rectangles
     into a path object, and clip it.  This then forms a mask which limits the region of
     the page on which one can draw.  This paragraph was drawn after setting the clipping

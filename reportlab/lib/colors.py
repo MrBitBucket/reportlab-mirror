@@ -1,3 +1,4 @@
+#!/bin/env python
 ###############################################################################
 #
 #	ReportLab Public License Version 1.0
@@ -6,8 +7,8 @@
 #   license is the same as that of Python
 #
 #	(C) Copyright ReportLab Inc. 1998-2000.
-#   adapted with permission from PIDDLE, original author Joe Strout
 #
+#   adapted with permission from PIDDLE, original author Joe Strout
 #
 # All Rights Reserved
 #
@@ -32,9 +33,10 @@
 #
 ###############################################################################
 #	$Log: colors.py,v $
-#	Revision 1.1  2000/03/08 11:27:55  andy_robinson
-#	Initial Checkin
+#	Revision 1.2  2000/03/08 13:06:39  andy_robinson
+#	Moved inch and cm definitions to reportlab.lib.units and amended all demos
 #
+__version__=''' $Id: colors.py,v 1.2 2000/03/08 13:06:39 andy_robinson Exp $ '''
 
 import string
 import math

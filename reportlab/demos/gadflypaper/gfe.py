@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: gfe.py,v $
+#	Revision 1.6  2000/03/08 13:06:39  andy_robinson
+#	Moved inch and cm definitions to reportlab.lib.units and amended all demos
+#
 #	Revision 1.5  2000/03/02 12:21:20  rgbecker
 #	Added recognition comment
-#
+#	
 #	Revision 1.4  2000/02/17 02:03:53  rgbecker
 #	Docstring & other fixes
 #	
@@ -46,7 +49,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:15:57  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: gfe.py,v 1.5 2000/03/02 12:21:20 rgbecker Exp $ '''
+__version__=''' $Id: gfe.py,v 1.6 2000/03/08 13:06:39 andy_robinson Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -73,7 +76,8 @@ can add functionality to the engine such as alternative disk based
 indexed table implementations, dynamic interfaces to remote data
 bases or or other data sources, and user defined computations."""
 
-inch=layout.inch
+from reportlab.lib.units import inch
+
 pageinfo = "%s / %s / %s" % (Author, email, Title)
 
 def myFirstPage(canvas, doc):

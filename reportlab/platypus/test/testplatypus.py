@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: testplatypus.py,v $
+#	Revision 1.7  2000/03/08 13:06:39  andy_robinson
+#	Moved inch and cm definitions to reportlab.lib.units and amended all demos
+#
 #	Revision 1.6  2000/02/17 02:09:05  rgbecker
 #	Docstring & other fixes
-#
+#	
 #	Revision 1.5  2000/02/16 14:13:00  rgbecker
 #	Final Fixes for Linux
 #	
@@ -47,7 +50,7 @@
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testplatypus.py,v 1.6 2000/02/17 02:09:05 rgbecker Exp $ '''
+__version__=''' $Id: testplatypus.py,v 1.7 2000/03/08 13:06:39 andy_robinson Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -61,9 +64,7 @@ and drawn into.
 import string
 from reportlab.pdfgen import canvas
 from reportlab.platypus import layout, tables
-
-inch = INCH = 72
-cm = CM = inch / 2.54
+from reportlab.lib.units import inch, cm
 
 #################################################################
 #
