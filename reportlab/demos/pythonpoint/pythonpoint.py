@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.20  2000/05/23 14:06:45  andy_robinson
+#	Preformatted objects now know how to split themselves.
+#
 #	Revision 1.19  2000/05/19 08:20:01  rgbecker
 #	Bring in line with canvas changes
-#
+#	
 #	Revision 1.18  2000/05/17 22:17:38  rgbecker
 #	Renamed BasicFrame to Frame
 #	
@@ -93,7 +96,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.19 2000/05/19 08:20:01 rgbecker Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.20 2000/05/23 14:06:45 andy_robinson Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -248,8 +251,9 @@ class PPFrame:
         frame = layout.Frame( self.x,
                               self.y,
                               self.width,
-                              self.height,
-                              showBoundary=1)
+                              self.height
+                              )
+        frame.showBoundary = self.showBoundary
  
         #build a story for the frame
         story = []

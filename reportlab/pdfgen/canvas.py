@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.37  2000/05/23 14:06:45  andy_robinson
+#	Preformatted objects now know how to split themselves.
+#
 #	Revision 1.36  2000/05/18 17:11:12  aaron_watters
 #	removed 0's on stable linkage and outline operations.
-#
+#	
 #	Revision 1.35  2000/05/18 09:05:08  andy_robinson
 #	Resynchronization
 #	
@@ -138,7 +141,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.36 2000/05/18 17:11:12 aaron_watters Exp $ '''
+__version__=''' $Id: canvas.py,v 1.37 2000/05/23 14:06:45 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -227,7 +230,7 @@ class Canvas:
                  bottomup = 1,
                  pageCompression=0,
 				 encoding=pdfdoc.DEFAULT_ENCODING,
-                 verbosity=1):
+                 verbosity=0):
         """Most of the attributes are private - we will use set/get methods
         as the preferred interface.  Default page size is A4."""
         self._filename = filename
