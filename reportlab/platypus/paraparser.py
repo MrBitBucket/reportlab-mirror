@@ -12,13 +12,8 @@ import copy
 import reportlab.lib.sequencer
 from reportlab.lib.abag import ABag
 
-try:
-    from reportlab.lib import xmllib
-    _xmllib_newStyle = 1
-except ImportError:
-    import xmllib
-    _xmllib_newStyle = 0
-
+from reportlab.lib import xmllib
+_xmllib_newStyle = 1
 
 from reportlab.lib.colors import toColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
@@ -487,9 +482,8 @@ class ParaParser(xmllib.XMLParser):
     def end_super( self ):
         self._pop(super=1)
 
-    if _xmllib_newStyle:
-        start_sup = start_super
-        end_sup = end_super
+    start_sup = start_super
+    end_sup = end_super
 
     #### sub script
     def start_sub( self, attributes ):
@@ -499,44 +493,35 @@ class ParaParser(xmllib.XMLParser):
         self._pop(sub=1)
 
     #### greek script
-    if _xmllib_newStyle:
-        #### add symbol encoding
-        def handle_charref(self, name):
-            try:
-                if name[0] == 'x':
-                    n = string.atoi(name[1:], 16)
-                else:
-                    n = string.atoi(name)
-            except string.atoi_error:
-                self.unknown_charref(name)
-                return
-            if 0 <=n<=255:
-                self.handle_data(chr(n))
-            elif symenc.has_key(n):
-                self._push(greek=1)
-                self.handle_data(symenc[n])
-                self._pop(greek=1)
+    #### add symbol encoding
+    def handle_charref(self, name):
+        try:
+            if name[0] == 'x':
+                n = string.atoi(name[1:], 16)
             else:
-                self.unknown_charref(name)
-
-        def handle_entityref(self,name):
-            if greeks.has_key(name):
-                self._push(greek=1)
-                self.handle_data(greeks[name])
-                self._pop(greek=1)
-            else:
-                xmllib.XMLParser.handle_entityref(self,name)
-
-        def syntax_error(self,lineno,message):
-            self._syntax_error(message)
-
-    else:
-        def start_greekLetter(self, attributes,letter):
+                n = string.atoi(name)
+        except string.atoi_error:
+            self.unknown_charref(name)
+            return
+        if 0 <=n<=255:
+            self.handle_data(chr(n))
+        elif symenc.has_key(n):
             self._push(greek=1)
-            self.handle_data(letter)
+            self.handle_data(symenc[n])
+            self._pop(greek=1)
+        else:
+            self.unknown_charref(name)
 
-        def syntax_error(self,message):
-            self._syntax_error(message)
+    def handle_entityref(self,name):
+        if greeks.has_key(name):
+            self._push(greek=1)
+            self.handle_data(greeks[name])
+            self._pop(greek=1)
+        else:
+            xmllib.XMLParser.handle_entityref(self,name)
+
+    def syntax_error(self,lineno,message):
+        self._syntax_error(message)
 
     def _syntax_error(self,message):
         if message[:10]=="attribute " and message[-17:]==" value not quoted": return
@@ -715,36 +700,7 @@ class ParaParser(xmllib.XMLParser):
 
     def __init__(self,verbose=0):
         self.caseSensitive = 0
-        if _xmllib_newStyle:
-            xmllib.XMLParser.__init__(self,verbose=verbose)
-        else:
-            xmllib.XMLParser.__init__(self)
-            # set up handlers for various tags
-            self.elements = {'b': (self.start_b, self.end_b),
-                             'strong':  (self.start_b, self.end_b),
-                             'u': (self.start_u, self.end_u),
-                             'i': (self.start_i, self.end_i),
-                             'em': (self.start_i, self.end_i),
-                             'super': (self.start_super, self.end_super),
-                             'sup': (self.start_super, self.end_super),
-                             'sub': (self.start_sub, self.end_sub),
-                             'font': (self.start_font, self.end_font),
-                             'greek': (self.start_greek, self.end_greek),
-                             'para': (self.start_para, self.end_para),
-                            }
-
-
-            # automatically add handlers for all of the greek characters
-            for item in greeks.keys():
-                self.elements[item] = (lambda attr,self=self,letter=greeks[item]:
-                    self.start_greekLetter(attr,letter), self.end_greek)
-
-            # set up dictionary for greek characters, this is a class variable
-            self.entitydefs = self.entitydefs.copy()
-            for item in greeks.keys():
-                self.entitydefs[item] = '<%s/>' % item
-
-
+        xmllib.XMLParser.__init__(self,verbose=verbose)
 
     def _iReset(self):
         self.fragList = []
@@ -796,16 +752,17 @@ class ParaParser(xmllib.XMLParser):
     def handle_cdata(self,data):
         self.handle_data(data)
 
-    #----------------------------------------------------------------
+    def _setup_for_parse(self,style):
+        self._seq = reportlab.lib.sequencer.getSequencer()
+        self._reset(style)  # reinitialise the parser
+
     def parse(self, text, style):
         """Given a formatted string will return a list of
         ParaFrag objects with their calculated widths.
         If errors occur None will be returned and the
         self.errors holds a list of the error messages.
         """
-        self._seq = reportlab.lib.sequencer.getSequencer()
-        self._reset(style)  # reinitialise the parser
-
+        self._setup_for_parse(style)
         # the xmlparser requires that all text be surrounded by xml
         # tags, therefore we must throw some unused flags around the
         # given string
@@ -813,6 +770,9 @@ class ParaParser(xmllib.XMLParser):
             text = "<para>"+text+"</para>"
         self.feed(text)
         self.close()    # force parsing to complete
+        return self._complete_parse()
+
+    def _complete_parse(self):
         del self._seq
         style = self._style
         del self._style
@@ -823,6 +783,28 @@ class ParaParser(xmllib.XMLParser):
         else:
             fragList = bFragList = None
         return style, fragList, bFragList
+
+    def _tt_parse(self,tt):
+        tag = tt[0]
+        try:
+            start = getattr(self,'start_'+tag)
+            end = getattr(self,'end_'+tag)
+        except AttributeError:
+            raise ValueError('Invalid tag "%s"' % tag)
+        start(tt[1] or {})
+        C = tt[2]
+        if C:
+            M = self._tt_handlers
+            for c in C:
+                M[type(c) is TupleType](c)
+        end()
+
+    def tt_parse(self,tt,style):
+        '''parse from tupletree form'''
+        self._setup_for_parse(style)
+        self._tt_handlers = self.handle_data,self._tt_parse
+        self._tt_parse(tt)
+        return self._complete_parse()
 
 if __name__=='__main__':
     from reportlab.platypus import cleanBlockQuotedText

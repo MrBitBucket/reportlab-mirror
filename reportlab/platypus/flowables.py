@@ -614,7 +614,7 @@ class PTOContainer(Flowable):
         #attempt a sub split on the last one we have
         i = len(R)
         c = C[i]
-        aH = availHeight - H - tSB - tH
+        aH = (availHeight - H - tSB - tH)*0.99
         if aH>=0.05*availHeight:
             canv._addTrailer = 1
             SS = c.split(availWidth,aH)
@@ -622,16 +622,19 @@ class PTOContainer(Flowable):
             SS = []
         try:
             del canv._addTrailer
+            Hdr = self._header
         except:
-            T = []  #somebody already deleted it!!!
+            T = None #somebody already deleted it!!!
+            Hdr = None
+
         if SS:
-            R1 = C[:i]+SS[0]+T
-            R2 = SS[1:]+C[i+1:]
+            R1 = C[:i] + SS[0] + T
+            R2 = Hdr + SS[1:]+C[i+1:]
         elif not i:
             return []
         else:
             R1 = C[:i-1]+T
-            R2 = C[i:]
+            R2 = Hdr + C[i:]
         return R1 + [PTOContainer(R2,self._trailer,self._header)]
 
     def drawOn(self, canv, x, y, _sW=0):
