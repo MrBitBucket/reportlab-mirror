@@ -949,7 +949,7 @@ class Table(Flowable):
                 #print 'rowHeights=', self._rowHeights
                 colorCycle = map(colors.toColorOrNone, arg)
                 count = len(colorCycle)
-                rowCount = er - sr
+                rowCount = er - sr + 1
                 for i in range(rowCount):
                     color = colorCycle[i%count]
                     h = self._rowHeights[sr + i]
@@ -963,7 +963,7 @@ class Table(Flowable):
                 #cycle through colours columnwise
                 colorCycle = map(colors.toColorOrNone, arg)
                 count = len(colorCycle)
-                colCount = ec - sc
+                colCount = ec - sc + 1
                 for i in range(colCount):
                     color = colorCycle[i%count]
                     w = self._colWidths[sc + i]
