@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.46 2001/09/10 14:44:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.47 2001/09/18 12:37:40 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -484,10 +484,10 @@ class Drawing(Group, Flowable):
 			renderPS_SEP.drawToFile(self,
 								filename,
 								title = fnroot,
-								dept = self.EPS_info[0],
-								company = self.EPS_info[1],
-								preview = self.preview,
-								showBorder=self.showBorder)
+								dept = getattr(self,'EPS_info',['Testing'])[0],
+								company = getattr(self,'EPS_info',['','ReportLab'])[1],
+								preview = getattr(self,'preview',1),
+								showBorder=getattr(self,'showBorder',0))
 
 			ext = ext +  '/.eps'
 
