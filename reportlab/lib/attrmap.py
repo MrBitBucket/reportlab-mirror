@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/attrmap.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/attrmap.py,v 1.6 2002/07/24 19:56:37 andy_robinson Exp $
-__version__=''' $Id: attrmap.py,v 1.6 2002/07/24 19:56:37 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/attrmap.py,v 1.7 2002/07/31 12:45:49 rgbecker Exp $
+__version__=''' $Id: attrmap.py,v 1.7 2002/07/31 12:45:49 rgbecker Exp $ '''
 from UserDict import UserDict
 from reportlab.lib.validators import isAnything, _SequenceTypes
 
@@ -37,15 +37,17 @@ class AttrMapValue:
 
 class AttrMap(UserDict):
     def __init__(self,BASE=None,UNWANTED=[],**kw):
+        data = {}
         if BASE:
             if isinstance(BASE,AttrMap):
                 data = BASE.data                        #they used BASECLASS._attrMap
-            elif hasattr(BASE,'_attrMap'):
-                data = getattr(BASE._attrMap,'data',{}) #they gave us the BASECLASS
             else:
-                raise ValueError, 'BASE=%s has wrong kind of value' % str(BASE)
-        else:
-            data = {}
+                if type(BASE) not in (type(()),type([])): BASE = (BASE,)
+                for B in BASE:
+                    if hasattr(B,'_attrMap'):
+                        data.update(getattr(B._attrMap,'data',{}))
+                    else:
+                        raise ValueError, 'BASE=%s has wrong kind of value' % str(B)
 
         UserDict.__init__(self,data)
         self.remove(UNWANTED)
@@ -103,14 +105,17 @@ def _findObjectAndAttr(src, P):
             src = getattr(src, p)
         return src, P[-1]
 
-def addProxyAttribute(src,name=None,dst=None):
+def addProxy__setattr__(obj):
+    if not hasattr(obj,'_proxy__setattr__'):
+        sa = getattr(obj,'__setattr__',None)
+
+def addProxyAttribute(src,name,validate=None,desc=None,initial=None,dst=None):
     '''
     Add a proxy attribute 'name' to src with targets dst
     '''
     #sanity
     assert hasattr(src,'_attrMap'), 'src object has no _attrMap'
     A, oA = _privateAttrMap(src,1)
-    assert name and name in A.keys(), 'invalid proxy attribute name %s' % repr(name)
     if type(dst) not in _SequenceTypes: dst = dst,
     D = []
     DV = []
@@ -120,4 +125,3 @@ def addProxyAttribute(src,name=None,dst=None):
         obj, attr = _findObjectAndAttr(src,d)
         if obj:
             dA = getattr(obj,'_attrMap',None)
-            assert dA and attr in dA.keys(), 'target attribute %s not in _attrMap' % d
