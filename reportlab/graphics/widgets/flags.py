@@ -1,6 +1,6 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/flags.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.12 2001/10/03 14:53:37 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.13 2001/10/03 19:19:28 rgbecker Exp $
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 
@@ -306,16 +306,16 @@ class Flag(_Symbol):
 			s = Star()
 			s.fillColor=colors.yellow
 			s.angle = angle
-			s.size = size*w
+			s.size = size*w*2
 			s.x = x*w+x0
 			s.y = y*w+y0
 			g.add(s)
 
 		addStar(5,5,3, 0)
-		addStar(10,2,1,36.86989765)
-		addStar(12,4,1,8.213210702)
-		addStar(12,7,1,16.60154960)
-		addStar(10,9,1,53.13010235)
+		addStar(10,1,1,36.86989765)
+		addStar(12,3,1,8.213210702)
+		addStar(12,6,1,16.60154960)
+		addStar(10,8,1,53.13010235)
 		return g
 
 	def _Flag_Denmark(self):
