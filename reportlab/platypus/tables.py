@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.37 2001/03/21 14:12:02 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.37 2001/03/21 14:12:02 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.38 2001/05/04 18:17:01 aaron_watters Exp $
+__version__=''' $Id: tables.py,v 1.38 2001/05/04 18:17:01 aaron_watters Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -104,6 +104,7 @@ def _listCellGeom(V,w,s,W=None,H=None):
 class Table(Flowable):
 	def __init__(self, data, colWidths=None, rowHeights=None, style=None,
 				repeatRows=0, repeatCols=0, splitByRow=1):
+		#print "colWidths", colWidths
 		nrows = len(data)
 		if len(data)==0 or type(data) not in _SeqTypes:
 			raise ValueError, "Table must have at least 1 row"
@@ -162,22 +163,26 @@ class Table(Flowable):
 
 		H = self._argH
 		W = self._argW
+		#print "W is", W
 
 		if None in H:
+			#print "none in H"
 			H = H[:]	#make a copy as we'll change it
 			self._rowHeights = H
 			while None in H:
 				i = H.index(None)
-				V = self._cellvalues[i]
-				S = self._cellStyles[i]
+				V = self._cellvalues[i] # values for row i
+				S = self._cellStyles[i] # styles for row i
 				h = 0
-				for v, s, w in map(None, V, S, W):
+				for v, s, w in map(None, V, S, W): # value, style, width (lengths must match)
+					#print "v,s,w", v,s,w
 					t = type(v)
 					if t in _SeqTypes or isinstance(v,Flowable):
 						if not t in _SeqTypes: v = (v,)
 						if w is None:
 							raise ValueError, "Flowables cell can't have auto width"
 						dW,t = _listCellGeom(v,w,s)
+						#print "leftpadding, rightpadding", s.leftPadding, s.rightPadding
 						dW = dW + s.leftPadding + s.rightPadding
 						if dW>w:
 							raise "LayoutError", "Flowable %s (%sx%s points) too wide for cell (%sx* points)." % (v,dW,t,w)
@@ -191,6 +196,7 @@ class Table(Flowable):
 				H[i] = h
 
 		if None in W:
+			#print "none in w"
 			W = W[:]
 			self._colWidths = W
 			while None in W:
@@ -212,6 +218,7 @@ class Table(Flowable):
 				W[i] = w
 
 		height = self._height = reduce(operator.add, H, 0)
+		#print "height, H", height, H
 		self._rowpositions = [height]	 # index 0 is actually topline; we skip when processing cells
 		for h in H:
 			height = height - h
@@ -220,8 +227,11 @@ class Table(Flowable):
 		width = 0
 		self._colpositions = [0]		#index -1 is right side boundary; we skip when processing cells
 		for w in W:
+			#print w, width
 			width = width + w
 			self._colpositions.append(width)
+		#print "final width", width
+		
 		self._width = width
 
 	def setStyle(self, tblstyle):
@@ -246,6 +256,8 @@ class Table(Flowable):
 					_setCellStyle(self._cellStyles, i, j, op, values)
 
 	def _drawLines(self):
+		# use round caps
+		self.canv.setLineCap(1)
 		for op, (sc, sr), (ec, er), weight, color in self._linecmds:
 			if sc < 0: sc = sc + self._ncols
 			if ec < 0: ec = ec + self._ncols
@@ -303,8 +315,9 @@ class Table(Flowable):
 		self._calc()
 		#nice and easy, since they are predetermined size
 		self.availWidth = availWidth
+		#print "width, height", self._width, self._height
 		return (self._width, self._height)
-
+		#return (0, self._height) # debug
 	def onSplit(self,T,byRow=1):
 		'''
 		This method will be called when the Table is split.
