@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.23 2001/11/19 09:21:23 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.23 2001/11/19 09:21:23 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.24 2001/12/19 19:43:03 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.24 2001/12/19 19:43:03 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -249,7 +249,7 @@ class Image(Flowable):
 	   are supported.  At the present time images as flowables are always centered horozontally
 	   in the frame.
 	"""
-	def __init__(self, filename, width=None, height=None):
+	def __init__(self, filename, width=None, height=None, kind='direct'):
 		"""If size to draw at not specified, get it from the image."""
 		from reportlab.lib.utils import PIL_Image  #this will raise an error if they do not have PIL.
 		self._filename = self.filename = filename
@@ -264,14 +264,17 @@ class Image(Flowable):
 			# we have to assume this is a file like object
 			self.filename = img = PIL_Image.open(filename)
 			(self.imageWidth, self.imageHeight) = img.size
-		if width:
-			self.drawWidth = width
-		else:
-			self.drawWidth = self.imageWidth
-		if height:
-			self.drawHeight = height
-		else:
-			self.drawHeight = self.imageHeight
+
+		if kind in ['direct','absolute']:
+			self.drawWidth = width or self.imageWidth
+			self.drawHeight = height or self.imageHeight
+		elif kind in ['percentage','%']:
+			self.drawWidth = self.imageWidth*width*0.01
+			self.drawHeight = self.imageHeight*height*0.01
+		elif kind in ['bound','proportional']:
+			factor = min(float(width)/self.imageWidth,float(height)/self.imageHeight)
+			self.drawWidth = self.imageWidth*factor
+			self.drawHeight = self.imageHeight*factor
 
 	def wrap(self, availWidth, availHeight):
 		#the caller may decide it does not fit.
