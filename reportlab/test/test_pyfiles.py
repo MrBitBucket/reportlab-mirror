@@ -11,7 +11,7 @@ from reportlab.test import unittest
 # Helper function and class.
 
 def unique(seq):
-    "Remove elements from a list that occure more than once."
+    "Remove elements from a list that occur more than once."
 
     # Return input if it has less than 2 elements.
     if len(seq) < 2:
@@ -73,7 +73,7 @@ class GlobDirectoryWalker:
 
 
 class SelfTestCase(unittest.TestCase):
-    "Test utility functions in this test module."
+    "Test unique() function."
 
     def testUnique(self):
         "Test unique() function."
@@ -109,10 +109,28 @@ class AsciiFileTestCase(unittest.TestCase):
             
             truncPath = path[string.find(path, 'reportlab'):]
             args = (truncPath, repr(map(ord, nonAscii)))
-            msg = "File %s contains charecters: %s." % args
+            msg = "File %s contains characters: %s." % args
 ##            if nonAscii:
 ##                print msg
             assert nonAscii == '', msg
+
+
+class FilenameTestCase(unittest.TestCase):
+    "Test if Python files contain trailing digits."
+
+    def testTrailingDigits(self):
+        "Test if Python files contain trailing digits."
+
+        RL_HOME = os.path.dirname(reportlab.__file__)
+        allPyFiles = GlobDirectoryWalker(RL_HOME, '*.py')
+
+        for path in allPyFiles:
+            basename = os.path.splitext(path)[0]
+            truncPath = path[string.find(path, 'reportlab'):]
+            msg = "Filename %s contains trailing digits." % truncPath
+            #assert basename[-1] not in string.digits, msg
+            if basename[-1] in string.digits:
+                print truncPath
 
 
 def makeSuite():
@@ -120,6 +138,7 @@ def makeSuite():
 
     suite.addTest(SelfTestCase('testUnique'))
     suite.addTest(AsciiFileTestCase('testAscii'))
+    suite.addTest(FilenameTestCase('testTrailingDigits'))
 
     return suite
 
