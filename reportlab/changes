@@ -1,4 +1,120 @@
 #################################################################################
+#################### RELEASE 1.15 at 14:00 GMT  9/Aug/2002      #################
+#################################################################################
+##### 2002/08/09 #####
+	platypus/tables.py 1.62 rgbecker  Improved line styles, allow for cap etc
+##### 2002/08/08 #####
+	rl_addons/renderPM/test_renderPM.py 1.5 rgbecker  Experimental stuff
+	rl_addons/renderPM/setup.py 1.12 rgbecker  Experimental stuff
+	rl_addons/renderPM/_renderPM.c 1.15 rgbecker  Experimental stuff
+	graphics/shapes.py 1.79 rgbecker  Added EmptyClipPath and handling
+	graphics/renderPM.py 1.22 rgbecker  Added EmptyClipPath and handling
+##### 2002/08/01 #####
+	rl_addons/renderPM/_renderPM.c 1.14 rgbecker  Minor cosmetic changes for gcc
+	test/test_renderSVG.py 1.6 dinu_gherman  Hopefully replaced errors with warnings in case of non-existant XML parser.
+##### 2002/07/31 #####
+	lib/validators.py 1.24 rgbecker  Added isShape & isNoneOrShape
+	lib/attrmap.py 1.7 rgbecker  Allow for multiple BASEs
+	graphics/charts/lineplots.py 1.34 rgbecker  Added areas.PlotArea for chart plot areas
+	graphics/charts/linecharts.py 1.25 rgbecker  Added areas.PlotArea for chart plot areas
+	graphics/charts/barcharts.py 1.68 rgbecker  Added areas.PlotArea for chart plot areas
+	graphics/charts/areas.py 1.1 rgbecker  Added areas.PlotArea for chart plot areas
+##### 2002/07/30 #####
+	graphics/charts/barcharts.py 1.67 rgbecker  added in Dirk Datzert's bg contrib
+	test/test_pdfbase_ttfonts.py 1.5 mgedmin  Allow use of a TTFont on different documents at the same time
+	pdfgen/textobject.py 1.26 mgedmin  Allow use of a TTFont on different documents at the same time
+	pdfbase/ttfonts.py 1.5 mgedmin  Allow use of a TTFont on different documents at the same time
+##### 2002/07/29 #####
+	pdfgen/canvas.py 1.105 mgedmin  _dynamicFont should be saved/restored together with _fontname
+	rl_addons/renderPM/setup.py 1.11 rgbecker  Attempt to fix string macro problem
+##### 2002/07/27 #####
+	graphics/widgetbase.py 1.33 rgbecker  Allow for multicolour single data barcharts
+	graphics/charts/barcharts.py 1.66 rgbecker  Allow for multicolour single data barcharts
+##### 2002/07/26 #####
+	graphics/charts/barcharts.py 1.65 rgbecker  Make format allow callable not just function
+##### 2002/07/25 #####
+	docs/userguide/ch2a_fonts.py 1.7 dinu_gherman  Fixed '<', '>' buglets...
+	docs/userguide/ch1_intro.py 1.8 dinu_gherman  Fixed '&' buglet.
+##### 2002/07/24 #####
+	__init__.py 1.22 andy_robinson  Removed all trailing whitespace
+	pdfbase/ttfonts.py 1.3 andy_robinson  Marius' path for non-standard TrueType files
+	rl_addons/renderPM/_renderPM.c 1.13 rgbecker  Rendering fixes & changes for Dinu's image shape
+	graphics/shapes.py 1.77 rgbecker  Changes for Dinu's image shape
+	graphics/renderPM.py 1.20 rgbecker  Changes for Dinu's image shape
+##### 2002/07/21 #####
+	pdfbase/pdfdoc.py 1.68 andy_robinson  Fixed page stream filter order (Thanks Bernhard) Fixed encoding of renderPS export
+	lib/codecharts.py 1.6 andy_robinson  Fixed page stream filter order (Thanks Bernhard) Fixed encoding of renderPS export
+	graphics/renderPS.py 1.19 andy_robinson  Fixed page stream filter order (Thanks Bernhard) Fixed encoding of renderPS export
+##### 2002/07/17 #####
+	tools/docco/graphdocpy.py 1.18 andy_robinson  Graphdocpy now works on unix and Windows (for me anyway...)
+	demos/odyssey/dodyssey.py 1.12 andy_robinson  Exterminated all tab characters and added a test to make sure they never come back.
+	rl_addons/renderPM/_renderPM.c 1.12 rgbecker  Preliminary work on _aapixbuf
+	lib/codecharts.py 1.5 andy_robinson  Fixed standard fonts demo, added a basic code page graphic
+	demos/stdfonts/stdfonts.py 1.11 andy_robinson  Fixed standard fonts demo, added a basic code page graphic
+##### 2002/07/16 #####
+	rl_addons/renderPM/setup.py 1.10 rgbecker  Sync with Gnome libart_lgpl 2.3.10
+	rl_addons/renderPM/_renderPM.c 1.11 rgbecker  Sync with Gnome libart_lgpl 2.3.10
+##### 2002/07/15 #####
+	graphics/charts/barcharts.py 1.62 rgbecker  Attempt to eliminate silly libart bug appearing
+##### 2002/07/12 #####
+	platypus/doctemplate.py 1.55 andy_robinson  Fixed missing fact in progressCallBack
+##### 2002/07/10 #####
+	rl_addons/renderPM/setup.py 1.9 dinu_gherman  Added 'darwin' to list of known platforms.
+	graphics/renderSVG.py 1.10 dinu_gherman  Added comment on svglib.
+##### 2002/07/09 #####
+	platypus/doctemplate.py 1.54 rgbecker  Andy's progress stuff
+##### 2002/07/07 #####
+	platypus/doctemplate.py 1.53 andy_robinson  Provision for callback progress monitoring in basic doctemplate class
+##### 2002/07/04 #####
+	test/utils.py 1.6 dinu_gherman  Slightly refactored test suite to do the same thing with less code.
+##### 2002/07/03 #####
+	graphics/charts/legends.py 1.21 rgbecker  Minor efficiency saving
+	graphics/shapes.py 1.75 rgbecker  Changes to allow flaky _drawTimeResize
+	graphics/renderbase.py 1.12 rgbecker  Changes to allow flaky _drawTimeResize
+	graphics/renderSVG.py 1.9 rgbecker  Changes to allow flaky _drawTimeResize
+	graphics/renderPS.py 1.17 rgbecker  Changes to allow flaky _drawTimeResize
+	graphics/renderPM.py 1.18 rgbecker  Changes to allow flaky _drawTimeResize
+	graphics/renderPDF.py 1.19 rgbecker  Changes to allow flaky _drawTimeResize
+##### 2002/07/02 #####
+	pdfbase/ttfonts.py 1.2 dinu_gherman  Applied Marius' patch for TrueType fonts converted from OS X .dfont files.
+##### 2002/07/01 #####
+	lib/colors.py 1.33 rgbecker  Added Color.hexval
+	graphics/charts/piecharts.py 1.21 rgbecker  Keep proper sequece for zero wedges
+##### 2002/06/21 #####
+	graphics/renderSVG.py 1.8 dinu_gherman  Added outer rectangular clipping path.
+##### 2002/06/20 #####
+	pdfbase/pdfpattern.py 1.1 aaron_watters  simple support for acrobat forms in reportlab documents.  Minor optimizations to metrics
+	pdfbase/pdfmetrics.py 1.54 aaron_watters  simple support for acrobat forms in reportlab documents.  Minor optimizations to metrics
+	pdfbase/pdfform.py 1.1 aaron_watters  simple support for acrobat forms in reportlab documents.  Minor optimizations to metrics
+	lib/colors.py 1.32 rgbecker  Added Whiter, Blacker and improved toColor
+	platypus/tables.py 1.59 rgbecker  Use of _SeqTypes here was wrong use callability instead
+	test/test_platypus_general.py 1.8 rgbecker  Added -debug option
+##### 2002/06/18 #####
+	graphics/widgets/grids.py 1.24 rgbecker  Avoid changing definition in _flipRectCorners
+	platypus/tables.py 1.58 rgbecker  added vcallable backgrounds
+##### 2002/06/16 #####
+	lib/colors.py 1.31 rgbecker  Added setColors fixed toColor
+##### 2002/06/14 #####
+	test/test_renderSVG.py 1.3 andy_robinson  Fixed 1.5-breakage (we imported sys.version_info which did not exist then) and also a nad directory in test_renderSVG
+	pdfbase/pdfdoc.py 1.66 andy_robinson  Fixed 1.5-breakage (we imported sys.version_info which did not exist then) and also a nad directory in test_renderSVG
+	platypus/frames.py 1.16 rgbecker  Allow showBoundary to be a color/tuple etc
+##### 2002/06/12 #####
+	graphics/charts/legends.py 1.20 rgbecker  Added callout and _calcHeight
+	lib/utils.py 1.34 rgbecker  Fix erroneous __path__ attribute reference
+	graphics/charts/axes.py 1.56 rgbecker  Allow per/label visibility
+##### 2002/06/04 #####
+	graphics/renderSVG.py 1.7 rgbecker  Apparent fix for transform problem
+##### 2002/06/03 #####
+	test/test_widgets_grids.py 1.1 dinu_gherman  Initial checkin. Transferred test code from widgets/grids.py.
+	graphics/widgets/grids.py 1.23 dinu_gherman  Removed test and sample code (soon in test suite).
+	test/test_renderSVG.py 1.2 dinu_gherman  Removed stray reference to renderSVG3.
+	graphics/renderSVG.py 1.6 dinu_gherman  Added newline before svg document element.
+	test/test_renderSVG.py 1.1 dinu_gherman  Initial checkin.
+##### 2002/05/31 #####
+	graphics/renderSVG.py 1.5 dinu_gherman  Load minidom specifically (pleasing Jython).
+##### 2002/05/29 #####
+	test/test_tools_pythonpoint.py 1.7 rgbecker  Improved for Demo
+#################################################################################
 #################### RELEASE 1.14 at 18:00 GMT 28/May/2002      #################
 #################################################################################
 ##### 2002/05/28 #####
