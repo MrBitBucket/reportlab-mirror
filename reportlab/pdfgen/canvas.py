@@ -1,12 +1,14 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.109 2003/02/02 08:37:33 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.109 2003/02/02 08:37:33 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.110 2003/03/14 00:05:16 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.110 2003/03/14 00:05:16 andy_robinson Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
 """
+
+
 
 ENABLE_TRACKING = 1 # turn this off to do profile testing w/o tracking
 
@@ -125,6 +127,7 @@ class Canvas:
         self._doc = pdfdoc.PDFDocument(encoding,
                                        compression=pageCompression,
                                        invariant=invariant)
+
 
         #this only controls whether it prints 'saved ...' - 0 disables
         self._verbosity = verbosity
@@ -407,15 +410,80 @@ class Canvas:
             result = d[name] = pdfdoc.Destination(name) # newly defined, unbound
         return result
 
-    def bookmarkPage(self, key):
-        """bind a bookmark (destination) to the current page"""
-        # XXXX there are a lot of other ways a bookmark destination can be bound: should be implemented.
-        # XXXX the other ways require tracking of the graphics state....
+    def bookmarkPage(self, key,
+                      fitType="Fit",
+                      left=None,
+                      top=None,
+                      bottom=None,
+                      right=None,
+                      zoom=None
+                      ):
+        """
+        This creates a bookmark to the current page which can
+        be referred to with the given key elsewhere.
+
+        PDF offers very fine grained control over how Acrobat
+        reader is zoomed when people link to this. The default
+        is to keep the user's current zoom settings. the last
+        arguments may or may not be needed depending on the
+        choice of 'fitType'.
+        
+        Fit types and the other arguments they use are:
+        /XYZ left top zoom - fine grained control.  null
+          or zero for any of the parameters means 'leave
+          as is', so "0,0,0" will keep the reader's settings.
+          NB. Adobe Reader appears to prefer "null" to 0's.
+          
+        /Fit - entire page fits in window
+
+        /FitH top - top coord at top of window, width scaled
+                    to fit.
+
+        /FitV left - left coord at left of window, height
+                     scaled to fit
+                     
+        /FitR left bottom right top - scale window to fit
+                                  the specified rectangle
+
+        (question: do we support /FitB, FitBH and /FitBV
+        which are hangovers from version 1.1 / Acrobat 3.0?)"""
         dest = self._bookmarkReference(key)
         self._doc.inPage() # try to enable page-only features
         pageref = self._doc.thisPageRef()
-        dest.fit()
-        dest.setPage(pageref) # formatter won't make a ref to a ref
+
+        #None = "null" for PDF
+        if left is None:
+            left = "null"
+        if top is None:
+            top = "null"
+        if bottom is None:
+            bottom = "null"
+        if right is None:
+            right = "null"
+        if zoom is None:
+            zoom = "null"
+        
+        if fitType == "XYZ":
+            dest.xyz(left,top,zoom)
+        elif fitType == "Fit":
+            dest.fit()
+        elif fitType == "FitH":
+            dest.fith(top)
+        elif fitType == "FitV":
+            dest.fitv(left)
+        elif fitType == "FitR":
+            dest.fitr(left,bottom,right,top)
+        #Do we need these (version 1.1 / Acrobat 3 versions)?
+        elif fitType == "FitB":
+            dest.fitb()
+        elif fitType == "FitBH":
+            dest.fitbh(top)
+        elif fitType == "FitBV":
+            dest.fitbv(left)
+        else:
+            raise "Unknown Fit type %s" % (fitType,)           
+
+        dest.setPage(pageref)
         return dest
 
     def bookmarkHorizontalAbsolute(self, key, yhorizontal):
@@ -426,13 +494,9 @@ class Canvas:
            etcetera) in effect for the current graphics state.  The programmer is
            responsible for making sure the bookmark matches an appropriate item on
            the page."""
-        dest = self._bookmarkReference(key)
-        self._doc.inPage() # try to enable page-only features
-        pageref = self._doc.thisPageRef()
-        dest.fith(yhorizontal)
-        dest.setPage(pageref)
-        return dest
-
+        #This method should probably be deprecated since it is just a sub-set of bookmarkPage
+        return self.bookmarkPage(key,fitType="FitH",top=yhorizontal)
+                    
     def bookmarkHorizontal(self, key, relativeX, relativeY):
         """w.r.t. the current transformation, bookmark this horizontal."""
         (xt, yt) = self.absolutePosition(relativeX,relativeY)

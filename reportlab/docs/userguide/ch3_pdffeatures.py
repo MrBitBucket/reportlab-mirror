@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch3_pdffeatures.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch3_pdffeatures.py,v 1.3 2002/07/24 19:56:35 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch3_pdffeatures.py,v 1.4 2003/03/14 00:05:15 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 
 
@@ -34,36 +34,104 @@ disc("""PDF supports internal hyperlinks.  There is a very wide
     range of link types, destination types and events which
     can be triggered by a click.  At the moment we just
     support the basic ability to jump from one part of a document
-    to another.  The bookmark methods define a destination that is the endpoint
-    of a jump.""")
+    to another, and to control the zoom level of the window after
+    the jump.  The bookmarkPage method defines a destination that
+    is the endpoint of a jump.""")
 #todo("code example here...")
 
 eg("""
- canvas.bookmarkPage(name)
- canvas.bookmarkHorizontalAbsolute(name, yhorizontal)""")
-
-disc("""
-    The $bookmarkPage$ method bookmarks the entire page.
-    After jumping to an endpoint defined by $bookmarkPage$ the
-    PDF browser will display the whole page on the screen.""")
-
-disc("""
-    By contrast, $bookmarkHorizontalAbsolute$ defines a destination
-    associated with a horizontal position on a page.  When the PDF browser
-    jumps to a destination defined by $bookmarkHorizontalAbsolute$ the
-    screen will show a part of the page with the horizontal line at
-    ^y=$yhorizontal$^ near the top, omitting parts of the rest of the page
-    if appropriate.
+    canvas.bookmarkPage(name,
+                        fitType="Fit",
+                        left=None,
+                        top=None,
+                        bottom=None,
+                        right=None,
+                        zoom=None
+                        )
 """)
+disc("""
+By default the $bookmarkPage$ method defines the page itself as the
+destination. After jumping to an endpoint defined by bookmarkPage,
+the PDF browser will display the whole page, scaling it to fit the
+screen:""")
+
+eg("""canvas.bookmarkPage(name)""")
+
+disc("""The $bookmarkPage$ method can be instructed to display the
+page in a number of different ways by providing a $fitType$
+parameter.""")
+
+eg("")
+
+t = Table([
+           ['fitType','Parameters Required','Meaning'],
+           ['Fit',None,'Entire page fits in window (the default)'],
+           ['FitH','top','Top coord at top of window, width scaled to fit'],
+           ['FitV','left','Left coord at left of window, height scaled to fit'],
+           ['FitR','left bottom right top','Scale window to fit the specified rectangle'],
+           ['XYZ','left top zoom','Fine grained control. If you omit a parameter\nthe PDF browser interprets it as "leave as is"']
+          ])
+t.setStyle(TableStyle([
+            ('FONT',(0,0),(-1,1),'Times-Bold',10,12),
+            ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ]))
+
+getStory().append(t)
+caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - Required attributes for different fit types""")
+
+disc("""
+Note : $fitType$ settings are case-sensitive so $fitType="FIT"$ is invalid$
+""")
+
+
+disc("""
+Sometimes you want the destination of a jump to be some part of a page.
+The $FitR$ fitType allows you to identify a particular rectangle, scaling
+the area to fit the entire page. 
+""")
+
+disc("""
+To set the display to a particular x and y coordinate of the page and to
+control the zoom directly use fitType="XYZ".
+""")
+
+eg("""
+canvas.bookmarkPage(‘my_bookmark’,fitType=”XYZ”,left=0,top=200)
+""")
+
+
+
+disc("""
+This destination is at the leftmost of the page with the top of the screen
+at position 200. Because $zoom$ was not set the zoom remains at whatever the
+user had it set to.
+""")
+
+eg("""
+canvas.bookmarkPage(‘my_bookmark’,fitType=”XYZ”,left=0,top=200,zoom=2)
+""")
+
+disc("""This time zoom is set to expand the page 2X its normal size.""")
+
+disc("""
+Note  : Both $XYZ$ and $FitR$ fitTypes require that their positional parameters
+($top, bottom, left, right$) be specified in terms of the default user space.
+They ignore any geometric transform in effect in the canvas graphic state.
+""")
+
+
 
 pencilnote()
 
 disc("""
-<i>Note:</i> The horizontal position $yhorizontal$ must be specified in terms
-of the <i>default user space</i>.  In particular $bookmarkHorizontalAbsolute$
-ignores any modified geometric transform in effect in the canvas graphics state.
+<i>Note:</i> Two previous bookmark methods are supported but deprecated now
+that bookmarkPage is so general.  These are $bookmarkHorizontalAbsolute$
+and $bookmarkHorizontal$. 
 """)
 
+heading3("Defining internal links")
 eg("""
  canvas.linkAbsolute(contents, destinationname, Rect=None, addtopage=1, name=None, **kw)
  """)
@@ -88,12 +156,13 @@ For example the code
 """)
 
 eg("""
-    canvas.bookmarkHorizontalAbsolute("Meaning_of_life", 5*inch)
+    canvas.bookmarkPage("Meaning_of_life")
 """)
 
 disc("""
-defines horizontal location on the currently drawn page with the identifier
-$Meaning_of_life$.  And the invocation (???)
+defines a location as the whole of the current page with the identifier
+$Meaning_of_life$.  To create a rectangular link to it while drawing a possibly
+different page, we would use this code:
 """)
 
 eg("""
@@ -103,8 +172,7 @@ eg("""
 
 disc("""
 By default during interactive viewing a rectangle appears around the
-link.
-Use the keyword argument $Border='[0 0 0]'$ to
+link. Use the keyword argument $Border='[0 0 0]'$ to
 suppress the visible rectangle around the during viewing link.
 For example
 """)

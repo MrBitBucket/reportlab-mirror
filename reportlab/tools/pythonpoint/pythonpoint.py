@@ -589,7 +589,15 @@ class PPPara:
         self.rawtext = ''
         self.style = None
 
+    def escapeAgain(self, text):
+        """The XML has been parsed once, so '&gt;' became '>'
+        in rawtext.  We need to escape this to get back to
+        something the Platypus parser can accept"""
+        pass
+    
     def getFlowable(self):
+        print 'rawText for para:'
+        print repr(self.rawtext)
         p = Paragraph(
                     self.rawtext,
                     getStyles()[self.style],
