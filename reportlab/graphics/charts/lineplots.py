@@ -44,11 +44,25 @@ class Shader(_SetKeyWordArgs):
         if not c[0]: c[0] = getattr(lp,'fillColor',colors.white)
         if not c[1]: c[1] = rowColor
 
+class NoFiller:
+    def fill(self, lp, g, rowNo, rowColor, points):
+        pass
+
 class Filler:
     '''mixin providing simple polygon fill'''
+    _attrMap = AttrMap(
+        fillColor = AttrMapValue(isColorOrNone, desc='filler interior color'),
+        strokeColor = AttrMapValue(isColorOrNone, desc='filler edge color'),
+        strokeWidth = AttrMapValue(isNumberOrNone, desc='filler edge width'),
+        )
+    def __init__(self,**kw):
+        self.__dict__ = kw
+
     def fill(self, lp, g, rowNo, rowColor, points):
-        self.points[:] = points
-        g.add(self)
+        g.add(Polygon(points,
+            fillColor=getattr(self,'fillColor',rowColor),
+            strokeColor=getattr(self,'strokeColor',rowColor),
+            strokeWidth=getattr(self,'strokeWidth',0.1)))
 
 class ShadedPolyFiller(Filler,ShadedPolygon):
     pass
@@ -256,13 +270,13 @@ class LinePlot(PlotArea):
                 for xy in row:
                     points = points + [xy[0], xy[1]]
                 if inFill:
-                    points = points + [inFillX1,inFillY,inFillX0,inFillY]
+                    fpoints = points + [inFillX1,inFillY,inFillX0,inFillY]
                     filler = getattr(rowStyle, 'filler', None)
                     if filler:
-                        filler.fill(self,inFillG,rowNo,rowColor,points)
+                        filler.fill(self,inFillG,rowNo,rowColor,fpoints)
                     else:
-                        inFillG.add(Polygon(points,fillColor=rowColor,strokeColor=rowColor,strokeWidth=0.1))
-                else:
+                        inFillG.add(Polygon(fpoints,fillColor=rowColor,strokeColor=rowColor,strokeWidth=0.1))
+                if inFill in (0,2):
                     line = PolyLine(points,strokeColor=rowColor,strokeLineCap=0,strokeLineJoin=1)
                     if width:
                         line.strokeWidth = width
