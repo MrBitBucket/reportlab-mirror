@@ -14,7 +14,7 @@
 # documentation for any purpose and without fee is hereby granted, provided
 # that the above copyright notice appear in all copies and that both that
 # copyright notice and this permission notice appear in supporting
-# documentation, and that the name of Robinson Analytics not be used
+# documentation, and that the name of ReportLab not be used
 # in advertising or publicity pertaining to distribution of the software
 # without specific, written prior permission. 
 # 
@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.3  2000/02/15 17:55:59  rgbecker
+#	License text fixes
+#
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
-#
-__version__=''' $Id: canvas.py,v 1.2 2000/02/15 15:47:09 rgbecker Exp $ '''
+#	
+__version__=''' $Id: canvas.py,v 1.3 2000/02/15 17:55:59 rgbecker Exp $ '''
 """ 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the

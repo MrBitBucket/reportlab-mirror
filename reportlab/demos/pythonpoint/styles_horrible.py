@@ -14,7 +14,7 @@
 # documentation for any purpose and without fee is hereby granted, provided
 # that the above copyright notice appear in all copies and that both that
 # copyright notice and this permission notice appear in supporting
-# documentation, and that the name of Robinson Analytics not be used
+# documentation, and that the name of ReportLab not be used
 # in advertising or publicity pertaining to distribution of the software
 # without specific, written prior permission. 
 # 
@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: styles_horrible.py,v $
-#	Revision 1.1  2000/02/15 15:09:05  rgbecker
-#	Initial revision
+#	Revision 1.2  2000/02/15 17:55:59  rgbecker
+#	License text fixes
 #
-__version__=''' $Id: styles_horrible.py,v 1.1 2000/02/15 15:09:05 rgbecker Exp $ '''
+#	Revision 1.1.1.1  2000/02/15 15:09:05  rgbecker
+#	Initial setup of demos directory and contents.
+#	
+__version__=''' $Id: styles_horrible.py,v 1.2 2000/02/15 17:55:59 rgbecker Exp $ '''
 # style_modern.py
 """This is an example style sheet.  You can create your own, and
 have them loaded by the presentation.  A style sheet is just a

@@ -14,7 +14,7 @@
 # documentation for any purpose and without fee is hereby granted, provided
 # that the above copyright notice appear in all copies and that both that
 # copyright notice and this permission notice appear in supporting
-# documentation, and that the name of Robinson Analytics not be used
+# documentation, and that the name of ReportLab not be used
 # in advertising or publicity pertaining to distribution of the software
 # without specific, written prior permission. 
 # 
@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: monterey.py,v $
-#	Revision 1.1  2000/02/15 15:07:38  rgbecker
-#	Initial revision
+#	Revision 1.2  2000/02/15 17:55:59  rgbecker
+#	License text fixes
 #
-__version__=''' $Id: monterey.py,v 1.1 2000/02/15 15:07:38 rgbecker Exp $ '''
+#	Revision 1.1.1.1  2000/02/15 15:07:38  rgbecker
+#	Initial setup of demos directory and contents.
+#	
+__version__=''' $Id: monterey.py,v 1.2 2000/02/15 17:55:59 rgbecker Exp $ '''
 """This builds the document for my talk at Monterey."""
 
 from piddle import *

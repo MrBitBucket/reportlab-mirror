@@ -14,7 +14,7 @@
 # documentation for any purpose and without fee is hereby granted, provided
 # that the above copyright notice appear in all copies and that both that
 # copyright notice and this permission notice appear in supporting
-# documentation, and that the name of Robinson Analytics not be used
+# documentation, and that the name of ReportLab not be used
 # in advertising or publicity pertaining to distribution of the software
 # without specific, written prior permission. 
 # 
@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.3  2000/02/15 17:55:59  rgbecker
+#	License text fixes
+#
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
-#
-__version__=''' $Id: tables.py,v 1.2 2000/02/15 15:47:09 rgbecker Exp $ '''
+#	
+__version__=''' $Id: tables.py,v 1.3 2000/02/15 17:55:59 rgbecker Exp $ '''
 """
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
