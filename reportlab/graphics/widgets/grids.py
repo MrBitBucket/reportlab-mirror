@@ -220,6 +220,101 @@ class Grid(Widget):
         return group
 
 
+class DoubleGrid(Widget):
+    """This combines two ordinary Grid objects orthogonal to each other.
+    """
+
+    _attrMap = AttrMap(
+        x = AttrMapValue(isNumber,
+            desc="The grid's lower-left x position."),
+        y = AttrMapValue(isNumber,
+            desc="The grid's lower-left y position."),
+        width = AttrMapValue(isNumber,
+            desc="The grid's width."),
+        height = AttrMapValue(isNumber,
+            desc="The grid's height."),
+
+        grid0 = AttrMapValue(None,
+            desc="The first grid component."),
+        grid1 = AttrMapValue(None,
+            desc="The second grid component."),
+        )
+
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+        self.width = 100 
+        self.height = 100 
+
+        g0 = Grid()        
+        g0.x = self.x
+        g0.y = self.y
+        g0.width = self.width 
+        g0.height = self.height 
+        g0.orientation = 'vertical' 
+        g0.useLines = 1
+        g0.useRects = 0
+        g0.delta = 20
+        g0.delta0 = 0
+        g0.deltaSteps = []
+        g0.fillColor = colors.white
+        g0.stripeColors = [colors.red, colors.green, colors.blue]
+        g0.strokeColor = colors.black
+        g0.strokeWidth = 1
+
+        g1 = Grid()        
+        g1.x = self.x
+        g1.y = self.y
+        g1.width = self.width 
+        g1.height = self.height 
+        g1.orientation = 'horizontal' 
+        g1.useLines = 1
+        g1.useRects = 0
+        g1.delta = 20
+        g1.delta0 = 0
+        g1.deltaSteps = []
+        g1.fillColor = colors.white
+        g1.stripeColors = [colors.red, colors.green, colors.blue]
+        g1.strokeColor = colors.black
+        g1.strokeWidth = 1
+
+        self.grid0 = g0
+        self.grid1 = g1
+
+
+##    # This give an AttributeError:
+##    #   DoubleGrid instance has no attribute 'grid0'
+##    def __setattr__(self, name, value):
+##        if name in ('x', 'y', 'width', 'height'):
+##            setattr(self.grid0, name, value)
+##            setattr(self.grid1, name, value)
+
+
+    def demo(self):
+        D = Drawing(100, 100)
+        g = DoubleGrid()
+        D.add(g)
+        return D
+
+
+    def draw(self):
+        group = Group()
+
+        g0, g1 = self.grid0, self.grid1
+
+        # Order groups to make sure both v and h lines
+        # are visible (works only when there is only
+        # one kind of stripes, v or h).
+        if g0.useRects == 1 and g1.useRects == 0:       
+            group.add(g0.draw())
+            group.add(g1.draw())
+        else:
+            group.add(g1.draw())
+            group.add(g0.draw())
+
+        return group
+
+
 class ShadedRect(Widget):
     """This makes a rectangle with shaded colors between two colors.
 
