@@ -1,8 +1,43 @@
-#! /usr/bin/env python
+#!/bin/env python
+###############################################################################
+#
+#	ReportLab Public License Version 1.0
+#
+#   Except for the change of names the spirit and intention of this
+#   license is the same as that of Python
+#
+#	(C) Copyright ReportLab Inc. 1998-2000.
+#
+#
+# All Rights Reserved
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted, provided
+# that the above copyright notice appear in all copies and that both that
+# copyright notice and this permission notice appear in supporting
+# documentation, and that the name of ReportLab not be used
+# in advertising or publicity pertaining to distribution of the software
+# without specific, written prior permission. 
+# 
+#
+# Disclaimer
+#
+# ReportLab Inc. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+# SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
+# IN NO EVENT SHALL ReportLab BE LIABLE FOR ANY SPECIAL, INDIRECT
+# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+# PERFORMANCE OF THIS SOFTWARE. 
+#
+###############################################################################
+#	$Log: cvs_check.py,v $
+#	Revision 1.2  2000/02/15 17:57:39  rgbecker
+#	License files added
+#
+__version__=''' $Id: cvs_check.py,v 1.2 2000/02/15 17:57:39 rgbecker Exp $ '''
 '''
 script for testing ReportLab anonymous cvs download and test
-
-12/Feb/2000	RGB Initial Version tested on Win95
 '''
 
 _globals=globals().copy()			#make a copy of out globals
@@ -43,8 +78,8 @@ def recursive_rmdir(d):
 				recursive_rmdir(fn)
 		os.rmdir(d)
 
-def cvs_checkout():
-	recursive_rmdir(_testdir)
+def cvs_checkout(d,u):
+	recursive_rmdir(d)
 
 	cvs = find_exe('cvs')
 	if cvs is None:
@@ -52,11 +87,11 @@ def cvs_checkout():
 		os.exit(1)
 
 	have_tmp = os.path.isdir(_tmp)
-	os.makedirs(_testdir)
-	os.environ['HOME']=_testdir
+	os.makedirs(d)
+	os.environ['HOME']=d
 	os.environ['CVSROOT']=':pserver:anonymous@cvs.reportlab.sourceforge.net:/cvsroot/reportlab'
-	os.chdir(_testdir)
-	f = open(os.path.join(_testdir,'.cvspass'),'w')
+	os.chdir(d)
+	f = open(os.path.join(d,'.cvspass'),'w')
 	f.write(_cvspass+'\n')
 	f.close()
 	i=os.popen(cvs+' -z7 -d:pserver:anonymous@cvs.reportlab.sourceforge.net:/cvsroot/reportlab co reportlab','r')
@@ -66,7 +101,7 @@ def cvs_checkout():
 		print 'there was an error during the download phase'
 		sys.exit(1)
 
-def do_tests():
+def do_tests(d):
 	global _ecount
 
 	def find_test_files(L,d,N):
@@ -75,12 +110,12 @@ def do_tests():
 		for n in filter(lambda n: n[-3:]=='.py',N):
 			L.append(os.path.normcase(os.path.normpath(os.path.join(d,n))))
 
-	fn = os.path.normcase(os.path.normpath(os.path.join(_testdir,'reportlab')))
+	fn = os.path.normcase(os.path.normpath(os.path.join(d,'reportlab')))
 	if fn not in sys.path: sys.path.insert(0,fn)
 	test_files = []
 	os.path.walk(fn,find_test_files,test_files)
 	for t in test_files:
-		fn =os.path.normcase(os.path.normpath(os.path.join(_testdir,t)))
+		fn =os.path.normcase(os.path.normpath(os.path.join(d,t)))
 		bn = os.path.basename(fn)
 		print '##### Test %s starting' % bn
 		try:
@@ -92,7 +127,7 @@ def do_tests():
 			_ecount = _ecount + 1
 
 if __name__=='__main__':
-	legal_options = ['-help','-nocvs','-notest','-clean', '-fclean']
+	legal_options = ['-dir', '-help','-nocvs','-notest','-clean', '-fclean']
 	def usage(code=0, msg=''):
 		f = code and sys.stderr or sys.stdout
 		if msg is not None: f.write(msg+'\n')
@@ -102,26 +137,36 @@ Usage
 	python reportlab_cvs_check.py [options]
 
 	option
-	-help	print this message and exit
-	-nocvs	don't do cvs checkout
-	-notest don't carry out tests
-	-clean	cleanup if no errors
-	-fclean	cleanup even if some errors occur
+	-help		print this message and exit
+	-dir path	specify directory to test implies -nocvs
+	-nocvs		don't do cvs checkout
+	-notest 	don't carry out tests
+	-clean		cleanup if no errors
+	-fclean		cleanup even if some errors occur
 ''')
 		sys.exit(code)
 
+	dir=_testdir
+	dflag = 0
 	options = sys.argv[1:]
+	sys.argv[1:]=[]
 	for k in options:
 		if k not in legal_options:
-			usage(code=1,msg="unknown option '%s'" % k)
+			if dflag:
+				dir = k
+				dflag = 0
+			else:
+				usage(code=1,msg="unknown option '%s'" % k)
+		else:
+			dflag = k=='-dir'
 
 	if '-help' in options: usage()
 
-	if '-nocvs' not in options:
-		cvs_checkout()
+	if '-nocvs' not in options and dir is _testdir:
+		cvs_checkout(dir)
 
 	if '-notest' not in options:
-		do_tests()
+		do_tests(dir)
 
-	if (_ecount==0 and '-clean' in options) or '-fclean' in options:
-		recursive_rmdir(_testdir)
+	if dir is _testdir and ((_ecount==0 and '-clean' in options) or '-fclean' in options):
+		recursive_rmdir(dir)
