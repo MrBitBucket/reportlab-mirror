@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pdfbase_pdfmetrics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_pdfmetrics.py,v 1.7 2001/05/30 15:10:56 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_pdfmetrics.py,v 1.8 2002/04/09 11:46:43 johnprecedo Exp $
 #test_pdfbase_pdfmetrics_widths
 """
 Various tests for PDF metrics.
@@ -24,20 +24,21 @@ def decoratePage(c, header):
     c.drawString(72, 800, header)
     c.drawCentredString(297, 54, 'Page %d' % c.getPageNumber())
 
-def makeWidthTestForAllGlyphs(canv, fontName):
+def makeWidthTestForAllGlyphs(canv, fontName, outlining=1):
     """New page, then runs down doing all the glyphs in one encoding"""
-    canv.setFont('Helvetica-Bold', 20)
-    title = 'Glyph Width Test for font %s' % fontName
+    thisFont = pdfmetrics.getFont(fontName)
+    canv.setFont('Helvetica-Bold', 12)
+    title = 'Glyph Metrics Test for font %s, ascent=%s, descent=%s' % (fontName, str(thisFont.face.ascent), str(thisFont.face.descent))
     canv.drawString(80, 750,  title)
     canv.setFont('Helvetica-Oblique',10)
     canv.drawCentredString(297, 54, 'Page %d' % canv.getPageNumber())
 
-    # put it in the outline
-    canv.bookmarkPage('GlyphWidths:' + fontName)
-    canv.addOutlineEntry(fontName,'GlyphWidths:' + fontName, level=1)
+    if outlining:
+        # put it in the outline
+        canv.bookmarkPage('GlyphWidths:' + fontName)
+        canv.addOutlineEntry(fontName,'GlyphWidths:' + fontName, level=1)
 
     y = 720
-    thisFont = pdfmetrics.getFont(fontName)
     widths = thisFont.widths
     glyphNames = thisFont.encoding.vector
     # need to get the right list of names for the font in question
