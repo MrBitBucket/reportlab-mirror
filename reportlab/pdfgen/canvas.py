@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.84 2001/07/11 09:21:53 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.84 2001/07/11 09:21:53 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.85 2001/07/17 15:34:10 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.85 2001/07/17 15:34:10 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -1022,7 +1022,7 @@ class Canvas:
                 self._fillColorRGB = aColor
                 self._code.append('%s rg' % fp_str(aColor) )
             elif l==4:
-                self.setFillColorCMYK(self, aColor[0], aColor[1], aColor[2], aColor[3])
+                self.setFillColorCMYK(aColor[0], aColor[1], aColor[2], aColor[3])
             else:
                 raise 'Unknown color', str(aColor)
         elif type(aColor) is StringType:
@@ -1047,11 +1047,11 @@ class Canvas:
                 self._strokeColorRGB = aColor
                 self._code.append('%s RG' % fp_str(aColor) )
             elif l==4:
-                self.setStrokeColorCMYK(self, aColor[0], aColor[1], aColor[2], aColor[3])
+                self.setStrokeColorCMYK(aColor[0], aColor[1], aColor[2], aColor[3])
             else:
                 raise 'Unknown color', str(aColor)
         elif type(aColor) is StringType:
-            self.setFillColor(toColor(aColor))
+            self.setStrokeColor(toColor(aColor))
         else:
             raise 'Unknown color', str(aColor)
 
