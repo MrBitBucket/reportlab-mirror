@@ -1681,6 +1681,11 @@ class Para(Flowable):
         font = style.bulletFontName
         size = style.bulletFontSize
         program.append( ("bullet", text, indent, font, size) )
+    def compile_tt(self, attdict, content, extra, program):
+        (f,b,i) = self.shiftfont(program, face="Courier")
+        for e in content:
+            self.compileComponent(e, program)
+        self.shiftfont(program, face=f)
     def compile_greek(self, attdict, content, extra, program):
         self.compile_font({"face": "symbol"}, content, extra, program)
     def compile_evalString(self, attdict, content, extra, program):
@@ -1928,6 +1933,7 @@ more text and even more text and on and on and so forth
 more text and even more text and on and on and so forth
 more text and even more text and on and on and so forth
 more text and even more text and on and on and so forth
+more text <tt>monospaced</tt> and back to normal
 
     <ul>
         <li> this is an element at 2
