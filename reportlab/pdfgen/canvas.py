@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.38  2000/05/26 09:44:40  rgbecker
+#	generalised colors slightly
+#
 #	Revision 1.37  2000/05/23 14:06:45  andy_robinson
 #	Preformatted objects now know how to split themselves.
-#
+#	
 #	Revision 1.36  2000/05/18 17:11:12  aaron_watters
 #	removed 0's on stable linkage and outline operations.
 #	
@@ -141,7 +144,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.37 2000/05/23 14:06:45 andy_robinson Exp $ '''
+__version__=''' $Id: canvas.py,v 1.38 2000/05/26 09:44:40 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -187,7 +190,7 @@ from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
-from reportlab.lib.colors import ColorType
+from reportlab.lib.colors import ColorType, toColor
 
 try:
 	import zlib
@@ -909,6 +912,8 @@ class Canvas:
                 self.setFillColorCMYK(self, aColor[0], aColor[1], aColor[2], aColor[3])
             else:
                 raise 'Unknown color', str(aColor)
+        elif type(aColor) is StringType:
+			self.setFillColor(colors.toColor(aColor))
         else:
             raise 'Unknown color', str(aColor)
 
@@ -928,6 +933,8 @@ class Canvas:
                 self.setStrokeColorCMYK(self, aColor[0], aColor[1], aColor[2], aColor[3])
             else:
                 raise 'Unknown color', str(aColor)
+        elif type(aColor) is StringType:
+			self.setFillColor(colors.toColor(aColor))
         else:
             raise 'Unknown color', str(aColor)
 
