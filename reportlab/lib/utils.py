@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.72 2004/04/01 16:59:22 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.72 2004/04/01 16:59:22 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.73 2004/05/07 15:28:33 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.73 2004/05/07 15:28:33 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -570,12 +570,12 @@ class DebugMemo:
     in addition to the payload variables the dump records many useful bits
     of information which are also printed in the show() method.
     '''
-    def __init__(self,fn='rl_dbgmemo.dbg',mode='w',getScript=1,modules=(),**kw):
+    def __init__(self,fn='rl_dbgmemo.dbg',mode='w',getScript=1,modules=(),capture_traceback=1, **kw):
         import time, socket
         self.fn = fn
         if mode!='w': return
         self.store = store = {}
-        if sys.exc_info() != (None,None,None):
+        if capture_traceback and sys.exc_info() != (None,None,None):
             import traceback
             s = getStringIO()
             traceback.print_exc(None,s)
