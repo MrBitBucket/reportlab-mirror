@@ -1,12 +1,12 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_widgetbase_tpc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_widgetbase_tpc.py,v 1.4 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_widgetbase_tpc.py,v 1.5 2004/03/26 11:37:09 rgbecker Exp $
 """
 Tests for TypedPropertyCollection class.
 """
 
-import os, sys, copy, tempfile
+import os, sys, copy
 from os.path import join, basename, splitext
 
 from reportlab.test import unittest

@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2003
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_indents.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_indents.py,v 1.1 2003/05/01 22:46:17 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_indents.py,v 1.2 2004/03/26 11:36:39 rgbecker Exp $
 """Tests for context-dependent indentation
 """
 
-import sys, os, tempfile, random
+import sys, os, random
 from string import split, strip, join, whitespace
 from operator import truth
 from types import StringType, ListType
