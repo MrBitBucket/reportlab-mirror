@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPDF.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.10 2001/07/12 14:16:20 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.11 2001/07/12 22:10:22 jvr Exp $
 # renderPDF - draws Drawings onto a canvas
 """Usage:
     import renderpdf
@@ -265,7 +265,7 @@ def drawToFile(d,fn,msg, showBoundary=1, autoSize=1):
         
     if autoSize:
         c.setPageSize((d.width, d.height))
-        draw(d, c, 0, 0)
+        draw(d, c, 0, 0, showBoundary=showBoundary)
     else:
     #show with a title
         c.setFont('Times-Roman', 12)
