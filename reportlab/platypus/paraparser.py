@@ -32,16 +32,19 @@
 #
 ###############################################################################
 #	$Log: paraparser.py,v $
+#	Revision 1.16  2000/05/15 12:15:29  rgbecker
+#	CDATA handler added
+#
 #	Revision 1.15  2000/05/13 16:04:06  rgbecker
 #	made size alias of fontsize for <para>
-#
+#	
 #	Revision 1.14  2000/05/11 14:05:17  rgbecker
 #	Use reportlab.lib.xmllib
 #	
 #	Revision 1.13  2000/04/25 13:07:57  rgbecker
 #	Added license
 #	
-__version__=''' $Id: paraparser.py,v 1.15 2000/05/13 16:04:06 rgbecker Exp $ '''
+__version__=''' $Id: paraparser.py,v 1.16 2000/05/15 12:15:29 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -400,6 +403,9 @@ class ParaParser(xmllib.XMLParser):
 
 		self.fragList.append(frag)
 
+	def handle_cdata(self,data):
+		self.handle_data(data)
+
 	#----------------------------------------------------------------
 	def parse(self, text, style):
 		"""Given a formatted string will return a list of
@@ -536,3 +542,4 @@ how carefully Aeaean Circe warned me to shun the island of the blessed
 sun-god, for it was here, she said, that our worst danger would lie.
 Head the ship, therefore, away from the island.''')
 	check_text('''&lt; &gt; &amp; &quot; &apos;''')
+	check_text('''<![CDATA[<>&'"]]>''')
