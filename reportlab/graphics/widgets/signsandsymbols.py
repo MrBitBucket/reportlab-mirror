@@ -10,26 +10,26 @@ from reportlab.graphics import renderPDF
 """This file is a collection of widgets.
 
 Widgets include:
-- ETriangle (an equilateral triangle),
-- RTriangle (a right angled triangle),
-- Octagon,
-- Crossbox,
-- Tickbox,
-- SmileyFace,
-- StopSign,
-- NoEntry,
-- NotAllowed (the red roundel from 'no smoking' signs),
-- NoSmoking,
-- DangerSign (a black exclamation point in a yellow triangle),
-- YesNo (returns a tickbox or a crossbox depending on a testvalue),
-- FloppyDisk,
-- ArrowOne, and
-- ArrowTwo
+- ETriangle0 (an equilateral triangle),
+- RTriangle0 (a right angled triangle),
+- Octagon0,
+- Crossbox0,
+- Tickbox0,
+- SmileyFace0,
+- StopSign0,
+- NoEntry0,
+- NotAllowed0 (the red roundel from 'no smoking' signs),
+- NoSmoking0,
+- DangerSign0 (a black exclamation point in a yellow triangle),
+- YesNo0 (returns a tickbox or a crossbox depending on a testvalue),
+- FloppyDisk0,
+- ArrowOne0, and
+- ArrowTwo0
 
 """
 
 
-class ETriangle(Widget):
+class ETriangle0(Widget):
     """This draws an equilateral triangle.
 
         possible attributes:
@@ -53,15 +53,15 @@ class ETriangle(Widget):
         self.strokecolor = None
 
     def demo(self):
-        D = shapes.Drawing(140, 140)
-        et = ETriangle()
+        D = shapes.Drawing(200, 100)
+        et = ETriangle0()
         et.x=20
         et.y=20
         et.draw()
         D.add(et)
         labelFontSize = 10
         D.add(shapes.String(et.x+(et.size/2),(et.y-(1.2*labelFontSize)),
-                            'Sample ETriangle', fillColor=colors.black, textAnchor='middle',
+                            self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
      
@@ -82,7 +82,7 @@ class ETriangle(Widget):
         g.add(triangle)
         return g
 
-class RTriangle(Widget):
+class RTriangle0(Widget):
     """This draws a right-angled triangle.
 
         possible attributes:
@@ -106,15 +106,15 @@ class RTriangle(Widget):
         self.strokecolor = None
 
     def demo(self):
-        D = shapes.Drawing(140, 140)
-        et = ETriangle()
+        D = shapes.Drawing(200, 100)
+        et = ETriangle0()
         et.x=20
         et.y=20
         et.draw()
         D.add(et)
         labelFontSize = 10
         D.add(shapes.String(et.x+(et.size/2),(et.y-(1.2*labelFontSize)),
-                            'Sample RTriangle', fillColor=colors.black, textAnchor='middle',
+                            self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
      
@@ -135,8 +135,8 @@ class RTriangle(Widget):
         g.add(triangle)
         return g  
 
-class Octagon(Widget):
-    """This draws an Octagon.
+class Octagon0(Widget):
+    """This widget draws an Octagon.
 
         possible attributes:
         'x', 'y', 'size', 'color', 'strokecolor'
@@ -159,15 +159,15 @@ class Octagon(Widget):
         self.strokecolor = None
         
     def demo(self):
-        D = shapes.Drawing(140, 140)
-        o = Octagon()
+        D = shapes.Drawing(200, 100)
+        o = Octagon0()
         o.x=20
         o.y=20
         o.draw()
         D.add(o)
         labelFontSize = 10
         D.add(shapes.String(o.x+(o.size/2),(o.y-(1.2*labelFontSize)),
-                            'Sample Octagon', fillColor=colors.black, textAnchor='middle',
+                            self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
 
@@ -177,7 +177,7 @@ class Octagon(Widget):
         s = self.size  # abbreviate as we will use this a lot 
         g = shapes.Group() 
         
-        # stop-sign specific bits
+        # Octagon specific bits
         athird=s/3
 
         octagon = shapes.Polygon(points=[self.x+athird, self.y,
@@ -194,7 +194,7 @@ class Octagon(Widget):
         g.add(octagon)
         return g
 
-class Crossbox(Widget):
+class Crossbox0(Widget):
     """This draws a black box with a red cross in it - a 'checkbox'.
 
         possible attributes:
@@ -220,15 +220,15 @@ class Crossbox(Widget):
         self.crosswidth = 10
         
     def demo(self):
-        D = shapes.Drawing(140, 140)
-        cb = Crossbox()
+        D = shapes.Drawing(200, 200)
+        labelFontSize = 10
+        cb = Crossbox0()
         cb.x=20
         cb.y=20
         cb.draw()
         D.add(cb)
-        labelFontSize = 10
         D.add(shapes.String(cb.x+(cb.size/2),(cb.y-(1.2*labelFontSize)),
-                            'Sample Crossbox', fillColor=colors.black, textAnchor='middle',
+                            self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
      
@@ -259,7 +259,7 @@ class Crossbox(Widget):
         return g
 
 
-class Tickbox(Widget):
+class Tickbox0(Widget):
     """This draws a black box with a red tick in it - another 'checkbox'.
 
         possible attributes:
@@ -285,15 +285,15 @@ class Tickbox(Widget):
         self.tickwidth = 10
         
     def demo(self):
-        D = shapes.Drawing(140, 140)
-        tb = Tickbox()
+        D = shapes.Drawing(200, 100)
+        tb = Tickbox0()
         tb.x=20
         tb.y=20
         tb.draw()
         D.add(tb)
         labelFontSize = 10
         D.add(shapes.String(tb.x+(tb.size/2),(tb.y-(1.2*labelFontSize)),
-                            'Sample Tickbox', fillColor=colors.black, textAnchor='middle',
+                            self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
 
@@ -319,7 +319,7 @@ class Tickbox(Widget):
 
         return g
 
-class SmileyFace(Widget):
+class SmileyFace0(Widget):
     """This draws a classic smiley face.
     
         possible attributes:
@@ -339,15 +339,15 @@ class SmileyFace(Widget):
         self.size = 100 
         
     def demo(self):
-        D = shapes.Drawing(140, 140)
-        sf = SmileyFace()
+        D = shapes.Drawing(200, 100)
+        sf = SmileyFace0()
         sf.x=20
         sf.y=20
         sf.draw()
         D.add(sf)
         labelFontSize = 10
-        D.add(shapes.String(ne.x+(ne.size/2),(ne.y-(1.2*labelFontSize)),
-                            'Sample SmileyFace', fillColor=colors.black, textAnchor='middle',
+        D.add(shapes.String(sf.x+(sf.size/2),(sf.y-(1.2*labelFontSize)),
+                            self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
 
@@ -383,7 +383,6 @@ class SmileyFace(Widget):
         degreedelta = 1
         pointslist = []
         a = pointslist.append
-#        a(centerx); a(centery)
         from math import sin, cos, pi
         degreestoradians = pi/180.0
         radiansdelta = degreedelta*degreestoradians
@@ -409,7 +408,7 @@ class SmileyFace(Widget):
 
 
 
-class StopSign(Widget):
+class StopSign0(Widget):
     """This draws a (British) stop sign.
 
         possible attributes:
@@ -429,15 +428,15 @@ class StopSign(Widget):
         self.size = 100 
         
     def demo(self):
-        D = shapes.Drawing(140, 140)
-        ss = StopSign()
+        D = shapes.Drawing(200, 100)
+        ss = StopSign0()
         ss.x=20
         ss.y=20
         ss.draw()
         D.add(ss)
         labelFontSize = 10
         D.add(shapes.String(ss.x+(ss.size/2),(ss.y-(1.2*labelFontSize)),
-                            'Sample StopSign', fillColor=colors.black, textAnchor='middle',
+                            self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
 
@@ -483,7 +482,7 @@ class StopSign(Widget):
         return g
 
 
-class NoEntry(Widget):
+class NoEntry0(Widget):
     """This draws a (British) No Entry sign - a red circle with a white line on it.
     
         possible attributes:
@@ -503,15 +502,15 @@ class NoEntry(Widget):
         self.size = 100 
         
     def demo(self):
-        D = shapes.Drawing(140, 140)
-        ne = NoEntry()
+        D = shapes.Drawing(200, 100)
+        ne = NoEntry0()
         ne.x=20
         ne.y=20
         ne.draw()
         D.add(ne)
         labelFontSize = 10
         D.add(shapes.String(ne.x+(ne.size/2),(ne.y-(1.2*labelFontSize)),
-                            'Sample NoEntry', fillColor=colors.black, textAnchor='middle',
+                            self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
 
@@ -545,7 +544,7 @@ class NoEntry(Widget):
 
         return g
 
-class NotAllowed(Widget):
+class NotAllowed0(Widget):
     """This draws a 'forbidden' roundel (as used in the no-smoking sign).
     
         possible attributes:
@@ -565,15 +564,15 @@ class NotAllowed(Widget):
         self.size = 100 
         
     def demo(self):
-        D = shapes.Drawing(140, 140)
-        na = NotAllowed()
+        D = shapes.Drawing(200, 100)
+        na = NotAllowed0()
         na.x=20
         na.y=20
         na.draw()
-        D.add(ne)
+        D.add(na)
         labelFontSize = 10
-        D.add(shapes.String(ne.x+(ne.size/2),(ne.y-(1.2*labelFontSize)),
-                            'Sample NotAllowed', fillColor=colors.black, textAnchor='middle',
+        D.add(shapes.String(na.x+(na.size/2),(na.y-(1.2*labelFontSize)),
+                            self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
 
@@ -624,7 +623,7 @@ class NotAllowed(Widget):
         return g
 
 
-class NoSmoking(NotAllowed):
+class NoSmoking0(NotAllowed0):
     """This draws a no-smoking sign.
     
         possible attributes:
@@ -644,15 +643,15 @@ class NoSmoking(NotAllowed):
         self.size = 100 
         
     def demo(self):
-        D = shapes.Drawing(140, 140)
-        na = StopSign()
+        D = shapes.Drawing(200, 100)
+        na = NoSmoking0()
         na.x=20
         na.y=20
         na.draw()
-        D.add(ne)
+        D.add(na)
         labelFontSize = 10
-        D.add(shapes.String(ne.x+(ne.size/2),(ne.y-(1.2*labelFontSize)),
-                            'Sample NoSmoking', fillColor=colors.black, textAnchor='middle',
+        D.add(shapes.String(na.x+(na.size/2),(na.y-(1.2*labelFontSize)),
+                            self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
 
@@ -694,39 +693,17 @@ class NoSmoking(NotAllowed):
         newx= newx+(s/35)
         g.add(cigarrette4)
             
-        roundel = NotAllowed()
+        roundel = NotAllowed0()
         roundel.draw()
         roundel.x = self.x
         roundel.y = self.y
         roundel.size = self.size
         g.add(roundel)
 
-            
-
-##        cigarrette3 = shapes.Rect(x = newx, y = (self.y+(s/2)-(s/8)), width = (s/64), height =(s/16),
-##               fillColor = colors.orangered,
-##               strokeColor = None,
-##               strokeWidth=0)
-##        newx= newx+(s/32)
-##        g.add(cigarrette3)
-
-
-##        cigarrette3 = shapes.Rect(x = ((self.x+(s/2)-(s/4))), y = (self.y+(s/2)-(s/8)), width = (s/2), height =(s/4),
-##               fillColor = colors.orangered,
-##               strokeColor = Nonegray,
-##               strokeWidth=0)
-##        g.add(cigarrette1)
-##
-##        cigarrette4 = shapes.Rect(x = ((self.x+(s/2)-(s/4))), y = (self.y+(s/2)-(s/8)), width = (s/2), height =(s/4),
-##               fillColor = colors.orangered,
-##               strokeColor = None,
-##               strokeWidth=0)
-##        g.add(cigarrette1)
-
         return g
 
 
-class DangerSign(Widget):
+class DangerSign0(Widget):
     """This draws a 'danger' sign: a yellow box with a black exclamation point.
 
         possible attributes:
@@ -752,15 +729,15 @@ class DangerSign(Widget):
         self.exmarkWidth = self.size*0.125
 
     def demo(self):
-        D = shapes.Drawing(140, 140)
-        ds = DangerSign()
+        D = shapes.Drawing(200, 100)
+        ds = DangerSign0()
         ds.x=20
         ds.y=20
         ds.draw()
         D.add(ds)
         labelFontSize = 10
         D.add(shapes.String(ds.x+(ds.size/2),(ds.y-(1.2*labelFontSize)),
-                            'Sample Dangersign', fillColor=colors.black, textAnchor='middle',
+                            self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
      
@@ -816,7 +793,7 @@ class DangerSign(Widget):
         return g
 
 
-class YesNo(Widget):
+class YesNo0(Widget):
     """This widget draw a tickbox or crossbox depending on 'testValue'.
 
         If this widget is supplied with a 'True' or 1 as a value for
@@ -847,10 +824,10 @@ class YesNo(Widget):
 
     def draw(self):
         if self.testValue:
-            yn=Tickbox()
+            yn=Tickbox0()
             yn.tickColor=self.tickcolor
         else:
-            yn=Crossbox()
+            yn=Crossbox0()
             yn.crossColor=self.crosscolor
         yn.x=self.x
         yn.y=self.y
@@ -860,24 +837,24 @@ class YesNo(Widget):
 
         
     def demo(self):
-        D = shapes.Drawing(140, 140)
-        yn = YesNo()
+        D = shapes.Drawing(200, 100)
+        yn = YesNo0()
         yn.x = 20
         yn.y = 20
         yn.testValue = 1
         yn.draw()
         D.add(yn)
         labelFontSize = 10
-        D.add(shapes.String(cb.x+(cb.size/2),(cb.y-(1.2*labelFontSize)),
-                            'Sample YesNo', fillColor=colors.black, textAnchor='middle',
+        D.add(shapes.String(yn.x+(yn.size/2),(yn.y-(1.2*labelFontSize)),
+                            self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
      
-class FloppyDisk(Widget):
+class FloppyDisk0(Widget):
     """This widget draws an icon of a floppy disk.
 
         possible attributes:
-        'x', 'y', 'size', 'exmarkColor', 'backColor', 'exmarkWidth'
+        'x', 'y', 'size', 'diskcolor'
 
         """
 
@@ -895,15 +872,15 @@ class FloppyDisk(Widget):
         self.diskColor = colors.black
 
     def demo(self):
-        D = shapes.Drawing(140, 140)
-        fd = FloppyDisk()
+        D = shapes.Drawing(200, 100)
+        fd = FloppyDisk0()
         fd.x=20
         fd.y=20
         fd.draw()
-        D.add(ds)
+        D.add(fd)
         labelFontSize = 10
-        D.add(shapes.String(ds.x+(fd.size/2),(fd.y-(1.2*labelFontSize)),
-                            'Sample FloppyDisk', fillColor=colors.black, textAnchor='middle',
+        D.add(shapes.String(fd.x+(fd.size/2),(fd.y-(1.2*labelFontSize)),
+                            self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
      
@@ -965,8 +942,8 @@ class FloppyDisk(Widget):
 
         return g
 
-class ArrowOne(Widget):
-    """This widget draws an arrow.
+class ArrowOne0(Widget):
+    """This widget draws an arrow (style one).
 
         possible attributes:
         'x', 'y', 'size', 'color'
@@ -987,15 +964,15 @@ class ArrowOne(Widget):
         self.color = colors.red
 
     def demo(self):
-        D = shapes.Drawing(140, 140)
-        a1 = ArrowOne()
+        D = shapes.Drawing(200, 100)
+        a1 = ArrowOne0()
         a1.x=20
         a1.y=20
         a1.draw()
         D.add(a1)
         labelFontSize = 10
         D.add(shapes.String(a1.x+(a1.size/2),(a1.y-(1.2*labelFontSize)),
-                            'Sample ArrowOne', fillColor=colors.black, textAnchor='middle',
+                            self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
      
@@ -1023,8 +1000,8 @@ class ArrowOne(Widget):
 
         return g
 
-class ArrowTwo(Widget):
-    """This widget draws an arrow.
+class ArrowTwo0(Widget):
+    """This widget draws an arrow (style two).
 
         possible attributes:
         'x', 'y', 'size', 'color'
@@ -1045,15 +1022,15 @@ class ArrowTwo(Widget):
         self.color = colors.blue
 
     def demo(self):
-        D = shapes.Drawing(140, 140)
-        a2 = ArrowOne()
+        D = shapes.Drawing(200, 100)
+        a2 = ArrowOne0()
         a2.x=20
         a2.y=20
         a2.draw()
         D.add(a2)
         labelFontSize = 10
-        D.add(shapes.String(a1.x+(a1.size/2),(a1.y-(1.2*labelFontSize)),
-                            'Sample ArrowTwo', fillColor=colors.black, textAnchor='middle',
+        D.add(shapes.String(a2.x+(a2.size/2),(a2.y-(1.2*labelFontSize)),
+                            self.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
         return D
      
@@ -1082,122 +1059,125 @@ class ArrowTwo(Widget):
         return g
 
 
-
-    
-if __name__=='__main__':
+def test():
     labelFontSize = 10
     D = shapes.Drawing(450,650)
-    cb = Crossbox()
+    cb = Crossbox0()
     cb.x = 20
     cb.y = 530
     cb.demo()
     D.add(cb)
     D.add(shapes.String(cb.x+(cb.size/2),(cb.y-(1.2*labelFontSize)),
-                            'Sample Crossbox', fillColor=colors.black, textAnchor='middle',
-                            fontSize=labelFontSize))
-    tb = Tickbox()
+                           cb.__class__.__name__, fillColor=colors.black, textAnchor='middle',
+                           fontSize=labelFontSize))
+
+    tb = Tickbox0()
     tb.x = 170
     tb.y = 530
     tb.demo()
     D.add(tb)
     D.add(shapes.String(tb.x+(tb.size/2),(tb.y-(1.2*labelFontSize)),
-                            'Sample Tickbox', fillColor=colors.black, textAnchor='middle',
+                            tb.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
 
 
-    yn = YesNo()
+    yn = YesNo0()
     yn.x = 320
     yn.y = 530
     yn.demo()
     D.add(yn)
+    tempstring = yn.__class__.__name__ + '*'
     D.add(shapes.String(yn.x+(tb.size/2),(yn.y-(1.2*labelFontSize)),
-                            'Sample YesNo *', fillColor=colors.black, textAnchor='middle',
+                            tempstring, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
     D.add(shapes.String(130,6,
                             "(The 'YesNo' widget returns a tickbox if testvalue=1, and a crossbox if testvalue=0)", fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize*0.75))
 
 
-    ss = StopSign()
+    ss = StopSign0()
     ss.x = 20
     ss.y = 400
     ss.demo()
     D.add(ss)
     D.add(shapes.String(ss.x+(ss.size/2), ss.y-(1.2*labelFontSize),
-                            'Sample StopSign', fillColor=colors.black, textAnchor='middle',
+                            ss.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
 
-    ne = NoEntry()
+    ne = NoEntry0()
     ne.x = 170
     ne.y = 400
     ne.demo()
     D.add(ne)
     D.add(shapes.String(ne.x+(ne.size/2),(ne.y-(1.2*labelFontSize)),
-                            'Sample NoEntry', fillColor=colors.black, textAnchor='middle',
+                            ne.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
 
-    sf = SmileyFace()
+    sf = SmileyFace0()
     sf.x = 320
     sf.y = 400
     sf.demo()
     D.add(sf)
     D.add(shapes.String(sf.x+(sf.size/2),(sf.y-(1.2*labelFontSize)),
-                            'Sample SmileyFace', fillColor=colors.black, textAnchor='middle',
+                            sf.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
 
-    ds = DangerSign()
+    ds = DangerSign0()
     ds.x = 20
     ds.y = 270
     ds.demo()
     D.add(ds)
     D.add(shapes.String(ds.x+(ds.size/2),(ds.y-(1.2*labelFontSize)),
-                            'Sample DangerSign', fillColor=colors.black, textAnchor='middle',
+                            ds.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))    
     
-    na = NotAllowed()
+    na = NotAllowed0()
     na.x = 170
     na.y = 270
     na.demo()
     D.add(na)
     D.add(shapes.String(na.x+(na.size/2),(na.y-(1.2*labelFontSize)),
-                            'Sample NotAllowed', fillColor=colors.black, textAnchor='middle',
+                            na.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))    
 
-    ns = NoSmoking()
+    ns = NoSmoking0()
     ns.x = 320
     ns.y = 270
     ns.demo()
     D.add(ns)
     D.add(shapes.String(ns.x+(ns.size/2),(ns.y-(1.2*labelFontSize)),
-                            'Sample NoSmoking', fillColor=colors.black, textAnchor='middle',
+                            ns.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))    
 
-    a1 = ArrowOne()
+    a1 = ArrowOne0()
     a1.x = 20
     a1.y = 140
     a1.demo()
     D.add(a1)
     D.add(shapes.String(a1.x+(a1.size/2),(a1.y-(1.2*labelFontSize)),
-                            'Sample ArrowOne', fillColor=colors.black, textAnchor='middle',
+                            a1.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize)) 
 
-    a2 = ArrowTwo()
+    a2 = ArrowTwo0()
     a2.x = 170
     a2.y = 140
     a2.demo()
     D.add(a2)
     D.add(shapes.String(a2.x+(a2.size/2),(a2.y-(1.2*labelFontSize)),
-                            'Sample ArrowTwo', fillColor=colors.black, textAnchor='middle',
-                            fontSize=labelFontSize)) 
+                            a2.__class__.__name__, fillColor=colors.black, textAnchor='middle',
+                           fontSize=labelFontSize)) 
 
-    fd = FloppyDisk()
+    fd = FloppyDisk0()
     fd.x = 320
     fd.y = 140
     fd.demo()
     D.add(fd)
     D.add(shapes.String(fd.x+(fd.size/2),(fd.y-(1.2*labelFontSize)),
-                            'Sample FloppyDisk', fillColor=colors.black, textAnchor='middle',
+                            fd.__class__.__name__, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize)) 
 
-    renderPDF.drawToFile(D, 'jwidgets_sample.pdf', 'Example Widgets (jwidgets.py)')
-    print 'wrote file: jwidgets_sample.pdf'
+    renderPDF.drawToFile(D, 'signsandsymbols.pdf', 'signsandsymbols.py')
+    print 'wrote file: signsandsymbols.pdf'
+    
+if __name__=='__main__':
+    test()
