@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/textobject.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/textobject.py,v 1.27 2004/03/09 23:24:34 andy_robinson Exp $
-__version__=''' $Id: textobject.py,v 1.27 2004/03/09 23:24:34 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/textobject.py,v 1.28 2004/03/18 12:05:22 rgbecker Exp $
+__version__=''' $Id: textobject.py,v 1.28 2004/03/18 12:05:22 rgbecker Exp $ '''
 __doc__="""
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -55,9 +55,10 @@ class PDFTextObject:
             self._code.append('1 0 0 1 %s Tm' % fp_str(x, y)) #bottom up
         else:
             self._code.append('1 0 0 -1 %s Tm' % fp_str(x, y))  #top down
-        self._x = x
-        self._y = y
-        self._x0 = x #the margin
+
+        # The current cursor position is at the text origin
+        self._x0 = self._x = x
+        self._y0 = self._y = y
 
     def setTextTransform(self, a, b, c, d, e, f):
         "Like setTextOrigin, but does rotation, scaling etc."
@@ -65,26 +66,57 @@ class PDFTextObject:
             c = -c    #reverse bottom row of the 2D Transform
             d = -d
         self._code.append('%s Tm' % fp_str(a, b, c, d, e, f))
-        #we only measure coords relative to present text matrix
-        self._x = e
-        self._y = f
+        
+        # The current cursor position is at the text origin Note that
+        # we aren't keeping track of all the transform on these
+        # coordinates: they are relative to the rotations/sheers
+        # defined in the matrix.
+        self._x0 = self._x = e
+        self._y0 = self._y = f
 
     def moveCursor(self, dx, dy):
-        """Moves to a point dx, dy away from the start of the
-        current line - NOT from the current point! So if
-        you call it in mid-sentence, watch out."""
+        
+        """Starts a new line at an offset dx,dy from the start of the
+        current line. This does not move the cursor relative to the
+        current position, and it changes the current offset of every
+        future line drawn (i.e. if you next do a textLine() call, it
+        will move the cursor to a position one line lower than the
+        position specificied in this call.  """
+
+        # Check if we have a previous move cursor call, and combine
+        # them if possible.
         if self._code and self._code[-1][-3:]==' Td':
             L = string.split(self._code[-1])
             if len(L)==3:
                 del self._code[-1]
             else:
                 self._code[-1] = string.join(L[:-4])
-            dx = dx + float(L[-3])
-            dy = dy - float(L[-2])
+
+            # Work out the last movement
+            lastDx = float(L[-3])
+            lastDy = float(L[-2])
+
+            # Combine the two movement
+            dx += lastDx
+            dy -= lastDy
+
+            # We will soon add the movement to the line origin, so if
+            # we've already done this for lastDx, lastDy, remove it
+            # first (so it will be right when added back again).
+            self._x0 -= lastDx
+            self._y0 -= lastDy
+
+        # Output the move text cursor call.
         self._code.append('%s Td' % fp_str(dx, -dy))
 
+        # Keep track of the new line offsets and the cursor position
+        self._x0 += dx
+        self._y0 += dy
+        self._x = self._x0
+        self._y = self._y0
+
     def setXPos(self, dx):
-        """Moves to a point dx away from the start of the
+        """Starts a new line dx away from the start of the
         current line - NOT from the current point! So if
         you call it in mid-sentence, watch out."""
         self.moveCursor(dx,0)
@@ -92,6 +124,11 @@ class PDFTextObject:
     def getCursor(self):
         """Returns current text position relative to the last origin."""
         return (self._x, self._y)
+
+    def getStartOfLine(self):
+        """Returns a tuple giving the text position of the start of the
+        current line."""
+        return (self._x0, self._y0)
 
     def getX(self):
         """Returns current x position relative to the last origin."""
@@ -282,11 +319,19 @@ class PDFTextObject:
     def textLine(self, text=''):
         """prints string at current point, text cursor moves down.
         Can work with no argument to simply move the cursor down."""
+        
+        # Update the coordinates of the cursor
         self._x = self._x0
         if self._canvas.bottomup:
             self._y = self._y - self._leading
         else:
             self._y = self._y + self._leading
+
+        # Update the location of the start of the line
+        # self._x0 is unchanged
+        self._y0 = self._y
+
+        # Output the text followed by a PDF newline command
         self._code.append('%s T*' % self._formatText(text))
 
     def textLines(self, stuff, trim=1):
@@ -306,13 +351,10 @@ class PDFTextObject:
         else:
             assert 1==0, "argument to textlines must be string,, list or tuple"
 
+        # Output each line one at a time. This used to be a long-hand
+        # copy of the textLine code, now called as a method.
         for line in lines:
-            self._code.append('%s T*' % self._formatText(line))
-            if self._canvas.bottomup:
-                self._y = self._y - self._leading
-            else:
-                self._y = self._y + self._leading
-        self._x = self._x0
+            self.textLine(line)
 
     def __nonzero__(self):
         'PDFTextObject is true if it has something done after the init'
