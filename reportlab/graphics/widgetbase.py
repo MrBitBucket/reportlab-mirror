@@ -181,6 +181,18 @@ class TypedPropertyCollection(PropHolder):
         self.__dict__['_value'] = exampleClass()
         self.__dict__['_children'] = {}
 
+    def wKlassFactory(self,Klass):
+        class WKlass(Klass):
+            def __getattr__(self,name):
+                try:
+                    return self.__class__.__bases__[0].__getattr__(self,name)
+                except:
+                    if self._index and self._parent._children.has_key(self._index) \
+                        and self._parent._children[self._index].__dict__.has_key(name):
+                        return getattr(self._parent._children[self._index],name)
+                    return getattr(self._parent,name)
+        return WKlass
+
     def __getitem__(self, index):
         try:
             return self._children[index]
@@ -189,16 +201,7 @@ class TypedPropertyCollection(PropHolder):
             if _ItemWrapper.has_key(Klass):
                 WKlass = _ItemWrapper[Klass]
             else:
-                class WKlass(Klass):
-                    def __getattr__(self,name):
-                        try:
-                            return self.__class__.__bases__[0].__getattr__(self,name)
-                        except:
-                            if self._index and self._parent._children.has_key(self._index):
-                                if self._parent._children[self._index].__dict__.has_key(name):
-                                    return getattr(self._parent._children[self._index],name)
-                            return getattr(self._parent,name)
-                _ItemWrapper[Klass] = WKlass
+                _ItemWrapper[Klass] = WKlass = self.wKlassFactory(Klass)
 
             child = WKlass()
             child._parent = self

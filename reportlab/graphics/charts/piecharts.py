@@ -238,7 +238,7 @@ class Pie(Widget):
 
         g = Group()
         i = 0
-        styleCount = len(self.slices)
+        self._seriesCount = styleCount = len(self.slices)
 
         startAngle = self.startAngle #% 360
         for angle in normData:
@@ -606,7 +606,7 @@ class Pie3d(Pie):
         OY = self.OY
         rad_dist = self.rad_dist
         _fillSide = self._fillSide
-        n = len(data)
+        self._seriesCount = n = len(data)
         _sl3d = self._sl3d = []
         g = Group()
         last = _360(self.startAngle)

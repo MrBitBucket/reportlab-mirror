@@ -139,6 +139,7 @@ class Doughnut(Widget):
         else:
             normData = self.normalizeData(self.data)
             n = len(normData)
+        self._seriesCount = n
 
         #labels
         if self.labels is None:

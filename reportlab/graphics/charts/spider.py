@@ -165,7 +165,7 @@ class SpiderChart(PlotArea):
 
         data = self.normalizeData()
 
-        n = len(data[0])
+        n = self._seriesCount = len(data[0])
 
         #labels
         if self.labels is None:
