@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testplatypus.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.17 2004/03/26 14:20:44 rgbecker Exp $
-__version__=''' $Id: test_platypus_general.py,v 1.17 2004/03/26 14:20:44 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.18 2004/05/28 14:39:42 rgbecker Exp $
+__version__=''' $Id: test_platypus_general.py,v 1.18 2004/05/28 14:39:42 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -377,17 +377,24 @@ def getExamples():
     if haveImages:
         gif = os.path.join(_RL_DIR,'test','pythonpowered.gif')
         if rl_isfile(gif):
-            story.append(Paragraph("Here is an Image  flowable obtained from a string filename.",styleSheet['Italic']))
-            img = platypus.Image(gif)
-            story.append(img)
+            data = []
+            t = data.append
+            t([ Paragraph("Here is an Image flowable obtained from a string filename.",styleSheet['Italic']),
+                    platypus.Image(gif),
 
-            story.append(Paragraph( "Here is an Image  flowable obtained from a utf8 filename.", styleSheet['Italic']))
-            img = platypus.Image(gif.encode('utf8'))
-            story.append(img)
+                Paragraph("Here is an Image flowable obtained from a string file url.",styleSheet['Italic']),
+                    platypus.Image('file://'+gif.replace('\\','/'))])
 
-            story.append(Paragraph("Here is an Image flowable obtained from an open file.",styleSheet['Italic']))
-            img = platypus.Image(open_for_read(gif,'b'))
-            story.append(img)
+            t([ Paragraph("Here is an Image flowable obtained from a string http url.",styleSheet['Italic']),
+                    platypus.Image('http://www.reportlab.com/rsrc/encryption.gif'),
+
+                Paragraph( "Here is an Image flowable obtained from a utf8 filename.", styleSheet['Italic']),
+                    platypus.Image(gif.encode('utf8'))])
+
+            t([Paragraph("Here is an Image flowable obtained from an open file.",styleSheet['Italic']),
+                platypus.Image(open_for_read(gif,'b')),
+                '',''])
+            story.append(platypus.Table(data,[96,None,96,None], [None, None,None]))
 
         jpg = os.path.join(_RL_DIR,'docs','images','lj8100.jpg')
         if rl_isfile(jpg):
