@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch9_future.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch9_future.py,v 1.2 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch9_future.py,v 1.3 2001/04/17 06:39:10 andy_robinson Exp $
 
 from genuserguide import *
 
@@ -33,3 +33,5 @@ We are also open for suggestions.  Please let us know what you think
 is missing.  You can also offer patches or contributions.  Please
 look to $http://www.reportlab.com$ for the latest mailing list and
 contact information.""")
+
+# this comment is a trivial test of SF checkin rights - delete it some time!  AR 2001-04-17
