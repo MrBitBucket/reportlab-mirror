@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/runAll.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.9 2002/07/24 19:56:38 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.10 2003/04/14 14:29:06 johnprecedo Exp $
 
 """Runs all test files in all subfolders.
 """
@@ -14,7 +14,7 @@ from reportlab.test import unittest
 from reportlab.test.utils import GlobDirectoryWalker
 
 
-def makeSuite(folder):
+def makeSuite(folder, exclude=[]):
     "Build a test suite of all available test files."
 
     allTests = unittest.TestSuite()
@@ -22,11 +22,12 @@ def makeSuite(folder):
     sys.path.insert(0, folder)
     for filename in GlobDirectoryWalker(folder, 'test_*.py'):
         modname = os.path.splitext(os.path.basename(filename))[0]
-        try:
-            module = __import__(modname)
-            allTests.addTest(module.makeSuite())
-        except ImportError:
-            pass
+        if modname not in exclude:
+            try:
+                module = __import__(modname)
+                allTests.addTest(module.makeSuite())
+            except ImportError:
+                pass
     del sys.path[0]
 
     return allTests
