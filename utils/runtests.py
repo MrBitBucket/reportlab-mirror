@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: runtests.py,v $
+#	Revision 1.9  2000/04/12 13:34:33  rgbecker
+#	Fixes to exception handling
+#
 #	Revision 1.8  2000/04/11 10:45:56  rgbecker
 #	CLEAN_EXCEPTIONS & sys.argv[0] setting
-#
+#	
 #	Revision 1.7  2000/04/07 09:21:29  rgbecker
 #	Fixed import bug
 #	
@@ -57,7 +60,7 @@
 #	New infrastructure
 #	
 #	
-__version__=''' $Id: runtests.py,v 1.8 2000/04/11 10:45:56 rgbecker Exp $ '''
+__version__=''' $Id: runtests.py,v 1.9 2000/04/12 13:34:33 rgbecker Exp $ '''
 '''
 script for testing ReportLab
 '''
@@ -68,9 +71,14 @@ _globals['__name__'] = "__main__"	#for passing to execfile
 import os, sys, string, traceback, re, copy
 
 #if a file matches this it won't be cleaned
-CLEAN_EXCEPTIONS=['demos/pythonpoint/logo.a85']
+CLEAN_EXCEPTIONS=['demos/pythonpoint/leftlogo.a85', 'demos/pythonpoint/spectrum.png']
 
 _ecount = 0	# count of errors
+
+def makeabs(dir):
+	if not os.path.isabs(dir): #abspath not available under 1.5.1
+		dir = os.path.join(os.getcwd(),dir)
+	return os.path.normcase(os.path.normpath(dir))
 
 def find_py_files(d):
 	def _py_files(L,d,N):
@@ -144,8 +152,8 @@ def do_tests(d,cyc):
 
 def is_exceptional(fn,exceptions):
 	for x in exceptions:
-		xfn = os.normcase(os.normpath(x))
-		if fn[-len(xfn):]==xfn: return 1
+		xfn = os.path.normcase(os.path.normpath(x))
+		if makeabs(fn)[-len(xfn):]==xfn: return 1
 	return 0
 
 def clean_files(d):
@@ -199,9 +207,7 @@ Usage
 		if k not in legal_options:
 			usage(code=1,msg="unknown option '%s'" % k)
 
-	dir = os.path.normcase(os.path.normpath(dir))
-	if not os.path.isabs(dir): #abspath not available under 1.5.1
-		dir = os.path.join(os.getcwd(),dir)
+	dir = makeabs(dir)
 	if not os.path.isdir(dir):
 		usage(code=1,msg="Invalid directory '%s'"%dir)
 
