@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paraparser.py,v $
+#	Revision 1.23  2000/06/13 04:11:49  aaron_watters
+#	noted replication of XML markup comment between paraparser.py and paragraph.py
+#
 #	Revision 1.22  2000/06/12 11:27:17  andy_robinson
 #	Added Sequencer and associated XML tags
-#
+#	
 #	Revision 1.21  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #	
@@ -61,7 +64,7 @@
 #	Revision 1.13  2000/04/25 13:07:57  rgbecker
 #	Added license
 #	
-__version__=''' $Id: paraparser.py,v 1.22 2000/06/12 11:27:17 andy_robinson Exp $ '''
+__version__=''' $Id: paraparser.py,v 1.23 2000/06/13 04:11:49 aaron_watters Exp $ '''
 import string
 import re
 from types import TupleType
@@ -223,6 +226,7 @@ class ParaFrag:
 		return n
 
 #------------------------------------------------------------------
+# !!! NOTE !!! THIS TEXT IS NOW REPLICATED IN PARAGRAPH.PY !!!
 # The ParaFormatter will be able to format the following xml
 # tags:
 #	   < b > < /b > - bold
