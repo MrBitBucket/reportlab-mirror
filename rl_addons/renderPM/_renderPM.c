@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "$Revision: 1.16 $"
+#define VERSION "0.9"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -1218,8 +1218,7 @@ void init_renderPM(void)
 
 	/* Add some symbolic constants to the module */
 	d = PyModule_GetDict(m);
-	_version = (PyObject*)(strchr(VERSION,' ')+1);
-	_version = PyString_FromStringAndSize((char*)_version, strchr((char*)_version,' ')-(char*)_version);
+	_version = PyString_FromString(VERSION);
 	PyDict_SetItemString(d, "_version", _version );
 	_libart_version = PyString_FromString(LIBART_VERSION);
 	PyDict_SetItemString(d, "_libart_version", _libart_version );
