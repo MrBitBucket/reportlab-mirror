@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.19 2001/07/11 00:31:09 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.20 2001/07/23 11:41:13 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.19 2001/07/11 00:31:09 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.20 2001/07/23 11:41:13 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -249,7 +249,7 @@ L2:
 static PyObject *_pdfmetrics_instanceStringWidth(PyObject *unused, PyObject* args)
 {
 	PyObject	*pfontName, *self;
-	char		*fontName, *encoding=NULL;
+	char		*fontName;
 	unsigned char *text;
 	double		fontSize;
 	fI_t		*fI;
@@ -637,10 +637,9 @@ static struct PyMethodDef _methods[] = {
 	};
 
 /*Initialization function for the module (*must* be called init_pdfmetrics)*/
-void init_rl_accel()
+void init_rl_accel(void)
 {
 	PyObject *m, *d, *v;
-	int i=0;
 
 	/*Create the module and add the functions */
 	m = Py_InitModule("_rl_accel", _methods);
