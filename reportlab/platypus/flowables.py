@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.27 2002/01/18 12:18:29 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.27 2002/01/18 12:18:29 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.28 2002/01/18 13:31:39 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.28 2002/01/18 13:31:39 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -59,6 +59,13 @@ class Flowable:
 		self.hAlign = 'LEFT'	#CENTER/CENTRE or RIGHT
 		self.vAlign = 'BOTTOM'	#MIDDLE or TOP
 
+
+	def _drawOn(self,canv):
+		'''ensure canv is set on and then draw'''
+		self.canv = canv
+		self.draw()#this is the bit you overload
+		del self.canv
+
 	def drawOn(self, canvas, x, y, _sW=0):
 		"Tell it to draw itself on the canvas.	Do not override"
 		if _sW and hasattr(self,'hAlign'):
@@ -69,14 +76,10 @@ class Flowable:
 				x = x + _sW
 			elif a != 'LEFT':
 				raise ValueError, "Bad hAlign value "+str(a)
-		self.canv = canvas
-		self.canv.saveState()
-		self.canv.translate(x, y)
-
-		self.draw()   #this is the bit you overload
-
-		self.canv.restoreState()
-		del self.canv
+		canvas.saveState()
+		canvas.translate(x, y)
+		self._drawOn(canvas)
+		canvas.restoreState()
 
 	def wrapOn(self, canv, aW, aH):
 		'''intended for use by packers allows setting the canvas on
