@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.6  2000/02/17 12:36:25  rgbecker
+#	added _HAVE_ZLIB to stop compression being set without zlib
+#
 #	Revision 1.5  2000/02/17 02:07:23  rgbecker
 #	Docstring & other fixes
-#
+#	
 #	Revision 1.4  2000/02/16 09:42:50  rgbecker
 #	Conversion to reportlab package
 #	
@@ -43,7 +46,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.5 2000/02/17 02:07:23 rgbecker Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.6 2000/02/17 12:36:25 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -69,8 +72,10 @@ from math import sin, cos, pi, ceil
 
 try:
     import zlib
+    _HAVE_ZLIB = 1
 except:
     print "zlib not available, page compression not available"
+    _HAVE_ZLIB = 0
 
 
 from reportlab.pdfgen.pdfgeom import bezierArc
@@ -466,7 +471,7 @@ class PDFPage(PDFObject):
     def setCompression(self, onoff=0):
         "Turns page compression on or off"
         assert onoff in [0,1], "Page compression options are 1=on, 2=off"
-        self.stream.compression = onoff
+        self.stream.compression = onoff & _HAVE_ZLIB
         
     def save(self, file):
         self.info['pagewidth'] = self.pagewidth
