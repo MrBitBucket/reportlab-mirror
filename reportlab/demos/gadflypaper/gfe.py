@@ -1,15 +1,15 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/gadflypaper/gfe.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/gadflypaper/gfe.py,v 1.13 2001/03/07 18:57:11 rgbecker Exp $
-__version__=''' $Id: gfe.py,v 1.13 2001/03/07 18:57:11 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/gadflypaper/gfe.py,v 1.14 2001/03/16 14:51:50 rgbecker Exp $
+__version__=''' $Id: gfe.py,v 1.14 2001/03/16 14:51:50 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
 import sys
 from reportlab.platypus import *
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.config import defaultPageSize
+from reportlab.rl_config import defaultPageSize
 PAGE_HEIGHT=defaultPageSize[1]
 
 styles = getSampleStyleSheet()

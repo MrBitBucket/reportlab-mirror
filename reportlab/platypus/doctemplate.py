@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.38 2001/03/13 08:38:11 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.39 2001/03/16 14:51:50 rgbecker Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.38 2001/03/13 08:38:11 dinu_gherman Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.39 2001/03/16 14:51:50 rgbecker Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -32,7 +32,7 @@ for the current frame).
 from reportlab.platypus.flowables import *
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
-from reportlab.config import defaultPageSize
+from reportlab.rl_config import defaultPageSize
 import reportlab.lib.sequencer
 
 from types import *

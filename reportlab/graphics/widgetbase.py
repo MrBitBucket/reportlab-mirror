@@ -2,7 +2,7 @@
 import string
 
 from reportlab.graphics import shapes
-from reportlab import config
+from reportlab import rl_config
 from reportlab.lib import colors
 
 class Widget(shapes.UserNode):
@@ -29,10 +29,10 @@ class Widget(shapes.UserNode):
                     value = getattr(self, attr)
                     assert checkerFunc(value), "Invalid value %s for attribute %s in class %s" % (value, attr, self.__class__.__name__)
                     
-    if config.shapeChecking:
+    if rl_config.shapeChecking:
         """This adds the ability to check every attribite assignment as it is made.
         It slows down shapes but is a big help when developing. It does not
-        get defined if config.shapeChecking = 0"""
+        get defined if rl_config.shapeChecking = 0"""
         def __setattr__(self, attr, value):
             """By default we verify.  This could be off
             in some parallel base classes."""

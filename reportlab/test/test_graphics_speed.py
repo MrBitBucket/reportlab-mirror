@@ -8,7 +8,7 @@ __version__ = ''' $Id $ '''
 
 import os, sys, time, profile
 
-import reportlab.config
+import reportlab.rl_config
 from reportlab.test import unittest
 from reportlab.lib import colors
 from reportlab.lib.units import cm
@@ -28,7 +28,7 @@ class GraphicsSpeedTestCase(unittest.TestCase):
         The rectangle's fillColor is yellow.
         The string's fillColor is red.
         """
-        reportlab.config.shapeChecking = not isFast
+        reportlab.rl_config.shapeChecking = not isFast
             
         pdfPath = 'test_graphics_speed_fast.pdf'
         c = Canvas(pdfPath)

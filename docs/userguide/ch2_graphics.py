@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch2_graphics.py,v 1.10 2001/03/07 18:57:11 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch2_graphics.py,v 1.11 2001/03/16 14:51:50 rgbecker Exp $
 from genuserguide import *
 
 heading1("Graphics and Text with $pdfgen$")
@@ -66,7 +66,7 @@ eg("""    def __init__(self,filename,
                  pagesize=(595.27,841.89),
                  bottomup = 1,
                  pageCompression=0,
-                 encoding=config.defaultEncoding,
+                 encoding=rl_config.defaultEncoding,
                  verbosity=0):
                  """)
 
@@ -123,8 +123,8 @@ on each page.""")
 disc("""The $encoding$ argument determines which font encoding
 is used for the standard fonts; this should correspond to
 the encoding on your system.  It has two values at present:
-$'WinAnsiEncoding'$ or $'MacRomanEncoding'$.  The
-$config.defaultEncoding$ above points to the former, which
+$'WinAnsiEncoding'$ or $'MacRomanEncoding'$.  The variable
+$rl_config.defaultEncoding$ above points to the former, which
 is standard on Windows and many Unices (including Linux). If
 you are a Mac user and want to make a global change, modify the
 line at the top of <i>reportlab/pdfbase/pdfdoc.py</i> to switch it

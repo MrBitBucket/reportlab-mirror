@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/fonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.5 2001/03/07 18:57:11 rgbecker Exp $
-__version__=''' $Id: fonts.py,v 1.5 2001/03/07 18:57:11 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.6 2001/03/16 14:51:50 rgbecker Exp $
+__version__=''' $Id: fonts.py,v 1.6 2001/03/16 14:51:50 rgbecker Exp $ '''
 import string, sys, os
 ###############################################################################
 #	A place to put useful font stuff
@@ -94,7 +94,7 @@ def _findFNR(fontName):
 	return _font2fnrMap[string.lower(fontName)]
 
 def findT1File(fontName,ext='.pfb'):
-	from reportlab.config import T1SearchPath
+	from reportlab.rl_config import T1SearchPath
 	assert T1SearchPath!=[]
 	n = _findFNR(fontName)+ext
 	for d in T1SearchPath:

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.69 2001/03/15 10:45:44 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.69 2001/03/15 10:45:44 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.70 2001/03/16 14:51:50 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.70 2001/03/16 14:51:50 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -18,7 +18,7 @@ import cStringIO
 from types import *
 from math import sin, cos, tan, pi, ceil
 
-from reportlab import config
+from reportlab import rl_config
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
@@ -102,7 +102,7 @@ class Canvas:
                  pagesize=(595.27,841.89),
                  bottomup = 1,
                  pageCompression=1,
-                 encoding=config.defaultEncoding,
+                 encoding=rl_config.defaultEncoding,
                  verbosity=0):
         """Create a canvas of a given size. etc.
         Most of the attributes are private - we will use set/get methods

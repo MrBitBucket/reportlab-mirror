@@ -7,7 +7,7 @@ from pprint import pprint
 import string
 from math import pi, cos, sin, tan
 from reportlab.platypus import Flowable
-from reportlab.config import shapeChecking
+from reportlab.rl_config import shapeChecking
 
 from reportlab.lib import colors
 
@@ -325,7 +325,7 @@ class Shape:
     if shapeChecking:
         """This adds the ability to check every attribute assignment as it is made.
         It slows down shapes but is a big help when developing. It does not
-        get defined if config.shapeChecking = 0"""
+        get defined if rl_config.shapeChecking = 0"""
         #print 'shapeChecking = 1, defining setattr'
         def __setattr__(self, attr, value):
             """By default we verify.  This could be off

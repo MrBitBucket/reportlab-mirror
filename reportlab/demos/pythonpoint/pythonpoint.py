@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/pythonpoint.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.30 2001/03/07 18:57:11 rgbecker Exp $
-__version__=''' $Id: pythonpoint.py,v 1.30 2001/03/07 18:57:11 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.31 2001/03/16 14:51:50 rgbecker Exp $
+__version__=''' $Id: pythonpoint.py,v 1.31 2001/03/16 14:51:50 rgbecker Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -59,7 +59,7 @@ from reportlab.platypus import Preformatted, Paragraph, Frame, Image, \
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib import styles
 import stdparser 
-from reportlab.config import defaultPageSize
+from reportlab.rl_config import defaultPageSize
 from reportlab.lib import colors
 
 class PPPresentation:

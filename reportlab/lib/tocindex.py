@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/tocindex.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/tocindex.py,v 1.6 2001/03/07 18:57:11 rgbecker Exp $
-__version__=''' $Id: tocindex.py,v 1.6 2001/03/07 18:57:11 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/tocindex.py,v 1.7 2001/03/16 14:51:50 rgbecker Exp $
+__version__=''' $Id: tocindex.py,v 1.7 2001/03/16 14:51:50 rgbecker Exp $ '''
 __doc__=''
 """
 This module will contain standard Table of Contents and Index objects.
@@ -21,7 +21,7 @@ from reportlab.platypus import tables
 from reportlab.lib import enums
 from reportlab.lib import colors
 from reportlab.lib.units import inch, cm
-from reportlab.config import defaultPageSize
+from reportlab.rl_config import defaultPageSize
 
     ##############################################################
     #

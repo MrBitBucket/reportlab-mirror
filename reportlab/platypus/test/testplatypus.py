@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testplatypus.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/test/Attic/testplatypus.py,v 1.22 2001/03/07 18:57:12 rgbecker Exp $
-__version__=''' $Id: testplatypus.py,v 1.22 2001/03/07 18:57:12 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/test/Attic/testplatypus.py,v 1.23 2001/03/16 14:51:50 rgbecker Exp $
+__version__=''' $Id: testplatypus.py,v 1.23 2001/03/16 14:51:50 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -21,7 +21,7 @@ from reportlab.platypus import Paragraph
 from reportlab.lib.units import inch, cm
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
-from reportlab.config import defaultPageSize
+from reportlab.rl_config import defaultPageSize
 PAGE_HEIGHT = defaultPageSize[1]
 
 #################################################################

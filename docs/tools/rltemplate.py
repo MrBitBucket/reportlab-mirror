@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/rltemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/tools/rltemplate.py,v 1.9 2001/03/07 18:57:11 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/tools/rltemplate.py,v 1.10 2001/03/16 14:51:50 rgbecker Exp $
 # doc template for RL manuals.  Currently YAML is hard-coded
 #to use this, which is wrong.
 
@@ -9,7 +9,7 @@
 from reportlab.platypus import PageTemplate, \
      BaseDocTemplate, Frame, Paragraph
 from reportlab.lib.units import inch, cm
-from reportlab.config import defaultPageSize
+from reportlab.rl_config import defaultPageSize
 
 
 class FrontCoverTemplate(PageTemplate):
