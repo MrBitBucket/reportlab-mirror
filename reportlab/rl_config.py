@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.36 2003/07/02 18:55:50 rgbecker Exp $
-__version__=''' $Id: rl_config.py,v 1.36 2003/07/02 18:55:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.37 2003/07/07 16:39:48 rgbecker Exp $
+__version__=''' $Id: rl_config.py,v 1.37 2003/07/07 16:39:48 rgbecker Exp $ '''
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -20,11 +20,16 @@ invariant=                  0                       #produces repeatble,identica
                                                     #(for regression testing)
 
 # places to look for T1Font information
-T1SearchPath =  ('c:/Program Files/Adobe/Acrobat 5.0/Resource/Font', #Win32, Acrobat 5
+T1SearchPath =  ('c:/Program Files/Adobe/Acrobat 6.0/Resource/Font', #Win32, Acrobat 5
+                 'c:/Program Files/Adobe/Acrobat 5.0/Resource/Font', #Win32, Acrobat 5
                  'c:/Program Files/Adobe/Acrobat 4.0/Resource/Font', #Win32, Acrobat 4
                  '%(disk)s/Applications/Python %(sys_version)s/reportlab/fonts', #Mac?
+                 '/usr/lib/Acrobat6/Resource/Font', #Linux, Acrobat 5?
                  '/usr/lib/Acrobat5/Resource/Font', #Linux, Acrobat 5?
                  '/usr/lib/Acrobat4/Resource/Font', #Linux, Acrobat 4
+                 '/usr/local/Acrobat6/Resource/Font', #Linux, Acrobat 5?
+                 '/usr/local/Acrobat5/Resource/Font', #Linux, Acrobat 5?
+                 '/usr/local/Acrobat4/Resource/Font', #Linux, Acrobat 4
                  '%(REPORTLAB_DIR)s/fonts' #special
                  )
 
@@ -37,9 +42,14 @@ TTFSearchPath = (
                 )
 
 # places to look for CMap files - should ideally merge with above
-CMapSearchPath = ('/usr/local/Acrobat5/Resource/CMap',
+CMapSearchPath = ('/usr/lib/Acrobat6/Resource/CMap',
+                  '/usr/lib/Acrobat5/Resource/CMap',
+                  '/usr/lib/Acrobat4/Resource/CMap',
+                  '/usr/local/Acrobat6/Resource/CMap',
+                  '/usr/local/Acrobat5/Resource/CMap',
                   '/usr/local/Acrobat4/Resource/CMap',
                   'C:\\Program Files\\Adobe\\Acrobat\\Resource\\CMap',
+                  'C:\\Program Files\\Adobe\\Acrobat 6.0\\Resource\\CMap',
                   'C:\\Program Files\\Adobe\\Acrobat 5.0\\Resource\\CMap',
                   'C:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\CMap'
                   )
