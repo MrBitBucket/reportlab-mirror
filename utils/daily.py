@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.5  2000/04/06 12:42:33  rgbecker
+#	removed attempt at tagging
+#
 #	Revision 1.4  2000/03/28 13:58:26  rgbecker
 #	Add -r tag for release
-#
+#	
 #	Revision 1.3  2000/03/28 13:40:32  rgbecker
 #	Fix server for release
 #	
@@ -44,7 +47,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.4 2000/03/28 13:58:26 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.5 2000/04/06 12:42:33 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -55,7 +58,7 @@ groupdir=os.path.normcase(os.path.normpath('/home/groups/ftp/pub/reportlab'))
 projdir = os.path.normcase(os.path.normpath('reportlab'))
 cvsdir = os.path.join(groupdir,projdir)
 release=0		#1 if making a release
-USER='rgbecker'
+USER='andy_robinson'
 
 def get_path():
 	for i in os.environ.keys():
@@ -107,7 +110,7 @@ def cvs_checkout(d):
 	if release:
 		print release
 		os.environ['CVSROOT']=':ext:%s@cvs1:/cvsroot/reportlab' % USER
-		do_exec(cvs+(' tag %s' % release), 'the tag phase')
+		#do_exec(cvs+(' rtag %s' % release), 'the tag phase')
 		do_exec(cvs+(' co -r %s reportlab'%release), 'the download phase')
 	else:
 		os.environ['CVSROOT']=':pserver:%s@cvs1:/cvsroot/reportlab' % USER
