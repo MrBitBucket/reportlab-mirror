@@ -107,7 +107,10 @@ disc("""The cell formatting commands all begin with an identifier, followed by
 the start and stop cell definitions and the perhaps other arguments.
 the cell formatting commands are:""")
 eg("""
-FONT                    - takes fontname, fontsize and (optional) leading.
+FONT                    - takes fontname, optional fontsize and (optional) leading.
+FONTNAME (or FACE)      - takes fontname
+FONTSIZE (or SIZE)      - takes fontsize in points
+LEADING                 - takes leading in points
 TEXTCOLOR               - takes a color name or (R,G,B) tuple.
 ALIGNMENT (or ALIGN)    - takes one of LEFT, RIGHT and CENTRE (or CENTER).
 LEFTPADDING             - takes an integer, defaults to 6.
@@ -163,7 +166,9 @@ data=  [['00', '01', '02', '03', '04'],
         ['10', '11', '12', '13', '14'],
         ['20', '21', '22', '23', '24'],
         ['30', '31', '32', '33', '34']]
-t=Table(data)
-t.setStyle(TableStyle([('GRID',(1,1),(-2,-2),1,colors.green),
-                        ('BOX',(0,0),(1,-1),2,colors.red)]))
+t=Table(data,style=[('GRID',(1,1),(-2,-2),1,colors.green),
+                    ('BOX',(0,0),(1,-1),2,colors.red),
+					('LINEABOVE',(1,2),(-2,2),1,colors.blue),
+					('LINEBEFORE',(2,1),(2,-2),1,colors.pink),
+					])
 """)
