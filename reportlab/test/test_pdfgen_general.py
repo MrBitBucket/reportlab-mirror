@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.6 2001/10/10 19:59:13 andy_robinson Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.6 2001/10/10 19:59:13 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.7 2001/11/21 01:39:54 andy_robinson Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.7 2001/11/21 01:39:54 andy_robinson Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
@@ -672,8 +672,10 @@ cost to performance.""")
       on the rectangle the PDF viewer moves to the bound position on the other
       page.  There are many other types of annotations and links supported by PDF.
       
-      For example there is a bookmark to each page in this document and below
-      is a browsable index that jumps to those pages.
+      For example, there is a bookmark to each page in this document and below
+      is a browsable index that jumps to those pages. In addition we show two
+      URL hyperlinks; for these, you specify a rectangle but must draw the contents
+      or any surrounding rectangle yourself.
       """)
     c.drawText(t)
     
@@ -687,6 +689,17 @@ cost to performance.""")
         title = titlelist[i]
         c.drawString(xmargin, yposition, title)
         c.linkAbsolute(title, title, (xmargin-ydelta/4, yposition-ydelta/4, xmax, yposition+ydelta/2))
+
+
+    # test URLs
+    r1 = (inch, 3*inch, 4*inch, 3.25*inch) # this is x1,y1,x2,y2
+    c.linkURL('http://www.reportlab.com/', r1)
+    c.drawString(inch+3, 3*inch+6, 'Hyperlink to www.reportlab.com')
+
+    r1 = (inch, 2.5*inch, 4*inch, 2.75*inch) # this is x1,y1,x2,y2
+    c.linkURL('mailto:reportlab-users@egroups.com', r1) 
+    c.drawString(inch+3, 2.5*inch+6, 'mailto:reportlab-users@egroups.com')
+
     ### now do stuff for the outline
     #for x in outlinenametree: print x
     #stop

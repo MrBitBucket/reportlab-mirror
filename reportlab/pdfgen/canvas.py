@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.90 2001/11/03 19:05:01 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.90 2001/11/03 19:05:01 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.91 2001/11/21 01:39:54 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.91 2001/11/21 01:39:54 andy_robinson Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -541,7 +541,43 @@ class Canvas:
             Rect = (xmin, ymin, xmax, ymax)
             #print "rect is", Rect
         return apply(self.linkAbsolute, (contents, destinationname, Rect, addtopage, name), kw)
-    
+
+
+    def linkURL(self, url, rect, relative=0):
+        """Create a rectangular URL 'hotspot' in the given rectangle.
+
+        if relative=1, this is in the current coord system, otherwise
+        in absolute page space. There is a 1 point border drawn for you
+        (this behaviour is built into Acrobat); we expect to add an
+        optional Border argument to let you override this soon."""
+        if relative:
+            (lx, ly, ux, uy) = rect
+            (xll,yll) = self.absolutePosition(lx,ly)
+            (xur,yur) = self.absolutePosition(ux, uy)
+            (xul,yul) = self.absolutePosition(lx, uy)
+            (xlr,ylr) = self.absolutePosition(ux, ly)
+            xs = (xll, xur, xul, xlr)
+            ys = (yll, yur, yul, ylr)
+            (xmin, ymin) = (min(xs), min(ys))
+            (xmax, ymax) = (max(xs), max(ys))
+            #(w2, h2) = (xmax-xmin, ymax-ymin)
+            rect = (xmin, ymin, xmax, ymax)
+
+        from reportlab.pdfbase.pdfdoc import PDFDictionary, PDFName, PDFArray, PDFString
+        ann = PDFDictionary()
+        ann["Type"] = PDFName("Annot")
+        ann["Subtype"] = PDFName("Link")
+        ann["Rect"] = PDFArray(rect) # the whole page for testing
+        #ann["Border"] = PDFArray(border)
+        #ann["Contents"] = PDFString(contents)
+        A = PDFDictionary()
+        #A["Type"] = PDFName("Action") # not needed?
+        ann["H"] = PDFName("I") # invert
+        A["S"] = PDFName("URI")
+        A["URI"] = PDFString(url)
+        ann["A"] = A
+        self._addAnnotation(ann)
+
     def _addAnnotation(self, annotation, name=None, addtopage=1):
         count = self._annotationCount = self._annotationCount+1
         if not name: name="NUMBER"+repr(count)
