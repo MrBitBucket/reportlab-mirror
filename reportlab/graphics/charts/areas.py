@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/areas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/areas.py,v 1.4 2003/09/10 14:47:17 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/areas.py,v 1.5 2003/09/15 15:31:53 johnprecedo Exp $
 """This module defines a Area mixin classes
 """
-__version__=''' $Id: areas.py,v 1.4 2003/09/10 14:47:17 rgbecker Exp $ '''
+__version__=''' $Id: areas.py,v 1.5 2003/09/15 15:31:53 johnprecedo Exp $ '''
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isNoneOrShape
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics.shapes import Rect, Group, Line, Polygon
@@ -73,11 +73,15 @@ class PlotArea(Widget):
                         c = strokeColor
                     if not strokeWidth: strokeWidth = 0.5
                     if fillColor or strokeColor or c:
+                        from reportlab.lib.colors import limegreen
                         bg = Polygon([x,y,x,y+h,x+_3d_dx,y+h+_3d_dy,x+w+_3d_dx,y+h+_3d_dy,x+w+_3d_dx,y+_3d_dy,x+w,y], 
                             strokeColor=strokeColor or c or grey, strokeWidth=strokeWidth, fillColor=fillColor)
                         g.add(bg)
                         g.add(Line(x,y,x+_3d_dx,y+_3d_dy, strokeWidth=0.5, strokeColor=c))
                         g.add(Line(x+_3d_dx,y+_3d_dy, x+_3d_dx,y+h+_3d_dy,strokeWidth=0.5, strokeColor=c))
+                        fc = Blacker(c, getattr(self,'_3d_blacken',0.8))
+                        g.add(Polygon([x,y,x+_3d_dx,y+_3d_dy,x+w+_3d_dx,y+_3d_dy,x+w,y], 
+                            strokeColor=strokeColor or c or grey, strokeWidth=strokeWidth, fillColor=fc))
                         bg = Line(x+_3d_dx,y+_3d_dy, x+w+_3d_dx,y+_3d_dy,strokeWidth=0.5, strokeColor=c)
                     else:
                         bg = None
