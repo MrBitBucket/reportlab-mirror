@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.63 2002/05/24 09:24:10 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.63 2002/05/24 09:24:10 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.64 2002/05/27 11:30:40 dinu_gherman Exp $
+__version__=''' $Id: pdfdoc.py,v 1.64 2002/05/27 11:30:40 dinu_gherman Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -22,6 +22,9 @@ from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfutils import LINEEND   # this constant needed in both
 from reportlab import rl_config
 from reportlab.lib.utils import import_zlib, PIL_Image, open_for_read
+
+
+# workaround for list()-bug in Jython 2.1 (should be fixed in 2.2)
 
 from sys import platform, version_info
 if platform[:4] == 'java' and version_info[:2] == (2, 1):
