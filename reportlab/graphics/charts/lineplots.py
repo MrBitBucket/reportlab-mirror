@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.11 2001/05/08 12:23:39 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.12 2001/05/09 07:45:25 dinu_gherman Exp $
 """
 This modules defines a very preliminary Line Plot example.
 """
@@ -12,8 +12,7 @@ from types import FunctionType
 from reportlab.lib import colors 
 from reportlab.lib.validators import * 
 from reportlab.graphics.shapes import Drawing, Group, Rect, Line, PolyLine
-from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
-from reportlab.graphics.widgetbase import StyleProperties
+from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.widgets.signsandsymbols import SmileyFace0
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.axes import XValueAxis, YValueAxis
@@ -23,16 +22,12 @@ from reportlab.graphics.charts.markers import *
 
 # This might be moved again from here...
 
-class LinePlotProperties(StyleProperties):
-    """An adapted set of properties to be used with line charts.
-
-    In fact, it only adds 'symbol' as allowed attribute that is
-    expected to have a Widget value, which a line plot will draw
-    at each data point. 
-    """
-
-    _attrMap = StyleProperties._attrMap.copy()
-    _attrMap.update({'symbol': None})
+class LinePlotProperties(PropHolder):
+    _attrMap = {
+        'strokeWidth':isNumber,
+        'strokeColor':isColorOrNone,
+        'symbol':None
+        }
 
 
 class LinePlot(Widget):
@@ -89,6 +84,7 @@ class LinePlot(Widget):
             ]
 
         self.defaultStyles = TypedPropertyCollection(LinePlotProperties)
+        self.defaultStyles.strokeWidth = 1
         self.defaultStyles[0].strokeColor = colors.red
         self.defaultStyles[1].strokeColor = colors.blue
         
@@ -242,9 +238,16 @@ class LinePlot(Widget):
             styleIdx = rowNo % styleCount
             rowColor = self.defaultStyles[styleIdx].strokeColor
             dash = getattr(self.defaultStyles[styleIdx], 'strokeDashArray', None)
-            width = getattr(self.defaultStyles[styleIdx], 'strokeWidth', None)
 
-            # Iterate over data columns.        
+            # width = getattr(self.defaultStyles[styleIdx], 'strokeWidth', None)
+            if hasattr(self.defaultStyles[styleIdx], 'strokeWidth'):
+                width = self.defaultStyles[styleIdx].strokeWidth
+            elif hasattr(self.defaultStyles, 'strokeWidth'):
+                width = self.defaultStyles.strokeWidth
+            else:
+                width = None
+
+            # Iterate over data columns.
             if self.joinedLines:
                 points = []
                 for xy in row:
@@ -337,8 +340,11 @@ def sample1a():
     lp.width = 300
     lp.data = data
     lp.joinedLines = 1
-    lp.defaultStyles.symbol = makeFilledDiamond
     lp.strokeColor = colors.black
+
+    lp.defaultStyles.symbol = makeEmptyCircle
+    lp.defaultStyles[0].strokeWidth = 2
+    lp.defaultStyles[1].strokeWidth = 4
 
     lp.xValueAxis.valueMin = 0
     lp.xValueAxis.valueMax = 5
