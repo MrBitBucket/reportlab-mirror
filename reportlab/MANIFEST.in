@@ -1,0 +1,5 @@
+recursive-include fonts *
+recursive-include docs *
+recursive-include lib *.c *.h *.in hyphen.mashed
+recursive-include test *.gif
+include changes license.txt README
