@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/genuserguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/genuserguide.py,v 1.6 2001/11/06 11:13:53 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/genuserguide.py,v 1.7 2001/11/29 13:14:21 rgbecker Exp $
 
-__version__=''' $Id: genuserguide.py,v 1.6 2001/11/06 11:13:53 johnprecedo Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.7 2001/11/29 13:14:21 rgbecker Exp $ '''
 
 __doc__ = """
 This module contains the script for building the user guide.
@@ -14,7 +14,10 @@ from reportlab.tools.docco.rl_doc_utils import *
 
 def run(pagesize, verbose=0):
 
-	doc = RLDocTemplate('userguide.pdf',pagesize = pagesize)
+	# copy to target
+	import reportlab
+	destfn = os.path.join(os.path.dirname(reportlab.__file__),'docs','userguide.pdf')
+	doc = RLDocTemplate(destfn,pagesize = pagesize)
 
 	#this builds the story
 	#resetStory()
@@ -32,22 +35,10 @@ def run(pagesize, verbose=0):
 	import app_demos
 
 	story = getStory()
-	if verbose:
-		print 'Built story contains %d flowables...' % len(story)
+	if verbose: print 'Built story contains %d flowables...' % len(story)
 	doc.build(story)
-	if verbose:
-		print 'Saved userguide.pdf'
+	if verbose: print 'Saved "%s"' % destfn
 
-	# copy to target
-	import reportlab
-	docdir = os.path.dirname(reportlab.__file__) + os.sep + 'docs'
-	destfn = docdir + os.sep + 'userguide.pdf'
-	import shutil
-	shutil.copyfile('userguide.pdf',
-					destfn)
-	if verbose:
-		print 'copied to %s' % destfn
-	
 	# remove *.pyc files
 	pat = os.path.join(os.path.dirname(sys.argv[0]), '*.pyc')
 	for file in glob.glob(pat):
@@ -55,11 +46,9 @@ def run(pagesize, verbose=0):
 
 
 def makeSuite():
-    "standard test harness support - run self as separate process"
-    from reportlab.test.utils import ScriptThatMakesFileTest
-    return ScriptThatMakesFileTest('../docs/userguide',
-								   'genuserguide.py',
-								   'userguide.pdf')
+	"standard test harness support - run self as separate process"
+	from reportlab.test.utils import ScriptThatMakesFileTest
+	return ScriptThatMakesFileTest('../docs/userguide', 'genuserguide.py', 'userguide.pdf') 
 
 if __name__=="__main__":
 	verbose = '-s' not in sys.argv
