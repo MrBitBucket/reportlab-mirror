@@ -9,6 +9,7 @@ available in horizontal and vertical versions.
 import string
 from types import FunctionType
 
+from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib import colors 
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.charts.textlabel0 import Label
@@ -216,14 +217,27 @@ class VerticalBarChart(Widget):
                     labelText = labelFmt(self.data[rowNo][colNo])
                 else:
                     raise Exception, "Unknown formatter type %s, expected string or function" % labelFmt
+
+                # We currently overwrite the boxAnchor with 'c' and display
+                # it at a constant offset to the bar's top/bottom determined
+                # by the barLabelNudge attribute.
                 if labelText:
                     label = self.barLabels[(rowNo, colNo)]
-                    #hack to make sure labels are outside the bar
-                    if height > 0:
-                        label.setOrigin(x + 0.5*width, y + height + self.barLabelNudge)
-                    else:
-                        label.setOrigin(x + 0.5*width, y + height - self.barLabelNudge)
+                    labelWidth = stringWidth(labelText, label.fontName, label.fontSize)                    
+
+                    sign = lambda v:[-1, 1][v>=0] # Where the heck is this function??
+                    y0 = y + height + sign(height) * self.barLabelNudge
+                    x0 = x + 0.5*width
+                    label.boxAnchor = 'c' # saves a lot of correcting code like this:...
+##                    if label.boxAnchor in ('w', 'sw', 'nw'):
+##                        x0 = x0 - 0.5*labelWidth
+##                    elif label.boxAnchor in ('e', 'se', 'ne'):
+##                        x0 = x0 + 0.5*labelWidth
+##                    elif label.boxAnchor == 'c':
+##                        pass
+                    label.setOrigin(x0, y0)
                     label.setText(labelText)
+
                     g.add(label)
 
         return g
@@ -295,7 +309,7 @@ def sample2a():
     bc.categoryAxis.categoryNames = labels
     bc.categoryAxis.labels.fontName = 'Helvetica'
     bc.categoryAxis.labels.fontSize = 8
-    bc.valueAxis.labels.boxAnchor = 'n'
+    bc.valueAxis.labels.boxAnchor = 'n'   # irrelevant (becomes 'c')
     bc.valueAxis.labels.textAnchor = 'middle'
     bc.categoryAxis.labels.dy = -60
     
@@ -336,10 +350,58 @@ def sample2b():
     bc.categoryAxis.categoryNames = labels
     bc.categoryAxis.labels.fontName = 'Helvetica'
     bc.categoryAxis.labels.fontSize = 8
-    bc.valueAxis.labels.boxAnchor = 'n'
+    bc.valueAxis.labels.boxAnchor = 'n'   # irrelevant (becomes 'c')
     bc.valueAxis.labels.textAnchor = 'middle'
     bc.categoryAxis.labels.dy = -60
     
+    drawing.add(bc)    
+
+    return drawing
+
+
+def sample2c():
+
+    data = [(2.4, -5.7, 2, 5, 9.99),
+            (0.6, -4.9, -3, 4, 9.99)
+            ]
+
+    labels = ("Q3 2000", "Year to Date", "12 months", "Annualised\n3 years", "Since 07.10.99")
+
+    drawing = Drawing(400, 200)
+
+    bc = VerticalBarChart()
+    bc.x = 50
+    bc.y = 50
+    bc.height = 120
+    bc.width = 300
+    bc.data = data
+
+    bc.barSpacing = 2
+    bc.groupSpacing = 10
+    bc.barWidth = 10
+    
+    bc.valueAxis.valueMin = -15
+    bc.valueAxis.valueMax = +15
+    bc.valueAxis.valueStep = 5
+    bc.valueAxis.labels.fontName = 'Helvetica'
+    bc.valueAxis.labels.fontSize = 8    
+
+    bc.categoryAxis.categoryNames = labels
+    bc.categoryAxis.labels.fontName = 'Helvetica'
+    bc.categoryAxis.labels.fontSize = 8
+    bc.valueAxis.labels.boxAnchor = 'n'
+    bc.valueAxis.labels.textAnchor = 'middle'
+    bc.categoryAxis.labels.dy = -60
+
+    bc.barLabelNudge = 10
+    
+    bc.barLabelFormat = '%0.2f'
+    bc.barLabels.dx = 0
+    bc.barLabels.dy = 0
+    bc.barLabels.boxAnchor = 'n'  # irrelevant (becomes 'c')
+    bc.barLabels.fontName = 'Helvetica'
+    bc.barLabels.fontSize = 6
+
     drawing.add(bc)    
 
     return drawing
@@ -369,12 +431,13 @@ def sample3():
     leftChart.defaultColors = (colors.green,)
 
     leftChart.barLabelFormat = '%0.2f'
-    leftChart.barLabels.dx = 3
-    leftChart.barLabels.dy = 10            
-    leftChart.barLabels.boxAnchor = 'w'
+    leftChart.barLabels.dx = 0
+    leftChart.barLabels.dy = 0
+    leftChart.barLabels.boxAnchor = 'w' # irrelevant (becomes 'c')
     leftChart.barLabels.angle = 90
     leftChart.barLabels.fontName = 'Helvetica'
     leftChart.barLabels.fontSize = 6
+    leftChart.barLabelNudge = 10
     
     leftChart.valueAxis.visible = 0
     leftChart.valueAxis.valueMin = -2
@@ -386,8 +449,8 @@ def sample3():
     leftChart.categoryAxis.categoryNames = names
     leftChart.categoryAxis.labels.angle = 90
     leftChart.categoryAxis.labels.boxAnchor = 'w'
-    leftChart.categoryAxis.labels.dx = 3
-    leftChart.categoryAxis.labels.dy = -100
+    leftChart.categoryAxis.labels.dx = 0
+    leftChart.categoryAxis.labels.dy = -125
     leftChart.categoryAxis.labels.fontName = 'Helvetica'
     leftChart.categoryAxis.labels.fontSize = 6
         
@@ -398,24 +461,3 @@ def sample3():
     drawing.add(g)    
 
     return drawing
-
-
-##if __name__=='__main__':
-##
-##    from reportlab.pdfgen.canvas import Canvas
-##    c = Canvas('barchart1.pdf')
-##    c.setFont('Helvetica-Bold',24)
-##    c.drawString(70, 750, 'Bar Chart Examples')
-##    
-##    sample1().drawOn(c, 70, 525)
-##    sample2().drawOn(c, 70, 300)
-##    sample3().drawOn(c, 70, 75)
-##
-##    c.save()    
-##    print 'saved barchart1.pdf'
-##
-##    from rlextra.graphics import renderGD
-##    renderGD.drawToFile(sample1(), 'barchart1_1.jpg', kind="JPG")
-##    #renderGD.drawToFile(sample2(), 'barchart1_2.jpg', kind="JPG")
-##    #renderGD.drawToFile(sample3(), 'barchart1_3.jpg', kind="JPG")
-##    print 'saved JPEG versions'
