@@ -167,8 +167,8 @@ class Grid0(Widget):
             if self.orientation == 'vertical':
                 i = 0
                 r = frange(self.x + self.delta0, self.x + w, self.delta)
-                for j in frange(len(r)):
-                    x = r[j]
+                for j in map(int, frange(len(r))):
+                    x = r[int(j)]
                     try:
                         stripe = Rect(x, self.y, r[j+1]-x, h)
                         stripe.fillColor = cols[i % len(cols)] 

@@ -1,12 +1,12 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.10 2001/06/27 10:19:40 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.11 2001/06/27 11:39:11 dinu_gherman Exp $
 """This will be a collection of legends to be used with charts.
 """
 
 
-import string
+import string, copy
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, OneOf, isString, isColorOrNone
@@ -17,7 +17,15 @@ from reportlab.graphics.shapes import Drawing, Group, String, Rect, STATE_DEFAUL
 
 
 class Legend(Widget):
-    """A very simple legend containing rectangular swatches and strings.
+    """A simple legend containing rectangular swatches and strings.
+
+    The swatches are filled rectangles whenever the respective
+    color object in 'colorNamePairs' is a subclass of Color in
+    reportlab.lib.colors. Otherwise the object passed instead is
+    assumed to have 'x', 'y', 'width' and 'height' attributes.
+    A legend then tries to set them or catches any error. This
+    lets you plug-in any widget you like as a replacement for
+    the default rectangular swatches.
 
     Strings can be nicely aligned left or right to the swatches.
     """
@@ -42,7 +50,7 @@ class Legend(Widget):
         alignment = AttrMapValue(OneOf(("left", "right")),
             desc="Alginment of text with respect to swatches"),
         colorNamePairs = AttrMapValue(None,
-            desc="List of color/name tuples"),
+            desc="List of color/name tuples (color can also be widget)"),
 
         fontName = AttrMapValue(isString,
             desc="Font name of the strings"),
@@ -121,24 +129,38 @@ class Legend(Widget):
                 d = self._calculateMaxWidth(colorNamePairs[j:])
                 t.x = t.x + d
                 t.textAnchor = "end"
-                r = Rect(thisx+d+self.dxTextSpace,thisy, dx, dy)
+                x, y, width, height = thisx+d+self.dxTextSpace, thisy, dx, dy
             elif self.alignment == "right":
                 # align text to right
                 t = String(thisx+self.dx+self.dxTextSpace, thisy, str(name))
                 t.textAnchor = "start"
-                r = Rect(thisx,thisy, dx, dy)
+                x, y, width, height = thisx, thisy, dx, dy
             else:
                 raise ValueError, "bad alignment"
 
             t.fontName = self.fontName
             t.fontSize = self.fontSize
             t.fillColor = self.fillColor
-            
-            r.fillColor = col
-            r.strokeColor = self.strokeColor
-            
+
+            # Make a 'normal' color swatch...
+            if isinstance(col, colors.Color):
+                r = Rect(x, y, width, height)
+                r.fillColor = col
+                r.strokeColor = self.strokeColor
+                g.add(r)
+            # ... or try and see if we should do better.
+            else:
+                try:
+                    c = copy.deepcopy(col)
+                    c.x = x
+                    c.y = y
+                    c.width = width
+                    c.height = height
+                    g.add(c)
+                except:
+                    pass
+
             g.add(t)
-            g.add(r)
 
             if count == self.columnMaximum-1:
                 count = 0
