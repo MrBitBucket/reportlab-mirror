@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/rl_doc_utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/rl_doc_utils.py,v 1.1 2001/10/27 22:37:02 andy_robinson Exp $
-__version__=''' $Id: rl_doc_utils.py,v 1.1 2001/10/27 22:37:02 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/tools/docco/rl_doc_utils.py,v 1.2 2001/11/13 18:59:50 dinu_gherman Exp $
+__version__=''' $Id: rl_doc_utils.py,v 1.2 2001/11/13 18:59:50 dinu_gherman Exp $ '''
 
 
 __doc__ = """
@@ -22,6 +22,7 @@ styleSheet = getStyleSheet()
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter, A4, A5, A3	# latter two for testing
 from reportlab.rl_config import defaultPageSize
+from reportlab.platypus import figures
 from reportlab.platypus import Paragraph, Spacer, Preformatted,\
 			PageBreak, CondPageBreak, Flowable, Table, TableStyle, \
 			NextPageTemplate, KeepTogether, Image, XPreformatted
@@ -30,7 +31,6 @@ from reportlab.lib import colors
 from reportlab.lib.sequencer import getSequencer
 
 import examples
-import platdemos
 
 appmode=0
 
@@ -220,7 +220,7 @@ def centred(text):
 def caption(text):
 	getStory().append(Paragraph(quickfix(text), Caption))
 
-class Illustration(platdemos.Figure):
+class Illustration(figures.Figure):
 	"""The examples are all presented as functions which do
 	something to a canvas, with a constant height and width
 	used.  This puts them inside a figure box with a caption."""
@@ -231,8 +231,8 @@ class Illustration(platdemos.Figure):
 			width = stdwidth
 		if not height:
 			height = stdheight
-		#platdemos.Figure.__init__(self, stdwidth * 0.75, stdheight * 0.75)
-		platdemos.Figure.__init__(self, width, height,
+		#figures.Figure.__init__(self, stdwidth * 0.75, stdheight * 0.75)
+		figures.Figure.__init__(self, width, height,
 					'Figure <seq template="%(Chapter)s-%(Figure+)s"/>: ' + quickfix(caption))
 		self.operation = operation
 
@@ -251,7 +251,7 @@ class GraphicsDrawing(Illustration):
 	"""Lets you include reportlab/graphics drawings seamlessly,
 	with the right numbering."""
 	def __init__(self, drawing, caption):
-		platdemos.Figure.__init__(self,
+		figures.Figure.__init__(self,
 								  drawing.width,
 								  drawing.height,
 					'Figure <seq template="%(Chapter)s-%(Figure+)s"/>: ' + quickfix(caption)
@@ -267,7 +267,7 @@ def draw(drawing, caption):
 	d = GraphicsDrawing(drawing, caption)
 	getStory().append(d)
 
-class ParaBox(platdemos.Figure):
+class ParaBox(figures.Figure):
 	"""Illustrates paragraph examples, with style attributes on the left"""
 	descrStyle = ParagraphStyle('description',
 								fontName='Courier',
@@ -275,7 +275,7 @@ class ParaBox(platdemos.Figure):
 								leading=9.6)
 
 	def __init__(self, text, style, caption):
-		platdemos.Figure.__init__(self, 0, 0, caption)
+		figures.Figure.__init__(self, 0, 0, caption)
 		self.text = text
 		self.style = style
 		self.para = Paragraph(text, style)
@@ -298,7 +298,7 @@ class ParaBox(platdemos.Figure):
 		self.pah = self.pah + self.style.spaceBefore + self.style.spaceAfter
 		prw, self.prh = self.pre.wrap(self.x2 - self.x1, availHeight)
 		self.figureHeight = max(self.prh, self.pah) * 10.0/9.0
-		return platdemos.Figure.wrap(self, availWidth, availHeight)
+		return figures.Figure.wrap(self, availWidth, availHeight)
 
 	def getStyleText(self, style):
 		"""Converts style to preformatted block of text"""
@@ -347,11 +347,11 @@ class ParaBox(platdemos.Figure):
 		return string.join(lines, '\n')
 
 
-class ParaBox2(platdemos.Figure):
+class ParaBox2(figures.Figure):
 	"""Illustrates a paragraph side-by-side with the raw
 	text, to show how the XML works."""
 	def __init__(self, text, caption):
-		platdemos.Figure.__init__(self, 0, 0, caption)
+		figures.Figure.__init__(self, 0, 0, caption)
 		descrStyle = ParagraphStyle('description',
 								fontName='Courier',
 								fontSize=8,
@@ -368,7 +368,7 @@ class ParaBox2(platdemos.Figure):
 		lw, self.lh = self.left.wrap(colWidth, availHeight)
 		rw, self.rh = self.right.wrap(colWidth, availHeight)
 		self.figureHeight = max(self.lh, self.rh) * 10.0/9.0
-		return platdemos.Figure.wrap(self, availWidth, availHeight)
+		return figures.Figure.wrap(self, availWidth, availHeight)
 
 	def drawFigure(self):
 		self.left.drawOn(self.canv,
