@@ -261,9 +261,9 @@ class ParaParser(xmllib.XMLParser):
 		if frag.sub:
 			frag.rise = -frag.fontSize*subFraction
 			frag.fontSize = max(frag.fontSize-sizeDelta,3)
-		elif frag.sub:
+		elif frag.super:
 			frag.rise = frag.fontSize*superFraction
-			frag.fontSize = min(frag.fontSize-sizeDelta,3)
+			frag.fontSize = max(frag.fontSize-sizeDelta,3)
 
 		if frag.greek: frag.fontName = 'symbol'
 		# bold, italic, and underline
@@ -312,7 +312,7 @@ if __name__=='__main__':
 	his men, for they perished through their own sheer folly in eating
 	the cattle of the Sun-god Hyperion; so the god prevented them from
 	ever reaching home. Tell me, too, about all these things, O daughter
-	of Jove, from whatsoever source you may know them.
+	of Jove, from whatsoever source you<super>1</super> may know them.
 	'''
 	text = cleanBlockQuotedText(text)
 	rv = _parser.parse(text,style)
@@ -321,4 +321,4 @@ if __name__=='__main__':
 			print l
 	else:
 		for l in rv:
-			print l.fontName,l.fontSize,l.textColor,l.bold, l.text[:25]
+			print l.fontName,l.fontSize,l.textColor,l.bold, l.rise, l.text[:25]
