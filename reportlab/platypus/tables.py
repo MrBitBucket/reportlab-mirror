@@ -1037,7 +1037,8 @@ class Table(Flowable):
             elif valign=='TOP':
                 y = rowpos + rowheight - cellstyle.topPadding - fontsize
             elif valign=='MIDDLE':
-                y = rowpos + (cellstyle.bottomPadding + rowheight-cellstyle.topPadding+(n-1)*leading)/2.0
+                #tim roberts pointed out missing fontsize correction 2004-10-04
+                y = rowpos + (cellstyle.bottomPadding + rowheight-cellstyle.topPadding+n*leading)/2.0 - fontsize
             else:
                 raise ValueError, "Bad valign: '%s'" % str(valign)
 
