@@ -77,7 +77,6 @@ class StateTracker:
         for (key, value) in delta.items():
             if key == 'transform':  #do cumulative matrix
                 newstate['transform'] = delta['transform']
-                #newstate['ctm'] = mmult(self.__combined[-1]['transform'], delta['transform'])
                 newstate['ctm'] = mmult(self.__combined[-1]['ctm'], delta['transform'])
                 #print 'statetracker transform = (%0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f)' % tuple(newstate['transform'])
                 #print 'statetracker ctm = (%0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f)' % tuple(newstate['ctm'])

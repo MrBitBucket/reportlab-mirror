@@ -45,6 +45,12 @@ STATE_DEFAULTS = {   # sensible defaults for all
     'textAnchor':  'start' # can be start, middle, end, inherited
     }
 
+# singleton value for automatic
+class _Auto:
+    def repr(self):
+        return 'Auto'
+Auto = _Auto()
+
     ################################################################
     #
     #   Here are some standard verifying functions which can be

@@ -335,10 +335,11 @@ def getDrawing10():
     
     g3 = Group(g2, transform = translate(25,25))
     D.add(g3)
-    
+
     g4 = Group(g3, transform = translate(25,25))
-    D.add(g3)
-    
+    D.add(g4)
+
+        
     return D
 
 def getAllFunctionDrawingNames():
