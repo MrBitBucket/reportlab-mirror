@@ -713,7 +713,7 @@ class Paragraph(Flowable):
                     offset = _drawBullet(canvas,offset,cur_y,bulletText,style)
 
                 #set up the font etc.
-                canvas._code.append('%s %s %s rg' % (f.textColor.red, f.textColor.green, f.textColor.blue))
+                canvas.setFillColor(f.textColor)
 
                 tx = self.beginText(cur_x, cur_y)
 
