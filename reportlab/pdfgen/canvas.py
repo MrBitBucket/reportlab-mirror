@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.98 2002/03/25 00:34:56 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.98 2002/03/25 00:34:56 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.99 2002/03/28 09:20:59 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.99 2002/03/28 09:20:59 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -55,6 +55,14 @@ PATH_OPS = {(0, 0, FILL_EVEN_ODD) : 'n',  #no op
 
 _escapePDF = pdfutils._escape
 _instanceEscapePDF = pdfutils._instanceEscapePDF
+
+if sys.hexversion >= 0x02000000:
+    def _digester(s):
+        return md5.md5(s).hexdigest()
+else:
+    # hexdigest not available in 1.5
+    def _digester(s):
+        return string.join(map(lambda x : "%0x" % ord(x), md5.md5(s).digest()), '')
 
 class Canvas:
     """This class is the programmer's interface to the PDF file format.  Methods
@@ -497,10 +505,10 @@ class Canvas:
         # is different, even the mask, this should be different.  
         if type(image) == type(''):
             #filename, use it
-            name = md5.md5('%s%s' % (image, mask)).hexdigest()
+            name = _digester('%s%s' % (image, mask))
         else:
             rawdata = image.convert('RGB').tostring()            
-            name = md5.md5(rawdata).hexdigest()
+            name = _digester(rawdata)
 
         # in the pdf document, this will be prefixed with something to
         # say it is an XObject.  Does it exist yet?
