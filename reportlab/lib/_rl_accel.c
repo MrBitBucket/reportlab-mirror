@@ -2,15 +2,15 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.24 2001/10/26 14:21:01 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.25 2002/02/21 14:48:13 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.24 2001/10/26 14:21:01 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.25 2002/02/21 14:48:13 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
 #include <math.h>
-#if defined(__GNUC__) || defined(sun) || defined(_AIX)
+#if defined(__GNUC__) || defined(sun) || defined(_AIX) || defined(__hpux)
 #	define STRICMP strcasecmp
 #elif defined(_MSC_VER)
 #	define STRICMP stricmp
