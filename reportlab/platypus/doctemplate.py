@@ -31,11 +31,14 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.17  2000/06/19 11:14:03  andy_robinson
+#	Global sequencer put in the 'story builder'.
+#
 #	Revision 1.16  2000/06/16 13:49:20  aaron_watters
 #	new build parameters to allow alternate filename and canvas implementation
 #	(in order to support slideshow summary mode, for example, or embedding one
 #	document in another).
-#
+#	
 #	Revision 1.15  2000/06/13 13:03:31  aaron_watters
 #	more documentation changes
 #	
@@ -81,7 +84,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.16 2000/06/16 13:49:20 aaron_watters Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.17 2000/06/19 11:14:03 andy_robinson Exp $ '''
 __doc__="""
 This module contains the core structure of platypus.
 
@@ -105,8 +108,10 @@ The special invisible flowable NextPageTemplate can be used to specify
 the page template for the next page (which by default is the one being used
 for the current frame).
 """
-from flowables import *
-from frames import Frame
+from reportlab.platypus.flowables import *
+from reportlab.platypus.paragraph import Paragraph
+from reportlab.platypus.frames import Frame
+import reportlab.lib.sequencer
 from types import *
 import sys
 
@@ -256,6 +261,9 @@ class BaseDocTemplate:
 		self.addPageTemplates(p)
 		self._calc()
 
+		self.seq = reportlab.lib.sequencer.Sequencer()
+		
+
 	def _calc(self):
 		self._rightMargin = self.pagesize[0] - self.rightMargin
 		self._topMargin = self.pagesize[1] - self.topMargin
@@ -404,6 +412,7 @@ class BaseDocTemplate:
 					f.postponed = 1
 					flowables.insert(0,f)			# put the flowable back
 					self.handle_frameEnd()
+
 
 	#these are provided so that deriving classes can refer to them
 	_handle_documentBegin = handle_documentBegin

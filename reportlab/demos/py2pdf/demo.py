@@ -37,14 +37,14 @@ class ImgPDFLayouter (PythonPDFLayouter):
         # Define a PDF form containing an image frame
         # that will be included on every page, but 
         # stored only once in the resulting file.
-        c.beginForm0("imageFrame")
+        c.beginForm("imageFrame")
         c.saveState()
         x, y = 219.0, 655.0 # Known size of the picture.
         c.scale((lm - 1*cm)/x, height/y)
         path = 'vertpython.jpg'
         c.drawInlineImage(path, 0, 0)
         c.restoreState()        
-        c.endForm0()
+        c.endForm()
 
     
     def putPageDecoration(self):
@@ -62,7 +62,7 @@ class ImgPDFLayouter (PythonPDFLayouter):
         c.drawCentredString(x, y, label)
 
         # Call the previously stored form.
-        c.doForm0("imageFrame")
+        c.doForm("imageFrame")
                 
 
 ### Helpers.

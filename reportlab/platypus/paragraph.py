@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.13  2000/06/19 11:14:03  andy_robinson
+#	Global sequencer put in the 'story builder'.
+#
 #	Revision 1.12  2000/06/13 13:03:31  aaron_watters
 #	more documentation changes
-#
+#	
 #	Revision 1.11  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #	
@@ -67,12 +70,12 @@
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.12 2000/06/13 13:03:31 aaron_watters Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.13 2000/06/19 11:14:03 andy_robinson Exp $ '''
 import string
 import types
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from paraparser import ParaParser, ParaFrag
-from flowables import Flowable
+from reportlab.platypus.paraparser import ParaParser, ParaFrag
+from reportlab.platypus.flowables import Flowable
 from reportlab.lib.colors import Color
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from copy import deepcopy
@@ -273,6 +276,10 @@ class Paragraph(Flowable):
 				raise "xml parser error (%s) in paragraph beginning\n'%s'"\
 					% (_parser.errors[0],text[:min(30,len(text))])
 			if bFrags: bulletText = bFrags
+
+		#AR hack
+		self.text = text
+		
 		self.frags = frags
 		self.style = style
 		self.bulletText = bulletText

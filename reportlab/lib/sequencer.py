@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: sequencer.py,v $
+#	Revision 1.5  2000/06/19 11:14:03  andy_robinson
+#	Global sequencer put in the 'story builder'.
+#
 #	Revision 1.4  2000/06/12 11:27:17  andy_robinson
 #	Added Sequencer and associated XML tags
-#
+#	
 #	Revision 1.3  2000/06/11 21:34:01  andy_robinson
 #	Largely complete class for numbering lists, figures and chapters
 #	
@@ -43,7 +46,7 @@
 #	Revision 1.1  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #	
-__version__=''' $Id: sequencer.py,v 1.4 2000/06/12 11:27:17 andy_robinson Exp $ '''
+__version__=''' $Id: sequencer.py,v 1.5 2000/06/19 11:14:03 andy_robinson Exp $ '''
 """This module defines a single public class, Sequencer, which aids in
 numbering and formatting lists."""
 
@@ -223,6 +226,21 @@ class Sequencer:
 		for (key, counter) in counters:
 			print '    %s: value = %d, base = %d, format example = %s' % (
 				key, counter.this(), counter._base, counter.thisf())
+
+
+"""Your story builder needs to set this to"""
+_sequencer = None
+def getSequencer():
+	global _sequencer
+	if _sequencer is None:
+		_sequencer = Sequencer()
+	return	_sequencer
+
+def setSequencer(seq):
+	s = _sequencer
+	_sequencer = seq
+	return s
+
 def test():
 	s = Sequencer()
 	print 'Counting using default sequence: %d %d %d' % (s.next(),s.next(), s.next())

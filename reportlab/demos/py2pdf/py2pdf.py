@@ -1017,7 +1017,7 @@ class PythonPDFLayouter (PDFLayouter):
                 c = self.canvas
                 i = self.startPositions.index(self.startPos)
                 c.bookmarkHorizontalAbsolute(nameTag, pos)
-                c.addOutlineEntry0('%s %s' % (item, t), nameTag, i)
+                c.addOutlineEntry('%s %s' % (item, t), nameTag, i)
 
     
     def addParam(self, t):

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paraparser.py,v $
+#	Revision 1.24  2000/06/19 11:14:03  andy_robinson
+#	Global sequencer put in the 'story builder'.
+#
 #	Revision 1.23  2000/06/13 04:11:49  aaron_watters
 #	noted replication of XML markup comment between paraparser.py and paragraph.py
-#
+#	
 #	Revision 1.22  2000/06/12 11:27:17  andy_robinson
 #	Added Sequencer and associated XML tags
 #	
@@ -64,7 +67,7 @@
 #	Revision 1.13  2000/04/25 13:07:57  rgbecker
 #	Added license
 #	
-__version__=''' $Id: paraparser.py,v 1.23 2000/06/13 04:11:49 aaron_watters Exp $ '''
+__version__=''' $Id: paraparser.py,v 1.24 2000/06/19 11:14:03 andy_robinson Exp $ '''
 import string
 import re
 from types import TupleType
@@ -72,6 +75,7 @@ import sys
 import os
 import copy
 
+import reportlab.lib.sequencer
 #try:
 #	from xml.parsers import xmllib
 #	_xmllib_newStyle = 1
@@ -374,20 +378,13 @@ class ParaParser(xmllib.XMLParser):
 
 
 	#---------------------------------------------------------------
-	def setSequencer(self, seq):
-		self._seq = seq
-
-	def getSequencer(self):
-		if self._seq is None:
-			self._seq = Sequencer()
-		return self._seq
 		
 	def start_seqdefault(self, attr):
 		try:
 			default = attr['id']
 		except KeyError:
 			default = None
-		self.getSequencer().setDefaultCounter(default)
+		self._seq.setDefaultCounter(default)
 
 	def end_seqdefault(self):
 		pass
@@ -401,7 +398,7 @@ class ParaParser(xmllib.XMLParser):
 			base = math.atoi(attr['base'])
 		except:
 			base=1
-		self.getSequencer().reset(id, base)
+		self._seq.reset(id, base)
 
 	def end_seqreset(self):
 		pass
@@ -417,7 +414,7 @@ class ParaParser(xmllib.XMLParser):
 			id = attr['id']
 		else: 
 			id = None
-		output = self.getSequencer().nextf(id)
+		output = self._seq.nextf(id)
 		self.handle_data(output)
 		
 	def end_seq(self):
@@ -545,11 +542,13 @@ class ParaParser(xmllib.XMLParser):
 		# the xmlparser requires that all text be surrounded by xml
 		# tags, therefore we must throw some unused flags around the
 		# given string
+		self._seq = reportlab.lib.sequencer.getSequencer()
 		self._reset(style)	# reinitialise the parser
 		if not(len(text)>=6 and text[0]=='<' and _re_para.match(text)):
 			text = "<para>"+text+"</para>"
 		self.feed(text)
 		self.close()	# force parsing to complete
+		del self._seq
 		style = self._style
 		del self._style
 		if len(self.errors)==0:
