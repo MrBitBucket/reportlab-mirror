@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.16 2003/04/17 23:37:39 andy_robinson Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.16 2003/04/17 23:37:39 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.17 2003/06/24 12:25:43 rgbecker Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.17 2003/06/24 12:25:43 rgbecker Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 
@@ -54,10 +54,6 @@ def framePageForm(c):
     #canvas.setStrokeColorRGB(0,0,0)\
     c.restoreState()
     c.endForm()
-
-titlelist = []
-closeit = 0
-
 
 def framePage(canvas, title):
     global closeit
@@ -197,6 +193,9 @@ def makeDocument(filename, pageCallBack=None):
     #the extra arg is a hack added later, so other
     #tests can get hold of the canvas just before it is
     #saved
+    global titlelist, closeit
+    titlelist = []
+    closeit = 0
 
     c = canvas.Canvas(filename)
     c.setPageCompression(0)
@@ -746,6 +745,13 @@ cost to performance.""")
 def run(filename):
     c = makeDocument(filename)
     c.save()
+    c = makeDocument(filename)
+    import os
+    f = os.path.splitext(filename)
+    f = open('%sm%s' % (f[0],f[1]),'wb')
+    f.write(c.getpdfdata())
+    f.close()
+
 
 
 def pageShapes(c):
