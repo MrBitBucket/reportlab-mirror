@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.52 2003/10/06 15:07:33 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.52 2003/10/06 15:07:33 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.53 2003/10/06 15:34:21 dragan1 Exp $
+__version__=''' $Id: utils.py,v 1.53 2003/10/06 15:34:21 dragan1 Exp $ '''
 
 import string, os, sys
 from types import *
@@ -307,10 +307,9 @@ class ImageReader:
         if sys.platform[0:4] == 'java':
             from javax.imageio import ImageIO
             if type(fileName) is type(''):
-                from java.io import File
-                fp = File(fileName)
+		fp = open(fileName,'rb')
             else:
-                fp = fileName
+		fp = fileName
             self._image = ImageIO.read(fp)
         else:
             import PIL.Image
@@ -341,8 +340,8 @@ class ImageReader:
                 a = pixels.append
                 for i in range(len(buffer)):
                     rgb = buffer[i]
-                    a((rgb>>16)&0xff)
-                    a((rgb>>8)&0xff)
+                    a(chr((rgb>>16)&0xff))
+                    a(chr((rgb>>8)&0xff))
                     a(chr(rgb&0xff))
                 self._data = ''.join(pixels)
             else:
