@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.23  2000/07/12 15:18:16  rgbecker
+#	Leading changes fixed
+#
 #	Revision 1.22  2000/07/12 14:23:12  rgbecker
 #	Table argument order changed
-#
+#	
 #	Revision 1.21  2000/07/12 09:05:17  rgbecker
 #	Fixed tuple size bug
 #	
@@ -95,7 +98,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.22 2000/07/12 14:23:12 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.23 2000/07/12 15:18:16 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -273,6 +276,9 @@ class Table(Flowable):
 				self._drawInnerGrid( (sc, sr), (ec, er), weight, color)
 			elif op in ('BOX',	'OUTLINE',):
 				self._drawBox( (sc, sr), (ec, er), weight, color)
+			elif op == 'BOXGRID':
+				self._drawBox( (sc, sr), (ec, er), weight, color)
+				self._drawInnerGrid( (sc, sr), (ec, er), weight, color)
 			elif op == 'INNERGRID':
 				self._drawInnerGrid( (sc, sr), (ec, er), weight, color)
 			elif op == 'LINEBELOW':
@@ -465,15 +471,16 @@ class Table(Flowable):
 		else:
 			val = str(cellval)
 		vals = string.split(val, "\n")
-		n = len(vals)-1
+		n = len(vals)
 		leading = cellstyle.leading
+		fontsize = cellstyle.fontsize
 		valign = cellstyle.valign
 		if valign=='BOTTOM':
-			y = rowpos + cellstyle.bottomPadding+n*leading
+			y = rowpos + cellstyle.bottomPadding+n*leading-fontsize
 		elif valign=='TOP':
-			y = rowpos + rowheight - cellstyle.topPadding - cellstyle.fontsize
+			y = rowpos + rowheight - cellstyle.topPadding - fontsize
 		elif valign=='MIDDLE':
-			y = rowpos + (cellstyle.bottomPadding + rowheight - cellstyle.topPadding+n*leading)/2.0
+			y = rowpos + (cellstyle.bottomPadding + rowheight-cellstyle.topPadding+(n-1)*leading)/2.0+leading-fontsize
 		else:
 			raise ValueError, "Bad valign: '%s'" % str(valign)
 
@@ -487,7 +494,7 @@ class Table(Flowable):
 #	drawString(self, x, y, text) where x is left
 
 LINECOMMANDS = (
-	'GRID', 'BOX', 'OUTLINE', 'INNERGRID', 'LINEBELOW', 'LINEABOVE', 'LINEBEFORE', 'LINEAFTER', )
+	'GRID', 'BOX', 'OUTLINE', 'INNERGRID', 'BOXGRID', 'LINEBELOW', 'LINEABOVE', 'LINEBEFORE', 'LINEAFTER', )
 
 
 def _isLineCommand(cmd):
@@ -497,8 +504,18 @@ def _setCellStyle(cellStyles, i, j, op, values):
 	new = CellStyle('<%d, %d>' % (i,j), cellStyles[i][j])
 	cellStyles[i][j] = new
 	if op == 'FONT':
+		n = len(values)
 		new.fontname = values[0]
-		new.fontsize = values[1]
+		if n>1:
+			new.fontsize = values[1]
+		if n>2:
+			new.leading = values[2]
+	elif op in ('FONTNAME', 'FACE'):
+		new.fontname = values[0]
+	elif op in ('SIZE', 'FONTSIZE'):
+		new.fontsize = values[0]
+	elif op == 'LEADING':
+		new.leading = values[0]
 	elif op == 'TEXTCOLOR':
 		new.color = colors.toColor(values[0], colors.Color(0,0,0))
 	elif op in ('ALIGN', 'ALIGNMENT'):
@@ -749,11 +766,11 @@ LIST_STYLE = TableStyle(
 		The red numbers should be aligned LEFT &amp; BOTTOM, the blue RIGHT &amp; TOP
 		and the green CENTER &amp; MIDDLE.
 	""", styleSheet['BodyText']))
-	data=	[['X00y', 'X01y', 'X02y', 'X03y', 'X04y'],
+	XY	=	[['X00y', 'X01y', 'X02y', 'X03y', 'X04y'],
 			['X10y', 'X11y', 'X12y', 'X13y', 'X14y'],
 			['X20y', 'X21y', 'X22y', 'X23y', 'X24y'],
 			['X30y', 'X31y', 'X32y', 'X33y', 'X34y']]
-	t=Table(data, 5*[0.4*inch], 4*[0.4*inch])
+	t=Table(XY, 5*[0.6*inch], 4*[0.6*inch])
 	t.setStyle([('ALIGN',(1,1),(-2,-2),'LEFT'),
 				('TEXTCOLOR',(1,1),(-2,-2),colors.red),
 
@@ -807,6 +824,15 @@ LIST_STYLE = TableStyle(
 				('ALIGN', (1, 1), (1, -1), 'CENTER'),
 				])
 	lst.append(t)
+	lst.append(Table(XY,
+			style=[	('FONT',(0,0),(-1,-1),'Times-Roman', 5,6),
+					('BOXGRID', (0,0), (-1,-1), 0.25, colors.blue),]))
+	lst.append(Table(XY,
+			style=[	('FONT',(0,0),(-1,-1),'Times-Roman', 10,12),
+					('BOXGRID', (0,0), (-1,-1), 0.25, colors.black),]))
+	lst.append(Table(XY,
+			style=[	('FONT',(0,0),(-1,-1),'Times-Roman', 20,24),
+					('BOXGRID', (0,0), (-1,-1), 0.25, colors.red),]))
 	SimpleDocTemplate('tables.pdf', showBoundary=1).build(lst)
 
 if __name__ == '__main__':
