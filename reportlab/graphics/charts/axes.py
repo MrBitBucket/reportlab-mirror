@@ -389,6 +389,21 @@ class YCategoryAxis(Widget):
 class XValueAxis(Widget):
     "X/value axis"
 
+    _attrMap = {
+        'visible':isNumber,
+        'strokeWidth':isNumber,
+        'strokeColor':isColorOrNone,
+        'strokeDashArray':None,
+        'tickUp':isNumber,
+        'tickDown':isNumber,
+        'minimumTickSpacing':isNumber,
+        'labels':None,
+        'labelTextFormat':None,
+        'valueMin':isNumberOrAuto,
+        'valueMax':isNumberOrAuto,
+        'valueStep':isNumberOrAuto
+        }
+
     def __init__(self):
 
         self._configured = 0
@@ -612,6 +627,22 @@ class XValueAxis(Widget):
 class XTimeValueAxis(XValueAxis):
     "X time value axis"
 
+    _attrMap = {
+        'visible':isNumber,
+        'strokeWidth':isNumber,
+        'strokeColor':isColorOrNone,
+        'strokeDashArray':None,
+        'tickUp':isNumber,
+        'tickDown':isNumber,
+        'minimumTickSpacing':isNumber,
+        'labels':None,
+        'labelTextFormat':None,
+        'valueMin':isNumberOrAuto,
+        'valueMax':isNumberOrAuto,
+        'valueStep':isNumberOrAuto,
+        'valueSteps':isListOfNumbers
+        }
+
     def demo(self):
         self.setPosition(20, 50, 150)
         self.configure([(10,20,30,40,50)])
@@ -647,7 +678,7 @@ class XTimeValueAxis(XValueAxis):
         self._scaleFactor = self._length * 1.0 / (self._valueMax - self._valueMin) 
 
         # now work out where to put tickmarks.
-        if hasattr(self, 'valueSteps'):            
+        if hasattr(self, 'valueSteps'): 
             self._tickValues = self.valueSteps
         else:
             if self.valueStep == Auto:
@@ -712,6 +743,21 @@ class XTimeValueAxis(XValueAxis):
 
 class YValueAxis(Widget):
     "Y/value axis"
+
+    _attrMap = {
+        'visible':isNumber,
+        'strokeWidth':isNumber,
+        'strokeColor':isColorOrNone,
+        'strokeDashArray':None,
+        'tickRight':isNumber,
+        'tickLeft':isNumber,
+        'minimumTickSpacing':isNumber,
+        'labels':None,
+        'labelTextFormat':None,
+        'valueMin':isNumberOrAuto,
+        'valueMax':isNumberOrAuto,
+        'valueStep':isNumberOrAuto
+        }
 
     def __init__(self):
 
