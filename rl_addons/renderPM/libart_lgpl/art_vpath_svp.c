@@ -86,7 +86,8 @@ art_vpath_from_svp (const ArtSVP *svp)
   ArtVpath *new;
   int *visited;
   int n_new, n_new_max;
-  int i, j, k;
+  int i, k;
+  int j = 0; /* Quiet compiler */
   int seg_num;
   int first;
   double last_x, last_y;

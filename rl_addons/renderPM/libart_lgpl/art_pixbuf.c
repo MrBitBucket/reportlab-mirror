@@ -19,6 +19,7 @@
 
 #include "art_misc.h"
 #include "art_pixbuf.h"
+#include <string.h>
 
 
 /**

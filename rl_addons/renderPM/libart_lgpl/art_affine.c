@@ -415,7 +415,7 @@ art_affine_translate (double dst[6], double tx, double ty)
 double
 art_affine_expansion (const double src[6])
 {
-  return sqrt (src[0] * src[3] - src[1] * src[2]);
+  return sqrt (fabs (src[0] * src[3] - src[1] * src[2]));
 }
 
 /**

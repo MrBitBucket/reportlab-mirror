@@ -1,3 +1,36 @@
+2001-08-03  Michael Meeks  <michael@ximian.com>
+
+	* Version 2.3.5 for the API freeze.
+
+2001-07-12  Darin Adler  <darin@bentspoon.com>
+
+	* art_affine.c: (art_affine_expansion): Fix handling of
+	negative numbers. We ran into this bug a while back when
+	figuring out why librsvg couldn't handle certain svg files.
+
+2001-07-12  Darin Adler  <darin@bentspoon.com>
+
+	* art_misc.h: Change art_expand macro so it's a single
+	statement, using the do while (0) trick, which gets rid
+	of some warnings.
+	* art_pixbuf.c: Add a missing include.
+	* art_vpath_svp.c: (art_vpath_from_svp): Initialize a
+	variable to avoid a compiler warning.
+	* gen_art_config.c: Add a missing include.
+
+2001-03-24  Martin Baulig  <baulig@suse.de>
+
+	Applied the patch from Alexander Larsson which was sitting
+	in gnome-libs/patches/libart.diff since February.
+	[FIXME: Alex, can you please provide a ChangeLog?])
+
+	* art_rgb_a_affine.[ch]: New files.
+
+2001-01-07  Hans Breuer <Hans@Breuer.Org>
+	* art_misc.c : embryonic change to use libart_lgpl on win32
+	* libart.def : new file, exported functions for win32 dll
+	* makefile.msc : handwritten for MSVC compiler
+
 2000-09-30  Martin Baulig  <baulig@suse.de>
 
 	* libart-2.0.pc.in: Provide pkg-config script.

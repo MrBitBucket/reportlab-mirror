@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "config.h"
+#include <stdlib.h>
 
 /**
  * A little utility function to generate header info.

@@ -36,6 +36,7 @@ libart_lgpl_la_SOURCES = \
 	art_rgb_bitmap_affine.c \
 	art_rgb_pixbuf_affine.c \
 	art_rgb_rgba_affine.c \
+	art_rgb_a_affine.c \
 	art_rgba.c \
 	art_rgb_svp.c \
 	art_svp.c \
@@ -81,6 +82,7 @@ libart_lgplinc_HEADERS = \
 	art_rgb_bitmap_affine.h \
 	art_rgb_pixbuf_affine.h \
 	art_rgb_rgba_affine.h \
+	art_rgb_a_affine.h \
 	art_rgb_svp.h \
 	art_rgba.h \
 	art_svp.h \
