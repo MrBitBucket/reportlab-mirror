@@ -31,16 +31,19 @@
 #
 ###############################################################################
 #	$Log: pathobject.py,v $
+#	Revision 1.5  2000/06/09 08:17:43  andy_robinson
+#	Full qualified a local import in pdfgen package
+#
 #	Revision 1.4  2000/02/17 02:08:04  rgbecker
 #	Docstring & other fixes
-#
+#	
 #	Revision 1.3  2000/02/15 17:55:59  rgbecker
 #	License text fixes
 #	
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pathobject.py,v 1.4 2000/02/17 02:08:04 rgbecker Exp $ '''
+__version__=''' $Id: pathobject.py,v 1.5 2000/06/09 08:17:43 andy_robinson Exp $ '''
 __doc__=""" 
 PDFPathObject is an efficient way to draw paths on a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -50,7 +53,7 @@ Progress Reports:
     created from pdfgen.py
 """
 import string
-import pdfgeom
+import reportlab.pdfgen.pdfgeom
 
 class PDFPathObject:
     """Represents a graphic path.  There are certain 'modes' to PDF
