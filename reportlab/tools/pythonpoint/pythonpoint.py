@@ -320,11 +320,13 @@ class PPPresentation:
         #assume landscape
         self.pageWidth = rl_config.defaultPageSize[1]
         self.pageHeight = rl_config.defaultPageSize[0]
+        self.verbose = rl_config._verbose
 
 
     def saveAsPresentation(self):
         """Write the PDF document, one slide per page."""
-
+        if self.verbose:
+            print 'saving presentation...'
         pageSize = (self.pageWidth, self.pageHeight)
         filename = os.path.splitext(self.sourceFilename)[0] + '.pdf'
         canv = canvas.Canvas(filename, pagesize = pageSize)
@@ -337,7 +339,12 @@ class PPPresentation:
         if self.subject:
             canv.setSubject(self.subject)
 
+        slideNo = 0
         for slide in self.slides:
+            #need diagnostic output if something wrong with XML
+            slideNo = slideNo + 1
+            if self.verbose:
+                print 'doing slide %d, id = %s' % (slideNo, slide.id)
             if self.notes:
                 #frame and shift the slide
                 canv.scale(0.67, 0.67)
@@ -874,9 +881,8 @@ def setStyles(newStyleSheet):
 ##    p.close()
 
 
-def process(datafilename, notes=0, handout=0, cols=0):
+def process(datafilename, notes=0, handout=0, cols=0, verbose=0):
     "Process one PythonPoint source file."
-
     parser = stdparser.PPMLParser()
     parser.sourceFilename = datafilename
     rawdata = open(datafilename).read()
@@ -886,8 +892,12 @@ def process(datafilename, notes=0, handout=0, cols=0):
     pres.notes = notes
     pres.handout = handout
     pres.cols = cols
+    pres.verbose = verbose
+
+    #this does all the work
     pres.save()
-    if rl_config._verbose:
+
+    if verbose:
         print 'saved presentation %s.pdf' % os.path.splitext(datafilename)[0]
     parser.close()
 
@@ -910,11 +920,12 @@ def process(datafilename, notes=0, handout=0, cols=0):
 
 def handleOptions():
     # set defaults
+    from reportlab import rl_config
     options = {'cols':2,
                'handout':0,
                'help':0,
                'notes':0,
-               'verbose':0}
+               'verbose':rl_config._verbose}
 
     try:
         shortOpts = 'hnv'
@@ -970,7 +981,7 @@ if __name__ == '__main__':
         for datafile in files:
             if os.path.isfile(datafile):
                 file = os.path.join(os.getcwd(), datafile)
-                notes, handout, cols = options['notes'], options['handout'], options['cols']
-                process(file, notes, handout, cols)
+                notes, handout, cols, verbose = options['notes'], options['handout'], options['cols'], options['verbose']
+                process(file, notes, handout, cols, verbose)
             else:
                 print 'Data file not found:', datafile
