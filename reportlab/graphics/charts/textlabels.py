@@ -1,11 +1,12 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.15 2001/09/25 16:57:39 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.16 2001/09/25 17:53:18 rgbecker Exp $
 import string
 
 from reportlab.lib import colors
-from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, isTextAnchor, isBoxAnchor, isBoolean
+from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, \
+		isTextAnchor, isBoxAnchor, isBoolean, isNoneOrNumberPair
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.shapes import Drawing, Group, Circle, Rect, String, STATE_DEFAULTS
@@ -192,8 +193,8 @@ class BarChartLabel(Label):
 		visible = AttrMapValue(isBoolean,desc="True if the label is to be drawn"),
 		lineStrokeWidth = AttrMapValue(isNumberOrNone, desc="Non-zero for a drawn line"),
 		lineStrokeColor = AttrMapValue(isColorOrNone, desc="Color for a drawn line"),
-		fixedEnd = AttrMapValue(isNumberPair, desc="None or fixed draw ends +/-"),
-		fixedStart = AttrMapValue(isNumberPair, desc="None or fixed draw starts +/-"),
+		fixedEnd = AttrMapValue(isNoneOrNumberPair, desc="None or fixed draw ends +/-"),
+		fixedStart = AttrMapValue(isNoneOrNumberPair, desc="None or fixed draw starts +/-"),
 		nudge = AttrMapValue(isNumber, desc="Non-zero sign dependent nudge"),
 		)
 
