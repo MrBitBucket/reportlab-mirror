@@ -1,3 +1,6 @@
+$Name:  $
+
+
 Installation
 ============
 Either unpack reportlab.zip or reportlab.tgz to some directory say
