@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.28 2002/03/22 13:46:20 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.28 2002/03/22 13:46:20 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.29 2002/03/27 13:34:43 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.29 2002/03/27 13:34:43 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -297,4 +297,10 @@ class DebugMemo:
 			if k in self.specials.keys(): apply(self.specials[k],(self,k,self.store[k]))
 
 	def payload(self,name):
+		return self.store['__payload'][name]
+
+	def __setitem__(self,name,value):
+		self.store['__payload'][name] = value
+
+	def __getitem__(self,name):
 		return self.store['__payload'][name]
