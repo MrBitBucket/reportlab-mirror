@@ -148,13 +148,14 @@ static py_FT_FontObject *_get_ft_face(char *fontName)
 		}
 
 	ft_face = PyObject_NEW(py_FT_FontObject, &py_FT_Font_Type);
+	ft_face->face = NULL;
 	if(!ft_face){
 		PyErr_Format(PyExc_MemoryError, "Cannot allocate ft_face for TTFont %s", fontName);
 		goto RET;
 		}
 	face = PyObject_GetAttrString(font,"face");
 	if(!face) goto RET;
-	_data = PyObject_GetAttrString(face,"_data");
+	_data = PyObject_GetAttrString(face,"_ttf_data");
 	Py_DECREF(face);
 	if(!_data) goto RET;
 	error = FT_New_Memory_Face(ft_library, PyString_AsString(_data), PyString_GET_SIZE(_data), 0, &ft_face->face);
@@ -1821,6 +1822,9 @@ void init_renderPM(void)
 
 	/*set up the types by hand*/
 	gstateType.ob_type = &PyType_Type;
+#ifdef	RENDERPM_FT
+    py_FT_Font_Type.ob_type = &PyType_Type;
+#endif
 
 	/* Create the module and add the functions */
 	m = Py_InitModule(MODULE, moduleMethods);
