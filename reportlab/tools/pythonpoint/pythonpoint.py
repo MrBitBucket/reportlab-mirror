@@ -390,6 +390,34 @@ class PPPresentation:
             self.saveAsPresentation()
 
 
+#class PPSection:
+#   """A section can hold graphics which will be drawn on all
+#   pages within it, before frames and other content are done.
+#  In other words, a background template."""
+#    def __init__(self, name):
+#       self.name = name
+#        self.graphics = []
+#
+#    def drawOn(self, canv):
+#        for graphic in self.graphics:
+###            graphic.drawOn(canv)
+#
+#            name = str(hash(graphic))
+#            internalname = canv._doc.hasForm(name)
+#
+#            canv.saveState()
+#            if not internalname:
+#                canv.beginForm(name)
+#                graphic.drawOn(canv)
+#                canv.endForm()
+#                canv.doForm(name)
+#            else:
+#                canv.doForm(name)
+#            canv.restoreState()
+
+
+definedForms = {}
+
 class PPSection:
     """A section can hold graphics which will be drawn on all
     pages within it, before frames and other content are done.
@@ -398,24 +426,26 @@ class PPSection:
     def __init__(self, name):
         self.name = name
         self.graphics = []
-
+        
     def drawOn(self, canv):
         for graphic in self.graphics:
-##            graphic.drawOn(canv)
-
             name = str(hash(graphic))
-            internalname = canv._doc.hasForm(name)
-
-            canv.saveState()
+            #internalname = canv._doc.hasForm(name)
+            if definedForms.has_key(name):
+                internalname = 1
+            else:
+                internalname = None
+                definedForms[name] = 1
             if not internalname:
                 canv.beginForm(name)
+                canv.saveState()
                 graphic.drawOn(canv)
+                canv.restoreState()
                 canv.endForm()
                 canv.doForm(name)
             else:
                 canv.doForm(name)
-            canv.restoreState()
-
+            
 
 class PPNotes:
     def __init__(self):
