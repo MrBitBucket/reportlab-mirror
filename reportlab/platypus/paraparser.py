@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.47 2002/07/24 19:56:38 andy_robinson Exp $
-__version__=''' $Id: paraparser.py,v 1.47 2002/07/24 19:56:38 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.48 2002/09/30 09:43:03 rgbecker Exp $
+__version__=''' $Id: paraparser.py,v 1.48 2002/09/30 09:43:03 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -167,6 +167,7 @@ class ParaFrag(ABag):
 #       < /i > - italics
 #       < u > < /u > - underline
 #       < super > < /super > - superscript
+#       < sup > < /sup > - superscript
 #       < sub > < /sub > - subscript
 #       <font name=fontfamily/fontname color=colorname size=float>
 #       < bullet > </bullet> - bullet text (at head of para only)
@@ -219,6 +220,10 @@ class ParaParser(xmllib.XMLParser):
 
     def end_super( self ):
         self._pop(super=1)
+
+    if _xmllib_newStyle:
+        start_sup = start_super
+        end_sup = end_super
 
     #### sub script
     def start_sub( self, attributes ):
@@ -416,6 +421,7 @@ class ParaParser(xmllib.XMLParser):
                             'u': (self.start_u, self.end_u),
                             'i': (self.start_i, self.end_i),
                             'super': (self.start_super, self.end_super),
+                            'sup': (self.start_super, self.end_super),
                             'sub': (self.start_sub, self.end_sub),
                             'font': (self.start_font, self.end_font),
                             'greek': (self.start_greek, self.end_greek),
@@ -456,7 +462,7 @@ class ParaParser(xmllib.XMLParser):
         if hasattr(frag,'cbDefn'):
             if data!='': syntax_error('Only <onDraw> tag allowed')
         else:
-            # if sub and super are both one they will cancel each other out
+            # if sub and super are both on they will cancel each other out
             if frag.sub == 1 and frag.super == 1:
                 frag.sub = 0
                 frag.super = 0
