@@ -369,7 +369,7 @@ class ParaParser(xmllib.XMLParser):
 			return style, None
 
 if __name__=='__main__':
-	from reportlab.platypus.layout import cleanBlockQuotedText
+	from reportlab.platypus.paragraph import cleanBlockQuotedText
 	_parser=ParaParser()
 
 	style=ParaFrag()

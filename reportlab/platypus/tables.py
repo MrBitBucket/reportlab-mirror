@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
-#	Revision 1.6  2000/04/14 11:54:57  rgbecker
+#	Revision 1.7  2000/04/14 12:17:05  rgbecker
 #	Splitting layout.py
 #
+#	Revision 1.6  2000/04/14 11:54:57  rgbecker
+#	Splitting layout.py
+#	
 #	Revision 1.5  2000/04/14 08:56:20  rgbecker
 #	Drawable ==> Flowable
 #	
@@ -46,14 +49,15 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.6 2000/04/14 11:54:57 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.7 2000/04/14 12:17:05 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
 color and weight of the lines (if any), and the font, alignment and padding of the text.
 """
 from reportlab.platypus import layout
-from reportlab.lib.styles import PropertySet
+from reportlab.platypus.paragraph import Paragraph
+from reportlab.lib.styles import PropertySet, getSampleStyleSheet
 import operator
 
 _stringtype = type('')
@@ -329,11 +333,11 @@ def test():
         ('Hats', 893, 912, '1,212', 643, 789, 159, 888, '1,298', 832, 453, '1,344','2,843')
         )
     doc = layout.SimpleFlowDocument('testtables.pdf', layout.DEFAULT_PAGE_SIZE, 1)
-    styleSheet = layout.getSampleStyleSheet()
+    styleSheet = getSampleStyleSheet()
     lst = []
-    lst.append(layout.Paragraph("Tables", styleSheet['Heading1']))
-    lst.append(layout.Paragraph(__doc__, styleSheet['BodyText']))
-    lst.append(layout.Paragraph("The Tables (shown in different styles below) were created using the following code:", styleSheet['BodyText']))
+    lst.append(Paragraph("Tables", styleSheet['Heading1']))
+    lst.append(Paragraph(__doc__, styleSheet['BodyText']))
+    lst.append(Paragraph("The Tables (shown in different styles below) were created using the following code:", styleSheet['BodyText']))
     lst.append(layout.Preformatted("""
     colwidths = (50, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32)
     rowheights = (24, 16, 16, 16, 16)
@@ -348,7 +352,7 @@ def test():
         )   
     t = Table(colwidths, rowheights,  data)
     """, styleSheet['Code'], dedent=4))
-    lst.append(layout.Paragraph("""
+    lst.append(Paragraph("""
     You can then give the Table a TableStyle object to control its format. The first TableStyle used was
     created as follows:
     """, styleSheet['BodyText']))
@@ -358,53 +362,53 @@ GRID_STYLE = TableStyle(
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
     """, styleSheet['Code']))
-    lst.append(layout.Paragraph("""
+    lst.append(Paragraph("""
     TableStyles are created by passing in a list of commands. There are two types of commands - line commands
     and cell formatting commands. In all cases, the first three elements of a command are the command name,
     the starting cell and the ending cell.
     """, styleSheet['BodyText']))
-    lst.append(layout.Paragraph("""
+    lst.append(Paragraph("""
     Line commands always follow this with the weight and color of the desired lines. Colors can be names,
     or they can be specified as a (R,G,B) tuple, where R, G and B are floats and (0,0,0) is black. The line
     command names are: GRID, BOX, OUTLINE, INNERGRID, LINEBELOW, LINEABOVE, LINEBEFORE
     and LINEAFTER. BOX and OUTLINE are equivalent, and GRID is the equivalent of applying both BOX and
     INNERGRID.
     """, styleSheet['BodyText']))
-    lst.append(layout.Paragraph("""
+    lst.append(Paragraph("""
     Cell formatting commands are:
     """, styleSheet['BodyText']))
-    lst.append(layout.Paragraph("""
+    lst.append(Paragraph("""
     FONT - takes fontname, fontsize and (optional) leading.
     """, styleSheet['Definition']))
-    lst.append(layout.Paragraph("""
+    lst.append(Paragraph("""
     TEXTCOLOR - takes a color name or (R,G,B) tuple.
     """, styleSheet['Definition']))
-    lst.append(layout.Paragraph("""
+    lst.append(Paragraph("""
     ALIGNMENT (or ALIGN) - takes one of LEFT, RIGHT and CENTRE (or CENTER).
     """, styleSheet['Definition']))
-    lst.append(layout.Paragraph("""
+    lst.append(Paragraph("""
     LEFTPADDING - defaults to 6.
     """, styleSheet['Definition']))
-    lst.append(layout.Paragraph("""
+    lst.append(Paragraph("""
     RIGHTPADDING - defaults to 6.
     """, styleSheet['Definition']))
-    lst.append(layout.Paragraph("""
+    lst.append(Paragraph("""
     BOTTOMPADDING - defaults to 3.
     """, styleSheet['Definition']))
-    lst.append(layout.Paragraph("""
+    lst.append(Paragraph("""
     A tablestyle is applied to a table by calling Table.setStyle(tablestyle).
     """, styleSheet['BodyText']))
     t = Table(colwidths, rowheights,  data)
     t.setStyle(GRID_STYLE)
     lst.append(layout.PageBreak())
-    lst.append(layout.Paragraph("This is GRID_STYLE\n", styleSheet['BodyText']))
+    lst.append(Paragraph("This is GRID_STYLE\n", styleSheet['BodyText']))
     lst.append(t)
     
     t = Table(colwidths, rowheights,  data)
     t.setStyle(BOX_STYLE)
-    lst.append(layout.Paragraph("This is BOX_STYLE\n", styleSheet['BodyText']))
+    lst.append(Paragraph("This is BOX_STYLE\n", styleSheet['BodyText']))
     lst.append(t)
-    lst.append(layout.Paragraph("""
+    lst.append(Paragraph("""
     It was created as follows:
     """, styleSheet['BodyText']))
     lst.append(layout.Preformatted("""
@@ -416,9 +420,9 @@ BOX_STYLE = TableStyle(
     
     t = Table(colwidths, rowheights,  data)
     t.setStyle(LABELED_GRID_STYLE)
-    lst.append(layout.Paragraph("This is LABELED_GRID_STYLE\n", styleSheet['BodyText']))
+    lst.append(Paragraph("This is LABELED_GRID_STYLE\n", styleSheet['BodyText']))
     lst.append(t)
-    lst.append(layout.Paragraph("""
+    lst.append(Paragraph("""
     It was created as follows:
     """, styleSheet['BodyText']))
     lst.append(layout.Preformatted("""
@@ -434,9 +438,9 @@ LABELED_GRID_STYLE = TableStyle(
     
     t = Table(colwidths, rowheights,  data)
     t.setStyle(COLORED_GRID_STYLE)
-    lst.append(layout.Paragraph("This is COLORED_GRID_STYLE\n", styleSheet['BodyText']))
+    lst.append(Paragraph("This is COLORED_GRID_STYLE\n", styleSheet['BodyText']))
     lst.append(t)
-    lst.append(layout.Paragraph("""
+    lst.append(Paragraph("""
     It was created as follows:
     """, styleSheet['BodyText']))
     lst.append(layout.Preformatted("""
@@ -451,9 +455,9 @@ COLORED_GRID_STYLE = TableStyle(
     
     t = Table(colwidths, rowheights,  data)
     t.setStyle(LIST_STYLE)
-    lst.append(layout.Paragraph("This is LIST_STYLE\n", styleSheet['BodyText']))
+    lst.append(Paragraph("This is LIST_STYLE\n", styleSheet['BodyText']))
     lst.append(t)
-    lst.append(layout.Paragraph("""
+    lst.append(Paragraph("""
     It was created as follows:
     """, styleSheet['BodyText']))
     lst.append(layout.Preformatted("""
@@ -475,9 +479,9 @@ LIST_STYLE = TableStyle(
      ('BACKGROUND', (0,0), (-1,0), (0,0.7,0.7))]
     )
     t.setStyle(ts)
-    lst.append(layout.Paragraph("This is a custom style\n", styleSheet['BodyText']))
+    lst.append(Paragraph("This is a custom style\n", styleSheet['BodyText']))
     lst.append(t)
-    lst.append(layout.Paragraph("""
+    lst.append(Paragraph("""
     It was created as follows:
     """, styleSheet['BodyText']))
     lst.append(layout.Preformatted("""

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: stdparser.py,v $
+#	Revision 1.3  2000/04/14 12:17:05  rgbecker
+#	Splitting layout.py
+#
 #	Revision 1.2  2000/04/06 12:15:38  andy_robinson
 #	Updated example XML to include full tag reference
-#
+#	
 #	Revision 1.1  2000/04/06 09:47:20  andy_robinson
 #	Added several new shape tags.
 #	Broke out parser into separate module, to
@@ -56,6 +59,7 @@ import string
 import imp
 import pythonpoint
 from reportlab.platypus import layout
+from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 
 class PPMLParser(xmllib.XMLParser):
     attributes = {
@@ -416,11 +420,13 @@ class PPMLParser(xmllib.XMLParser):
         self._curString.font = args['font']
         self._curString.size = eval(args['size'])
         if args['align'] == 'left':
-            self._curString.align = layout.TA_LEFT
+            self._curString.align = TA_LEFT
         elif args['align'] == 'center':
-            self._curString.align = layout.TA_CENTER
+            self._curString.align = TA_CENTER
         elif args['align'] == 'right':
-            self._curString.align = layout.TA_RIGHT
+            self._curString.align = TA_RIGHT
+        elif args['align'] == 'justify':
+            self._curString.align = TA_JUSTIFY
         #text comes later within the tag
         
     def end_string(self):

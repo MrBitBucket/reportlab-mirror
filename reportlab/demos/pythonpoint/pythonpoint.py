@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.13  2000/04/14 12:17:05  rgbecker
+#	Splitting layout.py
+#
 #	Revision 1.12  2000/04/14 08:56:20  rgbecker
 #	Drawable ==> Flowable
-#
+#	
 #	Revision 1.11  2000/04/10 09:05:49  andy_robinson
 #	- Fixed multi-line strings
 #	- added cached image so demo works without PIL
@@ -72,7 +75,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.12 2000/04/14 08:56:20 rgbecker Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.13 2000/04/14 12:17:05 rgbecker Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -121,6 +124,9 @@ import imp
 
 from reportlab.pdfgen import canvas
 from reportlab.platypus import layout
+from reportlab.platypus.paragraph import Paragraph
+from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
+from reportlab.lib import styles
 import stdparser 
 
 
@@ -255,7 +261,7 @@ class PPPara:
         self.style = None
 
     def getFlowable(self):
-        return layout.Paragraph(
+        return Paragraph(
                     self.rawtext,
                     getStyles()[self.style],
                     self.bulletText
@@ -440,7 +446,7 @@ class PPString:
         self.text = ''
         self.x = x
         self.y = y
-        self.align = layout.TA_LEFT
+        self.align = TA_LEFT
         self.font = 'Times-Roman'
         self.size = 12
         self.color = (0,0,0)
@@ -468,11 +474,11 @@ class PPString:
         canv.setFillColorRGB(r,g,b)
         cur_y = self.y
         for line in lines:
-            if self.align == layout.TA_LEFT:
+            if self.align == TA_LEFT:
                 canv.drawString(self.x, cur_y, line)
-            elif self.align == layout.TA_CENTER:
+            elif self.align == TA_CENTER:
                 canv.drawCentredString(self.x, cur_y, line)
-            elif self.align == layout.TA_RIGHT:
+            elif self.align == TA_RIGHT:
                 canv.drawRightString(self.x, cur_y, line)
             cur_y = cur_y - 1.2*self.size
                 
@@ -483,7 +489,7 @@ def getSampleStyleSheet():
     """Returns a dictionary of styles to get you started.  We will
     provide a way to specify a module of these."""
     stylesheet = {}
-    ParagraphStyle = layout.ParagraphStyle
+    ParagraphStyle = styles.ParagraphStyle
     
     para = ParagraphStyle('Normal', None)   #the ancestor of all
     para.fontName = 'Times-Roman'
@@ -503,12 +509,12 @@ def getSampleStyleSheet():
     stylesheet['Indent'] = para
 
     para = ParagraphStyle('Centered', stylesheet['Normal'])
-    para.alignment = layout.TA_CENTER
+    para.alignment = TA_CENTER
     stylesheet['Centered'] = para
     
     para = ParagraphStyle('BigCentered', stylesheet['Normal'])
     para.spaceBefore = 12
-    para.alignment = layout.TA_CENTER
+    para.alignment = TA_CENTER
     stylesheet['BigCentered'] = para
 
     para = ParagraphStyle('Italic', stylesheet['BodyText'])
@@ -519,14 +525,14 @@ def getSampleStyleSheet():
     para.fontName = 'Times-Roman'
     para.fontSize = 48
     para.Leading = 58
-    para.alignment = layout.TA_CENTER
+    para.alignment = TA_CENTER
     stylesheet['Title'] = para
     
     para = ParagraphStyle('Heading1', stylesheet['Normal'])
     para.fontName = 'Times-Bold'
     para.fontSize = 36
     para.leading = 44
-    para.alignment = layout.TA_CENTER
+    para.alignment = TA_CENTER
     stylesheet['Heading1'] = para
     
     para = ParagraphStyle('Heading2', stylesheet['Normal'])

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: gfe.py,v $
+#	Revision 1.7  2000/04/14 12:17:05  rgbecker
+#	Splitting layout.py
+#
 #	Revision 1.6  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
-#
+#	
 #	Revision 1.5  2000/03/02 12:21:20  rgbecker
 #	Added recognition comment
 #	
@@ -49,14 +52,16 @@
 #	Revision 1.1.1.1  2000/02/15 15:15:57  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: gfe.py,v 1.6 2000/03/08 13:06:39 andy_robinson Exp $ '''
+__version__=''' $Id: gfe.py,v 1.7 2000/04/14 12:17:05 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
 import sys
 from reportlab.platypus import layout
+from reportlab.platypus.paragraph import Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
 
-styles = layout.getSampleStyleSheet()
+styles = getSampleStyleSheet()
 
 Title = "Integrating Diverse Data Sources with Gadfly 2"
 
@@ -111,7 +116,7 @@ Elements = []
 
 HeaderStyle = styles["Heading1"] # XXXX
 
-def header(txt, style=HeaderStyle, klass=layout.Paragraph, sep=0.3):
+def header(txt, style=HeaderStyle, klass=Paragraph, sep=0.3):
     s = layout.Spacer(0.2*inch, sep*inch)
     Elements.append(s)
     para = klass(txt, style)
