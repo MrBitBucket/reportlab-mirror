@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.63 2003/05/11 11:01:30 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.64 2003/10/06 11:31:09 rgbecker Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.63 2003/05/11 11:01:30 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.64 2003/10/06 11:31:09 rgbecker Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -801,36 +801,6 @@ def progressCB(typ, value):
     """
     print 'PROGRESS MONITOR:  %-10s   %d' % (typ, value)
 
-
-    ##########################################################
-    ##
-    ##   testing
-    ##
-    ##########################################################
-
-def randomText():
-    #this may or may not be appropriate in your company
-    from random import randint, choice
-
-    RANDOMWORDS = ['strategic','direction','proactive',
-    'reengineering','forecast','resources',
-    'forward-thinking','profit','growth','doubletalk',
-    'venture capital','IPO']
-
-    sentences = 5
-    output = ""
-    for sentenceno in range(randint(1,5)):
-        output = output + 'Blah'
-        for wordno in range(randint(10,25)):
-            if randint(0,4)==0:
-                word = choice(RANDOMWORDS)
-            else:
-                word = 'blah'
-            output = output + ' ' +word
-        output = output+'.'
-    return output
-
-
 if __name__ == '__main__':
 
     def myFirstPage(canvas, doc):
@@ -863,6 +833,7 @@ if __name__ == '__main__':
         normal = ParagraphStyle('normal')
         normal.firstLineIndent = 18
         normal.spaceBefore = 6
+        from reportlab.lib.randomtext import randomText
         import random
         for i in range(15):
             height = 0.5 + (2*random.random())
