@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.42 2001/10/03 11:12:59 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.43 2001/10/03 13:36:54 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -545,7 +545,7 @@ class ValueAxis(Widget):
 				valueMax = 1
 			else:
 				valueMax = valueMin+1
-		elif self.forceZero:
+		if self.forceZero:
 			if valueMax<0: valueMax=0
 			elif valueMin>0: valueMin = 0
 		self._valueMin, self._valueMax = (valueMin, valueMax)
