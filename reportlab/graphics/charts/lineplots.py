@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.13 2001/05/11 10:08:55 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.14 2001/05/15 20:00:55 dinu_gherman Exp $
 """
 This modules defines a very preliminary Line Plot example.
 """
@@ -26,6 +26,7 @@ class LinePlotProperties(PropHolder):
     _attrMap = {
         'strokeWidth':isNumber(),
         'strokeColor':isColorOrNone(),
+        'strokeDashArray':isListOfNumbersOrNone(),
         'symbol':None
         }
 
