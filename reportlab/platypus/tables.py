@@ -43,7 +43,7 @@ class CellStyle(PropertySet):
         }
 
 LINECAPS={'butt':0,'round':1,'projecting':2,'squared':2}
-LINEJOINS={'miter':0,'round':1,'bevel':2}
+LINEJOINS={'miter':0, 'mitre':0, 'round':1,'bevel':2}
 
 # experimental replacement
 class CellStyle1(PropertySet):
@@ -661,22 +661,23 @@ class Table(Flowable):
             else:
                 cap = cmd[5]
                 try:
-                    if type(cap) is not type(int):
+                    if not isinstance(cap,int):
                         cap = LINECAPS[cap]
                     elif cap<0 or cap>2:
                         raise ValueError
                     cmd = cmd[:5]+(cap,)+cmd[6:]
                 except:
-                    ValueError('Bad cap value %s in %s'%(cap,str(cmd)))
+                    raise ValueError('Bad cap value %s in %s'%(cap,str(cmd)))
+
             #dashes at index 6 - this is a dash array:
-            if len(cmd)<7: cmd = cmd+(None,)
+            if len(cmd)<7: cmd += (None,)
 
             #join mode at index 7 - can be string or numeric, look up as for caps
             if len(cmd)<8: cmd = cmd+(1,)
             else:
                 join = cmd[7]
                 try:
-                    if type(join) is not type(int):
+                    if not isinstance(join,int):
                         join = LINEJOINS[cap]
                     elif join<0 or join>2:
                         raise ValueError
@@ -687,7 +688,7 @@ class Table(Flowable):
             #linecount at index 8.  Default is 1, set to 2 for double line.
             if len(cmd)<9:
                 lineCount = 1
-                cmd = cmd + (lineCount,)
+                cmd += (lineCount,)
             else:
                 lineCount = cmd[8]
             assert lineCount >= 1
@@ -720,6 +721,16 @@ class Table(Flowable):
             if cap!=None and ccap!=cap:
                 self.canv.setLineCap(cap)
                 ccap = cap
+            if dash is None or dash == []:
+                if cdash is not None:
+                    self.canv.setDash()
+                    cdash = None
+            elif dash != cdash:
+                self.canv.setDash(dash)
+                cdash = dash
+            if join is not None and cjoin!=join:
+                self.canv.setLineJoin(join)
+                cjoin = join
             getattr(self,_LineOpMap.get(op, '_drawUnknown' ))( (sc, sr), (ec, er), weight, color, count, space)
         self.canv.restoreState()
         self._curcolor = None
