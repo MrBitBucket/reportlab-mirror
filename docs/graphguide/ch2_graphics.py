@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.20 2001/05/29 19:19:58 johnprecedo Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.21 2001/06/18 13:29:34 rgbecker Exp $
 
 from gengraphguide import *
 
@@ -965,7 +965,7 @@ from reportlab.graphics.charts import piecharts
 pc = piecharts.Pie()
 pc.defaultColors = [navy, blue, skyblue] #used in rotation 
 pc.data = [10,30,50,25] 
-pc.defaultStyles[7].strokeWidth = 5 
+pc.pieStyles[7].strokeWidth = 5 
 """)
 #removed 'pc.backColor = yellow' from above code example
 
