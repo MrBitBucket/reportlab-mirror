@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.15 2000/12/29 02:06:13 andy_robinson Exp $
-__version__=''' $Id: flowables.py,v 1.15 2000/12/29 02:06:13 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.16 2001/03/07 18:57:12 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.16 2001/03/07 18:57:12 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -32,8 +32,8 @@ from reportlab.lib.units import inch
 from reportlab.lib.colors import red
 from reportlab.pdfbase import pdfutils
 
-from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
-PAGE_HEIGHT = DEFAULT_PAGE_SIZE[1]
+from reportlab.config import defaultPageSize
+PAGE_HEIGHT = defaultPageSize[1]
 
 #############################################################
 #	Flowable Objects - a base class and a few examples.

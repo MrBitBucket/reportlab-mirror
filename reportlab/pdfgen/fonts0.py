@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/fonts0.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: fonts0.py,v 1.1 2001/03/06 17:38:15 andy_robinson Exp $ '''
+__version__=''' $Id: fonts0.py,v 1.2 2001/03/07 18:57:11 rgbecker Exp $ '''
 __doc__=""" 
 This is an attempt to break out fonts as user-accessible objects.  You can explicitly
 construct a font object with any desired encoding and add it to the document.  The
@@ -82,6 +82,7 @@ import string
 import types
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase import pdfdoc
+from reportlab import config
 
 class Encoding:
     """This is an abstract base class for encodings.  """
@@ -117,7 +118,7 @@ class SingleByteEncoding(Encoding):
             assert len(vector) == 256, 'Encoding vector must have 256 elements'
             self.vector = vector[:]  # TAKE A COPY so they don't mess up pdfmetrics
             self._encodingName = None
-            self._baseEncodingName = pdfdoc.DEFAULT_ENCODING
+            self._baseEncodingName = config.defaultEncoding
         elif type(vector) is types.StringType:
             try:
                 self.vector = pdfmetrics.encodings[vector][:]  # TAKE A COPY!
@@ -205,13 +206,10 @@ class SingleByteEncoding(Encoding):
         if curRange:
             ranges.append(curRange)
         return ranges
-                
-        
+
 WinAnsiEncoding = SingleByteEncoding('WinAnsiEncoding')
 MacRomanEncoding = SingleByteEncoding('MacRomanEncoding')
-defaultEncoding = SingleByteEncoding(pdfdoc.DEFAULT_ENCODING)
-
-        
+defaultEncoding = SingleByteEncoding(config.defaultEncoding)
 
 class Font:
     """Base class for a font.  Not sure yet what it needs to do"""

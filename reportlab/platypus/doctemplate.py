@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.36 2001/03/06 17:38:15 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.37 2001/03/07 18:57:11 rgbecker Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.36 2001/03/06 17:38:15 andy_robinson Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.37 2001/03/07 18:57:11 rgbecker Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -32,7 +32,7 @@ for the current frame).
 from reportlab.platypus.flowables import *
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
-from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
+from reportlab.config import defaultPageSize
 import reportlab.lib.sequencer
 
 from types import *
@@ -129,7 +129,7 @@ class PageTemplate:
 	derived classes can also implement beforeDrawPage and afterDrawPage if they want
 	"""
 	def __init__(self,id=None,frames=[],onPage=_doNothing, onPageEnd=_doNothing,
-				 pagesize=DEFAULT_PAGE_SIZE):
+				 pagesize=defaultPageSize):
 		if type(frames) not in (ListType,TupleType): frames = [frames]
 		assert filter(lambda x: not isinstance(x,Frame), frames)==[], "frames argument error"
 		self.id = id
@@ -202,7 +202,7 @@ class BaseDocTemplate:
 	title: Internal title for document (does not automatically display on any page)
 	author: Internal author for document (does not automatically display on any page)
 	"""
-	_initArgs = {	'pagesize':DEFAULT_PAGE_SIZE,
+	_initArgs = {	'pagesize':defaultPageSize,
 					'pageTemplates':[],
 					'showBoundary':0,
 					'leftMargin':inch,

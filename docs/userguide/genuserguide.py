@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/genuserguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/genuserguide.py,v 1.38 2000/11/05 17:41:58 andy_robinson Exp $
-__version__=''' $Id: genuserguide.py,v 1.38 2000/11/05 17:41:58 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/docs/userguide/genuserguide.py,v 1.39 2001/03/07 18:57:11 rgbecker Exp $
+__version__=''' $Id: genuserguide.py,v 1.39 2001/03/07 18:57:11 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -20,7 +20,8 @@ styleSheet = getStyleSheet()
 
 #from reportlab.platypus.doctemplate import SimpleDocTemplate
 from reportlab.lib.units import inch
-from reportlab.lib.pagesizes import letter, A4, A5, A3, DEFAULT_PAGE_SIZE  # latter two for testing
+from reportlab.lib.pagesizes import letter, A4, A5, A3  # latter two for testing
+from reportlab.config import defaultPageSize
 from reportlab.platypus import Paragraph, Spacer, Preformatted,\
             PageBreak, CondPageBreak, Flowable, Table, TableStyle, \
             NextPageTemplate, KeepTogether, Image, XPreformatted
@@ -426,5 +427,5 @@ if __name__=="__main__":
             raise
         print 'set page size to',sys.argv[1]
     else:
-        (w, h) = DEFAULT_PAGE_SIZE
+        (w, h) = defaultPageSize
     run((w, h))

@@ -2,12 +2,12 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/pagesizes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/pagesizes.py,v 1.5 2000/10/25 08:57:45 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/pagesizes.py,v 1.6 2001/03/07 18:57:11 rgbecker Exp $
 
 """This module defines a few common page sizes in points (1/72 inch).
 To be expanded to include things like label sizes, envelope windows
 etc."""
-__version__=''' $Id: pagesizes.py,v 1.5 2000/10/25 08:57:45 rgbecker Exp $ '''
+__version__=''' $Id: pagesizes.py,v 1.6 2001/03/07 18:57:11 rgbecker Exp $ '''
 
 from reportlab.lib.units import cm, inch
 
@@ -34,10 +34,6 @@ B2 = (_BW*2, _BH*2)
 B1 = (_BH*4, _BW*2)
 B0 = (_BW*4, _BH*4)
 
-#change this to suit your average needs
-DEFAULT_PAGE_SIZE = A4
-
 def landscape(pagesize):
-    """Use this to invert any pagesize"""
-    return (pagesize[1], pagesize[0])
-
+	"""Use this to invert any pagesize"""
+	return (pagesize[1], pagesize[0])

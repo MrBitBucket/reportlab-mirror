@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/pythonpoint.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.29 2000/12/14 17:11:03 rgbecker Exp $
-__version__=''' $Id: pythonpoint.py,v 1.29 2000/12/14 17:11:03 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.30 2001/03/07 18:57:11 rgbecker Exp $
+__version__=''' $Id: pythonpoint.py,v 1.30 2001/03/07 18:57:11 rgbecker Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -59,7 +59,7 @@ from reportlab.platypus import Preformatted, Paragraph, Frame, Image, \
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib import styles
 import stdparser 
-from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
+from reportlab.config import defaultPageSize
 from reportlab.lib import colors
 
 class PPPresentation:
@@ -75,8 +75,8 @@ class PPPresentation:
         self.showOutline = 1   #should it be displayed when opening?
         self.compression = 1        
         #assume landscape        
-        self.pageWidth = DEFAULT_PAGE_SIZE[1]  
-        self.pageHeight = DEFAULT_PAGE_SIZE[0]  
+        self.pageWidth = defaultPageSize[1]  
+        self.pageHeight = defaultPageSize[0]  
 
     def save(self):
         """This writes out the PDF document"""

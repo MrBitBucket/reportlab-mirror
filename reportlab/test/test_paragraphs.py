@@ -6,9 +6,9 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib.colors import red, black, navy, white
 from reportlab.lib.randomtext import randomText
-from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
+from reportlab.config import defaultPageSize
 
-(PAGE_WIDTH, PAGE_HEIGHT) = DEFAULT_PAGE_SIZE
+(PAGE_WIDTH, PAGE_HEIGHT) = defaultPageSize
 
 
 def myFirstPage(canvas, doc):

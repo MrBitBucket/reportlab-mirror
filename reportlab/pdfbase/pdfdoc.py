@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.39 2001/03/06 17:38:15 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.39 2001/03/06 17:38:15 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.40 2001/03/07 18:57:11 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.40 2001/03/07 18:57:11 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -19,7 +19,7 @@ piddlePDF calls pdfgen and offers a high-level interface.
 """
 """extremely anally  retentive structured version of pdfdoc"""
 
-DEFAULT_ENCODING = 'WinAnsiEncoding' #hack here for a system wide change
+from reportlab import config
 ALLOWED_ENCODINGS = ('WinAnsiEncoding', 'MacRomanEncoding')
 
 PDFError = 'PDFError'
@@ -112,7 +112,7 @@ class PDFDocument:
     # set this to define filters 
     defaultStreamFilters = None
     pageCounter = 1
-    def __init__(self, encoding=DEFAULT_ENCODING, dummyoutline=0, doFonts=0):
+    def __init__(self, encoding=config.defaultEncoding, dummyoutline=0, doFonts=0):
         #self.defaultStreamFilters = [PDFBase85Encode, PDFZCompress] # for testing!
         #self.defaultStreamFilters = [PDFZCompress] # for testing!
         assert encoding in ['MacRomanEncoding',
@@ -1458,7 +1458,7 @@ class PDFType1Font:
         PD = PDFDictionary(D)
         return PD.format(document)
 
-def MakeStandardEnglishFontObjects(document, encoding=DEFAULT_ENCODING):
+def MakeStandardEnglishFontObjects(document, encoding=config.defaultEncoding):
     # make the standard fonts and the standard font dictionary
     if encoding not in ALLOWED_ENCODINGS:
         raise ValueError, "bad encoding %s" % repr(encoding)
@@ -1473,7 +1473,7 @@ def MakeStandardEnglishFontObjects(document, encoding=DEFAULT_ENCODING):
             # they should be taken in the order they appear in the font file
             F.Encoding = PDFName('StandardEncoding')
         else:
-            F.Encoding = PDFName(DEFAULT_ENCODING)
+            F.Encoding = PDFName(config.defaultEncoding)
         F.__Comment__ = "Standard English Font %s" % repr(name)
         fname = "F"+repr(count)
         F.Name = fname

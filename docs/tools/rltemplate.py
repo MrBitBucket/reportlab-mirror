@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/rltemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/tools/rltemplate.py,v 1.8 2000/11/05 17:41:58 andy_robinson Exp $
+#$Header: /tmp/reportlab/docs/tools/rltemplate.py,v 1.9 2001/03/07 18:57:11 rgbecker Exp $
 # doc template for RL manuals.  Currently YAML is hard-coded
 #to use this, which is wrong.
 
@@ -9,11 +9,11 @@
 from reportlab.platypus import PageTemplate, \
      BaseDocTemplate, Frame, Paragraph
 from reportlab.lib.units import inch, cm
-from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
+from reportlab.config import defaultPageSize
 
 
 class FrontCoverTemplate(PageTemplate):
-    def __init__(self, id, pageSize=DEFAULT_PAGE_SIZE):
+    def __init__(self, id, pageSize=defaultPageSize):
         self.pageWidth = pageSize[0]
         self.pageHeight = pageSize[1]
         frame1 = Frame(inch,
@@ -44,7 +44,7 @@ class FrontCoverTemplate(PageTemplate):
     
 
 class OneColumnTemplate(PageTemplate):
-    def __init__(self, id, pageSize=DEFAULT_PAGE_SIZE):
+    def __init__(self, id, pageSize=defaultPageSize):
         self.pageWidth = pageSize[0]
         self.pageHeight = pageSize[1]
         frame1 = Frame(inch,
@@ -65,7 +65,7 @@ class OneColumnTemplate(PageTemplate):
         canvas.restoreState()
 
 class TwoColumnTemplate(PageTemplate):
-    def __init__(self, id, pageSize=DEFAULT_PAGE_SIZE):
+    def __init__(self, id, pageSize=defaultPageSize):
         self.pageWidth = pageSize[0]
         self.pageHeight = pageSize[1]
         colWidth = 0.5 * (self.pageWidth - 2.25*inch)

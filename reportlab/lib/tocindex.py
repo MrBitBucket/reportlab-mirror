@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/tocindex.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/tocindex.py,v 1.5 2000/12/14 17:11:03 rgbecker Exp $
-__version__=''' $Id: tocindex.py,v 1.5 2000/12/14 17:11:03 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/tocindex.py,v 1.6 2001/03/07 18:57:11 rgbecker Exp $
+__version__=''' $Id: tocindex.py,v 1.6 2001/03/07 18:57:11 rgbecker Exp $ '''
 __doc__=''
 """
 This module will contain standard Table of Contents and Index objects.
@@ -20,8 +20,8 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.platypus import tables
 from reportlab.lib import enums
 from reportlab.lib import colors
-import reportlab.lib.pagesizes
 from reportlab.lib.units import inch, cm
+from reportlab.config import defaultPageSize
 
     ##############################################################
     #
@@ -175,7 +175,7 @@ class TableOfContents0(IndexingFlowable0):
     #
     # everything from here down is concerned with creating a good example document
     # i.e. test code as well as tutorial
-PAGE_HEIGHT = reportlab.lib.pagesizes.DEFAULT_PAGE_SIZE[1]
+PAGE_HEIGHT = defaultPageSize[1]
 def getSampleTOCData(depth=3):
     """Returns a longish block of page numbers and headings over 3 levels"""
     from random import randint

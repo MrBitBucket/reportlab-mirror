@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/fonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.4 2001/03/02 15:35:43 rgbecker Exp $
-__version__=''' $Id: fonts.py,v 1.4 2001/03/02 15:35:43 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.5 2001/03/07 18:57:11 rgbecker Exp $
+__version__=''' $Id: fonts.py,v 1.5 2001/03/07 18:57:11 rgbecker Exp $ '''
 import string, sys, os
 ###############################################################################
 #	A place to put useful font stuff
@@ -51,7 +51,7 @@ _tt2ps_map = {
 			('zapfdingbats', 1, 0) :'ZapfDingbats',
 			('zapfdingbats', 0, 1) :'ZapfDingbats',
 			('zapfdingbats', 1, 1) :'ZapfDingbats',
-	  }
+			}
 
 _ps2tt_map={}
 for k,v in _tt2ps_map.items():
@@ -74,33 +74,30 @@ def tt2ps(fn,b,i):
 
 #this maps fontnames to the equivalent filename root.
 _font2fnrMap={
-	'symbol': 'Sy______',
-	'zapfdingbats': 'Zd______',
-	'helvetica': '_a______',
-	'helvetica-bold': '_ab_____',
-	'helvetica-boldoblique': '_abi____',
-	'helvetica-oblique': '_ai_____',
-	'times-bold': '_eb_____',
-	'times-bolditalic': '_ebi____',
-	'times-italic': '_ei_____',
-	'times-roman': '_er_____',
-	'courier-bold': 'cob_____',
-	'courier-boldoblique': 'cobo____',
-	'courier': 'com_____',
-	'courier-oblique': 'coo_____',
+	'symbol':					'Sy______',
+	'zapfdingbats':				'Zd______',
+	'helvetica':				'_a______',
+	'helvetica-bold':			'_ab_____',
+	'helvetica-boldoblique':	'_abi____',
+	'helvetica-oblique':		'_ai_____',
+	'times-bold':				'_eb_____',
+	'times-bolditalic':			'_ebi____',
+	'times-italic':				'_ei_____',
+	'times-roman':				'_er_____',
+	'courier-bold':				'cob_____',
+	'courier-boldoblique':		'cobo____',
+	'courier':					'com_____',
+	'courier-oblique':			'coo_____',
 	}
-
-if sys.platform=='win32':
-	_T1Path=['c:\\program Files\\Adobe\\Acrobat 4.0\\Resource\\Font']
-else:
-	_T1Path=[]
 
 def _findFNR(fontName):
 	return _font2fnrMap[string.lower(fontName)]
 
-def findPFB(fontName):
-	n = _findFNR(fontName)+'.pfb'
-	for d in _T1Path:
+def findT1File(fontName,ext='.pfb'):
+	from reportlab.config import T1SearchPath
+	assert T1SearchPath!=[]
+	n = _findFNR(fontName)+ext
+	for d in T1SearchPath:
 		f = os.path.join(d,n)
 		if os.path.isfile(f): return f
 	return None

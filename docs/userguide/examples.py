@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/examples.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/Attic/examples.py,v 1.16 2000/10/25 08:57:45 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/userguide/Attic/examples.py,v 1.17 2001/03/07 18:57:11 rgbecker Exp $
 import string
 
 testannotations="""
@@ -771,9 +771,9 @@ for (a,b) in g.items():
 platypussetup = """
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
+from reportlab.config import defaultPageSize
 from reportlab.lib.units import inch
-PAGE_HEIGHT=DEFAULT_PAGE_SIZE[1]; PAGE_WIDTH=DEFAULT_PAGE_SIZE[0]
+PAGE_HEIGHT=defaultPageSize[1]; PAGE_WIDTH=defaultPageSize[0]
 styles = getSampleStyleSheet()
 """
 platypusfirstpage = """

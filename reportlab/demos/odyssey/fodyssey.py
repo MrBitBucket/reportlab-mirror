@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/odyssey/fodyssey.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/odyssey/fodyssey.py,v 1.14 2000/10/25 08:57:44 rgbecker Exp $
-__version__=''' $Id: fodyssey.py,v 1.14 2000/10/25 08:57:44 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/odyssey/fodyssey.py,v 1.15 2001/03/07 18:57:11 rgbecker Exp $
+__version__=''' $Id: fodyssey.py,v 1.15 2001/03/07 18:57:11 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -11,7 +11,6 @@ from reportlab.platypus import *
 from reportlab.lib.units import inch
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
-from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
 
 styles = getSampleStyleSheet()
 

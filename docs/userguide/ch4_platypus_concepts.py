@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch4_platypus_concepts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch4_platypus_concepts.py,v 1.9 2000/12/06 13:55:20 aaron_watters Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch4_platypus_concepts.py,v 1.10 2001/03/07 18:57:11 rgbecker Exp $
 from genuserguide import *
 
 #####################################################################################################3
@@ -302,7 +302,7 @@ heading3("The $BaseDocTemplate$ class")
 
 eg("""
     BaseDocTemplate(self, filename,
-					pagesize=DEFAULT_PAGE_SIZE,
+					pagesize=defaultPageSize,
 					pageTemplates=[],
 					showBoundary=0,
 					leftMargin=inch,
