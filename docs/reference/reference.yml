@@ -40,7 +40,7 @@ package for drawing.
 .df <font name="Courier"><b>reportlab.pdfbase</b></font>
 - this is not part of the
 public interface.  It contains code to handle the 'outer
-structure' of PDF files, and utilitis to handle text metrics
+structure' of PDF files, and utilities to handle text metrics
 and compressed streams.
 
 .df <font name="Courier"><b>reportlab.platypus</b></font>
@@ -158,6 +158,9 @@ applications.
 .h1 Appendix A - CVS Revision History
 .beginPre Code
 $Log: reference.yml,v $
+Revision 1.12  2001/07/11 09:21:27  rgbecker
+Typo fix from Jerome Alet
+
 Revision 1.11  2000/07/10 23:56:09  andy_robinson
 Paragraphs chapter pretty much complete.  Fancy cover.
 
