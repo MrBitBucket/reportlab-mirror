@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.42 2001/09/01 12:14:03 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.43 2001/09/04 18:08:11 johnprecedo Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -434,7 +434,7 @@ class Drawing(Group, Flowable):
 	def save(self, formats=['pdf'], verbose=None, fnRoot=None):
 		"Saves copies of self in desired location and formats"
 		ext = ''
-		fnroot = os.path.join(getattr(self,'outDir','.'), fnRoot or (getattr(self,'fileNamePattern',(self.__class__.__name__+'%03d') % getattr(self,'chartId',0))))
+		fnroot = os.path.join(getattr(self,'outDir','.'), fnRoot or (getattr(self,'fileNamePattern',(self.__class__.__name__+'%03d')) % getattr(self,'chartId',0)))
 
 		plotMode, verbose = formats or getattr(self,'formats',[]), verbose or getattr(self,'verbose',_verbose)
 		_saved = logger.warnOnce.enabled, logger.infoOnce.enabled
