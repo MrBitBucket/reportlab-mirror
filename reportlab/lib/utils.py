@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.22 2001/11/03 19:46:45 andy_robinson Exp $
-__version__=''' $Id: utils.py,v 1.22 2001/11/03 19:46:45 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.23 2001/12/12 11:42:43 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.23 2001/12/12 11:42:43 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -74,6 +74,7 @@ def import_zlib():
 	except ImportError, errMsg:
 		_checkImportError(errMsg)
 		zlib = None
+		from reportlab.rl_config import ZLIB_WARNINGS
 		if ZLIB_WARNINGS: warnOnce('zlib not available')
 	return zlib
 
