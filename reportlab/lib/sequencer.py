@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: sequencer.py,v $
+#	Revision 1.8  2000/07/10 11:58:35  andy_robinson
+#	Pre-incrementing bug fixed
+#
 #	Revision 1.7  2000/07/08 07:11:21  andy_robinson
 #	Changed to pre-increment
-#
+#	
 #	Revision 1.6  2000/06/21 19:46:43  rgbecker
 #	Added Roman formatters
 #	
@@ -52,7 +55,7 @@
 #	Revision 1.1  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #
-__version__=''' $Id: sequencer.py,v 1.7 2000/07/08 07:11:21 andy_robinson Exp $ '''
+__version__=''' $Id: sequencer.py,v 1.8 2000/07/10 11:58:35 andy_robinson Exp $ '''
 """This module defines a single public class, Sequencer, which aids in
 numbering and formatting lists."""
 #
@@ -230,7 +233,7 @@ class Sequencer:
 		func = self._formatters[format]
 		self._getCounter(counter).setFormatter(func)
 
-	def reset(self, counter=None, base=1):
+	def reset(self, counter=None, base=0):
 		if not counter:
 			counter = self._defaultCounter
 		self._getCounter(counter)._value = base

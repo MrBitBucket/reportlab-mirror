@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.27  2000/07/10 11:58:35  andy_robinson
+#	Pre-incrementing bug fixed
+#
 #	Revision 1.26  2000/07/07 16:21:12  rgbecker
 #	Cosmetics
-#
+#	
 #	Revision 1.25  2000/07/06 12:40:37  rgbecker
 #	Push canvas into flowables during wrap/split
 #	
@@ -111,7 +114,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.26 2000/07/07 16:21:12 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.27 2000/07/10 11:58:35 andy_robinson Exp $ '''
 __doc__="""
 This module contains the core structure of platypus.
 
@@ -494,6 +497,10 @@ class BaseDocTemplate:
 			self.handle_pageBreak()
 
 		self.canv.save()
+		#AR - hack - for some reason a document did not
+		#have these:
+		#if hasattr(self, 'frame'): del self.frame
+		#if hasattr(self, 'pageTemplate'): del self.pageTemplate
 		del self.frame, self.pageTemplate
 
 	def build(self, flowables, filename=None, canvasmaker=canvas.Canvas):
