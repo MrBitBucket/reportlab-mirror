@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.9 2001/05/07 14:10:41 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.10 2001/05/08 19:39:15 dinu_gherman Exp $
 """
 This modules defines a variety of Bar Chart components.
 
@@ -17,7 +17,7 @@ from types import FunctionType, StringType
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, SequenceOf
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
+from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.shapes import Auto, Line, Rect, Group, Drawing
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.axes import YCategoryAxis, XValueAxis
@@ -46,6 +46,14 @@ from reportlab.graphics.charts.textlabels import Label
 ##        g.add(Line(0, y0, x+width, y0, strokeWidth=lineWidth))
 
 
+class BarChartProperties(PropHolder):
+    _attrMap = {
+        'strokeColor':isColor,
+        'fillColor':isColor,
+        'strokeWidth':isNumber
+        }
+
+
 # Bar chart classes.
 
 class BarChart(Widget):
@@ -67,7 +75,7 @@ class BarChart(Widget):
         'strokeColor':isColorOrNone,
         'fillColor':isColorOrNone,
 
-        'defaultColors':SequenceOf(isColor),
+        'defaultStyles':None,
 
         'categoryAxis':None,
         'categoryNames':isListOfStrings,
@@ -96,7 +104,11 @@ class BarChart(Widget):
         # we really need some well-designed default lists of
         # colors e.g. from Tufte.  These will be used in a
         # cycle to set the fill color of each series.
-        self.defaultColors = [colors.red, colors.green, colors.blue, colors.maroon, colors.limegreen, colors.deepskyblue]
+        self.defaultStyles = TypedPropertyCollection(BarChartProperties)
+        self.defaultStyles.strokeWidth = 1
+        self.defaultStyles[0].fillColor = colors.red
+        self.defaultStyles[1].fillColor = colors.green
+        self.defaultStyles[2].fillColor = colors.blue
 
         # control bar spacing. is useAbsolute = 1 then
         # the next parameters are in points; otherwise
@@ -276,14 +288,14 @@ class BarChart(Widget):
 
         for rowNo in range(len(self._barPositions)):
             row = self._barPositions[rowNo]
-            colorCount = len(self.defaultColors)
-            colorIdx = rowNo % colorCount
-            rowColor = self.defaultColors[colorIdx]
+            styleCount = len(self.defaultStyles)
+            styleIdx = rowNo % styleCount
+            rowStyle = self.defaultStyles[styleIdx]
             for colNo in range(len(row)):
                 barPos = row[colNo]
                 (x, y, width, height) = barPos
                 r = Rect(x, y, width, height)
-                r.fillColor = rowColor
+                r.fillColor = rowStyle.fillColor
                 r.strokeColor = colors.black
                 g.add(r)
 
@@ -294,7 +306,8 @@ class BarChart(Widget):
                 elif type(labelFmt) is FunctionType:
                     labelText = labelFmt(self.data[rowNo][colNo])
                 else:
-                    raise Exception, "Unknown formatter type %s, expected string or function" % labelFmt
+                    msg = "Unknown formatter type %s, expected string or function" % labelFmt
+                    raise Exception, msg
 
                 # We currently overwrite the boxAnchor with 'c' and display
                 # it at a constant offset to the bar's top/bottom determined
@@ -629,7 +642,7 @@ def sampleV3():
     bc.height = 100
     bc.width = 150
     bc.data = (series1,)
-    bc.defaultColors = (colors.green,)
+    bc.defaultStyles.fillColor = colors.green
 
     bc.barLabelFormat = '%0.2f'
     bc.barLabels.dx = 0
@@ -1251,7 +1264,7 @@ def sampleH3():
     bc.height = 150
     bc.width = 250
     bc.data = (series1,)
-    bc.defaultColors = (colors.green,)
+    bc.defaultStyles.fillColor = colors.green
 
     bc.barLabelFormat = '%0.2f'
     bc.barLabels.dx = 0
