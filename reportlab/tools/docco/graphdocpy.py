@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.12 2002/02/05 18:20:09 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.13 2002/03/02 14:05:51 rgbecker Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -19,6 +19,7 @@ import sys
 sys.path.insert(0, '.')
 import os, re, types, string, getopt, pickle, copy, time, StringIO, pprint, traceback
 from string import find, join, split, replace, expandtabs, rstrip
+from reportlab import rl_config
 
 from docpy import PackageSkeleton0, ModuleSkeleton0
 from docpy import DocBuilder0, PdfDocBuilder0, HtmlDocBuilder0
@@ -44,8 +45,10 @@ from reportlab.platypus.doctemplate \
      import PageTemplate, BaseDocTemplate
 from reportlab.platypus.tables import TableStyle, Table
 from reportlab.graphics.shapes import NotImplementedError
-from reportlab.tools.docco import inspect
-
+try:
+	import inspect
+except ImportError:
+	from reportlab.tools.docco import inspect
 
 # Needed to draw Widget/Drawing demos.
 
@@ -54,7 +57,7 @@ from reportlab.graphics.shapes import Drawing
 from reportlab.graphics import shapes
 from reportlab.graphics import renderPDF
 
-VERBOSE = 0
+VERBOSE = rl_config._verbose
 VERIFY = 1
 
 _abstractclasserr_re = re.compile(r'^\s*abstract\s*class\s*(\w+)\s*instantiated',re.I)
@@ -994,11 +997,10 @@ def main():
     isSilent = hasOpt('-s')
     
     # On -f set the appropriate DocBuilder to use or a default one.
-    builderClassName = optsDict.get('-f', 'GraphPdf') + 'DocBuilder0'
-    if builderClassName in ('PdfDocBuilder0', 'HtmlDocBuilder0'):
-        builderClassName = 'Graph' + builderClassName
-    builder = eval(builderClassName + '()')
-    
+    builder = { 'Pdf': GraphPdfDocBuilder0,
+				'Html': GraphHtmlDocBuilder0,
+				}[optsDict.get('-f', 'Pdf')]()
+
     # Set default module or package to document.
     if not hasOpt('-p') and not hasOpt('-m'):
         optsDict['-p'] = 'reportlab.graphics'
