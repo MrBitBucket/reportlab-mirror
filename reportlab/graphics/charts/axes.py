@@ -698,7 +698,7 @@ class ValueAxis(_AxisG):
             rrn = rangeRound in ['both','floor']
             rrx = rangeRound in ['both','ceiling']
         else:
-            rrn = rrx = False
+            rrn = rrx = 0
 
         go = do_rr or do_abf
         cache = {}
