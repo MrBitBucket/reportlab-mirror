@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfmetrics.py,v $
+#	Revision 1.8  2000/07/26 12:01:10  rgbecker
+#	Accelerator rearrangements
+#
 #	Revision 1.7  2000/07/19 19:06:39  rgbecker
 #	Added _pdfmetrics.c
-#
+#	
 #	Revision 1.6  2000/06/26 15:58:22  rgbecker
 #	Simple fix to widths problem
 #	
@@ -49,13 +52,13 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfmetrics.py,v 1.7 2000/07/19 19:06:39 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.8 2000/07/26 12:01:10 rgbecker Exp $ '''
 __doc__="""This contains pre-canned text metrics for the PDFgen package, and may also
 be used for any other PIDDLE back ends or packages which use the standard
 Type 1 postscript fonts.
 
 Its main function is to let you work out the width of strings; it exposes a 
-single function, stringWidth(text, fontname, fontSize), which works out the width of a 
+single function, stringWidth(text, fontName, fontSize), which works out the width of a 
 string in the given font in points.
 
 The AFM loading stuff worked for me but is not being heavily tested, as pre-canning
@@ -70,6 +73,7 @@ to sort out the fontname case issue and the resolution of PIDDLE fonts to
 Postscript font names within this module, but have not yet done so.
 """
 import string
+from reportlab.lib.logger import warnOnce, infoOnce
 DEFAULT_ENCODING='WinAnsiEncoding'
 
 StandardEnglishFonts = [
@@ -137,10 +141,10 @@ def parseAFMfile(filename, info={}):
 	between = 0
 	for line in alllines:
 		lline = string.lower(line)
-		i = string.find(lline,'fontname')
+		i = string.find(lline,'fontName')
 		if i>=0:
-			fontname = string.strip(line[i+9:])
-			info['fontname'] = fontname
+			fontName = string.strip(line[i+9:])
+			info['fontName'] = fontName
 		if string.find(lline, 'endcharmetrics') > -1:
 			between = 0
 			break
@@ -169,52 +173,60 @@ def parseAFMfile(filename, info={}):
 	return widths
 
 
-class FontCache:
-	"""Loads and caches font width information on demand.  Font names
-	converted to lower case for indexing.  Public interface is stringWidth"""
-	if _stringWidth:
-		def __init__(self):
-			global widths
-			self.__widtharrays = widths
-			for e, F in widths.items():
-				for f, W in  F.items():
-					ad = ascent_descent[f]
-					_pdfmetrics.setFontInfo(f,e,ad[0],ad[1],W)
-	else:
-		def __init__(self):
-			global widths
-			self.__widtharrays = widths
-		
-	def loadfont(self, fontname,encoding):
-		filename = AFMDIR + os.sep + fontname + '.afm'
-		print 'cache loading',filename
-		assert os.path.exists(filename)
-		widths = parseAFMfile(filename)
-		self.__widtharrays[encoding][fontname] = widths
+if _stringWidth:
+	for e, F in widths.items():
+		for f, W in  F.items():
+			ad = ascent_descent[f]
+			_pdfmetrics.setFontInfo(f,e,ad[0],ad[1],W)
 
-	def getfont(self, fontname, encoding):
+	def _loadfont(font,encoding):
+		filename = AFMDIR + os.sep + font + '.afm'
+		infoOnce('cache loading %s'%filename)
+		assert os.path.exists(filename)
+		W = parseAFMfile(filename)
+		ad = (0,0)	# TODO don't have this yet?
+		_pdfmetrics.setFontInfo(font,encoding,ad[0],ad[1],W)
+
+	def _SWRecover(text, font, fontSize, encoding):
+		#infoOnce('_SWRecover('...',%s,%s,%s')%(font,str(fontSize),encoding))
 		try:
-			return self.__widtharrays[encoding][fontname]
+			_loadFont(font,encoding)
+			return _stringWidth(text,font,fontSize,encoding)
 		except:
+			warnOnce('Font %s:%s not found - using Courier:%s for widths'%(font,encoding,encoding))
+			return _stringWidth(text,'courier',fontSize,encoding)
+
+	_pdfmetrics.defaultEncoding(DEFAULT_ENCODING)
+	_pdfmetrics._SWRecover(_SWRecover)
+	stringWidth = _stringWidth
+
+else:
+	class FontCache:
+		"""Loads and caches font width information on demand.  Font names
+		converted to lower case for indexing.  Public interface is stringWidth"""
+		def __init__(self):
+			global widths
+			self.__widtharrays = widths
+			
+		def loadfont(self, fontName,encoding):
+			filename = AFMDIR + os.sep + fontName + '.afm'
+			infoOnce('Info: cache loading%s'%filename)
+			assert os.path.exists(filename)
+			widths = parseAFMfile(filename)
+			self.__widtharrays[encoding][fontName] = widths
+
+		def getfont(self, fontName, encoding):
 			try:
-				self.loadfont(fontname,encoding)
-				return self.__widtharrays[encoding][fontname]
+				return self.__widtharrays[encoding][fontName]
 			except:
-				# font not found, use Courier
-				print 'Font',fontname,'not found - using Courier for widths'
-				return self.getfont('courier',encoding)
-	
-	if _stringWidth:
-		def stringWidth(self, text, font, fontSize, encoding=DEFAULT_ENCODING):
-			try:
-				return _stringWidth(text,font,fontSize,encoding)
-			except:
-				widths = self.getfont(string.lower(font),encoding)
-				w = 0
-				for char in text:
-					w = w + widths[ord(char)]
-				return w*fontSize*0.001
-	else:
+				try:
+					self.loadfont(fontName,encoding)
+					return self.__widtharrays[encoding][fontName]
+				except:
+					# font not found, use Courier
+					warnOnce('Font %s:%s not found - using Courier:%s for widths'%(fontName,encoding,encoding))
+					return self.getfont('courier',encoding)
+		
 		def stringWidth(self, text, font, fontSize, encoding=DEFAULT_ENCODING):
 			widths = self.getfont(string.lower(font),encoding)
 			w = 0
@@ -222,11 +234,11 @@ class FontCache:
 				w = w + widths[ord(char)]
 			return w*fontSize*0.001
 
-	def status(self):
-		#returns loaded fonts
-		return self.__widtharrays.keys()
-		
-TheFontCache = FontCache()
+		def status(self):
+			#returns loaded fonts
+			return self.__widtharrays.keys()
+			
+	TheFontCache = FontCache()
 
-#expose the singleton as a single function
-stringWidth = TheFontCache.stringWidth
+	#expose the singleton as a single function
+	stringWidth = TheFontCache.stringWidth
