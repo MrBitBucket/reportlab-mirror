@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.17 2001/04/05 12:32:56 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.18 2001/04/05 12:47:15 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -443,6 +443,11 @@ class Group(Shape):
         #don;t get overwritten
         Shape.__init__(self, keywords)
         
+    def _addNamedNode(self,name,node):
+        'if name is not None add an attribute pointing to node and add to the attrMap'
+        if name:
+            self._attrMap[name] = isValidChild
+            setattr(self, name, node)
 
     def add(self, node, name=None):
         """Appends child node to the 'contents' attribute.  In addition,
@@ -451,12 +456,13 @@ class Group(Shape):
         # propagates properties down
         assert isValidChild(node), "Can only add Shape or UserNode objects to a Group"
         self.contents.append(node)
-        if name:
-            #it better be valid or the checker will scream; and we need
-            #to make _attrMap an instance rather than a class attribite
-            #at this point too
-            self._attrMap[name] = isValidChild
-            setattr(self, name, node)
+        self._addNamedNode(name,node)
+
+    def insert(self, i, n, name=None):
+        'Inserts sub-node n in contents at specified location'
+        assert isValidChild(n), "Can only insert Shape or UserNode objects in a Group"
+        self.contents.insert(i,n)
+        self._addNamedNode(name,n)
 
     def copy0(self):
         """Returns a new group with recursively copied contents.
