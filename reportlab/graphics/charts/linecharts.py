@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.18 2001/10/12 14:38:23 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.19 2002/02/04 17:16:27 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
@@ -312,27 +312,30 @@ class HorizontalLineChart(LineChart):
 	def draw(self):
 		"Draws itself."
 
-		self.valueAxis.setPosition(self.x, self.y, self.height)
-		self.valueAxis.configure(self.data)
+		vA, cA = self.valueAxis, self.categoryAxis
+		vA.setPosition(self.x, self.y, self.height)
+		vA.configure(self.data)
 
 		# If zero is in chart, put x axis there, otherwise
 		# use bottom.
-		xAxisCrossesAt = self.valueAxis.scale(0)
+		xAxisCrossesAt = vA.scale(0)
 		if ((xAxisCrossesAt > self.y + self.height) or (xAxisCrossesAt < self.y)):
 			y = self.y
 		else:
 			y = xAxisCrossesAt
 
-		self.categoryAxis.setPosition(self.x, y, self.width)
-		self.categoryAxis.configure(self.data)
+		cA.setPosition(self.x, y, self.width)
+		cA.configure(self.data)
 
 		self.calcPositions()
 
 		g = Group()
 
-		g.add(self.categoryAxis)
-		g.add(self.valueAxis)
+		g.add(cA)
+		g.add(vA)
 		g.add(self.makeBackground())
+		cA.makeGrid(g)
+		vA.makeGrid(g)
 		g.add(self.makeLines())
 
 		return g

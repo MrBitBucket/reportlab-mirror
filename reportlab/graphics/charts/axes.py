@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.50 2001/12/18 11:14:02 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.51 2002/02/04 17:16:27 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -156,7 +156,7 @@ class CategoryAxis(Widget):
 	def makeGrid(self,g):
 		'''this is only called by a container object'''
 		if self.visibleGrid and (self.gridStart or self.gridEnd):
-			self._makeLines(g,self.gridStart,self.gridStart,self.gridStrokeColor,self.gridStrokeWidth,self.gridStrokeDashArray)
+			self._makeLines(g,self.gridStart,self.gridEnd,self.gridStrokeColor,self.gridStrokeWidth,self.gridStrokeDashArray)
 
 
 class XCategoryAxis(CategoryAxis):
