@@ -30,7 +30,11 @@ Interface summary:\n\
 	gstate(width,height[,depth=3,bg=0xffffff])		#create an initialised graphics state\n\
 	makeT1Font(fontName,pfbPath,names)				#make a T1 font\n\
 	delCache()										#delete all font info\n\
-\n\
+	pil2pict(cols,rows,datastr,palette) return PICT version of im as a string\n"
+#ifdef	RENDERPM_FT
+"    ft_get_face(fontName) --> ft_face instance\n"
+#endif
+"\n\
 	Error			# module level error\n\
 	error			# alias for Error\n\
 	_libart_version	# base library version string\n\
@@ -58,6 +62,7 @@ typedef	struct {
 		art_u8	*buf;
 		} gstateColorX;
 
+#ifdef	RENDERPM_FT
 static	PyObject* parse_utf8(PyObject* self, PyObject* args)
 {
 	char		*c, *msg;
@@ -99,7 +104,6 @@ ERR:
 	return Py_None;
 }
 
-#ifdef	RENDERPM_FT
 PyObject*	_pdfmetrics__fonts=0;
 static PyObject *_get_pdfmetrics__fonts(void){
 	if(!_pdfmetrics__fonts){
@@ -123,17 +127,17 @@ staticforward PyTypeObject py_FT_Font_Type;
 /* round a 26.6 pixel coordinate to the nearest larger integer */
 #define PIXEL(x) ((((x)+63) & -64)>>6)
 
-static FT_Face *ft_getfont(char *fontName)
+static py_FT_FontObject *_get_ft_face(char *fontName)
 {
-    int error, _data_size;
-	PyObject *_fonts=_get_pdfmetrics__fonts();
-	PyObject *font = NULL, *ft_face=NULL, *_data=NULL;
-	FT_Face	*face=NULL;
+    int				error = 1;
+	PyObject		*_fonts=_get_pdfmetrics__fonts();
+	PyObject		*font = NULL, *_data=NULL;
+	py_FT_FontObject *ft_face;
 
 	if(!_fonts) return NULL;
 	font = PyDict_GetItemString(_fonts,fontName);
 	if(!font) return NULL;
-	ft_face = PyObject_GetAttrString(font,"_ft_face");
+	ft_face = (py_FT_FontObject*)PyObject_GetAttrString(font,"_ft_face");
 	if(!ft_face){
     	if(!ft_library){
         	error = FT_Init_FreeType(&ft_library);
@@ -145,23 +149,46 @@ static FT_Face *ft_getfont(char *fontName)
 
     	ft_face = PyObject_NEW(py_FT_FontObject, &py_FT_Font_Type);
     	if(!ft_face) goto ERR;
-		_data = PyObject_GetAttrString(font,'_data');
-    	error = FT_New_Memory_Face(ft_library, _data, _data_size, 0, &ft_face->face);
+		_data = PyObject_GetAttrString(font,"_data");
+		if(_data){
+    		error = FT_New_Memory_Face(ft_library, PyString_AsString(_data), PyString_GET_SIZE(_data), 0, &ft_face->face);
+			Py_DECREF(_data);
+			}
     	if (error){
 ERR:		PyErr_SetString(PyExc_IOError, "cannot load font");
 			goto RET;
     		}
+		PyObject_SetAttrString(font,"_ft_face",(PyObject*)ft_face);
 		}
-	face = ft_face->face;
 RET:if(font) Py_DECREF(font);
-	if(ft_face) Py_DECREF(ft_face);
-	if(_data) Py_DECREF(_data);
-    return face;
+	if(error && ft_face){
+		Py_DECREF(ft_face);
+		ft_face  = NULL;
+		}
+    return ft_face;
+}
+
+static FT_Face _ft_get_face(char *fontName)
+{
+	py_FT_FontObject	*ft_face = _get_ft_face(fontName);
+	if(!ft_face){
+		FT_Face	face = ft_face->face;
+		Py_DECREF(ft_face);
+    	return face;
+		}
+	return NULL;
+}
+
+static	PyObject*	ft_get_face(PyObject* self, PyObject* args)
+{
+	char* fontName;
+	if(!PyArg_ParseTuple(args,"s:ft_get_face",&fontName)) return NULL;
+	return (PyObject*)_get_ft_face(fontName);
 }
 
 static void py_FT_font_dealloc(py_FT_FontObject* self)
 {
-    FT_Done_Face(self->face);
+    if(self->face) FT_Done_Face(self->face);
     PyObject_DEL(self);
 }
 
@@ -670,60 +697,61 @@ static PyObject* gstate_pathStroke(gstateObject* self, PyObject* args)
 
 #ifdef	RENDERPM_FT
 typedef struct	{
-		ArtBpat	*path;
-		int		pathLen, pathMax;	/*current and maximum sizes*/
+		ArtBpath	*path;
+		int			pathLen, pathMax;	/*current and maximum sizes*/
 		} _ft_outliner_user_t;
 
-int _ft_move_to(FT_Vector* to, void* user)
+static int _ft_move_to(FT_Vector* to, void* user)
 {
 	_ft_outliner_user_t *self = (_ft_outliner_user_t*)user;
 	double x[3], y[3];
 	x[0] = x[1] = y[0] = y[1] = 0;
-	x[2] = to.x;
-	y[2] = to.y;
+	x[2] = to->x;
+	y[2] = to->y;
 	bpath_add_point(&(self->path), &(self->pathLen), &(self->pathMax), ART_MOVETO, x, y);
 	return 1;
 }
 
-int _ft_line_to(FT_Vector* to, void*  user)
+static int _ft_line_to(FT_Vector* to, void*  user)
 {
 	_ft_outliner_user_t *self = (_ft_outliner_user_t*)user;
 	double	x[3], y[3];
 	x[0] = x[1] = y[0] = y[1] = 0;
-	x[2] = to.x;
-	y[2] = to.y;
+	x[2] = to->x;
+	y[2] = to->y;
 	bpath_add_point(&(self->path), &(self->pathLen), &(self->pathMax), ART_LINETO, x, y);
 	return 1;
 }
 
-int _ft_conic_to( FT_Vector*  control, FT_Vector*  to, void*  user )
-{
-	return _ft_cubic_to(control, control, to, user);
-}
-
-int _ft_cubic_to( FT_Vector*  control1, FT_Vector*  control2, FT_Vector*  to, void*       user )
+static int _ft_cubic_to( FT_Vector*  control1, FT_Vector*  control2, FT_Vector*  to, void*       user )
 {
 	_ft_outliner_user_t *self = (_ft_outliner_user_t*)user;
 	double	x[3], y[3];
-	x[0] = control1.x;
-	y[0] = control1.y;
-	x[1] = control2.x;
-	y[1] = control2.y;
-	x[2] = to.x;
-	y[2] = to.y;
+	x[0] = control1->x;
+	y[0] = control1->y;
+	x[1] = control2->x;
+	y[1] = control2->y;
+	x[2] = to->x;
+	y[2] = to->y;
 	bpath_add_point(&(self->path), &(self->pathLen), &(self->pathMax), ART_CURVETO, x, y);
 	return 1;
 }
 
-FT_Outline_Funcs _ft_outliner = {
+static int _ft_conic_to( FT_Vector*  control, FT_Vector*  to, void*  user )
+{
+	return _ft_cubic_to(control, control, to, user);
+}
+
+static FT_Outline_Funcs _ft_outliner = {
 	_ft_move_to,
 	_ft_line_to,
 	_ft_conic_to,
 	_ft_cubic_to,
 	0,
-	{0,0}
+	0
 	};
 
+#include <freetype/ftoutln.h>
 static ArtBpath *_ft_get_glyph_outline(FT_Face face, int c, _ft_outliner_user_t *user)
 {
 	int	err;
@@ -733,7 +761,7 @@ static ArtBpath *_ft_get_glyph_outline(FT_Face face, int c, _ft_outliner_user_t 
 	if(face->glyph->format!=FT_GLYPH_FORMAT_OUTLINE){
 		return NULL;
 		}
-	if((err=FT_Outline_Decompose( &face->glyph->outline, _ft_outliner, (void*)user))){
+	if((err=FT_Outline_Decompose( &face->glyph->outline, &_ft_outliner, (void*)user))){
 		return NULL;
 		}
 	else{
@@ -755,7 +783,7 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 	ArtBpath	*saved_path;
 	void	*font = self->font;
 #ifdef	RENDERPM_FT
-	int				ft_font = self->ft_font, _ft_err;
+	int				ft_font = self->ft_font;
 	Py_UNICODE		*utext;
 	PyObject		*unicode;
 	_ft_outliner_user_t _ft_data;
@@ -768,7 +796,7 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 #ifdef	RENDERPM_FT
 	if(ft_font){
 		unicode = PyUnicode_DecodeUTF8(text, textlen,NULL);
-		if(!unicode) return;
+		if(!unicode) return NULL;
 		textlen = PyUnicode_GetSize(unicode);
 		utext = PyUnicode_AsUnicode(unicode);
 		_ft_data.pathMax = 0;
@@ -800,7 +828,7 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 		if(ft_font){
 			_ft_data.pathLen = 0;
 			c = (*utext++);
-			self->path = _ft_get_glyph_outline((FT_Face)font,&_ft_data);
+			self->path = _ft_get_glyph_outline((FT_Face)font,c,&_ft_data);
 			}
 		else{
 #endif
@@ -824,9 +852,8 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 		art_affine_multiply(self->ctm, trans, self->ctm);
 		}
 #ifdef	RENDERPM_FT
-	if(ft_font && _ft_data.path);
+	if(ft_font && _ft_data.path)
 		free(_ft_data.path);
-		}
 #endif
 
 	/*restore original ctm*/
@@ -891,7 +918,7 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 	int		n, i, c;
 	void	*font = self->font;
 #ifdef	RENDERPM_FT
-	int				ft_font = self->ft_font, _ft_err;
+	int				ft_font = self->ft_font;
 	Py_UNICODE		*utext;
 	PyObject		*unicode;
 	_ft_outliner_user_t _ft_data;
@@ -903,8 +930,8 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 	if(!PyArg_ParseTuple(args,"s#|dd:_stringPath", &text, &n, &x, &y)) return NULL;
 #ifdef	RENDERPM_FT
 	if(ft_font){
-		unicode = PyUnicode_DecodeUTF8(text, textlen,NULL);
-		if(!unicode) return;
+		unicode = PyUnicode_DecodeUTF8(text, n,NULL);
+		if(!unicode) return NULL;
 		n = PyUnicode_GetSize(unicode);
 		utext = PyUnicode_AsUnicode(unicode);
 		_ft_data.pathMax = 0;
@@ -919,7 +946,7 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 		if(ft_font){
 			_ft_data.pathLen = 0;
 			c = utext[i];
-			self->path = _ft_get_glyph_outline((FT_Face)font,&_ft_data);
+			self->path = _ft_get_glyph_outline((FT_Face)font,c,&_ft_data);
 			}
 		else{
 #endif
@@ -954,9 +981,7 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 		x += w*s;
 		}
 #ifdef	RENDERPM_FT
-	if(ft_font && _ft_data.path);
-		free(_ft_data.path);
-		}
+	if(ft_font && _ft_data.path) free(_ft_data.path);
 #endif
 	return P;
 }
@@ -980,7 +1005,7 @@ static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
 		}
 #ifdef	RENDERPM_FT
 	else{
-		f = ft_getfont(fontName);
+		f = (Gt1EncodedFont*)_ft_get_face(fontName);
 		ft_font = 1;
 		}
 #endif
@@ -1239,15 +1264,16 @@ static PyObject* _get_gstateFontName(gstateObject *self)
 		int ft_font = self->ft_font;
 		if(ft_font){
 			FT_Face	ft_f = (FT_Face)f;
-			char *name = malloc(strlen(face->family_name)+strlen(face->style_name)+2);
+			char *name = malloc(strlen(ft_f->family_name)+strlen(ft_f->style_name)+2);
 			PyObject*	r;
-			strcpy(name,face->family_name);
-			if(face->style_name){
+			strcpy(name,ft_f->family_name);
+			if(ft_f->style_name){
 				strcat(name," ");
-				strcat(name,face->style_name);
+				strcat(name,ft_f->style_name);
 				}
 			r = PyString_FromString(name);
 			free(name);
+			return r;
 			}
 #endif
 		return PyString_FromString(gt1_encoded_font_name(f));
@@ -1768,14 +1794,14 @@ static PyObject* pil2pict(PyObject* self, PyObject* args)
 
 
 static struct PyMethodDef moduleMethods[] = {
-#ifdef	RENDERPM_FT
-    {"getfont", (PyCFunction) getfont, METH_VARARGS|METH_KEYWORDS},
-#endif /*ifdef	RENDERPM_FT*/
 	{"gstate", (PyCFunction)gstate, METH_VARARGS|METH_KEYWORDS, "gstate(width,height[,depth=3][,bg=0xffffff]) create an initialised graphics state"},
 	{"makeT1Font", (PyCFunction)makeT1Font, METH_VARARGS, "makeT1Font(fontName,pfbPath,names)"},
 	{"delCache", (PyCFunction)delCache, METH_VARARGS, "delCache()"},
 	{"pil2pict", (PyCFunction)pil2pict, METH_VARARGS, "pil2pict(cols,rows,datastr,palette) return PICT version of im as a string"},
+#ifdef	RENDERPM_FT
+    {"ft_get_face", (PyCFunction)ft_get_face, METH_VARARGS|METH_KEYWORDS,"ft_get_face(fontName) --> ft_face instance"},
 	{"parse_utf8", (PyCFunction)parse_utf8, METH_VARARGS, "parse_utf8(utf8_string) return UCS list"},
+#endif /*ifdef	RENDERPM_FT*/
 	{NULL,	NULL}			/*sentinel*/
 	};
 
