@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.63 2002/09/30 13:15:27 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.63 2002/09/30 13:15:27 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.64 2002/10/15 14:49:54 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.64 2002/10/15 14:49:54 rgbecker Exp $ '''
 from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
@@ -733,10 +733,11 @@ class Paragraph(Flowable):
         the same as the wrap width; for others it might be
         useful for seeing if paragraphs will fit in spaces."""
         assert hasattr(self, 'width'), "Cannot call this method before wrap()"
-        w = []
-        for frag in self.blPara.lines:
-            w.append(self.width - frag.extraSpace)
-        return w
+        if self.blPara.kind:
+            func = lambda frag, w=self.width: w - frag.extraSpace
+        else:
+            func = lambda frag, w=self.width: w - frag[0]
+        return map(func,self.blPara.lines)
 
 if __name__=='__main__':    #NORUNTESTS
     def dumpParagraphLines(P):
