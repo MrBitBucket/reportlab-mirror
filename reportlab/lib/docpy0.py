@@ -26,6 +26,9 @@ Type the following for usage info:
 
 # Dinu Gherman
 
+__version__ = 0,1
+
+
 import sys, os, re, types, string, getopt
 from string import find, join, split, replace, expandtabs, rstrip
 
@@ -44,19 +47,6 @@ from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate \
      import PageTemplate, BaseDocTemplate
 from reportlab.platypus.tables import TableStyle, Table
-
-# Needed to draw widget demos.
-
-from reportlab.graphics import shapes
-from reportlab.graphics.widgetbase import Widget
-from reportlab.graphics import renderPDF
-
-# Ignore if no GD rendering available.
-
-try:
-    from rlextra.graphics import renderGD
-except ImportError:
-    pass
 
 
 ####################################################################
@@ -878,175 +868,6 @@ class PdfDocBuilder0(DocBuilder0):
 
 ####################################################################
 # 
-# Special-purpose document builders
-# (This will later be placed in a dedicated file.)
-# 
-####################################################################
-
-class GraphPdfDocBuilder0(PdfDocBuilder0):
-    "A PDF document builder displaying widget drawings and other info."
-
-    fileSuffix = '-graph.pdf'
-
-    def beginClass(self, name, doc, bases):
-        PdfDocBuilder0.beginClass(self, name, doc, bases)
-        # Keep an eye on the base classes.
-        self.currentBaseClasses = bases
-        
-    
-    def endClass(self, name, doc, bases):
-        "Append a graphic demo of a widget at the end of a class."
-        
-        PdfDocBuilder0.endClass(self, name, doc, bases)
-
-        # Find out if that was a Widget.
-        widgetFound = 0
-        for b in self.currentBaseClasses:
-            if b.__name__ == 'Widget':
-                widgetFound = 1
-                break
-
-        if widgetFound:
-            widget = eval('self.skeleton.moduleSpace.' + name + '()')
-            self.showWidgetDemo(widget)
-            self.showWidgetDemoCode(widget)
-            self.showWidgetProperties(widget)
-            
-
-    def showWidgetDemo(self, widget):
-        """Show a graphical demo of the widget."""
-
-        # Get a demo drawing from the widget and add it to the story.
-        # Ignored if no GD rendering available
-        # or the demo method does not returna drawing.
-        try:
-            drawing = widget.demo()
-            widget.verify()
-            flo = renderPDF.GraphicsFlowable(drawing)
-            self.story.append(Spacer(6,6))
-            self.story.append(flo)
-            self.story.append(Spacer(6,6))
-        except IndexError:
-            pass
-
-
-    def showWidgetDemoCode(self, widget):
-        """Show a demo code of the widget."""
-
-        widgetClass = widget.__class__
-        demoMethod = widgetClass.demo
-        srcFileName = demoMethod.im_func.func_code.co_filename
-        (dirname, fileNameOnly) = os.path.split(srcFileName)
-
-        # Heading
-        className = widgetClass.__name__
-        self.story.append(Paragraph("<i>Example</i>", self.bt))
-
-        # Sample code
-        lines = open(srcFileName, 'r').readlines()
-        lines = map(string.rstrip, lines)
-        codeSample = getFunctionBody(demoMethod, lines)
-        self.story.append(Preformatted(codeSample, self.code))
-
-
-
-    def showWidgetProperties(self, widget):
-        """Dump all properties of a widget."""
-        
-        props = widget.getProperties()
-        keys = props.keys()
-        keys.sort()
-        lines = []
-        for key in keys:
-            value = props[key]
-            lines.append('%s = %s' % (key, value))
-        text = join(lines, '\n')
-        self.story.append(Paragraph("<i>Properties of Example Widget</i>", self.bt))
-        self.story.append(XPreformatted(text, self.code))
-
-
-class GraphHtmlDocBuilder0(HtmlDocBuilder0):
-    "A class to write the skeleton of a Python source."
-
-    fileSuffix = '-graph.html'
-
-    def endClass(self, name, doc, bases):
-        "Append a graphic demo of a widget at the end of a class."
-        
-        HtmlDocBuilder0.endClass(self, name, doc, bases)
-
-        # Find out if that was a Widget.
-        widgetFound = 0
-        for b in self.currentBaseClasses:
-            if b.__name__ == 'Widget':
-                #print "RING: Widget '%s' found!!" % name
-                widgetFound = 1
-                break
-
-        if widgetFound:
-            widget = eval('self.skeleton.moduleSpace.' + name + '()')
-            self.showWidgetDemo(widget)
-            self.showWidgetDemoCode(widget)
-            self.showWidgetProperties(widget)
-
-
-    def showWidgetDemo(self, widget):
-        """Show a graphical demo of the widget."""
-
-        # Get a demo drawing from the widget and add it to the story.
-        # Ignored if no GD rendering available
-        # or the demo method does not returna drawing.
-        try:
-            drawing = widget.demo()
-            widget.verify()
-            modName = self.skeleton.getModuleName()
-            path = '%s-%s.jpg' % (modName, widget.__class__.__name__)
-            #print path
-            renderGD.drawToFile(drawing, path, kind='JPG')
-            self.outLines.append('<H3>Demo</H3>')
-            self.outLines.append(makeHtmlInlineImage(path))
-        except:
-            pass
-
-
-    def showWidgetDemoCode(self, widget):
-        """Show a demo code of the widget."""
-
-        widgetClass = widget.__class__
-        demoMethod = widgetClass.demo
-        srcFileName = demoMethod.im_func.func_code.co_filename
-        (dirname, fileNameOnly) = os.path.split(srcFileName)
-
-        # Heading
-        className = widgetClass.__name__
-        self.outLines.append('<H3>Example Code</H3>')
-
-        # Sample code
-        lines = open(srcFileName, 'r').readlines()
-        lines = map(string.rstrip, lines)
-        codeSample = getFunctionBody(demoMethod, lines)
-        self.outLines.append('<PRE>%s</PRE>' % codeSample)
-        self.outLines.append('')
-
-
-    def showWidgetProperties(self, widget):
-        """Dump all properties of a widget."""
-        
-        props = widget.getProperties()
-        keys = props.keys()
-        keys.sort()
-        lines = []
-        for key in keys:
-            value = props[key]
-            lines.append('%s = %s' % (key, value))
-        text = join(lines, '\n')
-        self.outLines.append('<H3>Properties of Example Widget</H3>')
-        self.outLines.append('<PRE>%s</PRE>' % text)
-        self.outLines.append('')
-
-
-####################################################################
-# 
 # Main
 # 
 ####################################################################
@@ -1059,7 +880,7 @@ Usage: python docpy0.py [options]
     [options]
         -h          Print this help message.
         -f name     Use the document builder indicated by 'name',
-                    e.g. Ascii, Html, Pdf, GraphHtml, GraphPdf.
+                    e.g. Ascii, Html, Pdf.
         -m module   Generate doc for module named 'module'.
         -p package  Generate doc for package named 'package'.
 
@@ -1070,8 +891,6 @@ Examples:
     python docpy0.py -m string -f Html
     python docpy0.py -m signsandsymbols.py -f Pdf
     python docpy0.py -p pingo -f Html
-    python docpy0.py -m signsandsymbols.py -f GraphPdf
-    python docpy0.py -m signsandsymbols.py -f GraphHtml
 """
 
 
@@ -1168,11 +987,6 @@ def main():
     
     opts, args = getopt.getopt(sys.argv[1:], 'hf:m:p:')
 
-##    # Without options run the previous main() generating lots of files.
-##    if opts == []:
-##        previousMain()
-##        sys.exit(0)
-##
     # On -h print usage and exit immediately.
     for o, a in opts:
         if o == '-h':
