@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.57 2002/10/10 10:13:45 mgedmin Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.58 2002/11/06 08:54:33 rgbecker Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -553,10 +553,11 @@ def registerEncoding(enc):
 def registerFont(font):
     "Registers a font, including setting up info for accelerated stringWidth"
     #assert isinstance(font, Font), 'Not a Font: %s' % font
-    _fonts[font.fontName] = font
+    fontName = str(font.fontName)
+    _fonts[fontName] = font
     if not font._multiByte:
         if _stringWidth:
-            _rl_accel.setFontInfo(string.lower(font.fontName),
+            _rl_accel.setFontInfo(string.lower(fontName),
                                   _dummyEncoding,
                                   font.face.ascent,
                                   font.face.descent,
