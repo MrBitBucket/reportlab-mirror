@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.69 2004/03/23 17:35:42 rgbecker Exp $ '''
+__version__=''' $Id$ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -20,7 +20,7 @@ would be pre-loaded, but due to a nasty circularity problem we
 trap attempts to access them and do it on first access.
 """
 import string, os
-from types import StringType, ListType, TupleType
+from types import StringType, ListType, TupleType, UnicodeType
 from reportlab.pdfbase import _fontdata
 from reportlab.lib.logger import warnOnce
 from reportlab.lib.utils import rl_isfile, open_and_read, open_and_readlines 
@@ -29,21 +29,42 @@ from reportlab.rl_config import defaultEncoding
 standardFonts = _fontdata.standardFonts
 standardEncodings = _fontdata.standardEncodings
 
-_dummyEncoding=' _not an encoding_ '
-# conditional import - try both import techniques, and set a flag
-try:
-    import _rl_accel
-    try:
-        _stringWidth = _rl_accel.stringWidth
-        _rl_accel.defaultEncoding(_dummyEncoding)
-    except:
-        _stringWidth = None
-except ImportError:
-    _stringWidth = None
+# AR 20040612 - disabling accelerated stringwidth until I have
+# a slow one which works right for Unicode.  Then we can change
+# the accelerated one.
+##_dummyEncoding=' _not an encoding_ '
+## conditional import - try both import techniques, and set a flag
+##try:
+##    import _rl_accel
+##    try:
+##        _stringWidth = _rl_accel.stringWidth
+##        _rl_accel.defaultEncoding(_dummyEncoding)
+##    except:
+##        _stringWidth = None
+##except ImportError:
+##    _stringWidth = None
+_stringWidth = None
+
 
 _typefaces = {}
 _encodings = {}
 _fonts = {}
+
+
+def codecName(encName):
+    """Attempt to convert some other encoding name to a Python codex"""
+    encName = encName.lower()
+    if encName[0:7] == 'winansi':
+        return 'cp1252'
+    elif encName[0:8] == 'MacRomanEncoding':
+        return 'mac-roman'
+    elif encName == 'zapfdingbatsencoding':
+        return 'cp1252'
+    elif encName == 'symbolencoding':
+        return 'cp1252'
+    else:
+        return encName
+    
 
 class FontError(Exception):
     pass
@@ -358,16 +379,19 @@ class Font:
                         pass
         self.widths = w
 
-    if not _stringWidth:
-        def stringWidth(self, text, size):
-            """This is the "purist" approach to width.  The practical one
-            is to use the stringWidth one which may be optimized
-            in C."""
-            w = 0
-            widths = self.widths
-            for ch in text:
-                w = w + widths[ord(ch)]
-            return w * 0.001 * size
+    #if not _stringWidth:
+    def stringWidth(self, text, size, encoding='latin-1'):
+        """This is the "purist" approach to width.  The practical approach
+        is to use the stringWidth function, which may be swapped in for one
+        written in C."""
+        if type(text) is UnicodeType:
+            text = text.encode(codecName(self.encoding.name))
+
+        w = 0
+        widths = self.widths
+        for ch in text:
+            w = w + widths[ord(ch)]
+        return w * 0.001 * size
 
     def _formatWidths(self):
         "returns a pretty block in PDF Array format to aid inspection"
@@ -652,9 +676,18 @@ def getRegisteredFontNames():
     reg.sort()
     return reg
 
-def _slowStringWidth(text, fontName, fontSize):
+def _slowStringWidth(text, fontName, fontSize, encoding=None):
     """Define this anyway so it can be tested, but whether it is used or not depends on _rl_accel"""
     font = getFont(fontName)
+    fontCodec = codecName(font.encoding.name)
+##    if encoding:
+##        print 'slowStringWidth(%s/%s, %s, %s)' % (encoding, fontCodec, repr(text), fontName)
+    if type(text) is StringType:
+        if encoding is not None:
+            if encoding <> fontCodec:
+                #convert
+                text = unicode(text, encoding).encode(fontCodec)
+    
     return font.stringWidth(text, fontSize)
     #this is faster, but will need more special-casing for multi-byte fonts.
     #wid = getFont(fontName).widths
@@ -721,13 +754,14 @@ def dumpFontData():
 
 def test3widths(texts):
     # checks all 3 algorithms give same answer, note speed
+
     import time
     for fontName in standardFonts[0:1]:
-        t0 = time.time()
-        for text in texts:
-            l1 = _stringWidth(text, fontName, 10)
-        t1 = time.time()
-        print 'fast stringWidth took %0.4f' % (t1 - t0)
+##        t0 = time.time()
+##        for text in texts:
+##            l1 = stringWidth(text, fontName, 10)
+##        t1 = time.time()
+##        print 'fast stringWidth took %0.4f' % (t1 - t0)
 
         t0 = time.time()
         w = getFont(fontName).widths

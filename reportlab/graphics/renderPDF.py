@@ -9,7 +9,7 @@
 Execute the script to see some test drawings.
 changed
 """
-__version__=''' $Id: renderPDF.py,v 1.24 2003/11/20 17:09:42 rgbecker Exp $ '''
+__version__=''' $Id$ '''
 
 from reportlab.graphics.shapes import *
 from reportlab.pdfgen.canvas import Canvas
@@ -173,10 +173,10 @@ class _PDFRenderer(Renderer):
     def drawString(self, stringObj):
         if self._fill:
             S = self._tracker.getState()
-            text_anchor, x, y, text = S['textAnchor'], stringObj.x,stringObj.y,stringObj.text
+            text_anchor, x, y, text, enc = S['textAnchor'], stringObj.x,stringObj.y,stringObj.text, stringObj.encoding
             if not text_anchor in ['start','inherited']:
                 font, font_size = S['fontName'], S['fontSize']
-                textLen = stringWidth(text, font,font_size)
+                textLen = stringWidth(text, font, font_size, enc)
                 if text_anchor=='end':
                     x = x-textLen
                 elif text_anchor=='middle':

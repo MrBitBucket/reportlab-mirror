@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/validators.py?cvsroot=reportlab
 #$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.30 2003/12/10 14:40:13 rgbecker Exp $
-__version__=''' $Id: validators.py,v 1.30 2003/12/10 14:40:13 rgbecker Exp $ '''
+__version__=''' $Id$ '''
 """
 This module contains some standard verifying functions which can be
 used in an attribute map.
@@ -65,7 +65,7 @@ class _isBoolean(Validator):
 
 class _isString(Validator):
     def test(self,x):
-        return type(x) is StringType
+        return type(x) in (StringType, UnicodeType)
 
 class _isNumber(Validator):
     def test(self,x):

@@ -58,10 +58,10 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.22 2004/04/05 14:17:29 rgbecker Exp $'
+__version__ = '$Id$'
 
 import string
-from types import StringType
+from types import StringType, UnicodeType
 from struct import pack, unpack
 from cStringIO import StringIO
 from reportlab.pdfbase import pdfmetrics, pdfdoc
@@ -953,11 +953,16 @@ class TTFont:
         self._dynamicFont = 1   # We want dynamic subsetting
         self.state = {}
 
-    def stringWidth(self, text, size):
+    def stringWidth(self, text, size, encoding='utf-8'):
         "Calculate text width"
         width = self.face.getCharWidth
         w = 0
-        for code in parse_utf8(text):
+        if type(text) is UnicodeType:
+            codes = map(ord, text)
+        else:
+            uText = unicode(text, encoding)
+            codes = map(ord, text)
+        for code in codes:
             w = w + width(code)
         return 0.001 * w * size
 

@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
 #$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.73 2004/02/05 18:31:35 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.73 2004/02/05 18:31:35 rgbecker Exp $ '''
+__version__=''' $Id$ '''
 from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
@@ -374,8 +374,9 @@ class Paragraph(Flowable):
 
         It will also be able to handle any MathML specified Greek characters.
     """
-    def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1):
+    def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1, encoding=None):
         self.caseSensitive = caseSensitive
+        self.encoding = encoding
         self._setup(text, style, bulletText, frags, cleanBlockQuotedText)
 
 
@@ -523,11 +524,12 @@ class Paragraph(Flowable):
             fontSize = f.fontSize
             fontName = f.fontName
             words = hasattr(f,'text') and split(f.text, ' ') or f.words
-            spaceWidth = stringWidth(' ', fontName, fontSize)
+            spaceWidth = stringWidth(' ', fontName, fontSize, self.encoding)
             cLine = []
             currentWidth = - spaceWidth   # hack to get around extra space for word 1
             for word in words:
-                wordWidth = stringWidth(word, fontName, fontSize)
+                #this underscores my feeling that Unicode throughout would be easier!
+                wordWidth = stringWidth(word, fontName, fontSize, self.encoding)
                 newWidth = currentWidth + spaceWidth + wordWidth
                 if newWidth<=maxWidth or len(cLine)==0:
                     # fit one more on this line

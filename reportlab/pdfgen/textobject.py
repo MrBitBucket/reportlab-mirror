@@ -154,6 +154,13 @@ class PDFTextObject:
         self._fontname = psfontname
         self._fontsize = size
         font = pdfmetrics.getFont(self._fontname)
+
+        #track codec name for auto-conversion
+        encName = font.encoding.name
+        if encName == 'WinAnsiEncoding':
+            encName = 'cp1252'
+        self._fontencoding = self._canvas._fontencoding = encName.lower()  #python codec name
+
         self._dynamicFont = getattr(font, '_dynamicFont', 0)
         if self._dynamicFont:
             self._curSubset = -1
@@ -177,7 +184,7 @@ class PDFTextObject:
         encName = font.encoding.name
         if encName == 'WinAnsiEncoding':
             encName = 'cp1252'
-        self._fontencoding = encName.lower()  #python codec name
+        self._fontencoding = self._canvas._fontencoding = encName.lower()  #python codec name
 
         self._dynamicFont = getattr(font, '_dynamicFont', 0)
         if self._dynamicFont:
@@ -297,8 +304,9 @@ class PDFTextObject:
     def _formatText(self, text):
         "Generates PDF text output operator(s)"
         #convert to current doc encoding
+        #print '_formatText',repr(text),'as',self._canvas._fontencoding,'->',
         text = self._canvas._convertText(text)
-
+        #print repr(text)
         if self._dynamicFont:
             #it's a truetype font and should be utf8.  If an error is raised,
             
@@ -342,6 +350,8 @@ class PDFTextObject:
         self._y0 = self._y
 
         # Output the text followed by a PDF newline command
+##        if type(text) == type(u''):
+##            print "doing unicode textline on", text.encode('cp1252')
         self._code.append('%s T*' % self._formatText(text))
 
     def textLines(self, stuff, trim=1):

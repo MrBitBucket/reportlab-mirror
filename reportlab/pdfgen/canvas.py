@@ -1275,12 +1275,13 @@ class Canvas:
 
     def _convertText(self, text):
         "Convert to correct encoding for current font"
-        if type(text) is type(u''):
+        if type(text) is UnicodeType:
             # If text is unicode always convert
             uni = text
+            converted = uni.encode(self._fontencoding, self.encodingErrorMode)
         elif self.encoding is None:
-            # If no encoding specified, no conversion
-            return text
+            # If no encoding specified, 8-bit no conversion
+            converted = text
         else:
             # Otherwise assume in specified encoding and decode
             if self.encoding == 'WinAnsiEncoding':
@@ -1291,7 +1292,9 @@ class Canvas:
                 docEnc = self.encoding
             #uni = text.decode(docEnc)  #hack #won't work in 2.1
             uni = unicode(text, docEnc, getattr(self,'decodingErrorMode',self.encodingErrorMode)) #works in 2.1
-        return uni.encode(self._fontencoding, self.encodingErrorMode)
+            converted = uni.encode(self._fontencoding, self.encodingErrorMode)
+##        print '  ->', converted
+        return converted
 
 
     def setFont(self, psfontname, size, leading = None):

@@ -5,6 +5,12 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfutils
+
+from reportlab.platypus.paragraph import Paragraph
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.graphics.shapes import Drawing, String, Ellipse
+
+
 import re
 
 import codecs
@@ -14,9 +20,10 @@ textPat = re.compile(r'\([^(]*\)')
 #test sentences
 testCp1252 = 'copyright %s trademark %s registered %s ReportLab! Ol%s!' % (chr(169), chr(153),chr(174), chr(0xe9))
 testUni = unicode(testCp1252, 'cp1252')
-testUTF8 = testUni.encode('utf_8')
+testUTF8 = testUni.encode('utf-8')
 # expected result is octal-escaped text in the PDF
 expectedCp1252 = pdfutils._escape(testCp1252)
+                    
 
 
 def extractText(pdfOps):
@@ -43,12 +50,56 @@ def subsetToUnicode(ttf, subsetCodeStr):
         if codeStr:
             chrs.append(unichr(subset[int(codeStr[1:], 8)]))
     return u''.join(chrs)
+
     
 
 class TextEncodingTestCase(unittest.TestCase):
     """Tests of expected Unicode and encoding behaviour
 
     """
+
+    def setUp(self):
+        self.luxi = TTFont("Luxi", "luxiserif.ttf")
+        pdfmetrics.registerFont(self.luxi)
+
+        self.styNormal = ParagraphStyle(name='Helvetica',  fontName='Helvetica-Oblique')
+        self.styTrueType = ParagraphStyle(name='TrueType',  fontName='luxi')
+
+
+    def testStringWidth(self):
+        msg = 'Hello World'
+        assert abs(pdfmetrics.stringWidth(msg, 'Courier', 10) - 66.0) < 0.01
+        assert abs(pdfmetrics.stringWidth(msg, 'Helvetica', 10) - 51.67) < 0.01
+        assert abs(pdfmetrics.stringWidth(msg, 'Times-Roman', 10) - 50.27) < 0.01
+        assert abs(pdfmetrics.stringWidth(msg, 'Luxi', 10) - 50.22) < 0.01
+
+        uniMsg1 = u"Hello World"
+        assert abs(pdfmetrics.stringWidth(uniMsg1, 'Courier', 10) - 66.0) < 0.01
+        assert abs(pdfmetrics.stringWidth(uniMsg1, 'Helvetica', 10) - 51.67) < 0.01
+        assert abs(pdfmetrics.stringWidth(uniMsg1, 'Times-Roman', 10) - 50.27) < 0.01
+        assert abs(pdfmetrics.stringWidth(uniMsg1, 'Luxi', 10) - 50.22) < 0.01
+
+
+        # Courier are all 600 ems wide.  So if one 'measures as utf8' one will
+        # get a wrong width as extra characters are seen
+        assert len(testCp1252) == 52
+        assert abs(pdfmetrics.stringWidth(testCp1252, 'Courier', 10) - 312.0) < 0.01
+        # the test string has 5 more bytes and so "measures too long" if passed to
+        # a single-byte font which treats it as a single-byte string.
+        assert len(testUTF8) == 57
+        assert abs(pdfmetrics.stringWidth(testUTF8, 'Courier', 10) - 342.0) < 0.01
+
+        assert len(testUni) == 52
+        assert abs(pdfmetrics.stringWidth(testUni, 'Courier', 10) - 312.0) < 0.01
+
+
+        # now try a TrueType font.  Should be able to accept Unicode or UTF8
+        #print 'utf8_luxi =', pdfmetrics.stringWidth(testUTF8, 'Luxi', 10)
+        #print 'unicluxi =', pdfmetrics.stringWidth(testUni, 'Luxi', 10)
+        #assert abs(pdfmetrics.stringWidth(testUTF8, 'Luxi', 10) - 224.44) < 0.01
+        assert abs(pdfmetrics.stringWidth(testUni, 'Luxi', 10) - 224.44) < 0.01
+
+
 
     #AR 9/6/2004 - just adding this to illustrate behaviour I expect.
     def testStraightThrough(self):
@@ -58,18 +109,9 @@ class TextEncodingTestCase(unittest.TestCase):
         c.drawString(100,800, 'hello') # 0
 
         self.assertEquals(c.encoding, None)
-
-        #warmup - is my text extraction working?
         self.assertEquals(extractText(c.getCurrentPageContent()), ['hello'])
 
         c.drawString(100,700, testCp1252) # 1
-        extracted = extractText(c.getCurrentPageContent())
-        self.assertEquals(extracted[1], expectedCp1252)
-
-        #now we register a unicode truetype font
-        luxi = TTFont("Luxi", "luxiserif.ttf")
-        pdfmetrics.registerFont(luxi)
-        #pdfmetrics.registerFont(TTFont("Rina", "rina.ttf"))
         c.setFont('Luxi', 12)
 
     
@@ -86,20 +128,72 @@ class TextEncodingTestCase(unittest.TestCase):
         c.drawString(100, 600, testUTF8) # 2
 
         # And Unicode strings should always be converted
-        c.drawString(100, 500, testUni) # 3
+#        c.drawString(100, 500, testUni) # 3
+
+        # now add a paragraph in Latin-1 in the latin-1 style
+        p = Paragraph(testCp1252, style=self.styNormal)
+        w, h = p.wrap(150, 100)
+        p.drawOn(c, 100, 400)
+        c.rect(100,400,w,h)
+        
+        # now add a paragraph in UTF-8 in the UTF-8 style
+        p2 = Paragraph(testUTF8, style=self.styTrueType)
+        w, h = p2.wrap(150, 100)
+        p2.drawOn(c, 300, 400)
+        c.rect(300,400,w,h)
+
+        # now add a paragraph in Unicode in the latin-1 style
+        p3 = Paragraph(testUni, style=self.styNormal)
+        w, h = p3.wrap(150, 100)
+        p3.drawOn(c, 100, 300)
+        c.rect(100,300,w,h)
+
+        
+        # now add a paragraph in Unicode in the UTF-8 style
+        p4 = Paragraph(testUni, style=self.styTrueType)
+        p4.wrap(150, 100)
+        p4.drawOn(c, 300, 300)
+        c.rect(300,300,w,h)
+
+
+        # now a graphic
+        d1 = Drawing(400,50)
+        d1.add(Ellipse(200,25,200,12.5, fillColor=None))
+        d1.add(String(200,25,testCp1252, textAnchor='middle'))
+        d1.drawOn(c, 100, 150)
+
+        # now a graphic in utf8
+        d2 = Drawing(400,50)
+        d2.add(Ellipse(200,25,200,12.5, fillColor=None))
+        d2.add(String(200,25,testUTF8, fontName='Luxi', textAnchor='middle'))
+        d2.drawOn(c, 100, 100)
+
+        # now a graphic in Unicode with T1 font
+        d3 = Drawing(400,50)
+        d3.add(Ellipse(200,25,200,12.5, fillColor=None))
+        d3.add(String(200,25,testUni, textAnchor='middle'))
+        d3.drawOn(c, 100, 50)
+
+        # now a graphic in Unicode with TT font
+        d4 = Drawing(400,50)
+        d4.add(Ellipse(200,25,200,12.5, fillColor=None))
+        d4.add(String(200,25,testUni, fontName='Luxi', textAnchor='middle'))
+        d4.drawOn(c, 100, 0)
 
         extracted = extractText(c.getCurrentPageContent())
 
         self.assertEquals(extracted[1], expectedCp1252)
+##        self.assertEquals(extracted[2], extracted[3])
+##        self.assertEquals(subsetToUnicode(self.luxi, extracted[2]), testUni)
 
-        self.assertEquals(extracted[2], extracted[3])
-        self.assertEquals(subsetToUnicode(luxi, extracted[2]), testUni)
+
+
+
 
         c.save()
 
 
     def testCp1252Canvas(self):
-
         """Verify canvas declared as cp1252 autoconverts.
 
         This assumes winansi (cp1252) input. It converts to the
@@ -109,32 +203,85 @@ class TextEncodingTestCase(unittest.TestCase):
 
         c = Canvas(outputfile('test_pdfbase_encodings_cp1252.pdf'), encoding='cp1252')
 
-        c.drawString(100,700, testCp1252)
-        extracted = extractText(c.getCurrentPageContent())
-        # Assuming default font's encoding is cp1252
-        self.assertEquals(extracted[0], expectedCp1252)
+
+        #print 'test 1'
+        c.drawString(100,700, testCp1252)   #0
         
         # Set a font with UTF8 encoding
-        luxi = TTFont("Luxi", "luxiserif.ttf")
-        pdfmetrics.registerFont(luxi)
         c.setFont('Luxi', 12)
 
+        #print 'test 2'
         # This should convert on the fly from cp1252 to UTF8
-        c.drawString(100,600, testCp1252)
+        c.drawString(100,600, testCp1252)  #1
+
+        #print 'test 3'
         # and this should convert from Unicode to UTF8
-        c.drawString(100,500, testUni)
+        c.drawString(100,500, testUni)  #2
+
+
+        # now add a paragraph in Latin-1 in the latin-1 style
+        #print
+        #print 'test 4: para cp1252, type 1 font:'
+        p = Paragraph(testCp1252, style=self.styNormal, encoding="cp1252")
+        p.wrap(150, 100)
+        p.drawOn(c, 100, 400)  #3
+        
+        # now add a paragraph in UTF-8 in the UTF-8 style
+        #print
+        #print 'test 5: para cp1252, truetype font:'
+        p2 = Paragraph(testCp1252, style=self.styTrueType, encoding="cp1252")
+        p2.wrap(150, 100)
+        p2.drawOn(c, 300, 400) #4
+
+        # now add a paragraph in Unicode in the latin-1 style
+        p3 = Paragraph(testUni, style=self.styNormal)
+        w, h = p3.wrap(150, 100)
+        p3.drawOn(c, 100, 300)
+        c.rect(100,300,w,h)
+
+        # now add a paragraph in Unicode in the UTF-8 style
+        p4 = Paragraph(testUni, style=self.styTrueType)
+        p4.wrap(150, 100)
+        p4.drawOn(c, 300, 300)
+        c.rect(300,300,w,h)
+
+        # now a graphic
+        d1 = Drawing(400,50)
+        d1.add(Ellipse(200,25,200,12.5, fillColor=None))
+        d1.add(String(200,25,testCp1252, textAnchor='middle', encoding='cp1252'))
+        d1.drawOn(c, 100, 150)
+
+        # now a graphic in utf8 font
+        d2 = Drawing(400,50)
+        d2.add(Ellipse(200,25,200,12.5, fillColor=None))
+        d2.add(String(200,25,testCp1252, fontName='Luxi', textAnchor='middle', encoding='cp1252'))
+        d2.drawOn(c, 100, 100)
+
+        # now a graphic in Unicode with T1 font
+        d3 = Drawing(400,50)
+        d3.add(Ellipse(200,25,200,12.5, fillColor=None))
+        d3.add(String(200,25,testUni, textAnchor='middle'))
+        d3.drawOn(c, 100, 50)
+
+        # now a graphic in Unicode with TT font
+        d4 = Drawing(400,50)
+        d4.add(Ellipse(200,25,200,12.5, fillColor=None))
+        d4.add(String(200,25,testUni, fontName='Luxi', textAnchor='middle'))
+        d4.drawOn(c, 100, 0)
+
         extracted = extractText(c.getCurrentPageContent())
 
+        self.assertEquals(extracted[0], expectedCp1252)
+        
         self.assertEquals(extracted[1], extracted[2])
-        self.assertEquals(subsetToUnicode(luxi, extracted[1]), testUni)
+##        self.assertEquals(subsetToUnicode(self.luxi, extracted[1]), testUni)
+##
+##        self.assertEquals(subsetToUnicode(self.luxi, extracted[4]), testUni)
 
-        #uncomment this to see some PDF for fun...
-        #print c.getCurrentPageContent()
         c.save()
 
         
     def testUtf8Canvas(self):
-
         """Verify canvas declared as utf8 autoconverts.
 
         This assumes utf8 input. It converts to the encoding of the
@@ -144,25 +291,72 @@ class TextEncodingTestCase(unittest.TestCase):
         c = Canvas(outputfile('test_pdfbase_encodings_utf8.pdf'), encoding='utf-8')
 
         c.drawString(100,700, testUTF8)
-        extracted = extractText(c.getCurrentPageContent())
-        # Input UTF8 should be encoded to font's cp1252
-        self.assertEquals(extracted[0], expectedCp1252)
         
         # Set a font with UTF8 encoding
-        luxi = TTFont("Luxi", "luxiserif.ttf")
-        pdfmetrics.registerFont(luxi)
         c.setFont('Luxi', 12)
 
         # This should pass the UTF8 through unchanged
         c.drawString(100,600, testUTF8)
         # and this should convert from Unicode to UTF8
         c.drawString(100,500, testUni)
-        extracted = extractText(c.getCurrentPageContent())
 
+
+        # now add a paragraph in Latin-1 in the latin-1 style
+        p = Paragraph(testUTF8, style=self.styNormal, encoding="utf-8")
+        w, h = p.wrap(150, 100)
+        p.drawOn(c, 100, 400)  #3
+        c.rect(100,300,w,h)
+        
+        # now add a paragraph in UTF-8 in the UTF-8 style
+        p2 = Paragraph(testUTF8, style=self.styTrueType, encoding="utf-8")
+        w, h = p2.wrap(150, 100)
+        p2.drawOn(c, 300, 400) #4
+        c.rect(100,300,w,h)
+
+        # now add a paragraph in Unicode in the latin-1 style
+        p3 = Paragraph(testUni, style=self.styNormal)
+        w, h = p3.wrap(150, 100)
+        p3.drawOn(c, 100, 300)
+        c.rect(100,300,w,h)
+
+        # now add a paragraph in Unicode in the UTF-8 style
+        p4 = Paragraph(testUni, style=self.styTrueType)
+        p4.wrap(150, 100)
+        p4.drawOn(c, 300, 300)
+        c.rect(300,300,w,h)
+
+        # now a graphic
+        d1 = Drawing(400,50)
+        d1.add(Ellipse(200,25,200,12.5, fillColor=None))
+        d1.add(String(200,25,testUTF8, textAnchor='middle', encoding='utf-8'))
+        d1.drawOn(c, 100, 150)
+
+        # now a graphic in utf8
+        d2 = Drawing(400,50)
+        d2.add(Ellipse(200,25,200,12.5, fillColor=None))
+        d2.add(String(200,25,testUTF8, fontName='Luxi', textAnchor='middle', encoding='utf-8'))
+        d2.drawOn(c, 100, 100)
+
+        # now a graphic in Unicode with T1 font
+        d3 = Drawing(400,50)
+        d3.add(Ellipse(200,25,200,12.5, fillColor=None))
+        d3.add(String(200,25,testUni, textAnchor='middle'))
+        d3.drawOn(c, 100, 50)
+
+        # now a graphic in Unicode with TT font
+        d4 = Drawing(400,50)
+        d4.add(Ellipse(200,25,200,12.5, fillColor=None))
+        d4.add(String(200,25,testUni, fontName='Luxi', textAnchor='middle'))
+        d4.drawOn(c, 100, 0)
+
+        extracted = extractText(c.getCurrentPageContent())
+        self.assertEquals(extracted[0], expectedCp1252)
         self.assertEquals(extracted[1], extracted[2])
-        self.assertEquals(subsetToUnicode(luxi, extracted[1]), testUni)
+        self.assertEquals(subsetToUnicode(self.luxi, extracted[1]), testUni)
 
         c.save()
+
+
 
 
 

@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
 #$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.49 2004/04/05 18:07:42 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.49 2004/04/05 18:07:42 rgbecker Exp $ '''
+__version__=''' $Id$ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -75,6 +75,11 @@ class Flowable:
         #optional holder for trace info
         self._traceInfo = None
         self._showBoundary = None
+
+        #many flowables handle text and must be processed in the
+        #absence of a canvas.  tagging them with their encoding
+        #helps us to get conversions right.  Use Python codec names.
+        self.encoding = None        
 
 
     def _drawOn(self,canv):
