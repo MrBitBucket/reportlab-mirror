@@ -222,6 +222,12 @@ class NoneOr(Validator):
         if x is None: return True
         return self._elemTest(x)
 
+class auto: pass
+class AutoOr(NoneOr):
+    def test(self,x):
+        if x in (auto,'auto'): return True
+        return self._elemTest(x)
+
 class isInstanceOf(Validator):
     def __init__(self,klass=None):
         self._klass = klass
