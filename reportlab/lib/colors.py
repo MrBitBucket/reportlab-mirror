@@ -33,10 +33,13 @@
 #
 ###############################################################################
 #	$Log: colors.py,v $
+#	Revision 1.3  2000/03/24 10:37:02  rgbecker
+#	Sync with pingo
+#
 #	Revision 1.2  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
-#
-__version__=''' $Id: colors.py,v 1.2 2000/03/08 13:06:39 andy_robinson Exp $ '''
+#	
+__version__=''' $Id: colors.py,v 1.3 2000/03/24 10:37:02 rgbecker Exp $ '''
 
 import string
 import math
@@ -65,6 +68,16 @@ class Color:
         if dsum < 0: return -1
         return 0
         
+def cmyk2rgb(cmyktuple):
+    # utility function
+    "Convert from a CMYK color tuple to an RGB color tuple"
+    # From the Adobe Postscript Ref. Manual 2nd ed.
+    (c,m,y,k) = cmyktuple
+    r = 1.0 - min(1.0, c + k)
+    g = 1.0 - min(1.0, m + k)
+    b = 1.0 - min(1.0, y + k)
+    return (r,g,b)
+
 def HexColor(val):
     """This class converts a hex string, or an actual integer number,
     into the corresponding color.  E.g., in "AABBCC" or 0xAABBCC,
