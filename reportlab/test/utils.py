@@ -2,7 +2,8 @@
 """
 
 
-import sys, os, string, fnmatch, copy
+import sys, os, string, fnmatch, copy, re
+from ConfigParser import ConfigParser
 
 from reportlab.test import unittest
 
@@ -37,6 +38,28 @@ def getCVSEntries(folder, files=1, folders=0):
                 allEntries.append(join(folder, entry))
 
     return allEntries
+
+
+# Still experimental class extending ConfigParser's behaviour.
+
+class ExtConfigParser(ConfigParser):
+    "A slightly extended version to return lists of strings."
+
+    pat = re.compile('\s*\[.*\]\s*')
+    
+    def getstringlist(self, section, option):
+        "Coerce option to a list of strings or return unchanged if that fails."
+
+        value = apply(ConfigParser.get, (self, section, option))
+
+        # This seems to allow for newlines inside values
+        # of the config file, but be careful!!
+        val = string.replace(value, '\n', '')
+
+        if self.pat.match(val):
+            return eval(val)
+        else:
+            return value
 
 
 # This class as suggested by /F with an additional hook
