@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.9 2003/11/17 22:42:58 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.10 2003/11/18 11:18:14 johnprecedo Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.lib.codecharts import SingleByteEncodingChart
 from reportlab.platypus import Image
@@ -555,7 +555,7 @@ for printing""")
 CPage(5)
 heading2("TrueType Font Support")
 disc("""
-Marius Gedminas ($mgedmin@delfi.lt$) with the help of Viktorija Zaksiene ($ryzaja@pov.lt$)
+Marius Gedminas ($mgedmin@delfi.lt$) with the help of Viktorija Zaksiene ($vika@pov.lt$)
 have contributed support for embedded TrueType fonts and preliminary Unicode translation using UTF-8.""")
 
 disc("""The current support should be regarded as experimental, but it seems to work and doesn't
