@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/cvslh.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/cvslh.py,v 1.6 2002/01/21 13:19:27 rgbecker Exp $
+#$Header: /tmp/reportlab/utils/cvslh.py,v 1.7 2003/11/19 10:15:41 rgbecker Exp $
 #
-#	python cvslh.py -d"2000/04/10 14:00:00" >\tmp\hacked_log
+#	python cvslh.py -d"2000-04-10 14:00:00" >\tmp\hacked_log
 #
 #	makes a reasonably formatted file of the log entries since the specified
 #	date. Use -r to reverse the time order, -f to get just a list of the modified files.

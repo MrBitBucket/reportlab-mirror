@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/daily.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/daily.py,v 1.53 2002/03/12 15:18:03 rgbecker Exp $
-__version__=''' $Id: daily.py,v 1.53 2002/03/12 15:18:03 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/utils/daily.py,v 1.54 2003/11/19 10:15:41 rgbecker Exp $
+__version__=''' $Id: daily.py,v 1.54 2003/11/19 10:15:41 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -126,7 +126,7 @@ def cvs_checkout(d):
 	if cvs is None:
 		os.exit(1)
 
-	os.environ['CVSROOT']=':pserver:%s@cvs.reportlab.sourceforge.net:/cvsroot/reportlab' % USER
+	os.environ['CVSROOT']=':ext:%s@cvs.reportlab.sourceforge.net:/cvsroot/reportlab' % USER
 	if release:
 		do_exec(cvs+(' export -r %s %s' % (tagname,projdir)), 'the export phase')
 	else:
