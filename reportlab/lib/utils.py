@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.64 2004/03/22 18:09:51 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.64 2004/03/22 18:09:51 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.65 2004/03/23 13:54:42 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.65 2004/03/23 13:54:42 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -119,22 +119,34 @@ else:
     def markfilename(filename,creatorcode=None,filetype=None):
         pass
 
+import reportlab
+_RL_DIR=os.path.dirname(reportlab.__file__)
+_RL_ADIR=os.path.abspath(_RL_DIR)
+del reportlab
+
 #Attempt to detect if this copy of reportlab is running in a
 #file system (as opposed to mostly running in a zip or McMillan
 #archive or Jar file).  This is used by test cases, so that
 #we can write test cases that don't get activated in a compiled
-_isFSD=None
-if _isFSD is None:
-    try:
-        __file__
-    except:
-        __file__ = sys.argv[0]
-    try:
-        _isFSD = not __loader__
-    except:
-        _isFSD = os.path.isfile(__file__)   #slight risk of wrong path
-        __loader__ = None
-    _isFSSD = _isFSD and os.path.isfile(os.path.splitext(__file__)[0] +'.py')
+try:
+    __file__
+except:
+    __file__ = sys.argv[0]
+try:
+    _isFSD = not __loader__
+    _loaderpfxlen = len(__loader__.archive+os.sep)
+    _loaderpfxlenA = _loaderpfxlen+len(_RL_ADIR)-len(_RL_DIR)
+except:
+    _isFSD = os.path.isfile(__file__)   #slight risk of wrong path
+    __loader__ = None
+_isFSSD = _isFSD and os.path.isfile(os.path.splitext(__file__)[0] +'.py')
+
+def _startswith_rl(fn):
+    '''if the name starts with a known prefix strip it off'''
+    fn = fn.replace('/',os.sep)
+    if fn.startswith(_RL_DIR): return fn[_loaderpfxlen:]
+    elif fn.startswith(_RL_ADIR): return fn[_loaderpfxlenA:]
+    return fn
 
 def isFileSystemDistro():
     '''return truth if a file system distribution'''
@@ -213,7 +225,8 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     if debug:
         import pprint
         pp = pprint.pprint
-        print 'path=',pp(path)
+        print 'path=',
+        pp(path)
 
     #make import errors a bit more informative
     opath = sys.path
@@ -364,11 +377,6 @@ def _className(self):
     except AttributeError:
         return str(self)
 
-_RL_DIR=None
-import reportlab
-_RL_DIR=os.path.dirname(reportlab.__file__)
-del reportlab
-
 def open_for_read(name,mode='b'):
     '''attempt to open a file or URL for reading'''
     if hasattr(name,'read'): return name
@@ -379,20 +387,18 @@ def open_for_read(name,mode='b'):
         o = urllib.urlopen(name)
         return getStringIO(o.read())
     except:
+        if 'r' not in mode: mode = 'r'+mode
         try:
-            return open(name,'r'+mode)
+            return open(name,mode)
         except IOError:
             t, v = sys.exc_info()[:2]
             if _isFSD or __loader__ is None: raise
             try:
                 #we have a __loader__, perhaps the filename starts with
                 #the dirname(reportlab.__file__) or is relative
-                name = name.replace('/',os.sep)
-                if name.startswith(_RL_DIR):
-                    name = name[len(__loader__.archive)+len(os.sep):]
-                elif os.path.isabs(name): raise
+                name = _startswith_rl(name)
                 s = __loader__.get_data(name)
-                if mode!='b' and os.linesep!='\n': s = s.replace(os.linesep,'\n')
+                if 'b' not in mode and os.linesep!='\n': s = s.replace(os.linesep,'\n')
                 return getStringIO(s)
             except:
                 raise t, v
@@ -404,12 +410,14 @@ def rl_isfile(fn,os_path_isfile=os.path.isfile):
     if hasattr(fn,'read'): return True
     if os_path_isfile(fn): return True
     if _isFSD or __loader__ is None: return False
-    if fn.startswith(_RL_DIR):
-        fn = fn.replace('/',os.sep)
-        fn = fn[len(__loader__.archive)+len(os.sep):]
-        return fn in __loader__._files.keys()
-    return False
+    fn = _startswith_rl(fn)
+    return fn in __loader__._files.keys()
 
+def rl_isdir(pn,os_path_isdir=os.path.isdir):
+    if os_path_isdir(pn): return True
+    if _isFSD or __loader__ is None: return False
+    pn = _startswith_rl(pn)
+    return len(filter(lambda x: x.startswith(pn),__loader__._files.keys()))>0
 
 class ImageReader:
     "Wraps up either PIL or Java to get data from bitmaps"
