@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/fonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.7 2001/04/23 13:09:14 rgbecker Exp $
-__version__=''' $Id: fonts.py,v 1.7 2001/04/23 13:09:14 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.8 2001/07/13 09:33:34 andy_robinson Exp $
+__version__=''' $Id: fonts.py,v 1.8 2001/07/13 09:33:34 andy_robinson Exp $ '''
 import string, sys, os
 ###############################################################################
 #	A place to put useful font stuff
@@ -71,3 +71,11 @@ def tt2ps(fn,b,i):
 	if _tt2ps_map.has_key(K):
 		return _tt2ps_map[K]
 	raise "Can't map PS font", fn
+
+def addMapping(face, bold, italic, psname):
+	'allow a custom font to be put in the mapping'
+	_tt2ps_map[(face, bold, italic)] = psname
+	# rebuild inverse - inefficient
+	for k,v in _tt2ps_map.items():
+		if not _ps2tt_map.has_key(k):
+			_ps2tt_map[string.lower(v)] = k

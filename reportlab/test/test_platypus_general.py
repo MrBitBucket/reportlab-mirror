@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testplatypus.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.2 2001/04/13 16:09:35 andy_robinson Exp $
-__version__=''' $Id: test_platypus_general.py,v 1.2 2001/04/13 16:09:35 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.3 2001/07/13 09:33:34 andy_robinson Exp $
+__version__=''' $Id: test_platypus_general.py,v 1.3 2001/07/13 09:33:34 andy_robinson Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -256,6 +256,12 @@ def getCommentary():
 			))
 
 	story.append(FrameBreak())
+
+	story.append(Paragraph(
+				"The next example uses a custom font",
+				styleSheet['Italic']))
+
+	story.append(FrameBreak())
 	return story
 
 def getExamples():
@@ -394,6 +400,42 @@ def getExamples():
 	story.append(g)
 	story.append(FrameBreak())
 	
+	#######################################################################
+	#	  Examples Page 4 - custom fonts
+	#######################################################################
+
+
+	# custom font with LettError-Robot font
+	import reportlab.rl_config
+	reportlab.rl_config.warnOnMissingFontGlyphs = 0
+	
+	from reportlab.pdfbase import pdfmetrics
+	face = pdfmetrics.EmbeddedType1Face('LeERC___.AFM','LeERC___.PFB')
+	faceName = face.name  # should be 'LettErrorRobot-Chrome'
+	pdfmetrics.registerTypeFace(face)
+	font = pdfmetrics.Font(faceName, faceName, 'WinAnsiEncoding')		
+	pdfmetrics.registerFont(font)
+
+
+	# put it inside a paragraph.
+	story.append(Paragraph(
+		"""This is an ordinary paragraph, which happens to contain
+		text in an embedded font:
+		<font name="LettErrorRobot-Chrome">LettErrorRobot-Chrome</font>.
+		Now for the real challenge...""", styleSheet['Normal']))
+
+
+	styRobot = ParagraphStyle('Robot', styleSheet['Normal'])
+	styRobot.fontSize = 16
+	styRobot.leading = 20
+	styRobot.fontName = 'LettErrorRobot-Chrome'
+	
+	story.append(Paragraph(
+				"This whole paragraph is 16-point Letterror-Robot-Chrome.",
+				styRobot))
+	story.append(FrameBreak())
+	
+
 	return story
 
 class AndyTemplate(BaseDocTemplate):
