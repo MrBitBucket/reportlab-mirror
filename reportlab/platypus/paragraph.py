@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.69 2003/12/10 11:35:20 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.69 2003/12/10 11:35:20 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.70 2003/12/16 18:04:37 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.70 2003/12/16 18:04:37 rgbecker Exp $ '''
 from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
@@ -656,13 +656,14 @@ class Paragraph(Flowable):
         lines = blPara.lines
 
         #work out the origin for line 1
-        cur_x = style.leftIndent
+        leftIndent = style.leftIndent
+        cur_x = leftIndent
 
         #if has a background, draw it
         if style.backColor:
             canvas.saveState()
             canvas.setFillColor(style.backColor)
-            canvas.rect(style.leftIndent,
+            canvas.rect(leftIndent,
                         0,
                         self.width - style.rightIndent,
                         self.height,
@@ -679,12 +680,12 @@ class Paragraph(Flowable):
             #left and right margins
             canvas.saveState()
             canvas.setFillColor(Color(0.9,0.9,0.9))
-            canvas.rect(0, 0, style.leftIndent, self.height)
+            canvas.rect(0, 0, leftIndent, self.height)
             canvas.rect(self.width - style.rightIndent, 0, style.rightIndent, self.height)
             # shade above and below
             canvas.setFillColor(Color(1.0,1.0,0.0))
             canvas.restoreState()
-            #self.drawLine(x + style.leftIndent, y, x + style.leftIndent, cur_y)
+            #self.drawLine(x + leftIndent, y, x + leftIndent, cur_y)
 
 
         nLines = len(lines)
@@ -725,13 +726,13 @@ class Paragraph(Flowable):
                     tx.XtraState.f = f
                     tx.XtraState.style = style
                     tx.XtraState.lines = lines
-                    _do_under_lines(0, t_off, tx)
+                    _do_under_lines(0, t_off+leftIndent, tx)
 
                     #now the middle of the paragraph, aligned with the left margin which is our origin.
                     for i in range(1, nLines):
                         t_off = dpl( tx, 0, lines[i][0], lines[i][1], noJustifyLast and i==lim)
                         if f.underline:
-                            _do_under_lines(i, t_off, tx)
+                            _do_under_lines(i, t_off+leftIndent, tx)
                 else:
                     for i in range(1, nLines):
                         dpl( tx, 0, lines[i][0], lines[i][1], noJustifyLast and i==lim)
@@ -770,13 +771,13 @@ class Paragraph(Flowable):
 
                 tx._fontname,tx._fontsize = None, None
                 t_off = dpl( tx, offset, lines[0], noJustifyLast and nLines==1)
-                _do_under(0, t_off, tx)
+                _do_under(0, t_off+leftIndent, tx)
 
                 #now the middle of the paragraph, aligned with the left margin which is our origin.
                 for i in range(1, nLines):
                     f = lines[i]
                     t_off = dpl( tx, 0, f, noJustifyLast and i==lim)
-                    _do_under(i, t_off, tx)
+                    _do_under(i, t_off+leftIndent, tx)
 
             canvas.drawText(tx)
             canvas.restoreState()
