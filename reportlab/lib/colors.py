@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.22 2001/08/22 19:31:23 johnprecedo Exp $
-__version__=''' $Id: colors.py,v 1.22 2001/08/22 19:31:23 johnprecedo Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.23 2001/09/19 23:36:47 andy_robinson Exp $
+__version__=''' $Id: colors.py,v 1.23 2001/09/19 23:36:47 andy_robinson Exp $ '''
 
 import string
 import math
@@ -79,8 +79,9 @@ class CMYKColor(Color):
 	def __repr__(self):
 		return "CMYKColor(%s%s%s)" % (
 			string.replace(fp_str(self.cyan, self.magenta, self.yellow, self.black),' ',','),
-			(self.density!=1 and (',density='+fp_str(self.density)) or ''),
-			(self.spotName and (',spotName='+repr(self.spotName)) or ''))
+			(self.spotName and (',spotName='+repr(self.spotName)) or ''),
+			(self.density!=1 and (',density='+fp_str(self.density)) or '')
+			)
 
 	def __hash__(self):
 		return hash( (self.cyan, self.magenta, self.yellow, self.black) )
@@ -119,8 +120,9 @@ class PCMYKColor(CMYKColor):
 	def __repr__(self):
 		return "PCMYKColor(%s%s%s)" % (
 			string.replace(fp_str(self.cyan*100, self.magenta*100, self.yellow*100, self.black*100),' ',','),
-			(self.density!=1 and (',density='+fp_str(self.density*100)) or ''),
-			(self.spotName and (',spotName='+repr(self.spotName)) or ''))
+			(self.spotName and (',spotName='+repr(self.spotName)) or ''),
+			(self.density!=1 and (',density='+fp_str(self.density*100)) or '')
+			)
 
 def cmyk2rgb((c,m,y,k),density=1):
 	"Convert from a CMYK color tuple to an RGB color tuple"
