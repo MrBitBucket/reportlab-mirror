@@ -601,11 +601,7 @@ class Table(Flowable):
             setattr(self,k,v)
 
     def _addCommand(self,cmd):
-        if cmd[0] == 'BACKGROUND':
-            self._bkgrndcmds.append(cmd)
-        if cmd[0] == 'ROWBACKGROUNDS':
-            self._bkgrndcmds.append(cmd)
-        if cmd[0] == 'COLBACKGROUNDS':
+        if cmd[0] in ('BACKGROUND','ROWBACKGROUNDS','COLBACKGROUNDS'):
             self._bkgrndcmds.append(cmd)
         elif cmd[0] == 'SPAN':
             self._spanCmds.append(cmd)
@@ -945,9 +941,6 @@ class Table(Flowable):
             canv = self.canv
             if callable(arg):
                 apply(arg,(self,canv, x0, y0, w, h))
-            elif cmd == 'BACKGROUND':
-                canv.setFillColor(colors.toColor(arg))
-                canv.rect(x0, y0, w, h, stroke=0,fill=1)
             elif cmd == 'ROWBACKGROUNDS':
                 #Need a list of colors to cycle through.  The arguments
                 #might be already colours, or convertible to colors, or
@@ -978,7 +971,9 @@ class Table(Flowable):
                         canv.setFillColor(color)
                         canv.rect(x0, y0, w, h, stroke=0,fill=1)
                     x0 = x0 +w
-                
+            else:   #cmd=='BACKGROUND'
+                canv.setFillColor(colors.toColor(arg))
+                canv.rect(x0, y0, w, h, stroke=0,fill=1)
 
     def _drawCell(self, cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight)):
         if self._curcellstyle is not cellstyle:
