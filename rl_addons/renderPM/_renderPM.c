@@ -1372,19 +1372,25 @@ static PyObject* pil2pict(PyObject* self, PyObject* args)
 	pict_putFixed(obs, rows, 0);
 	pict_putFill(obs, 4);
 
-	if(tc!=-1){
-		pict_putShort(obs, PICT_background);
-		pict_putShort(obs, (short)(((unsigned long)((tc>>16)&0xFF)*65535L)/255L));
-		pict_putShort(obs, (short)(((unsigned long)((tc>>8)&0xFF)*65535L)/255L));
-		pict_putShort(obs, (short)(((unsigned long)(tc&0xFF)*65535L)/255L));
-		pict_putShort(obs, 0x0f);				/*bkcolor*/
-		pict_putLong(obs, (unsigned long)tc);
-		}
 
 	/* seems to be needed by many PICT2 programs */
 	pict_putShort(obs, PICT_clipRgn);
 	pict_putShort(obs, 10);
 	pict_putRect(obs, 0, 0, rows, cols);
+	if(tc!=-1){
+		pict_putShort(obs, PICT_background);
+		pict_putShort(obs, (short)(((unsigned long)((tc>>16)&0xFF)*65535L)/255L));
+		pict_putShort(obs, (short)(((unsigned long)((tc>>8)&0xFF)*65535L)/255L));
+		pict_putShort(obs, (short)(((unsigned long)(tc&0xFF)*65535L)/255L));
+#if 0
+		pict_putShort(obs, 0x0f);				/*bkcolor*/
+		pict_putLong(obs, (unsigned long)tc);
+#endif
+		pict_putShort(obs,5);					/*src mode*/
+		pict_putShort(obs,36);	
+		pict_putShort(obs,8);					/*src mode*/
+		pict_putShort(obs,36);	
+		}
 
 	/* write picture */
 	pict_putShort(obs, PICT_PackBitsRect);
