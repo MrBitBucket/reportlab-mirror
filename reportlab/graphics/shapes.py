@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.68 2001/11/08 13:36:27 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.69 2001/11/29 11:30:24 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -553,7 +553,7 @@ class Drawing(Group, Flowable):
 		if not os.path.isdir(outDir): os.makedirs(outDir)
 		fnroot = os.path.normpath(os.path.join(outDir,fnRoot))
 		plotMode = os.path.splitext(fnroot)
-		if string.lower(plotMode[1][1:]) in ['pdf','eps','gif','png','jpg','jpeg','tiff','tif','py']:
+		if string.lower(plotMode[1][1:]) in ['pdf','ps','eps','gif','png','jpg','jpeg','tiff','tif','py']:
 			fnroot = plotMode[0]
 
 		plotMode, verbose = formats or getattr(self,'formats',['pdf']), (verbose is not None and (verbose,) or (getattr(self,'verbose',_verbose),))[0]
@@ -605,8 +605,14 @@ class Drawing(Group, Flowable):
 								company = getattr(self,'EPS_info',['','ReportLab'])[1],
 								preview = getattr(self,'preview',1),
 								showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
-
 			ext = ext +  '/.eps'
+
+		if 'ps' in plotMode:
+			from reportlab.graphics import renderPS
+			filename = fnroot+'.ps'
+			if verbose: print "generating EPS file %s" % filename
+			renderPS.drawToFile(self, filename, showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
+			ext = ext +  '/.ps'
 
 		if 'py' in plotMode:
 			filename = fnroot+'.py'
