@@ -958,7 +958,7 @@ class TTFont:
         if type(text) is not UnicodeType:
             text = unicode(text, encoding or 'utf-8')   # encoding defaults to utf-8
         width = lambda x,f=self.face.getCharWidth: f(ord(x))
-        return 0.001 * reduce(operator_add,map(width,text)) * size
+        return 0.001 * reduce(operator_add,map(width,text), 0) * size
 
     def splitString(self, text, doc, encoding='utf-8'):
         """Splits text into a number of chunks, each of which belongs to a
