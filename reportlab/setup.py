@@ -30,7 +30,7 @@ def get_version():
     try:
         for l in open(pjoin(FN+'.py'),'r').readlines():
             if l.startswith('Version'):
-                exec l
+                exec l.strip()
                 return Version
     except:
         pass
