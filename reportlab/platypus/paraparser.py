@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.36 2000/12/10 11:57:42 andy_robinson Exp $
-__version__=''' $Id: paraparser.py,v 1.36 2000/12/10 11:57:42 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.37 2000/12/11 00:40:57 rgbecker Exp $
+__version__=''' $Id: paraparser.py,v 1.37 2000/12/11 00:40:57 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -162,13 +162,15 @@ class ParaFrag(ABag):
 # !!! NOTE !!! THIS TEXT IS NOW REPLICATED IN PARAGRAPH.PY !!!
 # The ParaFormatter will be able to format the following xml
 # tags:
-#	   < b > < /b > - bold
-#	   < i > < /i > - italics
-#	   < u > < /u > - underline
-#	   < super > < /super > - superscript
-#	   < sub > < /sub > - subscript
-#	   <font name=fontfamily/fontname color=colorname size=float>
-#      < bullet > </bullet> - bullet text (at head of para only)
+#		< /b > - bold
+#		< /i > - italics
+#		< u > < /u > - underline
+#		< super > < /super > - superscript
+#		< sub > < /sub > - subscript
+#		<font name=fontfamily/fontname color=colorname size=float>
+# 		< bullet > </bullet> - bullet text (at head of para only)
+#		<onDraw name=callable label="a label">
+#	
 #		The whole may be surrounded by <para> </para> tags
 #
 # It will also be able to handle any MathML specified Greek characters.
@@ -348,7 +350,7 @@ class ParaParser(xmllib.XMLParser):
 		pass
 
 	def start_onDraw(self,attr):
-		defn = ParaFrag()
+		defn = ABag()
 		if attr.has_key('name'): defn.name = attr['name']
 		else: self._syntax_error('<onDraw> needs at least a name attribute')
 
