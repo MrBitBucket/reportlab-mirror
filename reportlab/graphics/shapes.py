@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.18 2001/04/05 12:47:15 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.19 2001/04/06 10:01:21 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -525,8 +525,11 @@ class Group(Shape):
     def asDrawing(self, width, height):
         """Convenience function to make a drawing from a group"""
         self.__class__ = Drawing
-        self.__Drawing_init__(width,height)
+        self._attrMap.update(self._xtraAttrMap)
+        self.width = width
+        self.height = height
 
+from reportlab.lib.utils import _updater
 class Drawing(Group, Flowable):
     """Outermost container; the thing a renderer works on.
     This has no properties except a height, width and list
@@ -536,16 +539,14 @@ class Drawing(Group, Flowable):
         'width':isNumber,
         'height':isNumber,
         'canv':None}
+
+    _attrMap = _updater(Group._attrMap,_xtraAttrMap)
     
     def __init__(self, width, height, *nodes, **keywords):
         apply(Group.__init__,(self,)+nodes,keywords)
-        self.__Drawing_init__(width,height)
-
-    def __Drawing_init__(self,width,height):
-        self._attrMap.update(self._xtraAttrMap)
         self.width = width
         self.height = height
-        
+
     def draw(self):
         """This is used by the Platypus framework to let the document
         draw itself in a story.  It is specific to PDF and should not
