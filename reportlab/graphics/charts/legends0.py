@@ -7,7 +7,7 @@ from reportlab.graphics.shapes import *
 from reportlab.graphics.widgetbase import Widget
 from reportlab.lib import colors
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from reportlab.graphics.charts.barchart1 import sample2
+from reportlab.graphics.charts.barchart1 import sample2a
 
 
 # This one was originally written by Aaron (for Pingo, I think).
@@ -171,7 +171,7 @@ def sample2c():
 def sample3c():
     "Make sample swatches."
 
-    d = sample2()
+    d = sample2a()
     
     swatches = Swatches0()
     swatches.alignment = 'right'
