@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.18 2004/01/21 10:09:34 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.19 2004/03/09 22:22:26 andy_robinson Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -58,7 +58,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.18 2004/01/21 10:09:34 rgbecker Exp $'
+__version__ = '$Id: ttfonts.py,v 1.19 2004/03/09 22:22:26 andy_robinson Exp $'
 
 import string
 from types import StringType
@@ -889,7 +889,7 @@ FF_ALLCAP       = 1 << 17-1
 FF_SMALLCAP     = 1 << 18-1
 FF_FORCEBOLD    = 1 << 19-1
 
-class TTFontFace(TTFontFile):
+class TTFontFace(TTFontFile, pdfmetrics.TypeFace):
     """TrueType typeface.
 
     Conceptually similar to a single byte typeface, but the glyphs are
@@ -897,6 +897,7 @@ class TTFontFace(TTFontFile):
 
     def __init__(self, filename, validate=0):
         "Loads a TrueType font from filename."
+        pdfmetrics.TypeFace.__init__(self, None)
         TTFontFile.__init__(self, filename, validate=validate)
 
     def getCharWidth(self, code):

@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.66 2004/01/20 22:50:31 andy_robinson Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.67 2004/03/09 22:22:26 andy_robinson Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -125,6 +125,15 @@ class TypeFace:
         self.glyphWidths = {}
         self.ascent = 0
         self.descent = 0
+
+
+        # all typefaces of whatever class should have these 3 attributes.
+        # these are the basis for family detection.
+        self.familyName = None  # should set on load/construction if possible
+        self.bold = 0    # bold faces should set this
+        self.italic = 0  #italic faces should set this
+
+        
         if name == 'ZapfDingbats':
             self.requiredEncoding = 'ZapfDingbatsEncoding'
         elif name == 'Symbol':
@@ -144,6 +153,10 @@ class TypeFace:
         self.glyphWidths = _fontdata.widthsByFontGlyph[name]
         self.glyphNames = self.glyphWidths.keys()
         self.ascent,self.descent = _fontdata.ascent_descent[name]
+
+    def getFontFiles(self):
+        "Info function, return list of the font files this depends on."
+        return []
 
     def findT1File(self, ext='.pfb'):
         possible_exts = (string.lower(ext), string.upper(ext))
@@ -423,12 +436,18 @@ class EmbeddedType1Face(TypeFace):
     Its glyph data will be embedded in the PDF file."""
     def __init__(self, afmFileName, pfbFileName):
         # ignore afm file for now
+        TypeFace.__init__(self, None)
+        #None is a hack, name will be supplied by AFM parse lower done
+        #in this __init__ method.
         self.afmFileName = os.path.abspath(afmFileName)
         self.pfbFileName = os.path.abspath(pfbFileName)
         self.requiredEncoding = None
         self._loadGlyphs(pfbFileName)
         self._loadMetrics(afmFileName)
 
+    def getFontFiles(self):
+        return [self.afmFileName, self.pfbFileName]
+    
     def _loadGlyphs(self, pfbFileName):
         """Loads in binary glyph data, and finds the four length
         measurements needed for the font descriptor"""
@@ -452,7 +471,7 @@ class EmbeddedType1Face(TypeFace):
         (topLevel, glyphData) = parseAFMFile(afmFileName)
 
         self.name = topLevel['FontName']
-
+        self.familyName = topLevel['FamilyName']
         self.ascent = topLevel.get('Ascender', 1000)
         self.descent = topLevel.get('Descender', 0)
         self.capHeight = topLevel.get('CapHeight', 1000)
@@ -574,8 +593,10 @@ def getTypeFace(faceName):
         # not found, construct it if known
         if faceName in standardFonts:
             face = TypeFace(faceName)
+            (face.familyName, face.bold, face.italic) = _fontdata.standardFontAttributes[faceName]
             registerTypeFace(face)
-            #print 'auto-constructing type face %s' % face.name
+##            print 'auto-constructing type face %s with family=%s, bold=%d, italic=%d' % (
+##                face.name, face.familyName, face.bold, face.italic)
             return face
         else:
             #try a brute force search
@@ -624,7 +645,11 @@ def getFont(fontName):
         registerFont(font)
         return font
 
-
+def getRegisteredFontNames():
+    "Returns what's in there"
+    reg = _fonts.keys()
+    reg.sort()
+    return reg
 
 def _slowStringWidth(text, fontName, fontSize):
     """Define this anyway so it can be tested, but whether it is used or not depends on _rl_accel"""
@@ -642,6 +667,14 @@ if _stringWidth:
     import new
     Font.stringWidth = new.instancemethod(_rl_accel._instanceStringWidth,None,Font)
     stringWidth = _stringWidth
+
+    #if accelerator present, make sure we at least
+    #register Courier font, since it will fall back to Courier
+    #as its default font.
+    face = TypeFace('Courier')
+    (face.familyName, face.bold, face.italic) = _fontdata.standardFontAttributes['Courier']
+    registerTypeFace(face)
+
 
     def _SWRecover(text, fontName, fontSize, encoding):
         '''This is called when _rl_accel's database doesn't know about a font.

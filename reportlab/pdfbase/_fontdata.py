@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/_fontdata.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: _fontdata.py,v 1.13 2003/07/07 19:38:31 rgbecker Exp $ '''
+__version__=''' $Id: _fontdata.py,v 1.14 2004/03/09 22:22:26 andy_robinson Exp $ '''
 __doc__="""
     database of font related things
     standardFonts       tuple of the 14 standard string font names
@@ -25,6 +25,28 @@ standardFonts = (
     'Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique', 'Helvetica-BoldOblique',
     'Times-Roman', 'Times-Bold', 'Times-Italic', 'Times-BoldItalic',
     'Symbol','ZapfDingbats')
+
+standardFontAttributes = {
+    #family, bold, italic defined for basic ones
+    'Courier':('Courier',0,0),
+    'Courier-Bold':('Courier',1,0),
+    'Courier-Oblique':('Courier',0,1),
+    'Courier-BoldOblique':('Courier',1,1),
+    
+    'Helvetica':('Helvetica',0,0),
+    'Helvetica-Bold':('Helvetica',1,0),
+    'Helvetica-Oblique':('Helvetica',0,1),
+    'Helvetica-BoldOblique':('Helvetica',1,1),
+
+    'Times-Roman':('Times-Roman',0,0),
+    'Times-Bold':('Times-Roman',1,0),
+    'Times-Italic':('Times-Roman',0,1),
+    'Times-BoldItalic':('Times-Roman',1,1),
+
+    'Symbol':('Symbol',0,0),
+    'ZapfDingbats':('ZapfDingbats',0,0)
+
+    }
 
 #this maps fontnames to the equivalent filename root.
 _font2fnrMapWin32 = {

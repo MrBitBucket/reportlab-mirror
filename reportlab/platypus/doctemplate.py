@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.72 2004/01/20 22:50:31 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.73 2004/03/09 22:22:26 andy_robinson Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.72 2004/01/20 22:50:31 andy_robinson Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.73 2004/03/09 22:22:26 andy_robinson Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -253,6 +253,10 @@ class BaseDocTemplate:
       a chapter and two more for the interior of a chapter on odd and even pages.
       If this argument is omitted then at least one pageTemplate should be provided
       using the addPageTemplates method before the document is built.
+    pageSize: a 2-tuple or a size constant from reportlab/lib/pagesizes.pu.
+     Used by the SimpleDocTemplate subclass which does NOT accept a list of
+     pageTemplates but makes one for you; ignored when using pageTemplates.
+
     showBoundary: if set draw a box around the frame boundaries.
     leftMargin:
     rightMargin:
