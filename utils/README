@@ -54,6 +54,18 @@ Release Procedure
 		cvs -z7 tag ReportLab_d_xy
 	where d.xy was the version number entered into __init__.py
 
+	If you need to tag the repository in www.reportlab.co.uk it is possible
+		a)	make a dir work
+		b)	cd work
+		c)	mkdir CVS
+		d)	cd CVS
+		e)	create Entries as empty
+		f)	create Root as :pserver:robin@www.reportlab.co.uk:/rl_home/repository
+		g)	create Repository as /rl_home/repository/
+		h)	cd ..
+			cvs -z3 upd -A -P -d to create a working copy
+		i)	cvs -z3 tag ReportLab_x_yz
+
 5)	Login to othala.pair.com
 
 	cd bin
@@ -66,12 +78,11 @@ Release Procedure
 	If we know that the idle py2pdf patch works
 	./daily.py -py2pdf to create the cutdown distribution for idle
 
-6)	Finally we need to edit ~/public_html/news.html around line 117 we should see
-	ReportLab News and customer comments
+6)	Finally we need to edit ~/public_html/news.txt add the appropriate
+	story at the top.
 
-	add the new release at the top
-	ie
-	 <dt><b>11 July 2000</b><dd>ReportLab d.xy Released; main changes are etc etc
+	Then commit the changes using cvs -z3 commit -m "Release x_yz" news.txt
+	and make the html correct using "./prep.py" (in the public_html directory).
 
 7)	Optional announcements made to clp, reportlab-users, reportlab-team
 
