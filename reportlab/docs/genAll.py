@@ -4,11 +4,16 @@ def _genAll(d=None,verbose=1):
 	if not d: d = '.'
 	if not os.path.isabs(d):
 		d = os.path.normpath(os.path.join(os.getcwd(),d))
-	for p in ('reference/genreference.py',
-			  'userguide/genuserguide.py',
-			  'graphguide/gengraphguide.py',
-			  '../tools/docco/graphdocpy.py',
-			  '../rl_addons/pyRXP/docs/PyRXP_Documentation.rml'):
+	L = ['reference/genreference.py',
+		'userguide/genuserguide.py',
+		'graphguide/gengraphguide.py',
+		'../tools/docco/graphdocpy.py',
+		]
+	if os.path.isdir('../rl_addons'):
+		L = L + ['../rl_addons/pyRXP/docs/PyRXP_Documentation.rml']
+	elif os.path.isdir('../../rl_addons'):
+		L = L + ['../../rl_addons/pyRXP/docs/PyRXP_Documentation.rml']
+	for p in L:
 		os.chdir(d)
 		os.chdir(os.path.dirname(p))
 		if p[-4:]=='.rml':
