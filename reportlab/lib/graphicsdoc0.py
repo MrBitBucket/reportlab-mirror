@@ -15,7 +15,6 @@ import sys, os, re, types, string, getopt, pickle
 from string import find, join, split, replace, expandtabs, rstrip
 
 from reportlab.lib.docpy0 import *
-from reportlab.lib.docpy0 import _reduceDocStringLength
 
 from reportlab.pdfgen import canvas
 from reportlab.lib import inspect
@@ -26,7 +25,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus.flowables import Flowable, Spacer
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.flowables \
-     import Flowable, Preformatted,Spacer, Image, KeepTogether
+     import Flowable, Preformatted,Spacer, Image, KeepTogether, PageBreak
 from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate \
@@ -179,17 +178,15 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
     Platypus story, as well.
     """
 
-    fileSuffix = '-graph.pdf'
+    fileSuffix = '.pdf'
 
-    # Skip non-demo methods.    
+    # Skip all methods.    
     def beginMethod(self, name, doc, sig):
-        if name == 'demo':
-            PdfDocBuilder0.beginMethod(self, name, doc, sig)
+        pass
 
 
     def endMethod(self, name, doc, sig):
-        if name == 'demo':
-            PdfDocBuilder0.endMethod(self, name, doc, sig)
+        pass
 
 
     def endClass(self, name, doc, bases):
@@ -200,10 +197,17 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         aClass = eval('self.skeleton.moduleSpace.' + name)
         if issubclass(aClass, Widget):
             widget = aClass()
-            self._showWidgetDemo(widget)
             self._showWidgetDemoCode(widget)
+            self._showWidgetDemo(widget)
             self._showWidgetProperties(widget)
             
+        self.story.append(PageBreak())
+
+
+    def beginFunctions(self, names):
+        if names:
+            PdfDocBuilder0.beginFunctions(self, names)
+
 
     # Skip non-sample functions.    
     def beginFunction(self, name, doc, sig):
@@ -223,7 +227,26 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         aFunc = eval('self.skeleton.moduleSpace.' + name)
         drawing = aFunc()
     
+        self._showFunctionDemoCode(aFunc)
         self._showDrawingDemo(drawing)
+
+        self.story.append(PageBreak())
+
+
+    def _showFunctionDemoCode(self, function):
+        """Show a demo code of the function generating the drawing."""
+
+        srcFileName = function.func_code.co_filename
+        (dirname, fileNameOnly) = os.path.split(srcFileName)
+
+        # Heading
+        self.story.append(Paragraph("<i>Example</i>", self.bt))
+
+        # Sample code
+        lines = open(srcFileName, 'r').readlines()
+        lines = map(string.rstrip, lines)
+        codeSample = getFunctionBody(function, lines)
+        self.story.append(Preformatted(codeSample, self.code))
 
 
     def _showDrawingDemo(self, drawing):
@@ -366,137 +389,6 @@ class PlatypusDocBuilder0(DocBuilder0):
         story.append(XPreformatted(doc, bt))
 
 
-class UmlPdfDocBuilder0(PdfDocBuilder0):
-    "Document the skeleton of a Python module with UML class diagrams."
-
-    fileSuffix = '-uml.pdf'
-
-    def begin(self):
-        styleSheet = getSampleStyleSheet()
-        self.h1 = styleSheet['Heading1']
-        self.h2 = styleSheet['Heading2']
-        self.h3 = styleSheet['Heading3']
-        self.code = styleSheet['Code']
-        self.bt = styleSheet['BodyText']
-        self.story = []
-        self.classCompartment = ''
-        self.methodCompartment = []
-
-
-    def beginModule(self, name, doc, imported):
-        story = self.story
-        h1, h2, h3, bt = self.h1, self.h2, self.h3, self.bt
-        styleSheet = getSampleStyleSheet()
-        bt1 = styleSheet['BodyText']
-
-        story.append(Paragraph(name, h1))
-        story.append(XPreformatted(doc, bt1))
-
-        if imported:
-            story.append(Paragraph('Imported modules', h2))
-            for m in imported:
-                story.append(Paragraph(m, bt1))
-
-
-    def beginClasses(self, names):
-        h1, h2, h3, bt = self.h1, self.h2, self.h3, self.bt
-        if names:
-            self.story.append(Paragraph('Classes', h2))
-
-
-    def beginClass(self, name, doc, bases):
-        self.classCompartment = ''
-        self.methodCompartment = []
-
-        if bases:
-            bases = map(lambda b:b.__name__, bases) # hack
-            self.classCompartment = '%s(%s)' % (name, join(bases, ', '))
-        else:
-            self.classCompartment = name
-
-
-    def endClass(self, name, doc, bases):
-        h1, h2, h3, bt, code = self.h1, self.h2, self.h3, self.bt, self.code
-        styleSheet = getSampleStyleSheet()
-        bt1 = styleSheet['BodyText']
-        story = self.story
-
-        # Use only the first line of the class' doc string --
-        # no matter how long! (Do the same later for methods)
-        classDoc = _reduceDocStringLength(doc)
-
-        tsa = tableStyleAttributes = []
- 
-        # Make table with class and method rows
-        # and add it to the story.
-        p = Paragraph('<b>%s</b>' % self.classCompartment, bt)
-        p.style.alignment = TA_CENTER
-        rows = [(p,)]
-        # No doc strings, now...
-        # rows = rows + [(Paragraph('<i>%s</i>' % classDoc, bt1),)]
-        lenRows = len(rows)
-        tsa.append(('BOX', (0,0), (-1,lenRows-1), 0.25, colors.black))
-        for name, doc, sig in self.methodCompartment:
-            nameAndSig = Paragraph('<b>%s</b>%s' % (name, sig), bt1)
-            rows.append((nameAndSig,))
-            # No doc strings, now...
-            # docStr = Paragraph('<i>%s</i>' % _reduceDocStringLength(doc), bt1)
-            # rows.append((docStr,))
-        tsa.append(('BOX', (0,lenRows), (-1,-1), 0.25, colors.black))
-        t = Table(rows, (12*cm,))
-        tableStyle = TableStyle(tableStyleAttributes)
-        t.setStyle(tableStyle)
-        self.story.append(t)
-        self.story.append(Spacer(1*cm, 1*cm))
-
-
-    def beginMethod(self, name, doc, sig):
-        self.methodCompartment.append((name, doc, sig))
-
-
-    def beginFunctions(self, names):
-        h1, h2, h3, bt = self.h1, self.h2, self.h3, self.bt
-        if names:
-            self.story.append(Paragraph('Functions', h2))
-        self.classCompartment = chr(171) + ' Module-Level Functions ' + chr(187)
-        self.methodCompartment = []
-
-
-    def beginFunction(self, name, doc, sig):
-        self.methodCompartment.append((name, doc, sig))
-
-
-    def endFunctions(self, names):
-        h1, h2, h3, bt, code = self.h1, self.h2, self.h3, self.bt, self.code
-        styleSheet = getSampleStyleSheet()
-        bt1 = styleSheet['BodyText']
-        story = self.story
-        if not names:
-            return
-        
-        tsa = tableStyleAttributes = []
-
-        # Make table with class and method rows
-        # and add it to the story.
-        p = Paragraph('<b>%s</b>' % self.classCompartment, bt)
-        p.style.alignment = TA_CENTER
-        rows = [(p,)]
-        lenRows = len(rows)
-        tsa.append(('BOX', (0,0), (-1,lenRows-1), 0.25, colors.black))
-        for name, doc, sig in self.methodCompartment:
-            nameAndSig = Paragraph('<b>%s</b>%s' % (name, sig), bt1)
-            rows.append((nameAndSig,))
-            # No doc strings, now...
-            # docStr = Paragraph('<i>%s</i>' % _reduceDocStringLength(doc), bt1)
-            # rows.append((docStr,))
-        tsa.append(('BOX', (0,lenRows), (-1,-1), 0.25, colors.black))
-        t = Table(rows, (12*cm,))
-        tableStyle = TableStyle(tableStyleAttributes)
-        t.setStyle(tableStyle)
-        self.story.append(t)
-        self.story.append(Spacer(1*cm, 1*cm))
-
-
 class GraphHtmlDocBuilder0(HtmlDocBuilder0):
     "A class to write the skeleton of a Python source."
 
@@ -597,7 +489,10 @@ Examples:
 """
 
 
-def documentModule0(path, builder=DocBuilder0()):
+# The following functions, including main(), are actually
+# the same as in docpy0.py.
+
+def documentModule0(path, builder=GraphPdfDocBuilder0()):
     """Generate documentation for one Python file in some format.
 
     This handles Python standard modules like string, custom modules
@@ -646,7 +541,7 @@ def documentModule0(path, builder=DocBuilder0()):
 
 
 def _packageWalkCallback(builder, dirPath, files):
-    """A callback function used when waking over a package tree."""
+    "A callback function used when waking over a package tree."
     
     files = filter(lambda f:f != '__init__.py', files)
     files = filter(lambda f:f[-3:] == '.py', files)
@@ -659,7 +554,7 @@ def _packageWalkCallback(builder, dirPath, files):
             builder.indentLevel = builder.indentLevel - 1
 
     
-def documentPackage0(path, builder=DocBuilder0()):
+def documentPackage0(pathOrName, builder=GraphPdfDocBuilder0()):
     """Generate documentation for one Python package in some format.
 
     Rigiht now, 'path' must be a filesystem path, later it will
@@ -669,14 +564,17 @@ def documentPackage0(path, builder=DocBuilder0()):
     The doc file will always be saved in the current directory.
     """
 
-    name = path
-    if string.find(path, os.sep) > -1:
-        name = os.path.splitext(os.path.basename(path))[0]
+    if string.find(pathOrName, os.sep) > -1:
+        name = os.path.splitext(os.path.basename(pathOrName))[0]
+        path = pathOrName
     else:
-        package = __import__(name)
-        name = path
+        package = __import__(pathOrName)
+        if '.' in pathOrName:
+            subname = 'package' + pathOrName[string.find(pathOrName, '.'):]
+            package = eval(subname)
+        name = pathOrName
         path = os.path.dirname(package.__file__)
-
+    
     cwd = os.getcwd()
     builder.beginPackage(name)
     os.path.walk(path, _packageWalkCallback, builder)
@@ -685,8 +583,7 @@ def documentPackage0(path, builder=DocBuilder0()):
 
 
 def main():
-    """Handle command-line options and trigger corresponding action.
-    """
+    "Handle command-line options and trigger corresponding action."
     
     opts, args = getopt.getopt(sys.argv[1:], 'hf:m:p:')
 
@@ -694,17 +591,19 @@ def main():
     for o, a in opts:
         if o == '-h':
             print printUsage.__doc__
-            #printUsage()
             sys.exit(0)
 
-    # On -f set the DocBuilder to use or a default one.
-    builder = DocBuilder0()
+    # On -f set the appropriate DocBuilder to use or a default one.
+    builder = GraphPdfDocBuilder0()
     for o, a in opts:
         if o == '-f':
             builder = eval("%sDocBuilder0()" % a)
             break
 
     # Now call the real documentation functions.
+    if not opts:
+        opts = [('-p', 'reportlab.graphics')] # default setting
+
     for o, a in opts:
         if o == '-m':
             builder.begin()
