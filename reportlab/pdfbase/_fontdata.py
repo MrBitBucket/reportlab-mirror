@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/_fontdata.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: _fontdata.py,v 1.9 2001/05/20 09:33:01 rgbecker Exp $ '''
+__version__=''' $Id: _fontdata.py,v 1.10 2001/05/20 09:34:50 rgbecker Exp $ '''
 __doc__=""" 
 	database of font related things
 	standardFonts		tuple of the 14 standard string font names
@@ -68,7 +68,7 @@ def _findFNR(fontName):
 def findT1File(fontName,ext='.pfb'):
 	from reportlab.rl_config import T1SearchPath
 	assert T1SearchPath!=[], "No Type-1 font search path"
-	if sys.platform in ('linux2',) and ext='.pfb': ext = ''
+	if sys.platform in ('linux2',) and ext=='.pfb': ext = ''
 	n = _findFNR(fontName)+ext
 	for d in T1SearchPath:
 		f = os.path.join(d,n)
