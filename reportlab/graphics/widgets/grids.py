@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/grids.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.29 2002/08/25 10:06:29 rgbecker Exp $
-__version__=''' $Id: grids.py,v 1.29 2002/08/25 10:06:29 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.30 2002/12/02 20:09:53 rgbecker Exp $
+__version__=''' $Id: grids.py,v 1.30 2002/12/02 20:09:53 rgbecker Exp $ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColorOrNone, isBoolean, isListOfNumbers, OneOf, isListOfColors
@@ -59,14 +59,10 @@ class Grid(Widget):
     """
 
     _attrMap = AttrMap(
-        x = AttrMapValue(isNumber,
-            desc="The grid's lower-left x position."),
-        y = AttrMapValue(isNumber,
-            desc="The grid's lower-left y position."),
-        width = AttrMapValue(isNumber,
-            desc="The grid's width."),
-        height = AttrMapValue(isNumber,
-            desc="The grid's height."),
+        x = AttrMapValue(isNumber, desc="The grid's lower-left x position."),
+        y = AttrMapValue(isNumber, desc="The grid's lower-left y position."),
+        width = AttrMapValue(isNumber, desc="The grid's width."),
+        height = AttrMapValue(isNumber, desc="The grid's height."),
         orientation = AttrMapValue(OneOf(('vertical', 'horizontal')),
             desc='Determines if stripes are vertical or horizontal.'),
         useLines = AttrMapValue(OneOf((0, 1)),
@@ -114,18 +110,15 @@ class Grid(Widget):
 
         return D
 
-
     def makeOuterRect(self):
-        # outer grid rectangle
-        group = Group()
-        #print 'Grid.makeOuterRect(%d, %d, %d, %d)' % (self.x, self.y, self.width, self.height)
-        rect = Rect(self.x, self.y, self.width, self.height)
-        rect.fillColor = self.fillColor
-        rect.strokeColor = self.strokeColor
-        rect.strokeWidth = self.strokeWidth
-
-        return group
-
+        if self.fillColor or self.strokeColor and self.strokeWidth:
+            rect = Rect(self.x, self.y, self.width, self.height)
+            rect.fillColor = self.fillColor
+            rect.strokeColor = self.strokeColor
+            rect.strokeWidth = self.strokeWidth
+            return rect
+        else:
+            return None
 
     def makeLinePosList(self, start, isX=0):
         "Returns a list of positions where to place lines."
@@ -228,19 +221,12 @@ class DoubleGrid(Widget):
     """
 
     _attrMap = AttrMap(
-        x = AttrMapValue(isNumber,
-            desc="The grid's lower-left x position."),
-        y = AttrMapValue(isNumber,
-            desc="The grid's lower-left y position."),
-        width = AttrMapValue(isNumber,
-            desc="The grid's width."),
-        height = AttrMapValue(isNumber,
-            desc="The grid's height."),
-
-        grid0 = AttrMapValue(None,
-            desc="The first grid component."),
-        grid1 = AttrMapValue(None,
-            desc="The second grid component."),
+        x = AttrMapValue(isNumber, desc="The grid's lower-left x position."),
+        y = AttrMapValue(isNumber, desc="The grid's lower-left y position."),
+        width = AttrMapValue(isNumber, desc="The grid's width."),
+        height = AttrMapValue(isNumber, desc="The grid's height."),
+        grid0 = AttrMapValue(None, desc="The first grid component."),
+        grid1 = AttrMapValue(None, desc="The second grid component."),
         )
 
     def __init__(self):
@@ -302,18 +288,16 @@ class DoubleGrid(Widget):
 
     def draw(self):
         group = Group()
-
         g0, g1 = self.grid0, self.grid1
-
         # Order groups to make sure both v and h lines
         # are visible (works only when there is only
         # one kind of stripes, v or h).
-        if g0.useRects == 1 and g1.useRects == 0:
-            group.add(g0.draw())
-            group.add(g1.draw())
-        else:
-            group.add(g1.draw())
-            group.add(g0.draw())
+        G = g0.useRects == 1 and g1.useRects == 0 and (g0,g1) or (g1,g0)
+        for g in G:
+            group.add(g.makeOuterRect())
+        for g in G:
+            group.add(g.makeInnerTiles())
+            group.add(g.makeInnerLines())
 
         return group
 
