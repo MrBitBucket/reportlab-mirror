@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.11 2002/10/10 14:21:00 mgedmin Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.12 2002/10/10 14:22:54 mgedmin Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -58,7 +58,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.11 2002/10/10 14:21:00 mgedmin Exp $'
+__version__ = '$Id: ttfonts.py,v 1.12 2002/10/10 14:22:54 mgedmin Exp $'
 
 import string
 from types import StringType
@@ -202,7 +202,7 @@ def TTFOpenFile(fn):
 class TTFontParser:
     "Basic TTF file parser"
 
-    def __init__(self, file, validate=1):
+    def __init__(self, file, validate=0):
         """Loads and parses a TrueType font file.  file can be a filename or a
         file object.  If validate is set to a false values, skips checksum
         validation.  This can save time, especially if the font is large.
@@ -394,7 +394,7 @@ class TTFontMaker:
 class TTFontFile(TTFontParser):
     "TTF file parser and generator"
 
-    def __init__(self, file, charInfo=1, validate=1):
+    def __init__(self, file, charInfo=1, validate=0):
         """Loads and parses a TrueType font file.
 
         file can be a filename or a file object.  If validate is set to a false
@@ -869,7 +869,7 @@ class TTFontFace(TTFontFile):
     Conceptually similar to a single byte typeface, but the glyphs are
     identified by UCS character codes instead of glyph names."""
 
-    def __init__(self, filename, validate=1):
+    def __init__(self, filename, validate=0):
         "Loads a TrueType font from filename."
         TTFontFile.__init__(self, filename, validate=validate)
 
@@ -941,7 +941,7 @@ class TTFont:
             self.internalName = None
             self.frozen = 0
 
-    def __init__(self, name, filename, validate=1):
+    def __init__(self, name, filename, validate=0):
         """Loads a TrueType font from filename.
 
         If validate is set to a false values, skips checksum validation.  This

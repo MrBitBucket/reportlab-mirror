@@ -155,11 +155,11 @@ class TTFontFileTestCase(unittest.TestCase):
     def testFontFileChecksum(self):
         "Tests TTFontFile and TTF parsing code"
         file = TTFOpenFile("luxiserif.ttf")[1].read()
-        TTFontFile(StringIO(file)) # should not fail
+        TTFontFile(StringIO(file), validate=1) # should not fail
         file1 = file[:12345] + "\xFF" + file[12346:] # change one byte
-        self.assertRaises(TTFError, TTFontFile, StringIO(file1))
+        self.assertRaises(TTFError, TTFontFile, StringIO(file1), validate=1)
         file1 = file[:8] + "\xFF" + file[9:] # change one byte
-        self.assertRaises(TTFError, TTFontFile, StringIO(file1))
+        self.assertRaises(TTFError, TTFontFile, StringIO(file1), validate=1)
 
     def testSubsetting(self):
         "Tests TTFontFile and TTF parsing code"
