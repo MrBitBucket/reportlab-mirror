@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.67 2004/03/23 15:20:50 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.67 2004/03/23 15:20:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.68 2004/03/23 17:34:11 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.68 2004/03/23 17:34:11 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -140,13 +140,6 @@ except:
     _isFSD = os.path.isfile(__file__)   #slight risk of wrong path
     __loader__ = None
 _isFSSD = _isFSD and os.path.isfile(os.path.splitext(__file__)[0] +'.py')
-
-def _startswith_rl(fn):
-    '''if the name starts with a known prefix strip it off'''
-    fn = fn.replace('/',os.sep)
-    if fn.startswith(_RL_DIR): return fn[_loaderpfxlen:]
-    if fn.startswith(__RL_DIR): return fn[_loaderpfxlenR:]
-    return fn
 
 def isFileSystemDistro():
     '''return truth if a file system distribution'''
@@ -376,6 +369,34 @@ def _className(self):
         return name
     except AttributeError:
         return str(self)
+
+
+import glob, fnmatch
+if sys.platform=='win32':
+    def __startswith_rl(fn,_RL_DIR=_RL_DIR.upper(),__RL_DIR=__RL_DIR.upper()):
+        '''if the name starts with a known prefix strip it off'''
+        fn = fn.replace('/',os.sep)
+        if fn.upper().startswith(_RL_DIR): return 1,fn[_loaderpfxlen:]
+        if fn.upper().startswith(__RL_DIR): return 1,fn[_loaderpfxlenR:]
+        return 0,fn
+else:
+    def __startswith_rl(fn):
+        '''if the name starts with a known prefix strip it off'''
+        fn = fn.replace('/',os.sep)
+        if fn.startswith(_RL_DIR): return 1,fn[_loaderpfxlen:]
+        if fn.startswith(__RL_DIR): return 1,fn[_loaderpfxlenR:]
+        return 0,fn
+
+def _startswith_rl(fn):
+    return __startswith_rl(fn)[1]
+
+def rl_glob(pattern,glob=glob.glob,fnmatch=fnmatch.fnmatch, _RL_DIR=_RL_DIR,pjoin=os.path.join):
+    c, pfn = __startswith_rl(pattern)
+    r = glob(pattern)
+    if c or r==[]:
+        r += map(lambda x: pjoin(_RL_DIR,x),filter(lambda x: fnmatch(x,pattern),__loader__._files.keys()))
+    return r
+del glob, fnmatch
 
 def open_for_read(name,mode='b'):
     '''attempt to open a file or URL for reading'''
