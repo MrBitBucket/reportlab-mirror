@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.49 2001/11/28 09:22:22 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.50 2002/01/17 10:52:03 rgbecker Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -107,9 +107,11 @@ def parseAFMFile(afmFileName):
         if line[0:16] == 'StartCharMetrics':
             inHeader = 0
         elif inHeader:
-            left, right = string.split(line, ' ', 1)
-            if left == 'Comment':
-                pass
+            if line[0:7] == 'Comment': pass
+            try:
+                left, right = string.split(line,' ',1)
+            except:
+                raise ValueError, "Header information error in afm %s: line='%s'" % (afmFileName, line)
             try:
                 right = string.atoi(right)
             except:
