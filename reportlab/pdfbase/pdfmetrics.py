@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.34 2001/04/20 16:14:33 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.35 2001/04/23 11:48:46 rgbecker Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -544,11 +544,8 @@ if _stringWidth:
         Currently encoding is always a dummy.
         '''
         try:
-            print 'Attempting to register', fontName
             font = getFont(fontName)
             registerFont(font)
-            print 'registered font %s' % fontName
-            dumpFontData()
             return _stringWidth(text,fontName,fontSize,encoding)
         except:
             warnOnce('Font %s:%s not found - using Courier:%s for widths'%(fontName,encoding,encoding))
