@@ -31,22 +31,28 @@
 #
 ###############################################################################
 #	$Log: utils.py,v $
+#	Revision 1.4  2000/10/05 14:58:28  rgbecker
+#	Changes to make freezing easier
+#
 #	Revision 1.3  2000/08/29 09:19:31  rgbecker
 #	Initial version of D Yoo's pyHnj
-#
+#	
 #	Revision 1.2  2000/08/24 18:19:47  rgbecker
 #	Added _className func
 #	
 #	Revision 1.1  2000/08/01 10:50:20  rgbecker
 #	Initial version
 #	
-__version__=''' $Id: utils.py,v 1.3 2000/08/29 09:19:31 rgbecker Exp $ '''
+__version__=''' $Id: utils.py,v 1.4 2000/10/05 14:58:28 rgbecker Exp $ '''
 from types import *
 SeqTypes = (ListType,TupleType)
 import string, os
 try:
 	#raise ImportError
-	from reportlab.lib._rl_accel import fp_str
+	try:
+		from reportlab.lib._rl_accel import fp_str	# specific
+	except ImportError:
+		from _rl_accel import fp_str				# in case of builtin version
 except ImportError:
 	def fp_str(*a):
 		if len(a)==1 and type(a[0]) in SeqTypes: a = a[0]

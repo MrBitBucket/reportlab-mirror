@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfutils.py,v $
+#	Revision 1.11  2000/10/05 14:59:04  rgbecker
+#	Changes to make freezing easier
+#
 #	Revision 1.10  2000/08/03 19:11:49  rgbecker
 #	Robin's take on Bernhard Herzog's fix to A85 decode
-#
+#	
 #	Revision 1.9  2000/08/01 10:56:24  rgbecker
 #	moved accelerators to lib
 #	
@@ -60,7 +63,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfutils.py,v 1.10 2000/08/03 19:11:49 rgbecker Exp $ '''
+__version__=''' $Id: pdfutils.py,v 1.11 2000/10/05 14:59:04 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -212,7 +215,10 @@ def _AsciiHexTest(text='What is the average velocity of a sparrow?'):
         print 'Failed!'
     
 try:
-    from reportlab.lib._rl_accel import _AsciiBase85Encode
+	try:
+        from reportlab.lib._rl_accel import _AsciiBase85Encode	# where we think it should be
+    except ImportError:
+        from _rl_accel import _AsciiBase85Encode				# builtin or on the path
 except ImportError:
     def _AsciiBase85Encode(input):
         """This is a compact encoding used for binary data within

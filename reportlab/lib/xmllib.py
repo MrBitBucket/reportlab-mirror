@@ -7,7 +7,7 @@ import re
 import string
 
 try:
-    import sgmlop
+    import sgmlop	# this works for both builtin on the path or relative
 except ImportError:
     sgmlop = None
 

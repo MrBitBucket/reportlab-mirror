@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfmetrics.py,v $
+#	Revision 1.13  2000/10/05 14:59:04  rgbecker
+#	Changes to make freezing easier
+#
 #	Revision 1.12  2000/09/27 21:56:01  andy_robinson
 #	more work on metrics and encodings for custom fonts
-#
+#	
 #	Revision 1.11  2000/09/27 19:57:48  andy_robinson
 #	Begun work on loading new AFM files
 #	
@@ -64,7 +67,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfmetrics.py,v 1.12 2000/09/27 21:56:01 andy_robinson Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.13 2000/10/05 14:59:04 rgbecker Exp $ '''
 __doc__="""This contains pre-canned text metrics for the PDFgen package, and may also
 be used for any other PIDDLE back ends or packages which use the standard
 Type 1 postscript fonts.
@@ -141,7 +144,10 @@ widths={
 	}
 ascent_descent = {'courier': (629, -157), 'courier-bold': (626, -142), 'courier-boldoblique': (626, -142), 'courier-oblique': (629, -157), 'helvetica': (718, -207), 'helvetica-bold': (718, -207), 'helvetica-boldoblique': (718, -207), 'helvetica-oblique': (718, -207), 'symbol': (0, 0), 'times-bold': (676, -205), 'times-bolditalic': (699, -205), 'times-italic': (683, -205), 'times-roman': (683, -217), 'zapfdingbats': (0, 0)}
 try:
-	from reportlab.lib import _rl_accel
+	try:
+		from reportlab.lib import _rl_accel		# works if we built it
+	except ImportError:
+		import _rl_accel						# works if builtin or on the path?
 	_stringWidth = _rl_accel.stringWidth
 except ImportError:
 	_stringWidth = None
