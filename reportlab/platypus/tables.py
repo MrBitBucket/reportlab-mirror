@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.50 2002/01/18 12:21:13 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.50 2002/01/18 12:21:13 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.51 2002/01/18 17:36:55 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.51 2002/01/18 17:36:55 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -216,8 +216,10 @@ class Table(Flowable):
 		W = self._argW
 		#print "W is", W
 
+		canv = self.canv
+		saved = None
 		if None in H:
-			#print "none in H"
+			saved = canv._fontname, canv._fontsize, canv._leading
 			H = H[:]	#make a copy as we'll change it
 			self._rowHeights = H
 			while None in H:
@@ -233,7 +235,9 @@ class Table(Flowable):
 						if not t in _SeqTypes: v = (v,)
 						if w is None:
 							raise ValueError, "Flowable %s in cell(%d,%d) can't have auto width in\n%s" % (v[0].identity(30),i,j,self.identity(30))
+						canv._fontname, canv._fontsize, canv._leading = s.fontname, s.fontsize, s.leading or 1.2*s.fontsize
 						dW,t = self._listCellGeom(v,w,s)
+						canv._fontname, canv._fontsize, canv._leading = saved
 						#print "leftpadding, rightpadding", s.leftPadding, s.rightPadding
 						dW = dW + s.leftPadding + s.rightPadding
 						if not rl_config.allowTableBoundsErrors and dW>w:
@@ -248,7 +252,6 @@ class Table(Flowable):
 				H[i] = h
 
 		if None in W:
-			#print "none in w"
 			W = W[:]
 			self._colWidths = W
 			while None in W:
@@ -258,7 +261,6 @@ class Table(Flowable):
 				S = map(f,self._cellStyles)
 				w = 0
 				i = 0
-				d = hasattr(self,'canv') and self.canv or pdfmetrics
 				for v, s in map(None, V, S):
 					i = i + 1
 					t = type(v)
@@ -267,7 +269,7 @@ class Table(Flowable):
 					elif t is not StringType: v = v is None and '' or str(v)
 					v = string.split(v, "\n")
 					t = s.leftPadding+s.rightPadding + max(map(lambda a, b=s.fontname,
-								c=s.fontsize,d=d.stringWidth: d(a,b,c), v))
+								c=s.fontsize,d=pdfmetrics.stringWidth: d(a,b,c), v))
 					if t>w: w = t	#record a new maximum
 				W[j] = w
 
@@ -371,9 +373,8 @@ class Table(Flowable):
 		self._calc()
 		#nice and easy, since they are predetermined size
 		self.availWidth = availWidth
-		#print "width, height", self._width, self._height
 		return (self._width, self._height)
-		#return (0, self._height) # debug
+
 	def onSplit(self,T,byRow=1):
 		'''
 		This method will be called when the Table is split.
