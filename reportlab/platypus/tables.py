@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.61 2002/07/24 19:56:38 andy_robinson Exp $
-__version__=''' $Id: tables.py,v 1.61 2002/07/24 19:56:38 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.62 2002/08/09 11:19:45 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.62 2002/08/09 11:19:45 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -43,6 +43,9 @@ class CellStyle(PropertySet):
         'background': (1,1,1),
         'valign': 'BOTTOM',
         }
+
+LINECAPS={'butt':0,'round':1,'projecting':2,'squared':2}
+LINEJOINS={'miter':0,'round':1,'bevel':2}
 
 # experimental replacement
 class CellStyle1(PropertySet):
@@ -341,6 +344,32 @@ class Table(Flowable):
         if cmd[0] == 'BACKGROUND':
             self._bkgrndcmds.append(cmd)
         elif _isLineCommand(cmd):
+            # we expect op, start, stop, weight, colour, cap, dashes, join
+            cmd = tuple(cmd)
+            if len(cmd)<5: raise ValueError('bad line command '+str(cmd))
+            if len(cmd)<6: cmd = cmd+(1,)
+            else:
+                cap = cmd[5]
+                try:
+                    if type(cap) is not type(int):
+                        cap = LINECAPS[cap]
+                    elif cap<0 or cap>2:
+                        raise ValueError
+                    cmd = cmd[:5]+(cap,)+cmd[6:]
+                except:
+                    ValueError('Bad cap value %s in %s'%(cap,str(cmd)))
+            if len(cmd)<7: cmd = cmd+(None,)
+            if len(cmd)<8: cmd = cmd+(1,)
+            else:
+                join = cmd[7]
+                try:
+                    if type(join) is not type(int):
+                        join = LINEJOINS[cap]
+                    elif join<0 or join>2:
+                        raise ValueError
+                    cmd = cmd[:7]+(join,)
+                except:
+                    ValueError('Bad join value %s in %s'%(join,str(cmd)))
             self._linecmds.append(cmd)
         else:
             (op, (sc, sr), (ec, er)), values = cmd[:3] , cmd[3:]
@@ -353,14 +382,18 @@ class Table(Flowable):
                     _setCellStyle(self._cellStyles, i, j, op, values)
 
     def _drawLines(self):
-        # use round caps
-        self.canv.setLineCap(1)
-        for op, (sc, sr), (ec, er), weight, color in self._linecmds:
+        ccap, cdash, cjoin = None, None, None
+        self.canv.saveState()
+        for op, (sc, sr), (ec, er), weight, color, cap, dash, join in self._linecmds:
             if sc < 0: sc = sc + self._ncols
             if ec < 0: ec = ec + self._ncols
             if sr < 0: sr = sr + self._nrows
             if er < 0: er = er + self._nrows
+            if ccap!=cap:
+                self.canv.setLineCap(cap)
+                ccap = cap
             getattr(self,_LineOpMap.get(op, '_drawUnknown' ))( (sc, sr), (ec, er), weight, color)
+        self.canv.restoreState()
         self._curcolor = None
 
     def _drawUnknown(self,  (sc, sr), (ec, er), weight, color):
@@ -487,7 +520,7 @@ class Table(Flowable):
 
         A = []
         # hack up the line commands
-        for op, (sc, sr), (ec, er), weight, color in self._linecmds:
+        for op, (sc, sr), (ec, er), weight, color, cap, dash, join in self._linecmds:
             if sc < 0: sc = sc + self._ncols
             if ec < 0: ec = ec + self._ncols
             if sr < 0: sr = sr + self._nrows
@@ -496,31 +529,31 @@ class Table(Flowable):
             if op in ('BOX','OUTLINE','GRID'):
                 if sr<n and er>=n:
                     # we have to split the BOX
-                    A.append(('LINEABOVE',(sc,sr), (ec,sr), weight, color))
-                    A.append(('LINEBEFORE',(sc,sr), (sc,er), weight, color))
-                    A.append(('LINEAFTER',(ec,sr), (ec,er), weight, color))
-                    A.append(('LINEBELOW',(sc,er), (ec,er), weight, color))
+                    A.append(('LINEABOVE',(sc,sr), (ec,sr), weight, color, cap, dash, join))
+                    A.append(('LINEBEFORE',(sc,sr), (sc,er), weight, color, cap, dash, join))
+                    A.append(('LINEAFTER',(ec,sr), (ec,er), weight, color, cap, dash, join))
+                    A.append(('LINEBELOW',(sc,er), (ec,er), weight, color, cap, dash, join))
                     if op=='GRID':
-                        A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color))
-                        A.append(('LINEABOVE',(sc,n), (ec,n), weight, color))
-                        A.append(('INNERGRID',(sc,sr), (ec,er), weight, color))
+                        A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color, cap, dash, join))
+                        A.append(('LINEABOVE',(sc,n), (ec,n), weight, color, cap, dash, join))
+                        A.append(('INNERGRID',(sc,sr), (ec,er), weight, color, cap, dash, join))
                 else:
-                    A.append((op,(sc,sr), (ec,er), weight, color))
+                    A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join))
             elif op in ('INNERGRID','LINEABOVE'):
                 if sr<n and er>=n:
-                    A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color))
-                    A.append(('LINEABOVE',(sc,n), (ec,n), weight, color))
-                A.append((op,(sc,sr), (ec,er), weight, color))
+                    A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color, cap, dash, join))
+                    A.append(('LINEABOVE',(sc,n), (ec,n), weight, color, cap, dash, join))
+                A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join))
             elif op == 'LINEBELOW':
                 if sr<n and er>=(n-1):
-                    A.append(('LINEABOVE',(sc,n), (ec,n), weight, color))
+                    A.append(('LINEABOVE',(sc,n), (ec,n), weight, color, cap, dash, join))
                 A.append((op,(sc,sr), (ec,er), weight, color))
             elif op == 'LINEABOVE':
                 if sr<=n and er>=n:
-                    A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color))
-                A.append((op,(sc,sr), (ec,er), weight, color))
+                    A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color, cap, dash, join))
+                A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join))
             else:
-                A.append((op,(sc,sr), (ec,er), weight, color))
+                A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join))
 
         R0._cr_0(n,A)
         R0._cr_0(n,self._bkgrndcmds)
@@ -899,7 +932,8 @@ LIST_STYLE = TableStyle(
     ts = TableStyle(
     [('LINEABOVE', (0,0), (-1,0), 2, colors.green),
      ('LINEABOVE', (0,1), (-1,-1), 0.25, colors.black),
-     ('LINEBELOW', (0,-1), (-1,-1), 2, colors.green),
+     ('LINEBELOW', (0,-1), (-1,-1), 3, colors.green,'butt'),
+     ('LINEBELOW', (0,-1), (-1,-1), 1, colors.white,'butt'),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT'),
      ('TEXTCOLOR', (0,1), (0,-1), colors.red),
      ('BACKGROUND', (0,0), (-1,0), colors.Color(0,0.7,0.7))]
@@ -914,7 +948,8 @@ LIST_STYLE = TableStyle(
    ts = TableStyle(
     [('LINEABOVE', (0,0), (-1,0), 2, colors.green),
      ('LINEABOVE', (0,1), (-1,-1), 0.25, colors.black),
-     ('LINEBELOW', (0,-1), (-1,-1), 2, colors.green),
+     ('LINEBELOW', (0,-1), (-1,-1), 3, colors.green,'butt'),
+     ('LINEBELOW', (0,-1), (-1,-1), 1, colors.white,'butt'),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT'),
      ('TEXTCOLOR', (0,1), (0,-1), colors.red),
      ('BACKGROUND', (0,0), (-1,0), colors.Color(0,0.7,0.7))]
