@@ -14,13 +14,27 @@ from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.tools.pythonpoint import pythonpoint
 
+
 def getModule(modulename,fromPath='reportlab.tools.pythonpoint.styles'):
+    """Get a module containing style declarations.
+
+    Search order is: 
+        reportlab/tools/pythonpoint/
+        reportlab/tools/pythonpoint/styles/
+        ./
+    """
+
     try:
         exec 'from reportlab.tools.pythonpoint import '+modulename
         return eval(modulename)
     except ImportError:
-        exec 'from reportlab.tools.pythonpoint.styles import '+modulename
-        return eval(modulename)
+        try:
+            exec 'from reportlab.tools.pythonpoint.styles import '+modulename
+            return eval(modulename)
+        except ImportError:
+            exec 'import '+modulename
+            return eval(modulename)
+
 
 class PPMLParser(xmllib.XMLParser):
     attributes = {
