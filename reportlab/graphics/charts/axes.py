@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.12 2001/04/11 13:13:40 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.13 2001/04/11 15:14:02 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -384,6 +384,21 @@ def _findMax(V, x):
 class ValueAxis(Widget):
     "Abstract value axis, unusable in itself."
 
+    _attrMap = {
+        'visible':isNumber,
+        'strokeWidth':isNumber,
+        'strokeColor':isColorOrNone,
+        'strokeDashArray':None,
+        'minimumTickSpacing':isNumber,
+        'maximumTicks' : isNumber,
+        'labels':None,
+        'labelTextFormat':None,
+        'valueMin':isNumberOrAuto,
+        'valueMax':isNumberOrAuto,
+        'valueStep':isNumberOrAuto,
+        'valueSteps':isListOfNumbers,
+        }
+
 ##    def __init__(self):
 ##        msg = "This is an abstract class and must be subclassed to be used!"
 ##        raise "NotImplementedError", msg
@@ -457,7 +472,7 @@ class ValueAxis(Widget):
         Returns a number.
         """
         
-        return self._length * 1.0 / (self._valueMax - self._valueMin) 
+        return self._length / float(self._valueMax - self._valueMin) 
 
 
     def _calcTickmarkPositions(self):
@@ -487,7 +502,7 @@ class ValueAxis(Widget):
         '''Calculate _valueStep for the axis or get from valueStep''' 
         if self.valueStep == Auto:
             rawRange = self._valueMax - self._valueMin
-            rawInterval = rawRange * (1.0 * self.minimumTickSpacing / self._length)
+            rawInterval = rawRange / min(self.maximumTicks-1,(float(self._length)/self.minimumTickSpacing ))
             niceInterval = nextRoundNumber(rawInterval)
             self._valueStep = niceInterval
         else:
@@ -508,22 +523,11 @@ class ValueAxis(Widget):
 
 class XValueAxis(ValueAxis):
     "X/value axis"
-
-    _attrMap = {
-        'visible':isNumber,
-        'strokeWidth':isNumber,
-        'strokeColor':isColorOrNone,
-        'strokeDashArray':None,
+    _attrMap = ValueAxis._attrMap.copy()
+    _attrMap.update({
         'tickUp':isNumber,
         'tickDown':isNumber,
-        'minimumTickSpacing':isNumber,
-        'labels':None,
-        'labelTextFormat':None,
-        'valueMin':isNumberOrAuto,
-        'valueMax':isNumberOrAuto,
-        'valueStep':isNumberOrAuto,
-        'valueSteps':isListOfNumbers
-        }
+        })
 
     def __init__(self):
 
@@ -554,6 +558,7 @@ class XValueAxis(ValueAxis):
 
         # how close can the ticks be?        
         self.minimumTickSpacing = 10
+        self.maximumTicks = 7
       
         # this may be either of (a) a format string like '%0.2f'
         # or (b) a function which takes the value as an argument
@@ -680,27 +685,15 @@ class XValueAxis(ValueAxis):
         
 class YValueAxis(ValueAxis):
     "Y/value axis"
-
-    _attrMap = {
-        'visible':isNumber,
-        'strokeWidth':isNumber,
-        'strokeColor':isColorOrNone,
-        'strokeDashArray':None,
-        'tickRight':isNumber,
+    _attrMap = ValueAxis._attrMap.copy()
+    _attrMap.update({
         'tickLeft':isNumber,
-        'minimumTickSpacing':isNumber,
-        'labels':None,
-        'labelTextFormat':None,
-        'valueMin':isNumberOrAuto,
-        'valueMax':isNumberOrAuto,
-        'valueStep':isNumberOrAuto,
-        'valueSteps':isListOfNumbers
-        }
+        'tickRight':isNumber,
+        })
 
     def __init__(self):
-
-        self._configured = 0
         self._dataIndex = 1
+        self._configured = 0
         # private properties set by methods.  The initial values
         # here are to make demos easy; they would always be
         # overridden in real life.        
@@ -726,6 +719,7 @@ class YValueAxis(ValueAxis):
 
         # how close can the ticks be?        
         self.minimumTickSpacing = 10
+        self.maximumTicks = 7
       
         # this may be either of (a) a format string like '%0.2f'
         # or (b) a function which takes the value as an argument
