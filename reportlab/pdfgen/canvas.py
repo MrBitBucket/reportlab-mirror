@@ -1,4 +1,40 @@
-#pdfgen.py
+###############################################################################
+#
+#	ReportLab Public License Version 1.0
+#
+#   Except for the change of names the spirit and intention of this
+#   license is the same as that of Python
+#
+#	(C) Copyright ReportLab Inc. 1998-2000.
+#
+#
+# All Rights Reserved
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted, provided
+# that the above copyright notice appear in all copies and that both that
+# copyright notice and this permission notice appear in supporting
+# documentation, and that the name of Robinson Analytics not be used
+# in advertising or publicity pertaining to distribution of the software
+# without specific, written prior permission. 
+# 
+#
+# Disclaimer
+#
+# ReportLab Inc. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+# SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
+# IN NO EVENT SHALL ReportLab BE LIABLE FOR ANY SPECIAL, INDIRECT
+# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+# PERFORMANCE OF THIS SOFTWARE. 
+#
+###############################################################################
+#	$Log: canvas.py,v $
+#	Revision 1.2  2000/02/15 15:47:09  rgbecker
+#	Added license, __version__ and Logi comment
+#
+__version__=''' $Id: canvas.py,v 1.2 2000/02/15 15:47:09 rgbecker Exp $ '''
 """ 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -6,25 +42,6 @@ foundation for piddlePDF, the PDF back end for PIDDLE.
 
 Documentation is a little slim right now; run then look at testpdfgen.py
 to get a clue.
-
----------- Licence Terms (same as the Python license) -----------------
-(C) Copyright Robinson Analytics 1998-1999.
-
-Permission to use, copy, modify, and distribute this software and its
-documentation for any purpose and without fee is hereby granted, provided
-that the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation, and that the name of Robinson Analytics not be used
-in advertising or publicity pertaining to distribution of the software
-without specific, written prior permission. 
-
-ROBINSON ANALYTICS LTD. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
-SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
-IN NO EVENT SHALL ROBINSON ANALYTICS BE LIABLE FOR ANY SPECIAL, INDIRECT
-OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE. 
 
 Progress Reports:
 8.83, 2000-01-13, gmcm:
@@ -45,8 +62,6 @@ Progress Reports:
         Adding RoundRect; changed all format strings to use %0.2f instead of %s,
         so we don't get exponentials in the output.
 0.8,1999-10-07, AR:  all changed!
-    
-
 """
 ##  0.81    1999-10-13:
 ##                
