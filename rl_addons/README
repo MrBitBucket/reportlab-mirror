@@ -1,0 +1,5 @@
+below this directory are the files needed to build the _renderPM extension
+which is used by reportlab.graphics.renderPM.
+
+
+The libart and gt1 files come from the gnome source tree at cvs.gnome.org
