@@ -491,14 +491,12 @@
   				delimiter string for bulk data; defaults to a carriage 
 				return.
 			</para>
-			<para style='Indent'><b>data</b> (required) - delimited
-  				bulk data for the table.
-			</para>
 			
 			<para style='Italic'>Contained By:</para>
 			<para style='Indent'>Frame</para>
 			<para style='Italic'>Can Contain:</para>
-			<para style='Indent'>Nothing</para>
+			<para style='Indent'>Bulk data, with the row and column delimiters
+			specified</para>
 	    </frame>
     </slide>
 
@@ -533,6 +531,7 @@
 			for example, the logo at top left of the page.
 			</para>
 			<para style='Italic'>Attributes:</para>
+			<para style='Indent'>filename: required</para>
 			<para style='Indent'>x, y: required</para>
 			<para style='Indent'>width, height: optional, stretches image 
 			to fit box if present.</para>
