@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.59 2002/11/06 17:11:31 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.60 2002/12/28 08:07:46 andy_robinson Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -555,7 +555,18 @@ def registerFont(font):
     #assert isinstance(font, Font), 'Not a Font: %s' % font
     fontName = font.fontName
     _fonts[fontName] = font
-    if not font._multiByte:
+    if font._multiByte:
+        # CID fonts don't need to have typeface registered.
+        #need to set mappings so it can go in a paragraph even if within
+        # bold tags
+        from reportlab.lib import fonts
+        ttname = string.lower(font.face.name)
+        fonts.addMapping(ttname, 0, 0, font.fontName)
+        fonts.addMapping(ttname, 1, 0, font.fontName)
+        fonts.addMapping(ttname, 0, 1, font.fontName)
+        fonts.addMapping(ttname, 1, 1, font.fontName)
+        #cannot accelerate these yet...
+    else:
         if _stringWidth:
             _rl_accel.setFontInfo(string.lower(fontName),
                                   _dummyEncoding,
