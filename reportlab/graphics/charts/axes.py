@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.9 2001/04/09 15:09:25 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.10 2001/04/09 22:02:35 dinu_gherman Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -458,11 +458,11 @@ class ValueAxis(Widget):
 
         Returns a list of numbers.
         """
-        
-        # now work out where to put tickmarks.
-        tickmarkPositions = []
 
-        # now work out where to put tickmarks.
+        if hasattr(self, 'valueSteps'): 
+            self._tickValues = self.valueSteps
+            return self._tickValues
+
         if self.valueStep == Auto:
             rawRange = self._valueMax - self._valueMin
             rawInterval = rawRange * (1.0 * self.minimumTickSpacing / self._length)
@@ -511,7 +511,8 @@ class XValueAxis(ValueAxis):
         'labelTextFormat':None,
         'valueMin':isNumberOrAuto,
         'valueMax':isNumberOrAuto,
-        'valueStep':isNumberOrAuto
+        'valueStep':isNumberOrAuto,
+        'valueSteps':isListOfNumbers
         }
 
     def __init__(self):
@@ -681,7 +682,8 @@ class YValueAxis(ValueAxis):
         'labelTextFormat':None,
         'valueMin':isNumberOrAuto,
         'valueMax':isNumberOrAuto,
-        'valueStep':isNumberOrAuto
+        'valueStep':isNumberOrAuto,
+        'valueSteps':isListOfNumbers
         }
 
     def __init__(self):
@@ -838,121 +840,121 @@ class YValueAxis(ValueAxis):
         
 # Deprecated!!! Will change!!!
 
-class XTimeValueAxis(XValueAxis):
-    "X time value axis"
-
-    _attrMap = {
-        'visible':isNumber,
-        'strokeWidth':isNumber,
-        'strokeColor':isColorOrNone,
-        'strokeDashArray':None,
-        'tickUp':isNumber,
-        'tickDown':isNumber,
-        'minimumTickSpacing':isNumber,
-        'labels':None,
-        'labelTextFormat':None,
-        'valueMin':isNumberOrAuto,
-        'valueMax':isNumberOrAuto,
-        'valueStep':isNumberOrAuto,
-        'valueSteps':isListOfNumbers
-        }
-
-    def demo(self):
-        self.setPosition(20, 50, 150)
-        self.configure([(10,20,30,40,50)])
-        d = Drawing(200, 100)
-        d.add(self)
-        return d
-
-        
-    def configure(self, dataSeries):
-        try:
-            minFound = dataSeries[0][0]
-            maxFound = dataSeries[0][0]
-            for ser in dataSeries:
-                for num in ser:
-                    if num < minFound:
-                        minFound = num
-                    if num > maxFound:
-                        maxFound = num
-        except IndexError:
-            minFound = self.valueMin
-            maxFound = self.valueMax
-        
-        if self.valueMin == Auto:
-            self._valueMin = minFound
-        else:
-            self._valueMin = self.valueMin
-
-        if self.valueMax == Auto:
-            self._valueMax = maxFound
-        else:
-            self._valueMax = self.valueMax
-
-        self._scaleFactor = self._length * 1.0 / (self._valueMax - self._valueMin) 
-
-        # now work out where to put tickmarks.
-        if hasattr(self, 'valueSteps'): 
-            self._tickValues = self.valueSteps
-        else:
-            if self.valueStep == Auto:
-                rawRange = self._valueMax - self._valueMin
-                rawInterval = rawRange * (1.0 * self.minimumTickSpacing / self._length)
-                niceInterval = nextRoundNumber(rawInterval)
-                self._valueStep = niceInterval
-            else:
-                self._valueStep = self.valueStep
-
-            self._tickValues = []
-            tick = int(self._valueMin / self._valueStep) * self._valueStep
-            if tick >= self._valueMin:
-                self._tickValues.append(tick)
-            tick = tick + self._valueStep
-            while tick <= self._valueMax:
-                self._tickValues.append(tick)
-                tick = tick + self._valueStep
-            
-        self._configured = 1            
-
-
-    def draw(self):
-        g = Group()
-        if not self.visible:
-            return g
-
-        axis = Line(self._x, self._y, self._x + self._length, self._y)
-        axis.strokeColor = self.strokeColor
-        axis.strokeWidth = self.strokeWidth
-        axis.strokeDashArray = self.strokeDashArray
-        g.add(axis)
-
-        formatFunc = self.labelTextFormat
-
-        i = 0
-        for tickValue in self._tickValues:
-            x = self.scale(tickValue)
-            if (self.tickUp != self.tickDown):
-                # draw tick marks
-                tick = Line(x, self._y - self.tickDown,
-                            x, self._y + self.tickUp)
-
-                tick.strokeColor = self.strokeColor
-                tick.strokeWidth = self.strokeWidth
-                tick.strokeDashArray = self.strokeDashArray
-                g.add(tick)
-
-            if formatFunc:
-                if type(formatFunc) is StringType:
-                    labelText = formatFunc % tickValue
-                else:
-                    labelText = formatFunc(tickValue)
-                label = self.labels[i]
-                label.setOrigin(x, self._y)
-                label.setText(labelText)
-                g.add(label)
-            i = i + 1
-                        
-        return g
+##class XTimeValueAxis(XValueAxis):
+##    "X time value axis"
+##
+##    _attrMap = {
+##        'visible':isNumber,
+##        'strokeWidth':isNumber,
+##        'strokeColor':isColorOrNone,
+##        'strokeDashArray':None,
+##        'tickUp':isNumber,
+##        'tickDown':isNumber,
+##        'minimumTickSpacing':isNumber,
+##        'labels':None,
+##        'labelTextFormat':None,
+##        'valueMin':isNumberOrAuto,
+##        'valueMax':isNumberOrAuto,
+##        'valueStep':isNumberOrAuto,
+##        'valueSteps':isListOfNumbers
+##        }
+##
+##    def demo(self):
+##        self.setPosition(20, 50, 150)
+##        self.configure([(10,20,30,40,50)])
+##        d = Drawing(200, 100)
+##        d.add(self)
+##        return d
+##
+##        
+##    def configure(self, dataSeries):
+##        try:
+##            minFound = dataSeries[0][0]
+##            maxFound = dataSeries[0][0]
+##            for ser in dataSeries:
+##                for num in ser:
+##                    if num < minFound:
+##                        minFound = num
+##                    if num > maxFound:
+##                        maxFound = num
+##        except IndexError:
+##            minFound = self.valueMin
+##            maxFound = self.valueMax
+##        
+##        if self.valueMin == Auto:
+##            self._valueMin = minFound
+##        else:
+##            self._valueMin = self.valueMin
+##
+##        if self.valueMax == Auto:
+##            self._valueMax = maxFound
+##        else:
+##            self._valueMax = self.valueMax
+##
+##        self._scaleFactor = self._length * 1.0 / (self._valueMax - self._valueMin) 
+##
+##        # now work out where to put tickmarks.
+##        if hasattr(self, 'valueSteps'): 
+##            self._tickValues = self.valueSteps
+##        else:
+##            if self.valueStep == Auto:
+##                rawRange = self._valueMax - self._valueMin
+##                rawInterval = rawRange * (1.0 * self.minimumTickSpacing / self._length)
+##                niceInterval = nextRoundNumber(rawInterval)
+##                self._valueStep = niceInterval
+##            else:
+##                self._valueStep = self.valueStep
+##
+##            self._tickValues = []
+##            tick = int(self._valueMin / self._valueStep) * self._valueStep
+##            if tick >= self._valueMin:
+##                self._tickValues.append(tick)
+##            tick = tick + self._valueStep
+##            while tick <= self._valueMax:
+##                self._tickValues.append(tick)
+##                tick = tick + self._valueStep
+##            
+##        self._configured = 1            
+##
+##
+##    def draw(self):
+##        g = Group()
+##        if not self.visible:
+##            return g
+##
+##        axis = Line(self._x, self._y, self._x + self._length, self._y)
+##        axis.strokeColor = self.strokeColor
+##        axis.strokeWidth = self.strokeWidth
+##        axis.strokeDashArray = self.strokeDashArray
+##        g.add(axis)
+##
+##        formatFunc = self.labelTextFormat
+##
+##        i = 0
+##        for tickValue in self._tickValues:
+##            x = self.scale(tickValue)
+##            if (self.tickUp != self.tickDown):
+##                # draw tick marks
+##                tick = Line(x, self._y - self.tickDown,
+##                            x, self._y + self.tickUp)
+##
+##                tick.strokeColor = self.strokeColor
+##                tick.strokeWidth = self.strokeWidth
+##                tick.strokeDashArray = self.strokeDashArray
+##                g.add(tick)
+##
+##            if formatFunc:
+##                if type(formatFunc) is StringType:
+##                    labelText = formatFunc % tickValue
+##                else:
+##                    labelText = formatFunc(tickValue)
+##                label = self.labels[i]
+##                label.setOrigin(x, self._y)
+##                label.setText(labelText)
+##                g.add(label)
+##            i = i + 1
+##                        
+##        return g
 
 
 # Sample functions.
