@@ -605,7 +605,7 @@ def getframeinfo(frame, context=1):
 
 def getlineno(frame):
     """Get the line number from a frame object, allowing for optimization."""
-    # Written by Marc-André Lemburg; revised by Jim Hugunin and Fredrik Lundh.
+    # Written by Marc-Andre Lemburg; revised by Jim Hugunin and Fredrik Lundh.
     lineno = frame.f_lineno
     code = frame.f_code
     if hasattr(code, 'co_lnotab'):
