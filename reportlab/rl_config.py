@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.41 2004/02/17 16:10:18 rgbecker Exp $
-__version__=''' $Id: rl_config.py,v 1.41 2004/02/17 16:10:18 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.42 2004/03/17 14:34:41 rgbecker Exp $
+__version__=''' $Id: rl_config.py,v 1.42 2004/03/17 14:34:41 rgbecker Exp $ '''
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -21,16 +21,18 @@ overlapAttachedSpace=       None                    #if set non false then adaja
                                                     #and space before are merged (max space is used).
 
 # places to look for T1Font information
-T1SearchPath =  ('c:/Program Files/Adobe/Acrobat 6.0/Resource/Font', #Win32, Acrobat 6
-                'c:/Program Files/Adobe/Acrobat 5.0/Resource/Font', #Win32, Acrobat 5
-                 'c:/Program Files/Adobe/Acrobat 4.0/Resource/Font', #Win32, Acrobat 4
-                 '%(disk)s/Applications/Python %(sys_version)s/reportlab/fonts', #Mac?
-                 '/usr/lib/Acrobat5/Resource/Font', #Linux, Acrobat 5?
-                 '/usr/lib/Acrobat4/Resource/Font', #Linux, Acrobat 4
-                 '/usr/local/Acrobat6/Resource/Font', #Linux, Acrobat 5?
-                 '/usr/local/Acrobat5/Resource/Font', #Linux, Acrobat 5?
-                 '/usr/local/Acrobat4/Resource/Font', #Linux, Acrobat 4
-                 '%(REPORTLAB_DIR)s/fonts' #special
+T1SearchPath =  (
+                'c:/Program Files/Adobe/Acrobat 6.0/Resource/Font', #Win32, Acrobat 6
+                'c:/Program Files/Adobe/Acrobat 5.0/Resource/Font',     #Win32, Acrobat 5
+                'c:/Program Files/Adobe/Acrobat 4.0/Resource/Font', #Win32, Acrobat 4
+                '%(disk)s/Applications/Python %(sys_version)s/reportlab/fonts', #Mac?
+                '/usr/lib/Acrobat5/Resource/Font',      #Linux, Acrobat 5?
+                '/usr/lib/Acrobat4/Resource/Font',      #Linux, Acrobat 4
+                '/usr/local/Acrobat6/Resource/Font',    #Linux, Acrobat 5?
+                '/usr/local/Acrobat5/Resource/Font',    #Linux, Acrobat 5?
+                '/usr/local/Acrobat4/Resource/Font',    #Linux, Acrobat 4
+                '%(REPORTLAB_DIR)s/fonts',              #special
+                '%(REPORTLAB_DIR)s/../fonts',           #special
                  )
 
 # places to look for TT Font information
@@ -38,7 +40,8 @@ TTFSearchPath = (
                 'c:/winnt/fonts',
                 'c:/windows/fonts',
                 '/usr/lib/X11/fonts/TrueType/',
-                '%(REPORTLAB_DIR)s/fonts' #special
+                '%(REPORTLAB_DIR)s/fonts',      #special
+                '%(REPORTLAB_DIR)s/../fonts',   #special
                 )
 
 # places to look for CMap files - should ideally merge with above
@@ -52,11 +55,17 @@ CMapSearchPath = ('/usr/lib/Acrobat6/Resource/CMap',
                   'C:\\Program Files\\Adobe\\Acrobat 6.0\\Resource\\CMap',
                   'C:\\Program Files\\Adobe\\Acrobat 5.0\\Resource\\CMap',
                   'C:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\CMap'
+                  '%(REPORTLAB_DIR)s/fonts/CMap',       #special
+                  '%(REPORTLAB_DIR)s/../fonts/CMap',    #special
                   )
 
 #### Normally don't need to edit below here ####
-import os, sys, string
-from reportlab.lib import pagesizes
+try:
+    execfile('local_rl_config.py')
+except:
+    pass
+
+_SAVED = {}
 
 def _setOpt(name, value, conv=None):
     '''set a module level value from environ/default'''
@@ -66,9 +75,6 @@ def _setOpt(name, value, conv=None):
         value = environ[ename]
     if conv: value = conv(value)
     globals()[name] = value
-
-sys_version = string.split(sys.version)[0]      #strip off the other garbage
-_SAVED = {}
 
 def _startUp():
     '''This function allows easy resetting to the global defaults
@@ -80,6 +86,9 @@ def _startUp():
                 'ZLIB_WARNINGS', 'warnOnMissingFontGlyphs', 'verbose', 'emptyTableAction',
                 'invariant','eps_preview_transparent',
                 )
+    import os, sys, string
+    sys_version = string.split(sys.version)[0]      #strip off the other garbage
+    from reportlab.lib import pagesizes
 
     if _SAVED=={}:
         for k in V:
