@@ -35,7 +35,7 @@ def getObjectsDefinedIn(modulename, directory=None):
         #now the full path should be known, if it is in the
         #package
         
-        directory = apply(os.path.join, [packagepath] + words[1:-1])
+        directory = apply(os.path.join, tuple([packagepath] + words[1:-1]))
         modulename = words[-1]
         searchpath = [directory]
 

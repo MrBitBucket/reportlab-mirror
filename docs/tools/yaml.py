@@ -85,10 +85,14 @@ class Parser:
             #is it a parser method?
             if hasattr(self.__class__, cmd):
                 method = eval('self.'+cmd)
+                apply(method, tuple(args))
+                #this was very bad; any type error in the method was hidden
+                #we have to hack the traceback
                 try:
-                    apply(method, args)
-                except TypeError:
-                    raise TypeError, "Incorrect arguments to parser method %s at line %d" % (cmd, self._lineNo)
+                    apply(method, tuple(args))
+                except TypeError, err:
+                    sys.stderr.write("Parser method: apply(%s,%s) %s at line %d\n" % (cmd, tuple(args), err, self._lineNo))
+                    raise
             else:
                 # assume it is a paragraph style -
                 # becomes the formatter's problem
