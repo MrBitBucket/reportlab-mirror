@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.26 2000/10/26 11:21:38 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.26 2000/10/26 11:21:38 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.27 2000/11/01 21:24:05 andy_robinson Exp $
+__version__=''' $Id: paragraph.py,v 1.27 2000/11/01 21:24:05 andy_robinson Exp $ '''
 import string
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -537,6 +537,17 @@ class Paragraph(Flowable):
 		for frag in self.frags:
 			plains.append(frag.text)
 		return string.join(plains, '')
+
+	def getActualLineWidths0(self):
+		"""Convenience function; tells you how wide each line
+		actually is.  For justified styles, this will be
+		the same as the wrap width; for others it might be
+		useful for seeing if paragraphs will fit in spaces."""
+		assert hasattr(self, 'width'), "Cannot call this method before wrap()"
+		w = []
+		for frag in self.bfrags.lines:
+			w.append(self.width - frag.extraSpace)
+		return w
 
 if __name__=='__main__':	#NORUNTESTS
 	def dumpParagraphLines(P):
