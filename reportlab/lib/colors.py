@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.35 2002/07/24 19:56:37 andy_robinson Exp $
-__version__=''' $Id: colors.py,v 1.35 2002/07/24 19:56:37 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.36 2002/09/09 14:08:19 rgbecker Exp $
+__version__=''' $Id: colors.py,v 1.36 2002/09/09 14:08:19 rgbecker Exp $ '''
 
 import string, math
 from types import StringType, ListType, TupleType
@@ -485,14 +485,15 @@ def toColor(arg,default=None):
     if isinstance(arg,Color): return arg
     tArg = type(arg)
     if tArg in _SeqTypes:
-        return Color(arg[0],arg[1],arg[2])
+        assert 3<=len(arg)<=4, 'Can only convert 3 and 4 sequences to color'
+        assert 0<=min(arg) and max(arg)<=1
+        return len(arg)==3 and Color(arg[0],arg[1],arg[2]) or CMYKColor(arg[0],arg[1],arg[2],arg[3])
     elif tArg == StringType:
         C = getAllNamedColors()
         s = string.lower(arg)
         if C.has_key(s): return C[s]
         try:
-            s = eval(arg)
-            if isinstance(s,Color): return s
+            return toColor(eval(arg))
         except:
             pass
 
