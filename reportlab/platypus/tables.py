@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.20  2000/07/11 14:29:45  rgbecker
+#	Table splitting start
+#
 #	Revision 1.19  2000/07/10 15:25:47  andy_robinson
 #	Added tables to PythonPoint
-#
+#	
 #	Revision 1.18  2000/07/08 15:30:04  rgbecker
 #	Cosmetics and error testing
 #	
@@ -86,7 +89,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.19 2000/07/10 15:25:47 andy_robinson Exp $ '''
+__version__=''' $Id: tables.py,v 1.20 2000/07/11 14:29:45 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -138,7 +141,8 @@ class TableStyle:
 TableStyleType = type(TableStyle())
 		
 class Table(Flowable):
-	def __init__(self, colWidths, rowHeights, data, style=None):
+	def __init__(self, colWidths, rowHeights, data, style=None,
+				repeatRows=0, repeatCols=0, splitByRow=1):
 		if not colWidths:
 			raise ValueError, "Table must have at least 1 column"
 		if not rowHeights:
@@ -150,40 +154,37 @@ class Table(Flowable):
 		for i in range(nrows):
 			if len(data[i]) != ncols:
 				raise ValueError, "Not enough data points in row %d!" % i
-		self._rowHeights = rowHeights
-		self._colWidths = colWidths
+		self._rowHeights = self._argH = rowHeights
+		self._colWidths = self._argW = colWidths
 		self._cellvalues = data
 		dflt = CellStyle('<default>')
-		self._cellstyles = [None]*nrows
+
+		self._cellStyles = [None]*nrows
 		for i in range(nrows):
-			self._cellstyles[i] = [dflt]*ncols
+			self._cellStyles[i] = [dflt]*ncols
+
 		self._bkgrndcmds = []
 		self._linecmds = []
 		self._curweight = self._curcolor = self._curcellstyle = None
+		self.repeatRows = repeatRows
+		self.repeatCols = repeatCols
+		self.splitByRow = splitByRow
 
 		if style:
 			self.setStyle(style)
 
 	def _calc(self):
-		if hasattr(self,'_argH'):
-			self._rowHeights = self._argH
-			del self._argH
 
-		if hasattr(self,'_argW'):
-			self._colWidths = self._argW
-			del self._argW
-
-		H = self._rowHeights
-		W = self._colWidths
+		H = self._argH
+		W = self._argW
 
 		if None in H:
-			self._argH = H
 			H = H[:]	#make a copy as we'll change it
 			self._rowHeights = H
 			while None in H:
 				i = H.index(None)
 				V = self._cellvalues[i]
-				S = self._cellstyles[i]
+				S = self._cellStyles[i]
 				h = 0
 				for v, s in map(None, V, S):
 					if type(v) is not _stringtype: v = str(v)
@@ -193,14 +194,13 @@ class Table(Flowable):
 				H[i] = h
 
 		if None in W:
-			self._argW = H
 			W = W[:]
 			self._colWidths = W
 			while None in W:
 				i = W.index(None)
 				f = lambda x,i=i: operator.getitem(x,i)
 				V = map(f,self._cellvalues)
-				S = map(f,self._cellstyles)
+				S = map(f,self._cellStyles)
 				w = 0
 				for v, s in map(None, V, S):
 					if type(v) is not _stringtype: v = str(v)
@@ -228,19 +228,22 @@ class Table(Flowable):
 		if type(tblstyle) is not TableStyleType:
 			tblstyle = TableStyle(tblstyle)
 		for cmd in tblstyle.getCommands():
-			if cmd[0] == 'BACKGROUND':
-				self._bkgrndcmds.append(cmd)
-			elif _isLineCommand(cmd):
-				self._linecmds.append(cmd)
-			else:
-				(op, (sc, sr), (ec, er)), values = cmd[:3] , cmd[3:]
-				if sc < 0: sc = sc + self._ncols
-				if ec < 0: ec = ec + self._ncols
-				if sr < 0: sr = sr + self._nrows
-				if er < 0: er = er + self._nrows
-				for i in range(sr, er+1):
-					for j in range(sc, ec+1):
-						_setCellStyle(self._cellstyles, i, j, op, values)
+			self._addCommand(cmd)
+
+	def _addCommand(self,cmd):
+		if cmd[0] == 'BACKGROUND':
+			self._bkgrndcmds.append(cmd)
+		elif _isLineCommand(cmd):
+			self._linecmds.append(cmd)
+		else:
+			(op, (sc, sr), (ec, er)), values = cmd[:3] , cmd[3:]
+			if sc < 0: sc = sc + self._ncols
+			if ec < 0: ec = ec + self._ncols
+			if sr < 0: sr = sr + self._nrows
+			if er < 0: er = er + self._nrows
+			for i in range(sr, er+1):
+				for j in range(sc, ec+1):
+					_setCellStyle(self._cellStyles, i, j, op, values)
 
 	def _drawLines(self):
 		for op, (sc, sr), (ec, er), weight, color in self._linecmds:
@@ -272,9 +275,11 @@ class Table(Flowable):
 		self._drawHLines((sc, er+1), (ec, er+1), weight, color)
 		self._drawVLines((sc, sr), (sc, er), weight, color)
 		self._drawVLines((ec+1, sr), (ec+1, er), weight, color)
+
 	def _drawInnerGrid(self, (sc, sr), (ec, er), weight, color):
 		self._drawHLines((sc, sr+1), (ec, er), weight, color)
 		self._drawVLines((sc+1, sr), (ec, er), weight, color)
+
 	def _prepLine(self, weight, color):
 		if color != self._curcolor:
 			self.canv.setStrokeColor(color)
@@ -282,12 +287,14 @@ class Table(Flowable):
 		if weight != self._curweight:
 			self.canv.setLineWidth(weight)
 			self._curweight = weight
+
 	def _drawHLines(self, (sc, sr), (ec, er), weight, color):
 		self._prepLine(weight, color)
 		scp = self._colpositions[sc]
 		ecp = self._colpositions[ec+1]
 		for rowpos in self._rowpositions[sr:er+1]:
 			self.canv.line(scp, rowpos, ecp, rowpos)
+
 	def _drawVLines(self, (sc, sr), (ec, er), weight, color):
 		self._prepLine(weight, color)
 		srp = self._rowpositions[sr]
@@ -300,13 +307,93 @@ class Table(Flowable):
 		#nice and easy, since they are predetermined size
 		self.availWidth = availWidth
 		return (self._width, self._height)
+
+	def _cr_0(self,n,cmds):
+		for op, (sc, sr), (ec, er), weight, color in cmds:
+			if sr>=n: continue
+			if er>=n: er = n-1
+			self._addCommand((op, (sc, sr), (ec, er), weight, color))
+
+	def _cr_1_1(self,n,repeatRows, cmds):
+		for op, (sc, sr), (ec, er), weight, color in cmds:
+			if sr>=0 and sr>=repeatRows and sr<n and er>=0 and er<n: continue
+			if sr>=repeatRows and sr<n: sr=repeatRows
+			elif sr>=repeatRows and sr>=n: sr=sr+repeatRows-n
+			if er>=repeatRows and er<n: er=repeatRows
+			elif er>=repeatRows and er>=n: er=er+repeatRows-n
+			self._addCommand((op, (sc, sr), (ec, er), weight, color))
+
+	def _cr_1_0(self,n,cmds):
+		for op, (sc, sr), (ec, er), weight, color in cmds:
+			if er>=0 and er<n: continue
+			if sr>=0 and sr<n: sr=0
+			if sr>=n: sr = sr-n
+			if er>=n: er = er-n
+			self._addCommand((op, (sc, sr), (ec, er), weight, color))
+
+	def _splitRows(self,availHeight):
+		self._calc()
+		h = 0
+		n = 0
+		lim = len(self._rowHeights)
+		while n<lim:
+			hn = h + self._rowHeights[n]
+			if hn>availHeight: break
+			h = hn
+			n = n + 1
+
+		if n<=self.repeatRows:
+			return []
+
+		if n==lim: return [self]
+
+		repeatRows = self.repeatRows
+		repeatCols = self.repeatCols
+		splitByRow = self.splitByRow
+		data = self._cellvalues
+
+		#we're going to split into two superRows
+		R0 = Table( self._argW, self._argH[:n], data[:n],
+				repeatRows=repeatRows, repeatCols=repeatCols,
+				splitByRow=splitByRow)
+
+		#copy the styles and commands
+		R0._cellStyles = self._cellStyles[:n]
+		R0._cr_0(n,self._linecmds)
+		R0._cr_0(n,self._bkgrndcmds)
+
+		if repeatRows:
+			R1 = Table(self._argW, self._argH[:repeatRows]+self._argH[n:],
+					data[:repeatRows]+data[n:],
+					repeatRows=repeatRows, repeatCols=repeatCols,
+					splitByRow=splitByRow)
+			R1._cellStyles = self._cellStyles[:repeatRows]+self._cellStyles[n:]
+			R1._cr_1_1(n,repeatRows,self._linecmds)
+			R1._cr_1_1(n,repeatRows,self._bkgrndcmds)
+		else:
+			R1 = Table(self._argW, self._argH[n:],data[n:],
+					repeatRows=repeatRows, repeatCols=repeatCols,
+					splitByRow=splitByRow)
+			R1._cellStyles = self._cellStyles[n:]
+			R1._cr_1_0(n,self._linecmds)
+			R1._cr_1_0(n,self._bkgrndcmds)
+
+		return [R0,R1]
+
+	def split(self, availWidth, availHeight):
+		if self.splitByRow:
+			if self._width>availWidth: return []
+			return self._splitRows(availHeight)
+		else:
+			raise NotImplementedError
+		
 				
 	def draw(self):
 		nudge = 0.5 * (self.availWidth - self._width)
 		self.canv.translate(nudge, 0)
 		self._drawBkgrnd()
 		self._drawLines()
-		for row, rowstyle, rowpos, rowheight in map(None, self._cellvalues, self._cellstyles, self._rowpositions[1:], self._rowHeights):
+		for row, rowstyle, rowpos, rowheight in map(None, self._cellvalues, self._cellStyles, self._rowpositions[1:], self._rowHeights):
 			for cellval, cellstyle, colpos, colwidth in map(None, row, rowstyle, self._colpositions[:-1], self._colWidths):
 				self._drawCell(cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight))
 
@@ -383,9 +470,9 @@ LINECOMMANDS = (
 def _isLineCommand(cmd):
 	return cmd[0] in LINECOMMANDS
 
-def _setCellStyle(cellstyles, i, j, op, values):
-	new = CellStyle('<%d, %d>' % (i,j), cellstyles[i][j])
-	cellstyles[i][j] = new
+def _setCellStyle(cellStyles, i, j, op, values):
+	new = CellStyle('<%d, %d>' % (i,j), cellStyles[i][j])
+	cellStyles[i][j] = new
 	if op == 'FONT':
 		new.fontname = values[0]
 		new.fontsize = values[1]
@@ -679,6 +766,16 @@ LIST_STYLE = TableStyle(
             ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
             ('BOX', (0,0), (-1,-1), 0.25, colors.black),
             ])
+	lst.append(t)
+	t=apply(Table,([None, None], [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None], [('Attribute', 'Synonyms'), ('alignment', 'align, alignment'), ('bulletColor', 'bulletcolor, bcolor'), ('bulletFontName', 'bfont, bulletfontname'), ('bulletFontSize', 'bfontsize, bulletfontsize'), ('bulletIndent', 'bindent, bulletindent'), ('firstLineIndent', 'findent, firstlineindent'), ('fontName', 'face, fontname, font'), ('fontSize', 'size, fontsize'), ('leading', 'leading'), ('leftIndent', 'leftindent, lindent'), ('rightIndent', 'rightindent, rindent'), ('spaceAfter', 'spaceafter, spacea'), ('spaceBefore', 'spacebefore, spaceb'), ('textColor', 'fg, textcolor, color')]))
+	t.repeatRows = 1
+	t.setStyle([
+				('FONT',(0,0),(-1,1),'Times-Bold',10,12),
+				('FONT',(0,1),(-1,-1),'Courier',8,8),
+				('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+				('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+				('BOX', (0,0), (-1,-1), 0.25, colors.black),
+				])
 	lst.append(t)
 	SimpleDocTemplate('testtables.pdf', showBoundary=1).build(lst)
 
