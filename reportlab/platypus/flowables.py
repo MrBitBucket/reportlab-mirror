@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.31 2002/07/24 19:56:38 andy_robinson Exp $
-__version__=''' $Id: flowables.py,v 1.31 2002/07/24 19:56:38 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.32 2002/11/03 14:51:09 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.32 2002/11/03 14:51:09 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -407,3 +407,42 @@ class Macro(Flowable):
         return (0,0)
     def draw(self):
         exec self.command in globals(), {'canvas':self.canv}
+
+class ParagraphAndImage(Flowable):
+    '''combine a Paragraph and an Image'''
+    def __init__(self,P,I,xpad=3,ypad=3):
+        self.P, self.style, self.I, self.xpad, self.ypad = P,P.style,I,xpad,ypad
+
+    def wrap(self,availWidth,availHeight):
+        wI, hI = self.I.wrap(availWidth,availHeight)
+        self.wI, self.hI = wI, hI
+        # work out widths array for breaking
+        self.width = availWidth
+        P, style, xpad, ypad = self.P, self.style, self.xpad, self.ypad
+        leading = style.leading
+        leftIndent = style.leftIndent
+        later_widths = availWidth - leftIndent - style.rightIndent
+        intermediate_widths = later_widths - xpad - wI
+        first_line_width = intermediate_widths - style.firstLineIndent
+        P.width = 0
+        P.blPara = P.breakLines([first_line_width] + int((hI+ypad)/leading)*[intermediate_widths]+[later_widths])
+        P.height = len(P.blPara.lines)*leading
+        self.height = max(hI,P.height)
+        return (self.width, self.height)
+
+    def split(self,availWidth, availHeight):
+        P, wI, hI, ypad = self.P, self.wI, self.hI, self.ypad
+        if hI+ypad>availHeight or len(P.frags)<=0: return []
+        S = P.split(availWidth,availHeight)
+        if not S: return S
+        P = self.P = S[0]
+        del S[0]
+        style = self.style = P.style
+        P.height = len(self.P.blPara.lines)*style.leading
+        self.height = max(hI,P.height)
+        return [self]+S
+
+    def draw(self):
+        canv = self.canv
+        self.I.drawOn(canv,self.width-self.wI-self.xpad,self.height-self.hI)
+        self.P.drawOn(canv,0,0)
