@@ -17,13 +17,16 @@ def _getFragLines(frags):
 			tleft = t[i+1:]
 			w.text = t[:i]
 			cline.append(w)
+			if len(cline)==1 and cline[0].text=='': cline[0].text = ' '
 			lines.append(cline)
 			cline = []
 			if tleft!='':
 				W.insert(0,w.clone(text=tleft))
 		else:
 			cline.append(w)
-	if cline!=[]: lines.append(cline)
+	if cline!=[]:
+		lines.append(cline)
+		if len(cline)==1 and cline[0].text=='': cline[0].text = ' '
 	return lines
 
 class XPreformatted(Paragraph):
@@ -115,13 +118,11 @@ class XPreformatted(Paragraph):
 						words = [f.clone()]
 						words[-1].text = nText
 					elif not _sameFrag(words[-1],f):
-						if nText!='' and nText[0]!=' ':
-							words[-1].text = words[-1].text + ' ' 
+						words[-1].text = words[-1].text + ' ' 
 						words.append(f.clone())
 						words[-1].text = nText
 					else:
-						if nText!='' and nText[0]!=' ':
-							words[-1].text = words[-1].text + ' ' + nText
+						words[-1].text = words[-1].text + ' ' + nText
 
 					for i in w[2:]:
 						f = i[0].clone()
@@ -164,19 +165,34 @@ if __name__=='__main__':	#NORUNTESTS
 			print "frag%d: '%s'" % (l, frags[l].text)
 	
 		l = 0
-		for W in _getFragWords(frags):
-			print "fragword%d: size=%d" % (l, W[0]),
-			for w in W[1:]:
-				print "'%s'" % w[1],
-			print
+		for L in _getFragLines(frags):
+			n=0
+			for W in _getFragWords(L):
+				print "frag%d.%d: size=%d" % (l, n, W[0]),
+				n = n + 1
+				for w in W[1:]:
+					print "'%s'" % w[1],
+				print
 			l = l + 1
+
+	def try_it(text,style,dedent):
+		P=XPreformatted(text,style,dedent=dedent)
+		dumpXPreformattedFrags(P)
+		aW, aH = 456.0, 42.8
+		w,h = P.wrap(aW, aH)
+		dumpXPreformattedLines(P)
+		S = P.split(aW,aH)
+		for s in S:
+			s.wrap(aW,aH)
+			dumpXPreformattedLines(s)
+			aH = 500
 
 	from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 	styleSheet = getSampleStyleSheet()
 	B = styleSheet['BodyText']
 	style = ParagraphStyle("discussiontext", parent=B)
 	style.fontName= 'Helvetica'
-	text='''
+	for (text,dedent) in [('''
 
 
 The <font name=courier color=green>CMYK</font> or subtractive
@@ -194,14 +210,16 @@ be the case that &amp;| &amp; | colors specified in <font name=courier color=gre
 and better control when printed.
 
 
-'''
-	P=XPreformatted(text,style)
-	dumpXPreformattedFrags(P)
-	aW, aH = 456.0, 42.8
-	w,h = P.wrap(aW, aH)
-	dumpXPreformattedLines(P)
-	S = P.split(aW,aH)
-	for s in S:
-		s.wrap(aW,aH)
-		dumpXPreformattedLines(s)
-		aH = 500
+''',0),
+('''
+
+   This is a non rearranging form of the <b>Paragraph</b> class;
+   <b><font color=red>XML</font></b> tags are allowed in <i>text</i> and have the same
+   
+      meanings as for the <b>Paragraph</b> class.
+   As for <b>Preformatted</b>, if dedent is non zero <font color=red size=+1>dedent</font>
+       common leading spaces will be removed from the
+   front of each line.
+
+''',3)]:
+		try_it(text,style,dedent)

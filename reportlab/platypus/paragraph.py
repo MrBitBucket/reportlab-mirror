@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.20  2000/08/24 18:21:47  rgbecker
+#	XPreformatted fixed empty lines and leading space
+#
 #	Revision 1.19  2000/08/23 13:58:28  rgbecker
 #	Preparing for cleanup
-#
+#	
 #	Revision 1.18  2000/08/17 15:50:37  rgbecker
 #	Various brutal changes to paragraph, canvas and textobject for speed/size
 #	
@@ -89,7 +92,7 @@
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.19 2000/08/23 13:58:28 rgbecker Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.20 2000/08/24 18:21:47 rgbecker Exp $ '''
 import string
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -97,6 +100,7 @@ from reportlab.platypus.paraparser import ParaParser, ParaFrag
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib.colors import Color
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
+from reportlab.lib.utils import _className
 from copy import deepcopy
 
 #our one and only parser
@@ -545,7 +549,7 @@ class Paragraph(Flowable):
 		bulletText = self.bulletText
 		if nLines > 0:
 			canvas.saveState()
-			canvas.addLiteral('% textcanvas.drawParagraph()')
+			canvas.addLiteral('%% %s.drawPara' % _className(self))
 			alignment = style.alignment
 			offset = style.firstLineIndent - style.leftIndent
 			lim = nLines-1
