@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.40 2001/02/28 19:30:34 rgbecker Exp $
-__version__=''' $Id: paraparser.py,v 1.40 2001/02/28 19:30:34 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.41 2001/03/22 09:46:27 andy_robinson Exp $
+__version__=''' $Id: paraparser.py,v 1.41 2001/03/22 09:46:27 andy_robinson Exp $ '''
 import string
 import re
 from types import TupleType
@@ -333,6 +333,21 @@ class ParaParser(xmllib.XMLParser):
 
 	def end_seqreset(self):
 		pass
+
+	# AR hacking in aliases to allow the proper casing for RML.
+	# the above ones should be deprecated over time. 2001-03-22
+	def start_seqDefault(self, attr):
+		self.start_seqdefault(attr)
+
+	def end_seqDefault(self):
+		self.end_seqdefault()
+		
+	def start_seqReset(self, attr):
+		self.start_seqreset(attr)
+
+	def end_seqReset(self):
+		self.end_seqreset()
+
 	
 	def start_seq(self, attr):
 		#if it has a template, use that; otherwise try for id;
