@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.37  2000/07/14 14:27:26  rgbecker
+#	Wasn't doing docs for releases
+#
 #	Revision 1.36  2000/06/20 13:49:29  rgbecker
 #	Added pyc_remove
-#
+#	
 #	Revision 1.35  2000/06/20 13:41:25  rgbecker
 #	Fixed miss assign to opp
 #	
@@ -140,7 +143,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.36 2000/06/20 13:49:29 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.37 2000/07/14 14:27:26 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -235,49 +238,53 @@ def cvs_checkout(d):
 		do_exec(cvs+(' export -r %s %s' % (tagname,projdir)), 'the export phase')
 	else:
 		do_exec(cvs+' co %s' % projdir, 'the checkout phase')
-		if py2pdf:
-			# now we need to move the files & delete those we don't need
-			dst = py2pdf_dir
-			recursive_rmdir(dst)
-			os.mkdir(dst)
-			do_exec("mv reportlab/demos/py2pdf/py2pdf.py %s"%dst)
-			do_exec("mv reportlab/demos/py2pdf/PyFontify.py %s" % dst)
-			do_exec("mv reportlab/demos/py2pdf/idle_print.py %s" % dst)
-			do_exec("rm -r reportlab/demos reportlab/platypus reportlab/lib/styles.py reportlab/README.pdfgen.txt reportlab/pdfgen/test", "reducing size")
-			do_exec("mv %s %s" % (projdir,dst))
-			do_exec("chmod a+x %s/py2pdf.py %s/idle_print.py" % (dst, dst))
-			CVS_remove(dst)
+
+	if py2pdf:
+		# now we need to move the files & delete those we don't need
+		dst = py2pdf_dir
+		recursive_rmdir(dst)
+		os.mkdir(dst)
+		do_exec("mv reportlab/demos/py2pdf/py2pdf.py %s"%dst)
+		do_exec("mv reportlab/demos/py2pdf/PyFontify.py %s" % dst)
+		do_exec("mv reportlab/demos/py2pdf/idle_print.py %s" % dst)
+		do_exec("rm -r reportlab/demos reportlab/platypus reportlab/lib/styles.py reportlab/README.pdfgen.txt reportlab/pdfgen/test", "reducing size")
+		do_exec("mv %s %s" % (projdir,dst))
+		do_exec("chmod a+x %s/py2pdf.py %s/idle_print.py" % (dst, dst))
+		CVS_remove(dst)
+	else:
+		do_exec(cvs+' co docs')
+		dst = os.path.join(d,"reportlab","docs")
+		do_exec("mkdir %s" % dst)
+
+		P=os.path.join(os.environ['HOME'],'python_stuff','lib')
+		PP=os.path.join(P,'PIL')
+		PP = "%s:%s:%s" % (d,P,PP)
+		#add our reportlab parent to the path so we import from there
+		if os.environ.has_key('PYTHONPATH'):
+			opp = os.environ['PYTHONPATH']
+			os.environ['PYTHONPATH']='%s:%s' % (PP,opp)
 		else:
-			do_exec(cvs+' co docs')
-			dst = os.path.join(d,"reportlab","docs")
-			do_exec("mkdir %s" % dst)
+			opp = None
+			os.environ['PYTHONPATH']=PP
 
-			#add our reportlab parent to the path so we import from there
-			if os.environ.has_key('PYTHONPATH'):
-				opp = os.environ['PYTHONPATH']
-				os.environ['PYTHONPATH']='%s:%s' % (d,opp)
-			else:
-				opp = None
-				os.environ['PYTHONPATH']=d
+		os.chdir('docs/reference')
+		do_exec(python + ' ../tools/yaml2pdf.py reference.yml')
+		os.chdir(d)
+		do_exec('cp docs/reference/*.pdf %s' % htmldir)
+		do_exec('mv docs/reference/*.pdf %s' % dst)
+		os.chdir('docs/userguide')
+		do_exec(python + ' genuserguide.py')
+		os.chdir(d)
+		do_exec('cp docs/userguide/*.pdf %s' % htmldir)
+		do_exec('mv docs/userguide/*.pdf %s' % dst)
+		recursive_rmdir('docs')
+		pyc_remove(cvsdir)
 
-			os.chdir('docs/reference')
-			do_exec(python + ' ../tools/yaml2pdf.py reference.yml')
-			os.chdir(d)
-			do_exec('cp docs/reference/*.pdf %s' % htmldir)
-			do_exec('mv docs/reference/*.pdf %s' % dst)
-			os.chdir('docs/userguide')
-			do_exec(python + ' genuserguide.py')
-			os.chdir(d)
-			do_exec('cp docs/userguide/*.pdf %s' % htmldir)
-			do_exec('mv docs/userguide/*.pdf %s' % dst)
-			recursive_rmdir('docs')
-			pyc_remove(cvsdir)
-
-			#restore the python path
-			if opp is None:
-				del os.environ['PYTHONPATH']
-			else:
-				os.environ['PYTHONPATH'] = opp
+		#restore the python path
+		if opp is None:
+			del os.environ['PYTHONPATH']
+		else:
+			os.environ['PYTHONPATH'] = opp
 
 def do_zip(d):
 	'create .tgz and .zip file archives of d/reportlab'
