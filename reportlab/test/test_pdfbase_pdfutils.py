@@ -1,3 +1,7 @@
+#copyright ReportLab Inc. 2000-2001
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pdfbase_pdfutils.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_pdfutils.py,v 1.3 2001/04/05 09:30:12 rgbecker Exp $
 """Tests for utility functions in reportlab.pdfbase.pdfutils.
 """
 

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/fonts0.py?cvsroot=reportlab
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.30 2001/03/31 14:05:01 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.31 2001/04/05 09:30:12 rgbecker Exp $ '''
 __doc__=""" 
 This provides the character widths database for calculating
 text metrics.  Everything for the base 14 fonts is pre-computed

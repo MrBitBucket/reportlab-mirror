@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch8_future.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch9_future.py,v 1.1 2001/03/26 12:04:45 johnprecedo Exp $
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch9_future.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/docs/userguide/ch9_future.py,v 1.2 2001/04/05 09:30:11 rgbecker Exp $
 
 from genuserguide import *
 

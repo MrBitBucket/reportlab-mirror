@@ -1,3 +1,7 @@
+#copyright ReportLab Inc. 2000-2001
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_toc.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_toc.py,v 1.6 2001/04/05 09:30:12 rgbecker Exp $
 """Tests for the Platypus TableOfContents class.
 
 Currently there is only one such test. Most such tests, like this

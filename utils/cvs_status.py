@@ -1,3 +1,7 @@
+#copyright ReportLab Inc. 2000-2001
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/cvs_status.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/utils/cvs_status.py,v 1.2 2001/04/05 09:30:12 rgbecker Exp $
 from string import find, strip
 import os
 def cvs_status(path):

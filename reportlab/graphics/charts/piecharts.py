@@ -1,3 +1,7 @@
+#copyright ReportLab Inc. 2000-2001
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.2 2001/04/05 09:30:11 rgbecker Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual

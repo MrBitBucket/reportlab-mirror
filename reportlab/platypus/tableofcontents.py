@@ -1,3 +1,7 @@
+#copyright ReportLab Inc. 2000-2001
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tableofcontents.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/platypus/tableofcontents.py,v 1.2 2001/04/05 09:30:12 rgbecker Exp $
 """
 This module defines a single TableOfContents0() class that can be used to
 create automatically a table of tontents for Platypus documents like

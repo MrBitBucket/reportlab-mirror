@@ -1,4 +1,8 @@
-__version__=''' $Id: renderPS.py,v 1.5 2001/03/26 07:47:22 rgbecker Exp $ '''
+#copyright ReportLab Inc. 2000-2001
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPS.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.6 2001/04/05 09:30:11 rgbecker Exp $
+__version__=''' $Id: renderPS.py,v 1.6 2001/04/05 09:30:11 rgbecker Exp $ '''
 import string, cStringIO, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str

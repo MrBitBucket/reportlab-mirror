@@ -1,7 +1,8 @@
 #!/bin/env python
-###############################################################################
-#	$Log $
-#	
+#copyright ReportLab Inc. 2000-2001
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/testdrawings.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/graphics/testdrawings.py,v 1.2 2001/04/05 09:30:11 rgbecker Exp $
 __version__=''' $Id $ '''
 """This contains a number of routines to generate test drawings
 for reportlab/graphics.  For now they are contrived, but we will expand them
@@ -53,6 +54,25 @@ def getDrawing2():
     D.add(String(10,50, 'Basic Shapes', fillColor=colors.black))
 
     return D
+
+
+##def getDrawing2():
+##    """This drawing uses groups. Each group has two circles and a comment.
+##    The line style is set at group level and should be red for the left,
+##    bvlue for the right."""
+##    D = Drawing(400, 200)
+##
+##    Group1 = Group()
+##
+##    Group1.add(String(50, 50, 'Group 1', fillColor=colors.black))
+##    Group1.add(Circle(75,100,25))
+##    Group1.add(Circle(125,100,25))
+##    D.add(Group1)
+##
+##    Group2 = Group(
+##        String(250, 50, 'Group 2', fillColor=colors.black),
+##        Circle(275,100,25),
+##        Circle(325,100,25)#,
 
 
 ##def getDrawing2():

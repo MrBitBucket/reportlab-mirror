@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch1_intro.py,v 1.6 2001/04/02 16:28:01 johnprecedo Exp $
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch1_intro.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/docs/graphguide/ch1_intro.py,v 1.7 2001/04/05 09:30:11 rgbecker Exp $
 
 from gengraphguide import *
 import reportlab

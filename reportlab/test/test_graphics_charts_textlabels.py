@@ -1,3 +1,7 @@
+#copyright ReportLab Inc. 2000-2001
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_graphics_charts_textlabels.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/test/Attic/test_graphics_charts_textlabels.py,v 1.3 2001/04/05 09:30:12 rgbecker Exp $
 """
 Tests for the text Label class.
 """

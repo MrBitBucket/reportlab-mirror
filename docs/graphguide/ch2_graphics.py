@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.16 2001/04/03 12:01:03 johnprecedo Exp $
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.17 2001/04/05 09:30:11 rgbecker Exp $
 
 from gengraphguide import *
 

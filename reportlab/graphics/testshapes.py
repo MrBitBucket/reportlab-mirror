@@ -1,4 +1,8 @@
 #!/bin/env python
+#copyright ReportLab Inc. 2000-2001
+#see license.txt for license details
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/testshapes.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.9 2001/04/05 09:30:11 rgbecker Exp $
 
 # testshapes.py - draws shapes onto a PDF canvas.
 
@@ -342,6 +346,33 @@ def getDrawing10():
         
     return D
 
+from widgets.signsandsymbols import SmileyFace0
+def getDrawing11():
+	'''test of anchoring'''
+	def makeSmiley(x, y, size, color):
+		"Make a smiley data item representation."
+		d = size
+		s = SmileyFace0()
+		s.color = color
+		s.x = x-d
+		s.y = y-d
+		s.size = d*2
+		return s
+
+	D = Drawing(400, 200) #, fillColor=colors.purple)
+	g = Group(transform=(1,0,0,1,0,0))
+	g.add(makeSmiley(100,100,10,colors.red))
+	g.add(Line(90,100,110,100,strokeColor=colors.green))
+	g.add(Line(100,90,100,110,strokeColor=colors.green))
+	D.add(g)
+	g = Group(transform=(2,0,0,2,100,-100))
+	g.add(makeSmiley(100,100,10,colors.blue))
+	g.add(Line(90,100,110,100,strokeColor=colors.green))
+	g.add(Line(100,90,100,110,strokeColor=colors.green))
+	D.add(g)
+	g = Group(transform=(2,0,0,2,0,0))
+	return D
+
 def getAllFunctionDrawingNames():
     "Get a list of drawing function names from somewhere."
 
@@ -355,7 +386,6 @@ def getAllFunctionDrawingNames():
             funcNames.append(funcName)
 
     return funcNames
-
 
 def writePDF(drawings):
     "Create and save a PDF file containing some drawings."

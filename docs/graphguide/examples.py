@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/examples.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/examples.py,v 1.1 2001/03/29 07:15:25 dinu_gherman Exp $
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/examples.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/docs/graphguide/Attic/examples.py,v 1.2 2001/04/05 09:30:11 rgbecker Exp $
 import string
 
 testannotations="""
