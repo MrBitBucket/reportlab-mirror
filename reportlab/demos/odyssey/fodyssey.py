@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: fodyssey.py,v $
+#	Revision 1.7  2000/05/12 16:19:07  rgbecker
+#	Title leading changes
+#
 #	Revision 1.6  2000/05/12 14:19:03  andy_robinson
 #	Added 'if __name__=='__main__'' handlers to demos
-#
+#	
 #	Revision 1.5  2000/05/12 12:49:38  rgbecker
 #	Minor fixes and changes for comparison with dodyssey.py
 #	
@@ -49,7 +52,7 @@
 #	Revision 1.1  2000/04/06 08:58:09  rgbecker
 #	Paragraph formatting version of odyssey.py
 #	
-__version__=''' $Id: fodyssey.py,v 1.6 2000/05/12 14:19:03 andy_robinson Exp $ '''
+__version__=''' $Id: fodyssey.py,v 1.7 2000/05/12 16:19:07 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -88,6 +91,7 @@ ChapterStyle.alignment = TA_CENTER
 ChapterStyle.fontsize = 16
 InitialStyle = copy.deepcopy(ChapterStyle)
 InitialStyle.fontsize = 16
+InitialStyle.leading = 20
 PreStyle = styles["Code"] 
 
 def newPage():

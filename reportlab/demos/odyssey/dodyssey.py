@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: dodyssey.py,v $
+#	Revision 1.3  2000/05/12 16:19:07  rgbecker
+#	Title leading changes
+#
 #	Revision 1.2  2000/05/12 14:19:03  andy_robinson
 #	Added 'if __name__=='__main__'' handlers to demos
-#
+#	
 #	Revision 1.1  2000/05/12 12:45:27  rgbecker
 #	Initial doctemplate version of fodyssey.py
 #	
@@ -49,7 +52,7 @@
 #	Revision 1.1  2000/04/06 08:58:09  rgbecker
 #	Paragraph formatting version of odyssey.py
 #	
-__version__=''' $Id: dodyssey.py,v 1.2 2000/05/12 14:19:03 andy_robinson Exp $ '''
+__version__=''' $Id: dodyssey.py,v 1.3 2000/05/12 16:19:07 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -98,6 +101,7 @@ ChapterStyle.alignment = TA_CENTER
 ChapterStyle.fontsize = 14
 InitialStyle = copy.deepcopy(ChapterStyle)
 InitialStyle.fontsize = 16
+InitialStyle.leading = 20
 PreStyle = styles["Code"] 
 
 def newPage():
@@ -108,7 +112,8 @@ def chapter(txt, style=ChapterStyle):
 	newPage()
 	Elements.append(Paragraph(txt, style))
 	Elements.append(doctemplate.Spacer(0.2*inch, 0.3*inch))
-	Elements.append(doctemplate.NextPageTemplate('TwoCol'))
+	if useTwoCol:
+		Elements.append(doctemplate.NextPageTemplate('TwoCol'))
 
 def fTitle(txt,style=InitialStyle):
 	Elements.append(Paragraph(txt, style))
@@ -124,6 +129,8 @@ elif 'center' in sys.argv or 'centre' in sys.argv:
 	ParaStyle.alignment = TA_CENTER
 else:
 	ParaStyle.alignment = TA_JUSTIFY
+
+useTwoCol = 'notwocol' not in sys.argv 
 
 def spacer(inches):
 	Elements.append(doctemplate.Spacer(0.1*inch, inches*inch))
