@@ -1,14 +1,16 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/spider.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/doughnut.py,v 1.1 2003/06/13 10:46:25 johnprecedo Exp $
+#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/doughnut.py?cvsroot=reportlab
+#$Header: /tmp/reportlab/reportlab/graphics/charts/doughnut.py,v 1.2 2003/06/13 11:07:17 johnprecedo Exp $
 # doughnut chart
 
 """Doughnut chart
 
+Produces a circular chart like the doughnut charts produced by Excel.
+Can handle multiple series (which produce concentric 'rings' in the chart).
 
 """
-__version__=''' $Id: doughnut.py,v 1.1 2003/06/13 10:46:25 johnprecedo Exp $ '''
+__version__=''' $Id: doughnut.py,v 1.2 2003/06/13 11:07:17 johnprecedo Exp $ '''
 
 import copy
 from math import sin, cos, pi
