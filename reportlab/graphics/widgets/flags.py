@@ -1,6 +1,6 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/flags.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.15 2001/10/11 16:15:10 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.16 2001/10/18 22:28:55 dinu_gherman Exp $
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 
@@ -41,6 +41,7 @@ from math import sin, cos, pi
 validFlag=OneOf(None,
 				'UK',
 				'USA',
+				'Afghanistan',
 				'Austria',
 				'Belgium',
 				'China',
@@ -54,6 +55,7 @@ validFlag=OneOf(None,
 				'Japan',
 				'Luxembourg',
 				'Holland',
+				'Palestine',
 				'Portugal',
 				'Russia',
 				'Spain',
@@ -262,6 +264,23 @@ class Flag(_Symbol):
 				ls.fillColor = colors.mintcream
 				ls.y = s-(starycounter+1)*s9+(s/18)+lss2
 				g.add(ls)
+		return g
+
+	def _Flag_Afghanistan(self):
+		s = _size
+		g = Group()
+
+		box = Rect(0, 0, s*2, s,
+			fillColor = colors.mintcream, strokeColor = colors.black, strokeWidth=0)
+		g.add(box)
+
+		greenbox = Rect(0, ((s/3.0)*2.0), width=s*2.0, height=s/3.0,
+				fillColor = colors.limegreen, strokeColor = None, strokeWidth=0)
+		g.add(greenbox)
+
+		blackbox = Rect(0, 0, width=s*2.0, height=s/3.0,
+				fillColor = colors.black, strokeColor = None, strokeWidth=0)
+		g.add(blackbox)
 		return g
 
 	def _Flag_Austria(self):
@@ -591,6 +610,32 @@ class Flag(_Symbol):
 		g.add(bluewedge)
 		return g
 
+	def _Flag_Palestine(self):
+		s = _size
+		g = Group()
+		box = Rect(0, s/3, s*2, s/3,
+			fillColor = colors.mintcream,
+						strokeColor = colors.black,
+			strokeWidth=0)
+		g.add(box)
+
+		greenbox = Rect(0, 0, width=s*2, height=s/3,
+			fillColor = colors.limegreen,
+			strokeColor = None,
+			strokeWidth=0)
+		g.add(greenbox)
+
+		blackbox = Rect(0, 2*s/3, width=s*2, height=s/3,
+			fillColor = colors.black,
+			strokeColor = None,
+			strokeWidth=0)
+		g.add(blackbox)
+
+		redwedge = Polygon(points = [ 0, 0, 2*s/3, (s/2), 0, s],
+					fillColor = colors.red, strokeColor = None, strokeWidth=0)
+		g.add(redwedge)
+		return g
+
 	def _Flag_Turkey(self):
 		s = _size
 		g = Group()
@@ -675,6 +720,7 @@ def test():
 	flags = [
 			'UK',
 			'USA',
+			'Afghanistan',
 			'Austria',
 			'Belgium',
 			'Denmark',
@@ -686,6 +732,7 @@ def test():
 			'Italy',
 			'Luxembourg',
 			'Holland',
+			'Palestine',
 			'Portugal',
 			'Spain',
 			'Sweden',
