@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.32 2002/11/03 14:51:09 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.32 2002/11/03 14:51:09 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.33 2003/04/04 15:30:51 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.33 2003/04/04 15:30:51 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -114,7 +114,7 @@ class Flowable:
         return []
 
     def getKeepWithNext(self):
-        """returns boolean determining whether the next flowabel should stay with this one"""
+        """returns boolean determining whether the next flowable should stay with this one"""
         if hasattr(self,'keepWithNext'): return self.keepWithNext
         elif hasattr(self,'style') and hasattr(self.style,'keepWithNext'): return self.style.keepWithNext
         else: return 0
