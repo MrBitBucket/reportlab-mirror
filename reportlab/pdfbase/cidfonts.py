@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/cidfonts?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: cidfonts.py,v 1.4 2001/09/19 22:38:13 andy_robinson Exp $ '''
+__version__=''' $Id: cidfonts.py,v 1.5 2001/09/28 21:27:17 andy_robinson Exp $ '''
 __doc__="""CID (Asian multi-byte) font support.
 
 This defines classes to represent CID fonts.  They know how to calculate
@@ -67,13 +67,8 @@ class CIDEncoding(pdfmetrics.Encoding):
         ones.  Some refer to others with a 'usecmap'
         command"""
         cmapfile = findCMapFile(name)
-        
+        # this will CRAWL with the unicode encodings...
         rawdata = open(cmapfile, 'r').read()
-        if len(rawdata) > 50000:
-            # CMAPs for unicode have 7000+ explicit ranges, takes minutes
-            # to parse.  Can we 'can' this data?
-            #print 'CMAP file %s too big, needs recoding in C' % name
-            return
         #if it contains the token 'usecmap', parse the other
         #cmap file first....
         usecmap_pos = find(rawdata, 'usecmap')
@@ -236,23 +231,18 @@ class CIDTypeFace(pdfmetrics.TypeFace):
 class CIDFont(pdfmetrics.Font):
     "Represents a built-in multi-byte font"
     def __init__(self, face, encoding):
-##        self._multiByte = 1
-##        self.fontName = face + '-' + encoding
-##        self.face = CIDTypeFace(face)
-##        self.encoding = CIDEncoding(encoding)
 
         self._multiByte = 1
         assert face in allowedTypeFaces, "TypeFace '%s' not supported! Use any of these instead: %s" % (face, allowedTypeFaces)
         self.faceName = face
         self.face = CIDTypeFace(face)
+
+        assert encoding in allowedEncodings, "Encoding '%s' not supported!  Use any of these instead: %s" % (encoding, allowedEncodings)
+        self.encodingName = encoding
         self.encoding = CIDEncoding(encoding)
 
-#        self.widths = [0.668] * 256
-        assert encoding in allowedEncodings, "Encoding '%s' not supported!  Use any of these instead: %s" % (encoding, allowedEncodings)
-        self.encoding = encoding
-
         #legacy hack doing quick cut and paste.
-        self.fontName = self.faceName + '-' + self.encoding
+        self.fontName = self.faceName + '-' + self.encodingName
         self.name = self.fontName
             
     def stringWidth(self, text, size):
@@ -271,7 +261,7 @@ class CIDFont(pdfmetrics.Font):
 
         bigDict = CIDFontInfo[self.face.name]
         bigDict['Name'] = '/' + internalName
-        bigDict['Encoding'] = '/' + self.encoding
+        bigDict['Encoding'] = '/' + self.encodingName
 
         #convert to PDF dictionary/array objects
         cidObj = structToPDF(bigDict)

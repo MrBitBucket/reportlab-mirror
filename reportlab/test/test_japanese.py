@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/Attic/test_japanese.py,v 1.6 2001/09/25 22:32:10 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/Attic/test_japanese.py,v 1.7 2001/09/28 21:27:17 andy_robinson Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -66,7 +66,7 @@ class JapaneseFontTests(unittest.TestCase):
         # this says "This is HeiseiKakugo" in shift-JIS
         message2 = '\202\261\202\352\202\315\225\275\220\254\212p\203S\203V\203b\203N\202\305\202\267\201B'
         c.drawString(100, 650, message2) 
-        wid = pdfmetrics.stringWidth(message1, 'HeiseiKakuGo-W5-90ms-RKSJ-H', 16)
+        wid = pdfmetrics.stringWidth(message2, 'HeiseiKakuGo-W5-90ms-RKSJ-H', 16)
         c.rect(100,650,wid,16,stroke=1,fill=0)
 
         
@@ -80,28 +80,34 @@ class JapaneseFontTests(unittest.TestCase):
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','EUC-H'))
         self.hDraw(c, '\xC5\xEC\xB5\xFE says Tokyo in EUC', 'HeiseiMin-W3-EUC-H', 100, 550)
 
-        pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','UniJIS-UCS2-H'))
-        def asciiToUCS2(text):
-            s = ''
-            for ch in text:
-                s = s + chr(0) + ch
-            return s
-        self.hDraw(c, '\x67\x71\x4E\xAC' + asciiToUCS2(' says Tokyo in UCS2'),
-                   'HeiseiMin-W3-UniJIS-UCS2-H', 100, 525)
+        if 0:
+            #this is super-slow until we do encoding caching.
+            pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','UniJIS-UCS2-H'))
+            def asciiToUCS2(text):
+                s = ''
+                for ch in text:
+                    s = s + chr(0) + ch
+                return s
+            self.hDraw(c, '\x67\x71\x4E\xAC' + asciiToUCS2(' says Tokyo in UCS2'),
+                       'HeiseiMin-W3-UniJIS-UCS2-H', 100, 525)
                     
 
         # now try verticals
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90ms-RKSJ-V'))
         c.setFont('HeiseiMin-W3-90ms-RKSJ-V', 16)
         c.drawString(400, 650, '\223\214\213\236 vertical Shift-JIS')
+        height = c.stringWidth('\223\214\213\236 vertical Shift-JIS', 'HeiseiMin-W3-90ms-RKSJ-V', 16)
+        c.rect(400,650,16,-height)
         
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','EUC-V'))
         c.setFont('HeiseiMin-W3-EUC-V', 16)
         c.drawString(425, 650, '\xC5\xEC\xB5\xFE vertical EUC')
-
-        pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','UniJIS-UCS2-V'))
-        c.setFont('HeiseiMin-W3-UniJIS-UCS2-V', 16)
-        c.drawString(450, 650, '\x67\x71\x4E\xAC' + asciiToUCS2(' vertical UCS2'))
+        height = c.stringWidth('\xC5\xEC\xB5\xFE vertical EUC', 'HeiseiMin-W3-EUC-V', 16)
+        c.rect(425,650,16,-height)
+        
+##        pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','UniJIS-UCS2-V'))
+##        c.setFont('HeiseiMin-W3-UniJIS-UCS2-V', 16)
+##        c.drawString(450, 650, '\x67\x71\x4E\xAC' + asciiToUCS2(' vertical UCS2'))
 
         c.setFillColor(colors.purple)
         tx = c.beginText(100, 200)
