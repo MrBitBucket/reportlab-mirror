@@ -118,6 +118,13 @@ class StateTracker:
         "returns the current transformation matrix at this point"""
         return self.__combined[-1]['ctm']
 
+    def __getitem__(self,key):
+        "returns the complete graphics state value of key at this point"
+        return self.__combined[-1][key]
+
+    def __setitem__(self,key,value):
+        "sets the complete graphics state value of key to value"
+        self.__combined[-1][key] = value
 
 def testStateTracker():
     print 'Testing state tracker'

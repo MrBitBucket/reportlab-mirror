@@ -158,8 +158,10 @@ class Table(Flowable):
             raise ValueError, "%s invalid data type" % self.identity()
         self._nrows = nrows = len(data)
         self._cellvalues = []
+        _seqCW = type(colWidths) in _SeqTypes
+        _seqRH = type(rowHeights) in _SeqTypes
         if nrows: self._ncols = ncols = max(map(_rowLen,data))
-        elif colWidths: ncols = len(colWidths)
+        elif colWidths and _seqCW: ncols = len(colWidths)
         else: ncols = 0
         if not emptyTableAction: emptyTableAction = rl_config.emptyTableAction
         if not (nrows and ncols):
@@ -181,10 +183,10 @@ class Table(Flowable):
             return
 
         self._cellvalues = data
-        if colWidths is None: colWidths = ncols*[None]
+        if not _seqCW: colWidths = ncols*[colWidths]
         elif len(colWidths) != ncols:
             raise ValueError, "%s data error - %d columns in data but %d in grid" % (self.identity(),ncols, len(colWidths))
-        if rowHeights is None: rowHeights = nrows*[None]
+        if not _seqRH: rowHeights = nrows*[rowHeights]
         elif len(rowHeights) != nrows:
             raise ValueError, "%s data error - %d rows in data but %d in grid" % (self.identity(),nrows, len(rowHeights))
         for i in range(nrows):

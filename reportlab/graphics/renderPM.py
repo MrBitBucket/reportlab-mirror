@@ -273,45 +273,46 @@ class PMCanvas:
         if fmt is None:
             if type(fn) is not StringType:
                 raise ValueError, "Invalid type '%s' for fn when fmt is None" % type(fn)
+            fmt = os.path.splitext(fn)[1]
+            if fmt.startswith('.'): fmt = fmt[1:]
+        configPIL = self.configPIL or {}
+        fmt = string.upper(fmt)
+        if fmt in ['GIF']:
+            im = _convert2pilp(im)
+        elif fmt in ['PCT','PICT']:
+            return _saveAsPICT(im,fn,fmt,transparent=configPIL.get('transparent',None))
+        elif fmt in ['PNG','TIFF','BMP', 'PPM', 'TIF']:
+            if fmt=='TIF': fmt = 'TIFF'
+            if fmt=='PNG':
+                try:
+                    from PIL import PngImagePlugin
+                except ImportError:
+                    import PngImagePlugin
+            elif fmt=='BMP':
+                try:
+                    from PIL import BmpImagePlugin
+                except ImportError:
+                    import BmpImagePlugin
+        elif fmt in ('JPG','JPEG'):
+            fmt = 'JPEG'
         else:
-            configPIL = self.configPIL or {}
-            fmt = string.upper(fmt)
-            if fmt in ['GIF']:
-                im = _convert2pilp(im)
-            elif fmt in ['PCT','PICT']:
-                return _saveAsPICT(im,fn,fmt,transparent=configPIL.get('transparent',None))
-            elif fmt in ['PNG','TIFF','BMP', 'PPM', 'TIF']:
-                if fmt=='TIF': fmt = 'TIFF'
-                if fmt=='PNG':
-                    try:
-                        from PIL import PngImagePlugin
-                    except ImportError:
-                        import PngImagePlugin
-                elif fmt=='BMP':
-                    try:
-                        from PIL import BmpImagePlugin
-                    except ImportError:
-                        import BmpImagePlugin
-            elif fmt in ('JPG','JPEG'):
-                fmt = 'JPEG'
-            else:
-                raise RenderPMError,"Unknown image kind %s" % fmt
-            if fmt=='TIFF':
-                tc = configPIL.get('transparent',None)
-                if tc:
-                    from PIL import ImageChops, Image
-                    T = 768*[0]
-                    for o, c in zip((0,256,512), tc.bitmap_rgb()):
-                        T[o+c] = 255
-                    #if type(fn) is type(''): ImageChops.invert(im.point(T).convert('L').point(255*[0]+[255])).save(fn+'_mask.gif','GIF')
-                    im = Image.merge('RGBA', im.split()+(ImageChops.invert(im.point(T).convert('L').point(255*[0]+[255])),))
-                    #if type(fn) is type(''): im.save(fn+'_masked.gif','GIF')
-                for a,d in ('resolution',self._dpi),('resolution unit','inch'):
-                    configPIL[a] = configPIL.get(a,d)
-            apply(im.save,(fn,fmt),configPIL)
-            if not hasattr(fn,'write') and os.name=='mac':
-                from reportlab.lib.utils import markfilename
-                markfilename(fn,ext=fmt)
+            raise RenderPMError,"Unknown image kind %s" % fmt
+        if fmt=='TIFF':
+            tc = configPIL.get('transparent',None)
+            if tc:
+                from PIL import ImageChops, Image
+                T = 768*[0]
+                for o, c in zip((0,256,512), tc.bitmap_rgb()):
+                    T[o+c] = 255
+                #if type(fn) is type(''): ImageChops.invert(im.point(T).convert('L').point(255*[0]+[255])).save(fn+'_mask.gif','GIF')
+                im = Image.merge('RGBA', im.split()+(ImageChops.invert(im.point(T).convert('L').point(255*[0]+[255])),))
+                #if type(fn) is type(''): im.save(fn+'_masked.gif','GIF')
+            for a,d in ('resolution',self._dpi),('resolution unit','inch'):
+                configPIL[a] = configPIL.get(a,d)
+        apply(im.save,(fn,fmt),configPIL)
+        if not hasattr(fn,'write') and os.name=='mac':
+            from reportlab.lib.utils import markfilename
+            markfilename(fn,ext=fmt)
 
     def saveToString(self,fmt='GIF'):
         s = getStringIO()
@@ -504,6 +505,12 @@ class PMCanvas:
     def saveState(self):
         '''do nothing for compatibility'''
         pass
+
+    def setFillColor(self,aColor):
+        self.fillColor = Color2Hex(aColor)
+
+    def setStrokeColor(self,aColor):
+        self.strokeColor = Color2Hex(aColor)
 
     restoreState = saveState
 
