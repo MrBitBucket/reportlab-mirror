@@ -80,8 +80,17 @@ The method Canvas.beginText allows users to construct
 a PDFTextObject, which is defined in reportlab/pdfgen/textobject.py.
 
 .getClassDoc reportlab.pdfgen.textobject PDFTextObject
+
 .pageBreak
 .h1 <i>reportlab.platypus</i> subpackage
+
+The platypus package defines our high-level page layout API.
+The division into modules is far from final and has been
+based more on balancing the module lengths than on any
+particular programming interface.  The __init__ module
+imports the key classes into the top level of the package.
+
+.getClassDoc reportlab.platypus.paragraph Paragraph
 
 .pageBreak
 .h1 <i>reportlab.lib</i> subpackage
@@ -115,6 +124,9 @@ applications.
 .h1 Appendix A - CVS Revision History
 .beginPre Code
 $Log: reference.yml,v $
+Revision 1.7  2000/06/17 07:46:45  andy_robinson
+Small text changes
+
 Revision 1.6  2000/06/14 21:22:52  andy_robinson
 Added docs for library
 
