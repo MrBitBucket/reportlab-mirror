@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_docstrings.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_docstrings.py,v 1.5 2001/05/18 12:16:42 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_docstrings.py,v 1.6 2001/05/18 18:40:37 dinu_gherman Exp $
 
 """This is a test on a package level that find all modules,
 classes, methods and functions that do not have a doc string
@@ -38,11 +38,17 @@ def getModuleObjects(folder, rootName, typ):
     "Get a list of all function objects defined *somewhere* in a package."
 
     folders = [folder] + subFoldersOfFolder(folder)
-    
+
     objects = []
     for f in folders:
+        opath = sys.path
         sys.path.insert(0, f)
+        cwd = os.getcwd()
         os.chdir(f)
+
+        if not os.path.isfile('__init__.py'):
+            continue
+
         pattern = os.path.join('*.py')
         prefix = f[string.find(f, rootName):]
         prefix = string.replace(prefix, os.sep, '.')
@@ -54,7 +60,7 @@ def getModuleObjects(folder, rootName, typ):
         for mName in modNames:
             module = __import__(mName)
             # Get the 'real' (leaf) module
-            # (__import__ loads only the top-level one). 
+            # (__import__ loads only the top-level one).
             if string.find(mName, '.') != -1:
                 for part in string.split(mName, '.')[1:]:
                     module = getattr(module, part)
@@ -79,17 +85,18 @@ def getModuleObjects(folder, rootName, typ):
                             if type(a) == typ:
                                 cName = obj.__name__
                                 objects.append(("%s.%s" % (mName, cName), a))
-        del sys.path[0]
+        os.chdir(cwd)
+        sys.path = opath
 
     return objects
 
-    
+
 class DocstringTestCase(SecureTestCase):
     "Testing if objects in the ReportLab package have docstrings."
-    
+
     def _writeLogFile(self, objType):
         "Write log file for different kind of documentable objects."
-        
+
         cwd = os.getcwd()
 
         objects = getModuleObjects(RL_HOME, 'reportlab', objType)
@@ -117,7 +124,7 @@ class DocstringTestCase(SecureTestCase):
                     file.write("%s\n" % (obj.__name__))
         file.close()
 
-        
+
     def test1(self):
         "Test if functions have a doc string."
 
@@ -144,7 +151,7 @@ class DocstringTestCase(SecureTestCase):
 
 def makeSuite():
     suite = unittest.TestSuite()
-    
+
     suite.addTest(DocstringTestCase('test1'))
     suite.addTest(DocstringTestCase('test2'))
     suite.addTest(DocstringTestCase('test3'))
@@ -156,4 +163,3 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
-    
