@@ -31,16 +31,19 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.4  2000/05/12 15:13:41  rgbecker
+#	Fixes to alignment handling
+#
 #	Revision 1.3  2000/05/11 14:04:34  rgbecker
 #	Removed usage of spaceBefore/After in wrap methods
-#
+#	
 #	Revision 1.2  2000/04/19 13:14:06  rgbecker
 #	Fixed repeated breaklines bug
 #	
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.3 2000/05/11 14:04:34 rgbecker Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.4 2000/05/12 15:13:41 rgbecker Exp $ '''
 import string
 import types
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -67,14 +70,16 @@ def	_leftDrawParaLine( tx, offset, extraspace, words, last=0):
 	tx.moveCursor(-offset, 0)
 
 def	_centerDrawParaLine( tx, offset, extraspace, words, last=0):
-	tx.moveCursor(offset + 0.5 * extraspace, 0)
+	m = offset + 0.5 * extraspace
+	tx.moveCursor(m, 0)
 	tx._textOut(string.join(words),1)
-	tx.moveCursor(-offset + 0.5 * extraspace, 0)
+	tx.moveCursor(-m, 0)
 
 def	_rightDrawParaLine( tx, offset, extraspace, words, last=0):
-	tx.moveCursor(offset + extraspace, 0)
+	m = offset + extraspace
+	tx.moveCursor(m, 0)
 	tx._textOut(string.join(words),1)
-	tx.moveCursor(-offset + extraspace, 0)
+	tx.moveCursor(-m, 0)
 
 def	_justifyDrawParaLine( tx, offset, extraspace, words, last=0):
 	tx.moveCursor(offset, 0)
@@ -106,14 +111,16 @@ def	_leftDrawParaLineX( tx, offset, line, last=0):
 	tx.moveCursor(-offset, 0)
 
 def	_centerDrawParaLineX( tx, offset, line, last=0):
-	tx.moveCursor(offset + 0.5 * line.extraSpace, 0)
+	m = offset+0.5*line.extraSpace
+	tx.moveCursor(m, 0)
 	_putFragLine(tx, line.words)
-	tx.moveCursor(-offset + 0.5 * line.extraSpace, 0)
+	tx.moveCursor(-m, 0)
 
 def	_rightDrawParaLineX( tx, offset, line, last=0):
-	tx.moveCursor(offset + line.extraSpace, 0)
+	m = offset+line.extraSpace
+	tx.moveCursor(m, 0)
 	_putFragLine(tx, line.words)
-	tx.moveCursor(-offset + line.extraSpace, 0)
+	tx.moveCursor(-m, 0)
 
 def	_justifyDrawParaLineX( tx, offset, line, last=0):
 	tx.moveCursor(offset, 0)
