@@ -8,10 +8,8 @@ __doc__="""
 """
 
 _geomAttr=('x1', 'y1', 'width', 'height', 'leftPadding', 'bottomPadding', 'rightPadding', 'topPadding')
-
-_FUZZ=1e-6 # to avoid numerical difficulties we use this as an error band
-
 from reportlab import rl_config
+_FUZZ=rl_config._FUZZ
 
 class Frame:
     '''

@@ -18,6 +18,7 @@ invariant=                  0                       #produces repeatable,identic
 eps_preview_transparent=    None                    #set to white etc
 overlapAttachedSpace=       None                    #if set non false then adajacent flowable space after
                                                     #and space before are merged (max space is used).
+_FUZZ=                      1e-6                    #fuzz for layout arithmetic
 
 # places to look for T1Font information
 T1SearchPath =  (
