@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.85 2003/01/15 12:23:36 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.86 2003/02/24 13:26:07 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.85 2003/01/15 12:23:36 rgbecker Exp $ '''
+__version__=''' $Id: shapes.py,v 1.86 2003/02/24 13:26:07 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -547,7 +547,7 @@ class Drawing(Group, Flowable):
     def asGroup(self,*args,**kw):
         return self._copy(apply(Group,args,kw))
 
-    def save(self, formats=None, verbose=None, fnRoot=None, outDir=None):
+    def save(self, formats=None, verbose=None, fnRoot=None, outDir=None, title=''):
         from reportlab import rl_config
         "Saves copies of self in desired location and formats"
         ext = ''
@@ -580,7 +580,7 @@ class Drawing(Group, Flowable):
             from reportlab.graphics import renderPDF
             filename = fnroot+'.pdf'
             if verbose: print "generating PDF file %s" % filename
-            renderPDF.drawToFile(self, filename, fnroot,showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
+            renderPDF.drawToFile(self, filename, title, showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
             ext = ext +  '/.pdf'
 
         if 'gif' in plotMode:
