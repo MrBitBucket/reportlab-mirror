@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.37 2001/04/30 10:28:53 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.38 2001/07/11 20:49:59 aaron_watters Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -372,7 +372,7 @@ class EmbeddedType1Face(TypeFace):
     def _loadGlyphs(self, pfbFileName):
         """Loads in binary glyph data, and finds the four length
         measurements needed for the font descriptor"""
-        assert os.path.isfile(pfbFileName), 'file %s not found'
+        assert os.path.isfile(pfbFileName), 'file %s not found' % pfbFileName
         rawdata = open(pfbFileName, 'rb').read()
         self._binaryData = rawdata
         firstPS = string.find(rawdata, '%!PS')
