@@ -31,11 +31,14 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.12  2000/04/14 08:56:20  rgbecker
+#	Drawable ==> Flowable
+#
 #	Revision 1.11  2000/04/10 09:05:49  andy_robinson
 #	- Fixed multi-line strings
 #	- added cached image so demo works without PIL
 #	- added to-do list
-#
+#	
 #	Revision 1.10  2000/04/07 12:29:47  rgbecker
 #	Fixe apendi() typo
 #	
@@ -69,7 +72,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.11 2000/04/10 09:05:49 andy_robinson Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.12 2000/04/14 08:56:20 rgbecker Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -86,7 +89,7 @@ should be coded up.
 The parser, which is in a separate module to allow for multiple
 parsers, turns the XML sample into an object tree.  There is a
 simple class hierarchy of items, the inner levels of which create
-drawable objects to go in the frames.  These know how to draw
+flowable objects to go in the frames.  These know how to draw
 themselves.
 
 The currently available 'Presentation Objects' are:
@@ -238,8 +241,8 @@ class PPFrame:
         #build a story for the frame
         story = []
         for thingy in self.content:
-            #ask it for any drawables
-            story.append(thingy.getDrawable())
+            #ask it for any flowables
+            story.append(thingy.getFlowable())
         #draw it
         
         frame.addFromList(story)
@@ -251,7 +254,7 @@ class PPPara:
         self.rawtext = ''
         self.style = None
 
-    def getDrawable(self):
+    def getFlowable(self):
         return layout.Paragraph(
                     self.rawtext,
                     getStyles()[self.style],
@@ -264,7 +267,7 @@ class PPPreformattedText:
         self.rawtext = ''
         self.style = None
 
-    def getDrawable(self):
+    def getFlowable(self):
         return layout.Preformatted(self.rawtext, getStyles()[self.style])
 
 class PPImage:
@@ -274,7 +277,7 @@ class PPImage:
         self.width = None
         self.height = None
 
-    def getDrawable(self):
+    def getFlowable(self):
         return layout.Image(self.filename, self.width, self.height)
 
 

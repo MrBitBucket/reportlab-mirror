@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: testplatypus.py,v $
+#	Revision 1.11  2000/04/14 08:56:20  rgbecker
+#	Drawable ==> Flowable
+#
 #	Revision 1.10  2000/04/13 17:10:38  rgbecker
 #	minor adjustments
-#
+#	
 #	Revision 1.9  2000/04/13 14:48:41  rgbecker
 #	<para> tag added in layout.py paraparser.py
 #	
@@ -59,7 +62,7 @@
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testplatypus.py,v 1.10 2000/04/13 17:10:38 rgbecker Exp $ '''
+__version__=''' $Id: testplatypus.py,v 1.11 2000/04/14 08:56:20 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -156,7 +159,7 @@ def getCommentary():
         What concepts does PLATYPUS deal with?
         """, styleSheet['Heading2']))
     story.append(layout.Paragraph("""
-        The central concepts in PLATYPUS are Drawable Objects, Frames, Flow
+        The central concepts in PLATYPUS are Flowable Objects, Frames, Flow
         Management, Styles and Style Sheets, Paragraphs and Tables.  This is
         best explained in contrast to PDFgen, the layer underneath PLATYPUS.
         PDFgen is a graphics library, and has primitive commans to draw lines
@@ -185,29 +188,29 @@ def getCommentary():
     #######################################################################
     
     story.append(layout.Paragraph("""
-        Drawable Objects
+        Flowable Objects
         """, styleSheet['Heading2']))
     spam = """
-        The first and most fundamental concept is that of a 'Drawable Object'.
+        The first and most fundamental concept is that of a 'Flowable Object'.
         In PDFgen, you draw stuff by calling methods of the canvas to set up
         the colors, fonts and line styles, and draw the graphics primitives.
         If you set the pen color to blue, everything you draw after will be
         blue until you change it again.  And you have to handle all of the X-Y
         coordinates yourself.
 
-        A 'Drawable object' is exactly what it says.  It knows how to draw itself
+        A 'Flowable object' is exactly what it says.  It knows how to draw itself
         on the canvas, and the way it does so is totally independent of what
         you drew before or after.  Furthermore, it draws itself at the location
         on the page you specify.
 
-        The most fundamental Drawable Objects in most documents are likely to be
+        The most fundamental Flowable Objects in most documents are likely to be
         paragraphs, tables, diagrams/charts and images - but there is no
         restriction.  You can write your own easily, and I hope that people
         will start to contribute them.  (Note for PIDDLE users - we'll provide a "PIDDLE drawing" object to let
         you insert platform-independent graphics into the flow of a document
         in the next couple of weeks)
 
-        When you write a drawable object, you inherit from Drawable and
+        When you write a flowable object, you inherit from Flowable and
         must implement two methods.  object.wrap(availWidth, availHeight) will be called by other parts of
         the system, and tells you how much space you have.  You should return
         how much space you are going to use.  For a fixed-size object, this
@@ -217,13 +220,13 @@ def getCommentary():
 
 
         The second method is object.draw().  Here, you do whatever you want.
-        The Drawable base class sets things up so that you have an origin of
+        The Flowable base class sets things up so that you have an origin of
         (0,0) for your drawing, and everything will fit nicely if you got the
         height and width right.  It also saves and restores the graphics state
         around your calls, so you don;t have to reset all the properties you
         changed.
 
-        Programs which actually draw a Drawable don't
+        Programs which actually draw a Flowable don't
         call draw() this directly - they call object.drawOn(canvas, x, y).
         So you can write code in your own coordinate system, and things
         can be drawn anywhere on the page (possibly even scaled or rotated).
@@ -237,7 +240,7 @@ def getCommentary():
     #######################################################################
 
     story.append(layout.Paragraph("""
-        Available Drawable Objects
+        Available Flowable Objects
         """, styleSheet['Heading2']))
 
 ##    spam = """
@@ -247,12 +250,12 @@ def getCommentary():
 ##        story.append(layout.Paragraph(text, styleSheet['BodyText']))
 
     story.append(layout.Paragraph("""
-        Platypus comes with a basic set of drawable objects.  Here we list their
+        Platypus comes with a basic set of flowable objects.  Here we list their
         class names and tell you what they do:
         """, styleSheet['BodyText']))
     #we can use the bullet feature to do a definition list
     story.append(layout.Paragraph("""
-        This is a contrived object to give an example of a Drawable -
+        This is a contrived object to give an example of a Flowable -
         just a fixed-size box with an X through it and a centred string.""",
             styleSheet['Definition'],
             bulletText='XBox  '  #hack - spot the extra space after
@@ -323,7 +326,7 @@ def getCommentary():
     return story
 
 def getExamples():
-    """Returns all the example drawable objects"""
+    """Returns all the example flowable objects"""
     styleSheet = layout.getSampleStyleSheet()
     
     story = []
@@ -382,10 +385,10 @@ def getExamples():
     #######################################################################
     
     story.append(layout.Paragraph("""
-        Here's the base class for Drawable...
+        Here's the base class for Flowable...
         """, styleSheet['Italic']))
     
-    code = '''class Drawable:
+    code = '''class Flowable:
         """Abstract base class for things to be drawn.  Key concepts:
     1. It knows its size
     2. It draws in its own coordinate system (this requires the

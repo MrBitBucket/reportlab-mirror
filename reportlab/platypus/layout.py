@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.15  2000/04/14 08:56:20  rgbecker
+#	Drawable ==> Flowable
+#
 #	Revision 1.14  2000/04/13 17:06:40  rgbecker
 #	Fixed SimpleFrame.add
-#
+#	
 #	Revision 1.13  2000/04/13 14:48:41  rgbecker
 #	<para> tag added in layout.py paraparser.py
 #	
@@ -70,7 +73,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.14 2000/04/13 17:06:40 rgbecker Exp $ '''
+__version__=''' $Id: layout.py,v 1.15 2000/04/14 08:56:20 rgbecker Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -280,11 +283,11 @@ def cleanBlockQuotedText(text):
 	return string.join(trimmed_lines, ' ')
 
 #############################################################
-#	Drawable Objects - a base class and a few examples.
+#	Flowable Objects - a base class and a few examples.
 #	One is just a box to get some metrics.	We also have
 #	a paragraph, an image and a special 'page break'
 #	object which fills the space.
-class Drawable:
+class Flowable:
 	"""Abstract base class for things to be drawn.	Key concepts:
 	1. It knows its size
 	2. It draws in its own coordinate system (this requires the
@@ -313,11 +316,11 @@ class Drawable:
 		size actually used."""
 		return (self.width, self.height)
 
-class XBox(Drawable):
-	"""Example drawable - a box with an x through it and a caption.
+class XBox(Flowable):
+	"""Example flowable - a box with an x through it and a caption.
 	This has a known size, so does not need to respond to wrap()."""
 	def __init__(self, width, height, text = 'A Box'):
-		Drawable.__init__(self)
+		Flowable.__init__(self)
 		self.width = width
 		self.height = height
 		self.text = text
@@ -448,7 +451,7 @@ def _getFragWords(frags):
 		f = r[1][0]
 	return R
 
-class Paragraph(Drawable):
+class Paragraph(Flowable):
 	def __init__(self, text, style, bulletText = None):
 		text = cleanBlockQuotedText(text)
 		style, rv = _parser.parse(text,style)
@@ -738,7 +741,7 @@ class Paragraph(Drawable):
 			canvas.drawText(tx)
 			canvas.restoreState()
 
-class Preformatted(Drawable):
+class Preformatted(Flowable):
 	"""This is like the HTML <PRE> tag.  The line breaks are exactly where you put
 	them, and it will not be wrapped.  So it is much simpler to implement!"""
 	def __init__(self, text, style, bulletText = None, dedent=0):
@@ -787,7 +790,7 @@ class Preformatted(Drawable):
 			tx.textLine(text)
 		self.canv.drawText(tx)
 
-class Image(Drawable):
+class Image(Flowable):
 	def __init__(self, filename, width=None, height=None):
 		"""If size to draw at not specified, get it from the image."""
 		import Image  #this will raise an error if they do not have PIL.
@@ -818,7 +821,7 @@ class Image(Drawable):
 								  self.drawWidth,
 								  self.drawHeight
 								  )
-class Spacer(Drawable):
+class Spacer(Flowable):
 	"""A spacer just takes up space and doesn't draw anything - it can
 	ensure a gap between objects."""
 	def __init__(self, width, height):
@@ -831,7 +834,7 @@ class Spacer(Drawable):
 	def draw(self):
 		pass
 
-class PageBreak(Drawable):
+class PageBreak(Flowable):
 	"""This works by consuming all remaining space in the frame!"""
 
 	def wrap(self, availWidth, availHeight):
@@ -855,7 +858,7 @@ class PageBreak(Drawable):
 
 		#self.canv.drawString(self.text, x, y, font=f)
 
-class Macro(Drawable):
+class Macro(Flowable):
 	"""This is not actually drawn (i.e. it has zero height)
 	but is executed when it would fit in the frame.  Allows direct
 	access to the canvas through the object 'canvas'"""
@@ -887,7 +890,7 @@ FrameFullError = "FrameFullError"
 LayoutError = "LayoutError"
 
 class SimpleFrame:
-	"""A region into which drawable objects are to be packed.
+	"""A region into which flowable objects are to be packed.
 	Flows downwards.  A more general solution is needed which
 	will allow flows in any direction, including 'across and then
 	down' for small objects, but this is useful for
@@ -920,7 +923,7 @@ class SimpleFrame:
 		self.y = y2 - self.topPadding
 
 
-	def add(self, drawable):
+	def add(self, flowable):
 		""" Draws the object at the current position.
 		Returns 1 if successful, 0 if it would not fit.
 		Raises a LayoutError if the object is too wide,
@@ -928,7 +931,7 @@ class SimpleFrame:
 		to avoid infinite loops"""
 		y = self.y
 		p = self.bottomMargin + self.bottomPadding
-		w, h = drawable.wrap(self.width, y - p )
+		w, h = flowable.wrap(self.width, y - p )
 
 		if h > self.height:
 			raise "LayoutError", "Object (%d points) too high for frame (%d points)." % (h, self.height)
@@ -939,9 +942,9 @@ class SimpleFrame:
 			return 0
 		else:
 			#now we can draw it, and update the current point.
-			drawable.drawOn(self.canvas, self.x, y)
+			flowable.drawOn(self.canvas, self.x, y)
 			self.y = y
-			self.objects.append(drawable)
+			self.objects.append(flowable)
 			return 1
 
 	def addFromList(self, drawlist):
@@ -995,7 +998,7 @@ class Sequencer:
 	def reset(self, category):
 		self.dict[category] = 0
 
-def _doNothing(drawables, doc):
+def _doNothing(flowables, doc):
 	"Dummy callback for onFirstPage and onNewPage"
 	pass
 
@@ -1007,7 +1010,7 @@ def _doNothing(drawables, doc):
 class SimpleFlowDocument:
 	"""A sample document that uses a single frame on each page.
 	The intention is for programmers to create their own document
-	models as needed.  This one accepts a list of drawables. You
+	models as needed.  This one accepts a list of flowables. You
 	can provide callbacks to decorate the first page and
 	subsequent pages; these should do headers, footers, sidebars
 	as needed."""
@@ -1028,7 +1031,7 @@ class SimpleFlowDocument:
 		self.onNewPage = _doNothing
 
 
-	def build(self, drawables):
+	def build(self, flowables):
 		canv = canvas.Canvas(self.filename)
 		#canv.setPageTransition('Dissolve')
 
@@ -1042,10 +1045,10 @@ class SimpleFlowDocument:
 					self.topMargin - inch - self.bottomMargin
 							)
 		frame1.showBoundary = self.showBoundary
-		frame1.addFromList(drawables)
-		#print 'drew page %d, %d objects remaining' % (self.page, len(drawables))
+		frame1.addFromList(flowables)
+		#print 'drew page %d, %d objects remaining' % (self.page, len(flowables))
 		# do subsequent pages
-		while len(drawables) > 0:
+		while len(flowables) > 0:
 			canv.showPage()
 			self.page = self.page + 1
 			self.onNewPage(canv, self)
@@ -1057,9 +1060,9 @@ class SimpleFlowDocument:
 					self.topMargin - self.bottomMargin
 							)
 			frame.showBoundary = self.showBoundary
-			frame.addFromList(drawables)
+			frame.addFromList(flowables)
 
-			#print 'drew page %d, %d objects remaining' % (self.page, len(drawables))
+			#print 'drew page %d, %d objects remaining' % (self.page, len(flowables))
 
 		canv.save()
 	##########################################################

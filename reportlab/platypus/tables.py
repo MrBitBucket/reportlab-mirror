@@ -31,16 +31,19 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.5  2000/04/14 08:56:20  rgbecker
+#	Drawable ==> Flowable
+#
 #	Revision 1.4  2000/02/17 02:09:05  rgbecker
 #	Docstring & other fixes
-#
+#	
 #	Revision 1.3  2000/02/15 17:55:59  rgbecker
 #	License text fixes
 #	
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.4 2000/02/17 02:09:05 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.5 2000/04/14 08:56:20 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -76,7 +79,7 @@ class TableStyle:
     def getCommands(self):
         return self._cmds
         
-class Table(layout.Drawable):
+class Table(layout.Flowable):
     def __init__(self, colWidths, rowHeights, data):
         if not colWidths:
             raise ValueError, "Table must have at least 1 column"
