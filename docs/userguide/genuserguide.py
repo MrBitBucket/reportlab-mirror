@@ -32,16 +32,19 @@
 #
 ###############################################################################
 #	$Log: genuserguide.py,v $
+#	Revision 1.4  2000/06/21 15:16:05  aaron_watters
+#	Lots of graphical examples added
+#
 #	Revision 1.3  2000/06/20 20:31:42  aaron_watters
 #	typos and more examples
-#
+#	
 #	Revision 1.2  2000/06/19 21:13:02  aaron_watters
 #	2nd try. more text
 #	
 #	Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #	initial checkin. user guide generation framework.
 #	
-__version__=''' $Id: genuserguide.py,v 1.3 2000/06/20 20:31:42 aaron_watters Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.4 2000/06/21 15:16:05 aaron_watters Exp $ '''
 
 
 __doc__ = """
@@ -161,6 +164,10 @@ class OperationWrapper(Flowable):
         canvas.restoreState()
         canvas.rect(0,0,x,y)
         
+
+def pencilnote():
+    BODY.append(examples.NoteAnnotation())
+        
 ###### testing...
 #canvasdemo(NOP)
 
@@ -178,6 +185,8 @@ class OperationWrapper(Flowable):
       
 #canvasdemo(NOP) # execute some code
 
+#pencilnote()
+
 head("ReportLab User Guide")
 
 disc("""
@@ -186,6 +195,10 @@ to the use of the ReportLab packages.  Some previous programming experience
 is presumed and familiarity with the Python Programming language is
 recommended.
 """)
+
+#canvasdemo(NOP) # execute some code
+
+pencilnote()
 
 disc("""
 This document is in a <em>very</em> preliminary form.
@@ -461,6 +474,12 @@ disc("""This produces the following.""")
 
 canvasdemo(examples.translate)
 
+
+#canvasdemo(NOP) # execute some code
+
+pencilnote()
+
+
 disc("""
 <em>Note:</em> As illustrated in the example it is perfectly possible to draw objects 
 or parts of objects "off the page".
@@ -484,6 +503,12 @@ disc("""This produces a "short and fat" reduced version of the previously displa
 
 canvasdemo(examples.scale)
 
+
+#canvasdemo(NOP) # execute some code
+
+pencilnote()
+
+
 disc("""<em>Note:</em> scaling may also move objects or parts of objects off the page,
 or may cause objects to "shrink to nothing." """)
 
@@ -499,6 +524,12 @@ translation) and then does the <em>same</em> operations in a different order.
 Observe the effect below.""")
 
 canvasdemo(examples.scaletranslate)
+
+
+#canvasdemo(NOP) # execute some code
+
+pencilnote()
+
 
 disc("""<em>Note:</em> scaling shrinks or grows everything including line widths
 so using the canvas.scale method to render a microscopic drawing in 
@@ -556,7 +587,15 @@ lesson('Fonts and text objects')
 
 lesson('Paths and polygons')
 
+eg(examples.testpenciltip)
+
+canvasdemo(examples.penciltip)
+
 lesson('Rectangles, circles, ellipses')
+
+eg(examples.testpencil)
+
+canvasdemo(examples.pencil)
 
 lesson('Bezier curves')
 
@@ -569,6 +608,14 @@ eg(examples.testbezier2)
 canvasdemo(examples.bezier2)
 
 lesson("...more lessons...")
+
+#####################################################################################################3
+
+lesson("Introduction to Platypus")
+
+lesson("A very simple Flowable")
+
+eg(examples.testnoteannotation)
     
 if __name__=="__main__":
     g = Guide()
