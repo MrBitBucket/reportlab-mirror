@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.56 2002/03/18 14:00:45 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.56 2002/03/18 14:00:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.57 2002/04/25 19:52:40 andy_robinson Exp $
+__version__=''' $Id: tables.py,v 1.57 2002/04/25 19:52:40 andy_robinson Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -227,15 +227,53 @@ class Table(Flowable):
 			t = t + vh + v.getSpaceBefore()+v.getSpaceAfter()
 		return w, t - V[0].getSpaceBefore()-V[-1].getSpaceAfter() 
 
-	def _calc(self):
-		if hasattr(self,'_width'): return
+	def _calc_width(self):
 
-		H = self._argH
 		W = self._argW
-		#print "W is", W
 
 		canv = getattr(self,'canv',None)
 		saved = None
+
+		if None in W:
+			W = W[:]
+			self._colWidths = W
+			while None in W:
+				j = W.index(None)
+				f = lambda x,j=j: operator.getitem(x,j)
+				V = map(f,self._cellvalues)
+				S = map(f,self._cellStyles)
+				w = 0
+				i = 0
+				for v, s in map(None, V, S):
+					i = i + 1
+					t = type(v)
+					if t in _SeqTypes or isinstance(v,Flowable):
+						raise ValueError, "Flowable %s in cell(%d,%d) can't have auto width\n%s" % (v.identity(30),i,j,self.identity(30))
+					elif t is not StringType: v = v is None and '' or str(v)
+					v = string.split(v, "\n")
+					t = s.leftPadding+s.rightPadding + max(map(lambda a, b=s.fontname,
+								c=s.fontsize,d=pdfmetrics.stringWidth: d(a,b,c), v))
+					if t>w: w = t	#record a new maximum
+				W[j] = w
+
+		width = 0
+		self._colpositions = [0]		#index -1 is right side boundary; we skip when processing cells
+		for w in W:
+			#print w, width
+			width = width + w
+			self._colpositions.append(width)
+		#print "final width", width
+		
+		self._width = width
+
+	def _calc_height(self):
+
+		H = self._argH
+		W = self._argW
+
+		canv = getattr(self,'canv',None)
+		saved = None
+
 		if None in H:
 			if canv: saved = canv._fontname, canv._fontsize, canv._leading
 			H = H[:]	#make a copy as we'll change it
@@ -269,28 +307,6 @@ class Table(Flowable):
 					if t>h: h = t	#record a new maximum
 				H[i] = h
 
-		if None in W:
-			W = W[:]
-			self._colWidths = W
-			while None in W:
-				j = W.index(None)
-				f = lambda x,j=j: operator.getitem(x,j)
-				V = map(f,self._cellvalues)
-				S = map(f,self._cellStyles)
-				w = 0
-				i = 0
-				for v, s in map(None, V, S):
-					i = i + 1
-					t = type(v)
-					if t in _SeqTypes or isinstance(v,Flowable):
-						raise ValueError, "Flowable %s in cell(%d,%d) can't have auto width\n%s" % (v.identity(30),i,j,self.identity(30))
-					elif t is not StringType: v = v is None and '' or str(v)
-					v = string.split(v, "\n")
-					t = s.leftPadding+s.rightPadding + max(map(lambda a, b=s.fontname,
-								c=s.fontsize,d=pdfmetrics.stringWidth: d(a,b,c), v))
-					if t>w: w = t	#record a new maximum
-				W[j] = w
-
 		height = self._height = reduce(operator.add, H, 0)
 		#print "height, H", height, H
 		self._rowpositions = [height]	 # index 0 is actually topline; we skip when processing cells
@@ -298,15 +314,20 @@ class Table(Flowable):
 			height = height - h
 			self._rowpositions.append(height)
 		assert abs(height)<1e-8, 'Internal height error'
-		width = 0
-		self._colpositions = [0]		#index -1 is right side boundary; we skip when processing cells
-		for w in W:
-			#print w, width
-			width = width + w
-			self._colpositions.append(width)
-		#print "final width", width
-		
-		self._width = width
+
+	def _calc(self):
+		if hasattr(self,'_width'): return
+
+		# calculate the full table height
+		self._calc_height()
+
+		# if the width has already been calculated, don't calculate again
+		# there's surely a better, more pythonic way to short circuit this FIXME FIXME
+		if hasattr(self,'_width_calculated_once'): return
+		self._width_calculated_once = 1
+
+		# calculate the full table width
+		self._calc_width()
 
 	def setStyle(self, tblstyle):
 		if type(tblstyle) is not TableStyleType:
@@ -456,7 +477,8 @@ class Table(Flowable):
 		data = self._cellvalues
 
 		#we're going to split into two superRows
-		R0 = Table( data[:n], self._argW, self._argH[:n],
+		#R0 = Table( data[:n], self._argW, self._argH[:n],
+		R0 = Table( data[:n], self._colWidths, self._argH[:n],
 				repeatRows=repeatRows, repeatCols=repeatCols,
 				splitByRow=splitByRow)
 
@@ -504,15 +526,17 @@ class Table(Flowable):
 		R0._cr_0(n,self._bkgrndcmds)
 
 		if repeatRows:
-			R1 = Table(data[:repeatRows]+data[n:],
-					self._argW, self._argH[:repeatRows]+self._argH[n:],
+			#R1 = Table(data[:repeatRows]+data[n:],self._argW, 
+			R1 = Table(data[:repeatRows]+data[n:],self._colWidths, 
+					self._argH[:repeatRows]+self._argH[n:],
 					repeatRows=repeatRows, repeatCols=repeatCols,
 					splitByRow=splitByRow)
 			R1._cellStyles = self._cellStyles[:repeatRows]+self._cellStyles[n:]
 			R1._cr_1_1(n,repeatRows,A)
 			R1._cr_1_1(n,repeatRows,self._bkgrndcmds)
 		else:
-			R1 = Table(data[n:], self._argW, self._argH[n:],
+			#R1 = Table(data[n:], self._argW, self._argH[n:],
+			R1 = Table(data[n:], self._colWidths, self._argH[n:],
 					repeatRows=repeatRows, repeatCols=repeatCols,
 					splitByRow=splitByRow)
 			R1._cellStyles = self._cellStyles[n:]
