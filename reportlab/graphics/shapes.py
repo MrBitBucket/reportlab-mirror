@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.97 2003/08/12 14:06:49 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.98 2003/08/27 16:23:06 johnprecedo Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.97 2003/08/12 14:06:49 rgbecker Exp $ '''
+__version__=''' $Id: shapes.py,v 1.98 2003/08/27 16:23:06 johnprecedo Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -697,7 +697,7 @@ class Drawing(Group, Flowable):
         return ext and fnroot+ext[1:] or ''
 
 
-    def asString(self, format, verbose=None):
+    def asString(self, format, verbose=None, preview=0):
         """Converts to an 8 bit string in given format."""
         assert format in ['pdf','ps','eps','gif','png','jpg','jpeg','bmp','ppm','tiff','tif','py','pict','pct'], 'Unknown file format "%s"' % format
         from reportlab import rl_config
@@ -711,7 +711,7 @@ class Drawing(Group, Flowable):
         elif format == 'eps':
             from rlextra.graphics import renderPS_SEP
             return renderPS_SEP.drawToString(self,
-                                preview = getattr(self,'preview',1),
+                                preview = preview,
                                 showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
         elif format == 'ps':
             from reportlab.graphics import renderPS
