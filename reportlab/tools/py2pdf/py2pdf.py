@@ -436,7 +436,7 @@ class Options:
 
         # Specify accepted long option names (GNU style).
         lo = 'tabSize= paperFormat= paperSize= landscape stdout title= fontName= fontSize='
-        lo = lo + ' bgCol= lineNum marcs help multiPage noOutline config= input= mode='
+        lo = lo + ' bgCol= verbose lineNum marcs help multiPage noOutline config= input= mode='
         lo = lo + ' commCol= identCol= kwCol= strngCol= paramCol= restCol='
         longOpts = string.split(lo, ' ')
     
@@ -1480,7 +1480,7 @@ def main(cmdline):
     if options.h or options.help:
         print __doc__
         sys.exit()
-        
+
     # Apply modest consistency checks and exit if needed.
     cmdStr = string.join(cmdline, ' ')
     find = string.find
@@ -1542,20 +1542,23 @@ def main(cmdline):
 def process(*args, **kwargs):
     "Provides a way of using py2pdf from within other Python scripts."
     
-    noValOpts = 'landscape stdout lineNum marcs help multiPage noOutline'
+    noValOpts = 'h v verbose landscape stdout lineNum marcs help multiPage noOutline'
     noValOpts = string.split(noValOpts, ' ')
 
-    line = string.join(args, ' ')
+    s = 'py2pdf.py'
     for k, v in kwargs.items():
         if len(k) == 1:
-            line = line + ' -%s=%s' % (k, v)
+            s = s + ' -%s' % k
+            if k not in noValOpts:
+                s = s + ' %s' % v
         elif len(k) > 1:
-            if k in noValOpts:
-                line = line + ' --%s' % k
-            else:
-                line = line + ' --%s=%s' % (k, v)
+            s = s + ' --%s' % k
+            if k not in noValOpts:
+                s = s + '=%s' % v
+    s = s + ' ' + string.join(args, ' ')
+    s = string.split(s, ' ')
 
-    print line
+    main(s)
     
 
 ###
