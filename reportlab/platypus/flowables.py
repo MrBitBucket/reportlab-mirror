@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.40 2003/09/18 09:07:37 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.40 2003/09/18 09:07:37 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.41 2003/11/09 00:54:22 andy_robinson Exp $
+__version__=''' $Id: flowables.py,v 1.41 2003/11/09 00:54:22 andy_robinson Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -38,6 +38,16 @@ from reportlab.pdfbase import pdfutils
 from reportlab.rl_config import defaultPageSize
 PAGE_HEIGHT = defaultPageSize[1]
 
+
+class TraceInfo:
+    "Holder for info about where an object originated"
+    def __init__(self):
+        self.srcFile = '(unknown)'
+        self.startLineNo = -1
+        self.startLinePos = -1
+        self.endLineNo = -1
+        self.endLinePos = -1
+        
 #############################################################
 #   Flowable Objects - a base class and a few examples.
 #   One is just a box to get some metrics.  We also have
@@ -62,6 +72,9 @@ class Flowable:
         self.hAlign = 'LEFT'    #CENTER/CENTRE or RIGHT
         self.vAlign = 'BOTTOM'  #MIDDLE or TOP
 
+        #optional holder for trace info
+        self._traceInfo = None
+        
 
     def _drawOn(self,canv):
         '''ensure canv is set on and then draw'''
@@ -491,3 +504,17 @@ class ParagraphAndImage(Flowable):
         canv = self.canv
         self.I.drawOn(canv,self.width-self.wI-self.xpad,self.height-self.hI)
         self.P.drawOn(canv,0,0)
+
+class FailOnWrap(Flowable):
+    def wrap(self, availWidth, availHeight):
+        raise ValueError("FailOnWrap flowable wrapped and failing as ordered!")
+    
+    def draw(self):
+        pass
+
+class FailOnDraw(Flowable):
+    def wrap(self, availWidth, availHeight):
+        return (0,0)
+    
+    def draw(self):
+        raise ValueError("FailOnDraw flowable drawn, and failing as ordered!")

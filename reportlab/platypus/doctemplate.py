@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.66 2003/10/28 12:57:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.67 2003/11/09 00:54:22 andy_robinson Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.66 2003/10/28 12:57:11 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.67 2003/11/09 00:54:22 andy_robinson Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -605,7 +605,24 @@ class BaseDocTemplate:
 
         while len(flowables):
             self.clean_hanging()
-            self.handle_flowable(flowables)
+            try:
+                first = flowables[0]
+                self.handle_flowable(flowables)
+            except:
+                #if it has trace info, add it to the traceback message.
+                if first._traceInfo:
+                    exc = sys.exc_info()[1]
+                    args = list(exc.args)
+                    tr = first._traceInfo
+                    args[0] = args[0] + '\n(srcFile %s, line %d char %d to line %d char %d)' % (
+                        tr.srcFile,
+                        tr.startLineNo,
+                        tr.startLinePos,
+                        tr.endLineNo,
+                        tr.endLinePos
+                        )
+                    exc.args = tuple(args)
+                raise
             if self._onProgress:
                 self._onProgress('PROGRESS',flowableCount - len(flowables))
 
