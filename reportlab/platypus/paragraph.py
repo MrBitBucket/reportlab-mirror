@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.58 2001/10/26 14:05:58 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.58 2001/10/26 14:05:58 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.59 2001/11/04 00:11:10 andy_robinson Exp $
+__version__=''' $Id: paragraph.py,v 1.59 2001/11/04 00:11:10 andy_robinson Exp $ '''
 from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
@@ -233,7 +233,9 @@ def _drawBullet(canvas, offset, cur_y, bulletText, style):
 			tx2.setFillColor(f.textColor)
 			tx2.textOut(f.text)
 
-	bulletEnd = tx2.getX()
+	#AR making definition lists a bit less ugly
+	#bulletEnd = tx2.getX()
+	bulletEnd = tx2.getX() + style.bulletFontSize * 0.6
 	offset = max(offset, bulletEnd - style.leftIndent)
 	canvas.drawText(tx2)
 	return offset

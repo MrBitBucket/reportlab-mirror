@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/platdemos.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/Attic/platdemos.py,v 1.1 2001/10/27 22:37:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/Attic/platdemos.py,v 1.2 2001/11/04 00:11:11 andy_robinson Exp $
 """This includes some demos of platypus for use in the API proposal"""
 from reportlab.lib import colors
 from reportlab.pdfgen.canvas import Canvas
@@ -12,16 +12,23 @@ from reportlab.platypus import Paragraph
 from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER
 
-captionStyle = ParagraphStyle('Caption', fontName='Times-Italic', fontSize=10, alignment=TA_CENTER)
+#captionStyle = ParagraphStyle('Caption', fontName='Times-Italic', fontSize=10, alignment=TA_CENTER)
 
 class Figure(Flowable):
-	def __init__(self, width, height, caption=""):
+	def __init__(self, width, height, caption="",
+				 captionFont="Times-Italic", captionSize=12):
 		Flowable.__init__(self)
 		self.width = width
 		self.figureHeight = height
 		self.captionHeight = 0	# work out later
 		self.caption = caption
-		self.captionStyle = ParagraphStyle('Caption', fontName='Times-Italic', fontSize=12, spaceBefore=6, alignment=TA_CENTER)
+		self.captionStyle = ParagraphStyle(
+			'Caption',
+			fontName=captionFont,
+			fontSize=captionSize,
+			leading=1.2*captionSize,
+			spaceBefore=captionSize * 0.5,
+			alignment=TA_CENTER)
 		#must build paragraph now to get sequencing in synch
 		#with rest of story
 		self.captionPara = Paragraph(self.caption, self.captionStyle)
