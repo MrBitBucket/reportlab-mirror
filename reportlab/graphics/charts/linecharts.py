@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.19 2002/02/04 17:16:27 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.20 2002/02/27 11:51:08 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
@@ -304,7 +304,9 @@ class HorizontalLineChart(LineChart):
 					if symbol: g.add(symbol)
 
 			# Draw item labels.
-			self.drawLabel(g, rowNo, colNo, x1, y1)
+			for colNo in range(len(row)):
+				x1, y1 = row[colNo]
+				self.drawLabel(g, rowNo, colNo, x1, y1)
 
 		return g
 
