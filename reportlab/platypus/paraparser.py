@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.51 2003/06/01 09:38:16 rgbecker Exp $
-__version__=''' $Id: paraparser.py,v 1.51 2003/06/01 09:38:16 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.52 2003/06/04 15:49:41 rgbecker Exp $
+__version__=''' $Id: paraparser.py,v 1.52 2003/06/04 15:49:41 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -118,9 +118,10 @@ _fontAttrMap = {'size': ('fontSize', _num),
 def _addAttributeNames(m):
     K = m.keys()
     for k in K:
-        n = string.lower(m[k][0])
-        if not m.has_key(n):
-            m[n] = m[k]
+        n = m[k][0]
+        if not m.has_key(n): m[n] = m[k]
+        n = string.lower(n)
+        if not m.has_key(n): m[n] = m[k]
 
 _addAttributeNames(_paraAttrMap)
 _addAttributeNames(_fontAttrMap)
@@ -699,7 +700,7 @@ class ParaParser(xmllib.XMLParser):
     #----------------------------------------------------------------
 
     def __init__(self,verbose=0):
-        self.caseSensitive = 1
+        self.caseSensitive = 0
         if _xmllib_newStyle:
             xmllib.XMLParser.__init__(self,verbose=verbose)
         else:
