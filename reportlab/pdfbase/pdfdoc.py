@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.83 2003/07/08 22:15:17 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.83 2003/07/08 22:15:17 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.84 2003/08/05 17:11:57 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.84 2003/08/05 17:11:57 rgbecker Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -230,8 +230,9 @@ class PDFDocument:
         f.write(self.GetPDFData(canvas))
         if myfile:
             f.close()
-            from reportlab.lib.utils import markfilename
-            markfilename(filename) # do platform specific file junk
+            if os.name=='mac':
+                from reportlab.lib.utils import markfilename
+                markfilename(filename) # do platform specific file junk
         if getattr(canvas,'_verbosity',None): print 'saved', filename
 
     def GetPDFData(self, canvas):
