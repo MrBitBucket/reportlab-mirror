@@ -32,6 +32,9 @@
 #
 ###############################################################################
 #   $Log: genuserguide.py,v $
+#   Revision 1.23  2000/07/08 13:24:27  andy_robinson
+#   Broke out chapter 1
+#
 #   Revision 1.22  2000/07/08 12:52:25  andy_robinson
 #   Separated out actual text from genuserguide, so it can be broken into
 #   chapters.
@@ -102,7 +105,7 @@
 #   Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #   initial checkin. user guide generation framework.
 #   
-__version__=''' $Id: genuserguide.py,v 1.22 2000/07/08 12:52:25 andy_robinson Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.23 2000/07/08 13:24:27 andy_robinson Exp $ '''
 
 
 __doc__ = """
@@ -398,6 +401,9 @@ def run():
     #this builds the story    
     resetStory()
 
+    import ch1_intro
+    #extendStory(ch1_intro.getStory())
+    
     import most_chapters
     extendStory(most_chapters.getStory())
     
