@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/docpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/docpy.py,v 1.5 2003/04/17 23:37:39 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/docpy.py,v 1.6 2004/05/08 17:19:54 rgbecker Exp $
 
 """Generate documentation from live Python objects.
 
@@ -54,8 +54,7 @@ from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate \
      import PageTemplate, BaseDocTemplate
 from reportlab.platypus.tables import TableStyle, Table
-from reportlab.tools.docco import inspect
-
+import inspect
 
 ####################################################################
 #

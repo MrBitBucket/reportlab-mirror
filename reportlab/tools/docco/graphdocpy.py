@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.23 2004/04/28 15:27:31 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.24 2004/05/08 17:19:54 rgbecker Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -49,10 +49,7 @@ from reportlab.platypus.doctemplate \
      import PageTemplate, BaseDocTemplate
 from reportlab.platypus.tables import TableStyle, Table
 from reportlab.graphics.shapes import NotImplementedError
-try:
-    import inspect
-except ImportError:
-    from reportlab.tools.docco import inspect
+import inspect
 
 # Needed to draw Widget/Drawing demos.
 
