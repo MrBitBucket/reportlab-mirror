@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2_graphics.py,v 1.5 2001/11/06 11:13:53 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2_graphics.py,v 1.6 2002/03/23 23:36:49 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.lib.codecharts import SingleByteEncodingChart
     
@@ -279,18 +279,65 @@ only a circular part of the image visible on the page.
 """)
 
 heading3("Image methods")
+pencilnote()
+disc("""
+You need the Python Imaging Library (PIL) to use images with the ReportLab package.
+""")
+
+disc("""
+There are two ways to draw images.  The preferred one is to go in two steps,
+calling $defineImage$ to load up your image, then $drawImage$ to draw it.
+This lets you define an image once and draw it many times; it will only be
+stored once in the PDF file.  $defineImage$ also exposes one advanced parameter,
+a transparency mask, and will expose more in future.  The older technique,
+$drawInlineImage$, stores bitmaps within the page stream and is thus very
+inefficient if you use the same image more than once in a document. We'll
+discuss the oldest one first:
+""")
 
 eg("""canvas.drawInlineImage(self, image, x,y, width=None,height=None) """)
 
 disc("""
-The $drawInlineImage$ method places an image on the canvas.
+The $drawInlineImage$ method places an image on the canvas.  The $image$
+parameter may be either a PIL Image object or an image filename.  Many common
+file formats are accepted including GIF and JPEG.
 """)
 
-pencilnote()
+eg("""canvas.defineImage(self, name, image, mask=None) """)
+disc("""
+This defines a named image to be used later.  The $name$ must be unique
+within the document.  You can usually just use the filename if you wish.
+The $image$ parameter is either a filename, in which case PIL will open it,
+or a PIL Image object (which lets you use dynamic images from other
+applications).  This method returns the width and height of the image as a
+2-tuple, since one commonly wants to know the size for layout calculations.""")
 
 disc("""
-You need the Python Imaging Library (PIL) to use images with the ReportLab package.
+The $mask$ parameter lets you create transparent images.  It takes 6 numbers
+and defines the range of RGB values which will be masked out or treated as
+transparent. For example with [0,2,40,42,136,139], it will mask out any pixels
+with a Red value from 0 or 1, Green from 40 or 41 and Blue of  136, 137 or 138
+(on a scale of 0-255). It's currently your job to know which color is the
+'transparent' or background one.""")
+
+disc("""PDF allows for many image features and we will expose more of the over
+time, probably with extra keyword arguments.""")
+
+eg("""canvas.drawImage(self, name, x, y, width=None, height=None)""")
+
+disc("""This draws the named image at the given location.  If you do not
+supply a width and height, it will use the width and height of the image itself
+at a default scaling of 1 pixel = 1 point (before any scaling you might have applied).
 """)
+
+disc("""As with Form XObjects, you can draw an image first and define it later if
+you wish.  This might be useful if you knbew the size of a bitmap but its appearance
+would be determined by events later in a program.  If you have not defined an image
+with a matching name before the document is saved, an error will be generated.  Also,
+if you are drawing first and defining later, you have to supply a width and height
+yourself, as this info is needed at the time of drawing and cannot be found out
+from the image object.""")
+
 
 heading3("Ending a page")
 

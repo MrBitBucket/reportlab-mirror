@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.55 2002/02/14 14:51:46 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.55 2002/02/14 14:51:46 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.56 2002/03/23 23:36:49 andy_robinson Exp $
+__version__=''' $Id: pdfdoc.py,v 1.56 2002/03/23 23:36:49 andy_robinson Exp $ '''
 __doc__=""" 
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The 
@@ -21,7 +21,7 @@ import string, types
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfutils import LINEEND   # this constant needed in both
 from reportlab import rl_config
-
+from reportlab.lib.utils import import_zlib, PIL_Image
 
 class PDFError(Exception):
     pass
@@ -100,8 +100,9 @@ def format(element, document, toplevel=0):
 def indent(s, IND=LINEEND+" "):
     return string.replace(s, LINEEND, IND)
 
-def formName(externalname):
-    return "FormXob.%s" % externalname
+def xObjectName(externalname):
+    return "Xobject.%s" % externalname
+
 
 # no encryption
 class NoEncryption:
@@ -255,15 +256,13 @@ class PDFDocument:
         self.pageCounter = self.pageCounter+1
         self.inObject = None
 
-    #def formName(self, externalname):  # made externally available
-    #    return "FormXob.%s" % externalname
-    
+   
     def addForm(self, name, form):
         """add a Form XObject."""
         # XXX should check that name is a legal PDF name
         if self.inObject != "form":
             self.inForm()
-        self.Reference(form, formName(name))
+        self.Reference(form, xObjectName(name))
         self.inObject = None
 
     def annotationName(self, externalname):
@@ -367,12 +366,12 @@ class PDFDocument:
     
     def hasForm(self, name):
         """test for existence of named form"""
-        internalname = formName(name)
+        internalname = xObjectName(name)
         return self.idToObject.has_key(internalname)
 
     def getFormBBox(self, name):
         "get the declared bounding box of the form as a list"
-        internalname = formName(name)
+        internalname = xObjectName(name)
         if self.idToObject.has_key(internalname):
             theform = self.idToObject[internalname]
             if isinstance(theform, PDFFormXObject):
@@ -384,17 +383,17 @@ class PDFDocument:
             else:
                 raise ValueError, "I don't understand the form instance %s" % repr(name)
 
-    def getFormName(self, name):
+    def getXObjectName(self, name):
         """Lets canvas find out what form is called internally.
         Never mind whether it is defined yet or not."""
-        return formName(name)
+        return xObjectName(name)
     
     def xobjDict(self, formnames):
         """construct an xobject dict (for inclusion in a resource dict, usually)
            from a list of form names (images not yet supported)"""
         D = {}
         for name in formnames:
-            internalname = formName(name)
+            internalname = xObjectName(name)
             reference = PDFObjectReference(internalname)
             D[internalname] = reference
         #print "xobjDict D", D
@@ -1667,6 +1666,74 @@ class PDFFormXObject:
         return self.Contents.format(document)
 
 
+class PDFImageXObject:
+    # first attempts at a hard-coded one
+    # in the file, Image XObjects are stream objects.  We already
+    # have a PDFStream object with 3 attributes:  dictionary, content
+    # and filters.  So the job of this thing is to construct the
+    # right PDFStream instance and ask it to format itself.
+    def __init__(self, name, source=None, mask=None):
+        self.name = name
+        self.width = 24
+        self.height = 23
+        self.bitsPerComponent = 1
+        self.colorSpace = 'DeviceGray'
+        self.filter = PDFName('ASCII85Decode') 
+        self.streamContent = """
+            003B00 002700 002480 0E4940 114920 14B220 3CB650
+            75FE88 17FF8C 175F14 1C07E2 3803C4 703182 F8EDFC
+            B2BBC2 BB6F84 31BFC2 18EA3C 0E3E00 07FC00 03F800
+            1E1800 1FF800>
+            """
+        self.mask = mask
+        
+        if source is None:
+            pass # use the canned one.
+        elif type(source) == type(''):
+            # it is a filename
+            img = PIL_Image.open(source)
+            self.loadImageFromPIL(img)
+        else: # it is already a PIL Image
+            self.loadImageFromPIL(source)
+
+    def loadImageFromPIL(self, PILImage):
+        "Extracts the stream, width and height"
+        zlib = import_zlib()
+        if not zlib: return
+        #standardize it to RGB.  We could be more optimal later.
+        if PILImage.mode <> 'RGB':
+            PILimage = PILImage.convert('RGB')
+        imgwidth, imgheight = PILimage.size
+        raw = PILimage.tostring()
+        assert(len(raw) == imgwidth * imgheight, "Wrong amount of data for image")
+        compressed = zlib.compress(raw)   
+        encoded = pdfutils._AsciiBase85Encode(compressed)
+        self.colorSpace = 'DeviceRGB'
+        self.bitsPerComponent = 8
+        self.streamContent = encoded
+        self.width = imgwidth
+        self.height = imgheight
+
+
+    def format(self, document):
+        S = PDFStream()
+        S.content = self.streamContent
+        
+        dict = S.dictionary
+        dict["Type"] = PDFName("XObject")
+        dict["Subtype"] = PDFName("Image")
+        dict["Width"] = self.width
+        dict["Height"] = self.height
+        dict["BitsPerComponent"] = self.bitsPerComponent
+        dict["ColorSpace"] = PDFName(self.colorSpace)
+        dict["Filter"] = PDFArray( [PDFName('ASCII85Decode'), PDFName('FlateDecode')])
+        dict["Length"] = len(self.streamContent)
+        if self.mask:
+            dict["Mask"] = PDFArray(self.mask)
+            
+        return S.format(document)
+        
+        
 if __name__=="__main__":
     print "There is no script interpretation for pdfdoc."
     

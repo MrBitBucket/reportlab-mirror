@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.96 2002/02/03 21:25:57 andy_robinson Exp $
-__version__=''' $Id: canvas.py,v 1.96 2002/02/03 21:25:57 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.97 2002/03/23 23:36:49 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.97 2002/03/23 23:36:49 andy_robinson Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -439,12 +439,70 @@ class Canvas:
         defined at save time, an exception will be raised. The form
         will be drawn within the context of the current graphics
         state."""
-        self._code.append("/%s Do" % self._doc.getFormName(name))
+        self._code.append("/%s Do" % self._doc.getXObjectName(name))
         self._formsinuse.append(name)
 
     def hasForm(self, name):
         """Query whether form XObj really exists yet."""
         return self._doc.hasForm(name)
+    
+    def defineImage(self, name, image, mask=None):
+        """
+        Defines an Image object to be drawn later by drawImage.
+        
+        The 'name' must be unique within the document.  You can
+        just use the filename if you wish.  The 'image' parameter
+        is either a filename, in which case PIL will open it, or
+        a PIL Image object (which lets you use dynamic images from
+        other applications).  This method returns the width and
+        height of the image as a 2-tuple.
+
+        The mask parameter takes 6 numbers and defines the range of
+        RGB values which will be masked out or treated as transparent.
+        For example with [0,2,40,42,136,139], it will mask out any
+        pixels with a Red value from 0-2, Green from 40-42 and
+        Blue from 136-139  (on a scale of 0-255)
+        """
+        img = pdfdoc.PDFImageXObject(name, image, mask=mask)
+        img.name = name
+        self._setXObjects(img)
+        regName = self._doc.getXObjectName(name)
+        self._doc.Reference(img, regName)
+        self._doc.addForm(name, img)
+        return img.width, img.height
+
+
+    def drawImage(self, name, x, y, width=None, height=None):
+        """Draw a predefined (or soon-to-be-defined) image.  
+        
+        If width and height not given but the image is already defined,
+        it is drawn at the 'natural' scaling of 1 point per pixel.  Thus
+        a 100x30 image will be that size in points.  If the image has not
+        yet been defined, and you do not give a size, an exception will
+        be raised.
+        
+        You can get the 'natural' width and height when you call defineImage.
+        If the image name is not defined at save time, an exception will be
+        raised.
+        """
+
+        # is the image defined yet?
+        regName = self._doc.getXObjectName(name)
+        imgObj = self._doc.idToObject.get(regName, None)
+        if imgObj is None and (width is None or height is None):
+            raise ValueError, "If the image is not yet defined, you must supply width and height!"
+        if width is None:
+            width = imgObj.width
+        if height is None:
+            height = imgObj.height
+
+        self.saveState()
+        self.translate(x, y)
+        self.scale(width, height)
+        self._code.append("/%s Do" % self._doc.getXObjectName(name))
+        self.restoreState()
+        
+        self._formsinuse.append(name)
         
     def _restartAccumulators(self):
         if self._codeStack:
@@ -507,7 +565,8 @@ class Canvas:
         self._doc.addForm(name, form)
         self._restartAccumulators()
         self.pop_state_stack()
-        
+
+
     #def forceCodeInsert0(self, code):
     #    """I know a whole lot about PDF and I want to add a bunch of code I know will work..."""
     #    self._code.append(code)
@@ -1211,98 +1270,6 @@ class Canvas:
         img_obj = PDFImage(image, x,y, width, height)
         img_obj.drawInlineImage(self)
         return
-        # the rest is historical (to delete)
-
-        if type(image) == StringType:
-            if os.path.splitext(image)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
-                #directly process JPEG files
-                #open file, needs some error handling!!
-                imageFile = open(image, 'rb')
-                info = pdfutils.readJPEGInfo(imageFile)
-                imgwidth, imgheight = info[0], info[1]
-                if info[2] == 1:
-                    colorSpace = 'DeviceGray'
-                elif info[2] == 3:
-                    colorSpace = 'DeviceRGB'
-                else: #maybe should generate an error, is this right for CMYK?
-                    colorSpace = 'DeviceCMYK'
-                imageFile.seek(0) #reset file pointer
-                imagedata = []
-                #imagedata.append('BI /Width %d /Height /BitsPerComponent 8 /ColorSpace /%s /Filter [/Filter [ /ASCII85Decode /DCTDecode] ID' % (info[0], info[1], colorSpace))
-                imagedata.append('BI /W %d /H %d /BPC 8 /CS /%s /F [/A85 /DCT] ID' % (info[0], info[1], colorSpace))
-                #write in blocks of (??) 60 characters per line to a list
-                compressed = imageFile.read()
-                encoded = pdfutils._AsciiBase85Encode(compressed)
-                outstream = cStringIO.StringIO(encoded)
-                dataline = outstream.read(60)
-                while dataline <> "":
-                    imagedata.append(dataline)
-                    dataline = outstream.read(60)
-                imagedata.append('EI')
-            else:
-                if not self.imageCaching:
-                    imagedata = pdfutils.cacheImageFile(image,returnInMemory=1)
-                else:
-                    if not pdfutils.cachedImageExists(image):
-                        if not zlib:
-                            return
-                        if not PIL_Image: return
-                        pdfutils.cacheImageFile(image)
-
-                    #now we have one cached, slurp it in
-                    cachedname = os.path.splitext(image)[0] + '.a85'
-                    imagedata = open(cachedname,'rb').readlines()
-                    #trim off newlines...
-                    imagedata = map(strip, imagedata)
-                
-                #parse line two for width, height
-                words = split(imagedata[1])
-                imgwidth = atoi(words[1])
-                imgheight = atoi(words[3])
-        else:
-            #PIL Image
-            #work out all dimensions
-            if not zlib:
-                return
-            myimage = image.convert('RGB')
-            imgwidth, imgheight = myimage.size
-            imagedata = []
-
-            # this describes what is in the image itself
-            # *NB* according to the spec you can only use the short form in inline images
-            #imagedata.append('BI /Width %d /Height /BitsPerComponent 8 /ColorSpace /%s /Filter [/Filter [ /ASCII85Decode /FlateDecode] ID' % (imgwidth, imgheight,'RGB'))
-            imagedata.append('BI /W %d /H %d /BPC 8 /CS /RGB /F [/A85 /Fl] ID' % (imgwidth, imgheight))
-
-            #use a flate filter and Ascii Base 85 to compress
-            raw = myimage.tostring()
-            assert(len(raw) == imgwidth * imgheight, "Wrong amount of data for image")
-            compressed = zlib.compress(raw)   #this bit is very fast...
-            encoded = pdfutils._AsciiBase85Encode(compressed) #...sadly this isn't
-
-            #write in blocks of (??) 60 characters per line to a list
-            outstream = cStringIO.StringIO(encoded)
-            dataline = outstream.read(60)
-            while dataline <> "":
-                imagedata.append(dataline)
-                dataline = outstream.read(60)
-            imagedata.append('EI')
-
-        #now build the PDF for the image.
-        if not width:
-            width = imgwidth
-        if not height:
-            height = imgheight
-        
-        # this says where and how big to draw it
-        if not self.bottomup: y = y+height
-        self._code.append('q %s 0 0 %s cm' % (fp_str(width), fp_str(height, x, y)))
-
-        # self._code.extend(imagedata) if >=python-1.5.2
-        for line in imagedata:
-            self._code.append(line)
-
-        self._code.append('Q')
-        #self._code.append('BT')
 
     def setPageCompression(self, pageCompression=1):
         """Possible values None, 1 or 0
