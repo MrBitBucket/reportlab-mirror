@@ -31,20 +31,24 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.4  2000/05/12 16:21:02  rgbecker
+#	_donothing explicit import
+#
 #	Revision 1.3  2000/05/12 14:53:38  rgbecker
 #	Handle splitting error in build
-#
+#	
 #	Revision 1.2  2000/05/12 14:45:31  rgbecker
 #	Single actions only in ActionFlowables
 #	
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.3 2000/05/12 14:53:38 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.4 2000/05/12 16:21:02 rgbecker Exp $ '''
 __doc__="""
 More complicated Document model
 """
 from layout import *
+from layout import _donothing
 from types import *
 import sys
 
@@ -189,6 +193,7 @@ class BaseDocTemplate:
 		if hasattr(self,'_nextFrameIndex'):
 			frame = self.pageTemplate.frames[self._nextFrameIndex]
 			del self._nextFrameIndex
+			self.handle_frameBegin()
 		elif hasattr(self.frame,'lastFrame') or self.frame is self.pageTemplate.frames[-1]:
 			self.handle_pageEnd()
 		else:
@@ -259,6 +264,7 @@ class BaseDocTemplate:
 					flowables.insert(0,f)			# put the flowable back
 					self.handle_frameEnd()
 
+	#these are provided so that deriving classes can refer to them
 	_handle_documentBegin = handle_documentBegin
 	_handle_pageBegin = handle_pageBegin
 	_handle_pageEnd = handle_pageEnd
