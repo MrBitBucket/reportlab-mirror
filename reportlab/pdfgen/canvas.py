@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.88 2001/10/05 19:50:50 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.88 2001/10/05 19:50:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.89 2001/10/31 02:06:35 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.89 2001/10/31 02:06:35 andy_robinson Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -406,6 +406,10 @@ class Canvas:
             raise ValueError, "form is not defined %s" % name
         self._code.append("/%s Do" % internalname)
         self._formsinuse.append(name)
+
+    def hasForm(self, name):
+        """Query whether form XObj exists"""
+        return self._doc.hasForm(name)
         
     def _restartAccumulators(self):
         if self._codeStack:
