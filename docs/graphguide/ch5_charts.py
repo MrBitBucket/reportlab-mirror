@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch5_charts.py,v 1.1 2001/08/07 10:17:35 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/ch5_charts.py,v 1.2 2001/08/07 10:50:21 dinu_gherman Exp $
 
 from gengraphguide import *
 
@@ -168,15 +168,34 @@ lab.angle = 45
 lab.dx = 0
 lab.dy = -20
 lab.boxStrokeColor = colors.green
-lab.setText('Another\nMulti-Line\nString')
+lab.setText('Some\nMulti-Line\nLabel')
 
 d.add(lab)
 """)
 
-# Hack to force a new paragraph before the todo() :-(
-disc("")
 
-todo("add image")
+from reportlab.graphics import shapes
+from reportlab.graphics.charts.textlabels import Label
+
+d = Drawing(200, 100)
+
+# mark the origin of the label
+d.add(Circle(100,90, 5, fillColor=colors.green))
+
+lab = Label()
+lab.setOrigin(100,90)
+lab.boxAnchor = 'ne'
+lab.angle = 45
+lab.dx = 0
+lab.dy = -20
+lab.boxStrokeColor = colors.green
+lab.setText('Some\nMulti-Line\nLabel')
+
+d.add(lab)
+
+draw(d, 'Label example')
+
+
 
 disc("""In the drawing above, the label is defined relative to the green blob. 
        The text box should have its north-east corner ten points down from 
@@ -185,24 +204,32 @@ disc("""In the drawing above, the label is defined relative to the green blob.
 disc("""At present labels have the following properties, which we believe are 
        sufficient for all charts we have seen to date:""")
 
-# Hack to force a new paragraph before the todo() :-(
 disc("")
 
-todo("""Note: need to turn these into pretty tables with explanations """)
+data=[["Property", "Meaning"],
+      ["dx", """The label's x displacement."""],
+      ["dy", """The label's y displacement."""],
+      ["angle", """The angle of rotation (counterclockwise) applied to the label."""],
+      ["boxAnchor", "The label's box anchor, one of 'n', 'e', 'w', 's', 'ne', 'nw', 'se', 'sw'."],
+      ["textAnchor", """The place where to anchor the label's text, one of 'start', 'middle', 'end'."""],
+      ["boxFillColor", """The fill color used in the label's box."""],
+      ["boxStrokeColor", "The stroke color used in the label's box."],
+      ["boxStrokeWidth", """The line width of the label's box."""],
+      ["fontName", """The label's font name."""],
+      ["fontSize", """The label's font size"""],
+      ["leading", """The leading value of the label's text lines."""]]
+t=Table(data, colWidths=(100,330))
+t.setStyle(TableStyle([
+            ('FONT',(0,0),(-1,0),'Times-Bold',10,12),
+            ('FONT',(0,1),(0,-1),'Courier',8,8),
+            ('FONT',(1,1),(1,-1),'Times-Roman',10,12),
+            ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ]))
+getStory().append(t)
+caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - Label properties""")
 
-eg("""
->>>lab.dumpProperties()
-angle = 45
-boxAnchor = ne
-boxFillColor = None
-boxStrokeColor = Color(0.00,0.50,0.00)
-boxStrokeWidth = 0.5
-dx = 0
-dy = -20
-fontName = Times-Roman
-fontSize = 10
-leading = 12.0
-textAnchor = start""")
 
 
 heading2("Axes")
