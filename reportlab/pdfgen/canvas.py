@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.23  2000/04/05 16:26:36  rgbecker
+#	Fixes to setFill/StrokeColor
+#
 #	Revision 1.22  2000/04/05 16:21:02  rgbecker
 #	Added _SeqTypes for efficiency
-#
+#	
 #	Revision 1.21  2000/04/05 16:15:11  rgbecker
 #	Made setFill/StrokeColor polymorphic
 #	
@@ -93,7 +96,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.22 2000/04/05 16:21:02 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.23 2000/04/05 16:26:36 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -766,12 +769,12 @@ class Canvas:
         """Takes a color object, allowing colors to be referred to by name"""
         if type(aColor) == ColorType:
             rgb = (aColor.red, aColor.green, aColor.blue)
-            self._strokeColorRGB = rgb
+            self._fillColorRGB = rgb
             self._code.append('%0.2f %0.2f %0.2f rg' % rgb )
         elif type(aColor) in _SeqTypes:
             l = len(aColor)
             if l==3:
-                self._strokeColorRGB = aColor
+                self._fillColorRGB = aColor
                 self._code.append('%0.2f %0.2f %0.2f rg' % aColor )
             elif l==4:
                 self.setFillColorCMYK(self, aColor[0], aColor[1], aColor[2], aColor[3])
