@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: testpdfgen.py,v $
+#	Revision 1.15  2000/05/19 15:09:16  andy_robinson
+#	Test script text now bears some resemblance to our code base
+#
 #	Revision 1.14  2000/05/18 17:10:09  aaron_watters
 #	removed 0's on outline and link operations
-#
+#	
 #	Revision 1.13  2000/04/25 20:21:12  aaron_watters
 #	added demonstration of usage of closed outline entries
 #	
@@ -72,7 +75,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testpdfgen.py,v 1.14 2000/05/18 17:10:09 aaron_watters Exp $ '''
+__version__=''' $Id: testpdfgen.py,v 1.15 2000/05/19 15:09:16 andy_robinson Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 import string
@@ -251,9 +254,6 @@ def drawCode(canvas, code):
     
 
 def run():
-##    print 'warning - hard-coded location'
-##    c = pdfgen.Canvas('d:\\distiller\\testing\\testpdfgen.pdf')
-##    c.setPageCompression(0)
     c = canvas.Canvas('testpdfgen.pdf')
     framePageForm(c) # define the frame form
     c.showOutline()
@@ -263,38 +263,47 @@ def run():
     
     
     t = c.beginText(inch, 10*inch)
+    t.setFont('Times-Roman', 10)
     drawCrossHairs(c, t.getX(),t.getY())
-    t.textLine('Hello World')
     t.textLines("""
-This tests a low-level API to the PDF file formac.  It is intended to sit
-underneath PIDDLE, and to closely mirror the PDF / Postscript imaging
+The ReportLab library permits you to create PDF documents directly from
+your Python code. The "pdfgen" subpackage is the lowest level exposed
+to the user and lets you directly position test and graphics on the
+page, with access to almost the full range of PDF features. 
+  The API is intended to closely mirror the PDF / Postscript imaging
 model.  There is an almost one to one correspondence between commands
 and PDF operators.  However, where PDF provides several ways to do a job,
-we have generally only picked one.
+we have generally only picked one. 
+  The test script attempts to use all of the methods exposed by the Canvas
+class, defined in reportlab/pdfgen/canvas.py
+  First, let's look at text output.  There are some basic commands
+to draw strings:
+-    canvas.setFont(fontname, fontsize [, leading])
+-    canvas.drawString(x, y, text)
+-    canvas.drawRightString(x, y, text)
+-    canvas.drawCentredString(x, y, text)
 
-The test script attempts to use all of the methods exposed by pdfgen.PDFEngine.
+The coordinates are in points starting at the bottom left corner of the
+page.  When setting a font, the leading (i.e. inter-line spacing)
+defaults to 1.2 * fontsize if the fontsize is not provided.
 
-First, let's look at test output.  Here are the basic commands:
+For more sophisticated operations, you can create a Text Object, defined
+in reportlab/pdfgen/testobject.py.  Text objects produce tighter PDF, run
+faster and have many methods for precise control of spacing and position.
+Basic usage goes as follows:
+-   tx = canvas.beginText(x, y)
+-   tx.textOut('Hello')    # this moves the cursor to the right
+-   tx.textLine('Hello again') # prints a line and moves down
+-   y = tx.getY()       # getX, getY and getCursor track position
+-   canvas.drawText(tx)  # all gets drawn at the end
 
-canvas.enterTextMode()  must be called before text operations
-canvas.exitTextMode()  must be called after text operations
-You can do graphics in between calls, but no coordinate transforms
-or clipping.
-
-canvas.setTextOrigin(x, y)  sets the text origin
-canvas.getCursor()  returns the current text cursor
-
-canvas.textOut(text) writes text, and moves the cursor to the righc.
-canvas.textLine(text) writes text, and moves the cursor down 'leading'.
-This means textLine() is faster - no need to do a stringWidth!
-
-canvas.textLines(stuff) accepts a multi-line string or a list/tuple
-of strings, and moves the cursor down the page.
-    
+The green crosshairs below test whether the text cursor is working
+properly.  They should appear at the bottom left of each relevant
+substring.
 """)
-    makesubsection(c, "TextMode operations", t.getY())
-    t.textLine('')
-    t.textLine('The green crosshairs test whether the text cursor is tracking correctly.')
+
+    t.setFillColorRGB(1,0,0)
+    t.setTextOrigin(inch, 4*inch)
     drawCrossHairs(c, t.getX(),t.getY())
     t.textOut('textOut moves across:')
     drawCrossHairs(c, t.getX(),t.getY())
@@ -311,12 +320,12 @@ of strings, and moves the cursor down the page.
     t.textLine('textLine moves down')
     drawCrossHairs(c, t.getX(),t.getY())
 
-    t.setTextOrigin(4*inch,4*inch)
+    t.setTextOrigin(4*inch,3.25*inch)
     drawCrossHairs(c, t.getX(),t.getY())
     t.textLines('This is a multi-line\nstring with embedded newlines\ndrawn with textLines().\n')
-    t.textLines(['This is a list of strings',
-                'drawn with textLines().',''])
     drawCrossHairs(c, t.getX(),t.getY())
+    t.textLines(['This is a list of strings',
+                'drawn with textLines().'])
     c.drawText(t)
 
     t = c.beginText(2*inch,2*inch)
