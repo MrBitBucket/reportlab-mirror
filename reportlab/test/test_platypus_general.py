@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testplatypus.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.18 2004/05/28 14:39:42 rgbecker Exp $
-__version__=''' $Id: test_platypus_general.py,v 1.18 2004/05/28 14:39:42 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.19 2004/06/03 10:38:25 rgbecker Exp $
+__version__=''' $Id: test_platypus_general.py,v 1.19 2004/06/03 10:38:25 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -379,11 +379,15 @@ def getExamples():
         if rl_isfile(gif):
             data = []
             t = data.append
+            furl = gif.replace(os.sep,'/')
+            if sys.platform=='win32' and furl[1]==':': furl = furl[0]+'|'+furl[2:]
+            if furl[0]!='/': furl = '/'+furl
+            furl = 'file://'+furl
             t([ Paragraph("Here is an Image flowable obtained from a string filename.",styleSheet['Italic']),
                     platypus.Image(gif),
 
                 Paragraph("Here is an Image flowable obtained from a string file url.",styleSheet['Italic']),
-                    platypus.Image('file://'+gif.replace('\\','/'))])
+                    platypus.Image(furl)])
 
             t([ Paragraph("Here is an Image flowable obtained from a string http url.",styleSheet['Italic']),
                     platypus.Image('http://www.reportlab.com/rsrc/encryption.gif'),
