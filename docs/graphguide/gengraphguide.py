@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/gengraphguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/gengraphguide.py,v 1.4 2001/08/07 10:26:06 dinu_gherman Exp $
-__version__=''' $Id: gengraphguide.py,v 1.4 2001/08/07 10:26:06 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/docs/graphguide/gengraphguide.py,v 1.5 2001/08/08 18:52:06 rgbecker Exp $
+__version__=''' $Id: gengraphguide.py,v 1.5 2001/08/08 18:52:06 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -35,9 +35,6 @@ import platdemos
 
 appmode=0
 
-
-from reportlab.lib.corp import ReportLabLogo
-LOGO = ReportLabLogo(0.25*inch, 0.25*inch, inch, 0.75*inch)
 
 from t_parse import Template
 QFcodetemplate = Template("X$X$", "X")
