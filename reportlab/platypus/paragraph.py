@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.47 2000/12/15 16:58:02 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.47 2000/12/15 16:58:02 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.48 2000/12/17 10:51:55 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.48 2000/12/17 10:51:55 rgbecker Exp $ '''
 from string import split, strip, join, whitespace
 from operator import truth
 from types import StringType, ListType
@@ -211,7 +211,10 @@ def _split_blParaHard(blPara,start,stop):
 		for w in l.words:
 			f.append(w)
 		if l is not lines[-1]:
-			f[-1].text = f[-1].text+' '
+			i = len(f)-1
+			while hasattr(f[i],'cbDefn'): i = i-1
+			g = f[i]
+			if g.text[-1]!=' ': g.text = g.text+' '
 	return f
 
 def _drawBullet(canvas, offset, cur_y, bulletText, style):
@@ -249,23 +252,7 @@ def _handleBulletWidth(bulletText,style,maxWidths):
 			#..then it overruns, and we have less space available on line 1
 			maxWidths[0] = maxWidths[0] - (bulletRight - indent)
 
-def moreFrags(iterator):
-	'''this should only be called at the beginning of a line'''
-	frags,i,start=iterator
-	l = len(frags)
-	while i<l:
-		text = frags[i].text
-		lim = len(text)
-		while start<lim and text[start]==' ': start=start+1
-		if start==lim:
-			i = i + 1
-			start = 0
-		else:
-			iterator[0:2] = [i,start]
-			return 1
-	return 0
-	
-def	splitLines(frags,widths):
+def	splitLines0(frags,widths):
 	'''
 	given a list of ParaFrags we return a list of ParaLines
 
@@ -279,13 +266,49 @@ def	splitLines(frags,widths):
 	lines	= []
 	lineNum	= 0
 	maxW	= widths[lineNum]
-	iterator = [frags,0,0]
-	while moreFrags(iterator):
+	i		= -1
+	l		= len(frags)
+	lim		= start = 0
+	while 1:
+		#find a non whitespace character
+		while i<l:
+			while start<lim and text[start]==' ': start=start+1
+			if start==lim:
+				i = i + 1
+				if i==l: break
+				start = 0
+				f = frags[i]
+				text = f.text
+				lim	= len(text)
+			else:
+				break	# we found one
+
+		if start==lim: break	#if we didn't find one we are done
+
 		#start of a line
+		g		= (None,None,None)
 		line	= []
 		cLen	= 0
+		nSpaces	= 0
 		while cLen<maxW:
-			pass
+			j = find(text,' ',start)
+			if j<0: j==lim
+			w = stringWidth(text[start:j],f.fontName,f.fontSize)
+			cLen = cLen + w
+			if cLen>maxW and line!=[]:
+				cLen = cLen-w
+				#this is the end of the line
+				while g.text[lim]==' ':
+					lim = lim - 1
+					nSpaces = nSpaces-1
+				break
+			if j<0: j = lim
+			if g[0] is f: g[2] = j	#extend
+			else:
+				g = (f,start,j)
+				line.append(g)
+			if j==lim:
+				i=i+1
 
 class Paragraph(Flowable):
 	""" Paragraph(text, style, bulletText=None)
@@ -375,6 +398,8 @@ class Paragraph(Flowable):
 		func = self._get_split_blParaFunc()
 
 		P1=self.__class__(None,style,bulletText=self.bulletText,frags=func(blPara,0,s))
+		#this is a major hack
+		P1.blPara = ParaLines(kind=1,lines=blPara.lines[0:s],aH=availHeight,aW=availWidth)
 		P1._JustifyLast = 1
 		if style.firstLineIndent != 0:
 			style = deepcopy(style)
@@ -469,6 +494,10 @@ class Paragraph(Flowable):
 			return ParaLines(kind=0, fontSize=style.fontSize, fontName=style.fontName,
 							textColor=style.textColor, lines=[])
 		else:
+			if hasattr(self,'blPara'):
+				#NB this is an utter hack that awaits the proper information
+				#preserving splitting algorithm
+				return self.blPara
 			n = 0
 			for w in _getFragWords(frags):
 				spaceWidth = stringWidth(' ',w[-1][0].fontName, w[-1][0].fontSize)
@@ -687,7 +716,7 @@ class Paragraph(Flowable):
 
 if __name__=='__main__':	#NORUNTESTS
 	def dumpParagraphLines(P):
-		print 'dumpParagraphLines(%s)' % str(P)
+		print 'dumpParagraphLines(<Paragraph @ %d>)' % id(P)
 		lines = P.blPara.lines
 		n =len(lines)
 		for l in range(n):
@@ -700,26 +729,32 @@ if __name__=='__main__':	#NORUNTESTS
 			print
 
 	def dumpParagraphFrags(P):
-		print 'dumpParagraphLines(%s)' % str(P)
+		print 'dumpParagraphFrags(<Paragraph @ %d>)' % id(P)
 		frags = P.frags
 		n =len(frags)
 		for l in range(n):
 			print "frag%d: '%s'" % (l, frags[l].text)
 	
 		l = 0
+		cum = 0
 		for W in _getFragWords(frags):
-			print "fragword%d: size=%d" % (l, W[0]),
+			cum = cum + W[0]
+			print "fragword%d: cum=%3d size=%d" % (l, cum, W[0]),
 			for w in W[1:]:
 				print "'%s'" % w[1],
 			print
 			l = l + 1
 
 	from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+	import sys
+	TESTS = sys.argv[1:]
+	if TESTS==[]: TESTS=['4']
 	styleSheet = getSampleStyleSheet()
 	B = styleSheet['BodyText']
 	style = ParagraphStyle("discussiontext", parent=B)
 	style.fontName= 'Helvetica'
-	text='''The <font name=courier color=green>CMYK</font> or subtractive method follows the way a printer
+	if '1' in TESTS:
+		text='''The <font name=courier color=green>CMYK</font> or subtractive method follows the way a printer
 mixes three pigments (cyan, magenta, and yellow) to form colors.
 Because mixing chemicals is more difficult than combining light there
 is a fourth parameter for darkness.  For example a chemical
@@ -730,23 +765,25 @@ don't use the <font name=courier color=green>CMY</font> pigments but use a direc
 be the case that &amp;| &amp; | colors specified in <font name=courier color=green>CMYK</font> will provide better fidelity
 and better control when printed.
 '''
-	P=Paragraph(text,style)
-	dumpParagraphFrags(P)
-	aW, aH = 456.0, 42.8
-	w,h = P.wrap(aW, aH)
-	dumpParagraphLines(P)
-	S = P.split(aW,aH)
-	for s in S:
-		s.wrap(aW,aH)
-		dumpParagraphLines(s)
-		aH = 500
+		P=Paragraph(text,style)
+		dumpParagraphFrags(P)
+		aW, aH = 456.0, 42.8
+		w,h = P.wrap(aW, aH)
+		dumpParagraphLines(P)
+		S = P.split(aW,aH)
+		for s in S:
+			s.wrap(aW,aH)
+			dumpParagraphLines(s)
+			aH = 500
 
-	P=Paragraph("""Price<super><font color="red">*</font></super>""", styleSheet['Normal'])
-	dumpParagraphFrags(P)
-	w,h = P.wrap(24, 200)
-	dumpParagraphLines(P)
+	if '2' in TESTS:
+		P=Paragraph("""Price<super><font color="red">*</font></super>""", styleSheet['Normal'])
+		dumpParagraphFrags(P)
+		w,h = P.wrap(24, 200)
+		dumpParagraphLines(P)
 
-	text = """Dieses Kapitel bietet eine schnelle <b><font color=red>Programme :: starten</font></b>
+	if '3' in TESTS:
+		text = """Dieses Kapitel bietet eine schnelle <b><font color=red>Programme :: starten</font></b>
 <onDraw name=myIndex label="Programme :: starten">
 <b><font color=red>Eingabeaufforderung :: (&gt;&gt;&gt;)</font></b>
 <onDraw name=myIndex label="Eingabeaufforderung :: (&gt;&gt;&gt;)">
@@ -759,7 +796,22 @@ sich zu sehr in speziellen Regeln oder Details zu verstricken. Dazu behandelt
 dieses Kapitel kurz die wesentlichen Konzepte wie Variablen, Ausdrücke,
 Kontrollfluss, Funktionen sowie Ein- und Ausgabe. Es erhebt nicht den Anspruch,
 umfassend zu sein."""
-	P=Paragraph(text, styleSheet['Code'])
-	dumpParagraphFrags(P)
-	w,h = P.wrap(6*72, 9.7*72)
-	dumpParagraphLines(P)
+		P=Paragraph(text, styleSheet['Code'])
+		dumpParagraphFrags(P)
+		w,h = P.wrap(6*72, 9.7*72)
+		dumpParagraphLines(P)
+
+	if '4' in TESTS:
+		text='''Die eingebaute Funktion <font name=Courier>range(i, j [, stride])</font><onDraw name=myIndex label="eingebaute Funktionen::range()"><onDraw name=myIndex label="range() (Funktion)"><onDraw name=myIndex label="Funktionen::range()"> erzeugt eine Liste von Ganzzahlen und füllt sie mit Werten <font name=Courier>k</font>, für die gilt: <font name=Courier>i &lt;= k &lt; j</font>. Man kann auch eine optionale Schrittweite angeben. Die eingebaute Funktion <font name=Courier>xrange()</font><onDraw name=myIndex label="eingebaute Funktionen::xrange()"><onDraw name=myIndex label="xrange() (Funktion)"><onDraw name=myIndex label="Funktionen::xrange()"> erfüllt einen ähnlichen Zweck, gibt aber eine unveränderliche Sequenz vom Typ <font name=Courier>XRangeType</font><onDraw name=myIndex label="XRangeType"> zurück. Anstatt alle Werte in der Liste abzuspeichern, berechnet diese Liste ihre Werte, wann immer sie angefordert werden. Das ist sehr viel speicherschonender, wenn mit sehr langen Listen von Ganzzahlen gearbeitet wird. <font name=Courier>XRangeType</font> kennt eine einzige Methode, <font name=Courier>s.tolist()</font><onDraw name=myIndex label="XRangeType::tolist() (Methode)"><onDraw name=myIndex label="s.tolist() (Methode)"><onDraw name=myIndex label="Methoden::s.tolist()">, die seine Werte in eine Liste umwandelt.'''
+		aW = 420
+		aH = 64.4
+		P=Paragraph(text, B)
+		dumpParagraphFrags(P)
+		w,h = P.wrap(aW,aH)
+		print 'After initial wrap',w,h
+		dumpParagraphLines(P)
+		S = P.split(aW,aH)
+		dumpParagraphFrags(S[0])
+		w0,h0 = S[0].wrap(aW,aH)
+		print 'After split wrap',w0,h0
+		dumpParagraphLines(S[0])

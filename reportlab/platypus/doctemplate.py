@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.32 2000/12/15 16:59:02 rgbecker Exp $
-__version__=''' $Id: doctemplate.py,v 1.32 2000/12/15 16:59:02 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.33 2000/12/17 10:51:55 rgbecker Exp $
+__version__=''' $Id: doctemplate.py,v 1.33 2000/12/17 10:51:55 rgbecker Exp $ '''
 __doc__="""
 This module contains the core structure of platypus.
 
@@ -387,9 +387,14 @@ class BaseDocTemplate:
 
 				if n:
 					if self.frame.add(S[0], self.canv, trySplit=0):
-						self.afterFlowable(f)
+						self.afterFlowable(S[0])
 					else:
-						if hasattr(f, 'getPlainText'):
+						if hasattr(f,'text'):
+							print 'Offending text:'
+							print "'''"+f.text+"'''"
+							print f.style.fontName, f.style.fontSize, f.style.leading, f.style.firstLineIndent, f.style.leftIndent, f.style.rightIndent
+							print S[0].style.fontName, S[0].style.fontSize, S[0].style.leading, S[0].style.firstLineIndent, S[0].style.leftIndent, S[0].style.rightIndent
+						elif hasattr(f, 'getPlainText'):
 							print 'Offending Paragraph:'
 							print f.getPlainText()
 						raise "LayoutError", "splitting error type=%s" % type(f)
