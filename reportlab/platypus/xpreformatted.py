@@ -27,6 +27,13 @@ def _getFragLines(frags):
 		lines.append(cline)
 	return lines
 
+def	_split_bfrag(bfrag,start,stop):
+	f = bfrag.clone()
+	for a in ('lines', 'text'):
+		if hasattr(f,a): delattr(f,a)
+	f.lines = bfrag.lines[start:stop]
+	return [f]
+
 def _countSpaces(text):
 	i = 0
 	s = 0
@@ -104,22 +111,30 @@ class XPreformatted(Paragraph):
 		nFrags= len(frags)
 		if nFrags==1:
 			f = frags[0]
-			fontSize = f.fontSize
-			fontName = f.fontName
 			if hasattr(f,'text'):
+				fontSize = f.fontSize
+				fontName = f.fontName
+				kind = 0
 				L=string.split(f.text, '\n')
 				for l in L:
 					currentWidth = stringWidth(l,fontName,fontSize)
 					requiredWidth = max(currentWidth,requiredWidth)
 					extraSpace = maxWidth-currentWidth
-					lines.append((extraSpace,string.split(l,' ')))
+					lines.append((extraSpace,string.split(l,' '),currentWidth))
 					lineno = lineno+1
 					maxWidth = lineno<len(maxWidths) and maxWidths[lineno] or maxWidths[-1]
 			else:
-				lines=f.lines
+				kind = f.kind
+				lines = f.lines
+				for L in lines:
+					if kind==0:
+						currentWidth = L[2]
+					else:
+						currentWidth = L.currentWidth
+					requiredWidth = max(currentWidth,requiredWidth)
 
 			self.width = max(self.width,requiredWidth)
-			return f.clone(kind=0, lines=lines)
+			return f.clone(kind=kind, lines=lines)
 		elif nFrags<=0:
 			return ParaFrag(kind=0, fontSize=style.fontSize, fontName=style.fontName,
 							textColor=style.textColor, lines=[])
@@ -141,12 +156,16 @@ class XPreformatted(Paragraph):
 				maxWidth = lineno<len(maxWidths) and maxWidths[lineno] or maxWidths[-1]
 				requiredWidth = max(currentWidth,requiredWidth)
 				extraSpace = maxWidth - currentWidth
-				lines.append(ParaFrag(extraSpace=extraSpace,wordCount=n, words=words, fontSize=maxSize))
+				lines.append(ParaFrag(extraSpace=extraSpace,wordCount=n, words=words, fontSize=maxSize, currentWidth=currentWidth))
 
 			self.width = max(self.width,requiredWidth)
 			return ParaFrag(kind=1, lines=lines)
 
 		return lines
+
+	# we need this her to get the right splitter
+	def _get_split_bFragFunc(self):
+		return _split_bfrag
 
 if __name__=='__main__':	#NORUNTESTS
 	def dumpXPreformattedLines(P):
@@ -195,9 +214,9 @@ if __name__=='__main__':	#NORUNTESTS
 	from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 	styleSheet = getSampleStyleSheet()
 	B = styleSheet['BodyText']
-	style = ParagraphStyle("discussiontext", parent=B)
-	style.fontName= 'Helvetica'
-	for (text,dedent) in [('''
+	DTstyle = ParagraphStyle("discussiontext", parent=B)
+	DTstyle.fontName= 'Helvetica'
+	for (text,dedent,style) in [('''
 
 
 The <font name=courier color=green>CMYK</font> or subtractive
@@ -215,7 +234,7 @@ be the case that &amp;| &amp; | colors specified in <font name=courier color=gre
 and better control when printed.
 
 
-''',0),
+''',0,DTstyle),
 ('''
 
    This is a non rearranging form of the <b>Paragraph</b> class;
@@ -226,5 +245,6 @@ and better control when printed.
        common leading spaces will be removed from the
    front of each line.
 
-''',3)]:
+''',3,DTstyle),
+]:
 		try_it(text,style,dedent)
