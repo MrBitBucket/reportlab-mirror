@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.37 2003/07/07 16:39:48 rgbecker Exp $
-__version__=''' $Id: rl_config.py,v 1.37 2003/07/07 16:39:48 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.38 2003/08/01 11:05:31 rgbecker Exp $
+__version__=''' $Id: rl_config.py,v 1.38 2003/08/01 11:05:31 rgbecker Exp $ '''
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -16,8 +16,8 @@ warnOnMissingFontGlyphs =   0                       #if 1, warns of each missing
 verbose =                   0
 showBoundary =              0                       # turns on and off boundary behaviour in Drawing
 emptyTableAction=           'error'                 # one of 'error', 'indicate', 'ignore'
-invariant=                  0                       #produces repeatble,identical PDFs without timestamp info
-                                                    #(for regression testing)
+invariant=                  0                       #produces repeatable,identical PDFs with same timestamp info (for regression testing)
+eps_preview_transparent=    None                    #set to white etc
 
 # places to look for T1Font information
 T1SearchPath =  ('c:/Program Files/Adobe/Acrobat 6.0/Resource/Font', #Win32, Acrobat 5
@@ -78,7 +78,7 @@ def _startUp():
                 'shapeChecking', 'defaultEncoding',
                 'pageCompression', 'defaultPageSize', 'defaultImageCaching', 'PIL_WARNINGS',
                 'ZLIB_WARNINGS', 'warnOnMissingFontGlyphs', 'verbose', 'emptyTableAction',
-                'invariant',
+                'invariant','eps_preview_transparent',
                 )
 
     if _SAVED=={}:
