@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.79 2001/05/29 19:02:33 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.79 2001/05/29 19:02:33 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.80 2001/06/11 10:30:27 rgbecker Exp $
+__version__=''' $Id: canvas.py,v 1.80 2001/06/11 10:30:27 rgbecker Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -120,7 +120,7 @@ class Canvas:
     def __init__(self,filename,
                  pagesize=(595.27,841.89),
                  bottomup = 1,
-                 pageCompression=1,
+                 pageCompression=None,
                  encoding=rl_config.defaultEncoding,
                  verbosity=0):
         """Create a canvas of a given size. etc.
@@ -1240,17 +1240,19 @@ class Canvas:
         self._code.append('Q')
         #self._code.append('BT')
 
-    def setPageCompression(self, onoff=1):
-        """Possible values 1 or 0 (1 for 'on' is the default).
+    def setPageCompression(self, pageCompression=1):
+        """Possible values None, 1 or 0
+		If None the value from rl_config will be used.
         If on, the page data will be compressed, leading to much
         smaller files, but takes a little longer to create the files.
         This applies to all subsequent pages, or until setPageCompression()
         is next called."""
-        if onoff and not zlib:
+        if pageCompression is None: pageCompression = rl_config.pageCompression
+        if pageCompression and not zlib:
             print 'zlib not available'
             self._pageCompression = 0
         else:
-            self._pageCompression = onoff
+            self._pageCompression = pageCompression
         
     def setPageTransition(self, effectname=None, duration=1, 
                         direction=0,dimension='H',motion='I'):
