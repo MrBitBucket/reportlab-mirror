@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.22 2002/08/08 22:45:05 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.22 2002/08/08 22:45:05 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.23 2003/03/02 01:54:57 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.23 2003/03/02 01:54:57 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
-    renderPM.drawToFile(drawing,filename,kind='GIF')
+    renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
 Other functions let you create a PM drawing as string or into a PM buffer.
 Execute the script to see some test drawings."""
 
@@ -229,12 +229,14 @@ def _setFont(gs,fontName,fontSize):
 
 BEZIER_ARC_MAGIC = 0.5522847498     #constant for drawing circular arcs w/ Beziers
 class PMCanvas:
-    def __init__(self,w,h,dpi=72,bg=0xffffff):
+    def __init__(self,w,h,dpi=72,bg=0xffffff,configPIL=None):
+        '''configPIL dict is passed to image save method'''
         scale = dpi/72.0
         self.__dict__['_gs'] = _renderPM.gstate(w,h,bg=bg)
         self.__dict__['_bg'] = bg
         self.__dict__['_baseCTM'] = (scale,0,0,scale,0,0)
         self.__dict__['_clipPaths'] = []
+        self.__dict__['configPIL'] = configPIL
         self.ctm = self._baseCTM
 
     def _drawTimeResize(self,w,h,bg=None):
@@ -261,31 +263,29 @@ class PMCanvas:
         return im
 
     def saveToFile(self,fn,fmt=None):
-        try:
-            from PIL import Image
-        except ImportError:
-            import Image
         im = self.toPIL()
         if fmt is None:
             if type(fn) is not StringType:
                 raise ValueError, "Invalid type '%s' for fn when fmt is None" % type(fn)
-            im.save(fn) #guess from name
         else:
             fmt = string.upper(fmt)
             if fmt in ['GIF']:
+                try:
+                    from PIL import Image
+                except ImportError:
+                    import Image
                 im = im.convert("P", dither=Image.NONE, palette=Image.ADAPTIVE)
-                im.save(fn,fmt)
             elif fmt in ['PNG','TIFF','BMP', 'PPM']:
                 if fmt=='PNG':
                     try:
                         from PIL import PngImagePlugin
                     except ImportError:
                         import PngImagePlugin
-                im.save(fn,fmt)
             elif fmt in ('JPG','JPEG'):
-                im.save(fn,'JPEG')
+                fmt = 'JPEG'
             else:
                 raise RenderPMError,"Unknown image kind %s" % fmt
+            apply(im.save,(fn,fmt),self.configPIL or {})
 
     def saveToString(self,fmt='GIF'):
         s = getStringIO()
@@ -482,17 +482,18 @@ class PMCanvas:
     restoreState = saveState
 
 
-def drawToFile(d,fn,fmt='GIF', dpi=72, bg=0xfffffff, quality=-1, showBoundary=rl_config.showBoundary):
-    '''create a pixmap and draw drawing, d to it then save as a file'''
+def drawToFile(d,fn,fmt='GIF', dpi=72, bg=0xfffffff, configPIL=None, showBoundary=rl_config.showBoundary):
+    '''create a pixmap and draw drawing, d to it then save as a file
+    configPIL dict is passed to image save method'''
     w = int(d.width+0.5)
     h = int(d.height+0.5)
     c = PMCanvas(w,h, dpi=dpi, bg=bg)
     draw(d, c, 0, 0)
     c.saveToFile(fn,fmt)
 
-def drawToString(d,fmt='GIF', dpi=72, bg=0xfffffff, quality=-1, showBoundary=rl_config.showBoundary):
+def drawToString(d,fmt='GIF', dpi=72, bg=0xfffffff, configPIL=None, showBoundary=rl_config.showBoundary):
     s = getStringIO()
-    drawToFile(d,s,fmt=fmt, dpi=dpi, bg=bg, quality=quality)
+    drawToFile(d,s,fmt=fmt, dpi=dpi, bg=bg, configPIL=configPIL)
     return s.getvalue()
 
 save = drawToFile
