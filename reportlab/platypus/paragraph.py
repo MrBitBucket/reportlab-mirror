@@ -1,7 +1,6 @@
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.73 2004/02/05 18:31:35 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/paragraph.py
 __version__=''' $Id$ '''
 from string import split, strip, join, whitespace, find
 from operator import truth

@@ -1,7 +1,6 @@
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.81 2004/06/03 11:26:44 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/utils.py
 __version__=''' $Id$ '''
 
 import string, os, sys, imp

@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-#copyright ReportLab Inc. 2000-2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_docstrings.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_docstrings.py,v 1.13 2004/05/03 08:11:48 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_docstrings.py
 
 """This is a test on a package level that find all modules,
 classes, methods and functions that do not have a doc string

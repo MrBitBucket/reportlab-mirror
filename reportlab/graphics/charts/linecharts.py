@@ -1,11 +1,10 @@
-#copyright ReportLab Inc. 2000-2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.44 2003/11/29 17:13:01 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/charts/linecharts.py
 """
 This modules defines a very preliminary Line Chart example.
 """
-__version__=''' $Id: linecharts.py,v 1.44 2003/11/29 17:13:01 rgbecker Exp $ '''
+__version__=''' $Id$ '''
 
 import string
 from types import FunctionType, StringType

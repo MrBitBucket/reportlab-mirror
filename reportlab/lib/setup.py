@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-#copyright ReportLab Inc. 2000-2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/setup.py,v 1.16 2003/11/09 11:53:55 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/setup.py
 if __name__=='__main__': #NO RUNTESTS
     import os, sys, re
     from distutils.core import setup, Extension

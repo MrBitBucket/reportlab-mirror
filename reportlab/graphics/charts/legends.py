@@ -1,10 +1,9 @@
-#copyright ReportLab Inc. 2000-2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.26 2003/11/01 18:52:34 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/charts/legends.py
 """This will be a collection of legends to be used with charts.
 """
-__version__=''' $Id: legends.py,v 1.26 2003/11/01 18:52:34 rgbecker Exp $ '''
+__version__=''' $Id$ '''
 
 import string, copy
 

@@ -1,8 +1,7 @@
-#copyright ReportLab Inc. 2000-2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPS.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.24 2004/01/29 17:06:24 rgbecker Exp $
-__version__=''' $Id: renderPS.py,v 1.24 2004/01/29 17:06:24 rgbecker Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/renderPS.py
+__version__=''' $Id$ '''
 import string, types
 from reportlab.pdfbase.pdfmetrics import getFont, stringWidth # for font info
 from reportlab.lib.utils import fp_str, getStringIO

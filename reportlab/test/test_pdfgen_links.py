@@ -1,7 +1,7 @@
-#copyright ReportLab Inc. 2000-2003
+#Copyright ReportLab Europe Ltd. 2000-2004
 #this test and associates functionality kinds donated by Ian Sparks.
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pdfgen_links.py?cvsroot=reportlab
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_pdfgen_links.py
 """
 Tests for internal links and destinations
 """

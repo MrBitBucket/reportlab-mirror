@@ -1,8 +1,7 @@
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pdfimages.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.22 2004/03/18 15:55:50 rgbecker Exp $
-__version__=''' $Id: pdfimages.py,v 1.22 2004/03/18 15:55:50 rgbecker Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/pdfgen/pdfimages.py
+__version__=''' $Id$ '''
 __doc__="""
 Image functionality sliced out of canvas.py for generalization
 """

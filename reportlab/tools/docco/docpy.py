@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-#copyright ReportLab Inc. 2000-2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/docpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/docpy.py,v 1.6 2004/05/08 17:19:54 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/tools/docco/docpy.py
 
 """Generate documentation from live Python objects.
 

@@ -1,9 +1,8 @@
 # Tables of Contents and Indices
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/tocindex.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/tocindex.py,v 1.10 2003/12/02 15:21:17 andy_robinson Exp $
-__version__=''' $Id: tocindex.py,v 1.10 2003/12/02 15:21:17 andy_robinson Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/tocindex.py
+__version__=''' $Id$ '''
 __doc__=''
 """
 This module will contain standard Table of Contents and Index objects.

@@ -1,8 +1,7 @@
-#copyright ReportLab Inc. 2000-2003
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/setup.py,v 1.11 2004/01/21 15:04:47 rgbecker Exp $
-__version__=''' $Id: setup.py,v 1.11 2004/01/21 15:04:47 rgbecker Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/setup.py
+__version__=''' $Id$ '''
 
 import os, sys, distutils
 from distutils.core import setup, Extension

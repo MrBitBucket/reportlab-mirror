@@ -1,9 +1,8 @@
 #!/bin/env python
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.23 2004/06/10 00:43:21 andy_robinson Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.23 2004/06/10 00:43:21 andy_robinson Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_pdfgen_general.py
+__version__=''' $Id$ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 

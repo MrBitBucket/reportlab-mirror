@@ -1,9 +1,8 @@
 #!/bin/env python
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/formatters.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/formatters.py,v 1.7 2002/07/24 19:56:37 andy_robinson Exp $
-__version__=''' $Id: formatters.py,v 1.7 2002/07/24 19:56:37 andy_robinson Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/formatters.py
+__version__=''' $Id$ '''
 __doc__="""
 These help format numbers and dates in a user friendly way.
 

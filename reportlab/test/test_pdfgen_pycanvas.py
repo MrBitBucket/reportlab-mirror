@@ -1,8 +1,7 @@
 #!/bin/env python
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_pycanvas.py,v 1.6 2004/03/26 14:20:44 rgbecker Exp $
-__version__=''' $Id: test_pdfgen_pycanvas.py,v 1.6 2004/03/26 14:20:44 rgbecker Exp $ '''
+__version__=''' $Id$ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas and the pycanvas module to output Python source code.
 

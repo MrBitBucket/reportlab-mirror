@@ -1,8 +1,7 @@
 #!/bin/env python
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/test_invariant.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_invariant.py,v 1.7 2004/03/26 14:20:44 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_invariant.py
 __version__=''' $Id'''
 __doc__="""Verfy that if in invariant mode, repeated runs
 make identical file.  This does NOT test across platforms

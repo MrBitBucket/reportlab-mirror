@@ -1,9 +1,8 @@
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/frames.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.23 2004/02/17 16:10:18 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/frames.py
 
-__version__=''' $Id: frames.py,v 1.23 2004/02/17 16:10:18 rgbecker Exp $ '''
+__version__=''' $Id$ '''
 
 __doc__="""
 """

@@ -1,9 +1,8 @@
 #!/bin/env python
-#copyright ReportLab Inc. 2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/rl_doc_utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/rl_doc_utils.py,v 1.7 2004/04/28 14:41:56 rgbecker Exp $
-__version__=''' $Id: rl_doc_utils.py,v 1.7 2004/04/28 14:41:56 rgbecker Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/tools/docco/rl_doc_utils.py
+__version__=''' $Id$ '''
 
 
 __doc__ = """

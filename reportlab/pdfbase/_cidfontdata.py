@@ -1,8 +1,8 @@
-#copyright ReportLab Inc. 2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/_cidfontdata.py?cvsroot=reportlab
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/pdfbase/_cidfontdata.py
 #$Header $
-__version__=''' $Id: _cidfontdata.py,v 1.9 2002/07/24 19:56:37 andy_robinson Exp $ '''
+__version__=''' $Id$ '''
 __doc__="""
 This defines additional static data to support CID fonts.
 

@@ -1,7 +1,6 @@
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch4_platypus_concepts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch4_platypus_concepts.py,v 1.5 2004/03/19 22:18:37 andy_robinson Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/docs/userguide/ch4_platypus_concepts.py
 from reportlab.tools.docco.rl_doc_utils import *
 
 #####################################################################################################3

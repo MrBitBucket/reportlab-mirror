@@ -1,12 +1,11 @@
 #!/bin/env python
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/corp.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/corp.py,v 1.13 2004/03/12 23:54:11 andy_robinson Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/corp.py
 """ This module includes some reusable routines for ReportLab's
  'Corporate Image' - the logo, standard page backdrops and
  so on - you are advised to do the same for your own company!"""
-__version__=''' $Id: corp.py,v 1.13 2004/03/12 23:54:11 andy_robinson Exp $ '''
+__version__=''' $Id$ '''
 
 from reportlab.lib.units import inch,cm
 from reportlab.lib.validators import *

@@ -1,8 +1,8 @@
-#copyright ReportLab Inc. 2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/_fontdata.py?cvsroot=reportlab
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/pdfbase/_fontdata.py
 #$Header $
-__version__=''' $Id: _fontdata.py,v 1.14 2004/03/09 22:22:26 andy_robinson Exp $ '''
+__version__=''' $Id$ '''
 __doc__="""
     database of font related things
     standardFonts       tuple of the 14 standard string font names

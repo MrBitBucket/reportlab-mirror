@@ -1,7 +1,6 @@
-#copyright ReportLab Inc. 2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/graphguide/ch3_shapes.py,v 1.3 2002/07/24 19:56:35 andy_robinson Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/docs/graphguide/ch3_shapes.py
 
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.graphics.shapes import *

@@ -1,9 +1,8 @@
 #!/bin/env python
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testtables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_tables.py,v 1.4 2004/03/26 14:20:44 rgbecker Exp $
-__version__=''' $Id: test_platypus_tables.py,v 1.4 2004/03/26 14:20:44 rgbecker Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_platypus_tables.py
+__version__=''' $Id$ '''
 __doc__='Test script for reportlab.tables'
 
 from reportlab.test import unittest

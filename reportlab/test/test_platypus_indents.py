@@ -1,7 +1,6 @@
-#copyright ReportLab Inc. 2000-2003
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_indents.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_indents.py,v 1.3 2004/03/26 14:20:44 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_platypus_indents.py
 """Tests for context-dependent indentation
 """
 

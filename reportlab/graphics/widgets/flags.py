@@ -1,6 +1,5 @@
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/flags.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.24 2002/11/27 20:23:11 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/widgets/flags.py
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 """This file is a collection of flag graphics as widgets.
@@ -28,7 +27,7 @@ USA, Czech Republic, European Union, Switzerland, Turkey, Brazil
 
 (Brazilian flag contributed by Publio da Costa Melo [publio@planetarium.com.br]).
 """
-__version__=''' $Id: flags.py,v 1.24 2002/11/27 20:23:11 rgbecker Exp $ '''
+__version__=''' $Id$ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *

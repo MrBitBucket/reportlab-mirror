@@ -1,7 +1,6 @@
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/test_multibyte_cht.py,v 1.7 2004/03/26 14:20:44 rgbecker Exp $
 # Temporary japanese support for ReportLab.
 """
 Test of traditional Chinese (as written in Taiwan)

@@ -1,10 +1,9 @@
 #!/bin/env python
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/randomtext.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/randomtext.py,v 1.10 2003/10/06 11:33:14 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/randomtext.py
 
-__version__=''' $Id: randomtext.py,v 1.10 2003/10/06 11:33:14 rgbecker Exp $ '''
+__version__=''' $Id$ '''
 
 ###############################################################################
 #   generates so-called 'Greek Text' for use in filling documents.

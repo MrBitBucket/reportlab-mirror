@@ -1,11 +1,10 @@
 /****************************************************************************
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.44 2004/05/24 12:19:53 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/_rl_accel.c
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.44 2004/05/24 12:19:53 rgbecker Exp $ "
+static __version__=" $Id$ "
 #endif
 #include "Python.h"
 #include <stdlib.h>

@@ -1,8 +1,7 @@
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/xpreformatted.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/xpreformatted.py,v 1.17 2003/06/01 09:38:16 rgbecker Exp $
-__version__=''' $Id: xpreformatted.py,v 1.17 2003/06/01 09:38:16 rgbecker Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/xpreformatted.py
+__version__=''' $Id$ '''
 
 import string
 from types import StringType, ListType

@@ -1,8 +1,7 @@
 #!/bin/env python
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/set_ops.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/set_ops.py,v 1.1 2003/06/10 09:59:06 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/set_ops.py
 import types
 import string
 

@@ -1,7 +1,6 @@
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/extformat.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/extformat.py,v 1.2 2004/04/01 17:00:33 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/extformat.py
 from tokenize import tokenprog
 import sys
 

@@ -1,7 +1,6 @@
-    #copyright ReportLab Inc. 2000-2001
+    #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/spider.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/spider.py,v 1.9 2003/06/19 17:33:00 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/charts/spider.py
 # spider chart, also known as radar chart
 
 """Spider Chart
@@ -10,7 +9,7 @@ Normal use shows variation of 5-10 parameters against some 'norm' or target.
 When there is more than one series, place the series with the largest
 numbers first, as it will be overdrawn by each successive one.
 """
-__version__=''' $Id: spider.py,v 1.9 2003/06/19 17:33:00 rgbecker Exp $ '''
+__version__=''' $Id$ '''
 
 import copy
 from math import sin, cos, pi

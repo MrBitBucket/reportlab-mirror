@@ -1,11 +1,10 @@
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/eventcal.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/eventcal.py,v 1.5 2004/01/20 22:50:31 andy_robinson Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/widgets/eventcal.py
 # Event Calendar widget
 # author: Andy Robinson
 """This file is a
 """
-__version__=''' $Id: eventcal.py,v 1.5 2004/01/20 22:50:31 andy_robinson Exp $ '''
+__version__=''' $Id$ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *

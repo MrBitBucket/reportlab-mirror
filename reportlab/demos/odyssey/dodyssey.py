@@ -1,8 +1,7 @@
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/odyssey/dodyssey.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/odyssey/dodyssey.py,v 1.16 2003/11/19 10:23:22 rgbecker Exp $
-__version__=''' $Id: dodyssey.py,v 1.16 2003/11/19 10:23:22 rgbecker Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/demos/odyssey/dodyssey.py
+__version__=''' $Id$ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT

@@ -1,8 +1,7 @@
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/enums.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/enums.py,v 1.3 2002/07/24 19:56:37 andy_robinson Exp $
-__version__=''' $Id: enums.py,v 1.3 2002/07/24 19:56:37 andy_robinson Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/enums.py
+__version__=''' $Id$ '''
 __doc__="""
 holder for all reportlab's enumerated types
 """

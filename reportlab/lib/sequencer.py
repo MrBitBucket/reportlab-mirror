@@ -1,8 +1,7 @@
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/sequencer.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/sequencer.py,v 1.14 2003/12/15 15:34:04 dragan1 Exp $
-__version__=''' $Id: sequencer.py,v 1.14 2003/12/15 15:34:04 dragan1 Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/sequencer.py
+__version__=''' $Id$ '''
 """This module defines a single public class, Sequencer, which aids in
 numbering and formatting lists."""
 #

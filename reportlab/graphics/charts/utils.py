@@ -1,9 +1,8 @@
-#copyright ReportLab Inc. 2000-2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/utils.py,v 1.9 2002/07/24 19:56:36 andy_robinson Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/charts/utils.py
 "Utilities used here and there."
-__version__=''' $Id: utils.py,v 1.9 2002/07/24 19:56:36 andy_robinson Exp $ '''
+__version__=''' $Id$ '''
 
 from time import mktime, gmtime, strftime
 import string

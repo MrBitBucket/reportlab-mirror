@@ -1,7 +1,6 @@
-#copyright ReportLab Inc. 2000-2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tableofcontents.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tableofcontents.py,v 1.7 2002/07/24 19:56:38 andy_robinson Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/tableofcontents.py
 """
 This module defines a single TableOfContents() class that can be used to
 create automatically a table of tontents for Platypus documents like
@@ -33,7 +32,7 @@ constant named delta. If one entry spans more than one line, all
 lines after the first are indented by the same constant named
 epsilon.
 """
-__version__=''' $Id: tableofcontents.py,v 1.7 2002/07/24 19:56:38 andy_robinson Exp $ '''
+__version__=''' $Id$ '''
 import string
 
 from reportlab.lib import enums

@@ -1,4 +1,4 @@
-#copyright ReportLab Inc. 2000-2002
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
 """
 Tests for RLG Image shapes.

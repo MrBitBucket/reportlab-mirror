@@ -1,11 +1,10 @@
-#copyright ReportLab Inc. 2000-2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/markers.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/markers.py,v 1.14 2003/09/05 16:03:44 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/widgets/markers.py
 """
 This modules defines a collection of markers used in charts.
 """
-__version__=''' $Id: markers.py,v 1.14 2003/09/05 16:03:44 rgbecker Exp $ '''
+__version__=''' $Id$ '''
 from types import FunctionType, ClassType
 from reportlab.graphics.shapes import Rect, Line, Circle, Polygon, Drawing, Group
 from reportlab.graphics.widgets.signsandsymbols import SmileyFace

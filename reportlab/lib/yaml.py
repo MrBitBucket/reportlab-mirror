@@ -1,7 +1,6 @@
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/yaml.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/yaml.py,v 1.4 2002/07/24 19:56:37 andy_robinson Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/yaml.py
 # parses "Yet Another Markup Language" into a list of tuples.
 # Each tuple says what the data is e.g.
 # ('Paragraph', 'Heading1', 'Why Reportlab Rules')
@@ -38,7 +37,7 @@ dot beginPre Code
 dot endPre
 - ends a preformatted object.
 """
-__version__=''' $Id: yaml.py,v 1.4 2002/07/24 19:56:37 andy_robinson Exp $ '''
+__version__=''' $Id$ '''
 
 
 import sys

@@ -1,9 +1,8 @@
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/platdemos.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.18 2004/05/28 23:41:18 andy_robinson Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/figures.py
 """This includes some demos of platypus for use in the API proposal"""
-__version__=''' $Id: figures.py,v 1.18 2004/05/28 23:41:18 andy_robinson Exp $ '''
+__version__=''' $Id$ '''
 
 import os
 

@@ -1,4 +1,3 @@
-# $Header: /tmp/reportlab/reportlab/demos/rlzope/rlzope.py,v 1.6 2004/03/17 16:29:30 rgbecker Exp $
 #
 # Using the ReportLab toolkit from within Zope
 #

@@ -1,7 +1,6 @@
-#copyright ReportLab Inc. 2000-2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/signsandsymbols.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.22 2002/07/24 19:56:36 andy_robinson Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/widgets/signsandsymbols.py
 # signsandsymbols.py
 # A collection of new widgets
 # author: John Precedo (johnp@reportlab.com)
@@ -24,7 +23,7 @@ Widgets include:
 - ArrowOne, and
 - ArrowTwo
 """
-__version__=''' $Id: signsandsymbols.py,v 1.22 2002/07/24 19:56:36 andy_robinson Exp $ '''
+__version__=''' $Id$ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *

@@ -1,8 +1,7 @@
-#copyright ReportLab Inc. 2000-2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.35 2004/01/20 22:50:31 andy_robinson Exp $
-__version__=''' $Id: widgetbase.py,v 1.35 2004/01/20 22:50:31 andy_robinson Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/widgetbase.py
+__version__=''' $Id$ '''
 import string
 
 from reportlab.graphics import shapes

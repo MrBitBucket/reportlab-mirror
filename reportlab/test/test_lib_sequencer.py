@@ -1,7 +1,6 @@
-#copyright ReportLab Inc. 2000-2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_lib_sequencer.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_lib_sequencer.py,v 1.7 2003/12/15 15:36:06 dragan1 Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_lib_sequencer.py
 """Tests for the reportlab.lib.sequencer module.
 """
 

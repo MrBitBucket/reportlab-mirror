@@ -1,8 +1,7 @@
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/styles.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/styles.py,v 1.15 2002/07/24 19:56:37 andy_robinson Exp $
-__version__=''' $Id: styles.py,v 1.15 2002/07/24 19:56:37 andy_robinson Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/styles.py
+__version__=''' $Id$ '''
 
 from reportlab.lib.colors import white, black
 from reportlab.lib.enums import TA_LEFT, TA_CENTER

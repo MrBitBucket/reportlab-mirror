@@ -1,6 +1,6 @@
-#copyright ReportLab Inc. 2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/codecharts?cvsroot=reportlab
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/codecharts.py
 #$Header $
 __version__=''' $Id '''
 __doc__="""Routines to print code page (character set) drawings.

@@ -1,9 +1,8 @@
 #!/bin/env python
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/units.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/units.py,v 1.6 2002/07/24 19:56:37 andy_robinson Exp $
-__version__=''' $Id: units.py,v 1.6 2002/07/24 19:56:37 andy_robinson Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/units.py
+__version__=''' $Id$ '''
 
 inch = 72.0
 cm = inch / 2.54

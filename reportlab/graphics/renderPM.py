@@ -1,8 +1,7 @@
-#copyright ReportLab Inc. 2001
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.46 2004/02/22 17:35:43 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.46 2004/02/22 17:35:43 rgbecker Exp $ '''
+__version__=''' $Id$ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})

@@ -1,9 +1,8 @@
 #!/bin/env python
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/logger.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/logger.py,v 1.5 2002/07/24 19:56:37 andy_robinson Exp $
-__version__=''' $Id: logger.py,v 1.5 2002/07/24 19:56:37 andy_robinson Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/logger.py
+__version__=''' $Id$ '''
 
 from sys import stderr
 class Logger:

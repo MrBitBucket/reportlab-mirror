@@ -1,8 +1,7 @@
 #!/bin/env python
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/test_images.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_images.py,v 1.5 2004/03/22 18:08:50 rgbecker Exp $
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_images.py
 __version__=''' $Id'''
 __doc__="""Tests to do with image handling.
 

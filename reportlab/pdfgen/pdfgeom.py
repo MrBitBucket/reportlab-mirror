@@ -1,8 +1,7 @@
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pdfgeom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pdfgeom.py,v 1.8 2002/07/24 19:56:38 andy_robinson Exp $
-__version__=''' $Id: pdfgeom.py,v 1.8 2002/07/24 19:56:38 andy_robinson Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/pdfgen/pdfgeom.py
+__version__=''' $Id$ '''
 __doc__="""
 This module includes any mathematical methods needed for PIDDLE.
 It should have no dependencies beyond the Python library.

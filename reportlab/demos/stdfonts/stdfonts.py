@@ -1,8 +1,7 @@
-#copyright ReportLab Inc. 2000
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/stdfonts/stdfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/stdfonts/stdfonts.py,v 1.12 2002/07/24 19:56:35 andy_robinson Exp $
-__version__=''' $Id: stdfonts.py,v 1.12 2002/07/24 19:56:35 andy_robinson Exp $ '''
+#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/demos/stdfonts/stdfonts.py
+__version__=''' $Id$ '''
 __doc__="""
 This generates tables showing the 14 standard fonts in both
 WinAnsi and MacRoman encodings, and their character codes.
