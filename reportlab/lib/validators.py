@@ -195,6 +195,12 @@ class NoneOr(Validator):
 		if x is None: return 1
 		return self._elemTest(x)
 
+class isInstanceOf(Validator):
+	def __init__(self,klass=None):
+		self._klass = klass
+	def test(self,x):
+		return isinstance(x,self._klass)
+
 isBoolean = _isBoolean()
 isString = _isString()
 isNumber = _isNumber()
