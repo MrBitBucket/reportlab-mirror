@@ -1,7 +1,7 @@
 #include <Python.h>
 #include <stdlib.h>
 #include <math.h>
-#if defined(__GNUC__)
+#if defined(__GNUC__) || defined(sun)
 #	define STRICMP strcasecmp
 #elif defined(_MSC_VER)
 #	define STRICMP stricmp

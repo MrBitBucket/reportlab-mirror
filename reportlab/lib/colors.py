@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: colors.py,v $
+#	Revision 1.12  2000/09/27 15:52:08  rgbecker
+#	Fix for sun compiler
+#
 #	Revision 1.11  2000/08/12 09:36:27  rgbecker
 #	Fix missing parens
-#
+#	
 #	Revision 1.10  2000/08/11 14:29:05  rgbecker
 #	added rgb2cmyk
 #	
@@ -62,7 +65,7 @@
 #	Revision 1.2  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
 #	
-__version__=''' $Id: colors.py,v 1.11 2000/08/12 09:36:27 rgbecker Exp $ '''
+__version__=''' $Id: colors.py,v 1.12 2000/09/27 15:52:08 rgbecker Exp $ '''
 
 import string
 import math
@@ -320,7 +323,7 @@ def getAllNamedColors():
 
     return _namedColors
 
-def describe(aColor):
+def describe(aColor,mode=0):
     # finds nearest match to one you provide.  Useful when
     # trying to replicate a web page and you only have the
     # RGB values
@@ -330,7 +333,14 @@ def describe(aColor):
         distance = colorDistance(aColor, color)
         if distance < closest[0]:
             closest = (distance, name, color)
-    print 'best match is %s, distance %0.4f' % (closest[1], closest[0])
+    if mode<=1:
+        s = 'best match is %s, distance %0.4f' % (closest[1], closest[0])
+        if mode==0: print s
+        else: return s
+    elif mode==2:
+        return (closest[1], closest[0])
+    else:
+        raise ValueError, "Illegal value for mode "+str(mode)
 
 def toColor(arg,default=None):
 	'''try to map an arbitrary arg to a color instance'''
