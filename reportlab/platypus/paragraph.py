@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.45 2000/12/14 13:18:50 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.45 2000/12/14 13:18:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.46 2000/12/15 11:49:45 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.46 2000/12/15 11:49:45 rgbecker Exp $ '''
 from string import split, strip, join, whitespace
 from operator import truth
 from types import StringType, ListType
@@ -452,22 +452,29 @@ class Paragraph(Flowable):
 					maxSize = max(maxSize,f.fontSize)
 					nText = w[1][1]
 					if words==[]:
-						words = [f.clone()]
-						words[-1].text = nText
-					elif not _sameFrag(words[-1],f):
+						g = f.clone()
+						words = [g]
+						g.text = nText
+					elif not _sameFrag(g,f):
 						if (nText!='' and nText[0]!=' ') or hasattr(f,'cbDefn'):
-							words[-1].text = words[-1].text + ' '
-						words.append(f.clone())
-						words[-1].text = nText
+							if hasattr(g,'cbDefn'):
+								i = len(words)-1
+								while hasattr(words[i],'cbDefn'): i = i-1
+								words[i].text = words[i].text + ' '
+							else:
+								g.text = g.text + ' '
+						g = f.clone()
+						words.append(g)
+						g.text = nText
 					else:
 						if nText!='' and nText[0]!=' ':
-							words[-1].text = words[-1].text + ' ' + nText
+							g.text = g.text + ' ' + nText
 
 					for i in w[2:]:
-						f = i[0].clone()
-						f.text=i[1]
-						words.append(f)
-						maxSize = max(maxSize,f.fontSize)
+						g = i[0].clone()
+						g.text=i[1]
+						words.append(g)
+						maxSize = max(maxSize,g.fontSize)
 						
 					currentWidth = newWidth
 				else:
@@ -485,14 +492,15 @@ class Paragraph(Flowable):
 					currentWidth = wordWidth
 					n = 1
 					maxSize = f.fontSize
-					words = [f.clone()]
-					words[-1].text = w[1][1]
+					g = f.clone()
+					words = [g]
+					g.text = w[1][1]
 
 					for i in w[2:]:
-						f = i[0].clone()
-						f.text=i[1]
-						words.append(f)
-						maxSize = max(maxSize,f.fontSize)
+						g = i[0].clone()
+						g.text=i[1]
+						words.append(g)
+						maxSize = max(maxSize,g.fontSize)
 
 			#deal with any leftovers on the final line
 			if words<>[]:
