@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.47 2001/11/18 11:36:41 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.48 2001/11/19 11:33:19 rgbecker Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.47 2001/11/18 11:36:41 andy_robinson Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.48 2001/11/19 11:33:19 rgbecker Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -65,7 +65,7 @@ class IndexingFlowable0(Flowable):
 		"""Called by multiBuild before it starts; use this to clear
 		old contents"""
 		pass
-	
+
 	def afterBuild(self):
 		"""Called after build ends but before isSatisfied"""
 		pass
@@ -169,7 +169,7 @@ class PageTemplate:
 	def checkPageSize(self,canv,doc):
 		'''This gets called by the template framework
 		If canv size != doc size then the canv size is set to
-		the template size or if that's not available to the 
+		the template size or if that's not available to the
 		doc size.
 		'''
 		#### NEVER EVER EVER COMPARE FLOATS FOR EQUALITY
@@ -193,7 +193,7 @@ class PageTemplate:
 		footer needed knowledge of what flowables were drawn on
 		this page."""
 		pass
-		
+
 
 class BaseDocTemplate:
 	"""
@@ -214,18 +214,18 @@ class BaseDocTemplate:
 		story flowables into the frames.
 
 	4)	The document instances can override the base handler routines.
-	
+
 	Most of the methods for this class are not called directly by the user,
 	but in some advanced usages they may need to be overridden via subclassing.
-	
+
 	EXCEPTION: doctemplate.build(...) must be called for most reasonable uses
 	since it builds a document using the page template.
-	
+
 	Each document template builds exactly one document into a file specified
 	by the filename argument on initialization.
 
 	Possible keyword arguments for the initialization:
-	
+
 	pageTemplates: A list of templates.  Must be nonempty.	Names
 	  assigned to the templates are used for referring to them so no two used
 	  templates should have the same name.	For example you might want one template
@@ -282,7 +282,7 @@ class BaseDocTemplate:
 		# passed to indexing flowables.
 		self._pageRefs = {}
 		self._indexingFlowables = []
-		
+
 		self._calc()
 		self.afterInit()
 
@@ -306,7 +306,7 @@ class BaseDocTemplate:
 		#assert filter(lambda x: not isinstance(x,PageTemplate), pageTemplates)==[], "pageTemplates argument error"
 		for t in pageTemplates:
 			self.pageTemplates.append(t)
-			
+
 	def handle_documentBegin(self):
 		'''implement actions at beginning of document'''
 		self._hanging = [PageBegin]
@@ -440,58 +440,28 @@ class BaseDocTemplate:
 			first._skipMeNextTime = 1
 			flowables.insert(0, FrameBreak())
 			return
-			
-		
+
+
 	def handle_keepWithNext(self, flowables):
 		"implements keepWithNext"
-		#disabled for now - will not work
-		return
-		
-		this = flowables[0]
-		if isinstance(this, KeepTogether):
-			if hasattr(this, '_skipMeNextTime'):
-				delattr(this, '_skipMeNextTime')
-				return
-			
-		keepWithNext = ((hasattr(this, 'keepWithNext') and this.keepWithNext == 1) or
-			(hasattr(this, 'style') and hasattr(this.style, 'keepWithNext') and this.style.keepWithNext == 1)
-			)
-		if keepWithNext:
-			print 'found a keepWithNext, %d items remaining' % len(flowables)
-			collected = []
-
-			#there could be multiple keepWithNext in a row...
-			while keepWithNext:
-
-				
-				collected.append(this)
-				del flowables[0]
-				if len(flowables) == 0:
-					break
-				else:
-					this = flowables[0]
-					keepWithNext = ((hasattr(this, 'keepWithNext') and this.keepTogether == 1) or
-						(hasattr(this, 'style') and hasattr(this.style, 'keepWithNext') and this.style.keepWithNext == 1)
-						)
-			#now we add the 'next' thing
-			if len(flowables) > 0:
-				this = flowables[0]
-				collected.append(this)
-				del flowables[0]
-			Keeper = KeepTogether(collected)
-			Keeper._skipMeNextTime = 1
-			print 'gathered %d items into one KeepTogether' % len(collected)
-			flowables.insert(0, Keeper)
-
-
+		i = 0
+		n = len(flowables)
+		while i<n and flowables[i].getKeepWithNext(): i = i + 1
+		if i:
+			i = i + 1
+			K = KeepTogether(flowables[:i])
+			for f in K._flowables:
+				f.keepWithNext = 0
+			del flowables[:i]
+			flowables.insert(0,K)
 
 	def handle_flowable(self,flowables):
 		'''try to handle one flowable from the front of list flowables.'''
-		
+
 		#allow document a chance to look at, modify or ignore
 		#the object(s) about to be processed
 		self.filterFlowables(flowables)
-		
+
 		self.handle_breakBefore(flowables)
 		self.handle_keepWithNext(flowables)
 		f = flowables[0]
@@ -599,19 +569,19 @@ class BaseDocTemplate:
 			if not f.isSatisfied():
 				allHappy = 0
 				break
-		return allHappy    
+		return allHappy
 
 	def notify0(self, kind, stuff):
 		""""Forward to any listeners"""
 		for l in self._indexingFlowables:
 			l.notify(kind, stuff)
-			
+
 	def pageRef0(self, label):
 		"""hook to register a page number"""
 		if _verbose: print "pageRef called with label '%s' on page %d" % (
 			label, self.page)
 		self._pageRefs[label] = self.page
-		
+
 	def multiBuild0(self, story,
 				   filename=None,
 				   canvasmaker=canvas.Canvas,
@@ -660,7 +630,7 @@ class BaseDocTemplate:
 				## print 'failed'
 			if passes > maxPasses:
 				raise IndexError, "Index entries not resolved after %d passes" % maxPasses
-		
+
 		if _verbose: print 'saved'
 
 	#these are pure virtuals override in derived classes
@@ -695,7 +665,7 @@ class BaseDocTemplate:
 		method returns.
 		'''
 		pass
-		
+
 	def afterFlowable(self, flowable):
 		'''called after a flowable has been rendered'''
 		pass
@@ -703,10 +673,10 @@ class BaseDocTemplate:
 
 class SimpleDocTemplate(BaseDocTemplate):
 	"""A special case document template that will handle many simple documents.
-	   See documentation for BaseDocTemplate.  No pageTemplates are required 
+	   See documentation for BaseDocTemplate.  No pageTemplates are required
 	   for this special case.	A page templates are inferred from the
 	   margin information and the onFirstPage, onLaterPages arguments to the build method.
-	   
+
 	   A document which has all pages with the same look except for the first
 	   page may can be built using this special approach.
 	"""
@@ -722,11 +692,11 @@ class SimpleDocTemplate(BaseDocTemplate):
 		"""build the document using the flowables.	Annotate the first page using the onFirstPage
 			   function and later pages using the onLaterPages function.  The onXXX pages should follow
 			   the signature
-			   
+
 				  def myOnFirstPage(canvas, document):
 					  # do annotations and modify the document
 					  ...
-					  
+
 			   The functions can do things like draw logos, page numbers,
 			   footers, etcetera. They can use external variables to vary
 			   the look (for example providing page numbering or section names).
