@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testplatypus.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.15 2004/03/22 18:08:50 rgbecker Exp $
-__version__=''' $Id: test_platypus_general.py,v 1.15 2004/03/22 18:08:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.16 2004/03/23 13:50:40 rgbecker Exp $
+__version__=''' $Id: test_platypus_general.py,v 1.16 2004/03/23 13:50:40 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -395,7 +395,7 @@ def getExamples():
             img = platypus.Image(jpg)
             story.append(img)
             story.append(Paragraph("Here is an JPEG Image flowable obtained from an open file.",styleSheet['Italic']))
-            img = platypus.Image(open(jpg,'rb'))
+            img = platypus.Image(open_for_read(jpg,'b'))
             story.append(img)
 
     story.append(Paragraph("""Here is a Table, which takes all kinds of formatting options...""",
