@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.12 2001/05/10 08:42:50 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.13 2001/05/11 10:06:28 dinu_gherman Exp $
 import string
 
 from reportlab.graphics import shapes
@@ -75,8 +75,12 @@ class PropHolder:
         one simply returns everything without a leading underscore.
         """
 
+        from reportlab.lib.validators import isValidChild
+        isValidChild = isValidChild()
+
         # TODO when we need it, but not before -
         # expose sequence contents?
+
         props = {}
         for name in self.__dict__.keys():
             if name[0:1] <> '_':

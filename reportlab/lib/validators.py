@@ -9,125 +9,333 @@ from types import FloatType, IntType, ListType, TupleType, StringType
 from reportlab.lib import colors
 
     
-def isBoolean(x):
-    return (x in (0, 1))
+##def isBoolean(x):
+##    return (x in (0, 1))
+##
+##
+##def isString(x):
+##    return (type(x) == StringType)
+##
+##            
+##def isNumber(x):
+##    # Don't think we really want complex numbers for numbers!
+##    return (type(x) in (FloatType, IntType))
+##
+##
+##def isNumberOrNone(x):
+##    if x is None:
+##        return 1
+##    else:
+##        # Don't think we really want complex numbers for numbers!
+##        return (type(x) in (FloatType, IntType))
+##
+##
+##def isNumberOrAuto(x):
+##    from reportlab.graphics.shapes import Auto
+##
+##    if x == Auto:
+##        return 1
+##    else:
+##        # Don't think we really want complex numbers for numbers!
+##        return (type(x) in (FloatType, IntType))
+##
+##
+##def isTextAnchor(x):
+##    return (x in ('start', 'middle', 'end'))
+##
+##
+##def isListOfNumbers(x):
+##    # Don't think we really want complex numbers for numbers!
+##    if type(x) in (ListType, TupleType):
+##        for element in x:
+##            if not isNumber(element):
+##                return 0
+##        return 1
+##    else:
+##        return 0
+##
+##
+##def isListOfNumbersOrNone(x):
+##    if x is None:
+##        return 1
+##    else:
+##        return isListOfNumbers(x)
+##
+##    
+##def isListOfShapes(x):
+##    from reportlab.graphics.shapes import Shape
+##    if type(x) in (ListType, TupleType):
+##        answer = 1
+##        for element in x:
+##            if not isinstance(x, Shape):
+##                answer = 0
+##        return answer
+##    else:
+##        return 0
+##
+##
+##def isListOfStrings(x):
+##    if type(x) in (ListType, TupleType):
+##        answer = 1
+##        for element in x:
+##            if type(element) <> type(""):
+##                answer = 0
+##        return answer
+##    else:
+##        return 0
+##
+##
+##def isListOfStringsOrNone(x):
+##    if x is None:
+##        return 1
+##    else:
+##        return isListOfStrings(x)
+##
+##
+##def isTransform(x):
+##    if type(x) in (ListType, TupleType):
+##        if len(x) == 6:
+##            for element in x:
+##                if not isNumber(element):
+##                    return 0
+##            return 1
+##        else:
+##            return 0
+##    else:
+##        return 0
+##    
+##
+##def isColor(x):
+##    return isinstance(x, colors.Color)
+##
+##
+##def isColorOrNone(x):
+##    if x is None:
+##        return 1
+##    else:
+##        return isinstance(x, colors.Color)
+##
+##
+##def isValidChild(x):
+##    """Is this child allowed in a drawing or group?
+##
+##    I.e. does it descend from Shape or UserNode?
+##    """
+##
+##    from reportlab.graphics.shapes import UserNode, Shape
+##    return isinstance(x, UserNode) or isinstance(x, Shape)
+##
+##
+##class OneOf:
+##    """Make validator functions for list of choices. Usage:
+##    >>> f = shapes.OneOf(('happy','sad'))
+##    >>> f('happy')
+##    1
+##    >>> f('grumpy')
+##    0
+##    >>> 
+##    """
+##
+##    def __init__(self, choices):
+##        self._choices = choices
+##
+##    def __call__(self, arg):
+##        return arg in self._choices
+##
+##
+##class SequenceOf:
+##    """Make validator functions for sequence of things:
+##    >>> isListOfColors = shapes.SequenceOf(isColor)    
+##    """
+##    
+##    def __init__(self, atomicFunc):
+##        self._atomicFunc = atomicFunc
+##
+##    def __call__(self, seq):
+##        if type(seq) not in (ListType, TupleType):
+##            return 0
+##        else:
+##            for elem in seq:
+##                if not self._atomicFunc(elem):
+##                    return 0
+##            return 1
 
 
-def isString(x):
-    return (type(x) == StringType)
+class Validator:
+    "Abstract validator class."
+
+    def __init__(self, *args, **kwdict):
+        self._args = args
+        for k, v in kwdict.items():
+            setattr(self, k, v)
+
+
+class isBoolean(Validator):
+    "Boolean validator class."
+
+    def __call__(self, x):
+        return (x in (0, 1))
+
+
+class isString(Validator):
+    "String validator class."
+
+    def __call__(self, x):
+        return (type(x) == StringType)
 
             
-def isNumber(x):
-    # Don't think we really want complex numbers for numbers!
-    return (type(x) in (FloatType, IntType))
+class isNumber(Validator):
+    "Number validator class."
 
-
-def isNumberOrNone(x):
-    if x is None:
-        return 1
-    else:
+    def __call__(self, x):
         # Don't think we really want complex numbers for numbers!
         return (type(x) in (FloatType, IntType))
 
 
-def isNumberOrAuto(x):
-    from reportlab.graphics.shapes import Auto
+class isNumberOrNone(Validator):
+    "NumberOrNone validator class."
 
-    if x == Auto:
-        return 1
-    else:
+    def __call__(self, x):
+        if x is None:
+            return 1
+        else:
+            # Don't think we really want complex numbers for numbers!
+            return (type(x) in (FloatType, IntType))
+
+
+class isNumberOrAuto(Validator):
+    "NumberOrAuto validator class."
+
+    def __call__(self, x):
+        from reportlab.graphics.shapes import Auto
+
+        if x == Auto:
+            return 1
+        else:
+            # Don't think we really want complex numbers for numbers!
+            return (type(x) in (FloatType, IntType))
+
+
+class isTextAnchor(Validator):
+    "TextAnchor validator class."
+
+    def __call__(self, x):
+        return (x in ('start', 'middle', 'end'))
+
+
+class isListOfNumbers(Validator):
+    "ListOfNumbers validator class."
+
+    def __call__(self, x):
         # Don't think we really want complex numbers for numbers!
-        return (type(x) in (FloatType, IntType))
-
-
-def isTextAnchor(x):
-    return (x in ('start', 'middle', 'end'))
-
-
-def isListOfNumbers(x):
-    # Don't think we really want complex numbers for numbers!
-    if type(x) in (ListType, TupleType):
-        for element in x:
-            if not isNumber(element):
-                return 0
-        return 1
-    else:
-        return 0
-
-
-def isListOfNumbersOrNone(x):
-    if x is None:
-        return 1
-    else:
-        return isListOfNumbers(x)
-
-    
-def isListOfShapes(x):
-    from reportlab.graphics.shapes import Shape
-    if type(x) in (ListType, TupleType):
-        answer = 1
-        for element in x:
-            if not isinstance(x, Shape):
-                answer = 0
-        return answer
-    else:
-        return 0
-
-
-def isListOfStrings(x):
-    if type(x) in (ListType, TupleType):
-        answer = 1
-        for element in x:
-            if type(element) <> type(""):
-                answer = 0
-        return answer
-    else:
-        return 0
-
-
-def isListOfStringsOrNone(x):
-    if x is None:
-        return 1
-    else:
-        return isListOfStrings(x)
-
-
-def isTransform(x):
-    if type(x) in (ListType, TupleType):
-        if len(x) == 6:
+        if type(x) in (ListType, TupleType):
             for element in x:
                 if not isNumber(element):
                     return 0
             return 1
         else:
             return 0
-    else:
-        return 0
+
+
+class isListOfNumbersOrNone(Validator):
+    "ListOfNumbersOrNone validator class."
+
+    def __call__(self, x):
+        if x is None:
+            return 1
+        else:
+            return isListOfNumbers(x)
+
+    
+class isListOfShapes(Validator):
+    "ListOfShapes validator class."
+
+    def __call__(self, x):
+        from reportlab.graphics.shapes import Shape
+        if type(x) in (ListType, TupleType):
+            answer = 1
+            for element in x:
+                if not isinstance(x, Shape):
+                    answer = 0
+            return answer
+        else:
+            return 0
+
+
+class isListOfStrings(Validator):
+    "ListOfStrings validator class."
+
+    def __call__(self, x):
+        if type(x) in (ListType, TupleType):
+            answer = 1
+            for element in x:
+                if type(element) <> type(""):
+                    answer = 0
+            return answer
+        else:
+            return 0
+
+
+class isListOfStringsOrNone(Validator):
+    "ListOfStringsOrNone validator class."
+
+    def __call__(self, x):
+        if x is None:
+            return 1
+        else:
+            return isListOfStrings(x)
+
+
+class isTransform(Validator):
+    "Transform validator class."
+
+    def __call__(self, x):
+        if type(x) in (ListType, TupleType):
+            if len(x) == 6:
+                for element in x:
+                    if not isNumber(element):
+                        return 0
+                return 1
+            else:
+                return 0
+        else:
+            return 0
     
 
-def isColor(x):
-    return isinstance(x, colors.Color)
+class isColor(Validator):
+    "Color validator class."
 
-
-def isColorOrNone(x):
-    if x is None:
-        return 1
-    else:
+    def __call__(self, x):
         return isinstance(x, colors.Color)
 
 
-def isValidChild(x):
-    """Is this child allowed in a drawing or group?
+class isColorOrNone(Validator):
+    "ColorOrNone validator class."
 
-    I.e. does it descend from Shape or UserNode?
-    """
+    def __call__(self, x):
+        if x is None:
+            return 1
+        else:
+            return isinstance(x, colors.Color)
 
-    from reportlab.graphics.shapes import UserNode, Shape
-    return isinstance(x, UserNode) or isinstance(x, Shape)
+
+class isValidChild(Validator):
+    "ValidChild validator class."
+
+    def __call__(self, x):
+        """Is this child allowed in a drawing or group?
+
+        I.e. does it descend from Shape or UserNode?
+        """
+
+        from reportlab.graphics.shapes import UserNode, Shape
+        return isinstance(x, UserNode) or isinstance(x, Shape)
 
 
-class OneOf:
-    """Make validator functions for list of choices. Usage:
+class OneOf(Validator):
+    """Make validator functions for list of choices.
+
+    Usage:
     >>> f = shapes.OneOf(('happy','sad'))
     >>> f('happy')
     1
@@ -136,11 +344,14 @@ class OneOf:
     >>> 
     """
 
-    def __init__(self, choices):
-        self._choices = choices
+    def __init__(self, *args, **kwdict):
+        self._args = args[0] # different from base class.
+        for k, v in kwdict.items():
+            setattr(self, k, v)
+
 
     def __call__(self, arg):
-        return arg in self._choices
+        return arg in self._args
 
 
 class SequenceOf:
@@ -148,14 +359,11 @@ class SequenceOf:
     >>> isListOfColors = shapes.SequenceOf(isColor)    
     """
     
-    def __init__(self, atomicFunc):
-        self._atomicFunc = atomicFunc
-
     def __call__(self, seq):
         if type(seq) not in (ListType, TupleType):
             return 0
         else:
             for elem in seq:
-                if not self._atomicFunc(elem):
+                if not self._args(elem):
                     return 0
             return 1
