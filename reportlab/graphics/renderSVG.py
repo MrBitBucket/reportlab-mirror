@@ -507,17 +507,15 @@ class SVGCanvas:
 
     def startGroup(self):
         if self.verbose: print "+++ begin SVGCanvas.startGroup"
-        group = transformNode(self.doc, "g", transform="")
-        self.currGroup.appendChild(group)
+        currGroup, group = self.currGroup, transformNode(self.doc, "g", transform="")
+        currGroup.appendChild(group)
         self.currGroup = group
         if self.verbose: print "+++ end SVGCanvas.startGroup"
+        return currGroup
 
-
-    def endGroup(self):
+    def endGroup(self,currGroup):
         if self.verbose: print "+++ begin SVGCanvas.endGroup"
-        if not self.currGroup.getAttribute("transform"):
-            pass #self.currGroup.removeAttribute("transform")
-        # self.currGroup = self.currGroup.parentNode
+        self.currGroup = currGroup
         if self.verbose: print "+++ end SVGCanvas.endGroup"
 
 
@@ -527,7 +525,6 @@ class SVGCanvas:
         t = 'matrix(%f, %f, %f, %f, %f, %f)' % (a,b,c,d,e,f)
         if (a, b, c, d, e, f) != (1, 0, 0, 1, 0, 0):
             self.currGroup.setAttribute("transform", "%s %s" % (tr, t))
-        # self.currGroup = self.currGroup.parentNode
 
 
     def translate(self, x, y):
@@ -645,7 +642,7 @@ class _SVGRenderer(Renderer):
     def drawGroup(self, group):
         if self.verbose: print "### begin _SVGRenderer.drawGroup"
 
-        self._canvas.startGroup()
+        currGroup = self._canvas.startGroup()
         a, b, c, d, e, f = self._tracker.getCTM()
         for childNode in group.getContents():
             if isinstance(childNode, UserNode):
@@ -653,8 +650,8 @@ class _SVGRenderer(Renderer):
             else:
                 node2 = childNode
             self.drawNode(node2)
-        self._canvas.endGroup()
         self._canvas.transform(a, b, c, d, e, f)
+        self._canvas.endGroup(currGroup)
 
         if self.verbose: print "### end _SVGRenderer.drawGroup"
 
@@ -746,7 +743,7 @@ class _SVGRenderer(Renderer):
         for key, value in delta.items():
             if key == 'transform':
                 pass 
-                # self._canvas.transform(value[0], value[1], value[2], value[3], value[4], value[5])
+                #self._canvas.transform(value[0], value[1], value[2], value[3], value[4], value[5])
             elif key == 'strokeColor':
                 self._canvas.setStrokeColor(value)
             elif key == 'strokeWidth':
