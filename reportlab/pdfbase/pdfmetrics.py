@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfmetrics.py,v 1.17 2000/12/10 14:04:31 andy_robinson Exp $
-__version__=''' $Id: pdfmetrics.py,v 1.17 2000/12/10 14:04:31 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfmetrics.py,v 1.18 2000/12/14 13:36:34 rgbecker Exp $
+__version__=''' $Id: pdfmetrics.py,v 1.18 2000/12/14 13:36:34 rgbecker Exp $ '''
 __doc__="""This contains pre-canned text metrics for the PDFgen package, and may also
 be used for any other PIDDLE back ends or packages which use the standard
 Type 1 postscript fonts.
@@ -247,15 +247,20 @@ class FontMetrics:
 			MacRomanWidths[i] = width
 		return MacRomanWidths
 
-
-
-
-
 if _stringWidth:
+	from reportlab.lib import RL_DEBUG
 	for e, F in widths.items():
 		for f, W in  F.items():
 			ad = ascent_descent[f]
 			_rl_accel.setFontInfo(f,e,ad[0],ad[1],W)
+			if RL_DEBUG:
+				for c in xrange(256):
+					wPy = W[c]
+					if wPy>0:
+						wX = int(1000*_stringWidth(chr(c),f,1,e))
+						if wX!=wPy:
+							raise ValueError, "_stringWidth(chr(%d),%s,1,%s)==>%d != %d" % (c,f,e,wX,wPy)
+	
 
 	def _loadfont(fontName, filename):
 		infoOnce('cache loading %s' % filename)
