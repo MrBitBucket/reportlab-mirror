@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.15 2003/11/02 22:14:23 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.16 2003/11/10 21:20:25 rgbecker Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -58,7 +58,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.15 2003/11/02 22:14:23 rgbecker Exp $'
+__version__ = '$Id: ttfonts.py,v 1.16 2003/11/10 21:20:25 rgbecker Exp $'
 
 import string
 from types import StringType
@@ -235,7 +235,7 @@ class TTFontParser:
         else:
             self.filename = '(ttf)'
 
-        self._data = file.read()
+        self._ttf_data = file.read()
         self._pos = 0
 
         # Read header
@@ -272,7 +272,7 @@ class TTFontParser:
             return
 
         # Check the checksums for the whole file
-        checkSum = calcChecksum(self._data)
+        checkSum = calcChecksum(self._ttf_data)
         checkSum = add32(0xB1B0AFBAL, -checkSum)
         if checkSum != 0:
             raise TTFError, 'Invalid font checksum'
@@ -310,18 +310,18 @@ class TTFontParser:
     def read_tag(self):
         "Read a 4-character tag"
         self._pos = self._pos + 4
-        return self._data[self._pos - 4:self._pos]
+        return self._ttf_data[self._pos - 4:self._pos]
 
     def read_ushort(self):
         "Reads an unsigned short"
         self._pos = self._pos + 2
-        return (ord(self._data[self._pos - 2]) << 8) + \
-               (ord(self._data[self._pos - 1]))
+        return (ord(self._ttf_data[self._pos - 2]) << 8) + \
+               (ord(self._ttf_data[self._pos - 1]))
 
     def read_ulong(self):
         "Reads an unsigned long"
         self._pos = self._pos + 4
-        return unpack('>l',self._data[self._pos - 4:self._pos])[0]
+        return unpack('>l',self._ttf_data[self._pos - 4:self._pos])[0]
 
     def read_short(self):
         "Reads a signed short"
@@ -333,21 +333,21 @@ class TTFontParser:
 
     def get_ushort(self, pos):
         "Return an unsigned short at given position"
-        return (ord(self._data[pos]) << 8) + \
-               (ord(self._data[pos + 1]))
+        return (ord(self._ttf_data[pos]) << 8) + \
+               (ord(self._ttf_data[pos + 1]))
 
     def get_ulong(self, pos):
         "Return an unsigned long at given position"
-        return unpack('>l',self._data[pos:pos+4])[0]
+        return unpack('>l',self._ttf_data[pos:pos+4])[0]
 
     def get_chunk(self, pos, length):
         "Return a chunk of raw data at given position"
-        return self._data[pos:pos+length]
+        return self._ttf_data[pos:pos+length]
 
     def get_table(self, tag):
         "Return the given TTF table"
         pos, length = self.get_table_pos(tag)
-        return self._data[pos:pos+length]
+        return self._ttf_data[pos:pos+length]
 
 
 class TTFontMaker:

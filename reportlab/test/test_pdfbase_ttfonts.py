@@ -103,7 +103,7 @@ class TTFontFileTestCase(unittest.TestCase):
 
         class FakeTTFontFile(TTFontParser):
             def __init__(self, data):
-                self._data = data
+                self._ttf_data = data
                 self._pos = 0
 
         ttf = FakeTTFontFile("\x81\x02\x03\x04" "\x85\x06" "ABCD" "\x7F\xFF" "\x80\x00" "\xFF\xFF")
