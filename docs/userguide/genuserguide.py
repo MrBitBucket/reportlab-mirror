@@ -32,6 +32,9 @@
 #
 ###############################################################################
 #   $Log: genuserguide.py,v $
+#   Revision 1.21  2000/07/07 22:55:31  andy_robinson
+#   Added paragraph examples and widget to User Guide
+#
 #   Revision 1.20  2000/07/07 16:18:37  rgbecker
 #   More on paragraphs
 #
@@ -95,7 +98,7 @@
 #   Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #   initial checkin. user guide generation framework.
 #   
-__version__=''' $Id: genuserguide.py,v 1.20 2000/07/07 16:18:37 rgbecker Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.21 2000/07/07 22:55:31 andy_robinson Exp $ '''
 
 
 __doc__ = """
@@ -103,6 +106,8 @@ This module contains the script for building the user guide.
 """
 
 import os, sys
+import string
+
 sys.path.insert(0,os.path.join(os.path.dirname(sys.argv[0]),'..','tools'))
 from rltemplate import RLDocTemplate
 from stylesheet import getStyleSheet
@@ -201,7 +206,10 @@ def NOP(*x,**y):
 BODY = []
 def CPage(inches):
     BODY.append(CondPageBreak(inches*inch))
-
+    
+def newPage():
+    BODY.append(PageBreak())
+    
 def story():
     return BODY
 
@@ -255,27 +263,6 @@ def todo(text):
     """Used for notes to ourselves"""
     BODY.append(Paragraph(quickfix(text), Comment))
     
-##class OperationWrapper(Flowable):
-##    """wrap a drawing operation as a flowable.
-##       the operation should respect the examplefunctiondisplaysizes
-##       limitations.
-##       This example wraps a drawing operator f(pdfgen.canvas).
-##       Always enclosed in a rectangle.
-##    """
-##    def __init__(self, operation):
-##        self.operation = operation
-##        
-##    def wrap(self, aw, ah):
-##        return examplefunctiondisplaysizes # always the same
-##        
-##    def draw(self):
-##        canvas = self.canv
-##        canvas.saveState()
-##        (x,y) = examplefunctiondisplaysizes
-##        self.operation(canvas)
-##        canvas.restoreState()
-##        canvas.rect(0,0,x,y)
-        
 class Illustration(platdemos.Figure):
     """The examples are all presented as functions which do
     something to a canvas, with a constant height and width
@@ -297,6 +284,90 @@ class Illustration(platdemos.Figure):
 def illust(operation, caption):
     i = Illustration(operation, caption)
     BODY.append(i)
+
+class ParaBox(platdemos.Figure):
+    descrStyle = ParagraphStyle('description',
+                                fontName='Courier',
+                                fontSize=8,
+                                leading=9.6)
+
+    def __init__(self, text, style):
+        platdemos.Figure.__init__(self, 0, 0)
+        self.text = text
+        self.style = style
+        self.para = Paragraph(text, style)
+
+        styleText = self.getStyleText(style)
+        self.pre = Preformatted(styleText, self.descrStyle)
+
+    def wrap(self, availWidth, availHeight):
+        """Left 30% is for attributes, right 50% for sample,
+        10% gutter each side."""
+        self.x0 = availWidth * 0.05  #left of box
+        self.x1 = availWidth * 0.1   #left of descriptive text
+        self.x2 = availWidth * 0.5   #left of para itself
+        self.x3 = availWidth * 0.9   #right of para itself
+        self.x4 = availWidth * 0.95  #right of box
+        self.width = self.x4 - self.x0
+        self.dx = 0.5 * (availWidth - self.width)
+
+        paw, self.pah = self.para.wrap(self.x3 - self.x2, availHeight)
+        self.pah = self.pah + self.style.spaceBefore + self.style.spaceAfter
+        prw, self.prh = self.pre.wrap(self.x2 - self.x1, availHeight)
+        self.figureHeight = max(self.prh, self.pah) * 10.0/9.0
+        return platdemos.Figure.wrap(self, availWidth, availHeight)
+
+    def getStyleText(self, style):
+        """Converts style to preformatted block of text"""
+        lines = []
+        for (key, value) in style.__dict__.items():
+            lines.append('%s = %s' % (key, value))
+        lines.sort()
+        return string.join(lines, '\n')        
+        
+    def drawFigure(self):
+        
+        #now we fill in the bounding box and before/after boxes       
+        self.canv.saveState()
+        self.canv.setFillGray(0.95)
+        self.canv.setDash(1,3)
+        self.canv.rect(self.x2 - self.x0,
+                       self.figureHeight * 0.95 - self.pah,
+                       self.x3-self.x2, self.para.height,
+                       fill=1,stroke=1)
+        
+        self.canv.setFillGray(0.90)
+        self.canv.rect(self.x2 - self.x0, #spaceBefore
+                       self.figureHeight * 0.95 - self.pah + self.para.height,
+                       self.x3-self.x2, self.style.spaceBefore,
+                       fill=1,stroke=1)
+        
+        self.canv.rect(self.x2 - self.x0, #spaceBefore
+                       self.figureHeight * 0.95 - self.pah - self.style.spaceAfter,
+                       self.x3-self.x2, self.style.spaceAfter,
+                       fill=1,stroke=1)
+
+        self.canv.restoreState()
+        #self.canv.setFillColor(colors.yellow)
+        self.para.drawOn(self.canv, self.x2 - self.x0,
+                         self.figureHeight * 0.95 - self.pah)
+        self.pre.drawOn(self.canv, self.x1 - self.x0,
+                         self.figureHeight * 0.95 - self.prh)
+        
+        
+
+    def getStyleText(self, style):
+        """Converts style to preformatted block of text"""
+        lines = []
+        for (key, value) in style.__dict__.items():
+            if key not in ('name','parent'):
+                lines.append('%s = %s' % (key, value))
+        return string.join(lines, '\n')
+
+def parabox(text, style, caption):
+    p = ParaBox(text, style)
+    p.caption = 'Figure <seq template="%(Chapter)s-%(Figure+)s"/>: ' + quickfix(caption)
+    BODY.append(p)
     
 def pencilnote():
     BODY.append(examples.NoteAnnotation())
@@ -1636,10 +1707,15 @@ eg("""
 	Flowable.getSpaceBefore(self):
 """)
 disc("""returns how much space should precede this item if another item precedess on the same page.""")
-heading2("Paragraphs in detail")
+
+disc("""The chapters which follow will cover the most important
+specific types of flowables - Paragraphs and Tables""")
+
+#begin chapter oon paragraphs
+heading1("Paragraphs")
 disc("""
 The $reportlab.platypus.Paragraph class$ is one of the most useful of the Platypus $Flowables$;
-it can format fairly arbitrary text and provides for in line font style and colour changes using
+it can format fairly arbitrary text and provides for inline font style and colour changes using
 an xml style markup. The overall shape of the formatted text can be justified, right or left ragged
 or centered. The xml markup can even be used to insert greek characters or to do subscripts.
 """)
@@ -1690,8 +1766,88 @@ class ParagraphStyle(PropertySet):
         'textColor': black
         }
 """)
-CPage(5.0)
-heading3("Paragraph XML Markup Tags")
+
+heading2("Using Paragraph Styles")
+
+#this will be used in the ParaBox demos.
+sample = """You are hereby charged that on the 28th day of May, 1970, you did
+willfully, unlawfully, and with malice of forethought, publish an
+alleged English-Hungarian phrase book with intent to cause a breach
+of the peace.  How do you plead?"""
+
+
+disc("""The $Paragraph$ and $ParagraphStyle$ classes together
+handle most common formatting needs. The following examples
+draw paragraphs in various styles, and add a bounding box
+so that you can see exactly what space is taken up.""")
+
+s1 = ParagraphStyle('Normal')
+parabox(sample, s1, 'The default $ParagraphStyle$')
+    
+disc("""The two atributes $spaceBefore$ and $spaceAfter$ do what they
+say, except at the top or bottom of a frame. At the top of a frame,
+$spaceBefore$ is ignored, and at the bottom, $spaceAfter$ is ignored.
+This means that you could specify that a 'Heading2' style had two
+inches of space before when it occurs in mid-page, but will not
+get acres fo whitespace at the top of a page.  These two attributes
+should be thought of as 'requests' to the Frame and are not part
+of the space occupied by the Paragraph itself.""")
+
+disc("""The $fontSize$ and $fontName$ tags are obvious, but it is
+important to set the $leading$.  This is the spacing between
+adjacent lines of text; a good rule of thumb is to make this
+20% larger than the point size.  To get double-spaced text,
+use a high $leading$.""")
+
+disc("""The figure below shows space before and after and an
+increased leading:""")
+
+parabox(sample,
+        ParagraphStyle('Spaced',
+                       spaceBefore=6,
+                       spaceAfter=6,
+                       leading=16),
+        'Space before and after and increased leading'
+        )
+
+disc("""The $firstLineIndent$, $leftIndent$ and $rightIndent$ attributes do exactly
+what you would expect.  If you want a straight left edge, remember
+to set $firstLineIndent$ equal to $leftIndent$.""")
+
+parabox(sample,
+        ParagraphStyle('indented',
+                       firstLineIndent=48,
+                       leftIndent=24,
+                       rightIndent=24),
+        'one third inch indents at left and right, two thirds on first line'
+        )
+
+disc("""Setting $firstLineIndent$ equal to zero, $leftIndent$
+much higher, and using a
+different font (we'll show you how later!) can give you a
+definition list:.""")
+
+parabox('<b><i>Judge Pickles: </i></b>' + sample,
+        ParagraphStyle('dl',
+                       leftIndent=36),
+        'Definition Lists'
+        )
+
+disc("""There are four possible values of $alignment$, defined as
+constants in the module <i>reportlab.lib.enums</i>.  These are
+TA_LEFT, TA_CENTER or TA_CENTRE, TA_RIGHT and
+TA_JUSTIFY, with values of 0, 1, 2 and 4 respectively.  These
+do exactly what you would expect.""")
+
+
+heading2("Paragraph XML Markup Tags")
+disc("""XML markup can be used to modify or specify the
+overall paragraph style, and also to specify intra-
+paragraph markup.""")
+
+heading3("The outermost &lt; para &gt; tag")
+
+
 disc("""
 The paragraph text may optionally be surrounded by
 &lt;para attributes....&gt;
@@ -1699,8 +1855,7 @@ The paragraph text may optionally be surrounded by
 tags. The attributes if any of the opening &lt;para&gt; tag affect the style that is used
 with the $Pargraph$ $text$ and/or $bulletText$.
 """)
-CPage(5.0)
-heading4("&lt;para&gt; Attributes and Synonyms")
+
 from reportlab.platypus.paraparser import _addAttributeNames, _paraAttrMap
 
 def getAttrs(A):
@@ -1711,11 +1866,11 @@ def getAttrs(A):
         if not S.has_key(a):
             S[a] = k
         else:
-            S[a] = "%s\n%s" %(S[a],k)
+            S[a] = "%s, %s" %(S[a],k)
 
     K = S.keys()
     K.sort()
-    D=[]
+    D=[('Attribute','Synonyms')]
     for k in K:
         D.append((k,S[k]))
     cols=2*[None]
@@ -1724,13 +1879,27 @@ def getAttrs(A):
 
 t=apply(Table,getAttrs(_paraAttrMap))
 t.setStyle(TableStyle([
+            ('FONT',(0,0),(-1,1),'Times-Bold',10,12),
+            ('FONT',(0,1),(-1,-1),'Courier',8,8),
             ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
             ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
             ('BOX', (0,0), (-1,-1), 0.25, colors.black),
             ]))
 BODY.append(t)
+disc("""Some useful synonyms have been provided for our Python attribute
+names, including lowercase versions, and the equivalent properties
+from the HTML standard where they exist.  These additions make
+it much easier to build XML-printing applications, since
+much intra-paragraph markup may not need translating. The
+table below shows the allowed attributes and synonyms in the
+outermost paragraph tag.""")
 
-heading2("Tables and TableStyles")
+
+heading3("Intra-paragraph markup and the $&lt;fontgt;$ tag")
+
+
+
+heading1("Tables and TableStyles")
 disc("""
 The $Table class$ is derived from the $Flowable class$ and is intended
 as a simple textual gridding mechanism. $Table$ cells can hold anything which can be converted to
@@ -1745,7 +1914,7 @@ color and weight of the lines (if any), and the font, alignment and padding of t
 A primitive automatic row height and or column width calculation mechanism is provided for.
 """)
 
-heading3('$class Table$ User Methods')
+heading2('$class Table$ User Methods')
 disc("""These are the main methods which are of interest to the client programmer""")
 
 heading4('$Table(colWidths, rowHeights, data)$')
