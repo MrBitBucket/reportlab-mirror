@@ -1,7 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.23 2001/12/05 19:46:18 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.24 2002/03/26 11:49:10 rgbecker Exp $
+__version__=''' $Id: textlabels.py,v 1.24 2002/03/26 11:49:10 rgbecker Exp $ '''
 import string
 
 from reportlab.lib import colors

@@ -1,11 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/signsandsymbols.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.19 2001/09/26 22:02:19 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/signsandsymbols.py,v 1.20 2002/03/26 11:49:10 rgbecker Exp $
 # signsandsymbols.py
 # A collection of new widgets
 # author: John Precedo (johnp@reportlab.com)
-
 """This file is a collection of widgets to produce some common signs and symbols.
 
 Widgets include:
@@ -24,8 +23,8 @@ Widgets include:
 - FloppyDisk,
 - ArrowOne, and
 - ArrowTwo
-
 """
+__version__=''' $Id: signsandsymbols.py,v 1.20 2002/03/26 11:49:10 rgbecker Exp $ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *

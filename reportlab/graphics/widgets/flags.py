@@ -1,9 +1,8 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/flags.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.18 2001/12/10 12:33:25 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.19 2002/03/26 11:49:10 rgbecker Exp $
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
-
 """This file is a collection of flag graphics as widgets.
 
 All flags are represented at the ratio of 1:2, even where the official ratio for the flag is something else
@@ -27,6 +26,7 @@ Holland (The Netherlands), Spain, Sweden
 Others:
 USA, Czech Republic, European Union, Switzerland, Turkey
 """
+__version__=''' $Id: flags.py,v 1.19 2002/03/26 11:49:10 rgbecker Exp $ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *

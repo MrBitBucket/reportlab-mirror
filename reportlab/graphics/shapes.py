@@ -1,10 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.71 2002/03/12 15:18:02 rgbecker Exp $
-# core of the graphics library - defines Drawing and Shapes
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.72 2002/03/26 11:49:10 rgbecker Exp $
 """
+core of the graphics library - defines Drawing and Shapes
 """
+__version__=''' $Id: shapes.py,v 1.72 2002/03/26 11:49:10 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
