@@ -2,16 +2,15 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/genuserguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/genuserguide.py,v 1.43 2001/03/28 20:48:17 dinu_gherman Exp $
-__version__=''' $Id: genuserguide.py,v 1.43 2001/03/28 20:48:17 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/docs/userguide/genuserguide.py,v 1.44 2001/03/29 07:27:34 dinu_gherman Exp $
 
+__version__=''' $Id: genuserguide.py,v 1.44 2001/03/29 07:27:34 dinu_gherman Exp $ '''
 
 __doc__ = """
 This module contains the script for building the user guide.
 """
 
-import os, sys
-import string
+import os, sys, string
 
 sys.path.insert(0,os.path.join(os.path.dirname(sys.argv[0]),'..','tools'))
 from rltemplate import RLDocTemplate
@@ -395,7 +394,6 @@ def handnote(xoffset=0, size=None, fillcolor=tan, strokecolor=green):
     getStory().append(examples.HandAnnotation(xoffset,size,fillcolor,strokecolor))
     
         
-
 #make a singleton, created when requested rather
 #than each time a chapter imports it.
 _story = None
@@ -405,10 +403,10 @@ def getStory():
         _story = []
     return _story
 
+
 def run(pagesize):
     
     doc = RLDocTemplate('userguide.pdf',pagesize = pagesize)
-
 
     #this builds the story    
     #resetStory()
@@ -421,7 +419,7 @@ def run(pagesize):
     import ch6_tables
     import ch7_custom
     import ch8_graphics
-    import ch8_graphics_long
+##    import ch8_graphics_long
     import ch9_future
     
     import app_demos
@@ -439,7 +437,6 @@ def run(pagesize):
     doc.build(story)
     print 'Saved userguide.pdf'
 
-    
     
 if __name__=="__main__":
     if len(sys.argv) > 1:
