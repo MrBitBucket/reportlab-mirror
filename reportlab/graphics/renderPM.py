@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.43 2003/12/10 10:29:20 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.43 2003/12/10 10:29:20 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.44 2003/12/17 18:41:23 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.44 2003/12/17 18:41:23 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -571,7 +571,7 @@ def test():
 
     i = 0
     #print in a loop, with their doc strings
-    for (drawing, docstring, name) in getAllTestDrawings():
+    for (drawing, docstring, name) in getAllTestDrawings(doTTF=hasattr(_renderPM,'ft_get_face')):
         fnRoot = 'renderPM%d' % i
         if 1 or i==10:
             w = int(drawing.width)

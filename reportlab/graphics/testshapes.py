@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/testshapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.19 2003/11/20 17:10:43 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.20 2003/12/17 18:41:23 rgbecker Exp $
 
 # testshapes.py - draws shapes onto a PDF canvas.
 
@@ -440,7 +440,7 @@ def getDrawing13():
     if maxx>400 or maxy>200: _,_,D = drawit(F,maxx,maxy)
     return D
 
-def getAllFunctionDrawingNames():
+def getAllFunctionDrawingNames(doTTF=1):
     "Get a list of drawing function names from somewhere."
 
     funcNames = []
@@ -450,7 +450,8 @@ def getAllFunctionDrawingNames():
     symbols.sort()
     for funcName in symbols:
         if funcName[0:10] == 'getDrawing':
-            funcNames.append(funcName)
+            if doTTF or funcName!='getDrawing13':
+                funcNames.append(funcName)
 
     return funcNames
 
@@ -461,9 +462,9 @@ def _evalFuncDrawing(name, D, l=None, g=None):
         d = getFailedDrawing(name)
     D.append((d, eval(name + '.__doc__'), name[3:]))
 
-def getAllTestDrawings():
+def getAllTestDrawings(doTTF=1):
     D = []
-    for f in getAllFunctionDrawingNames():
+    for f in getAllFunctionDrawingNames(doTTF=doTTF):
         _evalFuncDrawing(f,D)
     return D
 
