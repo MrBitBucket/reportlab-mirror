@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/styles.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/styles.py,v 1.10 2000/12/10 10:50:26 andy_robinson Exp $
-__version__=''' $Id: styles.py,v 1.10 2000/12/10 10:50:26 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/styles.py,v 1.11 2000/12/10 11:57:42 andy_robinson Exp $
+__version__=''' $Id: styles.py,v 1.11 2000/12/10 11:57:42 andy_robinson Exp $ '''
 
 from reportlab.lib.colors import white, black
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
@@ -79,7 +79,8 @@ class ParagraphStyle(PropertySet):
         'bulletFontName':'Times-Roman',
         'bulletFontSize':10,
         'bulletIndent':0,
-        'textColor': black
+        'textColor': black,
+        'backColor':None
         }
 
 class LineStyle(PropertySet):
