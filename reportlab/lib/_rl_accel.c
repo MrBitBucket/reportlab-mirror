@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.8 2001/03/16 14:29:59 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.9 2001/03/21 17:01:24 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.8 2001/03/16 14:29:59 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.9 2001/03/21 17:01:24 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -23,7 +23,7 @@ static __version__=" $Id: _rl_accel.c,v 1.8 2001/03/16 14:29:59 rgbecker Exp $ "
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.3"
+#define VERSION "0.31"
 #define MODULE "_rl_accel"
 static PyObject *moduleVersion;
 
@@ -416,6 +416,59 @@ PyObject *_fp_str(PyObject *self, PyObject *args)
 		}
 }
 
+static PyTypeObject AttrDictType = {
+	PyObject_HEAD_INIT(0)
+	0,								/*ob_size*/
+	0,								/*tp_name*/
+	0,								/*tp_basicsize*/
+	0,								/*tp_itemsize*/
+	/* methods */
+	0,								/*tp_dealloc*/
+	0,								/*tp_print*/
+	0,								/*tp_getattr*/
+	0,								/*tp_setattr*/
+	0,								/*tp_compare*/
+	0,								/*tp_repr*/
+	0,								/*tp_as_number*/
+	0,								/*tp_as_sequence*/
+	0,								/*tp_as_mapping*/
+	0,								/*tp_hash*/
+	0,								/*tp_call*/
+	0,								/*tp_str*/
+	
+	/* Space for future expansion */
+	0L,0L,0L,0L,
+	/* Documentation string */
+	NULL
+};
+static char* AttrDict_tp_doc=
+	"AttrDict instance\n\
+\n\
+";
+
+static getattrfunc dict_getattr;
+static	PyObject *AttrDict_getattr(PyObject* self, char* name)
+{
+	PyObject* r = PyDict_GetItemString(self,name);
+	if(!r) r = dict_getattr(self,name);
+	return r;
+}
+
+static int AttrDict_setattr(PyObject* self, char *name, PyObject* value)
+{
+	PyDict_SetItemString(self,name,value);
+}
+
+static PyObject *AttrDict(PyObject *self, PyObject *args)
+{
+	PyObject *r;
+	if (!PyArg_ParseTuple(args, ":AttrDict")) return NULL;
+	r = PyDict_New();
+	if(!r) return NULL;
+	r->ob_type = &AttrDictType;
+	return r;
+}
+
 static char *__doc__=
 "_rl_accel contains various accelerated utilities\n\
     a fast string width function\n\
@@ -427,6 +480,7 @@ static char *__doc__=
 	_AsciiBase85Encode does what is says\n\
 	\n\
 	fp_str converts numeric arguments to a single blank separated string\n\
+	AttrDict creates a dict object which can do setattr/getattr type things\n\
 ";
 
 static struct PyMethodDef _methods[] = {
@@ -442,6 +496,7 @@ static struct PyMethodDef _methods[] = {
 					"return None to retry or the correct result."},
 	{"_AsciiBase85Encode", _a85_encode, METH_VARARGS, "_AsciiBase85Encode(\".....\") return encoded string"},
 	{"fp_str", _fp_str, METH_VARARGS, "fp_str(a0, a1,...) convert numerics to blank separated string"},
+	{"AttrDict", AttrDict, METH_VARARGS, "AttrDict() create a dict which can use attribute notation"},
 	{NULL,		NULL}		/* sentinel */
 	};
 
@@ -450,6 +505,14 @@ void init_rl_accel()
 {
 	PyObject *m, *d;
 	int i=0;
+
+	/*set up our modified dictionary type*/
+	AttrDictType = PyDict_Type;
+	AttrDictType.tp_doc = AttrDict_tp_doc;
+	AttrDictType.tp_name = "AttrDict";
+	dict_getattr = AttrDictType.tp_getattr;
+	AttrDictType.tp_getattr = AttrDict_getattr;
+	AttrDictType.tp_setattr = AttrDict_setattr;
 
 	/*Create the module and add the functions */
 	m = Py_InitModule("_rl_accel", _methods);
