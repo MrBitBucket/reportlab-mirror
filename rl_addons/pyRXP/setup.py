@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2002
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/setup.py,v 1.5 2002/04/17 17:27:59 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/setup.py,v 1.6 2002/05/03 10:20:22 rgbecker Exp $
 if __name__=='__main__': #NO RUNTESTS
 	import os, sys
 	from distutils.core import setup, Extension
@@ -25,7 +25,7 @@ if __name__=='__main__': #NO RUNTESTS
 		LIBS=['nsl', 'socket', 'dl']
 	elif sys.platform=="aix4":
 		LIBS=['nsl_r', 'dl']
-	elif sys.platform in ("freebsd4", "darwin", "mac"):
+	elif sys.platform in ("freebsd4", "darwin", "mac", "linux2"):
 		LIBS=[]
 	else:
 		msg = "Don't know about system %s" % sys.platform
