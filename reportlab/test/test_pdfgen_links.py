@@ -2,19 +2,20 @@
 #this test and associates functionality kinds donated by Ian Sparks.
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pdfgen_links.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_links.py,v 1.3 2004/03/26 14:20:44 rgbecker Exp $
 """
 Tests for internal links and destinations
 """
 
 #
-# Fit tests#
+# Fit tests
+#
 # Modification History
 # ====================
 #
 # 11-Mar-2003 Ian Sparks
 #   * Initial version.
-##
+#
+#
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
