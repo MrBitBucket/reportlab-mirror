@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.9  2000/04/07 12:31:29  rgbecker
+#	Color fixes/changes
+#
 #	Revision 1.8  2000/04/06 09:52:02  andy_robinson
 #	Removed some old comments; tweaks to experimental Outline methods.
-#
+#	
 #	Revision 1.7  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
 #	
@@ -52,7 +55,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.8 2000/04/06 09:52:02 andy_robinson Exp $ '''
+__version__=''' $Id: layout.py,v 1.9 2000/04/07 12:31:29 rgbecker Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -69,7 +72,7 @@ import types
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
-
+from reportlab.lib.colors import white, black, red, Color
 
 DEFAULT_PAGE_SIZE = (595.27,841.89)
 PAGE_HEIGHT = DEFAULT_PAGE_SIZE[1]
@@ -78,16 +81,11 @@ TA_CENTER = 1
 TA_RIGHT = 2
 TA_JUSTIFY = 4
 
-
-
-
 ###########################################################
-#
 #   Styles.  This class provides an 'instance inheritance'
-# mechanism for its desecndants, simpler than acquisition
+# mechanism for its descendants, simpler than acquisition
 # but not as far-reaching
 ###########################################################
-
 class PropertySet:
     defaults = {}
 
@@ -149,13 +147,14 @@ class ParagraphStyle(PropertySet):
         'spaceAfter':0,
         'bulletFontName':'Times-Roman',
         'bulletFontSize':10,
-        'bulletIndent':0
+        'bulletIndent':0,
+		'textColor': black
         }
 
 class LineStyle(PropertySet):
     defaults = {
         'width':1,
-        'color': (0,0,0)
+        'color': black
         }
     def prepareCanvas(self, canvas):
         """You can ask a LineStyle to set up the canvas for drawing
@@ -173,7 +172,7 @@ class CellStyle(PropertySet):
         'topPadding':3,
         'bottomPadding':3,
         'firstLineIndent':0,
-        'color':(1,1,1),
+        'color':white,
         'alignment': 'LEFT',
         }
 
@@ -328,7 +327,8 @@ class XBox(Drawable):
 
 class Paragraph(Drawable):
     def __init__(self, text, style, bulletText = None):
-        self.text = cleanBlockQuotedText(text)
+        text = cleanBlockQuotedText(text)
+        self.text = text
         self.style = style
         self.bulletText = bulletText
         self.debug = 0   #turn this on to see a pretty one with all the margins etc.
@@ -420,10 +420,8 @@ class Paragraph(Drawable):
         Returns the final y position at the bottom. Not safe for
         paragraphs without spaces e.g. Japanese; wrapping
         algorithm will go infinite."""
-        text = cleanBlockQuotedText(self.text)
 
         #stash the key facts locally for speed
-        text = self.text
         canvas = self.canv
 
         #work out the origin for line 1
@@ -434,16 +432,15 @@ class Paragraph(Drawable):
             # This boxes and shades stuff to show how the paragraph
             # uses its space.  Useful for self-documentation so
             # the debug code stays!
-
             # box the lot
             canvas.rect(0, 0, self.width, self.height)
             #left and right margins
             canvas.saveState()
-            canvas.setFillColorRGB(0.9,0.9,0.9)
+            canvas.setFillColor(Color(0.9,0.9,0.9))
             canvas.rect(0, 0, self.style.leftIndent, self.height)
             canvas.rect(self.width - self.style.rightIndent, 0, self.style.rightIndent, self.height)
             # shade above and below
-            canvas.setFillColorRGB(1.0,1.0,0.0)
+            canvas.setFillColor(Color(1.0,1.0,0.0))
             canvas.rect(0, self.height - self.style.spaceBefore, self.width,  self.style.spaceBefore)
             canvas.rect(0, 0, self.width, self.style.spaceAfter)
             canvas.restoreState()
@@ -466,7 +463,6 @@ class Paragraph(Drawable):
             #this means moving the line origin to the right depending
             #on whether it is centred, right-aligned or left-aligned
             offset = self.style.firstLineIndent - self.style.leftIndent
-
 
             if self.bulletText <> None:
                 tx2 = canvas.beginText(self.style.bulletIndent, cur_y)
@@ -556,8 +552,6 @@ class Preformatted(Drawable):
         while string.strip(self.lines[-1]) == '':
             self.lines = self.lines[:-1]
 
-
-
     def wrap(self, availWidth, availHeight):
         self.width = availWidth
         self.height = (self.style.spaceBefore +
@@ -583,9 +577,6 @@ class Preformatted(Drawable):
         for text in self.lines:
             tx.textLine(text)
         self.canv.drawText(tx)
-
-
-
 
 class Image(Drawable):
     def __init__(self, filename, width=None, height=None):
@@ -890,7 +881,7 @@ def randomText():
 
 def myFirstPage(canvas, doc):
     canvas.saveState()
-    canvas.setStrokeColorRGB(1,0,0)
+    canvas.setStrokeColor(red)
     canvas.setLineWidth(5)
     canvas.line(66,72,66,PAGE_HEIGHT-72)
     canvas.setFont('Times-Bold',24)
@@ -902,7 +893,7 @@ def myFirstPage(canvas, doc):
 def myLaterPages(canvas, doc):
     #canvas.drawImage("snkanim.gif", 36, 36)
     canvas.saveState()
-    canvas.setStrokeColorRGB(1,0,0)
+    canvas.setStrokeColor(red)
     canvas.setLineWidth(5)
     canvas.line(66,72,66,PAGE_HEIGHT-72)
     canvas.setFont('Times-Roman',12)
