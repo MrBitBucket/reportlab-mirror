@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.31  2000/06/19 15:55:41  rgbecker
+#	Fixing up docs generation
+#
 #	Revision 1.30  2000/05/17 15:39:10  rgbecker
 #	Changes related to removal of SimpleFlowDocument
-#
+#	
 #	Revision 1.29  2000/04/26 12:57:38  rgbecker
 #	-py2pdf chmod commands added
 #	
@@ -122,7 +125,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.30 2000/05/17 15:39:10 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.31 2000/06/19 15:55:41 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -191,10 +194,12 @@ def do_exec(cmd, cmdname):
 
 def cvs_checkout(d):
 	os.chdir(d)
-	cvsdir = os.path.join(groupdir,projdir)
+	cvsdir = os.path.join(d,projdir)
 	recursive_rmdir(cvsdir)
+	recursive_rmdir('docs')
 
 	cvs = find_exe('cvs')
+	python = find_exe('python')
 	if cvs is None:
 		os.exit(1)
 
@@ -215,6 +220,29 @@ def cvs_checkout(d):
 			do_exec("mv %s %s" % (projdir,dst), "moving %s to %s" %(projdir,py2pdf_dir))
 			do_exec("chmod a+x %s/py2pdf.py %s/idle_print.py" % (dst, dst), "chmod")
 			CVS_remove(dst)
+		else:
+			pythonrc = os.path.join(d,'pythonrc')
+			do_exec(cvs+' co docs' % , 'the docs checkout phase')
+			dst = os.path.join(d,"reportlab","docs")
+			do_exec("mkdir %s" % dst, "mkdir reportlab/docs")
+
+			#create a startup file which puts our version of reportlab at the front of the list
+			f = open('pythonrc','w')
+			f.write('import sys;sys.path.insert(0,"%s")\n'% d)
+			f.close()
+			os.environ['PYTHONSTART']=pythonrc
+
+			os.chdir('docs/reference')
+			do_exec(python + ' ../tools/yaml2pdf.py reference.yml','building reference')
+			os.chdir(d)
+			do_exec('mv docs/reference/*.pdf %s'%dst,'moving reference')
+			os.chdir('docs/userguide')
+			do_exec(python + ' genuserguide.py', 'building userguide')
+			os.chdir(d)
+			do_exec('mv docs/userguide/*.pdf %s'%dst,'moving userguide')
+			recursive_rmdir('docs')
+			del os.environ['PYTHONSTART']
+			os.remove(pythonrc)
 
 def do_zip(d):
 	'create .tgz and .zip file archives of d/reportlab'
@@ -232,6 +260,7 @@ def do_zip(d):
 		pdir = py2pdf_dir
 	else:
 		pdir = projdir
+
 	cvsdir = os.path.join(groupdir,pdir)
 
 	tar = find_exe('tar')
