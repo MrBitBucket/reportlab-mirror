@@ -536,6 +536,50 @@ LIST_STYLE = TableStyle(
     t=LongTable(data, style=sty, colWidths = [50,100,200])
     lst.append(t)
 
+
+    lst.append(PageBreak())
+
+    lst.append(Paragraph('Trying colour cycling in background', styleSheet['Heading1']))
+    lst.append(Paragraph("This should alternate pale blue and uncolored by row", styleSheet['BodyText']))
+    data=  [['001', '01', '02', '03', '04', '05'],
+            ['002', '01', '02', '03', '04', '05'],
+            ['003', '01', '02', '03', '04', '05'],
+            ['004', '01', '02', '03', '04', '05'],
+            ['005', '01', '02', '03', '04', '05'],
+            ['006', '01', '02', '03', '04', '05'],
+            ['007', '01', '02', '03', '04', '05'],
+            ['008', '01', '02', '03', '04', '05'],
+            ['009', '01', '02', '03', '04', '05'],
+            ['010', '01', '02', '03', '04', '05'],
+
+            ]
+    t=Table(data,style=[
+                    ('GRID',(0,0),(-1,-1),0.5,colors.grey),
+                    ('ROWBACKGROUNDS', (0, 0), (-1, -1), (0xD0D0FF, None)),
+                    ])
+    lst.append(t)
+    lst.append(Spacer(0,6))
+    lst.append(Paragraph("And this should pale blue, pale pink and None by column", styleSheet['BodyText']))
+    data=  [['001', '01', '02', '03', '04', '05'],
+            ['002', '01', '02', '03', '04', '05'],
+            ['003', '01', '02', '03', '04', '05'],
+            ['004', '01', '02', '03', '04', '05'],
+            ['005', '01', '02', '03', '04', '05'],
+            ['006', '01', '02', '03', '04', '05'],
+            ['007', '01', '02', '03', '04', '05'],
+            ['008', '01', '02', '03', '04', '05'],
+            ['009', '01', '02', '03', '04', '05'],
+            ['010', '01', '02', '03', '04', '05'],
+
+            ]
+    t=Table(data,style=[
+                    ('GRID',(0,0),(-1,-1),0.5,colors.grey),
+                    ('COLBACKGROUNDS', (0, 0), (-1, -1), (0xD0D0FF, 0xFFD0D0, None)),
+                    ])
+    lst.append(t)
+
+
+
     SimpleDocTemplate(outputfile('tables.pdf'), showBoundary=1).build(lst)
 
 

@@ -512,6 +512,13 @@ def toColor(arg,default=None):
             raise 'Invalid color value', str(arg)
         return default
 
+def toColorOrNone(arg,default=None):
+    '''as above but allows None as a legal value'''
+    if arg is None:
+        return None
+    else:
+        return toColor(arg, default)
+
 def setColors(**kw):
     UNDEF = []
     progress = 1

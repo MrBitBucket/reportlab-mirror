@@ -442,6 +442,7 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1):
     return W, H
 
 def _makeIndexable(V):
+    "if it isn't a list or tuple, wrap it in a list"
     if type(V) not in (ListType, TupleType): V = V is not None and [V] or []
     return V
 

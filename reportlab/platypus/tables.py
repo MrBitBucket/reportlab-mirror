@@ -603,6 +603,10 @@ class Table(Flowable):
     def _addCommand(self,cmd):
         if cmd[0] == 'BACKGROUND':
             self._bkgrndcmds.append(cmd)
+        if cmd[0] == 'ROWBACKGROUNDS':
+            self._bkgrndcmds.append(cmd)
+        if cmd[0] == 'COLBACKGROUNDS':
+            self._bkgrndcmds.append(cmd)
         elif cmd[0] == 'SPAN':
             self._spanCmds.append(cmd)
         elif _isLineCommand(cmd):
@@ -941,9 +945,40 @@ class Table(Flowable):
             canv = self.canv
             if callable(arg):
                 apply(arg,(self,canv, x0, y0, w, h))
-            else:
+            elif cmd == 'BACKGROUND':
                 canv.setFillColor(colors.toColor(arg))
                 canv.rect(x0, y0, w, h, stroke=0,fill=1)
+            elif cmd == 'ROWBACKGROUNDS':
+                #Need a list of colors to cycle through.  The arguments
+                #might be already colours, or convertible to colors, or
+                # None, or the string 'None'.
+                #It's very common to alternate a pale shade with None.
+                #print 'rowHeights=', self._rowHeights
+                colorCycle = map(colors.toColorOrNone, arg)
+                count = len(colorCycle)
+                rowCount = er - sr
+                for i in range(rowCount):
+                    color = colorCycle[i%count]
+                    h = self._rowHeights[sr + i]
+                    if color:
+                        canv.setFillColor(color)
+                        canv.rect(x0, y0, w, -h, stroke=0,fill=1)
+                    #print '    draw %0.0f, %0.0f, %0.0f, %0.0f' % (x0,y0,w,-h)
+                    y0 = y0 - h
+
+            elif cmd == 'COLBACKGROUNDS':
+                #cycle through colours columnwise
+                colorCycle = map(colors.toColorOrNone, arg)
+                count = len(colorCycle)
+                colCount = ec - sc
+                for i in range(colCount):
+                    color = colorCycle[i%count]
+                    w = self._colWidths[sc + i]
+                    if color:
+                        canv.setFillColor(color)
+                        canv.rect(x0, y0, w, h, stroke=0,fill=1)
+                    x0 = x0 +w
+                
 
     def _drawCell(self, cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight)):
         if self._curcellstyle is not cellstyle:
@@ -1101,6 +1136,12 @@ LIST_STYLE = TableStyle(
      ('LINEBELOW', (0,-1), (-1,-1), 2, colors.green),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
+
+
+# experimental iterator which can apply a sequence
+# of colors e.g. Blue, None, Blue, None as you move
+# down.
+
 
 if __name__ == '__main__':
     from reportlab.test.test_platypus_tables import old_tables_test

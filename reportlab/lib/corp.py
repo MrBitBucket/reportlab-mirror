@@ -411,31 +411,22 @@ def test():
 
     #wbite on blue
     rl = RL_CorpLogo()
-    D = Drawing(rl.width,rl.height)
-    D.add(rl)
-    D.__dict__['verbose'] = 1
-    D.save(fnRoot='corplogo_whiteonblue',formats=['pdf','eps'])
-
     rl.width = 129
     rl.height = 86
     D = Drawing(rl.width,rl.height)
     D.add(rl)
     D.__dict__['verbose'] = 1
-    D.save(fnRoot='corplogo_whiteonblue',formats=['jpg','gif'])
+    D.save(fnRoot='corplogo_whiteonblue',formats=['pdf','eps','jpg','gif'])
 
 
     #blue on white
     rl = RL_CorpLogoReversed()
-    D = Drawing(rl.width,rl.height)
-    D.add(rl)
-    D.__dict__['verbose'] = 1
-    D.save(fnRoot='corplogo_blueonwhite',formats=['pdf','eps'])
     rl.width = 129
     rl.height = 86
     D = Drawing(rl.width,rl.height)
     D.add(rl)
     D.__dict__['verbose'] = 1
-    D.save(fnRoot='corplogo_whiteonblue',formats=['jpg','gif'])
+    D.save(fnRoot='corplogo_blueonwhite',formats=['pdf','eps','jpg','gif'])
 
 
 
