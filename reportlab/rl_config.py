@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.29 2002/03/12 15:18:02 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.30 2002/03/15 13:56:32 rgbecker Exp $
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =				1
@@ -14,6 +14,7 @@ ZLIB_WARNINGS =				1
 warnOnMissingFontGlyphs =	0						#if 1, warns of each missing glyph
 verbose =					0
 showBoundary =				0						# turns on and off boundary behaviour in Drawing
+emptyTableAction=			'error'					# one of 'error', 'indicate', 'ignore'
 
 # places to look for T1Font information
 T1SearchPath =	('c:/Program Files/Adobe/Acrobat 5.0/Resource/Font', #Win32, Acrobat 5
@@ -54,7 +55,7 @@ def	_startUp():
 	else we use the given default'''
 	V = ('T1SearchPath','CMapSearchPath','shapeChecking', 'defaultEncoding', 'pageCompression',
 				'defaultPageSize', 'defaultImageCaching', 'PIL_WARNINGS',
-				'ZLIB_WARNINGS', 'warnOnMissingFontGlyphs', 'verbose',
+				'ZLIB_WARNINGS', 'warnOnMissingFontGlyphs', 'verbose', 'emptyTableAction',
 				)
 
 	if _SAVED=={}:

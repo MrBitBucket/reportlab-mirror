@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.53 2002/01/28 12:33:53 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.53 2002/01/28 12:33:53 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.54 2002/03/15 13:56:33 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.54 2002/03/15 13:56:33 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -20,7 +20,7 @@ tables and table styles.
 
 from reportlab.platypus import *
 from reportlab import rl_config
-from reportlab.lib.styles import PropertySet, getSampleStyleSheet
+from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.utils import fp_str
 from reportlab.pdfbase import pdfmetrics
@@ -104,27 +104,44 @@ def _rowLen(x):
 
 class Table(Flowable):
 	def __init__(self, data, colWidths=None, rowHeights=None, style=None,
-				repeatRows=0, repeatCols=0, splitByRow=1):
+				repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None):
 		#print "colWidths", colWidths
 		self.hAlign = 'CENTER'
 		self.vAlign = 'MIDDLE'
+		if type(data) not in _SeqTypes:
+			raise ValueError, "%s invalid data type" % self.identity()
 		self._nrows = nrows = len(data)
-		if len(data)==0 or type(data) not in _SeqTypes:
-			raise ValueError, "%s must have at least 1 row" % self.identity()
-		ncols = max(map(_rowLen,data))
-		if not ncols:
-			raise ValueError, "%s must have at least 1 column" % self.identity()
+		if nrows: self._ncols = ncols = max(map(_rowLen,data))
+		elif colWidths: ncols = len(colWidths)
+		else: ncols = 0
+		if not emptyTableAction: emptyTableAction = rl_config.emptyTableAction
+		if not (nrows and ncols):
+			if emptyTableAction=='error':
+				raise ValueError, "%s must have at least a row and column" % self.identity()
+			elif emptyTableAction=='indicate':
+				self.__class__ = Preformatted
+				global _emptyTableStyle
+				if '_emptyTableStyle' not in globals().keys():
+					_emptyTableStyle = ParagraphStyle('_emptyTableStyle')
+					_emptyTableStyle.textColor = colors.red
+					_emptyTableStyle.backColor = colors.yellow
+				Preformatted.__init__(self,'Table(%d,%d)' % (nrows,ncols), _emptyTableStyle)
+			elif emptyTableAction=='ignore':
+				self.__class__ = Spacer
+				Spacer.__init__(self,0,0)
+			else:
+				raise ValueError, '%s bad emptyTableAction: "%s"' % (self.identity(),emptyTableAction)
+			return
+
 		if colWidths is None: colWidths = ncols*[None]
 		elif len(colWidths) != ncols:
 			raise ValueError, "%s data error - %d columns in data but %d in grid" % (self.identity(),ncols, len(colWidths))
 		if rowHeights is None: rowHeights = nrows*[None]
 		elif len(rowHeights) != nrows:
 			raise ValueError, "%s data error - %d rows in data but %d in grid" % (self.identity(),nrows, len(rowHeights))
-		ncols = len(colWidths)
 		for i in range(nrows):
 			if len(data[i]) != ncols:
 				raise ValueError, "%s not enough data points in row %d!" % (self.identity(),i)
-		self._ncols = ncols
 		self._rowHeights = self._argH = rowHeights
 		self._colWidths = self._argW = colWidths
 		self._cellvalues = data
