@@ -61,6 +61,7 @@ def _find_rl_accel():
 # why oh why don't most setup scripts have a script handler?
 # if you don't have one, you can't edit in Pythonwin
 def run():
+    RL_ACCEL = _find_rl_accel()
     EXT_MODULES = RL_ACCEL and [Extension( '_rl_accel',
                                 [RL_ACCEL+'/_rl_accel.c'],
                                 include_dirs=[],
