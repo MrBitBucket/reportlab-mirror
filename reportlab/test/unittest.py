@@ -30,7 +30,7 @@ SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 __author__ = "Steve Purcell (stephen_purcell@yahoo.com)"
-__version__ = "$Revision: 1.3 $"[11:-2]
+__version__ = "$Revision: 1.4 $"[11:-2]
 
 import time
 import sys
@@ -423,7 +423,7 @@ class _WritelnDecorator:
             import java.lang.System
             self.linesep = java.lang.System.getProperty("line.separator")
         else:
-            self.linesep = os.linesep
+            self.linesep = '\n'
 
     def __getattr__(self, attr):
         return getattr(self.stream,attr)
