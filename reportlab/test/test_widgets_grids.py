@@ -1,5 +1,6 @@
 
-import unittest
+from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
 
 from reportlab.lib import colors
 from reportlab.graphics.shapes import Drawing, Group, Line, Rect
@@ -443,17 +444,10 @@ class GridTestCase(unittest.TestCase):
         renderSVG.drawToFile(d, 'test_widgets_grids2.svg')
 
 
-
-
 def makeSuite():
-    suite = unittest.TestSuite()
-
-    suite.addTest(GridTestCase('test0'))
-    suite.addTest(GridTestCase('test1'))
-    suite.addTest(GridTestCase('test2'))
-
-    return suite
+    return makeSuiteForClasses(GridTestCase)
 
 
+#noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())

@@ -1,17 +1,18 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_paragraphs.py,v 1.7 2001/11/26 21:49:01 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_paragraphs.py,v 1.8 2002/07/04 09:24:49 dinu_gherman Exp $
 """Tests for the reportlab.platypus.paragraphs module.
 """
 
 import sys, os, tempfile
-
 from string import split, strip, join, whitespace
 from operator import truth
 from types import StringType, ListType
 
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
+
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus.paraparser import ParaParser
 from reportlab.platypus.flowables import Flowable
@@ -58,7 +59,7 @@ class MyDocTemplate(BaseDocTemplate):
 class ParagraphSplitTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."
     
-    def test1(self):
+    def test0(self):
         "This makes one long multi-page paragraph."
 
         # Build story.
@@ -77,7 +78,7 @@ class ParagraphSplitTestCase(unittest.TestCase):
 class FragmentTestCase(unittest.TestCase):
     "Test fragmentation of paragraphs."
     
-    def test1(self):
+    def test0(self):
         "Test empty paragraph."
 
         styleSheet = getSampleStyleSheet()
@@ -88,7 +89,7 @@ class FragmentTestCase(unittest.TestCase):
         assert frags == []
 
 
-    def test2(self):
+    def test1(self):
         "Test simple paragraph."
 
         styleSheet = getSampleStyleSheet()
@@ -99,16 +100,13 @@ class FragmentTestCase(unittest.TestCase):
         assert frags == ['X', 'Y', 'Z']
 
 
+#noruntests
 def makeSuite():
-    suite = unittest.TestSuite()
-    
-    suite.addTest(FragmentTestCase('test1'))
-    suite.addTest(FragmentTestCase('test2'))
-    suite.addTest(ParagraphSplitTestCase('test1'))
-
-    return suite
+    return makeSuiteForClasses(FragmentTestCase, ParagraphSplitTestCase)
 
 
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+
+

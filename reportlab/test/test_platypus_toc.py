@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_toc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_toc.py,v 1.7 2001/11/26 21:49:01 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_toc.py,v 1.8 2002/07/04 09:24:49 dinu_gherman Exp $
 """Tests for the Platypus TableOfContents class.
 
 Currently there is only one such test. Most such tests, like this
@@ -15,6 +15,8 @@ from os.path import join, basename, splitext
 from math import sqrt
 
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
+
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -27,6 +29,7 @@ from reportlab.platypus import tableofcontents
 from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.platypus.tables import TableStyle, Table
 from reportlab.lib import randomtext
+
 
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
@@ -89,9 +92,11 @@ def makeHeaderStyle(level, fontName='Times-Roman'):
 
     return style
 
+
 def makeBodyStyle():
     "Body text style - the default will do"
     return ParagraphStyle('body')
+
 
 def makeTocHeaderStyle(level, delta, epsilon, fontName='Times-Roman'):
     "Make a header style for different levels."
@@ -115,7 +120,7 @@ def makeTocHeaderStyle(level, delta, epsilon, fontName='Times-Roman'):
 class TocTestCase(unittest.TestCase):
     "Test TableOfContents class (eyeball-test)."
     
-    def test1(self):
+    def test0(self):
         """Test story with TOC and a cascaded header hierarchy.
 
         The story should contain exactly one table of contents that is
@@ -149,7 +154,7 @@ class TocTestCase(unittest.TestCase):
         styleSheet = getSampleStyleSheet()
         bt = styleSheet['BodyText']
 
-        description = '<font color=red>%s</font>' % self.test1.__doc__
+        description = '<font color=red>%s</font>' % self.test0.__doc__
         story.append(XPreformatted(description, bt))
 
         toc = TableOfContents()
@@ -171,9 +176,7 @@ class TocTestCase(unittest.TestCase):
         
 
 def makeSuite():
-    suite = unittest.TestSuite()
-    suite.addTest(TocTestCase('test1'))
-    return suite
+    return makeSuiteForClasses(TocTestCase)
 
 
 #noruntests

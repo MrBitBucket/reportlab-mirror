@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pdfbase_pdfmetrics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_pdfmetrics.py,v 1.8 2002/04/09 11:46:43 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_pdfmetrics.py,v 1.9 2002/07/04 09:24:49 dinu_gherman Exp $
 #test_pdfbase_pdfmetrics_widths
 """
 Various tests for PDF metrics.
@@ -9,7 +9,9 @@ Various tests for PDF metrics.
 The main test prints out a PDF documents enabling checking of widths of every
 glyph in every standard font.  Long!
 """
+
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase import _fontdata
@@ -19,10 +21,12 @@ from reportlab.lib import colors
 verbose = 0
 fontNamesToTest = _fontdata.standardFonts #[0:12]  #leaves out Symbol and Dingbats for now
 
+
 def decoratePage(c, header):
     c.setFont('Helvetica-Oblique',10)
     c.drawString(72, 800, header)
     c.drawCentredString(297, 54, 'Page %d' % c.getPageNumber())
+
 
 def makeWidthTestForAllGlyphs(canv, fontName, outlining=1):
     """New page, then runs down doing all the glyphs in one encoding"""
@@ -66,7 +70,6 @@ def makeWidthTestForAllGlyphs(canv, fontName, outlining=1):
             y = y - 12
                 
 
-
 def makeTestDoc(fontNames):
     filename = 'test_pdfbase_pdfmetrics.pdf'
     c = Canvas(filename)
@@ -86,14 +89,17 @@ def makeTestDoc(fontNames):
         if verbose:
             print 'saved',filename
 
+
 class PDFMetricsTestCase(unittest.TestCase):
     "Test various encodings used in PDF files."
-    def testGlyphWidthsAreCorrect(self):
-        "Visual test for glyph widths"
+
+    def test0(self):
+        "Visual test for correct glyph widths"
         makeTestDoc(fontNamesToTest)        
 
+
 def makeSuite():
-    return unittest.makeSuite(PDFMetricsTestCase,'test')
+    return makeSuiteForClasses(PDFMetricsTestCase)
 
 
 #noruntests
@@ -113,5 +119,4 @@ if __name__=='__main__':
                 
         fontNamesToTest = sys.argv[1:]
 
-    runner = unittest.TextTestRunner()
-    runner.run(makeSuite())
+    unittest.TextTestRunner().run(makeSuite())

@@ -1,3 +1,4 @@
+
 """Test TrueType font subsetting & embedding code.
 
 This test uses a sample font (luxiserif.ttf) taken from XFree86 which is called Luxi
@@ -6,7 +7,10 @@ Serif Regular and is covered under the license in ../fonts/luxiserif_licence.txt
 
 import string
 from cStringIO import StringIO
+
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
+
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.pdfdoc import PDFDocument, PDFError
@@ -15,6 +19,7 @@ from reportlab.pdfbase.ttfonts import TTFont, TTFontFace, TTFontFile, TTFOpenFil
                                       parse_utf8, makeToUnicodeCMap, \
                                       FF_SYMBOLIC, FF_NONSYMBOLIC, \
                                       calcChecksum, _add32
+
 
 def utf8(code):
     "Convert a given UCS character index into UTF-8"
@@ -53,6 +58,7 @@ def utf8(code):
                   0x80 + ((code >> 6) & 0x3F),
                   0x80 + (code & 0x3F))
 
+
 class TTFontsTestCase(unittest.TestCase):
     "Make documents with TrueType fonts"
 
@@ -79,6 +85,7 @@ class TTFontsTestCase(unittest.TestCase):
         c.setFont('TestFont', 10)
         c.drawString(100, 700, 'Hello, ' + utf8(0xffee))
         c.save()
+
 
 class TTFontFileTestCase(unittest.TestCase):
     "Tests TTFontFile, TTFontParser and TTFontMaker classes"
@@ -182,6 +189,7 @@ class TTFontFileTestCase(unittest.TestCase):
         ttf = TTFontParser(StringIO(stm), 0)
         self.assertEquals(ttf.get_table("ABCD"), "xyzzy")
         self.assertEquals(ttf.get_table("QUUX"), "123")
+
 
 class TTFontFaceTestCase(unittest.TestCase):
     "Tests TTFontFace class"
@@ -326,14 +334,17 @@ CMapName currentdict /CMap defineresource pop
 end
 end""")
 
+
 def makeSuite():
-    suite = unittest.TestSuite()
-    loader = unittest.TestLoader()
-    suite.addTest(loader.loadTestsFromTestCase(TTFontsTestCase))
-    suite.addTest(loader.loadTestsFromTestCase(TTFontFileTestCase))
-    suite.addTest(loader.loadTestsFromTestCase(TTFontFaceTestCase))
-    suite.addTest(loader.loadTestsFromTestCase(TTFontTestCase))
+    suite = makeSuiteForClasses(
+        TTFontsTestCase, 
+        TTFontFileTestCase,
+        TTFontFaceTestCase, 
+        TTFontTestCase)
     return suite
 
+
+#noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+

@@ -2,16 +2,20 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.13 2002/05/24 11:25:54 dinu_gherman Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.13 2002/05/24 11:25:54 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.14 2002/07/04 09:24:49 dinu_gherman Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.14 2002/07/04 09:24:49 dinu_gherman Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
+
 import string
+
+from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
+
 from reportlab.pdfgen import canvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
 from reportlab.lib.utils import PIL_Image
-from reportlab.test import unittest
 
 #################################################################
 #
@@ -54,6 +58,7 @@ def framePageForm(c):
 titlelist = []
 closeit = 0
     
+
 def framePage(canvas, title):
     global closeit
     titlelist.append(title)
@@ -72,16 +77,19 @@ def framePage(canvas, title):
     canvas.restoreState()
     canvas.doForm("frame")
     
+
 def makesubsection(canvas, title, horizontal):
     canvas.bookmarkHorizontalAbsolute(title, horizontal)
     #newsubsection(title)
     canvas.addOutlineEntry(title+" subsection", title, level=1)
     
+
 # outline helpers
 #outlinenametree = []
 #def newsection(name):
 #    outlinenametree.append(name)
     
+
 #def newsubsection(name):
 #    from types import TupleType
 #    thissection = outlinenametree[-1]
@@ -91,6 +99,7 @@ def makesubsection(canvas, title, horizontal):
 #    else:
 #        (sectionname, subsectionlist) = thissection
 #    subsectionlist.append(name)
+
 
 class DocBlock:
     """A DocBlock has a chunk of commentary and a chunk of code.
@@ -136,7 +145,6 @@ class DocBlock:
 
         canvas.restoreState()
         
-
         
 def drawAxes(canvas, label):
     """draws a couple of little rulers showing the coords -
@@ -159,6 +167,7 @@ def drawAxes(canvas, label):
 
     canvas.drawString(18, 30, label)
 
+
 def drawCrossHairs(canvas, x, y):
     """just a marker for checking text metrics - blue for fun"""
 
@@ -168,6 +177,7 @@ def drawCrossHairs(canvas, x, y):
     canvas.line(x,y-6,x,y+6)
     canvas.restoreState()
     
+
 def drawCode(canvas, code):
     """Draws a block of text at current point, indented and in Courier"""
     canvas.addLiteral('36 0 Td')
@@ -196,7 +206,6 @@ def makeDocument(filename, pageCallBack=None):
     
     framePage(c, 'PDFgen graphics API test script')
     makesubsection(c, "PDFgen and PIDDLE", 10*inch)
-    
     
     t = c.beginText(inch, 10*inch)
     t.setFont('Times-Roman', 10)
@@ -279,7 +288,6 @@ substring.
 
     #mark the cursor where it stopped
     c.showPage()
-
 
     
     ##############################################################
@@ -385,9 +393,8 @@ substring.
     c.drawString(4*inch, 3*inch, 'dash pattern, join and cap style interacting - ')
     c.drawString(4*inch, 3*inch - 12, 'round join & miter results in sausages')
     
-
-    
     c.showPage()
+
 
 ##############################################################
 #
@@ -395,7 +402,6 @@ substring.
 #
 ###############################################################
     framePage(c, 'Shape Drawing Routines')
-    
 
     t = c.beginText(inch, 10*inch)
     t.textLines("""
@@ -426,7 +432,6 @@ cost to performance.""")
     c.setDash()
     t.setTextOrigin(4*inch, 7 * inch)
     t.textLine('canvas.bezier(x1, y1, x2, y2, x3, y3, x4, y4)')
-    
 
     #rectangle
     makesubsection(c, "rectangles", 7*inch)
@@ -453,14 +458,14 @@ cost to performance.""")
     t.setTextOrigin(4*inch, 2 * inch)
     t.textLine('canvas.circle(x, y, radius)')
     c.drawText(t)
+
+    c.showPage()
+
 ##############################################################
 #
 # Page 4 - fonts
 #
 ###############################################################
-
-    
-    c.showPage()
     framePage(c, "Font Control")
 
     c.drawString(inch, 10*inch, 'Listing available fonts...')
@@ -480,7 +485,6 @@ cost to performance.""")
     modes, an outline color could be defined by setStrokeColorRGB() too""")
     c.drawText(t)
     
-    
     t = c.beginText(inch, 2.75 * inch)
     t.setFont('Times-Bold',36)
     t.setFillColor(colors.green)  #green
@@ -495,15 +499,13 @@ cost to performance.""")
     t.setFillColorRGB(0,0,0)   #back to default
     t.setStrokeColorRGB(0,0,0) #ditto
     c.drawText(t)
+    c.showPage()
 
-
-    
 #########################################################################
 #
 #  Page 5 - coord transforms
 #
 #########################################################################
-    c.showPage()
     framePage(c, "Coordinate Transforms")
     c.setFont('Times-Roman', 12)
     t = c.beginText(inch, 10 * inch)
@@ -544,13 +546,13 @@ cost to performance.""")
     drawAxes(c, "5. down 5, 3 across, skew beta 30")
     c.restoreState()
 
+    c.showPage()
     
 #########################################################################
 #
 #  Page 6 - clipping
 #
 #########################################################################
-    c.showPage()
     framePage(c, "Clipping")
     c.setFont('Times-Roman', 12)
     t = c.beginText(inch, 10 * inch)
@@ -589,7 +591,6 @@ cost to performance.""")
     
     c.restoreState()
 
-
     t = c.beginText(inch, 5 * inch)
     t.textLines("""You can also use text as an outline for clipping with the text render mode.
         The API is not particularly clean on this and one has to follow the right sequence;
@@ -614,13 +615,14 @@ cost to performance.""")
     #now reset canvas to get rid of the clipping mask    
     c.restoreState()
         
+    c.showPage()
+
 
 #########################################################################
 #
 #  Page 7 - images
 #
 #########################################################################
-    c.showPage()
     framePage(c, "Images")
     c.setFont('Times-Roman', 12)
     t = c.beginText(inch, 10 * inch)
@@ -677,13 +679,14 @@ cost to performance.""")
     else:
         c.rect(3*inch, 1.2*inch, 110, 44)
 
+    c.showPage()
+
 
 #########################################################################
 #
 #  Page 8 - Forms and simple links
 #
 #########################################################################
-    c.showPage()
     framePage(c, "Forms and Links")
     c.setFont('Times-Roman', 12)
     t = c.beginText(inch, 10 * inch)
@@ -744,8 +747,10 @@ def run(filename):
     c = makeDocument(filename)
     c.save()
 
+
 def pageShapes(c):
     """Demonstrates the basic lines and shapes"""
+
     c.showPage()
     framePage(c, "Basic line and shape routines""")
     c.setTextOrigin(inch, 10 * inch)
@@ -763,17 +768,20 @@ def pageShapes(c):
     
     d.draw(c, inch, 9 * inch)
 
+
 class PdfgenTestCase(unittest.TestCase):
     "Make documents with lots of Pdfgen features"
-    def test1(self):
+
+    def test0(self):
         "Make a PDFgen document with most graphics features"
         run('test_pdfgen_general.pdf')
 
-def makeSuite():
-    suite = unittest.TestSuite()
-    suite.addTest(PdfgenTestCase('test1'))
-    return suite
 
-    
+def makeSuite():
+    return makeSuiteForClasses(PdfgenTestCase)
+
+
+#noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+

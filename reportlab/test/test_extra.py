@@ -42,7 +42,7 @@ class ExternalTestCase(SecureTestCase):
         $HOME/bar/foo.py
     """
 
-    def test1(self):
+    def test0(self):
         "Execute external test cases."
 
         cwd = os.getcwd()
@@ -85,10 +85,10 @@ class ExternalTestCase(SecureTestCase):
 
 def makeSuite():
     suite = unittest.TestSuite()
-    
-    if sys.platform[:4] != 'java':   
-        suite.addTest(ExternalTestCase('test1'))
-    
+    loader = unittest.TestLoader()
+    if sys.platform[:4] != 'java':
+        suite.addTest(loader.loadTestsFromTestCase(ExternalTestCase))
+
     return suite
 
 

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_lib_colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_lib_colors.py,v 1.6 2001/04/05 09:30:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_lib_colors.py,v 1.7 2002/07/04 09:24:49 dinu_gherman Exp $
 """Tests for the reportlab.lib.colors module.
 """
 
@@ -9,6 +9,8 @@
 import os, math
 
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
+
 from reportlab.pdfgen.canvas import Canvas
 import reportlab.pdfgen.canvas
 from reportlab.lib import colors
@@ -35,7 +37,7 @@ def framePage(canvas, title):
 class ColorTestCase(unittest.TestCase):
     ""
     
-    def test1(self):
+    def test0(self):
         "Test color2bw function on all named colors."
 
         cols = colors.getAllNamedColors().values()
@@ -45,7 +47,7 @@ class ColorTestCase(unittest.TestCase):
             assert r == g == b
     
 
-    def test2(self):
+    def test1(self):
         "Test colorDistance function."
 
         cols = colors.getAllNamedColors().values()
@@ -54,7 +56,7 @@ class ColorTestCase(unittest.TestCase):
             assert d == 0
 
 
-    def test3(self):
+    def test2(self):
         "Test toColor function on half a dozen ways to say 'red'."
 
         allRed = [colors.red, [1, 0, 0], (1, 0, 0),
@@ -64,7 +66,7 @@ class ColorTestCase(unittest.TestCase):
             assert colors.toColor(thing) == colors.red
 
 
-    def test4(self):
+    def test3(self):
         "Test roundtrip RGB to CMYK conversion."
 
         # Take all colors as test subjects, except 'transparent'.
@@ -85,7 +87,7 @@ class ColorTestCase(unittest.TestCase):
             deltas = map(abs, (r1-r2, g1-g2, b1-b2))
             assert deltas < [math.pow(10, -N)] * 3
 
-    def test5(self):
+    def test4(self):
         "Construct CMYK instances and test round trip conversion"
 
         rgbCols = colors.getAllNamedColors().items()
@@ -105,7 +107,7 @@ class ColorTestCase(unittest.TestCase):
             assert deltas < [math.pow(10, -N)] * 3
 
 
-    def test6(self):
+    def test5(self):
         "List and display all named colors and their gray equivalents."
         
         canvas = reportlab.pdfgen.canvas.Canvas('test_lib_colors.pdf')
@@ -151,16 +153,8 @@ class ColorTestCase(unittest.TestCase):
         
 
 def makeSuite():
-    suite = unittest.TestSuite()
-    
-    suite.addTest(ColorTestCase('test1'))
-    suite.addTest(ColorTestCase('test2'))
-    suite.addTest(ColorTestCase('test3'))
-    suite.addTest(ColorTestCase('test4'))
-    suite.addTest(ColorTestCase('test5'))
-    suite.addTest(ColorTestCase('test6'))
+    return makeSuiteForClasses(ColorTestCase)
 
-    return suite
 
 #noruntests
 if __name__ == "__main__":

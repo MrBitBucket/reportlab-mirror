@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_charts_textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_charts_textlabels.py,v 1.2 2001/11/26 21:49:01 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_charts_textlabels.py,v 1.3 2002/07/04 09:24:49 dinu_gherman Exp $
 """
 Tests for the text Label class.
 """
@@ -10,6 +10,7 @@ import os, sys, copy, tempfile
 from os.path import join, basename, splitext
 
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.lib.pagesizes import A4
@@ -263,8 +264,7 @@ textAnchor attribute.""", bt))
             story.append(d)
             story.append(Spacer(0, 1*cm))
 
-        story.append(PageBreak())
-        
+        story.append(PageBreak())        
 
         pdfPath = 'test_charts_textlabels.pdf'
         tempfile.tempdir = os.curdir
@@ -274,9 +274,7 @@ textAnchor attribute.""", bt))
 
 
 def makeSuite():
-    suite = unittest.TestSuite()
-    suite.addTest(LabelTestCase('test1'))
-    return suite
+    return makeSuiteForClasses(LabelTestCase)
 
 
 #noruntests

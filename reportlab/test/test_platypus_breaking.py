@@ -1,17 +1,18 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_breaking.py,v 1.3 2001/11/26 21:49:01 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_breaking.py,v 1.4 2002/07/04 09:24:49 dinu_gherman Exp $
 """Tests pageBreakBefore, frameBreakBefore, keepWithNext...
 """
 
 import sys, os, time
-
 from string import split, strip, join, whitespace
 from operator import truth
 from types import StringType, ListType
 
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
+
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib import colors
 from reportlab.lib.units import cm
@@ -49,8 +50,9 @@ class MyDocTemplate(BaseDocTemplate):
 		self.addPageTemplates(template)
 
 
-def _test1(self):
+def _test0(self):
 	"This makes one long multi-page paragraph."
+
 	# Build story.
 	story = []
 
@@ -73,9 +75,7 @@ def _test1(self):
 		Subsequent pages test pageBreakBefore, frameBreakBefore and
 		keepTogether attributes.  Generated at %s.  The number in brackets
 		at the end of each paragraph is its position in the story. (%d)""" % (
-			time.ctime(time.time()), len(story)),
-						   bt))
-
+			time.ctime(time.time()), len(story)), bt))
 
 	for i in range(10):
 		story.append(Paragraph('Heading 1 always starts a new page (%d)' % len(story), h1))
@@ -92,22 +92,23 @@ def _test1(self):
 				story.append(Paragraph('I should never be at the bottom of a frame (%d)' % len(story), h3))
 				story.append(Paragraph(randomText(theme=PYTHON, sentences=1)+' (%d)' % len(story), bt))
 
-
 	doc = MyDocTemplate('test_platypus_breaking.pdf')
 	doc.multiBuild(story)
 
+
 class BreakingTestCase(unittest.TestCase):
 	"Test multi-page splitting of paragraphs (eyeball-test)."
-	def test1(self):
-		_test1(self)
+	def test0(self):
+		_test0(self)
+
 
 def makeSuite():
-	suite = unittest.TestSuite()
-	suite.addTest(BreakingTestCase('test1'))
-	return suite
+    return makeSuiteForClasses(BreakingTestCase)
 
+
+#noruntests
 if __name__ == "__main__": #NORUNTESTS
 	if 'debug' in sys.argv:
-		_test1(None)
+		_test0(None)
 	else:
 		unittest.TextTestRunner().run(makeSuite())

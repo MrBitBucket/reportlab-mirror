@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/test_multibyte_chs.py,v 1.2 2001/10/28 00:22:18 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_multibyte_chs.py,v 1.3 2002/07/04 09:24:49 dinu_gherman Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -12,6 +12,7 @@ by classes in reportlab.pdfbase.cidfonts
 import string, os
 
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen.canvas import Canvas
@@ -24,13 +25,13 @@ VERBOSE = 0
 
 class CHSFontTests(unittest.TestCase):
     
-    def test1(self):
+    def test0(self):
         "A basic document drawing some strings"
 
         # if they do not have the Japanese font files, go away quietly
         from reportlab.pdfbase.cidfonts import CIDFont, findCMapFile
 
-        
+
         enc = 'GB-EUC-H'
         try:
             findCMapFile(enc)
@@ -104,14 +105,13 @@ class CHSFontTests(unittest.TestCase):
         if VERBOSE:
             print 'saved test_multibyte_chs.pdf'
 
+
 def makeSuite():
-    return unittest.makeSuite(CHSFontTests,'test')
+    return makeSuiteForClasses(CHSFontTests)
+
 
 #noruntests
 if __name__ == "__main__":
     VERBOSE = 1
     unittest.TextTestRunner().run(makeSuite())
-    
-
-
 

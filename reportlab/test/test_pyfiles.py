@@ -1,15 +1,17 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pyfiles.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pyfiles.py,v 1.8 2002/05/24 14:38:09 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pyfiles.py,v 1.9 2002/07/04 09:24:49 dinu_gherman Exp $
 """Tests performed on all Python source files of the ReportLab distribution.
 """
 
 
 import os, sys, string, fnmatch, re
 
-import reportlab
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
+
+import reportlab
 from reportlab.test.utils import SecureTestCase, GlobDirectoryWalker
 
 
@@ -181,17 +183,14 @@ class FirstLineTestCase(SecureTestCase):
 
 
 def makeSuite():
-    suite = unittest.TestSuite()    
-
-    suite.addTest(SelfTestCase('testUnique'))
-    suite.addTest(AsciiFileTestCase('testAscii'))
-    suite.addTest(FilenameTestCase('testTrailingDigits'))
+    suite = makeSuiteForClasses(SelfTestCase, AsciiFileTestCase, FilenameTestCase)
     if sys.platform[:4] != 'java':
-        suite.addTest(FirstLineTestCase('test1'))
-
+        loader = unittest.TestLoader()
+        suite.addTest(loader.loadTestsFromTestCase(FirstLineTestCase))
     return suite
 
 
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_lib_sequencer.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_lib_sequencer.py,v 1.4 2001/04/05 09:30:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_lib_sequencer.py,v 1.5 2002/07/04 09:24:49 dinu_gherman Exp $
 """Tests for the reportlab.lib.sequencer module.
 """
 
@@ -9,13 +9,14 @@
 import sys, random
 
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
 from reportlab.lib.sequencer import Sequencer
 
 
 class SequencerTestCase(unittest.TestCase):
     "Test Sequencer usage."
     
-    def test1(self):
+    def test0(self):
         "Test sequencer default counter."
 
         seq = Sequencer()
@@ -23,7 +24,7 @@ class SequencerTestCase(unittest.TestCase):
         assert seq.this() == 0, msg
 
 
-    def test2(self):
+    def test1(self):
         "Test incrementing default counter."
 
         seq = Sequencer()
@@ -34,7 +35,7 @@ class SequencerTestCase(unittest.TestCase):
             assert seq.this() == n, msg
 
 
-    def test3(self):
+    def test2(self):
         "Test resetting default counter."
 
         seq = Sequencer()
@@ -49,7 +50,7 @@ class SequencerTestCase(unittest.TestCase):
         assert seq.this() == start, msg
 
 
-    def test4(self):
+    def test3(self):
         "Test incrementing dedicated counter."
 
         seq = Sequencer()
@@ -60,7 +61,7 @@ class SequencerTestCase(unittest.TestCase):
             assert seq.this('myCounter1') == n, msg
 
 
-    def test5(self):
+    def test4(self):
         "Test resetting dedicated counter."
 
         seq = Sequencer()
@@ -75,7 +76,7 @@ class SequencerTestCase(unittest.TestCase):
         assert seq.this('myCounter1') == start, msg
 
 
-    def test6(self):
+    def test5(self):
         "Test incrementing multiple dedicated counters."
 
         seq = Sequencer()
@@ -114,16 +115,7 @@ class SequencerTestCase(unittest.TestCase):
 
 
 def makeSuite():
-    suite = unittest.TestSuite()
-    
-    suite.addTest(SequencerTestCase('test1'))
-    suite.addTest(SequencerTestCase('test2'))
-    suite.addTest(SequencerTestCase('test3'))
-    suite.addTest(SequencerTestCase('test4'))
-    suite.addTest(SequencerTestCase('test5'))
-    suite.addTest(SequencerTestCase('test6'))
-
-    return suite
+    return makeSuiteForClasses(SequencerTestCase)
 
 
 #noruntests

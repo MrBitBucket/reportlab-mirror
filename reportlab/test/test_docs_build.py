@@ -11,7 +11,7 @@ from reportlab.test.utils import SecureTestCase
 class ManualTestCase(SecureTestCase):
     "Runs all 3 manual-builders from the top."
     
-    def test1(self):
+    def test0(self):
         "Test if all manuals buildable from source."
 
         import reportlab
@@ -38,9 +38,9 @@ class ManualTestCase(SecureTestCase):
 
 def makeSuite():
     suite = unittest.TestSuite()
-    
+    loader = unittest.TestLoader()
     if sys.platform[:4] != 'java':
-        suite.addTest(ManualTestCase('test1'))
+        suite.addTest(loader.loadTestsFromTestCase(ManualTestCase))
 
     return suite
 

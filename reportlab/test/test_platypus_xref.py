@@ -1,17 +1,18 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_xref.py,v 1.1 2001/11/27 02:49:26 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_xref.py,v 1.2 2002/07/04 09:24:49 dinu_gherman Exp $
 """Test long documents with indexes, tables and cross-references
 """
 
 import sys, os, time
-
 from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
 
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
+
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -20,6 +21,7 @@ from reportlab.platypus import Paragraph, Flowable, Frame, PageTemplate, BaseDoc
 from reportlab.platypus.frames import Frame
 from reportlab.lib.randomtext import randomText, PYTHON
 from reportlab.platypus.tableofcontents import TableOfContents, SimpleIndex
+
 
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
@@ -70,8 +72,9 @@ class MyDocTemplate(BaseDocTemplate):
                     #print 'IndexEntry:',phrase, self.page
             
 
-def _test1(self):
+def _test0(self):
     "This makes one long multi-page paragraph."
+
     # Build story.
     story = []
 
@@ -88,7 +91,6 @@ def _test1(self):
 
     bt = styleSheet['BodyText']
 
-    
     story.append(Paragraph("""Cross-Referencing Test""", styleSheet["Title"]))
     story.append(Paragraph("""
         Subsequent pages test cross-references: indexes, tables and individual
@@ -116,21 +118,22 @@ def _test1(self):
     story.append(Paragraph('The Index which goes at the back', h1))
     story.append(SimpleIndex())
 
-
     doc = MyDocTemplate('test_platypus_xref.pdf')
     doc.multiBuild(story)
 
+
 class BreakingTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."
-    def test1(self):
-        _test1(self)
+    def test0(self):
+        _test0(self)
+
 
 def makeSuite():
-    suite = unittest.TestSuite()
-    suite.addTest(BreakingTestCase('test1'))
-    return suite
+    return makeSuiteForClasses(BreakingTestCase)
 
-if __name__ == "__main__": #NORUNTESTS
+
+#noruntests
+if __name__ == "__main__":
     if 'debug' in sys.argv:
         _test1(None)
     else:

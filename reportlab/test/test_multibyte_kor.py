@@ -2,6 +2,7 @@
 import string, os
 
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen.canvas import Canvas
@@ -14,7 +15,8 @@ VERBOSE = 0
 
 
 class KoreanFontTests(unittest.TestCase):
-    def test1(self):
+
+    def test0(self):
 
         # if they do not have the font files or encoding, go away quietly
         try:
@@ -104,8 +106,6 @@ Adobe\xc0\xc7 \xc0\xe5\xbe\xd6\xc0\xda \xc1\xf6\xbf\xf8
                 c.showPage()
                 y = 700
 
-
-
         c.save()
         
         if VERBOSE:
@@ -113,15 +113,11 @@ Adobe\xc0\xc7 \xc0\xe5\xbe\xd6\xc0\xda \xc1\xf6\xbf\xf8
         
 
 def makeSuite():
-    suite = unittest.TestSuite()
-    suite.addTest(KoreanFontTests('test1'))
-    return suite
+    return makeSuiteForClasses(KoreanFontTests)
+
 
 #noruntests
 if __name__ == "__main__":
     VERBOSE = 1
     unittest.TextTestRunner().run(makeSuite())
-    
-
-
 

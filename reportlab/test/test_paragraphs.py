@@ -1,10 +1,12 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_paragraphs.py,v 1.11 2001/08/22 19:58:39 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_paragraphs.py,v 1.12 2002/07/04 09:24:49 dinu_gherman Exp $
 # tests some paragraph styles
 
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
+
 from reportlab.platypus import Paragraph, SimpleDocTemplate, XBox
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch
@@ -40,7 +42,7 @@ def myLaterPages(canvas, doc):
 class ParagraphTestCase(unittest.TestCase):
     "Test Paragraph class (eyeball-test)."
     
-    def test1(self):
+    def test0(self):
         """Test...
 
         The story should contain...
@@ -125,9 +127,7 @@ class ParagraphTestCase(unittest.TestCase):
         
 
 def makeSuite():
-    suite = unittest.TestSuite()
-    suite.addTest(ParagraphTestCase('test1'))
-    return suite
+    return makeSuiteForClasses(ParagraphTestCase)
 
 
 #noruntests

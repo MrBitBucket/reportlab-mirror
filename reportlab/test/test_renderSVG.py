@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
 import string
-import unittest
 from xml.dom import minidom
+
+from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
 
 from reportlab.graphics.shapes import *
 from reportlab.graphics import renderSVG
@@ -104,21 +106,10 @@ class RenderSvgAxesTestCase(unittest.TestCase):
         renderSVG.drawToFile(d, path)
 
 
-
-
 def makeSuite():
-    suite = unittest.TestSuite()
-
-    suite.addTest(RenderSvgSimpleTestCase('test0'))
-    suite.addTest(RenderSvgSimpleTestCase('test1'))
-    suite.addTest(RenderSvgSimpleTestCase('test2'))
-
-    suite.addTest(RenderSvgAxesTestCase('test0'))
-
-    return suite
+    return makeSuiteForClasses(RenderSvgSimpleTestCase, RenderSvgAxesTestCase)
 
 
-
-
+#noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())

@@ -2,15 +2,18 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/test_pdfgen_callback.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_callback.py,v 1.1 2002/02/03 21:25:57 andy_robinson Exp $
-__version__=''' $Id: test_pdfgen_callback.py,v 1.1 2002/02/03 21:25:57 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_callback.py,v 1.2 2002/07/04 09:24:49 dinu_gherman Exp $
+__version__=''' $Id: test_pdfgen_callback.py,v 1.2 2002/07/04 09:24:49 dinu_gherman Exp $ '''
 __doc__='checks callbacks work'
 
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
+
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.test.test_pdfgen_general import makeDocument
 
 _PAGE_COUNT = 0
+
 
 class CallBackTestCase(unittest.TestCase):
     "checks it gets called"
@@ -18,7 +21,7 @@ class CallBackTestCase(unittest.TestCase):
     def callMe(self, pageNo):
         self.pageCount = pageNo
 
-    def test1(self):
+    def test0(self):
         "Make a PDFgen document with most graphics features"
 
         self.pageCount = 0
@@ -28,10 +31,9 @@ class CallBackTestCase(unittest.TestCase):
 
 
 def makeSuite():
-    suite = unittest.TestSuite()
-    suite.addTest(CallBackTestCase('test1'))
-    return suite
+    return makeSuiteForClasses(CallBackTestCase)
 
-    
+
+#noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())

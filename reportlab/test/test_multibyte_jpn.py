@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/test_multibyte_jpn.py,v 1.2 2001/11/06 03:02:44 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_multibyte_jpn.py,v 1.3 2002/07/04 09:24:49 dinu_gherman Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -12,6 +12,7 @@ by classes in reportlab.pdfbase.cidfonts
 import string, os
 
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen.canvas import Canvas
@@ -22,13 +23,14 @@ VERBOSE = 0
 
 
 class JapaneseFontTests(unittest.TestCase):
+
     def hDraw(self, c, msg, fnt, x, y):
         "Helper - draws it with a box around"
         c.setFont(fnt, 16, 16)
         c.drawString(x, y, msg)
         c.rect(x,y,pdfmetrics.stringWidth(msg, fnt, 16),16,stroke=1,fill=0)
         
-    def test1(self):
+    def test0(self):
         "A basic document drawing some strings"
 
         # if they do not have the Japanese font files, go away quietly
@@ -270,14 +272,14 @@ Adobe Acrobat 5.0\x82\xc5\x8d\xec\x90\xac\x82\xb5\x82\xbdAdobe PDF\x82\xcd\x81A(
         if VERBOSE:
             print 'saved test_multibyte_jpn.pdf'
 
+
 def makeSuite():
-    return unittest.makeSuite(JapaneseFontTests,'test')
+    return makeSuiteForClasses(JapaneseFontTests)
+
 
 #noruntests
 if __name__ == "__main__":
     VERBOSE = 1
     unittest.TextTestRunner().run(makeSuite())
-    
-
 
 

@@ -2,6 +2,7 @@
 """
 
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
 from reportlab.lib import colors
 from reportlab.lib import validators
 
@@ -155,21 +156,9 @@ class ValidatorTestCase(unittest.TestCase):
 
 
 def makeSuite():
-	suite = unittest.TestSuite()
-	
-	suite.addTest(ValidatorTestCase('test0'))
-	suite.addTest(ValidatorTestCase('test1'))
-	suite.addTest(ValidatorTestCase('test2'))
-	suite.addTest(ValidatorTestCase('test4'))
-	suite.addTest(ValidatorTestCase('test5'))
-	suite.addTest(ValidatorTestCase('test6'))
-	suite.addTest(ValidatorTestCase('test7'))
-	suite.addTest(ValidatorTestCase('test8'))
-
-	return suite
+    return makeSuiteForClasses(ValidatorTestCase)
 
 
 #noruntests
 if __name__ == "__main__":
-	unittest.TextTestRunner().run(makeSuite())
-	
+    unittest.TextTestRunner().run(makeSuite())

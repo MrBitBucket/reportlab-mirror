@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pdfgen_pagemodes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_pagemodes.py,v 1.5 2001/06/07 18:14:21 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_pagemodes.py,v 1.6 2002/07/04 09:24:49 dinu_gherman Exp $
 # full screen test
 
 """Tests for PDF page modes support in reportlab.pdfgen.
@@ -11,6 +11,8 @@
 import os
 
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
+
 from reportlab.pdfgen.canvas import Canvas
 
 
@@ -48,35 +50,29 @@ class PdfPageModeTestCase(unittest.TestCase):
         assert fileDoesExist(filename)
 
 
-    def test1(self):
+    def test0(self):
         "This should open in full screen mode."
         
-        self._doTest('FullScreen.pdf', 'FullScreen', self.test1.__doc__)
+        self._doTest('FullScreen.pdf', 'FullScreen', self.test0.__doc__)
+
+
+    def test1(self):
+        "This should open with outline visible."
+
+        self._doTest('Outline.pdf', 'Outline', self.test1.__doc__)
 
 
     def test2(self):
-        "This should open with outline visible."
-
-        self._doTest('Outline.pdf', 'Outline', self.test2.__doc__)
-
-
-    def test3(self):
         "This should open in the user's default mode."
 
-        self._doTest('UseNone.pdf', 'UseNone', self.test3.__doc__)
+        self._doTest('UseNone.pdf', 'UseNone', self.test2.__doc__)
 
 
 def makeSuite():
-    suite = unittest.TestSuite()
-    
-    suite.addTest(PdfPageModeTestCase('test1'))
-    suite.addTest(PdfPageModeTestCase('test2'))
-    suite.addTest(PdfPageModeTestCase('test3'))
-
-    return suite
+    return makeSuiteForClasses(PdfPageModeTestCase)
 
 
 #noruntests
 if __name__ == "__main__":
-    unittest.TextTestRunner().run(makeSuite())
+    unittest.TextTestRunner().run(makeSuite)
     

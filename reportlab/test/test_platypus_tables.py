@@ -2,14 +2,17 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testtables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_tables.py,v 1.1 2001/04/13 16:02:55 andy_robinson Exp $
-__version__=''' $Id: test_platypus_tables.py,v 1.1 2001/04/13 16:02:55 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_tables.py,v 1.2 2002/07/04 09:24:49 dinu_gherman Exp $
+__version__=''' $Id: test_platypus_tables.py,v 1.2 2002/07/04 09:24:49 dinu_gherman Exp $ '''
 __doc__='Test script for reportlab.tables'
+
+from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
 
 from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle
 from reportlab.lib.units import inch
 from reportlab.lib import colors
-from reportlab.test import unittest
+
 
 def getTable():
     t = Table((('','North','South','East','West'),
@@ -20,6 +23,7 @@ def getTable():
              (24, 16,16,18)
             )
     return t
+
 
 def makeStyles():
     styles = []
@@ -34,6 +38,7 @@ def makeStyles():
         style.add('LINEABOVE', (0, -1), (-1,-1), 2, colors.black)
     styles[-1].add('LINEBELOW',(1,-1), (-1, -1), 2, (0.5, 0.5, 0.5))
     return styles
+
 
 def run():
     doc = SimpleDocTemplate('test_platypus_tables.pdf', pagesize=(8.5*inch, 11*inch), showBoundary=1)
@@ -50,21 +55,23 @@ def run():
         lst.append(Spacer(0,12))
     doc.build(lst)
 
+
 class TablesTestCase(unittest.TestCase):
     "Make documents with tables"
-    def test1(self):
+
+    def test0(self):
         "Make a document full of tables"
         run()
 
+
 def makeSuite():
-    suite = unittest.TestSuite()
-    suite.addTest(TablesTestCase('test1'))
-    return suite
+    return makeSuiteForClasses(TablesTestCase)
 
 
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+
 
 #LINEABOVE
 #LINEBELOW

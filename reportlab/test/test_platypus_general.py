@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testplatypus.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.8 2002/06/20 09:55:29 rgbecker Exp $
-__version__=''' $Id: test_platypus_general.py,v 1.8 2002/06/20 09:55:29 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.9 2002/07/04 09:24:49 dinu_gherman Exp $
+__version__=''' $Id: test_platypus_general.py,v 1.9 2002/07/04 09:24:49 dinu_gherman Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -13,7 +13,12 @@ return the 'story' for each.  The run() function gets the stories, then
 builds a special "document model" in which the frames are added to each page
 and drawn into.
 """
+
 import string, copy, sys
+
+from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
+
 from reportlab.pdfgen import canvas
 from reportlab import platypus
 from reportlab.platypus import BaseDocTemplate, PageTemplate, Flowable, FrameBreak
@@ -22,7 +27,6 @@ from reportlab.lib.units import inch, cm
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.rl_config import defaultPageSize
-from reportlab.test import unittest
 
 PAGE_HEIGHT = defaultPageSize[1]
 
@@ -468,8 +472,12 @@ class AndyTemplate(BaseDocTemplate):
             self.fillFrame(flowables2)
 
         self._endBuild()
+
+
 def showProgress(pageNo):
     print 'CALLBACK SAYS: page %d' % pageNo
+
+
 def run():
     doc = AndyTemplate('test_platypus_general.pdf')
     #doc.setPageCallBack(showProgress)
@@ -477,16 +485,17 @@ def run():
     examples = getExamples()
     doc.build(commentary,examples)
 
+
 class PlatypusTestCase(unittest.TestCase):
     "Make documents with lots of Platypus features"
-    def test1(self):
+
+    def test0(self):
         "Make a platypus document"
         run()
 
+
 def makeSuite():
-    suite = unittest.TestSuite()
-    suite.addTest(PlatypusTestCase('test1'))
-    return suite
+    return makeSuiteForClasses(PlatypusTestCase)
 
 
 #noruntests
@@ -494,4 +503,4 @@ if __name__ == "__main__":
     if '-debug' in sys.argv:
         run()
     else:
-        unittest.TextTestRunner().run(makeSuite())
+        unittest.TextTestRunner().run(makeSuite)

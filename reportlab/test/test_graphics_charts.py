@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_graphics_charts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_graphics_charts.py,v 1.12 2001/06/19 09:56:29 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_graphics_charts.py,v 1.13 2002/07/04 09:24:49 dinu_gherman Exp $
 """
 Tests for chart class.
 """
@@ -10,6 +10,7 @@ import os, sys, copy, tempfile
 from os.path import join, basename, splitext
 
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.lib.pagesizes import A4
@@ -194,7 +195,7 @@ class ChartTestCase(unittest.TestCase):
             doc.build(self.story)
 
 
-    def test1(self):
+    def test0(self):
         "Test bar charts."
 
         story = self.story
@@ -206,7 +207,7 @@ class ChartTestCase(unittest.TestCase):
         story.append(Spacer(0, 1*cm))
         
 
-    def test2(self):
+    def test1(self):
         "Test bar charts."
 
         story = self.story
@@ -218,7 +219,7 @@ class ChartTestCase(unittest.TestCase):
         story.append(Spacer(0, 1*cm))
         
 
-    def test3(self):
+    def test2(self):
         "Test bar charts."
 
         story = self.story
@@ -231,7 +232,7 @@ class ChartTestCase(unittest.TestCase):
         story.append(Spacer(0, 1*cm))
 
         
-    def test4(self):
+    def test3(self):
         "Test line charts."
 
         story = self.story
@@ -243,7 +244,7 @@ class ChartTestCase(unittest.TestCase):
         story.append(Spacer(0, 1*cm))
         
 
-    def test5(self):
+    def test4(self):
         "Test line charts."
 
         story = self.story
@@ -255,7 +256,7 @@ class ChartTestCase(unittest.TestCase):
         story.append(Spacer(0, 1*cm))
         
 
-    def test6(self):
+    def test5(self):
         "Test pie charts."
 
         story = self.story
@@ -272,14 +273,7 @@ class ChartTestCase(unittest.TestCase):
 
 
 def makeSuite():
-    suite = unittest.TestSuite()
-    suite.addTest(ChartTestCase('test1'))
-    suite.addTest(ChartTestCase('test2'))
-    suite.addTest(ChartTestCase('test3'))
-    suite.addTest(ChartTestCase('test4'))
-    suite.addTest(ChartTestCase('test5'))
-    suite.addTest(ChartTestCase('test6'))
-    return suite
+    return makeSuiteForClasses(ChartTestCase)
 
 
 #noruntests

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_widgetbase_tpc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_widgetbase_tpc.py,v 1.1 2001/06/07 15:27:03 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_widgetbase_tpc.py,v 1.2 2002/07/04 09:24:49 dinu_gherman Exp $
 """
 Tests for TypedPropertyCollection class.
 """
@@ -9,10 +9,12 @@ Tests for TypedPropertyCollection class.
 import os, sys, copy, tempfile
 from os.path import join, basename, splitext
 
+from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
+
 from reportlab.graphics.widgetbase import PropHolder, TypedPropertyCollection
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
 from reportlab.lib.validators import isNumber
-from reportlab.test import unittest
 
 
 TPC = TypedPropertyCollection
@@ -24,9 +26,11 @@ class PH(PropHolder):
 		b = AttrMapValue(isNumber)
 		)
 
+
 class APH(PH):
 	def __init__(self):
 		self.a = 1
+
 
 class BPH(APH):
 	def __init__(self):
@@ -36,10 +40,11 @@ class BPH(APH):
 		if name=='b': return -1
 		raise AttributeError
 
+
 class TPCTestCase(unittest.TestCase):
 	"Test TypedPropertyCollection class."
 
-	def test1(self):
+	def test0(self):
 		"Test setting an invalid collective attribute."
 
 		t = TPC(PH)
@@ -49,7 +54,7 @@ class TPCTestCase(unittest.TestCase):
 			pass
 		
 
-	def test2(self):
+	def test1(self):
 		"Test setting a valid collective attribute."
 
 		t = TPC(PH)
@@ -57,7 +62,7 @@ class TPCTestCase(unittest.TestCase):
 		assert t.a == 42
 
 
-	def test3(self):
+	def test2(self):
 		"Test setting a valid collective attribute with an invalid value."
 
 		t = TPC(PH)
@@ -67,7 +72,7 @@ class TPCTestCase(unittest.TestCase):
 			pass
 
 
-	def test4(self):
+	def test3(self):
 		"Test setting a valid collective attribute with a convertible invalid value."
 
 		t = TPC(PH)
@@ -75,7 +80,7 @@ class TPCTestCase(unittest.TestCase):
 		assert t.a == '42' # Or should it rather be an integer?
 		
 
-	def test5(self):
+	def test4(self):
 		"Test accessing an unset collective attribute."
 
 		t = TPC(PH)
@@ -85,7 +90,7 @@ class TPCTestCase(unittest.TestCase):
 			pass
 
 
-	def test6(self):
+	def test5(self):
 		"Test overwriting a collective attribute in one slot."
 
 		t = TPC(PH)
@@ -94,7 +99,7 @@ class TPCTestCase(unittest.TestCase):
 		assert t[0].a == 4242
 
 
-	def test7(self):
+	def test6(self):
 		"Test overwriting a one slot attribute with a collective one."
 
 		t = TPC(PH)
@@ -102,7 +107,8 @@ class TPCTestCase(unittest.TestCase):
 		t.a = 42
 		assert t[0].a == 4242
 
-	def test8(self):
+
+	def test7(self):
 		"Test to ensure we can handle classes with __getattr__ methods"
 
 		a=TypedPropertyCollection(APH)
@@ -124,20 +130,9 @@ class TPCTestCase(unittest.TestCase):
 
 
 def makeSuite():
-	suite = unittest.TestSuite()
-
-	suite.addTest(TPCTestCase('test1'))
-	suite.addTest(TPCTestCase('test2'))
-	suite.addTest(TPCTestCase('test3'))
-	suite.addTest(TPCTestCase('test4'))
-	suite.addTest(TPCTestCase('test5'))
-	suite.addTest(TPCTestCase('test6'))
-	suite.addTest(TPCTestCase('test7'))
-	suite.addTest(TPCTestCase('test8'))
-
-	return suite
+    return makeSuiteForClasses(TPCTestCase)
 
 
 #noruntests
 if __name__ == "__main__":
-	unittest.TextTestRunner().run(makeSuite())
+    unittest.TextTestRunner().run(makeSuite())

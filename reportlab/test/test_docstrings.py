@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_docstrings.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_docstrings.py,v 1.8 2002/05/24 14:38:09 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_docstrings.py,v 1.9 2002/07/04 09:24:49 dinu_gherman Exp $
 
 """This is a test on a package level that find all modules,
 classes, methods and functions that do not have a doc string
@@ -152,25 +152,25 @@ class DocstringTestCase(SecureTestCase):
         file.close()
 
 
-    def test1(self):
+    def test0(self):
         "Test if functions have a doc string."
 
         self._writeLogFile(FunctionType)
 
 
-    def test2(self):
+    def test1(self):
         "Test if classes have a doc string."
 
         self._writeLogFile(ClassType)
 
 
-    def test3(self):
+    def test2(self):
         "Test if methods have a doc string."
 
         self._writeLogFile(MethodType)
 
 
-    def test4(self):
+    def test3(self):
         "Test if modules have a doc string."
 
         self._writeLogFile(ModuleType)
@@ -178,12 +178,9 @@ class DocstringTestCase(SecureTestCase):
 
 def makeSuite():
     suite = unittest.TestSuite()
-
+    loader = unittest.TestLoader()
     if sys.platform[:4] != 'java':
-        suite.addTest(DocstringTestCase('test1'))
-        suite.addTest(DocstringTestCase('test2'))
-        suite.addTest(DocstringTestCase('test3'))
-        suite.addTest(DocstringTestCase('test4'))
+        suite.addTest(loader.loadTestsFromTestCase(DocstringTestCase))
 
     return suite
 

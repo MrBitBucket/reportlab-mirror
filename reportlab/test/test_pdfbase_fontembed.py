@@ -1,12 +1,17 @@
 import os
+
+from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
+
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
-from reportlab.test import unittest
 from reportlab.test.test_pdfbase_pdfmetrics import makeWidthTestForAllGlyphs
+
 
 class EmbeddingTestCase(unittest.TestCase):
     "Make documents with embedded fonts"
-    def testEmbedding(self):
+
+    def test0(self):
         """Make documents with embedded fonts.
 
         Just vam Rossum has kindly donated a font which we may use
@@ -14,7 +19,6 @@ class EmbeddingTestCase(unittest.TestCase):
         if you want to use it for real."""
 
         #LettError fonts should always be there.  The others are voluntary.
-
         
         ok = 1
         
@@ -22,7 +26,6 @@ class EmbeddingTestCase(unittest.TestCase):
         c.setPageCompression(0)
         c.setFont('Helvetica', 12)
         c.drawString(100, 700, 'This is Helvetica.  The text below should be different fonts...')
-
 
         if os.path.isfile('GDB_____.AFM') and os.path.isfile('GDB_____.PFB'):
             # a normal text font
@@ -46,7 +49,6 @@ class EmbeddingTestCase(unittest.TestCase):
             cartaFont = pdfmetrics.Font('Carta', 'Carta', 'CartaEncoding')
             pdfmetrics.registerFont(cartaFont)
 
-
             text = 'This should be in Carta, a map symbol font:'
             c.setFont('Helvetica', 12)
             c.drawString(100, 600, text)
@@ -54,7 +56,6 @@ class EmbeddingTestCase(unittest.TestCase):
             
             c.setFont('Carta', 12)
             c.drawString(100+w, 600, ' Hello World')
-                   
 
         # LettError sample - creates on demand, we hope
         y = 550
@@ -80,11 +81,10 @@ class EmbeddingTestCase(unittest.TestCase):
 
 
 def makeSuite():
-    suite = unittest.TestSuite()
-    suite.addTest(EmbeddingTestCase('testEmbedding'))
-    return suite
+    return makeSuiteForClasses(EmbeddingTestCase)
 
-    
+
+#noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
 

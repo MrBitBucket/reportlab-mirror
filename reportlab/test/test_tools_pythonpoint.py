@@ -1,14 +1,20 @@
 """Tests for the PythonPoint tool.
 """
+
 import os, sys, string
-import reportlab
+
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
+
+import reportlab
+
 
 class PythonPointTestCase(unittest.TestCase):
 	"Some very crude tests on PythonPoint."
 
-	def test1(self):
+	def test0(self):
 		"Test if pythonpoint.pdf can be created from pythonpoint.xml."
+
 		join, dirname, isfile, abspath = os.path.join, os.path.dirname, os.path.isfile, os.path.abspath
 		rlDir = abspath(dirname(reportlab.__file__))
 		from reportlab.tools.pythonpoint import pythonpoint
@@ -21,10 +27,11 @@ class PythonPointTestCase(unittest.TestCase):
 		assert os.path.exists(pdf)
 		os.remove(pdf)
 
-def makeSuite():
-	suite = unittest.TestSuite()
-	suite.addTest(PythonPointTestCase('test1'))
-	return suite
 
-if __name__ == "__main__":	#NORUNTESTS
-	unittest.TextTestRunner().run(makeSuite())
+def makeSuite():
+    return makeSuiteForClasses(PythonPointTestCase)
+
+
+#noruntests
+if __name__ == "__main__":
+    unittest.TextTestRunner().run(makeSuite())

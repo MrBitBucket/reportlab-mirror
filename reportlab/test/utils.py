@@ -10,6 +10,17 @@ from reportlab.test import unittest
 
 # Helper functions.
 
+def makeSuiteForClasses(*classes):
+    "Return a test suite with tests loaded from provided classes."
+
+    suite = unittest.TestSuite()
+    loader = unittest.TestLoader()
+    for C in classes:
+        suite.addTest(loader.loadTestsFromTestCase(C))
+
+    return suite
+
+
 def getCVSEntries(folder, files=1, folders=0):
     """Returns a list of filenames as listed in the CVS/Entries file.
 
@@ -189,6 +200,7 @@ class SecureTestCase(unittest.TestCase):
 
         sys.path = self._initialPath
         os.chdir(self._initialWorkDir)
+
 
 class ScriptThatMakesFileTest(unittest.TestCase):
     """Runs a Python script at OS level, expecting it to produce a file.

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_graphics_speed.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_graphics_speed.py,v 1.10 2001/06/19 09:56:29 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_graphics_speed.py,v 1.11 2002/07/04 09:24:49 dinu_gherman Exp $
 """
 This does a test drawing with lots of things in it, running
 with and without attribute checking.
@@ -14,6 +14,7 @@ import os, sys, time, profile
 
 import reportlab.rl_config
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.pdfgen.canvas import Canvas
@@ -26,7 +27,7 @@ from reportlab.graphics.charts.piecharts import Pie
 class GraphicsSpeedTestCase(unittest.TestCase):
     "Test speed of the graphics rendering process."
     
-    def test1(self, isFast=0):
+    def test0(self, isFast=0):
         """Hello World, on a rectangular background.
 
         The rectangle's fillColor is yellow.
@@ -61,13 +62,13 @@ class GraphicsSpeedTestCase(unittest.TestCase):
         open('test_graphics_speed_test%s.log' % (isFast+1), 'w').write(result)
 
 
-    def test2(self, isFast=1):
+    def test1(self, isFast=1):
         "Same as test1(), but with shape checking turned on."
 
-        self.test1(isFast)
+        self.test0(isFast)
 
         
-    def test3(self):
+    def test2(self):
         "This is a profiled version of test1()."
 
         fileName = 'test_graphics_speed_profile.log'
@@ -77,11 +78,7 @@ class GraphicsSpeedTestCase(unittest.TestCase):
 
 
 def makeSuite():
-    suite = unittest.TestSuite()
-    suite.addTest(GraphicsSpeedTestCase('test1'))
-    suite.addTest(GraphicsSpeedTestCase('test2'))
-    suite.addTest(GraphicsSpeedTestCase('test3'))
-    return suite
+    return makeSuiteForClasses(GraphicsSpeedTestCase)
 
 
 #noruntests

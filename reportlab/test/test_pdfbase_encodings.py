@@ -1,11 +1,16 @@
+from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
+
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
-from reportlab.test import unittest
+
 
 class EncodingTestCase(unittest.TestCase):
     "Make documents with custom encodings"
-    def testEncodings(self):
+
+    def test0(self):
         "Make custom encodings of standard fonts"
+
         # make a custom encoded font.
         c = Canvas('test_pdfbase_encodings.pdf')
         c.setPageCompression(0)
@@ -23,7 +28,6 @@ class EncodingTestCase(unittest.TestCase):
         # now we can make a font based on this encoding
         f = pdfmetrics.Font('FontWithoutVowels', 'Helvetica-Oblique', 'EncodingWithoutVowels')
         pdfmetrics.registerFont(f)
-        
 
         c.setFont('FontWithoutVowels', 12)
         c.drawString(125, 675, "The magic word is squamish ossifrage")
@@ -85,11 +89,9 @@ class EncodingTestCase(unittest.TestCase):
 
 
 def makeSuite():
-    suite = unittest.TestSuite()
-    suite.addTest(EncodingTestCase('testEncodings'))
-    return suite
+    return makeSuiteForClasses(EncodingTestCase)
 
-    
+
+#noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
-

@@ -7,6 +7,8 @@ Tests for RLG Image shapes.
 import os
 
 from reportlab.test import unittest
+from reportlab.test.utils import makeSuiteForClasses
+
 from reportlab.graphics.shapes import Image, Drawing
 from reportlab.graphics import renderPDF
 from reportlab.lib.pagesizes import A4
@@ -78,12 +80,7 @@ class ImageTestCase(unittest.TestCase):
 
 
 def makeSuite():
-    suite = unittest.TestSuite()
-    suite.addTest(ImageTestCase('test0'))
-    suite.addTest(ImageTestCase('test1'))
-    suite.addTest(ImageTestCase('test2'))
-    suite.addTest(ImageTestCase('test3'))
-    return suite
+    return makeSuiteForClasses(ImageTestCase)
 
 
 #noruntests
