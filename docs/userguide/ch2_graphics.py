@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch2_graphics.py,v 1.14 2001/08/02 15:40:36 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch2_graphics.py,v 1.15 2001/08/03 10:23:33 dinu_gherman Exp $
 from genuserguide import *
 
 heading1("Graphics and Text with $pdfgen$")
@@ -658,7 +658,7 @@ illust(examples.fonts, "the 14 standard fonts")
 disc("""
 The next section explains how you can use arbitrary fonts,
 which will increase slightly the document size because these
-fonts need to be embedded in the document.
+fonts need to be embedded within the document.
 """)
 
 heading2("Arbitrary fonts")
@@ -667,9 +667,9 @@ disc("""
 You can use the following mechanism described below to include
 arbitrary fonts in your documents. Just van Rossum has kindly
 donated a font named <i>LettErrorRobot-Chrome</i> which we may
-use for testing/documenting purposes (and which you may use as
-well). It comes bundled with the ReportLab distribution in the
-directory reportlab/test.
+use for testing and/or documenting purposes (and which you may
+use as well). It comes bundled with the ReportLab distribution in the
+directory $reportlab/test$.
 """)
 
 disc("""
@@ -677,9 +677,19 @@ Right now font-embedding relies on font description files in
 the Adobe AFM and PFB format. The former is an ASCII file and
 contains font metrics information while the latter is a
 binary file that describes the shapes of the font. The
-reportlab/test directory contains the files 'LeERC___.AFM'
-and 'LeERC___.PFB' that are used as an example font.
+$reportlab/test$ directory contains the files $'LeERC___.AFM'$
+and $'LeERC___.PFB'$ that are used as an example font.
 """)
+
+disc("""
+In the following example we first set to suppress any
+warnings during the font-emdedding as a result of missing
+glyphs (sometime the case for the Euro character, say).
+Then we locate the folder containing the test font and
+register it for future use with the $pdfmetrics$ module,
+after which we can use it like any other standard font.
+""")
+
 
 eg("""
 # we know some glyphs are missing, suppress warnings
@@ -709,11 +719,13 @@ canvas.drawString(10, 100, 'LettErrorRobot-Chrome')
 illust(examples.customfont1, "Using a very non-standard font")
 
 disc("""
-The font's facename comes from the AFM file's FontName field.
+The font's facename comes from the AFM file's $FontName$ field.
 In the example above we knew the name in advance, but quite
 often the names of font description files are pretty cryptic
 and then you might want to retrieve the name from an AFM file
-automatically using some code like the following:
+automatically.
+When lacking a more sophisticated method you can use some
+code as simple as this:
 """)
 
 eg("""
@@ -736,6 +748,24 @@ def findFontName(path):
             found = 1
 
     return fontName
+""")
+
+disc("""
+In the <i>LettErrorRobot-Chrome</i> example we explicitely specified
+the place of the font description files to be loaded.
+In general, you'll prefer to store your fonts in some canonic
+locations and make the embedding mechanism aware of them.
+Using the same configuration mechanism we've already seen at the
+beginning of this section we can indicate a default search path
+for Type-1 fonts.
+""")
+
+disc("""
+Unfortunately, there is no reliable standard yet for such
+locations (not even on the same platform) and, hence, you might
+have to edit the file $reportlab/rl_config.py$ to modify the
+value of the $T1SearchPath$ identifier to contain additional
+directories.
 """)
 
 
