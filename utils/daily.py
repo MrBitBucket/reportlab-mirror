@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/utils/daily.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/utils/daily.py,v 1.47 2001/10/05 14:23:23 rgbecker Exp $
-__version__=''' $Id: daily.py,v 1.47 2001/10/05 14:23:23 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/utils/daily.py,v 1.48 2001/10/28 11:20:26 rgbecker Exp $
+__version__=''' $Id: daily.py,v 1.48 2001/10/28 11:20:26 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -125,9 +125,15 @@ def cvs_checkout(d):
 			print 'PYTHONPATH=%s'%os.environ['PYTHONPATH']
 
 		os.chdir(dst)
-		do_exec(python + ' tools/genAll.py')
-		do_exec('cp %s %s' % (os.path.join(dst,'*.pdf'),htmldir))
-		do_exec('rm *.pdf')
+		try:
+			do_exec(python + ' tools/genAll.py')
+			do_exec('cp %s %s' % (os.path.join(dst,'*.pdf'),htmldir))
+			do_exec('rm *.pdf')
+		except:
+			print '????????????????????????????????'
+			print 'Failed to run genAll.py, cwd=%s' % os.getcwd()
+			do_exec('ls -l')
+			print '????????????????????????????????'
 		os.chdir(d)
 		pyc_remove(cvsdir)
 
