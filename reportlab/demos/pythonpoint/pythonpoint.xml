@@ -1,3 +1,10 @@
+<!--An experimental DTD is available from:
+	http://www.belug.org/~mw/pythonpoint/
+Thanks to Michael Wiedmann. If you use it, uncomment
+the two lines below
+<?xml version="1.0" encoding="iso-8859-1" standalone="no" ?> 
+<!DOCTYPE presentation SYSTEM "pythonpoint.dtd"> 
+-->
 <presentation filename='pythonpoint.pdf'>
   <section name = 'Main'>
   	<!-- any graphics in the section go on all its pages as a backdrop -->
@@ -426,11 +433,11 @@
         </frame>
     </slide>
 
-    <slide id="Slide207" title="Tag: preformat"
+    <slide id="Slide207" title="Tag: prefmt"
 		 effectname='Blinds' effectdirection='0' outlinelevel='2'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
-            <para style='Heading2'>Tag "preformat"</para>
+            <para style='Heading2'>Tag "prefmt"</para>
 			<para style='BodyText'>
 			This is used for printing code, or other text which contains
 			line breaks.
@@ -542,7 +549,7 @@
         </frame>
     </slide>
 
-    <slide id="Slide211" title="Tag: Rectangle" outlinelevel='2'>
+    <slide id="Slide211" title="Tag: Rectangle" outlinelevel='2'
 		 effectname='Blinds' effectdirection='0'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
@@ -559,7 +566,7 @@
         </frame>
     </slide>
 
-    <slide id="Slide212" title="Tag: RoundRect" outlinelevel='2'>
+    <slide id="Slide212" title="Tag: RoundRect" outlinelevel='2'
 		 effectname='Blinds' effectdirection='0'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
@@ -570,7 +577,7 @@
         </frame>
     </slide>
 
-    <slide id="Slide213" title="Tag: Ellipse" outlinelevel='2'>
+    <slide id="Slide213" title="Tag: Ellipse" outlinelevel='2'
 		 effectname='Blinds' effectdirection='0'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
@@ -591,7 +598,7 @@
         </frame>
     </slide>
 
-    <slide id="Slide214" title="Tag: Polygon" outlinelevel='2'>
+    <slide id="Slide214" title="Tag: Polygon" outlinelevel='2'
 		 effectname='Blinds' effectdirection='0'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
@@ -611,7 +618,7 @@
         </frame>
     </slide>
 
-    <slide id="Slide215" title="Tag: Line" outlinelevel='2'>
+    <slide id="Slide215" title="Tag: Line" outlinelevel='2'
 		 effectname='Blinds' effectdirection='0'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
@@ -630,7 +637,7 @@
         </frame>
     </slide>
 
-    <slide id="Slide215" title="Tag: String" outlinelevel='2'>
+    <slide id="Slide215" title="Tag: String" outlinelevel='2'
 		 effectname='Blinds' effectdirection='0'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
@@ -656,7 +663,7 @@
         </frame>
     </slide>
 
-    <slide id="Slide216" title="Tag: CustomShape" outlinelevel='2'>
+    <slide id="Slide216" title="Tag: CustomShape" outlinelevel='2'
 		 effectname='Blinds' effectdirection='0'>
         <frame x="120" y="72" width="700" height="510" 
 			leftmargin="36" rightmargin="36">
