@@ -60,6 +60,8 @@ class Grid0(Widget):
             desc='Determines the width/height of the stripes.'),
         delta0 = AttrMapValue(isNumber,
             desc='Determines the stripes initial width/height offset.'),
+        deltaSteps = AttrMapValue(isListOfNumbers,
+            desc='List of deltas to be used cyclically.'),
         stripeColors = AttrMapValue(isListOfColors,
             desc='Colors applied cyclically in the right or upper direction.'),
         fillColor = AttrMapValue(isColorOrNone,
@@ -80,6 +82,7 @@ class Grid0(Widget):
         self.useRects = 1
         self.delta = 20
         self.delta0 = 0
+        self.deltaSteps = []
         self.fillColor = colors.white
         self.stripeColors = [colors.red, colors.green, colors.blue]
         self.strokeColor = colors.black
@@ -90,7 +93,6 @@ class Grid0(Widget):
         D = Drawing(100, 100)
 
         g = Grid0()
-        #g.draw()
         D.add(g)
 
         return D
@@ -116,44 +118,30 @@ class Grid0(Widget):
 
         if self.useLines == 1:
             if self.orientation == 'vertical':
-                for x in frange(self.x + self.delta0, self.x + w, self.delta):
+                r = frange(self.x + self.delta0, self.x + w, self.delta)
+                r.append(self.x + w)
+                if self.delta0 != 0:
+                    r.insert(0, self.x)
+
+                for j in range(len(r)):
+                    x = r[j]
                     line = Line(x, self.y, x, self.y + h)
                     line.strokeColor = self.strokeColor
                     line.strokeWidth = self.strokeWidth
                     group.add(line)
-                # if offset != 0 we need to draw left- and rightmost
-                # stripe seperately
-                if self.delta0 != 0:
-                    line = Line(self.x, self.y, self.x, self.y + h)
-                    line.strokeColor = self.strokeColor
-                    line.strokeWidth = self.strokeWidth
-                    group.add(line)
-
-                # hack: this should happen in the for-loop above...
-                line = Line(self.x + w, self.y, self.x + w, self.y + h)
-                line.strokeColor = self.strokeColor
-                line.strokeWidth = self.strokeWidth
-                group.add(line)
 
             elif self.orientation == 'horizontal':
-                for y in frange(self.y + self.delta0, self.y + h, self.delta):
+                r = frange(self.y + self.delta0, self.y + h, self.delta)
+                r.append(self.y + w)
+                if self.delta0 != 0:
+                    r.insert(0, self.y)
+
+                for j in range(len(r)):
+                    y = r[j]
                     line = Line(self.x, y, self.x + w, y)
                     line.strokeColor = self.strokeColor
                     line.strokeWidth = self.strokeWidth
                     group.add(line)
-                # if offset != 0 we need to draw upper- and lowermost
-                # stripe seperately
-                if self.delta0 != 0:
-                    line = Line(self.x, self.y, self.x + w, self.y)
-                    line.strokeColor = self.strokeColor
-                    line.strokeWidth = self.strokeWidth
-                    group.add(line)
-
-                # hack: this should happen in the for-loop above...
-                line = Line(self.x, self.y + w, self.x + w, self.y + w)
-                line.strokeColor = self.strokeColor
-                line.strokeWidth = self.strokeWidth
-                group.add(line)
 
         return group
 
@@ -385,7 +373,7 @@ def test():
     D = Drawing(450, 650)
 
     d = 80
-    s = 60
+    s = 50
     
     for row in range(10):
         y = 530 - row*d
