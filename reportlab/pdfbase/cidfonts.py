@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/cidfonts?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: cidfonts.py,v 1.6 2001/09/29 08:04:32 andy_robinson Exp $ '''
+__version__=''' $Id: cidfonts.py,v 1.7 2001/10/04 16:01:08 andy_robinson Exp $ '''
 __doc__="""CID (Asian multi-byte) font support.
 
 This defines classes to represent CID fonts.  They know how to calculate
@@ -134,7 +134,8 @@ class CIDEncoding(pdfmetrics.Encoding):
             else:
                 words = words[1:]
         finished = time.clock()
-        print 'loaded %s in %0.4f seconds' % (self.name, finished - started)
+        #print 'loaded %s in %0.4f seconds' % (self.name, finished - started)
+
     def translate(self, text):
         "Convert a string into a list of CIDs"
         output = []
@@ -267,6 +268,7 @@ class CIDFont(pdfmetrics.Font):
         self._multiByte = 1
         assert face in allowedTypeFaces, "TypeFace '%s' not supported! Use any of these instead: %s" % (face, allowedTypeFaces)
         self.faceName = face
+        #should cache in registry...
         self.face = CIDTypeFace(face)
 
         assert encoding in allowedEncodings, "Encoding '%s' not supported!  Use any of these instead: %s" % (encoding, allowedEncodings)
@@ -276,13 +278,22 @@ class CIDFont(pdfmetrics.Font):
         #legacy hack doing quick cut and paste.
         self.fontName = self.faceName + '-' + self.encodingName
         self.name = self.fontName
+
+        # need to know if it is vertical or horizontal
+        self.isVertical = (self.encodingName[-1] == 'V')
+        
             
     def stringWidth(self, text, size):
         cidlist = self.encoding.translate(text)
-        w = 0
-        for cid in cidlist:
-            w = w + self.face.getCharWidth(cid)
-        return 0.001 * w * size
+        if self.isVertical:
+            #this part is "not checked!" but seems to work.
+            #assume each is 1000 ems high
+            return len(cidlist) * size
+        else:
+            w = 0
+            for cid in cidlist:
+                w = w + self.face.getCharWidth(cid)
+            return 0.001 * w * size
 
 
     def addObjects(self, doc):

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/Attic/test_japanese.py,v 1.8 2001/09/29 08:08:10 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/Attic/test_japanese.py,v 1.9 2001/10/04 16:01:08 andy_robinson Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -75,7 +75,7 @@ class JapaneseFontTests(unittest.TestCase):
 
 
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90msp-RKSJ-H'))
-        self.hDraw(c, '\223\214\213\236 proportional Shift-JIS', 'HeiseiMin-W3-90msp-RKSJ-H', 100, 575)
+        self.hDraw(c, '\223\214\213\236, but in proportional Shift-JIS.', 'HeiseiMin-W3-90msp-RKSJ-H', 100, 575)
         
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','EUC-H'))
         self.hDraw(c, '\xC5\xEC\xB5\xFE says Tokyo in EUC', 'HeiseiMin-W3-EUC-H', 100, 550)
