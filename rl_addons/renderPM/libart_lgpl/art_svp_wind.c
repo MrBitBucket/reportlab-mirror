@@ -338,6 +338,12 @@ x_order_2 (ArtPoint z0, ArtPoint z1, ArtPoint z2, ArtPoint z3)
   else if (d1 < -EPSILON)
     return 1;
 
+  if (z0.x == z1.x && z1.x == z2.x && z2.x == z3.x)
+    {
+      fprintf (STDERR, "x_order_2: colinear and horizontally aligned!\n");
+      return 0;
+    }
+
   if (z0.x <= z2.x && z1.x <= z2.x && z0.x <= z3.x && z1.x <= z3.x)
     return -1;
   if (z0.x >= z2.x && z1.x >= z2.x && z0.x >= z3.x && z1.x >= z3.x)

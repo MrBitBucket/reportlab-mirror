@@ -286,12 +286,19 @@ art_svp_intersect (const ArtSVP *svp1, const ArtSVP *svp2)
 #ifdef ART_USE_NEW_INTERSECTOR 
   ArtSVP *svp3, *svp_new;
   ArtSvpWriter *swr;
+#ifdef	ROBIN_DEBUG
+	dump_svp("art_svp_intersect svp1", svp1);
+	dump_svp("art_svp_intersect svp2", svp2);
+#endif
 
   svp3 = art_svp_merge (svp1, svp2);
   swr = art_svp_writer_rewind_new (ART_WIND_RULE_INTERSECT);
   art_svp_intersector (svp3, swr);
   svp_new = art_svp_writer_rewind_reap (swr);
   art_free (svp3); /* shallow free because svp3 contains shared segments */
+#ifdef	ROBIN_DEBUG
+  dump_svp("art_svp_intersect svp_new", svp_new);
+#endif
 
   return svp_new;
 #else

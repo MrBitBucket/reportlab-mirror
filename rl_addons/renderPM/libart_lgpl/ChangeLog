@@ -1,3 +1,43 @@
+2003-05-05  Alexander Larsson  <alexl@redhat.com>
+
+	* configure.in:
+	Bump to 2.3.12
+
+2003-04-24  Alexander Larsson  <alexl@redhat.com>
+
+	* art_uta_vpath.c (art_uta_from_vpath):
+	Don't silently stomp on memory on bad vpaths.
+
+2003-04-11  Alexander Larsson  <alexl@redhat.com>
+
+	* art_svp_vpath_stroke.c (render_seg):
+	Handle cases when dmr2 is very small better.
+
+2003-04-10  Alexander Larsson  <alexl@redhat.com>
+
+	* art_svp_wind.c (x_order_2):
+	Handle horizontally aligned segments.
+
+2002-11-25  Alexander Larsson  <alexl@redhat.com>
+
+	* configure.in: Bump to 2.3.11
+
+2002-10-16  John Harper  <jsh@unfactored.org>
+
+	* art_render_svp.c (art_render_svp_callback,
+	art_render_svp_callback_span, art_render_svp_callback_opacity,
+	art_render_svp_callback_opacity_span): if no runs would
+	normally be emitted, but start is greater than zero, emit a
+	single run covering the entire width of the rendered region
+
+2002-08-18  Havoc Pennington  <hp@pobox.com>
+
+	* autogen.sh: hardcode aclocal-1.4/automake-1.4 so that users with
+	both automake 1.6 and 1.4 installed get the right automake. Means
+	compilation from CVS will now require the latest automake 1.4
+	release, or manually creating symlinks called "automake-1.4" and
+	"aclocal-1.4"
+
 2002-07-01  Alexander Larsson  <alexl@redhat.com>
 
 	* Release 2.3.10

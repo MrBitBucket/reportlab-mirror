@@ -101,6 +101,14 @@ art_render_svp_callback (void *callback_data, int y,
 	  n_run++;
 	}
     }
+  else if ((running_sum >> 16) > 0)
+    {
+      run[0].x = x0;
+      run[0].alpha = running_sum;
+      run[1].x = x1;
+      run[1].alpha = running_sum;
+      n_run = 2;
+    }
 
   render->n_run = n_run;
 
@@ -168,6 +176,17 @@ art_render_svp_callback_span (void *callback_data, int y,
 	  span_x[n_span++] = x1;
 	}
     }
+  else if ((running_sum >> 16) > 0)
+    {
+      run[0].x = x0;
+      run[0].alpha = running_sum;
+      run[1].x = x1;
+      run[1].alpha = running_sum;
+      n_run = 2;
+      span_x[0] = x0;
+      span_x[1] = x1;
+      n_span = 2;
+    }
 
   render->n_run = n_run;
   render->n_span = n_span;
@@ -233,6 +252,14 @@ art_render_svp_callback_opacity (void *callback_data, int y,
 	  run[n_run].alpha = 0x8000;
 	  n_run++;
 	}
+    }
+  else if ((running_sum >> 16) > 0)
+    {
+      run[0].x = x0;
+      run[0].alpha = running_sum;
+      run[1].x = x1;
+      run[1].alpha = running_sum;
+      n_run = 2;
     }
 
   render->n_run = n_run;
@@ -307,6 +334,17 @@ art_render_svp_callback_opacity_span (void *callback_data, int y,
 	  n_run++;
 	  span_x[n_span++] = x1;
 	}
+    }
+  else if ((running_sum >> 16) > 0)
+    {
+      run[0].x = x0;
+      run[0].alpha = running_sum;
+      run[1].x = x1;
+      run[1].alpha = running_sum;
+      n_run = 2;
+      span_x[0] = x0;
+      span_x[1] = x1;
+      n_span = 2;
     }
 
   render->n_run = n_run;

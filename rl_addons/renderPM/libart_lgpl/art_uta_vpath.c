@@ -331,7 +331,9 @@ art_uta_from_vpath (const ArtVpath *vec)
 	  break;
 	default:
 	  /* this shouldn't happen */
-	  break;
+          art_free (rbuf);
+          art_free (uta);
+          return NULL;
 	}
     }
 

@@ -179,10 +179,16 @@ render_seg (ArtVpath **p_forw, int *pn_forw, int *pn_forw_max,
     join = ART_PATH_STROKE_JOIN_BEVEL;
 
   /* the case when dmr2 is zero or very small bothers me
-     (i.e. near a 180 degree angle) */
-  scale = line_width * line_width / dmr2;
-  dmx *= scale;
-  dmy *= scale;
+     (i.e. near a 180 degree angle)
+     ALEX: So, we avoid the optimization when dmr2 is very small. This should
+     be safe since dmx/y is only used in optimization and in MITER case, and MITER
+     should be converted to BEVEL when dmr2 is very small. */
+  if (dmr2 > EPSILON_2)
+    {
+      scale = line_width * line_width / dmr2;
+      dmx *= scale;
+      dmy *= scale;
+    }
 
   if (cross * cross < EPSILON_2 && dx0 * dx1 + dy0 * dy1 >= 0)
     {
@@ -206,6 +212,7 @@ render_seg (ArtVpath **p_forw, int *pn_forw, int *pn_forw_max,
 #ifdef NO_OPTIMIZE_INNER
 	  0 &&
 #endif
+	  (dmr2 > EPSILON_2) &&
 	  /* check that i1 + dm[xy] is inside i0-i1 rectangle */
 	  (dx0 + dmx) * dx0 + (dy0 + dmy) * dy0 > 0 &&
 	  /* and that i1 + dm[xy] is inside i1-i2 rectangle */
@@ -266,6 +273,7 @@ render_seg (ArtVpath **p_forw, int *pn_forw, int *pn_forw_max,
 #ifdef NO_OPTIMIZE_INNER
 	  0 &&
 #endif
+	  (dmr2 > EPSILON_2) &&
 	  /* check that i1 - dm[xy] is inside i0-i1 rectangle */
 	  (dx0 - dmx) * dx0 + (dy0 - dmy) * dy0 > 0 &&
 	  /* and that i1 - dm[xy] is inside i1-i2 rectangle */
