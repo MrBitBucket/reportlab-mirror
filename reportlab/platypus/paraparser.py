@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.49 2003/05/26 09:56:16 rgbecker Exp $
-__version__=''' $Id: paraparser.py,v 1.49 2003/05/26 09:56:16 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.50 2003/05/26 12:22:54 rgbecker Exp $
+__version__=''' $Id: paraparser.py,v 1.50 2003/05/26 12:22:54 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -219,7 +219,7 @@ greeks = {
     'rho': 'r',
     'sdot': '\xd7',
     'sigma': 's',
-    'sigmaf': 'v',
+    'sigmaf': 'V',
     'sigmav': 'V',
     'sim': '~',
     'spades': '\xaa',
@@ -231,8 +231,8 @@ greeks = {
     'tau': 't',
     'there4': '\\',
     'theta': 'q',
-    'thetasym': 'j',
-    'thetav': 'j',
+    'thetasym': 'J',
+    'thetav': 'J',
     'trade': '\xe4',
     'uArr': '\xdd',
     'uarr': '\xad',
@@ -287,7 +287,7 @@ symenc = {
     959:'o', # omicron
     960:'p', # pi
     961:'r', # rho
-    962:'v', # sigmaf
+    962:'V', # sigmaf
     963:'s', # sigma
     964:'t', # tau
     965:'u', # upsilon
@@ -295,9 +295,9 @@ symenc = {
     967:'c', # chi
     968:'y', # psi
     969:'w', # omega
-    977:'j', # thetasym
+    977:'J', # thetasym
     978:'\241', # upsih
-    981:'f', # phiv
+    981:'f', # phis
     982:'v', # piv
     # mathematical symbols
     8704:'"', # forall
@@ -469,15 +469,12 @@ class ParaParser(xmllib.XMLParser):
                 return
             if 0 <=n<=255:
                 self.handle_data(chr(n))
-            else:
-                try:
-                    c = symenc[n]
-                except KeyError:
-                    self.unknown_charref(name)
-                    return
+            elif symenc.has_key(n):
                 self._push(greek=1)
-                self.handle_data(c)
+                self.handle_data(symenc[n])
                 self._pop(greek=1)
+            else:
+                self.unknown_charref(name)
 
         def handle_entityref(self,name):
             if greeks.has_key(name):
