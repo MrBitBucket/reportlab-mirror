@@ -34,7 +34,7 @@ from reportlab.lib.units import inch
 from reportlab.lib.colors import red, gray, lightgrey
 from reportlab.pdfbase import pdfutils
 
-from reportlab.rl_config import defaultPageSize
+from reportlab.rl_config import defaultPageSize, _FUZZ
 PAGE_HEIGHT = defaultPageSize[1]
 
 
@@ -586,6 +586,7 @@ class PTOContainer(Flowable):
 
     def wrap(self,availWidth,availHeight):
         self.width, self.height = _listWrapOn(self._content,availWidth,self.canv)
+        return self.width,self.height
 
     def getSpaceBefore(self):
         return self._content[0].getSpaceBefore()
@@ -600,21 +601,20 @@ class PTOContainer(Flowable):
         if (tH+tSB)>=availHeight*0.90: return []
         canv = self.canv
         C = self._content
-        H = pS = 0
+        i = H = pS = 0
         for c in C:
-            w, h = c.wrapOn(canv,aW,0xfffffff)
+            _, h = c.wrapOn(canv,availWidth,0xfffffff)
             if c is not C[0]: h += max(c.getSpaceBefore()-pS,0)
-            if c is not C[-1]:
-                pS = c.getSpaceAfter()
+            pS = c.getSpaceAfter()
+            H += h+pS
             if H+tH+max(tSB,pS)>=availHeight-_FUZZ: break
+            i += 1
 
         #first retract last thing we tried
-        H -= h
+        H -= (h+pS)
 
         #attempt a sub split on the last one we have
-        i = len(R)
-        c = C[i]
-        aH = (availHeight - H - tSB - tH)*0.99
+        aH = (availHeight - H - max(pS,tSB) - tH)*0.99
         if aH>=0.05*availHeight:
             canv._addTrailer = 1
             SS = c.split(availWidth,aH)
@@ -624,24 +624,26 @@ class PTOContainer(Flowable):
             del canv._addTrailer
             Hdr = self._header
         except:
-            T = None #somebody already deleted it!!!
-            Hdr = None
+            T = [] #somebody already deleted it!!!
+            Hdr = []
 
         if SS:
-            R1 = C[:i] + SS[0] + T
+            from doctemplate import FrameBreak
+            R1 = C[:i] + SS[:1] + T + [FrameBreak()]
             R2 = Hdr + SS[1:]+C[i+1:]
         elif not i:
             return []
         else:
             R1 = C[:i-1]+T
             R2 = Hdr + C[i:]
-        return R1 + [PTOContainer(R2,self._trailer,self._header)]
+        return R1 + [PTOContainer(R2,deepcopy(self._trailer),deepcopy(self._header))]
 
     def drawOn(self, canv, x, y, _sW=0):
         '''we simulate being added to a frame'''
         pS = 0
-        aW = self.width+sW
+        aW = self.width+_sW
         C = self._content
+        y += self.height
         for c in C:
             w, h = c.wrapOn(canv,aW,0xfffffff)
             if c is not C[0]: h += max(c.getSpaceBefore()-pS,0)

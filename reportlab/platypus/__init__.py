@@ -4,10 +4,10 @@
 __version__=''' $Id$ '''
 __doc__=''
 from reportlab.platypus.flowables import Flowable, Image, Macro, PageBreak, Preformatted, Spacer, XBox, \
-                        CondPageBreak, KeepTogether, TraceInfo, FailOnWrap, FailOnDraw
+                        CondPageBreak, KeepTogether, TraceInfo, FailOnWrap, FailOnDraw, PTOContainer
 from reportlab.platypus.paragraph import Paragraph, cleanBlockQuotedText, ParaLines
 from reportlab.platypus.paraparser import ParaFrag
-from reportlab.platypus.tables import Table, TableStyle, CellStyle
+from reportlab.platypus.tables import Table, TableStyle, CellStyle, LongTable
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate, PageTemplate, ActionFlowable, \
                         SimpleDocTemplate, FrameBreak, PageBegin, Indenter
