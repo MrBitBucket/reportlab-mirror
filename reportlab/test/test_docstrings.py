@@ -93,8 +93,7 @@ class DocstringTestCase(unittest.TestCase):
                 types.ModuleType:'modules'}[objType]
 
         os.chdir(cwd)
-        path = os.path.basename(sys.argv[0])
-        path = os.path.splitext(path)[0] + "-%s.log" % expl
+        path = "test_docstrings-%s.log" % expl
         file = open(path, 'w')
         file.write('No doc strings found for the following %s below.\n\n' % expl)
         p = re.compile('__.+__')
