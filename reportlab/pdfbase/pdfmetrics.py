@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfmetrics.py,v $
+#	Revision 1.7  2000/07/19 19:06:39  rgbecker
+#	Added _pdfmetrics.c
+#
 #	Revision 1.6  2000/06/26 15:58:22  rgbecker
 #	Simple fix to widths problem
-#
+#	
 #	Revision 1.5  2000/04/12 16:24:35  rgbecker
 #	XML Tagged Paragraph parser changes
 #
@@ -46,7 +49,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfmetrics.py,v 1.6 2000/06/26 15:58:22 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.7 2000/07/19 19:06:39 rgbecker Exp $ '''
 __doc__="""This contains pre-canned text metrics for the PDFgen package, and may also
 be used for any other PIDDLE back ends or packages which use the standard
 Type 1 postscript fonts.
@@ -118,7 +121,12 @@ widths={
 		'zapfdingbats': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,278,974,961,974,980,719,789,790,791,690,960,939,549,855,911,933,911,945,974,755,846,762,761,571,677,763,760,759,754,494,552,537,577,692,786,788,788,790,793,794,816,823,789,841,823,833,816,831,923,744,723,749,790,792,695,776,768,792,759,707,708,682,701,826,815,789,789,707,687,696,689,786,787,713,791,785,791,873,761,762,762,759,759,892,892,788,784,438,138,277,415,392,392,668,668,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,732,544,544,910,667,760,760,776,595,694,626,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,788,894,838,1016,458,748,924,748,918,927,928,928,834,873,828,924,924,917,930,931,463,883,836,836,867,867,696,696,874,0,874,760,946,771,865,771,888,967,888,831,873,927,970,234,0]
 		}
 	}
-ascent_descent = {'Courier': (629, -157), 'Courier-Bold': (626, -142), 'Courier-BoldOblique': (626, -142), 'Courier-Oblique': (629, -157), 'Helvetica': (718, -207), 'Helvetica-Bold': (718, -207), 'Helvetica-BoldOblique': (718, -207), 'Helvetica-Oblique': (718, -207), 'Symbol': (0, 0), 'Times-Bold': (676, -205), 'Times-BoldItalic': (699, -205), 'Times-Italic': (683, -205), 'Times-Roman': (683, -217), 'ZapfDingbats': (0, 0)}
+ascent_descent = {'courier': (629, -157), 'courier-bold': (626, -142), 'courier-boldoblique': (626, -142), 'courier-oblique': (629, -157), 'helvetica': (718, -207), 'helvetica-bold': (718, -207), 'helvetica-boldoblique': (718, -207), 'helvetica-oblique': (718, -207), 'symbol': (0, 0), 'times-bold': (676, -205), 'times-bolditalic': (699, -205), 'times-italic': (683, -205), 'times-roman': (683, -217), 'zapfdingbats': (0, 0)}
+try:
+	import _pdfmetrics
+	_stringWidth = _pdfmetrics.stringWidth
+except ImportError:
+	_stringWidth = None
 
 def parseAFMfile(filename, info={}):
 	"""Returns an array holding the widths of all characters in the font.
@@ -164,10 +172,18 @@ def parseAFMfile(filename, info={}):
 class FontCache:
 	"""Loads and caches font width information on demand.  Font names
 	converted to lower case for indexing.  Public interface is stringWidth"""
-	def __init__(self):
-		global widths
-		self.__widtharrays = widths
-
+	if _stringWidth:
+		def __init__(self):
+			global widths
+			self.__widtharrays = widths
+			for e, F in widths.items():
+				for f, W in  F.items():
+					ad = ascent_descent[f]
+					_pdfmetrics.setFontInfo(f,e,ad[0],ad[1],W)
+	else:
+		def __init__(self):
+			global widths
+			self.__widtharrays = widths
 		
 	def loadfont(self, fontname,encoding):
 		filename = AFMDIR + os.sep + fontname + '.afm'
@@ -188,12 +204,23 @@ class FontCache:
 				print 'Font',fontname,'not found - using Courier for widths'
 				return self.getfont('courier',encoding)
 	
-	def stringWidth(self, text, font, fontSize, encoding=DEFAULT_ENCODING):
-		widths = self.getfont(string.lower(font),encoding)
-		w = 0
-		for char in text:
-			w = w + widths[ord(char)]
-		return w*fontSize*0.001
+	if _stringWidth:
+		def stringWidth(self, text, font, fontSize, encoding=DEFAULT_ENCODING):
+			try:
+				return _stringWidth(text,font,fontSize,encoding)
+			except:
+				widths = self.getfont(string.lower(font),encoding)
+				w = 0
+				for char in text:
+					w = w + widths[ord(char)]
+				return w*fontSize*0.001
+	else:
+		def stringWidth(self, text, font, fontSize, encoding=DEFAULT_ENCODING):
+			widths = self.getfont(string.lower(font),encoding)
+			w = 0
+			for char in text:
+				w = w + widths[ord(char)]
+			return w*fontSize*0.001
 
 	def status(self):
 		#returns loaded fonts
