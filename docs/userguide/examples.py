@@ -581,6 +581,18 @@ def fonts(canvas):
         y = y-13
 """
 
+testforms = """
+def forms(canvas):
+    #first create a form...
+    canvas.beginForm("SpumoniForm")
+    #re-use some drawing functions from earlier
+    spumoni(canvas)
+    canvas.endForm()
+
+    #then draw it
+    canvas.doForm("SpumoniForm")    
+"""
+
 # D = dir()
 g = globals()
 Dprime = {}

@@ -22,7 +22,11 @@ class Figure(Flowable):
         self.figureHeight = height
         self.captionHeight = 0  # work out later
         self.caption = None
-        self.captionStyle = ParagraphStyle('Default')
+        self.captionStyle = ParagraphStyle('Caption',
+                       fontName='Times-Italic',
+                       fontSize=12,
+                       spaceBefore=6,
+                       alignment=TA_CENTER)
         self.spaceBefore = 12
         self.spaceAfter = 12
 
@@ -73,7 +77,7 @@ def drawPage(canvas,x, y, width, height):
 
 class PageFigure(Figure):
     """Shows a blank page in a frame, and draws on that.  Used in
-    illustrations."""
+    illustrations of how PLATYPUS works."""
     def __init__(self):
         Figure.__init__(self, 3*inch, 3*inch)
         self.caption = 'Figure 1 - a blank page'
