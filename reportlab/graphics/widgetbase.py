@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.22 2001/06/06 14:52:37 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.23 2001/06/07 14:44:47 rgbecker Exp $
 import string
 
 from reportlab.graphics import shapes
@@ -171,18 +171,14 @@ class TypedPropertyCollection(PropHolder):
 
 	def __init__(self, exampleClass):
 		#give it same validation rules as what it holds
-		self._prototype = exampleClass
-		example = exampleClass()
-		self._attrMap = example._attrMap.clone()
-		#give it same default values as whhat it holds
-		self.setProperties(example.getProperties())
-		self._children = {}
+		self.__dict__['_value'] = exampleClass()
+		self.__dict__['_children'] = {}
 
 	def __getitem__(self, index):
 		try:
 			return self._children[index]
 		except KeyError:
-			Klass = self._prototype
+			Klass = self._value.__class__
 			if _ItemWrapper.has_key(Klass):
 				WKlass = _ItemWrapper[Klass]
 			else:
@@ -203,8 +199,8 @@ class TypedPropertyCollection(PropHolder):
 			return child
 
 	def __setitem__(self, key, value):
-		msg = "This collection can only hold objects of type %s" % self._prototype.__name__
-		assert isinstance(value, self._prototype), msg
+		msg = "This collection can only hold objects of type %s" % self._value.__class__.__name__
+		assert isinstance(value, self._value.__class__), msg
 
 	def __len__(self):
 		return len(self._children.keys())
@@ -214,7 +210,7 @@ class TypedPropertyCollection(PropHolder):
 		# differs from the parent
 		props = {}
 
-		for (key, value) in Widget.getProperties(self).items():
+		for (key, value) in self._value.getProperties(self).items():
 			props['%s' % key] = value
 
 		for idx in self._children.keys():
@@ -231,6 +227,12 @@ class TypedPropertyCollection(PropHolder):
 		for name, value in kw.items():
 			for i in xrange(len(value)):
 				setattr(self[i],name,value[i])
+
+	def __getattr__(self,name):
+		return getattr(self._value,name)
+
+	def __setattr__(self,name,value):
+		return setattr(self._value,name,value)
 
 ## No longer needed!
 class StyleProperties(PropHolder):
