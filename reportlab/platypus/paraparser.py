@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: paraparser.py,v $
+#	Revision 1.18  2000/05/20 15:36:42  andy_robinson
+#	Removed 1.5.2-style getattr call
+#
 #	Revision 1.17  2000/05/16 14:28:55  rgbecker
 #	Fixes/Changes to get testplatypus to work with new framework
-#
+#	
 #	Revision 1.16  2000/05/15 12:15:29  rgbecker
 #	CDATA handler added
 #	
@@ -47,7 +50,7 @@
 #	Revision 1.13  2000/04/25 13:07:57  rgbecker
 #	Added license
 #	
-__version__=''' $Id: paraparser.py,v 1.17 2000/05/16 14:28:55 rgbecker Exp $ '''
+__version__=''' $Id: paraparser.py,v 1.18 2000/05/20 15:36:42 andy_robinson Exp $ '''
 import string
 import re
 from types import TupleType
@@ -132,7 +135,12 @@ _addAttributeNames(_fontAttrMap)
 def _applyAttributes(obj, attr):
 	for k, v in attr.items():
 		if type(v) is TupleType and v[0]=='relative':
-			v = v[1]+getattr(obj,k,0)
+			#AR 20/5/2000 - remove 1.5.2-ism
+			#v = v[1]+getattr(obj,k,0)
+			if hasattr(obj, k):
+				v = v[1]+getattr(obj,k)
+			else:
+				v = v[1]
 		setattr(obj,k,v)
 
 #characters not supported: epsi, Gammad, gammad, kappav, rhov, Upsi, upsi
