@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.16  2000/04/19 14:26:13  rgbecker
+#	Added tagname
+#
 #	Revision 1.15  2000/04/19 14:16:07  rgbecker
 #	Got rid of userArgs
-#
+#	
 #	Revision 1.14  2000/04/19 14:08:47  rgbecker
 #	py2pdf additions
 #	
@@ -77,7 +80,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.15 2000/04/19 14:16:07 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.16 2000/04/19 14:26:13 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -141,10 +144,10 @@ def cvs_checkout(d):
 
 	os.environ['CVSROOT']=':pserver:%s@cvs.reportlab.sourceforge.net:/cvsroot/reportlab' % USER
 	if release:
-		do_exec(cvs+(' export -r %s reportlab'%release), 'the export phase')
+		do_exec(cvs+(' export -r %s reportlab' % tagname), 'the export phase')
 	else:
 		if py2pdf:
-			do_exec(cvs+' export reportlab', 'the checkout phase')
+			do_exec(cvs+(' export -r %s reportlab' % tagname), 'the checkout phase')
 			# now we need to move the files & delete those we don't need
 			os.mkdir("py2pdf")
 			do_exec("mv reportlab/demos/py2pdf/py2pdf.py py2pdf", "mv py2pdf.py")
@@ -159,7 +162,7 @@ def do_zip(d):
 
 	os.chdir(d)
 	if release:
-		b = release
+		b = tagname
 	else:
 		b = py2pdf and "py2pdf" or "current"
 
@@ -192,16 +195,19 @@ def do_zip(d):
 			os.symlink(tarfile,ltarfile)
 
 if __name__=='__main__':
+	def Usage(msg=None):
+		if msg is not None:
+			print msg
+		print 'Usage:\n    python daily.py [-release tag] | [-py2pdf tag]'
+		sys.exit(1)
 	release = '-release' in sys.argv[1:]
 	py2pdf = '-py2pdf' in sys.argv[1:]
-	if release:
-		if py2pdf:
-			print "Can't have -release and -py2pdf options"
-			sys.exit(1)
-		if len(sys.argv)!=3 or sys.argv[1]!='-release':
-			print 'Usage:\n    python daily.py [-release tag]'
-			sys.exit(1)
-		release=sys.argv[2]
+	if release or py2pdf:
+		if py2pdf and release:
+			Usage("Can't have -release and -py2pdf options")
+		if len(sys.argv)!=3 or sys.argv[1] not in ['-release','-py2pdf']:
+			Usage()
+		tagname=sys.argv[2]
 	cvs_checkout(groupdir)
 	do_zip(groupdir)
 	if release:
