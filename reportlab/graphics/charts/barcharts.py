@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.57 2001/12/06 18:11:21 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.58 2001/12/18 11:14:02 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -227,7 +227,7 @@ class BarChart(Widget):
 			# bar dimensions are normalized to fit.  How wide
 			# notionally is one group of bars?
 			availWidth = cScale(0)[1]
-			normFactor = availWidth/groupWidth
+			normFactor = availWidth/float(groupWidth)
 			if self.debug:
 				print '%d series, %d points per series' % (seriesCount, self._rowLength)
 				print 'width = %d group + (%d bars * %d barWidth) + (%d gaps * %d interBar) = %d total' % (

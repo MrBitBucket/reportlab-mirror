@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.49 2001/12/17 14:15:15 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.50 2001/12/18 11:14:02 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -472,7 +472,7 @@ class ValueAxis(Widget):
 		valueStep = AttrMapValue(isNumberOrNone, desc='Step size used between ticks.'),
 		valueSteps = AttrMapValue(isListOfNumbersOrNone, desc='List of step sizes used between ticks.'),
 		avoidBoundFrac = AttrMapValue(isNumberOrNone, desc='Fraction of interval to allow above and below.'),
-		rangeRound=AttrMapValue(OneOf('neither','both','ceiling','floor'),'How to round the axis limits'),
+		rangeRound=AttrMapValue(OneOf('none','both','ceiling','floor'),'How to round the axis limits'),
 		)
 
 	def __init__(self):
@@ -521,7 +521,7 @@ class ValueAxis(Widget):
 		self.valueMax = None
 		self.valueStep = None
 		self.avoidBoundFrac = None
-		self.rangeRound = 'both'
+		self.rangeRound = 'none'
 
 
 	def setPosition(self, x, y, length):
