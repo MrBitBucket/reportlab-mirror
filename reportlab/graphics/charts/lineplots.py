@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.2 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.3 2001/04/09 11:59:32 dinu_gherman Exp $
 """
 This modules defines a very preliminary Line Plot example.
 """
@@ -15,26 +15,26 @@ from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.widgets.signsandsymbols import SmileyFace0
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.axes import XValueAxis, YValueAxis, XTimeValueAxis
-      
 
-def mkTimeTuple(timeString):
-    "Convert a string to a tuple for use in the time module."
-
-    list = [0] * 9
-    dd, mm, yyyy = map(int, string.split(timeString, '/'))
-    list[:3] = [yyyy, mm, dd]
-    
-    return tuple(list)
-
-    
-def str2seconds(timeString):
-    "Convert a number of seconds since the epoch into a date string."
-    return time.mktime(mkTimeTuple(timeString))
-
-
-def seconds2str(seconds):
-    "Convert a date string into the number of seconds since the epoch."
-    return time.strftime('%Y-%m-%d', time.gmtime(seconds))
+from reportlab.graphics.charts.utils import *
+##def mkTimeTuple(timeString):
+##    "Convert a string to a tuple for use in the time module."
+##
+##    list = [0] * 9
+##    dd, mm, yyyy = map(int, string.split(timeString, '/'))
+##    list[:3] = [yyyy, mm, dd]
+##    
+##    return tuple(list)
+##
+##    
+##def str2seconds(timeString):
+##    "Convert a number of seconds since the epoch into a date string."
+##    return time.mktime(mkTimeTuple(timeString))
+##
+##
+##def seconds2str(seconds):
+##    "Convert a date string into the number of seconds since the epoch."
+##    return time.strftime('%Y-%m-%d', time.gmtime(seconds))
 
 
 def makeFilledSquare(x, y, size, color):

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.5 2001/04/09 11:32:20 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.6 2001/04/09 11:59:32 dinu_gherman Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -34,7 +34,6 @@ the former axes in its own coordinate system.
 """
 
 
-import time
 from types import FunctionType, StringType
 
 from reportlab.graphics.shapes import Drawing, Line, Group, Auto
@@ -42,56 +41,7 @@ from reportlab.graphics.shapes import STATE_DEFAULTS
 from reportlab.graphics.shapes import isNumber, isNumberOrAuto, isListOfNumbers, isColorOrNone
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.charts.textlabels import Label
-
-
-# Move these three functions into reportlab/charts/utils.py
-
-def str2seconds(timeString):
-    "Convert a number of seconds since the epoch into a date string."
-    return time.mktime(mkTimeTuple(timeString))
-
-
-def seconds2str(seconds):
-    "Convert a date string into the number of seconds since the epoch."
-    return time.strftime('%Y-%m-%d', time.gmtime(seconds))
-
-
-def nextRoundNumber(x):
-    """Return the first 'nice round number' greater than or equal to x
-
-    Used in selecting apropriate tick mark intervals; we say we want
-    an interval which places ticks at least 10 points apart, work out
-    what that is in chart space, and ask for the nextRoundNumber().
-    Tries the series 1,2,5,10,20,50,100.., going up or down as needed."""
-    
-    #guess to nearest order of magnitude
-    if x in (0, 1):
-        return x
-
-    if x < 0:
-        return -1.0 * nextRoundNumber(-x)
-    else:
-        from math import log10
-        lg = int(log10(x))
-        if lg == 0:
-            if x < 1:
-                base = 0.1
-            else:
-                base = 1.0
-        elif lg < 0:
-            base = 10.0 ** (lg - 1)
-        else:
-            base = 10.0 ** lg    # e.g. base(153) = 100
-        # base will always be lower than x
-
-        if base >= x:
-            return base * 1.0
-        elif (base * 2) >= x:
-            return base * 2.0
-        elif (base * 5) >= x:
-            return base * 5.0
-        else:
-            return base * 10.0
+from reportlab.graphics.charts.utils import nextRoundNumber
 
 
 class XCategoryAxis(Widget):
