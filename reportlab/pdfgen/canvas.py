@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.54  2000/10/24 02:04:14  aaron_watters
+#	sliced out image functionality (oops adding in pdfimages.py next) tests pass
+#
 #	Revision 1.53  2000/10/18 05:03:21  aaron_watters
 #	complete revision of pdfdoc.  Not finished (compression missing, testing needed)
 #	I got Robin's last change in at the last moment :)
-#
+#	
 #	Revision 1.52  2000/10/15 21:57:13  andy_robinson
 #	Added showFullScreen0
 #	
@@ -190,7 +193,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.53 2000/10/18 05:03:21 aaron_watters Exp $ '''
+__version__=''' $Id: canvas.py,v 1.54 2000/10/24 02:04:14 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -1173,6 +1176,12 @@ class Canvas:
         caching mechanism"""
 
         self._currentPageHasImages = 1
+        # new here
+        from pdfimages import PDFImage
+        img_obj = PDFImage(image, x,y, width, height)
+        img_obj.drawInlineImage(self)
+        return
+		# the rest is historical (to delete)
 
         if type(image) == StringType:
             if os.path.splitext(image)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
