@@ -1,4 +1,194 @@
 #################################################################################
+#################### RELEASE 1.13 at 15:00 GMT 27/March/2002    #################
+#################################################################################
+##### 2002/03/27 #####
+	lib/utils.py 1.29 rgbecker  Add DebugMemo __g/setitem__
+	pdfbase/pdfdoc.py 1.58 rgbecker  revert to older internal name for backward compatibility
+	platypus/tableofcontents.py 1.6 rgbecker  Added __version__
+	platypus/figures.py 1.2 rgbecker  Added __version__
+	lib/yaml.py 1.3 rgbecker  Added __version__
+	rl_config.py 1.31 rgbecker  Added __version__
+	lib/validators.py 1.21 rgbecker  Added __version__
+	lib/normalDate.py 1.5 rgbecker  Added __version__
+	lib/attrmap.py 1.4 rgbecker  Added __version__
+	lib/abag.py 1.6 rgbecker  Added __version__
+##### 2002/03/26 #####
+	graphics/widgets/signsandsymbols.py 1.20 rgbecker  Added __version__
+	graphics/widgets/flags.py 1.19 rgbecker  Added __version__
+	graphics/widgets/__init__.py 1.3 rgbecker  Added __version__
+	graphics/widgetbase.py 1.30 rgbecker  Added __version__
+	graphics/shapes.py 1.72 rgbecker  Added __version__
+	graphics/charts/textlabels.py 1.24 rgbecker  Added __version__
+	graphics/charts/piecharts.py 1.19 rgbecker  Added __version__
+	graphics/charts/lineplots.py 1.28 rgbecker  Added __version__
+	graphics/charts/linecharts.py 1.21 rgbecker  Added __version__
+	graphics/charts/legends.py 1.19 rgbecker  Added __version__
+	graphics/charts/barcharts.py 1.61 rgbecker  Added __version__
+	graphics/charts/axes.py 1.53 rgbecker  Added __version__
+	graphics/charts/__init__.py 1.3 rgbecker  Added __version__
+	graphics/renderPDF.py 1.15 rgbecker  Added __version__
+	graphics/__init__.py 1.3 rgbecker  Added __version__
+	graphics/widgets/markers.py 1.9 rgbecker  Fix versioning again :(
+	graphics/widgets/grids.py 1.22 rgbecker  Fix versioning again :(
+	graphics/charts/utils.py 1.7 rgbecker  Fix versioning again :(
+	graphics/charts/markers.py 1.7 rgbecker  Fix versioning again :(
+	graphics/widgets/markers.py 1.8 rgbecker  Fix versioning
+	graphics/widgets/grids.py 1.21 rgbecker  Fix versioning
+	graphics/charts/utils.py 1.6 rgbecker  Fix versioning
+	graphics/charts/markers.py 1.6 rgbecker  Fix versioning
+	graphics/widgets/markers.py 1.7 rgbecker  Headers+versioning
+	graphics/widgets/grids.py 1.20 rgbecker  Headers+versioning
+	graphics/charts/utils.py 1.5 rgbecker  Headers+versioning
+	graphics/charts/markers.py 1.5 rgbecker  Headers+versioning
+##### 2002/03/25 #####
+	tools/pythonpoint/pythonpoint.py 1.12 andy_robinson  modified to use drawImage throughout
+	tools/py2pdf/demo.py 1.2 andy_robinson  modified to use drawImage throughout
+	tools/docco/rltemplate.py 1.2 andy_robinson  modified to use drawImage throughout
+	platypus/flowables.py 1.29 andy_robinson  modified to use drawImage throughout
+	pdfbase/pdfdoc.py 1.57 andy_robinson  modified to use drawImage throughout
+	demos/rlzope/rlzope.py 1.3 andy_robinson  modified to use drawImage throughout
+	test/test_pdfgen_general.py 1.12 andy_robinson  Slimmed down to a single drawImage function
+	pdfgen/canvas.py 1.98 andy_robinson  Slimmed down to a single drawImage function
+	docs/userguide/ch2_graphics.py 1.7 andy_robinson  Slimmed down to a single drawImage function
+##### 2002/03/23 #####
+	pdfgen/canvas.py 1.97 andy_robinson  expanded docco and fixed 'natural size'
+	pdfbase/pdfdoc.py 1.56 andy_robinson  expanded docco and fixed 'natural size'
+	docs/userguide/ch2_graphics.py 1.6 andy_robinson  expanded docco and fixed 'natural size'
+	test/test_pdfgen_general.py 1.11 andy_robinson  Image XObjects added at last!
+	rl_addons/pyRXP/setup.py 1.2 rgbecker  Fix for Python 2.2 install location
+	rl_addons/renderPM/setup.py 1.8 rgbecker  Fix for Python 2.2 install location
+	lib/setup.py 1.11 rgbecker  Fixed to work with 2.2
+	lib/attrmap.py 1.3 rgbecker  Fixed to work with 2.2
+##### 2002/03/22 #####
+	lib/formatters.py 1.5 rgbecker  Fixed up zero places case
+	rl_addons/pyRXP/pyRXP.c 1.2 rgbecker  Fixed stupid buglet
+	lib/formatters.py 1.4 rgbecker  Fixe broken carry for 5% of cases
+	lib/utils.py 1.28 rgbecker  Changes to DebugMemo.__doc__
+	rl_addons/pyRXP/test/tpyRXP.py 1.1 rgbecker  Working versions
+	rl_addons/pyRXP/test/t.py 1.1 rgbecker  Working versions
+	lib/utils.py 1.27 rgbecker  Slight formatting improvements & added payload method
+	rl_addons/pyRXP/setup.py 1.1 rgbecker  Transferred to SF
+	rl_addons/pyRXP/pyRXP.c 1.1 rgbecker  Transferred to SF
+	rl_addons/pyRXP/patches/rl-1.2.5.patch 1.1 rgbecker  Transferred to SF
+	rl_addons/pyRXP/patches/differ.bat 1.1 rgbecker  Transferred to SF
+	rl_addons/pyRXP/README 1.1 rgbecker  Transferred to SF
+	rl_addons/pyRXP/rxp/xmlparser.h 1.2 rgbecker  Changes needed to support pyRXP
+	rl_addons/pyRXP/rxp/xmlparser.c 1.2 rgbecker  Changes needed to support pyRXP
+	rl_addons/pyRXP/rxp/system.h 1.2 rgbecker  Changes needed to support pyRXP
+	rl_addons/pyRXP/rxp/stdio16.c 1.2 rgbecker  Changes needed to support pyRXP
+	rl_addons/pyRXP/rxp/rxp.1 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/rxp.1 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/Threads 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/Threads 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/Manual 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/Manual 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/RELNOTES 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/RELNOTES 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/COPYRIGHT 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/COPYRIGHT 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/COPYING 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/COPYING 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/version.h 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/version.h 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/system.h 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/system.h 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/stdio16.h 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/stdio16.h 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/rxputil.h 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/rxputil.h 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/namespaces.h 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/namespaces.h 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/input.h 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/input.h 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/infoset-print.h 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/infoset-print.h 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/http.h 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/http.h 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/hash.h 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/hash.h 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/Makefile 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/Makefile 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/xmlparser.h 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/xmlparser.h 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/url.h 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/url.h 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/string16.h 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/string16.h 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/infoset-print.c 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/infoset-print.c 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/dtd.h 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/dtd.h 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/ctype16.h 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/ctype16.h 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/charset.h 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/charset.h 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/version.c 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/version.c 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/namespaces.c 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/namespaces.c 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/http.c 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/http.c 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/hash.c 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/hash.c 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/system.c 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/system.c 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/stdio16.c 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/stdio16.c 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/input.c 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/input.c 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/dtd.c 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/dtd.c 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/ctype16.c 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/ctype16.c 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/url.c 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/url.c 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/string16.c 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/string16.c 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/charset.c 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/charset.c 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/xmlparser.c 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/xmlparser.c 1.1.1.1 rgbecker  Import of rxp-1.2.5
+	rl_addons/pyRXP/rxp/rxp.c 1.1 rgbecker  Initial revision
+	rl_addons/pyRXP/rxp/rxp.c 1.1.1.1 rgbecker  Import of rxp-1.2.5
+##### 2002/03/21 #####
+	utils/headerlines.py 1.1 rgbecker  Initial version
+	lib/utils.py 1.26 rgbecker  Added DebugMemo stuff
+##### 2002/03/18 #####
+	lib/utils.py 1.25 rgbecker  Small fp_str fixes
+	lib/_rl_accel.c 1.27 rgbecker  Small fp_str fixes
+	platypus/tables.py 1.56 rgbecker  Fix up styles vs data dimensions mismatching
+##### 2002/03/15 #####
+	platypus/tables.py 1.55 rgbecker  Fix AttributeError; thanks David Horkoff <dhorkoff@genusrmt.ca>
+	lib/_rl_accel.c 1.26 rgbecker  Maybe fix for Jerome Alet's fp_str bug
+	platypus/tables.py 1.54 rgbecker  Added emptyTableAction
+	rl_config.py 1.30 rgbecker  Added emptyTableAction
+	platypus/__init__.py 1.13 rgbecker  Add PageBegin to pkg exports
+##### 2002/03/14 #####
+	graphics/charts/axes.py 1.52 rgbecker  Attempt to fix overspecification problems
+##### 2002/03/12 #####
+	utils/daily.py 1.53 rgbecker  rl_config._verbose ==> verbose
+	tools/pythonpoint/pythonpoint.py 1.11 rgbecker  rl_config._verbose ==> verbose
+	tools/docco/graphdocpy.py 1.14 rgbecker  rl_config._verbose ==> verbose
+	platypus/doctemplate.py 1.52 rgbecker  rl_config._verbose ==> verbose
+	pdfbase/pdfutils.py 1.29 rgbecker  rl_config._verbose ==> verbose
+	rl_config.py 1.29 rgbecker  rl_config._verbose ==> verbose
+	graphics/shapes.py 1.71 rgbecker  rl_config._verbose ==> verbose
+	rl_addons/renderPM/test_renderPM.py 1.4 rgbecker  Add new test
+	rl_addons/renderPM/setup.py 1.7 rgbecker  Add aix4
+	pdfgen/pdfimages.py 1.14 rgbecker  Remove excess whitespace
+	lib/normalDate.py 1.4 rgbecker  Bauer's patch for 2.2 compat
+##### 2002/03/10 #####
+	tools/docco/inspect.py 1.3 rgbecker  Removed e acute as Dinu test doesn't like it
+	tools/pythonpoint/stdparser.py 1.4 rgbecker  Removed 2.0 ism
+##### 2002/03/05 #####
+	README 1.9 rgbecker  Testing change only
+##### 2002/03/02 #####
+	tools/docco/graphdocpy.py 1.13 rgbecker  Slight clean up of option setting
+	tools/docco/inspect.py 1.2 rgbecker  2.1 version
+##### 2002/03/01 #####
+	tools/docco/README 1.1 johnprecedo  Checked in a readme warning the users that some of these are obsolete.
+	test/test_tools_pythonpoint.py 1.5 rgbecker  Fix up quoting for spaces in paths case on win32
+#################################################################################
 #################### RELEASE 1.12 at 17:00 GMT 28/February/2002 #################
 #################################################################################
 ##### 2002/02/28 #####
