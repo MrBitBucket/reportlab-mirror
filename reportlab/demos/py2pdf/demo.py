@@ -170,9 +170,11 @@ def main(inPath, *tests):
     for t in tests:
         newPath = modifyPath(inPath, t.__name__)
         shutil.copyfile(inPath, newPath)
-        print t.__doc__
-        t(newPath)
-        os.remove(newPath)
+        try:
+            print t.__doc__
+            t(newPath)
+        finally:
+            os.remove(newPath)
         print
                 
 
