@@ -1,4 +1,3 @@
-
 ###############################################################################
 #
 #	ReportLab Public License Version 1.0
@@ -32,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.16  2000/04/27 18:11:56  rgbecker
+#	Dinu's SaveFile patch
+#
 #	Revision 1.15  2000/04/25 20:19:07  aaron_watters
 #	added support for closed outline entries
-#
+#	
 #	Revision 1.14  2000/04/18 19:50:30  aaron_watters
 #	Minor support for inPage/inForm api elimination in canvas
 #	
@@ -68,7 +70,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.15 2000/04/25 20:19:07 aaron_watters Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.16 2000/04/27 18:11:56 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -277,7 +279,12 @@ class PDFDocument:
         """Open a file, and ask each object in turn to write itself to
         the file.  Keep track of the file position at each point for
         use in the index at the end"""
-        f = open(filename, 'wb')
+
+        if type(f)==type(''):
+            f = open(filename, 'wb')
+        else:
+            f = filename
+
         i = 1
         self.xref = []
         f.write("%PDF-1.2" + LINEEND)  # for CID support
