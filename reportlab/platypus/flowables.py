@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.45 2004/01/20 22:50:31 andy_robinson Exp $
-__version__=''' $Id: flowables.py,v 1.45 2004/01/20 22:50:31 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.46 2004/03/22 14:06:12 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.46 2004/03/22 14:06:12 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -302,9 +302,10 @@ class Image(Flowable):
         # but we still need to know its size now
         fp = hasattr(filename,'read')
         if fp:
+            self._file = filename
             self.filename = `filename`
         else:
-            self.filename = filename
+            self._file = self.filename = filename
         if not fp and os.path.splitext(filename)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
             f = open(filename, 'rb')
             info = pdfutils.readJPEGInfo(f)
@@ -345,7 +346,8 @@ class Image(Flowable):
     def __getattr__(self,a):
         if a=='_img':
             from reportlab.lib.utils import ImageReader  #this may raise an error
-            self._img = ImageReader(self.filename)
+            self._img = ImageReader(self._file)
+            del self._file
             return self._img
         elif a in ('drawWidth','drawHeight','imageWidth','imageHeight'):
             self._setup_inner()
