@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.19 2001/05/21 11:15:58 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.20 2001/05/21 11:46:30 rgbecker Exp $
 import string
 
 from reportlab.graphics import shapes
@@ -147,7 +147,7 @@ class Widget(PropHolder, shapes.UserNode):
 		return self.draw()
 
 		
-_ElementWrapper={}
+_ItemWrapper={}
 
 class TypedPropertyCollection(PropHolder):
 	"""A container with properties for objects of the same kind.
@@ -183,8 +183,8 @@ class TypedPropertyCollection(PropHolder):
 			return self._children[index]
 		except KeyError:
 			Klass = self._prototype
-			if Klass in _ElementWrapper.keys():
-				WKlass = _ElementWrapper[Klass]
+			if Klass in _ItemWrapper.keys():
+				WKlass = _ItemWrapper[Klass]
 			else:
 				class WKlass(Klass):
 					def __getattr__(self,name):
@@ -192,6 +192,7 @@ class TypedPropertyCollection(PropHolder):
 							return Klass.__getattr__(self,name)
 						except:
 							return getattr(self._parent,name)
+				_ItemWrapper[Klass] = WKlass
 
 			child = WKlass()
 			child._parent = self
@@ -381,6 +382,7 @@ def test():
 	wedges = TypedPropertyCollection(WedgeProperties)
 	wedges.fillColor = colors.red
 	wedges.setVector(fillColor=(colors.blue,colors.green,colors.white))
+	print len(_ItemWrapper)
 
 	d = shapes.Drawing(400, 200)
 	tc = TwoCircles()
