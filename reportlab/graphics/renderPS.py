@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPS.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.22 2003/04/17 11:28:28 rgbecker Exp $
-__version__=''' $Id: renderPS.py,v 1.22 2003/04/17 11:28:28 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.23 2003/06/12 18:01:43 rgbecker Exp $
+__version__=''' $Id: renderPS.py,v 1.23 2003/06/12 18:01:43 rgbecker Exp $ '''
 import string, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str, getStringIO
@@ -716,15 +716,18 @@ class _PSRenderer(Renderer):
         self._canvas.circle( circle.cx, circle.cy, circle.r)
 
     def drawWedge(self, wedge):
-        centerx, centery, radius, startangledegrees, endangledegrees = \
-         wedge.centerx, wedge.centery, wedge.radius, wedge.startangledegrees, wedge.endangledegrees
-        yradius = wedge.yradius
-        (x1, y1) = (centerx-radius, centery-yradius)
-        (x2, y2) = (centerx+radius, centery+yradius)
-        extent = endangledegrees - startangledegrees
-        #print "extent", extent, startangledegrees
-        #self._canvas.drawArc(x1, y1, x2, y2, -45, 90, fromcenter=1)
-        self._canvas.drawArc(x1, y1, x2, y2, startangledegrees, extent, fromcenter=1)
+        yradius, radius1, yradius1 = wedge._xtraRadii()
+        if (radius1==0 or radius1 is None) and (yradius1==0 or yradius1 is None):
+            startangledegrees = wedge.startangledegrees
+            endangledegrees = wedge.endangledegrees
+            centerx= wedge.centerx
+            centery = wedge.centery
+            radius = wedge.radius
+            extent = endangledegrees - startangledegrees
+            self._canvas.drawArc(centerx-radius, centery-yradius, centerx+radius, centery+yradius,
+                startangledegrees, extent, fromcenter=1)
+        else:
+            self.drawPolygon(wedge.asPolygon())
 
     def drawPolyLine(self, p):
         if self._canvas._strokeColor:

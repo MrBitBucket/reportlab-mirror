@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.91 2003/04/29 17:12:18 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.92 2003/06/12 18:01:42 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.91 2003/04/29 17:12:18 rgbecker Exp $ '''
+__version__=''' $Id: shapes.py,v 1.92 2003/06/12 18:01:42 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -914,12 +914,13 @@ class Wedge(SolidShape):
         startangledegrees = AttrMapValue(isNumber),
         endangledegrees = AttrMapValue(isNumber),
         yradius = AttrMapValue(isNumberOrNone),
+        radius1 = AttrMapValue(isNumberOrNone),
+        yradius1 = AttrMapValue(isNumberOrNone),
         )
 
     degreedelta = 1 # jump every 1 degrees
 
     def __init__(self, centerx, centery, radius, startangledegrees, endangledegrees, yradius=None, **kw):
-        if yradius is None: yradius = radius
         SolidShape.__init__(self, kw)
         while endangledegrees<startangledegrees:
             endangledegrees = endangledegrees+360
@@ -928,39 +929,53 @@ class Wedge(SolidShape):
             centerx, centery, radius, startangledegrees, endangledegrees
         self.yradius = yradius
 
+    def _xtraRadii(self):
+        yradius = getattr(self, 'yradius', None)
+        if yradius is None: yradius = self.radius
+        radius1 = getattr(self,'radius1', None)
+        yradius1 = getattr(self,'yradius1',radius1)
+        if radius1 is None: radius1 = yradius1
+        return yradius, radius1, yradius1
+
     #def __repr__(self):
     #        return "Wedge"+repr((self.centerx, self.centery, self.radius, self.startangledegrees, self.endangledegrees ))
     #__str__ = __repr__
 
     def asPolygon(self):
         #print "asPolygon"
-        centerx, centery, radius, startangledegrees, endangledegrees = \
-            self.centerx, self.centery, self.radius, self.startangledegrees, self.endangledegrees
-        yradius = self.yradius
+        centerx= self.centerx
+        centery = self.centery
+        radius = self.radius
+        yradius, radius1, yradius1 = self._xtraRadii()
+        startangledegrees = self.startangledegrees
+        endangledegrees = self.endangledegrees
         degreedelta = self.degreedelta
         points = []
         a = points.append
-        a(centerx); a(centery)
         from math import sin, cos, pi
         degreestoradians = pi/180.0
         radiansdelta = degreedelta*degreestoradians
         startangle = startangledegrees*degreestoradians
         endangle = endangledegrees*degreestoradians
         while endangle<startangle:
-            #print "endangle", endangle
             endangle = endangle+2*pi
         angle = startangle
-        #print "start", startangle, "end", endangle
+        CA = []
+        CAA = CA.append
         while angle<endangle:
-            #print angle
-            x = centerx + cos(angle)*radius
-            y = centery + sin(angle)*yradius
-            a(x); a(y)
+            CAA((cos(angle),sin(angle)))
             angle = angle+radiansdelta
-        #print "done"
-        x = centerx + cos(endangle)*radius
-        y = centery + sin(endangle)*yradius
-        a(x); a(y)
+        CAA((cos(endangle),sin(endangle)))
+        for c,s in CA:
+            a(centerx+radius*c)
+            a(centery+yradius*s)
+        if (radius1==0 or radius1 is None) and (yradius1==0 or yradius1 is None):
+            a(centerx); a(centery)
+        else:
+            CA.reverse()
+            for c,s in CA:
+                a(centerx+radius1*c)
+                a(centery+yradius1*s)
         return Polygon(points)
 
     def copy(self):

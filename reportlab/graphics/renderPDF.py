@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPDF.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.21 2002/09/17 21:36:01 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.22 2003/06/12 18:01:43 rgbecker Exp $
 # renderPDF - draws Drawings onto a canvas
 """Usage:
     import renderpdf
@@ -9,7 +9,7 @@
 Execute the script to see some test drawings.
 changed
 """
-__version__=''' $Id: renderPDF.py,v 1.21 2002/09/17 21:36:01 andy_robinson Exp $ '''
+__version__=''' $Id: renderPDF.py,v 1.22 2003/06/12 18:01:43 rgbecker Exp $ '''
 
 from reportlab.graphics.shapes import *
 from reportlab.pdfgen.canvas import Canvas
@@ -130,12 +130,19 @@ class _PDFRenderer(Renderer):
     def drawWedge(self, wedge):
         centerx, centery, radius, startangledegrees, endangledegrees = \
          wedge.centerx, wedge.centery, wedge.radius, wedge.startangledegrees, wedge.endangledegrees
-        yradius = wedge.yradius
-        path = self._canvas.beginPath()
-        path.moveTo(centerx, centery)
+        yradius, radius1, yradius1 = wedge._xtraRadii()
+        if yradius is None: yradius = radius
         angle = endangledegrees-startangledegrees
-        path.arcTo(centerx-radius, centery-yradius, centerx+radius, centery+yradius,
+        path = self._canvas.beginPath()
+        if (radius1==0 or radius1 is None) and (yradius1==0 or yradius1 is None):
+            path.moveTo(centerx, centery)
+            path.arcTo(centerx-radius, centery-yradius, centerx+radius, centery+yradius,
                    startangledegrees, angle)
+        else:
+            path.arc(centerx-radius, centery-yradius, centerx+radius, centery+yradius,
+                   startangledegrees, angle)
+            path.arcTo(centerx-radius1, centery-yradius1, centerx+radius1, centery+yradius1,
+                   endangledegrees, -angle)
         path.close()
         self._canvas.drawPath(path,
                     fill=self._fill,
