@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.12  2000/06/13 13:03:31  aaron_watters
+#	more documentation changes
+#
 #	Revision 1.11  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
-#
+#	
 #	Revision 1.10  2000/05/26 09:49:23  rgbecker
 #	Color fixes; thanks to J Alet
 #	
@@ -62,11 +65,14 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.11 2000/06/01 15:23:06 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.12 2000/06/13 13:03:31 aaron_watters Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
 color and weight of the lines (if any), and the font, alignment and padding of the text.
+
+See the test output from running this module as a script for a discussion of the method for constructing
+tables and table styles.
 """
 from reportlab.platypus import *
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.15  2000/06/13 13:03:31  aaron_watters
+#	more documentation changes
+#
 #	Revision 1.14  2000/06/01 16:27:56  rgbecker
 #	pageSize is wrong at present
-#
+#	
 #	Revision 1.13  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #	
@@ -73,9 +76,29 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.14 2000/06/01 16:27:56 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.15 2000/06/13 13:03:31 aaron_watters Exp $ '''
 __doc__="""
-More complicated Document model
+This module contains the core structure of platypus.
+
+Platypus constructs documents.  Document styles are determined by DocumentTemplates.
+
+Each DocumentTemplate contains one or more PageTemplates which defines the look of the
+pages of the document.
+
+Each PageTemplate has a procedure for drawing the "non-flowing" part of the page
+(for example the header, footer, page number, fixed logo graphic, watermark, etcetera) and
+a set of Frames which enclose the flowing part of the page (for example the paragraphs,
+tables, or non-fixed diagrams of the text).
+
+A document is built when a DocumentTemplate is fed a sequence of Flowables.
+The action of the build consumes the flowables in order and places them onto
+frames on pages as space allows.  When a frame runs out of space the next frame
+of the page is used.  If no frame remains a new page is created.  A new page
+can also be created if a page break is forced.
+
+The special invisible flowable NextPageTemplate can be used to specify
+the page template for the next page (which by default is the one being used
+for the current frame).
 """
 from flowables import *
 from frames import Frame
@@ -87,7 +110,10 @@ def _doNothing(canvas, doc):
 	pass
 
 class ActionFlowable(Flowable):
-	'''This Flowable is never drawn, it can be used for data driven controls'''
+	'''This Flowable is never drawn, it can be used for data driven controls
+	   For example to change a page template (from one column to two, for example)
+	   use NextPageTemplate which creates an ActionFlowable.
+	'''
 	def __init__(self,action=[]):
 		if type(action) not in (ListType, TupleType):
 			action = (action,)
@@ -110,7 +136,7 @@ class ActionFlowable(Flowable):
 				raise NotImplementedError, "Can't handle ActionFlowable(%s)" % action
 			else:
 				raise
-		except:
+		except "bogus":
 			t, v, None = sys.exc_info()
 			raise t, "%s\n   handle_%s args=%s"%(v,action,args)
 
@@ -121,6 +147,7 @@ FrameBreak = ActionFlowable('frameEnd')
 PageBegin = ActionFlowable('pageBegin')
 
 class NextPageTemplate(ActionFlowable):
+	"""When you get to the next page, use the template specified (change to two column, for example)  """
 	def __init__(self,pt):
 		ActionFlowable.__init__(self,('nextPageTemplate',pt))
 
@@ -162,6 +189,36 @@ class BaseDocTemplate:
 		story flowables into the frames.
 
 	4)	The document instances can override the base handler routines.
+	
+	Most of the methods for this class are not called directly by the user,
+	but in some advanced usages they may need to be overridden via subclassing.
+	
+	EXCEPTION: doctemplate.build(...) must be called for most reasonable uses
+	since it builds a document using the page template.
+	
+        Each document template builds exactly one document into a file specified
+        by the filename argument on initialization.
+	
+	Possible keyword arguments for the initialization:
+	
+	pageTemplates: A list of templates.  Must be nonempty.  Names
+	  assigned to the templates are used for referring to them so no two used
+	  templates should have the same name.  For example you might want one template
+	  for a title page, one for a section first page, one for a first page of
+	  a chapter and two more for the interior of a chapter on odd and even pages.
+	  If this argument is omitted then at least one pageTemplate should be provided
+	  using the addPageTemplates method before the document is built.
+	showBoundary: (for debugging) if set draw a box around the frame boundaries.
+	leftMargin:
+	rightMargin:
+	topMargin:
+	bottomMargin:  Margin sizes in points (default 1 inch)
+	  These margins may be overridden by the pageTemplates.  They are primarily of interest
+	  for the SimpleDocumentTemplate subclass.
+	allowSplitting:  If set flowables (eg, paragraphs) may be split across frames or pages
+	  (default: 1)
+	title: Internal title for document (does not automatically display on any page)
+	author: Internal author for document (does not automatically display on any page)
 	"""
 	_initArgs = {	'pagesize':DEFAULT_PAGE_SIZE,
 					'pageTemplates':[],
@@ -177,6 +234,7 @@ class BaseDocTemplate:
 	_invalidInitArgs = ()
 
 	def __init__(self, filename, **kw):
+		"""create a document template bound to a filename (see class documentation for keyword arguments)"""
 		self.filename = filename
 
 		for k in self._initArgs.keys():
@@ -205,7 +263,7 @@ class BaseDocTemplate:
 			self.handle_flowable(self._hanging)
 
 	def addPageTemplates(self,pageTemplates):
-		'add one or a sequence of pageTamplates'
+		'add one or a sequence of pageTemplates'
 		if type(pageTemplates) not in (ListType,TupleType):
 			pageTemplates = [pageTemplates]
 		assert filter(lambda x: not isinstance(x,PageTemplate), pageTemplates)==[], "pageTemplates argument error"
@@ -370,7 +428,8 @@ class BaseDocTemplate:
 		del self.frame, self.pageTemplate
 
 	def build(self, flowables):
-		assert filter(lambda x: not isinstance(x,Flowable), flowables)==[], "flowables argument error"
+		"""Build the document from a list of flowables."""
+		#assert filter(lambda x: not isinstance(x,Flowable), flowables)==[], "flowables argument error"
 		self._startBuild()
 
 		while len(flowables):
@@ -380,11 +439,31 @@ class BaseDocTemplate:
 		self._endBuild()
 
 class SimpleDocTemplate(BaseDocTemplate):
+	"""A special case document template that will handle many simple documents.
+	   See documentation for BaseDocTemplate.  No pageTemplates are required 
+	   for this special case.   A page templates are inferred from the
+	   margin information and the onFirstPage, onLaterPages arguments to the build method.
+	   
+	   A document which has all pages with the same look except for the first
+	   page may can be built using this special approach.
+	   """
 	def handle_pageBegin(self):
 		self._handle_pageBegin()
 		self._handle_nextPageTemplate('Later')
 
 	def build(self,flowables,onFirstPage=_doNothing, onLaterPages=_doNothing):
+	        """build the document using the flowables.  Annotate the first page using the onFirstPage
+	           function and later pages using the onLaterPages function.  The onXXX pages should follow
+	           the signature
+	           
+	              def myOnFirstPage(canvas, document):
+	                  # do annotations and modify the document
+	                  ...
+	                  
+	           The functions can do thing like draw logos, page numbers,
+	           footers, etcetera. They can use external variables to vary
+	           the look (for example providing page numbering or section names).
+	        """
 		frameT = Frame(self.leftMargin, self.bottomMargin, self.width, self.height, id='normal')
 		self.addPageTemplates([PageTemplate(id='First',frames=frameT, onPage=onFirstPage),
 						PageTemplate(id='Later',frames=frameT, onPage=onLaterPages)])

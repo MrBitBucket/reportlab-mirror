@@ -31,14 +31,27 @@
 #
 ###############################################################################
 #	$Log: frames.py,v $
+#	Revision 1.2  2000/06/13 13:03:31  aaron_watters
+#	more documentation changes
+#
 #	Revision 1.1  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
-#
-__version__=''' $Id: frames.py,v 1.1 2000/06/01 15:23:06 rgbecker Exp $ '''
+#	
+__version__=''' $Id: frames.py,v 1.2 2000/06/13 13:03:31 aaron_watters Exp $ '''
 __doc__="""
 """
 class Frame:
-	'''Abstraction for the definitional part of a Frame
+	'''
+	A Frame is a piece of space in a document that is filled by the
+	"flowables" in the story.  For example in a book like document most
+	pages have the text paragraphs in one or two frames.  For generality
+	a page might have several frames (for example for 3 column text or
+	for text that wraps around a graphic).
+	
+	After creation a Frame is not usually manipulated directly by the
+	applications program -- it is used internally by the platypus modules.
+	
+	Here is a diagramatid abstraction for the definitional part of a Frame
 
                 width                    x2,y2
     	+---------------------------------+
@@ -54,7 +67,10 @@ class Frame:
     	|   +-------------------------+   |
     	|    bottom padding				  |
     	+---------------------------------+
-    	(x1,y1)
+    	(x1,y1) <-- lower left corner
+    	
+        NOTE!! Frames are stateful objects.  No single frame should be used in
+        two documents at the same time (especially in the presence of multithreading.
 	'''
 	def __init__(self, x1, y1, width,height, leftPadding=6, bottomPadding=6,
 			rightPadding=6, topPadding=6, id=None, showBoundary=0):
@@ -123,7 +139,7 @@ class Frame:
 	add = _add
 
 	def split(self,flowable):
-		'''calls split on the flowable'''
+		'''As the flowable to split using up the available space.'''
 		y = self.y
 		p = self.y1p
 		s = self.atTop and 0 or flowable.getSpaceBefore()
@@ -131,6 +147,7 @@ class Frame:
 
 
 	def drawBoundary(self,canv):
+		"draw the frame boundary as a rectangle (primarily for debugging)."
 		canv.rect(
 				self.x1,
 				self.y1,

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.12  2000/06/13 13:03:31  aaron_watters
+#	more documentation changes
+#
 #	Revision 1.11  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
-#
+#	
 #	Revision 1.10  2000/05/31 10:12:20  rgbecker
 #	<bullet> xml tag added
 #	
@@ -64,7 +67,7 @@
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.11 2000/06/01 15:23:06 rgbecker Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.12 2000/06/13 13:03:31 aaron_watters Exp $ '''
 import string
 import types
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -75,6 +78,7 @@ from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from copy import deepcopy
 
 #our one and only parser
+# XXXXX if the parser has any internal state using only one is probably a BAD idea!
 _parser=ParaParser()
 
 def cleanBlockQuotedText(text):
@@ -245,7 +249,23 @@ def _drawBullet(canvas, offset, cur_y, bulletText, style):
 	return offset
 
 class Paragraph(Flowable):
+	"""format a block of text into a paragraph with a given style
+	
+	   The paragraph Text can contain XML-like markup including the 
+	   tags:
+	   <b> ... </b> - bold
+	   <i> ... </i> - italics
+	   <u> ... </u> - underline
+	   <super> ... </super> - superscript
+	   <sub> ... </sub> - subscript
+	   <font name=fontfamily/fontname color=colorname size=float>
+
+		The whole may be surrounded by <para> </para> tags
+
+	 It will also be able to handle any MathML specified Greek characters.
+	"""
 	def __init__(self, text, style, bulletText = None, frags=None):
+		
 		if frags is None:
 			text = cleanBlockQuotedText(text)
 			style, frags, bFrags = _parser.parse(text,style)

@@ -31,15 +31,31 @@
 #
 ###############################################################################
 #	$Log: flowables.py,v $
+#	Revision 1.3  2000/06/13 13:03:31  aaron_watters
+#	more documentation changes
+#
 #	Revision 1.2  2000/06/01 16:27:56  rgbecker
 #	pageSize is wrong at present
-#
+#	
 #	Revision 1.1  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #	
 #	
-__version__=''' $Id: flowables.py,v 1.2 2000/06/01 16:27:56 rgbecker Exp $ '''
+__version__=''' $Id: flowables.py,v 1.3 2000/06/13 13:03:31 aaron_watters Exp $ '''
 __doc__="""
+A flowable is a "floating element" in a document whose exact position is determined by the
+other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
+a section header, etcetera.  Examples of non-flowables include page numbering annotations,
+headers, footers, fixed diagrams or logos, among others.
+
+Flowables are defined here as objects which know how to determine their size and which
+can draw themselves onto a page with respect to a relative "origin" position determined
+at a higher level.  Some Flowables also know how to "split themselves".  For example a
+long paragraph might split itself between one page and the next.
+
+The "text" of a document usually consists mainly of a sequence of flowables which
+flow into a document from top to bottom (with column and page breaks controlled by
+higher level components).
 """
 
 # 200-10-13 gmcm
@@ -100,11 +116,13 @@ class Flowable:
 		return []
 
 	def getSpaceAfter(self):
+	        """returns how much space should follow this item if another item follows on the same page."""
 		if hasattr(self,'spaceAfter'): return self.spaceAfter
 		elif hasattr(self,'style') and hasattr(self.style,'spaceAfter'): return self.style.spaceAfter
 		else: return 0
 
 	def getSpaceBefore(self):
+	        """returns how much space should precede this item if another item precedess on the same page."""
 		if hasattr(self,'spaceBefore'): return self.spaceBefore
 		elif hasattr(self,'style') and hasattr(self.style,'spaceBefore'): return self.style.spaceBefore
 		else: return 0
@@ -128,9 +146,15 @@ class XBox(Flowable):
 		self.canv.drawCentredString(0.5*self.width, 0.5*self.height, self.text)
 
 class Preformatted(Flowable):
-	"""This is like the HTML <PRE> tag.  The line breaks are exactly where you put
-	them, and it will not be wrapped.  So it is much simpler to implement!"""
+	"""This is like the HTML <PRE> tag.  
+	It attempts to display text exactly as you typed it in a fixed width "typewriter" font.
+	The line breaks are exactly where you put
+	them, and it will not be wrapped."""
 	def __init__(self, text, style, bulletText = None, dedent=0):
+	        """text is the text to display. If dedent is set then common leading space
+	           will be chopped off the front (for example if the entire text is indented
+	           6 spaces or more then each line will have 6 spaces removed from the front).
+	        """
 		self.style = style
 		self.bulletText = bulletText
 
@@ -194,6 +218,10 @@ class Preformatted(Flowable):
 		self.canv.drawText(tx)
 
 class Image(Flowable):
+	"""an image (digital picture).  Formats supported by PIL (the Python Imaging Library
+	   are supported.  At the present time images as flowables are always centered horozontally
+	   in the frame.
+	"""
 	def __init__(self, filename, width=None, height=None):
 		"""If size to draw at not specified, get it from the image."""
 		import Image  #this will raise an error if they do not have PIL.
@@ -231,8 +259,8 @@ class Image(Flowable):
 								  self.drawHeight
 								  )
 class Spacer(Flowable):
-	"""A spacer just takes up space and doesn't draw anything - it can
-	ensure a gap between objects."""
+	"""A spacer just takes up space and doesn't draw anything - it guarantees
+	   a gap between objects."""
 	def __init__(self, width, height):
 		self.width = width
 		self.height = height
@@ -244,7 +272,8 @@ class Spacer(Flowable):
 		pass
 
 class PageBreak(Flowable):
-	"""This works by consuming all remaining space in the frame!"""
+	"""Move on to the next page in the document.
+	   This works by consuming all remaining space in the frame!"""
 
 	def wrap(self, availWidth, availHeight):
 		self.width = availWidth
