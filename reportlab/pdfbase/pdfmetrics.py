@@ -1,25 +1,25 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfmetrics.py,v 1.15 2000/11/08 10:13:20 andy_robinson Exp $
-__version__=''' $Id: pdfmetrics.py,v 1.15 2000/11/08 10:13:20 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfmetrics.py,v 1.16 2000/11/13 15:26:46 rgbecker Exp $
+__version__=''' $Id: pdfmetrics.py,v 1.16 2000/11/13 15:26:46 rgbecker Exp $ '''
 __doc__="""This contains pre-canned text metrics for the PDFgen package, and may also
 be used for any other PIDDLE back ends or packages which use the standard
 Type 1 postscript fonts.
 
-Its main function is to let you work out the width of strings; it exposes a 
-single function, stringWidth(text, fontName, fontSize), which works out the width of a 
+Its main function is to let you work out the width of strings; it exposes a
+single function, stringWidth(text, fontName, fontSize), which works out the width of a
 string in the given font in points.
 
 The AFM loading stuff worked for me but is not being heavily tested, as pre-canning
 the widths for the standard 14 fonts in Acrobat Reader is so much more useful. One
-could easily extend it to get the exact bounding box for each characterm useful for 
+could easily extend it to get the exact bounding box for each characterm useful for
 kerning.
 
 
 The ascent_descent attribute of the module is a dictionary mapping font names
 (with the proper Postscript capitalisation) to ascents and descents.  I ought
-to sort out the fontname case issue and the resolution of PIDDLE fonts to 
+to sort out the fontname case issue and the resolution of PIDDLE fonts to
 Postscript font names within this module, but have not yet done so.
 """
 import string
@@ -29,8 +29,8 @@ DEFAULT_ENCODING='WinAnsiEncoding'
 AFMDIR = 'C:\\code\\users\\andy\\fontembed'
 
 StandardEnglishFonts = [
-	'Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique',  
-	'Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique', 
+	'Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique',
+	'Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique',
 	'Helvetica-BoldOblique',
 	'Times-Roman', 'Times-Bold', 'Times-Italic', 'Times-BoldItalic',
 	'Symbol','ZapfDingbats']
@@ -198,20 +198,20 @@ class FontMetrics:
 				metriclines.append(line)
 			if string.find(lline, 'startcharmetrics') > -1:
 				between = 1
-				
+
 		# break up - very shaky assumption about array size
 		widths = [0] * 256
 		widthsByName = {}
 		for line in metriclines:
 			chunks = string.split(line, ';')
-			
+
 			(c, cid) = string.split(chunks[0])
 			(wx, width) = string.split(chunks[1])
 			(n, name) = string.split(chunks[2])
 			#(b, x1, y1, x2, y2) = string.split(chunks[3])
 			widths[string.atoi(cid)] = string.atoi(width)
 			widthsByName[name] = string.atoi(width)
-		
+
 		# by default, any empties should get the width of a space
 		for i in range(len(widths)):
 			if widths[i] == 0:
@@ -243,9 +243,9 @@ class FontMetrics:
 				width = 0
 			MacRomanWidths[i] = width
 		return MacRomanWidths
-	
-		
-		
+
+
+
 
 
 if _stringWidth:
@@ -263,7 +263,7 @@ if _stringWidth:
 		fm = FontMetrics(filename)
 		_rl_accel.setFontInfo(string.lower(fontName), 'WinAnsiEncoding', ad[0], ad[1], fm.getWinAnsiWidths())
 		_rl_accel.setFontInfo(string.lower(fontName), 'MacRomanEncoding', ad[0], ad[1], fm.getMacRomanWidths())
-		
+
 
 	def _SWRecover(text, font, fontSize, encoding):
 		#infoOnce('_SWRecover('...',%s,%s,%s')%(font,str(fontSize),encoding))
@@ -286,14 +286,14 @@ else:
 		def __init__(self):
 			global widths
 			self.__widtharrays = widths
-			
+
 		def loadFont(self, fontName, filename):
 			infoOnce('Info: cache loading%s' % filename)
 			assert os.path.exists(filename)
 			fm = FontMetrics(filename)
 			self.__widtharrays['WinAnsiEncoding'][string.lower(fontName)] = fm.getWinAnsiWidths()
 			self.__widtharrays['MacRomanEncoding'][string.lower(fontName)] = fm.getMacRomanWidths()
-			
+
 
 		def getfont(self, fontName, encoding):
 			try:
@@ -306,7 +306,7 @@ else:
 					# font not found, use Courier
 					warnOnce('Font %s:%s not found - using Courier:%s for widths'%(fontName,encoding,encoding))
 					return self.getfont('courier',encoding)
-		
+
 		def stringWidth(self, text, font, fontSize, encoding=DEFAULT_ENCODING):
 			widths = self.getfont(string.lower(font),encoding)
 			w = 0
@@ -317,7 +317,7 @@ else:
 		def status(self):
 			#returns loaded fonts
 			return self.__widtharrays.keys()
-			
+
 	TheFontCache = FontCache()
 
 	#expose the singleton as a single function

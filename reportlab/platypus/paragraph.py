@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.27 2000/11/01 21:24:05 andy_robinson Exp $
-__version__=''' $Id: paragraph.py,v 1.27 2000/11/01 21:24:05 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.28 2000/11/13 15:26:46 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.28 2000/11/13 15:26:46 rgbecker Exp $ '''
 import string
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -53,15 +53,21 @@ def	_justifyDrawParaLine( tx, offset, extraspace, words, last=0):
 
 def	_putFragLine(tx,words):
 	for f in words:
-		if (tx._fontname,tx._fontsize)!=(f.fontName,f.fontSize):
-			tx._setFont(f.fontName, f.fontSize)
-		if tx.XtraState.textColor!=f.textColor:
-			tx.XtraState.textColor = f.textColor
-			tx.setFillColor(f.textColor)
-		if tx.XtraState.rise!=f.rise:
-			tx.XtraState.rise=f.rise
-			tx.setRise(f.rise)
-		tx._textOut(f.text,f is words[-1])	# cheap textOut
+		if hasattr(f,'cbDefn'):
+			func = getattr(tx._canvas,f.cbDefn.name,None)
+			if not func:
+				raise AttributeError, "Missing %s callback attribute '%s'" % (f.cbDefn.kind,f.cbDefn.name)
+			func(tx._canvas,f.cbDefn.kind,f.cbDefn.label)
+		else:
+			if (tx._fontname,tx._fontsize)!=(f.fontName,f.fontSize):
+				tx._setFont(f.fontName, f.fontSize)
+			if tx.XtraState.textColor!=f.textColor:
+				tx.XtraState.textColor = f.textColor
+				tx.setFillColor(f.textColor)
+			if tx.XtraState.rise!=f.rise:
+				tx.XtraState.rise=f.rise
+				tx.setRise(f.rise)
+			tx._textOut(f.text,f is words[-1])	# cheap textOut
 
 def	_leftDrawParaLineX( tx, offset, line, last=0):
 	tx.setXPos(offset)

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/odyssey/dodyssey.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/odyssey/dodyssey.py,v 1.8 2000/10/25 08:57:44 rgbecker Exp $
-__version__=''' $Id: dodyssey.py,v 1.8 2000/10/25 08:57:44 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/odyssey/dodyssey.py,v 1.9 2000/11/13 15:26:46 rgbecker Exp $
+__version__=''' $Id: dodyssey.py,v 1.9 2000/11/13 15:26:46 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -28,6 +28,13 @@ def myLaterPages(canvas, doc):
 	canvas.restoreState()
 	
 def go():
+	def myCanvasMaker(fn,**kw):
+		from reportlab.pdfgen.canvas import Canvas
+		canv = apply(Canvas,(fn,),kw)
+		# attach our callback to the canvas
+		canv.myOnDrawCB = myOnDrawCB
+		return canv
+
 	doc = BaseDocTemplate('dodyssey.pdf',showBoundary=0)
 
 	#normal frame as for SimpleFlowDocument
@@ -41,7 +48,7 @@ def go():
 						PageTemplate(id='OneCol',frames=frameT, onPage=myLaterPages),
 						PageTemplate(id='TwoCol',frames=[frame1,frame2], onPage=myLaterPages),
 						])
-	doc.build(Elements)
+	doc.build(Elements,canvasmaker=myCanvasMaker)
 
 Elements = []
 
@@ -56,10 +63,16 @@ PreStyle = styles["Code"]
 def newPage():
 	Elements.append(PageBreak())
 
+chNum = 0
+def myOnDrawCB(canv,kind,label):
+	print 'myOnDrawCB(%s)'%kind, 'Page number=', canv.getPageNumber(), 'label value=', label
+
 def chapter(txt, style=ChapterStyle):
+	global chNum
 	Elements.append(NextPageTemplate('OneCol'))
 	newPage()
-	Elements.append(Paragraph(txt, style))
+	chNum = chNum + 1
+	Elements.append(Paragraph(('<onDraw name=myOnDrawCB label="chap %d">'%chNum)+txt, style))
 	Elements.append(Spacer(0.2*inch, 0.3*inch))
 	if useTwoCol:
 		Elements.append(NextPageTemplate('TwoCol'))

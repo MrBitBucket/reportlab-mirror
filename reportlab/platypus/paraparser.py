@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.28 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: paraparser.py,v 1.28 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.29 2000/11/13 15:26:46 rgbecker Exp $
+__version__=''' $Id: paraparser.py,v 1.29 2000/11/13 15:26:46 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -84,7 +84,6 @@ _fontAttrMap = {'size': ('fontSize', _num),
 				'name': ('fontName', None),
 				'fg': 	('textColor', toColor),
 				'color':('textColor', toColor)}
-
 
 def _addAttributeNames(m):
 	K = m.keys()
@@ -260,10 +259,8 @@ class ParaParser(xmllib.XMLParser):
 	def end_greek(self):
 		self._pop(greek=1)
 
-
 	def start_font(self,attr):
-		A = self.getAttributes(attr,_fontAttrMap)
-		apply(self._push,(),A)
+		apply(self._push,(),self.getAttributes(attr,_fontAttrMap))
 
 	def end_font(self):
 		self._pop()
@@ -353,6 +350,20 @@ class ParaParser(xmllib.XMLParser):
 		
 	def end_seq(self):
 		pass
+
+	def start_onDraw(self,attr):
+		defn = ParaFrag()
+		if attr.has_key('name'): defn.name = attr['name']
+		else: self._syntax_error('<onDraw/> needs at least a name attribute')
+
+		if attr.has_key('label'): defn.label = attr['label']
+		defn.kind='onDraw'
+		self._push(cbDefn=defn)
+
+	def end_onDraw(self):
+		if hasattr(self,'text'): self._syntax_error('Only <onDraw/> tag allowed')
+		else: self.handle_data('')
+		self._pop()
 
 	#---------------------------------------------------------------
 	def _push(self,**attr):
@@ -607,3 +618,4 @@ Head the ship, therefore, away from the island.''')
 There was a bard also to sing to them and play
 his lyre, while two tumblers went about performing in the midst of
 them when the man struck up with his tune.]''')
+	check_text('''<onDraw name="myFunc" label="aaa   bbb">A paragraph''')
