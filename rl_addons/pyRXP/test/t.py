@@ -1,7 +1,15 @@
 import traceback, sys
 _pyRXP = None
-_verbose = 0
-_logf = None
+_logf = open('pyRXP_test.log','w')
+_bad = 0
+_total = 0
+def _dot(c,write=sys.stdout.write):
+	global _total, _bad
+	write(c)
+	if c=='E': _bad = _bad + 1
+	if _total%40 == 39: write('\n')
+	_total = _total + 1
+
 def goodTest(x,t,tb=0,**kw):
 	try:
 		P=_pyRXP.Parser(**kw)
@@ -21,11 +29,14 @@ def goodTest(x,t,tb=0,**kw):
 	if type(r) is type(''):
 		r = r.replace('\r','\\r')
 		r = r.replace('\n','\\n')
-	print '%s.Parser(%s)(%s)-->'%(_pyRXP.__name__,s[2:],repr(x)),r,
+	print >>_logf, '%s.Parser(%s)(%s)'%(_pyRXP.__name__,s[2:],repr(x)),
 	if r==t and rb==tb:
-		print 'OK'
+		print >>_logf, 'OK'
+		_dot('.')
 	else:
-		print '!!!!!BAD!!!!! should --> ', t
+		_dot('E')
+		print >>_logf,'\nBAD got ', r
+		print >>_logf,'Expected', t
 
 def failTest(x,t,tb=1,**kw):
 	goodTest(x,t,tb,**kw)
@@ -33,18 +44,23 @@ def failTest(x,t,tb=1,**kw):
 def _runTests(pyRXP):
 	global _pyRXP
 	_pyRXP = pyRXP
+	print >>_logf, '############# Testing',pyRXP.__name__
 	try:
 		for k,v in pyRXP.parser_flags.items(): eval('pyRXP.Parser(%s=%d)' % (k,v))
-		print 'Parser keywords OK'
+		print >>_logf,'Parser keywords OK'
+		_dot('.')
 	except:
 		traceback.print_exc()
-		print 'Parser keywords BAD'
+		print >>_logf,'Parser keywords BAD'
+		_dot('E')
 	try:
 		for k,v in pyRXP.parser_flags.items(): eval('pyRXP.Parser()("<a/>",%s=%d)' % (k,v))
-		print 'Parser().parse keywords OK'
+		print >>_logf,'Parser().parse keywords OK'
+		_dot('.')
 	except:
 		traceback.print_exc()
-		print 'Parser().parse keywords BAD'
+		print >>_logf,'Parser().parse keywords BAD'
+		_dot('E')
 
 	goodTest('<a></a>',('a', None, [], None))
 	goodTest('<a></a>',('a', {}, [], None),ExpandEmpty=1)
@@ -77,7 +93,9 @@ def run():
 	else:
 		for p in (pyRXP, pyRXPU):
 			if p: _runTests(p)
-
+		msg = "\n%d tests, %s failures!" % (_total,_bad and `_bad` or 'no')
+		print msg
+		print >> _logf, msg
 
 if __name__=='__main__': #noruntests
 	run()
