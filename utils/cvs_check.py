@@ -32,10 +32,10 @@
 #
 ###############################################################################
 #	$Log: cvs_check.py,v $
-#	Revision 1.2  2000/02/15 17:57:39  rgbecker
-#	License files added
+#	Revision 1.3  2000/02/15 19:36:51  rgbecker
+#	Fix call of cvs_checkout
 #
-__version__=''' $Id: cvs_check.py,v 1.2 2000/02/15 17:57:39 rgbecker Exp $ '''
+__version__=''' $Id: cvs_check.py,v 1.3 2000/02/15 19:36:51 rgbecker Exp $ '''
 '''
 script for testing ReportLab anonymous cvs download and test
 '''
@@ -78,7 +78,7 @@ def recursive_rmdir(d):
 				recursive_rmdir(fn)
 		os.rmdir(d)
 
-def cvs_checkout(d,u):
+def cvs_checkout(d):
 	recursive_rmdir(d)
 
 	cvs = find_exe('cvs')
