@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.30 2001/07/16 12:25:04 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.31 2001/07/19 00:09:21 andy_robinson Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -653,7 +653,12 @@ class ValueAxis(Widget):
             if f:
                 v = self.scale(tick)
                 if type(f) is StringType: txt = f % tick
-                elif type(f) in (TupleType,ListType): txt = f[i]
+                elif type(f) in (TupleType,ListType):
+                    #it's a list, use as many items as we get
+                    if i < len(f):
+                        txt = f[i]
+                    else:
+                        txt = ''
                 else: txt = f(tick)
                 label = labels[i]
                 pos[d] = v

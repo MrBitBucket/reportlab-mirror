@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.25 2001/07/16 12:30:09 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.26 2001/07/19 00:09:22 andy_robinson Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -22,7 +22,7 @@ from reportlab.graphics.shapes import Line, Rect, Group, Drawing
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.axes import YCategoryAxis, XValueAxis
 from reportlab.graphics.charts.textlabels import Label
-from reportlab.graphics.widgets.grids import ShadedRect0
+from reportlab.graphics.widgets.grids import ShadedRect
 
 
 ### Helpers (maybe put this into Drawing... or shapes)

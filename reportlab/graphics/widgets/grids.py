@@ -43,7 +43,7 @@ def makeDistancesList(list):
     return d
 
 
-class Grid0(Widget):
+class Grid(Widget):
     """This makes a rectangular grid of equidistant stripes.
 
     The grid contains an outer border rectangle, and stripes
@@ -106,7 +106,7 @@ class Grid0(Widget):
     def demo(self):
         D = Drawing(100, 100)
 
-        g = Grid0()
+        g = Grid()
         D.add(g)
 
         return D
@@ -115,7 +115,7 @@ class Grid0(Widget):
     def makeOuterRect(self):
         # outer grid rectangle
         group = Group()
-        #print 'Grid0.makeOuterRect(%d, %d, %d, %d)' % (self.x, self.y, self.width, self.height)
+        #print 'Grid.makeOuterRect(%d, %d, %d, %d)' % (self.x, self.y, self.width, self.height)
         rect = Rect(self.x, self.y, self.width, self.height)
         rect.fillColor = self.fillColor
         rect.strokeColor = self.strokeColor
@@ -147,7 +147,7 @@ class Grid0(Widget):
         r.append(start + length)
         if self.delta0 != 0:
             r.insert(0, start)
-        #print 'Grid0.makeLinePosList() -> %s' % r
+        #print 'Grid.makeLinePosList() -> %s' % r
         return r
     
 
@@ -220,7 +220,7 @@ class Grid0(Widget):
         return group
 
 
-class ShadedRect0(Widget):
+class ShadedRect(Widget):
     """This makes a rectangle with shaded colors between two colors.
 
     Colors are interpolated linearly between 'fillColorStart'
@@ -267,7 +267,7 @@ class ShadedRect0(Widget):
     def demo(self):
         D = Drawing(100, 100)
 
-        g = ShadedRect0()
+        g = ShadedRect()
         D.add(g)
 
         return D
@@ -361,7 +361,7 @@ def test():
         if row == 0:
             for col in range(4):
                 x = 20 + col*d
-                g = Grid0()
+                g = Grid()
                 g.x = x
                 g.y = y
                 g.width = s
@@ -381,7 +381,7 @@ def test():
         elif row == 1:
             for col in range(4):
                 x = 20 + col*d 
-                g = Grid0()
+                g = Grid()
                 g.y = y
                 g.x = x
                 g.width = s
@@ -401,7 +401,7 @@ def test():
         elif row == 2:
             for col in range(3):
                 x = 20 + col*d
-                g = Grid0()
+                g = Grid()
                 g.x = x
                 g.y = y
                 g.width = s
@@ -419,7 +419,7 @@ def test():
         elif row == 3:
             for col in range(3):
                 x = 20 + col*d
-                sr = ShadedRect0()
+                sr = ShadedRect()
                 sr.x = x
                 sr.y = y
                 sr.width = s
@@ -437,7 +437,7 @@ def test():
         elif row == 4:
             for col in range(3):
                 x = 20 + col*d
-                sr = ShadedRect0()
+                sr = ShadedRect()
                 sr.x = x
                 sr.y = y
                 sr.width = s
@@ -456,7 +456,7 @@ def test():
         elif row == 5:
             for col in range(3):
                 x = 20 + col*d
-                sr = ShadedRect0()
+                sr = ShadedRect()
                 sr.x = x
                 sr.y = y
                 sr.width = s
@@ -476,7 +476,7 @@ def test():
         elif row == 6:
             for col in range(3):
                 x = 20 + col*d
-                sr = ShadedRect0()
+                sr = ShadedRect()
                 sr.x = x
                 sr.y = y+s
                 sr.width = s
