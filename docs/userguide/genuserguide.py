@@ -32,6 +32,9 @@
 #
 ###############################################################################
 #   $Log: genuserguide.py,v $
+#   Revision 1.29  2000/07/13 12:38:56  rgbecker
+#   More demos in appendix
+#
 #   Revision 1.28  2000/07/13 12:18:32  rgbecker
 #   begin app_demos.py
 #
@@ -120,7 +123,7 @@
 #   Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #   initial checkin. user guide generation framework.
 #   
-__version__=''' $Id: genuserguide.py,v 1.28 2000/07/13 12:18:32 rgbecker Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.29 2000/07/13 12:38:56 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -283,6 +286,7 @@ def heading1(text):
     getStory().append(p)
 
 def Appendix1(text,):
+    global appmode
     getStory().append(PageBreak())
     if not appmode:
         seq.setFormat('Chapter','A')
