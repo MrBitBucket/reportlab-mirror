@@ -176,7 +176,7 @@ class XCategoryAxis(Widget):
 
     def configure(self, multiSeries):
         self._catCount = len(multiSeries[0])
-        self._barWidth = self._length / self._catCount
+        self._barWidth = self._length / (self._catCount or 1)
 
         
     def scale(self, idx):
@@ -476,7 +476,7 @@ class XValueAxis(Widget):
     def configure(self, dataSeries):
         """Let the axis configure its scale and range based on the data.
         
-        Called after setPosition.Let it look at a list of lists of
+        Called after setPosition. Let it look at a list of lists of
         numbers determine the tick mark intervals.  If valueMin,
         valueMax and valueStep are configured then it
         will use them; if any of them are set to Auto it
@@ -486,19 +486,23 @@ class XValueAxis(Widget):
         variable self._values, which is a list of numbers
         to use in plotting."""
 
-        msg = "Need at least one real data series to configure the axis"
-        assert len(dataSeries) > 0, msg
-        msg = "Need at least one element in a data series to configure the axis"
-        assert len(dataSeries[0]) >= 1, msg
-        
-        minFound = dataSeries[0][0]
-        maxFound = dataSeries[0][0]
-        for ser in dataSeries:
-            for num in ser:
-                if num < minFound:
-                    minFound = num
-                if num > maxFound:
-                    maxFound = num
+##        msg = "Need at least one real data series to configure the axis"
+##        assert len(dataSeries) > 0, msg
+##        msg = "Need at least one element in a data series to configure the axis"
+##        assert len(dataSeries[0]) >= 1, msg
+
+        try:
+            minFound = dataSeries[0][0]
+            maxFound = dataSeries[0][0]
+            for ser in dataSeries:
+                for num in ser:
+                    if num < minFound:
+                        minFound = num
+                    if num > maxFound:
+                        maxFound = num
+        except IndexError:
+            minFound = self.valueMin
+            maxFound = self.valueMax
         
         if self.valueMin == Auto:
             self._valueMin = minFound
@@ -511,7 +515,7 @@ class XValueAxis(Widget):
             self._valueMax = self.valueMax
 
         self._scaleFactor = self._length * 1.0 / (self._valueMax - self._valueMin) 
-        
+            
         if self.valueStep == Auto:
             # this needs refining - aim
             # to choose intervals 10 points apart at the
@@ -695,7 +699,7 @@ class YValueAxis(Widget):
     def configure(self, dataSeries):
         """Let the axis configure its scale and range based on the data.
         
-        Called after setPosition.Let it look at a list of lists of
+        Called after setPosition. Let it look at a list of lists of
         numbers determine the tick mark intervals.  If valueMin,
         valueMax and valueStep are configured then it
         will use them; if any of them are set to Auto it
@@ -705,19 +709,23 @@ class YValueAxis(Widget):
         variable self._values, which is a list of numbers
         to use in plotting."""
 
-        msg = "Need at least one real data series to configure the axis"
-        assert len(dataSeries) > 0, msg
-        msg = "Need at least one element in a data series to configure the axis"
-        assert len(dataSeries[0]) >= 1, msg
-        
-        minFound = dataSeries[0][0]
-        maxFound = dataSeries[0][0]
-        for ser in dataSeries:
-            for num in ser:
-                if num < minFound:
-                    minFound = num
-                if num > maxFound:
-                    maxFound = num
+##        msg = "Need at least one real data series to configure the axis"
+##        assert len(dataSeries) > 0, msg
+##        msg = "Need at least one element in a data series to configure the axis"
+##        assert len(dataSeries[0]) >= 1, msg
+
+        try:
+            minFound = dataSeries[0][0]
+            maxFound = dataSeries[0][0]
+            for ser in dataSeries:
+                for num in ser:
+                    if num < minFound:
+                        minFound = num
+                    if num > maxFound:
+                        maxFound = num
+        except IndexError:
+            minFound = self.valueMin
+            maxFound = self.valueMax
         
         if self.valueMin == Auto:
             self._valueMin = minFound
@@ -730,7 +738,7 @@ class YValueAxis(Widget):
             self._valueMax = self.valueMax
 
         self._scaleFactor = self._length * 1.0 / (self._valueMax - self._valueMin) 
-        
+            
         if self.valueStep == Auto:
             # this needs refining - aim
             # to choose intervals 10 points apart at the

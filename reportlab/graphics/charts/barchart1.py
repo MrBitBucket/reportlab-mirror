@@ -447,13 +447,11 @@ class HorizontalBarChart(VerticalBarChart):
 # Samples
 
 def sample0a():
-    "Make a pathologic bar chart with only one data item."
+    "Make a slightly pathologic bar chart with only TWO data items."
     
     drawing = Drawing(400, 200)
 
-    data = [
-            (42,)
-            ]
+    data = [(13, 20)]
     
     bc = VerticalBarChart()
     bc.x = 50
@@ -461,7 +459,38 @@ def sample0a():
     bc.height = 125
     bc.width = 300
     bc.data = data
-    bc.strokeColor = colors.yellow  # visible border
+
+    bc.strokeColor = colors.black
+
+    bc.valueAxis.valueMin = 0
+    bc.valueAxis.valueMax = 60
+    bc.valueAxis.valueStep = 15
+    
+    bc.categoryAxis.labels.boxAnchor = 'ne'
+    bc.categoryAxis.labels.dx = 8
+    bc.categoryAxis.labels.dy = -2
+    bc.categoryAxis.labels.angle = 30
+    bc.categoryAxis.categoryNames = ['Ying', 'Yang']
+
+    drawing.add(bc)
+
+    return drawing    
+
+    
+def sample0b():
+    "Make a pathologic bar chart with only ONE data item."
+    
+    drawing = Drawing(400, 200)
+
+    data = [(42,)]
+    
+    bc = VerticalBarChart()
+    bc.x = 50
+    bc.y = 50
+    bc.height = 125
+    bc.width = 300
+    bc.data = data
+    bc.strokeColor = colors.black
 
     bc.valueAxis.valueMin = 0
     bc.valueAxis.valueMax = 50
@@ -478,15 +507,12 @@ def sample0a():
     return drawing    
 
     
-def sample0b():
-    "Make a slightly pathologic bar chart with only two data items."
+def sample0c():
+    "Make a really pathologic bar chart with NO data items at all!"
     
     drawing = Drawing(400, 200)
 
-    data = [
-            (13, 20),
-            #(14, 6, 21)
-            ]
+    data = [()]
     
     bc = VerticalBarChart()
     bc.x = 50
@@ -494,8 +520,7 @@ def sample0b():
     bc.height = 125
     bc.width = 300
     bc.data = data
-
-    bc.strokeColor = colors.yellow  # visible border
+    bc.strokeColor = colors.black
 
     bc.valueAxis.valueMin = 0
     bc.valueAxis.valueMax = 60
@@ -504,11 +529,8 @@ def sample0b():
     bc.categoryAxis.labels.boxAnchor = 'ne'
     bc.categoryAxis.labels.dx = 8
     bc.categoryAxis.labels.dy = -2
-    bc.categoryAxis.labels.angle = 30
+    bc.categoryAxis.categoryNames = []
 
-    catNames = string.split('Jan Feb', ' ')
-    catNames = map(lambda n:n+'-99', catNames)
-    bc.categoryAxis.categoryNames = catNames
     drawing.add(bc)
 
     return drawing    
@@ -528,8 +550,7 @@ def sample1():
     bc.height = 125
     bc.width = 300
     bc.data = data
-
-    bc.strokeColor = colors.yellow  # visible border
+    bc.strokeColor = colors.black
 
     bc.valueAxis.valueMin = 0
     bc.valueAxis.valueMax = 60
@@ -560,7 +581,6 @@ def sample2a():
     drawing = Drawing(400, 200)
 
     bc = VerticalBarChart()
-    #bc.debug = 1
     bc.x = 50
     bc.y = 50
     bc.height = 120
@@ -601,7 +621,6 @@ def sample2b():
     drawing = Drawing(400, 200)
 
     bc = VerticalBarChart()
-    #bc.debug = 1
     bc.x = 50
     bc.y = 50
     bc.height = 120
