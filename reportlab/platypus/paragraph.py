@@ -93,6 +93,7 @@ def _justifyDrawParaLine( tx, offset, extraspace, words, last=0):
 
 def _putFragLine(tx,words):
     cur_x = 0
+    xtraState = tx.XtraState
     for f in words:
         if hasattr(f,'cbDefn'):
             func = getattr(tx._canvas,f.cbDefn.name,None)
@@ -103,24 +104,31 @@ def _putFragLine(tx,words):
         else:
             if (tx._fontname,tx._fontsize)!=(f.fontName,f.fontSize):
                 tx._setFont(f.fontName, f.fontSize)
-            if tx.XtraState.textColor!=f.textColor:
-                tx.XtraState.textColor = f.textColor
+            if xtraState.textColor!=f.textColor:
+                xtraState.textColor = f.textColor
                 tx.setFillColor(f.textColor)
-            if tx.XtraState.rise!=f.rise:
-                tx.XtraState.rise=f.rise
+            if xtraState.rise!=f.rise:
+                xtraState.rise=f.rise
                 tx.setRise(f.rise)
             tx._textOut(f.text,f is words[-1])  # cheap textOut
             txtlen = tx._canvas.stringWidth(f.text, tx._fontname, tx._fontsize)
-            if not tx.XtraState.underline and f.underline:
-                tx.XtraState.underline = 1
-                tx.XtraState.underline_x = cur_x
-            elif tx.XtraState.underline and not f.underline:
-                tx.XtraState.underline = 0
-                spacelen = tx._canvas.stringWidth(' ', tx._fontname, tx._fontsize)
-                tx.XtraState.underlines.append( (tx.XtraState.underline_x, cur_x-spacelen) )
+            if not xtraState.underline and f.underline:
+                xtraState.underline = 1
+                xtraState.underline_x = cur_x
+                xtraState.underlineColor = f.textColor
+            elif xtraState.underline:
+                if not f.underline:
+                    xtraState.underline = 0
+                    spacelen = tx._canvas.stringWidth(' ', tx._fontname, tx._fontsize)
+                    xtraState.underlines.append( (xtraState.underline_x, cur_x-spacelen, xtraState.underlineColor) )
+                    xtraState.underlineColor = None
+                elif xtraState.textColor!=xtraState.underlineColor:
+                    xtraState.underlines.append( (xtraState.underline_x, cur_x, xtraState.underlineColor) )
+                    xtraState.underlineColor = xtraState.textColor
+                    xtraState.underline_x = cur_x
             cur_x = cur_x + txtlen
-    if tx.XtraState.underline:
-        tx.XtraState.underlines.append( (tx.XtraState.underline_x, cur_x) )
+    if xtraState.underline:
+        xtraState.underlines.append( (xtraState.underline_x, cur_x, xtraState.underlineColor) )
 
 def _leftDrawParaLineX( tx, offset, line, last=0):
     setXPos(tx,offset)
@@ -344,11 +352,17 @@ def _do_under_lines(i, t_off, tx):
     tx._canvas.line(t_off, y, t_off+textlen, y)
 
 def _do_under(i, t_off, tx):
-    y = tx.XtraState.cur_y - i*tx.XtraState.style.leading - tx.XtraState.f.fontSize/8.0 # 8.0 factor copied from para.py
-    for x1,x2 in tx.XtraState.underlines:
+    xtraState = tx.XtraState
+    y = xtraState.cur_y - i*xtraState.style.leading - xtraState.f.fontSize/8.0 # 8.0 factor copied from para.py
+    ulc = None
+    for x1,x2,c in xtraState.underlines:
+        if c!=ulc:
+            tx._canvas.setStrokeColor(c)
+            ulc = c
         tx._canvas.line(t_off+x1, y, t_off+x2, y)
-    tx.XtraState.underlines = []
-    tx.XtraState.underline=0
+    xtraState.underlines = []
+    xtraState.underline=0
+    xtraState.underlineColor=None
 
 class Paragraph(Flowable):
     """ Paragraph(text, style, bulletText=None, caseSensitive=1)
@@ -726,6 +740,9 @@ class Paragraph(Flowable):
                     tx.XtraState.f = f
                     tx.XtraState.style = style
                     tx.XtraState.lines = lines
+                    tx.XtraState.underlines=[]
+                    tx.XtraState.underlineColor=None
+                    canvas.setStrokeColor(f.textColor)
                     _do_under_lines(0, t_off+leftIndent, tx)
 
                     #now the middle of the paragraph, aligned with the left margin which is our origin.
@@ -761,6 +778,7 @@ class Paragraph(Flowable):
                 tx.XtraState.rise=0
                 tx.XtraState.underline=0
                 tx.XtraState.underlines=[]
+                tx.XtraState.underlineColor=None
                 tx.setLeading(style.leading)
                 tx.XtraState.cur_y = cur_y
                 tx.XtraState.f = f

@@ -9,7 +9,7 @@ from reportlab.test.utils import makeSuiteForClasses, outputfile
 from reportlab.platypus import Paragraph, SimpleDocTemplate, XBox, Indenter, XPreformatted
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch
-from reportlab.lib.colors import red, black, navy, white
+from reportlab.lib.colors import red, black, navy, white, green
 from reportlab.lib.randomtext import randomText
 from reportlab.rl_config import defaultPageSize
 
@@ -57,6 +57,7 @@ class ParagraphTestCase(unittest.TestCase):
 
         #need a style
         styNormal = ParagraphStyle('normal')
+        styGreen = ParagraphStyle('green',parent=styNormal,textColor=green)
 
         # some to test
         stySpaced = ParagraphStyle('spaced',
@@ -112,6 +113,8 @@ class ParagraphTestCase(unittest.TestCase):
         story.append(Paragraph("""This has <i>italic text</i> here.""", styNormal))
         story.append(Paragraph("""This has <b>bold text</b> here.""", styNormal))
         story.append(Paragraph("""This has <u>underlined text</u> here.""", styNormal))
+        story.append(Paragraph("""This has <font color=blue><u>blue and <font color=red>red</font> underlined text</u></font> here.""", styNormal))
+        story.append(Paragraph("""<u>green underlining</u>""", styGreen))
         story.append(Paragraph("""This has m<super>2</super> a superscript.""", styNormal))
         story.append(Paragraph("""This has m<sub>2</sub> a subscript. Like H<sub>2</sub>O!""", styNormal))
         story.append(Paragraph("""This has a font change to <font name=Helvetica>Helvetica</font>.""", styNormal))
