@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "0.9"
+#define VERSION "0.91"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -1199,10 +1199,239 @@ static PyObject* delCache(PyObject* self, PyObject* args)
 	return Py_None;
 }
 
+#define HEADER_SIZE		512
+
+#define	RUN_THRESH		3
+#define	MAX_RUN			128		/* 0xff = 2, 0xfe = 3, etc */
+#define	MAX_COUNT		128		/* 0x00 = 1, 0x01 = 2, etc */
+
+/* Opcodes */
+#define PICT_picVersion		0x11
+#define	PICT_headerOp		0x0C00
+#define PICT_clipRgn		0x01
+#define PICT_PackBitsRect	0x98
+#define PICT_EndOfPicture	0xFF
+#define PICT_MAXCOLORS 256
+
+typedef unsigned char pixel;
+typedef struct {pixel *p, *buf;} BYTE_STREAM;
+void pict_putc(unsigned c, BYTE_STREAM* bs)
+{
+	*bs->p++ = c;
+}
+
+static void pict_putFill(BYTE_STREAM* fd, int n)
+{
+	register int i;
+
+	for (i = 0; i < n; i++)
+		(void) pict_putc(0, fd);
+}
+
+static void pict_putShort(BYTE_STREAM* fd, int i)
+{
+	(void) pict_putc((i >> 8) & 0xff, fd);
+	(void) pict_putc(i & 0xff, fd);
+}
+
+static void pict_putLong( BYTE_STREAM *fd, long i )
+{
+	(void) pict_putc((int)((i >> 24) & 0xff), fd);
+	(void) pict_putc(((int)(i >> 16) & 0xff), fd);
+	(void) pict_putc(((int)(i >> 8) & 0xff), fd);
+	(void) pict_putc((int)(i & 0xff), fd);
+}
+
+static void pict_putFixed(BYTE_STREAM* fd, int in, int frac)
+{
+	pict_putShort(fd, in);
+	pict_putShort(fd, frac);
+}
+
+static void pict_putRect(BYTE_STREAM* fd, int x1, int x2, int y1, int y2)
+{
+	pict_putShort(fd, x1);
+	pict_putShort(fd, x2);
+	pict_putShort(fd, y1);
+	pict_putShort(fd, y2);
+}
+
+#define		runtochar(c)	(257-(c))
+#define		counttochar(c)	((c)-1)
+static int pict_putRow(BYTE_STREAM* fd, int row, int cols, pixel* rowpixels, char* packed)
+{
+	register int i;
+	int packcols, count, run, rep, oc;
+	register pixel *pP;
+	pixel lastp;
+	register char *p;
+
+	run = count = 0;
+	for (cols--, i = cols, pP = rowpixels + cols, p = packed, lastp = *pP;
+		i >= 0; i--, lastp = *pP, pP--){
+		if (lastp == *pP) run++;
+		else if (run < RUN_THRESH){
+			while (run > 0){
+				*p++ = lastp;
+				run--;
+				count++;
+				if (count == MAX_COUNT){
+					*p++ = counttochar(MAX_COUNT);
+					count -= MAX_COUNT;
+					}
+				}
+			run = 1;
+			}
+		else{
+			if (count > 0) *p++ = counttochar(count);
+			count = 0;
+			while (run > 0){
+				rep = run > MAX_RUN ? MAX_RUN : run;
+				*p++ = lastp;
+				*p++ = runtochar(rep);
+				run -= rep;
+				}
+			run = 1;
+			}
+		}
+	if (run < RUN_THRESH){
+		while (run > 0){
+			*p++ = lastp;
+			run--;
+			count++;
+			if (count == MAX_COUNT){
+				*p++ = counttochar(MAX_COUNT);
+				count -= MAX_COUNT;
+				}
+			}
+		}
+	else{
+		if (count > 0) *p++ = counttochar(count);
+		count = 0;
+		while (run > 0){
+			rep = run > MAX_RUN ? MAX_RUN : run;
+			*p++ = lastp;
+			*p++ = runtochar(rep);
+				run -= rep;
+			}
+		run = 1;
+		}
+	if (count > 0) *p++ = counttochar(count);
+
+	packcols = p - packed;		/* how many did we write? */
+	if (cols > 250){
+		pict_putShort(fd, packcols);
+		oc = packcols + 2;
+		}
+	else{
+		(void) pict_putc(packcols, fd);
+		oc = packcols + 1;
+		}
+
+	/* now write out the packed row */
+	while(p != packed){
+		--p;
+		(void) pict_putc(*p, fd);
+		}
+
+	return (oc);
+}
+
+static PyObject* pil2pict(PyObject* self, PyObject* args)
+{
+	PyObject *result;
+	int		rows, cols, colors, i, row, oc, len, npixels;
+	char	*packed;
+	long	lpos;
+	pixel	*palette, *pixels;
+	BYTE_STREAM	OBS;
+	BYTE_STREAM	*obs = &OBS;
+
+	if(!PyArg_ParseTuple(args,"iis#s#:pil2pict",&cols,&rows,&pixels,&npixels,&palette,&colors)) return NULL;
+
+	colors /= 3;
+	len = HEADER_SIZE*4+colors*4*sizeof(short)+cols*rows*sizeof(pixel);	/*generous estimate of maximum size*/
+	obs->buf = obs->p = (pixel*)malloc(len);
+
+	/* write the header */
+	pict_putFill(obs, HEADER_SIZE);
+
+	/* write picSize and picFrame */
+	pict_putShort(obs, 0);
+	pict_putRect(obs, 0, 0, rows, cols);
+
+	/* write version op and version */
+	pict_putShort(obs, PICT_picVersion);
+	pict_putShort(obs, 0x02FF);
+	pict_putShort(obs, PICT_headerOp);
+	pict_putLong(obs, -1L);
+	pict_putFixed(obs, 0, 0);
+	pict_putFixed(obs, 0, 0);
+	pict_putFixed(obs, cols, 0);
+	pict_putFixed(obs, rows, 0);
+	pict_putFill(obs, 4);
+
+	/* seems to be needed by many PICT2 programs */
+	pict_putShort(obs, PICT_clipRgn);
+	pict_putShort(obs, 10);
+	pict_putRect(obs, 0, 0, rows, cols);
+
+	/* write picture */
+	pict_putShort(obs, PICT_PackBitsRect);
+	pict_putShort(obs, cols | 0x8000);
+	pict_putRect(obs, 0, 0, rows, cols);
+	pict_putShort(obs, 0);	/* pmVersion */
+	pict_putShort(obs, 0);	/* packType */
+	pict_putLong(obs, 0L);	/* packSize */
+	pict_putFixed(obs, 72, 0);	/* hRes */
+	pict_putFixed(obs, 72, 0);	/* vRes */
+	pict_putShort(obs, 0);	/* pixelType */
+	pict_putShort(obs, 8);	/* pixelSize */
+	pict_putShort(obs, 1);	/* cmpCount */
+	pict_putShort(obs, 8);	/* cmpSize */
+	pict_putLong(obs, 0L);	/* planeBytes */
+	pict_putLong(obs, 0L);	/* pmTable */
+	pict_putLong(obs, 0L);	/* pmReserved */
+	pict_putLong(obs, 0L);	/* ctSeed */
+	pict_putShort(obs, 0);	/* ctFlags */
+	pict_putShort(obs, colors-1);	/* ctSize */
+
+	/*Write out the colormap*/
+	for (i = 0; i < colors; i++){
+		pict_putShort(obs, i);
+		pict_putShort(obs, (short)(((unsigned long)palette[3*i]*65535L)/255L));
+		pict_putShort(obs, (short)(((unsigned long)palette[3*i+1]*65535L)/255L));
+		pict_putShort(obs, (short)(((unsigned long)palette[3*i+2]*65535L)/255L));
+		}
+
+	pict_putRect(obs, 0, 0, rows, cols);	/* srcRect */
+	pict_putRect(obs, 0, 0, rows, cols);	/* dstRect */
+	pict_putShort(obs, 0);				/* mode */
+
+	/*write out the pixel data.*/
+	packed = (char*) malloc((unsigned)(cols+cols/MAX_COUNT+1));
+	oc = 0;
+	for(row=0; row<rows; row++) oc += pict_putRow(obs, row, cols, pixels+row*cols, packed);
+	free(packed);
+
+	/*pad to even number of bytes*/
+	if (oc & 1) (void)pict_putc(0, obs);
+	pict_putShort(obs, PICT_EndOfPicture);
+
+	len = obs->p-obs->buf;
+	lpos = (obs->p-obs->buf) - HEADER_SIZE;
+	obs->p = obs->buf + HEADER_SIZE;
+	pict_putShort(obs, (short)(lpos & 0xffff));
+	result = PyString_FromStringAndSize(obs->buf,len);
+	free(obs->buf);
+	return result;
+}
+
 static struct PyMethodDef moduleMethods[] = {
 	{"gstate", (PyCFunction)gstate, METH_VARARGS|METH_KEYWORDS, "gstate(width,height[,depth=3][,bg=0xffffff]) create an initialised graphics state"},
 	{"makeT1Font", (PyCFunction)makeT1Font, METH_VARARGS, "makeT1Font(fontName,pfbPath,names)"},
 	{"delCache", (PyCFunction)delCache, METH_VARARGS, "delCache()"},
+	{"pil2pict", (PyCFunction)pil2pict, METH_VARARGS, "pil2pict(cols,rows,datastr,palette) return PICT version of im as a string"},
 	{NULL,	NULL}			/*sentinel*/
 	};
 
