@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/flags.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.7 2001/09/21 17:04:27 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/flags.py,v 1.8 2001/09/21 18:06:07 rgbecker Exp $
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 
@@ -147,11 +147,12 @@ class Flag(ETriangle0):
 
 	def availableFlagNames(self):
 		'''return a list of the things we can display'''
-		return filter(lambda x: x is not None, self._attrMap['kind']._enum)
+		return filter(lambda x: x is not None, self._attrMap['kind'].validate._enum)
 
 	def demo(self):
 		D = shapes.Drawing(200, 100)
 		name = self.availableFlagNames()
+		import time
 		name = name[int(time.time()) % len(name)]
 		fx = Flag()
 		fx.kind = name
