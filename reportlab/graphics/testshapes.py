@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/testshapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.20 2003/12/17 18:41:23 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.21 2004/01/28 13:03:47 rgbecker Exp $
 
 # testshapes.py - draws shapes onto a PDF canvas.
 
@@ -27,7 +27,7 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus import Flowable
 from reportlab.graphics.shapes import *
 from reportlab.graphics.renderPDF import _PDFRenderer
-from reportlab.test import unittest
+import unittest
 
 _FONTS = ['Times-Roman','Courier','Times-BoldItalic',]
 
@@ -417,8 +417,12 @@ def getDrawing13():
             for D in ('c:\WINNT','c:\Windows'):
                 fn = os.path.join(D,'Fonts',ttf)
                 if os.path.isfile(fn):
-                    pdfmetrics.registerFont(ttfonts.TTFont(name, fn))
-                    F.append(name)
+                    try:
+                        f = ttfonts.TTFont(name, fn)
+                        pdfmetrics.registerFont(f)
+                        F.append(name)
+                    except:
+                        pass
 
     def drawit(F,w=400,h=200,fontSize=12,slack=2,gap=5):
         D = Drawing(w,h)
