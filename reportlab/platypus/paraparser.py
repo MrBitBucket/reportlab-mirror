@@ -32,10 +32,13 @@
 #
 ###############################################################################
 #	$Log: paraparser.py,v $
+#	Revision 1.14  2000/05/11 14:05:17  rgbecker
+#	Use reportlab.lib.xmllib
+#
 #	Revision 1.13  2000/04/25 13:07:57  rgbecker
 #	Added license
-#
-__version__=''' $Id: paraparser.py,v 1.13 2000/04/25 13:07:57 rgbecker Exp $ '''
+#	
+__version__=''' $Id: paraparser.py,v 1.14 2000/05/11 14:05:17 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -43,12 +46,14 @@ import sys
 import os
 import copy
 
-try:
-	from xml.parsers import xmllib
-	_xmllib_newStyle = 1
-except ImportError:
-	import xmllib
-	_xmllib_newStyle = 0
+#try:
+#	from xml.parsers import xmllib
+#	_xmllib_newStyle = 1
+#except ImportError:
+#	import xmllib
+#	_xmllib_newStyle = 0
+from reportlab.lib import xmllib
+_xmllib_newStyle = 1
 
 from reportlab.lib.colors import stringToColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
@@ -350,7 +355,7 @@ class ParaParser(xmllib.XMLParser):
 					self.start_greekLetter(attr,letter), self.end_greek)
 
 			# set up dictionary for greek characters, this is a class variable
-			self.entitydefs = copy.copy(self.entitydefs)
+			self.entitydefs = self.entitydefs.copy()
 			for item in greeks.keys():
 				self.entitydefs[item] = '<%s/>' % item
 
@@ -524,3 +529,4 @@ but listen while I tell you the prophecy that Teiresias made me, and
 how carefully Aeaean Circe warned me to shun the island of the blessed
 sun-god, for it was here, she said, that our worst danger would lie.
 Head the ship, therefore, away from the island.''')
+	check_text('''&lt; &gt; &amp; &quot; &apos;''')
