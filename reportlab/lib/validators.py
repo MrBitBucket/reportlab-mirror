@@ -142,6 +142,10 @@ class _isValidChild(Validator):
 		from reportlab.graphics.shapes import UserNode, Shape
 		return isinstance(x, UserNode) or isinstance(x, Shape)
 
+class _isValidChildOrNone(_isValidChild):
+	def test(self,x):
+		return _isValidChild.test(self,x) or x is None
+
 class OneOf(Validator):
 	"""Make validator functions for list of choices.
 
@@ -195,6 +199,7 @@ isColor = _isColor()
 isListOfColors = SequenceOf(isColor,'isListOfColors')
 isColorOrNone = _isColorOrNone()
 isValidChild = _isValidChild()
+isValidChildOrNone = _isValidChildOrNone()
 isAnything = _isAnything()
 isNothing = _isNothing()
 isXYCoord = SequenceOf(isNumber,lo=2,hi=2,emptyOK=0)
