@@ -201,4 +201,7 @@ copyright (C) Thomas Bushnell, BSG.
 
 To really test that reportlab can produce pages quickly download the
 complete version of the test from http://classics.mit.edu//Homer/odyssey.html
-and copy it to this directory as odyssey.txt.
+and copy it to this directory as odyssey.full.txt.
+
+A zipped version of the full text is available for download at
+ftp://ftp.reportlab.com/odyssey.full.zip
