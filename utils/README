@@ -39,7 +39,7 @@ As there were a fair number of problems, I am looking at the output of
 Release Procedure
 1) edit reportlab/__init__.py and insert the new version number d.xy
 
-2) use cvs -z7 log >/tmp/log followed by
+2) use cvs -z9 log >/tmp/log followed by
    python utils/cvslh.py -d"2000/mm/dd hh:mm:ss" -s -r </tmp/log >/tmp/logh
    to get a list of the latest changes. The date & time should correspond to
    the previous release. Add the changes into the reportlab changes file at
