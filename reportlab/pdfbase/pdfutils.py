@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.30 2002/04/13 15:24:06 rgbecker Exp $
-__version__=''' $Id: pdfutils.py,v 1.30 2002/04/13 15:24:06 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.31 2002/05/23 16:24:43 rgbecker Exp $
+__version__=''' $Id: pdfutils.py,v 1.31 2002/05/23 16:24:43 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -171,8 +171,7 @@ def _AsciiHexEncode(input):
     for char in input:
         output.write('%02x' % ord(char))
     output.write('>')
-    output.reset()
-    return output.read()
+    return output.getvalue()
 
 
 def _AsciiHexDecode(input):
@@ -192,8 +191,7 @@ def _AsciiHexDecode(input):
         twobytes = stripped[i:i+2]
         output.write(chr(eval('0x'+twobytes)))
         i = i + 2
-    output.reset()
-    return output.read()
+    return output.getvalue()
 
 
 if 1: # for testing always define this
@@ -266,8 +264,7 @@ if 1: # for testing always define this
     
         #terminator code for ascii 85    
         outstream.write('~>')
-        outstream.reset()
-        return outstream.read()
+        return outstream.getvalue()
 
 try:
     try:
@@ -352,8 +349,7 @@ def _AsciiBase85Decode(input):
         outstream.write(lastword)
 
     #terminator code for ascii 85    
-    outstream.reset()
-    return outstream.read()
+    return outstream.getvalue()
 
 
 def _wrap(input, columns=60):
