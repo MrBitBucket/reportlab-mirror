@@ -33,16 +33,19 @@
 #
 ###############################################################################
 #	$Log: colors.py,v $
+#	Revision 1.5  2000/04/05 15:26:17  rgbecker
+#	Added ColorType
+#
 #	Revision 1.4  2000/04/05 14:22:38  rgbecker
 #	Allow 0x in HexColor, added stringToColor, fixed caching in getAllNamedColors
-#
+#	
 #	Revision 1.3  2000/03/24 10:37:02  rgbecker
 #	Sync with pingo
 #	
 #	Revision 1.2  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
 #	
-__version__=''' $Id: colors.py,v 1.4 2000/04/05 14:22:38 rgbecker Exp $ '''
+__version__=''' $Id: colors.py,v 1.5 2000/04/05 15:26:17 rgbecker Exp $ '''
 
 import string
 import math
@@ -70,6 +73,7 @@ class Color:
         if dsum > 0: return 1
         if dsum < 0: return -1
         return 0
+
         
 def cmyk2rgb(cmyktuple):
     # utility function
@@ -253,8 +257,7 @@ whitesmoke =    HexColor(0xF5F5F5)
 yellow =    HexColor(0xFFFF00)
 yellowgreen =   HexColor(0x9ACD32)
 
-
-
+ColorType=type(black)
 
     ################################################################
     #
