@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.9 2001/03/30 18:13:51 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.10 2001/03/30 18:28:55 dinu_gherman Exp $
 
 from gengraphguide import *
 
@@ -1700,37 +1700,45 @@ draw(drawing, 'Like before, but with modified spacing')
 ##title, subTitle Not implemented yet. These would be label-like objects whose text could be set directly and which would appear in sensible locations. For now, you can just place extra strings on the drawing. 
 
 
-heading3("Open Issues")
-
-disc("There are several open issues:")
-
-list("""vertical position of X axis - by default the X axis sits at the 
-       bottom. One should be able to specify if it sits at the top, the 
-       bottom or at a specific y value (e.g. y=0).""")
-list("""bar labelling - in cases with some negative bars, the label should 
-       appear BELOW the negative labels and ABOVE the positive ones. How can 
-       we specify this?""")
-list("""color specification - right now the chart has an undocumented property 
-       $defaultColors$, which provides a list of colors to cycle through. If 
-       you introduce a legend, it should share the list of colors. What's 
-       more, several charts can share a legend. Should we sppecify colors and 
-       line styles on a legend object and attach charts to that, ruling that 
-       the legend need not be visible? Similar issues appear to x-y charts.""")
+heading3("Remaining Issues")
 
 disc("""
-When we are a bit more confident of the design, we expect to add 
-variants of bar charts to deal with stacked and 100% bars as well as 
-the side-by-side variant seen here, and variants with vertical and 
-horizontal orientation.
-For now, if you want one oriented the other way, just put it in a group
-and rotate it - here's a $VerticalBarChart$ where we just turned the
-labels and the whole chart around by 90 degrees, and hid one of the
-axes:
+There are several issues that are <i>almost</i> solved, but for which
+is is a bit too early to start making them really public.
+Nevertheless, here is a list of things that are under way:
 """)
 
-disc("")
+list("""
+Vertical position of X axis - by default the X axis sits at the bottom.
+One will be able to specify if it sits at the top, the bottom or at
+a specific Y value (either in absolute coordinates or in those of the
+axis itself).
+""")
 
-todo("add image")
+list("""
+Bar labelling - in cases where bar values are negative, the label
+should appear <i>below</i> the lower end of the bar and <i>above</i>
+the upper end of the other ones.
+This is actually already working automatically.
+""")
+
+list("""
+Color specification - right now the chart has an undocumented property 
+$defaultColors$, which provides a list of colors to cycle through,
+such that each data series gets its own color.
+If you introduce a legend, it should share the list of colors.
+Most likely, this will be replaced with a scheme to specify a kind
+of legend containing attributes with different values for each data
+series.
+This legend can then also be shared by several charts, but need not
+be visible itself.
+""")
+
+disc("""
+When the current design will have become more stable, we expect to add 
+variants of bar charts to deal with stacked and percentile bars as well as 
+the side-by-side variant seen here.
+""")
 
 
 heading2("Pie Charts")
