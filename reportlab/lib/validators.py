@@ -186,6 +186,17 @@ class SequenceOf(Validator):
 			if not self._elemTest(e): return 0
 		return 1
 
+class EitherOr(Validator):
+	def __init__(self,tests,name=None):
+		if type(tests) not in _SequenceTypes: tests = (tests,)
+		self._tests = tests
+		if name: self._str = name
+
+	def test(self, x):
+		for t in self._tests:
+			if t(x): return 1
+		return 0
+
 class NoneOr(Validator):
 	def __init__(self,elemTest,name=None):
 		self._elemTest = elemTest
