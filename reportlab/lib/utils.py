@@ -1,14 +1,87 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.58 2004/01/20 22:50:31 andy_robinson Exp $
-__version__=''' $Id: utils.py,v 1.58 2004/01/20 22:50:31 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.59 2004/03/08 18:36:05 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.59 2004/03/08 18:36:05 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
 from reportlab.lib.logger import warnOnce
 SeqTypes = (ListType,TupleType)
 
+def _findFiles(dirList,ext='.ttf'):
+    from os.path import isfile, isdir, join as path_join
+    from os import listdir
+    ext = ext.lower()
+    R = []
+    A = R.append
+    for D in dirList:
+        if not isdir(D): continue
+        for fn in listdir(D):
+            fn = path_join(D,fn)
+            if isfile(fn) and (not ext or fn.lower().endswith(ext)): A(fn)
+    return R
+
+try:
+    _UserDict = dict
+except:
+    from UserDict import UserDict as _UserDict
+
+class CIDict(_UserDict):
+    def __init__(self,*a,**kw):
+        map(self.update, a)
+        self.update(kw)
+
+    def update(self,D):
+        for k,v in D.items(): self[k] = v
+
+    def __setitem__(self,k,v):
+        try:
+            k = k.lower()
+        except:
+            pass
+        _UserDict.__setitem__(self,k,v)
+
+    def __getitem__(self,k):
+        try:
+            k = k.lower()
+        except:
+            pass
+        return _UserDict.__getitem__(self,k)
+
+    def __delitem__(self,k):
+        try:
+            k = k.lower()
+        except:
+            pass
+        return _UserDict.__delitem__(self,k)
+
+    def get(self,k,dv=None):
+        try:
+            return self[k]
+        except KeyError:
+            return dv
+
+    def has_key(self,k):
+        try:
+            self[k]
+            return True
+        except:
+            return False
+
+    def pop(self,k,*a):
+        try:
+            k = k.lower()
+        except:
+            pass
+        return _UserDict.pop(*((self,k)+a))
+
+    def setdefault(self,k,*a):
+        try:
+            k = k.lower()
+        except:
+            pass
+        return _UserDict.setdefault(*((self,k)+a))
 
 if os.name == 'mac':
     #with the Mac, we need to tag the file in a special
