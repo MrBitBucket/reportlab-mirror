@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.26 2004/03/24 17:14:53 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.27 2004/03/26 10:48:43 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.26 2004/03/24 17:14:53 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.27 2004/03/26 10:48:43 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,7 +31,7 @@ static char* __version__=" $Id: pyRXP.c,v 1.26 2004/03/24 17:14:53 rgbecker Exp 
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "1.02"
+#define VERSION "1.03"
 #define MAX_DEPTH 256
 
 #if CHAR_SIZE==16
@@ -506,7 +506,7 @@ static InputSource entity_open(Entity e, void *info)
 		arglist = Py_BuildValue("(s)",e->systemid);	/*NB 8 bit*/
 		result = PyEval_CallObject(eoCB, arglist);
 		if(result){
-			int isTuple;
+			int isTuple=0;
 			if(PyString_Check(result)||(isTuple=PyTuple_Check(result))){
 				int	i;
 				PyObject_Cmp(PyTuple_GET_ITEM(arglist,0),result,&i);
