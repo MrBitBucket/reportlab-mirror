@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: gfe.py,v $
+#	Revision 1.11  2000/06/01 16:27:56  rgbecker
+#	pageSize is wrong at present
+#
 #	Revision 1.10  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
-#
+#	
 #	Revision 1.9  2000/05/17 15:37:33  rgbecker
 #	Changes related to removal of SimpleFlowDocument
 #	
@@ -61,7 +64,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:15:57  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: gfe.py,v 1.10 2000/06/01 15:23:06 rgbecker Exp $ '''
+__version__=''' $Id: gfe.py,v 1.11 2000/06/01 16:27:56 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -118,7 +121,7 @@ def myLaterPages(canvas, doc):
     
 def go():
     Elements.insert(0,Spacer(0,inch))
-    doc = SimpleDocTemplate('gfe.pdf',pageSize=DEFAULT_PAGE_SIZE)
+    doc = SimpleDocTemplate('gfe.pdf')
     doc.build(Elements,onFirstPage=myFirstPage, onLaterPages=myLaterPages)
 
 Elements = []

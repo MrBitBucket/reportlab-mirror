@@ -31,11 +31,14 @@
 #
 ###############################################################################
 #	$Log: flowables.py,v $
+#	Revision 1.2  2000/06/01 16:27:56  rgbecker
+#	pageSize is wrong at present
+#
 #	Revision 1.1  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
-#
 #	
-__version__=''' $Id: flowables.py,v 1.1 2000/06/01 15:23:06 rgbecker Exp $ '''
+#	
+__version__=''' $Id: flowables.py,v 1.2 2000/06/01 16:27:56 rgbecker Exp $ '''
 __doc__="""
 """
 
@@ -262,4 +265,4 @@ class Macro(Flowable):
 	def draw(self):
 		exec self.command in globals(), {'canvas':self.canv}
 
-from paragraph import Paragraph
+#from paragraph import Paragraph

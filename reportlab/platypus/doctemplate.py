@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.14  2000/06/01 16:27:56  rgbecker
+#	pageSize is wrong at present
+#
 #	Revision 1.13  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
-#
+#	
 #	Revision 1.12  2000/05/26 10:27:37  rgbecker
 #	Fixed infinite recursion bug
 #	
@@ -70,7 +73,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.13 2000/06/01 15:23:06 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.14 2000/06/01 16:27:56 rgbecker Exp $ '''
 __doc__="""
 More complicated Document model
 """
@@ -99,10 +102,14 @@ class ActionFlowable(Flowable):
 	def apply(self,doc):
 		action = self.action[0]
 		args = tuple(self.action[1:])
+		arn = 'handle_'+action
 		try:
-			apply(getattr(doc,'handle_'+action), args)
-		except AttributeError:
-			raise NotImplementedError, "Can't handle ActionFlowable(%s)" % action
+			apply(getattr(doc,arn), args)
+		except AttributeError, aerr:
+			if aerr.args[0]==arn:
+				raise NotImplementedError, "Can't handle ActionFlowable(%s)" % action
+			else:
+				raise
 		except:
 			t, v, None = sys.exc_info()
 			raise t, "%s\n   handle_%s args=%s"%(v,action,args)
@@ -156,7 +163,7 @@ class BaseDocTemplate:
 
 	4)	The document instances can override the base handler routines.
 	"""
-	_initArgs = {	'pageSize':DEFAULT_PAGE_SIZE,
+	_initArgs = {	'pagesize':DEFAULT_PAGE_SIZE,
 					'pageTemplates':[],
 					'showBoundary':0,
 					'leftMargin':inch,
@@ -187,8 +194,8 @@ class BaseDocTemplate:
 		self._calc()
 
 	def _calc(self):
-		self._rightMargin = self.pageSize[0] - self.rightMargin
-		self._topMargin = self.pageSize[1] - self.topMargin
+		self._rightMargin = self.pagesize[0] - self.rightMargin
+		self._topMargin = self.pagesize[1] - self.topMargin
 		self.width = self._rightMargin - self.leftMargin
 		self.height = self._topMargin - self.bottomMargin
 

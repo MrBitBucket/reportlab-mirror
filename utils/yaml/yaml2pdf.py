@@ -19,6 +19,7 @@ import yaml
 from reportlab.lib.styles import ParagraphStyle, StyleSheet1
 from reportlab.lib.enums import *
 from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import inch
 from reportlab.platypus import *
 from reportlab.lib import colors
 
@@ -42,9 +43,8 @@ class MyPageTemplate(PageTemplate):
         canvas.drawCentredString(doc.pagesize[0] / 2, 0.75*inch, 'Page %d' % canvas.getPageNumber())
         canvas.restoreState()
 
-
 class MyDocTemplate(BaseDocTemplate):
-	_invalidInitArgs = ('pageTemplates',)
+    _invalidInitArgs = ('pageTemplates',)
     def __init__(self, filename, **kw):
         apply(BaseDocTemplate.__init__,(self,filename),kw)
 

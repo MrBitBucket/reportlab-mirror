@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: testtables.py,v $
+#	Revision 1.10  2000/06/01 16:27:56  rgbecker
+#	pageSize is wrong at present
+#
 #	Revision 1.9  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
-#
+#	
 #	Revision 1.8  2000/05/17 15:37:33  rgbecker
 #	Changes related to removal of SimpleFlowDocument
 #	
@@ -57,7 +60,7 @@
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #
-__version__=''' $Id: testtables.py,v 1.9 2000/06/01 15:23:06 rgbecker Exp $ '''
+__version__=''' $Id: testtables.py,v 1.10 2000/06/01 16:27:56 rgbecker Exp $ '''
 __doc__='Test script for reportlab.tables'
 from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle
 from reportlab.lib.units import inch
@@ -89,7 +92,7 @@ def makeStyles():
     return styles
 
 def run():
-    doc = SimpleDocTemplate('testtables.pdf', pageSize=(8.5*inch, 11*inch), showBoundary=1)
+    doc = SimpleDocTemplate('testtables.pdf', pagesize=(8.5*inch, 11*inch), showBoundary=1)
     styles = makeStyles()
     lst = []
     for style in styles:
