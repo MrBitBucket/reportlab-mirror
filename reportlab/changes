@@ -1,3 +1,276 @@
+########### 1.01 Released 2000/10/10
+##### 2000/10/05 #####
+	pdfbase/pdfutils.py 1.12 rgbecker
+		 Fix indentation
+	pdfbase/pdfutils.py 1.11 rgbecker
+		 Changes to make freezing easier
+	pdfbase/pdfmetrics.py 1.13 rgbecker
+		 Changes to make freezing easier
+	lib/xmllib.py 1.4 rgbecker
+		 Changes to make freezing easier
+	lib/utils.py 1.4 rgbecker
+		 Changes to make freezing easier
+##### 2000/10/04 #####
+	platypus/xpreformatted.py 1.10 rgbecker
+		 Fixed copying bug
+##### 2000/10/03 #####
+	lib/styles.py 1.7 rgbecker
+		 Code needs a firstLineIndent same as normal lineIndent
+	platypus/paragraph.py 1.23 rgbecker
+		 Justified XPreformatteds are OK
+##### 2000/10/02 #####
+	platypus/frames.py 1.9 rgbecker
+		 Fixed the atTop test again
+	platypus/frames.py 1.8 rgbecker
+		 Fixed the atTop test
+	platypus/xpreformatted.py 1.9 rgbecker
+		 Added license
+	platypus/xpreformatted.py 1.8 rgbecker
+		 Splitting fixes. Mostly caused by XPreformatted not doing it right.
+	platypus/paragraph.py 1.22 rgbecker
+		 Splitting fixes. Mostly caused by XPreformatted not doing it right.
+##### 2000/10/01 #####
+	platypus/frames.py 1.7 rgbecker
+		 Fixed atTop bugs thanks to the effbot
+	platypus/xpreformatted.py 1.7 rgbecker
+		 Cleaning up XPreformatted
+	platypus/xpreformatted.py 1.6 rgbecker
+		 Removed space split and readding
+##### 2000/09/27 #####
+	pdfbase/pdfmetrics.py 1.12 andy_robinson
+		 more work on metrics and encodings for custom fonts
+	pdfbase/pdfmetrics.py 1.11 andy_robinson
+		 Begun work on loading new AFM files
+	lib/colors.py 1.12 rgbecker
+		 Fix for sun compiler
+	lib/_rl_accel.c 1.3 rgbecker
+		 Fix for sun compiler
+##### 2000/09/25 #####
+	lib/styles.py 1.6 andy_robinson
+		 added has_key method to stylesheet1
+	demos/stdfonts/stdfonts.py 1.6 andy_robinson
+		 Allows you to generate hex, decimal or octal labels
+##### 2000/09/08 #####
+	pdfbase/pdfdoc.py 1.24 rgbecker
+		 Paul Eddington's unix tell() returns a LongIntType bugfix
+##### 2000/09/04 #####
+	pdfgen/canvas.py 1.51 rgbecker
+		 Fix spurious comment reference to layout
+##### 2000/09/01 #####
+	docs/userguide/ch2_graphics.py 1.8 rgbecker
+		 Correct size setting thanks to Werner Louche
+	pdfgen/textobject.py 1.18 rgbecker
+		 Improved optimisation checks
+	pdfgen/canvas.py 1.50 rgbecker
+		 Improved optimisation checks
+	pdfgen/textobject.py 1.17 rgbecker
+		 Fixed potential 'Td' bug
+##### 2000/08/31 #####
+	pdfgen/canvas.py 1.49 rgbecker
+		 Fix transform optimisation
+##### 2000/08/29 #####
+	lib/pyHnj.dsp 1.1 rgbecker
+		 Initial version of D Yoo's pyHnj
+	lib/utils.py 1.3 rgbecker
+		 Initial version of D Yoo's pyHnj
+	lib/pyHnjmodule.c 1.1 rgbecker
+		 Initial version of D Yoo's pyHnj
+	lib/hyphen.mashed 1.1 rgbecker
+		 Initial version of D Yoo's pyHnj
+	lib/hyphen.h 1.1 rgbecker
+		 Initial version of D Yoo's pyHnj
+	lib/hyphen.c 1.1 rgbecker
+		 Initial version of D Yoo's pyHnj
+	lib/hnjalloc.h 1.1 rgbecker
+		 Initial version of D Yoo's pyHnj
+	lib/hnjalloc.c 1.1 rgbecker
+		 Initial version of D Yoo's pyHnj
+	lib/__BUILD.dsw 1.2 rgbecker
+		 Initial version of D Yoo's pyHnj
+	lib/Setup.in 1.2 rgbecker
+		 Initial version of D Yoo's pyHnj
+	lib/Makefile.pre.in 1.3 rgbecker
+		 Initial version of D Yoo's pyHnj
+	extensions/__init__.py 1.1 rgbecker
+		 Initial version
+	extensions/README 1.1 rgbecker
+		 Initial version
+##### 2000/08/25 #####
+	platypus/xpreformatted.py 1.5 rgbecker
+		 Further tweaks of XPreformatted
+	platypus/paragraph.py 1.21 rgbecker
+		 Further tweaks of XPreformatted
+	docs/userguide/ch6_tables.py 1.15 rgbecker
+		 Further tweaks of XPreformatted
+##### 2000/08/24 #####
+	platypus/xpreformatted.py 1.4 rgbecker
+		 XPreformatted fixed empty lines and leading space
+	platypus/paragraph.py 1.20 rgbecker
+		 XPreformatted fixed empty lines and leading space
+	lib/utils.py 1.2 rgbecker
+		 Added _className func
+	docs/userguide/ch6_tables.py 1.14 rgbecker
+		 harder test of XPreformatted
+	docs/userguide/ch6_tables.py 1.13 rgbecker
+		 Added blank lines to XPreformatted sample
+	platypus/xpreformatted.py 1.3 rgbecker
+		 Fixes to _dedenter
+	platypus/flowables.py 1.9 rgbecker
+		 Fixes to _dedenter
+	docs/userguide/genuserguide.py 1.35 rgbecker
+		 Added  Mac Intro
+	docs/userguide/ch1_intro.py 1.10 rgbecker
+		 Added  Mac Intro
+	docs/images/Python_1.6a2_HINT.gif 1.1 rgbecker
+		 Initial versions for Mac intro
+	docs/images/Python_1.6a2.gif 1.1 rgbecker
+		 Initial versions for Mac intro
+	docs/images/Edit_Prefs.gif 1.1 rgbecker
+		 Initial versions for Mac intro
+	platypus/xpreformatted.py 1.2 rgbecker
+		 XPreformatted first fixes; now runs
+	platypus/flowables.py 1.8 rgbecker
+		 XPreformatted first fixes; now runs
+	platypus/__init__.py 1.10 rgbecker
+		 XPreformatted first fixes; now runs
+	docs/userguide/genuserguide.py 1.34 rgbecker
+		 Preformatted docco added
+	docs/userguide/ch6_tables.py 1.12 rgbecker
+		 Preformatted docco added
+	pdfbase/pdfdoc.py 1.23 aaron_watters
+		 change to PDFLiteral to support "lazy string conversions" (to support lazy crosslinks)
+##### 2000/08/23 #####
+	platypus/xpreformatted.py 1.1 rgbecker
+		 Initial semi working version
+	platypus/paragraph.py 1.19 rgbecker
+		 Preparing for cleanup
+##### 2000/08/20 #####
+	pdfgen/canvas.py 1.48 andy_robinson
+		 Changed an argument syntax for clarity
+	demos/pythonpoint/leftlogo.a85 1.3 andy_robinson
+		 Added as binary file
+	demos/pythonpoint/leftlogo.a85 1.2 andy_robinson
+		 Removed ASCII file as Mac was corrupting it
+##### 2000/08/17 #####
+	platypus/paragraph.py 1.18 rgbecker
+		 Various brutal changes to paragraph, canvas and textobject for speed/size
+	pdfgen/textobject.py 1.16 rgbecker
+		 Various brutal changes to paragraph, canvas and textobject for speed/size
+	pdfgen/canvas.py 1.47 rgbecker
+		 Various brutal changes to paragraph, canvas and textobject for speed/size
+	demos/odyssey/odyssey.txt 1.8 rgbecker
+		 Various brutal changes to paragraph, canvas and textobject for speed/size
+	platypus/paraparser.py 1.27 rgbecker
+		 Changed test formatting
+##### 2000/08/16 #####
+	pdfbase/pdfmetrics.py 1.10 rgbecker
+		 Start using _rl_accel
+##### 2000/08/12 #####
+	lib/colors.py 1.11 rgbecker
+		 Fix missing parens
+##### 2000/08/11 #####
+	lib/colors.py 1.10 rgbecker
+		 added rgb2cmyk
+	docs/userguide/ch7_custom.py 1.5 rgbecker
+		 Added rotated image derived class example
+##### 2000/08/09 #####
+	pdfbase/pdfdoc.py 1.22 rgbecker
+		 Andy's Symbol/Zapf font fix
+##### 2000/08/03 #####
+	pdfbase/pdfutils.py 1.10 rgbecker
+		 Robin's take on Bernhard Herzog's fix to A85 decode
+	platypus/frames.py 1.6 rgbecker
+		 Changing to packer led positioning
+	platypus/flowables.py 1.7 rgbecker
+		 Changing to packer led positioning
+	lib/_rl_accel.c 1.2 rgbecker
+		 Linux/GnuC fixes
+	lib/Makefile.pre.in 1.2 rgbecker
+		 Linux/GnuC fixes
+##### 2000/08/02 #####
+	docs/userguide/genuserguide.py 1.33 rgbecker
+		 Table cell updates
+	docs/userguide/ch6_tables.py 1.11 rgbecker
+		 Table cell updates
+	docs/images/replogo.gif 1.3 rgbecker
+		 Readded with -kb flag
+	docs/images/replogo.gif 1.2 rgbecker
+		 Removed bad replogo.gif
+	platypus/tables.py 1.30 rgbecker
+		 Flowable cell fixes/changes
+##### 2000/08/01 #####
+	platypus/tables.py 1.29 rgbecker
+		 Fixed flowable valign bottom/top middle maybe
+	platypus/tables.py 1.28 rgbecker
+		 Additions/Improvements to LINE CMD Splitting
+	pdfgen/textobject.py 1.15 rgbecker
+		 Converted to using fp_str
+	pdfgen/canvas.py 1.46 rgbecker
+		 Converted to using fp_str
+	utils/runtests.py 1.13 rgbecker
+		 Added -time flag
+	lib/README.extensions 1.1 rgbecker
+		 Initial version
+	lib/Makefile.pre.in 1.1 rgbecker
+		 Initial version
+	pdfbase/pdfutils.py 1.9 rgbecker
+		 moved accelerators to lib
+	pdfbase/pdfmetrics.py 1.9 rgbecker
+		 moved accelerators to lib
+	pdfbase/_streams.c 1.2 rgbecker
+		 moved accelerators to lib
+	pdfbase/_pdfmetrics.c 1.3 rgbecker
+		 moved accelerators to lib
+	pdfbase/Setup.in 1.2 rgbecker
+		 moved accelerators to lib
+	lib/Setup.in 1.1 rgbecker
+		 Initial version
+	lib/utils.py 1.1 rgbecker
+		 Initial version
+	lib/sgmlop.dsp 1.1 rgbecker
+		 Initial version
+	lib/sgmlop.c 1.1 rgbecker
+		 Initial version
+	lib/_rl_accel.dsp 1.1 rgbecker
+		 Initial version
+	lib/_rl_accel.c 1.1 rgbecker
+		 Initial version
+	lib/__BUILD.dsw 1.1 rgbecker
+		 Initial version
+	pdfgen/textobject.py 1.14 andy_robinson
+		 Updated old doc string
+##### 2000/07/31 #####
+	pdfgen/canvas.py 1.45 rgbecker
+		 B Herzog fix to dimension formats
+##### 2000/07/30 #####
+	platypus/frames.py 1.5 rgbecker
+		 geometry changing attributes now work
+##### 2000/07/28 #####
+	pdfgen/textobject.py 1.13 rgbecker
+		 Bernhard herzog inspired fixes
+	pdfgen/canvas.py 1.44 rgbecker
+		 Bernhard herzog inspired fixes
+##### 2000/07/26 #####
+	pdfbase/pdfmetrics.py 1.8 rgbecker
+		 Accelerator rearrangements
+	pdfbase/_pdfmetrics.c 1.2 rgbecker
+		 Accelerator rearrangements
+	lib/logger.py 1.1 rgbecker
+		 Initial version
+##### 2000/07/25 #####
+	docs/userguide/ch3_pdffeatures.py 1.6 rgbecker
+		 Bruce Eckel spotted these typos.
+	docs/userguide/ch2_graphics.py 1.7 rgbecker
+		 Bruce Eckel spotted these typos.
+	docs/userguide/ch1_intro.py 1.9 rgbecker
+		 Bruce Eckel spotted these typos.
+##### 2000/07/20 #####
+	platypus/doctemplate.py 1.28 rgbecker
+		 Added pagesize to canvasmaker call
+	README.pdfgen.txt 1.8 rgbecker
+		 Release 1.00 Administration
+	README 1.1 rgbecker
+		 Release 1.00 Administration
 ########### 1.00 Released 2000/07/20
 demos/pythonpoint/pythonpoint.py
       1.25 2000/07/15 21:13:29  Minor additions to styles etc. andy_robinson
