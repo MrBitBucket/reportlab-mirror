@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.13 2001/04/02 16:27:22 johnprecedo Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.14 2001/04/03 11:36:52 johnprecedo Exp $
 
 from gengraphguide import *
 
@@ -954,7 +954,7 @@ disc("""We could not come up with a consistent architecture for designing
 
 disc("""For simple widgets it is recommended that you do what we did above: 
        select non-overlapping properties, initialize every property on 
-       __init__and construct everything when $draw()$ is called. You can 
+       $__init__$ and construct everything when $draw()$ is called. You can 
        instead have $__setattr__$ hooks and have things updated when certain 
        attributes are set. Consider a pie chart. If you want to expose the 
        individual wedges, you might write code like this:""")
@@ -969,9 +969,9 @@ pc.wedges[7].strokeWidth = 5
 #removed 'pc.backColor = yellow' from above code example
 
 # Hack to force a new paragraph before the todo() :-(
-disc("")
+#disc("")
 
-todo("We need more of an explaination of what '$__setattr__$ hooks' are")
+#todo("We need more of an explanation of what '$__setattr__$ hooks' are")
 
 disc("""The last line is problematic as we have only created four wedges - in 
        fact we might not have created them yet. Does $pc.wedges[7]$ raise an 
@@ -1029,7 +1029,39 @@ d.add(pc3, 'pie3')
 # Hack to force a new paragraph before the todo() :-(
 disc("")
 
-todo("add image")
+#todo("add image")
+
+from reportlab.lib.colors import *
+from reportlab.graphics import shapes,renderPDF 
+from reportlab.graphics.charts.piecharts import Pie
+
+d = Drawing(400,200)
+d.add(String(100,175,"Without labels", textAnchor="middle"))
+d.add(String(300,175,"With labels", textAnchor="middle"))
+pc = Pie()
+pc.x = 25
+pc.y = 50
+pc.data = [10,20,30,40,50,60]
+pc.wedges[0].popout = 5
+d.add(pc, 'pie1')
+pc2 = Pie()
+pc2.x = 150
+pc2.y = 50
+pc2.data = [10,20,30,40,50,60]
+pc2.labels = ['a','b','c','d','e','f']
+d.add(pc2, 'pie2')
+pc3 = Pie()
+pc3.x = 275
+pc3.y = 50
+pc3.data = [10,20,30,40,50,60]
+pc3.labels = ['a','b','c','d','e','f']
+pc3.wedges.labelRadius = 0.65
+pc3.wedges.fontName = "Helvetica-Bold"
+pc3.wedges.fontSize = 16
+pc3.wedges.fontColor = colors.yellow
+d.add(pc3, 'pie3')
+
+draw(d, 'A sample Pie')
 
 
 heading1("Charts")
