@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.34 2003/08/12 14:06:49 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.34 2003/08/12 14:06:49 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.35 2003/09/09 11:06:00 johnprecedo Exp $
+__version__=''' $Id: renderPM.py,v 1.35 2003/09/09 11:06:00 johnprecedo Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
@@ -598,6 +598,9 @@ def test():
     html.append(htmlBottom)
     htmlFileName = os.path.join('pmout', 'index.html')
     open(htmlFileName, 'w').writelines(html)
+    if sys.platform=='mac':
+        from reportlab.lib.utils import markfilename
+        markfilename(htmlFileName,ext='HTML')
     print 'wrote %s' % htmlFileName
 
 if __name__=='__main__':
