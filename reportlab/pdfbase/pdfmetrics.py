@@ -23,7 +23,7 @@ import string, os
 from types import StringType, ListType, TupleType
 from reportlab.pdfbase import _fontdata
 from reportlab.lib.logger import warnOnce
-from reportlab.lib.utils import rl_isfile, open_and_read, open_and_readlines 
+from reportlab.lib.utils import rl_isfile, rl_isdir, open_and_read, open_and_readlines 
 from reportlab.rl_config import defaultEncoding
 
 standardFonts = _fontdata.standardFonts
@@ -61,7 +61,7 @@ def parseAFMFile(afmFileName):
     lines = open_and_readlines(afmFileName, 'r')
     if len(lines)<=1:
         #likely to be a MAC file
-        lines = string.split(lines,'\r')
+        if lines: lines = string.split(lines[0],'\r')
         if len(lines)<=1:
             raise ValueError, 'AFM file %s hasn\'t enough data' % afmFileName
     topLevel = {}
@@ -186,6 +186,16 @@ class TypeFace:
             warnOnce("Can't find %s for face '%s'" % (ext, self.name))
         return r
 
+def bruteForceSearchForFile(fn,searchPath=None):
+    if searchPath is None: from reportlab.rl_config import T1SearchPath as searchPath
+    if rl_isfile(fn): return fn
+    bfn = os.path.basename(fn)
+    for dirname in searchPath:
+        if not rl_isdir(dirname): continue
+        tfn = os.path.join(dirname,bfn)
+        if rl_isfile(tfn): return tfn
+    return fn
+
 def bruteForceSearchForAFM(faceName):
     """Looks in all AFM files on path for face with given name.
 
@@ -194,16 +204,13 @@ def bruteForceSearchForAFM(faceName):
     from reportlab.rl_config import T1SearchPath
 
     for dirname in T1SearchPath:
-        if not os.path.isdir(dirname):
-            continue
+        if not rl_isdir(dirname): continue
         possibles = glob.glob(dirname + os.sep + '*.[aA][fF][mM]')
         for possible in possibles:
             (topDict, glyphDict) = parseAFMFile(possible)
             if topDict['FontName'] == faceName:
                 return possible
     return None
-
-
 
 #for faceName in standardFonts:
 #    registerTypeFace(TypeFace(faceName))
@@ -452,6 +459,7 @@ class EmbeddedType1Face(TypeFace):
     def _loadGlyphs(self, pfbFileName):
         """Loads in binary glyph data, and finds the four length
         measurements needed for the font descriptor"""
+        pfbFileName = bruteForceSearchForFile(pfbFileName)
         assert rl_isfile(pfbFileName), 'file %s not found' % pfbFileName
         d = open_and_read(pfbFileName, 'b')
         s1, l1 = _pfbCheck(0,d,PFB_ASCII,pfbFileName)
@@ -469,6 +477,7 @@ class EmbeddedType1Face(TypeFace):
     def _loadMetrics(self, afmFileName):
         """Loads in and parses font metrics"""
         #assert os.path.isfile(afmFileName), "AFM file %s not found" % afmFileName
+        afmFileName = bruteForceSearchForFile(afmFileName)
         (topLevel, glyphData) = parseAFMFile(afmFileName)
 
         self.name = topLevel['FontName']
