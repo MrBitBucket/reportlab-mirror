@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: testplatypus.py,v $
+#	Revision 1.8  2000/04/12 16:26:51  rgbecker
+#	XML Tagged Paragraph parser changes
+#
 #	Revision 1.7  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
-#
+#	
 #	Revision 1.6  2000/02/17 02:09:05  rgbecker
 #	Docstring & other fixes
 #	
@@ -50,7 +53,7 @@
 #	Revision 1.2  2000/02/15 15:47:10  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: testplatypus.py,v 1.7 2000/03/08 13:06:39 andy_robinson Exp $ '''
+__version__=''' $Id: testplatypus.py,v 1.8 2000/04/12 16:26:51 rgbecker Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -61,7 +64,7 @@ return the 'story' for each.  The run() function gets the stories, then
 builds a special "document model" in which the frames are added to each page
 and drawn into.
 """
-import string
+import string, copy
 from reportlab.pdfgen import canvas
 from reportlab.platypus import layout, tables
 from reportlab.lib.units import inch, cm
@@ -337,6 +340,22 @@ def getExamples():
         right indents of 18 points, a first line indent of 36 points,
         and 6 points of space before and after itself.  A paragraph
         object fills the width of the enclosing frame, as you would expect.""", sty)
+
+    p.debug = 1   #show me the borders
+    story.append(p)
+
+    story.append(layout.Paragraph("""Same but with justification""", styleSheet['BodyText']))
+    styJ = copy.deepcopy(sty)
+    styJ.alignment = layout.TA_JUSTIFY
+    p = layout.Paragraph("""
+        <font color=red>Platypus</font> is all about fitting objects into frames on the page.  You
+        are looking at a fairly simple Platypus paragraph in Debug mode.
+        It has some gridlines drawn around it to show the left and right indents,
+        and the space before and after, all of which are attributes set in
+        the style sheet.  To be specific, this paragraph has left and
+        right indents of 18 points, a first line indent of 36 points,
+        and 6 points of space before and after itself.  A paragraph
+        object fills the width of the enclosing frame, as you would expect.""", styJ)
 
     p.debug = 1   #show me the borders
     story.append(p)

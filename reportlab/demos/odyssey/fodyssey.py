@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: fodyssey.py,v $
+#	Revision 1.2  2000/04/12 16:24:34  rgbecker
+#	XML Tagged Paragraph parser changes
+#
 #	Revision 1.1  2000/04/06 08:58:09  rgbecker
 #	Paragraph formatting version of odyssey.py
-#
-__version__=''' $Id: fodyssey.py,v 1.1 2000/04/06 08:58:09 rgbecker Exp $ '''
+#	
+__version__=''' $Id: fodyssey.py,v 1.2 2000/04/12 16:24:34 rgbecker Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -62,7 +65,7 @@ def myLaterPages(canvas, doc):
 	canvas.restoreState()
 	
 def go():
-	doc = layout.SimpleFlowDocument('fodyssey.pdf',layout.DEFAULT_PAGE_SIZE)
+	doc = layout.SimpleFlowDocument('fodyssey.pdf',layout.DEFAULT_PAGE_SIZE,showBoundary=0)
 	doc.onFirstPage = myFirstPage
 	doc.onNewPage = myLaterPages
 	doc.build(Elements)
@@ -81,7 +84,8 @@ def chapter(txt, style=ChapterStyle):
 	Elements.append(layout.Paragraph(txt, style))
 	Elements.append(layout.Spacer(0.2*inch, 0.3*inch))
 
-ParaStyle = styles["Normal"]
+ParaStyle = copy.copy(styles["Normal"])
+ParaStyle.alignment = layout.TA_JUSTIFY
 
 def p(txt, style=ParaStyle):
 	Elements.append(layout.Spacer(0.2*inch, 0.1*inch))
@@ -177,6 +181,7 @@ def parseOdyssey(fn):
 	go()
 	t7 = time()
 	print "saving to PDF took %.4f seconds" %(t7-t6)
+	print "Total run took %.4f seconds"%(t7-t0)
 
 for fn in ('Odyssey.full.txt','Odyssey.txt'):
 	if os.path.isfile(fn):

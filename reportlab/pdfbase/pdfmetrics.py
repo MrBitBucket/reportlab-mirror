@@ -1,11 +1,11 @@
 ###############################################################################
 #
-#	ReportLab Public License Version 1.0
+#   ReportLab Public License Version 1.0
 #
 #   Except for the change of names the spirit and intention of this
 #   license is the same as that of Python
 #
-#	(C) Copyright ReportLab Inc. 1998-2000.
+#   (C) Copyright ReportLab Inc. 1998-2000.
 #
 #
 # All Rights Reserved
@@ -30,26 +30,27 @@
 # PERFORMANCE OF THIS SOFTWARE. 
 #
 ###############################################################################
-#	$Log: pdfmetrics.py,v $
-#	Revision 1.4  2000/02/17 02:07:23  rgbecker
-#	Docstring & other fixes
+#   $Log: pdfmetrics.py,v $
+#   Revision 1.5  2000/04/12 16:24:35  rgbecker
+#   XML Tagged Paragraph parser changes
 #
-#	Revision 1.3  2000/02/15 17:55:59  rgbecker
-#	License text fixes
-#	
-#	Revision 1.2  2000/02/15 15:47:09  rgbecker
-#	Added license, __version__ and Logi comment
-#	
-__version__=''' $Id: pdfmetrics.py,v 1.4 2000/02/17 02:07:23 rgbecker Exp $ '''
+#   Revision 1.4  2000/02/17 02:07:23  rgbecker
+#   Docstring & other fixes
+#   
+#   Revision 1.3  2000/02/15 17:55:59  rgbecker
+#   License text fixes
+#   
+#   Revision 1.2  2000/02/15 15:47:09  rgbecker
+#   Added license, __version__ and Logi comment
+#   
+__version__=''' $Id: pdfmetrics.py,v 1.5 2000/04/12 16:24:35 rgbecker Exp $ '''
 __doc__="""This contains pre-canned text metrics for the PDFgen package, and may also
 be used for any other PIDDLE back ends or packages which use the standard
 Type 1 postscript fonts.
 
 Its main function is to let you work out the width of strings; it exposes a 
-single function, stringwidth(text, fontname), which works out the width of a 
-string in the given font. This is an integer defined in em-square units - each
-character is defined in a 1000 x 1000 box called the em-square - for a 1-point high
-character.  So to convert to points, multiply by 1000 and then by point size.
+single function, stringWidth(text, fontname, fontSize), which works out the width of a 
+string in the given font in points.
 
 The AFM loading stuff worked for me but is not being heavily tested, as pre-canning
 the widths for the standard 14 fonts in Acrobat Reader is so much more useful. One
@@ -64,18 +65,16 @@ Postscript font names within this module, but have not yet done so.
 """
 import string
 
-
-
 StandardEnglishFonts = [
-	'Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique',  
-	'Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique', 
-	'Helvetica-BoldOblique',
-	'Times-Roman', 'Times-Bold', 'Times-Italic', 'Times-BoldItalic',
-	'Symbol','ZapfDingbats']
+    'Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique',  
+    'Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique', 
+    'Helvetica-BoldOblique',
+    'Times-Roman', 'Times-Bold', 'Times-Italic', 'Times-BoldItalic',
+    'Symbol','ZapfDingbats']
 
 ##############################################################
 #
-#			PDF Metrics
+#           PDF Metrics
 # This is a preamble to give us a stringWidth function.
 # loads and caches AFM files, but won't need to as the
 # standard fonts are there already
@@ -124,7 +123,7 @@ def parseAFMfile(filename):
 
 class FontCache:
     """Loads and caches font width information on demand.  Font names
-    converted to lower case for indexing.  Public interface is stringwidth"""
+    converted to lower case for indexing.  Public interface is stringWidth"""
     def __init__(self):
         global widths
         self.__widtharrays = widths
@@ -149,13 +148,12 @@ class FontCache:
                 print 'Font',fontname,'not found - using Courier for widths'
                 return self.getfont('courier')
     
-
-    def stringwidth(self, text, font):
+    def stringWidth(self, text, font, fontSize):
         widths = self.getfont(string.lower(font))
         w = 0
         for char in text:
             w = w + widths[ord(char)]
-        return w
+        return w*fontSize*0.001
 
     def status(self):
         #returns loaded fonts
@@ -164,6 +162,4 @@ class FontCache:
 TheFontCache = FontCache()
 
 #expose the singleton as a single function
-stringwidth = TheFontCache.stringwidth
-
-
+stringWidth = TheFontCache.stringWidth

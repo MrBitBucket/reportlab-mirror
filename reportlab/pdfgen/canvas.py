@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.26  2000/04/12 16:26:51  rgbecker
+#	XML Tagged Paragraph parser changes
+#
 #	Revision 1.25  2000/04/10 09:21:21  andy_robinson
 #	Color methods in textobject and canvas now synchronised.
 #	Added 'verbosity' keyword to allow hiding of 'save myfile.pdf' messages.
-#
+#	
 #	Revision 1.24  2000/04/06 09:52:02  andy_robinson
 #	Removed some old comments; tweaks to experimental Outline methods.
 #	
@@ -103,7 +106,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.25 2000/04/10 09:21:21 andy_robinson Exp $ '''
+__version__=''' $Id: canvas.py,v 1.26 2000/04/12 16:26:51 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -749,9 +752,9 @@ class Canvas:
         self._leading = leading
         self._code.append('BT %s %0.1f Tf %0.1f TL ET' % (pdffontname, size, leading))
 
-    def stringWidth(self, text, fontname, fontsize):
+    def stringWidth(self, text, fontName, fontSize):
         "gets width of a string in the given font and size"
-        return pdfmetrics.stringwidth(text, fontname) * 0.001 * fontsize
+        return pdfmetrics.stringWidth(text, fontName, fontSize)
         
     # basic graphics modes
     def setLineWidth(self, width):
