@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.42 2004/03/17 14:34:41 rgbecker Exp $
-__version__=''' $Id: rl_config.py,v 1.42 2004/03/17 14:34:41 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.43 2004/03/19 10:55:55 rgbecker Exp $
+__version__=''' $Id: rl_config.py,v 1.43 2004/03/19 10:55:55 rgbecker Exp $ '''
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -66,6 +66,7 @@ except:
     pass
 
 _SAVED = {}
+sys_version=None
 
 def _setOpt(name, value, conv=None):
     '''set a module level value from environ/default'''
@@ -87,6 +88,7 @@ def _startUp():
                 'invariant','eps_preview_transparent',
                 )
     import os, sys, string
+    global sys_version
     sys_version = string.split(sys.version)[0]      #strip off the other garbage
     from reportlab.lib import pagesizes
 
