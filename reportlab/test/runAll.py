@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/runAll.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.11 2003/04/22 16:12:58 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.12 2003/07/07 14:33:08 rgbecker Exp $
 
 """Runs all test files in all subfolders.
 """
@@ -54,6 +54,6 @@ if __name__ == '__main__':
     for filename in GlobDirectoryWalker(folder, '*.pyc'):
         os.remove(filename)
     if NI:
-        print >>sys.stderr, '\n###################### the following tests could not be imported'
+        sys.stderr.write('\n###################### the following tests could not be imported\n')
         for f,tb in NI:
             print 'file: "%s"\n%s\n' % (f,string.join(tb,''))
