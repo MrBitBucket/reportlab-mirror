@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "0.93"
+#define VERSION "0.95"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -427,38 +427,42 @@ static void _gstate_pathFill(gstateObject* self,int endIt, int vpReverse)
 		ArtVpath	*vpath, *trVpath;
 		ArtSVP		*svp, *tmp_svp;
 		pixBufT*	p;
+		double		a;
 		if(endIt) gstate_pathEnd(self);
 		dump_path(self);
 		vpath = art_bez_path_to_vec(self->path, 0.25);
 		if(0 && vpReverse) _vpath_reverse(vpath);
 		trVpath =  art_vpath_affine_transform(vpath, self->ctm);
-		_vpath_area(trVpath);
-		svp = art_svp_from_vpath(trVpath);
-		if(self->clipSVP) {
-			tmp_svp = svp;
-			dump_svp("fill clip svp path",self->clipSVP);
-			dump_svp("fill svp orig",svp);
-			svp = art_svp_intersect(tmp_svp, self->clipSVP);
-			art_svp_free(tmp_svp);
-			}
+		a = _vpath_area(trVpath);
+		if(fabs(a)>1e-7){
+			/*fill only larger things*/
+			svp = art_svp_from_vpath(trVpath);
+			if(self->clipSVP) {
+				tmp_svp = svp;
+				dump_svp("fill clip svp path",self->clipSVP);
+				dump_svp("fill svp orig",svp);
+				svp = art_svp_intersect(tmp_svp, self->clipSVP);
+				art_svp_free(tmp_svp);
+				}
 
 #ifdef	ROBIN_DEBUG
-	 	printf("fillColor=0x%8.8x, opacity=" GFMT " -->0x%8.8x\n",self->fillColor.value, self->fillOpacity, _RGBA(self->fillColor.value, self->fillOpacity));
-		dump_vpath("fill vpath", vpath);
-		dump_vpath("fill trVpath", trVpath);
-		dump_svp("fill svp",svp);
+			printf("fillColor=0x%8.8x, opacity=" GFMT " -->0x%8.8x\n",self->fillColor.value, self->fillOpacity, _RGBA(self->fillColor.value, self->fillOpacity));
+			dump_vpath("fill vpath", vpath);
+			dump_vpath("fill trVpath", trVpath);
+			dump_svp("fill svp",svp);
 #endif
-		p = self->pixBuf;
-		art_rgb_svp_alpha(svp,
-						 0,0,
-						 p->width, p->height,
-						 _RGBA(self->fillColor.value, self->fillOpacity),
-						 p->buf,
-						 p->rowstride,
-						 NULL);
+			p = self->pixBuf;
+			art_rgb_svp_alpha(svp,
+							 0,0,
+							 p->width, p->height,
+							 _RGBA(self->fillColor.value, self->fillOpacity),
+							 p->buf,
+							 p->rowstride,
+							 NULL);
 
+			art_svp_free(svp);
+			}
 		PyMem_Free(trVpath);
-		art_svp_free(svp);
 		PyMem_Free(vpath);
 		}
 }
@@ -1244,18 +1248,12 @@ static void pict_putLong( BYTE_STREAM *fd, long i )
 	(void) pict_putc((int)(i & 0xff), fd);
 }
 
-static void pict_putFixed(BYTE_STREAM* fd, int in, int frac)
+static void pict_putRect(BYTE_STREAM* fd, int s0, int s1, int s2, int s3)
 {
-	pict_putShort(fd, in);
-	pict_putShort(fd, frac);
-}
-
-static void pict_putRect(BYTE_STREAM* fd, int x1, int x2, int y1, int y2)
-{
-	pict_putShort(fd, x1);
-	pict_putShort(fd, x2);
-	pict_putShort(fd, y1);
-	pict_putShort(fd, y2);
+	pict_putShort(fd, s0);
+	pict_putShort(fd, s1);
+	pict_putShort(fd, s2);
+	pict_putShort(fd, s3);
 }
 
 #define		runtochar(c)	(257-(c))
@@ -1366,15 +1364,16 @@ static PyObject* pil2pict(PyObject* self, PyObject* args)
 	pict_putShort(obs, PICT_picVersion);
 	pict_putShort(obs, 0x02FF);
 	pict_putShort(obs, PICT_headerOp);
-	pict_putLong(obs, -1L);
-	pict_putFixed(obs, 0, 0);
-	pict_putFixed(obs, 0, 0);
-	pict_putFixed(obs, cols, 0);
-	pict_putFixed(obs, rows, 0);
+	pict_putShort(obs, 0xFFFE);
+	pict_putShort(obs, 0);
+
+	pict_putRect(obs, 72, 0, 72, 0);	/*h/v resolutions*/
+	pict_putRect(obs, 0,0, cols,rows);
 	pict_putFill(obs, 4);
 
 
 	/* seems to be needed by many PICT2 programs */
+	pict_putShort(obs, 0x1e);	/*DefHilite*/
 	pict_putShort(obs, PICT_clipRgn);
 	pict_putShort(obs, 10);
 	pict_putRect(obs, 0, 0, rows, cols);
@@ -1388,9 +1387,9 @@ static PyObject* pil2pict(PyObject* self, PyObject* args)
 		pict_putLong(obs, (unsigned long)tc);
 #endif
 		pict_putShort(obs,5);					/*src mode*/
-		pict_putShort(obs,36);	
+		pict_putShort(obs,36|64);
 		pict_putShort(obs,8);					/*src mode*/
-		pict_putShort(obs,36);	
+		pict_putShort(obs,36|64);
 		}
 
 	/* write picture */
@@ -1400,8 +1399,7 @@ static PyObject* pil2pict(PyObject* self, PyObject* args)
 	pict_putShort(obs, 0);	/* pmVersion */
 	pict_putShort(obs, 0);	/* packType */
 	pict_putLong(obs, 0L);	/* packSize */
-	pict_putFixed(obs, 72, 0);	/* hRes */
-	pict_putFixed(obs, 72, 0);	/* vRes */
+	pict_putRect(obs, 72, 0, 72, 0);	/* hRes/vRes */
 	pict_putShort(obs, 0);	/* pixelType */
 	pict_putShort(obs, 8);	/* pixelSize */
 	pict_putShort(obs, 1);	/* cmpCount */
@@ -1423,7 +1421,7 @@ static PyObject* pil2pict(PyObject* self, PyObject* args)
 
 	pict_putRect(obs, 0, 0, rows, cols);		/*srcRect*/
 	pict_putRect(obs, 0, 0, rows, cols);		/*dstRect*/
-	pict_putShort(obs,tc!=-1 ? 36 : 0);			/*transfer mode*/
+	pict_putShort(obs,tc!=-1 ? 36|64 : 0);			/*transfer mode*/
 
 	/*write out the pixel data.*/
 	packed = (char*) malloc((unsigned)(cols+cols/MAX_COUNT+1));
