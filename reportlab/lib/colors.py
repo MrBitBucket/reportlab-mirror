@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.43 2003/09/08 16:42:26 dragan1 Exp $
-__version__=''' $Id: colors.py,v 1.43 2003/09/08 16:42:26 dragan1 Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.44 2003/11/19 10:19:47 rgbecker Exp $
+__version__=''' $Id: colors.py,v 1.44 2003/11/19 10:19:47 rgbecker Exp $ '''
 
 import string, math
 from types import StringType, ListType, TupleType
@@ -546,7 +546,7 @@ def Whiter(c,f):
     return linearlyInterpolatedColor(w, c, 0, 1, f)
 
 def Blacker(c,f):
-    '''given a color combine with black as c*f w*(1-f) 0<=f<=1'''
+    '''given a color combine with black as c*f+b*(1-f) 0<=f<=1'''
     c = toColor(c)
     if isinstance(c,PCMYKColor):
         b = _PCMYK_black
