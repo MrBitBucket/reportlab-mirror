@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.46  2000/08/01 11:28:33  rgbecker
+#	Converted to using fp_str
+#
 #	Revision 1.45  2000/07/31 12:03:23  rgbecker
 #	B Herzog fix to dimension formats
-#
+#	
 #	Revision 1.44  2000/07/28 00:00:41  rgbecker
 #	Bernhard herzog inspired fixes
 #	
@@ -165,7 +168,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.45 2000/07/31 12:03:23 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.46 2000/08/01 11:28:33 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -218,6 +221,7 @@ try:
 except ImportError:
 	zlib = None
 
+from reportlab.lib.utils import fp_str
 _SeqTypes=(TupleType,ListType)
 
 # Robert Kern
@@ -359,12 +363,10 @@ class Canvas:
     def _make_preamble(self):
         if self.bottomup:
             #set initial font
-            #self._preamble = 'BT /F9 12 Tf 14.4 TL ET'
             self._preamble = '1 0 0 1 0 0 cm BT /F9 12 Tf 14.4 TL ET'
         else:
             #switch coordinates, flip text and set font
-            #self._preamble = '1 0 0 -1 0 %0.2f cm BT /F9 12 Tf 14.4 TL ET' % self._pagesize[1]
-            self._preamble = '1 0 0 -1 0 %0.2f cm BT /F9 12 Tf 14.4 TL ET' % self._pagesize[1]
+            self._preamble = '1 0 0 -1 0 %s cm BT /F9 12 Tf 14.4 TL ET' % fp_str(self._pagesize[1])
 
     def _escape(self, s):
         """PDF escapes are like Python ones, but brackets need slashes before them too.
@@ -703,7 +705,7 @@ class Canvas:
         self._currentMatrix = (a0*a+c0*b,    b0*a+d0*b,
                                a0*c+c0*d,    b0*c+d0*d,
                                a0*e+c0*f+e0, b0*e+d0*f+f0)
-        self._code.append('%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f cm' % (a,b,c,d,e,f))
+        self._code.append('%s cm' % fp_str(a,b,c,d,e,f))
 
     def translate(self, dx, dy):
         """move the origin from the current (0,0) point to the (dx,dy) point
@@ -780,7 +782,7 @@ class Canvas:
     def line(self, x1,y1, x2,y2):
         """draw a line segment from (x1,y1) to (x2,y2) (with color, thickness and
         other attributes determined by the current graphics state)."""     
-        self._code.append('n %0.2f %0.2f m %0.2f %0.2f l S' % (x1, y1, x2, y2))
+        self._code.append('n %s m %s l S' % (fp_str(x1, y1), fp_str(x2, y2)))
 
     def lines(self, linelist):
         """Like line(), permits many lines to be drawn in one call.
@@ -794,7 +796,7 @@ class Canvas:
         """
         self._code.append('n')
         for (x1,y1,x2,y2) in linelist:
-            self._code.append('%0.2f %0.2f m %0.2f %0.2f l' % (x1, y1, x2, y2))
+            self._code.append('%s m %s l' % (fp_str(x1, y1), fp_str(x2, y2)))
         self._code.append('S')
 
     def grid(self, xlist, ylist):
@@ -813,8 +815,8 @@ class Canvas:
 
     def bezier(self, x1, y1, x2, y2, x3, y3, x4, y4):
         "Bezier curve with the four given control points"
-        self._code.append('n %0.2f %0.2f m %0.2f %0.2f %0.2f %0.2f %0.2f %0.2f c S' %
-                          (x1, y1, x2, y2, x3, y3, x4, y4)
+        self._code.append('n %s m %s c S' %
+                          (fp_str(x1, y1), fp_str(x2, y2, x3, y3, x4, y4))
                           )
     def arc(self, x1,y1, x2,y2, startAng=0, extent=90):
         """
@@ -832,16 +834,16 @@ class Canvas:
 
         pointList = pdfgeom.bezierArc(x1,y1, x2,y2, startAng, extent)
         #move to first point
-        self._code.append('n %0.2f %0.2f m' % pointList[0][:2])
+        self._code.append('n %s m' % fp_str(pointList[0][:2]))
         for curve in pointList:
-            self._code.append('%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f c' % curve[2:])
+            self._code.append('%s c' % fp_str(curve[2:]))
         # stroke
         self._code.append('S')
 
         #--------now the shape drawing methods-----------------------
     def rect(self, x, y, width, height, stroke=1, fill=0):
         "draws a rectangle with lower left corner at (x,y) and width and height as given."
-        self._code.append('n %0.2f %0.2f %0.2f %0.2f re ' % (x, y, width, height)
+        self._code.append('n %s re ' % fp_str(x, y, width, height)
                           + PATH_OPS[stroke, fill, self._fillMode])
         
     
@@ -855,9 +857,9 @@ class Canvas:
         
         pointList = pdfgeom.bezierArc(x1,y1, x2,y2, 0, 360)
         #move to first point
-        self._code.append('n %0.2f %0.2f m' % pointList[0][:2])
+        self._code.append('n %s m' % fp_str(pointList[0][:2]))
         for curve in pointList:
-            self._code.append('%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f c' % curve[2:])
+            self._code.append('%s c' % fp_str(curve[2:]))
         #finish
         self._code.append(PATH_OPS[stroke, fill, self._fillMode])
 
@@ -870,13 +872,13 @@ class Canvas:
         y_cen  = (y1+y2)/2.
         pointList = pdfgeom.bezierArc(x1,y1, x2,y2, startAng, extent)
   
-        self._code.append('n %0.2f %0.2f m' % (x_cen, y_cen))
+        self._code.append('n %s m' % fp_str(x_cen, y_cen))
         # Move the pen to the center of the rectangle
-        self._code.append('%0.2f %0.2f l' % pointList[0][:2])
+        self._code.append('%s l' % fp_str(pointList[0][:2]))
         for curve in pointList:
-            self._code.append('%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f c' % curve[2:])
+            self._code.append('%s c' % fp_str(curve[2:]))
         # finish the wedge
-        self._code.append('%0.2f %0.2f l ' % (x_cen, y_cen))
+        self._code.append('%s l ' % fp_str(x_cen, y_cen))
         # final operator
         self._code.append(PATH_OPS[stroke, fill, self._fillMode])
 
@@ -911,22 +913,22 @@ class Canvas:
         y4 = y0 + height - t
         y5 = y0 + height
 
-        self._code.append('n %0.2f %0.2f m' % (x2, y0))
-        self._code.append('%0.2f %0.2f l' % (x3, y0))  # bottom row
-        self._code.append('%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f c'
-                         % (x4, y0, x5, y1, x5, y2)) # bottom right
+        self._code.append('n %s m' % fp_str(x2, y0))
+        self._code.append('%s l' % fp_str(x3, y0))  # bottom row
+        self._code.append('%s c'
+                         % fp_str(x4, y0, x5, y1, x5, y2)) # bottom right
 
-        self._code.append('%0.2f %0.2f l' % (x5, y3))  # right edge
-        self._code.append('%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f c'
-                         % (x5, y4, x4, y5, x3, y5)) # top right
+        self._code.append('%s l' % fp_str(x5, y3))  # right edge
+        self._code.append('%s c'
+                         % fp_str(x5, y4, x4, y5, x3, y5)) # top right
         
-        self._code.append('%0.2f %0.2f l' % (x2, y5))  # top row
-        self._code.append('%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f c'
-                         % (x1, y5, x0, y4, x0, y3)) # top left
+        self._code.append('%s l' % fp_str(x2, y5))  # top row
+        self._code.append('%s c'
+                         % fp_str(x1, y5, x0, y4, x0, y3)) # top left
         
-        self._code.append('%0.2f %0.2f l' % (x0, y2))  # left edge
-        self._code.append('%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f c'
-                         % (x0, y1, x1, y0, x2, y0)) # bottom left
+        self._code.append('%s l' % fp_str(x0, y2))  # left edge
+        self._code.append('%s c'
+                         % fp_str(x0, y1, x1, y0, x2, y0)) # bottom left
 
         self._code.append('h')  #close off, although it should be where it started anyway
         
@@ -948,14 +950,14 @@ class Canvas:
             (cyan, magenta, yellow and darkness value).
          Takes 4 arguments between 0.0 and 1.0"""
          self._fillColorCMYK = (c, m, y, k)
-         self._code.append('%0.2f %0.2f %0.2f %0.2f k' % (c, m, y, k))
+         self._code.append('%s k' % fp_str(c, m, y, k))
          
     def setStrokeColorCMYK(self, c, m, y, k):
          """set the stroke color useing negative color values
             (cyan, magenta, yellow and darkness value).
             Takes 4 arguments between 0.0 and 1.0"""
          self._strokeColorCMYK = (c, m, y, k)
-         self._code.append('%0.2f %0.2f %0.2f %0.2f K' % (c, m, y, k))
+         self._code.append('%s K' % fp_str(c, m, y, k))
 
     def drawString(self, x, y, text):
         """Draws a string in the current text styles."""
@@ -997,7 +999,7 @@ class Canvas:
         if leading is None:
             leading = size * 1.2
         self._leading = leading
-        self._code.append('BT %s %0.1f Tf %0.1f TL ET' % (pdffontname, size, leading))
+        self._code.append('BT %s %s Tf %0.1f TL ET' % (pdffontname, fp_str(size), leading))
 
     def stringWidth(self, text, fontName, fontSize, encoding=None):
         "gets width of a string in the given font and size"
@@ -1007,7 +1009,7 @@ class Canvas:
     # basic graphics modes
     def setLineWidth(self, width):
         self._lineWidth = width
-        self._code.append('%0.2f w' % width)
+        self._code.append('%s w' % fp_str(width))
 
     def setLineCap(self, mode):
         """0=butt,1=round,2=square"""
@@ -1023,7 +1025,7 @@ class Canvas:
         
     def setMiterLimit(self, limit):
         self._miterLimit = limit
-        self._code.append('%0.2f M' % limit)
+        self._code.append('%s M' % fp_str(limit))
 
     def setDash(self, array=[], phase=0):
         """Two notations.  pass two numbers, or an array and phase"""
@@ -1038,25 +1040,25 @@ class Canvas:
         """Set the fill color using positive color description
            (Red,Green,Blue).  Takes 3 arguments between 0.0 and 1.0"""
         self._fillColorRGB = (r, g, b)
-        self._code.append('%0.2f %0.2f %0.2f rg' % (r,g,b))
+        self._code.append('%s rg' % fp_str(r,g,b))
         
     def setStrokeColorRGB(self, r, g, b):
         """Set the stroke color using positive color description
            (Red,Green,Blue).  Takes 3 arguments between 0.0 and 1.0"""
         self._strokeColorRGB = (r, g, b)
-        self._code.append('%0.2f %0.2f %0.2f RG' % (r,g,b))
+        self._code.append('%s RG' % fp_str(r,g,b))
 
     def setFillColor(self, aColor):
         """Takes a color object, allowing colors to be referred to by name"""
         if type(aColor) == ColorType:
             rgb = (aColor.red, aColor.green, aColor.blue)
             self._fillColorRGB = rgb
-            self._code.append('%0.2f %0.2f %0.2f rg' % rgb )
+            self._code.append('%s rg' % fp_str(rgb) )
         elif type(aColor) in _SeqTypes:
             l = len(aColor)
             if l==3:
                 self._fillColorRGB = aColor
-                self._code.append('%0.2f %0.2f %0.2f rg' % aColor )
+                self._code.append('%s rg' % fp_str(aColor) )
             elif l==4:
                 self.setFillColorCMYK(self, aColor[0], aColor[1], aColor[2], aColor[3])
             else:
@@ -1072,12 +1074,12 @@ class Canvas:
         if type(aColor) == ColorType:
             rgb = (aColor.red, aColor.green, aColor.blue)
             self._strokeColorRGB = rgb
-            self._code.append('%0.2f %0.2f %0.2f RG' % rgb )
+            self._code.append('%s RG' % fp_str(rgb) )
         elif type(aColor) in _SeqTypes:
             l = len(aColor)
             if l==3:
                 self._strokeColorRGB = aColor
-                self._code.append('%0.2f %0.2f %0.2f RG' % aColor )
+                self._code.append('%s RG' % fp_str(aColor) )
             elif l==4:
                 self.setStrokeColorCMYK(self, aColor[0], aColor[1], aColor[2], aColor[3])
             else:
@@ -1090,12 +1092,12 @@ class Canvas:
     def setFillGray(self, gray):
         """Sets the gray level; 0.0=black, 1.0=white"""
         self._fillColorRGB = (gray, gray, gray)
-        self._code.append('%0.2f g' % gray)
+        self._code.append('%s g' % fp_str(gray))
         
     def setStrokeGray(self, gray):
         """Sets the gray level; 0.0=black, 1.0=white"""
         self._strokeColorRGB = (gray, gray, gray)
-        self._code.append('%0.2f G' % gray)
+        self._code.append('%s G' % fp_str(gray))
 
         
     # path stuff - the separate path object builds it    
@@ -1228,9 +1230,9 @@ class Canvas:
         #self._code.append('ET')
         #self._code.append('q %0.2f 0 0 %0.2f %0.2f %0.2f cm' % (width, height, x, y+height))
         if self.bottomup:
-            self._code.append('q %0.2f 0 0 %0.2f %0.2f %0.2f cm' % (width, height, x, y))
+            self._code.append('q %s 0 0 %s cm' % (fp_str(width), fp_str(height, x, y)))
         else:
-            self._code.append('q %0.2f 0 0 %0.2f %0.2f %0.2f cm' % (width, height, x, y+height))
+            self._code.append('q %s 0 0 %s cm' % (fp_str(width), fp_str(height, x, y+height)))
 
         # self._code.extend(imagedata) if >=python-1.5.2
         for line in imagedata:

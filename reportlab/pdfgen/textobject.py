@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: textobject.py,v $
+#	Revision 1.15  2000/08/01 11:28:33  rgbecker
+#	Converted to using fp_str
+#
 #	Revision 1.14  2000/08/01 05:22:23  andy_robinson
 #	Updated old doc string
-#
+#	
 #	Revision 1.13  2000/07/28 00:00:42  rgbecker
 #	Bernhard herzog inspired fixes
 #	
@@ -72,7 +75,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: textobject.py,v 1.14 2000/08/01 05:22:23 andy_robinson Exp $ '''
+__version__=''' $Id: textobject.py,v 1.15 2000/08/01 11:28:33 rgbecker Exp $ '''
 __doc__=""" 
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -85,6 +88,7 @@ import string
 from types import *
 from reportlab.lib import colors
 from reportlab.lib.colors import ColorType
+from reportlab.lib.utils import fp_str
 
 _SeqTypes=(TupleType,ListType)
 
@@ -114,9 +118,9 @@ class PDFTextObject:
 
     def setTextOrigin(self, x, y):    
         if self._canvas.bottomup:
-            self._code.append('1 0 0 1 %0.2f %0.2f Tm' % (x, y)) #bottom up
+            self._code.append('1 0 0 1 %s Tm' % fp_str(x, y)) #bottom up
         else:
-            self._code.append('1 0 0 -1 %0.2f %0.2f Tm' % (x, y))  #top down
+            self._code.append('1 0 0 -1 %s Tm' % fp_str(x, y))  #top down
         self._x = x
         self._y = y
         self._x0 = x #the margin
@@ -126,7 +130,7 @@ class PDFTextObject:
         if not self._canvas.bottomup:
             c = -c    #reverse bottom row of the 2D Transform
             d = -d
-        self._code.append('%0.2f %0.2f %0.2f %0.2f %0.2f %0.2f Tm' % (a, b, c, d, e, f))
+        self._code.append('%s Tm' % fp_str(a, b, c, d, e, f))
         #we only measure coords relative to present text matrix
         self._x = e
         self._y = f
@@ -157,7 +161,7 @@ class PDFTextObject:
         self._fontname = psfontname
         self._fontsize = size
         pdffontname = self._canvas._doc.getInternalFontName(psfontname)
-        self._code.append('%s %0.1f Tf' % (pdffontname, size))
+        self._code.append('%s %s Tf' % (pdffontname, fp_str(size)))
 
     def setFont(self, psfontname, size, leading = None):
         """Sets the font.  If leading not specified, defaults to 1.2 x
@@ -170,29 +174,29 @@ class PDFTextObject:
         if leading is None:
             leading = size * 1.2
         self._leading = leading
-        self._code.append('%s %0.1f Tf %0.1f TL' % (pdffontname, size, leading))
+        self._code.append('%s %s Tf %s TL' % (pdffontname, fp_str(size), fp_str(leading)))
 
     def setCharSpace(self, charSpace):
          """Adjusts inter-character spacing"""
          self._charSpace = charSpace
-         self._code.append('%0.2f Tc' % charSpace)
+         self._code.append('%s Tc' % fp_str(charSpace))
 
     def setWordSpace(self, wordSpace):
         """Adjust inter-word spacing.  This can be used
         to flush-justify text - you get the width of the
         words, and add some space between them."""
         self._wordSpace = wordSpace
-        self._code.append('%0.2f Tw' % wordSpace)
+        self._code.append('%s Tw' % fp_str(wordSpace))
 
     def setHorizScale(self, horizScale):
         "Stretches text out horizontally"
         self._horizScale = 100 + horizScale
-        self._code.append('%0.2f Tz' % horizScale)
+        self._code.append('%s Tz' % fp_str(horizScale))
 
     def setLeading(self, leading):
         "How far to move down at the end of a line."
         self._leading = leading
-        self._code.append('%0.2f TL' % leading)
+        self._code.append('%s TL' % fp_str(leading))
 
     def setTextRenderMode(self, mode):
         """Set the text rendering mode.
@@ -214,37 +218,37 @@ class PDFTextObject:
         "Move text baseline up or down to allow superscrip/subscripts"
         self._rise = rise
         self._y = self._y - rise    # + ?  _textLineMatrix?
-        self._code.append('%0.2f Ts' % rise)
+        self._code.append('%s Ts' % fp_str(rise))
 
     def setStrokeColorRGB(self, r, g, b):
         self._strokeColorRGB = (r, g, b)
-        self._code.append('%0.2f %0.2f %0.2f RG' % (r,g,b))
+        self._code.append('%s RG' % fp_str(r,g,b))
 
     def setFillColorRGB(self, r, g, b):
         self._fillColorRGB = (r, g, b)
-        self._code.append('%0.2f %0.2f %0.2f rg' % (r,g,b))
+        self._code.append('%s rg' % fp_str(r,g,b))
  
     def setFillColorCMYK(self, c, m, y, k):
         """Takes 4 arguments between 0.0 and 1.0"""
         self._fillColorCMYK = (c, m, y, k)
-        self._code.append('%0.2f %0.2f %0.2f %0.2f k' % (c, m, y, k))
+        self._code.append('%s k' % fp_str(c, m, y, k))
         
     def setStrokeColorCMYK(self, c, m, y, k):
         """Takes 4 arguments between 0.0 and 1.0"""
         self._strokeColorCMYK = (c, m, y, k)
-        self._code.append('%0.2f %0.2f %0.2f %0.2f K' % (c, m, y, k))
+        self._code.append('%s K' % fp_str(c, m, y, k))
 
     def setFillColor(self, aColor):
         """Takes a color object, allowing colors to be referred to by name"""
         if type(aColor) == ColorType:
             rgb = (aColor.red, aColor.green, aColor.blue)
             self._fillColorRGB = rgb
-            self._code.append('%0.2f %0.2f %0.2f rg' % rgb )
+            self._code.append('%s rg' % fp_str(rgb) )
         elif type(aColor) in _SeqTypes:
             l = len(aColor)
             if l==3:
                 self._fillColorRGB = aColor
-                self._code.append('%0.2f %0.2f %0.2f rg' % aColor )
+                self._code.append('%s rg' % fp_str(aColor) )
             elif l==4:
                 self.setFillColorCMYK(self, aColor[0], aColor[1], aColor[2], aColor[3])
             else:
@@ -258,12 +262,12 @@ class PDFTextObject:
         if type(aColor) == ColorType:
             rgb = (aColor.red, aColor.green, aColor.blue)
             self._strokeColorRGB = rgb
-            self._code.append('%0.2f %0.2f %0.2f RG' % rgb )
+            self._code.append('%s RG' % fp_str(rgb) )
         elif type(aColor) in _SeqTypes:
             l = len(aColor)
             if l==3:
                 self._strokeColorRGB = aColor
-                self._code.append('%0.2f %0.2f %0.2f RG' % aColor )
+                self._code.append('%s RG' % fp_str(aColor) )
             elif l==4:
                 self.setStrokeColorCMYK(self, aColor[0], aColor[1], aColor[2], aColor[3])
             else:
@@ -274,12 +278,12 @@ class PDFTextObject:
     def setFillGray(self, gray):
         """Sets the gray level; 0.0=black, 1.0=white"""
         self._fillColorRGB = (gray, gray, gray)
-        self._code.append('%0.2f g' % gray)
+        self._code.append('%s g' % fp_str(gray))
         
     def setStrokeGray(self, gray):
         """Sets the gray level; 0.0=black, 1.0=white"""
         self._strokeColorRGB = (gray, gray, gray)
-        self._code.append('%0.2f G' % gray)
+        self._code.append('%s G' % fp_str(gray))
 
 
     def _textOut(self, text, TStar=0):
