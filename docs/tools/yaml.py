@@ -38,7 +38,7 @@ Special commands understood at present are:
 import sys
 import string
 import imp
-import docs.tools.codegrab
+import codegrab
 
 #modes:
 PLAIN = 1
@@ -146,7 +146,7 @@ class Parser:
     def getModuleDoc(self, modulename, pathname=None):
         """Documents the entire module at this point by making
         paragraphs and preformatted objects"""
-        docco = docs.tools.codegrab.getObjectsDefinedIn(modulename, pathname)
+        docco = codegrab.getObjectsDefinedIn(modulename, pathname)
         if docco.doc <> None:
             self._results.append(('Paragraph', 'DocString', docco.doc))
         if len(docco.functions) > 0:
@@ -168,7 +168,7 @@ class Parser:
 
     def getClassDoc(self, modulename, classname, pathname=None):
         """Documents the class and its public methods"""
-        docco = docs.tools.codegrab.getObjectsDefinedIn(modulename, pathname)
+        docco = codegrab.getObjectsDefinedIn(modulename, pathname)
         found = 0
         for cls in docco.classes:
             if cls.name == classname:

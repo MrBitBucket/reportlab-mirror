@@ -14,8 +14,8 @@ import sys
 import os
 import imp
 
-import docs.tools.yaml
-from docs.tools.rltemplate import RLDocTemplate
+import yaml
+from rltemplate import RLDocTemplate
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import *
 from reportlab.lib.pagesizes import A4
@@ -24,11 +24,11 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 
 
-from docs.tools.stylesheet import getStyleSheet
+from stylesheet import getStyleSheet
 
 
 def run(infilename, outfilename):
-    p = docs.tools.yaml.Parser()
+    p = yaml.Parser()
     results = p.parseFile(infilename)
 
     ss = getStyleSheet()
@@ -85,8 +85,6 @@ def run(infilename, outfilename):
     #print it
     doc = RLDocTemplate(outfilename, pagesize=A4)
     doc.build(story)
-
-
 
 if __name__ == '__main__': #NORUNTESTS
     if len(sys.argv) == 2:
