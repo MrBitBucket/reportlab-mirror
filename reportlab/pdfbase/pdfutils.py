@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.15 2001/02/22 09:31:31 dinu_gherman Exp $
-__version__=''' $Id: pdfutils.py,v 1.15 2001/02/22 09:31:31 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.16 2001/02/22 09:34:46 dinu_gherman Exp $
+__version__=''' $Id: pdfutils.py,v 1.16 2001/02/22 09:34:46 dinu_gherman Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -157,18 +157,21 @@ def _AsciiHexDecode(input):
     return output.read()
 
 
-def _AsciiHexTest(text='What is the average velocity of a sparrow?'):
-    "Does the obvious test for whether ASCII-Hex encoding works."
-    print 'Plain text:', text
-    encoded = _AsciiHexEncode(text)
-    print 'Encoded:', encoded
-    decoded = _AsciiHexDecode(encoded)
-    print 'Decoded:', decoded
-    if decoded == text:
-        print 'Passed'
-    else:
-        print 'Failed!'
+## Moved to test suite.
+##
+##def _AsciiHexTest(text='What is the average velocity of a sparrow?'):
+##    "Does the obvious test for whether ASCII-Hex encoding works."
+##    print 'Plain text:', text
+##    encoded = _AsciiHexEncode(text)
+##    print 'Encoded:', encoded
+##    decoded = _AsciiHexDecode(encoded)
+##    print 'Decoded:', decoded
+##    if decoded == text:
+##        print 'Passed'
+##    else:
+##        print 'Failed!'
     
+
 try:
     try:
         from reportlab.lib._rl_accel import _AsciiBase85Encode	# where we think it should be
