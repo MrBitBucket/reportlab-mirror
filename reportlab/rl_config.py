@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.10 2001/06/21 12:39:21 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.11 2001/06/21 13:31:59 rgbecker Exp $
 import sys, string
 from reportlab.lib import pagesizes
 shapeChecking = 1
@@ -19,6 +19,7 @@ elif sys.platform in ('linux2',):
 else:
 	T1SearchPath=[]
 
+_verbose=0
 PIL_WARNINGS=1								# set to zero to avoid any warning
 ZLIB_WARNINGS=1
 
