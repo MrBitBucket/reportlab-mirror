@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.12  2000/04/06 14:10:10  rgbecker
+#	Made anonymous
+#
 #	Revision 1.11  2000/04/06 14:08:00  rgbecker
 #	Changed release naming convention
-#
+#	
 #	Revision 1.10  2000/04/06 13:01:58  rgbecker
 #	Added import of time
 #	
@@ -65,7 +68,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.11 2000/04/06 14:08:00 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.12 2000/04/06 14:10:10 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -76,7 +79,8 @@ groupdir=os.path.normcase(os.path.normpath('/home/groups/ftp/pub/reportlab'))
 projdir = os.path.normcase(os.path.normpath('reportlab'))
 cvsdir = os.path.join(groupdir,projdir)
 release=0		#1 if making a release
-USER=os.environ['USER']
+#USER=os.environ['USER']
+USER='anonymous'
 
 def get_path():
 	for i in os.environ.keys():
@@ -126,10 +130,10 @@ def cvs_checkout(d):
 		os.exit(1)
 
 	if release:
-		os.environ['CVSROOT']=':pserver:%s@cvs1:/cvsroot/reportlab' % USER
+		os.environ['CVSROOT']=':pserver:%s@cvs:/cvsroot/reportlab' % USER
 		do_exec(cvs+(' co -r %s reportlab'%release), 'the download phase')
 	else:
-		os.environ['CVSROOT']=':pserver:%s@cvs1:/cvsroot/reportlab' % USER
+		os.environ['CVSROOT']=':pserver:%s@cvs:/cvsroot/reportlab' % USER
 		do_exec(cvs+' co reportlab', 'the download phase')
 
 def do_zip(d):
