@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.78 2002/07/24 19:56:36 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.79 2002/08/08 22:45:05 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.78 2002/07/24 19:56:36 andy_robinson Exp $ '''
+__version__=''' $Id: shapes.py,v 1.79 2002/08/08 22:45:05 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -757,7 +757,6 @@ def _renderPath(path, drawFuncs):
             hadMoveTo = hadMoveTo + 1
     return hadMoveTo == hadClosePath
 
-
 class Path(SolidShape):
     """Path, made up of straight lines and bezier curves."""
 
@@ -804,6 +803,8 @@ class Path(SolidShape):
 
     def closePath(self):
         self.operators.append(_CLOSEPATH)
+
+EmptyClipPath=Path()    #special path
 
 def definePath(pathSegs=[],isClipPath=0, dx=0, dy=0, **kw):
     O = []

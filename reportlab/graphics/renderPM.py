@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.21 2002/07/24 19:56:36 andy_robinson Exp $
-__version__=''' $Id: renderPM.py,v 1.21 2002/07/24 19:56:36 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.22 2002/08/08 22:45:05 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.22 2002/08/08 22:45:05 rgbecker Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -190,16 +190,28 @@ class _PMRenderer(Renderer):
             self._canvas.drawString(x,y,text)
 
     def drawPath(self, path):
-        from reportlab.graphics.shapes import _renderPath
         c = self._canvas
+        if path is EmptyClipPath:
+            del c._clipPaths[-1]
+            if c._clipPaths:
+                P = c._clipPaths[-1]
+                icp = P.isClipPath
+                P.isClipPath = 1
+                self.drawPath(P)
+                P.isClipPath = icp
+            else:
+                c.clipPathClear()
+            return
         c.pathBegin()
         drawFuncs = (c.moveTo, c.lineTo, c.curveTo, c.pathClose)
+        from reportlab.graphics.shapes import _renderPath
         isClosed = _renderPath(path, drawFuncs)
-        if isClosed:
-            c.pathFill()
         if path.isClipPath:
             c.clipPathSet()
-        c.pathStroke()
+            c._clipPaths.append(path)
+        else:
+            if isClosed: c.pathFill()
+            c.pathStroke()
 
 def _setFont(gs,fontName,fontSize):
     try:
@@ -222,6 +234,7 @@ class PMCanvas:
         self.__dict__['_gs'] = _renderPM.gstate(w,h,bg=bg)
         self.__dict__['_bg'] = bg
         self.__dict__['_baseCTM'] = (scale,0,0,scale,0,0)
+        self.__dict__['_clipPaths'] = []
         self.ctm = self._baseCTM
 
     def _drawTimeResize(self,w,h,bg=None):
