@@ -127,7 +127,7 @@ def _getdoc(object):
     return result and rstrip(result) + '\n' or ''
 
 
-def _reduceDocStringLength(docStr):
+def reduceDocStringLength(docStr):
     "Return first line of a multiline string."
     
     return split(docStr, '\n')[0]
@@ -530,7 +530,7 @@ class AsciiDocBuilder0(DocBuilder0):
         append = self.outLines.append
         lev, label = self.indentLevel, self.indentLabel
         self.outLines.append('%sModule: %s' % (lev*label, name))
-##        self.outLines.append('%s%s' % ((lev+1)*label, _reduceDocStringLength(doc)))
+##        self.outLines.append('%s%s' % ((lev+1)*label, reduceDocStringLength(doc)))
         append('')
 
         if imported:
@@ -559,7 +559,7 @@ class AsciiDocBuilder0(DocBuilder0):
             append('%s%s' % (lev*label, name))
         return
 
-##        append('%s%s' % ((lev+1)*label, _reduceDocStringLength(doc)))
+##        append('%s%s' % ((lev+1)*label, reduceDocStringLength(doc)))
         self.outLines.append('')
 
 
@@ -571,7 +571,7 @@ class AsciiDocBuilder0(DocBuilder0):
         append = self.outLines.append
         lev, label = self.indentLevel, self.indentLabel
         append('%s%s%s' % (lev*label, name, sig))
-##        append('%s%s' % ((lev+1)*label, _reduceDocStringLength(doc)))
+##        append('%s%s' % ((lev+1)*label, reduceDocStringLength(doc)))
 ##        append('')
 
 
@@ -590,7 +590,7 @@ class AsciiDocBuilder0(DocBuilder0):
         append = self.outLines.append
         lev, label = self.indentLevel, self.indentLabel
         self.outLines.append('%s%s%s' % (lev*label, name, sig))
-##        append('%s%s' % ((lev+1)*label, _reduceDocStringLength(doc)))
+##        append('%s%s' % ((lev+1)*label, reduceDocStringLength(doc)))
 ##        append('')
 
 
@@ -809,6 +809,137 @@ class PdfDocBuilder0(DocBuilder0):
         story.append(XPreformatted(doc, bt))
 
 
+class UmlPdfDocBuilder0(PdfDocBuilder0):
+    "Document the skeleton of a Python module with UML class diagrams."
+
+    fileSuffix = '-uml.pdf'
+
+    def begin(self):
+        styleSheet = getSampleStyleSheet()
+        self.h1 = styleSheet['Heading1']
+        self.h2 = styleSheet['Heading2']
+        self.h3 = styleSheet['Heading3']
+        self.code = styleSheet['Code']
+        self.bt = styleSheet['BodyText']
+        self.story = []
+        self.classCompartment = ''
+        self.methodCompartment = []
+
+
+    def beginModule(self, name, doc, imported):
+        story = self.story
+        h1, h2, h3, bt = self.h1, self.h2, self.h3, self.bt
+        styleSheet = getSampleStyleSheet()
+        bt1 = styleSheet['BodyText']
+
+        story.append(Paragraph(name, h1))
+        story.append(XPreformatted(doc, bt1))
+
+        if imported:
+            story.append(Paragraph('Imported modules', h2))
+            for m in imported:
+                story.append(Paragraph(m, bt1))
+
+
+    def beginClasses(self, names):
+        h1, h2, h3, bt = self.h1, self.h2, self.h3, self.bt
+        if names:
+            self.story.append(Paragraph('Classes', h2))
+
+
+    def beginClass(self, name, doc, bases):
+        self.classCompartment = ''
+        self.methodCompartment = []
+
+        if bases:
+            bases = map(lambda b:b.__name__, bases) # hack
+            self.classCompartment = '%s(%s)' % (name, join(bases, ', '))
+        else:
+            self.classCompartment = name
+
+
+    def endClass(self, name, doc, bases):
+        h1, h2, h3, bt, code = self.h1, self.h2, self.h3, self.bt, self.code
+        styleSheet = getSampleStyleSheet()
+        bt1 = styleSheet['BodyText']
+        story = self.story
+
+        # Use only the first line of the class' doc string --
+        # no matter how long! (Do the same later for methods)
+        classDoc = reduceDocStringLength(doc)
+
+        tsa = tableStyleAttributes = []
+ 
+        # Make table with class and method rows
+        # and add it to the story.
+        p = Paragraph('<b>%s</b>' % self.classCompartment, bt)
+        p.style.alignment = TA_CENTER
+        rows = [(p,)]
+        # No doc strings, now...
+        # rows = rows + [(Paragraph('<i>%s</i>' % classDoc, bt1),)]
+        lenRows = len(rows)
+        tsa.append(('BOX', (0,0), (-1,lenRows-1), 0.25, colors.black))
+        for name, doc, sig in self.methodCompartment:
+            nameAndSig = Paragraph('<b>%s</b>%s' % (name, sig), bt1)
+            rows.append((nameAndSig,))
+            # No doc strings, now...
+            # docStr = Paragraph('<i>%s</i>' % reduceDocStringLength(doc), bt1)
+            # rows.append((docStr,))
+        tsa.append(('BOX', (0,lenRows), (-1,-1), 0.25, colors.black))
+        t = Table(rows, (12*cm,))
+        tableStyle = TableStyle(tableStyleAttributes)
+        t.setStyle(tableStyle)
+        self.story.append(t)
+        self.story.append(Spacer(1*cm, 1*cm))
+
+
+    def beginMethod(self, name, doc, sig):
+        self.methodCompartment.append((name, doc, sig))
+
+
+    def beginFunctions(self, names):
+        h1, h2, h3, bt = self.h1, self.h2, self.h3, self.bt
+        if names:
+            self.story.append(Paragraph('Functions', h2))
+        self.classCompartment = chr(171) + ' Module-Level Functions ' + chr(187)
+        self.methodCompartment = []
+
+
+    def beginFunction(self, name, doc, sig):
+        self.methodCompartment.append((name, doc, sig))
+
+
+    def endFunctions(self, names):
+        h1, h2, h3, bt, code = self.h1, self.h2, self.h3, self.bt, self.code
+        styleSheet = getSampleStyleSheet()
+        bt1 = styleSheet['BodyText']
+        story = self.story
+        if not names:
+            return
+        
+        tsa = tableStyleAttributes = []
+
+        # Make table with class and method rows
+        # and add it to the story.
+        p = Paragraph('<b>%s</b>' % self.classCompartment, bt)
+        p.style.alignment = TA_CENTER
+        rows = [(p,)]
+        lenRows = len(rows)
+        tsa.append(('BOX', (0,0), (-1,lenRows-1), 0.25, colors.black))
+        for name, doc, sig in self.methodCompartment:
+            nameAndSig = Paragraph('<b>%s</b>%s' % (name, sig), bt1)
+            rows.append((nameAndSig,))
+            # No doc strings, now...
+            # docStr = Paragraph('<i>%s</i>' % reduceDocStringLength(doc), bt1)
+            # rows.append((docStr,))
+        tsa.append(('BOX', (0,lenRows), (-1,-1), 0.25, colors.black))
+        t = Table(rows, (12*cm,))
+        tableStyle = TableStyle(tableStyleAttributes)
+        t.setStyle(tableStyle)
+        self.story.append(t)
+        self.story.append(Spacer(1*cm, 1*cm))
+
+
 ####################################################################
 # 
 # Main
@@ -823,7 +954,7 @@ Usage: python docpy0.py [options]
     [options]
         -h          Print this help message.
         -f name     Use the document builder indicated by 'name',
-                    e.g. Ascii, Html, Pdf.
+                    e.g. Ascii, Html, Pdf (default), UmlPdf.
         -m module   Generate doc for module named 'module'.
         -p package  Generate doc for package named 'package'.
 
@@ -833,11 +964,11 @@ Examples:
     python docpy0.py -m docpy0.py -f Ascii
     python docpy0.py -m string -f Html
     python docpy0.py -m signsandsymbols.py -f Pdf
-    python docpy0.py -p pingo -f Html
+    python docpy0.py -p reportlab.platypus -f UmlPdf
 """
 
 
-def documentModule0(path, builder=DocBuilder0()):
+def documentModule0(path, builder=PdfDocBuilder0()):
     """Generate documentation for one Python file in some format.
 
     This handles Python standard modules like string, custom modules
@@ -886,7 +1017,7 @@ def documentModule0(path, builder=DocBuilder0()):
 
 
 def _packageWalkCallback(builder, dirPath, files):
-    """A callback function used when waking over a package tree."""
+    "A callback function used when waking over a package tree."
     
     files = filter(lambda f:f != '__init__.py', files)
     files = filter(lambda f:f[-3:] == '.py', files)
@@ -899,7 +1030,7 @@ def _packageWalkCallback(builder, dirPath, files):
             builder.indentLevel = builder.indentLevel - 1
 
     
-def documentPackage0(path, builder=DocBuilder0()):
+def documentPackage0(pathOrName, builder=PdfDocBuilder0()):
     """Generate documentation for one Python package in some format.
 
     Rigiht now, 'path' must be a filesystem path, later it will
@@ -909,14 +1040,17 @@ def documentPackage0(path, builder=DocBuilder0()):
     The doc file will always be saved in the current directory.
     """
 
-    name = path
-    if string.find(path, os.sep) > -1:
-        name = os.path.splitext(os.path.basename(path))[0]
+    if string.find(pathOrName, os.sep) > -1:
+        name = os.path.splitext(os.path.basename(pathOrName))[0]
+        path = pathOrName
     else:
-        package = __import__(name)
-        name = path
+        package = __import__(pathOrName)
+        if '.' in pathOrName:
+            subname = 'package' + pathOrName[string.find(pathOrName, '.'):]
+            package = eval(subname)
+        name = pathOrName
         path = os.path.dirname(package.__file__)
-
+    
     cwd = os.getcwd()
     builder.beginPackage(name)
     os.path.walk(path, _packageWalkCallback, builder)
@@ -925,8 +1059,7 @@ def documentPackage0(path, builder=DocBuilder0()):
 
 
 def main():
-    """Handle command-line options and trigger corresponding action.
-    """
+    "Handle command-line options and trigger corresponding action."
     
     opts, args = getopt.getopt(sys.argv[1:], 'hf:m:p:')
 
@@ -934,17 +1067,19 @@ def main():
     for o, a in opts:
         if o == '-h':
             print printUsage.__doc__
-            #printUsage()
             sys.exit(0)
 
-    # On -f set the DocBuilder to use or a default one.
-    builder = DocBuilder0()
+    # On -f set the appropriate DocBuilder to use or a default one.
+    builder = PdfDocBuilder0()
     for o, a in opts:
         if o == '-f':
             builder = eval("%sDocBuilder0()" % a)
             break
 
     # Now call the real documentation functions.
+    if not opts:
+        opts = [('-p', 'reportlab.graphics')] # default setting
+
     for o, a in opts:
         if o == '-m':
             builder.begin()
