@@ -14,7 +14,7 @@
             &#187;%(title)s, page %(page)s&#171;
         </infostring-->
     <!-- Now for the slides -->
-    <slide title="Introduction" id="Slide001" effectname="Wipe">
+    <slide title="Main" id="Slide001" effectname="Wipe">
       <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
                     Conference Kit Demo
@@ -38,6 +38,8 @@
 		<para style="Bullet">
 					Who is it aimed at?</para>
 		<para style="Bullet">
+					How does it help?</para>
+		<para style="Bullet">
 					What does it produce?</para>
 		<para style="Bullet">
 					What size can it support?</para>
@@ -49,7 +51,7 @@
                     What is it?
                 </para>
         <para style="Bullet">
-					Conferences &amp; Events
+					Conferences and Events
                 </para>
         <para style="Bullet">
                     Hosted Solution
@@ -84,29 +86,29 @@
      			</para>
       </frame>
     </slide>
-    <slide title="Who is it aimed at1" id="Slide005" effectname="Dissolve" outlinelevel="1">
+    <slide title="How does it help" id="Slide005" effectname="Dissolve" outlinelevel="1">
       <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
-                    Who is it aimed at?
+                    How does it help?
                 </para>
         <para style="Heading2">
-					Exhibitors &amp; Sponsors
+					Exhibitors and Sponsors
                 </para>
         <para style="Bullet">
 					Target Marketing
                 </para>
 		<para style="Bullet">
-					Save time &amp; effort
+					Save time and effort
                 </para>
 		<para style="Bullet">
 					Print out bulk amounts
                </para>
       </frame>
     </slide>
-    <slide title="Who is it aimed at2" id="Slide006" effectname="Dissolve" outlinelevel="1">
+    <slide title="How does it help1" id="Slide006" effectname="Dissolve" outlinelevel="1">
       <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
-                    Who is it aimed at
+                   How does it help?
                 </para>
         <para style="Heading2">
 					Event Management Companies
@@ -125,10 +127,10 @@
                 </para>
       </frame>
     </slide>
-    <slide title="Who is it aimed at3" id="Slide007" effectname="Wipe" outlinelevel="1">
+    <slide title="How does it help2" id="Slide007" effectname="Wipe" outlinelevel="1">
       <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
-                    Who is it aimed at?
+                    How does it help?
                 </para>
         <para style="Heading2">
 					Speakers
@@ -144,10 +146,10 @@
                 </para>
       </frame>
     </slide>
-    <slide title="Who is it aimed at4" id="Slide008" effectname="Wipe" outlinelevel="1">
+    <slide title="How does it help3" id="Slide008" effectname="Wipe" outlinelevel="1">
       <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
-                    Who is it aimed at?
+                    How does it help?
                 </para>
 		<para style="Heading2">
 					Delegates
@@ -181,20 +183,20 @@
                 Badge Wizard  
 				</para>
 		<para style="Bullet">
-					Personalised badges, lunch &amp; reception tickets
+					Personalised badges, lunch and reception tickets
                 </para>
         <para style="Heading2">
                Timetables
 				</para>
 		<para style="Heading2">
-                Brochures &amp; Handouts 
+                Brochures and Handouts 
 				</para>
       </frame>
     </slide>
     <slide title="Pricing" id="Slide009" effectname="Glitter" outlinelevel="1">
       <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
-                    Pricing &amp; Availability
+                    Pricing and Availability
                 </para>
         <para style="Bullet">
                     Test
