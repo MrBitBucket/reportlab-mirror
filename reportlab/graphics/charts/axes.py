@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.54 2002/04/30 17:13:50 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.55 2002/05/21 16:40:53 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.54 2002/04/30 17:13:50 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.55 2002/05/21 16:40:53 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -841,9 +841,7 @@ class NormalDateXValueAxis(XValueAxis):
 	Depending on the data and some built-in rules, the axis
 	displays normalDate values as nicely formatted dates.
 
-	FidXValueAxis is an axis component for FidLinePlot.
-
-	The client chart should have NormalDate values.
+	The client chart should have NormalDate X values.
 	"""
 
 	_attrMap = AttrMap(BASE = XValueAxis,
@@ -1107,9 +1105,77 @@ class YValueAxis(ValueAxis):
 			self._makeLines(g,-self.tickLeft,self.tickRight,self.strokeColor,self.strokeWidth,self.strokeDashArray)
 		return g
 
+class AdjYValueAxis(YValueAxis):
+	"""A Y-axis applying additional rules.
+
+	Depending on the data and some built-in rules, the axis
+	may choose to adjust its range and origin.
+	"""
+	_attrMap = AttrMap(BASE = YValueAxis,
+		requiredRange = AttrMapValue(isNumberOrNone, desc='Minimum required value range.'),
+		leftAxisPercent = AttrMapValue(isBoolean, desc='When true add percent sign to label values.'),
+		leftAxisOrigShiftIPC = AttrMapValue(isNumber, desc='Lowest label shift interval ratio.'),
+		leftAxisOrigShiftMin = AttrMapValue(isNumber, desc='Minimum amount to shift.'),
+		leftAxisSkipLL0 = AttrMapValue(isBoolean, desc='Skip lowest tick label when true.')
+		)
+
+	def __init__(self):
+		apply(YValueAxis.__init__, (self,))
+		self.requiredRange = 30
+		self.leftAxisPercent = 1
+		self.leftAxisOrigShiftIPC = 0.15
+		self.leftAxisOrigShiftMin = 12
+		self.leftAxisSkipLL0 = 0
+		self.valueSteps = None
+
+	def _rangeAdjust(self):
+		"Adjusts the value range of the axis."
+
+		from reportlab.graphics.charts.utils import find_good_grid, ticks
+		y_min, y_max = self._valueMin, self._valueMax
+
+		valueStep, requiredRange = self.valueStep, self.requiredRange
+		if requiredRange and y_max - y_min < requiredRange:
+			y1, y2, None = find_good_grid(y_min, y_max,grid=valueStep)
+			if y2 - y1 < requiredRange:
+				ym = (y1+y2)*0.5
+				y1 = min(ym-requiredRange*0.5,y_min)
+				y2 = max(ym+requiredRange*0.5,y_max)
+				if y_min>=100 and y1<100:
+					y2 = y2 + 100 - y1
+					y1 = 100
+				elif y_min>=0 and y1<0:
+					y2 = y2 - y1
+					y1 = 0
+			self._valueMin, self._valueMax = y1, y2
+
+		T, L = ticks(self._valueMin, self._valueMax, split=1, percent=self.leftAxisPercent,grid=valueStep)
+		abf = self.avoidBoundFrac
+		if abf:
+			_n = getattr(self,'_cValueMin',T[0])
+			_x = getattr(self,'_cValueMax',T[-1])
+			i = (T[1]-T[0])*abf
+			if _n - T[0] < i: self._valueMin = self._valueMin - i
+			if T[-1]-_x < i: self._valueMax = self._valueMax + i
+			T, L = ticks(self._valueMin, self._valueMax, split=1, percent=self.leftAxisPercent,grid=valueStep)
+
+		self._valueMin = T[0]
+		self._valueMax = T[-1]
+		self.valueSteps = T
+		from reportlab.lib.formatters import DecimalFormatter
+		if not isinstance(self.labelTextFormat,DecimalFormatter): self.labelTextFormat = L
+
+		if abs(self._valueMin-100)<1e-6:
+			self._calcValueStep()
+			vMax, vMin = self._valueMax, self._valueMin
+			m = max(self.leftAxisOrigShiftIPC*self._valueStep,
+					(vMax-vMin)*self.leftAxisOrigShiftMin/self._length)
+			self._valueMin = self._valueMin - m
+
+		if self.leftAxisSkipLL0:
+			L[0] = ''
 
 # Sample functions.
-
 def sample0a():
 	"Sample drawing with one xcat axis and two buckets."
 
