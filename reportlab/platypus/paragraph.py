@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.37 2000/12/07 23:54:32 aaron_watters Exp $
-__version__=''' $Id: paragraph.py,v 1.37 2000/12/07 23:54:32 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.38 2000/12/08 09:29:36 rgbecker Exp $
+__version__=''' $Id: paragraph.py,v 1.38 2000/12/08 09:29:36 rgbecker Exp $ '''
 import string
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -70,10 +70,13 @@ def	_justifyDrawParaLine( tx, offset, extraspace, words, last=0):
 		#last one, left align
 		tx._textOut(text,1)
 	else:
-		nspaces = max(len(words)-1, 1)
-		tx.setWordSpace(extraspace / float(nspaces))
-		tx._textOut(text,1)
-		tx.setWordSpace(0)
+		nSpaces = len(words)-1
+		if nSpaces:
+			tx.setWordSpace(extraspace / float(nSpaces))
+			tx._textOut(text,1)
+			tx.setWordSpace(0)
+		else:
+			tx._textOut(text,1)
 
 def	_putFragLine(tx,words):
 	for f in words:
@@ -115,9 +118,13 @@ def	_justifyDrawParaLineX( tx, offset, line, last=0):
 		_putFragLine(tx, line.words)
 	else:
 		tx.setXPos(offset)
-		tx.setWordSpace(line.extraSpace / float(line.wordCount-1))
-		_putFragLine(tx, line.words)
-		tx.setWordSpace(0)
+		nSpaces = line.wordCount - 1
+		if nSpaces:
+			tx.setWordSpace(line.extraSpace / float(nSpaces))
+			_putFragLine(tx, line.words)
+			tx.setWordSpace(0)
+		else:
+			_putFragLine(tx, line.words)
 
 def	_sameFrag(f,g):
 	'returns 1 if two ParaFrags map out the same'
