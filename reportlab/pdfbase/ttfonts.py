@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.5 2002/07/30 12:06:45 mgedmin Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.6 2002/09/02 15:08:39 mgedmin Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -58,7 +58,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.5 2002/07/30 12:06:45 mgedmin Exp $'
+__version__ = '$Id: ttfonts.py,v 1.6 2002/09/02 15:08:39 mgedmin Exp $'
 
 import string
 from types import StringType
@@ -220,7 +220,7 @@ class TTFontParser:
             version = self.read_ulong()
             if version == 0x4F54544F:
                 raise TTFError, 'OpenType fonts with PostScript outlines are not supported'
-            if version != 0x00010000:
+            if version != 0x00010000 and version != 0x74727565:
                 raise TTFError, 'Not a TrueType font'
         except:
             raise TTFError, 'Not a TrueType font'
@@ -485,25 +485,33 @@ class TTFontFile(TTFontParser):
 
         # OS/2 - OS/2 and Windows metrics table
         # (needs data from head table)
-        self.seek_table("OS/2")
-        version = self.read_ushort()
-        self.skip(2)
-        usWeightClass = self.read_ushort()
-        self.skip(2)
-        fsType = self.read_ushort()
-        if fsType == 0x0002 or (fsType & 0x0300) != 0:
-            raise TTFError, 'Font does not allow subsetting/embedding (%04X)' % fsType
-        self.skip(11*2 + 10 + 4*4 + 4 + 3*2)
-        sTypoAscender = self.read_short()
-        sTypoDescender = self.read_short()
-        self.ascent = scale(sTypoAscender)      # XXX: for some reason it needs to be multiplied by 1.24--1.28
-        self.descent = scale(sTypoDescender)
+        if self.table.has_key("OS/2"):
+            self.seek_table("OS/2")
+            version = self.read_ushort()
+            self.skip(2)
+            usWeightClass = self.read_ushort()
+            self.skip(2)
+            fsType = self.read_ushort()
+            if fsType == 0x0002 or (fsType & 0x0300) != 0:
+                raise TTFError, 'Font does not allow subsetting/embedding (%04X)' % fsType
+            self.skip(11*2 + 10 + 4*4 + 4 + 3*2)
+            sTypoAscender = self.read_short()
+            sTypoDescender = self.read_short()
+            self.ascent = scale(sTypoAscender)      # XXX: for some reason it needs to be multiplied by 1.24--1.28
+            self.descent = scale(sTypoDescender)
 
-        if version > 1:
-            self.skip(3*2 + 2*4 + 2)
-            sCapHeight = self.read_short()
-            self.capHeight = scale(sCapHeight)
+            if version > 1:
+                self.skip(3*2 + 2*4 + 2)
+                sCapHeight = self.read_short()
+                self.capHeight = scale(sCapHeight)
+            else:
+                self.capHeight = self.ascent
         else:
+            # Microsoft TTFs require an OS/2 table; Apple ones do not.  Try to
+            # cope.  The data is not very important anyway.
+            usWeightClass = 500
+            self.ascent = scale(yMax)
+            self.descent = scale(yMin)
             self.capHeight = self.ascent
 
         # There's no way to get stemV from a TTF file short of analyzing actual outline data
