@@ -10,7 +10,7 @@ from reportlab.lib.attrmap import AttrMap, AttrMapValue
 from reportlab.lib.colors import black
 from reportlab.graphics.widgets.flags import Flag
 from math import sin, cos, pi
-import copy
+import copy, new
 _toradians = pi/180.0
 
 class Marker(Widget):
@@ -44,25 +44,24 @@ class Marker(Widget):
 		self.x = self.y = self.dx = self.dy = self.angle = 0
 
 	def clone(self):
-		return copy.copy(self)
+		return new.instance(self.__class__,self.__dict__.copy())
 
 	def _Smiley(self):
+		x, y = self.x+self.dx, self.y+self.dy
 		d = self.size/2.0
 		s = SmileyFace()
 		s.fillColor = self.fillColor
 		s.strokeWidth = self.strokeWidth
 		s.strokeColor = self.strokeColor
-		s.x = -d
-		s.y = -d
+		s.x = x-d
+		s.y = y-d
 		s.size = d*2
 		return s
 
 	def _Square(self):
+		x, y = self.x+self.dx, self.y+self.dy
 		d = self.size/2.0
-		s = Rect(-d, -d, 2*d, 2*d)
-		s.fillColor = self.fillColor
-		s.strokeColor = self.strokeColor
-		s.strokeWidth = self.strokeWidth
+		s = Rect(x-d,y-d,2*d,2*d,fillColor=self.fillColor,strokeColor=self.strokeColor,strokeWidth=self.strokeWidth)
 		return s
 
 	def _Diamond(self):
@@ -70,18 +69,18 @@ class Marker(Widget):
 		return self._doPolygon((-d,0,0,d,d,0,0,-d))
 
 	def _Circle(self):
-		s = Circle(0, 0, self.size/2.0)
-		s.fillColor = self.fillColor
-		s.strokeColor = self.strokeColor
-		s.strokeWidth = self.strokeWidth
+		x, y = self.x+self.dx, self.y+self.dy
+		s = Circle(x,y,self.size/2.0,fillColor=self.fillColor,strokeColor=self.strokeColor,strokeWidth=self.strokeWidth)
 		return s
 
 	def _Cross(self):
+		x, y = self.x+self.dx, self.y+self.dy
 		s = float(self.size)
 		h, s = s/2, s/6
 		return self._doPolygon((-s,-h,-s,-s,-h,-s,-h,s,-s,s,-s,h,s,h,s,s,h,s,h,-s,s,-s,s,-h))
 
 	def _Triangle(self):
+		x, y = self.x+self.dx, self.y+self.dy
 		r = float(self.size)/2
 		c = 30*_toradians
 		s = sin(30*_toradians)*r
@@ -95,7 +94,6 @@ class Marker(Widget):
 		c = cos(c)*r
 		z = s/2
 		g = c/2
-		x, y = self.x+self.dx, self.y+self.dy
 		return self._doPolygon((0,r,-z,s,-c,s,-s,0,-c,-s,-z,-s,0,-r,z,-s,c,-s,s,0,c,s,z,s))
 
 	def _Pentagon(self):
@@ -111,7 +109,9 @@ class Marker(Widget):
 		return self._doNgon(8)
 
 	def _doPolygon(self,P):
-		return Polygon(P, strokeWidth = self.strokeWidth, strokeColor= self.strokeColor, fillColor=self.fillColor)
+		x, y = self.x+self.dx, self.y+self.dy
+		if x or y: P = map(lambda i,P=P,A=[x,y]: P[i] + A[i&1], range(len(P)))
+		return Polygon(P, strokeWidth =self.strokeWidth, strokeColor=self.strokeColor, fillColor=self.fillColor)
 
 	def _doFill(self):
 		old = self.fillColor
@@ -129,7 +129,7 @@ class Marker(Widget):
 			P.append(size*cos(r))
 			P.append(size*sin(r))
 		return self._doPolygon(P)
-			
+
 	_FilledCircle = _doFill
 	_FilledSquare = _doFill
 	_FilledDiamond = _doFill
@@ -143,14 +143,22 @@ class Marker(Widget):
 
 	def draw(self):
 		if self.kind:
-			m = getattr(self,'_'+self.kind)()
-			x, y, angle = self.x+self.dx, self.y+self.dy, self.angle
-			if x or y or angle:
+			m = getattr(self,'_'+self.kind)
+			if self.angle:
+				_x, _dx, _y, _dy = self.x, self.dx, self.y, self.dy
+				self.x, self.dx, self.y, self.dy = 0,0,0,0
+				try:
+					m = m()
+				finally:
+					self.x, self.dx, self.y, self.dy = _x, _dx, _y, _dy
 				if not isinstance(m,Group):
 					_m, m = m, Group()
 					m.add(_m)
-				if angle: m.rotate(angle)
+				if self.angle: m.rotate(angle)
+				x, y = _x+_dx, _y+_dy
 				if x or y: m.shift(x,y)
+			else:
+				m = m()
 		else:
 			m = Group()
 		return m
