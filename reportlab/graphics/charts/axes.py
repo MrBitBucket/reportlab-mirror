@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.65 2003/05/27 19:05:54 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.66 2003/06/03 12:36:10 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -31,7 +31,7 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id: axes.py,v 1.65 2003/05/27 19:05:54 rgbecker Exp $ '''
+__version__=''' $Id: axes.py,v 1.66 2003/06/03 12:36:10 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType, TupleType, ListType
@@ -966,9 +966,7 @@ class NormalDateXValueAxis(XValueAxis):
                 if not isinstance(x,VC):
                     D[i] = (VC(x),y)
 
-    def configure(self, data):
-        self._convertXV(data)
-        xVals = map(lambda dv: dv[0], data[0])
+    def _getStepsAndLabels(self,xVals):
         if self.dailyFreq:
             xEOM = []
             pm = 0
@@ -984,6 +982,12 @@ class NormalDateXValueAxis(XValueAxis):
             steps, labels = self._xAxisTicker(xEOM)
         else:
             steps, labels = self._xAxisTicker(xVals)
+        return setps, labels
+
+    def configure(self, data):
+        self._convertXV(data)
+        xVals = map(lambda dv: dv[0], data[0])
+        steps,labels = self._getStepsAndLabels(xVals)
         valueMin, valueMax = self.valueMin, self.valueMax
         if valueMin is None: valueMin = xVals[0]
         if valueMax is None: valueMax = xVals[-1]
@@ -994,7 +998,6 @@ class NormalDateXValueAxis(XValueAxis):
         self._scaleFactor = self._length / float(valueMax - valueMin)
         self._tickValues = steps
         self._configured = 1
-
 
 class YValueAxis(ValueAxis):
     "Y/value axis"
