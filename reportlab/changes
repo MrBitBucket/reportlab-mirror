@@ -1,4 +1,158 @@
 #################################################################################
+#################### RELEASE 1.16 at 16:00 GMT  7/Nov/2002      #################
+#################################################################################
+##### 2002/11/07 #####
+	pdfbase/pdfdoc.py 1.74 rgbecker  Remove string method usage
+	test/test_docs_build.py 1.6 rgbecker  Fix for non-standard python testing
+##### 2002/11/06 #####
+	pdfbase/pdfmetrics.py 1.59 rgbecker  Jerome's New improved hasher
+	pdfgen/pycanvas.py 1.8 rgbecker  Jerome's New improved hasher
+	pdfgen/canvas.py 1.108 rgbecker  Jerome's fix for strange filenames
+	pdfbase/pdfdoc.py 1.73 rgbecker  Jerome's fix for strange filenames
+	pdfbase/pdfmetrics.py 1.58 rgbecker  Fix for Jerome's magic breakages in 1.5.2
+##### 2002/11/04 #####
+	tools/pythonpoint/stdparser.py 1.13 andy_robinson  Fixed extra space due to incorrect bullet text
+	test/test_source_chars.py 1.4 rgbecker  Fix missing Baseclass method invocation
+	pdfbase/pdfutils.py 1.33 rgbecker  Added A85 caching possibility to Image XObjects
+	pdfbase/pdfdoc.py 1.72 rgbecker  Added A85 caching possibility to Image XObjects
+	tools/pythonpoint/stdparser.py 1.12 andy_robinson  Whitespace and tab character cleanup
+	tools/pythonpoint/pythonpoint.py 1.19 andy_robinson  Whitespace and tab character cleanup
+	test/test_source_chars.py 1.3 andy_robinson  Whitespace and tab character cleanup
+	test/test_renderSVG.py 1.7 andy_robinson  Whitespace and tab character cleanup
+	test/test_platypus_paragraphs.py 1.11 andy_robinson  Whitespace and tab character cleanup
+	setup_reportlab.py 1.2 andy_robinson  Whitespace and tab character cleanup
+	setup.py 1.2 andy_robinson  Whitespace and tab character cleanup
+	platypus/para.py 1.2 andy_robinson  Whitespace and tab character cleanup
+	pdfgen/pycanvas.py 1.7 andy_robinson  Whitespace and tab character cleanup
+	pdfgen/canvas.py 1.107 andy_robinson  Whitespace and tab character cleanup
+	pdfbase/pdfdoc.py 1.71 andy_robinson  Whitespace and tab character cleanup
+	lib/rparsexml.py 1.2 andy_robinson  Whitespace and tab character cleanup
+	graphics/charts/slidebox.py 1.6 andy_robinson  Whitespace and tab character cleanup
+	graphics/charts/dotbox.py 1.2 andy_robinson  Whitespace and tab character cleanup
+	docs/userguide/ch1_intro.py 1.13 andy_robinson  Whitespace and tab character cleanup
+##### 2002/11/03 #####
+	tools/pythonpoint/stdparser.py 1.11 andy_robinson  Added pageDuration feature for automatic slide transitions
+	tools/pythonpoint/pythonpoint.py 1.18 andy_robinson  Added pageDuration feature for automatic slide transitions
+	tools/pythonpoint/demos/pythonpoint.xml 1.6 andy_robinson  Added pageDuration feature for automatic slide transitions
+	pdfgen/canvas.py 1.106 andy_robinson  Added pageDuration feature for automatic slide transitions
+	tools/pythonpoint/pythonpoint.dtd 1.2 andy_robinson  Updated copyright year while testing write access
+	platypus/flowables.py 1.32 rgbecker  Added ParagraphAndImage
+	test/test_platypus_paragraphs.py 1.10 rgbecker  Added test of ParagraphAndImage
+##### 2002/10/30 #####
+	tools/pythonpoint/stdparser.py 1.10 dinu_gherman  Added ./ to styles search folder list.
+##### 2002/10/28 #####
+	rl_addons/renderPM/setup.py 1.14 rgbecker  Fix up byteorder for 1.5.2
+	rl_addons/renderPM/filelist.txt 1.1 rgbecker  Release of 0.9
+	rl_addons/renderPM/do_tags.bat 1.2 rgbecker  Release of 0.9
+	rl_addons/renderPM/bingo.py 1.2 rgbecker  Release of 0.9
+	rl_addons/renderPM/_renderPM.c 1.17 rgbecker  Release of 0.9
+	rl_addons/renderPM/PROJECT_CVS_TAG 1.1 rgbecker  Release of 0.9
+##### 2002/10/25 #####
+	rl_addons/pyRXP/test/t.py 1.4 rgbecker  Copy back errbuf for various detected errors
+	rl_addons/pyRXP/pyRXP.c 1.10 rgbecker  Copy back errbuf for various detected errors
+##### 2002/10/22 #####
+	pdfbase/pdfdoc.py 1.70 rgbecker  Added JPEG special case for PDFImageXOBject
+##### 2002/10/20 #####
+	rl_addons/pyRXP/pyRXP.c 1.9 rgbecker  Fix pyRXP.version number
+##### 2002/10/19 #####
+	lib/_rl_accel.c 1.29 rgbecker  Forgot the VERSION
+	lib/_rl_accel.c 1.28 rgbecker  Added Ury Marshak's checksum speedup
+	pdfbase/ttfonts.py 1.13 rgbecker  Added Ury Marshak's checksum speedup
+	graphics/shapes.py 1.81 rgbecker  Fix for tuple case in definePath
+##### 2002/10/18 #####
+	pdfgen/pycanvas.py 1.6 johnprecedo  Applied Jerome Alet's patch (submitted on Mon 07/10/2002).
+	rl_addons/pyRXP/test/t.py 1.3 rgbecker  Inspired by Alex Martelli add MakeMutableTree & ExpandEmpty flags fourth item callback!
+	rl_addons/pyRXP/pyRXP.c 1.8 rgbecker  Inspired by Alex Martelli add MakeMutableTree & ExpandEmpty flags fourth item callback!
+##### 2002/10/16 #####
+	setup.py 1.1 andy_robinson  Added a highly dodgy, experimental setup.py
+##### 2002/10/15 #####
+	setup_reportlab.py 1.1 johnprecedo  First stab at a distutils setup script.
+	platypus/paragraph.py 1.64 rgbecker  Attempt at fixing getActualLineWidths0
+##### 2002/10/14 #####
+	graphics/charts/d_verticalbarchart.py 1.2 johnprecedo  Moved to rlextra/examples/graphics.
+	graphics/charts/d_horizontalbarchart.py 1.2 johnprecedo  Moved to rlextra/examples/graphics.
+##### 2002/10/10 #####
+	test/test_pdfbase_ttfonts.py 1.7 mgedmin  Turn off checksum validation by default
+	pdfbase/ttfonts.py 1.12 mgedmin  Turn off checksum validation by default
+	pdfbase/ttfonts.py 1.11 mgedmin  Added a workaround for some broken TTFs (like Thyromanes)
+	pdfbase/ttfonts.py 1.10 mgedmin  Let TTFont users disable checksum validation.  Also, don't parse the same TTF info twice (in TTFontFace and TTFontFile constructors).
+	pdfbase/pdfmetrics.py 1.57 mgedmin  Let TTFont users disable checksum validation.  Also, don't parse the same TTF info twice (in TTFontFace and TTFontFile constructors).
+##### 2002/10/07 #####
+	tools/pythonpoint/styles/standard.py 1.3 rgbecker  jerome Alet spotted this typo
+	pdfgen/pycanvas.py 1.5 rgbecker  Fixed 1.5 compat (+=)
+	test/test_pdfbase_ttfonts.py 1.6 mgedmin  Align glyphs at dword boundaries as recommended by the TTF spec. (also fixes a bug)
+	pdfbase/ttfonts.py 1.9 mgedmin  Align glyphs at dword boundaries as recommended by the TTF spec. (also fixes a bug)
+##### 2002/10/06 #####
+	graphics/renderSVG.py 1.13 andy_robinson  Whoops, wrong stringIO
+##### 2002/10/04 #####
+	graphics/renderSVG.py 1.12 andy_robinson  Dirk Datzert's drawToString function
+##### 2002/10/03 #####
+	pdfgen/pycanvas.py 1.4 rgbecker  Jerome's Patch added by Robin
+	graphics/charts/slidebox.py 1.5 johnprecedo  Examples for Diagra documentation.
+	graphics/charts/dotbox.py 1.1 johnprecedo  Examples for Diagra documentation.
+	graphics/charts/d_verticalbarchart.py 1.1 johnprecedo  Examples for Diagra documentation.
+	graphics/charts/d_horizontalbarchart.py 1.1 johnprecedo  Examples for Diagra documentation.
+##### 2002/10/02 #####
+	test/test_pdfgen_pycanvas.py 1.2 andy_robinson  Latest, well commented source
+	pdfgen/pycanvas.py 1.3 andy_robinson  Latest, well commented source
+	pdfgen/pycanvas.py 1.2 andy_robinson  Jerome's latest version, refactored he says
+##### 2002/10/01 #####
+	test/test_pdfgen_pycanvas.py 1.1 andy_robinson  Jerome Alet's Macro-recording canvas
+	pdfgen/pycanvas.py 1.1 andy_robinson  Jerome Alet's Macro-recording canvas
+##### 2002/09/30 #####
+	platypus/paragraph.py 1.63 rgbecker  Fixed splitting bug
+	platypus/paraparser.py 1.48 rgbecker  Attempt to use sup as well as super
+##### 2002/09/29 #####
+	demos/rlzope/readme.txt 1.2 rgbecker  Update to refelect Jerome's .pth recommendation
+##### 2002/09/27 #####
+	graphics/charts/slidebox.py 1.4 rgbecker  Fix parentheses again
+	graphics/charts/slidebox.py 1.3 rgbecker  Fix parentheses
+##### 2002/09/26 #####
+	test/test_platypus_general.py 1.11 andy_robinson  Fixed makeSuite non-function-call in script handler and added a token ampersand to check xml parsing.
+	graphics/charts/slidebox.py 1.2 rgbecker  Fix ascent scaling problem
+	graphics/charts/slidebox.py 1.1 rgbecker  Added slidebox in charts now
+	docs/userguide/ch6_tables.py 1.6 andy_robinson  Fixed bad docco thanks to Derek Basch
+##### 2002/09/17 #####
+	graphics/renderPDF.py 1.21 andy_robinson  Added drawToString method as suggested by Dirk Datzert
+##### 2002/09/13 #####
+	lib/colors.py 1.37 rgbecker  Add cornflowerblue = cornflower
+##### 2002/09/12 #####
+	docs/userguide/ch6_tables.py 1.5 andy_robinson  Expanded the docs a little
+##### 2002/09/09 #####
+	platypus/para.py 1.1 aaron_watters  new experimental paragraph implementation which supports hyperlinking, underlining, embedded lists etc
+	lib/rparsexml.py 1.1 aaron_watters  added to support new paragraph
+	lib/colors.py 1.36 rgbecker  Fixed toColors to be even more accepting
+##### 2002/09/07 #####
+	docs/userguide/ch1_intro.py 1.12 dragan1  minor grammar corrections
+##### 2002/09/06 #####
+	pdfbase/ttfonts.py 1.8 mgedmin  Support POST table version 4 as found in some Apple TTFs. Fixed a typo in struct.pack format that could prevent huge fonts from working.
+	docs/userguide/ch1_intro.py 1.11 rgbecker  Dragan: added jython installation instructions
+##### 2002/09/02 #####
+	pdfbase/ttfonts.py 1.7 mgedmin  Typos in error reporting (s/ver.min/ver_min/)
+	pdfbase/ttfonts.py 1.6 mgedmin  Support Apple TTFs: different signature and optional OS/2 table
+##### 2002/08/25 #####
+	graphics/widgets/grids.py 1.29 rgbecker  Allow stroke to appear
+	rl_addons/renderPM/setup.py 1.13 rgbecker  Added byteorder test
+##### 2002/08/23 #####
+	demos/rlzope/rlzope.py 1.5 johnprecedo  Patch from Juergen Plasser/Jeriome Alet. Corrects a problem which happens when images are >64Kb.
+##### 2002/08/19 #####
+	test/utils.py 1.8 rgbecker  Fix for spaces in commands
+	rl_addons/renderPM/libart_lgpl/testart.c 1.3 rgbecker  Added intersect2 test
+	rl_addons/renderPM/libart_lgpl/art_svp_wind.c 1.4 rgbecker  Allow for NOSTDERR
+	rl_addons/renderPM/libart_lgpl/art_misc.c 1.4 rgbecker  Allow for NOSTDERR
+##### 2002/08/13 #####
+	graphics/widgets/flags.py 1.23 johnprecedo  Fixed Star() so that it behaves in the same way as StarFive in markers. Added the Brazilian flag while I was here (contributed by Publio da Costa Melo [publio@planetarium.com.br]).
+	graphics/widgets/markers.py 1.13 rgbecker  Added StarFive, FilledStarFive and fixed rotations
+##### 2002/08/12 #####
+	graphics/widgets/grids.py 1.28 rgbecker  Fix up 2.2'ism lambda
+##### 2002/08/11 #####
+	graphics/widgets/grids.py 1.27 rgbecker  Experimental ShadedPolygon added
+	graphics/shapes.py 1.80 rgbecker  Experimental ShadedPolygon added
+##### 2002/08/10 #####
+	docs/graphguide/ch1_intro.py 1.7 dragan1  Changed email address to reportlab-users@reportlab.com
+	docs/userguide/ch1_intro.py 1.10 dragan1  Changed email address to reportlab-users@reportlab.com
+	docs/userguide/ch1_intro.py 1.9 dragan1  changed info about mailing list and corrected a couple of dead links to PIL
+#################################################################################
 #################### RELEASE 1.15 at 14:00 GMT  9/Aug/2002      #################
 #################################################################################
 ##### 2002/08/09 #####
