@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.45 2001/10/01 09:58:42 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.46 2001/10/10 10:08:20 rgbecker Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.45 2001/10/01 09:58:42 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.46 2001/10/10 10:08:20 rgbecker Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -76,10 +76,10 @@ class ActionFlowable(Flowable):
 	   For example to change a page template (from one column to two, for example)
 	   use NextPageTemplate which creates an ActionFlowable.
 	'''
-	def __init__(self,action=[]):
+	def __init__(self,action=()):
 		if type(action) not in (ListType, TupleType):
 			action = (action,)
-		self.action = action
+		self.action = tuple(action)
 
 	def wrap(self, availWidth, availHeight):
 		'''Should never be called.'''
@@ -111,8 +111,30 @@ class ActionFlowable(Flowable):
 	def __call__(self):
 		return self
 
+class NextFrameFlowable(ActionFlowable):
+	def __init__(self,ix,resume=0):
+		ActionFlowable.__init__(self,('nextFrame',ix,resume))
 
-FrameBreak = ActionFlowable('frameEnd')
+class CurrentFrameFlowable(ActionFlowable):
+	def __init__(self,ix,resume=0):
+		ActionFlowable.__init__(self,('currentFrame',ix,resume))
+
+class _FrameBreak(ActionFlowable):
+	'''
+	A special ActionFlowable that allows setting doc._nextFrameIndex
+
+	eg story.append(FrameBreak('mySpecialFrame'))
+	'''
+	def __call__(self,ix=None,resume=0):
+		r = self.__class__(self.action+(resume,))
+		r._ix = ix
+		return r
+
+	def apply(self,doc):
+		if getattr(self,'_ix',None): doc._nextFrameIndex = self._ix
+		ActionFlowable.apply(self,doc)
+
+FrameBreak = _FrameBreak('frameEnd')
 PageBegin = ActionFlowable('pageBegin')
 
 
@@ -299,6 +321,7 @@ class BaseDocTemplate:
 		self.pageTemplate.beforeDrawPage(self.canv,self)
 		self.pageTemplate.checkPageSize(self.canv,self)
 		self.pageTemplate.onPage(self.canv,self)
+		for f in self.pageTemplate.frames: f._reset()
 		self.beforePage()
 		if hasattr(self,'_nextFrameIndex'):
 			del self._nextFrameIndex
@@ -328,20 +351,21 @@ class BaseDocTemplate:
 			while len(self._hanging)==n:
 				self.handle_frameEnd()
 
-	def handle_frameBegin(self,*args):
-		'''What to do at the beginning of a page'''
-		self.frame._reset()
-		if self.showBoundary or self.frame.showBoundary:
-			self.frame.drawBoundary(self.canv)
+	def handle_frameBegin(self,resume=0):
+		'''What to do at the beginning of a frame'''
+		f = self.frame
+		if f._atTop:
+			if self.showBoundary or self.frame.showBoundary:
+				self.frame.drawBoundary(self.canv)
 
-	def handle_frameEnd(self):
+	def handle_frameEnd(self,resume=0):
 		''' Handles the semantics of the end of a frame. This includes the selection of
 			the next frame or if this is the last frame then invoke pageEnd.
 		'''
 		if hasattr(self,'_nextFrameIndex'):
 			frame = self.pageTemplate.frames[self._nextFrameIndex]
 			del self._nextFrameIndex
-			self.handle_frameBegin()
+			self.handle_frameBegin(resume)
 		elif hasattr(self.frame,'lastFrame') or self.frame is self.pageTemplate.frames[-1]:
 			self.handle_pageEnd()
 			self.frame = None
