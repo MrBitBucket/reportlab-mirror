@@ -1,14 +1,33 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.40 2003/01/15 12:18:47 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.40 2003/01/15 12:18:47 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.41 2003/01/20 21:11:22 andy_robinson Exp $
+__version__=''' $Id: utils.py,v 1.41 2003/01/20 21:11:22 andy_robinson Exp $ '''
 
 import string, os, sys
 from types import *
 from reportlab.lib.logger import warnOnce
 SeqTypes = (ListType,TupleType)
 
+
+def isFileSystemDistro():
+    """Attempt to detect if this copy of reportlab is running in a
+    file system (as opposed to mostly running in a zip or McMillan
+    archive or Jar file).  This is used by test cases, so that
+    we can write test cases that don't get activated in a compiled
+    distribution."""
+    # is this safe enough?
+    import reportlab.pdfgen.canvas
+    hypothetical_location = reportlab.pdfgen.canvas
+    return os.path.isfile(hypothetical_location)
+
+def isCompactDistro():
+    return not isFileSystemDistro()
+
+def isSourceDistro():
+    import reportlab.pdfgen.canvas
+    hypothetical_location = reportlab.pdfgen.canvas
+    
 def _checkImportError(errMsg):
     if string.lower(string.strip(str(errMsg)[0:16]))!='no module named': raise
 
