@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/areas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/areas.py,v 1.1 2002/07/31 12:45:08 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/areas.py,v 1.2 2002/11/27 20:20:37 rgbecker Exp $
 """This module defines a Area mixin classes
 """
-__version__=''' $Id: areas.py,v 1.1 2002/07/31 12:45:08 rgbecker Exp $ '''
+__version__=''' $Id: areas.py,v 1.2 2002/11/27 20:20:37 rgbecker Exp $ '''
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isNoneOrShape
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics.shapes import Rect, Group
@@ -36,7 +36,6 @@ class PlotArea(Widget):
         self.debug = 0
 
     def makeBackground(self):
-        strokeColor,strokeWidth,fillColor=self.strokeColor, self.strokeWidth, self.fillColor
         if self.background is not None:
             BG = self.background
             if isinstance(BG,Group):
@@ -56,10 +55,12 @@ class PlotArea(Widget):
                     bg.height = self.height
                     g.add(bg)
             return g
-        elif (strokeWidth and strokeColor) or fillColor:
-            g = Group()
-            g.add(Rect(self.x, self.y, self.width, self.height,
-                strokeColor=strokeColor, strokeWidth=strokeWidth, fillColor=fillColor))
-            return g
         else:
-            return None
+            strokeColor,strokeWidth,fillColor=self.strokeColor, self.strokeWidth, self.fillColor
+            if (strokeWidth and strokeColor) or fillColor:
+                g = Group()
+                g.add(Rect(self.x, self.y, self.width, self.height,
+                    strokeColor=strokeColor, strokeWidth=strokeWidth, fillColor=fillColor))
+                return g
+            else:
+                return None
