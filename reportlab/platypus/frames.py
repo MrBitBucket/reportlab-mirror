@@ -1,58 +1,4 @@
-###############################################################################
-#
-#	ReportLab Public License Version 1.0
-#
-#	Except for the change of names the spirit and intention of this
-#	license is the same as that of Python
-#
-#	(C) Copyright ReportLab Inc. 1998-2000.
-#
-#
-# All Rights Reserved
-#
-# Permission to use, copy, modify, and distribute this software and its
-# documentation for any purpose and without fee is hereby granted, provided
-# that the above copyright notice appear in all copies and that both that
-# copyright notice and this permission notice appear in supporting
-# documentation, and that the name of ReportLab not be used
-# in advertising or publicity pertaining to distribution of the software
-# without specific, written prior permission.
-#
-#
-# Disclaimer
-#
-# ReportLab Inc. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
-# SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
-# IN NO EVENT SHALL ReportLab BE LIABLE FOR ANY SPECIAL, INDIRECT
-# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-# PERFORMANCE OF THIS SOFTWARE.
-#
-###############################################################################
-#	$Log: frames.py,v $
-#	Revision 1.7  2000/10/01 12:53:33  rgbecker
-#	Fixed atTop bugs thanks to the effbot
-#
-#	Revision 1.6  2000/08/03 14:12:53  rgbecker
-#	Changing to packer led positioning
-#	
-#	Revision 1.5  2000/07/30 22:32:29  rgbecker
-#	geometry changing attributes now work
-#	
-#	Revision 1.4  2000/07/07 16:21:12  rgbecker
-#	Cosmetics
-#	
-#	Revision 1.3  2000/07/06 12:40:38  rgbecker
-#	Push canvas into flowables during wrap/split
-#	
-#	Revision 1.2  2000/06/13 13:03:31  aaron_watters
-#	more documentation changes
-#	
-#	Revision 1.1  2000/06/01 15:23:06  rgbecker
-#	Platypus re-organisation
-#	
-__version__=''' $Id: frames.py,v 1.7 2000/10/01 12:53:33 rgbecker Exp $ '''
+__version__=''' $Id: frames.py,v 1.8 2000/10/02 14:41:50 rgbecker Exp $ '''
 __doc__="""
 """
 _geomAttr=('x1','y1','width','height', 'leftPadding', 'bottomPadding', 'rightPadding', 'topPadding')
@@ -146,7 +92,7 @@ class Frame:
 		y = self._y
 		p = self._y1p
 		s = 0
-		if self._atTop: s = flowable.getSpaceBefore()
+		if not self._atTop: s = flowable.getSpaceBefore()
 		h = y - p - s
 		if h>0:
 			flowable.canv = canv #so they can use stringWidth etc
@@ -208,3 +154,60 @@ class Frame:
 			else:
 				#leave it in the list for later
 				break
+###############################################################################
+#
+#	ReportLab Public License Version 1.0
+#
+#	Except for the change of names the spirit and intention of this
+#	license is the same as that of Python
+#
+#	(C) Copyright ReportLab Inc. 1998-2000.
+#
+#
+# All Rights Reserved
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted, provided
+# that the above copyright notice appear in all copies and that both that
+# copyright notice and this permission notice appear in supporting
+# documentation, and that the name of ReportLab not be used
+# in advertising or publicity pertaining to distribution of the software
+# without specific, written prior permission.
+#
+#
+# Disclaimer
+#
+# ReportLab Inc. DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+# SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS,
+# IN NO EVENT SHALL ReportLab BE LIABLE FOR ANY SPECIAL, INDIRECT
+# OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+# PERFORMANCE OF THIS SOFTWARE.
+#
+###############################################################################
+#	$Log: frames.py,v $
+#	Revision 1.8  2000/10/02 14:41:50  rgbecker
+#	Fixed the atTop test
+#
+#	Revision 1.7  2000/10/01 12:53:33  rgbecker
+#	Fixed atTop bugs thanks to the effbot
+#	
+#	Revision 1.6  2000/08/03 14:12:53  rgbecker
+#	Changing to packer led positioning
+#	
+#	Revision 1.5  2000/07/30 22:32:29  rgbecker
+#	geometry changing attributes now work
+#	
+#	Revision 1.4  2000/07/07 16:21:12  rgbecker
+#	Cosmetics
+#	
+#	Revision 1.3  2000/07/06 12:40:38  rgbecker
+#	Push canvas into flowables during wrap/split
+#	
+#	Revision 1.2  2000/06/13 13:03:31  aaron_watters
+#	more documentation changes
+#	
+#	Revision 1.1  2000/06/01 15:23:06  rgbecker
+#	Platypus re-organisation
+#	
