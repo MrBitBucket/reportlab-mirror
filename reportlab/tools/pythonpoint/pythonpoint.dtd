@@ -30,6 +30,8 @@
 <!ATTLIST presentation
   filename CDATA #REQUIRED
   pageDuration CDATA #IMPLIED
+  pageWidth CDATA #IMPLIED
+  pageHeight CDATA #IMPLIED
 >
 <!-- First-Level Elements -->
 <!ELEMENT author (#PCDATA)>
@@ -252,7 +254,6 @@
   effectduration NMTOKEN "1"
 >
 <!ELEMENT u (#PCDATA)>
-
 <!ELEMENT drawing EMPTY>
 <!ATTLIST drawing
   module CDATA #REQUIRED
@@ -261,7 +262,6 @@
   hAlign CDATA #IMPLIED
   showBoundary CDATA #IMPLIED
 >
-
 <!ELEMENT pageCatcherFigure (#PCDATA)>
 <!ATTLIST pageCatcherFigure
   filename CDATA #REQUIRED
