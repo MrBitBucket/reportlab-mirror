@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPS.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.15 2002/04/13 15:19:54 rgbecker Exp $
-__version__=''' $Id: renderPS.py,v 1.15 2002/04/13 15:19:54 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.16 2002/05/28 15:08:47 rgbecker Exp $
+__version__=''' $Id: renderPS.py,v 1.16 2002/05/28 15:08:47 rgbecker Exp $ '''
 import string, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str, getStringIO
@@ -463,8 +463,7 @@ class PSCanvas:
         output = getStringIO()
         for char in input:
             output.write('%02x' % ord(char))
-        output.reset()
-        return output.read()
+        return output.getvalue()
 
     def _drawImageLevel2(self, image, x1,y1, x2=None,y2=None): # Postscript Level2 version
         Image = import_Image()
