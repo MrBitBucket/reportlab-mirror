@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.6 2001/03/27 16:48:46 johnprecedo Exp $
+#$Header: /tmp/reportlab/docs/userguide/Attic/ch8_graphics.py,v 1.7 2001/03/27 19:58:01 johnprecedo Exp $
 from genuserguide import *
 
 heading1("Platform Independent Graphics using $reportlab/graphics$")
@@ -15,8 +15,9 @@ standard distribution. This chapter is both the "design document" and
 the "tutorial".""")
 
 #seamless or what?
-from reportlab.graphics.charts import barcharts
-draw(barcharts.sampleH0a(), 'A Sample Drawing')
+#from reportlab.graphics.charts import barcharts
+#draw(barcharts.sampleH0a(), 'A Sample Drawing')
+# draw (drawing object, 'caption')
 
 disc("""The ReportLab library is a general document toolkit aiming to help
 generate documents for reporting solutions. One important aspect of
@@ -122,17 +123,10 @@ eg("""
 
 disc("This will produce a PDF file containing the following graphic: ")
 
-##    from reportlab.lib import colors
-##    from reportlab.graphics.shapes import * 
-## 
-##    D = Drawing(400, 200)
-##    D.add(Rect(50, 50, 300, 100, fillColor=colors.yellow))
-##    D.add(String(150,100, 'Hello World',
-##                 fontSize=18, fillColor=colors.red))
-## 
-##    from reportlab.graphics import renderPDF 
-##    renderPDF.drawToFile(D, 'example1.pdf', 'My First Drawing') 
-
+from reportlab.graphics.shapes import * 
+from reportlab.graphics import testshapes
+t=testshapes.getDrawing01()
+draw(t, "'Hello World'")
  
 disc("""The Y coordinate counts from the bottom up. This is correct for PDF 
        and Postscript, and appears to be natural for people, especially when 
@@ -176,7 +170,10 @@ bullet("Path (<i>not implemented yet, but will be added in the future</i>)")
 
 
 disc("This drawing, taken from our test suite, shows most of the basic shapes. : ")
+todo("add image")
 
+#t=testshapes.getDrawing06()
+#draw(t, "'Basic shapes'")
  
 heading3("Solid Shapes")
 disc("""Shapes have two kinds of properties - some to define their geometry 
@@ -192,7 +189,8 @@ eg("""
 >>> r.strokeWidth = 3
 >>> 
 """)
- 
+todo("add image")
+
 disc("""<i>In future examples we will omit the import statements.</i>""")
 
 disc("""All shapes have a number of properties which can be set. At an 
@@ -260,6 +258,8 @@ eg("""
              strokeWidth=2,
              strokeColor=colors.purple)
 """)
+todo("add image")
+
  
 heading3("Strings")
 disc("""ReportLab Graphics is not designed for fancy text layout, but it can 
@@ -305,6 +305,19 @@ eg("""
                  fontName='Courier',
                  fontSize=36))
 """)
+
+todo("add image")
+
+#D = Drawing(400, 200)
+#for size in range(12, 36, 4):
+#    D.add(String(10+size*2, 10+size*2, 'Hello World',
+#                 fontName='Times-Roman',
+#                 fontSize=size))
+#
+#D.add(String(150, 150, 'Hello World',
+#             fontName='Courier',
+#             fontSize=36))
+#draw(D, 'test!')
 
 heading3("""Paths """)
 disc("""Postscript paths are a widely understood concept in graphics.
@@ -407,6 +420,8 @@ eg("""
                                            rotate(30)))
     D.add(thirdAxisGroup)
 """)
+
+todo("add image")
 
  
 heading3("""2.6 Verification """)
@@ -607,11 +622,15 @@ eg("""
 >>> renderPDF.drawToFile(d, 'face.pdf', 'A Face')""")
 
 
-##d = shapes.Drawing(400, 200)
-##f = widgetbase.Face()
-##f.skinColor = colors.yellow
-##f.mood = "sad"
-##d.add(f)
+todo("add image")
+
+
+d = Drawing(400, 200)
+f = widgetbase.Face()
+f.skinColor = colors.yellow
+f.mood = "sad"
+d.add(f)
+d.draw()
 
 disc("""Let's see what properties it has available, using the setProperties 
        interface we saw earlier:""")
@@ -642,8 +661,7 @@ disc("""In addition, a widget always provides a $demo()$ method. Simple ones
 
 disc("""Here are a handful of simple widgets available in the module 
        <i>signsandsymbols.py</i>:""")
-
-
+todo("add image")
 
 heading3("""Compound Widgets """)
 disc("""Let's imagine a compound widget which draws two faces side by side. 
@@ -839,6 +857,8 @@ pc3.wedges.fontSize = 16
 pc3.wedges.fontColor = colors.yellow
 d.add(pc3, 'pie3')""")
 
+todo("add image")
+
 
 heading2("Charts ")
 disc("""The motivation for much of this is to create a flexible chart package. 
@@ -938,8 +958,9 @@ disc("""<para lindent=+36>A corollary of the component approach is that you can 
        of what we are aiming for is the weather report in our gallery 
        contributed by a user; we'd like to make it easy to create such 
        drawings, hook the building blocks up to their legends, and feed that 
-       data in a consistent way. Click the image to download the full page 
-       PDF.""")
+       data in a consistent way.""")
+disc("""<para lindent=+36>(If you want to see the image, it is available on our website at 
+<font color=blue>http://www.reportlab.com/demos/provencio.pdf</font>)""")
 
 
 heading3("Key Concepts and Components")
@@ -978,6 +999,9 @@ disc("""The text and 'origin' of a label are typically set by its parent
        its positon relative to this origin and all of its formatting.""")
 
 eg("""
+from reportlab.graphics import shapes
+from reportlab.graphics.charts.textlabels import Label
+
 d = Drawing(200, 100)
 
 # mark the origin of the label
@@ -993,6 +1017,9 @@ lab.boxStrokeColor = colors.green
 lab.setText('Another\nMulti-Line\nString')
 
 d.add(lab)""")
+
+todo("add image")
+
 
 disc("""In the drawing above, the label is defined relative to the green blob. 
        The text box should have its north-east corner ten points down from 
@@ -1017,7 +1044,7 @@ leading = 12.0
 textAnchor = start""")
 
 heading3("Axes")
-disc("""We identify two basic kinds of axes - Value and Category Axes. Both 
+disc("""We identify two basic kinds of axes - <i>Value</i> and <i>Category</i> Axes. Both 
        come in horizontal and vertical flavors. Both can be subclassed to 
        make very specific kinds of axis. For example, if you have complex 
        rules for which dates to display in a time series application, or want 
@@ -1030,29 +1057,34 @@ disc("""Axes are responsible for determining the mapping from data to image
 disc("""This drawing shows two axes, one of each kind, which have been created 
        directly without reference to any chart:""")
 
+todo("add image")
+
 disc("Here is the code that created them: ")
 
 eg("""
-    drawing = Drawing(400, 200)
+from reportlab.graphics import shapes
+from reportlab.graphics.charts.axes import XCategoryAxis,YValueAxis 
 
-    data = [(10, 20, 30, 40),
-            (15, 22, 37, 42)]        
+drawing = Drawing(400, 200)
 
-    xAxis = XCategoryAxis()
-    xAxis.setPosition(75, 75, 300)
-    xAxis.configure(data)
-    xAxis.categoryNames = ['Beer','Wine','Meat','Cannelloni']
-    xAxis.labels.boxAnchor = 'n'
-    xAxis.labels[3].dy = -15
-    xAxis.labels[3].angle = 30
-    xAxis.labels[3].fontName = 'Times-Bold'
+data = [(10, 20, 30, 40),
+        (15, 22, 37, 42)]        
 
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.configure(data)
+xAxis = XCategoryAxis()
+xAxis.setPosition(75, 75, 300)
+xAxis.configure(data)
+xAxis.categoryNames = ['Beer','Wine','Meat','Cannelloni']
+xAxis.labels.boxAnchor = 'n'
+xAxis.labels[3].dy = -15
+xAxis.labels[3].angle = 30
+xAxis.labels[3].fontName = 'Times-Bold'
 
-    drawing.add(xAxis)
-    drawing.add(yAxis)""")
+yAxis = YValueAxis()
+yAxis.setPosition(50, 50, 125)
+yAxis.configure(data)
+
+drawing.add(xAxis)
+drawing.add(yAxis)""")
 
 disc("""Remember that you won't have to create axes directly; when using a 
        standard chart, it comes with ready-made axes. The methods are what 
@@ -1348,5 +1380,12 @@ disc("""Combining multiple plot types is really easy. You can just draw
        remind us where this example came from we'll attribute it, and happily 
        show the well-known graph as an example.""")
 
-todo("""That's all for now - tell us what you think and check back soon :-}""")
+heading3("""Other chart classes""")
 
+disc("""This has not been an exhaustive look at all the chart classes. Those classes 
+       are constantly being worked on. To see exactly what is in the current 
+       distribution, use the $graphdocpy.py$ utility. By default, it will run 
+       on reportlab\graphics, and produce a full report. (If you want to run
+       it on other modules or packages, $graphdocpy.py -h$ print a help
+       message that will tell you how.)""")
+disc("This is the tool that was mentioned in the section on 'Documenting Widgets'")
