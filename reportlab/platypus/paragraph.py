@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.6  2000/05/15 13:36:11  rgbecker
+#	Splitting changes
+#
 #	Revision 1.5  2000/05/13 16:03:23  rgbecker
 #	Fix extraspace calculation
-#
+#	
 #	Revision 1.4  2000/05/12 15:13:41  rgbecker
 #	Fixes to alignment handling
 #	
@@ -46,7 +49,7 @@
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.5 2000/05/13 16:03:23 rgbecker Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.6 2000/05/15 13:36:11 rgbecker Exp $ '''
 import string
 import types
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -54,6 +57,7 @@ from reportlab.platypus.paraparser import ParaParser, ParaFrag
 from reportlab.platypus.layout import Flowable
 from reportlab.lib.colors import Color
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
+from copy import deepcopy
 
 #our one and only parser
 _parser=ParaParser()
@@ -189,14 +193,33 @@ def _getFragWords(frags):
 		f = r[1][0]
 	return R
 
+def	_split_bfragSimple(bfrag,start,stop):
+	f = bfrag.clone()
+	for a in ('lines', 'kind', 'text'):
+		if hasattr(f,a): delattr(f,a)
+
+	f.words = []
+	for l in bfrag.lines[start:stop]:
+		for w in l[1]:
+			f.words.append(w)
+	return [f]
+
+def	_split_bfragHard(bfrag,start,stop):
+	f = []
+	for l in bfrag.lines[start:stop-1]:
+		for w in l.words:
+			f.append(w)
+	return f
+
 class Paragraph(Flowable):
-	def __init__(self, text, style, bulletText = None):
-		text = cleanBlockQuotedText(text)
-		style, rv = _parser.parse(text,style)
-		if rv is None:
-			raise "xml parser error (%s) in paragraph beginning\n'%s'"\
+	def __init__(self, text, style, bulletText = None, frags=None):
+		if frags is None:
+			text = cleanBlockQuotedText(text)
+			style, frags = _parser.parse(text,style)
+			if frags is None:
+				raise "xml parser error (%s) in paragraph beginning\n'%s'"\
 					% (_parser.errors[0],text[:min(30,len(text))])
-		self.frags = rv
+		self.frags = frags
 		self.style = style
 		self.bulletText = bulletText
 		self.debug = 0	 #turn this on to see a pretty one with all the margins etc.
@@ -207,9 +230,34 @@ class Paragraph(Flowable):
 		first_line_width = availWidth - self.style.firstLineIndent - self.style.rightIndent
 		later_widths = availWidth - self.style.leftIndent - self.style.rightIndent
 		self.bfrags = self.breakLines([first_line_width, later_widths])
+		self.height = len(self.bfrags.lines) * self.style.leading
 
 		#estimate the size
 		return (self.width, self.height)
+
+	def split(self,availWidth, availHeight):
+		if len(self.frags)<=0: return []
+
+		#the split information is all inside self.bfrags
+		if not hasattr(self,'bfrags'):
+			self.wrap(availWidth,availHeight)
+		bfrags = self.bfrags
+		style = self.style
+		leading = style.leading
+		lines = bfrags.lines
+		n = len(lines)
+		s = int(availHeight/leading)
+		if s<=1: return []
+		if n<=s: return [self]
+		func = bfrags.kind==0 and _split_bfragSimple or _split_bfragHard
+
+		P1=Paragraph(None,style,bulletText=self.bulletText,frags=func(bfrags,0,s))
+		P1._JustifyLast = 1
+		if style.firstLineIndent != 0:
+			style = deepcopy(style)
+			style.firstLineIndent = 0
+		P2=Paragraph(None,style,bulletText=None,frags=func(bfrags,s,n))
+		return [P1,P2]
 
 	def draw(self):
 		#call another method for historical reasons.  Besides, I
@@ -233,11 +281,10 @@ class Paragraph(Flowable):
 		B) When there is more than one input formatting fragment the out put is
 			A fragment specifier with
 				kind = 1
-				lines=	A list of fragments
-							1) extraspace (needed for justified)
-							2) fontSize
-							3) leading
-							4) words=word list
+				lines=	A list of fragments each having fields
+							extraspace (needed for justified)
+							fontSize
+							words=word list
 								each word is itself a fragment with
 								various settings
 
@@ -254,7 +301,6 @@ class Paragraph(Flowable):
 		maxwidth = maxwidths[lineno]
 		style = self.style
 		fFontSize = float(style.fontSize)
-		sLeading = style.leading
 
 		#for bullets, work out width and ensure we wrap the right amount onto line one
 		if self.bulletText <> None:
@@ -273,7 +319,7 @@ class Paragraph(Flowable):
 			f = frags[0]
 			fontSize = f.fontSize
 			fontName = f.fontName
-			words = string.split(f.text, ' ')
+			words = hasattr(f,'text') and string.split(f.text, ' ') or f.words
 			spacewidth = stringWidth(' ', fontName, fontSize)
 			cLine = []
 			currentwidth = - spacewidth   # hack to get around extra space for word 1
@@ -297,7 +343,6 @@ class Paragraph(Flowable):
 
 			#deal with any leftovers on the final line
 			if cLine!=[]: lines.append((maxwidth - currentwidth, cLine))
-			self.height = self.height + len(lines) * sLeading
 			return f.clone(kind=0, lines=lines)
 		elif nFrags<=0:
 			return ParaFrag(kind=0, fontSize=style.fontSize, fontName=style.fontName,
@@ -363,7 +408,6 @@ class Paragraph(Flowable):
 			if words<>[]:
 				lines.append(ParaFrag(extraSpace=(maxwidth - currentwidth),wordCount=n,
 									words=words, fontSize=maxSize))
-			self.height = self.height + len(lines) * sLeading
 			return ParaFrag(kind=1, lines=lines)
 
 		return lines
@@ -400,6 +444,7 @@ class Paragraph(Flowable):
 			canvas.restoreState()
 			#self.drawLine(x + style.leftIndent, y, x + style.leftIndent, cur_y)
 
+
 		nLines = len(lines)
 		if nLines > 0:
 			canvas.saveState()
@@ -408,6 +453,7 @@ class Paragraph(Flowable):
 			#is there a bullet?  if so, draw it first
 			offset = style.firstLineIndent - style.leftIndent
 			lim = nLines-1
+			noJustifyLast = not (hasattr(self,'_JustifyLast') and self._JustifyLast)
 
 			if bfrags.kind==0:
 				if alignment == TA_LEFT:
@@ -436,11 +482,11 @@ class Paragraph(Flowable):
 
 				#now the font for the rest of the paragraph
 				tx.setFont(f.fontName, f.fontSize, style.leading)
-				dpl( tx, offset, lines[0][0], lines[0][1], nLines==1)
+				dpl( tx, offset, lines[0][0], lines[0][1], noJustifyLast and nLines==1)
 
 				#now the middle of the paragraph, aligned with the left margin which is our origin.
 				for i in range(1, nLines):
-					dpl( tx, 0, lines[i][0], lines[i][1], i==lim)
+					dpl( tx, 0, lines[i][0], lines[i][1], noJustifyLast and i==lim)
 			else:
 				f = lines[0]
 				cur_y = self.height - f.fontSize
@@ -467,12 +513,12 @@ class Paragraph(Flowable):
 				tx.XtraState.textColor=None
 				tx.XtraState.rise=0
 				tx.setLeading(style.leading)
-				dpl( tx, offset, lines[0], nLines==1)
+				dpl( tx, offset, lines[0], noJustifyLast and nLines==1)
 
 				#now the middle of the paragraph, aligned with the left margin which is our origin.
 				for i in range(1, nLines):
 					f = lines[i]
-					dpl( tx, 0, f, i==lim)
+					dpl( tx, 0, f, noJustifyLast and i==lim)
 
 			canvas.drawText(tx)
 			canvas.restoreState()
