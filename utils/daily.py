@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.20  2000/04/19 15:06:28  rgbecker
+#	Added py2pdf_dir
+#
 #	Revision 1.19  2000/04/19 15:00:32  rgbecker
 #	pyfontify-->PyFontify
-#
+#	
 #	Revision 1.18  2000/04/19 14:56:07  rgbecker
 #	Added CVS_remove
 #	
@@ -89,7 +92,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.19 2000/04/19 15:00:32 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.20 2000/04/19 15:06:28 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -98,6 +101,7 @@ import os, sys, string, traceback, re
 #this is where we extract files etc
 groupdir=os.path.normcase(os.path.normpath('%s/public_ftp'%os.environ['HOME']))
 projdir = os.path.normcase(os.path.normpath('reportlab'))
+py2pdf_dir = os.path.normcase(os.path.normpath('py2pdf'))
 cvsdir = os.path.join(groupdir,projdir)
 release=0		#1 if making a release
 py2pdf=0		#1 if doing a special py2pdf zip/tgz
@@ -171,12 +175,14 @@ def cvs_checkout(d):
 		if py2pdf:
 			do_exec(cvs+' co reportlab', 'the checkout phase')
 			# now we need to move the files & delete those we don't need
-			os.mkdir("py2pdf")
-			do_exec("mv reportlab/demos/py2pdf/py2pdf.py py2pdf", "mv py2pdf.py")
-			do_exec("mv reportlab/demos/py2pdf/PyFontify.py reportlab", "mv pyfontify.py")
+			dst = py2pdf_dir
+			recursive_rmdir(dst)
+			os.mkdir(dst)
+			do_exec("mv reportlab/demos/py2pdf/py2pdf.py %s"%dst, "mv py2pdf.py")
+			do_exec("mv reportlab/demos/py2pdf/PyFontify.py %s" % dst, "mv pyfontify.py")
 			do_exec("rm -r reportlab/demos reportlab/platypus reportlab/lib/styles.py reportlab/README.pdfgen.txt", "rm")
-			do_exec("mv reportlab py2pdf")
-			CVS_remove('py2pdf')
+			do_exec("mv reportlab %s" dst)
+			CVS_remove(dst)
 		else:
 			do_exec(cvs+' co reportlab', 'the checkout phase')
 
@@ -193,7 +199,7 @@ def do_zip(d):
 	zipfile = '%s/%s.zip' % (groupdir,b)
 
 	if py2pdf:
-		projdir = 'py2pdf'
+		projdir = py2pdf_dir
 		cvsdir = os.path.join(groupdir,projdir)
 
 	tar = find_exe('tar')
