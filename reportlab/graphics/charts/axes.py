@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.28 2001/06/27 14:31:50 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.29 2001/07/02 16:50:53 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -132,7 +132,7 @@ class XCategoryAxis(CategoryAxis):
     _attrMap = AttrMap(BASE=CategoryAxis,
         tickUp = AttrMapValue(isNumber),
         tickDown = AttrMapValue(isNumber),
-        joinAxisMode = AttrMapValue(OneOf(('bottom', 'top', 'value', 'points', None))),
+        joinAxisMode = AttrMapValue(OneOf('bottom', 'top', 'value', 'points', None)),
         )
 
     def __init__(self):

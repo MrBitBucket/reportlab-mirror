@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.17 2001/06/19 09:56:29 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.18 2001/07/02 16:50:53 rgbecker Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -66,7 +66,7 @@ class Pie(Widget):
 		data = AttrMapValue(isListOfNumbers, desc='list of numbers defining wedge sizes; need not sum to 1'),
 		labels = AttrMapValue(isListOfStringsOrNone, desc="optional list of labels to use for each data point"),
 		startAngle = AttrMapValue(isNumber, desc="angle of first slice; like the compass, 0 is due North"),
-		direction = AttrMapValue( OneOf(('clockwise', 'anticlockwise')), desc="'clockwise' or 'anticlockwise'"),
+		direction = AttrMapValue( OneOf('clockwise', 'anticlockwise'), desc="'clockwise' or 'anticlockwise'"),
 		slices = AttrMapValue(None, desc="collection of wedge descriptor objects"),
 		)
 	

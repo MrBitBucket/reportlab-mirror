@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.11 2001/06/27 11:39:11 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.12 2001/07/02 16:50:53 rgbecker Exp $
 """This will be a collection of legends to be used with charts.
 """
 
@@ -47,7 +47,7 @@ class Legend(Widget):
             desc="Height of swatch rectangle"),
         columnMaximum = AttrMapValue(isNumber,
             desc="Max. number of items per column"),
-        alignment = AttrMapValue(OneOf(("left", "right")),
+        alignment = AttrMapValue(OneOf("left", "right"),
             desc="Alginment of text with respect to swatches"),
         colorNamePairs = AttrMapValue(None,
             desc="List of color/name tuples (color can also be widget)"),

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.27 2001/06/27 14:59:00 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.28 2001/07/02 16:50:53 rgbecker Exp $
 import string
 
 from reportlab.graphics import shapes
@@ -300,7 +300,7 @@ class Face(Widget):
 		size = AttrMapValue(isNumber),
 		skinColor = AttrMapValue(isColorOrNone),
 		eyeColor = AttrMapValue(isColorOrNone),
-		mood = AttrMapValue(OneOf(('happy','sad','ok'))),
+		mood = AttrMapValue(OneOf('happy','sad','ok')),
 		)
 
 	def __init__(self):
