@@ -977,7 +977,7 @@ def validate(rawdata):
         _pyRXP_Parser = pyRXP.Parser(eoCB=eocb)
     return _pyRXP_Parser.parse(rawdata)
 
-def process(datafile, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=None, datafilename=None):
+def process(datafile, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=None, datafilename=None, fx=1):
     "Process one PythonPoint source file."
     if not hasattr(datafile, "read"):
         if not datafilename: datafilename = datafile
@@ -989,11 +989,13 @@ def process(datafile, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=
     #if pyRXP present, use it to check and get line numbers for errors...
     validate(rawdata)
 
-    return _process(rawdata, datafilename, notes, handout, printout, cols, verbose, outDir)
+    return _process(rawdata, datafilename, notes, handout, printout, cols, verbose, outDir, fx)
 
-def _process(rawdata, datafilename, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=None):
+def _process(rawdata, datafilename, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=None, fx=1):
+    #print 'inner process fx=%d' % fx
     from reportlab.tools.pythonpoint.stdparser import PPMLParser
     parser = PPMLParser()
+    parser.fx = fx
     parser.sourceFilename = datafilename
     parser.feed(rawdata)
     pres = parser.getPresentation()
@@ -1040,6 +1042,7 @@ def handleOptions():
                'printout':0,
                'help':0,
                'notes':0,
+               'fx':1,
                'verbose':rl_config.verbose,
                'silent':0,
                'outDir': None}
@@ -1047,8 +1050,8 @@ def handleOptions():
     args = sys.argv[1:]
     args = filter(lambda x: x and x[0]=='-',args) + filter(lambda x: not x or x[0]!='-',args)
     try:
-        shortOpts = 'hnvs'
-        longOpts = string.split('cols= outdir= handout help notes printout verbose silent')
+        shortOpts = 'hnvsx'
+        longOpts = string.split('cols= outdir= handout help notes printout verbose silent nofx')
         optList, args = getopt.getopt(args, shortOpts, longOpts)
     except getopt.error, msg:
         options['help'] = 1
@@ -1079,6 +1082,9 @@ def handleOptions():
     if filter(lambda ov: ov[0] in ('n', 'notes'), optList):
         options['notes'] = 1
 
+    if filter(lambda ov: ov[0] in ('x', 'nofx'), optList):
+        options['fx'] = 0
+
     if filter(lambda ov: ov[0] in ('v', 'verbose'), optList):
         options['verbose'] = 1
 
@@ -1107,13 +1113,15 @@ def main():
     if options['verbose'] and options['printout']:
         print 'printout mode'
 
+    if not options['fx']:
+        print 'suppressing special effects'
     for fileGlobs in args:
         files = glob.glob(fileGlobs)
         for datafile in files:
             if os.path.isfile(datafile):
                 file = os.path.join(os.getcwd(), datafile)
-                notes, handout, printout, cols, verbose = options['notes'], options['handout'], options['printout'],  options['cols'], options['verbose']
-                process(file, notes, handout, printout, cols, verbose, options['outDir'])
+                notes, handout, printout, cols, verbose, fx = options['notes'], options['handout'], options['printout'],  options['cols'], options['verbose'], options['fx']
+                process(file, notes, handout, printout, cols, verbose, options['outDir'], fx=fx)
             else:
                 print 'Data file not found:', datafile
 

@@ -270,5 +270,6 @@
   width CDATA #IMPLIED
   height CDATA #IMPLIED
   background CDATA #IMPLIED
+  border CDATA #IMPLIED
   scaleFactor CDATA #IMPLIED
 >

@@ -1,12 +1,14 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.44 2004/03/23 17:32:20 rgbecker Exp $
-__version__=''' $Id: rl_config.py,v 1.44 2004/03/23 17:32:20 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.45 2004/05/28 23:41:18 andy_robinson Exp $
+__version__=''' $Id: rl_config.py,v 1.45 2004/05/28 23:41:18 andy_robinson Exp $ '''
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
-defaultEncoding =           'WinAnsiEncoding'       # 'WinAnsi' or 'MacRoman'
+defaultEncoding =           'WinAnsiEncoding'       # 'WinAnsi' or 'MacRoman'.
+                                                    # should switch to cp1252, utf-8 or latin-1 on next release!
+                                                    
 pageCompression =           1                       # default page compression mode
 defaultPageSize =           'A4'                    #default page size
 defaultImageCaching =       0                       #set to zero to remove those annoying cached images
@@ -19,6 +21,7 @@ invariant=                  0                       #produces repeatable,identic
 eps_preview_transparent=    None                    #set to white etc
 overlapAttachedSpace=       None                    #if set non false then adajacent flowable space after
                                                     #and space before are merged (max space is used).
+autoConvertEncoding  =      0                       #convert internally as needed (experimental)
 
 # places to look for T1Font information
 T1SearchPath =  (

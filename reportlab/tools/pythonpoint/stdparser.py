@@ -209,7 +209,7 @@ class PPMLParser(xmllib.XMLParser):
         self._curTitle = None
         self._curAuthor = None
         self._curSubject = None
-
+        self.fx = 1
         xmllib.XMLParser.__init__(self)
 
 
@@ -442,19 +442,20 @@ class PPMLParser(xmllib.XMLParser):
 
 
     def pack_slide(self, element, args):
-        effectName = self._arg(element,args,'effectname')
-        if effectName <> 'None':
-            curSlide = copy.deepcopy(self._curSlide)
-            if self._curFrame:
-                curFrame = copy.deepcopy(self._curFrame)
-                curSlide.frames.append(curFrame)
-            self._curPres.slides.append(curSlide)
-            self._curSlide.effectName = effectName
-            self._curSlide.effectDirection = self.ceval(element,args,'effectdirection')
-            self._curSlide.effectDimension = self._arg(element,args,'effectdimension')
-            self._curSlide.effectDuration = self.ceval(element,args,'effectduration')
-            self._curSlide.effectMotion = self._arg(element,args,'effectmotion')
-            self._curSlide.outlineEntry = None
+        if self.fx:
+            effectName = self._arg(element,args,'effectname')
+            if effectName <> 'None':
+                curSlide = copy.deepcopy(self._curSlide)
+                if self._curFrame:
+                    curFrame = copy.deepcopy(self._curFrame)
+                    curSlide.frames.append(curFrame)
+                self._curPres.slides.append(curSlide)
+                self._curSlide.effectName = effectName
+                self._curSlide.effectDirection = self.ceval(element,args,'effectdirection')
+                self._curSlide.effectDimension = self._arg(element,args,'effectdimension')
+                self._curSlide.effectDuration = self.ceval(element,args,'effectduration')
+                self._curSlide.effectMotion = self._arg(element,args,'effectmotion')
+                self._curSlide.outlineEntry = None
 
     def start_para(self, args):
         self.pack_slide('para', args)
@@ -791,13 +792,17 @@ class PPMLParser(xmllib.XMLParser):
     def start_pageCatcherFigure(self, args):
         filename = args["filename"]
         pageNo = int(args["pageNo"])
+        width = float(args.get("width", "595"))
+        height = float(args.get("height", "842"))
+        
 
-
-        fig = figures.PageCatcherFigure(filename, pageNo, args.get("caption", ""))
+        fig = figures.PageCatcherFigureNonA4(filename, pageNo, args.get("caption", ""), width, height)
         sf = args.get('scaleFactor', None)
         if sf: sf = float(sf)
-
+        border = not (args.get('border', None) in ['0','no'])
+        
         fig.scaleFactor = sf
+        fig.border = border
 
         #self.ceval('pageCatcherFigure',args,'scaleFactor'),
         #initargs = self.ceval('customshape',args,'initargs')

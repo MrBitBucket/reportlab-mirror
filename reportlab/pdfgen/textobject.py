@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/textobject.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/textobject.py,v 1.28 2004/03/18 12:05:22 rgbecker Exp $
-__version__=''' $Id: textobject.py,v 1.28 2004/03/18 12:05:22 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/textobject.py,v 1.29 2004/05/28 23:41:18 andy_robinson Exp $
+__version__=''' $Id: textobject.py,v 1.29 2004/05/28 23:41:18 andy_robinson Exp $ '''
 __doc__="""
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -18,6 +18,14 @@ from reportlab.lib import colors
 from reportlab.lib.colors import ColorType
 from reportlab.lib.utils import fp_str
 from reportlab.pdfbase import pdfmetrics
+
+#compatibility/migration hook for encoding conversion.
+#let peoples' hand-edited config files still work.
+try:
+    from reportlab.rl_config import autoConvertEncoding
+except:
+    autoConvertEncoding = 0
+
 
 _SeqTypes=(TupleType,ListType)
 
@@ -164,6 +172,13 @@ class PDFTextObject:
             leading = size * 1.2
         self._leading = leading
         font = pdfmetrics.getFont(self._fontname)
+
+        #track codec name for auto-conversion
+        encName = font.encoding.name
+        if encName == 'WinAnsiEncoding':
+            encName = 'cp1252'
+        self._fontencoding = encName.lower()  #python codec name
+
         self._dynamicFont = getattr(font, '_dynamicFont', 0)
         if self._dynamicFont:
             self._curSubset = -1
@@ -281,20 +296,15 @@ class PDFTextObject:
 
     def _formatText(self, text):
         "Generates PDF text output operator(s)"
+        #convert to current doc encoding
+        if autoConvertEncoding:
+            text = self._canvas._convertText(text)
         if self._dynamicFont:
             #it's a truetype font and should be utf8.  If an error is raised,
             
             results = []
             font = pdfmetrics.getFont(self._fontname)
-            try: #assume UTF8
-                stuff = font.splitString(text, self._canvas._doc)
-            except UnicodeDecodeError:
-                #assume latin1 as fallback
-                from reportlab.pdfbase.ttfonts import latin1_to_utf8
-                from reportlab.lib.logger import warnOnce
-                warnOnce('non-utf8 data fed to truetype font, assuming latin-1 data')
-                text = latin1_to_utf8(text)
-                stuff = font.splitString(text, self._canvas._doc)
+            stuff = font.splitString(text, self._canvas._doc)
             for subset, chunk in stuff:
                 if subset != self._curSubset:
                     pdffontname = font.getSubsetInternalName(subset, self._canvas._doc)

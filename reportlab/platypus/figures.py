@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/platdemos.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.17 2004/01/20 22:50:31 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.18 2004/05/28 23:41:18 andy_robinson Exp $
 """This includes some demos of platypus for use in the API proposal"""
-__version__=''' $Id: figures.py,v 1.17 2004/01/20 22:50:31 andy_robinson Exp $ '''
+__version__=''' $Id: figures.py,v 1.18 2004/05/28 23:41:18 andy_robinson Exp $ '''
 
 import os
 
@@ -23,9 +23,11 @@ captionStyle = ParagraphStyle('Caption', fontName='Times-Italic', fontSize=10, a
 
 class Figure(Flowable):
     def __init__(self, width, height, caption="",
-                 captionFont="Times-Italic", captionSize=12, background=None,
+                 captionFont="Times-Italic", captionSize=12,
+                 background=None,
                  captionTextColor=toColor('black'),
-                 captionBackColor=None):
+                 captionBackColor=None,
+                 border=1):
         Flowable.__init__(self)
         self.width = width
         self.figureHeight = height
@@ -37,7 +39,7 @@ class Figure(Flowable):
         self._captionData = None
         self.captionHeight = 0  # work out later
         self.background = background
-
+        self.border = border
         self.spaceBefore = 12
         self.spaceAfter = 12
 
@@ -82,7 +84,8 @@ class Figure(Flowable):
             self.canv.translate(0, self.captionHeight)
         if self.background:
             self.drawBackground()
-        self.drawBorder()
+        if self.border:
+            self.drawBorder()
         self.drawFigure()
 
     def drawBorder(self):

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.123 2004/03/18 15:55:49 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.123 2004/03/18 15:55:49 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.124 2004/05/28 23:41:18 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.124 2004/05/28 23:41:18 andy_robinson Exp $ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -125,7 +125,19 @@ class Canvas:
         if encoding is None: encoding = rl_config.defaultEncoding
         if invariant is None: invariant = rl_config.invariant
         self._filename = filename
-        self._encodingName = encoding
+
+        # encoding is (for historical reasons) one of WinAnsiEncoding or MacRomanEncoding
+        # this is being adapted on 28/5/04 to flag the encoding used for input 8-bit text.
+        # You may supply Unicode strings anywhere.
+        # If you supply 8-bit strings, the are assumed to be in the given 8-bit
+        # encoding.  Preferred long term default will be utf-8 but latin-1 will be
+        # supported forever.
+        # None means 'unknown, do not convert'
+        self.encoding = encoding
+        self.encodingErrorMode = 'strict'
+
+        
+        
         self._doc = pdfdoc.PDFDocument(encoding,
                                        compression=pageCompression,
                                        invariant=invariant)
@@ -173,6 +185,8 @@ class Canvas:
         self._y = 0
         self._fontname = 'Times-Roman'
         self._fontsize = 12
+        self._fontencoding = 'cp1252'
+        
         self._dynamicFont = 0
         self._textMode = 0  #track if between BT/ET
         self._leading = 14.4
@@ -1259,6 +1273,26 @@ class Canvas:
         names.sort()
         return names
 
+    def _convertText(self, text):
+        "Convert to correct encoding for current font"
+        #print 'convert %s' % repr(text)
+        if self.encoding is None:
+            return text
+        elif self.encoding == 'MacRomanEncoding':
+            #give up, codecs cannot handle it
+            return text
+        elif type(text) is type(u''):
+            return text.encode(self._fontencoding, self.encodingErrorMode)
+        else:
+            #ordinary string, go to unicode
+            if self.encoding == 'WinAnsiEncoding':
+                docEnc = 'cp1252'
+            else:
+                docEnc = self.encoding
+            uni = text.decode('utf-8')  #hack
+            return uni.encode(self._fontencoding, self.encodingErrorMode)
+    
+
     def setFont(self, psfontname, size, leading = None):
         """Sets the font.  If leading not specified, defaults to 1.2 x
         font size. Raises a readable exception if an illegal font
@@ -1271,6 +1305,13 @@ class Canvas:
             leading = size * 1.2
         self._leading = leading
         font = pdfmetrics.getFont(self._fontname)
+
+        #track codec name for auto-conversion
+        encName = font.encoding.name
+        if encName == 'WinAnsiEncoding':
+            encName = 'cp1252'
+        self._fontencoding = encName.lower()  #python codec name
+
         self._dynamicFont = getattr(font, '_dynamicFont', 0)
         if not self._dynamicFont:
             pdffontname = self._doc.getInternalFontName(psfontname)
