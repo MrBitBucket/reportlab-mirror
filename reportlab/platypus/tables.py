@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.28  2000/08/01 16:07:39  rgbecker
+#	Additions/Improvements to LINE CMD Splitting
+#
 #	Revision 1.27  2000/07/20 13:32:33  rgbecker
 #	Started debugging Table split
-#
+#	
 #	Revision 1.26  2000/07/12 15:36:56  rgbecker
 #	Allow automatic leading in FONT command
 #	
@@ -110,7 +113,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.27 2000/07/20 13:32:33 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.28 2000/08/01 16:07:39 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -162,16 +165,27 @@ class TableStyle:
 		return self._cmds
 
 TableStyleType = type(TableStyle())
-_SeqType = (TupleType, ListType)
+_SeqTypes = (TupleType, ListType)
 
 def _rowLen(x):
-	return type(x) not in _SeqType and 1 or len(x)
+	return type(x) not in _SeqTypes and 1 or len(x)
+
+def _listCellGeom(V,w,s,W=None):
+	aW = w-s.leftPadding-s.rightPadding
+	t = 0
+	w = 0
+	for v in V:
+		vw, vh = v.wrap(aW, 72000)
+		if W is not None: W.append(vw)
+		w = max(w,vw)
+		t = t + vh + v.getSpaceBefore()+v.getSpaceAfter()
+	return w, t - V[0].getSpaceBefore()-V[-1].getSpaceAfter() 
 
 class Table(Flowable):
 	def __init__(self, data, colWidths=None, rowHeights=None, style=None,
 				repeatRows=0, repeatCols=0, splitByRow=1):
 		nrows = len(data)
-		if len(data)==0 or type(data) not in _SeqType:
+		if len(data)==0 or type(data) not in _SeqTypes:
 			raise ValueError, "Table must have at least 1 row"
 		ncols = max(map(_rowLen,data))
 		if not ncols:
@@ -220,10 +234,16 @@ class Table(Flowable):
 				V = self._cellvalues[i]
 				S = self._cellStyles[i]
 				h = 0
-				for v, s in map(None, V, S):
-					if type(v) is not _stringtype: v = str(v)
-					v = string.split(v, "\n")
-					t = s.leading*len(v)+s.bottomPadding+s.topPadding
+				for v, s, w in map(None, V, S, W):
+					t = type(v)
+					if t in _SeqTypes:
+						if w is None:
+							raise ValueError, "Flowables cell can't have auto width"
+						dummy,t = _listCellGeom(v,w,s)
+					else:
+						if t is not _stringtype: v = str(v)
+						v = string.split(v, "\n")
+						t = s.leading*len(v)+s.bottomPadding+s.topPadding
 					if t>h: h = t	#record a new maximum
 				H[i] = h
 
@@ -238,7 +258,10 @@ class Table(Flowable):
 				w = 0
 				d = hasattr(self,'canv') and self.canv or pdfmetrics
 				for v, s in map(None, V, S):
-					if type(v) is not _stringtype: v = str(v)
+					t = type(v)
+					if t in _SeqTypes:
+						raise ValueError, "Flowables cell can't have auto width"
+					elif t is not _stringtype: v = str(v)
 					v = string.split(v, "\n")
 					t = s.leftPadding+s.rightPadding + max(map(lambda a, b=s.fontname,
 								c=s.fontsize,d=d.stringWidth: d(a,b,c), v))
@@ -339,6 +362,13 @@ class Table(Flowable):
 		self.availWidth = availWidth
 		return (self._width, self._height)
 
+	def onSplit(self,T,byRow=1):
+		'''
+		This method will be called when the Table is split.
+		Special purpose tables can override to do special stuff.
+		'''
+		pass
+
 	def _cr_0(self,n,cmds):
 		for c in cmds:
 			c = tuple(c)
@@ -395,7 +425,39 @@ class Table(Flowable):
 
 		#copy the styles and commands
 		R0._cellStyles = self._cellStyles[:n]
-		R0._cr_0(n,self._linecmds)
+
+		A = []
+		# hack up the line commands
+		for op, (sc, sr), (ec, er), weight, color in self._linecmds:
+			if sc < 0: sc = sc + self._ncols
+			if ec < 0: ec = ec + self._ncols
+			if sr < 0: sr = sr + self._nrows
+			if er < 0: er = er + self._nrows
+
+			if op in ('BOX','OUTLINE','GRID'):
+				if sr<n and er>=n:
+					# we have to split the BOX
+					A.append(('LINEABOVE',(sc,sr), (ec,sr), weight, color))
+					A.append(('LINEBEFORE',(sc,sr), (sc,er), weight, color))
+					A.append(('LINEAFTER',(ec,sr), (ec,er), weight, color))
+					A.append(('LINEBELOW',(sc,er), (ec,er), weight, color))
+					if op=='GRID':
+						A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color))
+						A.append(('INNERGRID',(sc,sr), (ec,er), weight, color))
+				else:
+					A.append((op,(sc,sr), (ec,er), weight, color))
+			elif op in ('INNERGRID','LINEABOVE'):
+				if sr<n and er>=n:
+					A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color))
+				A.append((op,(sc,sr), (ec,er), weight, color))
+			elif op == 'LINEBELOW':
+				if sr<(n-1) and er>=n:
+					A.append(('LINEABOVE',(sc,n), (ec,n), weight, color))
+				A.append((op,(sc,sr), (ec,er), weight, color))
+			else:
+				A.append((op,(sc,sr), (ec,er), weight, color))
+
+		R0._cr_0(n,A)
 		R0._cr_0(n,self._bkgrndcmds)
 
 		if repeatRows:
@@ -404,16 +466,18 @@ class Table(Flowable):
 					repeatRows=repeatRows, repeatCols=repeatCols,
 					splitByRow=splitByRow)
 			R1._cellStyles = self._cellStyles[:repeatRows]+self._cellStyles[n:]
-			R1._cr_1_1(n,repeatRows,self._linecmds)
+			R1._cr_1_1(n,repeatRows,A)
 			R1._cr_1_1(n,repeatRows,self._bkgrndcmds)
 		else:
 			R1 = Table(data[n:], self._argW, self._argH[n:],
 					repeatRows=repeatRows, repeatCols=repeatCols,
 					splitByRow=splitByRow)
 			R1._cellStyles = self._cellStyles[n:]
-			R1._cr_1_0(n,self._linecmds)
+			R1._cr_1_0(n,A)
 			R1._cr_1_0(n,self._bkgrndcmds)
 
+		self.onSplit(R0)
+		self.onSplit(R1)
 		return [R0,R1]
 
 	def split(self, availWidth, availHeight):
@@ -439,7 +503,7 @@ class Table(Flowable):
 			if ec < 0: ec = ec + self._ncols
 			if sr < 0: sr = sr + self._nrows
 			if er < 0: er = er + self._nrows
-			color = colors.toColor(color, colors.Color(1,1,1))
+			color = colors.toColor(color)
 			x0 = self._colpositions[sc]
 			y0 = self._rowpositions[sr]
 			x1 = self._colpositions[ec+1]
@@ -448,52 +512,68 @@ class Table(Flowable):
 			self.canv.rect(x0, y0, x1-x0, y1-y0,stroke=0,fill=1)
 
 	def _drawCell(self, cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight)):
-		#print "cellstyle is ", repr(cellstyle), id(cellstyle)
 		if self._curcellstyle is not cellstyle:
 			cur = self._curcellstyle
 			if cur is None or cellstyle.color != cur.color:
-				#print "setting cell color to %s" % `cellstyle.color`
 				self.canv.setFillColor(cellstyle.color)
 			if cur is None or cellstyle.leading != cur.leading or cellstyle.fontname != cur.fontname or cellstyle.fontsize != cur.fontsize:
-				#print "setting font: %s, %s, %s" % (cellstyle.fontname, cellstyle.fontsize, cellstyle.leading)
 				self.canv.setFont(cellstyle.fontname, cellstyle.fontsize, cellstyle.leading)
 			self._curcellstyle = cellstyle
-		#print "leading is ", cellstyle.leading, "size is", cellstyle.fontsize
+
 		just = cellstyle.alignment
-		#print "alignment is ", just
-		if just == 'LEFT':
-			draw = self.canv.drawString
-			x = colpos + cellstyle.leftPadding
-		elif just in ('CENTRE', 'CENTER'):
-			draw = self.canv.drawCentredString
-			x = colpos + colwidth * 0.5
-		elif just == 'RIGHT':
-			draw = self.canv.drawRightString
-			x = colpos + colwidth - cellstyle.rightPadding
-		else:
-			raise ValueError, 'Invalid justification %s' % just
-
-		if type(cellval) is _stringtype:
-			val = cellval
-		else:
-			val = str(cellval)
-		vals = string.split(val, "\n")
-		n = len(vals)
-		leading = cellstyle.leading
-		fontsize = cellstyle.fontsize
 		valign = cellstyle.valign
-		if valign=='BOTTOM':
-			y = rowpos + cellstyle.bottomPadding+n*leading-fontsize
-		elif valign=='TOP':
-			y = rowpos + rowheight - cellstyle.topPadding - fontsize
-		elif valign=='MIDDLE':
-			y = rowpos + (cellstyle.bottomPadding + rowheight-cellstyle.topPadding+(n-1)*leading)/2.0
+		n = type(cellval)
+		if n in _SeqTypes:
+			# we assume it's a list of Flowables
+			if valign != 'TOP' or just != 'LEFT':
+				W = []
+				w, h = _listCellGeom(cellval,colwidth,cellstyle,W=W)
+			else:
+				W = len(cellval)*[0]
+			if valign=='TOP':
+				y = rowpos + rowheight - cellstyle.topPadding
+			elif valign=='BOTTOM':
+				y = rowpos+cellstyle.bottomPadding+h
+			else:
+				y = rowpos+(rowheight+cellstyle.bottomPadding-cellstyle.topPadding+h)/2.0
+			y = y+cellval[0].getSpaceBefore()
+			for v, w in map(None,cellval,W):
+				if just=='LEFT': x = colpos+cellstyle.leftPadding
+				elif just=='RIGHT': x = colpos+colwidth-cellstyle.rightPadding - w
+				else: x = colpos+(colwidth+cellstyle.leftPadding-cellstyle.rightPadding-w)/2.0
+				y = y - v.getSpaceBefore()
+				v.drawOn(self.canv,x,y)
+				y = y - v.getSpaceAfter()
 		else:
-			raise ValueError, "Bad valign: '%s'" % str(valign)
+			if just == 'LEFT':
+				draw = self.canv.drawString
+				x = colpos + cellstyle.leftPadding
+			elif just in ('CENTRE', 'CENTER'):
+				draw = self.canv.drawCentredString
+				x = colpos + colwidth * 0.5
+			elif just == 'RIGHT':
+				draw = self.canv.drawRightString
+				x = colpos + colwidth - cellstyle.rightPadding
+			else:
+				raise ValueError, 'Invalid justification %s' % just
+			if n is _stringtype: val = cellval
+			else: val = str(cellval)
+			vals = string.split(val, "\n")
+			n = len(vals)
+			leading = cellstyle.leading
+			fontsize = cellstyle.fontsize
+			if valign=='BOTTOM':
+				y = rowpos + cellstyle.bottomPadding+n*leading-fontsize
+			elif valign=='TOP':
+				y = rowpos + rowheight - cellstyle.topPadding - fontsize
+			elif valign=='MIDDLE':
+				y = rowpos + (cellstyle.bottomPadding + rowheight-cellstyle.topPadding+(n-1)*leading)/2.0
+			else:
+				raise ValueError, "Bad valign: '%s'" % str(valign)
 
-		for v in vals:
-			draw(x, y, v)
-			y = y-leading
+			for v in vals:
+				draw(x, y, v)
+				y = y-leading
 		
 # for text,
 #	drawCentredString(self, x, y, text) where x is center
@@ -872,6 +952,9 @@ LIST_STYLE = TableStyle(
 					('BOX',(0,0),(1,-1),2,colors.red),
 					('LINEABOVE',(1,2),(-2,2),1,colors.blue),
 					('LINEBEFORE',(2,1),(2,-2),1,colors.pink),
+					('BACKGROUND', (0, 0), (0, 1), colors.pink),
+					('BACKGROUND', (1, 1), (1, 2), colors.lavender),
+					('BACKGROUND', (2, 2), (2, 3), colors.orange),
 					])
 	lst.append(t)
 	lst.append(Spacer(0,6))
@@ -882,6 +965,33 @@ LIST_STYLE = TableStyle(
 	for s in t.split(4*inch,36):
 		lst.append(s)
 		lst.append(Spacer(0,6))
+
+	lst.append(Spacer(0,6))
+	for s in t.split(4*inch,56):
+		lst.append(s)
+		lst.append(Spacer(0,6))
+
+	data=  [['A', 'B', 'C', (Paragraph("<b>A paragraph</b>",styleSheet["BodyText"]),), 'D'],
+			['00', '01', '02', '03', '04'],
+			['10', '11', '12', '13', '14'],
+			['20', '21', '22', '23', '24'],
+			['30', '31', '32', '33', '34']]
+
+	t=Table(data,style=[('GRID',(1,1),(-2,-2),1,colors.green),
+					('BOX',(0,0),(1,-1),2,colors.red),
+					('LINEABOVE',(1,2),(-2,2),1,colors.blue),
+					('LINEBEFORE',(2,1),(2,-2),1,colors.pink),
+					('BACKGROUND', (0, 0), (0, 1), colors.pink),
+					('BACKGROUND', (1, 1), (1, 2), colors.lavender),
+					('BACKGROUND', (2, 2), (2, 3), colors.orange),
+					('BOX',(0,0),(-1,-1),2,colors.black),
+					('GRID',(0,0),(-1,-1),0.5,colors.black),
+					('VALIGN',(3,0),(3,0),'BOTTOM'),
+					('BACKGROUND',(3,0),(3,0),colors.limegreen),
+					])
+
+	t._argW[3]=1.5*inch
+	lst.append(t)
 
 	SimpleDocTemplate('tables.pdf', showBoundary=1).build(lst)
 
