@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/platdemos.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.15 2004/01/07 16:36:34 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.16 2004/01/10 15:59:18 rgbecker Exp $
 """This includes some demos of platypus for use in the API proposal"""
-__version__=''' $Id: figures.py,v 1.15 2004/01/07 16:36:34 rgbecker Exp $ '''
+__version__=''' $Id: figures.py,v 1.16 2004/01/10 15:59:18 rgbecker Exp $ '''
 
 import os
 
@@ -307,22 +307,29 @@ if _hasPageCatcher:
         """PageCatcher page with a caption below it.  Size to be supplied."""
         # This should merge with PageFigure into one class that reuses
         # form information to determine the page orientation...
-        def __init__(self, filename, pageNo, caption, width, height, background=None):
+        _cache = {}
+        def __init__(self, filename, pageNo, caption, width, height, background=None, caching=None):
             fn = self.filename = filename
             self.pageNo = pageNo
             fn = fn.replace(os.sep,'_').replace('/','_').replace('\\','_').replace('-','_').replace(':','_')
             self.prefix = fn.replace('.','_')+'_'+str(pageNo)+'_'
             self.formName = self.prefix + str(pageNo)
+            self.caching = caching
             FlexFigure.__init__(self, width, height, caption, background)
 
         def drawFigure(self):
-            self.canv.saveState()
             if not self.canv.hasForm(self.formName):
-                f = open(self.filename,'rb')
-                pdf = f.read()
-                f.close()
-                f, data = storeFormsInMemory(pdf, pagenumbers=[self.pageNo], prefix=self.prefix)
+                if self.filename in self._cache:
+                    f,data = self._cache[self.filename]
+                else:
+                    f = open(self.filename,'rb')
+                    pdf = f.read()
+                    f.close()
+                    f, data = storeFormsInMemory(pdf, pagenumbers=[self.pageNo], prefix=self.prefix)
+                    if self.caching=='memory':
+                        self._cache[self.filename] = f, data
                 f = restoreFormsInMemory(data, self.canv)
+            self.canv.saveState()
             self.canv.scale(self._scaleFactor, self._scaleFactor)
             self.canv.doForm(self.formName)
             self.canv.restoreState()
@@ -330,8 +337,8 @@ if _hasPageCatcher:
     class PageCatcherFigure(PageCatcherFigureNonA4):
         """PageCatcher page with a caption below it.  Presumes A4, Portrait.
         This needs our commercial PageCatcher product, or you'll get a blank."""
-        def __init__(self, filename, pageNo, caption, width=595, height=842, background=None):
-            PageCatcherFigureNonA4.__init__(self, filename, pageNo, caption, width, height, background=background)
+        def __init__(self, filename, pageNo, caption, width=595, height=842, background=None, caching=None):
+            PageCatcherFigureNonA4.__init__(self, filename, pageNo, caption, width, height, background=background, caching=caching)
 
 def demo1(canvas):
     frame = Frame(
