@@ -1,22 +1,22 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.27 2003/07/02 16:10:10 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.28 2003/07/29 15:13:18 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
-__version__=''' $Id: linecharts.py,v 1.27 2003/07/02 16:10:10 rgbecker Exp $ '''
+__version__=''' $Id: linecharts.py,v 1.28 2003/07/29 15:13:18 rgbecker Exp $ '''
 
 import string
 from types import FunctionType, StringType
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, \
-                                    isListOfStringsOrNone, SequenceOf
+                                    isListOfStringsOrNone, SequenceOf, isBoolean
 from reportlab.lib.attrmap import *
 from reportlab.lib.formatters import Formatter
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
-from reportlab.graphics.shapes import Line, Rect, Group, Drawing
+from reportlab.graphics.shapes import Line, Rect, Group, Drawing, Polygon, PolyLine
 from reportlab.graphics.widgets.signsandsymbols import NoEntry
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.textlabels import Label
@@ -83,6 +83,8 @@ class HorizontalLineChart(LineChart):
         categoryAxis = AttrMapValue(None, desc='Handle of the category axis.'),
         categoryNames = AttrMapValue(isListOfStringsOrNone, desc='List of category names.'),
         data = AttrMapValue(None, desc='Data to be plotted, list of (lists of) numbers.'),
+        inFill = AttrMapValue(isBoolean, desc='Whether infilling should be done.'),
+        reversePlotOrder = AttrMapValue(isBoolean, desc='If true reverse plot order.'),
         )
 
     def __init__(self):
@@ -129,6 +131,8 @@ class HorizontalLineChart(LineChart):
 
         # New line chart attributes.
         self.joinedLines = 1 # Connect items with straight lines.
+        self.inFill = 0
+        self.reversePlotOrder = 0
 
 
     def demo(self):
@@ -221,13 +225,23 @@ class HorizontalLineChart(LineChart):
         g = Group()
 
         labelFmt = self.lineLabelFormat
+        P = range(len(self._positions))
+        if self.reversePlotOrder: P.reverse()
+        inFill = self.inFill
+        if inFill:
+            inFillY = self.categoryAxis._y
+            inFillX0 = self.valueAxis._x
+            inFillX1 = inFillX0 + self.categoryAxis._length
+            inFillG = getattr(self,'_inFillG',g)
 
         # Iterate over data rows.
-        for rowNo in range(len(self._positions)):
+        for rowNo in P:
             row = self._positions[rowNo]
             styleCount = len(self.lines)
             styleIdx = rowNo % styleCount
             rowStyle = self.lines[styleIdx]
+            rowColor = rowStyle.strokeColor
+            dash = getattr(rowStyle, 'strokeDashArray', None)
 
             if hasattr(self.lines[styleIdx], 'strokeWidth'):
                 strokeWidth = self.lines[styleIdx].strokeWidth
@@ -237,16 +251,20 @@ class HorizontalLineChart(LineChart):
                 strokeWidth = None
 
             # Iterate over data columns.
-            for colNo in range(len(row)):
-                x1, y1 = row[colNo]
-                if self.joinedLines == 1:
-                    if colNo > 0:
-                        # Draw lines between adjacent items.
-                        x2, y2 = row[colNo-1]
-                        line = Line(x1, y1, x2, y2)
-                        line.strokeColor = rowStyle.strokeColor
-                        line.strokeWidth = rowStyle.strokeWidth
-                        g.add(line)
+            if self.joinedLines:
+                points = []
+                for colNo in range(len(row)):
+                    points += row[colNo]
+                if inFill:
+                    points = points + [inFillX1,inFillY,inFillX0,inFillY]
+                    inFillG.add(Polygon(points,fillColor=rowColor,strokeColor=rowColor,strokeWidth=0.1))
+                else:
+                    line = PolyLine(points,strokeColor=rowColor,strokeLineCap=0,strokeLineJoin=1)
+                    if strokeWidth:
+                        line.strokeWidth = strokeWidth
+                    if dash:
+                        line.strokeDashArray = dash
+                    g.add(line)
 
             if hasattr(self.lines[styleIdx], 'symbol'):
                 uSymbol = self.lines[styleIdx].symbol
@@ -267,7 +285,6 @@ class HorizontalLineChart(LineChart):
                 self.drawLabel(g, rowNo, colNo, x1, y1)
 
         return g
-
 
     def draw(self):
         "Draws itself."
@@ -290,8 +307,11 @@ class HorizontalLineChart(LineChart):
         self.calcPositions()
 
         g = Group()
-
         g.add(self.makeBackground())
+        if self.inFill:
+            self._inFillG = Group()
+            g.add(self._inFillG)
+
         g.add(cA)
         g.add(vA)
         vA.gridStart = cA._x
