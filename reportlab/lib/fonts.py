@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/fonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.11 2001/08/22 20:35:25 aaron_watters Exp $
-__version__=''' $Id: fonts.py,v 1.11 2001/08/22 20:35:25 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.12 2001/08/23 00:39:26 rgbecker Exp $
+__version__=''' $Id: fonts.py,v 1.12 2001/08/23 00:39:26 rgbecker Exp $ '''
 import string, sys, os
 ###############################################################################
 #	A place to put useful font stuff
@@ -63,24 +63,28 @@ def ps2tt(psfn):
 	psfn = string.lower(psfn)
 	if _ps2tt_map.has_key(psfn):
 		return _ps2tt_map[psfn]
-	raise "Can't map PS font", psfn
+	raise ValueError, "Can't map PS font %s" % psfn
 
 def tt2ps(fn,b,i):
 	'family name + bold & italic to ps font name'
 	K = (string.lower(fn),b,i)
 	if _tt2ps_map.has_key(K):
 		return _tt2ps_map[K]
-	raise "Can't map PS font", fn
+	else:
+		fn, b1, i1 = ps2tt(K[0])
+		K = fn, b1|b, i1|i
+		if _tt2ps_map.has_key(K):
+			return _tt2ps_map[K]
+	raise ValueError, "Can't map TT font %s" % fn
 
 def addMapping(face, bold, italic, psname):
 	'allow a custom font to be put in the mapping -- ONLY IF NOT ALREADY PRESENT!'
-	key = (face, bold, italic)
-	if not _tt2ps_map.has_key(key):
-		_tt2ps_map[key] = psname
-	else:
-		#raise ValueError, "mapping exists %s" % repr(key) # I DON'T KNOW WHY THE PREAMBLE DOES THIS! XXXX
-		pass #ignore it
-	# rebuild inverse - inefficient
-	for k,v in _tt2ps_map.items():
-		if not _ps2tt_map.has_key(k):
-			_ps2tt_map[string.lower(v)] = k
+	k = (string.lower(face), bold, italic)
+	if not _tt2ps_map.has_key(k):
+		_tt2ps_map[k] = psname
+		# rebuild inverse - inefficient
+		for k,v in _tt2ps_map.items():
+			if not _ps2tt_map.has_key(k):
+				_ps2tt_map[string.lower(v)] = k
+	elif _tt2ps_map[k]!=psname:
+		raise ValueError, "_tt2ps_map[%s]==%s already, not %s" % (repr(k), _tt2ps_map[k], psname)
