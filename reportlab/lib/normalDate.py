@@ -23,9 +23,11 @@ _monthName = ['January', 'February', 'March', 'April', 'May', 'June',
 			  'July','August','September','October','November','December']
 
 from types import IntType, StringType, ListType, TupleType
-_SeqTypes = (ListType,TupleType)
-
 import string, re, time
+if hasattr(time,'struct_time'):
+	_DateSeqTypes = (ListType,TupleType,time.struct_time)
+else:
+	_DateSeqTypes = (ListType,TupleType)
 
 _fmtPat = re.compile('\\{(m{1,5}|yyyy|yy|d{1,4})\\}',re.MULTILINE|re.IGNORECASE)
 _iso_re = re.compile(r'(\d\d\d\d|\d\d)-(\d\d)-(\d\d)')
@@ -106,7 +108,6 @@ class NormalDate:
 			4. tuple in (yyyy, mm, dd) - localtime/gmtime can also be used
 		"""
 		if normalDate is None:
-			import time
 			self.setNormalDate(time.localtime(time.time()))
 		else:
 			self.setNormalDate(normalDate)
@@ -452,7 +453,7 @@ class NormalDate:
 					self.setNormalDate(m.group(1)+m.group(2)+m.group(3))
 				else:
 					raise NormalDateException("unable to setNormalDate(%s)" % `normalDate`)
-		elif tn in _SeqTypes:
+		elif tn in _DateSeqTypes:
 			self.normalDate = int("%04d%02d%02d" % normalDate[:3])
 		elif tn is _NDType:
 			self.normalDate = normalDate.normalDate
