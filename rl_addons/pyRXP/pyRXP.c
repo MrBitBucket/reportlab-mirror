@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.20 2003/04/03 00:07:51 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.21 2003/04/03 12:29:17 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.20 2003/04/03 00:07:51 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.21 2003/04/03 12:29:17 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -508,14 +508,13 @@ void PyErr_FromStderr(Parser p, char *msg){
 		void *handle;
 		int handle2, handle3;
 		};
-#if CHAR_SIZE == 8
 	char *buf=((struct _FILE16*)Stderr)->handle;
+#if CHAR_SIZE == 8
 	if(p->errbuf) Fprintf(Stderr,"%s\n", p->errbuf);
 	Fprintf(Stderr,"%s\n", msg);
 	buf[((struct _FILE16*)Stderr)->handle2] = 0;
 	PyErr_SetString(moduleError,buf);
 #else
-	Char *buf=((struct _FILE16*)Stderr)->handle;
 	PyObject* t;
 	if(p->errbuf) Fprintf(Stderr,"%s\n", p->errbuf);
 	Fprintf(Stderr,"%s\n", msg);
@@ -584,11 +583,7 @@ PyObject *ProcessSource(Parser p, InputSource source)
 		PyErr_Clear();
 		}
 	else {
-		if(!r) PyErr_FromStderr(p,"Internal error, stack not fully popped!");
-		else {
-			Fprintf(Stderr,"error return=%d\n",r);
-			PyErr_FromStderr(p,"Parse Failed!");
-			}
+		PyErr_FromStderr(p,r ? "Parse Failed!" : "Internal error, stack not fully popped!");
 		for(i=0;i<=depth;i++){
 			Py_DECREF(stack[i]);
 			}
