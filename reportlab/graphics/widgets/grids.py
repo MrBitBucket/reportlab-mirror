@@ -90,7 +90,7 @@ class Grid0(Widget):
         D = Drawing(100, 100)
 
         g = Grid0()
-        g.draw()
+        #g.draw()
         D.add(g)
 
         return D
@@ -170,7 +170,6 @@ class Grid0(Widget):
             if self.orientation == 'vertical':
                 i = 0
                 r = frange(self.x + self.delta0, self.x + w, self.delta)
-##                for j in map(int, frange(len(r))):
                 for j in range(len(r)):
                     x = r[j]
                     try:
@@ -181,7 +180,11 @@ class Grid0(Widget):
                         i = i + 1
                     except IndexError:
                         if self.delta0 == 0:
-                            stripe = Rect(x, self.y, self.delta, h)
+                            if x + self.delta > self.x + w:
+                                w1 = self.x + w - x
+                            else:
+                                w1 = self.delta
+                            stripe = Rect(x, self.y, w1, h)
                             stripe.fillColor = cols[i % len(cols)] 
                             stripe.strokeColor = None
                             group.add(stripe)
@@ -194,7 +197,7 @@ class Grid0(Widget):
                     lmStripe.strokeColor = None
                     group.add(lmStripe)
 
-                    rmStripe = Rect(self.x + w - self.delta0, self.y, self.delta0, h)
+                    rmStripe = Rect(x, self.y, self.x + w - x, h)
                     rmStripe.fillColor = cols[i % len(cols)] 
                     rmStripe.strokeColor = None
                     group.add(rmStripe)
@@ -202,7 +205,6 @@ class Grid0(Widget):
             elif self.orientation == 'horizontal':
                 i = 0
                 r = frange(self.y + self.delta0, self.y + h, self.delta)
-##                for j in frange(len(r)):
                 for j in range(len(r)):
                     y = r[j]
                     try:
@@ -213,7 +215,11 @@ class Grid0(Widget):
                         i = i + 1
                     except IndexError:
                         if self.delta0 == 0:
-                            stripe = Rect(self.x, y, w, self.delta)
+                            if y + self.delta > self.y + w:
+                                h1 = self.y + w - y
+                            else:
+                                h1 = self.delta
+                            stripe = Rect(self.x, y, w, h1)
                             stripe.fillColor = cols[i % len(cols)] 
                             stripe.strokeColor = None
                             group.add(stripe)
@@ -226,7 +232,7 @@ class Grid0(Widget):
                     lmStripe.strokeColor = None
                     group.add(lmStripe)
 
-                    umStripe = Rect(self.x, self.y + w - self.delta0, w, self.delta0)
+                    umStripe = Rect(self.x, self.y + w - self.delta0, w, self.y + h - y)
                     umStripe.fillColor = cols[i % len(cols)] 
                     umStripe.strokeColor = None
                     group.add(umStripe)
@@ -355,16 +361,21 @@ class ShadedRect0(Widget):
 
 
 def test():
-    D = Drawing(450,650)
+    D = Drawing(450, 650)
 
-    for row in range(5):
-        y = 530 - row*120
+    d = 80
+    s = 60
+    
+    for row in range(10):
+        y = 530 - row*d
         if row == 0:
             for col in range(3):
-                x = 20 + col*120
+                x = 20 + col*d
                 g = Grid0()
                 g.x = x
                 g.y = y
+                g.width = s
+                g.height = s
                 g.useRects = 0
                 g.useLines = 1
                 if col == 0:
@@ -377,10 +388,12 @@ def test():
                 D.add(g)
         elif row == 1:
             for col in range(3):
-                x = 20 + col*120
+                x = 20 + col*d 
                 g = Grid0()
                 g.y = y
                 g.x = x
+                g.width = s
+                g.height = s
                 if col == 0:
                     pass
                 elif col == 1:
@@ -391,10 +404,12 @@ def test():
                 D.add(g)
         elif row == 2:
             for col in range(3):
-                x = 20 + col*120
+                x = 20 + col*d
                 g = Grid0()
                 g.x = x
                 g.y = y
+                g.width = s
+                g.height = s
                 g.useLines = 1
                 g.useRects = 1
                 if col == 0:
@@ -407,10 +422,12 @@ def test():
                 D.add(g)
         elif row == 3:
             for col in range(3):
-                x = 20 + col*120
+                x = 20 + col*d
                 sr = ShadedRect0()
                 sr.x = x
                 sr.y = y
+                sr.width = s
+                sr.height = s
                 sr.fillColorStart = colors.Color(0, 0, 0)
                 sr.fillColorEnd = colors.Color(1, 1, 1)
                 if col == 0:
@@ -423,12 +440,33 @@ def test():
                 D.add(sr)
         elif row == 4:
             for col in range(3):
-                x = 20 + col*120
+                x = 20 + col*d
                 sr = ShadedRect0()
                 sr.x = x
                 sr.y = y
+                sr.width = s
+                sr.height = s
                 sr.fillColorStart = colors.red
                 sr.fillColorEnd = colors.blue
+                sr.orientation = 'horizontal'
+                if col == 0:
+                    sr.numShades = 10
+                elif col == 1:
+                    sr.numShades = 20
+                elif col == 2:
+                    sr.numShades = 50
+                sr.demo()
+                D.add(sr)
+        elif row == 5:
+            for col in range(3):
+                x = 20 + col*d
+                sr = ShadedRect0()
+                sr.x = x
+                sr.y = y
+                sr.width = s
+                sr.height = s
+                sr.fillColorStart = colors.white
+                sr.fillColorEnd = colors.green
                 sr.orientation = 'horizontal'
                 if col == 0:
                     sr.numShades = 10
