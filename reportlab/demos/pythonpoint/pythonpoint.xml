@@ -20,6 +20,12 @@
 			but will undoubtedly change and evolve.  Read on for a tutorial...
 			</para>
         </frame>
+		<!-- a fram off the page can do speaker notes!-->
+		<frame x="0" y="-200" width="842" height="190"> 
+		    <para>Smile and look them in the eye!</para>
+        
+		</frame>
+		
     </slide>
 
     <slide id="Part1" title="Part 1" effectname='Blinds' effectdirection='0'>
@@ -226,9 +232,33 @@
 			<para/>
 			<para/>
 			<para/>
-            <para style='Heading1'>Part 2 - Tag Reference</para>
+            <para style='Heading1'>Part 2 - Reference</para>
 			<para/>
-			<para style='Centered'>This section covers all tags currently in use.</para>
+			<para style='Centered'>This section covers all command line options
+			and tags currently in use.</para>
+        </frame>
+    </slide>
+
+    <slide id="Slide200" title="Command Line Options"
+		 effectname='Blinds' effectdirection='0' outlinelevel='1'>
+        <frame x="120" y="72" width="700" height="510" 
+			leftmargin="36" rightmargin="36">
+            <para style="Heading2">Command Line Options</para>
+			<para>Usage (NT, or executable Unix script):</para>
+			<para><i>pythonpoint.py [/notes] myslides.xml</i></para>
+			<para>or (Win9x or non-executable script)</para>
+			<para><i>python pythonpoint.py [/notes] myslides.xml</i></para>
+			<para style='BodyText'>
+			Notes:
+			</para>
+			<para style='Bullet'>The resulting PDF file has the same
+			name as the input file.</para>
+			<para style='Bullet'>The Speaker Notes mode prints a shrunken
+			canvas with room for notes around the edge.  To create notes,
+			make an extra frame off the page.  See the source of
+			Pythonpoint.xml slide 001 for an example.
+			</para>
+			
         </frame>
     </slide>
 
@@ -435,6 +465,41 @@
 			<para style='Indent'>Rename it 'flowing image'?  Control
 			over alignment and size if needed.  Image caching.</para>
         </frame>
+    </slide>
+
+    <slide id="Slide208a" title="Tag: table"
+		 effectname='Blinds' effectdirection='0' outlinelevel='2'>
+        <frame x="120" y="72" width="700" height="510" 
+			leftmargin="36" rightmargin="36">
+            <para style='Heading2'>Tag "table" - tables</para>
+			<para style='BodyText'>
+			This lets you draw tables with a wide variety of formatting
+			options.  
+			</para>
+			<para style='Italic'>Attributes:</para>
+			<para style='Indent'><b>widths</b> (optional) in points (auto-sizes if not given)
+			</para>
+			<para style='Indent'><b>heights</b> (optional) in points (auto-sizes if not given)
+			</para>
+			<para style='Indent'><b>style</b> (optional) - name of a ReportLab
+			    tablestyle  defined in the stylesheet.
+			</para>
+			<para style='Indent'><b>colDelim</b> (optional) - the column
+  				delimiter string for bulk data; defaults to a comma.
+			</para>
+			<para style='Indent'><b>rowDelim</b> (optional) - the line
+  				delimiter string for bulk data; defaults to a carriage 
+				return.
+			</para>
+			<para style='Indent'><b>data</b> (required) - delimited
+  				bulk data for the table.
+			</para>
+			
+			<para style='Italic'>Contained By:</para>
+			<para style='Indent'>Frame</para>
+			<para style='Italic'>Can Contain:</para>
+			<para style='Indent'>Nothing</para>
+	    </frame>
     </slide>
 
     <slide id="Slide209" title="Drawable Objects"

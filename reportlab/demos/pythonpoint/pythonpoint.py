@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.23  2000/07/12 06:33:43  andy_robinson
+#	Added Speaker Notes facility
+#
 #	Revision 1.22  2000/07/10 15:25:47  andy_robinson
 #	Added tables to PythonPoint
-#
+#	
 #	Revision 1.21  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #	
@@ -102,7 +105,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.22 2000/07/10 15:25:47 andy_robinson Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.23 2000/07/12 06:33:43 andy_robinson Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -164,6 +167,7 @@ class PPPresentation:
     def __init__(self):
         self.filename = None
         self.description = None
+        self.speakerNotes = 0   # different printing mode
         self.slides = []
         self.effectName = None
         self.showOutline = 1   #should it be displayed when opening?
@@ -180,6 +184,16 @@ class PPPresentation:
         canv.setPageCompression(0)
             
         for slide in self.slides:
+
+            
+            if self.speakerNotes:
+                #frame and shift the slide
+                canv.scale(0.67, 0.67)
+                canv.translate(self.pageWidth / 6.0, self.pageHeight / 3.0)
+                canv.rect(0,0,self.pageWidth, self.pageHeight)
+
+
+
             slide.drawOn(canv)
             canv.showPage()
 
@@ -678,16 +692,26 @@ def test():
     p.getPresentation().save()
     p.close()
 
-def process(datafilename):
+def process(datafilename, speakerNotes=0):
     parser = stdparser.PPMLParser()
     rawdata = open(datafilename).read()
     parser.feed(rawdata)
     pres = parser.getPresentation()
+    pres.speakerNotes = speakerNotes
     pres.save()
+    print 'saved presentation %s.pdf' % os.path.splitext(datafilename)[0]
     parser.close()
 
 if __name__ == '__main__':
     import sys
+    #see if there is a '/n' argument
+    speakernotes = 0
+    for arg in sys.argv:
+        if arg in ['/n','/no','/not','/note','/notes']:
+            speakernotes = 1
+            sys.argv.remove(arg)
+            print 'speaker notes mode'
+            
     if len(sys.argv) == 1 and os.path.isfile('pythonpoint.xml'):
 		sys.argv.append('pythonpoint.xml')
     if len(sys.argv) == 1:
@@ -702,6 +726,6 @@ Read it, then look at the XML; all should be clear!"""
     else:
         for datafile in sys.argv[1:]:
             if os.path.isfile(datafile):
-                process(datafile)   #see just above
+                process(datafile, speakernotes)   #see just above
             else:
                 print 'Data file not found:', datafile
