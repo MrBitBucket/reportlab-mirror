@@ -20,11 +20,43 @@ from reportlab.lib.enums import *
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus.layout import *
 from reportlab.platypus.paragraph import Paragraph
+from reportlab.platypus.doctemplate import *
 from reportlab.lib import colors
+
 
 import reportlab.lib.styles
 
+def decoratePage(canvas, doc):
+    canvas.saveState()
+    canvas.setFont('Times-Roman', 10)
+    canvas.drawCentredString(doc.pagesize[0] / 2, 0.75*inch, 'Page %d' % canvas.getPageNumber())
+    canvas.restoreState()
 
+class MyPageTemplate(PageTemplate):
+    def __init__(self, id):
+        myFrame = BasicFrame(inch, inch, 6*inch, 10*inch, id='normal')
+        PageTemplate.__init__(self, id, [myFrame])  # note lack of onPage
+
+    def drawPage(self, canvas, doc):
+        canvas.saveState()
+        canvas.setFont('Times-Roman', 10)
+        canvas.drawCentredString(doc.pagesize[0] / 2, 0.75*inch, 'Page %d' % canvas.getPageNumber())
+        canvas.restoreState()
+
+
+class MyDocTemplate(BaseDocTemplate):
+    def __init__(self, filename, pagesize=DEFAULT_PAGE_SIZE, pageTemplates=[],
+                     showBoundary=0, leftMargin=inch, rightMargin=inch,
+                     topMargin=inch, bottomMargin=inch):
+        BaseDocTemplate.__init__(self, 	filename, pagesize,
+                     pageTemplates, showBoundary,
+                     leftMargin, rightMargin,
+                     topMargin, bottomMargin)
+        #give it a single PageTemplate
+        
+        self.addPageTemplates(MyPageTemplate('Normal'))
+
+    
 
 def run(infilename, outfilename):
     p = yaml.Parser()
@@ -67,7 +99,7 @@ def run(infilename, outfilename):
             print 'skipping',typ, 'for now'
 
     #print it
-    doc = SimpleFlowDocument(outfilename, pagesize=A4)
+    doc = MyDocTemplate(outfilename, pagesize=A4)
     doc.build(story)
 
 
@@ -78,7 +110,8 @@ def getStyleSheet():
     stylesheet.add(ParagraphStyle(name='Normal',
                                   fontName='Times-Roman',
                                   fontSize=10,
-                                  leading=12)
+                                  leading=12,
+                                  spaceBefore=6)
                    )
 
     stylesheet.add(ParagraphStyle(name='Comment',
@@ -139,7 +172,7 @@ def getStyleSheet():
                                   parent=stylesheet['Normal'],
                                   firstLineIndent=36,
                                   leftIndent=36,
-                                  spaceBefore=3,
+                                  spaceBefore=0,
                                   bulletFontName='Symbol'),
                    alias='bu')
 

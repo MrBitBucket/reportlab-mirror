@@ -3,15 +3,28 @@
 CVS Revision History
 .beginPre Code
 $Log: platprop.yml,v $
-Revision 1.2  2000/05/15 13:37:53  andy_robinson
-Preliminary docco on Paragraphs and ParagraphStyles
+Revision 1.3  2000/05/15 16:02:41  andy_robinson
+More Paragraph Documentation
 
 Revision 1.1  2000/05/15 10:58:54  andy_robinson
 Platypus Proposal
 .endPre
 
+This document is only partly written.  Anticipated sections:
+.bu     What is PLATYPUS about?
+.bu     Frames and Flowables
+.bu     Paragraphs, Paragraph Styles and Text
+.bu     Document Templates
 
-.h1 Paragraphs, Paragraph Styles and Text
+
+.h1 What is PLATYPUS about?
+
+
+.h1 Frames and Flowables
+
+
+
+.h2 Paragraphs, Paragraph Styles and Text
 
 The most common Flowable objects in most applications will almost certainly be paragraphs, and these are also the most complex we have implemented so far.  This section explains what can be done with Paragraphs.
 
@@ -152,6 +165,49 @@ There can also be an outermost tag around each paragraph which can override the 
 
 
 
+.h1 Document Templates
+
+
+.h2 Issues to discuss
+
+.h3 Making Page Templates and level of reuse
+
+A PageTemplate defines a number of frames.  Logically, it might also want to decorate itself with static stuff (logos, letterheads), dynamic stuff (the page number), and maybe even information about the current point in the story (the chapter heading, or the first and last words defined on the page, it it was a dictionary).  So some hook is needed to allow custom drawing for a PageTemplate.
+
+Currently we support at least two patterns:
+
+Option 1: make a load of page decoration routines for things like the letterhead.  These take the argument signature myfunc(canvas, doc [, *args, **kwargs]).  These are passed in as the onPage argument when adding PageTemplates to DocTemplates:
+
+.beginPre Code
+def decoratePage(canvas, doc):
+    canvas.saveState()
+    canvas.setFont('Times-Roman', 10)
+    canvas.drawCentredString(doc.pagesize[0] / 2, 0.75*inch, 'Page %d' % canvas.getPageNumber())
+    canvas.restoreState()
+
+class MyPageTemplate(PageTemplate):
+    def __init__(self, id):
+        myFrame = BasicFrame(inch, inch, 6*inch, 10*inch, id='normal')
+        PageTemplate.__init__(self, id, [myFrame], onPage=decoratePage)
+
+.endPre
+
+Option 2:  Subclass PageTemplate.  So I would design and reuse a class called "MyCompanyAngryLetterFirstPageTemplate", which knew both what frames it had and what else to draw.  If a PageTemplate has a drawPage method, this is called
+when the page starts to drw.
+
+.beginPre Code
+class MyPageTemplate(PageTemplate):
+    def __init__(self, id):
+        myFrame = BasicFrame(inch, inch, 6*inch, 10*inch, id='normal')
+        PageTemplate.__init__(self, id, [myFrame])  # note lack of onPage
+
+    def drawPage(self, canvas, doc):
+        canvas.saveState()
+        canvas.setFont('Times-Roman', 10)
+        canvas.drawCentredString(doc.pagesize[0] / 2, 0.75*inch, 'Page %d' % canvas.getPageNumber())
+        canvas.restoreState()
+
+.endPre
 
 
 
