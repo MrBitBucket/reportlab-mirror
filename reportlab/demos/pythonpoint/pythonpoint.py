@@ -31,9 +31,15 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.7  2000/04/06 09:47:20  andy_robinson
+#	Added several new shape tags.
+#	Broke out parser into separate module, to
+#	allow for alternative parsers in future.
+#	Broke out 'user guide' into pythonpoint.xml
+#
 #	Revision 1.6  2000/03/21 19:36:37  rgbecker
 #	8bit character fixes
-#
+#	
 #	Revision 1.5  2000/02/23 15:09:23  rgbecker
 #	Memory leak fixes
 #	
@@ -49,7 +55,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.6 2000/03/21 19:36:37 rgbecker Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.7 2000/04/06 09:47:20 andy_robinson Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -63,387 +69,44 @@ in other page layout stuff.
 Look at the sample near the top, which shows how the presentation
 should be coded up.
 
-The parser turns the XML sample into an object tree.  There is a
+The parser, which is in a separate module to allow for multiple
+parsers, turns the XML sample into an object tree.  There is a
 simple class hierarchy of items, the inner levels of which create
-drawable objects to go in the frames.
+drawable objects to go in the frames.  These know how to draw
+themselves.
+
+The currently available 'Presentation Objects' are:
+
+    The main hierarchy...
+        PPPresentation
+        PPSection
+        PPSlide
+        PPFrame
+
+    Things to flow within frames...
+        PPPara - flowing text
+        PPPreformatted - text with line breaks and tabs, for code..
+        PPImage
+
+    Things to draw directly on the page...
+        PPRect
+        PPRoundRect
+        PPDrawingElement - user base class for graphics
+        PPLine
+        PPEllipse
 
 """
 
 import os
 import string
-import xmllib
 import pprint
 import imp
 
 from reportlab.pdfgen import canvas
 from reportlab.platypus import layout
-
-sample = """
-<presentation filename='pythonpoint.pdf'>
-  <section name = 'Main'>
-  	<!-- any graphics in the scetion go on all its paages as a backdrop -->
-    <rectangle x="20" y="510" width="800" height="65" fill="(0,0,1)"/>
-    <rectangle x="20" y="20" width="65" height="555" fill="(0,0,1)"/>
-        
-    <slide id="Slide001" title="My First Slide" effectname='Wipe'>
-        <frame x="96" y="72" width="700" height="432" leftmargin="36" rightmargin="36">
-            <para style='Heading1'>Welcome to PythonPoint</para>
-            <para style='BodyText'>...a library for creating presentation slides.</para>
-            <para style='BodyText'>
-                PythonPoint lets you create attractive and consistent presentation slides
-                on any platform.  It is a demo app built on top of the PDFgen PDF library
-                and the PLATYPUS Page Layout library.  Essentially, it converts slides
-                in an XML format to PDF.
-            </para>
-        </frame>
-    </slide>
-    <slide id="Slide002" title="XML Notation" effectname='Blinds' effectdirection='0'>
-        <frame x="96" y="72" width="700" height="432" leftmargin="36" rightmargin="36">
-            <para style='Heading1'>XML Notation</para>
-            <para style='BodyText'>You create slides in a text editor with 
-				a basic XML	syntax looking like this:
-			</para>
-            <prefmt style='Code'><![CDATA[
-<frame x="160" y="72" width="600" height="432"
-    leftmargin="36" rightmargin="36">
-    <para style='Heading1'>
-        Welcome to PythonPoint
-    </para>
-    <para style='BodyText'>
-        ...a library for creating presentation slides.
-    </para>
-</frame>        ]]>
-            </prefmt>
-            <para style='BodyText'>Pythonpoint then converts these into slides.  Just enter
-				"pythonpoint.py myfile.xml" to create a PDF document (usually called "myfile.pdf").
-			</para>
-
-			
-        </frame>
-    </slide>
-
-    <slide id="Slide003" title="Page Layout" effectname='Box'>
-        <frame x="96" y="72" width="700" height="432" leftmargin="36" rightmargin="36" border='true'>
-            <para style='Heading1'>Page Layout Model</para>
-            <para style='BodyText'>
-                The Page Layout model comes from PLATYPUS (Page Layout and Typography Using Scripts),
-                a key component of the toolkit.  This covers concepts such as:
-            </para>
-            <para style='Bullet' bullettext = '\245'>Reusable 'Drawable Objects'</para>
-            <para style='Bullet' bullettext = '\245'>Frames into which objects flow (like this)</para>
-            <para style='Bullet' bullettext = '\245'>Style Sheets for text, table cells, line styles etc.</para>
-            <para style='Bullet' bullettext = '\245'>Wrapping, page breaking an document management logic</para>
-            <para style='BodyText'>Everything is open and extensible.  I hope a library of reusable objects
-            such as charts and diagrams will grow up.</para>
-        </frame>
-    </slide>
-
-    <slide id="Slide004" title="Reuse" effectname='Wipe'>
-        <frame x="96" y="72" width="700" height="432" leftmargin="36" rightmargin="36">
-            <para style='Heading1'>Reuse and Consistency - Sections</para>
-            <para style='BodyText'>
-				You can create a 'section' spanning some or all tags in the presentation and place graphics
-				on this.  The blue border and title come from the section.  Here's how we did the border:
-			</para>
-			<prefmt style='Code'><![CDATA[
-<presentation filename='pythonpoint.pdf'>
-  <section name = 'Main'>
-  	<!-- any graphics in the section go on all its pages as a backdrop -->
-    <rectangle x="20" y="510" width="800" height="65" fill="(0,0,1)"/>
-    <rectangle x="20" y="20" width="65" height="555" fill="(0,0,1)"/>
-	...all slides go here...
-  </section>
-</presentation>	]]>
-           
-			</prefmt>
-			<para style='BodyText'> Thus you can re-brand an entire
-				presentation for a  new audience in seconds.
-            </para>
-		</frame>
-	</slide>
-
-    <slide id="Slide005" title="Styles" effectname='Dissolve'>
-        <frame x="96" y="72" width="700" height="432" leftmargin="36" rightmargin="36">
-            <para style='Heading1'>Style Sheets</para>
-            <para style='BodyText'>
-                Paragraph styles are defined externally.  You may specify a filename
-				from which to load a stylesheet with the stylesheet tag.
-            </para>
-            <para style='BodyText'>
-				Thus you can have different sizes and formats by switching stylesheets,
-				or colour and black-and-white options.
-            </para>
-			<para style='BodyText'>
-				When they are added, tables will be driven by line and cell styles in a 
-				similar way.
-            </para>
-			
-        </frame>
-    </slide>
-	
-    <slide id="Slide006" title="Special Effects" effectname='Dissolve'>
-        <frame x="96" y="72" width="700" height="432" leftmargin="36" rightmargin="36">
-            <para style='Heading1'>Special Effects</para>
-            <para style='BodyText'>
-                Acrobat Reader supports tags to define page transition effects.  If you
-				are reading this on screen, you should have seen a selection of these:
-            </para>
-	        <para style='Bullet' bullettext = '\245'>Split</para>
-	        <para style='Bullet' bullettext = '\245'>Blinds</para>
-	        <para style='Bullet' bullettext = '\245'>Box</para>
-	        <para style='Bullet' bullettext = '\245'>Wipe</para>
-	        <para style='Bullet' bullettext = '\245'>Dissolve</para>
-	        <para style='Bullet' bullettext = '\245'>Glitter</para>
-    		<para style='BodyText'>
-				Each has a range of options to fine-tune.
-            </para>
-			<para style='BodyText'>
-				When they are added, tables will be driven by line and cell styles in a 
-				similar way.
-            </para>
-			
-        </frame>
-    </slide>
-	
-	<slide id="Slide007" title="Future Features" effectname='Glitter'>
-        <frame x="96" y="72" width="700" height="432" leftmargin="36" rightmargin="36">
-            <para style='Heading1'>Features Coming Soon</para>
-            <para style='BodyText'>
-                This is the first version that runs.  A lot can now be added fairly easily:
-            </para>
-            <para style='Bullet' bullettext = '\245'>Preprocessor to let you enter paragraphs 
-				and bullets as one block of text, with less tag typing!</para>
-            <para style='Bullet' bullettext = '\245'>PIDDLE drawings</para>
-            <para style='Bullet' bullettext = '\245'>Inline images within the frames</para>
-            <para style='Bullet' bullettext = '\245'>'Object Graphics' tags with grouping and coordinate transformations</para>
-            <para style='Bullet' bullettext = '\245'>Speaker notes and a mode to print them</para>
-            <para style='Bullet' bullettext = '\245'>Tools to archive slides in a database and build presentations to order</para>
-            <para style='Italic' bullettext = '\245'>...what else can YOU think of?</para>
-        </frame>
-    </slide>
-
-  </section>
-</presentation>
-"""
-
-class PPMLParser(xmllib.XMLParser):
-    attributes = {
-        #this defines the available attributes for all objects,
-        #and their default values.  Although these don't have to
-        #be strings, the ones parsed from the XML do, so
-        #everything is a quoted string and the parser has to
-        #convert these to numbers where appropriate.
-        'stylesheet': {
-            'path':'None',
-            'module':'None',
-            'function':'getParagraphStyles'
-            },
-        'frame': {
-            'x':'0',
-            'y':'0',
-            'width':'0',
-            'height':'0',
-            'leftmargin':'0',
-            'rightmargin':'0',
-            'topmargin':'0',
-            'bottommargin':'0',
-            'border':'false'
-            },
-        'slide': {
-            'id':'None',
-            'title':'None',
-            'effectname':'None',   # Split, Blinds, Box, Wipe, Dissolve, Glitter
-            'effectdirection':'0',   # 0,90,180,270
-            'effectdimension':'H',   # H or V - horizontal or vertical
-            'effectmotion':'I',     # Inwards or Outwards
-            'effectduration':'1'    #seconds
-            },
-        'para': {
-            'style':'Normal',
-            'bullettext':''
-            },
-        'image': {
-            'filename':'',
-            'width':'None',
-            'height':'None'
-            },
-        'rectangle': {
-            'x':'0',
-            'y':'0',
-            'width':'100',
-            'height':'100',
-            'fill':'None',
-            'stroke':'None'
-            }
-        }
-    
-    def __init__(self):
-        self.presentations = []
-        self._curPres = None
-        self._curSection = None
-        self._curSlide = None
-        self._curFrame = None
-        self._curPara = None  #the only places we are interested in
-        self._curPrefmt = None
-        xmllib.XMLParser.__init__(self)
-
-    def getPresentation(self):
-        return self._curPres
-        
-    def handle_data(self, data):
-        #the only data should be paragraph text
-        if self._curPara:
-            self._curPara.rawtext = self._curPara.rawtext + data
-        if self._curPrefmt:
-            self._curPrefmt.rawtext = self._curPrefmt.rawtext + data
-            
-    def handle_cdata(self, data):
-        #just append to current paragraph text, so we can quote XML
-        if self._curPara:
-            self._curPara.rawtext = self._curPara.rawtext + data
-        if self._curPrefmt:
-            self._curPrefmt.rawtext = self._curPrefmt.rawtext + data
-        
-            
-    def start_presentation(self, args):
-        #print 'started presentation:', args['filename']
-        self._curPres = PPPresentation()
-        self._curPres.filename = args['filename']
-        if args.has_key('effect'):
-            self._curPres.effectName = args['effect']
-
-    def end_presentation(self):
-        #print 'ended presentation'
-        print 'Fully parsed presentation',self._curPres.filename
-
-    def start_stylesheet(self, attributes):
-        #makes it the current style sheet.
-        path = attributes['path']
-        if path=='None':
-            path = None
-        modulename = attributes['module']
-        funcname = attributes['function']
-        found = imp.find_module(modulename, path)
-        assert found, "StyleSheet %s not found" % modulename
-        (file, pathname, description) = found
-        mod = imp.load_module(modulename, file, pathname, description)
-        
-        #now get the function
-        func = getattr(mod, funcname)
-        setStyles(func())
-        print 'set global stylesheet to %s.%s()' % (modulename, funcname)
-        
-    def end_stylesheet(self):
-        pass
-
-    def start_section(self, attributes):
-        name = attributes['name']
-        self._curSection = PPSection(name)
-
-    def end_section(self):
-        self._curSection = None
-
-    def start_slide(self, args):
-        s = PPSlide()
-        s.id = args['id']
-        s.title = args['title']
-        if args['effectname'] <> 'None':
-            s.effectName = args['effectname']
-        s.effectDirection = string.atoi(args['effectdirection'])
-        s.effectDimension = args['effectdimension']
-        s.effectMotion = args['effectmotion']
-
-        #let it know its section, which may be none
-        s.section = self._curSection
-        self._curSlide = s
-        
-    def end_slide(self):
-        self._curPres.slides.append(self._curSlide)
-        self._curSlide = None
-
-    def start_frame(self, args):
-        self._curFrame = PPFrame(
-            string.atof(args['x']),
-            string.atof(args['y']),
-            string.atof(args['width']),
-            string.atof(args['height'])
-            )
-        self._curFrame.leftMargin = string.atof(args['leftmargin'])
-        self._curFrame.topMargin = string.atof(args['topmargin'])
-        self._curFrame.rightMargin = string.atof(args['rightmargin'])
-        self._curFrame.bottomMargin = string.atof(args['bottommargin'])
-        if args['border']=='true':
-            self._curFrame.showBoundary = 1
-
-    def end_frame(self):
-        self._curSlide.frames.append(self._curFrame)
-        self._curFrame = None
-
-    def start_para(self, args):
-        self._curPara = PPPara()
-        self._curPara.style = args['style']
-        self._curPara.bulletText = args['bullettext']
-
-    def end_para(self):
-        self._curFrame.content.append(self._curPara)
-        self._curPara = None
-
-    def start_prefmt(self, args):
-        self._curPrefmt = PPPreformattedText()
-        self._curPrefmt.style = args['style']
-
-    def end_prefmt(self):
-        self._curFrame.content.append(self._curPrefmt)
-        self._curPrefmt = None
-
-    def start_image(self, args):
-        self._curImage = PPImage()
-        self._curImage.filename = args['filename']
-        if args['width'] <> 'None':
-            self._curImage.width = string.atof(args['width'])
-        if args['height'] <> 'None':
-            self._curImage.height = string.atof(args['height'])
-        
-    def end_image(self):
-        self._curFrame.content.append(self._curImage)
-        self._curImage = None
+import stdparser 
 
 
-    ## the graphics objects - go into either the current section
-    ## or the current slide.
-    def start_fixedimage(self, args):
-        img = PPFixedImage()
-        img.filename = args['filename']
-        img.x = eval(args['x'])
-        img.y = eval(args['y'])
-        img.width = eval(args['width'])
-        img.height = eval(args['height'])
-        self._curFixedImage = img
-
-    def end_fixedimage(self):
-        if self._curSlide:
-            self._curSlide.graphics.append(self._curFixedImage)
-        elif self._curSection:
-            self._curSection.graphics.append(self._curFixedImage)
-        self._curFixedImage = None
-
-    def start_rectangle(self, args):
-        rect = PPRectangle(
-                    eval(args['x']),
-                    eval(args['y']),
-                    eval(args['width']),
-                    eval(args['height'])
-                    )
-        self._curRectangle = rect
-        self._curRectangle.fillColor = eval(args['fill'])
-        self._curRectangle.strokeColor = eval(args['stroke'])
-
-    def end_rectangle(self):
-        if self._curSlide:
-            self._curSlide.graphics.append(self._curRectangle)
-        elif self._curSection:
-            self._curSection.graphics.append(self._curRectangle)
-        self._curRectangle = None
 
 
         
@@ -453,6 +116,7 @@ class PPPresentation:
         self.description = None
         self.slides = []
         self.effectName = None
+        self.showOutline = 0   #should it be displayed when opening?
         
         #assume landscape        
         self.pageWidth = layout.DEFAULT_PAGE_SIZE[1]  
@@ -464,10 +128,18 @@ class PPPresentation:
                                 pagesize = (self.pageWidth, self.pageHeight)
                                )
         canv.setPageCompression(0)
+        canv.outlineNames = []   #HACK - not a normal attribute of a canvas, we are stashing
+                        #stuff here
             
         for slide in self.slides:
             slide.drawOn(canv)
             canv.showPage()
+
+        #draw the outline
+        if canv.outlineNames <> []:
+            apply(canv.setOutlineNames0, canv.outlineNames)
+        if self.showOutline:
+            canv.showOutline0()
         canv.save()        
 
 class PPSection:
@@ -487,6 +159,7 @@ class PPSlide:
     def __init__(self):
         self.id = None
         self.title = None
+        self.outlineEntry = None
         self.effectName = None
         self.effectDirection = 0
         self.effectDimension = 'H'
@@ -503,6 +176,14 @@ class PPSlide:
                         dimension = self.effectDimension,
                         motion = self.effectMotion
                         )
+        if self.title:
+            #put an outline entry in the left pane
+            tag = self.title
+            canv._inPage0()
+            canv.bookmarkPage0(tag)
+            canv.outlineNames.append(tag)
+            
+            
         
         if self.section:
             self.section.drawOn(canv)
@@ -563,6 +244,15 @@ class PPPara:
                     self.bulletText
                     )
 
+class PPPreformattedText:
+    """Use this for source code, or stuff you wo not want to wrap"""
+    def __init__(self):
+        self.rawtext = ''
+        self.style = None
+
+    def getDrawable(self):
+        return layout.Preformatted(self.rawtext, getStyles()[self.style])
+
 class PPImage:
     """Flowing image within the text"""
     def __init__(self):
@@ -574,33 +264,18 @@ class PPImage:
         return layout.Image(self.filename, self.width, self.height)
 
 
+
+    #############################################################
+    #
+    #   The following are things you can draw on a page directly.
+    #
+    ##############################################################
+
 class PPDrawingElement:
     """Base class for something which you draw directly on the page."""
     def drawOn(selg, canv):
         raise "NotImplementedError", "Abstract base class!"
 
-class PPRectangle:
-    def __init__(self, x, y, width, height):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.fillColor = None
-        self.strokeColor = (1,1,1)
-
-    def drawOn(self, canv):
-        canv.saveState()
-        if self.fillColor:
-            r,g,b = self.fillColor
-            canv.setFillColorRGB(r,g,b)
-        if self.strokeColor:
-            r,g,b = self.strokeColor
-            canv.setStrokeColorRGB(r,g,b)
-        canv.rect(self.x, self.y, self.width, self.height,
-                    stroke=(self.strokeColor<>None),
-                    fill = (self.fillColor<>None)
-                    )
-        canv.restoreState()
         
 class PPFixedImage(PPDrawingElement):
     """You place this on the page, rather than flowing it"""
@@ -620,17 +295,170 @@ class PPFixedImage(PPDrawingElement):
                                 self.width,
                                 self.height
                                    )
+class PPRectangle:
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.fillColor = None
+        self.strokeColor = (1,1,1)
+        self.lineWidth=0
+
+    def drawOn(self, canv):
+        canv.saveState()
+        canv.setLineWidth(self.lineWidth)
+        if self.fillColor:
+            r,g,b = self.fillColor
+            canv.setFillColorRGB(r,g,b)
+        if self.strokeColor:
+            r,g,b = self.strokeColor
+            canv.setStrokeColorRGB(r,g,b)
+        canv.rect(self.x, self.y, self.width, self.height,
+                    stroke=(self.strokeColor<>None),
+                    fill = (self.fillColor<>None)
+                    )
+        canv.restoreState()
                                    
+class PPRoundRect:
+    def __init__(self, x, y, width, height, radius):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.radius = radius
+        self.fillColor = None
+        self.strokeColor = (1,1,1)
+        self.lineWidth=0
+        
+    def drawOn(self, canv):
+        canv.saveState()
+        canv.setLineWidth(self.lineWidth)
+        if self.fillColor:
+            r,g,b = self.fillColor
+            canv.setFillColorRGB(r,g,b)
+        if self.strokeColor:
+            r,g,b = self.strokeColor
+            canv.setStrokeColorRGB(r,g,b)
+        canv.roundRect(self.x, self.y, self.width, self.height,
+                    self.radius,
+                    stroke=(self.strokeColor<>None),
+                    fill = (self.fillColor<>None)
+                    )
+        canv.restoreState()
 
-class PPPreformattedText:
-    """Use this for source code, or stuff you wo not want to wrap"""
-    def __init__(self):
-        self.rawtext = ''
-        self.style = None
+class PPLine:
+    def __init__(self, x1, y1, x2, y2):
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+        self.fillColor = None
+        self.strokeColor = (1,1,1)
+        self.lineWidth=0
+        
 
-    def getDrawable(self):
-        return layout.Preformatted(self.rawtext, getStyles()[self.style])
+    def drawOn(self, canv):
+        canv.saveState()
+        canv.setLineWidth(self.lineWidth)
+        if self.strokeColor:
+            r,g,b = self.strokeColor
+            canv.setStrokeColorRGB(r,g,b)
+        canv.line(self.x1, self.y1, self.x2, self.y2)
+        canv.restoreState()
 
+class PPEllipse:
+    def __init__(self, x1, y1, x2, y2):
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+        self.fillColor = None
+        self.strokeColor = (1,1,1)
+        self.lineWidth=0
+        
+
+    def drawOn(self, canv):
+        canv.saveState()
+        canv.setLineWidth(self.lineWidth)
+        if self.strokeColor:
+            r,g,b = self.strokeColor
+            canv.setStrokeColorRGB(r,g,b)
+        if self.fillColor:
+            r,g,b = self.fillColor
+            canv.setFillColorRGB(r,g,b)
+        canv.ellipse(self.x1, self.y1, self.x2, self.y2,
+                    stroke=(self.strokeColor<>None),
+                    fill = (self.fillColor<>None)
+                     )
+        canv.restoreState()
+
+class PPPolygon:
+    def __init__(self, pointlist):
+        self.points = pointlist
+        self.fillColor = None
+        self.strokeColor = (1,1,1)
+        self.lineWidth=0
+        
+
+    def drawOn(self, canv):
+        canv.saveState()
+        canv.setLineWidth(self.lineWidth)
+        if self.strokeColor:
+            r,g,b = self.strokeColor
+            canv.setStrokeColorRGB(r,g,b)
+
+        path = canv.beginPath()
+        (x,y) = self.points[0]
+        path.moveTo(x,y)
+        for (x,y) in self.points[1:]:
+            path.lineTo(x,y)
+        path.close()
+        canv.drawPath(path, stroke=(self.strokeColor<>None))
+        canv.restoreState()
+
+    
+class PPString:
+    def __init__(self, x, y):
+        self.text = ''
+        self.x = x
+        self.y = y
+        self.align = layout.TA_LEFT
+        self.font = 'Times-Roman'
+        self.size = 12
+        self.color = (0,0,0)
+
+    def normalizeText(self):
+        """It contains literal XML text typed over several lines.
+        We want to throw away
+        tabs, newlines and so on, and only accept embedded string
+        like '\n'"""
+        lines = string.split(self.text, '\n')
+        newtext = []
+        for line in lines:
+            newtext.append(string.strip(line))
+        #eval turns all the escape sequences into real data
+        self.text = eval(string.join(newtext, ' '))
+        
+    def drawOn(self, canv):
+        if self.color is None:
+            return
+        lines = string.split(string.strip(self.text), '\n')
+        canv.saveState()
+        canv.setFont(self.font, self.size)
+        r,g,b = self.color
+        canv.setFillColorRGB(r,g,b)
+        cur_y = self.y
+        for line in lines:
+            if self.align == layout.TA_LEFT:
+                canv.drawString(self.x, cur_y, line)
+            elif self.align == layout.TA_CENTER:
+                canv.drawCentredString(self.x, cur_y, line)
+            elif self.align == layout.TA_RIGHT:
+                canv.drawRightString(self.x, cur_y, line)
+            cur_y = cur_y - 1.2*self.size
+                
+        canv.restoreState()
 
 
 def getSampleStyleSheet():
@@ -729,13 +557,13 @@ def setStyles(newStyleSheet):
 
         
 def test():
-    p = PPMLParser()
+    p = stdparser.PPMLParser()
     p.feed(sample)
     p.getPresentation().save()
     p.close()
 
 def process(datafilename):
-    parser = PPMLParser()
+    parser = stdparser.PPMLParser()
     rawdata = open(datafilename).read()
     parser.feed(rawdata)
     pres = parser.getPresentation()
@@ -751,5 +579,12 @@ if __name__ == '__main__':
         else:
             print 'Data file not found:',datafile
     else:
-        print "Creating demo file pythonpoint.pdf"
-        test()
+        print """PythonPoint - copyright ReportLab Inc. 1999-2000
+usage:
+    pythonpoint.py my_presentation.xml
+
+To create the PythonPoint user guide, do:
+    pythonpoint.py pythonpoint.xml
+
+Read it, then look at the XML; all should be clear!"""
+        
