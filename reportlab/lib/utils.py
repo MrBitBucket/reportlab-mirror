@@ -144,19 +144,18 @@ try:
     _archivepfxlen = len(_archivepfx)
     _archivedirpfxlen = len(_archivedirpfx)
     if sys.platform=='win32':
-        def __startswith_rl(fn,_archivepfx=_archivepfx.upper(),_archivedirpfx=_archivedirpfx.upper(),_archive=_archive.upper(),_archivedir=_archivedir.upper()):
+        def __startswith_rl(fn,_archivepfx=_archivepfx.upper(),_archivedirpfx=_archivedirpfx.upper(),_archive=_archive.upper(),_archivedir=_archivedir.upper(),os_path_normpath=os.path.normpath):
             '''if the name starts with a known prefix strip it off'''
-            fn = fn.replace('/',os.sep)
-            if fn.startswith('.'+os.sep): fn = fn[1+len(os.sep):]
+            fn = os_path_normpath(fn.replace('/',os.sep))
             fnu = fn.upper()
             if fnu in (_archivedir,_archive): return 1,''
             if fnu.startswith(_archivepfx): return 1,fn[_archivepfxlen:]
             if fnu.startswith(_archivedirpfx): return 1,fn[_archivedirpfxlen:]
             return not os.path.isabs(fn),fn
     else:
-        def __startswith_rl(fn):
+        def __startswith_rl(fn,os_path_normpath=os.path.normpath):
             '''if the name starts with a known prefix strip it off'''
-            fn = fn.replace('/',os.sep)
+            fn = os_path_normpath(fn.replace('/',os.sep))
             if fn in (_archivedir,_archive): return 1,''
             if fn.startswith(_archivepfx): return 1,fn[_archivepfxlen:]
             if fn.startswith(_archivedirpfx): return 1,fn[_archivedirpfxlen:]
@@ -467,10 +466,10 @@ def rl_isfile(fn,os_path_isfile=os.path.isfile):
     fn = _startswith_rl(fn)
     return fn in __loader__._files.keys()
 
-def rl_isdir(pn,os_path_isdir=os.path.isdir):
+def rl_isdir(pn,os_path_isdir=os.path.isdir,os_path_normpath=os.path.normpath):
     if os_path_isdir(pn): return True
     if _isFSD or __loader__ is None: return False
-    pn = _startswith_rl(pn)
+    pn = os_path_normpath(pn)
     return len(filter(lambda x,pn=pn: x.startswith(pn),__loader__._files.keys()))>0
 
 def rl_get_module(name,dir):

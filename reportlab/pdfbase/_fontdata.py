@@ -90,13 +90,15 @@ else:
 def _findFNR(fontName):
     return _font2fnrMap[string.lower(fontName)]
 
-def _searchT1Dirs(n):
-    from reportlab.rl_config import T1SearchPath
+from reportlab.rl_config import T1SearchPath
+from reportlab.lib.utils import rl_isfile
+def _searchT1Dirs(n,rl_isfile=rl_isfile,T1SearchPath=T1SearchPath):
     assert T1SearchPath!=[], "No Type-1 font search path"
     for d in T1SearchPath:
         f = os.path.join(d,n)
-        if os.path.isfile(f): return f
+        if rl_isfile(f): return f
     return None
+del T1SearchPath, rl_isfile
 
 def findT1File(fontName,ext='.pfb'):
     if sys.platform in ('linux2',) and ext=='.pfb':

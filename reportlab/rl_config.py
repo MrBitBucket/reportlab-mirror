@@ -35,6 +35,7 @@ T1SearchPath =  (
                 '/usr/local/Acrobat4/Resource/Font',    #Linux, Acrobat 4
                 '%(REPORTLAB_DIR)s/fonts',              #special
                 '%(REPORTLAB_DIR)s/../fonts',           #special
+                '%(REPORTLAB_DIR)s/../../fonts',        #special
                  )
 
 # places to look for TT Font information
@@ -44,6 +45,7 @@ TTFSearchPath = (
                 '/usr/lib/X11/fonts/TrueType/',
                 '%(REPORTLAB_DIR)s/fonts',      #special
                 '%(REPORTLAB_DIR)s/../fonts',   #special
+                '%(REPORTLAB_DIR)s/../../fonts',#special
                 )
 
 # places to look for CMap files - should ideally merge with above
@@ -59,6 +61,7 @@ CMapSearchPath = ('/usr/lib/Acrobat6/Resource/CMap',
                   'C:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\CMap'
                   '%(REPORTLAB_DIR)s/fonts/CMap',       #special
                   '%(REPORTLAB_DIR)s/../fonts/CMap',    #special
+                  '%(REPORTLAB_DIR)s/../../fonts/CMap', #special
                   )
 
 #### Normally don't need to edit below here ####
