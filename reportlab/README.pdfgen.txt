@@ -18,9 +18,21 @@ Then reportlab.pdfbase, reportlab.pdfgen and reportlab.platypus are
 available packages.
 
 
+Documentation
+=============
+Execute the script reportlab/pdfgen/test/testpdfgen.py.  This will
+generate a PDF document which you can read; the script and document
+together show how to use the low-level canvas.
+
+Ditto for reportlab/platypus/test/testplatypus.py.  These show how 
+to use the high-level page flow API.  Be warned that the latter is
+subject to change.
+
+
 Existing Code
 =============
-Modifying existing code to work with the package structure:
+If you have code from before December 1999, here is how to modifying 
+it to work with the package structure:
 
 import pdfmetrics   ->  from reportlab.pdfbase import pdfmetrics
 import pdfutils     ->  from reportlab.pdfbase import pdfutils
