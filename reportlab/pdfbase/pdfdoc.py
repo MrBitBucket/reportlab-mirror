@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.45 2001/06/15 14:04:02 aaron_watters Exp $
-__version__=''' $Id: pdfdoc.py,v 1.45 2001/06/15 14:04:02 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.46 2001/07/10 00:14:04 aaron_watters Exp $
+__version__=''' $Id: pdfdoc.py,v 1.46 2001/07/10 00:14:04 aaron_watters Exp $ '''
 __doc__=""" 
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The 
@@ -28,9 +28,11 @@ class PDFError(Exception):
 
 
 # set this flag to get more vertical whitespace (and larger files)
-LongFormat = 1
-
-# XXXX stream filters need to be added
+LongFormat = 0
+##if LongFormat: (doesn't work)
+##    pass
+##else:
+##    LINEEND = "\n" # no wasteful carriage returns!
 
 # __InternalName__ is a special attribute that can only be set by the Document arbitrator
 __InternalName__ = "__InternalName__"
@@ -41,7 +43,11 @@ __RefOnly__ = "__RefOnly__"
 # __Comment__ provides a (one line) comment to inline with an object ref, if present
 #   if it is more than one line then percentize it...
 __Comment__ = "__Comment__"
+
+# If DoComments is set then add helpful (space wasting) comment lines to PDF files
 DoComments = 1
+if not LongFormat:
+    DoComments = 0
 
 # name for standard font dictionary
 BasicFonts = "BasicFonts"
@@ -97,13 +103,34 @@ def indent(s, IND=LINEEND+" "):
 def formName(externalname):
     return "FormXob.%s" % externalname
 
+# no encryption
+class NoEncryption:
+    def encode(self, t):
+        "encode a string, stream, text"
+        return t
+    def prepare(self, document):
+        # get ready to do encryption
+        pass
+    def register(self, objnum, version):
+        # enter a new direct object
+        pass
+    def info(self):
+        # the representation of self in file if any (should be None or PDFDict)
+        return None
+
+class DummyDoc:
+    "used to bypass encryption when required"
+    encrypt = NoEncryption()
+    
 ### the global document structure manager
 
 class PDFDocument:
+    _ID = None
     objectcounter = 0
     inObject = None
     # set this to define filters 
     defaultStreamFilters = None
+    encrypt = NoEncryption() # default no encryption
     pageCounter = 1
     def __init__(self, encoding=rl_config.defaultEncoding, dummyoutline=0):
         #self.defaultStreamFilters = [PDFBase85Encode, PDFZCompress] # for testing!
@@ -116,6 +143,11 @@ class PDFDocument:
             encoding = encoding + 'Encoding'
             
         self.encoding = encoding
+        # signature for creating PDF ID
+        import md5, time
+        sig = self.signature = md5.new()
+        sig.update("a reportlab document")
+        sig.update(repr(time.time())) # initialize with timestamp digest
         # mapping of internal identifier ("Page001") to PDF objectnumber and generation number (34, 0)
         self.idToObjectNumberAndVersion = {}
         # mapping of internal identifier ("Page001") to PDF object (PDFPage instance)
@@ -142,8 +174,26 @@ class PDFDocument:
         DD.__Comment__ = "The standard fonts dictionary"
         DDR = self.Reference(DD, BasicFonts)
 
+    def updateSignature(self, thing):
+        "add information to the signature"
+        if self._ID: return # but not if its used already!
+        self.signature.update(str(thing))
+        
+    def ID(self):
+        if self._ID:
+            return self._ID
+        digest = self.signature.digest()
+        doc = DummyDoc()
+        ID = PDFString(digest)
+        IDs = ID.format(doc)
+        self._ID = "%s %% ReportLab generated PDF document -- digest (http://www.reportlab.com) %s [%s %s] %s" % (
+            LINEEND, LINEEND, IDs, IDs, LINEEND)
+        return self._ID
 
     def SaveToFile(self, filename, canvas):
+        # add info stuff to signature
+        self.info.digest(self.signature)
+        ### later: maybe add more info to sig?
         # prepare outline
         self.Reference(self.Catalog)
         self.Reference(self.info)
@@ -186,7 +236,7 @@ class PDFDocument:
                 # does pdfmetrics know about it? if so, add
                 from reportlab.pdfbase import pdfmetrics                
                 fontObj = pdfmetrics.getFont(psfontname)
-                fontObj.addObjects(self)
+                fontObj.addObjects(self) 
                 #self.addFont(fontObj)
                 return fm[psfontname]
             except KeyError:
@@ -278,10 +328,17 @@ class PDFDocument:
     def format(self):
         # register the Catalog/INfo and then format the objects one by one until exhausted
         # (possible infinite loop if there is a bug that continually makes new objects/refs...)
+        # Prepare encryption
+        self.encrypt.prepare(self)
         cat = self.Catalog
         info = self.info
         self.Reference(self.Catalog)
         self.Reference(self.info)
+        # register the encryption dictionary if present
+        encryptref = None
+        encryptinfo = self.encrypt.info()
+        if encryptinfo:
+            encryptref = self.Reference(encryptinfo)
         # make std fonts (this could be made optional
         counter = 0 # start at first object (object 1 after preincrement)
         ids = [] # the collection of object ids in object number order
@@ -299,6 +356,8 @@ class PDFDocument:
                 #printidToOb
                 obj = idToOb[id]
                 IO = PDFIndirectObject(id, obj)
+                # register object number and version
+                #encrypt.register(id, 
                 IOf = IO.format(self)
                 # add a comment to the PDF output
                 if DoComments:
@@ -322,7 +381,9 @@ class PDFDocument:
             startxref = xrefoffset,
             Size = lno,
             Root = self.Reference(cat),
-            Info = self.Reference(info)
+            Info = self.Reference(info),
+            Encrypt = encryptref,
+            ID = self.ID(),
             )
         trailerf = trailer.format(self)
         File.add(trailerf)
@@ -392,29 +453,43 @@ PDFtrue = "true"
 PDFfalse = "false"
 PDFnull = "null"
 
-def PDFText(t):
-    L = list(t)
-    for i in range(len(L)):
-        ch = L[i]
-        n = ord(ch)
-        h = hex(n)
-        h2 = h[2:] # nuke the 0x
-        if len(h2)<2:
-            h2 = "0"+h2
-        L[i] = h2
-    result = string.join(L, "")
-    return "<%s>" % result
+class PDFText:
+    def __init__(self, t):
+        self.t = t
+    def format(self, document):
+        t = self.t
+        t = document.encrypt.encode(t)
+        L = list(t)
+        for i in range(len(L)):
+            ch = L[i]
+            n = ord(ch)
+            h = hex(n)
+            h2 = h[2:] # nuke the 0x
+            if len(h2)<2:
+                h2 = "0"+h2
+            L[i] = h2
+        result = string.join(L, "")
+        return "<%s>" % result
+    def __str__(self):
+        dummydoc = DummyDoc()
+        return self.format(dummydoc)
 
 def PDFnumber(n):
     return n
 
-def PDFString(str):
-    # might need to change this to class for encryption
-    return "(%s)" % pdfutils._escape(str)
+class PDFString:
+    def __init__(self, str):
+        # might need to change this to class for encryption
+        self.s = str
+    def format(self, document):
+        s = document.encrypt.encode(self.s)
+        return "(%s)" % pdfutils._escape(s)
+    def __str__(self):
+        return "(%s)" % pdfutils._escape(self.s)
     
 def PDFName(data):
     # might need to change this to class for encryption
-    #  NOTE: RESULT MUST ALWAYS SUPPORT MEANINGFUL COMPARISONS (EQUALITY)
+    #  NOTE: RESULT MUST ALWAYS SUPPORT MEANINGFUL COMPARISONS (EQUALITY) AND HASH
     # first convert the name
     ldata = list(data)
     index = 0
@@ -538,6 +613,8 @@ class PDFStream:
             #print "****** FILTERS", fnames
             #stop
             dictionary["Filter"] = PDFArray(fnames)
+        # "stream encoding is done after all filters have been applied"
+        content = document.encrypt.encode(content)
         fc = format(content, document)
         #print "type(content)", type(content), len(content), type(self.dictionary)
         lc = len(content)
@@ -606,6 +683,8 @@ class PDFIndirectObject:
     def format(self, document):
         name = self.name
         (n, v) = document.idToObjectNumberAndVersion[name]
+        # set encryption parameters
+        document.encrypt.register(n, v)
         content = self.content
         fcontent = format(content, document, toplevel=1) # yes this is at top level
         sdict = LINEENDDICT.copy()
@@ -643,6 +722,7 @@ class PDFFile:
         self.strings.append(s)
         return result
     def format(self, document):
+        strings = map(str, self.strings) # final conversion, in case of lazy objects
         return string.join(self.strings, "")
 
 XREFFMT = '%0.10d %0.5d n'    
@@ -721,7 +801,7 @@ class PDFTrailer:
             raise ValueError, "Size and Root keys required"
         dict = self.dict = PDFDictionary()
         for (n,v) in [("Size", Size), ("Prev", Prev), ("Root", Root),
-                      ("Info", Info), ("Id", ID), ("Encrypt", Encrypt)]:
+                      ("Info", Info), ("ID", ID), ("Encrypt", Encrypt)]:
             if v is not None:
                 dict[n] = v
     def format(self, document):
@@ -1184,6 +1264,10 @@ class PDFInfo:
         self.subject = "unspecified"
         #now = time.localtime(time.time())
         #self.datestr = '%04d%02d%02d%02d%02d%02d' % tuple(now[0:6])
+    def digest(self, md5object):
+        # add self information to signature
+        for x in (self.title, self.author, self.subject):
+            md5object.update(str(x))
         
     def format(self, document):
         D = {}
