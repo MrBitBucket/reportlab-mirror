@@ -32,43 +32,54 @@
 #
 ###############################################################################
 #	$Log: idle_print.py,v $
+#	Revision 1.3  2000/04/25 12:15:10  rgbecker
+#	Linux fixes
+#
 #	Revision 1.2  2000/04/21 13:15:22  rgbecker
 #	Changed to spawnve
-#
+#	
 #	Revision 1.1  2000/04/20 12:19:35  rgbecker
 #	Initial interface script for idle
 #	
-__version__=''' $Id: idle_print.py,v 1.2 2000/04/21 13:15:22 rgbecker Exp $ '''
+__version__=''' $Id: idle_print.py,v 1.3 2000/04/25 12:15:10 rgbecker Exp $ '''
 # this is a simple script to convert a specified input file to pdf
 # it should have only filename arguments; these are assumed temporary
 # and will be removed unless there's a -noremove flag.
 # you should adjust the globals below to configure for your system
 
 import sys, os, py2pdf, string, time
-#whether we remove input/output files; if you get trouble on windows try settin _out to 0
+#whether we remove input/output files; if you get trouble on windows try setting _out to 0
 auto_rm_in	= 1
 auto_rm_out = 1
 
 #formatting options to be passed to the py2pdf program. see below for others
 py2pdf_options = ['--format=pdf','--mode=color','--paperFormat=A4']
 
-#how to call up your acrobat reader, '---file---' will get changed at run time
+#how to call up your acrobat reader, will get changed at run time
 if sys.platform=='win32':
+	useSpawn = 1
 	# under win32 we can't get to a PS file so use acrord32 to come up as normal
 	acrord = 'C:\\Program Files\\Adobe\\Acrobat 4.0\\Reader\\AcroRd32.exe'
 	argstr = '%s'
 else:
+	useSpawn = 0
 	# change /opt to /usr/local if that's where you installed Acrobat4
-	# change the /dev/lp to whatever the postcript should be sent to
 	acrord = '/opt/Acrobat4/bin/acroread'
-	argstr = '-toPostScript,-pairs,%s,/dev/lp'
+	argstr = '-toPostScript'
+	filterCmd = '/usr/local/bin/myFilter'
 
 for f in sys.argv[1:]:
+	print f
 	py2pdf.main(py2pdf_options + [f])
 	if auto_rm_in: os.remove(f)
 	pdfname = os.path.splitext(f)[0]+'.pdf'
-	args = [acrord] + string.split(argstr%pdfname,',')
-	os.spawnve(os.P_WAIT,args[0],args,os.environ)
+	if useSpawn:
+		args = [acrord] + string.split(argstr%pdfname,',')
+		print args, os.spawnve(os.P_WAIT,args[0],args,os.environ)
+	else:
+		cmd = "cat %s | %s %s | %s" % (pdfname,acrord,argstr,filterCmd)
+		os.system(cmd)
+
 	if auto_rm_out: os.remove(pdfname)
 
 #########################################################################
