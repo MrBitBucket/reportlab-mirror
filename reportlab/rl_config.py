@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.25 2001/10/03 19:00:02 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.26 2001/10/05 00:23:26 andy_robinson Exp $
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =				1
@@ -11,7 +11,7 @@ defaultPageSize =			'A4'					#default page size
 defaultImageCaching =		0						#set to zero to remove those annoying cached images
 PIL_WARNINGS =				1						#set to zero to remove those annoying warnings
 ZLIB_WARNINGS =				1						
-warnOnMissingFontGlyphs =	1						#if 1, warns of each missing glyph
+warnOnMissingFontGlyphs =	0						#if 1, warns of each missing glyph
 _verbose =					0
 showBoundary =				0						# turns on and off boundary behaviour in Drawing
 
@@ -21,7 +21,9 @@ T1SearchPath =	('c:/Program Files/Adobe/Acrobat 4.0/Resource/Font', #Win32
 				'%(disk)s/Applications/Python %(sys_version)s/reportlab/fonts', #Mac?
 				'/usr/lib/Acrobat4/Resource/Font', #Linux
 				'/usr/lib/Acrobat5/Resource/Font', #Linux, Acrobat 5?
-				'%(REPORTLAB_DIR)s/lib/fontDir', #special
+				'%(REPORTLAB_DIR)s/test', #special
+				'%(REPORTLAB_DIR)s/fonts', #special
+				'%(REPORTLAB_DIR)s/lib/fontDir' #special
 				)
 
 # places to look for CMap files - should ideally merge with above
@@ -30,7 +32,6 @@ CMapSearchPath = ('/usr/local/Acrobat4/Resource/CMap',
 				'C:\\Program Files\\Adobe\\Acrobat 5.0\\Resource\\CMap',
 				'C:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\CMap'
 				)
-
 
 #### Normally don't need to edit below here ####
 import os, sys, string

@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.8 2001/10/04 21:22:26 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.9 2001/10/05 00:23:26 andy_robinson Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -1032,10 +1032,10 @@ def main():
 
 def makeSuite():
     "standard test harness support - run self as separate process"
-    from reportlab.test.unittest import TestSuite
     from reportlab.test.utils import ScriptThatMakesFileTest
-    test = ScriptThatMakesFileTest('tools/docco','graphdocpy.py','reportlab.graphics.pdf')
-    return TestSuite((test,))
+    return ScriptThatMakesFileTest('tools/docco',
+                                   'graphdocpy.py',
+                                   'reportlab.graphics.pdf')
 
 if __name__ == '__main__':
     main()

@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.45 2001/09/03 14:06:14 andy_robinson Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.46 2001/10/05 00:23:26 andy_robinson Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -148,16 +148,45 @@ class TypeFace:
 
     def findT1File(self,ext='.pfb'):
         if hasattr(self,'pfbFileName'):
-            r = self.splitext(self.pfbFileName)[0] + ext
+            r = os.path.splitext(self.pfbFileName)[0] + ext
             if os.path.isfile(r): return r
         try:
             r = _fontdata.findT1File(self.name)
         except:
-            r = None
+            afm = bruteForceSearchForAFM(self.name)
+            if afm:
+                if ext == '.pfb':
+                    pfb = os.path.splitext(afm)[0] + 'pfb'
+                    if os.path.isfile(pfb):
+                        r = pfb
+                    else:
+                        r = None
+                elif ext == '.afm':
+                    r = afm
+            else:
+                r = None
         if r is None:
             warnOnce("Can't find %s for face '%s'" % (ext, self.name))
         return r
 
+def bruteForceSearchForAFM(faceName):
+    """Looks in all AFM files on path for face with given name.
+
+    Returns AFM file name or None.  Ouch!"""
+    import glob
+    from reportlab.rl_config import T1SearchPath
+
+    for dirname in T1SearchPath:
+        if not os.path.isdir(dirname):
+            continue
+        possibles = glob.glob(dirname + os.sep + '*.AFM')
+        for possible in possibles:
+            (topDict, glyphDict) = parseAFMFile(possible)
+            if topDict['FontName'] == faceName:
+                return possible
+    return None
+            
+        
 
 #for faceName in standardFonts:
 #    registerTypeFace(TypeFace(faceName))
@@ -517,7 +546,16 @@ def getTypeFace(faceName):
             #print 'auto-constructing type face %s' % face.name
             return face
         else:
-            raise
+            #try a brute force search
+            afm = bruteForceSearchForAFM(faceName)
+            if afm:
+                pfb = os.path.splitext(afm)[0] + '.pfb'
+                assert os.path.isfile(pfb), 'file %s not found!' % pfb
+                face = EmbeddedType1Face(afm, pfb)
+                registerTypeFace(face)
+                return face
+            else:
+                raise
 
 def getEncoding(encName):
     """Lazily construct known encodings if not found"""
