@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/barcharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.37 2001/09/14 08:27:25 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/barcharts.py,v 1.38 2001/09/14 08:29:30 rgbecker Exp $
 """This module defines a variety of Bar Chart components.
 
 The basic flavors are Side-by-side, available in horizontal and
@@ -179,7 +179,7 @@ class BarChart(Widget):
 	def _findMinMaxValues(self):
 		"Find the minimum and maximum value of the data we have."
 		D = map(lambda x: map(lambda x: x is not None and x or 0,x),self.data)
-		return min(min(D)), max(max(D))
+		return min(map(min,D)), max(map(max,D))
 
 	def makeBackground(self):
 		g = Group()
