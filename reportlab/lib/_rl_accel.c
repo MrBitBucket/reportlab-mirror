@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.20 2001/07/23 11:41:13 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.21 2001/09/05 11:14:45 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.20 2001/07/23 11:41:13 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.21 2001/09/05 11:14:45 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -341,16 +341,18 @@ PyObject *_a85_encode(PyObject *self, PyObject *args)
 				block -= res * _a85_nums[j];
 				}
 		}
-	
-	block = 0L;
 
-	for (i=0; i<extra; i++)
-		block += (unsigned long)inData[length-extra+i] << (24-8*i);
+	if(extra>0){
+		block = 0L;
 
-	for (j=4; j>=4-extra; j--){
-		res = block / _a85_nums[j];
-		buf[k++] = (char)(res+33);
-		block -= res * _a85_nums[j];
+		for (i=0; i<extra; i++)
+			block += (unsigned long)inData[length-extra+i] << (24-8*i);
+
+		for (j=4; j>=4-extra; j--){
+			res = block / _a85_nums[j];
+			buf[k++] = (char)(res+33);
+			block -= res * _a85_nums[j];
+			}
 		}
 
 	buf[k++] = '~';
