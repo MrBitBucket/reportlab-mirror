@@ -105,6 +105,7 @@ class XPreformatted(Paragraph):
 				maxSize = 0
 				currentWidth = 0
 				words = []
+				first = 1
 				for w in _getFragWords(L):
 					spaceWidth = stringWidth(' ',w[-1][0].fontName, w[-1][0].fontSize)
 					if not n: currentWidth = -spaceWidth	# hack to get around extra space for word 1
@@ -118,11 +119,17 @@ class XPreformatted(Paragraph):
 						words = [f.clone()]
 						words[-1].text = nText
 					elif not _sameFrag(words[-1],f):
-						words[-1].text = words[-1].text + ' ' 
+						ok = nText!='' and nText[0]!=' '
+						if first or ok:
+							words[-1].text = words[-1].text + ' '
+							if first and ok: first=0
 						words.append(f.clone())
 						words[-1].text = nText
 					else:
-						words[-1].text = words[-1].text + ' ' + nText
+						ok = nText!='' and nText[0]!=' '
+						if first or ok:
+							words[-1].text = words[-1].text + ' ' + nText
+							if first and ok: first=0
 
 					for i in w[2:]:
 						f = i[0].clone()
@@ -215,7 +222,7 @@ and better control when printed.
 
    This is a non rearranging form of the <b>Paragraph</b> class;
    <b><font color=red>XML</font></b> tags are allowed in <i>text</i> and have the same
-   
+
       meanings as for the <b>Paragraph</b> class.
    As for <b>Preformatted</b>, if dedent is non zero <font color=red size=+1>dedent</font>
        common leading spaces will be removed from the

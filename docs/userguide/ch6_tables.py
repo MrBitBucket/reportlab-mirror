@@ -286,6 +286,7 @@ text='''
    As for <b>Preformatted</b>, if dedent is non zero <font color=red size=+1>dedent</font>
        common leading spaces will be removed from the
    front of each line.
+   You can have &amp;amp; style entities as well for &amp; &lt; &gt; and &quot;.
 
 '''
 t=XPreformatted(text,normalStyle,dedent=3)

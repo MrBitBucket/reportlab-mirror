@@ -16,8 +16,8 @@
 # copyright notice and this permission notice appear in supporting
 # documentation, and that the name of ReportLab not be used
 # in advertising or publicity pertaining to distribution of the software
-# without specific, written prior permission. 
-# 
+# without specific, written prior permission.
+#
 #
 # Disclaimer
 #
@@ -27,13 +27,16 @@
 # OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
 # OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 # OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-# PERFORMANCE OF THIS SOFTWARE. 
+# PERFORMANCE OF THIS SOFTWARE.
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.21  2000/08/25 11:35:37  rgbecker
+#	Further tweaks of XPreformatted
+#
 #	Revision 1.20  2000/08/24 18:21:47  rgbecker
 #	XPreformatted fixed empty lines and leading space
-#
+#	
 #	Revision 1.19  2000/08/23 13:58:28  rgbecker
 #	Preparing for cleanup
 #	
@@ -92,7 +95,7 @@
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.20 2000/08/24 18:21:47 rgbecker Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.21 2000/08/25 11:35:37 rgbecker Exp $ '''
 import string
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -467,7 +470,7 @@ class Paragraph(Flowable):
 						words[-1].text = nText
 					elif not _sameFrag(words[-1],f):
 						if nText!='' and nText[0]!=' ':
-							words[-1].text = words[-1].text + ' ' 
+							words[-1].text = words[-1].text + ' '
 						words.append(f.clone())
 						words[-1].text = nText
 					else:
