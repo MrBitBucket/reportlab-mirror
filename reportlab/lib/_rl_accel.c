@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.10 2001/03/21 18:58:37 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.11 2001/03/22 00:23:38 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.10 2001/03/21 18:58:37 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.11 2001/03/22 00:23:38 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -416,7 +416,7 @@ PyObject *_fp_str(PyObject *self, PyObject *args)
 		}
 }
 
-static PyTypeObject AttrDictType = {
+static PyTypeObject _AttrDictType = {
 	PyObject_HEAD_INIT(0)
 	0,								/*ob_size*/
 	0,								/*tp_name*/
@@ -441,65 +441,66 @@ static PyTypeObject AttrDictType = {
 	/* Documentation string */
 	NULL
 };
-static char* AttrDict_tp_doc=
-	"AttrDict instance\n\
+static char* _AttrDict_tp_doc=
+	"_AttrDict instance\n\
 \n\
 ";
 
 static getattrfunc dict_getattr;
-static	PyObject *AttrDict_getattr(PyObject* self, char* name)
+static	PyObject *_AttrDict_getattr(PyObject* self, char* name)
 {
 	PyObject* r;
 	self->ob_type=&PyDict_Type;
 	r = PyDict_GetItemString(self,name);
 	if(!r) r = dict_getattr(self,name);
-	self->ob_type=&AttrDictType;
+	self->ob_type=&_AttrDictType;
 	return r;
 }
 
-static int AttrDict_setattr(PyObject* self, char *name, PyObject* value)
+static int _AttrDict_setattr(PyObject* self, char *name, PyObject* value)
 {
 	int	r;
 	self->ob_type=&PyDict_Type;
 	r = PyDict_SetItemString(self,name,value);
-	self->ob_type=&AttrDictType;
+	self->ob_type=&_AttrDictType;
 	return r;
 }
 
-static PyObject *AttrDict(PyObject *self, PyObject *args)
+static PyObject *_AttrDict(PyObject *self, PyObject *args)
 {
 	PyObject *r;
-	if (!PyArg_ParseTuple(args, ":AttrDict")) return NULL;
+	if (!PyArg_NoArgs(args)) return NULL;
+
 	r = PyDict_New();
 	if(!r) return NULL;
-	r->ob_type = &AttrDictType;
+	r->ob_type = &_AttrDictType;
 	return r;
 }
 
 static binaryfunc dict_subscript;
 static objobjargproc dict_ass_sub;
-static PyObject * AttrDict_subscript(PyObject *self, register PyObject *key)
+static PyObject * _AttrDict_subscript(PyObject *self, register PyObject *key)
 {
 	PyObject* r;
 	self->ob_type=&PyDict_Type;
 	r = dict_subscript(self,key);
-	self->ob_type=&AttrDictType;
+	self->ob_type=&_AttrDictType;
 	return r;
 }
 
-static int AttrDict_ass_sub(PyObject *self, PyObject *v, PyObject *w)
+static int _AttrDict_ass_sub(PyObject *self, PyObject *v, PyObject *w)
 {
 	int r;
 	self->ob_type=&PyDict_Type;
 	r = dict_ass_sub(self,v,w);
-	self->ob_type=&AttrDictType;
+	self->ob_type=&_AttrDictType;
 	return r;
 }
 
-static PyMappingMethods AttrDict_as_mapping = {
+static PyMappingMethods _AttrDict_as_mapping = {
 	(inquiry)0, /*mp_length*/
-	(binaryfunc)AttrDict_subscript, /*mp_subscript*/
-	(objobjargproc)AttrDict_ass_sub, /*mp_ass_subscript*/
+	(binaryfunc)_AttrDict_subscript, /*mp_subscript*/
+	(objobjargproc)_AttrDict_ass_sub, /*mp_ass_subscript*/
 };
 
 static char *__doc__=
@@ -513,7 +514,7 @@ static char *__doc__=
 	_AsciiBase85Encode does what is says\n\
 	\n\
 	fp_str converts numeric arguments to a single blank separated string\n\
-	AttrDict creates a dict object which can do setattr/getattr type things\n\
+	_AttrDict creates a dict object which can do setattr/getattr type things\n\
 ";
 
 static struct PyMethodDef _methods[] = {
@@ -529,7 +530,7 @@ static struct PyMethodDef _methods[] = {
 					"return None to retry or the correct result."},
 	{"_AsciiBase85Encode", _a85_encode, METH_VARARGS, "_AsciiBase85Encode(\".....\") return encoded string"},
 	{"fp_str", _fp_str, METH_VARARGS, "fp_str(a0, a1,...) convert numerics to blank separated string"},
-	{"AttrDict", AttrDict, METH_VARARGS, "AttrDict() create a dict which can use attribute notation"},
+	{"_AttrDict", _AttrDict, METH_VARARGS, "_AttrDict() create a dict which can use attribute notation"},
 	{NULL,		NULL}		/* sentinel */
 	};
 
@@ -540,16 +541,16 @@ void init_rl_accel()
 	int i=0;
 
 	/*set up our modified dictionary type*/
-	AttrDictType = PyDict_Type;
-	AttrDictType.tp_doc = AttrDict_tp_doc;
-	AttrDictType.tp_name = "AttrDict";
-	dict_getattr = AttrDictType.tp_getattr;
-	AttrDictType.tp_getattr = AttrDict_getattr;
-	AttrDictType.tp_setattr = AttrDict_setattr;
-	AttrDict_as_mapping.mp_length = AttrDictType.tp_as_mapping->mp_length;
-	dict_subscript = AttrDictType.tp_as_mapping->mp_subscript;
-	dict_ass_sub = AttrDictType.tp_as_mapping->mp_ass_subscript;
-	AttrDictType.tp_as_mapping = &AttrDict_as_mapping;
+	_AttrDictType = PyDict_Type;
+	_AttrDictType.tp_doc = _AttrDict_tp_doc;
+	_AttrDictType.tp_name = "_AttrDict";
+	dict_getattr = _AttrDictType.tp_getattr;
+	_AttrDictType.tp_getattr = _AttrDict_getattr;
+	_AttrDictType.tp_setattr = _AttrDict_setattr;
+	_AttrDict_as_mapping.mp_length = _AttrDictType.tp_as_mapping->mp_length;
+	dict_subscript = _AttrDictType.tp_as_mapping->mp_subscript;
+	dict_ass_sub = _AttrDictType.tp_as_mapping->mp_ass_subscript;
+	_AttrDictType.tp_as_mapping = &_AttrDict_as_mapping;
 
 	/*Create the module and add the functions */
 	m = Py_InitModule("_rl_accel", _methods);
