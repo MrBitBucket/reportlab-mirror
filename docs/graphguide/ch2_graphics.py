@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.7 2001/03/30 17:05:23 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.8 2001/03/30 17:29:59 dinu_gherman Exp $
 
 from gengraphguide import *
 
@@ -52,12 +52,12 @@ heading2("Coordinate System")
 
 disc("""
 The Y-direction in our X-Y coordinate system points from the
-bottom <em>up</em>.
+bottom <i>up</i>.
 This is consistent with PDF, Postscript and mathematical notation.
 It also appears to be more natural for people, especially when 
 working with charts.
 Note that in other graphics models (such as SVG) the Y-coordinate
-points <em>down</em>.
+points <i>down</i>.
 
 The X-coordinate points, as usual, from left to right.
 So far there doesn't seem to be any model advocating the opposite
@@ -184,7 +184,7 @@ eg("""
 """)
 
 disc("""
-Once you turn off shapeChecking, the classes are actually built 
+Once you turn off $shapeChecking$, the classes are actually built 
 without the verification hook; code should get faster, then.
 Currently the penalty seems to be about 25% on batches of charts,
 so it is hardly worth disabling.
@@ -329,7 +329,7 @@ bullet("Path (<i>not implemented yet, but will be added in the future</i>)")
 disc("""
 The following drawing, taken from our test suite, shows most of the
 basic shapes (except for groups).
-Those with a filled purple surface are also called <em>solid shapes</em>
+Those with a filled purple surface are also called <i>solid shapes</i>
 (these are $Rect$, $Circle$, $Ellipse$, $Wedge$ and $Polygon$).
 """)
 
@@ -715,7 +715,7 @@ eg("""
 >>> import reportlab.lib.colors 
 >>> import reportlab.graphics.shapes 
 >>> import reportlab.graphics.renderPDF
->>> d = shapes.Drawing(400, 200)
+>>> d = shapes.Drawing(200, 100)
 >>> f = widgetbase.Face()
 >>> f.skinColor = colors.yellow
 >>> f.mood = "sad"
@@ -734,8 +734,8 @@ d.add(f)
 draw(d, 'A sample widget')
 
 disc("""
-Let's see what properties it has available, using the setProperties 
-interface we saw earlier:
+Let's see what properties it has available, using the $setProperties()$ 
+method we have seen earlier:
 """)
 
 eg("""
@@ -749,31 +749,56 @@ y = 10
 >>>
 """)
 
-disc("""One thing which seems strange about the above code is that we did not 
-       set the size or position when we made the face. This is a necessary 
-       trade-off to allow a uniform interface for constructing widgets and 
-       documenting them - they cannot require arguments in their __init__ 
-       method. Instead, they are generally designed to fit in a 200 x 100 
-       window, and you move or resize them by setting properties such as
-       x, y, width and so on after creation.""")
+disc("""
+One thing which seems strange about the above code is that we did not 
+set the size or position when we made the face.
+This is a necessary trade-off to allow a uniform interface for
+constructing widgets and documenting them - they cannot require
+arguments in their $__init__()$ method.
+Instead, they are generally designed to fit in a 200 x 100 
+window, and you move or resize them by setting properties such as
+x, y, width and so on after creation.
+""")
 
-disc("""In addition, a widget always provides a $demo()$ method. Simple ones 
-       like this always do something sensible before setting properties, but 
-       more complex ones like a chart would not have any data to plot. The 
-       documentation tool calls $demo()$ so that your fancy new chart class can 
-       create a drawing showing what it can do.""")
+disc("""
+In addition, a widget always provides a $demo()$ method.
+Simple ones like this always do something sensible before setting
+properties, but more complex ones like a chart would not have any
+data to plot.
+The documentation tool calls $demo()$ so that your fancy new chart
+class can create a drawing showing what it can do.
+""")
 
-disc("""Here are a handful of simple widgets available in the module 
-       <i>signsandsymbols.py</i>:""")
+disc("""
+Here are a handful of simple widgets available in the module 
+<i>signsandsymbols.py</i>:
+""")
 
-# Hack to force a new paragraph before the todo() :-(
-disc("")
+from reportlab.graphics.widgets import signsandsymbols
+d = Drawing(230, 230)
 
-todo("add image")
-# This doesn't work - thes test method writes to a pdf file.
-##from reportlab.graphics.widgets import signsandsymbols
-##t=signsandsymbols.test()
-##draw(t, "Examples of widgets from 'signsandsymbols.py'")
+ne = signsandsymbols.NoEntry0()
+ne.x=10
+ne.y=10
+
+ds = signsandsymbols.DangerSign0()
+ds.x=120
+ds.y=10
+
+fd = signsandsymbols.FloppyDisk0()
+fd.x=10
+fd.y=120
+
+ns = signsandsymbols.NoSmoking0()
+ns.x=120
+ns.y=120
+
+d.add(ne)
+d.add(ds)
+d.add(fd)
+d.add(ns)
+
+draw(d, 'A few samples from signsandsymbols.py')
 
 
 heading2("Compound Widgets")
