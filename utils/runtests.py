@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: runtests.py,v $
+#	Revision 1.5  2000/04/03 09:29:36  rgbecker
+#	Eliminated -dir option
+#
 #	Revision 1.4  2000/03/02 12:22:28  rgbecker
 #	Added recognition comment checks
-#
+#	
 #	Revision 1.3  2000/03/02 10:43:37  rgbecker
 #	Fixed problem with -dir relativepath
 #	
@@ -45,7 +48,7 @@
 #	New infrastructure
 #	
 #	
-__version__=''' $Id: runtests.py,v 1.4 2000/03/02 12:22:28 rgbecker Exp $ '''
+__version__=''' $Id: runtests.py,v 1.5 2000/04/03 09:29:36 rgbecker Exp $ '''
 '''
 script for testing ReportLab
 '''
@@ -140,11 +143,11 @@ if __name__=='__main__':
 		f.write(\
 '''
 Usage
-    python runtests.py [options]
+    python runtests.py [dir] [options]
 
     option
+    dir             directory to test default .
     -help           print this message and exit
-    -dir path       directory to test default /tmp/reportlab_test/reportlab
     -cycles[=flags] check for cycles using Tim Peter's Cyclops cycle finder
                     flags=s(tats), a(rcs), C(omponents), c(ycles), o(bjects)
     -notest         don't carry out tests
@@ -153,11 +156,15 @@ Usage
 ''')
 		sys.exit(code)
 
-	dir=_testdir
-	dflag = 0
+	dir='.'
 	cyc = None
 	options = sys.argv[1:]
 	sys.argv[1:]=[]
+
+	if options!=[] and options[0][0]!='-':
+		dir = options[0][0]
+		del options[0]
+
 	for k in options:
 		if '=' in k:
 			i, cyc = string.split(k,'=')
@@ -167,18 +174,9 @@ Usage
 					usage(code=1,msg="Bad cycles option '%s'"%i)
 		elif k=='-cycles': cyc = 'sc'
 		if k not in legal_options:
-			if dflag:
-				dir = k
-				dflag = 0
-			else:
-				usage(code=1,msg="unknown option '%s'" % k)
-		else:
-			dflag = k=='-dir'
+			usage(code=1,msg="unknown option '%s'" % k)
 
 	dir = os.path.normcase(os.path.normpath(dir))
-	if not os.path.isdir(dir):
-		usage(code=1,msg='-dir needs a directory')
-
 	if not os.path.isabs(dir): #abspath not available under 1.5.1
 		dir = os.path.join(os.getcwd(),dir)
 	if not os.path.isdir(dir):
