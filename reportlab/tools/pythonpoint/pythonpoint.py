@@ -921,6 +921,11 @@ class PPString:
 
         canv.restoreState()
 
+class PPDrawing:
+    def __init__(self):
+        self.drawing = None
+    def getFlowable(self):
+        return self.drawing
 
 def getSampleStyleSheet():
     from reportlab.tools.pythonpoint.styles.standard import getParagraphStyles
