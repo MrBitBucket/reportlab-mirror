@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.35  2000/06/20 13:41:25  rgbecker
+#	Fixed miss assign to opp
+#
 #	Revision 1.34  2000/06/20 11:50:36  rgbecker
 #	Fix htmldir moves (ie copy)
-#
+#	
 #	Revision 1.33  2000/06/20 11:43:51  rgbecker
 #	Chanded do_exec, added htmldir moves etc
 #	
@@ -134,7 +137,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.34 2000/06/20 11:50:36 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.35 2000/06/20 13:41:25 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -241,6 +244,7 @@ def cvs_checkout(d):
 				opp = os.environ['PYTHONPATH']
 				os.environ['PYTHONPATH']='%s:%s' % (d,opp)
 			else:
+				opp = None
 				os.environ['PYTHONPATH']=d
 
 			os.chdir('docs/reference')
