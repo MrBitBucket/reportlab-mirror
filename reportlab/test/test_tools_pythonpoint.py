@@ -1,8 +1,16 @@
 """Tests for the (soon to be) reportlab.tools.pythonpoint package.
 """
-import os, sys
+import os, sys, string
 from reportlab.test import unittest
 from reportlab.test.utils import SecureTestCase
+
+if sys.platform == 'win32':
+	def _quote(*args):
+		fmt = max(map(lambda s: len(string.split(s)), args))>1 and '"%s"' or '%s'
+		return fmt % string.join(map(lambda s: len(string.split(s))>1 and '"%s"' % s or s, args),' ')
+else:
+	def _quote(*args):
+		return string.join(args,' ')
 
 class PythonPointTestCase(SecureTestCase):
     "Some very crude tests on PythonPoint."
@@ -24,9 +32,10 @@ class PythonPointTestCase(SecureTestCase):
             pass
 
         if os.path.isfile(pp):
-            os.system("%s %s %s %s" % (sys.executable,pp,xml, quiet))
+            os.system(_quote(sys.executable,pp,xml, quiet))
         elif os.path.isfile(exe):
-            os.system("%s %s %s" % (exe,xml, quiet))
+            print _quote(exe,xml,quiet)
+            os.system(_quote(exe,xml,quiet))
 
         assert os.path.exists(pdf)
 
