@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.83 2002/11/27 20:19:24 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.84 2003/01/14 19:10:31 rgbecker Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.83 2002/11/27 20:19:24 rgbecker Exp $ '''
+__version__=''' $Id: shapes.py,v 1.84 2003/01/14 19:10:31 rgbecker Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -326,6 +326,7 @@ class Group(Shape):
         if hasattr(obj,'transform'): obj.transform = self.transform[:]
 
         self_contents = self.contents
+        a = obj.contents.append
         for child in self_contents:
             if isinstance(child, UserNode):
                 newChild = child.provideNode()
@@ -333,7 +334,7 @@ class Group(Shape):
                 newChild = child.expandUserNodes()
             else:
                 newChild = child.copy()
-            obj.contents.append(newChild)
+            a(newChild)
 
         self._copyNamedContents(obj)
         return obj
@@ -367,9 +368,9 @@ class Group(Shape):
         self_contents = self.contents
         if not aKeys: aKeys = self._attrMap.keys()
         for (k, v) in self.__dict__.items():
-            if k in self_contents:
+            if v in self_contents:
                 pos = self_contents.index(v)
-                setattr(obj, oldKey, obj.contents[pos])
+                setattr(obj, k, obj.contents[pos])
             elif k in aKeys and k not in noCopy:
                 setattr(obj, k, copy(v))
 
