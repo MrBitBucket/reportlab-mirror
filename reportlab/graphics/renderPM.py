@@ -210,7 +210,10 @@ def _setFont(gs,fontName,fontSize):
         #here's where we try to add a font to the canvas
         try:
             f = getFont(fontName)
-            _renderPM.makeT1Font(fontName,f.face.findT1File(),f.encoding.vector,open_and_read)
+            if _renderPM._version<='0.98':  #added reader arg in 0.99
+                _renderPM.makeT1Font(fontName,f.face.findT1File(),f.encoding.vector)
+            else:
+                _renderPM.makeT1Font(fontName,f.face.findT1File(),f.encoding.vector,open_and_read)
         except:
             s1, s2 = map(str,sys.exc_info()[:2])
             raise RenderPMError, "Can't setFont(%s) missing the T1 files?\nOriginally %s: %s" % (fontName,s1,s2)
