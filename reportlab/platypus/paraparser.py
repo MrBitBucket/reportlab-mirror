@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.44 2001/08/22 20:35:25 aaron_watters Exp $
-__version__=''' $Id: paraparser.py,v 1.44 2001/08/22 20:35:25 aaron_watters Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.45 2001/08/23 08:38:58 rgbecker Exp $
+__version__=''' $Id: paraparser.py,v 1.45 2001/08/23 08:38:58 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -13,9 +13,7 @@ import copy
 import reportlab.lib.sequencer
 from reportlab.lib.abag import ABag
 from reportlab.lib.utils import _checkImportError
-#try:
-#	from xml.parsers import xmllib
-#	_xmllib_newStyle = 1
+
 try:
 	from reportlab.lib import xmllib
 	_xmllib_newStyle = 1
@@ -286,7 +284,6 @@ class ParaParser(xmllib.XMLParser):
 			frag.textColor = hasattr(style,'bulletColor') and style.bulletColor or style.textColor
 		else:
 			frag.fontName, frag.bold, frag.italic = ps2tt(style.fontName)
-			#print "content-type: text/html";print; print frag.fontName, frag.bold, frag.italic, "<br>"
 			frag.fontSize = style.fontSize
 			frag.textColor = style.textColor
 		return frag
@@ -474,10 +471,7 @@ class ParaParser(xmllib.XMLParser):
 			if frag.greek: frag.fontName = 'symbol'
 
 		# bold, italic, and underline
-		#print "content-type: text/html"; print; print "0ld frag.fontName, frag.bold, frag.italic", (frag.fontName, frag.bold, frag.italic)
 		x = frag.fontName = tt2ps(frag.fontName,frag.bold,frag.italic)
-		#from reportlab.lib import fonts; from pprint import pprint; print "<pre>"; pprint(fonts._tt2ps_map); print "</pre>"
-		#print "new frag.fontName", frag.fontName, x, "<br>"
 
 		#save our data
 		frag.text = data
