@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.28 2001/07/02 16:50:53 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.29 2002/01/28 12:34:37 rgbecker Exp $
 import string
 
 from reportlab.graphics import shapes
@@ -186,11 +186,18 @@ class TypedPropertyCollection(PropHolder):
 						try:
 							return self.__class__.__bases__[0].__getattr__(self,name)
 						except:
+							if self._index and self._parent._children.has_key(self._index):
+								if self._parent._children[self._index].__dict__.has_key(name):
+									return getattr(self._parent._children[self._index],name)
 							return getattr(self._parent,name)
 				_ItemWrapper[Klass] = WKlass
 
 			child = WKlass()
 			child._parent = self
+			if type(index) in (type(()),type([])) and len(index)>1:
+				child._index = index[:-1]
+			else:
+				child._index = None
 			for i in filter(lambda x,K=child.__dict__.keys(): x in K,child._attrMap.keys()):
 				del child.__dict__[i]
 
