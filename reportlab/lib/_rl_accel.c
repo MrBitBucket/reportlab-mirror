@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.27 2002/03/18 14:23:31 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.28 2002/10/19 18:06:07 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.27 2002/03/18 14:23:31 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.28 2002/10/19 18:06:07 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -89,7 +89,7 @@ static PyObject *_pdfmetrics__SWRecover(PyObject* dummy, PyObject* args)
 				PyErr_SetString(PyExc_TypeError, "parameter must be callable");
 				return NULL;
 				}
-			Py_INCREF(temp);         			/* Add a reference to new callback */
+			Py_INCREF(temp);					/* Add a reference to new callback */
 			Py_XDECREF(_SWRecover);	/* Dispose of previous callback */
 			_SWRecover = temp;				/* Remember new callback */
 			}
@@ -148,7 +148,7 @@ badSeq:	PyErr_SetString(ErrorObject,"widths should be a length 256 sequence of i
 		Encodings = e;
 		f = NULL;
 		}
-	else 
+	else
 		f = find_font(fontName,e->fonts);
 
 	if(!f){
@@ -308,11 +308,11 @@ L2:	Py_DECREF(pfontName);
 	return Py_BuildValue("f",0.001*fontSize*w);
 }
 
-#define a85_0          1L
-#define a85_1          85L
-#define a85_2        7225L
-#define a85_3      614125L
-#define a85_4    52200625L
+#define a85_0		   1L
+#define a85_1		   85L
+#define a85_2		 7225L
+#define a85_3	   614125L
+#define a85_4	 52200625L
 
 PyObject *_a85_encode(PyObject *self, PyObject *args)
 {
@@ -353,11 +353,11 @@ PyObject *_a85_encode(PyObject *self, PyObject *args)
 
 			res = block / a85_1;
 			buf[k++] = (char)(res+33);
-			
+
 			buf[k++] = (char)(block-res*a85_1+33);
 			}
 		}
-	
+
 	if(extra>0){
 		block = 0L;
 
@@ -485,7 +485,7 @@ static PyTypeObject _AttrDictType = {
 	0,								/*tp_hash*/
 	0,								/*tp_call*/
 	0,								/*tp_str*/
-	
+
 	/* Space for future expansion */
 	0L,0L,0L,0L,
 	/* Documentation string */
@@ -659,14 +659,49 @@ L1:			return NULL;
 L0:	return PyInt_FromLong((long)r);
 }
 
+static PyObject *ttfonts_calcChecksum(PyObject *self, PyObject* args)
+{
+	unsigned char	*data;
+	int				dataLen;
+	unsigned long	Sum = 0L;
+	unsigned char	*EndPtr;
+	unsigned long n;
+	int leftover;
+
+
+	if (!PyArg_ParseTuple(args, "s#:calcChecksum", &data, &dataLen)) return NULL;
+	EndPtr = data + (dataLen & ~3);
+
+	/*full ULONGs*/
+	while(data < EndPtr){
+		n = ((*data++) << 24);
+		n += ((*data++) << 16);
+		n += ((*data++) << 8);
+		n += ((*data++));
+		Sum += n;
+		}
+
+	/*pad with zeros*/
+	leftover = dataLen & 3;
+	if(leftover){
+		n = ((*data++) << 24);
+		if (leftover>1) n += ((*data++) << 16);
+		if (leftover>2) n += ((*data++) << 8);
+		Sum += n;
+		}
+
+	return PyInt_FromLong(Sum);
+}
+
+
 static char *__doc__=
 "_rl_accel contains various accelerated utilities\n\
-    stringWidth a fast string width function\n\
+	stringWidth a fast string width function\n\
 	_instanceStringWidth a method version of stringWidth\n\
-    defaultEncoding gets/sets the default encoding for stringWidth\n\
-    getFontInfo gets font info from the internal table\n\
-    setFontInfo adds a font to the internal table\n\
-    _SWRecover gets/sets a callback for stringWidth recovery\n\
+	defaultEncoding gets/sets the default encoding for stringWidth\n\
+	getFontInfo gets font info from the internal table\n\
+	setFontInfo adds a font to the internal table\n\
+	_SWRecover gets/sets a callback for stringWidth recovery\n\
 	escapePDF makes a string safe for PDF\n\
 	_instanceEscapePDF method equivalent of escapePDF\n\
 	\n\
@@ -677,6 +712,7 @@ static char *__doc__=
 #ifdef	ATTRDICT
 "	_AttrDict creates a dict object which can do setattr/getattr type things\n"
 #endif
+	"calcChecksum calculate checksums for TTFs\n"
 ;
 
 static struct PyMethodDef _methods[] = {
@@ -698,6 +734,7 @@ static struct PyMethodDef _methods[] = {
 #ifdef	ATTRDICT
 	{"_AttrDict", _AttrDict, METH_VARARGS, "_AttrDict() create a dict which can use attribute notation"},
 #endif
+	{"calcChecksum", ttfonts_calcChecksum, METH_VARARGS, "calcChecksum(string) calculate checksums for TTFs"},
 	{NULL,		NULL}		/* sentinel */
 	};
 
