@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.25 2002/02/21 14:48:13 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.26 2002/03/15 16:42:38 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.25 2002/02/21 14:48:13 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.26 2002/03/15 16:42:38 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -27,7 +27,7 @@ static __version__=" $Id: _rl_accel.c,v 1.25 2002/02/21 14:48:13 rgbecker Exp $ 
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.37"
+#define VERSION "0.38"
 #define MODULE "_rl_accel"
 #ifndef	ATTRDICT
 	#if PY_MAJOR_VERSION>=2
@@ -391,7 +391,7 @@ PyObject *_a85_encode(PyObject *self, PyObject *args)
 static	char* _fp_fmts[]={"%.0f", "%.1f", "%.2f", "%.3f", "%.4f", "%.5f", "%.6f", "%.8f", "%.9f"};
 static	char *_fp_one(PyObject *pD)
 {
-	double d;
+	double	d;
 	static	char s[30];
 	int l;
 	char*	dot;
@@ -400,19 +400,26 @@ static	char *_fp_one(PyObject *pD)
 		PyErr_SetString(ErrorObject, "bad numeric value");
 		return NULL;
 		}
-	l = min(max(0,6-(int)log10(fabs(d))),6);
-	sprintf(s,_fp_fmts[l], d);
-	l = strlen(s)-1;
-	while(l && s[l]=='0') l--;
-	if(s[l]=='.' || s[l]==',') s[l]=0;
-	else {
-		s[l+1]=0;
-		if(s[0]=='0' && (s[1]=='.'||s[1]==',')){
-			if(s[1]==',') s[1] = '.';
-			return s+1;
-			}
+	if(fabs(d)<=1.0e-7){
+		s[0]='0';
+		s[1]=0;
 		}
-	if((dot=strchr(s,','))) *dot = '.';
+	else{
+		if(fabs(d)>1) l = min(max(0,6-(int)log10(fabs(d))),6);
+		else l = 6;
+		sprintf(s,_fp_fmts[l], d);
+		l = strlen(s)-1;
+		while(l && s[l]=='0') l--;
+		if(s[l]=='.' || s[l]==',') s[l]=0;
+		else {
+			s[l+1]=0;
+			if(s[0]=='0' && (s[1]=='.'||s[1]==',')){
+				if(s[1]==',') s[1] = '.';
+				return s+1;
+				}
+			}
+		if((dot=strchr(s,','))) *dot = '.';
+		}
 	return s;
 }
 
