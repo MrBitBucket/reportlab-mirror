@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.32 2002/04/13 18:24:27 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.32 2002/04/13 18:24:27 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.33 2002/04/13 18:38:18 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.33 2002/04/13 18:38:18 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -86,19 +86,17 @@ except ImportError, errMsg:
 PIL_Image = Image
 del Image
 
+__StringIO=None
 def getStringIO(buf=None):
 	'''unified StringIO instance interface'''
-	try:
-		from cStringIO import StringIO
-		s = StringIO()	#avoid mismatch between StringIO and cStringIO
-						#initialised cStringIO has no write method
-		if buf is not None:
-			s.write(buf)
-			s.seek(0)
-		return s
-	except ImportError:
-		from StringIO import StringIO
-		return buf is not None and StringIO(buf) or StringIO()
+	global __StringIO
+	if not __StringIO:
+		try:
+			from cStringIO import StringIO
+		except ImportError:
+			from StringIO import StringIO
+		__StringIO = StringIO
+	return buf is not None and __StringIO(buf) or __StringIO()
 
 class ArgvDictValue:
 	'''A type to allow clients of getArgvDict to specify a conversion function'''
