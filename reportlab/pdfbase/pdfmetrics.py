@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.48 2001/11/21 12:12:21 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.49 2001/11/28 09:22:22 rgbecker Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -147,20 +147,24 @@ class TypeFace:
         self.glyphNames = self.glyphWidths.keys()
 
     def findT1File(self,ext='.pfb'):
+        possible_exts = (string.lower(ext), string.upper(ext))
         if hasattr(self,'pfbFileName'):
-            r = os.path.splitext(self.pfbFileName)[0] + ext
-            if os.path.isfile(r): return r
+            r_basename = os.path.splitext(self.pfbFileName)[0]
+            for e in possible_exts:
+                if os.path.isfile(r_basename + e):
+                    return r_basename + e
         try:
             r = _fontdata.findT1File(self.name)
         except:
             afm = bruteForceSearchForAFM(self.name)
             if afm:
                 if ext == '.pfb':
-                    pfb = os.path.splitext(afm)[0] + 'pfb'
-                    if os.path.isfile(pfb):
-                        r = pfb
-                    else:
-                        r = None
+                    for e in possible_exts:
+                        pfb = os.path.splitext(afm)[0] + e
+                        if os.path.isfile(pfb):
+                            r = pfb
+                        else:
+                            r = None
                 elif ext == '.afm':
                     r = afm
             else:
@@ -565,7 +569,9 @@ def getTypeFace(faceName):
             #try a brute force search
             afm = bruteForceSearchForAFM(faceName)
             if afm:
-                pfb = os.path.splitext(afm)[0] + '.pfb'
+                for e in ('.pfb', '.PFB'):
+                    pfb = os.path.splitext(afm)[0] + e
+                    if os.path.isfile(pfb): break
                 assert os.path.isfile(pfb), 'file %s not found!' % pfb
                 face = EmbeddedType1Face(afm, pfb)
                 registerTypeFace(face)
