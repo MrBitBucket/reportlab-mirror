@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.46 2001/10/10 10:08:20 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.47 2001/11/18 11:36:41 andy_robinson Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.46 2001/10/10 10:08:20 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.47 2001/11/18 11:36:41 andy_robinson Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -413,12 +413,87 @@ class BaseDocTemplate:
 		else:
 			raise TypeError, "argument fx should be string or integer"
 
+	def handle_breakBefore(self, flowables):
+		'''preprocessing step to allow pageBreakBefore and frameBreakBefore attributes'''
+		first = flowables[0]
+		# if we insert a page break before, we'll process that, see it again,
+		# and go in an infinite loop.  So we need to set a flag on the object
+		# saying 'skip me'.  This should be unset on the next pass
+		if hasattr(first, '_skipMeNextTime'):
+			delattr(first, '_skipMeNextTime')
+			return
+		# this could all be made much quicker by putting the attributes
+		# in to the flowables with a defult value of 0
+		if hasattr(first,'pageBreakBefore') and first.pageBreakBefore == 1:
+			first._skipMeNextTime = 1
+			first.insert(0, PageBreak())
+			return
+		if hasattr(first,'style') and hasattr(first.style, 'pageBreakBefore') and first.style.pageBreakBefore == 1:
+			first._skipMeNextTime = 1
+			flowables.insert(0, PageBreak())
+			return
+		if hasattr(first,'frameBreakBefore') and first.frameBreakBefore == 1:
+			first._skipMeNextTime = 1
+			flowables.insert(0, FrameBreak())
+			return
+		if hasattr(first,'style') and hasattr(first.style, 'frameBreakBefore') and first.style.frameBreakBefore == 1:
+			first._skipMeNextTime = 1
+			flowables.insert(0, FrameBreak())
+			return
+			
+		
+	def handle_keepWithNext(self, flowables):
+		"implements keepWithNext"
+		#disabled for now - will not work
+		return
+		
+		this = flowables[0]
+		if isinstance(this, KeepTogether):
+			if hasattr(this, '_skipMeNextTime'):
+				delattr(this, '_skipMeNextTime')
+				return
+			
+		keepWithNext = ((hasattr(this, 'keepWithNext') and this.keepWithNext == 1) or
+			(hasattr(this, 'style') and hasattr(this.style, 'keepWithNext') and this.style.keepWithNext == 1)
+			)
+		if keepWithNext:
+			print 'found a keepWithNext, %d items remaining' % len(flowables)
+			collected = []
+
+			#there could be multiple keepWithNext in a row...
+			while keepWithNext:
+
+				
+				collected.append(this)
+				del flowables[0]
+				if len(flowables) == 0:
+					break
+				else:
+					this = flowables[0]
+					keepWithNext = ((hasattr(this, 'keepWithNext') and this.keepTogether == 1) or
+						(hasattr(this, 'style') and hasattr(this.style, 'keepWithNext') and this.style.keepWithNext == 1)
+						)
+			#now we add the 'next' thing
+			if len(flowables) > 0:
+				this = flowables[0]
+				collected.append(this)
+				del flowables[0]
+			Keeper = KeepTogether(collected)
+			Keeper._skipMeNextTime = 1
+			print 'gathered %d items into one KeepTogether' % len(collected)
+			flowables.insert(0, Keeper)
+
+
+
 	def handle_flowable(self,flowables):
 		'''try to handle one flowable from the front of list flowables.'''
 		
 		#allow document a chance to look at, modify or ignore
 		#the object(s) about to be processed
 		self.filterFlowables(flowables)
+		
+		self.handle_breakBefore(flowables)
+		self.handle_keepWithNext(flowables)
 		f = flowables[0]
 		del flowables[0]
 		if f is None:
@@ -431,21 +506,23 @@ class BaseDocTemplate:
 			f.apply(self)
 			self.afterFlowable(f)
 		else:
-			#general case we have to do something
+			#try to fit it then draw it
 			if self.frame.add(f, self.canv, trySplit=self.allowSplitting):
 				self.afterFlowable(f)
 			else:
+				#if isinstance(f, KeepTogether): print 'could not add it to frame'
 				if self.allowSplitting:
 					# see if this is a splittable thing
 					S = self.frame.split(f,self.canv)
 					n = len(S)
 				else:
 					n = 0
-
+				#if isinstance(f, KeepTogether): print 'n=%d' % n
 				if n:
 					if self.frame.add(S[0], self.canv, trySplit=0):
 						self.afterFlowable(S[0])
 					else:
+						print 'n = %d' % n
 						raise "LayoutError", "splitting error on page %d in\n%s" % (self.page,f.identity(30))
 					del S[0]
 					for f in xrange(n-1):
@@ -618,7 +695,7 @@ class BaseDocTemplate:
 		method returns.
 		'''
 		pass
-
+		
 	def afterFlowable(self, flowable):
 		'''called after a flowable has been rendered'''
 		pass
