@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.38 2001/07/16 15:20:47 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.39 2001/08/08 12:59:42 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -71,15 +71,15 @@ def scale(sx, sy):
 	return (sx, 0, 0, sy, 0, 0)
 
 def rotate(angle):
-	a = angle * pi /180
+	a = angle * pi/180
 	return (cos(a), sin(a), -sin(a), cos(a), 0, 0)
 
 def skewX(angle):
-	a = angle * 180 / pi
+	a = angle * pi/180
 	return (1, 0, tan(a), 1, 0, 0)
 
 def skewY(angle):
-	a = angle * 180 / pi
+	a = angle * pi/180
 	return (1, tan(a), 0, 1, 0, 0)
 
 def mmult(A, B):
