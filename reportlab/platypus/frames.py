@@ -31,13 +31,16 @@
 #
 ###############################################################################
 #	$Log: frames.py,v $
+#	Revision 1.3  2000/07/06 12:40:38  rgbecker
+#	Push canvas into flowables during wrap/split
+#
 #	Revision 1.2  2000/06/13 13:03:31  aaron_watters
 #	more documentation changes
-#
+#	
 #	Revision 1.1  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #	
-__version__=''' $Id: frames.py,v 1.2 2000/06/13 13:03:31 aaron_watters Exp $ '''
+__version__=''' $Id: frames.py,v 1.3 2000/07/06 12:40:38 rgbecker Exp $ '''
 __doc__="""
 """
 class Frame:
@@ -117,7 +120,9 @@ class Frame:
 		s = self.atTop and 0 or flowable.getSpaceBefore()
 		h = y - p - s
 		if h>0:
+			flowable.canv = canv #so they can use stringWidth etc
 			w, h = flowable.wrap(self.width, h)
+			del flowable.canv
 		else:
 			return 0
 
@@ -138,12 +143,15 @@ class Frame:
 
 	add = _add
 
-	def split(self,flowable):
+	def split(self,flowable,canv):
 		'''As the flowable to split using up the available space.'''
 		y = self.y
 		p = self.y1p
 		s = self.atTop and 0 or flowable.getSpaceBefore()
-		return flowable.split(self.width, y-p-s)
+		flowable.canv = canv	#some flowables might need this
+		r = flowable.split(self.width, y-p-s)
+		del flowable.canv
+		return r
 
 
 	def drawBoundary(self,canv):

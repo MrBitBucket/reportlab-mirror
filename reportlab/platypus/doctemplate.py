@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
+#	Revision 1.25  2000/07/06 12:40:37  rgbecker
+#	Push canvas into flowables during wrap/split
+#
 #	Revision 1.24  2000/07/05 12:22:21  rgbecker
 #	Force _calc in SimpleDocTemplae.build
-#
+#	
 #	Revision 1.23  2000/07/03 15:39:51  rgbecker
 #	Documentation fixes
 #	
@@ -105,7 +108,7 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.24 2000/07/05 12:22:21 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.25 2000/07/06 12:40:37 rgbecker Exp $ '''
 __doc__="""
 This module contains the core structure of platypus.
 
@@ -443,7 +446,7 @@ class BaseDocTemplate:
 			else:
 				if self.allowSplitting:
 					# see if this is a splittable thing
-					S = self.frame.split(f)
+					S = self.frame.split(f,self.canv)
 					n = len(S)
 				else:
 					n = 0
