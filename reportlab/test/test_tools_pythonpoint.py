@@ -21,12 +21,11 @@ class PythonPointTestCase(unittest.TestCase):
         ppDir = dirname(pythonpoint.__file__)
         xml = join(ppDir, 'demos', 'pythonpoint.xml')
         datafilename = 'pythonpoint.pdf'
-        outdir = outputfile('')
+        outDir = outputfile('')
         if isCompactDistro():
             cwd = None
             xml = open_for_read(xml)
         else:
-            outDir = join(rlDir, 'test')
             cwd = os.getcwd()
             os.chdir(join(ppDir, 'demos'))
         pdf = join(outDir, datafilename)
@@ -34,7 +33,6 @@ class PythonPointTestCase(unittest.TestCase):
         pythonpoint.process(xml, outDir=outDir, verbose=0, datafilename=datafilename)
         if cwd: os.chdir(cwd)
         assert os.path.exists(pdf)
-        os.remove(pdf)
 
 def makeSuite():
     return makeSuiteForClasses(PythonPointTestCase)
