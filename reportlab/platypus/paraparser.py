@@ -442,11 +442,9 @@ class ParaParser(xmllib.XMLParser):
 
     def __getattr__( self, attrName ):
         """This way we can handle <TAG> the same way as <tag> (ignoring case)."""
-        if attrName != attrName.lower() and attrName!="caseSensitive" and not self.caseSensitive:
-            if attrName[:6]=="start_":
-                return eval ("self."+attrName.lower())
-            if attrName[:4]=="end_":
-                return eval ("self."+attrName.lower())
+        if attrName!=attrName.lower() and attrName!="caseSensitive" and not self.caseSensitive and \
+            (attrName.startswith("start_") or attrName.startswith("end_")):
+                return getattr(self,attrName.lower())
         raise AttributeError, attrName
 
     #### bold
