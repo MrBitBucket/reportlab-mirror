@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.18 2001/06/13 07:13:56 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.19 2001/07/11 00:31:09 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.18 2001/06/13 07:13:56 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.19 2001/07/11 00:31:09 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -27,7 +27,7 @@ static __version__=" $Id: _rl_accel.c,v 1.18 2001/06/13 07:13:56 rgbecker Exp $ 
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.34"
+#define VERSION "0.35"
 #define MODULE "_rl_accel"
 #ifndef	ATTRDICT
 	#if PY_MAJOR_VERSION>=2
@@ -552,7 +552,7 @@ static PyMappingMethods _AttrDict_as_mapping = {
 
 static PyObject *_escapePDF(unsigned char* text, int textlen)
 {
-	unsigned char*	out = PyMem_Malloc((textlen>>2)+1);
+	unsigned char*	out = PyMem_Malloc((textlen<<2)+1);
 	int				j=0, i=0;
 	char			buf[4];
 	PyObject*		ret;
