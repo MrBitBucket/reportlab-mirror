@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.11 2000/10/26 11:21:38 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.11 2000/10/26 11:21:38 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.12 2000/11/23 14:01:59 andy_robinson Exp $
+__version__=''' $Id: flowables.py,v 1.12 2000/11/23 14:01:59 andy_robinson Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -99,6 +99,10 @@ class Flowable:
 		if hasattr(self,'spaceBefore'): return self.spaceBefore
 		elif hasattr(self,'style') and hasattr(self.style,'spaceBefore'): return self.style.spaceBefore
 		else: return 0
+
+	def isIndexing(self):
+		"""Hook for IndexingFlowables - things which have cross references"""
+		return 0
 
 class XBox(Flowable):
 	"""Example flowable - a box with an x through it and a caption.

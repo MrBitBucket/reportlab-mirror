@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/styles.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/styles.py,v 1.8 2000/10/25 08:57:45 rgbecker Exp $
-__version__=''' $Id: styles.py,v 1.8 2000/10/25 08:57:45 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/styles.py,v 1.9 2000/11/23 14:01:58 andy_robinson Exp $
+__version__=''' $Id: styles.py,v 1.9 2000/11/23 14:01:58 andy_robinson Exp $ '''
 
 from reportlab.lib.colors import white, black
 from reportlab.lib.enums import TA_LEFT
@@ -212,12 +212,14 @@ def getSampleStyleSheet():
     para = ParagraphStyle('Heading1', stylesheet['Normal'])
     para.fontName = 'Times-Bold'
     para.fontSize = 18
+    para.leading = 22
     para.spaceAfter = 6
     stylesheet['Heading1'] = para
 
     para = ParagraphStyle('Heading2', stylesheet['Normal'])
     para.fontName = 'Times-Bold'
     para.fontSize = 14
+    para.leading = 18
     para.spaceBefore = 12
     para.spaceAfter = 6
     stylesheet['Heading2'] = para
@@ -225,6 +227,7 @@ def getSampleStyleSheet():
     para = ParagraphStyle('Heading3', stylesheet['Normal'])
     para.fontName = 'Times-BoldItalic'
     para.fontSize = 12
+    para.leading = 14
     para.spaceBefore = 12
     para.spaceAfter = 6
     stylesheet['Heading3'] = para
@@ -278,6 +281,7 @@ def getSampleStyleSheet1():
                                   parent=stylesheet['Normal'],
                                   fontName = 'Times-Bold',
                                   fontSize=18,
+                                  leading=22,
                                   spaceAfter=6),
                    alias='h1')
 
@@ -285,6 +289,7 @@ def getSampleStyleSheet1():
                                   parent=stylesheet['Normal'],
                                   fontName = 'Times-Bold',
                                   fontSize=14,
+                                  leading=18,
                                   spaceBefore=12,
                                   spaceAfter=6),
                    alias='h2')
@@ -293,6 +298,7 @@ def getSampleStyleSheet1():
                                   parent=stylesheet['Normal'],
                                   fontName = 'Times-BoldItalic',
                                   fontSize=12,
+                                  leading=14,
                                   spaceBefore=12,
                                   spaceAfter=6),
                    alias='h3')
