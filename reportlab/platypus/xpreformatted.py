@@ -176,17 +176,24 @@ if __name__=='__main__':	#NORUNTESTS
 	B = styleSheet['BodyText']
 	style = ParagraphStyle("discussiontext", parent=B)
 	style.fontName= 'Helvetica'
-	text='''The <font name=courier color=green>CMYK</font> or subtractive
-	method follows the way a printer
+	text='''
+
+
+The <font name=courier color=green>CMYK</font> or subtractive
+
+method follows the way a printer
 mixes three pigments (cyan, magenta, and yellow) to form colors.
 Because mixing chemicals is more difficult than combining light there
 is a fourth parameter for darkness.  For example a chemical
 combination of the <font name=courier color=green>CMY</font> pigments generally never makes a perfect
+
 black -- instead producing a muddy color -- so, to get black printers
 don't use the <font name=courier color=green>CMY</font> pigments but use a direct black ink.  Because
 <font name=courier color=green>CMYK</font> maps more directly to the way printer hardware works it may
 be the case that &amp;| &amp; | colors specified in <font name=courier color=green>CMYK</font> will provide better fidelity
 and better control when printed.
+
+
 '''
 	P=XPreformatted(text,style)
 	dumpXPreformattedFrags(P)

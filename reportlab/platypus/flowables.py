@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: flowables.py,v $
+#	Revision 1.9  2000/08/24 14:10:54  rgbecker
+#	Fixes to _dedenter
+#
 #	Revision 1.8  2000/08/24 11:33:31  rgbecker
 #	XPreformatted first fixes; now runs
-#
+#	
 #	Revision 1.7  2000/08/03 14:12:53  rgbecker
 #	Changing to packer led positioning
 #	
@@ -56,7 +59,7 @@
 #	Platypus re-organisation
 #	
 #	
-__version__=''' $Id: flowables.py,v 1.8 2000/08/24 11:33:31 rgbecker Exp $ '''
+__version__=''' $Id: flowables.py,v 1.9 2000/08/24 14:10:54 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -176,6 +179,14 @@ class XBox(Flowable):
 		self.canv.setFont('Times-Roman',12)
 		self.canv.drawCentredString(0.5*self.width, 0.5*self.height, self.text)
 
+def _trimEmptyLines(lines):
+	#don't want the first or last to be empty
+	while len(lines) and string.strip(lines[0]) == '':
+		lines = lines[1:]
+	while len(lines) and string.strip(lines[-1]) == '':
+		lines = lines[:-1]
+	return lines
+
 def _dedenter(text,dedent=0):
 	'''
 	tidy up text - carefully, it is probably code.  If people want to
@@ -183,16 +194,16 @@ def _dedenter(text,dedent=0):
 	and it will chop off that many character, otherwise it leaves
 	left edge intact.
 	'''
-	templines = string.split(text, '\n')
-	lines = []
-	for line in templines:
-		line = string.rstrip(line[dedent:])
-		lines.append(line)
-	#don't want the first or last to be empty
-	while string.strip(lines[0]) == '':
-		lines = lines[1:]
-	while string.strip(lines[-1]) == '':
-		lines = lines[:-1]
+	lines = string.split(text, '\n')
+	if dedent>0:
+		templines = _trimEmptyLines(lines)
+		lines = []
+		for line in templines:
+			line = string.rstrip(line[dedent:])
+			lines.append(line)
+	else:
+		lines = _trimEmptyLines(lines)
+
 	return lines
 
 class Preformatted(Flowable):
