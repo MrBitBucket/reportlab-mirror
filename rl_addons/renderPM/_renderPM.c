@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "$Revision: 1.11 $"
+#define VERSION "$Revision: 1.12 $"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -743,23 +743,6 @@ static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
 	return NULL;
 }
 
-static struct PyMethodDef gstate_methods[] = {
-	{"clipPathClear", (PyCFunction)gstate_clipPathClear, METH_VARARGS, "clipPathClear()"},
-	{"clipPathSet", (PyCFunction)gstate_clipPathSet, METH_VARARGS, "clipPathSet()"},
-	{"curveTo", (PyCFunction)gstate_curveTo, METH_VARARGS, "curveTo(x1,y1,x2,y2,x3,y3)"},
-	{"drawString", (PyCFunction)gstate_drawString, METH_VARARGS, "drawString(x,y,text)"},
-	{"lineTo", (PyCFunction)gstate_lineTo, METH_VARARGS, "lineTo(x,y)"},
-	{"moveTo", (PyCFunction)gstate_moveTo, METH_VARARGS, "moveTo(x,y)"},
-	{"moveToClosed", (PyCFunction)gstate_moveToClosed, METH_VARARGS, "moveToClosed(x,y)"},
-	{"pathBegin", (PyCFunction)gstate_pathBegin, METH_VARARGS, "pathBegin()"},
-	{"pathClose", (PyCFunction)gstate_pathClose, METH_VARARGS, "pathClose()"},
-	{"pathFill", (PyCFunction)gstate_pathFill, METH_VARARGS, "pathFill()"},
-	{"pathStroke", (PyCFunction)gstate_pathStroke, METH_VARARGS, "pathStroke()"},
-	{"setFont", (PyCFunction)gstate_setFont, METH_VARARGS, "setFont(fontName,fontSize)"},
-	{"_stringPath", (PyCFunction)gstate__stringPath, METH_VARARGS, "_stringPath(text[,x=0,y=0])"},
-	{NULL, NULL}		/* sentinel */
-};
-
 static	void _dashFree(gstateObject* self)
 {
 	if(self->dash.dash){
@@ -795,6 +778,10 @@ static int _setA2DMX(PyObject* value, double* ctm)
 		ctm[5] = m[5];
 		}
 	return i;
+}
+
+static PyObject* gstate__aapixbuf(gstateObject* self, PyObject* args)
+{
 }
 
 static int _setStrAttr(PyObject* value, char** pStr)
@@ -965,6 +952,24 @@ static PyObject* _get_gstateFontName(Gt1EncodedFont *f)
 	return Py_None;
 }
 
+static struct PyMethodDef gstate_methods[] = {
+	{"clipPathClear", (PyCFunction)gstate_clipPathClear, METH_VARARGS, "clipPathClear()"},
+	{"clipPathSet", (PyCFunction)gstate_clipPathSet, METH_VARARGS, "clipPathSet()"},
+	{"curveTo", (PyCFunction)gstate_curveTo, METH_VARARGS, "curveTo(x1,y1,x2,y2,x3,y3)"},
+	{"drawString", (PyCFunction)gstate_drawString, METH_VARARGS, "drawString(x,y,text)"},
+	{"lineTo", (PyCFunction)gstate_lineTo, METH_VARARGS, "lineTo(x,y)"},
+	{"moveTo", (PyCFunction)gstate_moveTo, METH_VARARGS, "moveTo(x,y)"},
+	{"moveToClosed", (PyCFunction)gstate_moveToClosed, METH_VARARGS, "moveToClosed(x,y)"},
+	{"pathBegin", (PyCFunction)gstate_pathBegin, METH_VARARGS, "pathBegin()"},
+	{"pathClose", (PyCFunction)gstate_pathClose, METH_VARARGS, "pathClose()"},
+	{"pathFill", (PyCFunction)gstate_pathFill, METH_VARARGS, "pathFill()"},
+	{"pathStroke", (PyCFunction)gstate_pathStroke, METH_VARARGS, "pathStroke()"},
+	{"setFont", (PyCFunction)gstate_setFont, METH_VARARGS, "setFont(fontName,fontSize)"},
+	{"_stringPath", (PyCFunction)gstate__stringPath, METH_VARARGS, "_stringPath(text[,x=0,y=0])"},
+	{"_aapixbuf", (PyCFunction)gstate__aapixbuf, METH_VARARGS, "_aapixbuf(dstX,dstY,dstW,dstH,src,srcW,srcH[,srcD[,aff]])"},
+	{NULL, NULL}		/* sentinel */
+};
+
 static PyObject* gstate_getattr(gstateObject *self, char *name)
 {
 #ifdef	ROBIN_DEBUG
@@ -1091,6 +1096,8 @@ gstates have the following methods\n\
  pathStroke() stroke current path\n\
  setFont(fontName,fontSize) set the font from the gt1 cache\n\
  _stringPath(text) return path dump of text\n\
+ _aapixbuf(dstX,dstY,dstW,dstH,src,srcW,srcH[,srcD[,aff]]) composite\n\
+      srcW by srcY depth srcD(=3) image to dst Rect(dstX,dstY,dstW,dstH)\n\
 \n\
 gstates have the following attributes\n\
 ctm			6vec float transformation matrix\n\
