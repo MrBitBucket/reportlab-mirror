@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.56 2003/11/29 17:13:01 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.57 2004/05/26 09:37:07 jjlee Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.56 2003/11/29 17:13:01 rgbecker Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.57 2004/05/26 09:37:07 jjlee Exp $ '''
 
 import string, time
 from types import FunctionType
@@ -708,7 +708,7 @@ class GridLinePlot(LinePlot):
         return g
 
 class AreaLinePlot(LinePlot):
-    '''we're given data in the form [(X1,Y11,..Y1M)....(Xn,Yn1,...YnM)]'''
+    '''we're given data in the form [(X1,Y11,..Y1M)....(Xn,Yn1,...YnM)]'''#'
     def __init__(self):
         LinePlot.__init__(self)
         self._inFill = 1

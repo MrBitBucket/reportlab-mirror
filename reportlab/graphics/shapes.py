@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.101 2004/04/14 13:10:51 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.102 2004/05/26 09:37:06 jjlee Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.101 2004/04/14 13:10:51 rgbecker Exp $ '''
+__version__=''' $Id: shapes.py,v 1.102 2004/05/26 09:37:06 jjlee Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -490,7 +490,7 @@ class Group(Shape):
             return None
 
 def _addObjImport(obj,I,n=None):
-    '''add an import of obj's class to a dictionary of imports'''
+    '''add an import of obj's class to a dictionary of imports''' #'
     from inspect import getmodule
     c = obj.__class__
     m = getmodule(c).__name__
