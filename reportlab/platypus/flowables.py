@@ -164,7 +164,7 @@ class Flowable:
         if hasattr(self, 'getPlainText'):
             r = self.getPlainText(identify=1)
         elif hasattr(self, 'text'):
-            r = self.text
+            r = str(self.text)
         else:
             r = '...'
         if r and maxLen:
@@ -474,6 +474,9 @@ class KeepTogether(Flowable):
         S = getattr(self,'_CPage',1) and [CondPageBreak(aH+1)] or []
         for f in self._flowables: S.append(f)
         return S
+
+    def identity(self):
+        return "<KeepTogether at %d> containing :" + "\n".join([f.identity() for f in self._flowables])
 
 class Macro(Flowable):
     """This is not actually drawn (i.e. it has zero height)

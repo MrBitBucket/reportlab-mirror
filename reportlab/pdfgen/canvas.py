@@ -10,7 +10,8 @@ ENABLE_TRACKING = 1 # turn this off to do profile testing w/o tracking
 
 import os
 import sys
-from string import join, split, strip, atoi, replace, upper
+import re
+from string import join, split, strip, atoi, replace, upper, digits
 import tempfile
 from types import *
 from math import sin, cos, tan, pi, ceil
@@ -24,6 +25,9 @@ from reportlab.pdfgen  import pdfgeom, pathobject, textobject
 from reportlab.lib.colors import Color, CMYKColor, toColor
 from reportlab.lib.utils import import_zlib
 from reportlab.lib.utils import fp_str
+
+
+digitPat = re.compile('\d')  #used in decimal alignment
 
 zlib = import_zlib()
 _SeqTypes=(TupleType,ListType)
@@ -115,6 +119,10 @@ class Canvas:
                  invariant = None,
                  verbosity=0):
         """Create a canvas of a given size. etc.
+
+        You may pass a file-like object to filename as an alternative to
+        a string.
+        
         Most of the attributes are private - we will use set/get methods
         as the preferred interface.  Default page size is A4."""
         if pagesize is None: pagesize = rl_config.defaultPageSize
@@ -1197,14 +1205,52 @@ class Canvas:
     def drawAlignedString(self, x, y, text, pivotChar="."):
         """Draws a string aligned on the first '.' (or other pivot character).
 
-        The centre position of the pivot character will be used as x."""
+        The centre position of the pivot character will be used as x.
+        So, you could draw a straight line down through all the decimals in a
+        column of numbers, and anything without a decimal should be
+        optically aligned with those that have.
+
+        There is one special rule to help with accounting formatting.  Here's
+        how normal numbers should be aligned on the 'dot'. Look at the
+        LAST two:
+           12,345,67
+              987.15
+               42
+           -1,234.56
+             (456.78)
+             (456)
+               27 inches
+               13cm
+        Since the last three do not contain a dot, a crude dot-finding
+        rule would place them wrong. So we test for the special case
+        where no pivot is found, digits are present, but the last character
+        is not a digit.  We then work back from the end of the string
+        This case is a tad slower but hopefully rare.
+        
+        """
         parts = text.split(pivotChar,1)
         pivW = self.stringWidth(pivotChar, self._fontname, self._fontsize)
-        leftText = parts[0]
-        self.drawRightString(x-0.5*pivW, y, leftText)
-        if len(parts) > 1:
-            rightText = pivotChar + parts[1]
+        
+        if len(parts) == 1 and digitPat.search(text) is not None and text[-1] not in digits:
+            #we have no decimal but it ends in a bracket, or 'in' or something.
+            #the cut should be after the last digit.
+            leftText = parts[0][0:-1]
+            rightText = parts[0][-1]
+            #any more?
+            while leftText[-1] not in digits:
+                rightText = leftText[-1] + rightText
+                leftText = leftText[0:-1]
+
+            self.drawRightString(x-0.5*pivW, y, leftText)
             self.drawString(x-0.5*pivW, y, rightText)
+
+        else:
+            #normal case
+            leftText = parts[0]
+            self.drawRightString(x-0.5*pivW, y, leftText)
+            if len(parts) > 1:
+                rightText = pivotChar + parts[1]
+                self.drawString(x-0.5*pivW, y, rightText)
 
     def getAvailableFonts(self):
         """Returns the list of PostScript font names available.

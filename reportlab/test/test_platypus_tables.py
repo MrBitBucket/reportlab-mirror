@@ -130,7 +130,7 @@ GRID_STYLE = TableStyle(
     TEXTCOLOR - takes a color name or (R,G,B) tuple.
     """, styleSheet['Definition']))
     lst.append(Paragraph("""
-    ALIGNMENT (or ALIGN) - takes one of LEFT, RIGHT and CENTRE (or CENTER).
+    ALIGNMENT (or ALIGN) - takes one of LEFT, RIGHT, CENTRE (or CENTER) or DECIMAL.
     """, styleSheet['Definition']))
     lst.append(Paragraph("""
     LEFTPADDING - defaults to 6.
@@ -268,7 +268,7 @@ LIST_STYLE = TableStyle(
     lst.append(Paragraph("""
         This demonstrates a number of features useful in financial statements. The first is decimal alignment;
         with ALIGN=DECIMAL the numbers align on the points; and the points are aligned based on
-        the LEFTPADDING, which is usually 3 points so you should set it higher.  The second is multiple lines;
+        the RIGHTPADDING, which is usually 3 points so you should set it higher.  The second is multiple lines;
         one can specify double or triple lines and control the separation if desired. Finally, the coloured
         negative numbers were (we regret to say) done in the style; we don't have a way to conditionally
         format numbers based on value yet.
@@ -280,6 +280,8 @@ LIST_STYLE = TableStyle(
                ['Company Vehicle','1,234.8901'],
                ['Petty Cash','42'],
                ['Intellectual Property','(42,078,231.56)'],
+               ['Overdraft','(12,345)'],
+               ['Boardroom Flat Screen','60 inches'],
                ['Net Position','Deep Sh*t.Really']
                ],
               [144,72])
