@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/markers.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/markers.py,v 1.9 2002/03/26 11:17:18 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/markers.py,v 1.10 2002/05/24 15:50:15 rgbecker Exp $
 """
 This modules defines a collection of markers used in charts.
 """
-__version__=''' $Id: markers.py,v 1.9 2002/03/26 11:17:18 rgbecker Exp $ '''
+__version__=''' $Id: markers.py,v 1.10 2002/05/24 15:50:15 rgbecker Exp $ '''
 from types import FunctionType, ClassType
 from reportlab.graphics.shapes import Rect, Line, Circle, Polygon, Drawing, Group
 from reportlab.graphics.widgets.signsandsymbols import SmileyFace
@@ -47,6 +47,7 @@ class Marker(Widget):
 		self.fillColor = None
 		self.size = 5
 		self.x = self.y = self.dx = self.dy = self.angle = 0
+		self.setProperties(kw)
 
 	def clone(self):
 		return new.instance(self.__class__,self.__dict__.copy())
@@ -196,12 +197,12 @@ class _isSymbol(Validator):
 
 isSymbol = _isSymbol()
 
-def makeMarker(name):
+def makeMarker(name,**kw):
 	if Marker._attrMap['kind'].validate(name):
-		m = Marker()
+		m = apply(Marker,(),kw)
 		m.kind = name
 	elif name[-5:]=='_Flag' and Flag._attrMap['kind'].validate(name[:-5]):
-		m = Flag()
+		m = apply(Flag,(),kw)
 		m.kind = name[:-5]
 		m.size = 10
 	else:
