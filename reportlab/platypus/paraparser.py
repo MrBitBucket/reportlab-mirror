@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paraparser.py,v $
+#	Revision 1.27  2000/08/17 15:05:51  rgbecker
+#	Changed test formatting
+#
 #	Revision 1.26  2000/07/10 23:53:46  andy_robinson
 #	Changed base of seqdefault tag to 0
-#
+#	
 #	Revision 1.25  2000/07/04 10:50:33  rgbecker
 #	Sequencer fixes
 #	
@@ -73,7 +76,7 @@
 #	Revision 1.13  2000/04/25 13:07:57  rgbecker
 #	Added license
 #	
-__version__=''' $Id: paraparser.py,v 1.26 2000/07/10 23:53:46 andy_robinson Exp $ '''
+__version__=''' $Id: paraparser.py,v 1.27 2000/08/17 15:05:51 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -571,7 +574,7 @@ if __name__=='__main__':
 		else:
 			print 'ParaStyle', l.fontName,l.fontSize,l.textColor
 			for l in rv:
-				print l.fontName,l.fontSize,l.textColor,l.bold, l.rise, l.text[:25]
+				print l.fontName,l.fontSize,l.textColor,l.bold, l.rise, '|%s|'%l.text[:25]
 
 	style=ParaFrag()
 	style.fontName='Times-Roman'
@@ -671,7 +674,8 @@ but listen while I tell you the prophecy that Teiresias made me, and
 how carefully Aeaean Circe warned me to shun the island of the blessed
 sun-god, for it was here, she said, that our worst danger would lie.
 Head the ship, therefore, away from the island.''')
-	check_text('''&lt; &gt; &amp; &quot; &apos;''')
+	check_text('''A&lt;B&gt;C&amp;D&quot;E&apos;F''')
+	check_text('''A&lt; B&gt; C&amp; D&quot; E&apos; F''')
 	check_text('''<![CDATA[<>&'"]]>''')
 	check_text('''<bullet face=courier size=14 color=green>+</bullet>
 There was a bard also to sing to them and play
