@@ -322,7 +322,7 @@ class SmileyFace0(Widget):
     """This draws a classic smiley face.
     
         possible attributes:
-        'x', 'y', 'size'
+        'x', 'y', 'size', 'color'
 
 """ 
 
@@ -330,12 +330,14 @@ class SmileyFace0(Widget):
         'x': shapes.isNumber,
         'y': shapes.isNumber,
         'size': shapes.isNumber,
+        'color': shapes.isColor
         }
 
     def __init__(self):
         self.x = 0
         self.y = 0
         self.size = 100 
+        self.color = colors.yellow 
         
     def demo(self):
         D = shapes.Drawing(200, 100)
@@ -358,7 +360,7 @@ class SmileyFace0(Widget):
         
         # SmileyFace specific bits
         outerCircle = shapes.Circle(cx = (self.x+(s/2)), cy = (self.y+(s/2)), r = s/2,
-               fillColor = colors.yellow,
+               fillColor = self.color,
                strokeColor = colors.black,
                strokeWidth=s/38)
         g.add(outerCircle)
