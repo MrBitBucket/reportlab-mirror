@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/test_multibyte_cht.py,v 1.3 2001/10/28 00:22:18 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_multibyte_cht.py,v 1.4 2001/11/06 03:02:44 andy_robinson Exp $
 # Temporary japanese support for ReportLab.
 """
 Test of traditional Chinese (as written in Taiwan)
@@ -60,7 +60,7 @@ class CHTFontTests(unittest.TestCase):
         c.drawString(100, 639, message2)
 
         hBoxText(message3 + ' MSung-Light' , c, 100, 600, 'MSung-Light', enc)
-        hBoxText(message3 + ' MHei-Medium', c, 100, 580, 'MHei-Medium', enc)
+        #hBoxText(message3 + ' MHei-Medium', c, 100, 580, 'MHei-Medium', enc)
         
 
 

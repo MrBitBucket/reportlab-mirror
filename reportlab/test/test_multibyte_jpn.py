@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/test_multibyte_jpn.py,v 1.1 2001/10/22 05:43:18 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_multibyte_jpn.py,v 1.2 2001/11/06 03:02:44 andy_robinson Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -96,13 +96,13 @@ class JapaneseFontTests(unittest.TestCase):
         c.setFont('HeiseiMin-W3-90ms-RKSJ-V', 16)
         c.drawString(400, 650, '\223\214\213\236 vertical Shift-JIS')
         height = c.stringWidth('\223\214\213\236 vertical Shift-JIS', 'HeiseiMin-W3-90ms-RKSJ-V', 16)
-        c.rect(400,650,16,-height)
+        c.rect(400-8,650,16,-height)
         
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','EUC-V'))
         c.setFont('HeiseiMin-W3-EUC-V', 16)
         c.drawString(425, 650, '\xC5\xEC\xB5\xFE vertical EUC')
         height = c.stringWidth('\xC5\xEC\xB5\xFE vertical EUC', 'HeiseiMin-W3-EUC-V', 16)
-        c.rect(425,650,16,-height)
+        c.rect(425-8,650,16,-height)
         
         c.setFillColor(colors.purple)
         tx = c.beginText(100, 250)
