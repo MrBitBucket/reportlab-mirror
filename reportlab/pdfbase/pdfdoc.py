@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.42 2001/03/16 14:51:50 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.42 2001/03/16 14:51:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.43 2001/03/21 20:57:51 aaron_watters Exp $
+__version__=''' $Id: pdfdoc.py,v 1.43 2001/03/21 20:57:51 aaron_watters Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -182,8 +182,9 @@ class PDFDocument:
 
     def inForm(self):
         """specify that we are in a form xobject (disable page features, etc)"""
-        if self.inObject not in ["form", None]:
-            raise ValueError, "can't go in form already in object %s" % self.inObject
+        # don't need this check anymore since going in a form pushes old context at canvas level.
+        #if self.inObject not in ["form", None]:
+        #    raise ValueError, "can't go in form already in object %s" % self.inObject
         self.inObject = "form"
         # don't need to do anything else, I think...        
 
