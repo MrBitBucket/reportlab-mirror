@@ -2,8 +2,8 @@
 #
 #	ReportLab Public License Version 1.0
 #
-#   Except for the change of names the spirit and intention of this
-#   license is the same as that of Python
+#	Except for the change of names the spirit and intention of this
+#	license is the same as that of Python
 #
 #	(C) Copyright ReportLab Inc. 1998-2000.
 #
@@ -31,39 +31,42 @@
 #
 ###############################################################################
 #	$Log: doctemplate.py,v $
-#	Revision 1.20  2000/06/21 12:27:42  rgbecker
-#	remove UserDocTemplate, but add Andy's hook methods
+#	Revision 1.21  2000/06/26 15:58:22  rgbecker
+#	Simple fix to widths problem
 #
-#	Revision 1.19  2000/06/20 21:56:17  andy_robinson
+#	Revision 1.20  2000/06/21 12:27:42	rgbecker
+#	remove UserDocTemplate, but add Andy's hook methods
+#	
+#	Revision 1.19  2000/06/20 21:56:17	andy_robinson
 #	re-synching after sourceforge went weird
 #	
-#	Revision 1.18  2000/06/19 23:51:23  andy_robinson
+#	Revision 1.18  2000/06/19 23:51:23	andy_robinson
 #	Added UserDocTemplate class, and paragraph.getPlainText()
 #	
-#	Revision 1.17  2000/06/19 11:14:03  andy_robinson
+#	Revision 1.17  2000/06/19 11:14:03	andy_robinson
 #	Global sequencer put in the 'story builder'.
 #	
-#	Revision 1.16  2000/06/16 13:49:20  aaron_watters
+#	Revision 1.16  2000/06/16 13:49:20	aaron_watters
 #	new build parameters to allow alternate filename and canvas implementation
 #	(in order to support slideshow summary mode, for example, or embedding one
 #	document in another).
 #	
-#	Revision 1.15  2000/06/13 13:03:31  aaron_watters
+#	Revision 1.15  2000/06/13 13:03:31	aaron_watters
 #	more documentation changes
 #	
-#	Revision 1.14  2000/06/01 16:27:56  rgbecker
+#	Revision 1.14  2000/06/01 16:27:56	rgbecker
 #	pageSize is wrong at present
 #	
-#	Revision 1.13  2000/06/01 15:23:06  rgbecker
+#	Revision 1.13  2000/06/01 15:23:06	rgbecker
 #	Platypus re-organisation
 #	
-#	Revision 1.12  2000/05/26 10:27:37  rgbecker
+#	Revision 1.12  2000/05/26 10:27:37	rgbecker
 #	Fixed infinite recursion bug
 #	
-#	Revision 1.11  2000/05/17 22:17:38  rgbecker
+#	Revision 1.11  2000/05/17 22:17:38	rgbecker
 #	Renamed BasicFrame to Frame
 #	
-#	Revision 1.10  2000/05/17 16:29:40  rgbecker
+#	Revision 1.10  2000/05/17 16:29:40	rgbecker
 #	Removal of SimpleFrame
 #	
 #	Revision 1.9  2000/05/17 15:37:33  rgbecker
@@ -93,11 +96,11 @@
 #	Revision 1.1  2000/05/12 12:53:33  rgbecker
 #	Initial try at a document template class
 #	
-__version__=''' $Id: doctemplate.py,v 1.20 2000/06/21 12:27:42 rgbecker Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.21 2000/06/26 15:58:22 rgbecker Exp $ '''
 __doc__="""
 This module contains the core structure of platypus.
 
-Platypus constructs documents.  Document styles are determined by DocumentTemplates.
+Platypus constructs documents.	Document styles are determined by DocumentTemplates.
 
 Each DocumentTemplate contains one or more PageTemplates which defines the look of the
 pages of the document.
@@ -157,7 +160,7 @@ class ActionFlowable(Flowable):
 				raise
 		except "bogus":
 			t, v, None = sys.exc_info()
-			raise t, "%s\n   handle_%s args=%s"%(v,action,args)
+			raise t, "%s\n	 handle_%s args=%s"%(v,action,args)
 
 	def __call__(self):
 		return self
@@ -223,14 +226,14 @@ class BaseDocTemplate:
 	EXCEPTION: doctemplate.build(...) must be called for most reasonable uses
 	since it builds a document using the page template.
 	
-        Each document template builds exactly one document into a file specified
-        by the filename argument on initialization.
+		Each document template builds exactly one document into a file specified
+		by the filename argument on initialization.
 	
 	Possible keyword arguments for the initialization:
 	
-	pageTemplates: A list of templates.  Must be nonempty.  Names
+	pageTemplates: A list of templates.  Must be nonempty.	Names
 	  assigned to the templates are used for referring to them so no two used
-	  templates should have the same name.  For example you might want one template
+	  templates should have the same name.	For example you might want one template
 	  for a title page, one for a section first page, one for a first page of
 	  a chapter and two more for the interior of a chapter on odd and even pages.
 	  If this argument is omitted then at least one pageTemplate should be provided
@@ -477,7 +480,7 @@ class BaseDocTemplate:
 		   If the filename argument is provided then that filename is used
 		   rather than the one provided upon initialization.
 		   If the canvasmaker argument is provided then it will be used
-		   instead of the default.  For example a slideshow might use
+		   instead of the default.	For example a slideshow might use
 		   an alternate canvas which places 6 slides on a page (by
 		   doing translations, scalings and redefining the page break
 		   operations).
@@ -531,29 +534,29 @@ class BaseDocTemplate:
 class SimpleDocTemplate(BaseDocTemplate):
 	"""A special case document template that will handle many simple documents.
 	   See documentation for BaseDocTemplate.  No pageTemplates are required 
-	   for this special case.   A page templates are inferred from the
+	   for this special case.	A page templates are inferred from the
 	   margin information and the onFirstPage, onLaterPages arguments to the build method.
 	   
 	   A document which has all pages with the same look except for the first
 	   page may can be built using this special approach.
-	   """
+	"""
 	def handle_pageBegin(self):
 		self._handle_pageBegin()
 		self._handle_nextPageTemplate('Later')
 
 	def build(self,flowables,onFirstPage=_doNothing, onLaterPages=_doNothing):
-	        """build the document using the flowables.  Annotate the first page using the onFirstPage
-	           function and later pages using the onLaterPages function.  The onXXX pages should follow
-	           the signature
-	           
-	              def myOnFirstPage(canvas, document):
-	                  # do annotations and modify the document
-	                  ...
-	                  
-	           The functions can do thing like draw logos, page numbers,
-	           footers, etcetera. They can use external variables to vary
-	           the look (for example providing page numbering or section names).
-	        """
+		"""build the document using the flowables.	Annotate the first page using the onFirstPage
+			   function and later pages using the onLaterPages function.  The onXXX pages should follow
+			   the signature
+			   
+				  def myOnFirstPage(canvas, document):
+					  # do annotations and modify the document
+					  ...
+					  
+			   The functions can do thing like draw logos, page numbers,
+			   footers, etcetera. They can use external variables to vary
+			   the look (for example providing page numbering or section names).
+		"""
 		frameT = Frame(self.leftMargin, self.bottomMargin, self.width, self.height, id='normal')
 		self.addPageTemplates([PageTemplate(id='First',frames=frameT, onPage=onFirstPage),
 						PageTemplate(id='Later',frames=frameT, onPage=onLaterPages)])

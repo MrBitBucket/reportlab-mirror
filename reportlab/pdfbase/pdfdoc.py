@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pdfdoc.py,v $
+#	Revision 1.21  2000/06/26 15:58:22  rgbecker
+#	Simple fix to widths problem
+#
 #	Revision 1.20  2000/06/23 17:51:22  aaron_watters
 #	/Producer (ReportLab http://www.reportlab.com) in document
-#
+#	
 #	Revision 1.19  2000/06/01 09:44:26  rgbecker
 #	SaveToFile: only close the file if we opened it.
 #	Aggregated from types imports to module level.
@@ -83,7 +86,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: pdfdoc.py,v 1.20 2000/06/23 17:51:22 aaron_watters Exp $ '''
+__version__=''' $Id: pdfdoc.py,v 1.21 2000/06/26 15:58:22 rgbecker Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -167,6 +170,7 @@ class PDFDocument:
                 encoding, ALLOWED_ENCODINGS)
                         
         self.fonts = MakeType1Fonts(encoding)
+        self.encoding = encoding	#hack to record the font encoding only used by canvas.stringWidth
 
         #mapping of Postscriptfont names to internal ones;
         #needs to be dynamically built once we start adding
