@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.47 2004/03/23 12:20:08 rgbecker Exp $
-__version__=''' $Id: flowables.py,v 1.47 2004/03/23 12:20:08 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.48 2004/03/30 14:58:35 rgbecker Exp $
+__version__=''' $Id: flowables.py,v 1.48 2004/03/30 14:58:35 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -32,7 +32,7 @@ from types import ListType, TupleType, StringType
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
-from reportlab.lib.colors import red, gray
+from reportlab.lib.colors import red, gray, lightgrey
 from reportlab.pdfbase import pdfutils
 
 from reportlab.rl_config import defaultPageSize
@@ -526,3 +526,44 @@ class FailOnDraw(Flowable):
 
     def draw(self):
         raise ValueError("FailOnDraw flowable drawn, and failing as ordered!")
+
+class HRFlowable(Flowable):
+    '''Like the hr tag'''
+    def __init__(self,
+            width="80%",
+            thickness=1,
+            lineCap='round',
+            color=lightgrey,
+            spaceBefore=1, spaceAfter=1,
+            hAlign='CENTER', vAlign='BOTTOM'):
+        Flowable.__init__(self)
+        self.width = width
+        self.lineWidth = thickness
+        self.lineCap=lineCap
+        self.spaceBefore = spaceBefore
+        self.spaceAfter = spaceAfter
+        self.color = color
+        self.hAlign = hAlign
+        self.vAlign = vAlign
+
+    def __repr__(self):
+        return "HRFloable(width=%s, height=%s)" % (self.width, self.height, self.text)
+
+    def wrap(self, availWidth, availHeight):
+        w = self.width
+        if type(w) is type(''):
+            w = w.strip()
+            if w.endswith('%'): w = availWidth*float(w[:-1])*0.01
+            else: w = float(w)
+        w = min(w,availWidth)
+        self._width = w
+        return w, self.lineWidth
+
+    def draw(self):
+        canv = self.canv
+        canv.saveState()
+        canv.setLineWidth(self.lineWidth)
+        canv.setLineCap({'butt':0,'round':1, 'square': 2}[self.lineCap.lower()])
+        canv.setStrokeColor(self.color)
+        canv.line(0, 0, self._width, self.height)
+        canv.restoreState()
