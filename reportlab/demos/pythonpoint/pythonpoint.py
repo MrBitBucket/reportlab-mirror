@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/pythonpoint.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.34 2001/07/25 10:30:33 dinu_gherman Exp $
-__version__=''' $Id: pythonpoint.py,v 1.34 2001/07/25 10:30:33 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/pythonpoint.py,v 1.35 2001/08/15 11:57:53 dinu_gherman Exp $
+__version__=''' $Id: pythonpoint.py,v 1.35 2001/08/15 11:57:53 dinu_gherman Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -60,6 +60,7 @@ from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib import styles
 from reportlab.lib import colors
 from reportlab.rl_config import defaultPageSize
+from reportlab import rl_config
 import stdparser 
 
 
@@ -651,7 +652,8 @@ def process(datafilename, speakerNotes=0):
     pres = parser.getPresentation()
     pres.speakerNotes = speakerNotes
     pres.save()
-    print 'saved presentation %s.pdf' % os.path.splitext(datafilename)[0]
+    if rl_config._verbose:
+        print 'saved presentation %s.pdf' % os.path.splitext(datafilename)[0]
     parser.close()
 
 

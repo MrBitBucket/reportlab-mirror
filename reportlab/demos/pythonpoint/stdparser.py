@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/stdparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/stdparser.py,v 1.13 2000/11/05 17:46:15 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/demos/pythonpoint/Attic/stdparser.py,v 1.14 2001/08/15 11:57:53 dinu_gherman Exp $
 __version__=''' $Id $ '''
 __doc__="""
 Parser for PythonPoint using the xmllib.py in the standard Python
@@ -12,12 +12,16 @@ The parser has a getPresentation method; it is called from
 pythonpoint.py.
 """
 
-from reportlab.lib import xmllib
-import string
 import imp
-import pythonpoint
+import string
+
+from reportlab import rl_config
+from reportlab.lib import xmllib
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
+
+import pythonpoint
+
 
 class PPMLParser(xmllib.XMLParser):
     attributes = {
@@ -220,7 +224,8 @@ class PPMLParser(xmllib.XMLParser):
 
     def end_presentation(self):
         #print 'ended presentation'
-        print 'Fully parsed presentation',self._curPres.filename
+        if rl_config._verbose:
+            print 'Fully parsed presentation',self._curPres.filename
 
     def start_title(self, args):
         self._curTitle = ''
@@ -258,7 +263,8 @@ class PPMLParser(xmllib.XMLParser):
         #now get the function
         func = getattr(mod, funcname)
         pythonpoint.setStyles(func())
-        print 'set global stylesheet to %s.%s()' % (modulename, funcname)
+        if rl_config._verbose:
+            print 'set global stylesheet to %s.%s()' % (modulename, funcname)
         
     def end_stylesheet(self):
         pass
@@ -549,10 +555,13 @@ class PPMLParser(xmllib.XMLParser):
             echo = echo + '>'
             self._curPara.rawtext = self._curPara.rawtext + echo
         else:
-            print 'Unknown start tag %s' % tag
+            if rl_config._verbose:
+                print 'Unknown start tag %s' % tag
+
     def unknown_endtag(self, tag):
         if  self._curPara:
             self._curPara.rawtext = self._curPara.rawtext + '</%s>'% tag
         else:
-            print 'Unknown end tag %s' % tag
+            if rl_config._verbose:
+                print 'Unknown end tag %s' % tag
     
