@@ -14,7 +14,8 @@ class EmbeddingTestCase(unittest.TestCase):
         ok = 1
         for filename in ('GDB_____.AFM','GDB_____.PFB',
                          'CR______.AFM','CR______.PFB',
-                         'LeERC___.AFM','LeERC___.PFB'):
+                         #'LeERC___.AFM','LeERC___.PFB'): # this is absent
+                         ):
             if not os.path.isfile(filename):
                 ok = 0
         if not ok:
@@ -56,18 +57,18 @@ class EmbeddingTestCase(unittest.TestCase):
         c.drawString(100+w, 600, ' Hello World')
                 
 
-        # LettError sample
-        y = 550
-        justFace = pdfmetrics.EmbeddedType1Face('LeERC___.AFM','LeERC___.PFB')
-
-        faceName = 'LettErrorRobot-Chrome'  # pulled from AFM file
-        pdfmetrics.registerTypeFace(justFace)
-
-        justFont = pdfmetrics.Font('LettErrorRobot-Chrome', faceName, 'WinAnsiEncoding')
-        pdfmetrics.registerFont(justFont)
-
-        c.setFont('LettErrorRobot-Chrome', 12)
-        c.drawString(100, y, 'This should be in LettErrorRobot-Chrome')
+##        # LettError sample
+##        y = 550
+##        justFace = pdfmetrics.EmbeddedType1Face('LeERC___.AFM','LeERC___.PFB')
+##
+##        faceName = 'LettErrorRobot-Chrome'  # pulled from AFM file
+##        pdfmetrics.registerTypeFace(justFace)
+##
+##        justFont = pdfmetrics.Font('LettErrorRobot-Chrome', faceName, 'WinAnsiEncoding')
+##        pdfmetrics.registerFont(justFont)
+##
+##        c.setFont('LettErrorRobot-Chrome', 12)
+##        c.drawString(100, y, 'This should be in LettErrorRobot-Chrome')
 
 
         c.save()
