@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/userguide/ch1_intro.py,v 1.15 2002/08/13 15:48:54 johnprecedo Exp $
+#$Header: /tmp/reportlab/docs/userguide/ch1_intro.py,v 1.16 2002/08/13 16:13:15 johnprecedo Exp $
 from rl_doc_utils import *
 import reportlab
 
@@ -366,7 +366,7 @@ just want to help out, let us know!""")
 disc("""The first step for anyone wanting to learn more or
 get involved is to join the mailing list.  Just send an email
 with the subject "Subscribe" to
-$reportlab-users@reportlab.com$.  You can also browse
+$reportlab-users-request@reportlab.com$.  You can also browse
 through the group's archives and contributions at
 $http://two.pairlist.net/mailman/listinfo/reportlab-users$.  This list is
 the place to report bugs and get support. """)

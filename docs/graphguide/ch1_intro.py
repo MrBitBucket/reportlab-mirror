@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch1_intro.py,v 1.9 2001/08/11 14:33:58 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/graphguide/ch1_intro.py,v 1.10 2002/08/13 16:13:14 johnprecedo Exp $
 from rl_doc_utils import *
 import reportlab
 
@@ -41,7 +41,7 @@ todo("""
 Be warned! This document is in a <em>very</em> preliminary form.
 We need your help to make sure it is complete and helpful.
 Please send any feedback to our user mailing list,
-reportlab-users@yahoogroups.com.
+reportlab-users@reportlab.com.
 """)
 
 
@@ -373,9 +373,9 @@ disc("""
 The first step for anyone wanting to learn more or
 get involved is to join the mailing list.
 Just send an email with the subject "Subscribe" to
-$reportlab-users-subscribe@yahoogroups.com$.
-You can also browse through the group's archives and
-contributions at $http://www.yahoogroups.com/group/reportlab-users$.
+$reportlab-users-request@reportlab.com$.
+You can also join or browse through the group's archives and
+contributions at $http://two.pairlist.net/mailman/listinfo/reportlab-users$.
 This list is the place to report bugs and get support.
 """)
 
