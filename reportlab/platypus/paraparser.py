@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.46 2002/07/17 22:46:24 andy_robinson Exp $
-__version__=''' $Id: paraparser.py,v 1.46 2002/07/17 22:46:24 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.47 2002/07/24 19:56:38 andy_robinson Exp $
+__version__=''' $Id: paraparser.py,v 1.47 2002/07/24 19:56:38 andy_robinson Exp $ '''
 import string
 import re
 from types import TupleType
@@ -171,7 +171,7 @@ class ParaFrag(ABag):
 #       <font name=fontfamily/fontname color=colorname size=float>
 #       < bullet > </bullet> - bullet text (at head of para only)
 #       <onDraw name=callable label="a label">
-#   
+#
 #       The whole may be surrounded by <para> </para> tags
 #
 # It will also be able to handle any MathML specified Greek characters.
@@ -308,7 +308,7 @@ class ParaParser(xmllib.XMLParser):
 
 
     #---------------------------------------------------------------
-        
+
     def start_seqdefault(self, attr):
         try:
             default = attr['id']
@@ -318,7 +318,7 @@ class ParaParser(xmllib.XMLParser):
 
     def end_seqdefault(self):
         pass
-    
+
     def start_seqreset(self, attr):
         try:
             id = attr['id']
@@ -340,14 +340,14 @@ class ParaParser(xmllib.XMLParser):
 
     def end_seqDefault(self):
         self.end_seqdefault()
-        
+
     def start_seqReset(self, attr):
         self.start_seqreset(attr)
 
     def end_seqReset(self):
         self.end_seqreset()
 
-    
+
     def start_seq(self, attr):
         #if it has a template, use that; otherwise try for id;
         #otherwise take default sequence
@@ -357,11 +357,11 @@ class ParaParser(xmllib.XMLParser):
             return
         elif attr.has_key('id'):
             id = attr['id']
-        else: 
+        else:
             id = None
         output = self._seq.nextf(id)
         self.handle_data(output)
-        
+
     def end_seq(self):
         pass
 
@@ -433,7 +433,7 @@ class ParaParser(xmllib.XMLParser):
             for item in greeks.keys():
                 self.entitydefs[item] = '<%s/>' % item
 
-        
+
 
     def _iReset(self):
         self.fragList = []

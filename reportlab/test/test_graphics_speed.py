@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_graphics_speed.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_graphics_speed.py,v 1.11 2002/07/04 09:24:49 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_graphics_speed.py,v 1.12 2002/07/24 19:56:38 andy_robinson Exp $
 """
 This does a test drawing with lots of things in it, running
 with and without attribute checking.
@@ -26,7 +26,7 @@ from reportlab.graphics.charts.piecharts import Pie
 
 class GraphicsSpeedTestCase(unittest.TestCase):
     "Test speed of the graphics rendering process."
-    
+
     def test0(self, isFast=0):
         """Hello World, on a rectangular background.
 
@@ -34,7 +34,7 @@ class GraphicsSpeedTestCase(unittest.TestCase):
         The string's fillColor is red.
         """
         reportlab.rl_config.shapeChecking = not isFast
-            
+
         pdfPath = 'test_graphics_speed_fast.pdf'
         c = Canvas(pdfPath)
         t0 = time.time()
@@ -57,8 +57,8 @@ class GraphicsSpeedTestCase(unittest.TestCase):
         d.drawOn(c, 80, 500)
 
         t1 = time.time()
-        
-        result = 'drew %d pie charts in %0.4f' % (num, t1 - t0) 
+
+        result = 'drew %d pie charts in %0.4f' % (num, t1 - t0)
         open('test_graphics_speed_test%s.log' % (isFast+1), 'w').write(result)
 
 
@@ -67,7 +67,7 @@ class GraphicsSpeedTestCase(unittest.TestCase):
 
         self.test0(isFast)
 
-        
+
     def test2(self):
         "This is a profiled version of test1()."
 

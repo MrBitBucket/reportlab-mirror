@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/stdfonts/stdfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/stdfonts/stdfonts.py,v 1.11 2002/07/17 20:58:39 andy_robinson Exp $
-__version__=''' $Id: stdfonts.py,v 1.11 2002/07/17 20:58:39 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/stdfonts/stdfonts.py,v 1.12 2002/07/24 19:56:35 andy_robinson Exp $
+__version__=''' $Id: stdfonts.py,v 1.12 2002/07/24 19:56:35 andy_robinson Exp $ '''
 __doc__="""
 This generates tables showing the 14 standard fonts in both
 WinAnsi and MacRoman encodings, and their character codes.
@@ -24,14 +24,14 @@ label_formats = {'dec':('%d=', 'Decimal'),
 def run(mode):
 
     label_formatter, caption = label_formats[mode]
-    
+
     for enc in ['MacRoman', 'WinAnsi']:
         canv = canvas.Canvas(
                 'StandardFonts_%s.pdf' % enc,
                 encoding=enc
                 )
         canv.setPageCompression(0)
-        
+
         for faceName in pdfmetrics.standardFonts:
             if faceName in ['Symbol', 'ZapfDingbats']:
                 encLabel = 'StandardEncoding'
@@ -43,13 +43,13 @@ def run(mode):
                                         faceName,
                                         encLabel)
                         )
-                
+
             canv.setFont('Times-Bold', 18)
             canv.drawString(80, 744, fontName)
             canv.setFont('Times-BoldItalic', 12)
             canv.drawRightString(515, 744, 'Labels in ' + caption)
-            
-            
+
+
             #for dingbats, we need to use another font for the numbers.
             #do two parallel text objects.
             if faceName == 'ZapfDingbats':
@@ -64,7 +64,7 @@ def run(mode):
                 canv.drawString(x, y, label_formatter % byt)
                 canv.setFont(fontName, 14)
                 canv.drawString(x + 44, y , chr(byt))
-            canv.showPage()            
+            canv.showPage()
         canv.save()
 
 if __name__ == '__main__':
@@ -72,10 +72,9 @@ if __name__ == '__main__':
         mode = string.lower(sys.argv[1])
         if mode not in ['dec','oct','hex']:
             print __doc__
-            
+
     elif len(sys.argv) == 1:
         mode = 'dec'
         run(mode)
     else:
         print __doc__
-    

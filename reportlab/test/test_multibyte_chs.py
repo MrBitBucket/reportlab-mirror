@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/test_multibyte_chs.py,v 1.3 2002/07/04 09:24:49 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_multibyte_chs.py,v 1.4 2002/07/24 19:56:38 andy_robinson Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -24,7 +24,7 @@ VERBOSE = 0
 
 
 class CHSFontTests(unittest.TestCase):
-    
+
     def test0(self):
         "A basic document drawing some strings"
 
@@ -39,7 +39,7 @@ class CHSFontTests(unittest.TestCase):
             #they don't have the font pack, return silently
             return
         pdfmetrics.registerFont(CIDFont('STSong-Light',enc))
-    
+
         c = Canvas('test_multibyte_chs.pdf')
         c.setFont('Helvetica', 30)
         c.drawString(100,700, 'Simplified Chinese Font Support')
@@ -55,7 +55,7 @@ class CHSFontTests(unittest.TestCase):
                  660,
                  'STSong-Light',
                  enc)
-        
+
 
         c.setFont('Helvetica', 10)
         tx = c.beginText(100, 500)
@@ -83,11 +83,11 @@ class CHSFontTests(unittest.TestCase):
             "GB-EUC-H".  This is the GB 2312-80 character set.
             """)
         c.drawText(tx)
-        
+
         c.setFont('Helvetica',10)
         c.drawCentredString(297, 36, 'Page %d' % c.getPageNumber())
         c.showPage()
-        
+
         # full kuten chart in EUC
         c.setFont('Helvetica', 18)
         c.drawString(72,750, 'Characters available in GB 2312-80, EUC encoding')
@@ -114,4 +114,3 @@ def makeSuite():
 if __name__ == "__main__":
     VERBOSE = 1
     unittest.TextTestRunner().run(makeSuite())
-

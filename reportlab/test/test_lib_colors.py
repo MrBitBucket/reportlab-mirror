@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_lib_colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_lib_colors.py,v 1.7 2002/07/04 09:24:49 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_lib_colors.py,v 1.8 2002/07/24 19:56:38 andy_robinson Exp $
 """Tests for the reportlab.lib.colors module.
 """
 
@@ -20,11 +20,11 @@ from reportlab.lib.units import inch, cm
 def framePage(canvas, title):
     canvas.setFont('Times-BoldItalic',20)
     canvas.drawString(inch, 10.5 * inch, title)
-                            
+
     canvas.setFont('Times-Roman',10)
     canvas.drawCentredString(4.135 * inch, 0.75 * inch,
                             'Page %d' % canvas.getPageNumber())
-    
+
     #draw a border
     canvas.setStrokeColorRGB(1,0,0)
     canvas.setLineWidth(5)
@@ -36,7 +36,7 @@ def framePage(canvas, title):
 
 class ColorTestCase(unittest.TestCase):
     ""
-    
+
     def test0(self):
         "Test color2bw function on all named colors."
 
@@ -45,7 +45,7 @@ class ColorTestCase(unittest.TestCase):
             gray = colors.color2bw(col)
             r, g, b = gray.red, gray.green, gray.blue
             assert r == g == b
-    
+
 
     def test1(self):
         "Test colorDistance function."
@@ -61,7 +61,7 @@ class ColorTestCase(unittest.TestCase):
 
         allRed = [colors.red, [1, 0, 0], (1, 0, 0),
                   'red', 'RED', '0xFF0000', '0xff0000']
-        
+
         for thing in allRed:
             assert colors.toColor(thing) == colors.red
 
@@ -80,7 +80,7 @@ class ColorTestCase(unittest.TestCase):
             c, m, y, k = colors.rgb2cmyk(r1, g1, b1)
             r2, g2, b2 = colors.cmyk2rgb((c, m, y, k))
             rgbCol2 = colors.Color(r2, g2, b2)
-            
+
             # Make sure the differences for each RGB component
             # isreally small (< power(10, -N)!
             N = 16 # max. value found to work on Python2.0 and Win2K.
@@ -91,7 +91,7 @@ class ColorTestCase(unittest.TestCase):
         "Construct CMYK instances and test round trip conversion"
 
         rgbCols = colors.getAllNamedColors().items()
-        
+
         # Make a roundtrip test (RGB > CMYK > RGB).
         for name, rgbCol in rgbCols:
             r1, g1, b1 = rgbCol.red, rgbCol.green, rgbCol.blue
@@ -99,7 +99,7 @@ class ColorTestCase(unittest.TestCase):
             cmykCol = colors.CMYKColor(c,m,y,k)
             r2, g2, b2 = cmykCol.red, cmykCol.green, cmykCol.blue #colors.cmyk2rgb((c, m, y, k))
             rgbCol2 = colors.Color(r2, g2, b2)
-            
+
             # Make sure the differences for each RGB component
             # isreally small (< power(10, -N)!
             N = 16 # max. value found to work on Python2.0 and Win2K.
@@ -109,9 +109,9 @@ class ColorTestCase(unittest.TestCase):
 
     def test5(self):
         "List and display all named colors and their gray equivalents."
-        
+
         canvas = reportlab.pdfgen.canvas.Canvas('test_lib_colors.pdf')
-        
+
         #do all named colors
         framePage(canvas, 'Color Demo - page %d' % canvas.getPageNumber())
 
@@ -124,7 +124,7 @@ class ColorTestCase(unittest.TestCase):
         canvas.drawString(200,725,'Pure RGB')
         canvas.drawString(300,725,'B&W Approx')
         canvas.drawString(400,725,'CMYK Approx')
-        
+
         y = 700
         for (name, color) in all_colors:
             canvas.setFillColor(colors.black)
@@ -138,7 +138,7 @@ class ColorTestCase(unittest.TestCase):
             CMYK = colors.CMYKColor(c,m,yel,k)
             canvas.setFillColor(CMYK)
             canvas.rect(400, y-10, 80, 30, fill=1)
-            
+
             y = y - 40
             if y < 100:
                 canvas.showPage()
@@ -150,7 +150,7 @@ class ColorTestCase(unittest.TestCase):
                 canvas.drawString(400,725,'CMYK Approx')
 
         canvas.save()
-        
+
 
 def makeSuite():
     return makeSuiteForClasses(ColorTestCase)

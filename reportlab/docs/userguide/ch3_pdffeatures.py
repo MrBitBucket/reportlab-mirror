@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch3_pdffeatures.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch3_pdffeatures.py,v 1.2 2001/10/27 22:37:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch3_pdffeatures.py,v 1.3 2002/07/24 19:56:35 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 
 
@@ -25,7 +25,7 @@ disc("""Forms do not need to refer to a whole page; anything which
 disc("""The example below shows the basic sequence used.  A real
     program would probably define the forms up front and refer to
     them from another location.""")
-    
+
 
 eg(examples.testforms)
 
@@ -41,12 +41,12 @@ disc("""PDF supports internal hyperlinks.  There is a very wide
 eg("""
  canvas.bookmarkPage(name)
  canvas.bookmarkHorizontalAbsolute(name, yhorizontal)""")
- 
+
 disc("""
     The $bookmarkPage$ method bookmarks the entire page.
     After jumping to an endpoint defined by $bookmarkPage$ the
     PDF browser will display the whole page on the screen.""")
-    
+
 disc("""
     By contrast, $bookmarkHorizontalAbsolute$ defines a destination
     associated with a horizontal position on a page.  When the PDF browser
@@ -67,7 +67,7 @@ ignores any modified geometric transform in effect in the canvas graphics state.
 eg("""
  canvas.linkAbsolute(contents, destinationname, Rect=None, addtopage=1, name=None, **kw)
  """)
- 
+
 disc("""
     The $linkAbsolute$ method defines a starting point for a jump.  When the user
     is browsing the generated document using a dynamic viewer (such as Acrobat Reader)
@@ -97,7 +97,7 @@ $Meaning_of_life$.  And the invocation (???)
 """)
 
 eg("""
- canvas.linkAbsolute("Find the Meaning of Life", "Meaning_of_life", 
+ canvas.linkAbsolute("Find the Meaning of Life", "Meaning_of_life",
                      (inch, inch, 6*inch, 2*inch))
 """)
 
@@ -110,7 +110,7 @@ For example
 """)
 
 eg("""
- canvas.linkAbsolute("Meaning of Life", "Meaning_of_life", 
+ canvas.linkAbsolute("Meaning of Life", "Meaning_of_life",
                      (inch, inch, 6*inch, 2*inch), Border='[0 0 0]')
 """)
 
@@ -135,7 +135,7 @@ disc("""^title^ is the caption which will be displayed in
      heading).  Finally, the ^closed^ argument specifies
     whether the node in the outline pane is closed
     or opened by default.""")
-    
+
 disc("""The snippet below is taken from the document template
     that formats this user guide.  A central processor looks
     at each paragraph in turn, and makes a new outline entry
@@ -146,7 +146,7 @@ disc("""The snippet below is taken from the document template
     outline entry points aims at the whole page, but it could
     as easily have been an individual paragraph.
     """)
-    
+
 eg("""
 #abridged code from our document template
 if paragraph.style == 'Heading1':
@@ -156,15 +156,15 @@ if paragraph.style == 'Heading1':
     self.canv.addOutlineEntry(paragraph.getPlainText(),
                                             key, 0, 0)
     """)
-    
+
 heading2("Page Transition Effects")
 
 
 eg("""
- canvas.setPageTransition(self, effectname=None, duration=1, 
+ canvas.setPageTransition(self, effectname=None, duration=1,
                         direction=0,dimension='H',motion='I')
                         """)
-                        
+
 disc("""
 The $setPageTransition$ method specifies how one page will be replaced with
 the next.  By setting the page transition effect to "dissolve" for example
@@ -181,7 +181,7 @@ eg("""
  canvas.setTitle(title)
  canvas.setSubject(subj)
  """)
- 
+
 disc("""
 These methods have no automatically seen visible effect on the document.
 They add internal annotations to the document.  These annotations can be
@@ -202,4 +202,3 @@ document like any other text.
 """)
 
 illust(examples.annotations, "Setting document internal annotations")
- 

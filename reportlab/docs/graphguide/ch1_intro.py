@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/graphguide/ch1_intro.py,v 1.5 2001/11/08 17:30:21 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/docs/graphguide/ch1_intro.py,v 1.6 2002/07/24 19:56:35 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 import reportlab
 
@@ -22,7 +22,7 @@ heading1("Introduction")
 
 heading2("About this document")
 disc("""
-This document is intended to be a helpful and reasonably full 
+This document is intended to be a helpful and reasonably full
 introduction to the use of the ReportLab Graphics sub-package.
 Starting with simple drawings and shapes, we will take you through the
 slightly more complex reusable widgets all the way through to our
@@ -39,8 +39,8 @@ talks you through all the required steps.
 """)
 
 disc("""
-We recommend that you read some or all of the User Guide and have at 
-least a basic understanding of how the ReportLab library works before 
+We recommend that you read some or all of the User Guide and have at
+least a basic understanding of how the ReportLab library works before
 you start getting to grips with ReportLab Graphics.
 """)
 
@@ -104,5 +104,4 @@ $reportlab-users-subscribe@egroups.com$.  You can also browse
 through the group's archives and contributions at
 $http://www.egroups.com/group/reportlab-users$.  This list is
 the place to report bugs and get support. """)
-
 

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/yaml2pdf.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/yaml2pdf.py,v 1.1 2001/10/27 22:37:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/yaml2pdf.py,v 1.2 2002/07/24 19:56:39 andy_robinson Exp $
 # yaml2pdf - turns stuff in Yet Another Markup Language
 # into PDF documents.  Very crude - it assumes a
 # doc template and stylesheet (hard coded for now)
@@ -36,7 +36,7 @@ def run(infilename, outfilename):
     results = p.parseFile(infilename)
 
     ss = getStyleSheet()
-    
+
     #now make flowables from the results
     story = []
     for thingy in results:
@@ -80,14 +80,14 @@ def run(infilename, outfilename):
             assert found, "Custom object module %s not found" % moduleName
             (file, pathname, description) = found
             mod = imp.load_module(moduleName, file, pathname, description)
-        
+
             #now get the function
             func = getattr(mod, funcName)
             story.append(func())
-            
+
         else:
             print 'skipping',typ, 'for now'
-            
+
 
     #print it
     doc = RLDocTemplate(outfilename, pagesize=A4)

@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/graphdocpy.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.18 2002/07/17 23:45:36 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/graphdocpy.py,v 1.19 2002/07/24 19:56:39 andy_robinson Exp $
 
 """Generate documentation for reportlab.graphics classes.
 
@@ -67,14 +67,14 @@ VERIFY = 1
 _abstractclasserr_re = re.compile(r'^\s*abstract\s*class\s*(\w+)\s*instantiated',re.I)
 
 ####################################################################
-# 
+#
 # Stuff needed for building PDF docs.
-# 
+#
 ####################################################################
 
 def mainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
-    
+
     canvas.saveState()
 
     pageNumber = canvas.getPageNumber()
@@ -92,13 +92,13 @@ def mainPageFrame(canvas, doc):
     canvas.drawString(2*cm, 1.65*cm, msg)
 
     canvas.restoreState()
-    
+
 
 class MyTemplate(BaseDocTemplate):
     "The document template used for all PDF documents."
-    
+
     _invalidInitArgs = ('pageTemplates',)
-    
+
     def __init__(self, filename, **kw):
         frame1 = Frame(2.5*cm, 2.5*cm, 15*cm, 25*cm, id='F1')
         self.allowSplitting = 0
@@ -138,7 +138,7 @@ class MyTemplate(BaseDocTemplate):
                 key = str(hash(f))
                 lev = int(f.style.name[7:])
                 try:
-                    if lev == 0: 
+                    if lev == 0:
                         isClosed = 0
                     else:
                         isClosed = 1
@@ -152,13 +152,13 @@ class MyTemplate(BaseDocTemplate):
                         traceback.print_exc()
                     else:
                         pass
-                    
+
 
 
 ####################################################################
-# 
+#
 # Utility functions
-# 
+#
 ####################################################################
 
 def indentLevel(line, spacesPerTab=4):
@@ -215,7 +215,7 @@ def getSource(name):
                 fullPath = os.path.join(rlgdir, name)
                 if os.path.isfile(fullPath):
                     found = fullPath
-                
+
     if found:
         return open(found).readlines()
     else:
@@ -239,7 +239,7 @@ def getFunctionBody(f, linesInFile):
         #it's a method, drill down and get its function
         f = f.im_func
 
-    extracted = []    
+    extracted = []
     firstLineNo = f.func_code.co_firstlineno - 1
     startingIndent = indentLevel(linesInFile[firstLineNo])
     extracted.append(linesInFile[firstLineNo])
@@ -262,9 +262,9 @@ def getFunctionBody(f, linesInFile):
     return string.join(extracted, '\n')
 
 ####################################################################
-# 
+#
 # Special-purpose document builders
-# 
+#
 ####################################################################
 
 class GraphPdfDocBuilder0(PdfDocBuilder0):
@@ -314,12 +314,12 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
             self.outPath = self.skeleton.getModuleName() + self.fileSuffix
         else:
             self.outPath = ''
-        
+
         if self.outPath:
             doc = MyTemplate(self.outPath)
             doc.multiBuild(self.story)
 
-        
+
     def beginModule(self, name, doc, imported):
         story = self.story
         bt = self.bt
@@ -340,7 +340,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
             self.shouldDisplayClasses = names
 
 
-    # Skip all methods.    
+    # Skip all methods.
     def beginMethod(self, name, doc, sig):
         pass
 
@@ -410,7 +410,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
 
     def endClass(self, name, doc, bases):
         "Append a graphic demo of a Widget or Drawing at the end of a class."
-        
+
         PdfDocBuilder0.endClass(self, name, doc, bases)
 
         aClass = eval('self.skeleton.moduleSpace.' + name)
@@ -427,14 +427,14 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
             self.story.append(Spacer(0*cm, 0.5*cm))
             self._showWidgetDemo(widget)
             self.story.append(Spacer(0*cm, 0.5*cm))
-            self._showWidgetProperties(widget)            
+            self._showWidgetProperties(widget)
             self.story.append(PageBreak())
         elif issubclass(aClass, Drawing):
             drawing = aClass()
             self.story.append(Spacer(0*cm, 0.5*cm))
             self._showDrawingCode(drawing)
             self.story.append(Spacer(0*cm, 0.5*cm))
-            self._showDrawingDemo(drawing)            
+            self._showDrawingDemo(drawing)
             self.story.append(Spacer(0*cm, 0.5*cm))
 
 
@@ -444,7 +444,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
             PdfDocBuilder0.beginFunctions(self, names)
 
 
-    # Skip non-sample functions.    
+    # Skip non-sample functions.
     def beginFunction(self, name, doc, sig):
         "Skip function for 'uninteresting' names."
 
@@ -457,13 +457,13 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
 
         if name[:6] != 'sample':
             return
-        
+
         if VERBOSE:
             print 'GraphPdfDocBuilder.endFunction(%s...)' % name
-        PdfDocBuilder0.endFunction(self, name, doc, sig)    
+        PdfDocBuilder0.endFunction(self, name, doc, sig)
         aFunc = eval('self.skeleton.moduleSpace.' + name)
         drawing = aFunc()
-    
+
         self.story.append(Spacer(0*cm, 0.5*cm))
         self._showFunctionDemoCode(aFunc)
         self.story.append(Spacer(0*cm, 0.5*cm))
@@ -475,10 +475,10 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
     def _showFunctionDemoCode(self, function):
         """Show a demo code of the function generating the drawing."""
 
-        
+
         srcFileName = function.func_code.co_filename
         (dirname, fileNameOnly) = os.path.split(srcFileName)
-        
+
         # Heading
         self.story.append(Paragraph("<i>Example</i>", self.bt))
         self.story.append(Paragraph("", self.bt))
@@ -533,7 +533,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
 
         # Get a demo drawing from the widget and add it to the story.
         # Ignored if no GD rendering available
-        # or the demo method does not return a drawing.        
+        # or the demo method does not return a drawing.
         try:
             if VERIFY:
                 widget.verify()
@@ -571,7 +571,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         except IOError:
             print 'documenting method %s of class %s running in %s' % (demoMethod.im_func.func_code.co_filename, widgetClass, os.getcwd())
             raise
-            
+
         lines = map(string.rstrip, lines)
         codeSample = getFunctionBody(demoMethod, lines)
         self.story.append(Preformatted(codeSample, self.code))
@@ -579,7 +579,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
 
     def _showWidgetProperties(self, widget):
         """Dump all properties of a widget."""
-        
+
         props = widget.getProperties()
         keys = props.keys()
         keys.sort()
@@ -592,7 +592,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
             value = f.getvalue()[:-1]
             valueLines = string.split(value, '\n')
             for i in range(1, len(valueLines)):
-                valueLines[i] = ' '*(len(key)+3) + valueLines[i]    
+                valueLines[i] = ' '*(len(key)+3) + valueLines[i]
             value = string.join(valueLines, '\n')
 
             lines.append('%s = %s' % (key, value))
@@ -625,7 +625,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
             self.shouldDisplayClasses = names
 
 
-    # Skip all methods.    
+    # Skip all methods.
     def beginMethod(self, name, doc, sig):
         pass
 
@@ -636,7 +636,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
 
     def beginClass(self, name, doc, bases):
         "Append a graphic demo of a widget at the end of a class."
-        
+
         aClass = eval('self.skeleton.moduleSpace.' + name)
         if issubclass(aClass, Widget):
             if self.shouldDisplayModule:
@@ -648,18 +648,18 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
                 if self.shouldDisplayClasses:
                     self.outLines.append('<H2>Classes</H2>')
                     self.shouldDisplayClasses = 0
-                
+
             HtmlDocBuilder0.beginClass(self, name, doc, bases)
 
 
     def endClass(self, name, doc, bases):
         "Append a graphic demo of a widget at the end of a class."
-        
+
         HtmlDocBuilder0.endClass(self, name, doc, bases)
 
         aClass = eval('self.skeleton.moduleSpace.' + name)
         if issubclass(aClass, Widget):
-            widget = aClass()            
+            widget = aClass()
             self._showWidgetDemoCode(widget)
             self._showWidgetDemo(widget)
             self._showWidgetProperties(widget)
@@ -670,7 +670,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
             HtmlDocBuilder0.beginFunctions(self, names)
 
 
-    # Skip non-sample functions.    
+    # Skip non-sample functions.
     def beginFunction(self, name, doc, sig):
         "Skip function for 'uninteresting' names."
 
@@ -683,11 +683,11 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
 
         if name[:6] != 'sample':
             return
-        
-        HtmlDocBuilder0.endFunction(self, name, doc, sig)    
+
+        HtmlDocBuilder0.endFunction(self, name, doc, sig)
         aFunc = eval('self.skeleton.moduleSpace.' + name)
         drawing = aFunc()
-    
+
         self._showFunctionDemoCode(aFunc)
         self._showDrawingDemo(drawing, aFunc.__name__)
 
@@ -747,7 +747,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
             self.outLines.append(makeHtmlInlineImage(path))
         except:
             if VERBOSE:
-                
+
                 print 'caught exception in GraphHTMLDocBuilder._showWidgetDemo'
                 traceback.print_exc()
             else:
@@ -776,7 +776,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
 
     def _showWidgetProperties(self, widget):
         """Dump all properties of a widget."""
-        
+
         props = widget.getProperties()
         keys = props.keys()
         keys.sort()
@@ -790,7 +790,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
             value = f.getvalue()[:-1]
             valueLines = string.split(value, '\n')
             for i in range(1, len(valueLines)):
-                valueLines[i] = ' '*(len(key)+3) + valueLines[i]    
+                valueLines[i] = ' '*(len(key)+3) + valueLines[i]
             value = string.join(valueLines, '\n')
 
             lines.append('%s = %s' % (key, value))
@@ -812,7 +812,7 @@ class PlatypusDocBuilder0(DocBuilder0):
         self.bt = styleSheet['BodyText']
         self.story = []
 
-        
+
     def end(self):
         if self.packageName:
             self.outPath = self.packageName + self.fileSuffix
@@ -820,11 +820,11 @@ class PlatypusDocBuilder0(DocBuilder0):
             self.outPath = self.skeleton.getModuleName() + self.fileSuffix
         else:
             self.outPath = ''
-        
+
         if self.outPath:
             f = open(self.outPath, 'w')
             pickle.dump(self.story, f)
-            
+
 
     def beginPackage(self, name):
         DocBuilder0.beginPackage(self, name)
@@ -875,14 +875,14 @@ class PlatypusDocBuilder0(DocBuilder0):
 
 
 ####################################################################
-# 
+#
 # Main
-# 
+#
 ####################################################################
 
 def printUsage():
     """graphdocpy.py - Automated documentation for the RL Graphics library.
-    
+
 Usage: python graphdocpy.py [options]
 
     [options]
@@ -953,19 +953,19 @@ def documentModule0(pathOrName, builder, opts={}):
     if dirName:
         modname = os.path.basename(modname)
 
-    # Load the module.    
+    # Load the module.
     try:
         module = __import__(modname)
     except:
         print 'Failed to import %s.' % modname
         os.chdir(cwd)
         return
-    
+
     # Do the real documentation work.
     s = ModuleSkeleton0()
     s.inspect(module)
     builder.write(s)
-    
+
     # Remove appended directory from Python search path if we got one.
     if dirName:
         del sys.path[-1]
@@ -978,9 +978,9 @@ def _packageWalkCallback((builder, opts), dirPath, files):
     #must CD into a directory to document the module correctly
     cwd = os.getcwd()
     os.chdir(dirPath)
-    
-    
-    # Skip __init__ files.    
+
+
+    # Skip __init__ files.
     files = filter(lambda f:f != '__init__.py', files)
 
     files = filter(lambda f:f[-3:] == '.py', files)
@@ -994,14 +994,14 @@ def _packageWalkCallback((builder, opts), dirPath, files):
         builder.indentLevel = builder.indentLevel - 1
     #CD back out
     os.chdir(cwd)
-    
+
 def documentPackage0(pathOrName, builder, opts={}):
     """Generate documentation for one Python package in some format.
 
     'pathOrName' can be either a filesystem path leading to a Python
     package or package name whose path will be resolved by importing
     the top-level module.
-    
+
     The doc file will always be saved in the current directory with
     a basename equal to that of the package, e.g. reportlab.lib.
     """
@@ -1030,7 +1030,7 @@ def documentPackage0(pathOrName, builder, opts={}):
 
 def main():
     "Handle command-line options and trigger corresponding action."
-    
+
     opts, args = getopt.getopt(sys.argv[1:], 'hsf:m:p:')
 
     # Make an options dictionary that is easier to use.
@@ -1038,7 +1038,7 @@ def main():
     for k, v in opts:
         optsDict[k] = v
     hasOpt = optsDict.has_key
-        
+
     # On -h print usage and exit immediately.
     if hasOpt('-h'):
         print printUsage.__doc__
@@ -1046,7 +1046,7 @@ def main():
 
     # On -s set silent mode.
     isSilent = hasOpt('-s')
-    
+
     # On -f set the appropriate DocBuilder to use or a default one.
     builder = { 'Pdf': GraphPdfDocBuilder0,
                 'Html': GraphHtmlDocBuilder0,
@@ -1058,7 +1058,7 @@ def main():
 
     # Save a few options for further use.
     options = {'isSilent':isSilent}
-    
+
     # Now call the real documentation functions.
     if hasOpt('-m'):
         nameOrPath = optsDict['-m']

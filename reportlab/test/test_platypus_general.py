@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/test/testplatypus.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.9 2002/07/04 09:24:49 dinu_gherman Exp $
-__version__=''' $Id: test_platypus_general.py,v 1.9 2002/07/04 09:24:49 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_general.py,v 1.10 2002/07/24 19:56:38 andy_robinson Exp $
+__version__=''' $Id: test_platypus_general.py,v 1.10 2002/07/24 19:56:38 andy_robinson Exp $ '''
 
 #tests and documents Page Layout API
 __doc__="""This is not obvious so here's a brief explanation.  This module is both
@@ -48,12 +48,12 @@ def framePage(canvas,doc):
 
     canvas.setFont('Times-Italic',12)
     canvas.drawRightString(523, PAGE_HEIGHT - 56, "Platypus User Guide and Test Script")
-    
+
     canvas.setFont('Times-Roman',12)
     canvas.drawString(4 * inch, 0.75 * inch,
                         "Page %d" % canvas.getPageNumber())
     canvas.restoreState()
-    
+
 def getParagraphs(textBlock):
     """Within the script, it is useful to whack out a page in triple
     quotes containing separate paragraphs. This breaks one into its
@@ -79,7 +79,7 @@ def getCommentary():
     """Returns the story for the commentary - all the paragraphs."""
 
     styleSheet = getSampleStyleSheet()
-    
+
     story = []
     story.append(Paragraph("""
         PLATYPUS User Guide and Test Script
@@ -96,7 +96,7 @@ def getCommentary():
     This document is both the user guide and the output of the test script.
     In other words, a script used platypus to create the document you are now
     reading, and the fact that you are reading it proves that it works.  Or
-    rather, that it worked for this script anyway.  It is a first release!  
+    rather, that it worked for this script anyway.  It is a first release!
 
     Platypus is built 'on top of' PDFgen, the Python library for creating PDF
     documents.  To learn about PDFgen, read the document testpdfgen.pdf.
@@ -137,7 +137,7 @@ def getCommentary():
     #######################################################################
     #     Commentary Page 2
     #######################################################################
-    
+
     story.append(Paragraph("""
         Flowable Objects
         """, styleSheet['Heading2']))
@@ -204,7 +204,7 @@ def getCommentary():
             styleSheet['Definition'],
             bulletText='XBox  '  #hack - spot the extra space after
             ))
-        
+
     story.append(Paragraph("""
         This is the basic unit of a document.  Paragraphs can be finely
         tuned and offer a host of properties through their associated
@@ -212,7 +212,7 @@ def getCommentary():
             styleSheet['Definition'],
             bulletText='Paragraph  '  #hack - spot the extra space after
             ))
-    
+
     story.append(Paragraph("""
         This is used for printing code and other preformatted text.
         There is no wrapping, and line breaks are taken where they occur.
@@ -229,7 +229,7 @@ def getCommentary():
             styleSheet['Definition'],
             bulletText='Image  '  #hack - spot the extra space after
             ))
-        
+
     story.append(Paragraph("""
         This is a table drawing class; it is intended to be simpler
         than a full HTML table model yet be able to draw attractive output,
@@ -271,7 +271,7 @@ def getCommentary():
 def getExamples():
     """Returns all the example flowable objects"""
     styleSheet = getSampleStyleSheet()
-    
+
     story = []
 
     #make a style with indents and spacing
@@ -326,11 +326,11 @@ def getExamples():
     #######################################################################
     #     Examples Page 2
     #######################################################################
-    
+
     story.append(Paragraph("""
         Here's the base class for Flowable...
         """, styleSheet['Italic']))
-    
+
     code = '''class Flowable:
         """Abstract base class for things to be drawn.  Key concepts:
     1. It knows its size
@@ -341,7 +341,7 @@ def getExamples():
         self.width = 0
         self.height = 0
         self.wrapped = 0
-        
+
     def drawOn(self, canvas, x, y):
         "Tell it to draw itself on the canvas.  Do not override"
         self.canv = canvas
@@ -352,14 +352,14 @@ def getExamples():
 
         self.canv.restoreState()
         del self.canv
-        
+
     def wrap(self, availWidth, availHeight):
         """This will be called by the enclosing frame before objects
         are asked their size, drawn or whatever.  It returns the
         size actually used."""
         return (self.width, self.height)
     '''
-    
+
     story.append(platypus.Preformatted(code, styleSheet['Code'], dedent=4))
     story.append(FrameBreak())
     #######################################################################
@@ -369,10 +369,10 @@ def getExamples():
     story.append(Paragraph(
                 "Here are some examples of the remaining objects above.",
                 styleSheet['Italic']))
-    
+
     story.append(Paragraph("This is a bullet point", styleSheet['Bullet'], bulletText='O'))
     story.append(Paragraph("Another bullet point", styleSheet['Bullet'], bulletText='O'))
-    
+
     story.append(Paragraph(
                 "Here is an Image.  For now, these are always centred in the frame.",
                 styleSheet['Italic']))
@@ -389,7 +389,7 @@ def getExamples():
     story.append(Paragraph("""Here is a Table, which takes all kinds of formatting options...""",
                 styleSheet['Italic']))
     story.append(platypus.Spacer(0, 12))
-    
+
     g = platypus.Table(
             (('','North','South','East','West'),
              ('Quarter 1',100,200,300,400),
@@ -409,7 +409,7 @@ def getExamples():
     g.setStyle(style)
     story.append(g)
     story.append(FrameBreak())
-    
+
     #######################################################################
     #     Examples Page 4 - custom fonts
     #######################################################################
@@ -418,12 +418,12 @@ def getExamples():
     # custom font with LettError-Robot font
     import reportlab.rl_config
     reportlab.rl_config.warnOnMissingFontGlyphs = 0
-    
+
     from reportlab.pdfbase import pdfmetrics
     face = pdfmetrics.EmbeddedType1Face('../fonts/LeERC___.AFM','../fonts/LeERC___.PFB')
     faceName = face.name  # should be 'LettErrorRobot-Chrome'
     pdfmetrics.registerTypeFace(face)
-    font = pdfmetrics.Font(faceName, faceName, 'WinAnsiEncoding')       
+    font = pdfmetrics.Font(faceName, faceName, 'WinAnsiEncoding')
     pdfmetrics.registerFont(font)
 
 
@@ -439,12 +439,12 @@ def getExamples():
     styRobot.fontSize = 16
     styRobot.leading = 20
     styRobot.fontName = 'LettErrorRobot-Chrome'
-    
+
     story.append(Paragraph(
                 "This whole paragraph is 16-point Letterror-Robot-Chrome.",
                 styRobot))
     story.append(FrameBreak())
-    
+
 
     return story
 

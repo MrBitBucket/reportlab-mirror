@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/graphguide/ch2_concepts.py,v 1.4 2002/05/27 09:20:31 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/docs/graphguide/ch2_concepts.py,v 1.5 2002/07/24 19:56:35 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 
 heading1("General Concepts")
@@ -15,7 +15,7 @@ the graphics library, which will show-up later in various places.
 heading2("Drawings and Renderers")
 
 disc("""
-A <i>Drawing</i> is a platform-independent description of a collection of 
+A <i>Drawing</i> is a platform-independent description of a collection of
 shapes.
 It is not directly associated with PDF, Postscript or any other output
 format.
@@ -36,13 +36,13 @@ shapes.
 """)
 
 disc("""
-The package provides several <i>Renderers</i> which know how to draw a 
+The package provides several <i>Renderers</i> which know how to draw a
 drawing into different formats.
 These include PDF (of course), Postscript, and bitmap output.
 The bitmap renderer uses Raph Levien's <i>libart</i> rasterizer
 and Fredrik Lundh's <i>Python Imaging Library</i> (PIL).
-Very recently, an experimental SVG renderer was also added. 
-It makes use of Python's standard library XML modules, so you don't 
+Very recently, an experimental SVG renderer was also added.
+It makes use of Python's standard library XML modules, so you don't
 need to install the XML-SIG's additional package named PyXML.
 If you have the right extensions installed, you can generate drawings
 in bitmap form for the web as well as vector form for PDF documents,
@@ -60,21 +60,21 @@ a one-page PDF document quickly.
 
 disc("""
 The SVG renderer is special as it is still pretty experimental.
-The SVG code it generates is not really optimised in any way and 
+The SVG code it generates is not really optimised in any way and
 maps only the features available in ReportLab Graphics (RLG) to
 SVG. This means there is no support for SVG animation, interactivity,
-scripting or more sophisticated clipping, masking or graduation 
+scripting or more sophisticated clipping, masking or graduation
 shapes.
 So, be careful, and please report any bugs you find!
 """)
 
 disc("""
-We expect to add both input and output filters for many vector 
+We expect to add both input and output filters for many vector
 graphics formats in future.
 SVG was the most prominent first one to start with for which there
 is now an output filter in the graphics package.
 An SVG input filter will probably become available in Summer 2002
-as an additional module. 
+as an additional module.
 GUIs will be able to obtain screen images from the bitmap output
 filter working with PIL, so a chart could appear in a Tkinter
 GUI window.
@@ -87,7 +87,7 @@ disc("""
 The Y-direction in our X-Y coordinate system points from the
 bottom <i>up</i>.
 This is consistent with PDF, Postscript and mathematical notation.
-It also appears to be more natural for people, especially when 
+It also appears to be more natural for people, especially when
 working with charts.
 Note that in other graphics models (such as SVG) the Y-coordinate
 points <i>down</i>.
@@ -107,33 +107,33 @@ seems, for Arabs looking at time series charts...).
 heading2("Getting Started")
 
 disc("""
-Let's create a simple drawing containing the string "Hello World", 
+Let's create a simple drawing containing the string "Hello World",
 displayed on top of a coloured rectangle.
 After creating it we will save the drawing to a standalone PDF file.
 """)
 
 eg("""
     from reportlab.lib import colors
-    from reportlab.graphics.shapes import * 
- 
+    from reportlab.graphics.shapes import *
+
     d = Drawing(400, 200)
     d.add(Rect(50, 50, 300, 100, fillColor=colors.yellow))
     d.add(String(150,100, 'Hello World',
                  fontSize=18, fillColor=colors.red))
- 
-    from reportlab.graphics import renderPDF 
-    renderPDF.drawToFile(d, 'example1.pdf', 'My First Drawing') 
+
+    from reportlab.graphics import renderPDF
+    renderPDF.drawToFile(d, 'example1.pdf', 'My First Drawing')
 """)
 
 disc("This will produce a PDF file containing the following graphic:")
 
-from reportlab.graphics.shapes import * 
+from reportlab.graphics.shapes import *
 from reportlab.graphics import testshapes
 t = testshapes.getDrawing01()
 draw(t, "'Hello World'")
- 
+
 disc("""
-Each renderer is allowed to do whatever is appropriate for its format, 
+Each renderer is allowed to do whatever is appropriate for its format,
 and may have whatever API is needed.
 If it refers to a file format, it usually has a $drawToFile$ function,
 and that's all you need to know about the renderer.
@@ -141,12 +141,12 @@ Let's save the same drawing in Encapsulated Postscript format:
 """)
 
 ##eg("""
-##    from reportlab.graphics import renderPS 
-##    renderPS.drawToFile(D, 'example1.eps', 'My First Drawing') 
+##    from reportlab.graphics import renderPS
+##    renderPS.drawToFile(D, 'example1.eps', 'My First Drawing')
 ##""")
 eg("""
-    from reportlab.graphics import renderPS 
-    renderPS.drawToFile(d, 'example1.eps') 
+    from reportlab.graphics import renderPS
+    renderPS.drawToFile(d, 'example1.eps')
 """)
 
 disc("""
@@ -157,8 +157,8 @@ a website, say, all we need to do is write code like this:
 """)
 
 eg("""
-    from reportlab.graphics import renderPM 
-    renderPM.saveToFile(d, 'example1.png', 'PNG') 
+    from reportlab.graphics import renderPM
+    renderPM.saveToFile(d, 'example1.png', 'PNG')
 """)
 
 disc("""
@@ -174,8 +174,8 @@ all we need to do is write code like this:
 """)
 
 eg("""
-    from reportlab.graphics import renderSVG 
-    renderSVG.drawToFile(d, 'example1.svg') 
+    from reportlab.graphics import renderSVG
+    renderSVG.drawToFile(d, 'example1.svg')
 """)
 
 
@@ -202,9 +202,9 @@ be turned off when you need it to be.
 
 eg("""
 >>> r = Rect(10,10,200,100, fillColor=colors.red)
->>> 
->>> r.fullColor = colors.green # note the typo 
->>> r.x = 'not a number'       # illegal argument type 
+>>>
+>>> r.fullColor = colors.green # note the typo
+>>> r.x = 'not a number'       # illegal argument type
 >>> del r.width                # that should confuse it
 """)
 
@@ -220,16 +220,16 @@ would not know how to draw itself.
 """)
 
 eg("""
->>> r = shapes.Rect(10,10,200,80) 
->>> r.fullColor = colors.green 
+>>> r = shapes.Rect(10,10,200,80)
+>>> r.fullColor = colors.green
 Traceback (most recent call last):
-  File "<interactive input>", line 1, in ? 
+  File "<interactive input>", line 1, in ?
   File "C:\code\users\andy\graphics\shapes.py", line 254, in __setattr__
     validateSetattr(self,attr,value)    #from reportlab.lib.attrmap
   File "C:\code\users\andy\lib\attrmap.py", line 74, in validateSetattr
     raise AttributeError, "Illegal attribute '%s' in class %s" % (name, obj.__class__.__name__)
 AttributeError: Illegal attribute 'fullColor' in class Rect
->>>  
+>>>
 """)
 
 disc("""
@@ -240,14 +240,14 @@ first import reportlab.graphics.shapes:
 """)
 
 eg("""
->>> import reportlab.rl_config 
->>> reportlab.rl_config.shapeChecking = 0 
->>> from reportlab.graphics import shapes 
+>>> import reportlab.rl_config
+>>> reportlab.rl_config.shapeChecking = 0
+>>> from reportlab.graphics import shapes
 >>>
 """)
 
 disc("""
-Once you turn off $shapeChecking$, the classes are actually built 
+Once you turn off $shapeChecking$, the classes are actually built
 without the verification hook; code should get faster, then.
 Currently the penalty seems to be about 25% on batches of charts,
 so it is hardly worth disabling.
@@ -268,54 +268,54 @@ once in a batch process.
 heading2("Property Editing")
 
 disc("""
-A cornerstone of the reportlab/graphics which we will cover below is 
+A cornerstone of the reportlab/graphics which we will cover below is
 that you can automatically document widgets.
 This means getting hold of all of their editable properties,
 including those of their subcomponents.
 """)
 
 disc("""
-Another goal is to be able to create GUIs and config files for 
+Another goal is to be able to create GUIs and config files for
 drawings.
-A generic GUI can be built to show all editable properties 
+A generic GUI can be built to show all editable properties
 of a drawing, and let you modify them and see the results.
 The Visual Basic or Delphi development environment are good
 examples of this kind of thing.
-In a batch charting application, a file could list all the 
+In a batch charting application, a file could list all the
 properties of all the components in a chart, and be merged
 with a database query to make a batch of charts.
 """)
 
 disc("""
-To support these applications we have two interfaces, $getProperties$ 
+To support these applications we have two interfaces, $getProperties$
 and $setProperties$, as well as a convenience method $dumpProperties$.
 The first returns a dictionary of the editable properties of an
 object; the second sets them en masse.
 If an object has publicly exposed 'children' then one can recursively
-set and get their properties too. 
+set and get their properties too.
 This will make much more sense when we look at <i>Widgets</i> later on,
 but we need to put the support into the base of the framework.
 """)
 
 eg("""
 >>> r = shapes.Rect(0,0,200,100)
->>> import pprint 
->>> pprint.pprint(r.getProperties()) 
-{'fillColor': Color(0.00,0.00,0.00), 
- 'height': 100, 
- 'rx': 0, 
- 'ry': 0, 
- 'strokeColor': Color(0.00,0.00,0.00), 
- 'strokeDashArray': None, 
- 'strokeLineCap': 0, 
- 'strokeLineJoin': 0, 
- 'strokeMiterLimit': 0, 
- 'strokeWidth': 1, 
- 'width': 200, 
- 'x': 0, 
- 'y': 0} 
->>> r.setProperties({'x':20, 'y':30, 'strokeColor': colors.red}) 
->>> r.dumpProperties() 
+>>> import pprint
+>>> pprint.pprint(r.getProperties())
+{'fillColor': Color(0.00,0.00,0.00),
+ 'height': 100,
+ 'rx': 0,
+ 'ry': 0,
+ 'strokeColor': Color(0.00,0.00,0.00),
+ 'strokeDashArray': None,
+ 'strokeLineCap': 0,
+ 'strokeLineJoin': 0,
+ 'strokeMiterLimit': 0,
+ 'strokeWidth': 1,
+ 'width': 200,
+ 'x': 0,
+ 'y': 0}
+>>> r.setProperties({'x':20, 'y':30, 'strokeColor': colors.red})
+>>> r.dumpProperties()
 fillColor = Color(0.00,0.00,0.00)
 height = 100
 rx = 0
@@ -338,8 +338,8 @@ one very long line.</i>
 """)
 
 disc("""
-These three methods don't seem to do much here, but as we will see 
-they make our widgets framework much more powerful when dealing with 
+These three methods don't seem to do much here, but as we will see
+they make our widgets framework much more powerful when dealing with
 non-primitive objects.
 """)
 
@@ -355,12 +355,12 @@ of a drawing after constructing it.
 """)
 
 eg("""
->>> d = shapes.Drawing(400, 200) 
->>> s = shapes.String(10, 10, 'Hello World') 
->>> d.add(s, 'caption') 
->>> s.caption.text 
-'Hello World' 
->>>  
+>>> d = shapes.Drawing(400, 200)
+>>> s = shapes.String(10, 10, 'Hello World')
+>>> d.add(s, 'caption')
+>>> s.caption.text
+'Hello World'
+>>>
 """)
 
 disc("""
@@ -372,6 +372,6 @@ global.
 """)
 
 disc("""
-This provides one paradigm for creating and modifying interactive 
+This provides one paradigm for creating and modifying interactive
 drawings.
 """)

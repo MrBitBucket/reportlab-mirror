@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/odyssey/fodyssey.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/odyssey/fodyssey.py,v 1.16 2002/07/17 22:46:22 andy_robinson Exp $
-__version__=''' $Id: fodyssey.py,v 1.16 2002/07/17 22:46:22 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/odyssey/fodyssey.py,v 1.17 2002/07/24 19:56:35 andy_robinson Exp $
+__version__=''' $Id: fodyssey.py,v 1.17 2002/07/24 19:56:35 andy_robinson Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -20,13 +20,13 @@ Author = "Homer"
 def myFirstPage(canvas, doc):
     canvas.saveState()
     canvas.restoreState()
-    
+
 def myLaterPages(canvas, doc):
     canvas.saveState()
     canvas.setFont('Times-Roman',9)
     canvas.drawString(inch, 0.75 * inch, "Page %d" % doc.page)
     canvas.restoreState()
-    
+
 def go():
     doc = SimpleDocTemplate('fodyssey.pdf',showBoundary='showboundary' in sys.argv)
     doc.allowSplitting = not 'nosplitting' in sys.argv
@@ -40,7 +40,7 @@ ChapterStyle.fontsize = 16
 InitialStyle = copy.deepcopy(ChapterStyle)
 InitialStyle.fontsize = 16
 InitialStyle.leading = 20
-PreStyle = styles["Code"] 
+PreStyle = styles["Code"]
 
 def newPage():
     Elements.append(PageBreak())
@@ -135,7 +135,7 @@ def parseOdyssey(fn):
         else:
             style = PreStyle
             func = pre
-    
+
         while 1:
             s=f
             f, k=findNext(L,s)

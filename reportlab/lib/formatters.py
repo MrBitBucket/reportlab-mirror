@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/formatters.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/formatters.py,v 1.6 2002/07/17 22:46:23 andy_robinson Exp $
-__version__=''' $Id: formatters.py,v 1.6 2002/07/17 22:46:23 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/formatters.py,v 1.7 2002/07/24 19:56:37 andy_robinson Exp $
+__version__=''' $Id: formatters.py,v 1.7 2002/07/24 19:56:37 andy_robinson Exp $ '''
 __doc__="""
 These help format numbers and dates in a user friendly way.
 
@@ -71,7 +71,7 @@ class DecimalFormatter(Formatter):
         if self.suffix:
             strBody = strBody + self.suffix
         return strBody
-    
+
     def __repr__(self):
         return "%s(places=%d, decimalSep=%s, thousandSep=%s, prefix=%s, suffix=%s)" % (
                     self.__class__.__name__,

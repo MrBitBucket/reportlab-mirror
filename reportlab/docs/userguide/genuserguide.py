@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/genuserguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/genuserguide.py,v 1.11 2002/07/17 22:46:22 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/genuserguide.py,v 1.12 2002/07/24 19:56:36 andy_robinson Exp $
 
-__version__=''' $Id: genuserguide.py,v 1.11 2002/07/17 22:46:22 andy_robinson Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.12 2002/07/24 19:56:36 andy_robinson Exp $ '''
 
 __doc__ = """
 This module contains the script for building the user guide.
@@ -49,7 +49,7 @@ def run(pagesize=defaultPageSize, verbose=0, outDir=None):
 def makeSuite():
     "standard test harness support - run self as separate process"
     from reportlab.test.utils import ScriptThatMakesFileTest
-    return ScriptThatMakesFileTest('../docs/userguide', 'genuserguide.py', 'userguide.pdf') 
+    return ScriptThatMakesFileTest('../docs/userguide', 'genuserguide.py', 'userguide.pdf')
 
 if __name__=="__main__":
     outDir = filter(lambda x: x[:9]=='--outdir=',sys.argv)

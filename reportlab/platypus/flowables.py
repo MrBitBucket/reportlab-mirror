@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/flowables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.30 2002/07/17 22:46:23 andy_robinson Exp $
-__version__=''' $Id: flowables.py,v 1.30 2002/07/17 22:46:23 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/flowables.py,v 1.31 2002/07/24 19:56:38 andy_robinson Exp $
+__version__=''' $Id: flowables.py,v 1.31 2002/07/24 19:56:38 andy_robinson Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -200,7 +200,7 @@ def _dedenter(text,dedent=0):
     return lines
 
 class Preformatted(Flowable):
-    """This is like the HTML <PRE> tag.  
+    """This is like the HTML <PRE> tag.
     It attempts to display text exactly as you typed it in a fixed width "typewriter" font.
     The line breaks are exactly where you put
     them, and it will not be wrapped."""
@@ -230,12 +230,12 @@ class Preformatted(Flowable):
     def split(self, availWidth, availHeight):
         #returns two Preformatted objects
 
-        #not sure why they can be called with a negative height     
+        #not sure why they can be called with a negative height
         if availHeight < self.style.leading:
             return []
-        
+
         linesThatFit = int(availHeight * 1.0 / self.style.leading)
-        
+
         text1 = string.join(self.lines[0:linesThatFit], '\n')
         text2 = string.join(self.lines[linesThatFit:], '\n')
         style = self.style
@@ -243,7 +243,7 @@ class Preformatted(Flowable):
             style = deepcopy(style)
             style.firstLineIndent = 0
         return [Preformatted(text1, self.style), Preformatted(text2, style)]
-        
+
 
     def draw(self):
         #call another method for historical reasons.  Besides, I
@@ -337,7 +337,7 @@ class PageBreak(Spacer):
        This works by consuming all remaining space in the frame!"""
     def __init__(self):
         pass
-    
+
     def __repr__(self):
         return "PageBreak()"
 
@@ -350,7 +350,7 @@ class CondPageBreak(Spacer):
     """Throw a page if not enough vertical space"""
     def __init__(self, height):
         self.height = height
-        
+
     def __repr__(self):
         return "CondPageBreak(%s)" %(self.height,)
 

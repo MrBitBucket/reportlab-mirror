@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2_graphics.py,v 1.7 2002/03/25 00:34:56 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2_graphics.py,v 1.8 2002/07/24 19:56:35 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.lib.codecharts import SingleByteEncodingChart
-    
+
 heading1("Graphics and Text with $pdfgen$")
 
 heading2("Basic Concepts")
@@ -13,7 +13,7 @@ The $pdfgen$ package is the lowest level interface for
 generating PDF documents.  A $pdfgen$ program is essentially
 a sequence of instructions for "painting" a document onto
 a sequence of pages.  The interface object which provides the
-painting operations is the $pdfgen canvas$.  
+painting operations is the $pdfgen canvas$.
 """)
 
 disc("""
@@ -99,9 +99,9 @@ Some printers do not work well with pages that are too large or too small.""")
 
 disc("""Very often, you will want to calculate things based on
 the page size.  In the example above we extracted the width and
-height.  Later in the program we may use the $width$ variable to 
+height.  Later in the program we may use the $width$ variable to
 define a right margin as $width - inch$ rather than using
-a constant.  By using variables the margin will still make sense even 
+a constant.  By using variables the margin will still make sense even
 if the page size changes.""")
 
 disc("""The $bottomup$ argument
@@ -152,7 +152,7 @@ each time a document is generated.  Higher numbers may
 give more output in future.""")
 
 todo("to do - all the info functions and other non-drawing stuff")
-     
+
 
 
 
@@ -174,7 +174,7 @@ of operations performed using a canvas.  The first type draws something
 on the page such as a text string or a rectangle or a line.  The second
 type changes the state of the canvas such as
 changing the current fill or stroke color or changing the current font
-type and size.  
+type and size.
 """)
 
 disc("""
@@ -275,7 +275,7 @@ and then draws the path on the canvas using $drawPath$.""")
 disc("""It is also possible
 to use a path as a "clipping region" using the $clipPath$ method -- for example a circular path
 can be used to clip away the outer parts of a rectangular image leaving
-only a circular part of the image visible on the page. 
+only a circular part of the image visible on the page.
 """)
 
 heading3("Image methods")
@@ -288,7 +288,7 @@ in our $test$ subdirectory and looking at page 7 of the output.
 
 disc("""
 There are two similar-sounding ways to draw images.  The preferred one is
-the $drawImage$ method.  This implements a caching system so you can 
+the $drawImage$ method.  This implements a caching system so you can
 define an image once and draw it many times; it will only be
 stored once in the PDF file.  $drawImage$ also exposes one advanced parameter,
 a transparency mask, and will expose more in future.  The older technique,
@@ -419,7 +419,7 @@ Very often it is important to save the current font, graphics transform, line st
 other graphics state in order to restore them later. The $saveState$ method marks the
 current graphics state for later restoration by a matching $restoreState$.  Note that
 the save and restore method invokation must match -- a restore call restores the state to
-the most recently saved state which hasn't been restored yet.  
+the most recently saved state which hasn't been restored yet.
 You cannot save the state on one page and restore
 it on the next, however -- no state is preserved between pages.""")
 
@@ -448,7 +448,7 @@ eg("""
  canvas.getAvailableFonts()
  canvas.stringWidth(self, text, fontName, fontSize, encoding=None)
  canvas.setPageCompression(onoff=1)
- canvas.setPageTransition(self, effectname=None, duration=1, 
+ canvas.setPageTransition(self, effectname=None, duration=1,
                         direction=0,dimension='H',motion='I')
 """)
 
@@ -495,7 +495,7 @@ pencilnote()
 
 
 disc("""
-<i>Note:</i> As illustrated in the example it is perfectly possible to draw objects 
+<i>Note:</i> As illustrated in the example it is perfectly possible to draw objects
 or parts of objects "off the page".
 In particular a common confusing bug is a translation operation that translates the
 entire drawing off the visible area of the page.  If a program produces a blank page
@@ -546,9 +546,9 @@ pencilnote()
 
 
 disc("""<em>Note:</em> scaling shrinks or grows everything including line widths
-so using the canvas.scale method to render a microscopic drawing in 
+so using the canvas.scale method to render a microscopic drawing in
 scaled microscopic units
-may produce a blob (because all line widths will get expanded a huge amount).  
+may produce a blob (because all line widths will get expanded a huge amount).
 Also rendering an aircraft wing in meters scaled to centimeters may cause the lines
 to shrink to the point where they disappear.  For engineering or scientific purposes
 such as these scale and translate
@@ -719,7 +719,7 @@ The text object methods shown above relate to basic text geometry.
 """)
 
 disc("""
-A text object maintains a text cursor which moves about the page when 
+A text object maintains a text cursor which moves about the page when
 text is drawn.  For example the $setTextOrigin$ places the cursor
 in a known position and the $textLine$ and $textLines$ methods move
 the text cursor down past the lines that have been missing.
@@ -762,7 +762,7 @@ spacing.""")
 
 eg(examples.testcharspace)
 
-disc("""The 
+disc("""The
 $charspace$ function exercises various spacing settings.
 It produces the following page.""")
 
@@ -785,7 +785,7 @@ heading3("Horizontal Scaling")
 
 eg("""textobject.setHorizScale(horizScale)""")
 
-disc("""Lines of text can be stretched or shrunken horizontally by the 
+disc("""Lines of text can be stretched or shrunken horizontally by the
 $setHorizScale$ method.""")
 
 eg(examples.testhorizontalscale)
@@ -827,8 +827,8 @@ The $setRise$ method <super>raises</super> or <sub>lowers</sub> text on the line
 (for creating superscripts or subscripts, for example).
 """)
 
-eg("""textobject.setFillColor(aColor); 
-textobject.setStrokeColor(self, aColor) 
+eg("""textobject.setFillColor(aColor);
+textobject.setStrokeColor(self, aColor)
 # and similar""")
 
 disc("""
@@ -911,7 +911,7 @@ disc("""
 Combinations of lines, curves, arcs and other figures
 can be combined into a single figure using path objects.
 For example the function shown below constructs two path
-objects using lines and curves.  
+objects using lines and curves.
 This function will be used later on as part of a
 pencil icon construction.
 """)
@@ -961,7 +961,7 @@ generally use Bezier curves to form the borders.
 eg(examples.testbezier)
 
 disc("""
-A Bezier curve is specified by four control points 
+A Bezier curve is specified by four control points
 $(x1,y1)$, $(x2,y2)$, $(x3,y3)$, $(x4,y4)$.
 The curve starts at $(x1,y1)$ and ends at $(x4,y4)$
 and the line segment from $(x1,y1)$ to $(x2,y2)$
@@ -1037,7 +1037,7 @@ eg("""pathobject.arcTo(x1,y1, x2,y2, startAng=0, extent=90) """)
 
 disc("""
 The $arc$ and $arcTo$ methods paint partial ellipses.  The $arc$ method first "lifts the brush"
-and starts a new shape sequence.  The $arcTo$ method joins the start of 
+and starts a new shape sequence.  The $arcTo$ method joins the start of
 the partial ellipse to the current
 shape sequence by line segment before drawing the partial ellipse.  The points
 ^(x1,y1)^ and ^(x2,y2)^ define opposite corner points of a rectangle enclosing

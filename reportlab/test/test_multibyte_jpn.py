@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/test_multibyte_jpn.py,v 1.3 2002/07/04 09:24:49 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_multibyte_jpn.py,v 1.4 2002/07/24 19:56:38 andy_robinson Exp $
 # Temporary japanese support for ReportLab.
 """
 The code in this module will disappear any day now and be replaced
@@ -29,7 +29,7 @@ class JapaneseFontTests(unittest.TestCase):
         c.setFont(fnt, 16, 16)
         c.drawString(x, y, msg)
         c.rect(x,y,pdfmetrics.stringWidth(msg, fnt, 16),16,stroke=1,fill=0)
-        
+
     def test0(self):
         "A basic document drawing some strings"
 
@@ -46,7 +46,7 @@ class JapaneseFontTests(unittest.TestCase):
 
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90ms-RKSJ-H'))
         pdfmetrics.registerFont(CIDFont('HeiseiKakuGo-W5','90ms-RKSJ-H'))
-    
+
         c = Canvas('test_multibyte_jpn.pdf')
         c.setFont('Helvetica', 30)
         c.drawString(100,700, 'Japanese Font Support')
@@ -66,18 +66,18 @@ class JapaneseFontTests(unittest.TestCase):
         c.setFont('HeiseiKakuGo-W5-90ms-RKSJ-H', 16)
         # this says "This is HeiseiKakugo" in shift-JIS
         message2 = '\202\261\202\352\202\315\225\275\220\254\212p\203S\203V\203b\203N\202\305\202\267\201B'
-        c.drawString(100, 650, message2) 
+        c.drawString(100, 650, message2)
         wid = pdfmetrics.stringWidth(message2, 'HeiseiKakuGo-W5-90ms-RKSJ-H', 16)
         c.rect(100,650,wid,16,stroke=1,fill=0)
 
-        
+
 
         self.hDraw(c, '\223\214\213\236 says Tokyo in Shift-JIS', 'HeiseiMin-W3-90ms-RKSJ-H', 100, 600)
 
 
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90msp-RKSJ-H'))
         self.hDraw(c, '\223\214\213\236, but in proportional Shift-JIS.', 'HeiseiMin-W3-90msp-RKSJ-H', 100, 575)
-        
+
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','EUC-H'))
         self.hDraw(c, '\xC5\xEC\xB5\xFE says Tokyo in EUC', 'HeiseiMin-W3-EUC-H', 100, 550)
 
@@ -91,7 +91,7 @@ class JapaneseFontTests(unittest.TestCase):
                 return s
             self.hDraw(c, '\x67\x71\x4E\xAC' + asciiToUCS2(' says Tokyo in UCS2'),
                        'HeiseiMin-W3-UniJIS-UCS2-H', 100, 525)
-                    
+
 
         # now try verticals
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90ms-RKSJ-V'))
@@ -99,13 +99,13 @@ class JapaneseFontTests(unittest.TestCase):
         c.drawString(400, 650, '\223\214\213\236 vertical Shift-JIS')
         height = c.stringWidth('\223\214\213\236 vertical Shift-JIS', 'HeiseiMin-W3-90ms-RKSJ-V', 16)
         c.rect(400-8,650,16,-height)
-        
+
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','EUC-V'))
         c.setFont('HeiseiMin-W3-EUC-V', 16)
         c.drawString(425, 650, '\xC5\xEC\xB5\xFE vertical EUC')
         height = c.stringWidth('\xC5\xEC\xB5\xFE vertical EUC', 'HeiseiMin-W3-EUC-V', 16)
         c.rect(425-8,650,16,-height)
-        
+
         c.setFillColor(colors.purple)
         tx = c.beginText(100, 250)
         tx.setFont('Helvetica', 12)
@@ -208,7 +208,7 @@ Adobe Acrobat 5.0\x82\xc5\x8d\xec\x90\xac\x82\xb5\x82\xbdAdobe PDF\x82\xcd\x81A(
                 ]
 
             The next few pages show the complete character set available in the encoding
-            "90ms-RKSJ-H" - Shift-JIS with the standard Microsoft extensions.  
+            "90ms-RKSJ-H" - Shift-JIS with the standard Microsoft extensions.
             """)
         c.drawText(tx)
 
@@ -228,14 +228,14 @@ Adobe Acrobat 5.0\x82\xc5\x8d\xec\x90\xac\x82\xb5\x82\xbdAdobe PDF\x82\xcd\x81A(
                 c.drawCentredString(297, 36, 'Page %d' % c.getPageNumber())
                 c.showPage()
                 y = 700
-        
+
         c.save()
-        
+
 
         if VERBOSE:
             print 'saved test_multibyte_jpn.pdf'
 
-    
+
     def ___test2_all(self):
         """Dumps out ALl GLYPHS in a CID font.
 
@@ -249,11 +249,11 @@ Adobe Acrobat 5.0\x82\xc5\x8d\xec\x90\xac\x82\xb5\x82\xbdAdobe PDF\x82\xcd\x81A(
             return
 
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','Identity-H'))
-    
+
         c = Canvas('test_japanese_2.pdf')
         c.setFont('Helvetica', 30)
         c.drawString(100,800, 'All Glyphs in Adobe-Japan-1-2 collection!')
-        
+
         # the two typefaces
         c.setFont('HeiseiMin-W3-Identity-H', 2)
 
@@ -267,7 +267,7 @@ Adobe Acrobat 5.0\x82\xc5\x8d\xec\x90\xac\x82\xb5\x82\xbdAdobe PDF\x82\xcd\x81A(
                 x = x0 + cell*dx
                 y = y0 - row*dy
                 c.drawString(x,y,s)
-                
+
         c.save()
         if VERBOSE:
             print 'saved test_multibyte_jpn.pdf'
@@ -281,5 +281,4 @@ def makeSuite():
 if __name__ == "__main__":
     VERBOSE = 1
     unittest.TextTestRunner().run(makeSuite())
-
 

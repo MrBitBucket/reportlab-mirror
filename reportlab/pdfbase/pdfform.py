@@ -72,13 +72,13 @@ def buttonFieldRelative(canvas, title, value, xR, yR):
 
 def selectFieldAbsolute(canvas, title, value, options, x, y, width, height):
     """Place a select field (drop down list) on the current page
-        with name title and 
+        with name title and
         with options listed in the sequence options
         default value value (must be one of options)
         at ABSOLUTE position (x,y) with dimensions (width, height)."""
     theform = getForm(canvas)
     theform.selectField(canvas, title, value, options, x, y, x+width, y+height)
-    
+
 def selectFieldRelative(canvas, title, value, options, xR, yR, width, height):
     "same as textFieldAbsolute except the x and y are relative to the canvas coordinate transform"
     (xA, yA) = canvas.absolutePosition(xR,yR)
@@ -132,7 +132,7 @@ def getForm(canvas):
         cat = d._catalog
         cat.AcroForm = theform
         return theform
-    
+
 class AcroForm:
     def __init__(self):
         self.fields = []
@@ -620,7 +620,7 @@ def ButtonStream(content):
     return result
 
 APDOFF = ButtonStream('0.749 g 0 0 16.7704 14.907 re f'+LINEEND)
-APDYES = ButtonStream( 
+APDYES = ButtonStream(
 '0.749 g 0 0 16.7704 14.907 re f q 1 1 14.7704 12.907 re W '+
 'n BT /ZaDb 11.3086 Tf 0 g  1 0 0 1 3.6017 3.3881 Tm (4) Tj ET'+LINEEND)
 APNYES = ButtonStream(

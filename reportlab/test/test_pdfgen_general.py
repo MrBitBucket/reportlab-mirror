@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/test/testpdfgen.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.14 2002/07/04 09:24:49 dinu_gherman Exp $
-__version__=''' $Id: test_pdfgen_general.py,v 1.14 2002/07/04 09:24:49 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_general.py,v 1.15 2002/07/24 19:56:38 andy_robinson Exp $
+__version__=''' $Id: test_pdfgen_general.py,v 1.15 2002/07/24 19:56:38 andy_robinson Exp $ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas
 
@@ -31,11 +31,11 @@ def framePageForm(c):
     # forms can't do non-constant operations
     #canvas.setFont('Times-BoldItalic',20)
     #canvas.drawString(inch, 10.5 * inch, title)
-                            
+
     #c.setFont('Times-Roman',10)
     #c.drawCentredString(4.135 * inch, 0.75 * inch,
     #                        'Page %d' % c.getPageNumber())
-    
+
     #draw a border
     c.setFillColor(colors.ReportLabBlue)
     c.rect(0.3*inch, inch, 0.5*inch, 10*inch, fill=1)
@@ -54,10 +54,10 @@ def framePageForm(c):
     #canvas.setStrokeColorRGB(0,0,0)\
     c.restoreState()
     c.endForm()
-    
+
 titlelist = []
 closeit = 0
-    
+
 
 def framePage(canvas, title):
     global closeit
@@ -65,7 +65,7 @@ def framePage(canvas, title):
     #canvas._inPage0()  # do we need this at all?  would be good to eliminate it
     canvas.saveState()
     canvas.setFont('Times-BoldItalic',20)
-    
+
     canvas.drawString(inch, 10.5 * inch, title)
     canvas.bookmarkHorizontalAbsolute(title, 10.8*inch)
     #newsection(title)
@@ -76,19 +76,19 @@ def framePage(canvas, title):
                             'Page %d' % canvas.getPageNumber())
     canvas.restoreState()
     canvas.doForm("frame")
-    
+
 
 def makesubsection(canvas, title, horizontal):
     canvas.bookmarkHorizontalAbsolute(title, horizontal)
     #newsubsection(title)
     canvas.addOutlineEntry(title+" subsection", title, level=1)
-    
+
 
 # outline helpers
 #outlinenametree = []
 #def newsection(name):
 #    outlinenametree.append(name)
-    
+
 
 #def newsubsection(name):
 #    from types import TupleType
@@ -111,7 +111,7 @@ class DocBlock:
         self.code = "canvas.setTextOrigin(cm, cm)\ncanvas.textOut('Hello World')"
         self.comment2 = "That was a doc block"
         self.drawHeight = 0
-        
+
     def _getHeight(self):
         "splits into lines"
         self.comment1lines = string.split(self.comment1, '\n')
@@ -135,7 +135,7 @@ class DocBlock:
         drawCode(canvas, self.code)
         canvas.textLines(self.comment2)
 
-        #now a box for the drawing, slightly within rect        
+        #now a box for the drawing, slightly within rect
         canvas.rect(x + 9, y - height + 9, 198, height - 18)
         #boundary:
         self.namespace = {'canvas':canvas,'cm': cm,'inch':inch}
@@ -144,8 +144,8 @@ class DocBlock:
         exec codeObj in self.namespace
 
         canvas.restoreState()
-        
-        
+
+
 def drawAxes(canvas, label):
     """draws a couple of little rulers showing the coords -
     uses points as units so you get an imperial ruler
@@ -157,7 +157,7 @@ def drawAxes(canvas, label):
         canvas.line(-6,tenths,0,tenths)
     canvas.line(-6, 66, 0, 72)  #arrow...
     canvas.line(6, 66, 0, 72)  #arrow...
-    
+
     canvas.line(0,0,72,0)
     for x in range(9):
         tenths = (x+1) * 7.2
@@ -172,11 +172,11 @@ def drawCrossHairs(canvas, x, y):
     """just a marker for checking text metrics - blue for fun"""
 
     canvas.saveState()
-    canvas.setStrokeColorRGB(0,1,0)    
+    canvas.setStrokeColorRGB(0,1,0)
     canvas.line(x-6,y,x+6,y)
     canvas.line(x,y-6,x,y+6)
     canvas.restoreState()
-    
+
 
 def drawCode(canvas, code):
     """Draws a block of text at current point, indented and in Courier"""
@@ -187,12 +187,12 @@ def drawCode(canvas, code):
     t = canvas.beginText()
     t.textLines(code)
     c.drawText(t)
-    
+
     canvas.setFillColor(colors.black)
     canvas.addLiteral('-36 0 Td')
     canvas.setFont('Times-Roman',10)
-    
-    
+
+
 def makeDocument(filename, pageCallBack=None):
     #the extra arg is a hack added later, so other
     #tests can get hold of the canvas just before it is
@@ -203,10 +203,10 @@ def makeDocument(filename, pageCallBack=None):
     c.setPageCallBack(pageCallBack)
     framePageForm(c) # define the frame form
     c.showOutline()
-    
+
     framePage(c, 'PDFgen graphics API test script')
     makesubsection(c, "PDFgen and PIDDLE", 10*inch)
-    
+
     t = c.beginText(inch, 10*inch)
     t.setFont('Times-Roman', 10)
     drawCrossHairs(c, t.getX(),t.getY())
@@ -214,11 +214,11 @@ def makeDocument(filename, pageCallBack=None):
 The ReportLab library permits you to create PDF documents directly from
 your Python code. The "pdfgen" subpackage is the lowest level exposed
 to the user and lets you directly position test and graphics on the
-page, with access to almost the full range of PDF features. 
+page, with access to almost the full range of PDF features.
   The API is intended to closely mirror the PDF / Postscript imaging
 model.  There is an almost one to one correspondence between commands
 and PDF operators.  However, where PDF provides several ways to do a job,
-we have generally only picked one. 
+we have generally only picked one.
   The test script attempts to use all of the methods exposed by the Canvas
 class, defined in reportlab/pdfgen/canvas.py
   First, let's look at text output.  There are some basic commands
@@ -289,7 +289,7 @@ substring.
     #mark the cursor where it stopped
     c.showPage()
 
-    
+
     ##############################################################
     #
     # page 2 - line styles
@@ -298,9 +298,9 @@ substring.
 
     #page 2 - lines and styles
     framePage(c, 'Line Drawing Styles')
-    
 
-    
+
+
     # three line ends, lines drawn the hard way
     #firt make some vertical end markers
     c.setDash(4,4)
@@ -308,7 +308,7 @@ substring.
     c.line(inch,9.2*inch,inch, 7.8*inch)
     c.line(3*inch,9.2*inch,3*inch, 7.8*inch)
     c.setDash() #clears it
-    
+
     c.setLineWidth(5)
     c.setLineCap(0)
     p = c.beginPath()
@@ -317,21 +317,21 @@ substring.
     c.drawPath(p)
     c.drawString(4*inch, 9*inch, 'the default - butt caps project half a width')
     makesubsection(c, "caps and joins", 8.5*inch)
-    
+
     c.setLineCap(1)
     p = c.beginPath()
     p.moveTo(inch, 8.5*inch)
     p.lineTo(3*inch, 8.5*inch)
     c.drawPath(p)
     c.drawString(4*inch, 8.5*inch, 'round caps')
-        
+
     c.setLineCap(2)
     p = c.beginPath()
     p.moveTo(inch, 8*inch)
     p.lineTo(3*inch, 8*inch)
     c.drawPath(p)
     c.drawString(4*inch, 8*inch, 'square caps')
-    
+
     c.setLineCap(0)
 
     # three line joins
@@ -392,7 +392,7 @@ substring.
     c.drawPath(p)
     c.drawString(4*inch, 3*inch, 'dash pattern, join and cap style interacting - ')
     c.drawString(4*inch, 3*inch - 12, 'round join & miter results in sausages')
-    
+
     c.showPage()
 
 
@@ -411,12 +411,12 @@ set of operators possible.  We can add any new ones that are of general use at n
 cost to performance.""")
     t.textLine()
 
-    #line demo    
+    #line demo
     makesubsection(c, "lines", 10*inch)
     c.line(inch, 8*inch, 3*inch, 8*inch)
     t.setTextOrigin(4*inch, 8*inch)
     t.textLine('canvas.line(x1, y1, x2, y2)')
-    
+
     #bezier demo - show control points
     makesubsection(c, "bezier curves", 7.5*inch)
     (x1, y1, x2, y2, x3, y3, x4, y4) = (
@@ -445,12 +445,12 @@ cost to performance.""")
     t.setTextOrigin(4*inch, 4.5 * inch)
     t.textLine('canvas.wedge(x1, y1, x2, y2, startDeg, extentDeg)')
     t.textLine('Note that this is an elliptical arc, not just circular!')
-    
+
     #wedge the other way
     c.wedge(inch, 4*inch, 3*inch, 3*inch, 0, -45)
     t.setTextOrigin(4*inch, 3.5 * inch)
     t.textLine('Use a negative extent to go clockwise')
-    
+
     #circle
     makesubsection(c, "circles", 3.5*inch)
     c.circle(1.5*inch, 2*inch, 0.5 * inch)
@@ -484,12 +484,12 @@ cost to performance.""")
     determines most of what you see.  If you specify other text rendering
     modes, an outline color could be defined by setStrokeColorRGB() too""")
     c.drawText(t)
-    
+
     t = c.beginText(inch, 2.75 * inch)
     t.setFont('Times-Bold',36)
     t.setFillColor(colors.green)  #green
     t.textLine('Green fill, no stroke')
-    
+
     #t.setStrokeColorRGB(1,0,0)  #ou can do this in a text object, or the canvas.
     t.setStrokeColor(colors.red)  #ou can do this in a text object, or the canvas.
     t.setTextRenderMode(2)   # fill and stroke
@@ -539,7 +539,7 @@ cost to performance.""")
     c.rotate(-30)
     drawAxes(c, "4. down 5, rotate 30' anticlockwise")
     c.restoreState()
-    
+
     c.saveState()
     c.translate(3 * inch, -5 * inch)
     c.skew(0,30)
@@ -547,7 +547,7 @@ cost to performance.""")
     c.restoreState()
 
     c.showPage()
-    
+
 #########################################################################
 #
 #  Page 6 - clipping
@@ -561,7 +561,7 @@ cost to performance.""")
     the page on which one can draw.  This paragraph was drawn after setting the clipping
     path, and so you should only see part of the text.""")
     c.drawText(t)
-    
+
     c.saveState()
     #c.setFillColorRGB(0,0,1)
     p = c.beginPath()
@@ -588,7 +588,7 @@ cost to performance.""")
     the page on which one can draw.  This paragraph was drawn after setting the clipping
     path, and so you should only see part of the text.""")
     c.drawText(t)
-    
+
     c.restoreState()
 
     t = c.beginText(inch, 5 * inch)
@@ -596,7 +596,7 @@ cost to performance.""")
         The API is not particularly clean on this and one has to follow the right sequence;
         this can be optimized shortly.""")
     c.drawText(t)
-    
+
     #first the outline
     c.saveState()
     t = c.beginText(inch, 3.0 * inch)
@@ -605,16 +605,16 @@ cost to performance.""")
     t.textLine('Python!')
     t.setTextRenderMode(0)
     c.drawText(t)    #this will make a clipping mask
-    
+
     #now some small stuff which wil be drawn into the current clip mask
     t = c.beginText(inch, 4 * inch)
     t.setFont('Times-Roman',6)
     t.textLines((('spam ' * 40) + '\n') * 15)
     c.drawText(t)
 
-    #now reset canvas to get rid of the clipping mask    
+    #now reset canvas to get rid of the clipping mask
     c.restoreState()
-        
+
     c.showPage()
 
 
@@ -627,9 +627,9 @@ cost to performance.""")
     c.setFont('Times-Roman', 12)
     t = c.beginText(inch, 10 * inch)
     if not PIL_Image:
-        c.drawString(inch, 11*inch, 
+        c.drawString(inch, 11*inch,
                      "Python Imaging Library not found! Below you see rectangles instead of images.")
-        
+
     t.textLines("""PDFgen uses the Python Imaging Library to process a very wide variety of image formats.
         This page shows image capabilities.  If I've done things right, the bitmap should have
         its bottom left corner aligned with the crosshairs.
@@ -639,7 +639,7 @@ cost to performance.""")
         You can also use drawInlineImage, which puts images in the page stream directly.
         This is slightly faster for Acrobat to render or for very small images, but wastes
         space if you use images more than once.""")
-    
+
     c.drawText(t)
 
     if PIL_Image:
@@ -695,19 +695,19 @@ cost to performance.""")
       as desired.  The blue logo bar to the left is an example of a form
       in this document.  See the function framePageForm in this demo script
       for an example of how to use canvas.beginForm(name, ...) ... canvas.endForm().
-      
+
       Documents can also contain cross references where (for example) a rectangle
       on a page may be bound to a position on another page.  If the user clicks
       on the rectangle the PDF viewer moves to the bound position on the other
       page.  There are many other types of annotations and links supported by PDF.
-      
+
       For example, there is a bookmark to each page in this document and below
       is a browsable index that jumps to those pages. In addition we show two
       URL hyperlinks; for these, you specify a rectangle but must draw the contents
       or any surrounding rectangle yourself.
       """)
     c.drawText(t)
-    
+
     nentries = len(titlelist)
     xmargin = 3*inch
     xmax = 7*inch
@@ -761,11 +761,11 @@ def pageShapes(c):
     y = 9 * inch
     d = DocBlock()
     d.comment1 = 'Lesson one'
-    d.code = "canvas.textOut('hello, world')" 
+    d.code = "canvas.textOut('hello, world')"
     print d.code
-    
+
     d.comment2 = 'Lesson two'
-    
+
     d.draw(c, inch, 9 * inch)
 
 
@@ -784,4 +784,3 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
-

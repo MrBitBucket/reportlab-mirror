@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/tests/testdemos.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/tests/testdemos.py,v 1.6 2002/07/17 22:46:22 andy_robinson Exp $
-__version__=''' $Id: testdemos.py,v 1.6 2002/07/17 22:46:22 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/tests/testdemos.py,v 1.7 2002/07/24 19:56:35 andy_robinson Exp $
+__version__=''' $Id: testdemos.py,v 1.7 2002/07/24 19:56:35 andy_robinson Exp $ '''
 __doc__='Test all demos'
 _globals=globals().copy()
 import os, sys

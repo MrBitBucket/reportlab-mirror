@@ -2,8 +2,8 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/_fontdata.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: _fontdata.py,v 1.11 2002/07/17 22:46:23 andy_robinson Exp $ '''
-__doc__=""" 
+__version__=''' $Id: _fontdata.py,v 1.12 2002/07/24 19:56:37 andy_robinson Exp $ '''
+__doc__="""
     database of font related things
     standardFonts       tuple of the 14 standard string font names
     standardEncodings   tuple of the known standard font names

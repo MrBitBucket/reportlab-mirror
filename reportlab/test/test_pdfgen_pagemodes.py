@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pdfgen_pagemodes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_pagemodes.py,v 1.6 2002/07/04 09:24:49 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pdfgen_pagemodes.py,v 1.7 2002/07/24 19:56:38 andy_robinson Exp $
 # full screen test
 
 """Tests for PDF page modes support in reportlab.pdfgen.
@@ -21,13 +21,13 @@ def fileDoesExist(path):
 
     return os.path.exists(path)
 
-    
+
 class PdfPageModeTestCase(unittest.TestCase):
     "Testing different page modes for opening a file in Acrobat Reader."
 
     baseFileName = 'test_pagemodes_'
-    
-    def _doTest(self, filename, mode, desc):        
+
+    def _doTest(self, filename, mode, desc):
         "A generic method called by all test real methods."
 
         filename = self.baseFileName + filename
@@ -52,7 +52,7 @@ class PdfPageModeTestCase(unittest.TestCase):
 
     def test0(self):
         "This should open in full screen mode."
-        
+
         self._doTest('FullScreen.pdf', 'FullScreen', self.test0.__doc__)
 
 
@@ -75,4 +75,3 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite)
-    

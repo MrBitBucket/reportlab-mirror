@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pdfgeom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pdfgeom.py,v 1.7 2001/01/12 21:36:57 dinu_gherman Exp $
-__version__=''' $Id: pdfgeom.py,v 1.7 2001/01/12 21:36:57 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/pdfgeom.py,v 1.8 2002/07/24 19:56:38 andy_robinson Exp $
+__version__=''' $Id: pdfgeom.py,v 1.8 2002/07/24 19:56:38 andy_robinson Exp $ '''
 __doc__="""
 This module includes any mathematical methods needed for PIDDLE.
 It should have no dependencies beyond the Python library.
@@ -50,7 +50,7 @@ such that the curve goes from (x1, y1) to (x4, y4) with (x2, y2) and
         sign = -1
     else:
         sign = 1
-    
+
     pointList = []
 
     for i in range(Nfrag):

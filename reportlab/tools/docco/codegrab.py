@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/codegrab.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/codegrab.py,v 1.2 2002/07/17 22:46:24 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/codegrab.py,v 1.3 2002/07/24 19:56:39 andy_robinson Exp $
 #codegrab.py
 """
 This grabs various Python class, method and function
@@ -38,7 +38,7 @@ def getObjectsDefinedIn(modulename, directory=None):
         (file, packagepath, description) = packagefound
         #now the full path should be known, if it is in the
         #package
-        
+
         directory = apply(os.path.join, tuple([packagepath] + words[1:-1]))
         modulename = words[-1]
         searchpath = [directory]
@@ -54,7 +54,7 @@ def getObjectsDefinedIn(modulename, directory=None):
     #grab the code too, minus trailing newlines
     lines = open(pathname, 'r').readlines()
     lines = map(string.rstrip, lines)
-    
+
     result = Struct()
     result.functions = []
     result.classes = []
@@ -82,7 +82,7 @@ def getObjectsDefinedIn(modulename, directory=None):
                     fn.status = 'experimental'
                 else:
                     fn.status = 'official'
-                        
+
                 result.functions.append(fn)
         elif type(value) == types.ClassType:
             if value.__module__ == modulename:
@@ -92,7 +92,7 @@ def getObjectsDefinedIn(modulename, directory=None):
                     cl.doc = dedent(value.__doc__)
                 else:
                     cl.doc = "(no documentation string)"
-            
+
                 cl.bases = []
                 for base in value.__bases__:
                     cl.bases.append(base.__name__)
@@ -102,7 +102,7 @@ def getObjectsDefinedIn(modulename, directory=None):
                     cl.status = 'experimental'
                 else:
                     cl.status = 'official'
-                
+
                 cl.methods = []
                 #loop over dict finding methods defined here
                 # Q - should we show all methods?
@@ -183,8 +183,8 @@ def dedent(comment):
                     line = line[1:]
             cleaned.append(line)
     return string.join(cleaned, '\n')
-                           
-    
+
+
 
 def dumpDoc(modulename, directory=None):
     """Test support.  Just prints docco on the module
@@ -223,7 +223,7 @@ if __name__=='__main__':
     for line in sys.path:
         print '   ',line
     M = sys.argv[1:]
-    if M==[]: 
+    if M==[]:
         M.append('reportlab.platypus.paragraph')
     for m in M:
         test(m)

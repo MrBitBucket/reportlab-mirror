@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPS.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.19 2002/07/21 08:18:44 andy_robinson Exp $
-__version__=''' $Id: renderPS.py,v 1.19 2002/07/21 08:18:44 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.20 2002/07/24 19:56:36 andy_robinson Exp $
+__version__=''' $Id: renderPS.py,v 1.20 2002/07/24 19:56:36 andy_robinson Exp $ '''
 import string, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str, getStringIO
@@ -39,7 +39,7 @@ PS_WinAnsiEncoding="""
   /FontName get exch definefont pop
 } bind def
 
-/WinAnsiEncoding [ 
+/WinAnsiEncoding [
   39/quotesingle 96/grave 128/euro 130/quotesinglbase/florin/quotedblbase
   /ellipsis/dagger/daggerdbl/circumflex/perthousand
   /Scaron/guilsinglleft/OE 145/quoteleft/quoteright
@@ -76,7 +76,7 @@ class PSCanvas:
 
 
         self._fontsUsed = {}  # track them as we go
-        
+
         self.setFont(STATE_DEFAULTS['fontName'],STATE_DEFAULTS['fontSize'])
         self.setStrokeColor(STATE_DEFAULTS['strokeColor'])
         self.setLineCap(2)
@@ -122,7 +122,7 @@ class PSCanvas:
         for fontName in self._fontsUsed.keys():
             fontReencode.append('WinAnsiEncoding /%s /%s RE' % (fontName, fontName))
         self.code.insert(1, string.join(fontReencode, self._sep))
-        
+
         file.write(string.join(self.code,self._sep))
         if file is not f: file.close()
 
@@ -148,7 +148,7 @@ class PSCanvas:
         if self._lineJoin!=v:
             self._lineJoin = v
             self.code.append('%d setlinejoin'%v)
-            
+
     def setDash(self, array=[], phase=0):
         """Two notations.  pass two numbers, or an array and phase"""
         # copied and modified from reportlab.canvas
@@ -197,12 +197,12 @@ class PSCanvas:
         return a copy of string s with special characters in postscript strings
         escaped with backslashes.
         Have not handled characters that are converted normally in python strings
-        i.e. \n -> newline 
+        i.e. \n -> newline
         '''
         str = string.replace(s, chr(0x5C), r'\\' )
         str = string.replace(str, '(', '\(' )
         str = string.replace(str, ')', '\)')
-        return str 
+        return str
 
     def drawString(self, s, x, y, angle=0):
         if self._fillColor != None:
@@ -239,17 +239,17 @@ class PSCanvas:
     def rect(self, x1,y1, x2,y2, rx=8, ry=8):
         "Draw a rectangle between x1,y1, and x2,y2"
         # Path is drawn in counter-clockwise direction"
-        
+
         x1, x2 = min(x1,x2), max(x1, x2) # from piddle.py
         y1, y2 = min(y1,y2), max(y1, y2)
         self.polygon(((x1,y1),(x2,y1),(x2,y2),(x1,y2)), closed=1)
 
     def roundRect(self, x1,y1, x2,y2, rx=8, ry=8):
-        """Draw a rounded rectangle between x1,y1, and x2,y2, 
-        with corners inset as ellipses with x radius rx and y radius ry. 
+        """Draw a rounded rectangle between x1,y1, and x2,y2,
+        with corners inset as ellipses with x radius rx and y radius ry.
         These should have x1<x2, y1<y2, rx>0, and ry>0."""
         # Path is drawn in counter-clockwise direction
-        
+
         x1, x2 = min(x1,x2), max(x1, x2) # from piddle.py
         y1, y2 = min(y1,y2), max(y1, y2)
 
@@ -257,7 +257,7 @@ class PSCanvas:
         # save current matrix, translate to center of ellipse, scale by rx ry, and draw
         # a circle of unit radius in counterclockwise dir, return to original matrix
         # arguments are (cx, cy, rx, ry, startAngle, endAngle)
-        ellipsePath = 'matrix currentmatrix %s %s translate %s %s scale 0 0 1 %s %s arc setmatrix' 
+        ellipsePath = 'matrix currentmatrix %s %s translate %s %s scale 0 0 1 %s %s arc setmatrix'
 
         # choice between newpath and moveTo beginning of arc
         # go with newpath for precision, does this violate any assumptions in code???
@@ -268,11 +268,11 @@ class PSCanvas:
         rrCode.append(ellipsePath % (x2-rx, y2-ry, rx, -ry, 270, 360))
         rrCode.append(ellipsePath % (x2-rx, y1+ry, rx, -ry, 0,  90) )
         rrCode.append('closepath')
-        
+
         self._fillAndStroke(rrCode)
 
     def ellipse(self, x1,y1, x2,y2):
-        """Draw an orthogonal ellipse inscribed within the rectangle x1,y1,x2,y2. 
+        """Draw an orthogonal ellipse inscribed within the rectangle x1,y1,x2,y2.
         These should have x1<x2 and y1<y2."""
         #Just invoke drawArc to actually draw the ellipse
         self.drawArc(x1,y1, x2,y2)
@@ -282,22 +282,22 @@ class PSCanvas:
 
     def drawArc(self, x1,y1, x2,y2, startAng=0, extent=360, fromcenter=0):
         """Draw a partial ellipse inscribed within the rectangle x1,y1,x2,y2,
-        starting at startAng degrees and covering extent degrees.   Angles 
+        starting at startAng degrees and covering extent degrees.   Angles
         start with 0 to the right (+x) and increase counter-clockwise.
         These should have x1<x2 and y1<y2."""
         #calculate centre of ellipse
         #print "x1,y1,x2,y2,startAng,extent,fromcenter", x1,y1,x2,y2,startAng,extent,fromcenter
         cx, cy = (x1+x2)/2.0, (y1+y2)/2.0
         rx, ry = (x2-x1)/2.0, (y2-y1)/2.0
-        
-        codeline = self._genArcCode(x1, y1, x2, y2, startAng, extent) 
+
+        codeline = self._genArcCode(x1, y1, x2, y2, startAng, extent)
 
         startAngleRadians = math.pi*startAng/180.0
         extentRadians = math.pi*extent/180.0
         endAngleRadians = startAngleRadians + extentRadians
 
         codelineAppended = 0
-        
+
         # fill portion
 
         if self._fillColor != None:
@@ -313,7 +313,7 @@ class PSCanvas:
         if self._strokeColor != None:
             # this is a bit hacked up.  There is certainly a better way...
             self.setColor(self._strokeColor)
-            (startx, starty) = (cx+rx*math.cos(startAngleRadians), cy+ry*math.sin(startAngleRadians)) 
+            (startx, starty) = (cx+rx*math.cos(startAngleRadians), cy+ry*math.sin(startAngleRadians))
             if not codelineAppended:
                 self.code.append(codeline)
             if fromcenter:
@@ -346,7 +346,7 @@ class PSCanvas:
 
         start = p[0]
         p = p[1:]
-        
+
         polyCode = []
         polyCode.append("%s m" % fp_str(start))
         for point in p:
@@ -388,7 +388,7 @@ class PSCanvas:
     def drawFigure(self, partList, closed=0):
         figureCode = []
         first = 1
-        
+
         for part in partList:
             op = part[0]
             args = list(part[1:])
@@ -453,7 +453,7 @@ class PSCanvas:
 
     ############################################################################################
     # drawImage(self. image, x1, y1, x2=None, y2=None) is now defined by either _drawImageLevel1
-    #    ._drawImageLevel2, the choice is made in .__init__ depending on option 
+    #    ._drawImageLevel2, the choice is made in .__init__ depending on option
     def _drawImageLevel1(self, image, x1, y1, x2=None,y2=None):
         # Postscript Level1 version available for fallback mode when Level2 doesn't work
         """drawImage(self,image,x1,y1,x2=None,y2=None) : If x2 and y2 are ommitted, they are
@@ -485,7 +485,7 @@ class PSCanvas:
         # user space to the rect...on the page that is to receive the
         # image. A common ImageMatrix is [width 0 0 -height 0 height]
         # (for a left to right, top to bottom image )
-        
+
         # first let's map the user coordinates start at offset x1,y1 on page
 
         self.code.extend([
@@ -510,10 +510,10 @@ class PSCanvas:
         # piddlePDF again
 
         rawimage = myimage.tostring()
-        assert(len(rawimage) == imgwidth*imgheight, 'Wrong amount of data for image') 
+        assert(len(rawimage) == imgwidth*imgheight, 'Wrong amount of data for image')
         #compressed = zlib.compress(rawimage) # no zlib at moment
         hex_encoded = self._AsciiHexEncode(rawimage)
-        
+
         # write in blocks of 78 chars per line
         outstream = getStringIO(hex_encoded)
 
@@ -540,12 +540,12 @@ class PSCanvas:
             print 'found image.mode= L'
             imBitsPerComponent = 8
             imNumComponents = 1
-            myimage = image 
+            myimage = image
         elif image.mode == '1':
             print 'found image.mode= 1'
             myimage = image.convert('L')
             imNumComponents = 1
-            myimage = image 
+            myimage = image
         else :
             myimage = image.convert('RGB')
             imNumComponents = 3
@@ -587,10 +587,10 @@ class PSCanvas:
                             'image'])
         # after image operator just need to dump image dat to file as hexstring
         rawimage = myimage.tostring()
-        assert(len(rawimage) == imwidth*imheight, 'Wrong amount of data for image') 
+        assert(len(rawimage) == imwidth*imheight, 'Wrong amount of data for image')
         #compressed = zlib.compress(rawimage) # no zlib at moment
         hex_encoded = self._AsciiHexEncode(rawimage)
-        
+
         # write in blocks of 78 chars per line
         outstream = getStringIO(hex_encoded)
 
@@ -743,7 +743,7 @@ class _PSRenderer(Renderer):
             S = self._tracker.getState()
             text_anchor, x, y, text = S['textAnchor'], stringObj.x,stringObj.y,stringObj.text
             if not text_anchor in ['start','inherited']:
-                font, fontSize = S['fontName'], S['fontSize'] 
+                font, fontSize = S['fontName'], S['fontSize']
                 textLen = stringWidth(text, font,fontSize)
                 if text_anchor=='end':
                     x = x-textLen

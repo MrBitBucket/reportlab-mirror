@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/testshapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.16 2002/07/17 22:46:22 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/testshapes.py,v 1.17 2002/07/24 19:56:36 andy_robinson Exp $
 
 # testshapes.py - draws shapes onto a PDF canvas.
 
@@ -45,7 +45,7 @@ def getFailedDrawing(funcName):
     function does something terribly wrong! The box contains
     an attention triangle, plus some error message.
     """
-    
+
     D = Drawing(400, 200)
 
     points = [200,170, 140,80, 260,80]
@@ -70,7 +70,7 @@ def getDrawing01():
     The rectangle's fillColor is yellow.
     The string's fillColor is red.
     """
-    
+
     D = Drawing(400, 200)
     D.add(Rect(50, 50, 300, 100, fillColor=colors.yellow))
     D.add(String(180,100, 'Hello World', fillColor=colors.red))
@@ -84,7 +84,7 @@ def getDrawing02():
     The lines are blue and their strokeWidth is 5 mm.
     One line has a strokeDashArray set to [5, 10, 15].
     """
-    
+
     D = Drawing(400, 200)
     D.add(Line(50,50, 300,100,
                strokeColor=colors.blue,
@@ -109,7 +109,7 @@ def getDrawing03():
     Times-Roman.  Finally, a solitary Courier string at
     the top right corner.
     """
-    
+
     D = Drawing(400, 200)
     for size in range(12, 36, 4):
         D.add(String(10+size*2,
@@ -131,7 +131,7 @@ def getDrawing04():
     Colours are blue, yellow and red from bottom left
     to upper right.
     """
-    
+
     D = Drawing(400, 200)
     i = 0
     for color in (colors.blue, colors.yellow, colors.red):
@@ -147,7 +147,7 @@ def getDrawing05():
 
     Text alignment conforms to the anchors in the left column.
     """
-    
+
     D = Drawing(400, 200)
 
     lineX = 250
@@ -171,9 +171,9 @@ def getDrawing06():
 
     purple = colors.purple
     purple = colors.green
-    
+
     D = Drawing(400, 200) #, fillColor=purple)
-    
+
     D.add(Line(10,10, 390,190))
 
     D.add(Circle(100,100,20, fillColor=purple))
@@ -193,8 +193,8 @@ def getDrawing06():
                strokeWidth=10,
                strokeColor=colors.yellow,
                fillColor=purple))  #square corners
-    
-    D.add(Rect(220, 150, 60, 30, 10, 10, fillColor=purple))  #round corners    
+
+    D.add(Rect(220, 150, 60, 30, 10, 10, fillColor=purple))  #round corners
 
     D.add(String(10,50, 'Basic Shapes', fillColor=colors.black))
 
@@ -214,13 +214,13 @@ def getDrawing07():
         Line(0,30,10,30),
         Line(0,40,10,40),
         Line(10,0,10,10), #ticks on x axis
-        Line(20,0,20,10), 
-        Line(30,0,30,10), 
-        Line(40,0,40,10), 
-        Line(50,0,50,10), 
-        Line(60,0,60,10), 
-        Line(70,0,70,10), 
-        Line(80,0,80,10), 
+        Line(20,0,20,10),
+        Line(30,0,30,10),
+        Line(40,0,40,10),
+        Line(50,0,50,10),
+        Line(60,0,60,10),
+        Line(70,0,70,10),
+        Line(80,0,80,10),
         Line(90,0,90,10),
         String(20, 35, 'Axes', fill=colors.black)
         )
@@ -228,17 +228,17 @@ def getDrawing07():
     firstAxisGroup = Group(Axis)
     firstAxisGroup.translate(10,10)
     D.add(firstAxisGroup)
-    
+
     secondAxisGroup = Group(Axis)
     secondAxisGroup.translate(150,10)
     secondAxisGroup.rotate(15)
-    
+
     D.add(secondAxisGroup)
 
 
     thirdAxisGroup = Group(Axis, transform=mmult(translate(300,10), rotate(30)))
     D.add(thirdAxisGroup)
-   
+
     return D
 
 
@@ -257,13 +257,13 @@ def getDrawing08():
         Line(0,30,10,30),
         Line(0,40,10,40),
         Line(10,0,10,10), #ticks on x axis
-        Line(20,0,20,10), 
-        Line(30,0,30,10), 
-        Line(40,0,40,10), 
-        Line(50,0,50,10), 
-        Line(60,0,60,10), 
-        Line(70,0,70,10), 
-        Line(80,0,80,10), 
+        Line(20,0,20,10),
+        Line(30,0,30,10),
+        Line(40,0,40,10),
+        Line(50,0,50,10),
+        Line(60,0,60,10),
+        Line(70,0,70,10),
+        Line(80,0,80,10),
         Line(90,0,90,10),
         String(20, 35, 'Axes', fill=colors.black)
         )
@@ -271,12 +271,12 @@ def getDrawing08():
     firstAxisGroup = Group(Axis)
     firstAxisGroup.translate(10,10)
     D.add(firstAxisGroup)
-    
+
     secondAxisGroup = Group(Axis)
     secondAxisGroup.translate(150,10)
     secondAxisGroup.scale(1,2)
     D.add(secondAxisGroup)
-    
+
     thirdAxisGroup = Group(Axis)
     thirdAxisGroup.translate(10,125)
     thirdAxisGroup.scale(2,1)
@@ -287,7 +287,7 @@ def getDrawing08():
     fourthAxisGroup.skew(30,0)
     D.add(fourthAxisGroup)
 
-    
+
     return D
 
 def getDrawing09():
@@ -337,14 +337,14 @@ def getDrawing10():
 
     g2 = Group(g1, transform = translate(25,25))
     D.add(g2)
-    
+
     g3 = Group(g2, transform = translate(25,25))
     D.add(g3)
 
     g4 = Group(g3, transform = translate(25,25))
     D.add(g4)
 
-        
+
     return D
 
 from widgets.signsandsymbols import SmileyFace
@@ -420,7 +420,7 @@ def getAllTestDrawings():
 
 def writePDF(drawings):
     "Create and save a PDF file containing some drawings."
-    
+
     pdfPath = os.path.splitext(sys.argv[0])[0] + '.pdf'
     c = Canvas(pdfPath)
     c.setFont('Times-Roman', 32)
@@ -450,7 +450,7 @@ def writePDF(drawings):
 
     c.save()
     print 'wrote %s ' % pdfPath
-        
+
 
 class ShapesTestCase(unittest.TestCase):
     "Test generating all kinds of shapes."
@@ -466,7 +466,7 @@ class ShapesTestCase(unittest.TestCase):
         "Do what has to be done after the tests are over."
 
         writePDF(self.drawings)
-    
+
 
     # This should always succeed. If each drawing would be
     # wrapped in a dedicated test method like this one, it
@@ -484,7 +484,7 @@ class ShapesTestCase(unittest.TestCase):
 
 def makeSuite():
     "Make a test suite for unit testing."
-    
+
     suite = unittest.TestSuite()
     suite.addTest(ShapesTestCase('testAllDrawings'))
     return suite

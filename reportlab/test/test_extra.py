@@ -66,14 +66,14 @@ class ExternalTestCase(SecureTestCase):
             f = os.path.expanduser(f)
             f = os.path.expandvars(f)
             f = os.path.abspath(f)
-            
+
             if os.path.exists(f):
                 # look for a makeSuite function and execute it if present
                 folder = os.path.abspath(os.path.dirname(f))
                 modname = os.path.splitext(os.path.basename(f))[0]
                 os.chdir(folder)
                 sys.path.insert(0, folder)
-                
+
                 module = __import__(modname) # seems to fail sometimes...
                 if 'makeSuite' in dir(module):
                     print "running", f

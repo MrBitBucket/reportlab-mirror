@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.22 2002/07/17 22:46:22 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.23 2002/07/24 19:56:36 andy_robinson Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -12,7 +12,7 @@
 This permits you to customize and pop out individual wedges;
 supports elliptical and circular pies.
 """
-__version__=''' $Id: piecharts.py,v 1.22 2002/07/17 22:46:22 andy_robinson Exp $ '''
+__version__=''' $Id: piecharts.py,v 1.23 2002/07/24 19:56:36 andy_robinson Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -32,7 +32,7 @@ from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropH
 
 class WedgeProperties(PropHolder):
     """This holds descriptive information about the wedges in a pie chart.
-    
+
     It is not to be confused with the 'wedge itself'; this just holds
     a recipe for how to format one, and does not allow you to hack the
     angles.  It can format a genuine Wedge object for you with its
@@ -75,7 +75,7 @@ class Pie(Widget):
         direction = AttrMapValue( OneOf('clockwise', 'anticlockwise'), desc="'clockwise' or 'anticlockwise'"),
         slices = AttrMapValue(None, desc="collection of wedge descriptor objects"),
         )
-    
+
     def __init__(self):
         self.x = 0
         self.y = 0
@@ -85,17 +85,17 @@ class Pie(Widget):
         self.labels = None  # or list of strings
         self.startAngle = 90
         self.direction = "clockwise"
-        
+
         self.slices = TypedPropertyCollection(WedgeProperties)
         self.slices[0].fillColor = colors.darkcyan
         self.slices[1].fillColor = colors.blueviolet
         self.slices[2].fillColor = colors.blue
         self.slices[3].fillColor = colors.cyan
 
-        
+
     def demo(self):
         d = Drawing(200, 100)
-    
+
         pc = Pie()
         pc.x = 50
         pc.y = 10
@@ -132,7 +132,7 @@ class Pie(Widget):
             normData.append(360.0 * number / sum)
 
         return normData
-    
+
 
     def makeWedges(self):
         # normalize slice data
@@ -163,7 +163,7 @@ class Pie(Widget):
         g = Group()
         i = 0
         styleCount = len(self.slices)
-        
+
         startAngle = self.startAngle #% 360
         for angle in normData:
             endAngle = (startAngle + (angle * whichWay)) #% 360
@@ -200,7 +200,7 @@ class Pie(Widget):
                 theWedge.strokeDashArray = wedgeStyle.strokeDashArray
 
                 g.add(theWedge)
-                    
+
                 # now draw a label
                 if labels[i] <> "":
                     averageAngle = (a1+a2)/2.0
@@ -208,7 +208,7 @@ class Pie(Widget):
                     labelRadius = wedgeStyle.labelRadius
                     labelX = centerx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
                     labelY = centery + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
-                    
+
                     theLabel = String(labelX, labelY, labels[i])
                     theLabel.textAnchor = "middle"
                     theLabel.fontSize = wedgeStyle.fontSize
@@ -308,7 +308,7 @@ class LegendedPie(Pie):
         self.leftPadding = 5
         self.rightPadding = 5
         self.topPadding = 5
-        self.bottomPadding = 5        
+        self.bottomPadding = 5
         self.drawLegend = 1
 
     def draw(self):
@@ -392,7 +392,7 @@ def sample0a():
     pc.data = [10]
     pc.labels = ['a']
     pc.slices.strokeWidth=1#0.5
-    
+
     d.add(pc)
 
     return d
@@ -411,7 +411,7 @@ def sample0b():
     pc.data = [10]
     pc.labels = ['a']
     pc.slices.strokeWidth=1#0.5
-    
+
     d.add(pc)
 
     return d
@@ -434,7 +434,7 @@ def sample1():
     pc.slices[3].strokeDashArray = [2,2]
     pc.slices[3].labelRadius = 1.75
     pc.slices[3].fontColor = colors.red
-    
+
     d.add(pc)
 
     return d

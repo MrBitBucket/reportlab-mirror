@@ -9,7 +9,7 @@ from reportlab.lib import validators
 
 class ValidatorTestCase(unittest.TestCase):
     "Test validating functions."
-    
+
     def test0(self):
         "Test isBoolean validator."
 
@@ -50,7 +50,7 @@ class ValidatorTestCase(unittest.TestCase):
 
         msg = 'Validation failed for number %s!'
 
-        numbers = [None, 0, 1, 2, -1, -2, 0.0, 0.1, -0.1] #, 2L, -2L]        
+        numbers = [None, 0, 1, 2, -1, -2, 0.0, 0.1, -0.1] #, 2L, -2L]
         isNumberOrNone = validators.isNumberOrNone
         for n in numbers:
             assert isNumberOrNone(n) == 1, msg % str(n)
@@ -82,7 +82,7 @@ class ValidatorTestCase(unittest.TestCase):
 
         msg = 'Validation failed for text anchor %s!'
 
-        strings = ['start', 'middle', 'end']        
+        strings = ['start', 'middle', 'end']
         isTextAnchor = validators.isTextAnchor
         for s in strings:
             assert isTextAnchor(s) == 1, msg % s
@@ -106,7 +106,7 @@ class ValidatorTestCase(unittest.TestCase):
 
         msg = 'Validation failed for OneOf %s!'
 
-        choices = ('clockwise', 'anticlockwise')        
+        choices = ('clockwise', 'anticlockwise')
         OneOf = validators.OneOf(choices)
         for c in choices:
             assert OneOf(c) == 1, msg % c

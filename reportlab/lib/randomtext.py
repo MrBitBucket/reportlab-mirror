@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/randomtext.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/randomtext.py,v 1.8 2002/07/17 22:46:23 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/lib/randomtext.py,v 1.9 2002/07/24 19:56:37 andy_robinson Exp $
 
-__version__=''' $Id: randomtext.py,v 1.8 2002/07/17 22:46:23 andy_robinson Exp $ '''
+__version__=''' $Id: randomtext.py,v 1.9 2002/07/24 19:56:37 andy_robinson Exp $ '''
 
 import string
 
@@ -32,7 +32,7 @@ EXAMPLE USAGE:
 
     This prints a random number of random sentences (up to a limit
     of ten) using the theme 'PYTHON'.
-    
+
 """
 
 #theme one :-)
@@ -52,7 +52,7 @@ COMPUTERS = ['Python', 'Perl', 'Pascal', 'Java', 'Javascript',
     'DOS', 'file system', 'FreeBSD', 'Freeware', 'GEOS', 'GNU',
     'Hurd', 'Linux', 'Mach', 'Macintosh OS', 'mailing lists', 'Minix',
     'Multics', 'NetWare', 'NextStep', 'OS/2', 'Plan 9', 'Realtime',
-    'UNIX', 'VMS', 'Windows', 'X Windows', 'Xinu', 'security', 'Intel', 
+    'UNIX', 'VMS', 'Windows', 'X Windows', 'Xinu', 'security', 'Intel',
     'encryption', 'PGP' , 'software', 'ActiveX', 'AppleScript', 'awk',
     'BETA', 'COBOL', 'Delphi', 'Dylan', 'Eiffel', 'extreme programming',
     'Forth', 'Fortran', 'functional languages', 'Guile', 'format your hard drive',
@@ -62,9 +62,9 @@ COMPUTERS = ['Python', 'Perl', 'Pascal', 'Java', 'Javascript',
     'Pascal', 'Perl', 'PL/I', 'PostScript', 'Prolog', 'hardware', 'Blue Screen of Death',
     'Rexx', 'RPG', 'Scheme', 'scripting languages', 'Smalltalk', 'crash!', 'disc crash',
     'Spanner', 'SQL', 'Tcl/Tk', 'TeX', 'TOM', 'Visual', 'Visual Basic', '4GL',
-    'VRML', 'Virtual Reality Modeling Language', 'difference engine', '...went into "yo-yo mode"', 
+    'VRML', 'Virtual Reality Modeling Language', 'difference engine', '...went into "yo-yo mode"',
     'Sun', 'Sun Microsystems', 'Hewlett Packard', 'output device',
-    'CPU', 'memory', 'registers', 'monitor', 'TFT display', 'plasma screen', 
+    'CPU', 'memory', 'registers', 'monitor', 'TFT display', 'plasma screen',
     'bug report', '"mis-feature"', '...millions of bugs!', 'pizza',
     '"illiterate programming"','...lots of pizza!', 'pepperoni pizza',
     'coffee', 'Jolt Cola[TM]', 'beer', 'BEER!']
@@ -123,7 +123,7 @@ STARTREK = ['Starfleet', 'Klingon', 'Romulan', 'Cardassian', 'Vulcan',
     'Red Alert!', 'warp-core breech', '"All hands abandon ship! This is not a drill!"']
 
 #theme six - print-related terms
-PRINTING = ['points', 'picas', 'leading', 'kerning', 'CMYK', 'offset litho', 
+PRINTING = ['points', 'picas', 'leading', 'kerning', 'CMYK', 'offset litho',
     'type', 'font family', 'typography', 'type designer',
     'baseline', 'white-out type', 'WOB', 'bicameral', 'bitmap',
     'blockletter', 'bleed', 'margin', 'body', 'widow', 'orphan',
@@ -163,7 +163,7 @@ PYTHON = ['Good evening ladies and Bruces','I want to buy some cheese', 'You do 
           "You're a very silly man and I'm not going to interview you.", "No Mungo... never kill a customer."
           "And I'd like to conclude by putting my finger up my nose",
           "egg and Spam", "egg bacon and Spam", "egg bacon sausage and Spam", "Spam bacon sausage and Spam",
-          "Spam egg Spam Spam bacon and Spam", "Spam sausage Spam Spam Spam bacon Spam tomato and Spam", 
+          "Spam egg Spam Spam bacon and Spam", "Spam sausage Spam Spam Spam bacon Spam tomato and Spam",
           "Spam Spam Spam egg and Spam", "Spam Spam Spam Spam Spam Spam baked beans Spam Spam Spam",
           "Spam!!", "I don't like Spam!!!", "You can't have egg, bacon, Spam and sausage without the Spam!",
           "I'll have your Spam. I Love it!",
@@ -206,4 +206,3 @@ def randomText(theme=STARTUP, sentences=5):
             output = output + ' ' +word
         output = output+'. '
     return output
-

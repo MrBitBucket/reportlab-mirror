@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPDF.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.19 2002/07/03 10:21:07 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.20 2002/07/24 19:56:36 andy_robinson Exp $
 # renderPDF - draws Drawings onto a canvas
 """Usage:
     import renderpdf
@@ -9,7 +9,7 @@
 Execute the script to see some test drawings.
 changed
 """
-__version__=''' $Id: renderPDF.py,v 1.19 2002/07/03 10:21:07 rgbecker Exp $ '''
+__version__=''' $Id: renderPDF.py,v 1.20 2002/07/24 19:56:36 andy_robinson Exp $ '''
 
 from reportlab.graphics.shapes import *
 from reportlab.pdfgen.canvas import Canvas
@@ -136,7 +136,7 @@ class _PDFRenderer(Renderer):
         path.arcTo(centerx-radius, centery-yradius, centerx+radius, centery+yradius,
                    startangledegrees, angle)
         path.close()
-        self._canvas.drawPath(path, 
+        self._canvas.drawPath(path,
                     fill=self._fill,
                     stroke=self._stroke)
 
@@ -167,7 +167,7 @@ class _PDFRenderer(Renderer):
             S = self._tracker.getState()
             text_anchor, x, y, text = S['textAnchor'], stringObj.x,stringObj.y,stringObj.text
             if not text_anchor in ['start','inherited']:
-                font, font_size = S['fontName'], S['fontSize'] 
+                font, font_size = S['fontName'], S['fontSize']
                 textLen = stringWidth(text, font,font_size)
                 if text_anchor=='end':
                     x = x-textLen
@@ -189,7 +189,7 @@ class _PDFRenderer(Renderer):
         if path.isClipPath:
             self._canvas.clipPath(pdfPath, fill=fill, stroke=self._stroke)
         else:
-            self._canvas.drawPath(pdfPath, 
+            self._canvas.drawPath(pdfPath,
                         fill=fill,
                         stroke=self._stroke)
 
@@ -253,7 +253,7 @@ class GraphicsFlowable(Flowable):
 
 def drawToFile(d, fn, msg="", showBoundary=rl_config.showBoundary, autoSize=1):
     """Makes a one-page PDF with just the drawing.
-    
+
     If autoSize=1, the PDF will be the same size as
     the drawing; if 0, it will place the drawing on
     an A4 page with a title above it - possibly overflowing
@@ -262,7 +262,7 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config.showBoundary, autoSize=1):
     c.setFont('Times-Roman', 36)
     c.drawString(80, 750, msg)
     c.setTitle(msg)
-        
+
     if autoSize:
         c.setPageSize((d.width, d.height))
         draw(d, c, 0, 0, showBoundary=showBoundary)
@@ -337,7 +337,7 @@ def test():
 ##    doc = SimpleDocTemplate('test_flowable.pdf')
 ##    story = []
 ##    story.append(Paragraph("This sees is a drawing can work as a flowable", styNormal))
-##    
+##
 ##    import testdrawings
 ##    drawings = []
 ##

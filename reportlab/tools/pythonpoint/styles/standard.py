@@ -16,7 +16,7 @@ def getParagraphStyles():
 
     stylesheet = {}
     ParagraphStyle = styles.ParagraphStyle
-    
+
     para = ParagraphStyle('Normal', None)   #the ancestor of all
     para.fontName = 'Times-Roman'
     para.fontSize = 24
@@ -27,7 +27,7 @@ def getParagraphStyles():
     para = ParagraphStyle('BodyText', stylesheet['Normal'])
     para.spaceBefore = 12
     stylesheet['BodyText'] = para
-    
+
     #Indented, for lists
     para = ParagraphStyle('Indent', stylesheet['Normal'])
     para.leftIndent = 36
@@ -37,7 +37,7 @@ def getParagraphStyles():
     para = ParagraphStyle('Centered', stylesheet['Normal'])
     para.alignment = TA_CENTER
     stylesheet['Centered'] = para
-    
+
     para = ParagraphStyle('BigCentered', stylesheet['Normal'])
     para.spaceBefore = 12
     para.alignment = TA_CENTER
@@ -53,21 +53,21 @@ def getParagraphStyles():
     para.leading = 58
     para.alignment = TA_CENTER
     stylesheet['Title'] = para
-    
+
     para = ParagraphStyle('Heading1', stylesheet['Normal'])
     para.fontName = 'Times-Bold'
     para.fontSize = 36
     para.leading = 44
     para.alignment = TA_CENTER
     stylesheet['Heading1'] = para
-    
+
     para = ParagraphStyle('Heading2', stylesheet['Normal'])
     para.fontName = 'Times-Bold'
     para.fontSize = 28
     para.leading = 34
     para.spaceBefore = 24
     stylesheet['Heading2'] = para
-    
+
     para = ParagraphStyle('Heading3', stylesheet['Normal'])
     para.fontName = 'Times-BoldItalic'
     para.spaceBefore = 24

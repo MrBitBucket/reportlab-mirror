@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/setup.py,v 1.13 2002/07/17 22:46:23 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/lib/setup.py,v 1.14 2002/07/24 19:56:37 andy_robinson Exp $
 if __name__=='__main__': #NO RUNTESTS
     import os, sys
     from distutils.core import setup, Extension

@@ -1,10 +1,10 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.22 2002/07/17 22:46:22 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.23 2002/07/24 19:56:36 andy_robinson Exp $
 """This will be a collection of legends to be used with charts.
 """
-__version__=''' $Id: legends.py,v 1.22 2002/07/17 22:46:22 andy_robinson Exp $ '''
+__version__=''' $Id: legends.py,v 1.23 2002/07/24 19:56:36 andy_robinson Exp $ '''
 
 import string, copy
 
@@ -29,15 +29,15 @@ class Legend(Widget):
 
     Strings can be nicely aligned left or right to the swatches.
     """
-    
+
     _attrMap = AttrMap(
         x = AttrMapValue(isNumber, desc="x-coordinate of upper-left reference point"),
         y = AttrMapValue(isNumber, desc="y-coordinate of upper-left reference point"),
         deltax = AttrMapValue(isNumberOrNone, desc="x-distance between neighbouring swatches"),
         deltay = AttrMapValue(isNumberOrNone, desc="y-distance between neighbouring swatches"),
         dxTextSpace = AttrMapValue(isNumber, desc="Distance between swatch rectangle and text"),
-        autoXPadding = AttrMapValue(isNumber, desc="x Padding between columns if deltax=None"), 
-        autoYPadding = AttrMapValue(isNumber, desc="y Padding between rows if deltay=None"), 
+        autoXPadding = AttrMapValue(isNumber, desc="x Padding between columns if deltax=None"),
+        autoYPadding = AttrMapValue(isNumber, desc="y Padding between rows if deltay=None"),
         dx = AttrMapValue(isNumber, desc="Width of swatch rectangle"),
         dy = AttrMapValue(isNumber, desc="Height of swatch rectangle"),
         columnMaximum = AttrMapValue(isNumber, desc="Max. number of items per column"),
@@ -217,7 +217,7 @@ class Legend(Widget):
         "Make sample legend."
 
         d = Drawing(200, 100)
-        
+
         legend = Legend()
         legend.alignment = 'left'
         legend.x = 0
@@ -234,9 +234,9 @@ class Legend(Widget):
 
 def sample1c():
     "Make sample legend."
-    
+
     d = Drawing(200, 100)
-    
+
     legend = Legend()
     legend.alignment = 'right'
     legend.x = 0
@@ -255,7 +255,7 @@ def sample2c():
     "Make sample legend."
 
     d = Drawing(200, 100)
-    
+
     legend = Legend()
     legend.alignment = 'right'
     legend.x = 20

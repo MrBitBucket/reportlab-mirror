@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/_cidfontdata.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: _cidfontdata.py,v 1.8 2001/11/06 03:02:43 andy_robinson Exp $ '''
+__version__=''' $Id: _cidfontdata.py,v 1.9 2002/07/24 19:56:37 andy_robinson Exp $ '''
 __doc__="""
 This defines additional static data to support CID fonts.
 
@@ -80,7 +80,7 @@ encodings_kor = [
                         #extensions, Script Manager Code 3
     'UniKS-UCS2-H',     #Unicode (UCS-2) encoding for the Adobe-Korea1 character collection
     'UniKS-UCS2-V'      #Vertical version of UniKS-UCS2-H
-    
+
     ]
 
 encodings_chs = [
@@ -138,7 +138,7 @@ CIDFontInfo['HeiseiMin-W3'] = {
 
             #there could be several descendant fonts if it is an old-style
             #type 0 compound font.  For CID fonts there is just one.
-            'DescendantFonts': [{  
+            'DescendantFonts': [{
                 'Type':'/Font',
                 'Subtype':'/CIDFontType0',
                 'BaseFont':'/HeiseiMin-W3',
@@ -435,7 +435,7 @@ CIDFontInfo['MSung-Light'] =  {'Type':'/Font',
             }
 
 
-            
+
 #shift-jis saying 'This is Heisei-Minchou'
 message1 =  '\202\261\202\352\202\315\225\275\220\254\226\276\222\251\202\305\202\267\201B'
 message2 = '\202\261\202\352\202\315\225\275\220\254\212p\203S\203V\203b\203N\202\305\202\267\201B'

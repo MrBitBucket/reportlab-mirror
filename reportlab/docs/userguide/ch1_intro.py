@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.6 2002/05/28 15:06:55 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.7 2002/07/24 19:56:35 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 import reportlab
 
@@ -112,14 +112,14 @@ mileage may vary real soon now, as far as we know).</para>
 """)
 disc("""
 Python is an <i>interpreted, interactive, object-oriented</i> programming language. It is often compared to Tcl, Perl,
-Scheme or Java. 
+Scheme or Java.
 """)
 
 disc("""
 Python combines remarkable power with very clear syntax. It has modules, classes, exceptions, very high level
 dynamic data types, and dynamic typing. There are interfaces to many system calls and libraries, as well as to
 various windowing systems (X11, Motif, Tk, Mac, MFC). New built-in modules are easily written in C or C++.
-Python is also usable as an extension language for applications that need a programmable interface. 
+Python is also usable as an extension language for applications that need a programmable interface.
 """)
 
 disc("""
@@ -128,11 +128,11 @@ The Python implementation is portable: it runs on most brands of UNIX
 IBM operating systems, VxWorks, PSOS, ... If
 your favorite system isn't listed here, it may still be supported, if there's a C
 programming language compiler for it. Ask around on
-comp.lang.python -- or just try compiling Python yourself. 
+comp.lang.python -- or just try compiling Python yourself.
 """)
 
 disc("""
-Python is copyrighted but <b>freely usable and distributable, even for commercial use</b>. 
+Python is copyrighted but <b>freely usable and distributable, even for commercial use</b>.
 The ReportLab core modules share the same copyright with the name of the copyright holder
 modified.  Both packages use the "Berkeley Standard Distribution (BSD) style" free software copyright.
 """)
@@ -147,7 +147,7 @@ disc("""Special thanks go to Just van Rossum for his valuable assistance with
 font technicalities and the LettErrorRobot-Chrome type 1 font.""")
 
 disc("""Marius Gedminas deserves a big hand for contributing the work on TrueType fonts and we
-are glad to include these in the toolkit. Finally we thank Bigelow & Holmes Inc ($design@bigelowandholmes.com$) 
+are glad to include these in the toolkit. Finally we thank Bigelow & Holmes Inc ($design@bigelowandholmes.com$)
 for Luxi Serif Regular and Ray Larabie ($http://www.larabiefonts.com$) for the Rina TrueType font.""")
 
 heading2("Installation and Setup")
@@ -183,7 +183,7 @@ latest stable version is also available as just $reportlab.zip$ (or
 $reportlab.tgz$), which is actually a symbolic link to the latest
 numbered version.""")
 
-disc("""We also make nightly snapshots of our CVS 
+disc("""We also make nightly snapshots of our CVS
 (version control) tree available.  In
 general, these are very stable because we have a comprehensive test
 suite that all developers can run at any time.
@@ -256,9 +256,9 @@ Win9x, enter "$python test_pdfgen_general.py$".  After a couple of seconds,
 the script completes and the file test_pdfgen_general.pdf should be ready for
 viewing.  If PIL is installed, there should be a "Python Powered"
 image on page 7.""")
-list("""$test_pdfgen_general.py$ tests most of the functions that you 
-will need. To run all the tests and make sure that absolutely 
-everything works, type $runAll.py$. If none of the tests fail, you're 
+list("""$test_pdfgen_general.py$ tests most of the functions that you
+will need. To run all the tests and make sure that absolutely
+everything works, type $runAll.py$. If none of the tests fail, you're
 done!""")
 
 disc("""
@@ -281,10 +281,10 @@ binaries
 get the latest RPM or DEB or whatever package and install (or get your
 super user (system administrator) to do the work).""")
 
-list("""If you are building Python yourself, unpack the sources into a 
-temporary directory using a tar command e.g. $tar xzvf py152.tgz$; 
-this will create a subdirectory called Python-1.5.2 (or whatever) cd 
-into this directory. Then read the file $README$! It contains the 
+list("""If you are building Python yourself, unpack the sources into a
+temporary directory using a tar command e.g. $tar xzvf py152.tgz$;
+this will create a subdirectory called Python-1.5.2 (or whatever) cd
+into this directory. Then read the file $README$! It contains the
 latest information on how to install Python.""")
 
 list("""If your system has the gzip libz library installed
@@ -335,7 +335,7 @@ First install Python.  The latest stable release is 2.1, but it is
 also possible to run Reportlab with any official Python from 1.5.2
 upwards.  You get the software (ready to run) by following the link from
 $http://www.python.org/download/download_mac.html$.
-Currently, you should go to 'Jack's MacPython page' and download 
+Currently, you should go to 'Jack's MacPython page' and download
 $MacPython21active.bin$.
 """)
 
@@ -365,9 +365,9 @@ image('Python_21.gif', 3*inch, 3*inch )
 
 
 disc("""
-We should now tell the OS about Python files, so you get the right 
-icons and so the operating system knows that  .py files are text 
-files. Open the File Exchange control panel. Click the Add button. 
+We should now tell the OS about Python files, so you get the right
+icons and so the operating system knows that  .py files are text
+files. Open the File Exchange control panel. Click the Add button.
 Wait for a list of applications to be generated.
 """)
 
@@ -383,7 +383,7 @@ Enter the extension ".py". Next to 'file type', click the 'Select'
 button and choose "Python Interpreter" from the list of applications.
 The 'File Type' box should then show 'text' and a logo like the one
 above. Fill in the same options on the right hand side as in the
-illustration above. Click 'change', then close the control panel. 
+illustration above. Click 'change', then close the control panel.
 """)
 
 disc("""
@@ -402,8 +402,8 @@ disc("""
 You should get the following modal dialog.
 This is the point, where your special data goes in.
 Reportlab is on the path in Extensions. So all you have to do is add
-the last line 
-<b>$(PYTHON):Extensions</b>. 
+the last line
+<b>$(PYTHON):Extensions</b>.
 """)
 
 image('Edit_Prefs.gif',3*inch,3*inch)
@@ -419,7 +419,7 @@ Adobe Acrobat. If this PDF file works, then you have successfully
 installed both Python and the basic ReportLab package. If you want to
 do a full test of everything, execute the script reportlab:test:runAll
 with a double click. It runs lots of tests for a few minutes and
-eventually says 'OK'. 
+eventually says 'OK'.
 """)
 
 
@@ -463,7 +463,7 @@ disc("""There are a number of options which most likely need to be configured gl
 The python script module $reportlab/rl_config.py$ may be edited to change the values of several
 important sitewide properties.""")
 bullet("""verbose: set to integer values to control diagnostic output.""")
-bullet("""shapeChecking: set this to zero to turn off a lot of error checking in the graphics modules""") 
+bullet("""shapeChecking: set this to zero to turn off a lot of error checking in the graphics modules""")
 bullet("""defaultEncoding: set this to WinAnsiEncoding or MacRomanEncoding.""")
 bullet("""defaultPageSize: set this to one of the values defined in reportlab/lib/pagesizes.py; as delivered
 it is set to pagesizes.A4; other values are pagesizes.letter etc.""")
@@ -487,7 +487,7 @@ bullet("""emptyTableAction: Controls behaviour for empty tables, can be 'error' 
 heading2("Learning More About Python")
 
 disc("""
-If you are a total beginner to Python, you should check out one or more from the 
+If you are a total beginner to Python, you should check out one or more from the
 growing number of resources on Python programming. The following are freely
 available on the web:
 """)
@@ -512,18 +512,18 @@ $http://www.freenetpages.co.uk/hp/alan.gauld/$
 """)
 disc("")
 
-bullet("""<b>How to think like a computer scientist</b> (Python version)</b>.  
+bullet("""<b>How to think like a computer scientist</b> (Python version)</b>.
 $http://www.ibiblio.org/obp/thinkCSpy/$
 """)
 disc("")
 
-bullet("""<b>Instant Python</b>.  
-A 6-page minimal crash course by Magnus Lie Hetland.  
+bullet("""<b>Instant Python</b>.
+A 6-page minimal crash course by Magnus Lie Hetland.
 $http://www.hetland.org/python/instant-python.php$
 """)
 disc("")
 
-bullet("""<b>Dive Into Python</b>.  
+bullet("""<b>Dive Into Python</b>.
 A free Python tutorial for experienced programmers.
 $http://diveintopython.org/$
 """)

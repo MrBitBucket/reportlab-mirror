@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/graphguide/ch3_shapes.py,v 1.2 2001/10/27 22:37:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/graphguide/ch3_shapes.py,v 1.3 2002/07/24 19:56:35 andy_robinson Exp $
 
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.graphics.shapes import *
@@ -22,7 +22,7 @@ disc("""
 Drawings are made up of Shapes.
 Absolutely anything can be built up by combining the same set of
 primitive shapes.
-The module $shapes.py$ supplies a number of primitive shapes and 
+The module $shapes.py$ supplies a number of primitive shapes and
 constructs which can be added to a drawing.
 They are:
 """)
@@ -49,12 +49,12 @@ from reportlab.graphics import testshapes
 
 t = testshapes.getDrawing06()
 draw(t, "Basic shapes")
- 
+
 
 heading2("Shape Properties")
 
 disc("""
-Shapes have two kinds of properties - some to define their geometry 
+Shapes have two kinds of properties - some to define their geometry
 and some to define their style.
 Let's create a red rectangle with 3-point thick green borders:
 """)
@@ -66,7 +66,7 @@ eg("""
 >>> r.fillColor = red
 >>> r.strokeColor = green
 >>> r.strokeWidth = 3
->>> 
+>>>
 """)
 
 from reportlab.graphics.shapes import Rect
@@ -105,7 +105,7 @@ strokeWidth = 3
 width = 200
 x = 5
 y = 5
->>> 
+>>>
 """)
 
 disc("""
@@ -118,16 +118,16 @@ The others are optional and come with sensible defaults.
 """)
 
 disc("""
-You may set other properties on subsequent lines, or by passing them 
+You may set other properties on subsequent lines, or by passing them
 as optional arguments to the constructor.
 We could also have created our rectangle this way:
 """)
 
 eg("""
->>> r = Rect(5, 5, 200, 100, 
-             fillColor=red, 
-             strokeColor=green, 
-             strokeWidth=3) 
+>>> r = Rect(5, 5, 200, 100,
+             fillColor=red,
+             strokeColor=green,
+             strokeWidth=3)
 """)
 
 disc("""
@@ -197,7 +197,7 @@ text = Hello World
 textAnchor = start
 x = 10
 y = 50
->>> 
+>>>
 """)
 
 disc("""
@@ -209,7 +209,7 @@ This provides an easy way to align text.
 """)
 
 disc("""
-Strings use a common font standard: the Type 1 Postscript fonts 
+Strings use a common font standard: the Type 1 Postscript fonts
 present in Acrobat Reader.
 We can thus use the basic 14 fonts in ReportLab and get accurate
 metrics for them.
@@ -282,38 +282,38 @@ will be, soon.
 # NB This commented out section is for 'future compatibility' - paths haven't
 #    been implemented yet, but when they are we can uncomment this back in.
 
-    ##disc("""Postscript paths are a widely understood concept in graphics. A Path 
-    ##       is a way of defining a region in space. You put an imaginary pen down, 
-    ##       draw straight and curved segments, and even pick the pen up and move 
-    ##       it. At the end of this you have described a region, which may consist 
-    ##       of several distinct close shapes or unclosed lines. At the end, this 
-    ##       'path' is 'stroked and filled' according to its properties. A Path has 
-    ##       the same style properties as a solid shape. It can be used to create 
+    ##disc("""Postscript paths are a widely understood concept in graphics. A Path
+    ##       is a way of defining a region in space. You put an imaginary pen down,
+    ##       draw straight and curved segments, and even pick the pen up and move
+    ##       it. At the end of this you have described a region, which may consist
+    ##       of several distinct close shapes or unclosed lines. At the end, this
+    ##       'path' is 'stroked and filled' according to its properties. A Path has
+    ##       the same style properties as a solid shape. It can be used to create
     ##       any irregular shape.""")
     ##
-    ##disc("""In Postscript-based imaging models such as PDF, Postscript and SVG, 
-    ##       everything is done with paths. All the specific shapes covered above 
-    ##       are instances of paths; even text strings (which are shapes in which 
-    ##       each character is an outline to be filled). Here we begin creating a 
+    ##disc("""In Postscript-based imaging models such as PDF, Postscript and SVG,
+    ##       everything is done with paths. All the specific shapes covered above
+    ##       are instances of paths; even text strings (which are shapes in which
+    ##       each character is an outline to be filled). Here we begin creating a
     ##       path with a straight line and a bezier curve:""")
     ##
     ##eg("""
-    ##>>> P = Path(0,0, strokeWidth=3, strokeColor=red) 
-    ##>>> P.lineTo(0, 50) 
-    ##>>> P.curveTo(10,50,80,80,100,30) 
-    ##>>> 
+    ##>>> P = Path(0,0, strokeWidth=3, strokeColor=red)
+    ##>>> P.lineTo(0, 50)
+    ##>>> P.curveTo(10,50,80,80,100,30)
+    ##>>>
     ##""")
 
-    ##disc("""As well as being the only way to draw complex shapes, paths offer some 
-    ##       performance advantages in renderers which support them. If you want to 
-    ##       create a scatter plot with 5000 blue circles of different sizes, you 
-    ##       can create 5000 circles, or one path object. With the latter, you only 
-    ##       need to set the color and line width once. PINGO just remembers the 
-    ##       drawing sequence, and writes it out into the file. In renderers which 
-    ##       do not support paths, the renderer will still have to decompose it 
+    ##disc("""As well as being the only way to draw complex shapes, paths offer some
+    ##       performance advantages in renderers which support them. If you want to
+    ##       create a scatter plot with 5000 blue circles of different sizes, you
+    ##       can create 5000 circles, or one path object. With the latter, you only
+    ##       need to set the color and line width once. PINGO just remembers the
+    ##       drawing sequence, and writes it out into the file. In renderers which
+    ##       do not support paths, the renderer will still have to decompose it
     ##       into 5000 circles so you won't save anything.""")
     ##
-    ##disc("""<b>Note that our current path implementation is an approximation; it 
+    ##disc("""<b>Note that our current path implementation is an approximation; it
     ##         should be finished off accurately for PDF and PS.</b>""")
 
 
@@ -330,9 +330,9 @@ Here we make a group which is rotated and translated:
 """)
 
 eg("""
->>> g =Group(shape1, shape2, shape3) 
->>> g.rotate(30) 
->>> g.translate(50, 200) 
+>>> g =Group(shape1, shape2, shape3)
+>>> g.rotate(30)
+>>> g.translate(50, 200)
 """)
 
 disc("""
@@ -357,13 +357,13 @@ eg("""
         Line(0,30,10,30),
         Line(0,40,10,40),
         Line(10,0,10,10), # ticks on x axis
-        Line(20,0,20,10), 
-        Line(30,0,30,10), 
-        Line(40,0,40,10), 
-        Line(50,0,50,10), 
-        Line(60,0,60,10), 
-        Line(70,0,70,10), 
-        Line(80,0,80,10), 
+        Line(20,0,20,10),
+        Line(30,0,30,10),
+        Line(40,0,40,10),
+        Line(50,0,50,10),
+        Line(60,0,60,10),
+        Line(70,0,70,10),
+        Line(80,0,80,10),
         Line(90,0,90,10),
         String(20, 35, 'Axes', fill=colors.black)
         )
@@ -371,15 +371,15 @@ eg("""
     firstAxisGroup = Group(Axis)
     firstAxisGroup.translate(10,10)
     d.add(firstAxisGroup)
-    
+
     secondAxisGroup = Group(Axis)
     secondAxisGroup.translate(150,10)
     secondAxisGroup.rotate(15)
-    
+
     d.add(secondAxisGroup)
 
-    thirdAxisGroup = Group(Axis, 
-                           transform=mmult(translate(300,10), 
+    thirdAxisGroup = Group(Axis,
+                           transform=mmult(translate(300,10),
                                            rotate(30)))
     d.add(thirdAxisGroup)
 """)
@@ -393,13 +393,13 @@ Axis = Group(
     Line(0,30,10,30),
     Line(0,40,10,40),
     Line(10,0,10,10), # ticks on x axis
-    Line(20,0,20,10), 
-    Line(30,0,30,10), 
-    Line(40,0,40,10), 
-    Line(50,0,50,10), 
-    Line(60,0,60,10), 
-    Line(70,0,70,10), 
-    Line(80,0,80,10), 
+    Line(20,0,20,10),
+    Line(30,0,30,10),
+    Line(40,0,40,10),
+    Line(50,0,50,10),
+    Line(60,0,60,10),
+    Line(70,0,70,10),
+    Line(80,0,80,10),
     Line(90,0,90,10),
     String(20, 35, 'Axes', fill=colors.black)
     )
@@ -410,8 +410,8 @@ secondAxisGroup = Group(Axis)
 secondAxisGroup.translate(150,10)
 secondAxisGroup.rotate(15)
 d.add(secondAxisGroup)
-thirdAxisGroup = Group(Axis, 
-                       transform=mmult(translate(300,10), 
+thirdAxisGroup = Group(Axis,
+                       transform=mmult(translate(300,10),
                                        rotate(30)))
 d.add(thirdAxisGroup)
 draw(d, "Groups examples")

@@ -1,13 +1,13 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/examples.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/examples.py,v 1.3 2002/07/17 22:46:24 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/examples.py,v 1.4 2002/07/24 19:56:39 andy_robinson Exp $
 import string
 
 testannotations="""
 def annotations(canvas):
     from reportlab.lib.units import inch
-    canvas.drawString(inch, 2.5*inch, 
+    canvas.drawString(inch, 2.5*inch,
        "setAuthor, setTitle, setSubject have no visible effect")
     canvas.drawString(inch, inch, "But if you are viewing this document dynamically")
     canvas.drawString(inch, 0.5*inch, "please look at File/Document Info")
@@ -29,12 +29,12 @@ def g(n):
     if n==0: return 1
     else: return n*g(n-1)
     """
-    
+
 testhello = """
 def hello(c):
     from reportlab.lib.units import inch
     # move the origin up and to the left
-    c.translate(inch,inch) 
+    c.translate(inch,inch)
     # define a large font
     c.setFont("Helvetica", 14)
     # choose some colors
@@ -77,7 +77,7 @@ def translate(canvas):
     canvas.translate(2.3*cm, 0.3*cm)
     coords(canvas)
     """
-    
+
 testscale = """
 def scale(canvas):
     canvas.scale(0.75, 0.5)
@@ -121,7 +121,7 @@ def colors(canvas):
     rdy=h/5.0; texty=h+2*rdy
     canvas.setFont("Helvetica",10)
     for [namedcolor, name] in (
-           [colors.lavenderblush, "lavenderblush"], 
+           [colors.lavenderblush, "lavenderblush"],
            [colors.lawngreen, "lawngreen"],
            [colors.lemonchiffon, "lemonchiffon"],
            [colors.lightblue, "lightblue"],
@@ -230,7 +230,7 @@ def bezier2(canvas):
     # make a sequence of control points
     xd,yd = 5.5*inch/2, 3*inch/2
     xc,yc = xd,yd
-    dxdy = [(0,0.33), (0.33,0.33), (0.75,1), (0.875,0.875), 
+    dxdy = [(0,0.33), (0.33,0.33), (0.75,1), (0.875,0.875),
             (0.875,0.875), (1,0.75), (0.33,0.33), (0.33,0)]
     pointlist = []
     for xoffset in (1,-1):
@@ -287,7 +287,7 @@ def pencil(canvas, text="No.2"):
     canvas.line(11*u,2.5*u,22*u,2.5*u)
     canvas.line(22*u,7.5*u,12*u,7.5*u)
     """
-    
+
 testpenciltip = """
 def penciltip(canvas, debug=1):
     from reportlab.lib.colors import tan, black, green
@@ -360,9 +360,9 @@ class HandAnnotation(Flowable):
 """
 
 lyrics = '''\
-well she hit Net Solutions 
+well she hit Net Solutions
 and she registered her own .com site now
-and filled it up with yahoo profile pics 
+and filled it up with yahoo profile pics
 she snarfed in one night now
 and she made 50 million when Hugh Hefner
 bought up the rights now
@@ -390,7 +390,7 @@ def textsize(canvas):
 """
 
 teststar = """
-def star(canvas, title="Title Here", aka="Comment here.", 
+def star(canvas, title="Title Here", aka="Comment here.",
          xcenter=None, ycenter=None, nvertices=5):
     from math import pi
     from reportlab.lib.units import inch
@@ -468,7 +468,7 @@ def customfont1(canvas):
                                faceName,
                                'WinAnsiEncoding')
     pdfmetrics.registerFont(justFont)
-    
+
     canvas.setFont('LettErrorRobot-Chrome', 32)
     canvas.drawString(10, 150, 'This should be in')
     canvas.drawString(10, 100, 'LettErrorRobot-Chrome')
@@ -725,7 +725,7 @@ def forms(canvas):
     canvas.endForm()
 
     #then draw it
-    canvas.doForm("SpumoniForm")    
+    canvas.doForm("SpumoniForm")
 """
 
 def doctemplateillustration(canvas):
@@ -804,7 +804,7 @@ for (a,b) in g.items():
         #print b
         b = strip(b)
         exec(b+'\n')
-        
+
 platypussetup = """
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
@@ -850,4 +850,3 @@ if __name__=="__main__":
         b = strip(b)
         exec(b+'\n')
     go()
-

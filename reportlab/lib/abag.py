@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/abag.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/abag.py,v 1.7 2002/07/17 22:46:23 andy_robinson Exp $
-__version__=''' $Id: abag.py,v 1.7 2002/07/17 22:46:23 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/abag.py,v 1.8 2002/07/24 19:56:37 andy_robinson Exp $
+__version__=''' $Id: abag.py,v 1.8 2002/07/24 19:56:37 andy_robinson Exp $ '''
 
 class ABag:
     """
@@ -37,7 +37,7 @@ class ABag:
             L.append(rv)
         L.append(") #"+n)
         return string.join(L, "\n")
-        
+
 if __name__=="__main__":
     AB = ABag(a=1, c="hello")
     CD = AB.clone()

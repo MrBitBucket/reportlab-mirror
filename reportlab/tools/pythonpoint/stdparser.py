@@ -89,7 +89,7 @@ class PPMLParser(xmllib.XMLParser):
             'radius':'6',
             'fill':'None',
             'stroke':'(0,0,0)',
-            'linewidth':'0'            
+            'linewidth':'0'
             },
         'line': {
             'x1':'0',
@@ -130,7 +130,7 @@ class PPMLParser(xmllib.XMLParser):
             'initargs':'None'
             }
         }
-    
+
     def __init__(self):
         self.presentations = []
         #yes, I know a generic stack would be easier...
@@ -148,7 +148,7 @@ class PPMLParser(xmllib.XMLParser):
         self._curTitle = None
         self._curAuthor = None
         self._curSubject = None
-        
+
         xmllib.XMLParser.__init__(self)
 
 
@@ -182,12 +182,12 @@ class PPMLParser(xmllib.XMLParser):
     def getPresentation(self):
         return self._curPres
 
-        
+
     def handle_data(self, data):
         #the only data should be paragraph text, preformatted para
         #text, 'string text' for a fixed string on the page,
         #or table data
-        
+
         if self._curPara:
             self._curPara.rawtext = self._curPara.rawtext + data
         elif self._curPrefmt:
@@ -205,7 +205,7 @@ class PPMLParser(xmllib.XMLParser):
             self._curAuthor = self._curAuthor + data
         elif self._curSubject <> None:
             self._curSubject = self._curSubject + data
-            
+
 
     def handle_cdata(self, data):
         #just append to current paragraph text, so we can quote XML
@@ -223,8 +223,8 @@ class PPMLParser(xmllib.XMLParser):
             self._curAuthor = self._curAuthor + data
         elif self._curSubject <> None:
             self._curSubject = self._curSubject + data
-        
-            
+
+
     def start_presentation(self, args):
         self._curPres = pythonpoint.PPPresentation()
         self._curPres.filename = self._arg('presentation',args,'filename')
@@ -253,7 +253,7 @@ class PPMLParser(xmllib.XMLParser):
         self._curPres.author = self._curAuthor
         self._curAuthor = None
 
-        
+
     def start_subject(self, args):
         self._curSubject = ''
 
@@ -278,13 +278,13 @@ class PPMLParser(xmllib.XMLParser):
         except ImportError:
             #last gasp
             mod = getModule(modulename)
- 
+
         #now get the function
         func = getattr(mod, funcname)
         pythonpoint.setStyles(func())
 ##        print 'set global stylesheet to %s.%s()' % (modulename, funcname)
 
-        
+
     def end_stylesheet(self):
         pass
 
@@ -320,14 +320,14 @@ class PPMLParser(xmllib.XMLParser):
             s.outlineEntry = a
         else:
             s.outlineEntry = s.title
-        
+
         s.outlineLevel = self.ceval('slide',args,'outlinelevel')
-        
+
         #let it know its section, which may be none
         s.section = self._curSection
         self._curSlide = s
 
-        
+
     def end_slide(self):
         self._curPres.slides.append(self._curSlide)
         self._curSlide = None
@@ -357,29 +357,29 @@ class PPMLParser(xmllib.XMLParser):
     def end_notes(self):
         self._curSlide.notes.append(self._curNotes)
         self._curNotes = None
-    
+
 
     def start_registerFont(self, args):
         name = self._arg('font',args,'name')
         path = self._arg('font',args,'path')
         pythonpoint.registerFont0(self.sourceFilename, name, path)
-        
+
 
     def end_registerFont(self):
         pass
-    
+
 
     def start_para(self, args):
         self._curPara = pythonpoint.PPPara()
         self._curPara.style = self._arg('para',args,'style')
 
-        # hack - bullet character if bullet style        
+        # hack - bullet character if bullet style
         bt = self._arg('para',args,'bullettext')
         if self._curPara.style == 'Bullet' and bt == '':
             bt = '\267'  # Symbol Font bullet character, reasonable default
         self._curPara.bulletText = bt
 
-        
+
     def end_para(self):
         if self._curFrame:
             self._curFrame.content.append(self._curPara)
@@ -417,7 +417,7 @@ class PPMLParser(xmllib.XMLParser):
         self._curImage.filename = filename
         self._curImage.width = self.ceval('image',args,'width')
         self._curImage.height = self.ceval('image',args,'height')
-        
+
 
     def end_image(self):
         self._curFrame.content.append(self._curImage)
@@ -436,8 +436,8 @@ class PPMLParser(xmllib.XMLParser):
             self._curTable.rowDelim = eval('"' + args['rowDelim'] + '"')
         if args.has_key('style'):
             self._curTable.style = args['style']
-        
-                
+
+
     def end_table(self):
         self._curFrame.content.append(self._curTable)
         self._curTable = None
@@ -545,7 +545,7 @@ class PPMLParser(xmllib.XMLParser):
                     )
         self._curEllipse.strokeColor = self.ceval('ellipse',args,'stroke')
         self._curEllipse.fillColor = self.ceval('ellipse',args,'fill')
-        
+
 
     def end_ellipse(self):
         if self._curSlide:
@@ -586,7 +586,7 @@ class PPMLParser(xmllib.XMLParser):
         elif args['align'] == 'justify':
             self._curString.align = TA_JUSTIFY
         #text comes later within the tag
-        
+
 
     def end_string(self):
         #controller should have set the text
@@ -606,7 +606,7 @@ class PPMLParser(xmllib.XMLParser):
     def end_infostring(self):
         self.end_string()
 
-    
+
     def start_customshape(self, args):
         #loads one
         path = self._arg('customshape',args,'path')
@@ -614,7 +614,7 @@ class PPMLParser(xmllib.XMLParser):
             path = []
         else:
             path=[path]
-            
+
         # add package root folder and input file's folder to path
         path.append(os.path.dirname(self.sourceFilename))
         path.append(os.path.dirname(pythonpoint.__file__))
@@ -627,14 +627,14 @@ class PPMLParser(xmllib.XMLParser):
             mod = imp.load_module(modulename, file, pathname, description)
         except ImportError:
             mod = getModule(modulename)
-        
+
         #now get the function
-        
+
         func = getattr(mod, funcname)
         initargs = self.ceval('customshape',args,'initargs')
         self._curCustomShape = apply(func, initargs)
-        
-        
+
+
     def end_customshape(self):
         if self._curSlide:
             self._curSlide.graphics.append(self._curCustomShape)

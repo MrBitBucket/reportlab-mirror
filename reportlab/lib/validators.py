@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/validators.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.22 2002/07/17 22:46:23 andy_robinson Exp $
-__version__=''' $Id: validators.py,v 1.22 2002/07/17 22:46:23 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.23 2002/07/24 19:56:37 andy_robinson Exp $
+__version__=''' $Id: validators.py,v 1.23 2002/07/24 19:56:37 andy_robinson Exp $ '''
 """
 This module contains some standard verifying functions which can be
 used in an attribute map.
@@ -77,7 +77,7 @@ class _isInt(Validator):
 
     def normalize(self,x):
         return int(x)
-    
+
 class _isNumberOrNone(_isNumber):
     def test(self,x):
         return x is None or isNumber(x)

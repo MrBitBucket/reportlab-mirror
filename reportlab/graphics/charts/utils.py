@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/utils.py,v 1.8 2002/07/17 22:46:22 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/utils.py,v 1.9 2002/07/24 19:56:36 andy_robinson Exp $
 "Utilities used here and there."
-__version__=''' $Id: utils.py,v 1.8 2002/07/17 22:46:22 andy_robinson Exp $ '''
+__version__=''' $Id: utils.py,v 1.9 2002/07/24 19:56:36 andy_robinson Exp $ '''
 
 from time import mktime, gmtime, strftime
 import string
@@ -17,7 +17,7 @@ def mkTimeTuple(timeString):
     list = [0] * 9
     dd, mm, yyyy = map(int, string.split(timeString, '/'))
     list[:3] = [yyyy, mm, dd]
-    
+
     return tuple(list)
 
 
@@ -45,7 +45,7 @@ def nextRoundNumber(x):
     what that is in chart space, and ask for the nextRoundNumber().
     Tries the series 1,2,5,10,20,50,100.., going up or down as needed.
     """
-    
+
     #guess to nearest order of magnitude
     if x in (0, 1):
         return x
@@ -77,7 +77,7 @@ def nextRoundNumber(x):
 
 
 ### Robin's stuff from rgb_ticks.
-        
+
 from math import log10, floor
 
 _intervals=(.1, .2, .25, .5)
@@ -164,7 +164,7 @@ def ticks(lower, upper, n=(4,5,6,7,8,9), split=1, percent=0, grid=None):
     if power==0: power = 1
     w = grid/10.**power
     w = int(w)!=w
-    
+
     if power > 3 or power < -3:
         format = '%+'+`w+7`+'.0e'
     else:
@@ -174,7 +174,7 @@ def ticks(lower, upper, n=(4,5,6,7,8,9), split=1, percent=0, grid=None):
         else:
             digits = w-int(power)
             format = '%'+`digits+2`+'.'+`digits`+'f'
-    
+
     if percent: format=format+'%%'
     T = []
     n = int(float(hi-t)/grid+0.1)+1

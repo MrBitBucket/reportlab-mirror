@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.25 2002/07/17 22:46:22 andy_robinson Exp $
-__version__=''' $Id: textlabels.py,v 1.25 2002/07/17 22:46:22 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.26 2002/07/24 19:56:36 andy_robinson Exp $
+__version__=''' $Id: textlabels.py,v 1.26 2002/07/24 19:56:36 andy_robinson Exp $ '''
 import string
 
 from reportlab.lib import colors
@@ -129,7 +129,7 @@ class Label(Widget):
     def __init__(self):
         self.x = 0
         self.y = 0
-        self._text = 'Multi-Line\nString' 
+        self._text = 'Multi-Line\nString'
 
         self.dx = 0
         self.dy = 0
@@ -213,7 +213,7 @@ class Label(Widget):
             self._top = 0
         elif boxAnchor in ['s','sw','se']:
             self._top = self._height
-        else: 
+        else:
             self._top = 0.5 * self._height
         self._bottom = self._top - self._height
 

@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_docstrings.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_docstrings.py,v 1.9 2002/07/04 09:24:49 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_docstrings.py,v 1.10 2002/07/24 19:56:38 andy_robinson Exp $
 
 """This is a test on a package level that find all modules,
 classes, methods and functions that do not have a doc string
@@ -30,7 +30,7 @@ def getModuleObjects(folder, rootName, typ):
     find = string.find
     split = string.split
     replace = string.replace
-    
+
     objects = []
     lookup = {}
     for file in GlobDirectoryWalker(folder, '*.py'):
@@ -46,7 +46,7 @@ def getModuleObjects(folder, rootName, typ):
         sys.path.insert(0, folder)
         cwd = os.getcwd()
         os.chdir(folder)
-        
+
         modName = os.path.splitext(os.path.basename(file))[0]
         prefix = folder[find(folder, rootName):]
         prefix = replace(prefix, os.sep, '.')
@@ -55,7 +55,7 @@ def getModuleObjects(folder, rootName, typ):
         try:
             module = __import__(mName)
         except ImportError:
-            # Restore sys.path and working directory.        
+            # Restore sys.path and working directory.
             os.chdir(cwd)
             del sys.path[0]
             continue
@@ -97,7 +97,7 @@ def getModuleObjects(folder, rootName, typ):
                                 objects.append((mName, a))
                                 lookup[a] = 1
 
-        # Restore sys.path and working directory.        
+        # Restore sys.path and working directory.
         os.chdir(cwd)
         del sys.path[0]
 
@@ -132,7 +132,7 @@ class DocstringTestCase(SecureTestCase):
                 # Skip names with leading and trailing double underscores.
                 if p.match(n):
                     continue
-            
+
             if objType == FunctionType:
                 if not obj.__doc__ or len(obj.__doc__) == 0:
                     lines.append("%s.%s\n" % (name, obj.__name__))

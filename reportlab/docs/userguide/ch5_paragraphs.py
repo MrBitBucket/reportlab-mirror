@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch5_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch5_paragraphs.py,v 1.2 2001/10/27 22:37:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch5_paragraphs.py,v 1.3 2002/07/24 19:56:36 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 
 #begin chapter oon paragraphs
@@ -12,7 +12,7 @@ it can format fairly arbitrary text and provides for inline font style and colou
 an XML style markup. The overall shape of the formatted text can be justified, right or left ragged
 or centered. The XML markup can even be used to insert greek characters or to do subscripts.
 """)
-disc("""The following text creates an instance of the $Paragraph$ class:""") 
+disc("""The following text creates an instance of the $Paragraph$ class:""")
 eg("""Paragraph(text, style, bulletText=None)""")
 disc("""The $text$ argument contains the text of the
 paragraph; excess white space is removed from the text at the ends and internally after
@@ -76,7 +76,7 @@ so that you can see exactly what space is taken up.""")
 
 s1 = ParagraphStyle('Normal')
 parabox(sample, s1, 'The default $ParagraphStyle$')
-    
+
 disc("""The two attributes $spaceBefore$ and $spaceAfter$ do what they
 say, except at the top or bottom of a frame. At the top of a frame,
 $spaceBefore$ is ignored, and at the bottom, $spaceAfter$ is ignored.
@@ -308,7 +308,7 @@ overrides the implied bullet style and ^bulletText^ specified in the  ^Paragraph
 creation.
 """)
 parabox("""<bullet>\267</bullet>this is a bullet point.  Spam
-spam spam spam spam spam spam spam spam spam spam spam 
+spam spam spam spam spam spam spam spam spam spam spam
 spam spam spam spam spam spam spam spam spam spam """,
         styleSheet['Bullet'],
         'Basic use of bullet points')

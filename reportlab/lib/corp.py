@@ -2,11 +2,11 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/corp.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/corp.py,v 1.9 2002/07/17 22:46:23 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/lib/corp.py,v 1.10 2002/07/24 19:56:37 andy_robinson Exp $
 """ This module includes some reusable routines for ReportLab's
  'Corporate Image' - the logo, standard page backdrops and
  so on - you are advised to do the same for your own company!"""
-__version__=''' $Id: corp.py,v 1.9 2002/07/17 22:46:23 andy_robinson Exp $ '''
+__version__=''' $Id: corp.py,v 1.10 2002/07/24 19:56:37 andy_robinson Exp $ '''
 
 from reportlab.lib.units import inch,cm
 from reportlab.lib.validators import *
@@ -187,12 +187,12 @@ class RL_CorpLogoThin(Widget):
 
 class ReportLabLogo:
     """vector reportlab logo centered in a 250x by 150y rectangle"""
-    
+
     def __init__(self, atx=0, aty=0, width=2.5*inch, height=1.5*inch, powered_by=0):
         self.origin = (atx, aty)
         self.dimensions = (width, height)
         self.powered_by = powered_by
-        
+
     def draw(self, canvas):
         from reportlab.graphics import renderPDF
         canvas.saveState()
@@ -217,7 +217,7 @@ class RL_BusinessCard(Widget):
     _attrMap = AttrMap(
         fillColor = AttrMapValue(isColorOrNone),
         strokeColor = AttrMapValue(isColorOrNone),
-        altStrokeColor = AttrMapValue(isColorOrNone), 
+        altStrokeColor = AttrMapValue(isColorOrNone),
         x = AttrMapValue(isNumber),
         y = AttrMapValue(isNumber),
         height = AttrMapValue(isNumber),
@@ -301,7 +301,7 @@ class RL_BusinessCard(Widget):
         g2 = Group()
         rl=RL_CorpLogo()
         rl.height = 1.25*cm
-        rl.width = 1.9*cm   
+        rl.width = 1.9*cm
         rl.draw()
         g2.add(rl)
         g.add(g2)
@@ -372,7 +372,7 @@ class RL_BusinessCard(Widget):
                             textAnchor = 'start',
                             text = self.name))
 
-        ty1 = ty-10*1.2 
+        ty1 = ty-10*1.2
 
         g.add(String(x = self.borderWidth+(self.borderWidth/5.0),
                             y = ty1-8,

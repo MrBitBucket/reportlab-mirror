@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/runAll.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.8 2001/10/10 12:20:46 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.9 2002/07/24 19:56:38 andy_robinson Exp $
 
 """Runs all test files in all subfolders.
 """
@@ -16,7 +16,7 @@ from reportlab.test.utils import GlobDirectoryWalker
 
 def makeSuite(folder):
     "Build a test suite of all available test files."
-    
+
     allTests = unittest.TestSuite()
 
     sys.path.insert(0, folder)
@@ -28,14 +28,14 @@ def makeSuite(folder):
         except ImportError:
             pass
     del sys.path[0]
-            
+
     return allTests
 
 
 #noruntests
 if __name__ == '__main__':
     folder = os.path.dirname(sys.argv[0]) or os.getcwd()
-    
+
     # special case for reportlab/test directory - clean up
     # all PDF & log files before starting run.  You don't
     # want this if reusing runAll anywhere else.

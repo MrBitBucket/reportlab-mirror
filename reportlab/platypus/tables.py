@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.60 2002/07/17 22:46:24 andy_robinson Exp $
-__version__=''' $Id: tables.py,v 1.60 2002/07/17 22:46:24 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.61 2002/07/24 19:56:38 andy_robinson Exp $
+__version__=''' $Id: tables.py,v 1.61 2002/07/24 19:56:38 andy_robinson Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -225,7 +225,7 @@ class Table(Flowable):
             if H is not None: H.append(vh)
             w = max(w,vw)
             t = t + vh + v.getSpaceBefore()+v.getSpaceAfter()
-        return w, t - V[0].getSpaceBefore()-V[-1].getSpaceAfter() 
+        return w, t - V[0].getSpaceBefore()-V[-1].getSpaceAfter()
 
     def _calc_width(self):
 
@@ -263,7 +263,7 @@ class Table(Flowable):
             width = width + w
             self._colpositions.append(width)
         #print "final width", width
-        
+
         self._width = width
 
     def _calc_height(self):
@@ -526,8 +526,8 @@ class Table(Flowable):
         R0._cr_0(n,self._bkgrndcmds)
 
         if repeatRows:
-            #R1 = Table(data[:repeatRows]+data[n:],self._argW, 
-            R1 = Table(data[:repeatRows]+data[n:],self._colWidths, 
+            #R1 = Table(data[:repeatRows]+data[n:],self._argW,
+            R1 = Table(data[:repeatRows]+data[n:],self._colWidths,
                     self._argH[:repeatRows]+self._argH[n:],
                     repeatRows=repeatRows, repeatCols=repeatCols,
                     splitByRow=splitByRow)
@@ -652,7 +652,7 @@ class Table(Flowable):
             for v in vals:
                 draw(x, y, v)
                 y = y-leading
-        
+
 # for text,
 #   drawCentredString(self, x, y, text) where x is center
 #   drawRightString(self, x, y, text) where x is right
@@ -771,7 +771,7 @@ def test():
         ('Key Ring', 0,0,0,0,0,0,1,0,0,0,2,13),
         ('Hats', 893, 912, '1,212', 643, 789, 159,
              888, '1,298', 832, 453, '1,344','2,843')
-        )   
+        )
     t = Table(data, colwidths, rowheights)
     """, styleSheet['Code'], dedent=4))
     lst.append(Paragraph("""
@@ -825,7 +825,7 @@ GRID_STYLE = TableStyle(
     lst.append(PageBreak())
     lst.append(Paragraph("This is GRID_STYLE\n", styleSheet['BodyText']))
     lst.append(t)
-    
+
     t = Table(data, colwidths, rowheights)
     t.setStyle(BOX_STYLE)
     lst.append(Paragraph("This is BOX_STYLE\n", styleSheet['BodyText']))
@@ -839,7 +839,7 @@ BOX_STYLE = TableStyle(
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
     """, styleSheet['Code']))
-    
+
     t = Table(data, colwidths, rowheights)
     t.setStyle(LABELED_GRID_STYLE)
     lst.append(Paragraph("This is LABELED_GRID_STYLE\n", styleSheet['BodyText']))
@@ -861,7 +861,7 @@ LABELED_GRID_STYLE = TableStyle(
     )
     """, styleSheet['Code']))
     lst.append(PageBreak())
-    
+
     t = Table(data, colwidths, rowheights)
     t.setStyle(COLORED_GRID_STYLE)
     lst.append(Paragraph("This is COLORED_GRID_STYLE\n", styleSheet['BodyText']))
@@ -878,7 +878,7 @@ COLORED_GRID_STYLE = TableStyle(
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
     """, styleSheet['Code']))
-    
+
     t = Table(data, colwidths, rowheights)
     t.setStyle(LIST_STYLE)
     lst.append(Paragraph("This is LIST_STYLE\n", styleSheet['BodyText']))
@@ -894,7 +894,7 @@ LIST_STYLE = TableStyle(
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
     """, styleSheet['Code']))
-   
+
     t = Table(data, colwidths, rowheights)
     ts = TableStyle(
     [('LINEABOVE', (0,0), (-1,0), 2, colors.green),

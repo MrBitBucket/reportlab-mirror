@@ -2,12 +2,12 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/pagesizes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/pagesizes.py,v 1.9 2002/07/17 22:46:23 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/lib/pagesizes.py,v 1.10 2002/07/24 19:56:37 andy_robinson Exp $
 
 """This module defines a few common page sizes in points (1/72 inch).
 To be expanded to include things like label sizes, envelope windows
 etc."""
-__version__=''' $Id: pagesizes.py,v 1.9 2002/07/17 22:46:23 andy_robinson Exp $ '''
+__version__=''' $Id: pagesizes.py,v 1.10 2002/07/24 19:56:37 andy_robinson Exp $ '''
 
 from reportlab.lib.units import cm, inch
 

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_breaking.py,v 1.5 2002/07/17 22:46:24 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_breaking.py,v 1.6 2002/07/24 19:56:38 andy_robinson Exp $
 """Tests pageBreakBefore, frameBreakBefore, keepWithNext...
 """
 

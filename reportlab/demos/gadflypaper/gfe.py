@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/gadflypaper/gfe.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/gadflypaper/gfe.py,v 1.14 2001/03/16 14:51:50 rgbecker Exp $
-__version__=''' $Id: gfe.py,v 1.14 2001/03/16 14:51:50 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/gadflypaper/gfe.py,v 1.15 2002/07/24 19:56:35 andy_robinson Exp $
+__version__=''' $Id: gfe.py,v 1.15 2002/07/24 19:56:35 andy_robinson Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -46,7 +46,7 @@ def myFirstPage(canvas, doc):
     canvas.setFont('Times-Roman',9)
     canvas.drawString(inch, 0.75 * inch, "First Page / %s" % pageinfo)
     canvas.restoreState()
-    
+
 def myLaterPages(canvas, doc):
     #canvas.drawImage("snkanim.gif", 36, 36)
     canvas.saveState()
@@ -56,7 +56,7 @@ def myLaterPages(canvas, doc):
     canvas.setFont('Times-Roman',9)
     canvas.drawString(inch, 0.75 * inch, "Page %d %s" % (doc.page, pageinfo))
     canvas.restoreState()
-    
+
 def go():
     Elements.insert(0,Spacer(0,inch))
     doc = SimpleDocTemplate('gfe.pdf')
@@ -79,7 +79,7 @@ def p(txt):
 
 #pre = p # XXX
 
-PreStyle = styles["Code"] 
+PreStyle = styles["Code"]
 
 def pre(txt):
     s = Spacer(0.1*inch, 0.1*inch)
@@ -112,52 +112,52 @@ three tables""")
 pre("""\
  -- drinkers who frequent bars (this is a comment)
  select * from frequents
- 
- DRINKER | PERWEEK | BAR     
+
+ DRINKER | PERWEEK | BAR
  ============================
- adam    | 1       | lolas   
- woody   | 5       | cheers  
- sam     | 5       | cheers  
- norm    | 3       | cheers  
- wilt    | 2       | joes    
- norm    | 1       | joes    
- lola    | 6       | lolas   
- norm    | 2       | lolas   
- woody   | 1       | lolas   
+ adam    | 1       | lolas
+ woody   | 5       | cheers
+ sam     | 5       | cheers
+ norm    | 3       | cheers
+ wilt    | 2       | joes
+ norm    | 1       | joes
+ lola    | 6       | lolas
+ norm    | 2       | lolas
+ woody   | 1       | lolas
  pierre  | 0       | frankies
 )
 """)
 pre("""\
  -- drinkers who like beers
  select * from likes
- 
- DRINKER | PERDAY | BEER        
+
+ DRINKER | PERDAY | BEER
  ===============================
- adam    | 2      | bud         
- wilt    | 1      | rollingrock 
- sam     | 2      | bud         
- norm    | 3      | rollingrock 
- norm    | 2      | bud         
+ adam    | 2      | bud
+ wilt    | 1      | rollingrock
+ sam     | 2      | bud
+ norm    | 3      | rollingrock
+ norm    | 2      | bud
  nan     | 1      | sierranevada
- woody   | 2      | pabst       
- lola    | 5      | mickies     
+ woody   | 2      | pabst
+ lola    | 5      | mickies
 
 """)
 pre("""\
  -- beers served from bars
  select * from serves
 
- BAR      | QUANTITY | BEER       
+ BAR      | QUANTITY | BEER
  =================================
- cheers   | 500      | bud        
- cheers   | 255      | samadams  
- joes     | 217      | bud        
- joes     | 13       | samadams  
- joes     | 2222     | mickies    
- lolas    | 1515     | mickies    
- lolas    | 333      | pabst      
+ cheers   | 500      | bud
+ cheers   | 255      | samadams
+ joes     | 217      | bud
+ joes     | 13       | samadams
+ joes     | 2222     | mickies
+ lolas    | 1515     | mickies
+ lolas    | 333      | pabst
  winkos   | 432      | rollingrock
- frankies | 5        | snafu      
+ frankies | 5        | snafu
 """)
 p("""
 The relational model for database structures makes
@@ -178,7 +178,7 @@ mechanisms for creating, querying, and modified
 relational tables. Several years ago SQL was one
 of many Relational Database Management System
 (RDBMS) query languages in use, and many would
-argue not the best on. Now, largely due 
+argue not the best on. Now, largely due
 to standardization efforts and the
 backing of IBM, SQL is THE standard way to talk
 to database systems.
@@ -186,8 +186,8 @@ to database systems.
 p("""
 There are many advantages SQL offers over other
 database query languages and alternative paradigms
-at this time (please see [O'Neill] or [Korth and Silberschatz] 
-for more extensive discussions and comparisons between the 
+at this time (please see [O'Neill] or [Korth and Silberschatz]
+for more extensive discussions and comparisons between the
 SQL/relational approach and others.)
 """)
 p("""
@@ -268,7 +268,7 @@ make most accesses to the underlying data (even sophisticated
 ones) straightforward.  """)
 
 p("""For an example of a moderately
-sophisticated query using the tables given above, 
+sophisticated query using the tables given above,
 the following query lists the drinkers who frequent lolas bar
 and like at least two beers not served by lolas
 """)
@@ -292,7 +292,7 @@ yielding the result
 pre("""
     DRINKER
     =======
-    norm   
+    norm
 """)
 p("""
 Experience shows that queries of this sort are actually
@@ -408,7 +408,7 @@ more informative (or equally informative) than both X and Y. For
 example B is the join of B with A, E is the join of B with D and""")
 
 pre("""
-    E join I = 
+    E join I =
       [DRINKER=>'sam', BAR=>'cheers', BEER=>'mickies', CAPACITY=>300]""")
 
 p("""For any two substitutions either (1) they disagree on the value
@@ -431,7 +431,7 @@ graph of attribute names and S2 is a substitution. This operation
 is defined to produce the substitution S2 such that""")
 
 pre("""
-    Name=>Value in S2 if and only if 
+    Name=>Value in S2 if and only if
         Name1=>Value in S and Name<=Name1 in R
 """)
 
@@ -730,7 +730,7 @@ pre("""
        def __init__(self): pass
 
        def attributes(self):
-           return kjbuckets.kjSet("PATTERN", "NAME") 
+           return kjbuckets.kjSet("PATTERN", "NAME")
 
        def estimate(self, known_attributes):
            if known_attributes.member("PATTERN"):
@@ -824,16 +824,16 @@ eliminating some uninteresting combinations, of implementing the
 function f, g, and h in combinations of Python, C and java:""")
 
 pre("""
-COST    | FLANG  | GLANG  | HLANG 
+COST    | FLANG  | GLANG  | HLANG
 ==================================
-111000  | C      | C      | C     
-115000  | java   | C      | C     
-120000  | python | C      | C     
-155000  | java   | java   | C     
-210000  | python | python | C     
-555000  | java   | java   | java 
-560000  | python | java   | java  
-610000  | python | python | java  
+111000  | C      | C      | C
+115000  | java   | C      | C
+120000  | python | C      | C
+155000  | java   | java   | C
+210000  | python | python | C
+555000  | java   | java   | java
+560000  | python | java   | java
+610000  | python | python | java
 1110000 | python | python | python
 """)
 

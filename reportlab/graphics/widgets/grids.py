@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/grids.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.25 2002/07/17 22:46:23 andy_robinson Exp $
-__version__=''' $Id: grids.py,v 1.25 2002/07/17 22:46:23 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.26 2002/07/24 19:56:36 andy_robinson Exp $
+__version__=''' $Id: grids.py,v 1.26 2002/07/24 19:56:36 andy_robinson Exp $ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *
@@ -31,7 +31,7 @@ def frange(start, end=None, inc=None):
         elif inc < 0 and next <= end:
             break
         L.append(next)
-        
+
     return L
 
 
@@ -94,9 +94,9 @@ class Grid(Widget):
     def __init__(self):
         self.x = 0
         self.y = 0
-        self.width = 100 
-        self.height = 100 
-        self.orientation = 'vertical' 
+        self.width = 100
+        self.height = 100
+        self.orientation = 'vertical'
         self.useLines = 0
         self.useRects = 1
         self.delta = 20
@@ -154,12 +154,12 @@ class Grid(Widget):
             r.insert(0, start)
         #print 'Grid.makeLinePosList() -> %s' % r
         return r
-    
+
 
     def makeInnerLines(self):
         # inner grid lines
         group = Group()
-        
+
         w, h = self.width, self.height
 
         if self.useLines == 1:
@@ -180,7 +180,7 @@ class Grid(Widget):
 
         return group
 
-    
+
     def makeInnerTiles(self):
         # inner grid lines
         group = Group()
@@ -197,7 +197,7 @@ class Grid(Widget):
                 r = self.makeLinePosList(self.y, isX=0)
 
             dist = makeDistancesList(r)
-            
+
             i = 0
             for j in range(len(dist)):
                 if self.orientation == 'vertical':
@@ -206,18 +206,18 @@ class Grid(Widget):
                 elif self.orientation == 'horizontal':
                     y = r[j]
                     stripe = Rect(self.x, y, w, dist[j])
-                stripe.fillColor = cols[i % len(cols)] 
+                stripe.fillColor = cols[i % len(cols)]
                 stripe.strokeColor = None
                 group.add(stripe)
                 i = i + 1
 
         return group
 
-    
+
     def draw(self):
         # general widget bits
         group = Group()
-        
+
         group.add(self.makeOuterRect())
         group.add(self.makeInnerTiles())
         group.add(self.makeInnerLines())
@@ -248,15 +248,15 @@ class DoubleGrid(Widget):
     def __init__(self):
         self.x = 0
         self.y = 0
-        self.width = 100 
-        self.height = 100 
+        self.width = 100
+        self.height = 100
 
-        g0 = Grid()        
+        g0 = Grid()
         g0.x = self.x
         g0.y = self.y
-        g0.width = self.width 
-        g0.height = self.height 
-        g0.orientation = 'vertical' 
+        g0.width = self.width
+        g0.height = self.height
+        g0.orientation = 'vertical'
         g0.useLines = 1
         g0.useRects = 0
         g0.delta = 20
@@ -267,12 +267,12 @@ class DoubleGrid(Widget):
         g0.strokeColor = colors.black
         g0.strokeWidth = 1
 
-        g1 = Grid()        
+        g1 = Grid()
         g1.x = self.x
         g1.y = self.y
-        g1.width = self.width 
-        g1.height = self.height 
-        g1.orientation = 'horizontal' 
+        g1.width = self.width
+        g1.height = self.height
+        g1.orientation = 'horizontal'
         g1.useLines = 1
         g1.useRects = 0
         g1.delta = 20
@@ -310,7 +310,7 @@ class DoubleGrid(Widget):
         # Order groups to make sure both v and h lines
         # are visible (works only when there is only
         # one kind of stripes, v or h).
-        if g0.useRects == 1 and g1.useRects == 0:       
+        if g0.useRects == 1 and g1.useRects == 0:
             group.add(g0.draw())
             group.add(g1.draw())
         else:
@@ -326,7 +326,7 @@ class ShadedRect(Widget):
     Colors are interpolated linearly between 'fillColorStart'
     and 'fillColorEnd', both of which appear at the margins.
     If 'numShades' is set to one, though, only 'fillColorStart'
-    is used.    
+    is used.
     """
 
     _attrMap = AttrMap(
@@ -346,9 +346,9 @@ class ShadedRect(Widget):
     def __init__(self):
         self.x = 0
         self.y = 0
-        self.width = 100 
-        self.height = 100 
-        self.orientation = 'vertical' 
+        self.width = 100
+        self.height = 100
+        self.orientation = 'vertical'
         self.numShades = 20
         self.fillColorStart = colors.pink
         self.fillColorEnd = colors.black
@@ -367,20 +367,20 @@ class ShadedRect(Widget):
 
     def _flipRectCorners(self):
         "Flip rectangle's corners if width or height is negative."
-        x, y, width, height, fillColorStart, fillColorEnd = self.x, self.y, self.width, self.height, self.fillColorStart, self.fillColorEnd 
+        x, y, width, height, fillColorStart, fillColorEnd = self.x, self.y, self.width, self.height, self.fillColorStart, self.fillColorEnd
         if width < 0 and height > 0:
-            x = x + width 
-            width = -width 
+            x = x + width
+            width = -width
             if self.orientation=='vertical': fillColorStart, fillColorEnd = fillColorEnd, fillColorStart
         elif height<0 and width>0:
-            y = y + height 
-            height = -height 
+            y = y + height
+            height = -height
             if self.orientation=='horizontal': fillColorStart, fillColorEnd = fillColorEnd, fillColorStart
         elif height < 0 and height < 0:
-            x = x + width 
-            width = -width 
-            y = y + height 
-            height = -height 
+            x = x + width
+            width = -width
+            y = y + height
+            height = -height
         return x, y, width, height, fillColorStart, fillColorEnd
 
     def draw(self):
@@ -423,7 +423,7 @@ class ShadedRect(Widget):
             stripe.strokeColor = None
             stripe.strokeWidth = 0
             group.add(stripe)
- 
+
 #
         return group
 
@@ -438,5 +438,4 @@ def colorRange(c0, c1, n):
         for i in range(n):
             C.append(colors.linearlyInterpolatedColor(c0,c1,0,lim, i))
     return C
-
 

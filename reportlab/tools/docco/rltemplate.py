@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/rltemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/rltemplate.py,v 1.2 2002/03/25 00:51:49 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/rltemplate.py,v 1.3 2002/07/24 19:56:39 andy_robinson Exp $
 # doc template for RL manuals.  Currently YAML is hard-coded
 #to use this, which is wrong.
 
@@ -39,9 +39,9 @@ class FrontCoverTemplate(PageTemplate):
         canvas.drawRightString(self.pageWidth - inch, 88, 'New Brunswick')
         canvas.drawRightString(self.pageWidth - inch, 76, 'New Jersey, 08904)')
         canvas.drawRightString(self.pageWidth - inch, 64, 'USA')
-        
+
         canvas.restoreState()
-    
+
 
 class OneColumnTemplate(PageTemplate):
     def __init__(self, id, pageSize=defaultPageSize):
@@ -97,7 +97,7 @@ class RLDocTemplate(BaseDocTemplate):
         self.addPageTemplates(FrontCoverTemplate('Cover', self.pagesize))
         self.addPageTemplates(OneColumnTemplate('Normal', self.pagesize))
         self.addPageTemplates(TwoColumnTemplate('TwoColumn', self.pagesize))
-        
+
         #just playing
         self.title = "(Document Title Goes Here)"
         self.chapter = "(No chapter yet)"
@@ -121,7 +121,7 @@ class RLDocTemplate(BaseDocTemplate):
 ##            except AttributeError:
 ##                print '%d: (something with ABag)' % self.counter
 ##            self.counter = self.counter + 1
-            
+
             if style == 'Title':
                 self.title = flowable.getPlainText()
             elif style == 'Heading1':

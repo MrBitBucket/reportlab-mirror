@@ -1,16 +1,16 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.32 2002/07/17 22:46:22 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.33 2002/07/24 19:56:36 andy_robinson Exp $
 """This module defines a very preliminary Line Plot example.
 """
-__version__=''' $Id: lineplots.py,v 1.32 2002/07/17 22:46:22 andy_robinson Exp $ '''
+__version__=''' $Id: lineplots.py,v 1.33 2002/07/24 19:56:36 andy_robinson Exp $ '''
 
 import string, time
 from types import FunctionType
 
-from reportlab.lib import colors 
-from reportlab.lib.validators import * 
+from reportlab.lib import colors
+from reportlab.lib.validators import *
 from reportlab.lib.attrmap import *
 from reportlab.graphics.shapes import Drawing, Group, Rect, Line, PolyLine
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
@@ -626,11 +626,11 @@ class ScatterPlot(LinePlot):
         self.x=self.x+_maxWidth(str(self.yValueAxis.valueMax), self.yValueAxis.labels.fontName, self.yValueAxis.labels.fontSize)
         self.y = self.bottomPadding+_axisTickLengths+_labelOffset+self.xValueAxis.labels.fontSize
 
-        self.xValueAxis.labels.dy = -_labelOffset 
+        self.xValueAxis.labels.dy = -_labelOffset
         self.xValueAxis.tickDown = _axisTickLengths
         self.xValueAxis.strokeWidth = _axisStrokeWidth
         self.xValueAxis.rangeRound='both'
-        self.yValueAxis.labels.dx = -_labelOffset 
+        self.yValueAxis.labels.dx = -_labelOffset
         self.yValueAxis.tickLeft = _axisTickLengths
         self.yValueAxis.strokeWidth = _axisStrokeWidth
         self.yValueAxis.rangeRound='both'

@@ -44,7 +44,7 @@ class CodeChartBase(Flowable):
         self.xlist = []
         for col in range(self.charsPerRow + 2):
             self.xlist.append(col * self.boxSize)
-        
+
     def formatByte(self, byt):
         if self.hex:
             return '%02X' % byt
@@ -82,7 +82,7 @@ class CodeChartBase(Flowable):
         self.canv.rect(0, self.ylist[-2], self.width, self.boxSize, fill=1, stroke=0)
         self.canv.rect(0, 0, self.boxSize, self.ylist[-2], fill=1, stroke=0)
         self.canv.setFillGray(0.0)
-        
+
         #label each row and column
         self.canv.setFont('Helvetica-Oblique',0.375 * self.boxSize)
         byt = 0
@@ -107,7 +107,7 @@ class CodeChartBase(Flowable):
                                         (self.rows + 0.25) * self.boxSize,
                                         topLeft
                                         )
-            
+
 class SingleByteEncodingChart(CodeChartBase):
     def __init__(self, faceName='Helvetica', encodingName='WinAnsiEncoding',
                  charsPerRow=16, boxSize=14, hex=1):
@@ -125,14 +125,14 @@ class SingleByteEncodingChart(CodeChartBase):
                                 )
 
         self.calcLayout()
-        
-        
+
+
     def draw(self):
         self.drawLabels()
         charList = [None] * 32 + map(chr, range(32, 256))
         self.drawChars(charList)
         self.canv.grid(self.xlist, self.ylist)
-                    
+
 
 class KutenRowCodeChart(CodeChartBase):
     """Formats one 'row' of the 94x94 space used in many Asian encodings.aliases
@@ -163,7 +163,7 @@ class KutenRowCodeChart(CodeChartBase):
             self.faceName = 'Helvetica'
             self.encodingName = 'WinAnsiEncoding'
         self.fontName = self.faceName + '-' + self.encodingName
-        self.calcLayout()        
+        self.calcLayout()
 
     def makeRow(self, row):
         """Works out the character values for this kuten row"""
@@ -180,15 +180,15 @@ class KutenRowCodeChart(CodeChartBase):
         else:
             cells.append([None] * 94)
         return cells
-                
+
     def draw(self):
         self.drawLabels(topLeft= 'R%d' % self.row)
 
         # work out which characters we need for the row
         #assert string.find(self.encodingName, 'EUC') > -1, 'Only handles EUC encoding today, you gave me %s!' % self.encodingName
-        
+
         # pad out by 1 to match Ken Lunde's tables
-        charList = [None] + self.makeRow(self.row) 
+        charList = [None] + self.makeRow(self.row)
         self.drawChars(charList)
         self.canv.grid(self.xlist, self.ylist)
 
@@ -217,7 +217,7 @@ class Big5CodeChart(CodeChartBase):
             self.faceName = 'Helvetica'
             self.encodingName = 'WinAnsiEncoding'
         self.fontName = self.faceName + '-' + self.encodingName
-        self.calcLayout()        
+        self.calcLayout()
 
     def makeRow(self, row):
         """Works out the character values for this Big5 row.
@@ -230,15 +230,15 @@ class Big5CodeChart(CodeChartBase):
                     col = y*16+x
                     ch = chr(row) + chr(col)
                     cells.append(ch)
-                
+
         else:
             cells.append([None] * 160)
         return cells
-                
+
     def draw(self):
         self.drawLabels(topLeft='%02X' % self.row)
 
-        charList = self.makeRow(self.row) 
+        charList = self.makeRow(self.row)
         self.drawChars(charList)
         self.canv.grid(self.xlist, self.ylist)
 
@@ -271,7 +271,7 @@ class CodeWidget(Widget):
         self.y = 0
         self.width = 160
         self.height = 160
-        
+
     def draw(self):
         dx = self.width / 16.0
         dy = self.height / 16.0
@@ -286,12 +286,12 @@ class CodeWidget(Widget):
                                self.y + (self.height - y*dy), chr(charValue))
                     g.add(s)
         return g
-        
 
 
-    
 
-    
+
+
+
 def test():
     c = Canvas('codecharts.pdf')
     c.setFont('Helvetica-Bold', 24)
@@ -324,5 +324,4 @@ def test():
 if __name__=='__main__':
     test()
 
-    
-        
+

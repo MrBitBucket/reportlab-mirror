@@ -4,13 +4,13 @@ Interface:
     tags = fontify(pytext, searchfrom, searchto)
 
 The 'pytext' argument is a string containing Python source code.
-The (optional) arguments 'searchfrom' and 'searchto' may contain a slice in pytext. 
+The (optional) arguments 'searchfrom' and 'searchto' may contain a slice in pytext.
 The returned value is a list of tuples, formatted like this:
     [('keyword', 0, 6, None), ('keyword', 11, 17, None), ('comment', 23, 53, None), etc. ]
 The tuple contents are always like this:
     (tag, startindex, endindex, sublist)
 tag is one of 'keyword', 'string', 'comment' or 'identifier'
-sublist is not used, hence always None. 
+sublist is not used, hence always None.
 """
 
 # Based on FontText.py by Mitchell S. Chapman,
@@ -19,7 +19,7 @@ sublist is not used, hence always None.
 # Many thanks for regular expression debugging & authoring are due to:
 #   Tim (the-incredib-ly y'rs) Peters and Cristian Tismer
 # So, who owns the copyright? ;-) How about this:
-# Copyright 1996-2001: 
+# Copyright 1996-2001:
 #   Mitchell S. Chapman,
 #   Zachary Roadhouse,
 #   Tim Peters,
@@ -97,14 +97,14 @@ def fontify(pytext, searchfrom = 0, searchto = None):
     # Cache a few attributes for quicker reference.
     search = matchRE.search
     idSearch = idRE.search
-    
+
     tags = []
     tags_append = tags.append
     commentTag = 'comment'
     stringTag = 'string'
     keywordTag = 'keyword'
     identifierTag = 'identifier'
-    
+
     start = 0
     end = searchfrom
     while 1:

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/styles_modern.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/pythonpoint/styles/modern.py,v 1.2 2001/08/29 12:31:43 dinu_gherman Exp $
-__version__=''' $Id: modern.py,v 1.2 2001/08/29 12:31:43 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/reportlab/tools/pythonpoint/styles/modern.py,v 1.3 2002/07/24 19:56:39 andy_robinson Exp $
+__version__=''' $Id: modern.py,v 1.3 2002/07/24 19:56:39 andy_robinson Exp $ '''
 # style_modern.py
 __doc__="""This is an example style sheet.  You can create your own, and
 have them loaded by the presentation.  A style sheet is just a
@@ -27,7 +27,7 @@ def getParagraphStyles():
     """Returns a dictionary of styles based on Helvetica"""
     stylesheet = {}
     ParagraphStyle = styles.ParagraphStyle
- 
+
     para = ParagraphStyle('Normal', None)   #the ancestor of all
     para.fontName = 'Helvetica'
     para.fontSize = 24
@@ -37,7 +37,7 @@ def getParagraphStyles():
     para = ParagraphStyle('BodyText', stylesheet['Normal'])
     para.spaceBefore = 12
     stylesheet['BodyText'] = para
-    
+
     para = ParagraphStyle('BigCentered', stylesheet['Normal'])
     para.spaceBefore = 12
     para.alignment = TA_CENTER
@@ -54,7 +54,7 @@ def getParagraphStyles():
     para.spaceAfter = 36
     para.alignment = TA_CENTER
     stylesheet['Title'] = para
-    
+
     para = ParagraphStyle('Heading1', stylesheet['Normal'])
     para.fontName = 'Helvetica-Bold'
     para.fontSize = 36
@@ -62,7 +62,7 @@ def getParagraphStyles():
     para.spaceAfter = 36
     para.alignment = TA_CENTER
     stylesheet['Heading1'] = para
-    
+
     para = ParagraphStyle('Heading2', stylesheet['Normal'])
     para.fontName = 'Helvetica-Bold'
     para.fontSize = 28
@@ -70,7 +70,7 @@ def getParagraphStyles():
     para.spaceBefore = 24
     para.spaceAfter = 12
     stylesheet['Heading2'] = para
-    
+
     para = ParagraphStyle('Heading3', stylesheet['Normal'])
     para.fontName = 'Helvetica-BoldOblique'
     para.spaceBefore = 24

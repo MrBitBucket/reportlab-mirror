@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pyfiles.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pyfiles.py,v 1.9 2002/07/04 09:24:49 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pyfiles.py,v 1.10 2002/07/24 19:56:38 andy_robinson Exp $
 """Tests performed on all Python source files of the ReportLab distribution.
 """
 
@@ -33,7 +33,7 @@ def unique(seq):
         seq2 = map(None, seq2)
     seq2.sort()
 
-    # Remove adjacent elements if they are identical.    
+    # Remove adjacent elements if they are identical.
     i = 0
     while i < len(seq2)-1:
         elem = seq2[i]
@@ -44,13 +44,13 @@ def unique(seq):
             pass
         i = i + 1
 
-    # Try to return something of the same type as the input. 
+    # Try to return something of the same type as the input.
     if type(seq) == type(''):
         return string.join(seq2, '')
     else:
         return seq2
 
-    
+
 # This class is more or less the same as one suggested by /F.
 
 class GlobDirectoryWalker:
@@ -95,8 +95,8 @@ class SelfTestCase(unittest.TestCase):
                  ([0, 0, 1, 1, 2, 2, 3, 3], [0, 1, 2, 3]),
                  ('abcabcabc', 'abc')
                  ]
-        
-        msg = "Failed: unique(%s) returns %s instead of %s." 
+
+        msg = "Failed: unique(%s) returns %s instead of %s."
         for sequence, expectedOutput in cases:
             output = unique(sequence)
             args = (sequence, output, expectedOutput)
@@ -111,12 +111,12 @@ class AsciiFileTestCase(unittest.TestCase):
 
         RL_HOME = os.path.dirname(reportlab.__file__)
         allPyFiles = GlobDirectoryWalker(RL_HOME, '*.py')
-        
+
         for path in allPyFiles:
             fileContent = open(path).read()
             nonAscii = filter(lambda c: ord(c)>127, fileContent)
             nonAscii = unique(nonAscii)
-            
+
             truncPath = path[string.find(path, 'reportlab'):]
             args = (truncPath, repr(map(ord, nonAscii)))
             msg = "File %s contains characters: %s." % args
@@ -176,7 +176,7 @@ class FirstLineTestCase(SecureTestCase):
         paths = self.findSuspiciousModules(RL_HOME, 'reportlab')
         paths.sort()
 
-        for p in paths:        
+        for p in paths:
             file.write("%s\n" % p)
 
         file.close()
@@ -193,4 +193,3 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
-

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/odyssey/dodyssey.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/odyssey/dodyssey.py,v 1.12 2002/07/17 22:46:22 andy_robinson Exp $
-__version__=''' $Id: dodyssey.py,v 1.12 2002/07/17 22:46:22 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/odyssey/dodyssey.py,v 1.13 2002/07/24 19:56:35 andy_robinson Exp $
+__version__=''' $Id: dodyssey.py,v 1.13 2002/07/24 19:56:35 andy_robinson Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -34,7 +34,7 @@ def myLaterPages(canvas, doc):
     canvas.setFont('Times-Roman',9)
     canvas.drawString(inch, 0.75 * inch, "Page %d" % doc.page)
     canvas.restoreState()
-    
+
 def go():
     def myCanvasMaker(fn,**kw):
         from reportlab.pdfgen.canvas import Canvas
@@ -66,7 +66,7 @@ ChapterStyle.fontsize = 14
 InitialStyle = copy.deepcopy(ChapterStyle)
 InitialStyle.fontsize = 16
 InitialStyle.leading = 20
-PreStyle = styles["Code"] 
+PreStyle = styles["Code"]
 
 def newPage():
     Elements.append(PageBreak())
@@ -90,7 +90,7 @@ def chapter(txt, style=ChapterStyle):
 
 def fTitle(txt,style=InitialStyle):
     Elements.append(Paragraph(txt, style))
-    
+
 ParaStyle = copy.deepcopy(styles["Normal"])
 ParaStyle.spaceBefore = 0.1*inch
 if 'right' in sys.argv:
@@ -104,7 +104,7 @@ elif 'center' in sys.argv or 'centre' in sys.argv:
 else:
     ParaStyle.alignment = TA_JUSTIFY
 
-useTwoCol = 'notwocol' not in sys.argv 
+useTwoCol = 'notwocol' not in sys.argv
 
 def spacer(inches):
     Elements.append(Spacer(0.1*inch, inches*inch))
@@ -202,7 +202,7 @@ def parseOdyssey(fn):
         else:
             style = PreStyle
             func = pre
-    
+
         while 1:
             s=f
             f, k=findNext(L,s)

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/colors.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.34 2002/07/17 22:46:23 andy_robinson Exp $
-__version__=''' $Id: colors.py,v 1.34 2002/07/17 22:46:23 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/colors.py,v 1.35 2002/07/24 19:56:37 andy_robinson Exp $
+__version__=''' $Id: colors.py,v 1.35 2002/07/24 19:56:37 andy_robinson Exp $ '''
 
 import string, math
 from types import StringType, ListType, TupleType
@@ -38,7 +38,7 @@ class Color:
 
     def hexval(self):
         return '0x%02x%02x%02x' % tuple(map(lambda x: int(x*255), self.rgb()))
-    
+
 class CMYKColor(Color):
     """This represents colors using the CMYK (cyan, magenta, yellow, black)
     model commonly used in professional printing.  This is implemented
@@ -212,7 +212,7 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
         g = c0.green+x*(c1.green- c0.green)/dx
         b = c0.blue+x*(c1.blue - c0.blue)/dx
         return Color(r,g,b)
-    elif cname is 'CMYKColor': 
+    elif cname is 'CMYKColor':
         c = c0.cyan+x*(c1.cyan - c0.cyan)/dx
         m = c0.magenta+x*(c1.magenta - c0.magenta)/dx
         y = c0.yellow+x*(c1.yellow - c0.yellow)/dx
@@ -265,7 +265,7 @@ _PCMYK_white=PCMYKColor(0,0,0,0)
 _CMYK_black=CMYKColor(0,0,0,1)
 _PCMYK_black=PCMYKColor(0,0,0,100)
 
-# Special colors 
+# Special colors
 ReportLabBlue =     HexColor(0x4e5688)
 ReportLabLightBlue = HexColor(0xb7b9d3)
 

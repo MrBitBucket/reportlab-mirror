@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/testdrawings.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/testdrawings.py,v 1.2 2001/04/05 09:30:11 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/testdrawings.py,v 1.3 2002/07/24 19:56:36 andy_robinson Exp $
 __version__=''' $Id $ '''
 """This contains a number of routines to generate test drawings
 for reportlab/graphics.  For now they are contrived, but we will expand them
@@ -15,12 +15,12 @@ from reportlab.lib import colors
 
 def getDrawing1():
     """Hello World, on a rectangular background"""
-    
+
     D = Drawing(400, 200)
-    D.add(Rect(50, 50, 300, 100, fillColor=colors.yellow))  #round corners    
+    D.add(Rect(50, 50, 300, 100, fillColor=colors.yellow))  #round corners
     D.add(String(180,100, 'Hello World', fillColor=colors.red))
 
-    
+
     return D
 
 
@@ -29,7 +29,7 @@ def getDrawing2():
     no groups or references.  Each solid shape should have
     a purple fill."""
     D = Drawing(400, 200) #, fillColor=colors.purple)
-    
+
     D.add(Line(10,10,390,190))
     D.add(Circle(100,100,20, fillColor=colors.purple))
     D.add(Circle(200,100,20, fillColor=colors.purple))
@@ -38,7 +38,7 @@ def getDrawing2():
     D.add(Wedge(330,100,40, -10,40, fillColor=colors.purple))
 
     D.add(PolyLine([120,10,130,20,140,10,150,20,160,10,
-                    170,20,180,10,190,20,200,10]))    
+                    170,20,180,10,190,20,200,10]))
 
     D.add(Polygon([300,20,350,20,390,80,300,75, 330, 40]))
 
@@ -48,8 +48,8 @@ def getDrawing2():
                strokeWidth=10,
                strokeColor=colors.red,
                fillColor=colors.yellow))  #square corners
-    
-    D.add(Rect(220, 150, 60, 30, 10, 10))  #round corners    
+
+    D.add(Rect(220, 150, 60, 30, 10, 10))  #round corners
 
     D.add(String(10,50, 'Basic Shapes', fillColor=colors.black))
 
@@ -95,7 +95,7 @@ def getDrawing2():
 ##
 ##        #group attributes
 ##        #strokeColor=colors.blue
-##        )        
+##        )
 ##    D.add(Group2)
 
 ##    return D
@@ -105,10 +105,10 @@ def getDrawing2():
 ##    """This uses a named reference object.  The house is a 'subroutine'
 ##    the basic brick colored walls are defined, but the roof and window
 ##    color are undefined and may be set by the container."""
-##    
+##
 ##    D = Drawing(400, 200, fill=colors.bisque)
 ##
-##    
+##
 ##    House = Group(
 ##        Rect(2,20,36,30, fill=colors.bisque),  #walls
 ##        Polygon([0,20,40,20,20,5]), #roof
@@ -116,8 +116,8 @@ def getDrawing2():
 ##        Rect(25, 38, 8, 7), #window
 ##        Rect(8, 25, 8, 7), #window
 ##        Rect(25, 25, 8, 7) #window
-##        
-##        )        
+##
+##        )
 ##    D.addDef('MyHouse', House)
 ##
 ##    # one row all the same color
@@ -150,8 +150,8 @@ def getDrawing2():
 ##                             fill = color,
 ##                             )
 ##              )
-##        
-##        
+##
+##
 ##    return D
 ##
 ##def getDrawing4():
@@ -170,9 +170,9 @@ def getDrawing2():
 ##            stroke_width=3,
 ##            fill=colors.aqua
 ##            )
-##    D.add(G)    
+##    D.add(G)
 ##
-##    
+##
 ##    D.add(String(10,50, 'Stack Unwinding - should be red, blue, red'))
 ##
 ##    return D
@@ -181,7 +181,7 @@ def getDrawing2():
 ##def getDrawing5():
 ##    """This Rotates Coordinate Axes"""
 ##    D = Drawing(400, 200)
-##    
+##
 ##
 ##
 ##    Axis = Group(
@@ -192,19 +192,19 @@ def getDrawing2():
 ##        Line(0,30,10,30),
 ##        Line(0,40,10,40),
 ##        Line(10,0,10,10), #ticks on x axis
-##        Line(20,0,20,10), 
-##        Line(30,0,30,10), 
-##        Line(40,0,40,10), 
-##        Line(50,0,50,10), 
-##        Line(60,0,60,10), 
-##        Line(70,0,70,10), 
-##        Line(80,0,80,10), 
+##        Line(20,0,20,10),
+##        Line(30,0,30,10),
+##        Line(40,0,40,10),
+##        Line(50,0,50,10),
+##        Line(60,0,60,10),
+##        Line(70,0,70,10),
+##        Line(80,0,80,10),
 ##        Line(90,0,90,10),
 ##        String(20, 35, 'Axes', fill=colors.black)
 ##        )
 ##
-##    D.addDef('Axes', Axis)        
-##    
+##    D.addDef('Axes', Axis)
+##
 ##    D.add(NamedReference('Axis', Axis,
 ##            transform=translate(10,10)))
 ##    D.add(NamedReference('Axis', Axis,
@@ -220,9 +220,9 @@ def getDrawing2():
 ##    C = (colors.black,colors.red,colors.green,colors.blue,colors.brown,colors.gray, colors.pink,
 ##        colors.lavender,colors.lime, colors.mediumblue, colors.magenta, colors.limegreen)
 ##
-##    for i in range(12):    
+##    for i in range(12):
 ##        D.add(String(0, 0, ' - - Rotated Text', fill=C[i%len(C)], transform=mmult(xform, rotate(30*i))))
-##    
+##
 ##    return D
 ##
 ##def getDrawing7():
@@ -233,7 +233,7 @@ def getDrawing2():
 ##
 ##    class MyUserNode(UserNode0):
 ##        import whrandom, math
-##        
+##
 ##
 ##        def provideNode(self, sender):
 ##            """draw a simple chart that changes everytime it's drawn"""
@@ -256,7 +256,7 @@ def getDrawing2():
 ##            return g
 ##
 ##    D = Drawing(400,200, fill=colors.white)  # AR - same size as others
-##    
+##
 ##    D.add(MyUserNode())
 ##
 ##    graphcolor= [colors.green, colors.red, colors.brown, colors.purple]
@@ -287,9 +287,9 @@ def getDrawing2():
 ##    D.add(Line(220,150, 220,200, stroke=colors.red))
 ##    D.add(String(220,180, "Text should be centered", text_anchor="middle") )
 ##
-##    
+##
 ##    return D
-    
+
 
 if __name__=='__main__':
     print __doc__

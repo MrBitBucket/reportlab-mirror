@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.31 2002/07/17 22:46:22 andy_robinson Exp $
-__version__=''' $Id: widgetbase.py,v 1.31 2002/07/17 22:46:22 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.32 2002/07/24 19:56:36 andy_robinson Exp $
+__version__=''' $Id: widgetbase.py,v 1.32 2002/07/24 19:56:36 andy_robinson Exp $ '''
 import string
 
 from reportlab.graphics import shapes
@@ -146,7 +146,7 @@ class Widget(PropHolder, shapes.UserNode):
     def provideNode(self):
         return self.draw()
 
-        
+
 _ItemWrapper={}
 
 class TypedPropertyCollection(PropHolder):
@@ -211,7 +211,7 @@ class TypedPropertyCollection(PropHolder):
 
     def __len__(self):
         return len(self._children.keys())
-        
+
     def getProperties(self,recur=1):
         # return any children which are defined and whatever
         # differs from the parent
@@ -250,7 +250,7 @@ class StyleProperties(PropHolder):
 
     A legend could be as simple as a wrapper around a list of style
     properties, where the 'desc' attribute contains a descriptive
-    string and the rest could be used by the legend e.g. to draw 
+    string and the rest could be used by the legend e.g. to draw
     something like a color swatch. The graphical presentation of
     the legend would be its own business, though.
 
@@ -261,7 +261,7 @@ class StyleProperties(PropHolder):
     drawing the bars while a line chart could also use additional
     ones like strokeWidth.
     """
-    
+
     _attrMap = AttrMap(
         strokeWidth = AttrMapValue(isNumber),
         strokeLineCap = AttrMapValue(isNumber),
@@ -279,7 +279,7 @@ class StyleProperties(PropHolder):
 
         for k, v in kwargs.items():
             setattr(self, k, v)
-            
+
 
     def __setattr__(self, name, value):
         "Verify attribute name and value, before setting it."

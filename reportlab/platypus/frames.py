@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/frames.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.17 2002/07/17 22:46:23 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/frames.py,v 1.18 2002/07/24 19:56:38 andy_robinson Exp $
 
-__version__=''' $Id: frames.py,v 1.17 2002/07/17 22:46:23 andy_robinson Exp $ '''
+__version__=''' $Id: frames.py,v 1.18 2002/07/24 19:56:38 andy_robinson Exp $ '''
 
 __doc__="""
 """
@@ -21,10 +21,10 @@ class Frame:
     pages have the text paragraphs in one or two frames.  For generality
     a page might have several frames (for example for 3 column text or
     for text that wraps around a graphic).
-    
+
     After creation a Frame is not usually manipulated directly by the
     applications program -- it is used internally by the platypus modules.
-    
+
     Here is a diagramatid abstraction for the definitional part of a Frame
 
                 width                    x2,y2
@@ -42,7 +42,7 @@ class Frame:
         |    bottom padding               |
         +---------------------------------+
         (x1,y1) <-- lower left corner
-        
+
         NOTE!! Frames are stateful objects.  No single frame should be used in
         two documents at the same time (especially in the presence of multithreading.
     '''
@@ -163,7 +163,7 @@ class Frame:
                 self._y2 - self._y1
                 )
         if isColor: canv.restoreState()
-        
+
     def addFromList(self, drawlist, canv):
         """Consumes objects from the front of the list until the
         frame is full.  If it cannot fit one object, raises

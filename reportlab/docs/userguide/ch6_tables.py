@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch6_tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch6_tables.py,v 1.3 2002/07/17 22:46:22 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch6_tables.py,v 1.4 2002/07/24 19:56:36 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.platypus import Image
 
@@ -9,7 +9,7 @@ heading1("Tables and TableStyles")
 disc("""
 The $Table$ class is derived from the $Flowable$ class and is intended
 as a simple textual gridding mechanism. $Table$ cells can hold anything which can be converted to
-a <b>Python</b> $string$. 
+a <b>Python</b> $string$.
 """)
 
 disc("""
@@ -282,7 +282,7 @@ text='''
 
    This is a non rearranging form of the <b>Paragraph</b> class;
    <b><font color=red>XML</font></b> tags are allowed in <i>text</i> and have the same
-   
+
       meanings as for the <b>Paragraph</b> class.
    As for <b>Preformatted</b>, if dedent is non zero <font color=red size=+1>dedent</font>
        common leading spaces will be removed from the
@@ -334,7 +334,7 @@ detects $pageBreaks$ internally and handles them specially.
 """)
 CPage(1)
 heading2("""$CondPageBreak(height)$""")
-disc("""This $Flowable$ attempts to force a $Frame$ break if insufficient vertical space remains 
+disc("""This $Flowable$ attempts to force a $Frame$ break if insufficient vertical space remains
 in the current $Frame$. It is thus probably wrongly named and should probably be renamed as
 $CondFrameBreak$.
 """)

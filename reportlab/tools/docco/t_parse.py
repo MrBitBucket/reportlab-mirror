@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/t_parse.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/t_parse.py,v 1.1 2001/10/27 22:37:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/t_parse.py,v 1.2 2002/07/24 19:56:39 andy_robinson Exp $
 """
 Template parsing module inspired by REXX (with thanks to Donn Cave for discussion).
 
@@ -10,7 +10,7 @@ Template initialization has the form:
              x = regex_x, y = regex_y, ...)
 Parsing has the form
    ([match1, match2, ..., matchn], lastindex) = T.PARSE(string)
-   
+
 Only the first argument is mandatory.
 
 The resultant object efficiently parses strings that match the template_string,
@@ -21,7 +21,7 @@ Template directives:
   Wildcard:
     The template may be initialized with a wildcard that matches any string
     up to the string matching the next directive (which may not be a wild
-    card or single character marker) or the next literal sequence of characters 
+    card or single character marker) or the next literal sequence of characters
     of the template.  The character that represents a wildcard is specified
     by the wild_card_marker parameter, which has no default.
 
@@ -65,7 +65,7 @@ Template directives:
       >>> T = Template("v: s i", v=id, s=str, i=int)
       >>> T.PARSE("this_is_an_identifier: 'a string' 12344")
       (['this_is_an_identifier', "'a string'", '12344'], 39)
-      >>> 
+      >>>
     Here id, str, and int are regular expression conveniences provided by
     this module.
 
@@ -75,7 +75,7 @@ Template directives:
 >>> T = Template("ssnum: NNN-NN-NNNN, fn=X, ln=X, age=I, quote=Q", "X", "N", I=int, Q=str)
 >>> T.PARSE("ssnum: 123-45-6789, fn=Aaron, ln=Watters, age=13, quote='do be do be do'")
 (['123', '45', '6789', 'Aaron', 'Watters', '13', "'do be do be do'"], 72)
->>> 
+>>>
 
 """
 
@@ -88,10 +88,10 @@ from string import find
 #
 # EG: T = Template("(NNN)NNN-NNNN X X", "X", "N")
 #     ([area, exch, ext, fn, ln], index) = T.PARSE("(908)949-2726 Aaron Watters")
-#      
+#
 class Template:
 
-   def __init__(self, 
+   def __init__(self,
                 template,
                 wild_card_marker=None,
                 single_char_marker=None,
@@ -210,7 +210,7 @@ class Template:
               #print "accepting", str[currentindex:last]
               result[current_directive_index] = str[currentindex:last]
               current_directive_index = current_directive_index+1
-              currentindex = last 
+              currentindex = last
        # sanity check
        if current_directive_index != ndirectives:
           raise SystemError, "not enough directives found?"

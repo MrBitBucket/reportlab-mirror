@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_lib_sequencer.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_lib_sequencer.py,v 1.5 2002/07/04 09:24:49 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_lib_sequencer.py,v 1.6 2002/07/24 19:56:38 andy_robinson Exp $
 """Tests for the reportlab.lib.sequencer module.
 """
 
@@ -15,7 +15,7 @@ from reportlab.lib.sequencer import Sequencer
 
 class SequencerTestCase(unittest.TestCase):
     "Test Sequencer usage."
-    
+
     def test0(self):
         "Test sequencer default counter."
 
@@ -40,7 +40,7 @@ class SequencerTestCase(unittest.TestCase):
 
         seq = Sequencer()
         start = seq.this()
-        
+
         for i in range(1, 101):
             n = seq.next()
 
@@ -66,7 +66,7 @@ class SequencerTestCase(unittest.TestCase):
 
         seq = Sequencer()
         start = seq.this('myCounter1')
-        
+
         for i in range(1, 101):
             n = seq.next('myCounter1')
 

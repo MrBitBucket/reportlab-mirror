@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/ttfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.3 2002/07/24 19:22:17 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/pdfbase/ttfonts.py,v 1.4 2002/07/24 19:56:37 andy_robinson Exp $
 """TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
@@ -56,7 +56,7 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-__version__ = '$Id: ttfonts.py,v 1.3 2002/07/24 19:22:17 andy_robinson Exp $'
+__version__ = '$Id: ttfonts.py,v 1.4 2002/07/24 19:56:37 andy_robinson Exp $'
 
 import string
 from types import StringType
@@ -107,7 +107,7 @@ def parse_utf8(string):
     return result
 
 def makeToUnicodeCMap(fontname, subset):
-    """Creates a ToUnicode CMap for a given subset.  See Adobe 
+    """Creates a ToUnicode CMap for a given subset.  See Adobe
     _PDF_Reference (ISBN 0-201-75839-3) for more information."""
     cmap = [
         "/CIDInit /ProcSet findresource begin",
@@ -657,7 +657,7 @@ class TTFontFile(TTFontParser):
         # the original font.  Also build a mapping of UCS codes to
         # glyph values in the new font.
 
-        # Start with 0 -> 0: "missing character" 
+        # Start with 0 -> 0: "missing character"
         glyphMap = [0]                  # new glyph index -> old glyph index
         glyphSet = {0:0}                # old glyph index -> new glyph index
         codeToGlyph = {}                # unicode -> new glyph index
@@ -744,7 +744,7 @@ class TTFontFile(TTFontParser):
         cmap = apply(pack, [">%dH" % len(cmap)] + cmap)
         output.add('cmap', cmap)
 
-        # hmtx - Horizontal Metrics 
+        # hmtx - Horizontal Metrics
         hmtx = []
         for n in range(numGlyphs):
             originalGlyphIdx = glyphMap[n]

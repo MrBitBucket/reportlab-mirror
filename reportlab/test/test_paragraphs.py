@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_paragraphs.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_paragraphs.py,v 1.13 2002/07/17 22:46:24 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_paragraphs.py,v 1.14 2002/07/24 19:56:38 andy_robinson Exp $
 # tests some paragraph styles
 
 from reportlab.test import unittest
@@ -41,7 +41,7 @@ def myLaterPages(canvas, doc):
 
 class ParagraphTestCase(unittest.TestCase):
     "Test Paragraph class (eyeball-test)."
-    
+
     def test0(self):
         """Test...
 
@@ -49,22 +49,22 @@ class ParagraphTestCase(unittest.TestCase):
 
         Features to be visually confirmed by a human being are:
 
-            1. ... 
+            1. ...
             2. ...
             3. ...
         """
 
         story = []
-        
+
         #need a style
         styNormal = ParagraphStyle('normal')
-        
+
         # some to test
         stySpaced = ParagraphStyle('spaced',
                                    parent=styNormal,
                                    spaceBefore=12,
                                    spaceAfter=12)
-        
+
 
         story.append(
             Paragraph("This is a normal paragraph. "
@@ -94,7 +94,7 @@ class ParagraphTestCase(unittest.TestCase):
                                        backColor=navy)
         story.append(
             Paragraph("This is a title with a background. ", styBackground))
-        
+
         story.append(
             Paragraph("""<para backcolor="pink">This got a background from the para tag</para>""", styNormal))
 
@@ -118,13 +118,13 @@ class ParagraphTestCase(unittest.TestCase):
         #This one fails:
         #story.append(Paragraph("""This has a font change to <font name=Helvetica-Oblique>Helvetica-Oblique</font>.""", styNormal))
         story.append(Paragraph("""This has a font change to <font name=Helvetica><i>Helvetica in italics</i></font>.""", styNormal))
-        
+
 
         template = SimpleDocTemplate('test_paragraphs.pdf',
                                      showBoundary=1)
         template.build(story,
             onFirstPage=myFirstPage, onLaterPages=myLaterPages)
-        
+
 
 def makeSuite():
     return makeSuiteForClasses(ParagraphTestCase)

@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/fonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.13 2002/07/17 22:46:23 andy_robinson Exp $
-__version__=''' $Id: fonts.py,v 1.13 2002/07/17 22:46:23 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/fonts.py,v 1.14 2002/07/24 19:56:37 andy_robinson Exp $
+__version__=''' $Id: fonts.py,v 1.14 2002/07/24 19:56:37 andy_robinson Exp $ '''
 import string, sys, os
 ###############################################################################
 #   A place to put useful font stuff
@@ -34,13 +34,13 @@ _tt2ps_map = {
             ('courier', 1, 0) :'Courier-Bold',
             ('courier', 0, 1) :'Courier-Oblique',
             ('courier', 1, 1) :'Courier-BoldOblique',
-            
+
             ('helvetica', 0, 0) :'Helvetica',
             ('helvetica', 1, 0) :'Helvetica-Bold',
             ('helvetica', 0, 1) :'Helvetica-Oblique',
             ('helvetica', 1, 1) :'Helvetica-BoldOblique',
 
-            # there is only one Symbol font         
+            # there is only one Symbol font
             ('symbol', 0, 0) :'Symbol',
             ('symbol', 1, 0) :'Symbol',
             ('symbol', 0, 1) :'Symbol',

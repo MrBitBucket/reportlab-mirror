@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/pythonpoint/customshapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/pythonpoint/customshapes.py,v 1.4 2002/07/17 22:46:24 andy_robinson Exp $
-__version__=''' $Id: customshapes.py,v 1.4 2002/07/17 22:46:24 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/tools/pythonpoint/customshapes.py,v 1.5 2002/07/24 19:56:39 andy_robinson Exp $
+__version__=''' $Id: customshapes.py,v 1.5 2002/07/24 19:56:39 andy_robinson Exp $ '''
 
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
@@ -24,7 +24,7 @@ evaluate the arguments string and pass it to the constructor.
 Then, it will call
 
     object.drawOn(canvas)
-    
+
 Thus your object must be fully defined by the constructor.
 For this one, we pass three argumenyts: x, y and scale.
 This does a five-tile jigsaw over which words can be overlaid;
@@ -37,7 +37,7 @@ from reportlab.lib import colors
 from reportlab.lib.corp import RL_CorpLogo
 from reportlab.graphics.shapes import Drawing
 
-## custom shape for use with PythonPoint.        
+## custom shape for use with PythonPoint.
 
 class Jigsaw:
     """This draws a jigsaw patterm.  By default it is centred on 0,0
@@ -57,13 +57,13 @@ class Jigsaw:
 
     def drawOn(self, canvas):
         canvas.saveState()
-        
-        canvas.setFont('Helvetica-Bold',24)        
+
+        canvas.setFont('Helvetica-Bold',24)
         canvas.drawString(600, 100, 'A Custom Shape')
 
         canvas.translate(self.x, self.y)
         canvas.scale(self.scale, self.scale)
-        self.drawBounds(canvas)        
+        self.drawBounds(canvas)
 
         self.drawCentre(canvas)
         self.drawTopLeft(canvas)
@@ -85,7 +85,7 @@ class Jigsaw:
             path.curveTo(p1[0], p1[1], p2[0], p2[1], p3[0], p3[1])
             idx = idx + 3
 
-            
+
     def drawShape(self, canvas, controls, color):
         """Utlity to draw a closed shape through a list of control points;
         extends the previous proc"""
@@ -103,12 +103,12 @@ class Jigsaw:
         canvas.line(-100,0,100,0)
         canvas.line(0,70,0,-70)
         canvas.setStrokeColor(colors.black)
-        
-    
+
+
     def drawCentre(self, canvas):
         controls = [ (0,50),   #top
 
-                #top right edge - duplicated for that corner piece                     
+                #top right edge - duplicated for that corner piece
                 (5,50),(10,45),(10,40),
                 (10,35),(15,30),(20,30),
                 (25,30),(30,25),(30,20),
@@ -122,7 +122,7 @@ class Jigsaw:
                 (15,-30), (10,-35), (10,-40),
                 (10,-45),(5,-50),(0,-50),
 
-                #bottom left                     
+                #bottom left
                 (-5,-50),(-10,-45),(-10,-40),
                 (-10,-35),(-15,-30),(-20,-30),
                 (-25,-30),(-30,-25),(-30,-20),
@@ -135,8 +135,8 @@ class Jigsaw:
                 (-30,25),(-25,30),(-20,30),
                 (-15,30),(-10,35),(-10,40),
                 (-10,45),(-5,50),(0,50)
-                     
-                ]            
+
+                ]
 
         self.drawShape(canvas, controls, colors.yellow)
 
@@ -152,7 +152,7 @@ class Jigsaw:
             (-75,15),(-68,15),(-68,10),
             (-68,5),(-70,5),(-70,0),
             (-69,0),(-51,0),(-50,0),
-            
+
             #five distinct curves
             (-50,5),(-45,10),(-40,10),
             (-35,10),(-30,15),(-30,20),
@@ -167,11 +167,11 @@ class Jigsaw:
 
 
     def drawBottomLeft(self, canvas):
-        
+
         controls = [(-100,-70),
             (-99,-70),(-1,-70),(0,-70),
             (0,-69),(0,-51),(0,-50),
-            
+
             #wavyline
             (-5,-50),(-10,-45),(-10,-40),
             (-10,-35),(-15,-30),(-20,-30),
@@ -180,7 +180,7 @@ class Jigsaw:
             (-45,-10),(-50,-5),(-50,0),
 
             #jigsaw interlock - 4 sections
-                    
+
             (-51, 0), (-69, 0), (-70, 0),
             (-70, 5), (-68, 5), (-68, 10),
             (-68, 15), (-75, 15), (-80, 15),
@@ -194,18 +194,18 @@ class Jigsaw:
 
 
     def drawBottomRight(self, canvas):
-        
+
         controls = [ (100,-70),
             (100,-69),(100,-1),(100,0),
             (99,0),(91,0),(90,0),
-            
+
             #jigsaw interlock - 4 sections
             (90, -5), (92, -5), (92, -10),
             (92, -15), (85, -15), (80, -15),
             (75, -15), (68, -15), (68, -10),
             (68, -5), (70, -5), (70, 0),
             (69, 0), (51, 0), (50, 0),
-                    
+
             #wavyline
             (50, -5), (45,-10), (40,-10),
             (35,-10), (30,-15), (30, -20),
@@ -221,11 +221,11 @@ class Jigsaw:
 
 
     def drawBottomLeft(self, canvas):
-        
+
         controls = [(-100,-70),
             (-99,-70),(-1,-70),(0,-70),
             (0,-69),(0,-51),(0,-50),
-            
+
             #wavyline
             (-5,-50),(-10,-45),(-10,-40),
             (-10,-35),(-15,-30),(-20,-30),
@@ -234,7 +234,7 @@ class Jigsaw:
             (-45,-10),(-50,-5),(-50,0),
 
             #jigsaw interlock - 4 sections
-                    
+
             (-51, 0), (-69, 0), (-70, 0),
             (-70, 5), (-68, 5), (-68, 10),
             (-68, 15), (-75, 15), (-80, 15),
@@ -245,7 +245,7 @@ class Jigsaw:
 
             ]
         self.drawShape(canvas, controls, colors.green)
-        
+
 
     def drawTopRight(self, canvas):
         controls = [(100, 70),
@@ -263,8 +263,8 @@ class Jigsaw:
             (92, -5), (90, -5), (90, 0),
             (91, 0), (99, 0), (100, 0)
                     ]
-        
-        self.drawShape(canvas, controls, colors.magenta)        
+
+        self.drawShape(canvas, controls, colors.magenta)
 
 
 class Logo:

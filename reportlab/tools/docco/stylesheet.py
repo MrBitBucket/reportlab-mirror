@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/stylesheet.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/stylesheet.py,v 1.2 2002/05/28 15:06:55 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/stylesheet.py,v 1.3 2002/07/24 19:56:39 andy_robinson Exp $
 #standard stylesheet for our manuals
 from reportlab.lib.styles import StyleSheet1, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
@@ -27,7 +27,7 @@ def getStyleSheet():
                                   leftIndent=36,
                                   firstLineIndent=0)
                    )
-    
+
     stylesheet.add(ParagraphStyle(name='BodyText',
                                   parent=stylesheet['Normal'],
                                   spaceBefore=6)
@@ -54,7 +54,7 @@ def getStyleSheet():
                                   spaceBefore=12,
                                   spaceAfter=6),
                    alias='h2')
-    
+
     stylesheet.add(ParagraphStyle(name='Heading3',
                                   parent=stylesheet['Normal'],
                                   fontName = 'Times-BoldItalic',
@@ -134,7 +134,7 @@ def getStyleSheet():
                                   textColor=colors.navy,
                                   alignment=TA_CENTER),
                    alias='u')
- 
+
     stylesheet.add(ParagraphStyle(name='Centred',
                                   parent=stylesheet['Normal'],
                                   alignment=TA_CENTER
@@ -144,5 +144,5 @@ def getStyleSheet():
                                   parent=stylesheet['Centred'],
                                   fontName='Times-Italic'
                                   ))
-    
+
     return stylesheet

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/odyssey/odyssey.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/odyssey/odyssey.py,v 1.10 2002/07/17 22:46:22 andy_robinson Exp $
-__version__=''' $Id: odyssey.py,v 1.10 2002/07/17 22:46:22 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/odyssey/odyssey.py,v 1.11 2002/07/24 19:56:35 andy_robinson Exp $
+__version__=''' $Id: odyssey.py,v 1.11 2002/07/24 19:56:35 andy_robinson Exp $ '''
 ___doc__=''
 #odyssey.py
 #
@@ -47,7 +47,7 @@ def drawPageFrame(canv):
     canv.drawCentredString(0.5*A4[0], 0.5 * inch,
                "Page %d" % canv.getPageNumber())
 
-    
+
 
 def run():
     started = time.time()
@@ -71,14 +71,14 @@ def run():
     tx.textLine("")
     tx.textLine("Andy Robinson, Robinson Analytics Ltd.")
     canv.drawText(tx)
-    
+
     canv.showPage()
     #on with the text...
     drawPageFrame(canv)
-    
+
     canv.setFont('Times-Roman', 12)
     tx = canv.beginText(left_margin, top_margin - 0.5*inch)
-    
+
     for fn in ('odyssey.full.txt','odyssey.txt'):
         if os.path.isfile(fn):
             break
@@ -92,7 +92,7 @@ def run():
         #canv.textOut(line)
         #canv.textLine('')
 
-        #page breaking        
+        #page breaking
         y = tx.getY()   #get y coordinate
         if y < bottom_margin + 0.5*inch:
             canv.drawText(tx)
@@ -110,17 +110,17 @@ def run():
         canv.drawText(tx)
         canv.showPage()
         drawPageFrame(canv)
-        
+
     print 'about to write to disk...'
-    
+
     canv.save()
-    
+
     finished = time.time()
     elapsed = finished - started
     pages = canv.getPageNumber()-1
     speed =  pages / elapsed
     print '%d pages in %0.2f seconds = %0.2f pages per second' % (
                 pages, elapsed, speed)
- 
+
 if __name__=='__main__':
     run()

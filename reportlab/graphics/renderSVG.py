@@ -65,13 +65,13 @@ def _pointsFromList(L):
 def transformNode(doc, newTag, node=None, **attrDict):
     """Transform a DOM node into new node and copy selected attributes.
 
-    Creates a new DOM node with tag name 'newTag' for document 'doc' 
+    Creates a new DOM node with tag name 'newTag' for document 'doc'
     and copies selected attributes from an existing 'node' as provided
     in 'attrDict'. The source 'node' can be None. Attribute values will
     be converted to strings.
 
-    E.g. 
-    
+    E.g.
+
         n = transformNode(doc, "node1", x="0", y="1")
         -> DOM node for <node1 x="0" y="1"/>
 
@@ -85,7 +85,7 @@ def transformNode(doc, newTag, node=None, **attrDict):
     newNode = doc.createElement(newTag)
     for newAttr, attr in attrDict.items():
         sattr =  str(attr)
-        if not node: 
+        if not node:
             newNode.setAttribute(newAttr, sattr)
         else:
             attrVal = node.getAttribute(sattr)
@@ -117,12 +117,12 @@ class SVGCanvas:
         title = self.doc.createElement('title')
         text = self.doc.createTextNode('...')
         title.appendChild(text)
-        self.svg.appendChild(title)                 
-                 
+        self.svg.appendChild(title)
+
         desc = self.doc.createElement('desc')
         text = self.doc.createTextNode('...')
         desc.appendChild(text)
-        self.svg.appendChild(desc)                 
+        self.svg.appendChild(desc)
 
         self.setFont(STATE_DEFAULTS['fontName'], STATE_DEFAULTS['fontSize'])
         self.setStrokeColor(STATE_DEFAULTS['strokeColor'])
@@ -131,14 +131,14 @@ class SVGCanvas:
         self.setLineWidth(1)
 
         # Add a rectangular clipping path identical to view area.
-        clipPath = transformNode(self.doc, "clipPath", id="clip") 
-        clipRect = transformNode(self.doc, "rect", x=0, y=0, 
+        clipPath = transformNode(self.doc, "clipPath", id="clip")
+        clipRect = transformNode(self.doc, "rect", x=0, y=0,
             width=self.width, height=self.height)
         clipPath.appendChild(clipRect)
         self.svg.appendChild(clipPath)
 
-        self.groupTree = transformNode(self.doc, "g", 
-            id="group", 
+        self.groupTree = transformNode(self.doc, "g",
+            id="group",
             transform="scale(1,-1) translate(0,-%d)" % self.height,
             style="clip-path: url(#clip)")
         self.svg.appendChild(self.groupTree)
@@ -158,12 +158,12 @@ class SVGCanvas:
         # use = self.doc.createElement('use')
         # use.setAttribute("xlink:href", "#group")
         # use.setAttribute("transform", "scale(1, -1)")
-        # self.svg.appendChild(use)        
+        # self.svg.appendChild(use)
 
         result = self.svg.toprettyxml(indent="    ")
         file.write(result)
 
-        if file is not f: 
+        if file is not f:
             file.close()
 
 
@@ -192,14 +192,14 @@ class SVGCanvas:
                 if word in include:
                     tmp.append(word)
             keys = tmp
-            
+
         items = []
         for k in keys:
             items.append((k, self.style[k]))
-        items = map(lambda i: "%s: %s"%(i[0], i[1]), items) 
+        items = map(lambda i: "%s: %s"%(i[0], i[1]), items)
         str = string.join(items, '; ') + ';'
 
-        return str 
+        return str
 
 
     def _escape(self, s):
@@ -207,17 +207,17 @@ class SVGCanvas:
         return a copy of string s with special characters in postscript strings
         escaped with backslashes.
         Have not handled characters that are converted normally in python strings
-        i.e. \n -> newline 
+        i.e. \n -> newline
         """
 
         str = string.replace(s, chr(0x5C), r'\\' )
         str = string.replace(str, '(', '\(' )
         str = string.replace(str, ')', '\)')
-        return str 
+        return str
 
 
     def _genArcCode(self, x1, y1, x2, y2, startAng, extent):
-        """Calculate the path for an arc inscribed in rectangle defined 
+        """Calculate the path for an arc inscribed in rectangle defined
         by (x1,y1),(x2,y2)."""
 
         return
@@ -240,7 +240,7 @@ class SVGCanvas:
 
 
     def _fillAndStroke(self, code, clip=0):
-        path = transformNode(self.doc, "path", 
+        path = transformNode(self.doc, "path",
             d=self.path, style=self._formatStyle(LINE_STYLES))
         self.currGroup.appendChild(path)
         self.path = ''
@@ -266,7 +266,7 @@ class SVGCanvas:
                 self.code.append("clip")
                 self.code.append("newpath")
         """
- 
+
 
     ### styles ###
 
@@ -282,7 +282,7 @@ class SVGCanvas:
         if self._lineJoin != v:
             self._lineJoin = v
             self.style['stroke-linecap'] = vals[v]
-            
+
 
     def setDash(self, array=[], phase=0):
         """Two notations. Pass two numbers, or an array and phase."""
@@ -337,11 +337,11 @@ class SVGCanvas:
 
     def rect(self, x1,y1, x2,y2, rx=8, ry=8):
         "Draw a rectangle between x1,y1 and x2,y2."
-        
+
         if self.verbose: print "+++ SVGCanvas.rect"
 
-        rect = transformNode(self.doc, "rect", 
-            x=x1, y=y1, width=x2-x1, height=y2-y1, 
+        rect = transformNode(self.doc, "rect",
+            x=x1, y=y1, width=x2-x1, height=y2-y1,
             style=self._formatStyle(LINE_STYLES))
 
         self.currGroup.appendChild(rect)
@@ -349,13 +349,13 @@ class SVGCanvas:
 
     def roundRect(self, x1,y1, x2,y2, rx=8, ry=8):
         """Draw a rounded rectangle between x1,y1 and x2,y2.
- 
-        Corners inset as ellipses with x-radius rx and y-radius ry. 
+
+        Corners inset as ellipses with x-radius rx and y-radius ry.
         These should have x1<x2, y1<y2, rx>0, and ry>0.
         """
 
-        rect = transformNode(self.doc, "rect", 
-            x=x1, y=y1, width=x2-x1, height=y2-y1, rx=rx, ry=ry, 
+        rect = transformNode(self.doc, "rect",
+            x=x1, y=y1, width=x2-x1, height=y2-y1, rx=rx, ry=ry,
             style=self._formatStyle(LINE_STYLES))
 
         self.currGroup.appendChild(rect)
@@ -371,8 +371,8 @@ class SVGCanvas:
             if angle != 0:
                st = st + " rotate(%f %f %f);" % (angle, x, y)
             st = st + " fill: %s;" % self.style['fill']
-            text = transformNode(self.doc, "text", 
-                x=x, y=y, style=st, 
+            text = transformNode(self.doc, "text",
+                x=x, y=y, style=st,
                 transform="translate(0,%d) scale(1,-1)" % (2*y))
             content = self.doc.createTextNode(s)
             text.appendChild(content)
@@ -394,11 +394,11 @@ class SVGCanvas:
     def line(self, x1, y1, x2, y2):
         if self._strokeColor != None:
             if 0: # something is wrong with line in my SVG viewer...
-                line = transformNode(self.doc, "line", 
-                    x=x1, y=y1, x2=x2, y2=y2, 
+                line = transformNode(self.doc, "line",
+                    x=x1, y=y1, x2=x2, y2=y2,
                     style=self._formatStyle(LINE_STYLES))
                 self.currGroup.appendChild(line)
-            path = transformNode(self.doc, "path", 
+            path = transformNode(self.doc, "path",
                 d="M %f,%f L %f,%f Z" % (x1,y1,x2,y2),
                 style=self._formatStyle(LINE_STYLES))
             self.currGroup.appendChild(path)
@@ -406,20 +406,20 @@ class SVGCanvas:
 
     def ellipse(self, x1, y1, x2, y2):
         """Draw an orthogonal ellipse inscribed within the rectangle x1,y1,x2,y2.
- 
+
         These should have x1<x2 and y1<y2.
         """
 
-        ellipse = transformNode(self.doc, "ellipse", 
-            cx=(x1+x2)/2.0, cy=(y1+y2)/2.0, rx=(x2-x1)/2.0, ry=(y2-y1)/2.0, 
+        ellipse = transformNode(self.doc, "ellipse",
+            cx=(x1+x2)/2.0, cy=(y1+y2)/2.0, rx=(x2-x1)/2.0, ry=(y2-y1)/2.0,
             style=self._formatStyle(LINE_STYLES))
 
         self.currGroup.appendChild(ellipse)
 
 
     def circle(self, xc, yc, r):
-        circle = transformNode(self.doc, "circle", 
-            cx=xc, cy=yc, r=r, 
+        circle = transformNode(self.doc, "circle",
+            cx=xc, cy=yc, r=r,
             style=self._formatStyle(LINE_STYLES))
 
         self.currGroup.appendChild(circle)
@@ -444,7 +444,7 @@ class SVGCanvas:
     def drawArc(self, x1,y1, x2,y2, startAng=0, extent=360, fromcenter=0):
         """Draw a partial ellipse inscribed within the rectangle x1,y1,x2,y2.
 
-        Starting at startAng degrees and covering extent degrees. Angles 
+        Starting at startAng degrees and covering extent degrees. Angles
         start with 0 to the right (+x) and increase counter-clockwise.
         These should have x1<x2 and y1<y2.
         """
@@ -456,7 +456,7 @@ class SVGCanvas:
         ax = rx * cos((startAng+extent)*pi/180) + cx
         ay = ry * sin((startAng+extent)*pi/180) + cy
 
-        str = ''        
+        str = ''
         if fromcenter:
             str = str + "M %f, %f L %f, %f " % (cx, cy, ax, ay)
 
@@ -470,7 +470,7 @@ class SVGCanvas:
         if fromcenter:
             str = str + "L %f, %f Z " % (cx, cy)
 
-        path = transformNode(self.doc, "path", 
+        path = transformNode(self.doc, "path",
             d=str, style=self._formatStyle())
         self.currGroup.appendChild(path)
 
@@ -484,7 +484,7 @@ class SVGCanvas:
             for i in xrange(len(points)):
                 pairs.append("%f %f" % (points[i]))
             pts = string.join(pairs, ', ')
-            polyline = transformNode(self.doc, "polygon", 
+            polyline = transformNode(self.doc, "polygon",
                 points=pts, style=self._formatStyle(LINE_STYLES))
             self.currGroup.appendChild(polyline)
 
@@ -511,7 +511,7 @@ class SVGCanvas:
             for i in xrange(len(points)):
                 pairs.append("%f %f" % (points[i]))
             pts = string.join(pairs, ', ')
-            polyline = transformNode(self.doc, "polyline", 
+            polyline = transformNode(self.doc, "polyline",
                 points=pts, style=self._formatStyle(LINE_STYLES))
             self.currGroup.appendChild(polyline)
 
@@ -590,7 +590,7 @@ class _SVGRenderer(Renderer):
 
 
     def draw(self, drawing, canvas, x, y, showBoundary=rl_config.showBoundary):
-        """This is the top level function, which draws the drawing at the given 
+        """This is the top level function, which draws the drawing at the given
         location. The recursive part is handled by drawNode.
         """
 
@@ -680,7 +680,7 @@ class _SVGRenderer(Renderer):
             #pdfgen roundRect function.  TODO
             self._canvas.roundRect(
                     rect.x, rect.y,
-                    rect.x+rect.width, rect.y+rect.height, 
+                    rect.x+rect.width, rect.y+rect.height,
                     rect.rx, rect.ry
                     )
 
@@ -690,7 +690,7 @@ class _SVGRenderer(Renderer):
             S = self._tracker.getState()
             text_anchor, x, y, text = S['textAnchor'], stringObj.x, stringObj.y, stringObj.text
             if not text_anchor in ['start', 'inherited']:
-                font, fontSize = S['fontName'], S['fontSize'] 
+                font, fontSize = S['fontName'], S['fontSize']
                 textLen = stringWidth(text, font,fontSize)
                 if text_anchor=='end':
                     x = x-textLen
@@ -755,7 +755,7 @@ class _SVGRenderer(Renderer):
 
         for key, value in delta.items():
             if key == 'transform':
-                pass 
+                pass
                 #self._canvas.transform(value[0], value[1], value[2], value[3], value[4], value[5])
             elif key == 'strokeColor':
                 self._canvas.setStrokeColor(value)

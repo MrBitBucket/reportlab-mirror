@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pdfbase_pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_pdfutils.py,v 1.5 2002/07/04 09:24:49 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_pdfutils.py,v 1.6 2002/07/24 19:56:38 andy_robinson Exp $
 """Tests for utility functions in reportlab.pdfbase.pdfutils.
 """
 
@@ -24,7 +24,7 @@ class PdfEncodingTestCase(unittest.TestCase):
         plainText = 'What is the average velocity of a sparrow?'
         encoded = _AsciiHexEncode(plainText)
         decoded = _AsciiHexDecode(encoded)
-        
+
         msg = "Round-trip AsciiHex encoding failed."
         assert decoded == plainText, msg
 

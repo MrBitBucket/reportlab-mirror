@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/gengraphguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/graphguide/gengraphguide.py,v 1.4 2002/07/17 22:46:22 andy_robinson Exp $
-__version__=''' $Id: gengraphguide.py,v 1.4 2002/07/17 22:46:22 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/docs/graphguide/gengraphguide.py,v 1.5 2002/07/24 19:56:35 andy_robinson Exp $
+__version__=''' $Id: gengraphguide.py,v 1.5 2002/07/24 19:56:35 andy_robinson Exp $ '''
 __doc__ = """
 This module contains the script for building the graphics guide.
 """

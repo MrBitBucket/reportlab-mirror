@@ -10,7 +10,7 @@
 # derived from an original version created
 # by Jeff Bauer of Rubicon Research and used
 # with his kind permission
-__version__=''' $Id: normalDate.py,v 1.6 2002/07/17 22:46:23 andy_robinson Exp $ '''
+__version__=''' $Id: normalDate.py,v 1.7 2002/07/24 19:56:37 andy_robinson Exp $ '''
 
 
 
@@ -83,7 +83,7 @@ class NormalDate:
 
     1.0 - No changes, except the version number.  After 3 years of use
             by various parties I think we can consider it stable.
-    0.8 - added Prof. Stephen Walton's suggestion for a range method 
+    0.8 - added Prof. Stephen Walton's suggestion for a range method
             - module author resisted the temptation to use lambda <0.5 wink>
     0.7 - added Dan Winkler's suggestions for __add__, __sub__ methods
     0.6 - modifications suggested by Kevin Digweed to fix:
@@ -138,7 +138,7 @@ class NormalDate:
         return self.__class__(self.normalDate)
 
     def __cmp__(self, target):
-        if target is None: 
+        if target is None:
             return 1
         elif not hasattr(target, 'normalDate'):
             return 1
@@ -174,7 +174,7 @@ class NormalDate:
 
     def daysBetweenDates(self, normalDate):
         """
-        return value may be negative, since calculation is 
+        return value may be negative, since calculation is
         self.scalar() - arg
         """
         if type(normalDate) is _NDType:
@@ -253,8 +253,8 @@ class NormalDate:
         {MMMMM} --> first character of monthname
         {D}     --> day of month as digit
         {DD}    --> 2 digit day of month
-        {DDD}   --> abrreviated weekday name 
-        {DDDD}  --> weekday name 
+        {DDD}   --> abrreviated weekday name
+        {DDDD}  --> weekday name
         '''
         r = fmt[:]
         f = 0
@@ -280,7 +280,7 @@ class NormalDate:
 
     def isLeapYear(self):
         """
-        determine if specified year is leap year, returning true (1) or 
+        determine if specified year is leap year, returning true (1) or
         false (0)
         """
         return isLeapYear(self.year())
@@ -440,7 +440,7 @@ class NormalDate:
 
     def setNormalDate(self, normalDate):
         """
-        accepts date as scalar string/integer (yyyymmdd) or tuple 
+        accepts date as scalar string/integer (yyyymmdd) or tuple
         (year, month, day, ...)"""
         tn=type(normalDate)
         if tn is IntType:

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/styles.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/styles.py,v 1.14 2001/03/17 15:22:25 rgbecker Exp $
-__version__=''' $Id: styles.py,v 1.14 2001/03/17 15:22:25 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/styles.py,v 1.15 2002/07/24 19:56:37 andy_robinson Exp $
+__version__=''' $Id: styles.py,v 1.15 2002/07/24 19:56:37 andy_robinson Exp $ '''
 
 from reportlab.lib.colors import white, black
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
@@ -26,7 +26,7 @@ class PropertySet:
         if parent:
             assert parent.__class__ == self.__class__, "Parent style must have same class as new style"
 
-        #step two 
+        #step two
         self.name = name
         self.parent = parent
         self.__dict__.update(self.defaults)
@@ -35,8 +35,8 @@ class PropertySet:
         # very strict that only keys in class defaults are
         # allowed, so they cannot inherit
         self.refresh()
-        
-        #step three - copy keywords if any                    
+
+        #step three - copy keywords if any
         for (key, value) in kw.items():
              self.__dict__[key] = value
 
@@ -64,7 +64,7 @@ class PropertySet:
         for key in keylist:
             value = self.__dict__.get(key, None)
             print indent + '%s = %s' % (key, value)
-            
+
 class ParagraphStyle(PropertySet):
     defaults = {
         'fontName':'Times-Roman',
@@ -143,11 +143,11 @@ class StyleSheet1:
                 raise KeyError, "Style '%s' already defined in stylesheet" % alias
             if self.byAlias.has_key(alias):
                 raise KeyError, "Alias name '%s' is already an alias in stylesheet" % alias
-        #passed all tests?  OK, add it    
+        #passed all tests?  OK, add it
         self.byName[key] = style
         if alias:
             self.byAlias[alias] = style
-     
+
     def list(self):
         styles = self.byName.items()
         styles.sort()
@@ -159,8 +159,8 @@ class StyleSheet1:
             print name, alias
             style.listAttrs('    ')
             print
-            
-        
+
+
 
 
 def testStyles():
@@ -220,7 +220,7 @@ def getSampleStyleSheet():
                                   spaceBefore=12,
                                   spaceAfter=6),
                    alias='h2')
-    
+
     stylesheet.add(ParagraphStyle(name='Heading3',
                                   parent=stylesheet['Normal'],
                                   fontName = 'Times-BoldItalic',
@@ -252,7 +252,6 @@ def getSampleStyleSheet():
                                   leading=8.8,
                                   firstLineIndent=0,
                                   leftIndent=36))
-    
-    
-    return stylesheet
 
+
+    return stylesheet

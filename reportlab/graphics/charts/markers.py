@@ -1,15 +1,15 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/markers.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/markers.py,v 1.7 2002/03/26 11:17:17 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/markers.py,v 1.8 2002/07/24 19:56:36 andy_robinson Exp $
 """
 This modules defines a collection of markers used in charts.
 
 The make* functions return a simple shape or a widget as for
 the smiley.
 """
-__version__=''' $Id: markers.py,v 1.7 2002/03/26 11:17:17 rgbecker Exp $ '''
-from reportlab.lib import colors 
+__version__=''' $Id: markers.py,v 1.8 2002/07/24 19:56:36 andy_robinson Exp $ '''
+from reportlab.lib import colors
 from reportlab.graphics.shapes import Rect, Line, Circle, Polygon
 from reportlab.graphics.widgets.signsandsymbols import SmileyFace
 

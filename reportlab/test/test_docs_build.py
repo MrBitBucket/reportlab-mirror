@@ -10,7 +10,7 @@ from reportlab.test.utils import SecureTestCase
 
 class ManualTestCase(SecureTestCase):
     "Runs all 3 manual-builders from the top."
-    
+
     def test0(self):
         "Test if all manuals buildable from source."
 
@@ -27,14 +27,14 @@ class ManualTestCase(SecureTestCase):
             os.remove('reference.pdf')
         if os.path.isfile('graphics_reference.pdf'):
             os.remove('graphics_reference.pdf')
-        
+
         os.system("python genAll.py -s")
 
         assert os.path.isfile('userguide.pdf'), 'genAll.py failed to generate userguide.pdf!'
         assert os.path.isfile('graphguide.pdf'), 'genAll.py failed to generate graphguide.pdf!'
         assert os.path.isfile('reference.pdf'), 'genAll.py failed to generate reference.pdf!'
         assert os.path.isfile('graphics_reference.pdf'), 'genAll.py failed to generate graphics_reference.pdf!'
-        
+
 
 def makeSuite():
     suite = unittest.TestSuite()

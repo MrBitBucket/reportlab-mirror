@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/cidfonts?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: cidfonts.py,v 1.9 2001/10/21 23:48:15 andy_robinson Exp $ '''
+__version__=''' $Id: cidfonts.py,v 1.10 2002/07/24 19:56:37 andy_robinson Exp $ '''
 __doc__="""CID (Asian multi-byte) font support.
 
 This defines classes to represent CID fonts.  They know how to calculate
@@ -30,7 +30,7 @@ def findCMapFile(name):
         if os.path.isfile(cmapfile):
             return cmapfile
     raise IOError, 'CMAP file for encodings "%s" not found!' % name
-    
+
 def structToPDF(structure):
     "Converts deeply nested structure to PDFdoc dictionary/array objects"
     if type(structure) is DictType:
@@ -83,7 +83,7 @@ class CIDEncoding(pdfmetrics.Encoding):
         hasher = md5.new()
         hasher.update(text)
         return hasher.digest()
-            
+
     def parseCMAPFile(self, name):
         """This is a tricky one as CMAP files are Postscript
         ones.  Some refer to others with a 'usecmap'
@@ -92,7 +92,7 @@ class CIDEncoding(pdfmetrics.Encoding):
         cmapfile = findCMapFile(name)
         # this will CRAWL with the unicode encodings...
         rawdata = open(cmapfile, 'r').read()
-        
+
         self._mapFileHash = self._hash(rawdata)
         #if it contains the token 'usecmap', parse the other
         #cmap file first....
@@ -109,7 +109,7 @@ class CIDEncoding(pdfmetrics.Encoding):
             # now continue parsing this, as it may
             # override some settings
 
-        
+
         words = split(rawdata)
         while words <> []:
             if words[0] == 'begincodespacerange':
@@ -143,7 +143,7 @@ class CIDEncoding(pdfmetrics.Encoding):
                         self._cmap[start + offset] = value + offset
                         offset = offset + 1
                     words = words[3:]
-                
+
             else:
                 words = words[1:]
         finished = time.clock()
@@ -185,7 +185,7 @@ class CIDEncoding(pdfmetrics.Encoding):
             else:
                 lastChar = char
         return output
-    
+
     def fastSave(self, directory):
         f = open(os.path.join(directory, self.name + '.fastmap'), 'wb')
         marshal.dump(self._mapFileHash, f)
@@ -193,7 +193,7 @@ class CIDEncoding(pdfmetrics.Encoding):
         marshal.dump(self._notDefRanges, f)
         marshal.dump(self._cmap, f)
         f.close()
-        
+
     def fastLoad(self, directory):
         started = time.clock()
         f = open(os.path.join(directory, self.name + '.fastmap'), 'rb')
@@ -204,8 +204,8 @@ class CIDEncoding(pdfmetrics.Encoding):
         f.close()
         finished = time.clock()
         #print 'loaded %s in %0.4f seconds' % (self.name, finished - started)
-        
-        
+
+
 class CIDTypeFace(pdfmetrics.TypeFace):
     """Multi-byte type face.
 
@@ -222,7 +222,7 @@ class CIDTypeFace(pdfmetrics.TypeFace):
         try:
             fontDict = CIDFontInfo[name]
         except KeyError:
-            raise KeyError, ("Unable to find information on CID typeface '%s'" % name + 
+            raise KeyError, ("Unable to find information on CID typeface '%s'" % name +
                             "Only the following font names work:" + repr(allowedTypeFaces)
                              )
         descFont = fontDict['DescendantFonts'][0]
@@ -234,7 +234,7 @@ class CIDTypeFace(pdfmetrics.TypeFace):
         # should really support self.glyphWidths, self.glyphNames
         # but not done yet.
 
-        
+
     def _expandWidths(self, compactWidthArray):
         """Expands Adobe nested list structure to get a dictionary of widths.
 
@@ -291,8 +291,8 @@ class CIDFont(pdfmetrics.Font):
 
         # need to know if it is vertical or horizontal
         self.isVertical = (self.encodingName[-1] == 'V')
-        
-            
+
+
     def stringWidth(self, text, size):
         cidlist = self.encoding.translate(text)
         if self.isVertical:
@@ -319,12 +319,12 @@ class CIDFont(pdfmetrics.Font):
         #convert to PDF dictionary/array objects
         cidObj = structToPDF(bigDict)
 
-        # link into document, and add to font map        
+        # link into document, and add to font map
         r = doc.Reference(cidObj, internalName)
         fontDict = doc.idToObject['BasicFonts'].dict
         fontDict[internalName] = r
         doc.fontMapping[self.name] = '/' + internalName
-        
+
 
 
 def precalculate(cmapdir):
@@ -341,7 +341,7 @@ def precalculate(cmapdir):
             continue
         enc.fastSave(cmapdir)
         print 'saved %s.fastmap' % file
-    
+
 def test():
     # only works if you have cirrect encodings on your box!
     c = Canvas('test_japanese.pdf')
@@ -350,7 +350,7 @@ def test():
 
     pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90ms-RKSJ-H'))
     pdfmetrics.registerFont(CIDFont('HeiseiKakuGo-W5','90ms-RKSJ-H'))
-        
+
 
     # the two typefaces
     c.setFont('HeiseiMin-W3-90ms-RKSJ-H', 16)
@@ -373,7 +373,7 @@ def test():
     encName = '90ms-RKSJ-H'
     enc = CIDEncoding(encName)
     print message1, '->', enc.translate(message1)
-    
+
     f = CIDFont('HeiseiMin-W3','90ms-RKSJ-H')
     print 'width = %0.2f' % f.stringWidth(message1, 10)
 
@@ -391,11 +391,10 @@ def test():
 ##        print '    mapping size = %d' % len(enc._cmap)
 ##    finished = time.time()
 ##    print 'constructed all encodings in %0.2f seconds' % (finished - started)
-    
+
 if __name__=='__main__':
     test()
 
-    
 
 
 

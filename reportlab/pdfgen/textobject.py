@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/textobject.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/textobject.py,v 1.24 2002/07/17 22:46:23 andy_robinson Exp $
-__version__=''' $Id: textobject.py,v 1.24 2002/07/17 22:46:23 andy_robinson Exp $ '''
-__doc__=""" 
+#$Header: /tmp/reportlab/reportlab/pdfgen/textobject.py,v 1.25 2002/07/24 19:56:38 andy_robinson Exp $
+__version__=''' $Id: textobject.py,v 1.25 2002/07/24 19:56:38 andy_robinson Exp $ '''
+__doc__="""
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
 
@@ -27,10 +27,10 @@ class PDFTextObject:
     operations need to be bracketed between BT (Begin text) and
     ET operators. This class ensures text operations are
     properly encapusalted. Ask the canvas for a text object
-    with beginText(x, y).  Do not construct one directly. 
+    with beginText(x, y).  Do not construct one directly.
     Do not use multiple text objects in parallel; PDF is
     not multi-threaded!
-    
+
     It keeps track of x and y coordinates relative to its origin."""
 
     def __init__(self, canvas, x=0,y=0):
@@ -44,13 +44,13 @@ class PDFTextObject:
         self._curSubset = -1
 
         self.setTextOrigin(x, y)
-            
+
     def getCode(self):
         "pack onto one line; used internally"
         self._code.append('ET')
         return string.join(self._code, ' ')
 
-    def setTextOrigin(self, x, y):    
+    def setTextOrigin(self, x, y):
         if self._canvas.bottomup:
             self._code.append('1 0 0 1 %s Tm' % fp_str(x, y)) #bottom up
         else:
@@ -82,7 +82,7 @@ class PDFTextObject:
             dx = dx + float(L[-3])
             dy = dy - float(L[-2])
         self._code.append('%s Td' % fp_str(dx, -dy))
- 
+
     def setXPos(self, dx):
         """Moves to a point dx away from the start of the
         current line - NOT from the current point! So if
@@ -167,7 +167,7 @@ class PDFTextObject:
         5 = Stroke text and add to clipping path
         6 = Fill then stroke and add to clipping path
         7 = Add to clipping path"""
-        
+
         assert mode in (0,1,2,3,4,5,6,7), "mode must be in (0,1,2,3,4,5,6,7)"
         self._textRenderMode = mode
         self._code.append('%d Tr' % mode)
@@ -185,12 +185,12 @@ class PDFTextObject:
     def setFillColorRGB(self, r, g, b):
         self._fillColorRGB = (r, g, b)
         self._code.append('%s rg' % fp_str(r,g,b))
- 
+
     def setFillColorCMYK(self, c, m, y, k):
         """Takes 4 arguments between 0.0 and 1.0"""
         self._fillColorCMYK = (c, m, y, k)
         self._code.append('%s k' % fp_str(c, m, y, k))
-        
+
     def setStrokeColorCMYK(self, c, m, y, k):
         """Takes 4 arguments between 0.0 and 1.0"""
         self._strokeColorCMYK = (c, m, y, k)
@@ -236,7 +236,7 @@ class PDFTextObject:
         """Sets the gray level; 0.0=black, 1.0=white"""
         self._fillColorRGB = (gray, gray, gray)
         self._code.append('%s g' % fp_str(gray))
-        
+
     def setStrokeGray(self, gray):
         """Sets the gray level; 0.0=black, 1.0=white"""
         self._strokeColorRGB = (gray, gray, gray)
@@ -294,7 +294,7 @@ class PDFTextObject:
             lines = stuff
         else:
             assert 1==0, "argument to textlines must be string,, list or tuple"
-        
+
         for line in lines:
             self._code.append('%s T*' % self._formatText(line))
             if self._canvas.bottomup:

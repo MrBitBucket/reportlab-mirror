@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_platypus_toc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_platypus_toc.py,v 1.8 2002/07/04 09:24:49 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_platypus_toc.py,v 1.9 2002/07/24 19:56:38 andy_robinson Exp $
 """Tests for the Platypus TableOfContents class.
 
 Currently there is only one such test. Most such tests, like this
@@ -33,7 +33,7 @@ from reportlab.lib import randomtext
 
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
-    
+
     canvas.saveState()
 
     canvas.rect(2.5*cm, 2.5*cm, 15*cm, 25*cm)
@@ -42,13 +42,13 @@ def myMainPageFrame(canvas, doc):
     canvas.drawString(10*cm, cm, str(pageNumber))
 
     canvas.restoreState()
-    
+
 
 class MyDocTemplate(BaseDocTemplate):
     "The document template used for all PDF documents."
-    
+
     _invalidInitArgs = ('pageTemplates',)
-    
+
     def __init__(self, filename, **kw):
         frame1 = Frame(2.5*cm, 2.5*cm, 15*cm, 25*cm, id='F1')
         self.allowSplitting = 0
@@ -59,14 +59,14 @@ class MyDocTemplate(BaseDocTemplate):
 
     def afterFlowable(self, flowable):
         "Registers TOC entries and makes outline entries."
-        
+
         if flowable.__class__.__name__ == 'Paragraph':
             styleName = flowable.style.name
             if styleName[:7] == 'Heading':
                 # Register TOC entries.
                 level = int(styleName[7:])
                 text = flowable.getPlainText()
-                pageNum = self.page 
+                pageNum = self.page
                 self.notify('TOCEntry', (level, text, pageNum))
 
                 # Add PDF outline entries (not really needed/tested here).
@@ -80,7 +80,7 @@ def makeHeaderStyle(level, fontName='Times-Roman'):
     "Make a header style for different levels."
 
     assert level >= 0, "Level must be >= 0."
-    
+
     PS = ParagraphStyle
     size = 24.0 / sqrt(1+level)
     style = PS(name = 'Heading' + str(level),
@@ -102,7 +102,7 @@ def makeTocHeaderStyle(level, delta, epsilon, fontName='Times-Roman'):
     "Make a header style for different levels."
 
     assert level >= 0, "Level must be >= 0."
-    
+
     PS = ParagraphStyle
     size = 12
     style = PS(name = 'Heading' + str(level),
@@ -119,7 +119,7 @@ def makeTocHeaderStyle(level, delta, epsilon, fontName='Times-Roman'):
 
 class TocTestCase(unittest.TestCase):
     "Test TableOfContents class (eyeball-test)."
-    
+
     def test0(self):
         """Test story with TOC and a cascaded header hierarchy.
 
@@ -129,7 +129,7 @@ class TocTestCase(unittest.TestCase):
 
         Features to be visually confirmed by a human being are:
 
-            1. TOC lines are indented in multiples of 1 cm. 
+            1. TOC lines are indented in multiples of 1 cm.
             2. Wrapped TOC lines continue with additional 0.5 cm indentation.
             3. ...
         """
@@ -173,7 +173,7 @@ class TocTestCase(unittest.TestCase):
         path = join(tempfile.tempdir, 'test_platypus_toc.pdf')
         doc = MyDocTemplate(path)
         doc.multiBuild(story)
-        
+
 
 def makeSuite():
     return makeSuiteForClasses(TocTestCase)

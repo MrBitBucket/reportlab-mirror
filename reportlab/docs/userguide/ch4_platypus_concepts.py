@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch4_platypus_concepts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch4_platypus_concepts.py,v 1.3 2002/07/17 22:46:22 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch4_platypus_concepts.py,v 1.4 2002/07/24 19:56:36 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 
 #####################################################################################################3
@@ -35,20 +35,20 @@ The overall design of Platypus can be thought of has having
 several layers, top down, these are""")
 
 disc("<b>$DocTemplates$</b> the outermost container for the document;")
- 
+
 disc("<b>$PageTemplates$</b> specifications for layouts of pages of various kinds;")
- 
+
 disc("<b>$Frames$</b> specifications of regions in pages that can contain flowing text or graphics.")
- 
-disc("""<b>$Flowables$</b> text or graphic elements that should be "flowed 
+
+disc("""<b>$Flowables$</b> text or graphic elements that should be "flowed
    into the document (i.e. things like images, paragraphs and tables, but not things
    like page footers or fixed page graphics).""")
-   
+
 disc("""<b>$pdfgen.Canvas$</b> the lowest level which ultimately receives the painting of the
    document from the other layers.""")
- 
+
 illust(examples.doctemplateillustration, "Illustration of DocTemplate structure")
- 
+
 disc("""
  The illustration above graphically illustrates the concepts of $DocTemplates$,
  $PageTemplates$ and $Flowables$.  It is deceptive, however, because each
@@ -108,7 +108,7 @@ disc("""Since we want pages after the first to look different from the
 first we define an alternate layout for the fixed features
 of the other pages.  Note that the two functions above use
 the $pdfgen$ level canvas operations to paint the annotations for
-the pages.  
+the pages.
 """)
 
 eg(examples.platypusgo)
@@ -119,7 +119,7 @@ Note that we are using a "canned" document template here which
 comes pre-built with page templates.  We are also using a pre-built
 paragraph style.  We are only using two types of flowables here
 -- $Spacers$ and $Paragraphs$.  The first $Spacer$ ensures that the
-Paragraphs skip past the title string. 
+Paragraphs skip past the title string.
 """)
 
 disc("""
@@ -347,7 +347,7 @@ eg("""
 """)
 disc("""
 This is the main method which is of interest to the application
-programmer. Assuming that the document instance is correctly set up the 
+programmer. Assuming that the document instance is correctly set up the
 $build$ method takes the <i>story</i> in the shape of the list of flowables
 (the $flowables$ argument) and loops through the list forcing the flowables
 one at a time through the formatting machinery. Effectively this causes
@@ -493,4 +493,3 @@ $beforPage(self,canvas,document)$. The methods allow class derivation to be used
 standard behaviour, whilst the attributes allow instance changes. The $id$ argument is used at
 run time to perform $PageTemplate$ switching so $id='FirstPage'$ or $id='TwoColumns'$ are typical.
 """)
-

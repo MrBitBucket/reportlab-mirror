@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/pdfimages.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.15 2002/04/13 15:24:06 rgbecker Exp $
-__version__=''' $Id: pdfimages.py,v 1.15 2002/04/13 15:24:06 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/pdfimages.py,v 1.16 2002/07/24 19:56:38 andy_robinson Exp $
+__version__=''' $Id: pdfimages.py,v 1.16 2002/07/24 19:56:38 andy_robinson Exp $ '''
 __doc__="""
 Image functionality sliced out of canvas.py for generalization
 """
@@ -12,7 +12,7 @@ import string
 from types import StringType
 import reportlab
 from reportlab.pdfbase import pdfutils
-from reportlab.pdfbase import pdfdoc 
+from reportlab.pdfbase import pdfdoc
 from reportlab.lib.utils import fp_str, getStringIO
 from reportlab.lib.utils import import_zlib, PIL_Image
 
@@ -34,7 +34,7 @@ class PDFImage:
 
 
         self.getImageData()
-        
+
     def jpg_imagedata(self):
         #directly process JPEG files
         #open file, needs some error handling!!
@@ -63,7 +63,7 @@ class PDFImage:
             dataline = outstream.read(60)
         imagedata.append('EI')
         return (imagedata, imgwidth, imgheight)
-    
+
     def cache_imagedata(self):
         image = self.image
         if not pdfutils.cachedImageExists(image):
@@ -105,13 +105,13 @@ class PDFImage:
             self.binaryData.append(dataline)
             dataline = outstream.read(60)
         imagedata.append('EI')
-        return (imagedata, imgwidth, imgheight) 
+        return (imagedata, imgwidth, imgheight)
 
     def getImageData(self):
         "Gets data, height, width - whatever type of image"
-        image = self.image 
+        image = self.image
         (width, height) = self.dimensions
-        
+
         if type(image) == StringType:
             self.filename = image
             if os.path.splitext(image)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
@@ -143,7 +143,7 @@ class PDFImage:
         caching mechanism"""
 
         (x,y) = self.point
-        
+
         # this says where and how big to draw it
         if not canvas.bottomup: y = y+self.height
         canvas._code.append('q %s 0 0 %s cm' % (fp_str(self.width), fp_str(self.height, x, y)))

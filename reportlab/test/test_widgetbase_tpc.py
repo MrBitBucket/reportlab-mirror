@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_widgetbase_tpc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_widgetbase_tpc.py,v 1.3 2002/07/17 22:46:24 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_widgetbase_tpc.py,v 1.4 2002/07/24 19:56:38 andy_robinson Exp $
 """
 Tests for TypedPropertyCollection class.
 """
@@ -52,7 +52,7 @@ class TPCTestCase(unittest.TestCase):
             t.c = 42
         except AttributeError:
             pass
-        
+
 
     def test1(self):
         "Test setting a valid collective attribute."
@@ -78,7 +78,7 @@ class TPCTestCase(unittest.TestCase):
         t = TPC(PH)
         t.a = '42'
         assert t.a == '42' # Or should it rather be an integer?
-        
+
 
     def test4(self):
         "Test accessing an unset collective attribute."

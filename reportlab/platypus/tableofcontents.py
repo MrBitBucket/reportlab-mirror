@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tableofcontents.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tableofcontents.py,v 1.6 2002/03/27 10:39:22 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/tableofcontents.py,v 1.7 2002/07/24 19:56:38 andy_robinson Exp $
 """
 This module defines a single TableOfContents() class that can be used to
 create automatically a table of tontents for Platypus documents like
@@ -31,9 +31,9 @@ to format the entries in the table of contents. Their indentation
 is calculated like this: each entry starts at a multiple of some
 constant named delta. If one entry spans more than one line, all
 lines after the first are indented by the same constant named
-epsilon. 
+epsilon.
 """
-__version__=''' $Id: tableofcontents.py,v 1.6 2002/03/27 10:39:22 rgbecker Exp $ '''
+__version__=''' $Id: tableofcontents.py,v 1.7 2002/07/24 19:56:38 andy_robinson Exp $ '''
 import string
 
 from reportlab.lib import enums
@@ -161,7 +161,7 @@ class TableOfContents(IndexingFlowable):
 
         If you knew the titles but not the page numbers, you could
         supply them to get sensible output on the first run."""
-        
+
         for (level, text, pageNum) in listOfEntries:
             self.addEntry(level, text, pageNum)
 
@@ -235,7 +235,7 @@ class SimpleIndex(IndexingFlowable):
 
     def isSatisfied(self):
         return (self._entries == self._lastEntries)
-        
+
     def beforeBuild(self):
         # keep track of the last run
         self._lastEntries = self._entries.copy()
@@ -323,9 +323,8 @@ class ReferenceText(IndexingFlowable):
         text = self.textPattern % self._lastPageNum
         self._para = Paragraph(text, self.paraStyle)
         return self._para.wrap(availWidth, availHeight)
-        
+
     def drawOn(self, canvas, x, y, _sW=0):
         self._para.drawOn(canvas, x, y, _sW)
-        
-    
-        
+
+

@@ -24,7 +24,7 @@ def getParagraphStyles():
 
     stylesheet = {}
     ParagraphStyle = styles.ParagraphStyle
- 
+
     para = ParagraphStyle('Normal', None)   #the ancestor of all
     para.fontName = 'Helvetica-Bold'
     para.fontSize = 24
@@ -35,7 +35,7 @@ def getParagraphStyles():
     para = ParagraphStyle('BodyText', stylesheet['Normal'])
     para.spaceBefore = 12
     stylesheet['BodyText'] = para
-    
+
     para = ParagraphStyle('BigCentered', stylesheet['Normal'])
     para.spaceBefore = 12
     para.alignment = TA_CENTER
@@ -53,7 +53,7 @@ def getParagraphStyles():
     para.spaceAfter = 36
     para.alignment = TA_CENTER
     stylesheet['Title'] = para
-    
+
     para = ParagraphStyle('Heading1', stylesheet['Normal'])
     para.fontName = 'Helvetica-Bold'
     para.fontSize = 48# 36
@@ -62,7 +62,7 @@ def getParagraphStyles():
     para.textColor = green
     para.alignment = TA_LEFT
     stylesheet['Heading1'] = para
-    
+
     para = ParagraphStyle('Heading2', stylesheet['Normal'])
     para.fontName = 'Helvetica-Bold'
     para.fontSize = 28
@@ -70,7 +70,7 @@ def getParagraphStyles():
     para.spaceBefore = 24
     para.spaceAfter = 12
     stylesheet['Heading2'] = para
-    
+
     para = ParagraphStyle('Heading3', stylesheet['Normal'])
     para.fontName = 'Helvetica-BoldOblique'
     para.spaceBefore = 24

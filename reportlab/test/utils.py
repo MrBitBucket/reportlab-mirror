@@ -29,7 +29,7 @@ def getCVSEntries(folder, files=1, folders=0):
     'files' is a boolean; 1 and 0 means to return files or not.
     'folders' is a boolean; 1 and 0 means to return folders or not.
     """
-    
+
     join = os.path.join
     split = string.split
 
@@ -39,7 +39,7 @@ def getCVSEntries(folder, files=1, folders=0):
     except IOError:
         return []
 
-    # Return names of files and/or folders in CVS/Entries files. 
+    # Return names of files and/or folders in CVS/Entries files.
     allEntries = []
     for line in f.readlines():
         if folders and line[0] == 'D' \
@@ -57,7 +57,7 @@ class ExtConfigParser(ConfigParser):
     "A slightly extended version to return lists of strings."
 
     pat = re.compile('\s*\[.*\]\s*')
-    
+
     def getstringlist(self, section, option):
         "Coerce option to a list of strings or return unchanged if that fails."
 
@@ -111,14 +111,14 @@ class GlobDirectoryWalker:
         "Filter hook, overwrite in subclasses as needed."
 
         return files
-    
+
 
 class RestrictedGlobDirectoryWalker(GlobDirectoryWalker):
     "An restricted directory tree iterator."
 
     def __init__(self, directory, pattern='*', ignore=None):
         apply(GlobDirectoryWalker.__init__, (self, directory, pattern))
-        
+
         if ignore == None:
             ignore = []
         self.ignoredPatterns = []
@@ -187,14 +187,14 @@ class SecureTestCase(unittest.TestCase):
     these methods in subclassed versions before doing your own
     business!
     """
-    
+
     def setUp(self):
         "Remember sys.path and current working directory."
 
         self._initialPath = copy.copy(sys.path)
         self._initialWorkDir = os.getcwd()
 
-        
+
     def tearDown(self):
         "Restore previous sys.path and working directory."
 
@@ -213,9 +213,9 @@ class ScriptThatMakesFileTest(unittest.TestCase):
         self.verbose = verbose
         # normally, each instance is told which method to run)
         unittest.TestCase.__init__(self)
-        
+
     def setUp(self):
-        
+
         self.cwd = os.getcwd()
         #change to reportlab directory first, so that
         #relative paths may be given to scriptdir
@@ -239,5 +239,4 @@ class ScriptThatMakesFileTest(unittest.TestCase):
             print out
         status = p.close()
         assert os.path.isfile(self.outFileName), "File %s not created!" % self.outFileName
-        
-    
+

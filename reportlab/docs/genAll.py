@@ -29,7 +29,7 @@ def _genAll(d=None,verbose=1):
 
 """Runs the manual-building scripts"""
 if __name__=='__main__':
-    #need a quiet mode for the test suite   
+    #need a quiet mode for the test suite
     if '-s' in sys.argv:  # 'silent
         verbose = 0
     else:

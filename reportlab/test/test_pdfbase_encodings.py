@@ -24,7 +24,7 @@ class EncodingTestCase(unittest.TestCase):
         for ch in 'AEIOU':
             zenc[ord(ch)] = 'Z'
         pdfmetrics.registerEncoding(zenc)
-        
+
         # now we can make a font based on this encoding
         f = pdfmetrics.Font('FontWithoutVowels', 'Helvetica-Oblique', 'EncodingWithoutVowels')
         pdfmetrics.registerFont(f)
@@ -49,7 +49,7 @@ class EncodingTestCase(unittest.TestCase):
         euroMac = pdfmetrics.Encoding('MacWithEuro', 'MacRomanEncoding')
         euroMac[219] = 'Euro'
         pdfmetrics.registerEncoding(euroMac)
-        
+
         pdfmetrics.registerFont(pdfmetrics.Font('MacHelvWithEuro', 'Helvetica-Oblique', 'MacWithEuro'))
 
         c.setFont('MacHelvWithEuro', 12)
@@ -70,7 +70,7 @@ class EncodingTestCase(unittest.TestCase):
         narrowEnc[ord('m')] = 'i'
         narrowEnc[ord('M')] = 'I'
         pdfmetrics.registerEncoding(narrowEnc)
-        
+
         pdfmetrics.registerFont(pdfmetrics.Font('narrow', 'Helvetica-Oblique', 'm-to-i'))
         c.setFont('narrow', 12)
         c.drawString(125, 450, sample)

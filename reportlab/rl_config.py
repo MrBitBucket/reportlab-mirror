@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.33 2002/07/17 22:46:22 andy_robinson Exp $
-__version__=''' $Id: rl_config.py,v 1.33 2002/07/17 22:46:22 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.34 2002/07/24 19:56:34 andy_robinson Exp $
+__version__=''' $Id: rl_config.py,v 1.34 2002/07/24 19:56:34 andy_robinson Exp $ '''
 
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -11,7 +11,7 @@ pageCompression =           1                       # default page compression m
 defaultPageSize =           'A4'                    #default page size
 defaultImageCaching =       0                       #set to zero to remove those annoying cached images
 PIL_WARNINGS =              1                       #set to zero to remove those annoying warnings
-ZLIB_WARNINGS =             1                       
+ZLIB_WARNINGS =             1
 warnOnMissingFontGlyphs =   0                       #if 1, warns of each missing glyph
 verbose =                   0
 showBoundary =              0                       # turns on and off boundary behaviour in Drawing

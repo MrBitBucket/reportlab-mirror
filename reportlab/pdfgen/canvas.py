@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.103 2002/05/28 15:06:55 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.103 2002/05/28 15:06:55 rgbecker Exp $ '''
-__doc__=""" 
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.104 2002/07/24 19:56:37 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.104 2002/07/24 19:56:37 andy_robinson Exp $ '''
+__doc__="""
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
 """
@@ -66,33 +66,33 @@ else:
 class Canvas:
     """This class is the programmer's interface to the PDF file format.  Methods
     are (or will be) provided here to do just about everything PDF can do.
-    
+
     The underlying model to the canvas concept is that of a graphics state machine
     that at any given point in time has a current font, fill color (for figure
     interiors), stroke color (for figure borders), line width and geometric transform, among
     many other characteristics.
-    
+
     Canvas methods generally either draw something (like canvas.line) using the
     current state of the canvas or change some component of the canvas
     state (like canvas.setFont).  The current state can be saved and restored
     using the saveState/restoreState methods.
-    
+
     Objects are "painted" in the order they are drawn so if, for example
     two rectangles overlap the last draw will appear "on top".  PDF form
     objects (supported here) are used to draw complex drawings only once,
     for possible repeated use.
-    
+
     There are other features of canvas which are not visible when printed,
     such as outlines and bookmarks which are used for navigating a document
     in a viewer.
-    
+
     Here is a very silly example usage which generates a Hello World pdf document.
-    
+
     from reportlab.pdfgen import canvas
     c = canvas.Canvas("hello.pdf")
     from reportlab.lib.units import inch
     # move the origin up and to the left
-    c.translate(inch,inch) 
+    c.translate(inch,inch)
     # define a large font
     c.setFont("Helvetica", 80)
     # choose some colors
@@ -109,7 +109,7 @@ class Canvas:
     c.showPage()
     c.save()
     """
-    
+
     def __init__(self,filename,
                  pagesize=(595.27,841.89),
                  bottomup = 1,
@@ -128,7 +128,7 @@ class Canvas:
 
         #this is called each time a page is output if non-null
         self._onPage = None
-        
+
         self._pagesize = pagesize
         #self._currentPageHasImages = 0
         self._pageTransition = None
@@ -143,7 +143,7 @@ class Canvas:
         self._annotationCount = 0
 
         self._outlines = [] # list for a name tree
-        
+
         #PostScript has the origin at bottom left. It is easy to achieve a top-
         #down coord system by translating to the top of the page and setting y
         #scale to -1, but then text is inverted.  So self.bottomup is used
@@ -166,8 +166,8 @@ class Canvas:
         self._leading = 14.4
         self._currentMatrix = (1., 0., 0., 1., 0., 0.)
         self._fillMode = 0   #even-odd
-        
-        #text state        
+
+        #text state
         self._charSpace = 0
         self._wordSpace = 0
         self._horizScale = 100
@@ -176,7 +176,7 @@ class Canvas:
         self._textLineMatrix = (1., 0., 0., 1., 0., 0.)
         self._textMatrix = (1., 0., 0., 1., 0., 0.)
 
-        # line drawing        
+        # line drawing
         self._lineCap = 0
         self._lineJoin = 0
         self._lineDash = None  #not done
@@ -187,7 +187,7 @@ class Canvas:
         self._strokeColorRGB = (0,0,0)
 
     def push_state_stack(self):
-        
+
         state = {}
         d = self.__dict__
         for name in self.STATE_ATTRIBUTES:
@@ -196,7 +196,7 @@ class Canvas:
         #del state["state_stack"]
         self.state_stack.append(state)
         return
-        
+
         stateatts = self.STATE_ATTRIBUTES # list based alternative (not used)
         staterange = self.STATE_RANGE
         state = list(staterange)
@@ -206,7 +206,7 @@ class Canvas:
         self.state_stack.append(state)
 
     def pop_state_stack(self):
-        
+
         state = self.state_stack[-1]
         del self.state_stack[-1]
         d = self.__dict__
@@ -214,7 +214,7 @@ class Canvas:
         #    d[name] = state[name] #setattr(self, name, state[name])
         d.update(state)
         return
-        
+
         stateatts = self.STATE_ATTRIBUTES # list based alternative (not used)
         staterange = self.STATE_RANGE
         d = self.__dict__
@@ -229,7 +229,7 @@ class Canvas:
     STATE_RANGE = range(len(STATE_ATTRIBUTES))
 
         #self._addStandardFonts()
-        
+
     def _make_preamble(self):
         # yuk
         iName = self._doc.getInternalFontName('Helvetica')
@@ -255,13 +255,13 @@ class Canvas:
         """Adds a new entry to the outline at given level.  If LEVEL not specified,
         entry goes at the top level.  If level specified, it must be
         no more than 1 greater than the outline level in the last call.
-        
+
         The key must be the (unique) name of a bookmark.
         the title is the (non-unique) name to be displayed for the entry.
-        
+
         If closed is set then the entry should show no subsections by default
         when displayed.
-        
+
         Example
            c.addOutlineEntry("first section", "section1")
            c.addOutlineEntry("introduction", "s1s1", 1, closed=1)
@@ -277,7 +277,7 @@ class Canvas:
            c.addOutlineEntry("detail2", "s2s2s2", 2)
            c.addOutlineEntry("conclusion", "s2s3", 1)
            c.addOutlineEntry("further reading", "s2s3s1", 2)
-           
+
         generated outline looks like
             - first section
             |- introduction
@@ -291,9 +291,9 @@ class Canvas:
             |+ body
             |- conclusion
             |  |- further reading
-           
+
         Note that the second "body" is closed.
-        
+
         Note that you can jump from level 5 to level 3 but not
         from 3 to 5: instead you need to provide all intervening
         levels going down (4 in this case).  Note that titles can
@@ -302,7 +302,7 @@ class Canvas:
         #to be completed
         #self._outlines.append(title)
         self._doc.outline.addOutlineEntry(key, level, title, closed=closed)
-        
+
     def setOutlineNames0(self, *nametree):   # keep this for now (?)
         """nametree should can be a recursive tree like so
            c.setOutlineNames(
@@ -320,27 +320,27 @@ class Canvas:
         """
         #print nametree
         apply(self._doc.outline.setNames, (self,)+nametree)
-        
+
     def setTitle(self, title):
         """write a title into the PDF file that won't automatically display
            in the document itself."""
         self._doc.setTitle(title)
-        
+
     def setSubject(self, subject):
         """write a subject into the PDF file that won't automatically display
            in the document itself."""
         self._doc.setSubject(subject)
-        
+
     def pageHasData(self):
         "Info function - app can call it after showPage to see if it needs a save"
         return len(self._code) == 0
-        
+
     def showOutline(self):
         """Specify that Acrobat Reader should start with the outline tree visible.
         showFullScreen() and showOutline() conflict; the one called last
         wins."""
         self._doc._catalog.showOutline()
-    
+
     def showFullScreen0(self):
         """Specify that Acrobat Reader should start in full screen mode.
         showFullScreen() and showOutline() conflict; the one called last
@@ -375,14 +375,14 @@ class Canvas:
 
     def setPageCallBack(self, func):
         """func(pageNum) will be called on each page end.
-        
+
        This is mainly a hook for progress monitoring.
         Call setPageCallback(None) to clear a callback."""
         self._onPage = func
-        
+
     def _setAnnotations(self,page):
         page.Annots = self._annotationrefs
-        
+
     def _setXObjects(self, thing):
         """for pages and forms, define the XObject dictionary for resources, if needed"""
         forms = self._formsinuse
@@ -391,7 +391,7 @@ class Canvas:
             thing.XObjects = xobjectsdict
         else:
             thing.XObjects = None
-            
+
     def _bookmarkReference(self, name):
         """get a reference to a (possibly undefined, possibly unbound) bookmark"""
         d = self._destinations
@@ -400,7 +400,7 @@ class Canvas:
         except:
             result = d[name] = pdfdoc.Destination(name) # newly defined, unbound
         return result
-        
+
     def bookmarkPage(self, key):
         """bind a bookmark (destination) to the current page"""
         # XXXX there are a lot of other ways a bookmark destination can be bound: should be implemented.
@@ -411,7 +411,7 @@ class Canvas:
         dest.fit()
         dest.setPage(pageref) # formatter won't make a ref to a ref
         return dest
-        
+
     def bookmarkHorizontalAbsolute(self, key, yhorizontal):
         """Bind a bookmark (destination) to the current page at a horizontal position.
            Note that the yhorizontal of the book mark is with respect to the default
@@ -431,15 +431,15 @@ class Canvas:
         """w.r.t. the current transformation, bookmark this horizontal."""
         (xt, yt) = self.absolutePosition(relativeX,relativeY)
         self.bookmarkHorizontalAbsolute(key, yt)
-        
+
     #def _inPage0(self):  disallowed!
     #    """declare a page, enable page features"""
     #    self._doc.inPage()
-        
+
     #def _inForm0(self):
     #    "deprecated in favore of beginForm...endForm"
     #    self._doc.inForm()
-            
+
     def doForm(self, name):
         """use a form XObj in current operation stream.
 
@@ -502,12 +502,12 @@ class Canvas:
         self._currentPageHasImages = 1
 
         # first, generate a unique name/signature for the image.  If ANYTHING
-        # is different, even the mask, this should be different.  
+        # is different, even the mask, this should be different.
         if type(image) == type(''):
             #filename, use it
             name = _digester('%s%s' % (image, mask))
         else:
-            rawdata = image.convert('RGB').tostring()            
+            rawdata = image.convert('RGB').tostring()
             name = _digester(rawdata)
 
         # in the pdf document, this will be prefixed with something to
@@ -522,7 +522,7 @@ class Canvas:
             self._doc.Reference(imgObj, regName)
             self._doc.addForm(name, imgObj)
 
-        # ensure we have a size, as PDF will make it 1x1 pixel otherwise!        
+        # ensure we have a size, as PDF will make it 1x1 pixel otherwise!
         if width is None:
             width = imgObj.width
         if height is None:
@@ -535,11 +535,11 @@ class Canvas:
         self._code.append("/%s Do" % regName)
         self.restoreState()
 
-        # track what's been used on this page        
+        # track what's been used on this page
         self._formsinuse.append(name)
-        
+
         return (imgObj.width, imgObj.height)
-    
+
     def _restartAccumulators(self):
         if self._codeStack:
             # restore the saved code
@@ -562,7 +562,7 @@ class Canvas:
         self._formsinuse = []
         self._annotationrefs = []
         self._formData = None
-        
+
     def beginForm(self, name, lowerx=0, lowery=0, upperx=None, uppery=None):
         """declare the current graphics stream to be a named form.
            A graphics stream can either be a page or a form, not both.
@@ -580,7 +580,7 @@ class Canvas:
         self._formData = (name, lowerx, lowery, upperx, uppery)
         self._doc.inForm()
         #self._inForm0()
-        
+
     def endForm(self):
         """emit the current collection of graphics operations as a Form
            as declared previously in beginForm."""
@@ -606,7 +606,7 @@ class Canvas:
     #def forceCodeInsert0(self, code):
     #    """I know a whole lot about PDF and I want to add a bunch of code I know will work..."""
     #    self._code.append(code)
-        
+
     def textAnnotation0(self, contents, Rect=None, addtopage=1, name=None, **kw):
         """Experimental.
         """
@@ -615,7 +615,7 @@ class Canvas:
             Rect = (0,0,w,h)
         annotation = apply(pdfdoc.TextAnnotation, (Rect, contents), kw)
         self._addAnnotation(annotation, name, addtopage)
-        
+
     def inkAnnotation0(self, contents, InkList=None, Rect=None, addtopage=1, name=None, **kw):
         "Experimental"
         (w,h) = self._pagesize
@@ -625,20 +625,20 @@ class Canvas:
             InkList = ( (100,100,100,h-100,w-100,h-100,w-100,100), )
         annotation = apply(pdfdoc.InkAnnotation, (Rect, contents, InkList), kw)
         self.addAnnotation(annotation, name, addtopage)
-    
+
     def linkAbsolute(self, contents, destinationname, Rect=None, addtopage=1, name=None, **kw):
         """rectangular link annotation positioned wrt the default user space.
            The identified rectangle on the page becomes a "hot link" which
            when clicked will send the viewer to the page and position identified
            by the destination.
-           
+
            Rect identifies (lowerx, lowery, upperx, uppery) for lower left
            and upperright points of the rectangle.  Translations and other transforms
            are IGNORED (the rectangular position is given with respect
            to the default user space.
            destinationname should be the name of a bookmark (which may be defined later
            but must be defined before the document is generated).
-           
+
            You may want to use the keyword argument Border='[0 0 0]' to
            suppress the visible rectangle around the during viewing link."""
         destination = self._bookmarkReference(destinationname) # permitted to be undefined... must bind later...
@@ -705,7 +705,7 @@ class Canvas:
         ann["Subtype"] = PDFName("Link")
         ann["Rect"] = PDFArray(rect) # the whole page for testing
 
-        # the action is a separate dictionary            
+        # the action is a separate dictionary
         A = PDFDictionary()
         A["Type"] = PDFName("Action") # not needed?
         A["S"] = PDFName("URI")
@@ -730,7 +730,7 @@ class Canvas:
         self._doc.addAnnotation(name, annotation)
         if addtopage:
             self._annotatePage(name)
-            
+
     def _annotatePage(self, name):
         ref = self._doc.refAnnotation(name)
         self._annotationrefs.append(ref)
@@ -738,12 +738,12 @@ class Canvas:
     def getPageNumber(self):
         "get the page number for the current page being generated."
         return self._pageNumber
-        
+
     def save(self):
         """Saves and close the PDF document in the file.
            If there is current data a ShowPage is executed automatically.
            After this operation the canvas must not be used further."""
-        if len(self._code):  
+        if len(self._code):
             self.showPage()
 
         self._doc.SaveToFile(self._filename, self)
@@ -864,7 +864,7 @@ class Canvas:
 
     def saveState(self):
         """Save the current graphics state to be restored later by restoreState.
-        
+
         For example:
             canvas.setFont("Helvetica", 20)
             canvas.saveState()
@@ -877,7 +877,7 @@ class Canvas:
         #"""These need expanding to save/restore Python's state tracking too"""
         self.push_state_stack()
         self._code.append('q')
-        
+
     def restoreState(self):
         """restore the graphics state to the matching saved state (see saveState)."""
         #"""These need expanding to save/restore Python's state tracking too"""
@@ -906,7 +906,7 @@ class Canvas:
 
     def line(self, x1,y1, x2,y2):
         """draw a line segment from (x1,y1) to (x2,y2) (with color, thickness and
-        other attributes determined by the current graphics state)."""     
+        other attributes determined by the current graphics state)."""
         self._code.append('n %s m %s l S' % (fp_str(x1, y1), fp_str(x2, y2)))
 
     def lines(self, linelist):
@@ -915,7 +915,7 @@ class Canvas:
                |
              -- --
                |
-        
+
              crosshairs = [(20,0,20,10), (20,30,20,40), (0,20,10,20), (30,20,40,20)]
              canvas.lines(crosshairs)
         """
@@ -948,11 +948,11 @@ class Canvas:
         starting at startAng degrees and covering extent degrees.   Angles
         start with 0 to the right (+x) and increase counter-clockwise.
         These should have x1<x2 and y1<y2.
-        
+
         Contributed to piddlePDF by Robert Kern, 28/7/99.
         Trimmed down by AR to remove color stuff for pdfgen.canvas and
         revert to positive coordinates.
-        
+
         The algorithm is an elliptical generalization of the formulae in
         Jim Fitzsimmon's TeX tutorial <URL: http://www.tinaja.com/bezarc1.pdf>."""
 
@@ -969,17 +969,17 @@ class Canvas:
     def rect(self, x, y, width, height, stroke=1, fill=0):
         "draws a rectangle with lower left corner at (x,y) and width and height as given."
         self._code.append('n %s re ' % fp_str(x, y, width, height)
-                          + PATH_OPS[stroke, fill, self._fillMode])        
-    
+                          + PATH_OPS[stroke, fill, self._fillMode])
+
     def ellipse(self, x1, y1, x2, y2, stroke=1, fill=0):
         """Draw an ellipse defined by an enclosing rectangle.
 
         Note that (x1,y1) and (x2,y2) are the corner points of
         the enclosing rectangle.
-        
+
         Uses bezierArc, which conveniently handles 360 degrees.
         Special thanks to Robert Kern."""
-        
+
         pointList = pdfgeom.bezierArc(x1,y1, x2,y2, 0, 360)
         #move to first point
         self._code.append('n %s m' % fp_str(pointList[0][:2]))
@@ -987,7 +987,7 @@ class Canvas:
             self._code.append('%s c' % fp_str(curve[2:]))
         #finish
         self._code.append(PATH_OPS[stroke, fill, self._fillMode])
-        
+
     def wedge(self, x1,y1, x2,y2, startAng, extent, stroke=1, fill=0):
         """Like arc, but connects to the centre of the ellipse.
         Most useful for pie charts and PacMan!"""
@@ -995,7 +995,7 @@ class Canvas:
         x_cen  = (x1+x2)/2.
         y_cen  = (y1+y2)/2.
         pointList = pdfgeom.bezierArc(x1,y1, x2,y2, startAng, extent)
-  
+
         self._code.append('n %s m' % fp_str(x_cen, y_cen))
         # Move the pen to the center of the rectangle
         self._code.append('%s l' % fp_str(pointList[0][:2]))
@@ -1022,7 +1022,7 @@ class Canvas:
         #to a circle. There are six relevant points on the x axis and y axis.
         #sketch them and it should all make sense!
         t = 0.4472 * radius
-        
+
         x0 = x
         x1 = x0 + t
         x2 = x0 + radius
@@ -1045,17 +1045,17 @@ class Canvas:
         self._code.append('%s l' % fp_str(x5, y3))  # right edge
         self._code.append('%s c'
                          % fp_str(x5, y4, x4, y5, x3, y5)) # top right
-        
+
         self._code.append('%s l' % fp_str(x2, y5))  # top row
         self._code.append('%s c'
                          % fp_str(x1, y5, x0, y4, x0, y3)) # top left
-        
+
         self._code.append('%s l' % fp_str(x0, y2))  # left edge
         self._code.append('%s c'
                          % fp_str(x0, y1, x1, y0, x2, y0)) # bottom left
 
         self._code.append('h')  #close off, although it should be where it started anyway
-        
+
         self._code.append(PATH_OPS[stroke, fill, self._fillMode])
 
         ##################################################
@@ -1074,7 +1074,7 @@ class Canvas:
          Takes 4 arguments between 0.0 and 1.0"""
          self._fillColorCMYK = (c, m, y, k)
          self._code.append('%s k' % fp_str(c, m, y, k))
-         
+
     def setStrokeColorCMYK(self, c, m, y, k):
          """set the stroke color useing negative color values
             (cyan, magenta, yellow and darkness value).
@@ -1102,10 +1102,10 @@ class Canvas:
         t = self.beginText(x - 0.5*width, y)
         t.textLine(text)
         self.drawText(t)
-  
+
     def getAvailableFonts(self):
         """Returns the list of PostScript font names available.
-        
+
         Standard set now, but may grow in future with font embedding."""
         fontnames = self._doc.getAvailableFonts()
         fontnames.sort()
@@ -1114,7 +1114,7 @@ class Canvas:
     def addFont(self, fontObj):
         "add a new font for subsequent use."
         self._doc.addFont(fontObj)
- 
+
     def _addStandardFonts(self):
         """Ensures the standard 14 fonts are available in the system encoding.
         Called by canvas on initialization"""
@@ -1151,7 +1151,7 @@ class Canvas:
             logger.warnOnce('encoding argument to Canvas.stringWidth is deprecated and has no effect!')
         #if encoding is None: encoding = self._doc.encoding
         return pdfmetrics.stringWidth(text, fontName, fontSize)
-        
+
     # basic graphics modes
 
     def setLineWidth(self, width):
@@ -1163,13 +1163,13 @@ class Canvas:
         assert mode in (0,1,2), "Line caps allowed: 0=butt,1=round,2=square"
         self._lineCap = mode
         self._code.append('%d J' % mode)
-        
+
     def setLineJoin(self, mode):
         """0=mitre, 1=round, 2=bevel"""
         assert mode in (0,1,2), "Line Joins allowed: 0=mitre, 1=round, 2=bevel"
         self._lineJoin = mode
         self._code.append('%d j' % mode)
-        
+
     def setMiterLimit(self, limit):
         self._miterLimit = limit
         self._code.append('%s M' % fp_str(limit))
@@ -1182,13 +1182,13 @@ class Canvas:
             assert phase >= 0, "phase is a length in user space"
             textarray = join(map(str, array))
             self._code.append('[%s] %s d' % (textarray, phase))
-        
+
     def setFillColorRGB(self, r, g, b):
         """Set the fill color using positive color description
            (Red,Green,Blue).  Takes 3 arguments between 0.0 and 1.0"""
         self._fillColorRGB = (r, g, b)
         self._code.append('%s rg' % fp_str(r,g,b))
-        
+
     def setStrokeColorRGB(self, r, g, b):
         """Set the stroke color using positive color description
            (Red,Green,Blue).  Takes 3 arguments between 0.0 and 1.0"""
@@ -1202,7 +1202,7 @@ class Canvas:
             c,m,y,k = (d*aColor.cyan, d*aColor.magenta, d*aColor.yellow, d*aColor.black)
             self._fillColorCMYK = (c, m, y, k)
             self._code.append('%s k' % fp_str(c, m, y, k))
-        elif isinstance(aColor, Color): 
+        elif isinstance(aColor, Color):
             rgb = (aColor.red, aColor.green, aColor.blue)
             self._fillColorRGB = rgb
             self._code.append('%s rg' % fp_str(rgb) )
@@ -1227,7 +1227,7 @@ class Canvas:
             c,m,y,k = (d*aColor.cyan, d*aColor.magenta, d*aColor.yellow, d*aColor.black)
             self._strokeColorCMYK = (c, m, y, k)
             self._code.append('%s K' % fp_str(c, m, y, k))
-        elif isinstance(aColor, Color): 
+        elif isinstance(aColor, Color):
         #if type(aColor) == ColorType:
             rgb = (aColor.red, aColor.green, aColor.blue)
             self._strokeColorRGB = rgb
@@ -1250,20 +1250,20 @@ class Canvas:
         """Sets the gray level; 0.0=black, 1.0=white"""
         self._fillColorRGB = (gray, gray, gray)
         self._code.append('%s g' % fp_str(gray))
-        
+
     def setStrokeGray(self, gray):
         """Sets the gray level; 0.0=black, 1.0=white"""
         self._strokeColorRGB = (gray, gray, gray)
         self._code.append('%s G' % fp_str(gray))
-        
-    # path stuff - the separate path object builds it    
+
+    # path stuff - the separate path object builds it
 
     def beginPath(self):
         """Returns a fresh path object.  Paths are used to draw
         complex figures.  The object returned follows the protocol
         for a pathobject.PDFPathObject instance"""
         return pathobject.PDFPathObject()
-    
+
     def drawPath(self, aPath, stroke=1, fill=0):
         "Draw the path object in the mode indicated"
         gc = aPath.getCode(); pathops = PATH_OPS[stroke, fill, self._fillMode]
@@ -1289,7 +1289,7 @@ class Canvas:
     def drawText(self, aTextObject):
         """Draws a text object"""
         self._code.append(str(aTextObject.getCode()))
-        
+
     def setPageCompression(self, pageCompression=1):
         """Possible values None, 1 or 0
         If None the value from rl_config will be used.
@@ -1303,8 +1303,8 @@ class Canvas:
         else:
             self._pageCompression = pageCompression
         self._doc.setCompression(self._pageCompression)
-        
-    def setPageTransition(self, effectname=None, duration=1, 
+
+    def setPageTransition(self, effectname=None, duration=1,
                         direction=0,dimension='H',motion='I'):
         """PDF allows page transition effects for use when giving
         presentations.  There are six possible effects.  You can
@@ -1314,7 +1314,7 @@ class Canvas:
             direction_arg = [0,90,180,270]
             dimension_arg = ['H', 'V']
             motion_arg = ['I','O'] (start at inside or outside)
-            
+
         This table says which ones take which arguments:
 
         PageTransitionEffects = {
@@ -1335,18 +1335,18 @@ class Canvas:
         self._pageTransition = {}
         if not effectname:
             return
-            
+
         #first check each optional argument has an allowed value
         if direction in [0,90,180,270]:
             direction_arg = ('Di', '/%d' % direction)
         else:
             raise 'PDFError', ' directions allowed are 0,90,180,270'
-        
+
         if dimension in ['H', 'V']:
             dimension_arg = ('Dm', '/' + dimension)
         else:
             raise'PDFError','dimension values allowed are H and V'
-        
+
         if motion in ['I','O']:
             motion_arg = ('M', '/' + motion)
         else:
@@ -1366,7 +1366,7 @@ class Canvas:
             args = PageTransitionEffects[effectname]
         except KeyError:
             raise 'PDFError', 'Unknown Effect Name "%s"' % effectname
-        
+
         # now build the dictionary
         transDict = {}
         transDict['Type'] = '/Trans'

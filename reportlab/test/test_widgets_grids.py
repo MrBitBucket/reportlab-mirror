@@ -30,16 +30,16 @@ class GridTestCase(unittest.TestCase):
         for c in colorRange(c0, c1, 4):
             print c
         print
-    
+
 
     def makeDrawing0(self):
         "Generate a RLG drawing with some uncommented grid samples."
-    
+
         D = Drawing(450, 650)
 
         d = 80
         s = 50
-    
+
         for row in range(10):
             y = 530 - row*d
             if row == 0:
@@ -64,7 +64,7 @@ class GridTestCase(unittest.TestCase):
                     D.add(g)
             elif row == 1:
                 for col in range(4):
-                    x = 20 + col*d 
+                    x = 20 + col*d
                     g = Grid()
                     g.y = y
                     g.x = x
@@ -188,7 +188,7 @@ class GridTestCase(unittest.TestCase):
 
         d = 80
         s = 50
-    
+
         for row in range(2):
             y = 530 - row*d
             if row == 0:
@@ -222,7 +222,7 @@ class GridTestCase(unittest.TestCase):
                     D.add(g)
             elif row == 1:
                 for col in range(4):
-                    x = 20 + col*d 
+                    x = 20 + col*d
                     g = DoubleGrid()
                     g.x = x
                     g.y = y
@@ -267,12 +267,12 @@ class GridTestCase(unittest.TestCase):
 
     def makeDrawing2(self):
         "Generate a RLG drawing with some uncommented grid samples."
-    
+
         D = Drawing(450, 650)
 
         d = 80
         s = 50
-    
+
         for row in range(10):
             y = 530 - row*d
             if row == 0:
@@ -297,7 +297,7 @@ class GridTestCase(unittest.TestCase):
                     D.add(g)
             elif row == 1:
                 for col in range(4):
-                    x = 20 + col*d 
+                    x = 20 + col*d
                     g = Grid()
                     g.y = y
                     g.x = x
@@ -385,7 +385,7 @@ class GridTestCase(unittest.TestCase):
     ##                  sr.fillColorStart = colors.white
     ##                  sr.fillColorEnd = colors.green
                     sr.fillColorStart = colors.PCMYKColor(11.0,11.0,72.0,0.0,    spotName='PANTONE 458 CV',density=1.00)
-                    sr.fillColorEnd = colors.PCMYKColor(100.0,65.0,0.0,30.0,    spotName='PANTONE 288 CV',density=1.00) 
+                    sr.fillColorEnd = colors.PCMYKColor(100.0,65.0,0.0,30.0,    spotName='PANTONE 288 CV',density=1.00)
                     sr.orientation = 'horizontal'
                     if col == 0:
                         sr.numShades = 10
@@ -422,7 +422,7 @@ class GridTestCase(unittest.TestCase):
 
     def test0(self):
         "Generate PDF and SVG documents of first sample drawing."
-    
+
         d = self.makeDrawing0()
         renderPDF.drawToFile(d, 'test_widgets_grids0.pdf')
         renderSVG.drawToFile(d, 'test_widgets_grids0.svg')
@@ -434,7 +434,7 @@ class GridTestCase(unittest.TestCase):
         d = self.makeDrawing1()
         renderPDF.drawToFile(d, 'test_widgets_grids1.pdf')
         renderSVG.drawToFile(d, 'test_widgets_grids1.svg')
-    
+
 
     def test2(self):
         "Generate PDF and SVG documents of third sample drawing."

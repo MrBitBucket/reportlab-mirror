@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_graphics_charts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_graphics_charts.py,v 1.13 2002/07/04 09:24:49 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_graphics_charts.py,v 1.14 2002/07/24 19:56:38 andy_robinson Exp $
 """
 Tests for chart class.
 """
@@ -33,7 +33,7 @@ from reportlab.graphics.charts.legends import Legend
 
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
-    
+
     canvas.saveState()
 
     #canvas.rect(2.5*cm, 2.5*cm, 15*cm, 25*cm)
@@ -42,13 +42,13 @@ def myMainPageFrame(canvas, doc):
     canvas.drawString(10*cm, cm, str(pageNumber))
 
     canvas.restoreState()
-    
+
 
 class MyDocTemplate(BaseDocTemplate):
     "The document template used for all PDF documents."
-    
+
     _invalidInitArgs = ('pageTemplates',)
-    
+
     def __init__(self, filename, **kw):
         frame1 = Frame(2.5*cm, 2.5*cm, 15*cm, 25*cm, id='F1')
         self.allowSplitting = 0
@@ -59,7 +59,7 @@ class MyDocTemplate(BaseDocTemplate):
 
 def sample1bar(data=[(13, 5, 20, 22, 37, 45, 19, 4)]):
     drawing = Drawing(400, 200)
-    
+
     bc = VerticalBarChart()
     bc.x = 50
     bc.y = 50
@@ -72,7 +72,7 @@ def sample1bar(data=[(13, 5, 20, 22, 37, 45, 19, 4)]):
     bc.valueAxis.valueMin = 0
     bc.valueAxis.valueMax = 60
     bc.valueAxis.valueStep = 15
-    
+
     bc.categoryAxis.labels.boxAnchor = 'ne'
     bc.categoryAxis.labels.dx = 8
     bc.categoryAxis.labels.dy = -2
@@ -83,7 +83,7 @@ def sample1bar(data=[(13, 5, 20, 22, 37, 45, 19, 4)]):
     bc.categoryAxis.categoryNames = catNames
     drawing.add(bc)
 
-    return drawing    
+    return drawing
 
 
 def sample2bar(data=[(13, 5, 20, 22, 37, 45, 19, 4),
@@ -93,7 +93,7 @@ def sample2bar(data=[(13, 5, 20, 22, 37, 45, 19, 4),
 
 def sample1line(data=[(13, 5, 20, 22, 37, 45, 19, 4)]):
     drawing = Drawing(400, 200)
-    
+
     bc = HorizontalLineChart()
     bc.x = 50
     bc.y = 50
@@ -106,7 +106,7 @@ def sample1line(data=[(13, 5, 20, 22, 37, 45, 19, 4)]):
     bc.valueAxis.valueMin = 0
     bc.valueAxis.valueMax = 60
     bc.valueAxis.valueStep = 15
-    
+
     bc.categoryAxis.labels.boxAnchor = 'ne'
     bc.categoryAxis.labels.dx = 8
     bc.categoryAxis.labels.dy = -2
@@ -117,7 +117,7 @@ def sample1line(data=[(13, 5, 20, 22, 37, 45, 19, 4)]):
     bc.categoryAxis.categoryNames = catNames
     drawing.add(bc)
 
-    return drawing    
+    return drawing
 
 
 def sample2line(data=[(13, 5, 20, 22, 37, 45, 19, 4),
@@ -129,7 +129,7 @@ def sample3(drawing=None):
     "Add sample swatches to a diagram."
 
     d = drawing or Drawing(400, 200)
-    
+
     swatches = Legend()
     swatches.alignment = 'right'
     swatches.x = 80
@@ -205,7 +205,7 @@ class ChartTestCase(unittest.TestCase):
         drawing = sample1bar()
         story.append(drawing)
         story.append(Spacer(0, 1*cm))
-        
+
 
     def test1(self):
         "Test bar charts."
@@ -217,7 +217,7 @@ class ChartTestCase(unittest.TestCase):
         drawing = sample2bar()
         story.append(drawing)
         story.append(Spacer(0, 1*cm))
-        
+
 
     def test2(self):
         "Test bar charts."
@@ -231,7 +231,7 @@ class ChartTestCase(unittest.TestCase):
         story.append(drawing)
         story.append(Spacer(0, 1*cm))
 
-        
+
     def test3(self):
         "Test line charts."
 
@@ -242,7 +242,7 @@ class ChartTestCase(unittest.TestCase):
         drawing = sample1line()
         story.append(drawing)
         story.append(Spacer(0, 1*cm))
-        
+
 
     def test4(self):
         "Test line charts."
@@ -254,7 +254,7 @@ class ChartTestCase(unittest.TestCase):
         drawing = sample2line()
         story.append(drawing)
         story.append(Spacer(0, 1*cm))
-        
+
 
     def test5(self):
         "Test pie charts."

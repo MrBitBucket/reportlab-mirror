@@ -377,7 +377,7 @@ class PPPresentation:
 
         if self.sourceFilename :
             filename = os.path.splitext(self.sourceFilename)[0] + '.pdf'
-        
+
         outfile = getStringIO()
         doc = SimpleDocTemplate(outfile, pagesize=rl_config.defaultPageSize, showBoundary=0)
         doc.leftMargin = 1*cm
@@ -399,7 +399,7 @@ class PPPresentation:
         return self.savetofile(outfile, filename)
 
     def savetofile(self, pseudofile, filename):
-        """Save the pseudo file to disk and return its content as a 
+        """Save the pseudo file to disk and return its content as a
         string of text."""
         pseudofile.flush()
         content = pseudofile.getvalue()
@@ -409,7 +409,7 @@ class PPPresentation:
             outf.write(content)
             outf.close()
         return content
- 
+
 
 
     def save(self):
@@ -457,7 +457,7 @@ class PPSection:
     def __init__(self, name):
         self.name = name
         self.graphics = []
-        
+
     def drawOn(self, canv):
         for graphic in self.graphics:
             name = str(hash(graphic))
@@ -476,7 +476,7 @@ class PPSection:
                 canv.doForm(name)
             else:
                 canv.doForm(name)
-            
+
 
 class PPNotes:
     def __init__(self):
@@ -986,7 +986,7 @@ def handleOptions():
         optList[i] = (o, v)
 
         if o == 'cols': options['cols'] = int(v)
-        elif o=='outdir': options['outDir'] = v 
+        elif o=='outdir': options['outDir'] = v
 
     if filter(lambda ov: ov[0] == 'handout', optList):
         options['handout'] = 1
@@ -1006,8 +1006,8 @@ def handleOptions():
     if filter(lambda ov: ov[0] in ('s', 'silent'), optList):
         optiona['silent'] = 1
         options['verbose'] = 0
-        
-    
+
+
     return options, args
 
 def main():

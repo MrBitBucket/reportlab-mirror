@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.20 2002/07/24 09:38:32 rgbecker Exp $
-__version__=''' $Id: renderPM.py,v 1.20 2002/07/24 09:38:32 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.21 2002/07/24 19:56:36 andy_robinson Exp $
+__version__=''' $Id: renderPM.py,v 1.21 2002/07/24 19:56:36 andy_robinson Exp $ '''
 """Usage:
     from reportlab.graphics import renderPM
     renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -26,7 +26,7 @@ try:
     import _renderPM
 except ImportError, errMsg:
     raise ImportError, "No module named _renderPM\n" + \
-        (str(errMsg)!='No module named _renderPM' and "it may be the wrong version or badly installed!" or 
+        (str(errMsg)!='No module named _renderPM' and "it may be the wrong version or badly installed!" or
                                     "see http://www.reportlab.com/rl_addons.html")
 
 from types import TupleType, ListType
@@ -42,7 +42,7 @@ def draw(drawing, canvas, x, y, showBoundary=rl_config.showBoundary):
     """As it says"""
     R = _PMRenderer()
     R.draw(drawing, canvas, x, y)
-    
+
 from reportlab.graphics.renderbase import Renderer
 class _PMRenderer(Renderer):
     """This draws onto a pix map image. It needs to be a class
@@ -179,7 +179,7 @@ class _PMRenderer(Renderer):
             S = self._tracker.getState()
             text_anchor, x, y, text = S['textAnchor'], stringObj.x,stringObj.y,stringObj.text
             if not text_anchor in ['start','inherited']:
-                font, font_size = S['fontName'], S['fontSize'] 
+                font, font_size = S['fontName'], S['fontSize']
                 textLen = stringWidth(text, font,font_size)
                 if text_anchor=='end':
                     x = x-textLen
@@ -410,7 +410,7 @@ class PMCanvas:
         # first segment
         x0 = cx + rx   # (x0,y0) start pt
         y0 = cy
-        
+
         x3 = cx        # (x3,y3) end pt of arc
         y3 = cy-ry
 
@@ -424,7 +424,7 @@ class PMCanvas:
         # next segment
         x0 = x3
         y0 = y3
-        
+
         x3 = cx-rx
         y3 = cy
 
@@ -437,7 +437,7 @@ class PMCanvas:
         # next segment
         x0 = x3
         y0 = y3
-        
+
         x3 = cx
         y3 = cy+ry
 
@@ -450,7 +450,7 @@ class PMCanvas:
         #last segment
         x0 = x3
         y0 = y3
-        
+
         x3 = cx+rx
         y3 = cy
 
@@ -513,7 +513,7 @@ if __name__=='__main__':
                 w = int(drawing.width)
                 h = int(drawing.height)
                 html.append('<hr><h2>Drawing %s %d</h2>\n<pre>%s</pre>' % (name, i, docstring))
-                    
+
                 for k in ['gif','tiff', 'png', 'jpg']:
                     if k in ['gif','png','jpg']:
                         html.append('<p>%s format</p>\n' % string.upper(k))

@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/colors/colortest.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/colors/colortest.py,v 1.2 2000/10/25 08:57:44 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/demos/colors/colortest.py,v 1.3 2002/07/24 19:56:35 andy_robinson Exp $
 import reportlab.pdfgen.canvas
 from reportlab.lib import colors
 from reportlab.lib.units import inch
@@ -28,7 +28,7 @@ def run():
     c.setFillColorRGB(1,0,0)
     c.rect(200, y, 300, 30, fill=1)
     y = y - 40
-    
+
     c.setFillColorRGB(0,0,0)
     c.drawString(100, y, 'magenta')
     c.setFillColorCMYK(0,1,0,0)
@@ -46,13 +46,13 @@ def run():
     c.setFillColorCMYK(0,0,1,0)
     c.rect(200, y, 300, 30, fill=1)
     y = y - 40
-    
+
     c.setFillColorRGB(0,0,0)
     c.drawString(100, y, 'blue')
     c.setFillColorRGB(0,0,1)
     c.rect(200, y, 300, 30, fill=1)
     y = y - 40
-        
+
     c.setFillColorRGB(0,0,0)
     c.drawString(100, y, 'black')
     c.setFillColorCMYK(0,0,0,1)
@@ -61,7 +61,7 @@ def run():
 
 
     c.showPage()
-    
+
     #do all named colors
     framePage(c, 'Color Demo - RGB Space - page %d' % c.getPageNumber())
 
@@ -83,17 +83,17 @@ def run():
 
 
 
-            
+
     c.save()
 
 def framePage(canvas, title):
     canvas.setFont('Times-BoldItalic',20)
     canvas.drawString(inch, 10.5 * inch, title)
-                            
+
     canvas.setFont('Times-Roman',10)
     canvas.drawCentredString(4.135 * inch, 0.75 * inch,
                             'Page %d' % canvas.getPageNumber())
-    
+
     #draw a border
     canvas.setStrokeColorRGB(1,0,0)
     canvas.setLineWidth(5)
@@ -104,4 +104,3 @@ def framePage(canvas, title):
 
 if __name__ == '__main__':
     run()
-    

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/attrmap.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/attrmap.py,v 1.5 2002/07/17 22:46:23 andy_robinson Exp $
-__version__=''' $Id: attrmap.py,v 1.5 2002/07/17 22:46:23 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/attrmap.py,v 1.6 2002/07/24 19:56:37 andy_robinson Exp $
+__version__=''' $Id: attrmap.py,v 1.6 2002/07/24 19:56:37 andy_robinson Exp $ '''
 from UserDict import UserDict
 from reportlab.lib.validators import isAnything, _SequenceTypes
 
@@ -16,7 +16,7 @@ class CallableValue:
 
     def __call__(self):
         return apply(self.func,self.args,self.kw)
-        
+
 class AttrMapValue:
     '''Simple multi-value holder for attribute maps'''
     def __init__(self,validate=None,desc=None,initial=None, **kw):

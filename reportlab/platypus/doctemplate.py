@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/doctemplate.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.56 2002/07/17 22:46:23 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/doctemplate.py,v 1.57 2002/07/24 19:56:38 andy_robinson Exp $
 
-__version__=''' $Id: doctemplate.py,v 1.56 2002/07/17 22:46:23 andy_robinson Exp $ '''
+__version__=''' $Id: doctemplate.py,v 1.57 2002/07/24 19:56:38 andy_robinson Exp $ '''
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -289,7 +289,7 @@ class BaseDocTemplate:
         self._onProgress = None
         self._flowableCount = 0  # so we know how far to go
 
-        
+
         self._calc()
         self.afterInit()
 
@@ -617,7 +617,7 @@ class BaseDocTemplate:
                 self._indexingFlowables.append(thing)
         #print 'scanned story, found these indexing flowables:\n'
         #print self._indexingFlowables
-        
+
         passes = 0
         while 1:
             passes = passes + 1
@@ -760,7 +760,7 @@ def progressCB(typ, value):
         PROGRESS - called often
         PAGE - called often when page is emitted
         FINISHED - called when really, really finished
-    
+
     some juggling is needed to accurately estimate numbers of
     pages in pageDrawing mode.
 
@@ -846,4 +846,3 @@ if __name__ == '__main__':
             onFirstPage=myFirstPage,onLaterPages=myLaterPages)
 
     run()
-

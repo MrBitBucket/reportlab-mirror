@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.61 2002/07/17 22:46:23 andy_robinson Exp $
-__version__=''' $Id: paragraph.py,v 1.61 2002/07/17 22:46:23 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.62 2002/07/24 19:56:38 andy_robinson Exp $
+__version__=''' $Id: paragraph.py,v 1.62 2002/07/24 19:56:38 andy_robinson Exp $ '''
 from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
@@ -323,7 +323,7 @@ class Paragraph(Flowable):
 
         This class is a flowable that can format a block of text
         into a paragraph with a given style.
-    
+
         The paragraph Text can contain XML-like markup including the tags:
         <b> ... </b> - bold
         <i> ... </i> - italics
@@ -355,7 +355,7 @@ class Paragraph(Flowable):
             L.append(rk)
             L.append(rv)
         L.append(") #"+n)
-        return string.join(L, "\n")     
+        return string.join(L, "\n")
 
     def _setup(self, text, style, bulletText, frags, cleaner):
         if frags is None:
@@ -436,7 +436,7 @@ class Paragraph(Flowable):
     def breakLines(self, width):
         """
         Returns a broken line structure. There are two cases
-        
+
         A) For the simple case of a single formatting input fragment the output is
             A fragment specifier with
                 kind = 0
@@ -564,7 +564,7 @@ class Paragraph(Flowable):
                         g.text=i[1]
                         words.append(g)
                         maxSize = max(maxSize,g.fontSize)
-                        
+
                     currentWidth = newWidth
                 else:
                     if currentWidth>self.width: self.width = currentWidth
@@ -619,7 +619,7 @@ class Paragraph(Flowable):
         if style.backColor:
             canvas.saveState()
             canvas.setFillColor(style.backColor)
-            canvas.rect(style.leftIndent, 
+            canvas.rect(style.leftIndent,
                         0,
                         self.width - style.rightIndent,
                         self.height,
@@ -759,7 +759,7 @@ if __name__=='__main__':    #NORUNTESTS
         n =len(frags)
         for l in range(n):
             print "frag%d: '%s'" % (l, frags[l].text)
-    
+
         l = 0
         cum = 0
         for W in _getFragWords(frags):

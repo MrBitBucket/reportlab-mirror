@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.31 2002/05/23 16:24:43 rgbecker Exp $
-__version__=''' $Id: pdfutils.py,v 1.31 2002/05/23 16:24:43 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.32 2002/07/24 19:56:37 andy_robinson Exp $
+__version__=''' $Id: pdfutils.py,v 1.32 2002/07/24 19:56:37 andy_robinson Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -47,14 +47,14 @@ def cacheImageFile(filename, returnInMemory=0):
         assert(len(raw) == imgwidth * imgheight, "Wrong amount of data for image")
         compressed = zlib.compress(raw)   #this bit is very fast...
         encoded = _AsciiBase85Encode(compressed) #...sadly this isn't
-        
+
         #write in blocks of 60 characters per line
         outstream = getStringIO(encoded)
         dataline = outstream.read(60)
         while dataline <> "":
             code.append(dataline)
             dataline = outstream.read(60)
-        
+
         code.append('EI')
         if returnInMemory: return code
 
@@ -87,7 +87,7 @@ def preProcessImages(spec):
                 print 'cached version of %s already exists' % filename
         else:
             cacheImageFile(filename)
-        
+
 
 def cachedImageExists(filename):
     """Determines if a cached image already exists for a given file.
@@ -105,7 +105,7 @@ def cachedImageExists(filename):
             return 1
     else:
         return 0
-    
+
 
 ##############################################################
 #
@@ -202,28 +202,28 @@ if 1: # for testing always define this
         a PDF file.  Four bytes of binary data become five bytes of
         ASCII.  This is the default method used for encoding images."""
         outstream = getStringIO()
-        # special rules apply if not a multiple of four bytes.  
+        # special rules apply if not a multiple of four bytes.
         whole_word_count, remainder_size = divmod(len(input), 4)
         cut = 4 * whole_word_count
         body, lastbit = input[0:cut], input[cut:]
-        
+
         for i in range(whole_word_count):
             offset = i*4
             b1 = ord(body[offset])
             b2 = ord(body[offset+1])
             b3 = ord(body[offset+2])
             b4 = ord(body[offset+3])
-        
+
             if b1<128:
                 num = (((((b1<<8)|b2)<<8)|b3)<<8)|b4
             else:
                 num = 16777216L * b1 + 65536 * b2 + 256 * b3 + b4
-    
+
             if num == 0:
                 #special case
                 outstream.write('z')
             else:
-                #solve for five base-85 numbers                            
+                #solve for five base-85 numbers
                 temp, c5 = divmod(num, 85)
                 temp, c4 = divmod(temp, 85)
                 temp, c3 = divmod(temp, 85)
@@ -234,11 +234,11 @@ if 1: # for testing always define this
                 outstream.write(chr(c3+33))
                 outstream.write(chr(c4+33))
                 outstream.write(chr(c5+33))
-    
+
         # now we do the final bit at the end.  I repeated this separately as
         # the loop above is the time-critical part of a script, whereas this
         # happens only once at the end.
-    
+
         #encode however many bytes we have as usual
         if remainder_size > 0:
             while len(lastbit) < 4:
@@ -247,22 +247,22 @@ if 1: # for testing always define this
             b2 = ord(lastbit[1])
             b3 = ord(lastbit[2])
             b4 = ord(lastbit[3])
-    
+
             num = 16777216L * b1 + 65536 * b2 + 256 * b3 + b4
-    
+
             #solve for c1..c5
             temp, c5 = divmod(num, 85)
             temp, c4 = divmod(temp, 85)
             temp, c3 = divmod(temp, 85)
             c1, c2 = divmod(temp, 85)
-    
+
             #print 'encoding: %d %d %d %d -> %d -> %d %d %d %d %d' % (
             #    b1,b2,b3,b4,num,c1,c2,c3,c4,c5)
             lastword = chr(c1+33) + chr(c2+33) + chr(c3+33) + chr(c4+33) + chr(c5+33)
             #write out most of the bytes.
             outstream.write(lastword[0:remainder_size + 1])
-    
-        #terminator code for ascii 85    
+
+        #terminator code for ascii 85
         outstream.write('~>')
         return outstream.getvalue()
 
@@ -290,13 +290,13 @@ def _AsciiBase85Decode(input):
 
     #may have 'z' in it which complicates matters - expand them
     stripped = replace(stripped,'z','!!!!!')
-    # special rules apply if not a multiple of five bytes.  
+    # special rules apply if not a multiple of five bytes.
     whole_word_count, remainder_size = divmod(len(stripped), 5)
     #print '%d words, %d leftover' % (whole_word_count, remainder_size)
     #assert remainder_size <> 1, 'invalid Ascii 85 stream!'
     cut = 5 * whole_word_count
     body, lastbit = stripped[0:cut], stripped[cut:]
-    
+
     for i in range(whole_word_count):
         offset = i*5
         c1 = ord(body[offset]) - 33
@@ -305,7 +305,7 @@ def _AsciiBase85Decode(input):
         c4 = ord(body[offset+3]) - 33
         c5 = ord(body[offset+4]) - 33
 
-        num = ((85L**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5    
+        num = ((85L**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5
 
         temp, b4 = divmod(num,256)
         temp, b3 = divmod(temp,256)
@@ -316,7 +316,7 @@ def _AsciiBase85Decode(input):
         outstream.write(chr(b2))
         outstream.write(chr(b3))
         outstream.write(chr(b4))
-        
+
     #decode however many bytes we have as usual
     if remainder_size > 0:
         while len(lastbit) < 5:
@@ -348,7 +348,7 @@ def _AsciiBase85Decode(input):
             lastword = ''
         outstream.write(lastword)
 
-    #terminator code for ascii 85    
+    #terminator code for ascii 85
     return outstream.getvalue()
 
 
@@ -366,7 +366,7 @@ def _wrap(input, columns=60):
 
     return join(output, LINEEND)
 
-    
+
 #########################################################################
 #
 #  JPEG processing code - contributed by Eric Johnson
@@ -408,7 +408,7 @@ def readJPEGInfo(image):
                 if x[0] != 8:
                     raise 'PDFError', ' JPEG must have 8 bits per component'
                 y = struct.unpack('BB', image.read(2))
-                height = (y[0] << 8) + y[1] 
+                height = (y[0] << 8) + y[1]
                 y = struct.unpack('BB', image.read(2))
                 width =  (y[0] << 8) + y[1]
                 y = struct.unpack('B', image.read(1))

@@ -10,7 +10,7 @@ class PDFPattern:
     def __init__(self, pattern_sequence, **keywordargs):
         """
         Description of a kind of PDF object using a pattern.
-        
+
         Pattern sequence should contain strings or singletons of form [string].
         Strings are literal strings to be used in the object.
         Singletons are names of keyword arguments to include.
@@ -56,5 +56,4 @@ class PDFPattern:
                     L.append( str(value) )
         return string.join(L, "")
 
-    
-                
+

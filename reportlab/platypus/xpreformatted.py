@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/xpreformatted.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/xpreformatted.py,v 1.15 2002/07/17 22:46:24 andy_robinson Exp $
-__version__=''' $Id: xpreformatted.py,v 1.15 2002/07/17 22:46:24 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/xpreformatted.py,v 1.16 2002/07/24 19:56:38 andy_robinson Exp $
+__version__=''' $Id: xpreformatted.py,v 1.16 2002/07/24 19:56:38 andy_robinson Exp $ '''
 
 import string
 from types import StringType, ListType
@@ -68,7 +68,7 @@ def _getFragWord(frags):
 
         #s = s + _countSpaces(text)
         s = s + string.count(text, ' ') # much faster for many blanks
-        
+
         #del f.text # we can't do this until we sort out splitting
                     # of paragraphs
     return n, s, W
@@ -82,7 +82,7 @@ class XPreformatted(Paragraph):
     def breakLines(self, width):
         """
         Returns a broken line structure. There are two cases
-        
+
         A) For the simple case of a single formatting input fragment the output is
             A fragment specifier with
                 kind = 0
@@ -183,7 +183,7 @@ class XPreformatted(Paragraph):
 
 
 class PythonPreformatted(XPreformatted):
-    """Used for syntax-colored Python code, otherwise like XPreformatted.  
+    """Used for syntax-colored Python code, otherwise like XPreformatted.
     """
 
     formats = {
@@ -221,11 +221,11 @@ class PythonPreformatted(XPreformatted):
             s, e = self.formats[k]
             fontifiedCode = fontifiedCode + s + code[i:j] + e
             pos = j
-            
+
         fontifiedCode = fontifiedCode + code[pos:]
-        
+
         return fontifiedCode
-    
+
 
 if __name__=='__main__':    #NORUNTESTS
     def dumpXPreformattedLines(P):
@@ -247,7 +247,7 @@ if __name__=='__main__':    #NORUNTESTS
         n =len(frags)
         for l in range(n):
             print "frag%d: '%s'" % (l, frags[l].text)
-    
+
         l = 0
         for L in _getFragLines(frags):
             n=0

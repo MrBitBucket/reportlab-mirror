@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/graphguide/ch5_charts.py,v 1.2 2001/10/27 22:37:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/graphguide/ch5_charts.py,v 1.3 2002/07/24 19:56:35 andy_robinson Exp $
 
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.graphics.shapes import *
@@ -10,7 +10,7 @@ heading1("Charts")
 
 disc("""
 The motivation for much of this is to create a flexible chart
-package. 
+package.
 This chapter presents a treatment of the ideas behind our charting
 model, what the design goals are and what components of the chart
 package already exist.
@@ -22,31 +22,31 @@ heading2("Design Goals")
 disc("Here are some of the design goals: ")
 
 disc("<i>Make simple top-level use really simple </i>")
-disc("""<para lindent=+36>It should be possible to create a simple chart with minimum lines of 
-       code, yet have it 'do the right things' with sensible automatic 
-       settings. The pie chart snippets above do this. If a real chart has 
-       many subcomponents, you still should not need to interact with them 
+disc("""<para lindent=+36>It should be possible to create a simple chart with minimum lines of
+       code, yet have it 'do the right things' with sensible automatic
+       settings. The pie chart snippets above do this. If a real chart has
+       many subcomponents, you still should not need to interact with them
        unless you want to customize what they do.""")
 
 disc("<i>Allow precise positioning </i>")
-disc("""<para lindent=+36>An absolute requirement in publishing and graphic design is to control 
-       the placing and style of every element. We will try to have properties 
-       that specify things in fixed sizes and proportions of the drawing, 
-       rather than having automatic resizing. Thus, the 'inner plot 
-       rectangle' will not magically change when you make the font size of 
-       the y labels bigger, even if this means your labels can spill out of 
-       the left edge of the chart rectangle. It is your job to preview the 
+disc("""<para lindent=+36>An absolute requirement in publishing and graphic design is to control
+       the placing and style of every element. We will try to have properties
+       that specify things in fixed sizes and proportions of the drawing,
+       rather than having automatic resizing. Thus, the 'inner plot
+       rectangle' will not magically change when you make the font size of
+       the y labels bigger, even if this means your labels can spill out of
+       the left edge of the chart rectangle. It is your job to preview the
        chart and choose sizes and spaces which will work.""")
 
-disc("""<para lindent=+36>Some things do need to be automatic. For example, if you want to fit N 
-       bars into a 200 point space and don't know N in advance, we specify 
-       bar separation as a percentage of the width of a bar rather than a 
-       point size, and let the chart work it out. This is still deterministic 
+disc("""<para lindent=+36>Some things do need to be automatic. For example, if you want to fit N
+       bars into a 200 point space and don't know N in advance, we specify
+       bar separation as a percentage of the width of a bar rather than a
+       point size, and let the chart work it out. This is still deterministic
        and controllable.""")
 
 disc("<i>Control child elements individually or as a group</i>")
-disc("""<para lindent=+36>We use smart collection classes that let you customize a group of 
-       things, or just one of them. For example you can do this in our 
+disc("""<para lindent=+36>We use smart collection classes that let you customize a group of
+       things, or just one of them. For example you can do this in our
        experimental pie chart:""")
 
 eg("""
@@ -64,23 +64,23 @@ pc.slices[3].labelRadius = 1.75
 pc.slices[3].fontColor = colors.red
 d.add(pc, '')
 """)
- 
-disc("""<para lindent=+36>pc.slices[3] actually lazily creates a little object which holds 
-       information about the slice in question; this will be used to format a 
+
+disc("""<para lindent=+36>pc.slices[3] actually lazily creates a little object which holds
+       information about the slice in question; this will be used to format a
        fourth slice at draw-time if there is one.""")
 
 disc("<i>Only expose things you should change </i>")
-disc("""<para lindent=+36>It would be wrong from a statistical viewpoint to let you directly 
-       adjust the angle of one of the pie wedges in the above example, since 
-       that is determined by the data. So not everything will be exposed 
-       through the public properties. There may be 'back doors' to let you 
-       violate this when you really need to, or methods to provide advanced 
+disc("""<para lindent=+36>It would be wrong from a statistical viewpoint to let you directly
+       adjust the angle of one of the pie wedges in the above example, since
+       that is determined by the data. So not everything will be exposed
+       through the public properties. There may be 'back doors' to let you
+       violate this when you really need to, or methods to provide advanced
        functionality, but in general properties will be orthogonal.""")
 
 disc("<i>Composition and component based </i>")
-disc("""<para lindent=+36>Charts are built out of reusable child widgets. A Legend is an 
-       easy-to-grasp example. If you need a specialized type of legend (e.g. 
-       circular colour swatches), you should subclass the standard Legend 
+disc("""<para lindent=+36>Charts are built out of reusable child widgets. A Legend is an
+       easy-to-grasp example. If you need a specialized type of legend (e.g.
+       circular colour swatches), you should subclass the standard Legend
        widget. Then you could either do something like...""")
 
 eg("""
@@ -90,48 +90,48 @@ c.legend.swatchRadius = 5    # set a property only relevant to the new one
 c.data = [10,20,30]   #   and then configure as usual...
 """)
 
-disc("""<para lindent=+36>...or create/modify your own chart or drawing class which creates one 
-       of these by default. This is also very relevant for time series 
+disc("""<para lindent=+36>...or create/modify your own chart or drawing class which creates one
+       of these by default. This is also very relevant for time series
        charts, where there can be many styles of x axis.""")
 
-disc("""<para lindent=+36>Top level chart classes will create a number of such components, and 
-       then either call methods or set private properties to tell them their 
-       height and position - all the stuff which should be done for you and 
-       which you cannot customise. We are working on modelling what the 
-       components should be and will publish their APIs here as a consensus 
+disc("""<para lindent=+36>Top level chart classes will create a number of such components, and
+       then either call methods or set private properties to tell them their
+       height and position - all the stuff which should be done for you and
+       which you cannot customise. We are working on modelling what the
+       components should be and will publish their APIs here as a consensus
        emerges.""")
 
 disc("<i>Multiples </i>")
-disc("""<para lindent=+36>A corollary of the component approach is that you can create diagrams 
-       with multiple charts, or custom data graphics. Our favourite example 
-       of what we are aiming for is the weather report in our gallery 
-       contributed by a user; we'd like to make it easy to create such 
-       drawings, hook the building blocks up to their legends, and feed that 
+disc("""<para lindent=+36>A corollary of the component approach is that you can create diagrams
+       with multiple charts, or custom data graphics. Our favourite example
+       of what we are aiming for is the weather report in our gallery
+       contributed by a user; we'd like to make it easy to create such
+       drawings, hook the building blocks up to their legends, and feed that
        data in a consistent way.""")
-disc("""<para lindent=+36>(If you want to see the image, it is available on our website at 
+disc("""<para lindent=+36>(If you want to see the image, it is available on our website at
 <font color=blue>http://www.reportlab.com/demos/provencio.pdf</font>)""")
 
 
 ##heading2("Key Concepts and Components")
 heading2("Overview")
 
-disc("""A chart or plot is an object which is placed on a drawing; it is not 
-       itself a drawing. You can thus control where it goes, put several on 
+disc("""A chart or plot is an object which is placed on a drawing; it is not
+       itself a drawing. You can thus control where it goes, put several on
        the same drawing, or add annotations.""")
 
-disc("""Charts have two axes; axes may be Value or Category axes. Axes in turn 
-       have a Labels property which lets you configure all text labels or 
-       each one individually. Most of the configuration details which vary 
+disc("""Charts have two axes; axes may be Value or Category axes. Axes in turn
+       have a Labels property which lets you configure all text labels or
+       each one individually. Most of the configuration details which vary
        from chart to chart relate to axis properties, or axis labels.""")
 
-disc("""Objects expose properties through the interfaces discussed in the 
-       previous section; these are all optional and are there to let the end 
-       user configure the appearance. Things which must be set for a chart to 
-       work, and essential communication between a chart and its components, 
+disc("""Objects expose properties through the interfaces discussed in the
+       previous section; these are all optional and are there to let the end
+       user configure the appearance. Things which must be set for a chart to
+       work, and essential communication between a chart and its components,
        are handled through methods.""")
 
-disc("""You can subclass any chart component and use your replacement instead 
-       of the original provided you implement the essential methods and 
+disc("""You can subclass any chart component and use your replacement instead
+       of the original provided you implement the essential methods and
        properties.""")
 
 
@@ -144,11 +144,11 @@ to individual data points.
 Labels may contain newline characters, but only one font.
 """)
 
-disc("""The text and 'origin' of a label are typically set by its parent 
-       object. They are accessed by methods rather than properties. Thus, the 
-       X axis decides the 'reference point' for each tickmark label and the 
-       numeric or date text for each label. However, the end user can set 
-       properties of the label (or collection of labels) directly to affect 
+disc("""The text and 'origin' of a label are typically set by its parent
+       object. They are accessed by methods rather than properties. Thus, the
+       X axis decides the 'reference point' for each tickmark label and the
+       numeric or date text for each label. However, the end user can set
+       properties of the label (or collection of labels) directly to affect
        its position relative to this origin and all of its formatting.""")
 
 eg("""
@@ -197,13 +197,13 @@ draw(d, 'Label example')
 
 
 disc("""
-In the drawing above, the label is defined relative to the green blob. 
-The text box should have its north-east corner ten points down from 
+In the drawing above, the label is defined relative to the green blob.
+The text box should have its north-east corner ten points down from
 the origin, and be rotated by 45 degrees about that corner.
 """)
 
 disc("""
-At present labels have the following properties, which we believe are 
+At present labels have the following properties, which we believe are
 sufficient for all charts we have seen to date:
 """)
 
@@ -261,23 +261,23 @@ the axis and make a new one.
 """)
 
 disc("""
-Axes are responsible for determining the mapping from data to image 
-coordinates; transforming points on request from the chart; drawing 
+Axes are responsible for determining the mapping from data to image
+coordinates; transforming points on request from the chart; drawing
 themselves and their tickmarks, gridlines and axis labels.
 """)
 
 disc("""
-This drawing shows two axes, one of each kind, which have been created 
+This drawing shows two axes, one of each kind, which have been created
 directly without reference to any chart:
 """)
 
 
 from reportlab.graphics import shapes
-from reportlab.graphics.charts.axes import XCategoryAxis,YValueAxis 
+from reportlab.graphics.charts.axes import XCategoryAxis,YValueAxis
 
 drawing = Drawing(400, 200)
 
-data = [(10, 20, 30, 40), (15, 22, 37, 42)]        
+data = [(10, 20, 30, 40), (15, 22, 37, 42)]
 
 xAxis = XCategoryAxis()
 xAxis.setPosition(75, 75, 300)
@@ -302,11 +302,11 @@ disc("Here is the code that created them: ")
 
 eg("""
 from reportlab.graphics import shapes
-from reportlab.graphics.charts.axes import XCategoryAxis,YValueAxis 
+from reportlab.graphics.charts.axes import XCategoryAxis,YValueAxis
 
 drawing = Drawing(400, 200)
 
-data = [(10, 20, 30, 40), (15, 22, 37, 42)]        
+data = [(10, 20, 30, 40), (15, 22, 37, 42)]
 
 xAxis = XCategoryAxis()
 xAxis.setPosition(75, 75, 300)
@@ -339,7 +339,7 @@ the same properties, except for those refering to ticks.
 heading3("XCategoryAxis class")
 
 disc("""
-A Category Axis doesn't really have a scale; it just divides itself 
+A Category Axis doesn't really have a scale; it just divides itself
 into equal-sized buckets.
 It is simpler than a value axis.
 The chart (or programmer) sets its location with the method
@@ -362,7 +362,7 @@ disc("")
 
 data=[["Property", "Meaning"],
       ["visible", """Should the axis be drawn at all? Sometimes you don't want
-to display one or both axes, but they still need to be there as 
+to display one or both axes, but they still need to be there as
 they manage the scaling of points."""],
       ["strokeColor", "Color of the axis"],
       ["strokeDashArray", """Whether to draw axis with a dash and, if so, what kind.
@@ -406,7 +406,7 @@ plotting.
 """)
 
 disc("""
-$setPosition(x, y, length)$ and $configure(data)$ work exactly as 
+$setPosition(x, y, length)$ and $configure(data)$ work exactly as
 for a category axis.
 If you have not fully specified the maximum, minimum and tick
 interval, then $configure()$ results in the axis choosing suitable
@@ -419,7 +419,7 @@ Thus:
 eg("""
 >>> yAxis = YValueAxis()
 >>> yAxis.setPosition(50, 50, 125)
->>> data = [(10, 20, 30, 40),(15, 22, 37, 42)]   
+>>> data = [(10, 20, 30, 40),(15, 22, 37, 42)]
 >>> yAxis.configure(data)
 >>> yAxis.scale(10)  # should be bottom of chart
 50.0
@@ -428,16 +428,16 @@ eg("""
 >>>
 """)
 
-disc("""By default, the highest data point is aligned with the top of the 
-       axis, the lowest with the bottom of the axis, and the axis choose 
-       'nice round numbers' for its tickmark points. You may override these 
+disc("""By default, the highest data point is aligned with the top of the
+       axis, the lowest with the bottom of the axis, and the axis choose
+       'nice round numbers' for its tickmark points. You may override these
        settings with the properties below. """)
 
 disc("")
 
 data=[["Property", "Meaning"],
       ["visible", """Should the axis be drawn at all? Sometimes you don't want
-to display one or both axes, but they still need to be there as 
+to display one or both axes, but they still need to be there as
 they manage the scaling of points."""],
       ["strokeColor", "Color of the axis"],
       ["strokeDashArray", """Whether to draw axis with a dash and, if so, what kind.
@@ -491,10 +491,10 @@ getStory().append(t)
 caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - YValueAxis properties""")
 
 disc("""
-The $valueSteps$ property lets you explicitly specify the 
-tick mark locations, so you don't have to follow regular intervals. 
-Hence, you can plot month ends and month end dates with a couple of 
-helper functions, and without needing special time series chart 
+The $valueSteps$ property lets you explicitly specify the
+tick mark locations, so you don't have to follow regular intervals.
+Hence, you can plot month ends and month end dates with a couple of
+helper functions, and without needing special time series chart
 classes.
 The following code show how to create a simple $XValueAxis$ with special
 tick intervals. Make sure to set the $valueSteps$ attribute before calling
@@ -503,11 +503,11 @@ the configure method!
 
 eg("""
 from reportlab.graphics.shapes import Drawing
-from reportlab.graphics.charts.axes import XValueAxis 
+from reportlab.graphics.charts.axes import XValueAxis
 
 drawing = Drawing(400, 100)
 
-data = [(10, 20, 30, 40)]        
+data = [(10, 20, 30, 40)]
 
 xAxis = XValueAxis()
 xAxis.setPosition(75, 50, 300)
@@ -518,13 +518,13 @@ xAxis.labels.boxAnchor = 'n'
 drawing.add(xAxis)
 """)
 
-   
+
 from reportlab.graphics import shapes
-from reportlab.graphics.charts.axes import XValueAxis 
+from reportlab.graphics.charts.axes import XValueAxis
 
 drawing = Drawing(400, 100)
 
-data = [(10, 20, 30, 40)]        
+data = [(10, 20, 30, 40)]
 
 xAxis = XValueAxis()
 xAxis.setPosition(75, 50, 300)
@@ -583,9 +583,9 @@ heading2("Bar Charts")
 disc("""
 This describes our current $VerticalBarChart$ class, which uses the
 axes and labels above.
-We think it is step in the right direction but is is 
+We think it is step in the right direction but is is
 far from final.
-Note that people we speak to are divided about 50/50 on whether to 
+Note that people we speak to are divided about 50/50 on whether to
 call this a 'Vertical' or 'Horizontal' bar chart.
 We chose this name because 'Vertical' appears next to 'Bar', so
 we take it to mean that the bars rather than the category axis
@@ -597,7 +597,7 @@ As usual, we will start with an example:
 """)
 
 from reportlab.graphics.shapes import Drawing
-from reportlab.graphics.charts.barcharts import VerticalBarChart 
+from reportlab.graphics.charts.barcharts import VerticalBarChart
 
 drawing = Drawing(400, 200)
 
@@ -605,7 +605,7 @@ data = [
         (13, 5, 20, 22, 37, 45, 19, 4),
         (14, 6, 21, 23, 38, 46, 20, 5)
         ]
-            
+
 bc = VerticalBarChart()
 bc.x = 50
 bc.y = 50
@@ -634,7 +634,7 @@ eg("""
     # code to produce the above chart
 
     from reportlab.graphics.shapes import Drawing
-    from reportlab.graphics.charts.barcharts import VerticalBarChart 
+    from reportlab.graphics.charts.barcharts import VerticalBarChart
 
     drawing = Drawing(400, 200)
 
@@ -642,7 +642,7 @@ eg("""
             (13, 5, 20, 22, 37, 45, 19, 4),
             (14, 6, 21, 23, 38, 46, 20, 5)
             ]
-                
+
     bc = VerticalBarChart()
     bc.x = 50
     bc.y = 50
@@ -654,7 +654,7 @@ eg("""
     bc.valueAxis.valueMin = 0
     bc.valueAxis.valueMax = 50
     bc.valueAxis.valueStep = 10
-    
+
     bc.categoryAxis.labels.boxAnchor = 'ne'
     bc.categoryAxis.labels.dx = 8
     bc.categoryAxis.labels.dy = -2
@@ -666,7 +666,7 @@ eg("""
 """)
 
 disc("""
-Most of this code is concerned with setting up the axes and 
+Most of this code is concerned with setting up the axes and
 labels, which we have already covered.
 Here are the top-level properties of the $VerticalBarChart$ class:
 """)
@@ -754,7 +754,7 @@ from somewhere as the total chart width stays unchanged.
 """)
 
 from reportlab.graphics.shapes import Drawing
-from reportlab.graphics.charts.barcharts import VerticalBarChart 
+from reportlab.graphics.charts.barcharts import VerticalBarChart
 
 drawing = Drawing(400, 200)
 
@@ -762,7 +762,7 @@ data = [
         (13, 5, 20, 22, 37, 45, 19, 4),
         (14, 6, 21, 23, 38, 46, 20, 5)
         ]
-            
+
 bc = VerticalBarChart()
 bc.x = 50
 bc.y = 50
@@ -796,25 +796,25 @@ Bars labels are automatically displayed for negative values
 """)
 
 
-##Property Value 
+##Property Value
 ##data This should be a "list of lists of numbers" or "list of tuples of numbers". If you have just one series, write it as
 ##data = [(10,20,30,42),]
-## 
-##x, y, width, height These define the inner 'plot rectangle'. We highlighted this with a yellow border above. Note that it is your job to place the chart on the drawing in a way which leaves room for all the axis labels and tickmarks. We specify this 'inner rectangle' because it makes it very easy to lay out multiple charts in a consistent manner. 
-##strokeColor Defaults to None. This will draw a border around the plot rectangle, which may be useful in debugging. Axes will overwrite this. 
-##fillColor Defaults to None. This will fill the plot rectangle with a solid color. (Note that we could implement dashArray etc. as for any other solid shape) 
-##barLabelFormat This is a format string or function used for displaying labels above each bar. We're working on ways to position these labels so that they work for positive and negative bars. 
-##useAbsolute Defaults to 0. If 1, the three properties below are absolute values in points (which means you can make a chart where the bars stick out from the plot rectangle); if 0, they are relative quantities and indicate the proportional widths of the elements involved. 
-##barWidth As it says. Defaults to 10. 
-##groupSpacing Defaults to 5. This is the space between each group of bars. If you have only one series, use groupSpacing and not barSpacing to split them up. Half of the groupSpacing is used before the first bar in the chart, and another half at the end. 
-##barSpacing Defaults to 0. This is the spacing between bars in each group. If you wanted a little gap between green and red bars in the example above, you would make this non-zero. 
-##barLabelFormat Defaults to None. As with the YValueAxis, if you supply a function or format string then labels will be drawn next to each bar showing the numeric value. 
+##
+##x, y, width, height These define the inner 'plot rectangle'. We highlighted this with a yellow border above. Note that it is your job to place the chart on the drawing in a way which leaves room for all the axis labels and tickmarks. We specify this 'inner rectangle' because it makes it very easy to lay out multiple charts in a consistent manner.
+##strokeColor Defaults to None. This will draw a border around the plot rectangle, which may be useful in debugging. Axes will overwrite this.
+##fillColor Defaults to None. This will fill the plot rectangle with a solid color. (Note that we could implement dashArray etc. as for any other solid shape)
+##barLabelFormat This is a format string or function used for displaying labels above each bar. We're working on ways to position these labels so that they work for positive and negative bars.
+##useAbsolute Defaults to 0. If 1, the three properties below are absolute values in points (which means you can make a chart where the bars stick out from the plot rectangle); if 0, they are relative quantities and indicate the proportional widths of the elements involved.
+##barWidth As it says. Defaults to 10.
+##groupSpacing Defaults to 5. This is the space between each group of bars. If you have only one series, use groupSpacing and not barSpacing to split them up. Half of the groupSpacing is used before the first bar in the chart, and another half at the end.
+##barSpacing Defaults to 0. This is the spacing between bars in each group. If you wanted a little gap between green and red bars in the example above, you would make this non-zero.
+##barLabelFormat Defaults to None. As with the YValueAxis, if you supply a function or format string then labels will be drawn next to each bar showing the numeric value.
 ##barLabels A collection of labels used to format all bar labels. Since this is a two-dimensional array, you may explicitly format the third label of the second series using this syntax:
 ##    chart.barLabels[(1,2)].fontSize = 12
-## 
-##valueAxis The value axis, which may be formatted as described previously 
-##categoryAxis The categoryAxis, which may be formatted as described previously 
-##title, subTitle Not implemented yet. These would be label-like objects whose text could be set directly and which would appear in sensible locations. For now, you can just place extra strings on the drawing. 
+##
+##valueAxis The value axis, which may be formatted as described previously
+##categoryAxis The categoryAxis, which may be formatted as described previously
+##title, subTitle Not implemented yet. These would be label-like objects whose text could be set directly and which would appear in sensible locations. For now, you can just place extra strings on the drawing.
 
 
 heading2("Line Charts")
@@ -985,7 +985,7 @@ heading2("Pie Charts")
 disc("""
 We've already seen a pie chart example above.
 This is provisional but seems to do most things.
-At the very least we need to change the name. 
+At the very least we need to change the name.
 For completeness we will cover it here.
 """)
 
@@ -1046,21 +1046,21 @@ probably be reworked to use such labels shortly.
 disc("")
 todo("Add properties table.")
 
-##Property Value 
-##data a list or tuple of numbers 
-##x, y, width, height Bounding box of the pie. Note that x and y do NOT specify the centre but the bottom left corner, and that width and height do not have to be equal; pies may be elliptical and wedges will be drawn correctly. 
-##labels None, or a list of strings. Make it None if you don't want labels around the edge of the pie. Since it is impossible to know the size of slices, we generally discourage placing labels in or around pies; it is much better to put them in a legend alongside. 
-##startAngle Where is the start angle of the first pie slice? The default is '90' which is twelve o'clock. 
-##direction Which direction do slices progress in? The default is 'clockwise'. 
-##wedges Collection of wedges. This lets you customise each wedge, or individual ones. See below 
-##wedges.strokeWidth Border width for wedge 
-##wedges.strokeColor Border color 
+##Property Value
+##data a list or tuple of numbers
+##x, y, width, height Bounding box of the pie. Note that x and y do NOT specify the centre but the bottom left corner, and that width and height do not have to be equal; pies may be elliptical and wedges will be drawn correctly.
+##labels None, or a list of strings. Make it None if you don't want labels around the edge of the pie. Since it is impossible to know the size of slices, we generally discourage placing labels in or around pies; it is much better to put them in a legend alongside.
+##startAngle Where is the start angle of the first pie slice? The default is '90' which is twelve o'clock.
+##direction Which direction do slices progress in? The default is 'clockwise'.
+##wedges Collection of wedges. This lets you customise each wedge, or individual ones. See below
+##wedges.strokeWidth Border width for wedge
+##wedges.strokeColor Border color
 ##wedges.strokeDashArray Solid or dashed line configuration for
 ##wedges.popout How far out should the slice(s) stick from the centre of
 ##the pie? default is zero.
-##wedges.fontName 
+##wedges.fontName
 ##wedges.fontSize
-##wedges.fontColor Used for text labels 
+##wedges.fontColor Used for text labels
 ##wedges.labelRadius This controls the anchor point for a text label. It
 ##is a fraction of the radius; 0.7 will place the text inside the pie,
 ##1.2 will place it slightly outside. (note that if we add labels, we
@@ -1115,7 +1115,7 @@ Nevertheless, here is a list of things that are under way:
 """)
 
 list("""
-Color specification - right now the chart has an undocumented property 
+Color specification - right now the chart has an undocumented property
 $defaultColors$, which provides a list of colors to cycle through,
 such that each data series gets its own color.
 Right now, if you introduce a legend, you need to make sure it shares
@@ -1162,7 +1162,7 @@ $drawSeries()$.
 heading3("Marker customisation and custom shapes")
 
 disc("""
-Well known plotting packages such as excel, Mathematica and Excel 
+Well known plotting packages such as excel, Mathematica and Excel
 offer ranges of marker types to add to charts.
 We can do better - you can write any kind of chart widget you
 want and just tell the chart to use it as an example.

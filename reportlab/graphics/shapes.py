@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.77 2002/07/24 09:38:32 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.78 2002/07/24 19:56:36 andy_robinson Exp $
 """
 core of the graphics library - defines Drawing and Shapes
 """
-__version__=''' $Id: shapes.py,v 1.77 2002/07/24 09:38:32 rgbecker Exp $ '''
+__version__=''' $Id: shapes.py,v 1.78 2002/07/24 19:56:36 andy_robinson Exp $ '''
 
 import string, os, sys
 from math import pi, cos, sin, tan
@@ -760,7 +760,7 @@ def _renderPath(path, drawFuncs):
 
 class Path(SolidShape):
     """Path, made up of straight lines and bezier curves."""
-    
+
     _attrMap = AttrMap(
         strokeColor = AttrMapValue(isColorOrNone),
         strokeWidth = AttrMapValue(isNumber),
@@ -809,7 +809,7 @@ def definePath(pathSegs=[],isClipPath=0, dx=0, dy=0, **kw):
     O = []
     P = []
     for seg in pathSegs:
-        if type(seg) not in [ListType,TupleType]: 
+        if type(seg) not in [ListType,TupleType]:
             opName = seg
             args = []
         else:

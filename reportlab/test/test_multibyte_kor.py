@@ -86,7 +86,7 @@ Adobe\xc0\xc7 \xc0\xe5\xbe\xd6\xc0\xda \xc1\xf6\xbf\xf8
             use UHC encoding or the Korean Unicode subset, for which the correct encoding
             names are also listed above.
             """)
-        
+
         c.drawText(tx)
 
         c.setFont('Helvetica',10)
@@ -107,10 +107,10 @@ Adobe\xc0\xc7 \xc0\xe5\xbe\xd6\xc0\xda \xc1\xf6\xbf\xf8
                 y = 700
 
         c.save()
-        
+
         if VERBOSE:
-            print 'saved test_multibyte_kor.pdf'    
-        
+            print 'saved test_multibyte_kor.pdf'
+
 
 def makeSuite():
     return makeSuiteForClasses(KoreanFontTests)
@@ -120,4 +120,3 @@ def makeSuite():
 if __name__ == "__main__":
     VERBOSE = 1
     unittest.TextTestRunner().run(makeSuite())
-

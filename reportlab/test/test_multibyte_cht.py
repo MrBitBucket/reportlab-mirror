@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
-#$Header: /tmp/reportlab/reportlab/test/test_multibyte_cht.py,v 1.5 2002/07/04 09:24:49 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_multibyte_cht.py,v 1.6 2002/07/24 19:56:38 andy_robinson Exp $
 # Temporary japanese support for ReportLab.
 """
 Test of traditional Chinese (as written in Taiwan)
@@ -29,7 +29,7 @@ class CHTFontTests(unittest.TestCase):
         c.setFont(fnt, 16, 16)
         c.drawString(x, y, msg)
         c.rect(x,y,pdfmetrics.stringWidth(msg, fnt, 16),16,stroke=1,fill=0)
-        
+
 
     def test0(self):
         "A basic document drawing some strings"
@@ -37,7 +37,7 @@ class CHTFontTests(unittest.TestCase):
         # if they do not have the Japanese font files, go away quietly
         from reportlab.pdfbase.cidfonts import CIDFont, findCMapFile
 
-        
+
         enc = 'ETenms-B5-H'
         try:
             findCMapFile(enc)
@@ -45,7 +45,7 @@ class CHTFontTests(unittest.TestCase):
             #they don't have the font pack, return silently
             return
         pdfmetrics.registerFont(CIDFont('MSung-Light',enc))
-    
+
         c = Canvas('test_multibyte_cht.pdf')
         c.setFont('Helvetica', 24)
         c.drawString(100,700, 'Traditional Chinese Font Support')
@@ -58,13 +58,13 @@ class CHTFontTests(unittest.TestCase):
         message2 = '\xa6n\xa1A\xa8\xc3\xaa\xed\xa5\xdc\xb2@\xb5L\xba\xc3\xb0\xdd\xa4\xa4\xb0\xea\xa6b\xb3o\xad\xd3\xa5i\xa9\xc6\xaa\xba\xae\xc9\xa8\xe8\xa1A\xb7|\xbbP\xac\xfc\xb0\xea\xa4H\xa5\xc1\xaf\xb8\xa6b\xa4@\xb0_\xa1C'
         message3 = '\xA7\x41\xA6\x6E\xB6\xDC'
 
-        
+
         c.drawString(100, 655, message1)
         c.drawString(100, 639, message2)
 
         hBoxText(message3 + ' MSung-Light' , c, 100, 600, 'MSung-Light', enc)
         #hBoxText(message3 + ' MHei-Medium', c, 100, 580, 'MHei-Medium', enc)
-        
+
 
 
         c.setFont('Helvetica', 10)
@@ -122,7 +122,7 @@ class CHTFontTests(unittest.TestCase):
                 c.showPage()
                 y = 600
 
-        
+
         c.save()
         if VERBOSE:
             print 'saved test_multibyte_cht.pdf'
@@ -136,4 +136,3 @@ def makeSuite():
 if __name__ == "__main__":
     VERBOSE = 1
     unittest.TextTestRunner().run(makeSuite())
-

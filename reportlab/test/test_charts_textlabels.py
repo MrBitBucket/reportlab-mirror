@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_charts_textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_charts_textlabels.py,v 1.3 2002/07/04 09:24:49 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_charts_textlabels.py,v 1.4 2002/07/24 19:56:38 andy_robinson Exp $
 """
 Tests for the text Label class.
 """
@@ -28,7 +28,7 @@ from reportlab.platypus.doctemplate \
 
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
-    
+
     canvas.saveState()
 
     #canvas.rect(2.5*cm, 2.5*cm, 15*cm, 25*cm)
@@ -37,13 +37,13 @@ def myMainPageFrame(canvas, doc):
     canvas.drawString(10*cm, cm, str(pageNumber))
 
     canvas.restoreState()
-    
+
 
 class MyDocTemplate(BaseDocTemplate):
     "The document template used for all PDF documents."
-    
+
     _invalidInitArgs = ('pageTemplates',)
-    
+
     def __init__(self, filename, **kw):
         frame1 = Frame(2.5*cm, 2.5*cm, 15*cm, 25*cm, id='F1')
         self.allowSplitting = 0
@@ -70,7 +70,7 @@ class LabelTestCase(unittest.TestCase):
 
     def _makeProtoLabel(self):
         "Return a label prototype for further modification."
-        
+
         protoLabel = Label()
         protoLabel.dx = 0
         protoLabel.dy = 0
@@ -87,10 +87,10 @@ class LabelTestCase(unittest.TestCase):
         w, h = drawWidth, drawHeight = 400, 100
 
         drawings = []
-        
+
         for boxAnchors in ('sw se nw ne', 'w e n s', 'c'):
             boxAnchors = string.split(boxAnchors, ' ')
-            
+
             # Create drawing.
             d = Drawing(w, h)
             d.add(Line(0,h/2, w, h/2, strokeColor=colors.gray, strokeWidth=0.5))
@@ -101,18 +101,18 @@ class LabelTestCase(unittest.TestCase):
                 # Modify label, put it on a drawing.
                 label = copy.deepcopy(protoLabel)
                 label.boxAnchor = boxAnchor
-                args = {'ba':boxAnchor, 'text':text or 'Hello World!'} 
+                args = {'ba':boxAnchor, 'text':text or 'Hello World!'}
                 label.setText('(%(ba)s) %(text)s (%(ba)s)' % args)
                 labels.append(label)
-                
+
             for label in labels:
                 d.add(label)
 
             drawings.append(d)
 
         return drawings
-    
-    
+
+
     def test1(self):
         "Test all different box anchors."
 
@@ -264,7 +264,7 @@ textAnchor attribute.""", bt))
             story.append(d)
             story.append(Spacer(0, 1*cm))
 
-        story.append(PageBreak())        
+        story.append(PageBreak())
 
         pdfPath = 'test_charts_textlabels.pdf'
         tempfile.tempdir = os.curdir

@@ -19,9 +19,9 @@ class EmbeddingTestCase(unittest.TestCase):
         if you want to use it for real."""
 
         #LettError fonts should always be there.  The others are voluntary.
-        
+
         ok = 1
-        
+
         c = Canvas('test_pdfbase_fontembed.pdf')
         c.setPageCompression(0)
         c.setFont('Helvetica', 12)
@@ -38,7 +38,7 @@ class EmbeddingTestCase(unittest.TestCase):
 
             c.setFont('AGaramond-Bold', 12)
             c.drawString(100, 650, 'This should be in AGaramond-Bold')
-        
+
         if os.path.isfile('CR______.AFM') and os.path.isfile('CR______.PFB'):
 
             # one with a custom encoding
@@ -53,7 +53,7 @@ class EmbeddingTestCase(unittest.TestCase):
             c.setFont('Helvetica', 12)
             c.drawString(100, 600, text)
             w = c.stringWidth(text, 'Helvetica', 12)
-            
+
             c.setFont('Carta', 12)
             c.drawString(100+w, 600, ' Hello World')
 
@@ -87,4 +87,3 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
-

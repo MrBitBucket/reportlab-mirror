@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.5 2002/07/17 22:46:22 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch2a_fonts.py,v 1.6 2002/07/24 19:56:35 andy_robinson Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 from reportlab.lib.codecharts import SingleByteEncodingChart
 from reportlab.platypus import Image
-    
+
 heading1("Fonts and encodings")
 
 disc("""
@@ -20,11 +20,11 @@ feedback and help in this area.
 
 disc("""
 Support for custom fonts and encoding is was new
-in reportlab (Release 1.10, 6 Nov. 2001), and may 
-change in the future. The canvas methods  $setFont$, $getFont$, 
-$registerEncoding$ and $registerTypeFace$ can all be considered 
-stable. Other things such as how reportlab searches for fonts are more 
-liable to change.  
+in reportlab (Release 1.10, 6 Nov. 2001), and may
+change in the future. The canvas methods  $setFont$, $getFont$,
+$registerEncoding$ and $registerTypeFace$ can all be considered
+stable. Other things such as how reportlab searches for fonts are more
+liable to change.
 """)
 
 
@@ -161,7 +161,7 @@ Every time you draw some text, you presume an encoding.
 The Reportlab PDF library offers very fine-grained control
 of character encodings, which can be critical.  You can specify
 the encoding to use at a per-installation, per-document or per-font
-level, and also synthesize your own encodings.  
+level, and also synthesize your own encodings.
 """)
 
 disc("""The module reportlab/rl_config.py contains a variable
@@ -176,7 +176,7 @@ This is the standard encoding on Windows and many Unix systems in America
 and Western Europe.  It is also knows as Code Page 1252, and is practically
 identical to ISO-Latin-1 (it contains one or two extra characters). This
 is the default encoding used by the Reportlab PDF Library. It was generated from
-a standard routine in $reportlab/lib$, $codecharts.py$, 
+a standard routine in $reportlab/lib$, $codecharts.py$,
 which can be used to display the contents of fonts.  The index numbers
 along the edges are in hex.""")
 
@@ -413,7 +413,7 @@ $reportlab/test/test_multibyte_cht.py$
 CPage(3)
 heading3("Korean")
 disc("""
-'language prefix': $kor$ 
+'language prefix': $kor$
 """)
 disc("""
 typefaces: '$HYSMyeongJoStd-Medium$','$HYGothic-Medium$'
@@ -435,7 +435,7 @@ eg("""
                     #extensions, Script Manager Code 3
 'UniKS-UCS2-H',     #Unicode (UCS-2) encoding for the Adobe-Korea1 character collection
 'UniKS-UCS2-V'      #Vertical version of UniKS-UCS2-H
-    
+
 """)
 disc("""
 test:

@@ -337,9 +337,9 @@ end""")
 
 def makeSuite():
     suite = makeSuiteForClasses(
-        TTFontsTestCase, 
+        TTFontsTestCase,
         TTFontFileTestCase,
-        TTFontFaceTestCase, 
+        TTFontFaceTestCase,
         TTFontTestCase)
     return suite
 
@@ -347,4 +347,3 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
-

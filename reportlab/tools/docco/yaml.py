@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/yaml.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/tools/docco/yaml.py,v 1.1 2001/10/27 22:37:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/tools/docco/yaml.py,v 1.2 2002/07/24 19:56:39 andy_robinson Exp $
 # parses "Yet Another Markup Language" into a list of tuples.
 # Each tuple says what the data is e.g.
 # ('Paragraph', 'Heading1', 'Why Reportlab Rules')
@@ -14,7 +14,7 @@ reasonable selection of formats.
 The general rule is that if a line begins with a '.',
 it requires special processing. Otherwise lines
 are concatenated to paragraphs, and blank lines
-separate paragraphs. 
+separate paragraphs.
 
 If the line ".foo bar bletch" is encountered,
 it immediately ends and writes out any current
@@ -53,25 +53,25 @@ BULLETCHAR = '\267'  # assumes font Symbol, but works on all platforms
 class Parser:
     def __init__(self):
         self.reset()
-        
+
     def reset(self):
         self._lineNo = 0
         self._style = 'Normal'  # the default
         self._results = []
         self._buf = []
         self._mode = PLAIN
-        
+
     def parseFile(self, filename):
         #returns list of objects
         data = open(filename, 'r').readlines()
-        
+
         for line in data:
             #strip trailing newlines
             self.readLine(line[:-1])
         self.endPara()
         return self._results
-        
-    def readLine(self, line):    
+
+    def readLine(self, line):
         #this is the inner loop
         self._lineNo = self._lineNo + 1
         stripped = string.lstrip(line)
@@ -85,7 +85,7 @@ class Parser:
             self.endPara()
             words = string.split(stripped[1:])
             cmd, args = words[0], words[1:]
-    
+
             #is it a parser method?
             if hasattr(self.__class__, cmd):
                 method = eval('self.'+cmd)
@@ -107,11 +107,11 @@ class Parser:
                 self._buf.append(data)
         else:
             #we have data, add to para
-            self._buf.append(line)            
+            self._buf.append(line)
 
     def endPara(self):
         #ends the current paragraph, or preformatted block
-            
+
         text = string.join(self._buf, ' ')
         if text:
             if self._mode == PREFORMATTED:
@@ -126,7 +126,7 @@ class Parser:
     def beginPre(self, stylename):
         self._mode = PREFORMATTED
         self._style = stylename
-        
+
     def endPre(self):
         self.endPara()
         self._mode = PLAIN
@@ -138,7 +138,7 @@ class Parser:
     def vSpace(self, points):
         """Inserts a vertical spacer"""
         self._results.append(('VSpace', points))
-        
+
     def pageBreak(self):
         """Inserts a frame break"""
         self._results.append(('PageBreak','blah'))  # must be a tuple
@@ -148,8 +148,8 @@ class Parser:
         self.endPara()
         self._results.append(('Custom',moduleName, funcName))
 
-    
-        
+
+
     def getModuleDoc(self, modulename, pathname=None):
         """Documents the entire module at this point by making
         paragraphs and preformatted objects"""
@@ -171,7 +171,7 @@ class Parser:
                         if mth.status == 'official':
                             self._results.append(('Preformatted','FunctionHeader', mth.proto))
                             self._results.append(('Preformatted','DocStringIndent', mth.doc))
-                    
+
 
     def getClassDoc(self, modulename, classname, pathname=None):
         """Documents the class and its public methods"""
@@ -191,7 +191,7 @@ class Parser:
 
     def nextPageTemplate(self, templateName):
         self._results.append(('NextPageTemplate',templateName))
-        
+
 if __name__=='__main__': #NORUNTESTS
     if len(sys.argv) <> 2:
         print 'usage: yaml.py source.txt'

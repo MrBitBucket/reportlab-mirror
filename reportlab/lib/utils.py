@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.35 2002/07/17 22:46:23 andy_robinson Exp $
-__version__=''' $Id: utils.py,v 1.35 2002/07/17 22:46:23 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.36 2002/07/24 19:56:37 andy_robinson Exp $
+__version__=''' $Id: utils.py,v 1.36 2002/07/24 19:56:37 andy_robinson Exp $ '''
 
 import string, os, sys
 from types import *
@@ -183,8 +183,8 @@ class DebugMemo:
     '''Intended as a simple report back encapsulator
 
     Typical usages
-    1) To record error data     
-        dbg = DebugMemo(fn='dbgmemo.dbg',myVar=value)       
+    1) To record error data
+        dbg = DebugMemo(fn='dbgmemo.dbg',myVar=value)
         dbg.add(anotherPayload='aaaa',andagain='bbb')
         dbg.dump()
 

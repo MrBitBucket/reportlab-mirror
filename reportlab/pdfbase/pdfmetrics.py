@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfmetrics.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.55 2002/07/17 22:46:23 andy_robinson Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.56 2002/07/24 19:56:37 andy_robinson Exp $ '''
 __doc__="""
 This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
@@ -197,8 +197,8 @@ def bruteForceSearchForAFM(faceName):
             if topDict['FontName'] == faceName:
                 return possible
     return None
-            
-        
+
+
 
 #for faceName in standardFonts:
 #    registerTypeFace(TypeFace(faceName))
@@ -331,7 +331,7 @@ class Font:
 
         # multi byte fonts do their own stringwidth calculations.
         # signal this here.
-        self._multiByte = 0 
+        self._multiByte = 0
 
     def _calcWidths(self):
         """Vector of widths for stringWidth function"""

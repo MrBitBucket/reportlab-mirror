@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/test_pdfbase_pdfmetrics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_pdfmetrics.py,v 1.9 2002/07/04 09:24:49 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/test/test_pdfbase_pdfmetrics.py,v 1.10 2002/07/24 19:56:38 andy_robinson Exp $
 #test_pdfbase_pdfmetrics_widths
 """
 Various tests for PDF metrics.
@@ -68,7 +68,7 @@ def makeWidthTestForAllGlyphs(canv, fontName, outlining=1):
             except KeyError:
                 canv.drawString(200, y, 'Could not find glyph named "%s"' % glyphName)
             y = y - 12
-                
+
 
 def makeTestDoc(fontNames):
     filename = 'test_pdfbase_pdfmetrics.pdf'
@@ -81,7 +81,7 @@ def makeTestDoc(fontNames):
     for fontName in fontNames:
         if verbose:
             print 'width test for', fontName
-    
+
         makeWidthTestForAllGlyphs(c, fontName)
         c.showPage()
     c.save()
@@ -95,7 +95,7 @@ class PDFMetricsTestCase(unittest.TestCase):
 
     def test0(self):
         "Visual test for correct glyph widths"
-        makeTestDoc(fontNamesToTest)        
+        makeTestDoc(fontNamesToTest)
 
 
 def makeSuite():
@@ -116,7 +116,7 @@ if __name__=='__main__':
                 print 'unknown font %s' % arg
                 print usage
                 sys.exit(0)
-                
+
         fontNamesToTest = sys.argv[1:]
 
     unittest.TextTestRunner().run(makeSuite())
