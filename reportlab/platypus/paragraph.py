@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paragraph.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.49 2000/12/18 09:24:15 rgbecker Exp $
-__version__=''' $Id: paragraph.py,v 1.49 2000/12/18 09:24:15 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paragraph.py,v 1.50 2001/03/06 17:38:15 andy_robinson Exp $
+__version__=''' $Id: paragraph.py,v 1.50 2001/03/06 17:38:15 andy_robinson Exp $ '''
 from string import split, strip, join, whitespace
 from operator import truth
 from types import StringType, ListType
@@ -791,11 +791,11 @@ and better control when printed.
 <onDraw name=myIndex label="Eingabeaufforderung :: (&gt;&gt;&gt;)">
 <b><font color=red>&gt;&gt;&gt; (Eingabeaufforderung)</font></b>
 <onDraw name=myIndex label="&gt;&gt;&gt; (Eingabeaufforderung)">
-Einführung in Python <b><font color=red>Python :: Einführung</font></b>
-<onDraw name=myIndex label="Python :: Einführung">.
+Einf\374hrung in Python <b><font color=red>Python :: Einf\374hrung</font></b>
+<onDraw name=myIndex label="Python :: Einf\374hrung">.
 Das Ziel ist, die grundlegenden Eigenschaften von Python darzustellen, ohne
 sich zu sehr in speziellen Regeln oder Details zu verstricken. Dazu behandelt
-dieses Kapitel kurz die wesentlichen Konzepte wie Variablen, Ausdrücke,
+dieses Kapitel kurz die wesentlichen Konzepte wie Variablen, Ausdr\374cke,
 Kontrollfluss, Funktionen sowie Ein- und Ausgabe. Es erhebt nicht den Anspruch,
 umfassend zu sein."""
 		P=Paragraph(text, styleSheet['Code'])
@@ -804,7 +804,7 @@ umfassend zu sein."""
 		dumpParagraphLines(P)
 
 	if '4' in TESTS:
-		text='''Die eingebaute Funktion <font name=Courier>range(i, j [, stride])</font><onDraw name=myIndex label="eingebaute Funktionen::range()"><onDraw name=myIndex label="range() (Funktion)"><onDraw name=myIndex label="Funktionen::range()"> erzeugt eine Liste von Ganzzahlen und füllt sie mit Werten <font name=Courier>k</font>, für die gilt: <font name=Courier>i &lt;= k &lt; j</font>. Man kann auch eine optionale Schrittweite angeben. Die eingebaute Funktion <font name=Courier>xrange()</font><onDraw name=myIndex label="eingebaute Funktionen::xrange()"><onDraw name=myIndex label="xrange() (Funktion)"><onDraw name=myIndex label="Funktionen::xrange()"> erfüllt einen ähnlichen Zweck, gibt aber eine unveränderliche Sequenz vom Typ <font name=Courier>XRangeType</font><onDraw name=myIndex label="XRangeType"> zurück. Anstatt alle Werte in der Liste abzuspeichern, berechnet diese Liste ihre Werte, wann immer sie angefordert werden. Das ist sehr viel speicherschonender, wenn mit sehr langen Listen von Ganzzahlen gearbeitet wird. <font name=Courier>XRangeType</font> kennt eine einzige Methode, <font name=Courier>s.tolist()</font><onDraw name=myIndex label="XRangeType::tolist() (Methode)"><onDraw name=myIndex label="s.tolist() (Methode)"><onDraw name=myIndex label="Methoden::s.tolist()">, die seine Werte in eine Liste umwandelt.'''
+		text='''Die eingebaute Funktion <font name=Courier>range(i, j [, stride])</font><onDraw name=myIndex label="eingebaute Funktionen::range()"><onDraw name=myIndex label="range() (Funktion)"><onDraw name=myIndex label="Funktionen::range()"> erzeugt eine Liste von Ganzzahlen und f\374llt sie mit Werten <font name=Courier>k</font>, f\374r die gilt: <font name=Courier>i &lt;= k &lt; j</font>. Man kann auch eine optionale Schrittweite angeben. Die eingebaute Funktion <font name=Courier>xrange()</font><onDraw name=myIndex label="eingebaute Funktionen::xrange()"><onDraw name=myIndex label="xrange() (Funktion)"><onDraw name=myIndex label="Funktionen::xrange()"> erf\374llt einen \344hnlichen Zweck, gibt aber eine unver\344nderliche Sequenz vom Typ <font name=Courier>XRangeType</font><onDraw name=myIndex label="XRangeType"> zur\374ck. Anstatt alle Werte in der Liste abzuspeichern, berechnet diese Liste ihre Werte, wann immer sie angefordert werden. Das ist sehr viel speicherschonender, wenn mit sehr langen Listen von Ganzzahlen gearbeitet wird. <font name=Courier>XRangeType</font> kennt eine einzige Methode, <font name=Courier>s.tolist()</font><onDraw name=myIndex label="XRangeType::tolist() (Methode)"><onDraw name=myIndex label="s.tolist() (Methode)"><onDraw name=myIndex label="Methoden::s.tolist()">, die seine Werte in eine Liste umwandelt.'''
 		aW = 420
 		aH = 64.4
 		P=Paragraph(text, B)

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/stdfonts/stdfonts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/stdfonts/stdfonts.py,v 1.8 2000/11/08 10:55:37 andy_robinson Exp $
-__version__=''' $Id: stdfonts.py,v 1.8 2000/11/08 10:55:37 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/stdfonts/stdfonts.py,v 1.9 2001/03/06 17:38:15 andy_robinson Exp $
+__version__=''' $Id: stdfonts.py,v 1.9 2001/03/06 17:38:15 andy_robinson Exp $ '''
 __doc__="""
 This generates tables showing the 14 standard fonts in both
 WinAnsi and MacRoman encodings, and their character codes.
@@ -32,7 +32,7 @@ def run(mode):
                 )
         canv.setPageCompression(0)
         
-        for fontname in pdfmetrics.StandardEnglishFonts:
+        for fontname in pdfmetrics.standardEnglishFonts:
             if fontname in ['Symbol', 'ZapfDingbats']:
                 encLabel = 'StandardEncoding'
             else:

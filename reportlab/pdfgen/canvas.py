@@ -1,37 +1,12 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.62 2001/02/28 11:53:20 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.62 2001/02/28 11:53:20 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.63 2001/03/06 17:38:15 andy_robinson Exp $
+__version__=''' $Id: canvas.py,v 1.63 2001/03/06 17:38:15 andy_robinson Exp $ '''
 __doc__=""" 
-PDFgen is a library to generate PDF files containing text and graphics.  It is the 
-foundation for a complete reporting solution in Python.  It is also the
-foundation for piddlePDF, the PDF back end for PIDDLE.
-
-Documentation is a little slim right now; run then look at testpdfgen.py
-to get a clue.
-
-Progress Reports:
-8.83, 2000-01-13, gmcm:
-    Packagizing:
-        renamed from pdfgen.py to canvas.py
-        broke out PDFTextObject to textobject.py
-        broke out PDFPathObject to pathobject.py
-        placed all three in a package directory named pdfgen
-0.82, 1999-10-27, AR:
-        Fixed some bugs on printing to Postscript.  Added 'Text Object'
-        analogous to Path Object to control entry and exit from text mode.
-        Much simpler clipping API.  All verified to export Postscript and
-        redistill.
-        One limitation still - clipping to text paths is fine in Acrobat
-        but not in Postscript (any level)
-        
-0.81,1999-10-13, AR:
-        Adding RoundRect; changed all format strings to use %0.2f instead of %s,
-        so we don't get exponentials in the output.
-0.8,1999-10-07, AR:  all changed!
+The Canvas object is the primary interface for creating PDF files. See
+doc/userguide.pdf for copious examples.
 """
-##  0.81    1999-10-13:
 
 
 import os
@@ -126,14 +101,14 @@ class Canvas:
     def __init__(self,filename,
                  pagesize=(595.27,841.89),
                  bottomup = 1,
-                 pageCompression=0,
+                 pageCompression=1,
                  encoding=pdfdoc.DEFAULT_ENCODING,
                  verbosity=0):
         """Create a canvas of a given size. etc.
         Most of the attributes are private - we will use set/get methods
         as the preferred interface.  Default page size is A4."""
         self._filename = filename
-
+        self._encodingName = encoding
         self._doc = pdfdoc.PDFDocument(encoding)
 
         #this only controls whether it prints 'saved ...' - 0 disables
@@ -192,6 +167,8 @@ class Canvas:
         self._fillColorRGB = (0,0,0)
         self._strokeColorRGB = (0,0,0)
 
+        self._registerStandardFonts()
+        
     def _make_preamble(self):
         if self.bottomup:
             #set initial font
@@ -841,11 +818,42 @@ class Canvas:
   
     def getAvailableFonts(self):
         """Returns the list of PostScript font names available.
+        
         Standard set now, but may grow in future with font embedding."""
         fontnames = self._doc.getAvailableFonts()
         fontnames.sort()
         return fontnames
 
+    def registerFont0(self, fontObj):
+        "Register a new font for subsequent use."
+        self._doc.addFont0(fontObj)
+
+        # extend the new metrics
+        pdfmetrics.addFont(fontObj)
+        
+    def _registerStandardFonts(self):
+        """Ensures the standard 14 fonts are available in the system encoding.
+
+        Called by canvas on initialization"""
+        
+        from reportlab.pdfgen import fonts0
+        enc = fonts0.defaultEncoding
+        for fontName in pdfmetrics.standardEnglishFonts[0:12]:
+            fontObj = fonts0.BuiltInType1Font(fontName, fontName, enc)
+            self.registerFont0(fontObj)
+        for fontName in ['Symbol','ZapfDingbats']:
+            fontObj = fonts0.BuiltInType1Font(fontName, fontName, 'StandardEncoding')
+            self.registerFont0(fontObj)
+            
+                    
+            
+    def listLoadedFonts0(self):
+        "Convenience function to list all loaded fonts"
+        names = pdfmetrics.widths.keys()
+        names.sort()
+        return names
+    
+        
     def setFont(self, psfontname, size, leading = None):
         """Sets the font.  If leading not specified, defaults to 1.2 x
         font size. Raises a readable exception if an illegal font
@@ -861,7 +869,10 @@ class Canvas:
 
     def stringWidth(self, text, fontName, fontSize, encoding=None):
         "gets width of a string in the given font and size"
-        if encoding is None: encoding = self._doc.encoding
+        if encoding is not None:
+            import logger
+            logger.warnOnce('encoding argument to Canvas.stringWidth is deprecated and has no effect!')
+        #if encoding is None: encoding = self._doc.encoding
         return pdfmetrics.stringWidth(text, fontName, fontSize)
         
     # basic graphics modes

@@ -2,8 +2,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.38 2001/02/28 11:53:55 rgbecker Exp $
-__version__=''' $Id: pdfdoc.py,v 1.38 2001/02/28 11:53:55 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.39 2001/03/06 17:38:15 andy_robinson Exp $
+__version__=''' $Id: pdfdoc.py,v 1.39 2001/03/06 17:38:15 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  
@@ -63,16 +63,16 @@ from reportlab.pdfbase.pdfutils import LINEEND   # this constant needed in both
 LINEENDDICT = {"LINEEND": LINEEND, "PERCENT": "%"}
 
 def markfilename(filename):
-	# with the Mac, we need to tag the file in a special
-	#way so the system knows it is a PDF file.
-	#This supplied by Joe Strout
-	import os
-	if os.name == 'mac':
-		import macfs
-		try: 
-			macfs.FSSpec(filename).SetCreatorType('CARO','PDF ')
-		except:
-			pass
+    # with the Mac, we need to tag the file in a special
+    #way so the system knows it is a PDF file.
+    #This supplied by Joe Strout
+    import os
+    if os.name == 'mac':
+        import macfs
+        try: 
+            macfs.FSSpec(filename).SetCreatorType('CARO','PDF ')
+        except:
+            pass
 
 def format(element, document, toplevel=0):
     """Indirection step for formatting.
@@ -112,7 +112,7 @@ class PDFDocument:
     # set this to define filters 
     defaultStreamFilters = None
     pageCounter = 1
-    def __init__(self, encoding=DEFAULT_ENCODING, dummyoutline=0, doFonts=1):
+    def __init__(self, encoding=DEFAULT_ENCODING, dummyoutline=0, doFonts=0):
         #self.defaultStreamFilters = [PDFBase85Encode, PDFZCompress] # for testing!
         #self.defaultStreamFilters = [PDFZCompress] # for testing!
         assert encoding in ['MacRomanEncoding',
@@ -145,7 +145,14 @@ class PDFDocument:
         #self.Reference(self.Info)
         # make std fonts (this could be made optional
         self.fontMapping = {}
-        if doFonts: MakeStandardEnglishFontObjects(self, encoding)
+        if doFonts:
+            MakeStandardEnglishFontObjects(self, encoding)
+        else:
+            #make an empty font dictionary
+            DD = PDFDictionary({})
+            DD.__Comment__ = "The standard fonts dictionary"
+            DDR = self.Reference(DD, BasicFonts)
+    
 
     def SaveToFile(self, filename, canvas):
         # prepare outline
@@ -237,7 +244,37 @@ class PDFDocument:
         fontnames = self.fontMapping.keys()
         fontnames.sort()
         return fontnames
-    
+
+
+    def addFont0(self, font):
+        """Add a new font object to the document.
+
+        Called from canvas.registerFont.  This does not handle extending
+        the font metrics database;  canvas.registerFont does that too."""
+        # may be several in succession
+        # get next font number
+##        nextFontId = 'F' + repr(len(self.fontMapping)+1)
+
+        font.addObjects(self)
+        # font must return at least one object, the first in the
+        # list is 'THE' font.  CID fonts may create 3 objects.
+##        objects = font.makeObjects(nextFontId)
+##        fontObj = objects[0]
+##        fontObj.__Comment__ = 'User-defined font %s' % font.name
+##
+##        ref = self.Reference(fontObj, nextFontId)
+##        
+##        # establish naming from public to internal name
+##        self.fontMapping[font.name] = '/' + nextFontId
+##
+##        # gets the BasicFonts dictionary        
+##        fontDict = self.idToObject['BasicFonts'].dict
+##        fontDict[nextFontId] = fontObj
+##
+##        # add any other objects generated
+##        for obj in objects[1:]:
+##            ref = self.Reference(obj)
+
     def format(self):
         # register the Catalog/INfo and then format the objects one by one until exhausted
         # (possible infinite loop if there is a bug that continually makes new objects/refs...)
@@ -402,8 +439,9 @@ class PDFDictionary:
             v = dict[k]
             fv = format(v, document)
             fk = format(PDFName(k), document)
-            a(fk)
-            a(" "+fv)
+            #a(fk)
+            #a(" "+fv)
+            a(fk + " " + fv)
         #L = map(str, L)
         if self.multiline:
             Lj = string.join(L, LINEEND)
@@ -572,8 +610,12 @@ class PDFObjectReference:
         return "%s %s R" % (n,v)
 
 ### chapter 5
-
-PDFHeader = ("%PDF-1.3"+LINEEND+"%íì¶¾  "+LINEEND)
+# Following Ken Lunde's advice and the PDF spec, this includes
+# some high-order bytes.  I chose the characters for Tokyo
+# in Shift-JIS encoding, as these cannot be mistaken for
+# any other encoding, and we'll be able to tell if something
+# has run our PDF files through a dodgy Unicode conversion.
+PDFHeader = ("%PDF-1.3"+LINEEND+"%\223\214\213\236"+LINEEND)
 
 class PDFFile:
     ### just accumulates strings: keeps track of current offset
@@ -872,236 +914,236 @@ class PDFOutlines0:
         
 
 class OutlineEntryObject:
-	"an entry in an outline"
-	Title = Dest = Parent = Prev = Next = First = Last = Count = None
-	def format(self, document):
-		D = {}
-		D["Title"] = PDFString(self.Title)
-		D["Parent"] = self.Parent
-		D["Dest"] = self.Dest
-		for n in ("Prev", "Next", "First", "Last", "Count"):
-			v = getattr(self, n)
-			if v is not None:
-				D[n] = v
-		PD = PDFDictionary(D)
-		return PD.format(document)
+    "an entry in an outline"
+    Title = Dest = Parent = Prev = Next = First = Last = Count = None
+    def format(self, document):
+        D = {}
+        D["Title"] = PDFString(self.Title)
+        D["Parent"] = self.Parent
+        D["Dest"] = self.Dest
+        for n in ("Prev", "Next", "First", "Last", "Count"):
+            v = getattr(self, n)
+            if v is not None:
+                D[n] = v
+        PD = PDFDictionary(D)
+        return PD.format(document)
 
 
 class PDFOutlines:
-	"""takes a recursive list of outline destinations
-	   like
-		   out = PDFOutline1()
-		   out.setNames(canvas, # requires canvas for name resolution
-			 "chapter1dest",
-			 ("chapter2dest",
-			  ["chapter2section1dest",
-			   "chapter2section2dest",
-			   "chapter2conclusiondest"]
-			 ), # end of chapter2 description
-			 "chapter3dest",
-			 ("chapter4dest", ["c4s1", "c4s2"])
-			 )
-	   Higher layers may build this structure incrementally. KISS at base level.
-	"""
-	# first attempt, many possible features missing.
-	#no init for now
-	mydestinations = ready = None
-	counter = 0
-	currentlevel = -1 # ie, no levels yet
-	
-	def __init__(self):
-		self.destinationnamestotitles = {}
-		self.destinationstotitles = {}
-		self.levelstack = []
-		self.buildtree = []
-		self.closedict = {} # dictionary of "closed" destinations in the outline
+    """takes a recursive list of outline destinations
+       like
+           out = PDFOutline1()
+           out.setNames(canvas, # requires canvas for name resolution
+             "chapter1dest",
+             ("chapter2dest",
+              ["chapter2section1dest",
+               "chapter2section2dest",
+               "chapter2conclusiondest"]
+             ), # end of chapter2 description
+             "chapter3dest",
+             ("chapter4dest", ["c4s1", "c4s2"])
+             )
+       Higher layers may build this structure incrementally. KISS at base level.
+    """
+    # first attempt, many possible features missing.
+    #no init for now
+    mydestinations = ready = None
+    counter = 0
+    currentlevel = -1 # ie, no levels yet
+    
+    def __init__(self):
+        self.destinationnamestotitles = {}
+        self.destinationstotitles = {}
+        self.levelstack = []
+        self.buildtree = []
+        self.closedict = {} # dictionary of "closed" destinations in the outline
 
-	def addOutlineEntry(self, destinationname, level=0, title=None, closed=None):
-		"""destinationname of None means "close the tree" """
-		from types import IntType, TupleType
-		if destinationname is None and level!=0:
-			raise ValueError, "close tree must have level of 0"
-		if type(level) is not IntType: raise ValueError, "level must be integer, got %s" % type(level)
-		if level<0: raise ValueError, "negative levels not allowed"
-		if title is None: title = destinationname
-		currentlevel = self.currentlevel
-		stack = self.levelstack
-		tree = self.buildtree
-		# adjust currentlevel and stack to match level
-		if level>currentlevel:
-			if level>currentlevel+1:
-				raise ValueError, "can't jump from outline level %s to level %s, need intermediates" %(currentlevel, level)
-			level = currentlevel = currentlevel+1
-			stack.append([])
-		while level<currentlevel:
-			# pop off levels to match
-			current = stack[-1]
-			del stack[-1]
-			previous = stack[-1]
-			lastinprevious = previous[-1]
-			if type(lastinprevious) is TupleType:
-				(name, sectionlist) = lastinprevious
-				raise ValueError, "cannot reset existing sections: " + repr(lastinprevious)
-			else:
-				name = lastinprevious
-				sectionlist = current
-				previous[-1] = (name, sectionlist)
-			#sectionlist.append(current)
-			currentlevel = currentlevel-1
-		if destinationname is None: return
-		stack[-1].append(destinationname)
-		self.destinationnamestotitles[destinationname] = title
-		if closed: self.closedict[destinationname] = 1
-		self.currentlevel = level
-		
-	def setDestinations(self, destinationtree):
-		self.mydestinations = destinationtree
-		
-	def format(self, document):
-		D = {}
-		D["Type"] = PDFName("Outlines")
-		c = self.count
-		D["Count"] = c
-		if c!=0:
-		    D["First"] = self.first
-		    D["Last"] = self.last
-		PD = PDFDictionary(D)
-		return PD.format(document)
-		
-	def setNames(self, canvas, *nametree):
-		desttree = self.translateNames(canvas, nametree)
-		self.setDestinations(desttree)
-		
-	def setNameList(self, canvas, nametree):
-		"Explicit list so I don't need to do apply(...) in the caller"
-		desttree = self.translateNames(canvas, nametree)
-		self.setDestinations(desttree)
-		
-	def translateNames(self, canvas, object):
-		"recursively translate tree of names into tree of destinations"
-		from types import StringType, ListType, TupleType
-		Ot = type(object)
-		destinationnamestotitles = self.destinationnamestotitles
-		destinationstotitles = self.destinationstotitles
-		closedict = self.closedict
-		if Ot is StringType:
-			destination = canvas._bookmarkReference(object)
-			title = object
-			if destinationnamestotitles.has_key(object):
-				title = destinationnamestotitles[object]
-			else:
-				destinationnamestotitles[title] = title
-			destinationstotitles[destination] = title
-			if closedict.has_key(object):
-				closedict[destination] = 1 # mark destination closed
-			return {object: canvas._bookmarkReference(object)} # name-->ref
-		if Ot is ListType or Ot is TupleType:
-			L = []
-			for o in object:
-				L.append(self.translateNames(canvas, o))
-			if Ot is TupleType:
-				return tuple(L)
-			return L
-		raise "in outline, destination name must be string: got a %s" % Ot
+    def addOutlineEntry(self, destinationname, level=0, title=None, closed=None):
+        """destinationname of None means "close the tree" """
+        from types import IntType, TupleType
+        if destinationname is None and level!=0:
+            raise ValueError, "close tree must have level of 0"
+        if type(level) is not IntType: raise ValueError, "level must be integer, got %s" % type(level)
+        if level<0: raise ValueError, "negative levels not allowed"
+        if title is None: title = destinationname
+        currentlevel = self.currentlevel
+        stack = self.levelstack
+        tree = self.buildtree
+        # adjust currentlevel and stack to match level
+        if level>currentlevel:
+            if level>currentlevel+1:
+                raise ValueError, "can't jump from outline level %s to level %s, need intermediates" %(currentlevel, level)
+            level = currentlevel = currentlevel+1
+            stack.append([])
+        while level<currentlevel:
+            # pop off levels to match
+            current = stack[-1]
+            del stack[-1]
+            previous = stack[-1]
+            lastinprevious = previous[-1]
+            if type(lastinprevious) is TupleType:
+                (name, sectionlist) = lastinprevious
+                raise ValueError, "cannot reset existing sections: " + repr(lastinprevious)
+            else:
+                name = lastinprevious
+                sectionlist = current
+                previous[-1] = (name, sectionlist)
+            #sectionlist.append(current)
+            currentlevel = currentlevel-1
+        if destinationname is None: return
+        stack[-1].append(destinationname)
+        self.destinationnamestotitles[destinationname] = title
+        if closed: self.closedict[destinationname] = 1
+        self.currentlevel = level
+        
+    def setDestinations(self, destinationtree):
+        self.mydestinations = destinationtree
+        
+    def format(self, document):
+        D = {}
+        D["Type"] = PDFName("Outlines")
+        c = self.count
+        D["Count"] = c
+        if c!=0:
+            D["First"] = self.first
+            D["Last"] = self.last
+        PD = PDFDictionary(D)
+        return PD.format(document)
+        
+    def setNames(self, canvas, *nametree):
+        desttree = self.translateNames(canvas, nametree)
+        self.setDestinations(desttree)
+        
+    def setNameList(self, canvas, nametree):
+        "Explicit list so I don't need to do apply(...) in the caller"
+        desttree = self.translateNames(canvas, nametree)
+        self.setDestinations(desttree)
+        
+    def translateNames(self, canvas, object):
+        "recursively translate tree of names into tree of destinations"
+        from types import StringType, ListType, TupleType
+        Ot = type(object)
+        destinationnamestotitles = self.destinationnamestotitles
+        destinationstotitles = self.destinationstotitles
+        closedict = self.closedict
+        if Ot is StringType:
+            destination = canvas._bookmarkReference(object)
+            title = object
+            if destinationnamestotitles.has_key(object):
+                title = destinationnamestotitles[object]
+            else:
+                destinationnamestotitles[title] = title
+            destinationstotitles[destination] = title
+            if closedict.has_key(object):
+                closedict[destination] = 1 # mark destination closed
+            return {object: canvas._bookmarkReference(object)} # name-->ref
+        if Ot is ListType or Ot is TupleType:
+            L = []
+            for o in object:
+                L.append(self.translateNames(canvas, o))
+            if Ot is TupleType:
+                return tuple(L)
+            return L
+        raise "in outline, destination name must be string: got a %s" % Ot
 
-	def prepare(self, document, canvas):
-		"""prepare all data structures required for save operation (create related objects)"""
-		if self.mydestinations is None:
-			if self.levelstack:
-				self.addOutlineEntry(None) # close the tree
-				destnames = self.levelstack[0]
-				#from pprint import pprint; pprint(destnames); stop
-				self.mydestinations = self.translateNames(canvas, destnames)
-			else:
-				self.first = self.last = None
-				self.count = 0
-				self.ready = 1
-				return
-		#self.first = document.objectReference("Outline.First")
-		#self.last = document.objectReference("Outline.Last")
-		# XXXX this needs to be generalized for closed entries!
-		self.count = count(self.mydestinations, self.closedict)
-		(self.first, self.last) = self.maketree(document, self.mydestinations, toplevel=1)
-		self.ready = 1
+    def prepare(self, document, canvas):
+        """prepare all data structures required for save operation (create related objects)"""
+        if self.mydestinations is None:
+            if self.levelstack:
+                self.addOutlineEntry(None) # close the tree
+                destnames = self.levelstack[0]
+                #from pprint import pprint; pprint(destnames); stop
+                self.mydestinations = self.translateNames(canvas, destnames)
+            else:
+                self.first = self.last = None
+                self.count = 0
+                self.ready = 1
+                return
+        #self.first = document.objectReference("Outline.First")
+        #self.last = document.objectReference("Outline.Last")
+        # XXXX this needs to be generalized for closed entries!
+        self.count = count(self.mydestinations, self.closedict)
+        (self.first, self.last) = self.maketree(document, self.mydestinations, toplevel=1)
+        self.ready = 1
 
-	def maketree(self, document, destinationtree, Parent=None, toplevel=0):
-		from types import ListType, TupleType, DictType
-		tdestinationtree = type(destinationtree)
-		if toplevel:
-			levelname = "Outline"
-			Parent = document.Reference(document.Outlines)
-		else:
-			self.count = self.count+1
-			levelname = "Outline.%s" % self.count
-			if Parent is None:
-				raise ValueError, "non-top level outline elt parent must be specified"
-		if tdestinationtree is not ListType and tdestinationtree is not TupleType:
-			raise ValueError, "destinationtree must be list or tuple, got %s"
-		nelts = len(destinationtree)
-		lastindex = nelts-1
-		lastelt = firstref = lastref = None
-		destinationnamestotitles = self.destinationnamestotitles
-		closedict = self.closedict
-		for index in range(nelts):
-			eltobj = OutlineEntryObject()
-			eltobj.Parent = Parent
-			eltname = "%s.%s" % (levelname, index)
-			eltref = document.Reference(eltobj, eltname)
-			#document.add(eltname, eltobj)
-			if lastelt is not None:
-				lastelt.Next = eltref
-				eltobj.Prev = lastref
-			if firstref is None:
-				firstref = eltref
-			lastref = eltref
-			lastelt = eltobj # advance eltobj
-			lastref = eltref
-			elt = destinationtree[index]
-			te = type(elt)
-			if te is DictType:
-				# simple leaf {name: dest}
-				leafdict = elt
-			elif te is TupleType:
-				# leaf with subsections: ({name: ref}, subsections) XXXX should clean up (see count(...))
-				try:
-					(leafdict, subsections) = elt
-				except:
-					raise ValueError, "destination tree elt tuple should have two elts, got %s" % len(elt)
-				eltobj.Count = count(subsections, closedict)
-				(eltobj.First, eltobj.Last) = self.maketree(document, subsections, eltref)
-			else:
-				raise ValueError, "destination tree elt should be dict or tuple, got %s" % te
-			try:
-				[(Title, Dest)] = leafdict.items()
-			except:
-				raise ValueError, "bad outline leaf dictionary, should have one entry "+str(elt)
-			eltobj.Title = destinationnamestotitles[Title]
-			eltobj.Dest = Dest
-			if te is TupleType and closedict.has_key(Dest):
-				# closed subsection, count should be negative
-				eltobj.Count = -eltobj.Count
-		return (firstref, lastref)
-		
+    def maketree(self, document, destinationtree, Parent=None, toplevel=0):
+        from types import ListType, TupleType, DictType
+        tdestinationtree = type(destinationtree)
+        if toplevel:
+            levelname = "Outline"
+            Parent = document.Reference(document.Outlines)
+        else:
+            self.count = self.count+1
+            levelname = "Outline.%s" % self.count
+            if Parent is None:
+                raise ValueError, "non-top level outline elt parent must be specified"
+        if tdestinationtree is not ListType and tdestinationtree is not TupleType:
+            raise ValueError, "destinationtree must be list or tuple, got %s"
+        nelts = len(destinationtree)
+        lastindex = nelts-1
+        lastelt = firstref = lastref = None
+        destinationnamestotitles = self.destinationnamestotitles
+        closedict = self.closedict
+        for index in range(nelts):
+            eltobj = OutlineEntryObject()
+            eltobj.Parent = Parent
+            eltname = "%s.%s" % (levelname, index)
+            eltref = document.Reference(eltobj, eltname)
+            #document.add(eltname, eltobj)
+            if lastelt is not None:
+                lastelt.Next = eltref
+                eltobj.Prev = lastref
+            if firstref is None:
+                firstref = eltref
+            lastref = eltref
+            lastelt = eltobj # advance eltobj
+            lastref = eltref
+            elt = destinationtree[index]
+            te = type(elt)
+            if te is DictType:
+                # simple leaf {name: dest}
+                leafdict = elt
+            elif te is TupleType:
+                # leaf with subsections: ({name: ref}, subsections) XXXX should clean up (see count(...))
+                try:
+                    (leafdict, subsections) = elt
+                except:
+                    raise ValueError, "destination tree elt tuple should have two elts, got %s" % len(elt)
+                eltobj.Count = count(subsections, closedict)
+                (eltobj.First, eltobj.Last) = self.maketree(document, subsections, eltref)
+            else:
+                raise ValueError, "destination tree elt should be dict or tuple, got %s" % te
+            try:
+                [(Title, Dest)] = leafdict.items()
+            except:
+                raise ValueError, "bad outline leaf dictionary, should have one entry "+str(elt)
+            eltobj.Title = destinationnamestotitles[Title]
+            eltobj.Dest = Dest
+            if te is TupleType and closedict.has_key(Dest):
+                # closed subsection, count should be negative
+                eltobj.Count = -eltobj.Count
+        return (firstref, lastref)
+        
 def count(tree, closedict=None): 
-	"""utility for outline: recursively count leaves in a tuple/list tree"""
-	from operator import add
-	from types import TupleType, ListType
-	tt = type(tree)
-	if tt is TupleType:
-		# leaf with subsections XXXX should clean up this structural usage
-		(leafdict, subsections) = tree
-		[(Title, Dest)] = leafdict.items()
-		if closedict and closedict.has_key(Dest):
-			return 1 # closed tree element
-	if tt is TupleType or tt is ListType:
-		#return reduce(add, map(count, tree))
-		counts = []
-		for e in tree:
-			counts.append(count(e, closedict))
-		return reduce(add, counts)
-	return 1
-	
-	
+    """utility for outline: recursively count leaves in a tuple/list tree"""
+    from operator import add
+    from types import TupleType, ListType
+    tt = type(tree)
+    if tt is TupleType:
+        # leaf with subsections XXXX should clean up this structural usage
+        (leafdict, subsections) = tree
+        [(Title, Dest)] = leafdict.items()
+        if closedict and closedict.has_key(Dest):
+            return 1 # closed tree element
+    if tt is TupleType or tt is ListType:
+        #return reduce(add, map(count, tree))
+        counts = []
+        for e in tree:
+            counts.append(count(e, closedict))
+        return reduce(add, counts)
+    return 1
+    
+    
 
 #### dummy info
 DUMMYINFO = """
