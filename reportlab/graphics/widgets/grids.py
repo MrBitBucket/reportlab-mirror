@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/grids.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.28 2002/08/12 11:02:27 rgbecker Exp $
-__version__=''' $Id: grids.py,v 1.28 2002/08/12 11:02:27 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.29 2002/08/25 10:06:29 rgbecker Exp $
+__version__=''' $Id: grids.py,v 1.29 2002/08/25 10:06:29 rgbecker Exp $ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColorOrNone, isBoolean, isListOfNumbers, OneOf, isListOfColors
@@ -383,13 +383,7 @@ class ShadedRect(Widget):
     def draw(self):
         # general widget bits
         group = Group()
-        x, y, w, h, fillColorStart, fillColorEnd = self._flipRectCorners()
-        rect = Rect(x, y, w, h)
-        rect.strokeColor = self.strokeColor
-        rect.strokeWidth = self.strokeWidth
-        rect.fillColor = None
-        group.add(rect)
-        c0, c1 = fillColorStart, fillColorEnd
+        x, y, w, h, c0, c1 = self._flipRectCorners()
         numShades = self.numShades
         if self.cylinderMode:
             if not numShades%2: numShades = numShades+1
@@ -420,8 +414,12 @@ class ShadedRect(Widget):
             stripe.strokeColor = None
             stripe.strokeWidth = 0
             group.add(stripe)
-
-#
+        if self.strokeColor and self.strokeWidth>=0:
+            rect = Rect(x, y, w, h)
+            rect.strokeColor = self.strokeColor
+            rect.strokeWidth = self.strokeWidth
+            rect.fillColor = None
+            group.add(rect)
         return group
 
 
@@ -515,5 +513,5 @@ if __name__=='__main__': #noruntests
     from reportlab.graphics.shapes import Drawing
     angle=45
     D = Drawing(120,120)
-    D.add(ShadedPolygon(points=(10,10,60,60,110,10),strokeColor=None,strokeWidth=1,angle=90,numShades=97,cylinderMode=0))
+    D.add(ShadedPolygon(points=(10,10,60,60,110,10),strokeColor=None,strokeWidth=1,angle=90,numShades=50,cylinderMode=0))
     D.save(formats=['gif'],fnRoot='shobj',outDir='/tmp')
