@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.22 2001/06/21 13:19:38 rgbecker Exp $
-__version__=''' $Id: pdfutils.py,v 1.22 2001/06/21 13:19:38 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.23 2001/07/10 21:01:12 aaron_watters Exp $
+__version__=''' $Id: pdfutils.py,v 1.23 2001/07/10 21:01:12 aaron_watters Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -113,11 +113,29 @@ def _escape(s):
     PDF escapes are almost like Python ones, but brackets
     need slashes before them too. Uses Python's repr function
     and chops off the quotes first."""
+    # this one only works in python versions <2.1
     s = repr(s)[1:-1]
     s = string.replace(s, '(','\(')
     s = string.replace(s, ')','\)')
     return s
 
+try:
+    from reportlab._rl_accel import escapePDF
+    _escape = escapePDF
+except ImportError:
+    if rl_config.sys_version>='2.1':
+        _ESCAPEDICT={}
+        for c in range(0,256):
+            if c<32 or c>=127:
+                _ESCAPEDICT[chr(c)]= '\\%03o' % c
+            elif c in (ord('\\'),ord('('),ord(')')):
+                _ESCAPEDICT[chr(c)] = '\\'+chr(c)
+            else:
+                _ESCAPEDICT[chr(c)] = chr(c)
+        del c
+        #Michael Hudson donated this
+        def _escape(s):
+            return join(map(lambda c, d=_ESCAPEDICT: d[c],s),'')
 
 def _normalizeLineEnds(text,desired=LINEEND):
     """Normalizes different line end character(s).

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/canvas.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.81 2001/06/21 13:29:21 rgbecker Exp $
-__version__=''' $Id: canvas.py,v 1.81 2001/06/21 13:29:21 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfgen/canvas.py,v 1.82 2001/07/10 21:01:12 aaron_watters Exp $
+__version__=''' $Id: canvas.py,v 1.82 2001/07/10 21:01:12 aaron_watters Exp $ '''
 __doc__=""" 
 The Canvas object is the primary interface for creating PDF files. See
 doc/userguide.pdf for copious examples.
@@ -52,23 +52,25 @@ PATH_OPS = {(0, 0, FILL_EVEN_ODD) : 'n',  #no op
             (1, 1, FILL_NON_ZERO) : 'B',  #Stroke and Fill
             }
 
-try:
-    from reportlab._rl_accel import _instanceEscapePDF
-    import new
-except:
-    _instanceEscapePDF=None
-
-if not _instanceEscapePDF:
-    if rl_config.sys_version>='2.1':
-        _ESCAPEDICT={}
-        for c in range(0,256):
-            if c<32 or c>=127:
-                _ESCAPEDICT[chr(c)]= '\\%03o' % c
-            elif c in (ord('\\'),ord('('),ord(')')):
-                _ESCAPEDICT[chr(c)] = '\\'+chr(c)
-            else:
-                _ESCAPEDICT[chr(c)] = chr(c)
-        del c
+## moved to pdfutils
+##try:
+##    from reportlab._rl_accel import _instanceEscapePDF
+##    import new
+##except:
+##    _instanceEscapePDF=None
+##
+##if not _instanceEscapePDF:
+##    if rl_config.sys_version>='2.1':
+##        _ESCAPEDICT={}
+##        for c in range(0,256):
+##            if c<32 or c>=127:
+##                _ESCAPEDICT[chr(c)]= '\\%03o' % c
+##            elif c in (ord('\\'),ord('('),ord(')')):
+##                _ESCAPEDICT[chr(c)] = '\\'+chr(c)
+##            else:
+##                _ESCAPEDICT[chr(c)] = chr(c)
+##        del c
+escapePDF = pdfutils._escape
 
 class Canvas:
     """This class is the programmer's interface to the PDF file format.  Methods
@@ -220,21 +222,23 @@ class Canvas:
             #switch coordinates, flip text and set font
             self._preamble = '1 0 0 -1 0 %s cm BT %s 12 Tf 14.4 TL ET' % (fp_str(self._pagesize[1]), iName)
 
-    if _instanceEscapePDF:
-        _escape = new.instancemethod(_instanceEscapePDF,None,Canvas)
-    else:
-        if rl_config.sys_version>='2.1':
-            #Michael Hudson donated this
-            def _escape(self,s):
-                return join(map(lambda c, d=_ESCAPEDICT: d[c],s),'')
-        else:
-            def _escape(self, s):
-                """PDF escapes are like Python ones, but brackets need slashes before them too.
-                Use Python's repr function and chop off the quotes first"""
-                s = repr(s)[1:-1]
-                s = replace(s, '(','\(')
-                s = replace(s, ')','\)')
-                return s
+##    if _instanceEscapePDF:
+##        _escape = new.instancemethod(_instanceEscapePDF,None,Canvas)
+##    else:
+##        if rl_config.sys_version>='2.1':
+##            #Michael Hudson donated this
+##            def _escape(self,s):
+##                return join(map(lambda c, d=_ESCAPEDICT: d[c],s),'')
+##        else:
+##            def _escape(self, s):
+##                """PDF escapes are like Python ones, but brackets need slashes before them too.
+##                Use Python's repr function and chop off the quotes first"""
+##                s = repr(s)[1:-1]
+##                s = replace(s, '(','\(')
+##                s = replace(s, ')','\)')
+##                return s
+    def _escape(self, s):
+        return escapePDF(s)
 
     #info functions - non-standard
     def setAuthor(self, author):
