@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/paraparser.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.29 2000/11/13 15:26:46 rgbecker Exp $
-__version__=''' $Id: paraparser.py,v 1.29 2000/11/13 15:26:46 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/paraparser.py,v 1.30 2000/11/13 17:25:52 rgbecker Exp $
+__version__=''' $Id: paraparser.py,v 1.30 2000/11/13 17:25:52 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -354,15 +354,12 @@ class ParaParser(xmllib.XMLParser):
 	def start_onDraw(self,attr):
 		defn = ParaFrag()
 		if attr.has_key('name'): defn.name = attr['name']
-		else: self._syntax_error('<onDraw/> needs at least a name attribute')
+		else: self._syntax_error('<onDraw> needs at least a name attribute')
 
 		if attr.has_key('label'): defn.label = attr['label']
 		defn.kind='onDraw'
 		self._push(cbDefn=defn)
-
-	def end_onDraw(self):
-		if hasattr(self,'text'): self._syntax_error('Only <onDraw/> tag allowed')
-		else: self.handle_data('')
+		self.handle_data('')
 		self._pop()
 
 	#---------------------------------------------------------------
@@ -443,6 +440,7 @@ class ParaParser(xmllib.XMLParser):
 
 		frag = copy.copy(self._stack[-1])
 		#save our data
+		if hasattr(self,'cbDefn') and data!='': syntax_error('Only <onDraw/> tag allowed')
 		frag.text = data
 
 		# if sub and super are both one they will cancel each other out
@@ -511,7 +509,10 @@ if __name__=='__main__':
 		else:
 			print 'ParaStyle', l.fontName,l.fontSize,l.textColor
 			for l in rv:
-				print l.fontName,l.fontSize,l.textColor,l.bold, l.rise, '|%s|'%l.text[:25]
+				print l.fontName,l.fontSize,l.textColor,l.bold, l.rise, '|%s|'%l.text[:25],
+				if hasattr(l,'cbDefn'):
+					print 'cbDefn',l.cbDefn.name,l.cbDefn.label,l.cbDefn.kind
+				else: print
 
 	style=ParaFrag()
 	style.fontName='Times-Roman'
@@ -619,3 +620,4 @@ There was a bard also to sing to them and play
 his lyre, while two tumblers went about performing in the midst of
 them when the man struck up with his tune.]''')
 	check_text('''<onDraw name="myFunc" label="aaa   bbb">A paragraph''')
+	check_text('''<para><onDraw name="myFunc" label="aaa   bbb">B paragraph</para>''')
