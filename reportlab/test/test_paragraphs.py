@@ -115,6 +115,7 @@ class ParagraphTestCase(unittest.TestCase):
         story.append(Paragraph("""This has <u>underlined text</u> here.""", styNormal))
         story.append(Paragraph("""This has <font color=blue><u>blue and <font color=red>red</font> underlined text</u></font> here.""", styNormal))
         story.append(Paragraph("""<u>green underlining</u>""", styGreen))
+        story.append(Paragraph("""<u>green <font size=+4><i>underlining</font></i></u>""", styGreen))
         story.append(Paragraph("""This has m<super>2</super> a superscript.""", styNormal))
         story.append(Paragraph("""This has m<sub>2</sub> a subscript. Like H<sub>2</sub>O!""", styNormal))
         story.append(Paragraph("""This has a font change to <font name=Helvetica>Helvetica</font>.""", styNormal))
