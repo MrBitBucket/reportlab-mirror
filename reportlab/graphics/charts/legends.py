@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/legends.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.9 2001/06/13 06:19:14 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/legends.py,v 1.10 2001/06/27 10:19:40 dinu_gherman Exp $
 """This will be a collection of legends to be used with charts.
 """
 
@@ -23,21 +23,35 @@ class Legend(Widget):
     """
     
     _attrMap = AttrMap(
-        x = AttrMapValue(isNumber),
-        y = AttrMapValue(isNumber),
-        deltax = AttrMapValue(isNumber),
-        deltay = AttrMapValue(isNumber),
-        dxTextSpace = AttrMapValue(isNumber),
-        dx = AttrMapValue(isNumber),
-        dy = AttrMapValue(isNumber),
-        columnMaximum = AttrMapValue(isNumber),
-        alignment = AttrMapValue(OneOf(("left", "right"))),
-        colorNamePairs = AttrMapValue(None),
+        x = AttrMapValue(isNumber,
+            desc="x-coordinate of upper-left reference point"),
+        y = AttrMapValue(isNumber,
+            desc="y-coordinate of upper-left reference point"),
+        deltax = AttrMapValue(isNumber,
+            desc="x-distance between neighbouring swatches"),
+        deltay = AttrMapValue(isNumber,
+            desc="y-distance between neighbouring swatches"),
+        dxTextSpace = AttrMapValue(isNumber,
+            desc="Distance between swatch rectangle and text"),
+        dx = AttrMapValue(isNumber,
+            desc="Width of swatch rectangle"),
+        dy = AttrMapValue(isNumber,
+            desc="Height of swatch rectangle"),
+        columnMaximum = AttrMapValue(isNumber,
+            desc="Max. number of items per column"),
+        alignment = AttrMapValue(OneOf(("left", "right")),
+            desc="Alginment of text with respect to swatches"),
+        colorNamePairs = AttrMapValue(None,
+            desc="List of color/name tuples"),
 
-        fontName = AttrMapValue(isString),
-        fontSize = AttrMapValue(isNumber),
-        fillColor = AttrMapValue(isColorOrNone),
-        strokeColor = AttrMapValue(isColorOrNone)
+        fontName = AttrMapValue(isString,
+            desc="Font name of the strings"),
+        fontSize = AttrMapValue(isNumber,
+            desc="Font size of the strings"),
+        fillColor = AttrMapValue(isColorOrNone,
+            desc=""),
+        strokeColor = AttrMapValue(isColorOrNone,
+            desc="Border color of the swatches")
        )
 
     def __init__(self):
