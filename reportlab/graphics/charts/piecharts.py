@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.4 2001/04/25 13:44:02 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.5 2001/04/25 14:19:28 dinu_gherman Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -248,22 +248,22 @@ def sample1():
 
     return d
 
+
 def sample2():
     "Make a pie chart with nine slices."
 
     d = Drawing(400, 200)
 
     pc = Pie()
-    pc.x = 150
-    pc.y = 50
-    pc.data = [0.31, 0.14800000000000002, 0.10800000000000001,
-    0.075999999999999998, 0.033000000000000002, 0.029999999999999999,
-    0.019, 0.126, 0.14999999999999999]
-#    pc.labels = ['1', '2', '3', '4', '5', '6', '7', '8', 'X']
+    pc.x = 125
+    pc.y = 25
+    pc.data = [0.31, 0.148, 0.108,
+               0.076, 0.033, 0.03,
+               0.019, 0.126, 0.15]
+    pc.labels = ['1', '2', '3', '4', '5', '6', '7', '8', 'X']
 
     pc.width = 150
     pc.height = 150
-    pc.labels = ['a']
     pc.wedges.strokeWidth=0.5
 
     pc.defaultColors = [colors.steelblue,
@@ -277,6 +277,46 @@ def sample2():
                   colors.darkseagreen,
                   colors.lightgoldenrodyellow
                   ]
+    d.add(pc)
+
+    return d
+
+
+def sample3():
+    "Make a pie chart with a very slim slice."
+
+    d = Drawing(400, 200)
+
+    pc = Pie()
+    pc.x = 125
+    pc.y = 25
+
+    pc.data = [74, 1, 25]
+
+    pc.width = 150
+    pc.height = 150
+    pc.wedges.strokeWidth=0.5
+
+    d.add(pc)
+
+    return d
+
+
+def sample4():
+    "Make a pie chart with several very slim slices."
+
+    d = Drawing(400, 200)
+
+    pc = Pie()
+    pc.x = 125
+    pc.y = 25
+
+    pc.data = [74, 1, 1, 1, 1, 22]
+
+    pc.width = 150
+    pc.height = 150
+    pc.wedges.strokeWidth=0.5
+
     d.add(pc)
 
     return d
