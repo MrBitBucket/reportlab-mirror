@@ -15,6 +15,8 @@ from reportlab.lib.pagesizes import A4
 
 
 IMAGES = []
+IMAGENAME = 'cs_logo.gif'
+IMAGENAME = 'pythonpowered.gif'
 
 
 class ImageTestCase(unittest.TestCase):
@@ -38,7 +40,7 @@ class ImageTestCase(unittest.TestCase):
         "Test convert a bitmap file as Image shape into a tmp. PDF file."
 
         d = Drawing(110, 44)
-        inPath = "pythonpowered.gif"
+        inPath = IMAGENAME
         img = Image(0, 0, 110, 44, inPath)
         d.add(img)
         IMAGES.append(img)
@@ -47,7 +49,7 @@ class ImageTestCase(unittest.TestCase):
     def test1(self):
         "Test Image shape, adding it to a PDF page."
 
-        inPath = "pythonpowered.gif"
+        inPath = IMAGENAME
         img = Image(0, 0, 110, 44, inPath)
         IMAGES.append(img)
 
@@ -55,7 +57,7 @@ class ImageTestCase(unittest.TestCase):
     def test2(self):
         "Test scaled Image shape adding it to a PDF page."
 
-        inPath = "pythonpowered.gif"
+        inPath = IMAGENAME
         img = Image(0, 0, 110, 44, inPath)
         d = Drawing(110, 44)
         d.add(img)
@@ -67,7 +69,7 @@ class ImageTestCase(unittest.TestCase):
     def test3(self):
         "Test rotated Image shape adding it to a PDF page."
 
-        inPath = "pythonpowered.gif"
+        inPath = IMAGENAME
         img = Image(0, 0, 110, 44, inPath)
         d = Drawing(110, 44)
         d.add(img)
