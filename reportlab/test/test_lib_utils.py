@@ -82,6 +82,27 @@ class ImporterTestCase(unittest.TestCase):
         theMax = recursiveGetAttr(drawing, 'barchart.valueAxis.valueMax')
         assert theMax == 72
 
+    def test7(self):
+        "test open and read of a simple relative file"
+        from reportlab.lib.utils import open_and_read
+        b = open_and_read('../docs/images/Edit_Prefs.gif')
+
+    def test8(self):
+        "test open and read of a relative file: URL"
+        from reportlab.lib.utils import open_and_read
+        b = open_and_read('file:../docs/images/Edit_Prefs.gif')
+
+    def test9(self):
+        "test open and read of an http: URL"
+        from reportlab.lib.utils import open_and_read
+        b = open_and_read('http://www.reportlab.com/rsrc/encryption.gif')
+
+    def test10(self):
+        "test open and read of a simple relative file"
+        from reportlab.lib.utils import open_and_read, getStringIO
+        b = getStringIO(open_and_read('../docs/images/Edit_Prefs.gif'))
+        b = open_and_read(b)
+
 def makeSuite():
     return makeSuiteForClasses(ImporterTestCase)
 
