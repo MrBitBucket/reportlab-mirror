@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.47 2001/11/28 10:41:22 rgbecker Exp $
-__version__=''' $Id: tables.py,v 1.47 2001/11/28 10:41:22 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.48 2002/01/17 14:00:40 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.48 2002/01/17 14:00:40 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -154,7 +154,6 @@ class Table(Flowable):
 
 		self._bkgrndcmds = []
 		self._linecmds = []
-		self._curweight = self._curcolor = self._curcellstyle = None
 		self.repeatRows = repeatRows
 		self.repeatCols = repeatCols
 		self.splitByRow = splitByRow
@@ -506,11 +505,14 @@ class Table(Flowable):
 			raise NotImplementedError
 
 	def draw(self):
+		self.canv.saveState()
+		self._curweight = self._curcolor = self._curcellstyle = None
 		self._drawBkgrnd()
 		self._drawLines()
 		for row, rowstyle, rowpos, rowheight in map(None, self._cellvalues, self._cellStyles, self._rowpositions[1:], self._rowHeights):
 			for cellval, cellstyle, colpos, colwidth in map(None, row, rowstyle, self._colpositions[:-1], self._colWidths):
 				self._drawCell(cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight))
+		self.canv.restoreState()
 
 	def _drawBkgrnd(self):
 		for cmd, (sc, sr), (ec, er), color in self._bkgrndcmds:
