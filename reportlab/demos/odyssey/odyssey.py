@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: odyssey.py,v $
+#	Revision 1.7  2000/04/06 08:51:06  rgbecker
+#	Fix to timing page count, try to read full text
+#
 #	Revision 1.6  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
-#
+#	
 #	Revision 1.5  2000/02/18 11:00:57  rgbecker
 #	trailing text/Odyssey fix
 #	
@@ -49,7 +52,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:09:29  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: odyssey.py,v 1.6 2000/03/08 13:06:39 andy_robinson Exp $ '''
+__version__=''' $Id: odyssey.py,v 1.7 2000/04/06 08:51:06 rgbecker Exp $ '''
 ___doc__=''
 #odyssey.py
 #
@@ -69,7 +72,7 @@ ___doc__=''
 # 239 pages in 39.39 seconds = 6 pages per second
 
 from reportlab.pdfgen import canvas
-import time
+import time, os
 
 
 from reportlab.lib.units import inch, cm
@@ -126,7 +129,11 @@ def run():
     canv.setFont('Times-Roman', 12)
     tx = canv.beginText(left_margin, top_margin - 0.5*inch)
     
-    data = open('odyssey.txt','r').readlines()
+    for fn in ('Odyssey.full.txt','Odyssey.txt'):
+        if os.path.isfile(fn):
+            break
+
+    data = open(fn,'r').readlines()
     for line in data:
         #this just does it the fast way...
         tx.textLine(line)
@@ -160,7 +167,7 @@ def run():
     
     finished = time.time()
     elapsed = finished - started
-    pages = canv.getPageNumber()
+    pages = canv.getPageNumber()-1
     speed =  pages / elapsed
     print '%d pages in %0.2f seconds = %0.2f pages per second' % (
                 pages, elapsed, speed)
