@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: runtests.py,v $
+#	Revision 1.4  2000/03/02 12:22:28  rgbecker
+#	Added recognition comment checks
+#
 #	Revision 1.3  2000/03/02 10:43:37  rgbecker
 #	Fixed problem with -dir relativepath
-#
+#	
 #	Revision 1.2  2000/02/23 15:08:23  rgbecker
 #	Fixed clean_files
 #	
@@ -42,7 +45,7 @@
 #	New infrastructure
 #	
 #	
-__version__=''' $Id: runtests.py,v 1.3 2000/03/02 10:43:37 rgbecker Exp $ '''
+__version__=''' $Id: runtests.py,v 1.4 2000/03/02 12:22:28 rgbecker Exp $ '''
 '''
 script for testing ReportLab
 '''
@@ -66,7 +69,7 @@ def find_py_files(d):
 	return L
 
 def find_executable_py_files(d):
-	prog=re.compile('^( |\t)*if( |\t)+__name__( |\t)*==( |\t)*(\'|\")__main__(\'|\")( |\t)*:')
+	prog=re.compile('^(( |\t)*if( |\t)+__name__( |\t)*==( |\t)*(\'|\")__main__(\'|\")( |\t)*:)|#REPORTLAB_TEST_SCRIPT')
 	L=[]
 	for n in find_py_files(d):
 		for l in open(n,'r').readlines():
