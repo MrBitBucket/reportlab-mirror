@@ -33,9 +33,13 @@
 #
 ###############################################################################
 #	$Log: pagesizes.py,v $
+#	Revision 1.3  2000/04/26 11:13:28  andy_robinson
+#	Fixed some broken pagesizes and added a
+#	landscape() function.
+#
 #	Revision 1.2  2000/03/08 13:40:49  rgbecker
 #	Added DEFAULT_PAGE_SIZE at end
-#
+#	
 #	Revision 1.1  2000/03/08 12:55:07  andy_robinson
 #	initial checkin
 #	
@@ -43,7 +47,7 @@
 """This module defines a few common page sizes in points (1/72 inch).
 To be expanded to include things like label sizes, envelope windows
 etc."""
-__version__=''' $Id: pagesizes.py,v 1.2 2000/03/08 13:40:49 rgbecker Exp $ '''
+__version__=''' $Id: pagesizes.py,v 1.3 2000/04/26 11:13:28 andy_robinson Exp $ '''
 
 from units import cm, inch
 
@@ -52,9 +56,9 @@ _W, _H = (21*cm, 29.7*cm)
 A6 = (_W*.5, _H*.5)
 A5 = (_H*.5, _W)
 A4 = (_W, _H)
-A3 = (_H*2, _W)
+A3 = (_H, _W*2)
 A2 = (_W*2, _H*2)
-A1 = (_H*4, _W*2)
+A1 = (_H*2, _W*4)
 A0 = (_W*4, _H*4)
 
 letter = (8.5*inch, 11*inch)
@@ -72,3 +76,8 @@ B0 = (_BW*4, _BH*4)
 
 #change this to suit your average needs
 DEFAULT_PAGE_SIZE = A4
+
+def landscape(pagesize):
+    """Use this to invert any pagesize"""
+    return (pagesize[1], pagesize[0])
+
