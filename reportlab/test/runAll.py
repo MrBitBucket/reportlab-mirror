@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/runAll.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.17 2004/03/26 14:26:50 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.18 2004/03/27 09:42:24 rgbecker Exp $
 """Runs all test files in all subfolders.
 """
 import os, glob, sys, string, traceback
@@ -37,8 +37,6 @@ def main(pattern='test_*.py'):
         folder = os.path.dirname(sys.argv[0]) or os.getcwd()
     from reportlab.lib.utils import isSourceDistro
     haveSRC = isSourceDistro()
-    _dbg = open('/tmp/_runAll.dbg','w')
-    print >>_dbg, "outputfile('')",outputfile('')
 
     def cleanup(folder,patterns=('*.pdf', '*.log','*.svg','runAll.txt', 'test_*.txt')):
         for pat in patterns:
@@ -62,6 +60,7 @@ def main(pattern='test_*.py'):
         sys.stderr.write('\n###################### the following tests could not be imported\n')
         for f,tb in NI:
             print 'file: "%s"\n%s\n' % (f,string.join(tb,''))
+    print 'Logs and output files written to folder "%s"' % outputfile('')
 
 if __name__ == '__main__': #noruntests
     main()
