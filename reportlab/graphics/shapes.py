@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.34 2001/06/21 17:23:59 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.35 2001/07/02 16:50:07 rgbecker Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -246,15 +246,10 @@ class Shape:
 		"""This adds the ability to check every attribute assignment as it is made.
 		It slows down shapes but is a big help when developing. It does not
 		get defined if rl_config.shapeChecking = 0"""
-
-		#print 'shapeChecking = 1, defining setattr'
 		def __setattr__(self, attr, value):
 			"""By default we verify.  This could be off
 			in some parallel base classes."""
 			validateSetattr(self,attr,value)	#from reportlab.lib.attrmap
-	#else:
-	#	 print 'shapeChecking = 0, not defining setattr'
-
 
 class Group(Shape):
 	"""Groups elements together.  May apply a transform
