@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPDF.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.17 2002/05/15 15:54:35 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.18 2002/05/17 08:01:18 dinu_gherman Exp $
 # renderPDF - draws Drawings onto a canvas
 """Usage:
     import renderpdf
@@ -9,7 +9,7 @@
 Execute the script to see some test drawings.
 changed
 """
-__version__=''' $Id: renderPDF.py,v 1.17 2002/05/15 15:54:35 dinu_gherman Exp $ '''
+__version__=''' $Id: renderPDF.py,v 1.18 2002/05/17 08:01:18 dinu_gherman Exp $ '''
 
 from reportlab.graphics.shapes import *
 from reportlab.pdfgen.canvas import Canvas
@@ -251,7 +251,7 @@ class GraphicsFlowable(Flowable):
     def draw(self):
         draw(self.drawing, self.canv, 0, 0)
 
-def drawToFile(d,fn,msg, showBoundary=rl_config.showBoundary, autoSize=1):
+def drawToFile(d, fn, msg="", showBoundary=rl_config.showBoundary, autoSize=1):
     """Makes a one-page PDF with just the drawing.
     
     If autoSize=1, the PDF will be the same size as
