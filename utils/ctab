@@ -1,0 +1,1 @@
+13 5 * * *		/usr/bin/python $HOME/utils/daily.py

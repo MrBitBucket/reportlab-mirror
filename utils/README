@@ -1,0 +1,37 @@
+The utils module is intended for non distribution stuff eg cvs_check.py.
+To run the daily script you need a .cvspass entry for cvs1:/cvsroot/reportlab.
+
+I have instituted a daily crontab job on sourceforge. Each day around 5 am VA Linux time (I
+think it's PST) we build two files in our FTP area called current.tgz & current.zip. These are
+intended as source archives and have the CVS dirs removed.
+
+The script used for the daily run is utils/daily.py. It can also be used with
+a release argument (the tag to be used).
+
+ie to create current.tgz & current.zip in /home/groups/ftp/pub/reportlab
+	python daily.py
+
+to create reportlab_yyyymmdd.zip/.tgz in /home/groups/ftp/pub/reportlab as a release
+with tag TTT
+	python daily.py -release TTT
+
+The files current.zip/.tgz and reportlab.zip/.tgz will then be linked to the created files.
+
+I don't know enough yet, but Cyclops looks like a really great tool.
+
+The utils/runtests.py script has a command line like
+
+   python runtests.py [options]
+
+    option
+    -help           print this message and exit
+    -dir path       directory to test default /tmp/reportlab_test/reportlab
+    -cycles[=flags] check for cycles using Tim Peter's Cyclops cycle finder
+                    flags=s(tats), a(rcs), C(omponents), c(ycles), o(bjects)
+    -notest         don't carry out tests
+    -clean          cleanup if no errors
+    -fclean         cleanup even if some errors occur
+
+As there are a fair number of problems, I am looking at the output of
+	python runtests.py -dir \python\reportlab -cycles=sCao
+
