@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.24  2000/10/23 23:55:27  rgbecker
+#	Added J Alet's bug case
+#
 #	Revision 1.23  2000/10/03 09:19:11  rgbecker
 #	Justified XPreformatteds are OK
-#
+#	
 #	Revision 1.22  2000/10/02 13:13:21  rgbecker
 #	Splitting fixes. Mostly caused by XPreformatted not doing it right.
 #	
@@ -101,7 +104,7 @@
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.23 2000/10/03 09:19:11 rgbecker Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.24 2000/10/23 23:55:27 rgbecker Exp $ '''
 import string
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -685,3 +688,8 @@ and better control when printed.
 		s.wrap(aW,aH)
 		dumpParagraphLines(s)
 		aH = 500
+
+	P=Paragraph("""Price<super><font color="red">*</font></super>""", styleSheet['Normal'])
+	dumpParagraphFrags(P)
+	w,h = P.wrap(24, 200)
+	dumpParagraphLines(P)
