@@ -157,8 +157,8 @@
                     PDFgen Image Support
                 </para>
                 <para>
-                    Python Imaging Library and zlib do all the work - many formats.  Images 
-			cached (like .pyc files) - very fast builds possible.
+                    Python Imaging Library and zlib do all the work - many formats.
+                    Images cached (like .pyc files) - very fast builds possible.
                 </para>
                 <image filename="python.gif" width="588" height="200"/>
             </frame>
@@ -191,7 +191,7 @@
                 </para>
                 <para style="BodyText">
                     Back ends includeTkinter, wxPython, Mac, Pythonwin, PDF, PostScript,
-				OpenGL, Adobe Illustrator and PIL.  Really easy to add a new one!
+                    OpenGL, Adobe Illustrator and PIL.  Really easy to add a new one!
                 </para>
             </frame>
         </slide>
