@@ -16,7 +16,7 @@ def goodTest(x,t,tb=0,**kw):
 		r = P(x)
 		rb = 0
 	except:
-		et, ev, None = sys.exc_info()
+		et, ev, _unused = sys.exc_info()
 		r = '%s %s' % (et.__name__, str(ev))
 		rb = 1
 
