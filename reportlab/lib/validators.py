@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/validators.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.24 2002/07/31 14:57:12 rgbecker Exp $
-__version__=''' $Id: validators.py,v 1.24 2002/07/31 14:57:12 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/validators.py,v 1.25 2002/12/03 15:38:03 rgbecker Exp $
+__version__=''' $Id: validators.py,v 1.25 2002/12/03 15:38:03 rgbecker Exp $ '''
 """
 This module contains some standard verifying functions which can be
 used in an attribute map.
@@ -227,7 +227,7 @@ isNumber = _isNumber()
 isInt = _isInt()
 isNoneOrInt = NoneOr(isInt,'isNoneOrInt')
 isNumberOrNone = _isNumberOrNone()
-isTextAnchor = OneOf('start','middle','end')
+isTextAnchor = OneOf('start','middle','end','boxauto')
 isListOfNumbers = SequenceOf(isNumber,'isListOfNumbers')
 isListOfNumbersOrNone = _isListOfNumbersOrNone()
 isListOfShapes = _isListOfShapes()

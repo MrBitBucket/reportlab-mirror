@@ -1,7 +1,7 @@
-#copyright ReportLab Inc. 2000-2001
+    #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/spider.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/spider.py,v 1.2 2002/12/03 13:58:35 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/spider.py,v 1.3 2002/12/03 15:37:12 rgbecker Exp $
 # spider chart, also known as radar chart
 
 """Spider Chart
@@ -10,7 +10,7 @@ Normal use shows variation of 5-10 parameters against some 'norm' or target.
 When there is more than one series, place the series with the largest
 numbers first, as it will be overdrawn by each successive one.
 """
-__version__=''' $Id: spider.py,v 1.2 2002/12/03 13:58:35 rgbecker Exp $ '''
+__version__=''' $Id: spider.py,v 1.3 2002/12/03 15:37:12 rgbecker Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -28,8 +28,19 @@ from reportlab.graphics.shapes import Group, Drawing, Line, Rect, Polygon, Ellip
     Wedge, String, STATE_DEFAULTS
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.areas import PlotArea
+from textlabels import Label
 
-_ANGLE2LABEL=[]
+_ANGLE2ANCHOR={0:'w', 45:'sw', 90:'s', 135:'se', 180:'e', 225:'ne', 270:'n', 315: 'nw'}
+def _findNearestAngleValue(angle,D):
+    angle =  angle % 360
+    print 'Angle: ', angle,
+    m = 900
+    for k in D.keys():
+        d = min((angle-k)%360,(k-angle)%360)
+        if d<m:
+            m, v = d, k
+    print '-->', m, v, D[v],
+    return D[v]
 
 class StrandProperties(PropHolder):
     """This holds descriptive information about concentric 'strands'.
@@ -141,8 +152,6 @@ class SpiderChart(PlotArea):
             angles.append(a)
             a = a + angleBetween
 
-
-
         #print '%d slices each of %0.2f radians here: %s' % (n, angleBetween, repr(angles))
         if self.direction == "anticlockwise":
             whichWay = 1
@@ -164,15 +173,28 @@ class SpiderChart(PlotArea):
         startAngle = self.startAngle
         spokes = []
         for angle in angles:
-            spoke = Line(centerx,
-                         centery,
-                         centerx + radius * sin(angle),
-                         centery + radius * cos(angle),
-                         strokeWidth = 0.5
-                         )
+            sa = sin(angle)*radius
+            ca = cos(angle)*radius
+            spoke = Line(centerx, centery, centerx + ca, centery + sa, strokeWidth = 0.5)
             #print 'added spoke (%0.2f, %0.2f) -> (%0.2f, %0.2f)' % (spoke.x1, spoke.y1, spoke.x2, spoke.y2)
-
             spokes.append(spoke)
+            text = self.labels[i]
+            if text:
+                si = self.strands[i]
+                labelRadius = si.labelRadius
+                ex = centerx + labelRadius*ca
+                ey = centery + labelRadius*sa
+                L = Label()
+                L.setText(text)
+                L.x = ex
+                L.y = ey
+                L.boxAnchor = _findNearestAngleValue(angle*180/pi,_ANGLE2ANCHOR)
+                L.fontName = si.fontName
+                L.fontSize = si.fontSize
+                L.fillColor = si.fontColor
+                L.textAnchor = 'boxauto'
+                spokes.append(L)
+            i  = i + 1
 
         # now plot the polygons
 

@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.27 2002/11/27 20:22:57 rgbecker Exp $
-__version__=''' $Id: textlabels.py,v 1.27 2002/11/27 20:22:57 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.28 2002/12/03 15:37:12 rgbecker Exp $
+__version__=''' $Id: textlabels.py,v 1.28 2002/12/03 15:37:12 rgbecker Exp $ '''
 import string
 
 from reportlab.lib import colors
@@ -92,6 +92,7 @@ def _text2Path(text, x=0, y=0, fontName='Times-Roman', fontSize=1000,
     return definePath(_text2PathDescription(text,x=x,y=y,fontName=fontName,
                     fontSize=fontSize,anchor=anchor,truncate=truncate,pathReverse=pathReverse))
 
+_BA2TA={'w':'start','nw':'start','sw':'start','e':'end', 'ne': 'end', 'se':'end', 'n':'middle','s':'middle','c':'middle'}
 class Label(Widget):
     """A text label to attach to something else, such as a chart axis.
 
@@ -228,7 +229,10 @@ class Label(Widget):
 
     def _getTextAnchor(self):
         '''This can be overridden to allow special effects'''
-        return self.textAnchor
+        ta = self.textAnchor
+        if ta=='boxauto': ta = _BA2TA[self.boxAnchor]
+        print self.boxAnchor, ta
+        return ta
 
     def draw(self):
         _text = self._text
