@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgets/grids.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.32 2003/08/12 14:06:49 rgbecker Exp $
-__version__=''' $Id: grids.py,v 1.32 2003/08/12 14:06:49 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/widgets/grids.py,v 1.33 2004/05/03 08:13:37 rgbecker Exp $
+__version__=''' $Id: grids.py,v 1.33 2004/05/03 08:13:37 rgbecker Exp $ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColorOrNone, isBoolean, isListOfNumbers, OneOf, isListOfColors
@@ -399,8 +399,8 @@ class ShadedRect(Widget):
             else:
                 col = colors.linearlyInterpolatedColor(c0,c1,V[0],V[-1], v)
             stripe.fillColor = col
-            stripe.strokeColor = None
-            stripe.strokeWidth = 0
+            stripe.strokeColor = col
+            stripe.strokeWidth = 1
             group.add(stripe)
         if self.strokeColor and self.strokeWidth>=0:
             rect = Rect(x, y, w, h)
