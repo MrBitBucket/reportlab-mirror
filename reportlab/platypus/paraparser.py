@@ -18,6 +18,12 @@ sizeDelta = 2		# amount to reduce font size by for super and sub script
 subFraction = 0.5	# fraction of font size that a sub script should be lowered
 superFraction = 0.5	# fraction of font size that a super script should be raised
 
+def _num(s):
+	try:
+		return int(s)
+	except ValueError:
+		return float(s)
+
 #characters not supported: epsi, Gammad, gammad, kappav, rhov, Upsi, upsi
 greeks = {
 	'alpha':'a',
@@ -64,7 +70,14 @@ class ParaFrag:
 	"""class ParaFrag contains the intermediate representation of string
 	segments as they are being parsed by the XMLParser.
 	"""
-	pass
+	def __init__(self,**attr):
+		for k,v in attr.items():
+			setattr(self,k,v)
+
+	def clone(self,**attr):
+		n = apply(ParaFrag,(),self.__dict__)
+		if attr != {}: apply(ParaFrag.__init__,(n,),attr)
+		return n
 
 #------------------------------------------------------------------
 # The ParaFormatter will be able to format the following xml
@@ -150,17 +163,20 @@ class ParaParser(xmllib.XMLParser):
 		self._pop(greek=1)
 
 	#things which are valid font attributes
-	_fontAttrMap = {'size': ('fontSize',None),
-					'name': ('font', None),
-					'color':('color',stringToColor)}
+	_fontAttrMap = {'size': ('fontSize',_num),
+					'name': ('fontName', None),
+					'color':('textColor',stringToColor)}
 	def start_font(self,attr):
 		A = {}
 		for i, j in self._fontAttrMap.items():
 			if attr.has_key(i):
 				func = j[1]
 				val  = attr[i]
-				A[j[0]] = (func is None) and val or apply(func,(val,))
-		apply(self._push,(),A)
+				try:
+					A[j[0]] = (func is None) and val or apply(func,(val,))
+				except:
+					self.syntax_error('%s: invalid value %s'%(i,val))
+			apply(self._push,(),A)
 
 	def end_font(self):
 		self._pop()
@@ -217,11 +233,11 @@ class ParaParser(xmllib.XMLParser):
 		frag = ParaFrag()
 		frag.sub = 0
 		frag.super = 0
-		frag.font, frag.bold, frag.italic = ps2tt(style.fontName)
+		frag.fontName, frag.bold, frag.italic = ps2tt(style.fontName)
 		frag.fontSize = style.fontSize
 		frag.underline = 0
 		frag.greek = 0
-		frag.color = style.textColor
+		frag.textColor = style.textColor
 		self._stack = [frag]
 
 	def syntax_error(self,message):
@@ -233,22 +249,22 @@ class ParaParser(xmllib.XMLParser):
 		"Creates an intermediate representation of string segments."
 
 		frag = copy.copy(self._stack[-1])
-		# segment first has data
-		frag.s = data
+		#save our data
+		frag.text = data
 
 		# if sub and super are both one they will cancel each other out
 		if frag.sub == 1 and frag.super == 1:
 			frag.sub = 0
 			frag.super = 0
 
-		if frag.greek: frag.font = 'symbol'
+		if frag.greek: frag.fontName = 'symbol'
 		# bold, italic, and underline
-		frag.font = tt2ps(frag.font,frag.bold,frag.italic)
+		frag.fontName = tt2ps(frag.fontName,frag.bold,frag.italic)
 
 		self.fragList.append(frag)
 
 	#----------------------------------------------------------------
-	def parse(self, s, style):
+	def parse(self, text, style):
 		"""Given a formatted string will return a list of
 		ParaFrag objects with their calculated widths.
 		If errors occur None will be returned and the
@@ -259,7 +275,7 @@ class ParaParser(xmllib.XMLParser):
 		# tags, therefore we must throw some unused flags around the
 		# given string
 		self._reset(style)	# reinitialise the parser
-		self.feed("<ReportLabParagraph>"+s+"</ReportLabParagraph>")
+		self.feed("<ReportLabParagraph>"+text+"</ReportLabParagraph>")
 		self.close()	# force parsing to complete
 		if len(self.errors)==0:
 			fragList = self.fragList
@@ -297,4 +313,4 @@ if __name__=='__main__':
 			print l
 	else:
 		for l in rv:
-			print l.font,l.fontSize,l.color,l.bold, l.s[:25]
+			print l.fontName,l.fontSize,l.textColor,l.bold, l.text[:25]
