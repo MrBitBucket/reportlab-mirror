@@ -372,7 +372,11 @@ class Table(Flowable):
         # Even if something is fixedWidth, the attribute to check is not
         # necessarily consistent (cf. Image.drawWidth).  Therefore, we'll
         # be extra-careful and fall through to this code if necessary.
-        if hasattr(v, 'minWidth'): return v.minWidth() # should be all flowables
+        if hasattr(v, 'minWidth'):
+            try:
+                return v.minWidth() # should be all flowables
+            except AttributeError:
+                pass
         if t is not StringType: v = v is not None and str(v) or ''
         v = string.split(v, "\n")
         return max(map(lambda a, b=s.fontname, c=s.fontsize,d=pdfmetrics.stringWidth: d(a,b,c), v))
