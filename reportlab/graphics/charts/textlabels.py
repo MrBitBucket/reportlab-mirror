@@ -1,11 +1,11 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/textlabels.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.11 2001/09/11 16:06:48 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/textlabels.py,v 1.12 2001/09/11 18:14:30 rgbecker Exp $
 import string
 
 from reportlab.lib import colors
-from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, isTextAnchor, isBoxAnchor
+from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, isTextAnchor, isBoxAnchor, isBoolean
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.shapes import Drawing, Group, Circle, Rect, String, STATE_DEFAULTS
@@ -40,6 +40,9 @@ class Label(Widget):
 		width = AttrMapValue(isNumberOrNone),
 		height = AttrMapValue(isNumberOrNone),
 		textAnchor = AttrMapValue(isTextAnchor),
+		visible = AttrMapValue(isBoolean,desc="True if the label is to be drawn"),
+		lineStrokeWidth = AttrMapValue(isNumberOrNone, desc="Non-zero for a drawn line"),
+		lineStrokeColor = AttrMapValue(isColorOrNone, desc="Color for a drawn line"),
 		)
 
 	def __init__(self):
@@ -61,6 +64,9 @@ class Label(Widget):
 		self.width = None
 		self.height = None
 		self.textAnchor = 'start'
+		self.visible = 1
+		self.lineStrokeWidth = 0
+		self.lineStrokeColor = None
 
 	def setText(self, text):
 		"""Set the text property.  May contain embedded newline characters.
