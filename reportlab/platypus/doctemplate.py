@@ -81,13 +81,6 @@ class ActionFlowable(Flowable):
             action = (action,)
         self.action = tuple(action)
 
-    def wrap(self, availWidth, availHeight):
-        '''Should never be called.'''
-        raise NotImplementedError
-
-    def draw(self):
-        '''Should never be called.'''
-        raise NotImplementedError
 
     def apply(self,doc):
         '''
@@ -116,6 +109,14 @@ class ActionFlowable(Flowable):
 
 class LCActionFlowable(ActionFlowable):
     locChanger = 1                  #we cause a frame or page change
+
+    def wrap(self, availWidth, availHeight):
+        '''Should never be called.'''
+        raise NotImplementedError
+
+    def draw(self):
+        '''Should never be called.'''
+        raise NotImplementedError
 
 class NextFrameFlowable(ActionFlowable):
     def __init__(self,ix,resume=0):

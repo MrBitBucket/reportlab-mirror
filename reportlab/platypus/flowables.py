@@ -448,8 +448,8 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1):
 def _flowableSublist(V):
     "if it isn't a list or tuple, wrap it in a list"
     if type(V) not in (ListType, TupleType): V = V is not None and [V] or []
-    from doctemplate import  ActionFlowable
-    assert not filter(lambda x: isinstance(x,ActionFlowable),V),'Action flowables not allowed in sublists'
+    from doctemplate import LCActionFlowable
+    assert not filter(lambda x: isinstance(x,LCActionFlowable),V),'LCActionFlowables not allowed in sublists'
     return V
 
 class KeepTogether(Flowable):
