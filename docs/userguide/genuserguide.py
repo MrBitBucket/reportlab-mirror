@@ -32,6 +32,9 @@
 #
 ###############################################################################
 #   $Log: genuserguide.py,v $
+#   Revision 1.27  2000/07/13 11:59:45  rgbecker
+#   Added some more
+#
 #   Revision 1.26  2000/07/10 23:56:09  andy_robinson
 #   Paragraphs chapter pretty much complete.  Fancy cover.
 #
@@ -114,7 +117,7 @@
 #   Revision 1.1  2000/06/17 02:57:56  aaron_watters
 #   initial checkin. user guide generation framework.
 #   
-__version__=''' $Id: genuserguide.py,v 1.26 2000/07/10 23:56:09 andy_robinson Exp $ '''
+__version__=''' $Id: genuserguide.py,v 1.27 2000/07/13 11:59:45 rgbecker Exp $ '''
 
 
 __doc__ = """
@@ -134,7 +137,7 @@ from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import Paragraph, Spacer, Preformatted,\
             PageBreak, CondPageBreak, Flowable, Table, TableStyle, \
-            NextPageTemplate
+            NextPageTemplate, KeepTogether
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.sequencer import getSequencer
@@ -254,6 +257,14 @@ def EmbeddedCode(code,name='t', fn='embedded.tmp'):
     disc("produces")
     exec code+("\ngetStory().append(%s)\n"%name)
 
+def startKeep():
+    return len(getStory())
+
+def endKeep(s):
+    S = getStory()
+    k = KeepTogether(S[s:])
+    S[s:] = [k]
+ 
 def title(text):
     """Use this for the document title only"""
     disc(text,style=styleSheet['Title'])
@@ -267,7 +278,15 @@ def heading1(text):
     getStory().append(PageBreak())
     p = Paragraph('Chapter <seq id="Chapter"/> - ' + quickfix(text), H1)
     getStory().append(p)
-    
+
+def Appendix1(text,init=0):
+    getStory().append(PageBreak())
+    if init:
+        seq.setFormat('Chapter','A')
+        seq.reset('Chapter')
+    p = Paragraph('Appendix <seq id="Chapter"/> - ' + quickfix(text), H1)
+    getStory().append(p)
+
 def heading2(text):
     """Used to be 'lesson'"""
     getStory().append(CondPageBreak(inch))

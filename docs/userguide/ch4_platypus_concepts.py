@@ -16,7 +16,7 @@ documents with a minimum of effort.
 
 disc("""
 The overall design of PLATYPUS can be thought of has having
-several layers these are
+several layers, top down, these are
 1) DocTemplate,
 2) PageTemplates,
 3) Frames,
@@ -27,7 +27,7 @@ several layers these are
 disc("""
 $DocTemplates$ contain one or more $PageTemplates$ each of which contain one or more
 $Frames$. $Flowables$ are things which can be <i>flowed</i> into a $Frame$ eg
-a $Paregraph$ or a $Table$.
+a $Paragraph$ or a $Table$.
 """)
 
 disc("""
@@ -79,6 +79,137 @@ eg("""
     doc = RLDocTemplate(filename,pagesize = letter)
     doc.build(story)
 """)
+
+heading2("$Flowables$")
+disc("""
+$Flowables$ are things which can be drawn and which have $wrap$, $draw$ and perhaps $split$ methods.
+$Flowable$ is an abstract base class for things to be drawn an instance knows its size
+and draws in its own coordinate system (this requires the base API to provide an absolute coordinate
+system when the $Flowable.draw$ method is called). To get an instance use $f=Flowable()$.
+""")
+disc("""
+It should be noted that the $Flowable$ class is an <i>abstract</i> class and is normally
+only used as a base class.
+""")
+k=startKeep()
+disc("""
+To illustrate the general way in which $Flowables$ are used we show how a derived class $Paragraph$
+is used and drawn on a canvas. $Paragraphs$ are so important they will get a whole chapter
+to themselves.
+""")
+eg("""
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.platypus import Paragraph
+    from reportlab.pdfgen.canvas import Canvas
+    styleSheet = getSampleStyleSheet()
+    style = styleSheet['BodyText']
+    P=Paragraph('This is a very silly example',style)
+    canv = Canvas('doc.pdf')
+    aW = 460    # available width and height
+    aH = 800
+    w,h = P.wrap(aW, aH)    # find required space
+    if w<aW and h<aH:
+        P.drawOn(canv,0,aH)
+        aH = aH - h         # reduce the available height
+        canv.save()
+    else:
+        raise ValueError, "Not enough room"
+""")
+endKeep(k)
+heading3("$Flowable$ User Methods")
+eg("""
+	Flowable.draw()
+""")
+disc("""This will be called to ask the flowable to actually render itself.
+The $Flowable$ class does not implement $draw$.
+The calling code should ensure that the flowable has an attribute $canv$
+which is the $pdfgen.Canvas$ which should be drawn to an that the $Canvas$
+is in an appropriate state (as regards translations rotations etc). Normally
+this method will only be called internally by the $drawOn$ method. Derived classes
+must implement this method.
+""")
+eg("""
+	Flowable.drawOn(canvas,x,y)
+""")
+disc("""
+This is the method which controlling programs use to render the flowable to a particular
+canvas. It handles the translation to the canvas coordinate (<i>x</i>,<i>y</i>) and ensuring that
+the flowable has a $canv$ attribute so that the
+$draw$ method (which is not implemented in the base class) can render in an
+absolute coordinate frame.
+""")
+eg("""
+	Flowable.wrap(availWidth, availHeight)
+""")
+disc("""This will be called by the enclosing frame before objects
+are asked their size, drawn or whatever.  It returns the
+size actually used.""")
+eg("""
+	Flowable.split(self, availWidth, availheight):
+""")
+disc("""This will be called by more sophisticated frames when
+		wrap fails. Stupid flowables should return [] meaning that they are unable to split.
+Clever flowables should split themselves and return a list of flowables. It is up to
+the client code to ensure that repeated attempts to split are avoided.
+If the space is sufficient the split method should return [self].
+Otherwise
+the flowable should rearrange itself and return a list $[f0,...]$ of flowables
+which will be considered in order. The implemented split method should avoid
+changing $self$ as this will allow sophisticated layout mechanisms to do multiple
+passes over a list of flowables.
+""")
+eg("""
+	Flowable.getSpaceAfter(self):
+	Flowable.getSpaceBefore(self):
+""")
+disc("""These methods return how much space should follow or precede
+the flowable. The space doesn't belong to the flowable itself ie the flowable's
+$draw$ method shouldn't consider it when rendering. Controlling programs
+will use the values returned in determining how much space is required by
+a particular flowable in context.
+""")
+
+disc("""The chapters which follow will cover the most important
+specific types of flowables - Paragraphs and Tables""")
+
+
+heading2("Frames")
+disc("""
+$Frames$ are active containers which are themselves contained in $PageTemplates$.
+$Frames$ have a location and size and maintain a concept of remaining drawable
+space.
+""")
+
+eg("""
+	Frame(x1, y1, width,height, leftPadding=6, bottomPadding=6,
+			rightPadding=6, topPadding=6, id=None, showBoundary=0)
+""")
+disc("""Creates a $Frame$ instance with lower left hand corner at coordinate $(x1,y1)$
+(relative to the canvas at use time) and with dimensions $width$ x $height$. The $Padding$
+arguments are positive quantities used to reduce the space available for drawing.
+The $id$ argument is an identifier for use at runtime eg 'LeftColumn' or 'Rightcolumn' etc.
+If the $showBoundary$ argument is non-zero then the boundary of the frame will get drawn
+at run time (this is useful sometimes).
+""")
+heading3("$Frame$ User Methods")
+eg("""
+	Frame.addFromList(drawlist, canvas)
+""")
+disc("""Consumes $Flowables$ from the front of $drawlist$ until the
+	frame is full.	If it cannot fit one object, raises
+	an exception.""")
+
+eg("""
+	Frame.split(flowable,canv)
+""")
+disc('''Ask the flowable to split using up the available space and return
+the list of flowables.
+''')
+
+eg("""
+	Frame.drawBoundary(canvas)
+""")
+disc("draw the frame boundary as a rectangle (primarily for debugging).")
 
 heading2("Documents and Templates")
 
@@ -265,80 +396,3 @@ standard behaviour, whilst the attributes allow instance changes. The $id$ argum
 run time to perform $PageTemplate$ switching so $id='FirstPage'$ or $id='TwoColumns'$ are typical.
 """)
 
-heading2("Frames")
-disc("""
-$Frames$ are active containers which are themselves contained in $PageTemplates$.
-$Frames$ have a location and size and maintain a concept of remaining drawable
-space.
-""")
-
-eg("""
-	Frame(x1, y1, width,height, leftPadding=6, bottomPadding=6,
-			rightPadding=6, topPadding=6, id=None, showBoundary=0)
-""")
-disc("""Creates a $Frame$ instance with lower left hand corner at coordinate $(x1,y1)$
-(relative to the canvas at use time) and with dimensions $width$ x $height$. The $Padding$
-arguments are positive quantities used to reduce the space available for drawing.
-The $id$ argument is an identifier for use at runtime eg 'LeftColumn' or 'Rightcolumn' etc.
-If the $showBoundary$ argument is non-zero then the boundary of the frame will get drawn
-at run time (this is useful sometimes).
-""")
-heading3("$Frame$ User Methods")
-eg("""
-	Frame.addFromList(drawlist, canvas)
-""")
-disc("""Consumes $Flowables$ from the front of $drawlist$ until the
-	frame is full.	If it cannot fit one object, raises
-	an exception.""")
-
-eg("""
-	Frame.split(flowable,canv)
-""")
-disc('''Ask the flowable to split using up the available space and return
-the list of flowables.
-''')
-
-eg("""
-	Frame.drawBoundary(canvas)
-""")
-disc("draw the frame boundary as a rectangle (primarily for debugging).")
-
-heading2("$Flowables$")
-disc("""
-$Flowables$ are things which can be drawn and which have $wrap$, $draw$ and perhaps $split$ methods.
-$Flowable$ is an abstract base class for things to be drawn an instance knows its size
-and draws in its own coordinate system (this requires the base API to provide an absolute coordinate
-system when the $Flowable.draw$ method is called). To get an instance use $f=Flowable()$.
-""")
-heading3("$Flowable$ User Methods")
-eg("""
-	Flowable.draw()
-""")
-disc("""This will be called to ask the flowable to actually render itself.
-The calling code should ensure that the flowable has an attribute $canv$
-which is the $pdfgen.Canvas$ which should be drawn to an that the $Canvas$
-is in an appropriate state (as regards translations rotations etc).
-""")
-eg("""
-	Flowable.wrap(availWidth, availHeight)
-""")
-disc("""This will be called by the enclosing frame before objects
-are asked their size, drawn or whatever.  It returns the
-size actually used.""")
-eg("""
-	Flowable.split(self, availWidth, availheight):
-""")
-disc("""This will be called by more sophisticated frames when
-		wrap fails. Stupid flowables should return []. Clever flowables
-		should split themselves and return a list of flowables""")
-eg("""
-	Flowable.getSpaceAfter(self):
-""")
-disc("""returns how much space should follow this item if another item follows on the same page.""")
-eg("""
-	Flowable.getSpaceBefore(self):
-""")
-disc("""returns how much space should precede this item if another item precedess on the same page.""")
-
-disc("""The chapters which follow will cover the most important
-specific types of flowables - Paragraphs and Tables""")
