@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: daily.py,v $
+#	Revision 1.34  2000/06/20 11:50:36  rgbecker
+#	Fix htmldir moves (ie copy)
+#
 #	Revision 1.33  2000/06/20 11:43:51  rgbecker
 #	Chanded do_exec, added htmldir moves etc
-#
+#	
 #	Revision 1.32  2000/06/20 09:15:50  rgbecker
 #	Use python path in docs creation
 #	
@@ -131,7 +134,7 @@
 #	Revision 1.1  2000/02/23 13:16:56  rgbecker
 #	New infrastructure
 #	
-__version__=''' $Id: daily.py,v 1.33 2000/06/20 11:43:51 rgbecker Exp $ '''
+__version__=''' $Id: daily.py,v 1.34 2000/06/20 11:50:36 rgbecker Exp $ '''
 '''
 script for creating daily cvs archive dump
 '''
@@ -243,13 +246,13 @@ def cvs_checkout(d):
 			os.chdir('docs/reference')
 			do_exec(python + ' ../tools/yaml2pdf.py reference.yml')
 			os.chdir(d)
-			do_exec('mv docs/reference/*.pdf %s'%dst)
-			do_exec('mv docs/reference/*.pdf %s'%htmldir)
+			do_exec('cp docs/reference/*.pdf %s' % htmldir)
+			do_exec('mv docs/reference/*.pdf %s' % dst)
 			os.chdir('docs/userguide')
 			do_exec(python + ' genuserguide.py')
 			os.chdir(d)
-			do_exec('mv docs/userguide/*.pdf %s'%dst)
-			do_exec('mv docs/userguide/*.pdf %s'%htmldir)
+			do_exec('cp docs/userguide/*.pdf %s' % htmldir)
+			do_exec('mv docs/userguide/*.pdf %s' % dst)
 			recursive_rmdir('docs')
 
 			#restore the python path
