@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
+#	Revision 1.29  2000/08/01 23:10:42  rgbecker
+#	Fixed flowable valign bottom/top middle maybe
+#
 #	Revision 1.28  2000/08/01 16:07:39  rgbecker
 #	Additions/Improvements to LINE CMD Splitting
-#
+#	
 #	Revision 1.27  2000/07/20 13:32:33  rgbecker
 #	Started debugging Table split
 #	
@@ -113,7 +116,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.28 2000/08/01 16:07:39 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.29 2000/08/01 23:10:42 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -525,17 +528,17 @@ class Table(Flowable):
 		n = type(cellval)
 		if n in _SeqTypes:
 			# we assume it's a list of Flowables
-			if valign != 'TOP' or just != 'LEFT':
+			if valign != 'BOTTOM' or just != 'LEFT':
 				W = []
 				w, h = _listCellGeom(cellval,colwidth,cellstyle,W=W)
 			else:
 				W = len(cellval)*[0]
 			if valign=='TOP':
-				y = rowpos + rowheight - cellstyle.topPadding
+				y = rowpos + rowheight - cellstyle.topPadding+h
 			elif valign=='BOTTOM':
-				y = rowpos+cellstyle.bottomPadding+h
+				y = rowpos+cellstyle.bottomPadding
 			else:
-				y = rowpos+(rowheight+cellstyle.bottomPadding-cellstyle.topPadding+h)/2.0
+				y = rowpos+(rowheight+cellstyle.bottomPadding-cellstyle.topPadding-h)/2.0
 			y = y+cellval[0].getSpaceBefore()
 			for v, w in map(None,cellval,W):
 				if just=='LEFT': x = colpos+cellstyle.leftPadding
