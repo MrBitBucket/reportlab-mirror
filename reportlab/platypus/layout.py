@@ -31,10 +31,13 @@
 #
 ###############################################################################
 #	$Log: layout.py,v $
+#	Revision 1.20  2000/04/28 13:39:12  rgbecker
+#	Fix _doNothing argument name
+#
 #	Revision 1.19  2000/04/26 11:07:15  andy_robinson
 #	Tables changed to use reportlab.lib.colors instead of
 #	the six hard-coded color strings there previously.
-#
+#	
 #	Revision 1.18  2000/04/25 15:42:04  rgbecker
 #	Factored out BasicFrame from SimpleFrame
 #	
@@ -86,7 +89,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: layout.py,v 1.19 2000/04/26 11:07:15 andy_robinson Exp $ '''
+__version__=''' $Id: layout.py,v 1.20 2000/04/28 13:39:12 rgbecker Exp $ '''
 __doc__="""
 Page Layout And TYPography Using Scripts
 a page layout API on top of PDFgen
@@ -141,6 +144,12 @@ class Flowable:
 		are asked their size, drawn or whatever.  It returns the
 		size actually used."""
 		return (self.width, self.height)
+
+	def split(self,availWidth, availheight):
+		"""This will be called by more sophisticated frames when
+		wrap fails. Stupid flowables should return (). Clever flowables
+		should split themselves and return a list of flowables"""
+		return ()
 
 class XBox(Flowable):
 	"""Example flowable - a box with an x through it and a caption.
@@ -278,21 +287,21 @@ class Macro(Flowable):
 class BasicFrame:
 	'''Abstraction for the definitional part of a Frame
 
-	            width                    x2,y2
-		+---------------------------------+
-		| l  top padding                r | h
-		| e +-------------------------+ i | e
-		| f |                         | g | i
-		| t |                         | h | g
-		|   |                         | t | h
-		| p |                         |   | t
-		| a |                         | p |
-		| d |                         | a |
-		|   |                         | d |
-		|   +-------------------------+   |
-		|    bottom padding				  |
-		+---------------------------------+
-		(x1,y1)
+                width                    x2,y2
+    	+---------------------------------+
+    	| l  top padding                r | h
+    	| e +-------------------------+ i | e
+    	| f |                         | g | i
+    	| t |                         | h | g
+    	|   |                         | t | h
+    	| p |                         |   | t
+    	| a |                         | p |
+    	| d |                         | a |
+    	|   |                         | d |
+    	|   +-------------------------+   |
+    	|    bottom padding				  |
+    	+---------------------------------+
+    	(x1,y1)
 	'''
 	def __init__(self, x1, y1, width,height, leftPadding=6, bottomPadding=6,
 			rightPadding=6, topPadding=6, id=None, showBoundary=0):
@@ -347,12 +356,10 @@ class BasicFrame:
 
 	add = _add
 
-#############################################################
-#
-#		A Frame, and a Document Model
-#
-#############################################################
 
+#############################################################
+#	A Frame, and a Document Model
+#############################################################
 FrameFullError = "FrameFullError"
 LayoutError = "LayoutError"
 
@@ -426,8 +433,8 @@ class Sequencer:
 	def reset(self, category):
 		self.dict[category] = 0
 
-def _doNothing(flowables, doc):
-	"Dummy callback for onFirstPage and onNewPage"
+def _doNothing(canvas, doc):
+	"Dummy callback for onPage"
 	pass
 
 ##########################################################
@@ -559,12 +566,10 @@ def run():
 		para = Paragraph(randomText(), normal)
 		objects_to_draw.append(para)
 
-
 	doc = SimpleFlowDocument('platypus.pdf',DEFAULT_PAGE_SIZE)
 	doc.onFirstPage = myFirstPage
 	doc.onNewPage = myLaterPages
 	doc.build(objects_to_draw)
-
 
 if __name__ == '__main__':
 	run()
