@@ -1,7 +1,7 @@
     #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/spider.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/spider.py,v 1.7 2003/06/09 17:41:25 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/spider.py,v 1.8 2003/06/19 15:28:40 rgbecker Exp $
 # spider chart, also known as radar chart
 
 """Spider Chart
@@ -10,7 +10,7 @@ Normal use shows variation of 5-10 parameters against some 'norm' or target.
 When there is more than one series, place the series with the largest
 numbers first, as it will be overdrawn by each successive one.
 """
-__version__=''' $Id: spider.py,v 1.7 2003/06/09 17:41:25 johnprecedo Exp $ '''
+__version__=''' $Id: spider.py,v 1.8 2003/06/19 15:28:40 rgbecker Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -19,27 +19,18 @@ from reportlab.lib import colors
 from reportlab.lib.validators import isColor, isNumber, isListOfNumbersOrNone,\
                                     isListOfNumbers, isColorOrNone, isString,\
                                     isListOfStringsOrNone, OneOf, SequenceOf,\
-                                    isBoolean, isListOfColors,\
-                                    isNoneOrListOfNoneOrStrings,\
-                                    isNoneOrListOfNoneOrNumbers
+                                    isBoolean, isListOfColors, isNumberOrNone,\
+                                    isNoneOrListOfNoneOrStrings, isTextAnchor,\
+                                    isNoneOrListOfNoneOrNumbers, isBoxAnchor,\
+                                    isStringOrNone
 from reportlab.lib.attrmap import *
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.graphics.shapes import Group, Drawing, Line, Rect, Polygon, Ellipse, \
     Wedge, String, STATE_DEFAULTS
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.areas import PlotArea
-from textlabels import Label
+from piecharts import WedgeLabel
 from reportlab.graphics.widgets.markers import Marker
-
-_ANGLE2ANCHOR={0:'w', 45:'sw', 90:'s', 135:'se', 180:'e', 225:'ne', 270:'n', 315: 'nw'}
-def _findNearestAngleValue(angle,D):
-    angle =  angle % 360
-    m = 900
-    for k in D.keys():
-        d = min((angle-k)%360,(k-angle)%360)
-        if d<m:
-            m, v = d, k
-    return D[v]
 
 class StrandProperties(PropHolder):
     """This holds descriptive information about concentric 'strands'.
@@ -58,7 +49,27 @@ class StrandProperties(PropHolder):
         labelRadius = AttrMapValue(isNumber),
         markers = AttrMapValue(isBoolean),
         markerType = AttrMapValue(isAnything),
-        markerSize = AttrMapValue(isNumber)
+        markerSize = AttrMapValue(isNumber),
+        label_dx = AttrMapValue(isNumber),
+        label_dy = AttrMapValue(isNumber),
+        label_angle = AttrMapValue(isNumber),
+        label_boxAnchor = AttrMapValue(isBoxAnchor),
+        label_boxStrokeColor = AttrMapValue(isColorOrNone),
+        label_boxStrokeWidth = AttrMapValue(isNumber),
+        label_boxFillColor = AttrMapValue(isColorOrNone),
+        label_strokeColor = AttrMapValue(isColorOrNone),
+        label_strokeWidth = AttrMapValue(isNumber),
+        label_text = AttrMapValue(isStringOrNone),
+        label_leading = AttrMapValue(isNumberOrNone),
+        label_width = AttrMapValue(isNumberOrNone),
+        label_maxWidth = AttrMapValue(isNumberOrNone),
+        label_height = AttrMapValue(isNumberOrNone),
+        label_textAnchor = AttrMapValue(isTextAnchor),
+        label_visible = AttrMapValue(isBoolean,desc="True if the label is to be drawn"),
+        label_topPadding = AttrMapValue(isNumber,'padding at top of box'),
+        label_leftPadding = AttrMapValue(isNumber,'padding at left of box'),
+        label_rightPadding = AttrMapValue(isNumber,'padding at right of box'),
+        label_bottomPadding = AttrMapValue(isNumber,'padding at bottom of box'),
         )
 
     def __init__(self):
@@ -73,6 +84,18 @@ class StrandProperties(PropHolder):
         self.markers = 0
         self.markerType = None
         self.markerSize = 0
+        self.label_dx = self.label_dy = self.label_angle = 0
+        self.label_text = None
+        self.label_topPadding = self.label_leftPadding = self.label_rightPadding = self.label_bottomPadding = 0
+        self.label_boxAnchor = 'c'
+        self.label_boxStrokeColor = None    #boxStroke
+        self.label_boxStrokeWidth = 0.5 #boxStrokeWidth
+        self.label_boxFillColor = None
+        self.label_strokeColor = None
+        self.label_strokeWidth = 0.1
+        self.label_leading =    self.label_width = self.label_maxWidth = self.label_height = None
+        self.label_textAnchor = 'start'
+        self.label_visible = 1
 
 class SpiderChart(PlotArea):
     _attrMap = AttrMap(BASE=PlotArea,
@@ -161,7 +184,6 @@ class SpiderChart(PlotArea):
         angle = self.startAngle*pi/180
         direction = self.direction == "clockwise" and -1 or 1
         angleBetween = direction*(2 * pi)/n
-        labels = self.labels
         markers = self.strands.markers
         for i in xrange(n):
             car = cos(angle)*radius
@@ -171,21 +193,39 @@ class SpiderChart(PlotArea):
             #print 'added spoke (%0.2f, %0.2f) -> (%0.2f, %0.2f)' % (spoke.x1, spoke.y1, spoke.x2, spoke.y2)
             spokes.append(spoke)
             if labels:
-                text = labels[i]
+                si = self.strands[i]
+                text = si.label_text
+                if text is None: text = labels[i]
                 if text:
-                    si = self.strands[i]
                     labelRadius = si.labelRadius
-                    ex = centerx + labelRadius*car
-                    ey = centery + labelRadius*sar
-                    L = Label()
-                    L.setText(text)
-                    L.x = ex
-                    L.y = ey
-                    L.boxAnchor = _findNearestAngleValue(angle*180/pi,_ANGLE2ANCHOR)
+                    L = WedgeLabel()
+                    L.x = centerx + labelRadius*car
+                    L.y = centery + labelRadius*sar
+                    L.boxAnchor = si.label_boxAnchor
+                    L._pmv = angle*180/pi
+                    L.dx = si.label_dx
+                    L.dy = si.label_dy
+                    L.angle = si.label_angle
+                    L.boxAnchor = si.label_boxAnchor
+                    L.boxStrokeColor = si.label_boxStrokeColor
+                    L.boxStrokeWidth = si.label_boxStrokeWidth
+                    L.boxFillColor = si.label_boxFillColor
+                    L.strokeColor = si.label_strokeColor
+                    L.strokeWidth = si.label_strokeWidth
+                    L._text = text
+                    L.leading = si.label_leading
+                    L.width = si.label_width
+                    L.maxWidth = si.label_maxWidth
+                    L.height = si.label_height
+                    L.textAnchor = si.label_textAnchor
+                    L.visible = si.label_visible
+                    L.topPadding = si.label_topPadding
+                    L.leftPadding = si.label_leftPadding
+                    L.rightPadding = si.label_rightPadding
+                    L.bottomPadding = si.label_bottomPadding
                     L.fontName = si.fontName
                     L.fontSize = si.fontSize
                     L.fillColor = si.fontColor
-                    L.textAnchor = 'boxauto'
                     spokes.append(L)
             angle = angle + angleBetween
 

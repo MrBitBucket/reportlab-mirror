@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/doughnut.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/doughnut.py,v 1.3 2003/06/13 12:08:20 johnprecedo Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/doughnut.py,v 1.4 2003/06/19 15:28:40 rgbecker Exp $
 # doughnut chart
 
 """Doughnut chart
@@ -10,7 +10,7 @@ Produces a circular chart like the doughnut charts produced by Excel.
 Can handle multiple series (which produce concentric 'rings' in the chart).
 
 """
-__version__=''' $Id: doughnut.py,v 1.3 2003/06/13 12:08:20 johnprecedo Exp $ '''
+__version__=''' $Id: doughnut.py,v 1.4 2003/06/19 15:28:40 rgbecker Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -31,16 +31,6 @@ from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropH
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.widgets.markers import Marker
-
-_ANGLE2ANCHOR={0:'w', 45:'sw', 90:'s', 135:'se', 180:'e', 225:'ne', 270:'n', 315: 'nw'}
-def _findNearestAngleValue(angle,D):
-    angle =  angle % 360
-    m = 900
-    for k in D.keys():
-        d = min((angle-k)%360,(k-angle)%360)
-        if d<m:
-            m, v = d, k
-    return D[v]
 
 class SectorProperties(PropHolder):
     """This holds descriptive information about the sectors in a doughnut chart.

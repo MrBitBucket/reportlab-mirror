@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.26 2003/05/29 15:49:28 fuzzypuffin Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.27 2003/06/19 15:28:40 rgbecker Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -12,7 +12,7 @@
 This permits you to customize and pop out individual wedges;
 supports elliptical and circular pies.
 """
-__version__=''' $Id: piecharts.py,v 1.26 2003/05/29 15:49:28 fuzzypuffin Exp $ '''
+__version__=''' $Id: piecharts.py,v 1.27 2003/06/19 15:28:40 rgbecker Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -21,14 +21,25 @@ from reportlab.lib import colors
 from reportlab.lib.validators import isColor, isNumber, isListOfNumbersOrNone,\
                                     isListOfNumbers, isColorOrNone, isString,\
                                     isListOfStringsOrNone, OneOf, SequenceOf,\
-                                    isBoolean, isListOfColors,\
-                                    isNoneOrListOfNoneOrStrings,\
-                                    isNoneOrListOfNoneOrNumbers
+                                    isBoolean, isListOfColors, isNumberOrNone,\
+                                    isNoneOrListOfNoneOrStrings, isTextAnchor,\
+                                    isNoneOrListOfNoneOrNumbers, isBoxAnchor,\
+                                    isStringOrNone
 from reportlab.lib.attrmap import *
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
+from textlabels import Label 
 
+_ANGLE2BOXANCHOR={0:'w', 45:'sw', 90:'s', 135:'se', 180:'e', 225:'ne', 270:'n', 315: 'nw', -45: 'nw'}
+class WedgeLabel(Label):
+    def _getBoxAnchor(self):
+        na = (int((self._pmv%360)/45.)*45)%360
+        if not (na % 90): # we have a right angle case
+            da = (self._pmv - na) % 360
+            if abs(da)>5:
+                na += da>0 and 45 or -45
+        return _ANGLE2BOXANCHOR[na]
 
 class WedgeProperties(PropHolder):
     """This holds descriptive information about the wedges in a pie chart.
@@ -49,6 +60,26 @@ class WedgeProperties(PropHolder):
         fontSize = AttrMapValue(isNumber),
         fontColor = AttrMapValue(isColorOrNone),
         labelRadius = AttrMapValue(isNumber),
+        label_dx = AttrMapValue(isNumber),
+        label_dy = AttrMapValue(isNumber),
+        label_angle = AttrMapValue(isNumber),
+        label_boxAnchor = AttrMapValue(isBoxAnchor),
+        label_boxStrokeColor = AttrMapValue(isColorOrNone),
+        label_boxStrokeWidth = AttrMapValue(isNumber),
+        label_boxFillColor = AttrMapValue(isColorOrNone),
+        label_strokeColor = AttrMapValue(isColorOrNone),
+        label_strokeWidth = AttrMapValue(isNumber),
+        label_text = AttrMapValue(isStringOrNone),
+        label_leading = AttrMapValue(isNumberOrNone),
+        label_width = AttrMapValue(isNumberOrNone),
+        label_maxWidth = AttrMapValue(isNumberOrNone),
+        label_height = AttrMapValue(isNumberOrNone),
+        label_textAnchor = AttrMapValue(isTextAnchor),
+        label_visible = AttrMapValue(isBoolean,desc="True if the label is to be drawn"),
+        label_topPadding = AttrMapValue(isNumber,'padding at top of box'),
+        label_leftPadding = AttrMapValue(isNumber,'padding at left of box'),
+        label_rightPadding = AttrMapValue(isNumber,'padding at right of box'),
+        label_bottomPadding = AttrMapValue(isNumber,'padding at bottom of box'),
         )
 
     def __init__(self):
@@ -61,7 +92,18 @@ class WedgeProperties(PropHolder):
         self.fontSize = STATE_DEFAULTS["fontSize"]
         self.fontColor = STATE_DEFAULTS["fillColor"]
         self.labelRadius = 1.2
-
+        self.label_dx = self.label_dy = self.label_angle = 0
+        self.label_text = None
+        self.label_topPadding = self.label_leftPadding = self.label_rightPadding = self.label_bottomPadding = 0
+        self.label_boxAnchor = 'c'
+        self.label_boxStrokeColor = None    #boxStroke
+        self.label_boxStrokeWidth = 0.5 #boxStrokeWidth
+        self.label_boxFillColor = None
+        self.label_strokeColor = None
+        self.label_strokeWidth = 0.1
+        self.label_leading =    self.label_width = self.label_maxWidth = self.label_height = None
+        self.label_textAnchor = 'start'
+        self.label_visible = 1
 
 class Pie(Widget):
     _attrMap = AttrMap(
@@ -74,6 +116,7 @@ class Pie(Widget):
         startAngle = AttrMapValue(isNumber, desc="angle of first slice; like the compass, 0 is due North"),
         direction = AttrMapValue( OneOf('clockwise', 'anticlockwise'), desc="'clockwise' or 'anticlockwise'"),
         slices = AttrMapValue(None, desc="collection of wedge descriptor objects"),
+        simpleLabels = AttrMapValue(isBoolean, desc="If true(default) use String not super duper WedgeLabel"),
         )
 
     def __init__(self):
@@ -85,6 +128,7 @@ class Pie(Widget):
         self.labels = None  # or list of strings
         self.startAngle = 90
         self.direction = "clockwise"
+        self.simpleLabels = 1
 
         self.slices = TypedPropertyCollection(WedgeProperties)
         self.slices[0].fillColor = colors.darkcyan
@@ -198,15 +242,42 @@ class Pie(Widget):
                     averageAngle = (a1+a2)/2.0
                     aveAngleRadians = averageAngle*pi/180.0
                     labelRadius = wedgeStyle.labelRadius
-                    labelX = centerx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
-                    labelY = centery + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
+                    labelX = cx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
+                    labelY = cy + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
 
-                    theLabel = String(labelX, labelY, labels[i])
-                    theLabel.textAnchor = "middle"
+                    if self.simpleLabels:
+                        theLabel = String(labelX, labelY, labels[i])
+                        theLabel.textAnchor = "middle"
+                    else:
+                        theLabel = WedgeLabel()
+                        theLabel._pmv = averageAngle
+                        theLabel.x = labelX
+                        theLabel.y = labelY
+                        theLabel.dx = wedgeStyle.label_dx
+                        theLabel.dy = wedgeStyle.label_dy
+                        theLabel.angle = wedgeStyle.label_angle
+                        theLabel.boxAnchor = wedgeStyle.label_boxAnchor
+                        theLabel.boxStrokeColor = wedgeStyle.label_boxStrokeColor
+                        theLabel.boxStrokeWidth = wedgeStyle.label_boxStrokeWidth
+                        theLabel.boxFillColor = wedgeStyle.label_boxFillColor
+                        theLabel.strokeColor = wedgeStyle.label_strokeColor
+                        theLabel.strokeWidth = wedgeStyle.label_strokeWidth
+                        _text = wedgeStyle.label_text
+                        if _text is None: _text = labels[i]
+                        theLabel._text = _text
+                        theLabel.leading = wedgeStyle.label_leading
+                        theLabel.width = wedgeStyle.label_width
+                        theLabel.maxWidth = wedgeStyle.label_maxWidth
+                        theLabel.height = wedgeStyle.label_height
+                        theLabel.textAnchor = wedgeStyle.label_textAnchor
+                        theLabel.visible = wedgeStyle.label_visible
+                        theLabel.topPadding = wedgeStyle.label_topPadding
+                        theLabel.leftPadding = wedgeStyle.label_leftPadding
+                        theLabel.rightPadding = wedgeStyle.label_rightPadding
+                        theLabel.bottomPadding = wedgeStyle.label_bottomPadding
                     theLabel.fontSize = wedgeStyle.fontSize
                     theLabel.fontName = wedgeStyle.fontName
                     theLabel.fillColor = wedgeStyle.fontColor
-
                     g.add(theLabel)
 
             startAngle = endAngle
