@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/platypus/tables.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.70 2004/01/07 16:07:17 dragan1 Exp $
-__version__=''' $Id: tables.py,v 1.70 2004/01/07 16:07:17 dragan1 Exp $ '''
+#$Header: /tmp/reportlab/reportlab/platypus/tables.py,v 1.71 2004/01/09 09:46:17 rgbecker Exp $
+__version__=''' $Id: tables.py,v 1.71 2004/01/09 09:46:17 rgbecker Exp $ '''
 
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
@@ -137,7 +137,7 @@ class Table(Flowable):
                     _emptyTableStyle = ParagraphStyle('_emptyTableStyle')
                     _emptyTableStyle.textColor = colors.red
                     _emptyTableStyle.backColor = colors.yellow
-                Preformatted.__init__(self,'Table(%d,%d)' % (nrows,ncols), _emptyTableStyle)
+                Preformatted.__init__(self,'%s(%d,%d)' % (self.__class__.__name__,nrows,ncols), _emptyTableStyle)
             elif emptyTableAction=='ignore':
                 self.__class__ = Spacer
                 Spacer.__init__(self,0,0)
@@ -182,7 +182,7 @@ class Table(Flowable):
         import pprint, string
         cv = pprint.pformat(cv)
         cv = string.replace(cv, "\n", "\n  ")
-        return "Table(\n rowHeights=%s,\n colWidths=%s,\n%s\n) # end table" % (r,c,cv)
+        return "%s(\n rowHeights=%s,\n colWidths=%s,\n%s\n) # end table" % (self.__class__.__name__,r,c,cv)
 
     def identity(self, maxLen=30):
         '''Identify our selves as well as possible'''
@@ -303,7 +303,7 @@ class Table(Flowable):
             v = string.split(v, "\n")
             return max(map(lambda a, b=s.fontname, c=s.fontsize,d=pdfmetrics.stringWidth: d(a,b,c), v))
 
-    def _calc_height(self):
+    def _calc_height(self, availHeight):
 
         H = self._argH
         W = self._argW
@@ -318,12 +318,20 @@ class Table(Flowable):
         else:
             spans = {}
 
+        hmax = lim = len(H)
+        longTable = getattr(self,'_longTableOptimize',None)
+
         if None in H:
             if canv: saved = canv._fontname, canv._fontsize, canv._leading
             H = H[:]    #make a copy as we'll change it
             self._rowHeights = H
             while None in H:
                 i = H.index(None)
+                if longTable:
+                    hmax = i
+                    height = reduce(operator.add, H[:i], 0)
+                    # we can stop if we have filled up all available room
+                    if height > availHeight: break
                 V = self._cellvalues[i] # values for row i
                 S = self._cellStyles[i] # styles for row i
                 h = 0
@@ -352,19 +360,20 @@ class Table(Flowable):
                         t = t+s.bottomPadding+s.topPadding
                     if t>h: h = t   #record a new maximum
                     j = j + 1
-
                 H[i] = h
+            if None not in H: hmax = lim 
 
-        height = self._height = reduce(operator.add, H, 0)
+        height = self._height = reduce(operator.add, H[:hmax], 0)
         #print "height, H", height, H
         self._rowpositions = [height]    # index 0 is actually topline; we skip when processing cells
-        for h in H:
+        for h in H[:hmax]:
             height = height - h
             self._rowpositions.append(height)
         assert abs(height)<1e-8, 'Internal height error'
+        self._hmax = hmax
 
     def _calc(self, availWidth, availHeight):
-        if hasattr(self,'_width'): return
+        #if hasattr(self,'_width'): return
 
         #in some cases there are unsizable things in
         #cells.  If so, apply a different algorithm
@@ -382,7 +391,7 @@ class Table(Flowable):
 
         # calculate the full table height
         #print 'during calc, self._colWidths=', self._colWidths
-        self._calc_height()
+        self._calc_height(availHeight)
 
         # if the width has already been calculated, don't calculate again
         # there's surely a better, more pythonic way to short circuit this FIXME FIXME
@@ -751,7 +760,7 @@ class Table(Flowable):
         h = 0
         n = 0
         lim = len(self._rowHeights)
-        while n<lim:
+        while n<self._hmax:
             hn = h + self._rowHeights[n]
             if hn>availHeight: break
             h = hn
@@ -768,8 +777,8 @@ class Table(Flowable):
         data = self._cellvalues
 
         #we're going to split into two superRows
-        #R0 = Table( data[:n], self._argW, self._argH[:n],
-        R0 = Table( data[:n], self._colWidths, self._argH[:n],
+        #R0 = slelf.__class__( data[:n], self._argW, self._argH[:n],
+        R0 = self.__class__( data[:n], self._colWidths, self._argH[:n],
                 repeatRows=repeatRows, repeatCols=repeatCols,
                 splitByRow=splitByRow)
 
@@ -825,8 +834,8 @@ class Table(Flowable):
         R0._cr_0(n,self._bkgrndcmds)
 
         if repeatRows:
-            #R1 = Table(data[:repeatRows]+data[n:],self._argW,
-            R1 = Table(data[:repeatRows]+data[n:],self._colWidths,
+            #R1 = slelf.__class__(data[:repeatRows]+data[n:],self._argW,
+            R1 = self.__class__(data[:repeatRows]+data[n:],self._colWidths,
                     self._argH[:repeatRows]+self._argH[n:],
                     repeatRows=repeatRows, repeatCols=repeatCols,
                     splitByRow=splitByRow)
@@ -834,8 +843,8 @@ class Table(Flowable):
             R1._cr_1_1(n,repeatRows,A)
             R1._cr_1_1(n,repeatRows,self._bkgrndcmds)
         else:
-            #R1 = Table(data[n:], self._argW, self._argH[n:],
-            R1 = Table(data[n:], self._colWidths, self._argH[n:],
+            #R1 = slelf.__class__(data[n:], self._argW, self._argH[n:],
+            R1 = self.__class__(data[n:], self._colWidths, self._argH[n:],
                     repeatRows=repeatRows, repeatCols=repeatCols,
                     splitByRow=splitByRow)
             R1._cellStyles = self._cellStyles[n:]
@@ -979,6 +988,10 @@ _LineOpMap = {  'GRID':'_drawGrid',
                 'LINEABOVE':'_drawHLines',
                 'LINEBEFORE':'_drawVLines',
                 'LINEAFTER':'_drawVLinesA', }
+
+class LongTable(Table):
+    '''Henning von Bargen's changes will be active'''
+    _longTableOptimize = 1
 
 LINECOMMANDS = _LineOpMap.keys()
 
@@ -1431,6 +1444,14 @@ LIST_STYLE = TableStyle(
             ('LINEBELOW', (0,'splitlast'), (-1,'splitlast'), 1, colors.white,'butt'),
            ]
     t=Table(data,style=sty, colWidths = [20] * 5, rowHeights = [20]*5)
+    lst.append(t)
+
+    # und jetzt noch eine Tabelle mit 5000 Zeilen:
+    sty = [ ('GRID',(0,0),(-1,-1),1,colors.green),
+            ('BOX',(0,0),(-1,-1),2,colors.red),
+           ]
+    data = [[str(i), Paragraph("xx "* (i%10), styleSheet["BodyText"]), Paragraph("blah "*(i%40), styleSheet["BodyText"])] for i in xrange(500)]
+    t=LongTable(data, style=sty, colWidths = [50,100,200])
     lst.append(t)
 
 
