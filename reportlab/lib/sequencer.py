@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: sequencer.py,v $
+#	Revision 1.7  2000/07/08 07:11:21  andy_robinson
+#	Changed to pre-increment
+#
 #	Revision 1.6  2000/06/21 19:46:43  rgbecker
 #	Added Roman formatters
-#
+#	
 #	Revision 1.5  2000/06/19 11:14:03  andy_robinson
 #	Global sequencer put in the 'story builder'.
 #
@@ -49,7 +52,7 @@
 #	Revision 1.1  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
 #
-__version__=''' $Id: sequencer.py,v 1.6 2000/06/21 19:46:43 rgbecker Exp $ '''
+__version__=''' $Id: sequencer.py,v 1.7 2000/07/08 07:11:21 andy_robinson Exp $ '''
 """This module defines a single public class, Sequencer, which aids in
 numbering and formatting lists."""
 #
@@ -98,9 +101,12 @@ def _format_abc(num):
 class _Counter:
 	"""Private class used by Sequencer.  Each counter
 	knows its format, and the IDs of anything it
-	resets, as well as its value. """
+	resets, as well as its value. Starts at zero
+	and increments just before you get the new value,
+	so that it is still 'Chapter 5' and not 'Chapter 6'
+	when you print 'Figure 5.1'"""
 	def __init__(self):
-		self._base = 1
+		self._base = 0
 		self._value = self._base
 		self._formatter = _format_123
 		self._resets = []
@@ -115,8 +121,8 @@ class _Counter:
 			self._value = self._base
 
 	def next(self):
-		v = self._value
 		self._value = self._value + 1
+		v = self._value
 		for counter in self._resets:
 			counter.reset()
 		return v
