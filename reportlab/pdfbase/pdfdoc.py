@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.78 2003/02/06 21:12:21 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.78 2003/02/06 21:12:21 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.79 2003/04/17 11:26:37 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.79 2003/04/17 11:26:37 rgbecker Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -75,18 +75,6 @@ Pages = "Pages"
 
 # for % substitutions
 LINEENDDICT = {"LINEEND": LINEEND, "PERCENT": "%"}
-
-def markfilename(filename):
-    # with the Mac, we need to tag the file in a special
-    #way so the system knows it is a PDF file.
-    #This supplied by Joe Strout
-    import os
-    if os.name == 'mac':
-        import macfs
-        try:
-            macfs.FSSpec(filename).SetCreatorType('CARO','PDF ')
-        except:
-            pass
 
 def format(element, document, toplevel=0):
     """Indirection step for formatting.
@@ -255,6 +243,7 @@ class PDFDocument:
         f.write(txt)
         if myfile:
             f.close()
+            from reportlab.lib.utils import markfilename
             markfilename(filename) # do platform specific file junk
         if getattr(canvas,'_verbosity',None): print 'saved', filename
 
@@ -1769,7 +1758,7 @@ class PDFImageXObject:
         self.width, self.height = map(string.atoi,(words[1],words[3]))
         self.colorSpace = 'DeviceRGB'
         self.bitsPerComponent = 8
-        self._filters = 'A85','Fl'
+        self._filters = 'ASCII85Decode','FlateDecode' #'A85','Fl'
         if IMG: self._checkTransparency(IMG[0])
         else: self.mask = None
         self.streamContent = string.join(imagedata[3:-1],'')
@@ -1786,7 +1775,7 @@ class PDFImageXObject:
             self.colorSpace = 'DeviceCMYK'
         imageFile.seek(0) #reset file pointer
         self.streamContent = pdfutils._AsciiBase85Encode(imageFile.read())
-        self._filters = 'A85','DCT'
+        self._filters = 'ASCII85Decode','DCTDecode' #'A85','DCT'
         self.mask = None
 
     def _checkTransparency(self,PILImage):
@@ -1797,6 +1786,8 @@ class PDFImageXObject:
                 self.mask = (tred, tred, tgreen, tgreen, tblue, tblue)
             else:
                 self.mask = None
+        elif hasattr(self.mask,'rgb'):
+            self.mask = self.mask.rgb()+self.mask.rgb()
 
     def loadImageFromPIL(self, PILImage):
         "Extracts the stream, width and height"
@@ -1812,7 +1803,7 @@ class PDFImageXObject:
         self.streamContent = pdfutils._AsciiBase85Encode(zlib.compress(raw))
         self.colorSpace = 'DeviceRGB'
         self.bitsPerComponent = 8
-        self._filters = 'A85','Fl'  # Ascii85decode, FlateDecode
+        self._filters = 'ASCII85Decode','FlateDecode' #'A85','Fl'
         self._checkTransparency(PILImage)
 
     def format(self, document):
