@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: tables.py,v $
-#	Revision 1.24  2000/07/12 15:25:42  rgbecker
+#	Revision 1.25  2000/07/12 15:26:46  rgbecker
 #	INNERGRID was dumb
 #
+#	Revision 1.24  2000/07/12 15:25:42  rgbecker
+#	INNERGRID was dumb
+#	
 #	Revision 1.23  2000/07/12 15:18:16  rgbecker
 #	Leading changes fixed
 #	
@@ -101,7 +104,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: tables.py,v 1.24 2000/07/12 15:25:42 rgbecker Exp $ '''
+__version__=''' $Id: tables.py,v 1.25 2000/07/12 15:26:46 rgbecker Exp $ '''
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
 row order. Drawing of the table can be controlled by using a TableStyle instance. This allows control of the
@@ -826,13 +829,13 @@ LIST_STYLE = TableStyle(
 	lst.append(t)
 	lst.append(Table(XY,
 			style=[	('FONT',(0,0),(-1,-1),'Times-Roman', 5,6),
-					('BOXGRID', (0,0), (-1,-1), 0.25, colors.blue),]))
+					('GRID', (0,0), (-1,-1), 0.25, colors.blue),]))
 	lst.append(Table(XY,
 			style=[	('FONT',(0,0),(-1,-1),'Times-Roman', 10,12),
-					('BOXGRID', (0,0), (-1,-1), 0.25, colors.black),]))
+					('GRID', (0,0), (-1,-1), 0.25, colors.black),]))
 	lst.append(Table(XY,
 			style=[	('FONT',(0,0),(-1,-1),'Times-Roman', 20,24),
-					('BOXGRID', (0,0), (-1,-1), 0.25, colors.red),]))
+					('GRID', (0,0), (-1,-1), 0.25, colors.red),]))
 	SimpleDocTemplate('tables.pdf', showBoundary=1).build(lst)
 
 if __name__ == '__main__':
