@@ -8,6 +8,9 @@ Type the following for usage info:
 """
 
 
+__version__ = 0,1
+
+
 import sys, os, re, types, string, getopt
 from string import find, join, split, replace, expandtabs, rstrip
 
@@ -89,6 +92,69 @@ class MyTemplate(BaseDocTemplate):
                                       closed=isClosed)
                 except:
                     pass
+
+
+####################################################################
+# 
+# Utility functions
+# 
+####################################################################
+
+def indentLevel(line, spacesPerTab=4):
+    """Counts the indent levels on the front.
+
+    It is assumed that one tab equals 4 spaces.
+    """
+    x = 0
+    nextTab = 4
+    for ch in line:
+        if ch == ' ':
+            x = x + 1
+        elif ch == '\t':
+            x = nextTab
+            nextTab = x + spacesPerTab
+        else:
+            return x
+
+
+assert indentLevel('hello') == 0, 'error in indentLevel'
+assert indentLevel(' hello') == 1, 'error in indentLevel'
+assert indentLevel('  hello') == 2, 'error in indentLevel'
+assert indentLevel('   hello') == 3, 'error in indentLevel'
+assert indentLevel('\thello') == 4, 'error in indentLevel'
+assert indentLevel(' \thello') == 4, 'error in indentLevel'
+assert indentLevel('\t hello') == 5, 'error in indentLevel'
+
+
+# This may well be replaceable by something in the inspect module.
+def getFunctionBody(f, linesInFile):
+    """Pass in the function object and the lines in the file.
+
+    Since we will typically grab several things out of
+    the same file.  it extracts a multiline text block.
+    Works with methods too."""
+
+    if hasattr(f, 'im_func'):
+        #it's a method, drill down and get its function
+        f = f.im_func
+
+    extracted = []    
+    firstLineNo = f.func_code.co_firstlineno - 1
+    startingIndent = indentLevel(linesInFile[firstLineNo])
+    extracted.append(linesInFile[firstLineNo])
+    #brackets = 0
+    for line in linesInFile[firstLineNo+1:]:
+        ind = indentLevel(line)
+        if ind <= startingIndent:
+            break
+        else:
+            extracted.append(line)
+         # we are not indented
+    return string.join(extracted, '\n')
+
+    # ???
+    usefulLines = lines[firstLineNo:lineNo+1]
+    return string.join(usefulLines, '\n')
 
 
 ####################################################################
