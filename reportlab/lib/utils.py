@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.62 2004/03/18 15:55:49 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.62 2004/03/18 15:55:49 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.63 2004/03/19 18:00:56 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.63 2004/03/19 18:00:56 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -133,6 +133,7 @@ if _isFSD is None:
         _isFSD = not __loader__
     except:
         _isFSD = os.path.isfile(__file__)   #slight risk of wrong path
+        __loader__ = None
     _isFSSD = _isFSD and os.path.isfile(os.path.splitext(__file__)[0] +'.py')
 
 def isFileSystemDistro():
@@ -363,6 +364,7 @@ def _className(self):
     except AttributeError:
         return str(self)
 
+_RL_DIR=None
 def open_for_read(name,mode='b'):
     '''attempt to open a file or URL for reading'''
     if hasattr(name,'read'): return name
@@ -373,7 +375,27 @@ def open_for_read(name,mode='b'):
         o = urllib.urlopen(name)
         return getStringIO(o.read())
     except:
-        return open(name,'r'+mode)
+        try:
+            return open(name,'r'+mode)
+        except IOError:
+            t, v = sys.exc_info()[:2]
+            if _isFSD or __loader__ is None: raise
+            try:
+                #we have a __loader__, perhaps the filename starts with
+                #the dirname(reportlab.__file__) or is relative
+                global _RL_DIR
+                if _RL_DIR is None:
+                    import reportlab
+                    _RL_DIR=os.path.dirname(reportlab.__file__)
+                name = name.replace('/',os.sep)
+                if name.startswith(_RL_DIR):
+                    name = name[len(__loader__.archive)+len(os.sep):]
+                elif os.path.isabs(name): raise
+                s = __loader__.get_data(name)
+                if mode!='b' and os.linesep!='\n': s = s.replace(os.linesep,'\n')
+                return getStringIO(s)
+            except:
+                raise t, v
 
 def open_and_read(name,mode='b'):
     return open_for_read(name,mode).read()
