@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/lineplots.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.18 2001/07/16 12:25:04 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/lineplots.py,v 1.19 2001/09/06 10:58:40 rgbecker Exp $
 """This module defines a very preliminary Line Plot example.
 """
 
@@ -54,16 +54,12 @@ class LinePlot(Widget):
         height = AttrMapValue(isNumber,
             desc='Height of the chart.'),
 
-        useAbsolute = AttrMapValue(isNumber,
-            desc='Flag to use absolute spacing values.'),
         lineLabelNudge = AttrMapValue(isNumber,
             desc='Distance between a data point and its label.'),
         lineLabels = AttrMapValue(None,
             desc='Handle to the list of data point labels.'),
         lineLabelFormat = AttrMapValue(None,
             desc='Formatting string or function used for data point labels.'),
-        groupSpacing = AttrMapValue(isNumber,
-            desc='? - Likely to disappear.'),
 
         joinedLines = AttrMapValue(isNumber,
             desc='Display data points joined with lines if true.'),
@@ -110,15 +106,6 @@ class LinePlot(Widget):
         self.lines[0].strokeColor = colors.red
         self.lines[1].strokeColor = colors.blue
         
-        # control bar spacing. is useAbsolute = 1 then
-        # the next parameters are in points; otherwise
-        # they are 'proportions' and are normalized to
-        # fit the available space.  Half a barSpacing
-        # is allocated at the beginning and end of the
-        # chart.
-        self.useAbsolute = 0   #- not done yet
-        self.groupSpacing = 1 #5
-
         self.lineLabels = TypedPropertyCollection(Label)
         self.lineLabelFormat = None
 
@@ -134,7 +121,6 @@ class LinePlot(Widget):
 
         # New line chart attributes.
         self.joinedLines = 1 # Connect items with straight lines.
-
 
     def demo(self):
         """Shows basic use of a line chart."""
@@ -184,16 +170,6 @@ class LinePlot(Widget):
 
         self._seriesCount = len(self.data)
         self._rowLength = len(self.data[0])
-        
-        if self.useAbsolute:
-            # bar dimensions are absolute
-            normFactor = 1.0
-        else:
-            # bar dimensions are normalized to fit.  How wide
-            # notionally is one group of bars?
-            normWidth = self.groupSpacing
-            availWidth = self.xValueAxis.scale(0)#[1]
-            normFactor = availWidth / normWidth
         
         self._positions = []
         for rowNo in range(len(self.data)):
