@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch1_intro.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.7 2002/07/24 19:56:35 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/userguide/ch1_intro.py,v 1.8 2002/07/25 11:09:35 dinu_gherman Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 import reportlab
 
@@ -147,7 +147,7 @@ disc("""Special thanks go to Just van Rossum for his valuable assistance with
 font technicalities and the LettErrorRobot-Chrome type 1 font.""")
 
 disc("""Marius Gedminas deserves a big hand for contributing the work on TrueType fonts and we
-are glad to include these in the toolkit. Finally we thank Bigelow & Holmes Inc ($design@bigelowandholmes.com$)
+are glad to include these in the toolkit. Finally we thank Bigelow &amp; Holmes Inc ($design@bigelowandholmes.com$)
 for Luxi Serif Regular and Ray Larabie ($http://www.larabiefonts.com$) for the Rina TrueType font.""")
 
 heading2("Installation and Setup")
