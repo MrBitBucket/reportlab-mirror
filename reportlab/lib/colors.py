@@ -33,9 +33,12 @@
 #
 ###############################################################################
 #	$Log: colors.py,v $
+#	Revision 1.7  2000/04/06 18:10:35  rgbecker
+#	Fixed type in stringToColor
+#
 #	Revision 1.6  2000/04/05 15:55:52  rgbecker
 #	Fixed getAllNamedColors, needed global etc
-#
+#	
 #	Revision 1.5  2000/04/05 15:26:17  rgbecker
 #	Added ColorType
 #	
@@ -48,7 +51,7 @@
 #	Revision 1.2  2000/03/08 13:06:39  andy_robinson
 #	Moved inch and cm definitions to reportlab.lib.units and amended all demos
 #	
-__version__=''' $Id: colors.py,v 1.6 2000/04/05 15:55:52 rgbecker Exp $ '''
+__version__=''' $Id: colors.py,v 1.7 2000/04/06 18:10:35 rgbecker Exp $ '''
 
 import string
 import math
@@ -310,7 +313,7 @@ def describe(aColor):
 def stringToColor(str):
 	'''try to map an arbitrary string to a color instance'''
 	if type(str) == types.StringType:
-		c = getAllNamedColors()
+		C = getAllNamedColors()
 		str = string.lower(str)
 		if C.has_key(str):
 			return C[str]
