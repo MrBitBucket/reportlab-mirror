@@ -1,11 +1,10 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch3_shapes.py,v 1.5 2001/08/13 12:04:12 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/graphguide/ch3_shapes.py,v 1.6 2001/09/25 12:11:01 rgbecker Exp $
 
 from rl_doc_utils import *
 from reportlab.graphics.shapes import *
-from reportlab.graphics.widgets import signsandsymbols
 
 heading1("Shapes")
 

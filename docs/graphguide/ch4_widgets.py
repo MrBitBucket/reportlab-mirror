@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch4_widgets.py,v 1.3 2001/08/11 14:33:58 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/graphguide/ch4_widgets.py,v 1.4 2001/09/25 12:11:01 rgbecker Exp $
 
 from rl_doc_utils import *
 from reportlab.graphics.shapes import *
@@ -134,10 +134,10 @@ from reportlab.graphics.widgets import signsandsymbols
 
 d = Drawing(230, 230)
 
-ne = signsandsymbols.NoEntry0()
-ds = signsandsymbols.DangerSign0()
-fd = signsandsymbols.FloppyDisk0()
-ns = signsandsymbols.NoSmoking0()
+ne = signsandsymbols.NoEntry()
+ds = signsandsymbols.DangerSign()
+fd = signsandsymbols.FloppyDisk()
+ns = signsandsymbols.NoSmoking()
 
 ne.x, ne.y = 10, 10
 ds.x, ds.y = 120, 10
@@ -161,10 +161,10 @@ from reportlab.graphics.widgets import signsandsymbols
 
 d = Drawing(230, 230)
 
-ne = signsandsymbols.NoEntry0()
-ds = signsandsymbols.DangerSign0()
-fd = signsandsymbols.FloppyDisk0()
-ns = signsandsymbols.NoSmoking0()
+ne = signsandsymbols.NoEntry()
+ds = signsandsymbols.DangerSign()
+fd = signsandsymbols.FloppyDisk()
+ns = signsandsymbols.NoSmoking()
 
 ne.x, ne.y = 10, 10
 ds.x, ds.y = 120, 10

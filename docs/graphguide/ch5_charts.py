@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch5_charts.py,v 1.5 2001/08/11 14:33:58 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/graphguide/ch5_charts.py,v 1.6 2001/09/25 12:11:01 rgbecker Exp $
 
 from rl_doc_utils import *
 from reportlab.graphics.shapes import *
@@ -347,7 +347,8 @@ $setPosition(x, y, length)$.
 The next stage is to show it the data so that it can configure
 itself.
 This is easy for a category axis - it just counts the number of
-data points in one of the data series.
+data points in one of the data series. The $reversed$ attribute (if 1)
+indicates that the categories should be reversed.
 When the drawing is drawn, the axis can provide some help to the
 chart with its $scale()$ method, which tells the chart where
 a given category begins and ends on the page.

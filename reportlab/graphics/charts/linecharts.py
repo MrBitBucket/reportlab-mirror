@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/linecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.13 2001/07/16 12:25:04 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/linecharts.py,v 1.14 2001/09/25 12:14:22 rgbecker Exp $
 """
 This modules defines a very preliminary Line Chart example.
 """
@@ -14,7 +14,7 @@ from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfS
 from reportlab.lib.attrmap import *
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing
-from reportlab.graphics.widgets.signsandsymbols import NoEntry0
+from reportlab.graphics.widgets.signsandsymbols import NoEntry
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.markers import *
@@ -527,7 +527,7 @@ def sample3():
     lc.strokeColor = colors.black
 
     lc.lines[0].symbol = makeSmiley
-    lc.lines[1].symbol = NoEntry0
+    lc.lines[1].symbol = NoEntry
     lc.lines[0].strokeWidth = 2
     lc.lines[1].strokeWidth = 4
 
