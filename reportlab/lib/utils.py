@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/utils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.74 2004/05/07 16:56:29 rgbecker Exp $
-__version__=''' $Id: utils.py,v 1.74 2004/05/07 16:56:29 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/lib/utils.py,v 1.75 2004/05/20 10:10:27 rgbecker Exp $
+__version__=''' $Id: utils.py,v 1.75 2004/05/20 10:10:27 rgbecker Exp $ '''
 
 import string, os, sys
 from types import *
@@ -617,10 +617,15 @@ class DebugMemo:
                 ):
             for a in A:
                 if hasattr(M,a):
-                    store[a] = getattr(M,a)()
-        if exed!=cwd: store.update({'exed': exed,
-                                    'lexed': os.listdir(exed),
-                                    })
+                    try:
+                        store[a] = getattr(M,a)()
+                    except:
+                        pass
+        if exed!=cwd:
+            try:
+                store.update({'exed': exed, 'lexed': os.listdir(exed),})
+            except:
+                pass
         if getScript:
             fn = os.path.abspath(sys.argv[0])
             if os.path.isfile(fn):
