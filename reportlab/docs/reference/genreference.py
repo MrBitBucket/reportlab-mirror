@@ -2,15 +2,16 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/reference/genreference.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/reference/genreference.py,v 1.6 2004/04/28 14:39:23 rgbecker Exp $
-__version__=''' $Id: genreference.py,v 1.6 2004/04/28 14:39:23 rgbecker Exp $ '''
+#$Header: /tmp/reportlab/reportlab/docs/reference/genreference.py,v 1.7 2004/05/25 16:33:56 rgbecker Exp $
+__version__=''' $Id: genreference.py,v 1.7 2004/05/25 16:33:56 rgbecker Exp $ '''
 __doc__ = """
 This module contains the script for building the reference.
 """
-def run(verbose=1, outDir=None):
+def run(verbose=None, outDir=None):
     import os, sys, shutil
     from reportlab.tools.docco import yaml2pdf
     from reportlab.lib.utils import _RL_DIR
+    if verbose is None: verbose=('-s' not in sys.argv)
     yaml2pdf.run('reference.yml','reference.pdf')
     if verbose: print 'Saved reference.pdf'
     docdir = os.path.join(_RL_DIR,'docs')
@@ -26,4 +27,4 @@ def makeSuite():
 
 
 if __name__=='__main__':
-    run(verbose=('-s' not in sys.argv))
+    run()
