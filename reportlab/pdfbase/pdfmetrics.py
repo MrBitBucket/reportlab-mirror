@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/fonts0.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.27 2001/03/16 14:35:30 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.28 2001/03/16 16:29:11 rgbecker Exp $ '''
 __doc__=""" 
 This provides the character widths database for calculating
 text metrics.  Everything for the base 14 fonts is pre-computed
@@ -45,6 +45,7 @@ try:
 	assert _rl_accel.version>="0.3", "bad _rl_accel"
 	_stringWidth = _rl_accel.stringWidth
 	_rl_accel.defaultEncoding(_dummyEncoding)
+	del widthVectorsByFont
 except ImportError, errMsg:
 	if str(errMsg)!='No module named _rl_accel': raise
 	_stringWidth = None
@@ -165,14 +166,14 @@ class Font:
 		if _stringWidth:
 			_rl_accel.setFontInfo(name,_dummyEncoding,self.ascent,self.descent,widths)
 		else:
-			_widthVectorsByName[name] = widths
+			widthVectorsByFont[name] = widths
 
 	def getWidths(self):
 		"Returns width array"
 		if _stringWidth:
 			return _rl_accel.getFontInfo(self.fontName)[0]
 		else:
-			return _widthVectorsByFont[self.fontName]
+			return widthVectorsByFont[self.fontName]
 
 	if not _stringWidth:
 		def stringWidth(self, text, size):
@@ -182,6 +183,14 @@ class Font:
 				w = w + widths[ord(ch)]
 			return w * 0.001 * size
 
+		def getWidths(self):
+			"Returns width array"
+			return _rl_accel.getFontInfo(self.fontName)[0]
+	else:
+		def getWidths(self):
+			"Returns width array"
+			return widthVectorsByFont[self.fontName]
+
 if _stringWidth:
 	import new
 	Font.stringWidth = new.instancemethod(_rl_accel._instanceStringWidth,None,Font)
@@ -189,7 +198,7 @@ if _stringWidth:
 else:
 	def stringWidth(text, fontName, fontSize):
 		try:
-			widths = _widthVectorsByFont[fontName]
+			widths = widthVectorsByFont[fontName]
 			w = 0
 			for char in text:
 				w = w + widths[ord(char)]

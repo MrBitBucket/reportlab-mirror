@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/fonts0.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: _fontdata.py,v 1.3 2001/03/16 14:39:46 rgbecker Exp $ '''
+__version__=''' $Id: _fontdata.py,v 1.4 2001/03/16 16:29:11 rgbecker Exp $ '''
 __doc__=""" 
 	database of font related things
 	standardFonts		tuple of the 14 standard string font names
@@ -10,13 +10,13 @@ __doc__="""
 	encodings			a mapping object from standard encoding names (and minor variants)
 						to the encoding vectors ie the tuple of string glyph names
 	widthsByFontGlyph	fontname x glyphname --> width of glyph
-	_widthVectorsByFont	fontName -> vector of widths
+	widthVectorsByFont	fontName -> vector of widths
 """
 import string, UserDict
 
 # mapping of name to width vector, starts empty until fonts are added
 # e.g. widths['Courier'] = [...600,600,600,...]
-_widthVectorsByFont = {}
+widthVectorsByFont = {}
 fontsByName = {}
 fontsByBaseEnc = {}
 # this is a list of the standard 14 font names in Acrobat Reader
