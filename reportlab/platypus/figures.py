@@ -1,9 +1,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/tools/platdemos.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.14 2004/01/07 13:18:49 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/platypus/figures.py,v 1.15 2004/01/07 16:36:34 rgbecker Exp $
 """This includes some demos of platypus for use in the API proposal"""
-__version__=''' $Id: figures.py,v 1.14 2004/01/07 13:18:49 rgbecker Exp $ '''
+__version__=''' $Id: figures.py,v 1.15 2004/01/07 16:36:34 rgbecker Exp $ '''
 
 import os
 
@@ -23,30 +23,48 @@ captionStyle = ParagraphStyle('Caption', fontName='Times-Italic', fontSize=10, a
 
 class Figure(Flowable):
     def __init__(self, width, height, caption="",
-                 captionFont="Times-Italic", captionSize=12, background=None):
+                 captionFont="Times-Italic", captionSize=12, background=None,
+                 captionTextColor=toColor('black'),
+                 captionBackColor=None):
         Flowable.__init__(self)
         self.width = width
         self.figureHeight = height
         self.caption = caption
+        self.captionFont = captionFont
+        self.captionSize = captionSize
+        self.captionTextColor = captionTextColor
+        self.captionBackColor = captionBackColor
+        self._captionData = None
+        self.captionHeight = 0  # work out later
         self.background = background
-        if self.caption:
-            self.captionHeight = 0  # work out later
+
+        self.spaceBefore = 12
+        self.spaceAfter = 12
+
+    def _getCaptionPara(self):
+        caption = self.caption
+        captionFont = self.captionFont
+        captionSize = self.captionSize
+        captionTextColor = self.captionTextColor
+        captionBackColor = self.captionBackColor
+        if self._captionData!=(caption,captionFont,captionSize,captionTextColor,captionBackColor):
+            self._captionData = (caption,captionFont,captionSize,captionTextColor,captionBackColor)
             self.captionStyle = ParagraphStyle(
                 'Caption',
                 fontName=captionFont,
                 fontSize=captionSize,
                 leading=1.2*captionSize,
+                textColor = captionTextColor,
+                backColor = captionBackColor,
                 spaceBefore=captionSize * 0.5,
                 alignment=TA_CENTER)
             #must build paragraph now to get sequencing in synch with rest of story
             self.captionPara = Paragraph(self.caption, self.captionStyle)
 
-        self.spaceBefore = 12
-        self.spaceAfter = 12
-
     def wrap(self, availWidth, availHeight):
         # try to get the caption aligned
         if self.caption:
+            self._getCaptionPara()
             (w, h) = self.captionPara.wrap(self.width, availHeight - self.figureHeight)
             self.captionHeight = h
             self.height = self.captionHeight + self.figureHeight
@@ -59,6 +77,7 @@ class Figure(Flowable):
     def draw(self):
         self.canv.translate(self.dx, 0)
         if self.caption:
+            self._getCaptionPara()
             self.drawCaption()
             self.canv.translate(0, self.captionHeight)
         if self.background:
@@ -156,7 +175,7 @@ class FlexFigure(Figure):
         self._scaleFactor = None
         self.background = background
 
-    def wrap(self, availWidth, availHeight):
+    def _scale(self,availWidth,availHeight):
         "Rescale to fit according to the rules, but only once"
         if self._scaleFactor is None or self.width>availWidth or self.height>availHeight:
             w, h = Figure.wrap(self, availWidth, availHeight)
@@ -172,7 +191,14 @@ class FlexFigure(Figure):
             elif self._scaleFactor>1 and self.growToFit:
                 self.width = self.width*self._scaleFactor - 0.0001
                 self.figureHeight = self.figureHeight * self._scaleFactor
+
+    def wrap(self, availWidth, availHeight):
+        self._scale(availWidth,availHeight)
         return Figure.wrap(self, availWidth, availHeight)
+
+    def split(self, availWidth, availHeight):
+        self._scale(availWidth,availHeight)
+        return Figure.split(self, availWidth, availHeight)
 
 class ImageFigure(FlexFigure):
     """Image with a caption below it"""
@@ -328,6 +354,8 @@ def test1():
     c  = Canvas('figures.pdf')
     f = Frame(inch, inch, 6*inch, 9*inch, showBoundary=1)
     v = PlatPropFigure1()
+    v.captionTextColor = toColor('blue')
+    v.captionBackColor = toColor('lightyellow')
     f.addFromList([v],c)
     c.save()
 
