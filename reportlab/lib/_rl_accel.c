@@ -2,10 +2,10 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/_rl_accel.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.29 2002/10/19 18:08:21 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/lib/_rl_accel.c,v 1.30 2002/11/20 17:35:52 rgbecker Exp $
  ****************************************************************************/
 #if 0
-static __version__=" $Id: _rl_accel.c,v 1.29 2002/10/19 18:08:21 rgbecker Exp $ "
+static __version__=" $Id: _rl_accel.c,v 1.30 2002/11/20 17:35:52 rgbecker Exp $ "
 #endif
 #include <Python.h>
 #include <stdlib.h>
@@ -27,7 +27,7 @@ static __version__=" $Id: _rl_accel.c,v 1.29 2002/10/19 18:08:21 rgbecker Exp $ 
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.39"
+#define VERSION "0.40"
 #define MODULE "_rl_accel"
 #ifndef	ATTRDICT
 	#if PY_MAJOR_VERSION>=2
@@ -388,6 +388,78 @@ PyObject *_a85_encode(PyObject *self, PyObject *args)
 	return retVal;
 }
 
+PyObject *_a85_decode(PyObject *self, PyObject *args)
+{
+	unsigned char	*inData, *p, *q, *tmp, *buf;
+	unsigned int	length, blocks, extra, k, num, c1, c2, c3, c4, c5;
+	static unsigned pad[] = {0,0,0xffffff,0xffff,0xff};
+	PyObject		*retVal;
+
+	if (!PyArg_ParseTuple(args, "z#", &inData, &length)) return NULL;
+	for(k=0,q=inData, p=q+length;q<p && (q=strchr(q,'z'));k++, q++);	/*count 'z'*/
+	length += k*4;
+	tmp = q = (char*)malloc(length+1);
+	while(inData<p && (k = *inData++)){
+		if(isspace(k)) continue;
+		if(k=='z'){
+			/*turn 'z' into '!!!!!'*/
+			memcpy(q,"!!!!!",5);
+			q += 5;
+			}
+		else
+			*q++ = k;
+		}
+	inData = tmp;
+	length = q - inData;
+	buf = inData+length-2;
+	if(buf[0]!='~' || buf[1]!='>'){
+		PyErr_SetString(ErrorObject, "Invalid terminator for Ascii Base 85 Stream");
+		free(inData);
+		return NULL;
+		}
+	length -= 2;
+	buf[0] = 0;
+
+	blocks = length / 5;
+	extra = length % 5;
+
+	buf = (char*)malloc((blocks+1)*4);
+	q = inData+blocks*5;
+	for(k=0;inData<q;inData+=5){
+		c1 = inData[0]-33;
+		c2 = inData[1]-33;
+		c3 = inData[2]-33;
+		c4 = inData[3]-33;
+		c5 = inData[4]-33;
+		num = (((c1*85+c2)*85+c3)*85+c4)*85+c5;
+		buf[k++] = num>>24;
+		buf[k++] = num>>16;
+		buf[k++] = num>>8;
+		buf[k++] = num;
+		}
+	if(extra>1){
+		c1 = inData[0]-33;
+		c2 = extra>=2 ? inData[1]-33: 0;
+		c3 = extra>=3 ? inData[2]-33: 0;
+		c4 = extra>=4 ? inData[3]-33: 0;
+		c5 = 0;
+		num = (((c1*85+c2)*85+c3)*85+c4)*85+c5 + pad[extra];
+		if(extra>1){
+			buf[k++] = num>>24;
+			if(extra>2){
+				buf[k++] = num>>16;
+				if(extra>3){
+					buf[k++] = num>>8;
+					}
+				}
+			}
+		}
+	retVal = PyString_FromStringAndSize(buf, k);
+	free(buf);
+	free(tmp);
+	return retVal;
+}
+
 static	char* _fp_fmts[]={"%.0f", "%.1f", "%.2f", "%.3f", "%.4f", "%.5f", "%.6f"};
 static	char *_fp_one(PyObject *pD)
 {
@@ -706,6 +778,7 @@ static char *__doc__=
 	_instanceEscapePDF method equivalent of escapePDF\n\
 	\n\
 	_AsciiBase85Encode does what is says\n\
+	_AsciiBase85Decode does what is says\n\
 	\n\
 	fp_str converts numeric arguments to a single blank separated string\n"
 
@@ -727,6 +800,7 @@ static struct PyMethodDef _methods[] = {
 					"callback callable(text,font,size,encoding)\n"
 					"return None to retry or the correct result."},
 	{"_AsciiBase85Encode", _a85_encode, METH_VARARGS, "_AsciiBase85Encode(\".....\") return encoded string"},
+	{"_AsciiBase85Decode", _a85_decode, METH_VARARGS, "_AsciiBase85Decode(\".....\") return decoded string"},
 	{"escapePDF", escapePDF, METH_VARARGS, "escapePDF(s) return PDF safed string"},
 	{"_instanceEscapePDF", _instanceEscapePDF, METH_VARARGS, "_instanceEscapePDF(s) return PDF safed string"},
 	{"fp_str", _fp_str, METH_VARARGS, "fp_str(a0, a1,...) convert numerics to blank separated string"},
