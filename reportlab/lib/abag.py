@@ -1,10 +1,12 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/lib/abag.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/lib/abag.py,v 1.2 2000/12/15 14:24:09 aaron_watters Exp $
+#$Header: /tmp/reportlab/reportlab/lib/abag.py,v 1.3 2001/01/10 09:08:10 dinu_gherman Exp $
+
 class ABag:
 	"""
-	A trivial BAG class for holding attributes
+	A trivial BAG class for holding attributes.
+	(Perhaps AttrBag would be a better name.)
 	"""
 	def __init__(self,**attr):
 		for k,v in attr.items():
