@@ -114,7 +114,10 @@ class Parser:
             #is it a parser method?
             if hasattr(self.__class__, cmd):
                 method = eval('self.'+cmd)
-                apply(method, args)
+                try:
+                    apply(method, args)
+                except TypeError:
+                    raise TypeError, "Incorrect arguments to parser method %s at line %d" % (cmd, self._lineNo)
             else:
                 # assume it is a paragraph style -
                 # becomes the formatter's problem
