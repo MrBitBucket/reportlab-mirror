@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-import string
+import sys, string
 from xml.dom import minidom
+from xml.sax._exceptions import SAXReaderNotAvailable
 
 from reportlab.test import unittest
 from reportlab.test.utils import makeSuiteForClasses
@@ -11,12 +12,42 @@ from reportlab.graphics import renderSVG
 
 
 
+
+def warnIgnoredRestofTest():
+    "Raise a warning (if possible) about a not fully completed test."
+
+    version = sys.version_info[:2]
+    msg = "XML parser not found - consider installing expat! Rest of test(s) ignored!"
+    if version >= (2, 1):
+        import warnings
+        warnings.warn(msg)
+    else:
+        # should better also be printed only once...
+        print msg
+
+
+
+
+# Check if we have a default XML parser available or not.
+
+try:
+    import xml
+    from xml.sax import make_parser
+    p = xml.sax.make_parser()
+    HAVE_XML_PARSER = 1
+except SAXReaderNotAvailable:
+    HAVE_XML_PARSER = 0
+    
+     
+    
+
 def load(path):
     "Helper function to read the generated SVG again."
 
     doc = minidom.parse(path)
     doc.normalize()
     return doc.documentElement
+
 
 
 
@@ -33,6 +64,10 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
         d.add(String(100, 0, "bar"))
         renderSVG.drawToFile(d, path)
 
+        if not HAVE_XML_PARSER:
+            warnIgnoredRestofTest()
+            return
+            
         svg = load(path)
         fg = svg.getElementsByTagName('g')[0]           # flipping group
         dg = fg.getElementsByTagName('g')[0]            # diagram group
@@ -55,6 +90,10 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
         d.add(g)
         renderSVG.drawToFile(d, path)
 
+        if not HAVE_XML_PARSER:
+            warnIgnoredRestofTest()
+            return
+            
         svg = load(path)
         fg = svg.getElementsByTagName('g')[0]           # flipping group
         dg = fg.getElementsByTagName('g')[0]            # diagram group
@@ -81,6 +120,10 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
         d.add(g)
         renderSVG.drawToFile(d, path)
 
+        if not HAVE_XML_PARSER:
+            warnIgnoredRestofTest()
+            return
+            
         svg = load(path)
         fg = svg.getElementsByTagName('g')[0]           # flipping group
         dg = fg.getElementsByTagName('g')[0]            # diagram group
@@ -91,6 +134,8 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
 
         assert t0 == 'foo'
         assert t1 == 'bar'
+
+
 
 
 class RenderSvgAxesTestCase(unittest.TestCase):
@@ -106,8 +151,12 @@ class RenderSvgAxesTestCase(unittest.TestCase):
         renderSVG.drawToFile(d, path)
 
 
+
+
 def makeSuite():
     return makeSuiteForClasses(RenderSvgSimpleTestCase, RenderSvgAxesTestCase)
+
+
 
 
 #noruntests
