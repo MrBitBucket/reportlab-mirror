@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/axes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.10 2001/04/09 22:02:35 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/axes.py,v 1.11 2001/04/11 11:39:31 rgbecker Exp $
 """Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
@@ -396,7 +396,7 @@ class ValueAxis(Widget):
         """
 
         # Set range.
-        self._valueMin, self._valueMax = self._setRange(dataSeries)
+        self._setRange(dataSeries)
 
         # Set scale factor.
         self._scaleFactor = self._calcScaleFactor() 
@@ -438,9 +438,15 @@ class ValueAxis(Widget):
             valueMax = maxFound
         else:
             valueMax = self.valueMax
+        self._valueMin, self._valueMax = (valueMin, valueMax)
+        self._rangeAdjust()
 
-        return valueMin, valueMax
-
+    def _rangeAdjust(self):
+        ''' override this if you want to alter the calculated range
+            eg want a minumamum range of 30%
+            or don't want 100% as the first point
+        '''
+        pass
 
     def _calcScaleFactor(self):
         """Calculate the axis' scale factor.
@@ -463,13 +469,7 @@ class ValueAxis(Widget):
             self._tickValues = self.valueSteps
             return self._tickValues
 
-        if self.valueStep == Auto:
-            rawRange = self._valueMax - self._valueMin
-            rawInterval = rawRange * (1.0 * self.minimumTickSpacing / self._length)
-            niceInterval = nextRoundNumber(rawInterval)
-            self._valueStep = niceInterval
-        else:
-            self._valueStep = self.valueStep
+        self._calcValueStep()
 
         tickmarkPositions = []
         tick = int(self._valueMin / self._valueStep) * self._valueStep
@@ -482,6 +482,15 @@ class ValueAxis(Widget):
 
         return tickmarkPositions
 
+    def _calcValueStep(self):
+        '''Calculate _valueStep for the axis or get from valueStep''' 
+        if self.valueStep == Auto:
+            rawRange = self._valueMax - self._valueMin
+            rawInterval = rawRange * (1.0 * self.minimumTickSpacing / self._length)
+            niceInterval = nextRoundNumber(rawInterval)
+            self._valueStep = niceInterval
+        else:
+            self._valueStep = self.valueStep
 
     def draw(self):
         g = Group()
