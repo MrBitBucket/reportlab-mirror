@@ -128,9 +128,10 @@ class FilenameTestCase(unittest.TestCase):
             basename = os.path.splitext(path)[0]
             truncPath = path[string.find(path, 'reportlab'):]
             msg = "Filename %s contains trailing digits." % truncPath
-            #assert basename[-1] not in string.digits, msg
-            if basename[-1] in string.digits:
-                print truncPath
+            assert basename[-1] not in string.digits, msg
+
+##            if basename[-1] in string.digits:
+##                print truncPath
 
 
 def makeSuite():
