@@ -2,14 +2,15 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/gengraphguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/graphguide/gengraphguide.py,v 1.6 2003/04/17 22:41:35 andy_robinson Exp $
-__version__=''' $Id: gengraphguide.py,v 1.6 2003/04/17 22:41:35 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/docs/graphguide/gengraphguide.py,v 1.7 2003/04/17 23:03:55 andy_robinson Exp $
+__version__=''' $Id: gengraphguide.py,v 1.7 2003/04/17 23:03:55 andy_robinson Exp $ '''
 __doc__ = """
 This module contains the script for building the graphics guide.
 """
 import os
 from reportlab.tools.docco.rl_doc_utils import *
-def run(pagesize, verbose=1, outDir=None):
+from reportlab.lib.pagesizes import A4
+def run(pagesize=A4, verbose=1, outDir=None):
     if outDir:
         filename = os.path.join(outDir, 'graphguide.pdf')
     else:
