@@ -460,6 +460,8 @@ class PPSection:
 
     def drawOn(self, canv):
         for graphic in self.graphics:
+            graphic.drawOn(canv)
+            continue
             name = str(hash(graphic))
             #internalname = canv._doc.hasForm(name)
             if definedForms.has_key(name):
@@ -910,19 +912,19 @@ def setStyles(newStyleSheet):
 ##    p.close()
 
 
-def process(datafilename, notes=0, handout=0, cols=0, verbose=0, outDir=None):
+def process(datafile, notes=0, handout=0, cols=0, verbose=0, outDir=None, datafilename=None):
     "Process one PythonPoint source file."
-    from reportlab.tools.pythonpoint.stdparser import PPMLParser
-
-    parser = PPMLParser()
-    if not hasattr(datafilename, "read") :
-        datafile = open(datafilename)
-    else :
-        datafile = datafilename
-        datafilename = "PseudoFile"
+    if not hasattr(datafile, "read"):
+        if not datafilename: datafilename = datafile
+        datafile = open(datafile)
+    else:
+        if not datafilename: datafilename = "PseudoFile"
     rawdata = datafile.read()
+    return _process(rawdata, datafilename, notes, handout, cols, verbose, outDir)
 
-
+def _process(rawdata, datafilename, notes=0, handout=0, cols=0, verbose=0, outDir=None):
+    from reportlab.tools.pythonpoint.stdparser import PPMLParser
+    parser = PPMLParser()
     parser.sourceFilename = datafilename
     parser.feed(rawdata)
     pres = parser.getPresentation()
@@ -968,10 +970,12 @@ def handleOptions():
                'silent':0,
                'outDir': None}
 
+    args = sys.argv[1:] 
+    args = filter(lambda x: x and x[0]=='-',args) + filter(lambda x: not x or x[0]!='-',args)
     try:
-        shortOpts = 'hnv'
-        longOpts = string.split('cols= outdir= handout help notes verbose')
-        optList, args = getopt.getopt(sys.argv[1:], shortOpts, longOpts)
+        shortOpts = 'hnvs'
+        longOpts = string.split('cols= outdir= handout help notes verbose silent')
+        optList, args = getopt.getopt(args, shortOpts, longOpts)
     except getopt.error, msg:
         options['help'] = 1
 
@@ -1004,7 +1008,7 @@ def handleOptions():
     #takes priority over verbose.  Used by our test suite etc.
         #to ensure no output at all
     if filter(lambda ov: ov[0] in ('s', 'silent'), optList):
-        optiona['silent'] = 1
+        options['silent'] = 1
         options['verbose'] = 0
 
 
