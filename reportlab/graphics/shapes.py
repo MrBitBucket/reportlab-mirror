@@ -263,6 +263,40 @@ def transformPoints(matrix, V):
 def zTransformPoints(matrix, V):
     return map(lambda x,matrix=matrix: zTransformPoint(matrix,x), V)
 
+def _textBoxLimits(text, font, fontSize, leading, textAnchor, boxAnchor):
+	w = 0
+	for t in text:
+		w = max(w,stringWidth(t,font, fontSize))
+
+	h = len(text)*leading
+	yt = fontSize
+	if boxAnchor[0]=='s':
+		yb = -h
+		yt = yt - h
+	elif boxAnchor[0]=='n':
+		yb = 0
+	else:
+		yb = -h/2.0
+		yt = yt + yb
+
+	if boxAnchor[-1]=='e':
+		xb = -w
+		if textAnchor=='end': xt = 0
+		elif textAnchor=='start': xt = -w
+		else: xt = -w/2.0
+	elif boxAnchor[-1]=='w':
+		xb = 0
+		if textAnchor=='end': xt = w
+		elif textAnchor=='start': xt = 0
+		else: xt = w/2.0
+	else:
+		xb = -w/2.0
+		if textAnchor=='end': xt = -xb
+		elif textAnchor=='start': xt = xb
+		else: xt = 0
+
+	return xb, yb, w, h, xt, yt
+
 def _rotatedBoxLimits( x, y, w, h, angle):
     '''
     Find the corner points of the rotated w x h sized box at x,y 
