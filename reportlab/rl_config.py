@@ -1,8 +1,9 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/rl_config.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.22 2001/09/10 03:08:29 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/rl_config.py,v 1.23 2001/09/13 19:06:43 aaron_watters Exp $
 
+allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =				1
 defaultEncoding =			'WinAnsiEncoding'		# 'WinAnsi' or 'MacRoman'
 pageCompression =			1						# default page compression mode
