@@ -125,6 +125,17 @@ A simple document processor can be made using derived class,
 .pageBreak
 .h2 Flowables
 .getClassDoc reportlab.platypus.paragraph Paragraph
+.getClassDoc reportlab.platypus.flowables Flowable
+.getClassDoc reportlab.platypus.flowables XBox
+.getClassDoc reportlab.platypus.flowables Preformatted
+.getClassDoc reportlab.platypus.flowables Image
+.getClassDoc reportlab.platypus.flowables Spacer
+.getClassDoc reportlab.platypus.flowables PageBreak
+.getClassDoc reportlab.platypus.flowables CondPageBreak
+.getClassDoc reportlab.platypus.flowables KeepTogether
+.getClassDoc reportlab.platypus.flowables Macro
+.getClassDoc reportlab.platypus.xpreformatted XPreformatted
+.getClassDoc reportlab.platypus.xpreformatted PythonPreformatted
 
 .pageBreak
 .h1 <i>reportlab.lib</i> subpackage
@@ -158,6 +169,9 @@ applications.
 .h1 Appendix A - CVS Revision History
 .beginPre Code
 $Log: reference.yml,v $
+Revision 1.13  2001/08/30 10:32:38  dinu_gherman
+Added missing flowables.
+
 Revision 1.12  2001/07/11 09:21:27  rgbecker
 Typo fix from Jerome Alet
 
