@@ -961,7 +961,7 @@ class TTFont:
             codes = map(ord, text)
         else:
             uText = unicode(text, encoding)
-            codes = map(ord, text)
+            codes = map(ord, uText)
         for code in codes:
             w = w + width(code)
         return 0.001 * w * size
