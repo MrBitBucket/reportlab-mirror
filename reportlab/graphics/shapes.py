@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/shapes.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.24 2001/05/07 14:10:41 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/shapes.py,v 1.25 2001/05/15 15:08:26 dinu_gherman Exp $
 # core of the graphics library - defines Drawing and Shapes
 """
 """
@@ -288,7 +288,10 @@ class Group(Shape):
     In addition, child nodes may be given a name in which
     case they are subsequently accessible as properties."""
 
-    _attrMap = {'transform':isTransform, 'contents':isListOfShapes}
+    _attrMap = {
+        'transform':isTransform(),
+        'contents':isListOfShapes()
+        }
     
     def __init__(self, *elements, **keywords):
         """Initial lists of elements may be provided to allow
@@ -400,8 +403,8 @@ class Drawing(Group, Flowable):
     of contents."""
 
     _xtraAttrMap = {
-        'width':isNumber,
-        'height':isNumber,
+        'width':isNumber(),
+        'height':isNumber(),
         'canv':None}
 
     _attrMap = Group._attrMap.copy()
@@ -489,12 +492,12 @@ class LineShape(Shape):
     # base for types of lines
 
     _attrMap = {
-        'strokeColor':isColorOrNone,
-        'strokeWidth':isNumber,
+        'strokeColor':isColorOrNone(),
+        'strokeWidth':isNumber(),
         'strokeLineCap':None,
         'strokeLineJoin':None,
-        'strokeMiterLimit':isNumber,
-        'strokeDashArray':isListOfNumbersOrNone,
+        'strokeMiterLimit':isNumber(),
+        'strokeDashArray':isListOfNumbersOrNone(),
         }
 
     def __init__(self, kw):
@@ -509,16 +512,16 @@ class LineShape(Shape):
 
 class Line(LineShape):
     _attrMap = {
-        'strokeColor':isColorOrNone,
-        'strokeWidth':isNumber,
+        'strokeColor':isColorOrNone(),
+        'strokeWidth':isNumber(),
         'strokeLineCap':None,
         'strokeLineJoin':None,
-        'strokeMiterLimit':isNumber,
-        'strokeDashArray':isListOfNumbersOrNone,
-        'x1':isNumber,
-        'y1':isNumber,
-        'x2':isNumber,
-        'y2':isNumber
+        'strokeMiterLimit':isNumber(),
+        'strokeDashArray':isListOfNumbersOrNone(),
+        'x1':isNumber(),
+        'y1':isNumber(),
+        'x2':isNumber(),
+        'y2':isNumber()
         }
 
     def __init__(self, x1, y1, x2, y2, **kw):
@@ -533,13 +536,13 @@ class SolidShape(Shape):
     # base for anything with outline and content
 
     _attrMap = {
-        'strokeColor':isColorOrNone,
-        'strokeWidth':isNumber,
+        'strokeColor':isColorOrNone(),
+        'strokeWidth':isNumber(),
         'strokeLineCap':None,
         'strokeLineJoin':None,
-        'strokeMiterLimit':isNumber,
+        'strokeMiterLimit':isNumber(),
         'strokeDashArray':None,
-        'fillColor':isColorOrNone
+        'fillColor':isColorOrNone()
         }
 
     def __init__(self, kw):
@@ -564,19 +567,19 @@ class Rect(SolidShape):
     """Rectangle, possibly with rounded corners."""    
 
     _attrMap = {
-        'strokeColor': isColorOrNone,
-        'strokeWidth': isNumber,
+        'strokeColor': isColorOrNone(),
+        'strokeWidth': isNumber(),
         'strokeLineCap': None,   #TODO - define the types expected and add a checker function
         'strokeLineJoin': None,  #TODO - define the types expected and add a checker function
         'strokeMiterLimit': None, #TODO - define the types expected and add a checker function
-        'strokeDashArray': isListOfNumbersOrNone, #TODO - define the types expected and add a checker function
-        'fillColor': isColorOrNone,
-        'x': isNumber,
-        'y': isNumber,
-        'width': isNumber,
-        'height': isNumber,
-        'rx': isNumber,
-        'ry': isNumber
+        'strokeDashArray': isListOfNumbersOrNone(), #TODO - define the types expected and add a checker function
+        'fillColor': isColorOrNone(),
+        'x': isNumber(),
+        'y': isNumber(),
+        'width': isNumber(),
+        'height': isNumber(),
+        'rx': isNumber(),
+        'ry': isNumber()
         }
         
     def __init__(self, x, y, width, height, rx=0, ry=0, **kw):
@@ -598,15 +601,15 @@ class Circle(SolidShape):
 
     _attrMap = {
         'strokeColor': None,
-        'strokeWidth': isNumber,
+        'strokeWidth': isNumber(),
         'strokeLineCap': None,
         'strokeLineJoin': None,
         'strokeMiterLimit': None,
-        'strokeDashArray': isListOfNumbersOrNone,
+        'strokeDashArray': isListOfNumbersOrNone(),
         'fillColor': None,
-        'cx': isNumber,
-        'cy': isNumber,
-        'r': isNumber
+        'cx': isNumber(),
+        'cy': isNumber(),
+        'r': isNumber()
         }
     
     def __init__(self, cx, cy, r, **kw):
@@ -625,16 +628,16 @@ class Ellipse(SolidShape):
 
     _attrMap = {
         'strokeColor': None,
-        'strokeWidth': isNumber,
+        'strokeWidth': isNumber(),
         'strokeLineCap': None,
         'strokeLineJoin': None,
         'strokeMiterLimit': None,
-        'strokeDashArray': isListOfNumbersOrNone,
+        'strokeDashArray': isListOfNumbersOrNone(),
         'fillColor': None,
-        'cx': isNumber,
-        'cy': isNumber,
-        'rx': isNumber,
-        'ry': isNumber
+        'cx': isNumber(),
+        'cy': isNumber(),
+        'rx': isNumber(),
+        'ry': isNumber()
         }
 
     def __init__(self, cx, cy, rx, ry, **kw):
@@ -656,18 +659,18 @@ class Wedge(SolidShape):
 
     _attrMap = {
         'strokeColor': None,
-        'strokeWidth': isNumber,
+        'strokeWidth': isNumber(),
         'strokeLineCap': None,
         'strokeLineJoin': None,
         'strokeMiterLimit': None,
-        'strokeDashArray': isListOfNumbersOrNone,
+        'strokeDashArray': isListOfNumbersOrNone(),
         'fillColor': None,
-        'centerx': isNumber,
-        'centery': isNumber,
-        'radius': isNumber,
-        'startangledegrees': isNumber,
-        'endangledegrees': isNumber,
-        'yradius':isNumberOrNone
+        'centerx': isNumber(),
+        'centery': isNumber(),
+        'radius': isNumber(),
+        'startangledegrees': isNumber(),
+        'endangledegrees': isNumber(),
+        'yradius':isNumberOrNone()
         }
 
     degreedelta = 1 # jump every 1 degrees
@@ -733,13 +736,13 @@ class Polygon(SolidShape):
 
     _attrMap = {
         'strokeColor': None,
-        'strokeWidth': isNumber,
+        'strokeWidth': isNumber(),
         'strokeLineCap': None,
         'strokeLineJoin': None,
         'strokeMiterLimit': None,
-        'strokeDashArray': isListOfNumbersOrNone,
+        'strokeDashArray': isListOfNumbersOrNone(),
         'fillColor': None,
-        'points': isListOfNumbers,
+        'points': isListOfNumbers(),
         }
 
     def __init__(self, points=[], **kw):
@@ -759,13 +762,13 @@ class PolyLine(LineShape):
     Put the numbers in the list, not two-tuples."""
 
     _attrMap = {
-        'strokeColor':isColorOrNone,
-        'strokeWidth':isNumber,
+        'strokeColor':isColorOrNone(),
+        'strokeWidth':isNumber(),
         'strokeLineCap':None,
         'strokeLineJoin':None,
-        'strokeMiterLimit':isNumber,
-        'strokeDashArray':isListOfNumbersOrNone,
-        'points':isListOfNumbers
+        'strokeMiterLimit':isNumber(),
+        'strokeDashArray':isListOfNumbersOrNone(),
+        'points':isListOfNumbers()
         }
 
     def __init__(self, points=[], **kw):
@@ -794,13 +797,13 @@ class String(Shape):
 
     # to do.
     _attrMap = {
-        'x': isNumber,
-        'y': isNumber,
-        'text': isString,
+        'x': isNumber(),
+        'y': isNumber(),
+        'text': isString(),
         'fontName':None,  #TODO - checker
-        'fontSize':isNumber,
-        'fillColor':isColorOrNone,
-        'textAnchor':isTextAnchor
+        'fontSize':isNumber(),
+        'fillColor':isColorOrNone(),
+        'textAnchor':isTextAnchor()
         }
 
     def __init__(self, x, y, text, **kw):

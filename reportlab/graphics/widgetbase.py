@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.13 2001/05/11 10:06:28 dinu_gherman Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.14 2001/05/15 15:08:26 dinu_gherman Exp $
 import string
 
 from reportlab.graphics import shapes
@@ -255,15 +255,15 @@ class StyleProperties(PropHolder):
 	"""
 	
 	_attrMap = {
-		'strokeWidth': isNumber,
-		'strokeLineCap': isNumber,
-		'strokeLineJoin': isNumber,
+		'strokeWidth': isNumber(),
+		'strokeLineCap': isNumber(),
+		'strokeLineJoin': isNumber(),
 		'strokeMiterLimit': None,
-		'strokeDashArray': isListOfNumbersOrNone,
-		'strokeOpacity': isNumber,
-		'strokeColor': isColorOrNone,
-		'fillColor': isColorOrNone,
-		'desc':isString
+		'strokeDashArray': isListOfNumbersOrNone(),
+		'strokeOpacity': isNumber(),
+		'strokeColor': isColorOrNone(),
+		'fillColor': isColorOrNone(),
+		'desc':isString()
 		}
 
 	def __init__(self, **kwargs):
@@ -310,16 +310,13 @@ class Face(Widget):
     to configure itself and hides all other details.
     """
 
-    def checkMood(moodName):
-        return (moodName in ('happy','sad','ok'))
-
     _attrMap = {
-        'x': isNumber,
-        'y': isNumber,
-        'size': isNumber,
-        'skinColor':isColorOrNone,
-        'eyeColor': isColorOrNone,
-        'mood': checkMood 
+        'x': isNumber(),
+        'y': isNumber(),
+        'size': isNumber(),
+        'skinColor': isColorOrNone(),
+        'eyeColor': isColorOrNone(),
+        'mood': OneOf(('happy','sad','ok'))
         }
 
     def __init__(self):
