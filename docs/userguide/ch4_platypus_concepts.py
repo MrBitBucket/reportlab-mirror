@@ -184,6 +184,32 @@ eg("""
 	Frame.drawBoundary(canvas)
 """)
 disc("draw the frame boundary as a rectangle (primarily for debugging).")
+heading3("Using $Frames$")
+disc("""
+$Frames$ can be used directly with canvases and flowables to create documents.
+The $Frame.addFromList$ method handles the $wrap$ &amp; $drawOn$ calls for you.
+You don't need all of the Platypus machinery to get something useful into
+PDF.
+""")
+eg("""
+from reportlab.pdfgen.canvas import Canvas
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.platypus import Paragraph, Frame
+styles = getSampleStyleSheet()
+styleN = styles['Normal']
+styleH = styles['Heading1']
+story = []
+
+#add some flowables
+story.append(Paragraph("This is a Heading",styleH))
+story.append(Paragraph("This is a paragraph in <i>Normal</i> style.",
+	styleN))
+c  = Canvas('mydoc.pdf')
+f = Frame(inch, inch, 6*inch, 9*inch, showBoundary=1)
+f.addFromList(story,c)
+c.save()
+""")
 
 heading2("Documents and Templates")
 
@@ -368,7 +394,7 @@ story = []
 
 #add some flowables
 story.append(Paragraph("This is a Heading",styleH))
-story.append(Paragraph("This is a paragraph in &lt;i&gt;Normal&lt;/i&gt; style.",
+story.append(Paragraph("This is a paragraph in <i>Normal</i> style.",
 	styleN))
 doc = SimpleDocTemplate('mydoc.pdf',pagesize = letter)
 doc.build(story)
