@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.5  2000/05/13 16:03:23  rgbecker
+#	Fix extraspace calculation
+#
 #	Revision 1.4  2000/05/12 15:13:41  rgbecker
 #	Fixes to alignment handling
-#
+#	
 #	Revision 1.3  2000/05/11 14:04:34  rgbecker
 #	Removed usage of spaceBefore/After in wrap methods
 #	
@@ -43,7 +46,7 @@
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.4 2000/05/12 15:13:41 rgbecker Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.5 2000/05/13 16:03:23 rgbecker Exp $ '''
 import string
 import types
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -293,7 +296,7 @@ class Paragraph(Flowable):
 						maxwidth = maxwidths[-1]  # use the last one
 
 			#deal with any leftovers on the final line
-			if cLine!=[]: lines.append((space_available, cLine))
+			if cLine!=[]: lines.append((maxwidth - currentwidth, cLine))
 			self.height = self.height + len(lines) * sLeading
 			return f.clone(kind=0, lines=lines)
 		elif nFrags<=0:
