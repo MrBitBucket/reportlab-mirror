@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: flowables.py,v $
+#	Revision 1.8  2000/08/24 11:33:31  rgbecker
+#	XPreformatted first fixes; now runs
+#
 #	Revision 1.7  2000/08/03 14:12:53  rgbecker
 #	Changing to packer led positioning
-#
+#	
 #	Revision 1.6  2000/07/13 11:42:10  rgbecker
 #	removed debug prints
 #	
@@ -53,7 +56,7 @@
 #	Platypus re-organisation
 #	
 #	
-__version__=''' $Id: flowables.py,v 1.7 2000/08/03 14:12:53 rgbecker Exp $ '''
+__version__=''' $Id: flowables.py,v 1.8 2000/08/24 11:33:31 rgbecker Exp $ '''
 __doc__="""
 A flowable is a "floating element" in a document whose exact position is determined by the
 other elements that precede it, such as a paragraph, a diagram interspersed between paragraphs,
@@ -173,6 +176,25 @@ class XBox(Flowable):
 		self.canv.setFont('Times-Roman',12)
 		self.canv.drawCentredString(0.5*self.width, 0.5*self.height, self.text)
 
+def _dedenter(text,dedent=0):
+	'''
+	tidy up text - carefully, it is probably code.  If people want to
+	indent code within a source script, you can supply an arg to dedent
+	and it will chop off that many character, otherwise it leaves
+	left edge intact.
+	'''
+	templines = string.split(text, '\n')
+	lines = []
+	for line in templines:
+		line = string.rstrip(line[dedent:])
+		lines.append(line)
+	#don't want the first or last to be empty
+	while string.strip(lines[0]) == '':
+		lines = lines[1:]
+	while string.strip(lines[-1]) == '':
+		lines = lines[:-1]
+	return lines
+
 class Preformatted(Flowable):
 	"""This is like the HTML <PRE> tag.  
 	It attempts to display text exactly as you typed it in a fixed width "typewriter" font.
@@ -185,22 +207,7 @@ class Preformatted(Flowable):
 		"""
 		self.style = style
 		self.bulletText = bulletText
-
-		#tidy up text - carefully, it is probably code.  If people want to
-		#indent code within a source script, you can supply an arg to dedent
-		#and it will chop off that many character, otherwise it leaves
-		#left edge intact.
-
-		templines = string.split(text, '\n')
-		self.lines = []
-		for line in templines:
-			line = string.rstrip(line[dedent:])
-			self.lines.append(line)
-		#don't want the first or last to be empty
-		while string.strip(self.lines[0]) == '':
-			self.lines = self.lines[1:]
-		while string.strip(self.lines[-1]) == '':
-			self.lines = self.lines[:-1]
+		self.lines = _dedenter(text,dedent)
 
 	def wrap(self, availWidth, availHeight):
 		self.width = availWidth

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: __init__.py,v $
+#	Revision 1.10  2000/08/24 11:33:31  rgbecker
+#	XPreformatted first fixes; now runs
+#
 #	Revision 1.9  2000/07/13 11:41:00  rgbecker
 #	Added KeepTogether
-#
+#	
 #	Revision 1.8  2000/06/27 10:07:55  rgbecker
 #	Added CondPageBreak
 #	
@@ -55,7 +58,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: __init__.py,v 1.9 2000/07/13 11:41:00 rgbecker Exp $ '''
+__version__=''' $Id: __init__.py,v 1.10 2000/08/24 11:33:31 rgbecker Exp $ '''
 __doc__=''
 from reportlab.platypus.flowables import Flowable, Image, Macro, PageBreak, Preformatted, Spacer, XBox, \
 						CondPageBreak, KeepTogether
@@ -65,3 +68,4 @@ from reportlab.platypus.tables import Table, TableStyle, CellStyle
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate, PageTemplate, ActionFlowable, \
 						SimpleDocTemplate, FrameBreak
+from xpreformatted import XPreformatted

@@ -2,6 +2,7 @@ import string
 from types import StringType, ListType
 from paragraph import Paragraph, cleanBlockQuotedText, _handleBulletWidth, ParaFrag, _getFragWords, \
 	stringWidth, _sameFrag
+from flowables import _dedenter
 
 def _getFragLines(frags):
 	lines = []
@@ -25,12 +26,10 @@ def _getFragLines(frags):
 	if cline!=[]: lines.append(cline)
 	return lines
 
-def _cleanBlockQuotedTextRetainLines(text):
-	return cleanBlockQuotedText(text,'\n')
-
 class XPreformatted(Paragraph):
-	def __init__(self, text, style, bulletText = None, frags=None):
-		self._setup(text, style, bulletText, frags, _cleanBlockQuotedTextRetainLines)
+	def __init__(self, text, style, bulletText = None, dedent=0, frags=None):
+		cleaner = lambda text, dedent=dedent: string.join(_dedenter(text,dedent),'\n')
+		self._setup(text, style, bulletText, frags, cleaner)
 
 	def breakLines(self, width):
 		"""
@@ -82,14 +81,13 @@ class XPreformatted(Paragraph):
 			fontName = f.fontName
 			if hasattr(f,'text'):
 				L=string.split(f.text, '\n')
-				lineno = 0
 				for l in L:
 					currentWidth = stringWidth(l,fontName,fontSize)
 					requiredWidth = max(currentWidth,requiredWidth)
 					extraSpace = maxWidth-currentWidth
 					lines.append((extraSpace,string.split(l,' ')))
 					lineno = lineno+1
-					maxWidth = lineno<len(maxWidths) and maxWidths[lineno] or maxWidth[-1]
+					maxWidth = lineno<len(maxWidths) and maxWidths[lineno] or maxWidths[-1]
 			else:
 				lines=f.lines
 
@@ -133,6 +131,8 @@ class XPreformatted(Paragraph):
 
 					currentWidth = currentWidth + spaceWidth + wordWidth
 
+				lineno = lineno+1
+				maxWidth = lineno<len(maxWidths) and maxWidths[lineno] or maxWidths[-1]
 				requiredWidth = max(currentWidth,requiredWidth)
 				extraSpace = maxWidth - currentWidth
 				lines.append(ParaFrag(extraSpace=extraSpace,wordCount=n, words=words, fontSize=maxSize))
