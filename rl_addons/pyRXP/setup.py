@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2002
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/setup.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/setup.py,v 1.2 2002/03/23 19:25:50 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/setup.py,v 1.3 2002/04/01 22:38:39 rgbecker Exp $
 if __name__=='__main__': #NO RUNTESTS
 	import os, sys
 	from distutils.core import setup, Extension
@@ -20,6 +20,8 @@ if __name__=='__main__': #NO RUNTESTS
 	elif sys.platform=="aix4":
 		LIBS=['nsl_r', 'dl']
 	elif sys.platform=="freebsd4":
+		LIBS=[]
+	elif sys.platform=="darwin":
 		LIBS=[]
 	elif sys.platform=="mac":
 		LIBS=[]
