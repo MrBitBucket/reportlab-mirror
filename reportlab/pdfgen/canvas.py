@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: canvas.py,v $
+#	Revision 1.9  2000/02/24 09:12:55  andy_robinson
+#	Removed some constants which are no longer used.
+#
 #	Revision 1.8  2000/02/20 14:43:27  rgbecker
 #	_currentPageHasImages = 0 in init
-#
+#	
 #	Revision 1.7  2000/02/20 11:08:56  rgbecker
 #	Canvas.setPageSize fix
 #	
@@ -52,7 +55,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: canvas.py,v 1.8 2000/02/20 14:43:27 rgbecker Exp $ '''
+__version__=''' $Id: canvas.py,v 1.9 2000/02/24 09:12:55 andy_robinson Exp $ '''
 __doc__=""" 
 PDFgen is a library to generate PDF files containing text and graphics.  It is the 
 foundation for a complete reporting solution in Python.  It is also the
@@ -119,17 +122,6 @@ PATH_OPS = {(0, 0, FILL_EVEN_ODD) : 'n',  #no op
             (1, 1, FILL_EVEN_ODD) : 'B*',  #Stroke and Fill
             (1, 1, FILL_NON_ZERO) : 'B',  #Stroke and Fill
             }
-
-close = 'h'
-newpath = 'n'
-stroke = 'S'
-closeStroke = 's'
-nzFill = 'f'
-eoFill = 'f*'
-fillStroke = 'B'
-closeFillStroke = 'b'
-eoFillStroke = 'B*'
-closeEoFillStroke = 'b*'
 
 class Canvas:
     """This is a low-level interface to the PDF file format.  The plan is to
