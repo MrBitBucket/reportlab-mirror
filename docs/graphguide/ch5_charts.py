@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/ch5_charts.py,v 1.6 2001/09/25 12:11:01 rgbecker Exp $
+#$Header: /tmp/reportlab/docs/graphguide/ch5_charts.py,v 1.7 2001/10/03 12:36:53 rgbecker Exp $
 
 from rl_doc_utils import *
 from reportlab.graphics.shapes import *
@@ -908,7 +908,7 @@ placed at each data point.
 
 eg("""
 from reportlab.graphics.charts.lineplots import LinePlot
-from reportlab.graphics.charts.markers import makeFilledCircle, makeEmptyCircle
+from reportlab.graphics.widgets.markers import makeMarker
 
 drawing = Drawing(400, 200)
 
@@ -924,8 +924,8 @@ lp.height = 125
 lp.width = 300
 lp.data = data
 lp.joinedLines = 1
-lp.lines[0].symbol = makeFilledCircle
-lp.lines[1].symbol = makeEmptyCircle
+lp.lines[0].symbol = makeMarker('FilledCircle')
+lp.lines[1].symbol = makeMarker('Circle')
 lp.lineLabelFormat = '%2.0f'
 lp.strokeColor = colors.black
 lp.xValueAxis.valueMin = 0
@@ -941,7 +941,7 @@ drawing.add(lp)
 
 
 from reportlab.graphics.charts.lineplots import LinePlot
-from reportlab.graphics.charts.markers import makeFilledCircle, makeEmptyCircle
+from reportlab.graphics.widgets.markers import makeMarker
 
 drawing = Drawing(400, 200)
 
@@ -957,8 +957,8 @@ lp.height = 125
 lp.width = 300
 lp.data = data
 lp.joinedLines = 1
-lp.lines[0].symbol = makeFilledCircle
-lp.lines[1].symbol = makeEmptyCircle
+lp.lines[0].symbol = makeMarker('FilledCircle')
+lp.lines[1].symbol = makeMarker('Circle')
 lp.lineLabelFormat = '%2.0f'
 lp.strokeColor = colors.black
 lp.xValueAxis.valueMin = 0
