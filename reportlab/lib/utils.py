@@ -250,9 +250,8 @@ def get_rl_tempdir(*subdirs):
 def get_rl_tempfile(fn=None):
     if not fn:
         import tempfile
-        return tempfile.mktemp('','',get_rl_tempdir())
-    else:
-        return os.path.join(get_rl_tempdir(),fn)
+        fn = tempfile.mktemp()
+    return os.path.join(get_rl_tempdir(),fn)
 
 def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     """Dynamically imports possible packagized module, or raises ImportError"""
