@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfutils.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.32 2002/07/24 19:56:37 andy_robinson Exp $
-__version__=''' $Id: pdfutils.py,v 1.32 2002/07/24 19:56:37 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfutils.py,v 1.33 2002/11/04 16:17:08 rgbecker Exp $
+__version__=''' $Id: pdfutils.py,v 1.33 2002/11/04 16:17:08 rgbecker Exp $ '''
 __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
@@ -21,21 +21,22 @@ LINEEND = '\015\012'
 #
 ##########################################################
 
-def cacheImageFile(filename, returnInMemory=0):
+def cacheImageFile(filename, returnInMemory=0, IMG=None):
     "Processes image as if for encoding, saves to a file with .a85 extension."
 
-    from reportlab.lib.utils import PIL_Image
+    from reportlab.lib.utils import PIL_Image, open_for_read
     import zlib
 
     cachedname = os.path.splitext(filename)[0] + '.a85'
     if filename==cachedname:
         if cachedImageExists(filename):
-            if returnInMemory: return split(open(cachedname,'rb').read(),LINEEND)[:-1]
+            if returnInMemory: return split(open_for_read(cachedname,'t').read(),LINEEND)[:-1]
         else:
             raise IOError, 'No such cached image %s' % filename
     else:
-        img1 = PIL_Image.open(filename)
+        img1 = PIL_Image.open(open_for_read(filename))
         img = img1.convert('RGB')
+        if IMG is not None: IMG.append(img)
         imgwidth, imgheight = img.size
         code = []
         code.append('BI')   # begin image

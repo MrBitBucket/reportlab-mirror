@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfbase/pdfdoc.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.71 2002/11/04 00:11:48 andy_robinson Exp $
-__version__=''' $Id: pdfdoc.py,v 1.71 2002/11/04 00:11:48 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/pdfbase/pdfdoc.py,v 1.72 2002/11/04 16:17:08 rgbecker Exp $
+__version__=''' $Id: pdfdoc.py,v 1.72 2002/11/04 16:17:08 rgbecker Exp $ '''
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -1724,14 +1724,26 @@ class PDFImageXObject:
             pass # use the canned one.
         elif type(source) == type(''):
             # it is a filename
-            img = open_for_read(source)
             import os
-            if string.lower(os.path.splitext(source)[1]) in ('.jpg', '.jpeg'):
-                self.loadImageFromJPEG(img)
+            ext = string.lower(os.path.splitext(source)[1])
+            if ext in ('.jpg', '.jpeg'):
+                self.loadImageFromJPEG(open_for_read(source))
             else:
-                self.loadImageFromPIL(PIL_Image.open(img))
+                self.loadImageFromA85(source)
         else: # it is already a PIL Image
             self.loadImageFromPIL(source)
+
+    def loadImageFromA85(self,source):
+        IMG=[]
+        imagedata = map(string.strip,pdfutils.cacheImageFile(source,returnInMemory=1,IMG=IMG))
+        words = string.split(imagedata[1])
+        self.width, self.height = map(string.atoi,(words[1],words[3]))
+        self.colorSpace = 'DeviceRGB'
+        self.bitsPerComponent = 8
+        self._filters = 'A85','Fl'
+        if IMG: self._checkTransparency(IMG[0])
+        else: self.mask = None
+        self.streamContent = ''.join(imagedata[2:-1])
 
     def loadImageFromJPEG(self,imageFile):
         info = pdfutils.readJPEGInfo(imageFile)
@@ -1748,6 +1760,15 @@ class PDFImageXObject:
         self._filters = 'A85','DCT'
         self.mask = None
 
+    def _checkTransparency(self,PILImage):
+        if self.mask=='auto':
+            if PILImage.info.has_key("transparency") :
+                transparency = PILImage.info["transparency"] * 3
+                (tred, tgreen, tblue) = map(ord, PILImage.palette.data[transparency:transparency+3])
+                self.mask = (tred, tred, tgreen, tgreen, tblue, tblue)
+            else:
+                self.mask = None
+
     def loadImageFromPIL(self, PILImage):
         "Extracts the stream, width and height"
         zlib = import_zlib()
@@ -1763,13 +1784,7 @@ class PDFImageXObject:
         self.colorSpace = 'DeviceRGB'
         self.bitsPerComponent = 8
         self._filters = 'A85','Fl'  # Ascii85decode, FlateDecode
-        if self.mask=='auto':
-            if PILImage.info.has_key("transparency") :
-                transparency = PILImage.info["transparency"] * 3
-                (tred, tgreen, tblue) = map(ord, PILImage.palette.data[transparency:transparency+3])
-                self.mask = (tred, tred, tgreen, tgreen, tblue, tblue)
-            else:
-                self.mask = None
+        self._checkTransparency(PILImage)
 
     def format(self, document):
         S = PDFStream()
