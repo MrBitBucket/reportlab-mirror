@@ -2,16 +2,17 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/gengraphguide.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/gengraphguide.py,v 1.3 2001/08/07 10:17:36 dinu_gherman Exp $
-__version__=''' $Id: gengraphguide.py,v 1.3 2001/08/07 10:17:36 dinu_gherman Exp $ '''
+#$Header: /tmp/reportlab/docs/graphguide/gengraphguide.py,v 1.4 2001/08/07 10:26:06 dinu_gherman Exp $
+__version__=''' $Id: gengraphguide.py,v 1.4 2001/08/07 10:26:06 dinu_gherman Exp $ '''
 
 
 __doc__ = """
 This module contains the script for building the graphics guide.
 """
 
-import os, sys
+import os, sys, glob
 import string
+import StringIO
 
 sys.path.insert(0,os.path.join(os.path.dirname(sys.argv[0]),'..','tools'))
 from rltemplate import RLDocTemplate
@@ -28,9 +29,10 @@ from reportlab.platypus import Paragraph, Spacer, Preformatted,\
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.sequencer import getSequencer
+
 import examples
 import platdemos
-import StringIO
+
 appmode=0
 
 
@@ -94,7 +96,6 @@ seq.setFormat('Figure', '1')
 seq.chain('Chapter','Section')
 seq.chain('Chapter','Figure')
 
-
 lessonnamestyle = H2
 discussiontextstyle = B
 exampletextstyle = styleSheet['Code']
@@ -102,6 +103,7 @@ exampletextstyle = styleSheet['Code']
 examplefunctionxinches = 5.5
 examplefunctionyinches = 3
 examplefunctiondisplaysizes = (examplefunctionxinches*inch, examplefunctionyinches*inch)
+
 
 # for testing
 def NOP(*x,**y):
@@ -331,7 +333,6 @@ class ParaBox(platdemos.Figure):
                          self.figureHeight * 0.95 - self.prh)
         
         
-
     def getStyleText(self, style):
         """Converts style to preformatted block of text"""
         lines = []
@@ -395,7 +396,6 @@ def handnote(xoffset=0, size=None, fillcolor=tan, strokecolor=green):
     getStory().append(examples.HandAnnotation(xoffset,size,fillcolor,strokecolor))
     
         
-
 #make a singleton, created when requested rather
 #than each time a chapter imports it.
 _story = None
@@ -405,10 +405,10 @@ def getStory():
         _story = []
     return _story
 
+
 def run(pagesize):
     
     doc = RLDocTemplate('graphguide.pdf',pagesize = pagesize)
-
 
     #this builds the story    
     #resetStory()
@@ -432,7 +432,12 @@ def run(pagesize):
     doc.build(story)
     print 'Saved graphguide.pdf'
 
-    
+    # remove *.pyc files
+    pat = os.path.join(os.path.dirname(sys.argv[0]), '*.pyc')
+    for file in glob.glob(pat):
+        os.remove(file)
+
+        
 if __name__=="__main__":
     if len(sys.argv) > 1:
         try:
