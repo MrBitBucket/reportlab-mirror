@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/userguide/ch7_custom.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.11 2001/03/30 18:36:12 dinu_gherman Exp $
+#$Header: /tmp/reportlab/docs/graphguide/Attic/ch2_graphics.py,v 1.12 2001/03/31 09:24:45 dinu_gherman Exp $
 
 from gengraphguide import *
 
@@ -1742,23 +1742,58 @@ and percentile bars as well as the side-by-side variant seen here.
 
 heading2("Pie Charts")
 
-disc("""We've already seen a pie chart example above. This is provisional but 
-       seems to do most things. At the very least we need to change the name. 
-       For completeness we will cover it here.""")
+disc("""
+We've already seen a pie chart example above.
+This is provisional but seems to do most things.
+At the very least we need to change the name. 
+For completeness we will cover it here.
+""")
 
 eg("""
-    pc = PieWithWedges()
-    pc.x = 150
-    pc.y = 50
-    pc.data = [10,20,30,40,50,60]
-    pc.labels = ['a','b','c','d','e','f']
-    pc.wedges.strokeWidth=0.5
-    pc.wedges[3].popout = 20
-    pc.wedges[3].strokeWidth = 2
-    pc.wedges[3].strokeDashArray = [2,2]
-    pc.wedges[3].labelRadius = 1.75
-    pc.wedges[3].fontColor = colors.red
+from reportlab.graphics.charts.piecharts import Pie
+
+d = Drawing(200, 100)
+
+pc = Pie()
+pc.x = 65
+pc.y = 15
+pc.width = 70
+pc.height = 70
+pc.data = [10,20,30,40,50,60]
+pc.labels = ['a','b','c','d','e','f']
+
+pc.wedges.strokeWidth=0.5
+pc.wedges[3].popout = 10
+pc.wedges[3].strokeWidth = 2
+pc.wedges[3].strokeDashArray = [2,2]
+pc.wedges[3].labelRadius = 1.75
+pc.wedges[3].fontColor = colors.red
+
+d.add(pc)
 """)
+
+from reportlab.graphics.charts.piecharts import Pie
+
+d = Drawing(200, 100)
+
+pc = Pie()
+pc.x = 65
+pc.y = 15
+pc.width = 70
+pc.height = 70
+pc.data = [10,20,30,40,50,60]
+pc.labels = ['a','b','c','d','e','f']
+
+pc.wedges.strokeWidth=0.5
+pc.wedges[3].popout = 10
+pc.wedges[3].strokeWidth = 2
+pc.wedges[3].strokeDashArray = [2,2]
+pc.wedges[3].labelRadius = 1.75
+pc.wedges[3].fontColor = colors.red
+
+d.add(pc)
+
+draw(d, 'A bare bones pie chart')
 
 disc("""
 Properties are covered below.
