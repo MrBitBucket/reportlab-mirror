@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
-#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.12 2001/09/23 04:56:55 kern Exp $
-__version__=''' $Id: renderPM.py,v 1.12 2001/09/23 04:56:55 kern Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPM.py,v 1.13 2001/09/28 10:30:12 rgbecker Exp $
+__version__=''' $Id: renderPM.py,v 1.13 2001/09/28 10:30:12 rgbecker Exp $ '''
 """Usage:
 	from reportlab.graphics import renderPM
 	renderPM.drawToFile(drawing,filename,kind='GIF')
@@ -15,6 +15,7 @@ from reportlab.pdfbase.pdfmetrics import getFont
 from reportlab.lib.logger import warnOnce
 from math import sin, cos, pi, ceil
 from StringIO import StringIO
+from reportlab import rl_config
 
 class RenderPMError(Exception):
 	pass
@@ -37,7 +38,7 @@ def Color2Hex(c):
 	return c
 
 # the main entry point for users...
-def draw(drawing, canvas, x, y):
+def draw(drawing, canvas, x, y, showBoundary=rl_config.showBoundary):
 	"""As it says"""
 	R = _PMRenderer()
 	R.draw(drawing, canvas, x, y)
@@ -73,29 +74,23 @@ class _PMRenderer(Renderer):
 		self._canvas.fillColor = Color2Hex(s['fillColor'])
 		self._canvas.setFont(s['fontName'], s['fontSize'])
 
-	def draw(self, drawing, canvas, x, y):
+	def draw(self, drawing, canvas, x=0, y=0, showBoundary=rl_config.showBoundary):
 		"""This is the top level function, which
 		draws the drawing at the given location.
 		The recursive part is handled by drawNode."""
-		#stash references for the other objects to draw on
+		#stash references for ease of  communication
 		self._canvas = canvas
 		self._drawing = drawing
 		try:
-			# do this gently - no one-liners!
-			#first, we need to invert it
+			if showBoundary: canvas.rect(x, y, drawing.width, drawing.height)
+			canvas.saveState()
 			deltas = STATE_DEFAULTS.copy()
-			deltas['transform'] = [1,0,0,1,0,0]
+			deltas['transform'] = [1,0,0,1,x,y]
 			self._tracker.push(deltas)
 			self.applyState()
-			if x or y:
-				self._tracker.push({'transform':translate(x,y)})
-
-			for node in drawing.getContents():
-				# it might be a user node, if so decompose it into a bunch of shapes
-				if isinstance(node, UserNode): node = node.provideNode()
-				self.drawNode(node)
-
+			self.drawNode(drawing)
 			self.pop()
+			canvas.restoreState()
 		finally:
 			#remove any circular references
 			del self._canvas, self._drawing
@@ -416,7 +411,14 @@ class PMCanvas:
 		self.curveTo(x1,y1,x2,y2,x3,y3)
 		self.pathClose()
 
-def drawToFile(d,fn,fmt='GIF', dpi=72, bg=0xfffffff, quality=-1):
+	def saveState(self):
+		'''do nothing for compatibility'''
+		pass
+
+	restoreState = saveState
+
+
+def drawToFile(d,fn,fmt='GIF', dpi=72, bg=0xfffffff, quality=-1, showBoundary=rl_config.showBoundary):
 	'''create a pixmap and draw drawing, d to it then save as a file'''
 	w = int(d.width+0.5)
 	h = int(d.height+0.5)
@@ -424,7 +426,7 @@ def drawToFile(d,fn,fmt='GIF', dpi=72, bg=0xfffffff, quality=-1):
 	draw(d, c, 0, 0)
 	c.saveToFile(fn,fmt)
 
-def drawToString(d,fmt='GIF', dpi=72, bg=0xfffffff, quality=-1):
+def drawToString(d,fmt='GIF', dpi=72, bg=0xfffffff, quality=-1, showBoundary=rl_config.showBoundary):
 	s = StringIO()
 	drawToFile(d,s,fmt=fmt, dpi=dpi, bg=bg, quality=quality)
 	return s.getvalue()

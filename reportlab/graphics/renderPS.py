@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPS.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.11 2001/09/23 04:56:55 kern Exp $
-__version__=''' $Id: renderPS.py,v 1.11 2001/09/23 04:56:55 kern Exp $ '''
+#$Header: /tmp/reportlab/reportlab/graphics/renderPS.py,v 1.12 2001/09/28 10:30:12 rgbecker Exp $
+__version__=''' $Id: renderPS.py,v 1.12 2001/09/28 10:30:12 rgbecker Exp $ '''
 import string, cStringIO, types
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str
@@ -12,6 +12,7 @@ from reportlab.graphics.shapes import STATE_DEFAULTS
 import math
 from types import StringType
 from operator import getitem
+from reportlab import rl_config
 
 class PSCanvas:
     def __init__(self,size=(300,300), PostScriptLevel=2):
@@ -547,10 +548,10 @@ from renderbase import Renderer
 #warnOnce = WarnOnce()
 
 # the main entry point for users...
-def draw(drawing, canvas, x, y, showBorder=1):
+def draw(drawing, canvas, x=0, y=0, showBoundary=rl_config.showBoundary):
     """As it says"""
     R = _PSRenderer()
-    R.draw(drawing, canvas, x, y, showBorder=showBorder)
+    R.draw(drawing, canvas, x, y, showBoundary=showBoundary)
 
 def _pointsFromList(L):
     '''
@@ -570,39 +571,25 @@ class _PSRenderer(Renderer):
     def __init__(self):
         self._tracker = StateTracker()
 
-    def draw(self, drawing, canvas, x, y, showBorder=1):
+    def draw(self, drawing, canvas, x, y, showBoundary=rl_config.showBoundary):
         """This is the top level function, which
         draws the drawing at the given location.
         The recursive part is handled by drawNode."""
-        #stash references for the other objects to draw on
+        #stash references for ease of  communication
         self._canvas = canvas
         self._drawing = drawing
         try:
             #bounding box
-            if showBorder:
-                canvas.rect(x, y, drawing.width, drawing.height)
-
-            #set up coords:
-            #canvas.comment('drawing begin')
+            if showBoundary: canvas.rect(x, y, drawing.width, drawing.height)
             canvas.saveState()
-            #canvas.translate(x, y + drawing.height)
-            #canvas.scale(1, -1)
-
-            # do this gently - no one-liners!
             deltas = STATE_DEFAULTS.copy()
+            deltas['transform'] = [1,0,0,1,x,y]
             self._tracker.push(deltas)
             self.applyStateChanges(deltas, {})
-
-            for node in drawing.getContents():
-                # it might be a user node, if so decompose it into a bunch of shapes
-                if isinstance(node, UserNode): node = node.provideNode()
-                self.drawNode(node)
-
+            self.drawNode(drawing)
             self._tracker.pop()
             canvas.restoreState()
-            #canvas.comment('drawing end')
         finally:
-            #remove any circular references
             del self._canvas, self._drawing
 
     def drawNode(self, node):
@@ -752,9 +739,9 @@ class _PSRenderer(Renderer):
                 fontsize = delta.get('fontSize', self._canvas._fontSize)
                 self._canvas.setFont(fontname, fontsize)
 
-def drawToFile(d,fn, showBorder=1):
+def drawToFile(d,fn, showBoundary=rl_config.showBoundary):
     c = PSCanvas((d.width,d.height))
-    draw(d, c, 0, 0, showBorder=showBorder)
+    draw(d, c, 0, 0, showBoundary=showBoundary)
     c.save(fn)
 
 #########################################################

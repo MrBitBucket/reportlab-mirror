@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/renderPDF.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.13 2001/09/23 04:56:55 kern Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/renderPDF.py,v 1.14 2001/09/28 10:30:12 rgbecker Exp $
 # renderPDF - draws Drawings onto a canvas
 """Usage:
     import renderpdf
@@ -14,19 +14,17 @@ changed
 from reportlab.graphics.shapes import *
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab import rl_config
 
 
 # the main entry point for users...
-def draw(drawing, canvas, x, y, showBoundary=1):
+def draw(drawing, canvas, x, y, showBoundary=rl_config.showBoundary):
     """As it says"""
     R = _PDFRenderer()
     R.draw(drawing, canvas, x, y, showBoundary=showBoundary)
 
 from renderbase import Renderer, StateTracker, getStateDelta
 
-### this is a hack... I didn't know how to turn off boundaries
-SHOWBOUNDARYDEFAULT = 1
-    
 class _PDFRenderer(Renderer):
     """This draws onto a PDF document.  It needs to be a class
     rather than a function, as some PDF-specific state tracking is
@@ -37,34 +35,22 @@ class _PDFRenderer(Renderer):
         self._fill = 0
         self._tracker = StateTracker()
 
-    def draw(self, drawing, canvas, x, y, showBoundary="DEFAULT"):
+    def draw(self, drawing, canvas, x=0, y=0, showBoundary=rl_config.showBoundary):
         """This is the top level function, which
         draws the drawing at the given location.
         The recursive part is handled by drawNode."""
         #stash references for the other objects to draw on
-        if showBoundary=="DEFAULT":
-            showBoundary = SHOWBOUNDARYDEFAULT
         self._canvas = canvas
         self._drawing = drawing
         try:
             #bounding box
             if showBoundary: canvas.rect(x, y, drawing.width, drawing.height)
-
-            #set up coords:
             canvas.saveState()
-            canvas.translate(x, y)
-            #canvas.scale(1, -1)
-
-            # do this gently - no one-liners!
             deltas = STATE_DEFAULTS.copy()
+            deltas['transform'] = [1,0,0,1,x,y]
             self._tracker.push(deltas)
             self.applyStateChanges(deltas, {})
-
-            for node in drawing.getContents():
-                # it might be a user node, if so decompose it into a bunch of shapes
-                if isinstance(node, UserNode): node = node.provideNode()
-                self.drawNode(node)
-
+            self.drawNode(drawing)
             self._tracker.pop()
             canvas.restoreState()
         finally:
@@ -256,7 +242,7 @@ class GraphicsFlowable(Flowable):
     def draw(self):
         draw(self.drawing, self.canv, 0, 0)
 
-def drawToFile(d,fn,msg, showBoundary=1, autoSize=1):
+def drawToFile(d,fn,msg, showBoundary=rl_config.showBoundary, autoSize=1):
     """Makes a one-page PDF with just the drawing.
     
     If autoSize=1, the PDF will be the same size as
