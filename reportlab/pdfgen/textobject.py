@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: textobject.py,v $
+#	Revision 1.11  2000/04/11 14:43:43  rgbecker
+#	Added _textOut for use in layout
+#
 #	Revision 1.10  2000/04/10 14:24:33  rgbecker
 #	Added defn of _SeqTypes
-#
+#	
 #	Revision 1.9  2000/04/10 14:13:14  rgbecker
 #	cursor move optimisation
 #	
@@ -60,7 +63,7 @@
 #	Revision 1.2  2000/02/15 15:47:09  rgbecker
 #	Added license, __version__ and Logi comment
 #	
-__version__=''' $Id: textobject.py,v 1.10 2000/04/10 14:24:33 rgbecker Exp $ '''
+__version__=''' $Id: textobject.py,v 1.11 2000/04/11 14:43:43 rgbecker Exp $ '''
 __doc__=""" 
 PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
@@ -259,6 +262,11 @@ class PDFTextObject:
         self._strokeColorRGB = (gray, gray, gray)
         self._code.append('%0.2f G' % gray)
 
+
+    def _textOut(self, text, TStar=0):
+        "prints string at current point, ignores text cursor"
+        text = self._canvas._escape(text)
+        self._code.append('(%s) Tj%s' % (text,(TStar and ' T*' or '')))
 
     def textOut(self, text):
         "prints string at current point, text cursor moves across"
