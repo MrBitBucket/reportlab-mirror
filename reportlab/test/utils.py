@@ -233,7 +233,8 @@ class ScriptThatMakesFileTest(unittest.TestCase):
         os.chdir(self.cwd)
 
     def runTest(self):
-        p = os.popen('%s %s' % (sys.executable,self.scriptName),'r')
+        fmt = sys.platform=='win32' and '"%s" %s' or '%s %s'
+        p = os.popen(fmt % (sys.executable,self.scriptName),'r')
         out = p.read()
         if self.verbose:
             print out
