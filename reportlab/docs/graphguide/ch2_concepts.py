@@ -1,14 +1,14 @@
 #copyright ReportLab Inc. 2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/docs/graphguide/ch2_graphics.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/docs/graphguide/ch2_concepts.py,v 1.2 2001/10/27 22:37:02 andy_robinson Exp $
+#$Header: /tmp/reportlab/reportlab/docs/graphguide/ch2_concepts.py,v 1.3 2001/11/08 17:24:39 johnprecedo Exp $
 from reportlab.tools.docco.rl_doc_utils import *
 
 heading1("General Concepts")
 
 disc("""
-Now, we present some more fundamental principles of the graphics
-library, that will show-up later in various places.
+In this chapter we will present some of the more fundamental principles of
+the graphics library, which will show-up later in various places.
 """)
 
 
