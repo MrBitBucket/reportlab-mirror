@@ -219,8 +219,8 @@ class _PDFRenderer(Renderer):
                 # both need setting together in PDF
                 # one or both might be in the deltas,
                 # so need to get whichever is missing
-                fontname = delta.get('font_family', self._canvas._fontname)
-                fontsize = delta.get('font_size', self._canvas._fontsize)
+                fontname = delta.get('fontName', self._canvas._fontname)
+                fontsize = delta.get('fontSize', self._canvas._fontsize)
                 self._canvas.setFont(fontname, fontsize)
 
 from reportlab.platypus import Flowable

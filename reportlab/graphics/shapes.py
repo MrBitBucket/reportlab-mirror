@@ -4,9 +4,9 @@
 
 from types import FloatType, IntType, ListType, TupleType, StringType
 from pprint import pprint
-from reportlab.platypus import Flowable
 import string
-
+from math import pi, cos, sin, tan
+from reportlab.platypus import Flowable
 from reportlab.config import shapeChecking
 
 from reportlab.lib import colors
@@ -142,6 +142,83 @@ def isValidChild(x):
     return isinstance(x, UserNode) or isinstance(x, Shape)
 
 
+
+    ####################################################################
+    # math utilities.  These could probably be moved into lib
+    # somewhere.
+    ####################################################################
+# constructors for matrices:
+def nullTransform():
+    return (1, 0, 0, 1, 0, 0)
+
+def translate(dx, dy):
+    return (1, 0, 0, 1, dx, dy)
+
+def scale(sx, sy):
+    return (sx, 0, 0, sy, 0, 0)
+
+def rotate(angle):
+    a = angle * pi /180 
+    return (cos(a), sin(a), -sin(a), cos(a), 0, 0)
+
+def skewX(angle):
+    a = angle * 180 / pi
+    return (1, 0, tan(a), 1, 0, 0)
+
+def skewY(angle):
+    a = angle * 180 / pi
+    return (1, tan(a), 0, 1, 0, 0)
+
+def mmult(A, B):
+    "A postmultiplied by B"
+    # I checked this RGB
+    # [a0 a2 a4]    [b0 b2 b4]
+    # [a1 a3 a5] *  [b1 b3 b5]
+    # [      1 ]    [      1 ]
+    #
+    return (A[0]*B[0] + A[2]*B[1],
+            A[1]*B[0] + A[3]*B[1],
+            A[0]*B[2] + A[2]*B[3],
+            A[1]*B[2] + A[3]*B[3],
+            A[0]*B[4] + A[2]*B[5] + A[4],
+            A[1]*B[4] + A[3]*B[5] + A[5])
+
+def inverse(A):
+    "For A affine 2D represented as 6vec return 6vec version of A**(-1)"
+    # I checked this RGB
+    det = float(A[0]*A[3] - A[2]*A[1])
+    R = [A[3]/det, -A[1]/det, -A[2]/det, A[0]/det]
+    return tuple(R+[-R[0]*A[4]-R[2]*A[5],-R[1]*A[4]-R[3]*A[5]])
+
+def zTransformPoint(A,v):
+    "Apply the homogenous part of atransformation a to vector v --> A*v"
+    return (A[0]*v[0]+A[2]*v[1],A[1]*v[0]+A[3]*v[1])
+
+def transformPoint(A,v):
+    "Apply transformation a to vector v --> A*v"
+    return (A[0]*v[0]+A[2]*v[1]+A[4],A[1]*v[0]+A[3]*v[1]+A[5])
+
+def transformPoints(matrix, V):
+    return map(transformPoint, V)
+
+def zTransformPoints(matrix, V):
+    return map(lambda x,matrix=matrix: zTransformPoint(matrix,x), V)
+
+def _rotatedBoxLimits( x, y, w, h, angle):
+    '''
+    Find the corner points of the rotated w x h sized box at x,y 
+    return the corner points and the min max points in the original space
+    '''
+    C = zTransformPoints(rotate(angle),((x,y),(x+w,y),(x+w,y+h),(x,y+h)))
+    X = map(lambda x: x[0], C)
+    Y = map(lambda x: x[1], C)
+    return min(X), max(X), min(Y), max(Y), C
+
+    #################################################################
+    #
+    #    And now the shapes themselves....
+    #
+    #################################################################
    
 class Shape:
     """Base class for all nodes in the tree. Nodes are simply
@@ -304,21 +381,21 @@ class Group(Shape):
 
     def rotate(self, theta):
         """Convenience to help you set transforms"""
-        raise NotImplementedError, "Finish me off please!"
-
+        self.transform = mmult(self.transform, rotate(theta))
+    
     def translate(self, dx, dy):
         """Convenience to help you set transforms"""
-        raise NotImplementedError, "Finish me off please!"
+        self.transform = mmult(self.transform, translate(dx, dy))
     
     def scale(self, sx, sy):
         """Convenience to help you set transforms"""
-        raise NotImplementedError, "Finish me off please!"
-
+        self.transform = mmult(self.transform, scale(sx, sy))
+    
 
     def skew(self, kx, ky):
         """Convenience to help you set transforms"""
-        raise NotImplementedError, "Finish me off please!"
-
+        self.transform = mmult(mmult(self.transform, skewX(kx)),skewY(ky))
+    
 
 
 class LineShape(Shape):
