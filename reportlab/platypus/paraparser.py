@@ -32,9 +32,12 @@
 #
 ###############################################################################
 #	$Log: paraparser.py,v $
+#	Revision 1.20  2000/05/31 10:12:20  rgbecker
+#	<bullet> xml tag added
+#
 #	Revision 1.19  2000/05/26 09:49:23  rgbecker
 #	Color fixes; thanks to J Alet
-#
+#	
 #	Revision 1.18  2000/05/20 15:36:42  andy_robinson
 #	Removed 1.5.2-style getattr call
 #	
@@ -53,7 +56,7 @@
 #	Revision 1.13  2000/04/25 13:07:57  rgbecker
 #	Added license
 #	
-__version__=''' $Id: paraparser.py,v 1.19 2000/05/26 09:49:23 rgbecker Exp $ '''
+__version__=''' $Id: paraparser.py,v 1.20 2000/05/31 10:12:20 rgbecker Exp $ '''
 import string
 import re
 from types import TupleType
@@ -103,6 +106,7 @@ def _align(s):
 	else: raise ValueError
 
 _paraAttrMap = {'font': ('fontName', None),
+				'face': ('fontName', None),
 				'fontsize': ('fontSize', _num),
 				'size': ('fontSize', _num),
 				'leading': ('leading', _num),
@@ -113,14 +117,24 @@ _paraAttrMap = {'font': ('fontName', None),
 				'spaceb': ('spaceBefore', _num),
 				'spacea': ('spaceAfter', _num),
 				'bfont': ('bulletFontName', None),
-				'bfontsize': ('bulletFontIndent',_num),
-				'bindent': ('bulletFontIndent',_num),
+				'bfontsize': ('bulletFontSize',_num),
+				'bindent': ('bulletIndent',_num),
 				'bcolor': ('bulletColor',toColor),
 				'color':('textColor',toColor),
 				'fg': ('textColor',toColor)}
 
+_bulletAttrMap = {
+				'font': ('bulletFontName', None),
+				'face': ('bulletFontName', None),
+				'size': ('bulletFontSize',_num),
+				'fontsize': ('bulletFontSize',_num),
+				'indent': ('bulletIndent',_num),
+				'color': ('bulletColor',toColor),
+				'fg': ('bulletColor',toColor)}
+
 #things which are valid font attributes
 _fontAttrMap = {'size': ('fontSize', _num),
+				'face': ('fontName', None),
 				'name': ('fontName', None),
 				'fg': 	('textColor', toColor),
 				'color':('textColor', toColor)}
@@ -134,6 +148,7 @@ def _addAttributeNames(m):
 
 _addAttributeNames(_paraAttrMap)
 _addAttributeNames(_fontAttrMap)
+_addAttributeNames(_bulletAttrMap)
 
 def _applyAttributes(obj, attr):
 	for k, v in attr.items():
@@ -305,11 +320,11 @@ class ParaParser(xmllib.XMLParser):
 	def end_font(self):
 		self._pop()
 
-	def start_para(self,attr):
+	def _initial_frag(self,attr,attrMap,bullet=0):
 		style = self._style
 		if attr!={}:
 			style = copy.deepcopy(style)
-			_applyAttributes(style,self.getAttributes(attr,_paraAttrMap))
+			_applyAttributes(style,self.getAttributes(attr,attrMap))
 			self._style = style
 
 		# initialize semantic values
@@ -317,14 +332,33 @@ class ParaParser(xmllib.XMLParser):
 		frag.sub = 0
 		frag.super = 0
 		frag.rise = 0
-		frag.fontName, frag.bold, frag.italic = ps2tt(style.fontName)
-		frag.fontSize = style.fontSize
 		frag.underline = 0
-		frag.textColor = style.textColor
 		frag.greek = 0
-		self._stack = [frag]
+		if bullet:
+			frag.fontName, frag.bold, frag.italic = ps2tt(style.bulletFontName)
+			frag.fontSize = style.bulletFontSize
+			frag.textColor = hasattr(style,'bulletColor') and style.bulletColor or style.textColor
+		else:
+			frag.fontName, frag.bold, frag.italic = ps2tt(style.fontName)
+			frag.fontSize = style.fontSize
+			frag.textColor = style.textColor
+		return frag
+
+	def start_para(self,attr):
+		self._stack = [self._initial_frag(attr,_paraAttrMap)]
 
 	def end_para(self):
+		self._pop()
+
+	def start_bullet(self,attr):
+		if hasattr(self,'bFragList'):
+			self._syntax_error('only one <bullet> tag allowed')
+		self.bFragList = []
+		frag = self._initial_frag(attr,_bulletAttrMap,1)
+		frag.isBullet = 1
+		self._stack.append(frag)
+
+	def end_bullet(self):
 		self._pop()
 
 	def _push(self,**attr):
@@ -383,14 +417,18 @@ class ParaParser(xmllib.XMLParser):
 			for item in greeks.keys():
 				self.entitydefs[item] = '<%s/>' % item
 
+	def _iReset(self):
+		self.fragList = []
+		if hasattr(self, 'bFragList'): delattr(self,'bFragList')
+
 	def _reset(self, style):
 		'''reset the parser'''
 		xmllib.XMLParser.reset(self)
 
 		# initialize list of string segments to empty
 		self.errors = []
-		self.fragList = []
 		self._style = style
+		self._iReset()
 
 	#----------------------------------------------------------------
 	def handle_data(self,data):
@@ -416,7 +454,11 @@ class ParaParser(xmllib.XMLParser):
 		# bold, italic, and underline
 		frag.fontName = tt2ps(frag.fontName,frag.bold,frag.italic)
 
-		self.fragList.append(frag)
+		if hasattr(frag,'isBullet'):
+			delattr(frag,'isBullet')
+			self.bFragList.append(frag)
+		else:
+			self.fragList.append(frag)
 
 	def handle_cdata(self,data):
 		self.handle_data(data)
@@ -441,10 +483,11 @@ class ParaParser(xmllib.XMLParser):
 		del self._style
 		if len(self.errors)==0:
 			fragList = self.fragList
-			self.fragList = []
-			return style, fragList
+			bFragList = hasattr(self,'bFragList') and self.bFragList or None
+			self._iReset()
 		else:
-			return style, None
+			fragList = bFragList = None
+		return style, fragList, bFragList
 
 if __name__=='__main__':
 	from reportlab.platypus.paragraph import cleanBlockQuotedText
@@ -452,7 +495,7 @@ if __name__=='__main__':
 	def check_text(text,p=_parser):
 		print '##########'
 		text = cleanBlockQuotedText(text)
-		l,rv = p.parse(text,style)
+		l,rv,bv = p.parse(text,style)
 		if rv is None:
 			for l in _parser.errors:
 				print l
@@ -465,6 +508,9 @@ if __name__=='__main__':
 	style.fontName='Times-Roman'
 	style.fontSize = 12
 	style.textColor = black
+	style.bulletFontName = black
+	style.bulletFontName='Times-Roman'
+	style.bulletFontSize=12
 
 	text='''
 	<b><i><greek>a</greek>D</i></b>&beta;
@@ -558,3 +604,7 @@ sun-god, for it was here, she said, that our worst danger would lie.
 Head the ship, therefore, away from the island.''')
 	check_text('''&lt; &gt; &amp; &quot; &apos;''')
 	check_text('''<![CDATA[<>&'"]]>''')
+	check_text('''<bullet face=courier size=14 color=green>+</bullet>
+There was a bard also to sing to them and play
+his lyre, while two tumblers went about performing in the midst of
+them when the man struck up with his tune.]''')

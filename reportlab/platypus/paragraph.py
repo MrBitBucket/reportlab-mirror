@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: paragraph.py,v $
+#	Revision 1.10  2000/05/31 10:12:20  rgbecker
+#	<bullet> xml tag added
+#
 #	Revision 1.9  2000/05/16 16:15:16  rgbecker
 #	Changes related to removal of SimpleFlowDocument
-#
+#	
 #	Revision 1.8  2000/05/16 15:58:27  rgbecker
 #	Fixed font setting bug
 #	
@@ -58,7 +61,7 @@
 #	Revision 1.1  2000/04/14 13:21:52  rgbecker
 #	Removed from layout.py
 #	
-__version__=''' $Id: paragraph.py,v 1.9 2000/05/16 16:15:16 rgbecker Exp $ '''
+__version__=''' $Id: paragraph.py,v 1.10 2000/05/31 10:12:20 rgbecker Exp $ '''
 import string
 import types
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -220,14 +223,33 @@ def	_split_bfragHard(bfrag,start,stop):
 			f.append(w)
 	return f
 
+def _drawBullet(canvas, offset, cur_y, bulletText, style):
+	'''draw a bullet text could be a simple string or a frag list'''
+	tx2 = canvas.beginText(style.bulletIndent, cur_y)
+	tx2.setFont(style.bulletFontName, style.bulletFontSize)
+	tx2.setFillColor(hasattr(style,'bulletColor') and style.bulletColor or style.textColor)
+	if type(bulletText) is types.StringType:
+		tx2.textOut(bulletText)
+	else:
+		for f in bulletText:
+			tx2.setFont(f.fontName, f.fontSize)
+			tx2.setFillColor(f.textColor)
+			tx2.textOut(f.text)
+
+	bulletEnd = tx2.getX()
+	offset = max(offset, bulletEnd - style.leftIndent)
+	canvas.drawText(tx2)
+	return offset
+
 class Paragraph(Flowable):
 	def __init__(self, text, style, bulletText = None, frags=None):
 		if frags is None:
 			text = cleanBlockQuotedText(text)
-			style, frags = _parser.parse(text,style)
+			style, frags, bFrags = _parser.parse(text,style)
 			if frags is None:
 				raise "xml parser error (%s) in paragraph beginning\n'%s'"\
 					% (_parser.errors[0],text[:min(30,len(text))])
+			if bFrags: bulletText = bFrags
 		self.frags = frags
 		self.style = style
 		self.bulletText = bulletText
@@ -312,10 +334,17 @@ class Paragraph(Flowable):
 		fFontSize = float(style.fontSize)
 
 		#for bullets, work out width and ensure we wrap the right amount onto line one
-		if self.bulletText <> None:
-			bulletWidth = stringWidth(
-				self.bulletText,
-				style.bulletFontName, style.bulletFontSize)
+		bulletText = self.bulletText
+		if bulletText <> None:
+			if type(bulletText) is types.StringType:
+				bulletWidth = stringWidth(
+					bulletText,
+					style.bulletFontName, style.bulletFontSize)
+			else:
+				#it's a list of fragments
+				bulletWidth = 0
+				for f in bulletText:
+					bulletWidth = bulletWidth + stringWidth(f.text, f.fontName, f.fontSize)
 			bulletRight = style.bulletIndent + bulletWidth
 			if bulletRight > style.firstLineIndent:
 				#..then it overruns, and we have less space available on line 1
@@ -421,6 +450,7 @@ class Paragraph(Flowable):
 
 		return lines
 
+
 	def drawPara(self,debug=0):
 		"""Draws a paragraph according to the given style.
 		Returns the final y position at the bottom. Not safe for
@@ -455,6 +485,7 @@ class Paragraph(Flowable):
 
 
 		nLines = len(lines)
+		bulletText = self.bulletText
 		if nLines > 0:
 			canvas.saveState()
 			canvas.addLiteral('% textcanvas.drawParagraph()')
@@ -474,15 +505,8 @@ class Paragraph(Flowable):
 					dpl = _justifyDrawParaLine
 				f = bfrags
 				cur_y = self.height - f.fontSize
-
-				if self.bulletText <> None:
-					tx2 = canvas.beginText(style.bulletIndent, cur_y)
-					tx2.setFont(style.bulletFontName, style.bulletFontSize)
-					tx2.setFillColor(hasattr(style,'bulletColor') and style.bulletColor or style.textColor)
-					tx2.textOut(self.bulletText)
-					bulletEnd = tx2.getX()
-					offset = max(offset, bulletEnd - style.leftIndent)
-					canvas.drawText(tx2)
+				if bulletText <> None:
+					offset = _drawBullet(canvas,offset,cur_y,bulletText,style)
 
 				#set up the font etc.
 				canvas._code.append('%s %s %s rg' % (f.textColor.red, f.textColor.green, f.textColor.blue))
@@ -499,6 +523,8 @@ class Paragraph(Flowable):
 			else:
 				f = lines[0]
 				cur_y = self.height - f.fontSize
+				if bulletText <> None:
+					offset = _drawBullet(canvas,offset,cur_y,bulletText,style)
 				if alignment == TA_LEFT:
 					dpl = _leftDrawParaLineX
 				elif alignment == TA_CENTER:
@@ -507,14 +533,6 @@ class Paragraph(Flowable):
 					dpl = _rightDrawParaLineX
 				elif self.style.alignment == TA_JUSTIFY:
 					dpl = _justifyDrawParaLineX
-
-				if self.bulletText <> None:
-					tx2 = canvas.beginText(style.bulletIndent, cur_y)
-					tx2.setFont(style.bulletFontName, style.bulletFontSize)
-					tx2.textOut(self.bulletText)
-					bulletEnd = tx2.getX()
-					offset = max(offset, bulletEnd - style.leftIndent)
-					canvas.drawText(tx2)
 
 				#set up the font etc.
 				tx = canvas.beginText(cur_x, cur_y)
