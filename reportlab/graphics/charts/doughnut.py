@@ -215,6 +215,7 @@ class Doughnut(AbstractPieChart):
                 sn = sn + 1
 
         else:
+            i = 0
             #single series doughnut
             iradius = self.height/5.0
             for angle in normData:
