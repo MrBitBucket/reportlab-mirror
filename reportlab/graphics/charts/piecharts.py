@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/charts/piecharts.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.37 2003/09/15 15:36:09 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/charts/piecharts.py,v 1.38 2003/09/16 13:32:27 rgbecker Exp $
 # experimental pie chart script.  Two types of pie - one is a monolithic
 #widget with all top-level properties, the other delegates most stuff to
 #a wedges collection whic lets you customize the group or every individual
@@ -12,7 +12,7 @@
 This permits you to customize and pop out individual wedges;
 supports elliptical and circular pies.
 """
-__version__=''' $Id: piecharts.py,v 1.37 2003/09/15 15:36:09 rgbecker Exp $ '''
+__version__=''' $Id: piecharts.py,v 1.38 2003/09/16 13:32:27 rgbecker Exp $ '''
 
 import copy
 from math import sin, cos, pi
@@ -595,7 +595,7 @@ class Pie3d(Pie):
         self._ydepth_3d = sin(a0)*self.depth_3d
         self._cx = self.x+self.width/2.0
         self._cy = self.y+(self.height - self._ydepth_3d)/2.0
-        radius = self._radius = self._cx - 5
+        radius = self._radius = self._cx-self.x
         self._radiusx = radiusx = radius
         self._radiusy = radiusy = (1.0 - self.perspective/100.0)*radius
         data = self.normalizeData()
