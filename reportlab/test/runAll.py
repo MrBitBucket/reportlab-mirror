@@ -2,7 +2,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/test/runAll.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.4 2001/04/05 09:30:12 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/test/runAll.py,v 1.5 2001/05/18 13:04:27 dinu_gherman Exp $
 
 
 """Runs all test files in all subfolders.
@@ -32,7 +32,7 @@ def removeFiles(rootFolder, ext):
             os.remove(f)
             
 
-def suite(folder):
+def makeSuite(folder):
     "Build a test suite of all test files found."
     
     allTests = unittest.TestSuite()
@@ -42,6 +42,7 @@ def suite(folder):
     subFolders = [folder]
     for sub in subFolders:
         files = glob.glob(os.path.join(sub, 'test_*.py'))
+        files.sort()
         modulesToTest = map(lambda f:os.path.basename(f)[:-3], files)
         sys.path.insert(0, sub)
         
@@ -51,6 +52,7 @@ def suite(folder):
         del sys.path[0]
         
     return allTests
+
 
 #noruntests
 if __name__ == '__main__':
@@ -63,6 +65,7 @@ if __name__ == '__main__':
         #print 'cleaning up previous output'
         removeFiles(folder, '.pdf')
         removeFiles(folder, '.log')
-        
-    unittest.TextTestRunner().run(suite(folder)).wasSuccessful()
+
+    testSuite = makeSuite(folder)
+    unittest.TextTestRunner().run(testSuite)
     removeFiles(folder, '.pyc')
