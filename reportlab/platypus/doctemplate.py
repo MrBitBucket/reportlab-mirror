@@ -414,9 +414,9 @@ class BaseDocTemplate:
                 pass    #store good state here
         self._hanging.append(PageBegin)
 
-    def handle_pageBreak(self):
+    def handle_pageBreak(self,slow=None):
         '''some might choose not to end all the frames'''
-        if self._pageBreakQuick:
+        if self._pageBreakQuick and not slow:
             self.handle_pageEnd()
         else:
             n = len(self._hanging)
@@ -549,7 +549,10 @@ class BaseDocTemplate:
             return
 
         if isinstance(f,PageBreak):
-            self.handle_pageBreak()
+            if isinstance(f,SlowPageBreak):
+                self.handle_pageBreak(slow=1)
+            else:
+                self.handle_pageBreak()
             self.afterFlowable(f)
         elif isinstance(f,ActionFlowable):
             f.apply(self)

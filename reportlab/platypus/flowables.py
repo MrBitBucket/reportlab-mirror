@@ -408,6 +408,9 @@ class PageBreak(Spacer):
         self.height = availHeight
         return (availWidth,availHeight)  #step back a point
 
+class SlowPageBreak(PageBreak):
+    pass
+
 class CondPageBreak(Spacer):
     """Throw a page if not enough vertical space"""
     def __init__(self, height):
