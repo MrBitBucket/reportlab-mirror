@@ -31,7 +31,18 @@ def extractText(pdfOps):
     return map(lambda x:x[1:-1], found)
 
 
-
+def subsetToUnicode(ttf, subsetCodeStr):
+    """Return unicode string represented by given subsetCode string
+    as found when TrueType font rendered to PDF, ttf must be the font
+    object that was used."""
+    # This relies on TTFont internals and uses the first document
+    # and subset it finds
+    subset = ttf.state.values()[0].subsets[0]
+    chrs = []
+    for codeStr in subsetCodeStr.split('\\'):
+        if codeStr:
+            chrs.append(unichr(subset[int(codeStr[1:], 8)]))
+    return u''.join(chrs)
     
 
 class TextEncodingTestCase(unittest.TestCase):
@@ -44,20 +55,21 @@ class TextEncodingTestCase(unittest.TestCase):
         """This assumes input encoding matches font.  no conversion,
         trademark character does not appear in TT font"""
         c = Canvas(outputfile('test_pdfbase_encodings_none.pdf'), encoding=None)
-        c.drawString(100,800, 'hello')
+        c.drawString(100,800, 'hello') # 0
 
         self.assertEquals(c.encoding, None)
 
         #warmup - is my text extraction working?
         self.assertEquals(extractText(c.getCurrentPageContent()), ['hello'])
 
-        c.drawString(100,700, testCp1252)
+        c.drawString(100,700, testCp1252) # 1
         extracted = extractText(c.getCurrentPageContent())
         self.assertEquals(extracted[1], expectedCp1252)
 
         #now we register a unicode truetype font
-        pdfmetrics.registerFont(TTFont("Rina", "rina.ttf"))
-        pdfmetrics.registerFont(TTFont("Luxi", "luxiserif.ttf"))
+        luxi = TTFont("Luxi", "luxiserif.ttf")
+        pdfmetrics.registerFont(luxi)
+        #pdfmetrics.registerFont(TTFont("Rina", "rina.ttf"))
         c.setFont('Luxi', 12)
 
     
@@ -71,10 +83,17 @@ class TextEncodingTestCase(unittest.TestCase):
         self.assertRaises(UnicodeDecodeError, c.drawString, 100,100,testCp1252)
 
         # But if we pass in UTF8, it should appear ok
-        c.drawString(100, 600, testUTF8)
+        c.drawString(100, 600, testUTF8) # 2
 
         # And Unicode strings should always be converted
-        c.drawString(100, 500, testUni)
+        c.drawString(100, 500, testUni) # 3
+
+        extracted = extractText(c.getCurrentPageContent())
+
+        self.assertEquals(extracted[1], expectedCp1252)
+
+        self.assertEquals(extracted[2], extracted[3])
+        self.assertEquals(subsetToUnicode(luxi, extracted[2]), testUni)
 
         c.save()
 
@@ -105,10 +124,9 @@ class TextEncodingTestCase(unittest.TestCase):
         # and this should convert from Unicode to UTF8
         c.drawString(100,500, testUni)
         extracted = extractText(c.getCurrentPageContent())
-        # Because of font-subsetting this extracted data doesn't really tell us if the 
-        # output is correct, but we can compare the outputs for different input
-        # encoding and ensure they are the same
+
         self.assertEquals(extracted[1], extracted[2])
+        self.assertEquals(subsetToUnicode(luxi, extracted[1]), testUni)
 
         #uncomment this to see some PDF for fun...
         #print c.getCurrentPageContent()
@@ -131,7 +149,8 @@ class TextEncodingTestCase(unittest.TestCase):
         self.assertEquals(extracted[0], expectedCp1252)
         
         # Set a font with UTF8 encoding
-        pdfmetrics.registerFont(TTFont("Luxi", "luxiserif.ttf"))
+        luxi = TTFont("Luxi", "luxiserif.ttf")
+        pdfmetrics.registerFont(luxi)
         c.setFont('Luxi', 12)
 
         # This should pass the UTF8 through unchanged
@@ -139,6 +158,9 @@ class TextEncodingTestCase(unittest.TestCase):
         # and this should convert from Unicode to UTF8
         c.drawString(100,500, testUni)
         extracted = extractText(c.getCurrentPageContent())
+
+        self.assertEquals(extracted[1], extracted[2])
+        self.assertEquals(subsetToUnicode(luxi, extracted[1]), testUni)
 
         c.save()
 
