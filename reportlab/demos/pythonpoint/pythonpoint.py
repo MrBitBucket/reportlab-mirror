@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.16  2000/05/16 23:48:00  andy_robinson
+#	Allowed intra-paragraph text; fixed various bugs
+#
 #	Revision 1.15  2000/04/28 17:04:28  andy_robinson
 #	Changed to display multiple outline levels
-#
+#	
 #	Revision 1.14  2000/04/25 14:37:18  rgbecker
 #	Commented out call of _inPage0
 #	
@@ -81,7 +84,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.15 2000/04/28 17:04:28 andy_robinson Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.16 2000/05/16 23:48:00 andy_robinson Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -230,24 +233,17 @@ class PPFrame:
         self.width = width
         self.height = height
         self.content = []
-
-        #others which can be set
-        self.leftMargin = 0
-        self.rightMargin = 0
-        self.topMargin = 0
-        self.bottomMargin = 0
-
         self.showBoundary = 0        
 
     def drawOn(self, canv):
         #make a layout frame
-        frame = layout.SimpleFrame(canv, self.x, self.y, self.width, self.height)
+        frame = layout.SimpleFrame(canv,
+                                   self.x,
+                                   self.y,
+                                   self.width,
+                                   self.height)
+                    
         frame.showBoundary = self.showBoundary
-        # terminology difference, must fix
-        frame.leftPadding = self.leftMargin
-        frame.topPadding = self.topMargin
-        frame.rightPadding = self.topMargin
-        frame.bottomPadding = self.bottomMargin
         
         #build a story for the frame
         story = []
@@ -255,7 +251,6 @@ class PPFrame:
             #ask it for any flowables
             story.append(thingy.getFlowable())
         #draw it
-        
         frame.addFromList(story)
 
         
@@ -266,14 +261,15 @@ class PPPara:
         self.style = None
 
     def getFlowable(self):
-        return Paragraph(
+        p = Paragraph(
                     self.rawtext,
                     getStyles()[self.style],
                     self.bulletText
                     )
+        return p
 
 class PPPreformattedText:
-    """Use this for source code, or stuff you wo not want to wrap"""
+    """Use this for source code, or stuff you do not want to wrap"""
     def __init__(self):
         self.rawtext = ''
         self.style = None
@@ -301,7 +297,7 @@ class PPImage:
 
 class PPDrawingElement:
     """Base class for something which you draw directly on the page."""
-    def drawOn(selg, canv):
+    def drawOn(self, canv):
         raise "NotImplementedError", "Abstract base class!"
 
         
@@ -556,7 +552,7 @@ def getSampleStyleSheet():
     para.firstLineIndent = 40
     para.leftIndent = 80
     para.spaceBefore = 6
-    #para.bulletFontName = 'Symbol'
+    para.bulletFontName = 'Symbol'
     para.bulletFontSize = 24
     para.bulletIndent = 20
     stylesheet['Bullet'] = para

@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: stdparser.py,v $
+#	Revision 1.6  2000/05/16 23:48:00  andy_robinson
+#	Allowed intra-paragraph text; fixed various bugs
+#
 #	Revision 1.5  2000/05/11 13:53:51  rgbecker
 #	Change to allow different xmllib
-#
+#	
 #	Revision 1.4  2000/04/28 17:04:28  andy_robinson
 #	Changed to display multiple outline levels
 #	
@@ -84,11 +87,11 @@ class PPMLParser(xmllib.XMLParser):
             'y':'0',
             'width':'0',
             'height':'0',
-            'leftmargin':'0',
-            'rightmargin':'0',
-            'topmargin':'0',
-            'bottommargin':'0',
-            'border':'false'
+            'border':'false',
+            'leftmargin':'0',  #this is ignored
+            'topmargin':'0',  #this is ignored
+            'rightmargin':'0',  #this is ignored
+            'bottommargin':'0',  #this is ignored
             },
         'slide': {
             'id':'None',
@@ -299,10 +302,6 @@ class PPMLParser(xmllib.XMLParser):
             self.ceval('frame',args,'width'),
             self.ceval('frame',args,'height')
             )
-        self._curFrame.leftMargin = self.ceval('frame',args,'leftmargin')
-        self._curFrame.topMargin = self.ceval('frame',args,'topmargin')
-        self._curFrame.rightMargin = self.ceval('frame',args,'rightmargin')
-        self._curFrame.bottomMargin = self.ceval('frame',args,'bottommargin')
         if self._arg('frame',args,'border')=='true':
             self._curFrame.showBoundary = 1
 
@@ -313,9 +312,12 @@ class PPMLParser(xmllib.XMLParser):
     def start_para(self, args):
         self._curPara = pythonpoint.PPPara()
         self._curPara.style = self._arg('para',args,'style')
-        # hack - we want to allow octal escape sequences in the input -
-        # treat as raw string and evaluate
-        self._curPara.bulletText = self._arg('para',args,'bullettext')
+
+        # hack - bullet character if bullet style        
+        bt = self._arg('para',args,'bullettext')
+        if self._curPara.style == 'Bullet' and bt == '':
+            bt = '\267'  # Symbol Font bullet character, reasonable default
+        self._curPara.bulletText = bt
         
     def end_para(self):
         self._curFrame.content.append(self._curPara)
@@ -492,3 +494,21 @@ class PPMLParser(xmllib.XMLParser):
         elif self._curSection:
             self._curSection.graphics.append(self._curCustomShape)
         self._curCustomShape = None
+
+
+    ## intra-paragraph XML should be allowed through into PLATYPUS
+    def unknown_starttag(self, tag, attrs):
+        if  self._curPara:
+            echo = '<%s' % tag
+            for (key, value) in attrs.items():
+                echo = echo + ' %s="%s"' % (key, value)
+            echo = echo + '>'
+            self._curPara.rawtext = self._curPara.rawtext + echo
+        else:
+            print 'Unknown start tag %s' % tag
+    def unknown_endtag(self, tag):
+        if  self._curPara:
+            self._curPara.rawtext = self._curPara.rawtext + '</%s>'% tag
+        else:
+            print 'Unknown end tag %s' % tag
+    
