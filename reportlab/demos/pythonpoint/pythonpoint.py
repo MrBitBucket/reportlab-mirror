@@ -31,9 +31,12 @@
 #
 ###############################################################################
 #	$Log: pythonpoint.py,v $
+#	Revision 1.19  2000/05/19 08:20:01  rgbecker
+#	Bring in line with canvas changes
+#
 #	Revision 1.18  2000/05/17 22:17:38  rgbecker
 #	Renamed BasicFrame to Frame
-#
+#	
 #	Revision 1.17  2000/05/17 16:29:40  rgbecker
 #	Removal of SimpleFrame
 #	
@@ -90,7 +93,7 @@
 #	Revision 1.1.1.1  2000/02/15 15:08:55  rgbecker
 #	Initial setup of demos directory and contents.
 #	
-__version__=''' $Id: pythonpoint.py,v 1.18 2000/05/17 22:17:38 rgbecker Exp $ '''
+__version__=''' $Id: pythonpoint.py,v 1.19 2000/05/19 08:20:01 rgbecker Exp $ '''
 # xml parser stuff for PythonPoint
 # PythonPoint Markup Language!
 __doc__="""
@@ -173,7 +176,7 @@ class PPPresentation:
 
         #ensure outline visible by default
         if self.showOutline:
-            canv.showOutline0()
+            canv.showOutline()
         canv.save()        
 
 class PPSection:
@@ -216,9 +219,8 @@ class PPSlide:
             self.showOutline = 1
             #put an outline entry in the left pane
             tag = self.title
-            #canv._inPage0()
-            canv.bookmarkPage0(tag)
-            canv.addOutlineEntry0(tag, tag, self.outlineLevel)
+            canv.bookmarkPage(tag)
+            canv.addOutlineEntry(tag, tag, self.outlineLevel)
             
             
         
