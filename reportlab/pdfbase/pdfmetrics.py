@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/pdfgen/fonts0.py?cvsroot=reportlab
 #$Header $
-__version__=''' $Id: pdfmetrics.py,v 1.24 2001/03/12 16:52:45 rgbecker Exp $ '''
+__version__=''' $Id: pdfmetrics.py,v 1.25 2001/03/15 10:36:13 rgbecker Exp $ '''
 __doc__=""" 
 This provides the character widths database for calculating
 text metrics.  Everything for the base 14 fonts is pre-computed
@@ -257,6 +257,15 @@ def addFont(name,baseFontName,encoding):
 		widthVectorsByFont[font.name] = font.getWidths()
 	return font
 
+_standardFontsAdded=0
+def addStandardFonts():
+	global _standardFontsAdded
+	if not _standardFontsAdded:
+		enc = defaultEncoding
+		for fontName in standardFonts:
+			addFont(fontName,fontName, fontName in ('Symbol','ZapfDingbats') and fontName or enc)
+		_standardFontsAdded=1
+
 def stringWidth(text, fontName, fontSize):
 	try:
 		widths = widthVectorsByFont[fontName]
@@ -265,8 +274,11 @@ def stringWidth(text, fontName, fontSize):
 			w = w + widths[ord(char)]
 		return w*fontSize*0.001
 	except KeyError:
+		if not _standardFontsAdded:
+			addStandardFonts()
+			return stringWidth(text,fontName,fontSize)
 		# CID Font?  ask the font itself
-		font = fonts[fontName]
+		font = fontsByName[fontName]
 		return font.stringWidth(text, fontSize)
 
 def testMetrics():
