@@ -16,8 +16,8 @@
 # copyright notice and this permission notice appear in supporting
 # documentation, and that the name of ReportLab not be used
 # in advertising or publicity pertaining to distribution of the software
-# without specific, written prior permission. 
-# 
+# without specific, written prior permission.
+#
 #
 # Disclaimer
 #
@@ -27,28 +27,59 @@
 # OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
 # OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 # OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-# PERFORMANCE OF THIS SOFTWARE. 
+# PERFORMANCE OF THIS SOFTWARE.
 #
 ###############################################################################
 #	$Log: sequencer.py,v $
+#	Revision 1.6  2000/06/21 19:46:43  rgbecker
+#	Added Roman formatters
+#
 #	Revision 1.5  2000/06/19 11:14:03  andy_robinson
 #	Global sequencer put in the 'story builder'.
 #
 #	Revision 1.4  2000/06/12 11:27:17  andy_robinson
 #	Added Sequencer and associated XML tags
-#	
+#
 #	Revision 1.3  2000/06/11 21:34:01  andy_robinson
 #	Largely complete class for numbering lists, figures and chapters
-#	
+#
 #	Revision 1.2  2000/06/09 16:18:19  andy_robinson
 #	Doc strings, sequencer
-#	
+#
 #	Revision 1.1  2000/06/01 15:23:06  rgbecker
 #	Platypus re-organisation
-#	
-__version__=''' $Id: sequencer.py,v 1.5 2000/06/19 11:14:03 andy_robinson Exp $ '''
+#
+__version__=''' $Id: sequencer.py,v 1.6 2000/06/21 19:46:43 rgbecker Exp $ '''
 """This module defines a single public class, Sequencer, which aids in
 numbering and formatting lists."""
+#
+# roman numbers conversion thanks to
+#
+# fredrik lundh, november 1996 (based on a C hack from 1984)
+#
+# fredrik@pythonware.com
+# http://www.pythonware.com
+#
+_RN_TEMPLATES = [ 0, 01, 011, 0111, 012, 02, 021, 0211, 02111, 013 ]
+_RN_LETTERS = "IVXLCDM"
+from string import lower
+
+def _format_I(value):
+    if value < 0 or value > 3999:
+        raise ValueError, "illegal value"
+    str = ""
+    base = -1
+    while value:
+        value, index = divmod(value, 10)
+        tmp = _RN_TEMPLATES[index]
+        while tmp:
+            tmp, index = divmod(tmp, 8)
+            str = _RN_LETTERS[index+base] + str
+        base = base + 2
+    return str
+
+def _format_i(num):
+	return lower(_format_I(num))
 
 def _format_123(num):
 	"""The simplest formatter"""
@@ -63,7 +94,6 @@ def _format_abc(num):
 	"""Lowercase.  Wraps around at 26."""
 	n = (num -1) % 26
 	return chr(n+97)
-
 
 class _Counter:
 	"""Private class used by Sequencer.  Each counter
@@ -105,7 +135,7 @@ class _Counter:
 		if not otherCounter in self._resets:
 			self._resets.append(otherCounter)
 
-		
+
 class Sequencer:
 	"""Something to make it easy to number paragraphs, sections,
 	images and anything else.  The features include registering
@@ -127,7 +157,7 @@ class Sequencer:
 		>>> seq.next('Figures')
 		1
 		>>>
-	
+
 	"""
 	def __init__(self):
 		self._counters = {}  #map key to current number
@@ -150,7 +180,7 @@ class Sequencer:
 			self._counters[counter] = cnt
 			return cnt
 
-		
+
 
 	def this(self, counter=None):
 		"""Retrieves counter value but does not increment. For
@@ -158,7 +188,7 @@ class Sequencer:
 		if not counter:
 			counter = self._defaultCounter
 		return self._getCounter(counter).this()
-		
+
 	def next(self, counter=None):
 		"""Retrieves the numeric value for the given counter, then
 		increments it by one.  New counters start at one."""
@@ -170,14 +200,14 @@ class Sequencer:
 		if not counter:
 			counter = self._defaultCounter
 		return self._getCounter(counter).thisf()
-	
+
 	def nextf(self, counter=None):
 		"""Retrieves the numeric value for the given counter, then
 		increments it by one.  New counters start at one."""
 		if not counter:
 			counter = self._defaultCounter
 		return self._getCounter(counter).nextf()
-	
+
 	def setDefaultCounter(self, default=None):
 		"""Changes the key used for the default"""
 		self._defaultCounter = default
@@ -193,7 +223,7 @@ class Sequencer:
 		the given format henceforth."""
 		func = self._formatters[format]
 		self._getCounter(counter).setFormatter(func)
-		
+
 	def reset(self, counter=None, base=1):
 		if not counter:
 			counter = self._defaultCounter
@@ -203,7 +233,7 @@ class Sequencer:
 		p = self._getCounter(parent)
 		c = self._getCounter(child)
 		p.chain(c)
-		
+
 
 	def __getitem__(self, key):
 		"""Allows compact notation to support the format function.
@@ -287,13 +317,9 @@ def test():
 	print 'Finally, string format notation for nested lists.  Cool!'
 	print 'The expression ("Figure %(Chapter)s.%(Figure+)s" % seq) gives:'
 	print '    Figure %(Chapter)s.%(Figure+)s' % s
-	print '    Figure %(Chapter)s.%(Figure+)s' % s 
-	print '    Figure %(Chapter)s.%(Figure+)s' % s 
-	
-	
-		
+	print '    Figure %(Chapter)s.%(Figure+)s' % s
+	print '    Figure %(Chapter)s.%(Figure+)s' % s
+
+
 if __name__=='__main__':
 	test()
-
-	
-	
