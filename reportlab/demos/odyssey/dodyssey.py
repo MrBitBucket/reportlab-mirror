@@ -1,8 +1,8 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/demos/odyssey/dodyssey.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/demos/odyssey/dodyssey.py,v 1.13 2002/07/24 19:56:35 andy_robinson Exp $
-__version__=''' $Id: dodyssey.py,v 1.13 2002/07/24 19:56:35 andy_robinson Exp $ '''
+#$Header: /tmp/reportlab/reportlab/demos/odyssey/dodyssey.py,v 1.14 2003/09/11 22:27:09 andy_robinson Exp $
+__version__=''' $Id: dodyssey.py,v 1.14 2003/09/11 22:27:09 andy_robinson Exp $ '''
 __doc__=''
 
 #REPORTLAB_TEST_SCRIPT
@@ -41,6 +41,7 @@ def go():
         canv = apply(Canvas,(fn,),kw)
         # attach our callback to the canvas
         canv.myOnDrawCB = myOnDrawCB
+        canv.invariant = 1
         return canv
 
     doc = BaseDocTemplate('dodyssey.pdf',showBoundary=0)
@@ -225,6 +226,9 @@ def parseOdyssey(fn):
     t7 = time()
     print "saving to PDF took %.4f seconds" %(t7-t6)
     print "Total run took %.4f seconds"%(t7-t0)
+
+    import md5
+    print 'file digest: %s' % md5.md5(open('dodyssey.pdf','rb').read()).hexdigest()
 
 for fn in ('odyssey.full.txt','odyssey.txt'):
     if os.path.isfile(fn):
