@@ -1,7 +1,7 @@
 #copyright ReportLab Inc. 2000-2001
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/reportlab/graphics/widgetbase.py?cvsroot=reportlab
-#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.25 2001/06/18 12:48:06 rgbecker Exp $
+#$Header: /tmp/reportlab/reportlab/graphics/widgetbase.py,v 1.26 2001/06/22 15:03:25 rgbecker Exp $
 import string
 
 from reportlab.graphics import shapes
@@ -216,11 +216,9 @@ class TypedPropertyCollection(PropHolder):
 		for idx in self._children.keys():
 			childProps = self._children[idx].getProperties(recur=recur)
 			for (key, value) in childProps.items():
-				parentValue = getattr(self, key)
-				if parentValue <> value:
+				if not hasattr(self,key) or getattr(self, key)<>value:
 					newKey = '[%s].%s' % (idx, key)
 					props[newKey] = value
-
 		return props
 
 	def setVector(self,**kw):
