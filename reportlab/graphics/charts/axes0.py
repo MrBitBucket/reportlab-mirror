@@ -31,11 +31,22 @@ the former axes in its own coordinate system.
 
 
 from types import FunctionType
+import time
 
 from reportlab.graphics.shapes import *
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics.charts.piechart0 import TypedPropertyCollection
 from reportlab.graphics.charts.textlabel0 import Label
+
+
+def str2seconds(timeString):
+    "Convert a number of seconds since the epoch into a date string."
+    return time.mktime(mkTimeTuple(timeString))
+
+
+def seconds2str(seconds):
+    "Convert a date string into the number of seconds since the epoch."
+    return time.strftime('%Y-%m-%d', time.gmtime(seconds))
 
 
 def nextRoundNumber(x):
@@ -558,6 +569,107 @@ class XValueAxis(Widget):
 
         return self._x + self._scaleFactor * (value - self._valueMin)
     
+
+    def draw(self):
+        g = Group()
+        if not self.visible:
+            return g
+
+        axis = Line(self._x, self._y, self._x + self._length, self._y)
+        axis.strokeColor = self.strokeColor
+        axis.strokeWidth = self.strokeWidth
+        axis.strokeDashArray = self.strokeDashArray
+        g.add(axis)
+
+        formatFunc = self.labelTextFormat
+
+        i = 0
+        for tickValue in self._tickValues:
+            x = self.scale(tickValue)
+            if (self.tickUp != self.tickDown):
+                # draw tick marks
+                tick = Line(x, self._y - self.tickDown,
+                            x, self._y + self.tickUp)
+
+                tick.strokeColor = self.strokeColor
+                tick.strokeWidth = self.strokeWidth
+                tick.strokeDashArray = self.strokeDashArray
+                g.add(tick)
+
+            if formatFunc:
+                if type(formatFunc) is StringType:
+                    labelText = formatFunc % tickValue
+                else:
+                    labelText = formatFunc(tickValue)
+                label = self.labels[i]
+                label.setOrigin(x, self._y)
+                label.setText(labelText)
+                g.add(label)
+            i = i + 1
+                        
+        return g
+
+
+class XTimeValueAxis(XValueAxis):
+    "X time value axis"
+
+    def demo(self):
+        self.setPosition(20, 50, 150)
+        self.configure([(10,20,30,40,50)])
+        d = Drawing(200, 100)
+        d.add(self)
+        return d
+
+        
+    def configure(self, dataSeries):
+        try:
+            minFound = dataSeries[0][0]
+            maxFound = dataSeries[0][0]
+            for ser in dataSeries:
+                for num in ser:
+                    if num < minFound:
+                        minFound = num
+                    if num > maxFound:
+                        maxFound = num
+        except IndexError:
+            minFound = self.valueMin
+            maxFound = self.valueMax
+        
+        if self.valueMin == Auto:
+            self._valueMin = minFound
+        else:
+            self._valueMin = self.valueMin
+
+        if self.valueMax == Auto:
+            self._valueMax = maxFound
+        else:
+            self._valueMax = self.valueMax
+
+        self._scaleFactor = self._length * 1.0 / (self._valueMax - self._valueMin) 
+
+        # now work out where to put tickmarks.
+        if hasattr(self, 'valueSteps'):            
+            self._tickValues = self.valueSteps
+        else:
+            if self.valueStep == Auto:
+                rawRange = self._valueMax - self._valueMin
+                rawInterval = rawRange * (1.0 * self.minimumTickSpacing / self._length)
+                niceInterval = nextRoundNumber(rawInterval)
+                self._valueStep = niceInterval
+            else:
+                self._valueStep = self.valueStep
+
+            self._tickValues = []
+            tick = int(self._valueMin / self._valueStep) * self._valueStep
+            if tick >= self._valueMin:
+                self._tickValues.append(tick)
+            tick = tick + self._valueStep
+            while tick <= self._valueMax:
+                self._tickValues.append(tick)
+                tick = tick + self._valueStep
+            
+        self._configured = 1            
+
 
     def draw(self):
         g = Group()
