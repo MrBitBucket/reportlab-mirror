@@ -1,4 +1,161 @@
 #################################################################################
+#################### RELEASE 1.14 at 18:00 GMT 28/May/2002      #################
+#################################################################################
+##### 2002/05/28 #####
+	fonts/rina.ttf 1.2 rgbecker  Readded with -kb
+	fonts/luxiserif.ttf 1.2 rgbecker  Readded with -kb
+	pdfbase/ttfonts.py 1.1 rgbecker  Added Marius Gedminas' TTF support
+	graphics/renderPS.py 1.16 rgbecker  Stray StringIO change to getvalue()
+	tools/docco/stylesheet.py 1.2 rgbecker  Added Marius Gedminas' TTF support
+	tools/docco/examples.py 1.2 rgbecker  Added Marius Gedminas' TTF support
+	test/test_pdfbase_ttfonts.py 1.1 rgbecker  Added Marius Gedminas' TTF support
+	rl_config.py 1.32 rgbecker  Added Marius Gedminas' TTF support
+	pdfgen/textobject.py 1.23 rgbecker  Added Marius Gedminas' TTF support
+	pdfgen/canvas.py 1.103 rgbecker  Added Marius Gedminas' TTF support
+	pdfbase/pdfdoc.py 1.65 rgbecker  Added Marius Gedminas' TTF support
+	fonts/rina_license.txt 1.1 rgbecker  Added Marius Gedminas' TTF support
+	fonts/rina.ttf 1.1 rgbecker  Added Marius Gedminas' TTF support
+	fonts/luxiserif_license.txt 1.1 rgbecker  Added Marius Gedminas' TTF support
+	fonts/luxiserif.ttf 1.1 rgbecker  Added Marius Gedminas' TTF support
+	docs/userguide/ch2a_fonts.py 1.4 rgbecker  Added Marius Gedminas' TTF support
+	docs/userguide/ch1_intro.py 1.6 rgbecker  Added Marius Gedminas' TTF support
+##### 2002/05/27 #####
+	pdfbase/pdfdoc.py 1.64 dinu_gherman  Added skipped comment to Jython workaround.
+	docs/graphguide/ch2_concepts.py 1.4 dinu_gherman  Added SVG blurb.
+##### 2002/05/26 #####
+	lib/setup.py 1.12 dinu_gherman  Added 'darwin' to list of known platforms.
+##### 2002/05/24 #####
+	test/test_platypus_general.py 1.7 dinu_gherman  Filtered Image flowable if no PIL available.
+	pdfbase/pdfmetrics.py 1.53 dinu_gherman  Fixed font filename extension case buglets on OS X.
+	graphics/widgets/markers.py 1.10 rgbecker  Added kw args to Flag and MArker classes
+	graphics/widgets/flags.py 1.20 rgbecker  Added kw args to Flag and MArker classes
+	graphics/charts/lineplots.py 1.31 rgbecker  Added ScatterPlot
+	test/test_pyfiles.py 1.8 dinu_gherman  Disabled some tests using os.chdir when running on Jython.
+	test/test_extra.py 1.4 dinu_gherman  Disabled some tests using os.chdir when running on Jython.
+	test/test_docstrings.py 1.8 dinu_gherman  Disabled some tests using os.chdir when running on Jython.
+	test/test_docs_build.py 1.3 dinu_gherman  Disabled some tests using os.chdir when running on Jython.
+	test/test_tools_pythonpoint.py 1.6 dinu_gherman  Simplified and removed os.system() calls.
+	test/test_graphics_images.py 1.3 dinu_gherman  Simplified code.
+	test/test_pdfgen_general.py 1.13 dinu_gherman  Test case now handles absence of PIL more gracefully.
+	test/test_lib_validators.py 1.6 dinu_gherman  'Typed' arguments to % operator, removes Jython complaints.
+	pdfbase/pdfdoc.py 1.63 rgbecker  Added Dinu's Jython 2.1 workaround
+##### 2002/05/23 #####
+	pdfbase/pdfutils.py 1.31 rgbecker  Remove stringio reset
+	graphics/charts/piecharts.py 1.20 rgbecker  Added LegendedPie
+##### 2002/05/22 #####
+	demos/odyssey/odyssey.txt 1.9 rgbecker  Fixed bad tag
+	demos/odyssey/dodyssey.py 1.11 rgbecker  Test framework
+	graphics/renderSVG.py 1.4 dinu_gherman  Removed dependency on PyXML. Now should use only std. lib. XML modules.
+##### 2002/05/21 #####
+	graphics/charts/lineplots.py 1.30 rgbecker  Added GridLinePlot
+	graphics/charts/axes.py 1.55 rgbecker  Added AdjYValueAxis
+	graphics/renderSVG.py 1.3 dinu_gherman  Removed tests depending on additional local files.
+##### 2002/05/17 #####
+	graphics/renderPDF.py 1.18 dinu_gherman  Made 'msg' in drawToFile() a keyword parameter with default "".
+##### 2002/05/16 #####
+	test/test_graphics_images.py 1.2 dinu_gherman  Added more tests, changed output file name.
+##### 2002/05/15 #####
+	graphics/renderSVG.py 1.2 andy_robinson  2.1 compatible
+	test/test_graphics_images.py 1.1 dinu_gherman  Initial check-in.
+	graphics/shapes.py 1.74 dinu_gherman  Added Images shape class, currently only rendered in PDF.
+	graphics/renderbase.py 1.11 dinu_gherman  Added Images shape class, currently only rendered in PDF.
+	graphics/renderPDF.py 1.17 dinu_gherman  Added Images shape class, currently only rendered in PDF.
+##### 2002/05/13 #####
+	rl_addons/pyRXP/examples/doc_examples.py 1.3 rgbecker  Fixed stupid extra '
+##### 2002/05/12 #####
+	graphics/renderSVG.py 1.1 dinu_gherman  Initial checkin.
+##### 2002/05/11 #####
+	rl_addons/pyRXP/examples/doc_examples.py 1.2 rgbecker  Fix bad quote chars
+##### 2002/05/10 #####
+	pdfbase/pdfdoc.py 1.62 aaron_watters  backwards compatible name
+##### 2002/05/08 #####
+	tools/pythonpoint/pythonpoint.py 1.15 dinu_gherman  Reintroduced lost changes up to revision 1.13.
+	tools/pythonpoint/stdparser.py 1.8 dinu_gherman  Bugfix, now also fills polygons.
+	tools/pythonpoint/pythonpoint.py 1.14 dinu_gherman  Bugfix, now also fills polygons.
+	lib/PyFontify.py 1.3 dinu_gherman  Added new Python keyword "as".
+##### 2002/05/03 #####
+	rl_addons/pyRXP/setup.py 1.6 rgbecker  Added linux2 to LIBS=[] case
+##### 2002/04/30 #####
+	graphics/charts/axes.py 1.54 rgbecker  Keep calculated max/min separate
+##### 2002/04/29 #####
+	docs/genAll.py 1.8 rgbecker  Allow for varying locations
+	docs/genAll.py 1.7 rgbecker  Added pyRXP Documentation
+	rl_addons/pyRXP/filelist.txt 1.1 rgbecker  Initial version after moving from users/john
+	rl_addons/pyRXP/examples/xmlutils.py 1.1 rgbecker  Initial version after moving from users/john
+	rl_addons/pyRXP/examples/tinydtd.dtd 1.1 rgbecker  Initial version after moving from users/john
+	rl_addons/pyRXP/examples/sample4.xml 1.1 rgbecker  Initial version after moving from users/john
+	rl_addons/pyRXP/examples/sample3.xml 1.1 rgbecker  Initial version after moving from users/john
+	rl_addons/pyRXP/examples/sample2.xml 1.1 rgbecker  Initial version after moving from users/john
+	rl_addons/pyRXP/examples/sample1.xml 1.1 rgbecker  Initial version after moving from users/john
+	rl_addons/pyRXP/examples/rml_a.xml 1.1 rgbecker  Initial version after moving from users/john
+	rl_addons/pyRXP/examples/rml_a.dtd 1.1 rgbecker  Initial version after moving from users/john
+	rl_addons/pyRXP/examples/play.dtd 1.1 rgbecker  Initial version after moving from users/john
+	rl_addons/pyRXP/examples/hamlet.xml 1.1 rgbecker  Initial version after moving from users/john
+	rl_addons/pyRXP/examples/expattree.py 1.1 rgbecker  Initial version after moving from users/john
+	rl_addons/pyRXP/examples/doc_examples.py 1.1 rgbecker  Initial version after moving from users/john
+	rl_addons/pyRXP/examples/benchmarks.py 1.1 rgbecker  Initial version after moving from users/john
+	rl_addons/pyRXP/examples/00readme.txt 1.1 rgbecker  Initial version after moving from users/john
+	rl_addons/pyRXP/docs/replogo.gif 1.1 rgbecker  Initial version after moving from users/john
+	rl_addons/pyRXP/docs/PyRXP_Documentation.rml 1.1 rgbecker  Initial version after moving from users/john
+	rl_addons/pyRXP/PROJECT_CVS_TAG 1.1 rgbecker  Initial version after moving from users/john
+##### 2002/04/25 #####
+	platypus/tables.py 1.57 andy_robinson  Jim Kraai's patch to preserve auto col width on subsequent pages when table split
+##### 2002/04/18 #####
+	rl_addons/pyRXP/pyRXP.c 1.7 rgbecker  Move to version 0.7
+	rl_addons/pyRXP/rxp/input.c 1.3 rgbecker  Was wrong to delete entity with source
+	rl_addons/pyRXP/pyRXP.c 1.6 rgbecker  Was wrong to delete entity with source
+	rl_addons/pyRXP/test/leaktest.py 1.1 rgbecker  Initial version
+	rl_addons/pyRXP/pyRXP.c 1.5 rgbecker  Changes made in pursuit of leaks
+	rl_addons/pyRXP/rxp/system.h 1.3 rgbecker  Changes made in pursuit of leaks
+	rl_addons/pyRXP/rxp/system.c 1.2 rgbecker  Changes made in pursuit of leaks
+	rl_addons/pyRXP/rxp/input.c 1.2 rgbecker  Changes made in pursuit of leaks
+	rl_addons/pyRXP/rxp/dtd.c 1.2 rgbecker  Changes made in pursuit of leaks
+##### 2002/04/17 #####
+	rl_addons/pyRXP/pyRXP.c 1.4 rgbecker  Made srcName a PyObject*, fixed parse attributes
+	rl_addons/pyRXP/setup.py 1.5 rgbecker  I think DLLs is the proper place for pyds etc
+	rl_addons/pyRXP/test/t.py 1.2 rgbecker  Added some more tests
+	rl_addons/pyRXP/pyRXP.c 1.3 rgbecker  Added ReturnList attribute, parse keyword args and __call__==parse! pyRXP.c
+##### 2002/04/16 #####
+	graphics/renderPDF.py 1.16 rgbecker  Fix Dinu's empty ellipse buglet in renderPDF
+##### 2002/04/13 #####
+	lib/utils.py 1.33 rgbecker  This seems adequate if we avoid Dinuisms like writing to initialised StringIOs
+	tools/docco/graphdocpy.py 1.16 rgbecker  Silly StringIO initialisation removed
+	lib/utils.py 1.32 rgbecker  Ensure initialised cStringIO instances are rewound
+	tools/docco/rl_doc_utils.py 1.3 rgbecker  Remove excess import
+	pdfgen/canvas.py 1.102 rgbecker  Remove excess import
+	tools/pythonpoint/pythonpoint.py 1.13 rgbecker  Use general StringIO instance interface
+	tools/docco/graphdocpy.py 1.15 rgbecker  Use general StringIO instance interface
+	pdfgen/pdfimages.py 1.15 rgbecker  Use general StringIO instance interface
+	pdfbase/pdfutils.py 1.30 rgbecker  Use general StringIO instance interface
+	graphics/renderPS.py 1.15 rgbecker  Use general StringIO instance interface
+	graphics/renderPM.py 1.17 rgbecker  Use generalised StringIO instance interface
+	lib/utils.py 1.31 rgbecker  use generalised StringIO instance interface
+	graphics/shapes.py 1.73 rgbecker  Minor optimisations
+	pdfbase/pdfdoc.py 1.61 rgbecker  Another go at Jerome's patch
+##### 2002/04/12 #####
+	pdfbase/pdfdoc.py 1.60 rgbecker  Jerome Alet's auto transparency patch
+	pdfbase/pdfdoc.py 1.59 rgbecker  Use open_for_read with images
+	lib/utils.py 1.30 rgbecker  Added open_for_read
+	rl_addons/pyRXP/setup.py 1.4 rgbecker  Be friendly about LIBS
+##### 2002/04/11 #####
+	graphics/charts/lineplots.py 1.29 rgbecker  Ragged length fix from Joe Pallas
+	graphics/charts/linecharts.py 1.22 rgbecker  Ragged length fix from Joe Pallas
+##### 2002/04/09 #####
+	test/test_pdfbase_fontembed.py 1.7 johnprecedo  Expanded so it does a 'makeWidthTestForAllGlyphs' for at least one embedded font - this makes sure that we're getting ascent/descent info for embedded fonts as well as the standard ones.
+	test/test_pdfbase_pdfmetrics.py 1.8 johnprecedo  Now tests for presence of ascent/descent.
+	pdfbase/pdfmetrics.py 1.52 johnprecedo  Hacked to use ascent and descent properly. (Patch from Jon Dyte [jon@totient.demon.co.uk])
+##### 2002/04/06 #####
+	tools/pythonpoint/stdparser.py 1.7 rgbecker  Attempt import from here and styles
+	tools/pythonpoint/stdparser.py 1.6 rgbecker  Was correct before, error in imputils vs 2.2
+	tools/pythonpoint/stdparser.py 1.5 rgbecker  No customshapes in styles
+##### 2002/04/01 #####
+	rl_addons/pyRXP/setup.py 1.3 rgbecker  Added darwini for Andy
+##### 2002/03/29 #####
+	pdfgen/canvas.py 1.101 rgbecker  Jerome's final correction
+	pdfgen/canvas.py 1.100 rgbecker  Really fix digestion
+##### 2002/03/28 #####
+	pdfgen/canvas.py 1.99 rgbecker  Hexdigest fix for 1.5.2
+#################################################################################
 #################### RELEASE 1.13 at 15:00 GMT 27/March/2002    #################
 #################################################################################
 ##### 2002/03/27 #####

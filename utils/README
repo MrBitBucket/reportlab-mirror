@@ -71,7 +71,7 @@ Release Procedure
 	to know that you can add a -F to the tag command to allow you to retag a modified
 	source file ie cvs -z3 tag -F ReportLab_d_xy
 
-5)	Login to zlaza.pair.com
+5)	Login to zelaza.pair.com
 
 	cd bin
 	./daily.py -release ReportLab_d_xy
