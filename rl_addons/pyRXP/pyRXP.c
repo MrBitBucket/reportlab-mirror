@@ -2,9 +2,9 @@
 #copyright ReportLab Inc. 2000
 #see license.txt for license details
 #history http://cvs.sourceforge.net/cgi-bin/cvsweb.cgi/rl_addons/pyRXP/pyRXP.c?cvsroot=reportlab
-#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.11 2003/02/19 10:24:04 rgbecker Exp $
+#$Header: /tmp/reportlab/rl_addons/pyRXP/pyRXP.c,v 1.12 2003/03/03 16:17:13 rgbecker Exp $
  ****************************************************************************/
-static char* __version__=" $Id: pyRXP.c,v 1.11 2003/02/19 10:24:04 rgbecker Exp $ ";
+static char* __version__=" $Id: pyRXP.c,v 1.12 2003/03/03 16:17:13 rgbecker Exp $ ";
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,7 +24,7 @@ static char* __version__=" $Id: pyRXP.c,v 1.11 2003/02/19 10:24:04 rgbecker Exp 
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "0.91"
+#define VERSION "0.92"
 #define MODULE "pyRXP"
 #define MAX_DEPTH 256
 static PyObject *moduleError;
@@ -115,6 +115,9 @@ The python module exports the following\n\
 			looks the same as the entity reference.\n\
 		ReturnComments = 0\n\
 			If this is set, comments are returned, otherwise they are ignored.\n\
+		ReturnProcessingInstructions = 0\n\
+			If this is set, processing instructions are returned, otherwise\n\
+			they are ignored.\n\
 		CaseInsensitive = 0\n\
 		ErrorOnUndefinedElements = 0\n\
 		ErrorOnUndefinedAttributes = 0\n\
@@ -217,11 +220,13 @@ static struct {char* k;long v;} flag_vals[]={
 	{"ReturnList",0},
 	{"ExpandEmpty",0},
 	{"MakeMutableTree",0},
+	{"ReturnProcessingInstructions",0},
 	{0}};
 #define LASTRXPFLAG ProcessDTD
 #define ReturnList (ParserFlag)(1+(int)LASTRXPFLAG)
 #define ExpandEmpty (ParserFlag)(1+(int)ReturnList)
 #define MakeMutableTree (ParserFlag)(1+(int)ExpandEmpty)
+#define ReturnProcessingInstructions (ParserFlag)(1+(int)MakeMutableTree )
 #define __GetFlag(p, flag) \
   ((((flag) < 32) ? ((p)->flags[0] & (1u << (flag))) : ((p)->flags[1] & (1u << ((flag)-32))))!=0)
 #ifdef	_DEBUG
@@ -298,6 +303,7 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 			r = 1;
 			break;
 		case XBIT_start:
+			fprintf(stderr,"start chars\n");
 		case XBIT_empty:
 			if(*depth==MAX_DEPTH){
 				Fprintf(Stderr,"Internal error, stack limit reached!\n");
@@ -329,10 +335,34 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 			Py_DECREF(t);
 			break;
 		case XBIT_pi:
-#if			0
-			bit->pi_name;
-			bit->pi_chars;
+			if(ParserGetFlag(p,ReturnProcessingInstructions)){
+#if CHAR_SIZE==8
+				char* c = (char*)PyMem_Malloc(strlen(bit->pi_chars)+strlen(bit->pi_name)+6);
+				strcpy(c,"<?");
+				strcat(c,bit->pi_name);
+				strcat(c," ");
+				strcat(c,bit->pi_chars);
+				strcat(c,"?>");
+				t = PyString_FromString(c);
+#else
+				char* c = (char*)PyMem_Malloc((strlen(bit->pi_chars)+strlen(bit->pi_name)+6)*2);
+				Char* z = strdup_char8_to_Char("<?");
+				Strcpy(c,z);
+				free(z);
+				Strcat(c,bit->pi_name);
+				z = strdup_char8_to_Char(" ");
+				Strcat(c,z);
+				free(z);
+				Strcat(c,bit->pi_chars);
+				z = strdup_char8_to_Char("?>");
+				Strcat(c,z);
+				free(z);
+				t = PYSTRING(c);
 #endif
+				PyList_Append(PDGetItem(stack[*depth],2),t);
+				Py_DECREF(t);
+				PyMem_Free(c);
+				}
 			break;
 		case XBIT_pcdata:
 			t = PyString_FromString(bit->pcdata_chars);

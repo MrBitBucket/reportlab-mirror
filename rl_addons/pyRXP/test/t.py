@@ -59,3 +59,4 @@ if __name__=='__main__': #noruntests
 		goodTest('<!--comment--><a/>',['<!--comment-->',('a', None, None, None)],ReturnComments=1,ReturnList=1)
 		goodTest('<!--comment--><a/>',('a', None, None, None),ReturnComments=1)
 		failTest('<?xml version="1.0" encoding="LATIN-1"?></a>',"Error Unknown declared encoding LATIN-1\nInternal error, ParserPush failed!\n")
+		goodTest('<?work version="1.0" encoding="utf-8"?><a/>',['<?work version="1.0" encoding="utf-8"?>', ('a', None, None, None)],IgnorePlacementErrors=1,ReturnList=1,ReturnProcessingInstructions=1,ReturnComments=1)
