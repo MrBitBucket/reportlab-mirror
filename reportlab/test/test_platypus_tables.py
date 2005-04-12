@@ -434,7 +434,7 @@ LIST_STYLE = TableStyle(
             ['', '11', '12', '13', '14'],
             ['20', '21', '22', '23', '24'],
             ['30', '31', '', '33', '34']]
-    t=Table(data,style=[
+    sty=[
                     ('GRID',(0,0),(-1,-1),0.5,colors.grey),
                     ('GRID',(1,1),(-2,-2),1,colors.green),
                     ('BOX',(0,0),(1,-1),2,colors.red),
@@ -445,7 +445,8 @@ LIST_STYLE = TableStyle(
                     ('SPAN',(0,0),(0,1)),
                     ('BACKGROUND', (2, 2), (2, 3), colors.orange),
                     ('SPAN',(2,2),(2,3)),
-                    ])
+                    ]
+    t=Table(data,style=sty)
     lst.append(Paragraph("Illustrating splits with spans: nosplit", styleSheet['BodyText']))
     lst.append(t)
     lst.append(Spacer(0,6))
@@ -460,6 +461,49 @@ LIST_STYLE = TableStyle(
         lst.append(Spacer(0,6))
     lst.append(Paragraph("Illustrating splits with spans: split(4in,56)", styleSheet['BodyText']))
     lst.append(Spacer(0,6))
+    for s in t.split(4*inch,56):
+        lst.append(s)
+        lst.append(Spacer(0,6))
+
+    data=  [['00', '01', '02', '03', '04'],
+            ['', '11', '12', '13', ''],
+            ['20', '21', '22', '23', '24'],
+            ['30', '31', '', '33', ''],
+            ['40', '41', '', '43', '44']]
+    sty=[
+        ('GRID',(0,0),(-1,-1),0.5,colors.grey),
+        ('GRID',(1,1),(-2,-2),1,colors.green),
+        ('BOX',(0,0),(1,-1),2,colors.red),
+        ('BOX',(0,0),(-1,-1),2,colors.black),
+        ('LINEABOVE',(1,2),(-2,2),1,colors.blue),
+        ('LINEBEFORE',(2,1),(2,-2),1,colors.pink),
+        ('BACKGROUND', (0, 0), (0, 1), colors.pink),
+        ('SPAN',(0,0),(0,1)),
+        ('BACKGROUND',(-2,1),(-1,1),colors.palegreen),
+        ('SPAN',(-2,1),(-1,1)),
+        ('BACKGROUND',(-2,3),(-1,3),colors.yellow),
+        ('SPAN',(-2,3),(-1,3)),
+        ('BACKGROUND', (2, 3), (2, 4), colors.orange),
+        ('SPAN',(2,3),(2,4)),
+        ]
+
+    t=Table(data,style=sty,repeatRows=2)
+    lst.append(Paragraph("Illustrating splits with spans and repeatRows: nosplit", styleSheet['BodyText']))
+    lst.append(t)
+    lst.append(Spacer(0,6))
+    if  0:
+        lst.append(Paragraph("Illustrating splits with spans and repeatRows: split(4in,30)", styleSheet['BodyText']))
+        for s in t.split(4*inch,30):
+            lst.append(s)
+            lst.append(Spacer(0,6))
+        lst.append(Spacer(0,6))
+        lst.append(Paragraph("Illustrating splits with spans and repeatRows: split(4in,36)", styleSheet['BodyText']))
+        for s in t.split(4*inch,36):
+            lst.append(s)
+            lst.append(Spacer(0,6))
+    lst.append(Paragraph("Illustrating splits with spans and repeatRows: split(4in,56)", styleSheet['BodyText']))
+    lst.append(Spacer(0,6))
+    t=Table(data,style=sty,repeatRows=2)
     for s in t.split(4*inch,56):
         lst.append(s)
         lst.append(Spacer(0,6))

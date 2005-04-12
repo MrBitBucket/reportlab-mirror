@@ -1035,6 +1035,7 @@ class Table(Flowable):
 
         R0._cr_0(n,A)
         R0._cr_0(n,self._bkgrndcmds)
+        R0._cr_0(n,self._spanCmds)
 
         if repeatRows:
             #R1 = slelf.__class__(data[:repeatRows]+data[n:],self._argW,
@@ -1045,6 +1046,7 @@ class Table(Flowable):
             R1._cellStyles = self._cellStyles[:repeatRows]+self._cellStyles[n:]
             R1._cr_1_1(n,repeatRows,A)
             R1._cr_1_1(n,repeatRows,self._bkgrndcmds)
+            R1._cr_1_1(n,repeatRows,self._spanCmds)
         else:
             #R1 = slelf.__class__(data[n:], self._argW, self._argH[n:],
             R1 = self.__class__(data[n:], self._colWidths, self._argH[n:],
@@ -1053,11 +1055,11 @@ class Table(Flowable):
             R1._cellStyles = self._cellStyles[n:]
             R1._cr_1_0(n,A)
             R1._cr_1_0(n,self._bkgrndcmds)
+            R1._cr_1_0(n,self._spanCmds)
 
 
         R0.hAlign = R1.hAlign = self.hAlign
         R0.vAlign = R1.vAlign = self.vAlign
-        if self._spanCmds: R0._spanCmds, R1._spanCmds=self._cloneSpanCommands(n)
         self.onSplit(R0)
         self.onSplit(R1)
         return [R0,R1]
@@ -1090,19 +1092,6 @@ class Table(Flowable):
             h=h+rh
             n=n+1
         return split_at
-
-    def _cloneSpanCommands(self,n):
-        spans0=[]
-        spans1=[]
-        for rng in self._spanRanges.values():
-            if rng:
-                if rng[0:2]!=rng[2:4]:
-                    x1,y1,x2,y2=rng
-                    assert (x1<=x2) and (y1<=y2), "_spanRanges does contain unexpected values!"
-                    assert not (y1<n and y2>=n) , "Something got wrong with _getFirstPossibleSplitRowPosition! %r" % [ys,ye,n]
-                    if y1< n and y2< n: spans0.append(("SPAN",(x1,y1  ),(x2,y2  )))
-                    if y1>=n and y2>=n: spans1.append(("SPAN",(x1,y1-n),(x2,y2-n)))
-        return spans0,spans1
 
     def split(self, availWidth, availHeight):
         self._calc(availWidth, availHeight)
@@ -1155,7 +1144,6 @@ class Table(Flowable):
                 #might be already colours, or convertible to colors, or
                 # None, or the string 'None'.
                 #It's very common to alternate a pale shade with None.
-                #print 'rowHeights=', self._rowHeights
                 colorCycle = map(colors.toColorOrNone, arg)
                 count = len(colorCycle)
                 rowCount = er - sr + 1
@@ -1165,7 +1153,6 @@ class Table(Flowable):
                     if color:
                         canv.setFillColor(color)
                         canv.rect(x0, y0, w, -h, stroke=0,fill=1)
-                    #print '    draw %0.0f, %0.0f, %0.0f, %0.0f' % (x0,y0,w,-h)
                     y0 = y0 - h
 
             elif cmd == 'COLBACKGROUNDS':
