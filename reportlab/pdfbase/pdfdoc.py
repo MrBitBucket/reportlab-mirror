@@ -146,7 +146,8 @@ class PDFDocument:
                  encoding=rl_config.defaultEncoding,
                  dummyoutline=0,
                  compression=rl_config.pageCompression,
-                 invariant=rl_config.invariant):
+                 invariant=rl_config.invariant,
+                 filename=None):
         #self.defaultStreamFilters = [PDFBase85Encode, PDFZCompress] # for testing!
         #self.defaultStreamFilters = [PDFZCompress] # for testing!
         assert encoding in ['MacRomanEncoding',
@@ -1301,11 +1302,13 @@ class PDFInfo:
     """PDF documents can have basic information embedded, viewable from
     File | Document Info in Acrobat Reader.  If this is wrong, you get
     Postscript errors while printing, even though it does not print."""
+    producer = "ReportLab http://www.reportlab.com"
+    title = "untitled"
+    author = "anonymous"
+    subject = "unspecified"
+
     def __init__(self):
         self.invariant = rl_config.invariant
-        self.title = "untitled"
-        self.author = "anonymous"
-        self.subject = "unspecified"
 
     def digest(self, md5object):
         # add self information to signature
@@ -1846,6 +1849,8 @@ class PDFImageXObject:
         dict["Height"] = self.height
         dict["BitsPerComponent"] = self.bitsPerComponent
         dict["ColorSpace"] = PDFName(self.colorSpace)
+        if self.colorSpace=='DeviceCMYK':
+            dict["Decode"] = PDFArray([1,0,1,0,1,0,1,0])
         dict["Filter"] = PDFArray(map(PDFName,self._filters))
         dict["Length"] = len(self.streamContent)
         if self.mask: dict["Mask"] = PDFArray(self.mask)
