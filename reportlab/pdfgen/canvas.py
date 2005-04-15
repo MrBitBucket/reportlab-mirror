@@ -132,7 +132,7 @@ class Canvas:
         self._encodingName = encoding
         self._doc = pdfdoc.PDFDocument(encoding,
                                        compression=pageCompression,
-                                       invariant=invariant)
+                                       invariant=invariant, filename=filename)
 
 
         #this only controls whether it prints 'saved ...' - 0 disables
