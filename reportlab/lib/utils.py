@@ -777,18 +777,20 @@ def find_locals(func,depth=0):
         depth += 1
 
 class _FmtSelfDict:
-    def __init__(self,obj):
+    def __init__(self,obj,overrideArgs):
         self.obj = obj
+        self._overrideArgs = overrideArgs
     def __getitem__(self,k):
         try:
-            return self.obj.__dict__[k]
+            return self._overrideArgs[k]
         except KeyError:
-            return getattr(self.obj,k)
+            try:
+                return self.obj.__dict__[k]
+            except KeyError:
+                return getattr(self.obj,k)
 
 class FmtSelfDict:
     '''mixin to provide the _fmt method'''
-    def _fmt(self,fmt):
-        D = getattr(self,'_fmtSelfDict',None)
-        if D is None:
-            D = self._fmtSelfDict = _FmtSelfDict(self)
+    def _fmt(self,fmt,**overrideArgs):
+        D = _FmtSelfDict(self, overrideArgs)
         return fmt % D
