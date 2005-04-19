@@ -19,7 +19,8 @@ class FmtTestCase(unittest.TestCase):
                 self.d = '(overridden)'
         obj = MixedIn()
         self.assertEqual('blah', obj._fmt('blah'))
-        self.assertRaises(ValueError, 'blah %%')
+        self.assertEqual('blah %', obj._fmt('blah %%'))
+        self.assertRaises(ValueError, obj._fmt, 'blah %')
         self.assertEqual(
             'moon AA june_BB spoon %(a)sCC ni',
             obj._fmt('moon %(a)s june%(_b)s spoon %%(a)s%(c)s %(d)s', c='CC', C='boon', d='ni'))
