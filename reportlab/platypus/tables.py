@@ -306,6 +306,7 @@ class Table(Flowable):
         return "<%s at %d %d rows x %s cols>%s" % (self.__class__.__name__, id(self), nr, nc, vx)
 
     def _listCellGeom(self, V,w,s,W=None,H=None,aH=72000):
+        if not V: return 0,0
         aW = w-s.leftPadding-s.rightPadding
         aH = aH - s.topPadding - s.bottomPadding
         t = 0
@@ -317,8 +318,6 @@ class Table(Flowable):
             if H is not None: H.append(vh)
             w = max(w,vw)
             t = t + vh + v.getSpaceBefore()+v.getSpaceAfter()
-        else:
-            return w, t
         return w, t - V[0].getSpaceBefore()-V[-1].getSpaceAfter()
 
     def _calc_width(self,availWidth,W=None):
