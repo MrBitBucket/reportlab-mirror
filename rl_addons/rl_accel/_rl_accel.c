@@ -27,7 +27,7 @@ static __version__=" $Id$ "
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.52"
+#define VERSION "0.53"
 #define MODULE "_rl_accel"
 
 
@@ -480,7 +480,7 @@ PyObject *_a85_decode(PyObject *self, PyObject *args)
 static	char* _fp_fmts[]={"%.0f", "%.1f", "%.2f", "%.3f", "%.4f", "%.5f", "%.6f"};
 static	char *_fp_one(PyObject *pD)
 {
-	double	d;
+	double	d, ad;
 	static	char s[30];
 	int l;
 	char*	dot;
@@ -492,25 +492,32 @@ static	char *_fp_one(PyObject *pD)
 		PyErr_SetString(ErrorObject, "bad numeric value");
 		return NULL;
 		}
-	if(fabs(d)<=1.0e-7){
+	ad = fabs(d);
+	if(ad<=1.0e-7){
 		s[0]='0';
 		s[1]=0;
 		}
 	else{
-		if(fabs(d)>1) l = min(max(0,6-(int)log10(fabs(d))),6);
+		if(ad>1e20){
+			PyErr_SetString(ErrorObject, "number too large");
+			return NULL;
+			}
+		if(ad>1) l = min(max(0,6-(int)log10(ad)),6);
 		else l = 6;
 		sprintf(s,_fp_fmts[l], d);
-		l = strlen(s)-1;
-		while(l && s[l]=='0') l--;
-		if(s[l]=='.' || s[l]==',') s[l]=0;
-		else {
-			s[l+1]=0;
-			if(s[0]=='0' && (s[1]=='.'||s[1]==',')){
-				if(s[1]==',') s[1] = '.';
-				return s+1;
+		if(l){
+			l = strlen(s)-1;
+			while(l && s[l]=='0') l--;
+			if(s[l]=='.' || s[l]==',') s[l]=0;
+			else {
+				s[l+1]=0;
+				if(s[0]=='0' && (s[1]=='.'||s[1]==',')){
+					if(s[1]==',') s[1] = '.';
+					return s+1;
+					}
 				}
+			if((dot=strchr(s,','))) *dot = '.';
 			}
-		if((dot=strchr(s,','))) *dot = '.';
 		}
 	return s;
 }
