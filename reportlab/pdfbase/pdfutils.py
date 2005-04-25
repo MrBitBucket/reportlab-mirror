@@ -25,6 +25,7 @@ def _chunker(src,dst=[],chunkSize=60):
 #
 ##########################################################
 
+_mode2cs = {'RGB':'RGB', 'CMYK': 'CMYK', 'L': 'G'}
 def cacheImageFile(filename, returnInMemory=0, IMG=None):
     "Processes image as if for encoding, saves to a file with .a85 extension."
 
@@ -47,7 +48,7 @@ def cacheImageFile(filename, returnInMemory=0, IMG=None):
         code = []
         # this describes what is in the image itself
         code.append('BI')
-        code.append('/W %s /H %s /BPC 8 /CS /RGB /F [/A85 /Fl]' % (imgwidth, imgheight))
+        code.append('/W %s /H %s /BPC 8 /CS /%s /F [/A85 /Fl]' % (imgwidth, imgheight,_mode2cs[img.mode]))
         code.append('ID')
         #use a flate filter and Ascii Base 85
         assert(len(raw) == imgwidth * imgheight, "Wrong amount of data for image")

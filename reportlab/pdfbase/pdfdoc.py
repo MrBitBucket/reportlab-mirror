@@ -1724,6 +1724,7 @@ class PDFPostScriptXObject:
         sdict["Subtype"] = PDFName("PS")
         return S.format(document)
 
+_mode2CS={'RGB':'DeviceRGB', 'L':'DeviceGrey', 'CMYK':'DeviceCMYK'}
 class PDFImageXObject:
     # first attempts at a hard-coded one
     # in the file, Image XObjects are stream objects.  We already
@@ -1763,7 +1764,7 @@ class PDFImageXObject:
         imagedata = map(string.strip,pdfutils.cacheImageFile(source,returnInMemory=1,IMG=IMG))
         words = string.split(imagedata[1])
         self.width, self.height = map(string.atoi,(words[1],words[3]))
-        self.colorSpace = 'DeviceRGB'
+        self.colorSpace = {'/RGB':'DeviceRGB', '/G':'DeviceGrey', '/CMYK':'DeviceCMYK'}[words[7]]
         self.bitsPerComponent = 8
         self._filters = 'ASCII85Decode','FlateDecode' #'A85','Fl'
         if IMG: self._checkTransparency(IMG[0])
@@ -1780,6 +1781,7 @@ class PDFImageXObject:
             self.colorSpace = 'DeviceRGB'
         else: #maybe should generate an error, is this right for CMYK?
             self.colorSpace = 'DeviceCMYK'
+            self._dotrans = 1
         imageFile.seek(0) #reset file pointer
         self.streamContent = pdfutils._AsciiBase85Encode(imageFile.read())
         self._filters = 'ASCII85Decode','DCTDecode' #'A85','DCT'
@@ -1809,7 +1811,7 @@ class PDFImageXObject:
             raw = im.getRGBData()
             assert(len(raw) == self.width*self.height, "Wrong amount of data for image")
             self.streamContent = pdfutils._AsciiBase85Encode(zlib.compress(raw))
-            self.colorSpace = 'DeviceRGB'
+            self.colorSpace= _mode2CS[im.mode]
             self.bitsPerComponent = 8
             self._filters = 'ASCII85Decode','FlateDecode' #'A85','Fl'
             self._checkTransparency(im)
@@ -1824,7 +1826,7 @@ class PDFImageXObject:
         dict["Height"] = self.height
         dict["BitsPerComponent"] = self.bitsPerComponent
         dict["ColorSpace"] = PDFName(self.colorSpace)
-        if self.colorSpace=='DeviceCMYK':
+        if self.colorSpace=='DeviceCMYK' and getattr(self,'_dotrans',0):
             dict["Decode"] = PDFArray([1,0,1,0,1,0,1,0])
         dict["Filter"] = PDFArray(map(PDFName,self._filters))
         dict["Length"] = len(self.streamContent)

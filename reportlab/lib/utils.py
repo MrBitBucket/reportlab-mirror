@@ -555,9 +555,14 @@ class ImageReader:
                     a(chr((rgb>>8)&0xff))
                     a(chr(rgb&0xff))
                 self._data = ''.join(pixels)
+                self.mode = 'RGB'
             else:
-                rgb = self._image.convert('RGB')
-                self._data = rgb.tostring()
+                im = self._image
+                mode = self.mode = im.mode
+                if mode not in ('L','RGB','CMYK'):
+                    im = im.convert('RGB')
+                    self.mode = 'RGB'
+                self._data = im.tostring()
         return self._data
 
     def getImageData(self):
