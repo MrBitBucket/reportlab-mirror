@@ -137,17 +137,17 @@ except:
 import glob, fnmatch
 try:
     _isFSD = not __loader__
-    _archive = __loader__.archive
+    _archive = os.path.normcase(os.path.normpath(__loader__.archive))
     _archivepfx = _archive + os.sep
-    _archivedir = os.path.dirname(__loader__.archive)
+    _archivedir = os.path.dirname(_archive)
     _archivedirpfx = _archivedir + os.sep
     _archivepfxlen = len(_archivepfx)
     _archivedirpfxlen = len(_archivedirpfx)
     def __startswith_rl(fn,
-                    _archivepfx=os.path.normcase(_archivepfx),
-                    _archivedirpfx=os.path.normcase(_archivedirpfx),
-                    _archive=os.path.normcase(_archive),
-                    _archivedir=os.path.normcase(_archivedir),
+                    _archivepfx=_archivepfx,
+                    _archivedirpfx=_archivedirpfx,
+                    _archive=_archive,
+                    _archivedir=_archivedir,
                     os_path_normpath=os.path.normpath,
                     os_path_normcase=os.path.normcase,
                     os_getcwd=os.getcwd,
