@@ -14,10 +14,14 @@ static char* __version__=" $Id$ ";
 #elif CHAR_SIZE == 16
 #	define initpyRXP initpyRXPU
 #	define MODULE "pyRXPU"
+#	define PYSTRING_TYPE PyUnicode_Type
+#	define PYSTRINGOBJECT PyUnicodeObject
 #elif CHAR_SIZE == 8
 #	define PYSTRING(s) PyString_FromString(s)
 #	define MODULE "pyRXP"
 #	define initpyRXP initpyRXP
+#	define PYSTRING_TYPE PyString_Type
+#	define PYSTRINGOBJECT PyStringObject
 #endif
 
 #include "system.h"
@@ -30,7 +34,7 @@ static char* __version__=" $Id$ ";
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "1.05"
+#define VERSION "1.06"
 #define MAX_DEPTH 256
 
 #if CHAR_SIZE==16
@@ -48,6 +52,26 @@ PyObject* PYSTRING8(const char* s)
 #	define PYSTRING8(s) PyString_FromString(s)
 #	define EmptyCharStr (Char*)""
 #endif
+PyObject* PyNSName(NSElementDefinition nsed, const Char *name){
+	Char		*t, *ns;
+	Namespace	NS;
+	static Char braces[]={'{','}',0};
+	int			lns;
+	PyObject*	r;
+	if(nsed && (NS=nsed->RXP_NAMESPACE) && (ns=NS->nsname) && (lns=(int)Strlen(ns))){
+		t = Strchr(name,':');
+		if(t) name=t+1;
+		t = (Char*)Malloc((lns+Strlen(name)+3)*sizeof(Char));
+		Strncpy(t,braces,1);
+		Strncpy(t+1,ns,lns);
+		Strncpy(t+lns+1,braces+1,1);
+		Strcpy(t+lns+2,name);
+		}
+	else t = (Char*)name;
+	r = PYSTRING(t);
+	if(t!=name) Free(t);
+	return r;
+	}
 static PyObject *moduleError;
 static PyObject *moduleVersion;
 static PyObject *RXPVersion;
@@ -196,7 +220,9 @@ The python module exports the following\n\
         XMLNamespaces = 0\n\
             If this is on, the parser processes namespace declarations (see\n\
             below).  Namespace declarations are *not* returned as part of the list\n\
-            of attributes on an element.\n\
+            of attributes on an element. The namespace value will be prepended to names\n\
+			in the manner suggested by James Clark ie if xmlns:foo='foovalue'\n\
+			is active then foo:name-->{fovalue}name.\n\
         NoNoDTDWarning = 1\n\
             Usually, if Validate is set, the parser will produce a warning if the\n\
             document has no DTD.  This flag suppresses the warning (useful if you\n\
@@ -414,8 +440,12 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 				}
 
 			empty = bit->type == XBIT_empty;
-			t = makeNode( pd, bit->element_definition->name,
-					get_attrs(pd, bit->attributes), empty);
+			t = ParserGetFlag(p, XMLNamespaces) ?
+					_makeNode( pd, PyNSName(bit->ns_element_definition, bit->element_definition->name),
+						get_attrs(pd, bit->attributes), empty)
+					:
+					makeNode( pd, bit->element_definition->name,
+						get_attrs(pd, bit->attributes), empty);
 			if(empty){
 				PyList_Append(PDGetItem(stack[*depth],2),t);
 				Py_DECREF(t);
