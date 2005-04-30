@@ -1724,7 +1724,7 @@ class PDFPostScriptXObject:
         sdict["Subtype"] = PDFName("PS")
         return S.format(document)
 
-_mode2CS={'RGB':'DeviceRGB', 'L':'DeviceGrey', 'CMYK':'DeviceCMYK'}
+_mode2CS={'RGB':'DeviceRGB', 'L':'DeviceGray', 'CMYK':'DeviceCMYK'}
 class PDFImageXObject:
     # first attempts at a hard-coded one
     # in the file, Image XObjects are stream objects.  We already
@@ -1764,7 +1764,7 @@ class PDFImageXObject:
         imagedata = map(string.strip,pdfutils.cacheImageFile(source,returnInMemory=1,IMG=IMG))
         words = string.split(imagedata[1])
         self.width, self.height = map(string.atoi,(words[1],words[3]))
-        self.colorSpace = {'/RGB':'DeviceRGB', '/G':'DeviceGrey', '/CMYK':'DeviceCMYK'}[words[7]]
+        self.colorSpace = {'/RGB':'DeviceRGB', '/G':'DeviceGray', '/CMYK':'DeviceCMYK'}[words[7]]
         self.bitsPerComponent = 8
         self._filters = 'ASCII85Decode','FlateDecode' #'A85','Fl'
         if IMG: self._checkTransparency(IMG[0])
