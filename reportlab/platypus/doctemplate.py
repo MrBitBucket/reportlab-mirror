@@ -411,7 +411,7 @@ class BaseDocTemplate:
             self.pageTemplate.afterDrawPage(self.canv, self)
             self.pageTemplate.onPageEnd(self.canv, self)
             self.afterPage()
-            self.canv.setPageRotation(getattr(self.pageTemplate,'rotation',0)
+            self.canv.setPageRotation(getattr(self.pageTemplate,'rotation',0))
             self.canv.showPage()
 
             if hasattr(self,'_nextPageTemplateCycle'):
