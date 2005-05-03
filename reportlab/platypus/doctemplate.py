@@ -411,6 +411,7 @@ class BaseDocTemplate:
             self.pageTemplate.afterDrawPage(self.canv, self)
             self.pageTemplate.onPageEnd(self.canv, self)
             self.afterPage()
+            self.canv.setPageRotation(getattr(self.pageTemplate,'rotation',0)
             self.canv.showPage()
 
             if hasattr(self,'_nextPageTemplateCycle'):
@@ -826,7 +827,7 @@ class SimpleDocTemplate(BaseDocTemplate):
         self._handle_pageBegin()
         self._handle_nextPageTemplate('Later')
 
-    def build(self,flowables,onFirstPage=_doNothing, onLaterPages=_doNothing):
+    def build(self,flowables,onFirstPage=_doNothing, onLaterPages=_doNothing, canvasmaker=canvas.Canvas):
         """build the document using the flowables.  Annotate the first page using the onFirstPage
                function and later pages using the onLaterPages function.  The onXXX pages should follow
                the signature
@@ -847,7 +848,7 @@ class SimpleDocTemplate(BaseDocTemplate):
             self.pageTemplates[0].beforeDrawPage = self.onFirstPage
         if onLaterPages is _doNothing and hasattr(self,'onLaterPages'):
             self.pageTemplates[1].beforeDrawPage = self.onLaterPages
-        BaseDocTemplate.build(self,flowables)
+        BaseDocTemplate.build(self,flowables, canvasmaker=canvasmaker)
 
 
 def progressCB(typ, value):
