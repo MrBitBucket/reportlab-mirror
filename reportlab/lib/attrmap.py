@@ -22,7 +22,7 @@ class AttrMapValue:
     def __init__(self,validate=None,desc=None,initial=None, **kw):
         self.validate = validate or isAnything
         self.desc = desc
-        self.initial = initial
+        self._initial = initial
         for k,v in kw.items():
             setattr(self,k,v)
 
