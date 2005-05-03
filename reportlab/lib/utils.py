@@ -502,9 +502,19 @@ def rl_get_module(name,dir):
         del om
         if f: f.close()
 
+def _isPILImage(im):
+    try:
+        from PIL.Image import Image
+        return isinstance(im,Image)
+    except ImportError:
+        return 0
+
 class ImageReader:
     "Wraps up either PIL or Java to get data from bitmaps"
     def __init__(self, fileName):
+        if isinstance(fileName,ImageReader):
+            self.__dict__ = fileName.__dict__   #borgize
+            return
         if not haveImages:
             warnOnce('Imaging Library not available, unable to import bitmaps')
             return
@@ -516,15 +526,31 @@ class ImageReader:
         self._height = None
         self._transparent = None
         self._data = None
-        self.fp = open_for_read(fileName,'b')
-
-        #detect which library we are using and open the image
-        if sys.platform[0:4] == 'java':
-            from javax.imageio import ImageIO
-            self._image = ImageIO.read(self.fp)
+        if _isPILImage(fileName):
+            self._image = fileName
+            self.fp = fileName.fp
+            try:
+                self.fileName = im.fileName
+            except AttributeError:
+                self.fileName = 'PILIMAGE_%d' % id(self)
         else:
-            import PIL.Image
-            self._image = PIL.Image.open(self.fp)
+            self.fp = open_for_read(fileName,'b')
+            #detect which library we are using and open the image
+            if sys.platform[0:4] == 'java':
+                from javax.imageio import ImageIO
+                self._image = ImageIO.read(self.fp)
+            else:
+                import PIL.Image
+                self._image = PIL.Image.open(self.fp)
+                if self._image=='JPEG': self.jpeg_fh = self._jpeg_fp
+
+    def _jpeg_fh(self):
+        fp = self.fp
+        fp.seek(0)
+        return fp
+
+    def jpeg_fh(self):
+        return None
 
     def getSize(self):
         if (self._width is None or self._height is None):
@@ -586,7 +612,10 @@ class ImageReader:
 
 def getImageData(imageFileName):
     "Get width, height and RGB pixels from image file.  Wraps Java/PIL"
-    return ImageReader.getImageData(imageFileName)
+    try:
+        return imageFileName.getImageData()
+    except AttributeError:
+        return ImageReader(imageFileName).getImageData()
 
 class DebugMemo:
     '''Intended as a simple report back encapsulator

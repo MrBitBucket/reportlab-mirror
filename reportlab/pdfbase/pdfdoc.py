@@ -1800,9 +1800,8 @@ class PDFImageXObject:
 
     def loadImageFromSRC(self, im):
         "Extracts the stream, width and height"
-        if im._image.format=='JPEG':
-            fp=im.fp
-            fp.seek(0)
+        fp = im.jpeg_fh()
+        if fp:
             self.loadImageFromJPEG(fp)
         else:
             zlib = import_zlib()
