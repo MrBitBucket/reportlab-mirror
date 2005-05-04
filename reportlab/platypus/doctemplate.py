@@ -289,7 +289,8 @@ class BaseDocTemplate:
                     'title':None,
                     'author':None,
                     'invariant':None,
-                    '_pageBreakQuick':1}
+                    '_pageBreakQuick':1,
+                    'rotation':0,}
     _invalidInitArgs = ()
     _firstPageTemplateIndex = 0
 
@@ -411,7 +412,7 @@ class BaseDocTemplate:
             self.pageTemplate.afterDrawPage(self.canv, self)
             self.pageTemplate.onPageEnd(self.canv, self)
             self.afterPage()
-            self.canv.setPageRotation(getattr(self.pageTemplate,'rotation',0))
+            self.canv.setPageRotation(getattr(self.pageTemplate,'rotation',self.rotation))
             self.canv.showPage()
 
             if hasattr(self,'_nextPageTemplateCycle'):
