@@ -67,6 +67,10 @@ PS_WinAnsiEncoding="""
 class PSCanvas:
     def __init__(self,size=(300,300), PostScriptLevel=2):
         self.width, self.height = size
+        xtraState = []
+        self._xtraState_push = xtraState.append
+        self._xtraState_pop = xtraState.pop
+        self.comments = 0
         self.code = []
         self._sep = '\n'
         self._strokeColor = self._fillColor = self._lineWidth = \
@@ -85,7 +89,7 @@ class PSCanvas:
         self.PostScriptLevel=PostScriptLevel
 
     def comment(self,msg):
-        self.code.append('%'+msg)
+        if self.comments: self.code.append('%'+msg)
 
     def drawImage(self, image, x1,y1, x2=None,y2=None): # Postscript Level2 version
         # select between postscript level 1 or level 2
@@ -129,10 +133,12 @@ class PSCanvas:
             markfilename(f,creatorcode='XPR3',filetype='EPSF')
 
     def saveState(self):
+        self._xtraState_push((self._fontCodeLoc,))
         self.code.append('gsave')
 
     def restoreState(self):
         self.code.append('grestore')
+        self._fontCodeLoc, = self._xtraState_pop()
 
     def stringWidth(self, s, font=None, fontSize=None):
         """Return the logical width of the string if it were drawn
