@@ -1117,6 +1117,9 @@ def main():
         print 'suppressing special effects'
     for fileGlobs in args:
         files = glob.glob(fileGlobs)
+        if not files:
+            print fileGlobs, "not found"
+            return
         for datafile in files:
             if os.path.isfile(datafile):
                 file = os.path.join(os.getcwd(), datafile)
