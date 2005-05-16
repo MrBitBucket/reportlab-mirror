@@ -198,10 +198,11 @@ def _endswith(obj,s):
 
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
-                repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None, ident=None):
+                repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None, ident=None,
+                hAlign=None,vAlign=None):
         self.ident = ident
-        self.hAlign = 'CENTER'
-        self.vAlign = 'MIDDLE'
+        self.hAlign = hAlign or 'CENTER'
+        self.vAlign = vAlign or 'MIDDLE'
         if type(data) not in _SeqTypes:
             raise ValueError, "%s invalid data type" % self.identity()
         self._nrows = nrows = len(data)
