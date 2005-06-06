@@ -516,8 +516,7 @@ class ImageReader:
             self.__dict__ = fileName.__dict__   #borgize
             return
         if not haveImages:
-            warnOnce('Imaging Library not available, unable to import bitmaps')
-            return
+            raise RuntimeError('Imaging Library not available, unable to import bitmaps')
         #start wih lots of null private fields, to be populated by
         #the relevant engine.
         self.fileName = fileName
