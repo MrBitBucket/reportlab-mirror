@@ -12,6 +12,16 @@ if __name__=='__main__': #NO RUNTESTS
         LIBS=[]
     else:
         raise ValueError, "Don't know about platform:"+sys.platform
+    EXTRA_MODULES = []
+    if os.path.isfile('rotormodule.c'):
+        EXTRA_MODULES.append(
+            Extension(  'rotor',
+                    ['rotormodule.c'],
+                    include_dirs=[],
+                    define_macros=[],
+                    library_dirs=[],
+                    libraries=LIBS, # libraries to link against
+                    ))
 
     setup(  name = "_rl_accel",
             version = VERSION,
@@ -41,7 +51,7 @@ if __name__=='__main__': #NO RUNTESTS
                                         library_dirs=[],
                                         libraries=LIBS, # libraries to link against
                                         ),
-                            ],
+                            ]+EXTRA_MODULES,
             )
 
     if sys.hexversion<0x2030000 and sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
