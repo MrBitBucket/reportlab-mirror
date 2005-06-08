@@ -17,30 +17,30 @@ from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropH
 from reportlab.graphics.shapes import Drawing, Group, String, Rect, Line, STATE_DEFAULTS
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
-
+from reportlab.lib.utils import isSeqType
 
 
 def _getStr(s):
-    if isinstance(s,(tuple,list)):
+    if isSeqType(s):
         return map(str,s)
     else:
         return str(s)
 
 def _getLines(s):
-    if isinstance(s,(tuple,list)):
+    if isSeqType(s):
         return tuple([(x or '').split('\n') for x in s])
     else:
         return (s or '').split('\n')
 
 def _getLineCount(s):
     T = _getLines(s)
-    if isinstance(s,(tuple,list)):
+    if isSeqType(s):
         return max([len(x) for x in T])
     else:
         return len(T)
 
 def _getWidth(s,fontName, fontSize, sepSpace=0):
-    if isinstance(s,(tuple,list)):
+    if isSeqType(s):
         sum = 0
         for t in s:
             m = [stringWidth(x, fontName, fontSize) for x in t.split('\n')]
@@ -314,7 +314,7 @@ class Legend(Widget):
 
             if callout: callout(self,g,thisx,y,(col,name))
             if alignment == "left":
-                if isinstance(name,(tuple,list)):
+                if isSeqType(name):
                     for t in T[0]:
                         S.append(String(thisx,y,t,fontName=fontName,fontSize=fontSize,fillColor=fillColor,
                                 textAnchor = "start"))
@@ -334,7 +334,7 @@ class Legend(Widget):
                         y -= leading
                 x = thisx+maxWidth[j]+dxTextSpace
             elif alignment == "right":
-                if isinstance(name,(tuple,list)):
+                if isSeqType(name):
                     y0 = y
                     for t in T[0]:
                         S.append(String(thisx+dx+dxTextSpace,y,t,fontName=fontName,fontSize=fontSize,fillColor=fillColor,

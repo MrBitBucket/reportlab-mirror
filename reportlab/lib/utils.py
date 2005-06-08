@@ -4,9 +4,16 @@
 __version__=''' $Id$ '''
 
 import string, os, sys, imp
-from types import *
 from reportlab.lib.logger import warnOnce
+from types import *
 SeqTypes = (ListType,TupleType)
+if sys.hexversion<0x2020000:
+    def isSeqType(v):
+        return type(t) in SeqTypes
+else:
+    def isSeqType(v):
+        return isinstance(v,(tuple,list))
+
 if sys.hexversion<0x2030000:
     True = 1
     False = 0
@@ -213,7 +220,7 @@ except ImportError:
     _tz_re = re.compile('0+$')
     del re
     def fp_str(*a):
-        if len(a)==1 and type(a[0]) in SeqTypes: a = a[0]
+        if len(a)==1 and isSeqType(a[0]): a = a[0]
         s = []
         A = s.append
         for i in a:
@@ -263,7 +270,7 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     normalize = lambda x: os.path.normcase(os.path.abspath(os.path.normpath(x)))
     path = map(normalize,sys.path)
     if baseDir:
-        if type(baseDir) not in SeqTypes:
+        if not isSeqType(baseDir):
             tp = [baseDir]
         else:
             tp = filter(None,list(baseDir))
@@ -793,7 +800,7 @@ class DebugMemo:
 
 def _flatten(L,a):
     for x in L:
-        if type(x) in SeqTypes: _flatten(x,a)
+        if isSeqType(x): _flatten(x,a)
         else: a(x)
 
 def flatten(L):
