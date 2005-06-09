@@ -7,6 +7,9 @@ __version__=''' $Id$ '''
 __doc__="""
 """
 
+import logging
+logger = logging.getLogger('reportlab.platypus')
+
 _geomAttr=('x1', 'y1', 'width', 'height', 'leftPadding', 'bottomPadding', 'rightPadding', 'topPadding')
 from reportlab import rl_config
 _FUZZ=rl_config._FUZZ
@@ -137,6 +140,7 @@ class Frame:
         else:
             #now we can draw it, and update the current point.
             flowable.drawOn(canv, self._x + self._leftExtraIndent, y, _sW=aW-w)
+            logger.debug('drew %s: \n    %s' % (flowable.__class__.__name__, flowable.identity()))
             s = flowable.getSpaceAfter()
             y -= s
             if self._oASpace: self._prevASpace = s
@@ -183,6 +187,7 @@ class Frame:
         frame is full.  If it cannot fit one object, raises
         an exception."""
 
+        logger.debug("enter Frame.addFromlist() for frame %s" % self.id)
         if self.showBoundary:
             self.drawBoundary(canv)
 

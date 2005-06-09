@@ -36,6 +36,8 @@ import reportlab.lib.sequencer
 
 from types import *
 import sys
+import logging
+logger = logging.getLogger("reportlab.platypus")
 
 class LayoutError(Exception):
     pass
@@ -377,6 +379,7 @@ class BaseDocTemplate:
         '''Perform actions required at beginning of page.
         shouldn't normally be called directly'''
         self.page = self.page + 1
+        logger.debug("beginning page %d" % self.page)
         self.pageTemplate.beforeDrawPage(self.canv,self)
         self.pageTemplate.checkPageSize(self.canv,self)
         self.pageTemplate.onPage(self.canv,self)
@@ -412,6 +415,7 @@ class BaseDocTemplate:
             self.pageTemplate.afterDrawPage(self.canv, self)
             self.pageTemplate.onPageEnd(self.canv, self)
             self.afterPage()
+            logger.debug("ending page %d" % self.page)
             self.canv.setPageRotation(getattr(self.pageTemplate,'rotation',self.rotation))
             self.canv.showPage()
 
