@@ -935,9 +935,17 @@ class TTFont:
         def __init__(self):
             self.assignments = {}
             self.nextCode = 0
-            self.subsets = []
             self.internalName = None
             self.frozen = 0
+
+            # Let's add the first 128 unicodes to the 0th subset, so ' '
+            # always has code 32 (for word spacing to work) and the ASCII
+            # output is readable
+            subset0 = range(128)
+            self.subsets = [subset0]
+            for n in subset0:
+                self.assignments[n] = n
+            self.nextCode = 128
 
     def __init__(self, name, filename, validate=0):
         """Loads a TrueType font from filename.
@@ -977,7 +985,12 @@ class TTFont:
                 if state.frozen:
                     raise pdfdoc.PDFError, "Font %s is already frozen, cannot add new character U+%04X" % (self.fontName, code)
                 n = state.nextCode
-                state.nextCode = state.nextCode + 1
+                if n & 0xFF == 32:
+                    # make code 32 always be a space character
+                    state.subsets[n >> 8].append(32)
+                    state.nextCode += 1
+                    n = state.nextCode
+                state.nextCode += 1
                 state.assignments[code] = n
                 if (n & 0xFF) == 0:
                     state.subsets.append([])

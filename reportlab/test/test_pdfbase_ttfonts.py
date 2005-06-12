@@ -254,17 +254,33 @@ class TTFontTestCase(unittest.TestCase):
         "Tests TTFont.splitString"
         doc = PDFDocument()
         font = TTFont("TestFont", "luxiserif.ttf")
-        text = string.join(map(utf8, range(0, 512)), "")
-        allchars = string.join(map(chr, range(0, 256)), "")
-        chunks = [(0, allchars), (1, allchars)]
+        text = string.join(map(utf8, xrange(0, 511)), "")
+        allchars = string.join(map(chr, xrange(0, 256)), "")
+        nospace = allchars[:32] + allchars[33:]
+        chunks = [(0, allchars), (1, nospace)]
         self.assertEquals(font.splitString(text, doc), chunks)
         # Do it twice
         self.assertEquals(font.splitString(text, doc), chunks)
 
-        text = string.join(map(utf8, range(511, -1, -1)), "")
+        text = string.join(map(utf8, range(510, -1, -1)), "")
         allchars = string.join(map(chr, range(255, -1, -1)), "")
-        chunks = [(1, allchars), (0, allchars)]
+        nospace = allchars[:223] + allchars[224:]
+        chunks = [(1, nospace), (0, allchars)]
         self.assertEquals(font.splitString(text, doc), chunks)
+
+    def testSplitStringSpaces(self):
+        # In order for justification (word spacing) to work, the space
+        # glyph must have a code 32, and no other character should have
+        # that code in any subset, or word spacing will be applied to it.
+
+        doc = PDFDocument()
+        font = TTFont("TestFont", "luxiserif.ttf")
+        text = string.join(map(utf8, range(512, -1, -1)), "")
+        chunks = font.splitString(text, doc)
+        state = font.state[doc]
+        self.assertEquals(state.assignments[32], 32)
+        self.assertEquals(state.subsets[0][32], 32)
+        self.assertEquals(state.subsets[1][32], 32)
 
     def testSubsetInternalName(self):
         "Tests TTFont.getSubsetInternalName"
@@ -305,10 +321,12 @@ class TTFontTestCase(unittest.TestCase):
         doc1 = PDFDocument()
         doc2 = PDFDocument()
         font = TTFont("TestFont", "luxiserif.ttf")
-        self.assertEquals(font.splitString('ab', doc1), [(0, '\0\1')])
-        self.assertEquals(font.splitString('b', doc2), [(0, '\0')])
+        self.assertEquals(font.splitString(u'hello ', doc1), [(0, 'hello ')])
+        self.assertEquals(font.splitString(u'hello ', doc2), [(0, 'hello ')])
+        self.assertEquals(font.splitString(u'\u0410\u0411'.encode('UTF-8'), doc1), [(0, '\x80\x81')])
+        self.assertEquals(font.splitString(u'\u0412'.encode('UTF-8'), doc2), [(0, '\x80')])
         font.addObjects(doc1)
-        self.assertEquals(font.splitString('c', doc2), [(0, '\1')])
+        self.assertEquals(font.splitString(u'\u0413'.encode('UTF-8'), doc2), [(0, '\x81')])
         font.addObjects(doc2)
 
     def testAddObjects(self):
@@ -324,8 +342,8 @@ class TTFontTestCase(unittest.TestCase):
         self.assertEquals(pdfFont.Name, internalName)
         self.assertEquals(pdfFont.BaseFont, "SUBSET+LuxiSerif+0")
         self.assertEquals(pdfFont.FirstChar, 0)
-        self.assertEquals(pdfFont.LastChar, 0)
-        self.assertEquals(len(pdfFont.Widths.sequence), 1)
+        self.assertEquals(pdfFont.LastChar, 127)
+        self.assertEquals(len(pdfFont.Widths.sequence), 128)
         toUnicode = doc.idToObject[pdfFont.ToUnicode.name]
         self.assert_(toUnicode.content != "")
         fontDescriptor = doc.idToObject[pdfFont.FontDescriptor.name]
