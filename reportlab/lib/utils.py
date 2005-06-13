@@ -9,7 +9,7 @@ from types import *
 SeqTypes = (ListType,TupleType)
 if sys.hexversion<0x2020000:
     def isSeqType(v):
-        return type(t) in SeqTypes
+        return type(v) in SeqTypes
 else:
     def isSeqType(v):
         return isinstance(v,(tuple,list))
