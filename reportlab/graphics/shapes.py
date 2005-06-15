@@ -639,7 +639,9 @@ class Drawing(Group, Flowable):
                 try:
                     fnRoot = fnRoot % getattr(self,'chartId',0)
                 except TypeError, err:
-                    if str(err) != 'not all arguments converted': raise
+                    #the exact error message changed from 2.2 to 2.3 so we need to
+                    #check a substring
+                    if str(err).find('not all arguments converted') < 0: raise
 
         if os.path.isabs(fnRoot):
             outDir, fnRoot = os.path.split(fnRoot)
