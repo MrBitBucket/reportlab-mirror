@@ -179,6 +179,7 @@ class SpiderChart(PlotArea):
                 if element > theMax:
                     theMax = element
         theMax = theMax * (1.0+outer)
+        if theMax<1e-9: theMax = 1.0
 
         scaled = []
         for row in data:
