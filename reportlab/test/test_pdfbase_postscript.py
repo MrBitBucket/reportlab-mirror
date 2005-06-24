@@ -10,7 +10,7 @@ contain graphics and tray commands if exported to
 a Postscript device in Acrobat 4.0"""
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile
+from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.pdfgen.canvas import Canvas
 
 
@@ -74,4 +74,4 @@ if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
     print 'saved '+outputfile('test_pdfgen_postscript_visible.pdf')
     print 'saved '+outputfile('test_pdfgen_postscript_tray.pdf')
-
+    printLocation()

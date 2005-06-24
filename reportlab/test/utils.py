@@ -16,6 +16,10 @@ def outputfile(fn):
     if fn: D = os.path.join(D,fn)
     return D
 
+def printLocation(depth=1):
+    if sys._getframe(depth).f_locals.get('__name__')=='__main__':
+        print 'Logs and output files written to folder "%s"' % outputfile('')
+
 def makeSuiteForClasses(*classes):
     "Return a test suite with tests loaded from provided classes."
 
@@ -255,4 +259,3 @@ class ScriptThatMakesFileTest(unittest.TestCase):
             print out
         status = p.close()
         assert os.path.isfile(self.outFileName), "File %s not created!" % self.outFileName
-

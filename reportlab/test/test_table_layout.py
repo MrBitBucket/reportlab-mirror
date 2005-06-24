@@ -13,7 +13,7 @@ from reportlab.platypus.flowables import PageBreak
 import os
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile
+from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 
 
 from types import TupleType, ListType, StringType
@@ -422,4 +422,4 @@ def makeSuite():
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
     print 'saved '+outputfile('test_table_layout.pdf')
-
+    printLocation()

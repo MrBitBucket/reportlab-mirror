@@ -10,7 +10,7 @@ from operator import truth
 from types import StringType, ListType
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile
+from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 
 from reportlab.lib import colors
 from reportlab.lib.units import cm
@@ -137,3 +137,4 @@ if __name__ == "__main__":
         _test1(None)
     else:
         unittest.TextTestRunner().run(makeSuite())
+        printLocation()

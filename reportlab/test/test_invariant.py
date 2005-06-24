@@ -8,7 +8,7 @@ make identical file.  This does NOT test across platforms
 or python versions, only a user can do that :-)"""
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile
+from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.pdfgen.canvas import Canvas
 filename = outputfile('test_invariant.pdf')
 
@@ -53,3 +53,4 @@ if __name__ == "__main__":
         major, minor = sys.version_info[0:2]
         print '%s on %s (Python %d.%d):\n    %d bytes, digest %s' % (
             filename,sys.platform, major, minor, fileSize, digest)
+    printLocation()

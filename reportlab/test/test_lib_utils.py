@@ -3,7 +3,7 @@
 import os
 import reportlab
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, printLocation
 from reportlab.lib import colors
 from reportlab.lib.utils import recursiveImport, recursiveGetAttr, recursiveSetAttr, rl_isfile, \
                                 isCompactDistro
@@ -109,3 +109,4 @@ def makeSuite():
 
 if __name__ == "__main__": #noruntests
     unittest.TextTestRunner().run(makeSuite())
+    printLocation()

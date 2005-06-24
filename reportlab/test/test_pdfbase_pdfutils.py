@@ -8,7 +8,7 @@
 import os
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, printLocation
 
 from reportlab.pdfbase.pdfutils import _AsciiHexEncode, _AsciiHexDecode
 from reportlab.pdfbase.pdfutils import _AsciiBase85Encode, _AsciiBase85Decode
@@ -49,3 +49,4 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+    printLocation()

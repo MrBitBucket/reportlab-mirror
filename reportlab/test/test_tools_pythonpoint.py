@@ -3,7 +3,7 @@
 
 import os, sys, string
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile
+from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 
 import reportlab
 
@@ -41,3 +41,4 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+    printLocation()

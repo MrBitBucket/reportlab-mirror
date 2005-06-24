@@ -9,7 +9,7 @@ Useful if you want to test that a really minimal PDF is healthy,
 since the output is about the smallest thing we can make."""
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile
+from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.pdfgen.canvas import Canvas
 
 
@@ -30,3 +30,4 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+    printLocation()

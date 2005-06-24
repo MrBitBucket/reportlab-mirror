@@ -8,7 +8,7 @@ import os, string, fnmatch, re, sys
 
 import reportlab
 from reportlab.test import unittest
-from reportlab.test.utils import SecureTestCase
+from reportlab.test.utils import SecureTestCase, printLocation
 
 
 RL_HOME = os.path.dirname(reportlab.__file__)
@@ -99,3 +99,4 @@ if __name__ == "__main__":
         assert os.path.isfile(EXTRA_FILE), 'file %s not found!' % EXTRA_FILE
     # otherwise, extra.txt will be used
     unittest.TextTestRunner().run(makeSuite())
+    printLocation()

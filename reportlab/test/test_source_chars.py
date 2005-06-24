@@ -11,7 +11,7 @@ from types import ModuleType, ClassType, MethodType, FunctionType
 
 import reportlab
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, SecureTestCase, GlobDirectoryWalker
+from reportlab.test.utils import makeSuiteForClasses, outputfile, SecureTestCase, GlobDirectoryWalker, printLocation
 from reportlab.lib.utils import open_and_read
 
 
@@ -92,3 +92,4 @@ if __name__ == "__main__":
         zapTrailingWhitespace(sys.argv[2])
     else:
         unittest.TextTestRunner().run(makeSuite())
+        printLocation()

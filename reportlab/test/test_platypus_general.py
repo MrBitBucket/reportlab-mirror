@@ -16,7 +16,7 @@ and drawn into.
 import string, copy, sys, os
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile
+from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 
 from reportlab.pdfgen import canvas
 from reportlab import platypus
@@ -578,3 +578,4 @@ if __name__ == "__main__":
         run()
     else:
         unittest.TextTestRunner().run(makeSuite())
+        printLocation()

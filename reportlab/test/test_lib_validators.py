@@ -2,7 +2,7 @@
 """
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, printLocation
 from reportlab.lib import colors
 from reportlab.lib import validators
 
@@ -162,3 +162,4 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+    printLocation()

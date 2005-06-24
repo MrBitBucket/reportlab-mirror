@@ -6,7 +6,7 @@
 """
 import os, glob, sys, string, traceback
 from reportlab.test import unittest
-from reportlab.test.utils import GlobDirectoryWalker, outputfile
+from reportlab.test.utils import GlobDirectoryWalker, outputfile, printLocation
 
 def makeSuite(folder, exclude=[],nonImportable=[],pattern='test_*.py'):
     "Build a test suite of all available test files."
@@ -60,7 +60,7 @@ def main(pattern='test_*.py'):
         sys.stderr.write('\n###################### the following tests could not be imported\n')
         for f,tb in NI:
             print 'file: "%s"\n%s\n' % (f,string.join(tb,''))
-    print 'Logs and output files written to folder "%s"' % outputfile('')
+    printLocation()
 
 if __name__ == '__main__': #noruntests
     main()

@@ -5,7 +5,7 @@
 import os, sys
 
 from reportlab.test import unittest
-from reportlab.test.utils import SecureTestCase
+from reportlab.test.utils import SecureTestCase, printLocation
 
 
 class ManualTestCase(SecureTestCase):
@@ -48,3 +48,4 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+    printLocation()

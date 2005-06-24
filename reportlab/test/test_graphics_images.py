@@ -7,7 +7,7 @@ Tests for RLG Image shapes.
 import os
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile
+from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 
 from reportlab.graphics.shapes import Image, Drawing
 from reportlab.graphics import renderPDF
@@ -88,3 +88,4 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+    printLocation()

@@ -16,7 +16,7 @@ from types import ModuleType, ClassType, MethodType, FunctionType
 
 import reportlab
 from reportlab.test import unittest
-from reportlab.test.utils import SecureTestCase, GlobDirectoryWalker, outputfile
+from reportlab.test.utils import SecureTestCase, GlobDirectoryWalker, outputfile, printLocation
 
 
 RL_HOME = os.path.dirname(reportlab.__file__)
@@ -172,3 +172,4 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+    printLocation()

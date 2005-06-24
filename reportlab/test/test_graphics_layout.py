@@ -6,7 +6,7 @@ Tests for getBounds methods of various graphical widgets
 """
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, printLocation
 
 from reportlab.graphics import shapes
 ##from reportlab.graphics.charts.barcharts import VerticalBarChart
@@ -79,3 +79,4 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+    printLocation()

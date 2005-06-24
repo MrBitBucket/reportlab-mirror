@@ -2,7 +2,7 @@
 import string, os
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile
+from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen.canvas import Canvas
@@ -120,3 +120,4 @@ def makeSuite():
 if __name__ == "__main__":
     VERBOSE = 1
     unittest.TextTestRunner().run(makeSuite())
+    printLocation()

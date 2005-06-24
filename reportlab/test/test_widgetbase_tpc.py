@@ -9,7 +9,7 @@ import os, sys, copy
 from os.path import join, basename, splitext
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses
+from reportlab.test.utils import makeSuiteForClasses, printLocation
 
 from reportlab.graphics.widgetbase import PropHolder, TypedPropertyCollection
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
@@ -135,3 +135,4 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+    printLocation()

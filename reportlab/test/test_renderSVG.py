@@ -5,7 +5,7 @@ from xml.dom import minidom
 from xml.sax._exceptions import SAXReaderNotAvailable
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile
+from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 
 from reportlab.graphics.shapes import *
 from reportlab.graphics import renderSVG
@@ -162,3 +162,4 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+    printLocation()

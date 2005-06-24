@@ -9,7 +9,7 @@ import os, sys, string, fnmatch, re
 
 import reportlab
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, SecureTestCase, GlobDirectoryWalker, outputfile
+from reportlab.test.utils import makeSuiteForClasses, SecureTestCase, GlobDirectoryWalker, outputfile, printLocation
 from reportlab.lib.utils import open_and_read, open_and_readlines
 
 RL_HOME = os.path.dirname(reportlab.__file__)
@@ -155,3 +155,4 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+    printLocation()

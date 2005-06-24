@@ -10,7 +10,7 @@ from operator import truth
 from types import StringType, ListType
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile
+from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib import colors
@@ -155,3 +155,4 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__": #NORUNTESTS
     unittest.TextTestRunner().run(makeSuite())
+    printLocation()

@@ -10,7 +10,7 @@ glyph in every standard font.  Long!
 """
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile
+from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase import _fontdata
@@ -119,3 +119,4 @@ if __name__=='__main__':
         fontNamesToTest = sys.argv[1:]
 
     unittest.TextTestRunner().run(makeSuite())
+    printLocation()

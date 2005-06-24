@@ -4,7 +4,7 @@
 # tests some paragraph styles
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile
+from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 
 from reportlab.platypus import Paragraph, SimpleDocTemplate, XBox, Indenter, XPreformatted
 from reportlab.lib.styles import ParagraphStyle
@@ -171,3 +171,4 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+    printLocation()
