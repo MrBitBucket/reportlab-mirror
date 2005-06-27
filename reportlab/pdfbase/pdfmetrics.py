@@ -23,7 +23,7 @@ import string, os
 from types import StringType, ListType, TupleType
 from reportlab.pdfbase import _fontdata
 from reportlab.lib.logger import warnOnce
-from reportlab.lib.utils import rl_isfile, rl_isdir, open_and_read, open_and_readlines 
+from reportlab.lib.utils import rl_isfile, rl_isdir, open_and_read, open_and_readlines, rl_glob
 from reportlab.rl_config import defaultEncoding
 
 standardFonts = _fontdata.standardFonts
@@ -200,12 +200,11 @@ def bruteForceSearchForAFM(faceName):
     """Looks in all AFM files on path for face with given name.
 
     Returns AFM file name or None.  Ouch!"""
-    import glob
     from reportlab.rl_config import T1SearchPath
 
     for dirname in T1SearchPath:
         if not rl_isdir(dirname): continue
-        possibles = glob.glob(dirname + os.sep + '*.[aA][fF][mM]')
+        possibles = rl_glob(dirname + os.sep + '*.[aA][fF][mM]')
         for possible in possibles:
             (topDict, glyphDict) = parseAFMFile(possible)
             if topDict['FontName'] == faceName:
