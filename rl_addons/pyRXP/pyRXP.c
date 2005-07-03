@@ -8,23 +8,10 @@ static char* __version__=" $Id$ ";
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-
+#include "system.h"
 #if !defined(CHAR_SIZE)
 #	error CHAR_SIZE not specified
-#elif CHAR_SIZE == 16
-#	define initpyRXP initpyRXPU
-#	define MODULE "pyRXPU"
-#	define PYSTRING_TYPE PyUnicode_Type
-#	define PYSTRINGOBJECT PyUnicodeObject
-#elif CHAR_SIZE == 8
-#	define PYSTRING(s) PyString_FromString(s)
-#	define MODULE "pyRXP"
-#	define initpyRXP initpyRXP
-#	define PYSTRING_TYPE PyString_Type
-#	define PYSTRINGOBJECT PyStringObject
 #endif
-
-#include "system.h"
 #include "ctype16.h"
 #include "charset.h"
 #include "string16.h"
@@ -34,25 +21,37 @@ static char* __version__=" $Id$ ";
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "1.06"
+#define VERSION "1.07"
 #define MAX_DEPTH 256
 
 #if CHAR_SIZE==16
-PyObject* PYSTRING(const Char* s)
+#	define initpyRXP initpyRXPU
+#	define MODULE "pyRXPU"
+#	define UTF8DECL ,int utf8
+#	define UTF8PASS ,utf8
+#	define PYNSNAME(nsed, name) PyNSName(nsed,name,utf8)
+PyObject* _PYSTRING(const Char* s, int utf8)
 {
-	return PyUnicode_FromUnicode((Py_UNICODE*)s, (int)Strlen(s));
+	return utf8 ? PyUnicode_EncodeUTF8((Py_UNICODE*)s, (int)Strlen(s), NULL)
+				: PyUnicode_FromUnicode((Py_UNICODE*)s, (int)Strlen(s));
 }
+#	define PYSTRING(s) _PYSTRING(s,utf8)
 PyObject* PYSTRING8(const char* s)
 {
 	return PyUnicode_DecodeUTF8((const char*)s, (int)strlen(s), NULL);
 }
 #	define EmptyCharStr (Char*)"\0"
 #else
+#	define MODULE "pyRXP"
+#	define initpyRXP initpyRXP
+#	define UTF8DECL
+#	define UTF8PASS
+#	define PYNSNAME(nsed, name) PyNSName(nsed,name)
 #	define PYSTRING(s) PyString_FromString(s)
 #	define PYSTRING8(s) PyString_FromString(s)
 #	define EmptyCharStr (Char*)""
 #endif
-PyObject* PyNSName(NSElementDefinition nsed, const Char *name){
+PyObject* PyNSName(NSElementDefinition nsed, const Char *name UTF8DECL){
 	Char		*t, *ns;
 	Namespace	NS;
 	static Char braces[]={'{','}',0};
@@ -82,7 +81,7 @@ static PyObject *recordLocation;
 static PyObject *parser_flags;
 static char *moduleDoc =
 "\n\
-This is pyRXP a python wrapper for RXP, a validating namespace-aware XML parser\n\
+This is " MODULE " a python wrapper for RXP, a validating namespace-aware XML parser\n\
 in C.\n\
 \n\
 RXP was written by Richard Tobin at the Language Technology Group,\n\
@@ -249,8 +248,13 @@ The python module exports the following\n\
             is only relevant with XML 1.1 documents.\n\
         XML11CheckExists = 0\n\
             Controls whether unknown characters are present. It is only effective\n\
-            when XML11CheckNF is set and the document is XML 1.1.\n\
-";
+            when XML11CheckNF is set and the document is XML 1.1.\n"
+#if	CHAR_SIZE==16
+"        ReturnUTF8 = 0\n\
+            Return UTF8 encoded strings rather than the default unicode\n"
+
+#endif
+;
 
 /*alter the integer values to change the module defaults*/
 static struct {char* k;long v;} flag_vals[]={
@@ -296,6 +300,9 @@ static struct {char* k;long v;} flag_vals[]={
 	{"MakeMutableTree",0},
 	{"ReturnProcessingInstructions",0},
 	{"ReturnCDATASectionsAsTuples",0},
+#if	CHAR_SIZE==16
+	{"ReturnUTF8",0},
+#endif
 	{0}};
 #define LASTRXPFLAG XML11CheckExists
 #define ReturnList (ParserFlag)(1+(int)LASTRXPFLAG)
@@ -303,6 +310,9 @@ static struct {char* k;long v;} flag_vals[]={
 #define MakeMutableTree (ParserFlag)(1+(int)ExpandEmpty)
 #define ReturnProcessingInstructions (ParserFlag)(1+(int)MakeMutableTree )
 #define ReturnCDATASectionsAsTuples (ParserFlag)(1+(int)ReturnProcessingInstructions)
+#if	CHAR_SIZE==16
+#define ReturnUTF8 (ParserFlag)(1+(int)ReturnCDATASectionsAsTuples)
+#endif
 #define __GetFlag(p, flag) \
   ((((flag) < 32) ? ((p)->flags[0] & (1u << (flag))) : ((p)->flags[1] & (1u << ((flag)-32))))!=0)
 #ifdef	_DEBUG
@@ -320,6 +330,9 @@ typedef	struct {
 		int			(*SetItem)(PyObject*, int, PyObject*);
 		PyObject*	(*GetItem)(PyObject*, int);
 		int			none_on_empty;
+#if	CHAR_SIZE==16
+		int			utf8;
+#endif
 		} ParserDetails;
 
 #define PDGetItem pd->GetItem
@@ -328,6 +341,9 @@ typedef	struct {
 static	PyObject* get_attrs(ParserDetails* pd, Attribute a)
 {
 	int		useNone = pd->none_on_empty && !a;
+#if	CHAR_SIZE==16
+	int		utf8 = pd->utf8;
+#endif
 
 	if(!useNone){
 		PyObject *attrs=PyDict_New(), *t, *s;
@@ -409,6 +425,9 @@ static	PyObject* _makeNode(ParserDetails* pd, PyObject *pyName, PyObject* attr, 
 
 static	PyObject* makeNode(ParserDetails* pd, const Char *name, PyObject* attr, int empty)
 {
+#if	CHAR_SIZE==16
+	int		utf8 = pd->utf8;
+#endif
 	return _makeNode(pd, PYSTRING(name), attr, empty);
 }
 
@@ -425,6 +444,9 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 	int	r = 0, empty;
 	PyObject	*t, *s;
 	ParserDetails*	pd = (ParserDetails*)(p->warning_callback_arg);
+#if	CHAR_SIZE==16
+	int		utf8 = pd->utf8;
+#endif
 	switch(bit->type) {
 		case XBIT_eof: break;
 		case XBIT_error:
@@ -441,7 +463,7 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 
 			empty = bit->type == XBIT_empty;
 			t = ParserGetFlag(p, XMLNamespaces) ?
-					_makeNode( pd, PyNSName(bit->ns_element_definition, bit->element_definition->name),
+					_makeNode( pd, PYNSNAME(bit->ns_element_definition, bit->element_definition->name),
 						get_attrs(pd, bit->attributes), empty)
 					:
 					makeNode( pd, bit->element_definition->name,
@@ -826,6 +848,9 @@ static PyObject* pyRXPParser_parse(pyRXPParserObject* xself, PyObject* args, PyO
 			}
 		}
 	CB.none_on_empty = !__GetFlag(self,ExpandEmpty);
+#if	CHAR_SIZE==16
+	CB.utf8 = __GetFlag(self,ReturnUTF8);
+#endif
 	if(__GetFlag(self,MakeMutableTree)){
 		CB.Node_New = PyList_New;
 		CB.SetItem = PyList_SetItem;
