@@ -41,6 +41,7 @@ PyObject* PYSTRING8(const char* s)
 	return PyUnicode_DecodeUTF8((const char*)s, (int)strlen(s), NULL);
 }
 #	define EmptyCharStr (Char*)"\0"
+#	define FMTCHAR "u"
 #else
 #	define MODULE "pyRXP"
 #	define initpyRXP initpyRXP
@@ -50,6 +51,7 @@ PyObject* PYSTRING8(const char* s)
 #	define PYSTRING(s) PyString_FromString(s)
 #	define PYSTRING8(s) PyString_FromString(s)
 #	define EmptyCharStr (Char*)""
+#	define FMTCHAR "s"
 #endif
 PyObject* PyNSName(NSElementDefinition nsed, const Char *name UTF8DECL){
 	Char		*t, *ns;
@@ -706,8 +708,16 @@ static void myWarnCB(XBit bit, void *info)
 	str = MakeFILE16FromString(buf,sizeof(buf)-1,"w");
 	_ParserPerror(str, pd->p, bit);
 	Fclose(str);
-	/* TODO: This probably needs to be unicode as well */
-	arglist = Py_BuildValue("(s)",buf);
+#if	CHAR_SIZE==16
+	{
+	struct _FILE16 {
+		void *handle;
+		int handle2, handle3;
+		};
+	buf[((struct _FILE16*)str)->handle2] = 0;
+	}
+#endif
+	arglist = Py_BuildValue("(" FMTCHAR ")",buf);
 	result = PyEval_CallObject(pd->warnCB, arglist);
 	Py_DECREF(arglist);
 	if(result){
