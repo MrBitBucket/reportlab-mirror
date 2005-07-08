@@ -72,6 +72,9 @@ class TTFError(pdfdoc.PDFError):
     "TrueType font exception"
     pass
 
+
+def SUBSETN(n,table=string.maketrans('0123456789','ABCDEFGHIJ')):
+    return ('%6.6d'%n).translate(table)
 #
 # Helpers
 #
@@ -1033,7 +1036,7 @@ class TTFont:
         for n in range(len(state.subsets)):
             subset = state.subsets[n]
             internalName = self.getSubsetInternalName(n, doc)[1:]
-            baseFontName = "SUBSET+%s+%d" % (self.face.name, n)
+            baseFontName = "%s+%s" % (SUBSETN(n),self.face.name)
 
             pdfFont = pdfdoc.PDFTrueTypeFont()
             pdfFont.__Comment__ = 'Font %s subset %d' % (self.fontName, n)

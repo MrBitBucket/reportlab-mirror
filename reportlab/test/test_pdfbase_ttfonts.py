@@ -340,7 +340,7 @@ class TTFontTestCase(unittest.TestCase):
         pdfFont = doc.idToObject[internalName]
         self.assertEquals(doc.idToObject['BasicFonts'].dict[internalName], pdfFont)
         self.assertEquals(pdfFont.Name, internalName)
-        self.assertEquals(pdfFont.BaseFont, "SUBSET+LuxiSerif+0")
+        self.assertEquals(pdfFont.BaseFont, "AAAAAA+LuxiSerif")
         self.assertEquals(pdfFont.FirstChar, 0)
         self.assertEquals(pdfFont.LastChar, 127)
         self.assertEquals(len(pdfFont.Widths.sequence), 128)
