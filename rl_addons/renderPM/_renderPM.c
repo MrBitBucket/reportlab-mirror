@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "1.00"
+#define VERSION "1.01"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -319,6 +319,15 @@ typedef struct {
 	ArtVpathDash	dash;			/*for doing dashes*/
 	Gt1EncodedFont*		font;		/*the currently set external font or NULL*/
 	} gstateObject;
+static ArtBpath notdefPath[6]={
+		{ART_MOVETO,0.0,0.0,0.0,0.0,726.0,0.0},
+		{ART_LINETO,0.0,0.0,0.0,0.0,726.0,692.0},
+		{ART_LINETO,0.0,0.0,0.0,0.0,35.0,692.0},
+		{ART_LINETO,0.0,0.0,0.0,0.0,35.0,0.0},
+		{ART_LINETO,0.0,0.0,0.0,0.0,726.0,0.0},
+		{ART_END,0.0,0.0,0.0,0.0,0.0,0.0},
+		};
+static int notdefPathLen=5;
 
 #ifdef	ROBIN_DEBUG
 #define	GFMT	"%.17g"
@@ -785,7 +794,7 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 	double	scaleFactor, x, y, w;
 	char*	text;
 	int		c, textlen, i;
-	ArtBpath	*saved_path;
+	ArtBpath	*saved_path, *path;
 	void	*font = self->font;
 #ifdef	RENDERPM_FT
 	int				ft_font = self->ft_font;
@@ -833,26 +842,34 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 		if(ft_font){
 			_ft_data.pathLen = 0;
 			c = utext[i];
-			self->path = _ft_get_glyph_outline((FT_Face)font,c,&_ft_data,&w);
+			path = _ft_get_glyph_outline((FT_Face)font,c,&_ft_data,&w);
+			if(!path){
+				_ft_data.pathLen = 0;
+				path = _ft_get_glyph_outline((FT_Face)font,0,&_ft_data,&w);
+				}
 			}
 		else{
 #endif
 		c = (text[i])&0xff;
-		self->path = gt1_get_glyph_outline((Gt1EncodedFont*)font, c, &w);	/*ascii encoding for the moment*/
+		path = gt1_get_glyph_outline((Gt1EncodedFont*)font, c, &w);	/*ascii encoding for the moment*/
+		if(!path){
+			path = notdefPath;
+			w = 761;
+			}
 #ifdef	RENDERPM_FT
 		}
 #endif
 
-		if(self->path){
+		if(path){
+			self->path = path;
 			_gstate_pathFill(self,0,1);
 #ifdef	RENDERPM_FT
-			if(!ft_font)
+			if(!ft_font && path!=notdefPath)
 #endif
-			art_free(self->path);
+			art_free(path);
 			}
 		else {
-			fprintf(stderr, "No glyph outline for code %d!\n", c);
-			w = 1000;
+			w = 761;
 			}
 
 		/*move to right, scaling width by xscale and don't allow rotations or skew in CTM */
@@ -951,14 +968,22 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 	for(i=0;i<n;i++){
 #ifdef	RENDERPM_FT
 		if(ft_font){
-			_ft_data.pathLen = 0;
 			c = utext[i];
+			_ft_data.pathLen = 0;
 			path = _ft_get_glyph_outline((FT_Face)font,c,&_ft_data,&w);
+			if(!path){
+				_ft_data.pathLen = 0;
+				path = _ft_get_glyph_outline((FT_Face)font,0,&_ft_data,&w);
+				}
 			}
 		else{
 #endif
 		c = text[i]&0xff;
 		path = gt1_get_glyph_outline((Gt1EncodedFont*)font, c, &w);	/*ascii encoding for the moment*/
+		if(!path){
+			path = notdefPath;
+			w = 761;
+			}
 #ifdef	RENDERPM_FT
 		}
 #endif
@@ -977,12 +1002,12 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 				}
 			p = _get_gstatePath(pp-path,path);
 #ifdef	RENDERPM_FT
-			if(!ft_font)
+			if(!ft_font && path!=notdefPath)
 #endif
 			art_free(path);
 			}
 		else {
-			fprintf(stderr, "No glyph outline for code %d!\n", c);
+			/*fprintf(stderr, "No glyph outline for code %d!\n", c);*/
 			w = 1000;
 			Py_INCREF(Py_None);
 			p = Py_None;
