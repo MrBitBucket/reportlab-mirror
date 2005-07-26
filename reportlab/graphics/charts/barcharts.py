@@ -335,10 +335,17 @@ class BarChart(PlotArea):
 
     def _labelXY(self,label,x,y,width,height):
         'Compute x, y for a label'
+        nudge = label.nudge
+        anti = getattr(label,'boxTarget','normal')=='anti'
+        if anti: nudge = -nudge
         if self._flipXY:
-            return x + width + (width>=0 and 1 or -1) * label.nudge, y + 0.5*height
+            value = width
+            if anti: value = 0
+            return x + value + (width>=0 and 1 or -1)*nudge, y + 0.5*height
         else:
-            return x + 0.5*width, y + height + (height>=0 and 1 or -1) * label.nudge
+            value = height
+            if anti: value = 0
+            return x + 0.5*width, y + value + (height>=0 and 1 or -1)*nudge
 
     def _addBarLabel(self, g, rowNo, colNo, x, y, width, height):
         text = self._getLabelText(rowNo,colNo)
