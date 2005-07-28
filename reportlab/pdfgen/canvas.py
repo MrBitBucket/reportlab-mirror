@@ -1331,10 +1331,10 @@ class Canvas:
     def setDash(self, array=[], phase=0):
         """Two notations.  pass two numbers, or an array and phase"""
         if type(array) == IntType or type(array) == FloatType:
-            self._code.append('[%s %s] 0 d' % (array, phase))
+            self._code.append('[%s] %s d' % (array, phase))
         elif type(array) == ListType or type(array) == TupleType:
             assert phase >= 0, "phase is a length in user space"
-            textarray = join(map(str, array))
+            textarray =  ' '.join(map(str, array))
             self._code.append('[%s] %s d' % (textarray, phase))
 
     def setFillColorRGB(self, r, g, b):
