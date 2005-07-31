@@ -1275,7 +1275,7 @@ class Para(Flowable):
             needatleast = state["leading"]
         else:
             needatleast = self.style1.leading
-        if availableHeight<=needatleast:
+        if availableHeight < needatleast:
             self.cansplit = 0
             #if debug:
             #    print "CANNOT COMPILE, NEED AT LEAST", needatleast, 'AVAILABLE', availableHeight
