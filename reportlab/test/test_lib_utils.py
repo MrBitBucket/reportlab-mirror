@@ -10,12 +10,15 @@ from reportlab.lib.utils import recursiveImport, recursiveGetAttr, recursiveSetA
 
 class ImporterTestCase(unittest.TestCase):
     "Test import utilities"
+    count = 0
 
     def setUp(self):
         from time import time
         from reportlab.lib.utils import get_rl_tempdir
-        self._tempdir = get_rl_tempdir('reportlab_test','tmp_%d' % time())
-        _testmodulename = os.path.join(self._tempdir,'test_module_%d.py' % time())
+        s = `int(time())` + `self.count`
+        self.count += 1
+        self._tempdir = get_rl_tempdir('reportlab_test','tmp_%s' % s)
+        _testmodulename = os.path.join(self._tempdir,'test_module_%s.py' % s)
         f = open(_testmodulename,'w')
         f.write('__all__=[]\n')
         f.close()
