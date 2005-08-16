@@ -16,7 +16,7 @@ class ImporterTestCase(unittest.TestCase):
         from time import time
         from reportlab.lib.utils import get_rl_tempdir
         s = `int(time())` + `self.count`
-        self.count += 1
+        self.__class__.count += 1
         self._tempdir = get_rl_tempdir('reportlab_test','tmp_%s' % s)
         _testmodulename = os.path.join(self._tempdir,'test_module_%s.py' % s)
         f = open(_testmodulename,'w')
