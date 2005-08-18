@@ -298,14 +298,7 @@ class XCategoryAxis(CategoryAxis):
             self._x = yAxis._x
             self._y = pos
 
-    def scale(self, idx):
-        """returns the x position and width in drawing units of the slice"""
-        return (self._x + self._scale(idx)*self._barWidth, self._barWidth)
-
-    def makeAxis(self):
-        g = Group()
-
-
+    def _joinToAxis(self):
         ja = self.joinAxis
         if ja:
             jam = self.joinAxisMode
@@ -316,6 +309,13 @@ class XCategoryAxis(CategoryAxis):
             elif jam in ('value', 'points'):
                 jta(ja, mode=jam, pos=jap)
 
+    def scale(self, idx):
+        """returns the x position and width in drawing units of the slice"""
+        return (self._x + self._scale(idx)*self._barWidth, self._barWidth)
+
+    def makeAxis(self):
+        g = Group()
+        self._joinToAxis()
         if not self.visibleAxis: return g
 
         axis = Line(self._x, self._y, self._x + self._length, self._y)
@@ -427,16 +427,7 @@ class YCategoryAxis(CategoryAxis):
             self._x = pos * 1.0
             self._y = xAxis._y * 1.0
 
-    def scale(self, idx):
-        "Returns the y position and width in drawing units of the slice."
-        return (self._y + self._scale(idx)*self._barWidth, self._barWidth)
-
-    def makeAxis(self):
-        g = Group()
-
-        if not self.visibleAxis:
-            return g
-
+    def _joinToAxis(self):
         ja = self.joinAxis
         if ja:
             jam = self.joinAxisMode
@@ -446,6 +437,15 @@ class YCategoryAxis(CategoryAxis):
                 jta(ja, mode=jam)
             elif jam in ('value', 'points'):
                 jta(ja, mode=jam, pos=jap)
+
+    def scale(self, idx):
+        "Returns the y position and width in drawing units of the slice."
+        return (self._y + self._scale(idx)*self._barWidth, self._barWidth)
+
+    def makeAxis(self):
+        g = Group()
+        self._joinToAxis()
+        if not self.visibleAxis: return g
 
         axis = Line(self._x, self._y, self._x, self._y + self._length)
         axis.strokeColor = self.strokeColor
@@ -927,6 +927,17 @@ class XValueAxis(ValueAxis):
             self._x = yAxis._x * 1.0
             self._y = pos * 1.0
 
+    def _joinToAxis(self):
+        ja = self.joinAxis
+        if ja:
+            jam = self.joinAxisMode
+            jap = self.joinAxisPos
+            jta = self.joinToAxis
+            if jam in ('bottom', 'top'):
+                jta(ja, mode=jam)
+            elif jam in ('value', 'points'):
+                jta(ja, mode=jam, pos=jap)
+
     def scale(self, value):
         """Converts a numeric value to a Y position.
 
@@ -945,19 +956,8 @@ class XValueAxis(ValueAxis):
 
     def makeAxis(self):
         g = Group()
-
-        if not self.visibleAxis:
-            return g
-
-        ja = self.joinAxis
-        if ja:
-            jam = self.joinAxisMode
-            jap = self.joinAxisPos
-            jta = self.joinToAxis
-            if jam in ('bottom', 'top'):
-                jta(ja, mode=jam)
-            elif jam in ('value', 'points'):
-                jta(ja, mode=jam, pos=jap)
+        self._joinToAxis()
+        if not self.visibleAxis: return g
 
         axis = Line(self._x, self._y, self._x + self._length, self._y)
         axis.strokeColor = self.strokeColor
@@ -1195,6 +1195,17 @@ class YValueAxis(ValueAxis):
             self._x = pos * 1.0
             self._y = xAxis._y * 1.0
 
+    def _joinToAxis(self):
+        ja = self.joinAxis
+        if ja:
+            jam = self.joinAxisMode
+            jap = self.joinAxisPos
+            jta = self.joinToAxis
+            if jam in ('left', 'right'):
+                jta(ja, mode=jam)
+            elif jam in ('value', 'points'):
+                jta(ja, mode=jam, pos=jap)
+
     def scale(self, value):
         """Converts a numeric value to a Y position.
 
@@ -1214,19 +1225,8 @@ class YValueAxis(ValueAxis):
 
     def makeAxis(self):
         g = Group()
-
-        if not self.visibleAxis:
-            return g
-
-        ja = self.joinAxis
-        if ja:
-            jam = self.joinAxisMode
-            jap = self.joinAxisPos
-            jta = self.joinToAxis
-            if jam in ('left', 'right'):
-                jta(ja, mode=jam)
-            elif jam in ('value', 'points'):
-                jta(ja, mode=jam, pos=jap)
+        self._joinToAxis()
+        if not self.visibleAxis: return g
 
         axis = Line(self._x, self._y, self._x, self._y + self._length)
         axis.strokeColor = self.strokeColor

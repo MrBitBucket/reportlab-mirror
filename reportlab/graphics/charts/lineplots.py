@@ -272,12 +272,12 @@ class LinePlot(AbstractLineChart):
                 for xy in row:
                     points = points + [xy[0], xy[1]]
                 if inFill:
-                    fpoints = points + [inFillX1,inFillY,inFillX0,inFillY]
+                    fpoints = [inFillX0,inFillY] + points + [inFillX1,inFillY]
                     filler = getattr(rowStyle, 'filler', None)
                     if filler:
                         filler.fill(self,inFillG,rowNo,rowColor,fpoints)
                     else:
-                        inFillG.add(Polygon(fpoints,fillColor=rowColor,strokeColor=rowColor,strokeWidth=0.1))
+                        inFillG.add(Polygon(fpoints,fillColor=rowColor,strokeColor=rowColor,strokeWidth=width or 0.1))
                 if inFill in (None,0,2):
                     line = PolyLine(points,strokeColor=rowColor,strokeLineCap=0,strokeLineJoin=1)
                     if width:
@@ -337,6 +337,7 @@ class LinePlot(AbstractLineChart):
         g = Group()
         g.add(self.makeBackground())
         if self._inFill:
+            xA._joinToAxis()
             self._inFillG = Group()
             g.add(self._inFillG)
         g.add(xA)
