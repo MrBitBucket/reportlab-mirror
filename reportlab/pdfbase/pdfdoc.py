@@ -502,16 +502,43 @@ class PDFText:
 def PDFnumber(n):
     return n
 
+import re
+_re_cleanparens=re.compile('[^()]')
+del re
+def _isbalanced(s):
+    '''test whether a string is balanced in parens'''
+    s = _re_cleanparens.sub('',s)
+    n = 0
+    for c in s:
+        if c=='(': n+=1
+        else:
+            n -= 1
+            if n<0: return 0
+    return not n and 1 or 0
+
 class PDFString:
-    def __init__(self, str):
+    def __init__(self, str, escape=1):
         # might need to change this to class for encryption
         self.s = str
+        self.escape = escape
     def format(self, document):
-        s = document.encrypt.encode(self.s)
-        try:
-            return "(%s)" % pdfutils._escape(s)
-        except:
-            raise ValueError, "cannot escape %s %s" %(s, repr(s))
+        s = self.s
+        escape = self.escape
+        if not isinstance(document.encrypt,NoEncryption):
+            s = document.encrypt.encode(s)
+            escape = 1
+        if escape:
+            try:
+                es = "(%s)" % pdfutils._escape(s)
+            except:
+                raise ValueError("cannot escape %s %s" % (s, repr(s)))
+            if escape&2:
+                es = es.replace('\\012','\n')
+            if escape&4 and _isbalanced(s): 
+                es = es.replace('\\(','(').replace('\\)',')')
+            return es
+        else:
+            return '(%s)' % s
     def __str__(self):
         return "(%s)" % pdfutils._escape(self.s)
 
@@ -1310,14 +1337,19 @@ class Annotation:
     required = ("Type", "Rect", "Contents", "Subtype")
     permitted = required+(
       "Border", "C", "T", "M", "F", "H", "BS", "AA", "AS", "Popup", "P")
-    def cvtdict(self, d):
+    def cvtdict(self, d, escape=1):
         """transform dict args from python form to pdf string rep as needed"""
         Rect = d["Rect"]
         if type(Rect) is not types.StringType:
             d["Rect"] = PDFArray(Rect)
-        d["Contents"] = PDFString(d["Contents"])
+        d["Contents"] = PDFString(d["Contents"],escape)
         return d
     def AnnotationDict(self, **kw):
+        if 'escape' in kw:
+            escape = kw['escape']
+            del kw['escape']
+        else:
+            escape = 1
         d = {}
         for (name,val) in self.defaults:
             d[name] = val
@@ -1325,7 +1357,7 @@ class Annotation:
         for name in self.required:
             if not d.has_key(name):
                 raise ValueError, "keyword argument %s missing" % name
-        d = self.cvtdict(d)
+        d = self.cvtdict(d,escape=escape)
         permitted = self.permitted
         for name in d.keys():
             if name not in permitted:
@@ -1352,7 +1384,7 @@ class TextAnnotation(Annotation):
         d["Rect"] = self.Rect
         d["Contents"] = self.Contents
         d["Subtype"] = "/Text"
-        return apply(self.AnnotationDict, (), d)
+        return self.AnnotationDict(**d)
 
 class LinkAnnotation(Annotation):
 
