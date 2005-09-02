@@ -116,6 +116,7 @@ def _addWedgeLabel(self,text,add,angle,labelX,labelY,wedgeStyle,labelClass=Wedge
     if self.simpleLabels:
         theLabel = String(labelX, labelY, text)
         theLabel.textAnchor = "middle"
+        theLabel._pmv = angle
     else:
         theLabel = labelClass()
         theLabel._pmv = angle
@@ -183,15 +184,88 @@ class AbstractPieChart(PlotArea):
             if _text is not None: text = _text
         return text
 
+
+def boundsOverlap(P,Q):
+    return not(P[0]>Q[2]-1e-2 or Q[0]>P[2]-1e-2 or P[1]>Q[3]-1e-2 or Q[1]>P[3]-1e-2)
+
+def _findOverlapRun(B,i):
+    '''find overlap run containing B[i]'''
+    n = len(B)
+    R = [i]
+    while 1:
+        i = R[-1]
+        j = (i+1)%n
+        if j in R or not boundsOverlap(B[i],B[j]): break
+        R.append(j)
+    while 1:
+        i = R[0]
+        j = (i-1)%n
+        if j in R or not boundsOverlap(B[i],B[j]): break
+        R.insert(0,j)
+    return R
+
+def findOverlapRun(B):
+    '''determine a set of overlaps in bounding boxes B or return None'''
+    n = len(B)
+    if n>1:
+        for i in xrange(n-1):
+            R = _findOverlapRun(B,i)
+            if len(R)>1: return R
+    return None
+
+def fixLabelOverlaps(L):
+    nL = len(L)
+    if nL<2: return
+    B = [l._origdata['bounds'] for l in L]
+    OK = 1
+    RP = []
+    iter = 0
+    mult = 1.
+
+    while iter<30:
+        R = findOverlapRun(B)
+        if not R: break
+        nR = len(R)
+        if nR==nL: break
+        if not [r for r in RP if r in R]:
+            mult = 1.0
+        da = 0
+        r0 = R[0]
+        rL = R[-1]
+        bi = B[r0]
+        taa = aa = _360(L[r0]._pmv)
+        for r in R[1:]:
+            b = B[r]
+            da = max(da,min(b[3]-bi[1],bi[3]-b[1]))
+            bi = b
+            aa += L[r]._pmv
+        aa = aa/float(nR)
+        utaa = abs(L[rL]._pmv-taa)
+        ntaa = _360(utaa)
+        da *= mult*(nR-1)/ntaa
+
+        for r in R:
+            l = L[r]
+            orig = l._origdata
+            angle = l._pmv = _360(l._pmv+da*(_360(l._pmv)-aa))
+            rad = angle/_180_pi
+            l.x = orig['cx'] + orig['rx']*cos(rad)
+            l.y = orig['cy'] + orig['ry']*sin(rad)
+            B[r] = l.getBounds()
+        RP = R
+        mult *= 1.05
+        iter += 1
+
 class Pie(AbstractPieChart):
     _attrMap = AttrMap(BASE=AbstractPieChart,
         data = AttrMapValue(isListOfNumbers, desc='list of numbers defining wedge sizes; need not sum to 1'),
         labels = AttrMapValue(isListOfStringsOrNone, desc="optional list of labels to use for each data point"),
         startAngle = AttrMapValue(isNumber, desc="angle of first slice; like the compass, 0 is due North"),
-        direction = AttrMapValue( OneOf('clockwise', 'anticlockwise'), desc="'clockwise' or 'anticlockwise'"),
+        direction = AttrMapValue(OneOf('clockwise', 'anticlockwise'), desc="'clockwise' or 'anticlockwise'"),
         slices = AttrMapValue(None, desc="collection of wedge descriptor objects"),
         simpleLabels = AttrMapValue(isBoolean, desc="If true(default) use String not super duper WedgeLabel"),
-        other_threshold = AttrMapValue(isNumber, desc='A value for doing thresh holding, not used yet.'),
+        other_threshold = AttrMapValue(isNumber, desc='A value for doing threshholding, not used yet.'),
+        checkLabelOverlap = AttrMapValue(isBoolean, desc="If true check and attempt to fix label overlaps(default off)"),
         )
     other_threshold=None
 
@@ -205,6 +279,7 @@ class Pie(AbstractPieChart):
         self.startAngle = 90
         self.direction = "clockwise"
         self.simpleLabels = 1
+        self.checkLabelOverlap = 0
 
         self.slices = TypedPropertyCollection(WedgeProperties)
         self.slices[0].fillColor = colors.darkcyan
@@ -267,6 +342,13 @@ class Pie(AbstractPieChart):
         self._seriesCount = len(normData)
         styleCount = len(self.slices)
 
+        checkLabelOverlap = self.checkLabelOverlap
+        if checkLabelOverlap:
+            L = []
+            g_add = L.append
+        else:
+            g_add = g.add
+
         startAngle = self.startAngle #% 360
         for angle in normData:
             endAngle = (startAngle + (angle * whichWay)) #% 360
@@ -284,13 +366,17 @@ class Pie(AbstractPieChart):
 
                 # is it a popout?
                 cx, cy = centerx, centery
-                if wedgeStyle.popout <> 0:
-                    # pop out the wedge
+                text = self.getSeriesName(i,'')
+                if text or wedgeStyle.popout:
                     averageAngle = (a1+a2)/2.0
-                    aveAngleRadians = averageAngle * pi/180.0
+                    aveAngleRadians = averageAngle/_180_pi
+                    cosAA = cos(aveAngleRadians)
+                    sinAA = sin(aveAngleRadians)
+                if wedgeStyle.popout:
+                    # pop out the wedge
                     popdistance = wedgeStyle.popout
-                    cx = centerx + popdistance * cos(aveAngleRadians)
-                    cy = centery + popdistance * sin(aveAngleRadians)
+                    cx = centerx + popdistance*cosAA
+                    cy = centery + popdistance*sinAA
 
                 if n > 1:
                     theWedge = Wedge(cx, cy, xradius, a1, a2, yradius=yradius)
@@ -303,17 +389,26 @@ class Pie(AbstractPieChart):
                 theWedge.strokeDashArray = wedgeStyle.strokeDashArray
 
                 g.add(theWedge)
-                text = self.getSeriesName(i,'')
                 if text:
-                    averageAngle = (a1+a2)/2.0
-                    aveAngleRadians = averageAngle*pi/180.0
                     labelRadius = wedgeStyle.labelRadius
-                    labelX = cx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
-                    labelY = cy + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
-                    _addWedgeLabel(self,text,g.add,averageAngle,labelX,labelY,wedgeStyle)
+                    rx = 0.5*self.width*labelRadius
+                    ry = 0.5*self.height*labelRadius
+                    labelX = cx + rx*cosAA
+                    labelY = cy + ry*sinAA
+                    _addWedgeLabel(self,text,g_add,averageAngle,labelX,labelY,wedgeStyle)
+                    if checkLabelOverlap:
+                        l = L[-1]
+                        l._origdata = { 'x': labelX, 'y':labelY, 'angle': averageAngle,
+                                        'rx': rx, 'ry':ry, 'cx':cx, 'cy':cy,
+                                        'bounds': l.getBounds(),
+                                        }
 
             startAngle = endAngle
             i = i + 1
+
+        if checkLabelOverlap:
+            fixLabelOverlaps(L)
+            map(g.add,L)
 
         return g
 
@@ -475,7 +570,7 @@ class LegendedPie(Pie):
         drawing.add(self.draw())
         return drawing
 
-from utils3d import _getShaded, _2rad, _360, _pi_2, _2pi
+from utils3d import _getShaded, _2rad, _360, _pi_2, _2pi, _180_pi
 class Wedge3dProperties(PropHolder):
     """This holds descriptive information about the wedges in a pie chart.
 

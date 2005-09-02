@@ -104,7 +104,7 @@ _2pi = 2*pi
 _180_pi=180./pi
 
 def _2rad(angle):
-    return (angle*pi)/180
+    return angle/_180_pi
 
 def mod_2pi(radians):
     radians = radians % _2pi
