@@ -33,6 +33,7 @@ from reportlab.graphics.charts.areas import PlotArea
 from textlabels import Label
 
 _ANGLE2BOXANCHOR={0:'w', 45:'sw', 90:'s', 135:'se', 180:'e', 225:'ne', 270:'n', 315: 'nw', -45: 'nw'}
+_ANGLE2RBOXANCHOR={0:'e', 45:'ne', 90:'n', 135:'nw', 180:'w', 225:'sw', 270:'s', 315: 'se', -45: 'se'}
 class WedgeLabel(Label):
     def _checkDXY(self,ba):
         pass
@@ -42,7 +43,7 @@ class WedgeLabel(Label):
             da = (self._pmv - na) % 360
             if abs(da)>5:
                 na = na + (da>0 and 45 or -45)
-        ba = _ANGLE2BOXANCHOR[na]
+        ba = (getattr(self,'_anti',None) and _ANGLE2RBOXANCHOR or _ANGLE2BOXANCHOR)[na]
         self._checkDXY(ba)
         return ba
 
