@@ -174,6 +174,9 @@ class TypedPropertyCollection(PropHolder):
     The last line should be taken as a prescription of how to
     create wedge no. 3 if one is needed; no error is raised if
     there are only two data points.
+
+    We try and make sensible use of tuple indeces.
+        line[(3,x)] is backed by line[(3,)], line[3] & line
     """
 
     def __init__(self, exampleClass):
@@ -187,9 +190,15 @@ class TypedPropertyCollection(PropHolder):
                 try:
                     return self.__class__.__bases__[0].__getattr__(self,name)
                 except:
-                    if self._index and self._parent._children.has_key(self._index) \
-                        and self._parent._children[self._index].__dict__.has_key(name):
-                        return getattr(self._parent._children[self._index],name)
+                    i = self._index
+                    if i:
+                        c = self._parent._children
+                        if c.has_key(i) and c[i].__dict__.has_key(name):
+                            return getattr(c[i],name)
+                        elif len(i)==1:
+                            i = i[0]
+                            if c.has_key(i) and c[i].__dict__.has_key(name):
+                                return getattr(c[i],name)
                     return getattr(self._parent,name)
         return WKlass
 
