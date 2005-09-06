@@ -23,8 +23,8 @@ class FilledRadarChart(_DrawingEditorMixin,Drawing):
         self.chart.strands[7].fillColor  = color08
         self.chart.strands[8].fillColor  = color09
         self.chart.strands[9].fillColor  = color10
-        self.chart.strands.fontName      = 'Helvetica'
-        self.chart.strands.fontSize      = 6
+        self.chart.strandLabels.fontName = 'Helvetica'
+        self.chart.strandLabels.fontSize = 6
         self.chart.fillColor             = backgroundGrey
         self.chart.data                  = [(125, 180, 200), (100, 150, 180)]
         self.chart.labels                = ['North', 'South', 'Central']

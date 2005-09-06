@@ -147,12 +147,13 @@ class SpiderChart(PlotArea):
                     strokeDashArray=strokeDashArray,fillColor=fillColor)
         else:
             bg = None
-        if symbol: symbol = uSymbol2Symbol(symbol,x+width/2.,ym,color)
-        if S and bg:
-            g = Group()
-            g.add(bg)
-            g.add(S)
-            return g
+        if symbol:
+            symbol = uSymbol2Symbol(symbol,x+width/2.,ym,color)
+            if bg:
+                g = Group()
+                g.add(bg)
+                g.add(symbol)
+                return g
         return symbol or bg
 
     def getSeriesName(self,i,default=None):

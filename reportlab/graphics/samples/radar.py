@@ -34,8 +34,8 @@ class RadarChart(_DrawingEditorMixin,Drawing):
         self.chart.strands[8].fillColor  = None
         self.chart.strands[9].fillColor  = None
         self.chart.strands.strokeWidth   = 1
-        self.chart.strands.fontName      = 'Helvetica'
-        self.chart.strands.fontSize      = 6
+        self.chart.strandLabels.fontName = 'Helvetica'
+        self.chart.strandLabels.fontSize = 6
         self.chart.fillColor             = backgroundGrey
         self.chart.data                  = [(125, 180, 200), (100, 150, 180)]
         self.chart.labels                = ['North', 'South', 'Central']
