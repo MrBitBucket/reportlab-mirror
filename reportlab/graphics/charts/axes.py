@@ -215,7 +215,7 @@ class CategoryAxis(_AxisG):
     def _calcTickmarkPositions(self):
         n = self._catCount
         if self.tickShift:
-            self._tickValues = [t+0.5 for t in range(n)]
+            self._tickValues = [t+0.5 for t in xrange(n)]
         else:
             self._tickValues = range(n+1)
 
@@ -475,28 +475,26 @@ class YCategoryAxis(CategoryAxis):
     def makeTickLabels(self):
         g = Group()
 
-        if not self.visibleTicks:
-            return g
+        if not self.visibleTicks: return g
 
-        if not (self.categoryNames is None):
+        categoryNames = self.categoryNames
+        if not (categoryNames is None):
             catCount = self._catCount
-            assert len(self.categoryNames) == catCount, \
-                "expected %d category names but found %d in axis" % (
-                len(self.categoryNames), catCount
-                )
+            n = len(categoryNames)
             reverseDirection = self.reverseDirection
             barWidth = self._barWidth
             labels = self.labels
             _x = self._labelAxisPos()
             _y = self._y
-            for i in range(catCount):
+            for i in xrange(catCount):
+                if reverseDirection: ic = catCount-i-1
+                else: ic = i
+                if ic>=n: continue
                 y = _y + (i+0.5) * barWidth
                 label = labels[i]
                 label.setOrigin(_x, y)
-                if reverseDirection: i = catCount-i-1
-                label.setText(self.categoryNames[i])
+                label.setText(categoryNames[ic] or '')
                 g.add(label)
-
         return g
 
 
