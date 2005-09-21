@@ -570,7 +570,8 @@ class HRFlowable(Flowable):
             lineCap='round',
             color=lightgrey,
             spaceBefore=1, spaceAfter=1,
-            hAlign='CENTER', vAlign='BOTTOM'):
+            hAlign='CENTER', vAlign='BOTTOM',
+            dash=None):
         Flowable.__init__(self)
         self.width = width
         self.lineWidth = thickness
@@ -580,6 +581,7 @@ class HRFlowable(Flowable):
         self.color = color
         self.hAlign = hAlign
         self.vAlign = vAlign
+        self.dash = dash
 
     def __repr__(self):
         return "HRFlowable(width=%s, height=%s)" % (self.width, self.height)
@@ -600,6 +602,7 @@ class HRFlowable(Flowable):
         canv.setLineWidth(self.lineWidth)
         canv.setLineCap({'butt':0,'round':1, 'square': 2}[self.lineCap.lower()])
         canv.setStrokeColor(self.color)
+        if self.dash: canv.setDash(self.dash)
         canv.line(0, 0, self._width, self.height)
         canv.restoreState()
 

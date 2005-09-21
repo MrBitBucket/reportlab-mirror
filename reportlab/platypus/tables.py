@@ -788,39 +788,44 @@ class Table(Flowable):
             self._spanCmds.append(cmd)
         elif _isLineCommand(cmd):
             # we expect op, start, stop, weight, colour, cap, dashes, join
-            cmd = tuple(cmd)
+            cmd = list(cmd)
             if len(cmd)<5: raise ValueError('bad line command '+str(cmd))
 
             #determine line cap value at position 5. This can be string or numeric.
             if len(cmd)<6:
-                cmd = cmd+(1,)
+                cmd.append(1)
             else:
                 cap = _convert2int(cmd[5], LINECAPS, 0, 2, 'cap', cmd)
-                cmd = cmd[:5]+(cap,)+cmd[6:]
+                cmd[5] = cap
 
             #dashes at index 6 - this is a dash array:
-            if len(cmd)<7: cmd += (None,)
+            if len(cmd)<7: cmd.append(None)
 
             #join mode at index 7 - can be string or numeric, look up as for caps
-            if len(cmd)<8: cmd = cmd+(1,)
+            if len(cmd)<8: cmd.append(1)
             else:
                 join = _convert2int(cmd[7], LINEJOINS, 0, 2, 'join', cmd)
-                cmd = cmd[:7]+(join,)+cmd[8:]
+                cmd[7] = join
 
             #linecount at index 8.  Default is 1, set to 2 for double line.
-            if len(cmd)<9:
-                lineCount = 1
-                cmd += (lineCount,)
+            if len(cmd)<9: cmd.append(1)
             else:
                 lineCount = cmd[8]
-            assert lineCount >= 1
+                if lineCount is None:
+                    lineCount = 1
+                    cmd[8] = lineCount
+                assert lineCount >= 1
             #linespacing at index 9. Not applicable unless 2+ lines, defaults to line
             #width so you get a visible gap between centres
-            if len(cmd)<10: cmd = cmd + (cmd[3],)
-
+            if len(cmd)<10: cmd.append(cmd[3])
+            else:
+                space = cmd[9]
+                if space is None:
+                    space = cmd[3]
+                    cmd[9] = space
             assert len(cmd) == 10
 
-            self._linecmds.append(cmd)
+            self._linecmds.append(tuple(cmd))
         else:
             (op, (sc, sr), (ec, er)), values = cmd[:3] , cmd[3:]
             if sc < 0: sc = sc + self._ncols
