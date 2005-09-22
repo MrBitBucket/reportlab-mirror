@@ -523,7 +523,7 @@ class PDFString:
         self.escape = escape
     def format(self, document):
         s = self.s
-        escape = self.escape
+        escape = getattr(self,'escape',1)
         if not isinstance(document.encrypt,NoEncryption):
             s = document.encrypt.encode(s)
             escape = 1
