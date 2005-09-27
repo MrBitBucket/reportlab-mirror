@@ -779,6 +779,8 @@ class FrameFlowable(_Container,Flowable):
             self.height = min(maxHeight,H)-_FUZZ
         else:
             def func(x):
+                for c in self._content: #hack for multi-frag paras
+                    if hasattr(c,'blPara'): del c.blPara
                 W, H = _listWrapOn(self._content,x*availWidth,self.canv)
                 W /= x
                 H /= x
@@ -786,7 +788,7 @@ class FrameFlowable(_Container,Flowable):
             W0 = W
             H0 = H
             s0 = 1
-            if W>maxWidth:
+            if W>maxWidth+_FUZZ:
                 #squeeze out the excess width
                 s1 = W/maxWidth
                 W, H = func(s1)
@@ -811,7 +813,7 @@ class FrameFlowable(_Container,Flowable):
                     #apply the quadratic model
                     s = _qsolve(maxHeight*(1-f),_hmodel(s0,s1,H0,H1))
                     W, H = func(s)
-                    if H<=maxHeight:
+                    if H<=maxHeight-_FUZZ:
                         self.width = W
                         self.height = H
                         self._scale = s
