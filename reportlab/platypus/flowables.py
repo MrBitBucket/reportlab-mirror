@@ -744,17 +744,18 @@ def _qsolve(h,(a,b)):
     return max(1./s1, 1./s2)
 
 class FrameFlowable(_Container,Flowable):
-    def __init__(self, maxWidth, maxHeight, content=[], mergeSpace=None, mode=0, id=None):
+    def __init__(self, maxWidth, maxHeight, content=[], mergeSpace=1, mode=0, name=None):
         '''mode describes the action to take when overflowing
             0   raise an error in the normal way
             1   ignore ie just draw it and report maxWidth, maxHeight
             2   shrinkToFit
         '''
-        self.id = id
+        self.name = name or str(id(self))
         self.maxWidth = maxWidth
         self.maxHeight = maxHeight
         self.mode = mode
         assert mode in (0,1,2), '%s invalid mode value %s' % (self.identity(),mode)
+        assert maxHeight>0,  '%s invalid maxHeight value %s' % (self.identity(),maxHeight)
         if mergeSpace is None: mergeSpace = overlapAttachedSpace
         self.mergespace = mergeSpace
         self._content = content
@@ -763,11 +764,11 @@ class FrameFlowable(_Container,Flowable):
         return self.maxWidth - self._leftExtraIndent - self._rightExtraIndent
 
     def identity(self, maxLen=None):
-        return "<%s at %d%s> size=%sx%s" % (self.__class__.__name__, id(self), self.id and ' id="%s"'%self.id, fp_str(self.maxWidth),fp_str(self.maxHeight))
+        return "<%s at %d%s> size=%sx%s" % (self.__class__.__name__, id(self), self.name and ' name="%s"'%self.name, fp_str(self.maxWidth),fp_str(self.maxHeight))
 
     def wrap(self,availWidth,availHeight):
         mode = self.mode
-        maxWidth = float(self.maxWidth)
+        maxWidth = float(self.maxWidth or availWidth)
         maxHeight = float(self.maxHeight)
         W, H = _listWrapOn(self._content,availWidth,self.canv)
         if mode==0 or (W<=maxWidth and H<=maxHeight):
