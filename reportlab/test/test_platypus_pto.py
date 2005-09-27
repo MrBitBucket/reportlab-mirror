@@ -8,7 +8,7 @@ import sys
 
 from reportlab.test import unittest
 from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
-from reportlab.platypus.flowables import Flowable, PTOContainer
+from reportlab.platypus.flowables import Flowable, PTOContainer, FrameFlowable
 from reportlab.lib.units import cm
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.colors import toColor, black
@@ -28,31 +28,19 @@ def myMainPageFrame(canvas, doc):
     canvas.drawString(10*cm, cm, str(pageNumber))
     canvas.restoreState()
 
-def _breakingTestCase(self):
-    "This makes one long multi-page paragraph."
+def _showDoc(fn,story):
+    pageTemplate = PageTemplate('normal', [Frame(72, 440, 170, 284, id='F1'),
+                            Frame(326, 440, 170, 284, id='F2'),
+                            Frame(72, 72, 170, 284, id='F3'),
+                            Frame(326, 72, 170, 284, id='F4'),
+                            ], myMainPageFrame)
+    doc = BaseDocTemplate(outputfile(fn),
+            pageTemplates = pageTemplate,
+            showBoundary = 1,
+            )
+    doc.multiBuild(story)
 
-    # Build story.
-    story = []
-    def fbreak(story=story):
-        story.append(FrameBreak())
-
-    styleSheet = getSampleStyleSheet()
-    H1 = styleSheet['Heading1']
-    H1.pageBreakBefore = 0
-    H1.keepWithNext = 0
-
-    bt = styleSheet['BodyText']
-    pto = ParagraphStyle('pto',parent=bt)
-    pto.alignment = TA_RIGHT
-    pto.fontSize -= 1
-    def ColorParagraph(c,text,style):
-        return Paragraph('<para color=%s>%s</para>' % (c,text),style)
-
-    def ptoblob(blurb,content,trailer=None,header=None, story=story, H1=H1):
-        if type(content) not in (type([]),type(())): content = [content]
-        story.append(PTOContainer([Paragraph(blurb,H1)]+list(content),trailer,header))
-
-    text2 ='''We have already seen that the natural general principle that will
+text2 ='''We have already seen that the natural general principle that will
 subsume this case cannot be arbitrary in the requirement that branching
 is not tolerated within the dominance scope of a complex symbol.
 Notice, incidentally, that the speaker-hearer's linguistic intuition is
@@ -63,7 +51,8 @@ acceptability from fairly high (e.g. (99a)) to virtual gibberish (e.g.
 (98d)).  By combining adjunctions and certain deformations, a
 descriptively adequate grammar cannot be arbitrary in the strong
 generative capacity of the theory.'''
-    text1='''
+
+text1='''
 On our assumptions, a descriptively adequate grammar delimits the strong
 generative capacity of the theory.  For one thing, the fundamental error
 of regarding functional notions as categorial is to be regarded as a
@@ -79,7 +68,7 @@ proposed grammar.  Analogously, the notion of level of grammaticalness
 may remedy and, at the same time, eliminate a general convention
 regarding the forms of the grammar.'''
     
-    text0 = '''To characterize a linguistic level L,
+text0 = '''To characterize a linguistic level L,
 this selectionally introduced contextual
 feature delimits the requirement that
 branching is not tolerated within the
@@ -103,6 +92,31 @@ of parasitic gaps in domains relatively
 inaccessible to ordinary extraction
 does not readily tolerate the strong
 generative capacity of the theory.'''
+
+def _ptoTestCase(self):
+    "This makes one long multi-page paragraph."
+
+    # Build story.
+    story = []
+    def fbreak(story=story):
+        story.append(FrameBreak())
+
+    styleSheet = getSampleStyleSheet()
+    H1 = styleSheet['Heading1']
+    H1.pageBreakBefore = 0
+    H1.keepWithNext = 0
+
+    bt = styleSheet['BodyText']
+    pto = ParagraphStyle('pto',parent=bt)
+    pto.alignment = TA_RIGHT
+    pto.fontSize -= 1
+    def ColorParagraph(c,text,style):
+        return Paragraph('<para color=%s>%s</para>' % (c,text),style)
+
+    def ptoblob(blurb,content,trailer=None,header=None, story=story, H1=H1):
+        if type(content) not in (type([]),type(())): content = [content]
+        story.append(PTOContainer([Paragraph(blurb,H1)]+list(content),trailer,header))
+
     t0 = [ColorParagraph('blue','Please turn over', pto )]
     h0 = [ColorParagraph('blue','continued from previous page', pto )]
     t1 = [ColorParagraph('red','Please turn over(inner)', pto )]
@@ -134,30 +148,38 @@ generative capacity of the theory.'''
     ptoblob('A long PTO',[Paragraph(text0+' '+text1,bt)],t0,h0)
     fbreak()
     ptoblob('2 PTO (inner split)',[ColorParagraph('pink',text0,bt),PTOContainer([ColorParagraph(black,'Inner Starts',H1),ColorParagraph('yellow',text2,bt),ColorParagraph('black','Inner Ends',H1)],t1,h1),ColorParagraph('magenta',text1,bt)],t0,h0)
+    _showDoc('test_platypus_pto.pdf',story)
 
-    pageTemplate = PageTemplate('normal', [Frame(2.5*cm, 15.5*cm, 6*cm, 10*cm, id='F1'),
-                            Frame(11.5*cm, 15.5*cm, 6*cm, 10*cm, id='F2'),
-                            Frame(2.5*cm, 2.5*cm, 6*cm, 10*cm, id='F3'),
-                            Frame(11.5*cm, 2.5*cm, 6*cm, 10*cm, id='F4'),
-                            ], myMainPageFrame)
-    doc = BaseDocTemplate(outputfile('test_platypus_pto.pdf'),
-            pageTemplates = pageTemplate,
-            showBoundary = 1,
-            )
-    doc.multiBuild(story)
+def _frameFlowableTestCase(self):
+    story = []
+    def fbreak(story=story):
+        story.append(FrameBreak())
+    styleSheet = getSampleStyleSheet()
+    H1 = styleSheet['Heading1']
+    H1.pageBreakBefore = 0
+    H1.keepWithNext = 0
+    bt = styleSheet['BodyText']
+    story.append(FrameFlowable(170-12,284-12,[Paragraph(text0,bt)],mode=2))
+    fbreak()
+    story.append(FrameFlowable(170-12,284-12,[Paragraph(text0,bt),Paragraph(text1,bt)],mode=2))
+    fbreak()
+    story.append(FrameFlowable(170-12,284-12,[Paragraph(text0,bt),Paragraph(text1,bt),Paragraph(text2,bt)],mode=2))
+    _showDoc('test_platypus_frameflowable.pdf',story)
 
-class BreakingTestCase(unittest.TestCase):
+class TestCases(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."
     def test0(self):
-        _breakingTestCase(self)
+        _ptoTestCase(self)
+    def test1(self):
+        _frameFlowableTestCase(self)
 
 def makeSuite():
-    return makeSuiteForClasses(BreakingTestCase)
+    return makeSuiteForClasses(TestCases)
 
 #noruntests
 if __name__ == "__main__": #NORUNTESTS
     if 'debug' in sys.argv:
-        _test0(None)
+        _frameFlowableTestCase(None)
     else:
         unittest.TextTestRunner().run(makeSuite())
         printLocation()

@@ -29,13 +29,14 @@ import string
 from copy import deepcopy
 from types import ListType, TupleType, StringType
 
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import inch
 from reportlab.lib.colors import red, gray, lightgrey
+from reportlab.lib.utils import fp_str
 from reportlab.pdfbase import pdfutils
 
-from reportlab.rl_config import defaultPageSize, _FUZZ
-PAGE_HEIGHT = defaultPageSize[1]
+from reportlab.rl_config import _FUZZ, overlapAttachedSpace
+__all__=('TraceInfo','Flowable','XBox','Preformatted','Image','Spacer','PageBreak','SlowPageBreak',
+        'CondPageBreak','KeepTogether','Macro','CallerMacro','ParagraphAndImage',
+        'FailOnWrap','HRFlowable','PTOContainer','FrameFlowable')
 
 
 class TraceInfo:
@@ -424,26 +425,28 @@ class CondPageBreak(Spacer):
             return (availWidth, availHeight)
         return (0, 0)
 
-def _listWrapOn(F,availWidth,canv,mergeSpace=1):
+def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None):
     '''return max width, required height for a list of flowables F'''
     W = 0
     H = 0
     pS = 0
-    n = len(F)
-    nm1 = n - 1
-    for i in xrange(n):
-        f = F[i]
+    atTop = 1
+    for f in F:
         w,h = f.wrapOn(canv,availWidth,0xfffffff)
+        if w<=_FUZZ or h<=_FUZZ: continue
         W = max(W,w)
-        H = H+h
-        if i:
+        H += h
+        if not atTop:
             h = f.getSpaceBefore()
             if mergeSpace: H += max(h-pS,0) 
             else: H += h
-        if i!=nm1:
-            pS = f.getSpaceAfter()
-            H += pS
-    return W, H
+        else:
+            if obj is not None: obj._spaceBefore = f.getSpaceBefore()
+            atTop = 0
+        pS = f.getSpaceAfter()
+        H += pS
+    if obj is not None: obj._spaceAfter = pS
+    return W, H-pS
 
 def _flowableSublist(V):
     "if it isn't a list or tuple, wrap it in a list"
@@ -611,7 +614,36 @@ class _PTOInfo:
         self.trailer = _flowableSublist(trailer)
         self.header = _flowableSublist(header)
 
-class PTOContainer(Flowable):
+class _Container:   #Abstract some common container like behaviour
+    def getSpaceBefore(self):
+        for c in self._content:
+            if not hasattr(c,'frameAction'):
+                return c.getSpaceBefore()
+        return 0
+
+    def getSpaceAfter(self):
+        for c in reversed(self._content):
+            if not hasattr(c,'frameAction'):
+                return c.getSpaceAfter()
+        return 0
+
+    def drawOn(self, canv, x, y, _sW=0,scale=1.0):
+        '''we simulate being added to a frame'''
+        pS = 0
+        aW = scale*(self.width+_sW)
+        C = self._content
+        y += self.height*scale
+        for c in C:
+            w, h = c.wrapOn(canv,aW,0xfffffff)
+            if w<_FUZZ or h<_FUZZ: continue
+            if c is not C[0]: h += max(c.getSpaceBefore()-pS,0)
+            y -= h
+            c.drawOn(canv,x,y,_sW=aW-w)
+            if c is not C[-1]:
+                pS = c.getSpaceAfter()
+                y -= pS
+
+class PTOContainer(_Container,Flowable):
     '''PTOContainer(contentList,trailerList,headerList)
     
     A container for flowables decorated with trailer & header lists.
@@ -631,12 +663,6 @@ class PTOContainer(Flowable):
     def wrap(self,availWidth,availHeight):
         self.width, self.height = _listWrapOn(self._content,availWidth,self.canv)
         return self.width,self.height
-
-    def getSpaceBefore(self):
-        return self._content[0].getSpaceBefore()
-
-    def getSpaceAfter(self):
-        return self._content[-1].getSpaceAfter()
 
     def split(self, availWidth, availHeight):
         canv = self.canv
@@ -685,17 +711,120 @@ class PTOContainer(Flowable):
             R2 = Hdr + C[i:]
         return R1 + [PTOContainer(R2,deepcopy(I.trailer),deepcopy(I.header))]
 
+#utility functions used by FrameFlowable
+def _hmodel(s0,s1,h0,h1):
+    # calculate the parameters in the model
+    # h = a/s**2 + b/s
+    a11 = 1./s0**2
+    a12 = 1./s0
+    a21 = 1./s1**2
+    a22 = 1./s1
+    det = a11*a22-a12*a21
+    b11 = a22/det
+    b12 = -a12/det
+    b21 = -a21/det
+    b22 = a11/det
+    a = b11*h0+b12*h1
+    b = b21*h0+b22*h1
+    return a,b
+
+def _qsolve(h,(a,b)):
+    '''solve the model v = a/s**2 + b/s for an s which gives us v==h'''
+    t = 0.5*b/a
+    from math import sqrt
+    f = -h/a
+    r = t*t-f
+    if r<0: return None
+    r = sqrt(r)
+    if t>=0:
+        s1 = -t - r 
+    else:
+        s1 = -t + r
+    s2 = f/s1
+    return max(1./s1, 1./s2)
+
+class FrameFlowable(_Container,Flowable):
+    def __init__(self, maxWidth, maxHeight, content=[], mergeSpace=None, mode=0, id=None):
+        '''mode describes the action to take when overflowing
+            0   raise an error in the normal way
+            1   ignore ie just draw it and report maxWidth, maxHeight
+            2   shrinkToFit
+        '''
+        self.id = id
+        self.maxWidth = maxWidth
+        self.maxHeight = maxHeight
+        self.mode = mode
+        assert mode in (0,1,2), '%s invalid mode value %s' % (self.identity(),mode)
+        if mergeSpace is None: mergeSpace = overlapAttachedSpace
+        self.mergespace = mergeSpace
+        self._content = content
+
+    def _getAvailableWidth(self):
+        return self.maxWidth - self._leftExtraIndent - self._rightExtraIndent
+
+    def identity(self, maxLen=None):
+        return "<%s at %d%s> size=%sx%s" % (self.__class__.__name__, id(self), self.id and ' id="%s"'%self.id, fp_str(self.maxWidth),fp_str(self.maxHeight))
+
+    def wrap(self,availWidth,availHeight):
+        mode = self.mode
+        maxWidth = float(self.maxWidth)
+        maxHeight = float(self.maxHeight)
+        W, H = _listWrapOn(self._content,availWidth,self.canv)
+        if mode==0 or (W<=maxWidth and H<=maxHeight):
+            self.width = W  #we take what we get
+            self.height = H
+        elif mode==1:   #we lie
+            self.width = min(maxWidth,W)-_FUZZ
+            self.height = min(maxHeight,H)-_FUZZ
+        else:
+            def func(x):
+                W, H = _listWrapOn(self._content,x*availWidth,self.canv)
+                W /= x
+                H /= x
+                return W, H
+            W0 = W
+            H0 = H
+            s0 = 1
+            if W>maxWidth:
+                #squeeze out the excess width
+                s1 = W/maxWidth
+                W, H = func(s1)
+                if H<=maxHeight:
+                    self.width = W
+                    self.height = H
+                    self._scale = s1
+                    return W,H
+                s0 = s1
+                H0 = H
+                W0 = W
+            s1 = H/maxHeight
+            W, H = func(s1)
+            self.width = W
+            self.height = H
+            self._scale = s1
+            if H<min(0.95*maxHeight,maxHeight-10):
+                #the standard case W should be OK, H is short we want
+                #to find the smallest s with H<=maxHeight
+                H1 = H
+                for f in 0, 0.01, 0.05, 0.10, 0.15:
+                    #apply the quadratic model
+                    s = _qsolve(maxHeight*(1-f),_hmodel(s0,s1,H0,H1))
+                    W, H = func(s)
+                    if H<=maxHeight:
+                        self.width = W
+                        self.height = H
+                        self._scale = s
+                        break
+
+        return self.width, self.height
+
     def drawOn(self, canv, x, y, _sW=0):
-        '''we simulate being added to a frame'''
-        pS = 0
-        aW = self.width+_sW
-        C = self._content
-        y += self.height
-        for c in C:
-            w, h = c.wrapOn(canv,aW,0xfffffff)
-            if c is not C[0]: h += max(c.getSpaceBefore()-pS,0)
-            y -= h
-            c.drawOn(canv,x,y,_sW=aW-w)
-            if c is not C[-1]:
-                pS = c.getSpaceAfter()
-                y -= pS
+        scale = getattr(self,'_scale',1.0)
+        if scale!=1.0:
+            canv.saveState()
+            canv.translate(x,y)
+            x=y=0
+            canv.scale(1.0/scale, 1.0/scale)
+        _Container.drawOn(self, canv, x, y, _sW=_sW, scale=scale)
+        if scale!=1.0:
+            canv.restoreState()

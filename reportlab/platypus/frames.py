@@ -63,12 +63,6 @@ class Frame:
         self.__dict__['_rightPadding'] = rightPadding
         self.__dict__['_topPadding'] = topPadding
 
-        # these two should NOT be set on a frame.
-        # they are used when Indenter flowables want
-        # to adjust edges e.g. to do nested lists
-        self._leftExtraIndent = 0.0
-        self._rightExtraIndent = 0.0
-
         # if we want a boundary to be shown
         self.showBoundary = showBoundary
 
@@ -104,6 +98,12 @@ class Frame:
         self._atTop = 1
         self._prevASpace = 0
 
+        # these two should NOT be set on a frame.
+        # they are used when Indenter flowables want
+        # to adjust edges e.g. to do nested lists
+        self._leftExtraIndent = 0.0
+        self._rightExtraIndent = 0.0
+
     def _getAvailableWidth(self):
         return self._aW - self._leftExtraIndent - self._rightExtraIndent
 
@@ -113,6 +113,10 @@ class Frame:
         Raises a LayoutError if the object is too wide,
         or if it is too high for a totally empty frame,
         to avoid infinite loops"""
+        if getattr(flowable,'frameAction',None):
+            flowable.frameAction(self)
+            return 1
+
         y = self._y
         p = self._y1p
         s = 0

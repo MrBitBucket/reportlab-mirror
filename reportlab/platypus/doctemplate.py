@@ -29,10 +29,12 @@ for the current frame).
 """
 
 from reportlab.platypus.flowables import *
+from reportlab.lib.units import inch
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
 from reportlab.rl_config import defaultPageSize, verbose
 import reportlab.lib.sequencer
+from reportlab.pdfgen import canvas
 
 from types import *
 import sys
@@ -153,21 +155,26 @@ def _evalMeasurement(n):
         if type(n) is type(()): n = n[1]
     return n
 
-class Indenter(ActionFlowable):
+class FrameActionFlowable(Flowable):
+    def __init__(self,*arg,**kw):
+        raise NotImplementedError('Abstract Class')
+
+    def frameAction(self,frame):
+        raise NotImplementedError('Abstract Class')
+
+class Indenter(FrameActionFlowable):
     """Increases or decreases left and right margins of frame.
 
     This allows one to have a 'context-sensitive' indentation
     and makes nested lists way easier.
     """
-
     def __init__(self, left=0, right=0):
         self.left = _evalMeasurement(left)
         self.right = _evalMeasurement(right)
 
-    def apply(self, doc):
-        doc.frame._leftExtraIndent = doc.frame._leftExtraIndent + self.left
-        doc.frame._rightExtraIndent = doc.frame._rightExtraIndent + self.right
-
+    def frameAction(self, frame):
+        frame._leftExtraIndent += self.left
+        frame._rightExtraIndent += self.right
 
 class NextPageTemplate(ActionFlowable):
     """When you get to the next page, use the template specified (change to two column, for example)  """
