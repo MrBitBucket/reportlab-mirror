@@ -36,7 +36,7 @@ from reportlab.pdfbase import pdfutils
 from reportlab.rl_config import _FUZZ, overlapAttachedSpace
 __all__=('TraceInfo','Flowable','XBox','Preformatted','Image','Spacer','PageBreak','SlowPageBreak',
         'CondPageBreak','KeepTogether','Macro','CallerMacro','ParagraphAndImage',
-        'FailOnWrap','HRFlowable','PTOContainer','FrameFlowable')
+        'FailOnWrap','HRFlowable','PTOContainer','KeepInFrame')
 
 
 class TraceInfo:
@@ -711,7 +711,7 @@ class PTOContainer(_Container,Flowable):
             R2 = Hdr + C[i:]
         return R1 + [PTOContainer(R2,deepcopy(I.trailer),deepcopy(I.header))]
 
-#utility functions used by FrameFlowable
+#utility functions used by KeepInFrame
 def _hmodel(s0,s1,h0,h1):
     # calculate the parameters in the model
     # h = a/s**2 + b/s
@@ -743,7 +743,7 @@ def _qsolve(h,(a,b)):
     s2 = f/s1
     return max(1./s1, 1./s2)
 
-class FrameFlowable(_Container,Flowable):
+class KeepInFrame(_Container,Flowable):
     def __init__(self, maxWidth, maxHeight, content=[], mergeSpace=1, mode=0, name=None):
         '''mode describes the action to take when overflowing
             0   raise an error in the normal way
@@ -755,7 +755,7 @@ class FrameFlowable(_Container,Flowable):
         self.maxHeight = maxHeight
         self.mode = mode
         assert mode in (0,1,2), '%s invalid mode value %s' % (self.identity(),mode)
-        assert maxHeight>0,  '%s invalid maxHeight value %s' % (self.identity(),maxHeight)
+        assert maxHeight>=0,  '%s invalid maxHeight value %s' % (self.identity(),maxHeight)
         if mergeSpace is None: mergeSpace = overlapAttachedSpace
         self.mergespace = mergeSpace
         self._content = content
@@ -769,7 +769,7 @@ class FrameFlowable(_Container,Flowable):
     def wrap(self,availWidth,availHeight):
         mode = self.mode
         maxWidth = float(self.maxWidth or availWidth)
-        maxHeight = float(self.maxHeight)
+        maxHeight = float(self.maxHeight or availHeight)
         W, H = _listWrapOn(self._content,availWidth,self.canv)
         if mode==0 or (W<=maxWidth and H<=maxHeight):
             self.width = W  #we take what we get
