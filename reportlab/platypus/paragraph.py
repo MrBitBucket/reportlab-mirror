@@ -476,6 +476,7 @@ class Paragraph(Flowable):
         #this is a major hack
         P1.blPara = ParaLines(kind=1,lines=blPara.lines[0:s],aH=availHeight,aW=availWidth)
         P1._JustifyLast = 1
+        P1._splitpara = 1
         if style.firstLineIndent != 0:
             style = deepcopy(style)
             style.firstLineIndent = 0
@@ -569,7 +570,7 @@ class Paragraph(Flowable):
             return ParaLines(kind=0, fontSize=style.fontSize, fontName=style.fontName,
                             textColor=style.textColor, lines=[])
         else:
-            if hasattr(self,'blPara'):
+            if hasattr(self,'blPara') and getattr(self,'_splitpara',0):
                 #NB this is an utter hack that awaits the proper information
                 #preserving splitting algorithm
                 return self.blPara

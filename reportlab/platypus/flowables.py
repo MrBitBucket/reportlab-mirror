@@ -744,17 +744,18 @@ def _qsolve(h,(a,b)):
     return max(1./s1, 1./s2)
 
 class KeepInFrame(_Container,Flowable):
-    def __init__(self, maxWidth, maxHeight, content=[], mergeSpace=1, mode=0, name=None):
+    def __init__(self, maxWidth, maxHeight, content=[], mergeSpace=1, mode='shrink', name=None):
         '''mode describes the action to take when overflowing
-            0   raise an error in the normal way
-            1   ignore ie just draw it and report maxWidth, maxHeight
-            2   shrinkToFit
+            error       raise an error in the normal way
+            continue    ignore ie just draw it and report maxWidth, maxHeight
+            shrink      shrinkToFit
+            truncate    fit as much as possible
         '''
         self.name = name or str(id(self))
         self.maxWidth = maxWidth
         self.maxHeight = maxHeight
         self.mode = mode
-        assert mode in (0,1,2), '%s invalid mode value %s' % (self.identity(),mode)
+        assert mode in ('error','overflow','shrink','truncate'), '%s invalid mode value %s' % (self.identity(),mode)
         assert maxHeight>=0,  '%s invalid maxHeight value %s' % (self.identity(),maxHeight)
         if mergeSpace is None: mergeSpace = overlapAttachedSpace
         self.mergespace = mergeSpace
@@ -771,16 +772,14 @@ class KeepInFrame(_Container,Flowable):
         maxWidth = float(self.maxWidth or availWidth)
         maxHeight = float(self.maxHeight or availHeight)
         W, H = _listWrapOn(self._content,availWidth,self.canv)
-        if mode==0 or (W<=maxWidth and H<=maxHeight):
+        if mode=='error' or (W<=maxWidth and H<=maxHeight):
             self.width = W  #we take what we get
             self.height = H
-        elif mode==1:   #we lie
+        elif mode in ('overflow','truncate'):   #we lie
             self.width = min(maxWidth,W)-_FUZZ
             self.height = min(maxHeight,H)-_FUZZ
         else:
             def func(x):
-                for c in self._content: #hack for multi-frag paras
-                    if hasattr(c,'blPara'): del c.blPara
                 W, H = _listWrapOn(self._content,x*availWidth,self.canv)
                 W /= x
                 H /= x
@@ -823,11 +822,17 @@ class KeepInFrame(_Container,Flowable):
 
     def drawOn(self, canv, x, y, _sW=0):
         scale = getattr(self,'_scale',1.0)
-        if scale!=1.0:
+        truncate = self.mode=='truncate'
+        ss = scale!=1.0 or truncate
+        if ss:
             canv.saveState()
-            canv.translate(x,y)
-            x=y=0
-            canv.scale(1.0/scale, 1.0/scale)
+            if truncate:
+                p = canv.beginPath()
+                p.rect(x, y, self.width,self.height)
+                canv.clipPath(p,stroke=0)
+            else:
+                canv.translate(x,y)
+                x=y=0
+                canv.scale(1.0/scale, 1.0/scale)
         _Container.drawOn(self, canv, x, y, _sW=_sW, scale=scale)
-        if scale!=1.0:
-            canv.restoreState()
+        if ss: canv.restoreState()

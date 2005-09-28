@@ -142,7 +142,8 @@ class _FrameBreak(LCActionFlowable):
         return r
 
     def apply(self,doc):
-        if getattr(self,'_ix',None): doc._nextFrameIndex = self._ix
+        if getattr(self,'_ix',None):
+            doc.handle_nextFrame(self._ix)
         ActionFlowable.apply(self,doc)
 
 FrameBreak = _FrameBreak('frameEnd')
@@ -467,7 +468,7 @@ class BaseDocTemplate:
         self._rightExtraIndent = self.frame._rightExtraIndent
 
         if hasattr(self,'_nextFrameIndex'):
-            frame = self.pageTemplate.frames[self._nextFrameIndex]
+            self.frame = self.pageTemplate.frames[self._nextFrameIndex]
             del self._nextFrameIndex
             self.handle_frameBegin(resume)
         elif hasattr(self.frame,'lastFrame') or self.frame is self.pageTemplate.frames[-1]:
@@ -511,7 +512,7 @@ class BaseDocTemplate:
         else:
             raise TypeError, "argument pt should be string or integer or list"
 
-    def handle_nextFrame(self,fx):
+    def handle_nextFrame(self,fx,resume=0):
         '''On endFrame change to the frame with name or index fx'''
         if type(fx) is StringType:
             for f in self.pageTemplate.frames:
@@ -524,18 +525,10 @@ class BaseDocTemplate:
         else:
             raise TypeError, "argument fx should be string or integer"
 
-    def handle_currentFrame(self,fx):
+    def handle_currentFrame(self,fx,resume=0):
         '''change to the frame with name or index fx'''
-        if type(fx) is StringType:
-            for f in self.pageTemplate.frames:
-                if f.id == fx:
-                    self._nextFrameIndex = self.pageTemplate.frames.index(f)
-                    return
-            raise ValueError, "can't find frame('%s')"%fx
-        elif type(fx) is IntType:
-            self._nextFrameIndex = fx
-        else:
-            raise TypeError, "argument fx should be string or integer"
+        self.handle_nextFrame(fx,resume)
+        self.handle_frameEnd(resume)
 
     def handle_breakBefore(self, flowables):
         '''preprocessing step to allow pageBreakBefore and frameBreakBefore attributes'''
