@@ -8,7 +8,7 @@ import sys
 
 from reportlab.test import unittest
 from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
-from reportlab.platypus.flowables import Flowable, PTOContainer, FrameFlowable
+from reportlab.platypus.flowables import Flowable, PTOContainer, KeepInFrame
 from reportlab.lib.units import cm
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.colors import toColor, black
@@ -150,7 +150,7 @@ def _ptoTestCase(self):
     ptoblob('2 PTO (inner split)',[ColorParagraph('pink',text0,bt),PTOContainer([ColorParagraph(black,'Inner Starts',H1),ColorParagraph('yellow',text2,bt),ColorParagraph('black','Inner Ends',H1)],t1,h1),ColorParagraph('magenta',text1,bt)],t0,h0)
     _showDoc('test_platypus_pto.pdf',story)
 
-def _frameFlowableTestCase(self):
+def _KeepInFrameTestCase(self,mode):
     story = []
     def fbreak(story=story):
         story.append(FrameBreak())
@@ -159,19 +159,26 @@ def _frameFlowableTestCase(self):
     H1.pageBreakBefore = 0
     H1.keepWithNext = 0
     bt = styleSheet['BodyText']
-    story.append(FrameFlowable(170-12,284-12,[Paragraph(text0,bt)],mode=2))
+    story.append(KeepInFrame(170-12,284-12,[Paragraph(text0,bt)],mode=mode))
     fbreak()
-    story.append(FrameFlowable(170-12,284-12,[Paragraph(text0,bt),Paragraph(text1,bt)],mode=2))
+    story.append(KeepInFrame(170-12,284-12,[Paragraph(text0,bt),Paragraph(text1,bt)],mode=mode))
     fbreak()
-    story.append(FrameFlowable(170-12,284-12,[Paragraph(text0,bt),Paragraph(text1,bt),Paragraph(text2,bt)],mode=2))
-    _showDoc('test_platypus_frameflowable.pdf',story)
+    story.append(KeepInFrame(170-12,284-12,[Paragraph(text0,bt),Paragraph(text1,bt),Paragraph(text2,bt)],mode=mode))
+    _showDoc('test_platypus_KeepInFrame%s.pdf'%mode,story)
 
 class TestCases(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."
     def test0(self):
         _ptoTestCase(self)
     def test1(self):
-        _frameFlowableTestCase(self)
+        _KeepInFrameTestCase(self,mode="shrink")
+    def test2(self):
+        _KeepInFrameTestCase(self,mode="overflow")
+    def test3(self):
+        _KeepInFrameTestCase(self,mode="truncate")
+    def test4(self):
+        from reportlab.platypus.doctemplate import LayoutError
+        self.assertRaises(LayoutError, _KeepInFrameTestCase,*(self,"error"))
 
 def makeSuite():
     return makeSuiteForClasses(TestCases)
@@ -179,7 +186,7 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__": #NORUNTESTS
     if 'debug' in sys.argv:
-        _frameFlowableTestCase(None)
+        _KeepInFrameTestCase(None)
     else:
         unittest.TextTestRunner().run(makeSuite())
         printLocation()
