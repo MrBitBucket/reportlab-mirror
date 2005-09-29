@@ -48,8 +48,9 @@ class Frame:
     '''
     def __init__(self, x1, y1, width,height, leftPadding=6, bottomPadding=6,
             rightPadding=6, topPadding=6, id=None, showBoundary=0,
-            overlapAttachedSpace=None):
+            overlapAttachedSpace=None,_debug=None):
         self.id = id
+        self._debug = _debug
 
         #these say where it goes on the page
         self.__dict__['_x1'] = x1
@@ -127,9 +128,10 @@ class Frame:
                 s = max(s-self._prevASpace,0)
         h = y - p - s
         if h>0:
+            flowable._frame = self
             flowable.canv = canv #so they can use stringWidth etc
             w, h = flowable.wrap(aW, h)
-            del flowable.canv
+            del flowable.canv, flowable._frame
         else:
             return 0
 
@@ -143,8 +145,10 @@ class Frame:
             return 0
         else:
             #now we can draw it, and update the current point.
+            flowable._frame = self
             flowable.drawOn(canv, self._x + self._leftExtraIndent, y, _sW=aW-w)
-            logger.debug('drew %s: \n    %s' % (flowable.__class__.__name__, flowable.identity()))
+            if self._debug: logger.debug('drew %s' % flowable.identity())
+            del flowable._frame
             s = flowable.getSpaceAfter()
             y -= s
             if self._oASpace: self._prevASpace = s

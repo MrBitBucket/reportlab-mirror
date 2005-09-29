@@ -109,7 +109,7 @@ class ActionFlowable(Flowable):
         return self
 
     def identity(self, maxLen=None):
-        return "ActionFlowable: %s" % str(self.action)
+        return "ActionFlowable: %s%s" % (str(self.action),self._frameName())
 
 class LCActionFlowable(ActionFlowable):
     locChanger = 1                  #we cause a frame or page change
@@ -299,8 +299,10 @@ class BaseDocTemplate:
                     'title':None,
                     'author':None,
                     'invariant':None,
+                    'pageCompression':None,
                     '_pageBreakQuick':1,
-                    'rotation':0,}
+                    'rotation':0,
+                    '_debug':0}
     _invalidInitArgs = ()
     _firstPageTemplateIndex = 0
 
@@ -316,7 +318,6 @@ class BaseDocTemplate:
                     raise ValueError, "Invalid argument %s" % k
                 v = kw[k]
             setattr(self,k,v)
-        #print "pagesize is", self.pagesize
 
         p = self.pageTemplates
         self.pageTemplates = []
@@ -387,7 +388,7 @@ class BaseDocTemplate:
         '''Perform actions required at beginning of page.
         shouldn't normally be called directly'''
         self.page = self.page + 1
-        logger.debug("beginning page %d" % self.page)
+        if self._debug: logger.debug("beginning page %d" % self.page)
         self.pageTemplate.beforeDrawPage(self.canv,self)
         self.pageTemplate.checkPageSize(self.canv,self)
         self.pageTemplate.onPage(self.canv,self)
@@ -398,6 +399,7 @@ class BaseDocTemplate:
         if hasattr(self,'_nextFrameIndex'):
             del self._nextFrameIndex
         self.frame = self.pageTemplate.frames[0]
+        self.frame._debug = self._debug
         self.handle_frameBegin()
 
     def handle_pageEnd(self):
@@ -423,7 +425,7 @@ class BaseDocTemplate:
             self.pageTemplate.afterDrawPage(self.canv, self)
             self.pageTemplate.onPageEnd(self.canv, self)
             self.afterPage()
-            logger.debug("ending page %d" % self.page)
+            if self._debug: logger.debug("ending page %d" % self.page)
             self.canv.setPageRotation(getattr(self.pageTemplate,'rotation',self.rotation))
             self.canv.showPage()
 
@@ -469,6 +471,7 @@ class BaseDocTemplate:
 
         if hasattr(self,'_nextFrameIndex'):
             self.frame = self.pageTemplate.frames[self._nextFrameIndex]
+            self.frame._debug = self._debug
             del self._nextFrameIndex
             self.handle_frameBegin(resume)
         elif hasattr(self.frame,'lastFrame') or self.frame is self.pageTemplate.frames[-1]:
@@ -477,6 +480,7 @@ class BaseDocTemplate:
         else:
             f = self.frame
             self.frame = self.pageTemplate.frames[self.pageTemplate.frames.index(f) + 1]
+            self.frame._debug = self._debug
             self.handle_frameBegin()
 
     def handle_nextPageTemplate(self,pt):
@@ -571,6 +575,14 @@ class BaseDocTemplate:
             del flowables[:i]
             flowables.insert(0,K)
 
+    def _fIdent(self,f,maxLen=None,frame=None):
+        if frame: f._frame = frame
+        try:
+            return f.identity(maxLen)
+        finally:
+            if frame: del f._frame
+
+
     def handle_flowable(self,flowables):
         '''try to handle one flowable from the front of list flowables.'''
 
@@ -581,7 +593,6 @@ class BaseDocTemplate:
         self.handle_breakBefore(flowables)
         self.handle_keepWithNext(flowables)
         f = flowables[0]
-        #print 'handling flowable %s' % f.identity()
         del flowables[0]
         if f is None:
             return
@@ -601,21 +612,18 @@ class BaseDocTemplate:
                 self._curPageFlowableCount = self._curPageFlowableCount + 1
                 self.afterFlowable(f)
             else:
-                #if isinstance(f, KeepTogether): print 'could not add it to frame'
                 if self.allowSplitting:
                     # see if this is a splittable thing
                     S = self.frame.split(f,self.canv)
-                    #print '%d parts to sequence on page %d' % (len(S), self.page)
                     n = len(S)
                 else:
                     n = 0
-                #if isinstance(f, KeepTogether): print 'n=%d' % n
                 if n:
                     if self.frame.add(S[0], self.canv, trySplit=0):
                         self._curPageFlowableCount = self._curPageFlowableCount + 1
                         self.afterFlowable(S[0])
                     else:
-                        ident = "Splitting error(n==%d) on page %d in\n%s" % (n,self.page,f.identity(30))
+                        ident = "Splitting error(n==%d) on page %d in\n%s" % (n,self.page,self._fIdent(f,30,self.frame))
                         #leave to keep apart from the raise
                         raise LayoutError(ident)
                     del S[0]
@@ -623,7 +631,7 @@ class BaseDocTemplate:
                         flowables.insert(f,S[f])    # put split flowables back on the list
                 else:
                     if hasattr(f,'_postponed'):
-                        ident = "Flowable %s too large on page %d" % (f.identity(30), self.page)
+                        ident = "Flowable %s too large on page %d" % (self._fIdent(f,30,self.frame), self.page)
                         #leave to keep apart from the raise
                         raise LayoutError(ident)
                     # this ought to be cleared when they are finally drawn!
@@ -646,7 +654,8 @@ class BaseDocTemplate:
         self._calc()
         self.canv = canvasmaker(filename or self.filename,
                                 pagesize=self.pagesize,
-                                invariant=self.invariant)
+                                invariant=self.invariant,
+                                pageCompression=self.pageCompression)
         if self._onPage:
             self.canv.setPageCallBack(self._onPage)
         self.handle_documentBegin()
@@ -737,8 +746,6 @@ class BaseDocTemplate:
         for thing in story:
             if thing.isIndexing():
                 self._indexingFlowables.append(thing)
-        #print 'scanned story, found these indexing flowables:\n'
-        #print self._indexingFlowables
 
         #better fix for filename is a 'file' problem
         self._doSave = 0

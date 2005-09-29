@@ -170,7 +170,12 @@ class Flowable:
             r = '...'
         if r and maxLen:
             r = r[:maxLen]
-        return "<%s at %d>%s" % (self.__class__.__name__, id(self), r)
+        return "<%s at %s%s>%s" % (self.__class__.__name__, hex(id(self)), self._frameName(), r)
+
+    def _frameName(self):
+        f = getattr(self,'_frame',None)
+        if f and f.id: return ' frame=%s' % f.id
+        return ''
 
 class XBox(Flowable):
     """Example flowable - a box with an x through it and a caption.
@@ -479,7 +484,7 @@ class KeepTogether(Flowable):
         return S
 
     def identity(self):
-        return "<KeepTogether at %d> containing :" + "\n".join([f.identity() for f in self._flowables])
+        return "<KeepTogether at %s%s> containing :%s" % (hex(id(self)),self._frameName(),"\n".join([f.identity() for f in self._flowables]))
 
 class Macro(Flowable):
     """This is not actually drawn (i.e. it has zero height)
@@ -744,14 +749,14 @@ def _qsolve(h,(a,b)):
     return max(1./s1, 1./s2)
 
 class KeepInFrame(_Container,Flowable):
-    def __init__(self, maxWidth, maxHeight, content=[], mergeSpace=1, mode='shrink', name=None):
+    def __init__(self, maxWidth, maxHeight, content=[], mergeSpace=1, mode='shrink', name=''):
         '''mode describes the action to take when overflowing
             error       raise an error in the normal way
             continue    ignore ie just draw it and report maxWidth, maxHeight
             shrink      shrinkToFit
             truncate    fit as much as possible
         '''
-        self.name = name or str(id(self))
+        self.name = name
         self.maxWidth = maxWidth
         self.maxHeight = maxHeight
         self.mode = mode
@@ -765,7 +770,7 @@ class KeepInFrame(_Container,Flowable):
         return self.maxWidth - self._leftExtraIndent - self._rightExtraIndent
 
     def identity(self, maxLen=None):
-        return "<%s at %d%s> size=%sx%s" % (self.__class__.__name__, id(self), self.name and ' name="%s"'%self.name, fp_str(self.maxWidth),fp_str(self.maxHeight))
+        return "<%s at %s%s%s> size=%sx%s" % (self.__class__.__name__, hex(id(self)), self._frameName(), self.name and ' name="%s"'%self.name or '', fp_str(self.maxWidth),fp_str(self.maxHeight))
 
     def wrap(self,availWidth,availHeight):
         mode = self.mode
