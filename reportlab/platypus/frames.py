@@ -195,7 +195,7 @@ class Frame:
         frame is full.  If it cannot fit one object, raises
         an exception."""
 
-        logger.debug("enter Frame.addFromlist() for frame %s" % self.id)
+        if self._debug: logger.debug("enter Frame.addFromlist() for frame %s" % self.id)
         if self.showBoundary:
             self.drawBoundary(canv)
 
