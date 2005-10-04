@@ -777,9 +777,9 @@ class KeepInFrame(_Container,Flowable):
         maxWidth = float(self.maxWidth or availWidth)
         maxHeight = float(self.maxHeight or availHeight)
         W, H = _listWrapOn(self._content,availWidth,self.canv)
-        if mode=='error' or (W<=maxWidth and H<=maxHeight):
-            self.width = W  #we take what we get
-            self.height = H
+        if mode=='error' or (W<=maxWidth+_FUZZ and H<=maxHeight+_FUZZ):
+            self.width = min(W,maxWidth)-_FUZZ      #we take what we get
+            self.height = min(H,maxHeight)-_FUZZ
         elif mode in ('overflow','truncate'):   #we lie
             self.width = min(maxWidth,W)-_FUZZ
             self.height = min(maxHeight,H)-_FUZZ
