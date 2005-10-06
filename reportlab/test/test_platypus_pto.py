@@ -150,7 +150,7 @@ def _ptoTestCase(self):
     ptoblob('2 PTO (inner split)',[ColorParagraph('pink',text0,bt),PTOContainer([ColorParagraph(black,'Inner Starts',H1),ColorParagraph('yellow',text2,bt),ColorParagraph('black','Inner Ends',H1)],t1,h1),ColorParagraph('magenta',text1,bt)],t0,h0)
     _showDoc('test_platypus_pto.pdf',story)
 
-def _KeepInFrameTestCase(self,mode):
+def _KeepInFrameTestCase(self,mode,offset=12):
     story = []
     def fbreak(story=story):
         story.append(FrameBreak())
@@ -159,11 +159,11 @@ def _KeepInFrameTestCase(self,mode):
     H1.pageBreakBefore = 0
     H1.keepWithNext = 0
     bt = styleSheet['BodyText']
-    story.append(KeepInFrame(170-12,284-12,[Paragraph(text0,bt)],mode=mode))
+    story.append(KeepInFrame(170-offset,284-offset,[Paragraph(text0,bt)],mode=mode))
     fbreak()
-    story.append(KeepInFrame(170-12,284-12,[Paragraph(text0,bt),Paragraph(text1,bt)],mode=mode))
+    story.append(KeepInFrame(170-offset,284-offset,[Paragraph(text0,bt),Paragraph(text1,bt)],mode=mode))
     fbreak()
-    story.append(KeepInFrame(170-12,284-12,[Paragraph(text0,bt),Paragraph(text1,bt),Paragraph(text2,bt)],mode=mode))
+    story.append(KeepInFrame(170-offset,284-offset,[Paragraph(text0,bt),Paragraph(text1,bt),Paragraph(text2,bt)],mode=mode))
     _showDoc('test_platypus_KeepInFrame%s.pdf'%mode,story)
 
 class TestCases(unittest.TestCase):
@@ -179,6 +179,9 @@ class TestCases(unittest.TestCase):
     def test4(self):
         from reportlab.platypus.doctemplate import LayoutError
         self.assertRaises(LayoutError, _KeepInFrameTestCase,*(self,"error"))
+    def test5(self):
+        from reportlab.platypus.doctemplate import LayoutError
+        self.assertRaises(LayoutError, _KeepInFrameTestCase,*(self,"shrink",0))
 
 def makeSuite():
     return makeSuiteForClasses(TestCases)

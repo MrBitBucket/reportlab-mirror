@@ -773,13 +773,22 @@ class KeepInFrame(_Container,Flowable):
         return "<%s at %s%s%s> size=%sx%s" % (self.__class__.__name__, hex(id(self)), self._frameName(), self.name and ' name="%s"'%self.name or '', fp_str(self.maxWidth),fp_str(self.maxHeight))
 
     def wrap(self,availWidth,availHeight):
+        from doctemplate import LayoutError
         mode = self.mode
         maxWidth = float(self.maxWidth or availWidth)
         maxHeight = float(self.maxHeight or availHeight)
         W, H = _listWrapOn(self._content,availWidth,self.canv)
-        if mode=='error' or (W<=maxWidth+_FUZZ and H<=maxHeight+_FUZZ):
-            self.width = min(W,maxWidth)-_FUZZ      #we take what we get
-            self.height = min(H,maxHeight)-_FUZZ
+        if (mode=='error' and (W>availWidth+_FUZZ or H>availHeight+_FUZZ)):
+            ident = 'content %sx%s too large for %s' % (W,H,self.identity(30))
+            #leave to keep apart from the raise
+            raise LayoutError(ident)
+        elif W<=availWidth+_FUZZ and H<=availHeight+_FUZZ:
+            self.width = W-_FUZZ      #we take what we get
+            self.height = H-_FUZZ
+        elif (maxWidth>=availWidth+_FUZZ or maxHeight>=availHeight+_FUZZ):
+            ident = 'Specified size too large for available space %sx%s in %s' % (availWidth,availHeight,self.identity(30))
+            #leave to keep apart from the raise
+            raise LayoutError(ident)
         elif mode in ('overflow','truncate'):   #we lie
             self.width = min(maxWidth,W)-_FUZZ
             self.height = min(maxHeight,H)-_FUZZ
