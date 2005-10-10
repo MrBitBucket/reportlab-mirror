@@ -36,7 +36,7 @@ from reportlab.pdfbase import pdfutils
 from reportlab.rl_config import _FUZZ, overlapAttachedSpace
 __all__=('TraceInfo','Flowable','XBox','Preformatted','Image','Spacer','PageBreak','SlowPageBreak',
         'CondPageBreak','KeepTogether','Macro','CallerMacro','ParagraphAndImage',
-        'FailOnWrap','HRFlowable','PTOContainer','KeepInFrame')
+        'FailOnWrap','HRFlowable','PTOContainer','KeepInFrame','UseUpSpace')
 
 
 class TraceInfo:
@@ -400,19 +400,24 @@ class Spacer(Flowable):
     def draw(self):
         pass
 
-class PageBreak(Spacer):
-    """Move on to the next page in the document.
-       This works by consuming all remaining space in the frame!"""
+class UseUpSpace(Flowable):
     def __init__(self):
         pass
 
     def __repr__(self):
-        return "PageBreak()"
+        return "%s()" % self.__class__.__name__
 
     def wrap(self, availWidth, availHeight):
         self.width = availWidth
         self.height = availHeight
         return (availWidth,availHeight)  #step back a point
+
+    def draw(self):
+        pass
+
+class PageBreak(UseUpSpace):
+    """Move on to the next page in the document.
+       This works by consuming all remaining space in the frame!"""
 
 class SlowPageBreak(PageBreak):
     pass
@@ -670,9 +675,10 @@ class PTOContainer(_Container,Flowable):
         return self.width,self.height
 
     def split(self, availWidth, availHeight):
+        if availHeight<0: return []
         canv = self.canv
         C = self._content
-        x = i = H = pS = 0
+        x = i = H = pS = hx = 0
         n = len(C)
         I2W = {}
         for x in xrange(n):
@@ -687,34 +693,36 @@ class PTOContainer(_Container,Flowable):
             else:
                 T,tW,tH,tSB = I2W[I]
             _, h = c.wrapOn(canv,availWidth,0xfffffff)
-            if x: h += max(c.getSpaceBefore()-pS,0)
+            if x:
+                hx = max(c.getSpaceBefore()-pS,0)
+                h += hx
             pS = c.getSpaceAfter()
             H += h+pS
-            if H+tH+max(tSB,pS)>=availHeight-_FUZZ: break
+            tHS = tH+max(tSB,pS)
+            if H+tHS>=availHeight-_FUZZ: break
             i += 1
 
         #first retract last thing we tried
         H -= (h+pS)
 
         #attempt a sub split on the last one we have
-        aH = (availHeight - H - max(pS,tSB) - tH)*0.99
+        aH = (availHeight-H-tHS-hx)*0.99999
         if aH>=0.05*availHeight:
             SS = c.splitOn(canv,availWidth,aH)
         else:
             SS = []
-        if SS:
-            from doctemplate import  FrameBreak
-            F = [FrameBreak()]
+        F = [UseUpSpace()]
 
-        if SS:
+        if len(SS)>1:
             R1 = C[:i] + SS[:1] + T + F
             R2 = Hdr + SS[1:]+C[i+1:]
         elif not i:
             return []
         else:
-            R1 = C[:i-1]+T
+            R1 = C[:i]+T+F
             R2 = Hdr + C[i:]
-        return R1 + [PTOContainer(R2,deepcopy(I.trailer),deepcopy(I.header))]
+        T =  R1 + [PTOContainer(R2,deepcopy(I.trailer),deepcopy(I.header))]
+        return T
 
 #utility functions used by KeepInFrame
 def _hmodel(s0,s1,h0,h1):
