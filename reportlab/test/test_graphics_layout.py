@@ -33,7 +33,7 @@ class BoundsTestCase(unittest.TestCase):
 
     def testWedge(self):
         s = shapes.Wedge(0,0,10,0,90)
-        assert s.getBounds() == (0,0,10,10)
+        assert s.getBounds() == (0,0,10,10), 'expected (0,0,10,10) got %s' % repr(s.getBounds())
 
     def testPolygon(self):
         points = [0,0,10,30,25,15]

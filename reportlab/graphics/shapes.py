@@ -878,26 +878,31 @@ class Path(SolidShape):
 EmptyClipPath=Path()    #special path
 
 def getArcPoints(centerx, centery, radius, startangledegrees, endangledegrees, yradius=None, degreedelta=None, reverse=None):
-    degreedelta = degreedelta or 1
     if yradius is None: yradius = radius
     points = []
     from math import sin, cos, pi
     degreestoradians = pi/180.0
-    radiansdelta = degreedelta*degreestoradians
     startangle = startangledegrees*degreestoradians
     endangle = endangledegrees*degreestoradians
     while endangle<startangle:
         endangle = endangle+2*pi
     angle = float(endangle - startangle)
+    a = points.append
     if angle>.001:
+        degreedelta = min(angle,degreedelta or 1.)
+        radiansdelta = degreedelta*degreestoradians
         n = max(int(angle/radiansdelta+0.5),1)
         radiansdelta = angle/n
-        a = points.append
-        for angle in xrange(n+1):
-            angle = startangle+angle*radiansdelta
-            a((centerx+radius*cos(angle),centery+yradius*sin(angle)))
-        #a((centerx+radius*cos(endangle),centery+yradius*sin(endangle)))
-        if reverse: points.reverse()
+        n += 1
+    else:
+        n = 1
+        radiansdelta = 0
+
+    for angle in xrange(n):
+        angle = startangle+angle*radiansdelta
+        a((centerx+radius*cos(angle),centery+yradius*sin(angle)))
+
+    if reverse: points.reverse()
     return points
 
 class ArcPath(Path):
@@ -1080,36 +1085,39 @@ class Wedge(SolidShape):
         yradius, radius1, yradius1 = self._xtraRadii()
         startangledegrees = self.startangledegrees
         endangledegrees = self.endangledegrees
-        degreedelta = self.degreedelta
         from math import sin, cos, pi
         degreestoradians = pi/180.0
-        radiansdelta = degreedelta*degreestoradians
         startangle = startangledegrees*degreestoradians
         endangle = endangledegrees*degreestoradians
         while endangle<startangle:
             endangle = endangle+2*pi
         angle = float(endangle-startangle)
         points = []
-        if angle>.001:
+        if angle>0.001:
+            degreedelta = min(self.degreedelta or 1.,angle)
+            radiansdelta = degreedelta*degreestoradians
             n = max(1,int(angle/radiansdelta+0.5))
             radiansdelta = angle/n
-            a = points.append
-            CA = []
-            CAA = CA.append
-            for angle in xrange(n+1):
-                angle = startangle+angle*radiansdelta
-                CAA((cos(angle),sin(angle)))
-            #CAA((cos(endangle),sin(endangle)))
+            n += 1
+        else:
+            n = 1
+            radiansdelta = 0
+        CA = []
+        CAA = CA.append
+        a = points.append
+        for angle in xrange(n):
+            angle = startangle+angle*radiansdelta
+            CAA((cos(angle),sin(angle)))
+        for c,s in CA:
+            a(centerx+radius*c)
+            a(centery+yradius*s)
+        if (radius1==0 or radius1 is None) and (yradius1==0 or yradius1 is None):
+            a(centerx); a(centery)
+        else:
+            CA.reverse()
             for c,s in CA:
-                a(centerx+radius*c)
-                a(centery+yradius*s)
-            if (radius1==0 or radius1 is None) and (yradius1==0 or yradius1 is None):
-                a(centerx); a(centery)
-            else:
-                CA.reverse()
-                for c,s in CA:
-                    a(centerx+radius1*c)
-                    a(centery+yradius1*s)
+                a(centerx+radius1*c)
+                a(centery+yradius1*s)
         return Polygon(points)
 
     def copy(self):
