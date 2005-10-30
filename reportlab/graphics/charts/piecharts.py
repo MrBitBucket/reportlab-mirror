@@ -698,6 +698,7 @@ class Pie3d(Pie):
         self.slices[4].fillColor = colors.azure
         self.slices[5].fillColor = colors.crimson
         self.slices[6].fillColor = colors.darkviolet
+        self.checkLabelOverlap = 0
 
     def _fillSide(self,L,i,angle,strokeColor,strokeWidth,fillColor):
         rd = self.rad_dist(angle)
@@ -750,12 +751,14 @@ class Pie3d(Pie):
         L = []
 
         class WedgeLabel3d(WedgeLabel):
+            _ydepth_3d = self._ydepth_3d
             def _checkDXY(self,ba):
                 if ba[0]=='n':
                     if not hasattr(self,'_ody'):
                         self._ody = self.dy
                         self.dy = -self._ody + self._ydepth_3d
-        WedgeLabel3d._ydepth_3d = self._ydepth_3d
+    
+        checkLabelOverlap = self.checkLabelOverlap
 
         for i in xrange(n):
             style = slices[i]
@@ -804,11 +807,21 @@ class Pie3d(Pie):
                 self._radiusx *= rat
                 self._radiusy *= rat
                 mid = sl.mid
-                _addWedgeLabel(self,text,L.append,mid,OX(i,mid,0),OY(i,mid,0),style,labelClass=WedgeLabel3d)
+                labelX = OX(i,mid,0)
+                labelY = OY(i,mid,0)
+                _addWedgeLabel(self,text,L.append,mid,labelX,labelY,style,labelClass=WedgeLabel3d)
+                if checkLabelOverlap:
+                    l = L[-1]
+                    l._origdata = { 'x': labelX, 'y':labelY, 'angle': mid,
+                                    'rx': self._radiusx, 'ry':self._radiusy, 'cx':CX(i,0), 'cy':CY(i,0),
+                                    'bounds': l.getBounds(),
+                                    }
                 self._radiusx = radiusx
                 self._radiusy = radiusy
 
         S.sort(lambda a,b: -cmp(a[0],b[0]))
+        if checkLabelOverlap:
+            fixLabelOverlaps(L)
         map(g.add,map(lambda x:x[1],S)+T+L)
         return g
 
