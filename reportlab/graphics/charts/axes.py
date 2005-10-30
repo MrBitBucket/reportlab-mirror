@@ -67,6 +67,15 @@ def _findMax(V, x, default,special=None):
     '''find maximum over V[i][x]'''
     return _findMinMaxValue(V,x,default,max,special=special)
 
+def _allInt(values):
+    '''true if all values are int'''
+    for v in values:
+        try:
+            if int(v)!=v: return 0
+        except:
+            return 0
+    return 1
+
 class _AxisG(Widget):
     def _get_line_pos(self,v):
         v = self.scale(v)
@@ -803,12 +812,7 @@ class ValueAxis(_AxisG):
             self._valueStep = self.valueStep
 
     def _allIntTicks(self):
-        for tick in self._tickValues:
-            try:
-                if int(tick)!=tick: return 0
-            except:
-                return 0
-        return 1
+        return _allInt(self._tickValues)
 
     def makeTickLabels(self):
         g = Group()
