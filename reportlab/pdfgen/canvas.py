@@ -22,7 +22,6 @@ from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
-from reportlab.lib.colors import Color, CMYKColor, toColor
 from reportlab.lib.utils import import_zlib
 from reportlab.lib.utils import fp_str
 
@@ -64,7 +63,7 @@ else:
     def _digester(s):
         return join(map(lambda x : "%02x" % ord(x), md5.md5(s).digest()), '')
 
-class Canvas:
+class Canvas(textobject._PDFColorSetter):
     """This class is the programmer's interface to the PDF file format.  Methods
     are (or will be) provided here to do just about everything PDF can do.
 
@@ -1167,20 +1166,6 @@ class Canvas:
         # use PDFTextObject for multi-line text.
         ##################################################
 
-    def setFillColorCMYK(self, c, m, y, k):
-         """set the fill color useing negative color values
-            (cyan, magenta, yellow and darkness value).
-         Takes 4 arguments between 0.0 and 1.0"""
-         self._fillColorCMYK = (c, m, y, k)
-         self._code.append('%s k' % fp_str(c, m, y, k))
-
-    def setStrokeColorCMYK(self, c, m, y, k):
-         """set the stroke color useing negative color values
-            (cyan, magenta, yellow and darkness value).
-            Takes 4 arguments between 0.0 and 1.0"""
-         self._strokeColorCMYK = (c, m, y, k)
-         self._code.append('%s K' % fp_str(c, m, y, k))
-
     def drawString(self, x, y, text):
         """Draws a string in the current text styles."""
         #we could inline this for speed if needed
@@ -1336,79 +1321,6 @@ class Canvas:
             assert phase >= 0, "phase is a length in user space"
             textarray =  ' '.join(map(str, array))
             self._code.append('[%s] %s d' % (textarray, phase))
-
-    def setFillColorRGB(self, r, g, b):
-        """Set the fill color using positive color description
-           (Red,Green,Blue).  Takes 3 arguments between 0.0 and 1.0"""
-        self._fillColorRGB = (r, g, b)
-        self._code.append('%s rg' % fp_str(r,g,b))
-
-    def setStrokeColorRGB(self, r, g, b):
-        """Set the stroke color using positive color description
-           (Red,Green,Blue).  Takes 3 arguments between 0.0 and 1.0"""
-        self._strokeColorRGB = (r, g, b)
-        self._code.append('%s RG' % fp_str(r,g,b))
-
-    def setFillColor(self, aColor):
-        """Takes a color object, allowing colors to be referred to by name"""
-        if isinstance(aColor, CMYKColor):
-            d = aColor.density
-            c,m,y,k = (d*aColor.cyan, d*aColor.magenta, d*aColor.yellow, d*aColor.black)
-            self._fillColorCMYK = (c, m, y, k)
-            self._code.append('%s k' % fp_str(c, m, y, k))
-        elif isinstance(aColor, Color):
-            rgb = (aColor.red, aColor.green, aColor.blue)
-            self._fillColorRGB = rgb
-            self._code.append('%s rg' % fp_str(rgb) )
-        elif type(aColor) in _SeqTypes:
-            l = len(aColor)
-            if l==3:
-                self._fillColorRGB = aColor
-                self._code.append('%s rg' % fp_str(aColor) )
-            elif l==4:
-                self.setFillColorCMYK(aColor[0], aColor[1], aColor[2], aColor[3])
-            else:
-                raise 'Unknown color', str(aColor)
-        elif type(aColor) is StringType:
-            self.setFillColor(toColor(aColor))
-        else:
-            raise 'Unknown color', str(aColor)
-
-    def setStrokeColor(self, aColor):
-        """Takes a color object, allowing colors to be referred to by name"""
-        if isinstance(aColor, CMYKColor):
-            d = aColor.density
-            c,m,y,k = (d*aColor.cyan, d*aColor.magenta, d*aColor.yellow, d*aColor.black)
-            self._strokeColorCMYK = (c, m, y, k)
-            self._code.append('%s K' % fp_str(c, m, y, k))
-        elif isinstance(aColor, Color):
-        #if type(aColor) == ColorType:
-            rgb = (aColor.red, aColor.green, aColor.blue)
-            self._strokeColorRGB = rgb
-            self._code.append('%s RG' % fp_str(rgb) )
-        elif type(aColor) in _SeqTypes:
-            l = len(aColor)
-            if l==3:
-                self._strokeColorRGB = aColor
-                self._code.append('%s RG' % fp_str(aColor) )
-            elif l==4:
-                self.setStrokeColorCMYK(aColor[0], aColor[1], aColor[2], aColor[3])
-            else:
-                raise 'Unknown color', str(aColor)
-        elif type(aColor) is StringType:
-            self.setStrokeColor(toColor(aColor))
-        else:
-            raise 'Unknown color', str(aColor)
-
-    def setFillGray(self, gray):
-        """Sets the gray level; 0.0=black, 1.0=white"""
-        self._fillColorRGB = (gray, gray, gray)
-        self._code.append('%s g' % fp_str(gray))
-
-    def setStrokeGray(self, gray):
-        """Sets the gray level; 0.0=black, 1.0=white"""
-        self._strokeColorRGB = (gray, gray, gray)
-        self._code.append('%s G' % fp_str(gray))
 
     # path stuff - the separate path object builds it
 
