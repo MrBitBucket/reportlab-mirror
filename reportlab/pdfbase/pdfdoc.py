@@ -75,18 +75,18 @@ Pages = "Pages"
 # for % substitutions
 LINEENDDICT = {"LINEEND": LINEEND, "PERCENT": "%"}
 
-def format(element, document, toplevel=0):
+from types import InstanceType
+def format(element, document, toplevel=0, InstanceType=InstanceType):
     """Indirection step for formatting.
        Ensures that document parameters alter behaviour
        of formatting for all elements.
     """
-    from types import InstanceType, FloatType, IntType
-    if type(element) is InstanceType:
+    t=type(element)
+    if t is InstanceType:
         if not toplevel and hasattr(element, __RefOnly__):
             # the object cannot be a component at non top level.
             # make a reference to it and return it's format
-            R = document.Reference(element)
-            return R.format(document)
+            return document.Reference(element).format(document)
         else:
             try:
                 fmt = element.format
@@ -96,7 +96,7 @@ def format(element, document, toplevel=0):
             if not rl_config.invariant and DoComments and hasattr(element, __Comment__):
                 f = "%s%s%s%s" % ("% ", element.__Comment__, LINEEND, f)
             return f
-    elif type(element) in (FloatType, IntType):
+    elif t in (float, int):
         #use a controlled number formatting routine
         #instead of str, so Jython/Python etc do not differ
         return fp_str(element)
@@ -447,10 +447,9 @@ class PDFDocument:
         #print "xobjDict D", D
         return PDFDictionary(D)
 
-    def Reference(self, object, name=None):
+    def Reference(self, object, name=None, InstanceType=InstanceType):
         ### note references may "grow" during the final formatting pass: don't use d.keys()!
         # don't make references to other references, or non instances, unless they are named!
-        from types import InstanceType
         #print"object type is ", type(object)
         tob = type(object)
         idToObject = self.idToObject
@@ -542,21 +541,15 @@ class PDFString:
     def __str__(self):
         return "(%s)" % pdfutils._escape(self.s)
 
-def PDFName(data):
+def PDFName(data,lo=chr(0x21),hi=chr(0x7e)):
     # might need to change this to class for encryption
     #  NOTE: RESULT MUST ALWAYS SUPPORT MEANINGFUL COMPARISONS (EQUALITY) AND HASH
     # first convert the name
-    ldata = list(data)
-    index = 0
-    for thischar in data:
-        if 0x21<=ord(thischar)<=0x7e and thischar not in "%()<>{}[]#":
-            pass # no problemo
-        else:
-            hexord = hex(ord(thischar))[2:] # forget the 0x thing...
-            ldata[index] = "#"+hexord
-        index = index+1
-    data = string.join(ldata, "")
-    return "/%s" % data
+    L = list(data)
+    for i,c in enumerate(L):
+        if c<lo or c>hi or c in "%()<>{}[]#":
+            L[i] = "#"+hex(ord(c))[2:] # forget the 0x thing...
+    return "/"+(''.join(L))
 
 class PDFDictionary:
 
@@ -576,26 +569,16 @@ class PDFDictionary:
         dict = self.dict
         keys = dict.keys()
         keys.sort()
-        L = []
-        a = L.append
-        for k in keys:
-            v = dict[k]
-            fv = format(v, document)
-            fk = format(PDFName(k), document)
-            #a(fk)
-            #a(" "+fv)
-            a(fk + " " + fv)
-        #L = map(str, L)
+        L = [(format(PDFName(k),document)+" "+format(dict[k],document)) for k in keys]
         if self.multiline:
-            Lj = string.join(L, LINEEND)
-            Lj = indent(Lj)
+            L = indent(LINEEND.join(L))
         else:
-            Lj = L
             # break up every 6 elements anyway
-            for i in range(6, len(Lj), 6):
-                Lj.insert(i,LINEEND)
-            Lj = string.join(L, " ")
-        return "<< %s >>" % Lj
+            t=L.insert
+            for i in xrange(6, len(L), 6):
+                t(i,LINEEND)
+            L = " ".join(L)
+        return "<< %s >>" % L
 
 # stream filters are objects to support round trip and
 # possibly in the future also support parameters
