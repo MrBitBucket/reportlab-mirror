@@ -88,11 +88,7 @@ def format(element, document, toplevel=0, InstanceType=InstanceType):
             # make a reference to it and return it's format
             return document.Reference(element).format(document)
         else:
-            try:
-                fmt = element.format
-            except:
-                raise AttributeError, "%s has no format operation" % element
-            f = fmt(document)
+            f = element.format(document)
             if not rl_config.invariant and DoComments and hasattr(element, __Comment__):
                 f = "%s%s%s%s" % ("% ", element.__Comment__, LINEEND, f)
             return f
@@ -102,9 +98,6 @@ def format(element, document, toplevel=0, InstanceType=InstanceType):
         return fp_str(element)
     else:
         return str(element)
-
-def indent(s, IND=LINEEND+" "):
-    return string.replace(s, LINEEND, IND)
 
 def xObjectName(externalname):
     return "FormXob.%s" % externalname
@@ -563,15 +556,14 @@ class PDFDictionary:
     def __setitem__(self, name, value):
         self.dict[name] = value
     def Reference(name, document):
-        ob = self.dict[name]
-        self.dict[name] = document.Reference(ob)
-    def format(self, document):
+        self.dict[name] = document.Reference(self.dict[name])
+    def format(self, document,IND=LINEEND+' '):
         dict = self.dict
         keys = dict.keys()
         keys.sort()
         L = [(format(PDFName(k),document)+" "+format(dict[k],document)) for k in keys]
         if self.multiline:
-            L = indent(LINEEND.join(L))
+            L = IND.join(L)
         else:
             # break up every 6 elements anyway
             t=L.insert
@@ -690,24 +682,17 @@ class PDFArray:
     def References(self, document):
         """make all objects in sequence references"""
         self.sequence = map(document.Reference, self.sequence)
-    def format(self, document):
-        #ssequence = map(str, self.sequence)
-        sequence = self.sequence
-        fsequence = []
-        for elt in sequence:
-            felt = format(elt, document)
-            fsequence.append(felt)
+    def format(self, document, IND=LINEEND+' '):
+        L = [format(e, document) for e in self.sequence]
         if self.multiline:
-            Lj = string.join(fsequence, LINEEND)
-            Lj = indent(Lj)
+            L = IND.join(L)
         else:
             # break up every 10 elements anyway
-            Lj = fsequence
             breakline = LINEEND+" "
-            for i in range(10, len(Lj), 10):
-                Lj.insert(i,breakline)
-            Lj = string.join(Lj)
-        return "[ %s ]" % Lj
+            for i in xrange(10, len(L), 10):
+                L.insert(i,breakline)
+            L = ' '.join(L)
+        return "[ %s ]" % L
 
 INDIRECTOBFMT = ("%(n)s %(v)s obj%(LINEEND)s"
                  "%(content)s" "%(LINEEND)s"
@@ -735,12 +720,10 @@ class PDFObjectReference:
     def __init__(self, name):
         self.name = name
     def format(self, document):
-        name = self.name
         try:
-            (n, v) = document.idToObjectNumberAndVersion[name]
+            return "%s %s R" % document.idToObjectNumberAndVersion[self.name]
         except:
-            raise KeyError, "forward reference to %s not resolved upon final formatting" % repr(name)
-        return "%s %s R" % (n,v)
+            raise KeyError, "forward reference to %s not resolved upon final formatting" % repr(self.name)
 
 ### chapter 5
 # Following Ken Lunde's advice and the PDF spec, this includes
