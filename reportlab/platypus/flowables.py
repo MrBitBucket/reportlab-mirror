@@ -632,7 +632,11 @@ class _Container:   #Abstract some common container like behaviour
         return 0
 
     def getSpaceAfter(self):
-        for c in reversed(self._content):
+        #this needs 2.4
+        #for c in reversed(self._content):
+        reverseContent = self._content[:]
+        reverseContent.reverse()
+        for c in reverseContent:
             if not hasattr(c,'frameAction'):
                 return c.getSpaceAfter()
         return 0
