@@ -131,9 +131,7 @@ def sample2line(data=[(13, 5, 20, 22, 37, 45, 19, 4),
 
 def sample3(drawing=None):
     "Add sample swatches to a diagram."
-
     d = drawing or Drawing(400, 200)
-
     swatches = Legend()
     swatches.alignment = 'right'
     swatches.x = 80
@@ -143,11 +141,8 @@ def sample3(drawing=None):
     swatches.columnMaximum = 4
     items = [(colors.red, 'before'), (colors.green, 'after')]
     swatches.colorNamePairs = items
-
     d.add(swatches, 'legend')
-
     return d
-
 
 def sample4pie():
     width = 300
@@ -230,6 +225,25 @@ def pcleg(i=None):
 def scleg(i=None):
     chart = SpiderChart()
     return autoLegender(i,chart,chart.strands,None)
+
+def plpleg(i=None):
+    from reportlab.lib.colors import pink, red, green
+    pie = Pie()
+    pie.x = 0
+    pie.y = 0
+    pie.pointerLabelMode='LeftAndRight'
+    pie.slices.label_boxStrokeColor      = red
+    pie.simpleLabels = 0
+    pie.sameRadii = 1
+    pie.data = [1, 0.1, 1.7, 4.2,0,0]
+    pie.labels = ['abcdef', 'b', 'c', 'd','e','fedcba']
+    pie.strokeWidth=1
+    pie.strokeColor=green
+    pie.slices.label_pointer_piePad      = 6
+    pie.width = 160
+    pie.direction = 'clockwise'
+    pie.pointerLabelMode  = 'LeftRight'
+    return autoLegender(i,pie,pie.slices,None)
 
 def notFail(d):
     try:
@@ -330,7 +344,7 @@ class ChartTestCase(unittest.TestCase):
 
     def test4b(self):
         story = self.story
-        for code in (lpleg, hlcleg, bcleg, pcleg, scleg):
+        for code in (lpleg, hlcleg, bcleg, pcleg, scleg, plpleg):
             code_name = code.func_code.co_name
             for i in ('standard', 'col auto', 'full auto', 'swatch set', 'swatch auto'):
                 d = code(i)
@@ -350,6 +364,45 @@ class ChartTestCase(unittest.TestCase):
         drawing = sample4pie()
         story.append(drawing)
         story.append(Spacer(0, 1*cm))
+
+    def test6(self):
+        from reportlab.graphics.charts.piecharts import Pie, _makeSideArcDefs, intervalIntersection
+        L = []
+
+        def intSum(arcs,A):
+            s = 0
+            for a in A:
+                for arc in arcs:
+                    i = intervalIntersection(arc[1:],a)
+                    if i: s += i[1] - i[0]
+            return s
+
+        def subtest(sa,d):
+            pc = Pie()
+            pc.direction=d
+            pc.startAngle=sa
+            arcs = _makeSideArcDefs(sa,d)
+            A = pc.makeAngles()
+            arcsum = sum([a[2]-a[1] for a in arcs])
+            isum = intSum(arcs,A)
+            mi = max([a[2]-a[1] for a in arcs])
+            ni = min([a[2]-a[1] for a in arcs])
+            l = []
+            s = (arcsum-360)
+            if s>1e-8: l.append('Arc length=%s != 360' % s)
+            s = abs(isum-360)
+            if s>1e-8: l.append('interval intersection length=%s != 360' % s)
+            if mi>360: l.append('max interval intersection length=%s >360' % mi)
+            if ni<0: l.append('min interval intersection length=%s <0' % ni)
+            if l:
+                l.append('sa: %s d: %s' % (sa,d))
+                l.append('sidearcs: %s' % arcs)
+                l.append('Angles: %s' % A)
+                raise ValueError('piecharts._makeSideArcDefs failure\n%s' % '\n'.join(l))
+
+        for d in ('anticlockwise','clockwise'):
+            for sa in (225, 180, 135, 90, 45, 0, -45, -90):
+                subtest(sa,d)
 
         # This triggers the document build operation (hackish).
         global FINISHED

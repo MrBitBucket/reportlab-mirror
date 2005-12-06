@@ -27,7 +27,7 @@ from reportlab.lib.validators import isColor, isNumber, isListOfNumbersOrNone,\
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.attrmap import *
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS, ArcPath, Polygon, Rect
+from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS, ArcPath, Polygon, Rect, PolyLine
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.areas import PlotArea
 from textlabels import Label
@@ -86,6 +86,11 @@ class WedgeProperties(PropHolder):
         label_leftPadding = AttrMapValue(isNumber,'padding at left of box'),
         label_rightPadding = AttrMapValue(isNumber,'padding at right of box'),
         label_bottomPadding = AttrMapValue(isNumber,'padding at bottom of box'),
+        label_pointer_strokeColor = AttrMapValue(isColorOrNone,desc='Color of indicator line'),
+        label_pointer_strokeWidth = AttrMapValue(isNumber,desc='StrokeWidth of indicator line'),
+        label_pointer_elbowLength = AttrMapValue(isNumber,desc='length of final indicator line segment'),
+        label_pointer_edgePad = AttrMapValue(isNumber,desc='pad between pointer label and box'),
+        label_pointer_piePad = AttrMapValue(isNumber,desc='pad between pointer label and pie'),
         swatchMarker = AttrMapValue(NoneOr(isSymbol), desc="None or makeMarker('Diamond') ..."),
         )
 
@@ -111,6 +116,11 @@ class WedgeProperties(PropHolder):
         self.label_leading =    self.label_width = self.label_maxWidth = self.label_height = None
         self.label_textAnchor = 'start'
         self.label_visible = 1
+        self.label_pointer_strokeColor = colors.black
+        self.label_pointer_strokeWidth = 0.5
+        self.label_pointer_elbowLength = 3
+        self.label_pointer_edgePad = 2
+        self.label_pointer_piePad = 3
 
 def _addWedgeLabel(self,text,add,angle,labelX,labelY,wedgeStyle,labelClass=WedgeLabel):
     # now draw a label
@@ -257,6 +267,104 @@ def fixLabelOverlaps(L):
         mult *= 1.05
         iter += 1
 
+def intervalIntersection(A,B):
+    x,y = max(min(A),min(B)),min(max(A),max(B))
+    if x>=y: return None
+    return x,y
+
+def _makeSideArcDefs(sa,direction):
+    sa %= 360
+    if 90<=sa<270:
+        if direction=='clockwise':
+            a = (0,90,sa),(1,-90,90),(0,-360+sa,-90)
+        else:
+            a = (0,sa,270),(1,270,450),(0,450,360+sa)
+    else:
+        offs = sa>=270 and 360 or 0
+        if direction=='clockwise':
+            a = (1,offs-90,sa),(0,offs-270,offs-90),(1,-360+sa,offs-270)
+        else:
+            a = (1,sa,offs+90),(0,offs+90,offs+270),(1,offs+270,360+sa)
+    return tuple([a for a in a if a[1]<a[2]])
+
+def _findLargestArc(xArcs,side):
+    a = [a[1] for a in xArcs if a[0]==side and a[1] is not None]
+    if not a: return None
+    if len(a)>1: a.sort(lambda x,y: cmp(y[1]-y[0],x[1]-x[0]))
+    return a[0]
+
+def _fPLSide(l,width,side=None):
+    data = l._origdata
+    if side is None:
+        li = data['li']
+        ri = data['ri']
+        if li is None:
+            side = 1
+            i = ri
+        elif ri is None:
+            side = 0
+            i = li
+        elif li[1]-li[0]>ri[1]-ri[0]:
+            side = 0
+            i = li
+        else:
+            side = 1
+            i = ri
+    w = data['width']
+    edgePad = data['edgePad']
+    if not side:    #on left
+        l._pmv = 0
+        l.x = edgePad
+        data['xL'] = l.x+w
+        i = data['li']
+    else:
+        l._pmv = 180
+        l.x = width - edgePad
+        data['xL'] = l.x-w
+        i = data['ri']
+    mid = data['mid'] = (i[0]+i[1])*0.5
+    data['smid'] = sin(mid/_180_pi)
+    data['cmid'] = cos(mid/_180_pi)
+    data['side'] = side
+    return side,w
+
+def _fPLcf(a,b):
+    return cmp(a._origdata['mid'],b._origdata['mid'])
+
+def _fixPointerLabels(n,L,x,y,width,height,side=None):
+    LR = [],[]
+    mlr = [0,0]
+    for l in L:
+        i,w = _fPLSide(l,width,side)
+        LR[i].append(l)
+        mlr[i] = max(w,mlr[i])
+    mul = 1
+    G = n*[None]
+    mel = 0
+    hh = height*0.5
+    for i in (0,1):
+        T = LR[i]
+        if T:
+            T.sort(_fPLcf)
+            if i: T.reverse()
+            m = mlr[i]
+            p = 0
+            dy = float(height)/len(T)
+            yl = y+height
+            for l in T:
+                data = l._origdata
+                inc = x+mul*(m-data['width'])
+                l.x += inc
+                data['xL'] += inc
+                G[data['index']] = l
+                l.y = yl-dy*0.5
+                yl -= dy
+                p = max(p,data['edgePad']+data['piePad'])
+                mel = max(mel,abs(data['smid']*(hh+data['elbowLength']))-hh)
+            mlr[i] = m+p
+        mul = -1
+    return G, mlr[0], mlr[1], mel
+
 class Pie(AbstractPieChart):
     _attrMap = AttrMap(BASE=AbstractPieChart,
         data = AttrMapValue(isListOfNumbers, desc='list of numbers defining wedge sizes; need not sum to 1'),
@@ -266,11 +374,14 @@ class Pie(AbstractPieChart):
         slices = AttrMapValue(None, desc="collection of wedge descriptor objects"),
         simpleLabels = AttrMapValue(isBoolean, desc="If true(default) use String not super duper WedgeLabel"),
         other_threshold = AttrMapValue(isNumber, desc='A value for doing threshholding, not used yet.'),
-        checkLabelOverlap = AttrMapValue(isBoolean, desc="If true check and attempt to fix label overlaps(default off)"),
+        checkLabelOverlap = AttrMapValue(isBoolean, desc="If true check and attempt to fix standard label overlaps(default off)"),
+        pointerLabelMode = AttrMapValue(OneOf(None,'LeftRight','LeftAndRight'), desc=""),
+        sameRadii = AttrMapValue(isBoolean, desc="If true make x/y radii the same(default off)"),
         )
     other_threshold=None
 
     def __init__(self):
+        PlotArea.__init__(self)
         self.x = 0
         self.y = 0
         self.width = 100
@@ -281,6 +392,8 @@ class Pie(AbstractPieChart):
         self.direction = "clockwise"
         self.simpleLabels = 1
         self.checkLabelOverlap = 0
+        self.pointerLabelMode = None
+        self.sameRadii = False
 
         self.slices = TypedPropertyCollection(WedgeProperties)
         self.slices[0].fillColor = colors.darkcyan
@@ -316,107 +429,210 @@ class Pie(AbstractPieChart):
         d.add(pc)
         return d
 
+    def makePointerLabels(self,angles,plMode):
+        class PL:
+            def __init__(self,centerx,centery,xradius,yradius,data,lu=0,ru=0):
+                self.centerx = centerx
+                self.centery = centery
+                self.xradius = xradius
+                self.yradius = yradius
+                self.data = data
+                self.lu = lu
+                self.ru = ru
+
+        labelX = self.width-2
+        labelY = self.height
+        n = nr = nl = maxW = sumH = 0
+        styleCount = len(self.slices)
+        L=[]
+        L_add = L.append
+        refArcs = _makeSideArcDefs(self.startAngle,self.direction)
+        for i, A in enumerate(angles):
+            if A[1] is None: continue
+            sn = self.getSeriesName(i,'')
+            if not sn: continue
+            n += 1
+            style = self.slices[i%styleCount]
+            _addWedgeLabel(self,sn,L_add,180,labelX,labelY,style,labelClass=WedgeLabel)
+            l = L[-1]
+            b = l.getBounds()
+            w = b[2]-b[0]
+            h = b[3]-b[1]
+            ri = [(a[0],intervalIntersection(A,(a[1],a[2]))) for a in refArcs]
+            li = _findLargestArc(ri,0)
+            ri = _findLargestArc(ri,1)
+            if li and ri:
+                if plMode=='LeftAndRight':
+                    if li[1]-li[0]<ri[1]-ri[0]:
+                        li = None
+                    else:
+                        ri = None
+                else:
+                    if li[1]-li[0]<0.02*(ri[1]-ri[0]):
+                        li = None
+                    elif (li[1]-li[0])*0.02>ri[1]-ri[0]:
+                        ri = None
+            if ri: nr += 1
+            if li: nl += 1
+            l._origdata = dict(bounds=b,width=w,height=h,li=li,ri=ri,index=i,edgePad=style.label_pointer_edgePad,piePad=style.label_pointer_piePad,elbowLength=style.label_pointer_elbowLength)
+            maxW = max(w,maxW)
+            sumH += h+2
+
+        if not n:   #we have no labels
+            xradius = self.width/2.0
+            yradius = self.height/2.0
+            if self.sameRadii: xradius=yradius=min(xradius,yradius)
+            centerx = self.x+xradius
+            centery = self.y+yradius
+            return PL(centerx,centery,xradius,yradius,[])
+
+        aonR = nr==n
+        if sumH<self.height and (aonR or nl==n):
+            side=int(aonR)
+        else:
+            side=None
+        G,lu,ru,mel = _fixPointerLabels(len(angles),L,self.x,self.y,self.width,self.height,side=side)
+        if plMode=='LeftAndRight':
+            lu = ru = max(lu,ru)
+        x0 = self.x+lu
+        x1 = self.x+self.width-ru
+        xradius = (x1-x0)*0.5
+        yradius = self.height*0.5-mel
+        centerx = x0+xradius
+        centery = self.y+yradius+mel
+        if self.sameRadii: xradius=yradius=min(xradius,yradius)
+        return PL(centerx,centery,xradius,yradius,G,lu,ru)
+
     def normalizeData(self):
         from operator import add
         data = self.data
         self._sum = sum = float(reduce(add,data,0))
         return abs(sum)>=1e-8 and map(lambda x,f=360./sum: f*x, data) or len(data)*[0]
 
+    def makeAngles(self):
+        startAngle = self.startAngle % 360
+        whichWay = self.direction == "clockwise" and -1 or 1
+        A = []
+        a = A.append
+        for angle in self.normalizeData():
+            endAngle = (startAngle + (angle * whichWay))
+            if abs(startAngle-endAngle)>=1e-5:
+                if startAngle >= endAngle:
+                    aa = endAngle,startAngle
+                else:
+                    aa = startAngle,endAngle
+            else:
+                aa = startAngle, None
+            startAngle = endAngle
+            a(aa)
+        return A
+
     def makeWedges(self):
-        # normalize slice data
-        normData = self.normalizeData()
-        n = len(normData)
+        angles = self.makeAngles()
+        n = len(angles)
         labels = _fixLabels(self.labels,n)
 
-        xradius = self.width/2.0
-        yradius = self.height/2.0
-        centerx = self.x + xradius
-        centery = self.y + yradius
-
-        if self.direction == "anticlockwise":
-            whichWay = 1
-        else:
-            whichWay = -1
-
-        g = Group()
-        i = 0
-        self._seriesCount = len(normData)
+        self._seriesCount = n
         styleCount = len(self.slices)
 
-        checkLabelOverlap = self.checkLabelOverlap
+        plMode = self.pointerLabelMode
+        if plMode:
+            checkLabelOverlap = False
+            PL=self.makePointerLabels(angles,plMode)
+            xradius = PL.xradius
+            yradius = PL.yradius
+            centerx = PL.centerx
+            centery = PL.centery
+            PL_data = PL.data
+            gSN = lambda i: ''
+        else:
+            xradius = self.width*0.5
+            yradius = self.height*0.5
+            centerx = self.x + xradius
+            centery = self.y + yradius
+            if self.sameRadii: xradius=yradius=min(xradius,yradius)
+            checkLabelOverlap = self.checkLabelOverlap
+            gSN = lambda i: self.getSeriesName(i,'')
+
+        g = Group()
+        g_add = g.add
         if checkLabelOverlap:
             L = []
-            g_add = L.append
+            L_add = L.append
         else:
-            g_add = g.add
+            L_add = g_add
 
-        startAngle = self.startAngle #% 360
-        for angle in normData:
-            endAngle = (startAngle + (angle * whichWay)) #% 360
-            if abs(startAngle-endAngle)>=1e-5:
-                if startAngle < endAngle:
-                    a1 = startAngle
-                    a2 = endAngle
-                else:
-                    a1 = endAngle
-                    a2 = startAngle
+        for i,(a1,a2) in enumerate(angles):
+            if a2 is None: continue
+            #if we didn't use %stylecount here we'd end up with the later wedges
+            #all having the default style
+            wedgeStyle = self.slices[i%styleCount]
 
-                #if we didn't use %stylecount here we'd end up with the later wedges
-                #all having the default style
-                wedgeStyle = self.slices[i%styleCount]
-
-                # is it a popout?
-                cx, cy = centerx, centery
-                text = self.getSeriesName(i,'')
-                if text or wedgeStyle.popout:
-                    averageAngle = (a1+a2)/2.0
-                    aveAngleRadians = averageAngle/_180_pi
-                    cosAA = cos(aveAngleRadians)
-                    sinAA = sin(aveAngleRadians)
-                if wedgeStyle.popout:
+            # is it a popout?
+            cx, cy = centerx, centery
+            text = gSN(i)
+            popout = wedgeStyle.popout
+            if text or popout:
+                averageAngle = (a1+a2)/2.0
+                aveAngleRadians = averageAngle/_180_pi
+                cosAA = cos(aveAngleRadians)
+                sinAA = sin(aveAngleRadians)
+                if popout:
                     # pop out the wedge
-                    popdistance = wedgeStyle.popout
-                    cx = centerx + popdistance*cosAA
-                    cy = centery + popdistance*sinAA
+                    cx = centerx + popout*cosAA
+                    cy = centery + popout*sinAA
 
-                if n > 1:
-                    theWedge = Wedge(cx, cy, xradius, a1, a2, yradius=yradius)
-                elif n==1:
-                    theWedge = Ellipse(cx, cy, xradius, yradius)
+            if n > 1:
+                theWedge = Wedge(cx, cy, xradius, a1, a2, yradius=yradius)
+            elif n==1:
+                theWedge = Ellipse(cx, cy, xradius, yradius)
 
-                theWedge.fillColor = wedgeStyle.fillColor
-                theWedge.strokeColor = wedgeStyle.strokeColor
-                theWedge.strokeWidth = wedgeStyle.strokeWidth
-                theWedge.strokeDashArray = wedgeStyle.strokeDashArray
+            theWedge.fillColor = wedgeStyle.fillColor
+            theWedge.strokeColor = wedgeStyle.strokeColor
+            theWedge.strokeWidth = wedgeStyle.strokeWidth
+            theWedge.strokeDashArray = wedgeStyle.strokeDashArray
 
-                g.add(theWedge)
-                if text:
-                    labelRadius = wedgeStyle.labelRadius
-                    rx = 0.5*self.width*labelRadius
-                    ry = 0.5*self.height*labelRadius
-                    labelX = cx + rx*cosAA
-                    labelY = cy + ry*sinAA
-                    _addWedgeLabel(self,text,g_add,averageAngle,labelX,labelY,wedgeStyle)
-                    if checkLabelOverlap:
-                        l = L[-1]
-                        l._origdata = { 'x': labelX, 'y':labelY, 'angle': averageAngle,
-                                        'rx': rx, 'ry':ry, 'cx':cx, 'cy':cy,
-                                        'bounds': l.getBounds(),
-                                        }
-
-            startAngle = endAngle
-            i = i + 1
+            g_add(theWedge)
+            if text:
+                labelRadius = wedgeStyle.labelRadius
+                rx = xradius*labelRadius
+                ry = yradius*labelRadius
+                labelX = cx + rx*cosAA
+                labelY = cy + ry*sinAA
+                _addWedgeLabel(self,text,L_add,averageAngle,labelX,labelY,wedgeStyle)
+                if checkLabelOverlap:
+                    l = L[-1]
+                    l._origdata = { 'x': labelX, 'y':labelY, 'angle': averageAngle,
+                                    'rx': rx, 'ry':ry, 'cx':cx, 'cy':cy,
+                                    'bounds': l.getBounds(),
+                                    }
+            elif plMode and PL_data:
+                l = PL_data[i]
+                if l:
+                    data = l._origdata
+                    sinM = data['smid']
+                    cosM = data['cmid']
+                    lX = cx + xradius*cosM
+                    lY = cy + yradius*sinM
+                    lpel = wedgeStyle.label_pointer_elbowLength
+                    lXi = lX + lpel*cosM
+                    lYi = lY + lpel*sinM
+                    L_add(PolyLine((lX,lY,lXi,lYi,data['xL'],l.y),
+                            strokeWidth=wedgeStyle.label_pointer_strokeWidth,
+                            strokeColor=wedgeStyle.label_pointer_strokeColor))
+                    L_add(l)
 
         if checkLabelOverlap:
             fixLabelOverlaps(L)
-            map(g.add,L)
+            map(g_add,L)
 
         return g
 
     def draw(self):
-        g = Group()
-        g.add(self.makeWedges())
-        return g
+        G = self.makeBackground()
+        w = self.makeWedges()
+        if G: return Group(G,w)
+        return w
 
 class LegendedPie(Pie):
     """Pie with a two part legend (one editable with swatches, one hidden without swatches)."""
@@ -741,7 +957,6 @@ class Pie3d(Pie):
             last = angle0
             if a0>0: angle0, angle1 = angle1, angle0
             _sl3d.append(_SL3D(angle0,angle1))
-            #print '%d: %.2f %.2f --> %s' %(len(_sl3d)-1,angle0,angle1,_sl3d[-1])
 
         labels = _fixLabels(self.labels,n)
         a0 = _3d_angle
