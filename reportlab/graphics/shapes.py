@@ -12,7 +12,7 @@ from types import FloatType, IntType, ListType, TupleType, StringType, InstanceT
 from pprint import pprint
 
 from reportlab.platypus import Flowable
-from reportlab.rl_config import shapeChecking, verbose
+from reportlab.rl_config import shapeChecking, verbose, defaultGraphicsFontName
 from reportlab.lib import logger
 from reportlab.lib import colors
 from reportlab.lib.validators import *
@@ -51,7 +51,7 @@ STATE_DEFAULTS = {   # sensible defaults for all
     #'fillOpacity': 1.0,  #100% - can be done later
 
     'fontSize': 10,
-    'fontName': 'Times-Roman',
+    'fontName': defaultGraphicsFontName,
     'textAnchor':  'start' # can be start, middle, end, inherited
     }
 
@@ -653,7 +653,7 @@ class Drawing(Group, Flowable):
         if not os.path.isdir(outDir): os.makedirs(outDir)
         fnroot = os.path.normpath(os.path.join(outDir,fnRoot))
         plotMode = os.path.splitext(fnroot)
-        if string.lower(plotMode[1][1:]) in ['pdf','ps','eps','gif','png','jpg','jpeg','pct','pict','tiff','tif','py','bmp']:
+        if string.lower(plotMode[1][1:]) in ['pdf','ps','eps','gif','png','jpg','jpeg','pct','pict','tiff','tif','py','bmp','svg']:
             fnroot = plotMode[0]
 
         plotMode, verbose = formats or getattr(self,'formats',['pdf']), (verbose is not None and (verbose,) or (getattr(self,'verbose',verbose),))[0]
@@ -690,6 +690,15 @@ class Drawing(Group, Flowable):
                                 preview = getattr(self,'preview',1),
                                 showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderPS_',**kw))
             ext = ext +  '/.eps'
+
+        if 'svg' in plotMode:
+            from reportlab.graphics import renderSVG
+            filename = fnroot+'.svg'
+            if verbose: print "generating EPS file %s" % filename
+            renderSVG.drawToFile(self,
+                                filename,
+                                showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderSVG_',**kw))
+            ext = ext +  '/.svg'
 
         if 'ps' in plotMode:
             from reportlab.graphics import renderPS

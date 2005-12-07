@@ -6,6 +6,7 @@ __version__=''' $Id$ '''
 allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
 defaultEncoding =           'WinAnsiEncoding'       # 'WinAnsi' or 'MacRoman'
+defaultGraphicsFontName='Times-Roman',              #initializer for STATE_DEFAULTS in shapes.py
 pageCompression =           1                       # default page compression mode
 defaultPageSize =           'A4'                    #default page size
 defaultImageCaching =       0                       #set to zero to remove those annoying cached images
