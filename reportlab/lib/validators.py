@@ -156,7 +156,7 @@ class _isValidChild(Validator):
 
 class _isValidChildOrNone(_isValidChild):
     def test(self,x):
-        return _isValidChild.test(self,x) or x is None
+        return x is None or _isValidChild.test(self,x)
 
 class _isCallable(Validator):
     def test(self, x):
@@ -238,6 +238,34 @@ class isInstanceOf(Validator):
         self._klass = klass
     def test(self,x):
         return isinstance(x,self._klass)
+
+class DerivedValue:
+    """This is used for magic values which work themselves out.
+    An example would be an "inherit" property, so that one can have
+
+      drawing.chart.categoryAxis.labels.fontName = inherit
+
+    and pick up the value from the top of the drawing.
+    Validators will permit this provided that a value can be pulled
+    in which satisfies it.  And the renderer will have special
+    knowledge of these so they can evaluate themselves.
+    """
+    def getValue(self, renderer, attr):
+        """Override this.  The renderers will pass the renderer,
+        and the attribute name.  Algorithms can then backtrack up
+        through all the stuff the renderer provides, including
+        a correct stack of parent nodes."""
+        return None
+
+class Inherit(DerivedValue):
+    def __repr__(self):
+        return "inherit"
+    
+    def getValue(self, renderer, attr):
+        return renderer.getStateValue(attr)
+
+inherit = Inherit()
+    
 
 isAuto = Auto()
 isBoolean = _isBoolean()

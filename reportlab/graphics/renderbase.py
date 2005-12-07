@@ -9,6 +9,7 @@ Superclass for renderers to factor out common functionality and default implemen
 __version__=''' $Id $ '''
 
 from reportlab.graphics.shapes import *
+from reportlab.lib.validators import DerivedValue
 from reportlab import rl_config
 
 def inverse(A):
@@ -55,47 +56,47 @@ class StateTracker:
     invert matrixes when you pop."""
     def __init__(self, defaults=None):
         # one stack to keep track of what changes...
-        self.__deltas = []
+        self._deltas = []
 
         # and another to keep track of cumulative effects.  Last one in
         # list is the current graphics state.  We put one in to simplify
         # loops below.
-        self.__combined = []
+        self._combined = []
         if defaults is None:
             defaults = STATE_DEFAULTS.copy()
         #ensure  that if we have a transform, we have a CTM
         if defaults.has_key('transform'):
             defaults['ctm'] = defaults['transform']
-        self.__combined.append(defaults)
+        self._combined.append(defaults)
 
     def push(self,delta):
         """Take a new state dictionary of changes and push it onto
         the stack.  After doing this, the combined state is accessible
         through getState()"""
 
-        newstate = self.__combined[-1].copy()
+        newstate = self._combined[-1].copy()
         for (key, value) in delta.items():
             if key == 'transform':  #do cumulative matrix
                 newstate['transform'] = delta['transform']
-                newstate['ctm'] = mmult(self.__combined[-1]['ctm'], delta['transform'])
+                newstate['ctm'] = mmult(self._combined[-1]['ctm'], delta['transform'])
                 #print 'statetracker transform = (%0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f)' % tuple(newstate['transform'])
                 #print 'statetracker ctm = (%0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f)' % tuple(newstate['ctm'])
 
             else:  #just overwrite it
                 newstate[key] = value
 
-        self.__combined.append(newstate)
-        self.__deltas.append(delta)
+        self._combined.append(newstate)
+        self._deltas.append(delta)
 
     def pop(self):
         """steps back one, and returns a state dictionary with the
         deltas to reverse out of wherever you are.  Depending
         on your back end, you may not need the return value,
         since you can get the complete state afterwards with getState()"""
-        del self.__combined[-1]
-        newState = self.__combined[-1]
-        lastDelta = self.__deltas[-1]
-        del  self.__deltas[-1]
+        del self._combined[-1]
+        newState = self._combined[-1]
+        lastDelta = self._deltas[-1]
+        del  self._deltas[-1]
         #need to diff this against the last one in the state
         reverseDelta = {}
         #print 'pop()...'
@@ -112,19 +113,19 @@ class StateTracker:
 
     def getState(self):
         "returns the complete graphics state at this point"
-        return self.__combined[-1]
+        return self._combined[-1]
 
     def getCTM(self):
         "returns the current transformation matrix at this point"""
-        return self.__combined[-1]['ctm']
+        return self._combined[-1]['ctm']
 
     def __getitem__(self,key):
         "returns the complete graphics state value of key at this point"
-        return self.__combined[-1][key]
+        return self._combined[-1][key]
 
     def __setitem__(self,key,value):
         "sets the complete graphics state value of key to value"
-        self.__combined[-1][key] = value
+        self._combined[-1][key] = value
 
 def testStateTracker():
     print 'Testing state tracker'
@@ -179,6 +180,7 @@ class Renderer:
 
     def __init__(self):
         self._tracker = StateTracker()
+        self._nodeStack = []   #track nodes visited
 
     def undefined(self, operation):
         raise ValueError, "%s operation not defined at superclass class=%s" %(operation, self.__class__)
@@ -195,7 +197,7 @@ class Renderer:
             #bounding box
             if showBoundary: canvas.rect(x, y, drawing.width, drawing.height)
             canvas.saveState()
-            self.initState(x,y)
+            self.initState(x,y)  #this is the push()
             self.drawNode(drawing)
             self.pop()
             canvas.restoreState()
@@ -218,12 +220,32 @@ class Renderer:
         # Undefined here, but with closer analysis probably can be handled in superclass
         self.undefined("drawNode")
 
+    def getStateValue(self, key):
+        """Return current state parameter for given key"""
+        currentState = self._tracker._combined[-1]
+        return currentState[key]
+    
+    def fillDerivedValues(self, node):
+        """Examine a node for any values which are Derived,
+        and replace them with their calculated values.
+        Generally things may look at the drawing or their
+        parent.
+        
+        """
+        for (key, value) in node.__dict__.items():
+            if isinstance(value, DerivedValue):
+                #just replace with default for key?
+                #print '    fillDerivedValues(%s)' % key
+                newValue = value.getValue(self, key)
+                #print '   got value of %s' % newValue
+                node.__dict__[key] = newValue
+
     def drawNodeDispatcher(self, node):
         """dispatch on the node's (super) class: shared code"""
-
+        
         canvas = getattr(self,'_canvas',None)
         # replace UserNode with its contents
-
+        
         try:
             node = _expandUserNode(node,canvas)
             if hasattr(node,'_canvas'):
@@ -231,6 +253,9 @@ class Renderer:
             else:
                 node._canvas = canvas
                 ocanvas = None
+
+            self.fillDerivedValues(node)
+
 
             #draw the object, or recurse
             if isinstance(node, Line):
@@ -270,6 +295,9 @@ class Renderer:
         canvas = getattr(self,'_canvas',None)
         for node in group.getContents():
             node = _expandUserNode(node,canvas)
+
+            #here is where we do derived values - this seems to get everything. Touch wood.            
+            self.fillDerivedValues(node)
             try:
                 if hasattr(node,'_canvas'):
                     ocanvas = 1

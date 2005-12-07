@@ -196,7 +196,8 @@ def getDrawing06():
 
     D.add(Rect(220, 150, 60, 30, 10, 10, fillColor=purple))  #round corners
 
-    D.add(String(10,50, 'Basic Shapes', fillColor=colors.black))
+    from reportlab.lib.validators import inherit
+    D.add(String(10,50, 'Basic Shapes', fillColor=colors.black, fontName=inherit))
 
     return D
 
@@ -443,6 +444,31 @@ def getDrawing13():
     if maxx>400 or maxy>200: _,_,D = drawit(F,maxx,maxy)
     return D
 
+##def getDrawing14():
+##    """This tests inherited properties.  Each font should be as it says."""
+##    D = Drawing(400, 200)
+##    
+##    fontSize = 12
+##    D.fontName = 'Courier'
+##    
+##    g1 = Group(
+##            Rect(0, 0, 150, 20, fillColor=colors.yellow),
+##            String(5, 5, 'Inherited Courier', fontName=inherit, fontSize = fontSize)
+##            )
+##    D.add(g1)
+##
+##    g2 = Group(g1, transform = translate(25,25))
+##    D.add(g2)
+##
+##    g3 = Group(g2, transform = translate(25,25))
+##    D.add(g3)
+##
+##    g4 = Group(g3, transform = translate(25,25))
+##    D.add(g4)
+##
+##
+##    return D
+
 def getAllFunctionDrawingNames(doTTF=1):
     "Get a list of drawing function names from somewhere."
 
@@ -459,10 +485,10 @@ def getAllFunctionDrawingNames(doTTF=1):
     return funcNames
 
 def _evalFuncDrawing(name, D, l=None, g=None):
-    try:
-        d = eval(name + '()', g or globals(), l or locals())
-    except:
-        d = getFailedDrawing(name)
+    #try:
+    d = eval(name + '()', g or globals(), l or locals())
+    #except:
+    #   d = getFailedDrawing(name)
     D.append((d, eval(name + '.__doc__'), name[3:]))
 
 def getAllTestDrawings(doTTF=1):

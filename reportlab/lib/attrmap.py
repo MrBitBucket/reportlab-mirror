@@ -3,7 +3,7 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/attrmap.py
 __version__=''' $Id$ '''
 from UserDict import UserDict
-from reportlab.lib.validators import isAnything, _SequenceTypes
+from reportlab.lib.validators import isAnything, _SequenceTypes, DerivedValue
 from reportlab import rl_config
 
 class CallableValue:
@@ -74,12 +74,18 @@ def validateSetattr(obj,name,value):
     if rl_config.shapeChecking:
         map = obj._attrMap
         if map and name[0]!= '_':
-            try:
-                validate = map[name].validate
-                if not validate(value):
-                    raise AttributeError, "Illegal assignment of '%s' to '%s' in class %s" % (value, name, obj.__class__.__name__)
-            except KeyError:
-                raise AttributeError, "Illegal attribute '%s' in class %s" % (name, obj.__class__.__name__)
+            #we always allow the inherited values; they cannot
+            #be checked until draw time.
+            if isinstance(value, DerivedValue):
+                #let it through
+                pass
+            else:            
+                try:
+                    validate = map[name].validate
+                    if not validate(value):
+                        raise AttributeError, "Illegal assignment of '%s' to '%s' in class %s" % (value, name, obj.__class__.__name__)
+                except KeyError:
+                    raise AttributeError, "Illegal attribute '%s' in class %s" % (name, obj.__class__.__name__)
     obj.__dict__[name] = value
 
 def _privateAttrMap(obj,ret=0):

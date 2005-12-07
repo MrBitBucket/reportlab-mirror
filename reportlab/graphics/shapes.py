@@ -569,8 +569,10 @@ class Drawing(Group, Flowable):
         height = AttrMapValue(isNumber,desc="Drawing height in points."),
         canv = AttrMapValue(None),
         background = AttrMapValue(isValidChildOrNone,desc="Background widget for the drawing"),
-        hAlign = AttrMapValue(OneOf("LEFT", "RIGHT", "CENTER", "CENTRE"), desc="Alignment within parent document"),
-        vAlign = AttrMapValue(OneOf("TOP", "BOTTOM", "CENTER", "CENTRE"), desc="Alignment within parent document"),
+        hAlign = AttrMapValue(OneOf("LEFT", "RIGHT", "CENTER", "CENTRE"), desc="Horizontal alignment within parent document"),
+        vAlign = AttrMapValue(OneOf("TOP", "BOTTOM", "CENTER", "CENTRE"), desc="Vertical alignment within parent document"),
+        #AR temporary hack to track back up.
+        #fontName = AttrMapValue(isStringOrNone),
         renderScale = AttrMapValue(isNumber,desc="Global scaling for rendering"),
         )
 
@@ -584,6 +586,7 @@ class Drawing(Group, Flowable):
         self.height = height
         self.hAlign = 'LEFT'
         self.vAlign = 'BOTTOM'
+        #self.fontName = 'Helvetica'
         self.renderScale = 1.0
 
     def _renderPy(self):
