@@ -15,6 +15,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.utils import getStringIO
 from reportlab import rl_config
+from reportlab.graphics.renderbase import renderScaledDrawing
 
 # the main entry point for users...
 def draw(drawing, canvas, x, y, showBoundary=rl_config._unset_):
@@ -244,6 +245,7 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1):
     the drawing; if 0, it will place the drawing on
     an A4 page with a title above it - possibly overflowing
     if too big."""
+    d = renderScaledDrawing(d)
     c = Canvas(fn)
     c.setFont('Times-Roman', 36)
     c.drawString(80, 750, msg)

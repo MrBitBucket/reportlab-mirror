@@ -570,7 +570,8 @@ class Drawing(Group, Flowable):
         canv = AttrMapValue(None),
         background = AttrMapValue(isValidChildOrNone,desc="Background widget for the drawing"),
         hAlign = AttrMapValue(OneOf("LEFT", "RIGHT", "CENTER", "CENTRE"), desc="Alignment within parent document"),
-        vAlign = AttrMapValue(OneOf("TOP", "BOTTOM", "CENTER", "CENTRE"), desc="Alignment within parent document")
+        vAlign = AttrMapValue(OneOf("TOP", "BOTTOM", "CENTER", "CENTRE"), desc="Alignment within parent document"),
+        renderScale = AttrMapValue(isNumber,desc="Global scaling for rendering"),
         )
 
     _attrMap = AttrMap(BASE=Group)
@@ -583,6 +584,7 @@ class Drawing(Group, Flowable):
         self.height = height
         self.hAlign = 'LEFT'
         self.vAlign = 'BOTTOM'
+        self.renderScale = 1.0
 
     def _renderPy(self):
         I = {'reportlab.graphics.shapes': ['_DrawingEditorMixin','Drawing','Group']}
@@ -614,7 +616,7 @@ class Drawing(Group, Flowable):
         obj.height = self.height
         return obj
 
-    def copy(self,obj):
+    def copy(self):
         """Returns a copy"""
         return self._copy(Drawing(self.width, self.height))
 

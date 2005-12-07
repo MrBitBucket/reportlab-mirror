@@ -6,7 +6,7 @@ import string, types
 from reportlab.pdfbase.pdfmetrics import getFont, stringWidth # for font info
 from reportlab.lib.utils import fp_str, getStringIO
 from reportlab.lib.colors import black
-from reportlab.graphics.renderbase import StateTracker, getStateDelta
+from reportlab.graphics.renderbase import StateTracker, getStateDelta, renderScaledDrawing
 from reportlab.graphics.shapes import STATE_DEFAULTS
 import math
 from types import StringType
@@ -816,6 +816,7 @@ class _PSRenderer(Renderer):
                 self._canvas.setFont(fontname, fontsize)
 
 def drawToFile(d,fn, showBoundary=rl_config.showBoundary):
+    d = renderScaledDrawing(d)
     c = PSCanvas((d.width,d.height))
     draw(d, c, 0, 0, showBoundary=showBoundary)
     c.save(fn)

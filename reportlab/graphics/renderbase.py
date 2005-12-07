@@ -164,6 +164,16 @@ def _expandUserNode(node,canvas):
             if not ocanvas: del onode._canvas
     return node
 
+def renderScaledDrawing(d):
+    renderScale = d.renderScale
+    if renderScale!=1.0:
+        d = d.copy()
+        d.width *= renderScale
+        d.height *= renderScale
+        d.scale(renderScale,renderScale)
+        d.renderScale = 1.0
+    return d
+
 class Renderer:
     """Virtual superclass for graphics renderers."""
 

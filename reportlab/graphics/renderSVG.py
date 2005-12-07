@@ -14,7 +14,7 @@ from operator import getitem
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.utils import fp_str
 from reportlab.lib.colors import black
-from reportlab.graphics.renderbase import StateTracker, getStateDelta, Renderer
+from reportlab.graphics.renderbase import StateTracker, getStateDelta, Renderer, renderScaledDrawing
 from reportlab.graphics.shapes import STATE_DEFAULTS, Path, UserNode
 from reportlab.graphics.shapes import * # (only for test0)
 from reportlab import rl_config
@@ -41,8 +41,8 @@ def drawToString(d, showBoundary=rl_config.showBoundary):
     drawToFile(d, s, showBoundary=showBoundary)
     return s.getvalue()
 
-
 def drawToFile(d, fn, showBoundary=rl_config.showBoundary):
+    d = renderScaledDrawing(d)
     c = SVGCanvas((d.width, d.height))
     draw(d, c, 0, 0, showBoundary=showBoundary)
     c.save(fn)

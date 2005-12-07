@@ -9,7 +9,7 @@ Other functions let you create a PM drawing as string or into a PM buffer.
 Execute the script to see some test drawings."""
 
 from reportlab.graphics.shapes import *
-from reportlab.graphics.renderbase import StateTracker, getStateDelta
+from reportlab.graphics.renderbase import StateTracker, getStateDelta, renderScaledDrawing
 from reportlab.pdfbase.pdfmetrics import getFont
 from math import sin, cos, pi, ceil
 from reportlab.lib.utils import getStringIO, open_and_read
@@ -541,6 +541,7 @@ class PMCanvas:
         self.strokeWidth = width
 
 def drawToPMCanvas(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_):
+    d = renderScaledDrawing(d)
     c = PMCanvas(d.width, d.height, dpi=dpi, bg=bg, configPIL=configPIL)
     draw(d, c, 0, 0, showBoundary=showBoundary)
     return c
