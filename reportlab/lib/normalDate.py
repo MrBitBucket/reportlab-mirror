@@ -10,7 +10,7 @@
 # derived from an original version created
 # by Jeff Bauer of Rubicon Research and used
 # with his kind permission
-__version__=''' $Id: normalDate.py,v 1.7 2002/07/24 19:56:37 andy_robinson Exp $ '''
+__version__=''' $Id$ '''
 
 
 
@@ -24,7 +24,7 @@ _monthName = ['January', 'February', 'March', 'April', 'May', 'June',
               'July','August','September','October','November','December']
 
 from types import IntType, StringType, ListType, TupleType
-import string, re, time
+import string, re, time, datetime
 if hasattr(time,'struct_time'):
     _DateSeqTypes = (ListType,TupleType,time.struct_time)
 else:
@@ -458,6 +458,8 @@ class NormalDate:
             self.normalDate = int("%04d%02d%02d" % normalDate[:3])
         elif tn is _NDType:
             self.normalDate = normalDate.normalDate
+        elif isinstance(normalDate,(datetime.datetime,datetime.date)):
+            self.normalDate = (normalDate.year*100+normalDate.month)*100+normalDate.day
         if not self._isValidNormalDate(self.normalDate):
             raise NormalDateException("unable to setNormalDate(%s)" % `normalDate`)
 
