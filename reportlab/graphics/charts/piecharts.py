@@ -55,7 +55,6 @@ class WedgeProperties(PropHolder):
     angles.  It can format a genuine Wedge object for you with its
     format method.
     """
-
     _attrMap = AttrMap(
         strokeWidth = AttrMapValue(isNumber),
         fillColor = AttrMapValue(isColorOrNone),
@@ -195,11 +194,10 @@ class AbstractPieChart(PlotArea):
             if _text is not None: text = _text
         return text
 
-
 def boundsOverlap(P,Q):
     return not(P[0]>Q[2]-1e-2 or Q[0]>P[2]-1e-2 or P[1]>Q[3]-1e-2 or Q[1]>P[3]-1e-2)
 
-def _findOverlapRun(B,i):
+def _findOverlapRun(B,i,wrap):
     '''find overlap run containing B[i]'''
     n = len(B)
     R = [i]
@@ -215,12 +213,12 @@ def _findOverlapRun(B,i):
         R.insert(0,j)
     return R
 
-def findOverlapRun(B):
+def findOverlapRun(B,wrap=1):
     '''determine a set of overlaps in bounding boxes B or return None'''
     n = len(B)
     if n>1:
         for i in xrange(n-1):
-            R = _findOverlapRun(B,i)
+            R = _findOverlapRun(B,i,wrap)
             if len(R)>1: return R
     return None
 
@@ -313,14 +311,12 @@ def _fPLSide(l,width,side=None):
     w = data['width']
     edgePad = data['edgePad']
     if not side:    #on left
-        l._pmv = 0
-        l.x = edgePad
-        data['xL'] = l.x+w
+        l._pmv = 180
+        l.x = edgePad+w
         i = data['li']
     else:
-        l._pmv = 180
-        l.x = width - edgePad
-        data['xL'] = l.x-w
+        l._pmv = 0
+        l.x = width - w - edgePad
         i = data['ri']
     mid = data['mid'] = (i[0]+i[1])*0.5
     data['smid'] = sin(mid/_180_pi)
@@ -328,8 +324,11 @@ def _fPLSide(l,width,side=None):
     data['side'] = side
     return side,w
 
-def _fPLcf(a,b):
-    return cmp(a._origdata['mid'],b._origdata['mid'])
+def _fPLCF(a,b):
+    return cmp(b._origdata['smid'],a._origdata['smid'])
+
+def _arcCF(a,b):
+    return cmp(a[1],b[1])
 
 def _fixPointerLabels(n,L,x,y,width,height,side=None):
     LR = [],[]
@@ -342,25 +341,61 @@ def _fixPointerLabels(n,L,x,y,width,height,side=None):
     G = n*[None]
     mel = 0
     hh = height*0.5
+    yhh = y+hh
+    m = max(mlr)
     for i in (0,1):
         T = LR[i]
         if T:
-            T.sort(_fPLcf)
-            if i: T.reverse()
-            m = mlr[i]
+            B = []
+            aB = B.append
+            S = []
+            aS = S.append
+            T.sort(_fPLCF)
             p = 0
-            dy = float(height)/len(T)
-            yl = y+height
+            yh = y+height
             for l in T:
                 data = l._origdata
                 inc = x+mul*(m-data['width'])
                 l.x += inc
-                data['xL'] += inc
                 G[data['index']] = l
-                l.y = yl-dy*0.5
-                yl -= dy
+                ly = yhh+data['smid']*hh
+                b = data['bounds']
+                b2 = (b[3]-b[1])*0.5
+                if ly+b2>yh: ly = yh-b2
+                if ly-b2<y: ly = y+b2
+                data['bounds'] = b = (b[0],ly-b2,b[2],ly+b2)
+                aB(b)
+                l.y = ly
+                aS(max(0,yh-ly-b2))
+                yh = ly-b2
                 p = max(p,data['edgePad']+data['piePad'])
                 mel = max(mel,abs(data['smid']*(hh+data['elbowLength']))-hh)
+            aS(yh-y)
+
+            iter = 0
+            nT = len(T)
+            while iter<30:
+                R = findOverlapRun(B,wrap=0)
+                if not R: break
+                nR = len(R)
+                if nR==nT: break
+                j0 = R[0]
+                j1 = R[-1]
+                jl = j1+1
+                sAbove = sum(S[:j0+1])
+                sFree = sAbove+sum(S[jl:])
+                sNeed = sum([b[3]-b[1] for b in B[j0:jl]])+jl-j0-(B[j0][3]-B[j1][1])
+                if sNeed>sFree: break
+                yh = B[j0][3]+sAbove*sNeed/sFree
+                for r in R:
+                    l = T[r]
+                    data = l._origdata
+                    b = data['bounds']
+                    b2 = (b[3]-b[1])*0.5
+                    yh -= 0.5
+                    ly = l.y = yh-b2
+                    B[r] = data['bounds'] = (b[0],ly-b2,b[2],yh)
+                    yh = ly - b2 - 0.5
             mlr[i] = m+p
         mul = -1
     return G, mlr[0], mlr[1], mel
@@ -377,10 +412,13 @@ class Pie(AbstractPieChart):
         checkLabelOverlap = AttrMapValue(isBoolean, desc="If true check and attempt to fix standard label overlaps(default off)"),
         pointerLabelMode = AttrMapValue(OneOf(None,'LeftRight','LeftAndRight'), desc=""),
         sameRadii = AttrMapValue(isBoolean, desc="If true make x/y radii the same(default off)"),
+        orderMode = AttrMapValue(OneOf('fixed','alternate')),
+        xradius = AttrMapValue(isNumberOrNone, desc="X direction Radius"),
+        yradius = AttrMapValue(isNumberOrNone, desc="Y direction Radius"),
         )
     other_threshold=None
 
-    def __init__(self):
+    def __init__(self,**kwd):
         PlotArea.__init__(self)
         self.x = 0
         self.y = 0
@@ -394,12 +432,17 @@ class Pie(AbstractPieChart):
         self.checkLabelOverlap = 0
         self.pointerLabelMode = None
         self.sameRadii = False
+        self.orderMode = 'fixed'
+        self.xradius = self.yradius = None
 
         self.slices = TypedPropertyCollection(WedgeProperties)
         self.slices[0].fillColor = colors.darkcyan
         self.slices[1].fillColor = colors.blueviolet
         self.slices[2].fillColor = colors.blue
         self.slices[3].fillColor = colors.cyan
+        self.slices[4].fillColor = colors.pink
+        self.slices[5].fillColor = colors.magenta
+        self.slices[6].fillColor = colors.yellow
 
     def demo(self):
         d = Drawing(200, 100)
@@ -447,7 +490,7 @@ class Pie(AbstractPieChart):
         L=[]
         L_add = L.append
         refArcs = _makeSideArcDefs(self.startAngle,self.direction)
-        for i, A in enumerate(angles):
+        for i, A in angles:
             if A[1] is None: continue
             sn = self.getSeriesName(i,'')
             if not sn: continue
@@ -479,11 +522,13 @@ class Pie(AbstractPieChart):
             sumH += h+2
 
         if not n:   #we have no labels
-            xradius = self.width/2.0
-            yradius = self.height/2.0
-            if self.sameRadii: xradius=yradius=min(xradius,yradius)
+            xradius = self.width*0.5
+            yradius = self.height*0.5
             centerx = self.x+xradius
             centery = self.y+yradius
+            if self.xradius: xradius = self.xradius
+            if self.yradius: yradius = self.yradius
+            if self.sameRadii: xradius=yradius=min(xradius,yradius)
             return PL(centerx,centery,xradius,yradius,[])
 
         aonR = nr==n
@@ -500,6 +545,8 @@ class Pie(AbstractPieChart):
         yradius = self.height*0.5-mel
         centerx = x0+xradius
         centery = self.y+yradius+mel
+        if self.xradius: xradius = self.xradius
+        if self.yradius: yradius = self.yradius
         if self.sameRadii: xradius=yradius=min(xradius,yradius)
         return PL(centerx,centery,xradius,yradius,G,lu,ru)
 
@@ -512,11 +559,27 @@ class Pie(AbstractPieChart):
     def makeAngles(self):
         startAngle = self.startAngle % 360
         whichWay = self.direction == "clockwise" and -1 or 1
+        D = [a for a in enumerate(self.normalizeData())]
+        if self.orderMode=='alternate':
+            W = [a for a in D if abs(a[1])>=1e-5]
+            W.sort(_arcCF)
+            T = [[],[]]
+            i = 0
+            while W:
+                if i<2:
+                    a = W.pop(0)
+                else:
+                    a = W.pop(-1)
+                T[i%2].append(a)
+                i += 1
+                i %= 4
+            T[1].reverse()
+            D = T[0]+T[1] + [a for a in D if abs(a[1])<1e-5]
         A = []
         a = A.append
-        for angle in self.normalizeData():
+        for i, angle in D:
             endAngle = (startAngle + (angle * whichWay))
-            if abs(startAngle-endAngle)>=1e-5:
+            if abs(angle)>=1e-5:
                 if startAngle >= endAngle:
                     aa = endAngle,startAngle
                 else:
@@ -524,7 +587,7 @@ class Pie(AbstractPieChart):
             else:
                 aa = startAngle, None
             startAngle = endAngle
-            a(aa)
+            a((i,aa))
         return A
 
     def makeWedges(self):
@@ -550,6 +613,8 @@ class Pie(AbstractPieChart):
             yradius = self.height*0.5
             centerx = self.x + xradius
             centery = self.y + yradius
+            if self.xradius: xradius = self.xradius
+            if self.yradius: yradius = self.yradius
             if self.sameRadii: xradius=yradius=min(xradius,yradius)
             checkLabelOverlap = self.checkLabelOverlap
             gSN = lambda i: self.getSeriesName(i,'')
@@ -562,7 +627,7 @@ class Pie(AbstractPieChart):
         else:
             L_add = g_add
 
-        for i,(a1,a2) in enumerate(angles):
+        for i,(a1,a2) in angles:
             if a2 is None: continue
             #if we didn't use %stylecount here we'd end up with the later wedges
             #all having the default style
@@ -617,7 +682,7 @@ class Pie(AbstractPieChart):
                     lpel = wedgeStyle.label_pointer_elbowLength
                     lXi = lX + lpel*cosM
                     lYi = lY + lpel*sinM
-                    L_add(PolyLine((lX,lY,lXi,lYi,data['xL'],l.y),
+                    L_add(PolyLine((lX,lY,lXi,lYi,l.x,l.y),
                             strokeWidth=wedgeStyle.label_pointer_strokeWidth,
                             strokeColor=wedgeStyle.label_pointer_strokeColor))
                     L_add(l)
