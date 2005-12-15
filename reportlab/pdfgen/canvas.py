@@ -527,11 +527,9 @@ class Canvas(textobject._PDFColorSetter):
         height are omitted, they are calculated from the image size.
         Also allow file names as well as images.  The size in pixels
         of the image is returned."""
-
-        self._currentPageHasImages = 1
         from pdfimages import PDFImage
         img_obj = PDFImage(image, x,y, width, height)
-        img_obj.drawInlineImage(self)
+        if img_obj.drawInlineImage(self): self._currentPageHasImages = 1
         return (img_obj.width, img_obj.height)
 
     def drawImage(self, image, x, y, width=None, height=None, mask=None):
@@ -559,8 +557,6 @@ class Canvas(textobject._PDFColorSetter):
 
         In general you should use drawImage in preference to drawInlineImage
         unless you have read the PDF Spec and understand the tradeoffs."""
-        self._currentPageHasImages = 1
-
         # first, generate a unique name/signature for the image.  If ANYTHING
         # is different, even the mask, this should be different.
         if type(image) == type(''):
@@ -587,6 +583,9 @@ class Canvas(textobject._PDFColorSetter):
             width = imgObj.width
         if height is None:
             height = imgObj.height
+        if width<1e-6 or height<1e-6: return
+    
+        self._currentPageHasImages = 1
 
         # scale and draw
         self.saveState()

@@ -382,7 +382,7 @@ class ChartTestCase(unittest.TestCase):
             pc.direction=d
             pc.startAngle=sa
             arcs = _makeSideArcDefs(sa,d)
-            A = pc.makeAngles()
+            A = [x[1] for x in pc.makeAngles()]
             arcsum = sum([a[2]-a[1] for a in arcs])
             isum = intSum(arcs,A)
             mi = max([a[2]-a[1] for a in arcs])
@@ -396,7 +396,7 @@ class ChartTestCase(unittest.TestCase):
             if ni<0: l.append('min interval intersection length=%s <0' % ni)
             if l:
                 l.append('sa: %s d: %s' % (sa,d))
-                l.append('sidearcs: %s' % arcs)
+                l.append('sidearcs: %s' % str(arcs))
                 l.append('Angles: %s' % A)
                 raise ValueError('piecharts._makeSideArcDefs failure\n%s' % '\n'.join(l))
 

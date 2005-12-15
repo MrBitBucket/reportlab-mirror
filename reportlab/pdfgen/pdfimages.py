@@ -147,6 +147,7 @@ class PDFImage:
         height are omitted, they are calculated from the image size.
         Also allow file names as well as images.  This allows a
         caching mechanism"""
+        if self.width<1e-6 or self.height<1e-6: return False
         (x,y) = self.point
         # this says where and how big to draw it
         if not canvas.bottomup: y = y+self.height
@@ -155,6 +156,7 @@ class PDFImage:
         for line in self.imageData:
             canvas._code.append(line)
         canvas._code.append('Q')
+        return True
 
     def format(self, document):
         """Allow it to be used within pdfdoc framework.  This only
