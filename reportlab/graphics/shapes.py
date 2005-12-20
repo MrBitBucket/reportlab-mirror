@@ -652,7 +652,7 @@ class Drawing(Group, Flowable):
             outDir, fnRoot = os.path.split(fnRoot)
         else:
             outDir = outDir or getattr(self,'outDir','.')
-        if not os.path.isabs(outDir): outDir = os.path.join(os.path.dirname(sys.argv[0]),outDir)
+        if not os.path.isabs(outDir): outDir = os.path.join(getattr(self,'_override_CWD',os.path.dirname(sys.argv[0])),outDir)
         if not os.path.isdir(outDir): os.makedirs(outDir)
         fnroot = os.path.normpath(os.path.join(outDir,fnRoot))
         plotMode = os.path.splitext(fnroot)
