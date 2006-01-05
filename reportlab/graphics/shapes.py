@@ -621,7 +621,7 @@ class Drawing(Group, Flowable):
 
     def copy(self):
         """Returns a copy"""
-        return self._copy(Drawing(self.width, self.height))
+        return self._copy(self.__class__(self.width, self.height))
 
     def asGroup(self,*args,**kw):
         return self._copy(apply(Group,args,kw))
@@ -867,7 +867,7 @@ class Path(SolidShape):
         self.isClipPath = isClipPath
 
     def copy(self):
-        new = Path(self.points[:], self.operators[:])
+        new = self.__class__(self.points[:], self.operators[:])
         new.setProperties(self.getProperties())
         return new
 
@@ -972,7 +972,7 @@ class Rect(SolidShape):
         self.ry = ry
 
     def copy(self):
-        new = Rect(self.x, self.y, self.width, self.height)
+        new = self.__class__(self.x, self.y, self.width, self.height)
         new.setProperties(self.getProperties())
         return new
 
@@ -1000,7 +1000,7 @@ class Image(SolidShape):
         self.path = path
 
     def copy(self):
-        new = Image(self.x, self.y, self.width, self.height, self.path)
+        new = self.__class__(self.x, self.y, self.width, self.height, self.path)
         new.setProperties(self.getProperties())
         return new
 
@@ -1022,7 +1022,7 @@ class Circle(SolidShape):
         self.r = r
 
     def copy(self):
-        new = Circle(self.cx, self.cy, self.r)
+        new = self.__class__(self.cx, self.cy, self.r)
         new.setProperties(self.getProperties())
         return new
 
@@ -1046,7 +1046,7 @@ class Ellipse(SolidShape):
         self.ry = ry
 
     def copy(self):
-        new = Ellipse(self.cx, self.cy, self.rx, self.ry)
+        new = self.__class__(self.cx, self.cy, self.rx, self.ry)
         new.setProperties(self.getProperties())
         return new
 
@@ -1135,7 +1135,7 @@ class Wedge(SolidShape):
         return Polygon(points)
 
     def copy(self):
-        new = Wedge(self.centerx,
+        new = self.__class__(self.centerx,
                     self.centery,
                     self.radius,
                     self.startangledegrees,
@@ -1160,7 +1160,7 @@ class Polygon(SolidShape):
         self.points = points
 
     def copy(self):
-        new = Polygon(self.points)
+        new = self.__class__(self.points)
         new.setProperties(self.getProperties())
         return new
 
@@ -1191,7 +1191,7 @@ class PolyLine(LineShape):
         self.points = points
 
     def copy(self):
-        new = PolyLine(self.points)
+        new = self.__class__(self.points)
         new.setProperties(self.getProperties())
         return new
 
@@ -1227,7 +1227,7 @@ class String(Shape):
         return self.x + stringWidth(self.text,self.fontName,self.fontSize)
 
     def copy(self):
-        new = String(self.x, self.y, self.text)
+        new = self.__class__(self.x, self.y, self.text)
         new.setProperties(self.getProperties())
         return new
 
