@@ -610,6 +610,15 @@ class Drawing(Group, Flowable):
         import renderPDF
         renderPDF.draw(self, self.canv, 0, 0, showBoundary=showBoundary)
 
+    def wrap(self, availWidth, availHeight):
+        width = self.width
+        height = self.height
+        renderScale = self.renderScale
+        if renderScale!=1.0:
+            width *= renderScale
+            height *= renderScale
+        return width, height
+
     def expandUserNodes(self):
         """Return a new drawing which only contains primitive shapes."""
         obj = Group.expandUserNodes(self)
