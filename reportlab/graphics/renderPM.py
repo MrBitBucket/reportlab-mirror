@@ -46,7 +46,7 @@ def Color2Hex(c):
 def draw(drawing, canvas, x, y, showBoundary=rl_config._unset_):
     """As it says"""
     R = _PMRenderer()
-    R.draw(drawing, canvas, x, y, showBoundary=showBoundary)
+    R.draw(renderScaledDrawing(drawing), canvas, x, y, showBoundary=showBoundary)
 
 from reportlab.graphics.renderbase import Renderer
 class _PMRenderer(Renderer):

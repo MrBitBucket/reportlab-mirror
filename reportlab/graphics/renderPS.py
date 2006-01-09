@@ -6,7 +6,7 @@ import string, types
 from reportlab.pdfbase.pdfmetrics import getFont, stringWidth # for font info
 from reportlab.lib.utils import fp_str, getStringIO
 from reportlab.lib.colors import black
-from reportlab.graphics.renderbase import StateTracker, getStateDelta, renderScaledDrawing
+from reportlab.graphics.renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing
 from reportlab.graphics.shapes import STATE_DEFAULTS
 import math
 from types import StringType
@@ -636,7 +636,6 @@ class PSCanvas:
     renderPS.draw(drawing, canvas, x, y)
 Execute the script to see some test drawings."""
 from shapes import *
-from renderbase import Renderer
 
 # hack so we only get warnings once each
 #warnOnce = WarnOnce()
@@ -645,7 +644,7 @@ from renderbase import Renderer
 def draw(drawing, canvas, x=0, y=0, showBoundary=rl_config.showBoundary):
     """As it says"""
     R = _PSRenderer()
-    R.draw(drawing, canvas, x, y, showBoundary=showBoundary)
+    R.draw(renderScaledDrawing(drawing), canvas, x, y, showBoundary=showBoundary)
 
 def _pointsFromList(L):
     '''

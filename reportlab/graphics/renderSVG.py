@@ -50,9 +50,8 @@ def drawToFile(d, fn, showBoundary=rl_config.showBoundary):
 
 def draw(drawing, canvas, x=0, y=0, showBoundary=rl_config.showBoundary):
     """As it says."""
-
     r = _SVGRenderer()
-    r.draw(drawing, canvas, x, y, showBoundary=showBoundary)
+    r.draw(renderScaledDrawing(drawing), canvas, x, y, showBoundary=showBoundary)
 
 
 ### helper functions ###

@@ -15,15 +15,13 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.utils import getStringIO
 from reportlab import rl_config
-from reportlab.graphics.renderbase import renderScaledDrawing
+from renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing
 
 # the main entry point for users...
 def draw(drawing, canvas, x, y, showBoundary=rl_config._unset_):
     """As it says"""
     R = _PDFRenderer()
-    R.draw(drawing, canvas, x, y, showBoundary=showBoundary)
-
-from renderbase import Renderer, StateTracker, getStateDelta
+    R.draw(renderScaledDrawing(drawing), canvas, x, y, showBoundary=showBoundary)
 
 class _PDFRenderer(Renderer):
     """This draws onto a PDF document.  It needs to be a class
@@ -227,7 +225,6 @@ class _PDFRenderer(Renderer):
                 self._canvas.setFont(fontname, fontsize)
 
 from reportlab.platypus import Flowable
-
 class GraphicsFlowable(Flowable):
     """Flowable wrapper around a Pingo drawing"""
     def __init__(self, drawing):

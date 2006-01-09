@@ -12,7 +12,7 @@ from types import FloatType, IntType, ListType, TupleType, StringType, InstanceT
 from pprint import pprint
 
 from reportlab.platypus import Flowable
-from reportlab.rl_config import shapeChecking, verbose, defaultGraphicsFontName
+from reportlab.rl_config import shapeChecking, verbose, defaultGraphicsFontName, _unset_
 from reportlab.lib import logger
 from reportlab.lib import colors
 from reportlab.lib.validators import *
@@ -603,14 +603,12 @@ class Drawing(Group, Flowable):
         s = s + '\n\nif __name__=="__main__": #NORUNTESTS\n\t%s().save(formats=[\'pdf\'],outDir=\'.\',fnRoot=None)\n' % n
         return s
 
-    def draw(self):
+    def draw(self,showBoundary=_unset_):
         """This is used by the Platypus framework to let the document
         draw itself in a story.  It is specific to PDF and should not
         be used directly."""
-
         import renderPDF
-        R = renderPDF._PDFRenderer()
-        R.draw(self, self.canv, 0, 0)
+        renderPDF.draw(self, self.canv, 0, 0, showBoundary=showBoundary)
 
     def expandUserNodes(self):
         """Return a new drawing which only contains primitive shapes."""
