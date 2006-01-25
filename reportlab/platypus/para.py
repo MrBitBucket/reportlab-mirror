@@ -1991,137 +1991,6 @@ def EmbedInRml2pdf():
     Controller["h3"] = theParaMapper
     Controller["title"] = theParaMapper
 
-
-testparagraph = """
-This is Text.
-<b>This is bold text.</b>
-This is Text.
-<i>This is italic text.</i>
-
-<ul>
-    <li> this is an element at 1
-more text and even more text and on and on and so forth
-more text and even more text and on and on and so forth
-more text and even more text and on and on and so forth
-more text and even more text and on and on and so forth
-more text and even more text and on and on and so forth
-more text <tt>monospaced</tt> and back to normal
-
-    <ul>
-        <li> this is an element at 2
-
-more text and even more text and on and on and so forth
-more text and even more text and on and on and so forth
-
-        <ul>
-            <li> this is an element at 3
-
-more text and even more text and on and on and so forth
-
-
-                <dl bulletFontName="Helvetica-BoldOblique" spaceBefore="10" spaceAfter="10">
-                <dt>frogs</dt> <dd>Little green slimy things. Delicious with <b>garlic</b></dd>
-                <dt>kittens</dt> <dd>cute, furry, not edible</dd>
-                <dt>bunnies</dt> <dd>cute, furry,. Delicious with <b>garlic</b></dd>
-                </dl>
-
-more text and even more text and on and on and so forth
-
-            <ul>
-                <li> this is an element at 4
-
-more text and even more text and on and on and so forth
-more text and even more text and on and on and so forth
-
-                </li>
-            </ul>
-
-more text and even more text and on and on and so forth
-more text and even more text and on and on and so forth
-
-            </li>
-        </ul>
-more text and even more text and on and on and so forth
-more text and even more text and on and on and so forth
-
-        </li>
-
-    </ul>
-<u><b>UNDERLINED</b> more text and even more text and on and on and so forth
-more text and even more text and on and on and so forth</u>
-
-<ol type="a">
-    <li>first element of the alpha list
-
-     <ul type="square">
-        <li>first element of the square unnumberred list</li>
-
-        <li>second element of the unnumberred list</li>
-
-        <li>third element of the unnumberred list
-        third element of the unnumberred list
-        third element of the unnumberred list
-        third element of the unnumberred list
-        third element of the unnumberred list
-        third element of the unnumberred list
-        third element of the unnumberred list
-        </li>
-
-        <li>fourth element of the unnumberred list</li>
-
-      </ul>
-
-    </li>
-
-    <li>second element of the alpha list</li>
-
-    <li>third element of the alpha list
-    third element of the unnumberred list &amp;#33; --> &#33;
-    third element of the unnumberred list &amp;#8704; --> &#8704;
-    third element of the unnumberred list &amp;exist; --> &exist;
-    third element of the unnumberred list
-    third element of the unnumberred list
-    third element of the unnumberred list
-    </li>
-
-    <li>fourth element of the alpha list</li>
-
-  </ol>
-
-
-    </li>
-</ul>
-
-<a href="http://www.reportlab.com">goto www.reportlab.com</a>.
-
-
-<para alignment="justify">
-<font color="red" size="15">R</font>ed letter. thisisareallylongword andsoisthis andthisislonger
-justified text paragraph example
-justified text paragraph example
-justified text paragraph example
-</para>
-
-"""
-
-def test2(canv):
-    #print test_program; return
-    from reportlab.lib.units import inch
-    from reportlab.lib.styles import ParagraphStyle
-    from reportlab.lib import rparsexml
-    parsedpara = rparsexml.parsexmlSimple(testparagraph,entityReplacer=None)
-    S = ParagraphStyle("Normal", None)
-    P = Para(S, parsedpara)
-    (w, h) = P.wrap(5*inch, 10*inch)
-    print "wrapped as", (h,w)
-    canv.translate(1*inch, 1*inch)
-    canv.rect(0,0,5*inch,10*inch, fill=0, stroke=1)
-    P.canv = canv
-    P.draw()
-    canv.setStrokeColorRGB(1, 0, 0)
-    #canv.translate(0, 3*inch)
-    canv.rect(0,0,w,-h, fill=0, stroke=1)
-
 def handleSpecialCharacters(engine, text, program=None):
     from paraparser import greeks, symenc
     from string import whitespace, atoi, atoi_error
@@ -2277,6 +2146,163 @@ def splitspace(text):
         result.append(e+" ")
     return result
 
+
+testparagraph = """
+This is Text.
+<b>This is bold text.</b>
+This is Text.
+<i>This is italic text.</i>
+
+<ul>
+    <li> this is an element at 1
+more text and even more text and on and on and so forth
+more text and even more text and on and on and so forth
+more text and even more text and on and on and so forth
+more text and even more text and on and on and so forth
+more text and even more text and on and on and so forth
+more text <tt>monospaced</tt> and back to normal
+
+    <ul>
+        <li> this is an element at 2
+
+more text and even more text and on and on and so forth
+more text and even more text and on and on and so forth
+
+        <ul>
+            <li> this is an element at 3
+
+more text and even more text and on and on and so forth
+
+
+                <dl bulletFontName="Helvetica-BoldOblique" spaceBefore="10" spaceAfter="10">
+                <dt>frogs</dt> <dd>Little green slimy things. Delicious with <b>garlic</b></dd>
+                <dt>kittens</dt> <dd>cute, furry, not edible</dd>
+                <dt>bunnies</dt> <dd>cute, furry,. Delicious with <b>garlic</b></dd>
+                </dl>
+
+more text and even more text and on and on and so forth
+
+            <ul>
+                <li> this is an element at 4
+
+more text and even more text and on and on and so forth
+more text and even more text and on and on and so forth
+
+                </li>
+            </ul>
+
+more text and even more text and on and on and so forth
+more text and even more text and on and on and so forth
+
+            </li>
+        </ul>
+more text and even more text and on and on and so forth
+more text and even more text and on and on and so forth
+
+        </li>
+
+    </ul>
+<u><b>UNDERLINED</b> more text and even more text and on and on and so forth
+more text and even more text and on and on and so forth</u>
+
+<ol type="a">
+    <li>first element of the alpha list
+
+     <ul type="square">
+        <li>first element of the square unnumberred list</li>
+
+        <li>second element of the unnumberred list</li>
+
+        <li>third element of the unnumberred list
+        third element of the unnumberred list
+        third element of the unnumberred list
+        third element of the unnumberred list
+        third element of the unnumberred list
+        third element of the unnumberred list
+        third element of the unnumberred list
+        </li>
+
+        <li>fourth element of the unnumberred list</li>
+
+      </ul>
+
+    </li>
+
+    <li>second element of the alpha list</li>
+
+    <li>third element of the alpha list
+    third element of the unnumberred list &amp;#33; --> &#33;
+    third element of the unnumberred list &amp;#8704; --> &#8704;
+    third element of the unnumberred list &amp;exist; --> &exist;
+    third element of the unnumberred list
+    third element of the unnumberred list
+    third element of the unnumberred list
+    </li>
+
+    <li>fourth element of the alpha list</li>
+
+  </ol>
+
+
+    </li>
+</ul>
+"""
+
+testparagraph1 = """
+<a href="http://www.reportlab.com">goto www.reportlab.com</a>.
+
+
+<para alignment="justify">
+<font color="red" size="15">R</font>ed letter. thisisareallylongword andsoisthis andthisislonger
+justified text paragraph example
+justified text paragraph example
+justified text paragraph example
+</para>
+
+<para alignment="center">
+<font color="green" size="15">G</font>reen letter.
+centered text paragraph example
+centered text paragraph example
+centered text paragraph example
+</para>
+<para alignment="right">
+<font color="blue" size="15">B</font>lue letter.
+right justified text paragraph example
+right justified text paragraph example
+right justified text paragraph example
+</para>
+<para alignment="left">
+<font color="yellow" size="15">Y</font>ellow letter.
+left justified text paragraph example
+left justified text paragraph example
+left justified text paragraph example
+</para>
+
+"""
+
+def test2(canv,testpara):
+    #print test_program; return
+    from reportlab.lib.units import inch
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.lib import rparsexml
+    parsedpara = rparsexml.parsexmlSimple(testpara,entityReplacer=None)
+    S = ParagraphStyle("Normal", None)
+    P = Para(S, parsedpara)
+    (w, h) = P.wrap(5*inch, 10*inch)
+    print "wrapped as", (h,w)
+    canv.saveState()
+    canv.translate(1*inch, 1*inch)
+    canv.rect(0,0,5*inch,10*inch, fill=0, stroke=1)
+    P.canv = canv
+    canv.saveState()
+    P.draw()
+    canv.restoreState()
+    canv.setStrokeColorRGB(1, 0, 0)
+    #canv.translate(0, 3*inch)
+    canv.rect(0,0,w,h, fill=0, stroke=1)
+    canv.restoreState()
+    canv.showPage()
+
 testlink = HotLink("http://www.reportlab.com")
 
 test_program = [
@@ -2331,7 +2357,6 @@ test_program = [
             ('pop',),
             ('nextLine', 0),]
 
-
 def test():
     from pprint import pprint
     #print test_program; return
@@ -2339,8 +2364,8 @@ def test():
     from reportlab.lib.units import inch
     fn = "paratest0.pdf"
     c = canvas.Canvas(fn)
-    test2(c)
-    c.showPage()
+    test2(c,testparagraph)
+    test2(c,testparagraph1)
     if 1:
         remainder = test_program + test_program + test_program
         laststate = {}
