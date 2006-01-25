@@ -540,15 +540,25 @@ class ImageReader:
             except AttributeError:
                 self.fileName = 'PILIMAGE_%d' % id(self)
         else:
-            self.fp = open_for_read(fileName,'b')
-            #detect which library we are using and open the image
-            if sys.platform[0:4] == 'java':
-                from javax.imageio import ImageIO
-                self._image = ImageIO.read(self.fp)
-            else:
-                import PIL.Image
-                self._image = PIL.Image.open(self.fp)
-                if self._image=='JPEG': self.jpeg_fh = self._jpeg_fp
+            try:
+                self.fp = open_for_read(fileName,'b')
+                #detect which library we are using and open the image
+                if sys.platform[0:4] == 'java':
+                    from javax.imageio import ImageIO
+                    self._image = ImageIO.read(self.fp)
+                else:
+                    import PIL.Image
+                    self._image = PIL.Image.open(self.fp)
+                    if self._image=='JPEG': self.jpeg_fh = self._jpeg_fp
+            except:
+                et,ev,tb = sys.exc_info()
+                if hasattr(ev,'args'):
+                    a = str(ev.args[-1])+(' fileName='+fileName)
+                    ev.args= ev.args[:-1]+(a,)
+                    raise et,ev,tb
+                else:
+                    raise
+
 
     def _jpeg_fh(self):
         fp = self.fp
