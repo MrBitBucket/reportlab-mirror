@@ -105,7 +105,7 @@ it's actually easy to do using platypus.
         story.append(ParagraphAndImage(Paragraph(text,bt),Image(gif)))
         phrase = 'This should be a paragraph spanning at least three pages. '
         description = phrase * 250
-        story.append(Paragraph(description, bt))
+        story.append(ParagraphAndImage(Paragraph(description, bt),Image(gif),side='left'))
 
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs.pdf'))
         doc.multiBuild(story)

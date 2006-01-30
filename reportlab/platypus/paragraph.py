@@ -707,10 +707,12 @@ class Paragraph(Flowable):
         nLines = len(lines)
         bulletText = self.bulletText
         if nLines > 0:
+            _offsets = getattr(self,'_offsets',[0])
+            _offsets += (nLines-len(_offsets))*[_offsets[-1]]
             canvas.saveState()
             #canvas.addLiteral('%% %s.drawPara' % _className(self))
             alignment = style.alignment
-            offset = style.firstLineIndent
+            offset = style.firstLineIndent+_offsets[0]
             lim = nLines-1
             noJustifyLast = not (hasattr(self,'_JustifyLast') and self._JustifyLast)
 
@@ -749,12 +751,12 @@ class Paragraph(Flowable):
 
                     #now the middle of the paragraph, aligned with the left margin which is our origin.
                     for i in range(1, nLines):
-                        t_off = dpl( tx, 0, lines[i][0], lines[i][1], noJustifyLast and i==lim)
+                        t_off = dpl( tx, _offsets[i], lines[i][0], lines[i][1], noJustifyLast and i==lim)
                         if f.underline:
                             _do_under_lines(i, t_off+leftIndent, tx)
                 else:
                     for i in range(1, nLines):
-                        dpl( tx, 0, lines[i][0], lines[i][1], noJustifyLast and i==lim)
+                        dpl( tx, _offsets[i], lines[i][0], lines[i][1], noJustifyLast and i==lim)
             else:
                 f = lines[0]
                 cur_y = self.height - f.fontSize
@@ -796,7 +798,7 @@ class Paragraph(Flowable):
                 #now the middle of the paragraph, aligned with the left margin which is our origin.
                 for i in range(1, nLines):
                     f = lines[i]
-                    t_off = dpl( tx, 0, f, noJustifyLast and i==lim)
+                    t_off = dpl( tx, _offsets[i], f, noJustifyLast and i==lim)
                     _do_under(i, t_off+leftIndent, tx)
 
             canvas.drawText(tx)

@@ -524,22 +524,33 @@ class CallerMacro(Flowable):
 
 class ParagraphAndImage(Flowable):
     '''combine a Paragraph and an Image'''
-    def __init__(self,P,I,xpad=3,ypad=3):
-        self.P, self.style, self.I, self.xpad, self.ypad = P,P.style,I,xpad,ypad
+    def __init__(self,P,I,xpad=3,ypad=3,side='right'):
+        self.P = P
+        self.I = I
+        self.xpad = xpad
+        self.ypad = ypad
+        self._side = side
 
     def wrap(self,availWidth,availHeight):
         wI, hI = self.I.wrap(availWidth,availHeight)
-        self.wI, self.hI = wI, hI
+        self.wI = wI
+        self.hI = hI
         # work out widths array for breaking
         self.width = availWidth
-        P, style, xpad, ypad = self.P, self.style, self.xpad, self.ypad
+        P = self.P
+        style = P.style
+        xpad = self.xpad
+        ypad = self.ypad
         leading = style.leading
         leftIndent = style.leftIndent
         later_widths = availWidth - leftIndent - style.rightIndent
         intermediate_widths = later_widths - xpad - wI
         first_line_width = intermediate_widths - style.firstLineIndent
         P.width = 0
-        P.blPara = P.breakLines([first_line_width] + int((hI+ypad)/leading)*[intermediate_widths]+[later_widths])
+        nIW = int((hI+ypad)/leading)
+        P.blPara = P.breakLines([first_line_width] + nIW*[intermediate_widths]+[later_widths])
+        if self._side=='left':
+            self._offsets = [wI+xpad]*(1+nIW)+[0]
         P.height = len(P.blPara.lines)*leading
         self.height = max(hI,P.height)
         return (self.width, self.height)
@@ -551,15 +562,23 @@ class ParagraphAndImage(Flowable):
         if not S: return S
         P = self.P = S[0]
         del S[0]
-        style = self.style = P.style
+        style = P.style
         P.height = len(self.P.blPara.lines)*style.leading
         self.height = max(hI,P.height)
         return [self]+S
 
     def draw(self):
         canv = self.canv
-        self.I.drawOn(canv,self.width-self.wI-self.xpad,self.height-self.hI)
-        self.P.drawOn(canv,0,0)
+        if self._side=='left':
+            self.I.drawOn(canv,0,self.height-self.hI)
+            self.P._offsets = self._offsets
+            try:
+                self.P.drawOn(canv,0,0)
+            finally:
+                del self.P._offsets
+        else:
+            self.I.drawOn(canv,self.width-self.wI-self.xpad,self.height-self.hI)
+            self.P.drawOn(canv,0,0)
 
 class FailOnWrap(Flowable):
     def wrap(self, availWidth, availHeight):
