@@ -692,11 +692,27 @@ cost to performance.""")
     c.drawString(1.5 * inch, 2.1*inch, "spanning these RGB values:  %s.  The background vanishes!!" % myMask)
     c.drawString(2.5*inch, 1.2*inch, 'This would normally be obscured')
     if haveImages:
-        c.drawImage(gif, 3*inch, 1.2*inch, w, h, mask=myMask)
+        c.drawImage(gif, 1*inch, 1.2*inch, w, h, mask=myMask)
+        c.drawImage(gif, 3*inch, 1.2*inch, w, h, mask='auto')
     else:
-        c.rect(3*inch, 1.2*inch, 110, 44)
+        c.rect(1*inch, 1.2*inch, w, h)
+        c.rect(3*inch, 1.2*inch, w, h)
 
     c.showPage()
+
+    if haveImages:
+        import shutil
+        c.drawString(1*inch, 10.25*inch, 'This jpeg is actually a gif')
+        jpg = outputfile(os.path.basename(gif.replace('gif','jpg')))
+        shutil.copyfile(gif,jpg)
+        c.drawImage(jpg, 1*inch, 9.25*inch, w, h, mask='auto')
+        tjpg = os.path.join(os.path.dirname(os.path.dirname(gif)),'docs','images','lj8100.jpg')
+        if os.path.isfile(tjpg):
+            c.drawString(4*inch, 10.25*inch, 'This gif is actually a jpeg')
+            tgif = outputfile(os.path.basename(gif.replace('jpg','gif')))
+            shutil.copyfile(tjpg,tgif)
+            c.drawImage(tgif, 4*inch, 9.25*inch, w, h, mask='auto')
+        c.showPage()
 
 
 #########################################################################

@@ -1746,20 +1746,19 @@ class PDFImageXObject:
 
         if source is None:
             pass # use the canned one.
-        elif type(source) == type(''):
+        elif type(source)==type(''):
             # it is a filename
             import os
             ext = string.lower(os.path.splitext(source)[1])
-            if ext in ('.jpg', '.jpeg'):
-                self.loadImageFromJPEG(open_for_read(source))
-            else:
-                self.loadImageFromA85(source)
+            src = open_for_read(source)
+            if not(ext in ('.jpg', '.jpeg') and self.loadImageFromJPEG(src)):
+                self.loadImageFromA85(src)
         else: # it is already a PIL Image
             self.loadImageFromSRC(source)
 
     def loadImageFromA85(self,source):
         IMG=[]
-        imagedata = map(string.strip,pdfutils.cacheImageFile(source,returnInMemory=1,IMG=IMG))
+        imagedata = map(string.strip,pdfutils.makeA85Image(source,IMG=IMG))
         words = string.split(imagedata[1])
         self.width, self.height = map(string.atoi,(words[1],words[3]))
         self.colorSpace = {'/RGB':'DeviceRGB', '/G':'DeviceGray', '/CMYK':'DeviceCMYK'}[words[7]]
@@ -1770,7 +1769,13 @@ class PDFImageXObject:
         self.streamContent = string.join(imagedata[3:-1],'')
 
     def loadImageFromJPEG(self,imageFile):
-        info = pdfutils.readJPEGInfo(imageFile)
+        try:
+            try:
+                info = pdfutils.readJPEGInfo(imageFile)
+            finally:
+                imageFile.seek(0) #reset file pointer
+        except:
+            return False
         self.width, self.height = info[0], info[1]
         self.bitsPerComponent = 8
         if info[2] == 1:
@@ -1780,10 +1785,10 @@ class PDFImageXObject:
         else: #maybe should generate an error, is this right for CMYK?
             self.colorSpace = 'DeviceCMYK'
             self._dotrans = 1
-        imageFile.seek(0) #reset file pointer
         self.streamContent = pdfutils._AsciiBase85Encode(imageFile.read())
         self._filters = 'ASCII85Decode','DCTDecode' #'A85','DCT'
         self.mask = None
+        return True
 
     def _checkTransparency(self,im):
         if self.mask=='auto':

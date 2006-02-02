@@ -26,39 +26,44 @@ def _chunker(src,dst=[],chunkSize=60):
 ##########################################################
 
 _mode2cs = {'RGB':'RGB', 'CMYK': 'CMYK', 'L': 'G'}
+
+def makeA85Image(filename,IMG=None):
+    import zlib
+    img = ImageReader(filename)
+    if IMG is not None: IMG.append(img)
+
+    imgwidth, imgheight = img.getSize()
+    raw = img.getRGBData()
+
+    code = []
+    append = code.append
+    # this describes what is in the image itself
+    append('BI')
+    append('/W %s /H %s /BPC 8 /CS /%s /F [/A85 /Fl]' % (imgwidth, imgheight,_mode2cs[img.mode]))
+    append('ID')
+    #use a flate filter and Ascii Base 85
+    assert(len(raw) == imgwidth * imgheight, "Wrong amount of data for image")
+    compressed = zlib.compress(raw)   #this bit is very fast...
+    encoded = _AsciiBase85Encode(compressed) #...sadly this may not be
+
+    #append in blocks of 60 characters
+    _chunker(encoded,code)
+
+    append('EI')
+    return code
+
 def cacheImageFile(filename, returnInMemory=0, IMG=None):
     "Processes image as if for encoding, saves to a file with .a85 extension."
-
-    from reportlab.lib.utils import open_for_read
-    import zlib
 
     cachedname = os.path.splitext(filename)[0] + '.a85'
     if filename==cachedname:
         if cachedImageExists(filename):
+            from reportlab.lib.utils import open_for_read
             if returnInMemory: return split(open_for_read(cachedname).read(),LINEEND)[:-1]
         else:
             raise IOError, 'No such cached image %s' % filename
     else:
-        img = ImageReader(filename)
-        if IMG is not None: IMG.append(img)
-
-        imgwidth, imgheight = img.getSize()
-        raw = img.getRGBData()
-
-        code = []
-        # this describes what is in the image itself
-        code.append('BI')
-        code.append('/W %s /H %s /BPC 8 /CS /%s /F [/A85 /Fl]' % (imgwidth, imgheight,_mode2cs[img.mode]))
-        code.append('ID')
-        #use a flate filter and Ascii Base 85
-        assert(len(raw) == imgwidth * imgheight, "Wrong amount of data for image")
-        compressed = zlib.compress(raw)   #this bit is very fast...
-        encoded = _AsciiBase85Encode(compressed) #...sadly this may not be
-
-        #append in blocks of 60 characters
-        _chunker(encoded,code)
-
-        code.append('EI')
+        code = makeA85Image(filename,IMG)
         if returnInMemory: return code
 
         #save it to a file
@@ -387,6 +392,7 @@ def readJPEGInfo(image):
     "Read width, height and number of components from open JPEG file."
 
     import struct
+    from pdfdoc import PDFError
 
     #Acceptable JPEG Markers:
     #  SROF0=baseline, SOF1=extended sequential or SOF2=progressive
@@ -412,7 +418,7 @@ def readJPEGInfo(image):
                 image.seek(2, 1)            #skip segment length
                 x = struct.unpack('B', image.read(1)) #data precision
                 if x[0] != 8:
-                    raise 'PDFError', ' JPEG must have 8 bits per component'
+                    raise PDFError('JPEG must have 8 bits per component')
                 y = struct.unpack('BB', image.read(2))
                 height = (y[0] << 8) + y[1]
                 y = struct.unpack('BB', image.read(2))
@@ -422,7 +428,7 @@ def readJPEGInfo(image):
                 return width, height, color
                 done = 1
             elif x[0] in unsupportedMarkers:
-                raise 'PDFError', ' Unsupported JPEG marker: %0.2x' % x[0]
+                raise PDFError('JPEG Unsupported JPEG marker: %0.2x' % x[0])
             elif x[0] not in noParamMarkers:
                 #skip segments with parameters
                 #read length and skip the data
