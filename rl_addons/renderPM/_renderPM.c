@@ -115,7 +115,7 @@ static PyObject *_get_pdfmetrics__fonts(void){
 		}
 	return _pdfmetrics__fonts;
 	}
-#include <f22build.h>
+#include <ft2build.h>
 #include FT_FREETYPE_H
 static FT_Library ft_library=0;
 typedef struct {

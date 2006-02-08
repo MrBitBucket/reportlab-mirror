@@ -59,7 +59,7 @@ def main():
 		FT_LIB = ['freetype']
 		FT_LIB_DIR = ['/usr/local/lib']
 		FT_MACROS = [('RENDERPM_FT',None)]
-		FT_INC_DIR = ['/usr/local/include/freetype2']
+		FT_INC_DIR = ['/usr/local/include','/usr/local/include/freetype2']
 	else:
 		ft_lib = check_ft_lib()
 		if ft_lib:
