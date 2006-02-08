@@ -115,7 +115,8 @@ static PyObject *_get_pdfmetrics__fonts(void){
 		}
 	return _pdfmetrics__fonts;
 	}
-#include <freetype/freetype.h>
+#include <f22build.h>
+#include FT_FREETYPE_H
 static FT_Library ft_library=0;
 typedef struct {
     PyObject_HEAD
@@ -764,7 +765,7 @@ static FT_Outline_Funcs _ft_outliner = {
 	0
 	};
 
-#include <freetype/ftoutln.h>
+#include FT_OUTLINE_H
 static ArtBpath *_ft_get_glyph_outline(FT_Face face, int c, _ft_outliner_user_t *user, double *pw)
 {
 	int	err, idx;

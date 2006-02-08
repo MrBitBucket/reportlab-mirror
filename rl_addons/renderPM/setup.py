@@ -48,22 +48,30 @@ def main():
 	LIBART_SRCS=glob(pJoin(LIBART_DIR, 'art_*.c'))
 	GT1_DIR=pJoin(DEVEL_DIR,'gt1')
 	GLIB_DIR=pJoin(DEVEL_DIR,'glib')
-	if sys.platform in ['darwin', 'win32', 'sunos5', 'freebsd4', 'mac', 'linux2','linux-i386','aix4']:
+	platform = sys.platform
+	if platform in ['darwin', 'win32', 'sunos5', 'freebsd4', 'freebsd6', 'mac', 'linux2','linux-i386','aix4']:
 		LIBS=[]
 	else:
-		raise ValueError, "Don't know about other systems"
+		raise ValueError, "Don't know about platform", platform
 
-	ft_lib = check_ft_lib()
-	if ft_lib:
-		FT_LIB = [os.path.splitext(os.path.basename(ft_lib))[0]]
-		FT_LIB_DIR = [os.path.dirname(ft_lib)]
+
+	if os.path.isdir('/usr/local/include/freetype2'):
+		FT_LIB = ['freetype']
+		FT_LIB_DIR = ['/usr/local/lib']
 		FT_MACROS = [('RENDERPM_FT',None)]
-		FT_INC_DIR = [FT_INCLUDE or os.path.join(os.path.dirname(os.path.dirname(ft_lib)),'include')]
+		FT_INC_DIR = ['/usr/local/include/freetype2']
 	else:
-		FT_LIB = []
-		FT_LIB_DIR = []
-		FT_MACROS = []
-		FT_INC_DIR = []
+		ft_lib = check_ft_lib()
+		if ft_lib:
+			FT_LIB = [os.path.splitext(os.path.basename(ft_lib))[0]]
+			FT_LIB_DIR = [os.path.dirname(ft_lib)]
+			FT_MACROS = [('RENDERPM_FT',None)]
+			FT_INC_DIR = [FT_INCLUDE or os.path.join(os.path.dirname(os.path.dirname(ft_lib)),'include')]
+		else:
+			FT_LIB = []
+			FT_LIB_DIR = []
+			FT_MACROS = []
+			FT_INC_DIR = []
 
 	setup(	name = "_renderPM",
 			version = VERSION,
