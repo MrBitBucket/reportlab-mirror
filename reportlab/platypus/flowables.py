@@ -448,8 +448,8 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None):
         H += h
         if not atTop:
             h = f.getSpaceBefore()
-            if mergeSpace: H += max(h-pS,0) 
-            else: H += h
+            if mergeSpace: h = max(h-pS,0) 
+            H += h
         else:
             if obj is not None: obj._spaceBefore = f.getSpaceBefore()
             atTop = 0
@@ -650,29 +650,31 @@ class _Container:   #Abstract some common container like behaviour
                 return c.getSpaceBefore()
         return 0
 
-    def getSpaceAfter(self):
+    def getSpaceAfter(self,content=None):
         #this needs 2.4
         #for c in reversed(self._content):
-        reverseContent = self._content[:]
+        reverseContent = (content or self._content)[:]
         reverseContent.reverse()
         for c in reverseContent:
             if not hasattr(c,'frameAction'):
                 return c.getSpaceAfter()
         return 0
 
-    def drawOn(self, canv, x, y, _sW=0,scale=1.0):
+    def drawOn(self, canv, x, y, _sW=0, scale=1.0, content=None, aW=None):
         '''we simulate being added to a frame'''
         pS = 0
-        aW = scale*(self.width+_sW)
-        C = self._content
+        if aW is None: aW = self.width
+        aW = scale*(aW+_sW)
+        if content is None:
+            content = self._content
         y += self.height*scale
-        for c in C:
+        for c in content:
             w, h = c.wrapOn(canv,aW,0xfffffff)
             if w<_FUZZ or h<_FUZZ: continue
-            if c is not C[0]: h += max(c.getSpaceBefore()-pS,0)
+            if c is not content[0]: h += max(c.getSpaceBefore()-pS,0)
             y -= h
             c.drawOn(canv,x,y,_sW=aW-w)
-            if c is not C[-1]:
+            if c is not content[-1]:
                 pS = c.getSpaceAfter()
                 y -= pS
 
@@ -881,3 +883,133 @@ class KeepInFrame(_Container,Flowable):
                 canv.scale(1.0/scale, 1.0/scale)
         _Container.drawOn(self, canv, x, y, _sW=_sW, scale=scale)
         if ss: canv.restoreState()
+
+class FlowablesAndImage(_Container,Flowable):
+    '''combine a list of flowables and an Image'''
+    def __init__(self,F,I,xpad=3,yoffs=0,ypad=3,side='right'):
+        self._content = _flowableSublist(F)
+        self._I = I
+        self._xpad = xpad
+        self._ypad = ypad
+        self._yoffs = yoffs
+        self._side = side
+
+    def getSpaceAfter(self):
+        if hasattr(self,'_C1'):
+            C = self._C1
+        elif hasattr(self,'_C0'):
+            C = self._C0
+        else:
+            C = self._content
+        return _Container.getSpaceAfter(self,C)
+
+    def getSpaceBefore(self):
+        return max(self._I.getSpaceBefore(),_Container.getSpaceBefore(self))
+
+    def _reset(self):
+        for a in ('_wrapArgs','_C0','_C1'):
+            try:
+                delattr(self,a)
+            except:
+                pass
+
+    def wrap(self,availWidth,availHeight):
+        canv = self.canv
+        if hasattr(self,'_wrapArgs'):
+            if self._wrapArgs==(availWidth,availHeight):
+                return self.width,self.height
+            self._reset()
+        self._wrapArgs = availWidth, availHeight
+        wI, hI = self._I.wrap(availWidth,availHeight)
+        self._wI = wI
+        self._hI = hI
+        xpad = self._xpad
+        ypad = self._ypad
+        yoffs = self._yoffs
+        self._iW = availWidth - xpad - wI
+        aH = yoffs + hI + ypad
+        W,H0,self._C0,self._C1 = self._findSplit(canv,self._iW,aH)
+        self.width = availWidth
+        aH = self._aH = max(aH,H0)
+        if not self._C1:
+            self.height = aH
+        else:
+            W1,H1 = _listWrapOn(self._C1,availWidth,canv)
+            self.height = aH+H1
+        return self.width, self.height
+
+    def split(self,availWidth, availHeight):
+        if hasattr(self,'_wrapArgs'):
+            if self._wrapArgs!=(availWidth,availHeight):
+                self._reset()
+        W,H=self.wrap(availWidth,availHeight)
+        if self._aH>availHeight: return []
+        C1 = self._C1
+        if C1:
+            c0 = C1[0]
+            S = c0.split(availWidth,availHeight-self._aH)
+            if not S:
+                self._C1 = []
+                self.height = self._aH
+            else:
+                self._C1 = [S[0]]
+                self.height = self._aH + S[0].height
+                C1 = S[1:]+C1[1:]
+        else:
+            self._C1 = []
+            self.height = self._aH
+        return [self]+C1
+
+    def drawOn(self, canv, x, y, _sW=0):
+        if self._side=='left':
+            Ix = x
+            Fx = x + self._xpad + self._wI
+        else:
+            Ix = x + self.width-self._wI-self._xpad
+            Fx = x
+        self._I.drawOn(canv,Ix,y+self.height-self._yoffs-self._hI)
+        _Container.drawOn(self, canv, Fx, y, content=self._C0, aW=self._iW)
+        if self._C1:
+            _Container.drawOn(self, canv, x, y-self._aH,content=self._C1)
+
+    def _findSplit(self,canv,availWidth,availHeight,mergeSpace=1,obj=None):
+        '''return max width, required height for a list of flowables F'''
+        W = 0
+        H = 0
+        pS = sB = 0
+        atTop = 1
+        F = self._content
+        for i,f in enumerate(F):
+            w,h = f.wrapOn(canv,availWidth,0xfffffff)
+            if w<=_FUZZ or h<=_FUZZ: continue
+            W = max(W,w)
+            if not atTop:
+                s = f.getSpaceBefore()
+                if mergeSpace: s = max(s-pS,0)
+                H += s
+            else:
+                if obj is not None: obj._spaceBefore = f.getSpaceBefore()
+                atTop = 0
+            if H>=availHeight:
+                return W, availHeight, F[:i],F[i:]
+            H += h
+            if H>availHeight:
+                from paragraph import Paragraph
+                aH = availHeight-(H-h)
+                if isinstance(f,(Paragraph,Preformatted)):
+                    leading = f.style.leading
+                    nH = leading*int(aH/float(leading))+_FUZZ
+                    print 'leading',leading,'availHeight',availHeight, 'aH=',aH, 'nH=',nH,
+                    if nH<aH: nH += leading
+                    availHeight += nH-aH
+                    print 'new nH=',nH,'new availHeight=',availHeight
+                    aH = nH
+                S = deepcopy(f).split(availWidth,aH)
+                if not S:
+                    return W, availHeight, F[:i],F[i:]
+                else:
+                    return W,availHeight,F[:i]+S[:1],S[1:]+F[i+1:]
+            pS = f.getSpaceAfter()
+            H += pS
+        if obj is not None: obj._spaceAfter = pS
+        return W, H-pS, F, []

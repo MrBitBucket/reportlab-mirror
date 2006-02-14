@@ -477,6 +477,8 @@ class Paragraph(Flowable):
         P1.blPara = ParaLines(kind=1,lines=blPara.lines[0:s],aH=availHeight,aW=availWidth)
         P1._JustifyLast = 1
         P1._splitpara = 1
+        P1.height = s*leading
+        P1.width = availWidth
         if style.firstLineIndent != 0:
             style = deepcopy(style)
             style.firstLineIndent = 0

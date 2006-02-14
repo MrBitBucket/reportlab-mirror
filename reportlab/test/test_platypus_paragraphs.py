@@ -104,10 +104,44 @@ it's actually easy to do using platypus.
         gif = os.path.join(_RL_DIR,'test','pythonpowered.gif')
         story.append(ParagraphAndImage(Paragraph(text,bt),Image(gif)))
         phrase = 'This should be a paragraph spanning at least three pages. '
-        description = phrase * 250
+        description = ''.join([('%d: '%i)+phrase for i in xrange(250)])
         story.append(ParagraphAndImage(Paragraph(description, bt),Image(gif),side='left'))
 
-        doc = MyDocTemplate(outputfile('test_platypus_paragraphs.pdf'))
+        doc = MyDocTemplate(outputfile('test_platypus_paragraphandimage.pdf'))
+        doc.multiBuild(story)
+
+    def test1(self):
+        "This makes one long multi-page paragraph."
+
+        # Build story.
+        story = []
+        styleSheet = getSampleStyleSheet()
+        h3 = styleSheet['Heading3']
+        bt = styleSheet['BodyText']
+        text = '''If you imagine that the box of X's tothe left is
+an image, what I want to be able to do is flow a
+series of paragraphs around the image
+so that once the bottom of the image is reached, then text will flow back to the
+left margin. I know that it would be possible to something like this
+using tables, but I can't see how to have a generic solution.
+There are two examples of this in the demonstration section of the reportlab
+site.
+If you look at the "minimal" euro python conference brochure, at the end of the
+timetable section (page 8), there are adverts for "AdSu" and "O'Reilly". I can
+see how the AdSu one might be done generically, but the O'Reilly, unsure...
+I guess I'm hoping that I've missed something, and that
+it's actually easy to do using platypus.
+'''
+        from reportlab.platypus.flowables import FlowablesAndImage, Image
+        from reportlab.lib.utils import _RL_DIR
+        gif = os.path.join(_RL_DIR,'test','pythonpowered.gif')
+        heading = Paragraph('This is a heading',h3)
+        story.append(FlowablesAndImage([heading,Paragraph(text,bt)],Image(gif)))
+        phrase = 'This should be a paragraph spanning at least three pages. '
+        description = ''.join([('%d: '%i)+phrase for i in xrange(250)])
+        story.append(FlowablesAndImage([heading,Paragraph(description, bt)],Image(gif),side='left'))
+
+        doc = MyDocTemplate(outputfile('test_platypus_flowablesandimage.pdf'))
         doc.multiBuild(story)
 
 class FragmentTestCase(unittest.TestCase):

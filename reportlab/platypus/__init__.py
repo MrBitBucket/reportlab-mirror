@@ -4,7 +4,8 @@
 __version__=''' $Id$ '''
 __doc__=''
 from reportlab.platypus.flowables import Flowable, Image, Macro, PageBreak, Preformatted, Spacer, XBox, \
-                        CondPageBreak, KeepTogether, TraceInfo, FailOnWrap, FailOnDraw, PTOContainer
+                        CondPageBreak, KeepTogether, TraceInfo, FailOnWrap, FailOnDraw, PTOContainer, \
+                        KeepInFrame, ParagraphAndImage, FlowablesAndImage
 from reportlab.platypus.paragraph import Paragraph, cleanBlockQuotedText, ParaLines
 from reportlab.platypus.paraparser import ParaFrag
 from reportlab.platypus.tables import Table, TableStyle, CellStyle, LongTable
