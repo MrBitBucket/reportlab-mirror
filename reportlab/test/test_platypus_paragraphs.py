@@ -132,16 +132,16 @@ see how the AdSu one might be done generically, but the O'Reilly, unsure...
 I guess I'm hoping that I've missed something, and that
 it's actually easy to do using platypus.
 '''
-        from reportlab.platypus.flowables import FlowablesAndImage, Image
+        from reportlab.platypus.flowables import ImageAndFlowables, Image
         from reportlab.lib.utils import _RL_DIR
         gif = os.path.join(_RL_DIR,'test','pythonpowered.gif')
         heading = Paragraph('This is a heading',h3)
-        story.append(FlowablesAndImage([heading,Paragraph(text,bt)],Image(gif)))
+        story.append(ImageAndFlowables(Image(gif),[heading,Paragraph(text,bt)]))
         phrase = 'This should be a paragraph spanning at least three pages. '
         description = ''.join([('%d: '%i)+phrase for i in xrange(250)])
-        story.append(FlowablesAndImage([heading,Paragraph(description, bt)],Image(gif),side='left'))
+        story.append(ImageAndFlowables(Image(gif),[heading,Paragraph(description, bt)],imageSide='left'))
 
-        doc = MyDocTemplate(outputfile('test_platypus_flowablesandimage.pdf'))
+        doc = MyDocTemplate(outputfile('test_platypus_imageandflowables.pdf'))
         doc.multiBuild(story)
 
 class FragmentTestCase(unittest.TestCase):

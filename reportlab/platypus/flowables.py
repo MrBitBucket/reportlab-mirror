@@ -884,15 +884,17 @@ class KeepInFrame(_Container,Flowable):
         _Container.drawOn(self, canv, x, y, _sW=_sW, scale=scale)
         if ss: canv.restoreState()
 
-class FlowablesAndImage(_Container,Flowable):
+class ImageAndFlowables(_Container,Flowable):
     '''combine a list of flowables and an Image'''
-    def __init__(self,F,I,xpad=3,yoffs=0,ypad=3,side='right'):
+    def __init__(self,I,F,imageLeftPadding=0,imageRightPadding=3,imageTopPadding=0,imageBottomPadding=3,
+                    imageSide='right'):
         self._content = _flowableSublist(F)
         self._I = I
-        self._xpad = xpad
-        self._ypad = ypad
-        self._yoffs = yoffs
-        self._side = side
+        self._irpad = imageRightPadding
+        self._ilpad = imageLeftPadding
+        self._ibpad = imageBottomPadding
+        self._itpad = imageTopPadding
+        self._side = imageSide
 
     def getSpaceAfter(self):
         if hasattr(self,'_C1'):
@@ -923,11 +925,12 @@ class FlowablesAndImage(_Container,Flowable):
         wI, hI = self._I.wrap(availWidth,availHeight)
         self._wI = wI
         self._hI = hI
-        xpad = self._xpad
-        ypad = self._ypad
-        yoffs = self._yoffs
-        self._iW = availWidth - xpad - wI
-        aH = yoffs + hI + ypad
+        ilpad = self._ilpad
+        irpad = self._irpad
+        ibpad = self._ibpad
+        itpad = self._itpad
+        self._iW = availWidth - irpad - wI - ilpad
+        aH = itpad + hI + ibpad
         W,H0,self._C0,self._C1 = self._findSplit(canv,self._iW,aH)
         self.width = availWidth
         aH = self._aH = max(aH,H0)
@@ -962,12 +965,12 @@ class FlowablesAndImage(_Container,Flowable):
 
     def drawOn(self, canv, x, y, _sW=0):
         if self._side=='left':
-            Ix = x
-            Fx = x + self._xpad + self._wI
+            Ix = x + self._ilpad
+            Fx = Ix+ self._irpad + self._wI
         else:
-            Ix = x + self.width-self._wI-self._xpad
+            Ix = x + self.width-self._wI-self._irpad - self._ilpad
             Fx = x
-        self._I.drawOn(canv,Ix,y+self.height-self._yoffs-self._hI)
+        self._I.drawOn(canv,Ix,y+self.height-self._itpad-self._hI)
         _Container.drawOn(self, canv, Fx, y, content=self._C0, aW=self._iW)
         if self._C1:
             _Container.drawOn(self, canv, x, y-self._aH,content=self._C1)
@@ -999,10 +1002,8 @@ class FlowablesAndImage(_Container,Flowable):
                 if isinstance(f,(Paragraph,Preformatted)):
                     leading = f.style.leading
                     nH = leading*int(aH/float(leading))+_FUZZ
-                    print 'leading',leading,'availHeight',availHeight, 'aH=',aH, 'nH=',nH,
                     if nH<aH: nH += leading
                     availHeight += nH-aH
-                    print 'new nH=',nH,'new availHeight=',availHeight
                     aH = nH
                 S = deepcopy(f).split(availWidth,aH)
                 if not S:
