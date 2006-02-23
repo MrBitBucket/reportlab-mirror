@@ -91,6 +91,7 @@ def run():
 	import pyRXP
 	try:
 		import pyRXPU
+		assert len(u'a'.encode('unicode_internal'))==2,"pyRXPU needs UCS2 Python"
 	except ImportError:
 		pyRXPU = None
 	if '__doc__' in sys.argv:
