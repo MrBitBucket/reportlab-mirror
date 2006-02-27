@@ -1302,7 +1302,7 @@ class Annotation:
     defaults = [("Type", PDFName("Annot"),)]
     required = ("Type", "Rect", "Contents", "Subtype")
     permitted = required+(
-      "Border", "C", "T", "M", "F", "H", "BS", "AA", "AS", "Popup", "P")
+      "Border", "C", "T", "M", "F", "H", "BS", "AA", "AS", "Popup", "P", "AP")
     def cvtdict(self, d, escape=1):
         """transform dict args from python form to pdf string rep as needed"""
         Rect = d["Rect"]
@@ -1339,7 +1339,7 @@ class Annotation:
 
 class TextAnnotation(Annotation):
     permitted = Annotation.permitted + (
-        "Open", "Name", "AP")
+        "Open", "Name")
     def __init__(self, Rect, Contents, **kw):
         self.Rect = Rect
         self.Contents = Contents

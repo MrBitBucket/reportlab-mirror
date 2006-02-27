@@ -766,7 +766,7 @@ class Canvas(textobject._PDFColorSetter):
             Rect = (xmin, ymin, xmax, ymax)
         return apply(self.linkAbsolute, (contents, destinationname, Rect, addtopage, name), kw)
 
-    def linkURL(self, url, rect, relative=0, thickness=0, color=None, dashArray=None, kind="URI"):
+    def linkURL(self, url, rect, relative=0, thickness=0, color=None, dashArray=None, kind="URI", **kw):
         """Create a rectangular URL 'hotspot' in the given rectangle.
 
         if relative=1, this is in the current coord system, otherwise
@@ -793,7 +793,7 @@ class Canvas(textobject._PDFColorSetter):
             #(w2, h2) = (xmax-xmin, ymax-ymin)
             rect = (xmin, ymin, xmax, ymax)
 
-        ann = PDFDictionary()
+        ann = PDFDictionary(dict=kw)
         ann["Type"] = PDFName("Annot")
         ann["Subtype"] = PDFName("Link")
         ann["Rect"] = PDFArray(rect) # the whole page for testing
