@@ -221,12 +221,12 @@ class TTFontParser:
         # Read header
         try:
             version = self.read_ulong()
-            if version == 0x4F54544F:
-                raise TTFError, 'OpenType fonts with PostScript outlines are not supported'
-            if version != 0x00010000 and version != 0x74727565:
-                raise TTFError, 'Not a TrueType font'
         except:
-            raise TTFError, 'Not a TrueType font'
+            raise TTFError("Not a TrueType font: can't read version")
+        if version == 0x4F54544F:
+            raise TTFError, 'OpenType fonts with PostScript outlines are not supported'
+        if version != 0x00010000 and version != 0x74727565 and version!=0x74746366:
+            raise TTFError('Not a TrueType font: version=0x%8.8X' % version)
 
         try:
             self.numTables = self.read_ushort()
@@ -438,17 +438,21 @@ class TTFontFile(TTFontParser):
             if nameId not in K: continue
             N = None
             if platformId == 3 and encodingId == 1 and languageId == 0x409: # Microsoft, Unicode, US English, PS Name
-                self.seek(string_data_offset + offset)
-                if length % 2 != 0:
-                    raise TTFError, "PostScript name is UTF-16BE string of odd length"
-                length /= 2
-                N = []
-                A = N.append
-                while length > 0:
-                    char = self.read_ushort()
-                    A(chr(char))
-                    length -= 1
-                N = ''.join(N)
+                opos = self._pos
+                try:
+                    self.seek(string_data_offset + offset)
+                    if length % 2 != 0:
+                        raise TTFError, "PostScript name is UTF-16BE string of odd length"
+                    length /= 2
+                    N = []
+                    A = N.append
+                    while length > 0:
+                        char = self.read_ushort()
+                        A(chr(char))
+                        length -= 1
+                    N = ''.join(N)
+                finally:
+                    self._pos = opos
             elif platformId == 1 and encodingId == 0 and languageId == 0: # Macintosh, Roman, English, PS Name
                 # According to OpenType spec, if PS name exists, it must exist
                 # both in MS Unicode and Macintosh Roman formats.  Apparently,
