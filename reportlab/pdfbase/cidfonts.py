@@ -87,7 +87,7 @@ class CIDEncoding(pdfmetrics.Encoding):
         """This is a tricky one as CMAP files are Postscript
         ones.  Some refer to others with a 'usecmap'
         command"""
-        started = time.clock()
+        #started = time.clock()
         cmapfile = findCMapFile(name)
         # this will CRAWL with the unicode encodings...
         rawdata = open(cmapfile, 'r').read()
@@ -145,8 +145,8 @@ class CIDEncoding(pdfmetrics.Encoding):
 
             else:
                 words = words[1:]
-        finished = time.clock()
-        print 'parsed CMAP %s in %0.4f seconds' % (self.name, finished - started)
+        #finished = time.clock()
+        #print 'parsed CMAP %s in %0.4f seconds' % (self.name, finished - started)
 
     def translate(self, text):
         "Convert a string into a list of CIDs"

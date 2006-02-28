@@ -245,12 +245,18 @@ if ',' in fp_str(0.25):
     def fp_str(*a):
         return string.replace(apply(_FP_STR,a),',','.')
 
+def _rl_getuid():
+    if hasattr(os,'getuid'):
+        return os.getuid()
+    else:
+        return ''
+
 _rl_tempdir=None
 def get_rl_tempdir(*subdirs):
     global _rl_tempdir
     if _rl_tempdir is None:
         import tempfile
-        _rl_tempdir = os.path.join(tempfile.gettempdir(),'ReportLab_tmp%s' % (sys.platform=='unix' and `os.getuid()` or ''))
+        _rl_tempdir = os.path.join(tempfile.gettempdir(),'ReportLab_tmp%s' % str(_rl_getuid()))
     d = _rl_tempdir
     if subdirs: d = os.path.join(*((d,)+subdirs))
     try:
