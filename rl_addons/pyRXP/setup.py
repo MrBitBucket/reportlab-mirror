@@ -25,7 +25,7 @@ if __name__=='__main__': #NO RUNTESTS
 		LIBS=['nsl', 'socket', 'dl']
 	elif sys.platform=="aix4":
 		LIBS=['nsl_r', 'dl']
-	elif sys.platform in ("freebsd4", "darwin", "mac", "linux2", "linux-i386"):
+	elif sys.platform in ("freebsd4", "freebsd6", "darwin", "mac", "linux2", "linux-i386"):
 		LIBS=[]
 	else:
 		msg = "Don't know about system %s" % sys.platform
