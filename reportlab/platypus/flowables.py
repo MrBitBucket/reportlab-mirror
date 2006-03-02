@@ -768,6 +768,8 @@ def _hmodel(s0,s1,h0,h1):
 
 def _qsolve(h,(a,b)):
     '''solve the model v = a/s**2 + b/s for an s which gives us v==h'''
+    if abs(a)<=_FUZZ:
+        return b/h
     t = 0.5*b/a
     from math import sqrt
     f = -h/a
@@ -835,12 +837,12 @@ class KeepInFrame(_Container,Flowable):
             H0 = H
             s0 = 1
             if W>maxWidth+_FUZZ:
-                #squeeze out the excess width
+                #squeeze out the excess width and or Height
                 s1 = W/maxWidth
                 W, H = func(s1)
-                if H<=maxHeight:
-                    self.width = W
-                    self.height = H
+                if H<=maxHeight+_FUZZ:
+                    self.width = W-_FUZZ
+                    self.height = H-_FUZZ
                     self._scale = s1
                     return W,H
                 s0 = s1
@@ -848,10 +850,10 @@ class KeepInFrame(_Container,Flowable):
                 W0 = W
             s1 = H/maxHeight
             W, H = func(s1)
-            self.width = W
-            self.height = H
+            self.width = W-_FUZZ
+            self.height = H-_FUZZ
             self._scale = s1
-            if H<min(0.95*maxHeight,maxHeight-10):
+            if H<min(0.95*maxHeight,maxHeight-10) or H>=maxHeight+_FUZZ:
                 #the standard case W should be OK, H is short we want
                 #to find the smallest s with H<=maxHeight
                 H1 = H
@@ -859,9 +861,9 @@ class KeepInFrame(_Container,Flowable):
                     #apply the quadratic model
                     s = _qsolve(maxHeight*(1-f),_hmodel(s0,s1,H0,H1))
                     W, H = func(s)
-                    if H<=maxHeight-_FUZZ:
-                        self.width = W
-                        self.height = H
+                    if H<=maxHeight+_FUZZ and W<=maxWidth+_FUZZ:
+                        self.width = W-_FUZZ
+                        self.height = H-_FUZZ
                         self._scale = s
                         break
 
