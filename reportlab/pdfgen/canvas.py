@@ -311,7 +311,7 @@ class Canvas(textobject._PDFColorSetter):
           each of the string names inside must be bound to a bookmark
           before the document is generated.
         """
-        apply(self._doc.outline.setNames, (self,)+nametree)
+        self._doc.outline.setNames(*((self,)+nametree))
 
     def setTitle(self, title):
         """write a title into the PDF file that won't automatically display
@@ -699,27 +699,43 @@ class Canvas(textobject._PDFColorSetter):
 
         self._formsinuse.append(rawName)
 
-    def textAnnotation(self, contents, Rect=None, addtopage=1, name=None, **kw):
+    def _absRect(self,rect,relative=0):
+        if not rect:
+            w,h = self._pagesize
+            rect = (0,0,w,h)
+        elif relative:
+            lx, ly, ux, uy = rect
+            xll,yll = self.absolutePosition(lx,ly)
+            xur,yur = self.absolutePosition(ux, uy)
+            xul,yul = self.absolutePosition(lx, uy)
+            xlr,ylr = self.absolutePosition(ux, ly)
+            xs = xll, xur, xul, xlr
+            ys = yll, yur, yul, ylr
+            xmin, ymin = min(xs), min(ys)
+            xmax, ymax = max(xs), max(ys)
+            rect = xmin, ymin, xmax, ymax
+        return rect
+
+    def freeTextAnnotation(self, contents, DA, Rect=None, addtopage=1, name=None, relative=0, **kw):
+        """DA is the default appearance string???"""
+        Rect = self._absRect(Rect,relative)
+        self._addAnnotation(pdfdoc.FreeTextAnnotation(Rect, contents, DA, **kw), name, addtopage)
+
+    def textAnnotation(self, contents, Rect=None, addtopage=1, name=None, relative=0, **kw):
         """Experimental, but works.
         """
-        if not Rect:
-            (w,h) = self._pagesize# default to whole page (?)
-            Rect = (0,0,w,h)
-        annotation = apply(pdfdoc.TextAnnotation, (Rect, contents), kw)
-        self._addAnnotation(annotation, name, addtopage)
-
+        Rect = self._absRect(Rect,relative)
+        self._addAnnotation(pdfdoc.TextAnnotation(Rect, contents, **kw), name, addtopage)
     textAnnotation0 = textAnnotation    #deprecated
 
-    def inkAnnotation0(self, contents, InkList=None, Rect=None, addtopage=1, name=None, **kw):
+    def inkAnnotation(self, contents, InkList=None, Rect=None, addtopage=1, name=None, relative=0, **kw):
         raise NotImplementedError
         "Experimental"
-        (w,h) = self._pagesize
-        if not Rect:
-            Rect = (0,0,w,h)
+        Rect = self._absRect(Rect,relative)
         if not InkList:
-            InkList = ( (100,100,100,h-100,w-100,h-100,w-100,100), )
-        annotation = apply(pdfdoc.InkAnnotation, (Rect, contents, InkList), kw)
-        self._addAnnotation(annotation, name, addtopage)
+            InkList = ((100,100,100,h-100,w-100,h-100,w-100,100),)
+        self._addAnnotation(pdfdoc.InkAnnotation(Rect, contents, InkList, **kw), name, addtopage)
+    inkAnnotation0 = inkAnnotation  #deprecated
 
     def linkAbsolute(self, contents, destinationname, Rect=None, addtopage=1, name=None, **kw):
         """rectangular link annotation positioned wrt the default user space.
@@ -737,34 +753,17 @@ class Canvas(textobject._PDFColorSetter):
            You may want to use the keyword argument Border='[0 0 0]' to
            suppress the visible rectangle around the during viewing link."""
         destination = self._bookmarkReference(destinationname) # permitted to be undefined... must bind later...
-        (w,h) = self._pagesize
-        if not Rect:
-            Rect = (0,0,w,h)
+        Rect = self._absRect(Rect)
         kw["Rect"] = Rect
         kw["Contents"] = contents
         kw["Destination"] = destination
-        annotation = apply(pdfdoc.LinkAnnotation, (), kw)
-        self._addAnnotation(annotation, name, addtopage)
+        self._addAnnotation(pdfdoc.LinkAnnotation(**kw), name, addtopage)
 
     def linkRect(self, contents, destinationname, Rect=None, addtopage=1, name=None, **kw):
         """rectangular link annotation w.r.t the current user transform.
            if the transform is skewed/rotated the absolute rectangle will use the max/min x/y
         """
-        if Rect is None:
-            pass # do whatever linkAbsolute does
-        else:
-            (lx, ly, ux, uy) = Rect
-            (xll,yll) = self.absolutePosition(lx,ly)
-            (xur,yur) = self.absolutePosition(ux, uy)
-            (xul,yul) = self.absolutePosition(lx, uy)
-            (xlr,ylr) = self.absolutePosition(ux, ly)
-            xs = (xll, xur, xul, xlr)
-            ys = (yll, yur, yul, ylr)
-            (xmin, ymin) = (min(xs), min(ys))
-            (xmax, ymax) = (max(xs), max(ys))
-            #(w2, h2) = (xmax-xmin, ymax-ymin)
-            Rect = (xmin, ymin, xmax, ymax)
-        return apply(self.linkAbsolute, (contents, destinationname, Rect, addtopage, name), kw)
+        return self.linkAbsolute(contents, destinationname, Rect, addtopage, name, **kw)
 
     def linkURL(self, url, rect, relative=0, thickness=0, color=None, dashArray=None, kind="URI", **kw):
         """Create a rectangular URL 'hotspot' in the given rectangle.
@@ -779,24 +778,11 @@ class Canvas(textobject._PDFColorSetter):
         from reportlab.pdfbase.pdfdoc import PDFDictionary, PDFName, PDFArray, PDFString
         #tried the documented BS element in the pdf spec but it
         #does not work, and Acrobat itself does not appear to use it!
-        if relative:
-            #adjust coordinates
-            (lx, ly, ux, uy) = rect
-            (xll,yll) = self.absolutePosition(lx,ly)
-            (xur,yur) = self.absolutePosition(ux, uy)
-            (xul,yul) = self.absolutePosition(lx, uy)
-            (xlr,ylr) = self.absolutePosition(ux, ly)
-            xs = (xll, xur, xul, xlr)
-            ys = (yll, yur, yul, ylr)
-            (xmin, ymin) = (min(xs), min(ys))
-            (xmax, ymax) = (max(xs), max(ys))
-            #(w2, h2) = (xmax-xmin, ymax-ymin)
-            rect = (xmin, ymin, xmax, ymax)
 
         ann = PDFDictionary(dict=kw)
         ann["Type"] = PDFName("Annot")
         ann["Subtype"] = PDFName("Link")
-        ann["Rect"] = PDFArray(rect) # the whole page for testing
+        ann["Rect"] = PDFArray(self._absRect(rect,relative)) # the whole page for testing
 
         # the action is a separate dictionary
         A = PDFDictionary()

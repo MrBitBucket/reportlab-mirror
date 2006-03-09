@@ -1352,6 +1352,22 @@ class TextAnnotation(Annotation):
         d["Subtype"] = "/Text"
         return self.AnnotationDict(**d)
 
+class FreeTextAnnotation(Annotation):
+    permitted = Annotation.permitted + ("DA",)
+    def __init__(self, Rect, Contents, DA, **kw):
+        self.Rect = Rect
+        self.Contents = Contents
+        self.DA = DA
+        self.otherkw = kw
+    def Dict(self):
+        d = {}
+        d.update(self.otherkw)
+        d["Rect"] = self.Rect
+        d["Contents"] = self.Contents
+        d["DA"] = self.DA
+        d["Subtype"] = "/FreeText"
+        return self.AnnotationDict(**d)
+
 class LinkAnnotation(Annotation):
 
     permitted = Annotation.permitted + (
