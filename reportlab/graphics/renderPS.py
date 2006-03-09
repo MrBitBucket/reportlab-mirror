@@ -489,7 +489,6 @@ class PSCanvas:
         calculated from image size. (x1,y1) is upper left of image, (x2,y2) is lower right of
         image in piddle coordinates."""
         # For now let's start with 24 bit RGB images (following piddlePDF again)
-        print "Trying to drawImage in piddlePS"
         component_depth = 8
         myimage = image.convert('RGB')
         imgwidth, imgheight = myimage.size
@@ -499,7 +498,7 @@ class PSCanvas:
             y2 = y1 + imgheight
         drawwidth = x2 - x1
         drawheight = y2 - y1
-        print 'Image size (%d, %d); Draw size (%d, %d)' % (imgwidth, imgheight, drawwidth, drawheight)
+        #print 'Image size (%d, %d); Draw size (%d, %d)' % (imgwidth, imgheight, drawwidth, drawheight)
         # now I need to tell postscript how big image is
 
         # "image operators assume that they receive sample data from
@@ -562,16 +561,13 @@ class PSCanvas:
         return output.getvalue()
 
     def _drawImageLevel2(self, image, x1,y1, x2=None,y2=None): # Postscript Level2 version
-        Image = import_Image()
-        if not Image: return
+        '''At present we're handling only PIL'''
         ### what sort of image are we to draw
         if image.mode=='L' :
-            print 'found image.mode= L'
             imBitsPerComponent = 8
             imNumComponents = 1
             myimage = image
         elif image.mode == '1':
-            print 'found image.mode= 1'
             myimage = image.convert('L')
             imNumComponents = 1
             myimage = image
@@ -581,7 +577,6 @@ class PSCanvas:
             imBitsPerComponent = 8
 
         imwidth, imheight = myimage.size
-        # print 'imwidth = %s, imheight = %s' % myimage.size
         if not x2:
             x2 = imwidth + x1
         if not y2:
@@ -597,7 +592,6 @@ class PSCanvas:
             self.code.append('/DeviceRGB setcolorspace')
         elif imNumComponents == 1 :
             self.code.append('/DeviceGray setcolorspace')
-            print 'setting colorspace gray'
         # create the image dictionary
         self.code.append("""
 <<
@@ -813,6 +807,17 @@ class _PSRenderer(Renderer):
                 fontname = delta.get('fontName', self._canvas._font)
                 fontsize = delta.get('fontSize', self._canvas._fontSize)
                 self._canvas.setFont(fontname, fontsize)
+
+    def drawImage(self, image):
+        from reportlab.lib.utils import ImageReader
+        im = ImageReader(image.path)
+        x0 = image.x
+        y0 = image.y
+        x1 = image.width
+        if x1 is not None: x1 += x0
+        y1 = image.height
+        if y1 is not None: y1 += y0
+        self._canvas.drawImage(im._image,x0,y0,x1,y1)
 
 def drawToFile(d,fn, showBoundary=rl_config.showBoundary):
     d = renderScaledDrawing(d)

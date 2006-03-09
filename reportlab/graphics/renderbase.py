@@ -242,10 +242,10 @@ class Renderer:
 
     def drawNodeDispatcher(self, node):
         """dispatch on the node's (super) class: shared code"""
-        
+
         canvas = getattr(self,'_canvas',None)
         # replace UserNode with its contents
-        
+
         try:
             node = _expandUserNode(node,canvas)
             if hasattr(node,'_canvas'):
@@ -255,8 +255,6 @@ class Renderer:
                 ocanvas = None
 
             self.fillDerivedValues(node)
-
-
             #draw the object, or recurse
             if isinstance(node, Line):
                 self.drawLine(node)

@@ -586,7 +586,6 @@ class Drawing(Group, Flowable):
         self.height = height
         self.hAlign = 'LEFT'
         self.vAlign = 'BOTTOM'
-        #self.fontName = 'Helvetica'
         self.renderScale = 1.0
 
     def _renderPy(self):
@@ -1037,7 +1036,6 @@ class Circle(SolidShape):
         return (self.cx - self.r, self.cy - self.r, self.cx + self.r, self.cy + self.r)
 
 class Ellipse(SolidShape):
-
     _attrMap = AttrMap(BASE=SolidShape,
         cx = AttrMapValue(isNumber),
         cy = AttrMapValue(isNumber),
