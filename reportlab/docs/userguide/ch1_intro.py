@@ -239,7 +239,7 @@ list("Add the $DLL$s in $PIL$ to your $Python\DLLs$ directory")
 
 list("""To verify,
 start the Python interpreter (command line) and type $from PIL import Image$, followed by
-$import _imaging$.  If you see no error messages, all is well.""")
+$import _imaging$ or (if you have a more modern copy of PIL) $import PIL._imaging$.  If you see no error messages, all is well.""")
 
 disc("""Now you are ready to install reportlab itself.""")
 
