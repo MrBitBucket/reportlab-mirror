@@ -7,7 +7,7 @@ This module contains some standard verifying functions which can be
 used in an attribute map.
 """
 
-import string, sys
+import string, sys,re
 from types import *
 _SequenceTypes = (ListType,TupleType)
 _NumberTypes = (FloatType,IntType)
@@ -239,6 +239,20 @@ class isInstanceOf(Validator):
     def test(self,x):
         return isinstance(x,self._klass)
 
+class matchesPattern(Validator):
+    """Matches value, or its string representation, against regex"""
+    def __init__(self, pattern):
+        self._pattern = re.compile(pattern)
+
+    def test(self,x):
+        print 'testing %s against %s' % (x, self._pattern)
+        if type(x) is StringType:
+            text = x
+        else:
+            text = str(x)
+        return (self._pattern.match(text) <> None)
+
+
 class DerivedValue:
     """This is used for magic values which work themselves out.
     An example would be an "inherit" property, so that one can have
@@ -256,6 +270,7 @@ class DerivedValue:
         through all the stuff the renderer provides, including
         a correct stack of parent nodes."""
         return None
+
 
 class Inherit(DerivedValue):
     def __repr__(self):
