@@ -241,9 +241,9 @@ class PSCanvas:
         if self._fillColor is not None:
             textLen = stringWidth(text, self._font,self._fontSize)
             if text_anchor=='end':
-                x = x-textLen
+                x -= textLen
             elif text_anchor=='middle':
-                x = x - textLen/2
+                x -= textLen/2.
             self.drawString(x,y,text)
 
     def drawRightString(self, text, x, y):

@@ -79,6 +79,9 @@ class TableStyle:
             # copy the parents list at construction time
             commands = commands + parent.getCommands()
             self._opts = parent._opts
+            for a in ('spaceBefore','spaceAfter'):
+                if hasattr(parent,a):
+                    setattr(self,a,getattr(parent,a))
         if cmds:
             commands = commands + list(cmds)
         self._cmds = commands
@@ -780,6 +783,9 @@ class Table(Flowable):
             self._addCommand(cmd)
         for k,v in tblstyle._opts.items():
             setattr(self,k,v)
+        for a in ('spaceBefore','spaceAfter'):
+            if not hasattr(self,a) and hasattr(tblstyle,a):
+                setattr(self,a,getattr(tblstyle,a))
 
     def _addCommand(self,cmd):
         if cmd[0] in ('BACKGROUND','ROWBACKGROUNDS','COLBACKGROUNDS'):

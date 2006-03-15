@@ -654,6 +654,19 @@ def getFont(fontName):
         registerFont(font)
         return font
 
+def getAscentDescent(fontName):
+    font = getFont(fontName)
+    try:
+        return font.ascent,font.descent
+    except:
+        return font.face.ascent,font.face.descent
+
+def getAscent(fontName):
+    return getAscentDescent(fontName)[0]
+
+def getDescent(fontName):
+    return getAscentDescent(fontName)[1]
+
 def getRegisteredFontNames():
     "Returns what's in there"
     reg = _fonts.keys()

@@ -386,6 +386,22 @@ class SVGCanvas:
 
             self.currGroup.appendChild(text)
 
+    def drawCentredString(self, s, x, y, angle=0,text_anchor='middle'):
+        if self.verbose: print "+++ SVGCanvas.drawCentredString"
+
+        if self._fillColor != None:
+            if not text_anchor in ['start', 'inherited']:
+                textLen = stringWidth(s,self._font,self._fontSize)
+                if text_anchor=='end':
+                    x -= textLen
+                elif text_anchor=='middle':
+                    x -= textLen/2.
+                else:
+                    raise ValueError, 'bad value for text_anchor ' + str(text_anchor)
+        self.drawString(x,y,text,angle=angle)
+
+    def drawRightString(self, text, x, y, angle=0):
+        self.drawCentredString(text,x,y,angle=angle,text_anchor='end')
 
     def comment(self, data):
         "Add a comment."
