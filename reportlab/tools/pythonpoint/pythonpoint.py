@@ -951,13 +951,6 @@ def setStyles(newStyleSheet):
     global _styles
     _styles = newStyleSheet
 
-
-##def test():
-##    p = stdparser.PPMLParser()
-##    p.feed(sample)
-##    p.getPresentation().save()
-##    p.close()
-
 _pyRXP_Parser = None
 def validate(rawdata):
     global _pyRXP_Parser
@@ -988,7 +981,6 @@ def process(datafile, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=
 
     #if pyRXP present, use it to check and get line numbers for errors...
     validate(rawdata)
-
     return _process(rawdata, datafilename, notes, handout, printout, cols, verbose, outDir, fx)
 
 def _process(rawdata, datafilename, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=None, fx=1):

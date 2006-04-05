@@ -79,7 +79,8 @@ class ParagraphStyle(PropertySet):
         'bulletFontSize':10,
         'bulletIndent':0,
         'textColor': black,
-        'backColor':None
+        'backColor':None,
+        'wordWrap':None,
         }
 
 class LineStyle(PropertySet):

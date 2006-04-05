@@ -49,22 +49,22 @@ class LinkTestCase(unittest.TestCase):
         c.addOutlineEntry("Page 1","P1")
 
         #Note : XYZ Left is ignored because at this zoom the whole page fits the screen
-        c.bookmarkPage("P1_XYZ",fitType="XYZ",top=7*inch,left=3*inch,zoom=0.5)
+        c.bookmarkPage("P1_XYZ",fit="XYZ",top=7*inch,left=3*inch,zoom=0.5)
         c.addOutlineEntry("Page 1 XYZ #1 (top=7,left=3,zoom=0.5)","P1_XYZ",level=1)
 
-        c.bookmarkPage("P1_XYZ2",fitType="XYZ",top=7*inch,left=3*inch,zoom=5)
+        c.bookmarkPage("P1_XYZ2",fit="XYZ",top=7*inch,left=3*inch,zoom=5)
         c.addOutlineEntry("Page 1 XYZ #2 (top=7,left=3,zoom=5)","P1_XYZ2",level=1)
 
-        c.bookmarkPage("P1_FIT",fitType="Fit")
+        c.bookmarkPage("P1_FIT",fit="Fit")
         c.addOutlineEntry("Page 1 Fit","P1_FIT",level=1)
 
-        c.bookmarkPage("P1_FITH",fitType="FitH",top=2*inch)
+        c.bookmarkPage("P1_FITH",fit="FitH",top=2*inch)
         c.addOutlineEntry("Page 1 FitH (top = 2 inch)","P1_FITH",level=1)
 
-        c.bookmarkPage("P1_FITV",fitType="FitV",left=3*inch)
+        c.bookmarkPage("P1_FITV",fit="FitV",left=3*inch)
         c.addOutlineEntry("Page 1 FitV (left = 3 inch)","P1_FITV",level=1)
 
-        c.bookmarkPage("P1_FITR",fitType="FitR",left=1*inch,bottom=2*inch,right=5*inch,top=6*inch)
+        c.bookmarkPage("P1_FITR",fit="FitR",left=1*inch,bottom=2*inch,right=5*inch,top=6*inch)
         c.addOutlineEntry("Page 1 FitR (left=1,bottom=2,right=5,top=6)","P1_FITR",level=1)
 
         c.bookmarkPage("P1_FORWARD")

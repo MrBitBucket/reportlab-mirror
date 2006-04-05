@@ -40,6 +40,8 @@ class CellStyle(PropertySet):
         'alignment': 'LEFT',
         'background': (1,1,1),
         'valign': 'BOTTOM',
+        'href': None,
+        'destination':None,
         }
 
 LINECAPS={None: None, 'butt':0,'round':1,'projecting':2,'squared':2}
@@ -59,6 +61,8 @@ class CellStyle1(PropertySet):
     alignment = 'LEFT'
     background = (1,1,1)
     valign = "BOTTOM"
+    href = None
+    destination = None
     def __init__(self, name, parent=None):
         self.name = name
         if parent is not None:
@@ -1251,6 +1255,15 @@ class Table(Flowable):
                 draw(x, y, v)
                 y -= leading
 
+        if cellstyle.href:
+            #external hyperlink
+            #print 'drawing URL %d,%d, %d, %d, %s' % (colpos, rowpos, colwidth, rowheight, cellstyle.href)
+            self.canv.linkURL(cellstyle.href, (colpos, rowpos, colpos + colwidth, rowpos + rowheight), relative=1)
+        if cellstyle.destination:
+            #external hyperlink
+            #print 'drawing destination %d,%d, %d, %d, %s' % (colpos, rowpos, colwidth, rowheight, cellstyle.destination)
+            self.canv.linkRect("", cellstyle.destination, Rect=(colpos, rowpos, colpos + colwidth, rowpos + rowheight), relative=1)
+        
 # for text,
 #   drawCentredString(self, x, y, text) where x is center
 #   drawRightString(self, x, y, text) where x is right
@@ -1308,6 +1321,10 @@ def _setCellStyle(cellStyles, i, j, op, values):
         new.topPadding = values[0]
     elif op == 'BOTTOMPADDING':
         new.bottomPadding = values[0]
+    elif op == 'HREF':
+        new.href = values[0]
+    elif op == 'DESTINATION':
+        new.destination = values[0]
 
 GRID_STYLE = TableStyle(
     [('GRID', (0,0), (-1,-1), 0.25, colors.black),

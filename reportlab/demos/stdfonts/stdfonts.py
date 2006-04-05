@@ -27,13 +27,12 @@ def run(mode):
     for enc in ['MacRoman', 'WinAnsi']:
         canv = canvas.Canvas(
                 'StandardFonts_%s.pdf' % enc,
-                encoding=enc
                 )
         canv.setPageCompression(0)
 
         for faceName in pdfmetrics.standardFonts:
             if faceName in ['Symbol', 'ZapfDingbats']:
-                encLabel = 'StandardEncoding'
+                encLabel = faceName+'Encoding'
             else:
                 encLabel = enc + 'Encoding'
 
@@ -51,18 +50,14 @@ def run(mode):
 
             #for dingbats, we need to use another font for the numbers.
             #do two parallel text objects.
-            if faceName == 'ZapfDingbats':
-                labelfont = 'Helvetica'
-            else:
-                labelfont = faceName
             for byt in range(32, 256):
                 col, row = divmod(byt - 32, 32)
                 x = 72 + (66*col)
                 y = 720 - (18*row)
-                canv.setFont(labelfont, 14)
+                canv.setFont('Helvetica', 14)
                 canv.drawString(x, y, label_formatter % byt)
                 canv.setFont(fontName, 14)
-                canv.drawString(x + 44, y , chr(byt))
+                canv.drawString(x+44, y, chr(byt).decode(encLabel,'ignore').encode('utf8'))
             canv.showPage()
         canv.save()
 

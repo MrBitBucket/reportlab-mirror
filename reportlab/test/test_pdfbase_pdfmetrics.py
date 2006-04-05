@@ -8,10 +8,8 @@ Various tests for PDF metrics.
 The main test prints out a PDF documents enabling checking of widths of every
 glyph in every standard font.  Long!
 """
-
 from reportlab.test import unittest
 from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
-
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase import _fontdata
 from reportlab.pdfgen.canvas import Canvas
@@ -30,8 +28,9 @@ def decoratePage(c, header):
 def makeWidthTestForAllGlyphs(canv, fontName, outlining=1):
     """New page, then runs down doing all the glyphs in one encoding"""
     thisFont = pdfmetrics.getFont(fontName)
+    encName = thisFont.encName
     canv.setFont('Helvetica-Bold', 12)
-    title = 'Glyph Metrics Test for font %s, ascent=%s, descent=%s' % (fontName, str(thisFont.face.ascent), str(thisFont.face.descent))
+    title = 'Glyph Metrics Test for font %s, ascent=%s, descent=%s, encoding=%s' % (fontName, str(thisFont.face.ascent), str(thisFont.face.descent), encName)
     canv.drawString(80, 750,  title)
     canv.setFont('Helvetica-Oblique',10)
     canv.drawCentredString(297, 54, 'Page %d' % canv.getPageNumber())
@@ -53,14 +52,14 @@ def makeWidthTestForAllGlyphs(canv, fontName, outlining=1):
         glyphName = glyphNames[i]
         if glyphName is not None:
             canv.setFont('Helvetica', 10)
-            canv.drawString(80, y, '%03d   %s ' % (i, glyphName))
+            text = unicode(chr(i),encName).encode('utf8')*30
             try:
-                glyphWidth = thisFont.face.glyphWidths[glyphName]
+                w = canv.stringWidth(text, fontName, 10)
+                canv.drawString(80, y, '%03d   %s w=%3d' % (i, glyphName, int((w/3.)*10)))
                 canv.setFont(fontName, 10)
-                canv.drawString(200, y, chr(i) * 30)
+                canv.drawString(200, y, text)
 
                 # now work out width and put a red marker next to the end.
-                w = canv.stringWidth(chr(i) * 30, fontName, 10)
                 canv.setFillColor(colors.red)
                 canv.rect(200 + w, y-1, 5, 10, stroke=0, fill=1)
                 canv.setFillColor(colors.black)

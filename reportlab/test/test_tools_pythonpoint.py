@@ -1,16 +1,12 @@
 """Tests for the PythonPoint tool.
 """
-
 import os, sys, string
 from reportlab.test import unittest
 from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
-
 import reportlab
-
 
 class PythonPointTestCase(unittest.TestCase):
     "Some very crude tests on PythonPoint."
-
     def test0(self):
         "Test if pythonpoint.pdf can be created from pythonpoint.xml."
 
@@ -36,7 +32,6 @@ class PythonPointTestCase(unittest.TestCase):
 
 def makeSuite():
     return makeSuiteForClasses(PythonPointTestCase)
-
 
 #noruntests
 if __name__ == "__main__":

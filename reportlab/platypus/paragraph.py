@@ -2,17 +2,29 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/paragraph.py
 __version__=''' $Id$ '''
-from string import split, strip, join, whitespace, find
+from string import join, whitespace, find
 from operator import truth
 from types import StringType, ListType
-from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.pdfbase.pdfmetrics import stringWidth, getFont
 from reportlab.platypus.paraparser import ParaParser
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib.colors import Color
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import _className
+from reportlab.lib.textsplit import wordSplit
 from copy import deepcopy
 from reportlab.lib.abag import ABag
+
+
+#on UTF8 branch, split and strip must be unicode-safe!
+def split(text, delim=' '):
+    if type(text) is str: text = text.decode('utf8')
+    if type(delim) is str: delim = delim.decode('utf8')
+    return [uword.encode('utf8') for uword in text.split(delim)]
+
+def strip(text):
+    if type(text) is str: text = text.decode('utf8')
+    return text.strip().encode('utf8')
 
 class ParaLines(ABag):
     """
@@ -126,9 +138,18 @@ def _putFragLine(tx,words):
                     xtraState.underlines.append( (xtraState.underline_x, cur_x, xtraState.underlineColor) )
                     xtraState.underlineColor = xtraState.textColor
                     xtraState.underline_x = cur_x
+            if not xtraState.link and f.link:
+                xtraState.link = f.link
+                xtraState.link_x = cur_x
+            elif xtraState.link and f.link is not xtraState.link:
+                    spacelen = tx._canvas.stringWidth(' ', tx._fontname, tx._fontsize)
+                    xtraState.links.append( (xtraState.link_x, cur_x-spacelen, xtraState.link) )
+                    xtraState.link = None
             cur_x = cur_x + txtlen
     if xtraState.underline:
         xtraState.underlines.append( (xtraState.underline_x, cur_x, xtraState.underlineColor) )
+    if xtraState.link:
+        xtraState.links.append( (xtraState.link_x, cur_x, xtraState.link) )
 
 def _leftDrawParaLineX( tx, offset, line, last=0):
     setXPos(tx,offset)
@@ -175,7 +196,7 @@ except ImportError:
         def _sameFrag(f,g):
             'returns 1 if two ParaFrags map out the same'
             if hasattr(f,'cbDefn') or hasattr(g,'cbDefn'): return 0
-            for a in ('fontName', 'fontSize', 'textColor', 'rise', 'underline'):
+            for a in ('fontName', 'fontSize', 'textColor', 'rise', 'underline', 'link'):
                 if getattr(f,a)!=getattr(g,a): return 0
             return 1
 
@@ -345,7 +366,7 @@ def splitLines0(frags,widths):
             if j==lim:
                 i=i+1
 
-def _do_under_lines(i, t_off, tx):
+def _do_under_line(i, t_off, tx):
     y = tx.XtraState.cur_y - i*tx.XtraState.style.leading - tx.XtraState.f.fontSize/8.0 # 8.0 factor copied from para.py
     text = join(tx.XtraState.lines[i][1])
     textlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
@@ -363,6 +384,24 @@ def _do_under(i, t_off, tx):
     xtraState.underlines = []
     xtraState.underline=0
     xtraState.underlineColor=None
+
+def _do_link_line(i, t_off, tx):
+    xs = tx.XtraState
+    leading = xs.style.leading
+    y = xs.cur_y - i*leading - xs.f.fontSize/8.0 # 8.0 factor copied from para.py
+    text = join(xs.lines[i][1])
+    textlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
+    tx._canvas.linkRect("", xs.link, (t_off, y, t_off+textlen, y+leading), relative=1)
+
+def _do_link(i, t_off, tx):
+    xs = tx.XtraState
+    leading = xs.style.leading
+    y = xs.cur_y - i*leading - xs.f.fontSize/8.0 # 8.0 factor copied from para.py
+    for x1,x2,link in xs.links:
+        tx._canvas.line(t_off+x1, y, t_off+x2, y)
+        tx._canvas.linkRect("", link, (t_off+x1, y, t_off+x2, y+leading), relative=1)
+    xs.links = []
+    xs.link=None
 
 class Paragraph(Flowable):
     """ Paragraph(text, style, bulletText=None, caseSensitive=1)
@@ -387,10 +426,10 @@ class Paragraph(Flowable):
 
         It will also be able to handle any MathML specified Greek characters.
     """
-    def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1):
+    def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1, encoding='utf8'):
         self.caseSensitive = caseSensitive
+        self.encoding = encoding
         self._setup(text, style, bulletText, frags, cleanBlockQuotedText)
-
 
     def __repr__(self):
         import string
@@ -431,7 +470,12 @@ class Paragraph(Flowable):
         leftIndent = self.style.leftIndent
         first_line_width = availWidth - (leftIndent+self.style.firstLineIndent) - self.style.rightIndent
         later_widths = availWidth - leftIndent - self.style.rightIndent
-        self.blPara = self.breakLines([first_line_width, later_widths])
+
+        if self.style.wordWrap == 'CJK':
+            #use Asian text wrap algorithm to break characters
+            self.blPara = self.breakLinesCJK([first_line_width, later_widths])
+        else:
+            self.blPara = self.breakLines([first_line_width, later_widths])
         self.height = len(self.blPara.lines) * self.style.leading
         return (self.width, self.height)
 
@@ -540,18 +584,19 @@ class Paragraph(Flowable):
             fontSize = f.fontSize
             fontName = f.fontName
             words = hasattr(f,'text') and split(f.text, ' ') or f.words
-            spaceWidth = stringWidth(' ', fontName, fontSize)
+            spaceWidth = stringWidth(' ', fontName, fontSize, self.encoding)
             cLine = []
             currentWidth = - spaceWidth   # hack to get around extra space for word 1
             for word in words:
-                wordWidth = stringWidth(word, fontName, fontSize)
+                #this underscores my feeling that Unicode throughout would be easier!
+                wordWidth = stringWidth(word, fontName, fontSize, self.encoding)
                 newWidth = currentWidth + spaceWidth + wordWidth
-                if newWidth<=maxWidth or len(cLine)==0:
+                if newWidth <= maxWidth or len(cLine) == 0: 
                     # fit one more on this line
                     cLine.append(word)
                     currentWidth = newWidth
                 else:
-                    if currentWidth>self.width: self.width = currentWidth
+                    if currentWidth > self.width: self.width = currentWidth
                     #end of line
                     lines.append((maxWidth - currentWidth, cLine))
                     cLine = [word]
@@ -658,6 +703,50 @@ class Paragraph(Flowable):
 
         return lines
 
+
+    def breakLinesCJK(self, width):
+        """Initially, the dumbest possible wrapping algorithm.
+        Cannot handle font variations."""
+
+
+        if type(width) <> ListType: maxWidths = [width]
+        else: maxWidths = width
+        lines = []
+        lineno = 0
+        style = self.style
+        fFontSize = float(style.fontSize)
+
+        #for bullets, work out width and ensure we wrap the right amount onto line one
+        _handleBulletWidth(self.bulletText, style, maxWidths)
+
+        maxWidth = maxWidths[0]
+
+        self.height = 0
+
+        #for now we only handle one fragment.  Need to generalize this quickly.
+        if len(self.frags) > 1:
+            raise ValueError('CJK Wordwrap can only handle one fragment per paragraph for now')
+        elif len(self.frags) == 0:
+            return ParaLines(kind=0, fontSize=style.fontSize, fontName=style.fontName,
+                            textColor=style.textColor, lines=[])
+
+        f = self.frags[0]
+
+        if hasattr(f,'text'):
+            text = f.text
+        else:
+            text = ''.join(getattr(f,'words',[]))
+
+        from reportlab.lib.textsplit import wordSplit
+        lines = wordSplit(text, maxWidths[0], f.fontName, f.fontSize)
+        #the paragraph drawing routine assumes multiple frags per line, so we need an
+        #extra list like this
+        #  [space, [text]]
+        #
+        wrappedLines = [(sp, [line]) for (sp, line) in lines]
+        return f.clone(kind=0, lines=wrappedLines)
+
+
     def beginText(self, x, y):
         return self.canv.beginText(x, y)
 
@@ -740,24 +829,27 @@ class Paragraph(Flowable):
                 #now the font for the rest of the paragraph
                 tx.setFont(f.fontName, f.fontSize, style.leading)
                 t_off = dpl( tx, offset, lines[0][0], lines[0][1], noJustifyLast and nLines==1)
-                if f.underline:
-                    tx.XtraState=ABag()
-                    tx.XtraState.cur_y = cur_y
-                    tx.XtraState.f = f
-                    tx.XtraState.style = style
-                    tx.XtraState.lines = lines
-                    tx.XtraState.underlines=[]
-                    tx.XtraState.underlineColor=None
+                if f.underline or f.link:
+                    xs = tx.XtraState=ABag()
+                    xs.cur_y = cur_y
+                    xs.f = f
+                    xs.style = style
+                    xs.lines = lines
+                    xs.underlines=[]
+                    xs.underlineColor=None
+                    xs.links=[]
+                    xs.link=f.link
                     canvas.setStrokeColor(f.textColor)
-                    _do_under_lines(0, t_off+leftIndent, tx)
+                    if f.underline: _do_under_line(0, t_off+leftIndent, tx)
+                    if f.link: _do_link_line(0, t_off+leftIndent, tx)
 
                     #now the middle of the paragraph, aligned with the left margin which is our origin.
-                    for i in range(1, nLines):
+                    for i in xrange(1, nLines):
                         t_off = dpl( tx, _offsets[i], lines[i][0], lines[i][1], noJustifyLast and i==lim)
-                        if f.underline:
-                            _do_under_lines(i, t_off+leftIndent, tx)
+                        if f.underline: _do_under_line(i, t_off+leftIndent, tx)
+                        if f.link: _do_link_line(i, t_off+leftIndent, tx)
                 else:
-                    for i in range(1, nLines):
+                    for i in xrange(1, nLines):
                         dpl( tx, _offsets[i], lines[i][0], lines[i][1], noJustifyLast and i==lim)
             else:
                 f = lines[0]
@@ -779,16 +871,18 @@ class Paragraph(Flowable):
 
                 #set up the font etc.
                 tx = self.beginText(cur_x, cur_y)
-                tx.XtraState=ABag()
-                tx.XtraState.textColor=None
-                tx.XtraState.rise=0
-                tx.XtraState.underline=0
-                tx.XtraState.underlines=[]
-                tx.XtraState.underlineColor=None
+                xs = tx.XtraState=ABag()
+                xs.textColor=None
+                xs.rise=0
+                xs.underline=0
+                xs.underlines=[]
+                xs.underlineColor=None
+                xs.links=[]
+                xs.link=None
                 tx.setLeading(style.leading)
-                tx.XtraState.cur_y = cur_y
-                tx.XtraState.f = f
-                tx.XtraState.style = style
+                xs.cur_y = cur_y
+                xs.f = f
+                xs.style = style
                 #f = lines[0].words[0]
                 #tx._setFont(f.fontName, f.fontSize)
 
@@ -796,12 +890,14 @@ class Paragraph(Flowable):
                 tx._fontname,tx._fontsize = None, None
                 t_off = dpl( tx, offset, lines[0], noJustifyLast and nLines==1)
                 _do_under(0, t_off+leftIndent, tx)
+                _do_link(0, t_off+leftIndent, tx)
 
                 #now the middle of the paragraph, aligned with the left margin which is our origin.
                 for i in range(1, nLines):
                     f = lines[i]
                     t_off = dpl( tx, _offsets[i], f, noJustifyLast and i==lim)
                     _do_under(i, t_off+leftIndent, tx)
+                    _do_link(i, t_off+leftIndent, tx)
 
             canvas.drawText(tx)
             canvas.restoreState()

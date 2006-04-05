@@ -74,6 +74,7 @@ def getDrawing01():
     D = Drawing(400, 200)
     D.add(Rect(50, 50, 300, 100, fillColor=colors.yellow))
     D.add(String(180,100, 'Hello World', fillColor=colors.red))
+    D.add(String(180,86, 'Some special characters \xc2\xa2\xc2\xa9\xc2\xae\xc2\xa3\xca\xa5\xd0\x96\xd6\x83\xd7\x90\xd9\x82\xe0\xa6\x95\xce\xb1\xce\xb2\xce\xb3', fillColor=colors.red))
 
     return D
 
@@ -399,9 +400,10 @@ def getDrawing13():
     pdfmetrics.registerFont(ttfonts.TTFont("Rina", "rina.ttf"))
     _FONTS[1] = 'LuxiSerif'
     _FONTS[2] = 'Rina'
-    F = ['Times-Roman','LuxiSerif', 'Rina']
+    F = ['Times-Roman','Courier','Helvetica','LuxiSerif', 'Rina']
     if sys.platform=='win32':
         for name, ttf in [('Adventurer Light SF','Advlit.ttf'),('ArialMS','ARIAL.TTF'),
+            ('Arial Unicode MS', 'ARIALUNI.TTF'),
             ('Book Antiqua','BKANT.TTF'),
             ('Century Gothic','GOTHIC.TTF'),
             ('Comic Sans MS', 'COMIC.TTF'),
@@ -432,7 +434,7 @@ def getDrawing13():
         maxx = 0
         for fontName in F:
             y -= th
-            text = fontName+": I should be totally horizontal and enclosed in a box"
+            text = fontName+": I should be totally horizontal and enclosed in a box and end in alphabetagamma \xc2\xa2\xc2\xa9\xc2\xae\xc2\xa3\xca\xa5\xd0\x96\xd6\x83\xd7\x90\xd9\x82\xe0\xa6\x95\xce\xb1\xce\xb2\xce\xb3"
             textWidth = stringWidth(text, fontName, fontSize)
             maxx = max(maxx,textWidth+20)
             D.add(
@@ -468,7 +470,6 @@ def getDrawing13():
 ##
 ##
 ##    return D
-
 def getAllFunctionDrawingNames(doTTF=1):
     "Get a list of drawing function names from somewhere."
 
@@ -485,10 +486,10 @@ def getAllFunctionDrawingNames(doTTF=1):
     return funcNames
 
 def _evalFuncDrawing(name, D, l=None, g=None):
-    #try:
-    d = eval(name + '()', g or globals(), l or locals())
-    #except:
-    #   d = getFailedDrawing(name)
+    try:
+        d = eval(name + '()', g or globals(), l or locals())
+    except:
+        d = getFailedDrawing(name)
     D.append((d, eval(name + '.__doc__'), name[3:]))
 
 def getAllTestDrawings(doTTF=1):

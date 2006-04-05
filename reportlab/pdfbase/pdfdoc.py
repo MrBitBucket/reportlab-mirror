@@ -15,7 +15,7 @@ and are not part of any public interface.  Instead, canvas and font
 classes are made available elsewhere for users to manipulate.
 """
 
-import string, types, binascii
+import string, types, binascii, codecs
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfutils import LINEEND # this constant needed in both
 from reportlab import rl_config
@@ -136,19 +136,10 @@ class PDFDocument:
     encrypt = NoEncryption() # default no encryption
     pageCounter = 1
     def __init__(self,
-                 encoding=rl_config.defaultEncoding,
                  dummyoutline=0,
                  compression=rl_config.pageCompression,
                  invariant=rl_config.invariant,
                  filename=None):
-        #self.defaultStreamFilters = [PDFBase85Encode, PDFZCompress] # for testing!
-        #self.defaultStreamFilters = [PDFZCompress] # for testing!
-        assert encoding in ['MacRomanEncoding',
-                            'WinAnsiEncoding',
-                            'MacRoman',
-                            'WinAnsi'], 'Unsupported encoding %s' % encoding
-        if encoding[-8:] <> 'Encoding':
-            encoding = encoding + 'Encoding'
 
         # allow None value to be passed in to mean 'give system defaults'
         if invariant is None:
@@ -156,7 +147,6 @@ class PDFDocument:
         else:
             self.invariant = invariant
         self.setCompression(compression)
-        self.encoding = encoding
         # signature for creating PDF ID
         import md5
         sig = self.signature = md5.new()
@@ -334,8 +324,6 @@ class PDFDocument:
         fontnames.sort()
         return fontnames
 
-
-
     def format(self):
         # register the Catalog/INfo and then format the objects one by one until exhausted
         # (possible infinite loop if there is a bug that continually makes new objects/refs...)
@@ -361,7 +349,7 @@ class PDFDocument:
         done = None
         File = PDFFile() # output collector
         while done is None:
-            counter = counter+1 # do next object...
+            counter += 1 # do next object...
             if numbertoid.has_key(counter):
                 id = numbertoid[counter]
                 #printidToOb
@@ -1082,7 +1070,7 @@ class PDFOutlines:
         self.buildtree = []
         self.closedict = {} # dictionary of "closed" destinations in the outline
 
-    def addOutlineEntry(self, destinationname, level=0, title=None, closed=None):
+    def addOutlineEntry(self, destinationname, level=0, title=None, closed=None, asUtf16=False):
         """destinationname of None means "close the tree" """
         from types import IntType, TupleType
         if destinationname is None and level!=0:
@@ -1116,6 +1104,12 @@ class PDFOutlines:
             currentlevel = currentlevel-1
         if destinationname is None: return
         stack[-1].append(destinationname)
+        if asUtf16:
+            if type(title) is str:
+                title = title.decode('utf8')
+            elif type(title) is not unicode:
+                raise ValueError('title must be utf8 string or unicode')
+            title = codecs.BOM_UTF16_BE+title.encode('utf_16_be')
         self.destinationnamestotitles[destinationname] = title
         if closed: self.closedict[destinationname] = 1
         self.currentlevel = level

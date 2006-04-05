@@ -229,7 +229,7 @@ pdfmetrics.registerEncoding(euroMac)
 pdfmetrics.registerFont(pdfmetrics.Font('MacHelvWithEuro', 'Helvetica-Oblique', 'MacWithEuro'))
 
 c.setFont('MacHelvWithEuro', 12)
-c.drawString(125, 575, 'Hacked MacRoman with Euro: Character 219 = "\333"') # oct(219)=0333
+c.drawString(125, 575, 'Hacked MacRoman with Euro: Character 219 = "\\xe2\\x82\\xac"') # utf8 for Euro
 """)
 
 heading2("Asian Font Support")

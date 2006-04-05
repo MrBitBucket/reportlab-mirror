@@ -212,7 +212,6 @@ class PPMLParser(xmllib.XMLParser):
         self.fx = 1
         xmllib.XMLParser.__init__(self)
 
-
     def _arg(self,tag,args,name):
         "What's this for???"
         if args.has_key(name):
@@ -223,7 +222,6 @@ class PPMLParser(xmllib.XMLParser):
             else:
                 v = None
         return v
-
 
     def ceval(self,tag,args,name):
         if args.has_key(name):
@@ -239,7 +237,6 @@ class PPMLParser(xmllib.XMLParser):
             v = str(pythonpoint.checkColor(v))
 
         return eval(v)
-
 
     def getPresentation(self):
         return self._curPres
@@ -268,7 +265,6 @@ class PPMLParser(xmllib.XMLParser):
         elif self._curSubject <> None:
             self._curSubject = self._curSubject + data
 
-
     def handle_cdata(self, data):
         #just append to current paragraph text, so we can quote XML
         if self._curPara:
@@ -286,7 +282,6 @@ class PPMLParser(xmllib.XMLParser):
         elif self._curSubject <> None:
             self._curSubject = self._curSubject + data
 
-
     def start_presentation(self, args):
         self._curPres = pythonpoint.PPPresentation()
         self._curPres.filename = self._arg('presentation',args,'filename')
@@ -301,11 +296,9 @@ class PPMLParser(xmllib.XMLParser):
             self._curPres.pageWidth = w
         #print 'page size =', self._curPres.pageSize
 
-
     def end_presentation(self):
         pass
 ##        print 'Fully parsed presentation',self._curPres.filename
-
 
     def start_title(self, args):
         self._curTitle = ''
@@ -315,24 +308,19 @@ class PPMLParser(xmllib.XMLParser):
         self._curPres.title = self._curTitle
         self._curTitle = None
 
-
     def start_author(self, args):
         self._curAuthor = ''
-
 
     def end_author(self):
         self._curPres.author = self._curAuthor
         self._curAuthor = None
 
-
     def start_subject(self, args):
         self._curSubject = ''
-
 
     def end_subject(self):
         self._curPres.subject = self._curSubject
         self._curSubject = None
-
 
     def start_stylesheet(self, args):
         #makes it the current style sheet.
@@ -356,15 +344,12 @@ class PPMLParser(xmllib.XMLParser):
         pythonpoint.setStyles(func())
 ##        print 'set global stylesheet to %s.%s()' % (modulename, funcname)
 
-
     def end_stylesheet(self):
         pass
-
 
     def start_section(self, args):
         name = self._arg('section',args,'name')
         self._curSection = pythonpoint.PPSection(name)
-
 
     def end_section(self):
         self._curSection = None
@@ -399,11 +384,9 @@ class PPMLParser(xmllib.XMLParser):
         s.section = self._curSection
         self._curSlide = s
 
-
     def end_slide(self):
         self._curPres.slides.append(self._curSlide)
         self._curSlide = None
-
 
     def start_frame(self, args):
         self._curFrame = pythonpoint.PPFrame(
@@ -415,21 +398,17 @@ class PPMLParser(xmllib.XMLParser):
         if self._arg('frame',args,'border')=='true':
             self._curFrame.showBoundary = 1
 
-
     def end_frame(self):
         self._curSlide.frames.append(self._curFrame)
         self._curFrame = None
-
 
     def start_notes(self, args):
         name = self._arg('notes',args,'name')
         self._curNotes = pythonpoint.PPNotes()
 
-
     def end_notes(self):
         self._curSlide.notes.append(self._curNotes)
         self._curNotes = None
-
 
     def start_registerFont(self, args):
         name = self._arg('font',args,'name')
@@ -466,14 +445,13 @@ class PPMLParser(xmllib.XMLParser):
         bt = self._arg('para',args,'bullettext')
         if bt == '':
             if self._curPara.style == 'Bullet':
-                bt = '\267'  # Symbol Font bullet character, reasonable default
+                bt = '\xc2\xb7'  # Symbol Font bullet character, reasonable default
             elif self._curPara.style == 'Bullet2':
-                bt = '\267'  # second-level bullet
+                bt = '\xc2\xb7'  # second-level bullet
             else:
                 bt = None
 
         self._curPara.bulletText = bt
-
 
     def end_para(self):
         if self._curFrame:
@@ -737,7 +715,6 @@ class PPMLParser(xmllib.XMLParser):
         initargs = self.ceval('customshape',args,'initargs')
         self._curCustomShape = apply(func, initargs)
 
-
     def end_customshape(self):
         if self._curSlide:
             self._curSlide.graphics.append(self._curCustomShape)
@@ -745,16 +722,11 @@ class PPMLParser(xmllib.XMLParser):
             self._curSection.graphics.append(self._curCustomShape)
         self._curCustomShape = None
 
-
-
     def start_drawing(self, args):
         #loads one
-
         moduleName = args["module"]
         funcName = args["constructor"]
-
         showBoundary = int(args.get("showBoundary", "0"))
-
         hAlign = args.get("hAlign", "CENTER")
 
 
@@ -783,11 +755,9 @@ class PPMLParser(xmllib.XMLParser):
         self._curDrawing = pythonpoint.PPDrawing()
         self._curDrawing.drawing = drawing
 
-
     def end_drawing(self):
         self._curFrame.content.append(self._curDrawing)
         self._curDrawing = None
-
 
     def start_pageCatcherFigure(self, args):
         filename = args["filename"]
@@ -808,8 +778,6 @@ class PPMLParser(xmllib.XMLParser):
         #initargs = self.ceval('customshape',args,'initargs')
         self._curFigure = pythonpoint.PPFigure()
         self._curFigure.figure = fig
-
-
 
     def end_pageCatcherFigure(self):
         self._curFrame.content.append(self._curFigure)
@@ -832,3 +800,14 @@ class PPMLParser(xmllib.XMLParser):
             self._curPara.rawtext = self._curPara.rawtext + '</%s>'% tag
         else:
             print 'Unknown end tag %s' % tag
+
+    def handle_charref(self, name):
+        try:
+            if name[0]=='x':
+                n = int(name[1:],16)
+            else:
+                n = int(name)
+        except ValueError:
+            self.unknown_charref(name)
+            return
+        self.handle_data(unichr(n).encode('utf8'))

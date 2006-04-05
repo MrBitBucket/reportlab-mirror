@@ -26,15 +26,17 @@ class JapaneseFontTests(unittest.TestCase):
     def hDraw(self, c, msg, fnt, x, y):
         "Helper - draws it with a box around"
         c.setFont(fnt, 16, 16)
+        font = pdfmetrics.getFont(fnt)
         c.drawString(x, y, msg)
-        c.rect(x,y,pdfmetrics.stringWidth(msg, fnt, 16),16,stroke=1,fill=0)
+        width = font.stringWidth(msg, 16)
+        c.rect(x,y,width,16,stroke=1,fill=0)
 
     def test0(self):
         "A basic document drawing some strings"
 
         # if they do not have the Japanese font files, go away quietly
         try:
-            from reportlab.pdfbase.cidfonts import CIDFont, findCMapFile
+            from reportlab.pdfbase.cidfonts import CIDFont, findCMapFile, UnicodeCIDFont
             findCMapFile('90ms-RKSJ-H')
             findCMapFile('90msp-RKSJ-H')
             findCMapFile('UniJIS-UCS2-H')
@@ -80,16 +82,26 @@ class JapaneseFontTests(unittest.TestCase):
         pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','EUC-H'))
         self.hDraw(c, '\xC5\xEC\xB5\xFE says Tokyo in EUC', 'HeiseiMin-W3-EUC-H', 100, 550)
 
-        if 0:
-            #this is super-slow until we do encoding caching.
-            pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','UniJIS-UCS2-H'))
-            def asciiToUCS2(text):
-                s = ''
-                for ch in text:
-                    s = s + chr(0) + ch
-                return s
-            self.hDraw(c, '\x67\x71\x4E\xAC' + asciiToUCS2(' says Tokyo in UCS2'),
-                       'HeiseiMin-W3-UniJIS-UCS2-H', 100, 525)
+        #this is super-slow until we do encoding caching.
+        pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','UniJIS-UCS2-H'))
+
+        def asciiToUCS2(text):
+            s = ''
+            for ch in text:
+                s = s + chr(0) + ch
+            return s
+        msg = '\x67\x71\x4E\xAC' + asciiToUCS2(' says Tokyo in UTF16')
+        self.hDraw(c, msg,'HeiseiMin-W3-UniJIS-UCS2-H', 100, 525)
+
+        #unicode font automatically supplies the encoding
+        pdfmetrics.registerFont(UnicodeCIDFont('HeiseiMin-W3'))
+
+        
+        msg = u'\u6771\u4EAC : Unicode font, unicode input'
+        self.hDraw(c, msg, 'HeiseiMin-W3', 100, 500)
+
+        msg = u'\u6771\u4EAC : Unicode font, utf8 input'.encode('utf8')
+        self.hDraw(c, msg, 'HeiseiMin-W3', 100, 475)
 
 
         # now try verticals
@@ -105,8 +117,33 @@ class JapaneseFontTests(unittest.TestCase):
         height = c.stringWidth('\xC5\xEC\xB5\xFE vertical EUC', 'HeiseiMin-W3-EUC-V', 16)
         c.rect(425-8,650,16,-height)
 
+
+
+        from reportlab.platypus.paragraph import Paragraph
+        from reportlab.lib.styles import ParagraphStyle
+        jStyle = ParagraphStyle('jtext',
+                                fontName='HeiseiMin-W3',
+                                fontSize=12,
+                                wordWrap="CJK"
+                                )
+        
+        gatwickText = '\xe3\x82\xac\xe3\x83\x88\xe3\x82\xa6\xe3\x82\xa3\xe3\x83\x83\xe3\x82\xaf\xe7\xa9\xba\xe6\xb8\xaf\xe3\x81\xa8\xe9\x80\xa3\xe7\xb5\xa1\xe9\x80\x9a\xe8\xb7\xaf\xe3\x81\xa7\xe7\x9b\xb4\xe7\xb5\x90\xe3\x81\x95\xe3\x82\x8c\xe3\x81\xa6\xe3\x81\x84\xe3\x82\x8b\xe5\x94\xaf\xe4\xb8\x80\xe3\x81\xae\xe3\x83\x9b\xe3\x83\x86\xe3\x83\xab\xe3\x81\xa7\xe3\x81\x82\xe3\x82\x8b\xe5\xbd\x93\xe3\x83\x9b\xe3\x83\x86\xe3\x83\xab\xe3\x81\xaf\xe3\x80\x81\xe8\xa1\x97\xe3\x81\xae\xe4\xb8\xad\xe5\xbf\x83\xe9\x83\xa8\xe3\x81\x8b\xe3\x82\x8930\xe5\x88\x86\xe3\x81\xae\xe5\xa0\xb4\xe6\x89\x80\xe3\x81\xab\xe3\x81\x94\xe3\x81\x96\xe3\x81\x84\xe3\x81\xbe\xe3\x81\x99\xe3\x80\x82\xe5\x85\xa8\xe5\xae\xa2\xe5\xae\xa4\xe3\x81\xab\xe9\xab\x98\xe9\x80\x9f\xe3\x82\xa4\xe3\x83\xb3\xe3\x82\xbf\xe3\x83\xbc\xe3\x83\x8d\xe3\x83\x83\xe3\x83\x88\xe7\x92\xb0\xe5\xa2\x83\xe3\x82\x92\xe5\xae\x8c\xe5\x82\x99\xe3\x81\x97\xe3\x81\xa6\xe3\x81\x8a\xe3\x82\x8a\xe3\x81\xbe\xe3\x81\x99\xe3\x80\x82\xe3\x83\x95\xe3\x82\xa1\xe3\x83\x9f\xe3\x83\xaa\xe3\x83\xbc\xe3\x83\xab\xe3\x83\xbc\xe3\x83\xa0\xe3\x81\xaf5\xe5\x90\x8d\xe6\xa7\x98\xe3\x81\xbe\xe3\x81\xa7\xe3\x81\x8a\xe6\xb3\x8a\xe3\x82\x8a\xe3\x81\x84\xe3\x81\x9f\xe3\x81\xa0\xe3\x81\x91\xe3\x81\xbe\xe3\x81\x99\xe3\x80\x82\xe3\x81\xbe\xe3\x81\x9f\xe3\x80\x81\xe3\x82\xa8\xe3\x82\xb0\xe3\x82\xbc\xe3\x82\xaf\xe3\x83\x86\xe3\x82\xa3\xe3\x83\x96\xe3\x83\xab\xe3\x83\xbc\xe3\x83\xa0\xe3\x81\xae\xe3\x81\x8a\xe5\xae\xa2\xe6\xa7\x98\xe3\x81\xaf\xe3\x80\x81\xe3\x82\xa8\xe3\x82\xb0\xe3\x82\xbc\xe3\x82\xaf\xe3\x83\x86\xe3\x82\xa3\xe3\x83\x96\xe3\x83\xa9\xe3\x82\xa6\xe3\x83\xb3\xe3\x82\xb8\xe3\x82\x92\xe3\x81\x94\xe5\x88\xa9\xe7\x94\xa8\xe3\x81\x84\xe3\x81\x9f\xe3\x81\xa0\xe3\x81\x91\xe3\x81\xbe\xe3\x81\x99\xe3\x80\x82\xe4\xba\x8b\xe5\x89\x8d\xe3\x81\xab\xe3\x81\x94\xe4\xba\x88\xe7\xb4\x84\xe3\x81\x84\xe3\x81\x9f\xe3\x81\xa0\xe3\x81\x91\xe3\x82\x8b\xe3\x82\xbf\xe3\x82\xa4\xe3\x83\xa0\xe3\x83\x88\xe3\x82\xa5\xe3\x83\x95\xe3\x83\xa9\xe3\x82\xa4\xe3\x83\xbb\xe3\x83\x91\xe3\x83\x83\xe3\x82\xb1\xe3\x83\xbc\xe3\x82\xb8\xe3\x81\xab\xe3\x81\xaf\xe3\x80\x81\xe7\xa9\xba\xe6\xb8\xaf\xe3\x81\xae\xe9\xa7\x90\xe8\xbb\x8a\xe6\x96\x99\xe9\x87\x91\xe3\x81\x8c\xe5\x90\xab\xe3\x81\xbe\xe3\x82\x8c\xe3\x81\xa6\xe3\x81\x8a\xe3\x82\x8a\xe3\x81\xbe\xe3\x81\x99\xe3\x80\x82'
+
+        c.setFont('HeiseiMin-W3', 12)
+##        from reportlab.lib.textsplit import wordSplit
+##        y = 400
+##        splat = wordSplit(gatwickText, 250, 'HeiseiMin-W3', 12, encoding='utf8')
+##        for (line, extraSpace) in splat:
+##            c.drawString(100,y,line)
+##            y -= 14
+        jPara = Paragraph(gatwickText, jStyle)
+        jPara.wrap(250, 200)
+        #from pprint import pprint as pp
+        #pp(jPara.blPara)
+        jPara.drawOn(c, 100, 250)
+
         c.setFillColor(colors.purple)
-        tx = c.beginText(100, 250)
+        tx = c.beginText(100, 200)
         tx.setFont('Helvetica', 12)
         tx.textLines("""This document shows sample output in Japanese
         from the Reportlab PDF library.  This page shows the two fonts
@@ -119,6 +156,21 @@ class JapaneseFontTests(unittest.TestCase):
         c.drawText(tx)
         c.setFont('Helvetica',10)
         c.drawCentredString(297, 36, 'Page %d' % c.getPageNumber())
+
+
+
+        c.showPage()
+
+        c.setFont('Helvetica', 30)
+        c.drawString(100,700, 'Japanese TrueType Font Support')
+        msg = u'\u6771\u4EAC : Unicode font, utf8 input'.encode('utf8')
+        from reportlab.pdfbase.ttfonts import TTFont
+        pdfmetrics.registerFont(TTFont('MS Mincho','msmincho.ttf'))
+        c.setFont('MS Mincho', 30)
+        c.drawString(100,600, msg)
+        
+                                
+
         c.showPage()
 
         # realistic text sample
@@ -214,19 +266,81 @@ Adobe Acrobat 5.0\x82\xc5\x8d\xec\x90\xac\x82\xb5\x82\xbdAdobe PDF\x82\xcd\x81A(
         c.setFont('Helvetica',10)
         c.drawCentredString(297, 36, 'Page %d' % c.getPageNumber())
 
+
+
         c.showPage()
-        # full kuten chart in EUC
-        c.setFont('Helvetica', 24)
-        c.drawString(72,750, 'Characters available in JIS 0208-1997')
-        y = 600
-        for row in range(1, 95):
-            KutenRowCodeChart(row, 'HeiseiMin-W3','EUC-H').drawOn(c, 72, y)
-            y = y - 125
-            if y < 50:
-                c.setFont('Helvetica',10)
-                c.drawCentredString(297, 36, 'Page %d' % c.getPageNumber())
-                c.showPage()
-                y = 700
+
+        from reportlab.lib import textsplit
+        
+        c.setFont('HeiseiMin-W3', 14)
+        y = 700
+        c.drawString(70, y, 'cannot end line')
+        y -= 20
+        for group in textsplit.CANNOT_START_LINE:
+            c.drawString(70, y, group)
+            y -= 20
+            c.setFont('Helvetica',10)
+            c.drawString(70, y, ' '.join(map(lambda x: repr(x)[4:-1], group)))
+            c.setFont('HeiseiMin-W3', 14)
+            y -= 20
+
+
+
+        y -= 20            
+        c.drawString(70, y, 'cannot end line')
+        y -= 20
+        for group in textsplit.CANNOT_END_LINE:
+            c.drawString(70, y, group)
+            y -= 20
+            c.setFont('Helvetica',10)
+            c.drawString(70, y, ' '.join(map(lambda x: repr(x)[2:], group)))
+            c.setFont('HeiseiMin-W3', 14)
+            y -= 20
+
+        c.showPage()
+##        c.showPage()
+##
+##
+##        # full kuten chart in EUC
+##        c.setFont('Helvetica', 24)
+##        c.drawString(72,750, 'Characters available in JIS 0208-1997')
+##        y = 600
+##        for row in range(1, 95):
+##            KutenRowCodeChart(row, 'HeiseiMin-W3','EUC-H').drawOn(c, 72, y)
+##            y = y - 125
+##            if y < 50:
+##                c.setFont('Helvetica',10)
+##                c.drawCentredString(297, 36, 'Page %d' % c.getPageNumber())
+##                c.showPage()
+##                y = 700
+##
+##        c.showPage()
+
+
+        #try with Unicode truetype - Mincho for starters
+##        import time
+##        started = time.clock()
+##        c.showPage()
+##        c.setFont('Helvetica',16)
+##        c.drawString(100,750, 'About to say Tokyo in MS Gothic...')
+##
+##        from reportlab.pdfbase.ttfonts import TTFont, TTFontFile
+##        f = TTFontFile("msgothic.ttf")
+##        print f.name
+##        
+##        pdfmetrics.registerFont(TTFont(f.name, f))
+##        
+##        utfText = u'Andr\202'.encode('utf8')
+##        c.setFont(f.name,16)
+##        c.drawString(100,700, utfText)
+##
+##
+##        #tokyoUCS2 = '\x67\x71\x4E\xAC'
+##        finished = time.clock()
+        
+        
+
+
 
         c.save()
 

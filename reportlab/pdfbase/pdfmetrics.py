@@ -23,27 +23,57 @@ import string, os
 from types import StringType, ListType, TupleType
 from reportlab.pdfbase import _fontdata
 from reportlab.lib.logger import warnOnce
-from reportlab.lib.utils import rl_isfile, rl_isdir, open_and_read, open_and_readlines, rl_glob
+from reportlab.lib.utils import rl_isfile, rl_glob, rl_isdir, open_and_read, open_and_readlines 
 from reportlab.rl_config import defaultEncoding
+import rl_codecs
 
+rl_codecs.RL_Codecs.register()
 standardFonts = _fontdata.standardFonts
 standardEncodings = _fontdata.standardEncodings
 
-_dummyEncoding=' _not an encoding_ '
-# conditional import - try both import techniques, and set a flag
+# AR 20040612 - disabling accelerated stringwidth until I have
+# a slow one which works right for Unicode.  Then we can change
+# the accelerated one.
+##_dummyEncoding=' _not an encoding_ '
+## conditional import - try both import techniques, and set a flag
 try:
-    import _rl_accel
-    try:
-        _stringWidth = _rl_accel.stringWidth
-        _rl_accel.defaultEncoding(_dummyEncoding)
-    except:
-        _stringWidth = None
+      import _rl_accel
+      try:
+          _stringWidth = _rl_accel.stringWidth
+          #_rl_accel.defaultEncoding(_dummyEncoding)
+      except:
+          _stringWidth = None
 except ImportError:
-    _stringWidth = None
+      _stringWidth = None
+_stringWidth = None
 
 _typefaces = {}
 _encodings = {}
 _fonts = {}
+
+def unicode2T1(utext,fonts):
+    '''return a list of (font,string) pairs representing the unicode text'''
+    #print 'unicode2t1(%s, %s): %s' % (utext, fonts, type(utext))
+    #if type(utext) 
+    R = []
+    font, fonts = fonts[0], fonts[1:]
+    enc = font.encName
+    if 'UCS-2' in enc:
+        enc = 'UTF16'
+    while utext:
+        try:
+            R.append((font,utext.encode(enc)))
+            break
+        except UnicodeEncodeError, e:
+            i0, il = e.args[2:4]
+            if i0:
+                R.append((font,utext[:i0].encode(enc)))
+            if fonts:
+                R.extend(unicode2T1(utext[i0:il],fonts))
+            else:
+                R.append((_notdefFont,_notdefChar*(il-i0)))
+            utext = utext[il:]
+    return R
 
 class FontError(Exception):
     pass
@@ -326,6 +356,7 @@ class Encoding:
 #for encName in standardEncodings:
 #    registerEncoding(Encoding(encName))
 
+standardT1SubstitutionFonts = []
 class Font:
     """Represents a font (i.e combination of face and encoding).
 
@@ -336,13 +367,23 @@ class Font:
     composition)"""
     def __init__(self, name, faceName, encName):
         self.fontName = name
-        self.face = getTypeFace(faceName)
+        face = self.face = getTypeFace(faceName)
         self.encoding= getEncoding(encName)
+        self.encName = encName
+        if face.builtIn and face.requiredEncoding is None:
+            _ = standardT1SubstitutionFonts
+        else:
+            _ = []
+        self.substitutionFonts = _
         self._calcWidths()
 
         # multi byte fonts do their own stringwidth calculations.
         # signal this here.
         self._multiByte = 0
+        
+
+    def __repr__(self):
+        return "<%s %s>" % (self.__class__.__name__, self.face.name)
 
     def _calcWidths(self):
         """Vector of widths for stringWidth function"""
@@ -365,15 +406,12 @@ class Font:
         self.widths = w
 
     if not _stringWidth:
-        def stringWidth(self, text, size):
-            """This is the "purist" approach to width.  The practical one
-            is to use the stringWidth one which may be optimized
-            in C."""
-            w = 0
-            widths = self.widths
-            for ch in text:
-                w = w + widths[ord(ch)]
-            return w * 0.001 * size
+        def stringWidth(self, text, size, encoding='utf8'):
+            """This is the "purist" approach to width.  The practical approach
+            is to use the stringWidth function, which may be swapped in for one
+            written in C."""
+            if not isinstance(text,unicode): text = text.decode(encoding)
+            return sum([sum(map(f.widths.__getitem__,map(ord,t))) for f, t in unicode2T1(text,[self]+self.substitutionFonts)])*0.001*size
 
     def _formatWidths(self):
         "returns a pretty block in PDF Array format to aid inspection"
@@ -653,6 +691,8 @@ def getFont(fontName):
             font = Font(fontName, fontName, defaultEncoding)
         registerFont(font)
         return font
+_notdefFont,_notdefChar = getFont('ZapfDingbats'),chr(110)
+standardT1SubstitutionFonts.extend([getFont('Symbol'),getFont('ZapfDingbats')])
 
 def getAscentDescent(fontName):
     font = getFont(fontName)
@@ -673,17 +713,9 @@ def getRegisteredFontNames():
     reg.sort()
     return reg
 
-def _slowStringWidth(text, fontName, fontSize):
+def _slowStringWidth(text, fontName, fontSize, encoding='utf8'):
     """Define this anyway so it can be tested, but whether it is used or not depends on _rl_accel"""
-    font = getFont(fontName)
-    return font.stringWidth(text, fontSize)
-    #this is faster, but will need more special-casing for multi-byte fonts.
-    #wid = getFont(fontName).widths
-    #w = 0
-    #for ch in text:
-    #    w = w + wid[ord(ch)]
-    #return 0.001 * w * fontSize
-
+    return getFont(fontName).stringWidth(text, fontSize, encoding=encoding)
 
 if _stringWidth:
     import new
@@ -744,11 +776,11 @@ def test3widths(texts):
     # checks all 3 algorithms give same answer, note speed
     import time
     for fontName in standardFonts[0:1]:
-        t0 = time.time()
-        for text in texts:
-            l1 = _stringWidth(text, fontName, 10)
-        t1 = time.time()
-        print 'fast stringWidth took %0.4f' % (t1 - t0)
+##        t0 = time.time()
+##        for text in texts:
+##            l1 = stringWidth(text, fontName, 10)
+##        t1 = time.time()
+##        print 'fast stringWidth took %0.4f' % (t1 - t0)
 
         t0 = time.time()
         w = getFont(fontName).widths
@@ -787,7 +819,6 @@ def test():
     registerTypeFace(wombat)
 
     dumpFontData()
-
 
 if __name__=='__main__':
     test()

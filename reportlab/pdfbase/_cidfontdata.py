@@ -126,6 +126,28 @@ allowedEncodings = (['Identity-H', 'Identity-V'] +
                     encodings_kor
                     )
 
+defaultUnicodeEncodings = {
+    #we ddefine a default Unicode encoding for each face name;
+    #this should be the most commonly used horizontal unicode encoding;
+    #also define a 3-letter language code.
+    'HeiseiMin-W3': ('jpn','UniJIS-UCS2-H'),
+    'HeiseiKakuGo-W5': ('jpn','UniJIS-UCS2-H'),
+    'STSong-Light': ('chs', 'UniGB-UCS2-H'),
+    'MSung-Light': ('cht', 'UniGB-UCS2-H'),
+    'MHei-Medium': ('cht', 'UniGB-UCS2-H'),
+    'HYSMyeongJo-Medium': ('kor', 'UniKS-UCS2-H'),
+    'HYGothic-Medium': ('kor','UniKS-UCS2-H'),
+    }
+
+typeFaces_chs = ['STSong-Light'] # to do
+typeFaces_cht = ['MSung-Light', 'MHei-Medium'] # to do
+typeFaces_jpn = ['HeiseiMin-W3', 'HeiseiKakuGo-W5']
+typeFaces_kor = ['HYSMyeongJo-Medium','HYGothic-Medium']
+
+
+#declare separately those used for unicode
+unicode_encodings = [enc for enc in allowedEncodings if 'UCS2' in enc]
+
 
 CIDFontInfo = {}
 #statically describe the fonts in Adobe's Japanese Language Packs

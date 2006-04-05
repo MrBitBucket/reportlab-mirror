@@ -7,7 +7,7 @@ This module contains some standard verifying functions which can be
 used in an attribute map.
 """
 
-import string, sys,re
+import string, sys
 from types import *
 _SequenceTypes = (ListType,TupleType)
 _NumberTypes = (FloatType,IntType)
@@ -64,7 +64,7 @@ class _isBoolean(Validator):
 
 class _isString(Validator):
     def test(self,x):
-        return type(x) is StringType
+        return type(x) in (StringType, UnicodeType)
 
 class _isNumber(Validator):
     def test(self,x):
@@ -156,7 +156,7 @@ class _isValidChild(Validator):
 
 class _isValidChildOrNone(_isValidChild):
     def test(self,x):
-        return x is None or _isValidChild.test(self,x)
+        return _isValidChild.test(self,x) or x is None
 
 class _isCallable(Validator):
     def test(self, x):
@@ -252,7 +252,6 @@ class matchesPattern(Validator):
             text = str(x)
         return (self._pattern.match(text) <> None)
 
-
 class DerivedValue:
     """This is used for magic values which work themselves out.
     An example would be an "inherit" property, so that one can have
@@ -270,7 +269,6 @@ class DerivedValue:
         through all the stuff the renderer provides, including
         a correct stack of parent nodes."""
         return None
-
 
 class Inherit(DerivedValue):
     def __repr__(self):

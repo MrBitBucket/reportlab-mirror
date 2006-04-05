@@ -17,9 +17,10 @@ import time
 
 import reportlab
 from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase._cidfontdata import allowedTypeFaces, allowedEncodings, CIDFontInfo
+from reportlab.pdfbase._cidfontdata import allowedTypeFaces, allowedEncodings, CIDFontInfo, defaultUnicodeEncodings
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfdoc
+from reportlab.pdfbase.pdfutils import _escape
 from reportlab.rl_config import CMapSearchPath
 
 
@@ -28,6 +29,7 @@ def findCMapFile(name):
     for dirname in CMapSearchPath:
         cmapfile = dirname + os.sep + name
         if os.path.isfile(cmapfile):
+            #print "found", cmapfile
             return cmapfile
     raise IOError, 'CMAP file for encodings "%s" not found!' % name
 
@@ -204,6 +206,16 @@ class CIDEncoding(pdfmetrics.Encoding):
         finished = time.clock()
         #print 'loaded %s in %0.4f seconds' % (self.name, finished - started)
 
+    def getData(self):
+        """Simple persistence helper.  Return a dict with all that matters."""
+        return {
+            'mapFileHash': self._mapFileHash,
+            'codeSpaceRanges': self._codeSpaceRanges,
+            'notDefRanges': self._notDefRanges,
+            'cmap': self._cmap,
+            
+            }
+    
 
 class CIDTypeFace(pdfmetrics.TypeFace):
     """Multi-byte type face.
@@ -292,7 +304,16 @@ class CIDFont(pdfmetrics.Font):
         self.isVertical = (self.encodingName[-1] == 'V')
 
 
-    def stringWidth(self, text, size):
+        #no substitutes initially
+        self.substitutionFonts = []
+        
+    def formatForPdf(self, text):
+        encoded = _escape(text)
+        #print 'encoded CIDFont:', encoded
+        return encoded
+
+    def stringWidth(self, text, size, encoding=None):
+        """This presumes non-Unicode input.  UnicodeCIDFont wraps it for that context"""
         cidlist = self.encoding.translate(text)
         if self.isVertical:
             #this part is "not checked!" but seems to work.
@@ -325,6 +346,88 @@ class CIDFont(pdfmetrics.Font):
         doc.fontMapping[self.name] = '/' + internalName
 
 
+class UnicodeCIDFont(CIDFont):
+    """Wraps up CIDFont to hide explicit encoding choice;
+    encodes text for output as UTF16.
+
+    lang should be one of 'jpn',chs','cht','kor' for now.
+    if vertical is set, it will select a different widths array
+    and possibly glyphs for some punctuation marks.
+
+    halfWidth is only for Japanese.
+
+
+    >>> dodgy = UnicodeCIDFont('nonexistent')
+    Traceback (most recent call last):
+    ...
+    KeyError: "don't know anything about CID font nonexistent"
+    >>> heisei = UnicodeCIDFont('HeiseiMin-W3')
+    >>> heisei.name
+    'HeiseiMin-W3'
+    >>> heisei.language
+    'jpn'
+    >>> heisei.encoding.name
+    'UniJIS-UCS2-H'
+    >>> #This is how PDF data gets encoded.
+    >>> print heisei.formatForPdf('hello')
+    \\377\\376h\\000e\\000l\\000l\\000o\\000
+    >>> tokyo = u'\u6771\u4AEC'
+    >>> print heisei.formatForPdf(tokyo)
+    \\377\\376qg\\354J
+    
+    """
+
+    def __init__(self, face, isVertical=False, isHalfWidth=False):
+        #pass
+        try:
+            lang, defaultEncoding = defaultUnicodeEncodings[face]
+        except KeyError:
+            raise KeyError("don't know anything about CID font %s" % face)
+
+        #we know the languages now.
+        self.language = lang
+        
+        #rebuilt encoding string.  They follow rules which work
+        #for the 7 fonts provided.
+        enc = defaultEncoding[:-1]
+        if isHalfWidth:
+            enc = enc + 'HW-'
+        if isVertical:
+            enc = enc + 'V'
+        else:
+            enc = enc + 'H'
+            
+        #now we can do the more general case               
+        CIDFont.__init__(self, face, enc)
+        #self.encName = 'utf_16_le'
+        #it's simpler for unicode, just use the face name
+        self.name = self.fontName = face   
+        self.vertical = isVertical
+        self.isHalfWidth = isHalfWidth
+
+
+    def formatForPdf(self, text):
+        #these ones should be encoded asUTF16 minus the BOM
+        from codecs import utf_16_be_encode
+        #print 'formatting %s: %s' % (type(text), repr(text))
+        if type(text) is not unicode:
+            text = text.decode('utf8')
+        utfText = utf_16_be_encode(text)[0]
+        encoded = _escape(utfText)
+        #print '  encoded:',encoded
+        return encoded
+        #
+        #result = _escape(encoded)
+        #print '    -> %s' % repr(result)
+        #return result
+    
+
+    def stringWidth(self, text, size, encoding=None):
+        "Just ensure we do width test on characters, not bytes..."
+        if type(text) is type(''):
+            text = text.decode('utf8')
+        return CIDFont.stringWidth(self, text, size, encoding)
+            
 
 def precalculate(cmapdir):
     # crunches through all, making 'fastmap' files
@@ -392,7 +495,9 @@ def test():
 ##    print 'constructed all encodings in %0.2f seconds' % (finished - started)
 
 if __name__=='__main__':
-    test()
+    import doctest, cidfonts
+    doctest.testmod(cidfonts)
+    #test()
 
 
 

@@ -131,7 +131,9 @@ def sample2line(data=[(13, 5, 20, 22, 37, 45, 19, 4),
 
 def sample3(drawing=None):
     "Add sample swatches to a diagram."
+
     d = drawing or Drawing(400, 200)
+
     swatches = Legend()
     swatches.alignment = 'right'
     swatches.x = 80
@@ -141,8 +143,11 @@ def sample3(drawing=None):
     swatches.columnMaximum = 4
     items = [(colors.red, 'before'), (colors.green, 'after')]
     swatches.colorNamePairs = items
+
     d.add(swatches, 'legend')
+
     return d
+
 
 def sample4pie():
     width = 300

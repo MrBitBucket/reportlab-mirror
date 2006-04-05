@@ -1216,6 +1216,7 @@ class String(Shape):
         fontSize = AttrMapValue(isNumber),
         fillColor = AttrMapValue(isColorOrNone),
         textAnchor = AttrMapValue(isTextAnchor),
+        encoding = AttrMapValue(isString),
         )
 
     def __init__(self, x, y, text, **kw):
@@ -1227,9 +1228,10 @@ class String(Shape):
         self.fontSize = STATE_DEFAULTS['fontSize']
         self.fillColor = STATE_DEFAULTS['fillColor']
         self.setProperties(kw)
+        self.encoding = 'cp1252'  #matches only fonts we have!
 
     def getEast(self):
-        return self.x + stringWidth(self.text,self.fontName,self.fontSize)
+        return self.x + stringWidth(self.text,self.fontName,self.fontSize, self.encoding)
 
     def copy(self):
         new = self.__class__(self.x, self.y, self.text)
@@ -1238,7 +1240,7 @@ class String(Shape):
 
     def getBounds(self):
         # assumes constant drop of 0.2*size to baseline
-        w = stringWidth(self.text,self.fontName,self.fontSize)
+        w = stringWidth(self.text,self.fontName,self.fontSize, self.encoding)
         if self.textAnchor == 'start':
             x = self.x
         elif self.textAnchor == 'middle':

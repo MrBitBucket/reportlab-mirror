@@ -63,6 +63,17 @@ else:
     def _digester(s):
         return join(map(lambda x : "%02x" % ord(x), md5.md5(s).digest()), '')
 
+def _annFormat(D,color,thickness,dashArray):
+    from reportlab.pdfbase.pdfdoc import PDFArray
+    if color:
+        D["C"] = PDFArray([color.red, color.green, color.blue])
+    border = [0,0,0]
+    if thickness:
+        border[2] = thickness
+    if dashArray:
+        border.append(PDFArray(dashArray))
+    D["Border"] = PDFArray(border)
+
 class Canvas(textobject._PDFColorSetter):
     """This class is the programmer's interface to the PDF file format.  Methods
     are (or will be) provided here to do just about everything PDF can do.
@@ -114,7 +125,6 @@ class Canvas(textobject._PDFColorSetter):
                  pagesize=None,
                  bottomup = 1,
                  pageCompression=None,
-                 encoding = None,
                  invariant = None,
                  verbosity=0):
         """Create a canvas of a given size. etc.
@@ -125,12 +135,10 @@ class Canvas(textobject._PDFColorSetter):
         Most of the attributes are private - we will use set/get methods
         as the preferred interface.  Default page size is A4."""
         if pagesize is None: pagesize = rl_config.defaultPageSize
-        if encoding is None: encoding = rl_config.defaultEncoding
         if invariant is None: invariant = rl_config.invariant
         self._filename = filename
-        self._encodingName = encoding
-        self._doc = pdfdoc.PDFDocument(encoding,
-                                       compression=pageCompression,
+
+        self._doc = pdfdoc.PDFDocument(compression=pageCompression,
                                        invariant=invariant, filename=filename)
 
 
@@ -176,6 +184,7 @@ class Canvas(textobject._PDFColorSetter):
         self._y = 0
         self._fontname = 'Times-Roman'
         self._fontsize = 12
+
         self._dynamicFont = 0
         self._textMode = 0  #track if between BT/ET
         self._leading = 14.4
@@ -244,7 +253,7 @@ class Canvas(textobject._PDFColorSetter):
            not automatically be seen when the document is viewed."""
         self._doc.setAuthor(author)
 
-    def addOutlineEntry(self, title, key, level=0, closed=None):
+    def addOutlineEntry(self, title, key, level=0, closed=None, asUtf16=False):
         """Adds a new entry to the outline at given level.  If LEVEL not specified,
         entry goes at the top level.  If level specified, it must be
         no more than 1 greater than the outline level in the last call.
@@ -294,7 +303,7 @@ class Canvas(textobject._PDFColorSetter):
         """
         #to be completed
         #self._outlines.append(title)
-        self._doc.outline.addOutlineEntry(key, level, title, closed=closed)
+        self._doc.outline.addOutlineEntry(key, level, title, closed=closed, asUtf16=asUtf16)
 
     def setOutlineNames0(self, *nametree):   # keep this for now (?)
         """nametree should can be a recursive tree like so
@@ -401,7 +410,7 @@ class Canvas(textobject._PDFColorSetter):
         return result
 
     def bookmarkPage(self, key,
-                      fitType="Fit",
+                      fit="Fit",
                       left=None,
                       top=None,
                       bottom=None,
@@ -453,30 +462,30 @@ class Canvas(textobject._PDFColorSetter):
         if zoom is None:
             zoom = "null"
 
-        if fitType == "XYZ":
+        if fit == "XYZ":
             dest.xyz(left,top,zoom)
-        elif fitType == "Fit":
+        elif fit == "Fit":
             dest.fit()
-        elif fitType == "FitH":
+        elif fit == "FitH":
             dest.fith(top)
-        elif fitType == "FitV":
+        elif fit == "FitV":
             dest.fitv(left)
-        elif fitType == "FitR":
+        elif fit == "FitR":
             dest.fitr(left,bottom,right,top)
         #Do we need these (version 1.1 / Acrobat 3 versions)?
-        elif fitType == "FitB":
+        elif fit == "FitB":
             dest.fitb()
-        elif fitType == "FitBH":
+        elif fit == "FitBH":
             dest.fitbh(top)
-        elif fitType == "FitBV":
+        elif fit == "FitBV":
             dest.fitbv(left)
         else:
-            raise "Unknown Fit type %s" % (fitType,)
+            raise "Unknown Fit type %s" % (fit,)
 
         dest.setPage(pageref)
         return dest
 
-    def bookmarkHorizontalAbsolute(self, key, yhorizontal):
+    def bookmarkHorizontalAbsolute(self, key, top, left=0, fit='XYZ', **kw):
         """Bind a bookmark (destination) to the current page at a horizontal position.
            Note that the yhorizontal of the book mark is with respect to the default
            user space (where the origin is at the lower left corner of the page)
@@ -485,12 +494,12 @@ class Canvas(textobject._PDFColorSetter):
            responsible for making sure the bookmark matches an appropriate item on
            the page."""
         #This method should probably be deprecated since it is just a sub-set of bookmarkPage
-        return self.bookmarkPage(key,fitType="FitH",top=yhorizontal)
+        return self.bookmarkPage(key, fit=fit, top=top, left=left, zoom=0)
 
-    def bookmarkHorizontal(self, key, relativeX, relativeY):
+    def bookmarkHorizontal(self, key, relativeX, relativeY, **kw):
         """w.r.t. the current transformation, bookmark this horizontal."""
-        (xt, yt) = self.absolutePosition(relativeX,relativeY)
-        self.bookmarkHorizontalAbsolute(key, yt)
+        (left, top) = self.absolutePosition(relativeX,relativeY)
+        self.bookmarkHorizontalAbsolute(key, top, left=left, **kw)
 
     #def _inPage0(self):  disallowed!
     #    """declare a page, enable page features"""
@@ -527,9 +536,11 @@ class Canvas(textobject._PDFColorSetter):
         height are omitted, they are calculated from the image size.
         Also allow file names as well as images.  The size in pixels
         of the image is returned."""
+
+        self._currentPageHasImages = 1
         from pdfimages import PDFImage
         img_obj = PDFImage(image, x,y, width, height)
-        if img_obj.drawInlineImage(self): self._currentPageHasImages = 1
+        img_obj.drawInlineImage(self)
         return (img_obj.width, img_obj.height)
 
     def drawImage(self, image, x, y, width=None, height=None, mask=None):
@@ -557,6 +568,8 @@ class Canvas(textobject._PDFColorSetter):
 
         In general you should use drawImage in preference to drawInlineImage
         unless you have read the PDF Spec and understand the tradeoffs."""
+        self._currentPageHasImages = 1
+
         # first, generate a unique name/signature for the image.  If ANYTHING
         # is different, even the mask, this should be different.
         if type(image) == type(''):
@@ -583,9 +596,6 @@ class Canvas(textobject._PDFColorSetter):
             width = imgObj.width
         if height is None:
             height = imgObj.height
-        if width<1e-6 or height<1e-6: return
-    
-        self._currentPageHasImages = 1
 
         # scale and draw
         self.saveState()
@@ -737,7 +747,8 @@ class Canvas(textobject._PDFColorSetter):
         self._addAnnotation(pdfdoc.InkAnnotation(Rect, contents, InkList, **kw), name, addtopage)
     inkAnnotation0 = inkAnnotation  #deprecated
 
-    def linkAbsolute(self, contents, destinationname, Rect=None, addtopage=1, name=None, **kw):
+    def linkAbsolute(self, contents, destinationname, Rect=None, addtopage=1, name=None,
+            thickness=0, color=None, dashArray=None, **kw):
         """rectangular link annotation positioned wrt the default user space.
            The identified rectangle on the page becomes a "hot link" which
            when clicked will send the viewer to the page and position identified
@@ -752,18 +763,21 @@ class Canvas(textobject._PDFColorSetter):
 
            You may want to use the keyword argument Border='[0 0 0]' to
            suppress the visible rectangle around the during viewing link."""
-        destination = self._bookmarkReference(destinationname) # permitted to be undefined... must bind later...
-        Rect = self._absRect(Rect)
-        kw["Rect"] = Rect
-        kw["Contents"] = contents
-        kw["Destination"] = destination
-        self._addAnnotation(pdfdoc.LinkAnnotation(**kw), name, addtopage)
+        return self.linkRect(contents, destinationname, Rect, addtopage, name, relative=0,
+                thickness=thickness, color=color, dashArray=dashArray, **kw)
 
-    def linkRect(self, contents, destinationname, Rect=None, addtopage=1, name=None, **kw):
+    def linkRect(self, contents, destinationname, Rect=None, addtopage=1, name=None, relative=0,
+            thickness=0, color=None, dashArray=None, **kw):
         """rectangular link annotation w.r.t the current user transform.
            if the transform is skewed/rotated the absolute rectangle will use the max/min x/y
         """
-        return self.linkAbsolute(contents, destinationname, Rect, addtopage, name, **kw)
+        destination = self._bookmarkReference(destinationname) # permitted to be undefined... must bind later...
+        Rect = self._absRect(Rect,relative)
+        kw["Rect"] = Rect
+        kw["Contents"] = contents
+        kw["Destination"] = destination
+        _annFormat(kw,color,thickness,dashArray)
+        return self._addAnnotation(pdfdoc.LinkAnnotation(**kw), name, addtopage)
 
     def linkURL(self, url, rect, relative=0, thickness=0, color=None, dashArray=None, kind="URI", **kw):
         """Create a rectangular URL 'hotspot' in the given rectangle.
@@ -798,17 +812,7 @@ class Canvas(textobject._PDFColorSetter):
             raise ValueError("Unknown linkURI kind '%s'" % kind)
 
         ann["A"] = A
-
-        # now for formatting stuff.
-        if color:
-            ann["C"] = PDFArray([color.red, color.green, color.blue])
-        border = [0,0,0]
-        if thickness:
-            border[2] = thickness
-        if dashArray:
-            border.append(PDFArray(dashArray))
-        ann["Border"] = PDFArray(border)
-
+        _annFormat(ann,color,thickness,dashArray)
         self._addAnnotation(ann)
 
     def _addAnnotation(self, annotation, name=None, addtopage=1):
@@ -1257,6 +1261,7 @@ class Canvas(textobject._PDFColorSetter):
             leading = size * 1.2
         self._leading = leading
         font = pdfmetrics.getFont(self._fontname)
+
         self._dynamicFont = getattr(font, '_dynamicFont', 0)
         if not self._dynamicFont:
             pdffontname = self._doc.getInternalFontName(psfontname)
@@ -1268,12 +1273,8 @@ class Canvas(textobject._PDFColorSetter):
         if leading is None: leading = self._leading
         self.setFont(self._fontname, size, leading)
 
-    def stringWidth(self, text, fontName, fontSize, encoding=None):
+    def stringWidth(self, text, fontName, fontSize):
         "gets width of a string in the given font and size"
-        if encoding is not None:
-            from reportlab.lib import logger
-            logger.warnOnce('encoding argument to Canvas.stringWidth is deprecated and has no effect!')
-        #if encoding is None: encoding = self._doc.encoding
         return pdfmetrics.stringWidth(text, fontName, fontSize)
 
     # basic graphics modes
@@ -1301,10 +1302,10 @@ class Canvas(textobject._PDFColorSetter):
     def setDash(self, array=[], phase=0):
         """Two notations.  pass two numbers, or an array and phase"""
         if type(array) == IntType or type(array) == FloatType:
-            self._code.append('[%s] %s d' % (array, phase))
+            self._code.append('[%s %s] 0 d' % (array, phase))
         elif type(array) == ListType or type(array) == TupleType:
             assert phase >= 0, "phase is a length in user space"
-            textarray =  ' '.join(map(str, array))
+            textarray = ' '.join(map(str, array))
             self._code.append('[%s] %s d' % (textarray, phase))
 
     # path stuff - the separate path object builds it
@@ -1438,6 +1439,15 @@ class Canvas(textobject._PDFColorSetter):
         for (key, value) in args:
             transDict[key] = value
         self._pageTransition = transDict
+
+    def getCurrentPageContent(self):
+        """Return uncompressed contents of current page buffer.
+
+        This is useful in creating test cases and assertions of what
+        got drawn, without necessarily saving pages to disk"""
+        return '\n'.join(self._code)
+
+
 
 if _instanceEscapePDF:
     import new

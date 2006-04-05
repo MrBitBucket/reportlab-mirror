@@ -10,7 +10,7 @@ Execute the script to see some test drawings."""
 
 from reportlab.graphics.shapes import *
 from reportlab.graphics.renderbase import StateTracker, getStateDelta, renderScaledDrawing
-from reportlab.pdfbase.pdfmetrics import getFont
+from reportlab.pdfbase.pdfmetrics import getFont, unicode2T1
 from math import sin, cos, pi, ceil
 from reportlab.lib.utils import getStringIO, open_and_read
 from reportlab import rl_config
@@ -151,20 +151,51 @@ class _PMRenderer(Renderer):
         self.drawPolyLine(polygon,_doClose=1)
 
     def drawString(self, stringObj):
-        fill = self._canvas.fillColor
+        canv = self._canvas
+        fill = canv.fillColor
         if fill is not None:
             S = self._tracker.getState()
-            text_anchor, x, y, text = S['textAnchor'], stringObj.x,stringObj.y,stringObj.text
+            text_anchor = S['textAnchor']
+            fontName = S['fontName']
+            fontSize = S['fontSize']
+            font = getFont(fontName)
+            text = stringObj.text
+            x = stringObj.x
+            y = stringObj.y
             if not text_anchor in ['start','inherited']:
-                font, font_size = S['fontName'], S['fontSize']
-                textLen = stringWidth(text, font,font_size)
+                textLen = stringWidth(text, fontName,fontSize)
                 if text_anchor=='end':
                     x = x-textLen
                 elif text_anchor=='middle':
                     x = x - textLen/2
                 else:
                     raise ValueError, 'bad value for textAnchor '+str(text_anchor)
-            self._canvas.drawString(x,y,text)
+            if getattr(font,'_dynamicFont',None):
+                if isinstance(text,unicode): text = text.encode('utf8')
+                canv.drawString(x,y,text)
+            else:
+                fc = font
+                if not isinstance(text,unicode):
+                    try:
+                        text = text.decode('utf8')
+                    except UnicodeDecodeError,e:
+                        i,j = e.args[2:4]
+                        raise UnicodeDecodeError(*(e.args[:4]+('%s\n%s-->%s<--%s' % (e.args[4],text[i-10:i],text[i:j],text[j:j+10]),)))
+
+                FT = unicode2T1(text,[font]+font.substitutionFonts)
+                n = len(FT)
+                nm1 = n-1
+                wscale = 0.001*fontSize
+                for i in xrange(n):
+                    f, t = FT[i]
+                    if f!=fc:
+                        canv.setFont(f.fontName,fontSize)
+                        fc = f
+                    canv.drawString(x,y,t)
+                    if i!=nm1:
+                        x += wscale*sum(map(f.widths.__getitem__,map(ord,t)))
+                if font!=fc:
+                    canv.setFont(fontName,fontSize)
 
     def drawPath(self, path):
         c = self._canvas

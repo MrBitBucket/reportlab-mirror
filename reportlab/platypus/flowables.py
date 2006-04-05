@@ -76,6 +76,11 @@ class Flowable:
         self._traceInfo = None
         self._showBoundary = None
 
+        #many flowables handle text and must be processed in the
+        #absence of a canvas.  tagging them with their encoding
+        #helps us to get conversions right.  Use Python codec names.
+        self.encoding = None        
+
 
     def _drawOn(self,canv):
         '''ensure canv is set on and then draw'''
@@ -410,7 +415,7 @@ class UseUpSpace(Flowable):
     def wrap(self, availWidth, availHeight):
         self.width = availWidth
         self.height = availHeight
-        return (availWidth,availHeight)  #step back a point
+        return (availWidth,availHeight-1e-8)  #step back a point
 
     def draw(self):
         pass
@@ -435,7 +440,7 @@ class CondPageBreak(Spacer):
             return (availWidth, availHeight)
         return (0, 0)
 
-def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None):
+def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
     '''return max width, required height for a list of flowables F'''
     W = 0
     H = 0
@@ -443,6 +448,7 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None):
     atTop = 1
     for f in F:
         w,h = f.wrapOn(canv,availWidth,0xfffffff)
+        if dims is not None: dims.append((w,h))
         if w<=_FUZZ or h<=_FUZZ: continue
         W = max(W,w)
         H += h
@@ -465,13 +471,30 @@ def _flowableSublist(V):
     assert not [x for x in V if isinstance(x,LCActionFlowable)],'LCActionFlowables not allowed in sublists'
     return V
 
-class KeepTogether(Flowable):
+class _ContainerSpace:  #Abstract some common container like behaviour
+    def getSpaceBefore(self):
+        for c in self._content:
+            if not hasattr(c,'frameAction'):
+                return c.getSpaceBefore()
+        return 0
+
+    def getSpaceAfter(self,content=None):
+        #this needs 2.4
+        #for c in reversed(content or self._content):
+        reverseContent = (content or self._content)[:]
+        reverseContent.reverse()
+        for c in reverseContent:
+            if not hasattr(c,'frameAction'):
+                return c.getSpaceAfter()
+        return 0
+
+class KeepTogether(_ContainerSpace,Flowable):
     def __init__(self,flowables,maxHeight=None):
-        self._flowables = _flowableSublist(flowables)
+        self._content = _flowableSublist(flowables)
         self._maxHeight = maxHeight
 
     def __repr__(self):
-        f = self._flowables
+        f = self._content
         L = map(repr,f)
         import string
         L = "\n"+string.join(L, "\n")
@@ -479,17 +502,34 @@ class KeepTogether(Flowable):
         return "KeepTogether(%s,maxHeight=%s) # end KeepTogether" % (L,self._maxHeight)
 
     def wrap(self, aW, aH):
-        W,H = _listWrapOn(self._flowables,aW,self.canv)
-        self._CPage = (H>aH) and (not self._maxHeight or H<=self._maxHeight)
+        dims = []
+        W,H = _listWrapOn(self._content,aW,self.canv,dims=dims)
+        self._H = H
+        self._H0 = dims and dims[0][1] or 0
+        self._wrapInfo = aW,aH
         return W, 0xffffff  # force a split
 
     def split(self, aW, aH):
-        S = getattr(self,'_CPage',1) and [CondPageBreak(aH+1)] or []
-        for f in self._flowables: S.append(f)
+        if getattr(self,'_wrapInfo',None)!=(aW,aH): self.wrap(aW,aH)
+        S = self._content[:]
+        C0 = self._H>aH and (not self._maxHeight or aH>self._maxHeight)
+        C1 = self._H0>aH
+        if C0 or C1:
+            if C0:
+                from doctemplate import FrameBreak
+                A = FrameBreak
+            else:
+                from doctemplate import NullActionFlowable
+                A = NullActionFlowable
+            S.insert(0,A())
         return S
 
-    def identity(self):
-        return "<KeepTogether at %s%s> containing :%s" % (hex(id(self)),self._frameName(),"\n".join([f.identity() for f in self._flowables]))
+    def identity(self, maxLen=None):
+        msg = "<KeepTogether at %s%s> containing :%s" % (hex(id(self)),self._frameName(),"\n".join([f.identity() for f in self._content]))
+        if maxLen:
+            return msg[0:maxLen]
+        else:
+            return msg
 
 class Macro(Flowable):
     """This is not actually drawn (i.e. it has zero height)
@@ -530,6 +570,12 @@ class ParagraphAndImage(Flowable):
         self.xpad = xpad
         self.ypad = ypad
         self._side = side
+
+    def getSpaceBefore(self):
+        return max(self.P.getSpaceBefore(),self.I.getSpaceBefore())
+
+    def getSpaceAfter(self):
+        return max(self.P.getSpaceAfter(),self.I.getSpaceAfter())
 
     def wrap(self,availWidth,availHeight):
         wI, hI = self.I.wrap(availWidth,availHeight)
@@ -643,23 +689,7 @@ class _PTOInfo:
         self.trailer = _flowableSublist(trailer)
         self.header = _flowableSublist(header)
 
-class _Container:   #Abstract some common container like behaviour
-    def getSpaceBefore(self):
-        for c in self._content:
-            if not hasattr(c,'frameAction'):
-                return c.getSpaceBefore()
-        return 0
-
-    def getSpaceAfter(self,content=None):
-        #this needs 2.4
-        #for c in reversed(self._content):
-        reverseContent = (content or self._content)[:]
-        reverseContent.reverse()
-        for c in reverseContent:
-            if not hasattr(c,'frameAction'):
-                return c.getSpaceAfter()
-        return 0
-
+class _Container(_ContainerSpace):  #Abstract some common container like behaviour
     def drawOn(self, canv, x, y, _sW=0, scale=1.0, content=None, aW=None):
         '''we simulate being added to a frame'''
         pS = 0
@@ -805,7 +835,10 @@ class KeepInFrame(_Container,Flowable):
         return self.maxWidth - self._leftExtraIndent - self._rightExtraIndent
 
     def identity(self, maxLen=None):
-        return "<%s at %s%s%s> size=%sx%s" % (self.__class__.__name__, hex(id(self)), self._frameName(), self.name and ' name="%s"'%self.name or '', fp_str(self.maxWidth),fp_str(self.maxHeight))
+        return "<%s at %s%s%s> size=%sx%s" % (self.__class__.__name__, hex(id(self)), self._frameName(),
+                getattr(self,'name','') and (' name="%s"'% getattr(self,'name','')) or '',
+                getattr(self,'maxWidth','') and (' maxWidth=%s'%fp_str(getattr(self,'maxWidth',0))) or '',
+                getattr(self,'maxHeight','')and (' maxHeight=%s' % fp_str(getattr(self,'maxHeight')))or '')
 
     def wrap(self,availWidth,availHeight):
         from doctemplate import LayoutError

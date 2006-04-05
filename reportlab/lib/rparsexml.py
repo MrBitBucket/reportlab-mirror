@@ -48,31 +48,22 @@ import string
 try:
     #raise ImportError, "dummy error"
     simpleparse = 0
-    import pyRXP
-    if pyRXP.version>='0.5':
-        def warnCB(s):
-            print s
-        pyRXP_parser = pyRXP.Parser(
-                            ErrorOnValidityErrors=1,
-                            NoNoDTDWarning=1,
-                            ExpandCharacterEntities=0,
-                            ExpandGeneralEntities=0,
-                            warnCB = warnCB,
-                            srcName='string input')
-        def parsexml(xmlText, oneOutermostTag=0,eoCB=None,entityReplacer=None):
-            pyRXP_parser.eoCB = eoCB
-            p = pyRXP_parser.parse(xmlText)
-            return oneOutermostTag and p or ('',None,[p],None)
-    else:
-        def parsexml(xmlText, oneOutermostTag=0,eoCB=None,entityReplacer=None):
-            '''eoCB is the entity open callback'''
-            def warnCB(s):
-                print s
-            flags = 0x0157e1ff | pyRXP.PARSER_FLAGS['ErrorOnValidityErrors']
-            for k in ('ExpandCharacterEntities','ExpandGeneralEntities'):
-                flags = flags & (~pyRXP.PARSER_FLAGS[k])
-            p = pyRXP.parse(xmlText,srcName='string input',flags=flags,warnCB=warnCB,eoCB=eoCB)
-            return oneOutermostTag and p or ('',None,[p],None)
+    import pyRXPU
+    def warnCB(s):
+        print s
+    pyRXP_parser = pyRXPU.Parser(
+                        ErrorOnValidityErrors=1,
+                        NoNoDTDWarning=1,
+                        ExpandCharacterEntities=1,
+                        ExpandGeneralEntities=1,
+                        warnCB = warnCB,
+                        srcName='string input',
+                        ReturnUTF8 = 1,
+                        )
+    def parsexml(xmlText, oneOutermostTag=0,eoCB=None,entityReplacer=None):
+        pyRXP_parser.eoCB = eoCB
+        p = pyRXP_parser.parse(xmlText)
+        return oneOutermostTag and p or ('',None,[p],None)
 except ImportError:
     simpleparse = 1
 

@@ -27,7 +27,9 @@ def makeStyles():
     styles = []
     for i in range(5):
         styles.append(TableStyle([('ALIGN', (1,1), (-1,-1), 'RIGHT'),
-                                         ('ALIGN', (0,0), (-1,0), 'CENTRE') ]))
+                                  ('ALIGN', (0,0), (-1,0), 'CENTRE'),
+                                  ('HREF', (0,0), (0,0), 'www.google.com'),
+                                  ]))
     for style in styles[1:]:
         style.add('GRID', (0,0), (-1,-1), 0.25, colors.black)
     for style in styles[2:]:

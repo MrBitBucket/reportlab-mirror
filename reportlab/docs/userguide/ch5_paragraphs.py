@@ -288,8 +288,8 @@ tag at its head.  The text will be drawn on the first line of
 the paragraph, with its x origin determined by the $bulletIndent$
 attribute of the style, and in the font given in the
 $bulletFontName$ attribute.  For genuine bullets, a good
-idea is to select the Symbol font in the style, and
-use a character such as $\\267)$:""")
+idea is to select the Times-Roman font in the style, and
+use a character such as $\\xe2\\x80\\xa2)$:""")
 
 t=apply(Table,getAttrs(_bulletAttrMap))
 t.setStyle([
@@ -306,7 +306,7 @@ disc("""The &lt;bullet&gt; tag is only allowed once in a given paragraph and its
 overrides the implied bullet style and ^bulletText^ specified in the  ^Paragraph^
 creation.
 """)
-parabox("""<bullet>\267</bullet>this is a bullet point.  Spam
+parabox("""<bullet>\xe2\x80\xa2</bullet>this is a bullet point.  Spam
 spam spam spam spam spam spam spam spam spam spam spam
 spam spam spam spam spam spam spam spam spam spam """,
         styleSheet['Bullet'],

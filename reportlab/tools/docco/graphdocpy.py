@@ -80,7 +80,7 @@ def mainPageFrame(canvas, doc):
         canvas.setFont('Times-Roman', 12)
         canvas.drawString(4 * inch, cm, "%d" % pageNumber)
         if hasattr(canvas, 'headerLine'): # hackish
-            headerline = string.join(canvas.headerLine, ' \215 ')
+            headerline = string.join(canvas.headerLine, ' \xc2\x8d ')
             canvas.drawString(2*cm, A4[1]-1.75*cm, headerline)
 
     canvas.setFont('Times-Roman', 8)

@@ -81,10 +81,12 @@ class ActionFlowable(Flowable):
        use NextPageTemplate which creates an ActionFlowable.
     '''
     def __init__(self,action=()):
+        #must call super init to ensure it has a width and height (of zero),
+        #as in some cases the packer might get called on it...
+        Flowable.__init__(self)
         if type(action) not in (ListType, TupleType):
             action = (action,)
         self.action = tuple(action)
-
 
     def apply(self,doc):
         '''
@@ -129,6 +131,10 @@ class NextFrameFlowable(ActionFlowable):
 class CurrentFrameFlowable(LCActionFlowable):
     def __init__(self,ix,resume=0):
         ActionFlowable.__init__(self,('currentFrame',ix,resume))
+
+class NullActionFlowable(ActionFlowable):
+    def apply(self):
+        pass
 
 class _FrameBreak(LCActionFlowable):
     '''
@@ -570,7 +576,7 @@ class BaseDocTemplate:
         if i:
             if not getattr(flowables[i],'locChanger',None): i += 1
             K = KeepTogether(flowables[:i])
-            for f in K._flowables:
+            for f in K._content:
                 f.keepWithNext = 0
             del flowables[:i]
             flowables.insert(0,K)
@@ -619,16 +625,17 @@ class BaseDocTemplate:
                 else:
                     n = 0
                 if n:
-                    if self.frame.add(S[0], self.canv, trySplit=0):
-                        self._curPageFlowableCount = self._curPageFlowableCount + 1
-                        self.afterFlowable(S[0])
-                    else:
-                        ident = "Splitting error(n==%d) on page %d in\n%s" % (n,self.page,self._fIdent(f,30,self.frame))
-                        #leave to keep apart from the raise
-                        raise LayoutError(ident)
-                    del S[0]
-                    for f in xrange(n-1):
-                        flowables.insert(f,S[f])    # put split flowables back on the list
+                    if not isinstance(S[0],(PageBreak,SlowPageBreak,ActionFlowable)):
+                        if self.frame.add(S[0], self.canv, trySplit=0):
+                            self._curPageFlowableCount = self._curPageFlowableCount + 1
+                            self.afterFlowable(S[0])
+                        else:
+                            ident = "Splitting error(n==%d) on page %d in\n%s" % (n,self.page,self._fIdent(f,30,self.frame))
+                            #leave to keep apart from the raise
+                            raise LayoutError(ident)
+                        del S[0]
+                    for i,f in enumerate(S):
+                        flowables.insert(i,f)   # put split flowables back on the list
                 else:
                     if hasattr(f,'_postponed'):
                         ident = "Flowable %s too large on page %d" % (self._fIdent(f,30,self.frame), self.page)

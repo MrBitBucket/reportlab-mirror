@@ -20,16 +20,27 @@ eps_preview_transparent=    None                    #set to white etc
 overlapAttachedSpace=       1                       #if set non false then adajacent flowable space after
                                                     #and space before are merged (max space is used).
 longTableOptimize =         0                       #default don't use Henning von Bargen's long table optimizations
+autoConvertEncoding  =      0                       #convert internally as needed (experimental)
 _FUZZ=                      1e-6                    #fuzz for layout arithmetic
 
 # places to look for T1Font information
 T1SearchPath =  (
+                'c:/Program Files/Adobe/Acrobat 9.0/Resource/Font', 
+                'c:/Program Files/Adobe/Acrobat 8.0/Resource/Font', 
+                'c:/Program Files/Adobe/Acrobat 7.0/Resource/Font', 
                 'c:/Program Files/Adobe/Acrobat 6.0/Resource/Font', #Win32, Acrobat 6
                 'c:/Program Files/Adobe/Acrobat 5.0/Resource/Font',     #Win32, Acrobat 5
                 'c:/Program Files/Adobe/Acrobat 4.0/Resource/Font', #Win32, Acrobat 4
                 '%(disk)s/Applications/Python %(sys_version)s/reportlab/fonts', #Mac?
+                '/usr/lib/Acrobat9/Resource/Font',      #Linux, Acrobat 5?
+                '/usr/lib/Acrobat8/Resource/Font',      #Linux, Acrobat 5?
+                '/usr/lib/Acrobat7/Resource/Font',      #Linux, Acrobat 5?
+                '/usr/lib/Acrobat6/Resource/Font',      #Linux, Acrobat 5?
                 '/usr/lib/Acrobat5/Resource/Font',      #Linux, Acrobat 5?
                 '/usr/lib/Acrobat4/Resource/Font',      #Linux, Acrobat 4
+                '/usr/local/Acrobat9/Resource/Font',    #Linux, Acrobat 5?
+                '/usr/local/Acrobat8/Resource/Font',    #Linux, Acrobat 5?
+                '/usr/local/Acrobat7/Resource/Font',    #Linux, Acrobat 5?
                 '/usr/local/Acrobat6/Resource/Font',    #Linux, Acrobat 5?
                 '/usr/local/Acrobat5/Resource/Font',    #Linux, Acrobat 5?
                 '/usr/local/Acrobat4/Resource/Font',    #Linux, Acrobat 4
@@ -51,13 +62,23 @@ TTFSearchPath = (
                 )
 
 # places to look for CMap files - should ideally merge with above
-CMapSearchPath = ('/usr/lib/Acrobat6/Resource/CMap',
+CMapSearchPath = (
+                  '/usr/lib/Acrobat9/Resource/CMap',
+                  '/usr/lib/Acrobat8/Resource/CMap',
+                  '/usr/lib/Acrobat7/Resource/CMap',
+                  '/usr/lib/Acrobat6/Resource/CMap',
                   '/usr/lib/Acrobat5/Resource/CMap',
                   '/usr/lib/Acrobat4/Resource/CMap',
+                  '/usr/local/Acrobat9/Resource/CMap',
+                  '/usr/local/Acrobat8/Resource/CMap',
+                  '/usr/local/Acrobat7/Resource/CMap',
                   '/usr/local/Acrobat6/Resource/CMap',
                   '/usr/local/Acrobat5/Resource/CMap',
                   '/usr/local/Acrobat4/Resource/CMap',
                   'C:\\Program Files\\Adobe\\Acrobat\\Resource\\CMap',
+                  'C:\\Program Files\\Adobe\\Acrobat 9.0\\Resource\\CMap',
+                  'C:\\Program Files\\Adobe\\Acrobat 8.0\\Resource\\CMap',
+                  'C:\\Program Files\\Adobe\\Acrobat 7.0\\Resource\\CMap',
                   'C:\\Program Files\\Adobe\\Acrobat 6.0\\Resource\\CMap',
                   'C:\\Program Files\\Adobe\\Acrobat 5.0\\Resource\\CMap',
                   'C:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\CMap'

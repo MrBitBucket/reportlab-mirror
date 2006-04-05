@@ -232,6 +232,7 @@ class PDFTextObject(_PDFColorSetter):
         self._fontname = psfontname
         self._fontsize = size
         font = pdfmetrics.getFont(self._fontname)
+
         self._dynamicFont = getattr(font, '_dynamicFont', 0)
         if self._dynamicFont:
             self._curSubset = -1
@@ -250,6 +251,7 @@ class PDFTextObject(_PDFColorSetter):
             leading = size * 1.2
         self._leading = leading
         font = pdfmetrics.getFont(self._fontname)
+
         self._dynamicFont = getattr(font, '_dynamicFont', 0)
         if self._dynamicFont:
             self._curSubset = -1
@@ -303,31 +305,44 @@ class PDFTextObject(_PDFColorSetter):
 
     def _formatText(self, text):
         "Generates PDF text output operator(s)"
+        canv = self._canvas
+        font = pdfmetrics.getFont(self._fontname)
+        R = []
         if self._dynamicFont:
             #it's a truetype font and should be utf8.  If an error is raised,
-            
-            results = []
-            font = pdfmetrics.getFont(self._fontname)
-            try: #assume UTF8
-                stuff = font.splitString(text, self._canvas._doc)
-            except UnicodeDecodeError:
-                #assume latin1 as fallback
-                from reportlab.pdfbase.ttfonts import latin1_to_utf8
-                from reportlab.lib.logger import warnOnce
-                warnOnce('non-utf8 data fed to truetype font, assuming latin-1 data')
-                text = latin1_to_utf8(text)
-                stuff = font.splitString(text, self._canvas._doc)
-            for subset, chunk in stuff:
+            for subset, t in font.splitString(text, canv._doc):
                 if subset != self._curSubset:
-                    pdffontname = font.getSubsetInternalName(subset, self._canvas._doc)
-                    results.append("%s %s Tf %s TL" % (pdffontname, fp_str(self._fontsize), fp_str(self._leading)))
+                    pdffontname = font.getSubsetInternalName(subset, canv._doc)
+                    R.append("%s %s Tf %s TL" % (pdffontname, fp_str(self._fontsize), fp_str(self._leading)))
                     self._curSubset = subset
-                chunk = self._canvas._escape(chunk)
-                results.append("(%s) Tj" % chunk)
-            return string.join(results, ' ')
+                R.append("(%s) Tj" % canv._escape(t))
+        elif font._multiByte:
+            #all the fonts should really work like this - let them know more about PDF...
+            R.append("%s %s Tf %s TL" % (
+                canv._doc.getInternalFontName(font.fontName),
+                fp_str(self._fontsize),
+                fp_str(self._leading)
+                ))
+            R.append("(%s) Tj" % font.formatForPdf(text))
+            
         else:
-            text = self._canvas._escape(text)
-            return "(%s) Tj" % text
+            #convert to T1  coding
+            fc = font
+            if not isinstance(text,unicode):
+                try:
+                    text = text.decode('utf8')
+                except UnicodeDecodeError,e:
+                    i,j = e.args[2:4]
+                    raise UnicodeDecodeError(*(e.args[:4]+('%s\n%s-->%s<--%s' % (e.args[4],text[i-10:i],text[i:j],text[j:j+10]),)))
+
+            for f, t in pdfmetrics.unicode2T1(text,[font]+font.substitutionFonts):
+                if f!=fc:
+                    R.append("%s %s Tf %s TL" % (canv._doc.getInternalFontName(f.fontName), fp_str(self._fontsize), fp_str(self._leading)))
+                    fc = f
+                R.append("(%s) Tj" % canv._escape(t))
+            if font!=fc:
+                R.append("%s %s Tf %s TL" % (canv._doc.getInternalFontName(self._fontname), fp_str(self._fontsize), fp_str(self._leading)))
+        return ' '.join(R)
 
     def _textOut(self, text, TStar=0):
         "prints string at current point, ignores text cursor"
