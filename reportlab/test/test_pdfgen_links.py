@@ -99,19 +99,19 @@ class LinkTestCase(unittest.TestCase):
         c.addOutlineEntry("Page 2","P2")
 
         #Note : This time left will be at 3*inch because the zoom makes the page to big to fit
-        c.bookmarkPage("P2_XYZ",fitType="XYZ",top=7*inch,left=3*inch,zoom=2)
+        c.bookmarkPage("P2_XYZ",fit="XYZ",top=7*inch,left=3*inch,zoom=2)
         c.addOutlineEntry("Page 2 XYZ (top=7,left=3,zoom=2.0)","P2_XYZ",level=1)
 
-        c.bookmarkPage("P2_FIT",fitType="Fit")
+        c.bookmarkPage("P2_FIT",fit="Fit")
         c.addOutlineEntry("Page 2 Fit","P2_FIT",level=1)
 
-        c.bookmarkPage("P2_FITH",fitType="FitH",top=2*inch)
+        c.bookmarkPage("P2_FITH",fit="FitH",top=2*inch)
         c.addOutlineEntry("Page 2 FitH (top = 2 inch)","P2_FITH",level=1)
 
-        c.bookmarkPage("P2_FITV",fitType="FitV",left=10*inch)
+        c.bookmarkPage("P2_FITV",fit="FitV",left=10*inch)
         c.addOutlineEntry("Page 2 FitV (left = 10 inch)","P2_FITV",level=1)
 
-        c.bookmarkPage("P2_FITR",fitType="FitR",left=1*inch,bottom=2*inch,right=5*inch,top=6*inch)
+        c.bookmarkPage("P2_FITR",fit="FitR",left=1*inch,bottom=2*inch,right=5*inch,top=6*inch)
         c.addOutlineEntry("Page 2 FitR (left=1,bottom=2,right=5,top=6)","P2_FITR",level=1)
 
         c.bookmarkPage("P2_FORWARD")
@@ -130,7 +130,7 @@ class LinkTestCase(unittest.TestCase):
         c.setFillColor(colors.green)
         c.drawString(2.5*inch,2.5*inch,"This line is hyperlinked from page 1")
     #    c.bookmarkHorizontalAbsolute("HYPER_1",3*inch) #slightly higher than the text otherwise text is of screen above.
-        c.bookmarkPage("HYPER_1",fitType="XYZ",top=2.5*inch,bottom=2*inch)
+        c.bookmarkPage("HYPER_1",fit="XYZ",top=2.5*inch,bottom=2*inch)
         c.restoreState()
 
         #
@@ -147,11 +147,11 @@ class LinkTestCase(unittest.TestCase):
         c.addOutlineEntry("Page 3 (Double-wide landscape page)","P3")
 
         #Note : XYZ with no zoom (set it to something first
-        c.bookmarkPage("P3_XYZ",fitType="XYZ",top=7*inch,left=3*inch,zoom=0)
+        c.bookmarkPage("P3_XYZ",fit="XYZ",top=7*inch,left=3*inch,zoom=0)
         c.addOutlineEntry("Page 3 XYZ (top=7,left=3,zoom=0)","P3_XYZ",level=1)
 
         #FitV works here because the page is so wide it can"t all fit on the page
-        c.bookmarkPage("P3_FITV",fitType="FitV",left=10*inch)
+        c.bookmarkPage("P3_FITV",fit="FitV",left=10*inch)
         c.addOutlineEntry("Page 3 FitV (left = 10 inch)","P3_FITV",level=1)
 
 
@@ -166,7 +166,7 @@ class LinkTestCase(unittest.TestCase):
         c.setFont("Courier", 40)
         c.setFillColor(colors.green)
         c.drawString(5*inch,6*inch,"42")
-        c.bookmarkPage("MOL",fitType="FitR",left=4*inch,top=7*inch,bottom=4*inch,right=6*inch)
+        c.bookmarkPage("MOL",fit="FitR",left=4*inch,top=7*inch,bottom=4*inch,right=6*inch)
 
 
 
