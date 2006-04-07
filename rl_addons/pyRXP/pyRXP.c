@@ -976,7 +976,7 @@ static pyRXPParserObject* pyRXPParser(PyObject* module, PyObject* args, PyObject
 
 	if(!PyArg_ParseTuple(args, ":Parser")) return NULL;
 	if(!(self = PyObject_NEW(pyRXPParserObject, &pyRXPParserType))) return NULL;
-	self->warnCB = self->eoCB = self->fourth = (void*)self->srcName = NULL;
+	self->warnCB = self->eoCB = self->fourth = self->srcName = NULL;
 	if(!(self->srcName=PyString_FromString("[unknown]"))){
 		PyErr_SetString(moduleError,"Internal error, memory limit reached!");
 Lfree:	pyRXPParserFree(self);
