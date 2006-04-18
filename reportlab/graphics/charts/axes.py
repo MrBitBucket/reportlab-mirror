@@ -487,7 +487,7 @@ class YCategoryAxis(CategoryAxis):
         if not self.visibleTicks: return g
 
         categoryNames = self.categoryNames
-        if not (categoryNames is None):
+        if categoryNames is not None:
             catCount = self._catCount
             n = len(categoryNames)
             reverseDirection = self.reverseDirection
@@ -744,12 +744,14 @@ class ValueAxis(_AxisG):
                         valueMin = T[0]-valueStep
                         go = 1
                     else:
+                        go = valueMin>=T[0]+fuzz
                         valueMin = T[0]
                 if rrx:
                     if valueMax>T[-1]+fuzz:
                         valueMax = T[-1]+valueStep
                         go = 1
                     else:
+                        go = valueMax<=T[-1]-fuzz
                         valueMax = T[-1]
 
         self._valueMin, self._valueMax = valueMin, valueMax
