@@ -288,32 +288,27 @@ class TTFontParser:
 
     def read_tag(self):
         "Read a 4-character tag"
-        self._pos = self._pos + 4
+        self._pos += 4
         return self._ttf_data[self._pos - 4:self._pos]
 
     def read_ushort(self):
         "Reads an unsigned short"
-        self._pos = self._pos + 2
-        return (ord(self._ttf_data[self._pos - 2]) << 8) + \
-               (ord(self._ttf_data[self._pos - 1]))
+        self._pos += 2
+        return unpack('>H',self._ttf_data[self._pos-2:self._pos])[0]
 
     def read_ulong(self):
         "Reads an unsigned long"
-        self._pos = self._pos + 4
+        self._pos += 4
         return unpack('>l',self._ttf_data[self._pos - 4:self._pos])[0]
 
     def read_short(self):
         "Reads a signed short"
-        us = self.read_ushort()
-        if us >= 0x8000:
-            return us - 0x10000
-        else:
-            return us
+        self._pos += 2
+        return unpack('>h',self._ttf_data[self._pos-2:self._pos])[0]
 
     def get_ushort(self, pos):
         "Return an unsigned short at given position"
-        return (ord(self._ttf_data[pos]) << 8) + \
-               (ord(self._ttf_data[pos + 1]))
+        return unpack('>H',self._ttf_data[pos:pos+2])[0]
 
     def get_ulong(self, pos):
         "Return an unsigned long at given position"
@@ -327,7 +322,6 @@ class TTFontParser:
         "Return the given TTF table"
         pos, length = self.get_table_pos(tag)
         return self._ttf_data[pos:pos+length]
-
 
 class TTFontMaker:
     "Basic TTF file generator"
@@ -508,14 +502,14 @@ class TTFontFile(TTFontParser):
             fsType = self.read_ushort()
             if fsType == 0x0002 or (fsType & 0x0300) != 0:
                 raise TTFError, 'Font does not allow subsetting/embedding (%04X)' % fsType
-            self.skip(11*2 + 10 + 4*4 + 4 + 3*2)
+            self.skip(58)   #11*2 + 10 + 4*4 + 4 + 3*2
             sTypoAscender = self.read_short()
             sTypoDescender = self.read_short()
             self.ascent = scale(sTypoAscender)      # XXX: for some reason it needs to be multiplied by 1.24--1.28
             self.descent = scale(sTypoDescender)
 
             if version > 1:
-                self.skip(3*2 + 2*4 + 2)
+                self.skip(16)   #3*2 + 2*4 + 2
                 sCapHeight = self.read_short()
                 self.capHeight = scale(sCapHeight)
             else:
@@ -543,7 +537,7 @@ class TTFontFile(TTFontParser):
             # try to remove this check altogether.
             raise TTFError, 'Unknown post table version %d.%04x' % (ver_maj, ver_min)
         self.italicAngle = self.read_short() + self.read_ushort() / 65536.0
-        self.skip(2*2)
+        self.skip(4)    #2*2
         isFixedPitch = self.read_ulong()
 
         self.flags = FF_SYMBOLIC        # All fonts that contain characters
