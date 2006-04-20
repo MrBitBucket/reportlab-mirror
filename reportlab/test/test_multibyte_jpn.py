@@ -165,11 +165,31 @@ class JapaneseFontTests(unittest.TestCase):
         c.drawString(100,700, 'Japanese TrueType Font Support')
         msg = u'\u6771\u4EAC : Unicode font, utf8 input'.encode('utf8')
         from reportlab.pdfbase.ttfonts import TTFont
-        pdfmetrics.registerFont(TTFont('MS Mincho','msmincho.ttf'))
-        c.setFont('MS Mincho', 30)
-        c.drawString(100,600, msg)
-        
-                                
+        try:
+            msmincho = TTFont('MS Mincho','msmincho.ttc',subfontIndex=0)
+            fn = ' file=msmincho.ttc subfont 0'
+        except:
+            try:
+                msmincho = TTFont('MS Mincho','msmincho.ttf')
+                fn = 'file=msmincho.ttf'
+            except:
+                msmincho = None
+        if msmincho is None:
+            c.drawString(100,600, 'Cannot find msmincho.ttf or msmincho.ttc')
+        else:
+            pdfmetrics.registerFont(msmincho)
+            c.setFont('MS Mincho', 30)
+            c.drawString(100,600, msg+fn)
+            if fn.endswith('0'):
+                try:
+                    msmincho1 = TTFont('MS Mincho 1','msmincho.ttc',subfontIndex=1)
+                    pdfmetrics.registerFont(msmincho1)
+                    fn = ' file=msmincho.ttc subfont 1'
+                    c.setFont('MS Mincho 1',30)
+                    c.drawString(100,500,msg+fn)
+                except:
+                    c.setFont('Helvetica',30)
+                    c.drawString(100,500,msg+fn)
 
         c.showPage()
 

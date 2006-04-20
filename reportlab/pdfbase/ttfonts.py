@@ -202,32 +202,51 @@ def TTFOpenFile(fn):
 
 class TTFontParser:
     "Basic TTF file parser"
+    ttfVersions = (0x00010000,0x74727565,0x74746366)
+    ttcVersions = (0x00010000,0x00020000)
+    fileKind='TTF'
 
-    def __init__(self, file, validate=0):
+    def __init__(self, file, validate=0,subfontIndex=0):
         """Loads and parses a TrueType font file.  file can be a filename or a
         file object.  If validate is set to a false values, skips checksum
         validation.  This can save time, especially if the font is large.
         """
-
-        # Open the file
-        if type(file) is StringType:
-            self.filename, file = TTFOpenFile(file)
+        self.validate = validate
+        self.readFile(file)
+        isCollection = self.readHeader()
+        if isCollection:
+            self.readTTCHeader()
+            self.getSubfont(subfontIndex)
         else:
-            self.filename = '(ttf)'
+            if self.validate: self.checksumFile()
+            self.readTableDirectory()
+            self.subfontNameX = ''
 
-        self._ttf_data = file.read()
-        self._pos = 0
+    def readTTCHeader(self):
+        self.ttcVersion = self.read_ulong()
+        self.fileKind = 'TTC'
+        self.ttfVersions = self.ttfVersions[:-1]
+        if self.ttcVersion not in self.ttcVersions: 
+            raise TTFError('"%s" is not a %s file: can\'t read version 0x%8.8x' %(self.filename,self.fileKind,self.ttcVersion))
+        self.numSubfonts = self.read_ulong()
+        self.subfontOffsets = []
+        a = self.subfontOffsets.append
+        for i in xrange(self.numSubfonts):
+            a(self.read_ulong())
 
-        # Read header
+    def getSubfont(self,subfontIndex):
+        if self.fileKind!='TTC':
+            raise TTFError('"%s" is not a TTC file: use this method' % (self.filename,self.fileKind))
         try:
-            version = self.read_ulong()
-        except:
-            raise TTFError("Not a TrueType font: can't read version")
-        if version == 0x4F54544F:
-            raise TTFError, 'OpenType fonts with PostScript outlines are not supported'
-        if version != 0x00010000 and version != 0x74727565 and version!=0x74746366:
-            raise TTFError('Not a TrueType font: version=0x%8.8X' % version)
+            pos = self.subfontOffsets[subfontIndex]
+        except IndexError:
+            raise TTFError('TTC file "%s": bad subfontIndex %s not in [0,%d]' % (self.filename,subfontIndex,self.numSubfonts-1))
+        self.seek(pos)
+        self.readHeader()
+        self.readTableDirectory()
+        self.subfontNameX = '-'+str(subfontIndex)
 
+    def readTableDirectory(self):
         try:
             self.numTables = self.read_ushort()
             self.searchRange = self.read_ushort()
@@ -246,16 +265,33 @@ class TTFontParser:
                 self.tables.append(record)
                 self.table[record['tag']] = record
         except:
-            raise TTFError, 'Corrupt TrueType font file'
+            raise TTFError('Corrupt %s file "%s" cannot read Table Directory' % (self.fileKind, self.filename))
+        if self.validate: self.checksumTables()
 
-        if not validate:
-            return
+    def readHeader(self):
+        '''read the sfnt header at the current position'''
+        try:
+            self.version = version = self.read_ulong()
+        except:
+            raise TTFError('"%s" is not a %s file: can\'t read version' %(self.filename,self.fileKind))
 
-        # Check the checksums for the whole file
-        checkSum = calcChecksum(self._ttf_data)
-        if add32(_L2U32(0xB1B0AFBAL), -checkSum) != 0:
-            raise TTFError, 'Invalid checksum %s len: %d &3: %d' % (hex32(checkSum),len(self._ttf_data),(len(self._ttf_data)&3))
+        if version==0x4F54544F:
+            raise TTFError('%s file "%s": postscript outlines are not supported'%(self.fileKind,self.filename))
 
+        if version not in self.ttfVersions:
+            raise TTFError('Not a TrueType font: version=0x%8.8X' % version)
+        return version==self.ttfVersions[-1]
+
+    def readFile(self,file):
+        if type(file) is StringType:
+            self.filename, file = TTFOpenFile(file)
+        else:
+            self.filename = '(ttf)'
+
+        self._ttf_data = file.read()
+        self._pos = 0
+
+    def checksumTables(self):
         # Check the checksums for all tables
         for t in self.tables:
             table = self.get_chunk(t['offset'], t['length'])
@@ -264,7 +300,13 @@ class TTFontParser:
                 adjustment = unpack('>l', table[8:8+4])[0]
                 checkSum = add32(checkSum, -adjustment)
             if t['checksum'] != checkSum:
-                raise TTFError, 'Invalid checksum %s table: %s' % (hex32(checkSum),t['tag'])
+                raise TTFError('TTF file "%s": invalid checksum %s table: %s' % (self.filename,hex32(checkSum),t['tag']))
+
+    def checksumFile(self):
+        # Check the checksums for the whole file
+        checkSum = calcChecksum(self._ttf_data)
+        if add32(_L2U32(0xB1B0AFBAL), -checkSum) != 0:
+            raise TTFError('TTF file "%s": invalid checksum %s len: %d &3: %d' % (self.filename,hex32(checkSum),len(self._ttf_data),(len(self._ttf_data)&3)))
 
     def get_table_pos(self, tag):
         "Returns the offset and size of a given TTF table."
@@ -381,14 +423,14 @@ class TTFontMaker:
 class TTFontFile(TTFontParser):
     "TTF file parser and generator"
 
-    def __init__(self, file, charInfo=1, validate=0):
+    def __init__(self, file, charInfo=1, validate=0,subfontIndex=0):
         """Loads and parses a TrueType font file.
 
         file can be a filename or a file object.  If validate is set to a false
         values, skips checksum validation.  This can save time, especially if
         the font is large.  See TTFontFile.extractInfo for more information.
         """
-        TTFontParser.__init__(self, file, validate=validate)
+        TTFontParser.__init__(self, file, validate=validate,subfontIndex=subfontIndex)
         self.extractInfo(charInfo)
 
     def extractInfo(self, charInfo=1):
@@ -867,10 +909,10 @@ class TTFontFace(TTFontFile, pdfmetrics.TypeFace):
     Conceptually similar to a single byte typeface, but the glyphs are
     identified by UCS character codes instead of glyph names."""
 
-    def __init__(self, filename, validate=0):
+    def __init__(self, filename, validate=0, subfontIndex=0):
         "Loads a TrueType font from filename."
         pdfmetrics.TypeFace.__init__(self, None)
-        TTFontFile.__init__(self, filename, validate=validate)
+        TTFontFile.__init__(self, filename, validate=validate, subfontIndex=subfontIndex)
 
     def getCharWidth(self, code):
         "Returns the width of character U+<code>"
@@ -948,14 +990,14 @@ class TTFont:
                 self.assignments[n] = n
             self.nextCode = 128
 
-    def __init__(self, name, filename, validate=0):
+    def __init__(self, name, filename, validate=0, subfontIndex=0):
         """Loads a TrueType font from filename.
 
         If validate is set to a false values, skips checksum validation.  This
         can save time, especially if the font is large.
         """
         self.fontName = name
-        self.face = TTFontFace(filename, validate=validate)
+        self.face = TTFontFace(filename, validate=validate, subfontIndex=subfontIndex)
         self.encoding = TTEncoding()
         self._multiByte = 1     # We want our own stringwidth
         self._dynamicFont = 1   # We want dynamic subsetting
@@ -1035,7 +1077,7 @@ class TTFont:
         for n in xrange(len(state.subsets)):
             subset = state.subsets[n]
             internalName = self.getSubsetInternalName(n, doc)[1:]
-            baseFontName = "%s+%s" % (SUBSETN(n),self.face.name)
+            baseFontName = "%s+%s%s" % (SUBSETN(n),self.face.name,self.face.subfontNameX)
 
             pdfFont = pdfdoc.PDFTrueTypeFont()
             pdfFont.__Comment__ = 'Font %s subset %d' % (self.fontName, n)

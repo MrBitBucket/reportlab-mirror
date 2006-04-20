@@ -1257,17 +1257,10 @@ class Table(Flowable):
 
         if cellstyle.href:
             #external hyperlink
-            #print 'drawing URL %d,%d, %d, %d, %s' % (colpos, rowpos, colwidth, rowheight, cellstyle.href)
             self.canv.linkURL(cellstyle.href, (colpos, rowpos, colpos + colwidth, rowpos + rowheight), relative=1)
         if cellstyle.destination:
             #external hyperlink
-            #print 'drawing destination %d,%d, %d, %d, %s' % (colpos, rowpos, colwidth, rowheight, cellstyle.destination)
             self.canv.linkRect("", cellstyle.destination, Rect=(colpos, rowpos, colpos + colwidth, rowpos + rowheight), relative=1)
-        
-# for text,
-#   drawCentredString(self, x, y, text) where x is center
-#   drawRightString(self, x, y, text) where x is right
-#   drawString(self, x, y, text) where x is left
 
 _LineOpMap = {  'GRID':'_drawGrid',
                 'BOX':'_drawBox',
