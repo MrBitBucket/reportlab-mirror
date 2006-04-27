@@ -978,7 +978,6 @@ class RL_Codecs:
     def __init__(self):
         raise NotImplementedError
 
-    @staticmethod
     def _256_exception_codec((exceptions,rexceptions)):
         import codecs
         decoding_map = codecs.make_identity_dict(xrange(32,256))
@@ -1000,10 +999,10 @@ class RL_Codecs:
             pass
         C = Codec()
         return (C.encode,C.decode,StreamReader,StreamWriter)
+    _256_exception_codec=staticmethod(_256_exception_codec)
 
     __rl_codecs_cache = {}
 
-    @staticmethod
     def __rl_codecs(name,cache=__rl_codecs_cache,data=__rl_codecs_data):
         try:
             return cache[name]
@@ -1011,8 +1010,8 @@ class RL_Codecs:
             cache[name] = c = RL_Codecs._256_exception_codec(
                 data[name])
         return c
+    __rl_codecs=staticmethod(__rl_codecs)
 
-    @staticmethod
     def _rl_codecs(name):
         name = name.lower()
         from pdfmetrics import standardEncodings
@@ -1020,8 +1019,9 @@ class RL_Codecs:
             e = e[:-8].lower()
             if name.startswith(e): return RL_Codecs.__rl_codecs(e)
         return None
+    _rl_codecs=staticmethod(_rl_codecs)
 
-    @staticmethod
     def register():
         import codecs
         codecs.register(RL_Codecs._rl_codecs)
+    register=staticmethod(register)
