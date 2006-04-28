@@ -282,9 +282,29 @@ class ParaFrag(ABag):
     fontname, fontSize, rise, textColor, cbDefn
     """
 
+
+_greek2Utf8=None
+def _greekConvert(data):
+    global _greek2Utf8
+    if not _greek2Utf8:
+        from reportlab.pdfbase.rl_codecs import RL_Codecs
+        import codecs
+        dm = decoding_map = codecs.make_identity_dict(xrange(32,256))
+        for k in xrange(0,32):
+            dm[k] = None
+        dm.update(RL_Codecs._RL_Codecs__rl_codecs_data['symbol'][0])
+        _greek2Utf8 = {}
+        for k,v in dm.iteritems():
+            if not v:
+                u = '\0'
+            else:
+                u = unichr(v).encode('utf8')
+            _greek2Utf8[chr(k)] = u
+    return ''.join(map(_greek2Utf8.__getitem__,data))
+
 #------------------------------------------------------------------
 # !!! NOTE !!! THIS TEXT IS NOW REPLICATED IN PARAGRAPH.PY !!!
-# The ParaFormatter will be able to format the following xml
+# The ParaFormatter will be able to format the following
 # tags:
 #       < /b > - bold
 #       < /i > - italics
@@ -295,6 +315,9 @@ class ParaFrag(ABag):
 #       <font name=fontfamily/fontname color=colorname size=float>
 #       < bullet > </bullet> - bullet text (at head of para only)
 #       <onDraw name=callable label="a label">
+#       <unichar name="unicode character name"/>
+#       <unichar value="unicode code point"/>
+#       <greek> - </greek>
 #
 #       The whole may be surrounded by <para> </para> tags
 #
@@ -410,11 +433,39 @@ class ParaParser(xmllib.XMLParser):
         if message[:10]=="attribute " and message[-17:]==" value not quoted": return
         self.errors.append(message)
 
-    def start_greek(self, attributes):
+    def start_greek(self, attr):
         self._push(greek=1)
 
     def end_greek(self):
         self._pop(greek=1)
+
+    def start_unichar(self, attr):
+        if attr.has_key('name'):
+            if attr.has_key('code'):
+                self._syntax_error('<unichar/> invalid with both name and code attributes')
+            try:
+                v = unicodedata.lookup(attr['name']).encode('utf8')
+            except KeyError:
+                self._syntax_error('<unichar/> invalid name attribute\n"%s"' % name)
+                v = '\0'
+        elif attr.has_key('code'):
+            try:
+                v = unichr(int(eval(attr['code']))).encode('utf8')
+            except:
+                self._syntax_error('<unichar/> invalid code attribute %s' % attr['code'])
+                v = '\0'
+        else:
+            v = None
+            if attr: 
+                self._syntax_error('<unichar/> invalid attribute %s' % attr.keys()[0])
+
+
+        if v is not None:
+            self.handle_data(v)
+        self._push()
+
+    def end_unichar(self):
+        self._pop()
 
     def start_font(self,attr):
         self._push(**self.getAttributes(attr,_fontAttrMap))
@@ -606,6 +657,9 @@ class ParaParser(xmllib.XMLParser):
         frag = copy.copy(self._stack[-1])
         if hasattr(frag,'cbDefn'):
             if data!='': syntax_error('Only <onDraw> tag allowed')
+        elif hasattr(frag,'_selfClosingTag'):
+            if data!='': syntax_error('No content allowed in %s tag' % frag._selfClosingTag)
+            return
         else:
             # if sub and super are both on they will cancel each other out
             if frag.sub == 1 and frag.super == 1:
@@ -619,7 +673,9 @@ class ParaParser(xmllib.XMLParser):
                 frag.rise = frag.fontSize*superFraction
                 frag.fontSize = max(frag.fontSize-sizeDelta,3)
 
-            if frag.greek: frag.fontName = 'symbol'
+            if frag.greek:
+                frag.fontName = 'symbol'
+                data = _greekConvert(data)
 
         # bold, italic, and underline
         x = frag.fontName = tt2ps(frag.fontName,frag.bold,frag.italic)
@@ -737,7 +793,7 @@ if __name__=='__main__':
     style.bulletFontSize=12
 
     text='''
-    <b><i><greek>a</greek>D</i></b>&beta;
+    <b><i><greek>a</greek>D</i></b>&beta;<unichr value="0x394"/>
     <font name="helvetica" size="15" color=green>
     Tell me, O muse, of that ingenious hero who travelled far and wide
     after</font> he had sacked the famous town of Troy. Many cities did he visit,

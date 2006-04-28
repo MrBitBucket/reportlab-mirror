@@ -130,7 +130,8 @@ If you look at the "minimal" euro python conference brochure, at the end of the
 timetable section (page 8), there are adverts for "AdSu" and "O'Reilly". I can
 see how the AdSu one might be done generically, but the O'Reilly, unsure...
 I guess I'm hoping that I've missed something, and that
-it's actually easy to do using platypus.
+it's actually easy to do using platypus.We can do greek letters <greek>mDngG</greek>. This should be a
+u with a dieresis on top "<unichar code=0xfc/>" and this "&#xfc;".
 '''
         from reportlab.platypus.flowables import ImageAndFlowables, Image
         from reportlab.lib.utils import _RL_DIR
