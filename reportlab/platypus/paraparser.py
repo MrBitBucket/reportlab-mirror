@@ -147,6 +147,8 @@ def _applyAttributes(obj, attr):
 #with additions suggested by Christoph Zwerschke who also suggested the
 #numeric entity names that follow.
 greeks = {
+    'pound': '\xc2\xa3',
+    'nbsp': '\xc2\xa0',
     'alefsym': '\xe2\x84\xb5',
     'Alpha': '\xce\x91',
     'alpha': '\xce\xb1',
@@ -459,10 +461,9 @@ class ParaParser(xmllib.XMLParser):
             if attr: 
                 self._syntax_error('<unichar/> invalid attribute %s' % attr.keys()[0])
 
-
         if v is not None:
             self.handle_data(v)
-        self._push()
+        self._push(_selfClosingTag='unichar')
 
     def end_unichar(self):
         self._pop()
