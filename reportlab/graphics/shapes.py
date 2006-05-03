@@ -658,6 +658,8 @@ class Drawing(Group, Flowable):
             outDir, fnRoot = os.path.split(fnRoot)
         else:
             outDir = outDir or getattr(self,'outDir','.')
+        outDir = outDir.rstrip().rstrip(os.sep)
+        if not outDir: outDir = '.'
         if not os.path.isabs(outDir): outDir = os.path.join(getattr(self,'_override_CWD',os.path.dirname(sys.argv[0])),outDir)
         if not os.path.isdir(outDir): os.makedirs(outDir)
         fnroot = os.path.normpath(os.path.join(outDir,fnRoot))
