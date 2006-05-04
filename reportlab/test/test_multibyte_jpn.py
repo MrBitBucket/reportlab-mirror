@@ -340,7 +340,7 @@ Adobe Acrobat 5.0\x82\xc5\x8d\xec\x90\xac\x82\xb5\x82\xbdAdobe PDF\x82\xcd\x81A(
         from reportlab.platypus import Paragraph
         from reportlab.lib.styles import ParagraphStyle
         jsty = ParagraphStyle('japanese',fontName='HeiseiMin-W3', wordWrap='CJK')
-        jpara = Paragraph(sample2_utf8, style=jsty)
+        jpara = Paragraph(oneline_uni, style=jsty)
 
         c.drawString(100, 710, 'Try to wrap a paragraph using a style with wordWrap="CJK"')
         w, h = jpara.wrap(400,400)

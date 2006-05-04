@@ -277,11 +277,11 @@ LIST_STYLE = TableStyle(
     """, styleSheet['BodyText']))
 
 
-    t = Table([['Corporate Assets','Amount'],
+    t = Table([[u'Corporate Assets','Amount'],
                ['Fixed Assets','1,234,567.89'],
                ['Company Vehicle','1,234.8901'],
                ['Petty Cash','42'],
-               ['Intellectual Property','(42,078,231.56)'],
+               [u'Intellectual Property\u00ae','(42,078,231.56)'],
                ['Overdraft','(12,345)'],
                ['Boardroom Flat Screen','60 inches'],
                ['Net Position','Deep Sh*t.Really']

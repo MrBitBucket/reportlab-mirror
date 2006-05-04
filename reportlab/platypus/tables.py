@@ -238,7 +238,8 @@ class Table(Flowable):
                 raise ValueError, '%s bad emptyTableAction: "%s"' % (self.identity(),emptyTableAction)
             return
 
-        self._cellvalues = data
+        # we need a cleanup pass to ensure data is strings - non-unicode and non-null
+        self._cellvalues = self.normalizeData(data)
         if not _seqCW: colWidths = ncols*[colWidths]
         elif len(colWidths) != ncols:
             raise ValueError, "%s data error - %d columns in data but %d in grid" % (self.identity(),ncols, len(colWidths))
@@ -276,6 +277,29 @@ class Table(Flowable):
         cv = pprint.pformat(cv)
         cv = string.replace(cv, "\n", "\n  ")
         return "%s(\n rowHeights=%s,\n colWidths=%s,\n%s\n) # end table" % (self.__class__.__name__,r,c,cv)
+
+    def normalizeData(self, data):
+        """Takes a block of input data (list of lists etc.) and
+        - coerces to non-unicode UTF8
+        - accepts nulls
+        
+        """
+        def normCell(stuff):
+            if stuff is None:
+                return ''
+            elif type(stuff) == type(u''):
+                return stuff.encode('utf8')
+            else:
+                return stuff
+        outData = []
+        for row in data:
+            outRow = [normCell(cell) for cell in row]
+            outData.append(outRow)
+        from pprint import pprint as pp
+        #pp(outData)
+        return outData
+
+
 
     def identity(self, maxLen=30):
         '''Identify our selves as well as possible'''
