@@ -10,15 +10,61 @@ from reportlab.test import unittest
 
 # Helper functions.
 
+
+_TEST_DIR_IS_WRITABLE = None  #not known yet
+def canWriteTestOutputHere():
+    """Is it a writable file system distro being invoked within
+    test directory?  If so, can write test output here.  If not,
+    it had better go in a temp directory.  Only do this once per
+    process"""
+
+    global _TEST_DIR_IS_WRITABLE
+    if _TEST_DIR_IS_WRITABLE is not None:
+        return _TEST_DIR_IS_WRITABLE
+    
+    from reportlab.lib.utils import isSourceDistro
+    if isSourceDistro():
+        curDir = os.getcwd()
+        parentDir = os.path.dirname(curDir)
+        if curDir.endswith('test') and parentDir.endswith('reportlab'):
+            #we're probably being run within the test directory.
+            #now check it's writeable.
+            writable = False
+            try:
+                fn = '00DELETE.ME'
+                open(fn, 'w').write('test of writability - can be deleted')
+                if os.path.isfile(fn):
+                    writable = True
+                    os.remove(fn)
+            except:
+                pass                
+            if writable:
+                _TEST_DIR_IS_WRITABLE = True
+
+    return _TEST_DIR_IS_WRITABLE
+                
+    
+
+
 def outputfile(fn):
-    from reportlab.lib.utils import get_rl_tempdir
-    D = get_rl_tempdir('reportlab_test')
-    if fn: D = os.path.join(D,fn)
-    return D
+    """This works out where to write test output.  If running
+    code in a zip file or a locked down file system, this will be a
+    temp directory; otherwise, the output of 'test_foo.py' will
+    normally be a file called 'test_foo.pdf', next door.
+    """
+    if canWriteTestOutputHere():
+        return fn
+    else:
+        from reportlab.lib.utils import isSourceDistro, get_rl_tempdir
+        D = get_rl_tempdir('reportlab_test')
+        if fn: D = os.path.join(D,fn)
+        return D
 
 def printLocation(depth=1):
     if sys._getframe(depth).f_locals.get('__name__')=='__main__':
-        print 'Logs and output files written to folder "%s"' % outputfile('')
+        outDir = outputfile('')
+        if outDir <> '':
+            print 'Logs and output files written to folder "%s"' % outDir
 
 def makeSuiteForClasses(*classes):
     "Return a test suite with tests loaded from provided classes."

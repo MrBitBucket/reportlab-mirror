@@ -280,8 +280,9 @@ class Table(Flowable):
 
     def normalizeData(self, data):
         """Takes a block of input data (list of lists etc.) and
-        - coerces to non-unicode UTF8
-        - accepts nulls
+        - coerces unicode strings to non-unicode UTF8
+        - coerces nulls to ''
+        - 
         
         """
         def normCell(stuff):
