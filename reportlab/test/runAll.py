@@ -38,7 +38,8 @@ def main(pattern='test_*.py'):
     from reportlab.lib.utils import isSourceDistro
     haveSRC = isSourceDistro()
 
-    def cleanup(folder,patterns=('*.pdf', '*.log','*.svg','runAll.txt', 'test_*.txt')):
+    def cleanup(folder,patterns=('*.pdf', '*.log','*.svg','runAll.txt', 'test_*.txt','_i_am_actually_a_*.*')):
+        if not folder: return
         for pat in patterns:
             for filename in GlobDirectoryWalker(folder, pattern=pat):
                 try:
@@ -51,16 +52,18 @@ def main(pattern='test_*.py'):
     # want this if reusing runAll anywhere else.
     if string.find(folder, 'reportlab' + os.sep + 'test') > -1: cleanup(folder)
     cleanup(outputfile(''))
-
     NI = []
-    testSuite = makeSuite(folder,nonImportable=NI,pattern=pattern+(not haveSRC and 'c' or ''))
-    unittest.TextTestRunner().run(testSuite)
+    cleanOnly = '--clean' in sys.argv
+    if not cleanOnly:
+        testSuite = makeSuite(folder,nonImportable=NI,pattern=pattern+(not haveSRC and 'c' or ''))
+        unittest.TextTestRunner().run(testSuite)
     if haveSRC: cleanup(folder,patterns=('*.pyc','*.pyo'))
-    if NI:
-        sys.stderr.write('\n###################### the following tests could not be imported\n')
-        for f,tb in NI:
-            print 'file: "%s"\n%s\n' % (f,string.join(tb,''))
-    printLocation()
+    if not cleanOnly:
+        if NI:
+            sys.stderr.write('\n###################### the following tests could not be imported\n')
+            for f,tb in NI:
+                print 'file: "%s"\n%s\n' % (f,string.join(tb,''))
+        printLocation()
 
 if __name__ == '__main__': #noruntests
     main()

@@ -713,13 +713,13 @@ cost to performance.""")
     if haveImages:
         import shutil
         c.drawString(1*inch, 10.25*inch, 'This jpeg is actually a gif')
-        jpg = outputfile(os.path.basename(gif.replace('gif','jpg')))
+        jpg = outputfile('_i_am_actually_a_gif.jpg')
         shutil.copyfile(gif,jpg)
         c.drawImage(jpg, 1*inch, 9.25*inch, w, h, mask='auto')
         tjpg = os.path.join(os.path.dirname(os.path.dirname(gif)),'docs','images','lj8100.jpg')
         if os.path.isfile(tjpg):
             c.drawString(4*inch, 10.25*inch, 'This gif is actually a jpeg')
-            tgif = outputfile(os.path.basename(gif.replace('jpg','gif')))
+            tgif = outputfile(os.path.basename('_i_am_actually_a_jpeg.gif'))
             shutil.copyfile(tjpg,tgif)
             c.drawImage(tgif, 4*inch, 9.25*inch, w, h, mask='auto')
         c.showPage()

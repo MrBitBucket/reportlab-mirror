@@ -165,8 +165,6 @@ class Frame:
         s = 0
         if not self._atTop: s = flowable.getSpaceBefore()
         flowable.canv = canv    #some flowables might need this
-
-        #print 'asked table to split.  _aW = %0.2f, y-p-s=%0.2f' % (self._aW, y-p-s)
         r = flowable.split(self._aW, y-p-s)
         del flowable.canv
         return r

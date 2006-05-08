@@ -145,7 +145,7 @@ def _putFragLine(tx,words):
                     spacelen = tx._canvas.stringWidth(' ', tx._fontname, tx._fontsize)
                     xtraState.links.append( (xtraState.link_x, cur_x-spacelen, xtraState.link) )
                     xtraState.link = None
-            cur_x = cur_x + txtlen
+            cur_x += txtlen
     if xtraState.underline:
         xtraState.underlines.append( (xtraState.underline_x, cur_x, xtraState.underlineColor) )
     if xtraState.link:
@@ -224,7 +224,7 @@ def _getFragWords(frags):
 
             for w in S[:-1]:
                 W.append((f,w))
-                n = n + stringWidth(w, f.fontName, f.fontSize)
+                n += stringWidth(w, f.fontName, f.fontSize)
                 W.insert(0,n)
                 R.append(W)
                 W = []
@@ -232,7 +232,7 @@ def _getFragWords(frags):
 
             w = S[-1]
             W.append((f,w))
-            n = n + stringWidth(w, f.fontName, f.fontSize)
+            n += stringWidth(w, f.fontName, f.fontSize)
             if text[-1] in whitespace:
                 W.insert(0,n)
                 R.append(W)
@@ -268,7 +268,7 @@ def _split_blParaHard(blPara,start,stop):
             i = len(f)-1
             while hasattr(f[i],'cbDefn'): i = i-1
             g = f[i]
-            if g.text and g.text[-1]!=' ': g.text = g.text+' '
+            if g.text and g.text[-1]!=' ': g.text += ' '
     return f
 
 def _drawBullet(canvas, offset, cur_y, bulletText, style):
@@ -328,9 +328,9 @@ def splitLines0(frags,widths):
     while 1:
         #find a non whitespace character
         while i<l:
-            while start<lim and text[start]==' ': start=start+1
+            while start<lim and text[start]==' ': start += 1
             if start==lim:
-                i = i + 1
+                i += 1
                 if i==l: break
                 start = 0
                 f = frags[i]
@@ -350,7 +350,7 @@ def splitLines0(frags,widths):
             j = find(text,' ',start)
             if j<0: j==lim
             w = stringWidth(text[start:j],f.fontName,f.fontSize)
-            cLen = cLen + w
+            cLen += w
             if cLen>maxW and line!=[]:
                 cLen = cLen-w
                 #this is the end of the line
@@ -364,7 +364,7 @@ def splitLines0(frags,widths):
                 g = (f,start,j)
                 line.append(g)
             if j==lim:
-                i=i+1
+                i += 1
 
 def _do_under_line(i, t_off, tx):
     y = tx.XtraState.cur_y - i*tx.XtraState.style.leading - tx.XtraState.f.fontSize/8.0 # 8.0 factor copied from para.py
@@ -548,7 +548,7 @@ class Paragraph(Flowable):
                         1) unused width in points
                         2) word list
 
-        B) When there is more than one input formatting fragment the out put is
+        B) When there is more than one input formatting fragment the output is
             A fragment specifier with
                 kind = 1
                 lines=  A list of fragments each having fields
@@ -601,7 +601,7 @@ class Paragraph(Flowable):
                     lines.append((maxWidth - currentWidth, cLine))
                     cLine = [word]
                     currentWidth = wordWidth
-                    lineno = lineno + 1
+                    lineno += 1
                     try:
                         maxWidth = maxWidths[lineno]
                     except IndexError:
@@ -639,7 +639,7 @@ class Paragraph(Flowable):
                     newWidth = currentWidth
                 if newWidth<=maxWidth or n==0:
                     # fit one more on this line
-                    n = n + 1
+                    n += 1
                     maxSize = max(maxSize,f.fontSize)
                     nText = w[1][1]
                     if words==[]:
@@ -651,16 +651,16 @@ class Paragraph(Flowable):
                             if hasattr(g,'cbDefn'):
                                 i = len(words)-1
                                 while hasattr(words[i],'cbDefn'): i = i-1
-                                words[i].text = words[i].text + ' '
+                                words[i].text += ' '
                             else:
-                                g.text = g.text + ' '
-                            nSp = nSp + 1
+                                g.text += ' '
+                            nSp += 1
                         g = f.clone()
                         words.append(g)
                         g.text = nText
                     else:
                         if nText!='' and nText[0]!=' ':
-                            g.text = g.text + ' ' + nText
+                            g.text += ' ' + nText
 
                     for i in w[2:]:
                         g = i[0].clone()
@@ -676,7 +676,7 @@ class Paragraph(Flowable):
                                         words=words, fontSize=maxSize))
 
                     #start new line
-                    lineno = lineno + 1
+                    lineno += 1
                     try:
                         maxWidth = maxWidths[lineno]
                     except IndexError:
@@ -708,8 +708,18 @@ class Paragraph(Flowable):
         """Initially, the dumbest possible wrapping algorithm.
         Cannot handle font variations."""
 
-
-        if type(width) <> ListType: maxWidths = [width]
+        #for now we only handle one fragment.  Need to generalize this quickly.
+        if len(self.frags) > 1:
+            raise ValueError('CJK Wordwrap can only handle one fragment per paragraph for now')
+        elif len(self.frags) == 0:
+            return ParaLines(kind=0, fontSize=style.fontSize, fontName=style.fontName,
+                            textColor=style.textColor, lines=[])
+        f = self.frags[0]
+        if 1 and hasattr(self,'blPara') and getattr(self,'_splitpara',0):
+            #NB this is an utter hack that awaits the proper information
+            #preserving splitting algorithm
+            return f.clone(kind=0, lines=self.blPara.lines)
+        if type(width)!=ListType: maxWidths = [width]
         else: maxWidths = width
         lines = []
         lineno = 0
@@ -723,12 +733,6 @@ class Paragraph(Flowable):
 
         self.height = 0
 
-        #for now we only handle one fragment.  Need to generalize this quickly.
-        if len(self.frags) > 1:
-            raise ValueError('CJK Wordwrap can only handle one fragment per paragraph for now')
-        elif len(self.frags) == 0:
-            return ParaLines(kind=0, fontSize=style.fontSize, fontName=style.fontName,
-                            textColor=style.textColor, lines=[])
 
         f = self.frags[0]
 
@@ -958,12 +962,12 @@ if __name__=='__main__':    #NORUNTESTS
         l = 0
         cum = 0
         for W in _getFragWords(frags):
-            cum = cum + W[0]
+            cum += W[0]
             print "fragword%d: cum=%3d size=%d" % (l, cum, W[0]),
             for w in W[1:]:
                 print "'%s'" % w[1],
             print
-            l = l + 1
+            l += 1
 
 
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle

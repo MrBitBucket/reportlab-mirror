@@ -1,50 +1,54 @@
 """Utilities for testing Python packages.
 """
-
-
 import sys, os, string, fnmatch, copy, re
 from ConfigParser import ConfigParser
-
 from reportlab.test import unittest
 
-
 # Helper functions.
-
+def isWritable(D):
+    try:
+        fn = '00DELETE.ME'
+        f = open(fn, 'w')
+        f.write('test of writability - can be deleted')
+        f.close()
+        if os.path.isfile(fn):
+            os.remove(fn)
+            return 1
+    except:
+        return 0
 
 _TEST_DIR_IS_WRITABLE = None  #not known yet
+_OUTDIR = None
 def canWriteTestOutputHere():
     """Is it a writable file system distro being invoked within
     test directory?  If so, can write test output here.  If not,
     it had better go in a temp directory.  Only do this once per
     process"""
 
-    global _TEST_DIR_IS_WRITABLE
+    global _TEST_DIR_IS_WRITABLE, _OUTDIR
     if _TEST_DIR_IS_WRITABLE is not None:
         return _TEST_DIR_IS_WRITABLE
-    
-    from reportlab.lib.utils import isSourceDistro
-    if isSourceDistro():
-        curDir = os.getcwd()
-        parentDir = os.path.dirname(curDir)
-        if curDir.endswith('test') and parentDir.endswith('reportlab'):
-            #we're probably being run within the test directory.
-            #now check it's writeable.
-            writable = False
-            try:
-                fn = '00DELETE.ME'
-                open(fn, 'w').write('test of writability - can be deleted')
-                if os.path.isfile(fn):
-                    writable = True
-                    os.remove(fn)
-            except:
-                pass                
-            if writable:
-                _TEST_DIR_IS_WRITABLE = True
 
+    D = [d[9:] for d in sys.argv if d.startswith('--outdir=')]
+    if D:
+        _OUTDIR = D[-1]
+        try:
+            os.makedirs(_OUTDIR)
+        except:
+            pass
+        map(sys.argv.remove,D)
+        _TEST_DIR_IS_WRITABLE = isWritable(_OUTDIR)
+    else:
+        from reportlab.lib.utils import isSourceDistro
+        if isSourceDistro():
+            curDir = os.getcwd()
+            parentDir = os.path.dirname(curDir)
+            if curDir.endswith('test') and parentDir.endswith('reportlab'):
+                #we're probably being run within the test directory.
+                #now check it's writeable.
+                _TEST_DIR_IS_WRITABLE = isWritable(curDir)
+                _OUTDIR = curDir
     return _TEST_DIR_IS_WRITABLE
-                
-    
-
 
 def outputfile(fn):
     """This works out where to write test output.  If running
@@ -53,17 +57,17 @@ def outputfile(fn):
     normally be a file called 'test_foo.pdf', next door.
     """
     if canWriteTestOutputHere():
-        return fn
+        D = _OUTDIR
     else:
         from reportlab.lib.utils import isSourceDistro, get_rl_tempdir
         D = get_rl_tempdir('reportlab_test')
-        if fn: D = os.path.join(D,fn)
-        return D
+    if fn: D = os.path.join(D,fn)
+    return D
 
 def printLocation(depth=1):
     if sys._getframe(depth).f_locals.get('__name__')=='__main__':
         outDir = outputfile('')
-        if outDir <> '':
+        if outDir!=_OUTDIR:
             print 'Logs and output files written to folder "%s"' % outDir
 
 def makeSuiteForClasses(*classes):
@@ -73,9 +77,7 @@ def makeSuiteForClasses(*classes):
     loader = unittest.TestLoader()
     for C in classes:
         suite.addTest(loader.loadTestsFromTestCase(C))
-
     return suite
-
 
 def getCVSEntries(folder, files=1, folders=0):
     """Returns a list of filenames as listed in the CVS/Entries file.
@@ -108,7 +110,6 @@ def getCVSEntries(folder, files=1, folders=0):
 
 
 # Still experimental class extending ConfigParser's behaviour.
-
 class ExtConfigParser(ConfigParser):
     "A slightly extended version to return lists of strings."
 

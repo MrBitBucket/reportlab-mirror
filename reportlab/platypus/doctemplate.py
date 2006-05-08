@@ -393,7 +393,7 @@ class BaseDocTemplate:
     def handle_pageBegin(self):
         '''Perform actions required at beginning of page.
         shouldn't normally be called directly'''
-        self.page = self.page + 1
+        self.page += 1
         if self._debug: logger.debug("beginning page %d" % self.page)
         self.pageTemplate.beforeDrawPage(self.canv,self)
         self.pageTemplate.checkPageSize(self.canv,self)
@@ -415,7 +415,7 @@ class BaseDocTemplate:
         '''
         #detect infinite loops...
         if self._curPageFlowableCount == 0:
-            self._emptyPages = self._emptyPages + 1
+            self._emptyPages += 1
         else:
             self._emptyPages = 0
         if self._emptyPages >= self._emptyPagesAllowed:
@@ -615,7 +615,7 @@ class BaseDocTemplate:
         else:
             #try to fit it then draw it
             if self.frame.add(f, self.canv, trySplit=self.allowSplitting):
-                self._curPageFlowableCount = self._curPageFlowableCount + 1
+                self._curPageFlowableCount += 1
                 self.afterFlowable(f)
             else:
                 if self.allowSplitting:
@@ -627,7 +627,7 @@ class BaseDocTemplate:
                 if n:
                     if not isinstance(S[0],(PageBreak,SlowPageBreak,ActionFlowable)):
                         if self.frame.add(S[0], self.canv, trySplit=0):
-                            self._curPageFlowableCount = self._curPageFlowableCount + 1
+                            self._curPageFlowableCount += 1
                             self.afterFlowable(S[0])
                         else:
                             ident = "Splitting error(n==%d) on page %d in\n%s" % (n,self.page,self._fIdent(f,30,self.frame))
@@ -706,7 +706,7 @@ class BaseDocTemplate:
                     exc = sys.exc_info()[1]
                     args = list(exc.args)
                     tr = first._traceInfo
-                    args[0] = args[0] + '\n(srcFile %s, line %d char %d to line %d char %d)' % (
+                    args[0] += '\n(srcFile %s, line %d char %d to line %d char %d)' % (
                         tr.srcFile,
                         tr.startLineNo,
                         tr.startLinePos,
@@ -758,7 +758,7 @@ class BaseDocTemplate:
         self._doSave = 0
         passes = 0
         while 1:
-            passes = passes + 1
+            passes += 1
             if self._onProgress:
                 self._onProgress('PASS', passes)
             if verbose: print 'building pass '+str(passes) + '...',
