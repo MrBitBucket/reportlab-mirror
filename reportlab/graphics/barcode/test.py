@@ -2,11 +2,11 @@
 
 import os, sys, time
 
-from rlextra.graphics.barcode.common import *
-from rlextra.graphics.barcode.code39 import *
-from rlextra.graphics.barcode.code93 import *
-from rlextra.graphics.barcode.code128 import *
-from rlextra.graphics.barcode.usps import *
+from reportlab.graphics.barcode.common import *
+from reportlab.graphics.barcode.code39 import *
+from reportlab.graphics.barcode.code93 import *
+from reportlab.graphics.barcode.code128 import *
+from reportlab.graphics.barcode.usps import *
 
 
 from reportlab.test import unittest
@@ -22,7 +22,7 @@ from reportlab.platypus.frames import Frame
 from reportlab.platypus.flowables import XBox, KeepTogether
 from reportlab.graphics.shapes import Drawing
 
-from rlextra.graphics.barcode import getCodes, getCodeNames, createBarcodeDrawing
+from reportlab.graphics.barcode import getCodes, getCodeNames, createBarcodeDrawing
 def run():
     styles = getSampleStyleSheet()
     styleN = styles['Normal']
@@ -56,7 +56,7 @@ def run():
     story.append(Paragraph('USPS POSTNET', styleN))
     story.append(POSTNET('78247-1043'))
 
-    from rlextra.graphics.barcode import createBarcodeDrawing
+    from reportlab.graphics.barcode import createBarcodeDrawing
     story.append(Paragraph('EAN13', styleN))
     bcd = createBarcodeDrawing('EAN13', value='123456789012')
     story.append(bcd)

@@ -29,7 +29,7 @@ from reportlab.graphics.shapes import Drawing
 d= Drawing(100,50)
 
 #create and set up the widget
-from rlextra.graphics.barcode.widgets import BarcodeStandard93
+from reportlab.graphics.barcode.widgets import BarcodeStandard93
 bc = BarcodeStandard93()
 bc.value = 'RGB-123456'
 
@@ -140,7 +140,7 @@ class BarcodeI2of5(_BarcodeWidget):
     _bcTransMap = {}
 
     def __init__(self,**kw):
-        from rlextra.graphics.barcode.common import I2of5
+        from reportlab.graphics.barcode.common import I2of5
         _BarcodeWidget.__init__(self,I2of5,1234,**kw)
 
 class BarcodeCode128(BarcodeI2of5):
@@ -152,7 +152,7 @@ class BarcodeCode128(BarcodeI2of5):
     codeName = "Code128"
     _attrMap = AttrMap(BASE=BarcodeI2of5,UNWANTED=('bearers','checksum','ratio','checksum','stop'))
     def __init__(self,**kw):
-        from rlextra.graphics.barcode.code128 import Code128
+        from reportlab.graphics.barcode.code128 import Code128
         _BarcodeWidget.__init__(self,Code128,"AB-12345678",**kw)
 
 class BarcodeStandard93(BarcodeCode128):
@@ -162,14 +162,14 @@ class BarcodeStandard93(BarcodeCode128):
         stop = AttrMapValue(isBoolean, desc='if we use start/stop symbols (default 1)'),
         )
     def __init__(self,**kw):
-        from rlextra.graphics.barcode.code93 import Standard93
+        from reportlab.graphics.barcode.code93 import Standard93
         _BarcodeWidget.__init__(self,Standard93,"CODE 93",**kw)
 
 class BarcodeExtended93(BarcodeStandard93):
     """This is a compressed form of Code 39, allowing the full ASCII charset"""
     codeName = "Extended93"
     def __init__(self,**kw):
-        from rlextra.graphics.barcode.code93 import Extended93
+        from reportlab.graphics.barcode.code93 import Extended93
         _BarcodeWidget.__init__(self,Extended93,"L@@K! Code 93 ;-)",**kw)
 
 class BarcodeStandard39(BarcodeI2of5):
@@ -179,7 +179,7 @@ class BarcodeStandard39(BarcodeI2of5):
 
     codeName = "Standard39"
     def __init__(self,**kw):
-        from rlextra.graphics.barcode.code39 import Standard39
+        from reportlab.graphics.barcode.code39 import Standard39
         _BarcodeWidget.__init__(self,Standard39,"A012345B%R",**kw)
 
 class BarcodeExtended39(BarcodeI2of5):
@@ -189,7 +189,7 @@ class BarcodeExtended39(BarcodeI2of5):
 
     codeName = "Extended39"
     def __init__(self,**kw):
-        from rlextra.graphics.barcode.code39 import Extended39
+        from reportlab.graphics.barcode.code39 import Extended39
         _BarcodeWidget.__init__(self,Extended39,"A012345B}",**kw)
 
 class BarcodeMSI(BarcodeI2of5):
@@ -200,7 +200,7 @@ class BarcodeMSI(BarcodeI2of5):
     """
     codeName = "MSI"
     def __init__(self,**kw):
-        from rlextra.graphics.barcode.common import MSI
+        from reportlab.graphics.barcode.common import MSI
         _BarcodeWidget.__init__(self,MSI,1234,**kw)
 
 class BarcodeCodabar(BarcodeI2of5):
@@ -209,7 +209,7 @@ class BarcodeCodabar(BarcodeI2of5):
     """
     codeName = "Codabar"
     def __init__(self,**kw):
-        from rlextra.graphics.barcode.common import Codabar
+        from reportlab.graphics.barcode.common import Codabar
         _BarcodeWidget.__init__(self,Codabar,"A012345B",**kw)
 
 class BarcodeCode11(BarcodeI2of5):
@@ -225,7 +225,7 @@ class BarcodeCode11(BarcodeI2of5):
             1 if the number of digits is 10 or less, else 2.'''),
             )
     def __init__(self,**kw):
-        from rlextra.graphics.barcode.common import Code11
+        from reportlab.graphics.barcode.common import Code11
         _BarcodeWidget.__init__(self,Code11,"01234545634563",**kw)
 
 class BarcodeFIM(_BarcodeWidget):
@@ -255,7 +255,7 @@ class BarcodeFIM(_BarcodeWidget):
         humanReadable = AttrMapValue(isBoolean, desc='if human readable'),
         )
     def __init__(self,**kw):
-        from rlextra.graphics.barcode.usps import FIM
+        from reportlab.graphics.barcode.usps import FIM
         _BarcodeWidget.__init__(self,FIM,"A",**kw)
 
 class BarcodePOSTNET(_BarcodeWidget):
@@ -270,7 +270,7 @@ class BarcodePOSTNET(_BarcodeWidget):
         humanReadable = AttrMapValue(isBoolean, desc='if human readable'),
         )
     def __init__(self,**kw):
-        from rlextra.graphics.barcode.usps import POSTNET
+        from reportlab.graphics.barcode.usps import POSTNET
         _BarcodeWidget.__init__(self,POSTNET,"78247-1043",**kw)
 
 if __name__=='__main__':
