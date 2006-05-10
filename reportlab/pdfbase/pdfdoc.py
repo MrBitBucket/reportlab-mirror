@@ -20,6 +20,7 @@ from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfutils import LINEEND # this constant needed in both
 from reportlab import rl_config
 from reportlab.lib.utils import import_zlib, open_for_read, fp_str
+from reportlab.pdfbase import pdfmetrics
 
 from sys import platform
 try:
@@ -199,7 +200,7 @@ class PDFDocument:
             return self._ID
         digest = self.signature.digest()
         doc = DummyDoc()
-        ID = PDFString(digest)
+        ID = PDFString(digest,enc='raw')
         IDs = ID.format(doc)
         self._ID = "%s %% ReportLab generated PDF document -- digest (http://www.reportlab.com) %s [%s %s] %s" % (
                 LINEEND, LINEEND, IDs, IDs, LINEEND)
@@ -260,7 +261,6 @@ class PDFDocument:
         else:
             try:
                 # does pdfmetrics know about it? if so, add
-                from reportlab.pdfbase import pdfmetrics
                 fontObj = pdfmetrics.getFont(psfontname)
                 if getattr(fontObj, '_dynamicFont', 0):
                     raise PDFError, "getInternalFontName(%s) called for a dynamic font" % repr(psfontname)
@@ -313,6 +313,9 @@ class PDFDocument:
     def setSubject(self, subject):
         "embeds in PDF file"
         self.info.subject = subject
+
+    def setDateFormatter(self, dateFormatter):
+        self.info._dateFormatter = dateFormatter
 
     def getAvailableFonts(self):
         fontnames = self.fontMapping.keys()
@@ -496,13 +499,55 @@ def _isbalanced(s):
             if n<0: return 0
     return not n and 1 or 0
 
+def _checkPdfdoc(utext):
+    '''return true if no Pdfdoc encoding errors'''
+    try:
+        utext.encode('pdfdoc')
+        return 1
+    except UnicodeEncodeError, e:
+        return 0
+
 class PDFString:
-    def __init__(self, str, escape=1):
-        # might need to change this to class for encryption
-        self.s = str
-        self.escape = escape
+    def __init__(self, s, escape=1, enc='auto'):
+        '''s can be unicode/utf8 or a PDFString
+        if escape is true then the output will be passed through escape
+        if enc is raw then the string will be left alone
+        if enc is auto we'll try and automatically adapt to utf_16_be if the
+        effective string is not entirely in pdfdoc
+        '''
+        if isinstance(s,PDFString):
+            self.s = s.s
+            self.escape = s.escape
+            self.enc = s.enc
+        else:
+            self.s = s
+            self.escape = escape
+            self.enc = enc
     def format(self, document):
         s = self.s
+        enc = getattr(self,'enc','auto')
+        if type(s) is str:
+            if enc is 'auto':
+                try:
+                    u = s.decode('utf8')
+                except:
+                    print s
+                    raise
+                if _checkPdfdoc(u):
+                    s = u.encode('pdfdoc')
+                else:
+                    s = codecs.BOM_UTF16_BE+u.encode('utf_16_be')
+        elif type(s) is unicode:
+            if enc is 'auto':
+                if _checkPdfdoc(s):
+                    s = s.encode('pdfdoc')
+                else:
+                    s = codecs.BOM_UTF16_BE+s.encode('utf_16_be')
+            else:
+                s = codecs.BOM_UTF16_BE+s.encode('utf_16_be')
+        else:
+            raise ValueError('PDFString argument must be str/unicode not %s' % type(s))
+
         escape = getattr(self,'escape',1)
         if not isinstance(document.encrypt,NoEncryption):
             s = document.encrypt.encode(s)
@@ -1070,7 +1115,7 @@ class PDFOutlines:
         self.buildtree = []
         self.closedict = {} # dictionary of "closed" destinations in the outline
 
-    def addOutlineEntry(self, destinationname, level=0, title=None, closed=None, asUtf16=False):
+    def addOutlineEntry(self, destinationname, level=0, title=None, closed=None):
         """destinationname of None means "close the tree" """
         from types import IntType, TupleType
         if destinationname is None and level!=0:
@@ -1104,12 +1149,6 @@ class PDFOutlines:
             currentlevel = currentlevel-1
         if destinationname is None: return
         stack[-1].append(destinationname)
-        if asUtf16:
-            if type(title) is str:
-                title = title.decode('utf8')
-            elif type(title) is not unicode:
-                raise ValueError('title must be utf8 string or unicode')
-            title = codecs.BOM_UTF16_BE+title.encode('utf_16_be')
         self.destinationnamestotitles[destinationname] = title
         if closed: self.closedict[destinationname] = 1
         self.currentlevel = level
@@ -1269,6 +1308,7 @@ class PDFInfo:
     title = "untitled"
     author = "anonymous"
     subject = "unspecified"
+    _dateFormatter = None
 
     def __init__(self):
         self.invariant = rl_config.invariant
@@ -1282,7 +1322,7 @@ class PDFInfo:
         D = {}
         D["Title"] = PDFString(self.title)
         D["Author"] = PDFString(self.author)
-        D["CreationDate"] = PDFDate(invariant=self.invariant)
+        D["CreationDate"] = PDFDate(invariant=self.invariant,dateFormatter=self._dateFormatter)
         D["Producer"] = PDFString(self.producer)
         D["Subject"] = PDFString(self.subject)
         PD = PDFDictionary(D)
@@ -1415,7 +1455,8 @@ def _getTimeStamp():
 
 class PDFDate:
     # gmt offset not yet suppported
-    def __init__(self, yyyy=None, mm=None, dd=None, hh=None, m=None, s=None, invariant=rl_config.invariant):
+    def __init__(self, yyyy=None, mm=None, dd=None, hh=None, m=None, s=None,
+                    invariant=rl_config.invariant,dateFormatter=None):
         if None in (yyyy, mm, dd, hh, m, s):
             if invariant:
                 now = (2000,01,01,00,00,00,0)
@@ -1429,10 +1470,12 @@ class PDFDate:
             if m is None: m=now[4]
             if s is None: s=now[5]
         self.date=(yyyy,mm,dd,hh,m,s)
+        self.dateFormatter = dateFormatter
 
     def format(self, doc):
-        return format(PDFString('%04d%02d%02d%02d%02d%02d' % self.date), doc)
-
+        dfmt = self.dateFormatter or (
+                lambda yyyy,mm,dd,hh,m,s: '%04d%02d%02d%02d%02d%02d' % (yyyy,mm,dd,hh,m,s))
+        return format(PDFString(dfmt(*self.date)), doc)
 
 class Destination:
     """not a pdfobject!  This is a placeholder that can delegates

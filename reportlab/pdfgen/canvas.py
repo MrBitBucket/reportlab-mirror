@@ -250,10 +250,15 @@ class Canvas(textobject._PDFColorSetter):
     def setAuthor(self, author):
         """identify the author for invisible embedding inside the PDF document.
            the author annotation will appear in the the text of the file but will
-           not automatically be seen when the document is viewed."""
+           not automatically be seen when the document is viewed, but is visible
+           in document properties etc etc."""
         self._doc.setAuthor(author)
 
-    def addOutlineEntry(self, title, key, level=0, closed=None, asUtf16=False):
+    def setDateFormatter(self, dateFormatter):
+        """accepts a func(yyyy,mm,dd,hh,m,s) used to create embedded formatted date"""
+        self._doc.setDateFormatter(dateFormatter)
+
+    def addOutlineEntry(self, title, key, level=0, closed=None):
         """Adds a new entry to the outline at given level.  If LEVEL not specified,
         entry goes at the top level.  If level specified, it must be
         no more than 1 greater than the outline level in the last call.
@@ -303,7 +308,7 @@ class Canvas(textobject._PDFColorSetter):
         """
         #to be completed
         #self._outlines.append(title)
-        self._doc.outline.addOutlineEntry(key, level, title, closed=closed, asUtf16=asUtf16)
+        self._doc.outline.addOutlineEntry(key, level, title, closed=closed)
 
     def setOutlineNames0(self, *nametree):   # keep this for now (?)
         """nametree should can be a recursive tree like so
