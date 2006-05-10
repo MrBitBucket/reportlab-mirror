@@ -14,7 +14,7 @@ from reportlab.lib.utils import _className
 from reportlab.lib.textsplit import wordSplit
 from copy import deepcopy
 from reportlab.lib.abag import ABag
-
+import re
 
 #on UTF8 branch, split and strip must be unicode-safe!
 def split(text, delim=' '):
@@ -385,13 +385,26 @@ def _do_under(i, t_off, tx):
     xtraState.underline=0
     xtraState.underlineColor=None
 
+_scheme_re = re.compile('^[a-zA-Z][-+a-zA-Z0-9]+$')
+def _doLink(tx,link,rect):
+    if type(link) is unicode:
+        link = unicode.encode('utf8')
+    parts = link.split(':',1)
+    scheme = len(parts)==2 and parts[0].lower() or ''
+    if _scheme_re.match(scheme) and scheme!='document':
+        kind=scheme.lower()=='pdf' and 'GoToR' or 'URI'
+        if kind=='GoToR': link = parts[1]
+        tx._canvas.linkURL(link, rect, relative=1, kind=kind)
+    else:
+        tx._canvas.linkRect("", scheme!='document' and link or parts[1], rect, relative=1)
+
 def _do_link_line(i, t_off, tx):
     xs = tx.XtraState
     leading = xs.style.leading
     y = xs.cur_y - i*leading - xs.f.fontSize/8.0 # 8.0 factor copied from para.py
     text = join(xs.lines[i][1])
     textlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
-    tx._canvas.linkRect("", xs.link, (t_off, y, t_off+textlen, y+leading), relative=1)
+    _doLink(tx, xs.link, (t_off, y, t_off+textlen, y+leading))
 
 def _do_link(i, t_off, tx):
     xs = tx.XtraState
@@ -399,7 +412,7 @@ def _do_link(i, t_off, tx):
     y = xs.cur_y - i*leading - xs.f.fontSize/8.0 # 8.0 factor copied from para.py
     for x1,x2,link in xs.links:
         tx._canvas.line(t_off+x1, y, t_off+x2, y)
-        tx._canvas.linkRect("", link, (t_off+x1, y, t_off+x2, y+leading), relative=1)
+        _doLink(tx, link, (t_off+x1, y, t_off+x2, y+leading))
     xs.links = []
     xs.link=None
 

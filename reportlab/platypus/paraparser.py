@@ -118,6 +118,7 @@ _linkAttrMap = {'size': ('fontSize', _num),
                 'dest': ('link', None),
                 'destination': ('link', None),
                 'target': ('link', None),
+                'href': ('link', None),
                 }
 
 def _addAttributeNames(m):
@@ -422,9 +423,7 @@ class ParaParser(xmllib.XMLParser):
 
     def handle_entityref(self,name):
         if greeks.has_key(name):
-            self._push(greek=1)
             self.handle_data(greeks[name])
-            self._pop(greek=1)
         else:
             xmllib.XMLParser.handle_entityref(self,name)
 
