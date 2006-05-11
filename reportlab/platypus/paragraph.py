@@ -721,6 +721,7 @@ class Paragraph(Flowable):
         """Initially, the dumbest possible wrapping algorithm.
         Cannot handle font variations."""
 
+        style = self.style
         #for now we only handle one fragment.  Need to generalize this quickly.
         if len(self.frags) > 1:
             raise ValueError('CJK Wordwrap can only handle one fragment per paragraph for now')
@@ -736,7 +737,6 @@ class Paragraph(Flowable):
         else: maxWidths = width
         lines = []
         lineno = 0
-        style = self.style
         fFontSize = float(style.fontSize)
 
         #for bullets, work out width and ensure we wrap the right amount onto line one
