@@ -231,9 +231,24 @@ def parseOdyssey(fn):
     import md5
     print 'file digest: %s' % md5.md5(open('dodyssey.pdf','rb').read()).hexdigest()
 
-for fn in ('odyssey.full.txt','odyssey.txt'):
-    if os.path.isfile(fn):
-        break
+def run():
+    for fn in ('odyssey.full.txt','odyssey.txt'):
+        if os.path.isfile(fn):
+            parseOdyssey(fn)
+            break
+
+def doProf(profname,func,*args,**kwd):
+        import hotshot, hotshot.stats
+        prof = hotshot.Profile(profname)
+        prof.runcall(func)
+        prof.close()
+        stats = hotshot.stats.load(profname)
+        stats.strip_dirs()
+        stats.sort_stats('time', 'calls')
+        stats.print_stats(20)
 
 if __name__=='__main__':
-    parseOdyssey(fn)
+    if '--prof' in sys.argv:
+        doProf('dodyssey.prof',run)
+    else:
+        run()
