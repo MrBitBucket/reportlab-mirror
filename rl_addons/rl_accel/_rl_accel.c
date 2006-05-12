@@ -727,7 +727,7 @@ static PyObject *hex32(PyObject *self, PyObject* args)
 	return PyString_FromString(buf);
 }
 
-#if PY_VERSION_HEX>=0x02040000
+#if PY_VERSION_HEX>=0x02030000
 static PyObject *_notdefFont=NULL;
 static PyObject *_notdefChar=NULL;
 static PyObject *_k_UCS_2 = NULL;
@@ -918,7 +918,7 @@ L_ERR:
 	Py_XDECREF(_o2);
 	Py_XDECREF(_o3);
 	Py_XDECREF(_o4);
-	res = 0;
+	res = NULL;
 L_OK:
 	Py_DECREF(R);
 	Py_DECREF(font);
@@ -926,6 +926,190 @@ L_OK:
 	Py_DECREF(e);
 	Py_DECREF(utext);
 	Py_DECREF(fonts);
+	return res;
+	}
+static PyObject *_pdfmetrics_fonts = NULL;	/*the fontName to font map from pdfmetrics*/
+static PyObject *_pdfmetrics_ffar = NULL;	/*findFontAndRegister from pdfmetrics*/
+static PyObject *getFontU(PyObject *module, PyObject *args, PyObject *kwds){
+	PyObject *fontName=NULL, *_o1=NULL, *_o2=NULL, *res=NULL;
+	static char *argnames[] = {"fontName",NULL};
+	if(!PyArg_ParseTupleAndKeywords(args, kwds, "O", argnames, &fontName)) return NULL;
+	if(!_pdfmetrics_fonts){
+		res = PyImport_ImportModule("reportlab.pdfbase.pdfmetrics");
+		if(!res) goto L_ERR;
+		_o1 = PyObject_GetAttrString(res,"_fonts");
+		if(!_o1) goto L_ERR;
+		_o2 = PyObject_GetAttrString(res,"findFontAndRegister");
+		if(!_o2) goto L_ERR;
+		_pdfmetrics_fonts = _o1;
+		_pdfmetrics_ffar = _o2;
+		Py_DECREF(res); _o1 = _o2 = res = NULL;
+		}
+	if((res = PyObject_GetItem(_pdfmetrics_fonts,fontName))) return res;
+	if(!PyErr_ExceptionMatches(PyExc_KeyError)) goto L_ERR;
+	PyErr_Clear();
+	_o1 = PyTuple_New(1); if(!_o1) goto L_ERR;
+	PyTuple_SET_ITEM(_o1, 0, fontName);
+	Py_INCREF(fontName);
+	res = PyObject_CallObject(_pdfmetrics_ffar,_o1);
+	Py_DECREF(_o1);	/*NB this should decremnent fontName as well*/
+	return res;
+
+L_ERR:
+	Py_XDECREF(_o1);
+	Py_XDECREF(_o2);
+	Py_XDECREF(res);
+	return NULL;
+	}
+static PyObject *stringWidthU(PyObject *self, PyObject *args, PyObject *kwds){
+	PyObject	*text=NULL, *fontName=NULL, *fontSize=NULL, *encoding=NULL,
+				*res=NULL, *_o1=NULL, *_o2=NULL, *_o3=NULL;
+	static char *argnames[] = {"text","fontName","fontSize","encoding",0};
+	if(!PyArg_ParseTupleAndKeywords(args, kwds, "OOO|O", argnames, &text, &fontName, &fontSize, &_o1)) return NULL;
+	Py_INCREF(text);
+	Py_INCREF(fontName);
+	Py_INCREF(fontSize);
+	if(_o1){
+		encoding = _o1;
+		_o1 = NULL;
+		Py_INCREF(encoding);
+		}
+	else encoding = PyString_FromString("utf8");
+
+	_o2 = PyTuple_New(1); if(!_o2) goto L_ERR;
+	Py_INCREF(fontName);
+	PyTuple_SET_ITEM(_o2, 0, fontName);
+	_o3 = getFontU(self,_o2,NULL); if(!_o3) goto L_ERR;
+	Py_DECREF(_o2); _o2 = NULL;
+	_o1 = PyObject_GetAttrString(_o3, "stringWidth"); if(!_o1) goto L_ERR;
+	Py_DECREF(_o3); _o3 = NULL;
+	_o2 = PyTuple_New(2); if(!_o2) goto L_ERR;
+	Py_INCREF(text);
+	PyTuple_SET_ITEM(_o2, 0, text);
+	Py_INCREF(fontSize);
+	PyTuple_SET_ITEM(_o2, 1, fontSize);
+	_o3 = PyDict_New(); if(!_o3) goto L_ERR;
+	if(PyDict_SetItemString(_o3, "encoding", encoding)<0) goto L_ERR;
+	res = PyEval_CallObjectWithKeywords(_o1, _o2, _o3);
+	Py_DECREF(_o1);
+	Py_DECREF(_o2);
+	Py_DECREF(_o3); _o1 = _o2 = _o3 = NULL;
+	goto L_OK;
+L_ERR:
+	Py_XDECREF(_o1);
+	Py_XDECREF(_o2);
+	Py_XDECREF(_o3);
+L_OK:
+	Py_DECREF(text);
+	Py_DECREF(fontName);
+	Py_DECREF(fontSize);
+	Py_DECREF(encoding);
+	return res;
+	}
+static PyObject *_instanceStringWidthU(PyObject *module, PyObject *args, PyObject *kwds){
+	PyObject *L, *t, *f, *self, *text, *size, *res,
+				*encoding = 0, *_o1 = 0, *_o2 = 0, *_o3 = 0;
+	unsigned char *b;
+	int n, m, i, j, s, _i1;
+	static char *argnames[]={"self","text","size","encoding",0};
+	if(!PyArg_ParseTupleAndKeywords(args, kwds, "OOO|O", argnames, &self, &text, &size, &encoding)) return 0;
+	Py_INCREF(self);
+	Py_INCREF(text);
+	Py_INCREF(size);
+	if(_o1){
+		encoding = _o1;
+		_o1 = NULL;
+		Py_INCREF(encoding);
+		}
+	else encoding = PyString_FromString("utf8");
+	L = Py_None; Py_INCREF(Py_None);
+	t = Py_None; Py_INCREF(Py_None);
+	f = Py_None; Py_INCREF(Py_None);
+
+	if(!PyUnicode_Check(text)){
+		_o1 = PyObject_GetAttrString(text, "decode"); if(!_o1) goto L_ERR;
+		_o3 = PyTuple_New(1); if(!_o3) goto L_ERR;
+		Py_INCREF(encoding);
+		PyTuple_SET_ITEM(_o3, 0, encoding);
+		_o2 = PyObject_CallObject(_o1, _o3); if(!_o2) goto L_ERR;
+		Py_DECREF(_o1);
+		Py_DECREF(_o3); _o1 = _o3 = NULL;
+		Py_DECREF(text);
+		text = _o2;
+		_o2 = NULL;
+		}
+
+	_o3 = PyList_New(1); if(!_o3) goto L_ERR;
+	Py_INCREF(self);
+	PyList_SET_ITEM(_o3, 0, self);
+	_o2 = PyObject_GetAttrString(self, "substitutionFonts"); if(!_o2) goto L_ERR;
+	_o1 = PyNumber_Add(_o3, _o2); if(!_o1) goto L_ERR;
+	Py_DECREF(_o3); _o3 = 0;
+	Py_DECREF(_o2); _o2 = NULL;
+	_o3 = PyTuple_New(2); if(!_o3) goto L_ERR;
+	Py_INCREF(text);
+	PyTuple_SET_ITEM(_o3, 0, text);
+	PyTuple_SET_ITEM(_o3, 1, _o1);
+	_o1 = NULL;
+	_o2 = unicode2T1(module,_o3,NULL); if(!_o2) goto L_ERR;
+	Py_DECREF(_o3); _o3 = NULL;
+	Py_DECREF(L);
+	L = _o2;
+	_o2 = NULL;
+
+	n = PyList_GET_SIZE(L);
+
+	for(s=i=0;i<n;++i){
+		_o1 = PyList_GetItem(L,i); if(!_o1) goto L_ERR;
+		Py_INCREF(_o1);
+
+		_o2 = PySequence_GetItem(_o1, 0); if(!_o2) goto L_ERR;
+		Py_DECREF(f);
+		f = _o2;
+		_o2 = NULL;
+
+		_o2 = PyObject_GetAttrString(f, "widths"); if(!_o2) goto L_ERR;
+		Py_DECREF(f);
+		f = _o2;
+		_o2 = NULL;
+
+		_o2 = PySequence_GetItem(_o1, 1); if(!_o2) goto L_ERR;
+		Py_DECREF(t);
+		t = _o2;
+		Py_DECREF(_o1);
+		_o1 = _o2 = NULL;
+
+		m = PyString_Size(t);
+		b = PyString_AS_STRING(t);
+
+		for(j=0;j<m;++j){
+			_o1 = PyInt_FromLong((long)(b[j]));
+			_o2 = PyDict_GetItem(f,_o1); if(!_o2) goto L_ERR;
+			_i1 = PyInt_AsLong(_o2);
+			_o2 = NULL;	/*we borrowed this*/
+			if(PyErr_Occurred()) goto L_ERR;
+			Py_DECREF(_o1); _o1 = 0;
+			s = _i1;
+			}
+		}
+
+	_o1 = PyFloat_FromDouble((s * 0.001)); if(!_o1) goto L_ERR;
+	res = PyNumber_Multiply(_o1, size); if(!res) goto L_ERR;
+	Py_DECREF(_o1); _o1 = 0;
+	goto L_OK;
+L_ERR:
+	Py_XDECREF(_o1);
+	Py_XDECREF(_o2);
+	Py_XDECREF(_o3);
+	res = 0;
+L_OK:
+	Py_DECREF(L);
+	Py_DECREF(t);
+	Py_DECREF(f);
+	Py_DECREF(self);
+	Py_DECREF(text);
+	Py_DECREF(size);
+	Py_DECREF(encoding);
 	return res;
 	}
 #endif
@@ -1282,8 +1466,11 @@ static struct PyMethodDef _methods[] = {
 	{"calcChecksum", ttfonts_calcChecksum, METH_VARARGS, "calcChecksum(string) calculate checksums for TTFs"},
 	{"add32", ttfonts_add32, METH_VARARGS, "add32(x,y)  32 bit unsigned x+y"},
 	{"hex32", hex32, METH_VARARGS, "hex32(x)  32 bit unsigned-->0X8.8X string"},
-#if PY_VERSION_HEX>=0x02040000
+#if PY_VERSION_HEX>=0x02030000
 	{"unicode2T1", (PyCFunction)unicode2T1, METH_VARARGS|METH_KEYWORDS, "return a list of (font,string) pairs representing the unicode text"},
+	{"getFontU", (PyCFunction)getFontU, METH_VARARGS|METH_KEYWORDS, "getFontU(name)-->Font instance"},
+	{"stringWidthU", (PyCFunction)stringWidthU, METH_VARARGS|METH_KEYWORDS, "stringWidthU(text,fontName,fontSize,encoding='utf8')--> font stringWidth(text,fontSize,encoding)"},
+	{"_instanceStringWidthU", (PyCFunction)stringWidthU, METH_VARARGS|METH_KEYWORDS, "Font.stringWidth(self,text,fontName,fontSize,encoding='utf8') --> width"},
 #endif
 #ifdef	HAVE_BOX
 	{"Box",	(PyCFunction)Box,	METH_VARARGS|METH_KEYWORDS, "Box(width,character=None) create a Knuth Box instance"},
