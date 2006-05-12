@@ -31,27 +31,11 @@ rl_codecs.RL_Codecs.register()
 standardFonts = _fontdata.standardFonts
 standardEncodings = _fontdata.standardEncodings
 
-# AR 20040612 - disabling accelerated stringwidth until I have
-# a slow one which works right for Unicode.  Then we can change
-# the accelerated one.
-##_dummyEncoding=' _not an encoding_ '
-## conditional import - try both import techniques, and set a flag
-try:
-      import _rl_accel
-      try:
-          _stringWidth = _rl_accel.stringWidth
-          #_rl_accel.defaultEncoding(_dummyEncoding)
-      except:
-          _stringWidth = None
-except ImportError:
-      _stringWidth = None
-_stringWidth = None
-
 _typefaces = {}
 _encodings = {}
 _fonts = {}
 
-def unicode2T1(utext,fonts):
+def _py_unicode2T1(utext,fonts):
     '''return a list of (font,string) pairs representing the unicode text'''
     #print 'unicode2t1(%s, %s): %s' % (utext, fonts, type(utext))
     #if type(utext) 
@@ -74,6 +58,11 @@ def unicode2T1(utext,fonts):
                 R.append((_notdefFont,_notdefChar*(il-i0)))
             utext = utext[il:]
     return R
+
+try:
+    from _rl_accel import unicode2T1
+except:
+    unicode2T1 = _py_unicode2T1
 
 class FontError(Exception):
     pass
@@ -405,13 +394,13 @@ class Font:
                         pass
         self.widths = w
 
-    if not _stringWidth:
-        def stringWidth(self, text, size, encoding='utf8'):
-            """This is the "purist" approach to width.  The practical approach
-            is to use the stringWidth function, which may be swapped in for one
-            written in C."""
-            if not isinstance(text,unicode): text = text.decode(encoding)
-            return sum([sum(map(f.widths.__getitem__,map(ord,t))) for f, t in unicode2T1(text,[self]+self.substitutionFonts)])*0.001*size
+    def _py_stringWidth(self, text, size, encoding='utf8'):
+        """This is the "purist" approach to width.  The practical approach
+        is to use the stringWidth function, which may be swapped in for one
+        written in C."""
+        if not isinstance(text,unicode): text = text.decode(encoding)
+        return sum([sum(map(f.widths.__getitem__,map(ord,t))) for f, t in unicode2T1(text,[self]+self.substitutionFonts)])*0.001*size
+    stringWidth = _py_stringWidth
 
     def _formatWidths(self):
         "returns a pretty block in PDF Array format to aid inspection"
@@ -622,14 +611,6 @@ def registerFont(font):
         fonts.addMapping(ttname, 1, 0, font.fontName)
         fonts.addMapping(ttname, 0, 1, font.fontName)
         fonts.addMapping(ttname, 1, 1, font.fontName)
-        #cannot accelerate these yet...
-    else:
-        if _stringWidth:
-            _rl_accel.setFontInfo(string.lower(fontName),
-                                  _dummyEncoding,
-                                  font.face.ascent,
-                                  font.face.descent,
-                                  font.widths)
 
 
 def getTypeFace(faceName):
@@ -672,7 +653,19 @@ def getEncoding(encName):
         else:
             raise
 
-def getFont(fontName):
+def findFontAndRegister(fontName):
+    '''search for and register a font given it's name'''
+    #it might have a font-specific encoding e.g. Symbol
+    # or Dingbats.  If not, take the default.
+    face = getTypeFace(fontName)
+    if face.requiredEncoding:
+        font = Font(fontName, fontName, face.requiredEncoding)
+    else:
+        font = Font(fontName, fontName, defaultEncoding)
+    registerFont(font)
+    return font
+
+def _py_getFont(fontName):
     """Lazily constructs known fonts if not found.
 
     Names of form 'face-encoding' will be built if
@@ -682,15 +675,13 @@ def getFont(fontName):
     try:
         return _fonts[fontName]
     except KeyError:
-        #it might have a font-specific encoding e.g. Symbol
-        # or Dingbats.  If not, take the default.
-        face = getTypeFace(fontName)
-        if face.requiredEncoding:
-            font = Font(fontName, fontName, face.requiredEncoding)
-        else:
-            font = Font(fontName, fontName, defaultEncoding)
-        registerFont(font)
-        return font
+        return findFontAndRegister(fontName)
+
+try:
+    from rl_accel import getFontU as getFont
+except ImportError:
+    getFont = _py_getFont
+
 _notdefFont,_notdefChar = getFont('ZapfDingbats'),chr(110)
 standardT1SubstitutionFonts.extend([getFont('Symbol'),getFont('ZapfDingbats')])
 
@@ -713,39 +704,21 @@ def getRegisteredFontNames():
     reg.sort()
     return reg
 
-def _slowStringWidth(text, fontName, fontSize, encoding='utf8'):
+def _py_stringWidth(text, fontName, fontSize, encoding='utf8'):
     """Define this anyway so it can be tested, but whether it is used or not depends on _rl_accel"""
     return getFont(fontName).stringWidth(text, fontSize, encoding=encoding)
 
-if _stringWidth:
+try:
+    from _rl_accel import stringWidthU as stringWidth
+except ImportError:
+    stringWidth = _py_stringWidth
+
+try:
+    from _rl_accel import NOTYET_instanceStringWidthU
     import new
-    Font.stringWidth = new.instancemethod(_rl_accel._instanceStringWidth,None,Font)
-    stringWidth = _stringWidth
-
-    #if accelerator present, make sure we at least
-    #register Courier font, since it will fall back to Courier
-    #as its default font.
-    f = getFont('Courier')
-
-
-    def _SWRecover(text, fontName, fontSize, encoding):
-        '''This is called when _rl_accel's database doesn't know about a font.
-        Currently encoding is always a dummy.
-        '''
-        try:
-            font = getFont(fontName)
-            if font._multiByte:
-                return font.stringWidth(text, fontSize)
-            else:
-                registerFont(font)
-                return _stringWidth(text,fontName,fontSize,encoding)
-        except:
-            warnOnce('Font %s:%s not found - using Courier:%s for widths'%(fontName,encoding,encoding))
-            return _stringWidth(text,'courier',fontSize,encoding)
-
-    _rl_accel._SWRecover(_SWRecover)
-else:
-    stringWidth = _slowStringWidth
+    Font.stringWidth = new.instancemethod(_instanceStringWidthU,None,Font)
+except ImportError:
+    pass
 
 def dumpFontData():
     print 'Registered Encodings:'
@@ -769,8 +742,6 @@ def dumpFontData():
     for key in k:
         font = _fonts[key]
         print '    %s (%s/%s)' % (font.fontName, font.face.name, font.encoding.name)
-
-
 
 def test3widths(texts):
     # checks all 3 algorithms give same answer, note speed
