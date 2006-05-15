@@ -1022,15 +1022,21 @@ static PyObject *stringWidthU(PyObject *self, PyObject *args, PyObject *kwds)
 		_o1 = NULL;
 		Py_INCREF(encoding);
 		}
-	else encoding = PyString_FromString("utf8");
+	else{
+		_o1 = PyString_FromString("utf8"); if(!_o1) ERROR_EXIT();
+		encoding = _o1;
+		_o1 = NULL;
+		}
 
-	_o2 = PyTuple_New(1); if(!_o2) ERROR_EXIT();
+	/*getFont(fontName).stringWidth --> _o2*/
+	_o1 = PyTuple_New(1); if(!_o1) ERROR_EXIT();
 	Py_INCREF(fontName);
-	PyTuple_SET_ITEM(_o2, 0, fontName);
-	_o3 = getFontU(self,_o2,NULL); if(!_o3) ERROR_EXIT();
-	Py_DECREF(_o2); _o2 = NULL;
-	_o1 = _GetAttrString(_o3, "stringWidth"); if(!_o1) ERROR_EXIT();
-	Py_DECREF(_o3); _o3 = NULL;
+	PyTuple_SET_ITEM(_o1, 0, fontName);
+	_o2 = getFontU(self,_o1,NULL); if(!_o2) ERROR_EXIT();
+	Py_DECREF(_o1);
+	_o1 = _GetAttrString(_o2, "stringWidth"); if(!_o1) ERROR_EXIT();
+	Py_DECREF(_o2);
+
 	_o2 = PyTuple_New(2); if(!_o2) ERROR_EXIT();
 	Py_INCREF(text);
 	PyTuple_SET_ITEM(_o2, 0, text);
@@ -1041,7 +1047,7 @@ static PyObject *stringWidthU(PyObject *self, PyObject *args, PyObject *kwds)
 	res = PyEval_CallObjectWithKeywords(_o1, _o2, _o3); if(!res) ERROR_EXIT();
 	Py_DECREF(_o1);
 	Py_DECREF(_o2);
-	Py_DECREF(_o3); _o1 = _o2 = _o3 = NULL;
+	Py_DECREF(_o3);
 	goto L_OK;
 L_ERR:
 	ADD_TB("stringWidthU");
@@ -1071,7 +1077,11 @@ static PyObject *_instanceStringWidthU(PyObject *module, PyObject *args, PyObjec
 		_o1 = NULL;
 		Py_INCREF(encoding);
 		}
-	else encoding = PyString_FromString("utf8");
+	else{
+		_o1 = PyString_FromString("utf8"); if(!_o1) ERROR_EXIT();
+		encoding = _o1;
+		_o1 = NULL;
+		}
 	L = Py_None; Py_INCREF(Py_None);
 	t = Py_None; Py_INCREF(Py_None);
 	f = Py_None; Py_INCREF(Py_None);
@@ -1144,7 +1154,7 @@ static PyObject *_instanceStringWidthU(PyObject *module, PyObject *args, PyObjec
 
 	_o1 = PyFloat_FromDouble((s * 0.001)); if(!_o1) ERROR_EXIT();
 	res = PyNumber_Multiply(_o1, size); if(!res) ERROR_EXIT();
-	Py_DECREF(_o1); _o1 = 0;
+	Py_DECREF(_o1);
 	goto L_OK;
 L_ERR:
 	ADD_TB("_instanceStringWidthU");
@@ -1162,6 +1172,105 @@ L_OK:
 	Py_DECREF(encoding);
 	return res;
 }
+static PyObject *_instanceStringWidthTTF(PyObject *module, PyObject *args, PyObject *kwds)
+{
+	PyObject *self, *text, *size, *res,
+				*encoding = 0, *_o1=NULL, *_o2=NULL, *_o3=NULL;
+	Py_UNICODE *b;
+	int n, i;
+	double s, _d1, dw;
+	static char *argnames[]={"self","text","size","encoding",0};
+	if(!PyArg_ParseTupleAndKeywords(args, kwds, "OOO|O", argnames, &self, &text, &size, &encoding)) return 0;
+	Py_INCREF(text);
+	if(_o1){
+		encoding = _o1;
+		_o1 = NULL;
+		Py_INCREF(encoding);
+		}
+	else{
+		_o1 = PyString_FromString("utf8"); if(!_o1) ERROR_EXIT();
+		encoding = _o1;
+		_o1 = NULL;
+		}
+
+	if(!PyUnicode_Check(text)){
+		i = PyObject_IsTrue(encoding); if(i<0) ERROR_EXIT();
+		if(!i){
+			Py_DECREF(encoding);
+			encoding = PyString_FromString("utf8"); if(!encoding) ERROR_EXIT();
+			}
+		_o1 = _GetAttrString(text, "decode"); if(!_o1) ERROR_EXIT();
+		_o3 = PyTuple_New(1); if(!_o3) ERROR_EXIT();
+		Py_INCREF(encoding);
+		PyTuple_SET_ITEM(_o3, 0, encoding);
+		_o2 = PyObject_CallObject(_o1, _o3); if(!_o2) ERROR_EXIT();
+		Py_DECREF(_o1);
+		Py_DECREF(_o3); _o1 = _o3 = NULL;
+		Py_DECREF(text);
+		text = _o2; /*no _o2=NULL as we assign there straight away*/ 
+		}
+
+	/*self.face.charWidths --> _o1, self.face.defaultWidth --> _o3*/
+	_o2 = _GetAttrString(self, "face"); if(!_o2) ERROR_EXIT();
+	_o1 = _GetAttrString(_o2, "charWidths"); if(!_o1) ERROR_EXIT(); if(!PyDict_Check(_o1)){PyErr_SetString(PyExc_TypeError, "TTFontFace instance charWidths is not a dict");ERROR_EXIT();}
+	_o3 = _GetAttrString(_o2, "defaultWidth"); if(!_o3) ERROR_EXIT();
+	Py_DECREF(_o2); _o2 = NULL;
+	dw = PyFloat_AsDouble(_o3);
+	if(PyErr_Occurred()) ERROR_EXIT();
+	Py_DECREF(_o3);	_o3=NULL;
+
+	n = PyUnicode_GET_SIZE(text);
+	b = PyUnicode_AS_UNICODE(text);
+
+	for(s=i=0;i<n;++i){
+		_o3 = PyInt_FromLong((long)b[i]); if(!_o3) ERROR_EXIT();
+		_o2 = PyDict_GetItem(_o1,_o3);
+		Py_DECREF(_o3); _o3 = NULL;
+		if(!_o2) _d1 = dw;
+		else{
+			_d1 = PyFloat_AsDouble(_o2);
+			_o2=NULL;	/*no decref as we borrowed it*/
+			if(PyErr_Occurred()) ERROR_EXIT();
+			}
+		s += _d1;
+		}
+	Py_DECREF(_o1);
+	_o1 = PyFloat_FromDouble((s * 0.001)); if(!_o1) ERROR_EXIT();
+	res = PyNumber_Multiply(_o1, size); if(!res) ERROR_EXIT();
+	Py_DECREF(_o1);
+	goto L_OK;
+L_ERR:
+	ADD_TB("_instanceStringWidthTTF");
+	Py_XDECREF(_o1);
+	Py_XDECREF(_o2);
+	Py_XDECREF(_o3);
+	res = NULL;
+L_OK:
+	Py_DECREF(text);
+	Py_DECREF(encoding);
+	return res;
+}
+#if 0
+/*cannot seem to speed this up*/
+static PyObject *_instanceGetCharWidth(PyObject *module, PyObject *args, PyObject *kwds)
+{
+	PyObject *self, *code, *res, *_o1=NULL;
+	static char *argnames[]={"self","code",0};
+	if(!PyArg_ParseTupleAndKeywords(args, kwds, "OO", argnames, &self, &code)) return 0;
+	_o1 = _GetAttrString(self, "charWidths"); if(!_o1) ERROR_EXIT(); if(!PyDict_Check(_o1)){PyErr_SetString(PyExc_TypeError, "TTFontFace instance charWidths is not a dict");ERROR_EXIT();}
+	res = PyDict_GetItem(_o1,code);
+	if(!res){
+		res = _GetAttrString(self, "defaultWidth"); if(!res) ERROR_EXIT();
+		}
+	Py_INCREF(res);
+	Py_DECREF(_o1);
+	return res;
+L_ERR:
+	ADD_TB("_instanceGetCharWidth");
+	Py_XDECREF(_o1);
+	return NULL;
+}
+#endif
 #endif
 
 #if PY_VERSION_HEX>=0x02030000
@@ -1521,6 +1630,10 @@ static struct PyMethodDef _methods[] = {
 	{"getFontU", (PyCFunction)getFontU, METH_VARARGS|METH_KEYWORDS, "getFontU(name)-->Font instance"},
 	{"stringWidthU", (PyCFunction)stringWidthU, METH_VARARGS|METH_KEYWORDS, "stringWidthU(text,fontName,fontSize,encoding='utf8')--> font stringWidth(text,fontSize,encoding)"},
 	{"_instanceStringWidthU", (PyCFunction)_instanceStringWidthU, METH_VARARGS|METH_KEYWORDS, "Font.stringWidth(self,text,fontName,fontSize,encoding='utf8') --> width"},
+	{"_instanceStringWidthTTF", (PyCFunction)_instanceStringWidthTTF, METH_VARARGS|METH_KEYWORDS, "TTFont.stringWidth(self,text,fontName,fontSize,encoding='utf8') --> width"},
+#if	0
+	{"_instanceGetCharWidth", (PyCFunction)_instanceGetCharWidth, METH_VARARGS|METH_KEYWORDS, "TTFontFace.getCharWidth(self,code) --> width"},
+#endif
 #endif
 #ifdef	HAVE_BOX
 	{"Box",	(PyCFunction)Box,	METH_VARARGS|METH_KEYWORDS, "Box(width,character=None) create a Knuth Box instance"},

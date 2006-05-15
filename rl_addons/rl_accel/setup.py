@@ -8,7 +8,7 @@ if __name__=='__main__': #NO RUNTESTS
     VERSION = re.search(r'^#\s*define\s+VERSION\s*"([^"]+)"',open('_rl_accel.c','r').read(),re.MULTILINE)
     VERSION = VERSION and VERSION.group(1) or 'unknown'
 
-    if sys.platform in ['linux2', 'win32', 'sunos5', 'freebsd4', 'freebsd6', 'aix4', 'mac', 'darwin']:
+    if sys.platform in ['linux2', 'win32', 'sunos5', 'freebsd4', 'freebsd5', 'freebsd6', 'aix4', 'mac', 'darwin']:
         LIBS=[]
     else:
         raise ValueError, "Don't know about platform:"+sys.platform
