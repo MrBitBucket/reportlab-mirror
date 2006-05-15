@@ -1003,12 +1003,14 @@ class TTFont:
         self._dynamicFont = 1   # We want dynamic subsetting
         self.state = {}
 
-    def stringWidth(self, text, size, encoding='utf-8'):
+    def _py_stringWidth(self, text, size, encoding='utf-8'):
         "Calculate text width"
         if type(text) is not UnicodeType:
             text = unicode(text, encoding or 'utf-8')   # encoding defaults to utf-8
-        width = self.face.getCharWidth
-        return 0.001*size*sum([width(ord(u)) for u in text])
+        g = self.face.charWidths.get
+        dw = self.face.defaultWidth
+        return 0.001*size*sum([g(ord(u),dw) for u in text])
+    stringWidth = _py_stringWidth
 
     def splitString(self, text, doc, encoding='utf-8'):
         """Splits text into a number of chunks, each of which belongs to a
@@ -1103,3 +1105,9 @@ class TTFont:
             fontDict = doc.idToObject['BasicFonts'].dict
             fontDict[internalName] = pdfFont
         del self.state[doc]
+try:
+    from _rl_accel import _instanceStringWidthTTF
+    import new
+    TTFont.stringWidth = new.instancemethod(_instanceStringWidthTTF,None,TTFont)
+except ImportError:
+    pass
