@@ -732,7 +732,6 @@ static PyObject *hex32(PyObject *self, PyObject* args)
 #if PY_VERSION_HEX>=0x02030000
 static PyObject *_notdefFont=NULL;
 static PyObject *_notdefChar=NULL;
-static PyObject *_k_UCS_2 = NULL;
 
 static PyObject *_GetExcValue(void)
 {
@@ -833,28 +832,26 @@ bad:
 static PyObject *unicode2T1(PyObject *self, PyObject *args, PyObject *kwds)
 {
 	int			i, j, _i1, _i2;
-	PyObject	*R, *font, *enc, *e, *res, *utext=NULL, *fonts=NULL,
-				*_o1 = NULL, *_o2 = NULL, *_o3 = NULL, *_o4 = NULL;
+	PyObject	*R, *font, *enc, *res, *utext=NULL, *fonts=NULL,
+				*_o1 = NULL, *_o2 = NULL, *_o3 = NULL;
 	static char *argnames[] = {"utext","fonts",NULL};
+	char		*encStr;
 	if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO", argnames, &utext, &fonts)) return NULL;
 	Py_INCREF(utext);
 	Py_INCREF(fonts);
 	R = Py_None; Py_INCREF(Py_None);
 	font = Py_None; Py_INCREF(Py_None);
 	enc = Py_None; Py_INCREF(Py_None);
-	e = Py_None; Py_INCREF(Py_None);
 
 	if(!_notdefFont){
 		_o1 = PyImport_ImportModule("reportlab.pdfbase.pdfmetrics"); if(!_o1) ERROR_EXIT();
 		_o2 = _GetAttrString(_o1,"_notdefFont");
 		_o3 = _GetAttrString(_o1,"_notdefChar");
-		_o4 = PyString_FromString("UCS-2");
 		if(!_o2 || !_o3 || !_o3) ERROR_EXIT();
 		_notdefFont = _o2;
 		_notdefChar = _o3;
-		_k_UCS_2 = _o4;
 		Py_DECREF(_o1);
-		_o1 = _o2 = _o3 = _o4 = NULL;
+		_o1 = _o2 = _o3 = NULL;
 		}
 
 	_o2 = PyList_New(0); if(!_o2) ERROR_EXIT();
@@ -875,110 +872,88 @@ static PyObject *unicode2T1(PyObject *self, PyObject *args, PyObject *kwds)
 	enc = _o2;
 	_o2 = NULL;
 
-	_i1 = PySequence_Contains(enc, _k_UCS_2);
-	if(_i1<0) {ERROR_EXIT();}
-	else if(_i1){
-		Py_DECREF(enc);
-		enc = PyString_FromString("UTF16");
-		}
+	encStr = PyString_AsString(enc);
+	if(PyErr_Occurred()) ERROR_EXIT();
+	if(strstr(encStr,"UCS-2")) encStr = "UTF16";
 
-	while(1){
-		_i1 = PyObject_IsTrue(utext); if(_i1<0) ERROR_EXIT();
-		if(!_i1) break;
-
-		_o2 = _GetAttrString(utext, "encode"); if(!_o2) ERROR_EXIT();
-		_o3 = PyTuple_New(1); if(!_o3) ERROR_EXIT();
-		Py_INCREF(enc);
-		PyTuple_SET_ITEM(_o3, 0, enc);
-		_o4 = PyObject_CallObject(_o2, _o3); if(!_o4) goto L_FAIL;
-		Py_DECREF(_o2); _o2 = 0;
-		Py_DECREF(_o3); _o3 = 0;
-		_o2 = PyTuple_New(2); if(!_o2) ERROR_EXIT();
-		Py_INCREF(font);
-		PyTuple_SET_ITEM(_o2, 0, font);
-		PyTuple_SET_ITEM(_o2, 1, _o4);
-		_o4 = NULL;
-		if(PyList_Append(R, _o2)) ERROR_EXIT();
-		Py_DECREF(_o2); _o2 = NULL;
-		break;
-L_FAIL:
-		Py_XDECREF(_o2);
-		Py_XDECREF(_o3);
-		Py_XDECREF(_o4); _o2 = _o3 = _o4 = NULL;
-
-		if(!PyErr_ExceptionMatches(PyExc_UnicodeEncodeError)) ERROR_EXIT();
-		_o1 = _GetExcValue(); if(!_o1) ERROR_EXIT();
-		Py_DECREF(e);
-		e = _o1;
-		_o1 = NULL;
-
-		_o3 = _GetAttrString(e, "args"); if(!_o3) ERROR_EXIT();
-		_o4 = PySequence_GetSlice(_o3, 2, 4); if(!_o4) ERROR_EXIT();
-		Py_DECREF(_o3); _o3 = 0;
-		_o2 = PySequence_GetItem(_o4, 0); if(!_o2) ERROR_EXIT();
-		i = PyInt_AsLong(_o2); if(PyErr_Occurred()) ERROR_EXIT();
-		Py_DECREF(_o2); _o2 = 0;
-		_o1 = PySequence_GetItem(_o4, 1); if(!_o1) ERROR_EXIT();
-		j = PyInt_AsLong(_o1); if(PyErr_Occurred()) ERROR_EXIT();
-		Py_DECREF(_o1);
-		Py_DECREF(_o4); _o1 = _o4 = 0;
-
-		if(i){
-			_o2 = PySequence_GetSlice(utext, 0, i); if(!_o2) ERROR_EXIT();
-			_o1 = _GetAttrString(_o2, "encode"); if(!_o1) ERROR_EXIT();
-			Py_DECREF(_o2); _o2 = NULL;
-			_o4 = PyTuple_New(1); if(!_o4) ERROR_EXIT();
-			Py_INCREF(enc);
-			PyTuple_SET_ITEM(_o4, 0, enc);
-			_o2 = PyObject_CallObject(_o1, _o4); if(!_o2) ERROR_EXIT();
-			Py_DECREF(_o1);
-			Py_DECREF(_o4); _o1 = _o4 = NULL;
-			_o1 = PyTuple_New(2); if(!_o1) ERROR_EXIT();
-			Py_INCREF(font);
-			PyTuple_SET_ITEM(_o1, 0, font);
-			PyTuple_SET_ITEM(_o1, 1, _o2);
-			_o2 = NULL;
-			if(PyList_Append(R, _o1)) ERROR_EXIT();
-			Py_DECREF(_o1); _o1 = NULL;
-			}
-
-		_i2 = PyObject_IsTrue(fonts); if(_i2<0) ERROR_EXIT();
-		if(_i2){
-			_o4 = PySequence_GetSlice(utext, i, j); if(!_o4) ERROR_EXIT();
+	while((_i1=PyObject_IsTrue(utext))>0){
+		if((_o1 = PyUnicode_AsEncodedString(utext, encStr, NULL))){
 			_o2 = PyTuple_New(2); if(!_o2) ERROR_EXIT();
-			PyTuple_SET_ITEM(_o2, 0, _o4);
-			Py_INCREF(fonts);
-			PyTuple_SET_ITEM(_o2, 1, fonts);
-			_o4 = NULL;
-			_o4 = unicode2T1(self,_o2,NULL); if(!_o4) ERROR_EXIT();
-			Py_DECREF(_o2); _o2 = 0;
-			_o3 = PyTuple_New(1); if(!_o3) ERROR_EXIT();
-			PyTuple_SET_ITEM(_o3, 0, _o4);
-			_o4 = NULL;
-			_o1 = _GetAttrString(R, "extend"); if(!_o1) ERROR_EXIT();
-			_o2 = PyObject_CallObject(_o1, _o3); if(!_o2) ERROR_EXIT();
-			Py_DECREF(_o1);
-			Py_DECREF(_o3);
-			Py_DECREF(_o2); _o1 = _o2 = _o3 = NULL;
+			Py_INCREF(font);
+			PyTuple_SET_ITEM(_o2, 0, font);
+			PyTuple_SET_ITEM(_o2, 1, _o1);
+			_o1 = NULL;
+			if(PyList_Append(R, _o2)) ERROR_EXIT();
+			Py_DECREF(_o2); _o2 = NULL;
+			break;
 			}
 		else{
-			_o2 = PyInt_FromLong((j - i)); if(!_o2) ERROR_EXIT();
-			_o4 = PyNumber_Multiply(_notdefChar, _o2); if(!_o4) ERROR_EXIT();
-			Py_DECREF(_o2); _o2 = NULL;
-			_o3 = PyTuple_New(2); if(!_o3) ERROR_EXIT();
-			PyTuple_SET_ITEM(_o3, 0, _notdefFont);
-			PyTuple_SET_ITEM(_o3, 1, _o4);
-			Py_INCREF(_notdefFont);
-			_o4 = NULL;
-			if(PyList_Append(R, _o3)) ERROR_EXIT();
-			Py_DECREF(_o3); _o3 = NULL;
-			}
+			Py_XDECREF(_o1); _o1 = NULL;
 
-		_o4 = PySequence_GetSlice(utext, j, 0x7fffffff); if(!_o4) ERROR_EXIT();
-		Py_DECREF(utext);
-		utext = _o4;
-		_o4 = NULL;
+			if(!PyErr_ExceptionMatches(PyExc_UnicodeEncodeError)) ERROR_EXIT();
+			_o1 = _GetExcValue(); if(!_o1) ERROR_EXIT();
+			_o2 = _GetAttrString(_o1, "args"); if(!_o2) ERROR_EXIT();
+			Py_DECREF(_o1);
+			_o1 = PySequence_GetSlice(_o2, 2, 4); if(!_o1) ERROR_EXIT();
+			Py_DECREF(_o2);
+			_o2 = PySequence_GetItem(_o1, 0); if(!_o2) ERROR_EXIT();
+			i = PyInt_AsLong(_o2); if(PyErr_Occurred()) ERROR_EXIT();
+			Py_DECREF(_o2);
+			_o2 = PySequence_GetItem(_o1, 1); if(!_o1) ERROR_EXIT();
+			j = PyInt_AsLong(_o2); if(PyErr_Occurred()) ERROR_EXIT();
+			Py_DECREF(_o2);
+			Py_DECREF(_o1); _o2 = _o1 = 0;
+
+			if(i){
+				_o1 = PySequence_GetSlice(utext, 0, i); if(!_o1) ERROR_EXIT();
+				_o2 = PyUnicode_AsEncodedString(_o1, encStr, NULL); if(!_o2) ERROR_EXIT();
+				Py_DECREF(_o1);
+				_o1 = PyTuple_New(2); if(!_o1) ERROR_EXIT();
+				Py_INCREF(font);
+				PyTuple_SET_ITEM(_o1, 0, font);
+				PyTuple_SET_ITEM(_o1, 1, _o2);
+				_o2 = NULL;
+				if(PyList_Append(R, _o1)) ERROR_EXIT();
+				Py_DECREF(_o1); _o1 = NULL;
+				}
+
+			_i2 = PyObject_IsTrue(fonts); if(_i2<0) ERROR_EXIT();
+			if(_i2){
+				_o1 = PySequence_GetSlice(utext, i, j); if(!_o1) ERROR_EXIT();
+				_o2 = PyTuple_New(2); if(!_o2) ERROR_EXIT();
+				PyTuple_SET_ITEM(_o2, 0, _o1);
+				Py_INCREF(fonts);
+				PyTuple_SET_ITEM(_o2, 1, fonts);
+				_o1 = unicode2T1(self,_o2,NULL); if(!_o1) ERROR_EXIT();
+				Py_DECREF(_o2); _o2 = 0;
+				_o3 = PyTuple_New(1); if(!_o3) ERROR_EXIT();
+				PyTuple_SET_ITEM(_o3, 0, _o1);
+				_o1 = _GetAttrString(R, "extend"); if(!_o1) ERROR_EXIT();
+				_o2 = PyObject_CallObject(_o1, _o3); if(!_o2) ERROR_EXIT();
+				Py_DECREF(_o1);
+				Py_DECREF(_o3);
+				Py_DECREF(_o2); _o1 = _o2 = _o3 = NULL;
+				}
+			else{
+				_o2 = PyInt_FromLong((j - i)); if(!_o2) ERROR_EXIT();
+				_o1 = PyNumber_Multiply(_notdefChar, _o2); if(!_o1) ERROR_EXIT();
+				Py_DECREF(_o2);
+				_o2 = PyTuple_New(2); if(!_o2) ERROR_EXIT();
+				PyTuple_SET_ITEM(_o2, 0, _notdefFont);
+				PyTuple_SET_ITEM(_o2, 1, _o1);
+				Py_INCREF(_notdefFont);
+				_o1 = NULL;
+				if(PyList_Append(R, _o2)) ERROR_EXIT();
+				Py_DECREF(_o2); _o2 = NULL;
+				}
+
+			_o1 = PySequence_GetSlice(utext, j, 0x7fffffff); if(!_o1) ERROR_EXIT();
+			Py_DECREF(utext);
+			utext = _o1;
+			_o1 = NULL;
+			}
 		}
+	if(_i1<0) ERROR_EXIT();
 
 	Py_INCREF(R);
 	res = R;
@@ -989,13 +964,11 @@ L_ERR:
 	Py_XDECREF(_o1);
 	Py_XDECREF(_o2);
 	Py_XDECREF(_o3);
-	Py_XDECREF(_o4);
 	res = NULL;
 L_OK:
 	Py_DECREF(R);
 	Py_DECREF(font);
 	Py_DECREF(enc);
-	Py_DECREF(e);
 	Py_DECREF(utext);
 	Py_DECREF(fonts);
 	return res;
