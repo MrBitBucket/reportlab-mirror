@@ -1068,7 +1068,7 @@ static PyObject *_instanceStringWidthU(PyObject *module, PyObject *args, PyObjec
 	unsigned char *b;
 	int n, m, i, j, s, _i1;
 	static char *argnames[]={"self","text","size","encoding",0};
-	if(!PyArg_ParseTupleAndKeywords(args, kwds, "OOO|O", argnames, &self, &text, &size, &encoding)) return 0;
+	if(!PyArg_ParseTupleAndKeywords(args, kwds, "OOO|O", argnames, &self, &text, &size, &_o1)) return 0;
 	Py_INCREF(self);
 	Py_INCREF(text);
 	Py_INCREF(size);
@@ -1180,7 +1180,7 @@ static PyObject *_instanceStringWidthTTF(PyObject *module, PyObject *args, PyObj
 	int n, i;
 	double s, _d1, dw;
 	static char *argnames[]={"self","text","size","encoding",0};
-	if(!PyArg_ParseTupleAndKeywords(args, kwds, "OOO|O", argnames, &self, &text, &size, &encoding)) return 0;
+	if(!PyArg_ParseTupleAndKeywords(args, kwds, "OOO|O", argnames, &self, &text, &size, &_o1)) return 0;
 	Py_INCREF(text);
 	if(_o1){
 		encoding = _o1;

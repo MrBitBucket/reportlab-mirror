@@ -1,7 +1,10 @@
 from reportlab.pdfbase.pdfmetrics import _py_stringWidth
 from _rl_accel import stringWidthU
 import time
+testCp1252 = 'copyright %s trademark %s registered %s ReportLab! Ol%s!' % (chr(169), chr(153),chr(174), chr(0xe9))
+enc='cp1252'
 assert stringWidthU('ABCDEF','Times-Roman',12)==_py_stringWidth('ABCDEF','Times-Roman',12)
+assert stringWidthU(testCp1252,'Times-Roman',12,enc)==_py_stringWidth(testCp1252,'Times-Roman',12,enc)
 def tim(N,msg,func,*args):
     t0 = time.time()
     for i in xrange(N):
