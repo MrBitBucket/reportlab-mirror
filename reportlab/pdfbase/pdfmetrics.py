@@ -61,7 +61,7 @@ def _py_unicode2T1(utext,fonts):
 
 try:
     from _rl_accel import unicode2T1
-except:
+except ImportError:
     unicode2T1 = _py_unicode2T1
 
 class FontError(Exception):
@@ -714,7 +714,7 @@ except ImportError:
     stringWidth = _py_stringWidth
 
 try:
-    from _rl_accel import NOTYET_instanceStringWidthU
+    from _rl_accel import _instanceStringWidthU
     import new
     Font.stringWidth = new.instancemethod(_instanceStringWidthU,None,Font)
 except ImportError:
