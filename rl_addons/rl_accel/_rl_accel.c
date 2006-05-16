@@ -735,9 +735,7 @@ static PyObject *_notdefChar=NULL;
 
 static PyObject *_GetExcValue(void)
 {
-	PyObject *type = NULL, *value = NULL, *tb = NULL;
-	PyObject *result = NULL;
-	PyThreadState *tstate = PyThreadState_Get();
+	PyObject *type = NULL, *value = NULL, *tb = NULL, *result=NULL;
 	PyErr_Fetch(&type, &value, &tb);
 	PyErr_NormalizeException(&type, &value, &tb);
 	if(PyErr_Occurred()) goto L_BAD;
@@ -745,17 +743,8 @@ static PyObject *_GetExcValue(void)
 		value = Py_None;
 		Py_INCREF(value);
 		}
-	Py_XDECREF(tstate->exc_type);
-	Py_XDECREF(tstate->exc_value);
-	Py_XDECREF(tstate->exc_traceback);
-	tstate->exc_type = type;
-	tstate->exc_value = value;
-	tstate->exc_traceback = tb;
+	Py_XINCREF(value);
 	result = value;
-	Py_XINCREF(result);
-	type = 0;
-	value = 0;
-	tb = 0;
 L_BAD:
 	Py_XDECREF(type);
 	Py_XDECREF(value);
@@ -892,16 +881,19 @@ static PyObject *unicode2T1(PyObject *self, PyObject *args, PyObject *kwds)
 
 			if(!PyErr_ExceptionMatches(PyExc_UnicodeEncodeError)) ERROR_EXIT();
 			_o1 = _GetExcValue(); if(!_o1) ERROR_EXIT();
+			PyErr_Clear();
 			_o2 = _GetAttrString(_o1, "args"); if(!_o2) ERROR_EXIT();
 			Py_DECREF(_o1);
 			_o1 = PySequence_GetSlice(_o2, 2, 4); if(!_o1) ERROR_EXIT();
 			Py_DECREF(_o2);
-			_o2 = PySequence_GetItem(_o1, 0); if(!_o2) ERROR_EXIT();
-			i = PyInt_AsLong(_o2); if(PyErr_Occurred()) ERROR_EXIT();
-			Py_DECREF(_o2);
-			_o2 = PySequence_GetItem(_o1, 1); if(!_o1) ERROR_EXIT();
-			j = PyInt_AsLong(_o2); if(PyErr_Occurred()) ERROR_EXIT();
-			Py_DECREF(_o2);
+				_o2 = PySequence_GetItem(_o1, 0); if(!_o2) ERROR_EXIT();
+				i = PyInt_AsLong(_o2); if(PyErr_Occurred()) ERROR_EXIT();
+				Py_DECREF(_o2);
+
+				_o2 = PySequence_GetItem(_o1, 1); if(!_o1) ERROR_EXIT();
+				j = PyInt_AsLong(_o2); if(PyErr_Occurred()) ERROR_EXIT();
+				Py_DECREF(_o2);
+
 			Py_DECREF(_o1); _o2 = _o1 = 0;
 
 			if(i){
