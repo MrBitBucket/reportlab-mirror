@@ -505,11 +505,11 @@ bullet("""defaultPageSize: set this to one of the values defined in reportlab/li
 it is set to pagesizes.A4; other values are pagesizes.letter etc.""")
 bullet("""defaultImageCaching: set to zero to inhibit the creation of .a85 files on your
 hard-drive. The default is to create these preprocessed PDF compatible image files for faster loading""")
-bullet("""T1SearchPathPath: this is a python list of strings representing directories that
+bullet("""T1SearchPath: this is a python list of strings representing directories that
 may be queried for information on Type 1 fonts""")
-bullet("""TTFSearchPathPath: this is a python list of strings representing directories that
+bullet("""TTFSearchPath: this is a python list of strings representing directories that
 may be queried for information on TrueType fonts""")
-bullet("""CMapSearchPathPath: this is a python list of strings representing directories that
+bullet("""CMapSearchPath: this is a python list of strings representing directories that
 may be queried for information on font code maps.""")
 bullet("""showBoundary: set to non-zero to get boundary lines drawn.""")
 bullet("""ZLIB_WARNINGS: set to non-zero to get warnings if the Python compression extension is not found.""")
