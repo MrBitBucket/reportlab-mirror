@@ -122,28 +122,27 @@ be smaller, but slower to generate.  Note that images are <i>always</i> compress
 will only save space if you have a very large amount of text and vector graphics
 on each page.""")
 
-disc("""The $encoding$ argument determines which font encoding
-is used for the standard fonts; this should correspond to
-the encoding on your system.  It has two values at present:
-$'WinAnsiEncoding'$ or $'MacRomanEncoding'$.  The variable
-$rl_config.defaultEncoding$ above points to the former, which
-is standard on Windows and many Unices (including Linux). If
-you are a Mac user and want to make a global change, modify the
-line at the top of <i>reportlab/pdfbase/pdfdoc.py</i> to switch it
-over.""")
-
-disc("""We plan to add support for encodings on a per-font
-basis in future, so you can explicitly add in new fonts
-and say how the data is to be encoded.  It is your responsibility
-to ensure that your string data is in an encoding matching that
-of the font.  If conversions are needed, the Unicode library
-in Python 1.6 can be of great help.""")
+disc("""The $encoding$ argument determines which font encoding is used for the
+standard Type 1 fonts; this should correspond to the encoding on your system.
+Note that this is the encoding used <i>internally by the font</i>; text you
+pass to the ReportLab toolkit for rendering should always either be a Python
+unicode string object or a UTF-8 encoded byte string (see the next chapter)!
+The font encoding has two values at present: $'WinAnsiEncoding'$ or
+$'MacRomanEncoding'$.  The variable $rl_config.defaultEncoding$ above points
+to the former, which is standard on Windows, Mac OS X and many Unices
+(including Linux). If you are Mac user and don't have OS X, you may want to
+make a global change: modify the line at the top of
+<i>reportlab/pdfbase/pdfdoc.py</i> to switch it over.  Otherwise, you can
+probably just ignore this argument completely and never pass it.  For all TTF
+and the commonly-used CID fonts, the encoding you pass in here is ignored,
+since the reportlab library itself knows the right encodings in those
+cases.""")
 
 disc("""The demo script $reportlab/demos/stdfonts.py$
 will print out two test documents showing all code points
 in all fonts, so you can look up characters.  Special
 characters can be inserted into string commands with
-the usual octal escape sequence; for example \\101 = 'A'.""")
+the usual Python escape sequences; for example \\101 = 'A'.""")
 
 disc("""The $verbosity$ argument determines how much log
 information is printed.  By default, it is zero to assist
