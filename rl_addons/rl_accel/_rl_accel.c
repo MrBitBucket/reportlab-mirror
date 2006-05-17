@@ -1571,13 +1571,13 @@ static PyTypeObject BoxList_type = {
 
 static char *__doc__=
 "_rl_accel contains various accelerated utilities\n\
-\tstringWidth a fast string width function\n\
-\t_instanceStringWidth a method version of stringWidth\n\
-\tdefaultEncoding gets/sets the default encoding for stringWidth\n\
-\tgetFonts gets font names from the internal table\n\
-\tgetFontInfo gets font info from the internal table\n\
-\tsetFontInfo adds a font to the internal table\n\
-\t_SWRecover gets/sets a callback for stringWidth recovery\n\
+\tstringWidth a fast string width function (legacy)\n\
+\t_instanceStringWidth a method version of stringWidth (legacy)\n\
+\tdefaultEncoding gets/sets the default encoding for stringWidth (legacy)\n\
+\tgetFonts gets font names from the internal table (legacy)\n\
+\tgetFontInfo gets font info from the internal table (legacy)\n\
+\tsetFontInfo adds a font to the internal table (legacy)\n\
+\t_SWRecover gets/sets a callback for stringWidth recovery (legacy)\n\
 \tescapePDF makes a string safe for PDF\n\
 \t_instanceEscapePDF method equivalent of escapePDF\n\
 \n\
@@ -1588,6 +1588,13 @@ static char *__doc__=
 "\tcalcChecksum calculate checksums for TTFs\n"
 "\tadd32 32 bit unsigned addition\n"
 "\thex32 32 bit unsigned to 0X8.8X string\n"
+#if PY_VERSION_HEX>=0x02030000
+"\tstringWidthU version2 stringWidth\n\
+\t_instanceStringWidthU version2 Font instance stringWidth\n\
+\t_instanceStringWidthTTF version2 TTFont instance stringWidth\n\
+\tgetFontU version2 pdfdmetrics.getFont\n\
+\tunicodeT1 version2 pdfmetrics.unicode2T1\n"
+#endif
 #ifdef	HAVE_BOX
 "\tBox(width,character=None) creates a Knuth character Box with the specified width.\n"
 "\tGlue(width,stretch,shrink) creates a Knuth glue Box with the specified width, stretch and shrink.\n"
