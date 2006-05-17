@@ -53,7 +53,7 @@ def _py_unicode2T1(utext,fonts):
             if i0:
                 R.append((font,utext[:i0].encode(enc)))
             if fonts:
-                R.extend(unicode2T1(utext[i0:il],fonts))
+                R.extend(_py_unicode2T1(utext[i0:il],fonts))
             else:
                 R.append((_notdefFont,_notdefChar*(il-i0)))
             utext = utext[il:]
@@ -678,7 +678,7 @@ def _py_getFont(fontName):
         return findFontAndRegister(fontName)
 
 try:
-    from rl_accel import getFontU as getFont
+    from _rl_accel import getFontU as getFont
 except ImportError:
     getFont = _py_getFont
 
