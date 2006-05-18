@@ -10,6 +10,7 @@ and fonts, we need some routines to display all those characters.
 These are defined herein.  The idea is to include flowable, drawable
 and graphic objects for single and multi-byte fonts. """
 import string
+import codecs
 
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Flowable
@@ -18,6 +19,13 @@ from reportlab.graphics.shapes import Drawing, Group, String, Circle, Rect
 from reportlab.graphics.widgetbase import Widget
 from reportlab.lib import colors
 
+adobe2codec = {
+    'WinAnsiEncoding':'winansi',
+    'MacRomanEncoding':'macroman',
+    'MacExpert':'macexpert',
+    'PDFDoc':'pdfdoc',
+    
+    }
 
 class CodeChartBase(Flowable):
     """Basic bits of drawing furniture used by
@@ -143,6 +151,24 @@ class SingleByteEncodingChart(CodeChartBase):
     def draw(self):
         self.drawLabels()
         charList = [None] * 32 + map(chr, range(32, 256))
+
+        #we need to convert these to Unicode, since ReportLab
+        #2.0 can only draw in Unicode.
+
+        encName = self.encodingName
+        #apply some common translations
+        encName = adobe2codec.get(encName, encName)
+        decoder = codecs.lookup(encName)[1]
+        def decodeFunc(txt):
+            if txt is None:
+                return None
+            else:
+                return decoder(txt, errors='replace')[0]
+            
+        charList = [decodeFunc(ch) for ch in charList]
+
+
+        
         self.drawChars(charList)
         self.canv.grid(self.xlist, self.ylist)
 

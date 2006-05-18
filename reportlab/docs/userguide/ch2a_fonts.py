@@ -11,35 +11,110 @@ heading1("Fonts and encodings")
 disc("""
 This chapter covers fonts, encodings and Asian language capabilities.
 If you are purely concerned with generating PDFs for Western
-European languages, you can skip this on a first reading.
+European languages, you can just read the "Unicode is the default" section
+below and skip the rest on a first reading.
 We expect this section to grow considerably over time. We
 hope that Open Source will enable us to give better support for
 more of the world's languages than other tools, and we welcome
 feedback and help in this area.
 """)
 
+heading2("Unicode and UTF8 are the default input encodings")
+
 disc("""
-Support for custom fonts and encoding is was new
-in reportlab (Release 1.10, 6 Nov. 2001), and may
-change in the future. The canvas methods  $setFont$, $getFont$,
-$registerEncoding$ and $registerTypeFace$ can all be considered
-stable. Other things such as how reportlab searches for fonts are more
-liable to change.
+Starting with reportlab Version 2.0 (May 2006), all text input you
+provide to our APIs should be in UTF8 or as Python Unicode objects.
+This applies to arguments to canvas.drawString and related APIs,
+table cell content, drawing object parameters, and paragraph source
+text.  
 """)
 
 
-heading2("Using non-standard fonts")
+disc("""
+We considered making the input encoding configurable or even locale-dependent,
+but decided that "explicit is better than implicit".""")
+
+disc("""
+This simplifies many things we used to do previously regarding greek
+letters, symbols and so on.  To display any character, find out its
+unicode code point, and make sure the font you are using is able
+to display it.""")
+
+disc("""
+If you are adapting a ReportLab 1.x application, or reading data from
+another source which contains single-byte data (e.g. latin-1 or WinAnsi),
+you need to do a conversion into Unicode.  The Python codecs package now
+includes converters for all the common encodings, including Asian ones.
+""")
+
+
+
+disc(u"""
+If your data is not encoded as UTF8, you will get a UnicodeDecodeError as
+soon as you feed in a non-ASCII character.  For example, this snippet below is
+attempting to read in and print a series of names, including one with a French
+accent:  ^Marc-Andr\u00e9 Lemburg^.  The standard error is quite helpful and tells you
+what character it doesn't like:
+""")
+
+eg(u"""
+>>> from reportlab.pdfgen.canvas import Canvas
+>>> c = Canvas('temp.pdf')
+>>> y = 700
+>>> for line in file('latin_python_gurus.txt','r'):
+...     c.drawString(100, y, line.strip())
+...
+Traceback (most recent call last):
+...
+UnicodeDecodeError: 'utf8' codec can't decode bytes in position 9-11: invalid data
+-->\u00e9 L<--emburg
+>>> 
+""")
+
+
+disc("""
+The simplest fix is just to convert your data to unicode, saying which encoding
+it comes from, like this:""")
+
+eg("""
+>>> for line in file('latin_input.txt','r'):
+...     uniLine = unicode(line, 'latin-1')
+...     c.drawString(100, y, uniLine.strip())
+>>>
+>>> c.save()
+""")
+
+
+heading2("Changing the built-in fonts output encoding")
+
+disc("""
+There are still a number of places in the code, including the rl_config
+defaultEncoding parameter, and arguments passed to various Font constructors.
+These generally relate to the OUTPUT encoding used when we write data in the font
+file. This affects which characters are actually available in the font if
+you are using Type 1 fonts, since only 256 glyphs can be available at
+one time. Unless you have a very specific need for
+MacRoman or MacExpert encoding characters, we advise you to ignore
+this.  By default the standard fonts (Helvetica, Courier, Times Roman)
+will offer the glyphs available in Latin-1.  If you try to print a non-Latin-1
+character using the built-in Helvetica, you'll see a rectangle or blob.
+
+""")
+
+
+heading2("Using non-standard Type 1 fonts")
 
 disc("""
 As discussed in the previous chapter, every copy of Acrobat Reader
 comes with 14 standard fonts built in.  Therefore, the ReportLab
 PDF Library only needs to refer to these by name.  If you want
-to use other fonts, they must be embedded in the PDF document.""")
+to use other fonts, they must be available to your code and
+will be embedded in the PDF document.""")
 
 disc("""
 You can use the mechanism described below to include arbitrary
-fonts in your documents. Just van Rossum has kindly
-donated a font named <i>LettErrorRobot-Chrome</i> which we may
+fonts in your documents. Just van Rossum has kindly donated a Type 1
+font named <i>LettErrorRobot-Chrome</i> which we may
 use for testing and/or documenting purposes (and which you may
 use as well). It comes bundled with the ReportLab distribution in the
 directory $reportlab/fonts$.
@@ -82,6 +157,13 @@ pdfmetrics.registerFont(justFont)
 canvas.setFont('LettErrorRobot-Chrome', 32)
 canvas.drawString(10, 150, 'This should be in')
 canvas.drawString(10, 100, 'LettErrorRobot-Chrome')
+""")
+
+
+disc("""
+Note that the argument "WinAnsiEncoding" has nothing to do with the input;
+it's to say which set of characters within the font file will be active
+and available.
 """)
 
 illust(examples.customfont1, "Using a very non-standard font")
@@ -133,10 +215,14 @@ Unfortunately, there is no reliable standard yet for such
 locations (not even on the same platform) and, hence, you might
 have to edit the file $reportlab/rl_config.py$ to modify the
 value of the $T1SearchPath$ identifier to contain additional
-directories.
+directories.  Our own recommendation is to use the ^reportlab/fonts^
+folder in development; and to have any needed fonts as packaged parts of
+your application in any kind of controlled server deployment.  This insulates
+you from fonts being installed and uninstalled by other software or system
+administrator.
 """)
 
-heading3("Missing Glyphs")
+heading3("Warnings about missing glyphs")
 disc("""If you specify an encoding, it is generally assumed that
 the font designer has provided all the needed glyphs.  However,
 this is not always true.  In the case of our example font,
@@ -157,19 +243,9 @@ reportlab.rl_config.warnOnMissingFontGlyphs = 0
 
 heading2("Standard Single-Byte Font Encodings")
 disc("""
-Every time you draw some text, you presume an encoding.
-The Reportlab PDF library offers very fine-grained control
-of character encodings, which can be critical.  You can specify
-the encoding to use at a per-installation, per-document or per-font
-level, and also synthesize your own encodings.
+This section shows you the glyphs available in the common encodings.
 """)
 
-disc("""The module reportlab/rl_config.py contains a variable
-'defaultEncoding' which will usually be set to one of "WinAnsiEncoding"
-or "MacRomanEncoding".  In the distribution, it is the first, but Mac users will
-commonly edit it.  Unless otherwise specified, this is used for text fonts.
-Let's start by reviewing the characters in these fonts.
-""")
 
 disc("""The code chart below shows the characters in the $WinAnsiEncoding$.
 This is the standard encoding on Windows and many Unix systems in America
@@ -204,366 +280,16 @@ cht4 = SingleByteEncodingChart(faceName='Symbol',encodingName='SymbolEncoding',c
 illust(lambda canv: cht4.drawOn(canv, 0, 0), "Symbol and its one and only encoding", cht4.width, cht4.height)
 
 
-heading2("Custom Font Encodings")
-
-disc("""
-It is possible to create your own single-byte encodings.  This may be necessary if you are
-designing fonts, or want to use a character which is provided in the font but not in the
-current encoding.  Adobe's fonts commonly contain 300 or more glyphs (covering symbols, ligatures
-and various things used in professional publishing), but only 256 can be referenced in any one
-encoding.
-""")
-
-disc("""
-The code below comes from $test_pdfbase_encodings.py$ and shows a simple example.  The MacRoman
-encoding lacks a Euro character, but it is there in the fonts.  You get hold of an encoding
-object (which must be based on an existing standard encoding), and treat it like a dictionary,
-assigning the byte values ("code points") you wish to change.  Then register it.  We'll make a
-Mac font with the Euro at position 219 to demonstrate this. """)
-eg("""
-# now make our hacked encoding
-euroMac = pdfmetrics.Encoding('MacWithEuro', 'MacRomanEncoding')
-euroMac[219] = 'Euro'
-pdfmetrics.registerEncoding(euroMac)
-
-pdfmetrics.registerFont(pdfmetrics.Font('MacHelvWithEuro', 'Helvetica-Oblique', 'MacWithEuro'))
-
-c.setFont('MacHelvWithEuro', 12)
-c.drawString(125, 575, 'Hacked MacRoman with Euro: Character 219 = "\\xe2\\x82\\xac"') # utf8 for Euro
-""")
-
-heading2("Asian Font Support")
-disc("""The Reportlab PDF Library aims to expose full support for Asian fonts.
-PDF is the first really portable solution for Asian text handling.
-Japanese, Traditional Chinese (Taiwan/Hong Kong), Simplified Chinese (mainland China)
-and Korean are all supported; however, you have to download the relevant font pack
-from Adobe's web site to view such PDF files, or you'll get cryptic error messages
-about "bad CMaps".  We do not yet support TrueType Unicode fonts with subsetting, which
-is the other technique used by Distiller in creating Asian PDF documents.
-""")
-
-disc("""Since many users will not have the font packs installed, we have included
-a rather grainy ^bitmap^ of some Japanese characters.  We will discuss below what is needed to
-generate them.""")
-# include a bitmap of some Asian text
-I=os.path.join(os.path.dirname(reportlab.__file__),'docs','images','jpnchars.jpg')
-try:
-    getStory().append(Image(I))
-except:
-    disc("""An image should have appeared here.""")
-
-disc("""Asian multi-byte fonts are called 'CIDFonts'.  CID stands for 'Character ID'.  The
-central idea is that a font contains many thousands of glyphs each identified by a numeric
-character ID, and that encodings determine which strings (typically one or two bytes long)
-map to which character IDs.  This is exactly the same concept as for single byte fonts.
-However, the implementation differs slightly, as does the amount of work we have to do
-to load and measure these fonts accurately.""")
-
-disc("""You create CID fonts with a combination of a face name and an encoding name.
-By convention, the font name is a combination of the two separated by a dash.
-It is actually possible to create separate CIDTypeFace and CIDEncoding objects, and
-to assign your own names, but there is no point; Adobe has followed the naming
-convention since CID fonts were introduced.  We wish they (and we) had done so with
-single byte fonts too!  Once a font is registered, you can use it by its combined
-name with $setFont$.""")
-
-eg("""
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.cidfonts import CIDFont
-pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90ms-RKSJ-H'))
-canvas.setFont('HeiseiMin-W3-90ms-RKSJ-H', 16)
-
-# this says "This is HeiseiMincho" in shift-JIS.  Not all our readers
-# have a Japanese PC, so I escaped it. On a Japanese-capable
-# system, print the string to see Kanji
-message1 = '\\202\\261\\202\\352\\202\\315\\225\\275\\220\\254\\226\\276\\222\\251\\202\\305\\202\\267\\201B'
-canvas.drawString(100, 675, message1)
-""")
-#had to double-escape the slashes above to get escapes into the PDF
-
-disc("""A full list of the available fonts and encodings is available near the
-top of $reportlab/pdfbase/_cidfontdata.py$.  Also, the following four test scripts
-generate samples in the corresponding languages:""")
-eg("""reportlab/test/test_multibyte_jpn.py
-reportlab/test/test_multibyte_kor.py
-reportlab/test/test_multibyte_chs.py
-reportlab/test/test_multibyte_cht.py""")
-
-disc("""The illustration below shows part of the first page
-of the Japanese output sample.  It shows both horizontal and vertical
-writing, and illustrates the ability to mix variable-width Latin
-characters in Asian sentences.  The choice of horizontal and vertical
-writing is determined by the encoding, which ends in 'H' or 'V'.
-Whether an encoding uses fixed-width or variable-width versions
-of Latin characters also depends on the encoding used; see the definitions
-below.""")
-
-Illustration(image("../images/jpn.gif", width=531*0.50,
-height=435*0.50), 'Output from test_multibyte_jpn.py')
-
-caption("""
-Output from test_multibyte_jpn.py
-""")
-heading2("Available Asian typefaces and encodings")
-disc("""
-The encoding and font data are grouped by some standard 'language
-prefixes':
-""")
-bullet("""
-$chs$ = Chinese Simplified (mainland)
-""")
-bullet("""
-$cht$ = Chinese Traditional (Taiwan)
-""")
-bullet("""
-$kor$ = Korean
-""")
-bullet("""
-$jpn$ = Japanese
-""")
-
-disc("""
-Each of the following sections provided the following information for each language:
-""")
-
-bullet("""
-'language prefix':
-chs, cht, kor or jpn
-""")
-bullet("""
-'typefaces':
-the allowed typefaces for that language
-""")
-bullet("""
-'encoding names':
-the official encoding names, with comments taken verbatim from the PDF
-Spec (also found in file $pdfbase/_cidfontdata.py$)
-""")
-bullet("""
-test:
-the name and location of the test file for that language
-""")
-
-
-CPage(3)
-heading3("Chinese Simplified")
-disc("""
-'language prefix': $chs$
-""")
-disc("""
-typefaces: '$STSong-Light$'
-""")
-disc("""
-encoding names:
-""")
-eg("""
-'GB-EUC-H',         # Microsoft Code Page 936 (lfCharSet 0x86), GB 2312-80
-                    # character set, EUC-CN encoding
-'GB-EUC-V',         # Vertical version of GB-EUC-H
-'GBpc-EUC-H',       # Macintosh, GB 2312-80 character set, EUC-CN encoding,
-                    # Script Manager code 2
-'GBpc-EUC-V',       # Vertical version of GBpc-EUC-H
-'GBK-EUC-H',        # Microsoft Code Page 936 (lfCharSet 0x86), GBK character
-                    # set, GBK encoding
-'GBK-EUC-V',        # Vertical version of GBK-EUC-V
-'UniGB-UCS2-H',     # Unicode (UCS-2) encoding for the Adobe-GB1
-                    # character collection
-'UniGB-UCS2-V'      # Vertical version of UniGB-UCS2-H.
-""")
-disc("""
-test:
-$reportlab/test/test_multibyte_chs.py$
-""")
-
-
-CPage(3)
-heading3("Chinese Traditional")
-disc("""
-'language prefix': $cht$
-""")
-disc("""
-typefaces: '$MSung-Light$', '$MHei-Medium$'
-""")
-disc("""
-encoding names:
-""")
-eg("""
-'B5pc-H',           # Macintosh, Big Five character set, Big Five encoding,
-                    # Script Manager code 2
-'B5pc-V',           # Vertical version of B5pc-H
-'ETen-B5-H',        # Microsoft Code Page 950 (lfCharSet 0x88), Big Five
-                    # character set with ETen extensions
-'ETen-B5-V',        # Vertical version of ETen-B5-H
-'ETenms-B5-H',      # Microsoft Code Page 950 (lfCharSet 0x88), Big Five
-                    # character set with ETen extensions; this uses proportional
-                    # forms for half-width Latin characters.
-'ETenms-B5-V',      # Vertical version of ETenms-B5-H
-'CNS-EUC-H',        # CNS 11643-1992 character set, EUC-TW encoding
-'CNS-EUC-V',        # Vertical version of CNS-EUC-H
-'UniCNS-UCS2-H',    # Unicode (UCS-2) encoding for the Adobe-CNS1
-                    # character collection
-'UniCNS-UCS2-V'     # Vertical version of UniCNS-UCS2-H.
-""")
-disc("""
-test:
-$reportlab/test/test_multibyte_cht.py$
-""")
-
-
-CPage(3)
-heading3("Korean")
-disc("""
-'language prefix': $kor$
-""")
-disc("""
-typefaces: '$HYSMyeongJoStd-Medium$','$HYGothic-Medium$'
-""")
-disc("""
-encoding names:
-""")
-eg("""
-'KSC-EUC-H',        # KS X 1001:1992 character set, EUC-KR encoding
-'KSC-EUC-V',        # Vertical version of KSC-EUC-H
-'KSCms-UHC-H',      # Microsoft Code Page 949 (lfCharSet 0x81), KS X 1001:1992
-                    #character set plus 8,822 additional hangul, Unified Hangul
-                    #Code (UHC) encoding
-'KSCms-UHC-V',      #Vertical version of KSCms-UHC-H
-'KSCms-UHC-HW-H',   #Same as KSCms-UHC-H, but replaces proportional Latin
-                    # characters with halfwidth forms
-'KSCms-UHC-HW-V',   #Vertical version of KSCms-UHC-HW-H
-'KSCpc-EUC-H',      #Macintosh, KS X 1001:1992 character set with MacOS-KH
-                    #extensions, Script Manager Code 3
-'UniKS-UCS2-H',     #Unicode (UCS-2) encoding for the Adobe-Korea1 character collection
-'UniKS-UCS2-V'      #Vertical version of UniKS-UCS2-H
-
-""")
-disc("""
-test:
-$reportlab/test/test_multibyte_kor.py$
-""")
-
-
-CPage(3)
-heading3("Japanese")
-disc("""
-'language prefix': $jpn$
-""")
-disc("""
-typefaces: '$HeiseiMin-W3$', '$HeiseiKakuGo-W5$'
-""")
-disc("""
-encoding names:
-""")
-eg("""
-'83pv-RKSJ-H',      #Macintosh, JIS X 0208 character set with KanjiTalk6
-                    #extensions, Shift-JIS encoding, Script Manager code 1
-'90ms-RKSJ-H',      #Microsoft Code Page 932 (lfCharSet 0x80), JIS X 0208
-                    #character set with NEC and IBM extensions
-'90ms-RKSJ-V',      #Vertical version of 90ms-RKSJ-H
-'90msp-RKSJ-H',     #Same as 90ms-RKSJ-H, but replaces half-width Latin
-                    #characters with proportional forms
-'90msp-RKSJ-V',     #Vertical version of 90msp-RKSJ-H
-'90pv-RKSJ-H',      #Macintosh, JIS X 0208 character set with KanjiTalk7
-                    #extensions, Shift-JIS encoding, Script Manager code 1
-'Add-RKSJ-H',       #JIS X 0208 character set with Fujitsu FMR extensions,
-                    #Shift-JIS encoding
-'Add-RKSJ-V',       #Vertical version of Add-RKSJ-H
-'EUC-H',            #JIS X 0208 character set, EUC-JP encoding
-'EUC-V',            #Vertical version of EUC-H
-'Ext-RKSJ-H',       #JIS C 6226 (JIS78) character set with NEC extensions,
-                    #Shift-JIS encoding
-'Ext-RKSJ-V',       #Vertical version of Ext-RKSJ-H
-'H',                #JIS X 0208 character set, ISO-2022-JP encoding,
-'V',                #Vertical version of H
-'UniJIS-UCS2-H',    #Unicode (UCS-2) encoding for the Adobe-Japan1 character
-                    #collection
-'UniJIS-UCS2-V',    #Vertical version of UniJIS-UCS2-H
-'UniJIS-UCS2-HW-H', #Same as UniJIS-UCS2-H, but replaces proportional Latin
-                    #characters with half-width forms
-'UniJIS-UCS2-HW-V'  #Vertical version of UniJIS-UCS2-HW-H
-""")
-disc("""
-test:
-$reportlab/test/test_multibyte_jpn.py$
-""")
-
-
-
-
-pencilnote()
-heading3("Character Mappings and Configuration")
-disc("""In order to accurately measure the width of Asian characters, and
-thus to correctly right-align and centre them, we need access to the mapping
-tables which relate each encoding to the glyphs in the font file.  We currently
-get this by processing the Acrobat Reader CMap files; these wil be on your
-system if the relevant font packs are installed.  If you try to generate an
-Asian document and get an error, check that the relevant Acrobat Language Pack
-is installed.  Then, check in rl_config.py which has a list of standard locations;
-you may need to edit this list.
-""")
-
-disc("""
-Most of these files are small and fast to parse, but the Unicode ones are
-big.  Any encoding with 'UCS2' in the name is Unicode.  The files work with
-consecutive runs of characters, but there may be 10,000 runs of 1 character
-in a Unicode maping table; it may take minutes to parse these.  Therefore,
-after the first parse, we write a marshalled dictionary in the
-$reportlab/fonts$ directory with the extension $.fastmap$.  This is used on
-subsequent calls and loads up to 100x faster.  If you are running in a
-secure environment such as a web server, be aware that you either need
-to pre-generate and copy up this file, or ensure that the web user can
-write this directory.
-""")
-
-heading3("To Do")
-disc("""We expect to be developing this area of the package for some time.accept2dyear
-Here is an outline of the main priorities.  We welcome help!""")
-
-bullet("""
-Ensure that we have accurate character metrics for all encodings in horizontal and
-vertical writing.""")
-
-bullet("""
-document everything thoroughly.""")
-
-bullet("""
-build a compressed mapping database which will remove any
-need to refer to Adobe's CMap files, and further speed up access.
-""")
-
-bullet("""
-write accelerators in C for loading CMaps and calculating the widths of
-strings""")
-
-bullet("""
-draw Asian text in the bitmap output of reportlab/graphics, so that we can provide
-identical charts in all media
-""")
-
-bullet("""
-allow support for Gaiji (user-defined characters) easily by implementing composite
-fonts made out of a standard Asian font and a small custom-built Type 1 font.
-""")
-
-bullet("""
-implement and then accelerate the correct paragraph wrapping rules for paragraphs""")
-
-bullet("""
-support Unicode documents with automatic selection of the underlying encoding
-for printing""")
-
 CPage(5)
 heading2("TrueType Font Support")
 disc("""
 Marius Gedminas ($mgedmin@delfi.lt$) with the help of Viktorija Zaksiene ($vika@pov.lt$)
-have contributed support for embedded TrueType fonts and preliminary Unicode translation using UTF-8.""")
+have contributed support for embedded TrueType fonts.  TrueType fonts work in Unicode/UTF8
+and are not limited to 256 characters.""")
 
-disc("""The current support should be regarded as experimental, but it seems to work and doesn't
-interfere with anything else. Marius' patch worked almost out of the box and only some additional
-support for finding TTF files was added.""")
 
 CPage(3)
-disc("""Simple things are done simply; we use <b>$reportlab.pdfbase.ttfonts.TTFont$</b> to create a true type
+disc("""We use <b>$reportlab.pdfbase.ttfonts.TTFont$</b> to create a true type
 font object and register using <b>$reportlab.pdfbase.pdfmetrics.registerFont$</b>.
 In pdfgen drawing directly to the canvas we can do""")
 eg("""
@@ -608,10 +334,172 @@ addMapping('Rina', 1, 0, 'Rina')    #bold
 addMapping('Rina', 1, 1, 'Rina')    #italic and bold
 """)
 
-disc("""we only have Rina regular so we map all to the same internal fontname. After registering and mapping
+disc("""We only have a Rina regular font, no bold or italic, so we must map all to the
+same internal fontname.  ^&lt;b&gt;^ and ^&lt;i&gt;^ tags may now be used safely, but
+have no effect.
+After registering and mapping
 the Rina font as above we can use paragraph text like""")
 parabox2("""<font name="Times-Roman" size="14">This is in Times-Roman</font>
-<font name="Rina" color="magenta" size="14">and this is in magenta Rina!</font>""","Using TTF fonts in paragraphs")
+<font name="Rina" color="magenta" size="14">and this is in magenta <b>Rina!</b></font>""","Using TTF fonts in paragraphs")
+
+
+
+
+heading2("Asian Font Support")
+disc("""The Reportlab PDF Library aims to expose full support for Asian fonts.
+PDF is the first really portable solution for Asian text handling. There are
+two main approaches for this:  Adobe's Asian Language Packs, or TrueType fonts.
+""")
+
+heading3("Asian Language Packs")
+disc("""
+This approach offers the best performance since nothing needs embedding in the PDF file;
+as with the standard fonts, everything is on the reader.""")
+
+disc("""
+Adobe makes available add-ons for each main language.  In Adobe Reader 6.0 and 7.0, you
+will be prompted to download and install these as soon as you try to open a document
+using them.  In earlier versions, you would see an error message on opening an Asian document
+and had to know what to do.   
+""")
+
+disc("""
+Japanese, Traditional Chinese (Taiwan/Hong Kong), Simplified Chinese (mainland China)
+and Korean are all supported and our software knows about the following fonts:
+""")
+bullet("""
+$chs$ = Chinese Simplified (mainland): '$STSong-Light$'
+""")
+bullet("""
+$cht$ = Chinese Traditional (Taiwan): '$MSung-Light$', '$MHei-Medium$'
+""")
+bullet("""
+$kor$ = Korean: '$HYSMyeongJoStd-Medium$','$HYGothic-Medium$'
+""")
+bullet("""
+$jpn$ = Japanese: '$HeiseiMin-W3$', '$HeiseiKakuGo-W5$'
+""")
+
+
+disc("""Since many users will not have the font packs installed, we have included
+a rather grainy ^bitmap^ of some Japanese characters.  We will discuss below what is needed to
+generate them.""")
+# include a bitmap of some Asian text
+I=os.path.join(os.path.dirname(reportlab.__file__),'docs','images','jpnchars.jpg')
+try:
+    getStory().append(Image(I))
+except:
+    disc("""An image should have appeared here.""")
+
+disc("""Prior to Version 2.0, you had to specify one of many native encodings
+when registering a CID Font. In version 2.0 you should a new UnicodeCIDFont
+class.""")
+
+eg("""
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+pdfmetrics.registerFont(UnicodeCIDFont('HeiseiMin-W3'))
+canvas.setFont('HeiseiMin-W3', 16)
+
+# the two unicode characters below are "Tokyo"
+msg = u'\u6771\u4EAC : Unicode font, unicode input'
+canvas.drawString(100, 675, msg)
+""")
+#had to double-escape the slashes above to get escapes into the PDF
+
+disc("""The old coding style with explicit encodings should still work, but is now
+only relevant if you need to construct vertical text.  We aim to add more readable options
+for horizontal and vertical text to the UnicodeCIDFont constructor in future.
+The following four test scripts generate samples in the corresponding languages:""")
+eg("""reportlab/test/test_multibyte_jpn.py
+reportlab/test/test_multibyte_kor.py
+reportlab/test/test_multibyte_chs.py
+reportlab/test/test_multibyte_cht.py""")
+
+## put back in when we have vertical text...
+##disc("""The illustration below shows part of the first page
+##of the Japanese output sample.  It shows both horizontal and vertical
+##writing, and illustrates the ability to mix variable-width Latin
+##characters in Asian sentences.  The choice of horizontal and vertical
+##writing is determined by the encoding, which ends in 'H' or 'V'.
+##Whether an encoding uses fixed-width or variable-width versions
+##of Latin characters also depends on the encoding used; see the definitions
+##below.""")
+##
+##Illustration(image("../images/jpn.gif", width=531*0.50,
+##height=435*0.50), 'Output from test_multibyte_jpn.py')
+##
+##caption("""
+##Output from test_multibyte_jpn.py
+##""")
+
+
+
+
+pencilnote()
+heading3("Character Mappings and Configuration")
+disc("""In order to accurately measure the width of Asian characters, and
+thus to correctly right-align and centre them, we need access to the mapping
+tables which relate each encoding to the glyphs in the font file.  We currently
+get this by processing the Acrobat Reader CMap files; these wil be on your
+system if the relevant font packs are installed.  If you try to generate an
+Asian document and get an error, check that the relevant Acrobat Language Pack
+is installed.  Then, check in rl_config.py which has a list of standard locations;
+you may need to edit this list.
+""")
+
+disc("""
+Most of these files are small and fast to parse, but the Unicode ones are
+big.  Any encoding with 'UCS2' in the name is Unicode.  The files work with
+consecutive runs of characters, but there may be 10,000 runs of 1 character
+in a Unicode maping table; it may take minutes to parse these.  Therefore,
+after the first parse, we write a marshalled dictionary in the
+$reportlab/fonts$ directory with the extension $.fastmap$.  This is used on
+subsequent calls and loads up to 100x faster.  If you are running in a
+secure environment such as a web server, be aware that you either need
+to pre-generate and copy up this file, or ensure that the web user can
+write this directory.
+""")
+
+
+heading3("TrueType fonts with Asian characters")
+disc("""
+This is the easy way to do it.  No special handling at all is needed to
+work with Asian TrueType fonts.  Windows users who have installed, for example,
+Japanese as an option in Control Panel, will have a font "msmincho.ttf" which
+can be used.  However, be aware that it takes time to parse the fonts, and that
+quite large subsets may need to be embedded in your PDFs.  We can also now parse
+files ending in .ttc, which are a slight variation of .ttf.
+
+""")
+
+
+heading3("To Do")
+disc("""We expect to be developing this area of the package for some time.accept2dyear
+Here is an outline of the main priorities.  We welcome help!""")
+
+bullet("""
+Ensure that we have accurate character metrics for all encodings in horizontal and
+vertical writing.""")
+
+bullet("""
+Add options to ^UnicodeCIDFont^ to allow vertical and proportional variants where the font permits it.""")
+
+bullet("""
+document everything thoroughly.""")
+
+bullet("""
+embed the metrics for the standard fonts in the code directly, removing the need
+for CMap files""")
+
+bullet("""
+write accelerators in C for loading CMaps and calculating the widths of
+strings""")
+
+
+bullet("""
+Improve the word wrapping code in paragraphs and allow vertical writing.""")
+
 
 
 CPage(5)
