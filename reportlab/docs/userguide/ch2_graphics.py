@@ -122,7 +122,13 @@ be smaller, but slower to generate.  Note that images are <i>always</i> compress
 will only save space if you have a very large amount of text and vector graphics
 on each page.""")
 
-disc("""The $encoding$ argument determines which font encoding is used for the
+disc("""The $encoding$ argument is largely obsolete in version 2.0 and can
+probably be omitted by 99% of users.  Its default value is fine unless you
+very specifically need to use one of the 25 or so characters which are present
+in MacRoman and not in Winansi.  A useful reference to these is here:
+<font color="blue"><u><a href="http://www.alanwood.net/demos/charsetdiffs.html">http://www.alanwood.net/demos/charsetdiffs.html</a></u></font>.
+
+The parameter determines which font encoding is used for the
 standard Type 1 fonts; this should correspond to the encoding on your system.
 Note that this is the encoding used <i>internally by the font</i>; text you
 pass to the ReportLab toolkit for rendering should always either be a Python
