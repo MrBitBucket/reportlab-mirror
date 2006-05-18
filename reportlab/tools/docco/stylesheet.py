@@ -22,9 +22,21 @@ def getStyleSheet():
                                   fontName='Times-Italic')
                    )
 
+    stylesheet.add(ParagraphStyle(name='Indent0',
+                                  leftIndent=18,)
+                   )
+
     stylesheet.add(ParagraphStyle(name='Indent1',
                                   leftIndent=36,
-                                  firstLineIndent=0)
+                                  firstLineIndent=0,
+                                  spaceBefore=1,
+                                  spaceAfter=7)
+                   )
+    
+    stylesheet.add(ParagraphStyle(name='Indent2',
+                                  leftIndent=50,
+                                  firstLineIndent=0,
+                                  spaceAfter=100)
                    )
 
     stylesheet.add(ParagraphStyle(name='BodyText',
@@ -106,6 +118,12 @@ def getStyleSheet():
                                   leading=8.8,
                                   leftIndent=36,
                                   firstLineIndent=0))
+    
+    stylesheet.add(ParagraphStyle(name='Link',
+                                  parent=stylesheet['Code'],
+                                  spaceAfter=7,
+                                  spaceBefore=0,
+                                  leftIndent=55))
 
     stylesheet.add(ParagraphStyle(name='FunctionHeader',
                                   parent=stylesheet['Normal'],
