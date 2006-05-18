@@ -10,7 +10,7 @@ def _dot(c,write=sys.stdout.write):
 	if _total%40 == 39: write('\n')
 	_total = _total + 1
 
-def goodTest(x,t,tb=0,**kw):
+def goodTest(x,t,tb=0,inOnly=0,**kw):
 	try:
 		P=_pyRXP.Parser(**kw)
 		r = P(x)
@@ -30,7 +30,7 @@ def goodTest(x,t,tb=0,**kw):
 		r = r.replace('\r','\\r')
 		r = r.replace('\n','\\n')
 	print >>_logf, '%s.Parser(%s)(%s)'%(_pyRXP.__name__,s[2:],repr(x)),
-	if r==t and rb==tb:
+	if (inOnly and t in r) or (r==t) and rb==tb:
 		print >>_logf, 'OK'
 		_dot('.')
 	else:
@@ -38,8 +38,11 @@ def goodTest(x,t,tb=0,**kw):
 		print >>_logf,'\nBAD got ', r
 		print >>_logf,'Expected', t
 
-def failTest(x,t,tb=1,**kw):
-	goodTest(x,t,tb,**kw)
+def failTest(x,t,tb=1,inOnly=0,**kw):
+	goodTest(x,t,tb,inOnly=inOnly,**kw)
+
+def bigDepth(n):
+	return n and '<tag%d>%s</tag%d>' % (n,bigDepth(n-1),n) or 'middle'
 
 def _runTests(pyRXP):
 	global _pyRXP
@@ -85,7 +88,7 @@ def _runTests(pyRXP):
 	goodTest('<a><![CDATA[<a>]]></a>',('a', None, ['<a>'], None))
 	goodTest('<a><![CDATA[<a>]]></a>',('a', None, [('<![CDATA[', None, ['<a>'], None)], None),ReturnCDATASectionsAsTuples=1)
 	goodTest('''<foo:A xmlns:foo="http://www.foo.org/"><foo:B><foo:C xmlns:foo="http://www.bar.org/"><foo:D>abcd</foo:D></foo:C></foo:B><foo:B/><A>bare A<C>bare C</C><B>bare B</B></A><A xmlns="http://default.reportlab.com/" xmlns:bongo="http://bongo.reportlab.com/">default ns A<bongo:A>bongo A</bongo:A><B>default NS B</B></A></foo:A>''',('{http://www.foo.org/}A', {'xmlns:foo': 'http://www.foo.org/'}, [('{http://www.foo.org/}B', None, [('{http://www.bar.org/}C', {'xmlns:foo': 'http://www.bar.org/'}, [('{http://www.bar.org/}D', None, ['abcd'], None)], None)], None), ('{http://www.foo.org/}B', None, None, None), ('A', None, ['bare A', ('C', None, ['bare C'], None), ('B', None, ['bare B'], None)], None), ('{http://default.reportlab.com/}A', {'xmlns': 'http://default.reportlab.com/', 'xmlns:bongo': 'http://bongo.reportlab.com/'}, ['default ns A', ('{http://bongo.reportlab.com/}A', None, ['bongo A'], None), ('{http://default.reportlab.com/}B', None, ['default NS B'], None)], None)], None),XMLNamespaces=1,ReturnNamespaceAttributes=1)
-
+	failTest(bigDepth(257),"""Error Internal error, stack limit reached!\n""", inOnly=1)
 
 def run():
 	import pyRXP

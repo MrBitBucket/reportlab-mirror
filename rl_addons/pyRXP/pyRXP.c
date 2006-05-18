@@ -641,7 +641,7 @@ PyObject *ProcessSource(Parser p, InputSource source)
 {
 	XBit		bit=0;
 	int			r, depth, i;
-	PyObject	*stack[MAX_DEPTH];
+	PyObject	*stack[MAX_DEPTH+1];
 	PyObject	*retVal = 0;
 	ParserDetails*	pd = (ParserDetails*)(p->warning_callback_arg);
 
