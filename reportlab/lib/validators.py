@@ -7,7 +7,7 @@ This module contains some standard verifying functions which can be
 used in an attribute map.
 """
 
-import string, sys
+import string, sys, codecs
 from types import *
 _SequenceTypes = (ListType,TupleType)
 _NumberTypes = (FloatType,IntType)
@@ -65,6 +65,16 @@ class _isBoolean(Validator):
 class _isString(Validator):
     def test(self,x):
         return type(x) in (StringType, UnicodeType)
+
+class _isCodec(Validator):
+    def test(self,x):
+        if type(x) not in (StringType, UnicodeType):
+            return False
+        try:
+            a,b,c,d = codecs.lookup(x)
+            return True
+        except LookupError:
+            return False
 
 class _isNumber(Validator):
     def test(self,x):
@@ -283,6 +293,7 @@ inherit = Inherit()
 isAuto = Auto()
 isBoolean = _isBoolean()
 isString = _isString()
+isCodec = _isCodec()
 isNumber = _isNumber()
 isInt = _isInt()
 isNoneOrInt = NoneOr(isInt,'isNoneOrInt')
