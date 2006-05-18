@@ -4,6 +4,7 @@
 from reportlab.tools.docco.rl_doc_utils import *
 import reportlab
 
+title("ReportLab PDF Library")
 title("User Guide")
 centred('ReportLab Version ' + reportlab.Version)
 
@@ -20,14 +21,18 @@ heading1("Introduction")
 
 
 heading2("About this document")
-disc("""This document is intended to be a conversational introduction
-to the use of the ReportLab packages.  Some previous programming experience
+disc("""This document is an introduction to the ReportLab PDF library.
+Some previous programming experience
 is presumed and familiarity with the Python Programming language is
 recommended.  If you are new to Python, we tell you in the next section
 where to go for orientation.
 """)
 
-disc("""After working your way through this, you should be ready to begin
+disc("""
+This manual does not cover 100% of the features, but should explain all
+the main concepts and help you get started, and point you at other
+learning resources. 
+After working your way through this, you should be ready to begin
 writing programs to produce sophisticated reports.
 """)
 
@@ -37,43 +42,48 @@ bullet("What is Python?")
 bullet("How do I get everything set up and running?")
 
 todo("""
-Be warned! This document is a work in progress.  We need your help to
-make sure it is complete and helpful.  Please send any feedback to our
-user mailing list, reportlab-users@reportlab.com.
+We need your help to make sure this manual is complete and helpful.
+Please send any feedback to our user mailing list,
+which is signposted from <a href="http://www.reportlab.org/">www.reportlab.org</a>.
 """)
 
-heading2("What is ReportLab?")
-disc("""ReportLab is a software library that lets you directly
+heading2("What is the ReportLab PDF Library?")
+disc("""This is a software library that lets you directly
 create documents in Adobe's Portable Document Format (PDF) using
-the Python programming language. """)
+the Python programming language.   It also creates charts and data graphics
+in various bitmap and vector formats as well as PDF.""")
 
 disc("""PDF is the global standard for electronic documents. It
 supports high-quality printing yet is totally portable across
 platforms, thanks to the freely available Acrobat Reader.  Any
-application which previously generated hard copy reports can
-benefit from making PDF documents instead; these can be archived,
+application which previously generated hard copy reports or driving a printer
+can benefit from making PDF documents instead; these can be archived,
 emailed, placed on the web, or printed out the old-fashioned way.
 However, the PDF file format is a complex
 indexed binary format which is impossible to type directly.
 The PDF format specification is more than 600 pages long and
 PDF files must provide precise byte offsets -- a single extra
 character placed anywhere in a valid PDF document can render it
-invalid.
-Until now, most of the world's PDF documents have been produced
-by Adobe's Acrobat tools, which act as a 'print driver'.
+invalid.  This makes it harder to generate than HTML.""")
+
+disc("""Most of the world's PDF documents have been produced
+by Adobe's Acrobat tools, or rivals such as JAWS PDF Creator, which act
+as 'print drivers'.  Anyone wanting to automate PDF production would
+typically use a product like Quark, Word or Framemaker running in a loop
+with macros or plugins, connected to Acrobat. Pipelines of several
+languages and products can be slow and somewhat unwieldy.
 """)
+
 
 disc("""The ReportLab library directly creates PDF based on
 your graphics commands.  There are no intervening steps.  Your applications
 can generate reports extremely fast - sometimes orders
 of magnitude faster than traditional report-writing
-tools.""")
+tools.   This approach is shared by several other libraries - PDFlib for C,
+iText for Java, iTextSharp for .NET and others.  However, The ReportLab library
+differs in that it can work at much higher levels, with a full featured engine
+for laying out documents complete with tables and charts.  """)
 
-disc("""
-By contrast, many other methods for generating PDF documents
-involve "pipelines" of several processes, which make the generation process
-slow, and very difficult to manage and maintain.
-""")
 
 disc("""In addition, because you are writing a program
 in a powerful general purpose language, there are no
@@ -100,15 +110,6 @@ bullet("""Going from XML to PDF in one step!""")
 
 
 heading2("What is Python?")
-disc("""<para lindent=+36>
-<b>python</b>, (<i>Gr. Myth.</i> An enormous serpent that lurked in the cave of Mount Parnassus and was slain
-by Apollo) <b>1.</b> any of a genus of large, non-poisonous snakes of Asia, Africa and Australia that
-suffocate their prey to death. <b>2.</b> popularly, any large snake that crushes its prey. <b>3.</b> totally awesome,
-bitchin' very high level programming language (which in <i>our</i> exceedingly humble opinions
-(for what they are worth)
-wallops the snot out of all the other contenders (but your
-mileage may vary real soon now, as far as we know).</para>
-""")
 disc("""
 Python is an <i>interpreted, interactive, object-oriented</i> programming language. It is often compared to Tcl, Perl,
 Scheme or Java.
@@ -121,19 +122,17 @@ various windowing systems (X11, Motif, Tk, Mac, MFC). New built-in modules are e
 Python is also usable as an extension language for applications that need a programmable interface.
 """)
 
+
 disc("""
-The Python implementation is portable: it runs on most brands of UNIX
-(including clones such as Linux), on Windows, DOS, OS/2, Mac, Amiga, DEC/VMS,
-IBM operating systems, VxWorks, PSOS, ... If
-your favorite system isn't listed here, it may still be supported, if there's a C
-programming language compiler for it. Ask around on
-comp.lang.python -- or just try compiling Python yourself.
+Python is as old as Java and has been growing steadily in popularity for 13 years; since our
+library first came out it has entered the mainstream.  Many ReportLab library users are
+already Python devotees, but if you are not, we feel that the language is an excellent
+choice for document-generation apps because of its expressiveness and ability to get
+data from anywhere.
 """)
 
 disc("""
 Python is copyrighted but <b>freely usable and distributable, even for commercial use</b>.
-The ReportLab core modules share the same copyright with the name of the copyright holder
-modified.  Both packages use the "Berkeley Standard Distribution (BSD) style" free software copyright.
 """)
 
 heading2("Acknowledgements")
@@ -159,37 +158,39 @@ verbose procedure for people who are new to Python.
 heading3("Installation for experts")
 disc("""First of all, we'll give you the high-speed version for experienced
 Python developers:""")
-list("Install Python 1.5.1 or later")
+list("""Install Python 2.3 or later (2.4 recommended).  ReportLab 2.x uses
+    Python 2.3 features and will use 2.4 going forwards.  We also maintain
+    a 1.x branch which works back to Python 2.1.
+     """)
 list("""If you want to produce compressed PDF files (recommended),
 check that zlib is installed.""")
 list("""If you want to work with bitmap images, install and
 test the Python Imaging Library""")
 list("""Unpack the reportlab package (reportlab.zip
-or reportlab.tgz) into a directory on your path""")
-list("""$cd$ to ^reportlab/test^ and execute $test_pdfgen_general.py$,
-which will create a file 'test_pdfgen_general.pdf'.""")
-list("""Execute $runAll.py$ to do a run of all the tests in this
-directory, and make sure that none of them fail.""")
+or reportlab.tgz) into a directory on your path.  (You can also use ^python setup.py install^ if you wish)""")
+list("""Unpack the rl_addons package and build the C extensions with distutils; or grab the
+corresponding .pyd files from our download page. """)
+
+
+list("""$cd$ to ^reportlab/test^ and execute $runAll.py$.
+This will create many PDF files. """)
+list("""You may also want to download and run the ^rl_check.py^ on our site, which
+health-checks an installation and reports on any missing options.  """)
 disc(" ")
 disc("""If you have any problems, check the 'Detailed Instructions' section below.""")
 
 heading3("A note on available versions")
 disc("""The $reportlab$ library can be found at $ftp.reportlab.com$ in
-the top-level directory. Each successive version is stored in both zip
-and tgz format, but the contents are identical.  Versions are
-numbered:  $ReportLab_1_00.zip$, $ReportLab_1_01.zip$ and so on. The
+the top-level directory or at http://www.reportlab.com/ftp/.
+Each successive version is stored in both zip
+and tgz format, but the contents are identical apart from line endings.
+Versions are numbered:  $ReportLab_1_00.zip$, $ReportLab_1_01.zip$ and so on. The
 latest stable version is also available as just $reportlab.zip$ (or
 $reportlab.tgz$), which is actually a symbolic link to the latest
-numbered version.""")
+numbered version.  Finally, daily snapshots off the trunk are available as
+$current.zip$ (or $current.tgz$).
+""")
 
-disc("""We also make nightly snapshots of our SVN
-(version control) tree available.  In
-general, these are very stable because we have a comprehensive test
-suite that all developers can run at any time.
-New modules and functions within the overall package may be in a state
-of flux, but stable features can be assumed to be stable.  If a bug is
-reported and fixed, we assume people who need the fix in a hurry will
-get $current.zip$""")
 
 heading3("Instructions for novices: Windows")
 
@@ -205,67 +206,46 @@ you have the binaries at hand.""")
 restartList()
 
 list("""Get and install Python from $http://www.python.org/.$
-Reportlab works with Python 1.5.2 upwards, but you will want something
-more up to date!  Follow the links to 'Download' and get the latest
-official version.  Currently this is Python 2.1 in the file
-$Python-2.1.exe$. It will prompt you for a directory location, which
-by default is
-$C:\Program Files\Python$. This works, but we recommend entering
-$C:\Python21$.  Quite often one wants to change directory into the
-Python directory from a command prompt, so a path without spaces saves
-a lot of typing!  After installing, you should be able to run the
+Reportlab 2.x works with Python 2.3 upwards but we strongly recommend to use
+the latest stable version of Python (2.4.3 at the time of writing).
+Follow the links to 'Download' and get the latest
+official version.  This will install itself into $C:\Python24$
+After installing, you should be able to run the
 'Python (command line)' option from the Start Menu.""")
 
-list("""If on Win9x, we recommend either adding your Python directory
-to the path , or copying python.exe to a location on your path, so
-that you can execute Python from any directory.""")
-
-list("""If you want a nice editing environment or might need to access
-Microsoft applications, get the Pythonwin add-on package from
-$http://aspn.activestate.com/ASPN/Downloads/ ActivePython/Extensions/Win32all$.
-The version that works with Python 2.1 is 'win32all.exe, build 140' in
-the file $win32all-140.exe$.  Once this is installed, you can start
+list("""If on Windows, we strongly recommend installing the Python Windows
+Extensions, which let you use access all the Windows data sources, and provide
+a very nice IDE.  This can be found at ^http://sourceforge.net/projects/pywin32/^.
+Once this is installed, you can start
 Pythonwin from the Start Menu and get a GUI application.""")
 
-disc("""The next step is optional and only necessary if you want to
-include images in your reports; it can also be carried out later.""")
+list("""The next step is optional and only necessary if you want to
+include images in your reports; it can also be carried out later.  However
+we always recommend a full installation if time permits.""")
 
-list("""Install the Python Imaging Library ($PIL$).  Follow the
-directions from $http://www.python.org/sigs/image-sig/index.html$ or
-get it directly from $http://www.pythonware.com/products/pil/$.
+list("""Install the Python Imaging Library ($PIL$) from $http://www.pythonware.com/products/pil/$.
 """)
 
-list("Add the $DLL$s in $PIL$ to your $Python\DLLs$ directory")
 
-list("""To verify,
-start the Python interpreter (command line) and type $from PIL import Image$, followed by
-$import _imaging$.  If you see no error messages, all is well.""")
-
-disc("""Now you are ready to install reportlab itself.""")
-
-list("""Unzip the archive straight into
+list("""Now you are ready to install reportlab itself.  Unzip the archive straight into
 your Python directory; it creates a subdirectory named
 $reportlab$.  You should now be able to go to a Python
 command line interpreter and type $import reportlab$ without getting
 an error message.""")
 
-list("""Open up a $MS-DOS$ command prompt and CD to
-"$..\\reportlab\\test$".  On NT, enter "$test_pdfgen_general.py$"; on
-Win9x, enter "$python test_pdfgen_general.py$".  After a couple of seconds,
-the script completes and the file test_pdfgen_general.pdf should be ready for
-viewing.  If PIL is installed, there should be a "Python Powered"
-image on page 7.""")
-list("""$test_pdfgen_general.py$ tests most of the functions that you
-will need. To run all the tests and make sure that absolutely
-everything works, type $runAll.py$. If none of the tests fail, you're
-done!""")
+list("""Download the zip file of precompiled DLLs for your Python version from
+the bottom of the ^http://www.reportlab.org/downloads.html^ downloads page, and unzip
+them into ^C:\Python24\lib\site-packages^ (or its equivalent for other Python versions""")
 
-disc("""
-[Note: the "couple of seconds" delay in step 8 is mainly due to
-compilation of the python scripts in the ReportLab package.
-The next time the ReportLab modules are used the execution
-will be noticeably faster because the $pyc$ compiled python
-files will be used in place of the $py$ python source files.]""")
+list("""Open up a $MS-DOS$ command prompt and CD to
+"$..\\reportlab\\test$".  Enter "$runAll.py$". You should see lots of dots
+and no error messages.  This will also create many PDF files and generate
+the manuals in ^reportlab/docs^ (including this one). """)
+
+list("""
+Finally, we recommend you download and run the script ^rl_check.py^ from
+^^http://www.reportlab.org/ftp/^. This will health-check all the above
+steps and warn you if anything is missing or mismatched.""")
 
 heading3("Instructions for Python novices: Unix")
 
@@ -327,115 +307,31 @@ $http://www.pythonware.com/products/pil/$.""")
 
 
 heading3("Instructions for Python novices: Mac")
-#this stuff was provided by humbert@ls12.cs.uni-dortmund.de
-#updated with stuff from EPSChartsDocs by John Precedo (7/11/2001)
 disc("""
-First install Python.  The latest stable release is 2.1, but it is
-also possible to run Reportlab with any official Python from 1.5.2
-upwards.  You get the software (ready to run) by following the link from
-$http://www.python.org/download/download_mac.html$.
-Currently, you should go to 'Jack's MacPython page' and download
-$MacPython21active.bin$.
-""")
-
-disc("""
-After a while a file should appear on your desktop called
-$MacPython21Active$. This file appears in this way if the 'helper
-applications' are correctly set up in your browser. If you are asked
-to 'select an alternate program', choose Stuffit Expander. If you get
-a dialogue saying 'The Document "MacPython21active.bin" could not be
-opened, because the application program that created it could not be
-found", you will have to do this manually. Find where Stuffit Expander
-is located on your system (using Sherlock if you have to), and then
-drag the icon for MacPython21active.bin onto Stuffit's icon. Stuffit
-should then unpack it for you.
-""")
-
-disc("""
-Double-click MacPython21Active. Say yes or continue to all the
-defaults. This will put Python 2.1 in your applications folder. Once
-you get to the 'the software was successfully installed' dialogue,
-click on 'OK'. The Finder should pop up a window called Python 2.1
-which contains the Python IDE, Interpreter etc with a folder
-structure like this:
-""")
-
-image('Python_21.gif', 3*inch, 3*inch )
-
-
-disc("""
-We should now tell the OS about Python files, so you get the right
-icons and so the operating system knows that  .py files are text
-files. Open the File Exchange control panel. Click the Add button.
-Wait for a list of applications to be generated.
-""")
-
-image('fileExchange.gif', 3*inch, 3*inch )
-
-disc("""
-If you cannot see all of the dialogue features, click 'Show Advanced
-Options' and the dialogue should resemble the one above.
-""")
-
-disc("""
-Enter the extension ".py". Next to 'file type', click the 'Select'
-button and choose "Python Interpreter" from the list of applications.
-The 'File Type' box should then show 'text' and a logo like the one
-above. Fill in the same options on the right hand side as in the
-illustration above. Click 'change', then close the control panel.
-""")
-
-disc("""
-Now you can put Extensions in the Extensions-Folder;
-which is where you should unpack the <b>reportlab.zip</b> with your
-favorite unpack-utility (Stuffit also does this).
-You'll get a subfolder named <b>reportlab</b>.
-""")
-
-disc("""
-After this step, you have to tell the PythonInterpreter, where to look for extensions.
-Start EditPythonPrefs (by double-clicking the icon).
-""")
-image('Python_21_HINT.gif',3*inch,3*inch)
-disc("""
-You should get the following modal dialog.
-This is the point, where your special data goes in.
-Reportlab is on the path in Extensions. So all you have to do is add
-the last line
-<b>$(PYTHON):Extensions</b>.
-""")
-
-image('Edit_Prefs.gif',3*inch,3*inch)
-
-disc("""
-You should find a folder under reportlab called test - inside that are
-all the test scripts. For the moment, double click on the file
-'test_pdfgen_general.py'. You should see a window called Python
-Interpreter.Out with some text appearing in it, and after that it
-should create a PDF file called 'test_pdfgen_general.pdf'. Make sure
-that a PDF file actually is output, and that you can view it from
-Adobe Acrobat. If this PDF file works, then you have successfully
-installed both Python and the basic ReportLab package. If you want to
-do a full test of everything, execute the script reportlab:test:runAll
-with a double click. It runs lots of tests for a few minutes and
-eventually says 'OK'.
+This is much easier with Mac OS X.  to be completed.
 """)
 
 
 heading3("Instructions for Jython (Java implementation of Python) users")
 
 disc("""
-Please note that we are still testing ReportLab toolkit under Jython.
-At the moment, it seems that most of ReportLab toolkit features work under
-Jython. However, things that need OS specific features, like os.chdir()
-will not work, because they're not supported by Java. This is especially
-true for the set of test suites.
-ReportLab toolkit has been tested under Sun's J2SDK 1.3.1. It is known that under
+A port to Java was done in 2004.  This involved some changes to the framework
+and creating Java equivalents of the C extensions.  At the end of this work
+the entire output of the test suite produced byte-for-byte identical output.
+However, we have not been testng against Jython since, because (a) as far as
+we know no one used it, and (b) Jython has not kept up with Python features
+which we need to use.    We suggest you use ReportLab v1.19 or v1.20 which
+were Python-2.1 compatible.  We'd welcome test reports and/or a volunteer to
+refresh things now that Jython is progressing.""")
+
+disc("""
+The Jython version was tested under Sun's J2SDK 1.3.1. It is known that under
 J2SDK 1.4.0_01 $test_pdfbase_ttfonts.py$ fails horribly with an outOfMemory
 exception, probably caused by a JVM bug.
 """)
 
-disc("")
+
+
 
 restartList()
 
@@ -457,6 +353,16 @@ ReportLab toolkit under Jython PATH, directory that contains Reportlab
 should be included: $python.path=REPORTLAB_HOME_PARENT_DIR$
 For example, if your Reportlab toolkit is installed under $C:\code\\reportlab$
 the path line should be: $python.path=C:\\\\code$ (note two backslashes!)
+""")
+
+heading3("Instructions for IronPython (Python for .NET) users")
+
+disc("""
+We haven't tackled this yet officially, but IronPython can apparently
+run much of our code.  We do need to go through the same exercises we did for Jython
+- finding the .NET equivalents of _rl_accel, pyRXP, _renderPM and PIL -
+to get 100% managed code.  Hopefully this will happen soon and we'd be
+delighted to work with anyone on this.
 """)
 
 
@@ -526,40 +432,40 @@ If you are a total beginner to Python, you should check out one or more from the
 growing number of resources on Python programming. The following are freely
 available on the web:
 """)
-disc("")
+
 
 bullet("""<b>Introductory Material on Python.  </b>
 A list of tutorials on the Python.org web site.
 $http://www.python.org/doc/Intros.html$
 """)
-disc("")
+
 
 bullet("""<b>Python Tutorial.  </b>
 The official Python Tutorial by Guido van Rossum (edited by Fred L. Drake, Jr.)
 $http://www.python.org/doc/tut/$
 """)
-disc("")
+
 
 bullet("""<b>Learning to Program.  </b>
 A tutorial on programming by Alan Gauld. Has a heavy emphasis on
 Python, but also uses other languages.
 $http://www.freenetpages.co.uk/hp/alan.gauld/$
 """)
-disc("")
+
 
 bullet("""<b>How to think like a computer scientist</b> (Python version)</b>.
 $http://www.ibiblio.org/obp/thinkCSpy/$
 """)
-disc("")
+
 
 bullet("""<b>Instant Python</b>.
 A 6-page minimal crash course by Magnus Lie Hetland.
 $http://www.hetland.org/python/instant-python.php$
 """)
-disc("")
+
 
 bullet("""<b>Dive Into Python</b>.
 A free Python tutorial for experienced programmers.
 $http://diveintopython.org/$
 """)
-disc("")
+
