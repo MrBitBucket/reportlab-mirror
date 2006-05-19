@@ -1,11 +1,12 @@
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2006
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/utils.py
+# $URI:$
 __version__=''' $Id$ '''
 
 import string, os, sys, imp
 from reportlab.lib.logger import warnOnce
 from types import *
+from rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
 SeqTypes = (ListType,TupleType)
 if sys.hexversion<0x2020000:
     def isSeqType(v):
@@ -244,32 +245,6 @@ if ',' in fp_str(0.25):
     _FP_STR = fp_str
     def fp_str(*a):
         return string.replace(apply(_FP_STR,a),',','.')
-
-def _rl_getuid():
-    if hasattr(os,'getuid'):
-        return os.getuid()
-    else:
-        return ''
-
-_rl_tempdir=None
-def get_rl_tempdir(*subdirs):
-    global _rl_tempdir
-    if _rl_tempdir is None:
-        import tempfile
-        _rl_tempdir = os.path.join(tempfile.gettempdir(),'ReportLab_tmp%s' % str(_rl_getuid()))
-    d = _rl_tempdir
-    if subdirs: d = os.path.join(*((d,)+subdirs))
-    try:
-        os.makedirs(d)
-    except:
-        pass
-    return d
-
-def get_rl_tempfile(fn=None):
-    if not fn:
-        import tempfile
-        fn = tempfile.mktemp()
-    return os.path.join(get_rl_tempdir(),fn)
 
 def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     """Dynamically imports possible packagized module, or raises ImportError"""
