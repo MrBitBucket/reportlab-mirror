@@ -35,6 +35,9 @@ def main(pattern='test_*.py'):
         assert folder
     except:
         folder = os.path.dirname(sys.argv[0]) or os.getcwd()
+    #allow for Benn's "screwball cygwin distro":
+    if folder == '':
+        folder = '.'
     from reportlab.lib.utils import isSourceDistro
     haveSRC = isSourceDistro()
 

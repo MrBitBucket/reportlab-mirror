@@ -85,9 +85,9 @@ def getStyleSheet():
     stylesheet.add(ParagraphStyle(name='Title',
                                   parent=stylesheet['Normal'],
                                   fontName = 'Times-Bold',
-                                  fontSize=48,
-                                  leading=56,
-                                  spaceAfter=72,
+                                  fontSize=32,
+                                  leading=40,
+                                  spaceAfter=36,
                                   alignment=TA_CENTER
                                   ),
                    alias='t')

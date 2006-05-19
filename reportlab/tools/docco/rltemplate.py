@@ -29,15 +29,10 @@ class FrontCoverTemplate(PageTemplate):
         canvas.setFont('Times-Roman', 10)
         canvas.line(inch, 120, self.pageWidth - inch, 120)
 
-        canvas.drawString(inch, 100, 'Lombard Business Park')
-        canvas.drawString(inch, 88, '8 Lombard Road')
-        canvas.drawString(inch, 76, 'Wimbledon')
-        canvas.drawString(inch, 64, 'London, ENGLAND SW19 3TZ')
-
-        canvas.drawRightString(self.pageWidth - inch, 100, '103 Bayard Street')
-        canvas.drawRightString(self.pageWidth - inch, 88, 'New Brunswick')
-        canvas.drawRightString(self.pageWidth - inch, 76, 'New Jersey, 08904)')
-        canvas.drawRightString(self.pageWidth - inch, 64, 'USA')
+        canvas.drawString(inch, 100, '165 The Broadway')
+        canvas.drawString(inch, 88, 'Wimbledon')
+        canvas.drawString(inch, 76, 'London SW19 1NE')
+        canvas.drawString(inch, 64, 'United Kingdom')
 
         canvas.restoreState()
 
