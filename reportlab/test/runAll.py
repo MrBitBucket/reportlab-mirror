@@ -68,5 +68,26 @@ def main(pattern='test_*.py'):
                 print 'file: "%s"\n%s\n' % (f,string.join(tb,''))
         printLocation()
 
+def mainEx():
+    '''for use in subprocesses'''
+    try:
+        main()
+    finally:
+        sys.stdout.flush()
+        sys.stderr.flush()
+        sys.stdout.close()
+        os.close(sys.stderr.fileno())
+
+def runExternally():
+    cmd = sys.executable+' -c"from reportlab.test import runAll;runAll.mainEx()"'
+    i,o,e=os.popen3(cmd)
+    i.close()
+    out = o.read()
+    err=e.read()
+    return '\n'.join((out,err))
+
+def checkForFailure(outerr):
+    return '\nFAILED' in outerr
+
 if __name__ == '__main__': #noruntests
     main()
