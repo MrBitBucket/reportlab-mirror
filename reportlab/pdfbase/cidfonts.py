@@ -17,7 +17,8 @@ import time
 
 import reportlab
 from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase._cidfontdata import allowedTypeFaces, allowedEncodings, CIDFontInfo, defaultUnicodeEncodings
+from reportlab.pdfbase._cidfontdata import allowedTypeFaces, allowedEncodings, CIDFontInfo, \
+     defaultUnicodeEncodings, widthsByUnichar
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase.pdfutils import _escape
@@ -405,6 +406,8 @@ class UnicodeCIDFont(CIDFont):
         self.vertical = isVertical
         self.isHalfWidth = isHalfWidth
 
+        self.unicodeWidths = widthsByUnichar[self.name]
+        
 
     def formatForPdf(self, text):
         #these ones should be encoded asUTF16 minus the BOM
@@ -426,7 +429,10 @@ class UnicodeCIDFont(CIDFont):
         "Just ensure we do width test on characters, not bytes..."
         if type(text) is type(''):
             text = text.decode('utf8')
-        return CIDFont.stringWidth(self, text, size, encoding)
+
+        widths = self.unicodeWidths
+        return size * 0.001 * sum([widths.get(uch, 1000) for uch in text])
+        #return CIDFont.stringWidth(self, text, size, encoding)
             
 
 def precalculate(cmapdir):
