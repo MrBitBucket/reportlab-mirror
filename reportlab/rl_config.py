@@ -81,7 +81,7 @@ CMapSearchPath = (
                   'C:\\Program Files\\Adobe\\Acrobat 7.0\\Resource\\CMap',
                   'C:\\Program Files\\Adobe\\Acrobat 6.0\\Resource\\CMap',
                   'C:\\Program Files\\Adobe\\Acrobat 5.0\\Resource\\CMap',
-                  'C:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\CMap'
+                  'C:\\Program Files\\Adobe\\Acrobat 4.0\\Resource\\CMap',
                   '%(REPORTLAB_DIR)s/fonts/CMap',       #special
                   '%(REPORTLAB_DIR)s/../fonts/CMap',    #special
                   '%(REPORTLAB_DIR)s/../../fonts/CMap', #special
