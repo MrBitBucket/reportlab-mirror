@@ -19,7 +19,8 @@ def run(pagesize=None, verbose=0, outDir=None):
     setStory()
     G = {}
     exec 'from reportlab.tools.docco.rl_doc_utils import *' in G, G
-    for f in ('ch1_intro',
+    for f in (
+        'ch1_intro',
         'ch2_graphics',
         'ch2a_fonts',
         'ch3_pdffeatures',
