@@ -50,19 +50,11 @@ class CHTFontTests(unittest.TestCase):
         c.setFont('Helvetica', 24)
         c.drawString(100,700, 'Traditional Chinese Font Support')
         c.setFont('Helvetica', 10)
-        c.drawString(100,680, 'Short sample: headline from Yahoo Hong Kong, 20 Oct 2001')
+        c.drawString(100,680, 'Short sample: "Taiwan  -  Ang Lee" (movie director)')
 
-##        c.setFont('MSung-Light-' + enc, 12)
-##        # this came from Yahoo Hong Kong leading story today
-##        message1 = '\xa5\xac\xae\xed\xbbP\xa6\xbf\xbfA\xa5\xc1\xa6b\xad\xba\xa6\xb8\xb7|\xad\xb1\xab\xe1\xa4@\xa6P\xa8\xa3\xb0O\xaa\xcc\xa1A\xa5L\xbb\xa1\xa1A\xa8\xe2\xa4H\xaa\xba\xad\xba\xa6\xb8\xb7|\xad\xb1\xabD\xb1`'
-##        message2 = '\xa6n\xa1A\xa8\xc3\xaa\xed\xa5\xdc\xb2@\xb5L\xba\xc3\xb0\xdd\xa4\xa4\xb0\xea\xa6b\xb3o\xad\xd3\xa5i\xa9\xc6\xaa\xba\xae\xc9\xa8\xe8\xa1A\xb7|\xbbP\xac\xfc\xb0\xea\xa4H\xa5\xc1\xaf\xb8\xa6b\xa4@\xb0_\xa1C'
-##        message3 = '\xA7\x41\xA6\x6E\xB6\xDC'
-##
-##
-##        c.drawString(100, 655, message1)
-##        c.drawString(100, 639, message2)
-##
-##        hBoxText(message3 + ' MSung-Light' , c, 100, 600, 'MSung-Light', enc)
+        hBoxText(u'\u81fa\u7063  -  \u674e\u5b89' , c, 100, 600, 'MSung-Light')
+
+
 ##        #hBoxText(message3 + ' MHei-Medium', c, 100, 580, 'MHei-Medium', enc)
 ##
 ##

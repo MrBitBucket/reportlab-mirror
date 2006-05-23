@@ -32,17 +32,18 @@ class KoreanFontTests(unittest.TestCase):
         c.setFont('Helvetica', 30)
         c.drawString(100,700, 'Korean Font Support')
         c.setFont('Helvetica', 10)
-        c.drawString(100,680, 'Short sample in Unified Hangul Coding (UHC)')
+        c.drawString(100,680, 'Short sample in Unicode; grey area should outline the text with correct width.')
 
-##        hBoxText('\xB9\xD9\xC5\xC1\xC3\xBC  (HYSMyeongJo-Medium)',
-##                 c, 100, 660, 'HYSMyeongJo-Medium')
-##        hBoxText('\xB9\xD9\xC5\xC1\xC3\xBC  (HYGothic-Medium)',
-##                 c, 100, 640, 'HYGothic-Medium', 'KSCms-UHC-H')
 
-        pdfmetrics.registerFont(UnicodeCIDFont('HYSMyeongJo-Medium'))
-        c.setFont('Helvetica', 10)
-        c.drawString(100,610, "Longer sample From Adobe's Acrobat web page in EUC:")
+        hBoxText(u'\ub300\ud55c\ubbfc\uad6d = Korea',
+                 c, 100, 660, 'HYSMyeongJo-Medium')
+        hBoxText(u'\uc548\uc131\uae30 = AHN Sung-Gi (Actor)',
+                 c, 100, 640, 'HYGothic-Medium')
 
+##        pdfmetrics.registerFont(UnicodeCIDFont('HYSMyeongJo-Medium'))
+##        c.setFont('Helvetica', 10)
+##        c.drawString(100,610, "Longer sample From Adobe's Acrobat web page in EUC:")
+##
 ##        sample = """\xbf\xad \xbc\xf6 \xbe\xf8\xb4\xc2 \xb9\xae\xbc\xad\xb4\xc2 \xbe\xc6\xb9\xab\xb7\xb1 \xbc\xd2\xbf\xeb\xc0\xcc \xbe\xf8\xbd\xc0\xb4\xcf\xb4\xd9. \xbb\xe7\xbe\xf7 \xb0\xe8\xc8\xb9\xbc\xad, \xbd\xba\xc7\xc1\xb7\xb9\xb5\xe5\xbd\xc3\xc6\xae, \xb1\xd7\xb7\xa1\xc7\xc8\xc0\xcc \xb8\xb9\xc0\xcc \xc6\xf7\xc7\xd4\xb5\xc8 \xbc\xd2\xc3\xa5\xc0\xda \xb6\xc7\xb4\xc2 \xc0\xa5
 ##\xbb\xe7\xc0\xcc\xc6\xae\xb8\xa6 \xc0\xdb\xbc\xba\xc7\xcf\xb4\xc2 \xb0\xe6\xbf\xec Adobe\xa2\xe7 Acrobat\xa2\xe7 5.0 \xbc\xd2\xc7\xc1\xc6\xae\xbf\xfe\xbe\xee\xb8\xa6 \xbb\xe7\xbf\xeb\xc7\xd8\xbc\xad \xc7\xd8\xb4\xe7 \xb9\xae\xbc\xad\xb8\xa6 Adobe
 ##Portable Document Format (PDF) \xc6\xc4\xc0\xcf\xb7\xce \xba\xaf\xc8\xaf\xc7\xd2 \xbc\xf6 \xc0\xd6\xbd\xc0\xb4\xcf\xb4\xd9. \xb4\xa9\xb1\xb8\xb3\xaa \xb1\xa4\xb9\xfc\xc0\xa7\xc7\xd1 \xc1\xbe\xb7\xf9\xc0\xc7

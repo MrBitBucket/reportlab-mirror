@@ -39,13 +39,10 @@ class CHSFontTests(unittest.TestCase):
 
 
         c.setFont('Helvetica', 10)
-        c.drawString(100,680, 'Short sample: "Reportlab is cool!" (or so we are told)')
+        c.drawString(100,680, 'Short sample: "China - Zhang Ziyi"  (famous actress)')
         # the two typefaces
 
-        msg_EUC_GB = '\xce\xc4\xbd\xa1\xb5\xc3\xb5\xbd\xc1\xcb \xc4\xc7\xd5\xfd\xba\xc3\xb0\xa2  \xce\xd2 \xba\xdc\xcf\xb2\xbb\xb6. Cool!'
-        dec = codecs.lookup('eucgb2312-cn')[1]  
-        msgUni = dec(msg_EUC_GB)[0]
-        hBoxText(msgUni,
+        hBoxText(u'\u4e2d\u56fd - \u7ae0\u5b50\u6021',
                  c,
                  100,
                  660,
