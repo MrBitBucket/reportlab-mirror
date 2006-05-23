@@ -436,29 +436,12 @@ reportlab/test/test_multibyte_cht.py""")
 
 
 
-pencilnote()
-heading3("Character Mappings and Configuration")
-disc("""In order to accurately measure the width of Asian characters, and
-thus to correctly right-align and centre them, we need access to the mapping
-tables which relate each encoding to the glyphs in the font file.  We currently
-get this by processing the Acrobat Reader CMap files; these wil be on your
-system if the relevant font packs are installed.  If you try to generate an
-Asian document and get an error, check that the relevant Acrobat Language Pack
-is installed.  Then, check in rl_config.py which has a list of standard locations;
-you may need to edit this list.
-""")
-
-disc("""
-Most of these files are small and fast to parse, but the Unicode ones are
-big.  Any encoding with 'UCS2' in the name is Unicode.  The files work with
-consecutive runs of characters, but there may be 10,000 runs of 1 character
-in a Unicode maping table; it may take minutes to parse these.  Therefore,
-after the first parse, we write a marshalled dictionary in the
-$reportlab/fonts$ directory with the extension $.fastmap$.  This is used on
-subsequent calls and loads up to 100x faster.  If you are running in a
-secure environment such as a web server, be aware that you either need
-to pre-generate and copy up this file, or ensure that the web user can
-write this directory.
+disc("""In previous versions of the ReportLab PDF Library, we had to make
+use of Adobe's CMap files (located near Acrobat Reader if the Asian Language
+packs were installed).  Now that we only have one encoding to deal with, the
+character width data is embedded in the package, and CMap files are not needed
+for generation.  The CMap search path in ^rl_config.py^ is now deprecated
+and has no effect if you restrict yourself to UnicodeCIDFont.
 """)
 
 
@@ -484,17 +467,6 @@ vertical writing.""")
 
 bullet("""
 Add options to ^UnicodeCIDFont^ to allow vertical and proportional variants where the font permits it.""")
-
-bullet("""
-document everything thoroughly.""")
-
-bullet("""
-embed the metrics for the standard fonts in the code directly, removing the need
-for CMap files""")
-
-bullet("""
-write accelerators in C for loading CMaps and calculating the widths of
-strings""")
 
 
 bullet("""
