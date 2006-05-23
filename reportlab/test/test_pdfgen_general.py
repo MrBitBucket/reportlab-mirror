@@ -694,6 +694,7 @@ cost to performance.""")
         if haveImages:
             (w, h) = c.drawImage(gif, (1.5 + i)*inch, 3*inch)
         else:
+            (w, h) = (144, 10)
             c.rect((1.5 + i)*inch, 3*inch, 110, 44)
 
     myMask = [254,255,222,223,0,1]
