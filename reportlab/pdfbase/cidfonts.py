@@ -25,6 +25,11 @@ from reportlab.pdfbase.pdfutils import _escape
 from reportlab.rl_config import CMapSearchPath
 
 
+#quick hackery for 2.0 release.  Now we always do unicode, and have built in
+#the CMAP data, any code to load CMap files is not needed.
+DISABLE_CMAP = True
+
+
 def findCMapFile(name):
     "Returns full filename, or raises error"
     for dirname in CMapSearchPath:
@@ -68,18 +73,19 @@ class CIDEncoding(pdfmetrics.Encoding):
         self._notDefRanges = []
         self._cmap = {}
         self.source = None
-        if useCache:
-            from reportlab.lib.utils import get_rl_tempdir
-            fontmapdir = get_rl_tempdir('FastCMAPS')
-            if os.path.isfile(fontmapdir + os.sep + name + '.fastmap'):
-                self.fastLoad(fontmapdir)
-                self.source = fontmapdir + os.sep + name + '.fastmap'
+        if not DISABLE_CMAP:
+            if useCache:
+                from reportlab.lib.utils import get_rl_tempdir
+                fontmapdir = get_rl_tempdir('FastCMAPS')
+                if os.path.isfile(fontmapdir + os.sep + name + '.fastmap'):
+                    self.fastLoad(fontmapdir)
+                    self.source = fontmapdir + os.sep + name + '.fastmap'
+                else:
+                    self.parseCMAPFile(name)
+                    self.source = 'CMAP: ' + name
+                    self.fastSave(fontmapdir)
             else:
                 self.parseCMAPFile(name)
-                self.source = 'CMAP: ' + name
-                self.fastSave(fontmapdir)
-        else:
-            self.parseCMAPFile(name)
 
     def _hash(self, text):
         hasher = md5.new()
