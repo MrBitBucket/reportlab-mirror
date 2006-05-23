@@ -282,17 +282,16 @@ class Big5CodeChart(CodeChartBase):
         self.canv.grid(self.xlist, self.ylist)
 
 
-def hBoxText(msg, canvas, x, y, faceName, encName):
+def hBoxText(msg, canvas, x, y, fontName):
     """Helper for stringwidth tests on Asian fonts.
 
     Registers font if needed.  Then draws the string,
     and a box around it derived from the stringWidth function"""
     canvas.saveState()
-    fontName = faceName + '-' + encName
     try:
         font = pdfmetrics.getFont(fontName)
     except KeyError:
-        font = cidfonts.CIDFont(faceName, encName)
+        font = cidfonts.UnicodeCIDFont(fontName)
         pdfmetrics.registerFont(font)
 
     canvas.setFillGray(0.8)
