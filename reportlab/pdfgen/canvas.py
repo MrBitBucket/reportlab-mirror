@@ -1,6 +1,5 @@
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2006
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/pdfgen/canvas.py
 __version__=''' $Id$ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
@@ -24,7 +23,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
 from reportlab.lib.utils import import_zlib
 from reportlab.lib.utils import fp_str
-
+from reportlab.lib.boxstuff import aspectRatioFix, anchorAdjustXY
 
 digitPat = re.compile('\d')  #used in decimal alignment
 
@@ -536,7 +535,7 @@ class Canvas(textobject._PDFColorSetter):
         #
         ######################################################
 
-    def drawInlineImage(self, image, x,y, width=None,height=None):
+    def drawInlineImage(self, image, x,y, width=None,height=None,preserveAspectRatio=False,boxAnchor='sw'):
         """Draw an Image into the specified rectangle.  If width and
         height are omitted, they are calculated from the image size.
         Also allow file names as well as images.  The size in pixels
@@ -544,11 +543,11 @@ class Canvas(textobject._PDFColorSetter):
 
         self._currentPageHasImages = 1
         from pdfimages import PDFImage
-        img_obj = PDFImage(image, x,y, width, height)
-        img_obj.drawInlineImage(self)
+        img_obj = PDFImage(image, x,y, width, height,preserveAspectRatio=preserveAspectRatio)
+        img_obj.drawInlineImage(self,boxAnchor=boxAnchor)
         return (img_obj.width, img_obj.height)
 
-    def drawImage(self, image, x, y, width=None, height=None, mask=None):
+    def drawImage(self, image, x, y, width=None, height=None, mask=None, preserveAspectRatio=False, boxAnchor='sw'):
         """Draws the image (ImageReader object or filename) as specified.
 
         "image" may be an image filename or a ImageReader object.  If width
@@ -597,10 +596,8 @@ class Canvas(textobject._PDFColorSetter):
             self._doc.addForm(name, imgObj)
 
         # ensure we have a size, as PDF will make it 1x1 pixel otherwise!
-        if width is None:
-            width = imgObj.width
-        if height is None:
-            height = imgObj.height
+        width,height = aspectRatioFix(preserveAspectRatio,width,height,imgObj.width,imgObj.height)
+        x,y = anchorAdjustXY(boxAnchor,x,y,width,height)
 
         # scale and draw
         self.saveState()

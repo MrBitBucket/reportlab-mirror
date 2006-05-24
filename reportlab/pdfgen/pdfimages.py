@@ -14,6 +14,7 @@ from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.lib.utils import fp_str, getStringIO
 from reportlab.lib.utils import import_zlib, haveImages
+from reportlab.lib.boxstuff import aspectRatioFix, anchorAdjustXY
 
 
 class PDFImage:
@@ -22,7 +23,7 @@ class PDFImage:
     an image we previously cached (optimisation, hardly used these
     days) or a JPEG (which PDF supports natively)."""
 
-    def __init__(self, image, x,y, width=None, height=None, caching=0):
+    def __init__(self, image, x,y, width=None, height=None, caching=0, preserveAspectRatio=False):
         self.image = image
         self.point = (x,y)
         self.dimensions = (width, height)
@@ -35,7 +36,7 @@ class PDFImage:
         self.bitsPerComponent = 8
         self.filters = []
         self.source = None # JPEG or PIL, set later
-        self.getImageData()
+        self.getImageData(preserveAspectRatio=preserveAspectRatio)
 
     def jpg_imagedata(self):
         #directly process JPEG files
@@ -108,7 +109,7 @@ class PDFImage:
         imagedata.append('EI')
         return (imagedata, imgwidth, imgheight)
 
-    def getImageData(self):
+    def getImageData(self,preserveAspectRatio=False):
         "Gets data, height, width - whatever type of image"
         image = self.image
         (width, height) = self.dimensions
@@ -133,24 +134,18 @@ class PDFImage:
                 (imagedata, imgwidth, imgheight) = self.JAVA_imagedata()
             else:
                 (imagedata, imgwidth, imgheight) = self.PIL_imagedata()
-        #now build the PDF for the image.
-        if not width:
-            width = imgwidth
-        if not height:
-            height = imgheight
-        self.width = width
-        self.height = height
+        self.width,self.height = aspectRatioFix(preserveAspectRatio,width,height,imgwidth,imgheight)
         self.imageData = imagedata
 
-    def drawInlineImage(self, canvas): #, image, x,y, width=None,height=None):
+    def drawInlineImage(self, canvas, boxAnchor='sw'): #, image, x,y, width=None,height=None):
         """Draw an Image into the specified rectangle.  If width and
         height are omitted, they are calculated from the image size.
         Also allow file names as well as images.  This allows a
         caching mechanism"""
         if self.width<1e-6 or self.height<1e-6: return False
-        (x,y) = self.point
+        x,y = anchorAdjustXY(boxAnchor,self.point[0],self.point[1],self.width,self.height)
         # this says where and how big to draw it
-        if not canvas.bottomup: y = y+self.height
+        if not canvas.bottomup: y = y+height
         canvas._code.append('q %s 0 0 %s cm' % (fp_str(self.width), fp_str(self.height, x, y)))
         # self._code.extend(imagedata) if >=python-1.5.2
         for line in self.imageData:
