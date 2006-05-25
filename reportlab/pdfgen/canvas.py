@@ -535,7 +535,7 @@ class Canvas(textobject._PDFColorSetter):
         #
         ######################################################
 
-    def drawInlineImage(self, image, x,y, width=None,height=None,preserveAspectRatio=False,boxAnchor='sw'):
+    def drawInlineImage(self, image, x,y, width=None,height=None,preserveAspectRatio=False,anchor='sw'):
         """Draw an Image into the specified rectangle.  If width and
         height are omitted, they are calculated from the image size.
         Also allow file names as well as images.  The size in pixels
@@ -543,11 +543,11 @@ class Canvas(textobject._PDFColorSetter):
 
         self._currentPageHasImages = 1
         from pdfimages import PDFImage
-        img_obj = PDFImage(image, x,y, width, height,preserveAspectRatio=preserveAspectRatio)
-        img_obj.drawInlineImage(self,boxAnchor=boxAnchor)
+        img_obj = PDFImage(image, x,y, width, height)
+        img_obj.drawInlineImage(self,anchor=anchor,preserveAspectRatio=preserveAspectRatio)
         return (img_obj.width, img_obj.height)
 
-    def drawImage(self, image, x, y, width=None, height=None, mask=None, preserveAspectRatio=False, boxAnchor='sw'):
+    def drawImage(self, image, x, y, width=None, height=None, mask=None, preserveAspectRatio=False, anchor='sw'):
         """Draws the image (ImageReader object or filename) as specified.
 
         "image" may be an image filename or a ImageReader object.  If width
@@ -596,8 +596,8 @@ class Canvas(textobject._PDFColorSetter):
             self._doc.addForm(name, imgObj)
 
         # ensure we have a size, as PDF will make it 1x1 pixel otherwise!
-        width,height = aspectRatioFix(preserveAspectRatio,width,height,imgObj.width,imgObj.height)
-        x,y = anchorAdjustXY(boxAnchor,x,y,width,height)
+        x,y,width,height = aspectRatioFix(preserveAspectRatio,anchor,x,y,width,height,imgObj.width,imgObj.height)
+        x,y = anchorAdjustXY(anchor,x,y,width,height)
 
         # scale and draw
         self.saveState()

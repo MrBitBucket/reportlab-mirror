@@ -23,10 +23,12 @@ class PDFImage:
     an image we previously cached (optimisation, hardly used these
     days) or a JPEG (which PDF supports natively)."""
 
-    def __init__(self, image, x,y, width=None, height=None, caching=0, preserveAspectRatio=False):
+    def __init__(self, image, x,y, width=None, height=None, caching=0):
         self.image = image
-        self.point = (x,y)
-        self.dimensions = (width, height)
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
         self.filename = None
         self.imageCaching = caching
         # the following facts need to be determined,
@@ -36,7 +38,7 @@ class PDFImage:
         self.bitsPerComponent = 8
         self.filters = []
         self.source = None # JPEG or PIL, set later
-        self.getImageData(preserveAspectRatio=preserveAspectRatio)
+        self.getImageData()
 
     def jpg_imagedata(self):
         #directly process JPEG files
@@ -112,7 +114,6 @@ class PDFImage:
     def getImageData(self,preserveAspectRatio=False):
         "Gets data, height, width - whatever type of image"
         image = self.image
-        (width, height) = self.dimensions
 
         if type(image) == StringType:
             self.filename = image
@@ -123,7 +124,6 @@ class PDFImage:
                     imagedata = pdfutils.cacheImageFile(image,returnInMemory=1)
                 else:
                     imagedata = self.cache_imagedata()
-                #parse line two for width, height
                 words = string.split(imagedata[1])
                 imgwidth = string.atoi(words[1])
                 imgheight = string.atoi(words[3])
@@ -134,16 +134,22 @@ class PDFImage:
                 (imagedata, imgwidth, imgheight) = self.JAVA_imagedata()
             else:
                 (imagedata, imgwidth, imgheight) = self.PIL_imagedata()
-        self.width,self.height = aspectRatioFix(preserveAspectRatio,width,height,imgwidth,imgheight)
         self.imageData = imagedata
+        self.imgwidth = imgwidth
+        self.imgheight = imgheight
+        self.width = self.width or imgwidth
+        self.height = self.height or imgheight
 
-    def drawInlineImage(self, canvas, boxAnchor='sw'): #, image, x,y, width=None,height=None):
+    def drawInlineImage(self, canvas, preserveAspectRatio=False,anchor='sw'): #, image, x,y, width=None,height=None):
         """Draw an Image into the specified rectangle.  If width and
         height are omitted, they are calculated from the image size.
         Also allow file names as well as images.  This allows a
         caching mechanism"""
-        if self.width<1e-6 or self.height<1e-6: return False
-        x,y = anchorAdjustXY(boxAnchor,self.point[0],self.point[1],self.width,self.height)
+        width = self.width
+        height = self.height
+        if width<1e-6 or height<1e-6: return False
+        x,y,self.width,self.height = aspectRatioFix(preserveAspectRatio,anchor,self.x,self.y,width,height,self.imgwidth,self.imgheight)
+        x,y = anchorAdjustXY(anchor,x,y,self.width,self.height)
         # this says where and how big to draw it
         if not canvas.bottomup: y = y+height
         canvas._code.append('q %s 0 0 %s cm' % (fp_str(self.width), fp_str(self.height, x, y)))
