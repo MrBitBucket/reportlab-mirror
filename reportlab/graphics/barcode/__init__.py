@@ -35,10 +35,17 @@ __version__ = '0.9'
 def getCodes():
     """Returns a dict mapping code names to widgets"""
 
-    from widgets import BarcodeI2of5, BarcodeCode128, BarcodeStandard93,\
-                        BarcodeExtended93, BarcodeStandard39, BarcodeExtended39,\
-                        BarcodeMSI, BarcodeCodabar, BarcodeCode11, BarcodeFIM,\
-                        BarcodePOSTNET 
+    from widgets import (BarcodeI2of5,
+                BarcodeCode128,
+                BarcodeStandard93,
+                BarcodeExtended93,
+                BarcodeStandard39,
+                BarcodeExtended39,
+                BarcodeMSI,
+                BarcodeCodabar,
+                BarcodeCode11,
+                BarcodeFIM,
+                BarcodePOSTNET)
 
     #newer codes will typically get their own module
     from eanbc import Ean13BarcodeWidget, Ean8BarcodeWidget

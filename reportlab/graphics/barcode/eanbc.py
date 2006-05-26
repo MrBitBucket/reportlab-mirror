@@ -286,12 +286,12 @@ class Ean13BarcodeWidget(PlotArea):
         c = s[7:]
         gAdd(String(x,y,c,fontName=fontName,fontSize=fontSize,fillColor=textColor,textAnchor='middle'))
 
+    @classmethod
     def _checkdigit(cls,num):
         z = ord('0')
         iSum = cls._0csw*sum([(ord(x)-z) for x in num[::2]]) \
                  + cls._1csw*sum([(ord(x)-z) for x in num[1::2]])
         return chr(z+((10-(iSum%10))%10))
-    _checkdigit=classmethod(_checkdigit)
 
 class isEan8String(Validator):
     def test(self,x):
