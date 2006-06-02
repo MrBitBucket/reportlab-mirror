@@ -48,7 +48,7 @@ def main():
 	LIBART_SRCS=glob(pJoin(LIBART_DIR, 'art_*.c'))
 	GT1_DIR=pJoin(DEVEL_DIR,'gt1')
 	platform = sys.platform
-	LIBS=[]
+	LIBS = []		#assume empty libraries list
 
 	if os.path.isdir('/usr/local/include/freetype2'):
 		FT_LIB = ['freetype']
