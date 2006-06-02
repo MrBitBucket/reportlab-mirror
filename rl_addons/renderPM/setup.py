@@ -47,13 +47,8 @@ def main():
 	LIBART_DIR=pJoin(DEVEL_DIR,'libart_lgpl')
 	LIBART_SRCS=glob(pJoin(LIBART_DIR, 'art_*.c'))
 	GT1_DIR=pJoin(DEVEL_DIR,'gt1')
-	GLIB_DIR=pJoin(DEVEL_DIR,'glib')
 	platform = sys.platform
-	if platform in ['darwin', 'win32', 'sunos5', 'freebsd4', 'freebsd6', 'mac', 'linux2','linux-i386','aix4']:
-		LIBS=[]
-	else:
-		raise ValueError, "Don't know about platform", platform
-
+	LIBS=[]
 
 	if os.path.isdir('/usr/local/include/freetype2'):
 		FT_LIB = ['freetype']
@@ -91,7 +86,7 @@ def main():
 						('_renderPM_gt1',
 						{
 						'sources':	pfxJoin(GT1_DIR,'gt1-dict.c','gt1-namecontext.c','gt1-parset1.c','gt1-region.c','parseAFM.c'),
-						'include_dirs': [DEVEL_DIR,GT1_DIR,GLIB_DIR,],
+						'include_dirs': [DEVEL_DIR,GT1_DIR,],
 						'macros': MACROS,
 						#'extra_compile_args':['/Z7'],
 						}

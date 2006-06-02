@@ -25,15 +25,8 @@ if __name__=='__main__': #NO RUNTESTS
 		LIBS=['nsl', 'socket', 'dl']
 	elif sys.platform=="aix4":
 		LIBS=['nsl_r', 'dl']
-	elif sys.platform in ("freebsd4", "freebsd5","freebsd6", "darwin", "mac", "linux2", "linux-i386"):
-		LIBS=[]
 	else:
-		msg = "Don't know about system %s" % sys.platform
-		if int(os.environ.get('LIBERROR',1)): 
-			raiseConfigError(msg+'\nset environment LIBERROR=0 to try no extra libs')
-		else:
-			print msg
-			LIBS=[]
+		LIBS=[]
 
 	rxpFiles = ('xmlparser.c', 'url.c', 'charset.c', 'string16.c', 'ctype16.c', 
                 'dtd.c', 'input.c', 'stdio16.c', 'system.c', 'hash.c', 
