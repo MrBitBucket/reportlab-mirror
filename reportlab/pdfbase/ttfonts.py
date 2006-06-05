@@ -104,14 +104,13 @@ def makeToUnicodeCMap(fontname, subset):
         "<00> <%02X>" % (len(subset) - 1),
         "endcodespacerange",
         "%d beginbfchar" % len(subset)
-    ] + map(lambda n, subset=subset: "<%02X> <%04X>" % (n, subset[n]),
-            xrange(len(subset))) + [
+        ] + ["<%02X> <%04X>" % (i,v) for i,v in enumerate(subset)] + [
         "endbfchar",
         "endcmap",
         "CMapName currentdict /CMap defineresource pop",
         "end",
         "end"
-    ]
+        ]
     return string.join(cmap, "\n")
 
 def splice(stream, offset, value):
@@ -771,11 +770,11 @@ class TTFontFile(TTFontParser):
                         self.skip(4)
                     elif flags & GF_WE_HAVE_A_TWO_BY_TWO:
                         self.skip(8)
-            n = n + 1
+            n += 1
 
         numGlyphs = n = len(glyphMap)
         while n > 1 and self.hmetrics[n][0] == self.hmetrics[n - 1][0]:
-            n = n - 1
+            n -= 1
         numberOfHMetrics = n
 
         # The following tables are simply copied from the original
@@ -975,22 +974,26 @@ class TTFont:
     """
 
     class State:
-        def __init__(self):
+        def __init__(self,asciiReadable=1):
             self.assignments = {}
             self.nextCode = 0
             self.internalName = None
             self.frozen = 0
 
-            # Let's add the first 128 unicodes to the 0th subset, so ' '
-            # always has code 32 (for word spacing to work) and the ASCII
-            # output is readable
-            subset0 = range(128)
-            self.subsets = [subset0]
-            for n in subset0:
-                self.assignments[n] = n
-            self.nextCode = 128
+            if asciiReadable:
+                # Let's add the first 128 unicodes to the 0th subset, so ' '
+                # always has code 32 (for word spacing to work) and the ASCII
+                # output is readable
+                subset0 = range(128)
+                self.subsets = [subset0]
+                for n in subset0:
+                    self.assignments[n] = n
+                self.nextCode = 128
+            else:
+                self.subsets = [[32]*33]
+                self.assignments[32] = 32
 
-    def __init__(self, name, filename, validate=0, subfontIndex=0):
+    def __init__(self, name, filename, validate=0, subfontIndex=0,asciiReadable=1):
         """Loads a TrueType font from filename.
 
         If validate is set to a false values, skips checksum validation.  This
@@ -1002,6 +1005,7 @@ class TTFont:
         self._multiByte = 1     # We want our own stringwidth
         self._dynamicFont = 1   # We want dynamic subsetting
         self.state = {}
+        self._asciiReadable = asciiReadable
 
     def _py_stringWidth(self, text, size, encoding='utf-8'):
         "Calculate text width"
@@ -1017,38 +1021,43 @@ class TTFont:
         single subset.  Returns a list of tuples (subset, string).  Use subset
         numbers with getSubsetInternalName.  Doc is needed for distinguishing
         subsets when building different documents at the same time."""
+        asciiReadable = self._asciiReadable
         try: state = self.state[doc]
-        except KeyError: state = self.state[doc] = TTFont.State()
+        except KeyError: state = self.state[doc] = TTFont.State(asciiReadable)
         curSet = -1
         cur = []
         results = []
         if type(text) is not UnicodeType:
             text = unicode(text, encoding or 'utf-8')   # encoding defaults to utf-8
+        assignments = state.assignments
+        subsets = state.subsets
         for code in map(ord,text):
-            if state.assignments.has_key(code):
-                n = state.assignments[code]
+            if assignments.has_key(code):
+                n = assignments[code]
             else:
                 if state.frozen:
                     raise pdfdoc.PDFError, "Font %s is already frozen, cannot add new character U+%04X" % (self.fontName, code)
                 n = state.nextCode
-                if n & 0xFF == 32:
+                if n&0xFF==32:
                     # make code 32 always be a space character
-                    state.subsets[n >> 8].append(32)
+                    if n!=32: subsets[n >> 8].append(32)
                     state.nextCode += 1
                     n = state.nextCode
                 state.nextCode += 1
-                state.assignments[code] = n
-                if (n & 0xFF) == 0:
-                    state.subsets.append([])
-                state.subsets[n >> 8].append(code)
+                assignments[code] = n
+                if n>32:
+                    if not(n&0xFF): subsets.append([])
+                    subsets[n >> 8].append(code)
+                else:
+                    subsets[0][n] = code
             if (n >> 8) != curSet:
                 if cur:
-                    results.append((curSet, string.join(map(chr, cur), "")))
+                    results.append((curSet, ''.join(map(chr,cur))))
                 curSet = (n >> 8)
                 cur = []
             cur.append(n & 0xFF)
         if cur:
-            results.append((curSet, string.join(map(chr, cur), "")))
+            results.append((curSet,''.join(map(chr,cur))))
         return results
 
     def getSubsetInternalName(self, subset, doc):
@@ -1056,7 +1065,7 @@ class TTFont:
         subset of this dynamic font.  Use this function instead of
         PDFDocument.getInternalFontName."""
         try: state = self.state[doc]
-        except KeyError: state = self.state[doc] = TTFont.State()
+        except KeyError: state = self.state[doc] = TTFont.State(self._asciiReadable)
         if subset < 0 or subset >= len(state.subsets):
             raise IndexError, 'Subset %d does not exist in font %s' % (subset, self.fontName)
         if state.internalName is None:
@@ -1074,10 +1083,9 @@ class TTFont:
         FontDescriptor is a (no more than) 256 character subset of the original
         TrueType font."""
         try: state = self.state[doc]
-        except KeyError: state = self.state[doc] = TTFont.State()
+        except KeyError: state = self.state[doc] = TTFont.State(self._asciiReadable)
         state.frozen = 1
-        for n in xrange(len(state.subsets)):
-            subset = state.subsets[n]
+        for n,subset in enumerate(state.subsets):
             internalName = self.getSubsetInternalName(n, doc)[1:]
             baseFontName = "%s+%s%s" % (SUBSETN(n),self.face.name,self.face.subfontNameX)
 
