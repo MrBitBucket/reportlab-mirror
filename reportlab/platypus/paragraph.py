@@ -293,7 +293,7 @@ def _drawBullet(canvas, offset, cur_y, bulletText, style):
     tx2 = canvas.beginText(style.bulletIndent, cur_y)
     tx2.setFont(style.bulletFontName, style.bulletFontSize)
     tx2.setFillColor(hasattr(style,'bulletColor') and style.bulletColor or style.textColor)
-    if type(bulletText) is StringType:
+    if isinstance(bulletText,basestring):
         tx2.textOut(bulletText)
     else:
         for f in bulletText:
@@ -311,8 +311,8 @@ def _drawBullet(canvas, offset, cur_y, bulletText, style):
 def _handleBulletWidth(bulletText,style,maxWidths):
     '''work out bullet width and adjust maxWidths[0] if neccessary
     '''
-    if bulletText <> None:
-        if type(bulletText) is StringType:
+    if bulletText!=None:
+        if isinstance(bulletText,basestring):
             bulletWidth = stringWidth( bulletText, style.bulletFontName, style.bulletFontSize)
         else:
             #it's a list of fragments

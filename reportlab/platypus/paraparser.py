@@ -716,7 +716,7 @@ class ParaParser(xmllib.XMLParser):
         # any 8-bit encoding which defines most of 256 points,
         # and revert at end.  Yuk.  Preliminary step prior to
         # removal of parser altogether.
-        enc = self._enc = 'cp1252' #our legacy default
+        enc = self._enc = 'utf8' #our legacy default
         self._UNI = type(text) is UnicodeType
         if self._UNI:
             text = text.encode(enc)
