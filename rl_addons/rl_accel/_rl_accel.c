@@ -27,7 +27,7 @@ static __version__=" $Id$ "
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.54"
+#define VERSION "0.55"
 #define MODULE "_rl_accel"
 
 
@@ -621,7 +621,7 @@ static PyObject *_instanceEscapePDF(PyObject *unused, PyObject* args)
 static PyObject *_sameFrag(PyObject *self, PyObject* args)
 {
 	PyObject *f, *g;
-	static char *names[] = {"fontName", "fontSize", "textColor", "rise", "underline", NULL};
+	static char *names[] = {"fontName", "fontSize", "textColor", "rise", "underline", "strike", "link", NULL};
 	int	r=0, t;
 	char **p;
 	if (!PyArg_ParseTuple(args, "OO:_sameFrag", &f, &g)) return NULL;
