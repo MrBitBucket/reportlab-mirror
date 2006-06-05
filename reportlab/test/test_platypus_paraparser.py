@@ -72,7 +72,7 @@ class ParaParserTestCase(unittest.TestCase):
         "Numeric entities should be unescaped by parser"
         txt = u"Hello &#169; copyright"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals(map(lambda x:x.text, fragList), [u'Hello ',u'\xc2\xa9',u' copyright'])
+        self.assertEquals(map(lambda x:x.text, fragList), [u'Hello ',u'\xa9',u' copyright'])
 
     def testEscapedUnicode(self):
         "Escaped high-bit stuff should go straight through"
