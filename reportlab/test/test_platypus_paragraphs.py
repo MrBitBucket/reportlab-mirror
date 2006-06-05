@@ -22,8 +22,7 @@ from reportlab.lib.utils import _className
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
-from reportlab.platypus.doctemplate \
-     import PageTemplate, BaseDocTemplate
+from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate
 from reportlab.platypus import tableofcontents
 from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.platypus.tables import TableStyle, Table
@@ -134,7 +133,7 @@ it's actually easy to do using platypus.We can do greek letters <greek>mDngG</gr
 u with a dieresis on top &lt;unichar code=0xfc/&gt;="<unichar code=0xfc/>" and this &amp;#xfc;="&#xfc;" and this \\xc3\\xbc="\xc3\xbc". On the other hand this
 should be a pound sign &amp;pound;="&pound;" and this an alpha &amp;alpha;="&alpha;". You can have links in the page <link href=http://www.reportlab.com color=blue>ReportLab</link>.
 Use scheme "pdf:" to indicate an external PDF link, "http:", "https:" to indicate an external link eg something to open in
-your browser. If an internal link begins with something that looks like a scheme, precede with "document:".
+your browser. If an internal link begins with something that looks like a scheme, precede with "document:". <strike>This text should have a strike through it.</strike>
 '''
         from reportlab.platypus.flowables import ImageAndFlowables, Image
         from reportlab.lib.utils import _RL_DIR

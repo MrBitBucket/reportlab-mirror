@@ -138,6 +138,20 @@ def _putFragLine(tx,words):
                     xtraState.underlines.append( (xtraState.underline_x, cur_x, xtraState.underlineColor) )
                     xtraState.underlineColor = xtraState.textColor
                     xtraState.underline_x = cur_x
+            if not xtraState.strike and f.strike:
+                xtraState.strike = 1
+                xtraState.strike_x = cur_x
+                xtraState.strikeColor = f.textColor
+            elif xtraState.strike:
+                if not f.strike:
+                    xtraState.strike = 0
+                    spacelen = tx._canvas.stringWidth(' ', tx._fontname, tx._fontsize)
+                    xtraState.strikes.append( (xtraState.strike_x, cur_x-spacelen, xtraState.strikeColor) )
+                    xtraState.strikeColor = None
+                elif xtraState.textColor!=xtraState.strikeColor:
+                    xtraState.strikes.append( (xtraState.strike_x, cur_x, xtraState.strikeColor) )
+                    xtraState.strikeColor = xtraState.textColor
+                    xtraState.strike_x = cur_x
             if not xtraState.link and f.link:
                 xtraState.link = f.link
                 xtraState.link_x = cur_x
@@ -148,6 +162,8 @@ def _putFragLine(tx,words):
             cur_x += txtlen
     if xtraState.underline:
         xtraState.underlines.append( (xtraState.underline_x, cur_x, xtraState.underlineColor) )
+    if xtraState.strike:
+        xtraState.strikes.append( (xtraState.strike_x, cur_x, xtraState.strikeColor) )
     if xtraState.link:
         xtraState.links.append( (xtraState.link_x, cur_x, xtraState.link) )
 
@@ -193,10 +209,11 @@ except ImportError:
     try:
         from reportlab.lib._rl_accel import _sameFrag
     except ImportError:
+        #if you modify this you need to modify _rl_accel RGB
         def _sameFrag(f,g):
             'returns 1 if two ParaFrags map out the same'
             if hasattr(f,'cbDefn') or hasattr(g,'cbDefn'): return 0
-            for a in ('fontName', 'fontSize', 'textColor', 'rise', 'underline', 'link'):
+            for a in ('fontName', 'fontSize', 'textColor', 'rise', 'underline', 'strike', 'link'):
                 if getattr(f,a)!=getattr(g,a): return 0
             return 1
 
@@ -366,24 +383,12 @@ def splitLines0(frags,widths):
             if j==lim:
                 i += 1
 
-def _do_under_line(i, t_off, tx):
-    y = tx.XtraState.cur_y - i*tx.XtraState.style.leading - tx.XtraState.f.fontSize/8.0 # 8.0 factor copied from para.py
+def _do_under_line(i, t_off, tx, lm=-0.125):
+    y = tx.XtraState.cur_y - i*tx.XtraState.style.leading + lm*tx.XtraState.f.fontSize
     text = join(tx.XtraState.lines[i][1])
     textlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
     tx._canvas.line(t_off, y, t_off+textlen, y)
 
-def _do_under(i, t_off, tx):
-    xtraState = tx.XtraState
-    y = xtraState.cur_y - i*xtraState.style.leading - xtraState.f.fontSize/8.0 # 8.0 factor copied from para.py
-    ulc = None
-    for x1,x2,c in xtraState.underlines:
-        if c!=ulc:
-            tx._canvas.setStrokeColor(c)
-            ulc = c
-        tx._canvas.line(t_off+x1, y, t_off+x2, y)
-    xtraState.underlines = []
-    xtraState.underline=0
-    xtraState.underlineColor=None
 
 _scheme_re = re.compile('^[a-zA-Z][-+a-zA-Z0-9]+$')
 def _doLink(tx,link,rect):
@@ -406,13 +411,37 @@ def _do_link_line(i, t_off, tx):
     textlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
     _doLink(tx, xs.link, (t_off, y, t_off+textlen, y+leading))
 
-def _do_link(i, t_off, tx):
+def _do_post_text(i, t_off, tx):
     xs = tx.XtraState
     leading = xs.style.leading
-    y = xs.cur_y - i*leading - xs.f.fontSize/8.0 # 8.0 factor copied from para.py
+    ff = 0.125*xs.f.fontSize
+    y0 = xs.cur_y - i*leading
+    y = y0 - ff
+    ulc = None
+    for x1,x2,c in xs.underlines:
+        if c!=ulc:
+            tx._canvas.setStrokeColor(c)
+            ulc = c
+        tx._canvas.line(t_off+x1, y, t_off+x2, y)
+    xs.underlines = []
+    xs.underline=0
+    xs.underlineColor=None
+
+    ys = y0 + 2*ff
+    ulc = None
+    for x1,x2,c in xs.strikes:
+        if c!=ulc:
+            tx._canvas.setStrokeColor(c)
+            ulc = c
+        tx._canvas.line(t_off+x1, ys, t_off+x2, ys)
+    xs.strikes = []
+    xs.strike=0
+    xs.strikeColor=None
+
+    yl = y + leading
     for x1,x2,link in xs.links:
         tx._canvas.line(t_off+x1, y, t_off+x2, y)
-        _doLink(tx, link, (t_off+x1, y, t_off+x2, y+leading))
+        _doLink(tx, link, (t_off+x1, y, t_off+x2, yl))
     xs.links = []
     xs.link=None
 
@@ -430,6 +459,7 @@ class Paragraph(Flowable):
         <b> ... </b> - bold
         <i> ... </i> - italics
         <u> ... </u> - underline
+        <strike> ... </strike> - strike through
         <super> ... </super> - superscript
         <sub> ... </sub> - subscript
         <font name=fontfamily/fontname color=colorname size=float>
@@ -846,7 +876,7 @@ class Paragraph(Flowable):
                 #now the font for the rest of the paragraph
                 tx.setFont(f.fontName, f.fontSize, style.leading)
                 t_off = dpl( tx, offset, lines[0][0], lines[0][1], noJustifyLast and nLines==1)
-                if f.underline or f.link:
+                if f.underline or f.link or f.strike:
                     xs = tx.XtraState=ABag()
                     xs.cur_y = cur_y
                     xs.f = f
@@ -854,16 +884,20 @@ class Paragraph(Flowable):
                     xs.lines = lines
                     xs.underlines=[]
                     xs.underlineColor=None
+                    xs.strikes=[]
+                    xs.strikeColor=None
                     xs.links=[]
                     xs.link=f.link
                     canvas.setStrokeColor(f.textColor)
                     if f.underline: _do_under_line(0, t_off+leftIndent, tx)
+                    if f.strike: _do_under_line(0, t_off+leftIndent, tx, lm=0.125)
                     if f.link: _do_link_line(0, t_off+leftIndent, tx)
 
                     #now the middle of the paragraph, aligned with the left margin which is our origin.
                     for i in xrange(1, nLines):
                         t_off = dpl( tx, _offsets[i], lines[i][0], lines[i][1], noJustifyLast and i==lim)
                         if f.underline: _do_under_line(i, t_off+leftIndent, tx)
+                        if f.strike: _do_under_line(i, t_off+leftIndent, tx, lm=0.125)
                         if f.link: _do_link_line(i, t_off+leftIndent, tx)
                 else:
                     for i in xrange(1, nLines):
@@ -894,6 +928,9 @@ class Paragraph(Flowable):
                 xs.underline=0
                 xs.underlines=[]
                 xs.underlineColor=None
+                xs.strike=0
+                xs.strikes=[]
+                xs.strikeColor=None
                 xs.links=[]
                 xs.link=None
                 tx.setLeading(style.leading)
@@ -906,15 +943,13 @@ class Paragraph(Flowable):
 
                 tx._fontname,tx._fontsize = None, None
                 t_off = dpl( tx, offset, lines[0], noJustifyLast and nLines==1)
-                _do_under(0, t_off+leftIndent, tx)
-                _do_link(0, t_off+leftIndent, tx)
+                _do_post_text(0, t_off+leftIndent, tx)
 
                 #now the middle of the paragraph, aligned with the left margin which is our origin.
                 for i in range(1, nLines):
                     f = lines[i]
                     t_off = dpl( tx, _offsets[i], f, noJustifyLast and i==lim)
-                    _do_under(i, t_off+leftIndent, tx)
-                    _do_link(i, t_off+leftIndent, tx)
+                    _do_post_text(i, t_off+leftIndent, tx)
 
             canvas.drawText(tx)
             canvas.restoreState()

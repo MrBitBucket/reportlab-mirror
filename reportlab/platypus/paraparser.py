@@ -312,6 +312,7 @@ def _greekConvert(data):
 #       < /b > - bold
 #       < /i > - italics
 #       < u > < /u > - underline
+#       < strike > < /strike > - strike through
 #       < super > < /super > - superscript
 #       < sup > < /sup > - superscript
 #       < sub > < /sub > - subscript
@@ -381,6 +382,13 @@ class ParaParser(xmllib.XMLParser):
 
     def end_u( self ):
         self._pop(underline=1)
+
+    #### strike
+    def start_strike( self, attributes ):
+        self._push(strike=1)
+
+    def end_strike( self ):
+        self._pop(strike=1)
 
     #### link
     def start_link(self, attributes):
@@ -486,6 +494,7 @@ class ParaParser(xmllib.XMLParser):
         frag.super = 0
         frag.rise = 0
         frag.underline = 0
+        frag.strike = 0
         frag.greek = 0
         frag.link = None
         if bullet:
@@ -878,7 +887,7 @@ to the yards, and the sheep bleating. Then I remembered what the blind
 Theban prophet Teiresias had told me, and how carefully Aeaean Circe
 had warned me to shun the island of the blessed sun-god. So being
 much troubled I said to the men, 'My men, I know you are hard pressed,
-but listen while I tell you the prophecy that Teiresias made me, and
+but listen while I <strike>tell you the prophecy that</strike> Teiresias made me, and
 how carefully Aeaean Circe warned me to shun the island of the blessed
 sun-god, for it was here, she said, that our worst danger would lie.
 Head the ship, therefore, away from the island.''')
