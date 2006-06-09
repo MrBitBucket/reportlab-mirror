@@ -150,7 +150,32 @@ class RlAccelTestCase(unittest.TestCase):
         assert _py_getFont(t1fn) is getFontU(t1fn)
 
     def test_sameFrag(self):
-        pass
+        from _rl_accel import _sameFrag
+        class ABag:
+            def __init__(self,**kwd):
+                self.__dict__.update(kwd)
+            def __str__(self):
+                V=['%s=%r' % v for v in self.__dict__.items()]
+                V.sort()
+                return 'ABag(%s)' % ','.join(V)
+
+        a=ABag(fontName='Helvetica',fontSize=12, textColor="red", rise=0, underline=0, strike=0, link="aaaa")
+        b=ABag(fontName='Helvetica',fontSize=12, textColor="red", rise=0, underline=0, strike=0, link="aaaa")
+        for name in ("fontName", "fontSize", "textColor", "rise", "underline", "strike", "link"):
+            old = getattr(a,name)
+            assert _sameFrag(a,b)==1, "_sameFrag(%s,%s)!=1" % (a,b)
+            assert _sameFrag(b,a)==1, "_sameFrag(%s,%s)!=1" % (b,a)
+            setattr(a,name,None)
+            assert _sameFrag(a,b)==0, "_sameFrag(%s,%s)!=0" % (a,b)
+            assert _sameFrag(b,a)==0, "_sameFrag(%s,%s)!=0" % (b,a)
+            delattr(a,name)
+            assert _sameFrag(a,b)==0, "_sameFrag(%s,%s)!=0" % (a,b)
+            assert _sameFrag(b,a)==0, "_sameFrag(%s,%s)!=0" % (b,a)
+            delattr(b,name)
+            assert _sameFrag(a,b)==1, "_sameFrag(%s,%s)!=1" % (a,b)
+            assert _sameFrag(b,a)==1, "_sameFrag(%s,%s)!=1" % (b,a)
+            setattr(a,name,old)
+            setattr(b,name,old)
 
 def makeSuite():
     # only run the tests if _rl_accel is present
