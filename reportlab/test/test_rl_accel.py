@@ -23,11 +23,11 @@ def getrc(defns,depth=1):
     else:
         L = L.copy()
     G0 = G0.copy()
-    return [getrefcount(eval(x,L,G0))-1 for x in defns.split()]
+    return ' '.join([str(getrefcount(eval(x,L,G0))-1) for x in defns.split()])
 
 def checkrc(defns,rcv0):
     rcv1 = getrc(defns,2)
-    return ' '.join(["%s %d-->%d" % (x,v,w) for x,v,w in zip(defns.split(),rcv0,rcv1) if v!=w])
+    return ' '.join(["%s %s-->%s" % (x,v,w) for x,v,w in zip(defns.split(),rcv0.split(),rcv1.split()) if v!=w])
 
 class RlAccelTestCase(unittest.TestCase):
 
