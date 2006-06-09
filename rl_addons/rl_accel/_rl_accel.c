@@ -27,9 +27,8 @@ static __version__=" $Id$ "
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.55"
+#define VERSION "0.56"
 #define MODULE "_rl_accel"
-
 
 static PyObject *moduleVersion;
 static PyObject *moduleObject;
@@ -629,22 +628,24 @@ static PyObject *_sameFrag(PyObject *self, PyObject* args)
 	for(p=names;*p;p++){
 		PyObject *fa, *ga;
 		fa = PyObject_GetAttrString(f,*p);
-		if(!fa){
-L1:			return NULL;
-			}
 		ga = PyObject_GetAttrString(g,*p);
-		if(!ga){
+		if(fa && ga){
+			t = PyObject_Compare(fa,ga);
 			Py_DECREF(fa);
-			goto L1;
+			Py_DECREF(ga);
+			if(PyErr_Occurred()) goto L1;
 			}
-		t = PyObject_Compare(fa,ga);
-		Py_DECREF(fa);
-		Py_DECREF(ga);
-		if(PyErr_Occurred()) goto L1;
+		else{
+			t = fa==ga ? 0 : 1;
+			Py_XDECREF(fa);
+			Py_XDECREF(ga);
+			PyErr_Clear();
+			}
 		if(t) goto L0;
 		}
 	r = 1;
 L0:	return PyInt_FromLong((long)r);
+L1:	return NULL;
 }
 
 static PyObject *ttfonts_calcChecksum(PyObject *self, PyObject* args)
