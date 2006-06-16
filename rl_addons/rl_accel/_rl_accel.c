@@ -27,7 +27,7 @@ static __version__=" $Id$ "
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.56"
+#define VERSION "0.57"
 #define MODULE "_rl_accel"
 
 static PyObject *moduleVersion;
@@ -1243,6 +1243,20 @@ L_OK:
 	Py_DECREF(encoding);
 	return res;
 }
+/*we may need to reload pdfmtrics etc etc*/
+static PyObject *_reset(PyObject *module)
+{
+	if(_notdefFont){
+		Py_DECREF(_notdefFont); _notdefFont = NULL;
+		Py_DECREF(_notdefChar);	_notdefChar = NULL;
+		}
+	if(_pdfmetrics_fonts){
+		Py_DECREF(_pdfmetrics_fonts); _pdfmetrics_fonts = NULL;
+		Py_DECREF(_pdfmetrics_ffar); _pdfmetrics_ffar = NULL;
+		}
+	Py_INCREF(Py_None);
+	return Py_None;
+}
 #if 0
 /*cannot seem to speed this up*/
 static PyObject *_instanceGetCharWidth(PyObject *module, PyObject *args, PyObject *kwds)
@@ -1594,7 +1608,8 @@ static char *__doc__=
 \t_instanceStringWidthU version2 Font instance stringWidth\n\
 \t_instanceStringWidthTTF version2 TTFont instance stringWidth\n\
 \tgetFontU version2 pdfdmetrics.getFont\n\
-\tunicodeT1 version2 pdfmetrics.unicode2T1\n"
+\tunicodeT1 version2 pdfmetrics.unicode2T1\n\
+\t_reset() version2 clears _rl_accel state\n"
 #endif
 #ifdef	HAVE_BOX
 "\tBox(width,character=None) creates a Knuth character Box with the specified width.\n"
@@ -1631,6 +1646,7 @@ static struct PyMethodDef _methods[] = {
 	{"stringWidthU", (PyCFunction)stringWidthU, METH_VARARGS|METH_KEYWORDS, "stringWidthU(text,fontName,fontSize,encoding='utf8')--> font stringWidth(text,fontSize,encoding)"},
 	{"_instanceStringWidthU", (PyCFunction)_instanceStringWidthU, METH_VARARGS|METH_KEYWORDS, "Font.stringWidth(self,text,fontName,fontSize,encoding='utf8') --> width"},
 	{"_instanceStringWidthTTF", (PyCFunction)_instanceStringWidthTTF, METH_VARARGS|METH_KEYWORDS, "TTFont.stringWidth(self,text,fontName,fontSize,encoding='utf8') --> width"},
+	{"_reset", (PyCFunction)_reset, METH_NOARGS, "_rl_accel._reset() reset _rl_accel state"},
 #if	0
 	{"_instanceGetCharWidth", (PyCFunction)_instanceGetCharWidth, METH_VARARGS|METH_KEYWORDS, "TTFontFace.getCharWidth(self,code) --> width"},
 #endif
