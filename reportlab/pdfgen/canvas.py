@@ -539,7 +539,21 @@ class Canvas(textobject._PDFColorSetter):
         """Draw an Image into the specified rectangle.  If width and
         height are omitted, they are calculated from the image size.
         Also allow file names as well as images.  The size in pixels
-        of the image is returned."""
+        of the image is returned.
+
+        New post version 2.0:  drawImage can center the image in a box you provide.
+        This saves developers from doing lots of math in their code.  You can
+        define a box with x,y,width and height.   If 'preserveAspectRatio'
+        is set, the image will be scaled up or down as needed in proportion to
+        fit entirely within the box.  Unless the aspect ratio perfectly matches
+        the box, this will leave some space.  So, the boxAnchor property defines
+        how the image should be anchored in the box, using imaginary points of
+        the compass.  'sw' for SouthWest is the default, but 'c' for center
+        will center it in the given box.
+
+
+
+        """
 
         self._currentPageHasImages = 1
         from pdfimages import PDFImage
@@ -550,7 +564,7 @@ class Canvas(textobject._PDFColorSetter):
     def drawImage(self, image, x, y, width=None, height=None, mask=None, preserveAspectRatio=False, anchor='sw'):
         """Draws the image (ImageReader object or filename) as specified.
 
-        "image" may be an image filename or a ImageReader object.  If width
+        "image" may be an image filename or an ImageReader object.  If width
         and height are not given, the "natural" width and height in pixels
         is used at a scale of 1 point to 1 pixel.
 
@@ -562,6 +576,16 @@ class Canvas(textobject._PDFColorSetter):
 
         The method returns the width and height of the underlying image since
         this is often useful for layout algorithms.
+
+        New post version 2.0:  drawImage can center the image in a box you provide.
+        This saves developers from doing lots of math in their code.  You can
+        define a box with x,y,width and height.   If 'preserveAspectRatio'
+        is set, the image will be scaled up or down as needed in proportion to
+        fit entirely within the box.  Unless the aspect ratio perfectly matches
+        the box, this will leave some space.  So, the boxAnchor property defines
+        how the image should be anchored in the box, using imaginary points of
+        the compass.  'sw' for SouthWest is the default, but 'c' for center
+        will center it in the given box.
 
         Unlike drawInlineImage, this creates 'external images' which
         are only stored once in the PDF file but can be drawn many times.

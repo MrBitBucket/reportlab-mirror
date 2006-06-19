@@ -37,7 +37,7 @@ from types import FunctionType, StringType, TupleType, ListType
 
 from reportlab.lib.validators import    isNumber, isNumberOrNone, isListOfStringsOrNone, isListOfNumbers, \
                                         isListOfNumbersOrNone, isColorOrNone, OneOf, isBoolean, SequenceOf, \
-                                        isString, EitherOr
+                                        isString, EitherOr, Validator, _SequenceTypes
 from reportlab.lib.attrmap import *
 from reportlab.lib import normalDate
 from reportlab.graphics.shapes import Drawing, Line, PolyLine, Group, STATE_DEFAULTS, _textBoxLimits, _rotatedBoxLimits
@@ -75,6 +75,10 @@ def _allInt(values):
         except:
             return 0
     return 1
+
+
+
+
 
 class _AxisG(Widget):
     def _get_line_pos(self,v):
@@ -977,6 +981,62 @@ class XValueAxis(ValueAxis):
             self._makeLines(g,-self.tickDown,self.tickUp,self.strokeColor,self.strokeWidth,self.strokeDashArray)
         return g
 
+
+
+#additional utilities to help specify calendar dates on which tick marks
+#are to be plotted.  After some thought, when the magic algorithm fails,
+#we can let them specify a number of days-of-the-year to tick in any given
+#year.  
+
+
+#################################################################################
+#
+#   Preliminary support objects/functions for the axis used in time series charts
+#
+#################################################################################
+
+_months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']
+_maxDays = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+def parseDayAndMonth(dmstr):
+    """This accepts and validates strings like "31-Dec" i.e. dates
+    of no particular year.  29 Feb is allowed.  These can be used
+    for recurring dates.  It returns a (dd, mm) pair where mm is the
+    month integer.  If the text is not valid it raises an error.
+    """
+
+    dstr, mstr = dmstr.split('-')
+    dd = int(dstr)
+    mstr = mstr.lower()
+    mm = _months.index(mstr) + 1
+    assert dd <= _maxDays[mm-1]
+    return (dd, mm)
+
+
+
+    
+class _isListOfDaysAndMonths(Validator):
+    """This accepts and validates lists of strings like "31-Dec" i.e. dates
+    of no particular year.  29 Feb is allowed.  These can be used
+    for recurring dates.
+    """
+    def test(self,x):
+        if type(x) in _SequenceTypes:
+            answer = True
+            for element in x:
+                try:
+                    dd, mm = parseDayAndMonth(element)
+                except:
+                    answer = False
+            return answer
+        else:
+            return False
+
+    def normalize(self,x):
+        #we store them as presented, it's the most presentable way
+        return x
+
+isListOfDaysAndMonths = _isListOfDaysAndMonths()
+
 class NormalDateXValueAxis(XValueAxis):
     """An X axis applying additional rules.
 
@@ -991,6 +1051,9 @@ class NormalDateXValueAxis(XValueAxis):
         niceMonth = AttrMapValue(isBoolean, desc="Flag for displaying months 'nicely'."),
         forceEndDate = AttrMapValue(isBoolean, desc='Flag for enforced displaying of last date value.'),
         forceFirstDate = AttrMapValue(isBoolean, desc='Flag for enforced displaying of first date value.'),
+        forceDatesEachYear = AttrMapValue(isListOfDaysAndMonths, desc='List of dates in format "31-Dec",' +
+            '"1-Jan".  If present they will always be used for tick marks in the current year, rather ' +
+            'than the dates chosen by the automatic algorithm. Hyphen compulsory, case of month optional.'),
         xLabelFormat = AttrMapValue(None, desc="Label format string (e.g. '{mm}/{yy}') or function."),
         dayOfWeekName = AttrMapValue(SequenceOf(isString,emptyOK=0,lo=7,hi=7), desc='Weekday names.'),
         monthName = AttrMapValue(SequenceOf(isString,emptyOK=0,lo=12,hi=12), desc='Month names.'),
@@ -1007,6 +1070,7 @@ class NormalDateXValueAxis(XValueAxis):
         self.niceMonth = 1
         self.forceEndDate = 0
         self.forceFirstDate = 0
+        self.forceDatesEachYear = []
         self.dailyFreq = 0
         self.xLabelFormat = "{mm}/{yy}"
         self.dayOfWeekName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -1035,7 +1099,17 @@ class NormalDateXValueAxis(XValueAxis):
         """Complex stuff...
 
         Needs explanation...
+
+        
+        Yes please says Andy :-(.  Modified on 19 June 2006 to attempt to allow
+        a mode where one can specify recurring days and months.
+
+
+        
         """
+
+            
+        
         axisLength = self._length
         formatter = self._dateFormatter
         labels = self.labels
@@ -1057,6 +1131,47 @@ class NormalDateXValueAxis(XValueAxis):
         def addTick(i, xVals=xVals, formatter=formatter, ticks=ticks, labels=labels):
             ticks.insert(0,xVals[i])
             labels.insert(0,formatter(xVals[i]))
+
+
+
+        #AR 20060619 - first we try the approach where the user has explicitly
+        #specified the days of year to be ticked.  Other explicit routes may
+        #be added.
+        if self.forceDatesEachYear:
+            forcedPartialDates = map(parseDayAndMonth, self.forceDatesEachYear)
+            #generate the list of dates in the range.
+            firstDate = xVals[0]
+            lastDate = xVals[-1]
+            #print 'dates range from %s to %s' % (firstDate, lastDate)
+            firstYear = firstDate.year()
+            lastYear = lastDate.year()
+            ticks = []
+            labels = []
+            yyyy = firstYear
+            #generate all forced dates between the year it starts and the year it
+            #ends, adding them if within range.
+            while yyyy <= lastYear:
+                for (dd, mm) in forcedPartialDates:
+                    theDate = normalDate.ND((yyyy, mm, dd))
+                    if theDate >= firstDate and theDate <= lastDate:
+                        ticks.append(theDate)
+                        labels.append(formatter(theDate))
+                yyyy += 1
+
+            #first and last may still be forced in.
+            if self.forceFirstDate and xVals[0] <> ticks[0]:
+                ticks.insert(0, firstDate)
+                labels.insert(0,formatter(firstDate))
+            if self.forceEndDate and xVals[-1] <> ticks[-1]:
+                ticks.append(lastDate)
+                labels.append(formatter(lastDate))
+                
+            #print 'xVals found on forced dates =', ticks
+            return ticks, labels
+
+        #otherwise, we apply the 'magic algorithm...' which looks for nice spacing
+        #based on the size and separation of the labels.
+
 
         for d in (1,2,3,6,12,24,60,120):
             k = n/d
