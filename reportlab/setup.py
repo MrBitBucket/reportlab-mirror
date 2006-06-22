@@ -238,6 +238,7 @@ An Open Source Python library for generating PDFs and graphics.
                     'reportlab.graphics.charts',
                     'reportlab.graphics.samples',
                     'reportlab.graphics.widgets',
+                    'reportlab.graphics.barcode',
                     'reportlab.graphics',
                     'reportlab.lib',
                     'reportlab.pdfbase',
