@@ -909,6 +909,8 @@ def progressCB(typ, value):
 if __name__ == '__main__':
 
     def myFirstPage(canvas, doc):
+        from reportlab.lib.colors import red
+        PAGE_HEIGHT = canvas._pagesize[1]
         canvas.saveState()
         canvas.setStrokeColor(red)
         canvas.setLineWidth(5)
@@ -920,6 +922,8 @@ if __name__ == '__main__':
         canvas.restoreState()
 
     def myLaterPages(canvas, doc):
+        from reportlab.lib.colors import red
+        PAGE_HEIGHT = canvas._pagesize[1]
         canvas.saveState()
         canvas.setStrokeColor(red)
         canvas.setLineWidth(5)
