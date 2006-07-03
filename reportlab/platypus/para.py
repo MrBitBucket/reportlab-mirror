@@ -698,9 +698,7 @@ class paragraphEngine:
                     size = self.fontSize
                     textobject.setFont(font, size)
                 if topcode in (StringType, UnicodeType):
-                    #textobject.textOut(opcode)
-                    text = escape(opcode)
-                    code.append('(%s) Tj' % text)
+                    textobject.textOut(opcode)
                 else:
                     # drawable thing
                     opcode.execute(self, textobject, canvas)
@@ -1171,9 +1169,7 @@ class FastPara(Flowable):
                 else:
                     textobject.setWordSpace(0.0)
             textobject.setTextOrigin(x,y)
-            text = escape(text)
-            code.append('(%s) Tj' % text)
-            #textobject.textOut(text)
+            textobject.textOut(text)
             y = y-leading
         c.drawText(textobject)
 
@@ -1992,7 +1988,7 @@ def EmbedInRml2pdf():
     Controller["title"] = theParaMapper
 
 def handleSpecialCharacters(engine, text, program=None):
-    from paraparser import greeks, symenc
+    from paraparser import greeks
     from string import whitespace, atoi, atoi_error
     standard={'lt':'<', 'gt':'>', 'amp':'&'}
     # add space prefix if space here
@@ -2029,26 +2025,14 @@ def handleSpecialCharacters(engine, text, program=None):
                             n = atoi(name[1:])
                     except atoi_error:
                         n = -1
-                    if 0<=n<=255: fragment = chr(n)+fragment[semi+1:]
-                    elif symenc.has_key(n):
-                        fragment = fragment[semi+1:]
-                        (f,b,i) = engine.shiftfont(program, face="symbol")
-                        program.append(symenc[n])
-                        engine.shiftfont(program, face=f)
-                        if fragment and fragment[0] in whitespace:
-                            program.append(" ") # follow with a space
+                    if n>=0:
+                        fragment = unichr(n).encode('utf8')+fragment[semi+1:]
                     else:
                         fragment = "&"+fragment
                 elif standard.has_key(name):
                     fragment = standard[name]+fragment[semi+1:]
                 elif greeks.has_key(name):
-                    fragment = fragment[semi+1:]
-                    greeksub = greeks[name]
-                    (f,b,i) = engine.shiftfont(program, face="symbol")
-                    program.append(greeksub)
-                    engine.shiftfont(program, face=f)
-                    if fragment and fragment[0] in whitespace:
-                        program.append(" ") # follow with a space
+                    fragment = greeks[name]+fragment[semi+1:]
                 else:
                     # add back the &
                     fragment = "&"+fragment
@@ -2254,7 +2238,7 @@ testparagraph1 = """
 
 <para alignment="justify">
 <font color="red" size="15">R</font>ed letter. thisisareallylongword andsoisthis andthisislonger
-justified text paragraph example
+justified text paragraph example with a pound sign \xc2\xa3
 justified text paragraph example
 justified text paragraph example
 </para>
