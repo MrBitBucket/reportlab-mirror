@@ -204,6 +204,7 @@ static int ConvertASCII(const char8 *buf, int count, FILE16 *file)
     case CE_ISO_8859_7:
     case CE_ISO_8859_8:
     case CE_ISO_8859_9:
+	case CE_CP_1252:
     case CE_unspecified_ascii_superset:
 	if(file->flags & FILE16_crlf)
 	{
@@ -311,6 +312,7 @@ static int ConvertUTF16(const char16 *buf, int count, FILE16 *file)
     case CE_ISO_8859_7:
     case CE_ISO_8859_8:
     case CE_ISO_8859_9:
+	case CE_CP_1252:
 	tablenum = (file->enc - CE_ISO_8859_2);
 	max = iso_max_val[tablenum];
 	from_unicode = unicode_to_iso[tablenum];

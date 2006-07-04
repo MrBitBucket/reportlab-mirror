@@ -768,6 +768,7 @@ int printable(int c)
     case CE_ISO_8859_7:
     case CE_ISO_8859_8:
     case CE_ISO_8859_9:
+	case CE_CP_1252:
 	tablenum = (encoding - CE_ISO_8859_2);
 	return c <= iso_max_val[tablenum] && unicode_to_iso[tablenum][c] != '?';
 

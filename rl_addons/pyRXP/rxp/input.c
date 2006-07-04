@@ -201,6 +201,7 @@ int SourceTell(InputSource s)
     case CE_ISO_8859_7:
     case CE_ISO_8859_8:
     case CE_ISO_8859_9:
+	case CE_CP_1252:
     case CE_unspecified_ascii_superset:
 	return s->bytes_before_current_line + s->next;
     case CE_UTF_8:
@@ -707,6 +708,7 @@ static void external_reader(InputSource s)
     case CE_ISO_8859_7:
     case CE_ISO_8859_8:
     case CE_ISO_8859_9:
+	case CE_CP_1252:
 	trans = translate_latin;
 	break;
     case CE_UTF_8:

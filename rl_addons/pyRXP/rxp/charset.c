@@ -17,9 +17,9 @@
 #include "charset.h"
 #include "string16.h"
 
-int iso_to_unicode[8][256];		/* latin-2 ... latin-9 */
-int iso_max_val[8];
-char8 *unicode_to_iso[8];
+int iso_to_unicode[NISO][256];		/* latin-2 ... latin-9 */
+int iso_max_val[NISO];
+char8 *unicode_to_iso[NISO];
 
 /* This table is used to initialise the above arrays */
 
@@ -153,6 +153,14 @@ static int latin_table[8][96] = {
 0x00f8, 0x00f9, 0x00fa, 0x00fb, 0x00fc, 0x0131, 0x015f, 0x00ff,
 }
 };
+static int cp_1252_table[32]=
+{
+0x20ac, -00001, 0x201a, 0x0192, 0x201e, 0x2026, 0x2020, 0x2021,
+0x02c6, 0x2030, 0x0160, 0x2039, 0x0152, -00001, 0x017d, -00001,
+-00001, 0x2018, 0x2019, 0x201c, 0x201d, 0x2022, 0x2013, 0x2014,
+0x02dc, 0x2122, 0x0161, 0x203a, 0x0153, -00001, 0x017e, 0x0178,
+};
+
 
 const char8 *CharacterEncodingName[CE_enum_count] = {
     "unknown",
@@ -170,6 +178,7 @@ const char8 *CharacterEncodingName[CE_enum_count] = {
     "ISO-8859-7",
     "ISO-8859-8",
     "ISO-8859-9",
+	"CP-1252",
 
     "UTF-16",
     "UTF-16",
@@ -193,6 +202,7 @@ const char8 *CharacterEncodingNameAndByteOrder[CE_enum_count] = {
     "ISO-8859-7",
     "ISO-8859-8",
     "ISO-8859-9",
+	"CP-1252",
 
     "UTF-16-B",
     "UTF-16-L",
@@ -203,6 +213,7 @@ const char8 *CharacterEncodingNameAndByteOrder[CE_enum_count] = {
 struct character_encoding_alias CharacterEncodingAlias[] = {
     {"ASCII", CE_ISO_646},
     {"US-ASCII", CE_ISO_646},
+    {"WINDOWS-1252", CE_CP_1252},
     {"ISO-Latin-1", CE_ISO_8859_1},
     {"ISO-Latin-2", CE_ISO_8859_2},
     {"ISO-Latin-3", CE_ISO_8859_3},
@@ -220,9 +231,54 @@ CharacterEncoding InternalCharacterEncoding;
 
 static int charset_initialised = 0;
 
+static int alloc_unicode_to_iso(int i, int max)
+{
+	if(!(unicode_to_iso[i] = Malloc(max+1))){
+	    fprintf(stderr, "Malloc failed in charset initialisation\n");
+	    return -1;
+		}
+	return 0;
+}
+
+static identity_iso_to_unicode(int i,int j,int jlim)
+{
+	for(; j<jlim; j++) iso_to_unicode[i][j] = j;
+}
+
+static table_to_iso_to_unicode(int i, int *table, int j0, int jlim, int *cmax)
+{
+	int j, max= *cmax;
+	for(j=j0; j<jlim; j++){
+	    int code = table[j-j0];
+	    iso_to_unicode[i][j] = code;
+	    if(code > max) max = code;
+		}
+	*cmax = max;
+}
+
+static identity_unicode_to_iso(int i,int j,int jlim)
+{
+	for(; j<jlim; j++) unicode_to_iso[i][j] = j;
+}
+
+static unknown_unicode_to_iso(int i,int j,int jlim)
+{
+	for(; j<jlim; j++) unicode_to_iso[i][j] = '?';
+}
+
+static table_to_unicode_to_iso(int i, int *table, int j0, int jlim)
+{
+	int j;
+	for(j=j0; j<jlim; j++){
+	    int code = table[j-j0];
+	    if(code != -1)
+		unicode_to_iso[i][code] = j;
+		}
+}
+
 int init_charset(void)
 {
-    int i, j;
+    int i, max;
     union {char b[2]; short s;} bytes;
 
     if(charset_initialised)
@@ -240,39 +296,32 @@ int init_charset(void)
 #endif
 
     /* Make ISO-Latin-N tables */
+    for(i=0; i<8; i++){
+		max = 0x9f;
+		identity_iso_to_unicode(i,0,0xa0);
+		table_to_iso_to_unicode(i,latin_table[i],0xa0,0x100,&max);
 
-    for(i=0; i<8; i++)
-    {
-	int max = 0x9f;
+		iso_max_val[i] = max;
+		if(alloc_unicode_to_iso(i,max)) return -1;
+		identity_unicode_to_iso(i,0,0xa0);
+		unknown_unicode_to_iso(i,0xa0,max);
+		table_to_unicode_to_iso(i,latin_table[i],0xa0,0x100);
+    	}
 
-	for(j=0; j<0xa0; j++)
-	    iso_to_unicode[i][j] = j;
-	for(j=0xa0; j<0x100; j++)
-	{
-	    int code = latin_table[i][j-0xa0];
-	    iso_to_unicode[i][j] = code;
-	    if(code > max) max = code;
-	}
+
+	/*cp-1252*/
+	max = 0xff;
+	i = 8;
+	identity_iso_to_unicode(i,0,0x80);
+	table_to_iso_to_unicode(i,cp_1252_table,0x80,0xa0,&max);
+	identity_iso_to_unicode(i,0xa0,0x100);
 
 	iso_max_val[i] = max;
-
-	if(!(unicode_to_iso[i] = Malloc(max+1)))
-	{
-	    fprintf(stderr, "Malloc failed in charset initialisation\n");
-	    return -1;
-	}
-
-	for(j=0; j<0xa0; j++)
-	    unicode_to_iso[i][j] = j;
-	for(j=0xa0; j<=max; j++)
-	    unicode_to_iso[i][j] = '?';
-	for(j=0xa0; j<0x100; j++)
-	{
-	    int code = latin_table[i][j-0xa0];
-	    if(code != -1)
-		unicode_to_iso[i][code] = j;
-	}
-    }
+	if(alloc_unicode_to_iso(i,max)) return -1;
+	identity_unicode_to_iso(i,0,0x80);
+	unknown_unicode_to_iso(i,0x80,max);
+	identity_unicode_to_iso(i,0xa0,0x100);
+	table_to_unicode_to_iso(i,cp_1252_table,0x80,0xa0);
 
     return 0;
 }
@@ -280,13 +329,9 @@ int init_charset(void)
 void deinit_charset(void)
 {
     int i;
-
-    if(!charset_initialised)
-	return;
+    if(!charset_initialised) return;
     charset_initialised = 0;
-
-    for(i=0; i<8; i++)
-	Free(unicode_to_iso[i]);
+    for(i=0; i<NISO; i++) Free(unicode_to_iso[i]);
 }
 
 /* Return true if the encoding has 8-bit input units and is the same
@@ -294,7 +339,7 @@ void deinit_charset(void)
 
 int EncodingIsAsciiSuperset(CharacterEncoding enc)
 {
-    return enc >= CE_unspecified_ascii_superset && enc <= CE_ISO_8859_9;
+    return enc >= CE_unspecified_ascii_superset && enc <= CE_CP_1252;
 }
 
 /* 

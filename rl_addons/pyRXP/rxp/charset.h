@@ -31,11 +31,12 @@ typedef char16 Char;
 
 enum character_encoding {
     CE_unknown, CE_unspecified_ascii_superset,
-    CE_UTF_8, CE_ISO_646, 
+    CE_UTF_8, CE_ISO_646,
     CE_ISO_8859_1,
 
     CE_ISO_8859_2, CE_ISO_8859_3, CE_ISO_8859_4, CE_ISO_8859_5,
     CE_ISO_8859_6, CE_ISO_8859_7, CE_ISO_8859_8, CE_ISO_8859_9,
+	CE_CP_1252,
 
     CE_UTF_16B, CE_UTF_16L, CE_ISO_10646_UCS_2B, CE_ISO_10646_UCS_2L, 
     CE_enum_count
@@ -57,10 +58,12 @@ STD_API int EncodingsCompatible(CharacterEncoding enc1, CharacterEncoding enc2,
 			CharacterEncoding *enc3);
 STD_API CharacterEncoding FindEncoding(char8 *name);
 
-/* Translation tables for Latin-N - do this right sometime! XXX */
+/* Translation tables for Latin-N and similar - do this right sometime! XXX */
 
-extern STD_API int iso_to_unicode[8][256];
-extern STD_API int iso_max_val[8];
-extern STD_API char8 *unicode_to_iso[8];
+#define NISO 9
+
+extern STD_API int iso_to_unicode[NISO][256];
+extern STD_API int iso_max_val[NISO];
+extern STD_API char8 *unicode_to_iso[NISO];
 
 #endif /* CHARSET_H */
