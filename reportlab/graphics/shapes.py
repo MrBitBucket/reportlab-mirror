@@ -667,7 +667,8 @@ class Drawing(Group, Flowable):
         if string.lower(plotMode[1][1:]) in ['pdf','ps','eps','gif','png','jpg','jpeg','pct','pict','tiff','tif','py','bmp','svg']:
             fnroot = plotMode[0]
 
-        plotMode, verbose = formats or getattr(self,'formats',['pdf']), (verbose is not None and (verbose,) or (getattr(self,'verbose',verbose),))[0]
+        plotMode = map(str.lower,formats or getattr(self,'formats',['pdf']))
+        verbose = (verbose is not None and (verbose,) or (getattr(self,'verbose',verbose),))[0]
         _saved = logger.warnOnce.enabled, logger.infoOnce.enabled
         logger.warnOnce.enabled = logger.infoOnce.enabled = verbose
         if 'pdf' in plotMode:
