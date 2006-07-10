@@ -157,7 +157,7 @@ a website, say, all we need to do is write code like this:
 
 eg("""
     from reportlab.graphics import renderPM
-    renderPM.saveToFile(d, 'example1.png', 'PNG')
+    renderPM.drawToFile(d, 'example1.png', 'PNG')
 """)
 
 disc("""
