@@ -20,7 +20,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
 from reportlab.lib.randomtext import randomText, PYTHON
-from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate
+from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, Indenter, SimpleDocTemplate
 from reportlab.platypus.paragraph import *
 
 
@@ -99,6 +99,18 @@ class BreakingTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."
     def test0(self):
         _test0(self)
+
+    def test1(self):
+        '''Ilpo Nyyssönen posted this broken test'''
+        normalStyle = ParagraphStyle(name = 'normal')
+        keepStyle = ParagraphStyle(name = 'keep', keepWithNext = True)
+        content = [
+            Paragraph("line 1", keepStyle),
+            Indenter(left = 1 * cm),
+            Paragraph("line 2", normalStyle),
+            ]
+        doc = SimpleDocTemplate(outputfile('test_platypus_breaking1.pdf'))
+        doc.build(content)
 
 
 def makeSuite():
