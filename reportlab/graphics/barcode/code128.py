@@ -255,7 +255,7 @@ class Code128(MultiWidthBarcode):
         while c < len(l):
             i = (-c - 1)
             if l[i] == '\xf1':
-                c = c + 1
+                c += 1
                 rl.insert(0, '\xf1')
                 continue
             elif len(l[i]) == 1 and l[i] in digits \

@@ -447,6 +447,7 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
     pS = 0
     atTop = 1
     for f in F:
+        if hasattr(f,'frameAction'): continue
         w,h = f.wrapOn(canv,availWidth,0xfffffff)
         if dims is not None: dims.append((w,h))
         if w<=_FUZZ or h<=_FUZZ: continue

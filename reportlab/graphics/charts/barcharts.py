@@ -16,7 +16,7 @@ from types import FunctionType, StringType
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isString,\
             isListOfStrings, SequenceOf, isBoolean, isNoneOrShape, isStringOrNone,\
-            NoneOr
+            NoneOr, isListOfNumbersOrNone
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.formatters import Formatter
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
@@ -32,6 +32,7 @@ class BarChartProperties(PropHolder):
         strokeColor = AttrMapValue(isColorOrNone, desc='Color of the bar border.'),
         fillColor = AttrMapValue(isColorOrNone, desc='Color of the bar interior area.'),
         strokeWidth = AttrMapValue(isNumber, desc='Width of the bar border.'),
+        strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array of a line.'),
         symbol = AttrMapValue(None, desc='A widget to be used instead of a normal bar.'),
         name = AttrMapValue(isString, desc='Text to be associated with a bar (eg seriesname)'),
         swatchMarker = AttrMapValue(NoneOr(isSymbol), desc="None or makeMarker('Diamond') ..."),
@@ -133,14 +134,14 @@ class BarChart(PlotArea):
         # colors e.g. from Tufte.  These will be used in a
         # cycle to set the fill color of each series.
         self.bars = TypedPropertyCollection(BarChartProperties)
-##        self.bars.symbol = None
         self.bars.strokeWidth = 1
         self.bars.strokeColor = colors.black
+        self.bars.strokeDashArray = None
 
         self.bars[0].fillColor = colors.red
         self.bars[1].fillColor = colors.green
         self.bars[2].fillColor = colors.blue
-        self.naLabel = None#NA_Label()
+        self.naLabel = None #NA_Label()
 
 
     def demo(self):
@@ -419,6 +420,8 @@ class BarChart(PlotArea):
         r.strokeWidth = style.strokeWidth
         r.fillColor = style.fillColor
         r.strokeColor = style.strokeColor
+        if style.strokeDashArray:
+            r.strokeDashArray = style.strokeDashArray
         g.add(r)
 
     def _makeBars(self,g,lg):

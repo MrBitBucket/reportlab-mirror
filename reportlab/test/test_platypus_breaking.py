@@ -101,7 +101,7 @@ class BreakingTestCase(unittest.TestCase):
         _test0(self)
 
     def test1(self):
-        '''Ilpo Nyyssönen posted this broken test'''
+        '''Ilpo Nyyss\xf6nen posted this broken test'''
         normalStyle = ParagraphStyle(name = 'normal')
         keepStyle = ParagraphStyle(name = 'keep', keepWithNext = True)
         content = [
