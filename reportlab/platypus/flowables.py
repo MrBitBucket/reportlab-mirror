@@ -968,8 +968,11 @@ class ImageAndFlowables(_Container,Flowable):
         self._iW = availWidth - irpad - wI - ilpad
         aH = itpad + hI + ibpad
         W,H0,self._C0,self._C1 = self._findSplit(canv,self._iW,aH)
-        self.width = availWidth
+        if W>self._iW+_FUZZ:
+            self._C0 = None
+            self._C1 = self._content
         aH = self._aH = max(aH,H0)
+        self.width = availWidth
         if not self._C1:
             self.height = aH
         else:
@@ -1007,7 +1010,8 @@ class ImageAndFlowables(_Container,Flowable):
             Ix = x + self.width-self._wI-self._irpad - self._ilpad
             Fx = x
         self._I.drawOn(canv,Ix,y+self.height-self._itpad-self._hI)
-        _Container.drawOn(self, canv, Fx, y, content=self._C0, aW=self._iW)
+        if self._C0:
+            _Container.drawOn(self, canv, Fx, y, content=self._C0, aW=self._iW)
         if self._C1:
             _Container.drawOn(self, canv, x, y-self._aH,content=self._C1)
 

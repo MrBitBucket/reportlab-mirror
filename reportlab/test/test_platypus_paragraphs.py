@@ -22,7 +22,7 @@ from reportlab.lib.utils import _className
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
-from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate
+from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, PageBreak, NextPageTemplate
 from reportlab.platypus import tableofcontents
 from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.platypus.tables import TableStyle, Table
@@ -48,10 +48,12 @@ class MyDocTemplate(BaseDocTemplate):
 
     def __init__(self, filename, **kw):
         frame1 = Frame(2.5*cm, 2.5*cm, 15*cm, 25*cm, id='F1')
+        frame2 = Frame(2.5*cm, 2.5*cm, 310, 25*cm, id='F2')
         self.allowSplitting = 0
         apply(BaseDocTemplate.__init__, (self, filename), kw)
         template = PageTemplate('normal', [frame1], myMainPageFrame)
-        self.addPageTemplates(template)
+        template1 = PageTemplate('special', [frame2], myMainPageFrame)
+        self.addPageTemplates([template,template1])
 
 
 class ParagraphCorners(unittest.TestCase):
@@ -143,8 +145,55 @@ your browser. If an internal link begins with something that looks like a scheme
         phrase = 'This should be a paragraph spanning at least three pages. '
         description = ''.join([('%d: '%i)+phrase for i in xrange(250)])
         story.append(ImageAndFlowables(Image(gif),[heading,Paragraph(description, bt)],imageSide='left'))
+        story.append(NextPageTemplate('special'))
+        story.append(PageBreak())
+        story.append(ImageAndFlowables(
+                        Image(gif,width=280,height=120),
+                        Paragraph('''The concept of an integrated one box solution for advanced voice and
+data applications began with the introduction of the IMACS. The
+IMACS 200 carries on that tradition with an integrated solution
+optimized for smaller port size applications that the IMACS could not
+economically address. An array of the most popular interfaces and
+features from the IMACS has been bundled into a small 2U chassis
+providing the ultimate in ease of installation.''',
+                        style=ParagraphStyle(
+                                name="base",
+                                fontName="Helvetica",
+                                leading=12,
+                                leftIndent=0,
+                                firstLineIndent=0,
+                                spaceBefore = 9.5,
+                                fontSize=9.5,
+                                )
+                            ),
+                    imageSide='left',
+                    )
+                )
+        story.append(ImageAndFlowables(
+                        Image(gif,width=240,height=120),
+                        Paragraph('''The concept of an integrated one box solution for advanced voice and
+data applications began with the introduction of the IMACS. The
+IMACS 200 carries on that tradition with an integrated solution
+optimized for smaller port size applications that the IMACS could not
+economically address. An array of the most popular interfaces and
+features from the IMACS has been bundled into a small 2U chassis
+providing the ultimate in ease of installation.''',
+                        style=ParagraphStyle(
+                                name="base",
+                                fontName="Helvetica",
+                                leading=12,
+                                leftIndent=0,
+                                firstLineIndent=0,
+                                spaceBefore = 9.5,
+                                fontSize=9.5,
+                                )
+                            ),
+                    imageSide='left',
+                    )
+                )
 
-        doc = MyDocTemplate(outputfile('test_platypus_imageandflowables.pdf'))
+        
+        doc = MyDocTemplate(outputfile('test_platypus_imageandflowables.pdf'),showBoundary=1)
         doc.multiBuild(story)
 
 class FragmentTestCase(unittest.TestCase):
