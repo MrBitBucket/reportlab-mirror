@@ -48,6 +48,18 @@ def _doNothing(canvas, doc):
     "Dummy callback for onPage"
     pass
 
+class PTCycle(list):
+    def __init__(self):
+        self._restart = 0
+        self._idx = 0
+        list.__init__(self)
+
+    def cyclicIterator(self):
+        while 1:
+            yield self[self._idx]
+            self._idx += 1
+            if self._idx>=len(self):
+                self._idx = self._restart
 
 class IndexingFlowable(Flowable):
     """Abstract interface definition for flowables which might
@@ -437,11 +449,7 @@ class BaseDocTemplate:
 
             if hasattr(self,'_nextPageTemplateCycle'):
                 #they are cycling through pages'; we keep the index
-                cyc = self._nextPageTemplateCycle
-                idx = self._nextPageTemplateIndex
-                self.pageTemplate = cyc[idx]  #which is one of the ones in the list anyway
-                #bump up by 1
-                self._nextPageTemplateIndex = (idx + 1) % len(cyc)
+                self.pageTemplate = self._nextPageTemplateCycle.next()
             elif hasattr(self,'_nextPageTemplateIndex'):
                 self.pageTemplate = self.pageTemplates[self._nextPageTemplateIndex]
                 del self._nextPageTemplateIndex
@@ -504,21 +512,25 @@ class BaseDocTemplate:
         elif type(pt) in (ListType, TupleType):
             #used for alternating left/right pages
             #collect the refs to the template objects, complain if any are bad
-            cycle = []
-            for templateName in pt:
+            c = PTCycle()
+            for ptn in pt:
                 found = 0
+                if ptn=='*':    #special case name used to short circuit the iteration
+                    c._restart = len(c)
+                    continue
                 for t in self.pageTemplates:
-                    if t.id == templateName:
-                        cycle.append(t)
+                    if t.id == ptn:
+                        c.append(t)
                         found = 1
                 if not found:
                     raise ValueError("Cannot find page template called %s" % templateName)
-            #double-check all of them are there...
-            
-            first = cycle[0]
+            if not c:
+                raise ValueError("No valid page templates in cycle")
+            elif c._restart>len(c):
+                raise ValueError("Invalid cycle restart position")
+
             #ensure we start on the first one
-            self._nextPageTemplateCycle = cycle
-            self._nextPageTemplateIndex = 0  #indexes into the cycle
+            self._nextPageTemplateCycle = c.cyclicIterator()
         else:
             raise TypeError, "argument pt should be string or integer or list"
 

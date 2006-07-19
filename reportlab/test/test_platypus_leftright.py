@@ -34,8 +34,6 @@ def myMainPageFrame(canvas, doc):
     canvas.drawString(10*cm, cm, str(pageNumber))
     canvas.restoreState()
 
-
-
 class LeftPageTemplate(PageTemplate):
     def __init__(self):
         #allow a bigger margin on the right for the staples
@@ -119,34 +117,36 @@ class LeftRightTestCase(unittest.TestCase):
 
         story.append(NextPageTemplate(['left','right']))
 
-
         story.append(Paragraph("""
             One can specify a list of templates instead of a single one in
             order to sequence through them.""",style=bt))
-        for i in range(10):
-            story.append(Paragraph('Heading 1 always starts a new page (%d)' % len(story), h1))
-            for j in range(3):
-                story.append(Paragraph('Heading1 paragraphs should always'
-                                'have a page break before.  Heading 2 on the other hand'
-                                'should always have a FRAME break before (%d)' % len(story), bt))
-                story.append(Paragraph('Heading 2 always starts a new frame (%d)' % len(story), h2))
-                story.append(Paragraph('Heading1 paragraphs should always'
-                                'have a page break before.  Heading 2 on the other hand'
-                                'should always have a FRAME break before (%d)' % len(story), bt))
+        def doSome():
+            for i in range(10):
+                story.append(Paragraph('Heading 1 always starts a new page (%d)' % len(story), h1))
                 for j in range(3):
-                    story.append(Paragraph(randomText(theme=PYTHON, sentences=2)+' (%d)' % len(story), bt))
-                    story.append(Paragraph('I should never be at the bottom of a frame (%d)' % len(story), h3))
-                    story.append(Paragraph(randomText(theme=PYTHON, sentences=1)+' (%d)' % len(story), bt))
+                    story.append(Paragraph('Heading1 paragraphs should always'
+                                    'have a page break before.  Heading 2 on the other hand'
+                                    'should always have a FRAME break before (%d)' % len(story), bt))
+                    story.append(Paragraph('Heading 2 always starts a new frame (%d)' % len(story), h2))
+                    story.append(Paragraph('Heading1 paragraphs should always'
+                                    'have a page break before.  Heading 2 on the other hand'
+                                    'should always have a FRAME break before (%d)' % len(story), bt))
+                    for j in range(3):
+                        story.append(Paragraph(randomText(theme=PYTHON, sentences=2)+' (%d)' % len(story), bt))
+                        story.append(Paragraph('I should never be at the bottom of a frame (%d)' % len(story), h3))
+                        story.append(Paragraph(randomText(theme=PYTHON, sentences=1)+' (%d)' % len(story), bt))
 
+        doSome()
         story.append(NextPageTemplate('plain'))
         story.append(Paragraph('Back to plain old page template',h1))
         story.append(Paragraph('Back to plain old formatting', bt))
-
+        story.append(Paragraph("""use a template name of * to indicate where the iteration should restart""",style=bt))
+        story.append(NextPageTemplate(['left','*','right']))
+        doSome()
 
         #doc = MyDocTemplate(outputfile('test_platypus_leftright.pdf'))
         doc = MyDocTemplate(outputfile('test_platypus_leftright.pdf'))
         doc.multiBuild(story)
-
 
 def makeSuite():
     return makeSuiteForClasses(LeftRightTestCase)
