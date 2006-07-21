@@ -27,7 +27,7 @@ static __version__=" $Id$ "
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.57"
+#define VERSION "0.58"
 #define MODULE "_rl_accel"
 
 static PyObject *moduleVersion;
@@ -624,7 +624,8 @@ static PyObject *_sameFrag(PyObject *self, PyObject* args)
 	int	r=0, t;
 	char **p;
 	if (!PyArg_ParseTuple(args, "OO:_sameFrag", &f, &g)) return NULL;
-	if(PyObject_HasAttrString(f,"cbDefn")||PyObject_HasAttrString(g,"cbDefn")) goto L0;
+	if(PyObject_HasAttrString(f,"cbDefn")||PyObject_HasAttrString(g,"cbDefn")
+		|| PyObject_HasAttrString(f,"lineBreak")||PyObject_HasAttrString(g,"lineBreak")) goto L0;
 	for(p=names;*p;p++){
 		PyObject *fa, *ga;
 		fa = PyObject_GetAttrString(f,*p);
