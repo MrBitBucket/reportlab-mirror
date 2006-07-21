@@ -465,7 +465,7 @@ class ParaParser(xmllib.XMLParser):
                 v = '\0'
         else:
             v = None
-            if attr: 
+            if attr:
                 self._syntax_error('<unichar/> invalid attribute %s' % attr.keys()[0])
 
         if v is not None:
@@ -483,12 +483,14 @@ class ParaParser(xmllib.XMLParser):
 
     def start_br(self, attr):
         #just do the trick to make sure there is no content
-        self._push(_selfClosingTag='br', lineBreak=True, text='')
+        self._push(_selfClosingTag='br',lineBreak=True,text='')
 
     def end_br(self):
-        frag = self._pop(_selfClosingTag='br', lineBreak=True)
-        self.fragList.append(frag)
-
+        frag = self._stack[-1]
+        assert frag._selfClosingTag=='br' and frag.lineBreak,'Parser failure in <br/>'
+        del frag._selfClosingTag
+        self.handle_data('')
+        self._pop()
 
     def _initial_frag(self,attr,attrMap,bullet=0):
         style = self._style
@@ -760,7 +762,7 @@ class ParaParser(xmllib.XMLParser):
             if bFragList:
                 for frag in bFragList:
                     frag.text = unicode(frag.text, self._enc)
-            
+
         return style, fragList, bFragList
 
     def _tt_parse(self,tt):
@@ -917,4 +919,4 @@ them when the man struck up with his tune.]''')
     check_text('''Here comes <font face="Courier" size="3cm">Courier 3cm</font> and normal again.''')
     #AR 14-Jul-2006: test <br/> tag
     check_text('''Before the break <br/>the middle line <br/> and the last line.''')
-    
+

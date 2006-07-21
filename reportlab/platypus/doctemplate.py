@@ -586,7 +586,7 @@ class BaseDocTemplate:
         n = len(flowables)
         while i<n and flowables[i].getKeepWithNext(): i += 1
         if i:
-            if not getattr(flowables[i],'locChanger',None): i += 1
+            if i<n and not getattr(flowables[i],'locChanger',None): i += 1
             K = KeepTogether(flowables[:i])
             for f in K._content:
                 f.keepWithNext = 0

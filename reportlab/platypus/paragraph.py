@@ -212,7 +212,8 @@ except ImportError:
         #if you modify this you need to modify _rl_accel RGB
         def _sameFrag(f,g):
             'returns 1 if two ParaFrags map out the same'
-            if hasattr(f,'cbDefn') or hasattr(g,'cbDefn'): return 0
+            if (hasattr(f,'cbDefn') or hasattr(g,'cbDefn')
+                    or hasattr(f,'lineBreak') or hasattr(g,'lineBreak')): return 0
             for a in ('fontName', 'fontSize', 'textColor', 'rise', 'underline', 'strike', 'link'):
                 if getattr(f,a)!=getattr(g,a): return 0
             return 1
@@ -257,10 +258,14 @@ def _getFragWords(frags):
                 n = 0
         elif hasattr(f,'cbDefn'):
             W.append((f,''))
-        elif getattr(f, 'lineBreak', False) == True:
+        elif hasattr(f, 'lineBreak'):
             #pass the frag through.  The line breaker will scan for it.
-            W.append((f,''))
-            
+            if W!=[]:
+                W.insert(0,n)
+                R.append(W)
+                W = []
+                n = 0
+            R.append([0,(f,'')])
 
     if W!=[]:
         W.insert(0,n)
@@ -638,7 +643,7 @@ class Paragraph(Flowable):
                 #this underscores my feeling that Unicode throughout would be easier!
                 wordWidth = stringWidth(word, fontName, fontSize, self.encoding)
                 newWidth = currentWidth + spaceWidth + wordWidth
-                if newWidth <= maxWidth or len(cLine) == 0: 
+                if newWidth <= maxWidth or len(cLine) == 0:
                     # fit one more on this line
                     cLine.append(word)
                     currentWidth = newWidth
@@ -670,6 +675,7 @@ class Paragraph(Flowable):
                 return self.blPara
             n = 0
             nSp = 0
+            lineBreakPrev = False
             for w in _getFragWords(frags):
                 spaceWidth = stringWidth(' ',w[-1][0].fontName, w[-1][0].fontSize)
 
@@ -684,9 +690,14 @@ class Paragraph(Flowable):
                     newWidth = currentWidth + spaceWidth + wordWidth
                 else:
                     newWidth = currentWidth
-                #if (not getattr(f, 'lineBreak','False')) and (newWidth<=maxWidth or n==0):
-                if newWidth<=maxWidth or n==0:
-                    # fit one more word on this line
+
+                #text to see if this frag is a line break. If it is and we will only act on it
+                #if the current width is non-negative or the previous thing was a deliberate lineBreak
+                lineBreak = hasattr(f,'lineBreak')
+                endLine = (newWidth>maxWidth and n>0) or (lineBreak and (currentWidth>0 or lineBreakPrev))
+                if not endLine:
+                    lineBreakPrev = lineBreak
+                    if lineBreak: continue      #throw it away
                     n += 1
                     maxSize = max(maxSize,f.fontSize)
                     nText = w[1][1]
@@ -718,6 +729,11 @@ class Paragraph(Flowable):
 
                     currentWidth = newWidth
                 else:  #either it won't fit, or it's a lineBreak tag
+                    if lineBreak and not len(words):
+                        g = f.clone()
+                        del g.lineBreak
+                        words.append(g)
+
                     if currentWidth>self.width: self.width = currentWidth
                     #end of line
                     lines.append(FragLine(extraSpace=(maxWidth - currentWidth),wordCount=n,
@@ -729,6 +745,12 @@ class Paragraph(Flowable):
                         maxWidth = maxWidths[lineno]
                     except IndexError:
                         maxWidth = maxWidths[-1]  # use the last one
+
+                    lineBreakPrev = lineBreak
+                    if lineBreak:
+                        n = 0
+                        continue
+
                     currentWidth = wordWidth
                     n = 1
                     maxSize = f.fontSize

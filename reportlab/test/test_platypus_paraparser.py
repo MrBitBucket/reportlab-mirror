@@ -83,10 +83,8 @@ class ParaParserTestCase(unittest.TestCase):
     def testBr(self):
         txt = u"Hello <br/> World"
         fragList = ParaParser().parse(txt, self.style)[1]
-        print fragList
-##        self.assertEquals(map(lambda x:x.text, fragList), [u'Hello ',u'Bold',u' World'])
-##        self.assertEquals(fragList[1].fontName, 'Times-Bold')
-
+        self.assertEquals(map(lambda x:x.text, fragList), [u'Hello ',u'',u' World'])
+        self.assertEquals(fragList[1].lineBreak, True)
 
 def makeSuite():
     return makeSuiteForClasses(ParaParserTestCase)

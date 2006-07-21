@@ -49,11 +49,27 @@ class MyDocTemplate(BaseDocTemplate):
         self.addPageTemplates(template)
 
 
+_text1='''Furthermore, the fundamental error of regarding functional notions as
+categorial delimits a general convention regarding the forms of the
+grammar.  I suggested that these results would follow from the
+assumption that the descriptive power of the base component may remedy
+and, at the same time, eliminate a descriptive fact.  Thus a subset of
+English sentences interesting on quite independent grounds raises
+serious doubts about the ultimate standard that determines the accuracy
+of any proposed grammar.  Of course, the natural general principle that
+will subsume this case can be defined in such a way as to impose the
+strong generative capacity of the theory.  By combining adjunctions and
+certain deformations, the descriptive power of the base component is not
+subject to the levels of acceptability from fairly high (e.g. (99a)) to
+virtual gibberish (e.g. (98d)).
+'''
 def _test0(self):
     "This makes one long multi-page paragraph."
 
     # Build story.
     story = []
+    a = story.append
+
 
     styleSheet = getSampleStyleSheet()
     h1 = styleSheet['Heading1']
@@ -69,27 +85,38 @@ def _test0(self):
     h3.keepWithNext = 1
 
     bt = styleSheet['BodyText']
-
-    story.append(Paragraph("""
+    a(Paragraph("""
         Subsequent pages test pageBreakBefore, frameBreakBefore and
         keepTogether attributes.  Generated at %s.  The number in brackets
         at the end of each paragraph is its position in the story. (%d)""" % (
             time.ctime(time.time()), len(story)), bt))
 
     for i in range(10):
-        story.append(Paragraph('Heading 1 always starts a new page (%d)' % len(story), h1))
+        a(Paragraph('Heading 1 always starts a new page (%d)' % len(story), h1))
         for j in range(3):
-            story.append(Paragraph('Heading1 paragraphs should always'
+            a(Paragraph('Heading1 paragraphs should always'
                             'have a page break before.  Heading 2 on the other hand'
                             'should always have a FRAME break before (%d)' % len(story), bt))
-            story.append(Paragraph('Heading 2 always starts a new frame (%d)' % len(story), h2))
-            story.append(Paragraph('Heading1 paragraphs should always'
+            a(Paragraph('Heading 2 always starts a new frame (%d)' % len(story), h2))
+            a(Paragraph('Heading1 paragraphs should always'
                             'have a page break before.  Heading 2 on the other hand'
                             'should always have a FRAME break before (%d)' % len(story), bt))
             for j in range(3):
-                story.append(Paragraph(randomText(theme=PYTHON, sentences=2)+' (%d)' % len(story), bt))
-                story.append(Paragraph('I should never be at the bottom of a frame (%d)' % len(story), h3))
-                story.append(Paragraph(randomText(theme=PYTHON, sentences=1)+' (%d)' % len(story), bt))
+                a(Paragraph(randomText(theme=PYTHON, sentences=2)+' (%d)' % len(story), bt))
+                a(Paragraph('I should never be at the bottom of a frame (%d)' % len(story), h3))
+                a(Paragraph(randomText(theme=PYTHON, sentences=1)+' (%d)' % len(story), bt))
+
+    a(Paragraph('Now we do &lt;br/&gt; tests', h1))
+    a(Paragraph('First off no br tags',h3))
+    a(Paragraph(_text1,bt))
+    a(Paragraph("&lt;br/&gt; after 'the' in line 4",h3))
+    a(Paragraph(_text1.replace('forms of the','forms of the<br/>',1),bt))
+    a(Paragraph("2*&lt;br/&gt; after 'the' in line 4",h3))
+    a(Paragraph(_text1.replace('forms of the','forms of the<br/><br/>',1),bt))
+    a(Paragraph("&lt;br/&gt; after 'I suggested ' in line 5",h3))
+    a(Paragraph(_text1.replace('I suggested ','I suggested<br/>',1),bt))
+    a(Paragraph("2*&lt;br/&gt; after 'I suggested ' in line 5",h3))
+    a(Paragraph(_text1.replace('I suggested ','I suggested<br/><br/>',1),bt))
 
     doc = MyDocTemplate(outputfile('test_platypus_breaking.pdf'))
     doc.multiBuild(story)
