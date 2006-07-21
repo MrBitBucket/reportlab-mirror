@@ -257,6 +257,10 @@ def _getFragWords(frags):
                 n = 0
         elif hasattr(f,'cbDefn'):
             W.append((f,''))
+        elif getattr(f, 'lineBreak', False) == True:
+            #pass the frag through.  The line breaker will scan for it.
+            W.append((f,''))
+            
 
     if W!=[]:
         W.insert(0,n)
@@ -680,8 +684,9 @@ class Paragraph(Flowable):
                     newWidth = currentWidth + spaceWidth + wordWidth
                 else:
                     newWidth = currentWidth
+                #if (not getattr(f, 'lineBreak','False')) and (newWidth<=maxWidth or n==0):
                 if newWidth<=maxWidth or n==0:
-                    # fit one more on this line
+                    # fit one more word on this line
                     n += 1
                     maxSize = max(maxSize,f.fontSize)
                     nText = w[1][1]
@@ -712,7 +717,7 @@ class Paragraph(Flowable):
                         maxSize = max(maxSize,g.fontSize)
 
                     currentWidth = newWidth
-                else:
+                else:  #either it won't fit, or it's a lineBreak tag
                     if currentWidth>self.width: self.width = currentWidth
                     #end of line
                     lines.append(FragLine(extraSpace=(maxWidth - currentWidth),wordCount=n,

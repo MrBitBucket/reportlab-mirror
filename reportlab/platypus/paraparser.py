@@ -481,6 +481,15 @@ class ParaParser(xmllib.XMLParser):
     def end_font(self):
         self._pop()
 
+    def start_br(self, attr):
+        #just do the trick to make sure there is no content
+        self._push(_selfClosingTag='br', lineBreak=True, text='')
+
+    def end_br(self):
+        frag = self._pop(_selfClosingTag='br', lineBreak=True)
+        self.fragList.append(frag)
+
+
     def _initial_frag(self,attr,attrMap,bullet=0):
         style = self._style
         if attr!={}:
@@ -611,6 +620,7 @@ class ParaParser(xmllib.XMLParser):
         self.handle_data('')
         self._pop()
 
+
     #---------------------------------------------------------------
     def _push(self,**attr):
         frag = copy.copy(self._stack[-1])
@@ -665,9 +675,9 @@ class ParaParser(xmllib.XMLParser):
 
         frag = copy.copy(self._stack[-1])
         if hasattr(frag,'cbDefn'):
-            if data!='': syntax_error('Only <onDraw> tag allowed')
+            if data!='': self._syntax_error('Only <onDraw> tag allowed')
         elif hasattr(frag,'_selfClosingTag'):
-            if data!='': syntax_error('No content allowed in %s tag' % frag._selfClosingTag)
+            if data!='': self._syntax_error('No content allowed in %s tag' % frag._selfClosingTag)
             return
         else:
             # if sub and super are both on they will cancel each other out
@@ -905,3 +915,6 @@ them when the man struck up with his tune.]''')
     check_text('''Here comes <FONT FACE="Helvetica" SIZE="14pt">Helvetica 14</FONT> with <STRONG>strong</STRONG> <EM>emphasis</EM>.''')
     check_text('''Here comes <font face="Helvetica" size="14pt">Helvetica 14</font> with <Strong>strong</Strong> <em>emphasis</em>.''')
     check_text('''Here comes <font face="Courier" size="3cm">Courier 3cm</font> and normal again.''')
+    #AR 14-Jul-2006: test <br/> tag
+    check_text('''Before the break <br/>the middle line <br/> and the last line.''')
+    
