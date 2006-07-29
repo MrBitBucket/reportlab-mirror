@@ -304,15 +304,38 @@ class PDFDocument:
 
     def setTitle(self, title):
         "embeds in PDF file"
-        self.info.title = title
+        if title is None:
+            self.info.title = '(anonymous)'
+        else:
+            self.info.title = title
+
 
     def setAuthor(self, author):
         "embedded in PDF file"
-        self.info.author = author
+        #allow resetting to clear it
+        if author is None:
+            self.info.author = '(anonymous)'
+        else:
+            self.info.author = author
 
     def setSubject(self, subject):
         "embeds in PDF file"
-        self.info.subject = subject
+
+        #allow resetting to clear it
+        if subject is None:
+            self.info.subject = '(unspecified)'
+        else:
+            self.info.subject = subject
+
+    def setKeywords(self, keywords):
+        "embeds a string containing keywords in PDF file"
+
+        #allow resetting to clear it but ensure it's a string
+        if keywords is None:
+            self.info.keywords = ''
+        else:
+            self.info.keywords = keywords
+
 
     def setDateFormatter(self, dateFormatter):
         self.info._dateFormatter = dateFormatter
@@ -605,6 +628,9 @@ class PDFDictionary:
             L = " ".join(L)
         return "<< %s >>" % L
 
+    def copy(self):
+        return PDFDictionary(self.dict)
+    
 # stream filters are objects to support round trip and
 # possibly in the future also support parameters
 class PDFStreamFilterZCompress:
@@ -1308,6 +1334,7 @@ class PDFInfo:
     title = "untitled"
     author = "anonymous"
     subject = "unspecified"
+    keywords = ""
     _dateFormatter = None
 
     def __init__(self):
@@ -1315,7 +1342,7 @@ class PDFInfo:
 
     def digest(self, md5object):
         # add self information to signature
-        for x in (self.title, self.author, self.subject):
+        for x in (self.title, self.author, self.subject, self.keywords):
             md5object.update(str(x))
 
     def format(self, document):
@@ -1325,9 +1352,17 @@ class PDFInfo:
         D["CreationDate"] = PDFDate(invariant=self.invariant,dateFormatter=self._dateFormatter)
         D["Producer"] = PDFString(self.producer)
         D["Subject"] = PDFString(self.subject)
+        D["Keywords"] = PDFString(self.keywords)
+            
         PD = PDFDictionary(D)
         return PD.format(document)
 
+    def copy(self):
+        "shallow copy - useful in pagecatchering"
+        thing = self.__klass__()
+        for (k, v) in self.__dict__.items():
+            setattr(thing, k, v)
+        return thing
 # skipping thumbnails, etc
 
 

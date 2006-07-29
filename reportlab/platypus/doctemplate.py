@@ -316,6 +316,8 @@ class BaseDocTemplate:
                     'allowSplitting':1,
                     'title':None,
                     'author':None,
+                    'subject':None,
+                    'keywords':[],
                     'invariant':None,
                     'pageCompression':None,
                     '_pageBreakQuick':1,
@@ -675,11 +677,18 @@ class BaseDocTemplate:
                                 pagesize=self.pagesize,
                                 invariant=self.invariant,
                                 pageCompression=self.pageCompression)
+
+        self.canv.setAuthor(self.author)
+        self.canv.setTitle(self.title)
+        self.canv.setSubject(self.subject)
+        self.canv.setKeywords(self.keywords)
+        
         if self._onPage:
             self.canv.setPageCallBack(self._onPage)
         self.handle_documentBegin()
 
     def _endBuild(self):
+        print 'start of doc._endBuild: keywords=', self.canv._doc.info.keywords
         if self._hanging!=[] and self._hanging[-1] is PageBegin:
             del self._hanging[-1]
             self.clean_hanging()
@@ -707,11 +716,18 @@ class BaseDocTemplate:
             self._onProgress('SIZE_EST', len(flowables))
         self._startBuild(filename,canvasmaker)
 
+        #pagecatcher can drag in information from embedded PDFs and we want ours
+        #to take priority, so cache and reapply our own info dictionary after the build.
+        self._savedInfo = self.canv._doc.info
+        handled = 0
         while len(flowables):
             self.clean_hanging()
             try:
                 first = flowables[0]
                 self.handle_flowable(flowables)
+                handled += 1
+
+
             except:
                 #if it has trace info, add it to the traceback message.
                 if hasattr(first, '_traceInfo') and first._traceInfo:
@@ -729,6 +745,9 @@ class BaseDocTemplate:
                 raise
             if self._onProgress:
                 self._onProgress('PROGRESS',flowableCount - len(flowables))
+
+        #reapply pagecatcher info
+        self.canv._doc.info = self._savedInfo 
 
         self._endBuild()
         if self._onProgress:

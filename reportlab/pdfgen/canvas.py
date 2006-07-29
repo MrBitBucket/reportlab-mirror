@@ -336,6 +336,14 @@ class Canvas(textobject._PDFColorSetter):
            in the document itself."""
         self._doc.setSubject(subject)
 
+    def setKeywords(self, keywords):
+        """write a list of keywords into the PDF file which shows in document properties.
+        Either submit a single string or a list/tuple"""
+        if type(keywords) in (TupleType, ListType):
+            keywords = ', '.join(keywords)
+        self._doc.setKeywords(keywords)
+        
+
     def pageHasData(self):
         "Info function - app can call it after showPage to see if it needs a save"
         return len(self._code) == 0
