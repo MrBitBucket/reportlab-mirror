@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="iso-8859-1" standalone="no" ?>
-<!DOCTYPE document SYSTEM "rml_1_0.dtd">
+<?xml version="1.0" encoding="cp-1252" standalone="no" ?>
+<!DOCTYPE document SYSTEM "rml.dtd">
 <document filename="PyRXP_Documentation.pdf">
-<!-- Last Modified:             $Date: 2003/11/27 14:55:24 $ -->
-<!-- Document Version Number:   $Revision: 1.5 $            -->
+<!-- Last Modified:             $Date$ -->
+<!-- Document Version Number:   $Revision$            -->
 
 <template pageSize="(595, 842)" 
         leftMargin="72" 
@@ -14,7 +14,7 @@
     <pageTemplate id="cover">
     <pageGraphics>
         <setFont name="Times-Bold" size="48"/>
-        <drawCentredString x="297" y="516">PyRXP 0.97</drawCentredString>
+        <drawCentredString x="297" y="516">PyRXP 1.08</drawCentredString>
         <setFont name="Times-Bold" size="12"/>
         <drawCentredString x="297" y="414">User Documentation</drawCentredString>
 
@@ -47,7 +47,7 @@
         </lines>
         <setFont name="Times-Roman" size="10"/>
         <drawString x="72" y="808">PyRXP User Documentation</drawString>
-        <drawRightString x="523" y="808">$Revision: 1.5 $</drawRightString>
+        <drawRightString x="523" y="808">$Revision$</drawRightString>
         <drawCentredString x="297.5" y="60">Page <pageNumber/></drawCentredString>
     </pageGraphics>
     <frame id="first" x1="72" y1="72" width="451" height="698"/>
@@ -429,18 +429,18 @@ tags, and each of these has some text content and an <i>amount</i> attribute.
 Wouldn't it be nice if you could write some Python code this simple?
 </para>
 
-<pre style="programListing">
+<xpre style="programListing">
 invoice = pyRXP.Parser().parse(myInvoiceText)
 for lineItem in invoice:
     print invoice.amount
-</pre>
+</xpre>
 
 <para>Likewise, if a node is known to contain text, it would be really handy
 to just treat it as a string.  We have a preprocessor we use to insert data
 into HTML and RML files which lets us put Python expressions in curly braces, 
 and we often do things like</para>
 
-<pre style="programListing">
+<xpre style="programListing">
 <![CDATA[
 <html><head><title>My web page</title></head>
 <body>
@@ -450,7 +450,7 @@ and we often do things like</para>
 </html>
 <h1></h1>
 ]]>
-</pre>
+</xpre>
 
 <para>
 Try to write the equivalent in Java and you'll have loads of method calls to
@@ -518,19 +518,19 @@ default settings) return the string "Smith &amp; Jones", and you can't
 tell from the tuple tree which one was in the file:
 </para>
 
-<pre style="programListing">
+<xpre style="programListing">
 <![CDATA[
 <provider>Smith &amp; Jones<provider>
 ]]>
-</pre>
+</xpre>
 <para>
 Alternatively one can use
 </para>
-<pre style="programListing">
+<xpre style="programListing">
 <![CDATA[
 <provider><[CDATA[Smith & Jones]]>]<![CDATA[]><provider>
 ]]>
-</pre>
+</xpre>
 
 <para>
 So if you want a tool to edit and rewrite XML files with perfect
@@ -577,9 +577,9 @@ ReportLab’s FTP server has a win32-dlls directory, which is
 sub-divided into Python versions. Each of these has the version of the
 pyd file suitable for use with that version of Python. So, the version
 we use with Python 2.2 is at</para>
-<pre style="programListing">
+<xpre style="programListing">
 http://www.reportlab.com/ftp/win32-dlls/2.2/pyRXP.pyd
-</pre>
+</xpre>
 
 <para>
 Download the pyRXP DLL from the ReportLab FTP site. Save the pyRXP.pyd
@@ -598,16 +598,16 @@ SourceForge.
 The source for pyRXP and a slightly patched version of RXP is made
 available by anonymous CVS at
 </para>
-<pre style="programListing">
+<xpre style="programListing">
 :pserver:anonymous@cvs.reportlab.sourceforge.net:/cvsroot/reportlab
-</pre>
+</xpre>
 <para>
 To get the source use the commands 
 </para>
-<pre style="programListing">
+<xpre style="programListing">
 cvs -d :pserver:anonymous@cvs.reportlab.sourceforge.net:/cvsroot/reportlab login 
 cvs -d :pserver:anonymous@cvs.reportlab.sourceforge.net:/cvsroot/reportlab co rl_addons/pyRXP 
-</pre>
+</xpre>
 
 <para>
 enter a carriage return for the password.
@@ -636,19 +636,19 @@ If you have built the Unicode aware version (<font face="Courier">pyRXPU.pyd</fo
 or <font face="Courier">pyRXPU.so</font>, only available in the source distribution at the moment),
 running the test program should show you this:
 </para>
-<pre style="programListing">
+<xpre style="programListing">
 C:\tmp\rl_addons\pyRXP\test>python testRXPbasic.py
 ..........................................
-42 tests, no failures!</pre>
+42 tests, no failures!</xpre>
 
 <para>
 If you have only installed the standard (8-bit) pyRXP, you should see something like this:
 </para>
-<pre style="programListing">
+<xpre style="programListing">
 C:\tmp\rl_addons\pyRXP\test>testRXPbasic.py
 .....................
 21 tests, no failures!
-</pre>
+</xpre>
 
 <para>
 These are basic health checks, which are the minimum required to make
@@ -664,15 +664,15 @@ directory. This depends on a set of more than 300 tests written by
 James Clark which you can download in the form of a zip file from
 </para>
 
-<pre style="programListing">
+<xpre style="programListing">
 http://www.reportlab.com/ftp/xmltest.zip
-</pre>
+</xpre>
 <para>
 or
 </para>
-<pre style="programListing">
+<xpre style="programListing">
 ftp://ftp.jclark.com/pub/xml/xmltest.zip
-</pre>
+</xpre>
 
 <para>
 You can simply drop this in the test directory and run the
@@ -685,9 +685,9 @@ We have made available a small directory of example stuff to play with.
 This will be superceded by the release of the framework soon.  As such
 there is no formal package location for it; unzip anywhere you want.
 </para>
-<pre style="programListing">
+<xpre style="programListing">
 http://www.reportlab.com/ftp/pyRXP_examples.zip
-</pre>
+</xpre>
 
 <para>
 The examples directory includes a couple of substantial XML files with
@@ -719,7 +719,7 @@ you string with the version information for the rxp library embedded
 in the module.
 </para>
 
-<pre style="programListing">
+<xpre style="programListing">
 C:\Python22>python
 Python 2.2.1 (#34, Apr  9 2002, 19:34:33) [MSC 32 bit (Intel)] on win32
 Type "help", "copyright", "credits" or "license" for more information.
@@ -728,16 +728,16 @@ Type "help", "copyright", "credits" or "license" for more information.
 '0.97'
 >>> pyRXP.RXPVersion
 'RXP 1.3.0 Copyright Richard Tobin, LTG, HCRC, University of Edinburgh'
-</pre>
+</xpre>
 
 <para>
 Once you have imported pyRXP, you can instantiate a parser instance
 using the <font face="Courier">Parser</font> class.
 </para>
 
-<pre style="programListing">
+<xpre style="programListing">
 >>>p=pyRXP.Parser()
-</pre>
+</xpre>
 
 <para>
 This by itself isn’t very useful. But it does allow us to create a
@@ -765,17 +765,17 @@ As well as exposing this method, instances of Parser are
 callable. This means that you can do this:
 </para>
 
-<pre style="programListing"><![CDATA[>>> p=pyRXP.Parser()
+<xpre style="programListing"><![CDATA[>>> p=pyRXP.Parser()
 >>> p('<a>some text</a>')
-]]></pre>
+]]></xpre>
 
 <para>
 instead of this
 </para>
 
-<pre style="programListing"><![CDATA[>>> p=pyRXP.Parser()
+<xpre style="programListing"><![CDATA[>>> p=pyRXP.Parser()
 >>> p.parse('<a>some text</a>')
-]]></pre>
+]]></xpre>
 
 <para>
 Both would give you exactly the same result (<font
@@ -793,14 +793,14 @@ We’ll start with some very simple examples and leave validation for
 later.
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.parse('<tag>content</tag>')
 ('tag', None, ['content'], None)
-]]></pre>
+]]></xpre>
 
 <para>
 This could also be expressed more long-windedly as 
-<font face="Courier"><![CDATA[pyRXP.Parser().parse('&lt;tag&gt;content&lt;/tag&gt;')]]></font>
+<font face="Courier"><![CDATA[pyRXP.Parser().parse('<tag>content</tag>')]]></font>
 </para>
 
 <para>
@@ -828,17 +828,17 @@ A tuple tree for more complex XML snippets will contain more of these
 tuples, but they will all use the same structure as this one.
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.parse('<tag1><tag2>content</tag2></tag1>')
 ('tag1', None, [('tag2', None, ['content'], None)], None)
-]]></pre>
+]]></xpre>
 
 <condPageBreak height="172"/>
 <para>
 This may be easier to understand if we lay it out differently:
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.parse('<tag1><tag2>content</tag2></tag1>')
 ('tag1',
  None,
@@ -848,7 +848,7 @@ This may be easier to understand if we lay it out differently:
        None)
      ],
 None)
-]]></pre>
+]]></xpre>
 
 <para>
 Tag1 is the name of the outer tag, which has no attributes. Its
@@ -875,7 +875,7 @@ opening and closing tag, and the other is the singleton form which by
 definition has no content.
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.parse('<tag>my contents</tag>')
 ('tag', None, ['my contents'], None)
 
@@ -884,7 +884,7 @@ definition has no content.
 
 >>> p.parse('<tag/>')
 ('tag', None, None, None)
-]]></pre>
+]]></xpre>
 
 <para>
 Notice how the contents list is handled differently for the last two
@@ -900,18 +900,18 @@ any by definition.
 Another example:
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>>p.parse('<outerTag><innerTag>bb</innerTag>aaa<singleTag/></outerTag>')
 ('outerTag', None, [('innerTag', None, ['bb'], None), 'aaa', ('singleTag', 
 None, None, None)], None)
-]]></pre>
+]]></xpre>
 
 <condPageBreak height="172"/>
 <para>
 Again, this is more understandable if we show it like this:
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 ('outerTag',
  None,
      [('innerTag',
@@ -925,7 +925,7 @@ Again, this is more understandable if we show it like this:
                None)
       ],
  None)
-]]></pre>
+]]></xpre>
 
 <para>
 In this example, the tuple contains the outerTag (with no attribute
@@ -950,16 +950,16 @@ but None isn't and therefore can't be changed.
 
 <para>Some examples. This is what happens if we accept the default behaviour:</para>
                                  
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.parse('<a>some text</a>')
 ('a', None, ['some text'], None)
-]]></pre>
+]]></xpre>
 
 <para>Explicitly setting <font face="Courier">ExpandEmpty</font> to 1 gives us these:</para>
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.parse('<a>some text</a>', ExpandEmpty=1)
 ('a', {}, ['some text'], None)
-]]></pre>
+]]></xpre>
 
 <para>
 Notice how the None from the first example is being returned as an
@@ -973,15 +973,15 @@ A very simple example of the singleton or 'self-closing' version of a
 tag.
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.parse('<b/>', ExpandEmpty=0)
 ('b', None, None, None)
-]]></pre>
+]]></xpre>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.parse('<b/>', ExpandEmpty=1)
 ('b', {}, [], None)
-]]></pre>
+]]></xpre>
 <para>
 Again, notice how the Nones have been expanded.
 </para>
@@ -991,29 +991,29 @@ Some more examples show how these work with slightly more complex XML
 which uses nested tags:
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.parse('<a>some text<b>Hello</b></a>', ExpandEmpty=0)
 ('a', None, ['some text', ('b', None, ['Hello'], None)], None)
 
 >>> p.parse('<a>some text<b>Hello</b></a>', ExpandEmpty=1)
 ('a', {}, ['some text', ('b', {}, ['Hello'], None)], None)
-]]></pre>
+]]></xpre>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.parse('<a>some text<b></b></a>', ExpandEmpty=0)
 ('a', None, ['some text', ('b', None, [], None)], None)
 
 >>> p.parse('<a>some text<b></b></a>', ExpandEmpty=1)
 ('a', {}, ['some text', ('b', {}, [], None)], None)
-]]></pre>
+]]></xpre>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.parse('<a>some text<b/></a>', ExpandEmpty=0)
 ('a', None, ['some text', ('b', None, None, None)], None)
 
 >>> p.parse('<a>some text<b/></a>', ExpandEmpty=1)
 ('a', {}, ['some text', ('b', {}, [], None)], None)
-]]></pre>
+]]></xpre>
 
 
 <condPageBreak height="140"/>
@@ -1037,19 +1037,19 @@ There is a module global called piTagName (ie you need to do
 '<font face="Courier">pyRXP.piTagName</font>' rather than refering to an instance like
 'p.piTagName' which won't work).
 </para>
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> pyRXP.piTagName
 '<?'
-]]></pre>
+]]></xpre>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.parse(<a><?works document="hello.doc"?></a>')
 ('a', None, [], None)
 >>> #vanishes - like a comment
 >>> p.parse('<a><?works document="hello.doc"?></a>', ReturnProcessingInstructions=1)
 ('a', None, [('<?', {'name': 'works'}, ['document="hello.doc"'], None)], None)
 >>>
-]]></pre>
+]]></xpre>
 
 <para>
 You can test against <font face="Courier">piTagName</font> - but don't
@@ -1058,12 +1058,12 @@ face="Courier">commentTagName</font> for an example of what would
 happen.
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.parse('<a><?works document="hello.doc"?></a>',
 ... ReturnProcessingInstructions=1)[2][0][0] is pyRXP.piTagName
 1
 >>> #identical! (ie same object each time)
-]]></pre>
+]]></xpre>
 
 <para>
 This is a simple test and doesn't even have to process the characters.
@@ -1084,10 +1084,9 @@ behaviour can be changed – see the section of Flags later for
 details).
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.parse('<tag><!-- this is a comment about the tag --></tag>')
 ('tag', None, [], None)
-</pre>
 
 >>> p.parse('<!-- this is a comment -->')
 Traceback (most recent call last):
@@ -1096,7 +1095,7 @@ pyRXP.Error: Error: Document ends too soon
  in unnamed entity at line 1 char 27 of [unknown]
 Document ends too soon
 Parse Failed!
-]]></pre>
+]]></xpre>
 
 <para>
 This causes an error, since the parser sees an empty string which
@@ -1107,10 +1106,10 @@ isn’t valid XML.
 It is possible to set pyRXP to not swallow comments using the ReturnComments attribute.
 </para>
 
-<pre style="programListing"><![CDATA[                                                                        
+<xpre style="programListing"><![CDATA[                                                                        
 >>> p.parse('<tag><!-- this is a comment about the tag --></tag>', ReturnComments=1)
 ('tag', None, [('<!--', None, [' this is a comment about the tag '], None)], None)
-]]></pre>
+]]></xpre>
 
 <para>
 Using ReturnComments, the comment are returned in the same way as an
@@ -1120,7 +1119,7 @@ do p.commentTagName, since it's a module object which isn't related to
 the parser at all.
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.commentTagName
 Traceback (most recent call last):
   File "<stdin>", line 1, in ?
@@ -1128,7 +1127,7 @@ AttributeError: commentTagName
 
 >>> pyRXP.commentTagName
 '<!--'
-]]></pre>
+]]></xpre>
 
 <para>
 Don't try to change the commentTagName. Not only would it be of
@@ -1137,7 +1136,7 @@ python module, but <i>not</i> in the underlying object, as
 the following example shows:
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> import pyRXP
 >>> p=pyRXP.Parser()
 >>> pyRXP.commentTagName = "##" # THIS WON'T WORK!
@@ -1148,13 +1147,13 @@ the following example shows:
 >>> # DOESN'T WORK!
 >>> ('a', None, [('<!--', None, [' this is another comment comment '], None)], None)
 >>> #SEE?
-]]></pre>
+]]></xpre>
 
 <para>
 What it is useful for is to check against to see if you have been returned a comment:
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.parse('<a><!-- comment --></a>', ReturnComments=1)
 ('a', None, [('<!--', None, [' comment '], None)], None)
 >>> p.parse('<a><!-- comment --></a>', ReturnComments=1)[2][0][0]
@@ -1164,7 +1163,7 @@ What it is useful for is to check against to see if you have been returned a com
 1
 >>> #they're identical
 >>> #it's easy to check if it's a special name
-]]></pre>
+]]></xpre>
 
 <para>
 Using ReturnComments is useful, but there are circumstances where it
@@ -1173,20 +1172,20 @@ that means which are outside the tag '&lt;tag/&gt;', ie the last
 element in the line) will still be lost:
 </para>
                                                                         
-<pre style="programListing"><![CDATA[                                                                        
+<xpre style="programListing"><![CDATA[                                                                        
 >>> p.parse('<tag/><!-- this is a comment about the tag -->', ReturnComments=1)
 ('tag', None, None, None)
-]]></pre>
+]]></xpre>
 
 <para>
 To get around this, you need to use the ReturnList attribute:
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.parse('<tag/><!-- this is a comment about the tag -->', ReturnComments=1, ReturnList=1)
 [('tag', None, None, None), ('<!--', None, [' this is a comment about the tag '], None)]
 >>>
-]]></pre>
+]]></xpre>
 
 <para>
 Since we've seen a number of errors in the preceding paragraphs, it
@@ -1200,7 +1199,7 @@ pyRXP Errors – SyntaxErrors  and IOErrors still won’t refer to
 your XML by name.
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.srcName = 'mycode'
 >>> p.parse('<a>aaa</a')
 Traceback (most recent call last):
@@ -1209,7 +1208,7 @@ pyRXP.Error: Error: Expected > after name in end tag, bu
  in unnamed entity at line 1 char 10 of mycode
 Expected > after name in end tag, but got <EOE>
 Parse Failed!
-]]></pre>
+]]></xpre>
 
 <para>
 The XML that is passed to the parser must be balanced. Not only must
@@ -1220,7 +1219,7 @@ by another valid tag, they are considered ‘multiple elements’ and
 a pyRXP Error is raised.
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.parse('<a></a><b></b>')
 Traceback (most recent call last):
   File "<stdin>", line 1, in ?
@@ -1229,20 +1228,21 @@ pyRXP.Error: Error: Document contains multiple elements
 
 >>> p.parse('<outer><a></a><b></b></outer>')
 ('outer', None, [('a', None, [], None), ('b', None, [], None)], None)
-]]></pre>
+]]></xpre>
 
 <h2>3.1.5 A brief note on pyRXPU</h2>
 <outlineAdd level="3">3.1.5 A brief note on pyRXPU</outlineAdd>
 
 <para>
-PyRXPU is the 16-bit Unicode aware version of pyRXP. It is currently
-only available the source distribution of pyRXP, since it is still
-'alpha' quality. Please report any bugs you find with it.
+PyRXPU is the 16-bit Unicode aware version of pyRXP.
 </para>
 
 <para>
 In most cases, the only difference in behaviour between pyRXP and pyRXPU is that
-pyRXPU returns Unicode strings.
+pyRXPU returns Unicode strings. This may be inconveneient for some applications as Python doesn't yet
+handle unicode filenames etc terribly well. A work around is to get pyRXPU to return <b>utf8</b> using the
+<i>ReturnUTF8</i> boolean argument in the parser creation or call. Then all values are returned as utf8
+encoded strings.
 </para>
 
 <para>
@@ -1250,24 +1250,24 @@ pyRXPU is built to try and do the right thing with both unicode and
 non-unicode strings.
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> import pyRXPU
 >>> pyRXPU.Parser()('<a><?works document="hello.doc"?></a>', ReturnProcessingInstructions=1)
 (u'a', None, [(u'<?', {'name': u'works'}, [u'document="hello.doc"'], None)], None)
-]]></pre>
+]]></xpre>
 
 <para>
 In most cases, the only way to tell the difference (<i>other</i> than
 sending in Unicode) is by the module name.
 </para>
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> import pyRXPU
 >>> pyRXPU.__name__
 'pyRXPU'
 >>> import pyRXP
 >>> pyRXP.__name__
 'pyRXP'
-]]></pre>
+]]></xpre>
 
 <nextFrame/>
 
@@ -1287,7 +1287,7 @@ For the following examples, we’re going to assume that you have a
 single directory with the DTD and any test files in it.
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> import os
 >>> os.getcwd()
 'C:\\tmp\\pyRXP_tests'
@@ -1303,7 +1303,7 @@ single directory with the DTD and any test files in it.
 
 <!ELEMENT a (b)>
 <!ELEMENT b (#PCDATA)*>
-]]></pre>
+]]></xpre>
                                
 <para>
 This is just to show you how trivial the DTD is for this example.
@@ -1313,7 +1313,7 @@ but you can have as many b’s as you want, and they can contain any
 content.
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> fn=open('sample1.xml', 'r').read()
 
 >>> print fn
@@ -1323,7 +1323,7 @@ content.
 <a>
 <b>This is the contents</b>
 </a>
-]]></pre>
+]]></xpre>
 
 <para>                             
 This is the simple example file.  The first line is the XML declaration,
@@ -1333,14 +1333,14 @@ second line says where the DTD is, and gives the name of the root element –
 attempt to validate it.
 </para>
 
-<pre style="programListing"><![CDATA[                              
+<xpre style="programListing"><![CDATA[                              
 >>p.parse(fn)
 ('a',
  None,
  ['\n', ('b', None, ['This tag is the contents'], None), '\n'],
  None)
 >>>
-]]></pre>
+]]></xpre>
 
 <para>This is a successful parse, and returns a tuple tree in the same way
 as we have seen where the input was a string.</para>
@@ -1351,7 +1351,7 @@ that can’t be found over a network), then any attempt to parse it
 will raise a pyRXP error.
 </para>
 
-<pre style="programListing"><![CDATA[                              
+<xpre style="programListing"><![CDATA[                              
 >>> fn=open('sample2.xml', 'r').read()
 
 >>> print fn
@@ -1368,14 +1368,14 @@ Traceback (most recent call last):
   File "<stdin>", line 1, in ?
 pyRXP.Error: Error: Couldn't open dtd entity file:///C:/tmp/pyRXP_tests/nonexistent.dtd
  in unnamed entity at line 2 char 38 of [unknown]
-]]></pre>
+]]></xpre>
                                
 
 <para>
 This is a different kind of error to one where no DTD is specified:
 </para>
 
-<pre style="programListing"><![CDATA[                              
+<xpre style="programListing"><![CDATA[                              
 >>> fn=open('sample4.xml', 'r').read()
 
 >>> print fn
@@ -1389,7 +1389,7 @@ Traceback (most recent call last):
   File "<stdin>", line 1, in ?
 pyRXP.Error: Error: Document has no DTD, validating abandoned
  in unnamed entity at line 3 char 2 of [unknown]
-]]></pre>
+]]></xpre>
 
 
 <condPageBreak height="252"/>
@@ -1398,7 +1398,7 @@ If you have errors in your XML and it does not validate against the
 DTD, you will get a different kind of pyRXPError.
 </para>
 
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> fn=open('sample3.xml', 'r').read()
 
 >>> print fn
@@ -1415,7 +1415,7 @@ Traceback (most recent call last):
 pyRXP.Error: Error: Start tag for undeclared element x
  in unnamed entity at line 4 char 3 of [unknown]
 >>>
-]]></pre>
+]]></xpre>
 
 <para>     
 Whether PyRXP validates against a DTD, together with a number of other
@@ -1475,15 +1475,15 @@ The string <i>src</i> contains the xml.
 <para>The keyword arguments can modify the instance attributes for this call only. For example, we can do
 </para>
 
-<pre style="programListing"><![CDATA[>>>p.parse('<a>some text</a>', ReturnList=1, ReturnComments=1)
-]]></pre>
+<xpre style="programListing"><![CDATA[>>>p.parse('<a>some text</a>', ReturnList=1, ReturnComments=1)
+]]></xpre>
 
 <para>instead of</para>
 
-<pre style="programListing"><![CDATA[>>>p.ReturnList=1
+<xpre style="programListing"><![CDATA[>>>p.ReturnList=1
 >>>p.ReturnComments=1
 >>>p.parse('<a>some text</a>')
-]]></pre>
+]]></xpre>
 
 <para>
 Any other parses using p will be unaffacted by the values of
@@ -1603,6 +1603,9 @@ ReturnList</td><td>0</td></tr>
 ReturnNamespaceAttributes</td><td>0
 </td></tr>
 <tr><td>
+ReturnUTF8 (pyRXPU)</td><td>0
+</td></tr>
+<tr><td>
 SimpleErrorFormat</td><td>0
 </td></tr>
 <tr><td>
@@ -1670,7 +1673,7 @@ not raise those errors.
 <para spaceAfter="0">
 Example:
 </para>
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.AllowMultipleElements = 0
 >>> p.parse('<a></a><b></b>')
 Traceback (most recent call last):
@@ -1682,7 +1685,7 @@ pyRXP.Error: Error: Document contains multiple elements
 >>> p.parse('<a></a><b></b>')
 ('a', None, [], None)
 >>>
-]]></pre>
+]]></xpre>
 
 <para spaceAfter="3">
 <b>AllowUndeclaredNSAttributes </b>
@@ -1718,7 +1721,7 @@ This flag controls whether the parse is case sensitive or not.
 <para spaceAfter="0">
 Example:
 </para>
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.CaseInsensitive=1
 >>> p.parse('<a></A>')
 ('A', None, [], None)
@@ -1730,7 +1733,7 @@ Traceback (most recent call last):
 pyRXP.Error: Error: Mismatched end tag: expected </a>, got </A>
  in unnamed entity at line 1 char 7 of [unknown]
 >>>
-]]></pre>
+]]></xpre>
 
 <para spaceAfter="3">
 <b>ErrorOnBadCharacterEntities</b>
@@ -1747,7 +1750,7 @@ an error, otherwise they are ignored with a warning.
 </para>
 <para spaceAfter="0">
 Example:
-</para><pre style="programListing"><![CDATA[
+</para><xpre style="programListing"><![CDATA[
 >>> p.ErrorOnBadCharacterEntities=0
 >>> p.parse('<a>&#999;</a>')
 ('a', None, [''], None)
@@ -1757,7 +1760,7 @@ Traceback (most recent call last):
   File "<stdin>", line 1, in ?
 pyRXP.Error: Error: 0x3e7 is not a valid 8-bit XML character
  in unnamed entity at line 1 char 10 of [unknown]
-]]></pre>
+]]></xpre>
 
 <para spaceAfter="3">
 <b>ErrorOnUndefinedAttributes</b>
@@ -1810,7 +1813,7 @@ looks the same as the entity reference.
 <para spaceAfter="0">
 Example:
 </para>
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.ErrorOnUndefinedEntities=0
 >>> p.parse('<a>&dud;</a>')
 ('a', None, ['&dud;'], None)
@@ -1821,7 +1824,7 @@ Traceback (most recent call last):
   File "<stdin>", line 1, in ?
 pyRXP.Error: Error: Undefined entity dud
  in unnamed entity at line 1 char 9 of [unknown]
-]]></pre>
+]]></xpre>
 
 <para spaceAfter="3">
 <b>ErrorOnUnquotedAttributeValues</b>
@@ -1875,7 +1878,7 @@ See also: ExpandGeneralEntities, ErrorOnBadCharacterEntities
 <para spaceAfter="0">
 Example:
 </para>
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.ExpandCharacterEntities=1
 >>> p.parse('<a>&#109;</a>')
 ('a', None, ['m'], None)
@@ -1883,7 +1886,7 @@ Example:
 >>> p.ExpandCharacterEntities=0
 >>> p.parse('<a>&#109;</a>')
 ('a', None, ['&#109;'], None)
-]]></pre>
+]]></xpre>
 
 
 <para spaceAfter="3">
@@ -1908,7 +1911,7 @@ See also: ExpandCharacterEntities
 <para spaceAfter="0">
 Example:
 </para>
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.ExpandGeneralEntities=0
 >>> p.parse('<a>&amp;</a>')
 ('a', None, ['&amp;'], None)
@@ -1916,7 +1919,7 @@ Example:
 >>> p.ExpandGeneralEntities=1
 >>> p.parse('<a>&amp;</a>')
 ('a', None, ['&'], None)
-]]></pre>
+]]></xpre>
 
 <para spaceAfter="3">
 <b>IgnoreEntities</b>
@@ -1934,7 +1937,7 @@ off, entities are passed through unaltered.
 <para spaceAfter="0">
 Example:
 </para>
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.IgnoreEntities=0
 >>> p.parse('<a>&amp;</a>')
 ('a', None, ['&'], None)
@@ -1942,7 +1945,7 @@ Example:
 >>> p.IgnoreEntities=1
 >>> p.parse('<a>&amp;</a>')
 ('a', None, ['&amp;'], None)
-]]></pre>
+]]></xpre>
 
 
 <para spaceAfter="3">
@@ -2074,14 +2077,14 @@ If this is set, comments are returned as nodes with tag name pyRXP.commentTagNam
 <para spaceAfter="0">
 Example:
 </para>
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.ReturnComments = 1
 >>> p.parse('<a><!-- this is a comment --></a>')
 ('a', None, [('<!--', None, [' this is a comment '], None)], None)
 >>> p.ReturnComments = 0
 >>> p.parse('<a><!-- this is a comment --></a>')
 ('a', None, [], None)
-]]></pre>
+]]></xpre>
 <para>
 See also: ReturnList
 </para>
@@ -2120,7 +2123,7 @@ actual XML content rather than any comments before it).
 <para spaceAfter="0">
 Example:
 </para>
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.ReturnComments=1
 >>> p.ReturnList=1
 >>> p.parse('<!-- comment --><a>Some Text</a><!-- another comment -->')
@@ -2130,7 +2133,7 @@ Example:
 >>> p.parse('<!-- comment --><a>Some Text</a><!-- another comment -->')
 ('a', None, ['Some Text'], None)
 >>> 
-]]></pre>
+]]></xpre>
 <para>
 See also: ReturnComments
 </para>
@@ -2169,7 +2172,7 @@ This causes the output on errors to get shorter and more compact.
 <para spaceAfter="0">
 Example:
 </para>
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.SimpleErrorFormat=0
 >>> p.parse('<a>causes an error</b>')
 Traceback (most recent call last):
@@ -2182,7 +2185,7 @@ pyRXP.Error: Error: Mismatched end tag: expected </a>, got </b>
 Traceback (most recent call last):
   File "<stdin>", line 1, in ?
 pyRXP.Error: [unknown]:1:22: Mismatched end tag: expected </a>, got </b>
-]]></pre>
+]]></xpre>
 
 <para spaceAfter="3">
 <b>TrustSDD</b>
@@ -2291,7 +2294,9 @@ Description:
 <para spaceAfter="3">
 If this is on, the parser processes namespace declarations (see
 below).  Namespace declarations are <i>not</i> returned as part of the list
-of attributes on an element.
+of attributes on an element. The namespace value will be prepended to names
+in the manner suggested by James Clark ie if <i>xmlns:foo='foovalue'</i>
+is active then <i>foo:name-->{fovalue}name</i>.
 </para>
 <para>
 See also: XMLSpace
@@ -2318,7 +2323,7 @@ error will be raised.
 <para spaceAfter="0">
 Example:
 </para>
-<pre style="programListing"><![CDATA[
+<xpre style="programListing"><![CDATA[
 >>> p.XMLPredefinedEntities=1
 >>> p.parse('<a>&amp;</a>')
 ('a', None, ['&'], None)
@@ -2329,7 +2334,7 @@ Traceback (most recent call last):
   File "<stdin>", line 1, in ?
 pyRXP.Error: Error: Undefined entity amp
  in unnamed entity at line 1 char 9 of [unknown]
-]]></pre>
+]]></xpre>
 
 <para spaceAfter="3">
 <b>XMLSpace</b>
@@ -2392,7 +2397,7 @@ art and if you think you can make it fairer or better, tell us how!  Here's
 an example run.</para>
 
 
-<pre style="programListing">
+<xpre style="programListing">
 <![CDATA[
 C:\code\rlextra\radxml\samples>benchmarks.py
 
@@ -2415,7 +2420,7 @@ Post-parsing: please input python process memory in kb >7180
 12618 tags, 8157 attributes
 pyRXP: init 0.0315, parse 0.3579, traverse 0.1594, mem used 4276kb, mem factor 9.86
 ]]>
-</pre>
+</xpre>
 
 
 
@@ -2445,9 +2450,9 @@ much less than most DOM parsers.</para>
 <para>By contrast, here's the result for the <i>minidom</i> parser included in the official
 Python distro:</para>
 
-<pre style="programListing">
+<xpre style="programListing">
 minidom: init 0.3039, parse 12.6435, traverse 0.0000, mem used 29136kb, mem factor 67.16
-</pre>
+</xpre>
 
 <para>Even though minidom uses pyexpat (which is in C) to parse the XML, it's
 36 times slower and uses 7 times more memory.  And of course it does not validate.
@@ -2466,7 +2471,7 @@ can iterate over child nodes as a sequence.  And, the str() method of
 a tag which just contains text is just the text.  The snippets below
 should make it clear what we are doing.</para>
 
-<pre style="programListing">
+<xpre style="programListing">
 <![CDATA[
 >>> tree = pyRXP.Parser().parse(srcText)
 >>> srcText = open('rml_a.xml').read()
@@ -2503,7 +2508,7 @@ Page Layout Tags
 Special Tags
 >>> 
 ]]>
-</pre>
+</xpre>
 
 
 <para>We are NOT saying this is a particularly good or complete wrapper;
@@ -2586,10 +2591,10 @@ Report Markup Language has numerous attributes like <i>x, y, width,
 height</i>, as well as color attributes.  It would be really useful to 
 generalize the conversion step. Let’s say you can provide a mapping like this
 </para>
-<pre style="Normal">
+<xpre style="Normal">
 1.  (tag, attribute) -> reader function
 2.   attribute -> reader function
-</pre>
+</xpre>
 <para>
 Many of the reader functions are just <i>int</i> or <i>float</i>; others
 could be written in Python or C.  For example we have standard length
