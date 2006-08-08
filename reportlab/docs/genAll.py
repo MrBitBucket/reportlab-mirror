@@ -1,5 +1,5 @@
 #!/bin/env python
-import os, sys
+import os, sys, traceback
 def _genAll(d=None,verbose=1):
     if not d: d = '.'
     if not os.path.isabs(d):
@@ -21,7 +21,7 @@ def _genAll(d=None,verbose=1):
                 from rlextra.rml2pdf.rml2pdf import main
                 main(exe=0,fn=[os.path.basename(p)], quiet=not verbose, outDir=d)
             except:
-                pass
+                traceback.print_exc()
         else:
             cmd = '%s %s %s' % (sys.executable,os.path.basename(p), not verbose and '-s' or '')
             if verbose: print cmd
