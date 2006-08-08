@@ -292,7 +292,7 @@ PyRXP was written by Robin Becker at ReportLab.
 </para>
 
 <para>
-This documentation describes pyRXP-0.97 being used with RXP 1.3.0, as
+This documentation describes pyRXP-1.08 being used with RXP 1.4.0, as
 well as ReportLab's emerging XML toolkit which uses it.
 </para>
 
@@ -725,9 +725,9 @@ Python 2.2.1 (#34, Apr  9 2002, 19:34:33) [MSC 32 bit (Intel)] on win32
 Type "help", "copyright", "credits" or "license" for more information.
 >>> import pyRXP 
 >>> pyRXP.version
-'0.97'
+'1.08'
 >>> pyRXP.RXPVersion
-'RXP 1.3.0 Copyright Richard Tobin, LTG, HCRC, University of Edinburgh'
+'RXP 1.4.0 Copyright Richard Tobin, LTG, HCRC, University of Edinburgh'
 </xpre>
 
 <para>
