@@ -688,7 +688,6 @@ class BaseDocTemplate:
         self.handle_documentBegin()
 
     def _endBuild(self):
-        print 'start of doc._endBuild: keywords=', self.canv._doc.info.keywords
         if self._hanging!=[] and self._hanging[-1] is PageBegin:
             del self._hanging[-1]
             self.clean_hanging()

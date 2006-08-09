@@ -398,7 +398,6 @@ def _do_under_line(i, t_off, tx, lm=-0.125):
     textlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
     tx._canvas.line(t_off, y, t_off+textlen, y)
 
-
 _scheme_re = re.compile('^[a-zA-Z][-+a-zA-Z0-9]+$')
 def _doLink(tx,link,rect):
     if type(link) is unicode:
@@ -473,6 +472,15 @@ class Paragraph(Flowable):
         <sub> ... </sub> - subscript
         <font name=fontfamily/fontname color=colorname size=float>
         <onDraw name=callable label="a label">
+        <link>link text</link>
+            attributes of links 
+                size/fontSize=num
+                name/face/fontName=name
+                fg/textColor/color=color
+                backcolor/backColor/bgcolor=color
+                dest/destination/target/href/link=target
+        <unichar name="unicode character name"/>
+        <unichar value="unicode code point"/>
 
         The whole may be surrounded by <para> </para> tags
 
@@ -643,7 +651,7 @@ class Paragraph(Flowable):
                 #this underscores my feeling that Unicode throughout would be easier!
                 wordWidth = stringWidth(word, fontName, fontSize, self.encoding)
                 newWidth = currentWidth + spaceWidth + wordWidth
-                if newWidth <= maxWidth or len(cLine) == 0:
+                if newWidth <= maxWidth or not len(cLine):
                     # fit one more on this line
                     cLine.append(word)
                     currentWidth = newWidth
@@ -904,7 +912,7 @@ class Paragraph(Flowable):
                 tx.setFont(f.fontName, f.fontSize, style.leading)
                 t_off = dpl( tx, offset, lines[0][0], lines[0][1], noJustifyLast and nLines==1)
                 if f.underline or f.link or f.strike:
-                    xs = tx.XtraState=ABag()
+                    xs = tx.XtraState = ABag()
                     xs.cur_y = cur_y
                     xs.f = f
                     xs.style = style
@@ -964,9 +972,6 @@ class Paragraph(Flowable):
                 xs.cur_y = cur_y
                 xs.f = f
                 xs.style = style
-                #f = lines[0].words[0]
-                #tx._setFont(f.fontName, f.fontSize)
-
 
                 tx._fontname,tx._fontsize = None, None
                 t_off = dpl( tx, offset, lines[0], noJustifyLast and nLines==1)

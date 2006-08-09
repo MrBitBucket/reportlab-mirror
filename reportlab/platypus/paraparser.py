@@ -319,6 +319,13 @@ def _greekConvert(data):
 #       <font name=fontfamily/fontname color=colorname size=float>
 #       < bullet > </bullet> - bullet text (at head of para only)
 #       <onDraw name=callable label="a label">
+#       <link>link text</link>
+#           attributes of links 
+#               size/fontSize=num
+#               name/face/fontName=name
+#               fg/textColor/color=color
+#               backcolor/backColor/bgcolor=color
+#               dest/destination/target/href/link=target
 #       <unichar name="unicode character name"/>
 #       <unichar value="unicode code point"/>
 #       <greek> - </greek>
@@ -917,6 +924,4 @@ them when the man struck up with his tune.]''')
     check_text('''Here comes <FONT FACE="Helvetica" SIZE="14pt">Helvetica 14</FONT> with <STRONG>strong</STRONG> <EM>emphasis</EM>.''')
     check_text('''Here comes <font face="Helvetica" size="14pt">Helvetica 14</font> with <Strong>strong</Strong> <em>emphasis</em>.''')
     check_text('''Here comes <font face="Courier" size="3cm">Courier 3cm</font> and normal again.''')
-    #AR 14-Jul-2006: test <br/> tag
     check_text('''Before the break <br/>the middle line <br/> and the last line.''')
-
