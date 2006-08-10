@@ -725,8 +725,6 @@ class BaseDocTemplate:
                 first = flowables[0]
                 self.handle_flowable(flowables)
                 handled += 1
-
-
             except:
                 #if it has trace info, add it to the traceback message.
                 if hasattr(first, '_traceInfo') and first._traceInfo:
