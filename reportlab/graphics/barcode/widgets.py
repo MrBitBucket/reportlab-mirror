@@ -13,6 +13,7 @@ __all__= (
         'BarcodeCode11',
         'BarcodeFIM',
         'BarcodePOSTNET',
+        'BarcodeUSPS_4State',
         )
 
 from reportlab.lib.validators import isInt, isNumber, isColor, isString, isColorOrNone, OneOf, isBoolean, EitherOr, isNumberOrNone
@@ -272,6 +273,26 @@ class BarcodePOSTNET(_BarcodeWidget):
     def __init__(self,**kw):
         from reportlab.graphics.barcode.usps import POSTNET
         _BarcodeWidget.__init__(self,POSTNET,"78247-1043",**kw)
+
+class BarcodeUSPS_4State(_BarcodeWidget):
+    codeName = "USPS_4State"
+    _attrMap = AttrMap(BASE=_BarcodeWidget,
+        widthSize = AttrMapValue(isNumber,'''(float, default 1): the bar width size adjustment between 0 and 1.'''),
+        heightSize = AttrMapValue(isNumber,'''(float, default 1): the bar height size adjustment between 0 and 1.'''),
+        fontName = AttrMapValue(isString, desc='human readable font'),
+        fontSize = AttrMapValue(isNumber, desc='human readable font size'),
+        tracking = AttrMapValue(isString, desc='tracking data'),
+        routing = AttrMapValue(isString, desc='routing data'),
+        humanReadable = AttrMapValue(isBoolean, desc='if human readable'),
+        )
+    def __init__(self,**kw):
+        from reportlab.graphics.barcode.usps4s import USPS_4State
+        kw.setdefault('routing','01234567891')
+        _BarcodeWidget.__init__(self,USPS_4State,'01234567094987654321',**kw)
+        del self.width, self.height
+
+    def annotate(self,x,y,text,fontName,fontSize,anchor='middle'):
+        _BarcodeWidget.annotate(self,x,y,text,fontName,fontSize,anchor='start')
 
 if __name__=='__main__':
     import os, sys, glob

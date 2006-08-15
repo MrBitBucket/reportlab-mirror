@@ -45,7 +45,8 @@ def getCodes():
                 BarcodeCodabar,
                 BarcodeCode11,
                 BarcodeFIM,
-                BarcodePOSTNET)
+                BarcodePOSTNET,
+                BarcodeUSPS_4State)
 
     #newer codes will typically get their own module
     from eanbc import Ean13BarcodeWidget, Ean8BarcodeWidget
@@ -66,6 +67,7 @@ def getCodes():
                 BarcodeCode11,
                 BarcodeFIM,
                 BarcodePOSTNET,
+                BarcodeUSPS_4State,
                 Ean13BarcodeWidget,
                 Ean8BarcodeWidget,
                 ):

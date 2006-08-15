@@ -45,13 +45,10 @@ class Barcode(Flowable):
     def _humanText(self):
         return self.encoded
 
-    def __init__(self, value='',**args):
+    def __init__(self, value='',**kwd):
         self.value = value
 
-        for (k, v) in args.items():
-            setattr(self, k, v)
-
-
+        self._setKeywords(**kwd)
         if not hasattr(self, 'gap'):
             self.gap = None
 
@@ -59,6 +56,10 @@ class Barcode(Flowable):
         self.encode()
         self.decompose()
         self.computeSize()
+
+    def _setKeywords(self,**kwd):
+        for (k, v) in kwd.iteritems():
+            setattr(self, k, v)
 
     def validate(self):
         self.valid = 1

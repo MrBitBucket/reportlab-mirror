@@ -7,6 +7,7 @@ from reportlab.graphics.barcode.code39 import *
 from reportlab.graphics.barcode.code93 import *
 from reportlab.graphics.barcode.code128 import *
 from reportlab.graphics.barcode.usps import *
+from reportlab.graphics.barcode.usps4s import USPS_4State
 
 
 from reportlab.test import unittest
@@ -55,6 +56,8 @@ def run():
     story.append(FIM("A"))
     story.append(Paragraph('USPS POSTNET', styleN))
     story.append(POSTNET('78247-1043'))
+    story.append(Paragraph('USPS 4 State', styleN))
+    story.append(USPS_4State('01234567094987654321','01234567891'))
 
     from reportlab.graphics.barcode import createBarcodeDrawing
     story.append(Paragraph('EAN13', styleN))
@@ -62,6 +65,8 @@ def run():
     story.append(bcd)
     story.append(Paragraph('EAN8', styleN))
     bcd = createBarcodeDrawing('EAN8', value='1234567')
+    story.append(Paragraph('USPS_4State', styleN))
+    bcd = createBarcodeDrawing('USPS_4State', value='01234567094987654321',routing='01234567891')
     story.append(bcd)
 
     story.append(Paragraph('Label Size', styleN))
