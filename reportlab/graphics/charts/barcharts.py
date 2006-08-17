@@ -43,6 +43,7 @@ class BarChartProperties(PropHolder):
         self.fillColor = colors.blue
         self.strokeWidth = 0.5
         self.symbol = None
+        self.strokeDashArray = None
 
 # Bar chart classes.
 class BarChart(PlotArea):
