@@ -194,7 +194,7 @@ _sgmlop_dealloc(FastSGMLParserObject* self)
     Py_XDECREF(self->handle_data);
     Py_XDECREF(self->handle_cdata);
     Py_XDECREF(self->handle_comment);
-    PyMem_DEL(self);
+    PyObject_FREE(self);
 }
 
 #define GETCB(member, name)\
@@ -471,7 +471,7 @@ element_dealloc(ElementObject* self)
 
     RELEASE(sizeof(ElementObject), "destroy element");
 
-    PyMem_DEL(self);
+    PyObject_FREE(self);
 }
 
 /* -------------------------------------------------------------------- */
@@ -751,7 +751,7 @@ treebuilder_dealloc(TreeBuilderObject* self)
     Py_XDECREF(self->last);
     Py_XDECREF(self->this);
     Py_DECREF(self->root);
-    PyMem_DEL(self);
+    PyObject_FREE(self);
 }
 
 /* -------------------------------------------------------------------- */
