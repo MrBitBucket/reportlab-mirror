@@ -21,7 +21,7 @@ def _genAll(d=None,verbose=1):
                 from rlextra.rml2pdf.rml2pdf import main
                 main(exe=0,fn=[os.path.basename(p)], quiet=not verbose, outDir=d)
             except:
-                traceback.print_exc()
+                if verbose: traceback.print_exc()
         else:
             cmd = '%s %s %s' % (sys.executable,os.path.basename(p), not verbose and '-s' or '')
             if verbose: print cmd

@@ -41,7 +41,6 @@ if platform[:4] == 'java' and version_info[:2] == (2, 1):
 class PDFError(Exception):
     pass
 
-
 # set this flag to get more vertical whitespace (and larger files)
 LongFormat = 1
 ##if LongFormat: (doesn't work)
@@ -71,7 +70,6 @@ BasicFonts = "BasicFonts"
 Pages = "Pages"
 
 ### generic utilities
-
 
 # for % substitutions
 LINEENDDICT = {"LINEEND": LINEEND, "PERCENT": "%"}
@@ -105,7 +103,6 @@ def xObjectName(externalname):
 
 # backwards compatibility
 formName = xObjectName
-
 
 # no encryption
 class NoEncryption:
@@ -262,7 +259,7 @@ class PDFDocument:
             try:
                 # does pdfmetrics know about it? if so, add
                 fontObj = pdfmetrics.getFont(psfontname)
-                if getattr(fontObj, '_dynamicFont', 0):
+                if fontObj._dynamicFont:
                     raise PDFError, "getInternalFontName(%s) called for a dynamic font" % repr(psfontname)
                 fontObj.addObjects(self)
                 #self.addFont(fontObj)
@@ -282,7 +279,6 @@ class PDFDocument:
         self.Pages.addPage(page)
         self.pageCounter = self.pageCounter+1
         self.inObject = None
-
 
     def addForm(self, name, form):
         """add a Form XObject."""
@@ -309,7 +305,6 @@ class PDFDocument:
         else:
             self.info.title = title
 
-
     def setAuthor(self, author):
         "embedded in PDF file"
         #allow resetting to clear it
@@ -335,7 +330,6 @@ class PDFDocument:
             self.info.keywords = ''
         else:
             self.info.keywords = keywords
-
 
     def setDateFormatter(self, dateFormatter):
         self.info._dateFormatter = dateFormatter
@@ -490,7 +484,6 @@ class PDFDocument:
         return PDFObjectReference(name)
 
 ### chapter 4 Objects
-
 PDFtrue = "true"
 PDFfalse = "false"
 PDFnull = "null"
@@ -601,7 +594,6 @@ def PDFName(data,lo=chr(0x21),hi=chr(0x7e)):
     return "/"+(''.join(L))
 
 class PDFDictionary:
-
     multiline = LongFormat
     def __init__(self, dict=None):
         """dict should be namestring to value eg "a": 122 NOT pdfname to value NOT "/a":122"""
@@ -982,7 +974,7 @@ class PDFPages(PDFCatalog):
         kids.References(document)
         self.Kids = kids
         self.Count = len(pages)
-
+ 
 class PDFPage(PDFCatalog):
     __Comment__ = "Page dictionary"
     # all PDF attributes can be set explicitly
@@ -1079,7 +1071,6 @@ def testpage(document):
     pages.addPage(P)
 
 #### DUMMY OUTLINES IMPLEMENTATION FOR testing
-
 DUMMYOUTLINE = """
 <<
   /Count
@@ -1095,7 +1086,6 @@ class PDFOutlines0:
     def format(self, document):
         return self.text
 
-
 class OutlineEntryObject:
     "an entry in an outline"
     Title = Dest = Parent = Prev = Next = First = Last = Count = None
@@ -1110,7 +1100,6 @@ class OutlineEntryObject:
                 D[n] = v
         PD = PDFDictionary(D)
         return PD.format(document)
-
 
 class PDFOutlines:
     """takes a recursive list of outline destinations
@@ -1365,7 +1354,6 @@ class PDFInfo:
         return thing
 # skipping thumbnails, etc
 
-
 class Annotation:
     """superclass for all annotations."""
     defaults = [("Type", PDFName("Annot"),)]
@@ -1464,13 +1452,9 @@ class LinkAnnotation(Annotation):
         d["Dest"] = self.Destination
         return apply(self.AnnotationDict, (), d)
 
-
 # skipping names tree
-
 # skipping actions
-
 # skipping names trees
-
 # skipping to chapter 7
 
 class PDFRectangle:
@@ -1660,14 +1644,12 @@ class PDFResourceDictionary:
         DD = PDFDictionary(D)
         return format(DD, document)
 
-    ##############################################################################
-    #
-    #   Font objects - the PDFDocument.addFont() method knows which of these
-    #   to construct when given a user-facing Font object
-    #
-    ##############################################################################
-
-
+##############################################################################
+#
+#   Font objects - the PDFDocument.addFont() method knows which of these
+#   to construct when given a user-facing Font object
+#
+##############################################################################
 class PDFType1Font:
     """no init: set attributes explicitly"""
     __RefOnly__ = 1

@@ -16,13 +16,7 @@ will result in a number of Font/FontDescriptor/Encoding object sets, and the
 contents of those will depend on the actual characters used for printing.
 
 To support dynamic font subsetting a concept of "dynamic font" was introduced.
-Dynamic Fonts have a _dynamicFont attribute set to 1.  Since other Font object
-may lack a this attribute, you should use constructs like
-
-    if getattr(font, '_dynamicFont', 0):
-        # dynamic font
-    else:
-        # traditional static font
+Dynamic Fonts have a _dynamicFont attribute set to 1.
 
 Dynamic fonts have the following additional functions:
 
@@ -403,7 +397,7 @@ class TTFontMaker:
                 head_start = offset
             checksum = calcChecksum(data)
             stm.write(tag)
-            stm.write(pack(">LLL", checksum, offset, len(data)))
+            stm.write(pack(">LLL", checksum&0xFFFFFFFFL, offset, len(data)))
             paddedLength = (len(data)+3)&~3
             offset = offset + paddedLength
 
@@ -415,7 +409,7 @@ class TTFontMaker:
         checksum = calcChecksum(stm.getvalue())
         checksum = add32(_L2U32(0xB1B0AFBAL), -checksum)
         stm.seek(head_start + 8)
-        stm.write(pack('>L', checksum))
+        stm.write(pack('>L', checksum&0xFFFFFFFFL))
 
         return stm.getvalue()
 
@@ -515,7 +509,9 @@ class TTFontFile(TTFontParser):
         ver_maj, ver_min = self.read_ushort(), self.read_ushort()
         if ver_maj != 1:
             raise TTFError, 'Unknown head table version %d.%04x' % (ver_maj, ver_min)
-        self.skip(8)
+        self.fontRevision = self.read_ushort(), self.read_ushort()
+
+        self.skip(4)
         magic = self.read_ulong()
         if magic != 0x5F0F3CF5:
             raise TTFError, 'Invalid head table magic %04x' % magic
@@ -578,13 +574,14 @@ class TTFontFile(TTFontParser):
             # try to remove this check altogether.
             raise TTFError, 'Unknown post table version %d.%04x' % (ver_maj, ver_min)
         self.italicAngle = self.read_short() + self.read_ushort() / 65536.0
-        self.skip(4)    #2*2
+        self.underlinePosition = self.read_short()
+        self.underlineThickness = self.read_short()
         isFixedPitch = self.read_ulong()
 
         self.flags = FF_SYMBOLIC        # All fonts that contain characters
                                         # outside the original Adobe character
                                         # set are considered "symbolic".
-        if self.italicAngle != 0:
+        if self.italicAngle!= 0:
             self.flags = self.flags | FF_ITALIC
         if usWeightClass >= 600:        # FW_REGULAR == 500, FW_SEMIBOLD == 600
             self.flags = self.flags | FF_FORCEBOLD
@@ -955,7 +952,6 @@ class TTEncoding:
     def __init__(self):
         self.name = "UTF-8"
 
-
 class TTFont:
     """Represents a TrueType font.
 
@@ -993,6 +989,9 @@ class TTFont:
                 self.subsets = [[32]*33]
                 self.assignments[32] = 32
 
+    _multiByte = 1      # We want our own stringwidth
+    _dynamicFont = 1    # We want dynamic subsetting
+
     def __init__(self, name, filename, validate=0, subfontIndex=0,asciiReadable=1):
         """Loads a TrueType font from filename.
 
@@ -1002,9 +1001,8 @@ class TTFont:
         self.fontName = name
         self.face = TTFontFace(filename, validate=validate, subfontIndex=subfontIndex)
         self.encoding = TTEncoding()
-        self._multiByte = 1     # We want our own stringwidth
-        self._dynamicFont = 1   # We want dynamic subsetting
-        self.state = {}
+        from weakref import WeakKeyDictionary
+        self.state = WeakKeyDictionary()
         self._asciiReadable = asciiReadable
 
     def _py_stringWidth(self, text, size, encoding='utf-8'):

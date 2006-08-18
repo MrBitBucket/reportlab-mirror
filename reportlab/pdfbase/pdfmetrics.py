@@ -23,7 +23,7 @@ import string, os
 from types import StringType, ListType, TupleType
 from reportlab.pdfbase import _fontdata
 from reportlab.lib.logger import warnOnce
-from reportlab.lib.utils import rl_isfile, rl_glob, rl_isdir, open_and_read, open_and_readlines 
+from reportlab.lib.utils import rl_isfile, rl_glob, rl_isdir, open_and_read, open_and_readlines
 from reportlab.rl_config import defaultEncoding
 import rl_codecs
 
@@ -38,7 +38,7 @@ _fonts = {}
 def _py_unicode2T1(utext,fonts):
     '''return a list of (font,string) pairs representing the unicode text'''
     #print 'unicode2t1(%s, %s): %s' % (utext, fonts, type(utext))
-    #if type(utext) 
+    #if type(utext)
     R = []
     font, fonts = fonts[0], fonts[1:]
     enc = font.encName
@@ -153,7 +153,6 @@ class TypeFace:
         self.bold = 0    # bold faces should set this
         self.italic = 0  #italic faces should set this
 
-        
         if name == 'ZapfDingbats':
             self.requiredEncoding = 'ZapfDingbatsEncoding'
         elif name == 'Symbol':
@@ -354,6 +353,10 @@ class Font:
     not clear yet if embedded ones need a new font class or
     just a new typeface class (which would do the job through
     composition)"""
+
+    _multiByte = 0      # do not want our own stringwidth
+    _dynamicFont = 0    # do not want dynamic subsetting
+
     def __init__(self, name, faceName, encName):
         self.fontName = name
         face = self.face = getTypeFace(faceName)
@@ -365,11 +368,6 @@ class Font:
             _ = []
         self.substitutionFonts = _
         self._calcWidths()
-
-        # multi byte fonts do their own stringwidth calculations.
-        # signal this here.
-        self._multiByte = 0
-        
 
     def __repr__(self):
         return "<%s %s>" % (self.__class__.__name__, self.face.name)
@@ -481,7 +479,7 @@ class EmbeddedType1Face(TypeFace):
 
     def getFontFiles(self):
         return [self.afmFileName, self.pfbFileName]
-    
+
     def _loadGlyphs(self, pfbFileName):
         """Loads in binary glyph data, and finds the four length
         measurements needed for the font descriptor"""

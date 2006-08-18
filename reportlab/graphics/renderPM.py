@@ -170,7 +170,7 @@ class _PMRenderer(Renderer):
                     x = x - textLen/2
                 else:
                     raise ValueError, 'bad value for textAnchor '+str(text_anchor)
-            if getattr(font,'_dynamicFont',None):
+            if font._dynamicFont:
                 if isinstance(text,unicode): text = text.encode('utf8')
                 canv.drawString(x,y,text)
             else:

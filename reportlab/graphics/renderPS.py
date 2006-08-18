@@ -13,7 +13,6 @@ from types import StringType
 from operator import getitem
 from reportlab import rl_config
 
-
 # we need to create encoding vectors for each font we use, or they will
 # come out in Adobe's old StandardEncoding, which NOBODY uses.
 PS_WinAnsiEncoding="""
@@ -72,36 +71,34 @@ class PSCanvas:
         self._xtraState_pop = xtraState.pop
         self.comments = 0
         self.code = []
+        self.code_append = self.code.append
         self._sep = '\n'
         self._strokeColor = self._fillColor = self._lineWidth = \
             self._font = self._fontSize = self._lineCap = \
             self._lineJoin = self._color = None
 
-
         self._fontsUsed =   [] # track them as we go
-
         self.setFont(STATE_DEFAULTS['fontName'],STATE_DEFAULTS['fontSize'])
         self.setStrokeColor(STATE_DEFAULTS['strokeColor'])
         self.setLineCap(2)
         self.setLineJoin(0)
         self.setLineWidth(1)
-
         self.PostScriptLevel=PostScriptLevel
 
     def comment(self,msg):
-        if self.comments: self.code.append('%'+msg)
+        if self.comments: self.code_append('%'+msg)
 
     def drawImage(self, image, x1,y1, x2=None,y2=None): # Postscript Level2 version
         # select between postscript level 1 or level 2
-        if PostScriptLevel==1:
+        if self.PostScriptLevel==1:
             self._drawImageLevel1(image, x1,y1, x2=None,y2=None)
-        elif PostScriptLevel == 2 :
+        elif self.PostScriptLevel==2:
             self._drawImageLevel2(image, x1,y1, x2=None,y2=None)
         else :
-            raise 'PostScriptLevelException'
+            raise ValueError('Unsupported Postscript Level %s' % self.PostScriptLevel)
 
     def clear(self):
-        self.code.append('showpage') # ugh, this makes no sense oh well.
+        self.code_append('showpage') # ugh, this makes no sense oh well.
 
     def save(self,f=None):
         if not hasattr(f,'write'):
@@ -134,10 +131,10 @@ class PSCanvas:
 
     def saveState(self):
         self._xtraState_push((self._fontCodeLoc,))
-        self.code.append('gsave')
+        self.code_append('gsave')
 
     def restoreState(self):
-        self.code.append('grestore')
+        self.code_append('grestore')
         self._fontCodeLoc, = self._xtraState_pop()
 
     def stringWidth(self, s, font=None, fontSize=None):
@@ -150,23 +147,23 @@ class PSCanvas:
     def setLineCap(self,v):
         if self._lineCap!=v:
             self._lineCap = v
-            self.code.append('%d setlinecap'%v)
+            self.code_append('%d setlinecap'%v)
 
     def setLineJoin(self,v):
         if self._lineJoin!=v:
             self._lineJoin = v
-            self.code.append('%d setlinejoin'%v)
+            self.code_append('%d setlinejoin'%v)
 
     def setDash(self, array=[], phase=0):
         """Two notations.  pass two numbers, or an array and phase"""
         # copied and modified from reportlab.canvas
         psoperation = "setdash"
         if type(array) == types.IntType or type(array) == types.FloatType:
-            self._code.append('[%s %s] 0 %s' % (array, phase, psoperation))
+            self.code_append('[%s %s] 0 %s' % (array, phase, psoperation))
         elif type(array) == types.ListType or type(array) == types.TupleType:
             assert phase >= 0, "phase is a length in user space"
             textarray = string.join(map(str, array))
-            self.code.append('[%s] %s %s' % (textarray, phase, psoperation))
+            self.code_append('[%s] %s %s' % (textarray, phase, psoperation))
 
     def setStrokeColor(self, color):
         self._strokeColor = color
@@ -177,9 +174,9 @@ class PSCanvas:
             self._color = color
             if color:
                 if hasattr(color, "cyan"):
-                    self.code.append('%s setcmykcolor' % fp_str(color.cyan, color.magenta, color.yellow, color.black))
+                    self.code_append('%s setcmykcolor' % fp_str(color.cyan, color.magenta, color.yellow, color.black))
                 else:
-                    self.code.append('%s setrgbcolor' % fp_str(color.red, color.green, color.blue))
+                    self.code_append('%s setrgbcolor' % fp_str(color.red, color.green, color.blue))
 
     def setFillColor(self, color):
         self._fillColor = color
@@ -188,19 +185,19 @@ class PSCanvas:
     def setLineWidth(self, width):
         if width != self._lineWidth:
             self._lineWidth = width
-            self.code.append('%s setlinewidth' % width)
+            self.code_append('%s setlinewidth' % width)
 
     def setFont(self,font,fontSize,leading=None):
         if self._font!=font or self._fontSize!=fontSize:
             self._fontCodeLoc = len(self.code)
             self._font = font
             self._fontSize = fontSize
-            self.code.append('')
+            self.code_append('')
 
     def line(self, x1, y1, x2, y2):
         if self._strokeColor != None:
             self.setColor(self._strokeColor)
-            self.code.append('%s m %s l stroke' % (fp_str(x1, y1), fp_str(x2, y2)))
+            self.code_append('%s m %s l stroke' % (fp_str(x1, y1), fp_str(x2, y2)))
 
     def _escape(self, s):
         '''
@@ -223,19 +220,12 @@ class PSCanvas:
                     self._fontsUsed.append(psName)
             self.setColor(self._fillColor)
             s = self._escape(s)
-## before inverting...
-##            if angle == 0 :   # do special case of angle = 0 first. Avoids a bunch of gsave/grestore ops
-##                self.code.append('%s m 1 -1 scale (%s) show 1 -1 scale' % (fp_str(x,y),s))
-##            else : # general case, rotated text
-##                self.code.append('gsave %s %s translate %s rotate' % (x,y,angle))
-##                self.code.append('0 0 m 1 -1 scale (%s) show' % s)
-##                self.code.append('grestore')
-            if angle == 0 :   # do special case of angle = 0 first. Avoids a bunch of gsave/grestore ops
-                self.code.append('%s m (%s) show ' % (fp_str(x,y),s))
+            if angle == 0:   # do special case of angle = 0 first. Avoids a bunch of gsave/grestore ops
+                self.code_append('%s m (%s) show ' % (fp_str(x,y),s))
             else : # general case, rotated text
-                self.code.append('gsave %s %s translate %s rotate' % (x,y,angle))
-                self.code.append('0 0 m (%s) show' % s)
-                self.code.append('grestore')
+                self.code_append('gsave %s translate %s rotate' % (fp_str(x,y),fp_str(angle)))
+                self.code_append('0 0 m (%s) show' % s)
+                self.code_append('grestore')
 
     def drawCentredString(self, x, y, text, text_anchor='middle'):
         if self._fillColor is not None:
@@ -254,10 +244,10 @@ class PSCanvas:
         data = (fp_str(x1, y1), fp_str(x2, y2, x3, y3, x4, y4))
         if self._fillColor != None:
             self.setColor(self._fillColor)
-            self.code.append((codeline % data) + ' eofill')
+            self.code_append((codeline % data) + ' eofill')
         if self._strokeColor != None:
             self.setColor(self._strokeColor)
-            self.code.append((codeline % data)
+            self.code_append((codeline % data)
                             + ((closed and ' closepath') or '')
                             + ' stroke')
 
@@ -288,15 +278,16 @@ class PSCanvas:
 
         # choice between newpath and moveTo beginning of arc
         # go with newpath for precision, does this violate any assumptions in code???
-        rrCode = ['newpath'] # Round Rect code path
+        rr = ['newpath'] # Round Rect code path
+        a = rr.append
         # upper left corner ellipse is first
-        rrCode.append(ellipsePath % (x1+rx, y1+ry, rx, -ry, 90, 180))
-        rrCode.append(ellipsePath % (x1+rx, y2-ry, rx, -ry, 180, 270))
-        rrCode.append(ellipsePath % (x2-rx, y2-ry, rx, -ry, 270, 360))
-        rrCode.append(ellipsePath % (x2-rx, y1+ry, rx, -ry, 0,  90) )
-        rrCode.append('closepath')
+        a(ellipsePath % (x1+rx, y1+ry, rx, -ry, 90, 180))
+        a(ellipsePath % (x1+rx, y2-ry, rx, -ry, 180, 270))
+        a(ellipsePath % (x2-rx, y2-ry, rx, -ry, 270, 360))
+        a(ellipsePath % (x2-rx, y1+ry, rx, -ry, 0,  90) )
+        a('closepath')
 
-        self._fillAndStroke(rrCode)
+        self._fillAndStroke(rr)
 
     def ellipse(self, x1,y1, x2,y2):
         """Draw an orthogonal ellipse inscribed within the rectangle x1,y1,x2,y2.
@@ -329,12 +320,12 @@ class PSCanvas:
 
         if self._fillColor != None:
             self.setColor(self._fillColor)
-            self.code.append(codeline)
+            self.code_append(codeline)
             codelineAppended = 1
-            if self._strokeColor!=None: self.code.append('gsave')
+            if self._strokeColor!=None: self.code_append('gsave')
             self.lineTo(cx,cy)
-            self.code.append('eofill')
-            if self._strokeColor!=None: self.code.append('grestore')
+            self.code_append('eofill')
+            if self._strokeColor!=None: self.code_append('grestore')
 
         # stroke portion
         if self._strokeColor != None:
@@ -342,13 +333,13 @@ class PSCanvas:
             self.setColor(self._strokeColor)
             (startx, starty) = (cx+rx*math.cos(startAngleRadians), cy+ry*math.sin(startAngleRadians))
             if not codelineAppended:
-                self.code.append(codeline)
+                self.code_append(codeline)
             if fromcenter:
                 # move to center
                 self.lineTo(cx,cy)
                 self.lineTo(startx, starty)
-                self.code.append('closepath')
-            self.code.append('stroke')
+                self.code_append('closepath')
+            self.code_append('stroke')
 
     def _genArcCode(self, x1, y1, x2, y2, startAng, extent):
         "Calculate the path for an arc inscribed in rectangle defined by (x1,y1),(x2,y2)"
@@ -374,33 +365,34 @@ class PSCanvas:
         start = p[0]
         p = p[1:]
 
-        polyCode = []
-        polyCode.append("%s m" % fp_str(start))
+        poly = []
+        a = poly.append
+        a("%s m" % fp_str(start))
         for point in p:
-            polyCode.append("%s l" % fp_str(point))
+            a("%s l" % fp_str(point))
         if closed:
-            polyCode.append("closepath")
+            a("closepath")
 
-        self._fillAndStroke(polyCode,stroke=stroke,fill=fill)
+        self._fillAndStroke(poly,stroke=stroke,fill=fill)
 
     def lines(self, lineList, color=None, width=None):
         if self._strokeColor != None:
             self._setColor(self._strokeColor)
             codeline = '%s m %s l stroke'
             for line in lineList:
-                self.code.append(codeline % (fp_str(line[0]),fp_str(line[1])))
+                self.code_append(codeline % (fp_str(line[0]),fp_str(line[1])))
 
     def moveTo(self,x,y):
-        self.code.append('%s m' % fp_str(x, y))
+        self.code_append('%s m' % fp_str(x, y))
 
     def lineTo(self,x,y):
-        self.code.append('%s l' % fp_str(x, y))
+        self.code_append('%s l' % fp_str(x, y))
 
     def curveTo(self,x1,y1,x2,y2,x3,y3):
-        self.code.append('%s c' % fp_str(x1,y1,x2,y2,x3,y3))
+        self.code_append('%s c' % fp_str(x1,y1,x2,y2,x3,y3))
 
     def closePath(self):
-        self.code.append('closepath')
+        self.code_append('closepath')
 
     def polyLine(self, p):
         assert len(p) >= 1, 'Polyline must have 1 or more points'
@@ -409,11 +401,11 @@ class PSCanvas:
             self.moveTo(p[0][0], p[0][1])
             for t in p[1:]:
                 self.lineTo(t[0], t[1])
-            self.code.append('stroke')
-
+            self.code_append('stroke')
 
     def drawFigure(self, partList, closed=0):
         figureCode = []
+        a = figureCode.append
         first = 1
 
         for part in partList:
@@ -423,28 +415,28 @@ class PSCanvas:
             if op == figureLine:
                 if first:
                     first = 0
-                    figureCode.append("%s m" % fp_str(args[:2]))
+                    a("%s m" % fp_str(args[:2]))
                 else:
-                    figureCode.append("%s l" % fp_str(args[:2]))
-                figureCode.append("%s l" % fp_str(args[2:]))
+                    a("%s l" % fp_str(args[:2]))
+                a("%s l" % fp_str(args[2:]))
 
             elif op == figureArc:
                 first = 0
                 x1,y1,x2,y2,startAngle,extent = args[:6]
-                figureCode.append(self._genArcCode(x1,y1,x2,y2,startAngle,extent))
+                a(self._genArcCode(x1,y1,x2,y2,startAngle,extent))
 
             elif op == figureCurve:
                 if first:
                     first = 0
-                    figureCode.append("%s m" % fp_str(args[:2]))
+                    a("%s m" % fp_str(args[:2]))
                 else:
-                    figureCode.append("%s l" % fp_str(args[:2]))
-                figureCode.append("%s curveto" % fp_str(args[2:]))
+                    a("%s l" % fp_str(args[:2]))
+                a("%s curveto" % fp_str(args[2:]))
             else:
                 raise TypeError, "unknown figure operator: "+op
 
         if closed:
-            figureCode.append("closepath")
+            a("closepath")
         self._fillAndStroke(figureCode)
 
     def _fillAndStroke(self,code,clip=0,fill=1,stroke=1):
@@ -453,28 +445,27 @@ class PSCanvas:
         if fill or stroke or clip:
             self.code.extend(code)
             if fill:
-                if stroke or clip: self.code.append("gsave")
+                if stroke or clip: self.code_append("gsave")
                 self.setColor(self._fillColor)
-                self.code.append("eofill")
-                if stroke or clip: self.code.append("grestore")
+                self.code_append("eofill")
+                if stroke or clip: self.code_append("grestore")
             if stroke:
-                if clip: self.code.append("gsave")
+                if clip: self.code_append("gsave")
                 self.setColor(self._strokeColor)
-                self.code.append("stroke")
-                if clip: self.code.append("grestore")
+                self.code_append("stroke")
+                if clip: self.code_append("grestore")
             if clip:
-                self.code.append("clip")
-                self.code.append("newpath")
-
+                self.code_append("clip")
+                self.code_append("newpath")
 
     def translate(self,x,y):
-        self.code.append('%s translate' % fp_str(x,y))
+        self.code_append('%s translate' % fp_str(x,y))
 
     def scale(self,x,y):
-        self.code.append('%s scale' % fp_str(x,y))
+        self.code_append('%s scale' % fp_str(x,y))
 
     def transform(self,a,b,c,d,e,f):
-        self.code.append('[%s] concat' % fp_str(a,b,c,d,e,f))
+        self.code_append('[%s] concat' % fp_str(a,b,c,d,e,f))
 
     def _drawTimeResize(self,w,h):
         '''if this is used we're probably in the wrong world'''
@@ -547,10 +538,10 @@ class PSCanvas:
 
         dataline = outstream.read(78)
         while dataline <> "":
-            self.code.append(dataline)
+            self.code_append(dataline)
             dataline= outstream.read(78)
-        self.code.append('% end of image data') # for clarity
-        self.code.append('grestore') # return coordinates to normal
+        self.code_append('% end of image data') # for clarity
+        self.code_append('grestore') # return coordinates to normal
 
     # end of drawImage
     def _AsciiHexEncode(self, input):  # also based on piddlePDF
@@ -589,20 +580,20 @@ class PSCanvas:
             '%s %s scale' % (drawwidth,drawheight)])
 
         if imNumComponents == 3 :
-            self.code.append('/DeviceRGB setcolorspace')
+            self.code_append('/DeviceRGB setcolorspace')
         elif imNumComponents == 1 :
-            self.code.append('/DeviceGray setcolorspace')
+            self.code_append('/DeviceGray setcolorspace')
         # create the image dictionary
-        self.code.append("""
+        self.code_append("""
 <<
 /ImageType 1
 /Width %d /Height %d  %% dimensions of source image
 /BitsPerComponent %d""" % (imwidth, imheight, imBitsPerComponent) )
 
         if imNumComponents == 1:
-            self.code.append('/Decode [0 1]')
+            self.code_append('/Decode [0 1]')
         if imNumComponents == 3:
-            self.code.append('/Decode [0 1 0 1 0 1]  %% decode color values normally')
+            self.code_append('/Decode [0 1 0 1 0 1]  %% decode color values normally')
 
         self.code.extend([  '/ImageMatrix [%s 0 0 %s 0 %s]' % (imwidth, -imheight, imheight),
                             '/DataSource currentfile /ASCIIHexDecode filter',
@@ -619,10 +610,10 @@ class PSCanvas:
 
         dataline = outstream.read(78)
         while dataline <> "":
-            self.code.append(dataline)
+            self.code_append(dataline)
             dataline= outstream.read(78)
-        self.code.append('> % end of image data') # > is EOD for hex encoded filterfor clarity
-        self.code.append('grestore') # return coordinates to normal
+        self.code_append('> % end of image data') # > is EOD for hex encoded filterfor clarity
+        self.code_append('grestore') # return coordinates to normal
 
 # renderpdf - draws them onto a canvas
 """Usage:
@@ -646,8 +637,9 @@ def _pointsFromList(L):
     produce a list of points [(x0,y0), (y1,y0),....]
     '''
     P=[]
-    for i in range(0,len(L),2):
-        P.append((L[i],L[i+1]))
+    a = P.append
+    for i in xrange(0,len(L),2):
+        a((L[i],L[i+1]))
     return P
 
 class _PSRenderer(Renderer):

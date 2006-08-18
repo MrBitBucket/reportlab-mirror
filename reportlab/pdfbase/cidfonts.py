@@ -220,9 +220,7 @@ class CIDEncoding(pdfmetrics.Encoding):
             'codeSpaceRanges': self._codeSpaceRanges,
             'notDefRanges': self._notDefRanges,
             'cmap': self._cmap,
-            
             }
-    
 
 class CIDTypeFace(pdfmetrics.TypeFace):
     """Multi-byte type face.
@@ -291,9 +289,10 @@ class CIDTypeFace(pdfmetrics.TypeFace):
 
 class CIDFont(pdfmetrics.Font):
     "Represents a built-in multi-byte font"
+    _multiByte = 1
+
     def __init__(self, face, encoding):
 
-        self._multiByte = 1
         assert face in allowedTypeFaces, "TypeFace '%s' not supported! Use any of these instead: %s" % (face, allowedTypeFaces)
         self.faceName = face
         #should cache in registry...
@@ -310,10 +309,9 @@ class CIDFont(pdfmetrics.Font):
         # need to know if it is vertical or horizontal
         self.isVertical = (self.encodingName[-1] == 'V')
 
-
         #no substitutes initially
         self.substitutionFonts = []
-        
+
     def formatForPdf(self, text):
         encoded = _escape(text)
         #print 'encoded CIDFont:', encoded
@@ -381,7 +379,7 @@ class UnicodeCIDFont(CIDFont):
     >>> tokyo = u'\u6771\u4AEC'
     >>> print heisei.formatForPdf(tokyo)
     \\377\\376qg\\354J
-    
+
     """
 
     def __init__(self, face, isVertical=False, isHalfWidth=False):
@@ -393,7 +391,7 @@ class UnicodeCIDFont(CIDFont):
 
         #we know the languages now.
         self.language = lang
-        
+
         #rebuilt encoding string.  They follow rules which work
         #for the 7 fonts provided.
         enc = defaultEncoding[:-1]
@@ -403,17 +401,17 @@ class UnicodeCIDFont(CIDFont):
             enc = enc + 'V'
         else:
             enc = enc + 'H'
-            
-        #now we can do the more general case               
+
+        #now we can do the more general case
         CIDFont.__init__(self, face, enc)
         #self.encName = 'utf_16_le'
         #it's simpler for unicode, just use the face name
-        self.name = self.fontName = face   
+        self.name = self.fontName = face
         self.vertical = isVertical
         self.isHalfWidth = isHalfWidth
 
         self.unicodeWidths = widthsByUnichar[self.name]
-        
+
 
     def formatForPdf(self, text):
         #these ones should be encoded asUTF16 minus the BOM
@@ -429,7 +427,7 @@ class UnicodeCIDFont(CIDFont):
         #result = _escape(encoded)
         #print '    -> %s' % repr(result)
         #return result
-    
+
 
     def stringWidth(self, text, size, encoding=None):
         "Just ensure we do width test on characters, not bytes..."
@@ -439,7 +437,7 @@ class UnicodeCIDFont(CIDFont):
         widths = self.unicodeWidths
         return size * 0.001 * sum([widths.get(uch, 1000) for uch in text])
         #return CIDFont.stringWidth(self, text, size, encoding)
-            
+
 
 def precalculate(cmapdir):
     # crunches through all, making 'fastmap' files

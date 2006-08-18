@@ -269,22 +269,18 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1):
         except:
             pass
 
-
 def drawToString(d, msg="", showBoundary=rl_config._unset_,autoSize=1):
     "Returns a PDF as a string in memory, without touching the disk"
     s = getStringIO()
     drawToFile(d, s, msg=msg, showBoundary=showBoundary,autoSize=autoSize)
     return s.getvalue()
 
-
 #########################################################
 #
-#   test code.  First, defin a bunch of drawings.
+#   test code.  First, define a bunch of drawings.
 #   Routine to draw them comes at the end.
 #
 #########################################################
-
-
 def test():
     c = Canvas('renderPDF.pdf')
     c.setFont('Times-Roman', 36)

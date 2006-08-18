@@ -126,9 +126,7 @@ class PDFTextObject(_PDFColorSetter):
         self._fontsize = self._canvas._fontsize
         self._leading = self._canvas._leading
         font = pdfmetrics.getFont(self._fontname)
-        self._dynamicFont = getattr(font, '_dynamicFont', 0)
         self._curSubset = -1
-
         self.setTextOrigin(x, y)
 
     def getCode(self):
@@ -152,7 +150,7 @@ class PDFTextObject(_PDFColorSetter):
             c = -c    #reverse bottom row of the 2D Transform
             d = -d
         self._code.append('%s Tm' % fp_str(a, b, c, d, e, f))
-        
+
         # The current cursor position is at the text origin Note that
         # we aren't keeping track of all the transform on these
         # coordinates: they are relative to the rotations/sheers
@@ -161,7 +159,6 @@ class PDFTextObject(_PDFColorSetter):
         self._y0 = self._y = f
 
     def moveCursor(self, dx, dy):
-        
         """Starts a new line at an offset dx,dy from the start of the
         current line. This does not move the cursor relative to the
         current position, and it changes the current offset of every
@@ -233,8 +230,7 @@ class PDFTextObject(_PDFColorSetter):
         self._fontsize = size
         font = pdfmetrics.getFont(self._fontname)
 
-        self._dynamicFont = getattr(font, '_dynamicFont', 0)
-        if self._dynamicFont:
+        if font._dynamicFont:
             self._curSubset = -1
         else:
             pdffontname = self._canvas._doc.getInternalFontName(psfontname)
@@ -251,9 +247,7 @@ class PDFTextObject(_PDFColorSetter):
             leading = size * 1.2
         self._leading = leading
         font = pdfmetrics.getFont(self._fontname)
-
-        self._dynamicFont = getattr(font, '_dynamicFont', 0)
-        if self._dynamicFont:
+        if font._dynamicFont:
             self._curSubset = -1
         else:
             pdffontname = self._canvas._doc.getInternalFontName(psfontname)
@@ -308,10 +302,10 @@ class PDFTextObject(_PDFColorSetter):
         canv = self._canvas
         font = pdfmetrics.getFont(self._fontname)
         R = []
-        if self._dynamicFont:
+        if font._dynamicFont:
             #it's a truetype font and should be utf8.  If an error is raised,
             for subset, t in font.splitString(text, canv._doc):
-                if subset != self._curSubset:
+                if subset!=self._curSubset:
                     pdffontname = font.getSubsetInternalName(subset, canv._doc)
                     R.append("%s %s Tf %s TL" % (pdffontname, fp_str(self._fontsize), fp_str(self._leading)))
                     self._curSubset = subset
@@ -324,7 +318,6 @@ class PDFTextObject(_PDFColorSetter):
                 fp_str(self._leading)
                 ))
             R.append("(%s) Tj" % font.formatForPdf(text))
-            
         else:
             #convert to T1  coding
             fc = font
@@ -356,7 +349,6 @@ class PDFTextObject(_PDFColorSetter):
     def textLine(self, text=''):
         """prints string at current point, text cursor moves down.
         Can work with no argument to simply move the cursor down."""
-        
         # Update the coordinates of the cursor
         self._x = self._x0
         if self._canvas.bottomup:

@@ -184,7 +184,6 @@ class Canvas(textobject._PDFColorSetter):
         self._fontname = 'Times-Roman'
         self._fontsize = 12
 
-        self._dynamicFont = 0
         self._textMode = 0  #track if between BT/ET
         self._leading = 14.4
         self._currentMatrix = (1., 0., 0., 1., 0., 0.)
@@ -223,7 +222,7 @@ class Canvas(textobject._PDFColorSetter):
         d.update(state)
 
     STATE_ATTRIBUTES = split("""
-     _x _y _fontname _fontsize _dynamicFont _textMode _leading _currentMatrix _fillMode
+     _x _y _fontname _fontsize _textMode _leading _currentMatrix _fillMode
      _fillMode _charSpace _wordSpace _horizScale _textRenderMode _rise _textLineMatrix
      _textMatrix _lineCap _lineJoin _lineDash _lineWidth _mitreLimit _fillColorRGB
      _strokeColorRGB""")
@@ -1295,9 +1294,7 @@ class Canvas(textobject._PDFColorSetter):
             leading = size * 1.2
         self._leading = leading
         font = pdfmetrics.getFont(self._fontname)
-
-        self._dynamicFont = getattr(font, '_dynamicFont', 0)
-        if not self._dynamicFont:
+        if not font._dynamicFont:
             pdffontname = self._doc.getInternalFontName(psfontname)
             self._code.append('BT %s %s Tf %s TL ET' % (pdffontname, fp_str(size), fp_str(leading)))
 
