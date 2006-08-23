@@ -418,8 +418,10 @@ class PDFDocument:
         internalname = xObjectName(name)
         return self.idToObject.has_key(internalname)
 
-    def getFormBBox(self, name):
-        "get the declared bounding box of the form as a list"
+    def getFormBBox(self, name, boxType="MediaBox"):
+        """get the declared bounding box of the form as a list.
+        If you specify a different PDF box definition (e.g. the
+        ArtBox) and it has one, that's what you'll get."""
         internalname = xObjectName(name)
         if self.idToObject.has_key(internalname):
             theform = self.idToObject[internalname]
@@ -428,7 +430,7 @@ class PDFDocument:
                 return theform.BBoxList()
             elif isinstance(theform, PDFStream):
                 # externally defined form
-                return list(theform.dictionary.dict["BBox"].sequence)
+                return list(theform.dictionary.dict[boxType].sequence)
             else:
                 raise ValueError, "I don't understand the form instance %s" % repr(name)
 

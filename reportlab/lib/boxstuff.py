@@ -15,6 +15,7 @@ def anchorAdjustXY(anchor,x,y,width,height):
     return x,y
 
 def aspectRatioFix(preserve,anchor,x,y,width,height,imWidth,imHeight):
+    scale = 1.0
     if width is None:
         width = imWidth
     if height is None:
@@ -45,4 +46,4 @@ def aspectRatioFix(preserve,anchor,x,y,width,height,imWidth,imHeight):
                 y -= dy
             else:
                 y += dy
-    return x,y, width, height
+    return x,y, width, height, scale
