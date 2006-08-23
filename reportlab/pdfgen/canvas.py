@@ -627,7 +627,7 @@ class Canvas(textobject._PDFColorSetter):
             self._doc.addForm(name, imgObj)
 
         # ensure we have a size, as PDF will make it 1x1 pixel otherwise!
-        x,y,width,height = aspectRatioFix(preserveAspectRatio,anchor,x,y,width,height,imgObj.width,imgObj.height)
+        x,y,width,height,scaled = aspectRatioFix(preserveAspectRatio,anchor,x,y,width,height,imgObj.width,imgObj.height)
         x,y = anchorAdjustXY(anchor,x,y,width,height)
 
         # scale and draw

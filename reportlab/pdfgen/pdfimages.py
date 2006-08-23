@@ -148,7 +148,7 @@ class PDFImage:
         width = self.width
         height = self.height
         if width<1e-6 or height<1e-6: return False
-        x,y,self.width,self.height = aspectRatioFix(preserveAspectRatio,anchor,self.x,self.y,width,height,self.imgwidth,self.imgheight)
+        x,y,self.width,self.height, scaled = aspectRatioFix(preserveAspectRatio,anchor,self.x,self.y,width,height,self.imgwidth,self.imgheight)
         x,y = anchorAdjustXY(anchor,x,y,self.width,self.height)
         # this says where and how big to draw it
         if not canvas.bottomup: y = y+height
