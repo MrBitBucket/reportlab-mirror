@@ -683,7 +683,6 @@ class Paragraph(Flowable):
                 return self.blPara
             n = 0
             nSp = 0
-            lineBreakPrev = False
             for w in _getFragWords(frags):
                 spaceWidth = stringWidth(' ',w[-1][0].fontName, w[-1][0].fontSize)
 
@@ -702,9 +701,8 @@ class Paragraph(Flowable):
                 #text to see if this frag is a line break. If it is and we will only act on it
                 #if the current width is non-negative or the previous thing was a deliberate lineBreak
                 lineBreak = hasattr(f,'lineBreak')
-                endLine = (newWidth>maxWidth and n>0) or (lineBreak and (currentWidth>0 or lineBreakPrev))
+                endLine = (newWidth>maxWidth and n>0) or lineBreak
                 if not endLine:
-                    lineBreakPrev = lineBreak
                     if lineBreak: continue      #throw it away
                     n += 1
                     maxSize = max(maxSize,f.fontSize)
@@ -717,7 +715,7 @@ class Paragraph(Flowable):
                         if currentWidth>0 and ((nText!='' and nText[0]!=' ') or hasattr(f,'cbDefn')):
                             if hasattr(g,'cbDefn'):
                                 i = len(words)-1
-                                while hasattr(words[i],'cbDefn'): i = i-1
+                                while hasattr(words[i],'cbDefn'): i -= 1
                                 words[i].text += ' '
                             else:
                                 g.text += ' '
@@ -737,9 +735,9 @@ class Paragraph(Flowable):
 
                     currentWidth = newWidth
                 else:  #either it won't fit, or it's a lineBreak tag
-                    if lineBreak and not len(words):
+                    if lineBreak:
                         g = f.clone()
-                        del g.lineBreak
+                        #del g.lineBreak
                         words.append(g)
 
                     if currentWidth>self.width: self.width = currentWidth
@@ -754,7 +752,6 @@ class Paragraph(Flowable):
                     except IndexError:
                         maxWidth = maxWidths[-1]  # use the last one
 
-                    lineBreakPrev = lineBreak
                     if lineBreak:
                         n = 0
                         continue
@@ -1037,7 +1034,7 @@ if __name__=='__main__':    #NORUNTESTS
         frags = P.frags
         n =len(frags)
         for l in range(n):
-            print "frag%d: '%s'" % (l, frags[l].text)
+            print "frag%d: '%s' %s" % (l, frags[l].text,' '.join(['%s=%s' % (k,getattr(frags[l],k)) for k in frags[l].__dict__ if k!=text]))
 
         l = 0
         cum = 0
@@ -1147,3 +1144,14 @@ umfassend zu sein."""
         dumpParagraphFrags(P)
         w,h = P.wrap(6*72, 9.7*72)
         dumpParagraphLines(P)
+
+    if flagged(8):
+        text ="""- bullet 0<br/>- bullet 1<br/>- bullet 2<br/>- bullet 3<br/>- bullet 4<br/>- bullet 5"""
+        P=Paragraph(text, styleSheet['Normal'])
+        dumpParagraphFrags(P)
+        w,h = P.wrap(6*72, 9.7*72)
+        dumpParagraphLines(P)
+        S = P.split(6*72,h/2.0)
+        print len(S)
+        dumpParagraphLines(S[0])
+        dumpParagraphLines(S[1])
