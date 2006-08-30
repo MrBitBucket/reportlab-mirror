@@ -21,7 +21,7 @@ static char* __version__=" $Id$ ";
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "1.08"
+#define VERSION "1.09"
 #define MAX_DEPTH 256
 
 #if CHAR_SIZE==16
@@ -32,8 +32,18 @@ static char* __version__=" $Id$ ";
 #	define PYNSNAME(nsed, name) PyNSName(nsed,name,utf8)
 PyObject* _PYSTRING(const Char* s, int utf8)
 {
-	return utf8 ? PyUnicode_EncodeUTF8((Py_UNICODE*)s, (int)Strlen(s), NULL)
-				: PyUnicode_FromUnicode((Py_UNICODE*)s, (int)Strlen(s));
+	int	lens = (int)Strlen(s);
+#if defined(Py_UNICODE_WIDE)
+	PyObject *u, *x;
+	u = PyUnicode_DecodeUTF16((char*)s,2*lens,NULL,NULL);
+	if(!utf8 || !u) return u;
+	x = PyUnicode_AsUTF8String(u);
+	Py_DECREF(u);
+	return x;
+#else
+	return utf8 ? PyUnicode_EncodeUTF8((Py_UNICODE*)s, lens, NULL)
+				: PyUnicode_FromUnicode((Py_UNICODE*)s, lens);
+#endif
 }
 #	define PYSTRING(s) _PYSTRING(s,utf8)
 PyObject* PYSTRING8(const char* s)
@@ -354,8 +364,8 @@ static	PyObject* get_attrs(ParserDetails* pd, Attribute a)
 				t=PYSTRING((Char*)a->definition->name),
 				s=PYSTRING((Char*)a->value)
 				);
-			Py_DECREF(t);
-			Py_DECREF(s);
+			Py_XDECREF(t);
+			Py_XDECREF(s);
 			}
 		return attrs;
 		}
@@ -498,13 +508,13 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 			if(ParserGetFlag(p,ReturnProcessingInstructions)){
 				s = PyDict_New();
 				PyDict_SetItemString(s, "name", t=PYSTRING(bit->pi_name));
-				Py_DECREF(t);
+				Py_XDECREF(t);
 				t = _makeNodePD( pd, piTagName, s, 0);
 				if(pd->fourth==recordLocation) _reverseSrcInfoTuple(PyTuple_GET_ITEM(t,3));
 				Py_INCREF(piTagName);
 				s = PYSTRING(bit->pi_chars);
 				PyList_Append(PDGetItem(t,2),s);
-				Py_DECREF(s);
+				Py_XDECREF(s);
 				PyList_Append(PDGetItem(stack[*depth],2),t);
 				Py_DECREF(t);
 				}
@@ -512,7 +522,7 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 		case XBIT_pcdata:
 			t = PYSTRING(bit->pcdata_chars);
 			PyList_Append(PDGetItem(stack[*depth],2),t);
-			Py_DECREF(t);
+			Py_XDECREF(t);
 			break;
 		case XBIT_cdsect:
 			if(ParserGetFlag(p,ReturnCDATASectionsAsTuples)){
@@ -522,14 +532,14 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 				Py_INCREF(Py_None);
 				s = PYSTRING(bit->cdsect_chars);
 				PyList_Append(PDGetItem(t,2),s);
-				Py_DECREF(s);
+				Py_XDECREF(s);
 				PyList_Append(PDGetItem(stack[*depth],2),t);
 				Py_DECREF(t);
 				}
 			else {
 				t = PYSTRING(bit->cdsect_chars);
 				PyList_Append(PDGetItem(stack[*depth],2),t);
-				Py_DECREF(t);
+				Py_XDECREF(t);
 				}
 			break;
 		case XBIT_dtd:
@@ -542,7 +552,7 @@ static	int handle_bit(Parser p, XBit bit, PyObject *stack[],int *depth)
 				Py_INCREF(commentTagName);
 				s = PYSTRING(bit->comment_chars);
 				PyList_Append(PDGetItem(t,2),s);
-				Py_DECREF(s);
+				Py_XDECREF(s);
 				PyList_Append(PDGetItem(stack[*depth],2),t);
 				Py_DECREF(t);
 				}
