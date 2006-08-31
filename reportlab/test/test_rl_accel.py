@@ -18,7 +18,8 @@ def getrc(defns,depth=1):
             if G is not G0 or G is L: break
             LL.append(L)
         L = {}
-        for l in reversed(LL):
+        LL.reverse()
+        for l in LL:
             L.update(l)
     else:
         L = L.copy()

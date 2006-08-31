@@ -44,10 +44,10 @@ class USPS_4State(Barcode):
         self._characters = None
         self._barcodes = None
 
-    @staticmethod
     def scale(kind,D,s):
         V = D[kind]
         return 72*(V[0]*(1-s)+s*V[1])
+    scale = staticmethod(scale)
 
     def tracking(self,tracking):
         self._init()
