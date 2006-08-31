@@ -193,10 +193,8 @@ outermost paragraph tag.""")
 
 heading2("Intra-paragraph markup")
 disc("""'<![CDATA[Within each paragraph, we use a basic set of XML tags
-to provide markup.  The most basic of these are bold (<b>...</b>)
-and italic (<i>...</i>).  It is also legal to use an underline
-tag (<u>...</u> but it has no effect; PostScript fonts don't
-support underlining, and neither do we, yet.]]>""")
+to provide markup.  The most basic of these are bold (<b>...</b>),
+italic (<i>...</i>) and underline (<u>...</u>).]]>""")
 
 parabox2("""<b>You are hereby charged</b> that on the 28th day of May, 1970, you did
 willfully, unlawfully, and <i>with malice of forethought</i>, publish an
