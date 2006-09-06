@@ -26,7 +26,10 @@ class Figure(Flowable):
                  background=None,
                  captionTextColor=toColor('black'),
                  captionBackColor=None,
-                 border=1):
+                 border=1,
+                 spaceBefore=12,
+                 spaceAfter=12,
+                 ):
         Flowable.__init__(self)
         self.width = width
         self.figureHeight = height
@@ -39,8 +42,8 @@ class Figure(Flowable):
         self.captionHeight = 0  # work out later
         self.background = background
         self.border = border
-        self.spaceBefore = 12
-        self.spaceAfter = 12
+        self.spaceBefore = spaceBefore
+        self.spaceAfter = spaceAfter
 
     def _getCaptionPara(self):
         caption = self.caption
@@ -160,19 +163,32 @@ class PlatPropFigure1(PageFigure):
 
 class FlexFigure(Figure):
     """Base for a figure class with a caption. Can grow or shrink in proportion"""
-    def __init__(self, width, height, caption, background=None):
+    def __init__(self, width, height, caption, background=None,
+                        captionFont='Helvetica-Oblique',captionSize=8,
+                        captionTextColor=colors.black,
+                        shrinkToFit=1,
+                        growToFit=1,
+                        spaceBefore=12,
+                        spaceAfter=12,
+                        captionGap=9,
+                        ):
         Figure.__init__(self, width, height, caption,
-                        captionFont="Helvetica-Oblique", captionSize=8,
-                        background=None)
-        self.shrinkToFit = 1 #if set and wrap is too tight, shrinks
-        self.growToFit = 1 #if set and wrap is too tight, shrinks
+                        captionFont=captionFont,
+                        captionSize=4,
+                        background=None,
+                        captionTextColor=captionTextColor,
+                        spaceBefore = spaceBefore,
+                        spaceAfter = spaceAfter,
+                        )
+        self.shrinkToFit = shrinkToFit  #if set and wrap is too tight, shrinks
+        self.growToFit = growToFit      #if set and wrap is too small, grows
         self.scaleFactor = None
         self.captionStyle = ParagraphStyle(
             'Caption',
-            fontName='Times', #'Helvetica-Oblique',
-            fontSize=4, #8,
-            spaceBefore=9, #3,
-            alignment=TA_CENTER
+            fontName=captionFont, #'Helvetica-Oblique',
+            fontSize=captionSize, #8,
+            spaceBefore=captionGap, #3,
+            alignment=TA_CENTER,
             )
         self._scaleFactor = None
         self.background = background
