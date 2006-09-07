@@ -29,6 +29,7 @@ class Figure(Flowable):
                  border=1,
                  spaceBefore=12,
                  spaceAfter=12,
+                 captionGap=None,
                  ):
         Flowable.__init__(self)
         self.width = width
@@ -38,6 +39,7 @@ class Figure(Flowable):
         self.captionSize = captionSize
         self.captionTextColor = captionTextColor
         self.captionBackColor = captionBackColor
+        self.captionGap = captionGap
         self._captionData = None
         self.captionHeight = 0  # work out later
         self.background = background
@@ -60,7 +62,7 @@ class Figure(Flowable):
                 leading=1.2*captionSize,
                 textColor = captionTextColor,
                 backColor = captionBackColor,
-                spaceBefore=captionSize * 0.5,
+                spaceBefore=self.captionGap or 0.5*captionSize,
                 alignment=TA_CENTER)
             #must build paragraph now to get sequencing in synch with rest of story
             self.captionPara = Paragraph(self.caption, self.captionStyle)
@@ -174,22 +176,16 @@ class FlexFigure(Figure):
                         ):
         Figure.__init__(self, width, height, caption,
                         captionFont=captionFont,
-                        captionSize=4,
+                        captionSize=captionSize,
                         background=None,
                         captionTextColor=captionTextColor,
                         spaceBefore = spaceBefore,
                         spaceAfter = spaceAfter,
+                        captionGap=9,
                         )
         self.shrinkToFit = shrinkToFit  #if set and wrap is too tight, shrinks
         self.growToFit = growToFit      #if set and wrap is too small, grows
         self.scaleFactor = None
-        self.captionStyle = ParagraphStyle(
-            'Caption',
-            fontName=captionFont, #'Helvetica-Oblique',
-            fontSize=captionSize, #8,
-            spaceBefore=captionGap, #3,
-            alignment=TA_CENTER,
-            )
         self._scaleFactor = None
         self.background = background
 
