@@ -224,11 +224,11 @@ class PageTemplate:
         pass
 
     def checkPageSize(self,canv,doc):
-        '''This gets called by the template framework
+        """This gets called by the template framework
         If canv size != template size then the canv size is set to
         the template size or if that's not available to the
         doc size.
-        '''
+        """
         #### NEVER EVER EVER COMPARE FLOATS FOR EQUALITY
         #RGB converting pagesizes to ints means we are accurate to one point
         #RGB I suggest we should be aiming a little better
@@ -405,8 +405,8 @@ class BaseDocTemplate:
         self.beforeDocument()
 
     def handle_pageBegin(self):
-        '''Perform actions required at beginning of page.
-        shouldn't normally be called directly'''
+        """Perform actions required at beginning of page.
+        shouldn't normally be called directly"""
         self.page += 1
         if self._debug: logger.debug("beginning page %d" % self.page)
         self.pageTemplate.beforeDrawPage(self.canv,self)
@@ -760,7 +760,7 @@ class BaseDocTemplate:
         return allHappy
 
     def notify(self, kind, stuff):
-        """"Forward to any listeners"""
+        """Forward to any listeners"""
         for l in self._indexingFlowables:
             l.notify(kind, stuff)
 
