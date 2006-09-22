@@ -980,6 +980,7 @@ class Pie3d(Pie):
         self.slices[5].fillColor = colors.crimson
         self.slices[6].fillColor = colors.darkviolet
         self.checkLabelOverlap = 0
+        self.xradius = self.yradius = None
 
     def _fillSide(self,L,i,angle,strokeColor,strokeWidth,fillColor):
         rd = self.rad_dist(angle)
@@ -999,9 +1000,11 @@ class Pie3d(Pie):
         self._ydepth_3d = sin(a0)*self.depth_3d
         self._cx = self.x+self.width/2.0
         self._cy = self.y+(self.height - self._ydepth_3d)/2.0
-        radius = self._radius = self._cx-self.x
-        self._radiusx = radiusx = radius
-        self._radiusy = radiusy = (1.0 - self.perspective/100.0)*radius
+        radiusx = radiusy = self._cx-self.x
+        if self.xradius: radiusx = self.xradius
+        if self.yradius: radiusy = self.yradius
+        self._radiusx = radiusx
+        self._radiusy = (1.0 - self.perspective/100.0)*radiusy
         data = self.normalizeData()
         sum = self._sum
 
