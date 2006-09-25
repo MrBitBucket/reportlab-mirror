@@ -11,7 +11,6 @@ Stacked and percentile bar charts to follow...
 __version__=''' $Id$ '''
 
 import string, copy
-from types import FunctionType, StringType
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isString,\
@@ -326,7 +325,7 @@ class BarChart(PlotArea):
             labelText = None
         elif labelFmt == 'values':
             labelText = self.barLabelArray[rowNo][colNo]
-        elif type(labelFmt) is StringType:
+        elif type(labelFmt) is str:
             labelText = labelFmt % self.data[rowNo][colNo]
         elif callable(labelFmt):
             labelText = labelFmt(self.data[rowNo][colNo])
@@ -588,17 +587,20 @@ class BarChart3D(BarChart):
         g = Group()
         theta_x = self.theta_x
         theta_y = self.theta_y
+        if self.categoryAxis.style == 'stacked':
+          fg_value=fg.value().reverse()
         for t in fg.value():
-            if t[0]==1:
-                z0,z1,x,y,width,height,rowNo,colNo = t[1:]
-                BarChart._addBarLabel(self,g,rowNo,colNo,x,y,width,height)
-            elif t[0]==0:
+            if t[0]==0:
                 z0,z1,x,y,width,height,rowNo,style = t[1:]
                 dz = z1 - z0
                 _draw_3d_bar(g, x, x+width, y, y+height, dz*theta_x, dz*theta_y,
                             fillColor=style.fillColor, fillColorShaded=None,
                             strokeColor=style.strokeColor, strokeWidth=style.strokeWidth,
                             shading=0.45)
+        for t in fg.value():
+            if t[0]==1:
+                z0,z1,x,y,width,height,rowNo,colNo = t[1:]
+                BarChart._addBarLabel(self,g,rowNo,colNo,x,y,width,height)
         return g
 
 class VerticalBarChart3D(BarChart3D,VerticalBarChart):

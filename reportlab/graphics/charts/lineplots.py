@@ -6,7 +6,6 @@
 __version__=''' $Id$ '''
 
 import string, time
-from types import FunctionType
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *
@@ -207,9 +206,9 @@ class LinePlot(AbstractLineChart):
                 labelText = self.lineLabelArray[rowNo][colNo]
             else:
                 labelText = labelFmt % labelValue
-        elif type(labelFmt) is FunctionType:
-            labelText = labelFmt(labelValue)
         elif isinstance(labelFmt, Formatter):
+            labelText = labelFmt(labelValue)
+        elif callable(labelFmt):
             labelText = labelFmt(labelValue)
         else:
             msg = "Unknown formatter type %s, expected string or function"

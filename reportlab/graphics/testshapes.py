@@ -398,11 +398,16 @@ def getDrawing13():
     from reportlab.pdfbase import pdfmetrics, ttfonts
     pdfmetrics.registerFont(ttfonts.TTFont("LuxiSerif", "luxiserif.ttf"))
     pdfmetrics.registerFont(ttfonts.TTFont("Rina", "rina.ttf"))
+    pdfmetrics.registerFont(ttfonts.TTFont("Vera", "Vera.ttf"))
+    pdfmetrics.registerFont(ttfonts.TTFont("VeraBd", "VeraBd.ttf"))
+    pdfmetrics.registerFont(ttfonts.TTFont("VeraIt", "VeraIt.ttf"))
+    pdfmetrics.registerFont(ttfonts.TTFont("VeraBI", "VeraBI.ttf"))
     _FONTS[1] = 'LuxiSerif'
     _FONTS[2] = 'Rina'
-    F = ['Times-Roman','Courier','Helvetica','LuxiSerif', 'Rina']
+    F = ['Times-Roman','Courier','Helvetica','LuxiSerif', 'Rina', 'Vera', 'VeraBd', 'VeraIt', 'VeraBI']
     if sys.platform=='win32':
-        for name, ttf in [('Adventurer Light SF','Advlit.ttf'),('ArialMS','ARIAL.TTF'),
+        for name, ttf in [
+            ('Adventurer Light SF','Advlit.ttf'),('ArialMS','ARIAL.TTF'),
             ('Arial Unicode MS', 'ARIALUNI.TTF'),
             ('Book Antiqua','BKANT.TTF'),
             ('Century Gothic','GOTHIC.TTF'),

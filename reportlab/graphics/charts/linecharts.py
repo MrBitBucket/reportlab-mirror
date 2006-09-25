@@ -7,7 +7,6 @@ This modules defines a very preliminary Line Chart example.
 __version__=''' $Id$ '''
 
 import string
-from types import FunctionType, StringType
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, \
@@ -243,14 +242,14 @@ class HorizontalLineChart(LineChart):
 
         if labelFmt is None:
             labelText = None
-        elif type(labelFmt) is StringType:
+        elif type(labelFmt) is str:
             if labelFmt == 'values':
                 labelText = self.lineLabelArray[rowNo][colNo]
             else:
                 labelText = labelFmt % labelValue
-        elif type(labelFmt) is FunctionType:
-            labelText = labelFmt(labelValue)
         elif isinstance(labelFmt, Formatter):
+            labelText = labelFmt(labelValue)
+        elif callable(labelFmt):
             labelText = labelFmt(labelValue)
         else:
             msg = "Unknown formatter type %s, expected string or function"

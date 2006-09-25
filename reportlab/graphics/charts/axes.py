@@ -33,7 +33,6 @@ the former axes in its own coordinate system.
 __version__=''' $Id$ '''
 
 import string
-from types import FunctionType, StringType, TupleType, ListType
 
 from reportlab.lib.validators import    isNumber, isNumberOrNone, isListOfStringsOrNone, isListOfNumbers, \
                                         isListOfNumbersOrNone, isColorOrNone, OneOf, isBoolean, SequenceOf, \
@@ -47,7 +46,7 @@ from reportlab.graphics.charts.utils import nextRoundNumber
 
 # Helpers.
 def _findMinMaxValue(V, x, default, func, special=None):
-    if type(V[0][0]) in (TupleType,ListType):
+    if isinstance(V[0][0],_SequenceTypes):
         if special:
             f=lambda T,x=x,special=special,func=func: special(T,x,func)
         else:
@@ -713,7 +712,7 @@ class ValueAxis(_AxisG):
         abf = self.avoidBoundFrac
         do_rr = not getattr(self,'valueSteps',None)
         do_abf = abf and do_rr
-        if type(abf) not in (TupleType,ListType):
+        if not isinstance(abf,_SequenceTypes):
             abf = abf, abf
         do_rr = rangeRound is not 'none' and do_rr
         if do_rr:
@@ -853,8 +852,8 @@ class ValueAxis(_AxisG):
                     t = tick*scl
                 else:
                     t = tick
-                if type(f) is StringType: txt = f % t
-                elif type(f) in (TupleType,ListType):
+                if type(f) is str: txt = f % t
+                elif isinstance(f,_SequenceTypes):
                     #it's a list, use as many items as we get
                     if i < len(f):
                         txt = f[i]
@@ -1024,7 +1023,7 @@ class _isListOfDaysAndMonths(Validator):
     for recurring dates.
     """
     def test(self,x):
-        if type(x) in _SequenceTypes:
+        if isinstance(x,_SequenceTypes):
             answer = True
             for element in x:
                 try:
@@ -1402,7 +1401,7 @@ class AdjYValueAxis(YValueAxis):
         abf = self.avoidBoundFrac
         if abf:
             i1 = (T[1]-T[0])
-            if type(abf) not in (TupleType,ListType):
+            if not isinstance(abf,_SequenceTypes):
                 i0 = i1 = i1*abf
             else:
                 i0 = i1*abf[0]
@@ -1429,7 +1428,7 @@ class AdjYValueAxis(YValueAxis):
             self._valueMin = self._valueMin - m
 
         if self.leftAxisSkipLL0:
-            if type(self.leftAxisSkipLL0) in (ListType,TupleType):
+            if isinstance(self.leftAxisSkipLL0,_SequenceTypes):
                 for x in self.leftAxisSkipLL0:
                     try:
                         L[x] = ''
