@@ -1,7 +1,7 @@
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_platypus_breaking.py
-"""Tests pageBreakBefore, frameBreakBefore, keepWithNext...
+"""Tests pleaseTurnOver, pageBreakBefore, frameBreakBefore, keepWithNext...
 """
 
 import sys
@@ -94,7 +94,9 @@ does not readily tolerate the strong
 generative capacity of the theory.'''
 
 def _ptoTestCase(self):
-    "This makes one long multi-page paragraph."
+    """PTO stands for Please Turn Over and is a means for
+    specifying content to be inserted when stuff goes over a page.
+    This makes one long multi-page paragraph."""
 
     # Build story.
     story = []
