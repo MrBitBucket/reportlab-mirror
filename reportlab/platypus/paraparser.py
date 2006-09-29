@@ -8,7 +8,7 @@ from types import TupleType, UnicodeType, StringType
 import sys
 import os
 import copy
-
+import unicodedata
 import reportlab.lib.sequencer
 from reportlab.lib.abag import ABag
 
