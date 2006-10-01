@@ -744,7 +744,10 @@ class PTOContainer(_Container,Flowable):
                 T = I.trailer
                 Hdr = I.header
                 tW, tH = _listWrapOn(T, availWidth, self.canv)
-                tSB = T[0].getSpaceBefore()
+                if len(T):  #trailer may have no content
+                    tSB = T[0].getSpaceBefore()
+                else:
+                    tSB = 0
                 I2W[I] = T,tW,tH,tSB
             else:
                 T,tW,tH,tSB = I2W[I]

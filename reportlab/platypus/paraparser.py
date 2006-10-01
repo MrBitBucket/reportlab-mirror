@@ -612,7 +612,18 @@ class ParaParser(xmllib.XMLParser):
             id = attr['id']
         else:
             id = None
-        output = self._seq.nextf(id)
+        increment = attr.get('inc', None)
+        if not increment:
+            output = self._seq.nextf(id)
+        else:
+            #accepts "no" for do not increment, or an integer.
+            #thus, 0 and 1 increment by the right amounts.
+            if increment.lower() == 'no':
+                output = self._seq.thisf(id)
+            else:
+                incr = int(increment)
+                output = self._seq.thisf(id)
+                self._seq.reset(id, self._seq._this() + incr)
         self.handle_data(output)
 
     def end_seq(self):
