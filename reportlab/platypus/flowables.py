@@ -847,26 +847,22 @@ class KeepInFrame(_Container,Flowable):
     def wrap(self,availWidth,availHeight):
         from doctemplate import LayoutError
         mode = self.mode
-        maxWidth = float(self.maxWidth or availWidth)
-        maxHeight = float(self.maxHeight or availHeight)
-        W, H = _listWrapOn(self._content,availWidth,self.canv)
-        if (mode=='error' and (W>availWidth+_FUZZ or H>availHeight+_FUZZ)):
+        maxWidth = float(min(self.maxWidth or availWidth,availWidth))
+        maxHeight = float(min(self.maxHeight or availHeight,availHeight))
+        W, H = _listWrapOn(self._content,maxWidth,self.canv)
+        if (mode=='error' and (W>maxWidth+_FUZZ or H>maxHeight+_FUZZ)):
             ident = 'content %sx%s too large for %s' % (W,H,self.identity(30))
             #leave to keep apart from the raise
             raise LayoutError(ident)
-        elif W<=availWidth+_FUZZ and H<=availHeight+_FUZZ:
+        elif W<=maxWidth+_FUZZ and H<=maxHeight+_FUZZ:
             self.width = W-_FUZZ      #we take what we get
             self.height = H-_FUZZ
-        elif (maxWidth>=availWidth+_FUZZ or maxHeight>=availHeight+_FUZZ):
-            ident = 'Specified size too large for available space %sx%s in %s' % (availWidth,availHeight,self.identity(30))
-            #leave to keep apart from the raise
-            raise LayoutError(ident)
         elif mode in ('overflow','truncate'):   #we lie
             self.width = min(maxWidth,W)-_FUZZ
             self.height = min(maxHeight,H)-_FUZZ
         else:
             def func(x):
-                W, H = _listWrapOn(self._content,x*availWidth,self.canv)
+                W, H = _listWrapOn(self._content,x*maxWidth,self.canv)
                 W /= x
                 H /= x
                 return W, H

@@ -182,8 +182,7 @@ class TestCases(unittest.TestCase):
         from reportlab.platypus.doctemplate import LayoutError
         self.assertRaises(LayoutError, _KeepInFrameTestCase,*(self,"error"))
     def test5(self):
-        from reportlab.platypus.doctemplate import LayoutError
-        self.assertRaises(LayoutError, _KeepInFrameTestCase,*(self,"shrink",0))
+        _KeepInFrameTestCase(self,"shrink",0)
 
 def makeSuite():
     return makeSuiteForClasses(TestCases)
