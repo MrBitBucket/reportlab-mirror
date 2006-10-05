@@ -91,6 +91,7 @@ class WedgeProperties(PropHolder):
         label_pointer_edgePad = AttrMapValue(isNumber,desc='pad between pointer label and box'),
         label_pointer_piePad = AttrMapValue(isNumber,desc='pad between pointer label and pie'),
         swatchMarker = AttrMapValue(NoneOr(isSymbol), desc="None or makeMarker('Diamond') ..."),
+        visible = AttrMapValue(isBoolean,'set to false to skip displaying'),
         )
 
     def __init__(self):
@@ -120,6 +121,7 @@ class WedgeProperties(PropHolder):
         self.label_pointer_elbowLength = 3
         self.label_pointer_edgePad = 2
         self.label_pointer_piePad = 3
+        self.visible = 1
 
 def _addWedgeLabel(self,text,add,angle,labelX,labelY,wedgeStyle,labelClass=WedgeLabel):
     # now draw a label
@@ -494,8 +496,9 @@ class Pie(AbstractPieChart):
             if A[1] is None: continue
             sn = self.getSeriesName(i,'')
             if not sn: continue
-            n += 1
             style = self.slices[i%styleCount]
+            if not style.label_visible or not style.visible: continue
+            n += 1
             _addWedgeLabel(self,sn,L_add,180,labelX,labelY,style,labelClass=WedgeLabel)
             l = L[-1]
             b = l.getBounds()
@@ -632,6 +635,7 @@ class Pie(AbstractPieChart):
             #if we didn't use %stylecount here we'd end up with the later wedges
             #all having the default style
             wedgeStyle = self.slices[i%styleCount]
+            if not wedgeStyle.visible: continue
 
             # is it a popout?
             cx, cy = centerx, centery
@@ -658,36 +662,37 @@ class Pie(AbstractPieChart):
             theWedge.strokeDashArray = wedgeStyle.strokeDashArray
 
             g_add(theWedge)
-            if text:
-                labelRadius = wedgeStyle.labelRadius
-                rx = xradius*labelRadius
-                ry = yradius*labelRadius
-                labelX = cx + rx*cosAA
-                labelY = cy + ry*sinAA
-                _addWedgeLabel(self,text,L_add,averageAngle,labelX,labelY,wedgeStyle)
-                if checkLabelOverlap:
-                    l = L[-1]
-                    l._origdata = { 'x': labelX, 'y':labelY, 'angle': averageAngle,
-                                    'rx': rx, 'ry':ry, 'cx':cx, 'cy':cy,
-                                    'bounds': l.getBounds(),
-                                    }
-            elif plMode and PL_data:
-                l = PL_data[i]
-                if l:
-                    data = l._origdata
-                    sinM = data['smid']
-                    cosM = data['cmid']
-                    lX = cx + xradius*cosM
-                    lY = cy + yradius*sinM
-                    lpel = wedgeStyle.label_pointer_elbowLength
-                    lXi = lX + lpel*cosM
-                    lYi = lY + lpel*sinM
-                    L_add(PolyLine((lX,lY,lXi,lYi,l.x,l.y),
-                            strokeWidth=wedgeStyle.label_pointer_strokeWidth,
-                            strokeColor=wedgeStyle.label_pointer_strokeColor))
-                    L_add(l)
+            if wedgeStyle.label_visible:
+                if text:
+                    labelRadius = wedgeStyle.labelRadius
+                    rx = xradius*labelRadius
+                    ry = yradius*labelRadius
+                    labelX = cx + rx*cosAA
+                    labelY = cy + ry*sinAA
+                    _addWedgeLabel(self,text,L_add,averageAngle,labelX,labelY,wedgeStyle)
+                    if checkLabelOverlap:
+                        l = L[-1]
+                        l._origdata = { 'x': labelX, 'y':labelY, 'angle': averageAngle,
+                                        'rx': rx, 'ry':ry, 'cx':cx, 'cy':cy,
+                                        'bounds': l.getBounds(),
+                                        }
+                elif plMode and PL_data:
+                    l = PL_data[i]
+                    if l:
+                        data = l._origdata
+                        sinM = data['smid']
+                        cosM = data['cmid']
+                        lX = cx + xradius*cosM
+                        lY = cy + yradius*sinM
+                        lpel = wedgeStyle.label_pointer_elbowLength
+                        lXi = lX + lpel*cosM
+                        lYi = lY + lpel*sinM
+                        L_add(PolyLine((lX,lY,lXi,lYi,l.x,l.y),
+                                strokeWidth=wedgeStyle.label_pointer_strokeWidth,
+                                strokeColor=wedgeStyle.label_pointer_strokeColor))
+                        L_add(l)
 
-        if checkLabelOverlap:
+        if checkLabelOverlap and L:
             fixLabelOverlaps(L)
             map(g_add,L)
 
@@ -1085,7 +1090,7 @@ class Pie3d(Pie):
                             strokeColor=strokeColor,strokeWidth=strokeWidth,fillColor=fillColor,strokeLineJoin=1))
 
             text = labels[i]
-            if text:
+            if style.label_visible and text:
                 rat = style.labelRadius
                 self._radiusx *= rat
                 self._radiusy *= rat
@@ -1103,7 +1108,7 @@ class Pie3d(Pie):
                 self._radiusy = radiusy
 
         S.sort(lambda a,b: -cmp(a[0],b[0]))
-        if checkLabelOverlap:
+        if checkLabelOverlap and L:
             fixLabelOverlaps(L)
         map(g.add,map(lambda x:x[1],S)+T+L)
         return g
