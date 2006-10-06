@@ -7,7 +7,6 @@ import os, sys, distutils, glob
 from distutils.core import setup, Extension
 
 # from Zope - App.Common.package_home
-
 def package_home(globals_dict):
     __name__=globals_dict['__name__']
     m=sys.modules[__name__]
@@ -57,8 +56,11 @@ def getVersionFromCCode(fn):
 
 def _rl_accel_dir_info(dir):
     import stat
-    fn = pjoin(dir,'_rl_accel')
-    return getVersionFromCCode(fn),os.stat(fn)[stat.ST_MTIME]
+    fn = pjoin(dir,'_rl_accel.c')
+    try:
+        return getVersionFromCCode(fn),os.stat(fn)[stat.ST_MTIME]
+    except:
+        return None
 
 def _cmp_rl_accel_dirs(a,b):
     return cmp(_rl_accel_dir_info(b),__rl_accel_dir_info(a))
@@ -82,8 +84,10 @@ def _find_rl_accel():
         if isfile(pjoin(x,'_rl_accel.c')):
             _.append(x)
     if _:
-        if len(_)>1: _.sort(_cmp_rl_accel_dirs)
-        return abspath(_[0])
+        _ = filter(_rl_accel_dir_info,_)
+        if len(_):
+            _.sort(_cmp_rl_accel_dirs)
+            return abspath(_[0])
     return None
 
 _FILES= [
@@ -174,43 +178,59 @@ _FILES= [
 # why oh why don't most setup scripts have a script handler?
 # if you don't have one, you can't edit in Pythonwin
 def run():
-    RL_ACCEL = _find_rl_accel()
-    LIBS = []
-    DATA_FILES = {}
-    if not RL_ACCEL:
-        EXT_MODULES = []
-        print '***************************************************'
-        print '*No rl_accel code found, you can obtain it at     *'
-        print '*http://www.reportlab.org/downloads.html#_rl_accel*'
-        print '***************************************************'
+    #extract private arguments
+    _yesV=('yes','y','1','true')
+    _yesnoV=_yesV+('no','n','0','false')
+    tra=[_ for _ in sys.argv if _.lower().startswith('--rl_accel=')]
+    if not tra: tra = True  #assume yes
     else:
-        fn = pjoin(RL_ACCEL,'lib','hyphen.mashed')
-        if isfile(fn): DATA_FILES[pjoin(package_path, 'lib')] = [fn]
-        EXT_MODULES = [
-                    Extension( '_rl_accel',
-                                [pjoin(RL_ACCEL,'_rl_accel.c')],
+        map(sys.argv.remove,tra)
+        tra=tra[-1].split('=',1)[1].lower()
+        assert tra in _yesnoV, 'bad argument --rl_accel='+tra
+        tra = tra in _yesV
+
+    if tra:
+        RL_ACCEL = _find_rl_accel()
+        LIBS = []
+        DATA_FILES = {}
+        if not RL_ACCEL:
+            EXT_MODULES = []
+            print '***************************************************'
+            print '*No rl_accel code found, you can obtain it at     *'
+            print '*http://www.reportlab.org/downloads.html#_rl_accel*'
+            print '***************************************************'
+        else:
+            print '################################################'
+            print '#Attempting install of _rl_accel, sgmlop & pyHnj'
+            print '#extensions from',RL_ACCEL
+            print '################################################'
+            fn = pjoin(RL_ACCEL,'lib','hyphen.mashed')
+            if isfile(fn): DATA_FILES[pjoin(package_path, 'lib')] = [fn]
+            EXT_MODULES = [
+                        Extension( '_rl_accel',
+                                    [pjoin(RL_ACCEL,'_rl_accel.c')],
+                                    include_dirs=[],
+                                define_macros=[],
+                                library_dirs=[],
+                                libraries=LIBS, # libraries to link against
+                                ),
+                        Extension( 'sgmlop',
+                                [pjoin(RL_ACCEL,'sgmlop.c')],
                                 include_dirs=[],
-                            define_macros=[],
-                            library_dirs=[],
-                            libraries=LIBS, # libraries to link against
-                            ),
-                    Extension( 'sgmlop',
-                            [pjoin(RL_ACCEL,'sgmlop.c')],
-                            include_dirs=[],
-                            define_macros=[],
-                            library_dirs=[],
-                            libraries=LIBS, # libraries to link against
-                            ),
-                    Extension( 'pyHnj',
-                            [pjoin(RL_ACCEL,'pyHnjmodule.c'),
-                             pjoin(RL_ACCEL,'hyphen.c'),
-                             pjoin(RL_ACCEL,'hnjalloc.c')],
-                            include_dirs=[],
-                            define_macros=[],
-                            library_dirs=[],
-                            libraries=LIBS, # libraries to link against
-                            ),
-                    ]
+                                define_macros=[],
+                                library_dirs=[],
+                                libraries=LIBS, # libraries to link against
+                                ),
+                        Extension( 'pyHnj',
+                                [pjoin(RL_ACCEL,'pyHnjmodule.c'),
+                                 pjoin(RL_ACCEL,'hyphen.c'),
+                                 pjoin(RL_ACCEL,'hnjalloc.c')],
+                                include_dirs=[],
+                                define_macros=[],
+                                library_dirs=[],
+                                libraries=LIBS, # libraries to link against
+                                ),
+                        ]
     for fn in _FILES:
         fn = os.sep.join(fn.split('/'))
         if isfile(fn):
