@@ -23,7 +23,7 @@ def _simpleSplit(txt,mW,SW):
     ws = SW(' ')
     O = []
     w = -ws
-    for t in string.split(txt):
+    for t in txt.split():
         lt = SW(t)
         if w+ws+lt<=mW or O==[]:
             O.append(t)

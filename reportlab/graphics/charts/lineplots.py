@@ -30,6 +30,7 @@ class LinePlotProperties(PropHolder):
         shader = AttrMapValue(None, desc='Shader Class.'),
         filler = AttrMapValue(None, desc='Filler Class.'),
         name = AttrMapValue(isStringOrNone, desc='Name of the line.'),
+        inFill = AttrMapValue(isBoolean, desc='If true flood fill to x axis'),
         )
 
 class Shader(_SetKeyWordArgs):
@@ -245,13 +246,13 @@ class LinePlot(AbstractLineChart):
         P = range(len(self._positions))
         if self.reversePlotOrder: P.reverse()
         inFill = getattr(self,'_inFill',None)
-        if inFill:
+        styleCount = len(self.lines)
+        if inFill or [rowNo for rowNo in P if getattr(self.lines[rowNo%styleCount],'inFill',False)]:
             inFillY = self.xValueAxis._y
             inFillX0 = self.yValueAxis._x
             inFillX1 = inFillX0 + self.xValueAxis._length
             inFillG = getattr(self,'_inFillG',g)
         # Iterate over data rows.
-        styleCount = len(self.lines)
         for rowNo in P:
             row = self._positions[rowNo]
             rowStyle = self.lines[rowNo % styleCount]
@@ -270,7 +271,7 @@ class LinePlot(AbstractLineChart):
                 points = []
                 for xy in row:
                     points = points + [xy[0], xy[1]]
-                if inFill:
+                if inFill or getattr(rowStyle,'inFill',False):
                     fpoints = [inFillX0,inFillY] + points + [inFillX1,inFillY]
                     filler = getattr(rowStyle, 'filler', None)
                     if filler:
