@@ -63,7 +63,7 @@ def _rl_accel_dir_info(dir):
         return None
 
 def _cmp_rl_accel_dirs(a,b):
-    return cmp(_rl_accel_dir_info(b),__rl_accel_dir_info(a))
+    return cmp(_rl_accel_dir_info(b),_rl_accel_dir_info(a))
 
 def _find_rl_accel():
     '''locate where the accelerator code lives'''
