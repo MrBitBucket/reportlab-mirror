@@ -110,10 +110,10 @@ class _AxisG(Widget):
         _3d_dx = getattr(parent,'_3d_dx',None)
         if _3d_dx is not None:
             _3d_dy = getattr(parent,'_3d_dy',None)
-            f = self._dataIndex and self._cyLine3d or self._cxLine3d
+            f = self.isYAxis and self._cyLine3d or self._cxLine3d
             return lambda v, s=start, e=end, f=f,_3d_dx=_3d_dx,_3d_dy=_3d_dy: f(v,s,e,_3d_dx=_3d_dx,_3d_dy=_3d_dy)
         else:
-            f = self._dataIndex and self._cyLine or self._cxLine
+            f = self.isYAxis and self._cyLine or self._cxLine
             return lambda v, s=start, e=end, f=f: f(v,s,e)
 
     def _makeLines(self,g,start,end,strokeColor,strokeWidth,strokeDashArray,parent=None):
@@ -136,9 +136,30 @@ class _AxisG(Widget):
             e = e is None and dim[0]+dim[1]
         c = self.gridStrokeColor
         if self.visibleGrid and (s or e) and c is not None:
-            if self._dataIndex: offs = self._x
+            if self.isYAxis: offs = self._x
             else: offs = self._y
             self._makeLines(g,s-offs,e-offs,c,self.gridStrokeWidth,self.gridStrokeDashArray,parent=parent)
+
+    def getGridDims(self,default=None):
+        if default is None:
+            default = (self._x,self._y)[self.isXAxis]
+        start = self.gridStart
+        if start is None: start = default
+        end = self.gridEnd
+        if end is None: end = default+self._length
+        return start,end
+
+    def isYAxis(self):
+        if getattr(self,'_dataIndex',None)==1: return True
+        acn = self.__class__.__name__
+        return acn[0]=='Y' or acn[:4]=='AdjY'
+    isYAxis = property(isYAxis)
+
+    def isXAxis(self):
+        if getattr(self,'_dataIndex',None)==0: return True
+        acn = self.__class__.__name__
+        return acn[0]=='X' or acn[:11]=='NormalDateX'
+    isXAxis = property(isXAxis)
 
 # Category axes.
 class CategoryAxis(_AxisG):
@@ -191,7 +212,7 @@ class CategoryAxis(_AxisG):
         self.gridStrokeWidth = 0.25
         self.gridStrokeColor = STATE_DEFAULTS['strokeColor']
         self.gridStrokeDashArray = STATE_DEFAULTS['strokeDashArray']
-        self.gridStart = self.gridEnd = 0
+        self.gridStart = self.gridEnd = None
         self.labels = TypedPropertyCollection(Label)
         # if None, they don't get labels. If provided,
         # you need one name per data point and they are
@@ -225,7 +246,10 @@ class CategoryAxis(_AxisG):
         if self.tickShift:
             self._tickValues = [t+0.5 for t in xrange(n)]
         else:
-            self._tickValues = range(n+1)
+            if self.reverseDirection:
+                self._tickValues = range(-1,n)
+            else:
+                self._tickValues = range(n+1)
 
     def draw(self):
         g = Group()
@@ -244,11 +268,9 @@ class CategoryAxis(_AxisG):
         return idx
 
 def _assertYAxis(axis):
-    acn = axis.__class__.__name__
-    assert acn[0]=='Y' or acn[:4]=='AdjY', "Cannot connect to other axes (%s), but Y- ones." % acn
+    assert axis.isYAxis, "Cannot connect to other axes (%s), but Y- ones." % axis.__class__.__name__
 def _assertXAxis(axis):
-    acn = axis.__class__.__name__
-    assert acn[0]=='X' or acn[:11]=='NormalDateX', "Cannot connect to other axes (%s), but X- ones." % acn
+    assert axis.isXAxis, "Cannot connect to other axes (%s), but X- ones." % axis.__class__.__name__
 
 class XCategoryAxis(CategoryAxis):
     "X/category axis"
@@ -567,8 +589,8 @@ class ValueAxis(_AxisG):
                         gridStrokeWidth = 0.25,
                         gridStrokeColor = STATE_DEFAULTS['strokeColor'],
                         gridStrokeDashArray = STATE_DEFAULTS['strokeDashArray'],
-                        gridStart = 0,
-                        gridEnd = 0,
+                        gridStart = None,
+                        gridEnd = None,
 
                         labels = TypedPropertyCollection(Label),
 

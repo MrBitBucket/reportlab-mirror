@@ -342,14 +342,16 @@ class LinePlot(AbstractLineChart):
             g.add(self._inFillG)
         g.add(xA)
         g.add(yA)
-        yA.gridStart = xA._x
-        yA.gridEnd = xA._x+xA._length
-        xA.gridStart = yA._y
-        xA.gridEnd = yA._y+yA._length
-        xA.makeGrid(g,parent=self)
-        yA.makeGrid(g,parent=self)
+        xA.makeGrid(g,parent=self,dim=xA.getGridDims())
+        yA.makeGrid(g,parent=self,dim=yA.getGridDims())
+        annotations = getattr(self,'annotations',())
+        for a in annotations:
+            if hasattr(a,'_beforeLines'):
+                g.add(a(self,xA.scale,yA.scale))
         g.add(self.makeLines())
-        for a in getattr(self,'annotations',()): g.add(a(self,xA.scale,yA.scale))
+        for a in annotations:
+            if not hasattr(a,'_beforeLines'):
+                g.add(a(self,xA.scale,yA.scale))
         return g
 
 class LinePlot3D(LinePlot):

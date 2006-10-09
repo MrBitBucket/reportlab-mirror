@@ -192,23 +192,8 @@ class BarChart(PlotArea):
         self.calcBarPositions()
         g = Group()
         g.add(self.makeBackground())
-
-        # ensure any axes have correct spacing set
-        # for grids. It sucks that we have to do
-        # this here.
-        if self._flipXY == 0:
-            vA.gridStart = cA._x
-            vA.gridEnd = cA._x+cA._length
-            cA.gridStart = vA._y
-            cA.gridEnd = vA._y+vA._length
-        else:
-            cA.gridStart = vA._x
-            cA.gridEnd = vA._x+vA._length
-            vA.gridStart = cA._y
-            vA.gridEnd = cA._y+cA._length
-
-        cA.makeGrid(g,parent=self)
-        vA.makeGrid(g,parent=self)
+        cA.makeGrid(g,parent=self, dim=cA.getGridDims())
+        vA.makeGrid(g,parent=self, dim=vA.getGridDims())
         g.add(self.makeBars())
         g.add(cA)
         g.add(vA)
@@ -316,7 +301,6 @@ class BarChart(PlotArea):
                 barRow.append(flipXY and (y,x,height,width) or (x, y, width, height))
 
             self._barPositions.append(barRow)
-
 
     def _getLabelText(self, rowNo, colNo):
         '''return formatted label text'''

@@ -367,12 +367,8 @@ class HorizontalLineChart(LineChart):
 
         g.add(cA)
         g.add(vA)
-        vA.gridStart = cA._x
-        vA.gridEnd = cA._x+cA._length
-        cA.gridStart = vA._y
-        cA.gridEnd = vA._y+vA._length
-        cA.makeGrid(g,parent=self)
-        vA.makeGrid(g,parent=self)
+        cA.makeGrid(g,parent=self,dim=cA.getGridDims())
+        vA.makeGrid(g,parent=self,dim=vA.getGridDims())
         g.add(self.makeLines())
         for a in getattr(self,'annotations',()): g.add(a(self,cA.scale,vA.scale))
         return g
