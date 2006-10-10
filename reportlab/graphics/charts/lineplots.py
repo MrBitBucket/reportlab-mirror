@@ -131,6 +131,7 @@ class LinePlot(AbstractLineChart):
 
         #private attributes
         self._inFill = None
+        self.annotations = []
 
     def demo(self):
         """Shows basic use of a line chart."""
@@ -344,13 +345,13 @@ class LinePlot(AbstractLineChart):
         g.add(yA)
         xA.makeGrid(g,parent=self,dim=xA.getGridDims())
         yA.makeGrid(g,parent=self,dim=yA.getGridDims())
-        annotations = getattr(self,'annotations',())
+        annotations = getattr(self,'annotations',[])
         for a in annotations:
-            if hasattr(a,'_beforeLines'):
+            if getattr(a,'beforeLines',None):
                 g.add(a(self,xA.scale,yA.scale))
         g.add(self.makeLines())
         for a in annotations:
-            if not hasattr(a,'_beforeLines'):
+            if not getattr(a,'beforeLines',None):
                 g.add(a(self,xA.scale,yA.scale))
         return g
 
