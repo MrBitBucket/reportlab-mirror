@@ -21,7 +21,7 @@ static char* __version__=" $Id$ ";
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "1.09"
+#define VERSION "1.10"
 #define MAX_DEPTH 256
 
 #if CHAR_SIZE==16
@@ -950,7 +950,7 @@ static void pyRXPParserFree(pyRXPParserObject* self)
 	/*this could be called if we're never going to use the parser again*/
 	deinit_parser();
 #endif
-	PyMem_DEL(self);
+	PyObject_DEL(self);
 }
 
 static PyTypeObject pyRXPParserType = {
