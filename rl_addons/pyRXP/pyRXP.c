@@ -3,7 +3,7 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/rl_addons/pyRXP/pyRXP.c
  ****************************************************************************/
-static char* __version__=" $Id$ ";
+#define svnId " $Id$ "
 #include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,7 +21,7 @@ static char* __version__=" $Id$ ";
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "1.10"
+#define VERSION "1.11"
 #define MAX_DEPTH 256
 
 #if CHAR_SIZE==16
@@ -114,6 +114,7 @@ The python module exports the following\n\
     version         the string version of the module\n\
     RXPVersion      the version string of the rxp library\n\
                     embedded in the module\n\
+	_svnId			svn $Id:$\n\
     parser_flags    a dictionary of parser flags\n\
                     the values are the defaults for parsers\n\
     piTagName       special tagname used for processing instructions\n\
@@ -1031,11 +1032,12 @@ DL_EXPORT(void) initpyRXP(void)
 
 	/* Add some symbolic constants to the module */
 	d = PyModule_GetDict(m);
+	PyDict_SetItemString(d, "_svnId", PyString_FromString(svnId));
 	moduleVersion = PyString_FromString(VERSION);
 	PyDict_SetItemString(d, "version", moduleVersion );
 	RXPVersion = PyString_FromString(rxp_version_string);
 	PyDict_SetItemString(d, "RXPVersion", RXPVersion );
-	moduleError = PyErr_NewException(MODULE ".Error",NULL,NULL);
+	moduleError = PyErr_NewException(MODULE ".error",NULL,NULL);
 	PyDict_SetItemString(d,"error",moduleError);
 	piTagName = PYSTRING8("<?");
 	PyDict_SetItemString(d, "piTagName", piTagName );

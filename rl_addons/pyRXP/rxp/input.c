@@ -384,7 +384,6 @@ static void internal_reader(InputSource s)
         goto end_of_line
 
 #define MORE_BYTES \
- more_bytes: \
 	s->nextin = nextin; \
 	s->line_length = nextout; \
         s->ignore_linefeed = ignore_linefeed; \
@@ -599,6 +598,7 @@ static int translate_utf8(InputSource s)
 	}
     }
 
+more_bytes:
     MORE_BYTES;
 
     END_OF_LINE;
@@ -663,6 +663,7 @@ static int translate_utf16(InputSource s)
 	OUTPUT;
     }
 
+more_bytes:
     MORE_BYTES;
 
     END_OF_LINE;

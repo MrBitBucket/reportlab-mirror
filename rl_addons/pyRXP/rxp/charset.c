@@ -240,12 +240,12 @@ static int alloc_unicode_to_iso(int i, int max)
 	return 0;
 }
 
-static identity_iso_to_unicode(int i,int j,int jlim)
+static void identity_iso_to_unicode(int i,int j,int jlim)
 {
 	for(; j<jlim; j++) iso_to_unicode[i][j] = j;
 }
 
-static table_to_iso_to_unicode(int i, int *table, int j0, int jlim, int *cmax)
+static void table_to_iso_to_unicode(int i, int *table, int j0, int jlim, int *cmax)
 {
 	int j, max= *cmax;
 	for(j=j0; j<jlim; j++){
@@ -256,17 +256,17 @@ static table_to_iso_to_unicode(int i, int *table, int j0, int jlim, int *cmax)
 	*cmax = max;
 }
 
-static identity_unicode_to_iso(int i,int j,int jlim)
+static void identity_unicode_to_iso(int i,int j,int jlim)
 {
 	for(; j<jlim; j++) unicode_to_iso[i][j] = j;
 }
 
-static unknown_unicode_to_iso(int i,int j,int jlim)
+static void unknown_unicode_to_iso(int i,int j,int jlim)
 {
 	for(; j<jlim; j++) unicode_to_iso[i][j] = '?';
 }
 
-static table_to_unicode_to_iso(int i, int *table, int j0, int jlim)
+static void table_to_unicode_to_iso(int i, int *table, int j0, int jlim)
 {
 	int j;
 	for(j=j0; j<jlim; j++){

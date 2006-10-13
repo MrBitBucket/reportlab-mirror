@@ -114,7 +114,7 @@ nf16res nf16check (NF16Checker checker, char16* s)
     flag         starterflag = (flag) checker->starterflag;
     nf16start    startP      = checker->startP;
     int          lastclass   = checker->lastclass;
-    char16       c;
+    unsigned     c;
     flag         f;
     int          class;
 
