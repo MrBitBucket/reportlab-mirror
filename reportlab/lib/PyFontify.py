@@ -27,13 +27,11 @@ sublist is not used, hence always None.
 
 __version__ = "0.4"
 
-import string
 import re
 
 # First a little helper, since I don't like to repeat things. (Tismer speaking)
-import string
-def replace(where, what, with):
-    return string.join(string.split(where, what), with)
+def replace(src, sep, rep):
+    return rep.join(src.split(sep))
 
 # This list of keywords is taken from ref/node13.html of the
 # Python 1.3 HTML documentation. ("access" is intentionally omitted.)
@@ -72,7 +70,7 @@ pat = r"""
     )*
     qqq
 """
-pat = string.join(string.split(pat), '')    # get rid of whitespace
+pat = ''.join(pat.split())  # get rid of whitespace
 tripleQuotePat = replace(pat, "q", "'") + "|" + replace(pat, 'q', '"')
 
 # Build up a regular expression which matches all and only
@@ -82,7 +80,7 @@ tripleQuotePat = replace(pat, "q", "'") + "|" + replace(pat, 'q', '"')
 # a keyword pattern.
 nonKeyPat = r"(^|[^a-zA-Z0-9_.\"'])"
 
-keyPat = nonKeyPat + "(" + string.join(keywordsList, "|") + ")" + nonKeyPat
+keyPat = nonKeyPat + "(" + "|".join(keywordsList) + ")" + nonKeyPat
 
 matchPat = commentPat + "|" + keyPat + "|" + tripleQuotePat + "|" + quotePat
 matchRE = re.compile(matchPat)
