@@ -1304,9 +1304,10 @@ class Canvas(textobject._PDFColorSetter):
         if leading is None: leading = self._leading
         self.setFont(self._fontname, size, leading)
 
-    def stringWidth(self, text, fontName, fontSize):
+    def stringWidth(self, text, fontName=None, fontSize=None):
         "gets width of a string in the given font and size"
-        return pdfmetrics.stringWidth(text, fontName, fontSize)
+        return pdfmetrics.stringWidth(text, fontName or self._fontname,
+                                    (fontSize,self._fontsize)[fontSize is None])
 
     # basic graphics modes
 
