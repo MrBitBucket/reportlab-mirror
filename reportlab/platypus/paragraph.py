@@ -33,7 +33,6 @@ class ParaLines(ABag):
         fontName, fontSize, textColor apply to whole Paragraph
         lines   [(extraSpace1,words1),....,(extraspaceN,wordsN)]
 
-
         kind==1 Complex
         lines   [FragLine1,...,FragLineN]
     """
@@ -106,6 +105,8 @@ def _justifyDrawParaLine( tx, offset, extraspace, words, last=0):
 def _putFragLine(tx,words):
     cur_x = 0
     xtraState = tx.XtraState
+    ws = getattr(tx,'_wordSpace',0)
+    nSpaces = 0
     for f in words:
         if hasattr(f,'cbDefn'):
             func = getattr(tx._canvas,f.cbDefn.name,None)
@@ -114,6 +115,7 @@ def _putFragLine(tx,words):
             func(tx._canvas,f.cbDefn.kind,f.cbDefn.label)
             if f is words[-1]: tx._textOut('',1)
         else:
+            cur_x_s = cur_x + nSpaces*ws
             if (tx._fontname,tx._fontsize)!=(f.fontName,f.fontSize):
                 tx._setFont(f.fontName, f.fontSize)
             if xtraState.textColor!=f.textColor:
@@ -122,50 +124,50 @@ def _putFragLine(tx,words):
             if xtraState.rise!=f.rise:
                 xtraState.rise=f.rise
                 tx.setRise(f.rise)
-            tx._textOut(f.text,f is words[-1])  # cheap textOut
-            txtlen = tx._canvas.stringWidth(f.text, tx._fontname, tx._fontsize)
+            text = f.text
+            tx._textOut(text,f is words[-1])    # cheap textOut
             if not xtraState.underline and f.underline:
                 xtraState.underline = 1
-                xtraState.underline_x = cur_x
+                xtraState.underline_x = cur_x_s
                 xtraState.underlineColor = f.textColor
             elif xtraState.underline:
                 if not f.underline:
                     xtraState.underline = 0
-                    spacelen = tx._canvas.stringWidth(' ', tx._fontname, tx._fontsize)
-                    xtraState.underlines.append( (xtraState.underline_x, cur_x-spacelen, xtraState.underlineColor) )
+                    xtraState.underlines.append( (xtraState.underline_x, cur_x_s, xtraState.underlineColor) )
                     xtraState.underlineColor = None
                 elif xtraState.textColor!=xtraState.underlineColor:
-                    xtraState.underlines.append( (xtraState.underline_x, cur_x, xtraState.underlineColor) )
+                    xtraState.underlines.append( (xtraState.underline_x, cur_x_s, xtraState.underlineColor) )
                     xtraState.underlineColor = xtraState.textColor
-                    xtraState.underline_x = cur_x
+                    xtraState.underline_x = cur_x_s
             if not xtraState.strike and f.strike:
                 xtraState.strike = 1
-                xtraState.strike_x = cur_x
+                xtraState.strike_x = cur_x_s
                 xtraState.strikeColor = f.textColor
             elif xtraState.strike:
                 if not f.strike:
                     xtraState.strike = 0
-                    spacelen = tx._canvas.stringWidth(' ', tx._fontname, tx._fontsize)
-                    xtraState.strikes.append( (xtraState.strike_x, cur_x-spacelen, xtraState.strikeColor) )
+                    xtraState.strikes.append( (xtraState.strike_x, cur_x_s, xtraState.strikeColor) )
                     xtraState.strikeColor = None
                 elif xtraState.textColor!=xtraState.strikeColor:
-                    xtraState.strikes.append( (xtraState.strike_x, cur_x, xtraState.strikeColor) )
+                    xtraState.strikes.append( (xtraState.strike_x, cur_x_s, xtraState.strikeColor) )
                     xtraState.strikeColor = xtraState.textColor
-                    xtraState.strike_x = cur_x
+                    xtraState.strike_x = cur_x_s
             if not xtraState.link and f.link:
                 xtraState.link = f.link
-                xtraState.link_x = cur_x
+                xtraState.link_x = cur_x_s
             elif xtraState.link and f.link is not xtraState.link:
-                    spacelen = tx._canvas.stringWidth(' ', tx._fontname, tx._fontsize)
-                    xtraState.links.append( (xtraState.link_x, cur_x-spacelen, xtraState.link) )
+                    xtraState.links.append( (xtraState.link_x, cur_x_s, xtraState.link) )
                     xtraState.link = None
+            txtlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
             cur_x += txtlen
+            nSpaces += text.count(' ')
+    cur_x_s = cur_x+(nSpaces-1)*ws
     if xtraState.underline:
-        xtraState.underlines.append( (xtraState.underline_x, cur_x, xtraState.underlineColor) )
+        xtraState.underlines.append( (xtraState.underline_x, cur_x_s, xtraState.underlineColor) )
     if xtraState.strike:
-        xtraState.strikes.append( (xtraState.strike_x, cur_x, xtraState.strikeColor) )
+        xtraState.strikes.append( (xtraState.strike_x, cur_x_s, xtraState.strikeColor) )
     if xtraState.link:
-        xtraState.links.append( (xtraState.link_x, cur_x, xtraState.link) )
+        xtraState.links.append( (xtraState.link_x, cur_x_s, xtraState.link) )
 
 def _leftDrawParaLineX( tx, offset, line, last=0):
     setXPos(tx,offset)
@@ -392,11 +394,10 @@ def splitLines0(frags,widths):
             if j==lim:
                 i += 1
 
-def _do_under_line(i, t_off, tx, lm=-0.125):
+def _do_under_line(i, t_off, ws, tx, lm=-0.125):
     y = tx.XtraState.cur_y - i*tx.XtraState.style.leading + lm*tx.XtraState.f.fontSize
-    text = join(tx.XtraState.lines[i][1])
-    textlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
-    tx._canvas.line(t_off, y, t_off+textlen, y)
+    textlen = tx._canvas.stringWidth(join(tx.XtraState.lines[i][1]), tx._fontname, tx._fontsize)
+    tx._canvas.line(t_off, y, t_off+textlen+ws, y)
 
 _scheme_re = re.compile('^[a-zA-Z][-+a-zA-Z0-9]+$')
 def _doLink(tx,link,rect):
@@ -411,13 +412,13 @@ def _doLink(tx,link,rect):
     else:
         tx._canvas.linkRect("", scheme!='document' and link or parts[1], rect, relative=1)
 
-def _do_link_line(i, t_off, tx):
+def _do_link_line(i, t_off, ws, tx):
     xs = tx.XtraState
     leading = xs.style.leading
     y = xs.cur_y - i*leading - xs.f.fontSize/8.0 # 8.0 factor copied from para.py
     text = join(xs.lines[i][1])
     textlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
-    _doLink(tx, xs.link, (t_off, y, t_off+textlen, y+leading))
+    _doLink(tx, xs.link, (t_off, y, t_off+textlen+ws, y+leading))
 
 def _do_post_text(i, t_off, tx):
     xs = tx.XtraState
@@ -907,7 +908,8 @@ class Paragraph(Flowable):
 
                 #now the font for the rest of the paragraph
                 tx.setFont(f.fontName, f.fontSize, style.leading)
-                t_off = dpl( tx, offset, lines[0][0], lines[0][1], noJustifyLast and nLines==1)
+                ws = lines[0][0]
+                t_off = dpl( tx, offset, ws, lines[0][1], noJustifyLast and nLines==1)
                 if f.underline or f.link or f.strike:
                     xs = tx.XtraState = ABag()
                     xs.cur_y = cur_y
@@ -921,16 +923,20 @@ class Paragraph(Flowable):
                     xs.links=[]
                     xs.link=f.link
                     canvas.setStrokeColor(f.textColor)
-                    if f.underline: _do_under_line(0, t_off+leftIndent, tx)
-                    if f.strike: _do_under_line(0, t_off+leftIndent, tx, lm=0.125)
-                    if f.link: _do_link_line(0, t_off+leftIndent, tx)
+                    dx = t_off+leftIndent
+                    if dpl!=_justifyDrawParaLine: ws = 0
+                    if f.underline: _do_under_line(0, dx, ws, tx)
+                    if f.strike: _do_under_line(0, dx, ws, tx, lm=0.125)
+                    if f.link: _do_link_line(0, dx, ws, tx)
 
                     #now the middle of the paragraph, aligned with the left margin which is our origin.
                     for i in xrange(1, nLines):
-                        t_off = dpl( tx, _offsets[i], lines[i][0], lines[i][1], noJustifyLast and i==lim)
-                        if f.underline: _do_under_line(i, t_off+leftIndent, tx)
-                        if f.strike: _do_under_line(i, t_off+leftIndent, tx, lm=0.125)
-                        if f.link: _do_link_line(i, t_off+leftIndent, tx)
+                        ws = lines[i][0]
+                        t_off = dpl( tx, _offsets[i], ws, lines[i][1], noJustifyLast and i==lim)
+                        if dpl!=_justifyDrawParaLine: ws = 0
+                        if f.underline: _do_under_line(i, t_off+leftIndent, ws, tx)
+                        if f.strike: _do_under_line(i, t_off+leftIndent, tx, ws, lm=0.125)
+                        if f.link: _do_link_line(i, t_off+leftIndent, ws, tx)
                 else:
                     for i in xrange(1, nLines):
                         dpl( tx, _offsets[i], lines[i][0], lines[i][1], noJustifyLast and i==lim)

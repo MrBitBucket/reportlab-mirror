@@ -10,7 +10,7 @@ from operator import truth
 from types import StringType, ListType
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation, outputfile
 
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus.paraparser import ParaParser
@@ -29,7 +29,6 @@ from reportlab.platypus.tables import TableStyle, Table
 from reportlab.platypus.paragraph import *
 from reportlab.platypus.paragraph import _getFragWords
 
-
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
 
@@ -42,7 +41,6 @@ def myMainPageFrame(canvas, doc):
 
     canvas.restoreState()
 
-
 class MyDocTemplate(BaseDocTemplate):
     _invalidInitArgs = ('pageTemplates',)
 
@@ -54,7 +52,6 @@ class MyDocTemplate(BaseDocTemplate):
         template = PageTemplate('normal', [frame1], myMainPageFrame)
         template1 = PageTemplate('special', [frame2], myMainPageFrame)
         self.addPageTemplates([template,template1])
-
 
 class ParagraphCorners(unittest.TestCase):
     "some corner cases which should parse"
@@ -74,8 +71,6 @@ class ParagraphCorners(unittest.TestCase):
         self.check('<para>      </para>')
         self.check('\t\t\n\t\t\t   <para>      </para>')
         
-
-
 class ParagraphSplitTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."
 
@@ -209,7 +204,6 @@ class FragmentTestCase(unittest.TestCase):
         frags = map(lambda f:f.text, P.frags)
         assert frags == []
 
-
     def test1(self):
         "Test simple paragraph."
 
@@ -220,11 +214,54 @@ class FragmentTestCase(unittest.TestCase):
         frags = map(lambda f:f.text, P.frags)
         assert frags == ['X', 'Y', 'Z']
 
+    def testUl(self):
+        from reportlab.platypus import BaseDocTemplate, PageTemplate, Frame, PageBegin
+        from reportlab.lib.units import inch
+        class MyDocTemplate(BaseDocTemplate):
+            _invalidInitArgs = ('pageTemplates',)
+
+            def __init__(self, filename, **kw):
+                self.allowSplitting = 0
+                kw['showBoundary']=1
+                BaseDocTemplate.__init__(self, filename, **kw)
+                self.addPageTemplates(
+                        [
+                        PageTemplate('normal',
+                                [Frame(inch, inch, 6.27*inch, 9.69*inch, id='first')],
+                                ),
+                        ])
+
+        styleSheet = getSampleStyleSheet()
+        normal = ParagraphStyle(name='normal',fontName='Times-Roman',fontSize=12,leading=1.2*12,parent=styleSheet['Normal'])
+        normal_sp = ParagraphStyle(name='normal_just',parent=normal,alignment=TA_JUSTIFY,spaceBefore=12)
+        normal_just = ParagraphStyle(name='normal_just',parent=normal,alignment=TA_JUSTIFY)
+        normal_right = ParagraphStyle(name='normal_just',parent=normal,alignment=TA_RIGHT)
+        normal_center = ParagraphStyle(name='normal_just',parent=normal,alignment=TA_CENTER)
+        normal_indent = ParagraphStyle(name='normal_indent',firstLineIndent=0.5*inch,parent=normal)
+        normal_indent_lv_2 = ParagraphStyle(name='normal_indent',firstLineIndent=1.0*inch,parent=normal)
+        text0 = '''Furthermore, a subset of English sentences interesting on quite
+independent grounds is not quite equivalent to a stipulation to place
+the constructions into these various categories.'''
+        text1 ='''We will bring evidence in favor of
+The following thesis:  most of the methodological work in modern
+linguistics can be defined in such a way as to impose problems of
+phonemic and morphological analysis.'''
+        story =[]
+        a = story.append
+        for t in ('u','strike'):
+            for n in xrange(6):
+                for s in (normal,normal_center,normal_right,normal_just,normal_indent, normal_indent_lv_2):
+                    a(Paragraph('n=%d style=%s tag=%s'%(n,s.name,t),style=normal_sp))
+                    a(Paragraph('%s<%s>%s</%s>. %s <%s>%s</%s>. %s' % (
+                    (s==normal_indent_lv_2 and '<seq id="document" inc="no"/>.<seq id="document_lv_2"/>' or ''),
+                    t,' '.join((n+1)*['A']),t,text0,t,' '.join((n+1)*['A']),t,text1),
+                    style=s))
+        doc = MyDocTemplate(outputfile('test_platypus_paragraphs_ul.pdf'))
+        doc.build(story)
 
 #noruntests
 def makeSuite():
     return makeSuiteForClasses(FragmentTestCase, ParagraphSplitTestCase)
-
 
 #noruntests
 if __name__ == "__main__":
