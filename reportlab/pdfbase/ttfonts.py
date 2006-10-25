@@ -128,21 +128,17 @@ except:
     def hex32(i):
         return '0X%8.8X' % (long(i)&0xFFFFFFFFL)
 try:
-    if _rl_accel.version<'0.59': raise ValueError
-    add32 = _rl_accel.add32
-    calcChecksum = _rl_accel.calcChecksum
+    add32 = _rl_accel.add32L
+    calcChecksum = _rl_accel.calcChecksumL
 except:
     def add32(x, y):
         "Calculate (x + y) modulo 2**32"
-        return ((x&0xFFFFFFFFL)+(y&0xFFFFFFFFL)) & 0xffffffffL
+        return (x+y) & 0xFFFFFFFFL
 
     def calcChecksum(data):
         """Calculates TTF-style checksums"""
         if len(data)&3: data = data + (4-(len(data)&3))*"\0"
-        sum = 0
-        for n in unpack(">%dl" % (len(data)>>2), data):
-            sum = add32(sum,n)
-        return sum
+        return sum(unpack(">%dl" % (len(data)>>2), data)) & 0xFFFFFFFFL
 del _rl_accel
 #
 # TrueType font handling
