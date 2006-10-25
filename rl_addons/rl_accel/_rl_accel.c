@@ -27,7 +27,7 @@ static __version__=" $Id$ "
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.58"
+#define VERSION "0.59"
 #define MODULE "_rl_accel"
 
 static PyObject *moduleVersion;
@@ -680,7 +680,7 @@ static PyObject *ttfonts_calcChecksum(PyObject *self, PyObject* args)
 		Sum += n;
 		}
 
-	return PyInt_FromLong(Sum);
+	return PyLong_FromUnsignedLong(Sum&0xFFFFFFFFU);
 }
 
 static PyObject *ttfonts_add32(PyObject *self, PyObject* args)
@@ -707,7 +707,7 @@ static PyObject *ttfonts_add32(PyObject *self, PyObject* args)
 	if(!PyArg_ParseTuple(args, "ii:add32", &x, &y)) return NULL;
 #endif
 	x += y;
-	return PyInt_FromLong(x);
+	return PyLong_FromUnsignedLong(x&0xFFFFFFFFU);
 }
 
 static PyObject *hex32(PyObject *self, PyObject* args)
