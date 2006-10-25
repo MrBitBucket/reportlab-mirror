@@ -18,8 +18,7 @@ from reportlab.pdfbase.ttfonts import TTFont, TTFontFace, TTFontFile, TTFOpenFil
                                       TTFontParser, TTFontMaker, TTFError, \
                                       parse_utf8, makeToUnicodeCMap, \
                                       FF_SYMBOLIC, FF_NONSYMBOLIC, \
-                                      calcChecksum, add32, _L2U32
-
+                                      calcChecksum, add32
 
 def utf8(code):
     "Convert a given UCS character index into UTF-8"
@@ -112,7 +111,7 @@ class TTFontFileTestCase(unittest.TestCase):
                 self._pos = 0
 
         ttf = FakeTTFontFile("\x81\x02\x03\x04" "\x85\x06" "ABCD" "\x7F\xFF" "\x80\x00" "\xFF\xFF")
-        self.assertEquals(ttf.read_ulong(), _L2U32(0x81020304L)) # big-endian
+        self.assertEquals(ttf.read_ulong(), 0x81020304L) # big-endian
         self.assertEquals(ttf._pos, 4)
         self.assertEquals(ttf.read_ushort(), 0x8506)
         self.assertEquals(ttf._pos, 6)
@@ -138,24 +137,24 @@ class TTFontFileTestCase(unittest.TestCase):
     def testAdd32(self):
         "Test add32"
         self.assertEquals(add32(10, -6), 4)
-        self.assertEquals(add32(6, -10), -4)
-        self.assertEquals(add32(_L2U32(0x80000000L), -1), 0x7FFFFFFF)
-        self.assertEquals(add32(0x7FFFFFFF, 1), _L2U32(0x80000000L))
+        self.assertEquals(add32(6, -10), -4&0xFFFFFFFFL)
+        self.assertEquals(add32(0x80000000L, -1), 0x7FFFFFFF)
+        self.assertEquals(add32(0x7FFFFFFF, 1), 0x80000000L)
 
     def testChecksum(self):
         "Test calcChecksum function"
         self.assertEquals(calcChecksum(""), 0)
         self.assertEquals(calcChecksum("\1"), 0x01000000)
         self.assertEquals(calcChecksum("\x01\x02\x03\x04\x10\x20\x30\x40"), 0x11223344)
-        self.assertEquals(calcChecksum("\x81"), _L2U32(0x81000000L))
-        self.assertEquals(calcChecksum("\x81\x02"), _L2U32(0x81020000L))
-        self.assertEquals(calcChecksum("\x81\x02\x03"), _L2U32(0x81020300L))
-        self.assertEquals(calcChecksum("\x81\x02\x03\x04"), _L2U32(0x81020304L))
-        self.assertEquals(calcChecksum("\x81\x02\x03\x04\x05"), _L2U32(0x86020304L))
+        self.assertEquals(calcChecksum("\x81"), 0x81000000L)
+        self.assertEquals(calcChecksum("\x81\x02"), 0x81020000L)
+        self.assertEquals(calcChecksum("\x81\x02\x03"), 0x81020300L)
+        self.assertEquals(calcChecksum("\x81\x02\x03\x04"), 0x81020304L)
+        self.assertEquals(calcChecksum("\x81\x02\x03\x04\x05"), 0x86020304L)
         self.assertEquals(calcChecksum("\x41\x02\x03\x04\xD0\x20\x30\x40"), 0x11223344)
         self.assertEquals(calcChecksum("\xD1\x02\x03\x04\x40\x20\x30\x40"), 0x11223344)
         self.assertEquals(calcChecksum("\x81\x02\x03\x04\x90\x20\x30\x40"), 0x11223344)
-        self.assertEquals(calcChecksum("\x7F\xFF\xFF\xFF\x00\x00\x00\x01"), _L2U32(0x80000000L))
+        self.assertEquals(calcChecksum("\x7F\xFF\xFF\xFF\x00\x00\x00\x01"), 0x80000000L)
 
     def testFontFileChecksum(self):
         "Tests TTFontFile and TTF parsing code"

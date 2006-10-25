@@ -59,9 +59,6 @@ from struct import pack, unpack
 from cStringIO import StringIO
 from reportlab.pdfbase import pdfmetrics, pdfdoc
 
-def _L2U32(L):
-    return unpack('l',pack('L',L))[0]
-
 class TTFError(pdfdoc.PDFError):
     "TrueType font exception"
     pass
@@ -117,7 +114,6 @@ def _set_ushort(stream, offset, value):
     offset and returns the resulting stream (the original is unchanged)"""
     return splice(stream, offset, pack(">H", value))
 
-import sys
 try:
     import _rl_accel
 except ImportError:
@@ -132,30 +128,22 @@ except:
     def hex32(i):
         return '0X%8.8X' % (long(i)&0xFFFFFFFFL)
 try:
+    if _rl_accel.version<'0.59': raise ValueError
     add32 = _rl_accel.add32
-except:
-    if sys.hexversion>=0x02030000:
-        def add32(x, y):
-            "Calculate (x + y) modulo 2**32"
-            return _L2U32((long(x)+y) & 0xffffffffL)
-    else:
-        def add32(x, y):
-            "Calculate (x + y) modulo 2**32"
-            lo = (x & 0xFFFF) + (y & 0xFFFF)
-            hi = (x >> 16) + (y >> 16) + (lo >> 16)
-            return (hi << 16) | (lo & 0xFFFF)
-
-try:
     calcChecksum = _rl_accel.calcChecksum
 except:
+    def add32(x, y):
+        "Calculate (x + y) modulo 2**32"
+        return ((x&0xFFFFFFFFL)+(y&0xFFFFFFFFL)) & 0xffffffffL
+
     def calcChecksum(data):
-        """Calculates PDF-style checksums"""
+        """Calculates TTF-style checksums"""
         if len(data)&3: data = data + (4-(len(data)&3))*"\0"
         sum = 0
         for n in unpack(">%dl" % (len(data)>>2), data):
             sum = add32(sum,n)
         return sum
-del _rl_accel, sys
+del _rl_accel
 #
 # TrueType font handling
 #
@@ -288,18 +276,19 @@ class TTFontParser:
         # Check the checksums for all tables
         for t in self.tables:
             table = self.get_chunk(t['offset'], t['length'])
-            checkSum = calcChecksum(table)
+            checksum = calcChecksum(table)
             if t['tag'] == 'head':
                 adjustment = unpack('>l', table[8:8+4])[0]
-                checkSum = add32(checkSum, -adjustment)
-            if t['checksum'] != checkSum:
-                raise TTFError('TTF file "%s": invalid checksum %s table: %s' % (self.filename,hex32(checkSum),t['tag']))
+                checksum = add32(checksum, -adjustment)
+            xchecksum = t['checksum']
+            if xchecksum != checksum:
+                raise TTFError('TTF file "%s": invalid checksum %s table: %s (expected %s)' % (self.filename,hex32(checksum),t['tag'],hex32(xchecksum)))
 
     def checksumFile(self):
         # Check the checksums for the whole file
-        checkSum = calcChecksum(self._ttf_data)
-        if add32(_L2U32(0xB1B0AFBAL), -checkSum) != 0:
-            raise TTFError('TTF file "%s": invalid checksum %s len: %d &3: %d' % (self.filename,hex32(checkSum),len(self._ttf_data),(len(self._ttf_data)&3)))
+        checksum = calcChecksum(self._ttf_data)
+        if 0xB1B0AFBAL!=checksum:
+            raise TTFError('TTF file "%s": invalid checksum %s (expected 0xB1B0AFBA) len: %d &3: %d' % (self.filename,hex32(checksum),len(self._ttf_data),(len(self._ttf_data)&3)))
 
     def get_table_pos(self, tag):
         "Returns the offset and size of a given TTF table."
@@ -334,7 +323,7 @@ class TTFontParser:
     def read_ulong(self):
         "Reads an unsigned long"
         self._pos += 4
-        return unpack('>l',self._ttf_data[self._pos - 4:self._pos])[0]
+        return unpack('>L',self._ttf_data[self._pos - 4:self._pos])[0]
 
     def read_short(self):
         "Reads a signed short"
@@ -347,7 +336,7 @@ class TTFontParser:
 
     def get_ulong(self, pos):
         "Return an unsigned long at given position"
-        return unpack('>l',self._ttf_data[pos:pos+4])[0]
+        return unpack('>L',self._ttf_data[pos:pos+4])[0]
 
     def get_chunk(self, pos, length):
         "Return a chunk of raw data at given position"
@@ -397,7 +386,7 @@ class TTFontMaker:
                 head_start = offset
             checksum = calcChecksum(data)
             stm.write(tag)
-            stm.write(pack(">LLL", checksum&0xFFFFFFFFL, offset, len(data)))
+            stm.write(pack(">LLL", checksum, offset, len(data)))
             paddedLength = (len(data)+3)&~3
             offset = offset + paddedLength
 
@@ -407,9 +396,9 @@ class TTFontMaker:
             stm.write(data[:len(data)&~3])
 
         checksum = calcChecksum(stm.getvalue())
-        checksum = add32(_L2U32(0xB1B0AFBAL), -checksum)
+        checksum = add32(0xB1B0AFBAL, -checksum)
         stm.seek(head_start + 8)
-        stm.write(pack('>L', checksum&0xFFFFFFFFL))
+        stm.write(pack('>L', checksum))
 
         return stm.getvalue()
 
