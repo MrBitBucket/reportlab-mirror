@@ -27,7 +27,7 @@ static __version__=" $Id$ "
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.59"
+#define VERSION "0.60"
 #define MODULE "_rl_accel"
 
 static PyObject *moduleVersion;
@@ -680,10 +680,71 @@ static PyObject *ttfonts_calcChecksum(PyObject *self, PyObject* args)
 		Sum += n;
 		}
 
+	return PyInt_FromLong(Sum);
+}
+
+static PyObject *ttfonts_calcChecksumL(PyObject *self, PyObject* args)
+{
+	unsigned char	*data;
+	int				dataLen;
+	unsigned long	Sum = 0L;
+	unsigned char	*EndPtr;
+	unsigned long n;
+	int leftover;
+
+
+	if (!PyArg_ParseTuple(args, "s#:calcChecksum", &data, &dataLen)) return NULL;
+	EndPtr = data + (dataLen & ~3);
+
+	/*full ULONGs*/
+	while(data < EndPtr){
+		n = ((*data++) << 24);
+		n += ((*data++) << 16);
+		n += ((*data++) << 8);
+		n += ((*data++));
+		Sum += n;
+		}
+
+	/*pad with zeros*/
+	leftover = dataLen & 3;
+	if(leftover){
+		n = ((*data++) << 24);
+		if (leftover>1) n += ((*data++) << 16);
+		if (leftover>2) n += ((*data++) << 8);
+		Sum += n;
+		}
+
 	return PyLong_FromUnsignedLong(Sum&0xFFFFFFFFU);
 }
 
 static PyObject *ttfonts_add32(PyObject *self, PyObject* args)
+{
+	unsigned long x, y;
+#if PY_VERSION_HEX>=0x02030000
+	PyObject	*ox, *oy;
+	if(!PyArg_ParseTuple(args, "OO:add32", &ox, &oy)) return NULL;
+	if(PyLong_Check(ox)){
+		x = PyLong_AsUnsignedLongMask(ox);
+		}
+	else{
+		x = PyInt_AsLong(ox);
+		if(PyErr_Occurred()) return NULL;
+		}
+	if(PyLong_Check(oy)){
+		y = PyLong_AsUnsignedLongMask(oy);
+		}
+	else{
+		y = PyInt_AsLong(oy);
+		if(PyErr_Occurred()) return NULL;
+		}
+#else
+	if(!PyArg_ParseTuple(args, "ii:add32", &x, &y)) return NULL;
+#endif
+	x += y;
+	return PyInt_FromLong(x);
+}
+
+static PyObject *ttfonts_add32L(PyObject *self, PyObject* args)
 {
 	unsigned long x, y;
 #if PY_VERSION_HEX>=0x02030000
@@ -1601,8 +1662,10 @@ static char *__doc__=
 \t_AsciiBase85Decode does what is says\n\
 \n\
 \tfp_str converts numeric arguments to a single blank separated string\n"
-"\tcalcChecksum calculate checksums for TTFs\n"
-"\tadd32 32 bit unsigned addition\n"
+"\tcalcChecksum calculate checksums for TTFs (legacy)\n"
+"\tcalcChecksumL calculate checksums for TTFs (returns long)\n"
+"\tadd32 32 bit unsigned addition (legacy)\n"
+"\tadd32L 32 bit unsigned addition (returns long)\n"
 "\thex32 32 bit unsigned to 0X8.8X string\n"
 #if PY_VERSION_HEX>=0x02030000
 "\tstringWidthU version2 stringWidth\n\
@@ -1638,8 +1701,10 @@ static struct PyMethodDef _methods[] = {
 	{"_instanceEscapePDF", _instanceEscapePDF, METH_VARARGS, "_instanceEscapePDF(s) return PDF safed string"},
 	{"fp_str", _fp_str, METH_VARARGS, "fp_str(a0, a1,...) convert numerics to blank separated string"},
 	{"_sameFrag", _sameFrag, 1, "_sameFrag(f,g) return 1 if fragments have same style"},
-	{"calcChecksum", ttfonts_calcChecksum, METH_VARARGS, "calcChecksum(string) calculate checksums for TTFs"},
-	{"add32", ttfonts_add32, METH_VARARGS, "add32(x,y)  32 bit unsigned x+y"},
+	{"calcChecksum", ttfonts_calcChecksum, METH_VARARGS, "calcChecksum(string) calculate checksums for TTFs (legacy)"},
+	{"calcChecksumL", ttfonts_calcChecksumL, METH_VARARGS, "calcChecksumL(string) calculate checksums for TTFs (returns long)"},
+	{"add32", ttfonts_add32, METH_VARARGS, "add32(x,y)  32 bit unsigned x+y (legacy)"},
+	{"add32L", ttfonts_add32L, METH_VARARGS, "add32L(x,y)  32 bit unsigned x+y (returns long)"},
 	{"hex32", hex32, METH_VARARGS, "hex32(x)  32 bit unsigned-->0X8.8X string"},
 #if PY_VERSION_HEX>=0x02030000
 	{"unicode2T1", (PyCFunction)unicode2T1, METH_VARARGS|METH_KEYWORDS, "return a list of (font,string) pairs representing the unicode text"},
