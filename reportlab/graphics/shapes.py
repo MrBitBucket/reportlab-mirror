@@ -564,6 +564,11 @@ class Drawing(Group, Flowable):
     This has no properties except a height, width and list
     of contents."""
 
+    _saveModes=(
+            'pdf','ps','eps','gif','png','jpg','jpeg','pct',
+            'pict','tiff','tif','py','bmp','svg',
+            )
+
     _xtraAttrMap = AttrMap(
         width = AttrMapValue(isNumber,desc="Drawing width in points."),
         height = AttrMapValue(isNumber,desc="Drawing height in points."),
@@ -664,7 +669,7 @@ class Drawing(Group, Flowable):
         if not os.path.isdir(outDir): os.makedirs(outDir)
         fnroot = os.path.normpath(os.path.join(outDir,fnRoot))
         plotMode = os.path.splitext(fnroot)
-        if string.lower(plotMode[1][1:]) in ['pdf','ps','eps','gif','png','jpg','jpeg','pct','pict','tiff','tif','py','bmp','svg']:
+        if string.lower(plotMode[1][1:]) in self._saveModes:
             fnroot = plotMode[0]
 
         plotMode = map(str.lower,formats or getattr(self,'formats',['pdf']))
