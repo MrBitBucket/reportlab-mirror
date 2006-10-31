@@ -129,24 +129,28 @@ class _AxisG(Widget):
 
     def makeGrid(self,g,dim=None,parent=None):
         '''this is only called by a container object'''
+        c = self.gridStrokeColor
+        w = self.gridStrokeWidth or 0
+        if not(w and c and self.visibleGrid): return
         s = self.gridStart
         e = self.gridEnd
-        if dim:
-            s = s is None and dim[0]
-            e = e is None and dim[0]+dim[1]
-        c = self.gridStrokeColor
-        if self.visibleGrid and (s or e) and c is not None:
+        if s is None or e is None:
+            if dim and callable(dim):
+                dim = dim()
+            if dim:
+                if s is None: s = dim[0]
+                if e is None: e = dim[1]
+            else:
+                if s is None: s = 0
+                if e is None: e = 0
+        if s or e:
             if self.isYAxis: offs = self._x
             else: offs = self._y
-            self._makeLines(g,s-offs,e-offs,c,self.gridStrokeWidth,self.gridStrokeDashArray,parent=parent)
+            self._makeLines(g,s-offs,e-offs,c,w,self.gridStrokeDashArray,parent=parent)
 
-    def getGridDims(self,default=None):
-        if default is None:
-            default = (self._x,self._y)[self.isXAxis]
-        start = self.gridStart
-        if start is None: start = default
-        end = self.gridEnd
-        if end is None: end = default+self._length
+    def getGridDims(self,start=None,end=None):
+        if start is None: start = (self._x,self._y)[self.isYAxis]
+        if end is None: end = start+self._length
         return start,end
 
     def isYAxis(self):

@@ -343,8 +343,8 @@ class LinePlot(AbstractLineChart):
             g.add(self._inFillG)
         g.add(xA)
         g.add(yA)
-        xA.makeGrid(g,parent=self,dim=xA.getGridDims())
-        yA.makeGrid(g,parent=self,dim=yA.getGridDims())
+        xA.makeGrid(g,parent=self,dim=yA.getGridDims)
+        yA.makeGrid(g,parent=self,dim=xA.getGridDims)
         annotations = getattr(self,'annotations',[])
         for a in annotations:
             if getattr(a,'beforeLines',None):
