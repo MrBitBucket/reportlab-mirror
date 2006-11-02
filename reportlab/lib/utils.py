@@ -825,3 +825,14 @@ class FmtSelfDict:
     def _fmt(self,fmt,**overrideArgs):
         D = _FmtSelfDict(self, overrideArgs)
         return fmt % D
+
+from reportlab.graphics.charts.textlabels import _simpleSplit, stringWidth
+def simpleSplit(text,fontName,fontSize,maxWidth):
+    lines = text.split('\n')
+    SW = lambda text, fN=fontName, fS=fontSize: stringWidth(text, fN, fS)
+    if maxWidth:
+        L = []
+        for l in lines:
+            L[-1:-1] = _simpleSplit(l,maxWidth,SW)
+        lines = L
+    return lines
