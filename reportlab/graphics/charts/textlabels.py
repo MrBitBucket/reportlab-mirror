@@ -5,6 +5,7 @@ __version__=''' $Id$ '''
 import string
 
 from reportlab.lib import colors
+from reportlab.lib.utils import simpleSplit, _simpleSplit
 from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, \
         isTextAnchor, isBoxAnchor, isBoolean, NoneOr, isInstanceOf, isNoneOrString
 from reportlab.lib.attrmap import *
@@ -18,22 +19,6 @@ _A2BA=  {
         'x': {0:'n', 45:'ne', 90:'e', 135:'se', 180:'s', 225:'sw', 270:'w', 315: 'nw', -45: 'nw'},
         'y': {0:'e', 45:'se', 90:'s', 135:'sw', 180:'w', 225:'nw', 270:'n', 315: 'ne', -45: 'ne'},
         }
-def _simpleSplit(txt,mW,SW):
-    L = []
-    ws = SW(' ')
-    O = []
-    w = -ws
-    for t in txt.split():
-        lt = SW(t)
-        if w+ws+lt<=mW or O==[]:
-            O.append(t)
-            w = w + ws + lt
-        else:
-            L.append(string.join(O,' '))
-            O = [t]
-            w = lt
-    if O!=[]: L.append(string.join(O,' '))
-    return L
 
 def _pathNumTrunc(n):
     if int(n)==n: return int(n)
@@ -214,25 +199,15 @@ class Label(Widget):
 
     def computeSize(self):
         # the thing will draw in its own coordinate system
-        self._lines = string.split(self._text, '\n')
         self._lineWidths = []
         topPadding = self.topPadding
         leftPadding = self.leftPadding
         rightPadding = self.rightPadding
         bottomPadding = self.bottomPadding
-        SW = lambda text, fN=self.fontName, fS=self.fontSize: stringWidth(text, fN, fS)
-        if self.maxWidth:
-            L = []
-            for l in self._lines:
-                L[-1:-1] = _simpleSplit(l,self.maxWidth,SW)
-            self._lines = L
+        self._lines = simpleSplit(self._text,self.fontName,self.fontSize,self.maxWidth)
         if not self.width:
-            w = 0
-            for line in self._lines:
-                thisWidth = SW(line)
-                self._lineWidths.append(thisWidth)
-                w = max(w,thisWidth)
-            self._width = w+leftPadding+rightPadding
+            self._lineWidths = [stringWidth(line,self.fontName,self.fontSize) for line in self._lines]
+            self._width = max(self._lineWidths)+leftPadding+rightPadding
         else:
             self._width = self.width
         self._height = self.height or ((self.leading or 1.2*self.fontSize) * len(self._lines)+topPadding+bottomPadding)

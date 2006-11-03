@@ -826,8 +826,25 @@ class FmtSelfDict:
         D = _FmtSelfDict(self, overrideArgs)
         return fmt % D
 
-from reportlab.graphics.charts.textlabels import _simpleSplit, stringWidth
+def _simpleSplit(txt,mW,SW):
+    L = []
+    ws = SW(' ')
+    O = []
+    w = -ws
+    for t in txt.split():
+        lt = SW(t)
+        if w+ws+lt<=mW or O==[]:
+            O.append(t)
+            w = w + ws + lt
+        else:
+            L.append(string.join(O,' '))
+            O = [t]
+            w = lt
+    if O!=[]: L.append(string.join(O,' '))
+    return L
+
 def simpleSplit(text,fontName,fontSize,maxWidth):
+    from reportlab.pdfbase.pdfmetrics import stringWidth
     lines = text.split('\n')
     SW = lambda text, fN=fontName, fS=fontSize: stringWidth(text, fN, fS)
     if maxWidth:
