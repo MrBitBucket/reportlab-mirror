@@ -21,8 +21,7 @@ from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
-from reportlab.lib.utils import import_zlib
-from reportlab.lib.utils import fp_str
+from reportlab.lib.utils import import_zlib, ImageReader, fp_str
 from reportlab.lib.boxstuff import aspectRatioFix, anchorAdjustXY
 
 digitPat = re.compile('\d')  #used in decimal alignment
@@ -607,12 +606,12 @@ class Canvas(textobject._PDFColorSetter):
 
         # first, generate a unique name/signature for the image.  If ANYTHING
         # is different, even the mask, this should be different.
-        if type(image) == type(''):
-            #filename, use it
-            name = _digester('%s%s' % (image, mask))
-        else:
+        if isinstance(image,ImageReader):
             rawdata = image.getRGBData()
             name = _digester(rawdata+str(mask))
+        else:
+            #filename, use it
+            name = _digester('%s%s' % (image, mask))
 
         # in the pdf document, this will be prefixed with something to
         # say it is an XObject.  Does it exist yet?
