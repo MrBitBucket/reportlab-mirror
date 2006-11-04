@@ -21,7 +21,7 @@
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "1.11"
+#define VERSION "1.12"
 #define MAX_DEPTH 256
 
 #if CHAR_SIZE==16
@@ -114,7 +114,7 @@ The python module exports the following\n\
     version         the string version of the module\n\
     RXPVersion      the version string of the rxp library\n\
                     embedded in the module\n\
-	_svnId			svn $Id:$\n\
+	_svnId			svn $Id$\n\
     parser_flags    a dictionary of parser flags\n\
                     the values are the defaults for parsers\n\
     piTagName       special tagname used for processing instructions\n\
@@ -609,6 +609,7 @@ static InputSource entity_open(Entity e, void *info)
 		FILE16 *f16;
 		memcpy(buf,PyString_AS_STRING(text),textlen);
 		f16 = MakeFILE16FromString(buf, textlen, "r");
+		SetCloseUnderlying(f16,1);
 		Py_DECREF(text);
 		if(!e->base_url) EntitySetBaseURL(e,e->systemid);
     	return NewInputSource(e, f16);
