@@ -164,26 +164,52 @@ def color2bw(colorRGB):
     bwColorRGB = Color(n, n, n)
     return bwColorRGB
 
-def HexColor(val):
+def HexColor(val, htmlOnly=False):
     """This function converts a hex string, or an actual integer number,
-    into the corresponding color.  E.g., in "AABBCC" or 0xAABBCC,
+    into the corresponding color.  E.g., in "#AABBCC" or 0xAABBCC,
     AA is the red, BB is the green, and CC is the blue (00-FF).
 
-    HTML uses a hex string with a preceding hash; if this is present,
-    it is stripped off.  (AR, 3-3-2000)
-
     For completeness I assume that #aabbcc or 0xaabbcc are hex numbers
-    otherwise a pure integer is converted as decimal rgb
-    """
+    otherwise a pure integer is converted as decimal rgb.  If htmlOnly is true,
+    only the #aabbcc form is allowed.
+
+    >>> HexColor('#ffffff')
+    Color(1,1,1)
+    >>> HexColor('#FFFFFF')
+    Color(1,1,1)
+    >>> HexColor('0xffffff')
+    Color(1,1,1)
+    >>> HexColor('16777215')
+    Color(1,1,1)
+
+    An '0x' or '#' prefix is required for hex (as opposed to decimal):
+
+    >>> HexColor('ffffff')
+    Traceback (most recent call last):
+    ValueError: invalid literal for int(): ffffff
+
+    >>> HexColor('#FFFFFF', htmlOnly=True)
+    Color(1,1,1)
+    >>> HexColor('0xffffff', htmlOnly=True)
+    Traceback (most recent call last):
+    ValueError: not a hex string
+    >>> HexColor('16777215', htmlOnly=True)
+    Traceback (most recent call last):
+    ValueError: not a hex string
+
+    """ #" for emacs
 
     if type(val) == StringType:
         b = 10
         if val[:1] == '#':
             val = val[1:]
             b = 16
-        elif string.lower(val[:2]) == '0x':
-            b = 16
-            val = val[2:]
+        else:
+            if htmlOnly:
+                raise ValueError('not a hex string')
+            if string.lower(val[:2]) == '0x':
+                b = 16
+                val = val[2:]
         val = string.atoi(val,b)
     return Color(((val>>16)&0xFF)/255.0,((val>>8)&0xFF)/255.0,(val&0xFF)/255.0)
 
@@ -563,3 +589,8 @@ def Blacker(c,f):
     elif isinstance(c,CMYKColor): b = _CMYK_black
     else: b = black
     return linearlyInterpolatedColor(b, c, 0, 1, f)
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
