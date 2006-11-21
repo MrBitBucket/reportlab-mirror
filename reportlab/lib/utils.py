@@ -517,7 +517,7 @@ class ImageReader:
             self._image = fileName
             self.fp = fileName.fp
             try:
-                self.fileName = fileName
+                self.fileName = self._image.fileName
             except AttributeError:
                 self.fileName = 'PILIMAGE_%d' % id(self)
         else:
