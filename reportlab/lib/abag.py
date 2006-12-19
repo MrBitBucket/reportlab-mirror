@@ -13,12 +13,11 @@ class ABag:
     c = a.clone(ak0=av0,.....) copy with optional additional attributes.
     """
     def __init__(self,**attr):
-        for k,v in attr.items():
-            setattr(self,k,v)
+        self.__dict__.update(attr)
 
     def clone(self,**attr):
-        n = apply(ABag,(),self.__dict__)
-        if attr != {}: apply(ABag.__init__,(n,),attr)
+        n = ABag(**self.__dict__)
+        if attr: n.__dict__.update(attr)
         return n
 
     def __repr__(self):
