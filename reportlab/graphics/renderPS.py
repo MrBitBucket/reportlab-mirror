@@ -811,7 +811,7 @@ class _PSRenderer(Renderer):
         if y1 is not None: y1 += y0
         self._canvas.drawImage(im._image,x0,y0,x1,y1)
 
-def drawToFile(d,fn, showBoundary=rl_config.showBoundary):
+def drawToFile(d,fn, showBoundary=rl_config.showBoundary,**kwd):
     d = renderScaledDrawing(d)
     c = PSCanvas((d.width,d.height))
     draw(d, c, 0, 0, showBoundary=showBoundary)

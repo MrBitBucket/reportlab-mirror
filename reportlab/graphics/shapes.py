@@ -696,10 +696,13 @@ class Drawing(Group, Flowable):
                 ext = ext + '/.' + bmFmt
 
         if 'eps' in plotMode:
-            from rlextra.graphics import renderPS_SEP
+            try:
+                from rlextra.graphics import renderPS_SEP as renderPS
+            except:
+                from reportlab.graphics import renderPS
             filename = fnroot+'.eps'
             if verbose: print "generating EPS file %s" % filename
-            renderPS_SEP.drawToFile(self,
+            renderPS.drawToFile(self,
                                 filename,
                                 title = fnroot,
                                 dept = getattr(self,'EPS_info',['Testing'])[0],
@@ -748,8 +751,12 @@ class Drawing(Group, Flowable):
             from reportlab.graphics import renderPM
             return renderPM.drawToString(self, fmt=format)
         elif format == 'eps':
-            from rlextra.graphics import renderPS_SEP
-            return renderPS_SEP.drawToString(self,
+            try:
+                from rlextra.graphics import renderPS_SEP as renderPS
+            except:
+                from reportlab.graphics import renderPS
+
+            return renderPS.drawToString(self,
                                 preview = preview,
                                 showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
         elif format == 'ps':
