@@ -698,7 +698,7 @@ class Drawing(Group, Flowable):
         if 'eps' in plotMode:
             try:
                 from rlextra.graphics import renderPS_SEP as renderPS
-            except:
+            except ImportError:
                 from reportlab.graphics import renderPS
             filename = fnroot+'.eps'
             if verbose: print "generating EPS file %s" % filename
@@ -753,7 +753,7 @@ class Drawing(Group, Flowable):
         elif format == 'eps':
             try:
                 from rlextra.graphics import renderPS_SEP as renderPS
-            except:
+            except ImportError:
                 from reportlab.graphics import renderPS
 
             return renderPS.drawToString(self,
