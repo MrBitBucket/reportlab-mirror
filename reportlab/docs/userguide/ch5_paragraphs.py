@@ -194,12 +194,20 @@ outermost paragraph tag.""")
 heading2("Intra-paragraph markup")
 disc("""'<![CDATA[Within each paragraph, we use a basic set of XML tags
 to provide markup.  The most basic of these are bold (<b>...</b>),
-italic (<i>...</i>) and underline (<u>...</u>).]]>""")
+italic (<i>...</i>) and underline (<u>...</u>).
+Other tags which are allowed are strong (<strong>...</strong>), and strike through (<strike>...</strike>).
+A break (<br/>) tage is also allowed.]]>
+""")
 
 parabox2("""<b>You are hereby charged</b> that on the 28th day of May, 1970, you did
 willfully, unlawfully, and <i>with malice of forethought</i>, publish an
 alleged English-Hungarian phrase book with intent to cause a breach
 of the peace.  <u>How do you plead</u>?""", "Simple bold and italic tags")
+
+parabox2("""<strong>You are hereby charged</strong> that on the 28th day of May, 1970, you did
+willfully, unlawfully, <strike>and with malice of forethought</strike>, <br/>publish an
+alleged English-Hungarian phrase book with intent to cause a breach
+of the peace. How do you plead?""", "Strong, strike, and break tags")
 
 heading3("The $&lt;font&gt;$ tag")
 disc("""The $&lt;font&gt;$ tag can be used to change the font name,

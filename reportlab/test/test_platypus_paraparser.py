@@ -41,7 +41,25 @@ class ParaParserTestCase(unittest.TestCase):
         fragList = ParaParser().parse(txt, self.style)[1]
         self.assertEquals(map(lambda x:x.text, fragList), ['Hello ','Bold',' World'])
         self.assertEquals(fragList[1].fontName, 'Times-Bold')
+        
+    def testStrong(self):
+        txt = "Hello <strong>Strong</strong> World"
+        fragList = ParaParser().parse(txt, self.style)[1]
+        self.assertEquals(map(lambda x:x.text, fragList), ['Hello ','Strong',' World'])
+        self.assertEquals(fragList[1].fontName, 'Times-Bold')
+        
+    def testItalic(self):
+        txt = "Hello <i>Italic</i> World"
+        fragList = ParaParser().parse(txt, self.style)[1]
+        self.assertEquals(map(lambda x:x.text, fragList), ['Hello ','Italic',' World'])
+        self.assertEquals(fragList[1].fontName, 'Times-Italic')
 
+    def testEm(self):
+        txt = "Hello <em>Em</em> World"
+        fragList = ParaParser().parse(txt, self.style)[1]
+        self.assertEquals(map(lambda x:x.text, fragList), ['Hello ','Em',' World'])
+        self.assertEquals(fragList[1].fontName, 'Times-Italic')
+        
     def testEntity(self):
         "Numeric entities should be unescaped by parser"
         txt = "Hello &#169; copyright"
