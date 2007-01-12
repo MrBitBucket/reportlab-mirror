@@ -145,12 +145,17 @@ _FILES= [
         'extensions/README',
         
         'fonts/00readme.txt',
+        'fonts/bitstream-vera-license.txt',
         'fonts/LeERC___.AFM',
         'fonts/LeERC___.PFB',
         'fonts/luxiserif.ttf',
         'fonts/luxiserif_license.txt',
         'fonts/rina.ttf',
         'fonts/rina_license.txt',
+        'fonts/Vera.ttf',
+        'fonts/VeraBd.ttf',
+        'fonts/VeraBI.ttf',
+        'fonts/VeraIt.ttf',
 
         'test/pythonpowered.gif',
 
