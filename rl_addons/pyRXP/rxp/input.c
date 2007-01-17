@@ -383,11 +383,14 @@ static void internal_reader(InputSource s)
     if(c == '\n') \
         goto end_of_line
 
-#define MORE_BYTES \
+#define _MORE_BYTES \
 	s->nextin = nextin; \
 	s->line_length = nextout; \
         s->ignore_linefeed = ignore_linefeed; \
-	return 1 \
+	return 1
+
+#define MORE_BYTES \
+ more_bytes: _MORE_BYTES
 
 #define END_OF_LINE \
  end_of_line: \
@@ -421,7 +424,7 @@ static int translate_8bit(InputSource s)
 	OUTPUT;
     }
 
-    MORE_BYTES;
+    _MORE_BYTES;
 
     END_OF_LINE;
 }
@@ -460,7 +463,7 @@ static int translate_latin(InputSource s)
 	OUTPUT;
     }
 
-    MORE_BYTES;
+    _MORE_BYTES;
 
     END_OF_LINE;
 }
@@ -488,7 +491,7 @@ static int translate_latin1(InputSource s)
 	OUTPUT;
     }
 
-    MORE_BYTES;
+    _MORE_BYTES;
 
     END_OF_LINE;
 }
@@ -598,7 +601,6 @@ static int translate_utf8(InputSource s)
 	}
     }
 
-more_bytes:
     MORE_BYTES;
 
     END_OF_LINE;
@@ -663,7 +665,6 @@ static int translate_utf16(InputSource s)
 	OUTPUT;
     }
 
-more_bytes:
     MORE_BYTES;
 
     END_OF_LINE;
