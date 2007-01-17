@@ -605,7 +605,7 @@ class PDFDictionary:
             self.dict = dict.copy()
     def __setitem__(self, name, value):
         self.dict[name] = value
-    def Reference(name, document):
+    def Reference(self, name, document):
         self.dict[name] = document.Reference(self.dict[name])
     def format(self, document,IND=LINEEND+' '):
         dict = self.dict
@@ -1586,7 +1586,7 @@ class PDFDestinationFitV:
         A = PDFArray( [ pageref, PDFName(self.typename), self.left ] )
         return format(A, document)
 
-class PDFDestinationBV(PDFDestinationFitV):
+class PDFDestinationFitBV(PDFDestinationFitV):
     typename = "FitBV"
 
 class PDFDestinationFitR:

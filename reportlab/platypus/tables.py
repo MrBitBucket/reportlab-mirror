@@ -71,7 +71,7 @@ class CellStyle1(PropertySet):
         if result is None:
             result = CellStyle1()
         for name in dir(self):
-            setattr(result, name, gettattr(self, name))
+            setattr(result, name, getattr(self, name))
         return result
 CellStyle = CellStyle1
 
@@ -898,7 +898,10 @@ class Table(Flowable):
         self._curcolor = None
 
     def _drawUnknown(self,  (sc, sr), (ec, er), weight, color, count, space):
-        raise ValueError, "Unknown line command '%s'" % op
+        #we are only called from _drawLines which is one level up
+        import sys
+        op = sys._getframe(1).f_locals['op']
+        raise ValueError("Unknown line command '%s'" % op)
 
     def _drawGrid(self, (sc, sr), (ec, er), weight, color, count, space):
         self._drawBox( (sc, sr), (ec, er), weight, color, count, space)
