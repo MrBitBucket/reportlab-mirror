@@ -112,7 +112,7 @@ def findT1File(fontName,ext='.pfb'):
             for k, v in _font2fnrMap.items():
                 if k in _font2fnrMapWin32.keys():
                     _font2fnrMapWin32[string.lower(v)] = _font2fnrMapWin32[k]
-            revmap = 1
+            _revmap = 1
         try:
             f = _searchT1Dirs(_font2fnrMapWin32[string.lower(fontName)]+ext)
             if f: return f
@@ -2588,3 +2588,12 @@ widthsByFontGlyph['ZapfDingbats'] = {'a1': 974,
  'a98': 392,
  'a99': 668,
  'space': 278}
+
+_initial_dicts=dict(
+    ascent_descent=ascent_descent.copy(),
+    fontsByBaseEnc=fontsByBaseEnc.copy(),
+    fontsByName=fontsByName.copy(),
+    standardFontAttributes=standardFontAttributes.copy(),
+    widthVectorsByFont=widthVectorsByFont.copy(),
+    widthsByFontGlyph=widthsByFontGlyph.copy(),
+    )

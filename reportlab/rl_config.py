@@ -152,4 +152,25 @@ def _startUp():
         else: conv = None
         _setOpt(k,v,conv)
 
+def _reset():
+    #attempt to reset reportlab and friends
+    _startUp()  #our reset
+    import sys
+    for mname in (
+            'reportlab.pdfbase.pdfmetrics',
+            'reportlab.pdfbase._fontdata',
+            ):
+        try:
+            m = sys.modules[mname]
+        except KeyError:
+            continue
+        d = m.__dict__
+        initial_dicts = d.get('_initial_dicts',{})
+        for k,v in initial_dicts.iteritems():
+            d[k].clear()
+            d[k].update(v)
+    m = sys.modules.get('rlextra.utils.cgisupport')
+    if m:
+        m.BorgTimeStamp().clear()
+
 _startUp()

@@ -789,6 +789,13 @@ def test():
 
     dumpFontData()
 
+#preserve the initial values here
+_initial_dicts = dict(
+    _typefaces = _typefaces.copy(),
+    _encodings = _encodings.copy(),
+    _fonts = _fonts.copy(),
+    )
+
 if __name__=='__main__':
     test()
     testStringWidthAlgorithms()
