@@ -21,7 +21,7 @@ from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import _className
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus.paragraph import Paragraph
-from reportlab.platypus.frames import Frame
+from reportlab.platypus.frames import Frame, ShowBoundaryValue
 from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, PageBreak, NextPageTemplate
 from reportlab.platypus import tableofcontents
 from reportlab.platypus.tableofcontents import TableOfContents
@@ -229,7 +229,7 @@ class ULTestCase(unittest.TestCase):
                 self.addPageTemplates(
                         [
                         PageTemplate('normal',
-                                [Frame(inch, inch, 6.27*inch, 9.69*inch, id='first')],
+                                [Frame(inch, inch, 6.27*inch, 9.69*inch, id='first',topPadding=0,rightPadding=0,leftPadding=0,bottomPadding=0,showBoundary=ShowBoundaryValue(color="red"))],
                                 ),
                         ])
 
@@ -277,12 +277,11 @@ class JustifyTestCase(unittest.TestCase):
 
             def __init__(self, filename, **kw):
                 self.allowSplitting = 0
-                kw['showBoundary']=1
                 BaseDocTemplate.__init__(self, filename, **kw)
                 self.addPageTemplates(
                         [
                         PageTemplate('normal',
-                                [Frame(inch, inch, 6.27*inch, 9.69*inch, id='first',topPadding=0,rightPadding=0,leftPadding=0,bottomPadding=0)],
+                                [Frame(inch, inch, 6.27*inch, 9.69*inch, id='first',topPadding=0,rightPadding=0,leftPadding=0,bottomPadding=0,showBoundary=ShowBoundaryValue(color="red"))],
                                 ),
                         ])
 

@@ -683,7 +683,6 @@ class Paragraph(Flowable):
                 #preserving splitting algorithm
                 return self.blPara
             n = 0
-            nSp = 0
             for w in _getFragWords(frags):
                 spaceWidth = stringWidth(' ',w[-1][0].fontName, w[-1][0].fontSize)
 
@@ -705,9 +704,9 @@ class Paragraph(Flowable):
                 endLine = (newWidth>maxWidth and n>0) or lineBreak
                 if not endLine:
                     if lineBreak: continue      #throw it away
-                    n += 1
-                    maxSize = max(maxSize,f.fontSize)
                     nText = w[1][1]
+                    if nText: n += 1
+                    maxSize = max(maxSize,f.fontSize)
                     if words==[]:
                         g = f.clone()
                         words = [g]
@@ -720,7 +719,6 @@ class Paragraph(Flowable):
                                 words[i].text += ' '
                             else:
                                 g.text += ' '
-                            nSp += 1
                         g = f.clone()
                         words.append(g)
                         g.text = nText
