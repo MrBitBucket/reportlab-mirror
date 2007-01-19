@@ -14,6 +14,14 @@ _geomAttr=('x1', 'y1', 'width', 'height', 'leftPadding', 'bottomPadding', 'right
 from reportlab import rl_config
 _FUZZ=rl_config._FUZZ
 
+class ShowBoundaryValue:
+    def __init__(self,color=(0,0,0),width=0.1):
+        self.color = color
+        self.width = width
+
+    def __nonzero__(self):
+        return self.color is not None and self.width>=0
+
 class Frame:
     '''
     A Frame is a piece of space in a document that is filled by the
@@ -173,20 +181,27 @@ class Frame:
         "draw the frame boundary as a rectangle (primarily for debugging)."
         from reportlab.lib.colors import Color, CMYKColor, toColor
         sb = self.showBoundary
-        isColor = type(sb) in (type(''),type(()),type([])) or isinstance(sb,Color)
-        if isColor:
-            sb = toColor(sb,self)
-            if sb is self: isColor = 0
-            else:
-                canv.saveState()
-                canv.setStrokeColor(sb)
+        ss = type(sb) in (type(''),type(()),type([])) or isinstance(sb,Color)
+        w = -1
+        if ss:
+            c = toColor(sb,self)
+            ss = c is not self
+        elif isinstance(sb,ShowBoundaryValue) and sb:
+            c = toColor(sb.color,self)
+            w = sb.width
+            ss = c is not self
+        if ss:
+            canv.saveState()
+            canv.setStrokeColor(c)
+            if w>=0:
+                canv.setLineWidth(w)
         canv.rect(
                 self._x1,
                 self._y1,
                 self._x2 - self._x1,
                 self._y2 - self._y1
                 )
-        if isColor: canv.restoreState()
+        if ss: canv.restoreState()
 
     def addFromList(self, drawlist, canv):
         """Consumes objects from the front of the list until the
