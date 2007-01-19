@@ -214,6 +214,8 @@ class FragmentTestCase(unittest.TestCase):
         frags = map(lambda f:f.text, P.frags)
         assert frags == ['X', 'Y', 'Z']
 
+class ULTestCase(unittest.TestCase):
+    "Test underlining and overstriking of paragraphs."
     def testUl(self):
         from reportlab.platypus import BaseDocTemplate, PageTemplate, Frame, PageBegin
         from reportlab.lib.units import inch
@@ -233,35 +235,95 @@ class FragmentTestCase(unittest.TestCase):
 
         styleSheet = getSampleStyleSheet()
         normal = ParagraphStyle(name='normal',fontName='Times-Roman',fontSize=12,leading=1.2*12,parent=styleSheet['Normal'])
-        normal_sp = ParagraphStyle(name='normal_just',parent=normal,alignment=TA_JUSTIFY,spaceBefore=12)
+        normal_sp = ParagraphStyle(name='normal_sp',parent=normal,alignment=TA_JUSTIFY,spaceBefore=12)
         normal_just = ParagraphStyle(name='normal_just',parent=normal,alignment=TA_JUSTIFY)
-        normal_right = ParagraphStyle(name='normal_just',parent=normal,alignment=TA_RIGHT)
-        normal_center = ParagraphStyle(name='normal_just',parent=normal,alignment=TA_CENTER)
+        normal_right = ParagraphStyle(name='normal_right',parent=normal,alignment=TA_RIGHT)
+        normal_center = ParagraphStyle(name='normal_center',parent=normal,alignment=TA_CENTER)
         normal_indent = ParagraphStyle(name='normal_indent',firstLineIndent=0.5*inch,parent=normal)
-        normal_indent_lv_2 = ParagraphStyle(name='normal_indent',firstLineIndent=1.0*inch,parent=normal)
+        normal_indent_lv_2 = ParagraphStyle(name='normal_indent_lv_2',firstLineIndent=1.0*inch,parent=normal)
+        texts = ['''Furthermore, a subset of English sentences interesting on quite
+independent grounds is not quite equivalent to a stipulation to place
+the constructions into these various categories.''',
+        '''We will bring evidence in favor of
+The following thesis:  most of the methodological work in modern
+linguistics can be defined in such a way as to impose problems of
+phonemic and morphological analysis.''']
+        story =[]
+        a = story.append
+        for mode in (0,1):
+            text0 = texts[0]
+            text1 = texts[1]
+            if mode:
+                text0 = text0.replace('English sentences','<b>English sentences</b>').replace('quite equivalent','<i>quite equivalent</i>')
+                text1 = text1.replace('the methodological work','<b>the methodological work</b>').replace('to impose problems','<i>to impose problems</i>')
+            for t in ('u','strike'):
+                for n in xrange(6):
+                    for s in (normal,normal_center,normal_right,normal_just,normal_indent, normal_indent_lv_2):
+                        a(Paragraph('n=%d style=%s tag=%s'%(n,s.name,t),style=normal_sp))
+                        a(Paragraph('%s<%s>%s</%s>. %s <%s>%s</%s>. %s' % (
+                        (s==normal_indent_lv_2 and '<seq id="document" inc="no"/>.<seq id="document_lv_2"/>' or ''),
+                        t,' '.join((n+1)*['A']),t,text0,t,' '.join((n+1)*['A']),t,text1),
+                        style=s))
+        doc = MyDocTemplate(outputfile('test_platypus_paragraphs_ul.pdf'))
+        doc.build(story)
+
+class JustifyTestCase(unittest.TestCase):
+    "Test justification of paragraphs."
+    def testUl(self):
+        from reportlab.platypus import BaseDocTemplate, PageTemplate, Frame, PageBegin
+        from reportlab.lib.units import inch
+        class MyDocTemplate(BaseDocTemplate):
+            _invalidInitArgs = ('pageTemplates',)
+
+            def __init__(self, filename, **kw):
+                self.allowSplitting = 0
+                kw['showBoundary']=1
+                BaseDocTemplate.__init__(self, filename, **kw)
+                self.addPageTemplates(
+                        [
+                        PageTemplate('normal',
+                                [Frame(inch, inch, 6.27*inch, 9.69*inch, id='first',topPadding=0,rightPadding=0,leftPadding=0,bottomPadding=0)],
+                                ),
+                        ])
+
+        styleSheet = getSampleStyleSheet()
+        normal = ParagraphStyle(name='normal',fontName='Times-Roman',fontSize=12,leading=1.2*12,parent=styleSheet['Normal'])
+        normal_sp = ParagraphStyle(name='normal_sp',parent=normal,alignment=TA_JUSTIFY,spaceBefore=12)
+        normal_just = ParagraphStyle(name='normal_just',parent=normal,alignment=TA_JUSTIFY,spaceAfter=12)
+        normal_right = ParagraphStyle(name='normal_right',parent=normal,alignment=TA_RIGHT)
+        normal_center = ParagraphStyle(name='normal_center',parent=normal,alignment=TA_CENTER)
+        normal_indent = ParagraphStyle(name='normal_indent',firstLineIndent=0.5*inch,parent=normal)
+        normal_indent_lv_2 = ParagraphStyle(name='normal_indent_lv_2',firstLineIndent=1.0*inch,parent=normal)
         text0 = '''Furthermore, a subset of English sentences interesting on quite
 independent grounds is not quite equivalent to a stipulation to place
-the constructions into these various categories.'''
-        text1 ='''We will bring evidence in favor of
+the constructions into these various categories. We will bring evidence in favor of
 The following thesis:  most of the methodological work in modern
 linguistics can be defined in such a way as to impose problems of
 phonemic and morphological analysis.'''
         story =[]
         a = story.append
-        for t in ('u','strike'):
-            for n in xrange(6):
-                for s in (normal,normal_center,normal_right,normal_just,normal_indent, normal_indent_lv_2):
-                    a(Paragraph('n=%d style=%s tag=%s'%(n,s.name,t),style=normal_sp))
-                    a(Paragraph('%s<%s>%s</%s>. %s <%s>%s</%s>. %s' % (
-                    (s==normal_indent_lv_2 and '<seq id="document" inc="no"/>.<seq id="document_lv_2"/>' or ''),
-                    t,' '.join((n+1)*['A']),t,text0,t,' '.join((n+1)*['A']),t,text1),
-                    style=s))
-        doc = MyDocTemplate(outputfile('test_platypus_paragraphs_ul.pdf'))
+        for mode in (0,1,2,3):
+            text = text0
+            if mode==1:
+                text = text.replace('English sentences','<b>English sentences</b>').replace('quite equivalent','<i>quite equivalent</i>')
+                text = text.replace('the methodological work','<b>the methodological work</b>').replace('to impose problems','<i>to impose problems</i>')
+                a(Paragraph('Justified paragraph in normal/bold/italic font',style=normal))
+            elif mode==2:
+                text = '<b>%s</b>' % text
+                a(Paragraph('Justified paragraph in bold font',style=normal))
+            elif mode==3:
+                text = '<i>%s</i>' % text
+                a(Paragraph('Justified paragraph in italic font',style=normal))
+            else:
+                a(Paragraph('Justified paragraph in normal font',style=normal))
+
+            a(Paragraph(text,style=normal_just))
+        doc = MyDocTemplate(outputfile('test_platypus_paragraphs_just.pdf'))
         doc.build(story)
 
 #noruntests
 def makeSuite():
-    return makeSuiteForClasses(FragmentTestCase, ParagraphSplitTestCase)
+    return makeSuiteForClasses(FragmentTestCase, ParagraphSplitTestCase, ULTestCase, JustifyTestCase)
 
 #noruntests
 if __name__ == "__main__":
