@@ -794,6 +794,8 @@ cost to performance.""")
 
 def run(filename):
     c = makeDocument(filename)
+    c.setAuthor(u'R\xfcp\xe9rt B\xe8\xe4r')
+    c.setTitle('R\xc3\xbcp\xc3\xa9rt B\xc3\xa8\xc3\xa4r\'s Book')
     c.save()
     c = makeDocument(filename)
     import os
@@ -801,8 +803,6 @@ def run(filename):
     f = open('%sm%s' % (f[0],f[1]),'wb')
     f.write(c.getpdfdata())
     f.close()
-
-
 
 def pageShapes(c):
     """Demonstrates the basic lines and shapes"""
