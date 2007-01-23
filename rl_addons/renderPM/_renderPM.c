@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "1.01"
+#define VERSION "1.02"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -1421,7 +1421,7 @@ static	void gstateFree(gstateObject* self)
 	if(self->clipSVP){
 		art_free(self->clipSVP);
 		}
-	PyMem_DEL(self);
+	PyObject_DEL(self);
 }
 
 static PyTypeObject gstateType = {
