@@ -38,6 +38,12 @@ if platform[:4] == 'java' and version_info[:2] == (2, 1):
             return x
         return map(f, sequence)
 
+def utf8str(x):
+    if isinstance(x,unicode):
+        return x.encode('utf8')
+    else:
+        return str(x)
+
 class PDFError(Exception):
     pass
 
@@ -189,7 +195,7 @@ class PDFDocument:
     def updateSignature(self, thing):
         "add information to the signature"
         if self._ID: return # but not if its used already!
-        self.signature.update(str(thing))
+        self.signature.update(utf8str(thing))
 
     def ID(self):
         "A unique fingerprint for the file (unless in invariant mode)"
@@ -207,10 +213,10 @@ class PDFDocument:
         if callable(getattr(filename, "write",None)):
             myfile = 0
             f = filename
-            filename = str(getattr(filename,'name',''))
+            filename = utf8str(getattr(filename,'name',''))
         else :
             myfile = 1
-            filename = str(filename)
+            filename = utf8str(filename)
             f = open(filename, "wb")
         f.write(self.GetPDFData(canvas))
         if myfile:
@@ -547,9 +553,10 @@ class PDFString:
         if type(s) is str:
             if enc is 'auto':
                 try:
-                    u = s.decode('utf8')
+                    u = s.decode(s.startswith('\xfe\xff') and 'utf16' or 'utf8')
                 except:
-                    print s
+                    import sys
+                    print >>sys.stderr, 'Error in',repr(s)
                     raise
                 if _checkPdfdoc(u):
                     s = u.encode('pdfdoc')
@@ -605,7 +612,7 @@ class PDFDictionary:
             self.dict = dict.copy()
     def __setitem__(self, name, value):
         self.dict[name] = value
-    def Reference(name, document):
+    def Reference(self, name, document):
         self.dict[name] = document.Reference(self.dict[name])
     def format(self, document,IND=LINEEND+' '):
         dict = self.dict
@@ -1290,7 +1297,7 @@ class PDFOutlines:
             try:
                 [(Title, Dest)] = leafdict.items()
             except:
-                raise ValueError, "bad outline leaf dictionary, should have one entry "+str(elt)
+                raise ValueError, "bad outline leaf dictionary, should have one entry "+utf8str(elt)
             eltobj.Title = destinationnamestotitles[Title]
             eltobj.Dest = Dest
             if te is TupleType and closedict.has_key(Dest):
@@ -1334,7 +1341,7 @@ class PDFInfo:
     def digest(self, md5object):
         # add self information to signature
         for x in (self.title, self.author, self.subject, self.keywords):
-            md5object.update(str(x))
+            md5object.update(utf8str(x))
 
     def format(self, document):
         D = {}
@@ -1586,7 +1593,7 @@ class PDFDestinationFitV:
         A = PDFArray( [ pageref, PDFName(self.typename), self.left ] )
         return format(A, document)
 
-class PDFDestinationBV(PDFDestinationFitV):
+class PDFDestinationFitBV(PDFDestinationFitV):
     typename = "FitBV"
 
 class PDFDestinationFitR:
