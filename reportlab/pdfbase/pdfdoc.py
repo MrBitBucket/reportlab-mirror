@@ -553,7 +553,7 @@ class PDFString:
         if type(s) is str:
             if enc is 'auto':
                 try:
-                    u = s.decode('utf8')
+                    u = s.decode(s.startswith(codecs.BOM_UTF16_BE) and 'utf16' or 'utf8')
                 except:
                     import sys
                     print >>sys.stderr, 'Error in',repr(s)
