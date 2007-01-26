@@ -326,6 +326,7 @@ def _greekConvert(data):
 #               fg/textColor/color=color
 #               backcolor/backColor/bgcolor=color
 #               dest/destination/target/href/link=target
+#       <a> alias for link
 #       <unichar name="unicode character name"/>
 #       <unichar value="unicode code point"/>
 #       <greek> - </greek>
@@ -405,6 +406,9 @@ class ParaParser(xmllib.XMLParser):
         frag = self._stack[-1]
         del self._stack[-1]
         assert frag.link!=None
+
+    start_a = start_link
+    end_a = end_link
 
     #### super script
     def start_super( self, attributes ):

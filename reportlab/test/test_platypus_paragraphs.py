@@ -128,7 +128,7 @@ see how the AdSu one might be done generically, but the O'Reilly, unsure...
 I guess I'm hoping that I've missed something, and that
 it's actually easy to do using platypus.We can do greek letters <greek>mDngG</greek>. This should be a
 u with a dieresis on top &lt;unichar code=0xfc/&gt;="<unichar code=0xfc/>" and this &amp;#xfc;="&#xfc;" and this \\xc3\\xbc="\xc3\xbc". On the other hand this
-should be a pound sign &amp;pound;="&pound;" and this an alpha &amp;alpha;="&alpha;". You can have links in the page <link href=http://www.reportlab.com color=blue>ReportLab</link>.
+should be a pound sign &amp;pound;="&pound;" and this an alpha &amp;alpha;="&alpha;". You can have links in the page <link href=http://www.reportlab.com color=blue>ReportLab</link> &amp; <a href=http://www.reportlab.org color=green>ReportLab.org</a>.
 Use scheme "pdf:" to indicate an external PDF link, "http:", "https:" to indicate an external link eg something to open in
 your browser. If an internal link begins with something that looks like a scheme, precede with "document:". <strike>This text should have a strike through it.</strike>
 '''
