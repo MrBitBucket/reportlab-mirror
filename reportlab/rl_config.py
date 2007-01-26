@@ -172,5 +172,8 @@ def _reset():
     m = sys.modules.get('rlextra.utils.cgisupport')
     if m:
         m.BorgTimeStamp().clear()
+    m = sys.modules.get('reportlab.lib.sequencer')
+    if m:
+        m.setSequencer(m.Sequencer())
 
 _startUp()
