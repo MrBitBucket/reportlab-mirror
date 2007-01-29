@@ -10,7 +10,7 @@ from operator import truth
 from types import StringType, ListType
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation, outputfile
+from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus.paraparser import ParaParser
@@ -128,7 +128,7 @@ see how the AdSu one might be done generically, but the O'Reilly, unsure...
 I guess I'm hoping that I've missed something, and that
 it's actually easy to do using platypus.We can do greek letters <greek>mDngG</greek>. This should be a
 u with a dieresis on top &lt;unichar code=0xfc/&gt;="<unichar code=0xfc/>" and this &amp;#xfc;="&#xfc;" and this \\xc3\\xbc="\xc3\xbc". On the other hand this
-should be a pound sign &amp;pound;="&pound;" and this an alpha &amp;alpha;="&alpha;". You can have links in the page <link href=http://www.reportlab.com color=blue>ReportLab</link>.
+should be a pound sign &amp;pound;="&pound;" and this an alpha &amp;alpha;="&alpha;". You can have links in the page <link href=http://www.reportlab.com color=blue>ReportLab</link> &amp; <a href=http://www.reportlab.org color=green>ReportLab.org</a>.
 Use scheme "pdf:" to indicate an external PDF link, "http:", "https:" to indicate an external link eg something to open in
 your browser. If an internal link begins with something that looks like a scheme, precede with "document:". <strike>This text should have a strike through it.</strike>
 '''
@@ -250,6 +250,8 @@ linguistics can be defined in such a way as to impose problems of
 phonemic and morphological analysis.''']
         story =[]
         a = story.append
+        a(Paragraph("This should %lt;a href=\"#theEnd\" color=\"blue\"&gt;<a href=\"#theEnd\" color=\"blue\">jump</a>&lt;/a&gt; jump to the end!",style=normal))
+        a(Paragraph("This should %lt;a href=\"#thePenultimate\" color=\"blue\"&gt;<a href=\"#thePenultimate\" color=\"blue\">jump</a>&lt;/a&gt; jump to the penultimate page!",style=normal))
         for mode in (0,1):
             text0 = texts[0]
             text1 = texts[1]
@@ -259,11 +261,14 @@ phonemic and morphological analysis.''']
             for t in ('u','strike'):
                 for n in xrange(6):
                     for s in (normal,normal_center,normal_right,normal_just,normal_indent, normal_indent_lv_2):
+                        if n==4 and s==normal_center and t=='strike':
+                            a(Paragraph("The second jump at the beginning should come here &lt;a name=\"thePenultimate\"/&gt;<a name=\"thePenultimate\"/>!",style=normal))
                         a(Paragraph('n=%d style=%s tag=%s'%(n,s.name,t),style=normal_sp))
                         a(Paragraph('%s<%s>%s</%s>. %s <%s>%s</%s>. %s' % (
                         (s==normal_indent_lv_2 and '<seq id="document" inc="no"/>.<seq id="document_lv_2"/>' or ''),
                         t,' '.join((n+1)*['A']),t,text0,t,' '.join((n+1)*['A']),t,text1),
                         style=s))
+        a(Paragraph("The jump at the beginning should come here &lt;a name=\"theEnd\"/&gt;<a name=\"theEnd\"/>!",style=normal))
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs_ul.pdf'))
         doc.build(story)
 

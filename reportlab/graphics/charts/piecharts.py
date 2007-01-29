@@ -1009,7 +1009,7 @@ class Pie3d(Pie):
         if self.xradius: radiusx = self.xradius
         if self.yradius: radiusy = self.yradius
         self._radiusx = radiusx
-        self._radiusy = (1.0 - self.perspective/100.0)*radiusy
+        self._radiusy = radiusy = (1.0 - self.perspective/100.0)*radiusy
         data = self.normalizeData()
         sum = self._sum
 
