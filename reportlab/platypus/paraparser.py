@@ -111,6 +111,7 @@ _fontAttrMap = {'size': ('fontSize', _num),
 _linkAttrMap = {'size': ('fontSize', _num),
                 'face': ('fontName', None),
                 'name': ('fontName', None),
+                'fontName': ('fontName', None),
                 'fg':   ('textColor', toColor),
                 'color':('textColor', toColor),
                 'backcolor':('backColor',toColor),
@@ -141,6 +142,8 @@ def _addAttributeNames(m):
 _addAttributeNames(_paraAttrMap)
 _addAttributeNames(_fontAttrMap)
 _addAttributeNames(_bulletAttrMap)
+_addAttributeNames(_anchorAttrMap)
+_addAttributeNames(_linkAttrMap)
 
 def _applyAttributes(obj, attr):
     for k, v in attr.items():
