@@ -335,7 +335,7 @@ def _greekConvert(data):
 #               fg/textColor/color=color
 #               backcolor/backColor/bgcolor=color
 #               dest/destination/target/href/link=target
-#       <a>anchor text</link>
+#       <a>anchor text</a>
 #           attributes of anchors 
 #               fontSize=num
 #               fontName=name

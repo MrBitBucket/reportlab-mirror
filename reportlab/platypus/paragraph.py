@@ -488,6 +488,14 @@ class Paragraph(Flowable):
                 fg/textColor/color=color
                 backcolor/backColor/bgcolor=color
                 dest/destination/target/href/link=target
+        <a>anchor text</a>
+            attributes of anchors 
+                fontSize=num
+                fontName=name
+                fg/textColor/color=color
+                backcolor/backColor/bgcolor=color
+                href=href
+        <a name="anchorpoint"/>
         <unichar name="unicode character name"/>
         <unichar value="unicode code point"/>
 
