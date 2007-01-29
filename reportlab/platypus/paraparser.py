@@ -120,6 +120,15 @@ _linkAttrMap = {'size': ('fontSize', _num),
                 'target': ('link', None),
                 'href': ('link', None),
                 }
+_anchorAttrMap = {'fontSize': ('fontSize', _num),
+                'fontName': ('fontName', None),
+                'name': ('name', None),
+                'fg':   ('textColor', toColor),
+                'color':('textColor', toColor),
+                'backcolor':('backColor',toColor),
+                'bgcolor':('backColor',toColor),
+                'href': ('href', None),
+                }
 
 def _addAttributeNames(m):
     K = m.keys()
@@ -326,7 +335,14 @@ def _greekConvert(data):
 #               fg/textColor/color=color
 #               backcolor/backColor/bgcolor=color
 #               dest/destination/target/href/link=target
-#       <a> alias for link
+#       <a>anchor text</link>
+#           attributes of anchors 
+#               fontSize=num
+#               fontName=name
+#               fg/textColor/color=color
+#               backcolor/backColor/bgcolor=color
+#               href=href
+#       <a name="anchorpoint"/>
 #       <unichar name="unicode character name"/>
 #       <unichar value="unicode code point"/>
 #       <greek> - </greek>
@@ -407,8 +423,34 @@ class ParaParser(xmllib.XMLParser):
         del self._stack[-1]
         assert frag.link!=None
 
-    start_a = start_link
-    end_a = end_link
+    #### anchor
+    def start_a(self, attributes):
+        A = self.getAttributes(attributes,_anchorAttrMap)
+        if A.get('name',None):
+            if len(A)>1:
+                self._syntax_error('<a name="..."/> anchor variant only allows name attribute')
+                A = dict(name=A['name'])
+            A['_selfClosingTag'] = 'anchor'
+        elif not A.get('href',None):
+            self._syntax_error('<a> tag must have name or href attribute')
+        else:
+            A['link'] = A.pop('href')   #convert to our link form
+        self._push(**A)
+
+    def end_a(self):
+        frag = self._stack[-1]
+        sct = getattr(frag,'_selfClosingTag','')
+        if sct:
+            assert sct=='anchor' and frag.name,'Parser failure in <a/>'
+            defn = frag.cbDefn = ABag()
+            defn.label = defn.kind = 'anchor'
+            defn.name = frag.name
+            del frag.name, frag._selfClosingTag
+            self.handle_data('')
+            self._pop()
+        else:
+            del self._stack[-1]
+            assert frag.link!=None
 
     #### super script
     def start_super( self, attributes ):

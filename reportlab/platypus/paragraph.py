@@ -109,10 +109,15 @@ def _putFragLine(tx,words):
     nSpaces = 0
     for f in words:
         if hasattr(f,'cbDefn'):
-            func = getattr(tx._canvas,f.cbDefn.name,None)
-            if not func:
-                raise AttributeError, "Missing %s callback attribute '%s'" % (f.cbDefn.kind,f.cbDefn.name)
-            func(tx._canvas,f.cbDefn.kind,f.cbDefn.label)
+            name = f.cbDefn.name
+            kind = f.cbDefn.kind
+            if kind=='anchor':
+                tx._canvas.bookmarkHorizontal(name,cur_x,tx._y+tx._leading)
+            else:
+                func = getattr(tx._canvas,name,None)
+                if not func:
+                    raise AttributeError, "Missing %s callback attribute '%s'" % (kind,name)
+                func(tx._canvas,kind,f.cbDefn.label)
             if f is words[-1]: tx._textOut('',1)
         else:
             cur_x_s = cur_x + nSpaces*ws
@@ -410,6 +415,9 @@ def _doLink(tx,link,rect):
         if kind=='GoToR': link = parts[1]
         tx._canvas.linkURL(link, rect, relative=1, kind=kind)
     else:
+        if link[0]=='#':
+            link = link[1:]
+            scheme=''
         tx._canvas.linkRect("", scheme!='document' and link or parts[1], rect, relative=1)
 
 def _do_link_line(i, t_off, ws, tx):
