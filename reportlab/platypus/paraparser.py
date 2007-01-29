@@ -141,6 +141,8 @@ def _addAttributeNames(m):
 _addAttributeNames(_paraAttrMap)
 _addAttributeNames(_fontAttrMap)
 _addAttributeNames(_bulletAttrMap)
+_addAttributeNames(_anchorAttrMap)
+_addAttributeNames(_linkAttrMap)
 
 def _applyAttributes(obj, attr):
     for k, v in attr.items():

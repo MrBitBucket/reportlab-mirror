@@ -195,14 +195,25 @@ heading2("Intra-paragraph markup")
 disc("""'<![CDATA[Within each paragraph, we use a basic set of XML tags
 to provide markup.  The most basic of these are bold (<b>...</b>),
 italic (<i>...</i>) and underline (<u>...</u>).
-Other tags which are allowed are strong (<strong>...</strong>), and strike through (<strike>...</strike>).
-A break (<br/>) tage is also allowed.]]>
+Other tags which are allowed are strong (<strong>...</strong>), and strike through (<strike>...</strike>). The <link> and <a> tags
+may be used to refer to URIs, documents or bookmarks in the current document. The a variant of the <a> tag can be used to
+mark a position in a document.
+A break (<br/>) tag is also allowed.]]>
 """)
 
 parabox2("""<b>You are hereby charged</b> that on the 28th day of May, 1970, you did
 willfully, unlawfully, and <i>with malice of forethought</i>, publish an
 alleged English-Hungarian phrase book with intent to cause a breach
 of the peace.  <u>How do you plead</u>?""", "Simple bold and italic tags")
+parabox2("""This <a href="#MYANCHOR" color="blue">is a link to</a> an anchor tag ie <a name="MYANCHOR"/><font color="green">here</font>.
+This <link href="#MYANCHOR" color="blue" fontName="Helvetica">is another link to</link> the same anchor tag.""",
+"anchors and links")
+disc("""The <b>link</b> tag can be used as a reference, but
+not as an anchor. The a and link hyperlink tags have additional attributes <i>fontName</i>,
+<i>fontSize</i>, <i>color</i> &amp; <i>backColor</i> attributes.
+The hyperlink reference can have a scheme of <b>http:</b><i>(external webpage)</i>, <b>pdf:</b><i>(different pdf document)</i> or 
+<b>document:</b><i>(same pdf document)</i>; a missing scheme is treated as <b>document</b> as is the case when the reference starts with # (in which case the anchor should omit it). Any other scheme is treated as some kind of URI.
+""")
 
 parabox2("""<strong>You are hereby charged</strong> that on the 28th day of May, 1970, you did
 willfully, unlawfully, <strike>and with malice of forethought</strike>, <br/>publish an
