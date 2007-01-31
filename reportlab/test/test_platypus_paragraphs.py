@@ -219,6 +219,7 @@ class ULTestCase(unittest.TestCase):
     def testUl(self):
         from reportlab.platypus import BaseDocTemplate, PageTemplate, Frame, PageBegin
         from reportlab.lib.units import inch
+        from reportlab.platypus.flowables import AnchorFlowable
         class MyDocTemplate(BaseDocTemplate):
             _invalidInitArgs = ('pageTemplates',)
 
@@ -250,8 +251,10 @@ linguistics can be defined in such a way as to impose problems of
 phonemic and morphological analysis.''']
         story =[]
         a = story.append
-        a(Paragraph("This should %lt;a href=\"#theEnd\" color=\"blue\"&gt;<a href=\"#theEnd\" color=\"blue\">jump</a>&lt;/a&gt; jump to the end!",style=normal))
-        a(Paragraph("This should %lt;a href=\"#thePenultimate\" color=\"blue\"&gt;<a href=\"#thePenultimate\" color=\"blue\">jump</a>&lt;/a&gt; jump to the penultimate page!",style=normal))
+        a(Paragraph("This should &lt;a href=\"#theEnd\" color=\"blue\"&gt;<a href=\"#theEnd\" color=\"blue\">jump</a>&lt;/a&gt; jump to the end!",style=normal))
+        a(Paragraph("This should &lt;a href=\"#thePenultimate\" color=\"blue\"&gt;<a href=\"#thePenultimate\" color=\"blue\">jump</a>&lt;/a&gt; jump to the penultimate page!",style=normal))
+        a(Paragraph("This should &lt;a href=\"#theThird\" color=\"blue\"&gt;<a href=\"#theThird\" color=\"blue\">jump</a>&lt;/a&gt; jump to a justified para!",style=normal))
+        a(Paragraph("This should &lt;a href=\"#theFourth\" color=\"blue\"&gt;<a href=\"#theFourth\" color=\"blue\">jump</a>&lt;/a&gt; jump to an indented para!",style=normal))
         for mode in (0,1):
             text0 = texts[0]
             text1 = texts[1]
@@ -261,8 +264,14 @@ phonemic and morphological analysis.''']
             for t in ('u','strike'):
                 for n in xrange(6):
                     for s in (normal,normal_center,normal_right,normal_just,normal_indent, normal_indent_lv_2):
-                        if n==4 and s==normal_center and t=='strike':
-                            a(Paragraph("The second jump at the beginning should come here &lt;a name=\"thePenultimate\"/&gt;<a name=\"thePenultimate\"/>!",style=normal))
+                        if n==4 and s==normal_center and t=='strike' and mode==1:
+                            a(Paragraph("<font color=green>The second jump at the beginning should come here &lt;a name=\"thePenultimate\"/&gt;<a name=\"thePenultimate\"/>!</font>",style=normal))
+                        elif n==4 and s==normal_just and t=='strike' and mode==1:
+                            a(Paragraph("<font color=green>The third jump at the beginning should come just below here to a paragraph with just an a tag in it!</font>",style=normal))
+                            a(Paragraph("<a name=\"theThird\"/>",style=normal))
+                        elif n==4 and s==normal_indent and t=='strike' and mode==1:
+                            a(Paragraph("<font color=green>The fourth jump at the beginning should come just below here!</font>",style=normal))
+                            a(AnchorFlowable('theFourth'))
                         a(Paragraph('n=%d style=%s tag=%s'%(n,s.name,t),style=normal_sp))
                         a(Paragraph('%s<%s>%s</%s>. %s <%s>%s</%s>. %s' % (
                         (s==normal_indent_lv_2 and '<seq id="document" inc="no"/>.<seq id="document_lv_2"/>' or ''),

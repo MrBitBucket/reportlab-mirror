@@ -701,7 +701,7 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
         y += self.height*scale
         for c in content:
             w, h = c.wrapOn(canv,aW,0xfffffff)
-            if w<_FUZZ or h<_FUZZ: continue
+            if (w<_FUZZ or h<_FUZZ) and not getattr(c,'_ZEROSIZE',None): continue
             if c is not content[0]: h += max(c.getSpaceBefore()-pS,0)
             y -= h
             c.drawOn(canv,x,y,_sW=aW-w)
@@ -1053,3 +1053,19 @@ class ImageAndFlowables(_Container,Flowable):
             H += pS
         if obj is not None: obj._spaceAfter = pS
         return W, H-pS, F, []
+
+class AnchorFlowable(Spacer):
+    '''create a bookmark in the pdf'''
+    _ZEROSIZE=1
+    def __init__(self,name):
+        Spacer.__init__(self,0,0)
+        self._name = name
+
+    def __repr__(self):
+        return "%s(%s)" % (self.__class__.__name__,self._name)
+
+    def wrap(self,aW,aH):
+        return 0,0
+
+    def draw(self):
+        self.canv.bookmarkHorizontal(self._name,0,0)

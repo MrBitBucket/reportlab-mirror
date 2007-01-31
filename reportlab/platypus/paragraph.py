@@ -118,7 +118,10 @@ def _putFragLine(tx,words):
                 if not func:
                     raise AttributeError, "Missing %s callback attribute '%s'" % (kind,name)
                 func(tx._canvas,kind,f.cbDefn.label)
-            if f is words[-1]: tx._textOut('',1)
+            if f is words[-1]:
+                if not tx._fontname:
+                    tx.setFont(xtraState.style.fontName,xtraState.style.fontSize)
+                    tx._textOut('',1)
         else:
             cur_x_s = cur_x + nSpaces*ws
             if (tx._fontname,tx._fontsize)!=(f.fontName,f.fontSize):
@@ -656,7 +659,7 @@ class Paragraph(Flowable):
         self.height = 0
         frags = self.frags
         nFrags= len(frags)
-        if nFrags==1:
+        if nFrags==1 and not hasattr(frags[0],'cbDefn'):
             f = frags[0]
             fontSize = f.fontSize
             fontName = f.fontName
