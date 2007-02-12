@@ -22,7 +22,7 @@ from reportlab import rl_config
 from reportlab.lib.styles import PropertySet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.utils import fp_str
-from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.pdfmetrics import stringWidth
 import operator, string
 from types import TupleType, ListType, StringType, FloatType, IntType
 
@@ -282,8 +282,8 @@ class Table(Flowable):
         """Takes a block of input data (list of lists etc.) and
         - coerces unicode strings to non-unicode UTF8
         - coerces nulls to ''
-        - 
-        
+        -
+
         """
         def normCell(stuff):
             if stuff is None:
@@ -299,8 +299,6 @@ class Table(Flowable):
         from pprint import pprint as pp
         #pp(outData)
         return outData
-
-
 
     def identity(self, maxLen=30):
         '''Identify our selves as well as possible'''
@@ -340,18 +338,30 @@ class Table(Flowable):
 
     def _listCellGeom(self, V,w,s,W=None,H=None,aH=72000):
         if not V: return 0,0
-        aW = w-s.leftPadding-s.rightPadding
+        aW = w - s.leftPadding - s.rightPadding
         aH = aH - s.topPadding - s.bottomPadding
         t = 0
         w = 0
         canv = getattr(self,'canv',None)
+        sb0 = None
         for v in V:
-            vw, vh = v.wrapOn(canv,aW, aH)
+            vw, vh = v.wrapOn(canv, aW, aH)
+            sb = v.getSpaceBefore()
+            sa = v.getSpaceAfter()
             if W is not None: W.append(vw)
             if H is not None: H.append(vh)
             w = max(w,vw)
-            t = t + vh + v.getSpaceBefore()+v.getSpaceAfter()
-        return w, t - V[0].getSpaceBefore()-V[-1].getSpaceAfter()
+            t += vh + sa + sb
+            if sb0 is None:
+                sb0 = sb
+        return w, t - sb0 - sa
+
+    def _listValueWidth(self,V,aH=72000,aW=72000):
+        if not V: return 0,0
+        t = 0
+        w = 0
+        canv = getattr(self,'canv',None)
+        return max([v.wrapOn(canv,aW,aH)[0] for v in V])
 
     def _calc_width(self,availWidth,W=None):
         if getattr(self,'_width_calculated_once',None): return
@@ -416,8 +426,10 @@ class Table(Flowable):
                 if type(w) in (FloatType,IntType): return w
             except AttributeError:
                 pass
-        v = string.split(v is not None and str(v) or '', "\n")
-        return max(map(lambda a, b=s.fontname, c=s.fontsize,d=pdfmetrics.stringWidth: d(a,b,c), v))
+        v = (v is not None and str(v) or '').split("\n")
+        fontName = s.fontname
+        fontSize = s.fontsize
+        return max([stringWidth(x,fontName,fontSize) for x in v])
 
     def _calc_height(self, availHeight, availWidth, H=None, W=None):
 
@@ -457,23 +469,22 @@ class Table(Flowable):
                     if ji in rowSpanCells:
                         t = 0.0  # don't count it, it's either occluded or unreliable
                     else:
-                        t = type(v)
-                        if t in _SeqTypes or isinstance(v,Flowable):
-                            if not t in _SeqTypes: v = (v,)
-                            if w is None:
+                        if isinstance(v,(tuple,list,Flowable)):
+                            if isinstance(v,Flowable): v = (v,)
+                            if w is None and not self._canGetWidth(v):
                                 raise ValueError, "Flowable %s in cell(%d,%d) can't have auto width in\n%s" % (v[0].identity(30),i,j,self.identity(30))
                             if canv: canv._fontname, canv._fontsize, canv._leading = s.fontname, s.fontsize, s.leading or 1.2*s.fontsize
                             if ji in colSpanCells:
                                 t = spanRanges[ji]
                                 w = max(colpositions[t[2]+1]-colpositions[t[0]],w)
-                            dW,t = self._listCellGeom(v,w,s)
+                            dW,t = self._listCellGeom(v,w or self._listValueWidth(v),s)
                             if canv: canv._fontname, canv._fontsize, canv._leading = saved
                             dW = dW + s.leftPadding + s.rightPadding
                             if not rl_config.allowTableBoundsErrors and dW>w:
                                 raise "LayoutError", "Flowable %s (%sx%s points) too wide for cell(%d,%d) (%sx* points) in\n%s" % (v[0].identity(30),fp_str(dW),fp_str(t),i,j, fp_str(w), self.identity(30))
                         else:
-                            v = string.split(v is not None and str(v) or '', "\n")
-                            t = s.leading*len(v)
+                            v = (v is not None and str(v) or '').split("\n")
+                            t = (s.leading or 1.2*s.fontSize)*len(v)
                         t = t+s.bottomPadding+s.topPadding
                     if t>h: h = t   #record a new maximum
                     j = j + 1
@@ -523,19 +534,17 @@ class Table(Flowable):
 
         Allow a couple which we know are fixed size such as
         images and graphics."""
-        bad = 0
         if upToRow is None: upToRow = self._nrows
         for row in range(min(self._nrows, upToRow)):
             for col in range(self._ncols):
                 value = self._cellvalues[row][col]
                 if not self._canGetWidth(value):
-                    bad = 1
-                    #raise Exception('Unsizable elements found at row %d column %d in table with content:\n %s' % (row, col, value))
-        return bad
+                    return 1
+        return 0
 
     def _canGetWidth(self, thing):
         "Can we work out the width quickly?"
-        if type(thing) in (ListType, TupleType):
+        if isinstance(thing,(ListType, TupleType)):
             for elem in thing:
                 if not self._canGetWidth(elem):
                     return 0
@@ -646,9 +655,9 @@ class Table(Flowable):
                     effectiveRemaining += minimum
             if desiredWidths: # else we're done
                 # let's say we have two variable columns.  One wanted
-                # 88 points, and one wanted 264 points.  The first has a 
+                # 88 points, and one wanted 264 points.  The first has a
                 # minWidth of 66, and the second of 55.  We have 71 points
-                # to divide up in addition to the totalMinimum (i.e., 
+                # to divide up in addition to the totalMinimum (i.e.,
                 # remaining==71).  Our algorithm tries to keep the proportion
                 # of these variable columns.
                 #
@@ -659,8 +668,8 @@ class Table(Flowable):
                 # That would make the first column 48 points, and the second
                 # 144 points--adding up to the desired 192.
                 #
-                # Unfortunately, that's too small for the first column.  It 
-                # must be 66 points.  Therefore, we go ahead and save that 
+                # Unfortunately, that's too small for the first column.  It
+                # must be 66 points.  Therefore, we go ahead and save that
                 # column width as 88 points.  That leaves (192-88==) 104
                 # points remaining.  The proportion to shrink the remaining
                 # column is (104/264), which, multiplied  by the desired
@@ -668,9 +677,9 @@ class Table(Flowable):
                 # column.
                 proportion = effectiveRemaining/totalDesired
                 # we sort the desired widths by difference between desired and
-                # and minimum values, a value called "disappointment" in the 
-                # code.  This means that the columns with a bigger 
-                # disappointment will have a better chance of getting more of 
+                # and minimum values, a value called "disappointment" in the
+                # code.  This means that the columns with a bigger
+                # disappointment will have a better chance of getting more of
                 # the available space.
                 desiredWidths.sort()
                 finalSet = []
@@ -1100,7 +1109,6 @@ class Table(Flowable):
             R1._cr_1_0(n,self._bkgrndcmds)
             R1._cr_1_0(n,self._spanCmds)
 
-
         R0.hAlign = R1.hAlign = self.hAlign
         R0.vAlign = R1.vAlign = self.vAlign
         self.onSplit(R0)
@@ -1164,7 +1172,6 @@ class Table(Flowable):
                         cellstyle = self._cellStyles[rowNo][colNo]
                         self._drawCell(cellval, cellstyle, (x, y), (width, height))
         self._drawLines()
-
 
     def _drawBkgrnd(self):
         nrows = self._nrows
@@ -1376,12 +1383,9 @@ LIST_STYLE = TableStyle(
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
 
-
 # experimental iterator which can apply a sequence
 # of colors e.g. Blue, None, Blue, None as you move
 # down.
-
-
 if __name__ == '__main__':
     from reportlab.test.test_platypus_tables import old_tables_test
     old_tables_test()
