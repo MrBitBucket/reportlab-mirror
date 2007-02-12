@@ -314,6 +314,7 @@ if __name__=='__main__':
             BarcodeCode11,
             BarcodeFIM,
             BarcodePOSTNET,
+            BarcodeUSPS_4State,
             ):
         name = C.__name__
         i = C()
