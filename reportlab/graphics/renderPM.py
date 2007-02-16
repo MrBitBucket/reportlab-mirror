@@ -568,6 +568,9 @@ class PMCanvas:
     def setLineCap(self,cap):
         self.lineCap = cap
 
+    def setLineJoin(self,join):
+        self.lineJoin = join
+
     def setLineWidth(self,width):
         self.strokeWidth = width
 
