@@ -158,7 +158,6 @@ class _PMRenderer(Renderer):
             text_anchor = S['textAnchor']
             fontName = S['fontName']
             fontSize = S['fontSize']
-            font = getFont(fontName)
             text = stringObj.text
             x = stringObj.x
             y = stringObj.y
@@ -170,32 +169,7 @@ class _PMRenderer(Renderer):
                     x = x - textLen/2
                 else:
                     raise ValueError, 'bad value for textAnchor '+str(text_anchor)
-            if font._dynamicFont:
-                if isinstance(text,unicode): text = text.encode('utf8')
-                canv.drawString(x,y,text)
-            else:
-                fc = font
-                if not isinstance(text,unicode):
-                    try:
-                        text = text.decode('utf8')
-                    except UnicodeDecodeError,e:
-                        i,j = e.args[2:4]
-                        raise UnicodeDecodeError(*(e.args[:4]+('%s\n%s-->%s<--%s' % (e.args[4],text[i-10:i],text[i:j],text[j:j+10]),)))
-
-                FT = unicode2T1(text,[font]+font.substitutionFonts)
-                n = len(FT)
-                nm1 = n-1
-                wscale = 0.001*fontSize
-                for i in xrange(n):
-                    f, t = FT[i]
-                    if f!=fc:
-                        canv.setFont(f.fontName,fontSize)
-                        fc = f
-                    canv.drawString(x,y,t)
-                    if i!=nm1:
-                        x += wscale*sum(map(f.widths.__getitem__,map(ord,t)))
-                if font!=fc:
-                    canv.setFont(fontName,fontSize)
+            canv.drawString(x,y,text,_fontInfo=(fontName,fontSize))
 
     def drawPath(self, path):
         c = self._canvas
@@ -455,6 +429,45 @@ class PMCanvas:
     def drawRightString(self, text, x, y):
         self.drawCentredString(text,x,y,text_anchor='end')
 
+    def drawString(self, x, y, text, _fontInfo=None):
+        gs = self._gs
+        if _fontInfo:
+            fontName, fontSize = _fontInfo
+        else:
+            fontSize = gs.fontSize
+            fontName = gs.fontName
+        try:
+            gfont=getFont(gs.fontName)
+        except:
+            gfont = None
+        font = getFont(fontName)
+        if font._dynamicFont:
+            if isinstance(text,unicode): text = text.encode('utf8')
+            gs.drawString(x,y,text)
+        else:
+            fc = font
+            if not isinstance(text,unicode):
+                try:
+                    text = text.decode('utf8')
+                except UnicodeDecodeError,e:
+                    i,j = e.args[2:4]
+                    raise UnicodeDecodeError(*(e.args[:4]+('%s\n%s-->%s<--%s' % (e.args[4],text[i-10:i],text[i:j],text[j:j+10]),)))
+
+            FT = unicode2T1(text,[font]+font.substitutionFonts)
+            n = len(FT)
+            nm1 = n-1
+            wscale = 0.001*fontSize
+            for i in xrange(n):
+                f, t = FT[i]
+                if f!=fc:
+                    _setFont(gs,f.fontName,fontSize)
+                    fc = f
+                gs.drawString(x,y,t)
+                if i!=nm1:
+                    x += wscale*sum(map(f.widths.__getitem__,map(ord,t)))
+            if font!=fc:
+                _setFont(gs,fontName,fontSize)
+
     def line(self,x1,y1,x2,y2):
         if self.strokeColor is not None:
             self.pathBegin()
@@ -567,6 +580,9 @@ class PMCanvas:
     # compatibility routines
     def setLineCap(self,cap):
         self.lineCap = cap
+
+    def setLineJoin(self,join):
+        self.lineJoin = join
 
     def setLineWidth(self,width):
         self.strokeWidth = width
