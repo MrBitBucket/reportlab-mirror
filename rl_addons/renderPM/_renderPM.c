@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "1.02"
+#define VERSION "1.03"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -310,6 +310,7 @@ typedef struct {
 	double		fillOpacity;
 	double		fontSize;
 	double		fontEMSize;			/*for scaling to points*/
+	PyObject	*fontNameObj;
 #ifdef	RENDERPM_FT
 	int			ft_font;			/*if we're trying ft_font things*/
 #endif
@@ -1028,8 +1029,14 @@ static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
 	Gt1EncodedFont*	f;
 	double	fontSize, fontEMSize;
 	int		ft_font;
+	PyObject *fontNameObj;
 
-	if(!PyArg_ParseTuple(args,"sd:setFont", &fontName, &fontSize)) return NULL;
+	if(!PyArg_ParseTuple(args,"Od:setFont", &fontNameObj, &fontSize)) return NULL;
+	fontName = PyString_AsString(fontNameObj);
+	if(!fontName){
+		PyErr_SetString(moduleError, "Invalid fontName");
+		return NULL;
+		}
 	if(fontSize<0){
 		PyErr_SetString(moduleError, "Invalid fontSize");
 		return NULL;
@@ -1049,6 +1056,9 @@ static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
 	if(f){
 		self->font = f;
 		self->fontSize = fontSize;
+		if(self->fontNameObj) Py_DECREF(self->fontNameObj);
+		self->fontNameObj = fontNameObj;
+		Py_INCREF(fontNameObj);
 		self->fontEMSize = fontEMSize;
 #ifdef	RENDERPM_FT
 		self->ft_font = ft_font;
@@ -1293,7 +1303,7 @@ static PyObject* _get_gstateColor(gstateColor* c)
 	return Py_None;
 }
 
-static PyObject* _get_gstateFontName(gstateObject *self)
+static PyObject* _get_gstateFontNameI(gstateObject *self)
 {
 	Gt1EncodedFont *f=self->font;
 	if(f){
@@ -1317,6 +1327,13 @@ static PyObject* _get_gstateFontName(gstateObject *self)
 		}
 	Py_INCREF(Py_None);
 	return Py_None;
+}
+static PyObject* _get_gstateFontName(gstateObject *self)
+{
+	PyObject* r = self->fontNameObj;
+	if(!r) r = Py_None;
+	Py_INCREF(r);
+	return r;
 }
 
 static struct PyMethodDef gstate_methods[] = {
@@ -1359,6 +1376,7 @@ static PyObject* gstate_getattr(gstateObject *self, char *name)
 	else if(!strcmp(name,"pathLen")) return PyInt_FromLong(self->pathLen);
 	else if(!strcmp(name,"fontSize")) return PyFloat_FromDouble(self->fontSize);
 	else if(!strcmp(name,"fontName")) return _get_gstateFontName(self);
+	else if(!strcmp(name,"fontNameI")) return _get_gstateFontNameI(self);
 	else if(!strcmp(name,"dashArray")) return _get_gstateDashArray(self);
 	else if(!strcmp(name,"pixBuf")){
 		pixBufT* p = self->pixBuf;
@@ -1421,6 +1439,7 @@ static	void gstateFree(gstateObject* self)
 	if(self->clipSVP){
 		art_free(self->clipSVP);
 		}
+	if(self->fontNameObj) Py_DECREF(self->fontNameObj);
 	PyObject_DEL(self);
 }
 
@@ -1527,6 +1546,7 @@ static	gstateObject* gstate(PyObject* module, PyObject* args, PyObject* keywds)
 			self->pathMax = m;
 			self->clipSVP = NULL;
 			self->font = NULL;
+			self->fontNameObj = NULL;
 			self->fontSize = 10;
 			self->dash.n_dash = 0;
 			self->dash.dash = NULL;
