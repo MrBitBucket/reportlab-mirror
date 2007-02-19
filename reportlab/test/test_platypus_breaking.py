@@ -115,6 +115,32 @@ def _test0(self):
     a(Paragraph(_text1.replace('I suggested ','I suggested<br/>',1),bt))
     a(Paragraph("2*&lt;br/&gt; after 'I suggested ' in line 5",h3))
     a(Paragraph(_text1.replace('I suggested ','I suggested<br/><br/>',1),bt))
+    a(Paragraph("&lt;br/&gt; at the end of the paragraph!",h3))
+    a(Paragraph("""text one<br/>text two<br/>""",bt))
+    a(Paragraph("Border with &lt;nr/&gt; at the end of the paragraph!",h3))
+    bt1 = ParagraphStyle('bodyText1',bt)
+    bt1.borderWidth = 0.5
+    bt1.borderColor = colors.toColor('red')
+    bt1.backColor = colors.pink
+    bt1.borderRadius = 2
+    bt1.borderPadding = 3
+    a(Paragraph("""text one<br/>text two<br/>""",bt1))
+    a(Paragraph("Border no &lt;nr/&gt; at the end of the paragraph!",h3))
+    bt1 = ParagraphStyle('bodyText1',bt)
+    bt1.borderWidth = 0.5
+    bt1.borderColor = colors.toColor('red')
+    bt1.backColor = colors.pink
+    bt1.borderRadius = 2
+    bt1.borderPadding = 3
+    a(Paragraph("""text one<br/>text two""",bt1))
+    a(Paragraph("Different border style!",h3))
+    bt2 = ParagraphStyle('bodyText1',bt1)
+    bt2.borderWidth = 1.5
+    bt2.borderColor = colors.toColor('blue')
+    bt2.backColor = colors.gray
+    bt2.borderRadius = 3
+    bt2.borderPadding = 3
+    a(Paragraph("""text one<br/>text two<br/>""",bt2))
 
     doc = MyDocTemplate(outputfile('test_platypus_breaking.pdf'))
     doc.multiBuild(story)

@@ -82,6 +82,10 @@ class ParagraphStyle(PropertySet):
         'backColor':None,
         'wordWrap':None,
         }
+        #borderWidth: 0,
+        #borderPadding: 0,
+        #borderColor: None,
+        #borderRadius: None,
 
 class LineStyle(PropertySet):
     defaults = {
