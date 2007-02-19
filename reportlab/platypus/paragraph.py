@@ -702,12 +702,12 @@ class Paragraph(Flowable):
                 #preserving splitting algorithm
                 return self.blPara
             n = 0
+            words = []
             for w in _getFragWords(frags):
                 spaceWidth = stringWidth(' ',w[-1][0].fontName, w[-1][0].fontSize)
 
                 if n==0:
                     currentWidth = -spaceWidth   # hack to get around extra space for word 1
-                    words = []
                     maxSize = 0
 
                 wordWidth = w[0]
@@ -717,7 +717,7 @@ class Paragraph(Flowable):
                 else:
                     newWidth = currentWidth
 
-                #text to see if this frag is a line break. If it is and we will only act on it
+                #test to see if this frag is a line break. If it is we will only act on it
                 #if the current width is non-negative or the previous thing was a deliberate lineBreak
                 lineBreak = hasattr(f,'lineBreak')
                 endLine = (newWidth>maxWidth and n>0) or lineBreak
@@ -772,6 +772,7 @@ class Paragraph(Flowable):
 
                     if lineBreak:
                         n = 0
+                        words = []
                         continue
 
                     currentWidth = wordWidth
@@ -788,7 +789,7 @@ class Paragraph(Flowable):
                         maxSize = max(maxSize,g.fontSize)
 
             #deal with any leftovers on the final line
-            if words<>[]:
+            if words!=[]:
                 if currentWidth>self.width: self.width = currentWidth
                 lines.append(ParaLines(extraSpace=(maxWidth - currentWidth),wordCount=n,
                                     words=words, fontSize=maxSize))
@@ -863,34 +864,38 @@ class Paragraph(Flowable):
         leftIndent = style.leftIndent
         cur_x = leftIndent
 
-        #if has a background, draw it
-        if style.backColor:
-            canvas.saveState()
-            canvas.setFillColor(style.backColor)
-            canvas.rect(leftIndent,
-                        0,
-                        self.width - (leftIndent+style.rightIndent),
-                        self.height,
-                        fill=1,
-                        stroke=0)
-            canvas.restoreState()
-
         if debug:
-            # This boxes and shades stuff to show how the paragraph
-            # uses its space.  Useful for self-documentation so
-            # the debug code stays!
-            # box the lot
-            canvas.rect(0, 0, self.width, self.height)
-            #left and right margins
+            bw = 0.5
+            bc = Color(1,1,0)
+            bg = Color(0.9,0.9,0.9)
+        else:
+            bw = getattr(style,'borderWidth',None)
+            bc = getattr(style,'borderColor',None)
+            bg = style.backColor
+        
+        #if has a background or border, draw it
+        if bg or (bc and bw):
             canvas.saveState()
-            canvas.setFillColor(Color(0.9,0.9,0.9))
-            canvas.rect(0, 0, leftIndent, self.height)
-            canvas.rect(self.width - style.rightIndent, 0, style.rightIndent, self.height)
-            # shade above and below
-            canvas.setFillColor(Color(1.0,1.0,0.0))
+            op = canvas.rect
+            kwds = dict(fill=0,stroke=0)
+            if bc and bw:
+                canvas.setStrokeColor(bc)
+                canvas.setLineWidth(bw)
+                kwds['stroke'] = 1
+                br = getattr(style,'borderRadius',0)
+                if br and not debug:
+                    op = canvas.roundRect
+                    kwds['radius'] = br
+            if bg:
+                canvas.setFillColor(bg)
+                kwds['fill'] = 1
+            bp = getattr(style,'borderPadding',0)
+            op(leftIndent-bp,
+                        -bp,
+                        self.width - (leftIndent+style.rightIndent)+2*bp,
+                        self.height+2*bp,
+                        **kwds)
             canvas.restoreState()
-            #self.drawLine(x + leftIndent, y, x + leftIndent, cur_y)
-
 
         nLines = len(lines)
         bulletText = self.bulletText
