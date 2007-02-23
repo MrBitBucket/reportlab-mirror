@@ -38,7 +38,6 @@ __all__=('TraceInfo','Flowable','XBox','Preformatted','Image','Spacer','PageBrea
         'CondPageBreak','KeepTogether','Macro','CallerMacro','ParagraphAndImage',
         'FailOnWrap','HRFlowable','PTOContainer','KeepInFrame','UseUpSpace')
 
-
 class TraceInfo:
     "Holder for info about where an object originated"
     def __init__(self):
@@ -79,8 +78,7 @@ class Flowable:
         #many flowables handle text and must be processed in the
         #absence of a canvas.  tagging them with their encoding
         #helps us to get conversions right.  Use Python codec names.
-        self.encoding = None        
-
+        self.encoding = None
 
     def _drawOn(self,canv):
         '''ensure canv is set on and then draw'''
@@ -273,7 +271,6 @@ class Preformatted(Flowable):
             style.firstLineIndent = 0
         return [Preformatted(text1, self.style), Preformatted(text2, style)]
 
-
     def draw(self):
         #call another method for historical reasons.  Besides, I
         #suspect I will be playing with alternate drawing routines
@@ -455,7 +452,7 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
         H += h
         if not atTop:
             h = f.getSpaceBefore()
-            if mergeSpace: h = max(h-pS,0) 
+            if mergeSpace: h = max(h-pS,0)
             H += h
         else:
             if obj is not None: obj._spaceBefore = f.getSpaceBefore()
@@ -711,11 +708,11 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
 
 class PTOContainer(_Container,Flowable):
     '''PTOContainer(contentList,trailerList,headerList)
-    
+
     A container for flowables decorated with trailer & header lists.
     If the split operation would be called then the trailer and header
     lists are injected before and after the split. This allows specialist
-    "please turn over" and "continued from previous" like behaviours.''' 
+    "please turn over" and "continued from previous" like behaviours.'''
     def __init__(self,content,trailer=None,header=None):
         I = _PTOInfo(trailer,header)
         self._content = C = []
@@ -811,7 +808,7 @@ def _qsolve(h,(a,b)):
     if r<0: return None
     r = sqrt(r)
     if t>=0:
-        s1 = -t - r 
+        s1 = -t - r
     else:
         s1 = -t + r
     s2 = f/s1
