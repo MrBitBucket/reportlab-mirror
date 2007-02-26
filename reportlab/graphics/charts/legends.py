@@ -19,10 +19,11 @@ from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.utils import isSeqType
 
-
 def _getStr(s):
     if isSeqType(s):
-        return map(str,s)
+        return map(_getStr,s)
+    elif isinstance(s,(unicode,str)):
+        return s
     else:
         return str(s)
 
