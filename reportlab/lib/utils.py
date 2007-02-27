@@ -853,3 +853,15 @@ def simpleSplit(text,fontName,fontSize,maxWidth):
             L[-1:-1] = _simpleSplit(l,maxWidth,SW)
         lines = L
     return lines
+
+def escapeTextOnce(text):
+    "Escapes once only"
+    from xml.sax.saxutils import escape
+    if text is None:
+        return text
+    text = escape(text)
+    text = text.replace('&amp;amp;', '&amp;')
+    text = text.replace('&amp;gt;', '&gt;')
+    text = text.replace('&amp;lt;', '&lt;')
+    return text
+
