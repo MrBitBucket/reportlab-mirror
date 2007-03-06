@@ -172,8 +172,8 @@ class Canvas(textobject._PDFColorSetter):
         #drawing coordinates.
         self.bottomup = bottomup
         self.imageCaching = rl_config.defaultImageCaching
-        self._make_preamble()
         self.init_graphics_state()
+        self._make_preamble()
         self.state_stack = []
 
     def init_graphics_state(self):
@@ -231,7 +231,8 @@ class Canvas(textobject._PDFColorSetter):
 
     def _make_preamble(self):
         # yuk
-        iName = self._doc.getInternalFontName('Helvetica')
+        iName = self._doc.getInternalFontName(self._fontname)
+        print iName, self._fontname
         if self.bottomup:
             #must set an initial font
             self._preamble = '1 0 0 1 0 0 cm BT %s 12 Tf 14.4 TL ET' % iName
