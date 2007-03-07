@@ -654,7 +654,10 @@ class PDFStreamFilterBase85Encode:
     pdfname = "ASCII85Decode"
     def encode(self, text):
         from pdfutils import _AsciiBase85Encode, _wrap
-        return _wrap(_AsciiBase85Encode(text))
+        text = _AsciiBase85Encode(text)
+        if rl_config.wrapA85:
+            text = _wrap(text)
+        return text
     def decode(self, text):
         from pdfutils import _AsciiBase85Decode
         return _AsciiBase85Decode(text)

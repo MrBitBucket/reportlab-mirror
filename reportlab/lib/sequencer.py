@@ -4,6 +4,7 @@
 __version__=''' $Id$ '''
 """This module defines a single public class, Sequencer, which aids in
 numbering and formatting lists."""
+__all__='''Sequencer getSequencer setSequencer'''.split()
 #
 # roman numbers conversion thanks to
 #
@@ -14,9 +15,6 @@ numbering and formatting lists."""
 
 _RN_TEMPLATES = [ 0, 01, 011, 0111, 012, 02, 021, 0211, 02111, 013 ]
 _RN_LETTERS = "IVXLCDM"
-
-from string import lower
-
 
 def _format_I(value):
     if value < 0 or value > 3999:
@@ -33,7 +31,7 @@ def _format_I(value):
     return str
 
 def _format_i(num):
-    return lower(_format_I(num))
+    return _format_I(num).lower()
 
 def _format_123(num):
     """The simplest formatter"""
@@ -48,7 +46,6 @@ def _format_abc(num):
     """Lowercase.  Wraps around at 26."""
     n = (num -1) % 26
     return chr(n+97)
-
 
 class _Counter:
     """Private class used by Sequencer.  Each counter
@@ -94,7 +91,6 @@ class _Counter:
         if not otherCounter in self._resets:
             self._resets.append(otherCounter)
 
-
 class Sequencer:
     """Something to make it easy to number paragraphs, sections,
     images and anything else.  The features include registering
@@ -120,16 +116,24 @@ class Sequencer:
 
     def __init__(self):
         self._counters = {}  #map key to current number
-        self._defaultCounter = None
+        self._formatters = {}
+        self._reset()
 
-        self._formatters = {
+    def _reset(self):
+        self._counters.clear()
+        self._formatters.clear()
+        self._formatters.update({
             # the formats it knows initially
             '1':_format_123,
             'A':_format_ABC,
             'a':_format_abc,
             'I':_format_I,
             'i':_format_i,
-            }
+            })
+        d = dict(_counters=self._counters,_formatters=self._formatters)
+        self.__dict__.clear()
+        self.__dict__.update(d)
+        self._defaultCounter = None
 
     def _getCounter(self, counter=None):
         """Creates one if not present"""
@@ -214,7 +218,6 @@ class Sequencer:
             print '    %s: value = %d, base = %d, format example = %s' % (
                 key, counter._this(), counter._base, counter.thisf())
 
-
 """Your story builder needs to set this to"""
 _sequencer = None
 
@@ -229,6 +232,15 @@ def setSequencer(seq):
     s = _sequencer
     _sequencer = seq
     return s
+
+def _reset():
+    global _sequencer
+    if _sequencer:
+        _sequencer._reset()
+
+from reportlab.rl_config import register_reset
+register_reset(_reset)
+del register_reset
 
 def test():
     s = Sequencer()

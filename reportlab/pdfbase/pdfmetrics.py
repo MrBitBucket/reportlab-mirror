@@ -789,6 +789,23 @@ def test():
 
     dumpFontData()
 
+#preserve the initial values here
+def _reset(
+        initial_dicts = dict(
+            _typefaces = _typefaces.copy(),
+            _encodings = _encodings.copy(),
+            _fonts = _fonts.copy(),
+            )
+        ):
+    for k,v in initial_dicts.iteritems():
+        d=globals()[k]
+        d.clear()
+        d.update(v)
+
+from reportlab.rl_config import register_reset
+register_reset(_reset)
+del register_reset
+
 if __name__=='__main__':
     test()
     testStringWidthAlgorithms()

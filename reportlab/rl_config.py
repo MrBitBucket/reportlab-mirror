@@ -3,7 +3,7 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/rl_config.py
 __version__=''' $Id$ '''
 
-allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
+allowTableBoundsErrors =    1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
 defaultEncoding =           'WinAnsiEncoding'       # 'WinAnsi' or 'MacRoman'
 defaultGraphicsFontName=    'Times-Roman'               #initializer for STATE_DEFAULTS in shapes.py
@@ -22,6 +22,7 @@ overlapAttachedSpace=       1                       #if set non false then adaja
 longTableOptimize =         0                       #default don't use Henning von Bargen's long table optimizations
 autoConvertEncoding  =      0                       #convert internally as needed (experimental)
 _FUZZ=                      1e-6                    #fuzz for layout arithmetic
+wrapA85=                    0                       #set to 1 to get old wrapped line behaviour
 
 # places to look for T1Font information
 T1SearchPath =  (
@@ -110,15 +111,31 @@ def _startUp():
     '''This function allows easy resetting to the global defaults
     If the environment contains 'RL_xxx' then we use the value
     else we use the given default'''
-    V = ('T1SearchPath','CMapSearchPath', 'TTFSearchPath',
-                'shapeChecking', 'defaultEncoding',
-                'pageCompression', 'defaultPageSize', 'defaultImageCaching',
-                'ZLIB_WARNINGS', 'warnOnMissingFontGlyphs', 'verbose', 'emptyTableAction',
-                'invariant','eps_preview_transparent',
-                )
-    import os, sys, string
+    V='''T1SearchPath
+CMapSearchPath
+TTFSearchPath
+allowTableBoundsErrors
+shapeChecking
+defaultEncoding 
+defaultGraphicsFontName
+pageCompression 
+defaultPageSize 
+defaultImageCaching 
+ZLIB_WARNINGS 
+warnOnMissingFontGlyphs 
+verbose 
+showBoundary 
+emptyTableAction
+invariant
+eps_preview_transparent
+overlapAttachedSpace
+longTableOptimize 
+autoConvertEncoding  
+_FUZZ
+wrapA85'''.split()
+    import os, sys
     global sys_version, _unset_
-    sys_version = string.split(sys.version)[0]      #strip off the other garbage
+    sys_version = sys.version.split()[0]        #strip off the other garbage
     from reportlab.lib import pagesizes
     from reportlab.lib.utils import rl_isdir
 
@@ -134,22 +151,40 @@ def _startUp():
     import reportlab
     D = {'REPORTLAB_DIR': os.path.abspath(os.path.dirname(reportlab.__file__)),
         'HOME': os.environ.get('HOME',os.getcwd()),
-        'disk': string.split(os.getcwd(), ':')[0],
+        'disk': os.getcwd().split(':')[0],
         'sys_version': sys_version,
         }
 
     for name in ('T1SearchPath','TTFSearchPath','CMapSearchPath'):
         P=[]
         for p in _SAVED[name]:
-            d = string.replace(p % D,'/',os.sep)
+            d = (p % D).replace('/',os.sep)
             if rl_isdir(d): P.append(d)
         _setOpt(name,P)
 
     for k in V[3:]:
         v = _SAVED[k]
-        if type(v)==type(1): conv = int
+        if isinstance(v,(int,float)): conv = type(v)
         elif k=='defaultPageSize': conv = lambda v,M=pagesizes: getattr(M,v)
         else: conv = None
         _setOpt(k,v,conv)
+
+_registered_resets=[]
+def register_reset(func):
+    _registered_resets[:] = [x for x in _registered_resets if x()]
+    L = [x for x in _registered_resets if x() is func]
+    if L: return
+    from weakref import ref
+    _registered_resets.append(ref(func))
+
+def _reset():
+    #attempt to reset reportlab and friends
+    _startUp()  #our reset
+    for f in _registered_resets[:]:
+        c = f()
+        if c:
+            c()
+        else:
+            _registered_resets.remove(f)
 
 _startUp()

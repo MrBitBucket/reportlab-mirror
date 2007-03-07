@@ -23,6 +23,22 @@ class HelloTestCase(unittest.TestCase):
         c.drawString(100,700, 'Hello World')
         c.save()
 
+    def test_rl_config_reset(self):
+        from reportlab import rl_config
+        from reportlab.pdfbase import pdfmetrics, _fontdata
+        tfd = pdfmetrics._typefaces
+        fbn = _fontdata.fontsByName
+        tfd[' a ']=1
+        fbn[' b ']=1
+        ntfd = len(tfd)
+        nfbn = len(fbn)
+        from reportlab.lib import sequencer
+        seq = sequencer.getSequencer()
+        seq._dingo = 1
+        rl_config._reset()
+        assert not hasattr(seq,'_dingo')
+        assert not tfd.has_key(' a ') and len(tfd)<ntfd
+        assert not fbn.has_key(' a ') and len(fbn)<nfbn
 
 def makeSuite():
     return makeSuiteForClasses(HelloTestCase)

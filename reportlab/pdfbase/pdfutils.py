@@ -8,7 +8,6 @@ __doc__=''
 
 import os
 from reportlab import rl_config
-from string import join, replace, strip, split
 from reportlab.lib.utils import getStringIO, ImageReader
 
 LINEEND = '\015\012'
@@ -59,7 +58,7 @@ def cacheImageFile(filename, returnInMemory=0, IMG=None):
     if filename==cachedname:
         if cachedImageExists(filename):
             from reportlab.lib.utils import open_for_read
-            if returnInMemory: return split(open_for_read(cachedname).read(),LINEEND)[:-1]
+            if returnInMemory: return filter(None,open_for_read(cachedname).read().split(LINEEND))
         else:
             raise IOError, 'No such cached image %s' % filename
     else:
@@ -68,7 +67,7 @@ def cacheImageFile(filename, returnInMemory=0, IMG=None):
 
         #save it to a file
         f = open(cachedname,'wb')
-        f.write(join(code, LINEEND)+LINEEND)
+        f.write(LINEEND.join(code)+LINEEND)
         f.close()
         if rl_config.verbose:
             print 'cached image as %s' % cachedname
@@ -142,29 +141,26 @@ except ImportError:
             del c
             #Michael Hudson donated this
             def _escape(s):
-                return join(map(lambda c, d=_ESCAPEDICT: d[c],s),'')
+                return ''.join(map(lambda c, d=_ESCAPEDICT: d[c],s))
         else:
             def _escape(s):
                 """Escapes some PDF symbols (in fact, parenthesis).
                 PDF escapes are almost like Python ones, but brackets
                 need slashes before them too. Uses Python's repr function
                 and chops off the quotes first."""
-                s = repr(s)[1:-1]
-                s = replace(s, '(','\(')
-                s = replace(s, ')','\)')
-                return s
+                return repr(s)[1:-1].replace('(','\(').replace(')','\)')
 
-def _normalizeLineEnds(text,desired=LINEEND):
+def _normalizeLineEnds(text,desired=LINEEND,unlikely='\000\001\002\003'):
     """Normalizes different line end character(s).
 
     Ensures all instances of CR, LF and CRLF end up as
     the specified one."""
-    unlikely = '\000\001\002\003'
-    text = replace(text, '\015\012', unlikely)
-    text = replace(text, '\015', unlikely)
-    text = replace(text, '\012', unlikely)
-    text = replace(text, unlikely, desired)
-    return text
+    
+    return (text
+            .replace('\015\012', unlikely)
+            .replace('\015', unlikely)
+            .replace(text, '\012', unlikely)
+            .replace(text, unlikely, desired))
 
 
 def _AsciiHexEncode(input):
@@ -186,7 +182,7 @@ def _AsciiHexDecode(input):
     Not used except to provide a test of the inverse function."""
 
     #strip out all whitespace
-    stripped = join(split(input),'')
+    stripped = ''.join(input.split())
     assert stripped[-1] == '>', 'Invalid terminator for Ascii Hex Stream'
     stripped = stripped[:-1]  #chop off terminator
     assert len(stripped) % 2 == 0, 'Ascii Hex stream has odd number of bytes'
@@ -279,13 +275,13 @@ if 1: # for testing always define this
         - but a round trip is essential for testing."""
         outstream = getStringIO()
         #strip all whitespace
-        stripped = join(split(input),'')
+        stripped = ''.join(input.split())
         #check end
         assert stripped[-2:] == '~>', 'Invalid terminator for Ascii Base 85 Stream'
         stripped = stripped[:-2]  #chop off terminator
 
         #may have 'z' in it which complicates matters - expand them
-        stripped = replace(stripped,'z','!!!!!')
+        stripped = stripped.replace('z','!!!!!')
         # special rules apply if not a multiple of five bytes.
         whole_word_count, remainder_size = divmod(len(stripped), 5)
         #print '%d words, %d leftover' % (whole_word_count, remainder_size)
@@ -365,7 +361,6 @@ except ImportError:
 
 def _wrap(input, columns=60):
     "Wraps input at a given column size by inserting LINEEND characters."
-
     output = []
     length = len(input)
     i = 0
@@ -374,8 +369,10 @@ def _wrap(input, columns=60):
         output.append(input[pos:pos+columns])
         i = i + 1
         pos = columns * i
-
-    return join(output, LINEEND)
+    #avoid HP printer problem
+    if len(output[-1])==1:
+        output[-2:] = [output[-2][:-1],output[-2][-1]+output[-1]]
+    return LINEEND.join(output)
 
 
 #########################################################################
