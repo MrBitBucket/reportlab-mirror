@@ -481,8 +481,8 @@ class TTFontFile(TTFontParser):
             raise TTFError, "Could not find PostScript font name"
         for c in psName:
             oc = ord(c)
-            if oc<33 or oc>126 or c in ('[', ']', '(', ')', '{', '}', '<', '>', '/', '%'):
-                raise TTFError, "psName contains invalid character '%s' ie U+%04X" % (c,ord(c))
+            if oc>126 or c in ' [](){}<>/%':
+                raise TTFError, "psName %r contains invalid character '%s' ie U+%04X" % (psName, c,ord(c))
         self.name = psName
         self.familyName = names[1] or psName
         self.styleName = names[2] or 'Regular'
