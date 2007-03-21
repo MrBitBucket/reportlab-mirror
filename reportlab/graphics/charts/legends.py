@@ -246,16 +246,15 @@ class Legend(Widget):
         if not deltay:
             deltay = max(dy,leading)+self.autoYPadding
         ba = self.boxAnchor
-        baw = ba not in ('nw','w','sw','autox')
         maxWidth = self._calculateMaxWidth(colorNamePairs)
         nCols = int((n+columnMaximum-1)/columnMaximum)
         xW = dx+dxTextSpace+self.autoXPadding
         variColumn = self.variColumn
         if variColumn:
-            width = reduce(operator.add,maxWidth,0)+xW*nCols
+            width = reduce(operator.add,maxWidth,0)+xW*(nCols-1)
         else:
             deltax = max(maxWidth+xW,deltax)
-            width = nCols*deltax
+            width = maxWidth+(nCols-1)*deltax
             maxWidth = nCols*[maxWidth]
 
         thisx = self.x
@@ -266,7 +265,7 @@ class Legend(Widget):
                 thisy += height/2.
             else:
                 thisy += height
-        if baw:
+        if ba not in ('nw','w','sw','autox'):
             if ba in ('n','c','s'):
                 thisx -= width/2
             else:
