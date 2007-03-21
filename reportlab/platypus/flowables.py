@@ -316,7 +316,11 @@ class Image(Flowable):
         if not fp and os.path.splitext(filename)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
             from reportlab.lib.utils import open_for_read
             f = open_for_read(filename, 'b')
-            info = pdfutils.readJPEGInfo(f)
+            try:
+                info = pdfutils.readJPEGInfo(f)
+            except:  #this is where we normally find a JPEG is corrupt.
+                #if so, include filename to help people track it down.
+                raise ValueError("Corrupt JPEG '%s', pdfutils.readJPEGInfo failed." % self.filename)
             f.close()
             self.imageWidth = info[0]
             self.imageHeight = info[1]
