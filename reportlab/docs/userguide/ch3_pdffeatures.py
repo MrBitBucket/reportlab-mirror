@@ -40,7 +40,7 @@ disc("""PDF supports internal hyperlinks.  There is a very wide
 
 eg("""
     canvas.bookmarkPage(name,
-                        fitType="Fit",
+                        fit="Fit",
                         left=None,
                         top=None,
                         bottom=None,
@@ -57,13 +57,13 @@ screen:""")
 eg("""canvas.bookmarkPage(name)""")
 
 disc("""The $bookmarkPage$ method can be instructed to display the
-page in a number of different ways by providing a $fitType$
+page in a number of different ways by providing a $fit$
 parameter.""")
 
 eg("")
 
 t = Table([
-           ['fitType','Parameters Required','Meaning'],
+           ['fit','Parameters Required','Meaning'],
            ['Fit',None,'Entire page fits in window (the default)'],
            ['FitH','top','Top coord at top of window, width scaled to fit'],
            ['FitV','left','Left coord at left of window, height scaled to fit'],
@@ -81,23 +81,23 @@ getStory().append(t)
 caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - Required attributes for different fit types""")
 
 disc("""
-Note : $fitType$ settings are case-sensitive so $fitType="FIT"$ is invalid$
+Note : $fit$ settings are case-sensitive so $fit="FIT"$ is invalid$
 """)
 
 
 disc("""
 Sometimes you want the destination of a jump to be some part of a page.
-The $FitR$ fitType allows you to identify a particular rectangle, scaling
+The $FitR$ fit allows you to identify a particular rectangle, scaling
 the area to fit the entire page.
 """)
 
 disc("""
 To set the display to a particular x and y coordinate of the page and to
-control the zoom directly use fitType="XYZ".
+control the zoom directly use fit="XYZ".
 """)
 
 eg("""
-canvas.bookmarkPage('my_bookmark',fitType="XYZ",left=0,top=200)
+canvas.bookmarkPage('my_bookmark',fit="XYZ",left=0,top=200)
 """)
 
 
@@ -109,13 +109,13 @@ user had it set to.
 """)
 
 eg("""
-canvas.bookmarkPage('my_bookmark',fitType="XYZ",left=0,top=200,zoom=2)
+canvas.bookmarkPage('my_bookmark',fit="XYZ",left=0,top=200,zoom=2)
 """)
 
 disc("""This time zoom is set to expand the page 2X its normal size.""")
 
 disc("""
-Note  : Both $XYZ$ and $FitR$ fitTypes require that their positional parameters
+Note  : Both $XYZ$ and $FitR$ fit types require that their positional parameters
 ($top, bottom, left, right$) be specified in terms of the default user space.
 They ignore any geometric transform in effect in the canvas graphic state.
 """)
