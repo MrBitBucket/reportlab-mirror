@@ -89,12 +89,13 @@ class Flowable:
     def drawOn(self, canvas, x, y, _sW=0):
         "Tell it to draw itself on the canvas.  Do not override"
         if _sW and hasattr(self,'hAlign'):
+            from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
             a = self.hAlign
-            if a in ['CENTER','CENTRE']:
+            if a in ('CENTER','CENTRE', TA_CENTER):
                 x = x + 0.5*_sW
-            elif a == 'RIGHT':
+            elif a in ('RIGHT',TA_RIGHT):
                 x = x + _sW
-            elif a != 'LEFT':
+            elif a not in ('LEFT',TA_LEFT):
                 raise ValueError, "Bad hAlign value "+str(a)
         canvas.saveState()
         canvas.translate(x, y)
