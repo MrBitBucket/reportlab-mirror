@@ -421,6 +421,8 @@ class TTFontFile(TTFontParser):
             descent      - Typographic descender in 1/1000ths of a point
             capHeight    - Cap height in 1/1000ths of a point (0 if not available)
             bbox         - Glyph bounding box [l,t,r,b] in 1/1000ths of a point
+            _bbox        - Glyph bounding box [l,t,r,b] in unitsPerEm
+            unitsPerEm   - Glyph units per em
             italicAngle  - Italic angle in degrees ccw
             stemV        - stem weight in 1/1000ths of a point (approximate)
         If charInfo is true, the following will also be set:
@@ -501,13 +503,14 @@ class TTFontFile(TTFontParser):
         if magic != 0x5F0F3CF5:
             raise TTFError, 'Invalid head table magic %04x' % magic
         self.skip(2)
-        unitsPerEm = self.read_ushort()
+        self.unitsPerEm = unitsPerEm = self.read_ushort()
         scale = lambda x, unitsPerEm=unitsPerEm: x * 1000 / unitsPerEm
         self.skip(16)
         xMin = self.read_short()
         yMin = self.read_short()
         xMax = self.read_short()
         yMax = self.read_short()
+        self._bbox = (xMin, yMin, xMax, yMax)
         self.bbox = map(scale, [xMin, yMin, xMax, yMax])
         self.skip(3*2)
         indexToLocFormat = self.read_ushort()
