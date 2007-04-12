@@ -115,8 +115,8 @@ class _isListOfShapes(Validator):
         from reportlab.graphics.shapes import Shape
         if type(x) in _SequenceTypes:
             answer = 1
-            for element in x:
-                if not isinstance(x, Shape):
+            for e in x:
+                if not isinstance(e, Shape):
                     answer = 0
             return answer
         else:
