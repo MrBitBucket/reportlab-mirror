@@ -61,16 +61,22 @@ else:
     def _digester(s):
         return join(map(lambda x : "%02x" % ord(x), md5.md5(s).digest()), '')
 
-def _annFormat(D,color,thickness,dashArray):
-    from reportlab.pdfbase.pdfdoc import PDFArray
+def _annFormat(D,color,thickness,dashArray,hradius=0,vradius=0):
+    from reportlab.pdfbase.pdfdoc import PDFArray, PDFDictionary
     if color:
         D["C"] = PDFArray([color.red, color.green, color.blue])
-    border = [0,0,0]
-    if thickness:
-        border[2] = thickness
+    border = [hradius,vradius,thickness or 0]
     if dashArray:
         border.append(PDFArray(dashArray))
     D["Border"] = PDFArray(border)
+#   BS = PDFDictionary()
+#   bss = 'S'
+#   if dashArray:
+#       BS['D'] = PDFArray(dashArray)
+#       bss = 'D'
+#   BS['W'] = thickness or 0
+#   BS['S'] = bss
+#   D['BS'] = BS
 
 class Canvas(textobject._PDFColorSetter):
     """This class is the programmer's interface to the PDF file format.  Methods
@@ -798,7 +804,7 @@ class Canvas(textobject._PDFColorSetter):
         return self.linkRect(contents, destinationname, Rect, addtopage, name, relative=0,
                 thickness=thickness, color=color, dashArray=dashArray, **kw)
 
-    def linkRect(self, contents, destinationname, Rect=None, addtopage=1, name=None, relative=0,
+    def linkRect(self, contents, destinationname, Rect=None, addtopage=1, name=None, relative=1,
             thickness=0, color=None, dashArray=None, **kw):
         """rectangular link annotation w.r.t the current user transform.
            if the transform is skewed/rotated the absolute rectangle will use the max/min x/y
