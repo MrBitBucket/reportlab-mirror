@@ -126,12 +126,13 @@ class FIM(Barcode):
         return self.decomposed
 
     def computeSize(self):
-        self.width = (len(self.decomposed) - 1) * self.spaceWidth + self.barWidth
+        self._width = (len(self.decomposed) - 1) * self.spaceWidth + self.barWidth
         if self.quiet:
-            self.width += self.lquiet + self.rquiet
-        self.height = self.barHeight
+            self._width += self.lquiet + self.rquiet
+        self._height = self.barHeight
 
     def draw(self):
+        self._calculate()
         left = self.quiet and self.lquiet or 0
         for c in self.decomposed:
             if c == '|':
@@ -197,7 +198,7 @@ class POSTNET(Barcode):
                 pass
             else:
                 raise ValueError, "Invalid character in input"
-        check = (10 - (check % 10)) % 10
+        check = (10 - check) % 10
         self.encoded = self.encoded + `check` + 'S'
         return self.encoded
 
@@ -208,10 +209,11 @@ class POSTNET(Barcode):
         return self.decomposed
 
     def computeSize(self):
-        self.width = len(self.decomposed) * self.barWidth + (len(self.decomposed) - 1) * self.spaceWidth
-        self.height = self.barHeight
+        self._width = len(self.decomposed) * self.barWidth + (len(self.decomposed) - 1) * self.spaceWidth
+        self._height = self.barHeight
 
     def draw(self):
+        self._calculate()
         sdown = self.barHeight - self.shortHeight
         left = 0
 
