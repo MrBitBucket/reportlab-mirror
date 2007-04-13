@@ -449,6 +449,7 @@ eg("""
  canvas.beginForm(name, lowerx=0, lowery=0, upperx=None, uppery=None)
  canvas.endForm()
  canvas.linkAbsolute(contents, destinationname, Rect=None, addtopage=1, name=None, **kw)
+ canvas.linkRect(contents, destinationname, Rect=None, addtopage=1, relative=1, name=None, **kw)
  canvas.getPageNumber()
  canvas.addLiteral()
  canvas.getAvailableFonts()

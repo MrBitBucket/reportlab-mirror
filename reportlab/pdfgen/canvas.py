@@ -63,12 +63,13 @@ else:
 
 def _annFormat(D,color,thickness,dashArray,hradius=0,vradius=0):
     from reportlab.pdfbase.pdfdoc import PDFArray, PDFDictionary
-    if color:
+    if color and not D.has_key('C'):
         D["C"] = PDFArray([color.red, color.green, color.blue])
-    border = [hradius,vradius,thickness or 0]
-    if dashArray:
-        border.append(PDFArray(dashArray))
-    D["Border"] = PDFArray(border)
+    if not D.has_key('Border'):
+        border = [hradius,vradius,thickness or 0]
+        if dashArray:
+            border.append(PDFArray(dashArray))
+        D["Border"] = PDFArray(border)
 #   BS = PDFDictionary()
 #   bss = 'S'
 #   if dashArray:

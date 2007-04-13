@@ -631,6 +631,9 @@ class PDFDictionary:
 
     def copy(self):
         return PDFDictionary(self.dict)
+
+    def has_key(self,k):
+        return self.dict.has_key(k)
     
 # stream filters are objects to support round trip and
 # possibly in the future also support parameters

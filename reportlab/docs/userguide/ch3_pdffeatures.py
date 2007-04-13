@@ -132,7 +132,8 @@ and $bookmarkHorizontal$.
 
 heading3("Defining internal links")
 eg("""
- canvas.linkAbsolute(contents, destinationname, Rect=None, addtopage=1, name=None, **kw)
+ canvas.linkAbsolute(contents, destinationname, Rect=None, addtopage=1, name=None, 
+ thickness=0, color=None, dashArray=None, **kw)
  """)
 
 disc("""
@@ -181,6 +182,12 @@ eg("""
                      (inch, inch, 6*inch, 2*inch), Border='[0 0 0]')
 """)
 
+disc("""The $thickness$, $color$ and $dashArray$ arguments may be used alternately
+to specify a border if no Border argument is specified.
+If Border is specified it must be either a string representation of a PDF
+array or a $PDFArray$ (see the pdfdoc module). The $color$ argument (which should be a $Color$ instance) is equivalent to a keyword argument $C$ which should resolve to a PDF color definition (Normally a three entry PDF array).
+""")
+disc("""The $canvas.linkRect$ method is similar in intent to the $linkAbsolute$ method, but has an extra argiument $relative=1$ so is intended to obey the local userspace transformation.""")
 
 heading2("Outline Trees")
 disc("""Acrobat Reader has a navigation page which can hold a
