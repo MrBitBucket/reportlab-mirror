@@ -81,7 +81,7 @@ getStory().append(t)
 caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - Required attributes for different fit types""")
 
 disc("""
-Note : $fit$ settings are case-sensitive so $fit="FIT"$ is invalid$
+Note : $fit$ settings are case-sensitive so $fit="FIT"$ is invalid
 """)
 
 
@@ -187,7 +187,7 @@ to specify a border if no Border argument is specified.
 If Border is specified it must be either a string representation of a PDF
 array or a $PDFArray$ (see the pdfdoc module). The $color$ argument (which should be a $Color$ instance) is equivalent to a keyword argument $C$ which should resolve to a PDF color definition (Normally a three entry PDF array).
 """)
-disc("""The $canvas.linkRect$ method is similar in intent to the $linkAbsolute$ method, but has an extra argiument $relative=1$ so is intended to obey the local userspace transformation.""")
+disc("""The $canvas.linkRect$ method is similar in intent to the $linkAbsolute$ method, but has an extra argument $relative=1$ so is intended to obey the local userspace transformation.""")
 
 heading2("Outline Trees")
 disc("""Acrobat Reader has a navigation page which can hold a
