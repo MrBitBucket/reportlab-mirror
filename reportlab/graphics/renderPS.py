@@ -4,6 +4,7 @@
 __version__=''' $Id$ '''
 import string, types
 from reportlab.pdfbase.pdfmetrics import getFont, stringWidth # for font info
+from reportlab.pdfbase import pdfutils
 from reportlab.lib.utils import fp_str, getStringIO
 from reportlab.lib.colors import black
 from reportlab.graphics.renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing
@@ -203,13 +204,11 @@ class PSCanvas:
         '''
         return a copy of string s with special characters in postscript strings
         escaped with backslashes.
-        Have not handled characters that are converted normally in python strings
-        i.e. \n -> newline
         '''
-        str = string.replace(s, chr(0x5C), r'\\' )
-        str = string.replace(str, '(', '\(' )
-        str = string.replace(str, ')', '\)')
-        return str
+        try:
+            return pdfutils._escape(s)
+        except:
+            raise ValueError("cannot escape %s %s" % (s, repr(s)))
 
     def drawString(self, x, y, s, angle=0):
         if self._fillColor != None:
