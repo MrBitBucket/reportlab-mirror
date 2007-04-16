@@ -504,13 +504,12 @@ class TTFontFile(TTFontParser):
             raise TTFError, 'Invalid head table magic %04x' % magic
         self.skip(2)
         self.unitsPerEm = unitsPerEm = self.read_ushort()
-        scale = lambda x, unitsPerEm=unitsPerEm: x * 1000 / unitsPerEm
+        scale = lambda x, unitsPerEm=unitsPerEm: x * 1000. / unitsPerEm
         self.skip(16)
         xMin = self.read_short()
         yMin = self.read_short()
         xMax = self.read_short()
         yMax = self.read_short()
-        self._bbox = (xMin, yMin, xMax, yMax)
         self.bbox = map(scale, [xMin, yMin, xMax, yMax])
         self.skip(3*2)
         indexToLocFormat = self.read_ushort()
@@ -1001,6 +1000,16 @@ class TTFont:
         dw = self.face.defaultWidth
         return 0.001*size*sum([g(ord(u),dw) for u in text])
     stringWidth = _py_stringWidth
+
+    def _assignState(self,doc,asciiReadable=None):
+        '''convenience function for those wishing to roll their own state properties'''
+        if asciiReadable is None:
+            asciiReadable = self._asciiReadable
+        try:
+            state = self.state[doc]
+        except KeyError:
+            state = self.state[doc] = TTFont.State(asciiReadable)
+        return state
 
     def splitString(self, text, doc, encoding='utf-8'):
         """Splits text into a number of chunks, each of which belongs to a
