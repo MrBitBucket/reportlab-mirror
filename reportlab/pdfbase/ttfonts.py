@@ -955,8 +955,8 @@ class TTFont:
         canvas.setFont('PostScriptFontName', size)
         canvas.drawString(x, y, "Some text encoded in UTF-8")
     """
-
     class State:
+        namePrefix = 'F'
         def __init__(self,asciiReadable=1):
             self.assignments = {}
             self.nextCode = 0
@@ -1001,7 +1001,7 @@ class TTFont:
         return 0.001*size*sum([g(ord(u),dw) for u in text])
     stringWidth = _py_stringWidth
 
-    def _assignState(self,doc,asciiReadable=None):
+    def _assignState(self,doc,asciiReadable=None,namePrefix=None):
         '''convenience function for those wishing to roll their own state properties'''
         if asciiReadable is None:
             asciiReadable = self._asciiReadable
@@ -1009,6 +1009,8 @@ class TTFont:
             state = self.state[doc]
         except KeyError:
             state = self.state[doc] = TTFont.State(asciiReadable)
+            if namePrefix is not None:
+                state.namePrefix = namePrefix
         return state
 
     def splitString(self, text, doc, encoding='utf-8'):
@@ -1064,7 +1066,7 @@ class TTFont:
         if subset < 0 or subset >= len(state.subsets):
             raise IndexError, 'Subset %d does not exist in font %s' % (subset, self.fontName)
         if state.internalName is None:
-            state.internalName = 'F%d' % (len(doc.fontMapping) + 1)
+            state.internalName = state.namePrefix +`(len(doc.fontMapping) + 1)`
             doc.fontMapping[self.fontName] = '/' + state.internalName
             doc.delayedFonts.append(self)
         return '/%s+%d' % (state.internalName, subset)
