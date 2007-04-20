@@ -4,7 +4,6 @@
 __version__=''' $Id$ '''
 import string, types
 from reportlab.pdfbase.pdfmetrics import getFont, stringWidth # for font info
-from reportlab.pdfbase import pdfutils
 from reportlab.lib.utils import fp_str, getStringIO
 from reportlab.lib.colors import black
 from reportlab.graphics.renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing
@@ -13,6 +12,28 @@ import math
 from types import StringType
 from operator import getitem
 from reportlab import rl_config
+_ESCAPEDICT={}
+for c in xrange(256):
+    if c<32 or c>=127:
+        _ESCAPEDICT[chr(c)]= '\\%03o' % c
+    elif c in (ord('\\'),ord('('),ord(')')):
+        _ESCAPEDICT[chr(c)] = '\\'+chr(c)
+    else:
+        _ESCAPEDICT[chr(c)] = chr(c)
+    del c
+
+def _escape_and_limit(s):
+    R = []
+    aR = R.append
+    n = 0
+    for c in s:
+        c = _ESCAPEDICT[c]
+        aR(c)
+        n += len(c)
+        if n>=200:
+            n = 0
+            aR('\\\n')
+    return ''.join(R)
 
 # we need to create encoding vectors for each font we use, or they will
 # come out in Adobe's old StandardEncoding, which NOBODY uses.
@@ -206,7 +227,7 @@ class PSCanvas:
         escaped with backslashes.
         '''
         try:
-            return pdfutils._escape(s)
+            return _escape_and_limit(s)
         except:
             raise ValueError("cannot escape %s %s" % (s, repr(s)))
 
