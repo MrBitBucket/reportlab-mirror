@@ -707,8 +707,10 @@ class Drawing(Group, Flowable):
                                 title = fnroot,
                                 dept = getattr(self,'EPS_info',['Testing'])[0],
                                 company = getattr(self,'EPS_info',['','ReportLab'])[1],
-                                preview = getattr(self,'preview',1),
-                                showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderPS_',**kw))
+                                preview = getattr(self,'preview',rl_config.eps_preview),
+                                showBoundary=getattr(self,'showBorder',rl_config.showBoundary),
+                                ttf_embed=getattr(self,'ttf_embed',rl_config.eps_ttf_embed),
+                                **_extraKW(self,'_renderPS_',**kw))
             ext = ext +  '/.eps'
 
         if 'svg' in plotMode:

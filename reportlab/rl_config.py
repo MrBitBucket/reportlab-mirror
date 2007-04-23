@@ -17,6 +17,8 @@ showBoundary =              0                       # turns on and off boundary 
 emptyTableAction=           'error'                 # one of 'error', 'indicate', 'ignore'
 invariant=                  0                       #produces repeatable,identical PDFs with same timestamp info (for regression testing)
 eps_preview_transparent=    None                    #set to white etc
+eps_preview=                1                   #set to False to disable
+eps_ttf_embed=              1                   #set to False to disable
 overlapAttachedSpace=       1                       #if set non false then adajacent flowable space after
                                                     #and space before are merged (max space is used).
 longTableOptimize =         0                       #default don't use Henning von Bargen's long table optimizations
@@ -128,6 +130,8 @@ showBoundary
 emptyTableAction
 invariant
 eps_preview_transparent
+eps_preview
+eps_ttf_embed
 overlapAttachedSpace
 longTableOptimize 
 autoConvertEncoding  
