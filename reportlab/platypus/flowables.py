@@ -772,6 +772,18 @@ class PTOContainer(_Container,Flowable):
             SS = c.splitOn(canv,availWidth,aH)
         else:
             SS = []
+
+        if not SS:
+            j = i
+            while i>1 and C[i-1].getKeepWithNext():
+                i -= 1
+                C[i].keepWithNext = 0
+
+            if i==1 and C[0].getKeepWithNext():
+                #robin's black sheep
+                i = j
+                C[0].keepWithNext = 0
+
         F = [UseUpSpace()]
 
         if len(SS)>1:
