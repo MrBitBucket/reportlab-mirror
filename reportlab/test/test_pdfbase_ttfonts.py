@@ -9,7 +9,7 @@ import string
 from cStringIO import StringIO
 
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation, NearTestCase
 
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
@@ -91,7 +91,7 @@ class TTFontsTestCase(unittest.TestCase):
         c.save()
 
 
-class TTFontFileTestCase(unittest.TestCase):
+class TTFontFileTestCase(NearTestCase):
     "Tests TTFontFile, TTFontParser and TTFontMaker classes"
 
     def testFontFileFailures(self):
@@ -127,10 +127,10 @@ class TTFontFileTestCase(unittest.TestCase):
         self.assertEquals(ttf.name, "LuxiSerif")
         self.assertEquals(ttf.flags, FF_SYMBOLIC)
         self.assertEquals(ttf.italicAngle, 0.0)
-        self.assertEquals(ttf.ascent, 783)      # FIXME: or 992?
-        self.assertEquals(ttf.descent, -206)    # FIXME: or -210?
+        self.assertNear(ttf.ascent,783.203125)    # FIXME: or 992?
+        self.assertNear(ttf.descent,-205.078125)    # FIXME: or -210?
         self.assertEquals(ttf.capHeight, 0)
-        self.assertEquals(ttf.bbox, [-204, -211, 983, 992])
+        self.assertNear(ttf.bbox, [-203.125, -210.9375, 983.3984375, 992.67578125])
         self.assertEquals(ttf.stemV, 87)
         self.assertEquals(ttf.defaultWidth, 250)
 
@@ -182,10 +182,10 @@ class TTFontFileTestCase(unittest.TestCase):
         self.assertEquals(subset.name, "LuxiSerif")
         self.assertEquals(subset.flags, FF_SYMBOLIC)
         self.assertEquals(subset.italicAngle, 0.0)
-        self.assertEquals(subset.ascent, 783)      # FIXME: or 992?
-        self.assertEquals(subset.descent, -206)    # FIXME: or -210?
+        self.assertNear(subset.ascent,783.203125)       # FIXME: or 992?
+        self.assertNear(subset.descent,-205.078125)     # FIXME: or -210?
         self.assertEquals(subset.capHeight, 0)
-        self.assertEquals(subset.bbox, [-204, -211, 983, 992])
+        self.assertNear(subset.bbox, [-203.125, -210.9375, 983.3984375, 992.67578125])
         self.assertEquals(subset.stemV, 87)
 
     def testFontMaker(self):
@@ -223,7 +223,7 @@ class TTFontFaceTestCase(unittest.TestCase):
         self.assert_(fontFile.content != "")
 
 
-class TTFontTestCase(unittest.TestCase):
+class TTFontTestCase(NearTestCase):
     "Tests TTFont class"
 
     def testParseUTF8(self):
@@ -247,7 +247,7 @@ class TTFontTestCase(unittest.TestCase):
         self.assert_(font.stringWidth("test", 10) > 0)
         width = font.stringWidth(utf8(0x2260) * 2, 1000)
         expected = font.face.getCharWidth(0x2260) * 2
-        self.assert_(abs(width - expected) < 0.01, "%g != %g" % (width, expected))
+        self.assertNear(width,expected)
 
     def testSplitString(self):
         "Tests TTFont.splitString"

@@ -1,5 +1,5 @@
 from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation, NearTestCase
 
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
@@ -44,7 +44,7 @@ def subsetToUnicode(ttf, subsetCodeStr):
             chrs.append(unichr(subset[int(codeStr[1:], 8)]))
     return u''.join(chrs)
 
-class TextEncodingTestCase(unittest.TestCase):
+class TextEncodingTestCase(NearTestCase):
     """Tests of expected Unicode and encoding behaviour
     """
     def setUp(self):
@@ -55,34 +55,34 @@ class TextEncodingTestCase(unittest.TestCase):
 
     def testStringWidth(self):
         msg = 'Hello World'
-        assert abs(pdfmetrics.stringWidth(msg, 'Courier', 10) - 66.0) < 0.01
-        assert abs(pdfmetrics.stringWidth(msg, 'Helvetica', 10) - 51.67) < 0.01
-        assert abs(pdfmetrics.stringWidth(msg, 'Times-Roman', 10) - 50.27) < 0.01
-        assert abs(pdfmetrics.stringWidth(msg, 'Luxi', 10) - 50.22) < 0.01
+        self.assertNear(pdfmetrics.stringWidth(msg, 'Courier', 10),66.0)
+        self.assertNear(pdfmetrics.stringWidth(msg, 'Helvetica', 10),51.67)
+        self.assertNear(pdfmetrics.stringWidth(msg, 'Times-Roman', 10),50.27)
+        self.assertNear(pdfmetrics.stringWidth(msg, 'Luxi', 10),50.263671875)
 
         uniMsg1 = u"Hello World"
-        assert abs(pdfmetrics.stringWidth(uniMsg1, 'Courier', 10) - 66.0) < 0.01
-        assert abs(pdfmetrics.stringWidth(uniMsg1, 'Helvetica', 10) - 51.67) < 0.01
-        assert abs(pdfmetrics.stringWidth(uniMsg1, 'Times-Roman', 10) - 50.27) < 0.01
-        assert abs(pdfmetrics.stringWidth(uniMsg1, 'Luxi', 10) - 50.22) < 0.01
+        self.assertNear(pdfmetrics.stringWidth(uniMsg1, 'Courier', 10),66.0)
+        self.assertNear(pdfmetrics.stringWidth(uniMsg1, 'Helvetica', 10),51.67)
+        self.assertNear(pdfmetrics.stringWidth(uniMsg1, 'Times-Roman', 10),50.27)
+        self.assertNear(pdfmetrics.stringWidth(uniMsg1, 'Luxi', 10),50.263671875)
 
 
         # Courier are all 600 ems wide.  So if one 'measures as utf8' one will
         # get a wrong width as extra characters are seen
-        assert len(testCp1252) == 52
-        assert abs(pdfmetrics.stringWidth(testCp1252, 'Courier', 10, 'cp1252') - 312.0) < 0.01
+        self.assertEquals(len(testCp1252),52)
+        self.assertNear(pdfmetrics.stringWidth(testCp1252, 'Courier', 10, 'cp1252'),312.0)
         # the test string has 5 more bytes and so "measures too long" if passed to
         # a single-byte font which treats it as a single-byte string.
-        assert len(testUTF8)==57
-        assert abs(pdfmetrics.stringWidth(testUTF8, 'Courier', 10) - 312.0) < 0.01
+        self.assertEquals(len(testUTF8),57)
+        self.assertNear(pdfmetrics.stringWidth(testUTF8, 'Courier', 10),312.0)
 
-        assert len(testUni)==52
-        assert abs(pdfmetrics.stringWidth(testUni, 'Courier', 10) - 312.0) < 0.01
+        self.assertEquals(len(testUni),52)
+        self.assertNear(pdfmetrics.stringWidth(testUni, 'Courier', 10),312.0)
 
 
         # now try a TrueType font.  Should be able to accept Unicode or UTF8
-        assert abs(pdfmetrics.stringWidth(testUTF8, 'Luxi', 10) - 224.44) < 0.01
-        assert abs(pdfmetrics.stringWidth(testUni, 'Luxi', 10) - 224.44) < 0.01
+        self.assertNear(pdfmetrics.stringWidth(testUTF8, 'Luxi', 10),224.638671875)
+        self.assertNear(pdfmetrics.stringWidth(testUni, 'Luxi', 10),224.638671875)
 
     def testUtf8Canvas(self):
         """Verify canvas declared as utf8 autoconverts.
