@@ -504,6 +504,17 @@ class Paragraph(Flowable):
 
         The whole may be surrounded by <para> </para> tags
 
+        The <b> and <i> tags will work for the built-in fonts (Helvetica
+        /Times / Courier).  For other fonts you need to register a family
+        of 4 fonts using reportlab.pdfbase.pdfmetrics.registerFont; then
+        use the addMapping function to tell the library that these 4 fonts
+        form a family e.g.
+            from reportlab.lib.fonts import addMapping
+            addMapping('Vera', 0, 0, 'Vera')    #normal
+            addMapping('Vera', 0, 1, 'Vera-Italic')    #italic
+            addMapping('Vera', 1, 0, 'Vera-Bold')    #bold
+            addMapping('Vera', 1, 1, 'Vera-BoldItalic')    #italic and bold
+
         It will also be able to handle any MathML specified Greek characters.
     """
     def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1, encoding='utf8'):
