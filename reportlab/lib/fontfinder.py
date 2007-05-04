@@ -2,7 +2,6 @@
 #see license.txt for license details
 __version__=''' $Id$ '''
 
-
 #modification of users/robin/ttflist.py.
 """This provides some general-purpose tools for finding fonts.
 
@@ -10,7 +9,6 @@ The FontFinder object can search for font files.  It aims to build
 a catalogue of fonts which our framework can work with.  It may be useful
 if you are building GUIs or design-time interfaces and want to present users
 with a choice of fonts.
-
 
 There are 3 steps to using it
 1. create FontFinder and set options and directories
@@ -25,8 +23,6 @@ There are 3 steps to using it
 
 Because the disk search takes some time to find and parse hundreds of fonts,
 it can use a cache to store a file with all fonts found. The cache file name
-is a function of the directories chosen.
-
 
 For each font found, it creates a structure with
 - the short font name
@@ -62,11 +58,8 @@ of non-Python applications.
 Future plans might include using this to auto-register fonts; and making it
 update itself smartly on repeated instantiation.
 """
-
 import sys, time, os, cPickle, md5, tempfile
-
 from xml.sax.saxutils import quoteattr
-        
 
 EXTENSIONS = ['.ttf','.ttc','.otf','.pfb','.pfa']
 
@@ -80,7 +73,6 @@ FF_ITALIC       = 1 <<  7-1
 FF_ALLCAP       = 1 << 17-1
 FF_SMALLCAP     = 1 << 18-1
 FF_FORCEBOLD    = 1 << 19-1
-
 
 class FontDescriptor:
     """This is a short descriptive record about a font.
@@ -106,7 +98,6 @@ class FontDescriptor:
     def __repr__(self):
         return "FontDescriptor(%s)" % self.name
 
-
     def getTag(self):
         "Return an XML tag representation"
         attrs = []
@@ -115,16 +106,15 @@ class FontDescriptor:
                 if v:
                     attrs.append('%s=%s' % (k, quoteattr(str(v))))
         return '<font ' + ' '.join(attrs) + '/>'
-        
 
 class FontFinder:
     def __init__(self, dirs=[], useCache=True, validate=False):
         self.useCache = useCache
         self.validate = validate
-        
+
         self._dirs = set(dirs)
         self._fonts = []
-        
+
         self._skippedFiles = [] #list of filenames we did not handle
         self._badFiles = []  #list of filenames we rejected
 
@@ -143,7 +133,7 @@ class FontFinder:
 
     def getFamilyNames(self):
         "Returns a list of the distinct font families found"
-        
+
         if not self._fontsByFamily:
             fonts = self._fonts
             for font in fonts:
@@ -158,13 +148,10 @@ class FontFinder:
 
     def getFontsInFamily(self, familyName):
         "Return list of all font objects with this family name"
-        return self._fontsByFamily[familyName]
-
+        return self._fontsByFamily.get(familyName,[])
 
     def getFamilyXmlReport(self):
         """Reports on all families found as XML.
-        
-
         """
         lines = []
         lines.append("<font_families>")
@@ -193,17 +180,15 @@ class FontFinder:
 
     def getFont(self, familyName, bold=False, italic=False):
         """Try to find a font matching the spec"""
-        
+
         for font in self._fonts:
             if font.familyName == familyName:
                 if font.isBold == bold:
                     if font.isItalic == italic:
                         return font
-                    
-        raise KeyError("Cannot find font %s with bold=%s, italic=%s" % (familyName, bold, italic)) 
 
-    
-    
+        raise KeyError("Cannot find font %s with bold=%s, italic=%s" % (familyName, bold, italic))
+
     def _getCacheFileName(self):
         """Base this on the directories...same set of directories
         should give same cache"""
@@ -211,8 +196,6 @@ class FontFinder:
         from reportlab.lib.utils import get_rl_tempfile
         fn = get_rl_tempfile('fonts_%s.dat' % hash)
         return fn
-    
-
 
     def save(self, fileName):
         f = open(fileName, 'w')
@@ -224,12 +207,11 @@ class FontFinder:
         finder2 = cPickle.load(f)
         f.close()
         self.__dict__.update(finder2.__dict__)
-        
+
     def search(self):
         started = time.clock()
         if not self._dirs:
             raise ValueError("Font search path is empty!  Please specify search directories using addDirectory or addDirectories")
-
 
         if self.useCache:
             cfn = self._getCacheFileName()
@@ -237,10 +219,8 @@ class FontFinder:
                 self.load(cfn)
                 print "loaded cached file with %d fonts (%s)" % (len(self._fonts), cfn)
                 return
-            
 
         from stat import ST_MTIME
-
         for dirName in self._dirs:
             fileNames = os.listdir(dirName)
             for fileName in fileNames:
@@ -296,16 +276,11 @@ class FontFinder:
                         f.isItalic = (float(info.get('ItalicAngle', 0)) > 0.0)
                         #if the weight has the word bold, deem it bold
                         f.isBold = ('bold' in info.get('Weight','').lower())
-                        
-                        
-                            
-                        
 
-                    
                     self._fonts.append(f)
         if self.useCache:
             self.save(cfn)
-            
+
         finished = time.clock()
         print "found %d fonts; skipped %d; bad %d.  Took %0.2f seconds" % (
             len(self._fonts), len(self._skippedFiles), len(self._badFiles),
@@ -338,10 +313,9 @@ def test():
     print 'Bold fonts\n\t'
     for font in ff.getFontsWithAttributes(isBold=True, isItalic=False):
         print font.fullName ,
-        
 
     print 'family report'
     print ff.getFamilyXmlReport()
-    
+
 if __name__=='__main__':
     test()
