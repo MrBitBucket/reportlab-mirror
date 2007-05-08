@@ -531,6 +531,12 @@ class YCategoryAxis(CategoryAxis):
                 g.add(label)
         return g
 
+class TickLabeller:
+    '''Abstract base class which may be used to indicate a change
+    in the call signature for callable label formats
+    '''
+    def __call__(self,axis,value):
+        return 'Abstract class instance called'
 
 # Value axes.
 class ValueAxis(_AxisG):
@@ -886,7 +892,10 @@ class ValueAxis(_AxisG):
                     else:
                         txt = ''
                 elif callable(f):
-                    txt = f(t)
+                    if isinstance(f,TickLabeller):
+                        txt = f(self,t)
+                    else:
+                        txt = f(t)
                 else:
                     raise ValueError, 'Invalid labelTextFormat %s' % f
                 if post: txt = post % txt
@@ -895,7 +904,7 @@ class ValueAxis(_AxisG):
                 apply(label.setOrigin,pos)
                 label.setText(txt)
                 g.add(label)
-            i = i + 1
+            i += 1
 
         return g
 
