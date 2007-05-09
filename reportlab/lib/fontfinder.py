@@ -107,6 +107,7 @@ class FontDescriptor:
                     attrs.append('%s=%s' % (k, quoteattr(str(v))))
         return '<font ' + ' '.join(attrs) + '/>'
 
+from reportlab.lib.utils import rl_isdir, rl_isfile, rl_listdir, rl_getmtime
 class FontFinder:
     def __init__(self, dirs=[], useCache=True, validate=False):
         self.useCache = useCache
@@ -121,10 +122,11 @@ class FontFinder:
         self._fontsByName = {}
         self._fontsByFamily = {}
         self._fontsByFamilyBoldItalic = {}   #indexed by bold, italic
+
     def addDirectory(self, dirName):
         #aesthetics - if there are 2 copies of a font, should the first or last
         #be picked up?  might need reversing
-        if os.path.isdir(dirName):
+        if rl_isdir(dirName):
             self._dirs.add(dirName)
 
     def addDirectories(self, dirNames):
@@ -215,21 +217,21 @@ class FontFinder:
 
         if self.useCache:
             cfn = self._getCacheFileName()
-            if os.path.isfile(cfn):
+            if rl_isfile(cfn):
                 self.load(cfn)
                 print "loaded cached file with %d fonts (%s)" % (len(self._fonts), cfn)
                 return
 
         from stat import ST_MTIME
         for dirName in self._dirs:
-            fileNames = os.listdir(dirName)
+            fileNames = rl_listdir(dirName)
             for fileName in fileNames:
                 root, ext = os.path.splitext(fileName)
                 if ext.lower() in EXTENSIONS:
                     #it's a font
                     f = FontDescriptor()
                     f.fileName = os.path.join(dirName, fileName)
-                    f.timeModified = os.stat(os.path.join(dirName, fileName))[ST_MTIME]
+                    f.timeModified = rl_getmtime(f.fileName)
 
                     ext = ext.lower()
                     if ext[0] == '.':
@@ -260,9 +262,9 @@ class FontFinder:
                     elif ext == 'pfb':
 
                         # type 1; we need an AFM file or have to skip.
-                        if os.path.isfile(os.path.join(dirName, root + '.afm')):
+                        if rl_isfile(os.path.join(dirName, root + '.afm')):
                             f.metricsFileName = os.path.join(dirName, root + '.afm')
-                        elif os.path.isfile(os.path.join(dirName, root + '.AFM')):
+                        elif rl_isfile(os.path.join(dirName, root + '.AFM')):
                             f.metricsFileName = os.path.join(dirName, root + '.AFM')
                         else:
                             self._skippedFiles.append(fileName)
@@ -294,8 +296,8 @@ def test():
     ff.useCache = True
     ff.validate = True
 
-    ff.addDirectory('C:\\windows\\fonts')
     import reportlab
+    ff.addDirectory('C:\\windows\\fonts')
     rlFontDir = os.path.join(os.path.dirname(reportlab.__file__), 'fonts')
     ff.addDirectory(rlFontDir)
     ff.search()
