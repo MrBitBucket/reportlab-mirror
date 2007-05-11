@@ -3,7 +3,7 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/renderPS.py
 __version__=''' $Id$ '''
 import string, types
-from reportlab.pdfbase.pdfmetrics import getFont, stringWidth # for font info
+from reportlab.pdfbase.pdfmetrics import getFont, stringWidth, unicode2T1 # for font info
 from reportlab.lib.utils import fp_str, getStringIO
 from reportlab.lib.colors import black
 from reportlab.graphics.renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing
@@ -34,56 +34,6 @@ def _escape_and_limit(s):
             n = 0
             aR('\\\n')
     return ''.join(R)
-
-# we need to create encoding vectors for each font we use, or they will
-# come out in Adobe's old StandardEncoding, which NOBODY uses.
-PS_WinAnsiEncoding="""
-/RE { %def
-  findfont begin
-  currentdict dup length dict begin
-    { %forall
-      1 index /FID ne { def } { pop pop } ifelse
-    } forall
-    /FontName exch def dup length 0 ne { %if
-      /Encoding Encoding 256 array copy def
-      0 exch { %forall
-        dup type /nametype eq { %ifelse
-          Encoding 2 index 2 index put
-          pop 1 add
-        }{ %else
-          exch pop
-        } ifelse
-      } forall
-    } if pop
-  currentdict dup end end
-  /FontName get exch definefont pop
-} bind def
-
-/WinAnsiEncoding [
-  39/quotesingle 96/grave 128/euro 130/quotesinglbase/florin/quotedblbase
-  /ellipsis/dagger/daggerdbl/circumflex/perthousand
-  /Scaron/guilsinglleft/OE 145/quoteleft/quoteright
-  /quotedblleft/quotedblright/bullet/endash/emdash
-  /tilde/trademark/scaron/guilsinglright/oe/dotlessi
-  159/Ydieresis 164/currency 166/brokenbar 168/dieresis/copyright
-  /ordfeminine 172/logicalnot 174/registered/macron/ring
-  177/plusminus/twosuperior/threesuperior/acute/mu
-  183/periodcentered/cedilla/onesuperior/ordmasculine
-  188/onequarter/onehalf/threequarters 192/Agrave/Aacute
-  /Acircumflex/Atilde/Adieresis/Aring/AE/Ccedilla
-  /Egrave/Eacute/Ecircumflex/Edieresis/Igrave/Iacute
-  /Icircumflex/Idieresis/Eth/Ntilde/Ograve/Oacute
-  /Ocircumflex/Otilde/Odieresis/multiply/Oslash
-  /Ugrave/Uacute/Ucircumflex/Udieresis/Yacute/Thorn
-  /germandbls/agrave/aacute/acircumflex/atilde/adieresis
-  /aring/ae/ccedilla/egrave/eacute/ecircumflex
-  /edieresis/igrave/iacute/icircumflex/idieresis
-  /eth/ntilde/ograve/oacute/ocircumflex/otilde
-  /odieresis/divide/oslash/ugrave/uacute/ucircumflex
-  /udieresis/yacute/thorn/ydieresis
-] def
-
-"""
 
 class PSCanvas:
     def __init__(self,size=(300,300), PostScriptLevel=2):
@@ -136,14 +86,7 @@ class PSCanvas:
 /l {lineto} bind def
 /c {curveto} bind def
 
-%s
-''' % (self.width,self.height, PS_WinAnsiEncoding))
-
-        # for each font used, reencode the vectors
-        fontReencode = []
-        for fontName in self._fontsUsed:
-            fontReencode.append('WinAnsiEncoding /%s /%s RE' % (fontName, fontName))
-        self.code.insert(1, string.join(fontReencode, self._sep))
+''' % (self.width,self.height))
 
         file.write(string.join(self.code,self._sep))
         if file is not f:
@@ -231,20 +174,46 @@ class PSCanvas:
         except:
             raise ValueError("cannot escape %s %s" % (s, repr(s)))
 
+    def _issueT1String(self,fontObj,x,y,s):
+        fc = fontObj
+        code_append = self.code_append
+        fontSize = self._fontSize
+        fontsUsed = self._fontsUsed
+        escape = self._escape
+        if not isinstance(s,unicode):
+            try:
+                s = s.decode('utf8')
+            except UnicodeDecodeError,e:
+                i,j = e.args[2:4]
+                raise UnicodeDecodeError(*(e.args[:4]+('%s\n%s-->%s<--%s' % (e.args[4],s[i-10:i],s[i:j],s[j:j+10]),)))
+
+        for f, t in unicode2T1(s,[fontObj]+fontObj.substitutionFonts):
+            if f!=fc:
+                psName = f.face.name
+                code_append('(%s) findfont %s scalefont setfont' % (psName,fp_str(fontSize)))
+                if psName not in fontsUsed:
+                    fontsUsed.append(psName)
+                fc = f
+            code_append('%s m (%s) show ' % (fp_str(x,y),escape(t)))
+            x += f.stringWidth(t.decode(f.encName),fontSize)
+        if fontObj!=fc:
+            self._font = None
+            self.setFont(fontObj.face.name,fontSize)
+
     def drawString(self, x, y, s, angle=0):
         if self._fillColor != None:
+            fontObj = getFont(self._font)
             if not self.code[self._fontCodeLoc]:
-                psName = getFont(self._font).face.name
+                psName = fontObj.face.name
                 self.code[self._fontCodeLoc]='(%s) findfont %s scalefont setfont' % (psName,fp_str(self._fontSize))
                 if psName not in self._fontsUsed:
                     self._fontsUsed.append(psName)
             self.setColor(self._fillColor)
-            s = self._escape(s)
-            if angle == 0:   # do special case of angle = 0 first. Avoids a bunch of gsave/grestore ops
-                self.code_append('%s m (%s) show ' % (fp_str(x,y),s))
-            else : # general case, rotated text
+            if angle!=0:
                 self.code_append('gsave %s translate %s rotate' % (fp_str(x,y),fp_str(angle)))
-                self.code_append('0 0 m (%s) show' % s)
+                x = y = 0
+            self._issueT1String(fontObj,x,y,s)
+            if angle!=0:
                 self.code_append('grestore')
 
     def drawCentredString(self, x, y, text, text_anchor='middle'):
