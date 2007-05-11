@@ -35,6 +35,55 @@ def _escape_and_limit(s):
             aR('\\\n')
     return ''.join(R)
 
+# we need to create encoding vectors for each font we use, or they will      
+ # come out in Adobe's old StandardEncoding, which NOBODY uses.      
+PS_WinAnsiEncoding="""       
+/RE { %def       
+  findfont begin     
+  currentdict dup length dict begin  
+ { %forall   
+   1 index /FID ne { def } { pop pop } ifelse    
+ } forall    
+ /FontName exch def dup length 0 ne { %if    
+   /Encoding Encoding 256 array copy def     
+   0 exch { %forall      
+     dup type /nametype eq { %ifelse     
+       Encoding 2 index 2 index put      
+       pop 1 add     
+     }{ %else    
+       exch pop      
+     } ifelse    
+   } forall      
+ } if pop    
+  currentdict dup end end    
+  /FontName get exch definefont pop  
+} bind def       
+ 
+/WinAnsiEncoding [       
+  39/quotesingle 96/grave 128/euro 130/quotesinglbase/florin/quotedblbase    
+  /ellipsis/dagger/daggerdbl/circumflex/perthousand  
+  /Scaron/guilsinglleft/OE 145/quoteleft/quoteright  
+  /quotedblleft/quotedblright/bullet/endash/emdash       
+  /tilde/trademark/scaron/guilsinglright/oe/dotlessi     
+  159/Ydieresis 164/currency 166/brokenbar 168/dieresis/copyright    
+  /ordfeminine 172/logicalnot 174/registered/macron/ring     
+  177/plusminus/twosuperior/threesuperior/acute/mu       
+  183/periodcentered/cedilla/onesuperior/ordmasculine    
+  188/onequarter/onehalf/threequarters 192/Agrave/Aacute     
+  /Acircumflex/Atilde/Adieresis/Aring/AE/Ccedilla    
+  /Egrave/Eacute/Ecircumflex/Edieresis/Igrave/Iacute     
+  /Icircumflex/Idieresis/Eth/Ntilde/Ograve/Oacute    
+  /Ocircumflex/Otilde/Odieresis/multiply/Oslash  
+  /Ugrave/Uacute/Ucircumflex/Udieresis/Yacute/Thorn  
+  /germandbls/agrave/aacute/acircumflex/atilde/adieresis     
+  /aring/ae/ccedilla/egrave/eacute/ecircumflex       
+  /edieresis/igrave/iacute/icircumflex/idieresis     
+  /eth/ntilde/ograve/oacute/ocircumflex/otilde       
+  /odieresis/divide/oslash/ugrave/uacute/ucircumflex     
+  /udieresis/yacute/thorn/ydieresis  
+] def    
+"""
+
 class PSCanvas:
     def __init__(self,size=(300,300), PostScriptLevel=2):
         self.width, self.height = size
@@ -72,6 +121,14 @@ class PSCanvas:
     def clear(self):
         self.code_append('showpage') # ugh, this makes no sense oh well.
 
+    def _t1_re_encode(self):
+        if not self._fontsUsed: return
+        # for each font used, reencode the vectors   
+        fontReencode = [PS_WinAnsiEncoding]
+        for fontName in self._fontsUsed:     
+            fontReencode.append('WinAnsiEncoding /%s /%s RE' % (fontName, fontName))     
+        self.code.insert(1, string.join(fontReencode, self._sep))
+
     def save(self,f=None):
         if not hasattr(f,'write'):
             file = open(f,'wb')
@@ -85,9 +142,9 @@ class PSCanvas:
 /m {moveto} bind def
 /l {lineto} bind def
 /c {curveto} bind def
-
 ''' % (self.width,self.height))
 
+        self._t1_re_encode()
         file.write(string.join(self.code,self._sep))
         if file is not f:
             file.close()
@@ -212,7 +269,11 @@ class PSCanvas:
             if angle!=0:
                 self.code_append('gsave %s translate %s rotate' % (fp_str(x,y),fp_str(angle)))
                 x = y = 0
-            self._issueT1String(fontObj,x,y,s)
+            if fontObj._dynamicFont:
+                s = self._escape(s)
+                self.code_append('%s m (%s) show ' % (fp_str(x,y),s))
+            else:
+                self._issueT1String(fontObj,x,y,s)
             if angle!=0:
                 self.code_append('grestore')
 
