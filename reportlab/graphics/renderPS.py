@@ -124,10 +124,14 @@ class PSCanvas:
     def _t1_re_encode(self):
         if not self._fontsUsed: return
         # for each font used, reencode the vectors   
-        fontReencode = [PS_WinAnsiEncoding]
+        C = []
         for fontName in self._fontsUsed:     
-            fontReencode.append('WinAnsiEncoding /%s /%s RE' % (fontName, fontName))     
-        self.code.insert(1, string.join(fontReencode, self._sep))
+            fontObj = getFont(fontName)
+            if not fontObj._dynamicFont and fontObj.encName=='WinAnsiEncoding':
+                C.append('WinAnsiEncoding /%s /%s RE' % (fontName, fontName))    
+        if C:
+            C.insert(0,PS_WinAnsiEncoding)
+            self.code.insert(1, string.join(C, self._sep))
 
     def save(self,f=None):
         if not hasattr(f,'write'):
