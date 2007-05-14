@@ -156,6 +156,7 @@ class FontFinder:
         """Reports on all families found as XML.
         """
         lines = []
+        lines.append('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>')
         lines.append("<font_families>")
         for dirName in self._dirs:
             lines.append("    <directory name=%s/>" % quoteattr(dirName))
@@ -164,7 +165,7 @@ class FontFinder:
                 lines.append('    <family name=%s>' % quoteattr(familyName))
                 for font in self.getFontsInFamily(familyName):
                     lines.append('        ' + font.getTag())
-                lines.append('    </family_name>')
+                lines.append('    </family>')
         lines.append("</font_families>")
         return '\n'.join(lines)
 
@@ -284,10 +285,10 @@ class FontFinder:
             self.save(cfn)
 
         finished = time.clock()
-        print "found %d fonts; skipped %d; bad %d.  Took %0.2f seconds" % (
-            len(self._fonts), len(self._skippedFiles), len(self._badFiles),
-            finished - started
-            )
+##        print "found %d fonts; skipped %d; bad %d.  Took %0.2f seconds" % (
+##            len(self._fonts), len(self._skippedFiles), len(self._badFiles),
+##            finished - started
+##            )
 
 def test():
     #windows-centric test maybe
