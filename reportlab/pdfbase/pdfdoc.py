@@ -14,7 +14,6 @@ The classes within this generally mirror structures in the PDF file
 and are not part of any public interface.  Instead, canvas and font
 classes are made available elsewhere for users to manipulate.
 """
-
 import string, types, binascii, codecs
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfutils import LINEEND # this constant needed in both
@@ -130,7 +129,6 @@ class DummyDoc:
     encrypt = NoEncryption()
 
 ### the global document structure manager
-
 class PDFDocument:
     _ID = None
     objectcounter = 0
@@ -431,6 +429,8 @@ class PDFDocument:
         internalname = xObjectName(name)
         if self.idToObject.has_key(internalname):
             theform = self.idToObject[internalname]
+            if hasattr(theform,'_extra_pageCatcher_info'):
+                return theform._extra_pageCatcher_info[boxType]
             if isinstance(theform, PDFFormXObject):
                 # internally defined form
                 return theform.BBoxList()
@@ -1038,7 +1038,7 @@ class PDFPage(PDFCatalog):
         # set up parameters unless usual behaviour is suppressed
         if self.Override_default_compilation:
             return
-        self.MediaBox = self.MediaBox or PDFArray([0, 0, self.pagewidth, self.pageheight])
+        self.MediaBox = self.MediaBox or PDFArray(self.Rotate in (90,270) and [0,0,self.pageheight,self.pagewidth] or [0, 0, self.pagewidth, self.pageheight])
         if not self.Annots:
             self.Annots = None
         else:
