@@ -63,6 +63,7 @@ class _BarcodeWidget(PlotArea):
             __name__ = self.__class__.__name__
         self.__class__ = Combiner
         PlotArea.__init__(self)
+        del self.width, self.height
         self.x = self.y = 0
         kw.setdefault('value',_value)
         BCC.__init__(self,**kw)
@@ -289,7 +290,6 @@ class BarcodeUSPS_4State(_BarcodeWidget):
         from reportlab.graphics.barcode.usps4s import USPS_4State
         kw.setdefault('routing','01234567891')
         _BarcodeWidget.__init__(self,USPS_4State,'01234567094987654321',**kw)
-        del self.width, self.height
 
     def annotate(self,x,y,text,fontName,fontSize,anchor='middle'):
         _BarcodeWidget.annotate(self,x,y,text,fontName,fontSize,anchor='start')
