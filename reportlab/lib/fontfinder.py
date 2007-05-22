@@ -219,9 +219,12 @@ class FontFinder:
         if self.useCache:
             cfn = self._getCacheFileName()
             if rl_isfile(cfn):
-                self.load(cfn)
-                print "loaded cached file with %d fonts (%s)" % (len(self._fonts), cfn)
-                return
+                try:
+                    self.load(cfn)
+                    #print "loaded cached file with %d fonts (%s)" % (len(self._fonts), cfn)
+                    return
+                except:
+                    pass  #pickle load failed.  Ho hum, maybe it's an old pickle.  Better rebuild it.
 
         from stat import ST_MTIME
         for dirName in self._dirs:
@@ -231,7 +234,7 @@ class FontFinder:
                 if ext.lower() in EXTENSIONS:
                     #it's a font
                     f = FontDescriptor()
-                    f.fileName = os.path.join(dirName, fileName)
+                    f.fileName = os.path.normpath(os.path.join(dirName, fileName))
                     f.timeModified = rl_getmtime(f.fileName)
 
                     ext = ext.lower()
@@ -264,9 +267,9 @@ class FontFinder:
 
                         # type 1; we need an AFM file or have to skip.
                         if rl_isfile(os.path.join(dirName, root + '.afm')):
-                            f.metricsFileName = os.path.join(dirName, root + '.afm')
+                            f.metricsFileName = os.path.normpath(os.path.join(dirName, root + '.afm'))
                         elif rl_isfile(os.path.join(dirName, root + '.AFM')):
-                            f.metricsFileName = os.path.join(dirName, root + '.AFM')
+                            f.metricsFileName = os.path.normpath(os.path.join(dirName, root + '.AFM'))
                         else:
                             self._skippedFiles.append(fileName)
                             continue
@@ -302,6 +305,9 @@ def test():
     rlFontDir = os.path.join(os.path.dirname(reportlab.__file__), 'fonts')
     ff.addDirectory(rlFontDir)
     ff.search()
+
+    print 'cache file name...'
+    print ff._getCacheFileName()
 
     print 'families...'
     for familyName in ff.getFamilyNames():
