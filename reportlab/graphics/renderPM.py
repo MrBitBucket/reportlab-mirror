@@ -291,6 +291,8 @@ class PMCanvas:
                     import BmpImagePlugin
         elif fmt in ('JPG','JPEG'):
             fmt = 'JPEG'
+        elif fmt in ('GIF',):
+            pass
         else:
             raise RenderPMError,"Unknown image kind %s" % fmt
         if fmt=='TIFF':
