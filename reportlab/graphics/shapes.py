@@ -749,7 +749,7 @@ class Drawing(Group, Flowable):
         if format == 'pdf':
             from reportlab.graphics import renderPDF
             return renderPDF.drawToString(self)
-        elif format in ['gif','png','tif','jpg','pct','pict','bmp','ppm']:
+        elif format in ['gif','png','tif','tiff','jpg','pct','pict','bmp','ppm']:
             from reportlab.graphics import renderPM
             return renderPM.drawToString(self, fmt=format)
         elif format == 'eps':
