@@ -272,9 +272,10 @@ class PMCanvas:
             if fmt.startswith('.'): fmt = fmt[1:]
         configPIL = self.configPIL or {}
         fmt = string.upper(fmt)
-        if fmt in ['GIF']:
+        if fmt in ('GIF','TIFFP'):
             im = _convert2pilp(im)
-        elif fmt in ['PCT','PICT']:
+            if fmt=='TIFFP': fmt='TIFF'
+        if fmt in ('PCT','PICT'):
             return _saveAsPICT(im,fn,fmt,transparent=configPIL.get('transparent',None))
         elif fmt in ['PNG','TIFF','BMP', 'PPM', 'TIF']:
             if fmt=='TIF': fmt = 'TIFF'
