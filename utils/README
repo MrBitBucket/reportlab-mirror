@@ -41,35 +41,21 @@ Release Procedure
 
 1) edit reportlab/__init__.py and insert the new version number d.xy
 
-2) utils/cvslh.py 2001-mm-dd hh:mm:ss" -r >/tmp/logh
+2) svn log -v -r{20060522}:HEAD >/tmp/logh
    to get a list of the latest changes. The date & time should correspond to
    the previous release. Add the changes into the reportlab changes file at
    the top. These changes should probably be trimmed.
    
 3)	Commit the alterations to __init__.py and changes
 
-4)	Assign a release tag to the repository for us this is done in a working
-	copy of ReportLab using
-		cvs -z3 tag ReportLab_d_xy
-	where d.xy was the version number entered into __init__.py
+4) Create a tag for the X_YZ realesae using commands like this
+	svn cp -m"Create Version X.YZ"	https://192.168.0.6/svn/public/reportlab/trunk \
+                                   	https://192.168.0.6/svn/public/reportlab/tags/RLRELEASES/ReportLab_X_YZ
 
-	If you need to tag the repository in www.reportlab.co.uk it is possible
-		a)	make a dir work
-		b)	cd work
-		c)	mkdir CVS
-		d)	cd CVS
-		e)	create Entries as empty
-		f)	create Root as :pserver:robin@www.reportlab.co.uk:/rl_home/repository
-		g)	create Repository as /rl_home/repository/
-		h)	cd ..
-			cvs -z3 upd -A -P -d to create a working copy
-		i)	cvs -z3 tag ReportLab_x_yz
+	svn cp -m"Create Version X.YZ"	https://192.168.0.6/svn/private/trunk \
+									https://192.168.0.6/svn/private/tags/RLRELEASES/ReportLab_X_YZ
 
-	alternatively log in to co.uk and do an rtag command on the actual repository.
-
-	If there are problems and you need to go back to step 1 and restart it mey be useful
-	to know that you can add a -F to the tag command to allow you to retag a modified
-	source file ie cvs -z3 tag -F ReportLab_d_xy
+	check that the result tagged releases have been created and that they contain what you expect them to.
 
 5)	Login to Yosemite.
 	Run batch script c:\SCRIPTS\ReportLabRelease.bat d_xy
