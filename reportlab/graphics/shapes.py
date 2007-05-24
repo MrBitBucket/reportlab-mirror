@@ -566,7 +566,7 @@ class Drawing(Group, Flowable):
 
     _saveModes=(
             'pdf','ps','eps','gif','png','jpg','jpeg','pct',
-            'pict','tiff','tif','py','bmp','svg','tiffp',
+            'pict','tiff','tif','py','bmp','svg','tiffp','tiffl','tiff1',
             )
 
     _xtraAttrMap = AttrMap(
@@ -687,7 +687,7 @@ class Drawing(Group, Flowable):
                 macfs.FSSpec(filename).SetCreatorType("CARO", "PDF ")
                 macostools.touched(filename)
 
-        for bmFmt in ['gif','png','tif','jpg','tiff','pct','pict', 'bmp','tiffp']:
+        for bmFmt in ('gif','png','tif','jpg','tiff','pct','pict', 'bmp','tiffp','tiffl','tiff1'):
             if bmFmt in plotMode:
                 from reportlab.graphics import renderPM
                 filename = '%s.%s' % (fnroot,bmFmt)
@@ -740,18 +740,18 @@ class Drawing(Group, Flowable):
             self.saveLogger(fnroot,ext)
         return ext and fnroot+ext[1:] or ''
 
-
-    def asString(self, format, verbose=None, preview=0):
+    def asString(self, format, verbose=None, preview=0, **kw):
         """Converts to an 8 bit string in given format."""
-        assert format in ['pdf','ps','eps','gif','png','jpg','jpeg','bmp','ppm','tiff','tif','py','pict','pct','tiffp'], 'Unknown file format "%s"' % format
+        assert format in ('pdf','ps','eps','gif','png','jpg','jpeg','bmp','ppm','tiff','tif','py','pict','pct','tiffp','tiffl','tiff1'), 'Unknown file format "%s"' % format
         from reportlab import rl_config
         #verbose = verbose is not None and (verbose,) or (getattr(self,'verbose',verbose),)[0]
         if format == 'pdf':
             from reportlab.graphics import renderPDF
             return renderPDF.drawToString(self)
-        elif format in ['gif','png','tif','tiff','jpg','pct','pict','bmp','ppm','tiffp']:
+        elif format in ('gif','png','tif','tiff','jpg','pct','pict','bmp','ppm','tiffp','tiffl','tiff1'):
             from reportlab.graphics import renderPM
-            return renderPM.drawToString(self, fmt=format)
+            return renderPM.drawToString(self, fmt=format,showBoundary=getattr(self,'showBorder',
+                            rl_config.showBoundary),**_extraKW(self,'_renderPM_',**kw))
         elif format == 'eps':
             try:
                 from rlextra.graphics import renderPS_SEP as renderPS
