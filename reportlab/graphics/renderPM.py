@@ -216,6 +216,12 @@ def _convert2pilp(im):
     Image = _getImage()
     return im.convert("P", dither=Image.NONE, palette=Image.ADAPTIVE)
 
+def _convert2pilL(im):
+    return im.convert("L")
+
+def _convert2pil1(im):
+    return im.convert("1")
+
 def _saveAsPICT(im,fn,fmt,transparent=None):
     im = _convert2pilp(im)
     cols, rows = im.size
@@ -272,13 +278,19 @@ class PMCanvas:
             if fmt.startswith('.'): fmt = fmt[1:]
         configPIL = self.configPIL or {}
         fmt = string.upper(fmt)
-        if fmt in ('GIF','TIFFP'):
+        if fmt in ('GIF'):
             im = _convert2pilp(im)
-            if fmt=='TIFFP': fmt='TIFF'
-        if fmt in ('PCT','PICT'):
+        elif fmt in ('TIFF','TIFFP','TIFFL','TIF','TIFF1'):
+            if fmt.endswith('P'):
+                im = _convert2pilp(im)
+            elif fmt.endswith('L'):
+                im = _convert2pilL(im)
+            elif fmt.endswith('1'):
+                im = _convert2pil1(im)
+            fmt='TIFF'
+        elif fmt in ('PCT','PICT'):
             return _saveAsPICT(im,fn,fmt,transparent=configPIL.get('transparent',None))
-        elif fmt in ['PNG','TIFF','BMP', 'PPM', 'TIF']:
-            if fmt=='TIF': fmt = 'TIFF'
+        elif fmt in ('PNG','BMP', 'PPM'):
             if fmt=='PNG':
                 try:
                     from PIL import PngImagePlugin
@@ -307,7 +319,7 @@ class PMCanvas:
                 #if type(fn) is type(''): im.save(fn+'_masked.gif','GIF')
             for a,d in ('resolution',self._dpi),('resolution unit','inch'):
                 configPIL[a] = configPIL.get(a,d)
-        apply(im.save,(fn,fmt),configPIL)
+        im.save(fn,fmt,**configPIL)
         if not hasattr(fn,'write') and os.name=='mac':
             from reportlab.lib.utils import markfilename
             markfilename(fn,ext=fmt)
