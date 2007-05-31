@@ -14,7 +14,7 @@ from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.pdfgen import canvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
-from reportlab.lib.utils import haveImages
+from reportlab.lib.utils import haveImages, fileName2Utf8
 
 #################################################################
 #
@@ -779,7 +779,7 @@ cost to performance.""")
                       color=colors.magenta)
     c.drawString(inch+3, 2*inch+6, 'Hyperlink with custom border style')
 
-    xpdf = outputfile('test_hello.pdf').replace('\\','/')
+    xpdf = fileName2Utf8(outputfile('test_hello.pdf').replace('\\','/'))
     link = 'Hard link to %s, with red border' % xpdf
     r1 = (inch, 1.5*inch, inch+2*3+c.stringWidth(link,c._fontname, c._fontsize), 1.75*inch) # this is x1,y1,x2,y2
     c.linkURL(xpdf, r1, thickness=1, color=colors.red, kind='GoToR')

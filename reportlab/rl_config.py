@@ -25,6 +25,8 @@ longTableOptimize =         0                       #default don't use Henning v
 autoConvertEncoding  =      0                       #convert internally as needed (experimental)
 _FUZZ=                      1e-6                    #fuzz for layout arithmetic
 wrapA85=                    0                       #set to 1 to get old wrapped line behaviour
+fsEncodings=('utf8','cp1252','cp430')               #encodings to attempt utf8 conversion with
+
 
 # places to look for T1Font information
 T1SearchPath =  (
@@ -136,7 +138,8 @@ overlapAttachedSpace
 longTableOptimize 
 autoConvertEncoding  
 _FUZZ
-wrapA85'''.split()
+wrapA85
+fsEncodings'''.split()
     import os, sys
     global sys_version, _unset_
     sys_version = sys.version.split()[0]        #strip off the other garbage

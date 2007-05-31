@@ -889,3 +889,12 @@ def escapeTextOnce(text):
     text = text.replace('&amp;lt;', '&lt;')
     return text
 
+def fileName2Utf8(fn):
+    '''attempt to convert a filename to utf8'''
+    from reportlab.rl_config import fsEncodings
+    for enc in fsEncodings:
+        try:
+            return fn.decode(enc).encode('utf8')
+        except:
+            pass
+    raise ValueError('cannot convert %r to utf8' % fn)
