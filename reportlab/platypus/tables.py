@@ -1242,10 +1242,6 @@ class Table(Flowable):
         rowHeights = self._rowHeights
         colWidths = self._colWidths
         spanRects = getattr(self,'_spanRects',None)
-        def bg(x0,y0,w,h,color):
-            canv.setFillColor(color)
-            canv.rect(x0, y0, w, h, stroke=0,fill=1)
-        A = [].append
         for cmd, (sc, sr), (ec, er), arg in self._bkgrndcmds:
             if sc < 0: sc = sc + ncols
             if ec < 0: ec = ec + ncols
@@ -1257,7 +1253,7 @@ class Table(Flowable):
             y1 = rowpositions[min(er+1,nrows)]
             w, h = x1-x0, y1-y0
             if callable(arg):
-                A((0x7ffffff,arg,(self,canv, x0, y0, w, h)))
+                arg(self,canv, x0, y0, w, h)
             elif cmd == 'ROWBACKGROUNDS':
                 #Need a list of colors to cycle through.  The arguments
                 #might be already colours, or convertible to colors, or
@@ -1270,7 +1266,8 @@ class Table(Flowable):
                     color = colorCycle[i%count]
                     h = rowHeights[sr + i]
                     if color:
-                        A((0,bg,(x0, y0, w, -h, color)))
+                        canv.setFillColor(color)
+                        canv.rect(x0, y0, w, -h, stroke=0,fill=1)
                     y0 = y0 - h
             elif cmd == 'COLBACKGROUNDS':
                 #cycle through colours columnwise
@@ -1281,23 +1278,19 @@ class Table(Flowable):
                     color = colorCycle[i%count]
                     w = colWidths[sc + i]
                     if color:
-                        A((1,bg,(x0, y0, w, h, color)))
+                        canv.setFillColor(color)
+                        canv.rect(x0, y0, w, h, stroke=0,fill=1)
                     x0 = x0 +w
             else:   #cmd=='BACKGROUND'
                 color = colors.toColorOrNone(arg)
                 if color:
-                    if ec-sc or er-sr:
-                        A((2,bg,(x0, y0, w, h, color)))
-                    elif spanRects:
+                    if ec==sc and er==sr and spanRects:
                         xywh = spanRects.get((sc,sr))
                         if xywh:
                             #it's a single cell
                             x0, y0, w, h = xywh
-                        A((3,bg,(x0, y0, w, h, color)))
-        A = A.__self__
-        A.sort()
-        for z,func,args in A:
-            func(*args)
+                    canv.setFillColor(color)
+                    canv.rect(x0, y0, w, h, stroke=0,fill=1)
 
     def _drawCell(self, cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight)):
         if self._curcellstyle is not cellstyle:
