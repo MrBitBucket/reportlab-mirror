@@ -12,7 +12,8 @@ from types import StringType, ListType
 from reportlab.test import unittest
 from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 
-from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.pdfbase.pdfmetrics import stringWidth, registerFont, registerFontFamily
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus.paraparser import ParaParser
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib.colors import Color
@@ -142,15 +143,19 @@ your browser. If an internal link begins with something that looks like a scheme
         story.append(ImageAndFlowables(Image(gif),[heading,Paragraph(description, bt)],imageSide='left'))
         story.append(NextPageTemplate('special'))
         story.append(PageBreak())
+        VERA = ('Vera','VeraBd','VeraIt','VeraBI')
+        for v in VERA:
+            registerFont(TTFont(v,v+'.ttf'))
+        registerFontFamily(*(VERA[:1]+VERA))
         story.append(ImageAndFlowables(
                         Image(gif,width=280,height=120),
-                        Paragraph('''The concept of an integrated one box solution for advanced voice and
+                        Paragraph('''<font name="Vera">The <b>concept</b> of an <i>integrated</i> one <b><i>box</i></b> solution for <i><b>advanced</b></i> voice and
 data applications began with the introduction of the IMACS. The
 IMACS 200 carries on that tradition with an integrated solution
 optimized for smaller port size applications that the IMACS could not
 economically address. An array of the most popular interfaces and
 features from the IMACS has been bundled into a small 2U chassis
-providing the ultimate in ease of installation.''',
+providing the ultimate in ease of installation.</font>''',
                         style=ParagraphStyle(
                                 name="base",
                                 fontName="Helvetica",

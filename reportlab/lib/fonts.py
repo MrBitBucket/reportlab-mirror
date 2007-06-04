@@ -3,7 +3,7 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/fonts.py
 __version__=''' $Id$ '''
-import string, sys, os
+import sys, os
 ###############################################################################
 #   A place to put useful font stuff
 ###############################################################################
@@ -58,18 +58,18 @@ _tt2ps_map = {
 _ps2tt_map={}
 for k,v in _tt2ps_map.items():
     if not _ps2tt_map.has_key(k):
-        _ps2tt_map[string.lower(v)] = k
+        _ps2tt_map[v.lower()] = k
 
 def ps2tt(psfn):
     'ps fontname to family name, bold, italic'
-    psfn = string.lower(psfn)
+    psfn = psfn.lower()
     if _ps2tt_map.has_key(psfn):
         return _ps2tt_map[psfn]
     raise ValueError, "Can't map determine family/bold/italic for %s" % psfn
 
 def tt2ps(fn,b,i):
     'family name + bold & italic to ps font name'
-    K = (string.lower(fn),b,i)
+    K = (fn.lower(),b,i)
     if _tt2ps_map.has_key(K):
         return _tt2ps_map[K]
     else:
@@ -81,9 +81,6 @@ def tt2ps(fn,b,i):
 
 def addMapping(face, bold, italic, psname):
     'allow a custom font to be put in the mapping'
-    k = (string.lower(face), bold, italic)
+    k = face.lower(), bold, italic
     _tt2ps_map[k] = psname
-    # rebuild inverse - inefficient
-    for k,v in _tt2ps_map.items():
-        if not _ps2tt_map.has_key(k):
-            _ps2tt_map[string.lower(v)] = k
+    _ps2tt_map[psname.lower()] = k
