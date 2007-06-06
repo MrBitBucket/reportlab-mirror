@@ -1,8 +1,10 @@
-/****************************************************************************
-#Copyright ReportLab Europe Ltd. 2000-2004
-#see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/_rl_accel.c
- ****************************************************************************/
+/*
+* Copyright ReportLab Europe Ltd. 2000-2007
+* licensed under the same terms as the ReportLab Toolkit
+* see http://www.reportlab.co.uk/svn/public/reportlab/trunk/reportlab/license.txt
+* for details.
+* history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/_rl_accel.c
+*/
 #if 0
 static __version__=" $Id$ "
 #endif
@@ -27,7 +29,7 @@ static __version__=" $Id$ "
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.60"
+#define VERSION "0.61"
 #define MODULE "_rl_accel"
 
 static PyObject *moduleVersion;
