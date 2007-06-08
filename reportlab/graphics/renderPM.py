@@ -277,8 +277,12 @@ class PMCanvas:
             fmt = os.path.splitext(fn)[1]
             if fmt.startswith('.'): fmt = fmt[1:]
         configPIL = self.configPIL or {}
+        configPIL.setdefault('preConvertCB',None)
+        preConvertCB=configPIL.pop('preConvertCB')
+        if preConvertCB:
+            im = preConvertCB(im)
         fmt = string.upper(fmt)
-        if fmt in ('GIF'):
+        if fmt in ('GIF',):
             im = _convert2pilp(im)
         elif fmt in ('TIFF','TIFFP','TIFFL','TIF','TIFF1'):
             if fmt.endswith('P'):
@@ -319,6 +323,14 @@ class PMCanvas:
                 #if type(fn) is type(''): im.save(fn+'_masked.gif','GIF')
             for a,d in ('resolution',self._dpi),('resolution unit','inch'):
                 configPIL[a] = configPIL.get(a,d)
+        configPIL.setdefault('chops_invert',0)
+        if configPIL.pop('chops_invert'):
+            from PIL import ImageChops
+            im = ImageChops.invert(im)
+        configPIL.setdefault('preSaveCB',None)
+        preSaveCB=configPIL.pop('preSaveCB')
+        if preSaveCB:
+            im = preSaveCB(im)
         im.save(fn,fmt,**configPIL)
         if not hasattr(fn,'write') and os.name=='mac':
             from reportlab.lib.utils import markfilename
