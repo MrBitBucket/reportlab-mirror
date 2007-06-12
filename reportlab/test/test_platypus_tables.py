@@ -692,6 +692,22 @@ LIST_STYLE = TableStyle(
     t=LongTable(data, style=sty, colWidths = [50,100,200])
     lst.append(t)
 
+    #Yuan Hong's bug tester
+    lst.append(PageBreak())
+    lst.append(Paragraph('Yian Hong\'s Bug Case (should not blow up)', styleSheet['Heading2']))
+    data = ([['Col1', 'Col2', 'Col3', 'Col4', 'Col5']]+
+                [['01', Paragraph('This is cell one that contains a paragraph.', styleSheet['Normal']), '02', '03', '04']
+                    for i in xrange(50)])
+
+    t = Table(data, ['20%']*5, repeatRows=1)
+    t.setStyle(TableStyle([
+        ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+        ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+        ('SPAN', (0,50), (-2,50)),
+        ]))
+
+    lst.append(t)
+
     SimpleDocTemplate(outputfile('tables.pdf'), showBoundary=1).build(lst)
 
 

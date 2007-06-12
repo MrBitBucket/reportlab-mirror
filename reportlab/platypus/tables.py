@@ -465,10 +465,10 @@ class Table(Flowable):
                 S = self._cellStyles[i] # styles for row i
                 h = 0
                 j = 0
-                for v, s, w in map(None, V, S, W): # value, style, width (lengths must match)
+                for j,(v, s, w) in enumerate(map(None, V, S, W)): # value, style, width (lengths must match)
                     ji = j,i
                     if ji in rowSpanCells:
-                        t = 0.0  # don't count it, it's either occluded or unreliable
+                        continue # don't count it, it's either occluded or unreliable
                     else:
                         if isinstance(v,(tuple,list,Flowable)):
                             if isinstance(v,Flowable): v = (v,)
@@ -477,6 +477,7 @@ class Table(Flowable):
                             if canv: canv._fontname, canv._fontsize, canv._leading = s.fontname, s.fontsize, s.leading or 1.2*s.fontsize
                             if ji in colSpanCells:
                                 t = spanRanges[ji]
+                                if not t: continue
                                 w = max(colpositions[t[2]+1]-colpositions[t[0]],w)
                             dW,t = self._listCellGeom(v,w or self._listValueWidth(v),s)
                             if canv: canv._fontname, canv._fontsize, canv._leading = saved
@@ -486,9 +487,8 @@ class Table(Flowable):
                         else:
                             v = (v is not None and str(v) or '').split("\n")
                             t = (s.leading or 1.2*s.fontSize)*len(v)
-                        t = t+s.bottomPadding+s.topPadding
+                        t += s.bottomPadding+s.topPadding
                     if t>h: h = t   #record a new maximum
-                    j = j + 1
                 H[i] = h
             if None not in H: hmax = lim
 
