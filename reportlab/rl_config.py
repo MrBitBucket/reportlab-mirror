@@ -19,6 +19,7 @@ invariant=                  0                       #produces repeatable,identic
 eps_preview_transparent=    None                    #set to white etc
 eps_preview=                1                   #set to False to disable
 eps_ttf_embed=              1                   #set to False to disable
+eps_ttf_embed_uid=          0                   #set to 1 to enable
 overlapAttachedSpace=       1                       #if set non false then adajacent flowable space after
                                                     #and space before are merged (max space is used).
 longTableOptimize =         0                       #default don't use Henning von Bargen's long table optimizations
@@ -134,6 +135,7 @@ invariant
 eps_preview_transparent
 eps_preview
 eps_ttf_embed
+eps_ttf_embed_uid
 overlapAttachedSpace
 longTableOptimize 
 autoConvertEncoding  
