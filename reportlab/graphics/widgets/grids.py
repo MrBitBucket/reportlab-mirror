@@ -4,7 +4,7 @@
 __version__=''' $Id$ '''
 
 from reportlab.lib import colors
-from reportlab.lib.validators import isNumber, isColorOrNone, isBoolean, isListOfNumbers, OneOf, isListOfColors
+from reportlab.lib.validators import isNumber, isColorOrNone, isBoolean, isListOfNumbers, OneOf, isListOfColors, isNumberOrNone
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
 from reportlab.graphics.shapes import Drawing, Group, Line, Rect, LineShape, definePath, EmptyClipPath
 from reportlab.graphics.widgetbase import Widget
@@ -83,7 +83,7 @@ class Grid(Widget):
         strokeWidth = AttrMapValue(isNumber,
             desc='Width used for lines.'),
         rectStrokeColor = AttrMapValue(isColorOrNone, desc='Color for outer rect stroke.'),
-        rectStrokeWidth = AttrMapValue(isColorOrNone, desc='Width for outer rect stroke.'),
+        rectStrokeWidth = AttrMapValue(isNumberOrNone, desc='Width for outer rect stroke.'),
         )
 
     def __init__(self):
