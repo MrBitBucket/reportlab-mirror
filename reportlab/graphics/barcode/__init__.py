@@ -87,6 +87,13 @@ def createBarcodeDrawing(codeName, **options):
         if k.startswith('_') or k in bcc._attrMap: kw[k] = v
     bc = bcc(**kw)
 
+
+    #Robin's new ones validate when setting the value property.
+    #Ty Sarna's old ones do not.  We need to test.
+    bc.validate()   #raise exception if bad value
+    if not bc.valid:
+        raise ValueError("Illegal barcode with value '%s' in code '%s'" % (options.get('value',None), codeName))
+
     #size it after setting the data    
     x1, y1, x2, y2 = bc.getBounds()
     w = float(x2 - x1)
