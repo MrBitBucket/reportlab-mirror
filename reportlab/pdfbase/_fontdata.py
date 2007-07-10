@@ -50,8 +50,8 @@ standardFontAttributes = {
 
 #this maps fontnames to the equivalent filename root.
 _font2fnrMapWin32 = {
-                    'symbol':                   'Sy______',
-                    'zapfdingbats':             'Zd______',
+                    'symbol':                   'sy______',
+                    'zapfdingbats':             'zd______',
                     'helvetica':                '_a______',
                     'helvetica-bold':           '_ab_____',
                     'helvetica-boldoblique':    '_abi____',
