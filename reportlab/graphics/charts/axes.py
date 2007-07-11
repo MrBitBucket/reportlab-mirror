@@ -794,8 +794,13 @@ class ValueAxis(_AxisG):
                     else:
                         go = valueMax<=T[-1]-fuzz
                         valueMax = T[-1]
+        if iter and not go:
+            self._computedValueStep = valueStep
+        else:
+            self._computedValueStep = None
 
-        self._valueMin, self._valueMax = valueMin, valueMax
+        self._valueMin = valueMin
+        self._valueMax = valueMax
         self._rangeAdjust()
 
     def _pseudo_configure(self):
@@ -826,8 +831,15 @@ class ValueAxis(_AxisG):
         return self._scaleFactor
 
     def _calcTickPositions(self):
-        self._calcValueStep()
-        valueMin, valueMax, valueStep = self._valueMin, self._valueMax, self._valueStep
+        valueStep = getattr(self,'_computedValueStep',None)
+        if valueStep:
+            del self._computedValueStep
+            self._valueStep = valueStep
+        else:
+            self._calcValueStep()
+            valueStep = self._valueStep
+        valueMin = self._valueMin
+        valueMax = self._valueMax
         fuzz = 1e-8*valueStep
         rangeRound = self.rangeRound
         i0 = int(float(valueMin)/valueStep)
