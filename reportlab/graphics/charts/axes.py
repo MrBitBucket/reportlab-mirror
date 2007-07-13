@@ -662,18 +662,7 @@ class ValueAxis(_AxisG):
         except:
             self._valueMin = valueMin
             self._valueMax = valueMax
-            T = self._calcTickPositions()
-            if len(T)>1:
-                valueStep = T[1]-T[0]
-            else:
-                oVS = self.valueStep
-                self.valueStep = None
-                T = self._calcTickPositions()
-                self.valueStep = oVS
-                if len(T)>1:
-                    valueStep = T[1]-T[0]
-                else:
-                    valueStep = self._valueStep
+            valueStep,T = self._calcStepAndTickPositions()
             r = cache[K] = valueStep, T, valueStep*1e-8
         return r
 
@@ -830,7 +819,7 @@ class ValueAxis(_AxisG):
         self._scaleFactor = self._length / float(self._valueMax - self._valueMin)
         return self._scaleFactor
 
-    def _calcTickPositions(self):
+    def _calcStepAndTickPositions(self):
         valueStep = getattr(self,'_computedValueStep',None)
         if valueStep:
             del self._computedValueStep
@@ -852,7 +841,10 @@ class ValueAxis(_AxisG):
         if rangeRound in ('both','ceiling'):
             if v<valueMax-fuzz: i1 += 1
         elif v>valueMax+fuzz: i1 -= 1
-        return [i*valueStep for i in xrange(i0,i1+1)]
+        return valueStep,[i*valueStep for i in xrange(i0,i1+1)]
+
+    def _calcTickPositions(self):
+        return self._calcStepAndTickPositions()[1]
 
     def _calcTickmarkPositions(self):
         """Calculate a list of tick positions on the axis.  Returns a list of numbers."""
