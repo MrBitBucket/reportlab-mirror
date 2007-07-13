@@ -168,9 +168,9 @@ def _expandUserNode(node,canvas):
 def renderScaledDrawing(d):
     renderScale = d.renderScale
     if renderScale!=1.0:
-        d = d.copy()
-        d.width *= renderScale
-        d.height *= renderScale
+        o = d
+        d = d.__class__(o.width*renderScale,o.height*renderScale)
+        d.__dict__ = o.__dict__.copy()
         d.scale(renderScale,renderScale)
         d.renderScale = 1.0
     return d
