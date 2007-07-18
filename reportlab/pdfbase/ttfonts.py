@@ -804,8 +804,8 @@ class TTFontFile(TTFontParser):
             originalGlyphIdx = glyphMap[n]
             aw, lsb = self.hmetrics[originalGlyphIdx]
             if n < numberOfHMetrics:
-                hmtx.append(aw)
-            hmtx.append(lsb)
+                hmtx.append(int(aw))
+            hmtx.append(int(lsb))
         hmtx = apply(pack, [">%dH" % len(hmtx)] + hmtx)
         output.add('hmtx', hmtx)
 
