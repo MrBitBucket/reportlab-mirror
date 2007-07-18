@@ -244,7 +244,10 @@ class HorizontalLineChart(LineChart):
             labelText = None
         elif type(labelFmt) is str:
             if labelFmt == 'values':
-                labelText = self.lineLabelArray[rowNo][colNo]
+                try:
+                    labelText = self.lineLabelArray[rowNo][colNo]
+                except:
+                    labelText = None
             else:
                 labelText = labelFmt % labelValue
         elif isinstance(labelFmt, Formatter):
