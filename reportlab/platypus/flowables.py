@@ -26,7 +26,7 @@ higher level components).
 """
 import os
 import string
-from copy import deepcopy
+from copy import deepcopy, copy
 from types import ListType, TupleType, StringType
 
 from reportlab.lib.colors import red, gray, lightgrey
@@ -794,7 +794,7 @@ class PTOContainer(_Container,Flowable):
         else:
             R1 = C[:i]+T+F
             R2 = Hdr + C[i:]
-        T =  R1 + [PTOContainer(R2,deepcopy(I.trailer),deepcopy(I.header))]
+        T =  R1 + [PTOContainer(R2,[copy(x) for x in I.trailer],[copy(x) for x in I.header])]
         return T
 
 #utility functions used by KeepInFrame
