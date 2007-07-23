@@ -554,10 +554,13 @@ class Pie(AbstractPieChart):
         return PL(centerx,centery,xradius,yradius,G,lu,ru)
 
     def normalizeData(self):
-        from operator import add
-        data = self.data
-        self._sum = sum = float(reduce(add,data,0))
-        return abs(sum)>=1e-8 and map(lambda x,f=360./sum: f*x, data) or len(data)*[0]
+        data = map(abs,self.data)
+        s = self._sum = float(sum(data))
+        if s>1e-8:
+            f = 360./s
+            return [f*x for x in data]
+        else:
+            return [0]*len(data)
 
     def makeAngles(self):
         startAngle = self.startAngle % 360
@@ -767,7 +770,7 @@ class LegendedPie(Pie):
         self.legend1.columnMaximum = 7
         self.legend1.alignment = 'right'
         self.legend_names = ['AAA:','AA:','A:','BBB:','NR:']
-        for f in range(0,len(self.data)):
+        for f in xrange(len(self.data)):
             self.legend1.colorNamePairs.append((self.pieAndLegend_colors[f], self.legend_names[f]))
         self.legend1.fontName = "Helvetica-Bold"
         self.legend1.fontSize = 6
@@ -792,7 +795,7 @@ class LegendedPie(Pie):
         if self.drawLegend:
             self.legend1.colorNamePairs = []
             self._legend2.colorNamePairs = []
-        for f in range(0,len(self.data)):
+        for f in xrange(len(self.data)):
             if self.legend_names == None:
                 self.slices[f].fillColor = self.pieAndLegend_colors[f]
                 self.legend1.colorNamePairs.append((self.pieAndLegend_colors[f], None))
