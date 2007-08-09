@@ -58,6 +58,12 @@ def _num(s, unit=1):
         except ValueError:
             return float(s)*unit
 
+def _autoLeading(x):
+    x = x.lower()
+    if x in ('','min','max','off'):
+        return x
+    raise ValueError('Invalid autoLeading=%r' % x )
+
 def _align(s):
     s = string.lower(s)
     if s=='left': return TA_LEFT
@@ -71,6 +77,7 @@ _paraAttrMap = {'font': ('fontName', None),
                 'fontsize': ('fontSize', _num),
                 'size': ('fontSize', _num),
                 'leading': ('leading', _num),
+                'autoleading': ('autoLeading', _autoLeading),
                 'lindent': ('leftIndent', _num),
                 'rindent': ('rightIndent', _num),
                 'findent': ('firstLineIndent', _num),
