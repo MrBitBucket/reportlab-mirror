@@ -1020,7 +1020,7 @@ class ImageAndFlowables(_Container,Flowable):
             Ix = x + self._ilpad
             Fx = Ix+ self._irpad + self._wI
         else:
-            Ix = x + self.width-self._wI-self._irpad - self._ilpad
+            Ix = x + self.width-self._wI-self._irpad
             Fx = x
         self._I.drawOn(canv,Ix,y+self.height-self._itpad-self._hI)
         if self._C0:
