@@ -312,12 +312,10 @@ def import_zlib():
         if ZLIB_WARNINGS: warnOnce('zlib not available')
     return zlib
 
-
 # Image Capability Detection.  Set a flag haveImages
 # to tell us if either PIL or Java imaging libraries present.
 # define PIL_Image as either None, or an alias for the PIL.Image
 # module, as there are 2 ways to import it
-
 if sys.platform[0:4] == 'java':
     try:
         import javax.imageio
@@ -335,7 +333,6 @@ else:
             Image = None
     haveImages = Image is not None
     if haveImages: del Image
-
 
 __StringIO=None
 def getStringIO(buf=None):
@@ -563,7 +560,6 @@ class ImageReader:
                     raise et,ev,tb
                 else:
                     raise
-
 
     def _jpeg_fh(self):
         fp = self.fp

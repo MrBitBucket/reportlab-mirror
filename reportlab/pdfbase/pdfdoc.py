@@ -1831,15 +1831,15 @@ class PDFImageXObject:
 
         if source is None:
             pass # use the canned one.
-        elif type(source)==type(''):
+        elif hasattr(source,'jpeg_fh'):
+            self.loadImageFromSRC(source)   #it is already a PIL Image
+        else:
             # it is a filename
             import os
             ext = string.lower(os.path.splitext(source)[1])
             src = open_for_read(source)
             if not(ext in ('.jpg', '.jpeg') and self.loadImageFromJPEG(src)):
                 self.loadImageFromA85(src)
-        else: # it is already a PIL Image
-            self.loadImageFromSRC(source)
 
     def loadImageFromA85(self,source):
         IMG=[]
