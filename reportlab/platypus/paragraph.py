@@ -216,17 +216,14 @@ def _rightDrawParaLineX( tx, offset, line, last=0):
 
 def _justifyDrawParaLineX( tx, offset, line, last=0):
     setXPos(tx,offset)
-    if last:
-        #last one, left align
-        _putFragLine(tx, line)
+    extraSpace = line.extraSpace
+    nSpaces = line.wordCount - 1
+    if last or not nSpaces or abs(extraSpace)<=1e-8 or line.lineBreak:
+        _putFragLine(tx, line)  #no space modification
     else:
-        nSpaces = line.wordCount - 1
-        if nSpaces:
-            tx.setWordSpace(line.extraSpace / float(nSpaces))
-            _putFragLine(tx, line)
-            tx.setWordSpace(0)
-        else:
-            _putFragLine(tx, line)
+        tx.setWordSpace(extraSpace / float(nSpaces))
+        _putFragLine(tx, line)
+        tx.setWordSpace(0)
     setXPos(tx,-offset)
     return offset
 
@@ -254,11 +251,15 @@ def _getFragWords(frags):
     R = []
     W = []
     n = 0
+    hangingStrip = False
     for f in frags:
         text = f.text
         #del f.text # we can't do this until we sort out splitting
                     # of paragraphs
         if text!='':
+            if hangingStrip:
+                hangingStrip = False
+                text = text.lstrip()
             S = split(text)
             if S==[]: S = ['']
             if W!=[] and text[0] in whitespace:
@@ -293,6 +294,7 @@ def _getFragWords(frags):
                 W = []
                 n = 0
             R.append([0,(f,'')])
+            hangingStrip = True
 
     if W!=[]:
         W.insert(0,n)
@@ -844,8 +846,8 @@ class Paragraph(Flowable):
 
                     if currentWidth>self.width: self.width = currentWidth
                     #end of line
-                    lines.append(FragLine(extraSpace=(maxWidth - currentWidth),wordCount=n,
-                                        words=words, fontSize=maxSize))
+                    lines.append(FragLine(extraSpace=maxWidth-currentWidth, wordCount=n,
+                                        lineBreak=lineBreak, words=words, fontSize=maxSize))
 
                     #start new line
                     lineno += 1
@@ -1148,11 +1150,18 @@ if __name__=='__main__':    #NORUNTESTS
                 print "%d:'%s'"%(w,getattr(words[w],'text',words[w])),
             print
 
+    def fragDump(w):
+        R= ["'%s'" % w[1]]
+        for a in ('fontName', 'fontSize', 'textColor', 'rise', 'underline', 'strike', 'link', 'cbDefn','lineBreak'):
+            if hasattr(w[0],a):
+                R.append('%s=%r' % (a,getattr(w[0],a)))
+        return ', '.join(R)
+        
     def dumpParagraphFrags(P):
         print 'dumpParagraphFrags(<Paragraph @ %d>) minWidth() = %.2f' % (id(P), P.minWidth())
         frags = P.frags
         n =len(frags)
-        for l in range(n):
+        for l in xrange(n):
             print "frag%d: '%s' %s" % (l, frags[l].text,' '.join(['%s=%s' % (k,getattr(frags[l],k)) for k in frags[l].__dict__ if k!=text]))
 
         l = 0
@@ -1161,12 +1170,13 @@ if __name__=='__main__':    #NORUNTESTS
             cum += W[0]
             print "fragword%d: cum=%3d size=%d" % (l, cum, W[0]),
             for w in W[1:]:
-                print "'%s'" % w[1],
+                print '(%s)' % fragDump(w),
             print
             l += 1
 
 
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import cm
     import sys
     TESTS = sys.argv[1:]
     if TESTS==[]: TESTS=['4']
@@ -1274,3 +1284,16 @@ umfassend zu sein."""
         print len(S)
         dumpParagraphLines(S[0])
         dumpParagraphLines(S[1])
+
+
+    if flagged(9):
+        text="""Furthermore, the fundamental error of
+regarding functional notions as
+categorial delimits a general
+convention regarding the forms of the<br/>
+grammar. I suggested that these results
+would follow from the assumption that"""
+        P=Paragraph(text,ParagraphStyle('aaa',parent=styleSheet['Normal'],align=TA_JUSTIFY))
+        dumpParagraphFrags(P)
+        w,h = P.wrap(6*cm-12, 9.7*72)
+        dumpParagraphLines(P)

@@ -83,6 +83,9 @@ def _test0(self):
     h3.keepWithNext = 1
 
     bt = styleSheet['BodyText']
+    btj = ParagraphStyle('bodyText1j',parent=bt,alignment=TA_JUSTIFY)
+    btr = ParagraphStyle('bodyText1r',parent=bt,alignment=TA_RIGHT)
+    btc = ParagraphStyle('bodyText1c',parent=bt,alignment=TA_CENTER)
     a(Paragraph("""
         Subsequent pages test pageBreakBefore, frameBreakBefore and
         keepTogether attributes.  Generated at %s.  The number in brackets
@@ -104,43 +107,44 @@ def _test0(self):
                 a(Paragraph('I should never be at the bottom of a frame (%d)' % len(story), h3))
                 a(Paragraph(randomText(theme=PYTHON, sentences=1)+' (%d)' % len(story), bt))
 
-    a(Paragraph('Now we do &lt;br/&gt; tests', h1))
-    a(Paragraph('First off no br tags',h3))
-    a(Paragraph(_text1,bt))
-    a(Paragraph("&lt;br/&gt; after 'the' in line 4",h3))
-    a(Paragraph(_text1.replace('forms of the','forms of the<br/>',1),bt))
-    a(Paragraph("2*&lt;br/&gt; after 'the' in line 4",h3))
-    a(Paragraph(_text1.replace('forms of the','forms of the<br/><br/>',1),bt))
-    a(Paragraph("&lt;br/&gt; after 'I suggested ' in line 5",h3))
-    a(Paragraph(_text1.replace('I suggested ','I suggested<br/>',1),bt))
-    a(Paragraph("2*&lt;br/&gt; after 'I suggested ' in line 5",h3))
-    a(Paragraph(_text1.replace('I suggested ','I suggested<br/><br/>',1),bt))
-    a(Paragraph("&lt;br/&gt; at the end of the paragraph!",h3))
-    a(Paragraph("""text one<br/>text two<br/>""",bt))
-    a(Paragraph("Border with &lt;nr/&gt; at the end of the paragraph!",h3))
-    bt1 = ParagraphStyle('bodyText1',bt)
-    bt1.borderWidth = 0.5
-    bt1.borderColor = colors.toColor('red')
-    bt1.backColor = colors.pink
-    bt1.borderRadius = 2
-    bt1.borderPadding = 3
-    a(Paragraph("""text one<br/>text two<br/>""",bt1))
-    a(Paragraph("Border no &lt;nr/&gt; at the end of the paragraph!",h3))
-    bt1 = ParagraphStyle('bodyText1',bt)
-    bt1.borderWidth = 0.5
-    bt1.borderColor = colors.toColor('red')
-    bt1.backColor = colors.pink
-    bt1.borderRadius = 2
-    bt1.borderPadding = 3
-    a(Paragraph("""text one<br/>text two""",bt1))
-    a(Paragraph("Different border style!",h3))
-    bt2 = ParagraphStyle('bodyText1',bt1)
-    bt2.borderWidth = 1.5
-    bt2.borderColor = colors.toColor('blue')
-    bt2.backColor = colors.gray
-    bt2.borderRadius = 3
-    bt2.borderPadding = 3
-    a(Paragraph("""text one<br/>text two<br/>""",bt2))
+    for align,bts in [('left',bt),('JUSTIFIED',btj),('RIGHT',btr),('CENTER',btc)]:
+        a(Paragraph('Now we do &lt;br/&gt; tests(align=%s)' % align, h1))
+        a(Paragraph('First off no br tags',h3))
+        a(Paragraph(_text1,bts))
+        a(Paragraph("&lt;br/&gt; after 'the' in line 4",h3))
+        a(Paragraph(_text1.replace('forms of the','forms of the<br/>',1),bts))
+        a(Paragraph("2*&lt;br/&gt; after 'the' in line 4",h3))
+        a(Paragraph(_text1.replace('forms of the','forms of the<br/><br/>',1),bts))
+        a(Paragraph("&lt;br/&gt; after 'I suggested ' in line 5",h3))
+        a(Paragraph(_text1.replace('I suggested ','I suggested<br/>',1),bts))
+        a(Paragraph("2*&lt;br/&gt; after 'I suggested ' in line 5",h3))
+        a(Paragraph(_text1.replace('I suggested ','I suggested<br/><br/>',1),bts))
+        a(Paragraph("&lt;br/&gt; at the end of the paragraph!",h3))
+        a(Paragraph("""text one<br/>text two<br/>""",bts))
+        a(Paragraph("Border with &lt;br/&gt; at the end of the paragraph!",h3))
+        bt1 = ParagraphStyle('bodyText1',bts)
+        bt1.borderWidth = 0.5
+        bt1.borderColor = colors.toColor('red')
+        bt1.backColor = colors.pink
+        bt1.borderRadius = 2
+        bt1.borderPadding = 3
+        a(Paragraph("""text one<br/>text two<br/>""",bt1))
+        a(Paragraph("Border no &lt;br/&gt; at the end of the paragraph!",h3))
+        bt1 = ParagraphStyle('bodyText1',bts)
+        bt1.borderWidth = 0.5
+        bt1.borderColor = colors.toColor('red')
+        bt1.backColor = colors.pink
+        bt1.borderRadius = 2
+        bt1.borderPadding = 3
+        a(Paragraph("""text one<br/>text two""",bt1))
+        a(Paragraph("Different border style!",h3))
+        bt2 = ParagraphStyle('bodyText1',bt1)
+        bt2.borderWidth = 1.5
+        bt2.borderColor = colors.toColor('blue')
+        bt2.backColor = colors.gray
+        bt2.borderRadius = 3
+        bt2.borderPadding = 3
+        a(Paragraph("""text one<br/>text two<br/>""",bt2))
 
     doc = MyDocTemplate(outputfile('test_platypus_breaking.pdf'))
     doc.multiBuild(story)
