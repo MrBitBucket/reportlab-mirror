@@ -279,7 +279,7 @@ def _getFragWords(frags):
             w = S[-1]
             W.append((f,w))
             n += stringWidth(w, f.fontName, f.fontSize)
-            if text[-1] in whitespace:
+            if text and text[-1] in whitespace:
                 W.insert(0,n)
                 R.append(W)
                 W = []
