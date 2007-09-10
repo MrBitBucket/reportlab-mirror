@@ -10,14 +10,26 @@ import copy, operator
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, OneOf, isString, isColorOrNone,\
         isNumberOrNone, isListOfNumbersOrNone, isStringOrNone, isBoolean,\
-        NoneOr, AutoOr, isAuto, Auto, isBoxAnchor, SequenceOf
+        EitherOr, NoneOr, AutoOr, isAuto, Auto, isBoxAnchor, SequenceOf, isInstanceOf
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth, getFont
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.shapes import Drawing, Group, String, Rect, Line, STATE_DEFAULTS
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
-from reportlab.lib.utils import isSeqType
+from reportlab.lib.utils import isSeqType, find_locals
+
+def _transMax(n,A):
+    X = n*[0]
+    m = 0
+    for a in A:
+        m = max(m,len(a))
+        for i,x in enumerate(a):
+            X[i] = max(X[i],x)
+    X = [0] + X[:m]
+    for i in xrange(m):
+        X[i+1] += X[i]
+    return X
 
 def _getStr(s):
     if isSeqType(s):
@@ -40,16 +52,58 @@ def _getLineCount(s):
     else:
         return len(T)
 
-def _getWidth(s,fontName, fontSize, sepSpace=0):
+def _getWidths(i,s, fontName, fontSize, subCols):
+    S = []
+    aS = S.append
     if isSeqType(s):
-        sum = 0
-        for t in s:
-            m = [stringWidth(x, fontName, fontSize) for x in t.split('\n')]
-            sum += m and max(m) or 0
-        sum += (len(s)-1)*sepSpace
-        return sum
-    m = [stringWidth(x, fontName, fontSize) for x in s.split('\n')]
-    return m and max(m) or 0
+        for j,t in enumerate(s):
+            sc = subCols[j,i]
+            fN = getattr(sc,'fontName',fontName)
+            fS = getattr(sc,'fontSize',fontSize)
+            m = [stringWidth(x, fN, fS) for x in t.split('\n')]
+            m = max(sc.minWidth,m and max(m) or 0)
+            aS(m)
+            aS(sc.rpad)
+        del S[-1]
+    else:
+        sc = subCols[0,i]
+        fN = getattr(sc,'fontName',fontName)
+        fS = getattr(sc,'fontSize',fontSize)
+        m = [stringWidth(x, fN, fS) for x in s.split('\n')]
+        aS(max(subCols[0,i],m and max(m) or 0))
+    return S
+
+class SubColProperty(PropHolder):
+    dividerLines = 0
+    _attrMap = AttrMap(
+        minWidth = AttrMapValue(isNumber,desc="minimum width for this subcol"),
+        rpad = AttrMapValue(isNumber,desc="right padding for this subcol"),
+        align = AttrMapValue(OneOf('left','right','center','centre'),desc='alignment in subCol'),
+        fontName = AttrMapValue(isString, desc="Font name of the strings"),
+        fontSize = AttrMapValue(isNumber, desc="Font size of the strings"),
+        leading = AttrMapValue(isNumber, desc="leading for the strings"),
+        fillColor = AttrMapValue(isColorOrNone, desc="fontColor"),
+        underlines = AttrMapValue(EitherOr((NoneOr(isInstanceOf(Line)),SequenceOf(isInstanceOf(Line),emptyOK=0,lo=0,hi=0x7fffffff))), desc="underline definitions"),
+        overlines = AttrMapValue(EitherOr((NoneOr(isInstanceOf(Line)),SequenceOf(isInstanceOf(Line),emptyOK=0,lo=0,hi=0x7fffffff))), desc="overline definitions"),
+        )
+
+class LegendCallout:
+    def _legendValues(legend,*args):
+        '''return a tuple of values from the first function up the stack with isinstance(self,legend)'''
+        L = find_locals(lambda L: L.get('self',None) is legend and L or None)
+        return tuple([L[a] for a in args])
+    _legendValues = staticmethod(_legendValues)
+
+    def _selfOrLegendValues(self,legend,*args):
+        L = find_locals(lambda L: L.get('self',None) is legend and L or None)
+        return tuple([getattr(self,a,L[a]) for a in args])
+
+    def __call__(self,legend,g,thisx,y,(col,name)):
+        pass
+
+class LegendColEndCallout(LegendCallout):
+    def __call__(self,legend, g, x, xt, y, width, lWidth):
+        pass
 
 class Legend(Widget):
     """A simple legend containing rectangular swatches and strings.
@@ -94,8 +148,8 @@ class Legend(Widget):
         dividerDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array for dividerLines.'),
         dividerOffsX = AttrMapValue(SequenceOf(isNumber,emptyOK=0,lo=2,hi=2), desc='divider lines X offsets'),
         dividerOffsY = AttrMapValue(isNumber, desc="dividerLines Y offset"),
-        sepSpace = AttrMapValue(isNumber, desc="separator spacing"),
         colEndCallout = AttrMapValue(None, desc="a user callout(self,g, x, xt, y,width, lWidth)"),
+        subCols = AttrMapValue(None,desc="subColumn properties"),
        )
 
     def __init__(self):
@@ -145,8 +199,15 @@ class Legend(Widget):
         self.dividerColor = colors.black
         self.dividerOffsX = (0,0)
         self.dividerOffsY = 0
-        self.sepSpace = 0
         self.colEndCallout = None
+        self._init_subCols()
+
+    def _init_subCols(self):
+        sc = self.subCols = TypedPropertyCollection(SubColProperty)
+        sc.rpad = 1
+        sc.minWidth = 0
+        sc.align = 'right'
+        sc[0].align = 'left' 
 
     def _getChartStyleName(self,chart):
         for a in 'lines', 'bars', 'slices', 'strands':
@@ -164,18 +225,21 @@ class Legend(Widget):
             texts = [str(chart.getSeriesName(i,'series %d' % i)) for i in xrange(chart._seriesCount)]
         return texts
 
-    def _calculateMaxWidth(self, colorNamePairs):
+    def _calculateMaxBoundaries(self, colorNamePairs):
         "Calculate the maximum width of some given strings."
-        M = []
-        a = M.append
-        for t in self._getTexts(colorNamePairs):
-            M.append(_getWidth(t, self.fontName, self.fontSize,self.sepSpace))
-        if not M: return 0
+        fontName = self.fontName
+        fontSize = self.fontSize
+        subCols = self.subCols
+
+        M = [_getWidths(i, m, fontName, fontSize, subCols) for i,m in enumerate(self._getTexts(colorNamePairs))]
+        if not M:
+            return [0,0]
+        n = max([len(m) for m in M])
         if self.variColumn:
             columnMaximum = self.columnMaximum
-            return [max(M[r:r+columnMaximum]) for r in range(0,len(M),self.columnMaximum)]
+            return [_transMax(n,M[r:r+columnMaximum]) for r in xrange(0,len(M),self.columnMaximum)]
         else:
-            return max(M)
+            return _transMax(n,M)
 
     def _calcHeight(self):
         dy = self.dy
@@ -241,20 +305,21 @@ class Legend(Widget):
         fillColor = self.fillColor
         strokeWidth = self.strokeWidth
         strokeColor = self.strokeColor
+        subCols = self.subCols
         leading = fontSize*1.2
         yGap = self.yGap
         if not deltay:
             deltay = max(dy,leading)+self.autoYPadding
         ba = self.boxAnchor
-        maxWidth = self._calculateMaxWidth(colorNamePairs)
+        maxWidth = self._calculateMaxBoundaries(colorNamePairs)
         nCols = int((n+columnMaximum-1)/columnMaximum)
         xW = dx+dxTextSpace+self.autoXPadding
         variColumn = self.variColumn
         if variColumn:
-            width = reduce(operator.add,maxWidth,0)+xW*(nCols-1)
+            width = reduce(operator.add,[m[-1] for m in maxWidth],0)+xW*nCols
         else:
-            deltax = max(maxWidth+xW,deltax)
-            width = maxWidth+(nCols-1)*deltax
+            deltax = max(maxWidth[-1]+xW,deltax)
+            width = maxWidth[-1]+nCols*deltax
             maxWidth = nCols*[maxWidth]
 
         thisx = self.x
@@ -273,11 +338,6 @@ class Legend(Widget):
         upperlefty = thisy
 
         g = Group()
-        def gAdd(t,g=g,fontName=fontName,fontSize=fontSize,fillColor=fillColor):
-            t.fontName = fontName
-            t.fontSize = fontSize
-            t.fillColor = fillColor
-            return g.add(t)
 
         ascent=getFont(fontName).face.ascent/1000.
         if ascent==0: ascent=0.718 # default (from helvetica)
@@ -307,59 +367,73 @@ class Legend(Widget):
                     name = getattr(swatchMarker,'chart',getattr(swatchMarker,'obj',None)).getSeriesName(i,'series %d' % i)
             T = _getLines(name)
             S = []
+            aS = S.append
             j = int(i/columnMaximum)
+            jOffs = maxWidth[j]
 
             # thisy+dy/2 = y+leading/2
             y = y0 = thisy+(dy-ascent)*0.5
 
             if callout: callout(self,g,thisx,y,(col,name))
             if alignment == "left":
-                if isSeqType(name):
-                    for t in T[0]:
-                        S.append(String(thisx,y,t,fontName=fontName,fontSize=fontSize,fillColor=fillColor,
-                                textAnchor = "start"))
-                        y -= leading
-                    yd = y
-                    y = y0
-                    for t in T[1]:
-                        S.append(String(thisx+maxWidth[j],y,t,fontName=fontName,fontSize=fontSize,fillColor=fillColor,
-                                textAnchor = "end"))
-                        y -= leading
-                    y = min(yd,y)
-                else:
-                    for t in T:
-                        # align text to left
-                        S.append(String(thisx+maxWidth[j],y,t,fontName=fontName,fontSize=fontSize,fillColor=fillColor,
-                                textAnchor = "end"))
-                        y -= leading
-                x = thisx+maxWidth[j]+dxTextSpace
-            elif alignment == "right":
-                if isSeqType(name):
-                    y0 = y
-                    for t in T[0]:
-                        S.append(String(thisx+dx+dxTextSpace,y,t,fontName=fontName,fontSize=fontSize,fillColor=fillColor,
-                                textAnchor = "start"))
-                        y -= leading
-                    yd = y
-                    y = y0
-                    for t in T[1]:
-                        S.append(String(thisx+dx+dxTextSpace+maxWidth[j],y,t,fontName=fontName,fontSize=fontSize,fillColor=fillColor,
-                                textAnchor = "end"))
-                        y -= leading
-                    y = min(yd,y)
-                else:
-                    for t in T:
-                        # align text to right
-                        S.append(String(thisx+dx+dxTextSpace,y,t,fontName=fontName,fontSize=fontSize,fillColor=fillColor,
-                                textAnchor = "start"))
-                        y -= leading
                 x = thisx
+                xn = thisx+jOffs[-1]+dxTextSpace
+            elif alignment == "right":
+                x = thisx+dx+dxTextSpace
+                xn = thisx
             else:
                 raise ValueError, "bad alignment"
+            if not isSeqType(name):
+                T = [T]
+            yd = y
+            for k,lines in enumerate(T):
+                y = y0
+                kk = k*2
+                x1 = x+jOffs[kk]
+                x2 = x+jOffs[kk+1]
+                sc = subCols[k,i]
+                anchor = sc.align
+                if anchor=='left':
+                    anchor = 'start'
+                    xoffs = x1
+                elif anchor=='right':
+                    anchor = 'end'
+                    xoffs = x2
+                else:
+                    anchor = 'middle'
+                    xoffs = 0.5*(x1+x2)
+                fN = getattr(sc,'fontName',fontName)
+                fS = getattr(sc,'fontSize',fontSize)
+                fC = getattr(sc,'fillColor',fillColor)
+                fL = getattr(sc,'leading',1.2*fontSize)
+                if fN==fontName:
+                    fA = (ascent*fS)/fontSize
+                else:
+                    fA = getFont(fontName).face.ascent/1000.
+                    if fA==0: fA=0.718
+                    fA *= fS
+                for t in lines:
+                    aS(String(xoffs,y,t,fontName=fN,fontSize=fS,fillColor=fC, textAnchor = anchor))
+                    y -= fL
+                yd = min(yd,y)
+                y += fL
+                for iy, a in ((y-max(fL-fA,0),'underlines'),(y+fA,'overlines')):
+                    il = getattr(sc,a,None)
+                    if il:
+                        if not isinstance(il,(tuple,list)): il = (il,)
+                        for l in il:
+                            l = copy.copy(l)
+                            l.y1 += iy
+                            l.y2 += iy
+                            l.x1 += x1
+                            l.x2 += x2
+                            aS(l)
+            x = xn
+            y = yd
             leadingMove = 2*y0-y-thisy
 
             if dividerLines:
-                xd = thisx+dx+dxTextSpace+maxWidth[j]+dividerOffsX[1]
+                xd = thisx+dx+dxTextSpace+jOffs[-1]+dividerOffsX[1]
                 yd = thisy+dy*0.5+dividerOffsY
                 if ((dividerLines&1) and i%columnMaximum) or ((dividerLines&2) and not i%columnMaximum):
                     g.add(Line(thisx+dividerOffsX[0],yd,xd,yd,
@@ -379,7 +453,7 @@ class Legend(Widget):
                     g.add(uSymbol2Symbol(swatchMarker,x+dx/2.,thisy+dy/2.,col))
                 else:
                     g.add(self._defaultSwatch(x,thisy,dx,dy,fillColor=col,strokeWidth=strokeWidth,strokeColor=strokeColor))
-            else:
+            elif col is not None:
                 try:
                     c = copy.deepcopy(col)
                     c.x = x
@@ -390,18 +464,18 @@ class Legend(Widget):
                 except:
                     pass
 
-            map(gAdd,S)
+            map(g.add,S)
             if self.colEndCallout and (i%columnMaximum==lim or i==(n-1)):
                 if alignment == "left":
                     xt = thisx
                 else:
                     xt = thisx+dx+dxTextSpace
                 yd = thisy+dy*0.5+dividerOffsY - (max(deltay,leadingMove)+yGap)
-                self.colEndCallout(self, g, thisx, xt, yd, maxWidth[j], maxWidth[j]+dx+dxTextSpace)
+                self.colEndCallout(self, g, thisx, xt, yd, jOffs[-1], jOffs[-1]+dx+dxTextSpace)
 
             if i%columnMaximum==lim:
                 if variColumn:
-                    thisx += maxWidth[j]+xW
+                    thisx += jOffs[-1]+xW
                 else:
                     thisx = thisx+deltax
                 thisy = upperlefty
@@ -428,7 +502,7 @@ class Legend(Widget):
 
         return d
 
-class TotalAnnotator:
+class TotalAnnotator(LegendColEndCallout):
     def __init__(self, lText='Total', rText='0.0', fontName='Times-Roman', fontSize=10,
             fillColor=colors.black, strokeWidth=0.5, strokeColor=colors.black, strokeDashArray=None,
             dx=0, dy=0, dly=0, dlx=(0,0)):
