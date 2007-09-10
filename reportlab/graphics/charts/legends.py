@@ -26,7 +26,10 @@ def _transMax(n,A):
         m = max(m,len(a))
         for i,x in enumerate(a):
             X[i] = max(X[i],x)
-    return X[:m]
+    X = [0] + X[:m]
+    for i in xrange(m):
+        X[i+1] += X[i]
+    return X
 
 def _getStr(s):
     if isSeqType(s):
@@ -49,8 +52,8 @@ def _getLineCount(s):
     else:
         return len(T)
 
-def _getBoundaries(i,s, fontName, fontSize, subCols):
-    S = [0]
+def _getWidths(i,s, fontName, fontSize, subCols):
+    S = []
     aS = S.append
     if isSeqType(s):
         for j,t in enumerate(s):
@@ -59,8 +62,8 @@ def _getBoundaries(i,s, fontName, fontSize, subCols):
             fS = getattr(sc,'fontSize',fontSize)
             m = [stringWidth(x, fN, fS) for x in t.split('\n')]
             m = max(sc.minWidth,m and max(m) or 0)
-            aS(S[-1]+m)
-            aS(S[-1]+sc.rpad)
+            aS(m)
+            aS(sc.rpad)
         del S[-1]
     else:
         sc = subCols[0,i]
@@ -80,8 +83,8 @@ class SubColProperty(PropHolder):
         fontSize = AttrMapValue(isNumber, desc="Font size of the strings"),
         leading = AttrMapValue(isNumber, desc="leading for the strings"),
         fillColor = AttrMapValue(isColorOrNone, desc="fontColor"),
-        underlines = AttrMapValue(EitherOr((NoneOr(isInstanceOf(Line)),SequenceOf(isInstanceOf(Line),emptyOK=0,lo=2,hi=2))), desc="underline definitions"),
-        overlines = AttrMapValue(EitherOr((NoneOr(isInstanceOf(Line)),SequenceOf(isInstanceOf(Line),emptyOK=0,lo=2,hi=2))), desc="overline definitions"),
+        underlines = AttrMapValue(EitherOr((NoneOr(isInstanceOf(Line)),SequenceOf(isInstanceOf(Line),emptyOK=0,lo=0,hi=0x7fffffff))), desc="underline definitions"),
+        overlines = AttrMapValue(EitherOr((NoneOr(isInstanceOf(Line)),SequenceOf(isInstanceOf(Line),emptyOK=0,lo=0,hi=0x7fffffff))), desc="overline definitions"),
         )
 
 class LegendCallout:
@@ -196,12 +199,15 @@ class Legend(Widget):
         self.dividerColor = colors.black
         self.dividerOffsX = (0,0)
         self.dividerOffsY = 0
+        self.colEndCallout = None
+        self._init_subCols()
+
+    def _init_subCols(self):
         sc = self.subCols = TypedPropertyCollection(SubColProperty)
         sc.rpad = 1
         sc.minWidth = 0
-        sc.align = 'left'
-        sc[0].align = 'right' 
-        self.colEndCallout = None
+        sc.align = 'right'
+        sc[0].align = 'left' 
 
     def _getChartStyleName(self,chart):
         for a in 'lines', 'bars', 'slices', 'strands':
@@ -225,7 +231,7 @@ class Legend(Widget):
         fontSize = self.fontSize
         subCols = self.subCols
 
-        M = [_getBoundaries(i, m, fontName, fontSize, subCols) for i,m in enumerate(self._getTexts(colorNamePairs))]
+        M = [_getWidths(i, m, fontName, fontSize, subCols) for i,m in enumerate(self._getTexts(colorNamePairs))]
         if not M:
             return [0,0]
         n = max([len(m) for m in M])
@@ -410,8 +416,8 @@ class Legend(Widget):
                     aS(String(xoffs,y,t,fontName=fN,fontSize=fS,fillColor=fC, textAnchor = anchor))
                     y -= fL
                 yd = min(yd,y)
-                y + fL - max(fL-fA,0)
-                for iy, a in ((y,'underlines'),(y+fA,'overlines')):
+                y += fL
+                for iy, a in ((y-max(fL-fA,0),'underlines'),(y+fA,'overlines')):
                     il = getattr(sc,a,None)
                     if il:
                         if not isinstance(il,(tuple,list)): il = (il,)
