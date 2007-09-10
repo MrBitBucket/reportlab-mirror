@@ -27,6 +27,7 @@ autoConvertEncoding  =      0                       #convert internally as neede
 _FUZZ=                      1e-6                    #fuzz for layout arithmetic
 wrapA85=                    0                       #set to 1 to get old wrapped line behaviour
 fsEncodings=('utf8','cp1252','cp430')               #encodings to attempt utf8 conversion with
+odbc_driver=                'odbc'                  #default odbc driver
 
 
 # places to look for T1Font information
@@ -141,7 +142,8 @@ longTableOptimize
 autoConvertEncoding  
 _FUZZ
 wrapA85
-fsEncodings'''.split()
+fsEncodings
+odbc_driver'''.split()
     import os, sys
     global sys_version, _unset_
     sys_version = sys.version.split()[0]        #strip off the other garbage
