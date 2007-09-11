@@ -189,3 +189,36 @@ def ticks(lower, upper, n=(4,5,6,7,8,9), split=1, percent=0, grid=None):
             v = t+grid*i
             T.append((v, format % v))
         return T
+
+def findNones(data):
+    if None in data:
+        b = 0
+        m = len(data)
+        while b<m and data[b] is None:
+            b += 1
+        if b==m: return data
+        l = 1
+        while data[-l] is None:
+            l += 1
+        data = data[b:-l]
+        I = [i for i in xrange(len(data)) if data[i] is None]
+        for i in I:
+            data[i] = 0.5*(data[i-1]+data[i+1])
+        return b, l, data
+    return 0,0,data
+
+def pairFixNones(pairs):
+    Y = [x[1] for x in pairs]
+    b,l,nY = findNones(Y)
+    if b or l or nY!=Y:
+        pairs = [(x[0],y) for x,y in zip(pairs[b:-l],nY)]
+    return pairs
+
+def maverage(data,n=6):
+    if None in data:
+        data = (n-1)*[data[0]]+data
+    data = [float(sum(data[i-n:i]))/n for i in xrange(n,len(data)+1)]
+    return data
+
+def pairMaverage(data,n=6):
+    return [(x[0],s) for x,s in zip(data, maverage([x[1] for x in data],n))]

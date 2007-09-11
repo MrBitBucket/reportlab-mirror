@@ -571,6 +571,7 @@ class ValueAxis(_AxisG):
         rangeRound=AttrMapValue(OneOf('none','both','ceiling','floor'),'How to round the axis limits'),
         zrangePref = AttrMapValue(isNumberOrNone, desc='Zero range axis limit preference.'),
         style = AttrMapValue(OneOf('normal','stacked','parallel_3d'),"How values are plotted!"),
+        skipEndL = AttrMapValue(OneOf('none','start','end','both'), desc='Skip high/low tick labels')
         )
 
     def __init__(self,**kw):
@@ -625,6 +626,7 @@ class ValueAxis(_AxisG):
                         rangeRound = 'none',
                         zrangePref = 0,
                         style = 'normal',
+                        skipEndL='none',
                         )
         self.labels.angle = 0
 
@@ -879,35 +881,54 @@ class ValueAxis(_AxisG):
         pos = [self._x, self._y]
         d = self._dataIndex
         labels = self.labels
+        if self.skipEndL!='none':
+            if self.isXAxis:
+                sk = self._x
+            else:
+                sk = self._y
+            if self.skipEndL=='start':
+                sk = [sk]
+            else:
+                sk = [sk,sk+self._length]
+                if self.skipEndL=='end':
+                    del sk[0]
+        else:
+            sk = []
 
         i = 0
         for tick in self._tickValues:
             if f and labels[i].visible:
                 v = self.scale(tick)
-                if scl is not None:
-                    t = tick*scl
-                else:
-                    t = tick
-                if type(f) is str: txt = f % t
-                elif isinstance(f,_SequenceTypes):
-                    #it's a list, use as many items as we get
-                    if i < len(f):
-                        txt = f[i]
+                if sk:
+                    for skv in sk:
+                        if abs(skv-v)<1e-6:
+                            v = None
+                            break
+                if v is not None:
+                    if scl is not None:
+                        t = tick*scl
                     else:
-                        txt = ''
-                elif callable(f):
-                    if isinstance(f,TickLabeller):
-                        txt = f(self,t)
+                        t = tick
+                    if type(f) is str: txt = f % t
+                    elif isinstance(f,_SequenceTypes):
+                        #it's a list, use as many items as we get
+                        if i < len(f):
+                            txt = f[i]
+                        else:
+                            txt = ''
+                    elif callable(f):
+                        if isinstance(f,TickLabeller):
+                            txt = f(self,t)
+                        else:
+                            txt = f(t)
                     else:
-                        txt = f(t)
-                else:
-                    raise ValueError, 'Invalid labelTextFormat %s' % f
-                if post: txt = post % txt
-                label = labels[i]
-                pos[d] = v
-                apply(label.setOrigin,pos)
-                label.setText(txt)
-                g.add(label)
+                        raise ValueError, 'Invalid labelTextFormat %s' % f
+                    if post: txt = post % txt
+                    label = labels[i]
+                    pos[d] = v
+                    apply(label.setOrigin,pos)
+                    label.setText(txt)
+                    g.add(label)
             i += 1
 
         return g
