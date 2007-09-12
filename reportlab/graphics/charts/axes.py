@@ -36,7 +36,7 @@ import string
 
 from reportlab.lib.validators import    isNumber, isNumberOrNone, isListOfStringsOrNone, isListOfNumbers, \
                                         isListOfNumbersOrNone, isColorOrNone, OneOf, isBoolean, SequenceOf, \
-                                        isString, EitherOr, Validator, _SequenceTypes
+                                        isString, EitherOr, Validator, _SequenceTypes, NoneOr, isInstanceOf
 from reportlab.lib.attrmap import *
 from reportlab.lib import normalDate
 from reportlab.graphics.shapes import Drawing, Line, PolyLine, Group, STATE_DEFAULTS, _textBoxLimits, _rotatedBoxLimits
@@ -276,7 +276,30 @@ def _assertYAxis(axis):
 def _assertXAxis(axis):
     assert axis.isXAxis, "Cannot connect to other axes (%s), but X- ones." % axis.__class__.__name__
 
-class XCategoryAxis(CategoryAxis):
+class _XTicks:
+    _tickTweaks = 0 #try 0.25-0.5
+    def _drawTicks(self,tU,tD):
+        g = Group()
+        if self.visibleTicks:
+            if tU or tD:
+                sW = self.strokeWidth
+                tW = self._tickTweaks
+                if tW:
+                    if tU and not tD:
+                        tD = tW*sW
+                    elif tD and not tU:
+                        tU = tW*sW
+                self._makeLines(g,tU,-tD,self.strokeColor,sW,self.strokeDashArray)
+        return g
+
+    def makeTicks(self):
+        return self._drawTicks(self.tickUp,self.tickDown)
+
+class _YTicks(_XTicks):
+    def makeTicks(self):
+        return self._drawTicks(self.tickRight,self.tickLeft)
+
+class XCategoryAxis(_XTicks,CategoryAxis):
     "X/category axis"
 
     _attrMap = AttrMap(BASE=CategoryAxis,
@@ -360,13 +383,6 @@ class XCategoryAxis(CategoryAxis):
 
         return g
 
-    def makeTicks(self):
-        g = Group()
-        if not self.visibleTicks: return g
-        if self.tickUp or self.tickDown:
-            self._makeLines(g,self.tickUp,-self.tickDown,self.strokeColor,self.strokeWidth,self.strokeDashArray)
-        return g
-
     def _labelAxisPos(self):
         axis = self.joinAxis
         if axis:
@@ -404,7 +420,7 @@ class XCategoryAxis(CategoryAxis):
         return g
 
 
-class YCategoryAxis(CategoryAxis):
+class YCategoryAxis(_YTicks,CategoryAxis):
     "Y/category axis"
 
     _attrMap = AttrMap(BASE=CategoryAxis,
@@ -487,13 +503,6 @@ class YCategoryAxis(CategoryAxis):
         axis.strokeDashArray = self.strokeDashArray
         g.add(axis)
 
-        return g
-
-    def makeTicks(self):
-        g = Group()
-        if not self.visibleTicks: return g
-        if self.tickLeft or self.tickRight:
-            self._makeLines(g,-self.tickLeft,self.tickRight,self.strokeColor,self.strokeWidth,self.strokeDashArray)
         return g
 
     def _labelAxisPos(self):
@@ -946,7 +955,7 @@ class ValueAxis(_AxisG):
         return g
 
 
-class XValueAxis(ValueAxis):
+class XValueAxis(_XTicks,ValueAxis):
     "X/value axis"
 
     _attrMap = AttrMap(BASE=ValueAxis,
@@ -1045,12 +1054,6 @@ class XValueAxis(ValueAxis):
 
         return g
 
-    def makeTicks(self):
-        g = Group()
-        if self.visibleTicks and (self.tickUp or self.tickDown):
-            self._makeLines(g,-self.tickDown,self.tickUp,self.strokeColor,self.strokeWidth,self.strokeDashArray)
-        return g
-
 #additional utilities to help specify calendar dates on which tick marks
 #are to be plotted.  After some thought, when the magic algorithm fails,
 #we can let them specify a number of days-of-the-year to tick in any given
@@ -1121,6 +1124,7 @@ class NormalDateXValueAxis(XValueAxis):
         dayOfWeekName = AttrMapValue(SequenceOf(isString,emptyOK=0,lo=7,hi=7), desc='Weekday names.'),
         monthName = AttrMapValue(SequenceOf(isString,emptyOK=0,lo=12,hi=12), desc='Month names.'),
         dailyFreq = AttrMapValue(isBoolean, desc='True if we are to assume daily data to be ticked at end of month.'),
+        specifiedTickDates = AttrMapValue(NoneOr(SequenceOf(isInstanceOf(normalDate.ND))), desc='Actual tick values to use; no calculations done'),
         )
 
     _valueClass = normalDate.ND
@@ -1139,7 +1143,7 @@ class NormalDateXValueAxis(XValueAxis):
         self.dayOfWeekName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         self.monthName = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
                             'August', 'September', 'October', 'November', 'December']
-        self.valueSteps = None
+        self.valueSteps = self.specifiedTickDates = None
 
     def _scalar2ND(self, x):
         "Convert a scalar to a NormalDate value."
@@ -1188,6 +1192,9 @@ class NormalDateXValueAxis(XValueAxis):
             ticks.insert(0,xVals[i])
             labels.insert(0,formatter(xVals[i]))
 
+        if self.specifiedTickDates:
+            ticks = self.specifiedTickDates[:]
+            return ticks,[formatter(d) for d in ticks]
 
 
         #AR 20060619 - first we try the approach where the user has explicitly
@@ -1307,7 +1314,7 @@ class NormalDateXValueAxis(XValueAxis):
         self._tickValues = steps
         self._configured = 1
 
-class YValueAxis(ValueAxis):
+class YValueAxis(_YTicks,ValueAxis):
     "Y/value axis"
 
     _attrMap = AttrMap(BASE=ValueAxis,
@@ -1402,12 +1409,6 @@ class YValueAxis(ValueAxis):
         axis.strokeWidth = self.strokeWidth
         axis.strokeDashArray = self.strokeDashArray
         g.add(axis)
-        return g
-
-    def makeTicks(self):
-        g = Group()
-        if self.visibleTicks and (self.tickLeft or self.tickRight):
-            self._makeLines(g,-self.tickLeft,self.tickRight,self.strokeColor,self.strokeWidth,self.strokeDashArray)
         return g
 
 class AdjYValueAxis(YValueAxis):
