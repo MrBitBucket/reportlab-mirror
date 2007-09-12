@@ -580,7 +580,10 @@ class ValueAxis(_AxisG):
         rangeRound=AttrMapValue(OneOf('none','both','ceiling','floor'),'How to round the axis limits'),
         zrangePref = AttrMapValue(isNumberOrNone, desc='Zero range axis limit preference.'),
         style = AttrMapValue(OneOf('normal','stacked','parallel_3d'),"How values are plotted!"),
-        skipEndL = AttrMapValue(OneOf('none','start','end','both'), desc='Skip high/low tick labels')
+        skipEndL = AttrMapValue(OneOf('none','start','end','both'), desc='Skip high/low tick labels'),
+        origShiftIPC = AttrMapValue(isNumberOrNone, desc='Lowest label shift interval ratio.'),
+        origShiftMin = AttrMapValue(isNumberOrNone, desc='Minimum amount to shift.'),
+        origShiftSpecialValue = AttrMapValue(isNumberOrNone, desc='special value for shift'),
         )
 
     def __init__(self,**kw):
@@ -636,6 +639,9 @@ class ValueAxis(_AxisG):
                         zrangePref = 0,
                         style = 'normal',
                         skipEndL='none',
+                        origShiftIPC = None,
+                        origShiftMin = None,
+                        origShiftSpecialValue = None,
                         )
         self.labels.angle = 0
 
@@ -801,6 +807,22 @@ class ValueAxis(_AxisG):
 
         self._valueMin = valueMin
         self._valueMax = valueMax
+
+        origShiftIPC = self.origShiftIPC
+        origShiftMin = self.origShiftMin
+        if origShiftMin is not None or origShiftIPC is not None:
+            origShiftSpecialValue = self.origShiftSpecialValue
+            self._calcValueStep()
+            valueMax, valueMin = self._valueMax, self._valueMin
+            if origShiftSpecialValue is None or abs(origShiftSpecialValue-valueMin)<1e-6:
+                if origShiftIPC:
+                    m = origShiftIPC*self._valueStep
+                else:
+                    m = 0
+                if origShiftMin:
+                    m = max(m,(valueMax-valueMin)*origShiftMin/self._length)
+                self._valueMin -= m
+
         self._rangeAdjust()
 
     def _pseudo_configure(self):
