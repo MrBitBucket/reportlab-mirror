@@ -26,7 +26,7 @@ class Marker(Widget):
                                 'FilledSquare', 'FilledCircle', 'FilledDiamond', 'FilledCross',
                                 'FilledTriangle','FilledStarSix', 'FilledPentagon', 'FilledHexagon',
                                 'FilledHeptagon', 'FilledOctagon', 'FilledStarFive',
-                                'Smiley'),
+                                'Smiley','ArrowHead', 'FilledArrowHead'),
                             desc='marker type name'),
                     size = AttrMapValue(isNumber,desc='marker size'),
                     x = AttrMapValue(isNumber,desc='marker x coordinate'),
@@ -37,16 +37,26 @@ class Marker(Widget):
                     fillColor = AttrMapValue(isColorOrNone, desc='marker fill colour'),
                     strokeColor = AttrMapValue(isColorOrNone, desc='marker stroke colour'),
                     strokeWidth = AttrMapValue(isNumber, desc='marker stroke width'),
+                    arrowBarbDx = AttrMapValue(isNumber, desc='arrow only the delta x for the barbs'),
+                    arrowHeight = AttrMapValue(isNumber, desc='arrow only height'),
                     )
 
     def __init__(self,*args,**kw):
-        self.kind = None
-        self.strokeColor = black
-        self.strokeWidth = 0.1
-        self.fillColor = None
-        self.size = 5
-        self.x = self.y = self.dx = self.dy = self.angle = 0
         self.setProperties(kw)
+        self._setKeywords(
+            kind = None,
+            strokeColor = black,
+            strokeWidth = 0.1,
+            fillColor = None,
+            size = 5,
+            x = 0,
+            y = 0,
+            dx = 0,
+            dy = 0,
+            angle = 0,
+            arrowBarbDx = -1.25,
+            arrowHeight = 1.875,
+            )
 
     def clone(self):
         return new.instance(self.__class__,self.__dict__.copy())
@@ -126,6 +136,12 @@ class Marker(Widget):
     def _Octagon(self):
         return self._doNgon(8)
 
+    def _ArrowHead(self):
+        s = self.size
+        h = self.arrowHeight
+        b = self.arrowBarbDx
+        return self._doPolygon((0,0,b,-h,s,0,b,h))
+
     def _doPolygon(self,P):
         x, y = self.x+self.dx, self.y+self.dy
         if x or y: P = map(lambda i,P=P,A=[x,y]: P[i] + A[i&1], range(len(P)))
@@ -159,6 +175,7 @@ class Marker(Widget):
     _FilledHeptagon = _doFill
     _FilledOctagon = _doFill
     _FilledStarFive = _doFill
+    _FilledArrowHead = _doFill
 
     def draw(self):
         if self.kind:
