@@ -306,28 +306,13 @@ class Image(Flowable):
         """If size to draw at not specified, get it from the image."""
         self.hAlign = 'CENTER'
         self._mask = mask
-        # if it is a JPEG, will be inlined within the file -
-        # but we still need to know its size now
         fp = hasattr(filename,'read')
         if fp:
             self._file = filename
             self.filename = `filename`
         else:
             self._file = self.filename = filename
-        if not fp and os.path.splitext(filename)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
-            from reportlab.lib.utils import open_for_read
-            f = open_for_read(filename, 'b')
-            try:
-                info = pdfutils.readJPEGInfo(f)
-            except:  #this is where we normally find a JPEG is corrupt.
-                #if so, include filename to help people track it down.
-                raise ValueError("Corrupt JPEG '%s', pdfutils.readJPEGInfo failed." % self.filename)
-            f.close()
-            self.imageWidth = info[0]
-            self.imageHeight = info[1]
-            self._img = None
-            self._setup(width,height,kind,0)
-        elif fp:
+        if fp:
             self._setup(width,height,kind,0)
         else:
             self._setup(width,height,kind,lazy)
