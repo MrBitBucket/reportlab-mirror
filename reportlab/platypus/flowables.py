@@ -312,7 +312,25 @@ class Image(Flowable):
             self.filename = `filename`
         else:
             self._file = self.filename = filename
-        if fp:
+        if not fp and os.path.splitext(filename)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
+            # if it is a JPEG, will be inlined within the file -
+            # but we still need to know its size now
+            from reportlab.lib.utils import open_for_read
+            f = open_for_read(filename, 'b')
+            try:
+                try:
+                    info = pdfutils.readJPEGInfo(f)
+                except:
+                    #couldn't read as a JPEG, try like normal
+                    self._setup(width,height,kind,lazy)
+                    return
+            finally:
+                f.close()
+            self.imageWidth = info[0]
+            self.imageHeight = info[1]
+            self._img = None
+            self._setup(width,height,kind,0)
+        elif fp:
             self._setup(width,height,kind,0)
         else:
             self._setup(width,height,kind,lazy)
