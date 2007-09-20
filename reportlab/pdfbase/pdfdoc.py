@@ -954,10 +954,18 @@ class PDFCatalog:
         return format(dict, document)
 
     def showOutline(self):
-        self.PageMode = PDFName("UseOutlines")
+        self.setPageMode("UseOutlines")
 
     def showFullScreen(self):
-        self.PageMode = PDFName("FullScreen")
+        self.setPageMode("FullScreen")
+
+    def setPageLayout(self,layout):
+        if layout:
+            self.PageLayout = PDFName(layout)
+
+    def setPageMode(self,mode):
+        if mode:
+            self.PageMode = PDFName(mode)
 
     def check_format(self, document):
         """for use in subclasses"""
