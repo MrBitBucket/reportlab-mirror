@@ -10,7 +10,7 @@ Stacked and percentile bar charts to follow...
 """
 __version__=''' $Id$ '''
 
-import string, copy
+import copy
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isString,\
@@ -25,6 +25,7 @@ from reportlab.graphics.shapes import Line, Rect, Group, Drawing, NotImplemented
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis, YCategoryAxis, XValueAxis
 from reportlab.graphics.charts.textlabels import BarChartLabel, NA_Label, NoneOrInstanceOfNA_Label
 from reportlab.graphics.charts.areas import PlotArea
+from reportlab.graphics.charts.legends import _objStr
 
 class BarChartProperties(PropHolder):
     _attrMap = AttrMap(
@@ -82,7 +83,7 @@ class BarChart(PlotArea):
 
     def getSeriesName(self,i,default=None):
         '''return series name i or default'''
-        return getattr(self.bars[i],'name',default)
+        return _objStr(getattr(self.bars[i],'name',default))
 
     def __init__(self):
         assert self.__class__.__name__ not in ('BarChart','BarChart3D'), 'Abstract Class %s Instantiated' % self.__class__.__name__
@@ -711,7 +712,7 @@ def sampleV1():
     bc.categoryAxis.labels.dy = -2
     bc.categoryAxis.labels.angle = 30
 
-    catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
+    catNames = 'Jan Feb Mar Apr May Jun Jul Aug'.split(' ')
     catNames = map(lambda n:n+'-99', catNames)
     bc.categoryAxis.categoryNames = catNames
     drawing.add(bc)
@@ -1332,7 +1333,7 @@ def sampleH1():
     bc.valueAxis.valueStep = 15
 
     bc.categoryAxis.labels.boxAnchor = 'e'
-    catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
+    catNames = 'Jan Feb Mar Apr May Jun Jul Aug'.split(' ')
     catNames = map(lambda n:n+'-99', catNames)
     bc.categoryAxis.categoryNames = catNames
     drawing.add(bc, 'barchart')

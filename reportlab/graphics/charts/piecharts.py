@@ -30,6 +30,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS, ArcPath, Polygon, Rect, PolyLine
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.areas import PlotArea
+from reportlab.graphics.charts.legends import _objStr
 from textlabels import Label
 
 _ANGLE2BOXANCHOR={0:'w', 45:'sw', 90:'s', 135:'se', 180:'e', 225:'ne', 270:'n', 315: 'nw', -45: 'nw'}
@@ -188,7 +189,7 @@ class AbstractPieChart(PlotArea):
     def getSeriesName(self,i,default=None):
         '''return series name i or default'''
         try:
-            text = str(self.labels[i])
+            text = _objStr(self.labels[i])
         except:
             text = default
         if not self.simpleLabels:

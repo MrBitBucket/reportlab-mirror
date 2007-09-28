@@ -31,13 +31,17 @@ def _transMax(n,A):
         X[i+1] += X[i]
     return X
 
-def _getStr(s):
-    if isSeqType(s):
-        return map(_getStr,s)
-    elif isinstance(s,(unicode,str)):
+def _objStr(s):
+    if isinstance(s,basestring):
         return s
     else:
         return str(s)
+
+def _getStr(s):
+    if isSeqType(s):
+        return map(_getStr,s)
+    else:
+        return _objStr(s)
 
 def _getLines(s):
     if isSeqType(s):
@@ -222,7 +226,7 @@ class Legend(Widget):
             texts = [_getStr(p[1]) for p in colorNamePairs]
         else:
             chart = colorNamePairs.chart
-            texts = [str(chart.getSeriesName(i,'series %d' % i)) for i in xrange(chart._seriesCount)]
+            texts = [chart.getSeriesName(i,'series %d' % i) for i in xrange(chart._seriesCount)]
         return texts
 
     def _calculateMaxBoundaries(self, colorNamePairs):

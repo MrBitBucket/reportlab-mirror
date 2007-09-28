@@ -5,9 +5,6 @@
 This modules defines a very preliminary Line Chart example.
 """
 __version__=''' $Id$ '''
-
-import string
-
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, \
                                     isListOfStringsOrNone, SequenceOf, isBoolean, NoneOr, \
@@ -21,6 +18,7 @@ from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol, makeMarker
 from reportlab.graphics.charts.areas import PlotArea
+from reportlab.graphics.charts.legends import _objStr
 
 class LineChartProperties(PropHolder):
     _attrMap = AttrMap(
@@ -67,7 +65,7 @@ class AbstractLineChart(PlotArea):
 
     def getSeriesName(self,i,default=None):
         '''return series name i or default'''
-        return getattr(self.lines[i],'name',default)
+        return _objStr(getattr(self.lines[i],'name',default))
 
 class LineChart(AbstractLineChart):
     pass
@@ -530,7 +528,7 @@ def sample1():
     lc.lines.symbol = makeMarker('FilledDiamond')
     lc.lineLabelFormat = '%2.0f'
 
-    catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
+    catNames = 'Jan Feb Mar Apr May Jun Jul Aug'.split(' ')
     lc.categoryAxis.categoryNames = catNames
     lc.categoryAxis.labels.boxAnchor = 'n'
 
@@ -609,7 +607,7 @@ def sample1a():
     lc.lines.symbol = makeMarker('FilledDiamond')
     lc.lineLabelFormat = '%2.0f'
 
-    catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
+    catNames = 'Jan Feb Mar Apr May Jun Jul Aug'.split(' ')
     lc.categoryAxis.categoryNames = catNames
     lc.categoryAxis.labels.boxAnchor = 'n'
 
@@ -643,7 +641,7 @@ def sample2():
     lc.strokeColor = colors.black
     lc.fillColor = colors.lightblue
 
-    catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
+    catNames = 'Jan Feb Mar Apr May Jun Jul Aug'.split(' ')
     lc.categoryAxis.categoryNames = catNames
     lc.categoryAxis.labels.boxAnchor = 'n'
 
@@ -680,7 +678,7 @@ def sample3():
     lc.lines[0].strokeWidth = 2
     lc.lines[1].strokeWidth = 4
 
-    catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
+    catNames = 'Jan Feb Mar Apr May Jun Jul Aug'.split(' ')
     lc.categoryAxis.categoryNames = catNames
     lc.categoryAxis.labels.boxAnchor = 'n'
 

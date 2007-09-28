@@ -29,6 +29,7 @@ from reportlab.graphics.shapes import Group, Drawing, Line, Rect, Polygon, PolyL
     Wedge, String, STATE_DEFAULTS
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.areas import PlotArea
+from reportlab.graphics.charts.legends import _objStr
 from piecharts import WedgeLabel
 from reportlab.graphics.widgets.markers import makeMarker, uSymbol2Symbol, isSymbol
 
@@ -158,7 +159,7 @@ class SpiderChart(PlotArea):
 
     def getSeriesName(self,i,default=None):
         '''return series name i or default'''
-        return getattr(self.strands[i],'name',default)
+        return _objStr(getattr(self.strands[i],'name',default))
 
     def __init__(self):
         PlotArea.__init__(self)
