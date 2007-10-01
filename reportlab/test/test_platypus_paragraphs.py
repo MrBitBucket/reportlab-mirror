@@ -313,19 +313,19 @@ class AutoLeadingTestCase(unittest.TestCase):
         normal_sp = ParagraphStyle(name='normal_sp',parent=normal,alignment=TA_JUSTIFY,spaceBefore=12)
         texts = ['''Furthermore, a subset of <font size="14">English sentences</font> interesting on quite
 independent grounds is not quite equivalent to a stipulation to place
-the constructions into these various categories.''',
+<font color="blue">the constructions <img src="../docs/images/testimg.gif"/> into these various categories.</font>''',
         '''We will bring <font size="18">Ugly Things</font> in favor of
 The following thesis:  most of the methodological work in Modern
-Linguistics can be defined in such a way as to impose problems of
-phonemic and <u>morphological</u> analysis.''']
+Linguistics can be <img src="../docs/images/testimg.gif" valign="baseline" /> defined in such <img src="../docs/images/testimg.gif" valign="10" /> a way as to impose problems of
+phonemic and <u>morphological <img src="../docs/images/testimg.gif" valign="top"/> </u> analysis.''']
         story =[]
         a = story.append
         t = 'u'
         n = 1
-        s = normal
-        for autoLeading in ('','min','max'):
-            a(Paragraph('style=%s(autoLeading=%s)'%(s.name,autoLeading),style=normal_sp))
-            a(Paragraph('<para autoleading="%s"><%s>%s</%s>. %s <%s>%s</%s>. %s</para>' % (
+        for s in (normal,normal_sp):
+            for autoLeading in ('','min','max'):
+                a(Paragraph('style=%s(autoLeading=%s)'%(s.name,autoLeading),style=normal_sp))
+                a(Paragraph('<para autoleading="%s"><%s>%s</%s>. %s <%s>%s</%s>. %s</para>' % (
                             autoLeading,
                             t,' '.join((n+1)*['A']),t,texts[0],t,' '.join((n+1)*['A']),t,texts[1]),
                             style=s))

@@ -102,10 +102,31 @@ def _justifyDrawParaLine( tx, offset, extraspace, words, last=0):
     setXPos(tx,-offset)
     return offset
 
+def imgVRange(h,va,fontSize,leading):
+    '''return bottom,top offsets relative to baseline(0)'''
+    if va=='baseline':
+        iyo = 0
+    elif va in ('text-top','top'):
+        iyo = fontSize-h
+    elif va=='middle':
+        iyo = fontSize - (leading+h)*0.5
+    elif va in ('text-bottom','bottom'):
+        iyo = fontSize - leading
+    elif va=='super':
+        iyo = 0.5*fontSize
+    elif va=='sub':
+        iyo = -0.5*fontSize
+    elif hasattr(va,'normalizedValue'):
+        iyo = va.normalizedValue(fontSize)
+    else:
+        iyo = va
+    return iyo,iyo+h
+
 def _putFragLine(tx,line):
     xs = tx.XtraState
     cur_x = 0
     cur_y = xs.cur_y
+    x0 = tx._x0
     autoLeading = xs.autoLeading
     leading = xs.leading
     if autoLeading=='max':
@@ -119,22 +140,34 @@ def _putFragLine(tx,line):
         tx.setLeading(leading)
         if oleading!=None:
             cur_y -= (leading-oleading)/1.6
-            tx.setTextOrigin(tx._x0,cur_y)
+            tx.setTextOrigin(x0,cur_y)
             xs.cur_y = cur_y
     ws = getattr(tx,'_wordSpace',0)
     nSpaces = 0
     words = line.words
     for f in words:
         if hasattr(f,'cbDefn'):
-            name = f.cbDefn.name
-            kind = f.cbDefn.kind
-            if kind=='anchor':
-                tx._canvas.bookmarkHorizontal(name,cur_x,cur_y+leading)
+            cbDefn = f.cbDefn
+            kind = cbDefn.kind
+            if kind=='img':
+                #draw image cbDefn,cur_y,cur_x
+                w = cbDefn.width
+                h = cbDefn.height
+                iy0,iy1 = imgVRange(h,cbDefn.valign,tx._fontsize,tx._leading)
+                cur_x_s = cur_x + nSpaces*ws
+                tx._canvas.drawImage(cbDefn.image,cur_x_s,cur_y+iy0,w,h)
+                cur_x += w
+                cur_x_s += w
+                setXPos(tx,cur_x_s-tx._x0)
             else:
-                func = getattr(tx._canvas,name,None)
-                if not func:
-                    raise AttributeError, "Missing %s callback attribute '%s'" % (kind,name)
-                func(tx._canvas,kind,f.cbDefn.label)
+                name = cbDefn.name
+                if kind=='anchor':
+                    tx._canvas.bookmarkHorizontal(name,cur_x,cur_y+leading)
+                else:
+                    func = getattr(tx._canvas,name,None)
+                    if not func:
+                        raise AttributeError, "Missing %s callback attribute '%s'" % (kind,name)
+                    func(tx._canvas,kind,cbDefn.label)
             if f is words[-1]:
                 if not tx._fontname:
                     tx.setFont(xs.style.fontName,xs.style.fontSize)
@@ -181,8 +214,8 @@ def _putFragLine(tx,line):
                 xs.link = f.link
                 xs.link_x = cur_x_s
             elif xs.link and f.link is not xs.link:
-                    xs.links.append( (xs.link_x, cur_x_s, xs.link) )
-                    xs.link = None
+                xs.links.append( (xs.link_x, cur_x_s, xs.link) )
+                xs.link = None
             txtlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
             cur_x += txtlen
             nSpaces += text.count(' ')
@@ -193,6 +226,8 @@ def _putFragLine(tx,line):
         xs.strikes.append( (xs.strike_x, cur_x_s, xs.strikeColor) )
     if xs.link:
         xs.links.append( (xs.link_x, cur_x_s, xs.link) )
+    if tx._x0!=x0:
+        setXPos(tx,x0-tx._x0)
 
 def _leftDrawParaLineX( tx, offset, line, last=0):
     setXPos(tx,offset)
@@ -285,7 +320,16 @@ def _getFragWords(frags):
                 W = []
                 n = 0
         elif hasattr(f,'cbDefn'):
-            W.append((f,''))
+            w = getattr(f.cbDefn,'width',0)
+            if w:
+                if W!=[]:
+                    W.insert(0,n)
+                    R.append(W)
+                    W = []
+                    n = 0
+                R.append([w,(f,' ')])
+            else:
+                W.append((f,''))
         elif hasattr(f, 'lineBreak'):
             #pass the frag through.  The line breaker will scan for it.
             if W!=[]:
@@ -321,7 +365,7 @@ def _split_blParaHard(blPara,start,stop):
             f.append(w)
         if l is not lines[-1]:
             i = len(f)-1
-            while hasattr(f[i],'cbDefn'): i = i-1
+            while hasattr(f[i],'cbDefn') and not getattr(f[i].cbDefn,'width',0): i -= 1
             g = f[i]
             if g.text and g.text[-1]!=' ': g.text += ' '
     return f
@@ -361,7 +405,7 @@ def _handleBulletWidth(bulletText,style,maxWidths):
         indent = style.leftIndent+style.firstLineIndent
         if bulletRight > indent:
             #..then it overruns, and we have less space available on line 1
-            maxWidths[0] = maxWidths[0] - (bulletRight - indent)
+            maxWidths[0] -= (bulletRight - indent)
 
 def splitLines0(frags,widths):
     '''
@@ -511,14 +555,14 @@ class Paragraph(Flowable):
         <font name=fontfamily/fontname color=colorname size=float>
         <onDraw name=callable label="a label">
         <link>link text</link>
-            attributes of links 
+            attributes of links
                 size/fontSize=num
                 name/face/fontName=name
                 fg/textColor/color=color
                 backcolor/backColor/bgcolor=color
                 dest/destination/target/href/link=target
         <a>anchor text</a>
-            attributes of anchors 
+            attributes of anchors
                 fontSize=num
                 fontName=name
                 fg/textColor/color=color
@@ -527,6 +571,7 @@ class Paragraph(Flowable):
         <a name="anchorpoint"/>
         <unichar name="unicode character name"/>
         <unichar value="unicode code point"/>
+        <img src="path" width="1in" height="1in" valign="bottom"/>
 
         The whole may be surrounded by <para> </para> tags
 
@@ -820,7 +865,7 @@ class Paragraph(Flowable):
                         if currentWidth>0 and ((nText!='' and nText[0]!=' ') or hasattr(f,'cbDefn')):
                             if hasattr(g,'cbDefn'):
                                 i = len(words)-1
-                                while hasattr(words[i],'cbDefn'): i -= 1
+                                while hasattr(words[i],'cbDefn') and not getattr(words[i].cbDefn,'width',0): i -= 1
                                 words[i].text += ' '
                             else:
                                 g.text += ' '
@@ -959,7 +1004,7 @@ class Paragraph(Flowable):
             bw = getattr(style,'borderWidth',None)
             bc = getattr(style,'borderColor',None)
             bg = style.backColor
-        
+
         #if has a background or border, draw it
         if bg or (bc and bw):
             canvas.saveState()
@@ -1156,7 +1201,7 @@ if __name__=='__main__':    #NORUNTESTS
             if hasattr(w[0],a):
                 R.append('%s=%r' % (a,getattr(w[0],a)))
         return ', '.join(R)
-        
+
     def dumpParagraphFrags(P):
         print 'dumpParagraphFrags(<Paragraph @ %d>) minWidth() = %.2f' % (id(P), P.minWidth())
         frags = P.frags
@@ -1288,7 +1333,7 @@ umfassend zu sein."""
 
     if flagged(9):
         text="""Furthermore, the fundamental error of
-regarding functional notions as
+regarding <img src="../docs/images/testimg.gif" width="3" height="7"/> functional notions as
 categorial delimits a general
 convention regarding the forms of the<br/>
 grammar. I suggested that these results

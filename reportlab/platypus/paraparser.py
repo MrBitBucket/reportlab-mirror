@@ -11,6 +11,7 @@ import copy
 import unicodedata
 import reportlab.lib.sequencer
 from reportlab.lib.abag import ABag
+from reportlab.lib.utils import ImageReader
 
 from reportlab.lib import xmllib
 
@@ -23,6 +24,19 @@ _re_para = re.compile(r'^\s*<\s*para(?:\s+|>|/>)')
 sizeDelta = 2       # amount to reduce font size by for super and sub script
 subFraction = 0.5   # fraction of font size that a sub script should be lowered
 superFraction = 0.5 # fraction of font size that a super script should be raised
+
+
+def _convnum(s, unit=1):
+    if s[0] in ['+','-']:
+        try:
+            return ('relative',int(s)*unit)
+        except ValueError:
+            return ('relative',float(s)*unit)
+    else:
+        try:
+            return int(s)*unit
+        except ValueError:
+            return float(s)*unit
 
 def _num(s, unit=1):
     """Convert a string like '10cm' to an int or float (in points).
@@ -47,16 +61,28 @@ def _num(s, unit=1):
     if s[-4:]=='pica':
         unit=pica
         s = s[:-4]
-    if s[0] in ['+','-']:
-        try:
-            return ('relative',int(s)*unit)
-        except ValueError:
-            return ('relative',float(s)*unit)
-    else:
-        try:
-            return int(s)*unit
-        except ValueError:
-            return float(s)*unit
+    return _convnum(s,unit)
+
+class _PCT:
+    def __init__(self,v):
+        self._value = v*0.01
+
+    def normalizedValue(self,normalizer):
+        return normalizer*self._value
+
+def _valignpc(s):
+    s = s.lower()
+    if s in ('baseline','sub','super','top','text-top','middle','bottom','text-bottom'):
+        return s
+    if s.endswith('%'):
+        n = _convnum(s[:-1])
+        if isinstance(n,tuple):
+            n = n[1]
+        return _PCT(n)
+    n = _num(s)
+    if isinstance(n,tuple):
+        n = n[1]
+    return n
 
 def _autoLeading(x):
     x = x.lower()
@@ -135,6 +161,12 @@ _anchorAttrMap = {'fontSize': ('fontSize', _num),
                 'backcolor':('backColor',toColor),
                 'bgcolor':('backColor',toColor),
                 'href': ('href', None),
+                }
+_imgAttrMap = {
+                'src': ('src', None),
+                'width': ('width',_num),
+                'height':('height',_num),
+                'valign':('valign',_valignpc),
                 }
 
 def _addAttributeNames(m):
@@ -354,6 +386,7 @@ def _greekConvert(data):
 #       <a name="anchorpoint"/>
 #       <unichar name="unicode character name"/>
 #       <unichar value="unicode code point"/>
+#       <img src="path" width="1in" height="1in" valign="bottom"/>
 #       <greek> - </greek>
 #
 #       The whole may be surrounded by <para> </para> tags
@@ -460,6 +493,28 @@ class ParaParser(xmllib.XMLParser):
         else:
             del self._stack[-1]
             assert frag.link!=None
+
+    def start_img(self,attributes):
+        A = self.getAttributes(attributes,_imgAttrMap)
+        if not A.get('src'):
+            self._syntax_error('<img> needs src attribute')
+        A['_selfClosingTag'] = 'img'
+        self._push(**A)
+
+    def end_img(self):
+        frag = self._stack[-1]
+        assert getattr(frag,'_selfClosingTag',''),'Parser failure in <img/>'
+        defn = frag.cbDefn = ABag()
+        defn.kind = 'img'
+        defn.src = getattr(frag,'src',None)
+        defn.image = ImageReader(defn.src)
+        size = defn.image.getSize()
+        defn.width = getattr(frag,'width',size[0])
+        defn.height = getattr(frag,'height',size[1])
+        defn.valign = getattr(frag,'valign','bottom')
+        del frag._selfClosingTag
+        self.handle_data('')
+        self._pop()
 
     #### super script
     def start_super( self, attributes ):
@@ -750,7 +805,8 @@ class ParaParser(xmllib.XMLParser):
 
         frag = copy.copy(self._stack[-1])
         if hasattr(frag,'cbDefn'):
-            if data!='': self._syntax_error('Only <onDraw> tag allowed')
+            kind = frag.cbDefn.kind
+            if data: self._syntax_error('Only empty <%s> tag allowed' % kind)
         elif hasattr(frag,'_selfClosingTag'):
             if data!='': self._syntax_error('No content allowed in %s tag' % frag._selfClosingTag)
             return
@@ -875,7 +931,7 @@ if __name__=='__main__':
             for l in rv:
                 print l.fontName,l.fontSize,l.textColor,l.bold, l.rise, '|%s|'%l.text[:25],
                 if hasattr(l,'cbDefn'):
-                    print 'cbDefn',l.cbDefn.name,l.cbDefn.label,l.cbDefn.kind
+                    print 'cbDefn',getattr(l.cbDefn,'name',''),getattr(l.cbDefn,'label',''),l.cbDefn.kind
                 else: print
 
     style=ParaFrag()
@@ -991,3 +1047,4 @@ them when the man struck up with his tune.]''')
     check_text('''Here comes <font face="Helvetica" size="14pt">Helvetica 14</font> with <Strong>strong</Strong> <em>emphasis</em>.''')
     check_text('''Here comes <font face="Courier" size="3cm">Courier 3cm</font> and normal again.''')
     check_text('''Before the break <br/>the middle line <br/> and the last line.''')
+    check_text('''This should be an inline image <img src='../docs/images/testimg.gif'/>!''')
