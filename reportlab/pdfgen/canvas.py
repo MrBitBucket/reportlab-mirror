@@ -1485,7 +1485,22 @@ class Canvas(textobject._PDFColorSetter):
         got drawn, without necessarily saving pages to disk"""
         return '\n'.join(self._code)
 
+    def setViewerPreference(self,pref,value):
+        '''set one of the allowed enbtries in the documents viewer preferences'''
+        catalog = self._doc.Catalog
+        VP = getattr(catalog,'ViewerPreferences',None)
+        if VP is None:
+            from reportlab.pdfbase.pdfdoc import PDFDictionary
+            VP = catalog.ViewerPreferences = PDFDictionary()
+        VP[pref] = value
 
+    def getViewerPreference(self,pref):
+        '''you'll get an error here if none have been set'''
+        return self._doc.Catalog.ViewerPreferences[pref]
+
+    def delViewerPreference(self,pref):
+        '''you'll get an error here if none have been set'''
+        del self._doc.Catalog.ViewerPreferences[pref]
 
 if _instanceEscapePDF:
     import new
