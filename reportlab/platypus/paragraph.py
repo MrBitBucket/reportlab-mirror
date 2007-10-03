@@ -372,7 +372,7 @@ def _split_blParaHard(blPara,start,stop):
 
 def _drawBullet(canvas, offset, cur_y, bulletText, style):
     '''draw a bullet text could be a simple string or a frag list'''
-    tx2 = canvas.beginText(style.bulletIndent, cur_y)
+    tx2 = canvas.beginText(style.bulletIndent, cur_y+getattr(style,"bulletOffsetY",0))
     tx2.setFont(style.bulletFontName, style.bulletFontSize)
     tx2.setFillColor(hasattr(style,'bulletColor') and style.bulletColor or style.textColor)
     if isinstance(bulletText,basestring):
