@@ -89,7 +89,8 @@ disc("""The $fontSize$ and $fontName$ tags are obvious, but it is
 important to set the $leading$.  This is the spacing between
 adjacent lines of text; a good rule of thumb is to make this
 20% larger than the point size.  To get double-spaced text,
-use a high $leading$.""")
+use a high $leading$. If you set $autoLeading$(default $"off"$) to $"min"$(use observed leading even if smaller than specified) or $"max"$(use the larger of observed and specified) then an attempt is made to determine the leading
+on a line by line basis. This may be useful if the lines contain different font sizes etc.""")
 
 disc("""The figure below shows space before and after and an
 increased leading:""")
@@ -230,8 +231,7 @@ Colors may be
 HTML color names or a hex string encoded in a variety of ways;
 see ^reportlab.lib.colors^ for the formats allowed.""")
 
-parabox2("""<font face="times" color="red">
-You are hereby charged</font> that on the 28th day of May, 1970, you did
+parabox2("""<font face="times" color="red">You are hereby charged</font> that on the 28th day of May, 1970, you did
 willfully, unlawfully, and <font size=14>with malice of forethought</font>,
 publish an
 alleged English-Hungarian phrase book with intent to cause a breach
@@ -249,6 +249,19 @@ tag, or with mathML entity names.]]>""")
 
 parabox2("""Equation (&alpha;): <greek>e</greek> <super><greek>ip</greek></super>  = -1""",
          "Greek letters and superscripts")
+
+heading3("Inline Images")
+disc("""We can embed images in a paragraph with the 
+&lt;img/&gt; tag which has attributes $src$, $width$, $height$ whose meanings are obvious. The $valign$ attribute may be set to a css like value from
+"baseline", "sub", "super", "top", "text-top", "middle", "bottom", "text-bottom"; the value may also be a numeric percentage or an absolute value.
+""")
+parabox2("""<para autoLeading="off" fontSize=12>This &lt;img/&gt; <img src="../images/testimg.gif" valign="top"/> is aligned <b>top</b>.<br/><br/>
+This &lt;img/&gt; <img src="../images/testimg.gif" valign="bottom"/> is aligned <b>bottom</b>.<br/><br/>
+This &lt;img/&gt; <img src="../images/testimg.gif" valign="middle"/> is aligned <b>middle</b>.<br/><br/>
+This &lt;img/&gt; <img src="../images/testimg.gif" valign="-4"/> is aligned <b>-4</b>.<br/><br/>
+This &lt;img/&gt; <img src="../images/testimg.gif" valign="+4"/> is aligned <b>+4</b>.<br/><br/>
+This &lt;img/&gt; <img src="../images/testimg.gif" width="10"/> has width <b>10</b>.<br/><br/>
+</para>""","Inline images")
 
 heading3("Numbering Paragraphs and Lists")
 disc("""The $&lt;seq&gt;$ tag provides comprehensive support
