@@ -830,7 +830,7 @@ class ParaParser(xmllib.XMLParser):
                 data = _greekConvert(data)
 
         # bold, italic, and underline
-        x = frag.fontName = tt2ps(frag.fontName,frag.bold,frag.italic)
+        frag.fontName = tt2ps(frag.fontName,frag.bold,frag.italic)
 
         #save our data
         frag.text = data
