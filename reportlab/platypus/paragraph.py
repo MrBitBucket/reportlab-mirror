@@ -102,16 +102,16 @@ def _justifyDrawParaLine( tx, offset, extraspace, words, last=0):
     setXPos(tx,-offset)
     return offset
 
-def imgVRange(h,va,fontSize):
+def imgVRange(h,va,fontSize,leading):
     '''return bottom,top offsets relative to baseline(0)'''
     if va=='baseline':
         iyo = 0
     elif va in ('text-top','top'):
         iyo = fontSize-h
     elif va=='middle':
-        iyo = fontSize - (1.2*fontSize+h)*0.5
+        iyo = fontSize - (leading+h)*0.5
     elif va in ('text-bottom','bottom'):
-        iyo = fontSize - 1.2*fontSize
+        iyo = fontSize - leading
     elif va=='super':
         iyo = 0.5*fontSize
     elif va=='sub':
@@ -130,10 +130,10 @@ def _putFragLine(tx,line):
     autoLeading = xs.autoLeading
     leading = xs.leading
     if autoLeading=='max':
-        leading = max(leading,line.ascent-line.descent)
+        leading = max(leading,1.2*line.fontSize)
         xs.f = line
     elif autoLeading=='min':
-        leading = line.ascent-line.descent
+        leading = 1.2*line.fontSize
         xs.f = line
     oleading = tx._leading
     if oleading!=leading:
@@ -153,7 +153,7 @@ def _putFragLine(tx,line):
                 #draw image cbDefn,cur_y,cur_x
                 w = cbDefn.width
                 h = cbDefn.height
-                iy0,iy1 = imgVRange(h,cbDefn.valign,tx._fontsize)
+                iy0,iy1 = imgVRange(h,cbDefn.valign,tx._fontsize,tx._leading)
                 cur_x_s = cur_x + nSpaces*ws
                 tx._canvas.drawImage(cbDefn.image,cur_x_s,cur_y+iy0,w,h)
                 cur_x += w
@@ -646,10 +646,10 @@ class Paragraph(Flowable):
             height = 0
             if autoLeading=='max':
                 for l in blPara.lines:
-                    height += max(l.ascent-l.descent,leading)
+                    height += max(1.2*l.fontSize,leading)
             elif autoLeading=='min':
                 for l in blPara.lines:
-                    height += l.ascent - l.descent
+                    height += 1.2*l.fontSize
             else:
                 raise ValueError('invalid autoLeading value %r' % autoLeading)
         else:
@@ -695,7 +695,7 @@ class Paragraph(Flowable):
             s = height = 0
             if autoLeading=='max':
                 for i,l in enumerate(blPara.lines):
-                    h = max(l.ascent-l.descent,leading)
+                    h = max(1.2*l.fontSize,leading)
                     n = height+h
                     if n>availHeight+1e-8:
                         break
@@ -703,7 +703,8 @@ class Paragraph(Flowable):
                     s = i+1
             elif autoLeading=='min':
                 for i,l in enumerate(blPara.lines):
-                    n = height+l.ascent-l.descent
+                    h = 1.2*l.fontSize
+                    n = height+1.2*l.fontSize
                     if n>availHeight+1e-8:
                         break
                     height = n
@@ -779,6 +780,7 @@ class Paragraph(Flowable):
         lines = []
         lineno = 0
         style = self.style
+        fFontSize = float(style.fontSize)
 
         #for bullets, work out width and ensure we wrap the right amount onto line one
         _handleBulletWidth(self.bulletText,style,maxWidths)
@@ -821,18 +823,15 @@ class Paragraph(Flowable):
                 if currentWidth>self.width: self.width = currentWidth
                 lines.append((maxWidth - currentWidth, cLine))
 
-            return f.clone(kind=0, lines=lines,ascent=f.fontSize,descent=-0.2*f.fontSize)
+            return f.clone(kind=0, lines=lines)
         elif nFrags<=0:
             return ParaLines(kind=0, fontSize=style.fontSize, fontName=style.fontName,
-                            textColor=style.textColor, ascent=style.fontSize,descent=-0.2*style.fontSize,
-                            lines=[])
+                            textColor=style.textColor, lines=[])
         else:
             if hasattr(self,'blPara') and getattr(self,'_splitpara',0):
                 #NB this is an utter hack that awaits the proper information
                 #preserving splitting algorithm
                 return self.blPara
-            autoLeading = getattr(self,'autoLeading',getattr(style,'autoLeading',''))
-            calcBounds = autoLeading not in ('','off')
             n = 0
             words = []
             for w in _getFragWords(frags):
@@ -840,7 +839,7 @@ class Paragraph(Flowable):
 
                 if n==0:
                     currentWidth = -spaceWidth   # hack to get around extra space for word 1
-                    minDescent = maxSize = 0
+                    maxSize = 0
 
                 wordWidth = w[0]
                 f = w[1][0]
@@ -857,15 +856,7 @@ class Paragraph(Flowable):
                     if lineBreak: continue      #throw it away
                     nText = w[1][1]
                     if nText: n += 1
-                    if calcBounds:
-                        cbDefn = getattr(f,'cbDefn',None)
-                        if getattr(cbDefn,'width',0):
-                            descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,f.fontSize)
-                        else:
-                            ascent = f.fontSize
-                            descent = -ascent*0.2
-                        maxSize = max(maxSize,ascent)
-                        minDescent = min(minDescent,descent)
+                    maxSize = max(maxSize,f.fontSize)
                     if words==[]:
                         g = f.clone()
                         words = [g]
@@ -889,15 +880,7 @@ class Paragraph(Flowable):
                         g = i[0].clone()
                         g.text=i[1]
                         words.append(g)
-                        if calcBounds:
-                            cbDefn = getattr(g,'cbDefn',None)
-                            if getattr(cbDefn,'width',0):
-                                descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,g.fontSize)
-                            else:
-                                ascent = g.fontSize
-                                descent = -ascent*0.2
-                            maxSize = max(maxSize,ascent)
-                            minDescent = min(minDescent,descent)
+                        maxSize = max(maxSize,g.fontSize)
 
                     currentWidth = newWidth
                 else:  #either it won't fit, or it's a lineBreak tag
@@ -909,7 +892,7 @@ class Paragraph(Flowable):
                     if currentWidth>self.width: self.width = currentWidth
                     #end of line
                     lines.append(FragLine(extraSpace=maxWidth-currentWidth, wordCount=n,
-                                        lineBreak=lineBreak, words=words, fontSize=maxSize, ascent=maxSize, descent=minDescent))
+                                        lineBreak=lineBreak, words=words, fontSize=maxSize))
 
                     #start new line
                     lineno += 1
@@ -925,16 +908,8 @@ class Paragraph(Flowable):
 
                     currentWidth = wordWidth
                     n = 1
+                    maxSize = f.fontSize
                     g = f.clone()
-                    if calcBounds:
-                        cbDefn = getattr(g,'cbDefn',None)
-                        if getattr(cbDefn,'width',0):
-                            descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,g.fontSize)
-                        else:
-                            ascent = g.fontSize
-                            descent = -ascent*0.2
-                        maxSize = ascent
-                        minDescent = descent
                     words = [g]
                     g.text = w[1][1]
 
@@ -942,21 +917,13 @@ class Paragraph(Flowable):
                         g = i[0].clone()
                         g.text=i[1]
                         words.append(g)
-                        if calcBounds:
-                            cbDefn = getattr(g,'cbDefn',None)
-                            if getattr(cbDefn,'width',0):
-                                descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,g.fontSize)
-                            else:
-                                ascent = g.fontSize
-                                descent = -ascent*0.2
-                            maxSize = max(maxSize,ascent)
-                            minDescent = min(minDescent,descent)
+                        maxSize = max(maxSize,g.fontSize)
 
             #deal with any leftovers on the final line
             if words!=[]:
                 if currentWidth>self.width: self.width = currentWidth
                 lines.append(ParaLines(extraSpace=(maxWidth - currentWidth),wordCount=n,
-                                    words=words, fontSize=maxSize,ascent=maxSize,descent=minDescent))
+                                    words=words, fontSize=maxSize))
             return ParaLines(kind=1, lines=lines)
 
         return lines
@@ -972,7 +939,7 @@ class Paragraph(Flowable):
             raise ValueError('CJK Wordwrap can only handle one fragment per paragraph for now')
         elif len(self.frags) == 0:
             return ParaLines(kind=0, fontSize=style.fontSize, fontName=style.fontName,
-                            textColor=style.textColor, lines=[],ascent=style.fontSize,descent=-0.2*style.fontSize)
+                            textColor=style.textColor, lines=[])
         f = self.frags[0]
         if 1 and hasattr(self,'blPara') and getattr(self,'_splitpara',0):
             #NB this is an utter hack that awaits the proper information
@@ -982,6 +949,7 @@ class Paragraph(Flowable):
         else: maxWidths = width
         lines = []
         lineno = 0
+        fFontSize = float(style.fontSize)
 
         #for bullets, work out width and ensure we wrap the right amount onto line one
         _handleBulletWidth(self.bulletText, style, maxWidths)
@@ -1005,7 +973,7 @@ class Paragraph(Flowable):
         #  [space, [text]]
         #
         wrappedLines = [(sp, [line]) for (sp, line) in lines]
-        return f.clone(kind=0, lines=wrappedLines, ascent=f.fontSize, descent=-0.2*f.fontSize)
+        return f.clone(kind=0, lines=wrappedLines)
 
     def beginText(self, x, y):
         return self.canv.beginText(x, y)
