@@ -327,7 +327,7 @@ def _getFragWords(frags):
                     R.append(W)
                     W = []
                     n = 0
-                R.append([w,(f,' ')])
+                R.append([w,(f,'')])
             else:
                 W.append((f,''))
         elif hasattr(f, 'lineBreak'):
@@ -876,10 +876,19 @@ class Paragraph(Flowable):
                         if currentWidth>0 and ((nText!='' and nText[0]!=' ') or hasattr(f,'cbDefn')):
                             if hasattr(g,'cbDefn'):
                                 i = len(words)-1
-                                while hasattr(words[i],'cbDefn') and not getattr(words[i].cbDefn,'width',0): i -= 1
-                                words[i].text += ' '
+                                while i>=0:
+                                    wi = words[i]
+                                    cbDefn = getattr(wi,'cbDefn',None)
+                                    if cbDefn:
+                                        if not getattr(cbDefn,'width',0):
+                                            i -= 1
+                                            continue
+                                    if not wi.text.endswith(' '):
+                                        wi.text += ' '
+                                    break
                             else:
-                                g.text += ' '
+                                if not g.text.endswith(' '):
+                                    g.text += ' '
                         g = f.clone()
                         words.append(g)
                         g.text = nText
@@ -1222,8 +1231,7 @@ if __name__=='__main__':    #NORUNTESTS
     def dumpParagraphLines(P):
         print 'dumpParagraphLines(<Paragraph @ %d>)' % id(P)
         lines = P.blPara.lines
-        n =len(lines)
-        for l in range(n):
+        for l,line in enumerate(lines):
             line = lines[l]
             if hasattr(line,'words'):
                 words = line.words
