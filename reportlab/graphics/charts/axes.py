@@ -907,6 +907,8 @@ class ValueAxis(_AxisG):
         if f is None:
             f = self.labelTextFormat or (self._allIntTicks() and '%.0f' or str)
         elif f is str and self._allIntTicks(): f = '%.0f'
+        elif hasattr(f,'calcPlaces'):
+            f.calcPlaces(self._tickValues)
         post = self.labelTextPostFormat
         scl = self.labelTextScale
         pos = [self._x, self._y]
