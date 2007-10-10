@@ -1490,8 +1490,8 @@ class Canvas(textobject._PDFColorSetter):
         catalog = self._doc.Catalog
         VP = getattr(catalog,'ViewerPreferences',None)
         if VP is None:
-            from reportlab.pdfbase.pdfdoc import PDFDictionary
-            VP = catalog.ViewerPreferences = PDFDictionary()
+            from reportlab.pdfbase.pdfdoc import ViewerPreferencesPDFDictionary
+            VP = catalog.ViewerPreferences = ViewerPreferencesPDFDictionary()
         VP[pref] = value
 
     def getViewerPreference(self,pref):
@@ -1501,6 +1501,17 @@ class Canvas(textobject._PDFColorSetter):
     def delViewerPreference(self,pref):
         '''you'll get an error here if none have been set'''
         del self._doc.Catalog.ViewerPreferences[pref]
+
+    def addPageLabel(self, pageNum, style=None, start=None, prefix=None):
+        '''add a PDFPageLabel for pageNum'''
+        catalog = self._doc.Catalog
+        PL = getattr(catalog,'PageLabels',None)
+        if PL is None:
+            from reportlab.pdfbase.pdfdoc import PDFPageLabels
+            PL = catalog.PageLabels = PDFPageLabels()
+
+        from reportlab.pdfbase.pdfdoc import PDFPageLabel
+        PL.addPageLabel(pageNum,PDFPageLabel(style,start,prefix))
 
 if _instanceEscapePDF:
     import new

@@ -832,6 +832,29 @@ class PdfgenTestCase(unittest.TestCase):
         "Make a PDFgen document with most graphics features"
         run(outputfile('test_pdfgen_general.pdf'))
 
+    def test1(self):
+        c=canvas.Canvas(outputfile('test_pdfgen_obscure.pdf'))
+        c.setViewerPreference('PrintScaling','None')
+        c.setViewerPreference('HideToolbar','true')
+        c.setViewerPreference('HideMenubar','true')
+        c.addPageLabel(0, prefix="Front")
+        c.addPageLabel(1, style='ROMAN_LOWER', start=2)
+        c.addPageLabel(8, style='ARABIC')
+        # (These are fixes for missing pages)
+        c.addPageLabel(11, style='ARABIC',start=6)
+        c.addPageLabel(17, style='ARABIC', start=14)
+        c.addPageLabel(21, style='ARABIC', start=22)
+        c.addPageLabel(99, style='LETTERS_UPPER')
+        c.addPageLabel(102, prefix="Back",start=1)
+
+        # Make some (mostly) empty pages
+        for i in xrange(113):
+            c.drawString(100, 100, 'Tis is page '+str(i))
+            c.showPage()
+
+        # Output the PDF
+        c.save()    
+
 def makeSuite():
     return makeSuiteForClasses(PdfgenTestCase)
 
