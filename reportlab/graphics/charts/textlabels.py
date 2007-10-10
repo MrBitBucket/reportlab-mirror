@@ -64,11 +64,11 @@ def _text2PathDescription(text, x=0, y=0, fontName='Times-Roman', fontSize=1000,
     from reportlab.graphics import renderPM
     renderPM._setFont(_gs,fontName,fontSize)
     P = []
-    if not anchor =='start':
+    if not anchor=='start':
         textLen = stringWidth(text, fontName,fontSize)
-        if text_anchor=='end':
+        if anchor=='end':
             x = x-textLen
-        elif text_anchor=='middle':
+        elif anchor=='middle':
             x = x - textLen/2.
     for g in _gs._stringPath(text,x,y):
         P.extend(_processGlyph(g,truncate=truncate,pathReverse=pathReverse))
