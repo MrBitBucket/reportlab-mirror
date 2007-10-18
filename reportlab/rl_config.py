@@ -3,7 +3,7 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/rl_config.py
 __version__=''' $Id$ '''
 
-allowTableBoundsErrors = 1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
+allowTableBoundsErrors =    1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
 defaultEncoding =           'WinAnsiEncoding'       # 'WinAnsi' or 'MacRoman'
 defaultGraphicsFontName=    'Times-Roman'               #initializer for STATE_DEFAULTS in shapes.py
@@ -27,6 +27,8 @@ autoConvertEncoding  =      0                       #convert internally as neede
 _FUZZ=                      1e-6                    #fuzz for layout arithmetic
 wrapA85=                    0                       #set to 1 to get old wrapped line behaviour
 fsEncodings=('utf8','cp1252','cp430')               #encodings to attempt utf8 conversion with
+odbc_driver=                'odbc'                  #default odbc driver
+
 
 # places to look for T1Font information
 T1SearchPath =  (
@@ -140,7 +142,8 @@ longTableOptimize
 autoConvertEncoding  
 _FUZZ
 wrapA85
-fsEncodings'''.split()
+fsEncodings
+odbc_driver'''.split()
     import os, sys
     global sys_version, _unset_
     sys_version = sys.version.split()[0]        #strip off the other garbage
@@ -177,31 +180,22 @@ fsEncodings'''.split()
         else: conv = None
         _setOpt(k,v,conv)
 
-def _reset_register(func):
-    pass
+_registered_resets=[]
+def register_reset(func):
+    _registered_resets[:] = [x for x in _registered_resets if x()]
+    L = [x for x in _registered_resets if x() is func]
+    if L: return
+    from weakref import ref
+    _registered_resets.append(ref(func))
 
 def _reset():
     #attempt to reset reportlab and friends
     _startUp()  #our reset
-    import sys
-    for mname in (
-            'reportlab.pdfbase.pdfmetrics',
-            'reportlab.pdfbase._fontdata',
-            ):
-        try:
-            m = sys.modules[mname]
-        except KeyError:
-            continue
-        d = m.__dict__
-        initial_dicts = d.get('_initial_dicts',{})
-        for k,v in initial_dicts.iteritems():
-            d[k].clear()
-            d[k].update(v)
-    m = sys.modules.get('rlextra.utils.cgisupport')
-    if m:
-        m.BorgTimeStamp().clear()
-    m = sys.modules.get('reportlab.lib.sequencer')
-    if m:
-        m.setSequencer(m.Sequencer())
+    for f in _registered_resets[:]:
+        c = f()
+        if c:
+            c()
+        else:
+            _registered_resets.remove(f)
 
 _startUp()

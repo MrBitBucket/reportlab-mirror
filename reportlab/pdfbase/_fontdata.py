@@ -2589,11 +2589,22 @@ widthsByFontGlyph['ZapfDingbats'] = {'a1': 974,
  'a99': 668,
  'space': 278}
 
-_initial_dicts=dict(
-    ascent_descent=ascent_descent.copy(),
-    fontsByBaseEnc=fontsByBaseEnc.copy(),
-    fontsByName=fontsByName.copy(),
-    standardFontAttributes=standardFontAttributes.copy(),
-    widthVectorsByFont=widthVectorsByFont.copy(),
-    widthsByFontGlyph=widthsByFontGlyph.copy(),
-    )
+#preserve the initial values here
+def _reset(
+        initial_dicts=dict(
+            ascent_descent=ascent_descent.copy(),
+            fontsByBaseEnc=fontsByBaseEnc.copy(),
+            fontsByName=fontsByName.copy(),
+            standardFontAttributes=standardFontAttributes.copy(),
+            widthVectorsByFont=widthVectorsByFont.copy(),
+            widthsByFontGlyph=widthsByFontGlyph.copy(),
+            )
+        ):
+    for k,v in initial_dicts.iteritems():
+        d=globals()[k]
+        d.clear()
+        d.update(v)
+
+from reportlab.rl_config import register_reset
+register_reset(_reset)
+del register_reset

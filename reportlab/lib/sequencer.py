@@ -230,6 +230,15 @@ def setSequencer(seq):
     _sequencer = seq
     return s
 
+def _reset():
+    global _sequencer
+    if _sequencer:
+        _sequencer._reset()
+
+from reportlab.rl_config import register_reset
+register_reset(_reset)
+del register_reset
+
 def test():
     s = Sequencer()
     print 'Counting using default sequence: %d %d %d' % (s.next(),s.next(), s.next())
