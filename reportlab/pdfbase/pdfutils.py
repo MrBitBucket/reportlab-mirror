@@ -8,7 +8,6 @@ __doc__=''
 
 import os
 from reportlab import rl_config
-from string import join, replace, strip, split
 from reportlab.lib.utils import getStringIO, ImageReader
 
 LINEEND = '\015\012'
@@ -59,7 +58,7 @@ def cacheImageFile(filename, returnInMemory=0, IMG=None):
     if filename==cachedname:
         if cachedImageExists(filename):
             from reportlab.lib.utils import open_for_read
-            if returnInMemory: return split(open_for_read(cachedname).read(),LINEEND)[:-1]
+            if returnInMemory: return filter(None,open_for_read(cachedname).read().split(LINEEND))
         else:
             raise IOError, 'No such cached image %s' % filename
     else:
@@ -68,7 +67,7 @@ def cacheImageFile(filename, returnInMemory=0, IMG=None):
 
         #save it to a file
         f = open(cachedname,'wb')
-        f.write(join(code, LINEEND)+LINEEND)
+        f.write(LINEEND.join(code)+LINEEND)
         f.close()
         if rl_config.verbose:
             print 'cached image as %s' % cachedname
@@ -132,7 +131,7 @@ except ImportError:
         _instanceEscapePDF=None
         if rl_config.sys_version>='2.1':
             _ESCAPEDICT={}
-            for c in range(0,256):
+            for c in xrange(0,256):
                 if c<32 or c>=127:
                     _ESCAPEDICT[chr(c)]= '\\%03o' % c
                 elif c in (ord('\\'),ord('('),ord(')')):
@@ -142,29 +141,26 @@ except ImportError:
             del c
             #Michael Hudson donated this
             def _escape(s):
-                return join(map(lambda c, d=_ESCAPEDICT: d[c],s),'')
+                return ''.join(map(lambda c, d=_ESCAPEDICT: d[c],s))
         else:
             def _escape(s):
                 """Escapes some PDF symbols (in fact, parenthesis).
                 PDF escapes are almost like Python ones, but brackets
                 need slashes before them too. Uses Python's repr function
                 and chops off the quotes first."""
-                s = repr(s)[1:-1]
-                s = replace(s, '(','\(')
-                s = replace(s, ')','\)')
-                return s
+                return repr(s)[1:-1].replace('(','\(').replace(')','\)')
 
-def _normalizeLineEnds(text,desired=LINEEND):
+def _normalizeLineEnds(text,desired=LINEEND,unlikely='\000\001\002\003'):
     """Normalizes different line end character(s).
 
     Ensures all instances of CR, LF and CRLF end up as
     the specified one."""
-    unlikely = '\000\001\002\003'
-    text = replace(text, '\015\012', unlikely)
-    text = replace(text, '\015', unlikely)
-    text = replace(text, '\012', unlikely)
-    text = replace(text, unlikely, desired)
-    return text
+    
+    return (text
+            .replace('\015\012', unlikely)
+            .replace('\015', unlikely)
+            .replace(text, '\012', unlikely)
+            .replace(text, unlikely, desired))
 
 
 def _AsciiHexEncode(input):
@@ -186,20 +182,13 @@ def _AsciiHexDecode(input):
     Not used except to provide a test of the inverse function."""
 
     #strip out all whitespace
-    stripped = join(split(input),'')
+    stripped = ''.join(input.split())
     assert stripped[-1] == '>', 'Invalid terminator for Ascii Hex Stream'
     stripped = stripped[:-1]  #chop off terminator
     assert len(stripped) % 2 == 0, 'Ascii Hex stream has odd number of bytes'
 
-    i = 0
-    output = getStringIO()
-    while i < len(stripped):
-        twobytes = stripped[i:i+2]
-        output.write(chr(eval('0x'+twobytes)))
-        i = i + 2
-    return output.getvalue()
-
-
+    return ''.join([chr(int(stripped[i:i+2],16)) for i in xrange(0,len(stripped),2)])
+        
 if 1: # for testing always define this
     def _AsciiBase85EncodePYTHON(input):
         """Encodes input using ASCII-Base85 coding.
@@ -207,13 +196,13 @@ if 1: # for testing always define this
         This is a compact encoding used for binary data within
         a PDF file.  Four bytes of binary data become five bytes of
         ASCII.  This is the default method used for encoding images."""
-        outstream = getStringIO()
         # special rules apply if not a multiple of four bytes.
         whole_word_count, remainder_size = divmod(len(input), 4)
         cut = 4 * whole_word_count
         body, lastbit = input[0:cut], input[cut:]
 
-        for i in range(whole_word_count):
+        out = [].append
+        for i in xrange(whole_word_count):
             offset = i*4
             b1 = ord(body[offset])
             b2 = ord(body[offset+1])
@@ -227,7 +216,7 @@ if 1: # for testing always define this
 
             if num == 0:
                 #special case
-                outstream.write('z')
+                out('z')
             else:
                 #solve for five base-85 numbers
                 temp, c5 = divmod(num, 85)
@@ -235,11 +224,11 @@ if 1: # for testing always define this
                 temp, c3 = divmod(temp, 85)
                 c1, c2 = divmod(temp, 85)
                 assert ((85**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5 == num, 'dodgy code!'
-                outstream.write(chr(c1+33))
-                outstream.write(chr(c2+33))
-                outstream.write(chr(c3+33))
-                outstream.write(chr(c4+33))
-                outstream.write(chr(c5+33))
+                out(chr(c1+33))
+                out(chr(c2+33))
+                out(chr(c3+33))
+                out(chr(c4+33))
+                out(chr(c5+33))
 
         # now we do the final bit at the end.  I repeated this separately as
         # the loop above is the time-critical part of a script, whereas this
@@ -266,26 +255,25 @@ if 1: # for testing always define this
             #    b1,b2,b3,b4,num,c1,c2,c3,c4,c5)
             lastword = chr(c1+33) + chr(c2+33) + chr(c3+33) + chr(c4+33) + chr(c5+33)
             #write out most of the bytes.
-            outstream.write(lastword[0:remainder_size + 1])
+            out(lastword[0:remainder_size + 1])
 
         #terminator code for ascii 85
-        outstream.write('~>')
-        return outstream.getvalue()
+        out('~>')
+        return ''.join(out.__self__)
 
     def _AsciiBase85DecodePYTHON(input):
         """Decodes input using ASCII-Base85 coding.
 
         This is not used - Acrobat Reader decodes for you
         - but a round trip is essential for testing."""
-        outstream = getStringIO()
         #strip all whitespace
-        stripped = join(split(input),'')
+        stripped = ''.join(input.split())
         #check end
         assert stripped[-2:] == '~>', 'Invalid terminator for Ascii Base 85 Stream'
         stripped = stripped[:-2]  #chop off terminator
 
         #may have 'z' in it which complicates matters - expand them
-        stripped = replace(stripped,'z','!!!!!')
+        stripped = stripped.replace('z','!!!!!')
         # special rules apply if not a multiple of five bytes.
         whole_word_count, remainder_size = divmod(len(stripped), 5)
         #print '%d words, %d leftover' % (whole_word_count, remainder_size)
@@ -293,7 +281,8 @@ if 1: # for testing always define this
         cut = 5 * whole_word_count
         body, lastbit = stripped[0:cut], stripped[cut:]
 
-        for i in range(whole_word_count):
+        out = [].append
+        for i in xrange(whole_word_count):
             offset = i*5
             c1 = ord(body[offset]) - 33
             c2 = ord(body[offset+1]) - 33
@@ -308,10 +297,10 @@ if 1: # for testing always define this
             b1, b2 = divmod(temp, 256)
 
             assert  num == 16777216 * b1 + 65536 * b2 + 256 * b3 + b4, 'dodgy code!'
-            outstream.write(chr(b1))
-            outstream.write(chr(b2))
-            outstream.write(chr(b3))
-            outstream.write(chr(b4))
+            out(chr(b1))
+            out(chr(b2))
+            out(chr(b3))
+            out(chr(b4))
 
         #decode however many bytes we have as usual
         if remainder_size > 0:
@@ -342,10 +331,10 @@ if 1: # for testing always define this
                 lastword = chr(b1) + chr(b2) + chr(b3)
             else:
                 lastword = ''
-            outstream.write(lastword)
+            out(lastword)
 
         #terminator code for ascii 85
-        return outstream.getvalue()
+        return ''.join(out.__self__)
 
 try:
     from _rl_accel import _AsciiBase85Encode                    # builtin or on the path
@@ -365,7 +354,6 @@ except ImportError:
 
 def _wrap(input, columns=60):
     "Wraps input at a given column size by inserting LINEEND characters."
-
     output = []
     length = len(input)
     i = 0
@@ -374,8 +362,10 @@ def _wrap(input, columns=60):
         output.append(input[pos:pos+columns])
         i = i + 1
         pos = columns * i
-
-    return join(output, LINEEND)
+    #avoid HP printer problem
+    if len(output[-1])==1:
+        output[-2:] = [output[-2][:-1],output[-2][-1]+output[-1]]
+    return LINEEND.join(output)
 
 
 #########################################################################

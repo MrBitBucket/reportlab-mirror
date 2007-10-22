@@ -44,13 +44,15 @@ class PDFImage:
         #directly process JPEG files
         #open file, needs some error handling!!
         fp = open(self.image, 'rb')
-        result = self._jpg_imagedata(fp)
-        fp.close()
+        try:
+            result = self._jpg_imagedata(fp)
+        finally:
+            fp.close()
         return result
 
     def _jpg_imagedata(self,imageFile):
-        self.source = 'JPEG'
         info = pdfutils.readJPEGInfo(imageFile)
+        self.source = 'JPEG'
         imgwidth, imgheight = info[0], info[1]
         if info[2] == 1:
             colorSpace = 'DeviceGray'
@@ -111,6 +113,16 @@ class PDFImage:
         imagedata.append('EI')
         return (imagedata, imgwidth, imgheight)
 
+    def non_jpg_imagedata(self,image):
+        if not self.imageCaching:
+            imagedata = pdfutils.cacheImageFile(image,returnInMemory=1)
+        else:
+            imagedata = self.cache_imagedata()
+        words = string.split(imagedata[1])
+        imgwidth = string.atoi(words[1])
+        imgheight = string.atoi(words[3])
+        return imagedata, imgwidth, imgheight
+
     def getImageData(self,preserveAspectRatio=False):
         "Gets data, height, width - whatever type of image"
         image = self.image
@@ -118,22 +130,19 @@ class PDFImage:
         if type(image) == StringType:
             self.filename = image
             if os.path.splitext(image)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
-                (imagedata, imgwidth, imgheight) = self.jpg_imagedata()
+                try:
+                    imagedata, imgwidth, imgheight = self.jpg_imagedata()
+                except:
+                    imagedata, imgwidth, imgheight = self.non_jpg_imagedata(image)  #try for normal kind of image
             else:
-                if not self.imageCaching:
-                    imagedata = pdfutils.cacheImageFile(image,returnInMemory=1)
-                else:
-                    imagedata = self.cache_imagedata()
-                words = string.split(imagedata[1])
-                imgwidth = string.atoi(words[1])
-                imgheight = string.atoi(words[3])
+                imagedata, imgwidth, imgheight = self.non_jpg_imagedata(image)
         else:
             import sys
             if sys.platform[0:4] == 'java':
                 #jython, PIL not available
-                (imagedata, imgwidth, imgheight) = self.JAVA_imagedata()
+                imagedata, imgwidth, imgheight = self.JAVA_imagedata()
             else:
-                (imagedata, imgwidth, imgheight) = self.PIL_imagedata()
+                imagedata, imgwidth, imgheight = self.PIL_imagedata()
         self.imageData = imagedata
         self.imgwidth = imgwidth
         self.imgheight = imgheight

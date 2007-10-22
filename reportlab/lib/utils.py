@@ -3,7 +3,7 @@
 # $URI:$
 __version__=''' $Id$ '''
 
-import string, os, sys, imp
+import string, os, sys, imp, time
 from reportlab.lib.logger import warnOnce
 from types import *
 from rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
@@ -312,12 +312,10 @@ def import_zlib():
         if ZLIB_WARNINGS: warnOnce('zlib not available')
     return zlib
 
-
 # Image Capability Detection.  Set a flag haveImages
 # to tell us if either PIL or Java imaging libraries present.
 # define PIL_Image as either None, or an alias for the PIL.Image
 # module, as there are 2 ways to import it
-
 if sys.platform[0:4] == 'java':
     try:
         import javax.imageio
@@ -335,7 +333,6 @@ else:
             Image = None
     haveImages = Image is not None
     if haveImages: del Image
-
 
 __StringIO=None
 def getStringIO(buf=None):
@@ -465,6 +462,30 @@ def rl_isdir(pn,os_path_isdir=os.path.isdir,os_path_normpath=os.path.normpath):
     if not pn.endswith(os.sep): pn += os.sep
     return len(filter(lambda x,pn=pn: x.startswith(pn),__loader__._files.keys()))>0
 
+def rl_listdir(pn,os_path_isdir=os.path.isdir,os_path_normpath=os.path.normpath,os_listdir=os.listdir):
+    if os_path_isdir(pn) or _isFSD or __loader__ is None: return os_listdir(pn)
+    pn = _startswith_rl(os_path_normpath(pn))
+    if not pn.endswith(os.sep): pn += os.sep
+    return [x[len(pn):] for x in __loader__._files.keys() if x.startswith(pn)]
+
+def rl_getmtime(pn,os_path_isfile=os.path.isfile,os_path_normpath=os.path.normpath,os_path_getmtime=os.path.getmtime,time_mktime=time.mktime):
+    if os_path_isfile(pn) or _isFSD or __loader__ is None: return os_path_getmtime(pn)
+    p = _startswith_rl(os_path_normpath(pn))
+    try:
+        e = __loader__._files[p]
+    except KeyError:
+        return os_path_getmtime(pn)
+    s = e[5]
+    d = e[6]
+    y = ((d>>9)&0x7f)+1980
+    m = (d>>5)&0xf
+    d &= 0x1f
+    h = (s>>11)&0xf
+    m = (s>>5)&0x3f
+    s &= 0x1f
+    s <<= 1
+    return time_mktime((y,m,d,h,m,s,0,0,0))
+
 def rl_get_module(name,dir):
     if sys.modules.has_key(name):
         om = sys.modules[name]
@@ -539,7 +560,6 @@ class ImageReader:
                     raise et,ev,tb
                 else:
                     raise
-
 
     def _jpeg_fh(self):
         fp = self.fp
@@ -853,3 +873,24 @@ def simpleSplit(text,fontName,fontSize,maxWidth):
             L[-1:-1] = _simpleSplit(l,maxWidth,SW)
         lines = L
     return lines
+
+def escapeTextOnce(text):
+    "Escapes once only"
+    from xml.sax.saxutils import escape
+    if text is None:
+        return text
+    text = escape(text)
+    text = text.replace('&amp;amp;', '&amp;')
+    text = text.replace('&amp;gt;', '&gt;')
+    text = text.replace('&amp;lt;', '&lt;')
+    return text
+
+def fileName2Utf8(fn):
+    '''attempt to convert a filename to utf8'''
+    from reportlab.rl_config import fsEncodings
+    for enc in fsEncodings:
+        try:
+            return fn.decode(enc).encode('utf8')
+        except:
+            pass
+    raise ValueError('cannot convert %r to utf8' % fn)

@@ -61,16 +61,23 @@ else:
     def _digester(s):
         return join(map(lambda x : "%02x" % ord(x), md5.md5(s).digest()), '')
 
-def _annFormat(D,color,thickness,dashArray):
-    from reportlab.pdfbase.pdfdoc import PDFArray
-    if color:
+def _annFormat(D,color,thickness,dashArray,hradius=0,vradius=0):
+    from reportlab.pdfbase.pdfdoc import PDFArray, PDFDictionary
+    if color and not D.has_key('C'):
         D["C"] = PDFArray([color.red, color.green, color.blue])
-    border = [0,0,0]
-    if thickness:
-        border[2] = thickness
-    if dashArray:
-        border.append(PDFArray(dashArray))
-    D["Border"] = PDFArray(border)
+    if not D.has_key('Border'):
+        border = [hradius,vradius,thickness or 0]
+        if dashArray:
+            border.append(PDFArray(dashArray))
+        D["Border"] = PDFArray(border)
+#   BS = PDFDictionary()
+#   bss = 'S'
+#   if dashArray:
+#       BS['D'] = PDFArray(dashArray)
+#       bss = 'D'
+#   BS['W'] = thickness or 0
+#   BS['S'] = bss
+#   D['BS'] = BS
 
 class Canvas(textobject._PDFColorSetter):
     """This class is the programmer's interface to the PDF file format.  Methods
@@ -172,15 +179,15 @@ class Canvas(textobject._PDFColorSetter):
         #drawing coordinates.
         self.bottomup = bottomup
         self.imageCaching = rl_config.defaultImageCaching
-        self._make_preamble()
         self.init_graphics_state()
+        self._make_preamble()
         self.state_stack = []
 
     def init_graphics_state(self):
         #initial graphics state, never modify any of these in place
         self._x = 0
         self._y = 0
-        self._fontname = 'Times-Roman'
+        self._fontname = 'Helvetica'
         self._fontsize = 12
 
         self._textMode = 0  #track if between BT/ET
@@ -231,7 +238,7 @@ class Canvas(textobject._PDFColorSetter):
 
     def _make_preamble(self):
         # yuk
-        iName = self._doc.getInternalFontName('Helvetica')
+        iName = self._doc.getInternalFontName(self._fontname)
         if self.bottomup:
             #must set an initial font
             self._preamble = '1 0 0 1 0 0 cm BT %s 12 Tf 14.4 TL ET' % iName
@@ -798,7 +805,7 @@ class Canvas(textobject._PDFColorSetter):
         return self.linkRect(contents, destinationname, Rect, addtopage, name, relative=0,
                 thickness=thickness, color=color, dashArray=dashArray, **kw)
 
-    def linkRect(self, contents, destinationname, Rect=None, addtopage=1, name=None, relative=0,
+    def linkRect(self, contents, destinationname, Rect=None, addtopage=1, name=None, relative=1,
             thickness=0, color=None, dashArray=None, **kw):
         """rectangular link annotation w.r.t the current user transform.
            if the transform is skewed/rotated the absolute rectangle will use the max/min x/y
@@ -1478,7 +1485,33 @@ class Canvas(textobject._PDFColorSetter):
         got drawn, without necessarily saving pages to disk"""
         return '\n'.join(self._code)
 
+    def setViewerPreference(self,pref,value):
+        '''set one of the allowed enbtries in the documents viewer preferences'''
+        catalog = self._doc.Catalog
+        VP = getattr(catalog,'ViewerPreferences',None)
+        if VP is None:
+            from reportlab.pdfbase.pdfdoc import ViewerPreferencesPDFDictionary
+            VP = catalog.ViewerPreferences = ViewerPreferencesPDFDictionary()
+        VP[pref] = value
 
+    def getViewerPreference(self,pref):
+        '''you'll get an error here if none have been set'''
+        return self._doc.Catalog.ViewerPreferences[pref]
+
+    def delViewerPreference(self,pref):
+        '''you'll get an error here if none have been set'''
+        del self._doc.Catalog.ViewerPreferences[pref]
+
+    def addPageLabel(self, pageNum, style=None, start=None, prefix=None):
+        '''add a PDFPageLabel for pageNum'''
+        catalog = self._doc.Catalog
+        PL = getattr(catalog,'PageLabels',None)
+        if PL is None:
+            from reportlab.pdfbase.pdfdoc import PDFPageLabels
+            PL = catalog.PageLabels = PDFPageLabels()
+
+        from reportlab.pdfbase.pdfdoc import PDFPageLabel
+        PL.addPageLabel(pageNum,PDFPageLabel(style,start,prefix))
 
 if _instanceEscapePDF:
     import new

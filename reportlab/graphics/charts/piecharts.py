@@ -30,6 +30,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS, ArcPath, Polygon, Rect, PolyLine
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.areas import PlotArea
+from reportlab.graphics.charts.legends import _objStr
 from textlabels import Label
 
 _ANGLE2BOXANCHOR={0:'w', 45:'sw', 90:'s', 135:'se', 180:'e', 225:'ne', 270:'n', 315: 'nw', -45: 'nw'}
@@ -188,7 +189,7 @@ class AbstractPieChart(PlotArea):
     def getSeriesName(self,i,default=None):
         '''return series name i or default'''
         try:
-            text = str(self.labels[i])
+            text = _objStr(self.labels[i])
         except:
             text = default
         if not self.simpleLabels:
@@ -554,10 +555,13 @@ class Pie(AbstractPieChart):
         return PL(centerx,centery,xradius,yradius,G,lu,ru)
 
     def normalizeData(self):
-        from operator import add
-        data = self.data
-        self._sum = sum = float(reduce(add,data,0))
-        return abs(sum)>=1e-8 and map(lambda x,f=360./sum: f*x, data) or len(data)*[0]
+        data = map(abs,self.data)
+        s = self._sum = float(sum(data))
+        if s>1e-8:
+            f = 360./s
+            return [f*x for x in data]
+        else:
+            return [0]*len(data)
 
     def makeAngles(self):
         startAngle = self.startAngle % 360
@@ -767,7 +771,7 @@ class LegendedPie(Pie):
         self.legend1.columnMaximum = 7
         self.legend1.alignment = 'right'
         self.legend_names = ['AAA:','AA:','A:','BBB:','NR:']
-        for f in range(0,len(self.data)):
+        for f in xrange(len(self.data)):
             self.legend1.colorNamePairs.append((self.pieAndLegend_colors[f], self.legend_names[f]))
         self.legend1.fontName = "Helvetica-Bold"
         self.legend1.fontSize = 6
@@ -792,7 +796,7 @@ class LegendedPie(Pie):
         if self.drawLegend:
             self.legend1.colorNamePairs = []
             self._legend2.colorNamePairs = []
-        for f in range(0,len(self.data)):
+        for f in xrange(len(self.data)):
             if self.legend_names == None:
                 self.slices[f].fillColor = self.pieAndLegend_colors[f]
                 self.legend1.colorNamePairs.append((self.pieAndLegend_colors[f], None))

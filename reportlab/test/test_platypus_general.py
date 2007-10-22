@@ -26,12 +26,14 @@ from reportlab.lib.units import inch, cm
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.rl_config import defaultPageSize
-from reportlab.lib.utils import haveImages, _RL_DIR, rl_isfile, open_for_read
+from reportlab.lib.utils import haveImages, _RL_DIR, rl_isfile, open_for_read, fileName2Utf8
 if haveImages:
     _GIF = os.path.join(_RL_DIR,'test','pythonpowered.gif')
     if not rl_isfile(_GIF): _GIF = None
 else:
     _GIF = None
+if _GIF: _GIFUTF8=fileName2Utf8(_GIF)
+
 _JPG = os.path.join(_RL_DIR,'docs','images','lj8100.jpg')
 if not rl_isfile(_JPG): _JPG = None
 
@@ -312,11 +314,11 @@ def getCommentary():
     story.append(FrameBreak())
     if _GIF:
         story.append(Paragraph("""We can use images via the file name""", styleSheet['BodyText']))
-        code('''    story.append(platypus.Image('%s'))'''%_GIF)
-        code('''    story.append(platypus.Image('%s'.encode('utf8')))''' % _GIF)
+        code('''    story.append(platypus.Image('%s'))'''%_GIFUTF8)
+        code('''    story.append(platypus.Image(fileName2Utf8('%s')))''' % _GIFUTF8)
         story.append(Paragraph("""They can also be used with a file URI or from an open python file!""", styleSheet['BodyText']))
-        code('''    story.append(platypus.Image('%s'))'''% getFurl(_GIF))
-        code('''    story.append(platypus.Image(open_for_read('%s','b')))''' % _GIF)
+        code('''    story.append(platypus.Image('%s'))'''% getFurl(_GIFUTF8))
+        code('''    story.append(platypus.Image(open_for_read('%s','b')))''' % _GIFUTF8)
         story.append(FrameBreak())
         story.append(Paragraph("""Images can even be obtained from the internet.""", styleSheet['BodyText']))
         code('''    img = platypus.Image('http://www.reportlab.com/rsrc/encryption.gif')
@@ -496,7 +498,7 @@ def getExamples():
         story.append(Paragraph("Here is an Image flowable obtained from a string filename.",styleSheet['Italic']))
         story.append(platypus.Image(_GIF))
         story.append(Paragraph( "Here is an Image flowable obtained from a utf8 filename.", styleSheet['Italic']))
-        story.append(platypus.Image(_GIF.encode('utf8')))
+        #story.append(platypus.Image(fileName2Utf8(_GIF)))
         story.append(Paragraph("Here is an Image flowable obtained from a string file url.",styleSheet['Italic']))
         story.append(platypus.Image(getFurl(_GIF)))
         story.append(Paragraph("Here is an Image flowable obtained from an open file.",styleSheet['Italic']))

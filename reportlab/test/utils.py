@@ -267,6 +267,17 @@ class SecureTestCase(unittest.TestCase):
         sys.path = self._initialPath
         os.chdir(self._initialWorkDir)
 
+class NearTestCase(unittest.TestCase):
+    def assertNear(a,b,accuracy=1e-5):
+        if isinstance(a,(float,int)):
+            if abs(a-b)>accuracy:
+                raise AssertionError("%s not near %s" % (a, b))
+        else:
+            for ae,be in zip(a,b):
+                if abs(ae-be)>accuracy:
+                    raise AssertionError("%s not near %s" % (a, b))
+    assertNear = staticmethod(assertNear)
+
 
 class ScriptThatMakesFileTest(unittest.TestCase):
     """Runs a Python script at OS level, expecting it to produce a file.

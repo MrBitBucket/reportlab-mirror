@@ -14,7 +14,6 @@ The classes within this generally mirror structures in the PDF file
 and are not part of any public interface.  Instead, canvas and font
 classes are made available elsewhere for users to manipulate.
 """
-
 import string, types, binascii, codecs
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfutils import LINEEND # this constant needed in both
@@ -130,7 +129,6 @@ class DummyDoc:
     encrypt = NoEncryption()
 
 ### the global document structure manager
-
 class PDFDocument:
     _ID = None
     objectcounter = 0
@@ -431,6 +429,8 @@ class PDFDocument:
         internalname = xObjectName(name)
         if self.idToObject.has_key(internalname):
             theform = self.idToObject[internalname]
+            if hasattr(theform,'_extra_pageCatcher_info'):
+                return theform._extra_pageCatcher_info[boxType]
             if isinstance(theform, PDFFormXObject):
                 # internally defined form
                 return theform.BBoxList()
@@ -631,6 +631,52 @@ class PDFDictionary:
 
     def copy(self):
         return PDFDictionary(self.dict)
+
+    def has_key(self,k):
+        return self.dict.has_key(k)
+
+
+class checkPDFNames:
+    def __init__(self,*names):
+        self.names = map(PDFName,names)
+    def __call__(self,value):
+        if not value.startswith('/'):
+            value=PDFName(value)
+        if value in self.names:
+            return value
+
+def checkPDFBoolean(value):
+    if value in ('true','false'): return value
+
+class CheckedPDFDictionary(PDFDictionary):
+    validate = {}
+    def __init__(self,dict=None,validate=None):
+        PDFDictionary.__init__(self,dict)
+        if validate: self.validate = validate
+
+    def __setitem__(self,name,value):
+        if name not in self.validate:
+            raise ValueError('invalid key, %r' % name)
+        cvalue = self.validate[name](value)
+        if cvalue is None:
+            raise ValueError('Bad value %r for key %r' % (value,name))
+        PDFDictionary.__setitem__(self,name,cvalue)
+
+class ViewerPreferencesPDFDictionary(CheckedPDFDictionary):
+    validate=dict(
+                HideToolbar=checkPDFBoolean,
+                HideMenubar=checkPDFBoolean,
+                HideWindowUI=checkPDFBoolean,
+                FitWindow=checkPDFBoolean,
+                CenterWindow=checkPDFBoolean,
+                NonFullScreenPageMode=checkPDFNames(*'UseNone UseOutlines UseThumbs UseOC'.split()),
+                Direction=checkPDFNames(*'L2R R2L'.split()),
+                ViewArea=checkPDFNames(*'MediaBox CropBox BleedBox TrimBox ArtBox'.split()),
+                ViewClip=checkPDFNames(*'MediaBox CropBox BleedBox TrimBox ArtBox'.split()),
+                PrintArea=checkPDFNames(*'MediaBox CropBox BleedBox TrimBox ArtBox'.split()),
+                PrintClip=checkPDFNames(*'MediaBox CropBox BleedBox TrimBox ArtBox'.split()),
+                PrintScaling=checkPDFNames(*'None AppDefault'.split()),
+                )
     
 # stream filters are objects to support round trip and
 # possibly in the future also support parameters
@@ -654,7 +700,10 @@ class PDFStreamFilterBase85Encode:
     pdfname = "ASCII85Decode"
     def encode(self, text):
         from pdfutils import _AsciiBase85Encode, _wrap
-        return _wrap(_AsciiBase85Encode(text))
+        text = _AsciiBase85Encode(text)
+        if rl_config.wrapA85:
+            text = _wrap(text)
+        return text
     def decode(self, text):
         from pdfutils import _AsciiBase85Decode
         return _AsciiBase85Decode(text)
@@ -948,17 +997,22 @@ class PDFCatalog:
         return format(dict, document)
 
     def showOutline(self):
-        self.PageMode = PDFName("UseOutlines")
+        self.setPageMode("UseOutlines")
 
     def showFullScreen(self):
-        self.PageMode = PDFName("FullScreen")
+        self.setPageMode("FullScreen")
+
+    def setPageLayout(self,layout):
+        if layout:
+            self.PageLayout = PDFName(layout)
+
+    def setPageMode(self,mode):
+        if mode:
+            self.PageMode = PDFName(mode)
 
     def check_format(self, document):
         """for use in subclasses"""
         pass
-
-# not yet implementing
-#  ViewerPreferences, PageLabelDictionaries,
 
 class PDFPages(PDFCatalog):
     """PAGES TREE WITH ONE INTERNAL NODE, FOR "BALANCING" CHANGE IMPLEMENTATION"""
@@ -1032,7 +1086,7 @@ class PDFPage(PDFCatalog):
         # set up parameters unless usual behaviour is suppressed
         if self.Override_default_compilation:
             return
-        self.MediaBox = self.MediaBox or PDFArray([0, 0, self.pagewidth, self.pageheight])
+        self.MediaBox = self.MediaBox or PDFArray(self.Rotate in (90,270) and [0,0,self.pageheight,self.pagewidth] or [0, 0, self.pagewidth, self.pageheight])
         if not self.Annots:
             self.Annots = None
         else:
@@ -1066,6 +1120,108 @@ class PDFPage(PDFCatalog):
         if not self.Parent:
             pages = document.Pages
             self.Parent = document.Reference(pages)
+
+#this code contributed by  Christian Jacobs <cljacobsen@gmail.com> 
+class PDFPageLabels(PDFCatalog):
+    __comment__ = None
+    __RefOnly__ = 0
+    __Defaults__ = {}
+    __NoDefault__ = ["Nums"]
+    __Refs__ = []
+
+    def __init__(self):
+        self.labels = []
+
+    def addPageLabel(self, page, label):
+        """ Adds a new PDFPageLabel to this catalog.
+        The 'page' argument, an integer, is the page number in the PDF document
+        with which the 'label' should be associated. Page numbering in the PDF
+        starts at zero! Thus, to change the label on the first page, '0' should be
+        provided as an argument, and to change the 6th page, '5' should be provided
+        as the argument.
+
+        The 'label' argument should be a PDFPageLabel instance, which describes the
+        format of the labels starting on page 'page' in the PDF and continuing
+        until the next encounter of a PDFPageLabel.
+
+        The order in which labels are added is not important.
+        """
+        self.labels.append((page, label))
+
+    def format(self, document):
+        self.labels.sort() 
+        labels = []
+        for page, label in self.labels:
+            labels.append(page)
+            labels.append(label)
+
+        self.Nums = PDFArray(labels)    #PDFArray makes a copy with list()
+        return PDFCatalog.format(self, document)
+
+class PDFPageLabel(PDFCatalog):
+    __Comment__ = None
+    __RefOnly__ = 0
+    __Defaults__ = {}
+    __NoDefault__ = "Type S P St".split()
+    __convertible__ = 'ARABIC ROMAN_UPPER ROMAN_LOWER LETTERS_UPPER LETTERS_LOWER'
+
+    ARABIC = 'D'
+    ROMAN_UPPER = 'R'
+    ROMAN_LOWER = 'r'
+    LETTERS_UPPER = 'A'
+    LETTERS_LOWER = 'a'
+
+    def __init__(self, style=None, start=None, prefix=None):
+        """
+        A PDFPageLabel changes the style of page numbering as displayed in a PDF
+        viewer. PDF page labels have nothing to do with 'physical' page numbers
+        printed on a canvas, but instead influence the 'logical' page numbers
+        displayed by PDF viewers. However, when using roman numerals (i, ii,
+        iii...) or page prefixes for appendecies (A.1, A.2...) on the physical
+        pages PDF page labels are necessary to change the logical page numbers
+        displayed by the PDF viewer to match up with the physical numbers. A
+        PDFPageLabel changes the properties of numbering at the page on which it
+        appears (see the class 'PDFPageLabels' for specifying where a PDFPageLabel
+        is associated) and all subsequent pages, until a new PDFPageLabel is
+        encountered.
+
+        The arguments to this initialiser determine the properties of all
+        subsequent page labels. 'style' determines the numberings style, arabic,
+        roman, letters; 'start' specifies the starting number; and 'prefix' any
+        prefix to be applied to the page numbers. All these arguments can be left
+        out or set to None.
+
+        * style:
+          - None:                       No numbering, can be used to display the
+                                        prefix only.
+          - PDFPageLabel.ARABIC:        Use arabic numbers: 1, 2, 3, 4...
+          - PDFPageLabel.ROMAN_UPPER:   Use upper case roman numerals: I, II, III...
+          - PDFPageLabel.ROMAN_LOWER:   Use lower case roman numerals: i, ii, iii...
+          - PDFPageLabel.LETTERS_UPPER: Use upper case letters: A, B, C, D...
+          - PDFPageLabel.LETTERS_LOWER: Use lower case letters: a, b, c, d...
+        * start:
+         - An integer specifying the starting number for this PDFPageLabel. This
+            can be used when numbering style changes to reset the page number back
+            to one, ie from roman to arabic, or from arabic to appendecies. Can be
+            any positive integer or None. I'm not sure what the effect of
+            specifying None is, probably that page numbering continues with the
+            current sequence, I'd have to check the spec to clarify though.
+        * prefix:
+         - A string which is prefixed to the page numbers. Can be used to display
+            appendecies in the format: A.1, A.2, ..., B.1, B.2, ... where a
+            PDFPageLabel is used to set the properties for the first page of each
+            appendix to restart the page numbering at one and set the prefix to the
+            appropriate letter for current appendix. The prefix can also be used to
+            display text only, if the 'style' is set to None. This can be used to
+            display strings such as 'Front', 'Back', or 'Cover' for the covers on
+            books.
+        """
+        if style:
+            if style.upper() in self.__convertible__: style = getattr(self,style.upper())
+            self.S = PDFName(style)
+        if start: self.St = PDFnumber(start)
+        if prefix: self.P = PDFString(prefix)
+#ends code contributed by  Christian Jacobs <cljacobsen@gmail.com> 
 
 def testpage(document):
     P = PDFPage()
@@ -1482,27 +1638,22 @@ def _getTimeStamp():
     return _NOWT
 
 class PDFDate:
-    # gmt offset not yet suppported
-    def __init__(self, yyyy=None, mm=None, dd=None, hh=None, m=None, s=None,
-                    invariant=rl_config.invariant,dateFormatter=None):
-        if None in (yyyy, mm, dd, hh, m, s):
-            if invariant:
-                now = (2000,01,01,00,00,00,0)
-            else:
-                import time
-                now = tuple(time.localtime(_getTimeStamp())[:6])
-            if yyyy is None: yyyy=now[0]
-            if mm is None: mm=now[1]
-            if dd is None: dd=now[2]
-            if hh is None: hh=now[3]
-            if m is None: m=now[4]
-            if s is None: s=now[5]
-        self.date=(yyyy,mm,dd,hh,m,s)
+    # gmt offset now suppported
+    def __init__(self, invariant=rl_config.invariant, dateFormatter=None):
+        if invariant:
+            now = (2000,01,01,00,00,00,0)
+        else:
+            import time
+            now = tuple(time.localtime(_getTimeStamp())[:6])
+        self.date = now[:6]
         self.dateFormatter = dateFormatter
 
     def format(self, doc):
+        from time import timezone
+        dhh, dmm = timezone // 3600, (timezone % 3600) % 60
         dfmt = self.dateFormatter or (
-                lambda yyyy,mm,dd,hh,m,s: '%04d%02d%02d%02d%02d%02d' % (yyyy,mm,dd,hh,m,s))
+                lambda yyyy,mm,dd,hh,m,s:
+                    "D:%04d%02d%02d%02d%02d%02d%+03d'%02d'" % (yyyy,mm,dd,hh,m,s,dhh,dmm))
         return format(PDFString(dfmt(*self.date)), doc)
 
 class Destination:
@@ -1825,15 +1976,15 @@ class PDFImageXObject:
 
         if source is None:
             pass # use the canned one.
-        elif type(source)==type(''):
+        elif hasattr(source,'jpeg_fh'):
+            self.loadImageFromSRC(source)   #it is already a PIL Image
+        else:
             # it is a filename
             import os
             ext = string.lower(os.path.splitext(source)[1])
             src = open_for_read(source)
             if not(ext in ('.jpg', '.jpeg') and self.loadImageFromJPEG(src)):
                 self.loadImageFromA85(src)
-        else: # it is already a PIL Image
-            self.loadImageFromSRC(source)
 
     def loadImageFromA85(self,source):
         IMG=[]

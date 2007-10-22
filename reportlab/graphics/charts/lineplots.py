@@ -92,6 +92,8 @@ class LinePlot(AbstractLineChart):
         yValueAxis = AttrMapValue(None, desc='Handle of the y axis.'),
         data = AttrMapValue(None, desc='Data to be plotted, list of (lists of) x/y tuples.'),
         annotations = AttrMapValue(None, desc='list of callables, will be called with self, xscale, yscale.'),
+        behindAxes = AttrMapValue(isBoolean, desc='If true use separate line group.'),
+        gridFirst = AttrMapValue(isBoolean, desc='If true use draw grids before axes.'),
         )
 
     def __init__(self):
@@ -132,6 +134,8 @@ class LinePlot(AbstractLineChart):
         #private attributes
         self._inFill = None
         self.annotations = []
+        self.behindAxes = 0
+        self.gridFirst = 0
 
     def demo(self):
         """Shows basic use of a line chart."""
@@ -253,6 +257,7 @@ class LinePlot(AbstractLineChart):
             inFillX0 = self.yValueAxis._x
             inFillX1 = inFillX0 + self.xValueAxis._length
             inFillG = getattr(self,'_inFillG',g)
+        lG = getattr(self,'_lineG',g)
         # Iterate over data rows.
         for rowNo in P:
             row = self._positions[rowNo]
@@ -285,7 +290,7 @@ class LinePlot(AbstractLineChart):
                         line.strokeWidth = width
                     if dash:
                         line.strokeDashArray = dash
-                    g.add(line)
+                    lG.add(line)
 
             if hasattr(rowStyle, 'symbol'):
                 uSymbol = rowStyle.symbol
@@ -337,14 +342,22 @@ class LinePlot(AbstractLineChart):
         self.calcPositions()
         g = Group()
         g.add(self.makeBackground())
-        if self._inFill:
+        if self._inFill or self.behindAxes:
             xA._joinToAxis()
-            self._inFillG = Group()
-            g.add(self._inFillG)
+            if self._inFill:
+                self._inFillG = Group()
+                g.add(self._inFillG)
+            if self.behindAxes:
+                self._lineG = Group()
+                g.add(self._lineG)
+        if self.gridFirst:
+            xA.makeGrid(g,parent=self,dim=yA.getGridDims)
+            yA.makeGrid(g,parent=self,dim=xA.getGridDims)
         g.add(xA)
         g.add(yA)
-        xA.makeGrid(g,parent=self,dim=yA.getGridDims)
-        yA.makeGrid(g,parent=self,dim=xA.getGridDims)
+        if not self.gridFirst:
+            xA.makeGrid(g,parent=self,dim=yA.getGridDims)
+            yA.makeGrid(g,parent=self,dim=xA.getGridDims)
         annotations = getattr(self,'annotations',[])
         for a in annotations:
             if getattr(a,'beforeLines',None):

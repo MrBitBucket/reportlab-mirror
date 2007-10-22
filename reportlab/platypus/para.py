@@ -1798,15 +1798,16 @@ class bulletMaker:
             indent = stringWidth("XXX", "Courier", size)
             atts["leftIndent"] = str(indent)
         self.count = 0
+        self._first = 1
 
     def makeBullet(self, atts, bl=None):
-        count = self.count = self.count+1
+        if not self._first:
+            # forget space before for non-first elements
+            atts["spaceBefore"] = "0"
+        else:
+            self._first = 0
         typ = self.typ
         tagname = self.tagname
-        #print "makeBullet", tagname, typ, count
-        # forget space before for non-first elements
-        if count>1:
-            atts["spaceBefore"] = "0"
         if bl is None:
             if tagname=="ul":
                 if typ=="disc": bl = chr(109)
@@ -1817,12 +1818,16 @@ class bulletMaker:
                 if not atts.has_key("bulletFontName"):
                     atts["bulletFontName"] = "ZapfDingbats"
             elif tagname=="ol":
-                if typ=="1": bl = repr(count)
+                if 'value' in atts:
+                    self.count = int(atts['value'])
+                else:
+                    self.count += 1
+                if typ=="1": bl = str(self.count)
                 elif typ=="a":
-                    theord = ord("a")+count-1
+                    theord = ord("a")+self.count-1
                     bl = chr(theord)
                 elif typ=="A":
-                    theord = ord("A")+count-1
+                    theord = ord("A")+self.count-1
                     bl = chr(theord)
                 else:
                     raise ValueError, "ordered bullet type %s not implemented" % repr(typ)
@@ -2167,14 +2172,13 @@ more text and even more text and on and on and so forth
 more text and even more text and on and on and so forth
 
             <ul>
-                <li> this is an element at 4
-
+                <li> this is an element at  4
 more text and even more text and on and on and so forth
+                </li>
+                <li> this is an element at4
 more text and even more text and on and on and so forth
-
                 </li>
             </ul>
-
 more text and even more text and on and on and so forth
 more text and even more text and on and on and so forth
 
@@ -2182,15 +2186,13 @@ more text and even more text and on and on and so forth
         </ul>
 more text and even more text and on and on and so forth
 more text and even more text and on and on and so forth
-
         </li>
-
     </ul>
 <u><b>UNDERLINED</b> more text and even more text and on and on and so forth
 more text and even more text and on and on and so forth</u>
 
 <ol type="a">
-    <li>first element of the alpha list
+    <li value="3">first element of the alpha list
 
      <ul type="square">
         <li>first element of the square unnumberred list</li>

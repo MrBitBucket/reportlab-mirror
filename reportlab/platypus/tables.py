@@ -22,7 +22,7 @@ from reportlab import rl_config
 from reportlab.lib.styles import PropertySet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.utils import fp_str
-from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.pdfmetrics import stringWidth
 import operator, string
 from types import TupleType, ListType, StringType, FloatType, IntType
 
@@ -246,15 +246,15 @@ class Table(Flowable):
         if not _seqRH: rowHeights = nrows*[rowHeights]
         elif len(rowHeights) != nrows:
             raise ValueError, "%s data error - %d rows in data but %d in grid" % (self.identity(),nrows, len(rowHeights))
-        for i in range(nrows):
+        for i in xrange(nrows):
             if len(data[i]) != ncols:
                 raise ValueError, "%s not enough data points in row %d!" % (self.identity(),i)
         self._rowHeights = self._argH = rowHeights
         self._colWidths = self._argW = colWidths
         cellrows = []
-        for i in range(nrows):
+        for i in xrange(nrows):
             cellcols = []
-            for j in range(ncols):
+            for j in xrange(ncols):
                 cellcols.append(CellStyle(`(i,j)`))
             cellrows.append(cellcols)
         self._cellStyles = cellrows
@@ -262,6 +262,7 @@ class Table(Flowable):
         self._bkgrndcmds = []
         self._linecmds = []
         self._spanCmds = []
+        self._nosplitCmds = []
         self.repeatRows = repeatRows
         self.repeatCols = repeatCols
         self.splitByRow = splitByRow
@@ -282,8 +283,8 @@ class Table(Flowable):
         """Takes a block of input data (list of lists etc.) and
         - coerces unicode strings to non-unicode UTF8
         - coerces nulls to ''
-        - 
-        
+        -
+
         """
         def normCell(stuff):
             if stuff is None:
@@ -299,8 +300,6 @@ class Table(Flowable):
         from pprint import pprint as pp
         #pp(outData)
         return outData
-
-
 
     def identity(self, maxLen=30):
         '''Identify our selves as well as possible'''
@@ -340,18 +339,30 @@ class Table(Flowable):
 
     def _listCellGeom(self, V,w,s,W=None,H=None,aH=72000):
         if not V: return 0,0
-        aW = w-s.leftPadding-s.rightPadding
+        aW = w - s.leftPadding - s.rightPadding
         aH = aH - s.topPadding - s.bottomPadding
         t = 0
         w = 0
         canv = getattr(self,'canv',None)
+        sb0 = None
         for v in V:
-            vw, vh = v.wrapOn(canv,aW, aH)
+            vw, vh = v.wrapOn(canv, aW, aH)
+            sb = v.getSpaceBefore()
+            sa = v.getSpaceAfter()
             if W is not None: W.append(vw)
             if H is not None: H.append(vh)
             w = max(w,vw)
-            t = t + vh + v.getSpaceBefore()+v.getSpaceAfter()
-        return w, t - V[0].getSpaceBefore()-V[-1].getSpaceAfter()
+            t += vh + sa + sb
+            if sb0 is None:
+                sb0 = sb
+        return w, t - sb0 - sa
+
+    def _listValueWidth(self,V,aH=72000,aW=72000):
+        if not V: return 0,0
+        t = 0
+        w = 0
+        canv = getattr(self,'canv',None)
+        return max([v.wrapOn(canv,aW,aH)[0] for v in V])
 
     def _calc_width(self,availWidth,W=None):
         if getattr(self,'_width_calculated_once',None): return
@@ -416,8 +427,10 @@ class Table(Flowable):
                 if type(w) in (FloatType,IntType): return w
             except AttributeError:
                 pass
-        v = string.split(v is not None and str(v) or '', "\n")
-        return max(map(lambda a, b=s.fontname, c=s.fontsize,d=pdfmetrics.stringWidth: d(a,b,c), v))
+        v = (v is not None and str(v) or '').split("\n")
+        fontName = s.fontname
+        fontSize = s.fontsize
+        return max([stringWidth(x,fontName,fontSize) for x in v])
 
     def _calc_height(self, availHeight, availWidth, H=None, W=None):
 
@@ -452,31 +465,30 @@ class Table(Flowable):
                 S = self._cellStyles[i] # styles for row i
                 h = 0
                 j = 0
-                for v, s, w in map(None, V, S, W): # value, style, width (lengths must match)
+                for j,(v, s, w) in enumerate(map(None, V, S, W)): # value, style, width (lengths must match)
                     ji = j,i
                     if ji in rowSpanCells:
-                        t = 0.0  # don't count it, it's either occluded or unreliable
+                        continue # don't count it, it's either occluded or unreliable
                     else:
-                        t = type(v)
-                        if t in _SeqTypes or isinstance(v,Flowable):
-                            if not t in _SeqTypes: v = (v,)
-                            if w is None:
+                        if isinstance(v,(tuple,list,Flowable)):
+                            if isinstance(v,Flowable): v = (v,)
+                            if w is None and not self._canGetWidth(v):
                                 raise ValueError, "Flowable %s in cell(%d,%d) can't have auto width in\n%s" % (v[0].identity(30),i,j,self.identity(30))
                             if canv: canv._fontname, canv._fontsize, canv._leading = s.fontname, s.fontsize, s.leading or 1.2*s.fontsize
                             if ji in colSpanCells:
                                 t = spanRanges[ji]
+                                if not t: continue
                                 w = max(colpositions[t[2]+1]-colpositions[t[0]],w)
-                            dW,t = self._listCellGeom(v,w,s)
+                            dW,t = self._listCellGeom(v,w or self._listValueWidth(v),s)
                             if canv: canv._fontname, canv._fontsize, canv._leading = saved
                             dW = dW + s.leftPadding + s.rightPadding
                             if not rl_config.allowTableBoundsErrors and dW>w:
                                 raise "LayoutError", "Flowable %s (%sx%s points) too wide for cell(%d,%d) (%sx* points) in\n%s" % (v[0].identity(30),fp_str(dW),fp_str(t),i,j, fp_str(w), self.identity(30))
                         else:
-                            v = string.split(v is not None and str(v) or '', "\n")
-                            t = s.leading*len(v)
-                        t = t+s.bottomPadding+s.topPadding
+                            v = (v is not None and str(v) or '').split("\n")
+                            t = (s.leading or 1.2*s.fontSize)*len(v)
+                        t += s.bottomPadding+s.topPadding
                     if t>h: h = t   #record a new maximum
-                    j = j + 1
                 H[i] = h
             if None not in H: hmax = lim
 
@@ -508,6 +520,9 @@ class Table(Flowable):
             if None in self._argH:
                 self._calc_width(availWidth,W=W)
 
+        if self._nosplitCmds:
+            self._calcNoSplitRanges()
+
         # calculate the full table height
         self._calc_height(availHeight,availWidth,W=W)
 
@@ -523,19 +538,17 @@ class Table(Flowable):
 
         Allow a couple which we know are fixed size such as
         images and graphics."""
-        bad = 0
         if upToRow is None: upToRow = self._nrows
-        for row in range(min(self._nrows, upToRow)):
-            for col in range(self._ncols):
+        for row in xrange(min(self._nrows, upToRow)):
+            for col in xrange(self._ncols):
                 value = self._cellvalues[row][col]
                 if not self._canGetWidth(value):
-                    bad = 1
-                    #raise Exception('Unsizable elements found at row %d column %d in table with content:\n %s' % (row, col, value))
-        return bad
+                    return 1
+        return 0
 
     def _canGetWidth(self, thing):
         "Can we work out the width quickly?"
-        if type(thing) in (ListType, TupleType):
+        if isinstance(thing,(ListType, TupleType)):
             for elem in thing:
                 if not self._canGetWidth(elem):
                     return 0
@@ -583,12 +596,12 @@ class Table(Flowable):
         minimums = {}
         totalMinimum = 0
         elementWidth = self._elementWidth
-        for colNo in range(self._ncols):
+        for colNo in xrange(self._ncols):
             w = W[colNo]
             if w is None or w=='*' or _endswith(w,'%'):
                 siz = 1
                 current = final = None
-                for rowNo in range(self._nrows):
+                for rowNo in xrange(self._nrows):
                     value = self._cellvalues[rowNo][colNo]
                     style = self._cellStyles[rowNo][colNo]
                     new = elementWidth(value,style)+style.leftPadding+style.rightPadding
@@ -646,9 +659,9 @@ class Table(Flowable):
                     effectiveRemaining += minimum
             if desiredWidths: # else we're done
                 # let's say we have two variable columns.  One wanted
-                # 88 points, and one wanted 264 points.  The first has a 
+                # 88 points, and one wanted 264 points.  The first has a
                 # minWidth of 66, and the second of 55.  We have 71 points
-                # to divide up in addition to the totalMinimum (i.e., 
+                # to divide up in addition to the totalMinimum (i.e.,
                 # remaining==71).  Our algorithm tries to keep the proportion
                 # of these variable columns.
                 #
@@ -659,8 +672,8 @@ class Table(Flowable):
                 # That would make the first column 48 points, and the second
                 # 144 points--adding up to the desired 192.
                 #
-                # Unfortunately, that's too small for the first column.  It 
-                # must be 66 points.  Therefore, we go ahead and save that 
+                # Unfortunately, that's too small for the first column.  It
+                # must be 66 points.  Therefore, we go ahead and save that
                 # column width as 88 points.  That leaves (192-88==) 104
                 # points remaining.  The proportion to shrink the remaining
                 # column is (104/264), which, multiplied  by the desired
@@ -668,9 +681,9 @@ class Table(Flowable):
                 # column.
                 proportion = effectiveRemaining/totalDesired
                 # we sort the desired widths by difference between desired and
-                # and minimum values, a value called "disappointment" in the 
-                # code.  This means that the columns with a bigger 
-                # disappointment will have a better chance of getting more of 
+                # and minimum values, a value called "disappointment" in the
+                # code.  This means that the columns with a bigger
+                # disappointment will have a better chance of getting more of
                 # the available space.
                 desiredWidths.sort()
                 finalSet = []
@@ -749,6 +762,52 @@ class Table(Flowable):
             if y0 > y1: y0, y1 = y1, y0
 
             if x0!=x1 or y0!=y1:
+                if x0!=x1: #column span
+                    for y in xrange(y0, y1+1):
+                        for x in xrange(x0,x1+1):
+                            csa((x,y))
+                if y0!=y1: #row span
+                    for y in xrange(y0, y1+1):
+                        for x in xrange(x0,x1+1):
+                            rsa((x,y))
+
+                for y in xrange(y0, y1+1):
+                    for x in xrange(x0,x1+1):
+                        spanRanges[x,y] = None
+                # set the main entry
+                spanRanges[x0,y0] = (x0, y0, x1, y1)
+
+    def _calcNoSplitRanges(self):
+        """
+        This creates some mappings to let the later code determine
+        if a cell is part of a "nosplit" range.
+        self._nosplitRanges shows the 'coords' in integers of each
+        'cell range', or None if it was clobbered:
+          (col, row) -> (col0, row0, col1, row1)
+
+        Any cell not in the key is not part of a spanned region
+        """
+        self._nosplitRanges = nosplitRanges = {}
+        for x in xrange(self._ncols):
+            for y in xrange(self._nrows):
+                nosplitRanges[x,y] = (x, y, x, y)
+        self._colNoSplitCells = []
+        self._rowNoSplitCells = []
+        csa = self._colNoSplitCells.append
+        rsa = self._rowNoSplitCells.append
+        for (cmd, start, stop) in self._nosplitCmds:
+            x0, y0 = start
+            x1, y1 = stop
+
+            #normalize
+            if x0 < 0: x0 = x0 + self._ncols
+            if x1 < 0: x1 = x1 + self._ncols
+            if y0 < 0: y0 = y0 + self._nrows
+            if y1 < 0: y1 = y1 + self._nrows
+            if x0 > x1: x0, x1 = x1, x0
+            if y0 > y1: y0, y1 = y1, y0
+
+            if x0!=x1 or y0!=y1:
                 #column span
                 if x0!=x1:
                     for y in xrange(y0, y1+1):
@@ -762,9 +821,9 @@ class Table(Flowable):
 
                 for y in xrange(y0, y1+1):
                     for x in xrange(x0,x1+1):
-                        spanRanges[x,y] = None
+                        nosplitRanges[x,y] = None
                 # set the main entry
-                spanRanges[x0,y0] = (x0, y0, x1, y1)
+                nosplitRanges[x0,y0] = (x0, y0, x1, y1)
 
     def _calcSpanRects(self):
         """Work out rects for tables which do row and column spanning.
@@ -821,6 +880,9 @@ class Table(Flowable):
             self._bkgrndcmds.append(cmd)
         elif cmd[0] == 'SPAN':
             self._spanCmds.append(cmd)
+        elif cmd[0] == 'NOSPLIT':
+            # we expect op, start, stop
+            self._nosplitCmds.append(cmd)
         elif _isLineCommand(cmd):
             # we expect op, start, stop, weight, colour, cap, dashes, join
             cmd = list(cmd)
@@ -867,8 +929,8 @@ class Table(Flowable):
             if ec < 0: ec = ec + self._ncols
             if sr < 0: sr = sr + self._nrows
             if er < 0: er = er + self._nrows
-            for i in range(sr, er+1):
-                for j in range(sc, ec+1):
+            for i in xrange(sr, er+1):
+                for j in xrange(sc, ec+1):
                     _setCellStyle(self._cellStyles, i, j, op, values)
 
     def _drawLines(self):
@@ -1079,6 +1141,7 @@ class Table(Flowable):
         R0._cr_0(n,A)
         R0._cr_0(n,self._bkgrndcmds)
         R0._cr_0(n,self._spanCmds)
+        R0._cr_0(n,self._nosplitCmds)
 
         if repeatRows:
             #R1 = slelf.__class__(data[:repeatRows]+data[n:],self._argW,
@@ -1090,6 +1153,7 @@ class Table(Flowable):
             R1._cr_1_1(n,repeatRows,A)
             R1._cr_1_1(n,repeatRows,self._bkgrndcmds)
             R1._cr_1_1(n,repeatRows,self._spanCmds)
+            R1._cr_1_1(n,repeatRows,self._nosplitCmds)
         else:
             #R1 = slelf.__class__(data[n:], self._argW, self._argH[n:],
             R1 = self.__class__(data[n:], self._colWidths, self._argH[n:],
@@ -1099,7 +1163,7 @@ class Table(Flowable):
             R1._cr_1_0(n,A)
             R1._cr_1_0(n,self._bkgrndcmds)
             R1._cr_1_0(n,self._spanCmds)
-
+            R1._cr_1_0(n,self._nosplitCmds)
 
         R0.hAlign = R1.hAlign = self.hAlign
         R0.vAlign = R1.vAlign = self.vAlign
@@ -1107,23 +1171,27 @@ class Table(Flowable):
         self.onSplit(R1)
         return [R0,R1]
 
+    def _getRowImpossible(impossible,cells,ranges):
+        for xy in cells:
+            r=ranges[xy]
+            if r!=None:
+                y1,y2=r[1],r[3]
+                if y1!=y2:
+                    ymin=min(y1,y2) #normalize
+                    ymax=max(y1,y2) #normalize
+                    y=ymin+1
+                    while 1:
+                        if y>ymax: break
+                        impossible[y]=None #split at position y is impossible because of overlapping rowspan
+                        y+=1
+    _getRowImpossible=staticmethod(_getRowImpossible)
+
     def _getFirstPossibleSplitRowPosition(self,availHeight):
+        impossible={}
         if self._spanCmds:
-            impossible={}
-            for xy in self._rowSpanCells:
-                r=self._spanRanges[xy]
-                if r!=None:
-                    y1,y2=r[1],r[3]
-                    if y1!=y2:
-                        ymin=min(y1,y2) #normalize
-                        ymax=max(y1,y2) #normalize
-                        y=ymin+1
-                        while 1:
-                            if y>ymax: break
-                            impossible[y]=None #split at position y is impossible because of overlapping rowspan
-                            y=y+1
-        else:
-            impossible={} # any split possible because table does *not* have rowspans
+            self._getRowImpossible(impossible,self._rowSpanCells,self._spanRanges)
+        if self._nosplitCmds:
+            self._getRowImpossible(impossible,self._rowNoSplitCells,self._nosplitRanges)
         h = 0
         n = 1
         split_at = 0 # from this point of view 0 is the first position where the table may *always* be splitted
@@ -1147,7 +1215,7 @@ class Table(Flowable):
     def draw(self):
         self._curweight = self._curcolor = self._curcellstyle = None
         self._drawBkgrnd()
-        if self._spanCmds == []:
+        if not self._spanCmds:
             # old fashioned case, no spanning, steam on and do each cell
             for row, rowstyle, rowpos, rowheight in map(None, self._cellvalues, self._cellStyles, self._rowpositions[1:], self._rowHeights):
                 for cellval, cellstyle, colpos, colwidth in map(None, row, rowstyle, self._colpositions[:-1], self._colWidths):
@@ -1155,8 +1223,8 @@ class Table(Flowable):
         else:
             # we have some row or col spans, need a more complex algorithm
             # to find the rect for each
-            for rowNo in range(self._nrows):
-                for colNo in range(self._ncols):
+            for rowNo in xrange(self._nrows):
+                for colNo in xrange(self._ncols):
                     cellRect = self._spanRects[colNo, rowNo]
                     if cellRect is not None:
                         (x, y, width, height) = cellRect
@@ -1165,23 +1233,27 @@ class Table(Flowable):
                         self._drawCell(cellval, cellstyle, (x, y), (width, height))
         self._drawLines()
 
-
     def _drawBkgrnd(self):
         nrows = self._nrows
         ncols = self._ncols
+        canv = self.canv
+        colpositions = self._colpositions
+        rowpositions = self._rowpositions
+        rowHeights = self._rowHeights
+        colWidths = self._colWidths
+        spanRects = getattr(self,'_spanRects',None)
         for cmd, (sc, sr), (ec, er), arg in self._bkgrndcmds:
             if sc < 0: sc = sc + ncols
             if ec < 0: ec = ec + ncols
             if sr < 0: sr = sr + nrows
             if er < 0: er = er + nrows
-            x0 = self._colpositions[sc]
-            y0 = self._rowpositions[sr]
-            x1 = self._colpositions[min(ec+1,ncols)]
-            y1 = self._rowpositions[min(er+1,nrows)]
+            x0 = colpositions[sc]
+            y0 = rowpositions[sr]
+            x1 = colpositions[min(ec+1,ncols)]
+            y1 = rowpositions[min(er+1,nrows)]
             w, h = x1-x0, y1-y0
-            canv = self.canv
             if callable(arg):
-                apply(arg,(self,canv, x0, y0, w, h))
+                arg(self,canv, x0, y0, w, h)
             elif cmd == 'ROWBACKGROUNDS':
                 #Need a list of colors to cycle through.  The arguments
                 #might be already colours, or convertible to colors, or
@@ -1190,29 +1262,35 @@ class Table(Flowable):
                 colorCycle = map(colors.toColorOrNone, arg)
                 count = len(colorCycle)
                 rowCount = er - sr + 1
-                for i in range(rowCount):
+                for i in xrange(rowCount):
                     color = colorCycle[i%count]
-                    h = self._rowHeights[sr + i]
+                    h = rowHeights[sr + i]
                     if color:
                         canv.setFillColor(color)
                         canv.rect(x0, y0, w, -h, stroke=0,fill=1)
                     y0 = y0 - h
-
             elif cmd == 'COLBACKGROUNDS':
                 #cycle through colours columnwise
                 colorCycle = map(colors.toColorOrNone, arg)
                 count = len(colorCycle)
                 colCount = ec - sc + 1
-                for i in range(colCount):
+                for i in xrange(colCount):
                     color = colorCycle[i%count]
-                    w = self._colWidths[sc + i]
+                    w = colWidths[sc + i]
                     if color:
                         canv.setFillColor(color)
                         canv.rect(x0, y0, w, h, stroke=0,fill=1)
                     x0 = x0 +w
             else:   #cmd=='BACKGROUND'
-                canv.setFillColor(colors.toColor(arg))
-                canv.rect(x0, y0, w, h, stroke=0,fill=1)
+                color = colors.toColorOrNone(arg)
+                if color:
+                    if ec==sc and er==sr and spanRects:
+                        xywh = spanRects.get((sc,sr))
+                        if xywh:
+                            #it's a single cell
+                            x0, y0, w, h = xywh
+                    canv.setFillColor(color)
+                    canv.rect(x0, y0, w, h, stroke=0,fill=1)
 
     def _drawCell(self, cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight)):
         if self._curcellstyle is not cellstyle:
@@ -1376,12 +1454,9 @@ LIST_STYLE = TableStyle(
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
 
-
 # experimental iterator which can apply a sequence
 # of colors e.g. Blue, None, Blue, None as you move
 # down.
-
-
 if __name__ == '__main__':
     from reportlab.test.test_platypus_tables import old_tables_test
     old_tables_test()

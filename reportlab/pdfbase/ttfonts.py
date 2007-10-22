@@ -421,6 +421,8 @@ class TTFontFile(TTFontParser):
             descent      - Typographic descender in 1/1000ths of a point
             capHeight    - Cap height in 1/1000ths of a point (0 if not available)
             bbox         - Glyph bounding box [l,t,r,b] in 1/1000ths of a point
+            _bbox        - Glyph bounding box [l,t,r,b] in unitsPerEm
+            unitsPerEm   - Glyph units per em
             italicAngle  - Italic angle in degrees ccw
             stemV        - stem weight in 1/1000ths of a point (approximate)
         If charInfo is true, the following will also be set:
@@ -481,7 +483,7 @@ class TTFontFile(TTFontParser):
             raise TTFError, "Could not find PostScript font name"
         for c in psName:
             oc = ord(c)
-            if oc<33 or oc>126 or c in ('[', ']', '(', ')', '{', '}', '<', '>', '/', '%'):
+            if oc>126 or c in ' [](){}<>/%':
                 raise TTFError, "psName=%r contains invalid character '%s' ie U+%04X" % (psName,c,ord(c))
         self.name = psName
         self.familyName = names[1] or psName
@@ -501,8 +503,8 @@ class TTFontFile(TTFontParser):
         if magic != 0x5F0F3CF5:
             raise TTFError, 'Invalid head table magic %04x' % magic
         self.skip(2)
-        unitsPerEm = self.read_ushort()
-        scale = lambda x, unitsPerEm=unitsPerEm: x * 1000 / unitsPerEm
+        self.unitsPerEm = unitsPerEm = self.read_ushort()
+        scale = lambda x, unitsPerEm=unitsPerEm: x * 1000. / unitsPerEm
         self.skip(16)
         xMin = self.read_short()
         yMin = self.read_short()
@@ -802,8 +804,8 @@ class TTFontFile(TTFontParser):
             originalGlyphIdx = glyphMap[n]
             aw, lsb = self.hmetrics[originalGlyphIdx]
             if n < numberOfHMetrics:
-                hmtx.append(aw)
-            hmtx.append(lsb)
+                hmtx.append(int(aw))
+            hmtx.append(int(lsb))
         hmtx = apply(pack, [">%dH" % len(hmtx)] + hmtx)
         output.add('hmtx', hmtx)
 
@@ -953,8 +955,8 @@ class TTFont:
         canvas.setFont('PostScriptFontName', size)
         canvas.drawString(x, y, "Some text encoded in UTF-8")
     """
-
     class State:
+        namePrefix = 'F'
         def __init__(self,asciiReadable=1):
             self.assignments = {}
             self.nextCode = 0
@@ -998,6 +1000,18 @@ class TTFont:
         dw = self.face.defaultWidth
         return 0.001*size*sum([g(ord(u),dw) for u in text])
     stringWidth = _py_stringWidth
+
+    def _assignState(self,doc,asciiReadable=None,namePrefix=None):
+        '''convenience function for those wishing to roll their own state properties'''
+        if asciiReadable is None:
+            asciiReadable = self._asciiReadable
+        try:
+            state = self.state[doc]
+        except KeyError:
+            state = self.state[doc] = TTFont.State(asciiReadable)
+            if namePrefix is not None:
+                state.namePrefix = namePrefix
+        return state
 
     def splitString(self, text, doc, encoding='utf-8'):
         """Splits text into a number of chunks, each of which belongs to a
@@ -1052,7 +1066,7 @@ class TTFont:
         if subset < 0 or subset >= len(state.subsets):
             raise IndexError, 'Subset %d does not exist in font %s' % (subset, self.fontName)
         if state.internalName is None:
-            state.internalName = 'F%d' % (len(doc.fontMapping) + 1)
+            state.internalName = state.namePrefix +`(len(doc.fontMapping) + 1)`
             doc.fontMapping[self.fontName] = '/' + state.internalName
             doc.delayedFonts.append(self)
         return '/%s+%d' % (state.internalName, subset)

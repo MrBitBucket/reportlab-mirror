@@ -7,7 +7,7 @@ __version__=''' $Id$ '''
 __doc__="""
 This module contains the core structure of platypus.
 
-Platypus constructs documents.  Document styles are determined by DocumentTemplates.
+rlatypus constructs documents.  Document styles are determined by DocumentTemplates.
 
 Each DocumentTemplate contains one or more PageTemplates which defines the look of the
 pages of the document.
@@ -108,8 +108,10 @@ class ActionFlowable(Flowable):
         action = self.action[0]
         args = tuple(self.action[1:])
         arn = 'handle_'+action
+        if arn=="handle_nextPageTemplate" and args[0]=='main':
+            pass
         try:
-            apply(getattr(doc,arn), args)
+            getattr(doc,arn)(*args)
         except AttributeError, aerr:
             if aerr.args[0]==arn:
                 raise NotImplementedError, "Can't handle ActionFlowable(%s)" % action
@@ -175,6 +177,7 @@ def _evalMeasurement(n):
     return n
 
 class FrameActionFlowable(Flowable):
+    _fixedWidth = _fixedHeight = 1
     def __init__(self,*arg,**kw):
         raise NotImplementedError('Abstract Class')
 
@@ -195,11 +198,18 @@ class Indenter(FrameActionFlowable):
         frame._leftExtraIndent += self.left
         frame._rightExtraIndent += self.right
 
+class NotAtTopPageBreak(FrameActionFlowable):
+    def __init__(self):
+        pass
+
+    def frameAction(self,frame):
+        if not frame._atTop:
+            frame._generated_content = [PageBreak()]
+
 class NextPageTemplate(ActionFlowable):
     """When you get to the next page, use the template specified (change to two column, for example)  """
     def __init__(self,pt):
         ActionFlowable.__init__(self,('nextPageTemplate',pt))
-
 
 class PageTemplate:
     """
@@ -250,7 +260,6 @@ class PageTemplate:
         footer needed knowledge of what flowables were drawn on
         this page."""
         pass
-
 
 class BaseDocTemplate:
     """
@@ -350,12 +359,10 @@ class BaseDocTemplate:
         self._pageRefs = {}
         self._indexingFlowables = []
 
-
         #callback facility for progress monitoring
         self._onPage = None
         self._onProgress = None
         self._flowableCount = 0  # so we know how far to go
-
 
         #infinite loop detection if we start doing lots of empty pages
         self._curPageFlowableCount = 0
@@ -602,7 +609,6 @@ class BaseDocTemplate:
         finally:
             if frame: del f._frame
 
-
     def handle_flowable(self,flowables):
         '''try to handle one flowable from the front of list flowables.'''
 
@@ -627,24 +633,32 @@ class BaseDocTemplate:
             f.apply(self)
             self.afterFlowable(f)
         else:
+            frame = self.frame
             #try to fit it then draw it
-            if self.frame.add(f, self.canv, trySplit=self.allowSplitting):
-                self._curPageFlowableCount += 1
-                self.afterFlowable(f)
+            if frame.add(f, self.canv, trySplit=self.allowSplitting):
+                if not isinstance(f,FrameActionFlowable):
+                    self._curPageFlowableCount += 1
+                    self.afterFlowable(f)
+                else:
+                    S = getattr(frame,'_generated_content',None)
+                    if S:
+                        for i,f in enumerate(S):
+                            flowables.insert(i,f)
+                        del frame._generated_content
             else:
                 if self.allowSplitting:
                     # see if this is a splittable thing
-                    S = self.frame.split(f,self.canv)
+                    S = frame.split(f,self.canv)
                     n = len(S)
                 else:
                     n = 0
                 if n:
                     if not isinstance(S[0],(PageBreak,SlowPageBreak,ActionFlowable)):
-                        if self.frame.add(S[0], self.canv, trySplit=0):
+                        if frame.add(S[0], self.canv, trySplit=0):
                             self._curPageFlowableCount += 1
                             self.afterFlowable(S[0])
                         else:
-                            ident = "Splitting error(n==%d) on page %d in\n%s" % (n,self.page,self._fIdent(f,30,self.frame))
+                            ident = "Splitting error(n==%d) on page %d in\n%s" % (n,self.page,self._fIdent(f,30,frame))
                             #leave to keep apart from the raise
                             raise LayoutError(ident)
                         del S[0]
@@ -652,7 +666,7 @@ class BaseDocTemplate:
                         flowables.insert(i,f)   # put split flowables back on the list
                 else:
                     if hasattr(f,'_postponed'):
-                        ident = "Flowable %s too large on page %d" % (self._fIdent(f,30,self.frame), self.page)
+                        ident = "Flowable %s too large on page %d" % (self._fIdent(f,30,frame), self.page)
                         #leave to keep apart from the raise
                         raise LayoutError(ident)
                     # this ought to be cleared when they are finally drawn!
@@ -682,7 +696,7 @@ class BaseDocTemplate:
         self.canv.setTitle(self.title)
         self.canv.setSubject(self.subject)
         self.canv.setKeywords(self.keywords)
-        
+
         if self._onPage:
             self.canv.setPageCallBack(self._onPage)
         self.handle_documentBegin()
@@ -744,7 +758,7 @@ class BaseDocTemplate:
                 self._onProgress('PROGRESS',flowableCount - len(flowables))
 
         #reapply pagecatcher info
-        self.canv._doc.info = self._savedInfo 
+        self.canv._doc.info = self._savedInfo
 
         self._endBuild()
         if self._onProgress:
@@ -856,7 +870,6 @@ class BaseDocTemplate:
         '''called after a flowable has been rendered'''
         pass
 
-
 class SimpleDocTemplate(BaseDocTemplate):
     """A special case document template that will handle many simple documents.
        See documentation for BaseDocTemplate.  No pageTemplates are required
@@ -896,7 +909,6 @@ class SimpleDocTemplate(BaseDocTemplate):
         if onLaterPages is _doNothing and hasattr(self,'onLaterPages'):
             self.pageTemplates[1].beforeDrawPage = self.onLaterPages
         BaseDocTemplate.build(self,flowables, canvasmaker=canvasmaker)
-
 
 def progressCB(typ, value):
     """Example prototype for progress monitoring.

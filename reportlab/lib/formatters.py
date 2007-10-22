@@ -2,13 +2,13 @@
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/formatters.py
+__all__=('Formatter','DecimalFormatter')
 __version__=''' $Id$ '''
 __doc__="""
 These help format numbers and dates in a user friendly way.
-
 Used by the graphics framework.
 """
-import string, sys, os
+import string, sys, os, re
 
 class Formatter:
     "Base formatter - simply applies python format strings"
@@ -22,17 +22,26 @@ class Formatter:
         return self.format(x)
 
 
+_ld_re=re.compile(r'^\d*\.')
+_tz_re=re.compile('0+$')
 class DecimalFormatter(Formatter):
     """lets you specify how to build a decimal.
 
     A future NumberFormatter class will take Microsoft-style patterns
     instead - "$#,##0.00" is WAY easier than this."""
     def __init__(self, places=2, decimalSep='.', thousandSep=None, prefix=None, suffix=None):
-        self.places = places
+        if places=='auto':
+            self.calcPlaces = self._calcPlaces
+        else:
+            self.places = places
         self.dot = decimalSep
         self.comma = thousandSep
         self.prefix = prefix
         self.suffix = suffix
+
+    def _calcPlaces(self,V):
+        '''called with the full set of values to be formatted so we can calculate places'''
+        self.places = max([len(_tz_re.sub('',_ld_re.sub('',str(v)))) for v in V])
 
     def format(self, num):
         # positivize the numbers

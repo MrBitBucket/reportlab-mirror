@@ -12,7 +12,7 @@ __doc__="""
     widthsByFontGlyph   fontname x glyphname --> width of glyph
     widthVectorsByFont  fontName -> vector of widths
 """
-import string, UserDict, os, sys
+import UserDict, os, sys
 
 # mapping of name to width vector, starts empty until fonts are added
 # e.g. widths['Courier'] = [...600,600,600,...]
@@ -50,8 +50,8 @@ standardFontAttributes = {
 
 #this maps fontnames to the equivalent filename root.
 _font2fnrMapWin32 = {
-                    'symbol':                   'Sy______',
-                    'zapfdingbats':             'Zd______',
+                    'symbol':                   'sy______',
+                    'zapfdingbats':             'zd______',
                     'helvetica':                '_a______',
                     'helvetica-bold':           '_ab_____',
                     'helvetica-boldoblique':    '_abi____',
@@ -83,12 +83,15 @@ if sys.platform in ('linux2',):
                 'courier-oblique': 'Courier-Oblique',
                 }
     _font2fnrMap = _font2fnrMapLinux2
-    _revmap = None
+    for k, v in _font2fnrMap.items():
+        if k in _font2fnrMapWin32.keys():
+            _font2fnrMapWin32[v.lower()] = _font2fnrMapWin32[k]
+    del k, v
 else:
     _font2fnrMap = _font2fnrMapWin32
 
 def _findFNR(fontName):
-    return _font2fnrMap[string.lower(fontName)]
+    return _font2fnrMap[fontName.lower()]
 
 from reportlab.rl_config import T1SearchPath
 from reportlab.lib.utils import rl_isfile
@@ -107,14 +110,9 @@ def findT1File(fontName,ext='.pfb'):
             if f: return f
         except:
             pass
-        global _revmap
-        if not _revmap:
-            for k, v in _font2fnrMap.items():
-                if k in _font2fnrMapWin32.keys():
-                    _font2fnrMapWin32[string.lower(v)] = _font2fnrMapWin32[k]
-            _revmap = 1
+
         try:
-            f = _searchT1Dirs(_font2fnrMapWin32[string.lower(fontName)]+ext)
+            f = _searchT1Dirs(_font2fnrMapWin32[fontName.lower()]+ext)
             if f: return f
         except:
             pass
@@ -131,14 +129,14 @@ class _Name2StandardEncodingMap(UserDict.UserDict):
     '''Trivial fake dictionary with some [] magic'''
     _XMap = {'winansi':'WinAnsiEncoding','macroman': 'MacRomanEncoding','standard':'StandardEncoding','symbol':'SymbolEncoding', 'zapfdingbats':'ZapfDingbatsEncoding','pdfdoc':'PDFDocEncoding', 'macexpert':'MacExpertEncoding'}
     def __setitem__(self,x,v):
-        y = string.lower(x)
+        y = x.lower()
         if y[-8:]=='encoding': y = y[:-8]
         y = self._XMap[y]
         if y in self.keys(): raise IndexError, 'Encoding %s is already set' % y
         self.data[y] = v
 
     def __getitem__(self,x):
-        y = string.lower(x)
+        y = x.lower()
         if y[-8:]=='encoding': y = y[:-8]
         y = self._XMap[y]
         return self.data[y]

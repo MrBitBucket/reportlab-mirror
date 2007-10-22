@@ -52,6 +52,8 @@ class Barcode(Flowable):
         if not hasattr(self, 'gap'):
             self.gap = None
 
+
+    def _calculate(self):
         self.validate()
         self.encode()
         self.decompose()
@@ -97,10 +99,22 @@ class Barcode(Flowable):
         if self.quiet:
             w += self.lquiet + self.rquiet
 
-        self.height = self.barHeight
-        self.width = w
+
+        self._height = self.barHeight
+        self._width = w
+
+    def width(self):
+        self._calculate()
+        return self._width
+    width = property(width)
+
+    def height(self):
+        self._calculate()
+        return self._height
+    height = property(height)
 
     def draw(self):
+        self._calculate()
         barWidth = self.barWidth
         wx = barWidth * self.ratio
 
@@ -125,9 +139,9 @@ class Barcode(Flowable):
 
         if self.bearers:
             self.rect(self.lquiet, 0, \
-                self.width - (self.lquiet + self.rquiet), b)
+                self._width - (self.lquiet + self.rquiet), b)
             self.rect(self.lquiet, self.barHeight - b, \
-                self.width - (self.lquiet + self.rquiet), b)
+                self._width - (self.lquiet + self.rquiet), b)
 
         self.drawHumanReadable()
 
@@ -139,7 +153,7 @@ class Barcode(Flowable):
             fontSize = self.fontSize
             fontName = self.fontName
             w = stringWidth(s,fontName,fontSize)
-            width = self.width
+            width = self._width
             if self.quiet:
                 width -= self.lquiet+self.rquiet
                 x = self.lquiet
@@ -185,10 +199,11 @@ class MultiWidthBarcode(Barcode):
         if self.quiet:
             w += self.lquiet + self.rquiet
 
-        self.height = self.barHeight
-        self.width = w
+        self._height = self.barHeight
+        self._width = w
 
     def draw(self):
+        self._calculate()
         oa, oA = ord('a') - 1, ord('A') - 1
         barWidth = self.barWidth
         left = self.quiet and self.lquiet or 0
@@ -318,26 +333,17 @@ class I2of5(Barcode):
 
     def encode(self):
         s = self.validated
+        cs = self.checksum
+        c = len(s)
 
-        # make sure result will be a multiple of 2 digits long,
-        # checksum included
-        if ((len(self.validated) % 2 == 0) and self.checksum) \
-        or ((len(self.validated) % 2 == 1) and not self.checksum):
+        #ensure len(result)%2 == 0, checksum included
+        if ((c % 2 == 0) and cs) or ((c % 2 == 1) and not cs):
             s = '0' + s
+            c += 1
 
-        if self.checksum:
-            c = 0
-            cm = 3
-
-            for d in s:
-                c = c + cm * int(d)
-                if cm == 3:
-                    cm = 1
-                else:
-                    cm = 3
-
-            d = 10 - (int(d) % 10)
-            s = s + `d`
+        if cs:
+            c = 3*sum([int(s[i]) for i in xrange(0,c,2)])+sum([int(s[i]) for i in xrange(1,c,2)])
+            s += str((10 - c) % 10)
 
         self.encoded = s
 

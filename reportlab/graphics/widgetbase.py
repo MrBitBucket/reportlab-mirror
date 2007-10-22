@@ -10,7 +10,6 @@ from reportlab.lib import colors
 from reportlab.lib.validators import *
 from reportlab.lib.attrmap import *
 
-
 class PropHolder:
     '''Base for property holders'''
 
@@ -153,6 +152,26 @@ class Widget(PropHolder, shapes.UserNode):
     def getBounds(self):
         "Return outer boundary as x1,y1,x2,y2.  Can be overridden for efficiency"
         return self.draw().getBounds()
+
+class ScaleWidget(Widget):
+    '''Contents with a scale and offset''' 
+    _attrMap = AttrMap(
+        x = AttrMapValue(isNumber,desc="x offset"),
+        y = AttrMapValue(isNumber,desc="y offset"),
+        scale = AttrMapValue(isNumber,desc="scale"),
+        contents = AttrMapValue(None,desc="Contained drawable elements"),
+        )
+    def __init__(self,x=0,y=0,scale=1.0,contents=None):
+        self.x = x
+        self.y = y
+        if not contents: contents=[]
+        elif not isinstance(contents,(tuple,list)):
+            contents = (contents,)
+        self.contents = list(contents)
+        self.scale = scale
+    
+    def draw(self):
+        return shapes.Group(transform=(self.scale,0,0,self.scale,self.x,self.y),*self.contents)
 
 _ItemWrapper={}
 

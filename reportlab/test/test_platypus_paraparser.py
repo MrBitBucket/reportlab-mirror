@@ -27,6 +27,7 @@ class ParaParserTestCase(unittest.TestCase):
         style.bulletFontName = black
         style.bulletFontName='Times-Roman'
         style.bulletFontSize=12
+        style.bulletOffsetY=3
         self.style = style        
 
     def testPlain(self):

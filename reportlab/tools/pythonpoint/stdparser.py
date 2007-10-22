@@ -246,7 +246,6 @@ class PPMLParser(xmllib.XMLParser):
         #the only data should be paragraph text, preformatted para
         #text, 'string text' for a fixed string on the page,
         #or table data
-
         if self._curPara:
             self._curPara.rawtext = self._curPara.rawtext + data
         elif self._curPrefmt:
@@ -445,9 +444,9 @@ class PPMLParser(xmllib.XMLParser):
         bt = self._arg('para',args,'bullettext')
         if bt == '':
             if self._curPara.style == 'Bullet':
-                bt = '\xc2\xb7'  # Symbol Font bullet character, reasonable default
+                bt = '\xe2\x80\xa2'  # Symbol Font bullet character, reasonable default
             elif self._curPara.style == 'Bullet2':
-                bt = '\xc2\xb7'  # second-level bullet
+                bt = '\xe2\x80\xa2'  # second-level bullet
             else:
                 bt = None
 

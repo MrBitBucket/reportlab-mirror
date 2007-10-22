@@ -26,7 +26,7 @@ higher level components).
 """
 import os
 import string
-from copy import deepcopy
+from copy import deepcopy, copy
 from types import ListType, TupleType, StringType
 
 from reportlab.lib.colors import red, gray, lightgrey
@@ -37,7 +37,6 @@ from reportlab.rl_config import _FUZZ, overlapAttachedSpace
 __all__=('TraceInfo','Flowable','XBox','Preformatted','Image','Spacer','PageBreak','SlowPageBreak',
         'CondPageBreak','KeepTogether','Macro','CallerMacro','ParagraphAndImage',
         'FailOnWrap','HRFlowable','PTOContainer','KeepInFrame','UseUpSpace')
-
 
 class TraceInfo:
     "Holder for info about where an object originated"
@@ -79,8 +78,7 @@ class Flowable:
         #many flowables handle text and must be processed in the
         #absence of a canvas.  tagging them with their encoding
         #helps us to get conversions right.  Use Python codec names.
-        self.encoding = None        
-
+        self.encoding = None
 
     def _drawOn(self,canv):
         '''ensure canv is set on and then draw'''
@@ -91,12 +89,13 @@ class Flowable:
     def drawOn(self, canvas, x, y, _sW=0):
         "Tell it to draw itself on the canvas.  Do not override"
         if _sW and hasattr(self,'hAlign'):
+            from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
             a = self.hAlign
-            if a in ['CENTER','CENTRE']:
+            if a in ('CENTER','CENTRE', TA_CENTER):
                 x = x + 0.5*_sW
-            elif a == 'RIGHT':
+            elif a in ('RIGHT',TA_RIGHT):
                 x = x + _sW
-            elif a != 'LEFT':
+            elif a not in ('LEFT',TA_LEFT):
                 raise ValueError, "Bad hAlign value "+str(a)
         canvas.saveState()
         canvas.translate(x, y)
@@ -273,7 +272,6 @@ class Preformatted(Flowable):
             style.firstLineIndent = 0
         return [Preformatted(text1, self.style), Preformatted(text2, style)]
 
-
     def draw(self):
         #call another method for historical reasons.  Besides, I
         #suspect I will be playing with alternate drawing routines
@@ -308,8 +306,6 @@ class Image(Flowable):
         """If size to draw at not specified, get it from the image."""
         self.hAlign = 'CENTER'
         self._mask = mask
-        # if it is a JPEG, will be inlined within the file -
-        # but we still need to know its size now
         fp = hasattr(filename,'read')
         if fp:
             self._file = filename
@@ -317,10 +313,19 @@ class Image(Flowable):
         else:
             self._file = self.filename = filename
         if not fp and os.path.splitext(filename)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
+            # if it is a JPEG, will be inlined within the file -
+            # but we still need to know its size now
             from reportlab.lib.utils import open_for_read
             f = open_for_read(filename, 'b')
-            info = pdfutils.readJPEGInfo(f)
-            f.close()
+            try:
+                try:
+                    info = pdfutils.readJPEGInfo(f)
+                except:
+                    #couldn't read as a JPEG, try like normal
+                    self._setup(width,height,kind,lazy)
+                    return
+            finally:
+                f.close()
             self.imageWidth = info[0]
             self.imageHeight = info[1]
             self._img = None
@@ -455,7 +460,7 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
         H += h
         if not atTop:
             h = f.getSpaceBefore()
-            if mergeSpace: h = max(h-pS,0) 
+            if mergeSpace: h = max(h-pS,0)
             H += h
         else:
             if obj is not None: obj._spaceBefore = f.getSpaceBefore()
@@ -690,6 +695,12 @@ class _PTOInfo:
         self.trailer = _flowableSublist(trailer)
         self.header = _flowableSublist(header)
 
+def cdeepcopy(obj):
+    if hasattr(obj,'deepcopy'):
+        return obj.deepcopy()
+    else:
+        return deepcopy(obj)
+
 class _Container(_ContainerSpace):  #Abstract some common container like behaviour
     def drawOn(self, canv, x, y, _sW=0, scale=1.0, content=None, aW=None):
         '''we simulate being added to a frame'''
@@ -701,7 +712,7 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
         y += self.height*scale
         for c in content:
             w, h = c.wrapOn(canv,aW,0xfffffff)
-            if w<_FUZZ or h<_FUZZ: continue
+            if (w<_FUZZ or h<_FUZZ) and not getattr(c,'_ZEROSIZE',None): continue
             if c is not content[0]: h += max(c.getSpaceBefore()-pS,0)
             y -= h
             c.drawOn(canv,x,y,_sW=aW-w)
@@ -709,13 +720,19 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
                 pS = c.getSpaceAfter()
                 y -= pS
 
+    def copyContent(self,content=None):
+        C = [].append
+        for c in (content or self._content):
+            C(cdeepcopy(c))
+        self._content = C.__self__
+
 class PTOContainer(_Container,Flowable):
     '''PTOContainer(contentList,trailerList,headerList)
-    
+
     A container for flowables decorated with trailer & header lists.
     If the split operation would be called then the trailer and header
     lists are injected before and after the split. This allows specialist
-    "please turn over" and "continued from previous" like behaviours.''' 
+    "please turn over" and "continued from previous" like behaviours.'''
     def __init__(self,content,trailer=None,header=None):
         I = _PTOInfo(trailer,header)
         self._content = C = []
@@ -770,6 +787,18 @@ class PTOContainer(_Container,Flowable):
             SS = c.splitOn(canv,availWidth,aH)
         else:
             SS = []
+
+        if not SS:
+            j = i
+            while i>1 and C[i-1].getKeepWithNext():
+                i -= 1
+                C[i].keepWithNext = 0
+
+            if i==1 and C[0].getKeepWithNext():
+                #robin's black sheep
+                i = j
+                C[0].keepWithNext = 0
+
         F = [UseUpSpace()]
 
         if len(SS)>1:
@@ -780,7 +809,7 @@ class PTOContainer(_Container,Flowable):
         else:
             R1 = C[:i]+T+F
             R2 = Hdr + C[i:]
-        T =  R1 + [PTOContainer(R2,deepcopy(I.trailer),deepcopy(I.header))]
+        T =  R1 + [PTOContainer(R2,[copy(x) for x in I.trailer],[copy(x) for x in I.header])]
         return T
 
 #utility functions used by KeepInFrame
@@ -811,7 +840,7 @@ def _qsolve(h,(a,b)):
     if r<0: return None
     r = sqrt(r)
     if t>=0:
-        s1 = -t - r 
+        s1 = -t - r
     else:
         s1 = -t + r
     s2 = f/s1
@@ -931,6 +960,12 @@ class ImageAndFlowables(_Container,Flowable):
         self._itpad = imageTopPadding
         self._side = imageSide
 
+    def deepcopy(self):
+        c = copy(self)  #shallow
+        self._reset()
+        c.copyContent() #partially deep?
+        return c
+
     def getSpaceAfter(self):
         if hasattr(self,'_C1'):
             C = self._C1
@@ -1006,7 +1041,7 @@ class ImageAndFlowables(_Container,Flowable):
             Ix = x + self._ilpad
             Fx = Ix+ self._irpad + self._wI
         else:
-            Ix = x + self.width-self._wI-self._irpad - self._ilpad
+            Ix = x + self.width-self._wI-self._irpad
             Fx = x
         self._I.drawOn(canv,Ix,y+self.height-self._itpad-self._hI)
         if self._C0:
@@ -1032,7 +1067,7 @@ class ImageAndFlowables(_Container,Flowable):
             else:
                 if obj is not None: obj._spaceBefore = f.getSpaceBefore()
                 atTop = 0
-            if H>=availHeight:
+            if H>=availHeight or w>availWidth:
                 return W, availHeight, F[:i],F[i:]
             H += h
             if H>availHeight:
@@ -1044,7 +1079,7 @@ class ImageAndFlowables(_Container,Flowable):
                     if nH<aH: nH += leading
                     availHeight += nH-aH
                     aH = nH
-                S = deepcopy(f).split(availWidth,aH)
+                S = cdeepcopy(f).splitOn(canv,availWidth,aH)
                 if not S:
                     return W, availHeight, F[:i],F[i:]
                 else:
@@ -1053,3 +1088,19 @@ class ImageAndFlowables(_Container,Flowable):
             H += pS
         if obj is not None: obj._spaceAfter = pS
         return W, H-pS, F, []
+
+class AnchorFlowable(Spacer):
+    '''create a bookmark in the pdf'''
+    _ZEROSIZE=1
+    def __init__(self,name):
+        Spacer.__init__(self,0,0)
+        self._name = name
+
+    def __repr__(self):
+        return "%s(%s)" % (self.__class__.__name__,self._name)
+
+    def wrap(self,aW,aH):
+        return 0,0
+
+    def draw(self):
+        self.canv.bookmarkHorizontal(self._name,0,0)

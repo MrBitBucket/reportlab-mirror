@@ -14,7 +14,7 @@ from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.pdfgen import canvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
-from reportlab.lib.utils import haveImages
+from reportlab.lib.utils import haveImages, fileName2Utf8
 
 #################################################################
 #
@@ -779,7 +779,7 @@ cost to performance.""")
                       color=colors.magenta)
     c.drawString(inch+3, 2*inch+6, 'Hyperlink with custom border style')
 
-    xpdf = outputfile('test_hello.pdf').replace('\\','/')
+    xpdf = fileName2Utf8(outputfile('test_hello.pdf').replace('\\','/'))
     link = 'Hard link to %s, with red border' % xpdf
     r1 = (inch, 1.5*inch, inch+2*3+c.stringWidth(link,c._fontname, c._fontsize), 1.75*inch) # this is x1,y1,x2,y2
     c.linkURL(xpdf, r1, thickness=1, color=colors.red, kind='GoToR')
@@ -831,6 +831,29 @@ class PdfgenTestCase(unittest.TestCase):
     def test0(self):
         "Make a PDFgen document with most graphics features"
         run(outputfile('test_pdfgen_general.pdf'))
+
+    def test1(self):
+        c=canvas.Canvas(outputfile('test_pdfgen_obscure.pdf'))
+        c.setViewerPreference('PrintScaling','None')
+        c.setViewerPreference('HideToolbar','true')
+        c.setViewerPreference('HideMenubar','true')
+        c.addPageLabel(0, prefix="Front")
+        c.addPageLabel(1, style='ROMAN_LOWER', start=2)
+        c.addPageLabel(8, style='ARABIC')
+        # (These are fixes for missing pages)
+        c.addPageLabel(11, style='ARABIC',start=6)
+        c.addPageLabel(17, style='ARABIC', start=14)
+        c.addPageLabel(21, style='ARABIC', start=22)
+        c.addPageLabel(99, style='LETTERS_UPPER')
+        c.addPageLabel(102, prefix="Back",start=1)
+
+        # Make some (mostly) empty pages
+        for i in xrange(113):
+            c.drawString(100, 100, 'Tis is page '+str(i))
+            c.showPage()
+
+        # Output the PDF
+        c.save()    
 
 def makeSuite():
     return makeSuiteForClasses(PdfgenTestCase)

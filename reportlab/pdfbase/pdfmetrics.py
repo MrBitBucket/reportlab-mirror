@@ -571,15 +571,10 @@ class EmbeddedType1Face(TypeFace):
 def registerTypeFace(face):
     assert isinstance(face, TypeFace), 'Not a TypeFace: %s' % face
     _typefaces[face.name] = face
-    # HACK - bold/italic do not apply for type 1, so egister
-    # all combinations of mappings.
-    from reportlab.lib import fonts
-    ttname = string.lower(face.name)
     if not face.name in standardFonts:
-        fonts.addMapping(ttname, 0, 0, face.name)
-        fonts.addMapping(ttname, 1, 0, face.name)
-        fonts.addMapping(ttname, 0, 1, face.name)
-        fonts.addMapping(ttname, 1, 1, face.name)
+        # HACK - bold/italic do not apply for type 1, so egister
+        # all combinations of mappings.
+        registerFontFamily(face.name)
 
 def registerEncoding(enc):
     assert isinstance(enc, Encoding), 'Not an Encoding: %s' % enc
@@ -594,6 +589,18 @@ def registerEncoding(enc):
         enc.freeze()
     # have not yet dealt with immutability!
 
+def registerFontFamily(family,normal=None,bold=None,italic=None,boldItalic=None):
+    from reportlab.lib import fonts
+    if not normal: normal = family
+    family = family.lower()
+    if not boldItalic: boldItalic = italic or bold or normal
+    if not bold: bold = normal
+    if not italic: italic = normal
+    fonts.addMapping(family, 0, 0, normal)
+    fonts.addMapping(family, 1, 0, bold)
+    fonts.addMapping(family, 0, 1, italic)
+    fonts.addMapping(family, 1, 1, boldItalic)
+
 def registerFont(font):
     "Registers a font, including setting up info for accelerated stringWidth"
     #assert isinstance(font, Font), 'Not a Font: %s' % font
@@ -603,13 +610,7 @@ def registerFont(font):
         # CID fonts don't need to have typeface registered.
         #need to set mappings so it can go in a paragraph even if within
         # bold tags
-        from reportlab.lib import fonts
-        ttname = string.lower(font.fontName)
-        fonts.addMapping(ttname, 0, 0, font.fontName)
-        fonts.addMapping(ttname, 1, 0, font.fontName)
-        fonts.addMapping(ttname, 0, 1, font.fontName)
-        fonts.addMapping(ttname, 1, 1, font.fontName)
-
+        registerFontFamily(font.fontName)
 
 def getTypeFace(faceName):
     """Lazily construct known typefaces if not found"""
