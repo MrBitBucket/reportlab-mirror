@@ -695,6 +695,12 @@ class _PTOInfo:
         self.trailer = _flowableSublist(trailer)
         self.header = _flowableSublist(header)
 
+def cdeepcopy(obj):
+    if hasattr(obj,'deepcopy'):
+        return obj.deepcopy()
+    else:
+        return deepcopy(obj)
+
 class _Container(_ContainerSpace):  #Abstract some common container like behaviour
     def drawOn(self, canv, x, y, _sW=0, scale=1.0, content=None, aW=None):
         '''we simulate being added to a frame'''
@@ -713,6 +719,12 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
             if c is not content[-1]:
                 pS = c.getSpaceAfter()
                 y -= pS
+
+    def copyContent(self,content=None):
+        C = [].append
+        for c in (content or self._content):
+            C(cdeepcopy(c))
+        self._content = C.__self__
 
 class PTOContainer(_Container,Flowable):
     '''PTOContainer(contentList,trailerList,headerList)
@@ -948,6 +960,12 @@ class ImageAndFlowables(_Container,Flowable):
         self._itpad = imageTopPadding
         self._side = imageSide
 
+    def deepcopy(self):
+        c = copy(self)  #shallow
+        self._reset()
+        c.copyContent() #partially deep?
+        return c
+
     def getSpaceAfter(self):
         if hasattr(self,'_C1'):
             C = self._C1
@@ -1049,7 +1067,7 @@ class ImageAndFlowables(_Container,Flowable):
             else:
                 if obj is not None: obj._spaceBefore = f.getSpaceBefore()
                 atTop = 0
-            if H>=availHeight:
+            if H>=availHeight or w>availWidth:
                 return W, availHeight, F[:i],F[i:]
             H += h
             if H>availHeight:
@@ -1061,7 +1079,7 @@ class ImageAndFlowables(_Container,Flowable):
                     if nH<aH: nH += leading
                     availHeight += nH-aH
                     aH = nH
-                S = deepcopy(f).split(availWidth,aH)
+                S = cdeepcopy(f).splitOn(canv,availWidth,aH)
                 if not S:
                     return W, availHeight, F[:i],F[i:]
                 else:
