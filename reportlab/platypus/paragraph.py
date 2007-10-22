@@ -153,7 +153,10 @@ def _putFragLine(tx,line):
                 #draw image cbDefn,cur_y,cur_x
                 w = cbDefn.width
                 h = cbDefn.height
-                iy0,iy1 = imgVRange(h,cbDefn.valign,tx._fontsize)
+                txfs = tx._fontsize
+                if txfs is None:
+                    txfs = xs.style.fontSize
+                iy0,iy1 = imgVRange(h,cbDefn.valign,txfs)
                 cur_x_s = cur_x + nSpaces*ws
                 tx._canvas.drawImage(cbDefn.image,cur_x_s,cur_y+iy0,w,h)
                 cur_x += w
