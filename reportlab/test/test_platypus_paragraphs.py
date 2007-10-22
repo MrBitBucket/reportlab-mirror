@@ -329,6 +329,7 @@ phonemic and <u>morphological <img src="../docs/images/testimg.gif" valign="top"
                             autoLeading,
                             t,' '.join((n+1)*['A']),t,texts[0],t,' '.join((n+1)*['A']),t,texts[1]),
                             style=s))
+        a(Paragraph('''<img src="../docs/images/testimg.gif" valign="top"/> image is very first thing in the line.''', style=normal))
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs_autoleading.pdf'))
         doc.build(story)
 
