@@ -330,6 +330,11 @@ phonemic and <u>morphological <img src="../docs/images/testimg.gif" valign="top"
                             t,' '.join((n+1)*['A']),t,texts[0],t,' '.join((n+1)*['A']),t,texts[1]),
                             style=s))
         a(Paragraph('''<img src="../docs/images/testimg.gif" valign="top"/> image is very first thing in the line.''', style=normal))
+        a(Paragraph('some text.... some more.... some text.... some more....', normal))
+        a(Paragraph('<img src="../docs/images/testimg.gif" width="0.57in" height="0.19in" /> some text <br /> ', normal))
+        a(Paragraph('some text.... some more.... some text.... some more....', normal))
+        a(Paragraph('<img src="../docs/images/testimg.gif" width="0.57in" height="0.19in" /> <br /> ', normal))
+        a(Paragraph('some text.... some more.... some text.... some more....', normal))
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs_autoleading.pdf'))
         doc.build(story)
 

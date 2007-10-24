@@ -843,7 +843,8 @@ class Paragraph(Flowable):
 
                 if n==0:
                     currentWidth = -spaceWidth   # hack to get around extra space for word 1
-                    minDescent = maxSize = 0
+                    maxSize = w[-1][0].fontSize
+                    minDescent = maxSize*0.2
 
                 wordWidth = w[0]
                 f = w[1][0]
