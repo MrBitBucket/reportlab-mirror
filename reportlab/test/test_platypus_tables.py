@@ -22,7 +22,6 @@ def getTable():
             )
     return t
 
-
 def makeStyles():
     styles = []
     for i in range(5):
@@ -38,7 +37,6 @@ def makeStyles():
         style.add('LINEABOVE', (0, -1), (-1,-1), 2, colors.black)
     styles[-1].add('LINEBELOW',(1,-1), (-1, -1), 2, (0.5, 0.5, 0.5))
     return styles
-
 
 def run():
     doc = SimpleDocTemplate(outputfile('test_platypus_tables.pdf'), pagesize=(8.5*inch, 11*inch), showBoundary=1)
@@ -708,8 +706,44 @@ LIST_STYLE = TableStyle(
 
     lst.append(t)
 
-    SimpleDocTemplate(outputfile('tables.pdf'), showBoundary=1).build(lst)
+    #Volker Haas' example
+    sty=[
+        ('TOPPADDING',(0,0),(-1,-1),0),
+        ('BOTTOMPADDING',(0,0),(-1,-1),0),
+        ('RIGHTPADDING',(0,0),(-1,-1),0),
+        ('LEFTPADDING',(0,0),(-1,-1),0),
+        ('GRID',(0,0),(-1,-1),0.5,colors.grey),
+        ('BACKGROUND', (0, 0), (0, 1), colors.pink),
+        ('SPAN',(0,0),(0,1)),
+        ('BACKGROUND', (2, 2), (2, 3), colors.orange),
+        ('SPAN',(2,2),(2,3)),
+        ('SPAN',(3,1),(4,1)),
+        ]
 
+    p_style= ParagraphStyle('Normal')
+    data=  [['00', '01', '02', '03', '04'],
+            ['', '11', '12', Paragraph('This is a string',p_style), ''],
+            ['20', '21', Paragraph('22<br/>blub<br/>asfd<br/>afd<br/>asdfs', p_style), '23', '24'],
+            ['30', '31', '', '33', '34']]
+    lst.append(Table(data,style=sty))
+    lst.append(Spacer(10,10))
+    data1=  [['00', '01', '02', '03', '04'],
+            ['', '11', '12', XPreformatted('This is a string',p_style), ''],
+            ['20', '21', Paragraph('22<br/>blub<br/>asfd<br/>afd<br/>asdfs',p_style), '23', '24'],
+            ['30', '31', '', '33', '34']]
+    lst.append(Table(data1,style=sty))
+    lst.append(Spacer(10,10))
+    data2=  [['00', '01', '02', '03', '04'],
+            ['', '11', '12', 'This is a string', ''],
+            ['20', '21','22\nblub\nasfd\nafd\nasdfs', '23', '24'],
+            ['30', '31', '', '33', '34']]
+    lst.append(Table(data2,style=sty))
+    data3=  [['00', '01', '02', '03', '04'],
+            ['', '11', '12', 'This is a string', ''],
+            ['20', '21', Paragraph('22<br/>blub<br/>asfd<br/>afd<br/>asdfs',p_style), '23', '24'],
+            ['30', '31', '', '33', '34']]
+    lst.append(Table(data3,style=sty))
+    SimpleDocTemplate(outputfile('tables.pdf'), showBoundary=1).build(lst)
 
 class TablesTestCase(unittest.TestCase):
     "Make documents with tables"

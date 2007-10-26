@@ -203,6 +203,12 @@ def _endswith(obj,s):
     except:
         return 0
 
+def _spanConsCmp(a,b):
+    r = cmp(b[1]-b[0],a[1]-a[0])
+    if not r:
+        r = cmp(a,b)
+    return r
+
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
                 repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None, ident=None,
@@ -371,8 +377,19 @@ class Table(Flowable):
         if None in W:  #some column widths are not given
             canv = getattr(self,'canv',None)
             saved = None
-            colSpanCells = self._spanCmds and self._colSpanCells or ()
-            if W is self._argW: W = W[:]
+            if self._spanCmds:
+                colSpanCells = self._colSpanCells
+                spanRanges = self._spanRanges
+            else:
+                colSpanCells = ()
+                spanRanges = {}
+            spanCons = {}
+            FUZZ = rl_config._FUZZ
+            if W is self._argW:
+                W0 = W
+                W = W[:]
+            else:
+                W0 = W[:]
             while None in W:
                 j = W.index(None) #find first unspecified column
                 f = lambda x,j=j: operator.getitem(x,j)
@@ -382,19 +399,40 @@ class Table(Flowable):
                 i = 0
 
                 for v, s in map(None, V, S):
-                    #if the current cell is part of a spanned region,
-                    #assume a zero size.
-                    if (j, i) in colSpanCells:
-                        t = 0.0
+                    ji = j,i
+                    span = spanRanges.get(ji,None)
+                    if ji in colSpanCells and not span: #if the current cell is part of a spanned region,
+                        t = 0.0                         #assume a zero size.
                     else:#work out size
                         t = self._elementWidth(v,s)
                         if t is None:
                             raise ValueError, "Flowable %s in cell(%d,%d) can't have auto width\n%s" % (v.identity(30),i,j,self.identity(30))
-                        t = t + s.leftPadding+s.rightPadding
+                        t += s.leftPadding+s.rightPadding
+                        if span:
+                            c0 = span[0]
+                            c1 = span[2]
+                            if c0!=c1:
+                                x = c0,c1
+                                spanCons[x] = max(spanCons.get(x,t),t)
+                                t = 0
                     if t>w: w = t   #record a new maximum
-                    i = i + 1
+                    i += 1
 
                 W[j] = w
+
+            if spanCons:
+                spanConsX = spanCons.keys()     #try to ensure span constraints are satisfied
+                spanConsX.sort(_spanConsCmp)    #assign required space to variable rows
+                for c0,c1 in spanConsX:         #equally to existing calculated values
+                    w = spanCons[c0,c1]
+                    t = sum(W[c0:c1+1])
+                    if t>=w-FUZZ: continue      #already good enough
+                    X = [x for x in xrange(c0,c1+1) if W0[x] is None]   #variable candidates
+                    if not X: continue          #something wrong here mate
+                    w -= t
+                    w /= float(len(X))
+                    for x in X:
+                        W[x] += w
 
         self._colWidths = W
         width = 0
@@ -407,8 +445,7 @@ class Table(Flowable):
         self._width_calculated_once = 1
 
     def _elementWidth(self,v,s):
-        t = type(v)
-        if t in _SeqTypes:
+        if isinstance(v,(list,tuple)):
             w = 0
             for e in v:
                 ew = self._elementWidth(e,s)
@@ -451,9 +488,13 @@ class Table(Flowable):
                 colpositions = self._colpositions
             else:
                 rowSpanCells = colSpanCells = ()
+                spanRanges = {}
             if canv: saved = canv._fontname, canv._fontsize, canv._leading
+            H0 = H
             H = H[:]    #make a copy as we'll change it
             self._rowHeights = H
+            spanCons = {}
+            FUZZ = rl_config._FUZZ
             while None in H:
                 i = H.index(None)
                 if longTable:
@@ -467,7 +508,8 @@ class Table(Flowable):
                 j = 0
                 for j,(v, s, w) in enumerate(map(None, V, S, W)): # value, style, width (lengths must match)
                     ji = j,i
-                    if ji in rowSpanCells:
+                    span = spanRanges.get(ji,None)
+                    if ji in rowSpanCells and not span:
                         continue # don't count it, it's either occluded or unreliable
                     else:
                         if isinstance(v,(tuple,list,Flowable)):
@@ -476,9 +518,8 @@ class Table(Flowable):
                                 raise ValueError, "Flowable %s in cell(%d,%d) can't have auto width in\n%s" % (v[0].identity(30),i,j,self.identity(30))
                             if canv: canv._fontname, canv._fontsize, canv._leading = s.fontname, s.fontsize, s.leading or 1.2*s.fontsize
                             if ji in colSpanCells:
-                                t = spanRanges[ji]
-                                if not t: continue
-                                w = max(colpositions[t[2]+1]-colpositions[t[0]],w)
+                                if not span: continue
+                                w = max(colpositions[span[2]+1]-colpositions[span[0]],w)
                             dW,t = self._listCellGeom(v,w or self._listValueWidth(v),s)
                             if canv: canv._fontname, canv._fontsize, canv._leading = saved
                             dW = dW + s.leftPadding + s.rightPadding
@@ -488,9 +529,30 @@ class Table(Flowable):
                             v = (v is not None and str(v) or '').split("\n")
                             t = (s.leading or 1.2*s.fontSize)*len(v)
                         t += s.bottomPadding+s.topPadding
+                        if span:
+                            r0 = span[1]
+                            r1 = span[3]
+                            if r0!=r1:
+                                x = r0,r1
+                                spanCons[x] = max(spanCons.get(x,t),t)
+                                t = 0
                     if t>h: h = t   #record a new maximum
                 H[i] = h
             if None not in H: hmax = lim
+
+            if spanCons:
+                spanConsX = spanCons.keys()     #try to ensure span constraints are satisfied
+                spanConsX.sort(_spanConsCmp)    #assign required space to variable rows
+                for r0,r1 in spanConsX:         #equally to existing calculated values
+                    h = spanCons[r0,r1]
+                    t = sum(H[r0:r1+1])
+                    if t>=h-FUZZ: continue      #already good enough
+                    X = [x for x in xrange(r0,r1+1) if H0[x] is None]   #variable candidates
+                    if not X: continue          #something wrong here mate
+                    h -= t
+                    h /= float(len(X))
+                    for x in X:
+                        H[x] += h
 
         height = self._height = reduce(operator.add, H[:hmax], 0)
         self._rowpositions = [height]    # index 0 is actually topline; we skip when processing cells
