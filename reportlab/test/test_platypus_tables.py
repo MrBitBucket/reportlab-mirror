@@ -706,43 +706,63 @@ LIST_STYLE = TableStyle(
 
     lst.append(t)
 
-    #Volker Haas' example
-    sty=[
-        ('TOPPADDING',(0,0),(-1,-1),0),
-        ('BOTTOMPADDING',(0,0),(-1,-1),0),
-        ('RIGHTPADDING',(0,0),(-1,-1),0),
-        ('LEFTPADDING',(0,0),(-1,-1),0),
-        ('GRID',(0,0),(-1,-1),0.5,colors.grey),
-        ('BACKGROUND', (0, 0), (0, 1), colors.pink),
-        ('SPAN',(0,0),(0,1)),
-        ('BACKGROUND', (2, 2), (2, 3), colors.orange),
-        ('SPAN',(2,2),(2,3)),
-        ('SPAN',(3,1),(4,1)),
-        ]
-
+    #Volker Haas' example extended
+    #the optimal row heights are the solution of an LP similar to
+    #
+    #Objective function
+    #   min: 3*h0+3*h1+3*h2+2*h3;
+    #
+    #constraints
+    #   h0>=12;
+    #   h1>=12;
+    #   h2>=12;
+    #   h3>=12;
+    #   h0+h1+h2>=48;
+    #   h0+h1>=12;
+    #   h2+h3>=60;
+    #
+    #the solution H=[12,12,24,36]
+    def makeTable(x,y):
+        return Table([
+                ['00', '01', '02', '03', '04', '05\nline2\nline3\nline4'],
+                ['', '11', '12', x, '',''],
+                ['20', '21', y, '23', '24',''],
+                ['30', '31', '', '33', '34','35'],
+                ],
+                style=[
+                    ('TOPPADDING',(0,0),(-1,-1),0),
+                    ('BOTTOMPADDING',(0,0),(-1,-1),0),
+                    ('RIGHTPADDING',(0,0),(-1,-1),0),
+                    ('LEFTPADDING',(0,0),(-1,-1),0),
+                    ('GRID',(0,0),(-1,-1),0.5,colors.grey),
+                    ('BACKGROUND', (0, 0), (0, 1), colors.pink),
+                    ('SPAN',(0,0),(0,1)),
+                    ('BACKGROUND', (2, 2), (2, 3), colors.orange),
+                    ('SPAN',(2,2),(2,3)),
+                    ('SPAN',(3,1),(4,1)),
+                    ('SPAN',(5,0),(5,2)),
+                ])
     p_style= ParagraphStyle('Normal')
-    data=  [['00', '01', '02', '03', '04'],
-            ['', '11', '12', Paragraph('This is a string',p_style), ''],
-            ['20', '21', Paragraph('22<br/>blub<br/>asfd<br/>afd<br/>asdfs', p_style), '23', '24'],
-            ['30', '31', '', '33', '34']]
-    lst.append(Table(data,style=sty))
+    lst.append(makeTable(
+            Paragraph('This is a string',p_style),
+            Paragraph('22<br/>blub<br/>asfd<br/>afd<br/>asdfs', p_style)
+            ))
+
     lst.append(Spacer(10,10))
-    data1=  [['00', '01', '02', '03', '04'],
-            ['', '11', '12', XPreformatted('This is a string',p_style), ''],
-            ['20', '21', Paragraph('22<br/>blub<br/>asfd<br/>afd<br/>asdfs',p_style), '23', '24'],
-            ['30', '31', '', '33', '34']]
-    lst.append(Table(data1,style=sty))
+    lst.append(makeTable(
+            XPreformatted('This is a string',p_style),
+            Paragraph('22<br/>blub<br/>asfd<br/>afd<br/>asdfs', p_style)
+            ))
     lst.append(Spacer(10,10))
-    data2=  [['00', '01', '02', '03', '04'],
-            ['', '11', '12', 'This is a string', ''],
-            ['20', '21','22\nblub\nasfd\nafd\nasdfs', '23', '24'],
-            ['30', '31', '', '33', '34']]
-    lst.append(Table(data2,style=sty))
-    data3=  [['00', '01', '02', '03', '04'],
-            ['', '11', '12', 'This is a string', ''],
-            ['20', '21', Paragraph('22<br/>blub<br/>asfd<br/>afd<br/>asdfs',p_style), '23', '24'],
-            ['30', '31', '', '33', '34']]
-    lst.append(Table(data3,style=sty))
+    lst.append(makeTable(
+            'This is a string',
+            '22\nblub\nasfd\nafd\nasdfs',
+            ))
+    lst.append(Spacer(10,10))
+    lst.append(makeTable(
+            'This is a string',
+            Paragraph('22<br/>blub<br/>asfd<br/>afd<br/>asdfs', p_style)
+            ))
     SimpleDocTemplate(outputfile('tables.pdf'), showBoundary=1).build(lst)
 
 class TablesTestCase(unittest.TestCase):

@@ -203,11 +203,24 @@ def _endswith(obj,s):
     except:
         return 0
 
-def _spanConsCmp(a,b):
-    r = cmp(b[1]-b[0],a[1]-a[0])
-    if not r:
-        r = cmp(a,b)
-    return r
+def spanFixDim(V0,V,spanCons,FUZZ=rl_config._FUZZ):
+    print 'V0=',V0
+    print 'V=',V
+    print 'spanCons=',spanCons
+    #assign required space to variable rows equally to existing calculated values
+    M = {}
+    for (x0,x1),v in spanCons.iteritems():
+        t = sum([V[x]+M.get(x,0) for x in xrange(x0,x1+1)])
+        if t>=v-FUZZ: continue      #already good enough
+        X = [x for x in xrange(x0,x1+1) if V0[x] is None]   #variable candidates
+        if not X: continue          #something wrong here mate
+        v -= t
+        v /= float(len(X))
+        for x in X:
+            M[x] = max(M.get(x,v),v)
+    for x,v in M.iteritems():
+        V[x] += v
+    print 'V-->',V
 
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
@@ -384,7 +397,6 @@ class Table(Flowable):
                 colSpanCells = ()
                 spanRanges = {}
             spanCons = {}
-            FUZZ = rl_config._FUZZ
             if W is self._argW:
                 W0 = W
                 W = W[:]
@@ -421,18 +433,7 @@ class Table(Flowable):
                 W[j] = w
 
             if spanCons:
-                spanConsX = spanCons.keys()     #try to ensure span constraints are satisfied
-                spanConsX.sort(_spanConsCmp)    #assign required space to variable rows
-                for c0,c1 in spanConsX:         #equally to existing calculated values
-                    w = spanCons[c0,c1]
-                    t = sum(W[c0:c1+1])
-                    if t>=w-FUZZ: continue      #already good enough
-                    X = [x for x in xrange(c0,c1+1) if W0[x] is None]   #variable candidates
-                    if not X: continue          #something wrong here mate
-                    w -= t
-                    w /= float(len(X))
-                    for x in X:
-                        W[x] += w
+                spanFixDim(W0,W,spanCons)
 
         self._colWidths = W
         width = 0
@@ -541,18 +542,7 @@ class Table(Flowable):
             if None not in H: hmax = lim
 
             if spanCons:
-                spanConsX = spanCons.keys()     #try to ensure span constraints are satisfied
-                spanConsX.sort(_spanConsCmp)    #assign required space to variable rows
-                for r0,r1 in spanConsX:         #equally to existing calculated values
-                    h = spanCons[r0,r1]
-                    t = sum(H[r0:r1+1])
-                    if t>=h-FUZZ: continue      #already good enough
-                    X = [x for x in xrange(r0,r1+1) if H0[x] is None]   #variable candidates
-                    if not X: continue          #something wrong here mate
-                    h -= t
-                    h /= float(len(X))
-                    for x in X:
-                        H[x] += h
+                spanFixDim(H0,H,spanCons)
 
         height = self._height = reduce(operator.add, H[:hmax], 0)
         self._rowpositions = [height]    # index 0 is actually topline; we skip when processing cells
