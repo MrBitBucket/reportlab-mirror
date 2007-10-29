@@ -204,9 +204,6 @@ def _endswith(obj,s):
         return 0
 
 def spanFixDim(V0,V,spanCons,FUZZ=rl_config._FUZZ):
-    print 'V0=',V0
-    print 'V=',V
-    print 'spanCons=',spanCons
     #assign required space to variable rows equally to existing calculated values
     M = {}
     for (x0,x1),v in spanCons.iteritems():
@@ -220,7 +217,6 @@ def spanFixDim(V0,V,spanCons,FUZZ=rl_config._FUZZ):
             M[x] = max(M.get(x,v),v)
     for x,v in M.iteritems():
         V[x] += v
-    print 'V-->',V
 
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
