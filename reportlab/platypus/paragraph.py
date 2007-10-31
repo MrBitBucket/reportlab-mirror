@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/paragraph.py
 __version__=''' $Id$ '''
-from string import join, whitespace, find
+from string import join, whitespace
 from operator import truth
 from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth, getFont
@@ -122,6 +122,8 @@ def imgVRange(h,va,fontSize):
         iyo = va
     return iyo,iyo+h
 
+_56=5./6
+_16=1./6
 def _putFragLine(tx,line):
     xs = tx.XtraState
     cur_x = 0
@@ -129,19 +131,29 @@ def _putFragLine(tx,line):
     x0 = tx._x0
     autoLeading = xs.autoLeading
     leading = xs.leading
-    if autoLeading=='max':
-        leading = max(leading,line.ascent-line.descent)
-        xs.f = line
-    elif autoLeading=='min':
-        leading = line.ascent-line.descent
-        xs.f = line
-    oleading = tx._leading
-    if oleading!=leading:
+    dal = autoLeading in ('min','max')
+    if dal:
+        if autoLeading=='max':
+            ascent = max(_56*leading,line.ascent)
+            descent = max(_16*leading,-line.descent)
+        else:
+            ascent = line.ascent
+            descent = -line.descent
+        leading = ascent+descent
+    if tx._leading!=leading:
         tx.setLeading(leading)
-        if oleading!=None:
-            cur_y -= (leading-oleading)/1.6
-            tx.setTextOrigin(x0,cur_y)
-            xs.cur_y = cur_y
+    if dal:
+        olb = tx._olb
+        if olb is not None:
+            xcy = olb-ascent
+            if tx._oleading!=leading:
+                cur_y += leading - tx._oleading
+            if abs(xcy-cur_y)>1e-8:
+                cur_y = xcy
+                tx.setTextOrigin(x0,cur_y)
+                xs.cur_y = cur_y
+        tx._olb = cur_y - descent
+        tx._oleading = leading
     ws = getattr(tx,'_wordSpace',0)
     nSpaces = 0
     words = line.words
@@ -449,7 +461,7 @@ def splitLines0(frags,widths):
         cLen    = 0
         nSpaces = 0
         while cLen<maxW:
-            j = find(text,' ',start)
+            j = text.find(' ',start)
             if j<0: j==lim
             w = stringWidth(text[start:j],f.fontName,f.fontSize)
             cLen += w
@@ -597,7 +609,6 @@ class Paragraph(Flowable):
         self._setup(text, style, bulletText, frags, cleanBlockQuotedText)
 
     def __repr__(self):
-        import string
         n = self.__class__.__name__
         L = [n+"("]
         keys = self.__dict__.keys()
@@ -605,12 +616,12 @@ class Paragraph(Flowable):
             v = getattr(self, k)
             rk = repr(k)
             rv = repr(v)
-            rk = "  "+string.replace(rk, "\n", "\n  ")
-            rv = "    "+string.replace(rv, "\n", "\n    ")
+            rk = "  "+rk.replace("\n", "\n  ")
+            rv = "    "+rk.replace("\n", "\n    ")
             L.append(rk)
             L.append(rv)
         L.append(") #"+n)
-        return string.join(L, "\n")
+        return '\n'.join(L)
 
     def _setup(self, text, style, bulletText, frags, cleaner):
         if frags is None:
@@ -1184,6 +1195,7 @@ class Paragraph(Flowable):
                 xs.link=None
                 xs.leading = style.leading
                 tx._leading = None
+                tx._olb = None
                 xs.cur_y = cur_y
                 xs.f = f
                 xs.style = style

@@ -335,6 +335,30 @@ phonemic and <u>morphological <img src="../docs/images/testimg.gif" valign="top"
         a(Paragraph('some text.... some more.... some text.... some more....', normal))
         a(Paragraph('<img src="../docs/images/testimg.gif" width="0.57in" height="0.19in" /> <br /> ', normal))
         a(Paragraph('some text.... some more.... some text.... some more....', normal))
+
+        #Volker Haas' valign tests
+        fmt = '''%(valign)s: Furthermore, a <u>subset</u> of <font size="14">English sentences</font> interesting on quite
+independent grounds is not quite equivalent to a stipulation to place <img src="../docs/images/redsquare.png" width="0.5in" height="0.5in" valign="%(valign)s"/>
+the constructions into these <u>various</u> categories. We will bring <font size="18">Ugly Things</font> in favor of
+The following thesis:  most of the methodological work in Modern
+Linguistics can be defined in such a way as to impose problems of
+phonemic and <u>morphological</u> analysis.'''
+
+        p_style= ParagraphStyle('Normal')
+        p_style.autoLeading = 'max'
+        for valign in (
+                'baseline',
+                'sub',
+                'super',
+                'top',
+                'text-top',
+                'middle',
+                'bottom',
+                'text-bottom',
+                '0%',
+                '2in',
+                ):
+            a(Paragraph(fmt % {'valign':valign},p_style))
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs_autoleading.pdf'))
         doc.build(story)
 
