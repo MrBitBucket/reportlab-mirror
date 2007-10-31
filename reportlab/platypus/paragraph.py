@@ -5,7 +5,7 @@ __version__=''' $Id$ '''
 from string import join, whitespace
 from operator import truth
 from types import StringType, ListType
-from reportlab.pdfbase.pdfmetrics import stringWidth, getFont
+from reportlab.pdfbase.pdfmetrics import stringWidth, getFont, getAscentDescent
 from reportlab.platypus.paraparser import ParaParser
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib.colors import Color
@@ -809,7 +809,7 @@ class Paragraph(Flowable):
             words = hasattr(f,'text') and split(f.text, ' ') or f.words
             spaceWidth = stringWidth(' ', fontName, fontSize, self.encoding)
             cLine = []
-            currentWidth = - spaceWidth   # hack to get around extra space for word 1
+            currentWidth = -spaceWidth   # hack to get around extra space for word 1
             for word in words:
                 #this underscores my feeling that Unicode throughout would be easier!
                 wordWidth = stringWidth(word, fontName, fontSize, self.encoding)
@@ -850,12 +850,17 @@ class Paragraph(Flowable):
             n = 0
             words = []
             for w in _getFragWords(frags):
-                spaceWidth = stringWidth(' ',w[-1][0].fontName, w[-1][0].fontSize)
+                f=w[-1][0]
+                fontName = f.fontName
+                fontSize = f.fontSize
+                spaceWidth = stringWidth(' ',fontName, fontSize)
 
                 if n==0:
                     currentWidth = -spaceWidth   # hack to get around extra space for word 1
-                    maxSize = w[-1][0].fontSize
-                    minDescent = maxSize*0.2
+                    maxSize = fontSize
+                    maxAscent, minDescent = getAscentDescent(fontName)
+                    maxAscent *= fontSize/1000.
+                    minDescent *= fontSize/1000.
 
                 wordWidth = w[0]
                 f = w[1][0]
@@ -872,16 +877,21 @@ class Paragraph(Flowable):
                     if lineBreak: continue      #throw it away
                     nText = w[1][1]
                     if nText: n += 1
-                    ascent = f.fontSize
+                    fontSize = f.fontSize
                     if calcBounds:
                         cbDefn = getattr(f,'cbDefn',None)
                         if getattr(cbDefn,'width',0):
-                            descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,ascent)
+                            descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
                         else:
-                            descent = -ascent*0.2
+                            ascent, descent = getAscentDescent(f.fontName)
+                            ascent *= fontSize/1000.
+                            descent *= fontSize/1000.
                     else:
-                        descent = -ascent*0.2
-                    maxSize = max(maxSize,ascent)
+                        ascent, descent = getAscentDescent(f.fontName)
+                        ascent *= fontSize/1000.
+                        descent *= fontSize/1000.
+                    maxSize = max(maxSize,fontSize)
+                    maxAscent = max(maxAscent,ascent)
                     minDescent = min(minDescent,descent)
                     if words==[]:
                         g = f.clone()
@@ -915,16 +925,21 @@ class Paragraph(Flowable):
                         g = i[0].clone()
                         g.text=i[1]
                         words.append(g)
-                        ascent = g.fontSize
+                        fontSize = g.fontSize
                         if calcBounds:
                             cbDefn = getattr(g,'cbDefn',None)
                             if getattr(cbDefn,'width',0):
-                                descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,ascent)
+                                descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
                             else:
-                                descent = -ascent*0.2
+                                ascent, descent = getAscentDescent(g.fontName)
+                                ascent *= fontSize/1000.
+                                descent *= fontSize/1000.
                         else:
-                            descent = -ascent*0.2
-                        maxSize = max(maxSize,ascent)
+                            ascent, descent = getAscentDescent(g.fontName)
+                            ascent *= fontSize/1000.
+                            descent *= fontSize/1000.
+                        maxSize = max(maxSize,fontSize)
+                        maxAscent = max(maxAscent,ascent)
                         minDescent = min(minDescent,descent)
 
                     currentWidth = newWidth
@@ -937,7 +952,7 @@ class Paragraph(Flowable):
                     if currentWidth>self.width: self.width = currentWidth
                     #end of line
                     lines.append(FragLine(extraSpace=maxWidth-currentWidth, wordCount=n,
-                                        lineBreak=lineBreak, words=words, fontSize=maxSize, ascent=maxSize, descent=minDescent))
+                                        lineBreak=lineBreak, words=words, fontSize=maxSize, ascent=maxAscent, descent=minDescent))
 
                     #start new line
                     lineno += 1
@@ -954,16 +969,21 @@ class Paragraph(Flowable):
                     currentWidth = wordWidth
                     n = 1
                     g = f.clone()
-                    ascent = g.fontSize
+                    fontSize = g.fontSize
                     if calcBounds:
                         cbDefn = getattr(g,'cbDefn',None)
                         if getattr(cbDefn,'width',0):
-                            descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,ascent)
+                            descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
                         else:
-                            descent = -ascent*0.2
+                            ascent, descent = getAscentDescent(g.fontName)
+                            ascent *= fontSize/1000.
+                            descent *= fontSize/1000.
                     else:
-                        descent = -ascent*0.2
-                    maxSize = ascent
+                        ascent, descent = getAscentDescent(g.fontName)
+                        ascent *= fontSize/1000.
+                        descent *= fontSize/1000.
+                    maxSize = fontSize
+                    maxAscent = ascent
                     minDescent = descent
                     words = [g]
                     g.text = w[1][1]
@@ -972,23 +992,28 @@ class Paragraph(Flowable):
                         g = i[0].clone()
                         g.text=i[1]
                         words.append(g)
-                        ascent = g.fontSize
+                        fontSize = g.fontSize
                         if calcBounds:
                             cbDefn = getattr(g,'cbDefn',None)
                             if getattr(cbDefn,'width',0):
-                                descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,ascent)
+                                descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
                             else:
-                                descent = -ascent*0.2
+                                ascent, descent = getAscentDescent(g.fontName)
+                                ascent *= fontSize/1000.
+                                descent *= fontSize/1000.
                         else:
-                            descent = -ascent*0.2
-                        maxSize = max(maxSize,ascent)
+                            ascent, descent = getAscentDescent(g.fontName)
+                            ascent *= fontSize/1000.
+                            descent *= fontSize/1000.
+                        maxSize = max(maxSize,fontSize)
+                        maxAscent = max(maxAscent,ascent)
                         minDescent = min(minDescent,descent)
 
             #deal with any leftovers on the final line
             if words!=[]:
                 if currentWidth>self.width: self.width = currentWidth
                 lines.append(ParaLines(extraSpace=(maxWidth - currentWidth),wordCount=n,
-                                    words=words, fontSize=maxSize,ascent=maxSize,descent=minDescent))
+                                    words=words, fontSize=maxSize,ascent=maxAscent,descent=minDescent))
             return ParaLines(kind=1, lines=lines)
 
         return lines

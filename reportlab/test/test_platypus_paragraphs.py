@@ -337,12 +337,12 @@ phonemic and <u>morphological <img src="../docs/images/testimg.gif" valign="top"
         a(Paragraph('some text.... some more.... some text.... some more....', normal))
 
         #Volker Haas' valign tests
-        fmt = '''%(valign)s: Furthermore, a <u>subset</u> of <font size="14">English sentences</font> interesting on quite
+        fmt = '''<font color="red">%(valign)s</font>: Furthermore, a <u>subset</u> <strike>of</strike> <font size="14">English sentences</font> interesting on quite
 independent grounds is not quite equivalent to a stipulation to place <img src="../docs/images/redsquare.png" width="0.5in" height="0.5in" valign="%(valign)s"/>
 the constructions into these <u>various</u> categories. We will bring <font size="18">Ugly Things</font> in favor of
 The following thesis:  most of the methodological work in Modern
 Linguistics can be defined in such a way as to impose problems of
-phonemic and <u>morphological</u> analysis.'''
+phonemic and <u>morphological</u> <strike>analysis</strike>.'''
 
         p_style= ParagraphStyle('Normal')
         p_style.autoLeading = 'max'
