@@ -1189,7 +1189,7 @@ class Paragraph(Flowable):
                         dpl( tx, _offsets[i], lines[i][0], lines[i][1], noJustifyLast and i==lim)
             else:
                 f = lines[0]
-                cur_y = self.height - f.ascent
+                cur_y = self.height - getattr(f,'ascent',f.fontSize)    #TODO fix XPreformatted to remove this hack
                 # default?
                 dpl = _leftDrawParaLineX
                 if bulletText <> None:
