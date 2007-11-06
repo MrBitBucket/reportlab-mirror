@@ -2,15 +2,12 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/xpreformatted.py
 __version__=''' $Id$ '''
-
 import string
 from types import StringType, ListType
-
 from reportlab.lib import PyFontify
 from paragraph import Paragraph, cleanBlockQuotedText, _handleBulletWidth, \
-     ParaLines, _getFragWords, stringWidth, _sameFrag
+     ParaLines, _getFragWords, stringWidth, _sameFrag, getAscentDescent, imgVRange
 from flowables import _dedenter
-
 
 def _getFragLines(frags):
     lines = []
@@ -72,7 +69,6 @@ def _getFragWord(frags):
                     # of paragraphs
     return n, s, W
 
-
 class XPreformatted(Paragraph):
     def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1, dedent=0):
         self.caseSensitive = caseSensitive
@@ -121,6 +117,8 @@ class XPreformatted(Paragraph):
         _handleBulletWidth(self.bulletText,style,maxWidths)
 
         self.height = 0
+        autoLeading = getattr(self,'autoLeading',getattr(style,'autoLeading',''))
+        calcBounds = autoLeading not in ('','off')
         frags = self.frags
         nFrags= len(frags)
         if nFrags==1:
@@ -128,6 +126,7 @@ class XPreformatted(Paragraph):
             if hasattr(f,'text'):
                 fontSize = f.fontSize
                 fontName = f.fontName
+                ascent, descent = getAscentDescent(f.fontName)
                 kind = 0
                 L=string.split(f.text, '\n')
                 for l in L:
@@ -137,6 +136,7 @@ class XPreformatted(Paragraph):
                     lines.append((extraSpace,string.split(l,' '),currentWidth))
                     lineno = lineno+1
                     maxWidth = lineno<len(maxWidths) and maxWidths[lineno] or maxWidths[-1]
+                blPara = f.clone(kind=kind, lines=lines,ascent=ascent,descent=descent,fontSize=fontSize)
             else:
                 kind = f.kind
                 lines = f.lines
@@ -146,31 +146,50 @@ class XPreformatted(Paragraph):
                     else:
                         currentWidth = L.currentWidth
                     requiredWidth = max(currentWidth,requiredWidth)
+                blPara = f.clone(kind=kind, lines=lines)
 
             self.width = max(self.width,requiredWidth)
-            return f.clone(kind=kind, lines=lines)
+            return blPara
         elif nFrags<=0:
             return ParaLines(kind=0, fontSize=style.fontSize, fontName=style.fontName,
-                            textColor=style.textColor, lines=[])
+                            textColor=style.textColor, ascent=style.fontSize,descent=-0.2*style.fontSize,
+                            lines=[])
         else:
             for L in _getFragLines(frags):
-                maxSize = 0
                 currentWidth, n, w = _getFragWord(L)
                 f = w[0][0]
-                maxSize = max(maxSize,f.fontSize)
+                maxSize = f.fontSize
+                maxAscent, minDescent = getAscentDescent(f.fontName)
+                maxAscent *= maxSize/1000.
+                minDescent *= maxSize/1000.
                 words = [f.clone()]
                 words[-1].text = w[0][1]
                 for i in w[1:]:
                     f = i[0].clone()
                     f.text=i[1]
                     words.append(f)
-                    maxSize = max(maxSize,f.fontSize)
+                    fontSize = f.fontSize
+                    if calcBounds:
+                        cbDefn = getattr(f,'cbDefn',None)
+                        if getattr(cbDefn,'width',0):
+                            descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
+                        else:
+                            ascent, descent = getAscentDescent(f.fontName)
+                            ascent *= fontSize/1000.
+                            descent *= fontSize/1000.
+                    else:
+                        ascent, descent = getAscentDescent(f.fontName)
+                        ascent *= fontSize/1000.
+                        descent *= fontSize/1000.
+                    maxSize = max(maxSize,fontSize)
+                    maxAscent = max(maxAscent,ascent)
+                    minDescent = min(minDescent,descent)
 
-                lineno = lineno+1
+                lineno += 1
                 maxWidth = lineno<len(maxWidths) and maxWidths[lineno] or maxWidths[-1]
                 requiredWidth = max(currentWidth,requiredWidth)
                 extraSpace = maxWidth - currentWidth
-                lines.append(ParaLines(extraSpace=extraSpace,wordCount=n, words=words, fontSize=maxSize, currentWidth=currentWidth))
+                lines.append(ParaLines(extraSpace=extraSpace,wordCount=n, words=words, fontSize=maxSize, ascent=maxAscent,descent=minDescent,currentWidth=currentWidth))
 
             self.width = max(self.width,requiredWidth)
             return ParaLines(kind=1, lines=lines)
@@ -181,11 +200,9 @@ class XPreformatted(Paragraph):
     def _get_split_blParaFunc(self):
         return _split_blPara
 
-
 class PythonPreformatted(XPreformatted):
     """Used for syntax-colored Python code, otherwise like XPreformatted.
     """
-
     formats = {
         'rest'       : ('', ''),
         'comment'    : ('<font color="green">', '</font>'),
@@ -225,7 +242,6 @@ class PythonPreformatted(XPreformatted):
         fontifiedCode = fontifiedCode + code[pos:]
 
         return fontifiedCode
-
 
 if __name__=='__main__':    #NORUNTESTS
     def dumpXPreformattedLines(P):
