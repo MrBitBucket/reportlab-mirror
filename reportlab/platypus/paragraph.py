@@ -14,6 +14,7 @@ from reportlab.lib.utils import _className
 from reportlab.lib.textsplit import wordSplit
 from copy import deepcopy
 from reportlab.lib.abag import ABag
+from reportlab.rl_config import platypus_link_underline 
 import re
 
 #on UTF8 branch, split and strip must be unicode-safe!
@@ -554,10 +555,11 @@ def _do_post_text(t_off, tx):
 
     yl = y + leading
     for x1,x2,link,c in xs.links:
-        if c!=csc:
-            tx._canvas.setStrokeColor(c)
-            csc = c
-        tx._canvas.line(t_off+x1, y, t_off+x2, y)
+        if platypus_link_underline:
+            if c!=csc:
+                tx._canvas.setStrokeColor(c)
+                csc = c
+            tx._canvas.line(t_off+x1, y, t_off+x2, y)
         _doLink(tx, link, (t_off+x1, y, t_off+x2, yl))
     xs.links = []
     xs.link=None
@@ -1184,18 +1186,21 @@ class Paragraph(Flowable):
                     canvas.setStrokeColor(f.textColor)
                     dx = t_off+leftIndent
                     if dpl!=_justifyDrawParaLine: ws = 0
-                    if f.underline or f.link: _do_under_line(0, dx, ws, tx)
-                    if f.strike: _do_under_line(0, dx, ws, tx, lm=0.125)
-                    if f.link: _do_link_line(0, dx, ws, tx)
+                    underline = f.underline or (f.link and platypus_link_underline)
+                    strike = f.strike
+                    link = f.link
+                    if underline: _do_under_line(0, dx, ws, tx)
+                    if strike: _do_under_line(0, dx, ws, tx, lm=0.125)
+                    if link: _do_link_line(0, dx, ws, tx)
 
                     #now the middle of the paragraph, aligned with the left margin which is our origin.
                     for i in xrange(1, nLines):
                         ws = lines[i][0]
                         t_off = dpl( tx, _offsets[i], ws, lines[i][1], noJustifyLast and i==lim)
                         if dpl!=_justifyDrawParaLine: ws = 0
-                        if f.underline: _do_under_line(i, t_off+leftIndent, ws, tx)
-                        if f.strike or f.link: _do_under_line(i, t_off+leftIndent, tx, ws, lm=0.125)
-                        if f.link: _do_link_line(i, t_off+leftIndent, ws, tx)
+                        if underline: _do_under_line(i, t_off+leftIndent, ws, tx)
+                        if strike: _do_under_line(i, t_off+leftIndent, ws, tx, lm=0.125)
+                        if link: _do_link_line(i, t_off+leftIndent, ws, tx)
                 else:
                     for i in xrange(1, nLines):
                         dpl( tx, _offsets[i], lines[i][0], lines[i][1], noJustifyLast and i==lim)

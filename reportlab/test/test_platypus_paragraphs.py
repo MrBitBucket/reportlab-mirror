@@ -22,6 +22,7 @@ from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import _className
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus.paragraph import Paragraph
+from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame, ShowBoundaryValue
 from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, PageBreak, NextPageTemplate
 from reportlab.platypus import tableofcontents
@@ -196,6 +197,55 @@ providing the ultimate in ease of installation.''',
         doc = MyDocTemplate(outputfile('test_platypus_imageandflowables.pdf'),showBoundary=1)
         doc.multiBuild(story)
 
+class TwoFrameDocTemplate(BaseDocTemplate):
+    "Define a simple document with two frames per page."
+    
+    def __init__(self, filename, **kw):
+        m = 2*cm
+        from reportlab.lib import pagesizes
+        PAGESIZE = pagesizes.landscape(pagesizes.A4)
+        cw, ch = (PAGESIZE[0]-2*m)/2., (PAGESIZE[1]-2*m)
+        ch -= 14*cm
+        f1 = Frame(m, m+0.5*cm, cw-0.75*cm, ch-1*cm, id='F1', 
+            leftPadding=0, topPadding=0, rightPadding=0, bottomPadding=0,
+            showBoundary=True
+        )
+        f2 = Frame(cw+2.7*cm, m+0.5*cm, cw-0.75*cm, ch-1*cm, id='F2', 
+            leftPadding=0, topPadding=0, rightPadding=0, bottomPadding=0,
+            showBoundary=True
+        )
+        apply(BaseDocTemplate.__init__, (self, filename), kw)
+        template = PageTemplate('template', [f1, f2])
+        self.addPageTemplates(template)
+
+
+class SplitFrameParagraphTest(unittest.TestCase):
+    "Test paragraph split over two frames."
+
+    def test(self):    
+        stylesheet = getSampleStyleSheet()
+        normal = stylesheet['BodyText']
+        normal.fontName = "Helvetica"
+        normal.fontSize = 12
+        normal.leading = 16
+        normal.alignment = TA_JUSTIFY
+    
+        text = "Bedauerlicherweise ist ein Donaudampfschiffkapit\xc3\xa4n auch <font color='red'>nur</font> <font color='green'>ein</font> Dampfschiffkapit\xc3\xa4n."
+        tagFormat = '%s'
+        # strange behaviour when using next code line
+        # (same for '<a href="http://www.reportlab.org">%s</a>'
+        tagFormat = '<font color="red">%s</font>'
+
+        #text = " ".join([tagFormat % w for w in text.split()])
+        
+        story = [Paragraph((text + " ") * 3, style=normal)]
+
+        from reportlab.lib import pagesizes
+        PAGESIZE = pagesizes.landscape(pagesizes.A4)
+        
+        doc = TwoFrameDocTemplate(outputfile('test_paragraphs_splitframe.pdf'), pagesize=PAGESIZE)
+        doc.build(story)
+
 class FragmentTestCase(unittest.TestCase):
     "Test fragmentation of paragraphs."
 
@@ -257,6 +307,9 @@ phonemic and morphological analysis.''']
         story =[]
         a = story.append
         a(Paragraph("This should &lt;a href=\"#theEnd\" color=\"blue\"&gt;<a href=\"#theEnd\" color=\"blue\">jump</a>&lt;/a&gt; jump to the end!",style=normal))
+        a(XPreformatted("This should &lt;a href=\"#theEnd\" color=\"blue\"&gt;<a href=\"#theEnd\" color=\"blue\">jump</a>&lt;/a&gt; jump to the end!",style=normal))
+        a(Paragraph("<a href=\"#theEnd\"><u><font color=\"blue\">ditto</font></u></a>",style=normal))
+        a(XPreformatted("<a href=\"#theEnd\"><u><font color=\"blue\">ditto</font></u></a>",style=normal))
         a(Paragraph("This should &lt;a href=\"#thePenultimate\" color=\"blue\"&gt;<a href=\"#thePenultimate\" color=\"blue\">jump</a>&lt;/a&gt; jump to the penultimate page!",style=normal))
         a(Paragraph("This should &lt;a href=\"#theThird\" color=\"blue\"&gt;<a href=\"#theThird\" color=\"blue\">jump</a>&lt;/a&gt; jump to a justified para!",style=normal))
         a(Paragraph("This should &lt;a href=\"#theFourth\" color=\"blue\"&gt;<a href=\"#theFourth\" color=\"blue\">jump</a>&lt;/a&gt; jump to an indented para!",style=normal))
@@ -359,6 +412,7 @@ phonemic and <u>morphological</u> <strike>analysis</strike>.'''
                 '2in',
                 ):
             a(Paragraph(fmt % {'valign':valign},p_style))
+            a(XPreformatted(fmt % {'valign':valign},p_style))
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs_autoleading.pdf'))
         doc.build(story)
 
@@ -417,7 +471,7 @@ phonemic and morphological analysis.'''
 
 #noruntests
 def makeSuite():
-    return makeSuiteForClasses(FragmentTestCase, ParagraphSplitTestCase, ULTestCase, JustifyTestCase, AutoLeadingTestCase)
+    return makeSuiteForClasses(SplitFrameParagraphTest,FragmentTestCase, ParagraphSplitTestCase, ULTestCase, JustifyTestCase, AutoLeadingTestCase)
 
 #noruntests
 if __name__ == "__main__":
