@@ -824,7 +824,7 @@ class Paragraph(Flowable):
             f = frags[0]
             fontSize = f.fontSize
             fontName = f.fontName
-            ascent, descent = getAscentDescent(fontName)
+            ascent, descent = getAscentDescent(fontName,fontSize)
             words = hasattr(f,'text') and split(f.text, ' ') or f.words
             spaceWidth = stringWidth(' ', fontName, fontSize, self.encoding)
             cLine = []
@@ -872,12 +872,10 @@ class Paragraph(Flowable):
                 fontSize = f.fontSize
                 spaceWidth = stringWidth(' ',fontName, fontSize)
 
-                if n==0:
+                if not words:
                     currentWidth = -spaceWidth   # hack to get around extra space for word 1
                     maxSize = fontSize
-                    maxAscent, minDescent = getAscentDescent(fontName)
-                    maxAscent *= fontSize/1000.
-                    minDescent *= fontSize/1000.
+                    maxAscent, minDescent = getAscentDescent(fontName,fontSize)
 
                 wordWidth = w[0]
                 f = w[1][0]
@@ -900,17 +898,13 @@ class Paragraph(Flowable):
                         if getattr(cbDefn,'width',0):
                             descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
                         else:
-                            ascent, descent = getAscentDescent(f.fontName)
-                            ascent *= fontSize/1000.
-                            descent *= fontSize/1000.
+                            ascent, descent = getAscentDescent(f.fontName,fontSize)
                     else:
-                        ascent, descent = getAscentDescent(f.fontName)
-                        ascent *= fontSize/1000.
-                        descent *= fontSize/1000.
+                        ascent, descent = getAscentDescent(f.fontName,fontSize)
                     maxSize = max(maxSize,fontSize)
                     maxAscent = max(maxAscent,ascent)
                     minDescent = min(minDescent,descent)
-                    if words==[]:
+                    if not words:
                         g = f.clone()
                         words = [g]
                         g.text = nText
@@ -948,13 +942,9 @@ class Paragraph(Flowable):
                             if getattr(cbDefn,'width',0):
                                 descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
                             else:
-                                ascent, descent = getAscentDescent(g.fontName)
-                                ascent *= fontSize/1000.
-                                descent *= fontSize/1000.
+                                ascent, descent = getAscentDescent(g.fontName,fontSize)
                         else:
-                            ascent, descent = getAscentDescent(g.fontName)
-                            ascent *= fontSize/1000.
-                            descent *= fontSize/1000.
+                            ascent, descent = getAscentDescent(g.fontName,fontSize)
                         maxSize = max(maxSize,fontSize)
                         maxAscent = max(maxAscent,ascent)
                         minDescent = min(minDescent,descent)
@@ -992,13 +982,9 @@ class Paragraph(Flowable):
                         if getattr(cbDefn,'width',0):
                             minDescent,maxAscent = imgVRange(cbDefn.height,cbDefn.valign,maxSize)
                         else:
-                            maxAscent, minDescent = getAscentDescent(g.fontName)
-                            maxAscent *= maxSize/1000.
-                            minDescent *= maxSize/1000.
+                            maxAscent, minDescent = getAscentDescent(g.fontName,maxSize)
                     else:
-                        maxAscent, minDescent = getAscentDescent(g.fontName)
-                        maxAscent *= maxSize/1000.
-                        minDescent *= maxSize/1000.
+                        maxAscent, minDescent = getAscentDescent(g.fontName,maxSize)
                     words = [g]
                     g.text = w[1][1]
 
@@ -1012,13 +998,9 @@ class Paragraph(Flowable):
                             if getattr(cbDefn,'width',0):
                                 descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
                             else:
-                                ascent, descent = getAscentDescent(g.fontName)
-                                ascent *= fontSize/1000.
-                                descent *= fontSize/1000.
+                                ascent, descent = getAscentDescent(g.fontName,fontSize)
                         else:
-                            ascent, descent = getAscentDescent(g.fontName)
-                            ascent *= fontSize/1000.
-                            descent *= fontSize/1000.
+                            ascent, descent = getAscentDescent(g.fontName,fontSize)
                         maxSize = max(maxSize,fontSize)
                         maxAscent = max(maxAscent,ascent)
                         minDescent = min(minDescent,descent)
