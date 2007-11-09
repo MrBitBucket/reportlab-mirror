@@ -29,6 +29,8 @@ wrapA85=                    0                       #set to 1 to get old wrapped
 fsEncodings=('utf8','cp1252','cp430')               #encodings to attempt utf8 conversion with
 odbc_driver=                'odbc'                  #default odbc driver
 platypus_link_underline=    0                       #paragraph links etc underlined if true
+canvas_basefontname=        'Helvetica'             #this is used to initialize the canvas; if you override to make
+                                                    #something else you are responsible for ensuring the font is registered etc etc
 
 # places to look for T1Font information
 T1SearchPath =  (
@@ -144,7 +146,8 @@ _FUZZ
 wrapA85
 fsEncodings
 odbc_driver
-platypus_link_underline'''.split()
+platypus_link_underline
+canvas_basefontname'''.split()
     import os, sys
     global sys_version, _unset_
     sys_version = sys.version.split()[0]        #strip off the other garbage

@@ -187,7 +187,7 @@ class Canvas(textobject._PDFColorSetter):
         #initial graphics state, never modify any of these in place
         self._x = 0
         self._y = 0
-        self._fontname = 'Helvetica'
+        self._fontname = rl_config.canvas_basefontname
         self._fontsize = 12
 
         self._textMode = 0  #track if between BT/ET
