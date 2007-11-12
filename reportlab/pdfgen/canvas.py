@@ -237,14 +237,16 @@ class Canvas(textobject._PDFColorSetter):
         #self._addStandardFonts()
 
     def _make_preamble(self):
-        # yuk
-        iName = self._doc.getInternalFontName(self._fontname)
+        P = [].append
         if self.bottomup:
-            #must set an initial font
-            self._preamble = '1 0 0 1 0 0 cm BT %s 12 Tf 14.4 TL ET' % iName
+            P('1 0 0 1 0 0 cm')
         else:
-            #switch coordinates, flip text and set font
-            self._preamble = '1 0 0 -1 0 %s cm BT %s 12 Tf 14.4 TL ET' % (fp_str(self._pagesize[1]), iName)
+            P('1 0 0 -1 0 %s cm' % fp_str(self._pagesize[1]))
+        font = pdfmetrics.getFont(self._fontname)
+        if not font._dynamicFont:
+            #set an initial font
+            P('BT %s 12 Tf 14.4 TL ET' % self._doc.getInternalFontName(self._fontname))
+        self._preamble = ' '.join(P.__self__)
 
     if not _instanceEscapePDF:
         def _escape(self, s):
