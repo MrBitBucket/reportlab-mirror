@@ -257,13 +257,13 @@ class Table(Flowable):
         self._cellvalues = self.normalizeData(data)
         if not _seqCW: colWidths = ncols*[colWidths]
         elif len(colWidths) != ncols:
-            raise ValueError, "%s data error - %d columns in data but %d in grid" % (self.identity(),ncols, len(colWidths))
+            raise ValueError, "%s data error - %d columns in data but %d in column widths" % (self.identity(),ncols, len(colWidths))
         if not _seqRH: rowHeights = nrows*[rowHeights]
         elif len(rowHeights) != nrows:
-            raise ValueError, "%s data error - %d rows in data but %d in grid" % (self.identity(),nrows, len(rowHeights))
+            raise ValueError, "%s data error - %d rows in data but %d in row heights" % (self.identity(),nrows, len(rowHeights))
         for i in xrange(nrows):
             if len(data[i]) != ncols:
-                raise ValueError, "%s not enough data points in row %d!" % (self.identity(),i)
+                raise ValueError, "%s not enough data columns in row %d!" % (self.identity(),i)
         self._rowHeights = self._argH = rowHeights
         self._colWidths = self._argW = colWidths
         cellrows = []
