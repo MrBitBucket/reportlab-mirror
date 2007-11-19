@@ -87,7 +87,7 @@ def _test0(self):
     btr = ParagraphStyle('bodyText1r',parent=bt,alignment=TA_RIGHT)
     btc = ParagraphStyle('bodyText1c',parent=bt,alignment=TA_CENTER)
     a(Paragraph("""
-        Subsequent pages test pageBreakBefore, frameBreakBefore and
+        <a name='top'/>Subsequent pages test pageBreakBefore, frameBreakBefore and
         keepTogether attributes.  Generated at %s.  The number in brackets
         at the end of each paragraph is its position in the story. (%d)""" % (
             time.ctime(time.time()), len(story)), bt))
@@ -145,6 +145,13 @@ def _test0(self):
         bt2.borderRadius = 3
         bt2.borderPadding = 3
         a(Paragraph("""text one<br/>text two<br/>""",bt2))
+    for i in 0, 1, 2:
+        P = Paragraph("""This is a paragraph with <font color='blue'><a href='#top'>with an incredibly
+long and boring link in side of it that
+contains lots and lots of stupidly boring and worthless information.
+So that we can split the link and see if we get problems like Dinu's.
+I hope we don't, but you never do Know.</a></font>""",bt)
+        a(P)
 
     doc = MyDocTemplate(outputfile('test_platypus_breaking.pdf'))
     doc.multiBuild(story)

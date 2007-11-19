@@ -182,7 +182,7 @@ def _putFragLine(tx,line):
                 else:
                     func = getattr(tx._canvas,name,None)
                     if not func:
-                        raise AttributeError, "Missing %s callback attribute '%s'" % (kind,name)
+                        raise AttributeError("Missing %s callback attribute '%s'" % (kind,name))
                     func(tx._canvas,kind,cbDefn.label)
             if f is words[-1]:
                 if not tx._fontname:
@@ -645,8 +645,8 @@ class Paragraph(Flowable):
             _parser.caseSensitive = self.caseSensitive
             style, frags, bulletTextFrags = _parser.parse(text,style)
             if frags is None:
-                raise "xml parser error (%s) in paragraph beginning\n'%s'"\
-                    % (_parser.errors[0],text[:min(30,len(text))])
+                raise ValueError("xml parser error (%s) in paragraph beginning\n'%s'"\
+                    % (_parser.errors[0],text[:min(30,len(text))]))
             if bulletTextFrags: bulletText = bulletTextFrags
 
         #AR hack
@@ -1202,7 +1202,7 @@ class Paragraph(Flowable):
                 elif self.style.alignment == TA_JUSTIFY:
                     dpl = _justifyDrawParaLineX
                 else:
-                    raise ValueError, "bad align %s" % repr(alignment)
+                    raise ValueError("bad align %s" % repr(alignment))
 
                 #set up the font etc.
                 tx = self.beginText(cur_x, cur_y)
