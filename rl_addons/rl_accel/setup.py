@@ -10,6 +10,14 @@ if __name__=='__main__': #NO RUNTESTS
 
     LIBS = []
     EXTRA_MODULES = []
+#   EXTRA_MODULES.append(
+#           Extension(  'xxx',
+#                   ['xxx.c'],
+#                   include_dirs=[],
+#                   define_macros=[],
+#                   library_dirs=[],
+#                   libraries=LIBS, # libraries to link against
+#                   ))
 
     setup(  name = "_rl_accel",
             version = VERSION,

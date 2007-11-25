@@ -215,12 +215,14 @@ newHyphenobject(PyObject *module, PyObject *args) {
   if (self == NULL)
     return NULL;
 
-  if((self->hdict = hnj_hyphen_load(filename)) == NULL)
-    return NULL; /* We want to raise a more descriptive error. */
+  if((self->hdict = hnj_hyphen_load(filename)) == NULL){
+	PyErr_Format(PyExc_IOError,"Failed to load hyphenization information from \"%s\"", filename);
+	Py_DECREF(self);
+    return NULL;
+  	}
 
   return self;
 }
-
 
 static void
 Hyphen_dealloc(Hyphenobject *self) {
