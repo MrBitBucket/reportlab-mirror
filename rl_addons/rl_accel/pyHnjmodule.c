@@ -230,7 +230,7 @@ Hyphen_dealloc(Hyphenobject *self) {
     hnj_hyphen_free(self->hdict);
     self->hdict = NULL;
   }
-  PyMem_DEL(self);
+  PyObject_DEL(self);
 }
 
 static PyObject *
