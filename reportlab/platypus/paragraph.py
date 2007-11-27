@@ -18,7 +18,7 @@ from reportlab.rl_config import platypus_link_underline
 import re
 
 #on UTF8 branch, split and strip must be unicode-safe!
-def split(text, delim=' '):
+def split(text, delim=None):
     if type(text) is str: text = text.decode('utf8')
     if type(delim) is str: delim = delim.decode('utf8')
     return [uword.encode('utf8') for uword in text.split(delim)]
