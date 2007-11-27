@@ -125,9 +125,8 @@ def imgVRange(h,va,fontSize):
 
 _56=5./6
 _16=1./6
-def _putFragLine(tx,line):
+def _putFragLine(cur_x, tx, line):
     xs = tx.XtraState
-    cur_x = 0
     cur_y = xs.cur_y
     x0 = tx._x0
     autoLeading = xs.autoLeading
@@ -256,36 +255,32 @@ def _putFragLine(tx,line):
 
 def _leftDrawParaLineX( tx, offset, line, last=0):
     setXPos(tx,offset)
-    _putFragLine(tx, line)
+    _putFragLine(offset, tx, line)
     setXPos(tx,-offset)
-    return offset
 
 def _centerDrawParaLineX( tx, offset, line, last=0):
     m = offset+0.5*line.extraSpace
     setXPos(tx,m)
-    _putFragLine(tx, line)
+    _putFragLine(m,tx, line)
     setXPos(tx,-m)
-    return m
 
 def _rightDrawParaLineX( tx, offset, line, last=0):
     m = offset+line.extraSpace
     setXPos(tx,m)
-    _putFragLine(tx, line)
+    _putFragLine(m,tx, line)
     setXPos(tx,-m)
-    return m
 
 def _justifyDrawParaLineX( tx, offset, line, last=0):
     setXPos(tx,offset)
     extraSpace = line.extraSpace
     nSpaces = line.wordCount - 1
     if last or not nSpaces or abs(extraSpace)<=1e-8 or line.lineBreak:
-        _putFragLine(tx, line)  #no space modification
+        _putFragLine(offset, tx, line)  #no space modification
     else:
         tx.setWordSpace(extraSpace / float(nSpaces))
-        _putFragLine(tx, line)
+        _putFragLine(offset, tx, line)
         tx.setWordSpace(0)
     setXPos(tx,-offset)
-    return offset
 
 try:
     from _rl_accel import _sameFrag
@@ -420,7 +415,7 @@ def _drawBullet(canvas, offset, cur_y, bulletText, style):
 def _handleBulletWidth(bulletText,style,maxWidths):
     '''work out bullet width and adjust maxWidths[0] if neccessary
     '''
-    if bulletText!=None:
+    if bulletText:
         if isinstance(bulletText,basestring):
             bulletWidth = stringWidth( bulletText, style.bulletFontName, style.bulletFontSize)
         else:
@@ -521,7 +516,7 @@ def _do_link_line(i, t_off, ws, tx):
     textlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
     _doLink(tx, xs.link, (t_off, y, t_off+textlen+ws, y+leading))
 
-def _do_post_text(t_off, tx):
+def _do_post_text(tx):
     xs = tx.XtraState
     leading = xs.style.leading
     autoLeading = xs.autoLeading
@@ -538,7 +533,7 @@ def _do_post_text(t_off, tx):
         if c!=csc:
             tx._canvas.setStrokeColor(c)
             csc = c
-        tx._canvas.line(t_off+x1, y, t_off+x2, y)
+        tx._canvas.line(x1, y, x2, y)
     xs.underlines = []
     xs.underline=0
     xs.underlineColor=None
@@ -548,7 +543,7 @@ def _do_post_text(t_off, tx):
         if c!=csc:
             tx._canvas.setStrokeColor(c)
             csc = c
-        tx._canvas.line(t_off+x1, ys, t_off+x2, ys)
+        tx._canvas.line(x1, ys, x2, ys)
     xs.strikes = []
     xs.strike=0
     xs.strikeColor=None
@@ -559,8 +554,8 @@ def _do_post_text(t_off, tx):
             if c!=csc:
                 tx._canvas.setStrokeColor(c)
                 csc = c
-            tx._canvas.line(t_off+x1, y, t_off+x2, y)
-        _doLink(tx, link, (t_off+x1, y, t_off+x2, yl))
+            tx._canvas.line(x1, y, x2, y)
+        _doLink(tx, link, (x1, y, x2, yl))
     xs.links = []
     xs.link=None
     xs.linkColor=None
@@ -1137,7 +1132,7 @@ class Paragraph(Flowable):
                     dpl = _justifyDrawParaLine
                 f = blPara
                 cur_y = self.height - f.fontSize
-                if bulletText <> None:
+                if bulletText:
                     offset = _drawBullet(canvas,offset,cur_y,bulletText,style)
 
                 #set up the font etc.
@@ -1191,7 +1186,8 @@ class Paragraph(Flowable):
                 cur_y = self.height - getattr(f,'ascent',f.fontSize)    #TODO fix XPreformatted to remove this hack
                 # default?
                 dpl = _leftDrawParaLineX
-                if bulletText <> None:
+                if bulletText:
+                    oo = offset
                     offset = _drawBullet(canvas,offset,cur_y,bulletText,style)
                 if alignment == TA_LEFT:
                     dpl = _leftDrawParaLineX
@@ -1226,14 +1222,14 @@ class Paragraph(Flowable):
                 xs.autoLeading = autoLeading
 
                 tx._fontname,tx._fontsize = None, None
-                t_off = dpl( tx, offset, lines[0], noJustifyLast and nLines==1)
-                _do_post_text(t_off+leftIndent, tx)
+                dpl( tx, offset, lines[0], noJustifyLast and nLines==1)
+                _do_post_text(tx)
 
                 #now the middle of the paragraph, aligned with the left margin which is our origin.
                 for i in range(1, nLines):
                     f = lines[i]
-                    t_off = dpl( tx, _offsets[i], f, noJustifyLast and i==lim)
-                    _do_post_text(t_off+leftIndent, tx)
+                    dpl( tx, _offsets[i], f, noJustifyLast and i==lim)
+                    _do_post_text(tx)
 
             canvas.drawText(tx)
             canvas.restoreState()
