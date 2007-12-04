@@ -684,7 +684,8 @@ class Paragraph(Flowable):
                 leading = 1.2*style.fontSize
             height = len(blPara.lines) * leading
         self.height = height
-        return (self.width, height)
+        print 'wrap kind=%s width=%s height=%s' % (blPara.kind,self.width,height)
+        return self.width, height
 
     def minWidth(self):
         'Attempt to determine a minimum sensible width'
@@ -1131,7 +1132,7 @@ class Paragraph(Flowable):
                 elif self.style.alignment == TA_JUSTIFY:
                     dpl = _justifyDrawParaLine
                 f = blPara
-                cur_y = self.height - f.fontSize
+                cur_y = self.height - getattr(f,'ascent',f.fontSize)    #TODO fix XPreformatted to remove this hack
                 if bulletText:
                     offset = _drawBullet(canvas,offset,cur_y,bulletText,style)
 
