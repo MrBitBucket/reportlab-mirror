@@ -684,7 +684,6 @@ class Paragraph(Flowable):
                 leading = 1.2*style.fontSize
             height = len(blPara.lines) * leading
         self.height = height
-        print 'wrap kind=%s width=%s height=%s' % (blPara.kind,self.width,height)
         return self.width, height
 
     def minWidth(self):
