@@ -379,8 +379,8 @@ class Image(Flowable):
         lazy = self._lazy
         if lazy>=2: self._lazy = 1
         self.canv.drawImage(    self._img or self.filename,
-                                0,
-                                0,
+                                getattr(self,'_offs_x',0),
+                                getattr(self,'_offs_y',0),
                                 self.drawWidth,
                                 self.drawHeight,
                                 mask=self._mask,

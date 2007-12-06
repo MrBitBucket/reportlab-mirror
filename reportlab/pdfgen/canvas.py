@@ -628,8 +628,12 @@ class Canvas(textobject._PDFColorSetter):
             smask = getattr(imgObj,'_smask',None)
             if smask:   #set up the softmask obtained above
                 mRegName = self._doc.getXObjectName(smask.name)
-                self._setXObjects(smask)
-                imgObj.smask = self._doc.Reference(smask,mRegName)
+                mImgObj = self._doc.idToObject.get(mRegName, None)
+                if not mImgObj:
+                    self._setXObjects(smask)
+                    imgObj.smask = self._doc.Reference(smask,mRegName)
+                else:
+                    imgObj.smask = pdfdoc.PDFObjectReference(smask,mRegName)
                 del imgObj._smask
 
         # ensure we have a size, as PDF will make it 1x1 pixel otherwise!
