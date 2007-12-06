@@ -3,7 +3,7 @@
 # $URI:$
 __version__=''' $Id$ '''
 
-import string, os, sys, imp, time
+import string, os, sys, imp, time, md5
 from reportlab.lib.logger import warnOnce
 from types import *
 from rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
@@ -18,6 +18,14 @@ else:
 if sys.hexversion<0x2030000:
     True = 1
     False = 0
+
+if sys.hexversion >= 0x02000000:
+    def _digester(s):
+        return md5.md5(s).hexdigest()
+else:
+    # hexdigest not available in 1.5
+    def _digester(s):
+        return join(map(lambda x : "%02x" % ord(x), md5.md5(s).digest()), '')
 
 def _findFiles(dirList,ext='.ttf'):
     from os.path import isfile, isdir, join as path_join
@@ -536,7 +544,7 @@ class ImageReader:
         self._data = None
         if _isPILImage(fileName):
             self._image = fileName
-            self.fp = fileName.fp
+            self.fp = getattr(fileName,'fp',None)
             try:
                 self.fileName = self._image.fileName
             except AttributeError:
@@ -581,6 +589,7 @@ class ImageReader:
     def getRGBData(self):
         "Return byte array of RGB data as string"
         if self._data is None:
+            self._dataA = None
             if sys.platform[0:4] == 'java':
                 import jarray
                 from java.awt.image import PixelGrabber
@@ -602,7 +611,11 @@ class ImageReader:
             else:
                 im = self._image
                 mode = self.mode = im.mode
-                if mode not in ('L','RGB','CMYK'):
+                if mode=='RGBA':
+                    self._dataA = ImageReader(im.split()[3])
+                    im = im.convert('RGB')
+                    self.mode = 'RGB'
+                elif mode not in ('L','RGB','CMYK'):
                     im = im.convert('RGB')
                     self.mode = 'RGB'
                 self._data = im.tostring()

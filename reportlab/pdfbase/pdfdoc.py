@@ -18,7 +18,7 @@ import string, types, binascii, codecs
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfutils import LINEEND # this constant needed in both
 from reportlab import rl_config
-from reportlab.lib.utils import import_zlib, open_for_read, fp_str
+from reportlab.lib.utils import import_zlib, open_for_read, fp_str, _digester
 from reportlab.pdfbase import pdfmetrics
 
 from sys import platform
@@ -2022,11 +2022,16 @@ class PDFImageXObject:
 
     def _checkTransparency(self,im):
         if self.mask=='auto':
-            tc = im.getTransparent()
-            if tc:
-                self.mask = (tc[0], tc[0], tc[1], tc[1], tc[2], tc[2])
-            else:
+            if im._dataA:
                 self.mask = None
+                self._smask = PDFImageXObject(_digester(im._dataA.getRGBData()),im._dataA,mask=None)
+                self._smask._decode = [0,1]
+            else:
+                tc = im.getTransparent()
+                if tc:
+                    self.mask = (tc[0], tc[0], tc[1], tc[1], tc[2], tc[2])
+                else:
+                    self.mask = None
         elif hasattr(self.mask,'rgb'):
             _ = self.mask.rgb()
             self.mask = _[0],_[0],_[1],_[1],_[2],_[2]
@@ -2060,9 +2065,12 @@ class PDFImageXObject:
         dict["ColorSpace"] = PDFName(self.colorSpace)
         if self.colorSpace=='DeviceCMYK' and getattr(self,'_dotrans',0):
             dict["Decode"] = PDFArray([1,0,1,0,1,0,1,0])
+        elif getattr(self,'_decode',None):
+            dict["Decode"] = PDFArray(self._decode)
         dict["Filter"] = PDFArray(map(PDFName,self._filters))
         dict["Length"] = len(self.streamContent)
         if self.mask: dict["Mask"] = PDFArray(self.mask)
+        if getattr(self,'smask',None): dict["SMask"] = self.smask
         return S.format(document)
 
 if __name__=="__main__":
