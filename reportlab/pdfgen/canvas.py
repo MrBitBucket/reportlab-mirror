@@ -633,7 +633,7 @@ class Canvas(textobject._PDFColorSetter):
                     self._setXObjects(smask)
                     imgObj.smask = self._doc.Reference(smask,mRegName)
                 else:
-                    imgObj.smask = pdfdoc.PDFObjectReference(smask,mRegName)
+                    imgObj.smask = pdfdoc.PDFObjectReference(mRegName)
                 del imgObj._smask
 
         # ensure we have a size, as PDF will make it 1x1 pixel otherwise!
