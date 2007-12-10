@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "1.04"
+#define VERSION "1.05"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -1903,6 +1903,9 @@ static struct PyMethodDef moduleMethods[] = {
 	{NULL,	NULL}			/*sentinel*/
 	};
 
+#ifdef DYNAMIC_ENDIANNESS
+extern void (*libart_set_DYNAMIC_BIGENDIAN(void));
+#endif
 void init_renderPM(void)
 {
 	PyObject *m, *d;
@@ -1928,4 +1931,7 @@ void init_renderPM(void)
 	/*add in the docstring*/
 	PyDict_SetItemString(d, "__doc__",	PyString_FromString(moduleDoc));
 	PyDict_SetItemString(d, "__file__", PyString_FromString(__FILE__));
+#ifdef DYNAMIC_ENDIANNESS
+	libart_set_DYNAMIC_BIGENDIAN();
+#endif
 }
