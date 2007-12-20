@@ -126,7 +126,7 @@ class XPreformatted(Paragraph):
             if hasattr(f,'text'):
                 fontSize = f.fontSize
                 fontName = f.fontName
-                ascent, descent = getAscentDescent(f.fontName)
+                ascent, descent = getAscentDescent(fontName,fontSize)
                 kind = 0
                 L=string.split(f.text, '\n')
                 for l in L:
@@ -159,9 +159,7 @@ class XPreformatted(Paragraph):
                 currentWidth, n, w = _getFragWord(L)
                 f = w[0][0]
                 maxSize = f.fontSize
-                maxAscent, minDescent = getAscentDescent(f.fontName)
-                maxAscent *= maxSize/1000.
-                minDescent *= maxSize/1000.
+                maxAscent, minDescent = getAscentDescent(f.fontName,maxSize)
                 words = [f.clone()]
                 words[-1].text = w[0][1]
                 for i in w[1:]:
@@ -169,18 +167,15 @@ class XPreformatted(Paragraph):
                     f.text=i[1]
                     words.append(f)
                     fontSize = f.fontSize
+                    fontName = f.fontName
                     if calcBounds:
                         cbDefn = getattr(f,'cbDefn',None)
                         if getattr(cbDefn,'width',0):
                             descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
                         else:
-                            ascent, descent = getAscentDescent(f.fontName)
-                            ascent *= fontSize/1000.
-                            descent *= fontSize/1000.
+                            ascent, descent = getAscentDescent(fontName,fontSize)
                     else:
-                        ascent, descent = getAscentDescent(f.fontName)
-                        ascent *= fontSize/1000.
-                        descent *= fontSize/1000.
+                        ascent, descent = getAscentDescent(fontName,fontSize)
                     maxSize = max(maxSize,fontSize)
                     maxAscent = max(maxAscent,ascent)
                     minDescent = min(minDescent,descent)
