@@ -131,6 +131,7 @@ def _putFragLine(cur_x, tx, line):
     x0 = tx._x0
     autoLeading = xs.autoLeading
     leading = xs.leading
+    cur_x += xs.leftIndent
     dal = autoLeading in ('min','max')
     if dal:
         if autoLeading=='max':
@@ -1214,6 +1215,7 @@ class Paragraph(Flowable):
                 xs.links=[]
                 xs.link=None
                 xs.leading = style.leading
+                xs.leftIndent = leftIndent
                 tx._leading = None
                 tx._olb = None
                 xs.cur_y = cur_y
@@ -1226,7 +1228,7 @@ class Paragraph(Flowable):
                 _do_post_text(tx)
 
                 #now the middle of the paragraph, aligned with the left margin which is our origin.
-                for i in range(1, nLines):
+                for i in xrange(1, nLines):
                     f = lines[i]
                     dpl( tx, _offsets[i], f, noJustifyLast and i==lim)
                     _do_post_text(tx)
@@ -1275,7 +1277,7 @@ if __name__=='__main__':    #NORUNTESTS
                 words = line[1]
             nwords = len(words)
             print 'line%d: %d(%s)\n  ' % (l,nwords,str(getattr(line,'wordCount','Unknown'))),
-            for w in range(nwords):
+            for w in xrange(nwords):
                 print "%d:'%s'"%(w,getattr(words[w],'text',words[w])),
             print
 
