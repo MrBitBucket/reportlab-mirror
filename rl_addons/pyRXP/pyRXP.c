@@ -21,8 +21,11 @@
 #include "stdio16.h"
 #include "version.h"
 #include "namespaces.h"
-#define VERSION "1.12"
+#define VERSION "1.13"
 #define MAX_DEPTH 256
+#if PY_VERSION_HEX < 0x02050000
+#	define Py_ssize_t int
+#endif
 
 #if CHAR_SIZE==16
 #	define initpyRXP initpyRXPU
@@ -339,9 +342,9 @@ typedef	struct {
 		PyObject*	warnCB;
 		PyObject*	eoCB;
 		PyObject*	fourth;
-		PyObject*	(*Node_New)(int);
-		int			(*SetItem)(PyObject*, int, PyObject*);
-		PyObject*	(*GetItem)(PyObject*, int);
+		PyObject*	(*Node_New)(ssize_t);
+		int			(*SetItem)(PyObject*, Py_ssize_t, PyObject*);
+		PyObject*	(*GetItem)(PyObject*, Py_ssize_t);
 		int			none_on_empty;
 #if	CHAR_SIZE==16
 		int			utf8;
@@ -823,7 +826,8 @@ static int pyRXPParser_setattr(pyRXPParserObject *self, char *name, PyObject* va
 
 static PyObject* pyRXPParser_parse(pyRXPParserObject* xself, PyObject* args, PyObject* kw)
 {
-	int			srcLen, i;
+	int			srcLen;
+	Py_ssize_t	i;
 	char		*src;
 	FILE16		*f;
 	InputSource source;
@@ -984,7 +988,7 @@ static PyTypeObject pyRXPParserType = {
 static pyRXPParserObject* pyRXPParser(PyObject* module, PyObject* args, PyObject* kw)
 {
 	pyRXPParserObject* self;
-	int	i;
+	Py_ssize_t	i;
 
 	if(!PyArg_ParseTuple(args, ":Parser")) return NULL;
 	if(!(self = PyObject_NEW(pyRXPParserObject, &pyRXPParserType))) return NULL;

@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "1.05"
+#define VERSION "1.06"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -766,10 +766,10 @@ static int _ft_conic_to( FT_Vector*  control, FT_Vector*  to, void*  user )
 }
 
 static FT_Outline_Funcs _ft_outliner = {
-	_ft_move_to,
-	_ft_line_to,
-	_ft_conic_to,
-	_ft_cubic_to,
+	(FT_Outline_MoveTo_Func)_ft_move_to,
+	(FT_Outline_LineTo_Func)_ft_line_to,
+	(FT_Outline_ConicTo_Func)_ft_conic_to,
+	(FT_Outline_CubicTo_Func)_ft_cubic_to,
 	0,
 	0
 	};

@@ -52,6 +52,11 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.  */
 
 #include "Python.h"
+#if PY_VERSION_HEX < 0x02050000
+#	define Py_ssize_t int
+#	define lenfunc inquiry
+#	define ssizeargfunc intargfunc
+#endif
 
 #include <ctype.h>
 
@@ -560,7 +565,7 @@ element_get(ElementObject* self, PyObject* args)
 }
 
 static PyObject*
-element_getitem(ElementObject* self, int index)
+element_getitem(ElementObject* self, Py_ssize_t index)
 {
     if (index < 0 || index >= self->child_count) {
         PyErr_SetString(PyExc_IndexError, "child index out of range");
@@ -571,7 +576,7 @@ element_getitem(ElementObject* self, int index)
     return self->children[index];
 }
 
-static int
+static Py_ssize_t
 element_length(ElementObject* self)
 {
     return self->child_count;
@@ -674,10 +679,10 @@ element_setattr(ElementObject *self, const char* name, PyObject* value)
 }
 
 static PySequenceMethods element_as_sequence = {
-    (inquiry) element_length, /* sq_length */
+    (lenfunc) element_length, /* sq_length */
     0, /* sq_concat */
     0, /* sq_repeat */
-    (intargfunc) element_getitem, /* sq_item */
+    (ssizeargfunc) element_getitem, /* sq_item */
     0, /* sq_slice */
     0, /* sq_ass_item */
     0, /* sq_ass_slice */
