@@ -188,6 +188,8 @@ def _putFragLine(cur_x, tx, line):
                 if not tx._fontname:
                     tx.setFont(xs.style.fontName,xs.style.fontSize)
                     tx._textOut('',1)
+                elif kind=='img':
+                    tx._textOut('',1)
         else:
             cur_x_s = cur_x + nSpaces*ws
             if (tx._fontname,tx._fontsize)!=(f.fontName,f.fontSize):
