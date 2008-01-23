@@ -1134,7 +1134,7 @@ class Table(Flowable):
 
         #we're going to split into two superRows
         #R0 = slelf.__class__( data[:n], self._argW, self._argH[:n],
-        R0 = self.__class__( data[:n], self._colWidths, self._argH[:n],
+        R0 = self.__class__( data[:n], colWidths=self._colWidths, rowHeights=self._argH[:n],
                 repeatRows=repeatRows, repeatCols=repeatCols,
                 splitByRow=splitByRow)
 
@@ -1193,8 +1193,8 @@ class Table(Flowable):
 
         if repeatRows:
             #R1 = slelf.__class__(data[:repeatRows]+data[n:],self._argW,
-            R1 = self.__class__(data[:repeatRows]+data[n:],self._colWidths,
-                    self._argH[:repeatRows]+self._argH[n:],
+            R1 = self.__class__(data[:repeatRows]+data[n:],colWidths=self._colWidths,
+                    rowHeights=self._argH[:repeatRows]+self._argH[n:],
                     repeatRows=repeatRows, repeatCols=repeatCols,
                     splitByRow=splitByRow)
             R1._cellStyles = self._cellStyles[:repeatRows]+self._cellStyles[n:]
@@ -1204,7 +1204,7 @@ class Table(Flowable):
             R1._cr_1_1(n,repeatRows,self._nosplitCmds)
         else:
             #R1 = slelf.__class__(data[n:], self._argW, self._argH[n:],
-            R1 = self.__class__(data[n:], self._colWidths, self._argH[n:],
+            R1 = self.__class__(data[n:], colWidths=self._colWidths, rowHeights=self._argH[n:],
                     repeatRows=repeatRows, repeatCols=repeatCols,
                     splitByRow=splitByRow)
             R1._cellStyles = self._cellStyles[n:]
