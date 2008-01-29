@@ -1382,7 +1382,7 @@ class Table(Flowable):
                 x = colpos + cellstyle.leftPadding
             elif just in ('CENTRE', 'CENTER'):
                 draw = self.canv.drawCentredString
-                x = colpos + colwidth * 0.5
+                x = colpos+(colwidth+cellstyle.leftPadding-cellstyle.rightPadding)*0.5
             elif just == 'RIGHT':
                 draw = self.canv.drawRightString
                 x = colpos + colwidth - cellstyle.rightPadding
