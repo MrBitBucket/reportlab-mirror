@@ -670,7 +670,7 @@ class PDFLayouter:
         else:
             # Fail if stdout desired (with multiPage).
             if o.stdout:
-                raise "IOError", "Can't create multiple pages on stdout!"
+                raise IOError("Can't create multiple pages on stdout!")
 
             # Create canvas with a modified path name.
             base, ext = os.path.splitext(self.pdfPath)
