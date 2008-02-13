@@ -226,7 +226,7 @@ class Table(Flowable):
         self.hAlign = hAlign or 'CENTER'
         self.vAlign = vAlign or 'MIDDLE'
         if type(data) not in _SeqTypes:
-            raise ValueError, "%s invalid data type" % self.identity()
+            raise ValueError("%s invalid data type" % self.identity())
         self._nrows = nrows = len(data)
         self._cellvalues = []
         _seqCW = type(colWidths) in _SeqTypes
@@ -237,7 +237,7 @@ class Table(Flowable):
         if not emptyTableAction: emptyTableAction = rl_config.emptyTableAction
         if not (nrows and ncols):
             if emptyTableAction=='error':
-                raise ValueError, "%s must have at least a row and column" % self.identity()
+                raise ValueError("%s must have at least a row and column" % self.identity())
             elif emptyTableAction=='indicate':
                 self.__class__ = Preformatted
                 global _emptyTableStyle
@@ -250,20 +250,20 @@ class Table(Flowable):
                 self.__class__ = Spacer
                 Spacer.__init__(self,0,0)
             else:
-                raise ValueError, '%s bad emptyTableAction: "%s"' % (self.identity(),emptyTableAction)
+                raise ValueError('%s bad emptyTableAction: "%s"' % (self.identity(),emptyTableAction))
             return
 
         # we need a cleanup pass to ensure data is strings - non-unicode and non-null
         self._cellvalues = self.normalizeData(data)
         if not _seqCW: colWidths = ncols*[colWidths]
         elif len(colWidths) != ncols:
-            raise ValueError, "%s data error - %d columns in data but %d in column widths" % (self.identity(),ncols, len(colWidths))
+            raise ValueError("%s data error - %d columns in data but %d in column widths" % (self.identity(),ncols, len(colWidths)))
         if not _seqRH: rowHeights = nrows*[rowHeights]
         elif len(rowHeights) != nrows:
-            raise ValueError, "%s data error - %d rows in data but %d in row heights" % (self.identity(),nrows, len(rowHeights))
+            raise ValueError("%s data error - %d rows in data but %d in row heights" % (self.identity(),nrows, len(rowHeights)))
         for i in xrange(nrows):
             if len(data[i]) != ncols:
-                raise ValueError, "%s not enough data columns in row %d!" % (self.identity(),i)
+                raise ValueError("%s not enough data columns in row %d!" % (self.identity(),i))
         self._rowHeights = self._argH = rowHeights
         self._colWidths = self._argW = colWidths
         cellrows = []
@@ -414,7 +414,7 @@ class Table(Flowable):
                     else:#work out size
                         t = self._elementWidth(v,s)
                         if t is None:
-                            raise ValueError, "Flowable %s in cell(%d,%d) can't have auto width\n%s" % (v.identity(30),i,j,self.identity(30))
+                            raise ValueError("Flowable %s in cell(%d,%d) can't have auto width\n%s" % (v.identity(30),i,j,self.identity(30)))
                         t += s.leftPadding+s.rightPadding
                         if span:
                             c0 = span[0]
@@ -512,7 +512,7 @@ class Table(Flowable):
                         if isinstance(v,(tuple,list,Flowable)):
                             if isinstance(v,Flowable): v = (v,)
                             if w is None and not self._canGetWidth(v):
-                                raise ValueError, "Flowable %s in cell(%d,%d) can't have auto width in\n%s" % (v[0].identity(30),i,j,self.identity(30))
+                                raise ValueError("Flowable %s in cell(%d,%d) can't have auto width in\n%s" % (v[0].identity(30),i,j,self.identity(30)))
                             if canv: canv._fontname, canv._fontsize, canv._leading = s.fontname, s.fontsize, s.leading or 1.2*s.fontsize
                             if ji in colSpanCells:
                                 if not span: continue
@@ -521,7 +521,8 @@ class Table(Flowable):
                             if canv: canv._fontname, canv._fontsize, canv._leading = saved
                             dW = dW + s.leftPadding + s.rightPadding
                             if not rl_config.allowTableBoundsErrors and dW>w:
-                                raise "LayoutError", "Flowable %s (%sx%s points) too wide for cell(%d,%d) (%sx* points) in\n%s" % (v[0].identity(30),fp_str(dW),fp_str(t),i,j, fp_str(w), self.identity(30))
+                                from reportlab.platypus.doctemplate import LayoutError
+                                raise LayoutError("Flowable %s (%sx%s points) too wide for cell(%d,%d) (%sx* points) in\n%s" % (v[0].identity(30),fp_str(dW),fp_str(t),i,j, fp_str(w), self.identity(30)))
                         else:
                             v = (v is not None and str(v) or '').split("\n")
                             t = (s.leading or 1.2*s.fontSize)*len(v)
@@ -1371,7 +1372,7 @@ class Table(Flowable):
                 elif just in ('CENTRE', 'CENTER'):
                     x = colpos+(colwidth+cellstyle.leftPadding-cellstyle.rightPadding-w)/2.0
                 else:
-                    raise ValueError, 'Invalid justification %s' % just
+                    raise ValueError('Invalid justification %s' % just)
                 y -= v.getSpaceBefore()
                 y -= h
                 v.drawOn(self.canv,x,y)
@@ -1390,7 +1391,7 @@ class Table(Flowable):
                 draw = self.canv.drawAlignedString
                 x = colpos + colwidth - cellstyle.rightPadding
             else:
-                raise ValueError, 'Invalid justification %s' % just
+                raise ValueError('Invalid justification %s' % just)
             vals = string.split(str(cellval), "\n")
             n = len(vals)
             leading = cellstyle.leading
@@ -1403,7 +1404,7 @@ class Table(Flowable):
                 #tim roberts pointed out missing fontsize correction 2004-10-04
                 y = rowpos + (cellstyle.bottomPadding + rowheight-cellstyle.topPadding+n*leading)/2.0 - fontsize
             else:
-                raise ValueError, "Bad valign: '%s'" % str(valign)
+                raise ValueError("Bad valign: '%s'" % str(valign))
 
             for v in vals:
                 draw(x, y, v)

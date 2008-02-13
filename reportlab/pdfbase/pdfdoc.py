@@ -264,12 +264,12 @@ class PDFDocument:
                 # does pdfmetrics know about it? if so, add
                 fontObj = pdfmetrics.getFont(psfontname)
                 if fontObj._dynamicFont:
-                    raise PDFError, "getInternalFontName(%s) called for a dynamic font" % repr(psfontname)
+                    raise PDFError("getInternalFontName(%s) called for a dynamic font" % repr(psfontname))
                 fontObj.addObjects(self)
                 #self.addFont(fontObj)
                 return fm[psfontname]
             except KeyError:
-                raise PDFError, "Font %s not known!" % repr(psfontname)
+                raise PDFError("Font %s not known!" % repr(psfontname))
 
     def thisPageName(self):
         return "Page"+repr(self.pageCounter)
@@ -553,15 +553,18 @@ class PDFString:
         if type(s) is str:
             if enc is 'auto':
                 try:
-                    u = s.decode(s.startswith(codecs.BOM_UTF16_BE) and 'utf16' or 'utf8')
+                    s.decode('pdfdoc')
                 except:
-                    import sys
-                    print >>sys.stderr, 'Error in',repr(s)
-                    raise
-                if _checkPdfdoc(u):
-                    s = u.encode('pdfdoc')
-                else:
-                    s = codecs.BOM_UTF16_BE+u.encode('utf_16_be')
+                    try:
+                        u = s.decode(s.startswith(codecs.BOM_UTF16_BE) and 'utf16' or 'utf8')
+                    except:
+                        import sys
+                        print >>sys.stderr, 'Error in',repr(s)
+                        raise
+                    if _checkPdfdoc(u):
+                        s = u.encode('pdfdoc')
+                    else:
+                        s = codecs.BOM_UTF16_BE+u.encode('utf_16_be')
         elif type(s) is unicode:
             if enc is 'auto':
                 if _checkPdfdoc(s):

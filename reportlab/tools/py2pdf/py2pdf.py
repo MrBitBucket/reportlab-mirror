@@ -117,7 +117,7 @@ def makeTuple(aString):
         return eval(aString)
     else:
         details = '%s cannot be parsed into a numeric tuple!' % aString
-        raise 'ValueError', details
+        raise ValueError(details)
 
 
 def loadFontifier(options=None):
@@ -1487,7 +1487,7 @@ def main(cmdline):
     if find(cmdStr, 'paperSize') >= 0 and find(cmdStr, 'paperFormat') >= 0:
         details = "You can specify either paperSize or paperFormat, "
         details = detail + "but not both!"
-        raise 'ValueError', details
+        raise ValueError(details)
 
     # Create PDF converter and pass options to it.
     if options.input:
@@ -1499,7 +1499,7 @@ def main(cmdline):
             P = PDFPrinter
         else:
             details = "Input file type must be 'python' or 'ascii'."
-            raise 'ValueError', details
+            raise ValueError(details)
 
     else:
         P = PythonPDFPrinter
