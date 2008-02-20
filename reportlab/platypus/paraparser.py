@@ -470,15 +470,21 @@ class ParaParser(xmllib.XMLParser):
     #### anchor
     def start_a(self, attributes):
         A = self.getAttributes(attributes,_anchorAttrMap)
-        if A.get('name',None):
+        name = A.get('name',None)
+        if name is not None:
+            name = name.strip()
+            if not name:
+                self._syntax_error('<a name="..."/> anchor variant requires non-blank name')
             if len(A)>1:
                 self._syntax_error('<a name="..."/> anchor variant only allows name attribute')
                 A = dict(name=A['name'])
             A['_selfClosingTag'] = 'anchor'
-        elif not A.get('href',None):
-            self._syntax_error('<a> tag must have name or href attribute')
         else:
-            A['link'] = A.pop('href')   #convert to our link form
+            href = A.get('href','').strip()
+            if not href:
+                self._syntax_error('<a> tag must have non-blank name or href attribute')
+            A['link'] = href    #convert to our link form
+            A.pop('href')
         self._push(**A)
 
     def end_a(self):

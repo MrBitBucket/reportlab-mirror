@@ -710,6 +710,30 @@ cost to performance.""")
         c.rect(3*inch, 1.2*inch, w, h)
 
     c.showPage()
+    c.drawString(1*inch, 10.25*inch, "For rgba type images we can use the alpha channel if we set mask='auto'.")
+    c.drawString(1*inch, 10.25*inch-14.4, "The first image is solid red with variable alpha.")
+    c.drawString(1*inch, 10.25*inch-2*14.4, "The second image is white alpha=0% to purple=100%")
+
+
+    for i in xrange(8):
+        c.drawString(1*inch,8*inch+i*14.4,"mask=None   Line %d"%i)
+        c.drawString(3*inch,8*inch+i*14.4,"mask='auto' Line %d"%i)
+        c.drawString(1*inch,6*inch+i*14.4,"mask=None   Line %d"%i)
+        c.drawString(3*inch,6*inch+i*14.4,"mask='auto' Line %d"%i)
+    w = 100
+    h = 75
+    c.rect(1*inch, 8+14.4*inch, w, h)
+    c.rect(3*inch, 8+14.4*inch, w, h)
+    c.rect(1*inch, 6+14.4*inch, w, h)
+    c.rect(3*inch, 6+14.4*inch, w, h)
+    if haveImages:
+        png = os.path.join(os.path.dirname(unittest.__file__),'solid_red_alpha.png')
+        c.drawImage(png, 1*inch, 8*inch+14.4, w, h, mask=None)
+        c.drawImage(png, 3*inch, 8*inch+14.4, w, h, mask='auto')
+        png = os.path.join(os.path.dirname(unittest.__file__),'alpha_test.png')
+        c.drawImage(png, 1*inch, 6*inch+14.4, w, h, mask=None)
+        c.drawImage(png, 3*inch, 6*inch+14.4, w, h, mask='auto')
+    c.showPage()
 
     if haveImages:
         import shutil

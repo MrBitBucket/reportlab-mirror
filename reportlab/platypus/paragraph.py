@@ -2,10 +2,10 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/paragraph.py
 __version__=''' $Id$ '''
-from string import join, whitespace, find
+from string import join, whitespace
 from operator import truth
 from types import StringType, ListType
-from reportlab.pdfbase.pdfmetrics import stringWidth, getFont
+from reportlab.pdfbase.pdfmetrics import stringWidth, getFont, getAscentDescent
 from reportlab.platypus.paraparser import ParaParser
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib.colors import Color
@@ -14,10 +14,11 @@ from reportlab.lib.utils import _className
 from reportlab.lib.textsplit import wordSplit
 from copy import deepcopy
 from reportlab.lib.abag import ABag
+from reportlab.rl_config import platypus_link_underline 
 import re
 
 #on UTF8 branch, split and strip must be unicode-safe!
-def split(text, delim=' '):
+def split(text, delim=None):
     if type(text) is str: text = text.decode('utf8')
     if type(delim) is str: delim = delim.decode('utf8')
     return [uword.encode('utf8') for uword in text.split(delim)]
@@ -122,26 +123,38 @@ def imgVRange(h,va,fontSize):
         iyo = va
     return iyo,iyo+h
 
-def _putFragLine(tx,line):
+_56=5./6
+_16=1./6
+def _putFragLine(cur_x, tx, line):
     xs = tx.XtraState
-    cur_x = 0
     cur_y = xs.cur_y
     x0 = tx._x0
     autoLeading = xs.autoLeading
     leading = xs.leading
-    if autoLeading=='max':
-        leading = max(leading,line.ascent-line.descent)
-        xs.f = line
-    elif autoLeading=='min':
-        leading = line.ascent-line.descent
-        xs.f = line
-    oleading = tx._leading
-    if oleading!=leading:
+    cur_x += xs.leftIndent
+    dal = autoLeading in ('min','max')
+    if dal:
+        if autoLeading=='max':
+            ascent = max(_56*leading,line.ascent)
+            descent = max(_16*leading,-line.descent)
+        else:
+            ascent = line.ascent
+            descent = -line.descent
+        leading = ascent+descent
+    if tx._leading!=leading:
         tx.setLeading(leading)
-        if oleading!=None:
-            cur_y -= (leading-oleading)/1.6
-            tx.setTextOrigin(x0,cur_y)
-            xs.cur_y = cur_y
+    if dal:
+        olb = tx._olb
+        if olb is not None:
+            xcy = olb-ascent
+            if tx._oleading!=leading:
+                cur_y += leading - tx._oleading
+            if abs(xcy-cur_y)>1e-8:
+                cur_y = xcy
+                tx.setTextOrigin(x0,cur_y)
+                xs.cur_y = cur_y
+        tx._olb = cur_y - descent
+        tx._oleading = leading
     ws = getattr(tx,'_wordSpace',0)
     nSpaces = 0
     words = line.words
@@ -158,7 +171,7 @@ def _putFragLine(tx,line):
                     txfs = xs.style.fontSize
                 iy0,iy1 = imgVRange(h,cbDefn.valign,txfs)
                 cur_x_s = cur_x + nSpaces*ws
-                tx._canvas.drawImage(cbDefn.image,cur_x_s,cur_y+iy0,w,h)
+                tx._canvas.drawImage(cbDefn.image,cur_x_s,cur_y+iy0,w,h,mask='auto')
                 cur_x += w
                 cur_x_s += w
                 setXPos(tx,cur_x_s-tx._x0)
@@ -169,11 +182,13 @@ def _putFragLine(tx,line):
                 else:
                     func = getattr(tx._canvas,name,None)
                     if not func:
-                        raise AttributeError, "Missing %s callback attribute '%s'" % (kind,name)
+                        raise AttributeError("Missing %s callback attribute '%s'" % (kind,name))
                     func(tx._canvas,kind,cbDefn.label)
             if f is words[-1]:
                 if not tx._fontname:
                     tx.setFont(xs.style.fontName,xs.style.fontSize)
+                    tx._textOut('',1)
+                elif kind=='img':
                     tx._textOut('',1)
         else:
             cur_x_s = cur_x + nSpaces*ws
@@ -213,12 +228,21 @@ def _putFragLine(tx,line):
                     xs.strikes.append( (xs.strike_x, cur_x_s, xs.strikeColor) )
                     xs.strikeColor = xs.textColor
                     xs.strike_x = cur_x_s
-            if not xs.link and f.link:
-                xs.link = f.link
-                xs.link_x = cur_x_s
-            elif xs.link and f.link is not xs.link:
-                xs.links.append( (xs.link_x, cur_x_s, xs.link) )
-                xs.link = None
+            if f.link and not xs.link:
+                if not xs.link:
+                    xs.link = f.link
+                    xs.link_x = cur_x_s
+                    xs.linkColor = xs.textColor
+            elif xs.link:
+                if not f.link:
+                    xs.links.append( (xs.link_x, cur_x_s, xs.link, xs.linkColor) )
+                    xs.link = None
+                    xs.linkColor = None
+                elif f.link!=xs.link or xs.textColor!=xs.linkColor:
+                    xs.links.append( (xs.link_x, cur_x_s, xs.link, xs.linkColor) )
+                    xs.link = f.link
+                    xs.link_x = cur_x_s
+                    xs.linkColor = xs.textColor
             txtlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
             cur_x += txtlen
             nSpaces += text.count(' ')
@@ -228,42 +252,38 @@ def _putFragLine(tx,line):
     if xs.strike:
         xs.strikes.append( (xs.strike_x, cur_x_s, xs.strikeColor) )
     if xs.link:
-        xs.links.append( (xs.link_x, cur_x_s, xs.link) )
+        xs.links.append( (xs.link_x, cur_x_s, xs.link,xs.linkColor) )
     if tx._x0!=x0:
         setXPos(tx,x0-tx._x0)
 
 def _leftDrawParaLineX( tx, offset, line, last=0):
     setXPos(tx,offset)
-    _putFragLine(tx, line)
+    _putFragLine(offset, tx, line)
     setXPos(tx,-offset)
-    return offset
 
 def _centerDrawParaLineX( tx, offset, line, last=0):
     m = offset+0.5*line.extraSpace
     setXPos(tx,m)
-    _putFragLine(tx, line)
+    _putFragLine(m,tx, line)
     setXPos(tx,-m)
-    return m
 
 def _rightDrawParaLineX( tx, offset, line, last=0):
     m = offset+line.extraSpace
     setXPos(tx,m)
-    _putFragLine(tx, line)
+    _putFragLine(m,tx, line)
     setXPos(tx,-m)
-    return m
 
 def _justifyDrawParaLineX( tx, offset, line, last=0):
     setXPos(tx,offset)
     extraSpace = line.extraSpace
     nSpaces = line.wordCount - 1
     if last or not nSpaces or abs(extraSpace)<=1e-8 or line.lineBreak:
-        _putFragLine(tx, line)  #no space modification
+        _putFragLine(offset, tx, line)  #no space modification
     else:
         tx.setWordSpace(extraSpace / float(nSpaces))
-        _putFragLine(tx, line)
+        _putFragLine(offset, tx, line)
         tx.setWordSpace(0)
     setXPos(tx,-offset)
-    return offset
 
 try:
     from _rl_accel import _sameFrag
@@ -368,9 +388,11 @@ def _split_blParaHard(blPara,start,stop):
             f.append(w)
         if l is not lines[-1]:
             i = len(f)-1
-            while hasattr(f[i],'cbDefn') and not getattr(f[i].cbDefn,'width',0): i -= 1
-            g = f[i]
-            if g.text and g.text[-1]!=' ': g.text += ' '
+            while i>=0 and hasattr(f[i],'cbDefn') and not getattr(f[i].cbDefn,'width',0): i -= 1
+            if i>=0:
+                g = f[i]
+                if not g.text: g.text = ' '
+                elif g.text[-1]!=' ': g.text += ' '
     return f
 
 def _drawBullet(canvas, offset, cur_y, bulletText, style):
@@ -396,7 +418,7 @@ def _drawBullet(canvas, offset, cur_y, bulletText, style):
 def _handleBulletWidth(bulletText,style,maxWidths):
     '''work out bullet width and adjust maxWidths[0] if neccessary
     '''
-    if bulletText!=None:
+    if bulletText:
         if isinstance(bulletText,basestring):
             bulletWidth = stringWidth( bulletText, style.bulletFontName, style.bulletFontSize)
         else:
@@ -449,7 +471,7 @@ def splitLines0(frags,widths):
         cLen    = 0
         nSpaces = 0
         while cLen<maxW:
-            j = find(text,' ',start)
+            j = text.find(' ',start)
             if j<0: j==lim
             w = stringWidth(text[start:j],f.fontName,f.fontSize)
             cLen += w
@@ -497,7 +519,7 @@ def _do_link_line(i, t_off, ws, tx):
     textlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
     _doLink(tx, xs.link, (t_off, y, t_off+textlen+ws, y+leading))
 
-def _do_post_text(t_off, tx):
+def _do_post_text(tx):
     xs = tx.XtraState
     leading = xs.style.leading
     autoLeading = xs.autoLeading
@@ -509,33 +531,37 @@ def _do_post_text(t_off, tx):
     ff = 0.125*f.fontSize
     y0 = xs.cur_y
     y = y0 - ff
-    ulc = None
+    csc = None
     for x1,x2,c in xs.underlines:
-        if c!=ulc:
+        if c!=csc:
             tx._canvas.setStrokeColor(c)
-            ulc = c
-        tx._canvas.line(t_off+x1, y, t_off+x2, y)
+            csc = c
+        tx._canvas.line(x1, y, x2, y)
     xs.underlines = []
     xs.underline=0
     xs.underlineColor=None
 
     ys = y0 + 2*ff
-    ulc = None
     for x1,x2,c in xs.strikes:
-        if c!=ulc:
+        if c!=csc:
             tx._canvas.setStrokeColor(c)
-            ulc = c
-        tx._canvas.line(t_off+x1, ys, t_off+x2, ys)
+            csc = c
+        tx._canvas.line(x1, ys, x2, ys)
     xs.strikes = []
     xs.strike=0
     xs.strikeColor=None
 
     yl = y + leading
-    for x1,x2,link in xs.links:
-        tx._canvas.line(t_off+x1, y, t_off+x2, y)
-        _doLink(tx, link, (t_off+x1, y, t_off+x2, yl))
+    for x1,x2,link,c in xs.links:
+        if platypus_link_underline:
+            if c!=csc:
+                tx._canvas.setStrokeColor(c)
+                csc = c
+            tx._canvas.line(x1, y, x2, y)
+        _doLink(tx, link, (x1, y, x2, yl))
     xs.links = []
     xs.link=None
+    xs.linkColor=None
     xs.cur_y -= leading
 
 class Paragraph(Flowable):
@@ -597,7 +623,6 @@ class Paragraph(Flowable):
         self._setup(text, style, bulletText, frags, cleanBlockQuotedText)
 
     def __repr__(self):
-        import string
         n = self.__class__.__name__
         L = [n+"("]
         keys = self.__dict__.keys()
@@ -605,12 +630,12 @@ class Paragraph(Flowable):
             v = getattr(self, k)
             rk = repr(k)
             rv = repr(v)
-            rk = "  "+string.replace(rk, "\n", "\n  ")
-            rv = "    "+string.replace(rv, "\n", "\n    ")
+            rk = "  "+rk.replace("\n", "\n  ")
+            rv = "    "+rk.replace("\n", "\n    ")
             L.append(rk)
             L.append(rv)
         L.append(") #"+n)
-        return string.join(L, "\n")
+        return '\n'.join(L)
 
     def _setup(self, text, style, bulletText, frags, cleaner):
         if frags is None:
@@ -618,8 +643,8 @@ class Paragraph(Flowable):
             _parser.caseSensitive = self.caseSensitive
             style, frags, bulletTextFrags = _parser.parse(text,style)
             if frags is None:
-                raise "xml parser error (%s) in paragraph beginning\n'%s'"\
-                    % (_parser.errors[0],text[:min(30,len(text))])
+                raise ValueError("xml parser error (%s) in paragraph beginning\n'%s'"\
+                    % (_parser.errors[0],text[:min(30,len(text))]))
             if bulletTextFrags: bulletText = bulletTextFrags
 
         #AR hack
@@ -662,7 +687,7 @@ class Paragraph(Flowable):
                 leading = 1.2*style.fontSize
             height = len(blPara.lines) * leading
         self.height = height
-        return (self.width, height)
+        return self.width, height
 
     def minWidth(self):
         'Attempt to determine a minimum sensible width'
@@ -789,16 +814,19 @@ class Paragraph(Flowable):
         maxWidth = maxWidths[0]
 
         self.height = 0
+        autoLeading = getattr(self,'autoLeading',getattr(style,'autoLeading',''))
+        calcBounds = autoLeading not in ('','off')
         frags = self.frags
         nFrags= len(frags)
         if nFrags==1 and not hasattr(frags[0],'cbDefn'):
             f = frags[0]
             fontSize = f.fontSize
             fontName = f.fontName
+            ascent, descent = getAscentDescent(fontName,fontSize)
             words = hasattr(f,'text') and split(f.text, ' ') or f.words
             spaceWidth = stringWidth(' ', fontName, fontSize, self.encoding)
             cLine = []
-            currentWidth = - spaceWidth   # hack to get around extra space for word 1
+            currentWidth = -spaceWidth   # hack to get around extra space for word 1
             for word in words:
                 #this underscores my feeling that Unicode throughout would be easier!
                 wordWidth = stringWidth(word, fontName, fontSize, self.encoding)
@@ -824,7 +852,7 @@ class Paragraph(Flowable):
                 if currentWidth>self.width: self.width = currentWidth
                 lines.append((maxWidth - currentWidth, cLine))
 
-            return f.clone(kind=0, lines=lines,ascent=f.fontSize,descent=-0.2*f.fontSize)
+            return f.clone(kind=0, lines=lines,ascent=ascent,descent=descent,fontSize=fontSize)
         elif nFrags<=0:
             return ParaLines(kind=0, fontSize=style.fontSize, fontName=style.fontName,
                             textColor=style.textColor, ascent=style.fontSize,descent=-0.2*style.fontSize,
@@ -834,16 +862,18 @@ class Paragraph(Flowable):
                 #NB this is an utter hack that awaits the proper information
                 #preserving splitting algorithm
                 return self.blPara
-            autoLeading = getattr(self,'autoLeading',getattr(style,'autoLeading',''))
-            calcBounds = autoLeading not in ('','off')
             n = 0
             words = []
             for w in _getFragWords(frags):
-                spaceWidth = stringWidth(' ',w[-1][0].fontName, w[-1][0].fontSize)
+                f=w[-1][0]
+                fontName = f.fontName
+                fontSize = f.fontSize
+                spaceWidth = stringWidth(' ',fontName, fontSize)
 
-                if n==0:
+                if not words:
                     currentWidth = -spaceWidth   # hack to get around extra space for word 1
-                    minDescent = maxSize = 0
+                    maxSize = fontSize
+                    maxAscent, minDescent = getAscentDescent(fontName,fontSize)
 
                 wordWidth = w[0]
                 f = w[1][0]
@@ -860,18 +890,19 @@ class Paragraph(Flowable):
                     if lineBreak: continue      #throw it away
                     nText = w[1][1]
                     if nText: n += 1
-                    ascent = f.fontSize
+                    fontSize = f.fontSize
                     if calcBounds:
                         cbDefn = getattr(f,'cbDefn',None)
                         if getattr(cbDefn,'width',0):
-                            descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,ascent)
+                            descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
                         else:
-                            descent = -ascent*0.2
+                            ascent, descent = getAscentDescent(f.fontName,fontSize)
                     else:
-                        descent = -ascent*0.2
-                    maxSize = max(maxSize,ascent)
+                        ascent, descent = getAscentDescent(f.fontName,fontSize)
+                    maxSize = max(maxSize,fontSize)
+                    maxAscent = max(maxAscent,ascent)
                     minDescent = min(minDescent,descent)
-                    if words==[]:
+                    if not words:
                         g = f.clone()
                         words = [g]
                         g.text = nText
@@ -903,16 +934,17 @@ class Paragraph(Flowable):
                         g = i[0].clone()
                         g.text=i[1]
                         words.append(g)
-                        ascent = g.fontSize
+                        fontSize = g.fontSize
                         if calcBounds:
                             cbDefn = getattr(g,'cbDefn',None)
                             if getattr(cbDefn,'width',0):
-                                descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,ascent)
+                                descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
                             else:
-                                descent = -ascent*0.2
+                                ascent, descent = getAscentDescent(g.fontName,fontSize)
                         else:
-                            descent = -ascent*0.2
-                        maxSize = max(maxSize,ascent)
+                            ascent, descent = getAscentDescent(g.fontName,fontSize)
+                        maxSize = max(maxSize,fontSize)
+                        maxAscent = max(maxAscent,ascent)
                         minDescent = min(minDescent,descent)
 
                     currentWidth = newWidth
@@ -925,7 +957,7 @@ class Paragraph(Flowable):
                     if currentWidth>self.width: self.width = currentWidth
                     #end of line
                     lines.append(FragLine(extraSpace=maxWidth-currentWidth, wordCount=n,
-                                        lineBreak=lineBreak, words=words, fontSize=maxSize, ascent=maxSize, descent=minDescent))
+                                        lineBreak=lineBreak, words=words, fontSize=maxSize, ascent=maxAscent, descent=minDescent))
 
                     #start new line
                     lineno += 1
@@ -942,17 +974,15 @@ class Paragraph(Flowable):
                     currentWidth = wordWidth
                     n = 1
                     g = f.clone()
-                    ascent = g.fontSize
+                    maxSize = g.fontSize
                     if calcBounds:
                         cbDefn = getattr(g,'cbDefn',None)
                         if getattr(cbDefn,'width',0):
-                            descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,ascent)
+                            minDescent,maxAscent = imgVRange(cbDefn.height,cbDefn.valign,maxSize)
                         else:
-                            descent = -ascent*0.2
+                            maxAscent, minDescent = getAscentDescent(g.fontName,maxSize)
                     else:
-                        descent = -ascent*0.2
-                    maxSize = ascent
-                    minDescent = descent
+                        maxAscent, minDescent = getAscentDescent(g.fontName,maxSize)
                     words = [g]
                     g.text = w[1][1]
 
@@ -960,23 +990,24 @@ class Paragraph(Flowable):
                         g = i[0].clone()
                         g.text=i[1]
                         words.append(g)
-                        ascent = g.fontSize
+                        fontSize = g.fontSize
                         if calcBounds:
                             cbDefn = getattr(g,'cbDefn',None)
                             if getattr(cbDefn,'width',0):
-                                descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,ascent)
+                                descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
                             else:
-                                descent = -ascent*0.2
+                                ascent, descent = getAscentDescent(g.fontName,fontSize)
                         else:
-                            descent = -ascent*0.2
-                        maxSize = max(maxSize,ascent)
+                            ascent, descent = getAscentDescent(g.fontName,fontSize)
+                        maxSize = max(maxSize,fontSize)
+                        maxAscent = max(maxAscent,ascent)
                         minDescent = min(minDescent,descent)
 
             #deal with any leftovers on the final line
             if words!=[]:
                 if currentWidth>self.width: self.width = currentWidth
                 lines.append(ParaLines(extraSpace=(maxWidth - currentWidth),wordCount=n,
-                                    words=words, fontSize=maxSize,ascent=maxSize,descent=minDescent))
+                                    words=words, fontSize=maxSize,ascent=maxAscent,descent=minDescent))
             return ParaLines(kind=1, lines=lines)
 
         return lines
@@ -1103,8 +1134,8 @@ class Paragraph(Flowable):
                 elif self.style.alignment == TA_JUSTIFY:
                     dpl = _justifyDrawParaLine
                 f = blPara
-                cur_y = self.height - f.fontSize
-                if bulletText <> None:
+                cur_y = self.height - getattr(f,'ascent',f.fontSize)    #TODO fix XPreformatted to remove this hack
+                if bulletText:
                     offset = _drawBullet(canvas,offset,cur_y,bulletText,style)
 
                 #set up the font etc.
@@ -1135,27 +1166,31 @@ class Paragraph(Flowable):
                     canvas.setStrokeColor(f.textColor)
                     dx = t_off+leftIndent
                     if dpl!=_justifyDrawParaLine: ws = 0
-                    if f.underline: _do_under_line(0, dx, ws, tx)
-                    if f.strike: _do_under_line(0, dx, ws, tx, lm=0.125)
-                    if f.link: _do_link_line(0, dx, ws, tx)
+                    underline = f.underline or (f.link and platypus_link_underline)
+                    strike = f.strike
+                    link = f.link
+                    if underline: _do_under_line(0, dx, ws, tx)
+                    if strike: _do_under_line(0, dx, ws, tx, lm=0.125)
+                    if link: _do_link_line(0, dx, ws, tx)
 
                     #now the middle of the paragraph, aligned with the left margin which is our origin.
                     for i in xrange(1, nLines):
                         ws = lines[i][0]
                         t_off = dpl( tx, _offsets[i], ws, lines[i][1], noJustifyLast and i==lim)
                         if dpl!=_justifyDrawParaLine: ws = 0
-                        if f.underline: _do_under_line(i, t_off+leftIndent, ws, tx)
-                        if f.strike: _do_under_line(i, t_off+leftIndent, tx, ws, lm=0.125)
-                        if f.link: _do_link_line(i, t_off+leftIndent, ws, tx)
+                        if underline: _do_under_line(i, t_off+leftIndent, ws, tx)
+                        if strike: _do_under_line(i, t_off+leftIndent, ws, tx, lm=0.125)
+                        if link: _do_link_line(i, t_off+leftIndent, ws, tx)
                 else:
                     for i in xrange(1, nLines):
                         dpl( tx, _offsets[i], lines[i][0], lines[i][1], noJustifyLast and i==lim)
             else:
                 f = lines[0]
-                cur_y = self.height - f.fontSize
+                cur_y = self.height - getattr(f,'ascent',f.fontSize)    #TODO fix XPreformatted to remove this hack
                 # default?
                 dpl = _leftDrawParaLineX
-                if bulletText <> None:
+                if bulletText:
+                    oo = offset
                     offset = _drawBullet(canvas,offset,cur_y,bulletText,style)
                 if alignment == TA_LEFT:
                     dpl = _leftDrawParaLineX
@@ -1166,7 +1201,7 @@ class Paragraph(Flowable):
                 elif self.style.alignment == TA_JUSTIFY:
                     dpl = _justifyDrawParaLineX
                 else:
-                    raise ValueError, "bad align %s" % repr(alignment)
+                    raise ValueError("bad align %s" % repr(alignment))
 
                 #set up the font etc.
                 tx = self.beginText(cur_x, cur_y)
@@ -1182,21 +1217,23 @@ class Paragraph(Flowable):
                 xs.links=[]
                 xs.link=None
                 xs.leading = style.leading
+                xs.leftIndent = leftIndent
                 tx._leading = None
+                tx._olb = None
                 xs.cur_y = cur_y
                 xs.f = f
                 xs.style = style
                 xs.autoLeading = autoLeading
 
                 tx._fontname,tx._fontsize = None, None
-                t_off = dpl( tx, offset, lines[0], noJustifyLast and nLines==1)
-                _do_post_text(t_off+leftIndent, tx)
+                dpl( tx, offset, lines[0], noJustifyLast and nLines==1)
+                _do_post_text(tx)
 
                 #now the middle of the paragraph, aligned with the left margin which is our origin.
-                for i in range(1, nLines):
+                for i in xrange(1, nLines):
                     f = lines[i]
-                    t_off = dpl( tx, _offsets[i], f, noJustifyLast and i==lim)
-                    _do_post_text(t_off+leftIndent, tx)
+                    dpl( tx, _offsets[i], f, noJustifyLast and i==lim)
+                    _do_post_text(tx)
 
             canvas.drawText(tx)
             canvas.restoreState()
@@ -1242,7 +1279,7 @@ if __name__=='__main__':    #NORUNTESTS
                 words = line[1]
             nwords = len(words)
             print 'line%d: %d(%s)\n  ' % (l,nwords,str(getattr(line,'wordCount','Unknown'))),
-            for w in range(nwords):
+            for w in xrange(nwords):
                 print "%d:'%s'"%(w,getattr(words[w],'text',words[w])),
             print
 

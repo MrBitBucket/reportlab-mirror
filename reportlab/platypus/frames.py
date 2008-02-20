@@ -82,7 +82,7 @@ class Frame:
 
     def __getattr__(self,a):
         if a in _geomAttr: return self.__dict__['_'+a]
-        raise AttributeError, a
+        raise AttributeError(a)
 
     def __setattr__(self,a,v):
         if a in _geomAttr:
@@ -148,8 +148,9 @@ class Frame:
 
         if y < p-_FUZZ:
             if not rl_config.allowTableBoundsErrors and ((h>self._aH or w>aW) and not trySplit):
-                raise "LayoutError", "Flowable %s (%sx%s points) too large for frame (%sx%s points)." % (
-                    flowable.__class__, w,h, aW,self._aH)
+                from reportlab.platypus.doctemplate import LayoutError
+                raise LayoutError("Flowable %s (%sx%s points) too large for frame (%sx%s points)." % (
+                    flowable.__class__, w,h, aW,self._aH))
             return 0
         else:
             #now we can draw it, and update the current point.

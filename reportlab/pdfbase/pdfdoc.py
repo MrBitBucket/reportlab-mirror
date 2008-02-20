@@ -18,7 +18,7 @@ import string, types, binascii, codecs
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfutils import LINEEND # this constant needed in both
 from reportlab import rl_config
-from reportlab.lib.utils import import_zlib, open_for_read, fp_str
+from reportlab.lib.utils import import_zlib, open_for_read, fp_str, _digester
 from reportlab.pdfbase import pdfmetrics
 
 from sys import platform
@@ -264,12 +264,12 @@ class PDFDocument:
                 # does pdfmetrics know about it? if so, add
                 fontObj = pdfmetrics.getFont(psfontname)
                 if fontObj._dynamicFont:
-                    raise PDFError, "getInternalFontName(%s) called for a dynamic font" % repr(psfontname)
+                    raise PDFError("getInternalFontName(%s) called for a dynamic font" % repr(psfontname))
                 fontObj.addObjects(self)
                 #self.addFont(fontObj)
                 return fm[psfontname]
             except KeyError:
-                raise PDFError, "Font %s not known!" % repr(psfontname)
+                raise PDFError("Font %s not known!" % repr(psfontname))
 
     def thisPageName(self):
         return "Page"+repr(self.pageCounter)
@@ -281,7 +281,7 @@ class PDFDocument:
         name = self.thisPageName()
         self.Reference(page, name)
         self.Pages.addPage(page)
-        self.pageCounter = self.pageCounter+1
+        self.pageCounter += 1
         self.inObject = None
 
     def addForm(self, name, form):
@@ -553,15 +553,18 @@ class PDFString:
         if type(s) is str:
             if enc is 'auto':
                 try:
-                    u = s.decode(s.startswith(codecs.BOM_UTF16_BE) and 'utf16' or 'utf8')
+                    s.decode('pdfdoc')
                 except:
-                    import sys
-                    print >>sys.stderr, 'Error in',repr(s)
-                    raise
-                if _checkPdfdoc(u):
-                    s = u.encode('pdfdoc')
-                else:
-                    s = codecs.BOM_UTF16_BE+u.encode('utf_16_be')
+                    try:
+                        u = s.decode(s.startswith(codecs.BOM_UTF16_BE) and 'utf16' or 'utf8')
+                    except:
+                        import sys
+                        print >>sys.stderr, 'Error in',repr(s)
+                        raise
+                    if _checkPdfdoc(u):
+                        s = u.encode('pdfdoc')
+                    else:
+                        s = codecs.BOM_UTF16_BE+u.encode('utf_16_be')
         elif type(s) is unicode:
             if enc is 'auto':
                 if _checkPdfdoc(s):
@@ -2022,11 +2025,16 @@ class PDFImageXObject:
 
     def _checkTransparency(self,im):
         if self.mask=='auto':
-            tc = im.getTransparent()
-            if tc:
-                self.mask = (tc[0], tc[0], tc[1], tc[1], tc[2], tc[2])
-            else:
+            if im._dataA:
                 self.mask = None
+                self._smask = PDFImageXObject(_digester(im._dataA.getRGBData()),im._dataA,mask=None)
+                self._smask._decode = [0,1]
+            else:
+                tc = im.getTransparent()
+                if tc:
+                    self.mask = (tc[0], tc[0], tc[1], tc[1], tc[2], tc[2])
+                else:
+                    self.mask = None
         elif hasattr(self.mask,'rgb'):
             _ = self.mask.rgb()
             self.mask = _[0],_[0],_[1],_[1],_[2],_[2]
@@ -2060,9 +2068,12 @@ class PDFImageXObject:
         dict["ColorSpace"] = PDFName(self.colorSpace)
         if self.colorSpace=='DeviceCMYK' and getattr(self,'_dotrans',0):
             dict["Decode"] = PDFArray([1,0,1,0,1,0,1,0])
+        elif getattr(self,'_decode',None):
+            dict["Decode"] = PDFArray(self._decode)
         dict["Filter"] = PDFArray(map(PDFName,self._filters))
         dict["Length"] = len(self.streamContent)
         if self.mask: dict["Mask"] = PDFArray(self.mask)
+        if getattr(self,'smask',None): dict["SMask"] = self.smask
         return S.format(document)
 
 if __name__=="__main__":

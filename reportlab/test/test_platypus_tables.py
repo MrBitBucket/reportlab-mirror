@@ -22,7 +22,6 @@ def getTable():
             )
     return t
 
-
 def makeStyles():
     styles = []
     for i in range(5):
@@ -38,7 +37,6 @@ def makeStyles():
         style.add('LINEABOVE', (0, -1), (-1,-1), 2, colors.black)
     styles[-1].add('LINEBELOW',(1,-1), (-1, -1), 2, (0.5, 0.5, 0.5))
     return styles
-
 
 def run():
     doc = SimpleDocTemplate(outputfile('test_platypus_tables.pdf'), pagesize=(8.5*inch, 11*inch), showBoundary=1)
@@ -708,8 +706,64 @@ LIST_STYLE = TableStyle(
 
     lst.append(t)
 
-    SimpleDocTemplate(outputfile('tables.pdf'), showBoundary=1).build(lst)
+    #Volker Haas' example extended
+    #the optimal row heights are the solution of an LP similar to
+    #
+    #Objective function
+    #   min: 3*h0+3*h1+3*h2+2*h3;
+    #
+    #constraints
+    #   h0>=12;
+    #   h1>=12;
+    #   h2>=12;
+    #   h3>=12;
+    #   h0+h1+h2>=48;
+    #   h0+h1>=12;
+    #   h2+h3>=60;
+    #
+    #the solution H=[12,12,24,36]
+    def makeTable(x,y):
+        return Table([
+                ['00', '01', '02', '03', '04', '05\nline2\nline3\nline4'],
+                ['', '11', '12', x, '',''],
+                ['20', '21', y, '23', '24',''],
+                ['30', '31', '', '33', '34','35'],
+                ],
+                style=[
+                    ('TOPPADDING',(0,0),(-1,-1),0),
+                    ('BOTTOMPADDING',(0,0),(-1,-1),0),
+                    ('RIGHTPADDING',(0,0),(-1,-1),0),
+                    ('LEFTPADDING',(0,0),(-1,-1),0),
+                    ('GRID',(0,0),(-1,-1),0.5,colors.grey),
+                    ('BACKGROUND', (0, 0), (0, 1), colors.pink),
+                    ('SPAN',(0,0),(0,1)),
+                    ('BACKGROUND', (2, 2), (2, 3), colors.orange),
+                    ('SPAN',(2,2),(2,3)),
+                    ('SPAN',(3,1),(4,1)),
+                    ('SPAN',(5,0),(5,2)),
+                ])
+    p_style= ParagraphStyle('Normal')
+    lst.append(makeTable(
+            Paragraph('This is a string',p_style),
+            Paragraph('22<br/>blub<br/>asfd<br/>afd<br/>asdfs', p_style)
+            ))
 
+    lst.append(Spacer(10,10))
+    lst.append(makeTable(
+            XPreformatted('This is a string',p_style),
+            Paragraph('22<br/>blub<br/>asfd<br/>afd<br/>asdfs', p_style)
+            ))
+    lst.append(Spacer(10,10))
+    lst.append(makeTable(
+            'This is a string',
+            '22\nblub\nasfd\nafd\nasdfs',
+            ))
+    lst.append(Spacer(10,10))
+    lst.append(makeTable(
+            'This is a string',
+            Paragraph('22<br/>blub<br/>asfd<br/>afd<br/>asdfs', p_style)
+            ))
+    SimpleDocTemplate(outputfile('tables.pdf'), showBoundary=1).build(lst)
 
 class TablesTestCase(unittest.TestCase):
     "Make documents with tables"

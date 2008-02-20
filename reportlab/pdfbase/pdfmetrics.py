@@ -684,18 +684,25 @@ except ImportError:
 _notdefFont,_notdefChar = getFont('ZapfDingbats'),chr(110)
 standardT1SubstitutionFonts.extend([getFont('Symbol'),getFont('ZapfDingbats')])
 
-def getAscentDescent(fontName):
+def getAscentDescent(fontName,fontSize=None):
     font = getFont(fontName)
     try:
-        return font.ascent,font.descent
+        ascent = font.ascent
+        descent = font.descent
     except:
-        return font.face.ascent,font.face.descent
+        ascent = font.face.ascent
+        descent = font.face.descent
+    if fontSize:
+        norm = fontSize/1000.
+        return ascent*norm, descent*norm
+    else:
+        return ascent, descent
 
-def getAscent(fontName):
-    return getAscentDescent(fontName)[0]
+def getAscent(fontName,fontSize=None):
+    return getAscentDescent(fontName,fontSize)[0]
 
-def getDescent(fontName):
-    return getAscentDescent(fontName)[1]
+def getDescent(fontName,fontSize=None):
+    return getAscentDescent(fontName,fontSize)[1]
 
 def getRegisteredFontNames():
     "Returns what's in there"

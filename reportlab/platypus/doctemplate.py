@@ -597,8 +597,8 @@ class BaseDocTemplate:
         if i:
             if i<n and not getattr(flowables[i],'locChanger',None): i += 1
             K = KeepTogether(flowables[:i])
-            for f in K._content:
-                f.keepWithNext = 0
+            for f in K._content[:-1]:
+                f.__dict__['keepWithNext'] = 0
             del flowables[:i]
             flowables.insert(0,K)
 

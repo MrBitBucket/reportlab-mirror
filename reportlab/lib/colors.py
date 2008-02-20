@@ -537,7 +537,7 @@ def toColor(arg,default=None):
         return HexColor(arg)
     except:
         if default is None:
-            raise 'Invalid color value', str(arg)
+            raise ValueError('Invalid color value %r' % arg)
         return default
 
 def toColorOrNone(arg,default=None):

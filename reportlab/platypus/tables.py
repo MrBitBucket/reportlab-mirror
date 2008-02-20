@@ -203,6 +203,21 @@ def _endswith(obj,s):
     except:
         return 0
 
+def spanFixDim(V0,V,spanCons,FUZZ=rl_config._FUZZ):
+    #assign required space to variable rows equally to existing calculated values
+    M = {}
+    for (x0,x1),v in spanCons.iteritems():
+        t = sum([V[x]+M.get(x,0) for x in xrange(x0,x1+1)])
+        if t>=v-FUZZ: continue      #already good enough
+        X = [x for x in xrange(x0,x1+1) if V0[x] is None]   #variable candidates
+        if not X: continue          #something wrong here mate
+        v -= t
+        v /= float(len(X))
+        for x in X:
+            M[x] = max(M.get(x,v),v)
+    for x,v in M.iteritems():
+        V[x] += v
+
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
                 repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None, ident=None,
@@ -211,7 +226,7 @@ class Table(Flowable):
         self.hAlign = hAlign or 'CENTER'
         self.vAlign = vAlign or 'MIDDLE'
         if type(data) not in _SeqTypes:
-            raise ValueError, "%s invalid data type" % self.identity()
+            raise ValueError("%s invalid data type" % self.identity())
         self._nrows = nrows = len(data)
         self._cellvalues = []
         _seqCW = type(colWidths) in _SeqTypes
@@ -222,7 +237,7 @@ class Table(Flowable):
         if not emptyTableAction: emptyTableAction = rl_config.emptyTableAction
         if not (nrows and ncols):
             if emptyTableAction=='error':
-                raise ValueError, "%s must have at least a row and column" % self.identity()
+                raise ValueError("%s must have at least a row and column" % self.identity())
             elif emptyTableAction=='indicate':
                 self.__class__ = Preformatted
                 global _emptyTableStyle
@@ -235,20 +250,20 @@ class Table(Flowable):
                 self.__class__ = Spacer
                 Spacer.__init__(self,0,0)
             else:
-                raise ValueError, '%s bad emptyTableAction: "%s"' % (self.identity(),emptyTableAction)
+                raise ValueError('%s bad emptyTableAction: "%s"' % (self.identity(),emptyTableAction))
             return
 
         # we need a cleanup pass to ensure data is strings - non-unicode and non-null
         self._cellvalues = self.normalizeData(data)
         if not _seqCW: colWidths = ncols*[colWidths]
         elif len(colWidths) != ncols:
-            raise ValueError, "%s data error - %d columns in data but %d in grid" % (self.identity(),ncols, len(colWidths))
+            raise ValueError("%s data error - %d columns in data but %d in column widths" % (self.identity(),ncols, len(colWidths)))
         if not _seqRH: rowHeights = nrows*[rowHeights]
         elif len(rowHeights) != nrows:
-            raise ValueError, "%s data error - %d rows in data but %d in grid" % (self.identity(),nrows, len(rowHeights))
+            raise ValueError("%s data error - %d rows in data but %d in row heights" % (self.identity(),nrows, len(rowHeights)))
         for i in xrange(nrows):
             if len(data[i]) != ncols:
-                raise ValueError, "%s not enough data points in row %d!" % (self.identity(),i)
+                raise ValueError("%s not enough data columns in row %d!" % (self.identity(),i))
         self._rowHeights = self._argH = rowHeights
         self._colWidths = self._argW = colWidths
         cellrows = []
@@ -371,8 +386,18 @@ class Table(Flowable):
         if None in W:  #some column widths are not given
             canv = getattr(self,'canv',None)
             saved = None
-            colSpanCells = self._spanCmds and self._colSpanCells or ()
-            if W is self._argW: W = W[:]
+            if self._spanCmds:
+                colSpanCells = self._colSpanCells
+                spanRanges = self._spanRanges
+            else:
+                colSpanCells = ()
+                spanRanges = {}
+            spanCons = {}
+            if W is self._argW:
+                W0 = W
+                W = W[:]
+            else:
+                W0 = W[:]
             while None in W:
                 j = W.index(None) #find first unspecified column
                 f = lambda x,j=j: operator.getitem(x,j)
@@ -382,19 +407,29 @@ class Table(Flowable):
                 i = 0
 
                 for v, s in map(None, V, S):
-                    #if the current cell is part of a spanned region,
-                    #assume a zero size.
-                    if (j, i) in colSpanCells:
-                        t = 0.0
+                    ji = j,i
+                    span = spanRanges.get(ji,None)
+                    if ji in colSpanCells and not span: #if the current cell is part of a spanned region,
+                        t = 0.0                         #assume a zero size.
                     else:#work out size
                         t = self._elementWidth(v,s)
                         if t is None:
-                            raise ValueError, "Flowable %s in cell(%d,%d) can't have auto width\n%s" % (v.identity(30),i,j,self.identity(30))
-                        t = t + s.leftPadding+s.rightPadding
+                            raise ValueError("Flowable %s in cell(%d,%d) can't have auto width\n%s" % (v.identity(30),i,j,self.identity(30)))
+                        t += s.leftPadding+s.rightPadding
+                        if span:
+                            c0 = span[0]
+                            c1 = span[2]
+                            if c0!=c1:
+                                x = c0,c1
+                                spanCons[x] = max(spanCons.get(x,t),t)
+                                t = 0
                     if t>w: w = t   #record a new maximum
-                    i = i + 1
+                    i += 1
 
                 W[j] = w
+
+            if spanCons:
+                spanFixDim(W0,W,spanCons)
 
         self._colWidths = W
         width = 0
@@ -407,8 +442,7 @@ class Table(Flowable):
         self._width_calculated_once = 1
 
     def _elementWidth(self,v,s):
-        t = type(v)
-        if t in _SeqTypes:
+        if isinstance(v,(list,tuple)):
             w = 0
             for e in v:
                 ew = self._elementWidth(e,s)
@@ -451,9 +485,13 @@ class Table(Flowable):
                 colpositions = self._colpositions
             else:
                 rowSpanCells = colSpanCells = ()
+                spanRanges = {}
             if canv: saved = canv._fontname, canv._fontsize, canv._leading
+            H0 = H
             H = H[:]    #make a copy as we'll change it
             self._rowHeights = H
+            spanCons = {}
+            FUZZ = rl_config._FUZZ
             while None in H:
                 i = H.index(None)
                 if longTable:
@@ -467,30 +505,41 @@ class Table(Flowable):
                 j = 0
                 for j,(v, s, w) in enumerate(map(None, V, S, W)): # value, style, width (lengths must match)
                     ji = j,i
-                    if ji in rowSpanCells:
+                    span = spanRanges.get(ji,None)
+                    if ji in rowSpanCells and not span:
                         continue # don't count it, it's either occluded or unreliable
                     else:
                         if isinstance(v,(tuple,list,Flowable)):
                             if isinstance(v,Flowable): v = (v,)
                             if w is None and not self._canGetWidth(v):
-                                raise ValueError, "Flowable %s in cell(%d,%d) can't have auto width in\n%s" % (v[0].identity(30),i,j,self.identity(30))
+                                raise ValueError("Flowable %s in cell(%d,%d) can't have auto width in\n%s" % (v[0].identity(30),i,j,self.identity(30)))
                             if canv: canv._fontname, canv._fontsize, canv._leading = s.fontname, s.fontsize, s.leading or 1.2*s.fontsize
                             if ji in colSpanCells:
-                                t = spanRanges[ji]
-                                if not t: continue
-                                w = max(colpositions[t[2]+1]-colpositions[t[0]],w)
+                                if not span: continue
+                                w = max(colpositions[span[2]+1]-colpositions[span[0]],w)
                             dW,t = self._listCellGeom(v,w or self._listValueWidth(v),s)
                             if canv: canv._fontname, canv._fontsize, canv._leading = saved
                             dW = dW + s.leftPadding + s.rightPadding
                             if not rl_config.allowTableBoundsErrors and dW>w:
-                                raise "LayoutError", "Flowable %s (%sx%s points) too wide for cell(%d,%d) (%sx* points) in\n%s" % (v[0].identity(30),fp_str(dW),fp_str(t),i,j, fp_str(w), self.identity(30))
+                                from reportlab.platypus.doctemplate import LayoutError
+                                raise LayoutError("Flowable %s (%sx%s points) too wide for cell(%d,%d) (%sx* points) in\n%s" % (v[0].identity(30),fp_str(dW),fp_str(t),i,j, fp_str(w), self.identity(30)))
                         else:
                             v = (v is not None and str(v) or '').split("\n")
                             t = (s.leading or 1.2*s.fontSize)*len(v)
                         t += s.bottomPadding+s.topPadding
+                        if span:
+                            r0 = span[1]
+                            r1 = span[3]
+                            if r0!=r1:
+                                x = r0,r1
+                                spanCons[x] = max(spanCons.get(x,t),t)
+                                t = 0
                     if t>h: h = t   #record a new maximum
                 H[i] = h
             if None not in H: hmax = lim
+
+            if spanCons:
+                spanFixDim(H0,H,spanCons)
 
         height = self._height = reduce(operator.add, H[:hmax], 0)
         self._rowpositions = [height]    # index 0 is actually topline; we skip when processing cells
@@ -1086,7 +1135,7 @@ class Table(Flowable):
 
         #we're going to split into two superRows
         #R0 = slelf.__class__( data[:n], self._argW, self._argH[:n],
-        R0 = self.__class__( data[:n], self._colWidths, self._argH[:n],
+        R0 = self.__class__( data[:n], colWidths=self._colWidths, rowHeights=self._argH[:n],
                 repeatRows=repeatRows, repeatCols=repeatCols,
                 splitByRow=splitByRow)
 
@@ -1145,8 +1194,8 @@ class Table(Flowable):
 
         if repeatRows:
             #R1 = slelf.__class__(data[:repeatRows]+data[n:],self._argW,
-            R1 = self.__class__(data[:repeatRows]+data[n:],self._colWidths,
-                    self._argH[:repeatRows]+self._argH[n:],
+            R1 = self.__class__(data[:repeatRows]+data[n:],colWidths=self._colWidths,
+                    rowHeights=self._argH[:repeatRows]+self._argH[n:],
                     repeatRows=repeatRows, repeatCols=repeatCols,
                     splitByRow=splitByRow)
             R1._cellStyles = self._cellStyles[:repeatRows]+self._cellStyles[n:]
@@ -1156,7 +1205,7 @@ class Table(Flowable):
             R1._cr_1_1(n,repeatRows,self._nosplitCmds)
         else:
             #R1 = slelf.__class__(data[n:], self._argW, self._argH[n:],
-            R1 = self.__class__(data[n:], self._colWidths, self._argH[n:],
+            R1 = self.__class__(data[n:], colWidths=self._colWidths, rowHeights=self._argH[n:],
                     repeatRows=repeatRows, repeatCols=repeatCols,
                     splitByRow=splitByRow)
             R1._cellStyles = self._cellStyles[n:]
@@ -1323,7 +1372,7 @@ class Table(Flowable):
                 elif just in ('CENTRE', 'CENTER'):
                     x = colpos+(colwidth+cellstyle.leftPadding-cellstyle.rightPadding-w)/2.0
                 else:
-                    raise ValueError, 'Invalid justification %s' % just
+                    raise ValueError('Invalid justification %s' % just)
                 y -= v.getSpaceBefore()
                 y -= h
                 v.drawOn(self.canv,x,y)
@@ -1334,7 +1383,7 @@ class Table(Flowable):
                 x = colpos + cellstyle.leftPadding
             elif just in ('CENTRE', 'CENTER'):
                 draw = self.canv.drawCentredString
-                x = colpos + colwidth * 0.5
+                x = colpos+(colwidth+cellstyle.leftPadding-cellstyle.rightPadding)*0.5
             elif just == 'RIGHT':
                 draw = self.canv.drawRightString
                 x = colpos + colwidth - cellstyle.rightPadding
@@ -1342,7 +1391,7 @@ class Table(Flowable):
                 draw = self.canv.drawAlignedString
                 x = colpos + colwidth - cellstyle.rightPadding
             else:
-                raise ValueError, 'Invalid justification %s' % just
+                raise ValueError('Invalid justification %s' % just)
             vals = string.split(str(cellval), "\n")
             n = len(vals)
             leading = cellstyle.leading
@@ -1355,7 +1404,7 @@ class Table(Flowable):
                 #tim roberts pointed out missing fontsize correction 2004-10-04
                 y = rowpos + (cellstyle.bottomPadding + rowheight-cellstyle.topPadding+n*leading)/2.0 - fontsize
             else:
-                raise ValueError, "Bad valign: '%s'" % str(valign)
+                raise ValueError("Bad valign: '%s'" % str(valign))
 
             for v in vals:
                 draw(x, y, v)

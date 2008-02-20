@@ -67,11 +67,11 @@ class _PDFColorSetter:
             elif l==4:
                 self.setFillColorCMYK(aColor[0], aColor[1], aColor[2], aColor[3])
             else:
-                raise 'Unknown color', str(aColor)
+                raise ValueError('Unknown color %r' % aColor)
         elif type(aColor) is StringType:
             self.setFillColor(toColor(aColor))
         else:
-            raise 'Unknown color', str(aColor)
+            raise ValueError('Unknown color %r' % aColor)
 
     def setStrokeColor(self, aColor):
         """Takes a color object, allowing colors to be referred to by name"""
@@ -92,11 +92,11 @@ class _PDFColorSetter:
             elif l==4:
                 self.setStrokeColorCMYK(aColor[0], aColor[1], aColor[2], aColor[3])
             else:
-                raise 'Unknown color', str(aColor)
+                raise ValueError('Unknown color %r' % aColor)
         elif type(aColor) is StringType:
             self.setStrokeColor(toColor(aColor))
         else:
-            raise 'Unknown color', str(aColor)
+            raise ValueError('Unknown color %r' % aColor)
 
     def setFillGray(self, gray):
         """Sets the gray level; 0.0=black, 1.0=white"""

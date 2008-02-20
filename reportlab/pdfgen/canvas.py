@@ -21,7 +21,7 @@ from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
-from reportlab.lib.utils import import_zlib, ImageReader, fp_str
+from reportlab.lib.utils import import_zlib, ImageReader, fp_str, _digester
 from reportlab.lib.boxstuff import aspectRatioFix, anchorAdjustXY
 
 digitPat = re.compile('\d')  #used in decimal alignment
@@ -52,14 +52,6 @@ PATH_OPS = {(0, 0, FILL_EVEN_ODD) : 'n',  #no op
 
 _escapePDF = pdfutils._escape
 _instanceEscapePDF = pdfutils._instanceEscapePDF
-
-if sys.hexversion >= 0x02000000:
-    def _digester(s):
-        return md5.md5(s).hexdigest()
-else:
-    # hexdigest not available in 1.5
-    def _digester(s):
-        return join(map(lambda x : "%02x" % ord(x), md5.md5(s).digest()), '')
 
 def _annFormat(D,color,thickness,dashArray,hradius=0,vradius=0):
     from reportlab.pdfbase.pdfdoc import PDFArray, PDFDictionary
@@ -187,7 +179,7 @@ class Canvas(textobject._PDFColorSetter):
         #initial graphics state, never modify any of these in place
         self._x = 0
         self._y = 0
-        self._fontname = 'Helvetica'
+        self._fontname = rl_config.canvas_basefontname
         self._fontsize = 12
 
         self._textMode = 0  #track if between BT/ET
@@ -237,14 +229,16 @@ class Canvas(textobject._PDFColorSetter):
         #self._addStandardFonts()
 
     def _make_preamble(self):
-        # yuk
-        iName = self._doc.getInternalFontName(self._fontname)
+        P = [].append
         if self.bottomup:
-            #must set an initial font
-            self._preamble = '1 0 0 1 0 0 cm BT %s 12 Tf 14.4 TL ET' % iName
+            P('1 0 0 1 0 0 cm')
         else:
-            #switch coordinates, flip text and set font
-            self._preamble = '1 0 0 -1 0 %s cm BT %s 12 Tf 14.4 TL ET' % (fp_str(self._pagesize[1]), iName)
+            P('1 0 0 -1 0 %s cm' % fp_str(self._pagesize[1]))
+        font = pdfmetrics.getFont(self._fontname)
+        if not font._dynamicFont:
+            #set an initial font
+            P('BT %s 12 Tf 14.4 TL ET' % self._doc.getInternalFontName(self._fontname))
+        self._preamble = ' '.join(P.__self__)
 
     if not _instanceEscapePDF:
         def _escape(self, s):
@@ -347,7 +341,6 @@ class Canvas(textobject._PDFColorSetter):
         if type(keywords) in (TupleType, ListType):
             keywords = ', '.join(keywords)
         self._doc.setKeywords(keywords)
-        
 
     def pageHasData(self):
         "Info function - app can call it after showPage to see if it needs a save"
@@ -563,11 +556,7 @@ class Canvas(textobject._PDFColorSetter):
         how the image should be anchored in the box, using imaginary points of
         the compass.  'sw' for SouthWest is the default, but 'c' for center
         will center it in the given box.
-
-
-
         """
-
         self._currentPageHasImages = 1
         from pdfimages import PDFImage
         img_obj = PDFImage(image, x,y, width, height)
@@ -615,7 +604,12 @@ class Canvas(textobject._PDFColorSetter):
         # is different, even the mask, this should be different.
         if isinstance(image,ImageReader):
             rawdata = image.getRGBData()
-            name = _digester(rawdata+str(mask))
+            smask = image._dataA
+            if mask=='auto' and smask:
+                mdata = smask.getRGBData()
+            else:
+                mdata = str(mask)
+            name = _digester(rawdata+mdata)
         else:
             #filename, use it
             name = _digester('%s%s' % (image, mask))
@@ -631,6 +625,16 @@ class Canvas(textobject._PDFColorSetter):
             self._setXObjects(imgObj)
             self._doc.Reference(imgObj, regName)
             self._doc.addForm(name, imgObj)
+            smask = getattr(imgObj,'_smask',None)
+            if smask:   #set up the softmask obtained above
+                mRegName = self._doc.getXObjectName(smask.name)
+                mImgObj = self._doc.idToObject.get(mRegName, None)
+                if not mImgObj:
+                    self._setXObjects(smask)
+                    imgObj.smask = self._doc.Reference(smask,mRegName)
+                else:
+                    imgObj.smask = pdfdoc.PDFObjectReference(mRegName)
+                del imgObj._smask
 
         # ensure we have a size, as PDF will make it 1x1 pixel otherwise!
         x,y,width,height,scaled = aspectRatioFix(preserveAspectRatio,anchor,x,y,width,height,imgObj.width,imgObj.height)
@@ -1442,17 +1446,17 @@ class Canvas(textobject._PDFColorSetter):
         if direction in [0,90,180,270]:
             direction_arg = ('Di', '/%d' % direction)
         else:
-            raise 'PDFError', ' directions allowed are 0,90,180,270'
+            raise PDFError(' directions allowed are 0,90,180,270')
 
         if dimension in ['H', 'V']:
             dimension_arg = ('Dm', '/' + dimension)
         else:
-            raise'PDFError','dimension values allowed are H and V'
+            raisePDFError('dimension values allowed are H and V')
 
         if motion in ['I','O']:
             motion_arg = ('M', '/' + motion)
         else:
-            raise'PDFError','motion values allowed are I and O'
+            raisePDFError('motion values allowed are I and O')
 
         # this says which effects require which argument types from above
         PageTransitionEffects = {
@@ -1467,7 +1471,7 @@ class Canvas(textobject._PDFColorSetter):
         try:
             args = PageTransitionEffects[effectname]
         except KeyError:
-            raise 'PDFError', 'Unknown Effect Name "%s"' % effectname
+            raise PDFError('Unknown Effect Name "%s"' % effectname)
 
         # now build the dictionary
         transDict = {}
