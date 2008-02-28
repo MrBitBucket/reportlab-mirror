@@ -281,7 +281,7 @@ class PDFDocument:
         name = self.thisPageName()
         self.Reference(page, name)
         self.Pages.addPage(page)
-        self.pageCounter = self.pageCounter+1
+        self.pageCounter += 1
         self.inObject = None
 
     def addForm(self, name, form):
@@ -615,6 +615,10 @@ class PDFDictionary:
             self.dict = dict.copy()
     def __setitem__(self, name, value):
         self.dict[name] = value
+    def __getitem__(self, a):
+        return self.dict[a]
+    def has_key(self,a):
+        return self.dict.has_key(a)
     def Reference(self, name, document):
         self.dict[name] = document.Reference(self.dict[name])
     def format(self, document,IND=LINEEND+' '):
