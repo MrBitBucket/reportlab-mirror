@@ -239,7 +239,6 @@ class CategoryAxis(_AxisG):
         self._y = y
         self._length = length
 
-
     def configure(self, multiSeries,barWidth=None):
         self._catCount = max(map(len,multiSeries))
         self._barWidth = barWidth or (self._length/float(self._catCount or 1))
@@ -293,11 +292,42 @@ class _XTicks:
         return g
 
     def makeTicks(self):
-        return self._drawTicks(self.tickUp,self.tickDown)
+        yold=self._y
+        try:
+            self._y = self._labelAxisPos(getattr(self,'tickAxisMode','axis'))
+            return self._drawTicks(self.tickUp,self.tickDown)
+        finally:
+            self._y = yold
+
+    def _labelAxisPos(self,mode=None):
+        axis = self.joinAxis
+        if axis:
+            mode = mode or self.labelAxisMode
+            if mode == 'low':
+                return axis._y
+            elif mode == 'high':
+                return axis._y + axis._length
+        return self._y
 
 class _YTicks(_XTicks):
+
+    def _labelAxisPos(self,mode=None):
+        axis = self.joinAxis
+        if axis:
+            mode = mode or self.labelAxisMode
+            if mode == 'low':
+                return axis._x
+            elif mode == 'high':
+                return axis._x + axis._length
+        return self._x
+
     def makeTicks(self):
-        return self._drawTicks(self.tickRight,self.tickLeft)
+        xold=self._x
+        try:
+            self._x = self._labelAxisPos(getattr(self,'tickAxisMode','axis'))
+            return self._drawTicks(self.tickRight,self.tickLeft)
+        finally:
+            self._x = xold
 
 class XCategoryAxis(_XTicks,CategoryAxis):
     "X/category axis"
@@ -322,7 +352,6 @@ class XCategoryAxis(_XTicks,CategoryAxis):
         self.tickUp = 0  # how far into chart does tick go?
         self.tickDown = 5  # how far below axis does tick go?
 
-
     def demo(self):
         self.setPosition(30, 70, 140)
         self.configure([(10,20,30,40,50)])
@@ -336,7 +365,6 @@ class XCategoryAxis(_XTicks,CategoryAxis):
         d = Drawing(200, 100)
         d.add(self)
         return d
-
 
     def joinToAxis(self, yAxis, mode='bottom', pos=None):
         "Join with y-axis using some mode."
@@ -383,16 +411,6 @@ class XCategoryAxis(_XTicks,CategoryAxis):
 
         return g
 
-    def _labelAxisPos(self):
-        axis = self.joinAxis
-        if axis:
-            mode = self.labelAxisMode
-            if mode == 'low':
-                return axis._y
-            elif mode == 'high':
-                return axis._y + axis._length
-        return self._y
-
     def makeTickLabels(self):
         g = Group()
 
@@ -419,7 +437,6 @@ class XCategoryAxis(_XTicks,CategoryAxis):
 
         return g
 
-
 class YCategoryAxis(_YTicks,CategoryAxis):
     "Y/category axis"
 
@@ -434,7 +451,6 @@ class YCategoryAxis(_YTicks,CategoryAxis):
 
     _dataIndex = 1
 
-
     def __init__(self):
         CategoryAxis.__init__(self)
         self.labels.boxAnchor = 'e' #east - right edge
@@ -443,7 +459,6 @@ class YCategoryAxis(_YTicks,CategoryAxis):
         # and have same line style as axis - need more
         self.tickLeft = 5  # how far left of axis does tick go?
         self.tickRight = 0  # how far right of axis does tick go?
-
 
     def demo(self):
         self.setPosition(50, 10, 80)
@@ -457,7 +472,6 @@ class YCategoryAxis(_YTicks,CategoryAxis):
         d = Drawing(200, 100)
         d.add(self)
         return d
-
 
     def joinToAxis(self, xAxis, mode='left', pos=None):
         "Join with x-axis using some mode."
@@ -504,16 +518,6 @@ class YCategoryAxis(_YTicks,CategoryAxis):
         g.add(axis)
 
         return g
-
-    def _labelAxisPos(self):
-        axis = self.joinAxis
-        if axis:
-            mode = self.labelAxisMode
-            if mode == 'low':
-                return axis._x
-            elif mode == 'high':
-                return axis._x + axis._length
-        return self._x
 
     def makeTickLabels(self):
         g = Group()
@@ -569,6 +573,7 @@ class ValueAxis(_AxisG):
         minimumTickSpacing = AttrMapValue(isNumber, desc='Minimum value for distance between ticks.'),
         maximumTicks = AttrMapValue(isNumber, desc='Maximum number of ticks.'),
         labels = AttrMapValue(None, desc='Handle of the axis labels.'),
+        labelAxisMode = AttrMapValue(OneOf('high','low','axis'), desc="Like joinAxisMode, but for the axis labels"),
         labelTextFormat = AttrMapValue(None, desc='Formatting string or function used for axis labels.'),
         labelTextPostFormat = AttrMapValue(None, desc='Extra Formatting string.'),
         labelTextScale = AttrMapValue(isNumberOrNone, desc='Scaling for label tick values.'),
@@ -584,6 +589,7 @@ class ValueAxis(_AxisG):
         origShiftIPC = AttrMapValue(isNumberOrNone, desc='Lowest label shift interval ratio.'),
         origShiftMin = AttrMapValue(isNumberOrNone, desc='Minimum amount to shift.'),
         origShiftSpecialValue = AttrMapValue(isNumberOrNone, desc='special value for shift'),
+        tickAxisMode = AttrMapValue(OneOf('high','low','axis'), desc="Like joinAxisMode, but for the ticks"),
         )
 
     def __init__(self,**kw):
@@ -624,6 +630,7 @@ class ValueAxis(_AxisG):
                         # a format string like '%0.2f'
                         # or a function which takes the value as an argument and returns a string
                         _labelTextFormat = None,
+                        labelAxisMode = 'axis',
                         labelTextFormat = None,
                         labelTextPostFormat = None,
                         labelTextScale = None,
@@ -642,6 +649,7 @@ class ValueAxis(_AxisG):
                         origShiftIPC = None,
                         origShiftMin = None,
                         origShiftSpecialValue = None,
+                        tickAxisMode = 'axis',
                         )
         self.labels.angle = 0
 
@@ -913,6 +921,7 @@ class ValueAxis(_AxisG):
         scl = self.labelTextScale
         pos = [self._x, self._y]
         d = self._dataIndex
+        pos[1-d] = self._labelAxisPos()
         labels = self.labels
         if self.skipEndL!='none':
             if self.isXAxis:
@@ -959,7 +968,7 @@ class ValueAxis(_AxisG):
                     if post: txt = post % txt
                     label = labels[i]
                     pos[d] = v
-                    apply(label.setOrigin,pos)
+                    label.setOrigin(*pos)
                     label.setText(txt)
                     g.add(label)
             i += 1
@@ -977,7 +986,6 @@ class ValueAxis(_AxisG):
         g.add(self.makeTickLabels())
 
         return g
-
 
 class XValueAxis(_XTicks,ValueAxis):
     "X/value axis"
@@ -1012,7 +1020,6 @@ class XValueAxis(_XTicks,ValueAxis):
         self.joinAxisMode = None
         self.joinAxisPos = None
 
-
     def demo(self):
         self.setPosition(20, 50, 150)
         self.configure([(10,20,30,40,50)])
@@ -1020,7 +1027,6 @@ class XValueAxis(_XTicks,ValueAxis):
         d = Drawing(200, 100)
         d.add(self)
         return d
-
 
     def joinToAxis(self, yAxis, mode='bottom', pos=None):
         "Join with y-axis using some mode."
@@ -1063,7 +1069,6 @@ class XValueAxis(_XTicks,ValueAxis):
         if value is None:
             value = 0
         return self._x + self._scaleFactor * (value - self._valueMin)
-
 
     def makeAxis(self):
         g = Group()
@@ -1219,7 +1224,6 @@ class NormalDateXValueAxis(XValueAxis):
         if self.specifiedTickDates:
             ticks = self.specifiedTickDates[:]
             return ticks,[formatter(d) for d in ticks]
-
 
         #AR 20060619 - first we try the approach where the user has explicitly
         #specified the days of year to be ticked.  Other explicit routes may
