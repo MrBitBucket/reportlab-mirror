@@ -55,7 +55,15 @@ class ParagraphStyle(PropertySet):
         'bulletFontName':'Times-Roman',
         'bulletFontSize':10,
         'bulletIndent':0,
-        'textColor': black
+        'textColor': black,
+        'backColor':None,
+        'wordWrap':None,
+        'borderWidth': 0,
+        'borderPadding': 0,
+        'borderColor': None,
+        'borderRadius': None,
+        'allowWidows': 1,
+        'allowOrphans': 0,
         }
 """)
 
@@ -132,6 +140,13 @@ constants in the module <i>reportlab.lib.enums</i>.  These are
 TA_LEFT, TA_CENTER or TA_CENTRE, TA_RIGHT and
 TA_JUSTIFY, with values of 0, 1, 2 and 4 respectively.  These
 do exactly what you would expect.""")
+
+disc("""Set $wordWrap$ to $'CJK'$ to get Asian language linewrapping. For normal western text you can change the way
+the line breaking algorithm handles <i>widows</i> and <i>orphans</i> with the $allowWidows$ and $allowOrphans$ values.
+Both should normally be set to $0$, but for historical reasons we have allowed <i>widows</i>.
+The default color of the text can be set with $textColor$ and the paragraph background
+colour can be set with $backColor$. The paragraph's border properties may be changed using
+$borderWidth$, $borderPadding$, $borderColor$ and $borderRadius$.""")
 
 
 heading2("Paragraph XML Markup Tags")

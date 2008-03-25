@@ -174,6 +174,20 @@ class BreakingTestCase(unittest.TestCase):
         doc = SimpleDocTemplate(outputfile('test_platypus_breaking1.pdf'))
         doc.build(content)
 
+    def test1(self):
+        sty = ParagraphStyle(name = 'normal')
+        sty.fontName = 'Times-Roman'
+        sty.fontSize = 10
+        sty.leading = 12
+
+        p = Paragraph('one two three',sty)
+        p.wrap(20,36)
+        self.assertEqual(len(p.split(20,24)),2) #widows allowed
+        self.assertEqual(len(p.split(20,16)),0) #orphans disallowed
+        p.allowWidows = 0
+        self.assertEqual(len(p.split(20,24)),0) #widows disallowed
+        p.allowOrphans = 1
+        self.assertEqual(len(p.split(20,16)),2) #orphans allowed
 
 def makeSuite():
     return makeSuiteForClasses(BreakingTestCase)

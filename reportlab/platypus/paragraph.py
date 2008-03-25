@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2008
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/paragraph.py
 __version__=''' $Id$ '''
@@ -748,10 +748,20 @@ class Paragraph(Flowable):
             height = s*l
 
         n = len(lines)
-        if s<=1:
-            del self.blPara
-            return []
+        allowWidows = getattr(self,'allowWidows',getattr(self,'allowWidows',1))
+        allowOrphans = getattr(self,'allowOrphans',getattr(self,'allowOrphans',0))
+        if not allowOrphans:
+            if s<=1:    #orphan?
+                del self.blPara
+                return []
         if n<=s: return [self]
+        if not allowWidows:
+            if n==s+1: #widow?
+                if (allowOrphans and n==3) or n>3:
+                    s -= 1  #give the widow some company
+                else:
+                    del self.blPara #no room for adjustment; force the whole para onwards
+                    return []
         func = self._get_split_blParaFunc()
 
         P1=self.__class__(None,style,bulletText=self.bulletText,frags=func(blPara,0,s))
