@@ -553,18 +553,18 @@ class PDFString:
         if type(s) is str:
             if enc is 'auto':
                 try:
-                    s.decode('pdfdoc')
-                except:
-                    try:
-                        u = s.decode(s.startswith(codecs.BOM_UTF16_BE) and 'utf16' or 'utf8')
-                    except:
-                        import sys
-                        print >>sys.stderr, 'Error in',repr(s)
-                        raise
+                    u = s.decode(s.startswith(codecs.BOM_UTF16_BE) and 'utf16' or 'utf8')
                     if _checkPdfdoc(u):
                         s = u.encode('pdfdoc')
                     else:
                         s = codecs.BOM_UTF16_BE+u.encode('utf_16_be')
+                except:
+                    try:
+                        s.decode('pdfdoc')
+                    except:
+                        import sys
+                        print >>sys.stderr, 'Error in',repr(s)
+                        raise
         elif type(s) is unicode:
             if enc is 'auto':
                 if _checkPdfdoc(s):
