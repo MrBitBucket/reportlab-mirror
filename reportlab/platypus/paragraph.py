@@ -1030,7 +1030,7 @@ class Paragraph(Flowable):
         style = self.style
         #for now we only handle one fragment.  Need to generalize this quickly.
         if len(self.frags) > 1:
-            raise ValueError('CJK Wordwrap can only handle one fragment per paragraph for now')
+            raise ValueError('CJK Wordwrap can only handle one fragment per paragraph for now.  Tried to handle:\ntext:  %s\nfrags: %s' % (self.text, self.frags))
         elif len(self.frags) == 0:
             return ParaLines(kind=0, fontSize=style.fontSize, fontName=style.fontName,
                             textColor=style.textColor, lines=[],ascent=style.fontSize,descent=-0.2*style.fontSize)

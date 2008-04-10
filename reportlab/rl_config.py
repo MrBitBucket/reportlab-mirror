@@ -68,6 +68,13 @@ TTFSearchPath = (
                 '%(REPORTLAB_DIR)s/../fonts',   #special
                 '%(REPORTLAB_DIR)s/../../fonts',#special
                 '%(HOME)s/fonts',               #special
+                #mac os X - from
+                #http://developer.apple.com/technotes/tn/tn2024.html
+                '~/Library/Fonts',
+                '/Library/Fonts',
+                '/Network/Library/Fonts',
+                '/System/Library/Fonts',
+                
                 )
 
 # places to look for CMap files - should ideally merge with above

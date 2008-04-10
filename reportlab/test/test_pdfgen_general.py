@@ -747,6 +747,14 @@ cost to performance.""")
             tgif = outputfile(os.path.basename('_i_am_actually_a_jpeg.gif'))
             shutil.copyfile(tjpg,tgif)
             c.drawImage(tgif, 4*inch, 9.25*inch, w, h, mask='auto')
+
+        #preserveAspectRatio test
+        c.drawString(inch, 6.25*inch, 'Both these should have the usual aspect ratio')
+
+        (w, h) = c.drawImage(gif, inch, 6*inch, width=2*inch, height=2*inch, preserveAspectRatio=True)
+        (w, h) = c.drawInlineImage(gif, inch, 4*inch, width=2*inch, height=2*inch, preserveAspectRatio=True)
+                    
+
         c.showPage()
 
 

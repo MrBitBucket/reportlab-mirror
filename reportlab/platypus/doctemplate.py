@@ -687,6 +687,10 @@ class BaseDocTemplate:
 
     def _startBuild(self, filename=None, canvasmaker=canvas.Canvas):
         self._calc()
+
+        #each distinct pass gets a sequencer
+        self.seq = reportlab.lib.sequencer.Sequencer()
+        
         self.canv = canvasmaker(filename or self.filename,
                                 pagesize=self.pagesize,
                                 invariant=self.invariant,
