@@ -206,8 +206,10 @@ class Label(Widget):
         bottomPadding = self.bottomPadding
         self._lines = simpleSplit(self._text,self.fontName,self.fontSize,self.maxWidth)
         if not self.width:
-            self._lineWidths = [stringWidth(line,self.fontName,self.fontSize) for line in self._lines]
-            self._width = max(self._lineWidths)+leftPadding+rightPadding
+            self._width = leftPadding+rightPadding
+            if self._lines:
+                self._lineWidths = [stringWidth(line,self.fontName,self.fontSize) for line in self._lines]
+                self._width += max(self._lineWidths)
         else:
             self._width = self.width
         self._height = self.height or ((self.leading or 1.2*self.fontSize) * len(self._lines)+topPadding+bottomPadding)
