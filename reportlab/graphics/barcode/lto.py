@@ -87,8 +87,8 @@ class VerticalLTOLabel(BaseLTOLabel) :
     A class for LTO labels with rectangular blocks around the tape identifier.
     """
     LABELFONT = ("Helvetica-Bold", 14)
-    BLOCKWIDTH = 1 * cm
-    BLOCKHEIGHT = 0.5 * cm
+    BLOCKWIDTH = 1*cm
+    BLOCKHEIGHT = 0.45*cm
     LINEWIDTH = 0.0125
     NBBLOCKS = 7
     COLORSCHEME = ("red",
@@ -143,10 +143,9 @@ class VerticalLTOLabel(BaseLTOLabel) :
                 canvas.setFillColorRGB(*getattr(colors, 
                                                 self.COLORSCHEME[int(part)], 
                                                 colors.Color(1, 1, 1)).rgb())
-                fillit = True
-            else :
-                fillit = False
-            canvas.rect(0, 0, self.BLOCKWIDTH, self.BLOCKHEIGHT, fill=fillit)
+            else:
+                canvas.setFillColorRGB(1, 1, 1)
+            canvas.rect(0, 0, self.BLOCKWIDTH, self.BLOCKHEIGHT, fill=True)
             canvas.translate((self.BLOCKWIDTH+canvas.stringWidth(part, *newfont))/2.0, 
                              (self.BLOCKHEIGHT/2.0))
             canvas.rotate(90.0)
