@@ -907,3 +907,31 @@ def fileName2Utf8(fn):
         except:
             pass
     raise ValueError('cannot convert %r to utf8' % fn)
+
+
+import itertools
+def prev_this_next(items):
+    """
+    Loop over a collection with look-ahead and look-back.
+    
+    From Thomas Guest, 
+    http://wordaligned.org/articles/zippy-triples-served-with-python
+    
+    Seriously useful looping tool (Google "zippy triples")
+    lets you loop a collection and see the previous and next items,
+    which get set to None at the ends.
+    
+    To be used in layout algorithms where one wants a peek at the
+    next item coming down the pipe.
+
+    """
+    
+    extend = itertools.chain([None], items, [None])
+    prev, this, next = itertools.tee(extend, 3)
+    try:
+        this.next()
+        next.next()
+        next.next()
+    except StopIteration:
+        pass
+    return itertools.izip(prev, this, next)
