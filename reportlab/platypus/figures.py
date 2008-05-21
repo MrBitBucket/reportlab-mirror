@@ -62,6 +62,7 @@ class Figure(Flowable):
                 leading=1.2*captionSize,
                 textColor = captionTextColor,
                 backColor = captionBackColor,
+                #seems to be getting ignored
                 spaceBefore=self.captionGap or 0.5*captionSize,
                 alignment=TA_CENTER)
             #must build paragraph now to get sequencing in synch with rest of story
@@ -72,7 +73,7 @@ class Figure(Flowable):
         if self.caption:
             self._getCaptionPara()
             (w, h) = self.captionPara.wrap(self.width, availHeight - self.figureHeight)
-            self.captionHeight = h
+            self.captionHeight = h + self.captionGap
             self.height = self.captionHeight + self.figureHeight
             if w>self.width: self.width = w
         else:
