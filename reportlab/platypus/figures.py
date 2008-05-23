@@ -72,8 +72,8 @@ class Figure(Flowable):
         # try to get the caption aligned
         if self.caption:
             self._getCaptionPara()
-            (w, h) = self.captionPara.wrap(self.width, availHeight - self.figureHeight)
-            self.captionHeight = h + self.captionGap
+            w, h = self.captionPara.wrap(self.width, availHeight - self.figureHeight)
+            self.captionHeight = h + (self.captionGap or 0.5*self.captionSize)
             self.height = self.captionHeight + self.figureHeight
             if w>self.width: self.width = w
         else:
