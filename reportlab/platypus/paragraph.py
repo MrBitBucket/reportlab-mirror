@@ -648,7 +648,7 @@ class Paragraph(Flowable):
             tt = style.textTransform
             if tt:
                 tt=tt.lower()
-                if tt=='lowercase'
+                if tt=='lowercase':
                     tt = unicode.lower
                 elif tt=='uppercase':
                     tt = unicode.upper
