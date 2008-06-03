@@ -645,6 +645,40 @@ class Paragraph(Flowable):
             if frags is None:
                 raise ValueError("xml parser error (%s) in paragraph beginning\n'%s'"\
                     % (_parser.errors[0],text[:min(30,len(text))]))
+            tt = style.textTransform
+            if tt:
+                tt=tt.lower()
+                if tt=='lowercase'
+                    tt = unicode.lower
+                elif tt=='uppercase':
+                    tt = unicode.upper
+                elif  tt=='capitalize':
+                    tt = unicode.capitalize
+                else:
+                    raise ValueError('ParaStyle.textTransform value %r is invalid' % style.textTransform) 
+                n = len(frags)
+                if n==1:
+                    #single fragment the easy case
+                    frags[0].text = tt(frags[0].text.decode('utf8')).encode('utf8')
+                elif tt is unicode.capitalize:
+                    pb = True
+                    for f in frags:
+                        t = f.text
+                        if not t: continue
+                        u = t.decode('utf8')
+                        if u.startswith(u' ') or pb:
+                            u = u.capitalize()
+                        else:
+                            i = u.index(u' ')
+                            u = u[:i]+u[i:].capitalize()
+                        pb = u.endswith(u' ')
+                        f.text = u.encode('utf8')
+                else:
+                    for f in frags:
+                        t = f.text
+                        if not t: continue
+                        f.text = tt(t.decode('utf8')).encode('utf8')
+
             if bulletTextFrags: bulletText = bulletTextFrags
 
         #AR hack
@@ -812,7 +846,7 @@ class Paragraph(Flowable):
         different first line indent; a longer list could be created to facilitate custom wraps
         around irregular objects."""
 
-        if type(width) <> ListType: maxWidths = [width]
+        if not isinstance(width,(tuple,list)): maxWidths = [width]
         else: maxWidths = width
         lines = []
         lineno = 0

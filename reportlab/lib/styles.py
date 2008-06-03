@@ -87,6 +87,7 @@ class ParagraphStyle(PropertySet):
         'borderRadius': None,
         'allowWidows': 1,
         'allowOrphans': 0,
+        'textTransform':None,   #uppercase lowercase (captitalize not yet) or None or absent
         }
 
 class LineStyle(PropertySet):
