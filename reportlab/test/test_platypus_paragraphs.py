@@ -57,9 +57,9 @@ class MyDocTemplate(BaseDocTemplate):
 
 class ParagraphCorners(unittest.TestCase):
     "some corner cases which should parse"
-    def check(text,bt = getSampleStyleSheet()['BodyText']):
+    def check(self,text,bt = getSampleStyleSheet()['BodyText']):
         try:
-            P = Paragraph(text,st)
+            P = Paragraph(text,style=bt)
         except:
             raise AssertionError("'%s' should parse"%text)
             
@@ -72,6 +72,23 @@ class ParagraphCorners(unittest.TestCase):
         self.check('<para></para>')
         self.check('<para>      </para>')
         self.check('\t\t\n\t\t\t   <para>      </para>')
+
+    def test1(self):
+        "This makes several special paragraphs."
+
+        # Build story.
+        story = []
+        styleSheet = getSampleStyleSheet()
+        bt = styleSheet['BodyText']
+        btL = ParagraphStyle('BodyTextLower',parent=bt,textTransform='lowercase')
+        btU = ParagraphStyle('BodyTextUpper',parent=bt,textTransform='uppercase')
+        btC = ParagraphStyle('BodyTextCapitalize',parent=bt,textTransform='capitalize')
+        story.append(Paragraph('''This should be <b>ORDINARY</b> text.''',style=bt))
+        story.append(Paragraph('''This should be <b>LOWER</b> text.''',style=btL))
+        story.append(Paragraph('''This should be <b>upper</b> text.''',style=btU))
+        story.append(Paragraph('''This should be <b>cAPITALIZED</b> text.''',style=btC))
+        doc = MyDocTemplate(outputfile('test_platypus_specialparagraphs.pdf'))
+        doc.multiBuild(story)
         
 class ParagraphSplitTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."
@@ -471,7 +488,7 @@ phonemic and morphological analysis.'''
 
 #noruntests
 def makeSuite():
-    return makeSuiteForClasses(SplitFrameParagraphTest,FragmentTestCase, ParagraphSplitTestCase, ULTestCase, JustifyTestCase, AutoLeadingTestCase)
+    return makeSuiteForClasses(ParagraphCorners,SplitFrameParagraphTest,FragmentTestCase, ParagraphSplitTestCase, ULTestCase, JustifyTestCase, AutoLeadingTestCase)
 
 #noruntests
 if __name__ == "__main__":
