@@ -564,6 +564,44 @@ def _do_post_text(tx):
     xs.linkColor=None
     xs.cur_y -= leading
 
+def textTransformFrags(frags,style):
+    tt = style.textTransform
+    if tt:
+        tt=tt.lower()
+        if tt=='lowercase':
+            tt = unicode.lower
+        elif tt=='uppercase':
+            tt = unicode.upper
+        elif  tt=='capitalize':
+            tt = unicode.title
+        elif tt=='none':
+            return
+        else:
+            raise ValueError('ParaStyle.textTransform value %r is invalid' % style.textTransform) 
+        n = len(frags)
+        if n==1:
+            #single fragment the easy case
+            frags[0].text = tt(frags[0].text.decode('utf8')).encode('utf8')
+        elif tt is unicode.title:
+            pb = True
+            for f in frags:
+                t = f.text
+                if not t: continue
+                u = t.decode('utf8')
+                if u.startswith(u' ') or pb:
+                    u = tt(u)
+                else:
+                    i = u.find(u' ')
+                    if i>=0:
+                        u = u[:i]+tt(u[i:])
+                pb = u.endswith(u' ')
+                f.text = u.encode('utf8')
+        else:
+            for f in frags:
+                t = f.text
+                if not t: continue
+                f.text = tt(t.decode('utf8')).encode('utf8')
+
 class Paragraph(Flowable):
     """ Paragraph(text, style, bulletText=None, caseSensitive=1)
         text a string of stuff to go into the paragraph.
@@ -645,41 +683,7 @@ class Paragraph(Flowable):
             if frags is None:
                 raise ValueError("xml parser error (%s) in paragraph beginning\n'%s'"\
                     % (_parser.errors[0],text[:min(30,len(text))]))
-            tt = style.textTransform
-            if tt:
-                tt=tt.lower()
-                if tt=='lowercase':
-                    tt = unicode.lower
-                elif tt=='uppercase':
-                    tt = unicode.upper
-                elif  tt=='capitalize':
-                    tt = unicode.title
-                else:
-                    raise ValueError('ParaStyle.textTransform value %r is invalid' % style.textTransform) 
-                n = len(frags)
-                if n==1:
-                    #single fragment the easy case
-                    frags[0].text = tt(frags[0].text.decode('utf8')).encode('utf8')
-                elif tt is unicode.title:
-                    pb = True
-                    for f in frags:
-                        t = f.text
-                        if not t: continue
-                        u = t.decode('utf8')
-                        if u.startswith(u' ') or pb:
-                            u = tt(u)
-                        else:
-                            i = u.find(u' ')
-                            if i>=0:
-                                u = u[:i]+tt(u[i:])
-                        pb = u.endswith(u' ')
-                        f.text = u.encode('utf8')
-                else:
-                    for f in frags:
-                        t = f.text
-                        if not t: continue
-                        f.text = tt(t.decode('utf8')).encode('utf8')
-
+            textTransformFrags(frags,style)
             if bulletTextFrags: bulletText = bulletTextFrags
 
         #AR hack
