@@ -80,10 +80,18 @@ class ParagraphCorners(unittest.TestCase):
         story = []
         styleSheet = getSampleStyleSheet()
         bt = styleSheet['BodyText']
-        btL = ParagraphStyle('BodyTextLower',parent=bt,textTransform='lowercase')
-        btU = ParagraphStyle('BodyTextUpper',parent=bt,textTransform='uppercase')
-        btC = ParagraphStyle('BodyTextCapitalize',parent=bt,textTransform='capitalize')
+        btN = ParagraphStyle('BodyTextTTNone',parent=bt,textTransform='none')
+        btL = ParagraphStyle('BodyTextTTLower',parent=bt,textTransform='lowercase')
+        btU = ParagraphStyle('BodyTextTTUpper',parent=bt,textTransform='uppercase')
+        btC = ParagraphStyle('BodyTextTTCapitalize',parent=bt,textTransform='capitalize')
+        story.append(Paragraph('''This should be ORDINARY text.''',style=bt))
+        story.append(Paragraph('''This should be ORDINARY text.''',style=btN))
+        story.append(Paragraph('''This should be LOWER text.''',style=btL))
+        story.append(Paragraph('''This should be upper text.''',style=btU))
+        story.append(Paragraph('''This should be cAPITALIZED text.''',style=btC))
+
         story.append(Paragraph('''T<i>hi</i>s shoul<font color="red">d b</font>e <b>ORDINARY</b> text.''',style=bt))
+        story.append(Paragraph('''T<i>hi</i>s shoul<font color="red">d b</font>e <b>ORDINARY</b> text.''',style=btN))
         story.append(Paragraph('''T<i>hi</i>s shoul<font color="red">d b</font>e <b>LOWER</b> text.''',style=btL))
         story.append(Paragraph('''T<i>hi</i>s shoul<font color="red">d b</font>e <b>upper</b> text.''',style=btU))
         story.append(Paragraph('''T<i>hi</i>s shoul<font color="red">d b</font>e <b>cAPITALIZED</b> text.''',style=btC))
