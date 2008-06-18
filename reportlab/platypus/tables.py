@@ -256,14 +256,25 @@ class Table(Flowable):
         # we need a cleanup pass to ensure data is strings - non-unicode and non-null
         self._cellvalues = self.normalizeData(data)
         if not _seqCW: colWidths = ncols*[colWidths]
-        elif len(colWidths) != ncols:
-            raise ValueError("%s data error - %d columns in data but %d in column widths" % (self.identity(),ncols, len(colWidths)))
+        elif len(colWidths)!=ncols:
+            if rl_config.allowShortTableRows and isinstance(colWidths,list):
+                n = len(colWidths)
+                if n<ncols:
+                    colWidths[n:] = (ncols-n)*[colWidths[-1]]
+                else:
+                    colWidths = colWidths[:ncols]
+            else:
+                raise ValueError("%s data error - %d columns in data but %d in column widths" % (self.identity(),ncols, len(colWidths)))
         if not _seqRH: rowHeights = nrows*[rowHeights]
         elif len(rowHeights) != nrows:
             raise ValueError("%s data error - %d rows in data but %d in row heights" % (self.identity(),nrows, len(rowHeights)))
-        for i in xrange(nrows):
-            if len(data[i]) != ncols:
-                raise ValueError("%s not enough data columns in row %d!" % (self.identity(),i))
+        for i,d in enumerate(data):
+            n = len(d)
+            if n!=ncols:
+                if rl_config.allowShortTableRows and isinstance(d,list):
+                    d[n:] = (ncols-n)*['']
+                else:
+                    raise ValueError("%s expected %d not %d columns in row %d!" % (self.identity(),ncols,n,i))
         self._rowHeights = self._argH = rowHeights
         self._colWidths = self._argW = colWidths
         cellrows = []

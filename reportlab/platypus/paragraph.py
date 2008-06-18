@@ -497,8 +497,8 @@ def _do_under_line(i, t_off, ws, tx, lm=-0.125):
 
 _scheme_re = re.compile('^[a-zA-Z][-+a-zA-Z0-9]+$')
 def _doLink(tx,link,rect):
-    if type(link) is unicode:
-        link = unicode.encode('utf8')
+    if isinstance(link,unicode):
+        link = link.encode('utf8')
     parts = link.split(':',1)
     scheme = len(parts)==2 and parts[0].lower() or ''
     if _scheme_re.match(scheme) and scheme!='document':
