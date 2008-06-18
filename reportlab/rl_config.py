@@ -31,6 +31,7 @@ odbc_driver=                'odbc'                  #default odbc driver
 platypus_link_underline=    0                       #paragraph links etc underlined if true
 canvas_basefontname=        'Helvetica'             #this is used to initialize the canvas; if you override to make
                                                     #something else you are responsible for ensuring the font is registered etc etc
+allowShortTableRows=1                               #allows some rows in a table to be short
 
 # places to look for T1Font information
 T1SearchPath =  (
@@ -154,7 +155,8 @@ wrapA85
 fsEncodings
 odbc_driver
 platypus_link_underline
-canvas_basefontname'''.split()
+canvas_basefontname
+allowShortTableRows'''.split()
     import os, sys
     global sys_version, _unset_
     sys_version = sys.version.split()[0]        #strip off the other garbage
