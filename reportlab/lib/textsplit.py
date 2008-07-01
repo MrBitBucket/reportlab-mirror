@@ -101,7 +101,6 @@ def dumbSplit(word, widths, availWidth):
     >>> dumbSplit(u'Hello', [10]*5, 40)
     [[0.0, u'Hell'], [30, u'o']]
     """
-
     _more = """
     #>>> dumbSplit(u'Hello', [10]*5, 4)   # less than one character
     #(u'', u'Hello')
@@ -124,7 +123,6 @@ def dumbSplit(word, widths, availWidth):
             #print 'ending a line; used %d, available %d' % (widthUsed, availWidth)
             selected = word[lineStartPos:i]
 
-
             #This is the most important of the Japanese typography rules.
             #if next character cannot start a line, wrap it up to this line so it hangs
             #in the right margin. We won't do two or more though - that's unlikely and
@@ -137,9 +135,6 @@ def dumbSplit(word, widths, availWidth):
                 selected += nextChar
                 extraSpace -= w
                 i += 1
-
-
-                
             lines.append([extraSpace, selected])
             lineStartPos = i
             widthUsed = w
@@ -160,7 +155,6 @@ def kinsokuShoriSplit(word, widths, availWidth):
     that.  There is no attempt to try to split compound words into
     constituent kanji.  It currently uses wrap-down: packs as much
     on a line as possible, then backtracks if needed
-
 
     This returns a number of words each of which should just about fit
     on a line.  If you give it a whole paragraph at once, it will
@@ -188,7 +182,6 @@ def kinsokuShoriSplit(word, widths, availWidth):
             if ch in CANNOT_END_LINE[0]:
                 pass
     #to be completed
-
 
 # This recipe refers:
 #

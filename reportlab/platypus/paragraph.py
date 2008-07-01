@@ -11,7 +11,7 @@ from reportlab.platypus.flowables import Flowable
 from reportlab.lib.colors import Color
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import _className
-from reportlab.lib.textsplit import wordSplit
+from reportlab.lib.textsplit import wordSplit, ALL_CANNOT_START
 from copy import deepcopy
 from reportlab.lib.abag import ABag
 from reportlab.rl_config import platypus_link_underline 
@@ -602,6 +602,98 @@ def textTransformFrags(frags,style):
                 if not t: continue
                 f.text = tt(t.decode('utf8')).encode('utf8')
 
+class cjkU(unicode):
+    '''simple class to hold the frag corresponding to a str'''
+    def __new__(cls,value,frag,encoding):
+        self = unicode.__new__(cls,value)
+        self._frag = frag
+        if hasattr(frag,'cbDefn'):
+            w = getattr(frag.cbDefn,'width',0)
+            self._width = w
+        else:
+            self._width = stringWidth(value,frag.fontName,frag.fontSize)
+        return self
+    frag = property(lambda self: self._frag)
+    width = property(lambda self: self._width)
+
+def makeCJKParaLine(U,extraSpace,calcBounds):
+    words = []
+    CW = []
+    f0 = FragLine()
+    maxSize = maxAscent = minDescent = 0
+    for u in U:
+        f = u.frag
+        fontSize = f.fontSize
+        if calcBounds:
+            cbDefn = getattr(f,'cbDefn',None)
+            if getattr(cbDefn,'width',0):
+                descent, ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
+            else:
+                ascent, descent = getAscentDescent(f.fontName,fontSize)
+        else:
+            ascent, descent = getAscentDescent(f.fontName,fontSize)
+        maxSize = max(maxSize,fontSize)
+        maxAscent = max(maxAscent,ascent)
+        minDescent = min(minDescent,descent)
+        if not _sameFrag(f0,f):
+            f0=f0.clone()
+            f0.text = u''.join(CW)
+            words.append(f0)
+            CW = []
+            f0 = f
+        CW.append(u)
+    if CW:
+        f0=f0.clone()
+        f0.text = u''.join(CW)
+        words.append(f0)
+    return FragLine(kind=1,extraSpace=extraSpace,wordCount=1,words=words[1:],fontSize=maxSize,ascent=maxAscent,descent=minDescent)
+
+def cjkFragSplit(frags, maxWidths, calcBounds, encoding='utf8'):
+    '''This attempts to be wordSplit for frags using the dumb algorithm'''
+    from reportlab.rl_config import _FUZZ
+    U = []  #get a list of single glyphs with their widths etc etc
+    for f in frags:
+        text = f.text
+        if not isinstance(text,unicode):
+            text = text.decode(encoding)
+        if text:
+            U.extend([cjkU(t,f,encoding) for t in text])
+        else:
+            U.append(cjkU(text,f,encoding))
+    lines = []
+    widthUsed = lineStartPos = 0
+    maxWidth = maxWidths[0]
+    for i, u in enumerate(U):
+        w = u.width
+        widthUsed += w
+        lineBreak = hasattr(u.frag,'lineBreak')
+        endLine = (widthUsed>maxWidth + _FUZZ and widthUsed>0) or lineBreak
+        if endLine:
+            if lineBreak: continue
+            extraSpace = maxWidth - widthUsed + w
+            #This is the most important of the Japanese typography rules.
+            #if next character cannot start a line, wrap it up to this line so it hangs
+            #in the right margin. We won't do two or more though - that's unlikely and
+            #would result in growing ugliness.
+            nextChar = U[i]
+            if nextChar in ALL_CANNOT_START:
+                extraSpace -= w
+                i += 1
+            lines.append(makeCJKParaLine(U[lineStartPos:i],extraSpace,calcBounds))
+            try:
+                maxWidth = maxWidths[len(lines)]
+            except IndexError:
+                maxWidth = maxWidths[-1]  # use the last one
+
+            lineStartPos = i
+            widthUsed = w
+            i -= 1
+    #any characters left?
+    if widthUsed > 0:
+        lines.append(makeCJKParaLine(U[lineStartPos:],maxWidth-widthUsed,calcBounds))
+
+    return ParaLines(kind=1,lines=lines)
+
 class Paragraph(Flowable):
     """ Paragraph(text, style, bulletText=None, caseSensitive=1)
         text a string of stuff to go into the paragraph.
@@ -1061,16 +1153,22 @@ class Paragraph(Flowable):
 
         return lines
 
-
     def breakLinesCJK(self, width):
         """Initially, the dumbest possible wrapping algorithm.
         Cannot handle font variations."""
 
+        if not isinstance(width,(list,tuple)): maxWidths = [width]
+        else: maxWidths = width
         style = self.style
-        #for now we only handle one fragment.  Need to generalize this quickly.
-        if len(self.frags) > 1:
-            raise ValueError('CJK Wordwrap can only handle one fragment per paragraph for now.  Tried to handle:\ntext:  %s\nfrags: %s' % (self.text, self.frags))
-        elif len(self.frags) == 0:
+
+        #for bullets, work out width and ensure we wrap the right amount onto line one
+        _handleBulletWidth(self.bulletText, style, maxWidths)
+        if len(self.frags)>1:
+            autoLeading = getattr(self,'autoLeading',getattr(style,'autoLeading',''))
+            calcBounds = autoLeading not in ('','off')
+            return cjkFragSplit(self.frags, maxWidths, calcBounds)
+            #raise ValueError('CJK Wordwrap can only handle one fragment per paragraph for now. Tried to handle:\ntext:  %s\nfrags: %s' % (self.text, self.frags))
+        elif not len(self.frags):
             return ParaLines(kind=0, fontSize=style.fontSize, fontName=style.fontName,
                             textColor=style.textColor, lines=[],ascent=style.fontSize,descent=-0.2*style.fontSize)
         f = self.frags[0]
@@ -1078,18 +1176,10 @@ class Paragraph(Flowable):
             #NB this is an utter hack that awaits the proper information
             #preserving splitting algorithm
             return f.clone(kind=0, lines=self.blPara.lines)
-        if type(width)!=ListType: maxWidths = [width]
-        else: maxWidths = width
         lines = []
         lineno = 0
 
-        #for bullets, work out width and ensure we wrap the right amount onto line one
-        _handleBulletWidth(self.bulletText, style, maxWidths)
-
-        maxWidth = maxWidths[0]
-
         self.height = 0
-
 
         f = self.frags[0]
 
