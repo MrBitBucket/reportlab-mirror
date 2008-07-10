@@ -750,13 +750,35 @@ class DebugMemo:
     def add(self,**kw):
         self._add(kw)
 
-    def dump(self):
+    def _dump(self,f):
         import pickle
-        pickle.dump(self.store,open(self.fn,'wb'))
+        pickle.dump(self.store,f)
+
+    def dump(self):
+        f = open(self.fn,'wb')
+        try:
+            self._dump(f)
+        finally:
+            f.close()
+
+    def dumps(self):
+        f = getStringIO()
+        self._dump(f)
+        return f.getvalue()
+
+    def _load(self,f):
+        import pickle
+        self.store = pickle.load(f)
 
     def load(self):
-        import pickle
-        self.store = pickle.load(open(self.fn,'rb'))
+        f = open(self.fn,'rb')
+        try:
+            self._load(f)
+        finally:
+            f.close()
+
+    def loads(self,s):
+        self._load(getStringIO(s))
 
     def _show_module_versions(self,k,v):
         self._writeln(k[2:])
