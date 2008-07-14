@@ -276,7 +276,7 @@ class Encoding:
         self.frozen = 1
 
     def isEqual(self, other):
-        return ((self.name == other.name) and (self.vector == other.vector))
+        return self.name==other.name and tuple(self.vector)==tuple(other.vector)
 
     def modifyRange(self, base, newNames):
         """Set a group of character names starting at the code point 'base'."""
@@ -583,7 +583,7 @@ def registerEncoding(enc):
         if enc.isEqual(_encodings[enc.name]):
             enc.freeze()
         else:
-            raise FontError('Encoding "%s" already registered with a different name vector!' % enc.Name)
+            raise FontError('Encoding "%s" already registered with a different name vector!' % enc.name)
     else:
         _encodings[enc.name] = enc
         enc.freeze()
