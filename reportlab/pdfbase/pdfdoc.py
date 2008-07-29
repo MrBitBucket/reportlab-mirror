@@ -183,7 +183,7 @@ class PDFDocument:
         #make an empty font dictionary
         DD = PDFDictionary({})
         DD.__Comment__ = "The standard fonts dictionary"
-        DDR = self.Reference(DD, BasicFonts)
+        self.Reference(DD, BasicFonts)
         self.delayedFonts = []
 
     def setCompression(self, onoff):
