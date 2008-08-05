@@ -60,9 +60,9 @@ try:
                         srcName='string input',
                         ReturnUTF8 = 1,
                         )
-    def parsexml(xmlText, oneOutermostTag=0,eoCB=None,entityReplacer=None):
+    def parsexml(xmlText, oneOutermostTag=0,eoCB=None,entityReplacer=None,parseOpts={}):
         pyRXP_parser.eoCB = eoCB
-        p = pyRXP_parser.parse(xmlText)
+        p = pyRXP_parser.parse(xmlText,**parseOpts)
         return oneOutermostTag and p or ('',None,[p],None)
 except ImportError:
     simpleparse = 1
