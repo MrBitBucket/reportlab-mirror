@@ -479,7 +479,13 @@ class RL_Codecs:
             0x00fd: 0xf8fd, # [unknown unicode name for bracerightmid]
             0x00fe: 0xf8fe, # [unknown unicode name for bracerightbt]
             0x00ff: None, # UNDEFINED
-            },None),
+            },
+            {
+            0x0394:0x0044, # GREEK CAPITAL LETTER DELTA
+            0x03a9:0x0057, # GREEK CAPITAL LETTER OMEGA
+            0x03bc:0x006d, # GREEK SMALL LETTER MU
+            }
+            ),
     'zapfdingbats':({
             0x0021: 0x2701, # UPPER BLADE SCISSORS
             0x0022: 0x2702, # BLACK SCISSORS
