@@ -537,8 +537,6 @@ class ImageReader:
         if isinstance(fileName,ImageReader):
             self.__dict__ = fileName.__dict__   #borgize
             return
-        if not haveImages:
-            raise RuntimeError('Imaging Library not available, unable to import bitmaps')
         #start wih lots of null private fields, to be populated by
         #the relevant engine.
         self.fileName = fileName
@@ -566,26 +564,29 @@ class ImageReader:
                         except:
                             pass
                     self.fp=getStringIO(self._cache.setdefault(md5(data).digest(),data))
-                    dbg=open('/tmp/rgb_debug.txt','a')
-                    print >>dbg,'length of cache=%d'%len(self._cache)
-                #detect which library we are using and open the image
-                if sys.platform[0:4] == 'java':
-                    from javax.imageio import ImageIO
-                    self._image = ImageIO.read(self.fp)
-                else:
-                    try:
+                if haveImages:
+                    #detect which library we are using and open the image
+                    if sys.platform[0:4] == 'java':
+                        from javax.imageio import ImageIO
+                        self._image = ImageIO.read(self.fp)
+                    else:
                         import PIL.Image
                         self._image = PIL.Image.open(self.fp)
-                        if self._image=='JPEG': self.jpeg_fh = self._jpeg_fp
+                        if self._image=='JPEG': self.jpeg_fh = self._jpeg_fh
+                else:
+                    from reportlab.pdfbase.pdfutils import readJPEGInfo
+                    try:
+                        self._width,self._height,c=readJPEGInfo(self.fp)
                     except:
-                        from reportlab.pdfbase.pdfutils import readJPEGInfo
-                        self.fp.seek(0)
-                        readJPEGInfo(self.fp)
-                        self.jpeg_fh = self._jpeg_fp
+                        raise RuntimeError('Imaging Library not available, unable to import bitmaps only jpegs')
+                    self.jpeg_fh = self._jpeg_fh
+                    self._data = self.fp.read()
+                    self._dataA=None
+                    self.fp.seek(0)
             except:
                 et,ev,tb = sys.exc_info()
                 if hasattr(ev,'args'):
-                    a = str(ev.args[-1])+(' fileName='+fileName)
+                    a = str(ev.args[-1])+(' fileName=%r'%fileName)
                     ev.args= ev.args[:-1]+(a,)
                     raise et,ev,tb
                 else:
