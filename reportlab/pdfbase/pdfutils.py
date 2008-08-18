@@ -416,7 +416,6 @@ def readJPEGInfo(image):
                 y = struct.unpack('B', image.read(1))
                 color =  y[0]
                 return width, height, color
-                done = 1
             elif x[0] in unsupportedMarkers:
                 raise PDFError('JPEG Unsupported JPEG marker: %0.2x' % x[0])
             elif x[0] not in noParamMarkers:

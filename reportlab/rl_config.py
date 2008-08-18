@@ -17,9 +17,9 @@ showBoundary =              0                       # turns on and off boundary 
 emptyTableAction=           'error'                 # one of 'error', 'indicate', 'ignore'
 invariant=                  0                       #produces repeatable,identical PDFs with same timestamp info (for regression testing)
 eps_preview_transparent=    None                    #set to white etc
-eps_preview=                1                   #set to False to disable
-eps_ttf_embed=              1                   #set to False to disable
-eps_ttf_embed_uid=          0                   #set to 1 to enable
+eps_preview=                1                       #set to False to disable
+eps_ttf_embed=              1                       #set to False to disable
+eps_ttf_embed_uid=          0                       #set to 1 to enable
 overlapAttachedSpace=       1                       #if set non false then adajacent flowable space after
                                                     #and space before are merged (max space is used).
 longTableOptimize =         0                       #default don't use Henning von Bargen's long table optimizations
@@ -32,6 +32,8 @@ platypus_link_underline=    0                       #paragraph links etc underli
 canvas_basefontname=        'Helvetica'             #this is used to initialize the canvas; if you override to make
                                                     #something else you are responsible for ensuring the font is registered etc etc
 allowShortTableRows=1                               #allows some rows in a table to be short
+internImageFiles=0                                  #attempt to convert images into internal memory files to reduce
+                                                    #the number of open files; try autoclosing as well if value is 2
 
 # places to look for T1Font information
 T1SearchPath =  (
@@ -156,7 +158,8 @@ fsEncodings
 odbc_driver
 platypus_link_underline
 canvas_basefontname
-allowShortTableRows'''.split()
+allowShortTableRows
+internImageFiles'''.split()
     import os, sys
     global sys_version, _unset_
     sys_version = sys.version.split()[0]        #strip off the other garbage

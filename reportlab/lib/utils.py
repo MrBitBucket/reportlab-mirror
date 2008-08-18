@@ -3,7 +3,11 @@
 # $URI:$
 __version__=''' $Id$ '''
 
-import string, os, sys, imp, time, md5
+import string, os, sys, imp, time
+try:
+    from hashlib import md5
+except:
+    from md5 import md5
 from reportlab.lib.logger import warnOnce
 from types import *
 from rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
@@ -21,11 +25,11 @@ if sys.hexversion<0x2030000:
 
 if sys.hexversion >= 0x02000000:
     def _digester(s):
-        return md5.md5(s).hexdigest()
+        return md5(s).hexdigest()
 else:
     # hexdigest not available in 1.5
     def _digester(s):
-        return join(map(lambda x : "%02x" % ord(x), md5.md5(s).digest()), '')
+        return join(map(lambda x : "%02x" % ord(x), md5(s).digest()), '')
 
 def _findFiles(dirList,ext='.ttf'):
     from os.path import isfile, isdir, join as path_join
@@ -528,6 +532,7 @@ def _isPILImage(im):
 
 class ImageReader:
     "Wraps up either PIL or Java to get data from bitmaps"
+    _cache={}
     def __init__(self, fileName):
         if isinstance(fileName,ImageReader):
             self.__dict__ = fileName.__dict__   #borgize
@@ -552,14 +557,31 @@ class ImageReader:
         else:
             try:
                 self.fp = open_for_read(fileName,'b')
+                from reportlab.rl_config import internImageFiles
+                if internImageFiles:
+                    data = self.fp.read()
+                    if internImageFiles&2:
+                        try:
+                            self.fp.close()
+                        except:
+                            pass
+                    self.fp=getStringIO(self._cache.setdefault(md5(data).digest(),data))
+                    dbg=open('/tmp/rgb_debug.txt','a')
+                    print >>dbg,'length of cache=%d'%len(self._cache)
                 #detect which library we are using and open the image
                 if sys.platform[0:4] == 'java':
                     from javax.imageio import ImageIO
                     self._image = ImageIO.read(self.fp)
                 else:
-                    import PIL.Image
-                    self._image = PIL.Image.open(self.fp)
-                    if self._image=='JPEG': self.jpeg_fh = self._jpeg_fp
+                    try:
+                        import PIL.Image
+                        self._image = PIL.Image.open(self.fp)
+                        if self._image=='JPEG': self.jpeg_fh = self._jpeg_fp
+                    except:
+                        from reportlab.pdfbase.pdfutils import readJPEGInfo
+                        self.fp.seek(0)
+                        readJPEGInfo(self.fp)
+                        self.jpeg_fh = self._jpeg_fp
             except:
                 et,ev,tb = sys.exc_info()
                 if hasattr(ev,'args'):
