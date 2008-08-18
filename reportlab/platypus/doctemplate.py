@@ -204,7 +204,7 @@ class NotAtTopPageBreak(FrameActionFlowable):
 
     def frameAction(self,frame):
         if not frame._atTop:
-            frame._generated_content = [PageBreak()]
+            frame.add_generated_content(PageBreak())
 
 class NextPageTemplate(ActionFlowable):
     """When you get to the next page, use the template specified (change to two column, for example)  """
@@ -488,20 +488,19 @@ class BaseDocTemplate:
         ''' Handles the semantics of the end of a frame. This includes the selection of
             the next frame or if this is the last frame then invoke pageEnd.
         '''
-
         self._leftExtraIndent = self.frame._leftExtraIndent
         self._rightExtraIndent = self.frame._rightExtraIndent
 
+        f = self.frame
         if hasattr(self,'_nextFrameIndex'):
             self.frame = self.pageTemplate.frames[self._nextFrameIndex]
             self.frame._debug = self._debug
             del self._nextFrameIndex
             self.handle_frameBegin(resume)
-        elif hasattr(self.frame,'lastFrame') or self.frame is self.pageTemplate.frames[-1]:
+        elif hasattr(f,'lastFrame') or f is self.pageTemplate.frames[-1]:
             self.handle_pageEnd()
             self.frame = None
         else:
-            f = self.frame
             self.frame = self.pageTemplate.frames[self.pageTemplate.frames.index(f) + 1]
             self.frame._debug = self._debug
             self.handle_frameBegin()
@@ -541,7 +540,7 @@ class BaseDocTemplate:
             #ensure we start on the first one
             self._nextPageTemplateCycle = c.cyclicIterator()
         else:
-            raise TypeError, "argument pt should be string or integer or list"
+            raise TypeError("argument pt should be string or integer or list")
 
     def handle_nextFrame(self,fx,resume=0):
         '''On endFrame change to the frame with name or index fx'''
@@ -550,7 +549,7 @@ class BaseDocTemplate:
                 if f.id == fx:
                     self._nextFrameIndex = self.pageTemplate.frames.index(f)
                     return
-            raise ValueError, "can't find frame('%s')"%fx
+            raise ValueError("can't find frame('%s') in %r(%s) which has frames %r"%(fx,self.pageTemplate,self.pageTemplate.id,[(f,f.id) for f in self.pageTemplate.frames]))
         elif type(fx) is IntType:
             self._nextFrameIndex = fx
         else:
@@ -558,6 +557,7 @@ class BaseDocTemplate:
 
     def handle_currentFrame(self,fx,resume=0):
         '''change to the frame with name or index fx'''
+
         self.handle_nextFrame(fx,resume)
         self.handle_frameEnd(resume)
 
@@ -609,6 +609,13 @@ class BaseDocTemplate:
         finally:
             if frame: del f._frame
 
+    def _addGeneratedContent(self,flowables,frame):
+        S = getattr(frame,'_generated_content',None)
+        if S:
+            for i,f in enumerate(S):
+                flowables.insert(i,f)
+            del frame._generated_content
+
     def handle_flowable(self,flowables):
         '''try to handle one flowable from the front of list flowables.'''
 
@@ -634,31 +641,28 @@ class BaseDocTemplate:
             self.afterFlowable(f)
         else:
             frame = self.frame
+            canv = self.canv
             #try to fit it then draw it
-            if frame.add(f, self.canv, trySplit=self.allowSplitting):
+            if frame.add(f, canv, trySplit=self.allowSplitting):
                 if not isinstance(f,FrameActionFlowable):
                     self._curPageFlowableCount += 1
                     self.afterFlowable(f)
-                else:
-                    S = getattr(frame,'_generated_content',None)
-                    if S:
-                        for i,f in enumerate(S):
-                            flowables.insert(i,f)
-                        del frame._generated_content
+                self._addGeneratedContent(flowables,frame)
             else:
                 if self.allowSplitting:
                     # see if this is a splittable thing
-                    S = frame.split(f,self.canv)
+                    S = frame.split(f,canv)
                     n = len(S)
                 else:
                     n = 0
                 if n:
                     if not isinstance(S[0],(PageBreak,SlowPageBreak,ActionFlowable)):
-                        if frame.add(S[0], self.canv, trySplit=0):
+                        if frame.add(S[0], canv, trySplit=0):
                             self._curPageFlowableCount += 1
                             self.afterFlowable(S[0])
+                            self._addGeneratedContent(flowables,frame)
                         else:
-                            ident = "Splitting error(n==%d) on page %d in\n%s" % (n,self.page,self._fIdent(f,30,frame))
+                            ident = "Splitting error(n==%d) on page %d in\n%s" % (n,self.page,self._fIdent(f,60,frame))
                             #leave to keep apart from the raise
                             raise LayoutError(ident)
                         del S[0]
@@ -666,7 +670,7 @@ class BaseDocTemplate:
                         flowables.insert(i,f)   # put split flowables back on the list
                 else:
                     if hasattr(f,'_postponed'):
-                        ident = "Flowable %s too large on page %d" % (self._fIdent(f,30,frame), self.page)
+                        ident = "Flowable %s too large on page %d" % (self._fIdent(f,60,frame), self.page)
                         #leave to keep apart from the raise
                         raise LayoutError(ident)
                     # this ought to be cleared when they are finally drawn!
@@ -735,34 +739,41 @@ class BaseDocTemplate:
 
         #pagecatcher can drag in information from embedded PDFs and we want ours
         #to take priority, so cache and reapply our own info dictionary after the build.
-        self._savedInfo = self.canv._doc.info
+        canv = self.canv
+        self._savedInfo = canv._doc.info
         handled = 0
-        while len(flowables):
-            self.clean_hanging()
-            try:
-                first = flowables[0]
-                self.handle_flowable(flowables)
-                handled += 1
-            except:
-                #if it has trace info, add it to the traceback message.
-                if hasattr(first, '_traceInfo') and first._traceInfo:
-                    exc = sys.exc_info()[1]
-                    args = list(exc.args)
-                    tr = first._traceInfo
-                    args[0] += '\n(srcFile %s, line %d char %d to line %d char %d)' % (
-                        tr.srcFile,
-                        tr.startLineNo,
-                        tr.startLinePos,
-                        tr.endLineNo,
-                        tr.endLinePos
-                        )
-                    exc.args = tuple(args)
-                raise
-            if self._onProgress:
-                self._onProgress('PROGRESS',flowableCount - len(flowables))
+
+        try:
+            canv._doctemplate = self
+            while len(flowables):
+                self.clean_hanging()
+                try:
+                    first = flowables[0]
+                    self.handle_flowable(flowables)
+                    handled += 1
+                except:
+                    #if it has trace info, add it to the traceback message.
+                    if hasattr(first, '_traceInfo') and first._traceInfo:
+                        exc = sys.exc_info()[1]
+                        args = list(exc.args)
+                        tr = first._traceInfo
+                        args[0] += '\n(srcFile %s, line %d char %d to line %d char %d)' % (
+                            tr.srcFile,
+                            tr.startLineNo,
+                            tr.startLinePos,
+                            tr.endLineNo,
+                            tr.endLinePos
+                            )
+                        exc.args = tuple(args)
+                    raise
+                if self._onProgress:
+                    self._onProgress('PROGRESS',flowableCount - len(flowables))
+        finally:
+            del canv._doctemplate
+
 
         #reapply pagecatcher info
-        self.canv._doc.info = self._savedInfo
+        canv._doc.info = self._savedInfo
 
         self._endBuild()
         if self._onProgress:
