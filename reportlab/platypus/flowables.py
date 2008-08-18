@@ -176,8 +176,12 @@ class Flowable:
             r = r[:maxLen]
         return "<%s at %s%s>%s" % (self.__class__.__name__, hex(id(self)), self._frameName(), r)
 
+    def _doctemplateAttr(self,a):
+        return getattr(getattr(getattr(self,'canv',None),'_doctemplate',None),a,None)
+
     def _frameName(self):
         f = getattr(self,'_frame',None)
+        if not f: f = self._doctemplateAttr('frame')
         if f and f.id: return ' frame=%s' % f.id
         return ''
 
@@ -433,7 +437,7 @@ class SlowPageBreak(PageBreak):
     pass
 
 class CondPageBreak(Spacer):
-    """Throw a page if not enough vertical space"""
+    """use up a frame if not enough vertical space effectively CondFrameBreak"""
     def __init__(self, height):
         self.height = height
 
@@ -442,8 +446,14 @@ class CondPageBreak(Spacer):
 
     def wrap(self, availWidth, availHeight):
         if availHeight<self.height:
-            return (availWidth, availHeight)
-        return (0, 0)
+            f = self._doctemplateAttr('frame')
+            if not f: return availWidth, availHeight
+            from doctemplate import FrameBreak
+            f.add_generated_content(FrameBreak)
+        return 0, 0
+
+    def identity(self,maxLen=None):
+        return repr(self).replace(')',',frame=%s)'%self._frameName())
 
 def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
     '''return max width, required height for a list of flowables F'''
@@ -1104,3 +1114,56 @@ class AnchorFlowable(Spacer):
 
     def draw(self):
         self.canv.bookmarkHorizontal(self._name,0,0)
+
+class FrameSplitter(Flowable):
+    '''When encountered this flowable should either switch directly to nextTemplate
+    if remaining space in the current frame is less than gap+required or it should
+    temporarily modify the current template to have the frames from nextTemplate
+    that are listed in nextFrames and switch to the first of those frames. 
+    '''
+    _ZEROSIZE=1
+    def __init__(self,nextTemplate,nextFrames=[],gap=10,required=72):
+        self.nextTemplate=nextTemplate
+        self.nextFrames=nextFrames
+        self.gap=gap
+        self.required=required
+
+    def wrap(self,aW,aH):
+        frame = self._frame
+        from reportlab.platypus.doctemplate import NextPageTemplate,CurrentFrameFlowable,LayoutError
+        G=[NextPageTemplate(self.nextTemplate)]
+        if aH<self.gap+self.required-_FUZZ:
+            #we are going straight to the nextTemplate with no attempt to modify the frames
+            G.append(PageBreak())
+        else:
+            #we are going to modify the incoming templates
+            templates = self._doctemplateAttr('pageTemplates')
+            if templates is None:
+                raise LayoutError('%s called in non-doctemplate environment'%self.identity())
+            T=[t for t in templates if t.id==self.nextTemplate]
+            if not T:
+                raise LayoutError('%s.nextTemplate=%s not found' % (self.identity(),self.nextTemplate))
+            T=T[0]
+            F=[f for f in T.frames if f.id in self.nextFrames]
+            N=[f.id for f in F]
+            N=[f for f in self.nextFrames if f not in N]
+            if N:
+                raise LayoutError('%s frames=%r not found in pageTemplate(%s)\n%r has frames %r' % (self.identity(),N,T.id,T,[f.id for f in T.frames]))
+            T=self._doctemplateAttr('pageTemplate')
+            def unwrap(canv,doc,T=T,onPage=T.onPage,oldFrames=T.frames):
+                T.frames=oldFrames
+                T.onPage=onPage
+                onPage(canv,doc)
+            T.onPage=unwrap
+            h=aH-self.gap
+            for i,f in enumerate(F):
+                f=copy(f)
+                f.height=h
+                f._reset()
+                F[i]=f
+            T.frames=F
+            G.append(CurrentFrameFlowable(F[0].id))
+        frame.add_generated_content(*G)
+        return 0,0
+    def draw(self):
+        pass
