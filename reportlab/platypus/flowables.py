@@ -399,7 +399,11 @@ class Image(Flowable):
             r = "%s filename=%s>" % (r[:-4],self.filename)
         return r
 
-class Spacer(Flowable):
+class NullDraw(Flowable):
+    def draw(self):
+        pass
+
+class Spacer(NullDraw):
     """A spacer just takes up space and doesn't draw anything - it guarantees
        a gap between objects."""
     _fixedWidth = 1
@@ -411,10 +415,7 @@ class Spacer(Flowable):
     def __repr__(self):
         return "%s(%s, %s)" % (self.__class__.__name__,self.width, self.height)
 
-    def draw(self):
-        pass
-
-class UseUpSpace(Flowable):
+class UseUpSpace(NullDraw):
     def __init__(self):
         pass
 
@@ -425,9 +426,6 @@ class UseUpSpace(Flowable):
         self.width = availWidth
         self.height = availHeight
         return (availWidth,availHeight-1e-8)  #step back a point
-
-    def draw(self):
-        pass
 
 class PageBreak(UseUpSpace):
     """Move on to the next page in the document.
@@ -642,16 +640,13 @@ class ParagraphAndImage(Flowable):
             self.I.drawOn(canv,self.width-self.wI-self.xpad,self.height-self.hI)
             self.P.drawOn(canv,0,0)
 
-class FailOnWrap(Flowable):
+class FailOnWrap(NullDraw):
     def wrap(self, availWidth, availHeight):
         raise ValueError("FailOnWrap flowable wrapped and failing as ordered!")
 
-    def draw(self):
-        pass
-
 class FailOnDraw(Flowable):
     def wrap(self, availWidth, availHeight):
-        return (0,0)
+        return 0,0
 
     def draw(self):
         raise ValueError("FailOnDraw flowable drawn, and failing as ordered!")
@@ -1115,7 +1110,7 @@ class AnchorFlowable(Spacer):
     def draw(self):
         self.canv.bookmarkHorizontal(self._name,0,0)
 
-class FrameSplitter(Flowable):
+class FrameSplitter(NullDraw):
     '''When encountered this flowable should either switch directly to nextTemplate
     if remaining space in the current frame is less than gap+required or it should
     temporarily modify the current template to have the frames from nextTemplate
@@ -1165,5 +1160,56 @@ class FrameSplitter(Flowable):
             G.append(CurrentFrameFlowable(F[0].id))
         frame.add_generated_content(*G)
         return 0,0
-    def draw(self):
-        pass
+
+class DocAssign(NullDraw):
+    '''At wrap time this flowable evaluates var=expr in the doctemplate namespace'''
+    _ZEROSIZE=1
+    def __init__(self,var,expr,life='frame'):
+        Flowable.__init__(self)
+        self.args = var,expr,life
+    def wrap(self,aW,aH):
+        NS=self._doctemplateAttr('_nameSpace')
+        NS.update(dict(availableWidth=aW,availableHeight=aH))
+        try:
+            self._doctemplateAttr('d'+self.__class__.__name__[1:])(*self.args)
+        finally:
+            for k in 'availableWidth','availableHeight':
+                try:
+                    del NS[k]
+                except:
+                    pass
+        return 0,0
+
+class DocExec(DocAssign):
+    '''at wrap time exec stmt in doc._nameSpace'''
+    def __init__(self,stmt):
+        Flowable.__init__(self)
+        self.args=stmt,
+
+class DocPara(DocAssign):
+    '''at wrap time create a paragraph with the value of expr as text
+    if paraTemplate is specified it should use %(value)s for string interpolation
+    suitable defaults will be used if style and klass are None
+    '''
+    def __init__(self,expr,paraTemplate=None,style=None,klass=None):
+        Flowable.__init__(self)
+        self.expr=expr
+        self.paraTemplate=paraTemplate
+        self.style=style
+        self.klass=klass
+
+    def wrap(self,aW,aH):
+        value=self._doctemplateAttr('docEval')(self.expr)
+        if self.paraTemplate:
+            value = self.paraTemplate % dict(value=value)
+        else:
+            value = str(value)
+        P = self.klass
+        if not P:
+            from reportlab.platypus.paragraph import Paragraph as P
+        style = self.style
+        if not style:
+            from reportlab.lib.styles import getSampleStyleSheet
+            style=getSampleStyleSheet()['Code']
+        self._doctemplateAttr('frame').add_generated_content(P(value,style=style))
+        return 0,0

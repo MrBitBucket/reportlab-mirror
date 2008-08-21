@@ -574,13 +574,21 @@ class PlatypusTestCase(unittest.TestCase):
         from reportlab.lib.styles import ParagraphStyle
         from reportlab.graphics.shapes import Drawing, Rect
         from reportlab.platypus import SimpleDocTemplate
+        from reportlab.platypus.flowables import DocAssign, DocExec, DocPara
         normal = ParagraphStyle(name='Normal', fontName='Helvetica', fontSize=8.5, leading=11)
         header = ParagraphStyle(name='Heading1', parent=normal, fontSize=14, leading=19,
                     spaceAfter=6, keepWithNext=1)
         d = Drawing(400, 200)
         d.add(Rect(50, 50, 300, 100))
 
-        story = [Paragraph("The section header", header), d]
+        story = [Paragraph("The section header", header), d,
+                DocAssign('currentFrame','doc.frame.id'),
+                DocAssign('currentPageTemplate','doc.pageTemplate.id'),
+                DocAssign('aW','availableWidth'),
+                DocAssign('aH','availableHeight'),
+                DocAssign('aWH','availableWidth,availableHeight'),
+                DocPara('repr(doc._nameSpace)'),
+                ]
         doc = SimpleDocTemplate('test_drawing_keepwithnext.pdf')
         doc.build(story)
 
