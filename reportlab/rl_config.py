@@ -32,8 +32,11 @@ platypus_link_underline=    0                       #paragraph links etc underli
 canvas_basefontname=        'Helvetica'             #this is used to initialize the canvas; if you override to make
                                                     #something else you are responsible for ensuring the font is registered etc etc
 allowShortTableRows=1                               #allows some rows in a table to be short
-internImageFiles=0                                  #attempt to convert images into internal memory files to reduce
-                                                    #the number of open files; try autoclosing as well if value is 2
+imageReaderFlags=0                                  #attempt to convert images into internal memory files to reduce
+                                                    #the number of open files (see lib.utils.ImageReader)
+                                                    #if imageReaderFlags&2 then attempt autoclosing of those files
+                                                    #if imageReaderFlags&4 then cache data 
+                                                    #if imageReaderFlags==-1 then use Ralf Schmitt's re-opening approach
 
 # places to look for T1Font information
 T1SearchPath =  (
@@ -159,7 +162,7 @@ odbc_driver
 platypus_link_underline
 canvas_basefontname
 allowShortTableRows
-internImageFiles'''.split()
+imageReaderFlags'''.split()
     import os, sys
     global sys_version, _unset_
     sys_version = sys.version.split()[0]        #strip off the other garbage

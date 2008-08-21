@@ -346,17 +346,14 @@ else:
     haveImages = Image is not None
     if haveImages: del Image
 
-__StringIO=None
+try:
+    from cStringIO import StringIO as __StringIO
+except ImportError:
+    from StringIO import StringIO as __StringIO
 def getStringIO(buf=None):
     '''unified StringIO instance interface'''
-    global __StringIO
-    if not __StringIO:
-        try:
-            from cStringIO import StringIO
-        except ImportError:
-            from StringIO import StringIO
-        __StringIO = StringIO
     return buf is not None and __StringIO(buf) or __StringIO()
+_StringIOKlass=__StringIO().__class__
 
 class ArgvDictValue:
     '''A type to allow clients of getArgvDict to specify a conversion function'''
@@ -530,7 +527,7 @@ def _isPILImage(im):
     except ImportError:
         return 0
 
-class ImageReader:
+class ImageReader(object):
     "Wraps up either PIL or Java to get data from bitmaps"
     _cache={}
     def __init__(self, fileName):
@@ -554,25 +551,32 @@ class ImageReader:
                 self.fileName = 'PILIMAGE_%d' % id(self)
         else:
             try:
+                from reportlab.rl_config import imageReaderFlags
                 self.fp = open_for_read(fileName,'b')
-                from reportlab.rl_config import internImageFiles
-                if internImageFiles:
+                if isinstance(self.fp,_StringIOKlass):  imageReaderFlags=0 #avoid messing with already internal files
+                if imageReaderFlags>0:  #interning
                     data = self.fp.read()
-                    if internImageFiles&2:
+                    if imageReaderFlags&2:  #autoclose
                         try:
                             self.fp.close()
                         except:
                             pass
-                    self.fp=getStringIO(self._cache.setdefault(md5(data).digest(),data))
+                    if imageReaderFlags&4:  #cache the data
+                        if not self._cache:
+                            from rl_config import register_reset
+                            register_reset(self._cache.clear)
+                        data=self._cache.setdefault(md5(data).digest(),data)
+                    self.fp=getStringIO(data)
+                elif imageReaderFlags==-1 and isinstance(fileName,(str,unicode)):
+                    #try Ralf Schmitt's re-opening technique of avoiding too many open files
+                    self.fp.close()
+                    del self.fp #will become a property in the next statement
+                    self.__class__=LazyImageReader
                 if haveImages:
                     #detect which library we are using and open the image
-                    if sys.platform[0:4] == 'java':
-                        from javax.imageio import ImageIO
-                        self._image = ImageIO.read(self.fp)
-                    else:
-                        import PIL.Image
-                        self._image = PIL.Image.open(self.fp)
-                        if self._image=='JPEG': self.jpeg_fh = self._jpeg_fh
+                    if not self._image:
+                        self._image = self._read_image(self.fp)
+                    if getattr(self._image,'format',None)=='JPEG': self.jpeg_fh = self._jpeg_fh
                 else:
                     from reportlab.pdfbase.pdfutils import readJPEGInfo
                     try:
@@ -591,6 +595,14 @@ class ImageReader:
                     raise et,ev,tb
                 else:
                     raise
+
+    def _read_image(self,fp):
+        if sys.platform[0:4] == 'java':
+            from javax.imageio import ImageIO
+            return ImageIO.read(fp)
+        else:
+            import PIL.Image
+            return PIL.Image.open(fp)
 
     def _jpeg_fh(self):
         fp = self.fp
@@ -662,6 +674,15 @@ class ImageReader:
                 return map(ord, palette[transparency:transparency+3])
             else:
                 return None
+
+class LazyImageReader(ImageReader): 
+    @property 
+    def fp(self): 
+        return open_for_read(self.fileName, 'b') 
+
+    @property 
+    def _image(self):
+        return self._read_image(self.fp)
 
 def getImageData(imageFileName):
     "Get width, height and RGB pixels from image file.  Wraps Java/PIL"
