@@ -574,7 +574,6 @@ class PlatypusTestCase(unittest.TestCase):
         from reportlab.lib.styles import ParagraphStyle
         from reportlab.graphics.shapes import Drawing, Rect
         from reportlab.platypus import SimpleDocTemplate
-        from reportlab.platypus.flowables import DocAssign, DocExec, DocPara
         normal = ParagraphStyle(name='Normal', fontName='Helvetica', fontSize=8.5, leading=11)
         header = ParagraphStyle(name='Heading1', parent=normal, fontSize=14, leading=19,
                     spaceAfter=6, keepWithNext=1)
@@ -582,14 +581,36 @@ class PlatypusTestCase(unittest.TestCase):
         d.add(Rect(50, 50, 300, 100))
 
         story = [Paragraph("The section header", header), d,
+                ]
+        doc = SimpleDocTemplate('test_drawing_keepwithnext.pdf')
+        doc.build(story)
+
+    def test2(self):
+        #test from Wietse Jacobs
+        from reportlab.lib.styles import ParagraphStyle
+        from reportlab.graphics.shapes import Drawing, Rect
+        from reportlab.platypus import SimpleDocTemplate
+        from reportlab.platypus.flowables import DocAssign, DocExec, DocPara, DocIf, DocWhile
+        normal = ParagraphStyle(name='Normal', fontName='Helvetica', fontSize=8.5, leading=11)
+        header = ParagraphStyle(name='Heading1', parent=normal, fontSize=14, leading=19,
+                    spaceAfter=6, keepWithNext=1)
+        d = Drawing(400, 200)
+        d.add(Rect(50, 50, 300, 100))
+
+        story = [
                 DocAssign('currentFrame','doc.frame.id'),
                 DocAssign('currentPageTemplate','doc.pageTemplate.id'),
                 DocAssign('aW','availableWidth'),
                 DocAssign('aH','availableHeight'),
                 DocAssign('aWH','availableWidth,availableHeight'),
+                DocAssign('i',3),
+                DocIf('i>3',Paragraph('The value of i is larger than 3',normal),Paragraph('The value of i is not larger than 3',normal)),
+                DocIf('i==3',Paragraph('The value of i is equal to 3',normal),Paragraph('The value of i is not equal to 3',normal)),
+                DocIf('i<3',Paragraph('The value of i is less than 3',normal),Paragraph('The value of i is not less than 3',normal)),
+                DocWhile('i',[DocPara('i',format='The value of i is %(__expr__)d',style=normal),DocExec('i-=1')]),
                 DocPara('repr(doc._nameSpace)'),
                 ]
-        doc = SimpleDocTemplate('test_drawing_keepwithnext.pdf')
+        doc = SimpleDocTemplate('test_doc_programming.pdf')
         doc.build(story)
 
 def makeSuite():

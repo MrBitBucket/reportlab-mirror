@@ -893,6 +893,7 @@ class BaseDocTemplate:
     _allowedLifetimes = 'page','frame','build','forever'
     def docAssign(self,var,expr,lifetime):
         var=var.strip()+'\n'
+        if not isinstance(expr,(str,unicode)): expr=str(expr)
         expr=expr.strip()
         T=tokenize.generate_tokens(lambda :var)
         tokens=[]

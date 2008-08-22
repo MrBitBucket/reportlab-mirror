@@ -1167,17 +1167,24 @@ class DocAssign(NullDraw):
     def __init__(self,var,expr,life='frame'):
         Flowable.__init__(self)
         self.args = var,expr,life
-    def wrap(self,aW,aH):
+
+    def funcWrap(self,aW,aH):
         NS=self._doctemplateAttr('_nameSpace')
         NS.update(dict(availableWidth=aW,availableHeight=aH))
         try:
-            self._doctemplateAttr('d'+self.__class__.__name__[1:])(*self.args)
+            return self.func()
         finally:
             for k in 'availableWidth','availableHeight':
                 try:
                     del NS[k]
                 except:
                     pass
+
+    def func(self):
+        return self._doctemplateAttr('d'+self.__class__.__name__[1:])(*self.args)
+
+    def wrap(self,aW,aH):
+        self.funcWrap(aW,aH)
         return 0,0
 
 class DocExec(DocAssign):
@@ -1188,20 +1195,33 @@ class DocExec(DocAssign):
 
 class DocPara(DocAssign):
     '''at wrap time create a paragraph with the value of expr as text
-    if paraTemplate is specified it should use %(value)s for string interpolation
+    if format is specified it should use %(__expr__)s for string interpolation
+    of the expression expr (if any). It may also use %(name)s interpolations
+    for other variables in the namespace.
     suitable defaults will be used if style and klass are None
     '''
-    def __init__(self,expr,paraTemplate=None,style=None,klass=None):
+    def __init__(self,expr,format=None,style=None,klass=None):
         Flowable.__init__(self)
         self.expr=expr
-        self.paraTemplate=paraTemplate
+        self.format=format
         self.style=style
         self.klass=klass
 
+    def func(self):
+        expr = self.expr
+        if expr:
+            if not isinstance(expr,(str,unicode)): expr = str(expr)
+            return self._doctemplateAttr('docEval')(expr)
+
+    def add_content(self,*args):
+        self._doctemplateAttr('frame').add_generated_content(*args)
+
     def wrap(self,aW,aH):
-        value=self._doctemplateAttr('docEval')(self.expr)
-        if self.paraTemplate:
-            value = self.paraTemplate % dict(value=value)
+        value = self.funcWrap(aW,aH)
+        if self.format:
+            NS=self._doctemplateAttr('_nameSpace').copy()
+            NS['__expr__'] = value
+            value = self.format % NS
         else:
             value = str(value)
         P = self.klass
@@ -1211,5 +1231,31 @@ class DocPara(DocAssign):
         if not style:
             from reportlab.lib.styles import getSampleStyleSheet
             style=getSampleStyleSheet()['Code']
-        self._doctemplateAttr('frame').add_generated_content(P(value,style=style))
+        self.add_content(P(value,style=style))
+        return 0,0
+
+class DocIf(DocPara):
+    def __init__(self,cond,thenBlock,elseBlock=[]):
+        Flowable.__init__(self)
+        self.expr = cond
+        self.blocks = elseBlock,thenBlock
+
+    def checkBlock(self,block):
+        if not isinstance(block,(list,tuple)):
+            block = (block,)
+        return block
+
+    def wrap(self,aW,aH):
+        self.add_content(*self.checkBlock(self.blocks[int(bool(self.funcWrap(aW,aH)))]))
+        return 0,0
+
+class DocWhile(DocIf):
+    def __init__(self,cond,whileBlock):
+        Flowable.__init__(self)
+        self.expr = cond
+        self.block = self.checkBlock(whileBlock)
+
+    def wrap(self,aW,aH):
+        if bool(self.funcWrap(aW,aH)):
+            self.add_content(*(list(self.block)+[self]))
         return 0,0
