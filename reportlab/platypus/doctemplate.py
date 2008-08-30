@@ -35,7 +35,6 @@ from reportlab.platypus.frames import Frame
 from reportlab.rl_config import defaultPageSize, verbose
 import reportlab.lib.sequencer
 from reportlab.pdfgen import canvas
-import tokenize
 
 from types import *
 import sys
@@ -437,7 +436,7 @@ class BaseDocTemplate:
             check the next page template
             hang a page begin
         '''
-        self._removeVars('page')
+        self._removeVars(('page','frame'))
         #detect infinite loops...
         if self._curPageFlowableCount == 0:
             self._emptyPages += 1
@@ -492,7 +491,7 @@ class BaseDocTemplate:
         ''' Handles the semantics of the end of a frame. This includes the selection of
             the next frame or if this is the last frame then invoke pageEnd.
         '''
-        self._removeVars('frame')
+        self._removeVars(('frame',))
         self._leftExtraIndent = self.frame._leftExtraIndent
         self._rightExtraIndent = self.frame._rightExtraIndent
 
@@ -714,7 +713,7 @@ class BaseDocTemplate:
         self.handle_documentBegin()
 
     def _endBuild(self):
-        self._removeVars('build')
+        self._removeVars(('build','page','frame'))
         if self._hanging!=[] and self._hanging[-1] is PageBegin:
             del self._hanging[-1]
             self.clean_hanging()
@@ -892,52 +891,50 @@ class BaseDocTemplate:
 
     _allowedLifetimes = 'page','frame','build','forever'
     def docAssign(self,var,expr,lifetime):
-        var=var.strip()+'\n'
         if not isinstance(expr,(str,unicode)): expr=str(expr)
         expr=expr.strip()
-        T=tokenize.generate_tokens(lambda :var)
-        tokens=[]
-        while 1:
-            t=T.next()
-            if t[0]==tokenize.NEWLINE: break
-            tokens.append(t)
-        simple = len(tokens)==1
-        del T
         var=var.strip()
+        self.docExec('%s=(%s)'%(var.strip(),expr.strip()),lifetime)
+
+    def docExec(self,stmt,lifetime):
+        stmt=stmt.strip()
+        NS=self._nameSpace
+        K0=NS.keys()
         try:
             if lifetime not in self._allowedLifetimes:
                 raise ValueError('bad lifetime %r not in %r'%(lifetime,self._allowedLifetimes))
-            exec '%s=(%s)' % (var,expr) in {},self._nameSpace
+            exec stmt in {},NS
         except:
             exc = sys.exc_info()[1]
             args = list(exc.args)
-            args[-1] += '\ndocAssign %s=(%s) lifetime=%r failed!' % (var,expr,lifetime)
+            args[-1] += '\ndocExec %s lifetime=%r failed!' % (stmt,lifetime)
             exc.args = tuple(args)
+            for k in NS.iterkeys():
+                if k not in K0:
+                    del NS[k]
             raise
-        if simple:
-            for v in self._lifetimes.itervalues():
+        self._addVars([k for k in NS.iterkeys() if k not in K0],lifetime)
+
+    def _addVars(self,vars,lifetime):
+        '''add namespace variables to lifetimes lists'''
+        LT=self._lifetimes
+        for var in vars:
+            for v in LT.itervalues():
                 if var in v:
                     v.remove(var)
-            self._lifetimes.setdefault(lifetime,set([])).add(var)
+            LT.setdefault(lifetime,set([])).add(var)
 
-    def docExec(self,stmt):
-        stmt=stmt.strip()
-        try:
-            exec stmt in {},self._nameSpace
-        except:
-            exc = sys.exc_info()[1]
-            args = list(exc.args)
-            args[-1] += '\ndocExec %s failed!' % stmt
-            exc.args = tuple(args)
-            raise
-
-    def _removeVars(self,lifetime):
-        for k in self._lifetimes.setdefault(lifetime,[]):
-            try:
-                del self._nameSpace[k]
-            except KeyError:
-                pass
-        del self._lifetimes[lifetime]
+    def _removeVars(self,lifetimes):
+        '''remove namespace variables for with lifetime in lifetimes'''
+        LT=self._lifetimes
+        NS=self._nameSpace
+        for lifetime in lifetimes:
+            for k in LT.setdefault(lifetime,[]):
+                try:
+                    del NS[k]
+                except KeyError:
+                    pass
+            del LT[lifetime]
 
     def docEval(self,expr):
         try:

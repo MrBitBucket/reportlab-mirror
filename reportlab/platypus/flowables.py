@@ -1189,9 +1189,9 @@ class DocAssign(NullDraw):
 
 class DocExec(DocAssign):
     '''at wrap time exec stmt in doc._nameSpace'''
-    def __init__(self,stmt):
+    def __init__(self,stmt,lifetime='frame'):
         Flowable.__init__(self)
-        self.args=stmt,
+        self.args=stmt,lifetime
 
 class DocPara(DocAssign):
     '''at wrap time create a paragraph with the value of expr as text
