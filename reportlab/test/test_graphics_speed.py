@@ -5,12 +5,8 @@
 This does a test drawing with lots of things in it, running
 with and without attribute checking.
 """
-
 __version__ = ''' $Id $ '''
-
-
-import os, sys, time, profile
-
+import os, sys, time
 import reportlab.rl_config
 from reportlab.test import unittest
 from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
@@ -60,21 +56,21 @@ class GraphicsSpeedTestCase(unittest.TestCase):
         result = 'drew %d pie charts in %0.4f' % (num, t1 - t0)
         open(outputfile('test_graphics_speed_test%s.log' % (isFast+1)), 'w').write(result)
 
-
     def test1(self, isFast=1):
         "Same as test1(), but with shape checking turned on."
-
         self.test0(isFast)
 
-
-    def test2(self):
-        "This is a profiled version of test1()."
-
-        fileName = outputfile('test_graphics_speed_profile.log')
-        # This runs ok, when only this test script is executed,
-        # but fails, when imported from runAll.py...
-##        profile.run("t = GraphicsSpeedTestCase('test2')", fileName)
-
+    if False:
+        def test2(self):
+            "This is a profiled version of test1()."
+            try:
+                import profile
+            except ImportError:
+                return
+            fileName = outputfile('test_graphics_speed_profile.log')
+            # This runs ok, when only this test script is executed,
+            # but fails, when imported from runAll.py...
+            profile.run("t = GraphicsSpeedTestCase('test2')", fileName)
 
 def makeSuite():
     return makeSuiteForClasses(GraphicsSpeedTestCase)

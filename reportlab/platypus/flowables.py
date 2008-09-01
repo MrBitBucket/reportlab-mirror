@@ -1200,12 +1200,13 @@ class DocPara(DocAssign):
     for other variables in the namespace.
     suitable defaults will be used if style and klass are None
     '''
-    def __init__(self,expr,format=None,style=None,klass=None):
+    def __init__(self,expr,format=None,style=None,klass=None,escape=True):
         Flowable.__init__(self)
         self.expr=expr
         self.format=format
         self.style=style
         self.klass=klass
+        self.escape=escape
 
     def func(self):
         expr = self.expr
@@ -1231,6 +1232,9 @@ class DocPara(DocAssign):
         if not style:
             from reportlab.lib.styles import getSampleStyleSheet
             style=getSampleStyleSheet()['Code']
+        if self.escape:
+            from xml.sax.saxutils import escape
+            value=escape(value)
         self.add_content(P(value,style=style))
         return 0,0
 

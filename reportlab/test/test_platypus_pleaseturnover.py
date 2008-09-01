@@ -113,7 +113,7 @@ def _ptoTestCase(self):
     pto.alignment = TA_RIGHT
     pto.fontSize -= 1
     def ColorParagraph(c,text,style):
-        return Paragraph('<para color=%s>%s</para>' % (c,text),style)
+        return Paragraph('<para color="%s">%s</para>' % (c,text),style)
 
     def ptoblob(blurb,content,trailer=None,header=None, story=story, H1=H1):
         if type(content) not in (type([]),type(())): content = [content]

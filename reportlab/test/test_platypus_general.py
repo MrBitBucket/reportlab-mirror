@@ -608,7 +608,7 @@ class PlatypusTestCase(unittest.TestCase):
                 DocIf('i==3',Paragraph('The value of i is equal to 3',normal),Paragraph('The value of i is not equal to 3',normal)),
                 DocIf('i<3',Paragraph('The value of i is less than 3',normal),Paragraph('The value of i is not less than 3',normal)),
                 DocWhile('i',[DocPara('i',format='The value of i is %(__expr__)d',style=normal),DocExec('i-=1')]),
-                DocPara('repr(doc._nameSpace)'),
+                DocPara('repr(doc._nameSpace)',escape=True),
                 ]
         doc = SimpleDocTemplate('test_doc_programming.pdf')
         doc.build(story)

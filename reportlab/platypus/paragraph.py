@@ -297,7 +297,7 @@ except ImportError:
             if (hasattr(f,'cbDefn') or hasattr(g,'cbDefn')
                     or hasattr(f,'lineBreak') or hasattr(g,'lineBreak')): return 0
             for a in ('fontName', 'fontSize', 'textColor', 'rise', 'underline', 'strike', 'link'):
-                if getattr(f,a)!=getattr(g,a): return 0
+                if getattr(f,a,None)!=getattr(g,a,None): return 0
             return 1
 
 def _getFragWords(frags):
