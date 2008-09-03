@@ -1,5 +1,0 @@
-<!-- A tiny sample DTD for use with the PyRXP documentation -->
-<!-- $Header $-->
-
-<!ELEMENT a (b)>
-<!ELEMENT b (#PCDATA)*>
